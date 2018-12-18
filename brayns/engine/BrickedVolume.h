@@ -20,35 +20,25 @@
 
 #pragma once
 
-#include <brayns/common/BaseObject.h>
-#include <brayns/common/types.h>
+#include <brayns/engine/Volume.h>
 
 namespace brayns
 {
-/** A base class for volumes to share common properties. */
-class Volume : public BaseObject
+/** A volume type where the voxels are copied for each added brick. */
+class BrickedVolume : public virtual Volume
 {
 public:
-    Volume(const Vector3ui& dimensions, const Vector3f& spacing,
-           const DataType type);
-    virtual ~Volume() = default;
-
-    virtual void setDataRange(const Vector2f& range) = 0;
-
-    virtual void commit() = 0;
-
-    size_t getSizeInBytes() const { return _sizeInBytes; }
-    Boxd getBounds() const
-    {
-        return {{0, 0, 0},
-                {_dimensions.x() * _spacing.x(), _dimensions.y() * _spacing.y(),
-                 _dimensions.z() * _spacing.z()}};
-    }
+    /** @name API for engine-specific code */
+    //@{
+    virtual void setBrick(const void* data, const Vector3ui& position,
+                          const Vector3ui& size) = 0;
+    //@}
 
 protected:
-    std::atomic_size_t _sizeInBytes{0};
-    const Vector3ui _dimensions;
-    const Vector3f _spacing;
-    const DataType _dataType;
+    BrickedVolume(const Vector3ui& dimensions, const Vector3f& spacing,
+                  const DataType type)
+        : Volume(dimensions, spacing, type)
+    {
+    }
 };
 }

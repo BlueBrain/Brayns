@@ -114,7 +114,7 @@ void _printVersion()
 
 namespace brayns
 {
-ParametersManager::ParametersManager()
+ParametersManager::ParametersManager(const int argc, const char** argv)
 {
     registerParameters(&_animationParameters);
     registerParameters(&_applicationParameters);
@@ -125,6 +125,8 @@ ParametersManager::ParametersManager()
 
     for (auto parameters : _parameterSets)
         _allOptions.add(parameters->parameters());
+
+    _parse(argc, argv);
 }
 
 void ParametersManager::registerParameters(AbstractParameters* parameters)
@@ -132,13 +134,14 @@ void ParametersManager::registerParameters(AbstractParameters* parameters)
     _parameterSets.push_back(parameters);
 }
 
-void ParametersManager::parse(int argc, const char** argv)
+void ParametersManager::_parse(int argc, const char** argv)
 {
     try
     {
         po::options_description generalOptions("General options");
         generalOptions.add_options()("help", "Print this help")(
-            "version", "Print the Brayns version");
+            "version", "Print the Brayns version")("verbose",
+                                                   "Print parsed parameters");
 
         _allOptions.add(generalOptions);
 
@@ -168,14 +171,15 @@ void ParametersManager::parse(int argc, const char** argv)
             exit(EXIT_SUCCESS);
         }
 
+        _printVersion();
         if (vm.count("version"))
-        {
-            _printVersion();
             exit(EXIT_SUCCESS);
-        }
 
         for (auto parameters : _parameterSets)
             parameters->parse(vm);
+
+        if (vm.count("verbose"))
+            print();
     }
     catch (const po::error& e)
     {
@@ -191,7 +195,6 @@ void ParametersManager::usage()
 
 void ParametersManager::print()
 {
-    _printVersion();
     for (AbstractParameters* parameters : _parameterSets)
         parameters->print();
 }
@@ -217,6 +220,11 @@ AnimationParameters& ParametersManager::getAnimationParameters()
     return _animationParameters;
 }
 
+const AnimationParameters& ParametersManager::getAnimationParameters() const
+{
+    return _animationParameters;
+}
+
 ApplicationParameters& ParametersManager::getApplicationParameters()
 {
     return _applicationParameters;
@@ -228,6 +236,11 @@ const ApplicationParameters& ParametersManager::getApplicationParameters() const
 }
 
 RenderingParameters& ParametersManager::getRenderingParameters()
+{
+    return _renderingParameters;
+}
+
+const RenderingParameters& ParametersManager::getRenderingParameters() const
 {
     return _renderingParameters;
 }
@@ -245,22 +258,6 @@ SceneParameters& ParametersManager::getSceneParameters()
 VolumeParameters& ParametersManager::getVolumeParameters()
 {
     return _volumeParameters;
-}
-
-void ParametersManager::set(const std::string& key, const std::string& value)
-{
-    const std::string p = "--" + key;
-    strings strs;
-    boost::split(strs, value, boost::is_any_of(" "));
-
-    const size_t argc = 2 + strs.size();
-    auto argv = std::make_unique<const char* []>(argc);
-    argv[0] = "";
-    argv[1] = p.c_str();
-    for (size_t i = 0; i < strs.size(); ++i)
-        argv[2 + i] = strs[i].c_str();
-
-    parse(argc, argv.get());
 }
 
 void ParametersManager::_processUnrecognizedOptions(

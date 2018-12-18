@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CAMERA_H
-#define CAMERA_H
+#pragma once
 
 #include <brayns/api.h>
 #include <brayns/common/PropertyObject.h>
@@ -39,6 +38,15 @@ namespace brayns
 class Camera : public PropertyObject
 {
 public:
+    /** @name API for engine-specific code */
+    //@{
+    /**
+       Commits the changes held by the camera object so that
+       attributes become available to the underlying rendering engine
+    */
+    virtual void commit(){};
+    //@}
+
     BRAYNS_API Camera() = default;
 
     BRAYNS_API virtual ~Camera() = default;
@@ -98,20 +106,8 @@ public:
        @return the orientation quaternion
     */
     const Quaterniond& getOrientation() const { return _orientation; }
-    /**
-       Commits the changes held by the camera object so that
-       attributes become available to the underlying rendering engine
-    */
-    BRAYNS_API virtual void commit(){};
-
     /** Resets the camera to its initial values */
     BRAYNS_API void reset();
-
-    /** Enable/disables environment mapping */
-    BRAYNS_API virtual void setEnvironmentMap(
-        const bool environmentMap BRAYNS_UNUSED)
-    {
-    }
 
     /** @internal Sets the name of current rendered frame buffer. */
     void setBufferTarget(const std::string& target)
@@ -136,5 +132,3 @@ private:
 
 std::ostream& operator<<(std::ostream& os, Camera& camera);
 }
-
-#endif

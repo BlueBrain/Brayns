@@ -23,11 +23,13 @@
 
 #ifdef BRAYNS_USE_FREEIMAGE
 #include <FreeImage.h>
+#endif
 
 namespace brayns
 {
 namespace freeimage
 {
+#ifdef BRAYNS_USE_FREEIMAGE
 struct ImageDeleter
 {
     inline void operator()(FIBITMAP* image)
@@ -50,13 +52,11 @@ using ImagePtr = std::unique_ptr<FIBITMAP, ImageDeleter>;
 using MemoryPtr = std::unique_ptr<FIMEMORY, MemoryDeleter>;
 
 bool SwapRedBlue32(FIBITMAP* freeImage);
-ImagePtr getImageFromFrameBuffer(FrameBuffer& frameBuffer);
 std::string getBase64Image(ImagePtr image, const std::string& format,
                            const int quality);
-std::string getBase64Image(FrameBuffer& frameBuffer, const std::string& format,
-                           const int quality);
 ImagePtr mergeImages(const std::vector<ImagePtr>& images);
-}
-}
-
+#else
+using ImagePtr = std::unique_ptr<int>;
 #endif
+}
+}

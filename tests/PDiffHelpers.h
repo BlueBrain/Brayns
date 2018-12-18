@@ -22,8 +22,8 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/utils/imageUtils.h>
+#include <brayns/engine/FrameBuffer.h>
 
 #include <perceptualdiff/metric.h>
 #include <perceptualdiff/rgba_image.h>
@@ -33,8 +33,8 @@
 inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
     brayns::FrameBuffer& fb)
 {
-    brayns::freeimage::ImagePtr image(FreeImage_ConvertTo32Bits(
-        brayns::freeimage::getImageFromFrameBuffer(fb).get()));
+    brayns::freeimage::ImagePtr image(
+        FreeImage_ConvertTo32Bits(fb.getImage().get()));
 
     const auto w = FreeImage_GetWidth(image.get());
     const auto h = FreeImage_GetHeight(image.get());
@@ -63,7 +63,7 @@ inline bool compareTestImage(const std::string& filename,
     const auto fullPath = std::string(BRAYNS_TESTDATA_IMAGES_PATH) + filename;
     if (saveImages)
     {
-        auto image = brayns::freeimage::getImageFromFrameBuffer(fb);
+        auto image = fb.getImage();
         FreeImage_Save(FreeImage_GetFIFFromFilename(filename.c_str()),
                        image.get(), filename.c_str());
     }

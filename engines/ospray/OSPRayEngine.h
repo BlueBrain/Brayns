@@ -21,7 +21,7 @@
 #ifndef OSPRAYENGINE_H
 #define OSPRAYENGINE_H
 
-#include <brayns/common/engine/Engine.h>
+#include <brayns/engine/Engine.h>
 
 namespace brayns
 {
@@ -35,9 +35,6 @@ public:
 
     ~OSPRayEngine();
 
-    /** @copydoc Engine::name */
-    EngineType name() const final;
-
     /** @copydoc Engine::commit */
     void commit() final;
 
@@ -48,7 +45,7 @@ public:
         const std::string& name, const Vector2ui& frameSize,
         FrameBufferFormat frameBufferFormat) const final;
 
-    ScenePtr createScene(ParametersManager& parametersManager) const final;
+    ScenePtr createScene() const final;
     CameraPtr createCamera() const final;
     RendererPtr createRenderer(
         const AnimationParameters& animationParameters,
@@ -61,7 +58,6 @@ private:
     void _createRenderers();
 
     bool _useDynamicLoadBalancer{false};
-    EngineType _type{EngineType::ospray};
 };
 }
 

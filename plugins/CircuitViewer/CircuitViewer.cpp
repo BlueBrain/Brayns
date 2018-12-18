@@ -23,9 +23,9 @@
 #include "io/MorphologyLoader.h"
 #include "renderer/AdvancedSimulationRenderer.h" // enum Shading
 
-#include <brayns/common/engine/Engine.h>
-#include <brayns/common/renderer/Renderer.h>
-#include <brayns/common/scene/Scene.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/Renderer.h>
+#include <brayns/engine/Scene.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
 

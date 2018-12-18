@@ -20,9 +20,9 @@
 
 #include "ImageGenerator.h"
 
-#include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/utils/base64/base64.h>
 #include <brayns/common/utils/imageUtils.h>
+#include <brayns/engine/FrameBuffer.h>
 #include <brayns/parameters/ApplicationParameters.h>
 
 namespace brayns
@@ -41,7 +41,7 @@ ImageGenerator::ImageBase64 ImageGenerator::createImage(
     const uint8_t quality BRAYNS_UNUSED)
 {
 #ifdef BRAYNS_USE_FREEIMAGE
-    return {freeimage::getBase64Image(frameBuffer, format, quality)};
+    return {freeimage::getBase64Image(frameBuffer.getImage(), format, quality)};
 #elif defined BRAYNS_USE_LIBJPEGTURBO
     BRAYNS_WARN << "No FreeImage found, will take TurboJPEG snapshot; "
                 << "ignoring format '" << format << "'" << std::endl;
@@ -64,7 +64,7 @@ ImageGenerator::ImageBase64 ImageGenerator::createImage(
 
     std::vector<freeimage::ImagePtr> images;
     for (auto frameBuffer : frameBuffers)
-        images.push_back(freeimage::getImageFromFrameBuffer(*frameBuffer));
+        images.push_back(frameBuffer->getImage());
     return {freeimage::getBase64Image(freeimage::mergeImages(images), format,
                                       quality)};
 #else

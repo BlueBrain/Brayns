@@ -24,19 +24,19 @@
 #include "PluginManager.h"
 
 #include <brayns/common/Timer.h>
-#include <brayns/common/camera/Camera.h>
-#include <brayns/common/camera/FlyingModeManipulator.h>
-#include <brayns/common/camera/InspectCenterManipulator.h>
-#include <brayns/common/engine/Engine.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/light/DirectionalLight.h>
 #include <brayns/common/log.h>
-#include <brayns/common/renderer/FrameBuffer.h>
-#include <brayns/common/renderer/Renderer.h>
-#include <brayns/common/scene/Model.h>
-#include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/DynamicLib.h>
 #include <brayns/common/utils/utils.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Model.h>
+#include <brayns/engine/Renderer.h>
+#include <brayns/engine/Scene.h>
+#include <brayns/manipulators/FlyingModeManipulator.h>
+#include <brayns/manipulators/InspectCenterManipulator.h>
 
 #include <brayns/parameters/ParametersManager.h>
 
@@ -76,16 +76,15 @@ namespace brayns
 struct Brayns::Impl : public PluginAPI
 {
     Impl(int argc, const char** argv)
-        : _pluginManager{argc, argv}
-        , _engineFactory{argc, argv, _parametersManager}
+        : _parametersManager{argc, argv}
+        , _engineFactory{std::make_unique<EngineFactory>(argc, argv,
+                                                         _parametersManager)}
+        , _pluginManager{argc, argv}
     {
-        _parametersManager.parse(argc, argv);
-        _parametersManager.print();
-
         // This initialization must happen before plugin intialization.
         _createEngine();
         _registerKeyboardShortcuts();
-        _setupCameraManipulator(CameraMode::inspect);
+        _setupCameraManipulator(CameraMode::inspect, false);
 
         _pluginManager.initPlugins(this);
 
@@ -96,6 +95,12 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->getScene().commit(); // Needed to obtain a bounding box
         _cameraManipulator->adjust(_engine->getScene().getBounds());
+    }
+
+    ~Impl()
+    {
+        _frameBuffers.clear();
+        _engineFactory.reset();
     }
 
     bool commit()
@@ -254,16 +259,14 @@ struct Brayns::Impl : public PluginAPI
 private:
     void _createEngine()
     {
-        _engine.reset(); // Free resources before creating a new engine
-
-        const auto& engineName =
+        auto engineName =
             _parametersManager.getApplicationParameters().getEngine();
-        _engine = _engineFactory.create(engineName);
+        // TODO: remove after braynsOptixEngine is available
+        if (engineName == "optix")
+            engineName = "braynsOSPRayEngine";
+        _engine = _engineFactory->create(engineName);
         if (!_engine)
-            throw std::runtime_error(
-                "Unsupported engine: " +
-                _parametersManager.getApplicationParameters().getEngineAsString(
-                    engineName));
+            throw std::runtime_error("Unsupported engine: " + engineName);
 
         // Default sun light
         DirectionalLightPtr sunLight(
@@ -386,7 +389,8 @@ private:
         scene.markModified();
     }
 
-    void _setupCameraManipulator(const CameraMode mode)
+    void _setupCameraManipulator(const CameraMode mode,
+                                 const bool adjust = true)
     {
         _cameraManipulator.reset();
 
@@ -404,7 +408,7 @@ private:
             break;
         };
 
-        if (_engine->getScenePtr())
+        if (adjust)
             _cameraManipulator->adjust(_engine->getScene().getBounds());
     }
 
@@ -769,9 +773,9 @@ private:
     }
 
     ParametersManager _parametersManager;
+    std::unique_ptr<EngineFactory> _engineFactory;
     PluginManager _pluginManager;
-    EngineFactory _engineFactory;
-    std::unique_ptr<Engine> _engine;
+    Engine* _engine{nullptr};
     KeyboardHandler _keyboardHandler;
     std::unique_ptr<AbstractManipulator> _cameraManipulator;
     std::vector<FrameBufferPtr> _frameBuffers;

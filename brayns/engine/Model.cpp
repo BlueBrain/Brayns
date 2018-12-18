@@ -22,9 +22,9 @@
 
 #include <brayns/common/Transformation.h>
 #include <brayns/common/log.h>
-#include <brayns/common/material/Material.h>
 #include <brayns/common/material/Texture2D.h>
-#include <brayns/common/volume/Volume.h>
+#include <brayns/engine/Material.h>
+#include <brayns/engine/Volume.h>
 
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 

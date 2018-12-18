@@ -21,7 +21,7 @@
 #include "SimulationHandler.h"
 
 #include <brayns/common/log.h>
-#include <brayns/common/material/Material.h>
+#include <brayns/engine/Material.h>
 
 #include <brain/compartmentReport.h>
 #include <brain/compartmentReportMapping.h>
@@ -43,7 +43,6 @@ SimulationHandler::SimulationHandler(const CompartmentReportPtr& report,
     _unit = metadata.timeUnit;
     _nbFrames = metadata.frameCount;
     _frameSize = report->getMapping().getFrameSize();
-
 
     BRAYNS_INFO << "-----------------------------------------------------------"
                 << std::endl;

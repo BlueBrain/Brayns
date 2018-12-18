@@ -20,13 +20,13 @@
 
 #include "ProteinLoader.h"
 
-#include <brayns/common/engine/Engine.h>
 #include <brayns/common/log.h>
-#include <brayns/common/material/Material.h>
-#include <brayns/common/scene/Model.h>
-#include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
 #include <brayns/common/utils/utils.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/Material.h>
+#include <brayns/engine/Model.h>
+#include <brayns/engine/Scene.h>
 
 #include <assert.h>
 #include <fstream>

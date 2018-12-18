@@ -21,9 +21,9 @@
 #pragma once
 
 #include <brayns/Brayns.h>
-#include <brayns/common/engine/Engine.h>
 #include <brayns/common/loader/Loader.h>
-#include <brayns/common/scene/Scene.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/Scene.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #include <plugins/Rockets/jsonSerialization.h>
@@ -99,8 +99,8 @@ public:
     {
         auto& testSuite = boost::unit_test::framework::master_test_suite();
         const char* app = testSuite.argv[0];
-        std::vector<const char*> argv{
-            app, "demo", "--http-server", "localhost:0"};
+        std::vector<const char*> argv{app, "demo", "--http-server",
+                                      "localhost:0"};
         for (const auto& arg : additionalArgv)
             argv.push_back(arg);
         const int argc = argv.size();

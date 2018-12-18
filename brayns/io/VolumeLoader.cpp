@@ -19,10 +19,10 @@
 
 #include "VolumeLoader.h"
 
-#include <brayns/common/scene/Model.h>
-#include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/utils.h>
-#include <brayns/common/volume/SharedDataVolume.h>
+#include <brayns/engine/Model.h>
+#include <brayns/engine/Scene.h>
+#include <brayns/engine/SharedDataVolume.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ini_parser.hpp>

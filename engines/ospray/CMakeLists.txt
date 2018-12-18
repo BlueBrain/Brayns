@@ -10,6 +10,15 @@
 # ".mic"-suffix trick, so we'll put libraries into separate
 # directories (names 'intel64' and 'mic', respectively)
 
+# compiler selection for the non-MIC part
+if(APPLE)
+  set(OSPRAY_COMPILER "CLANG" CACHE STRING "compiler to use (ICC,GCC, or CLANG)")
+  set_property(CACHE OSPRAY_COMPILER PROPERTY STRINGS ICC GCC CLANG)
+else()
+  set(OSPRAY_COMPILER "GCC" CACHE STRING "compiler to use (ICC or GCC)")
+  set_property(CACHE OSPRAY_COMPILER PROPERTY STRINGS ICC GCC)
+endif()
+
 set(BRAYNSOSPRAYENGINE_ISPC_SOURCES
   ispc/camera/utils.ispc
   ispc/camera/OrthographicCamera.ispc
@@ -82,7 +91,7 @@ set_source_files_properties(
     PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations)
 
 set(BRAYNSOSPRAYENGINE_LINK_LIBRARIES
-    PRIVATE vmmlib braynsCommon braynsParameters ${OSPRAY_LIBRARIES}
+    PRIVATE braynsEngine braynsParameters ${OSPRAY_LIBRARIES}
 )
 
 # reuse ispc setup and macros from ospray

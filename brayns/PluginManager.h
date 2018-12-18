@@ -22,6 +22,7 @@
 
 #include <brayns/common/types.h>
 #include <brayns/common/utils/DynamicLib.h>
+#include <brayns/pluginapi/ExtensionPlugin.h>
 
 #include <vector>
 
@@ -50,7 +51,7 @@ public:
 
 private:
     std::vector<DynamicLib> _libs;
-    std::vector<ExtensionPluginPtr> _extensions;
+    std::vector<std::unique_ptr<ExtensionPlugin>> _extensions;
 
     void _loadPlugin(const char* name, int argc, const char* argv[]);
 };

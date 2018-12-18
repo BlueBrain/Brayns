@@ -46,10 +46,6 @@ const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
 const size_t DEFAULT_JPEG_COMPRESSION = 90;
 const std::string DEFAULT_TMP_FOLDER = "/tmp";
-
-const std::map<std::string, brayns::EngineType> ENGINES = {
-    {"ospray", brayns::EngineType::ospray},
-    {"optix", brayns::EngineType::optix}};
 }
 
 namespace brayns
@@ -102,14 +98,7 @@ ApplicationParameters::ApplicationParameters()
 void ApplicationParameters::parse(const po::variables_map& vm)
 {
     if (vm.count(PARAM_ENGINE))
-    {
-        const std::string& engine = vm[PARAM_ENGINE].as<std::string>();
-        const auto kv = ENGINES.find(engine);
-        if (kv != ENGINES.end())
-            _engine = kv->second;
-        else
-            throw std::runtime_error("Invalid engine '" + engine + "'.");
-    }
+        _engine = vm[PARAM_ENGINE].as<std::string>();
     if (vm.count(PARAM_INPUT_PATHS))
         _inputPaths = vm[PARAM_INPUT_PATHS].as<strings>();
     if (vm.count(PARAM_HTTP_SERVER))
@@ -142,9 +131,8 @@ void ApplicationParameters::parse(const po::variables_map& vm)
 void ApplicationParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Engine                            : "
-                << getEngineAsString(_engine) << std::endl;
-    BRAYNS_INFO << "Ospray modules                    : " << std::endl;
+    BRAYNS_INFO << "Engine                      : " << _engine << std::endl;
+    BRAYNS_INFO << "Ospray modules              : " << std::endl;
     for (const auto& module : _modules)
         BRAYNS_INFO << "- " << module << std::endl;
     BRAYNS_INFO << "Window size                 : " << _windowSize << std::endl;
@@ -159,14 +147,5 @@ void ApplicationParameters::print()
                 << std::endl;
     BRAYNS_INFO << "Max. render  FPS            : " << _maxRenderFPS
                 << std::endl;
-}
-
-const std::string& ApplicationParameters::getEngineAsString(
-    const EngineType value) const
-{
-    for (auto& kv : ENGINES)
-        if (kv.second == value)
-            return kv.first;
-    throw std::runtime_error("Could not get engine as string");
 }
 }

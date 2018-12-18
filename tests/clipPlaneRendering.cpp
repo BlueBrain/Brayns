@@ -23,10 +23,10 @@
 #include "PDiffHelpers.h"
 
 #include <brayns/Brayns.h>
-#include <brayns/common/camera/Camera.h>
-#include <brayns/common/engine/Engine.h>
 #include <brayns/common/scene/ClipPlane.h>
-#include <brayns/common/scene/Scene.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/Scene.h>
 
 #include <boost/test/unit_test.hpp>
 
@@ -34,14 +34,15 @@ class Demo
 {
 public:
     Demo()
-        : _argv{"clipPlanes", "demo", "--disable-accumulation",
-            "--window-size", "50",  "50"}
+        : _argv{"clipPlanes",    "demo", "--disable-accumulation",
+                "--window-size", "50",   "50"}
         , _brayns(_argv.size(), _argv.data())
     {
         instance = &_brayns;
     }
 
     static brayns::Brayns* instance;
+
 private:
     std::vector<const char*> _argv;
     brayns::Brayns _brayns;
@@ -104,4 +105,3 @@ BOOST_AUTO_TEST_CASE(orthographic)
 {
     testClipping(*Demo::instance, true);
 }
-

@@ -20,11 +20,11 @@
 
 #include "Engine.h"
 
-#include <brayns/common/camera/Camera.h>
 #include <brayns/common/light/DirectionalLight.h>
-#include <brayns/common/renderer/FrameBuffer.h>
-#include <brayns/common/renderer/Renderer.h>
-#include <brayns/common/scene/Scene.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Renderer.h>
+#include <brayns/engine/Scene.h>
 
 #include <brayns/common/ImageManager.h>
 

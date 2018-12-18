@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/common/scene/Model.h>
+#include <brayns/engine/Model.h>
 #include <brayns/parameters/VolumeParameters.h>
 
 #include <ospray.h>

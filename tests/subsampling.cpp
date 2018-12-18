@@ -20,8 +20,8 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/common/engine/Engine.h>
-#include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/FrameBuffer.h>
 
 #define BOOST_TEST_MODULE braynsSubsampling
 #include <boost/test/unit_test.hpp>

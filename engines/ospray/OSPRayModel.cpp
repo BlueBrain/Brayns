@@ -23,9 +23,9 @@
 #include "OSPRayVolume.h"
 #include "utils.h"
 
-#include <brayns/common/material/Material.h>
-#include <brayns/common/scene/Scene.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
+#include <brayns/engine/Material.h>
+#include <brayns/engine/Scene.h>
 
 #include <brayns/parameters/ParametersManager.h>
 

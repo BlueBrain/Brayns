@@ -21,12 +21,12 @@
 #include "MorphologyLoader.h"
 #include "ModelData.h"
 
-#include <brayns/common/material/Material.h>
-#include <brayns/common/scene/Model.h>
-#include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
 #include <brayns/common/utils/enumUtils.h>
 #include <brayns/common/utils/utils.h>
+#include <brayns/engine/Material.h>
+#include <brayns/engine/Model.h>
+#include <brayns/engine/Scene.h>
 
 #include <brain/brain.h>
 
@@ -332,8 +332,7 @@ MorphologyLoaderParams::MorphologyLoaderParams(const PropertyMap& properties)
     setVariable(dampenBranchThicknessChangerate,
                 PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE.name, false);
     setVariable(useSDFGeometries, PROP_USE_SDF_GEOMETRIES.name, false);
-    setEnumVariable(geometryQuality, "geometryQuality",
-                    GeometryQuality::high);
+    setEnumVariable(geometryQuality, "geometryQuality", GeometryQuality::high);
 }
 
 class MorphologyLoader::Impl

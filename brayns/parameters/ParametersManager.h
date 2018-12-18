@@ -43,7 +43,7 @@ namespace brayns
 class ParametersManager
 {
 public:
-    ParametersManager();
+    ParametersManager(int argc, const char** argv);
 
     /**
        Registers specific parameters to the manager
@@ -62,23 +62,18 @@ public:
     BRAYNS_API void print();
 
     /**
-       Parses registered parameters
-       @param argc number of command line parameters
-       @param argv actual command line parameters
-     */
-    BRAYNS_API void parse(int argc, const char** argv);
-
-    /**
        Gets animation parameters
        @return Animation parameters for the current scene
     */
     BRAYNS_API AnimationParameters& getAnimationParameters();
+    BRAYNS_API const AnimationParameters& getAnimationParameters() const;
 
     /**
        Gets rendering parameters
        @return Rendering parameters for the current scene
     */
     BRAYNS_API RenderingParameters& getRenderingParameters();
+    BRAYNS_API const RenderingParameters& getRenderingParameters() const;
 
     /**
        Gets geometry parameters
@@ -105,12 +100,6 @@ public:
     */
     BRAYNS_API VolumeParameters& getVolumeParameters();
 
-    /**
-       Sets a parameter (application, geometry, rendering, etc). If the
-       parameter is not registered, the setting is ignored.
-     */
-    void set(const std::string& key, const std::string& value);
-
     /** Call resetModified on all parameters. */
     void resetModified();
 
@@ -121,6 +110,7 @@ public:
     bool isAnyModified() const;
 
 private:
+    void _parse(int argc, const char** argv);
     void _processUnrecognizedOptions(
         const std::vector<std::string>& unrecognizedOptions) const;
 

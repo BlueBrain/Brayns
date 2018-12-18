@@ -21,14 +21,14 @@
 #include "BaseWindow.h"
 
 #include <brayns/Brayns.h>
-#include <brayns/common/camera/AbstractManipulator.h>
-#include <brayns/common/camera/Camera.h>
-#include <brayns/common/engine/Engine.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/log.h>
-#include <brayns/common/renderer/FrameBuffer.h>
-#include <brayns/common/renderer/Renderer.h>
-#include <brayns/common/scene/Scene.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Renderer.h>
+#include <brayns/engine/Scene.h>
+#include <brayns/manipulators/AbstractManipulator.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/parameters/SceneParameters.h>
 

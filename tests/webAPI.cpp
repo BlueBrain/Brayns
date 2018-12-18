@@ -23,7 +23,7 @@
 #include <jsonPropertyMap.h>
 
 #include "ClientServer.h"
-#include <brayns/common/renderer/Renderer.h>
+#include <brayns/engine/Renderer.h>
 
 BOOST_GLOBAL_FIXTURE(ClientServer);
 

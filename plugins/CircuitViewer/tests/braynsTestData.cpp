@@ -24,12 +24,12 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/common/camera/Camera.h>
-#include <brayns/common/engine/Engine.h>
-#include <brayns/common/renderer/FrameBuffer.h>
-#include <brayns/common/scene/Model.h>
-#include <brayns/common/scene/Scene.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Model.h>
+#include <brayns/engine/Scene.h>
 
 #include <brayns/parameters/ParametersManager.h>
 
@@ -43,10 +43,13 @@ BOOST_AUTO_TEST_CASE(simple_circuit)
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    const char* argv[] = {
-        app, BBP_TEST_BLUECONFIG3, "--disable-accumulation",
-        "--samples-per-pixel", "16", "--plugin",
-        "braynsCircuitViewer --targets Layer1"};
+    const char* argv[] = {app,
+                          BBP_TEST_BLUECONFIG3,
+                          "--disable-accumulation",
+                          "--samples-per-pixel",
+                          "16",
+                          "--plugin",
+                          "braynsCircuitViewer --targets Layer1"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);

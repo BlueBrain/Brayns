@@ -36,8 +36,9 @@ Material::~Material()
 
 void Material::commit()
 {
-    auto map_Kd = (optix::Texture*)getParamObject(
-        "map_Kd", getParamObject("map_kd", nullptr));
+    auto map_Kd =
+        (optix::Texture*)getParamObject("map_Kd",
+                                        getParamObject("map_kd", nullptr));
 
     const float d = getParam1f("d", 1.f);
     const float refraction = getParam1f("refraction", 0.f);
@@ -48,7 +49,7 @@ void Material::commit()
     const ospray::vec3f Ks =
         getParam3f("ks", getParam3f("Ks", ospray::vec3f(0.f)));
     const float Ns = getParam1f("ns", getParam1f("Ns", 10.f));
-    const bool skybox = getParam1i("skybox", 0) == 1;
+    const bool skybox = getParam<bool>("skybox", false);
 
     if (!optixMaterial)
         optixMaterial = Context::get().createMaterial(map_Kd);

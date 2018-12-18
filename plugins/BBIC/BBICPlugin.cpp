@@ -20,8 +20,8 @@
 #include "BBICLoader.h"
 
 #include <brayns/common/PropertyMap.h>
-#include <brayns/common/scene/Model.h>
-#include <brayns/common/scene/Scene.h>
+#include <brayns/engine/Model.h>
+#include <brayns/engine/Scene.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
 namespace bbic

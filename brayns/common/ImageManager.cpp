@@ -20,28 +20,10 @@
 
 #include "ImageManager.h"
 #include <brayns/common/log.h>
-#include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/utils/imageUtils.h>
 
 namespace brayns
 {
-bool ImageManager::exportFrameBufferToFile(
-    FrameBuffer& frameBuffer BRAYNS_UNUSED,
-    const std::string& filename BRAYNS_UNUSED)
-{
-#ifdef BRAYNS_USE_FREEIMAGE
-    auto image = freeimage::getImageFromFrameBuffer(frameBuffer);
-    FreeImage_Save(FreeImage_GetFIFFromFilename(filename.c_str()), image.get(),
-                   filename.c_str());
-
-    return true;
-#else
-    BRAYNS_DEBUG << "FreeImage is required to export frames to file"
-                 << std::endl;
-    return false;
-#endif
-}
-
 Texture2DPtr ImageManager::importTextureFromFile(
     const std::string& filename BRAYNS_UNUSED)
 {

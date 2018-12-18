@@ -175,19 +175,12 @@ class VolumeParameters;
 
 class PluginAPI;
 class ExtensionPlugin;
-using ExtensionPluginPtr = std::shared_ptr<ExtensionPlugin>;
 
 class KeyboardHandler;
 
 class MeshLoader;
 
 class Statistics;
-
-enum class EngineType
-{
-    ospray,
-    optix
-};
 
 /** Define the frame buffer format */
 enum class FrameBufferFormat

@@ -36,12 +36,29 @@ if($ENV{TRAVIS})
 endif()
 include(Common)
 
+if(NOT EXISTS ${PROJECT_SOURCE_DIR}/perceptualdiff/FindFreeImage.cmake)
+  message(FATAL_ERROR "FindFreeImage.cmake missing, run: git submodule update --init")
+endif()
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/perceptualdiff)
+
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build Async++ as a shared library" FORCE)
+add_subdirectory(async++)
+list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/async++/include/async++/*'
+                         '${PROJECT_SOURCE_DIR}/async++/src/*')
+
+
 # Core dependencies
 common_find_package(Boost REQUIRED COMPONENTS
   filesystem system program_options unit_test_framework)
 common_find_package(vmmlib REQUIRED)
 common_find_package(OpenMP)
 common_find_package(libuv 1.8)
+common_find_package(FreeImage)
+
+if(FreeImage_FOUND)
+  add_subdirectory(perceptualdiff)
+  list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/perceptualdiff/*')
+endif()
 
 if(libuv_FOUND)
   # The libuv version of Ubuntu 16.04 is too old to have this definition that is
@@ -67,11 +84,6 @@ else()
   common_find_package_disable(LibArchive)
 endif()
 
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build Async++ as a shared library" FORCE)
-add_subdirectory(async++)
-list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/async++/include/async++/*'
-                         '${PROJECT_SOURCE_DIR}/async++/src/*')
-
 # HTTP messaging
 common_find_package(LibJpegTurbo)
 common_find_package(Rockets)
@@ -84,22 +96,13 @@ else()
   set(BRAYNS_NETWORKING_ENABLED OFF)
 endif()
 
-if(NOT EXISTS ${PROJECT_SOURCE_DIR}/perceptualdiff/FindFreeImage.cmake)
-  message(FATAL_ERROR "FindFreeImage.cmake missing, run: git submodule update --init")
-endif()
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/perceptualdiff)
-common_find_package(FreeImage)
-if(FreeImage_FOUND)
-  add_subdirectory(perceptualdiff)
-endif()
-list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/perceptualdiff/*')
-
 # OSPRay rendering engine
 common_find_package(ospray 1.7 SYSTEM)
-if(OSPRAY_FOUND)
-  option(BRAYNS_OSPRAY_ENABLED "Activate OSPRay rendering engine" ON)
+option(BRAYNS_OSPRAY_ENABLED "Activate OSPRay rendering engine" ${OSPRAY_FOUND})
+if(BRAYNS_OSPRAY_ENABLED)
+  common_find_package(ospray 1.7 SYSTEM REQUIRED)
 else()
-  set(BRAYNS_OSPRAY_ENABLED OFF)
+  common_find_package_disable(ospray)
 endif()
 
 # Mesh loading
@@ -130,24 +133,6 @@ list(APPEND BRAYNS_DEPENDENT_LIBRARIES Async++ vmmlib)
 # BRAYNS applications and libraries
 # ------------------------------------------------------------------------------
 
-if(NOT OSPRAY_FOUND)
-  message(WARNING "OSPRay not found. Brayns cannot work without an engine" )
-endif()
-
-if(BRAYNS_OSPRAY_ENABLED)
-  # ------------------------------------------------------------------------------
-  # OSPRAY specific settings
-  # ------------------------------------------------------------------------------
-  # compiler selection for the non-MIC part
-  if(APPLE)
-    set(OSPRAY_COMPILER "CLANG" CACHE STRING "compiler to use (ICC,GCC, or CLANG)")
-    set_property(CACHE OSPRAY_COMPILER PROPERTY STRINGS ICC GCC CLANG)
-  else(APPLE)
-    set(OSPRAY_COMPILER "GCC" CACHE STRING "compiler to use (ICC or GCC)")
-    set_property(CACHE OSPRAY_COMPILER PROPERTY STRINGS ICC GCC)
-  endif()
-endif()
-
 if(BRAYNS_VIEWER_ENABLED)
   add_subdirectory(apps/ui)
   add_subdirectory(apps/BraynsViewer)
@@ -170,6 +155,8 @@ endif()
 if(BRAYNS_OSPRAY_ENABLED)
   add_subdirectory(engines/ospray)
   add_subdirectory(ospray_modules)
+else()
+  message(WARNING "OSPRay not found or enabled. Brayns cannot work without an engine" )
 endif()
 add_subdirectory(plugins)
 add_subdirectory(brayns)

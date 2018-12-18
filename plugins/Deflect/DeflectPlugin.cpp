@@ -24,11 +24,11 @@
 
 #include <brayns/common/ActionInterface.h>
 #include <brayns/common/PropertyMap.h>
-#include <brayns/common/camera/AbstractManipulator.h>
-#include <brayns/common/engine/Engine.h>
 #include <brayns/common/input/KeyboardHandler.h>
-#include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/utils/utils.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/FrameBuffer.h>
+#include <brayns/manipulators/AbstractManipulator.h>
 
 #include <brayns/parameters/ParametersManager.h>
 

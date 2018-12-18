@@ -22,7 +22,7 @@
 #include "BraynsViewer.h"
 
 #include <brayns/Brayns.h>
-#include <brayns/common/engine/Engine.h>
+#include <brayns/engine/Engine.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #include <thread>
@@ -38,7 +38,7 @@ void BraynsViewer::display()
 {
     const auto& ap = _brayns.getParametersManager().getApplicationParameters();
     std::stringstream ss;
-    ss << "Brayns Viewer [" << ap.getEngineAsString(ap.getEngine()) << "] ";
+    ss << "Brayns Viewer [" << ap.getEngine() << "] ";
     auto animationFrame =
         _brayns.getParametersManager().getAnimationParameters().getFrame();
     if (animationFrame != std::numeric_limits<uint32_t>::max())

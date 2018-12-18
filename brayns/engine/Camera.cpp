@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Camera.h"
+#include <brayns/engine/Camera.h>
 
 namespace brayns
 {

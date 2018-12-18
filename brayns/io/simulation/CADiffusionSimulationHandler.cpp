@@ -21,11 +21,11 @@
 #include "CADiffusionSimulationHandler.h"
 
 #include <brayns/common/Transformation.h>
-#include <brayns/common/engine/Engine.h>
-#include <brayns/common/material/Material.h>
-#include <brayns/common/scene/Model.h>
-#include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/utils.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/Material.h>
+#include <brayns/engine/Model.h>
+#include <brayns/engine/Scene.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <fstream>

@@ -22,6 +22,7 @@
 #define ENGINEFACTORY_H
 
 #include <brayns/common/types.h>
+#include <brayns/common/utils/DynamicLib.h>
 
 namespace brayns
 {
@@ -47,16 +48,20 @@ public:
     /**
      * @brief Create an instance of the engine corresponding the given name. If
      *        the name is incorrect, a null pointer is returned.
-     * @param name of the engine (opray, optix)
+     * @param name of the engine library, e.g. braynsOSPRayEngine
      * @return A pointer to the engine, null if the engine could not be
      *         instantiated
      */
-    std::unique_ptr<Engine> create(EngineType name);
+    Engine* create(const std::string& name);
 
 private:
     int _argc;
     const char** _argv;
     ParametersManager& _parametersManager;
+    std::vector<DynamicLib> _libs;
+    std::map<std::string, std::unique_ptr<Engine>> _engines;
+
+    Engine* _loadEngine(const std::string& name, int argc, const char* argv[]);
 };
 }
 
