@@ -22,6 +22,7 @@
 #include "ModelData.h"
 #include "MorphologyLoader.h"
 #include "SimulationHandler.h"
+#include "utils.h"
 
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Model.h>
@@ -30,8 +31,11 @@
 
 #include <brain/brain.h>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
+
+#include <regex>
 
 namespace brayns
 {
@@ -52,7 +56,7 @@ const Property PROP_REPORT{
     {"Report", "Circuit report [string]"}};
 const Property PROP_TARGETS = {
     "targets",  std::string(""),
-    {"Targets", "Circuit targets [comma separated strings]"}};
+    {"Targets", "Circuit targets [comma separated list of int, int-int or label]"}};
 const Property PROP_SYNCHRONOUS_MODE = {
     "synchronousMode", false, {"Synchronous mode"}};
 // clang-format on
@@ -501,13 +505,20 @@ public:
                                          ? strings{{""}}
                                          : _properties.targetList;
 
-        auto resolveTarget = [&](const std::string& name) {
-            const float fraction = _properties.density / 100.0f;
+        auto resolveTarget = [&](std::string key) {
+
+            const auto fraction = _properties.density / 100.0f;
+            const auto seed = _properties.randomSeed;
+
+            boost::trim(key);
+
+            auto gids = _keyToGIDorRange(key, fraction, seed);
+            if (!gids.empty())
+                return gids;
+
             if (simulation)
-                return simulation->getGIDs(name, fraction,
-                                           _properties.randomSeed);
-            return circuit.getRandomGIDs(fraction, name,
-                                         _properties.randomSeed);
+                return simulation->getGIDs(key, fraction, seed);
+            return circuit.getRandomGIDs(fraction, key, seed);
         };
 
         for (const auto& target : localTargets)

@@ -32,6 +32,7 @@ set(BRAYNSCIRCUITVIEWER_SOURCES
   io/CircuitLoader.cpp
   io/MorphologyLoader.cpp
   io/SimulationHandler.cpp
+  io/utils.h
   renderer/AdvancedSimulationRenderer.cpp
   renderer/BasicSimulationRenderer.cpp
   renderer/SimulationMaterial.cpp
