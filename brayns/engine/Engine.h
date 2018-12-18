@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ENGINE_H
-#define ENGINE_H
+#pragma once
 
 #include <brayns/common/PropertyMap.h>
 #include <brayns/common/Statistics.h>
@@ -39,6 +38,36 @@ namespace brayns
 class Engine
 {
 public:
+    /** @name API for engine-specific code */
+    //@{
+    /**
+     * Commits changes to the engine. This include scene, camera and renderer
+     * modifications
+     */
+    virtual void commit();
+    /** Executes engine specific pre-render operations */
+    virtual void preRender();
+    /** Executes engine specific post-render operations */
+    virtual void postRender();
+    /** @return the minimum frame size in pixels supported by this engine. */
+    virtual Vector2ui getMinimumFrameSize() const = 0;
+    /** Factory method to create an engine-specific framebuffer. */
+    virtual FrameBufferPtr createFrameBuffer(
+        const std::string& name, const Vector2ui& frameSize,
+        FrameBufferFormat frameBufferFormat) const = 0;
+
+    /** Factory method to create an engine-specific scene. */
+    virtual ScenePtr createScene() const = 0;
+
+    /** Factory method to create an engine-specific camera. */
+    virtual CameraPtr createCamera() const = 0;
+
+    /** Factory method to create an engine-specific renderer. */
+    virtual RendererPtr createRenderer(
+        const AnimationParameters& animationParameters,
+        const RenderingParameters& renderingParameters) const = 0;
+    //@}
+
     /**
      * @brief Engine constructor
      * @param parametersManager holds all engine parameters (geometry,
@@ -47,24 +76,11 @@ public:
     explicit Engine(ParametersManager& parametersManager);
     virtual ~Engine() = default;
 
-    /** @return the name of the engine */
-    virtual EngineType name() const = 0;
-
-    /**
-     * Commits changes to the engine. This include scene, camera and renderer
-     * modifications
-     */
-    virtual void commit();
-
     /** Renders the current scene and populates the frame buffer accordingly */
     void render();
-    /** Executes engine specific pre-render operations */
-    virtual void preRender();
-    /** Executes engine specific post-render operations */
-    virtual void postRender();
+
     /** Gets the scene */
     Scene& getScene() { return *_scene; }
-    auto getScenePtr() { return _scene; }
     /** Gets the frame buffer */
     FrameBuffer& getFrameBuffer() { return *_frameBuffers[0]; }
     /** Gets the camera */
@@ -74,20 +90,10 @@ public:
     Renderer& getRenderer();
 
     /**
-       Initializes materials for the current scene
-       @param colorMap Predefined color map
-    */
-    void initializeMaterials(
-        MaterialsColorMap colorMap = MaterialsColorMap::none);
-
-    /**
      * Callback when a new frame shall be triggered. Currently called by event
      * plugins Deflect and Rockets.
      */
     std::function<void()> triggerRender{[] {}};
-
-    /** @return the minimum frame size in pixels supported by this engine. */
-    virtual Vector2ui getMinimumFrameSize() const = 0;
 
     /**
      * Keep continue to run the engine, aka the user did not request to stop
@@ -106,22 +112,7 @@ public:
      */
     bool continueRendering() const;
 
-    /** Factory method to create an engine-specific framebuffer. */
-    virtual FrameBufferPtr createFrameBuffer(
-        const std::string& name, const Vector2ui& frameSize,
-        FrameBufferFormat frameBufferFormat) const = 0;
-
-    virtual ScenePtr createScene(
-        ParametersManager& parametersManager) const = 0;
-
-    /** Factory method to create an engine-specific camera. */
-    virtual CameraPtr createCamera() const = 0;
-
-    virtual RendererPtr createRenderer(
-        const AnimationParameters& animationParameters,
-        const RenderingParameters& renderingParameters) const = 0;
-
-    auto& getParametersManager() { return _parametersManager; }
+    const auto& getParametersManager() const { return _parametersManager; }
     /**
      * Add the given frame buffer to the list of buffers that shall be filled
      * during rendering.
@@ -155,9 +146,6 @@ public:
                      const PropertyMap& properties = {});
 
 protected:
-    void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
-    void _render();
-
     ParametersManager& _parametersManager;
     ScenePtr _scene;
     CameraPtr _camera;
@@ -168,5 +156,3 @@ protected:
     bool _keepRunning{true};
 };
 }
-
-#endif // ENGINE_H

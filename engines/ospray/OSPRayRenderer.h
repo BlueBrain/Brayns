@@ -21,8 +21,8 @@
 #ifndef OSPRAYRENDERER_H
 #define OSPRAYRENDERER_H
 
-#include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/types.h>
+#include <brayns/engine/Renderer.h>
 
 #include <ospray.h>
 

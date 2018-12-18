@@ -24,8 +24,8 @@
 #include <tests/paths.h>
 
 #include "ClientServer.h"
-#include <brayns/common/engine/Engine.h>
-#include <brayns/common/renderer/Renderer.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/Renderer.h>
 
 #include <ImageGenerator.h>
 #include <brayns/common/utils/base64/base64.h>

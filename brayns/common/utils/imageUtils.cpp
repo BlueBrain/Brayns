@@ -20,8 +20,6 @@
 #include "imageUtils.h"
 #include "base64/base64.h"
 
-#include <brayns/common/renderer/FrameBuffer.h>
-
 #ifdef BRAYNS_USE_FREEIMAGE
 
 namespace
@@ -62,25 +60,6 @@ bool SwapRedBlue32(FIBITMAP* freeImage)
     return true;
 }
 
-ImagePtr getImageFromFrameBuffer(FrameBuffer& frameBuffer)
-{
-    frameBuffer.map();
-    const auto colorBuffer = frameBuffer.getColorBuffer();
-    const auto& size = frameBuffer.getSize();
-
-    ImagePtr image(FreeImage_ConvertFromRawBits(
-        const_cast<uint8_t*>(colorBuffer), size.x(), size.y(),
-        frameBuffer.getColorDepth() * size.x(), 8 * frameBuffer.getColorDepth(),
-        0xFF0000, 0x00FF00, 0x0000FF, false));
-
-    frameBuffer.unmap();
-
-#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_BGR
-    SwapRedBlue32(image.get());
-#endif
-    return image;
-}
-
 std::string getBase64Image(ImagePtr image, const std::string& format,
                            const int quality)
 {
@@ -107,13 +86,6 @@ std::string getBase64Image(ImagePtr image, const std::string& format,
     DWORD numPixels = 0;
     FreeImage_AcquireMemory(memory.get(), &pixels, &numPixels);
     return {base64_encode(pixels, numPixels)};
-}
-
-std::string getBase64Image(FrameBuffer& frameBuffer, const std::string& format,
-                           const int quality)
-{
-    return getBase64Image(freeimage::getImageFromFrameBuffer(frameBuffer),
-                          format, quality);
 }
 
 ImagePtr mergeImages(const std::vector<ImagePtr>& images)

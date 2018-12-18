@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef Model_H
-#define Model_H
+#pragma once
 
 #include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
@@ -200,13 +199,37 @@ private:
 class Model
 {
 public:
+    /** @name API for engine-specific code */
+    //@{
+    virtual void commitGeometry() = 0;
+
+    /** Factory method to create an engine-specific material. */
+    BRAYNS_API virtual MaterialPtr createMaterial(const size_t materialId,
+                                                  const std::string& name) = 0;
+
+    /**
+     * Create a volume with the given dimensions, voxel spacing and data type
+     * where the voxels are set via setVoxels() from any memory location.
+     */
+    BRAYNS_API virtual SharedDataVolumePtr createSharedDataVolume(
+        const Vector3ui& dimensions, const Vector3f& spacing,
+        const DataType type) const = 0;
+
+    /**
+     * Create a volume with the given dimensions, voxel spacing and data type
+     * where the voxels are copied via setBrick() into an optimized internal
+     * storage.
+     */
+    BRAYNS_API virtual BrickedVolumePtr createBrickedVolume(
+        const Vector3ui& dimensions, const Vector3f& spacing,
+        const DataType type) const = 0;
+
+    BRAYNS_API virtual void buildBoundingBox() = 0;
+    //@}
+
     BRAYNS_API Model() = default;
 
     BRAYNS_API virtual ~Model() = default;
-
-    virtual void commitGeometry() = 0;
-
-    virtual bool commitTransferFunction() = 0;
 
     /**
      * @return true if the geometry Model does not contain any geometry, false
@@ -333,27 +356,6 @@ public:
     */
     void BRAYNS_API setMaterialsColorMap(const MaterialsColorMap colorMap);
 
-    /** Factory method to create an engine-specific material. */
-    BRAYNS_API virtual MaterialPtr createMaterial(const size_t materialId,
-                                                  const std::string& name) = 0;
-
-    /**
-     * Create a volume with the given dimensions, voxel spacing and data type
-     * where the are voxels are set via setVoxels() from any memory location.
-     */
-    BRAYNS_API virtual SharedDataVolumePtr createSharedDataVolume(
-        const Vector3ui& dimensions, const Vector3f& spacing,
-        const DataType type) const = 0;
-
-    /**
-     * Create a volume with the given dimensions, voxel spacing and data type
-     * where the voxels are copied via setBrick() into an optimized internal
-     * storage.
-     */
-    BRAYNS_API virtual BrickedVolumePtr createBrickedVolume(
-        const Vector3ui& dimensions, const Vector3f& spacing,
-        const DataType type) const = 0;
-
     /**
      * @brief createMissingMaterials Checks that all materials exist for
      * existing geometry in the model. Missing materials are created with the
@@ -374,8 +376,6 @@ public:
      * registered in the model
      */
     BRAYNS_API MaterialPtr getMaterial(const size_t materialId) const;
-
-    BRAYNS_API virtual void buildBoundingBox() = 0;
 
     /** @return the transfer function used for volumes and simulations. */
     TransferFunction& getTransferFunction() { return _transferFunction; }
@@ -464,4 +464,3 @@ protected:
     SERIALIZATION_FRIEND(Model)
 };
 }
-#endif // Model_H

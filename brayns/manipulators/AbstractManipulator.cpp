@@ -20,10 +20,10 @@
 
 #include "AbstractManipulator.h"
 
-#include "Camera.h"
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/log.h>
-#include <brayns/common/scene/Scene.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/Scene.h>
 
 namespace brayns
 {

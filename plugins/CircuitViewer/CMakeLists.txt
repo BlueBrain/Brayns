@@ -11,6 +11,7 @@ set(BraynsCircuitViewer_VERSION_ABI 1)
 include(Common)
 
 common_find_package(Brion REQUIRED)
+common_find_package(ospray 1.7 SYSTEM)
 # For unit tests
 common_find_package(BBPTestData)
 common_find_package_post()
@@ -21,10 +22,6 @@ set(BRAYNSCIRCUITVIEWER_HEADERS
   io/ModelData.h
   io/MorphologyLoader.h
   io/SimulationHandler.h
-  renderer/AdvancedSimulationRenderer.h
-  renderer/BasicSimulationRenderer.h
-  renderer/SimulationMaterial.h
-  renderer/SimulationRenderer.h
 )
 
 set(BRAYNSCIRCUITVIEWER_SOURCES
@@ -33,34 +30,44 @@ set(BRAYNSCIRCUITVIEWER_SOURCES
   io/MorphologyLoader.cpp
   io/SimulationHandler.cpp
   io/utils.h
-  renderer/AdvancedSimulationRenderer.cpp
-  renderer/BasicSimulationRenderer.cpp
-  renderer/SimulationMaterial.cpp
-  renderer/SimulationRenderer.cpp
-  renderer/SimulationRenderer.ih
 )
-
-set(BRAYNSCIRCUITVIEWER_ISPC_SOURCES
-  renderer/AdvancedSimulationRenderer.ispc
-  renderer/BasicSimulationRenderer.ispc
-  renderer/SimulationMaterial.ispc
-  renderer/SimulationRenderer.ispc
-)
-list(APPEND BRAYNSCIRCUITVIEWER_SOURCES ${BRAYNSCIRCUITVIEWER_ISPC_SOURCES})
-
-# reuse ispc setup and macros from ospray
-list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
-if(CMAKE_BUILD_TYPE STREQUAL Debug)
-  set(OSPRAY_DEBUG_BUILD ON)
-endif()
-include(ispc)
-
-# Compile ispc code
-include_directories_ispc(${PROJECT_SOURCE_DIR}/../../ ${OSPRAY_INCLUDE_DIRS})
-ospray_ispc_compile(${BRAYNSCIRCUITVIEWER_ISPC_SOURCES})
-list(APPEND BRAYNSCIRCUITVIEWER_SOURCES ${ISPC_OBJECTS})
 
 set(BRAYNSCIRCUITVIEWER_LINK_LIBRARIES PRIVATE braynsPluginAPI Brain)
+
+if(OSPRAY_FOUND)
+  list(APPEND BRAYNSCIRCUITVIEWER_HEADERS
+    renderer/AdvancedSimulationRenderer.h
+    renderer/BasicSimulationRenderer.h
+    renderer/SimulationMaterial.h
+    renderer/SimulationRenderer.h
+  )
+  list(APPEND BRAYNSCIRCUITVIEWER_SOURCES
+    renderer/AdvancedSimulationRenderer.cpp
+    renderer/BasicSimulationRenderer.cpp
+    renderer/SimulationMaterial.cpp
+    renderer/SimulationRenderer.cpp
+    renderer/SimulationRenderer.ih
+  )
+  set(BRAYNSCIRCUITVIEWER_ISPC_SOURCES
+    renderer/AdvancedSimulationRenderer.ispc
+    renderer/BasicSimulationRenderer.ispc
+    renderer/SimulationMaterial.ispc
+    renderer/SimulationRenderer.ispc
+  )
+  list(APPEND BRAYNSCIRCUITVIEWER_SOURCES ${BRAYNSCIRCUITVIEWER_ISPC_SOURCES})
+
+  # reuse ispc setup and macros from ospray
+  list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
+  if(CMAKE_BUILD_TYPE STREQUAL Debug)
+    set(OSPRAY_DEBUG_BUILD ON)
+  endif()
+  include(ispc)
+
+  # Compile ispc code
+  include_directories_ispc(${PROJECT_SOURCE_DIR}/../../ ${OSPRAY_INCLUDE_DIRS})
+  ospray_ispc_compile(${BRAYNSCIRCUITVIEWER_ISPC_SOURCES})
+  list(APPEND BRAYNSCIRCUITVIEWER_SOURCES ${ISPC_OBJECTS})
+endif()
 
 set(BRAYNSCIRCUITVIEWER_OMIT_LIBRARY_HEADER ON)
 set(BRAYNSCIRCUITVIEWER_OMIT_VERSION_HEADERS ON)

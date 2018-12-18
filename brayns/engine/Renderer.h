@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef RENDERER_H
-#define RENDERER_H
+#pragma once
 
 #include <brayns/api.h>
 #include <brayns/common/PropertyObject.h>
@@ -31,31 +30,33 @@ namespace brayns
 class Renderer : public PropertyObject
 {
 public:
-    BRAYNS_API Renderer(const AnimationParameters& animationParameters,
-                        const RenderingParameters& renderingParameters);
-    virtual ~Renderer() = default;
-    virtual void render(FrameBufferPtr frameBuffer) = 0;
-
-    /** @return the variance from the previous render(). */
-    virtual float getVariance() const { return 0.f; }
-    virtual void commit() = 0;
-    void setScene(ScenePtr scene) { _scene = scene; };
-    virtual void setCamera(CameraPtr camera) = 0;
-
     struct PickResult
     {
         bool hit{false};
         Vector3d pos;
     };
+
+    /** @name API for engine-specific code */
+    //@{
+    virtual void render(FrameBufferPtr frameBuffer) = 0;
+
+    /** @return the variance from the previous render(). */
+    virtual float getVariance() const { return 0.f; }
+    virtual void commit() = 0;
+    virtual void setCamera(CameraPtr camera) = 0;
     virtual PickResult pick(const Vector2f& /*pickPos*/)
     {
         return PickResult();
     }
+    //@}
 
+    BRAYNS_API Renderer(const AnimationParameters& animationParameters,
+                        const RenderingParameters& renderingParameters);
+
+    void setScene(ScenePtr scene) { _scene = scene; };
 protected:
     const AnimationParameters& _animationParameters;
     const RenderingParameters& _renderingParameters;
     ScenePtr _scene;
 };
 }
-#endif // RENDERER_H

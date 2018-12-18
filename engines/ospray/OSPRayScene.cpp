@@ -29,7 +29,7 @@
 #include <brayns/common/light/DirectionalLight.h>
 #include <brayns/common/light/PointLight.h>
 #include <brayns/common/log.h>
-#include <brayns/common/scene/Model.h>
+#include <brayns/engine/Model.h>
 
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/ParametersManager.h>
@@ -44,7 +44,7 @@ OSPRayScene::OSPRayScene(ParametersManager& parametersManager,
     : Scene(parametersManager)
     , _memoryManagementFlags(memoryManagementFlags)
 {
-    _backgroundMaterial = std::make_shared<OSPRayMaterial>();
+    _backgroundMaterial = std::make_shared<OSPRayMaterial>(true);
 }
 
 OSPRayScene::~OSPRayScene()
@@ -229,7 +229,7 @@ bool OSPRayScene::_commitVolumeAndTransferFunction(
     bool rebuildScene = false;
     for (auto& modelDescriptor : modelDescriptors)
     {
-        auto& model = modelDescriptor->getModel();
+        auto& model = static_cast<OSPRayModel&>(modelDescriptor->getModel());
         if (model.commitTransferFunction())
             markModified(false);
         if (model.isVolumesDirty())

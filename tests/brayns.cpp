@@ -20,12 +20,12 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/common/camera/Camera.h>
-#include <brayns/common/camera/InspectCenterManipulator.h>
-#include <brayns/common/engine/Engine.h>
-#include <brayns/common/renderer/FrameBuffer.h>
-#include <brayns/common/scene/Model.h>
-#include <brayns/common/scene/Scene.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Model.h>
+#include <brayns/engine/Scene.h>
+#include <brayns/manipulators/InspectCenterManipulator.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #define BOOST_TEST_MODULE brayns
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(defaults)
 
     auto& pm = brayns.getParametersManager();
     const auto& appParams = pm.getApplicationParameters();
-    BOOST_CHECK(appParams.getEngine() == brayns::EngineType::ospray);
+    BOOST_CHECK(appParams.getEngine() == "braynsOSPRayEngine");
     BOOST_CHECK(appParams.getOsprayModules().empty());
     BOOST_CHECK_EQUAL(appParams.getWindowSize(), brayns::Vector2ui(800, 600));
     BOOST_CHECK(!appParams.isBenchmarking());

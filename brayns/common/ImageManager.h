@@ -35,17 +35,6 @@ class ImageManager
 {
 public:
     /**
-     * @brief Exports the contents of a frame buffer to a file. The format of
-     * the file (PNG, JPG, etc) is determined by the extension of the specified
-     * file name
-     * @param frameBuffer Frame buffer to export
-     * @param filename Full name of the file, with appropriate extension
-     * @return True is export was successful, false otherwise
-     */
-    static bool exportFrameBufferToFile(FrameBuffer& frameBuffer,
-                                        const std::string& filename);
-
-    /**
      * @brief Import a Texture from file
      * @param filename Full name of the texture file
      * @return Pointer to Texture2D object is import was successful, nullptr

@@ -20,11 +20,11 @@
 
 #include <brayns/Brayns.h>
 #include <brayns/common/Timer.h>
-#include <brayns/common/camera/Camera.h>
-#include <brayns/common/engine/Engine.h>
 #include <brayns/common/log.h>
-#include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/Scene.h>
 
 int main(int argc, const char** argv)
 {

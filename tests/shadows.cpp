@@ -21,15 +21,15 @@
 #include <brayns/Brayns.h>
 #include <tests/paths.h>
 
-#include <brayns/common/camera/Camera.h>
-#include <brayns/common/engine/Engine.h>
 #include <brayns/common/light/DirectionalLight.h>
-#include <brayns/common/material/Material.h>
-#include <brayns/common/renderer/FrameBuffer.h>
-#include <brayns/common/renderer/Renderer.h>
-#include <brayns/common/scene/Model.h>
-#include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Material.h>
+#include <brayns/engine/Model.h>
+#include <brayns/engine/Renderer.h>
+#include <brayns/engine/Scene.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #define BOOST_TEST_MODULE shadows

@@ -5,9 +5,5 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSSERVICE_SOURCES main.cpp)
-
-set(BRAYNSSERVICE_LINK_LIBRARIES
-  PUBLIC brayns braynsCommon braynsIO braynsParameters ${libuv_LIBRARIES}
-)
-
+set(BRAYNSSERVICE_LINK_LIBRARIES PUBLIC brayns ${libuv_LIBRARIES})
 common_application(braynsService)

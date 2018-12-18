@@ -21,7 +21,7 @@
 #ifndef OSPRAYFRAMEBUFFER_H
 #define OSPRAYFRAMEBUFFER_H
 
-#include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/engine/FrameBuffer.h>
 #include <ospray.h>
 
 #include <mutex>

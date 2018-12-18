@@ -29,7 +29,7 @@ if(BRAYNS_OSPRAY_ENABLED)
   list(APPEND BRAYNSDEFLECT_HEADERS DeflectPixelOp.h)
 endif()
 
-set(BRAYNSDEFLECT_LINK_LIBRARIES PRIVATE braynsCommon braynsParameters Deflect)
+set(BRAYNSDEFLECT_LINK_LIBRARIES PRIVATE braynsCommon braynsManipulators braynsParameters Deflect)
 
 if(libuv_FOUND)
   list(APPEND BRAYNSDEFLECT_LINK_LIBRARIES PRIVATE ${libuv_LIBRARIES})

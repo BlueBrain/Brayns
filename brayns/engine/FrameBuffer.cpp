@@ -44,4 +44,27 @@ size_t FrameBuffer::getColorDepth() const
         return 0;
     }
 }
+
+freeimage::ImagePtr FrameBuffer::getImage()
+{
+#ifdef BRAYNS_USE_FREEIMAGE
+    map();
+    const auto colorBuffer = getColorBuffer();
+    const auto& size = getSize();
+
+    freeimage::ImagePtr image(FreeImage_ConvertFromRawBits(
+        const_cast<uint8_t*>(colorBuffer), size.x(), size.y(),
+        getColorDepth() * size.x(), 8 * getColorDepth(), 0xFF0000, 0x00FF00,
+        0x0000FF, false));
+
+    unmap();
+
+#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_BGR
+    freeimage::SwapRedBlue32(image.get());
+#endif
+    return image;
+#else
+    return nullptr;
+#endif
+}
 }

@@ -6,31 +6,19 @@
 set(BRAYNSCOMMON_SOURCES
   ImageManager.cpp
   PropertyMap.cpp
-  camera/AbstractManipulator.cpp
-  camera/Camera.cpp
-  camera/FlyingModeManipulator.cpp
-  camera/InspectCenterManipulator.cpp
-  engine/Engine.cpp
   input/KeyboardHandler.cpp
   light/DirectionalLight.cpp
   light/Light.cpp
   light/PointLight.cpp
   loader/LoaderRegistry.cpp
-  material/Material.cpp
   material/Texture2D.cpp
-  renderer/FrameBuffer.cpp
-  renderer/Renderer.cpp
   scene/ClipPlane.cpp
-  scene/Model.cpp
-  scene/Scene.cpp
   simulation/AbstractSimulationHandler.cpp
   transferFunction/TransferFunction.cpp
   utils/base64/base64.cpp
   utils/DynamicLib.cpp
   utils/imageUtils.cpp
   utils/utils.cpp
-  volume/SharedDataVolume.cpp
-  volume/Volume.cpp
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
@@ -43,11 +31,6 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   Statistics.h
   Timer.h
   Transformation.h
-  camera/AbstractManipulator.h
-  camera/Camera.h
-  camera/FlyingModeManipulator.h
-  camera/InspectCenterManipulator.h
-  engine/Engine.h
   geometry/CommonDefines.h
   geometry/Cone.h
   geometry/Cylinder.h
@@ -62,14 +45,9 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   loader/Loader.h
   loader/LoaderRegistry.h
   log.h
-  material/Material.h
   material/Texture2D.h
   mathTypes.h
-  renderer/FrameBuffer.h
-  renderer/Renderer.h
   scene/ClipPlane.h
-  scene/Model.h
-  scene/Scene.h
   simulation/AbstractSimulationHandler.h
   tasks/Task.h
   tasks/TaskFunctor.h
@@ -78,9 +56,6 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   types.h
   utils/enumUtils.h
   utils/utils.h
-  volume/BrickedVolume.h
-  volume/SharedDataVolume.h
-  volume/Volume.h
 )
 
 set(BRAYNSCOMMON_HEADERS

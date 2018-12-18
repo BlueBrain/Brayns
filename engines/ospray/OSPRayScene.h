@@ -21,8 +21,8 @@
 #ifndef OSPRAYSCENE_H
 #define OSPRAYSCENE_H
 
-#include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
+#include <brayns/engine/Scene.h>
 
 #include <ospray.h>
 

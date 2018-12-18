@@ -22,9 +22,9 @@
 
 #include <brayns/common/geometry/TrianglesMesh.h>
 #include <brayns/common/loader/Loader.h>
-#include <brayns/common/material/Material.h>
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/types.h>
+#include <brayns/engine/Material.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <string>

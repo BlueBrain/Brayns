@@ -22,12 +22,12 @@
 
 #include "errors.h"
 
-#include <brayns/common/camera/Camera.h>
-#include <brayns/common/engine/Engine.h>
-#include <brayns/common/renderer/FrameBuffer.h>
-#include <brayns/common/scene/Model.h>
-#include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/utils.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Model.h>
+#include <brayns/engine/Scene.h>
 
 #include <brayns/parameters/ParametersManager.h>
 

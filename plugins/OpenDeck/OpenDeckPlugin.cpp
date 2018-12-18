@@ -19,9 +19,9 @@
 
 #include "OpenDeckPlugin.h"
 
-#include <brayns/common/camera/Camera.h>
-#include <brayns/common/engine/Engine.h>
 #include <brayns/common/log.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/Engine.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <ospray/SDK/camera/PerspectiveCamera.h>

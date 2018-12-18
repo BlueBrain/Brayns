@@ -23,8 +23,8 @@
 #include "LoadModelFunctor.h"
 #include "errors.h"
 
-#include <brayns/common/engine/Engine.h>
-#include <brayns/common/scene/Scene.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/Scene.h>
 
 #include <sstream>
 

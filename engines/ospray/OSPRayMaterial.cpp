@@ -70,6 +70,7 @@ void OSPRayMaterial::commit()
     ospSet1f(_ospMaterial, "reflection", _reflectionIndex);
     ospSet1f(_ospMaterial, "a", _emission);
     ospSet1f(_ospMaterial, "glossiness", _glossiness);
+    ospSet1b(_ospMaterial, "skybox", _isBackGroundMaterial);
 
     // Textures
     for (const auto& textureType : textureTypeMaterialAttribute)

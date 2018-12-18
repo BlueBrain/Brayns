@@ -6,7 +6,7 @@
 
 set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
                    ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
-                   brayns braynsIO)
+                   brayns braynsIO braynsManipulators)
 
 configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
 

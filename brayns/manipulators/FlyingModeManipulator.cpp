@@ -20,7 +20,7 @@
 
 #include "FlyingModeManipulator.h"
 
-#include "Camera.h"
+#include <brayns/engine/Camera.h>
 
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/log.h>

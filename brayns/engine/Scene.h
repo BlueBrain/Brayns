@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef SCENE_H
-#define SCENE_H
+#pragma once
 
 #include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
@@ -43,19 +42,8 @@ namespace brayns
 class Scene : public BaseObject
 {
 public:
-    /**
-     * Creates a scene object responsible for handling models, simulations and
-     * light sources.
-     *
-     * @param parametersManager Parameters for the scene (Geometry, volume,
-     *                          rendering, etc)
-     */
-    BRAYNS_API Scene(ParametersManager& parametersManager);
-
-    virtual ~Scene() = default;
-
-    BRAYNS_API Scene& operator=(const Scene& rhs);
-
+    /** @name API for engine-specific code */
+    //@{
     /**
      * Called after scene-related changes have been made before rendering the
      * scene.
@@ -67,6 +55,22 @@ public:
      * @return True if lights were committed, false otherwise
      */
     BRAYNS_API virtual bool commitLights() = 0;
+
+    /** Factory method to create an engine-specific model. */
+    BRAYNS_API virtual ModelPtr createModel() const = 0;
+
+    //@}
+
+    /**
+     * Creates a scene object responsible for handling models, simulations and
+     * light sources.
+     *
+     * @param parametersManager Parameters for the scene (Geometry, volume,
+     *                          rendering, etc)
+     */
+    BRAYNS_API Scene(ParametersManager& parametersManager);
+
+    BRAYNS_API Scene& operator=(const Scene& rhs);
 
     /**
         Returns the bounding box of the scene
@@ -95,8 +99,6 @@ public:
     */
     BRAYNS_API void clearLights();
 
-    BRAYNS_API virtual ModelPtr createModel() const = 0;
-
     /**
         Adds a model to the scene
         @throw std::runtime_error if model is empty
@@ -122,11 +124,6 @@ public:
      * @return true if the scene does not contain any geometry, false otherwise
      */
     BRAYNS_API bool empty() const;
-
-    BRAYNS_API ParametersManager& getParametersManager()
-    {
-        return _parametersManager;
-    }
 
     /** Add a clip plane to the scene.
      * @param plane The coefficients of the clip plane equation.
@@ -264,4 +261,3 @@ private:
     SERIALIZATION_FRIEND(Scene)
 };
 }
-#endif // SCENE_H

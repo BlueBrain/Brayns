@@ -21,7 +21,7 @@
 #ifndef OSPRAYCAMERA_H
 #define OSPRAYCAMERA_H
 
-#include <brayns/common/camera/Camera.h>
+#include <brayns/engine/Camera.h>
 #include <ospray.h>
 
 namespace brayns
@@ -49,8 +49,7 @@ public:
     */
     void setClipPlanes(const Planes& planes);
 
-    /** @copydoc Camera::setEnvironmentMap */
-    void setEnvironmentMap(const bool environmentMap) final;
+    void setEnvironmentMap(const bool environmentMap);
 
     /**
        Gets the OSPRay implementation of the camera object

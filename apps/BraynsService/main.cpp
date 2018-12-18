@@ -20,10 +20,10 @@
 
 #include <brayns/Brayns.h>
 #include <brayns/common/Timer.h>
-#include <brayns/common/engine/Engine.h>
 #include <brayns/common/log.h>
-#include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/types.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/Renderer.h>
 
 #include <uvw.hpp>
 

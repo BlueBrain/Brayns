@@ -25,9 +25,9 @@
 #include "utils.h"
 
 #include <brayns/common/log.h>
-#include <brayns/common/scene/Model.h>
-#include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/utils.h>
+#include <brayns/engine/Model.h>
+#include <brayns/engine/Scene.h>
 
 #include <brain/brain.h>
 

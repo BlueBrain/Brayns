@@ -22,10 +22,10 @@
 
 #include <brayns/common/Transformation.h>
 #include <brayns/common/log.h>
-#include <brayns/common/material/Material.h>
 #include <brayns/common/scene/ClipPlane.h>
-#include <brayns/common/scene/Model.h>
 #include <brayns/common/utils/utils.h>
+#include <brayns/engine/Material.h>
+#include <brayns/engine/Model.h>
 #include <brayns/io/simulation/CADiffusionSimulationHandler.h>
 #include <brayns/parameters/ParametersManager.h>
 

@@ -24,7 +24,6 @@
 #include <brayns/common/utils/utils.h>
 #include <brayns/parameters/ParametersManager.h>
 
-#include <brayns/pluginapi/ExtensionPlugin.h>
 #include <brayns/pluginapi/PluginAPI.h>
 #ifdef BRAYNS_USE_NETWORKING
 #include <plugins/Rockets/RocketsPlugin.h>
@@ -82,7 +81,7 @@ void PluginManager::initPlugins(PluginAPI* api)
         // Since the Rockets plugin provides the ActionInterface, it must be
         // initialized before anything else
         _extensions.insert(_extensions.begin(),
-                           std::make_shared<RocketsPlugin>());
+                           std::make_unique<RocketsPlugin>());
 #else
         throw std::runtime_error(
             "BRAYNS_NETWORKING_ENABLED was not set, but HTTP server URI "

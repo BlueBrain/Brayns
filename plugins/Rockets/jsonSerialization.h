@@ -22,16 +22,16 @@
 
 #include <brayns/common/Statistics.h>
 #include <brayns/common/Transformation.h>
-#include <brayns/common/camera/Camera.h>
-#include <brayns/common/engine/Engine.h>
-#include <brayns/common/material/Material.h>
-#include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/ClipPlane.h>
-#include <brayns/common/scene/Model.h>
-#include <brayns/common/scene/Scene.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/utils/base64/base64.h>
 #include <brayns/common/utils/utils.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/Material.h>
+#include <brayns/engine/Model.h>
+#include <brayns/engine/Renderer.h>
+#include <brayns/engine/Scene.h>
 #include <brayns/parameters/AnimationParameters.h>
 #include <brayns/parameters/ApplicationParameters.h>
 #include <brayns/parameters/RenderingParameters.h>
@@ -82,20 +82,17 @@ STATICJSON_DECLARE_ENUM(brayns::GeometryQuality,
                         {"medium", brayns::GeometryQuality::medium},
                         {"high", brayns::GeometryQuality::high});
 
-STATICJSON_DECLARE_ENUM(
-    brayns::ColorScheme, {"none", brayns::ColorScheme::none},
-    {"by_id", brayns::ColorScheme::by_id},
-    {"protein_atoms", brayns::ColorScheme::protein_atoms},
-    {"protein_chains", brayns::ColorScheme::protein_chains},
-    {"protein_residues", brayns::ColorScheme::protein_residues});
+STATICJSON_DECLARE_ENUM(brayns::ColorScheme,
+                        {"none", brayns::ColorScheme::none},
+                        {"by_id", brayns::ColorScheme::by_id},
+                        {"protein_atoms", brayns::ColorScheme::protein_atoms},
+                        {"protein_chains", brayns::ColorScheme::protein_chains},
+                        {"protein_residues",
+                         brayns::ColorScheme::protein_residues});
 
 STATICJSON_DECLARE_ENUM(brayns::MemoryMode,
                         {"shared", brayns::MemoryMode::shared},
                         {"replicated", brayns::MemoryMode::replicated});
-
-STATICJSON_DECLARE_ENUM(brayns::EngineType,
-                        {"ospray", brayns::EngineType::ospray},
-                        {"optix", brayns::EngineType::optix});
 
 STATICJSON_DECLARE_ENUM(brayns::TextureType,
                         {"diffuse", brayns::TextureType::TT_DIFFUSE},

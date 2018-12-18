@@ -23,9 +23,9 @@
 
 #include <brain/compartmentReportView.h>
 #include <brayns/api.h>
-#include <brayns/common/scene/Scene.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/types.h>
+#include <brayns/engine/Scene.h>
 
 namespace brayns
 {

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MATERIAL_H
-#define MATERIAL_H
+#pragma once
 
 #include <brayns/api.h>
 #include <brayns/common/PropertyObject.h>
@@ -49,12 +48,15 @@ typedef std::map<TextureType, Texture2DPtr> TextureDescriptors;
 class Material : public PropertyObject
 {
 public:
-    BRAYNS_API Material();
-
+    /** @name API for engine-specific code */
+    //@{
     /**
      * Called after material change
      */
-    BRAYNS_API virtual void commit() = 0;
+    virtual void commit() = 0;
+    //@}
+
+    BRAYNS_API Material();
 
     BRAYNS_API const std::string& getName() const { return _name; }
     BRAYNS_API void setName(const std::string& value)
@@ -129,4 +131,3 @@ protected:
     SERIALIZATION_FRIEND(Material)
 };
 }
-#endif // MATERIAL_H

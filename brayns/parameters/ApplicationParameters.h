@@ -42,9 +42,7 @@ public:
     void print() final;
 
     /** Engine*/
-    EngineType getEngine() const { return _engine; }
-    void setEngine(const EngineType name) { _updateValue(_engine, name); }
-    const std::string& getEngineAsString(const EngineType value) const;
+    const std::string& getEngine() const { return _engine; }
     /** OSPRay modules */
     const std::vector<std::string>& getOsprayModules() const
     {
@@ -104,7 +102,7 @@ public:
 protected:
     void parse(const po::variables_map& vm) final;
 
-    EngineType _engine{EngineType::ospray};
+    std::string _engine{"braynsOSPRayEngine"};
     std::vector<std::string> _modules;
     strings _pluginsRaw;
     Vector2d _windowSize;

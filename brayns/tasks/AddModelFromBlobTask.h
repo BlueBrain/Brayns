@@ -21,8 +21,8 @@
 #pragma once
 
 #include <brayns/common/loader/Loader.h>
-#include <brayns/common/scene/Model.h>
 #include <brayns/common/tasks/Task.h>
+#include <brayns/engine/Model.h>
 
 namespace brayns
 {

@@ -21,7 +21,7 @@
 #ifndef OSPRAYMATERIAL_H
 #define OSPRAYMATERIAL_H
 
-#include <brayns/common/material/Material.h>
+#include <brayns/engine/Material.h>
 #include <ospray.h>
 
 namespace brayns
@@ -29,7 +29,11 @@ namespace brayns
 class OSPRayMaterial : public Material
 {
 public:
-    OSPRayMaterial() = default;
+    OSPRayMaterial(const bool backgroundMaterial = false)
+        : Material()
+        , _isBackGroundMaterial(backgroundMaterial)
+    {
+    }
     ~OSPRayMaterial();
 
     /** Noop until commit(renderer) is called. */
@@ -44,6 +48,7 @@ public:
 private:
     OSPTexture _createOSPTexture2D(Texture2DPtr texture);
     OSPMaterial _ospMaterial{nullptr};
+    bool _isBackGroundMaterial{false};
 };
 }
 

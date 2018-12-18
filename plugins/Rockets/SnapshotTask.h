@@ -23,12 +23,12 @@
 #include <brayns/common/tasks/Task.h>
 
 #include "ImageGenerator.h"
-#include <brayns/common/camera/Camera.h>
-#include <brayns/common/engine/Engine.h>
-#include <brayns/common/renderer/FrameBuffer.h>
-#include <brayns/common/renderer/Renderer.h>
-#include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/utils.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Renderer.h>
+#include <brayns/engine/Scene.h>
 
 #include <brayns/parameters/ParametersManager.h>
 
@@ -57,7 +57,7 @@ public:
                     ImageGenerator& imageGenerator)
         : _params(std::move(params))
         , _camera(engine.createCamera())
-        , _scene(engine.createScene(engine.getParametersManager()))
+        , _scene(engine.createScene())
         , _imageGenerator(imageGenerator)
         , _engine(engine)
     {

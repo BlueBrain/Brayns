@@ -39,7 +39,6 @@ namespace brayns
 OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
     : Engine(parametersManager)
 {
-    BRAYNS_INFO << "Initializing OSPRay" << std::endl;
     auto& ap = _parametersManager.getApplicationParameters();
     try
     {
@@ -54,9 +53,8 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
         argv.push_back("--osp:erroroutput");
         argv.push_back("cerr");
 
-        if (ap.getEngine() == EngineType::optix)
+        if (ap.getEngine() == "optix")
         {
-            _type = EngineType::optix;
             argv.push_back("--osp:module:optix");
             argv.push_back("--osp:device:optix");
         }
@@ -93,22 +91,16 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
         }
     }
 
-    BRAYNS_INFO << "Initializing renderers" << std::endl;
-
     _createRenderers();
 
     const auto ospFlags = _getOSPDataFlags();
 
-    BRAYNS_INFO << "Initializing scene" << std::endl;
     _scene = std::make_shared<OSPRayScene>(_parametersManager, ospFlags);
 
-    BRAYNS_INFO << "Initializing camera" << std::endl;
     _createCameras();
 
     _renderer->setScene(_scene);
     _renderer->setCamera(_camera);
-
-    BRAYNS_INFO << "Engine initialization complete" << std::endl;
 }
 
 OSPRayEngine::~OSPRayEngine()
@@ -121,15 +113,18 @@ OSPRayEngine::~OSPRayEngine()
     ospShutdown();
 }
 
-EngineType OSPRayEngine::name() const
-{
-    // can be ospray or optix
-    return _type;
-}
-
 void OSPRayEngine::commit()
 {
     Engine::commit();
+
+    // Needed for Optix
+    if (_parametersManager.getSceneParameters().isModified())
+    {
+        auto ospCamera = std::static_pointer_cast<OSPRayCamera>(_camera);
+        ospCamera->setEnvironmentMap(!_parametersManager.getSceneParameters()
+                                          .getEnvironmentMap()
+                                          .empty());
+    }
 
     auto device = ospGetCurrentDevice();
     if (device && _parametersManager.getRenderingParameters().isModified())
@@ -225,9 +220,10 @@ FrameBufferPtr OSPRayEngine::createFrameBuffer(
                                                frameBufferFormat);
 }
 
-ScenePtr OSPRayEngine::createScene(ParametersManager& parametersManager) const
+ScenePtr OSPRayEngine::createScene() const
 {
-    return std::make_shared<OSPRayScene>(parametersManager, _getOSPDataFlags());
+    return std::make_shared<OSPRayScene>(_parametersManager,
+                                         _getOSPDataFlags());
 }
 
 CameraPtr OSPRayEngine::createCamera() const
@@ -304,8 +300,11 @@ void OSPRayEngine::_createCameras()
     ospCamera->setCurrentType(rp.getCameraType());
     ospCamera->createOSPCamera();
     _camera = ospCamera;
-
-    _camera->setEnvironmentMap(
-        !_parametersManager.getSceneParameters().getEnvironmentMap().empty());
 }
+}
+
+extern "C" brayns::Engine* brayns_engine_create(
+    int, const char**, brayns::ParametersManager& parametersManager)
+{
+    return new brayns::OSPRayEngine(parametersManager);
 }

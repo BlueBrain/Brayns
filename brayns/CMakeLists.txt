@@ -6,6 +6,8 @@
 
 add_subdirectory(parameters)
 add_subdirectory(common)
+add_subdirectory(engine)
+add_subdirectory(manipulators)
 add_subdirectory(io)
 add_subdirectory(tasks)
 add_subdirectory(pluginapi)
@@ -19,16 +21,8 @@ set(BRAYNS_SOURCES
 )
 
 set(BRAYNS_LINK_LIBRARIES
-  PUBLIC braynsParameters braynsCommon
-  PRIVATE braynsIO braynsPluginAPI braynsTasks ${OSPRAY_COMMON_LIBRARY})
-
-if(TARGET braynsOSPRayEngine)
-  list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE braynsOSPRayEngine)
-endif()
-
-if(TARGET braynsCircuitViewer)
-  list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE braynsCircuitViewer)
-endif()
+  PUBLIC braynsParameters braynsCommon braynsEngine
+  PRIVATE braynsIO braynsPluginAPI braynsManipulators braynsTasks)
 
 if(TARGET braynsRockets)
   list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE braynsRockets)

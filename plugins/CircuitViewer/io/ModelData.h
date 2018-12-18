@@ -24,8 +24,8 @@
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/SDFGeometry.h>
 #include <brayns/common/geometry/Sphere.h>
-#include <brayns/common/scene/Model.h>
 #include <brayns/common/types.h>
+#include <brayns/engine/Model.h>
 
 namespace brayns
 {
@@ -36,12 +36,12 @@ struct ModelData
     // std::vector move constructor is not noexcept until C++17, if we want
     // this class to be movable we have to do it by hand.
     ModelData(ModelData&& other) noexcept
-       : spheres(std::move(other.spheres))
-       , cylinders(std::move(other.cylinders))
-       , cones(std::move(other.cones))
-       , sdfGeometries(std::move(other.sdfGeometries))
-       , sdfNeighbours(std::move(other.sdfNeighbours))
-       , sdfMaterials(std::move(other.sdfMaterials))
+        : spheres(std::move(other.spheres)),
+          cylinders(std::move(other.cylinders)),
+          cones(std::move(other.cones)),
+          sdfGeometries(std::move(other.sdfGeometries)),
+          sdfNeighbours(std::move(other.sdfNeighbours)),
+          sdfMaterials(std::move(other.sdfMaterials))
     {
     }
 
