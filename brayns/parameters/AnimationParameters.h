@@ -48,6 +48,11 @@ public:
     /** The (frame) delta to apply for animations to select the next frame. */
     void setDelta(const int32_t delta) { _updateValue(_delta, delta); }
     int32_t getDelta() const { return _delta; }
+    void setStart(const uint32_t start)
+    {
+        _updateValue(_start, start);
+        _updateValue(_current, std::max(_current, _start));
+    }
     uint32_t getStart() const { return _start; }
     void setEnd(const uint32_t end)
     {
