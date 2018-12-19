@@ -141,8 +141,7 @@ RUN apt-get update \
     libboost-iostreams1.67.0 \
     libfreeimage3 \
     libgomp1 \
-    libhdf5-100 \
-    libhdf5-cpp-100 \
+    libhdf5-103 \
     libturbojpeg0 \
     libuv1 \
  && apt-get clean \
