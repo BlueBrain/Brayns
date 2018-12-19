@@ -43,6 +43,9 @@ public:
     /** Calls ExtensionPlugin::init in all loaded plugins */
     void initPlugins(PluginAPI* api);
 
+    /** Destroys all plugins. */
+    void destroyPlugins();
+
     /** Calls ExtensionPlugin::preRender in all loaded plugins */
     void preRender();
 

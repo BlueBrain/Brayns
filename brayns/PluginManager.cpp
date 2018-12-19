@@ -95,6 +95,12 @@ void PluginManager::initPlugins(PluginAPI* api)
     }
 }
 
+void PluginManager::destroyPlugins()
+{
+    _extensions.clear();
+    _libs.clear();
+}
+
 void PluginManager::preRender()
 {
     for (const auto& extension : _extensions)

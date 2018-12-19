@@ -78,6 +78,7 @@ public:
         _modifiedCallback = callback;
     }
 
+    void clearModifiedCallback() { _modifiedCallback = ModifiedCallback(); }
 protected:
     /**
      * Helper function for derived classes to update a parameter and mark it

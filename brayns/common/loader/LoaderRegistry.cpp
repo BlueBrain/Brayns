@@ -109,6 +109,13 @@ const Loader& LoaderRegistry::getSuitableLoader(
                              "' and filetype '" + filetype + "'");
 }
 
+void LoaderRegistry::clear()
+{
+    _loaders.clear();
+    _archiveLoader.reset();
+    _loaderInfos.clear();
+}
+
 bool LoaderRegistry::_archiveSupported(const std::string& filename,
                                        const std::string& filetype) const
 {

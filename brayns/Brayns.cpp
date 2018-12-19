@@ -77,8 +77,7 @@ struct Brayns::Impl : public PluginAPI
 {
     Impl(int argc, const char** argv)
         : _parametersManager{argc, argv}
-        , _engineFactory{std::make_unique<EngineFactory>(argc, argv,
-                                                         _parametersManager)}
+        , _engineFactory{argc, argv, _parametersManager}
         , _pluginManager{argc, argv}
     {
         // This initialization must happen before plugin intialization.
@@ -99,8 +98,11 @@ struct Brayns::Impl : public PluginAPI
 
     ~Impl()
     {
-        _frameBuffers.clear();
-        _engineFactory.reset();
+        // make sure that plugin objects are removed first, as plugins are
+        // destroyed before the engine, but plugin destruction still should have
+        // a valid engine and _api (aka this object).
+        _engine->getScene().getLoaderRegistry().clear();
+        _pluginManager.destroyPlugins();
     }
 
     bool commit()
@@ -264,7 +266,7 @@ private:
         // TODO: remove after braynsOptixEngine is available
         if (engineName == "optix")
             engineName = "braynsOSPRayEngine";
-        _engine = _engineFactory->create(engineName);
+        _engine = _engineFactory.create(engineName);
         if (!_engine)
             throw std::runtime_error("Unsupported engine: " + engineName);
 
@@ -773,7 +775,7 @@ private:
     }
 
     ParametersManager _parametersManager;
-    std::unique_ptr<EngineFactory> _engineFactory;
+    EngineFactory _engineFactory;
     PluginManager _pluginManager;
     Engine* _engine{nullptr};
     KeyboardHandler _keyboardHandler;
