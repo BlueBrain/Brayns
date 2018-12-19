@@ -31,8 +31,6 @@
 #include <assert.h>
 #include <fstream>
 
-#include <boost/filesystem.hpp>
-
 namespace
 {
 const auto PROP_RADIUS_MULTIPLIER = "radiusMultiplier";

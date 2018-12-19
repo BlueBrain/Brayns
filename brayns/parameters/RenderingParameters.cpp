@@ -21,8 +21,6 @@
 #include "RenderingParameters.h"
 #include <brayns/common/log.h>
 
-#include <boost/lexical_cast.hpp>
-
 namespace
 {
 const std::string PARAM_ACCUMULATION = "disable-accumulation";

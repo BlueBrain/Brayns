@@ -35,8 +35,6 @@
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/parameters/SceneParameters.h>
 
-#include <boost/algorithm/string/predicate.hpp> // ends_with
-
 namespace brayns
 {
 OSPRayScene::OSPRayScene(ParametersManager& parametersManager,

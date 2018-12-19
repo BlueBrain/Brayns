@@ -19,9 +19,6 @@
  */
 
 #include "AbstractParameters.h"
-#include <boost/program_options.hpp>
-#include <brayns/common/types.h>
-#include <ostream>
 
 namespace brayns
 {

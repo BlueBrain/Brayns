@@ -23,8 +23,6 @@
 #include <brayns/parameters/AbstractParameters.h>
 #include <brayns/version.h>
 
-#include <boost/algorithm/string.hpp>
-
 namespace
 {
 // https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C++

@@ -22,8 +22,6 @@
 #include <brayns/common/log.h>
 #include <brayns/parameters/ParametersManager.h>
 
-#include <boost/lexical_cast.hpp>
-
 namespace
 {
 const std::string PARAM_BENCHMARKING = "enable-benchmark";
