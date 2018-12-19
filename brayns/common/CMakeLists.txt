@@ -56,12 +56,12 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   types.h
   utils/enumUtils.h
   utils/utils.h
+  utils/imageUtils.h
 )
 
 set(BRAYNSCOMMON_HEADERS
   utils/DynamicLib.h
   utils/base64/base64.h
-  utils/imageUtils.h
 )
 
 set(BRAYNSCOMMON_INCLUDE_NAME brayns/common)
