@@ -42,6 +42,15 @@ SERIALIZATION_ACCESS(ModelInstance)
 
 namespace brayns
 {
+struct SDFGeometryData
+{
+    std::vector<SDFGeometry> geometries;
+    std::map<size_t, std::vector<uint64_t>> geometryIndices;
+
+    std::vector<std::vector<size_t>> neighbours;
+    std::vector<uint64_t> neighboursFlat;
+};
+
 class ModelInstance : public BaseObject
 {
 public:
@@ -307,7 +316,11 @@ public:
     /**
         Returns streamlines handled by the model
     */
-    StreamlinesDataMap& getStreamlines() { return _streamlines; }
+    StreamlinesDataMap& getStreamlines()
+    {
+        _streamlinesDirty = true;
+        return _streamlines;
+    }
     /**
       Adds a SDFGeometry to the scene
       @param materialId Material of the geometry
@@ -318,6 +331,15 @@ public:
       */
     uint64_t addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
                             const std::vector<size_t>& neighbourIndices);
+
+    /**
+     * Returns SDF geometry data handled by the model
+     */
+    SDFGeometryData& getSDFGeometryData()
+    {
+        _sdfGeometriesDirty = true;
+        return _sdf;
+    }
 
     /** Update the list of neighbours for a SDF geometry
       @param geometryIdx Index of the geometry
@@ -442,15 +464,6 @@ protected:
     Boxd _streamlinesBounds;
 
     Boxd _bounds;
-
-    struct SDFGeometryData
-    {
-        std::vector<SDFGeometry> geometries;
-        std::map<size_t, std::vector<uint64_t>> geometryIndices;
-
-        std::vector<std::vector<size_t>> neighbours;
-        std::vector<uint64_t> neighboursFlat;
-    };
 
     SDFGeometryData _sdf;
     bool _sdfGeometriesDirty{false};
