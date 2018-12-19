@@ -305,6 +305,10 @@ public:
                                   const Streamline& streamline);
 
     /**
+        Returns streamlines handled by the model
+    */
+    StreamlinesDataMap& getStreamlines() { return _streamlines; }
+    /**
       Adds a SDFGeometry to the scene
       @param materialId Material of the geometry
       @param geom Geometry to add
