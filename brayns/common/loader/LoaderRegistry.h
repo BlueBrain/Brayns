@@ -81,6 +81,9 @@ public:
               const Matrix4f& transformation, const size_t materialID,
               LoaderProgress cb);
 
+    /** @internal */
+    void clear();
+
 private:
     bool _archiveSupported(const std::string& filename,
                            const std::string& filetype) const;

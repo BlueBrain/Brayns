@@ -35,6 +35,7 @@ namespace brayns
 class RocketsPlugin : public ExtensionPlugin
 {
 public:
+    ~RocketsPlugin();
     void init() final;
 
     /**

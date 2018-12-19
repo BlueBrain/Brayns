@@ -227,6 +227,9 @@ public:
 
         if (_rocketsServer)
             _rocketsServer->setSocketListener(nullptr);
+
+        for (auto i : _objects)
+            i->clearModifiedCallback();
     }
 
     void preRender()
@@ -657,6 +660,8 @@ public:
                 else
                     throttle.second(delayedNotify, delayedNotify, throttleTime);
             });
+
+        _objects.push_back(&obj);
     }
 
     template <class T>
@@ -1580,7 +1585,14 @@ public:
     // need to delay those as we are initialized first, but other plugins might
     // alter the list of renderers for instance
     bool _endpointsRegistered{false};
+
+    std::vector<BaseObject*> _objects;
 };
+
+RocketsPlugin::~RocketsPlugin()
+{
+    _api->setActionInterface(ActionInterfacePtr());
+}
 
 void RocketsPlugin::init()
 {
