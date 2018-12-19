@@ -31,9 +31,6 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
-
 namespace brayns
 {
 const float TOTAL_PROGRESS = 100.f;

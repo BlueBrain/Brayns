@@ -21,7 +21,6 @@
 #ifndef PARAMETERSMANAGER_H
 #define PARAMETERSMANAGER_H
 
-#include <boost/program_options.hpp>
 #include <brayns/api.h>
 #include <brayns/common/types.h>
 #include <brayns/parameters/AnimationParameters.h>

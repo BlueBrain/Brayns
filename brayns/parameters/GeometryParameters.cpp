@@ -22,9 +22,6 @@
 #include <brayns/common/log.h>
 #include <brayns/common/types.h>
 
-#include <boost/lexical_cast.hpp>
-#include <boost/tokenizer.hpp>
-
 namespace
 {
 const std::string PARAM_LOAD_CACHE_FILE = "load-cache-file";
@@ -35,9 +32,8 @@ const std::string PARAM_RADIUS_MULTIPLIER = "radius-multiplier";
 const std::string PARAM_MEMORY_MODE = "memory-mode";
 const std::string PARAM_DEFAULT_BVH_FLAG = "default-bvh-flag";
 
-const std::array<std::string, 5> COLOR_SCHEMES = {{
-     "none", "by-id", "protein-atoms", "protein-chains",
-     "protein-residues"}};
+const std::array<std::string, 5> COLOR_SCHEMES = {
+    {"none", "by-id", "protein-atoms", "protein-chains", "protein-residues"}};
 
 const std::string GEOMETRY_QUALITIES[3] = {"low", "medium", "high"};
 const std::string GEOMETRY_MEMORY_MODES[2] = {"shared", "replicated"};
