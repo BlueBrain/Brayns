@@ -41,23 +41,21 @@ public:
     /** @copydoc AbstractParameters::print */
     void print() final;
 
-    /** OSPRay renderer */
     const std::string& getCurrentRenderer() const { return _renderer; }
-    void setCurrentRenderer(const std::string renderer)
+    void setCurrentRenderer(const std::string& renderer)
     {
         _updateValue(_renderer, renderer);
     }
-    /** OSPRay supported renderers */
+    /** All registered renderers */
     const auto& getRenderers() const { return _renderers; }
     void addRenderer(const std::string& renderer)
     {
         _renderers.push_front(renderer);
     }
-    /**
-       Camera type
-    */
-    const std::string& getCameraType() const { return _cameraType; }
-    const auto& getCameras() const { return _cameraTypeNames; }
+    const std::string& getCurrentCamera() const { return _camera; }
+    /** All registered cameras */
+    const auto& getCameras() const { return _cameras; }
+    void addCamera(const std::string& camera) { _cameras.push_front(camera); }
     /** Number of samples per pixel */
     int getSamplesPerPixel() const { return _spp; }
     void setSamplesPerPixel(const int value) { _updateValue(_spp, value); }
@@ -99,13 +97,12 @@ public:
     }
     size_t getMaxAccumFrames() const { return _maxAccumFrames; }
 protected:
-    void initializeDefaultCameras();
     void parse(const po::variables_map& vm) final;
 
     std::string _renderer{"basic"};
     std::deque<std::string> _renderers;
-    std::string _cameraType{"perspective"};
-    std::deque<std::string> _cameraTypeNames;
+    std::string _camera{"perspective"};
+    std::deque<std::string> _cameras;
     int _spp{1};
     bool _accumulation{true};
     Vector3d _backgroundColor{0., 0., 0.};

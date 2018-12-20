@@ -138,12 +138,20 @@ public:
     void resetFrameBuffers();
 
     /**
-     * Add a new renderer with optional properties. The renderer registration
-     * for a concrete engine is specific to the actual engine, e.g.
+     * Add a new renderer type with optional properties. The renderer
+     * registration for a concrete engine is specific to the actual engine, e.g.
      * OSP_REGISTER_RENDERER for OSPRay.
      */
-    void addRenderer(const std::string& name,
-                     const PropertyMap& properties = {});
+    void addRendererType(const std::string& name,
+                         const PropertyMap& properties = {});
+
+    /**
+     * Add a new camera type with optional properties. The camera registration
+     * for a concrete engine is specific to the actual engine, e.g.
+     * OSP_REGISTER_CAMERA for OSPRay.
+     */
+    void addCameraType(const std::string& name,
+                       const PropertyMap& properties = {});
 
 protected:
     ParametersManager& _parametersManager;

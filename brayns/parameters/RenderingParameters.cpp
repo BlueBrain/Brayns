@@ -31,9 +31,6 @@ const std::string PARAM_MAX_ACCUMULATION_FRAMES = "max-accumulation-frames";
 const std::string PARAM_RENDERER = "renderer";
 const std::string PARAM_SPP = "samples-per-pixel";
 const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
-
-const std::array<std::string, 3> CAMERA_TYPE_NAMES = {
-    {"perspective", "orthographic", "panoramic"}};
 }
 
 namespace brayns
@@ -41,9 +38,8 @@ namespace brayns
 RenderingParameters::RenderingParameters()
     : AbstractParameters("Rendering")
 {
-    _parameters.add_options()(
-        PARAM_RENDERER.c_str(), po::value<std::string>(),
-        "OSPRay active renderer [default|simulation|proximity|particle]")(
+    _parameters.add_options()(PARAM_RENDERER.c_str(), po::value<std::string>(),
+                              "The renderer to use")(
         PARAM_SPP.c_str(), po::value<size_t>(),
         "Number of samples per pixel [int]")(
         PARAM_ACCUMULATION.c_str(), po::bool_switch()->default_value(false),
@@ -51,20 +47,13 @@ RenderingParameters::RenderingParameters()
                                 po::value<floats>()->multitoken(),
                                 "Background color [float float float]")(
         PARAM_CAMERA.c_str(), po::value<std::string>(),
-        "Camera [perspective|orthographic|panoramic]")(
-        PARAM_HEAD_LIGHT.c_str(), po::bool_switch()->default_value(false),
-        "Disable light source attached to camera origin.")(
+        "The camera to use")(PARAM_HEAD_LIGHT.c_str(),
+                             po::bool_switch()->default_value(false),
+                             "Disable light source attached to camera origin.")(
         PARAM_VARIANCE_THRESHOLD.c_str(), po::value<float>(),
         "Threshold for adaptive accumulation [float]")(
         PARAM_MAX_ACCUMULATION_FRAMES.c_str(), po::value<size_t>(),
         "Maximum number of accumulation frames");
-
-    initializeDefaultCameras();
-}
-
-void RenderingParameters::initializeDefaultCameras()
-{
-    _cameraTypeNames = {CAMERA_TYPE_NAMES.begin(), CAMERA_TYPE_NAMES.end()};
 }
 
 void RenderingParameters::parse(const po::variables_map& vm)
@@ -89,10 +78,10 @@ void RenderingParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_CAMERA))
     {
         const std::string& cameraName = vm[PARAM_CAMERA].as<std::string>();
-        _cameraType = cameraName;
-        if (std::find(_cameraTypeNames.begin(), _cameraTypeNames.end(),
-                      cameraName) == _cameraTypeNames.end())
-            _cameraTypeNames.push_front(cameraName);
+        _camera = cameraName;
+        if (std::find(_cameras.begin(), _cameras.end(), cameraName) ==
+            _cameras.end())
+            _cameras.push_front(cameraName);
     }
     _headLight = !vm[PARAM_HEAD_LIGHT].as<bool>();
     if (vm.count(PARAM_VARIANCE_THRESHOLD))
@@ -113,7 +102,7 @@ void RenderingParameters::print()
     BRAYNS_INFO << "Samples per pixel                 : " << _spp << std::endl;
     BRAYNS_INFO << "Background color                  : " << _backgroundColor
                 << std::endl;
-    BRAYNS_INFO << "Camera                            : " << _cameraType
+    BRAYNS_INFO << "Camera                            : " << _camera
                 << std::endl;
     BRAYNS_INFO << "Accumulation                      : "
                 << asString(_accumulation) << std::endl;

@@ -72,8 +72,9 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(appParams.getImageStreamFPS(), 60);
 
     const auto& renderParams = pm.getRenderingParameters();
-    BOOST_CHECK_EQUAL(renderParams.getCameraType(), "perspective");
+    BOOST_CHECK_EQUAL(renderParams.getCurrentCamera(), "perspective");
     BOOST_CHECK_EQUAL(renderParams.getCurrentRenderer(), "basic");
+    BOOST_CHECK_EQUAL(renderParams.getCameras().size(), 4);
     BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 6);
     BOOST_CHECK_EQUAL(renderParams.getSamplesPerPixel(), 1);
     BOOST_CHECK_EQUAL(renderParams.getBackgroundColor(),
