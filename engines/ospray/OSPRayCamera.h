@@ -56,12 +56,12 @@ public:
        @return OSPRay implementation of the camera object
     */
     OSPCamera impl() { return _camera; }
-    void createOSPCamera();
-
 private:
     OSPCamera _camera{nullptr};
     std::string _currentOSPCamera;
     Planes _clipPlanes;
+
+    void _createOSPCamera();
 };
 }
 #endif // OSPRAYCAMERA_H

@@ -55,14 +55,14 @@ void _addAdvancedSimulationRenderer(Engine& engine)
     properties.setProperty(
         {"volumeAlphaCorrection", 0.5, 0.001, 1., {"Volume alpha correction"}});
     // clang-format on
-    engine.addRenderer("advanced_simulation", properties);
+    engine.addRendererType("advanced_simulation", properties);
 }
 void _addBasicSimulationRenderer(Engine& engine)
 {
     PropertyMap properties;
     properties.setProperty(
         {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
-    engine.addRenderer("basic_simulation", properties);
+    engine.addRendererType("basic_simulation", properties);
 }
 }
 

@@ -111,9 +111,17 @@ void Engine::resetFrameBuffers()
         frameBuffer->resetModified();
 }
 
-void Engine::addRenderer(const std::string& name, const PropertyMap& properties)
+void Engine::addRendererType(const std::string& name,
+                             const PropertyMap& properties)
 {
     _parametersManager.getRenderingParameters().addRenderer(name);
     getRenderer().setProperties(name, properties);
+}
+
+void Engine::addCameraType(const std::string& name,
+                           const PropertyMap& properties)
+{
+    _parametersManager.getRenderingParameters().addCamera(name);
+    getCamera().setProperties(name, properties);
 }
 }

@@ -37,7 +37,7 @@ void OSPRayCamera::commit()
 
     const bool cameraChanged = _currentOSPCamera != getCurrentType();
     if (cameraChanged)
-        createOSPCamera();
+        _createOSPCamera();
 
     const auto& position = getPosition();
     const auto& dir = getOrientation().rotate(Vector3f(0.0f, 0.0f, -1.0f));
@@ -83,7 +83,7 @@ void OSPRayCamera::setClipPlanes(const Planes& planes)
     markModified(false);
 }
 
-void OSPRayCamera::createOSPCamera()
+void OSPRayCamera::_createOSPCamera()
 {
     auto newCamera = ospNewCamera(getCurrentType().c_str());
     if (!newCamera)

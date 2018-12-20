@@ -157,15 +157,15 @@ void OSPRayEngine::_createRenderers()
         _parametersManager.getAnimationParameters(),
         _parametersManager.getRenderingParameters());
 
-    addRenderer("raycast_Ng");
-    addRenderer("raycast_Ns");
+    addRendererType("raycast_Ng");
+    addRendererType("raycast_Ns");
 
     {
         PropertyMap properties;
         properties.setProperty({"shadows", 0., 0., 1., {"Shadow intensity"}});
         properties.setProperty(
             {"softShadows", 0., 0., 1., {"Shadow softness"}});
-        addRenderer("pathtracing", properties);
+        addRendererType("pathtracing", properties);
     }
 
     {
@@ -187,7 +187,7 @@ void OSPRayEngine::_createRenderers()
             {"electronShadingEnabled", false, {"Electron shading"}});
         properties.setProperty(
             {"surfaceShadingEnabled", true, {"Surface shading"}});
-        addRenderer("proximity", properties);
+        addRendererType("proximity", properties);
     }
     {
         PropertyMap properties;
@@ -206,10 +206,10 @@ void OSPRayEngine::_createRenderers()
         properties.setProperty(
             {"oneSidedLighting", true, {"One-sided lighting"}});
         properties.setProperty({"shadowsEnabled", false, {"Shadows"}});
-        addRenderer("scivis", properties);
+        addRendererType("scivis", properties);
     }
 
-    addRenderer("basic");
+    addRendererType("basic");
 }
 
 FrameBufferPtr OSPRayEngine::createFrameBuffer(
@@ -249,7 +249,7 @@ uint32_t OSPRayEngine::_getOSPDataFlags() const
 
 void OSPRayEngine::_createCameras()
 {
-    auto ospCamera = std::make_shared<OSPRayCamera>();
+    _camera = std::make_shared<OSPRayCamera>();
 
     const bool isStereo =
         _parametersManager.getApplicationParameters().isStereo();
@@ -262,44 +262,39 @@ void OSPRayEngine::_createCameras()
                            0.0635,
                            {"Eye separation"}};
 
-    RenderingParameters& rp = _parametersManager.getRenderingParameters();
-    for (const auto& camera : rp.getCameras())
     {
         PropertyMap properties;
-        if (camera == "perspective")
+        properties.setProperty(fovy);
+        properties.setProperty(aspect);
+        properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
+        properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
+        if (isStereo)
         {
-            properties.setProperty(fovy);
-            properties.setProperty(aspect);
-            properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
-            properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
-            if (isStereo)
-            {
-                properties.setProperty(stereoProperty);
-                properties.setProperty(eyeSeparation);
-            }
+            properties.setProperty(stereoProperty);
+            properties.setProperty(eyeSeparation);
         }
-        if (camera == "orthographic")
-        {
-            properties.setProperty({"height", 1., {"Height"}});
-            properties.setProperty(aspect);
-        }
-        if (camera == "perspectiveParallax")
-        {
-            properties.setProperty(fovy);
-            properties.setProperty(aspect);
-            if (isStereo)
-            {
-                properties.setProperty(stereoProperty);
-                properties.setProperty(eyeSeparation);
-                properties.setProperty(
-                    {"zeroParallaxPlane", 1., {"Zero parallax plane"}});
-            }
-        }
-        ospCamera->setProperties(camera, properties);
+        addCameraType("perspective", properties);
     }
-    ospCamera->setCurrentType(rp.getCameraType());
-    ospCamera->createOSPCamera();
-    _camera = ospCamera;
+    {
+        PropertyMap properties;
+        properties.setProperty({"height", 1., {"Height"}});
+        properties.setProperty(aspect);
+        addCameraType("orthographic", properties);
+    }
+    {
+        PropertyMap properties;
+        properties.setProperty(fovy);
+        properties.setProperty(aspect);
+        if (isStereo)
+        {
+            properties.setProperty(stereoProperty);
+            properties.setProperty(eyeSeparation);
+            properties.setProperty(
+                {"zeroParallaxPlane", 1., {"Zero parallax plane"}});
+        }
+        addCameraType("perspectiveParallax", properties);
+    }
+    addCameraType("panoramic");
 }
 }
 

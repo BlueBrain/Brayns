@@ -128,9 +128,12 @@ struct Brayns::Impl : public PluginAPI
             _parametersManager.getApplicationParameters().getWindowSize();
 
         auto& camera = _engine->getCamera();
-        camera.updateProperty("aspect",
-                              static_cast<double>(windowSize.x()) /
-                                  static_cast<double>(windowSize.y()));
+        if (camera.hasProperties() && camera.hasProperty("aspect"))
+        {
+            camera.updateProperty("aspect",
+                                  static_cast<double>(windowSize.x()) /
+                                      static_cast<double>(windowSize.y()));
+        }
         for (auto frameBuffer : _frameBuffers)
             frameBuffer->resize(windowSize);
 
@@ -276,6 +279,9 @@ private:
                                  DEFAULT_SUN_INTENSITY));
         _engine->getScene().addLight(sunLight);
         _engine->getScene().commitLights();
+
+        _engine->getCamera().setCurrentType(
+            _parametersManager.getRenderingParameters().getCurrentCamera());
     }
 
     void _createFrameBuffer()
