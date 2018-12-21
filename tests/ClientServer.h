@@ -96,6 +96,8 @@ public:
     }
 
     ClientServer(std::vector<const char*> additionalArgv = {})
+        : _wsClient{std::make_unique<rockets::ws::Client>()}
+        , _client(*_wsClient)
     {
         auto& testSuite = boost::unit_test::framework::master_test_suite();
         const char* app = testSuite.argv[0];
@@ -114,8 +116,14 @@ public:
         scene.getLoaderRegistry().registerLoader(
             std::make_unique<ForeverLoader>(scene));
 
-        connect(_wsClient);
+        connect(*_wsClient);
         _instance = this;
+    }
+
+    ~ClientServer()
+    {
+        _wsClient.reset();
+        _brayns->commit(); // handle disconnect of client
     }
 
     void connect(rockets::ws::Client& client)
@@ -139,7 +147,7 @@ public:
         auto request = _client.request<Params, RetVal>(method, params);
         while (!request.is_ready())
         {
-            _wsClient.process(0);
+            _wsClient->process(0);
             _brayns->commitAndRender();
         }
 
@@ -152,7 +160,7 @@ public:
         auto request = _client.request(method, params);
         while (!request.is_ready())
         {
-            _wsClient.process(0);
+            _wsClient->process(0);
             _brayns->commitAndRender();
         }
 
@@ -167,7 +175,7 @@ public:
         auto request = _client.request<RetVal>(method);
         while (!request.is_ready())
         {
-            _wsClient.process(0);
+            _wsClient->process(0);
             _brayns->commitAndRender();
         }
 
@@ -181,7 +189,7 @@ public:
         auto request = _client.request(method, to_json(params));
         while (!request.is_ready())
         {
-            _wsClient.process(0);
+            _wsClient->process(0);
             _brayns->commitAndRender();
         }
 
@@ -215,7 +223,7 @@ public:
 
         while (!rockets::is_ready(future))
         {
-            _wsClient.process(0);
+            _wsClient->process(0);
             _brayns->commitAndRender();
         }
 
@@ -248,7 +256,7 @@ public:
 
         while (!rockets::is_ready(future))
         {
-            _wsClient.process(0);
+            _wsClient->process(0);
             _brayns->commitAndRender();
         }
 
@@ -260,7 +268,7 @@ public:
     {
         _client.notify<Params>(method, params);
 
-        _wsClient.process(CLIENT_PROCESS_TIMEOUT);
+        _wsClient->process(CLIENT_PROCESS_TIMEOUT);
         for (size_t i = 0; i < SERVER_PROCESS_RETRIES; ++i)
             _brayns->commitAndRender();
     }
@@ -269,25 +277,25 @@ public:
     {
         _client.notify(method, std::string());
 
-        _wsClient.process(CLIENT_PROCESS_TIMEOUT);
+        _wsClient->process(CLIENT_PROCESS_TIMEOUT);
         for (size_t i = 0; i < SERVER_PROCESS_RETRIES; ++i)
             _brayns->commitAndRender();
     }
 
     auto& getBrayns() { return *_brayns; }
-    auto& getWsClient() { return _wsClient; }
+    auto& getWsClient() { return *_wsClient; }
     auto& getJsonRpcClient() { return _client; }
     void process()
     {
-        _wsClient.process(CLIENT_PROCESS_TIMEOUT);
+        _wsClient->process(CLIENT_PROCESS_TIMEOUT);
         _brayns->commit();
     }
 
 private:
     static ClientServer* _instance;
     std::unique_ptr<brayns::Brayns> _brayns;
-    rockets::ws::Client _wsClient;
-    rockets::jsonrpc::Client<rockets::ws::Client> _client{_wsClient};
+    std::unique_ptr<rockets::ws::Client> _wsClient;
+    rockets::jsonrpc::Client<rockets::ws::Client> _client;
 };
 
 class Client

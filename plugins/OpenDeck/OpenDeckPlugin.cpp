@@ -24,8 +24,6 @@
 #include <brayns/engine/Engine.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
-#include <ospray/SDK/camera/PerspectiveCamera.h>
-
 namespace brayns
 {
 namespace

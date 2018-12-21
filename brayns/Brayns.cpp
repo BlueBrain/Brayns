@@ -23,18 +23,22 @@
 #include "EngineFactory.h"
 #include "PluginManager.h"
 
+#include <brayns/common/PropertyMap.h>
 #include <brayns/common/Timer.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/light/DirectionalLight.h>
 #include <brayns/common/log.h>
+#include <brayns/common/mathTypes.h>
 #include <brayns/common/utils/DynamicLib.h>
 #include <brayns/common/utils/utils.h>
+
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
+
 #include <brayns/manipulators/FlyingModeManipulator.h>
 #include <brayns/manipulators/InspectCenterManipulator.h>
 
@@ -43,27 +47,17 @@
 #if BRAYNS_USE_LIBARCHIVE
 #include <brayns/io/ArchiveLoader.h>
 #endif
+#if BRAYNS_USE_ASSIMP
 #include <brayns/io/MeshLoader.h>
+#endif
 #include <brayns/io/MolecularSystemReader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/VolumeLoader.h>
 #include <brayns/io/XYZBLoader.h>
 
 #include <brayns/pluginapi/PluginAPI.h>
-#include <brayns/tasks/AddModelTask.h>
 
-#if BRAYNS_USE_ASSIMP
-#include <brayns/io/MeshLoader.h>
-#endif
-
-#include <brayns/io/MolecularSystemReader.h>
-
-#ifdef BRAYNS_USE_OSPRAY
-#include <ospcommon/library.h>
-#endif
-
-#include <brayns/common/PropertyMap.h>
-#include <brayns/common/mathTypes.h>
+#include <thread>
 
 namespace
 {
@@ -323,7 +317,7 @@ private:
         registry.registerLoader(std::make_unique<MeshLoader>(scene, params));
 #endif
 #if BRAYNS_USE_LIBARCHIVE
-        registry.registerLoader(
+        registry.registerArchiveLoader(
             std::make_unique<ArchiveLoader>(scene, registry));
 #endif
         registry.registerLoader(
