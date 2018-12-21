@@ -35,10 +35,7 @@ if($ENV{TRAVIS})
   endif()
 endif()
 
-# disable noisy warnings from ChoosePython
-set(CHOOSE_PYTHON_DONE ON)
-include(FindBoostConfig)
-
+set(CHOOSE_PYTHON_IGNORE_BOOST ON)
 include(Common)
 
 if(NOT EXISTS ${PROJECT_SOURCE_DIR}/perceptualdiff/FindFreeImage.cmake)
@@ -48,6 +45,11 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/perceptualdiff)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build Async++ as a shared library" FORCE)
 add_subdirectory(async++)
+if(APPLE)
+  # std::exception derivatives are not catched otherwise, e.g. in unit tests for
+  # testing loading errors; see https://stackoverflow.com/questions/21737201
+  target_compile_options(Async++ PRIVATE -frtti)
+endif()
 list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/async++/include/async++/*'
                          '${PROJECT_SOURCE_DIR}/async++/src/*')
 

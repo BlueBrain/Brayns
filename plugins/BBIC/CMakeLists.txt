@@ -34,7 +34,7 @@ set(BRAYNSBBIC_HEADERS
 add_library(braynsBBIC SHARED ${BRAYNSBBIC_SOURCES} ${BRAYNSBBIC_HEADERS})
 target_link_libraries(braynsBBIC
   PUBLIC braynsCommon braynsPluginAPI
-  PRIVATE ${HDF5_LIBRARIES} HighFive
+  PRIVATE braynsEngine ${HDF5_LIBRARIES} HighFive
 )
 target_include_directories(braynsBBIC PRIVATE ${HDF5_INCLUDE_DIRS})
 set_target_properties(braynsBBIC PROPERTIES

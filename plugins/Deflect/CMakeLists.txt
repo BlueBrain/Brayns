@@ -12,6 +12,7 @@ set(DeflectPlugin_VERSION_ABI 1)
 include(Common)
 
 common_find_package(Deflect REQUIRED)
+common_find_package(ospray 1.7 SYSTEM)
 common_find_package_post()
 
 set(BRAYNSDEFLECT_SOURCES
@@ -24,12 +25,15 @@ set(BRAYNSDEFLECT_HEADERS
   utils.h
 )
 
-if(BRAYNS_OSPRAY_ENABLED)
+set(BRAYNSDEFLECT_LINK_LIBRARIES PRIVATE braynsCommon braynsEngine
+  braynsManipulators braynsParameters Deflect)
+
+if(OSPRAY_FOUND)
   list(APPEND BRAYNSDEFLECT_SOURCES DeflectPixelOp.cpp)
   list(APPEND BRAYNSDEFLECT_HEADERS DeflectPixelOp.h)
+  list(APPEND BRAYNSDEFLECT_LINK_LIBRARIES PUBLIC ${OSPRAY_LIBRARIES}
+    PRIVATE braynsOSPRayEngine)
 endif()
-
-set(BRAYNSDEFLECT_LINK_LIBRARIES PRIVATE braynsCommon braynsManipulators braynsParameters Deflect)
 
 if(libuv_FOUND)
   list(APPEND BRAYNSDEFLECT_LINK_LIBRARIES PRIVATE ${libuv_LIBRARIES})

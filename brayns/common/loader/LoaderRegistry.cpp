@@ -20,10 +20,6 @@
 
 #include "LoaderRegistry.h"
 
-#ifdef BRAYNS_USE_LIBARCHIVE
-#include <brayns/io/ArchiveLoader.h>
-#endif
-
 #include <brayns/common/utils/utils.h>
 
 #include <boost/filesystem.hpp>
@@ -34,13 +30,6 @@ namespace brayns
 {
 void LoaderRegistry::registerLoader(std::unique_ptr<Loader> loader)
 {
-#ifdef BRAYNS_USE_LIBARCHIVE
-    if (dynamic_cast<ArchiveLoader*>(loader.get()) != nullptr)
-    {
-        _archiveLoader = std::move(loader);
-        return;
-    }
-#endif
     _loaderInfos.push_back({loader->getName(), loader->getSupportedExtensions(),
                             loader->getProperties()});
     _loaders.push_back(std::move(loader));
@@ -114,6 +103,11 @@ void LoaderRegistry::clear()
     _loaders.clear();
     _archiveLoader.reset();
     _loaderInfos.clear();
+}
+
+void LoaderRegistry::registerArchiveLoader(std::unique_ptr<Loader> loader)
+{
+    _archiveLoader = std::move(loader);
 }
 
 bool LoaderRegistry::_archiveSupported(const std::string& filename,

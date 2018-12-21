@@ -84,6 +84,9 @@ public:
     /** @internal */
     void clear();
 
+    /** @internal */
+    void registerArchiveLoader(std::unique_ptr<Loader> loader);
+
 private:
     bool _archiveSupported(const std::string& filename,
                            const std::string& filetype) const;

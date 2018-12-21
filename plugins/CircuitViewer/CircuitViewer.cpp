@@ -21,7 +21,10 @@
 #include "CircuitViewer.h"
 #include "io/CircuitLoader.h"
 #include "io/MorphologyLoader.h"
+
+#ifdef BRAYNS_USE_OSPRAY
 #include "renderer/AdvancedSimulationRenderer.h" // enum Shading
+#endif
 
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/Renderer.h>
@@ -33,6 +36,7 @@ namespace brayns
 {
 namespace
 {
+#ifdef BRAYNS_USE_OSPRAY
 void _addAdvancedSimulationRenderer(Engine& engine)
 {
     // clang-format off
@@ -64,6 +68,7 @@ void _addBasicSimulationRenderer(Engine& engine)
         {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
     engine.addRendererType("basic_simulation", properties);
 }
+#endif
 }
 
 CircuitViewer::CircuitViewer(PropertyMap&& circuitParams,
@@ -75,10 +80,7 @@ CircuitViewer::CircuitViewer(PropertyMap&& circuitParams,
 
 void CircuitViewer::init()
 {
-    auto& scene = _api->getScene();
-    auto& registry = scene.getLoaderRegistry();
     auto& params = _api->getParametersManager();
-    params.getRenderingParameters().setCurrentRenderer("basic_simulation");
 
     // This code should eventually go away. A more verbose alternative to
     // the harcoded label is to move the PropertyMap to struct parsing code
@@ -94,14 +96,20 @@ void CircuitViewer::init()
     addGeometryQuality(_circuitParams);
     addGeometryQuality(_morphologyParams);
 
+    auto& scene = _api->getScene();
+    auto& registry = scene.getLoaderRegistry();
     registry.registerLoader(
         std::make_unique<CircuitLoader>(scene, std::move(_circuitParams)));
     registry.registerLoader(
         std::make_unique<MorphologyLoader>(scene,
                                            std::move(_morphologyParams)));
 
+#ifdef BRAYNS_USE_OSPRAY
     _addAdvancedSimulationRenderer(_api->getEngine());
     _addBasicSimulationRenderer(_api->getEngine());
+
+    params.getRenderingParameters().setCurrentRenderer("basic_simulation");
+#endif
 }
 }
 

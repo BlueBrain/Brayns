@@ -29,8 +29,6 @@
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
-#include <brayns/parameters/ParametersManager.h>
-
 namespace brayns
 {
 const float TOTAL_PROGRESS = 100.f;

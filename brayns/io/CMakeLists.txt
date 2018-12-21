@@ -20,7 +20,7 @@ set(BRAYNSIO_PUBLIC_HEADERS
 )
 
 set(BRAYNSIO_LINK_LIBRARIES
-  PRIVATE braynsParameters braynsCommon vmmlib
+  PRIVATE braynsParameters braynsCommon braynsEngine
     ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
 )
 

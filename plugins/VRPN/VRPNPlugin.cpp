@@ -23,8 +23,6 @@
 #include <brayns/engine/Camera.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
-#include <ospray/SDK/camera/PerspectiveCamera.h>
-
 namespace brayns
 {
 namespace
@@ -68,8 +66,7 @@ Property getHeadRotationProperty()
 Property getStereoModeProperty()
 {
     return {"stereoMode",
-            static_cast<int>(
-                ospray::PerspectiveCamera::StereoMode::OSP_STEREO_SIDE_BY_SIDE),
+            3, // side-by-side
             {"None", "Left eye", "Right eye", "Side by side"},
             {"Stereo mode"}};
 }
