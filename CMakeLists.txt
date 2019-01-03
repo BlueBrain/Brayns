@@ -22,18 +22,23 @@ set(BRAYNS_PORT_DEPEND "assimp boost freeimage glew tbb")
 # Enable cloning of all optional subprojects for CI builds
 if($ENV{TRAVIS})
   if(NOT DEFINED BRAYNS_NETWORKING_ENABLED)
-    set(BRAYNS_NETWORKING_ENABLED ON)
+    option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ON)
   endif()
   if(NOT DEFINED BRAYNS_DEFLECT_ENABLED)
-    set(BRAYNS_DEFLECT_ENABLED ON)
+    option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" ON)
   endif()
   if(NOT DEFINED BRAYNS_CIRCUITVIEWER_ENABLED)
-    set(BRAYNS_CIRCUITVIEWER_ENABLED ON)
+    option(BRAYNS_CIRCUITVIEWER_ENABLED "Activate CircuitViewer plugin" ON)
   endif()
   if(NOT DEFINED BRAYNS_BBIC_ENABLED)
-    set(BRAYNS_BBIC_ENABLED ON)
+    option(BRAYNS_BBIC_ENABLED "Activate BBIC Volume plugin" ON)
   endif()
 endif()
+
+# disable noisy warnings from ChoosePython
+set(CHOOSE_PYTHON_DONE ON)
+include(FindBoostConfig)
+
 include(Common)
 
 if(NOT EXISTS ${PROJECT_SOURCE_DIR}/perceptualdiff/FindFreeImage.cmake)
