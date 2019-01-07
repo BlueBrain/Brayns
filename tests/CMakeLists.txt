@@ -48,6 +48,10 @@ if(NOT BRAYNS_ASSIMP_ENABLED)
   )
 endif()
 
+if(NOT TARGET braynsCircuitViewer)
+  list(APPEND EXCLUDE_FROM_TESTS shadows.cpp)
+endif()
+
 if(BRAYNS_NETWORKING_ENABLED AND BRAYNS_OSPRAY_ENABLED)
   list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
   include(ispc)
@@ -98,3 +102,8 @@ list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/brayns/common/utils/base64/*'
                          '${PROJECT_SOURCE_DIR}/plugins/Rockets/rapidjson/*'
                          '${PROJECT_SOURCE_DIR}/plugins/Rockets/staticjson/*')
 include(CommonCTest)
+
+if(TARGET braynsCircuitViewer)
+  add_dependencies(${PROJECT_NAME}-tests braynsCircuitViewer)
+endif()
+
