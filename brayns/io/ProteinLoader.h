@@ -34,6 +34,7 @@ namespace brayns
 class ProteinLoader : public Loader
 {
 public:
+    ProteinLoader(Scene& scene, const PropertyMap& properties);
     ProteinLoader(Scene& scene, const GeometryParameters& params);
 
     std::vector<std::string> getSupportedExtensions() const final;
