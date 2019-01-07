@@ -215,6 +215,7 @@ enum class GeometryQuality
  */
 const size_t NO_MATERIAL = std::numeric_limits<size_t>::max();
 const size_t BOUNDINGBOX_MATERIAL_ID = NO_MATERIAL - 1;
+const size_t SECONDARY_MODEL_MATERIAL_ID = NO_MATERIAL - 2;
 
 enum class MemoryMode
 {

@@ -147,7 +147,8 @@ void OSPRayScene::commit()
             }
 
             if (modelDescriptor->getVisible() && instance.getVisible())
-                addInstance(_rootModel, impl.getModel(), instanceTransform);
+                addInstance(_rootModel, impl.getPrimaryModel(),
+                            instanceTransform);
         }
 
         impl.markInstancesClean();

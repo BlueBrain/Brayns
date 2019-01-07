@@ -40,7 +40,8 @@ public:
     bool commitTransferFunction();
     void commitMaterials(const std::string& renderer);
 
-    OSPModel getModel() const { return _model; }
+    OSPModel getPrimaryModel() const { return _primaryModel; }
+    OSPModel getSecondaryModel() const { return _secondaryModel; }
     OSPModel getBoundingBoxModel() const { return _boundingBoxModel; }
     MaterialPtr createMaterial(const size_t materialId,
                                const std::string& name) final;
@@ -80,11 +81,13 @@ private:
     // Whether this model has set the AnimationParameters "is ready" callback
     bool _setIsReadyCallback{false};
 
-    OSPModel _model{nullptr};
+    // Models
+    OSPModel _primaryModel{nullptr};
+    OSPModel _secondaryModel{nullptr};
+    OSPModel _boundingBoxModel{nullptr};
 
     // Bounding box
     size_t _boudingBoxMaterialId{0};
-    OSPModel _boundingBoxModel{nullptr};
 
     // Simulation model
     OSPData _ospSimulationData{nullptr};
