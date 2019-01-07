@@ -48,7 +48,9 @@ if(NOT BRAYNS_ASSIMP_ENABLED)
   )
 endif()
 
-if(NOT TARGET braynsCircuitViewer)
+if(TARGET braynsCircuitViewer)
+  list(APPEND TEST_LIBRARIES braynsCircuitViewer)
+else()
   list(APPEND EXCLUDE_FROM_TESTS shadows.cpp)
 endif()
 
@@ -102,8 +104,3 @@ list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/brayns/common/utils/base64/*'
                          '${PROJECT_SOURCE_DIR}/plugins/Rockets/rapidjson/*'
                          '${PROJECT_SOURCE_DIR}/plugins/Rockets/staticjson/*')
 include(CommonCTest)
-
-if(TARGET braynsCircuitViewer)
-  add_dependencies(${PROJECT_NAME}-tests braynsCircuitViewer)
-endif()
-

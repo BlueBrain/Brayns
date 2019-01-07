@@ -14,3 +14,7 @@ endif()
 if(BRAYNS_CIRCUITVIEWER_ENABLED)
   git_subproject(Brion https://github.com/BlueBrain/Brion.git d8e7c2e)
 endif()
+
+if(BRAYNS_BBIC_ENABLED)
+  git_subproject(HighFive https://github.com/BlueBrain/HighFive.git 8db7f3c)
+endif()
