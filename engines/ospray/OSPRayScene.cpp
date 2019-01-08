@@ -111,6 +111,8 @@ void OSPRayScene::commit()
         BRAYNS_DEBUG << "Committing " << modelDescriptor->getName()
                      << std::endl;
 
+        impl.commitGeometry();
+
         // add volumes to root model, because scivis renderer does not consider
         // volumes from instances
         if (modelDescriptor->getVisible())
@@ -155,7 +157,6 @@ void OSPRayScene::commit()
     }
     BRAYNS_DEBUG << "Committing root models" << std::endl;
 
-    ospSet1i(_rootModel, "isRootModel", 1); // Needed for OptiX
     ospCommit(_rootModel);
 
     _computeBounds();

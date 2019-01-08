@@ -429,13 +429,12 @@ public:
         _bvhFlags = std::move(bvhFlags);
     }
     const std::set<BVHFlag>& getBVHFlags() const { return _bvhFlags; }
-protected:
+    void updateBounds();
     /** Factory method to create an engine-specific material. */
     BRAYNS_API virtual MaterialPtr createMaterialImpl(
         const PropertyMap& properties = {}) = 0;
 
-    void _updateBounds();
-
+protected:
     AbstractSimulationHandlerPtr _simulationHandler;
     TransferFunction _transferFunction;
 

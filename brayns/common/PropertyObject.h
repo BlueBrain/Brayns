@@ -79,6 +79,16 @@ public:
         return _properties.at(_currentType).getProperty<T>(name);
     }
 
+    /**
+     * @return the value of the property with the given name for the current
+     *         type. If it does not exist return the given value.
+     */
+    template <typename T>
+    inline T getPropertyOrValue(const std::string& name, T val) const
+    {
+        return hasProperty(name) ? getProperty<T>(name) : val;
+    }
+
     /** Assign a new set of properties to the current type. */
     void setProperties(const PropertyMap& properties)
     {

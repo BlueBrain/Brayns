@@ -136,3 +136,18 @@ BOOST_AUTO_TEST_CASE(render_protein_in_stereo_and_compare)
     BOOST_CHECK(compareTestImage("testdataProtein_right_eye.png",
                                  *brayns.getEngine().getFrameBuffers()[1]));
 }
+
+BOOST_AUTO_TEST_CASE(render_capsule_and_compare)
+{
+    auto& testSuite = boost::unit_test::framework::master_test_suite();
+
+    const char* app = testSuite.argv[0];
+    const char* argv[] = {app, BRAYNS_TESTDATA_MODEL_CAPSULE_PATH,
+                          "--disable-accumulation"};
+    const int argc = sizeof(argv) / sizeof(char*);
+
+    brayns::Brayns brayns(argc, argv);
+    brayns.commitAndRender();
+    BOOST_CHECK(compareTestImage("testCapsule.png",
+                                 brayns.getEngine().getFrameBuffer()));
+}

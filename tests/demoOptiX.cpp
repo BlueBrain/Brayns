@@ -49,9 +49,6 @@ BOOST_AUTO_TEST_CASE(render_demo)
     camera.setOrientation(brayns::Quaterniond(0.0, 0.0, 0.0, 1.0));
     camera.setPosition(camPos - (rotCenter - camPos));
 
-    brayns.getEngine().getScene().setMaterialsColorMap(
-        brayns::MaterialsColorMap::gradient);
-
     brayns.commitAndRender();
 
     BOOST_CHECK(compareTestImage("testdemoOptiX.png",

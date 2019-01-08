@@ -53,12 +53,6 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
         argv.push_back("--osp:erroroutput");
         argv.push_back("cerr");
 
-        if (ap.getEngine() == "optix")
-        {
-            argv.push_back("--osp:module:optix");
-            argv.push_back("--osp:device:optix");
-        }
-
         if (_parametersManager.getApplicationParameters()
                 .getParallelRendering())
         {
@@ -115,14 +109,6 @@ OSPRayEngine::~OSPRayEngine()
 
 void OSPRayEngine::commit()
 {
-    // Needed for Optix; do it before Engine::commit() before resetModified()
-    // is called on the background material
-    if (_scene->getBackgroundMaterial()->isModified())
-    {
-        auto ospCamera = std::static_pointer_cast<OSPRayCamera>(_camera);
-        ospCamera->setEnvironmentMap(_scene->hasEnvironmentMap());
-    }
-
     Engine::commit();
 
     auto device = ospGetCurrentDevice();

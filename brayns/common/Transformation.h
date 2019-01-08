@@ -70,9 +70,14 @@ public:
     }
     bool operator!=(const Transformation& rhs) const { return !(*this == rhs); }
     // only applies rotation and translation, use scaling separately if needed
-    Matrix4d toMatrix() const
+    Matrix4d toMatrix(bool withScale = false) const
     {
         Matrix4d matrix(getRotation(), getTranslation());
+        if (withScale)
+        {
+            matrix.scale(_scale);
+            matrix.scaleTranslation(_scale);
+        }
         return matrix;
     }
 

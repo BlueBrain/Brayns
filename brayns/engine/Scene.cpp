@@ -151,7 +151,7 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
 
     model.setBVHFlags(defaultBVHFlags);
     model.buildBoundingBox();
-    model.commitGeometry();
+    model.updateBounds();
 
     {
         std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
@@ -165,6 +165,7 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
     }
 
     _computeBounds();
+    markModified();
     return modelDescriptor->getModelID();
 }
 
@@ -278,7 +279,6 @@ void Scene::buildDefault()
     BRAYNS_INFO << "Building default Cornell Box scene" << std::endl;
 
     auto model = createModel();
-
     const Vector3f WHITE = {1.f, 1.f, 1.f};
 
     const Vector3f positions[8] = {
