@@ -315,6 +315,12 @@ static AtomicRadius atomic_radii[colorMapSize] = // atomic radii in microns
      {"OXT", 25.f, 112},
      {"P", 25.f, 113}};
 
+ProteinLoader::ProteinLoader(Scene& scene, const PropertyMap& properties)
+    : Loader(scene)
+    , _defaults(properties)
+{
+}
+
 ProteinLoader::ProteinLoader(Scene& scene, const GeometryParameters& params)
     : Loader(scene)
 {
