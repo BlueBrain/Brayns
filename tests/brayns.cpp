@@ -81,8 +81,6 @@ BOOST_AUTO_TEST_CASE(defaults)
                       brayns::Vector3d(0, 0, 0));
 
     const auto& geomParams = pm.getGeometryParameters();
-    BOOST_CHECK_EQUAL(geomParams.getLoadCacheFile(), "");
-    BOOST_CHECK_EQUAL(geomParams.getSaveCacheFile(), "");
     BOOST_CHECK(geomParams.getColorScheme() == brayns::ColorScheme::none);
     BOOST_CHECK(geomParams.getGeometryQuality() ==
                 brayns::GeometryQuality::high);

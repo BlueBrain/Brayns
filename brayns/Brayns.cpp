@@ -383,11 +383,6 @@ private:
             }
         }
 
-        auto& geometryParameters = _parametersManager.getGeometryParameters();
-        if (!geometryParameters.getLoadCacheFile().empty())
-            scene.loadFromCacheFile();
-
-        scene.saveToCacheFile();
         scene.markModified();
     }
 
@@ -500,9 +495,6 @@ private:
             'x', "Set animation frame to " +
                      std::to_string(DEFAULT_TEST_ANIMATION_FRAME),
             std::bind(&Brayns::Impl::_defaultAnimationFrame, this));
-        _keyboardHandler.registerKeyboardShortcut(
-            '|', "Create cache file ",
-            std::bind(&Brayns::Impl::_saveSceneToCacheFile, this));
         _keyboardHandler.registerKeyboardShortcut(
             '{', "Decrease eye separation",
             std::bind(&Brayns::Impl::_decreaseEyeSeparation, this));
@@ -738,12 +730,6 @@ private:
     {
         auto& animParams = _parametersManager.getAnimationParameters();
         animParams.setFrame(DEFAULT_TEST_ANIMATION_FRAME);
-    }
-
-    void _saveSceneToCacheFile()
-    {
-        auto& scene = _engine->getScene();
-        scene.saveToCacheFile();
     }
 
     void _resetCamera()

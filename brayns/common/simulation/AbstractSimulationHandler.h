@@ -49,32 +49,6 @@ public:
 
     BRAYNS_API virtual void unbind(const MaterialPtr& /* material */){};
 
-    /**
-    * @brief Attaches a memory mapped file to the scene so that renderers can
-    * access the data
-    *        as if it was in memory. The OS is in charge of dealing with the map
-    * file in system
-    *        memory.
-    * @param cacheFile File containing the simulation values
-    * @return True if the file was successfully attached, false otherwise
-    */
-    BRAYNS_API bool attachSimulationToCacheFile(const std::string& cacheFile);
-
-    /**
-    * @brief Writes the header to a stream. The header contains the number of
-    * frames and the frame
-    *        size.
-    * @param stream Stream where the header should be written
-    */
-    BRAYNS_API void writeHeader(std::ofstream& stream);
-
-    /**
-    * @brief Writes a frame to a stream. A frame is a set of float values.
-    * @param stream Stream where the header should be written
-    * @param values Frame values
-    */
-    BRAYNS_API void writeFrame(std::ofstream& stream, const floats& values);
-
     /** @return the current loaded frame for the simulation. */
     uint32_t getCurrentFrame() const { return _currentFrame; }
     /**
@@ -123,9 +97,6 @@ protected:
     double _dt{0};
     std::string _unit;
 
-    uint64_t _headerSize{0};
-    void* _memoryMapPtr{nullptr};
-    int _cacheFileDescriptor{-1};
     floats _frameData;
 };
 }
