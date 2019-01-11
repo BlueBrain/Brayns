@@ -155,37 +155,6 @@ public:
     */
     CADiffusionSimulationHandlerPtr getCADiffusionSimulationHandler() const;
 
-    /** Loads geometry a binary cache file defined by the --load-cache-file
-       command line parameter. The cache file is a binary representation of the
-       following structure:
-       - Version
-       - Number of materials
-       - Materials
-       - For each material:
-         - Number of spheres
-         - Spheres
-         - Number of cylinders
-         - Cylinders
-         - Number of cones
-         - Cones
-         - Number of vertices
-         - Vertices
-         - Number of indices
-         - Indices
-         - Number of normals
-         - Normals
-         - Number of texture coordinates
-         - Texture coordinates
-       - Scene bounds
-    */
-    BRAYNS_API void loadFromCacheFile();
-
-    /**
-        Saves geometry a binary cache file defined by the --save-cache-file
-       command line parameter. See loadFromCacheFile for file structure
-    */
-    BRAYNS_API void saveToCacheFile();
-
     /** @return the current size in bytes of the loaded geometry. */
     size_t getSizeInBytes() const;
 

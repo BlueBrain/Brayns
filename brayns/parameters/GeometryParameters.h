@@ -42,14 +42,9 @@ public:
     /** @copydoc AbstractParameters::print */
     void print() final;
 
-    /** Binary representation of a scene to load */
-    const std::string& getLoadCacheFile() const { return _loadCacheFile; }
-    /** Binary representation of a scene to save */
-    const std::string& getSaveCacheFile() const { return _saveCacheFile; }
     ColorScheme getColorScheme() const { return _colorScheme; }
     GeometryQuality getGeometryQuality() const { return _geometryQuality; }
     float getRadiusMultiplier() const { return _radiusMultiplier; }
-
     /**
      * Defines what memory mode should be used between Brayns and the
      * underlying renderer
@@ -64,8 +59,6 @@ protected:
     void parse(const po::variables_map& vm) final;
 
     // Scene
-    std::string _loadCacheFile;
-    std::string _saveCacheFile;
     std::set<BVHFlag> _defaultBVHFlags;
 
     // Geometry
