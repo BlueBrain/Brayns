@@ -22,3 +22,12 @@ if(BRAYNS_OPENDECK_ENABLED)
     add_dependencies(braynsOSPRayEngine ospray_module_opendeck)
   endif()
 endif()
+
+# Multiview module
+option(BRAYNS_MULTIVIEW_ENABLED "Activate multiview module" OFF)
+if(BRAYNS_MULTIVIEW_ENABLED)
+  add_subdirectory(multiview)
+  if(TARGET ospray_module_multiview)
+    add_dependencies(braynsOSPRayEngine ospray_module_multiview)
+  endif()
+endif()
