@@ -38,11 +38,6 @@ EngineFactory::EngineFactory(const int argc, const char** argv,
     , _argv{argv}
     , _parametersManager{parametersManager}
 {
-    auto name = _parametersManager.getApplicationParameters().getEngine();
-    // TODO: remove after braynsOptixEngine is available
-    if (name == "optix")
-        name = "braynsOSPRayEngine";
-    _loadEngine(name, _argc, _argv);
 }
 
 Engine* EngineFactory::create(const std::string& name)
