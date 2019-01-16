@@ -39,6 +39,10 @@ public:
     void setCurrentType(const std::string& type)
     {
         _updateValue(_currentType, type);
+
+        // add default (empty) property map for new type
+        if (_properties.count(type) == 0)
+            _properties[type];
     }
 
     /** @return the current set type. */
@@ -97,8 +101,6 @@ public:
         markModified();
     }
 
-    /** @return true if the current type has any properties. */
-    bool hasProperties() const { return _properties.count(_currentType) != 0; }
     /** @return the entire property map for the current type. */
     const auto& getPropertyMap() const { return _properties.at(_currentType); }
     /** @return the entire property map for the given type. */

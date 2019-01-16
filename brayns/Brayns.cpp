@@ -122,7 +122,7 @@ struct Brayns::Impl : public PluginAPI
             _parametersManager.getApplicationParameters().getWindowSize();
 
         auto& camera = _engine->getCamera();
-        if (camera.hasProperties() && camera.hasProperty("aspect"))
+        if (camera.hasProperty("aspect"))
         {
             camera.updateProperty("aspect",
                                   static_cast<double>(windowSize.x()) /

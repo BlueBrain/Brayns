@@ -82,8 +82,6 @@ void toOSPRayProperties(const PropertyMap& object, OSPObject ospObject)
 
 void toOSPRayProperties(const PropertyObject& object, OSPObject ospObject)
 {
-    if (!object.hasProperties())
-        return;
     toOSPRayProperties(object.getPropertyMap(), ospObject);
 }
 
