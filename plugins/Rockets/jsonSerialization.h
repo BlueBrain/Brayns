@@ -492,19 +492,21 @@ inline bool modelBinaryParamsFromJson(T& params, const std::string& json)
     Document document;
     document.Parse(json.c_str());
 
+    if (document.HasMember("loader_properties"))
     {
+        auto& loaderProperties = document["loader_properties"];
         Document propertyDoc;
-        propertyDoc.CopyFrom(document["loader_properties"],
-                             propertyDoc.GetAllocator());
+        propertyDoc.CopyFrom(loaderProperties, propertyDoc.GetAllocator());
         rapidjson::StringBuffer buffer;
         rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         propertyDoc.Accept(writer);
 
         params.setLoaderProperties(jsonToPropertyMap(buffer.GetString()));
+
+        // Clear loader_properties to be able to parse rest of values
+        loaderProperties.SetObject();
     }
 
-    // Clear loader_properties to be able to parse rest of values
-    document["loader_properties"].SetObject();
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     document.Accept(writer);
