@@ -112,7 +112,7 @@ public:
     /** @internal Sets the name of current rendered frame buffer. */
     void setBufferTarget(const std::string& target)
     {
-        _updateValue(_bufferTarget, target);
+        _updateValue(_bufferTarget, target, false);
     }
     /** @internal @return the current rendererd frame buffer. */
     const std::string& getBufferTarget() const { return _bufferTarget; }
