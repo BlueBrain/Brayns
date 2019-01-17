@@ -344,10 +344,14 @@ public:
     {
         // call pending notifies from delayed throttle threads here as
         // notify() and process() are not threadsafe within Rockets.
-        std::lock_guard<std::mutex> lock(_delayedNotifiesMutex);
-        for (const auto& func : _delayedNotifies)
+        std::vector<std::function<void()>> delayedNotifies;
+        {
+            std::lock_guard<std::mutex> lock(_delayedNotifiesMutex);
+            delayedNotifies = std::move(_delayedNotifies);
+        }
+
+        for (const auto& func : delayedNotifies)
             func();
-        _delayedNotifies.clear();
     }
 
     void _setupRocketsServer()
@@ -419,8 +423,10 @@ public:
 
     void _delayedNotify(const std::function<void()>& notify)
     {
-        std::lock_guard<std::mutex> lock(_delayedNotifiesMutex);
-        _delayedNotifies.push_back(notify);
+        {
+            std::lock_guard<std::mutex> lock(_delayedNotifiesMutex);
+            _delayedNotifies.push_back(notify);
+        }
 
 #ifdef BRAYNS_USE_LIBUV
         if (_processDelayedNotifies)
