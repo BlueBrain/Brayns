@@ -48,7 +48,7 @@ WS_PATH = '/ws'
 SCHEMA_ENDPOINT = '/schema'
 
 
-class Status(object):
+class Status:
     """Holds the execution status of an HTTP request."""
 
     def __init__(self, code, contents):

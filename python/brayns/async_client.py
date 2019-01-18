@@ -32,7 +32,7 @@ from .utils import build_schema_requests_from_registry, convert_snapshot_respons
 from . import utils
 
 
-class aobject(object):
+class aobject:
     """Inheriting from this class allows to define an async __init__."""
 
     async def __new__(cls, *a, **kw):
