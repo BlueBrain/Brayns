@@ -61,6 +61,10 @@ const auto PROP_GEOMETRY_QUALITY = "geometryQuality";
 const auto PROP_COLOR_SCHEME = "colorScheme";
 
 const auto LOADER_NAME = "mesh";
+
+constexpr float TOTAL_PROGRESS = 100.f;
+constexpr float LOADING_FRACTION = 50.f;
+constexpr float POST_LOADING_FRACTION = 50.f;
 }
 
 namespace brayns
@@ -77,8 +81,6 @@ public:
 
     bool Update(const float percentage) final
     {
-        constexpr float TOTAL_PROGRESS = 100.f;
-        constexpr float LOADING_FRACTION = 50.f;
         _callback.updateProgress(_msg.str(), (percentage * LOADING_FRACTION) /
                                                  TOTAL_PROGRESS);
         return true;
@@ -175,11 +177,14 @@ ModelDescriptorPtr MeshLoader::importFromBlob(
     if (!aiScene->HasMeshes())
         throw std::runtime_error("No meshes found");
 
+    callback.updateProgress("Post-processing...",
+                            (LOADING_FRACTION) / TOTAL_PROGRESS);
+
     auto model = _scene.createModel();
 
     const size_t materialId =
         colorScheme == ColorScheme::by_id ? index : defaultMaterialId;
-    _postLoad(aiScene, *model, {}, materialId, "");
+    _postLoad(aiScene, *model, {}, materialId, "", callback);
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
@@ -281,8 +286,8 @@ void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
 
 void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
                            const Matrix4f& transformation,
-                           const size_t materialId,
-                           const std::string& folder) const
+                           const size_t materialId, const std::string& folder,
+                           const LoaderProgress& callback) const
 {
     // Always create placeholder material since it is not guaranteed to exist
     model.createMaterial(materialId, "default");
@@ -365,7 +370,15 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
                 << "Some faces are not triangulated and have been removed"
                 << std::endl;
         indexOffsets[mesh->mMaterialIndex] += mesh->mNumVertices;
+
+        callback.updateProgress("Post-processing...",
+                                LOADING_FRACTION +
+                                    (((m + 1) / aiScene->mNumMeshes) *
+                                     POST_LOADING_FRACTION) /
+                                        TOTAL_PROGRESS);
     }
+
+    callback.updateProgress("Post-processing...", 1.f);
 
     BRAYNS_DEBUG << "Loaded " << nbVertices << " vertices and " << nbFaces
                  << " faces" << std::endl;
@@ -419,10 +432,13 @@ void MeshLoader::importMesh(const std::string& fileName,
     if (!aiScene->HasMeshes())
         throw std::runtime_error("Error finding meshes in scene");
 
+    callback.updateProgress("Post-processing...",
+                            (LOADING_FRACTION) / TOTAL_PROGRESS);
+
     boost::filesystem::path filepath = fileName;
 
     _postLoad(aiScene, model, transformation, defaultMaterialId,
-              filepath.parent_path().string());
+              filepath.parent_path().string(), callback);
 }
 
 std::string MeshLoader::getName() const
