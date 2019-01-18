@@ -39,6 +39,11 @@ public:
        file name of the environment map
     */
     const std::string& getEnvironmentMap() const { return _environmentMap; }
+    void setEnvironmentMap(const std::string& envMap)
+    {
+        _updateValue(_environmentMap, envMap);
+    }
+
 protected:
     void parse(const po::variables_map& vm) final;
 

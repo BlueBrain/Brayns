@@ -421,12 +421,23 @@ void Scene::_computeBounds()
 
 void Scene::_updateEnvironmentMap()
 {
-    const auto& environmentMap =
-        _parametersManager.getSceneParameters().getEnvironmentMap();
+    auto& sp = _parametersManager.getSceneParameters();
+    const auto& environmentMap = sp.getEnvironmentMap();
     if (environmentMap.empty())
         _backgroundMaterial->removeTexture(TT_DIFFUSE);
     else
-        _backgroundMaterial->setTexture(environmentMap, TT_DIFFUSE);
+    {
+        try
+        {
+            _backgroundMaterial->setTexture(environmentMap, TT_DIFFUSE);
+        }
+        catch (const std::runtime_error& e)
+        {
+            BRAYNS_ERROR << "Cannot load environment map: " << e.what()
+                         << std::endl;
+            sp.setEnvironmentMap("");
+        }
+    }
 
     if (_backgroundMaterial->isModified())
         markModified();
