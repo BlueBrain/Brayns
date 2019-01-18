@@ -393,24 +393,6 @@ public:
 
     void _setupWebsocket()
     {
-        _rocketsServer->handleOpen([this](const uintptr_t) {
-            std::vector<rockets::ws::Response> responses;
-
-            const auto image =
-                _imageGenerator.createJPEG(_engine.getFrameBuffer(),
-                                           _parametersManager
-                                               .getApplicationParameters()
-                                               .getJpegCompression());
-            if (image.size > 0)
-            {
-                std::string message;
-                message.assign((const char*)image.data.get(), image.size);
-                responses.push_back({message, rockets::ws::Recipient::sender,
-                                     rockets::ws::Format::binary});
-            }
-            return responses;
-        });
-
         _rocketsServer->handleClose([this](const uintptr_t clientID) {
             _binaryRequests.removeRequest(clientID);
             return std::vector<rockets::ws::Response>{};
