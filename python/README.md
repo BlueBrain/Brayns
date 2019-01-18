@@ -1,6 +1,6 @@
 # Brayns Python Client
 
-> A client for [Brayns](../README.md) based on the [Rockets client](https://github.com/BlueBrain/Rockets/python/README.md) to provide remote control of a running Brayns instance.
+> A client for [Brayns](../README.md) based on the [Rockets client](https://github.com/BlueBrain/Rockets/blob/master/python/README.md) to provide remote control of a running Brayns instance.
 
 [![Travis CI](https://img.shields.io/travis/BlueBrain/Brayns/master.svg?style=flat-square)](https://travis-ci.org/BlueBrain/Brayns)
 
