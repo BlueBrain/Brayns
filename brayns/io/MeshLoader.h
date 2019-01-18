@@ -72,7 +72,8 @@ private:
 
     void _postLoad(const aiScene* aiScene, Model& model,
                    const Matrix4f& transformation, const size_t defaultMaterial,
-                   const std::string& folder) const;
+                   const std::string& folder,
+                   const LoaderProgress& callback) const;
     size_t _getQuality(const GeometryQuality geometryQuality) const;
 };
 }
