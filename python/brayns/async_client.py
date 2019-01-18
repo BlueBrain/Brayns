@@ -73,8 +73,8 @@ class AsyncClient(BaseClient, aobject):
         :param int quality: compression quality between 1 (worst) and 100 (best)
         :param object renderer: renderer to use instead of current renderer
         :param int samples_per_pixel: samples per pixel to increase render quality
-        :return: the PIL image of the current rendering, None on error obtaining the image
-        :rtype: :py:class:`~PIL.Image.Image`
+        :return: the asyncio.Future of the snapshot generation, or None if inside a notebook
+        :rtype: :py:class:`~asyncio.Future`
         """
         args = locals()
         del args['self']
