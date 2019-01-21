@@ -2,7 +2,6 @@
 
 > Use [Docker](https://docs.docker.com) to run Brayns as a service and avoid painful tooling setup.
 
-**NOTE**: This is work in progress.
 
 ### Prerequisites
 -----------------
@@ -33,6 +32,14 @@ docker run -ti --rm -p 8200:8200 brayns
 
 **NOTE** If you are having trouble exiting the process after you run the container (with the above command), use `docker stop <container-id>` to stop the container.
 `docker ps` will give you the current running process.
+
+If you'd like to also run the UI, use [docker stack](https://docs.docker.com/get-started/part5):
+```bash
+# UI on port 8000 and API on port 8200
+docker stack deploy -c docker-compose.yml brayns
+```
+
+**NOTE** You have to build both the UI and API images (using `docker-compose build`) before you can run them using stacks.
 
 Run Brayns with the HTTP interface binded to a different port:
 ```bash

@@ -1,24 +1,72 @@
-dist: xenial
-sudo: true
-language: python
-python:
-  - 3.5
-  - 3.6
-  - 3.7
-install:
-  - cd python
-  - pip install .
-  - pip install tox-travis
-script:
-  - tox
-before_deploy:
-  - pip install twine
-deploy:
-  provider: pypi
-  user: nachbaur
-  password:
-    secure: QT9y2YUvHLKhT5Tn8P23REtj8yeyxtmsSymr2IG0oqBn4sfmQbEpf7GO/NYiK1h+XQwh/h9iLSvqNXYtNc/hGJotP/6Jw0JXVrkI3tqepvQY0X0AzJATX1A2ioI1q09+SJQXgEdaDZj7Dafy0vyj+nIK+Ig1zjrb1wbv89EvpVi/QMh825tQPKlZk/Y7kOyJVWWqWQOuKxSfcc4suqiPEUplUFnOXtLJZr+Q5eNX2BcaiTmlzJ+IasVZYIZUatHTiDrL5j35VnXRYfGfn+CBp/CzfJBqPMKtzk+QJwla3UYYjreG4Z35xSHR83/ErYE3GOCFrmsIZ/fnu0cMMbMzQ6kz/DhblTiPqwO+clhqZlMqkpzV2WILLZsB19tld7hNQhBLP9W2qLnMg/2rWMfuqk4sqOgMBXzbuBUSAGKZLXXXe8W0uoVbRhIeh9Kf6CKTb+SXDPh8zxsuLpgdazultK2hXQcRIIf4NEFvzKlC+12+OVtuFkeKtSrUPSAcwlWNH28aJ/URuKMK7RjkqC5ATJrdtTmg1T5FQUA2Hf+fv7vHAQnAPM8gp2lD37MG34qRkhbc1icMCxc62mJ14atwgLk5jKqOAmKjV7EIHT4bZhtn0uyukWQYUIu5NaNswvHhHR5XyJbQMjZJ3dSGN/UJNpZKdXXsDHFpH/AwqYf8HA8=
-  on:
-    tags: true
-    branch: master
-    condition: "$TRAVIS_PYTHON_VERSION == 3.6"
+sudo: false
+
+matrix:
+  include:
+    # Node
+    - language: node_js
+      node_js: 8
+      env:
+        - secure: "aD/NIIsuN9YrGMqOgJK0DsE1IB3t6cNfrhkehMiM76UdbvO1CoBuX5MlzUqJIGjU/TUzSh6wRnuYuh/g/jj31YkAXgLLq2ROkgB0xAQY0amko8P+7Jh8INH8zWtAxEA0HNksZKAfE2vXQdPSJ/axXFLKgWcC9S/wPKHrrClP6uJiMfX4qOZIunM/pob2cpwBgvBsNfzOcN1N0+SLLI5vwj/JmJaSvesVi5Oetf+myhy6aAavpVTYd65KbqeCTp1Ge6cnJWi0nuqUVoGrwHgyJ0lBxU2CCEzEf2iRabxoX6qeo7+wIH843TLBG4TirpwA6plh3Q06IKsJpiDFT/cCxQlbZgmu45CLX24bV6KFqdkAYW/geKOE7ck48fLT8HsjXBiLap7P/pLHWcf963TILlBYvFg9Nhe2Od63tYhlrTPBpjWM4GsgvHsj2ON9huBYaw/Nzkyl8kQKESMFOvEigpOQPMzTwNm2CWAAxML4t98IPpg5i4Mjy/thwpYezEjjw7e1FuyNePT5X0x0tCT4AQSb+MA/pkFPrqoDvt+CTyCzCGhgf4Ds1N2Dd5NTttiBee2lLJhjoXQosogBBPfgeQ7aBtS0OS0kBDaM7sDxINBNy+nUZAt+tC3pd1rE7BifOS6x9CBios1HP3V5LPMgLtnukPL+qX/+XFqed5lAyCI="
+      before_install:
+        - |
+          cd js
+          yarn --pure-lockfile --non-interactive
+      script:
+        - yarn test
+        - yarn build
+      after_success:
+        - source ./scripts/set_brayns_npm_version.sh
+      deploy:
+        provider: script
+        # https://blog.travis-ci.com/2018-04-11-how_to_publish_node_js_packages_with_travis_ci_and_packagecloud
+        script: npm config set '//registry.npmjs.org/:_authToken' ${NPM_AUTH_TOKEN} && npm publish packages/sdk
+        skip_cleanup: true
+        on:
+          condition: $BRAYNS_CLIENT_VERSION != ''
+          branch: master
+    # Python 3.5
+    - language: python
+      python: 3.5
+      install:
+        - cd python
+        - pip install .
+        - pip install tox-travis
+      script:
+        - tox
+    # Python 3.6
+    - language: python
+      python: 3.6
+      install:
+        - cd python
+        - pip install .
+        - pip install tox-travis
+      script:
+        - tox
+      before_deploy:
+        - pip install twine
+      after_success:
+        - export BRAYNS_PY_DO_DEPLOY=`../scripts/check_version.py`
+      deploy:
+        provider: pypi
+        user: nachbaur
+        password:
+          secure: "QT9y2YUvHLKhT5Tn8P23REtj8yeyxtmsSymr2IG0oqBn4sfmQbEpf7GO/NYiK1h+XQwh/h9iLSvqNXYtNc/hGJotP/6Jw0JXVrkI3tqepvQY0X0AzJATX1A2ioI1q09+SJQXgEdaDZj7Dafy0vyj+nIK+Ig1zjrb1wbv89EvpVi/QMh825tQPKlZk/Y7kOyJVWWqWQOuKxSfcc4suqiPEUplUFnOXtLJZr+Q5eNX2BcaiTmlzJ+IasVZYIZUatHTiDrL5j35VnXRYfGfn+CBp/CzfJBqPMKtzk+QJwla3UYYjreG4Z35xSHR83/ErYE3GOCFrmsIZ/fnu0cMMbMzQ6kz/DhblTiPqwO+clhqZlMqkpzV2WILLZsB19tld7hNQhBLP9W2qLnMg/2rWMfuqk4sqOgMBXzbuBUSAGKZLXXXe8W0uoVbRhIeh9Kf6CKTb+SXDPh8zxsuLpgdazultK2hXQcRIIf4NEFvzKlC+12+OVtuFkeKtSrUPSAcwlWNH28aJ/URuKMK7RjkqC5ATJrdtTmg1T5FQUA2Hf+fv7vHAQnAPM8gp2lD37MG34qRkhbc1icMCxc62mJ14atwgLk5jKqOAmKjV7EIHT4bZhtn0uyukWQYUIu5NaNswvHhHR5XyJbQMjZJ3dSGN/UJNpZKdXXsDHFpH/AwqYf8HA8="
+        on:
+          condition: $BRAYNS_PY_DO_DEPLOY != ''
+          branch: master
+    # Python 3.7
+    - language: python
+      # https://github.com/travis-ci/travis-ci/issues/9815#issuecomment-425867404
+      dist: xenial
+      sudo: true
+      python: 3.7
+      install:
+        - cd python
+        - pip install .
+        - pip install tox-travis
+      script:
+        - tox
+
+notifications:
+  email:
+    on_success: never

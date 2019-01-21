@@ -1,0 +1,14 @@
+{
+    "extends": [
+        "../../tslint.json"
+    ],
+    "rules": {
+        "no-implicit-dependencies": false,
+        "no-submodule-imports": {
+            "options": [
+                "lodash",
+                "rxjs"
+            ]
+        }
+    }
+}
