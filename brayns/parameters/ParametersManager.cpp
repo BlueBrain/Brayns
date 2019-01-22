@@ -118,7 +118,6 @@ ParametersManager::ParametersManager(const int argc, const char** argv)
     registerParameters(&_applicationParameters);
     registerParameters(&_geometryParameters);
     registerParameters(&_renderingParameters);
-    registerParameters(&_sceneParameters);
     registerParameters(&_volumeParameters);
 
     for (auto parameters : _parameterSets)
@@ -246,11 +245,6 @@ const RenderingParameters& ParametersManager::getRenderingParameters() const
 GeometryParameters& ParametersManager::getGeometryParameters()
 {
     return _geometryParameters;
-}
-
-SceneParameters& ParametersManager::getSceneParameters()
-{
-    return _sceneParameters;
 }
 
 VolumeParameters& ParametersManager::getVolumeParameters()

@@ -94,9 +94,6 @@ BOOST_AUTO_TEST_CASE(defaults)
                       brayns::Vector3d(1., 1., 1.));
     BOOST_CHECK_EQUAL(volumeParams.getOffset(), brayns::Vector3d(0., 0., 0.));
 
-    const auto& sceneParams = pm.getSceneParameters();
-    BOOST_CHECK_EQUAL(sceneParams.getEnvironmentMap(), "");
-
     auto& scene = brayns.getEngine().getScene();
     brayns::Boxd defaultBoundingBox;
     defaultBoundingBox.merge(brayns::Vector3d(0, 0, 0));

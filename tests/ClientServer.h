@@ -379,6 +379,11 @@ brayns::Renderer& getRenderer()
     return ClientServer::instance().getBrayns().getEngine().getRenderer();
 }
 
+auto& getFrameBuffer()
+{
+    return ClientServer::instance().getBrayns().getEngine().getFrameBuffer();
+}
+
 auto& getWsClient()
 {
     return ClientServer::instance().getWsClient();

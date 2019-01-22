@@ -33,7 +33,6 @@
 
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/ParametersManager.h>
-#include <brayns/parameters/SceneParameters.h>
 
 namespace brayns
 {

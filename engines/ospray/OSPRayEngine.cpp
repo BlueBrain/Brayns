@@ -115,16 +115,15 @@ OSPRayEngine::~OSPRayEngine()
 
 void OSPRayEngine::commit()
 {
-    Engine::commit();
-
-    // Needed for Optix
-    if (_parametersManager.getSceneParameters().isModified())
+    // Needed for Optix; do it before Engine::commit() before resetModified()
+    // is called on the background material
+    if (_scene->getBackgroundMaterial()->isModified())
     {
         auto ospCamera = std::static_pointer_cast<OSPRayCamera>(_camera);
-        ospCamera->setEnvironmentMap(!_parametersManager.getSceneParameters()
-                                          .getEnvironmentMap()
-                                          .empty());
+        ospCamera->setEnvironmentMap(_scene->hasEnvironmentMap());
     }
+
+    Engine::commit();
 
     auto device = ospGetCurrentDevice();
     if (device && _parametersManager.getRenderingParameters().isModified())

@@ -11,7 +11,6 @@ set(BRAYNSPARAMETERS_SOURCES
   RenderingParameters.cpp
   GeometryParameters.cpp
   ApplicationParameters.cpp
-  SceneParameters.cpp
   VolumeParameters.cpp
 )
 
@@ -22,7 +21,6 @@ set(BRAYNSPARAMETERS_PUBLIC_HEADERS
   RenderingParameters.h
   GeometryParameters.h
   ApplicationParameters.h
-  SceneParameters.h
   VolumeParameters.h
 )
 

@@ -22,7 +22,6 @@
 
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/parameters/RenderingParameters.h>
-#include <brayns/parameters/SceneParameters.h>
 #include <brayns/parameters/VolumeParameters.h>
 
 #include <sstream>

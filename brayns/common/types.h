@@ -170,7 +170,6 @@ class ApplicationParameters;
 class GeometryParameters;
 class ParametersManager;
 class RenderingParameters;
-class SceneParameters;
 class VolumeParameters;
 
 class PluginAPI;
