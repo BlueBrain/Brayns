@@ -73,6 +73,8 @@ private:
     void _commitSDFGeometries();
     bool _commitTransferFunction();
     bool _commitSimulationData();
+    void _addGeometryToModel(const OSPGeometry geometry,
+                             const size_t materialId);
     void _setBVHFlags();
 
     AnimationParameters& _animationParameters;

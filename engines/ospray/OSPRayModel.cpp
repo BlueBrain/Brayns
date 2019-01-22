@@ -149,6 +149,22 @@ void OSPRayModel::buildBoundingBox()
     addCylinder(BOUNDINGBOX_MATERIAL_ID, {positions[3], positions[7], radius});
 }
 
+void OSPRayModel::_addGeometryToModel(const OSPGeometry geometry,
+                                      const size_t materialId)
+{
+    switch (materialId)
+    {
+    case BOUNDINGBOX_MATERIAL_ID:
+        ospAddGeometry(_boundingBoxModel, geometry);
+        break;
+    case SECONDARY_MODEL_MATERIAL_ID:
+        ospAddGeometry(_secondaryModel, geometry);
+        break;
+    default:
+        ospAddGeometry(_primaryModel, geometry);
+    }
+}
+
 OSPGeometry& OSPRayModel::_createGeometry(GeometryMap& map,
                                           const size_t materialId,
                                           const char* name)
@@ -180,20 +196,9 @@ void OSPRayModel::_commitSpheres(const size_t materialId)
     ospSet1i(geometry, "offset_center", offsetof(Sphere, center));
     ospSet1i(geometry, "offset_radius", offsetof(Sphere, radius));
     ospSet1i(geometry, "bytes_per_sphere", sizeof(Sphere));
-
     ospCommit(geometry);
 
-    switch (materialId)
-    {
-    case BOUNDINGBOX_MATERIAL_ID:
-        ospAddGeometry(_boundingBoxModel, geometry);
-        break;
-    case SECONDARY_MODEL_MATERIAL_ID:
-        ospAddGeometry(_secondaryModel, geometry);
-        break;
-    default:
-        ospAddGeometry(_primaryModel, geometry);
-    }
+    _addGeometryToModel(geometry, materialId);
 }
 
 void OSPRayModel::_commitCylinders(const size_t materialId)
@@ -211,17 +216,7 @@ void OSPRayModel::_commitCylinders(const size_t materialId)
     ospSet1i(geometry, "bytes_per_cylinder", sizeof(Cylinder));
     ospCommit(geometry);
 
-    switch (materialId)
-    {
-    case BOUNDINGBOX_MATERIAL_ID:
-        ospAddGeometry(_boundingBoxModel, geometry);
-        break;
-    case SECONDARY_MODEL_MATERIAL_ID:
-        ospAddGeometry(_secondaryModel, geometry);
-        break;
-    default:
-        ospAddGeometry(_primaryModel, geometry);
-    }
+    _addGeometryToModel(geometry, materialId);
 }
 
 void OSPRayModel::_commitCones(const size_t materialId)
@@ -237,17 +232,7 @@ void OSPRayModel::_commitCones(const size_t materialId)
     ospSet1i(geometry, "bytes_per_cone", sizeof(Cone));
     ospCommit(geometry);
 
-    switch (materialId)
-    {
-    case BOUNDINGBOX_MATERIAL_ID:
-        ospAddGeometry(_boundingBoxModel, geometry);
-        break;
-    case SECONDARY_MODEL_MATERIAL_ID:
-        ospAddGeometry(_secondaryModel, geometry);
-        break;
-    default:
-        ospAddGeometry(_primaryModel, geometry);
-    }
+    _addGeometryToModel(geometry, materialId);
 }
 
 void OSPRayModel::_commitMeshes(const size_t materialId)
