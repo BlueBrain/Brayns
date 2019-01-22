@@ -96,8 +96,9 @@ OSPRayModel::~OSPRayModel()
     releaseAndClearGeometry(_ospStreamlines);
     releaseAndClearGeometry(_ospSDFGeometries);
 
+    ospRelease(_primaryModel);
+    ospRelease(_secondaryModel);
     ospRelease(_boundingBoxModel);
-    ospRelease(_model);
 }
 
 void OSPRayModel::setMemoryFlags(const size_t memoryManagementFlags)
@@ -148,6 +149,22 @@ void OSPRayModel::buildBoundingBox()
     addCylinder(BOUNDINGBOX_MATERIAL_ID, {positions[3], positions[7], radius});
 }
 
+void OSPRayModel::_addGeometryToModel(const OSPGeometry geometry,
+                                      const size_t materialId)
+{
+    switch (materialId)
+    {
+    case BOUNDINGBOX_MATERIAL_ID:
+        ospAddGeometry(_boundingBoxModel, geometry);
+        break;
+    case SECONDARY_MODEL_MATERIAL_ID:
+        ospAddGeometry(_secondaryModel, geometry);
+        break;
+    default:
+        ospAddGeometry(_primaryModel, geometry);
+    }
+}
+
 OSPGeometry& OSPRayModel::_createGeometry(GeometryMap& map,
                                           const size_t materialId,
                                           const char* name)
@@ -155,7 +172,7 @@ OSPGeometry& OSPRayModel::_createGeometry(GeometryMap& map,
     auto& geometry = map[materialId];
     if (geometry)
     {
-        ospRemoveGeometry(_model, geometry);
+        ospRemoveGeometry(_primaryModel, geometry);
         ospRelease(geometry);
     }
     geometry = ospNewGeometry(name);
@@ -179,13 +196,9 @@ void OSPRayModel::_commitSpheres(const size_t materialId)
     ospSet1i(geometry, "offset_center", offsetof(Sphere, center));
     ospSet1i(geometry, "offset_radius", offsetof(Sphere, radius));
     ospSet1i(geometry, "bytes_per_sphere", sizeof(Sphere));
-
     ospCommit(geometry);
 
-    if (materialId == BOUNDINGBOX_MATERIAL_ID)
-        ospAddGeometry(_boundingBoxModel, geometry);
-    else
-        ospAddGeometry(_model, geometry);
+    _addGeometryToModel(geometry, materialId);
 }
 
 void OSPRayModel::_commitCylinders(const size_t materialId)
@@ -203,10 +216,7 @@ void OSPRayModel::_commitCylinders(const size_t materialId)
     ospSet1i(geometry, "bytes_per_cylinder", sizeof(Cylinder));
     ospCommit(geometry);
 
-    if (materialId == BOUNDINGBOX_MATERIAL_ID)
-        ospAddGeometry(_boundingBoxModel, geometry);
-    else
-        ospAddGeometry(_model, geometry);
+    _addGeometryToModel(geometry, materialId);
 }
 
 void OSPRayModel::_commitCones(const size_t materialId)
@@ -222,10 +232,7 @@ void OSPRayModel::_commitCones(const size_t materialId)
     ospSet1i(geometry, "bytes_per_cone", sizeof(Cone));
     ospCommit(geometry);
 
-    if (materialId == BOUNDINGBOX_MATERIAL_ID)
-        ospAddGeometry(_boundingBoxModel, geometry);
-    else
-        ospAddGeometry(_model, geometry);
+    _addGeometryToModel(geometry, materialId);
 }
 
 void OSPRayModel::_commitMeshes(const size_t materialId)
@@ -273,7 +280,7 @@ void OSPRayModel::_commitMeshes(const size_t materialId)
 
     ospCommit(geometry);
 
-    ospAddGeometry(_model, geometry);
+    ospAddGeometry(_primaryModel, geometry);
 }
 
 void OSPRayModel::_commitStreamlines(const size_t materialId)
@@ -306,7 +313,7 @@ void OSPRayModel::_commitStreamlines(const size_t materialId)
 
     ospCommit(geometry);
 
-    ospAddGeometry(_model, geometry);
+    ospAddGeometry(_primaryModel, geometry);
 }
 
 void OSPRayModel::_commitSDFGeometries()
@@ -358,7 +365,7 @@ void OSPRayModel::_commitSDFGeometries()
 
         ospCommit(geometry);
 
-        ospAddGeometry(_model, geometry);
+        ospAddGeometry(_primaryModel, geometry);
     }
 
     ospRelease(globalData);
@@ -439,9 +446,9 @@ bool OSPRayModel::_commitTransferFunction()
 
 void OSPRayModel::_setBVHFlags()
 {
-    ospSet1i(_model, "dynamicScene", _bvhFlags.count(BVHFlag::dynamic));
-    ospSet1i(_model, "compactMode", _bvhFlags.count(BVHFlag::compact));
-    ospSet1i(_model, "robustMode", _bvhFlags.count(BVHFlag::robust));
+    ospSet1i(_primaryModel, "dynamicScene", _bvhFlags.count(BVHFlag::dynamic));
+    ospSet1i(_primaryModel, "compactMode", _bvhFlags.count(BVHFlag::compact));
+    ospSet1i(_primaryModel, "robustMode", _bvhFlags.count(BVHFlag::robust));
 }
 
 void OSPRayModel::commitGeometry()
@@ -455,8 +462,8 @@ void OSPRayModel::commitGeometry()
     if (!isDirty())
         return;
 
-    if (!_model)
-        _model = ospNewModel();
+    if (!_primaryModel)
+        _primaryModel = ospNewModel();
 
     // Materials
     for (auto material : _materials)
@@ -503,7 +510,9 @@ void OSPRayModel::commitGeometry()
     _instancesDirty = false;
 
     // Commit models
-    ospCommit(_model);
+    ospCommit(_primaryModel);
+    if (_secondaryModel)
+        ospCommit(_secondaryModel);
     if (_boundingBoxModel)
         ospCommit(_boundingBoxModel);
 }
