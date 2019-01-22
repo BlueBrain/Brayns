@@ -212,11 +212,10 @@ public:
     //@{
     virtual void commitGeometry() = 0;
 
-    /** Create a material with an assigned id and name.
-     *  No material properties are set.
-     */
-    BRAYNS_API MaterialPtr createMaterial(const size_t materialId,
-                                          const std::string& name);
+    /** Factory method to create an engine-specific material. */
+    BRAYNS_API virtual MaterialPtr createMaterial(
+        const size_t materialId, const std::string& name,
+        const PropertyMap& properties = {}) = 0;
 
     /**
      * Create a volume with the given dimensions, voxel spacing and data type
@@ -383,6 +382,13 @@ public:
        transparency, reflection, and light emission
     */
     void BRAYNS_API setMaterialsColorMap(const MaterialsColorMap colorMap);
+
+    /**
+     * @brief createMissingMaterials Checks that all materials exist for
+     * existing geometry in the model. Missing materials are created with the
+     * default parameters
+     */
+    BRAYNS_API void createMissingMaterials(const PropertyMap& properties = {});
 
     /**
      * @brief getMaterials Returns a reference to the map of materials handled

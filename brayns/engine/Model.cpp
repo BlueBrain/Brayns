@@ -515,16 +515,28 @@ void Model::_updateBounds()
     _bounds.merge(_volumesBounds);
 }
 
-MaterialPtr Model::createMaterial(const size_t materialId,
-                                  const std::string& name)
+void Model::createMissingMaterials(const brayns::PropertyMap& properties)
 {
-    auto material = _materials[materialId] = createMaterialImpl();
-    material->setName(name);
-    if (_simulationHandler)
-        _simulationHandler->bind(material);
-    return material;
-}
+    std::set<size_t> materialIds;
+    for (auto& spheres : _spheres)
+        materialIds.insert(spheres.first);
+    for (auto& cylinders : _cylinders)
+        materialIds.insert(cylinders.first);
+    for (auto& cones : _cones)
+        materialIds.insert(cones.first);
+    for (auto& meshes : _trianglesMeshes)
+        materialIds.insert(meshes.first);
+    for (auto& sdfGeometries : _sdf.geometryIndices)
+        materialIds.insert(sdfGeometries.first);
 
+    for (const auto materialId : materialIds)
+    {
+        const auto it = _materials.find(materialId);
+        if (it == _materials.end())
+            createMaterial(materialId, std::to_string(materialId), properties);
+    }
+    _bindMaterials(_simulationHandler, _materials);
+}
 
 void Model::setSimulationHandler(AbstractSimulationHandlerPtr handler)
 {
