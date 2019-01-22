@@ -356,6 +356,7 @@ private:
                     constexpr auto MIN_SECS = 5;
                     constexpr auto MIN_PERCENTAGE = 10;
 
+                    t = std::max(0.f, std::min(t, 1.f));
                     const int percentage = static_cast<int>(100.0f * t);
                     const auto time = std::chrono::steady_clock::now();
                     const auto secondsElapsed =
