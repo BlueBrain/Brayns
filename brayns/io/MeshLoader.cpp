@@ -81,8 +81,10 @@ public:
 
     bool Update(const float percentage) final
     {
-        _callback.updateProgress(_msg.str(), (percentage * LOADING_FRACTION) /
-                                                 TOTAL_PROGRESS);
+        if (percentage > 0.f)
+            _callback.updateProgress(_msg.str(), (std::min(1.f, percentage) *
+                                                  LOADING_FRACTION) /
+                                                     TOTAL_PROGRESS);
         return true;
     }
 
@@ -372,10 +374,10 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
         indexOffsets[mesh->mMaterialIndex] += mesh->mNumVertices;
 
         callback.updateProgress("Post-processing...",
-                                LOADING_FRACTION +
-                                    (((m + 1) / aiScene->mNumMeshes) *
-                                     POST_LOADING_FRACTION) /
-                                        TOTAL_PROGRESS);
+                                (LOADING_FRACTION +
+                                 (((m + 1) / aiScene->mNumMeshes) *
+                                  POST_LOADING_FRACTION)) /
+                                    TOTAL_PROGRESS);
     }
 
     callback.updateProgress("Post-processing...", 1.f);
