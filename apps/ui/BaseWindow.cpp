@@ -30,7 +30,6 @@
 #include <brayns/engine/Scene.h>
 #include <brayns/manipulators/AbstractManipulator.h>
 #include <brayns/parameters/ParametersManager.h>
-#include <brayns/parameters/SceneParameters.h>
 
 #include <assert.h>
 

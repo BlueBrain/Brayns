@@ -47,17 +47,17 @@ inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
 
     if (ray.geomID < 0)
     {
-        // No intersection. Return skybox color
-        color = make_vec3f(
-            skyboxMapping((Renderer*)self, ray, self->abstract.bgMaterial));
-        sample.alpha = 0.f;
-        return color;
+        // No intersection, use environment map or background color
+        vec4f bgSample =
+            skyboxMapping((Renderer*)self, ray, self->abstract.bgMaterial);
+        sample.alpha = bgSample.w;
+        return make_vec3f(bgSample);
     }
 
     DifferentialGeometry dg;
     postIntersect(self->abstract.super.model, dg, ray,
                   DG_NS | DG_NG | DG_NORMALIZE | DG_FACEFORWARD |
-                  DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
+                      DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
 
     uniform DefaultMaterial* material = (uniform DefaultMaterial*)dg.material;
 

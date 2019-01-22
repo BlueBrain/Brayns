@@ -35,7 +35,6 @@
 #include <brayns/parameters/AnimationParameters.h>
 #include <brayns/parameters/ApplicationParameters.h>
 #include <brayns/parameters/RenderingParameters.h>
-#include <brayns/parameters/SceneParameters.h>
 #include <brayns/parameters/VolumeParameters.h>
 #include <brayns/tasks/AddModelFromBlobTask.h>
 #include <brayns/tasks/errors.h>
@@ -57,6 +56,11 @@ struct GetInstances
 struct SchemaParam
 {
     std::string endpoint;
+};
+
+struct EnvironmentMapParam
+{
+    std::string filename;
 };
 
 struct ObjectID
@@ -165,6 +169,12 @@ inline void init(brayns::GetInstances* g, ObjectHandler* h)
 inline void init(brayns::SchemaParam* s, ObjectHandler* h)
 {
     h->add_property("endpoint", &s->endpoint);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::EnvironmentMapParam* s, ObjectHandler* h)
+{
+    h->add_property("filename", &s->filename);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -358,12 +368,6 @@ inline void init(brayns::RenderingParameters* r, ObjectHandler* h)
                     Flags::IgnoreRead | Flags::Optional);
     h->add_property("variance_threshold", &r->_varianceThreshold,
                     Flags::Optional);
-    h->set_flags(Flags::DisallowUnknownKey);
-}
-
-inline void init(brayns::SceneParameters* s, ObjectHandler* h)
-{
-    h->add_property("environment_map", &s->_environmentMap, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

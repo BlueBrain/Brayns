@@ -64,7 +64,6 @@ const std::string ENDPOINT_CAMERA_PARAMS = "camera-params";
 const std::string ENDPOINT_RENDERER = "renderer";
 const std::string ENDPOINT_RENDERER_PARAMS = "renderer-params";
 const std::string ENDPOINT_SCENE = "scene";
-const std::string ENDPOINT_SCENE_PARAMS = "scene-parameters";
 const std::string ENDPOINT_VOLUME_PARAMS = "volume-parameters";
 
 // REST GET, JSONRPC get-* request
@@ -90,6 +89,7 @@ const std::string METHOD_MODEL_PROPERTIES_SCHEMA = "model-properties-schema";
 const std::string METHOD_REMOVE_CLIP_PLANES = "remove-clip-planes";
 const std::string METHOD_REMOVE_MODEL = "remove-model";
 const std::string METHOD_SCHEMA = "schema";
+const std::string METHOD_SET_ENVIRONMENT_MAP = "set-environment-map";
 const std::string METHOD_SET_MODEL_PROPERTIES = "set-model-properties";
 const std::string METHOD_SET_MODEL_TRANSFER_FUNCTION =
     "set-model-transfer-function";
@@ -919,7 +919,6 @@ public:
         _handle(ENDPOINT_ANIMATION_PARAMS,
                 _parametersManager.getAnimationParameters(),
                 INTERACTIVE_THROTTLE);
-        _handle(ENDPOINT_SCENE_PARAMS, _parametersManager.getSceneParameters());
         _handle(ENDPOINT_VOLUME_PARAMS,
                 _parametersManager.getVolumeParameters());
 
@@ -937,6 +936,8 @@ public:
 
         _handleRequestModelUpload();
         _handleChunk();
+
+        _handleSetEnvironmentMap();
 
         _handleAddModel();
         _handleRemoveModel();
@@ -1537,6 +1538,25 @@ public:
             LOADERS_SCHEMA,
             buildJsonRpcSchemaRequestReturnOnly<std::vector<PropertyMap>>(
                 desc));
+    }
+
+    void _handleSetEnvironmentMap()
+    {
+        const RpcParameterDescription desc{METHOD_SET_ENVIRONMENT_MAP,
+                                           "Set a environment map in the scene",
+                                           "filename",
+                                           "environment map texture file"};
+
+        _handleRPC<EnvironmentMapParam, bool>(desc, [&](const auto& envMap) {
+            this->_rebroadcast(METHOD_SET_ENVIRONMENT_MAP, to_json(envMap),
+                               {_currentClientID});
+            if (_engine.getScene().setEnvironmentMap(envMap.filename))
+            {
+                _engine.triggerRender();
+                return true;
+            }
+            return false;
+        });
     }
 
     Engine& _engine;

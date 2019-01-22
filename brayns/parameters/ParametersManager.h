@@ -27,7 +27,6 @@
 #include <brayns/parameters/ApplicationParameters.h>
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/RenderingParameters.h>
-#include <brayns/parameters/SceneParameters.h>
 #include <brayns/parameters/VolumeParameters.h>
 
 namespace brayns
@@ -88,12 +87,6 @@ public:
     BRAYNS_API const ApplicationParameters& getApplicationParameters() const;
 
     /**
-       Gets scene parameters
-       @return Parameters for the current scene
-    */
-    BRAYNS_API SceneParameters& getSceneParameters();
-
-    /**
        Gets volume parameters
        @return Parameters for the current volume
     */
@@ -120,7 +113,6 @@ private:
     ApplicationParameters _applicationParameters;
     GeometryParameters _geometryParameters;
     RenderingParameters _renderingParameters;
-    SceneParameters _sceneParameters;
     VolumeParameters _volumeParameters;
 };
 }

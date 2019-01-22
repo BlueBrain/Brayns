@@ -169,6 +169,20 @@ public:
     void setMaterialsColorMap(
         MaterialsColorMap colorMap = MaterialsColorMap::none);
 
+    /**
+     * Set a new environment map to the scene as the background image. If envMap
+     * is empty, it removes the previous map and the background color is used
+     * instead.
+     *
+     * @param envMap a filepath to an image that shall be used as the
+     *               environment map texture
+     * @return false if the new map could not be set, true otherwise
+     */
+    bool setEnvironmentMap(const std::string& envMap);
+
+    /** @return true if an environment map is currently set in the scene. */
+    bool hasEnvironmentMap() const;
+
     MaterialPtr getBackgroundMaterial() const { return _backgroundMaterial; }
     /**
      * Load the model from the given blob.
@@ -207,10 +221,10 @@ public:
 
 protected:
     void _computeBounds();
-    void _updateEnvironmentMap();
 
     ParametersManager& _parametersManager;
     MaterialPtr _backgroundMaterial;
+    bool _hasEnvironmentMap{false};
 
     // Model
     size_t _modelID{0};

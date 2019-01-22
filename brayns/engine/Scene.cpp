@@ -98,7 +98,6 @@ Scene& Scene::operator=(const Scene& rhs)
 
 void Scene::commit()
 {
-    _updateEnvironmentMap();
 }
 
 size_t Scene::getSizeInBytes() const
@@ -404,6 +403,38 @@ void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)
     markModified();
 }
 
+bool Scene::setEnvironmentMap(const std::string& envMap)
+{
+    if (envMap.empty())
+    {
+        _backgroundMaterial->removeTexture(TT_DIFFUSE);
+        _updateValue(_hasEnvironmentMap, false);
+    }
+    else
+    {
+        try
+        {
+            _backgroundMaterial->setTexture(envMap, TT_DIFFUSE);
+            _updateValue(_hasEnvironmentMap, true);
+        }
+        catch (const std::runtime_error& e)
+        {
+            BRAYNS_ERROR << "Cannot load environment map: " << e.what()
+                         << std::endl;
+            return false;
+        }
+    }
+
+    if (_backgroundMaterial->isModified())
+        markModified();
+    return true;
+}
+
+bool Scene::hasEnvironmentMap() const
+{
+    return _hasEnvironmentMap;
+}
+
 void Scene::_computeBounds()
 {
     std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
@@ -417,29 +448,5 @@ void Scene::_computeBounds()
     if (_bounds.isEmpty())
         // If no model is enabled. return empty bounding box
         _bounds.merge({0, 0, 0});
-}
-
-void Scene::_updateEnvironmentMap()
-{
-    auto& sp = _parametersManager.getSceneParameters();
-    const auto& environmentMap = sp.getEnvironmentMap();
-    if (environmentMap.empty())
-        _backgroundMaterial->removeTexture(TT_DIFFUSE);
-    else
-    {
-        try
-        {
-            _backgroundMaterial->setTexture(environmentMap, TT_DIFFUSE);
-        }
-        catch (const std::runtime_error& e)
-        {
-            BRAYNS_ERROR << "Cannot load environment map: " << e.what()
-                         << std::endl;
-            sp.setEnvironmentMap("");
-        }
-    }
-
-    if (_backgroundMaterial->isModified())
-        markModified();
 }
 }
