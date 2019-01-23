@@ -137,8 +137,9 @@ inline float _getLastSampleRadius(const brain::neuron::Section& section)
 
 /* Morphology tree processing */
 
-uint32_ts computeTreeTraversalOrder(const brain::neuron::Morphology& morphology,
-                                    const NeuronDisplayMode displayMode)
+uint32_ts _computeTreeTraversalOrder(
+    const brain::neuron::Morphology& morphology,
+    const NeuronDisplayMode displayMode)
 {
     uint32_ts visited;
     uint32_ts stack;
@@ -306,6 +307,26 @@ void _finalizeSDFGeometries(ModelData& modelData, SDFData& sdfData)
                                  neighbours);
     }
 }
+
+void _createMaterials(Model& model, NeuronColorScheme scheme, size_t index)
+{
+    switch (scheme)
+    {
+    case NeuronColorScheme::by_id:
+        model.createMaterial(index, std::to_string(index));
+        break;
+    case NeuronColorScheme::by_segment_type:
+        model.createMaterial(0, "unknown_section");
+        model.createMaterial(1, "soma");
+        model.createMaterial(2, "axon");
+        model.createMaterial(3, "dendrite");
+        model.createMaterial(4, "apical dendrite");
+        break;
+    default:
+        model.createMaterial(0, "default");
+        break;
+    }
+}
 }
 
 MorphologyLoaderParams::MorphologyLoaderParams(const PropertyMap& properties)
@@ -424,7 +445,7 @@ public:
 
         // Dendrites and axon
         for (const auto sectionId :
-             computeTreeTraversalOrder(morphology, _params.mode))
+             _computeTreeTraversalOrder(morphology, _params.mode))
         {
             const auto& section = morphology.getSection(sectionId);
             const auto& samples = section.getSamples();
@@ -655,7 +676,8 @@ ModelDescriptorPtr MorphologyLoader::importFromFile(
     auto impl = MorphologyLoader::Impl(params);
     impl.processMorphology(morphology, index).addTo(*model);
 
-    model->createMissingMaterials();
+    _createMaterials(*model, params.colorScheme, index);
+
     callback.updateProgress("Loading " + modelName + " ...", 1.f);
 
     Transformation transformation;

@@ -176,9 +176,14 @@ OSPGeometry& OSPRayModel::_createGeometry(GeometryMap& map,
         ospRelease(geometry);
     }
     geometry = ospNewGeometry(name);
-    auto material = static_cast<OSPRayMaterial*>(_materials[materialId].get());
-    if (material && material->getOSPMaterial())
-        ospSetMaterial(geometry, material->getOSPMaterial());
+
+    auto matIt = _materials.find(materialId);
+    if (matIt != _materials.end())
+    {
+        auto material = std::static_pointer_cast<OSPRayMaterial>(matIt->second);
+        if (material->getOSPMaterial())
+            ospSetMaterial(geometry, material->getOSPMaterial());
+    }
 
     return geometry;
 }
@@ -545,11 +550,11 @@ void OSPRayModel::commitMaterials(const std::string& renderer)
             auto geomIt = map.begin();
             while (matIt != _materials.end() && geomIt != map.end())
             {
-                while (matIt->first < geomIt->first)
+                while (matIt->first < geomIt->first &&
+                       matIt != _materials.end())
                     ++matIt;
                 if (matIt->first != geomIt->first)
                 {
-                    // This shouldn't happen
                     BRAYNS_ERROR << "Material for geometry missing"
                                  << std::endl;
                     ++geomIt;
@@ -564,13 +569,9 @@ void OSPRayModel::commitMaterials(const std::string& renderer)
     }
 }
 
-MaterialPtr OSPRayModel::createMaterial(const size_t materialId,
-                                        const std::string& name)
+MaterialPtr OSPRayModel::createMaterialImpl()
 {
-    MaterialPtr material = std::make_shared<OSPRayMaterial>();
-    material->setName(name);
-    _materials[materialId] = material;
-    return material;
+    return std::make_shared<OSPRayMaterial>();
 }
 
 SharedDataVolumePtr OSPRayModel::createSharedDataVolume(

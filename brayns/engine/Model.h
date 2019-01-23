@@ -212,9 +212,11 @@ public:
     //@{
     virtual void commitGeometry() = 0;
 
-    /** Factory method to create an engine-specific material. */
-    BRAYNS_API virtual MaterialPtr createMaterial(const size_t materialId,
-                                                  const std::string& name) = 0;
+    /** Create a material with an assigned id and name.
+     *  No material properties are set.
+     */
+    BRAYNS_API MaterialPtr createMaterial(const size_t materialId,
+                                          const std::string& name);
 
     /**
      * Create a volume with the given dimensions, voxel spacing and data type
@@ -383,13 +385,6 @@ public:
     void BRAYNS_API setMaterialsColorMap(const MaterialsColorMap colorMap);
 
     /**
-     * @brief createMissingMaterials Checks that all materials exist for
-     * existing geometry in the model. Missing materials are created with the
-     * default parameters
-     */
-    BRAYNS_API void createMissingMaterials();
-
-    /**
      * @brief getMaterials Returns a reference to the map of materials handled
      * by the model
      * @return The map of materials handled by the model
@@ -436,6 +431,9 @@ public:
     }
     const std::set<BVHFlag>& getBVHFlags() const { return _bvhFlags; }
 protected:
+    /** Factory method to create an engine-specific material. */
+    BRAYNS_API virtual MaterialPtr createMaterialImpl() = 0;
+
     void _updateBounds();
 
     AbstractSimulationHandlerPtr _simulationHandler;
