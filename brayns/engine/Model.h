@@ -384,13 +384,6 @@ public:
     void BRAYNS_API setMaterialsColorMap(const MaterialsColorMap colorMap);
 
     /**
-     * @brief createMissingMaterials Checks that all materials exist for
-     * existing geometry in the model. Missing materials are created with the
-     * default parameters
-     */
-    BRAYNS_API void createMissingMaterials(const PropertyMap& properties = {});
-
-    /**
      * @brief getMaterials Returns a reference to the map of materials handled
      * by the model
      * @return The map of materials handled by the model

@@ -448,4 +448,3 @@ void Scene::_computeBounds()
         // If no model is enabled. return empty bounding box
         _bounds.merge({0, 0, 0});
 }
-}

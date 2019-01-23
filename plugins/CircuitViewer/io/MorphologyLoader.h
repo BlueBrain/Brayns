@@ -107,6 +107,8 @@ private:
 
     PropertyMap _defaults; // command line defaults
 };
+
+void createMissingMaterials(Model& model);
 }
 
 #endif // MORPHOLOGY_LOADER_H

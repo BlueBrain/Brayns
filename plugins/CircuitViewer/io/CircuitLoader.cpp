@@ -590,6 +590,7 @@ private:
             {
             case NeuronColorScheme::by_target:
             {
+                size_ts ids;
                 ids.reserve(gids.size());
                 size_t id = 0;
                 for (const auto size : targetSizes)
