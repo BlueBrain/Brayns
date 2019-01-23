@@ -185,6 +185,11 @@ export type SNAPSHOT_TYPE = typeof SNAPSHOT;
 export const SCHEMA = 'schema';
 export type SCHEMA_TYPE = typeof SCHEMA;
 
+// Environment map
+export const SET_ENVIRONMENT_MAP = 'set-environment-map';
+export type SET_ENVIRONMENT_MAP_TYPE = typeof SET_ENVIRONMENT_MAP;
+export const GET_ENVIRONMENT_MAP = 'get-environment-map';
+export type GET_ENVIRONMENT_MAP_TYPE = typeof GET_ENVIRONMENT_MAP;
 
 /**
  * RPC Notifications from client -> server

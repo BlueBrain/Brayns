@@ -1,18 +1,26 @@
 import React, {ChangeEvent, PureComponent} from 'react';
 
 import {
+    EnvironmentMap,
+    GET_ENVIRONMENT_MAP,
     GET_RENDERER,
     GET_RENDERER_PARAMS,
     Renderer as RendererType,
     RENDERER_PARAMS,
     RendererParams,
     SCHEMA,
+    SET_ENVIRONMENT_MAP,
     SET_RENDERER,
     SET_RENDERER_PARAMS
 } from 'brayns';
 import {JSONSchema7} from 'json-schema';
 import {Subscription} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
+
+import IconButton from '@material-ui/core/IconButton';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import TextField from '@material-ui/core/TextField';
+import CloseIcon from '@material-ui/icons/Close';
 
 import brayns, {onReady} from '../../common/client';
 import {
@@ -26,7 +34,6 @@ import {dispatchNotification} from '../../common/events';
 
 import {findSchemaForType} from './utils';
 
-
 const MAX_ACC_FRAMES = 1000;
 
 
@@ -36,7 +43,9 @@ export default class Renderer extends PureComponent<Props, State> {
         backgroundColor: [0, 0, 0],
         maxAccumFrames: 0,
         samplesPerPixel: 1,
-        headLight: false
+        headLight: false,
+        environmentMap: '',
+        isEnvMapValid: true
     };
 
     private subs: Subscription[] = [];
@@ -89,6 +98,14 @@ export default class Renderer extends PureComponent<Props, State> {
         }, false);
     }
 
+    updateEnvironmentMap = (evt: ChangeEvent<HTMLInputElement>) => {
+        this.setEnvironmentMap(evt.target.value);
+    }
+
+    clearEnvMap = () => {
+        this.setEnvironmentMap('');
+    }
+
     updateRenderer = async (props: RendererParams, updateState: boolean = true) => {
         try {
             await brayns.request(SET_RENDERER, props);
@@ -133,12 +150,15 @@ export default class Renderer extends PureComponent<Props, State> {
                         currentRendererParams: params
                     });
                 }),
+            brayns.observe(SET_ENVIRONMENT_MAP)
+                .subscribe(({filename: environmentMap}) => this.setState({environmentMap})),
             onReady().pipe(mergeMap(() => getCurrentState()))
-                .subscribe(([renderer, schema, params]) => {
+                .subscribe(([renderer, schema, {filename: environmentMap}, params]) => {
                     this.setState({
                         ...getRendererState(renderer, schema),
                         paramsSchema: schema,
-                        currentRendererParams: params
+                        currentRendererParams: params,
+                        environmentMap
                     });
                 })
         ]);
@@ -161,7 +181,9 @@ export default class Renderer extends PureComponent<Props, State> {
             samplesPerPixel,
             maxAccumFrames,
             headLight,
-            types
+            types,
+            environmentMap,
+            isEnvMapValid
         } = this.state;
 
         const fields = currentRendererSchema ? (
@@ -172,6 +194,22 @@ export default class Renderer extends PureComponent<Props, State> {
                 disabled={disabled}
             />
         ) : null;
+
+        const hasEnvMap = environmentMap && environmentMap.length;
+        const envMapInputProps = {};
+        if (hasEnvMap) {
+            Object.assign(envMapInputProps, {
+                endAdornment: (
+                    <InputAdornment position="end">
+                        <IconButton onClick={this.clearEnvMap} disabled={disabled}>
+                            <CloseIcon fontSize="small" />
+                        </IconButton>
+                    </InputAdornment>
+                )
+            });
+        }
+
+        const disableBackgroundColor = disabled || (hasEnvMap && isEnvMapValid);
 
         return (
             <div>
@@ -215,8 +253,21 @@ export default class Renderer extends PureComponent<Props, State> {
                     value={backgroundColor}
                     onChange={this.updateBackgroundColor}
                     margin="normal"
+                    disabled={!!disableBackgroundColor}
+                    fullWidth
+                />
+
+                <TextField
+                    id="environmentmap"
+                    label="Environment map"
+                    value={environmentMap}
+                    onChange={this.updateEnvironmentMap}
+                    margin="normal"
                     disabled={disabled}
                     fullWidth
+                    InputProps={envMapInputProps}
+                    error={!disabled && !isEnvMapValid}
+                    helperText={disabled || isEnvMapValid ? '' : 'Invalid path'}
                 />
 
                 <SwitchField
@@ -232,13 +283,24 @@ export default class Renderer extends PureComponent<Props, State> {
             </div>
         );
     }
-}
 
+    private setEnvironmentMap = (filename: string) => {
+        this.setState({environmentMap: filename}, async () => {
+            try {
+                const isEnvMapValid = await brayns.request(SET_ENVIRONMENT_MAP, {filename});
+                this.setState({isEnvMapValid});
+            } catch (err) {
+                dispatchNotification(err);
+            }
+        });
+    }
+}
 
 function getCurrentState(): Promise<CurrentState> {
     return Promise.all([
         brayns.request(GET_RENDERER),
         brayns.request(SCHEMA, {endpoint: RENDERER_PARAMS}),
+        brayns.request(GET_ENVIRONMENT_MAP),
         getCurrentRendererParams()
     ]) as any;
 }
@@ -313,13 +375,16 @@ interface State extends Partial<RendererState> {
     paramsSchema?: JSONSchema7;
     currentRendererSchema?: JSONSchema7;
     currentRendererParams?: any;
+    environmentMap?: string;
+    isEnvMapValid?: boolean;
 }
 
-interface CurrentState extends Array<JSONSchema7 | RendererType | object> {
+interface CurrentState extends Array<JSONSchema7 | RendererType | object | EnvironmentMap> {
     0: RendererType;
     1: JSONSchema7;
-    2: object;
-    length: 3;
+    2: EnvironmentMap;
+    3: object;
+    length: 4;
 }
 
 interface WithRenderer extends Array<RendererType | object> {

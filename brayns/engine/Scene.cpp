@@ -405,34 +405,33 @@ void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)
 
 bool Scene::setEnvironmentMap(const std::string& envMap)
 {
+    bool success = true;
     if (envMap.empty())
-    {
         _backgroundMaterial->removeTexture(TT_DIFFUSE);
-        _updateValue(_hasEnvironmentMap, false);
-    }
     else
     {
         try
         {
             _backgroundMaterial->setTexture(envMap, TT_DIFFUSE);
-            _updateValue(_hasEnvironmentMap, true);
         }
         catch (const std::runtime_error& e)
         {
-            BRAYNS_ERROR << "Cannot load environment map: " << e.what()
+            BRAYNS_DEBUG << "Cannot load environment map: " << e.what()
                          << std::endl;
-            return false;
+            _backgroundMaterial->removeTexture(TT_DIFFUSE);
+            success = false;
         }
     }
 
+    _updateValue(_environmentMap, success ? envMap : "");
     if (_backgroundMaterial->isModified())
         markModified();
-    return true;
+    return success;
 }
 
 bool Scene::hasEnvironmentMap() const
 {
-    return _hasEnvironmentMap;
+    return !_environmentMap.empty();
 }
 
 void Scene::_computeBounds()

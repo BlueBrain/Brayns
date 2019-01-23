@@ -78,6 +78,7 @@ const std::string METHOD_SNAPSHOT = "snapshot";
 // JSONRPC synchronous requests
 const std::string METHOD_ADD_CLIP_PLANE = "add-clip-plane";
 const std::string METHOD_GET_CLIP_PLANES = "get-clip-planes";
+const std::string METHOD_GET_ENVIRONMENT_MAP = "get-environment-map";
 const std::string METHOD_GET_INSTANCES = "get-instances";
 const std::string METHOD_GET_LOADERS = "get-loaders";
 const std::string METHOD_GET_MODEL_PROPERTIES = "get-model-properties";
@@ -938,6 +939,7 @@ public:
         _handleChunk();
 
         _handleSetEnvironmentMap();
+        _handleGetEnvironmentMap();
 
         _handleAddModel();
         _handleRemoveModel();
@@ -1556,6 +1558,16 @@ public:
                 return true;
             }
             return false;
+        });
+    }
+
+    void _handleGetEnvironmentMap()
+    {
+        const RpcDescription desc{METHOD_GET_ENVIRONMENT_MAP,
+                                  "Get the environment map from the scene"};
+
+        _handleRPC<EnvironmentMapParam>(desc, [&]() -> EnvironmentMapParam {
+            return {_engine.getScene().getEnvironmentMap()};
         });
     }
 
