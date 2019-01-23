@@ -281,16 +281,17 @@ void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)
         case MaterialsColorMap::none:
             switch (index)
             {
-            case 0: // Default, soma
+            case 0:
+            case 1: // Default, soma
                 material.second->setDiffuseColor(Vector3f(0.9f, 0.9f, 0.9f));
                 break;
-            case 1: // Axon
+            case 2: // Axon
                 material.second->setDiffuseColor(Vector3f(0.2f, 0.4f, 0.8f));
                 break;
-            case 2: // Dendrite
+            case 3: // Dendrite
                 material.second->setDiffuseColor(Vector3f(0.8f, 0.2f, 0.2f));
                 break;
-            case 3: // Apical dendrite
+            case 4: // Apical dendrite
                 material.second->setDiffuseColor(Vector3f(0.8f, 0.2f, 0.8f));
                 break;
             default:
@@ -537,31 +538,16 @@ void Model::_updateBounds()
     _bounds.merge(_volumesBounds);
 }
 
-void Model::createMissingMaterials()
+MaterialPtr Model::createMaterial(const size_t materialId,
+                                  const std::string& name)
 {
-    std::set<size_t> materialIds;
-    for (auto& spheres : _spheres)
-        materialIds.insert(spheres.first);
-    for (auto& cylinders : _cylinders)
-        materialIds.insert(cylinders.first);
-    for (auto& cones : _cones)
-        materialIds.insert(cones.first);
-    for (auto& meshes : _trianglesMeshes)
-        materialIds.insert(meshes.first);
-    for (auto& sdfGeometries : _sdf.geometryIndices)
-        materialIds.insert(sdfGeometries.first);
-
-    for (const auto materialId : materialIds)
-    {
-        const auto it = _materials.find(materialId);
-        if (it == _materials.end())
-        {
-            auto material =
-                createMaterial(materialId, std::to_string(materialId));
-        }
-    }
-    _bindMaterials(_simulationHandler, _materials);
+    auto material = _materials[materialId] = createMaterialImpl();
+    material->setName(name);
+    if (_simulationHandler)
+        _simulationHandler->bind(material);
+    return material;
 }
+
 
 void Model::setSimulationHandler(AbstractSimulationHandlerPtr handler)
 {

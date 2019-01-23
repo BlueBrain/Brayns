@@ -43,8 +43,6 @@ public:
     OSPModel getPrimaryModel() const { return _primaryModel; }
     OSPModel getSecondaryModel() const { return _secondaryModel; }
     OSPModel getBoundingBoxModel() const { return _boundingBoxModel; }
-    MaterialPtr createMaterial(const size_t materialId,
-                               const std::string& name) final;
     SharedDataVolumePtr createSharedDataVolume(const Vector3ui& dimensions,
                                                const Vector3f& spacing,
                                                const DataType type) const final;
@@ -107,5 +105,7 @@ private:
     size_t _memoryManagementFlags{OSP_DATA_SHARED_BUFFER};
 
     std::string _renderer;
+
+    MaterialPtr createMaterialImpl() final;
 };
 }

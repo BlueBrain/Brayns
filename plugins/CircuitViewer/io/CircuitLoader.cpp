@@ -35,6 +35,7 @@
 #include <boost/tokenizer.hpp>
 
 #include <regex>
+#include <unordered_set>
 
 namespace brayns
 {
@@ -556,7 +557,7 @@ public:
         }
 
         const auto perCellMaterialIds =
-            _createPerCellMaterialIds(circuit, allGids, targetSizes);
+            _createMaterials(*model, circuit, allGids, targetSizes);
 
         if (_morphologyParams.mode == NeuronDisplayMode::soma)
         {
@@ -571,8 +572,6 @@ public:
                                 reportMapping, perCellMaterialIds);
         }
 
-        // Create materials
-        model->createMissingMaterials();
         // Assigning some colors to not get all white
         if (_morphologyParams.colorScheme != NeuronColorScheme::none)
         {
@@ -602,32 +601,61 @@ public:
     }
 
 private:
-    size_ts _createPerCellMaterialIds(const brain::Circuit& circuit,
-                                      const brain::GIDSet& gids,
-                                      const size_ts& targetSizes) const
+    size_ts _createMaterials(Model& model,
+                            const brain::Circuit& circuit,
+                            const brain::GIDSet& gids,
+                            const size_ts& targetSizes) const
     {
+        const auto scheme = _morphologyParams.colorScheme;
         try
         {
-            switch (_morphologyParams.colorScheme)
+            size_ts ids;
+            switch (scheme)
             {
             case NeuronColorScheme::by_target:
             {
-                size_ts ids;
                 ids.reserve(gids.size());
                 size_t id = 0;
                 for (const auto size : targetSizes)
-                    std::fill_n(std::back_inserter(ids), size, id);
-                return ids;
+                    std::fill_n(std::back_inserter(ids), size, id++);
+                break;
             }
             case NeuronColorScheme::by_etype:
-                return circuit.getElectrophysiologyTypes(gids);
+                ids = circuit.getElectrophysiologyTypes(gids);
+                break;
             case NeuronColorScheme::by_mtype:
-                return circuit.getMorphologyTypes(gids);
+                ids = circuit.getMorphologyTypes(gids);
+                break;
             case NeuronColorScheme::by_layer:
-                return _getLayerIds(circuit, gids);
+                ids = _getLayerIds(circuit, gids);
+                break;
+            case NeuronColorScheme::by_segment_type:
+                model.createMaterial(0, "unknown_section");
+                model.createMaterial(1, "soma");
+                model.createMaterial(2, "axon");
+                model.createMaterial(3, "dendrite");
+                model.createMaterial(4, "apical dendrite");
+                return size_ts();
+            case NeuronColorScheme::by_id:
+                for (size_t i = 0; i != gids.size(); ++i)
+                    model.createMaterial(i, std::to_string(i));
+                return size_ts();
             default:
+                model.createMaterial(NO_MATERIAL, "default");
                 return size_ts();
             }
+
+            assert(!ids.empty());
+            std::unordered_set<size_t> created;
+            for (auto id : ids)
+            {
+                if (!created.count(id))
+                {
+                    created.insert(id);
+                    model.createMaterial(id, std::to_string(id));
+                }
+            }
+            return ids;
         }
         catch (const std::runtime_error& e)
         {
