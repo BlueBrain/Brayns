@@ -30,6 +30,7 @@ import {
     GET_CAMERA_PARMS_TYPE,
     GET_CAMERA_TYPE,
     GET_CLIP_PLANES_TYPE,
+    GET_ENVIRONMENT_MAP_TYPE,
     GET_LOADERS_TYPE,
     GET_MODEL_PROPERTIES_TYPE,
     GET_MODEL_TRANSFER_FUNCTION_TYPE,
@@ -55,6 +56,7 @@ import {
     SET_APP_PARAMS_TYPE,
     SET_CAMERA_PARMS_TYPE,
     SET_CAMERA_TYPE,
+    SET_ENVIRONMENT_MAP_TYPE,
     SET_MODEL_PROPERTIES_TYPE,
     SET_MODEL_TRANSFER_FUNCTION_TYPE,
     SET_RENDERER_PARMS_TYPE,
@@ -76,6 +78,7 @@ import {
     Camera,
     CameraParams,
     ClipPlane,
+    EnvironmentMap,
     GetModelPropsParams,
     GetModelPropsSchemaParams,
     InspectCoords,
@@ -226,6 +229,8 @@ export class Client {
     request(method: REMOVE_CLIP_PLANES_TYPE, params: number[]): RequestTask<number[], boolean>;
     request(method: SNAPSHOT_TYPE, params: SnapshotParams): RequestTask<SnapshotParams, Snapshot>;
     request(method: SCHEMA_TYPE, params: SchemaParams): RequestTask<SchemaParams, JSONSchema7>;
+    request(method: SET_ENVIRONMENT_MAP_TYPE, params: EnvironmentMap): RequestTask<EnvironmentMap, boolean>;
+    request(method: GET_ENVIRONMENT_MAP_TYPE): RequestTask<undefined, EnvironmentMap>;
     request<R, P>(method: RequestType | string, params?: P): RequestTask<P, R> {
         return this.rockets!.request<P, R>(method, params);
     }
@@ -246,6 +251,7 @@ export class Client {
     observe(method: REMOVE_CLIP_PLANES_TYPE): Observable<number[]>;
     observe(method: SET_STATISTICS_TYPE): Observable<Statistics>;
     observe(method: IMAGE_JPEG_TYPE): Observable<Blob>;
+    observe(method: SET_ENVIRONMENT_MAP_TYPE): Observable<EnvironmentMap>;
     observe<R>(method: ObservableType | IMAGE_JPEG_TYPE | string): Observable<R | Blob> {
         if (method === IMAGE_JPEG) {
             return this.binary.asObservable();
@@ -406,7 +412,9 @@ export type RequestType = GET_ANIMATION_PARAMS_TYPE
     | GET_CLIP_PLANES_TYPE
     | REMOVE_CLIP_PLANES_TYPE
     | SNAPSHOT_TYPE
-    | SCHEMA_TYPE;
+    | SCHEMA_TYPE
+    | SET_ENVIRONMENT_MAP_TYPE
+    | GET_ENVIRONMENT_MAP_TYPE;
 
 export type NotificationType = SET_ANIMATION_PARAMS_TYPE
     | SET_APP_PARAMS_TYPE
@@ -430,7 +438,8 @@ export type ObservableType = SET_ANIMATION_PARAMS_TYPE
     | SET_SCENE_TYPE
     | SET_MODEL_PROPERTIES_TYPE
     | SET_MODEL_TRANSFER_FUNCTION_TYPE
-    | SET_STATISTICS_TYPE;
+    | SET_STATISTICS_TYPE
+    | SET_ENVIRONMENT_MAP_TYPE;
 
 export type SchemaType = RequestType
     | NotificationType

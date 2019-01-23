@@ -180,6 +180,11 @@ public:
      */
     bool setEnvironmentMap(const std::string& envMap);
 
+    /**
+     *  @return the current set environment map texture file, or empty if no
+     *          environment is set
+     */
+    const std::string& getEnvironmentMap() const { return _environmentMap; }
     /** @return true if an environment map is currently set in the scene. */
     bool hasEnvironmentMap() const;
 
@@ -224,7 +229,7 @@ protected:
 
     ParametersManager& _parametersManager;
     MaterialPtr _backgroundMaterial;
-    bool _hasEnvironmentMap{false};
+    std::string _environmentMap;
 
     // Model
     size_t _modelID{0};

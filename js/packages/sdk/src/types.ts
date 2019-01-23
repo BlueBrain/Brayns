@@ -193,6 +193,10 @@ export interface SchemaParams {
     endpoint: string;
 }
 
+export interface EnvironmentMap {
+    filename: string;
+}
+
 export interface Version {
     major: number;
     minor: number;
