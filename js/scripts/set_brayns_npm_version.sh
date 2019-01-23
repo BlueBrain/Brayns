@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-REMOTE_VERSION=$(`npm show brayns version 2> /dev/null` || :)
+REMOTE_VERSION=`npm show brayns version 2> /dev/null` || true
 R_VER=${REMOTE_VERSION// /}
 # https://gist.github.com/DarrenN/8c6a5b969481725a4413
 LOCAL_VERSION=$(node -p "require('./packages/sdk/package.json').version")
