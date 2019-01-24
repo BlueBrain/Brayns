@@ -633,7 +633,7 @@ bool isValue<bool>(const rapidjson::GenericValue<rapidjson::UTF8<>>& v)
 //////////////////////////////////////////////////////////////////////
 
 template <typename T, size_t S>
-bool get_array(const rapidjson::Value& v, std::array<T, S> val)
+bool get_array(const rapidjson::Value& v, std::array<T, S>& val)
 {
     if (!(v.IsArray() && v.Size() == S))
         return false;

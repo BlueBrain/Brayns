@@ -152,12 +152,10 @@ ModelDescriptorPtr RawVolumeLoader::importFromFile(
 
     callback.updateProgress("Parsing volume file ...", 0.f);
 
-    const auto dimensions =
-        toVmmlVec(properties.getProperty(PROP_DIMENSIONS.name,
-                                         std::array<int32_t, 3>({{0, 0, 0}})));
-    const auto spacing =
-        toVmmlVec(properties.getProperty(PROP_SPACING.name,
-                                         std::array<double, 3>({{0, 0, 0}})));
+    const auto dimensions = toVmmlVec(
+        properties.getProperty<std::array<int32_t, 3>>(PROP_DIMENSIONS.name));
+    const auto spacing = toVmmlVec(
+        properties.getProperty<std::array<double, 3>>(PROP_SPACING.name));
     const auto type = stringToEnum<DataType>(
         properties.getProperty<std::string>(PROP_TYPE.name));
 
