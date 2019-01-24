@@ -29,14 +29,19 @@
 
 #include <boost/filesystem.hpp>
 
-namespace
-{
-const auto LOADER_NAME = "xyzb";
-}
-
 namespace brayns
 {
-constexpr float DEFAULT_POINT_SIZE = 0.0001f;
+namespace
+{
+constexpr auto ALMOST_ZERO = 1e-7f;
+constexpr auto LOADER_NAME = "xyzb";
+
+float _computeHalfArea(const Boxf& bbox)
+{
+    const auto size = bbox.getSize();
+    return size[0] * size[1] + size[0] * size[2] + size[1] * size[2];
+}
+}
 
 XYZBLoader::XYZBLoader(Scene& scene)
     : Loader(scene)
@@ -97,7 +102,9 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
         {
             const Vector3f position(lineData[0], lineData[1], lineData[2]);
             bbox.merge(position);
-            model->addSphere(materialId, {position, DEFAULT_POINT_SIZE});
+            // The point radius used here is irrelevant as it's going to be
+            // changed later.
+            model->addSphere(materialId, {position, 1});
             break;
         }
         default:
@@ -109,9 +116,15 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
 
     // Find an appropriate mean radius to avoid overlaps of the spheres, see
     // https://en.wikipedia.org/wiki/Wigner%E2%80%93Seitz_radius
+
     const auto volume = bbox.getSize().product();
-    const double meanRadius =
-        std::pow((3. / (4. * M_PI * (numlines / volume))), 1. / 3.);
+    const auto density4PI =
+        4 * M_PI * numlines /
+        (volume > ALMOST_ZERO ? volume : _computeHalfArea(bbox));
+
+    const double meanRadius = volume > ALMOST_ZERO
+                                  ? std::pow((3. / density4PI), 1. / 3.)
+                                  : std::sqrt(1 / density4PI);
 
     // resize the spheres to the new mean radius
     for (i = 0; i < numlines; ++i)
