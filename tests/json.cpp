@@ -24,7 +24,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_CASE(test_ModelParams)
+BOOST_AUTO_TEST_CASE(loaderProperties)
 {
     brayns::ModelParams paramsOrig;
 
@@ -34,6 +34,7 @@ BOOST_AUTO_TEST_CASE(test_ModelParams)
         properties.setProperty({"int", 42});
         properties.setProperty(
             {"enum", std::string("b"), {"a", "b", "c", "d"}, {}});
+        properties.setProperty({"array", std::array<int, 3>{{1, 2, 3}}});
         paramsOrig.setLoaderProperties(properties);
     }
 
@@ -50,4 +51,13 @@ BOOST_AUTO_TEST_CASE(test_ModelParams)
     BOOST_CHECK_EQUAL(
         paramsOrig.getLoaderProperties().getProperty<std::string>("enum"),
         paramsParse.getLoaderProperties().getProperty<std::string>("enum"));
+
+    const auto& origArray =
+        paramsOrig.getLoaderProperties().getProperty<std::array<int, 3>>(
+            "array");
+    const auto& parseArray =
+        paramsParse.getLoaderProperties().getProperty<std::array<int, 3>>(
+            "array");
+    BOOST_CHECK_EQUAL_COLLECTIONS(origArray.begin(), origArray.end(),
+                                  parseArray.begin(), parseArray.end());
 }
