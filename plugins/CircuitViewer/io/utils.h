@@ -18,6 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <brayns/engine/Material.h>
+#include <brayns/engine/Model.h>
+
+#include <brain/neuron/types.h>
 #include <brain/types.h>
 
 #include <random>
@@ -27,8 +31,47 @@ namespace brayns
 {
 namespace
 {
-brion::GIDSet _gidsFromRange(const uint32_t first, const uint32_t last,
-                             const double fraction, const int32_t seed)
+inline void _createBySegmentMaterials(Model& model)
+{
+    std::array<MaterialPtr, 5> materials{{
+        model.createMaterial(0, "unknown_section"),
+        model.createMaterial(1, "soma"),
+        model.createMaterial(2, "axon"),
+        model.createMaterial(3, "dendrite"),
+        model.createMaterial(4, "apical dendrite")}};
+    materials[0]->setDiffuseColor(Vector3f(0.9f, 0.9f, 0.9f));
+    materials[1]->setDiffuseColor(Vector3f(0.9f, 0.9f, 0.9f));
+    materials[2]->setDiffuseColor(Vector3f(0.2f, 0.4f, 0.8f));
+    materials[3]->setDiffuseColor(Vector3f(0.8f, 0.2f, 0.2f));
+    materials[4]->setDiffuseColor(Vector3f(0.8f, 0.2f, 0.8f));
+    for (auto& material : materials)
+    {
+        material->setSpecularColor(Vector3f(0.f));
+        material->setOpacity(1.f);
+        material->setReflectionIndex(0.f);
+        material->setEmission(0.f);
+    }
+}
+
+inline size_t _getMaterialId(const brain::neuron::SectionType type)
+{
+    switch (type)
+    {
+    case brain::neuron::SectionType::soma:
+        return 1;
+    case brain::neuron::SectionType::axon:
+        return 2;
+    case brain::neuron::SectionType::dendrite:
+        return 3;
+    case brain::neuron::SectionType::apicalDendrite:
+        return 4;
+    default:
+        return 0;
+    }
+}
+
+inline brion::GIDSet _gidsFromRange(const uint32_t first, const uint32_t last,
+                                    const double fraction, const int32_t seed)
 {
     if (last < first)
         throw std::runtime_error("Invalid GID range");
@@ -59,8 +102,9 @@ brion::GIDSet _gidsFromRange(const uint32_t first, const uint32_t last,
     return brion::GIDSet(gids.begin(), gids.end());
 }
 
-brion::GIDSet _keyToGIDorRange(const std::string& key, const double fraction,
-                               const int32_t seed)
+inline brion::GIDSet _keyToGIDorRange(const std::string& key,
+                                      const double fraction,
+                                      const int32_t seed)
 {
     std::regex regex(
         "([0-9]+)|"               // single GID

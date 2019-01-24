@@ -20,6 +20,7 @@
 
 #include "MorphologyLoader.h"
 #include "ModelData.h"
+#include "utils.h"
 
 #include <brayns/common/types.h>
 #include <brayns/common/utils/enumUtils.h>
@@ -316,11 +317,7 @@ void _createMaterials(Model& model, NeuronColorScheme scheme, size_t index)
         model.createMaterial(index, std::to_string(index));
         break;
     case NeuronColorScheme::by_segment_type:
-        model.createMaterial(0, "unknown_section");
-        model.createMaterial(1, "soma");
-        model.createMaterial(2, "axon");
-        model.createMaterial(3, "dendrite");
-        model.createMaterial(4, "apical dendrite");
+        _createBySegmentMaterials(model);
         break;
     default:
         model.createMaterial(0, "default");
@@ -377,24 +374,7 @@ public:
                 materialId = index;
                 break;
             case NeuronColorScheme::by_segment_type:
-                switch (sectionType)
-                {
-                case brain::neuron::SectionType::soma:
-                    materialId = 1;
-                    break;
-                case brain::neuron::SectionType::axon:
-                    materialId = 2;
-                    break;
-                case brain::neuron::SectionType::dendrite:
-                    materialId = 3;
-                    break;
-                case brain::neuron::SectionType::apicalDendrite:
-                    materialId = 4;
-                    break;
-                default:
-                    materialId = 0;
-                    break;
-                }
+                materialId = _getMaterialId(sectionType);
                 break;
             default:
                 materialId = 0;
