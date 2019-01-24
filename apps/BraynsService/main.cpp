@@ -24,6 +24,7 @@
 #include <brayns/common/types.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/Renderer.h>
+#include <brayns/parameters/ParametersManager.h>
 
 #include <uvw.hpp>
 
@@ -126,6 +127,14 @@ private:
         _triggerRendering->on<uvw::AsyncEvent>([&](const auto&, auto&) {
             _brayns->render();
             _renderingDone->send();
+
+            if (_brayns->getParametersManager()
+                    .getApplicationParameters()
+                    .isBenchmarking())
+            {
+                std::cout << _brayns->getEngine().getStatistics().getFPS()
+                          << " fps" << std::endl;
+            }
         });
 
         // stop render loop, triggered from main thread
