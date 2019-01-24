@@ -30,9 +30,8 @@ BOOST_AUTO_TEST_CASE(subsampling_buffer_size)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app,   "--window-size",       "400",
-                          "200", "--samples-per-pixel", "-2",
-                          "demo"};
+    const char* argv[] = {app, "--window-size", "400", "200", "--subsampling",
+                          "4", "demo"};
     const int argc = sizeof(argv) / sizeof(char*);
     brayns::Brayns brayns(argc, argv);
 

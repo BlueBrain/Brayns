@@ -363,6 +363,7 @@ inline void init(brayns::RenderingParameters* r, ObjectHandler* h)
     h->add_property("head_light", &r->_headLight, Flags::Optional);
     h->add_property("max_accum_frames", &r->_maxAccumFrames, Flags::Optional);
     h->add_property("samples_per_pixel", &r->_spp, Flags::Optional);
+    h->add_property("subsampling", &r->_subsampling, Flags::Optional);
     h->add_property("types", &r->_renderers,
                     Flags::IgnoreRead | Flags::Optional);
     h->add_property("variance_threshold", &r->_varianceThreshold,
