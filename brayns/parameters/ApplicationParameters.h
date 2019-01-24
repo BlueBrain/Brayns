@@ -79,16 +79,6 @@ public:
 
     /** Max render FPS to limit */
     size_t getMaxRenderFPS() const { return _maxRenderFPS; }
-    /** Folder used by the application to store temporary files */
-    std::string getTmpFolder() const { return _tmpFolder; }
-    /** @return true if synchronous mode is enabled, aka rendering waits for
-     * data loading. */
-    bool getSynchronousMode() const { return _synchronousMode; }
-    void setSynchronousMode(const bool synchronousMode)
-    {
-        _updateValue(_synchronousMode, synchronousMode);
-    }
-
     bool isStereo() const { return _stereo; }
     bool getParallelRendering() const { return _parallelRendering; }
     const std::string& getHttpServerURI() const { return _httpServerURI; }
@@ -104,13 +94,10 @@ protected:
 
     std::string _engine{"braynsOSPRayEngine"};
     std::vector<std::string> _modules;
-    strings _pluginsRaw;
     Vector2d _windowSize;
     bool _benchmarking{false};
     size_t _jpegCompression;
-    std::string _tmpFolder;
     bool _stereo{false};
-    bool _synchronousMode{false};
     size_t _imageStreamFPS{60};
     size_t _maxRenderFPS{std::numeric_limits<size_t>::max()};
     std::string _httpServerURI;

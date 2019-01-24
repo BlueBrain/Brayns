@@ -82,11 +82,10 @@ BOOST_AUTO_TEST_CASE(render_demo_with_proximity_renderer)
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app,         "--renderer",
-                          "proximity", "--samples-per-pixel",
-                          "256",       "--synchronous-mode",
-                          "demo",      "--window-size",
-                          "400",       "300"};
+    const char* argv[] = {
+        app,   "--renderer", "proximity",     "--samples-per-pixel",
+        "256", "demo",       "--window-size", "400",
+        "300"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
