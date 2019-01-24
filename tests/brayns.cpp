@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(defaults)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app, "demo", "--synchronous-mode"};
+    const char* argv[] = {app, "demo"};
     const int argc = sizeof(argv) / sizeof(char*);
     brayns::Brayns brayns(argc, argv);
 

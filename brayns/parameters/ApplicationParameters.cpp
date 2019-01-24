@@ -36,14 +36,11 @@ const std::string PARAM_MODULE = "module";
 const std::string PARAM_PARALLEL_RENDERING = "parallel-rendering";
 const std::string PARAM_PLUGIN = "plugin";
 const std::string PARAM_STEREO = "stereo";
-const std::string PARAM_SYNCHRONOUS_MODE = "synchronous-mode";
-const std::string PARAM_TMP_FOLDER = "tmp-folder";
 const std::string PARAM_WINDOW_SIZE = "window-size";
 
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
 const size_t DEFAULT_JPEG_COMPRESSION = 90;
-const std::string DEFAULT_TMP_FOLDER = "/tmp";
 }
 
 namespace brayns
@@ -52,7 +49,6 @@ ApplicationParameters::ApplicationParameters()
     : AbstractParameters("Application")
     , _windowSize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT)
     , _jpegCompression(DEFAULT_JPEG_COMPRESSION)
-    , _tmpFolder(DEFAULT_TMP_FOLDER)
 {
     _parameters.add_options()(PARAM_ENGINE.c_str(), po::value<std::string>(),
                               "Engine name [ospray|optix]")(
@@ -62,7 +58,7 @@ ApplicationParameters::ApplicationParameters()
                                        "HTTP interface")(
         PARAM_INPUT_PATHS.c_str(), po::value<std::vector<std::string>>(),
         "List of files/folders to load data from")(
-        PARAM_PLUGIN.c_str(), po::value<strings>(&_pluginsRaw)->composing(),
+        PARAM_PLUGIN.c_str(), po::value<strings>()->composing(),
         "Dynamic plugin to load from LD_LIBRARY_PATH; "
         "can be repeated to load multiple plugins. "
         "Arguments to plugins can be added by inserting a space followed by "
@@ -74,21 +70,15 @@ ApplicationParameters::ApplicationParameters()
         PARAM_JPEG_COMPRESSION.c_str(), po::value<size_t>(),
         "JPEG compression rate (100 is full quality) [int]")(
         PARAM_JPEG_SIZE.c_str(), po::value<uints>()->multitoken(),
-        "JPEG size [int int]")(PARAM_TMP_FOLDER.c_str(),
-                               po::value<std::string>(),
-                               "Folder used by the application to "
-                               "store temporary files [string")(
+        "JPEG size [int int]")(
         PARAM_PARALLEL_RENDERING.c_str(),
         po::bool_switch()->default_value(false),
         "Enable parallel rendering, equivalent to --osp:mpi")(
         PARAM_STEREO.c_str(), po::bool_switch()->default_value(false),
-        "Enable stereo rendering")(
-        PARAM_SYNCHRONOUS_MODE.c_str(), po::bool_switch()->default_value(false),
-        "Enable synchronous mode rendering vs data loading")(
-        PARAM_IMAGE_STREAM_FPS.c_str(), po::value<size_t>(),
-        "Image stream FPS (60 default), [int]")(PARAM_MAX_RENDER_FPS.c_str(),
-                                                po::value<size_t>(),
-                                                "Max. render FPS");
+        "Enable stereo rendering")(PARAM_IMAGE_STREAM_FPS.c_str(),
+                                   po::value<size_t>(),
+                                   "Image stream FPS (60 default), [int]")(
+        PARAM_MAX_RENDER_FPS.c_str(), po::value<size_t>(), "Max. render FPS");
 
     _positionalArgs.add(PARAM_INPUT_PATHS.c_str(), -1);
 }
@@ -113,11 +103,8 @@ void ApplicationParameters::parse(const po::variables_map& vm)
     _benchmarking = vm[PARAM_BENCHMARKING].as<bool>();
     if (vm.count(PARAM_JPEG_COMPRESSION))
         _jpegCompression = vm[PARAM_JPEG_COMPRESSION].as<size_t>();
-    if (vm.count(PARAM_TMP_FOLDER))
-        _tmpFolder = vm[PARAM_TMP_FOLDER].as<std::string>();
     _parallelRendering = vm[PARAM_PARALLEL_RENDERING].as<bool>();
     _stereo = vm[PARAM_STEREO].as<bool>();
-    _synchronousMode = vm[PARAM_SYNCHRONOUS_MODE].as<bool>();
     if (vm.count(PARAM_IMAGE_STREAM_FPS))
         _imageStreamFPS = vm[PARAM_IMAGE_STREAM_FPS].as<size_t>();
     if (vm.count(PARAM_MAX_RENDER_FPS))
@@ -138,9 +125,6 @@ void ApplicationParameters::print()
                 << std::endl;
     BRAYNS_INFO << "JPEG Compression            : " << _jpegCompression
                 << std::endl;
-    BRAYNS_INFO << "Temporary folder            : " << _tmpFolder << std::endl;
-    BRAYNS_INFO << "Synchronous mode            : "
-                << asString(_synchronousMode) << std::endl;
     BRAYNS_INFO << "Image stream FPS            : " << _imageStreamFPS
                 << std::endl;
     BRAYNS_INFO << "Max. render  FPS            : " << _maxRenderFPS

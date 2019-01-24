@@ -520,9 +520,6 @@ private:
         _keyboardHandler.registerKeyboardShortcut(
             'c', "Display current camera information",
             std::bind(&Brayns::Impl::_displayCameraInformation, this));
-        _keyboardHandler.registerKeyboardShortcut(
-            'm', "Toggle synchronous/asynchronous mode",
-            std::bind(&Brayns::Impl::_toggleSynchronousMode, this));
     }
 
     void _blackBackground()
@@ -753,12 +750,6 @@ private:
     void _displayCameraInformation()
     {
         BRAYNS_INFO << _engine->getCamera() << std::endl;
-    }
-
-    void _toggleSynchronousMode()
-    {
-        auto& app = _parametersManager.getApplicationParameters();
-        app.setSynchronousMode(!app.getSynchronousMode());
     }
 
     ParametersManager _parametersManager;
