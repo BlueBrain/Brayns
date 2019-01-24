@@ -166,8 +166,7 @@ public:
      * scene
      * @param colorMap Color map to use for every individual model
      */
-    void setMaterialsColorMap(
-        MaterialsColorMap colorMap = MaterialsColorMap::none);
+    void setMaterialsColorMap(MaterialsColorMap colorMap);
 
     /**
      * Set a new environment map to the scene as the background image. If envMap

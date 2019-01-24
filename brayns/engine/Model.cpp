@@ -278,29 +278,6 @@ void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)
 
         switch (colorMap)
         {
-        case MaterialsColorMap::none:
-            switch (index)
-            {
-            case 0:
-            case 1: // Default, soma
-                material.second->setDiffuseColor(Vector3f(0.9f, 0.9f, 0.9f));
-                break;
-            case 2: // Axon
-                material.second->setDiffuseColor(Vector3f(0.2f, 0.4f, 0.8f));
-                break;
-            case 3: // Dendrite
-                material.second->setDiffuseColor(Vector3f(0.8f, 0.2f, 0.2f));
-                break;
-            case 4: // Apical dendrite
-                material.second->setDiffuseColor(Vector3f(0.8f, 0.2f, 0.8f));
-                break;
-            default:
-                material.second->setDiffuseColor(
-                    Vector3f(float(std::rand() % 255) / 255.f,
-                             float(std::rand() % 255) / 255.f,
-                             float(std::rand() % 255) / 255.f));
-            }
-            break;
         case MaterialsColorMap::gradient:
         {
             const float a = float(index) / float(_materials.size() - 1);

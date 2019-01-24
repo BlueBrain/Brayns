@@ -241,24 +241,7 @@ size_t _getMaterialId(const NeuronColorScheme colorScheme, const uint64_t index,
         materialId = index;
         break;
     case NeuronColorScheme::by_segment_type:
-        switch (sectionType)
-        {
-        case brain::neuron::SectionType::soma:
-            materialId = 1;
-            break;
-        case brain::neuron::SectionType::axon:
-            materialId = 2;
-            break;
-        case brain::neuron::SectionType::dendrite:
-            materialId = 3;
-            break;
-        case brain::neuron::SectionType::apicalDendrite:
-            materialId = 4;
-            break;
-        default:
-            materialId = 0;
-            break;
-        }
+        materialId = _getMaterialId(sectionType);
         break;
     case NeuronColorScheme::by_target: // no break
     case NeuronColorScheme::by_etype:  // no break
@@ -572,18 +555,6 @@ public:
                                 reportMapping, perCellMaterialIds);
         }
 
-        // Assigning some colors to not get all white
-        if (_morphologyParams.colorScheme != NeuronColorScheme::none)
-        {
-            if (_morphologyParams.colorScheme ==
-                NeuronColorScheme::by_segment_type)
-                // This mode already handles sections types in a hacky way. A
-                // refactoring is needed
-                model->setMaterialsColorMap(MaterialsColorMap::none);
-            else
-                model->setMaterialsColorMap(MaterialsColorMap::gradient);
-        }
-
         // Compute circuit center
         auto positions = circuit.getPositions(allGids);
         Boxf center;
@@ -601,6 +572,11 @@ public:
     }
 
 private:
+    /** Create materials for the requested color scheme and return a list of
+        per cell material IDs if necessary.
+        Per cell material IDs are used for by_etype, by_mtype, by_layer and
+        by_target color schemes.
+    */
     size_ts _createMaterials(Model& model,
                             const brain::Circuit& circuit,
                             const brain::GIDSet& gids,
@@ -630,15 +606,12 @@ private:
                 ids = _getLayerIds(circuit, gids);
                 break;
             case NeuronColorScheme::by_segment_type:
-                model.createMaterial(0, "unknown_section");
-                model.createMaterial(1, "soma");
-                model.createMaterial(2, "axon");
-                model.createMaterial(3, "dendrite");
-                model.createMaterial(4, "apical dendrite");
+                _createBySegmentMaterials(model);
                 return size_ts();
             case NeuronColorScheme::by_id:
                 for (size_t i = 0; i != gids.size(); ++i)
                     model.createMaterial(i, std::to_string(i));
+                model.setMaterialsColorMap(MaterialsColorMap::gradient);
                 return size_ts();
             default:
                 model.createMaterial(NO_MATERIAL, "default");
@@ -655,6 +628,7 @@ private:
                     model.createMaterial(id, std::to_string(id));
                 }
             }
+            model.setMaterialsColorMap(MaterialsColorMap::gradient);
             return ids;
         }
         catch (const std::runtime_error& e)

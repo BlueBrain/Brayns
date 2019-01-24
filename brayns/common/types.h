@@ -224,7 +224,6 @@ enum class MemoryMode
 
 enum class MaterialsColorMap
 {
-    none,           // Random colors
     random,         // Random materials including transparency, reflection,
                     // and light emission
     shades_of_grey, // 255 shades of grey
