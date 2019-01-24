@@ -139,9 +139,10 @@ export interface InspectCoords {
 }
 
 
-export type RendererParams = Partial<Pick<Renderer, 'current' | 'samplesPerPixel' | 'maxAccumFrames' | 'backgroundColor' | 'headLight' | 'varianceThreshold'>>;
+export type RendererParams = Partial<Pick<Renderer, 'current' | 'samplesPerPixel' | 'subsampling' | 'maxAccumFrames' | 'backgroundColor' | 'headLight' | 'varianceThreshold'>>;
 export interface Renderer extends AbstractObject {
     samplesPerPixel: number;
+    subsampling: number;
     maxAccumFrames: number;
     backgroundColor: number[];
     headLight: boolean;

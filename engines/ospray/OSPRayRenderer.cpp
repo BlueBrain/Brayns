@@ -108,7 +108,7 @@ void OSPRayRenderer::commit()
     const auto& color = rp.getBackgroundColor();
     ospSet3f(_renderer, "bgColor", color.x(), color.y(), color.z());
     ospSet1f(_renderer, "varianceThreshold", rp.getVarianceThreshold());
-    ospSet1i(_renderer, "spp", std::max(1, rp.getSamplesPerPixel()));
+    ospSet1i(_renderer, "spp", rp.getSamplesPerPixel());
 
     if (auto material = std::static_pointer_cast<OSPRayMaterial>(
             scene->getBackgroundMaterial()))

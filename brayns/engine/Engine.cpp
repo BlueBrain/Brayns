@@ -44,15 +44,13 @@ void Engine::commit()
 
 void Engine::preRender()
 {
+    const auto& renderParams = _parametersManager.getRenderingParameters();
+    if (!renderParams.isModified())
+        return;
     for (auto frameBuffer : _frameBuffers)
     {
-        const auto& renderParams = _parametersManager.getRenderingParameters();
         frameBuffer->setAccumulation(renderParams.getAccumulation());
-
-        const auto spp =
-            _parametersManager.getRenderingParameters().getSamplesPerPixel();
-        const size_t factor = spp >= 0 ? 1 : std::pow(2, std::abs(spp));
-        frameBuffer->setSubsampling(factor);
+        frameBuffer->setSubsampling(renderParams.getSubsampling());
     }
 }
 

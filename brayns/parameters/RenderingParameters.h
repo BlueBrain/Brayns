@@ -57,8 +57,16 @@ public:
     const auto& getCameras() const { return _cameras; }
     void addCamera(const std::string& camera) { _cameras.push_front(camera); }
     /** Number of samples per pixel */
-    int getSamplesPerPixel() const { return _spp; }
-    void setSamplesPerPixel(const int value) { _updateValue(_spp, value); }
+    uint32_t getSamplesPerPixel() const { return _spp; }
+    void setSamplesPerPixel(const uint32_t value)
+    {
+        _updateValue(_spp, std::max(1u, value));
+    }
+    uint32_t getSubsampling() const { return _subsampling; }
+    void setSubsampling(const uint32_t subsampling)
+    {
+        _updateValue(_subsampling, std::max(1u, subsampling));
+    }
     const Vector3d& getBackgroundColor() const { return _backgroundColor; }
     void setBackgroundColor(const Vector3d& value)
     {
@@ -103,7 +111,8 @@ protected:
     std::deque<std::string> _renderers;
     std::string _camera{"perspective"};
     std::deque<std::string> _cameras;
-    int _spp{1};
+    uint32_t _spp{1};
+    uint32_t _subsampling{1};
     bool _accumulation{true};
     Vector3d _backgroundColor{0., 0., 0.};
     bool _headLight{true};

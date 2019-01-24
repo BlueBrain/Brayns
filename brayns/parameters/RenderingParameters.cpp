@@ -30,6 +30,7 @@ const std::string PARAM_HEAD_LIGHT = "no-head-light";
 const std::string PARAM_MAX_ACCUMULATION_FRAMES = "max-accumulation-frames";
 const std::string PARAM_RENDERER = "renderer";
 const std::string PARAM_SPP = "samples-per-pixel";
+const std::string PARAM_SUBSAMPLING = "subsampling";
 const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
 }
 
@@ -38,22 +39,27 @@ namespace brayns
 RenderingParameters::RenderingParameters()
     : AbstractParameters("Rendering")
 {
-    _parameters.add_options()(PARAM_RENDERER.c_str(), po::value<std::string>(),
-                              "The renderer to use")(
-        PARAM_SPP.c_str(), po::value<size_t>(),
-        "Number of samples per pixel [int]")(
-        PARAM_ACCUMULATION.c_str(), po::bool_switch()->default_value(false),
-        "Disable accumulation")(PARAM_BACKGROUND_COLOR.c_str(),
-                                po::value<floats>()->multitoken(),
-                                "Background color [float float float]")(
-        PARAM_CAMERA.c_str(), po::value<std::string>(),
-        "The camera to use")(PARAM_HEAD_LIGHT.c_str(),
-                             po::bool_switch()->default_value(false),
-                             "Disable light source attached to camera origin.")(
-        PARAM_VARIANCE_THRESHOLD.c_str(), po::value<float>(),
-        "Threshold for adaptive accumulation [float]")(
-        PARAM_MAX_ACCUMULATION_FRAMES.c_str(), po::value<size_t>(),
-        "Maximum number of accumulation frames");
+    _parameters.add_options() //
+        (PARAM_RENDERER.c_str(), po::value<std::string>(),
+         "The renderer to use") //
+        (PARAM_SPP.c_str(), po::value<uint32_t>(&_spp),
+         "Number of samples per pixel [uint]") //
+        (PARAM_SUBSAMPLING.c_str(), po::value<uint32_t>(&_subsampling),
+         "Subsampling factor [uint]") //
+        (PARAM_ACCUMULATION.c_str(), po::bool_switch()->default_value(false),
+         "Disable accumulation") //
+        (PARAM_BACKGROUND_COLOR.c_str(), po::value<floats>()->multitoken(),
+         "Background color [float float float]") //
+        (PARAM_CAMERA.c_str(), po::value<std::string>(),
+         "The camera to use") //
+        (PARAM_HEAD_LIGHT.c_str(), po::bool_switch()->default_value(false),
+         "Disable light source attached to camera origin.") //
+        (PARAM_VARIANCE_THRESHOLD.c_str(),
+         po::value<double>(&_varianceThreshold),
+         "Threshold for adaptive accumulation [float]") //
+        (PARAM_MAX_ACCUMULATION_FRAMES.c_str(),
+         po::value<size_t>(&_maxAccumFrames),
+         "Maximum number of accumulation frames");
 }
 
 void RenderingParameters::parse(const po::variables_map& vm)
@@ -66,8 +72,6 @@ void RenderingParameters::parse(const po::variables_map& vm)
             _renderers.end())
             _renderers.push_front(rendererName);
     }
-    if (vm.count(PARAM_SPP))
-        _spp = vm[PARAM_SPP].as<size_t>();
     _accumulation = !vm[PARAM_ACCUMULATION].as<bool>();
     if (vm.count(PARAM_BACKGROUND_COLOR))
     {
@@ -84,10 +88,6 @@ void RenderingParameters::parse(const po::variables_map& vm)
             _cameras.push_front(cameraName);
     }
     _headLight = !vm[PARAM_HEAD_LIGHT].as<bool>();
-    if (vm.count(PARAM_VARIANCE_THRESHOLD))
-        _varianceThreshold = vm[PARAM_VARIANCE_THRESHOLD].as<float>();
-    if (vm.count(PARAM_MAX_ACCUMULATION_FRAMES))
-        _maxAccumFrames = vm[PARAM_MAX_ACCUMULATION_FRAMES].as<size_t>();
     markModified();
 }
 

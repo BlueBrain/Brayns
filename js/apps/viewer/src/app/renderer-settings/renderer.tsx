@@ -43,6 +43,7 @@ export default class Renderer extends PureComponent<Props, State> {
         backgroundColor: [0, 0, 0],
         maxAccumFrames: 0,
         samplesPerPixel: 1,
+        subsampling: 1,
         headLight: false,
         environmentMap: '',
         isEnvMapValid: true
@@ -67,10 +68,12 @@ export default class Renderer extends PureComponent<Props, State> {
         }
     }
 
-    updateSamplesPerPixel = (value: number) => {
-        this.updateRenderer({
-            samplesPerPixel: computeSPPx(this.state.samplesPerPixel!, value)
-        });
+    updateSamplesPerPixel = (samplesPerPixel: number) => {
+        this.updateRenderer({samplesPerPixel});
+    }
+
+    updateSubsampling = (subsampling: number) => {
+        this.updateRenderer({subsampling});
     }
 
     updateMaxAccumFrames = (value: number) => {
@@ -179,6 +182,7 @@ export default class Renderer extends PureComponent<Props, State> {
             currentRendererParams,
             backgroundColor,
             samplesPerPixel,
+            subsampling,
             maxAccumFrames,
             headLight,
             types,
@@ -230,6 +234,21 @@ export default class Renderer extends PureComponent<Props, State> {
                     onChange={this.updateSamplesPerPixel}
                     type="integer"
                     step={1}
+                    min={1}
+                    max={128}
+                    disabled={disabled}
+                    margin="normal"
+                    fullWidth
+                />
+
+                <NumericField
+                    label="Subsampling"
+                    value={subsampling}
+                    onChange={this.updateSubsampling}
+                    type="integer"
+                    step={1}
+                    min={1}
+                    max={16}
                     disabled={disabled}
                     margin="normal"
                     fullWidth
@@ -339,13 +358,6 @@ function toRendererState(props: RendererParams): CommonRendererState {
         };
     }
     return props as any;
-}
-
-function computeSPPx(prev: number, current: number) {
-    if (current === 0) {
-        return prev > 0 ? -1 : 1;
-    }
-    return current;
 }
 
 // TODO: Add tests?

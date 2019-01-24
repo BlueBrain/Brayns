@@ -101,7 +101,10 @@ public:
         _scene->commit();
 
         if (_params.renderingParams)
+        {
             _params.renderingParams->setSamplesPerPixel(1);
+            _params.renderingParams->setSubsampling(1);
+        }
 
         _renderer->setCamera(_camera);
         _renderer->setScene(_scene);
