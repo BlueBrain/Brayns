@@ -41,7 +41,7 @@ OSPRayScene::OSPRayScene(ParametersManager& parametersManager,
     : Scene(parametersManager)
     , _memoryManagementFlags(memoryManagementFlags)
 {
-    _backgroundMaterial = std::make_shared<OSPRayMaterial>(true);
+    _backgroundMaterial = std::make_shared<OSPRayMaterial>(PropertyMap(), true);
 }
 
 OSPRayScene::~OSPRayScene()

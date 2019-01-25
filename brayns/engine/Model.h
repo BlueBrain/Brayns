@@ -213,9 +213,9 @@ public:
     virtual void commitGeometry() = 0;
 
     /** Factory method to create an engine-specific material. */
-    BRAYNS_API virtual MaterialPtr createMaterial(
-        const size_t materialId, const std::string& name,
-        const PropertyMap& properties = {}) = 0;
+    BRAYNS_API MaterialPtr createMaterial(const size_t materialId,
+                                          const std::string& name,
+                                          const PropertyMap& properties = {});
 
     /**
      * Create a volume with the given dimensions, voxel spacing and data type
@@ -431,7 +431,8 @@ public:
     const std::set<BVHFlag>& getBVHFlags() const { return _bvhFlags; }
 protected:
     /** Factory method to create an engine-specific material. */
-    BRAYNS_API virtual MaterialPtr createMaterialImpl() = 0;
+    BRAYNS_API virtual MaterialPtr createMaterialImpl(
+        const PropertyMap& properties = {}) = 0;
 
     void _updateBounds();
 

@@ -29,8 +29,9 @@ namespace brayns
 class OSPRayMaterial : public Material
 {
 public:
-    OSPRayMaterial(const bool backgroundMaterial = false)
-        : Material()
+    OSPRayMaterial(const PropertyMap& properties = {},
+                   const bool backgroundMaterial = false)
+        : Material(properties)
         , _isBackGroundMaterial(backgroundMaterial)
     {
     }

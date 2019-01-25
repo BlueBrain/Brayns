@@ -24,9 +24,10 @@
 
 namespace brayns
 {
-Material::Material()
+Material::Material(const PropertyMap& properties)
 {
     setCurrentType("default");
+    _properties.at(_currentType).merge(properties);
 }
 
 Texture2DPtr Material::getTexture(const TextureType type) const
