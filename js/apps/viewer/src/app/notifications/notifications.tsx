@@ -14,7 +14,7 @@ import {Notification, onNotification} from '../../common/events';
 const NOTIFICATION_ID = 'notification';
 const SNACKBAR_POSITION: SnackbarOrigin = {
     vertical: 'bottom',
-    horizontal: 'right'
+    horizontal: 'left'
 };
 
 
