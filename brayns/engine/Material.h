@@ -56,7 +56,7 @@ public:
     virtual void commit() = 0;
     //@}
 
-    BRAYNS_API Material();
+    BRAYNS_API Material(const PropertyMap& properties = {});
 
     BRAYNS_API const std::string& getName() const { return _name; }
     BRAYNS_API void setName(const std::string& value)

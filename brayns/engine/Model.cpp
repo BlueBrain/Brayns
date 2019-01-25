@@ -516,15 +516,15 @@ void Model::_updateBounds()
 }
 
 MaterialPtr Model::createMaterial(const size_t materialId,
-                                  const std::string& name)
+                                  const std::string& name,
+                                  const PropertyMap& properties)
 {
-    auto material = _materials[materialId] = createMaterialImpl();
+    auto material = _materials[materialId] = createMaterialImpl(properties);
     material->setName(name);
     if (_simulationHandler)
         _simulationHandler->bind(material);
     return material;
 }
-
 
 void Model::setSimulationHandler(AbstractSimulationHandlerPtr handler)
 {

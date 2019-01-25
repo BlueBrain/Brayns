@@ -19,6 +19,7 @@
  */
 
 #include "OSPRayMaterial.h"
+#include "utils.h"
 
 #include <brayns/common/log.h>
 
@@ -71,6 +72,9 @@ void OSPRayMaterial::commit()
     ospSet1f(_ospMaterial, "a", _emission);
     ospSet1f(_ospMaterial, "glossiness", _glossiness);
     ospSet1b(_ospMaterial, "skybox", _isBackGroundMaterial);
+
+    // Properties
+    toOSPRayProperties(*this, _ospMaterial);
 
     // Textures
     for (const auto& textureType : textureTypeMaterialAttribute)

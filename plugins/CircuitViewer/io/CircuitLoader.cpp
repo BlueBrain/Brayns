@@ -577,10 +577,9 @@ private:
         Per cell material IDs are used for by_etype, by_mtype, by_layer and
         by_target color schemes.
     */
-    size_ts _createMaterials(Model& model,
-                            const brain::Circuit& circuit,
-                            const brain::GIDSet& gids,
-                            const size_ts& targetSizes) const
+    size_ts _createMaterials(Model& model, const brain::Circuit& circuit,
+                             const brain::GIDSet& gids,
+                             const size_ts& targetSizes) const
     {
         const auto scheme = _morphologyParams.colorScheme;
         try

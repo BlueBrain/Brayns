@@ -569,9 +569,9 @@ void OSPRayModel::commitMaterials(const std::string& renderer)
     }
 }
 
-MaterialPtr OSPRayModel::createMaterialImpl()
+MaterialPtr OSPRayModel::createMaterialImpl(const PropertyMap& properties)
 {
-    return std::make_shared<OSPRayMaterial>();
+    return std::make_shared<OSPRayMaterial>(properties);
 }
 
 SharedDataVolumePtr OSPRayModel::createSharedDataVolume(

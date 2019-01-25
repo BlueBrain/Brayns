@@ -106,6 +106,6 @@ private:
 
     std::string _renderer;
 
-    MaterialPtr createMaterialImpl() final;
+    MaterialPtr createMaterialImpl(const PropertyMap& properties = {}) final;
 };
 }
