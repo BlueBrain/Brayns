@@ -68,7 +68,7 @@ void AddModelFromBlobTask::appendBlob(const std::string& blob)
         return;
     }
 
-    _blob += blob;
+    _blob.insert(_blob.end(), blob.begin(), blob.end());
 
     _receivedBytes += blob.size();
     std::stringstream msg;

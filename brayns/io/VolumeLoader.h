@@ -69,5 +69,11 @@ public:
         const std::string& filename, const LoaderProgress& callback,
         const PropertyMap& properties, const size_t index = 0,
         const size_t defaultMaterialId = NO_MATERIAL) const final;
+
+private:
+    ModelDescriptorPtr _loadVolume(
+        const std::string& filename, const LoaderProgress& callback,
+        const PropertyMap& properties,
+        const std::function<void(SharedDataVolumePtr)>& mapData) const;
 };
 }

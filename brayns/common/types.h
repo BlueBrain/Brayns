@@ -273,7 +273,7 @@ struct Blob
 {
     std::string type;
     std::string name;
-    std::string data;
+    uint8_ts data;
 };
 
 class Loader;

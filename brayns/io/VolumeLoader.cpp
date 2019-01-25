@@ -36,7 +36,7 @@ const Property PROP_DIMENSIONS = {"dimensions",
                                   std::array<int32_t, 3>({{0, 0, 0}}),
                                   {"Dimensions"}};
 const Property PROP_SPACING = {"spacing",
-                               std::array<double, 3>({{0, 0, 0}}),
+                               std::array<double, 3>({{1, 1, 1}}),
                                {"Spacing"}};
 const Property PROP_TYPE = {"type",
                             brayns::enumToString(brayns::DataType::UINT8),
@@ -133,18 +133,28 @@ bool RawVolumeLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
 }
 
 ModelDescriptorPtr RawVolumeLoader::importFromBlob(
-    Blob&& blob BRAYNS_UNUSED, const LoaderProgress&,
-    const PropertyMap& properties BRAYNS_UNUSED,
+    Blob&& blob, const LoaderProgress& callback, const PropertyMap& properties,
     const size_t index BRAYNS_UNUSED,
     const size_t defaultMaterialId BRAYNS_UNUSED) const
 {
-    throw std::runtime_error("Volume loading from blob is not supported");
+    return _loadVolume(blob.name, callback, properties, [&blob](auto volume) {
+        volume->mapData(std::move(blob.data));
+    });
 }
 
 ModelDescriptorPtr RawVolumeLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
-    const PropertyMap& propertiesTmp, const size_t index BRAYNS_UNUSED,
+    const PropertyMap& properties, const size_t index BRAYNS_UNUSED,
     const size_t defaultMaterialId BRAYNS_UNUSED) const
+{
+    return _loadVolume(filename, callback, properties,
+                       [filename](auto volume) { volume->mapData(filename); });
+}
+
+ModelDescriptorPtr RawVolumeLoader::_loadVolume(
+    const std::string& filename, const LoaderProgress& callback,
+    const PropertyMap& propertiesTmp,
+    const std::function<void(SharedDataVolumePtr)>& mapData) const
 {
     // Fill property map since the actual property types are known now.
     PropertyMap properties = getProperties();
@@ -168,7 +178,7 @@ ModelDescriptorPtr RawVolumeLoader::importFromFile(
     volume->setDataRange(dataRange);
 
     callback.updateProgress("Loading voxels ...", 0.5f);
-    volume->mapData(filename);
+    mapData(volume);
 
     callback.updateProgress("Adding model ...", 1.f);
     model->addVolume(volume);

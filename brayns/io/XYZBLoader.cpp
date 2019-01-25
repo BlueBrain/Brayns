@@ -63,7 +63,7 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
 {
     BRAYNS_INFO << "Loading xyz " << blob.name << std::endl;
 
-    std::stringstream stream(blob.data);
+    std::stringstream stream(std::string(blob.data.begin(), blob.data.end()));
     size_t numlines = 0;
     {
         numlines = std::count(std::istreambuf_iterator<char>(stream),
