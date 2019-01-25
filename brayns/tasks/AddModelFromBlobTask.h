@@ -71,7 +71,7 @@ private:
     async::event_task<Blob> _chunkEvent;
     async::event_task<ModelDescriptorPtr> _errorEvent;
     std::vector<async::task<ModelDescriptorPtr>> _finishTasks;
-    std::string _blob;
+    uint8_ts _blob;
     BinaryParam _param;
     size_t _receivedBytes{0};
     const float CHUNK_PROGRESS_WEIGHT{0.5f};

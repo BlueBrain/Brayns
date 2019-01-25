@@ -78,9 +78,15 @@ void SharedDataVolume::mapData(const std::string& filename)
     setVoxels(_memoryMapPtr);
 }
 
-void SharedDataVolume::mapData(const std::vector<char>& buffer)
+void SharedDataVolume::mapData(const uint8_ts& buffer)
 {
     _memoryBuffer.insert(_memoryBuffer.begin(), buffer.begin(), buffer.end());
+    setVoxels(_memoryBuffer.data());
+}
+
+void SharedDataVolume::mapData(uint8_ts&& buffer)
+{
+    _memoryBuffer = std::move(buffer);
     setVoxels(_memoryBuffer.data());
 }
 }

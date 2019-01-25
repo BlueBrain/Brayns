@@ -41,7 +41,8 @@ public:
      * setVoxels().
      */
     void mapData(const std::string& filename);
-    void mapData(const std::vector<char>& buffer);
+    void mapData(const uint8_ts& buffer);
+    void mapData(uint8_ts&& buffer);
 
 protected:
     SharedDataVolume(const Vector3ui& dimensions, const Vector3f& spacing,
@@ -53,7 +54,7 @@ protected:
     ~SharedDataVolume();
 
 private:
-    std::vector<char> _memoryBuffer;
+    uint8_ts _memoryBuffer;
     void* _memoryMapPtr{nullptr};
     int _cacheFileDescriptor{-1};
     size_t _size{0};
