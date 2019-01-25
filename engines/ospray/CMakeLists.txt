@@ -60,6 +60,7 @@ set(BRAYNSOSPRAYENGINE_SOURCES
 list(APPEND BRAYNSOSPRAYENGINE_SOURCES ${BRAYNSOSPRAYENGINE_ISPC_SOURCES})
 
 set(BRAYNSOSPRAYENGINE_HEADERS
+  utils.h
   OSPRayCamera.h
   OSPRayEngine.h
   OSPRayFrameBuffer.h
@@ -71,9 +72,6 @@ set(BRAYNSOSPRAYENGINE_HEADERS
   ispc/camera/OrthographicCamera.h
   ispc/camera/PerspectiveCamera.h
   ispc/camera/PerspectiveParallaxCamera.h
-  ispc/geometry/Cones.h
-  ispc/geometry/Cylinders.h
-  ispc/geometry/SDFGeometries.h
   ispc/render/BasicRenderer.h
   ispc/render/DefaultMaterial.h
   ispc/render/PathTracingRenderer.h
@@ -81,8 +79,10 @@ set(BRAYNSOSPRAYENGINE_HEADERS
   ispc/render/utils/AbstractRenderer.h
 )
 
-set(BRAYNSOSPRAYENGINE_HEADERS
-  utils.h
+set(BRAYNSOSPRAYENGINE_PUBLIC_HEADERS
+  ispc/geometry/Cones.h
+  ispc/geometry/Cylinders.h
+  ispc/geometry/SDFGeometries.h
 )
 
 set_source_files_properties(
