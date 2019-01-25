@@ -158,8 +158,12 @@ void OSPRayModel::_addGeometryToModel(const OSPGeometry geometry,
         ospAddGeometry(_boundingBoxModel, geometry);
         break;
     case SECONDARY_MODEL_MATERIAL_ID:
+    {
+        if (!_secondaryModel)
+            _secondaryModel = ospNewModel();
         ospAddGeometry(_secondaryModel, geometry);
         break;
+    }
     default:
         ospAddGeometry(_primaryModel, geometry);
     }
