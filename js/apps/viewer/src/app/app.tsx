@@ -14,6 +14,7 @@ import {debounceTime} from 'rxjs/operators';
 
 import AppBar from '@material-ui/core/AppBar';
 import lightBlue from '@material-ui/core/colors/lightBlue';
+import red from '@material-ui/core/colors/red';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Drawer from '@material-ui/core/Drawer';
 import Fade from '@material-ui/core/Fade';
@@ -95,6 +96,9 @@ const LIGHT_THEME = createMuiTheme({
             light: lightBlue['A400'],
             main: lightBlue['500'],
             dark: lightBlue['A700']
+        },
+        error: {
+            main: red['400']
         }
     },
     typography: {
@@ -108,6 +112,9 @@ const DARK_THEME = createMuiTheme({
             light: lightBlue['A400'],
             main: lightBlue['500'],
             dark: lightBlue['A700']
+        },
+        error: {
+            main: red['400']
         },
         type: 'dark'
     },
@@ -679,7 +686,6 @@ class App extends PureComponent<Props, State> {
                                     <span className={classes.spacer} />
                                     <ResetCamera disabled={hasSocketError} />
                                     <Snapshot disabled={hasSocketError} />
-                                    <RequestNotifications disabled={hasSocketError} />
                                     <QuitRenderer />
                                     <Tooltip title={'Report an issue'} {...TOOLTIP_DELAY}>
                                         <IconButton
@@ -733,6 +739,9 @@ class App extends PureComponent<Props, State> {
                                                 <Cube />
                                             </div>
                                         </Fade>
+
+                                        <RequestNotifications disabled={hasSocketError} />
+
                                         <AnimationPlayer disabled={hasSocketError} />
                                         <ConnectionStatus open={hasSocketError} />
                                     </DataPortal>
