@@ -231,8 +231,7 @@ void Scene::removeClipPlane(const size_t id)
         markModified();
 }
 
-ModelDescriptorPtr Scene::loadModel(Blob&& blob, const size_t materialID,
-                                    const ModelParams& params,
+ModelDescriptorPtr Scene::loadModel(Blob&& blob, const ModelParams& params,
                                     LoaderProgress cb)
 {
     const auto& loader =
@@ -242,8 +241,7 @@ ModelDescriptorPtr Scene::loadModel(Blob&& blob, const size_t materialID,
     // HACK: Add loader name in properties for archive loader
     auto propCopy = params.getLoaderProperties();
     propCopy.setProperty({"loaderName", params.getLoaderName()});
-    auto modelDescriptor =
-        loader.importFromBlob(std::move(blob), cb, propCopy, 0, materialID);
+    auto modelDescriptor = loader.importFromBlob(std::move(blob), cb, propCopy);
     if (!modelDescriptor)
         throw std::runtime_error("No model returned by loader");
     *modelDescriptor = params;
@@ -252,7 +250,6 @@ ModelDescriptorPtr Scene::loadModel(Blob&& blob, const size_t materialID,
 }
 
 ModelDescriptorPtr Scene::loadModel(const std::string& path,
-                                    const size_t materialID,
                                     const ModelParams& params,
                                     LoaderProgress cb)
 {
@@ -261,8 +258,7 @@ ModelDescriptorPtr Scene::loadModel(const std::string& path,
     // HACK: Add loader name in properties for archive loader
     auto propCopy = params.getLoaderProperties();
     propCopy.setProperty({"loaderName", params.getLoaderName()});
-    auto modelDescriptor =
-        loader.importFromFile(path, cb, propCopy, 0, materialID);
+    auto modelDescriptor = loader.importFromFile(path, cb, propCopy);
     if (!modelDescriptor)
         throw std::runtime_error("No model returned by loader");
     *modelDescriptor = params;

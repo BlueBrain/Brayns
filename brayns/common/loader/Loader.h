@@ -100,15 +100,11 @@ public:
      * @param blob the blob containing the data to import
      * @param callback Callback for loader progress
      * @param properties Properties used for loading
-     * @param index Index of the element, mainly used for material
-     * assignment
-     * @param defaultMaterialId the default material to use
      * @return the model that has been created by the loader
      */
     virtual ModelDescriptorPtr importFromBlob(
         Blob&& blob, const LoaderProgress& callback,
-        const PropertyMap& properties, const size_t index = 0,
-        const size_t defaultMaterialId = NO_MATERIAL) const = 0;
+        const PropertyMap& properties) const = 0;
 
     /**
      * Import the data from the given file and return the created model.
@@ -116,14 +112,11 @@ public:
      * @param filename the file containing the data to import
      * @param callback Callback for loader progress
      * @param properties Properties used for loading
-     * @param index Index of the element, mainly used for material assignment
-     * @param defaultMaterialId the default material to use
      * @return the model that has been created by the loader
      */
     virtual ModelDescriptorPtr importFromFile(
         const std::string& filename, const LoaderProgress& callback,
-        const PropertyMap& properties, const size_t index = 0,
-        const size_t defaultMaterialId = NO_MATERIAL) const = 0;
+        const PropertyMap& properties) const = 0;
 
     /**
      * Query the loader if it can load the given file

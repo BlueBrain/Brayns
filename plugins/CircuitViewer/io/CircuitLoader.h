@@ -49,17 +49,14 @@ public:
     bool isSupported(const std::string& filename,
                      const std::string& extension) const final;
 
-    ModelDescriptorPtr importFromBlob(Blob&& blob,
-                                      const LoaderProgress& callback,
-                                      const PropertyMap& properties,
-                                      const size_t index,
-                                      const size_t materialID) const final;
+    ModelDescriptorPtr importFromBlob(
+        Blob&& blob, const LoaderProgress& callback,
+        const PropertyMap& properties) const final;
 
-    ModelDescriptorPtr importFromFile(const std::string& filename,
-                                      const LoaderProgress& callback,
-                                      const PropertyMap& properties,
-                                      const size_t index,
-                                      const size_t materialID) const final;
+    ModelDescriptorPtr importFromFile(
+        const std::string& filename, const LoaderProgress& callback,
+        const PropertyMap& properties) const final;
+
 private:
     PropertyMap _defaults; // command line defaults
 };

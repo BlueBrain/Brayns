@@ -30,8 +30,8 @@ struct TrianglesMesh
     Vector3fs vertices;
     Vector3fs normals;
     Vector4fs colors;
-    Vector3uis indices;
-    Vector2fs textureCoordinates;
+    std::vector<Vector3ui> indices;
+    std::vector<Vector2f> textureCoordinates;
 };
 }
 

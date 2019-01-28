@@ -57,9 +57,7 @@ bool XYZBLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
 
 ModelDescriptorPtr XYZBLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback,
-    const PropertyMap& properties BRAYNS_UNUSED,
-    const size_t index BRAYNS_UNUSED,
-    const size_t defaultMaterialId BRAYNS_UNUSED) const
+    const PropertyMap& properties BRAYNS_UNUSED) const
 {
     BRAYNS_INFO << "Loading xyz " << blob.name << std::endl;
 
@@ -74,8 +72,7 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
     auto model = _scene.createModel();
 
     const auto name = boost::filesystem::basename({blob.name});
-    const auto materialId =
-        (defaultMaterialId == NO_MATERIAL ? 0 : defaultMaterialId);
+    const auto materialId = 0;
     model->createMaterial(materialId, name);
     auto& spheres = model->getSpheres()[materialId];
 
@@ -138,9 +135,8 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
 
     Property radiusProperty("radius", meanRadius, 0., meanRadius * 2.,
                             {"Point size"});
-    radiusProperty.onModified([
-        materialId, modelDesc = std::weak_ptr<ModelDescriptor>(modelDescriptor)
-    ](const auto& property) {
+    radiusProperty.onModified([modelDesc = std::weak_ptr<ModelDescriptor>(
+                                   modelDescriptor)](const auto& property) {
         if (auto modelDesc_ = modelDesc.lock())
         {
             const auto newRadius = property.template get<double>();
@@ -156,8 +152,7 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
 
 ModelDescriptorPtr XYZBLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
-    const PropertyMap& properties, const size_t index,
-    const size_t defaultMaterialId) const
+    const PropertyMap& properties) const
 {
     std::ifstream file(filename);
     if (!file.good())
@@ -166,7 +161,7 @@ ModelDescriptorPtr XYZBLoader::importFromFile(
                            filename,
                            {std::istreambuf_iterator<char>(file),
                             std::istreambuf_iterator<char>()}},
-                          callback, properties, index, defaultMaterialId);
+                          callback, properties);
 }
 
 std::string XYZBLoader::getName() const

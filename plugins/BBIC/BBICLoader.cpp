@@ -54,8 +54,7 @@ bool Loader::isSupported(const std::string&, const std::string& extension) const
 
 brayns::ModelDescriptorPtr Loader::importFromFile(
     const std::string& fileName, const brayns::LoaderProgress& callback,
-    const brayns::PropertyMap& /*properties*/, const size_t /*index*/,
-    const size_t /*defaultMaterial*/) const
+    const brayns::PropertyMap& /*properties*/) const
 {
     VolumeModel volumeModel(fileName, _scene.createModel(), callback);
     auto modelDesc = volumeModel.getModel();

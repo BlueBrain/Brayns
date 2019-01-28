@@ -39,20 +39,16 @@ public:
                      const std::string& extension) const final;
     ModelDescriptorPtr importFromBlob(
         Blob&& blob, const LoaderProgress& callback,
-        const PropertyMap& properties, const size_t index = 0,
-        const size_t defaultMaterialId = NO_MATERIAL) const final;
+        const PropertyMap& properties) const final;
 
     ModelDescriptorPtr importFromFile(
         const std::string& filename, const LoaderProgress& callback,
-        const PropertyMap& properties, const size_t index = 0,
-        const size_t defaultMaterialId = NO_MATERIAL) const final;
+        const PropertyMap& properties) const final;
 
 private:
     ModelDescriptorPtr loadExtracted(const std::string& path,
                                      const LoaderProgress& callback,
-                                     const PropertyMap& properties,
-                                     const size_t index,
-                                     const size_t defaultMaterialId) const;
+                                     const PropertyMap& properties) const;
     LoaderRegistry& _registry;
 };
 }

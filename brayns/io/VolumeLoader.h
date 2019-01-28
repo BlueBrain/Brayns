@@ -20,7 +20,6 @@
 #pragma once
 
 #include <brayns/common/loader/Loader.h>
-#include <brayns/parameters/VolumeParameters.h>
 
 namespace brayns
 {
@@ -38,13 +37,11 @@ public:
                      const std::string& extension) const final;
     ModelDescriptorPtr importFromBlob(
         Blob&& blob, const LoaderProgress& callback,
-        const PropertyMap& properties, const size_t index = 0,
-        const size_t defaultMaterialId = NO_MATERIAL) const final;
+        const PropertyMap& properties) const final;
 
     ModelDescriptorPtr importFromFile(
         const std::string& filename, const LoaderProgress& callback,
-        const PropertyMap& properties, const size_t index = 0,
-        const size_t defaultMaterialId = NO_MATERIAL) const final;
+        const PropertyMap& properties) const final;
 };
 
 /** A volume loader for raw volumes with params for dimensions.
@@ -62,13 +59,11 @@ public:
                      const std::string& extension) const final;
     ModelDescriptorPtr importFromBlob(
         Blob&& blob, const LoaderProgress& callback,
-        const PropertyMap& properties, const size_t index = 0,
-        const size_t defaultMaterialId = NO_MATERIAL) const final;
+        const PropertyMap& properties) const final;
 
     ModelDescriptorPtr importFromFile(
         const std::string& filename, const LoaderProgress& callback,
-        const PropertyMap& properties, const size_t index = 0,
-        const size_t defaultMaterialId = NO_MATERIAL) const final;
+        const PropertyMap& properties) const final;
 
 private:
     ModelDescriptorPtr _loadVolume(

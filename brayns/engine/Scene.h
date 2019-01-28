@@ -192,25 +192,22 @@ public:
      * Load the model from the given blob.
      *
      * @param blob the blob containing the data to import
-     * @param materialID the default material ot use
      * @param params Parameters for the model to be loaded
      * @param cb the callback for progress updates from the loader
      * @return the model that has been added to the scene
      */
-    ModelDescriptorPtr loadModel(Blob&& blob, const size_t materialID,
-                                 const ModelParams& params, LoaderProgress cb);
+    ModelDescriptorPtr loadModel(Blob&& blob, const ModelParams& params,
+                                 LoaderProgress cb);
 
     /**
      * Load the model from the given file.
      *
      * @param path the file or folder containing the data to import
-     * @param materialID the default material ot use
      * @param params Parameters for the model to be loaded
      * @param cb the callback for progress updates from the loader
      * @return the model that has been added to the scene
      */
     ModelDescriptorPtr loadModel(const std::string& path,
-                                 const size_t materialID,
                                  const ModelParams& params, LoaderProgress cb);
 
     void visitModels(const std::function<void(Model&)>& functor);
