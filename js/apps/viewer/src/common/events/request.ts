@@ -12,7 +12,7 @@ import {
 
 export const REQUEST_START = 'requeststart';
 export const REQUEST_PROGRESS = 'requestprogress';
-export const REQUEST_COMPLETE = 'requestcomplete';
+export const REQUEST_DONE = 'requestdone';
 export const REQUEST_CANCEL = 'requestcancel';
 
 
@@ -24,8 +24,8 @@ export function onRequestProgress() {
     return addEventObserver<ProgressEvent>(REQUEST_PROGRESS);
 }
 
-export function onRequestComplete() {
-    return addEventObserver<Request>(REQUEST_COMPLETE);
+export function onRequestDone() {
+    return addEventObserver<RequestDoneEvent>(REQUEST_DONE);
 }
 
 export function onRequestCancel<P = any, R = any>(task: RequestTask<P, R>) {
@@ -59,11 +59,19 @@ export function dispatchRequest<P, R>(task: RequestTask<P, R>) {
 }
 
 function createDone(request: Request) {
-    return () => {
-        dispatchEvent(REQUEST_COMPLETE, request);
+    return (error: boolean = false) => {
+        dispatchEvent(REQUEST_DONE, {
+            request,
+            error
+        });
     };
 }
 
 export interface ProgressEvent extends Progress {
     id: string | number;
+}
+
+export interface RequestDoneEvent {
+    error?: any;
+    request: Request;
 }
