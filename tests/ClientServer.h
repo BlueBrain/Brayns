@@ -60,8 +60,7 @@ public:
     brayns::PropertyMap getProperties() const { return {}; }
     brayns::ModelDescriptorPtr importFromBlob(
         brayns::Blob&&, const brayns::LoaderProgress& callback,
-        const brayns::PropertyMap& properties BRAYNS_UNUSED, const size_t,
-        const size_t) const final
+        const brayns::PropertyMap& properties BRAYNS_UNUSED) const final
     {
         for (;;)
         {
@@ -73,8 +72,7 @@ public:
 
     brayns::ModelDescriptorPtr importFromFile(
         const std::string&, const brayns::LoaderProgress& callback,
-        const brayns::PropertyMap& properties BRAYNS_UNUSED, const size_t,
-        const size_t) const final
+        const brayns::PropertyMap& properties BRAYNS_UNUSED) const final
     {
         for (;;)
         {

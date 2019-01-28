@@ -342,8 +342,7 @@ bool ProteinLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
 
 ModelDescriptorPtr ProteinLoader::importFromFile(
     const std::string& fileName, const LoaderProgress&,
-    const PropertyMap& inProperties, const size_t index,
-    const size_t defaultMaterialId BRAYNS_UNUSED) const
+    const PropertyMap& inProperties) const
 {
     // Fill property map since the actual property types are known now.
     PropertyMap properties = _defaults;
@@ -469,9 +468,7 @@ ModelDescriptorPtr ProteinLoader::importFromFile(
             // Convert radius from angstrom
             const float radius = 0.0001f * atom.radius * radiusMultiplier;
 
-            const auto materialId =
-                colorScheme == ColorScheme::by_id ? index : atom.materialId;
-            spheres[materialId].push_back({center, radius});
+            spheres[atom.materialId].push_back({center, radius});
         }
     }
     file.close();

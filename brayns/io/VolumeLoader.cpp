@@ -25,6 +25,7 @@
 #include <brayns/engine/SharedDataVolume.h>
 
 #include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 using boost::property_tree::ptree;
@@ -133,9 +134,8 @@ bool RawVolumeLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
 }
 
 ModelDescriptorPtr RawVolumeLoader::importFromBlob(
-    Blob&& blob, const LoaderProgress& callback, const PropertyMap& properties,
-    const size_t index BRAYNS_UNUSED,
-    const size_t defaultMaterialId BRAYNS_UNUSED) const
+    Blob&& blob, const LoaderProgress& callback,
+    const PropertyMap& properties) const
 {
     return _loadVolume(blob.name, callback, properties, [&blob](auto volume) {
         volume->mapData(std::move(blob.data));
@@ -144,8 +144,7 @@ ModelDescriptorPtr RawVolumeLoader::importFromBlob(
 
 ModelDescriptorPtr RawVolumeLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
-    const PropertyMap& properties, const size_t index BRAYNS_UNUSED,
-    const size_t defaultMaterialId BRAYNS_UNUSED) const
+    const PropertyMap& properties) const
 {
     return _loadVolume(filename, callback, properties,
                        [filename](auto volume) { volume->mapData(filename); });
@@ -226,17 +225,14 @@ bool MHDVolumeLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
 
 ModelDescriptorPtr MHDVolumeLoader::importFromBlob(
     Blob&& blob BRAYNS_UNUSED, const LoaderProgress&,
-    const PropertyMap& properties BRAYNS_UNUSED,
-    const size_t index BRAYNS_UNUSED,
-    const size_t defaultMaterialId BRAYNS_UNUSED) const
+    const PropertyMap& properties BRAYNS_UNUSED) const
 {
     throw std::runtime_error("Volume loading from blob is not supported");
 }
 
 ModelDescriptorPtr MHDVolumeLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
-    const PropertyMap&, const size_t index BRAYNS_UNUSED,
-    const size_t defaultMaterialId BRAYNS_UNUSED) const
+    const PropertyMap&) const
 {
     std::string volumeFile = filename;
     boost::property_tree::ptree pt;
@@ -267,8 +263,7 @@ ModelDescriptorPtr MHDVolumeLoader::importFromFile(
                             PROP_TYPE.enums, PROP_TYPE.metaData});
 
     return RawVolumeLoader(_scene).importFromFile(volumeFile, callback,
-                                                  properties, index,
-                                                  defaultMaterialId);
+                                                  properties);
 }
 
 std::string MHDVolumeLoader::getName() const

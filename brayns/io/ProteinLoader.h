@@ -22,9 +22,7 @@
 #define PROTEINLOADER_H
 
 #include <brayns/common/loader/Loader.h>
-#include <brayns/common/types.h>
 #include <brayns/parameters/GeometryParameters.h>
-#include <string>
 
 namespace brayns
 {
@@ -45,13 +43,10 @@ public:
                      const std::string& extension) const final;
     ModelDescriptorPtr importFromFile(
         const std::string& fileName, const LoaderProgress& callback,
-        const PropertyMap& properties, const size_t index = 0,
-        const size_t defaultMaterialId = NO_MATERIAL) const final;
+        const PropertyMap& properties) const final;
 
-    ModelDescriptorPtr importFromBlob(
-        Blob&&, const LoaderProgress&,
-        const PropertyMap& properties BRAYNS_UNUSED, const size_t = 0,
-        const size_t = NO_MATERIAL) const final
+    ModelDescriptorPtr importFromBlob(Blob&&, const LoaderProgress&,
+                                      const PropertyMap&) const final
     {
         throw std::runtime_error("Loading from blob not supported");
     }

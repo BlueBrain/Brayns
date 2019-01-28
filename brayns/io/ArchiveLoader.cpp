@@ -200,8 +200,7 @@ bool ArchiveLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
 
 ModelDescriptorPtr ArchiveLoader::loadExtracted(
     const std::string& path, const LoaderProgress& callback,
-    const PropertyMap& properties, const size_t index,
-    const size_t defaultMaterialId) const
+    const PropertyMap& properties) const
 {
     const auto loaderName =
         properties.getProperty<std::string>("loaderName", "");
@@ -217,40 +216,34 @@ ModelDescriptorPtr ArchiveLoader::loadExtracted(
 
         if (loader && loader->isSupported(currPath, extension))
         {
-            return loader->importFromFile(currPath, callback, properties, index,
-                                          defaultMaterialId);
+            return loader->importFromFile(currPath, callback, properties);
         }
         else if (!loader && _registry.isSupportedFile(currPath))
         {
             const auto& loaderMatch =
                 _registry.getSuitableLoader(currPath, "", "");
-            return loaderMatch.importFromFile(currPath, callback, properties,
-                                              index, defaultMaterialId);
+            return loaderMatch.importFromFile(currPath, callback, properties);
         }
     }
     throw std::runtime_error("No loader found for archive.");
 }
 
 ModelDescriptorPtr ArchiveLoader::importFromBlob(
-    Blob&& blob, const LoaderProgress& callback, const PropertyMap& properties,
-    const size_t index BRAYNS_UNUSED,
-    const size_t defaultMaterialId BRAYNS_UNUSED) const
+    Blob&& blob, const LoaderProgress& callback,
+    const PropertyMap& properties) const
 {
     fs::path path = fs::temp_directory_path() / fs::unique_path();
     extractBlob(std::move(blob), path.string());
-    return loadExtracted(path.string(), callback, properties, index,
-                         defaultMaterialId);
+    return loadExtracted(path.string(), callback, properties);
 }
 
 ModelDescriptorPtr ArchiveLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
-    const PropertyMap& properties, const size_t index,
-    const size_t defaultMaterialId) const
+    const PropertyMap& properties) const
 {
     fs::path path = fs::temp_directory_path() / fs::unique_path();
     extractFile(filename, path.string());
-    return loadExtracted(path.string(), callback, properties, index,
-                         defaultMaterialId);
+    return loadExtracted(path.string(), callback, properties);
 }
 
 std::string ArchiveLoader::getName() const

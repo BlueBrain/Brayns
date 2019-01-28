@@ -768,16 +768,14 @@ bool CircuitLoader::isSupported(const std::string& filename,
 
 ModelDescriptorPtr CircuitLoader::importFromBlob(
     Blob&& /*blob*/, const LoaderProgress& /*callback*/,
-    const PropertyMap& properties BRAYNS_UNUSED, const size_t /*index*/,
-    const size_t /*materialID*/) const
+    const PropertyMap& /*properties*/) const
 {
     throw std::runtime_error("Loading circuit from blob is not supported");
 }
 
 ModelDescriptorPtr CircuitLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
-    const PropertyMap& inProperties, const size_t /*index*/,
-    const size_t /*materialID*/) const
+    const PropertyMap& inProperties) const
 {
     callback.updateProgress("Loading circuit ...", 0);
 

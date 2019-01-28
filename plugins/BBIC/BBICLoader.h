@@ -41,13 +41,11 @@ public:
 
     brayns::ModelDescriptorPtr importFromFile(
         const std::string& fileName, const brayns::LoaderProgress& callback,
-        const brayns::PropertyMap& properties, const size_t index,
-        const size_t defaultMaterial) const final;
+        const brayns::PropertyMap& properties) const final;
 
     brayns::ModelDescriptorPtr importFromBlob(
         brayns::Blob&& /*blob*/, const brayns::LoaderProgress& /*callback*/,
-        const brayns::PropertyMap& /*properties*/, const size_t /*index*/,
-        const size_t /*defaultMaterial*/) const final
+        const brayns::PropertyMap& /*properties*/) const final
     {
         throw std::runtime_error(
             "Loading BBIC volume from blob is not supported");

@@ -631,16 +631,14 @@ bool MorphologyLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
 
 ModelDescriptorPtr MorphologyLoader::importFromBlob(
     Blob&& /*blob*/, const LoaderProgress& /*callback*/,
-    const PropertyMap& properties BRAYNS_UNUSED, const size_t /*index*/,
-    const size_t /*materialID*/) const
+    const PropertyMap& /*properties*/) const
 {
     throw std::runtime_error("Load morphology from memory not supported");
 }
 
 ModelDescriptorPtr MorphologyLoader::importFromFile(
     const std::string& fileName, const LoaderProgress& callback,
-    const PropertyMap& inProperties, const size_t index,
-    const size_t defaultMaterialId BRAYNS_UNUSED) const
+    const PropertyMap& inProperties) const
 {
     // Fill property map since the actual property types are known now.
     PropertyMap properties = _defaults;
@@ -654,8 +652,9 @@ ModelDescriptorPtr MorphologyLoader::importFromFile(
     brain::neuron::Morphology morphology{servus::URI(fileName)};
 
     auto impl = MorphologyLoader::Impl(params);
-    impl.processMorphology(morphology, index).addTo(*model);
 
+    const size_t index = 0;
+    impl.processMorphology(morphology, index).addTo(*model);
     _createMaterials(*model, params.colorScheme, index);
 
     callback.updateProgress("Loading " + modelName + " ...", 1.f);

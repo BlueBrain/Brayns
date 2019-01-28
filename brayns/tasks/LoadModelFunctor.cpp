@@ -68,15 +68,14 @@ ModelDescriptorPtr LoadModelFunctor::_performLoad(
 ModelDescriptorPtr LoadModelFunctor::_loadData(Blob&& blob,
                                                const ModelParams& params)
 {
-    return _engine.getScene().loadModel(std::move(blob), NO_MATERIAL, params,
+    return _engine.getScene().loadModel(std::move(blob), params,
                                         {_getProgressFunc()});
 }
 
 ModelDescriptorPtr LoadModelFunctor::_loadData(const std::string& path,
                                                const ModelParams& params)
 {
-    return _engine.getScene().loadModel(path, NO_MATERIAL, params,
-                                        {_getProgressFunc()});
+    return _engine.getScene().loadModel(path, params, {_getProgressFunc()});
 }
 
 void LoadModelFunctor::_updateProgress(const std::string& message,

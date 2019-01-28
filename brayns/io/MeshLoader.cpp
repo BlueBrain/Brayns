@@ -31,6 +31,7 @@
 #include <fstream>
 
 #include <brayns/common/utils/utils.h>
+#include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
@@ -58,7 +59,6 @@ std::vector<std::string> getSupportedTypes()
 
 using Property = brayns::Property;
 const auto PROP_GEOMETRY_QUALITY = "geometryQuality";
-const auto PROP_COLOR_SCHEME = "colorScheme";
 
 const auto LOADER_NAME = "mesh";
 
@@ -102,10 +102,6 @@ MeshLoader::MeshLoader(Scene& scene)
 MeshLoader::MeshLoader(Scene& scene, const GeometryParameters& params)
     : Loader(scene)
 {
-    _defaults.setProperty({PROP_COLOR_SCHEME,
-                           enumToString(params.getColorScheme()),
-                           brayns::enumNames<brayns::ColorScheme>(),
-                           {"Color scheme"}});
     _defaults.setProperty({PROP_GEOMETRY_QUALITY,
                            enumToString(params.getGeometryQuality()),
                            enumNames<brayns::GeometryQuality>(),
@@ -121,8 +117,7 @@ bool MeshLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
 
 ModelDescriptorPtr MeshLoader::importFromFile(
     const std::string& fileName, const LoaderProgress& callback,
-    const PropertyMap& inProperties, const size_t index,
-    const size_t defaultMaterialId) const
+    const PropertyMap& inProperties) const
 {
     // Fill property map since the actual property types are known now.
     PropertyMap properties = _defaults;
@@ -131,14 +126,9 @@ ModelDescriptorPtr MeshLoader::importFromFile(
     const auto geometryQuality =
         stringToEnum<GeometryQuality>(properties.getProperty<std::string>(
             PROP_GEOMETRY_QUALITY, enumToString(GeometryQuality::high)));
-    const auto colorScheme = stringToEnum<ColorScheme>(
-        properties.getProperty<std::string>(PROP_COLOR_SCHEME,
-                                            enumToString(ColorScheme::none)));
-    const size_t materialId =
-        colorScheme == ColorScheme::by_id ? index : defaultMaterialId;
 
     auto model = _scene.createModel();
-    importMesh(fileName, callback, *model, {}, materialId, geometryQuality);
+    importMesh(fileName, callback, *model, {}, 0, geometryQuality);
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
@@ -151,8 +141,7 @@ ModelDescriptorPtr MeshLoader::importFromFile(
 
 ModelDescriptorPtr MeshLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback,
-    const PropertyMap& propertiesTmp, const size_t index,
-    const size_t defaultMaterialId) const
+    const PropertyMap& propertiesTmp) const
 {
     // Fill property map since the actual property types are known now.
     PropertyMap properties = getProperties();
@@ -161,9 +150,6 @@ ModelDescriptorPtr MeshLoader::importFromBlob(
     const auto geometryQuality =
         stringToEnum<GeometryQuality>(properties.getProperty<std::string>(
             PROP_GEOMETRY_QUALITY, enumToString(GeometryQuality::high)));
-    const auto colorScheme = stringToEnum<ColorScheme>(
-        properties.getProperty<std::string>(PROP_COLOR_SCHEME,
-                                            enumToString(ColorScheme::none)));
 
     Assimp::Importer importer;
     importer.SetProgressHandler(new ProgressWatcher(callback, blob.name));
@@ -184,9 +170,7 @@ ModelDescriptorPtr MeshLoader::importFromBlob(
 
     auto model = _scene.createModel();
 
-    const size_t materialId =
-        colorScheme == ColorScheme::by_id ? index : defaultMaterialId;
-    _postLoad(aiScene, *model, {}, materialId, "", callback);
+    _postLoad(aiScene, *model, {}, 0, "", callback);
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());

@@ -377,7 +377,7 @@ private:
 
                 // No properties passed, use command line defaults.
                 ModelParams params(path, path, {});
-                scene.loadModel(path, NO_MATERIAL, params, {progress});
+                scene.loadModel(path, params, {progress});
             }
         }
 

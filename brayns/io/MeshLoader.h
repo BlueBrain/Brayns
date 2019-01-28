@@ -20,14 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/geometry/TrianglesMesh.h>
 #include <brayns/common/loader/Loader.h>
-#include <brayns/common/material/Texture2D.h>
-#include <brayns/common/types.h>
-#include <brayns/engine/Material.h>
 #include <brayns/parameters/GeometryParameters.h>
-
-#include <string>
 
 class aiScene;
 
@@ -51,13 +45,11 @@ public:
 
     ModelDescriptorPtr importFromFile(
         const std::string& fileName, const LoaderProgress& callback,
-        const PropertyMap& properties, const size_t index = 0,
-        const size_t defaultMaterial = NO_MATERIAL) const final;
+        const PropertyMap& properties) const final;
 
     ModelDescriptorPtr importFromBlob(
         Blob&& blob, const LoaderProgress& callback,
-        const PropertyMap& properties, const size_t index = 0,
-        const size_t defaultMaterial = NO_MATERIAL) const final;
+        const PropertyMap& properties) const final;
 
     void importMesh(const std::string& fileName, const LoaderProgress& callback,
                     Model& model, const Matrix4f& transformation,
