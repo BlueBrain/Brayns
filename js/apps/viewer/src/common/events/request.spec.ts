@@ -4,11 +4,11 @@ import {
     dispatchRequest,
     dispatchRequestCancel,
     onRequestCancel,
-    onRequestComplete,
+    onRequestDone,
     onRequestProgress,
     onRequestStart,
     REQUEST_CANCEL,
-    REQUEST_COMPLETE,
+    REQUEST_DONE,
     REQUEST_PROGRESS,
     REQUEST_START
 } from './request';
@@ -73,19 +73,26 @@ describe('dispatchRequest()', () => {
 
         source.complete();
 
-        expect(mockDispatchEvent).toHaveBeenCalledWith(REQUEST_COMPLETE, request);
+        expect(mockDispatchEvent).toHaveBeenCalledWith(REQUEST_DONE, {
+            request,
+            error: false
+        });
     });
 
     it('dispatches a request complete event with the request when the request throws', () => {
         const source = new Subject();
         const request = new Request('test');
+        const error = new Error('Oops :(');
 
         const task = createTask(source, request);
         dispatchRequest(task);
 
-        source.error({});
+        source.error(error);
 
-        expect(mockDispatchEvent).toHaveBeenCalledWith(REQUEST_COMPLETE, request);
+        expect(mockDispatchEvent).toHaveBeenCalledWith(REQUEST_DONE, {
+            request,
+            error
+        });
     });
 });
 
@@ -155,7 +162,7 @@ describe('onRequestProgress()', () => {
     });
 });
 
-describe('onRequestComplete()', () => {
+describe('onRequestDone()', () => {
     beforeEach(() => {
         mockAddEventObserver.mockClear();
     });
@@ -163,7 +170,7 @@ describe('onRequestComplete()', () => {
     it('returns an Observable', () => {
         const subject = new Subject();
         mockAddEventObserver.mockReturnValueOnce(subject);
-        expect(onRequestComplete()).toBeInstanceOf(Observable);
+        expect(onRequestDone()).toBeInstanceOf(Observable);
     });
 
     it('should emit request complete', done => {
@@ -172,9 +179,9 @@ describe('onRequestComplete()', () => {
 
         const data = {ping: true};
 
-        onRequestComplete()
+        onRequestDone()
             .subscribe(request => {
-                expect(mockAddEventObserver).toHaveBeenCalledWith(REQUEST_COMPLETE);
+                expect(mockAddEventObserver).toHaveBeenCalledWith(REQUEST_DONE);
                 expect(request).toEqual(data);
                 done();
             });

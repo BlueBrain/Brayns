@@ -1,8 +1,10 @@
 import React, {PureComponent} from 'react';
 
 import {
+    GET_ANIMATION_PARAMS,
     LOAD_MODEL,
     PathParams,
+    SET_ANIMATION_PARAMS,
     SNAPSHOT,
     SnapshotParams,
     UPLOAD_MODEL,
@@ -11,7 +13,12 @@ import {
 import classNames from 'classnames';
 import {Request} from 'rockets-client';
 import {animationFrameScheduler, Subscription} from 'rxjs';
-import {observeOn} from 'rxjs/operators';
+import {
+    distinctUntilChanged,
+    map,
+    mergeMap,
+    observeOn
+} from 'rxjs/operators';
 
 import Avatar from '@material-ui/core/Avatar';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -35,17 +42,29 @@ import CancelIcon from '@material-ui/icons/CancelRounded';
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import ErrorIcon from '@material-ui/icons/ErrorOutline';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import WarningIcon from '@material-ui/icons/WarningRounded';
 
+import brayns, {onReady} from '../../common/client';
 import {
     dispatchRequestCancel,
-    onRequestComplete,
+    onRequestDone,
     onRequestProgress,
     onRequestStart,
-    ProgressEvent
+    ProgressEvent,
+    RequestDoneEvent
 } from '../../common/events';
+import {hasAnimation} from '../animation-player/utils';
+
+
+const REQUEST_PENDING = 0;
+const REQUEST_IN_PROGRESS = 1;
+const REQUEST_DONE = 2;
+const REQUEST_IS_CANCELING = 3;
+const REQUEST_CANCELED = 4;
+const REQUEST_ERRORED = 5;
 
 
 const styles = (theme: Theme) => createStyles({
@@ -54,6 +73,9 @@ const styles = (theme: Theme) => createStyles({
         bottom: theme.spacing.unit * 2,
         right: theme.spacing.unit * 2,
         width: 360
+    },
+    rootShift: {
+        marginBottom: 94
     },
     header: {
         position: 'relative',
@@ -107,6 +129,11 @@ const styles = (theme: Theme) => createStyles({
     requestAction: {
         padding: '10px 12px'
     },
+    requestName: {
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden'
+    },
     progressContainer: {
         position: 'relative'
     },
@@ -130,8 +157,8 @@ const style = withStyles(styles);
 class Notifications extends PureComponent<Props, State> {
     state: State = {
         requests: [],
-        activeRequests: [],
-        doneRequests: [],
+        progressEvents: [],
+        requestDoneEvents: [],
         canceledRequests: [],
         closeNotifications: true
     };
@@ -148,8 +175,8 @@ class Notifications extends PureComponent<Props, State> {
     clearRequests = () => {
         this.setState({
             requests: [],
-            activeRequests: [],
-            doneRequests: [],
+            progressEvents: [],
+            requestDoneEvents: [],
             canceledRequests: []
         });
     }
@@ -174,6 +201,18 @@ class Notifications extends PureComponent<Props, State> {
 
     componentDidMount() {
         this.subs.push(...[
+            brayns.observe(SET_ANIMATION_PARAMS).pipe(
+                map(hasAnimation),
+                distinctUntilChanged())
+                .subscribe(hasAnimation => {
+                    this.setState({hasAnimation});
+                }),
+            onReady().pipe(
+                mergeMap(() => brayns.request(GET_ANIMATION_PARAMS)),
+                map(hasAnimation))
+                .subscribe(hasAnimation => {
+                    this.setState({hasAnimation});
+                }),
             onRequestStart()
                 .subscribe(request => {
                     this.setState(state => {
@@ -190,7 +229,7 @@ class Notifications extends PureComponent<Props, State> {
                 .pipe(observeOn(animationFrameScheduler))
                 .subscribe(progress => {
                     this.setState(state => {
-                        const active = [...state.activeRequests];
+                        const active = [...state.progressEvents];
 
                         const index = active.findIndex(p => p.id === progress.id);
                         if (index !== -1) {
@@ -199,14 +238,23 @@ class Notifications extends PureComponent<Props, State> {
                             active.unshift(progress);
                         }
 
-                        return {activeRequests: active};
+                        return {progressEvents: active};
                     });
                 }),
-            onRequestComplete()
-                .subscribe(request => {
+            onRequestDone()
+                .subscribe(evt => {
                     this.setState(state => {
-                        const done = pushDone(request, state.doneRequests);
-                        return {doneRequests: done};
+                        const copy = [...state.requestDoneEvents];
+                        const index = copy.findIndex(e => e.request.id === evt.request.id);
+                        if (index !== -1) {
+                            return null;
+                        }
+                        return {
+                            requestDoneEvents: [
+                                ...copy,
+                                evt
+                            ]
+                        };
                     });
                 })
         ]);
@@ -222,29 +270,23 @@ class Notifications extends PureComponent<Props, State> {
         const {classes} = this.props;
         const {
             requests,
-            activeRequests,
+            progressEvents,
             canceledRequests,
-            doneRequests,
+            requestDoneEvents,
             expandNotifications,
-            closeNotifications
+            closeNotifications,
+            hasAnimation
         } = this.state;
 
+        const notificationsHeaderText = getNotificationsCount(progressEvents.length, requestDoneEvents.length);
         const notifications = renderNotifications({
             requests,
-            activeRequests,
-            doneRequests,
+            progressEvents,
+            requestDoneEvents,
             canceledRequests,
             classes,
             cancelRequest: this.cancelRequest
         });
-
-        const activeCount = activeRequests.length;
-        const doneCount = doneRequests.length;
-        const pendingCount = activeCount - doneCount;
-
-        const notificationsHeaderText = pendingCount > 0
-            ? `${pendingCount} pending ${pluralizeReqStr(pendingCount)}, ${doneCount} complete`
-            : `${doneCount} ${pluralizeReqStr(doneCount)} complete`;
 
         return (
             <Fade
@@ -252,7 +294,7 @@ class Notifications extends PureComponent<Props, State> {
                 onExited={this.clearRequests}
                 unmountOnExit
             >
-                <div className={classes.root}>
+                <div className={classNames(classes.root, {[classes.rootShift]: hasAnimation})}>
                     <Paper>
                         <div className={classNames(classes.header, {[classes.headerShift]: !expandNotifications})}>
                             <Typography className={classes.headerText} variant="subtitle1">
@@ -290,72 +332,93 @@ export default style(Notifications);
 
 
 function renderNotifications({
-    requests, activeRequests, doneRequests, canceledRequests,
+    requests, progressEvents, requestDoneEvents, canceledRequests,
     classes,
     cancelRequest
 }: {
     requests: AnyRequest[];
-    activeRequests: ProgressEvent[];
-    doneRequests: AnyRequest[];
+    progressEvents: ProgressEvent[];
+    requestDoneEvents: RequestDoneEvent[];
     canceledRequests: AnyRequest[];
     classes: Record<any, string>;
     cancelRequest(request: AnyRequest): () => void;
 }) {
     const items = requests.map(request => {
         const key = `${request.id}`;
-        const name = getName(request);
-        const requestFinder = createRequestFinder(request);
+        const name = getRequestName(request);
+        const icon = getRequestTypeIcon(request);
 
-        const icon = getIcon(request);
-        const canceled = !!canceledRequests.find(requestFinder);
-        const done = !!doneRequests.find(requestFinder);
-
-        const progress = activeRequests.find(requestFinder);
-        const amount = getProgressAmount(progress);
-        const message = getMessage(progress, done, canceled);
+        const progressEvt = progressEvents.find(evt => evt.id === request.id);
+        const requestDoneEvt = requestDoneEvents.find(evt => evt.request.id === request.id);
+        const canceledRequest = canceledRequests.find(evt => evt.id === request.id);
+        const state = getRequestState(progressEvt, canceledRequest, requestDoneEvt);
+        const message = getRequestStateMessage(state, progressEvt);
 
         let action;
-        if (done && canceled) {
-            action = <WarningIcon color="error" />;
-        } else if (done && !canceled) {
-            action = <CheckIcon className={classes.successColor} />;
-        } else if (!done && canceled)  {
-            action = (
-                <CircularProgress
-                    variant="indeterminate"
-                    color="secondary"
-                    thickness={4}
-                    size={24}
-                />
-            );
-        } else {
-            action = (
-                <div className={classes.progressContainer}>
-                    <IconButton
-                        color="inherit"
-                        onClick={cancelRequest(request)}
-                        disabled={canceled}
-                        aria-label="Cancel request"
-                    >
-                        <CancelIcon />
-                    </IconButton>
+        const requestActionCls = state !== REQUEST_IN_PROGRESS ? classes.requestAction : '';
+        switch (state) {
+            case REQUEST_PENDING:
+                action = (
                     <CircularProgress
-                        className={classes.progress}
-                        variant="static"
-                        color="inherit"
-                        value={amount}
+                        variant="indeterminate"
+                        color="primary"
                         thickness={4}
                         size={24}
                     />
-                </div>
-            );
+                );
+                break;
+            case REQUEST_IN_PROGRESS:
+                const amount = getProgressAmount(progressEvt);
+                action = (
+                    <div className={classes.progressContainer}>
+                        <IconButton
+                            color="inherit"
+                            onClick={cancelRequest(request)}
+                            aria-label="Cancel request"
+                        >
+                            <CancelIcon />
+                        </IconButton>
+                        <CircularProgress
+                            className={classes.progress}
+                            variant="static"
+                            color="inherit"
+                            value={amount}
+                            thickness={4}
+                            size={24}
+                        />
+                    </div>
+                );
+                break;
+            case REQUEST_IS_CANCELING:
+                action = (
+                    <CircularProgress
+                        variant="indeterminate"
+                        color="secondary"
+                        thickness={4}
+                        size={24}
+                    />
+                );
+                break;
+            case REQUEST_CANCELED:
+                action = <WarningIcon color="disabled" />;
+                break;
+            case REQUEST_ERRORED:
+                action = <ErrorIcon color="error" />;
+                break;
+            case REQUEST_DONE:
+                action = <CheckIcon className={classes.successColor} />;
+                break;
         }
 
         return (
             <ListItem key={key}>
                 <Avatar>{icon}</Avatar>
-                <ListItemText primary={name} secondary={message}/>
-                <ListItemSecondaryAction className={classNames((done || canceled) && classes.requestAction)}>
+                <ListItemText
+                    primary={name}
+                    secondary={message}
+                    classes={{primary: classes.requestName}}
+                />
+                <ListItemSecondaryAction className={requestActionCls}>
                     {action}
                 </ListItemSecondaryAction>
             </ListItem>
@@ -365,19 +428,17 @@ function renderNotifications({
     return items;
 }
 
-function pushDone<T extends {id: string | number}>(request: AnyRequest, items: T[]) {
-    const index = items.findIndex(item => item.id === request.id);
-    if (index !== -1) {
-        return [...items];
-    }
-    return [
-        ...items,
-        request
-    ];
-}
+function getNotificationsCount(progressEventsCount: number, requestDoneEventsCount: number) {
+    const pendingCount = progressEventsCount - requestDoneEventsCount;
+    const hasPending = pendingCount > 0;
+    const requestsStr = hasPending ? '' : ` ${pluralizeReqStr(requestDoneEventsCount)}`;
+    const requestsDoneStr = `${requestDoneEventsCount}${requestsStr} complete`;
 
-function createRequestFinder(request: AnyRequest) {
-    return <T extends {id: string | number}>(item: T) => item.id === request.id;
+    if (hasPending) {
+        return `${pendingCount} pending ${pluralizeReqStr(pendingCount)}${requestDoneEventsCount > 0 ? `, ${requestsDoneStr}` : ''}`;
+    }
+
+    return requestsDoneStr;
 }
 
 function getProgressAmount(progress?: ProgressEvent) {
@@ -391,38 +452,65 @@ function getProgressAmount(progress?: ProgressEvent) {
     return 0;
 }
 
-function getMessage(progress?: ProgressEvent, done?: boolean, canceled?: boolean) {
-    if (canceled && !done) {
-        return 'Canceling ...';
+function getRequestState(progress?: ProgressEvent, canceledRequest?: AnyRequest, requestDoneEvt?: RequestDoneEvent) {
+    const isDone = !!requestDoneEvt;
+    const wasCanceled = !!canceledRequest;
+    const isCanceling = wasCanceled && !isDone;
+    const hasError = requestDoneEvt && !!requestDoneEvt.error;
+
+    if (isCanceling) {
+        return REQUEST_IS_CANCELING;
     }
 
     if (progress && progress.amount < 1) {
-        return progress.operation;
+        return REQUEST_IN_PROGRESS;
     }
 
-    if (done && !canceled) {
-        return 'Done';
+    if (wasCanceled) {
+        return REQUEST_CANCELED;
     }
 
-    if (done && canceled) {
-        return 'Canceled';
+    if (hasError) {
+        return REQUEST_ERRORED;
     }
 
-    return 'Pending ...';
+    if (isDone) {
+        return REQUEST_DONE;
+    }
+
+    return REQUEST_PENDING;
 }
 
-function getName(request: AnyRequest) {
+function getRequestStateMessage(state: number, progress?: ProgressEvent) {
+    switch (state) {
+        case REQUEST_PENDING:
+            return 'Pending ...';
+        case REQUEST_IN_PROGRESS:
+            return progress!.operation;
+        case REQUEST_IS_CANCELING:
+            return 'Canceling ...';
+        case REQUEST_CANCELED:
+            return 'Canceled';
+        case REQUEST_ERRORED:
+            return 'Failed';
+        case REQUEST_DONE:
+        default:
+            return 'Done';
+    }
+}
+
+function getRequestName(request: AnyRequest) {
     return isSnapshot(request)
         ? request.params!.name
-        : isLoad(request)
+        : isLoadFromPath(request)
             ? request.params!.path
             : isUpload(request)
                 ? `${request.params!.name}.${request.params!.type}`
                 : '';
 }
 
-function getIcon(request: AnyRequest) {
-    if (isUpload(request) || isLoad(request)) {
+function getRequestTypeIcon(request: AnyRequest) {
+    if (isUpload(request) || isLoadFromPath(request)) {
         return <CloudUploadIcon />;
     } else if (isSnapshot(request)) {
         return <PhotoCameraIcon />;
@@ -438,7 +526,7 @@ function isUpload(request: AnyRequest): request is Request<UploadParams> {
     return request.method === UPLOAD_MODEL;
 }
 
-function isLoad(request: AnyRequest): request is Request<PathParams> {
+function isLoadFromPath(request: AnyRequest): request is Request<PathParams> {
     return request.method === LOAD_MODEL;
 }
 
@@ -453,11 +541,12 @@ interface Props extends WithStyles<typeof styles> {
 
 interface State {
     requests: AnyRequest[];
-    activeRequests: ProgressEvent[];
-    doneRequests: AnyRequest[];
+    progressEvents: ProgressEvent[];
+    requestDoneEvents: RequestDoneEvent[];
     canceledRequests: AnyRequest[];
     expandNotifications?: boolean;
     closeNotifications?: boolean;
+    hasAnimation?: boolean;
 }
 
 type AnyRequest = Request<SnapshotParams
