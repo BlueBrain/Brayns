@@ -32,36 +32,36 @@ Texture2DPtr ImageManager::importTextureFromFile(
     if (auto temporary = FreeImage_Load(FreeImage_GetFileType(filename.c_str()),
                                         filename.c_str()))
     {
-        image.reset(FreeImage_IsTransparent(temporary)
-                        ? FreeImage_ConvertTo32Bits(temporary)
-                        : FreeImage_ConvertTo24Bits(temporary));
+        image.reset(FreeImage_ConvertTo32Bits(temporary));
         FreeImage_Unload(temporary);
     }
     else
         return nullptr;
 
-    FreeImage_FlipVertical(image.get());
 #if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_BGR
     freeimage::SwapRedBlue32(image.get());
 #endif
 
-    Texture2DPtr texture(new Texture2D);
-    texture->setFilename(filename);
-    texture->setWidth(FreeImage_GetWidth(image.get()));
-    texture->setHeight(FreeImage_GetHeight(image.get()));
-    texture->setNbChannels(FreeImage_IsTransparent(image.get()) ? 4 : 3);
-    texture->setDepth(1);
-    texture->setRawData((unsigned char*)FreeImage_GetBits(image.get()),
-                        texture->getWidth() * texture->getHeight() *
-                            texture->getNbChannels());
+    const auto width = FreeImage_GetWidth(image.get());
+    const auto height = FreeImage_GetHeight(image.get());
+    const auto pitch = FreeImage_GetPitch(image.get());
+    const auto channels = 4;
 
-    BRAYNS_DEBUG << filename << ": " << texture->getWidth() << "x"
-                 << texture->getHeight() << "x" << texture->getNbChannels()
-                 << "x" << texture->getDepth() << " added to the texture cache"
-                 << std::endl;
+    std::vector<unsigned char> rawData(height * pitch);
+    FreeImage_ConvertToRawBits(rawData.data(), image.get(), pitch, channels * 8,
+                               FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK,
+                               FI_RGBA_BLUE_MASK, TRUE);
+
+    auto texture = std::make_shared<Texture2D>();
+    texture->setFilename(filename);
+    texture->setWidth(width);
+    texture->setHeight(height);
+    texture->setNbChannels(channels);
+    texture->setDepth(1);
+    texture->setRawData(std::move(rawData));
     return texture;
 #else
-    BRAYNS_DEBUG << "FreeImage is required to load images from file"
+    BRAYNS_ERROR << "FreeImage is required to load images from file"
                  << std::endl;
     return nullptr;
 #endif
