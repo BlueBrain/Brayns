@@ -35,4 +35,9 @@ void Texture2D::setRawData(unsigned char* data, size_t size)
     _rawData.clear();
     _rawData.assign(data, data + size);
 }
+
+void Texture2D::setRawData(std::vector<unsigned char>&& rawData)
+{
+    _rawData = std::move(rawData);
+}
 }
