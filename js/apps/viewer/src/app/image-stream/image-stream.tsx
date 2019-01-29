@@ -52,7 +52,6 @@ export class ImageStream extends PureComponent<Props> {
     private canvasRef: RefObject<HTMLCanvasElement> = createRef();
 
     // We use this image to decode the jpeg from Blob streams
-    private image = new Image();
     private imageRenderFps = new BehaviorSubject(0);
 
     private dataUri = new Subject<string>();
@@ -119,10 +118,28 @@ export class ImageStream extends PureComponent<Props> {
             }),
             // Draw new image
             brayns.observe(IMAGE_JPEG)
-                .pipe(observeOn(animationFrameScheduler))
-                .subscribe(image => {
-                    const url = URL.createObjectURL(image);
-                    this.image.src = url;
+                .pipe(observeOn(animationFrameScheduler), mergeMap(blobToImg))
+                .subscribe(img => {
+                    const width = img.naturalWidth;
+                    const height = img.naturalHeight;
+                    const widthScaleFactor = this.canvas!.width / width;
+                    const heightScaleFactor = this.canvas!.height / height;
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    // Draw image on the offscreen canvas
+                    ctx.drawImage(img, 0, 0);
+
+                    // Schedule uri for revoke
+                    this.dataUri.next(img.src);
+
+                    if (this.ctx) {
+                        this.ctx.drawImage(canvas, 0, 0, widthScaleFactor * width, heightScaleFactor * height);
+                    }
+
+                    // Calc the fps of decode + paint of image and emit
+                    const fps = getRenderFps();
+                    this.imageRenderFps.next(fps);
                 }),
             // Update the canvas (the offscreen one as well),
             // image size (on the server as well) and renderer viewport.
@@ -149,34 +166,6 @@ export class ImageStream extends PureComponent<Props> {
                     }
                 })
         ]);
-
-        // This callback will be fired whenever the image source is changed and loaded
-        // See https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Attribute/image.onload for details.
-        this.image.onload = () => {
-            const width = this.image.naturalWidth;
-            const height = this.image.naturalHeight;
-            const widthScaleFactor = this.canvas!.width / width;
-            const heightScaleFactor = this.canvas!.height / height;
-            canvas.width = width;
-            canvas.height = height;
-
-            // Draw image on the offscreen canvas
-            ctx.drawImage(this.image, 0, 0);
-
-            // Schedule uri for revoke
-            this.dataUri.next(this.image.src);
-
-            // Draw the image on the next frame
-            requestAnimationFrame(() => {
-                if (this.ctx) {
-                    this.ctx.drawImage(canvas, 0, 0, widthScaleFactor * width, heightScaleFactor * height);
-                }
-
-                // Calc the fps of decode + paint of image and emit
-                const fps = getRenderFps();
-                this.imageRenderFps.next(fps);
-            });
-        };
     }
 
     componentWillUnmount() {
@@ -207,7 +196,6 @@ function toInt(viewport: number[]) {
 }
 
 // TODO: Add tests
-// TODO: Move to @brayns/utils
 function smoothFpsFn() {
     let lastPaintTime: number;
     const smoothingFactor = 0.9;
@@ -233,6 +221,21 @@ function smoothFpsFn() {
 
         return smoothFps;
     };
+}
+
+function blobToImg(blob: Blob) {
+    const url = URL.createObjectURL(blob);
+    const img: any = new Image();
+    return new Promise<HTMLImageElement>(resolve => {
+        img.src = url;
+        // https://medium.com/dailyjs/image-loading-with-image-decode-b03652e7d2d2
+        if (img.decode) {
+            img.decode()
+                .then(() => resolve(img));
+        } else {
+            img.onload = () => resolve(img);
+        }
+    });
 }
 
 
