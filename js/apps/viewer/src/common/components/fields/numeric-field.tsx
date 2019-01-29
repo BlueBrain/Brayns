@@ -28,6 +28,13 @@ const styles = (theme: Theme) => createStyles({
         flexDirection: 'column',
         minWidth: 0
     },
+    slider: {
+        // TODO: Remove when https://github.com/mui-org/material-ui/issues/13455 is fixed
+        padding: 24,
+        margin: -24,
+        overflow: 'hidden',
+        boxSizing: 'content-box'
+    },
     marginNormal: {
         marginTop: theme.spacing.unit * 2,
         marginBottom: theme.spacing.unit
@@ -123,6 +130,7 @@ class NumericField extends PureComponent<Props, State> {
         const showSlider = isNumber(min) && isNumber(max) && !noSlider;
         const slider = showSlider ? (
             <Slider
+                className={classes.slider}
                 value={getValueForSlider(value, this.props.value)}
                 onChange={this.updateFromSlider}
                 min={min}
