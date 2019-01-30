@@ -128,7 +128,7 @@ ModelDescriptorPtr MeshLoader::importFromFile(
             PROP_GEOMETRY_QUALITY, enumToString(GeometryQuality::high)));
 
     auto model = _scene.createModel();
-    importMesh(fileName, callback, *model, {}, 0, geometryQuality);
+    importMesh(fileName, callback, *model, {}, NO_MATERIAL, geometryQuality);
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
@@ -170,7 +170,7 @@ ModelDescriptorPtr MeshLoader::importFromBlob(
 
     auto model = _scene.createModel();
 
-    _postLoad(aiScene, *model, {}, 0, "", callback);
+    _postLoad(aiScene, *model, {}, NO_MATERIAL, "", callback);
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
