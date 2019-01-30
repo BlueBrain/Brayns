@@ -112,7 +112,7 @@ else()
   common_find_package_disable(ospray)
 endif()
 
-option(BRAYNS_OPTIX_ENABLED "Activate OptiX module" OFF)
+option(BRAYNS_OPTIX_ENABLED "Activate OptiX rendering engine" OFF)
 if(BRAYNS_OPTIX_ENABLED)
   add_subdirectory(engines/optix)
 endif()
