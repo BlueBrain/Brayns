@@ -88,14 +88,7 @@ void OptiXModel::commitGeometry()
             _commitMeshes(meshes.first);
 
     updateBounds();
-
-    _spheresDirty = false;
-    _cylindersDirty = false;
-    _conesDirty = false;
-    _trianglesMeshesDirty = false;
-    _streamlinesDirty = false;
-    _sdfGeometriesDirty = false;
-    _volumesDirty = false;
+    markGeometriesClean();
 
     // handled by the scene
     _instancesDirty = false;

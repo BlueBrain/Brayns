@@ -511,15 +511,8 @@ void OSPRayModel::commitGeometry()
         _commitSDFGeometries();
 
     updateBounds();
+    markGeometriesClean();
     _setBVHFlags();
-
-    _spheresDirty = false;
-    _cylindersDirty = false;
-    _conesDirty = false;
-    _trianglesMeshesDirty = false;
-    _streamlinesDirty = false;
-    _sdfGeometriesDirty = false;
-    _volumesDirty = false;
 
     // handled by the scene
     _instancesDirty = false;

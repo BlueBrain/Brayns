@@ -51,6 +51,8 @@ public:
     /** @copydoc Scene::createModel */
     ModelPtr createModel() const final;
 
+    /** @copydoc Scene::supportsConcurrentSceneUpdates. */
+    bool supportsConcurrentSceneUpdates() const final { return false; }
 private:
     optix::Buffer _lightBuffer{nullptr};
     std::vector<BasicLight> _optixLights;

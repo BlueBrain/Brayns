@@ -508,6 +508,17 @@ void Model::updateBounds()
     _bounds.merge(_volumesBounds);
 }
 
+void Model::markGeometriesClean()
+{
+    _spheresDirty = false;
+    _cylindersDirty = false;
+    _conesDirty = false;
+    _trianglesMeshesDirty = false;
+    _streamlinesDirty = false;
+    _sdfGeometriesDirty = false;
+    _volumesDirty = false;
+}
+
 MaterialPtr Model::createMaterial(const size_t materialId,
                                   const std::string& name,
                                   const PropertyMap& properties)

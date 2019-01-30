@@ -151,7 +151,12 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
 
     model.setBVHFlags(defaultBVHFlags);
     model.buildBoundingBox();
-    model.updateBounds();
+
+    // Since models can be added concurrently we check if that is supported
+    if (supportsConcurrentSceneUpdates())
+        model.commitGeometry();
+    else
+        markModified();
 
     {
         std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
@@ -164,8 +169,6 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
                 {true, true, modelDescriptor->getTransformation()});
     }
 
-    _computeBounds();
-    markModified();
     return modelDescriptor->getModelID();
 }
 

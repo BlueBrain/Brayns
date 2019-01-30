@@ -48,6 +48,8 @@ public:
     /** @copydoc Scene::commitLights */
     bool commitLights() final;
 
+    /** @copydoc Scene::supportsConcurrentSceneUpdates. */
+    bool supportsConcurrentSceneUpdates() const final { return true; }
     ModelPtr createModel() const final;
 
     OSPModel getModel() { return _rootModel; }
