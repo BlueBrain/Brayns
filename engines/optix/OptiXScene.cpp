@@ -118,6 +118,16 @@ void OptiXScene::commit()
     if (!isModified())
         return;
 
+    // Remove all models marked for removal
+    for (auto& model : _modelDescriptors)
+        if (model->isMarkedForRemoval())
+            model->callOnRemoved();
+
+    _modelDescriptors.erase(
+        std::remove_if(_modelDescriptors.begin(), _modelDescriptors.end(),
+                       [](const auto& m) { return m->isMarkedForRemoval(); }),
+        _modelDescriptors.end());
+
     auto context = OptiXContext::get().getOptixContext();
 
     if (hasEnvironmentMap())

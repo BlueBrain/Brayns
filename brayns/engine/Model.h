@@ -185,7 +185,8 @@ public:
         if (_onRemovedCallback)
             _onRemovedCallback(*this);
     }
-
+    void markForRemoval() { _markedForRemoval = true; }
+    bool isMarkedForRemoval() const { return _markedForRemoval; }
 private:
     size_t _nextInstanceID{0};
     Boxd _bounds;
@@ -194,6 +195,7 @@ private:
     ModelInstances _instances;
     PropertyMap _properties;
     RemovedCallback _onRemovedCallback;
+    bool _markedForRemoval = false;
 
     SERIALIZATION_FRIEND(ModelDescriptor)
 };

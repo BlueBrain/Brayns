@@ -175,12 +175,27 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
 bool Scene::removeModel(const size_t id)
 {
     std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-    auto model = _remove(_modelDescriptors, id, &ModelDescriptor::getModelID);
-    if (model)
+
+    if (supportsConcurrentSceneUpdates())
     {
-        model->callOnRemoved();
-        return true;
+        auto model =
+            _remove(_modelDescriptors, id, &ModelDescriptor::getModelID);
+        if (model)
+        {
+            model->callOnRemoved();
+            return true;
+        }
     }
+    else
+    {
+        auto model = _find(_modelDescriptors, id, &ModelDescriptor::getModelID);
+        if (model)
+        {
+            model->markForRemoval();
+            return true;
+        }
+    }
+
     return false;
 }
 
