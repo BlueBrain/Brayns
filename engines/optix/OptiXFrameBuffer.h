@@ -39,7 +39,6 @@ public:
                      FrameBufferFormat frameBufferFormat);
     ~OptiXFrameBuffer();
 
-    void clear() final;
     void resize(const Vector2ui& size) final;
     void map() final;
     void unmap() final;
@@ -61,7 +60,6 @@ private:
     optix::Buffer _accumBuffer{nullptr};
     uint8_t* _colorBuffer{nullptr};
     float* _depthBuffer{nullptr};
-    uint16_t _accumulationFrame{0};
     void* _imageData{nullptr};
 
     // protect map/unmap

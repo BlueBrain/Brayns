@@ -105,11 +105,6 @@ void OptiXFrameBuffer::_recreate()
     BRAYNS_DEBUG << "Frame buffer created" << std::endl;
 }
 
-void OptiXFrameBuffer::clear()
-{
-    _accumulationFrame = 0u;
-}
-
 void OptiXFrameBuffer::map()
 {
     _mapMutex.lock();
@@ -121,10 +116,8 @@ void OptiXFrameBuffer::_mapUnsafe()
     rtBufferMap(_frameBuffer->get(), &_imageData);
 
     auto context = OptiXContext::get().getOptixContext();
-    if (_accumulation)
-        context["frame"]->setUint(_accumulationFrame);
-    else
-        context["frame"]->setUint(0u);
+    const auto frame = _accumulation ? static_cast<size_t>(_accumFrames) : 0;
+    context["frame"]->setUint(frame);
 
     switch (_frameBufferFormat)
     {
@@ -137,7 +130,7 @@ void OptiXFrameBuffer::_mapUnsafe()
     default:
         BRAYNS_ERROR << "Unsupported format" << std::endl;
     }
-    ++_accumulationFrame;
+    ++_accumFrames;
 }
 
 void OptiXFrameBuffer::unmap()
