@@ -44,7 +44,6 @@ public:
     void setCamera(CameraPtr camera) final;
 
 private:
-    uint64_t _frame;
     std::string _currentRenderer;
 };
 } // namespace brayns

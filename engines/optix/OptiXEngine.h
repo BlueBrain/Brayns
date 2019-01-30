@@ -56,8 +56,5 @@ private:
     void _initializeContext();
     void _createRenderers();
     void _createCameras();
-
-    uint64_t _totalMemory;
-    std::string _workingDirectory;
 };
 } // namespace brayns
