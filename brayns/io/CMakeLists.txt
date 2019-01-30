@@ -4,7 +4,6 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSIO_SOURCES
-  MolecularSystemReader.cpp
   ProteinLoader.cpp
   simulation/CADiffusionSimulationHandler.cpp
   VolumeLoader.cpp
@@ -12,7 +11,6 @@ set(BRAYNSIO_SOURCES
 )
 
 set(BRAYNSIO_PUBLIC_HEADERS
-  MolecularSystemReader.h
   ProteinLoader.h
   simulation/CADiffusionSimulationHandler.h
   VolumeLoader.h

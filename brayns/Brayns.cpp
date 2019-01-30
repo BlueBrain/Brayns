@@ -50,7 +50,6 @@
 #if BRAYNS_USE_ASSIMP
 #include <brayns/io/MeshLoader.h>
 #endif
-#include <brayns/io/MolecularSystemReader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/VolumeLoader.h>
 #include <brayns/io/XYZBLoader.h>
@@ -320,8 +319,6 @@ private:
         registry.registerArchiveLoader(
             std::make_unique<ArchiveLoader>(scene, registry));
 #endif
-        registry.registerLoader(
-            std::make_unique<MolecularSystemReader>(scene, params));
     }
 
     void _loadData()
