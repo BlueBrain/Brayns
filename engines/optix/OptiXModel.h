@@ -31,7 +31,8 @@ namespace brayns
 class OptiXModel : public Model
 {
 public:
-    OptiXModel() = default;
+    OptiXModel(AnimationParameters& animationParameters,
+               VolumeParameters& volumeParameters);
 
     /** @copydoc Model::commit */
     void commitGeometry() final;

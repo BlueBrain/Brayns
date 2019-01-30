@@ -25,7 +25,7 @@
 namespace brayns
 {
 OSPRayVolume::OSPRayVolume(const Vector3ui& dimensions, const Vector3f& spacing,
-                           const DataType type, VolumeParameters& params,
+                           const DataType type, const VolumeParameters& params,
                            OSPTransferFunction transferFunction,
                            const std::string& volumeType)
     : Volume(dimensions, spacing, type)
@@ -84,7 +84,7 @@ OSPRayVolume::~OSPRayVolume()
 OSPRayBrickedVolume::OSPRayBrickedVolume(const Vector3ui& dimensions,
                                          const Vector3f& spacing,
                                          const DataType type,
-                                         VolumeParameters& params,
+                                         const VolumeParameters& params,
                                          OSPTransferFunction transferFunction)
     : Volume(dimensions, spacing, type)
     , BrickedVolume(dimensions, spacing, type)
@@ -95,7 +95,7 @@ OSPRayBrickedVolume::OSPRayBrickedVolume(const Vector3ui& dimensions,
 
 OSPRaySharedDataVolume::OSPRaySharedDataVolume(
     const Vector3ui& dimensions, const Vector3f& spacing, const DataType type,
-    VolumeParameters& params, OSPTransferFunction transferFunction)
+    const VolumeParameters& params, OSPTransferFunction transferFunction)
     : Volume(dimensions, spacing, type)
     , SharedDataVolume(dimensions, spacing, type)
     , OSPRayVolume(dimensions, spacing, type, params, transferFunction,

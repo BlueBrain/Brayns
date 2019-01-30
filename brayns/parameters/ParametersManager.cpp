@@ -247,7 +247,17 @@ GeometryParameters& ParametersManager::getGeometryParameters()
     return _geometryParameters;
 }
 
+const GeometryParameters& ParametersManager::getGeometryParameters() const
+{
+    return _geometryParameters;
+}
+
 VolumeParameters& ParametersManager::getVolumeParameters()
+{
+    return _volumeParameters;
+}
+
+const VolumeParameters& ParametersManager::getVolumeParameters() const
 {
     return _volumeParameters;
 }

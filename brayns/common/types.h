@@ -160,10 +160,6 @@ class PointLight;
 class AbstractSimulationHandler;
 using AbstractSimulationHandlerPtr = std::shared_ptr<AbstractSimulationHandler>;
 
-class CADiffusionSimulationHandler;
-using CADiffusionSimulationHandlerPtr =
-    std::shared_ptr<CADiffusionSimulationHandler>;
-
 class AbstractParameters;
 class AnimationParameters;
 class ApplicationParameters;

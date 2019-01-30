@@ -26,8 +26,7 @@
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Scene.h>
-
-#include <brayns/parameters/ParametersManager.h>
+#include <brayns/parameters/AnimationParameters.h>
 
 namespace brayns
 {
@@ -67,9 +66,7 @@ double interpolatedOpacity(const Vector2ds& controlPoints, const double x)
 
 OSPRayModel::OSPRayModel(AnimationParameters& animationParameters,
                          VolumeParameters& volumeParameters)
-    : Model()
-    , _animationParameters(animationParameters)
-    , _volumeParameters(volumeParameters)
+    : Model(animationParameters, volumeParameters)
 {
     _ospTransferFunction = ospNewTransferFunction("piecewise_linear");
     if (_ospTransferFunction)
@@ -196,8 +193,8 @@ void OSPRayModel::_commitSpheres(const size_t materialId)
 {
     auto& geometry = _createGeometry(_ospSpheres, materialId, "spheres");
 
-    auto data = allocateVectorData(_spheres.at(materialId), OSP_FLOAT,
-                                   _memoryManagementFlags);
+    auto data = allocateVectorData(_geometries->_spheres.at(materialId),
+                                   OSP_FLOAT, _memoryManagementFlags);
 
     ospSetObject(geometry, "spheres", data);
     ospRelease(data);
@@ -214,8 +211,8 @@ void OSPRayModel::_commitCylinders(const size_t materialId)
 {
     auto& geometry = _createGeometry(_ospCylinders, materialId, "cylinders");
 
-    auto data = allocateVectorData(_cylinders.at(materialId), OSP_FLOAT,
-                                   _memoryManagementFlags);
+    auto data = allocateVectorData(_geometries->_cylinders.at(materialId),
+                                   OSP_FLOAT, _memoryManagementFlags);
     ospSetObject(geometry, "cylinders", data);
     ospRelease(data);
 
@@ -231,8 +228,8 @@ void OSPRayModel::_commitCylinders(const size_t materialId)
 void OSPRayModel::_commitCones(const size_t materialId)
 {
     auto& geometry = _createGeometry(_ospCones, materialId, "cones");
-    auto data = allocateVectorData(_cones.at(materialId), OSP_FLOAT,
-                                   _memoryManagementFlags);
+    auto data = allocateVectorData(_geometries->_cones.at(materialId),
+                                   OSP_FLOAT, _memoryManagementFlags);
 
     ospSetObject(geometry, "cones", data);
     ospRelease(data);
@@ -245,7 +242,7 @@ void OSPRayModel::_commitCones(const size_t materialId)
 void OSPRayModel::_commitMeshes(const size_t materialId)
 {
     auto& geometry = _createGeometry(_ospMeshes, materialId, "trianglemesh");
-    auto& trianglesMesh = _trianglesMeshes.at(materialId);
+    auto& trianglesMesh = _geometries->_trianglesMeshes.at(materialId);
 
     OSPData vertices = allocateVectorData(trianglesMesh.vertices, OSP_FLOAT3,
                                           _memoryManagementFlags);
@@ -294,7 +291,7 @@ void OSPRayModel::_commitStreamlines(const size_t materialId)
 {
     auto& geometry =
         _createGeometry(_ospStreamlines, materialId, "streamlines");
-    auto& data = _streamlines[materialId];
+    auto& data = _geometries->_streamlines[materialId];
 
     {
         OSPData vertex =
@@ -325,45 +322,48 @@ void OSPRayModel::_commitStreamlines(const size_t materialId)
 
 void OSPRayModel::_commitSDFGeometries()
 {
-    auto globalData =
-        allocateVectorData(_sdf.geometries, OSP_CHAR, _memoryManagementFlags);
+    auto globalData = allocateVectorData(_geometries->_sdf.geometries, OSP_CHAR,
+                                         _memoryManagementFlags);
 
     // Create and upload flat list of neighbours
-    const size_t numGeoms = _sdf.geometries.size();
-    _sdf.neighboursFlat.clear();
+    const size_t numGeoms = _geometries->_sdf.geometries.size();
+    _geometries->_sdf.neighboursFlat.clear();
 
     for (size_t geomI = 0; geomI < numGeoms; geomI++)
     {
-        const size_t currOffset = _sdf.neighboursFlat.size();
-        const auto& neighsI = _sdf.neighbours[geomI];
+        const size_t currOffset = _geometries->_sdf.neighboursFlat.size();
+        const auto& neighsI = _geometries->_sdf.neighbours[geomI];
         if (!neighsI.empty())
         {
-            _sdf.geometries[geomI].numNeighbours = neighsI.size();
-            _sdf.geometries[geomI].neighboursIndex = currOffset;
-            _sdf.neighboursFlat.insert(std::end(_sdf.neighboursFlat),
-                                       std::begin(neighsI), std::end(neighsI));
+            _geometries->_sdf.geometries[geomI].numNeighbours = neighsI.size();
+            _geometries->_sdf.geometries[geomI].neighboursIndex = currOffset;
+            _geometries->_sdf.neighboursFlat.insert(
+                std::end(_geometries->_sdf.neighboursFlat), std::begin(neighsI),
+                std::end(neighsI));
         }
     }
 
     // Make sure we don't create an empty buffer in the case of no neighbours
-    if (_sdf.neighboursFlat.empty())
-        _sdf.neighboursFlat.resize(1, 0);
+    if (_geometries->_sdf.neighboursFlat.empty())
+        _geometries->_sdf.neighboursFlat.resize(1, 0);
 
-    auto neighbourData = allocateVectorData(_sdf.neighboursFlat, OSP_ULONG,
-                                            _memoryManagementFlags);
+    auto neighbourData = allocateVectorData(_geometries->_sdf.neighboursFlat,
+                                            OSP_ULONG, _memoryManagementFlags);
 
     for (const auto& mat : _materials)
     {
         const size_t materialId = mat.first;
 
-        if (_sdf.geometryIndices.find(materialId) == _sdf.geometryIndices.end())
+        if (_geometries->_sdf.geometryIndices.find(materialId) ==
+            _geometries->_sdf.geometryIndices.end())
             continue;
 
         auto& geometry =
             _createGeometry(_ospSDFGeometries, materialId, "sdfgeometries");
 
-        auto data = allocateVectorData(_sdf.geometryIndices[materialId],
-                                       OSP_ULONG, _memoryManagementFlags);
+        auto data =
+            allocateVectorData(_geometries->_sdf.geometryIndices[materialId],
+                               OSP_ULONG, _memoryManagementFlags);
         ospSetObject(geometry, "sdfgeometries", data);
         ospRelease(data);
 
@@ -460,7 +460,7 @@ void OSPRayModel::_setBVHFlags()
 
 void OSPRayModel::commitGeometry()
 {
-    for (auto volume : _volumes)
+    for (auto volume : _geometries->_volumes)
     {
         auto ospVolume = std::dynamic_pointer_cast<OSPRayVolume>(volume);
         ospVolume->commit();
@@ -479,31 +479,31 @@ void OSPRayModel::commitGeometry()
     // Group geometry
     if (_spheresDirty)
     {
-        for (const auto& spheres : _spheres)
+        for (const auto& spheres : _geometries->_spheres)
             _commitSpheres(spheres.first);
     }
 
     if (_cylindersDirty)
     {
-        for (const auto& cylinders : _cylinders)
+        for (const auto& cylinders : _geometries->_cylinders)
             _commitCylinders(cylinders.first);
     }
 
     if (_conesDirty)
     {
-        for (const auto& cones : _cones)
+        for (const auto& cones : _geometries->_cones)
             _commitCones(cones.first);
     }
 
     if (_trianglesMeshesDirty)
     {
-        for (const auto& meshes : _trianglesMeshes)
+        for (const auto& meshes : _geometries->_trianglesMeshes)
             _commitMeshes(meshes.first);
     }
 
     if (_streamlinesDirty)
     {
-        for (const auto& streamlines : _streamlines)
+        for (const auto& streamlines : _geometries->_streamlines)
             _commitStreamlines(streamlines.first);
     }
 

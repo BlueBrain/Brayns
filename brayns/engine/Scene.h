@@ -64,13 +64,10 @@ public:
     /**
      * Creates a scene object responsible for handling models, simulations and
      * light sources.
-     *
-     * @param parametersManager Parameters for the scene (Geometry, volume,
-     *                          rendering, etc)
      */
-    BRAYNS_API Scene(ParametersManager& parametersManager);
-
-    BRAYNS_API Scene& operator=(const Scene& rhs);
+    BRAYNS_API Scene(AnimationParameters& animationParameters,
+                     GeometryParameters& geometryParameters,
+                     VolumeParameters& volumeParameters);
 
     /**
         Returns the bounding box of the scene
@@ -144,17 +141,6 @@ public:
        @return the clip planes
     */
     const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
-    /**
-        Sets the Calcium diffusion simulation handler
-    */
-    void setCADiffusionSimulationHandler(
-        CADiffusionSimulationHandlerPtr handler);
-
-    /**
-        Gets the Calcium diffusion simulation handler
-    */
-    CADiffusionSimulationHandlerPtr getCADiffusionSimulationHandler() const;
-
     /** @return the current size in bytes of the loaded geometry. */
     size_t getSizeInBytes() const;
 
@@ -220,12 +206,17 @@ public:
         return std::shared_lock<std::shared_timed_mutex>(_modelMutex);
     }
 
+    /** @internal */
+    BRAYNS_API void cloneFrom(const Scene& rhs);
+
 protected:
     /** @return True if this scene supports scene updates from any thread. */
     virtual bool supportsConcurrentSceneUpdates() const { return false; }
     void _computeBounds();
 
-    ParametersManager& _parametersManager;
+    AnimationParameters& _animationParameters;
+    GeometryParameters& _geometryParameters;
+    VolumeParameters& _volumeParameters;
     MaterialPtr _backgroundMaterial;
     std::string _environmentMap;
 
@@ -236,9 +227,6 @@ protected:
 
     Lights _lights;
     ClipPlanes _clipPlanes;
-
-    // Simulation
-    CADiffusionSimulationHandlerPtr _caDiffusionSimulationHandler{nullptr};
 
     LoaderRegistry _loaderRegistry;
     Boxd _bounds;

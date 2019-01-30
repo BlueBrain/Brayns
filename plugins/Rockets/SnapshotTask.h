@@ -37,8 +37,10 @@ namespace brayns
 struct SnapshotParams
 {
     std::unique_ptr<AnimationParameters> animParams;
-    std::unique_ptr<Camera> camera;
+    std::unique_ptr<GeometryParameters> geometryParams;
+    std::unique_ptr<VolumeParameters> volumeParams;
     std::unique_ptr<RenderingParameters> renderingParams;
+    std::unique_ptr<Camera> camera;
     int samplesPerPixel{1};
     Vector2ui size;
     size_t quality{100};
@@ -57,7 +59,6 @@ public:
                     ImageGenerator& imageGenerator)
         : _params(std::move(params))
         , _camera(engine.createCamera())
-        , _scene(engine.createScene())
         , _imageGenerator(imageGenerator)
         , _engine(engine)
     {
@@ -67,11 +68,27 @@ public:
                 engine.getParametersManager().getAnimationParameters());
         }
 
+        if (_params.geometryParams == nullptr)
+        {
+            _params.geometryParams = std::make_unique<GeometryParameters>(
+                engine.getParametersManager().getGeometryParameters());
+        }
+
         if (_params.renderingParams == nullptr)
         {
             _params.renderingParams = std::make_unique<RenderingParameters>(
                 engine.getParametersManager().getRenderingParameters());
         }
+
+        if (_params.volumeParams == nullptr)
+        {
+            _params.volumeParams = std::make_unique<VolumeParameters>(
+                engine.getParametersManager().getVolumeParameters());
+        }
+
+        _scene =
+            engine.createScene(*_params.animParams, *_params.geometryParams,
+                               *_params.volumeParams);
 
         _renderer = engine.createRenderer(*_params.animParams,
                                           *_params.renderingParams);
@@ -88,17 +105,16 @@ public:
         else
             *_camera = engine.getCamera();
 
-        *_scene = engine.getScene();
+        _scene->cloneFrom(engine.getScene());
     }
 
     ImageGenerator::ImageBase64 operator()()
     {
+        _scene->commit();
+
         _camera->updateProperty("aspect",
                                 double(_params.size.x()) / _params.size.y());
         _camera->commit();
-
-        _scene->commitLights();
-        _scene->commit();
 
         if (_params.renderingParams)
         {
@@ -109,6 +125,8 @@ public:
         _renderer->setCamera(_camera);
         _renderer->setScene(_scene);
         _renderer->commit();
+
+        _scene->commitLights();
 
         std::stringstream msg;
         msg << "Render snapshot";

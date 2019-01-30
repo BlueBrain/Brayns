@@ -33,8 +33,10 @@
 
 namespace brayns
 {
-OptiXScene::OptiXScene(ParametersManager& parametersManager)
-    : Scene(parametersManager)
+OptiXScene::OptiXScene(AnimationParameters& animationParameters,
+                       GeometryParameters& geometryParameters,
+                       VolumeParameters& volumeParameters)
+    : Scene(animationParameters, geometryParameters, volumeParameters)
     , _lightBuffer(nullptr)
 {
     _backgroundMaterial = std::make_shared<OptiXMaterial>();
@@ -110,7 +112,8 @@ bool OptiXScene::commitLights()
 
 ModelPtr OptiXScene::createModel() const
 {
-    return std::make_unique<OptiXModel>();
+    return std::make_unique<OptiXModel>(_animationParameters,
+                                        _volumeParameters);
 }
 
 void OptiXScene::commit()

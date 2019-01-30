@@ -21,7 +21,6 @@
 #pragma once
 
 #include <brayns/engine/Model.h>
-#include <brayns/parameters/VolumeParameters.h>
 
 #include <ospray.h>
 
@@ -74,9 +73,6 @@ private:
     void _addGeometryToModel(const OSPGeometry geometry,
                              const size_t materialId);
     void _setBVHFlags();
-
-    AnimationParameters& _animationParameters;
-    VolumeParameters& _volumeParameters;
 
     // Whether this model has set the AnimationParameters "is ready" callback
     bool _setIsReadyCallback{false};

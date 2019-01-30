@@ -26,8 +26,8 @@
 #include <brayns/common/utils/utils.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
-#include <brayns/io/simulation/CADiffusionSimulationHandler.h>
-#include <brayns/parameters/ParametersManager.h>
+
+#include <brayns/parameters/GeometryParameters.h>
 
 #include <fstream>
 
@@ -63,21 +63,36 @@ std::shared_ptr<T> _remove(std::vector<std::shared_ptr<T>>& list,
 
 namespace brayns
 {
-Scene::Scene(ParametersManager& parametersManager)
-    : _parametersManager(parametersManager)
+Scene::Scene(AnimationParameters& animationParameters,
+             GeometryParameters& geometryParameters,
+             VolumeParameters& volumeParameters)
+    : _animationParameters(animationParameters)
+    , _geometryParameters(geometryParameters)
+    , _volumeParameters(volumeParameters)
 {
 }
 
-Scene& Scene::operator=(const Scene& rhs)
+void Scene::cloneFrom(const Scene& rhs)
 {
     if (this == &rhs)
-        return *this;
+        return;
 
     {
         std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
         std::shared_lock<std::shared_timed_mutex> rhsLock(rhs._modelMutex);
-        _modelDescriptors = rhs._modelDescriptors;
+
+        _modelDescriptors.clear();
+        _modelDescriptors.reserve(rhs._modelDescriptors.size());
+        for (const auto& modelDesc : rhs._modelDescriptors)
+        {
+            auto newModelDesc =
+                std::make_shared<ModelDescriptor>(createModel(),
+                                                  modelDesc->getPath());
+            newModelDesc->cloneFrom(*modelDesc);
+            _modelDescriptors.push_back(newModelDesc);
+        }
     }
+    _computeBounds();
 
     *_backgroundMaterial = *rhs._backgroundMaterial;
     _backgroundMaterial->markModified();
@@ -85,15 +100,7 @@ Scene& Scene::operator=(const Scene& rhs)
     _lights = rhs._lights;
     _clipPlanes = rhs._clipPlanes;
 
-    if (rhs._caDiffusionSimulationHandler)
-    {
-        _caDiffusionSimulationHandler =
-            std::make_shared<CADiffusionSimulationHandler>();
-        *_caDiffusionSimulationHandler = *rhs._caDiffusionSimulationHandler;
-    }
-
     markModified();
-    return *this;
 }
 
 void Scene::commit()
@@ -146,8 +153,7 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
     if (model.empty())
         throw std::runtime_error("Empty models not supported.");
 
-    const auto defaultBVHFlags =
-        _parametersManager.getGeometryParameters().getDefaultBVHFlags();
+    const auto defaultBVHFlags = _geometryParameters.getDefaultBVHFlags();
 
     model.setBVHFlags(defaultBVHFlags);
     model.buildBoundingBox();
@@ -209,22 +215,6 @@ ModelDescriptorPtr Scene::getModel(const size_t id) const
 {
     auto lock = acquireReadAccess();
     return _find(_modelDescriptors, id, &ModelDescriptor::getModelID);
-}
-
-void Scene::setCADiffusionSimulationHandler(
-    CADiffusionSimulationHandlerPtr handler)
-{
-    _caDiffusionSimulationHandler = handler;
-    if (_caDiffusionSimulationHandler)
-        _parametersManager.getAnimationParameters().setEnd(
-            _caDiffusionSimulationHandler->getNbFrames());
-    else
-        _parametersManager.getAnimationParameters().reset();
-}
-
-CADiffusionSimulationHandlerPtr Scene::getCADiffusionSimulationHandler() const
-{
-    return _caDiffusionSimulationHandler;
 }
 
 bool Scene::empty() const

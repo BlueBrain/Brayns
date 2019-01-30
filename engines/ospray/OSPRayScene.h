@@ -38,8 +38,9 @@ namespace brayns
 class OSPRayScene : public Scene
 {
 public:
-    OSPRayScene(ParametersManager& parametersManager,
-                const size_t memoryManagementFlags);
+    OSPRayScene(AnimationParameters& animationParameters,
+                GeometryParameters& geometryParameters,
+                VolumeParameters& volumeParameters);
     ~OSPRayScene();
 
     /** @copydoc Scene::commit */

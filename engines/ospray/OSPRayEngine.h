@@ -45,15 +45,15 @@ public:
         const std::string& name, const Vector2ui& frameSize,
         FrameBufferFormat frameBufferFormat) const final;
 
-    ScenePtr createScene() const final;
+    ScenePtr createScene(AnimationParameters& animationParameters,
+                         GeometryParameters& geometryParameters,
+                         VolumeParameters& volumeParameters) const final;
     CameraPtr createCamera() const final;
     RendererPtr createRenderer(
         const AnimationParameters& animationParameters,
         const RenderingParameters& renderingParameters) const final;
 
 private:
-    uint32_t _getOSPDataFlags() const;
-
     void _createCameras();
     void _createRenderers();
 

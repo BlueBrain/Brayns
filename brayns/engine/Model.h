@@ -189,6 +189,9 @@ public:
     void markForRemoval() { _markedForRemoval = true; }
     /** @internal */
     bool isMarkedForRemoval() const { return _markedForRemoval; }
+    /** @internal */
+    void cloneFrom(const ModelDescriptor& rhs);
+
 private:
     size_t _nextInstanceID{0};
     Boxd _bounds;
@@ -212,6 +215,9 @@ private:
 class Model
 {
 public:
+    Model(AnimationParameters& animationParameters,
+          VolumeParameters& volumeParameters);
+
     /** @name API for engine-specific code */
     //@{
     virtual void commitGeometry() = 0;
@@ -241,7 +247,7 @@ public:
     BRAYNS_API virtual void buildBoundingBox() = 0;
     //@}
 
-    BRAYNS_API Model() = default;
+    // BRAYNS_API Model() = default;
 
     BRAYNS_API virtual ~Model() = default;
 
@@ -261,11 +267,11 @@ public:
     /**
         Returns spheres handled by the Model
     */
-    const SpheresMap& getSpheres() const { return _spheres; }
+    const SpheresMap& getSpheres() const { return _geometries->_spheres; }
     SpheresMap& getSpheres()
     {
         _spheresDirty = true;
-        return _spheres;
+        return _geometries->_spheres;
     }
     /**
       Adds a sphere to the model
@@ -279,11 +285,11 @@ public:
     /**
         Returns cylinders handled by the model
       */
-    const CylindersMap& getCylinders() const { return _cylinders; }
+    const CylindersMap& getCylinders() const { return _geometries->_cylinders; }
     CylindersMap& getCylinders()
     {
         _cylindersDirty = true;
-        return _cylinders;
+        return _geometries->_cylinders;
     }
     /**
       Adds a cylinder to the model
@@ -296,11 +302,11 @@ public:
     /**
         Returns cones handled by the model
     */
-    const ConesMap& getCones() const { return _cones; }
+    const ConesMap& getCones() const { return _geometries->_cones; }
     ConesMap& getCones()
     {
         _conesDirty = true;
-        return _cones;
+        return _geometries->_cones;
     }
     /**
       Adds a cone to the model
@@ -324,7 +330,7 @@ public:
     StreamlinesDataMap& getStreamlines()
     {
         _streamlinesDirty = true;
-        return _streamlines;
+        return _geometries->_streamlines;
     }
     /**
       Adds a SDFGeometry to the scene
@@ -343,7 +349,7 @@ public:
     SDFGeometryData& getSDFGeometryData()
     {
         _sdfGeometriesDirty = true;
-        return _sdf;
+        return _geometries->_sdf;
     }
 
     /** Update the list of neighbours for a SDF geometry
@@ -359,12 +365,12 @@ public:
     */
     const TrianglesMeshMap& getTrianglesMeshes() const
     {
-        return _trianglesMeshes;
+        return _geometries->_trianglesMeshes;
     }
     TrianglesMeshMap& getTrianglesMeshes()
     {
         _trianglesMeshesDirty = true;
-        return _trianglesMeshes;
+        return _geometries->_trianglesMeshes;
     }
 
     /** Add a volume to the model*/
@@ -423,7 +429,7 @@ public:
     size_t getSizeInBytes() const { return _sizeInBytes; }
     void markInstancesDirty() { _instancesDirty = true; }
     void markInstancesClean() { _instancesDirty = false; }
-    const Volumes& getVolumes() const { return _volumes; }
+    const Volumes& getVolumes() const { return _geometries->_volumes; }
     bool isVolumesDirty() const { return _volumesDirty; }
     void resetVolumesDirty() { _volumesDirty = false; }
     /** @internal */
@@ -434,6 +440,8 @@ public:
     }
     const std::set<BVHFlag>& getBVHFlags() const { return _bvhFlags; }
     void updateBounds();
+    /** @internal */
+    void cloneFrom(const Model& rhs);
 
 protected:
     /** Factory method to create an engine-specific material. */
@@ -443,43 +451,61 @@ protected:
     /** Mark all geometries as clean. */
     void _markGeometriesClean();
 
+    AnimationParameters& _animationParameters;
+    VolumeParameters& _volumeParameters;
+
     AbstractSimulationHandlerPtr _simulationHandler;
     TransferFunction _transferFunction;
 
     MaterialMap _materials;
 
-    SpheresMap _spheres;
+    struct Geometries
+    {
+        SpheresMap _spheres;
+        CylindersMap _cylinders;
+        ConesMap _cones;
+        TrianglesMeshMap _trianglesMeshes;
+        StreamlinesDataMap _streamlines;
+        SDFGeometryData _sdf;
+        Volumes _volumes;
+
+        Boxd _sphereBounds;
+        Boxd _cylindersBounds;
+        Boxd _conesBounds;
+        Boxd _trianglesMeshesBounds;
+        Boxd _streamlinesBounds;
+        Boxd _sdfGeometriesBounds;
+        Boxd _volumesBounds;
+
+        bool isEmpty() const
+        {
+            return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
+                   _trianglesMeshes.empty() && _sdf.geometries.empty() &&
+                   _streamlines.empty() && _volumes.empty();
+        }
+    };
+
+    // the model clone actually shares all geometries to save memory. It will
+    // still create engine specific copies though (BVH only ideally) as part of
+    // commitGeometry()
+    std::shared_ptr<Geometries> _geometries{std::make_shared<Geometries>()};
+
     bool _spheresDirty{true};
-    Boxd _sphereBounds;
-
-    CylindersMap _cylinders;
     bool _cylindersDirty{true};
-    Boxd _cylindersBounds;
-
-    ConesMap _cones;
     bool _conesDirty{true};
-    Boxd _conesBounds;
-
-    TrianglesMeshMap _trianglesMeshes;
     bool _trianglesMeshesDirty{true};
-    Boxd _trianglesMeshesBounds;
-
-    StreamlinesDataMap _streamlines;
     bool _streamlinesDirty{true};
-    Boxd _streamlinesBounds;
+    bool _sdfGeometriesDirty{true};
+    bool _volumesDirty{true};
+
+    bool _areGeomtriesDirty() const
+    {
+        return _spheresDirty || _cylindersDirty || _conesDirty ||
+               _trianglesMeshesDirty || _sdfGeometriesDirty;
+    }
 
     Boxd _bounds;
-
-    SDFGeometryData _sdf;
-    bool _sdfGeometriesDirty{false};
-    Boxd _sdfGeometriesBounds;
-
     bool _instancesDirty{true};
-
-    Volumes _volumes;
-    bool _volumesDirty{true};
-    Boxd _volumesBounds;
-
     std::set<BVHFlag> _bvhFlags;
     size_t _sizeInBytes{0};
 

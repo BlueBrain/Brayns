@@ -5,14 +5,12 @@
 
 set(BRAYNSIO_SOURCES
   ProteinLoader.cpp
-  simulation/CADiffusionSimulationHandler.cpp
   VolumeLoader.cpp
   XYZBLoader.cpp
 )
 
 set(BRAYNSIO_PUBLIC_HEADERS
   ProteinLoader.h
-  simulation/CADiffusionSimulationHandler.h
   VolumeLoader.h
   XYZBLoader.h
 )

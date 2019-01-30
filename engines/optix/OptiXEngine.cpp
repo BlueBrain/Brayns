@@ -39,7 +39,10 @@ OptiXEngine::OptiXEngine(ParametersManager& parametersManager)
     _initializeContext();
 
     BRAYNS_INFO << "Initializing scene" << std::endl;
-    _scene.reset(new OptiXScene(_parametersManager));
+    _scene = std::make_shared<OptiXScene>(
+        _parametersManager.getAnimationParameters(),
+        _parametersManager.getGeometryParameters(),
+        _parametersManager.getVolumeParameters());
 
     BRAYNS_INFO << "Initializing renderers" << std::endl;
     _createRenderers();
@@ -180,9 +183,12 @@ void OptiXEngine::_createRenderers()
     }
 }
 
-ScenePtr OptiXEngine::createScene() const
+ScenePtr OptiXEngine::createScene(AnimationParameters& animationParameters,
+                                  GeometryParameters& geometryParameters,
+                                  VolumeParameters& volumeParameters) const
 {
-    return std::make_shared<OptiXScene>(_parametersManager);
+    return std::make_shared<OptiXScene>(animationParameters, geometryParameters,
+                                        volumeParameters);
 }
 
 FrameBufferPtr OptiXEngine::createFrameBuffer(

@@ -1,6 +1,5 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Jafet Villafranca Diaz <jafet.villafrancadiaz@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -33,14 +32,9 @@ namespace brayns
 class AbstractSimulationHandler
 {
 public:
-    /**
-     * @brief Default constructor
-     */
-    AbstractSimulationHandler() = default;
+    /** @return a clone of the concrete simulation handler implementation. */
+    virtual AbstractSimulationHandlerPtr clone() const = 0;
 
-    /**
-     * @brief Default desctuctor
-     */
     virtual ~AbstractSimulationHandler();
 
     AbstractSimulationHandler& operator=(const AbstractSimulationHandler& rhs);

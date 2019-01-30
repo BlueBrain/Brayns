@@ -31,10 +31,10 @@
 #include <brayns/common/utils/base64/base64.h>
 
 #include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
 #include <fstream>
 #include <perceptualdiff/metric.h>
 #include <perceptualdiff/rgba_image.h>
-namespace fs = boost::filesystem;
 
 //#define GENERATE_REFERENCE_SNAPSHOT
 
