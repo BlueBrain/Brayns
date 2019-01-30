@@ -19,11 +19,11 @@ common_find_package(OptiX REQUIRED SYSTEM)
 
 include_directories(${OptiX_INCLUDE_DIRS})
 
-set(BRAYNS_OPTIX_ENGINE_OMIT_LIBRARY_HEADER ON)
-set(BRAYNS_OPTIX_ENGINE_OMIT_VERSION_HEADERS ON)
-set(BRAYNS_OPTIX_ENGINE_EXPORT ON)
+set(BRAYNSOPTIXENGINE_OMIT_LIBRARY_HEADER ON)
+set(BRAYNSOPTIXENGINE_OMIT_VERSION_HEADERS ON)
+set(BRAYNSOPTIXENGINE_EXPORT ON)
 
-set(BRAYNS_OPTIX_ENGINE_CU
+set(BRAYNSOPTIXENGINE_CU
   cuda/camera/PerspectiveCamera.cu
   cuda/Constantbg.cu
   cuda/geometry/Cones.cu
@@ -35,25 +35,25 @@ set(BRAYNS_OPTIX_ENGINE_CU
 )
 
 CUDA_GET_SOURCES_AND_OPTIONS(source_files cmake_options options ${ARGN})
-CUDA_WRAP_SRCS(brayns_optix_engine
-  PTX generated_files ${BRAYNS_OPTIX_ENGINE_CU} ${cmake_options}
+CUDA_WRAP_SRCS(braynsOptixEngine
+  PTX generated_files ${BRAYNSOPTIXENGINE_CU} ${cmake_options}
   OPTIONS ${options}
 )
 
-set(BRAYNS_OPTIX_ENGINE_PTX
-  brayns_optix_engine_generated_PerspectiveCamera.cu.ptx
-  brayns_optix_engine_generated_Constantbg.cu.ptx
-  brayns_optix_engine_generated_Cones.cu.ptx
-  brayns_optix_engine_generated_Cylinders.cu.ptx
-  brayns_optix_engine_generated_Spheres.cu.ptx
-  brayns_optix_engine_generated_TrianglesMesh.cu.ptx
-  brayns_optix_engine_generated_AdvancedSimulation.cu.ptx
-  brayns_optix_engine_generated_BasicRenderer.cu.ptx
+set(BRAYNSOPTIXENGINE_PTX
+  braynsOptixEngine_generated_PerspectiveCamera.cu.ptx
+  braynsOptixEngine_generated_Constantbg.cu.ptx
+  braynsOptixEngine_generated_Cones.cu.ptx
+  braynsOptixEngine_generated_Cylinders.cu.ptx
+  braynsOptixEngine_generated_Spheres.cu.ptx
+  braynsOptixEngine_generated_TrianglesMesh.cu.ptx
+  braynsOptixEngine_generated_AdvancedSimulation.cu.ptx
+  braynsOptixEngine_generated_BasicRenderer.cu.ptx
 )
 include(StringifyPtx)
-stringify_ptx(${BRAYNS_OPTIX_ENGINE_PTX})
+stringify_ptx(${BRAYNSOPTIXENGINE_PTX})
 
-set(BRAYNS_OPTIX_ENGINE_SOURCES
+set(BRAYNSOPTIXENGINE_SOURCES
   ${PTX_SOURCES}
   OptiXContext.cpp
   OptiXFrameBuffer.cpp
@@ -77,7 +77,7 @@ set_source_files_properties(
   PROPERTIES COMPILE_FLAGS -Wno-shadow
 )
 
-set(BRAYNS_OPTIX_ENGINE_PUBLIC_HEADERS
+set(BRAYNSOPTIXENGINE_PUBLIC_HEADERS
   ${PTX_HEADERS}
   OptiXContext.h
   OptiXFrameBuffer.h
@@ -87,11 +87,11 @@ set(BRAYNS_OPTIX_ENGINE_PUBLIC_HEADERS
   OptiXEngine.h
 )
 
-set(BRAYNS_OPTIX_ENGINE_LINK_LIBRARIES
+set(BRAYNSOPTIXENGINE_LINK_LIBRARIES
     PRIVATE braynsEngine vmmlib braynsCommon braynsParameters ${OptiX_LIBRARIES})
 
-common_library(brayns_optix_engine)
+common_library(braynsOptixEngine)
 
 if(CUDA_VERSION VERSION_GREATER 8)
-  target_compile_options(brayns_optix_engine PRIVATE "-Wno-error=cpp")
+  target_compile_options(braynsOptixEngine PRIVATE "-Wno-error=cpp")
 endif()

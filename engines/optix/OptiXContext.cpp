@@ -20,12 +20,12 @@
 
 #include "OptiXContext.h"
 
-#include <engines/optix/brayns_optix_engine_generated_Cones.cu.ptx.h>
-#include <engines/optix/brayns_optix_engine_generated_Constantbg.cu.ptx.h>
-#include <engines/optix/brayns_optix_engine_generated_Cylinders.cu.ptx.h>
-#include <engines/optix/brayns_optix_engine_generated_PerspectiveCamera.cu.ptx.h>
-#include <engines/optix/brayns_optix_engine_generated_Spheres.cu.ptx.h>
-#include <engines/optix/brayns_optix_engine_generated_TrianglesMesh.cu.ptx.h>
+#include <engines/optix/braynsOptixEngine_generated_Cones.cu.ptx.h>
+#include <engines/optix/braynsOptixEngine_generated_Constantbg.cu.ptx.h>
+#include <engines/optix/braynsOptixEngine_generated_Cylinders.cu.ptx.h>
+#include <engines/optix/braynsOptixEngine_generated_PerspectiveCamera.cu.ptx.h>
+#include <engines/optix/braynsOptixEngine_generated_Spheres.cu.ptx.h>
+#include <engines/optix/braynsOptixEngine_generated_TrianglesMesh.cu.ptx.h>
 
 #include <brayns/common/log.h>
 #include <brayns/common/material/Texture2D.h>
@@ -33,15 +33,14 @@
 namespace
 {
 const std::string DEFAULT_ACCELERATION_STRUCTURE = "Trbvh";
-const std::string CUDA_SPHERES = brayns_optix_engine_generated_Spheres_cu_ptx;
-const std::string CUDA_CYLINDERS =
-    brayns_optix_engine_generated_Cylinders_cu_ptx;
-const std::string CUDA_CONES = brayns_optix_engine_generated_Cones_cu_ptx;
+const std::string CUDA_SPHERES = braynsOptixEngine_generated_Spheres_cu_ptx;
+const std::string CUDA_CYLINDERS = braynsOptixEngine_generated_Cylinders_cu_ptx;
+const std::string CUDA_CONES = braynsOptixEngine_generated_Cones_cu_ptx;
 const std::string CUDA_TRIANGLES_MESH =
-    brayns_optix_engine_generated_TrianglesMesh_cu_ptx;
+    braynsOptixEngine_generated_TrianglesMesh_cu_ptx;
 const std::string CUDA_PERSPECTIVE_CAMERA =
-    brayns_optix_engine_generated_PerspectiveCamera_cu_ptx;
-const std::string CUDA_MISS = brayns_optix_engine_generated_Constantbg_cu_ptx;
+    braynsOptixEngine_generated_PerspectiveCamera_cu_ptx;
+const std::string CUDA_MISS = braynsOptixEngine_generated_Constantbg_cu_ptx;
 
 const std::string CUDA_FUNC_BOUNDS = "bounds";
 const std::string CUDA_FUNC_INTERSECTION = "intersect";

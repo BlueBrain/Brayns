@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <engines/optix/brayns_optix_engine_generated_AdvancedSimulation.cu.ptx.h>
-#include <engines/optix/brayns_optix_engine_generated_BasicRenderer.cu.ptx.h>
+#include <engines/optix/braynsOptixEngine_generated_AdvancedSimulation.cu.ptx.h>
+#include <engines/optix/braynsOptixEngine_generated_BasicRenderer.cu.ptx.h>
 
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/parameters/ParametersManager.h>
@@ -132,7 +132,7 @@ void OptiXEngine::_createRenderers()
 
     { // Advanced renderer
         const std::string CUDA_ADVANCED_SIMULATION =
-            brayns_optix_engine_generated_AdvancedSimulation_cu_ptx;
+            braynsOptixEngine_generated_AdvancedSimulation_cu_ptx;
 
         OptiXContext& context = OptiXContext::get();
 
@@ -167,7 +167,7 @@ void OptiXEngine::_createRenderers()
 
     { // Basic renderer
         const std::string CUDA_BASIC_RENDERER =
-            brayns_optix_engine_generated_BasicRenderer_cu_ptx;
+            braynsOptixEngine_generated_BasicRenderer_cu_ptx;
         OptiXContext& context = OptiXContext::get();
 
         OptixShaderProgram osp;

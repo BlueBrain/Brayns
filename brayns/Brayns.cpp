@@ -261,7 +261,7 @@ private:
             _parametersManager.getApplicationParameters().getEngine();
 
         if (engineName == "optix")
-            engineName = "brayns_optix_engine";
+            engineName = "braynsOptixEngine";
 
         _engine = _engineFactory.create(engineName);
         if (!_engine)
