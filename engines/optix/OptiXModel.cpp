@@ -88,7 +88,7 @@ void OptiXModel::commitGeometry()
             _commitMeshes(meshes.first);
 
     updateBounds();
-    markGeometriesClean();
+    _markGeometriesClean();
 
     // handled by the scene
     _instancesDirty = false;

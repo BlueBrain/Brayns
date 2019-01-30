@@ -508,7 +508,7 @@ void Model::updateBounds()
     _bounds.merge(_volumesBounds);
 }
 
-void Model::markGeometriesClean()
+void Model::_markGeometriesClean()
 {
     _spheresDirty = false;
     _cylindersDirty = false;

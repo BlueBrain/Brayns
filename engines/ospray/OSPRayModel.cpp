@@ -511,7 +511,7 @@ void OSPRayModel::commitGeometry()
         _commitSDFGeometries();
 
     updateBounds();
-    markGeometriesClean();
+    _markGeometriesClean();
     _setBVHFlags();
 
     // handled by the scene
