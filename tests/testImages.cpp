@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(render_capsule_and_compare)
 
     const char* app = testSuite.argv[0];
     const char* argv[] = {app, BRAYNS_TESTDATA_MODEL_CAPSULE_PATH,
-                          "--disable-accumulation"};
+                          "--samples-per-pixel", "128"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
