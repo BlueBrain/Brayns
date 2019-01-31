@@ -28,7 +28,7 @@
         "lodash": "^4.17.10",
         "react": "^16.6.3",
         "react-dom": "^16.6.3",
-        "react-dropzone": "^6.2.4",
+        "react-dropzone": "^8.0.4",
         "react-swipeable-views": "^0.13.0",
         "rockets-client": "^0.3.0",
         "rxjs": "^6.2.1",
