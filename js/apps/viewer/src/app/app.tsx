@@ -46,7 +46,12 @@ import TuneIcon from '@material-ui/icons/Tune';
 
 import brayns from '../common/client';
 import {GithubIcon, OwlIcon} from '../common/components';
-import {KeyCode, TOOLTIP_DELAY} from '../common/constants';
+import {
+    APP_BAR_HEIGHT,
+    APP_BAR_HEIGHT_XS,
+    KeyCode,
+    TOOLTIP_DELAY
+} from '../common/constants';
 import {
     dispatchAppParams,
     dispatchKeyboardLock,
@@ -220,10 +225,10 @@ const styles = (theme: Theme) => createStyles({
         width: '100%',
         backgroundColor: theme.palette.background.default,
         height: 'calc(100% - 56px)',
-        marginTop: 56,
+        marginTop: APP_BAR_HEIGHT_XS,
         [theme.breakpoints.up('sm')]: {
             height: 'calc(100% - 64px)',
-            marginTop: 64
+            marginTop: APP_BAR_HEIGHT
         }
     },
     canvas: {

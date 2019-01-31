@@ -3,6 +3,9 @@ export const TOOLTIP_DELAY = {
     leaveDelay: 150
 };
 
+export const APP_BAR_HEIGHT_XS = 56;
+export const APP_BAR_HEIGHT = 64;
+
 export enum KeyCode {
     ArrowLeft = 37,
     ArrowRight = 39,
