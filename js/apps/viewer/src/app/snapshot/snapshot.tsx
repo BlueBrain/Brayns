@@ -32,6 +32,7 @@ import {
     withStyles,
     WithStyles
 } from '@material-ui/core/styles';
+import {Breakpoint} from '@material-ui/core/styles/createBreakpoints';
 import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 import withWidth, {isWidthDown, WithWidth} from '@material-ui/core/withWidth';
@@ -39,7 +40,12 @@ import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 
 import brayns from '../../common/client';
 import {NumericField, SlideUp} from '../../common/components';
-import {KeyCode, TOOLTIP_DELAY} from '../../common/constants';
+import {
+    APP_BAR_HEIGHT,
+    APP_BAR_HEIGHT_XS,
+    KeyCode,
+    TOOLTIP_DELAY
+} from '../../common/constants';
 import {
     dispatchKeyboardLock,
     dispatchNotification,
@@ -85,7 +91,7 @@ const style = withStyles(styles);
 
 export class Snapshot extends Component<Props, State> {
     state: State = {
-        ...defaultSize(),
+        ...defaultSize(this.props.width),
         data: undefined,
         canShowSnackBar: true,
         showDialog: false,
@@ -159,7 +165,7 @@ export class Snapshot extends Component<Props, State> {
     reset = () => {
         // Reset the state
         this.setState({
-            ...defaultSize(),
+            ...defaultSize(this.props.width),
             canShowSnackBar: true,
             filename: '',
             format: ImageFormat.Jpeg,
@@ -171,7 +177,7 @@ export class Snapshot extends Component<Props, State> {
     openDialog = () => {
         dispatchKeyboardLock(true);
         this.setState({
-            ...defaultSize(),
+            ...defaultSize(this.props.width),
             showDialog: true
         });
     }
@@ -404,13 +410,13 @@ function setMimeType(data: string, format?: ImageFormat) {
     return data;
 }
 
-function defaultSize(): {
+function defaultSize(currentWidth: Breakpoint): {
     width: number;
     height: number;
 } {
     const [width, height] = [
         window.innerWidth,
-        window.innerHeight
+        window.innerHeight - (isWidthDown('xs', currentWidth) ? APP_BAR_HEIGHT_XS : APP_BAR_HEIGHT)
     ].map(toPixelRatio);
 
     return {
