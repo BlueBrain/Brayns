@@ -185,7 +185,9 @@ public:
         if (_onRemovedCallback)
             _onRemovedCallback(*this);
     }
+    /** @internal */
     void markForRemoval() { _markedForRemoval = true; }
+    /** @internal */
     bool isMarkedForRemoval() const { return _markedForRemoval; }
 private:
     size_t _nextInstanceID{0};
