@@ -62,6 +62,10 @@ const std::string CUDA_FUNC_CAMERA_ENVMAP_MISS = "envmap_miss";
                                      std::string(#func) + "'");    \
     } while (0)
 
+constexpr size_t OPTIX_STACK_SIZE = 2800;
+constexpr size_t OPTIX_RAY_TYPE_COUNT = 2;
+constexpr size_t OPTIX_ENTRY_POINT_COUNT = 1;
+
 namespace brayns
 {
 std::unique_ptr<OptiXContext> OptiXContext::_context;
@@ -190,9 +194,9 @@ void OptiXContext::_initialize()
     if (!_optixContext)
         throw(std::runtime_error("Failed to initialize OptiX"));
 
-    _optixContext->setRayTypeCount(2);
-    _optixContext->setEntryPointCount(1);
-    _optixContext->setStackSize(2800);
+    _optixContext->setRayTypeCount(OPTIX_RAY_TYPE_COUNT);
+    _optixContext->setEntryPointCount(OPTIX_ENTRY_POINT_COUNT);
+    _optixContext->setStackSize(OPTIX_STACK_SIZE);
 
     _bounds[OptixGeometryType::cone] =
         _optixContext->createProgramFromPTXString(CUDA_CONES, CUDA_FUNC_BOUNDS);
