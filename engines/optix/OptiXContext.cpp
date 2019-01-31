@@ -78,6 +78,8 @@ OptiXContext::OptiXContext()
 
 OptiXContext::~OptiXContext()
 {
+    if (_optixContext)
+        _optixContext->destroy();
 }
 
 OptiXContext& OptiXContext::get()

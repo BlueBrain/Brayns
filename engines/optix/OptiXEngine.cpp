@@ -59,10 +59,6 @@ OptiXEngine::~OptiXEngine()
     _camera.reset();
 
     _frameBuffers.clear();
-
-    auto context = OptiXContext::get().getOptixContext();
-    if (context)
-        context->destroy();
 }
 
 void OptiXEngine::_initializeContext()
