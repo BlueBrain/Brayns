@@ -521,7 +521,7 @@ MaterialPtr Model::createMaterial(const size_t materialId,
 {
     auto material = _materials[materialId] = createMaterialImpl(properties);
     material->setName(name);
-    if (_simulationHandler)
+    if (_simulationHandler && materialId != BOUNDINGBOX_MATERIAL_ID)
         _simulationHandler->bind(material);
     return material;
 }
