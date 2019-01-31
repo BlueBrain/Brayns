@@ -5,7 +5,7 @@ import React, {
     PureComponent,
     RefObject
 } from 'react';
-import Dropzone from 'react-dropzone';
+import Dropzone, {DropzoneRenderArgs} from 'react-dropzone';
 
 import {BinaryParams} from 'brayns';
 import classNames from 'classnames';
@@ -119,13 +119,6 @@ class DataPortal extends PureComponent<Props, State> {
         }
     }
 
-    showDropHint = () => {
-        this.setState({showDropHint: true});
-    }
-    hideDropHint = () => {
-        this.setState({showDropHint: false});
-    }
-
     import = async (files: File[]) => {
         const {context} = this.state;
 
@@ -133,29 +126,21 @@ class DataPortal extends PureComponent<Props, State> {
         this.onClose();
 
         if (needsUserInput(files, context)) {
-            this.setState(state => {
-                const models = {
-                    models: files.map(file => {
-                        const name = findLoader(file, context);
-                        return {
-                            file,
-                            name,
-                            properties: defaultProps(name, context.loaders!)
-                        };
-                    })
-                };
-                // If user added a file from native file select
-                if (state.showDropHint) {
+            dispatchKeyboardLock(true);
+
+            const models = {
+                models: files.map(file => {
+                    const name = findLoader(file, context);
                     return {
-                        ...models,
-                        showDropHint: false
+                        file,
+                        name,
+                        properties: defaultProps(name, context.loaders!)
                     };
-                } else {
-                    return {
-                        ...models,
-                        openLoaderProps: true
-                    };
-                }
+                })
+            };
+            this.setState({
+                ...models,
+                openLoaderProps: true
             });
         } else {
             const items = files.map(file => {
@@ -171,19 +156,8 @@ class DataPortal extends PureComponent<Props, State> {
                 };
             });
 
-            this.hideDropHint();
             this.upload(items);
         }
-    }
-
-    openLoaderProps = async () => {
-        const {models} = this.state;
-        if (!models.length) {
-            return;
-        }
-
-        dispatchKeyboardLock(true);
-        this.setState({openLoaderProps: true});
     }
 
     closeLoaderProps = () => {
@@ -214,7 +188,6 @@ class DataPortal extends PureComponent<Props, State> {
             ])
         }));
 
-        // this.hideDropHint();
         this.upload(items);
         this.closeLoaderProps();
     }
@@ -282,7 +255,6 @@ class DataPortal extends PureComponent<Props, State> {
             width
         } = this.props;
         const {
-            showDropHint,
             openLoaderProps,
             models,
             context
@@ -291,41 +263,41 @@ class DataPortal extends PureComponent<Props, State> {
         const fullScreen = isWidthDown('xs', width);
         const canUpload = !disabled && models.every(m => m.name.length > 0);
 
+        const dropzone = ({getRootProps, getInputProps, isDragActive}: DropzoneRenderArgs) => (
+            <div {...getRootProps({className: classNames(classes.container, className)})}>
+                <input {...getInputProps()} />
+
+                <Fade
+                    in={isDragActive}
+                    unmountOnExit
+                    timeout={{enter: 150, exit: 50}}
+                >
+                    <div className={classes.overlay}>
+                        <div className={classes.gutterBottom}>
+                            <InsertDriveFileIcon style={{fontSize: 26}} />
+                        </div>
+                        <Typography variant="h6" color="inherit" gutterBottom>Drop files/folders here to upload</Typography>
+                        <Typography variant="caption" color="inherit">Use an archive for meshes with materials</Typography>
+                    </div>
+                </Fade>
+
+                {children}
+            </div>
+        );
+
         return (
             <Fragment>
                 <Dropzone
                     key="data-portal"
                     ref={this.dropzoneRef}
                     getDataTransferItems={fromEvent}
-                    className={classNames(classes.container, className)}
-                    onDragEnter={this.showDropHint}
-                    onDragLeave={this.hideDropHint}
                     onDrop={this.import}
                     onFileDialogCancel={this.onClose}
                     disabled={disabled}
                     multiple
                     disableClick
-                    disablePreview
                 >
-                    <Fade
-                        in={showDropHint}
-                        unmountOnExit
-                        timeout={{enter: 150, exit: 50}}
-                        onExited={this.openLoaderProps}
-                    >
-                        <div className={classes.overlay}>
-                            <div className={classes.gutterBottom}>
-                                <InsertDriveFileIcon style={{fontSize: 26}} />
-                            </div>
-                            <Typography variant="h6" color="inherit" gutterBottom>
-                                Drop files/folders here to upload
-                            </Typography>
-                            <Typography variant="caption" color="inherit">
-                                Use an archive for meshes with materials
-                            </Typography>
-                        </div>
-                    </Fade>
-                    {children}
+                    {dropzone}
                 </Dropzone>
 
                 <Dialog
@@ -376,7 +348,6 @@ interface Props extends WithStyles<typeof styles>, WithWidth {
 
 interface State {
     models: ModelWithLoader[];
-    showDropHint?: boolean;
     openLoaderProps?: boolean;
     context: LoadersContext;
 }
