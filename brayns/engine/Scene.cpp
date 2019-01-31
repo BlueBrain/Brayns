@@ -155,8 +155,6 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
     // Since models can be added concurrently we check if that is supported
     if (supportsConcurrentSceneUpdates())
         model.commitGeometry();
-    else
-        markModified();
 
     {
         std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
@@ -169,31 +167,39 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
                 {true, true, modelDescriptor->getTransformation()});
     }
 
+    markModified();
+
     return modelDescriptor->getModelID();
 }
 
 bool Scene::removeModel(const size_t id)
 {
-    std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+    ModelDescriptorPtr model = nullptr;
 
     if (supportsConcurrentSceneUpdates())
     {
-        auto model =
-            _remove(_modelDescriptors, id, &ModelDescriptor::getModelID);
-        if (model)
         {
-            model->callOnRemoved();
-            return true;
+            std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+            model =
+                _remove(_modelDescriptors, id, &ModelDescriptor::getModelID);
         }
+        if (model)
+            model->callOnRemoved();
     }
     else
     {
-        auto model = _find(_modelDescriptors, id, &ModelDescriptor::getModelID);
-        if (model)
         {
-            model->markForRemoval();
-            return true;
+            std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+            model = _find(_modelDescriptors, id, &ModelDescriptor::getModelID);
         }
+        if (model)
+            model->markForRemoval();
+    }
+
+    if (model != nullptr)
+    {
+        markModified();
+        return true;
     }
 
     return false;

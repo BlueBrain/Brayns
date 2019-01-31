@@ -1304,7 +1304,6 @@ public:
                                   [& engine = _engine](const size_ts& ids) {
                                       for (const auto id : ids)
                                           engine.getScene().removeModel(id);
-                                      engine.getScene().markModified();
                                       engine.triggerRender();
                                       return true;
                                   });
