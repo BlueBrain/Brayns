@@ -434,11 +434,12 @@ public:
     }
     const std::set<BVHFlag>& getBVHFlags() const { return _bvhFlags; }
     void updateBounds();
+
+protected:
     /** Factory method to create an engine-specific material. */
     BRAYNS_API virtual MaterialPtr createMaterialImpl(
         const PropertyMap& properties = {}) = 0;
 
-protected:
     /** Mark all geometries as clean. */
     void _markGeometriesClean();
 

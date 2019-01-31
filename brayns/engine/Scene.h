@@ -220,9 +220,9 @@ public:
         return std::shared_lock<std::shared_timed_mutex>(_modelMutex);
     }
 
+protected:
     /** @return True if this scene supports scene updates from any thread. */
     virtual bool supportsConcurrentSceneUpdates() const { return false; }
-protected:
     void _computeBounds();
 
     ParametersManager& _parametersManager;
