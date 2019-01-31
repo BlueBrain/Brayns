@@ -69,13 +69,12 @@ export class ModelEditor extends PureComponent<Props, State> {
             />
         ) : <span />;
 
-        return (
+        return hasProps ? (
             <ExpansionPanel
                 expanded={expanded === 'props'}
                 classes={{root: classes.panel}}
                 onChange={this.createPanelToggleHandler('props')}
                 elevation={0}
-                disabled={!hasProps}
             >
                 <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                     <Typography>Properties</Typography>
@@ -84,7 +83,7 @@ export class ModelEditor extends PureComponent<Props, State> {
                     {fields}
                 </ExpansionPanelDetails>
             </ExpansionPanel>
-        );
+        ) : null;
     }, modelPropsRenderKey);
 
     updateSettings = (settings: Partial<ModelProps>) => {
