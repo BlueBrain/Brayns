@@ -35,7 +35,7 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import ComputerIcon from '@material-ui/icons/Computer';
 import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
-import HelpIcon from '@material-ui/icons/Help';
+import KeyboardIcon from '@material-ui/icons/Keyboard';
 import LayersIcon from '@material-ui/icons/Layers';
 import LayersClearIcon from '@material-ui/icons/LayersClear';
 import LinkIcon from '@material-ui/icons/Link';
@@ -763,24 +763,30 @@ class App extends PureComponent<Props, State> {
                                             <ChevronRightIcon />
                                         </IconButton>
                                         <span className={classes.spacer} />
-                                        <IconButton
-                                            onClick={this.openAppSettings}
-                                            aria-label="Open settings"
-                                        >
-                                            <SettingsIcon />
-                                        </IconButton>
-                                        <IconButton
-                                            onClick={this.openAppInfo}
-                                            aria-label="Show app info"
-                                        >
-                                            <DeveloperModeIcon />
-                                        </IconButton>
-                                        <IconButton
-                                            onClick={this.openShortcuts}
-                                            aria-label="Show shortcuts"
-                                        >
-                                            <HelpIcon />
-                                        </IconButton>
+                                        <Tooltip title={'App settings'} {...TOOLTIP_DELAY}>
+                                            <IconButton
+                                                onClick={this.openAppSettings}
+                                                aria-label="Open settings"
+                                            >
+                                                <SettingsIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title={'About app'} {...TOOLTIP_DELAY}>
+                                            <IconButton
+                                                onClick={this.openAppInfo}
+                                                aria-label="Show app info"
+                                            >
+                                                <DeveloperModeIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title={'Shortcuts'} {...TOOLTIP_DELAY}>
+                                            <IconButton
+                                                onClick={this.openShortcuts}
+                                                aria-label="Show shortcuts"
+                                            >
+                                                <KeyboardIcon />
+                                            </IconButton>
+                                        </Tooltip>
                                     </div>
                                     <RendererSettings disabled={hasSocketError} />
                                 </div>
