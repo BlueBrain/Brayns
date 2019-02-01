@@ -26,5 +26,5 @@ constexpr auto BRAYNS_TESTDATA_MODEL_UNSUPPORTED_PATH =
     BRAYNS_TESTDATA_PATH "modelsInvalid/unsupported.abc";
 constexpr auto BRAYNS_TESTDATA_MODEL_PDB_PATH = BRAYNS_TESTDATA_PATH "1bna.pdb";
 constexpr auto BRAYNS_TESTDATA_MODEL_CAPSULE_PATH =
-    BRAYNS_TESTDATA_PATH "modelsValid/capsule/capsule.obj";
+    BRAYNS_TESTDATA_PATH "modelsValid/tex_capsule.zip";
 #endif
