@@ -196,7 +196,7 @@ bool Scene::removeModel(const size_t id)
             model->markForRemoval();
     }
 
-    if (model != nullptr)
+    if (model)
     {
         markModified();
         return true;
