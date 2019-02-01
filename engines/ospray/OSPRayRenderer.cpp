@@ -172,7 +172,7 @@ void OSPRayRenderer::_createOSPRenderer()
     if (_camera)
         ospSetObject(_renderer, "camera", _camera->impl());
     _currentOSPRenderer = getCurrentType();
-    markModified();
+    markModified(false);
 }
 
 void OSPRayRenderer::_commitRendererMaterials()

@@ -93,6 +93,6 @@ void OSPRayCamera::_createOSPCamera()
         ospRelease(_camera);
     _camera = newCamera;
     _currentOSPCamera = getCurrentType();
-    markModified();
+    markModified(false);
 }
 }
