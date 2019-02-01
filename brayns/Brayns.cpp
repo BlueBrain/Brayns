@@ -78,11 +78,13 @@ struct Brayns::Impl : public PluginAPI
         _registerKeyboardShortcuts();
         _setupCameraManipulator(CameraMode::inspect, false);
 
-        _pluginManager.initPlugins(this);
+        // Loaders before plugin init since 'Brain Atlas' uses the mesh loader
+        _registerLoaders();
 
+        // Plugin init before frame buffer creation needed by OpenDeck plugin
+        _pluginManager.initPlugins(this);
         _createFrameBuffer();
 
-        _registerLoaders();
         _loadData();
 
         _engine->getScene().commit(); // Needed to obtain a bounding box
