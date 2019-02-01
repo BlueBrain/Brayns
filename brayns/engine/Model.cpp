@@ -421,11 +421,10 @@ void Model::updateSizeInBytes()
         _sizeInBytes += sdfNeighbours.size() * sizeof(size_t);
 }
 
-void Model::_updateBounds()
+void Model::updateBounds()
 {
     if (_spheresDirty)
     {
-        _spheresDirty = false;
         _sphereBounds.reset();
         for (const auto& spheres : _spheres)
             if (spheres.first != BOUNDINGBOX_MATERIAL_ID)
@@ -438,7 +437,6 @@ void Model::_updateBounds()
 
     if (_cylindersDirty)
     {
-        _cylindersDirty = false;
         _cylindersBounds.reset();
         for (const auto& cylinders : _cylinders)
             if (cylinders.first != BOUNDINGBOX_MATERIAL_ID)
@@ -451,7 +449,6 @@ void Model::_updateBounds()
 
     if (_conesDirty)
     {
-        _conesDirty = false;
         _conesBounds.reset();
         for (const auto& cones : _cones)
             if (cones.first != BOUNDINGBOX_MATERIAL_ID)
@@ -464,7 +461,6 @@ void Model::_updateBounds()
 
     if (_trianglesMeshesDirty)
     {
-        _trianglesMeshesDirty = false;
         _trianglesMeshesBounds.reset();
         for (const auto& mesh : _trianglesMeshes)
             if (mesh.first != BOUNDINGBOX_MATERIAL_ID)
@@ -474,7 +470,6 @@ void Model::_updateBounds()
 
     if (_streamlinesDirty)
     {
-        _streamlinesDirty = false;
         _streamlinesBounds.reset();
         for (const auto& streamline : _streamlines)
             for (size_t index = 0; index < streamline.second.vertex.size();
@@ -491,7 +486,6 @@ void Model::_updateBounds()
 
     if (_sdfGeometriesDirty)
     {
-        _sdfGeometriesDirty = false;
         _sdfGeometriesBounds.reset();
         for (const auto& geom : _sdf.geometries)
             _sdfGeometriesBounds.merge(getSDFBoundingBox(geom));
@@ -499,7 +493,6 @@ void Model::_updateBounds()
 
     if (_volumesDirty)
     {
-        _volumesDirty = false;
         _volumesBounds.reset();
         for (const auto& volume : _volumes)
             _volumesBounds.merge(volume->getBounds());
@@ -513,6 +506,17 @@ void Model::_updateBounds()
     _bounds.merge(_streamlinesBounds);
     _bounds.merge(_sdfGeometriesBounds);
     _bounds.merge(_volumesBounds);
+}
+
+void Model::_markGeometriesClean()
+{
+    _spheresDirty = false;
+    _cylindersDirty = false;
+    _conesDirty = false;
+    _trianglesMeshesDirty = false;
+    _streamlinesDirty = false;
+    _sdfGeometriesDirty = false;
+    _volumesDirty = false;
 }
 
 MaterialPtr Model::createMaterial(const size_t materialId,

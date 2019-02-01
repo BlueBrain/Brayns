@@ -237,8 +237,6 @@ void OSPRayModel::_commitCones(const size_t materialId)
     ospSetObject(geometry, "cones", data);
     ospRelease(data);
 
-    // Needed by the OptiX module
-    ospSet1i(geometry, "bytes_per_cone", sizeof(Cone));
     ospCommit(geometry);
 
     _addGeometryToModel(geometry, materialId);
@@ -512,7 +510,8 @@ void OSPRayModel::commitGeometry()
     if (_sdfGeometriesDirty)
         _commitSDFGeometries();
 
-    _updateBounds();
+    updateBounds();
+    _markGeometriesClean();
     _setBVHFlags();
 
     // handled by the scene

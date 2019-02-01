@@ -221,6 +221,8 @@ public:
     }
 
 protected:
+    /** @return True if this scene supports scene updates from any thread. */
+    virtual bool supportsConcurrentSceneUpdates() const { return false; }
     void _computeBounds();
 
     ParametersManager& _parametersManager;

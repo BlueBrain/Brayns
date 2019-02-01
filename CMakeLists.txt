@@ -112,6 +112,11 @@ else()
   common_find_package_disable(ospray)
 endif()
 
+option(BRAYNS_OPTIX_ENABLED "Activate OptiX rendering engine" OFF)
+if(BRAYNS_OPTIX_ENABLED)
+  add_subdirectory(engines/optix)
+endif()
+
 # Mesh loading
 common_find_package(assimp SYSTEM)
 option(BRAYNS_ASSIMP_ENABLED "Activate assimp library for standard 3D file format management" ${assimp_FOUND})

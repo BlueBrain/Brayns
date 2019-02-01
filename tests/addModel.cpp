@@ -112,7 +112,6 @@ BOOST_AUTO_TEST_CASE(xyz_obj)
     auto newNbModels = getScene().getNumModels();
     BOOST_CHECK_EQUAL(initialNbModels + 2, newNbModels);
     getScene().removeModel(newNbModels - 1);
-    getScene().markModified();
     newNbModels = getScene().getNumModels();
     BOOST_CHECK_EQUAL(initialNbModels + 1, newNbModels);
 }

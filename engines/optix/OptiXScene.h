@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -18,29 +18,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYSCENE_H
-#define OSPRAYSCENE_H
+#pragma once
 
 #include <brayns/common/types.h>
 #include <brayns/engine/Scene.h>
 
-#include <ospray.h>
+#include <optixu/optixpp_namespace.h>
+
+#include "CommonStructs.h"
 
 namespace brayns
 {
 /**
 
-   OSPRay specific scene
+   OptiX specific scene
 
-   This object is the OSPRay specific implementation of a scene
+   This object is the OptiX specific implementation of a scene
 
 */
-class OSPRayScene : public Scene
+class OptiXScene : public Scene
 {
 public:
-    OSPRayScene(ParametersManager& parametersManager,
-                const size_t memoryManagementFlags);
-    ~OSPRayScene();
+    OptiXScene(ParametersManager& parametersManager);
+    ~OptiXScene();
 
     /** @copydoc Scene::commit */
     void commit() final;
@@ -48,25 +48,23 @@ public:
     /** @copydoc Scene::commitLights */
     bool commitLights() final;
 
-    /** @copydoc Scene::supportsConcurrentSceneUpdates. */
-    bool supportsConcurrentSceneUpdates() const final { return true; }
+    /** @copydoc Scene::createModel */
     ModelPtr createModel() const final;
 
-    OSPModel getModel() { return _rootModel; }
-    OSPData lightData() { return _ospLightData; }
-    ModelDescriptorPtr getSimulatedModel();
-
+    /** @copydoc Scene::supportsConcurrentSceneUpdates. */
+    bool supportsConcurrentSceneUpdates() const final { return false; }
 private:
-    bool _commitVolumeAndTransferFunction(ModelDescriptors& modelDescriptors);
+    optix::Buffer _lightBuffer{nullptr};
+    std::vector<BasicLight> _optixLights;
+    ::optix::Group _rootGroup{nullptr};
 
-    OSPModel _rootModel{nullptr};
+    // Material Lookup tables
+    optix::Buffer _colorMapBuffer{nullptr};
+    optix::Buffer _emissionIntensityMapBuffer{nullptr};
+    ::optix::TextureSampler _backgroundTextureSampler{nullptr};
+    ::optix::TextureSampler _dummyTextureSampler{nullptr};
 
-    std::vector<OSPLight> _ospLights;
-    OSPData _ospLightData{nullptr};
-
-    size_t _memoryManagementFlags{0};
-
-    ModelDescriptors _activeModels;
+    // Volumes
+    optix::Buffer _volumeBuffer;
 };
-}
-#endif // OSPRAYSCENE_H
+} // namespace brayns

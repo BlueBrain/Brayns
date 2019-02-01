@@ -151,7 +151,10 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
 
     model.setBVHFlags(defaultBVHFlags);
     model.buildBoundingBox();
-    model.commitGeometry();
+
+    // Since models can be added concurrently we check if that is supported
+    if (supportsConcurrentSceneUpdates())
+        model.commitGeometry();
 
     {
         std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
@@ -164,19 +167,41 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
                 {true, true, modelDescriptor->getTransformation()});
     }
 
-    _computeBounds();
+    markModified();
+
     return modelDescriptor->getModelID();
 }
 
 bool Scene::removeModel(const size_t id)
 {
-    std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-    auto model = _remove(_modelDescriptors, id, &ModelDescriptor::getModelID);
+    ModelDescriptorPtr model = nullptr;
+
+    if (supportsConcurrentSceneUpdates())
+    {
+        {
+            std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+            model =
+                _remove(_modelDescriptors, id, &ModelDescriptor::getModelID);
+        }
+        if (model)
+            model->callOnRemoved();
+    }
+    else
+    {
+        {
+            std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+            model = _find(_modelDescriptors, id, &ModelDescriptor::getModelID);
+        }
+        if (model)
+            model->markForRemoval();
+    }
+
     if (model)
     {
-        model->callOnRemoved();
+        markModified();
         return true;
     }
+
     return false;
 }
 
@@ -278,7 +303,6 @@ void Scene::buildDefault()
     BRAYNS_INFO << "Building default Cornell Box scene" << std::endl;
 
     auto model = createModel();
-
     const Vector3f WHITE = {1.f, 1.f, 1.f};
 
     const Vector3f positions[8] = {

@@ -259,9 +259,10 @@ private:
     {
         auto engineName =
             _parametersManager.getApplicationParameters().getEngine();
-        // TODO: remove after braynsOptixEngine is available
+
         if (engineName == "optix")
-            engineName = "braynsOSPRayEngine";
+            engineName = "braynsOptixEngine";
+
         _engine = _engineFactory.create(engineName);
         if (!_engine)
             throw std::runtime_error("Unsupported engine: " + engineName);
@@ -588,19 +589,19 @@ private:
     void _diffuseShading()
     {
         _engine->getRenderer().updateProperty("shadingEnabled", true);
-        _engine->getRenderer().updateProperty("electronShading", false);
+        _engine->getRenderer().updateProperty("electronShadingEnabled", false);
     }
 
     void _electronShading()
     {
         _engine->getRenderer().updateProperty("shadingEnabled", false);
-        _engine->getRenderer().updateProperty("electronShading", true);
+        _engine->getRenderer().updateProperty("electronShadingEnabled", true);
     }
 
     void _disableShading()
     {
         _engine->getRenderer().updateProperty("shadingEnabled", false);
-        _engine->getRenderer().updateProperty("electronShading", false);
+        _engine->getRenderer().updateProperty("electronShadingEnabled", false);
     }
 
     void _increaseAmbientOcclusionStrength()
