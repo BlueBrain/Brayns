@@ -29,7 +29,13 @@
 #include <brayns/engine/Scene.h>
 
 #define BOOST_TEST_MODULE testImages
+
+#include <brayns/defines.h>
+#ifdef BRAYNS_USE_NETWORKING
+#include "ClientServer.h"
+#else
 #include <boost/test/unit_test.hpp>
+#endif
 
 #include "PDiffHelpers.h"
 
@@ -76,6 +82,28 @@ BOOST_AUTO_TEST_CASE(render_xyz_and_compare)
     BOOST_CHECK(compareTestImage("testdataMonkey_smaller.png",
                                  brayns.getEngine().getFrameBuffer()));
 }
+
+#ifdef BRAYNS_USE_NETWORKING
+BOOST_AUTO_TEST_CASE(render_xyz_change_radius_from_rockets)
+{
+    const auto path = BRAYNS_TESTDATA_MODEL_MONKEY_PATH;
+    const std::vector<const char*> argv = {path, "--disable-accumulation"};
+
+    ClientServer clientServer(argv);
+
+    auto model = clientServer.getBrayns().getEngine().getScene().getModel(0);
+    auto props = model->getProperties();
+    props.updateProperty("radius", props.getProperty<double>("radius") / 2.);
+
+    clientServer.makeNotification<brayns::PropertyMap>("set-model-properties",
+                                                       props);
+
+    clientServer.getBrayns().commitAndRender();
+    BOOST_CHECK(compareTestImage(
+        "testdataMonkey_smaller.png",
+        clientServer.getBrayns().getEngine().getFrameBuffer()));
+}
+#endif
 
 BOOST_AUTO_TEST_CASE(render_demo_with_proximity_renderer)
 {

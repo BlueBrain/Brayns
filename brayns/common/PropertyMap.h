@@ -124,8 +124,8 @@ struct Property
     }
 
     template <typename T>
-    Property(const std::string& name_, const T value,
-             const T min_, const T max_, const MetaData& metaData_ = {})
+    Property(const std::string& name_, const T value, const T min_,
+             const T max_, const MetaData& metaData_ = {})
         : name(name_)
         , metaData(metaData_)
         , type(getType<T>())
@@ -183,9 +183,7 @@ struct Property
     {
         assertValidType<T>();
         _checkType<T>();
-        _data = v;
-        if (_modifiedCallback)
-            _modifiedCallback(*this);
+        _setData(v);
     }
 
     template <typename T>
@@ -255,6 +253,13 @@ private:
         return boost::any_cast<T>(v);
     }
 
+    void _setData(const boost::any& data)
+    {
+        _data = data;
+        if (_modifiedCallback)
+            _modifiedCallback(*this);
+    }
+
     void _copy(const Property& from);
 };
 
@@ -315,7 +320,7 @@ public:
             if (property->type != newProperty.type)
                 throw std::runtime_error(
                     "setProperty does not allow for changing the type");
-            property->_data = newProperty._data;
+            property->_setData(newProperty._data);
         }
         else
             _properties.push_back(std::make_shared<Property>(newProperty));

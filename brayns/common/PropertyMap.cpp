@@ -257,21 +257,15 @@ void Property::_copy(const Property& from)
     };
 
     if (from.type == type)
-    {
-        _data = from._data;
-    }
+        _setData(from._data);
     else if (compatibleEnums(*this, from))
-    {
         setEnum(*this, from);
-    }
     else if (compatibleTypes(type, from.type))
-    {
         setValue(*this, from);
-    }
     else
     {
-        throw std::runtime_error("Incompatible types for property '" +
-                                 name + "'");
+        throw std::runtime_error("Incompatible types for property '" + name +
+                                 "'");
     }
 }
 
