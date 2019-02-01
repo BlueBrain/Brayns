@@ -137,6 +137,7 @@ BOOST_AUTO_TEST_CASE(render_protein_in_stereo_and_compare)
                                  *brayns.getEngine().getFrameBuffers()[1]));
 }
 
+#if BRAYNS_USE_LIBARCHIVE
 BOOST_AUTO_TEST_CASE(render_capsule_and_compare)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
@@ -151,3 +152,4 @@ BOOST_AUTO_TEST_CASE(render_capsule_and_compare)
     BOOST_CHECK(compareTestImage("testCapsule.png",
                                  brayns.getEngine().getFrameBuffer()));
 }
+#endif
