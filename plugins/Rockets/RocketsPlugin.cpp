@@ -264,7 +264,9 @@ public:
                               const PropertyMap& input,
                               const std::function<void(PropertyMap)>& action)
     {
-        _jsonrpcServer->connect(desc.methodName, [action](const auto& request) {
+        _jsonrpcServer->connect(desc.methodName, [action,
+                                                  this](const auto& request) {
+            ScopedCurrentClient scope(this->_currentClientID, request.clientID);
             action(jsonToPropertyMap(request.message));
         });
 
@@ -275,7 +277,11 @@ public:
     void registerNotification(const RpcDescription& desc,
                               const std::function<void()>& action)
     {
-        _jsonrpcServer->connect(desc.methodName, [action] { action(); });
+        _jsonrpcServer->connect(desc.methodName, [action,
+                                                  this](const auto& request) {
+            ScopedCurrentClient scope(this->_currentClientID, request.clientID);
+            action();
+        });
 
         _handleSchema(desc.methodName, buildJsonRpcSchemaNotify(desc));
     }
@@ -284,8 +290,9 @@ public:
                          const PropertyMap& input, const PropertyMap& output,
                          const std::function<PropertyMap(PropertyMap)>& action)
     {
-        _bindEndpoint(desc.methodName, [ name = desc.methodName,
-                                         action ](const auto& request) {
+        _bindEndpoint(desc.methodName, [ name = desc.methodName, action,
+                                         this ](const auto& request) {
+            ScopedCurrentClient scope(this->_currentClientID, request.clientID);
             try
             {
                 return Response{
@@ -307,7 +314,9 @@ public:
     void registerRequest(const RpcDescription& desc, const PropertyMap& output,
                          const std::function<PropertyMap()>& action)
     {
-        _jsonrpcServer->bind(desc.methodName, [action](const auto&) {
+        _jsonrpcServer->bind(desc.methodName, [action,
+                                               this](const auto& request) {
+            ScopedCurrentClient scope(this->_currentClientID, request.clientID);
             return Response{to_json(action())};
         });
 
@@ -317,28 +326,34 @@ public:
 
     void _registerRequest(const std::string& name, const RetParamFunc& action)
     {
-        _jsonrpcServer->bind(name, [action](const auto& request) {
+        _jsonrpcServer->bind(name, [action, this](const auto& request) {
+            ScopedCurrentClient scope(this->_currentClientID, request.clientID);
             return Response{action(request.message)};
         });
     }
 
     void _registerRequest(const std::string& name, const RetFunc& action)
     {
-        _jsonrpcServer->bind(name, [action](const auto&) {
+        _jsonrpcServer->bind(name, [action, this](const auto& request) {
+            ScopedCurrentClient scope(this->_currentClientID, request.clientID);
             return Response{action()};
         });
     }
 
     void _registerNotification(const std::string& name, const ParamFunc& action)
     {
-        _jsonrpcServer->connect(name, [action](const auto& request) {
+        _jsonrpcServer->connect(name, [action, this](const auto& request) {
+            ScopedCurrentClient scope(this->_currentClientID, request.clientID);
             action(request.message);
         });
     }
 
     void _registerNotification(const std::string& name, const VoidFunc& action)
     {
-        _jsonrpcServer->connect(name, [action] { action(); });
+        _jsonrpcServer->connect(name, [action, this](const auto& request) {
+            ScopedCurrentClient scope(this->_currentClientID, request.clientID);
+            action();
+        });
     }
 
     void processDelayedNotifies()
