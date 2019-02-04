@@ -4,15 +4,9 @@ import React, {
     RefObject
 } from 'react';
 
-import {
-    GET_CAMERA,
-    INSPECT,
-    InspectParams,
-    SET_CAMERA
-} from 'brayns';
-import {isNumber} from 'lodash';
-import {BehaviorSubject, fromEvent, Subscription} from 'rxjs';
-import {filter, mergeMap} from 'rxjs/operators';
+import {INSPECT, InspectParams} from 'brayns';
+import {fromEvent, Subscription} from 'rxjs';
+import {mergeMap} from 'rxjs/operators';
 import {
     PerspectiveCamera,
     Quaternion,
@@ -26,23 +20,16 @@ import {
     WithStyles
 } from '@material-ui/core/styles';
 
-import brayns, {ifReady, onReady} from '../../common/client';
-import {
-    CameraChange,
-    dispatchCamera,
-    dispatchNotification,
-    onCameraChange,
-    onCameraSettingsChange,
-    onViewportChange
-} from '../../common/events';
-import {compareVectors} from '../../common/math';
+import brayns, {
+    CameraCoords,
+    ifReady,
+    withCamera,
+    WithCamera,
+} from '../../common/client';
+import {dispatchNotification, onViewportChange} from '../../common/events';
 import {isCmdKey} from '../../common/utils';
 
 import {EventType, TrackballControls} from './trackball-controls';
-
-
-const PAN_SPEED_FACTOR = 2;
-const ZOOM_SPEED_FACTOR = Math.E;
 
 
 const styles = (theme: Theme) => createStyles({
@@ -76,8 +63,6 @@ export class Camera extends PureComponent<Props> {
         return current;
     }
 
-    private current = new BehaviorSubject<CameraChange | null>(null);
-
     inspect = async (evt: MouseEvent) => {
         const viewport = this.viewport;
         if (!viewport) {
@@ -108,8 +93,8 @@ export class Camera extends PureComponent<Props> {
         }
     }
 
-    update = (camera: CameraChange) => {
-        if (!this.camera || !this.controls) {
+    update = (camera?: CameraCoords) => {
+        if (!camera || !this.camera || !this.controls) {
             return;
         }
 
@@ -124,10 +109,6 @@ export class Camera extends PureComponent<Props> {
         this.camera.up.copy(up);
 
         this.controls.target.fromArray(camera.target ? camera.target : [0, 0, 0]);
-
-        if (isNotEqual(this.current.value, camera)) {
-            dispatchCamera(camera);
-        }
     }
 
     resize(width: number, height: number) {
@@ -186,44 +167,20 @@ export class Camera extends PureComponent<Props> {
 
         this.subs.push(...[
             // When camera moves we sync with the renderer camera
-            // Skip initial change
             cameraChange.subscribe(change => {
-                dispatchCamera(change);
+                this.props.onSetCameraCoords!(change);
             }),
-            // Capture camera update events sent from other components
-            onCameraChange()
-                .pipe(filter(change => isNotEqual(this.current.value, change)))
-                .subscribe(camera => {
-                    brayns.notify(SET_CAMERA, camera);
-                    this.current.next(camera);
-                    this.update(camera);
-                }),
-            onCameraSettingsChange()
-                .subscribe(({sensitivity}) => {
-                    if (isNumber(sensitivity)) {
-                        this.controls!.panSpeed = sensitivity / PAN_SPEED_FACTOR;
-                        this.controls!.rotateSpeed = sensitivity;
-                        this.controls!.zoomSpeed = ZOOM_SPEED_FACTOR * sensitivity;
-                    }
-                }),
             // Listen to viewport size updates
             onViewportChange()
                 .subscribe(viewport => {
                     const [width, height] = viewport;
                     this.resize(width, height);
-                }),
-            // Get current state on renderer connect
-            onReady().pipe(mergeMap(() => brayns.request(GET_CAMERA)))
-                .subscribe(camera => {
-                    this.current.next(camera);
-                    this.update(camera);
-                }),
-            brayns.observe(SET_CAMERA)
-                .subscribe(camera => {
-                    this.current.next(camera);
-                    this.update(camera);
                 })
         ]);
+    }
+
+    componentDidUpdate() {
+        this.update(this.props.camera);
     }
 
     componentWillUnmount() {
@@ -255,18 +212,13 @@ export class Camera extends PureComponent<Props> {
     }
 }
 
-export default style(Camera);
+export default style(
+    withCamera(Camera)
+);
 
 
 function aspectRatio(width: number, height: number): number {
     return width / height;
-}
-
-function isNotEqual(prev: CameraChange | null, next: CameraChange) {
-    return prev !== next
-        || !prev
-        || !compareVectors(prev.position, next.position)
-        || !compareVectors(prev.orientation, next.orientation);
 }
 
 function getPosition(camera: PerspectiveCamera) {
@@ -285,5 +237,5 @@ function getTarget(controls: TrackballControls) {
     return target.toArray();
 }
 
-
-type Props = WithStyles<typeof styles>;
+type Props = WithStyles<typeof styles>
+    & WithCamera;

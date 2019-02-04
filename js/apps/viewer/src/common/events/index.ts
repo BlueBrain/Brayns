@@ -1,5 +1,4 @@
 export * from './app-params';
-export * from './camera';
 export * from './fps';
 export * from './keyboard';
 export * from './notification';
