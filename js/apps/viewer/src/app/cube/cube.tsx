@@ -5,14 +5,8 @@ import React, {
     RefObject
 } from 'react';
 
-import {GET_CAMERA} from 'brayns';
 import classNames from 'classnames';
-import {animationFrameScheduler, Subscription} from 'rxjs';
-import {
-    debounceTime,
-    mergeMap,
-    observeOn
-} from 'rxjs/operators';
+import {Subscription} from 'rxjs';
 
 import IconButton from '@material-ui/core/IconButton';
 import {
@@ -27,10 +21,8 @@ import ArrowLeftIcon from '@material-ui/icons/ArrowLeft';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import Rotate90DegreesCcwIcon from '@material-ui/icons/Rotate90DegreesCcw';
 
-import brayns, {onReady} from '../../common/client';
-import {dispatchCamera, onCameraChange} from '../../common/events';
+import {withCamera, WithCamera} from '../../common/client';
 import {
-    CameraProps,
     Face,
     rotateCamera,
     rotateToTarget,
@@ -139,10 +131,10 @@ export class Cube extends PureComponent<Props, State> {
 
     rotateToFace = (target: Face) => async () => {
         this.showControls();
-        const {camera} = this.state;
+        const {camera} = this.props;
         if (camera) {
-            const c = rotateToTarget(camera, target);
-            dispatchCamera(c);
+            const coords = rotateToTarget(camera, target);
+            this.props.onSetCameraCoords!(coords);
         }
     }
 
@@ -154,10 +146,10 @@ export class Cube extends PureComponent<Props, State> {
     rotateToBottom = this.rotateToFace('bottom');
 
     rotate = (rotation: Rotation) => () => {
-        const {camera} = this.state;
+        const {camera} = this.props;
         if (camera) {
-            const result = rotateCamera(camera, rotation);
-            dispatchCamera(result);
+            const coords = rotateCamera(camera, rotation);
+            this.props.onSetCameraCoords!(coords);
         }
     }
 
@@ -192,20 +184,6 @@ export class Cube extends PureComponent<Props, State> {
         }
     }
 
-    componentDidMount() {
-        this.subs.push(...[
-            onReady().pipe(mergeMap(() => brayns.request(GET_CAMERA)))
-                .subscribe(camera => {
-                    this.setState(toState(camera));
-                }),
-            onCameraChange().pipe(
-                debounceTime(50),
-                observeOn(animationFrameScheduler))
-                .subscribe(camera => {
-                    this.setState(toState(camera));
-                })
-        ]);
-    }
     componentWillUnmount() {
         document.removeEventListener('mousedown', this.hideControls);
         while (this.subs.length) {
@@ -215,8 +193,9 @@ export class Cube extends PureComponent<Props, State> {
     }
 
     render() {
-        const {classes, className} = this.props;
-        const {rotation, showControls} = this.state;
+        const {classes, className, camera} = this.props;
+        const {showControls} = this.state;
+        const rotation = toAxisAngle(camera ? camera : {orientation: [0, 0, 0, 1]} as any);
         const transform = toCssRotation(rotation);
 
         const controlVisible = {[classes.controlVisible]: showControls};
@@ -303,16 +282,10 @@ export class Cube extends PureComponent<Props, State> {
     }
 }
 
-export default style(Cube);
+export default style(
+    withCamera(Cube)
+);
 
-
-function toState(camera: CameraProps) {
-    return {
-        camera,
-        // TODO: Fix the transition from back -> left (and others)
-        rotation: toAxisAngle(camera)
-    };
-}
 
 function toCssRotation(rotation?: number[]) {
     if (Array.isArray(rotation)) {
@@ -332,12 +305,11 @@ function toPx(num: number): string {
 }
 
 
-interface Props extends WithStyles<typeof styles> {
+interface Props extends WithStyles<typeof styles>, WithCamera {
     className?: string;
 }
 
 interface State {
-    camera?: CameraProps;
     rotation?: number[];
     showControls?: boolean;
 }

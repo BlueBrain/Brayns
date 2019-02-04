@@ -1,35 +1,26 @@
 import React, {PureComponent} from 'react';
 
-import {GET_CAMERA, GET_SCENE} from 'brayns';
-
-import brayns from '../../common/client';
+import {GET_SCENE} from 'brayns';
 
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import FilterCenterFocusIcon from '@material-ui/icons/FilterCenterFocus';
 
+import brayns, {withCamera, WithCamera} from '../../common/client';
 import {KeyCode, TOOLTIP_DELAY} from '../../common/constants';
-import {dispatchCamera, dispatchCameraSettings} from '../../common/events';
-import {rotateToBoundingBox} from '../../common/math';
 import {isCmdKey} from '../../common/utils';
 
-
-export default class ResetCamera extends PureComponent<Props> {
+class ResetCamera extends PureComponent<Props> {
     resetCamera = async () => {
-        const camera = await brayns.request(GET_CAMERA);
         const scene = await brayns.request(GET_SCENE);
-        const res = rotateToBoundingBox(camera, scene.bounds);
-        dispatchCamera(res);
-        dispatchCameraSettings({
-            sensitivity: 1
-        });
-    }
+        await this.props.onReset!(scene.bounds);
+    };
 
-    resetCameraOnKeydown = (evt: KeyboardEvent) => {
+    resetCameraOnKeydown = async (evt: KeyboardEvent) => {
         const {disabled} = this.props;
         if (!disabled && evt.keyCode === KeyCode.R && evt.shiftKey && !isCmdKey(evt)) {
             evt.preventDefault();
-            this.resetCamera();
+            await this.resetCamera();
         }
     }
 
@@ -60,6 +51,8 @@ export default class ResetCamera extends PureComponent<Props> {
     }
 }
 
-interface Props {
+export default withCamera(ResetCamera);
+
+interface Props extends WithCamera {
     disabled?: boolean;
 }

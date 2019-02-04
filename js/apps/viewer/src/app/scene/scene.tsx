@@ -9,7 +9,6 @@ import {
     ADD_CLIP_PLANE,
     BoundingBox,
     ClipPlane,
-    GET_CAMERA,
     GET_CLIP_PLANES,
     GET_SCENE,
     Model,
@@ -25,7 +24,6 @@ import classNames from 'classnames';
 import {pick} from 'lodash';
 import {Subscription} from 'rxjs';
 import {filter, mergeMap} from 'rxjs/operators';
-import {Vector3} from 'three';
 
 import AppBar from '@material-ui/core/AppBar';
 import Drawer, {DrawerClassKey, DrawerProps} from '@material-ui/core/Drawer';
@@ -48,16 +46,17 @@ import AddIcon from '@material-ui/icons/Add';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 
-import brayns, {onReady} from '../../common/client';
+import brayns, {
+    onReady,
+    WithCamera,
+    withCamera
+} from '../../common/client';
 import {KeyCode} from '../../common/constants';
 import {
-    dispatchCamera,
-    dispatchCameraSettings,
     dispatchKeyboardLock,
     dispatchNotification,
     onKeyboardLockChange
 } from '../../common/events';
-import {rotateToBoundingBox} from '../../common/math';
 import storage from '../../common/storage';
 
 import ClipPlaneActions from './clip-plane-actions';
@@ -185,12 +184,7 @@ export class SceneModels extends PureComponent<Props, State> {
      */
 
     focusModel = async (box: BoundingBox) => {
-        const camera = await brayns.request(GET_CAMERA);
-        const res = rotateToBoundingBox(camera, box);
-        dispatchCamera(res);
-        dispatchCameraSettings({
-            sensitivity: getModelZoomFactor(box)
-        });
+        this.props.onReset!(box);
     }
 
     updateModel = async (updates: Partial<ModelProps>) => {
@@ -786,7 +780,7 @@ export class SceneModels extends PureComponent<Props, State> {
 }
 
 
-export default style(SceneModels);
+export default style(withCamera(SceneModels));
 
 
 function getSelectionNextVisibility(models: Model[], selectedModels: ModelId[]) {
@@ -798,18 +792,10 @@ function getSelectionNextVisibility(models: Model[], selectedModels: ModelId[]) 
     return false;
 }
 
-function getModelZoomFactor(bb: BoundingBox) {
-    const min = new Vector3(...bb.min);
-    const max = new Vector3(...bb.max);
-    const length = max.sub(min)
-        .length();
-    const factor = Math.log10(length);
-    return Math.abs(factor);
-}
-
 
 interface Props extends Pick<DrawerProps, 'anchor' | 'open' | 'variant'>,
-    WithStyles<typeof styles, true> {
+    WithStyles<typeof styles, true>,
+    WithCamera {
     DrawerClasses?: Partial<ClassNameMap<DrawerClassKey>>;
     SlideProps?: Partial<SlideProps>;
     onClose?(): void;
