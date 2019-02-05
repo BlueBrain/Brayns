@@ -134,7 +134,7 @@ export class Cube extends PureComponent<Props, State> {
         const {camera} = this.props;
         if (camera) {
             const coords = rotateToTarget(camera, target);
-            this.props.onSetCameraCoords!(coords);
+            this.props.onCameraCoordsChange!(coords);
         }
     }
 
@@ -149,7 +149,7 @@ export class Cube extends PureComponent<Props, State> {
         const {camera} = this.props;
         if (camera) {
             const coords = rotateCamera(camera, rotation);
-            this.props.onSetCameraCoords!(coords);
+            this.props.onCameraCoordsChange!(coords);
         }
     }
 

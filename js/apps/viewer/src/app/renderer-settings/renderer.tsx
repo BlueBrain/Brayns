@@ -24,19 +24,19 @@ const MAX_ACC_FRAMES = 1000;
 
 
 class Renderer extends PureComponent<Props> {
-    changeRendererType = (evt: ChangeEvent<HTMLSelectElement>) => this.props.onChangeRendererType!(evt.target.value);
+    changeRendererType = (evt: ChangeEvent<HTMLSelectElement>) => this.props.onRendererTypeChange!(evt.target.value);
 
-    updateSamplesPerPixel = (samplesPerPixel: number) => this.props.onChangeRendererProps!({samplesPerPixel});
+    updateSamplesPerPixel = (samplesPerPixel: number) => this.props.onRendererPropsChange!({samplesPerPixel});
 
-    updateSubsampling = (subsampling: number) => this.props.onChangeRendererProps!({subsampling});
+    updateSubsampling = (subsampling: number) => this.props.onRendererPropsChange!({subsampling});
 
-    updateHeadLight = (evt: ChangeEvent<HTMLInputElement>, checked: boolean) => this.props.onChangeRendererProps!({
+    updateHeadLight = (evt: ChangeEvent<HTMLInputElement>, checked: boolean) => this.props.onRendererPropsChange!({
         headLight: checked
     });
 
     updateMaxAccumFrames = (value: number) => {
         const num = Math.round(value);
-        this.props.onChangeRendererProps!({
+        this.props.onRendererPropsChange!({
             maxAccumFrames: num < MAX_ACC_FRAMES
                 ? num
                 : MAX_ACC_FRAMES
@@ -45,17 +45,17 @@ class Renderer extends PureComponent<Props> {
 
     updateBackgroundColor = (color: number[]) => {
         const rgb = fromRgb(color);
-        this.props.onChangeRendererProps!({
+        this.props.onRendererPropsChange!({
             backgroundColor: rgb
         });
     }
 
     updateEnvironmentMap = (evt: ChangeEvent<HTMLInputElement>) => {
-        this.props.onSetEnvMap!(evt.target.value);
+        this.props.onEnvMapChange!(evt.target.value);
     }
 
     clearEnvMap = () => {
-        this.props.onSetEnvMap!('');
+        this.props.onEnvMapChange!('');
     }
 
     render() {
@@ -63,7 +63,7 @@ class Renderer extends PureComponent<Props> {
             disabled,
             envMap,
             isEnvMapValid,
-            onSetRendererParams,
+            onRendererParamsChange: onSetRendererParams,
             params,
             renderer,
             schema

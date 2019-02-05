@@ -28,9 +28,9 @@ import {findSchemaByTitle} from './utils';
 
 export const CameraContext = createContext<CameraContextValue>({
     params: {},
-    onSetCameraCoords: () => {},
-    onChangeCameraType: () => Promise.resolve(),
-    onSetCameraParams: () => Promise.resolve(),
+    onCameraCoordsChange: () => {},
+    onCameraTypeChange: () => Promise.resolve(),
+    onCameraParamsChange: () => Promise.resolve(),
     onReset: () => Promise.resolve()
 });
 
@@ -139,9 +139,9 @@ export class CameraProvider extends Component<{}, State> {
             camera,
             params,
             schema: currentSchema,
-            onSetCameraCoords: this.setCameraCoords,
-            onChangeCameraType: this.changeCameraType,
-            onSetCameraParams: this.setCameraParams,
+            onCameraCoordsChange: this.setCameraCoords,
+            onCameraTypeChange: this.changeCameraType,
+            onCameraParamsChange: this.setCameraParams,
             onReset: this.reset
         };
         return (
@@ -202,9 +202,9 @@ interface State extends CameraWithParams {
 export type WithCamera = Partial<CameraContextValue>;
 
 export interface CameraContextValue extends CameraWithParams {
-    onSetCameraCoords: SetCameraCoordsFn;
-    onChangeCameraType: ChangeCameraTypeFn;
-    onSetCameraParams: SetCameraParamsFn;
+    onCameraCoordsChange: SetCameraCoordsFn;
+    onCameraTypeChange: ChangeCameraTypeFn;
+    onCameraParamsChange: SetCameraParamsFn;
     onReset: ResetCameraFn;
 }
 

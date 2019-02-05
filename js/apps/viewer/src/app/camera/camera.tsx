@@ -168,7 +168,7 @@ export class Camera extends PureComponent<Props> {
         this.subs.push(...[
             // When camera moves we sync with the renderer camera
             cameraChange.subscribe(change => {
-                this.props.onSetCameraCoords!(change);
+                this.props.onCameraCoordsChange!(change);
             }),
             // Listen to viewport size updates
             onViewportChange()
