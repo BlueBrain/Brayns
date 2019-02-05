@@ -44,7 +44,10 @@ import ThreeSixtyIcon from '@material-ui/icons/ThreeSixty';
 import TimelineIcon from '@material-ui/icons/Timeline';
 import TuneIcon from '@material-ui/icons/Tune';
 
-import brayns, {CameraProvider} from '../common/client';
+import brayns, {
+    CameraProvider,
+    RendererProvider
+} from '../common/client';
 import {GithubIcon, OwlIcon} from '../common/components';
 import {
     APP_BAR_HEIGHT,
@@ -648,182 +651,184 @@ class App extends PureComponent<Props, State> {
                 <MuiThemeProvider theme={theme}>
                     <CssBaseline />
                     <CameraProvider>
-                        <div className={classes.root}>
-                            <div className={classes.appFrame}>
-                                <AppBar color="default" elevation={0} className={classNames(classes.appBar, appBarShift)}>
-                                    <Toolbar className={classes.appBarToolbar} disableGutters>
-                                        <Tooltip title={modelsBtnTitle} {...TOOLTIP_DELAY}>
-                                            <IconButton
-                                                color={modelsBtnColor}
-                                                onClick={this.toggleModelsPanel}
-                                                aria-label="Open models panel"
-                                            >
-                                                {modelsBtnIcon}
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title={'Add model'} placement="bottom" {...TOOLTIP_DELAY}>
-                                            <div>
+                        <RendererProvider>
+                            <div className={classes.root}>
+                                <div className={classes.appFrame}>
+                                    <AppBar color="default" elevation={0} className={classNames(classes.appBar, appBarShift)}>
+                                        <Toolbar className={classes.appBarToolbar} disableGutters>
+                                            <Tooltip title={modelsBtnTitle} {...TOOLTIP_DELAY}>
                                                 <IconButton
-                                                    onClick={this.showAddModelMenu}
-                                                    aria-label="Open add model menu"
-                                                    aria-owns={addModelMenuAnchor ? 'add-model-menu' : ''}
-                                                    aria-haspopup="true"
-                                                    disabled={hasSocketError}
+                                                    color={modelsBtnColor}
+                                                    onClick={this.toggleModelsPanel}
+                                                    aria-label="Open models panel"
                                                 >
-                                                    <CloudUploadIcon />
+                                                    {modelsBtnIcon}
                                                 </IconButton>
-                                            </div>
-                                        </Tooltip>
-                                        <Menu
-                                            id="add-model-menu"
-                                            anchorEl={addModelMenuAnchor}
-                                            open={Boolean(addModelMenuAnchor)}
-                                            onClose={this.hideAddModelMenu}
-                                        >
-                                            <MenuItem onClick={this.openFileDialog}>
-                                                <ComputerIcon className={classes.gutterRight} />
-                                                From your computer
-                                            </MenuItem>
-                                            <MenuItem onClick={this.openLoadModelDialog}>
-                                                <LinkIcon className={classes.gutterRight} />
-                                                From path
-                                            </MenuItem>
-                                        </Menu>
-                                        <span className={classes.spacer} />
-                                        <ResetCamera disabled={hasSocketError} />
-                                        <Snapshot disabled={hasSocketError} />
-                                        <QuitRenderer />
-                                        <Tooltip title={'Report an issue'} {...TOOLTIP_DELAY}>
-                                            <IconButton
-                                                href={BRAYNS_GITHUB_URL}
-                                                target="_blank"
-                                                rel="noopener"
-                                                aria-label="Navigate to Brayns github issues"
-                                            >
-                                                <GithubIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title={settingsBtnTitle} {...TOOLTIP_DELAY}>
-                                            <IconButton
-                                                color={settingsBtnColor}
-                                                onClick={this.toggleSettingsPanel}
-                                                aria-label="Open settings panel"
-                                            >
-                                                <TuneIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </Toolbar>
-                                </AppBar>
-                                {/* https://material-ui-next.com/demos/drawers/#persistent-drawer */}
-                                <Scene
-                                    variant="persistent"
-                                    DrawerClasses={{paper: classNames(classes.drawerPaper, classes.modelsDrawer)}}
-                                    SlideProps={slideProps}
-                                    anchor={'left'}
-                                    open={showModelsPanel}
-                                    onClose={this.closeModelsPanel}
-                                />
-                                <main ref={this.viewportRef} className={classes.viewport}>
-                                    <div className={classes.canvas}>
-                                        <ImageStream />
-                                    </div>
-                                    <div className={classNames(classes.content, contentShift)}>
-                                        <DataPortal
-                                            className={classes.dataPortal}
-                                            disabled={hasSocketError}
-                                            open={showFileDialog}
-                                            onClose={this.closeFileDialog}
-                                        >
-                                            <Camera />
-                                            <Fade in={canShowStatistics} unmountOnExit>
-                                                <div className={classes.statistics}>
-                                                    <Statistics />
+                                            </Tooltip>
+                                            <Tooltip title={'Add model'} placement="bottom" {...TOOLTIP_DELAY}>
+                                                <div>
+                                                    <IconButton
+                                                        onClick={this.showAddModelMenu}
+                                                        aria-label="Open add model menu"
+                                                        aria-owns={addModelMenuAnchor ? 'add-model-menu' : ''}
+                                                        aria-haspopup="true"
+                                                        disabled={hasSocketError}
+                                                    >
+                                                        <CloudUploadIcon />
+                                                    </IconButton>
                                                 </div>
-                                            </Fade>
-                                            <Fade in={canShowNavCube} unmountOnExit>
-                                                <div className={classes.cube}>
-                                                    <Cube />
-                                                </div>
-                                            </Fade>
-
-                                            <RequestNotifications disabled={hasSocketError} />
-
-                                            <AnimationPlayer disabled={hasSocketError} />
-                                            <ConnectionStatus open={hasSocketError} />
-                                        </DataPortal>
-                                    </div>
-                                </main>
-                                <Drawer
-                                    variant="persistent"
-                                    classes={{paper: classNames(classes.drawerPaper, classes.settingsDrawer)}}
-                                    anchor={'right'}
-                                    open={showSettingsPanel}
-                                    SlideProps={slideProps}
-                                >
-                                    <div className={classes.drawerInner}>
-                                        <div className={classes.drawerHeader}>
-                                            <IconButton
-                                                onClick={this.closeSettingsPanel}
-                                                aria-label="Close settings"
+                                            </Tooltip>
+                                            <Menu
+                                                id="add-model-menu"
+                                                anchorEl={addModelMenuAnchor}
+                                                open={Boolean(addModelMenuAnchor)}
+                                                onClose={this.hideAddModelMenu}
                                             >
-                                                <ChevronRightIcon />
-                                            </IconButton>
+                                                <MenuItem onClick={this.openFileDialog}>
+                                                    <ComputerIcon className={classes.gutterRight} />
+                                                    From your computer
+                                                </MenuItem>
+                                                <MenuItem onClick={this.openLoadModelDialog}>
+                                                    <LinkIcon className={classes.gutterRight} />
+                                                    From path
+                                                </MenuItem>
+                                            </Menu>
                                             <span className={classes.spacer} />
-                                            <Tooltip title={'App settings'} {...TOOLTIP_DELAY}>
+                                            <ResetCamera disabled={hasSocketError} />
+                                            <Snapshot disabled={hasSocketError} />
+                                            <QuitRenderer />
+                                            <Tooltip title={'Report an issue'} {...TOOLTIP_DELAY}>
                                                 <IconButton
-                                                    onClick={this.openAppSettings}
-                                                    aria-label="Open settings"
+                                                    href={BRAYNS_GITHUB_URL}
+                                                    target="_blank"
+                                                    rel="noopener"
+                                                    aria-label="Navigate to Brayns github issues"
                                                 >
-                                                    <SettingsIcon />
+                                                    <GithubIcon />
                                                 </IconButton>
                                             </Tooltip>
-                                            <Tooltip title={'About app'} {...TOOLTIP_DELAY}>
+                                            <Tooltip title={settingsBtnTitle} {...TOOLTIP_DELAY}>
                                                 <IconButton
-                                                    onClick={this.openAppInfo}
-                                                    aria-label="Show app info"
+                                                    color={settingsBtnColor}
+                                                    onClick={this.toggleSettingsPanel}
+                                                    aria-label="Open settings panel"
                                                 >
-                                                    <DeveloperModeIcon />
+                                                    <TuneIcon />
                                                 </IconButton>
                                             </Tooltip>
-                                            <Tooltip title={'Shortcuts'} {...TOOLTIP_DELAY}>
-                                                <IconButton
-                                                    onClick={this.openShortcuts}
-                                                    aria-label="Show shortcuts"
-                                                >
-                                                    <KeyboardIcon />
-                                                </IconButton>
-                                            </Tooltip>
+                                        </Toolbar>
+                                    </AppBar>
+                                    {/* https://material-ui-next.com/demos/drawers/#persistent-drawer */}
+                                    <Scene
+                                        variant="persistent"
+                                        DrawerClasses={{paper: classNames(classes.drawerPaper, classes.modelsDrawer)}}
+                                        SlideProps={slideProps}
+                                        anchor={'left'}
+                                        open={showModelsPanel}
+                                        onClose={this.closeModelsPanel}
+                                    />
+                                    <main ref={this.viewportRef} className={classes.viewport}>
+                                        <div className={classes.canvas}>
+                                            <ImageStream />
                                         </div>
-                                        <RendererSettings disabled={hasSocketError} />
-                                    </div>
-                                </Drawer>
+                                        <div className={classNames(classes.content, contentShift)}>
+                                            <DataPortal
+                                                className={classes.dataPortal}
+                                                disabled={hasSocketError}
+                                                open={showFileDialog}
+                                                onClose={this.closeFileDialog}
+                                            >
+                                                <Camera />
+                                                <Fade in={canShowStatistics} unmountOnExit>
+                                                    <div className={classes.statistics}>
+                                                        <Statistics />
+                                                    </div>
+                                                </Fade>
+                                                <Fade in={canShowNavCube} unmountOnExit>
+                                                    <div className={classes.cube}>
+                                                        <Cube />
+                                                    </div>
+                                                </Fade>
+
+                                                <RequestNotifications disabled={hasSocketError} />
+
+                                                <AnimationPlayer disabled={hasSocketError} />
+                                                <ConnectionStatus open={hasSocketError} />
+                                            </DataPortal>
+                                        </div>
+                                    </main>
+                                    <Drawer
+                                        variant="persistent"
+                                        classes={{paper: classNames(classes.drawerPaper, classes.settingsDrawer)}}
+                                        anchor={'right'}
+                                        open={showSettingsPanel}
+                                        SlideProps={slideProps}
+                                    >
+                                        <div className={classes.drawerInner}>
+                                            <div className={classes.drawerHeader}>
+                                                <IconButton
+                                                    onClick={this.closeSettingsPanel}
+                                                    aria-label="Close settings"
+                                                >
+                                                    <ChevronRightIcon />
+                                                </IconButton>
+                                                <span className={classes.spacer} />
+                                                <Tooltip title={'App settings'} {...TOOLTIP_DELAY}>
+                                                    <IconButton
+                                                        onClick={this.openAppSettings}
+                                                        aria-label="Open settings"
+                                                    >
+                                                        <SettingsIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title={'About app'} {...TOOLTIP_DELAY}>
+                                                    <IconButton
+                                                        onClick={this.openAppInfo}
+                                                        aria-label="Show app info"
+                                                    >
+                                                        <DeveloperModeIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title={'Shortcuts'} {...TOOLTIP_DELAY}>
+                                                    <IconButton
+                                                        onClick={this.openShortcuts}
+                                                        aria-label="Show shortcuts"
+                                                    >
+                                                        <KeyboardIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </div>
+                                            <RendererSettings disabled={hasSocketError} />
+                                        </div>
+                                    </Drawer>
+                                </div>
+
+                                <LoadModel
+                                    open={showLoadModelDialog as boolean}
+                                    onPathLoad={this.loadPath}
+                                    onClose={this.closeLoadModelDialog}
+                                />
+
+                                <AppInfo
+                                    open={showAppInfo}
+                                    onClose={this.closeAppInfo}
+                                />
+
+                                <AppSettings
+                                    open={showAppSettings}
+                                    preferences={appPreferences}
+                                    onUpdate={this.updateAppPreference}
+                                    onClose={this.closeAppSettings}
+                                />
+
+                                <Shortcuts
+                                    open={!!showShortcuts}
+                                    onClose={this.closeShortcuts}
+                                />
+
+                                <Notifications />
                             </div>
-
-                            <LoadModel
-                                open={showLoadModelDialog as boolean}
-                                onPathLoad={this.loadPath}
-                                onClose={this.closeLoadModelDialog}
-                            />
-
-                            <AppInfo
-                                open={showAppInfo}
-                                onClose={this.closeAppInfo}
-                            />
-
-                            <AppSettings
-                                open={showAppSettings}
-                                preferences={appPreferences}
-                                onUpdate={this.updateAppPreference}
-                                onClose={this.closeAppSettings}
-                            />
-
-                            <Shortcuts
-                                open={!!showShortcuts}
-                                onClose={this.closeShortcuts}
-                            />
-
-                            <Notifications />
-                        </div>
+                        </RendererProvider>
                     </CameraProvider>
                 </MuiThemeProvider>
             </Fragment>
