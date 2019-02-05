@@ -167,19 +167,20 @@ void ModelDescriptor::computeBounds()
     }
 }
 
-void ModelDescriptor::cloneFrom(const ModelDescriptor& rhs)
+ModelDescriptorPtr ModelDescriptor::clone(ModelPtr model) const
 {
-    if (this == &rhs)
-        return;
+    auto newModelDesc =
+        std::make_shared<ModelDescriptor>(std::move(model), getPath());
 
-    *this = static_cast<const ModelParams&>(rhs);
+    *newModelDesc = static_cast<const ModelParams&>(*this);
 
-    _bounds = rhs._bounds;
-    _metadata = rhs._metadata;
-    _model->cloneFrom(rhs.getModel());
-    _instances = rhs._instances;
-    _properties = rhs._properties;
-    _model->buildBoundingBox();
+    newModelDesc->_bounds = _bounds;
+    newModelDesc->_metadata = _metadata;
+    newModelDesc->_model->copyFrom(getModel());
+    newModelDesc->_instances = _instances;
+    newModelDesc->_properties = _properties;
+    newModelDesc->_model->buildBoundingBox();
+    return newModelDesc;
 }
 
 Model::Model(AnimationParameters& animationParameters,
@@ -441,7 +442,7 @@ void Model::updateSizeInBytes()
         _sizeInBytes += sdfNeighbours.size() * sizeof(size_t);
 }
 
-void Model::cloneFrom(const Model& rhs)
+void Model::copyFrom(const Model& rhs)
 {
     if (this == &rhs)
         return;

@@ -105,7 +105,7 @@ public:
         else
             *_camera = engine.getCamera();
 
-        _scene->cloneFrom(engine.getScene());
+        _scene->copyFrom(engine.getScene());
     }
 
     ImageGenerator::ImageBase64 operator()()

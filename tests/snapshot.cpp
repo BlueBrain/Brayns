@@ -27,16 +27,7 @@
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/Renderer.h>
 
-#include <ImageGenerator.h>
-#include <brayns/common/utils/base64/base64.h>
-
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
-#include <fstream>
-#include <perceptualdiff/metric.h>
-#include <perceptualdiff/rgba_image.h>
-
-//#define GENERATE_REFERENCE_SNAPSHOT
+#include "tests/PDiffHelpers.h"
 
 BOOST_GLOBAL_FIXTURE(ClientServer);
 
@@ -50,24 +41,8 @@ BOOST_AUTO_TEST_CASE(snapshot)
     auto image =
         makeRequest<brayns::SnapshotParams,
                     brayns::ImageGenerator::ImageBase64>("snapshot", params);
-    auto decodedImage = base64_decode(image.data);
-    const auto referenceFilename = BRAYNS_TESTDATA_IMAGES_PATH "snapshot.png";
-#ifdef GENERATE_REFERENCE_SNAPSHOT
-    {
-        std::fstream file(referenceFilename, std::ios::out);
-        file << decodedImage;
-    }
-#endif
 
-    const std::string newFilename(
-        (fs::temp_directory_path() / fs::unique_path()).string());
-    {
-        std::fstream file(newFilename, std::ios::out);
-        file << decodedImage;
-    }
-    const auto newImage{pdiff::read_from_file(newFilename)};
-    const auto referenceImage{pdiff::read_from_file(referenceFilename)};
-    BOOST_CHECK(pdiff::yee_compare(*referenceImage, *newImage));
+    BOOST_CHECK(compareBase64TestImage(image, "snapshot.png"));
 }
 
 BOOST_AUTO_TEST_CASE(snapshot_with_render_params)

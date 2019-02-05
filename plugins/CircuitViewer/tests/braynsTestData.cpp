@@ -37,13 +37,15 @@
 #include <BBP/TestDatasets.h>
 
 #define BOOST_TEST_MODULE braynsTestData
+
+#ifdef BRAYNS_USE_NETWORKING
 #include "tests/ClientServer.h"
+#else
+#endif
 
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 #include <fstream>
-
-//#define GENERATE_REFERENCE_SNAPSHOT
 
 BOOST_AUTO_TEST_CASE(simple_circuit)
 {
@@ -137,31 +139,16 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping)
             .getAnimationParameters());
     params.animParams->setFrame(42);
 
+#ifdef BRAYNS_USE_NETWORKING
     auto image = clientServer.makeRequest<
         brayns::SnapshotParams, brayns::ImageGenerator::ImageBase64>("snapshot",
                                                                      params);
-    auto decodedImage = base64_decode(image.data);
-    const auto referenceFilename = BRAYNS_TESTDATA_IMAGES_PATH
-        "testdataallmini50basicsimulation_snapshot.png";
-#ifdef GENERATE_REFERENCE_SNAPSHOT
-    {
-        std::fstream file(referenceFilename, std::ios::out);
-        file << decodedImage;
-    }
-#endif
 
-    const std::string newFilename(
-        (fs::temp_directory_path() / fs::unique_path()).string());
-    {
-        std::fstream file(newFilename, std::ios::out);
-        file << decodedImage;
-    }
-    const auto newImage{pdiff::read_from_file(newFilename)};
-    const auto referenceImage{pdiff::read_from_file(referenceFilename)};
-    const auto liveImage{pdiff::read_from_file(
-        BRAYNS_TESTDATA_IMAGES_PATH "testdataallmini50basicsimulation.png")};
-    BOOST_CHECK(pdiff::yee_compare(*referenceImage, *newImage));
-    BOOST_CHECK(!pdiff::yee_compare(*liveImage, *newImage));
+    BOOST_CHECK(compareBase64TestImage(
+        image, "testdataallmini50basicsimulation_snapshot.png"));
+    BOOST_CHECK(
+        !compareBase64TestImage(image, "testdataallmini50basicsimulation.png"));
+#endif
 }
 
 void testSdfGeometries(bool dampened)

@@ -30,6 +30,14 @@
 
 #include <tests/paths.h>
 
+#ifdef BRAYNS_USE_NETWORKING
+#include <ImageGenerator.h>
+#include <boost/filesystem.hpp>
+#include <brayns/common/utils/base64/base64.h>
+#include <fstream>
+namespace fs = boost::filesystem;
+#endif
+
 inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
     brayns::FrameBuffer& fb)
 {
@@ -53,14 +61,22 @@ inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
     return result;
 }
 
+inline bool _compareImage(const pdiff::RGBAImage& image,
+                          const std::string& filename,
+                          const pdiff::PerceptualDiffParameters& parameters =
+                              pdiff::PerceptualDiffParameters())
+{
+    const auto fullPath = std::string(BRAYNS_TESTDATA_IMAGES_PATH) + filename;
+    const auto referenceImage{pdiff::read_from_file(fullPath)};
+    return pdiff::yee_compare(*referenceImage, image, parameters);
+}
+
 inline bool compareTestImage(const std::string& filename,
                              brayns::FrameBuffer& fb,
                              const pdiff::PerceptualDiffParameters& parameters =
                                  pdiff::PerceptualDiffParameters())
 {
     static bool saveImages = getenv("BRAYNS_SAVE_TEST_IMAGES");
-
-    const auto fullPath = std::string(BRAYNS_TESTDATA_IMAGES_PATH) + filename;
     if (saveImages)
     {
         auto image = fb.getImage();
@@ -69,6 +85,31 @@ inline bool compareTestImage(const std::string& filename,
     }
 
     auto testImage = createPDiffRGBAImage(fb);
-    const auto referenceImage{pdiff::read_from_file(fullPath)};
-    return pdiff::yee_compare(*referenceImage, *testImage, parameters);
+    return _compareImage(*testImage, filename, parameters);
 }
+
+#ifdef BRAYNS_USE_NETWORKING
+inline bool compareBase64TestImage(
+    const brayns::ImageGenerator::ImageBase64& image,
+    const std::string& filename)
+{
+    auto decodedImage = base64_decode(image.data);
+    const auto fullPath = std::string(BRAYNS_TESTDATA_IMAGES_PATH) + filename;
+
+    static bool saveImages = getenv("BRAYNS_SAVE_TEST_IMAGES");
+    if (saveImages)
+    {
+        std::fstream file(fullPath, std::ios::out);
+        file << decodedImage;
+    }
+
+    const std::string newFilename(
+        (fs::temp_directory_path() / fs::unique_path()).string());
+    {
+        std::fstream file(newFilename, std::ios::out);
+        file << decodedImage;
+    }
+    const auto testImage{pdiff::read_from_file(newFilename)};
+    return _compareImage(*testImage, filename);
+}
+#endif

@@ -190,7 +190,7 @@ public:
     /** @internal */
     bool isMarkedForRemoval() const { return _markedForRemoval; }
     /** @internal */
-    void cloneFrom(const ModelDescriptor& rhs);
+    ModelDescriptorPtr clone(ModelPtr model) const;
 
 private:
     size_t _nextInstanceID{0};
@@ -246,8 +246,6 @@ public:
 
     BRAYNS_API virtual void buildBoundingBox() = 0;
     //@}
-
-    // BRAYNS_API Model() = default;
 
     BRAYNS_API virtual ~Model() = default;
 
@@ -441,7 +439,7 @@ public:
     const std::set<BVHFlag>& getBVHFlags() const { return _bvhFlags; }
     void updateBounds();
     /** @internal */
-    void cloneFrom(const Model& rhs);
+    void copyFrom(const Model& rhs);
 
 protected:
     /** Factory method to create an engine-specific material. */

@@ -207,7 +207,7 @@ public:
     }
 
     /** @internal */
-    BRAYNS_API void cloneFrom(const Scene& rhs);
+    BRAYNS_API void copyFrom(const Scene& rhs);
 
 protected:
     /** @return True if this scene supports scene updates from any thread. */

@@ -72,7 +72,7 @@ Scene::Scene(AnimationParameters& animationParameters,
 {
 }
 
-void Scene::cloneFrom(const Scene& rhs)
+void Scene::copyFrom(const Scene& rhs)
 {
     if (this == &rhs)
         return;
@@ -84,13 +84,7 @@ void Scene::cloneFrom(const Scene& rhs)
         _modelDescriptors.clear();
         _modelDescriptors.reserve(rhs._modelDescriptors.size());
         for (const auto& modelDesc : rhs._modelDescriptors)
-        {
-            auto newModelDesc =
-                std::make_shared<ModelDescriptor>(createModel(),
-                                                  modelDesc->getPath());
-            newModelDesc->cloneFrom(*modelDesc);
-            _modelDescriptors.push_back(newModelDesc);
-        }
+            _modelDescriptors.push_back(modelDesc->clone(createModel()));
     }
     _computeBounds();
 
