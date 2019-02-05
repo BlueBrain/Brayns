@@ -29,10 +29,10 @@ import {findSchemaByTitle} from './utils';
 
 export const RendererContext = createContext<RendererContextValue>({
     params: {},
-    onChangeRendererProps: () => {},
-    onChangeRendererType: () => Promise.resolve(),
-    onSetRendererParams: () => Promise.resolve(),
-    onSetEnvMap: () => Promise.resolve()
+    onRendererPropsChange: () => {},
+    onRendererTypeChange: () => Promise.resolve(),
+    onRendererParamsChange: () => Promise.resolve(),
+    onEnvMapChange: () => Promise.resolve()
 });
 
 export class RendererProvider extends Component<{}, State> {
@@ -151,10 +151,10 @@ export class RendererProvider extends Component<{}, State> {
             envMap,
             isEnvMapValid,
             schema: currentSchema,
-            onChangeRendererProps: this.changeRendererProps,
-            onChangeRendererType: this.changeRendererType,
-            onSetRendererParams: this.setRendererParams,
-            onSetEnvMap: this.setEnvMap
+            onRendererPropsChange: this.changeRendererProps,
+            onRendererTypeChange: this.changeRendererType,
+            onRendererParamsChange: this.setRendererParams,
+            onEnvMapChange: this.setEnvMap
         };
         return (
             <RendererContext.Provider value={context}>
@@ -215,10 +215,10 @@ interface State extends RendererWithParams {
 export type WithRenderer = Partial<RendererContextValue>;
 
 export interface RendererContextValue extends RendererWithParams {
-    onChangeRendererType: ChangeRendererTypeFn;
-    onChangeRendererProps: ChangeRendererPropsFn;
-    onSetRendererParams: SetRendererParamsFn;
-    onSetEnvMap: SetEnvMapFn;
+    onRendererTypeChange: ChangeRendererTypeFn;
+    onRendererPropsChange: ChangeRendererPropsFn;
+    onRendererParamsChange: SetRendererParamsFn;
+    onEnvMapChange: SetEnvMapFn;
 }
 
 export type ChangeRendererPropsFn = (props: Partial<RendererProps>) => void;

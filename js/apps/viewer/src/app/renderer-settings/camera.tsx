@@ -25,10 +25,10 @@ const style = withStyles(styles);
 
 
 class CameraSettings extends PureComponent<Props> {
-    changeCameraType = (evt: ChangeEvent<HTMLSelectElement>) => this.props.onChangeCameraType!(evt.target.value);
+    changeCameraType = (evt: ChangeEvent<HTMLSelectElement>) => this.props.onCameraTypeChange!(evt.target.value);
 
     render() {
-        const {classes, disabled, camera, params, schema, onSetCameraParams} = this.props;
+        const {classes, disabled, camera, params, schema, onCameraParamsChange: onSetCameraParams} = this.props;
         const current = camera ? camera.current : '';
         const types = camera ? camera.types : [];
         const fields = schema ? (
