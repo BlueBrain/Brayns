@@ -4,7 +4,7 @@ import React, {
     RefObject
 } from 'react';
 
-import {IMAGE_JPEG, SET_APP_PARAMS} from 'brayns';
+import {IMAGE_JPEG} from 'brayns';
 import {isNumber} from 'lodash';
 import {
     BehaviorSubject,
@@ -25,7 +25,12 @@ import {
     WithStyles
 } from '@material-ui/core/styles';
 
-import brayns, {ifReady, onReady} from '../../common/client';
+import brayns, {
+    ifReady,
+    onReady,
+    withAppParms,
+    WithAppParams
+} from '../../common/client';
 import {dispatchFps, onAppParamsChange} from '../../common/events';
 
 
@@ -45,7 +50,7 @@ const styles = (theme: Theme) => createStyles({
 const style = withStyles(styles);
 
 
-export class ImageStream extends Component<WithStyles<typeof styles>> {
+export class ImageStream extends Component<Props> {
     private containerRef: RefObject<HTMLDivElement> = createRef();
     private canvasRef: RefObject<HTMLCanvasElement> = createRef();
 
@@ -78,7 +83,7 @@ export class ImageStream extends Component<WithStyles<typeof styles>> {
         // See https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas
         const [width, height] = toInt(viewport);
 
-        brayns.notify(SET_APP_PARAMS, {
+        this.props.onAppParamsChange!({
             viewport: [width, height]
         });
 
@@ -176,7 +181,9 @@ export class ImageStream extends Component<WithStyles<typeof styles>> {
     }
 }
 
-export default style(ImageStream);
+export default style(
+    withAppParms(ImageStream)
+);
 
 
 function toInt(viewport: number[]) {
@@ -225,3 +232,7 @@ function blobToImg(blob: Blob) {
         }
     });
 }
+
+
+type Props = WithStyles<typeof styles>
+    & WithAppParams;
