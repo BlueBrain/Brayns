@@ -3,7 +3,6 @@ import React, {ChangeEvent, Component} from 'react';
 
 import {
     GET_ANIMATION_PARAMS,
-    GET_RENDERER,
     ImageFormat,
     SNAPSHOT
 } from 'brayns';
@@ -37,7 +36,12 @@ import Tooltip from '@material-ui/core/Tooltip';
 import withWidth, {isWidthDown, WithWidth} from '@material-ui/core/withWidth';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 
-import brayns, {withCamera, WithCamera} from '../../common/client';
+import brayns, {
+    withCamera,
+    WithCamera,
+    withRenderer,
+    WithRenderer
+} from '../../common/client';
 import {NumericField, SlideUp} from '../../common/components';
 import {
     APP_BAR_HEIGHT,
@@ -113,9 +117,8 @@ export class Snapshot extends Component<Props, State> {
             format
         } = this.state;
 
-        const [animationParameters, renderer] = await Promise.all([
-            brayns.request(GET_ANIMATION_PARAMS),
-            brayns.request(GET_RENDERER)
+        const [animationParameters] = await Promise.all([
+            brayns.request(GET_ANIMATION_PARAMS)
         ]);
 
         dispatchKeyboardLock(false);
@@ -125,11 +128,11 @@ export class Snapshot extends Component<Props, State> {
 
         const snapshot = brayns.request(SNAPSHOT, {
             animationParameters,
-            renderer,
             format,
             quality,
             samplesPerPixel,
             camera: this.props.camera,
+            renderer: this.props.renderer,
             name: `${filename}.${format}`,
             size: [width, height] as number[]
         } as any);
@@ -396,8 +399,9 @@ export class Snapshot extends Component<Props, State> {
 }
 
 export default withWidth()(
-    style(withCamera(Snapshot))
-);
+    style(
+        withRenderer(
+            withCamera(Snapshot))));
 
 
 function setMimeType(data: string, format?: ImageFormat) {
@@ -448,7 +452,10 @@ function b64ToBlob(b64Str: string) {
 }
 
 
-interface Props extends WithStyles<typeof styles>, WithWidth, WithCamera {
+interface Props extends WithStyles<typeof styles>,
+    WithWidth,
+    WithCamera,
+    WithRenderer {
     color?: PropTypes.Color;
     disabled?: boolean;
 }
