@@ -6,3 +6,4 @@ export {
 } from './client';
 export {findSchemaByTitle} from './utils';
 export * from './camera-context';
+export * from './renderer-context';
