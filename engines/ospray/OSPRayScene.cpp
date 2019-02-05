@@ -32,14 +32,18 @@
 #include <brayns/engine/Model.h>
 
 #include <brayns/parameters/GeometryParameters.h>
-#include <brayns/parameters/ParametersManager.h>
+#include <brayns/parameters/VolumeParameters.h>
 
 namespace brayns
 {
-OSPRayScene::OSPRayScene(ParametersManager& parametersManager,
-                         const size_t memoryManagementFlags)
-    : Scene(parametersManager)
-    , _memoryManagementFlags(memoryManagementFlags)
+OSPRayScene::OSPRayScene(AnimationParameters& animationParameters,
+                         GeometryParameters& geometryParameters,
+                         VolumeParameters& volumeParameters)
+    : Scene(animationParameters, geometryParameters, volumeParameters)
+    , _memoryManagementFlags(geometryParameters.getMemoryMode() ==
+                                     MemoryMode::shared
+                                 ? uint32_t(OSP_DATA_SHARED_BUFFER)
+                                 : 0)
 {
     _backgroundMaterial = std::make_shared<OSPRayMaterial>(PropertyMap(), true);
 }
@@ -117,6 +121,7 @@ void OSPRayScene::commit()
         // volumes from instances
         if (modelDescriptor->getVisible())
         {
+            modelDescriptor->getModel().commitGeometry();
             for (auto volume : modelDescriptor->getModel().getVolumes())
             {
                 auto ospVolume =
@@ -239,7 +244,7 @@ bool OSPRayScene::_commitVolumeAndTransferFunction(
         for (auto volume : model.getVolumes())
         {
             if (volume->isModified() || rebuildScene ||
-                _parametersManager.getVolumeParameters().isModified())
+                _volumeParameters.isModified())
             {
                 volume->commit();
                 // to reset accumulation if new blocks are added
@@ -253,9 +258,8 @@ bool OSPRayScene::_commitVolumeAndTransferFunction(
 
 ModelPtr OSPRayScene::createModel() const
 {
-    return std::make_unique<OSPRayModel>(
-        _parametersManager.getAnimationParameters(),
-        _parametersManager.getVolumeParameters());
+    return std::make_unique<OSPRayModel>(_animationParameters,
+                                         _volumeParameters);
 }
 
 ModelDescriptorPtr OSPRayScene::getSimulatedModel()

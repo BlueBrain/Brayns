@@ -39,7 +39,9 @@ namespace brayns
 class OptiXScene : public Scene
 {
 public:
-    OptiXScene(ParametersManager& parametersManager);
+    OptiXScene(AnimationParameters& animationParameters,
+               GeometryParameters& geometryParameters,
+               VolumeParameters& volumeParameters);
     ~OptiXScene();
 
     /** @copydoc Scene::commit */

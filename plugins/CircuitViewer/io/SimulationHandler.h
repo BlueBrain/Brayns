@@ -42,7 +42,10 @@ class SimulationHandler : public AbstractSimulationHandler
 public:
     SimulationHandler(const CompartmentReportPtr& report,
                       const bool synchronousMode);
+    SimulationHandler(const SimulationHandler& rhs);
     ~SimulationHandler();
+
+    AbstractSimulationHandlerPtr clone() const final;
 
     void bind(const MaterialPtr& material) final;
 
@@ -61,12 +64,12 @@ private:
     bool _makeFrameReady(uint32_t frame);
 
     CompartmentReportPtr _compartmentReport;
+    bool _synchronousMode{false};
     double _startTime;
     double _endTime;
     std::future<brion::Frame> _currentFrameFuture;
     bool _ready{false};
     std::vector<MaterialPtr> _materials;
-    bool _synchronousMode{false};
 };
 }
 

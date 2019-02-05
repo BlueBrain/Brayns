@@ -21,6 +21,7 @@
 
 #include "CircuitViewer/tests/paths.h"
 #include "tests/PDiffHelpers.h"
+#include <jsonSerialization.h>
 
 #include <brayns/Brayns.h>
 
@@ -36,7 +37,15 @@
 #include <BBP/TestDatasets.h>
 
 #define BOOST_TEST_MODULE braynsTestData
-#include <boost/test/unit_test.hpp>
+
+#ifdef BRAYNS_USE_NETWORKING
+#include "tests/ClientServer.h"
+#else
+#endif
+
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+#include <fstream>
 
 BOOST_AUTO_TEST_CASE(simple_circuit)
 {
@@ -87,22 +96,19 @@ BOOST_AUTO_TEST_CASE(circuit_with_color_by_mtype)
 
 BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping)
 {
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
+    const std::vector<const char*> argv = {
+        BBP_TEST_BLUECONFIG3, "--samples-per-pixel", "16", "--animation-frame",
+        "50", "--plugin",
+        "braynsCircuitViewer --targets allmini50 --report "
+        "voltages --synchronous-mode"};
 
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {app, BBP_TEST_BLUECONFIG3, "--samples-per-pixel",
-                          "16", "--animation-frame", "50", "--plugin",
-                          "braynsCircuitViewer --targets allmini50 --report "
-                          "voltages --synchronous-mode"};
+    ClientServer clientServer(argv);
 
-    const int argc = sizeof(argv) / sizeof(char*);
-
-    brayns::Brayns brayns(argc, argv);
-
-    auto modelDesc = brayns.getEngine().getScene().getModel(0);
+    auto modelDesc =
+        clientServer.getBrayns().getEngine().getScene().getModel(0);
     const auto rotCenter = modelDesc->getTransformation().getRotationCenter();
 
-    auto& camera = brayns.getEngine().getCamera();
+    auto& camera = clientServer.getBrayns().getEngine().getCamera();
     const auto camPos = camera.getPosition();
 
     std::cout << "Rot Center: " << rotCenter << std::endl;
@@ -113,11 +119,36 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping)
 
     modelDesc->getModel().getTransferFunction().setValuesRange({-66, -62});
 
-    brayns.commit();
+    clientServer.getBrayns().commit();
     modelDesc->getModel().getSimulationHandler()->waitReady();
-    brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage("testdataallmini50basicsimulation.png",
-                                 brayns.getEngine().getFrameBuffer()));
+    clientServer.getBrayns().commitAndRender();
+    BOOST_CHECK(compareTestImage(
+        "testdataallmini50basicsimulation.png",
+        clientServer.getBrayns().getEngine().getFrameBuffer()));
+
+    brayns::SnapshotParams params;
+    params.format = "png";
+    params.samplesPerPixel = 16;
+    params.size = clientServer.getBrayns()
+                      .getParametersManager()
+                      .getApplicationParameters()
+                      .getWindowSize();
+    params.animParams = std::make_unique<brayns::AnimationParameters>(
+        clientServer.getBrayns()
+            .getParametersManager()
+            .getAnimationParameters());
+    params.animParams->setFrame(42);
+
+#ifdef BRAYNS_USE_NETWORKING
+    auto image = clientServer.makeRequest<
+        brayns::SnapshotParams, brayns::ImageGenerator::ImageBase64>("snapshot",
+                                                                     params);
+
+    BOOST_CHECK(compareBase64TestImage(
+        image, "testdataallmini50basicsimulation_snapshot.png"));
+    BOOST_CHECK(
+        !compareBase64TestImage(image, "testdataallmini50basicsimulation.png"));
+#endif
 }
 
 void testSdfGeometries(bool dampened)

@@ -87,9 +87,10 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
 
     _createRenderers();
 
-    const auto ospFlags = _getOSPDataFlags();
-
-    _scene = std::make_shared<OSPRayScene>(_parametersManager, ospFlags);
+    _scene = std::make_shared<OSPRayScene>(
+        _parametersManager.getAnimationParameters(),
+        _parametersManager.getGeometryParameters(),
+        _parametersManager.getVolumeParameters());
 
     _createCameras();
 
@@ -205,10 +206,12 @@ FrameBufferPtr OSPRayEngine::createFrameBuffer(
                                                frameBufferFormat);
 }
 
-ScenePtr OSPRayEngine::createScene() const
+ScenePtr OSPRayEngine::createScene(AnimationParameters& animationParameters,
+                                   GeometryParameters& geometryParameters,
+                                   VolumeParameters& volumeParameters) const
 {
-    return std::make_shared<OSPRayScene>(_parametersManager,
-                                         _getOSPDataFlags());
+    return std::make_shared<OSPRayScene>(animationParameters,
+                                         geometryParameters, volumeParameters);
 }
 
 CameraPtr OSPRayEngine::createCamera() const
@@ -222,14 +225,6 @@ RendererPtr OSPRayEngine::createRenderer(
 {
     return std::make_shared<OSPRayRenderer>(animationParameters,
                                             renderingParameters);
-}
-
-uint32_t OSPRayEngine::_getOSPDataFlags() const
-{
-    return _parametersManager.getGeometryParameters().getMemoryMode() ==
-                   MemoryMode::shared
-               ? uint32_t(OSP_DATA_SHARED_BUFFER)
-               : 0;
 }
 
 void OSPRayEngine::_createCameras()

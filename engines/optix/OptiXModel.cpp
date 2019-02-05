@@ -46,6 +46,12 @@ void setBuffer(RTbuffertype bufferType, RTformat bufferFormat,
     geometry->setBuffer(buffer);
 }
 
+OptiXModel::OptiXModel(AnimationParameters& animationParameters,
+                       VolumeParameters& volumeParameters)
+    : Model(animationParameters, volumeParameters)
+{
+}
+
 void OptiXModel::commitGeometry()
 {
     // Materials
@@ -63,28 +69,28 @@ void OptiXModel::commitGeometry()
     size_t nbCylinders = 0;
     size_t nbCones = 0;
     if (_spheresDirty)
-        for (const auto& spheres : _spheres)
+        for (const auto& spheres : _geometries->_spheres)
         {
             nbSpheres += spheres.second.size();
             _commitSpheres(spheres.first);
         }
 
     if (_cylindersDirty)
-        for (const auto& cylinders : _cylinders)
+        for (const auto& cylinders : _geometries->_cylinders)
         {
             nbCylinders += cylinders.second.size();
             _commitCylinders(cylinders.first);
         }
 
     if (_conesDirty)
-        for (const auto& cones : _cones)
+        for (const auto& cones : _geometries->_cones)
         {
             nbCones += cones.second.size();
             _commitCones(cones.first);
         }
 
     if (_trianglesMeshesDirty)
-        for (const auto& meshes : _trianglesMeshes)
+        for (const auto& meshes : _geometries->_trianglesMeshes)
             _commitMeshes(meshes.first);
 
     updateBounds();
@@ -105,11 +111,11 @@ void OptiXModel::commitGeometry()
 
 void OptiXModel::_commitSpheres(const size_t materialId)
 {
-    if (_spheres.find(materialId) == _spheres.end())
+    if (_geometries->_spheres.find(materialId) == _geometries->_spheres.end())
         return;
 
     auto context = OptiXContext::get().getOptixContext();
-    const auto& spheres = _spheres[materialId];
+    const auto& spheres = _geometries->_spheres[materialId];
     context["sphere_size"]->setUint(sizeof(Sphere) / sizeof(float));
 
     // Geometry
@@ -139,11 +145,12 @@ void OptiXModel::_commitSpheres(const size_t materialId)
 
 void OptiXModel::_commitCylinders(const size_t materialId)
 {
-    if (_cylinders.find(materialId) == _cylinders.end())
+    if (_geometries->_cylinders.find(materialId) ==
+        _geometries->_cylinders.end())
         return;
 
     auto context = OptiXContext::get().getOptixContext();
-    const auto& cylinders = _cylinders[materialId];
+    const auto& cylinders = _geometries->_cylinders[materialId];
     context["cylinder_size"]->setUint(sizeof(Cylinder) / sizeof(float));
     _optixCylinders[materialId] =
         OptiXContext::get().createGeometry(OptixGeometryType::cylinder);
@@ -171,11 +178,11 @@ void OptiXModel::_commitCylinders(const size_t materialId)
 
 void OptiXModel::_commitCones(const size_t materialId)
 {
-    if (_cones.find(materialId) == _cones.end())
+    if (_geometries->_cones.find(materialId) == _geometries->_cones.end())
         return;
 
     auto context = OptiXContext::get().getOptixContext();
-    const auto& cones = _cones[materialId];
+    const auto& cones = _geometries->_cones[materialId];
     context["cone_size"]->setUint(sizeof(Cone) / sizeof(float));
     _optixCones[materialId] =
         OptiXContext::get().createGeometry(OptixGeometryType::cone);
@@ -203,10 +210,11 @@ void OptiXModel::_commitCones(const size_t materialId)
 
 void OptiXModel::_commitMeshes(const size_t materialId)
 {
-    if (_trianglesMeshes.find(materialId) == _trianglesMeshes.end())
+    if (_geometries->_trianglesMeshes.find(materialId) ==
+        _geometries->_trianglesMeshes.end())
         return;
 
-    const auto& meshes = _trianglesMeshes[materialId];
+    const auto& meshes = _geometries->_trianglesMeshes[materialId];
     _optixMeshes[materialId] =
         OptiXContext::get().createGeometry(OptixGeometryType::triangleMesh);
 

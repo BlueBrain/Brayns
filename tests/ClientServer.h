@@ -93,14 +93,13 @@ public:
         return *_instance;
     }
 
-    ClientServer(std::vector<const char*> additionalArgv = {})
+    ClientServer(std::vector<const char*> additionalArgv = {"demo"})
         : _wsClient{std::make_unique<rockets::ws::Client>()}
         , _client(*_wsClient)
     {
         auto& testSuite = boost::unit_test::framework::master_test_suite();
         const char* app = testSuite.argv[0];
-        std::vector<const char*> argv{app, "demo", "--http-server",
-                                      "localhost:0"};
+        std::vector<const char*> argv{app, "--http-server", "localhost:0"};
         for (const auto& arg : additionalArgv)
             argv.push_back(arg);
         const int argc = argv.size();
@@ -134,7 +133,7 @@ public:
         while (!is_ready(connectFuture))
         {
             client.process(CLIENT_PROCESS_TIMEOUT);
-            _brayns->commitAndRender();
+            _brayns->commit();
         }
         connectFuture.get();
     }
@@ -146,7 +145,7 @@ public:
         while (!request.is_ready())
         {
             _wsClient->process(0);
-            _brayns->commitAndRender();
+            _brayns->commit();
         }
 
         return request.get();
@@ -159,7 +158,7 @@ public:
         while (!request.is_ready())
         {
             _wsClient->process(0);
-            _brayns->commitAndRender();
+            _brayns->commit();
         }
 
         RetVal retVal;
@@ -174,7 +173,7 @@ public:
         while (!request.is_ready())
         {
             _wsClient->process(0);
-            _brayns->commitAndRender();
+            _brayns->commit();
         }
 
         return request.get();
@@ -188,7 +187,7 @@ public:
         while (!request.is_ready())
         {
             _wsClient->process(0);
-            _brayns->commitAndRender();
+            _brayns->commit();
         }
 
         return request.get().result;
@@ -222,7 +221,7 @@ public:
         while (!rockets::is_ready(future))
         {
             _wsClient->process(0);
-            _brayns->commitAndRender();
+            _brayns->commit();
         }
 
         return future.get();
@@ -255,7 +254,7 @@ public:
         while (!rockets::is_ready(future))
         {
             _wsClient->process(0);
-            _brayns->commitAndRender();
+            _brayns->commit();
         }
 
         return future.get();
@@ -268,7 +267,7 @@ public:
 
         _wsClient->process(CLIENT_PROCESS_TIMEOUT);
         for (size_t i = 0; i < SERVER_PROCESS_RETRIES; ++i)
-            _brayns->commitAndRender();
+            _brayns->commit();
     }
 
     void makeNotification(const std::string& method)
@@ -277,7 +276,7 @@ public:
 
         _wsClient->process(CLIENT_PROCESS_TIMEOUT);
         for (size_t i = 0; i < SERVER_PROCESS_RETRIES; ++i)
-            _brayns->commitAndRender();
+            _brayns->commit();
     }
 
     auto& getBrayns() { return *_brayns; }

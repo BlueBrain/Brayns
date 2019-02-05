@@ -57,7 +57,9 @@ public:
         FrameBufferFormat frameBufferFormat) const = 0;
 
     /** Factory method to create an engine-specific scene. */
-    virtual ScenePtr createScene() const = 0;
+    virtual ScenePtr createScene(AnimationParameters& animationParameters,
+                                 GeometryParameters& geometryParameters,
+                                 VolumeParameters& volumeParameters) const = 0;
 
     /** Factory method to create an engine-specific camera. */
     virtual CameraPtr createCamera() const = 0;

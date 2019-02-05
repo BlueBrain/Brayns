@@ -56,10 +56,24 @@ SimulationHandler::SimulationHandler(const CompartmentReportPtr& report,
                 << std::endl;
 }
 
+SimulationHandler::SimulationHandler(const SimulationHandler& rhs)
+    : AbstractSimulationHandler(rhs)
+    , _compartmentReport(rhs._compartmentReport)
+    , _synchronousMode(true)
+    , _startTime(rhs._startTime)
+    , _endTime(rhs._endTime)
+{
+}
+
 SimulationHandler::~SimulationHandler()
 {
     for (const auto& material : _materials)
         material->setCurrentType("default");
+}
+
+AbstractSimulationHandlerPtr SimulationHandler::clone() const
+{
+    return std::make_shared<SimulationHandler>(*this);
 }
 
 void SimulationHandler::bind(const MaterialPtr& material)
@@ -108,8 +122,7 @@ void SimulationHandler::_triggerLoading(const uint32_t frame)
     timestamp = std::max(_startTime, timestamp);
     timestamp = std::min(_endTime, timestamp);
 
-    if (_currentFrameFuture.valid())
-        _currentFrameFuture.wait();
+    waitReady();
 
     _ready = false;
     _currentFrameFuture = _compartmentReport->load(timestamp);
@@ -122,7 +135,7 @@ bool SimulationHandler::_isFrameLoaded() const
 
     if (_synchronousMode)
     {
-        _currentFrameFuture.wait();
+        waitReady();
         return true;
     }
 

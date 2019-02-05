@@ -78,6 +78,7 @@ public:
        @return Geometry parameters for the current scene
     */
     BRAYNS_API GeometryParameters& getGeometryParameters();
+    BRAYNS_API const GeometryParameters& getGeometryParameters() const;
 
     /**
        Gets application parameters
@@ -91,6 +92,7 @@ public:
        @return Parameters for the current volume
     */
     BRAYNS_API VolumeParameters& getVolumeParameters();
+    BRAYNS_API const VolumeParameters& getVolumeParameters() const;
 
     /** Call resetModified on all parameters. */
     void resetModified();
