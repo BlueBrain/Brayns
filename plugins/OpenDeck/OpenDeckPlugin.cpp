@@ -47,6 +47,11 @@ OpenDeckPlugin::OpenDeckPlugin(const Vector2ui& wallRes,
 
 void OpenDeckPlugin::init()
 {
+#ifdef BRAYNS_USE_OSPRAY
+    _api->getEngine().addCameraType("cylindric");
+    _api->getEngine().addCameraType("cylindricStereo");
+    _api->getEngine().addCameraType("cylindricStereoTracked");
+#endif
     FrameBufferPtr frameBuffer =
         _api->getEngine().createFrameBuffer(leftWallBufferName, _wallRes,
                                             FrameBufferFormat::rgba_i8);

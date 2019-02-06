@@ -166,7 +166,6 @@ endif()
 
 if(BRAYNS_OSPRAY_ENABLED)
   add_subdirectory(engines/ospray)
-  add_subdirectory(ospray_modules)
 else()
   message(WARNING "OSPRay not found or enabled. Brayns cannot work without an engine" )
 endif()
