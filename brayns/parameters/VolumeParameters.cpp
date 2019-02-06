@@ -35,9 +35,9 @@ VolumeParameters::VolumeParameters()
     , _elementSpacing(1.f, 1.f, 1.f)
     , _offset(0.f, 0.f, 0.f)
 {
-    _parameters.add_options()(
-        PARAM_VOLUME_DIMENSIONS.c_str(), po::value<size_ts>()->multitoken(),
-        "Volume dimensions [int int int]")(
+    _parameters.add_options()(PARAM_VOLUME_DIMENSIONS.c_str(),
+                              po::value<size_ts>()->multitoken(),
+                              "Volume dimensions [int int int]")(
         PARAM_VOLUME_ELEMENT_SPACING.c_str(), po::value<floats>()->multitoken(),
         "Element spacing in the volume [int int int]")(
         PARAM_VOLUME_OFFSET.c_str(), po::value<floats>()->multitoken(),

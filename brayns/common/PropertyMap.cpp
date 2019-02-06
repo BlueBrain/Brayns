@@ -24,6 +24,7 @@
 #include "utils/utils.h"
 
 #include <array>
+#include <iomanip>
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/make_shared.hpp>

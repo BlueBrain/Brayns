@@ -88,7 +88,7 @@ set(BRAYNSOPTIXENGINE_PUBLIC_HEADERS
 )
 
 set(BRAYNSOPTIXENGINE_LINK_LIBRARIES
-    PRIVATE braynsEngine vmmlib braynsCommon braynsParameters ${OptiX_LIBRARIES})
+    PRIVATE braynsEngine glm braynsCommon braynsParameters ${OptiX_LIBRARIES})
 
 common_library(braynsOptixEngine)
 

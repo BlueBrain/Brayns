@@ -12,7 +12,7 @@ set(BRAYNSUI_PUBLIC_HEADERS
 )
 
 set(BRAYNSUI_LINK_LIBRARIES
-    PUBLIC brayns braynsParameters vmmlib
+    PUBLIC brayns braynsParameters glm
       ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     PRIVATE braynsManipulators ${GLUT_LIBRARIES} ${GLEW_LIBRARIES}
 )

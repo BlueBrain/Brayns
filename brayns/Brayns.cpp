@@ -125,8 +125,8 @@ struct Brayns::Impl : public PluginAPI
         if (camera.hasProperty("aspect"))
         {
             camera.updateProperty("aspect",
-                                  static_cast<double>(windowSize.x()) /
-                                      static_cast<double>(windowSize.y()));
+                                  static_cast<double>(windowSize.x) /
+                                      static_cast<double>(windowSize.y));
         }
         for (auto frameBuffer : _frameBuffers)
             frameBuffer->resize(windowSize);
@@ -141,8 +141,8 @@ struct Brayns::Impl : public PluginAPI
             auto sun = std::dynamic_pointer_cast<DirectionalLight>(sunLight);
             if (sun && (camera.isModified() || rp.isModified()))
             {
-                sun->setDirection(camera.getOrientation().rotate(
-                    Vector3f(0.0f, 0.0f, -1.0f)));
+                sun->setDirection(
+                    glm::rotate(camera.getOrientation(), Vector3d(0, 0, -1)));
                 scene.commitLights();
             }
         }
@@ -217,7 +217,7 @@ struct Brayns::Impl : public PluginAPI
         if (colorBuffer)
         {
             const size_t size =
-                frameSize.x() * frameSize.y() * frameBuffer.getColorDepth();
+                frameSize.x * frameSize.y * frameBuffer.getColorDepth();
             renderOutput.colorBuffer.assign(colorBuffer, colorBuffer + size);
             renderOutput.colorBufferFormat = frameBuffer.getFrameBufferFormat();
         }
@@ -225,7 +225,7 @@ struct Brayns::Impl : public PluginAPI
         const auto depthBuffer = frameBuffer.getDepthBuffer();
         if (depthBuffer)
         {
-            const size_t size = frameSize.x() * frameSize.y();
+            const size_t size = frameSize.x * frameSize.y;
             renderOutput.depthBuffer.assign(depthBuffer, depthBuffer + size);
         }
 

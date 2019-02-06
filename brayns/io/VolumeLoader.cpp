@@ -50,7 +50,7 @@ namespace brayns
 namespace
 {
 template <size_t M, typename T>
-std::string to_string(const vmml::vector<M, T>& vec)
+std::string to_string(const glm::vec<M, T>& vec)
 {
     std::stringstream stream;
     stream << vec;
@@ -58,7 +58,7 @@ std::string to_string(const vmml::vector<M, T>& vec)
 }
 
 template <typename T>
-vmml::vector<3, T> to_Vector3(const std::string& s)
+auto to_Vector3(const std::string& s)
 {
     std::vector<T> result;
     std::stringstream ss(s);
@@ -67,7 +67,7 @@ vmml::vector<3, T> to_Vector3(const std::string& s)
         result.push_back(boost::lexical_cast<T>(item));
     if (result.size() != 3)
         throw std::runtime_error("Not exactly 3 values for mhd array");
-    return vmml::vector<3, T>(result.data());
+    return glm::vec<3, T>(result[0], result[1], result[2]);
 }
 
 DataType dataTypeFromMET(const std::string& type)
@@ -161,14 +161,14 @@ ModelDescriptorPtr RawVolumeLoader::_loadVolume(
 
     callback.updateProgress("Parsing volume file ...", 0.f);
 
-    const auto dimensions = toVmmlVec(
+    const auto dimensions = toGlmVec(
         properties.getProperty<std::array<int32_t, 3>>(PROP_DIMENSIONS.name));
-    const auto spacing = toVmmlVec(
+    const auto spacing = toGlmVec(
         properties.getProperty<std::array<double, 3>>(PROP_SPACING.name));
     const auto type = stringToEnum<DataType>(
         properties.getProperty<std::string>(PROP_TYPE.name));
 
-    if (dimensions.product() == 0)
+    if (glm::compMul(dimensions) == 0)
         throw std::runtime_error("Volume dimensions are empty");
 
     const auto dataRange = dataRangeFromType(type);
@@ -241,10 +241,10 @@ ModelDescriptorPtr MHDVolumeLoader::importFromFile(
     if (pt.get<std::string>("ObjectType") != "Image")
         throw std::runtime_error("Wrong object type for mhd file");
 
-    const auto dimensions =
-        toArray(to_Vector3<int32_t>(pt.get<std::string>("DimSize")));
-    const auto spacing =
-        toArray(to_Vector3<double>(pt.get<std::string>("ElementSpacing")));
+    const auto dimensions = toArray<3, int32_t>(
+        to_Vector3<int32_t>(pt.get<std::string>("DimSize")));
+    const auto spacing = toArray<3, int32_t>(
+        to_Vector3<double>(pt.get<std::string>("ElementSpacing")));
     const auto type = dataTypeFromMET(pt.get<std::string>("ElementType"));
 
     boost::filesystem::path path = pt.get<std::string>("ElementDataFile");

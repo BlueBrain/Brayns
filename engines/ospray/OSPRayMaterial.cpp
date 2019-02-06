@@ -61,10 +61,10 @@ void OSPRayMaterial::commit()
     else
         ospRemoveParam(_ospMaterial, "apply_simulation");
 
-    ospSet3f(_ospMaterial, "kd", _diffuseColor.x(), _diffuseColor.y(),
-             _diffuseColor.z());
-    ospSet3f(_ospMaterial, "ks", _specularColor.x(), _specularColor.y(),
-             _specularColor.z());
+    ospSet3f(_ospMaterial, "kd", _diffuseColor.x, _diffuseColor.y,
+             _diffuseColor.z);
+    ospSet3f(_ospMaterial, "ks", _specularColor.x, _specularColor.y,
+             _specularColor.z);
     ospSet1f(_ospMaterial, "ns", _specularExponent);
     ospSet1f(_ospMaterial, "d", _opacity);
     ospSet1f(_ospMaterial, "refraction", _refractionIndex);

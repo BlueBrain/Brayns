@@ -113,8 +113,8 @@ BOOST_AUTO_TEST_CASE(cylinders)
 
     const double dist = 1.5;
     const double alpha = -std::atan(2 * height / dist);
-    const brayns::Quaterniond orientation(alpha,
-                                          brayns::Vector3d(1.0, 0.0, 0.0));
+    const brayns::Quaterniond orientation(
+        glm::angleAxis(alpha, brayns::Vector3d(1.0, 0.0, 0.0)));
     camera.setOrientation(orientation);
     camera.setPosition(brayns::Vector3f(0.f, 2 * height, dist));
 

@@ -145,7 +145,7 @@ void OSPRayScene::commit()
                 Transformation modelTransform;
                 modelTransform.setTranslation(modelBounds.getCenter() /
                                                   modelBounds.getSize() -
-                                              Vector3f(0.5f));
+                                              Vector3d(0.5));
                 modelTransform.setScale(modelBounds.getSize());
 
                 addInstance(_rootModel, impl.getBoundingBoxModel(),
@@ -184,11 +184,11 @@ bool OSPRayScene::commitLights()
                 _ospLights.push_back(ospNewLight(nullptr, "DirectionalLight"));
 
             const Vector3f color = directionalLight->getColor();
-            ospSet3f(_ospLights[lightCount], "color", color.x(), color.y(),
-                     color.z());
+            ospSet3f(_ospLights[lightCount], "color", color.x, color.y,
+                     color.z);
             const Vector3f direction = directionalLight->getDirection();
-            ospSet3f(_ospLights[lightCount], "direction", direction.x(),
-                     direction.y(), direction.z());
+            ospSet3f(_ospLights[lightCount], "direction", direction.x,
+                     direction.y, direction.z);
             ospSet1f(_ospLights[lightCount], "intensity",
                      directionalLight->getIntensity());
             ospCommit(_ospLights[lightCount]);
@@ -203,11 +203,11 @@ bool OSPRayScene::commitLights()
                     _ospLights.push_back(ospNewLight(nullptr, "PointLight"));
 
                 const Vector3f position = pointLight->getPosition();
-                ospSet3f(_ospLights[lightCount], "position", position.x(),
-                         position.y(), position.z());
+                ospSet3f(_ospLights[lightCount], "position", position.x,
+                         position.y, position.z);
                 const Vector3f color = pointLight->getColor();
-                ospSet3f(_ospLights[lightCount], "color", color.x(), color.y(),
-                         color.z());
+                ospSet3f(_ospLights[lightCount], "color", color.x, color.y,
+                         color.z);
                 ospSet1f(_ospLights[lightCount], "intensity",
                          pointLight->getIntensity());
                 ospSet1f(_ospLights[lightCount], "radius",

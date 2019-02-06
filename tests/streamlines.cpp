@@ -97,10 +97,10 @@ BOOST_AUTO_TEST_CASE(streamlines)
         scene.addModel(modelDesc);
 
         auto position = modelDesc->getModel().getBounds().getCenter();
-        position.z() += modelDesc->getModel().getBounds().getSize().find_max();
+        position.z += glm::compMax(modelDesc->getModel().getBounds().getSize());
 
-        const brayns::Quaterniond identity;
-        brayns.getEngine().getCamera().setInitialState(position, identity);
+        brayns.getEngine().getCamera().setInitialState(
+            position, glm::identity<brayns::Quaterniond>());
     }
 
     brayns.commitAndRender();

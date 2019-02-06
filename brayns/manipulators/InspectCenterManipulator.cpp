@@ -72,41 +72,41 @@ InspectCenterManipulator::~InspectCenterManipulator()
 void InspectCenterManipulator::dragLeft(const Vector2i& to,
                                         const Vector2i& from)
 {
-    const float du = (to.x() - from.x()) *
-                     DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER * getRotationSpeed();
-    const float dv = (to.y() - from.y()) *
-                     DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER * getRotationSpeed();
+    const float du = (to.x - from.x) * DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER *
+                     getRotationSpeed();
+    const float dv = (to.y - from.y) * DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER *
+                     getRotationSpeed();
     rotate(_camera.getTarget(), du, dv, AxisMode::localY);
 }
 
 void InspectCenterManipulator::dragRight(const Vector2i& to,
                                          const Vector2i& from)
 {
-    const float distance = -(to.y() - from.y()) *
+    const float distance = -(to.y - from.y) *
                            DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER *
                            getMotionSpeed();
-    if (distance < (_camera.getTarget() - _camera.getPosition()).length())
-        translate(Vector3f::forward() * distance);
+    if (distance < glm::length(_camera.getTarget() - _camera.getPosition()))
+        translate(Vector3f(0, 0, -1) * distance);
 }
 
 void InspectCenterManipulator::dragMiddle(const Vector2i& to,
                                           const Vector2i& from)
 {
-    const float x = (to.x() - from.x()) *
-                    DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER * getMotionSpeed();
-    const float y = (to.y() - from.y()) *
-                    DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER * getMotionSpeed();
-    const Vector3f translation(-x, y, 0.f);
+    const float x = (to.x - from.x) * DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER *
+                    getMotionSpeed();
+    const float y = (to.y - from.y) * DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER *
+                    getMotionSpeed();
+    const Vector3d translation(-x, y, 0);
     translate(translation);
     _camera.setTarget(_camera.getTarget() +
-                      _camera.getOrientation().rotate(translation));
+                      glm::rotate(_camera.getOrientation(), translation));
 }
 
 void InspectCenterManipulator::wheel(const Vector2i& /*position*/, float delta)
 {
     delta *= getWheelSpeed();
-    if (delta < (_camera.getTarget() - _camera.getPosition()).length())
-        translate(Vector3f::forward() * delta);
+    if (delta < glm::length(_camera.getTarget() - _camera.getPosition()))
+        translate(Vector3f(0, 0, -1) * delta);
 }
 
 void InspectCenterManipulator::_rotateLeft()

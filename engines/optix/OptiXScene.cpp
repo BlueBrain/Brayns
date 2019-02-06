@@ -70,8 +70,8 @@ bool OptiXScene::commitLights()
         {
             const Vector3f& position = pointLight->getPosition();
             const Vector3f& color = pointLight->getColor();
-            BasicLight optixLight = {{position.x(), position.y(), position.z()},
-                                     {color.x(), color.y(), color.z()},
+            BasicLight optixLight = {{position.x, position.y, position.z},
+                                     {color.x, color.y, color.z},
                                      1, // Casts shadows
                                      BASIC_LIGHT_TYPE_POINT};
             _optixLights.push_back(optixLight);
@@ -84,9 +84,9 @@ bool OptiXScene::commitLights()
             {
                 const Vector3f& direction = directionalLight->getDirection();
                 const Vector3f& color = directionalLight->getColor();
-                BasicLight optixLight = {{direction.x(), direction.y(),
-                                          direction.z()},
-                                         {color.x(), color.y(), color.z()},
+                BasicLight optixLight = {{direction.x, direction.y,
+                                          direction.z},
+                                         {color.x, color.y, color.z},
                                          1, // Casts shadows
                                          BASIC_LIGHT_TYPE_DIRECTIONAL};
                 _optixLights.push_back(optixLight);
@@ -189,18 +189,12 @@ void OptiXScene::commit()
             Transformation modelTransform;
             modelTransform.setTranslation(modelBounds.getCenter() /
                                               modelBounds.getSize() -
-                                          Vector3f(0.5f));
+                                          Vector3d(0.5));
             modelTransform.setScale(modelBounds.getSize());
 
-            Matrix4d mtxd = modelTransform.toMatrix(true);
-            float trf[16];
-
-            { // Convert column-major to row-major
-                size_t ctr = 0;
-                for (size_t r = 0; r < 4; r++)
-                    for (size_t c = 0; c < 4; c++)
-                        trf[ctr++] = static_cast<float>(mtxd.array[c * 4 + r]);
-            }
+            Matrix4f mtxd = modelTransform.toMatrix(true);
+            mtxd = glm::transpose(mtxd);
+            auto trf = glm::value_ptr(mtxd);
 
             xform->setMatrix(false, trf, 0);
             xform->setChild(boundingBoxGroup);

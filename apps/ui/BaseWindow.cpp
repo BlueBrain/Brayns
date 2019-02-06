@@ -149,8 +149,7 @@ void BaseWindow::mouseButton(const int button, const bool released,
                                      .getApplicationParameters()
                                      .getWindowSize();
         const auto& result = _brayns.getEngine().getRenderer().pick(
-            {pos.x() / float(windowSize.x()),
-             1.f - pos.y() / float(windowSize.y())});
+            {pos.x / float(windowSize.x), 1.f - pos.y / float(windowSize.y)});
         if (result.hit)
         {
             // updates position based on new target and current rotation
@@ -216,10 +215,10 @@ void BaseWindow::reshape(Vector2ui newSize)
     // In case of 3D stereo vision, make sure the width is even
     if (applicationParameters.isStereo())
     {
-        if (newSize.x() % 2 != 0)
-            newSize.x() = (newSize.x() - 1) / 2;
+        if (newSize.x % 2 != 0)
+            newSize.x = (newSize.x - 1) / 2;
         else
-            newSize.x() /= 2;
+            newSize.x /= 2;
     }
 
     _windowSize = newSize;
@@ -244,7 +243,7 @@ void BaseWindow::display()
 
     const auto& newWindowSize = _getWindowSize();
     if (newWindowSize != _windowSize)
-        glutReshapeWindow(newWindowSize.x(), newWindowSize.y());
+        glutReshapeWindow(newWindowSize.x, newWindowSize.y);
 
     size_t offset = 0;
     for (auto frameBuffer : _brayns.getEngine().getFrameBuffers())
@@ -267,11 +266,11 @@ void BaseWindow::display()
         frameBuffer->map();
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        glOrtho(0, frameSize.x(), 0.0f, frameSize.y(), -1.0f, 1.0f);
+        glOrtho(0, frameSize.x, 0.0f, frameSize.y, -1.0f, 1.0f);
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        glViewport(offset, 0, frameSize.x(), frameSize.y());
+        glViewport(offset, 0, frameSize.x, frameSize.y);
 
         GLenum type = GL_FLOAT;
         const GLvoid* buffer = 0;
@@ -293,25 +292,25 @@ void BaseWindow::display()
         if (buffer)
         {
             glBindTexture(GL_TEXTURE_2D, _fbTexture);
-            glTexImage2D(GL_TEXTURE_2D, 0, format, frameBuffer->getSize().x(),
-                         frameBuffer->getSize().y(), 0, format, type, buffer);
+            glTexImage2D(GL_TEXTURE_2D, 0, format, frameBuffer->getSize().x,
+                         frameBuffer->getSize().y, 0, format, type, buffer);
 
             glBegin(GL_QUADS);
             glTexCoord2f(0.f, 0.f);
             glVertex3f(0, 0, 0);
             glTexCoord2f(0.f, 1.f);
-            glVertex3f(0, frameSize.y(), 0);
+            glVertex3f(0, frameSize.y, 0);
             glTexCoord2f(1.f, 1.f);
-            glVertex3f(frameSize.x(), frameSize.y(), 0);
+            glVertex3f(frameSize.x, frameSize.y, 0);
             glTexCoord2f(1.f, 0.f);
-            glVertex3f(frameSize.x(), 0, 0);
+            glVertex3f(frameSize.x, 0, 0);
             glEnd();
 
             glBindTexture(GL_TEXTURE_2D, 0);
         }
 
         frameBuffer->unmap();
-        offset += frameSize.x();
+        offset += frameSize.x;
     }
 
     const bool displayFPS = _brayns.getParametersManager()
@@ -371,7 +370,7 @@ void BaseWindow::setTitle(const char* title)
 void BaseWindow::create(const char* title)
 {
     const auto windowSize = _getWindowSize();
-    glutInitWindowSize(windowSize.x(), windowSize.y());
+    glutInitWindowSize(windowSize.x, windowSize.y);
     _windowID = glutCreateWindow(title);
     _activeWindow = this;
     glutDisplayFunc(glut3dDisplay);
@@ -434,11 +433,11 @@ void BaseWindow::specialkey(const int key, const Vector2f&)
         break;
     case GLUT_KEY_F11:
         if (_fullScreen)
-            glutPositionWindow(_windowPosition.x(), _windowPosition.y());
+            glutPositionWindow(_windowPosition.x, _windowPosition.y);
         else
         {
-            _windowPosition.x() = glutGet((GLenum)GLUT_WINDOW_X);
-            _windowPosition.y() = glutGet((GLenum)GLUT_WINDOW_Y);
+            _windowPosition.x = glutGet((GLenum)GLUT_WINDOW_X);
+            _windowPosition.y = glutGet((GLenum)GLUT_WINDOW_Y);
             glutFullScreen();
         }
         _fullScreen = !_fullScreen;
@@ -475,9 +474,9 @@ Vector2ui BaseWindow::_getWindowSize() const
     Vector2ui newWindowSize;
     for (auto frameBuffer : _brayns.getEngine().getFrameBuffers())
     {
-        newWindowSize.x() += frameBuffer->getFrameSize().x();
-        newWindowSize.y() =
-            std::max(newWindowSize.y(), frameBuffer->getFrameSize().y());
+        newWindowSize.x += frameBuffer->getFrameSize().x;
+        newWindowSize.y =
+            std::max(newWindowSize.y, frameBuffer->getFrameSize().y);
     }
     return newWindowSize;
 }

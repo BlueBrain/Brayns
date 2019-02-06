@@ -45,13 +45,12 @@ AbstractManipulator::AbstractManipulator(Camera& camera,
 void AbstractManipulator::adjust(const Boxd& boundingBox)
 {
     const auto size =
-        boundingBox.isEmpty() ? 1 : boundingBox.getSize().find_max();
+        boundingBox.isEmpty() ? 1 : glm::compMax(boundingBox.getSize());
     auto position = boundingBox.getCenter();
     auto target = position;
-    position.z() += size;
+    position.z += size;
 
-    const Quaterniond identity;
-    _camera.setInitialState(position, identity, target);
+    _camera.setInitialState(position, glm::identity<Quaterniond>(), target);
 
     _motionSpeed = DEFAULT_MOTION_SPEED * size;
 
@@ -83,33 +82,32 @@ void AbstractManipulator::updateMotionSpeed(const float speed)
     _motionSpeed *= speed;
 }
 
-void AbstractManipulator::translate(const Vector3f& vector)
+void AbstractManipulator::translate(const Vector3d& vector)
 {
     auto orientation = _camera.getOrientation();
-    const auto translation = orientation.rotate(vector);
+    const auto translation = glm::rotate(orientation, vector);
 
     _camera.setPosition(_camera.getPosition() + translation);
 }
 
-void AbstractManipulator::rotate(const Vector3f& pivot, const float du,
-                                 const float dv, AxisMode axisMode)
+void AbstractManipulator::rotate(const Vector3d& pivot, const double du,
+                                 const double dv, AxisMode axisMode)
 {
     const Vector3d axisX =
-        _camera.getOrientation().rotate(Vector3d(1.0, 0.0, 0.0));
+        glm::rotate(_camera.getOrientation(), Vector3d(1.0, 0.0, 0.0));
 
     const Vector3d axisY =
         axisMode == AxisMode::localY
-            ? _camera.getOrientation().rotate(Vector3d(0.0, 1.0, 0.0))
+            ? glm::rotate(_camera.getOrientation(), Vector3d(0.0, 1.0, 0.0))
             : Vector3d(0.0, 1.0, 0.0);
 
-    const Quaterniond deltaU(-du, axisY);
-    const Quaterniond deltaV(-dv, axisX);
+    const Quaterniond deltaU = glm::angleAxis(-du, axisY);
+    const Quaterniond deltaV = glm::angleAxis(-dv, axisX);
 
     const Quaterniond final = deltaU * deltaV * _camera.getOrientation();
-    const Vector3d dir = final.rotate(Vector3d(0.0, 0.0, -1.0));
+    const Vector3d dir = glm::rotate(final, Vector3d(0.0, 0.0, -1.0));
 
-    const double rotationRadius =
-        Vector3d(_camera.getPosition() - pivot).length();
+    const double rotationRadius = glm::length(_camera.getPosition() - pivot);
     _camera.setPosition(pivot + rotationRadius * -dir);
     _camera.setOrientation(final);
 }

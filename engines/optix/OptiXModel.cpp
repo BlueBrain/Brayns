@@ -278,14 +278,14 @@ void OptiXModel::buildBoundingBox()
     const Vector3f c(0.5f);
     const float radius = 0.005f;
     const Vector3f positions[8] = {
-        {c.x() - s.x(), c.y() - s.y(), c.z() - s.z()},
-        {c.x() + s.x(), c.y() - s.y(), c.z() - s.z()}, //    6--------7
-        {c.x() - s.x(), c.y() + s.y(), c.z() - s.z()}, //   /|       /|
-        {c.x() + s.x(), c.y() + s.y(), c.z() - s.z()}, //  2--------3 |
-        {c.x() - s.x(), c.y() - s.y(), c.z() + s.z()}, //  | |      | |
-        {c.x() + s.x(), c.y() - s.y(), c.z() + s.z()}, //  | 4------|-5
-        {c.x() - s.x(), c.y() + s.y(), c.z() + s.z()}, //  |/       |/
-        {c.x() + s.x(), c.y() + s.y(), c.z() + s.z()}  //  0--------1
+        {c.x - s.x, c.y - s.y, c.z - s.z},
+        {c.x + s.x, c.y - s.y, c.z - s.z}, //    6--------7
+        {c.x - s.x, c.y + s.y, c.z - s.z}, //   /|       /|
+        {c.x + s.x, c.y + s.y, c.z - s.z}, //  2--------3 |
+        {c.x - s.x, c.y - s.y, c.z + s.z}, //  | |      | |
+        {c.x + s.x, c.y - s.y, c.z + s.z}, //  | 4------|-5
+        {c.x - s.x, c.y + s.y, c.z + s.z}, //  |/       |/
+        {c.x + s.x, c.y + s.y, c.z + s.z}  //  0--------1
     };
 
     for (size_t i = 0; i < 8; ++i)

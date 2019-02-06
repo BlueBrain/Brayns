@@ -21,47 +21,120 @@
 #ifndef _mathTypes_h_
 #define _mathTypes_h_
 
-#include <vmmlib/vmmlib.hpp>
+#define GLM_FORCE_CTOR_INIT
+#include <glm/glm.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/ext.hpp>
+#include <glm/gtx/io.hpp>
+#include <vector>
 
 namespace brayns
 {
+template <typename T>
+class Box;
+}
+namespace staticjson
+{
+class ObjectHandler;
+template <typename U>
+void init(brayns::Box<U>*, ObjectHandler*);
+}
+
+namespace brayns
+{
+template <class T>
+class Box
+{
+public:
+    using vec = glm::vec<3, T>;
+
+    Box() = default;
+
+    Box(const vec& pMin, const vec& pMax)
+        : _min(glm::min(pMin, pMax))
+        , _max(glm::max(pMin, pMax))
+    {
+    }
+    inline bool operator==(const Box<T>& other) const
+    {
+        return _min == other._min && _max == other._max;
+    }
+
+    inline void merge(const Box<T>& aabb)
+    {
+        _min = glm::min(_min, aabb.getMin());
+        _max = glm::max(_max, aabb.getMax());
+    }
+
+    inline void merge(const vec& point)
+    {
+        _min = glm::min(_min, point);
+        _max = glm::max(_max, point);
+    }
+
+    inline void reset()
+    {
+        _min = vec(std::numeric_limits<T>::max());
+        _max = vec(-std::numeric_limits<T>::max());
+    }
+
+    inline bool isEmpty() const
+    {
+        return _min.x >= _max.x || _min.y >= _max.y || _min.z >= _max.x;
+    }
+
+    inline vec getCenter() const { return (_min + _max) * .5; }
+    inline vec getSize() const { return _max - _min; }
+    inline const vec& getMin() const { return _min; }
+    inline const vec& getMax() const { return _max; }
+private:
+    vec _min{std::numeric_limits<T>::max()};
+    vec _max{-std::numeric_limits<T>::max()};
+    friend void staticjson::init(Box<double>*, staticjson::ObjectHandler*);
+};
+
+template <typename T>
+inline std::ostream& operator<<(std::ostream& os, const Box<T>& aabb)
+{
+    return os << aabb.getMin() << " - " << aabb.getMax();
+}
+
 /**
  * AABB definitions
  */
-typedef vmml::AABB<float> Boxf;
-typedef vmml::AABB<double> Boxd;
+using Boxf = Box<float>;
+using Boxd = Box<double>;
 
 /**
  * Matrix definitions
  */
-using vmml::Matrix4f;
-
-using vmml::Matrix4d;
-using vmml::Matrix4f;
+using Matrix4d = glm::mat<4, 4, double>;
+using Matrix4f = glm::mat4;
 
 /**
  * Vector definitions
  */
-using vmml::Vector2i;
-using vmml::Vector3i;
+using Vector2i = glm::vec<2, int32_t>;
+using Vector3i = glm::vec<3, int32_t>;
 
-using vmml::Vector2ui;
-using vmml::Vector3ui;
+using Vector2ui = glm::vec<2, uint32_t>;
+using Vector3ui = glm::vec<3, uint32_t>;
 
-using vmml::Vector2f;
-using vmml::Vector3f;
+using Vector2f = glm::vec2;
+using Vector3f = glm::vec3;
+using Vector4f = glm::vec4;
 typedef std::vector<Vector3f> Vector3fs;
-using vmml::Vector4f;
 typedef std::vector<Vector4f> Vector4fs;
 
-typedef vmml::vector<2, double> Vector2d;
+using Vector2d = glm::vec<2, double>;
+using Vector3d = glm::vec<3, double>;
+using Vector4d = glm::vec<4, double>;
 typedef std::vector<Vector2d> Vector2ds;
-typedef vmml::vector<3, double> Vector3d;
 
 /**
  * Quaternion definitions
  */
-using Quaterniond = vmml::Quaternion<double>; //!< Double quaternion.
+using Quaterniond = glm::tquat<double, glm::highp>; //!< Double quaternion.
 }
 
 #endif // _mathTypes_h_

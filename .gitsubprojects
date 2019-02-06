@@ -1,6 +1,4 @@
 # -*- mode: cmake -*-
-git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git 6fd928f)
-
 if(BRAYNS_NETWORKING_ENABLED)
   git_subproject(Rockets https://github.com/BlueBrain/Rockets.git cc53765)
 endif()

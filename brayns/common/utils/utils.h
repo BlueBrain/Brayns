@@ -23,6 +23,8 @@
 #include <brayns/common/mathTypes.h>
 #include <brayns/common/types.h>
 
+#include <algorithm>
+
 namespace brayns
 {
 strings parseFolder(const std::string& folder, const strings& filters);
@@ -45,17 +47,18 @@ inline auto lowerCase(std::string str)
 }
 
 template <size_t M, typename T>
-inline vmml::vector<M, T> toVmmlVec(const std::array<T, M>& input)
+inline glm::vec<M, T> toGlmVec(const std::array<T, M>& input)
 {
-    return vmml::vector<M, T>(input.data());
+    glm::vec<M, T> vec;
+    memcpy(glm::value_ptr(vec), input.data(), input.size() * sizeof(T));
+    return vec;
 }
 
 template <size_t M, typename T>
-inline std::array<T, M> toArray(const vmml::vector<M, T>& input)
+inline std::array<T, M> toArray(const glm::vec<M, T>& input)
 {
     std::array<T, M> output;
-    std::copy(std::begin(input.array), std::end(input.array),
-              std::begin(output));
+    memcpy(output.data(), glm::value_ptr(input), M * sizeof(T));
     return output;
 }
 

@@ -54,7 +54,7 @@ public:
 
     float getRotationSpeed() const;
     float getWheelSpeed() const;
-    void rotate(const Vector3f& pivot, float du, float dv, AxisMode axisMode);
+    void rotate(const Vector3d& pivot, double du, double dv, AxisMode axisMode);
 
 protected:
     /*! target camera */
@@ -71,7 +71,7 @@ protected:
      * _rotates_ with each unit on the screen */
     double _rotationSpeed;
 
-    void translate(const Vector3f& v);
+    void translate(const Vector3d& v);
 };
 }
 

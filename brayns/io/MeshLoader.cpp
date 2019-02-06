@@ -170,7 +170,7 @@ ModelDescriptorPtr MeshLoader::importFromBlob(
 
     auto model = _scene.createModel();
 
-    _postLoad(aiScene, *model, {}, NO_MATERIAL, "", callback);
+    _postLoad(aiScene, *model, Matrix4f(1), NO_MATERIAL, "", callback);
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
@@ -286,11 +286,9 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
     std::map<size_t, size_t> indexOffsets;
 
     const auto trfm = aiScene->mRootNode->mTransformation;
-    Matrix4f matrix;
-    matrix.setRow(0, {trfm.a1, trfm.a2, trfm.a3, trfm.a4});
-    matrix.setRow(1, {trfm.b1, trfm.b2, trfm.b3, trfm.b4});
-    matrix.setRow(2, {trfm.c1, trfm.c2, trfm.c3, trfm.c4});
-    matrix.setRow(3, {trfm.d1, trfm.d2, trfm.d3, trfm.d4});
+    Matrix4f matrix{trfm.a1, trfm.b1, trfm.c1, trfm.d1, trfm.a2, trfm.b2,
+                    trfm.c2, trfm.d2, trfm.a3, trfm.b3, trfm.c3, trfm.d3,
+                    trfm.a4, trfm.b4, trfm.c4, trfm.d4};
     matrix = matrix * transformation;
 
     for (size_t m = 0; m < aiScene->mNumMeshes; ++m)
@@ -318,8 +316,8 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
             {
                 const auto& n = mesh->mNormals[i];
                 const Vector4f normal = matrix * Vector4f(n.x, n.y, n.z, 0.f);
-                const Vector3f transformedNormal = {normal.x(), normal.y(),
-                                                    normal.z()};
+                const Vector3f transformedNormal = {normal.x, normal.y,
+                                                    normal.z};
                 triangleMeshes.normals.push_back(transformedNormal);
             }
 
@@ -385,7 +383,7 @@ size_t MeshLoader::_getQuality(const GeometryQuality geometryQuality) const
 
 void MeshLoader::importMesh(const std::string& fileName,
                             const LoaderProgress& callback, Model& model,
-                            const vmml::Matrix4f& transformation,
+                            const Matrix4f& transformation,
                             const size_t defaultMaterialId,
                             const GeometryQuality geometryQuality) const
 {

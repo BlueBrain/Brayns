@@ -27,6 +27,7 @@ namespace fs = boost::filesystem;
 
 #include <algorithm>
 #include <set>
+#include <sstream>
 #include <string>
 
 namespace brayns

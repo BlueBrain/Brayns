@@ -108,7 +108,7 @@ void OSPRayRenderer::commit()
     ospSet1i(_renderer, "randomNumber", rand() % 10000);
 
     const auto& color = rp.getBackgroundColor();
-    ospSet3f(_renderer, "bgColor", color.x(), color.y(), color.z());
+    ospSet3f(_renderer, "bgColor", color.x, color.y, color.z);
     ospSet1f(_renderer, "varianceThreshold", rp.getVarianceThreshold());
     ospSet1i(_renderer, "spp", rp.getSamplesPerPixel());
 
@@ -137,7 +137,7 @@ void OSPRayRenderer::setCamera(CameraPtr camera)
 Renderer::PickResult OSPRayRenderer::pick(const Vector2f& pickPos)
 {
     OSPPickResult ospResult;
-    osp::vec2f pos{pickPos.x(), pickPos.y()};
+    osp::vec2f pos{pickPos.x, pickPos.y};
 
     // HACK: as the time for picking is set to 0.5 and interpolated in a
     // (default) 0..0 range, the ray.time will be 0. So all geometries that have

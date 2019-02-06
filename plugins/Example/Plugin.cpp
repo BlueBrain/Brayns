@@ -19,6 +19,8 @@
 
 #include "Plugin.h"
 
+#include <iostream>
+
 namespace brayns
 {
 ExamplePlugin::ExamplePlugin(int argc, const char** argv)

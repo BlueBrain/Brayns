@@ -224,8 +224,8 @@ void _addSDFSample(SDFData& sdfData, const brain::neuron::Section section,
                     continue;
 
                 const auto& geom = sdfData.geometries[geomIdx];
-                const float dist0 = geom.p0.squared_distance(bifGeom.center);
-                const float dist1 = geom.p1.squared_distance(bifGeom.center);
+                const float dist0 = glm::distance2(geom.p0, bifGeom.center);
+                const float dist1 = glm::distance2(geom.p1, bifGeom.center);
                 const float radiusSum = geom.radius + bifGeom.radius;
                 const float radiusSumSq = radiusSum * radiusSum;
 
@@ -513,7 +513,7 @@ public:
                 float radius = samples[i].w() * 0.5f * _params.radiusMultiplier;
                 constexpr float maxRadiusChange = 0.1f;
 
-                const float dist = (target - position).length();
+                const float dist = glm::length(target - position);
                 // The radius of the last sample of a section is never
                 // modified
                 if (dist > 0.0001f && i != samples.size() - 1 &&
@@ -597,7 +597,7 @@ private:
     {
         const size_t materialId =
             materialFunc(brain::neuron::SectionType::soma);
-        const auto somaPosition = soma.getCentroid();
+        const auto somaPosition = glm::make_vec3(soma.getCentroid().array);
         const float somaRadius =
             soma.getMeanRadius() * _params.radiusMultiplier;
         const auto& children = soma.getChildren();
@@ -660,7 +660,8 @@ ModelDescriptorPtr MorphologyLoader::importFromFile(
     callback.updateProgress("Loading " + modelName + " ...", 1.f);
 
     Transformation transformation;
-    transformation.setRotationCenter(morphology.getSoma().getCentroid());
+    transformation.setRotationCenter(
+        glm::make_vec3(morphology.getSoma().getCentroid().array));
     auto modelDescriptor =
         std::make_shared<ModelDescriptor>(std::move(model), fileName);
     modelDescriptor->setTransformation(transformation);

@@ -60,10 +60,10 @@ void OptiXCamera::commit()
 
     _calculateCameraVariables(u, v, w);
 
-    context[CUDA_ATTR_CAMERA_EYE]->setFloat(pos.x(), pos.y(), pos.z());
-    context[CUDA_ATTR_CAMERA_U]->setFloat(u.x(), u.y(), u.z());
-    context[CUDA_ATTR_CAMERA_V]->setFloat(v.x(), v.y(), v.z());
-    context[CUDA_ATTR_CAMERA_W]->setFloat(w.x(), w.y(), w.z());
+    context[CUDA_ATTR_CAMERA_EYE]->setFloat(pos.x, pos.y, pos.z);
+    context[CUDA_ATTR_CAMERA_U]->setFloat(u.x, u.y, u.z);
+    context[CUDA_ATTR_CAMERA_V]->setFloat(v.x, v.y, v.z);
+    context[CUDA_ATTR_CAMERA_W]->setFloat(w.x, w.y, w.z);
     context[CUDA_ATTR_CAMERA_APERTURE_RADIUS]->setFloat(
         getPropertyOrValue<double>("apertureRadius", 0.0));
     context[CUDA_ATTR_CAMERA_FOCAL_SCALE]->setFloat(
@@ -107,14 +107,14 @@ void OptiXCamera::_calculateCameraVariables(Vector3d& U, Vector3d& V,
                                             Vector3d& W)
 {
     const auto& position = getPosition();
-    const auto& up = getOrientation().rotate(Vector3f(0.0f, 1.0f, 0.0f));
+    const auto& up = glm::rotate(getOrientation(), Vector3d(0, 1, 0));
 
     float ulen, vlen, wlen;
     W = getTarget() - position;
 
-    wlen = W.length();
-    U = normalize(cross(W, up));
-    V = normalize(cross(U, W));
+    wlen = glm::length(W);
+    U = normalize(glm::cross(W, up));
+    V = normalize(glm::cross(U, W));
 
     vlen = wlen *
            tanf(0.5f * getPropertyOrValue<double>("fovy", 45.0) * M_PI / 180.f);

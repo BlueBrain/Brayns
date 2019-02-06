@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping)
     std::cout << "Rot Center: " << rotCenter << std::endl;
     std::cout << "Cam Pos: " << camPos << std::endl;
 
-    camera.setOrientation(brayns::Quaterniond(0.0, 0.0, 0.0, 1.0));
+    camera.setOrientation(brayns::Quaterniond(1, 0, 0, 0));
     camera.setPosition(camPos + 0.9 * (rotCenter - camPos));
 
     modelDesc->getModel().getTransferFunction().setValuesRange({-66, -62});
@@ -185,7 +185,7 @@ void testSdfGeometries(bool dampened)
     auto& camera = brayns.getEngine().getCamera();
     const auto camPos = camera.getPosition();
 
-    camera.setOrientation(brayns::Quaterniond(0.0, 0.0, 0.0, 1.0));
+    camera.setOrientation(brayns::Quaterniond(1, 0, 0, 0));
     camera.setPosition(camPos + 0.92 * (rotCenter - camPos));
 
     brayns.commitAndRender();

@@ -49,9 +49,11 @@ BOOST_AUTO_TEST_CASE(inspect)
         makeRequest<std::array<double, 2>, brayns::Renderer::PickResult>(
             "inspect", {{0.5, 0.5}});
     BOOST_CHECK(inspectResult.hit);
-    BOOST_CHECK(inspectResult.pos.equals({0.500001490116119, 0.500001490116119,
-                                          1.19209289550781e-7},
-                                         0.000001f));
+    BOOST_CHECK(
+        glm::all(glm::epsilonEqual(inspectResult.pos,
+                                   {0.500001490116119, 0.500001490116119,
+                                    1.19209289550781e-7},
+                                   0.000001)));
 
     auto failedInspectResult =
         makeRequest<std::array<double, 2>, brayns::Renderer::PickResult>(
