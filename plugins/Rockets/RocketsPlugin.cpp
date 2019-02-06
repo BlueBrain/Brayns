@@ -290,9 +290,8 @@ public:
                          const PropertyMap& input, const PropertyMap& output,
                          const std::function<PropertyMap(PropertyMap)>& action)
     {
-        _bindEndpoint(desc.methodName, [ name = desc.methodName, action,
-                                         this ](const auto& request) {
-            ScopedCurrentClient scope(this->_currentClientID, request.clientID);
+        _bindEndpoint(desc.methodName, [ name = desc.methodName,
+                                         action ](const auto& request) {
             try
             {
                 return Response{
