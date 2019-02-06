@@ -1,8 +1,8 @@
 import React, {
-    Component,
     createRef,
     CSSProperties,
     MouseEvent as ReactMouseEvent,
+    PureComponent,
     RefObject
 } from 'react';
 
@@ -19,11 +19,7 @@ import {
 } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 
-import {
-    compareAnimationParams,
-    framesCount,
-    frameToTimeStr
-} from './utils';
+import {frameToTimeStr} from './utils';
 
 
 // https://material-ui-next.com/demos/drawers/#mini-variant-drawer
@@ -121,7 +117,7 @@ const styles = (theme: Theme) => createStyles({
 const style = withStyles(styles, {withTheme: true});
 
 
-class ProgressBar extends Component<Props, State> {
+class ProgressBar extends PureComponent<Props, State> {
     state: State = {
         showHandle: false,
         isDragging: false
@@ -197,9 +193,7 @@ class ProgressBar extends Component<Props, State> {
     jumpToFrame = (frame?: number) => {
         const {onFrameChange} = this.props;
         if (onFrameChange && isNumber(frame)) {
-            onFrameChange({
-                current: frame
-            });
+            onFrameChange(frame);
         }
     }
 
@@ -212,7 +206,7 @@ class ProgressBar extends Component<Props, State> {
         // Don't allow for less than 0 or more than the width of the rect
         const position = Math.max(0, Math.min(evt.clientX - rect.left, rect.width));
         const delta = position / rect.width;
-        const frame = Math.floor(delta * framesCount(this.props.animationParams));
+        const frame = Math.floor(delta * this.props.frameCount);
 
         // Update the next position/frame
         return {
@@ -221,28 +215,18 @@ class ProgressBar extends Component<Props, State> {
         };
     }
 
-    shouldComponentUpdate(nextProps: Props, nextState: State): boolean {
-        return !compareAnimationParams(nextProps.animationParams, this.props.animationParams)
-            || nextProps.theme !== this.props.theme
-            || nextState.isDragging !== this.state.isDragging
-            || nextState.nextFrame !== this.state.nextFrame
-            || nextState.nextPosition !== this.state.nextPosition
-            || nextState.showHandle !== this.state.showHandle;
-    }
-
     render() {
-        const {classes, animationParams} = this.props;
+        const {classes, animationParams, frameCount} = this.props;
         const {
             nextFrame,
             nextPosition,
             showHandle
         } = this.state;
 
-        const currentProgress = getProgress(animationParams);
+        const currentProgress = getProgress(animationParams, frameCount);
         const currentProgressPosition = this.progressPosition(currentProgress);
         const currentProgressWidth = toPercent(currentProgress);
 
-        // TODO: Add a simple handle at the end of the progress bar
         return (
             <div
                 className={classnames(classes.container, {[classes.containerShift]: showHandle})}
@@ -307,9 +291,9 @@ class ProgressBar extends Component<Props, State> {
 export default style(ProgressBar);
 
 
-function getProgress(params: Partial<AnimationParameters>): number {
+function getProgress(params: Partial<AnimationParameters>, frameCount: number): number {
     if (isNumber(params.current)) {
-        return (params.current / framesCount(params)) || 0;
+        return (params.current / frameCount) || 0;
     }
     return 0;
 }
@@ -332,7 +316,8 @@ function knobTransform(pos: number, show?: boolean): CSSProperties {
 
 interface Props extends WithStyles<typeof styles, true> {
     animationParams: Partial<AnimationParameters>;
-    onFrameChange?(value: Partial<AnimationParameters>): void;
+    frameCount: number;
+    onFrameChange?(frame: number): void;
 }
 
 interface State {

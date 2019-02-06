@@ -1,11 +1,10 @@
 // tslint:disable: member-ordering
-import React, {ChangeEvent, Component} from 'react';
+import React, {
+    ChangeEvent,
+    Component
+} from 'react';
 
-import {
-    GET_ANIMATION_PARAMS,
-    ImageFormat,
-    SNAPSHOT
-} from 'brayns';
+import {ImageFormat, SNAPSHOT} from 'brayns';
 import classNames from 'classnames';
 import {isNumber} from 'lodash';
 import {Subscription} from 'rxjs';
@@ -37,6 +36,8 @@ import withWidth, {isWidthDown, WithWidth} from '@material-ui/core/withWidth';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 
 import brayns, {
+    withAnimation,
+    WithAnimation,
     withCamera,
     WithCamera,
     withRenderer,
@@ -117,22 +118,18 @@ export class Snapshot extends Component<Props, State> {
             format
         } = this.state;
 
-        const [animationParameters] = await Promise.all([
-            brayns.request(GET_ANIMATION_PARAMS)
-        ]);
-
         dispatchKeyboardLock(false);
         this.setState({
             showDialog: false
         });
 
         const snapshot = brayns.request(SNAPSHOT, {
-            animationParameters,
             format,
             quality,
             samplesPerPixel,
             camera: this.props.camera,
             renderer: this.props.renderer,
+            animationParameters: this.props.animationParams,
             name: `${filename}.${format}`,
             size: [width, height] as number[]
         } as any);
@@ -401,7 +398,8 @@ export class Snapshot extends Component<Props, State> {
 export default withWidth()(
     style(
         withRenderer(
-            withCamera(Snapshot))));
+            withCamera(
+                withAnimation(Snapshot)))));
 
 
 function setMimeType(data: string, format?: ImageFormat) {
@@ -455,7 +453,8 @@ function b64ToBlob(b64Str: string) {
 interface Props extends WithStyles<typeof styles>,
     WithWidth,
     WithCamera,
-    WithRenderer {
+    WithRenderer,
+    WithAnimation {
     color?: PropTypes.Color;
     disabled?: boolean;
 }
