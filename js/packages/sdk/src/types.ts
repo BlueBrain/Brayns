@@ -120,14 +120,14 @@ export interface CancelParams {
     id: string | number;
 }
 
-export type SetAnimationParameters = Partial<Pick<AnimationParameters, 'current' | 'delta'>>;
+export type SetAnimationParameters = Partial<Pick<AnimationParameters, 'current' | 'delta' | 'playing'>>;
 
 export interface AnimationParameters {
     current: number;
     delta: number;
     dt: number;
-    end: number;
-    start: number;
+    frameCount: number;
+    playing: boolean;
     unit: string;
 }
 

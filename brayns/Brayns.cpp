@@ -256,7 +256,6 @@ struct Brayns::Impl : public PluginAPI
         _actionInterface = interface;
     }
     Scene& getScene() final { return _engine->getScene(); }
-
 private:
     void _createEngine()
     {
@@ -712,8 +711,7 @@ private:
 
     void _toggleAnimationPlayback()
     {
-        auto& animParams = _parametersManager.getAnimationParameters();
-        animParams.setDelta(animParams.getDelta() == 0 ? 1 : 0);
+        _parametersManager.getAnimationParameters().togglePlayback();
     }
 
     void _resetCamera()

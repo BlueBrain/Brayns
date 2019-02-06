@@ -51,7 +51,7 @@ public:
        Parses parameters managed by the class
        @param vm the variables map of all arguments passed by the user
      */
-    virtual void parse(const po::variables_map& vm) = 0;
+    virtual void parse(const po::variables_map&){};
 
     /**
        Displays values of registered parameters

@@ -391,7 +391,7 @@ bool OSPRayModel::_commitSimulationData()
             [handler = _simulationHandler] { return handler->isReady(); });
         ap.setDt(_simulationHandler->getDt());
         ap.setUnit(_simulationHandler->getUnit());
-        ap.setEnd(_simulationHandler->getNbFrames());
+        ap.setNumFrames(_simulationHandler->getNbFrames());
         _setIsReadyCallback = true;
     }
 

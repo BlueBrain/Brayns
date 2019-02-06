@@ -98,7 +98,8 @@ export class AnimationPlayer extends PureComponent<Props> {
     }
 
     handleKeydown = (evt: KeyboardEvent) => {
-        const {isAnimating} = this.props;
+        const {animationParams = {}} = this.props;
+        const isAnimating = animationParams.playing;
 
         if (this.keyboardLocked) {
             return;
@@ -139,7 +140,9 @@ export class AnimationPlayer extends PureComponent<Props> {
         this.subs.push(...[
             onPageVisibilityChange()
                 .subscribe(async hidden => {
-                    const {isAnimating} = this.props;
+                    const {animationParams = {}} = this.props;
+                    const isAnimating = animationParams.playing;
+
                     if (hidden && isAnimating) {
                         await this.props.onStop!();
                         this.wasAnimationSuspended = true;
@@ -172,10 +175,7 @@ export class AnimationPlayer extends PureComponent<Props> {
             classes,
             online,
             hasAnimation,
-            frameCount = 0,
-            delta,
             animationParams = {},
-            isAnimating,
             onToggle,
             onFrameChange,
             onFramePrev,
@@ -185,6 +185,7 @@ export class AnimationPlayer extends PureComponent<Props> {
         const showPlayer = hasAnimation && online;
         const disableBtns = !hasAnimation || !online;
 
+        const frameCount = (animationParams.frameCount || 1) - 1;
         const totalMs = frameToTimeStr(frameCount, animationParams.dt);
         const currentMs = frameToTimeStr(animationParams.current, animationParams.dt);
 
@@ -200,12 +201,12 @@ export class AnimationPlayer extends PureComponent<Props> {
                     <MuiThemeProvider theme={theme}>
                         <div className={classes.controls}>
                             <Controls
-                                play={!!isAnimating}
+                                play={!!animationParams.playing}
                                 onPlayToggle={onToggle!}
                                 onPrev={onFramePrev!}
                                 onNext={onFrameNext!}
                                 disablePrev={animationParams.current === 0}
-                                disableNext={animationParams.current === animationParams.end}
+                                disableNext={animationParams.current === frameCount}
                                 disabled={disableBtns}
                             />
                             <Typography variant="caption">
@@ -213,7 +214,7 @@ export class AnimationPlayer extends PureComponent<Props> {
                             </Typography>
                             <span className={classes.spacer} />
                             <AnimationSpeedController
-                                delta={delta}
+                                delta={animationParams.delta}
                                 disabled={disableBtns}
                                 onDeltaChange={onDeltaChange!}
                             />

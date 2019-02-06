@@ -21,8 +21,6 @@ import brayns, {onReady} from './client';
 export const AnimationContext = createContext<AnimationContextValue>({
     hasAnimation: false,
     animationParams: {},
-    isAnimating: false,
-    delta: 1,
     onFrameChange: () => Promise.resolve(),
     onFrameNext: () => Promise.resolve(),
     onFramePrev: () => Promise.resolve(),
@@ -34,38 +32,31 @@ export const AnimationContext = createContext<AnimationContextValue>({
 
 export class AnimationProvider extends Component<{}, State> {
     state: State = {
-        animationParams: {},
-        isAnimating: false,
-        delta: 1
+        animationParams: {}
     };
 
     private subs: Subscription[] = [];
 
-    play = () => this.changeAnimationParams({delta: this.state.delta});
+    play = () => this.changeAnimationParams({playing: true});
 
-    stop = () => this.changeAnimationParams({delta: 0});
+    stop = () => this.changeAnimationParams({playing: false});
 
     toggle = async () => {
-        const isAnimating = !this.state.isAnimating;
+        const {playing}: Partial<AnimationParameters> = this.state.animationParams || {};
         await this.changeAnimationParams({
-            delta: isAnimating ? this.state.delta : 0
+            playing: !playing
         });
     }
 
-    onDeltaChange = async (delta: number) => {
-        this.setState({delta});
-        if (this.state.isAnimating) {
-           await this.changeAnimationParams({delta});
-        }
-    }
+    onDeltaChange = (delta: number) => this.changeAnimationParams({delta});
 
     prevFrame = async () => {
         const {
             animationParams = {}
         } = this.state;
-        const {current} = animationParams;
-        if (isNumber(current)) {
-            const frame = current - 1;
+        const {current, delta} = animationParams;
+        if (isNumber(current) && isNumber(delta)) {
+            const frame = current - delta;
             if (frame >= 0) {
                 await this.changeFrame(frame);
             }
@@ -76,10 +67,10 @@ export class AnimationProvider extends Component<{}, State> {
         const {
             animationParams = {}
         } = this.state;
-        const {current, end} = animationParams;
-        if (isNumber(current) && isNumber(end)) {
-            const frame = current + 1;
-            if (frame <= end) {
+        const {current, delta, frameCount} = animationParams;
+        if (isNumber(current) && isNumber(delta) && isNumber(frameCount)) {
+            const frame = current + delta;
+            if (frame < frameCount) {
                 await this.changeFrame(frame);
             }
         }
@@ -90,16 +81,12 @@ export class AnimationProvider extends Component<{}, State> {
     changeAnimationParams = async (params: Partial<AnimationParameters>) => {
         try {
             await brayns.request(SET_ANIMATION_PARAMS, params);
-            this.setState(state => {
-                const animationParams = {
+            this.setState(state => ({
+                animationParams: {
                     ...state.animationParams as Partial<AnimationParameters>,
                     ...params
-                };
-                return {
-                    animationParams,
-                    isAnimating: isNumber(animationParams.delta) && animationParams.delta > 0
-                };
-            });
+                }
+            }));
         } catch (err) {
             dispatchNotification(err);
         }
@@ -128,17 +115,11 @@ export class AnimationProvider extends Component<{}, State> {
         const {children} = this.props;
         const {
             hasAnimation,
-            animationParams,
-            frameCount,
-            isAnimating,
-            delta
+            animationParams
         } = this.state;
         const context: AnimationContextValue = {
             hasAnimation,
             animationParams,
-            frameCount,
-            isAnimating,
-            delta,
             onFrameChange: this.changeFrame,
             onFrameNext: this.nextFrame,
             onFramePrev: this.prevFrame,
@@ -177,29 +158,15 @@ export function withAnimation<P>(Component: ComponentType<P & WithAnimation>): C
 
 
 function toState(animationParams: AnimationParameters): State {
-    const frameCount = getFramesCount(animationParams);
     return {
         animationParams,
-        frameCount,
-        isAnimating: animationParams.delta > 0,
-        hasAnimation: frameCount > 0
+        hasAnimation: animationParams.frameCount > 0
     };
 }
-
-function getFramesCount(params: Partial<AnimationParameters>): number {
-    if (isNumber(params.start) && isNumber(params.end)) {
-        return params.end - params.start;
-    }
-    return 0;
-}
-
 
 interface State {
     hasAnimation?: boolean;
     animationParams?: Partial<AnimationParameters>;
-    frameCount?: number;
-    isAnimating?: boolean;
-    delta?: number;
 }
 
 export type WithAnimation = Partial<AnimationContextValue>;
