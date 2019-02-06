@@ -24,8 +24,8 @@ import CheckIcon from '@material-ui/icons/Check';
 import ErrorIcon from '@material-ui/icons/ErrorOutline';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
+import {withLoaders, WithLoaders} from '../../common/client';
 import ModelLoader, {LoaderDescriptor} from './model-loader';
-import {withLoaders, WithLoaders} from './provider';
 
 
 const styles = (theme: Theme) => createStyles({
@@ -162,8 +162,8 @@ export class ModelList extends PureComponent<Props, State> {
     }
 }
 
-const ModelListWithLoaders = withLoaders(ModelList);
-export default style(ModelListWithLoaders);
+export default style(
+    withLoaders(ModelList));
 
 
 export interface ModelWithLoader extends LoaderDescriptor {
