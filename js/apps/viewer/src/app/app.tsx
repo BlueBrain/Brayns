@@ -45,6 +45,7 @@ import TimelineIcon from '@material-ui/icons/Timeline';
 import TuneIcon from '@material-ui/icons/Tune';
 
 import brayns, {
+    AnimationProvider,
     AppParamsProvider,
     CameraProvider,
     RendererProvider
@@ -753,9 +754,10 @@ class App extends PureComponent<Props, State> {
                                                         </div>
                                                     </Fade>
 
-                                                    <RequestNotifications disabled={hasSocketError} />
-
-                                                    <AnimationPlayer disabled={hasSocketError} />
+                                                    <AnimationProvider>
+                                                        <RequestNotifications disabled={hasSocketError} />
+                                                        <AnimationPlayer disabled={hasSocketError} />
+                                                    </AnimationProvider>
                                                     <ConnectionStatus open={hasSocketError} />
                                                 </DataPortal>
                                             </div>
