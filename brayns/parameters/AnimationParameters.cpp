@@ -54,10 +54,14 @@ void AnimationParameters::print()
 
 void AnimationParameters::reset()
 {
-    _updateValue(_end, 0u);
-    _updateValue(_current, 0u);
-    _updateValue(_unit, std::string());
-    _updateValue(_dt, 0.);
+    _updateValue(_end, 0u, false);
+    _updateValue(_current, 0u, false);
+    _updateValue(_unit, std::string(), false);
+    _updateValue(_dt, 0., false);
+
+    // trigger the modified callback only once
+    if (isModified())
+        markModified();
 }
 
 void AnimationParameters::update()
