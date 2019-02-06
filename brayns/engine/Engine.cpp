@@ -79,7 +79,7 @@ Renderer& Engine::getRenderer()
 bool Engine::continueRendering() const
 {
     auto frameBuffer = _frameBuffers[0];
-    return _parametersManager.getAnimationParameters().getDelta() != 0 ||
+    return _parametersManager.getAnimationParameters().isPlaying() ||
            (frameBuffer->getAccumulation() &&
             (frameBuffer->numAccumFrames() <
              _parametersManager.getRenderingParameters().getMaxAccumFrames()));

@@ -46,20 +46,14 @@ public:
     }
     uint32_t getFrame() const { return _current; }
     /** The (frame) delta to apply for animations to select the next frame. */
-    void setDelta(const int32_t delta) { _updateValue(_delta, delta); }
+    void setDelta(const int32_t delta);
     int32_t getDelta() const { return _delta; }
-    void setStart(const uint32_t start)
+    void setNumFrames(const uint32_t numFrames)
     {
-        _updateValue(_start, start);
-        _updateValue(_current, std::max(_current, _start));
+        _updateValue(_numFrames, numFrames);
+        _updateValue(_current, std::min(_current, _numFrames));
     }
-    uint32_t getStart() const { return _start; }
-    void setEnd(const uint32_t end)
-    {
-        _updateValue(_end, end);
-        _updateValue(_current, std::min(_current, _end));
-    }
-    uint32_t getEnd() const { return _end; }
+    uint32_t getNumFrames() const { return _numFrames; }
     /** The dt of a simulation. */
     void setDt(const double dt) { _updateValue(_dt, dt); }
     double getDt() const { return _dt; }
@@ -94,21 +88,20 @@ public:
     /** Jump 'frames' from current frame if all listeners are ready. */
     void jumpFrames(int frames);
 
+    void togglePlayback() { _playing = !_playing; }
+    bool isPlaying() const { return _playing; }
 private:
-    void parse(const po::variables_map& vm) final;
-
     uint32_t _adjustedCurrent(const uint32_t newCurrent) const
     {
-        const auto nbFrames = _end - _start;
-        return nbFrames == 0 ? 0 : _start + (newCurrent % nbFrames);
+        return _numFrames == 0 ? 0 : newCurrent % _numFrames;
     }
 
     bool _canUpdateFrame() const;
 
-    uint32_t _start{0};
-    uint32_t _end{0};
+    uint32_t _numFrames{0};
     uint32_t _current{0};
-    int32_t _delta{0};
+    int32_t _delta{1};
+    bool _playing{false};
     double _dt{0};
     std::string _unit;
 

@@ -924,6 +924,7 @@ public:
 
     void _registerEndpoints()
     {
+        _handleAnimationParams();
         _handleCamera();
         _handleImageJPEG();
         _handleRenderer();
@@ -931,9 +932,6 @@ public:
 
         _handle(ENDPOINT_APP_PARAMS,
                 _parametersManager.getApplicationParameters());
-        _handle(ENDPOINT_ANIMATION_PARAMS,
-                _parametersManager.getAnimationParameters(),
-                INTERACTIVE_THROTTLE);
         _handle(ENDPOINT_VOLUME_PARAMS,
                 _parametersManager.getVolumeParameters());
 
@@ -1049,6 +1047,18 @@ public:
                              });
 
         _handleSchema(ENDPOINT_VERSION, version.getSchema());
+    }
+
+    void _handleAnimationParams()
+    {
+        auto& animParams = _parametersManager.getAnimationParameters();
+        auto preUpdate = [](const AnimationParameters& obj) {
+            return obj.getDelta() != 0;
+        };
+
+        _handleGET(ENDPOINT_ANIMATION_PARAMS, animParams, INTERACTIVE_THROTTLE);
+        _handlePUT(ENDPOINT_ANIMATION_PARAMS, animParams, preUpdate,
+                   std::function<void(AnimationParameters&)>());
     }
 
     void _handleCamera()

@@ -31,19 +31,11 @@ namespace brayns
 AnimationParameters::AnimationParameters()
     : AbstractParameters("Animation")
 {
-    _parameters.add_options()(PARAM_ANIMATION_FRAME, po::value<uint32_t>(),
+    _parameters.add_options()(PARAM_ANIMATION_FRAME,
+                              po::value<uint32_t>(&_current),
                               "Scene animation frame [uint]")(
-        PARAM_PLAY_ANIMATION, po::bool_switch()->default_value(false),
+        PARAM_PLAY_ANIMATION, po::bool_switch(&_playing)->default_value(false),
         "Start animation playback");
-}
-
-void AnimationParameters::parse(const po::variables_map& vm)
-{
-    if (vm.count(PARAM_ANIMATION_FRAME))
-        _current = vm[PARAM_ANIMATION_FRAME].as<uint32_t>();
-    if (vm[PARAM_PLAY_ANIMATION].as<bool>())
-        _delta = 1;
-    markModified();
 }
 
 void AnimationParameters::print()
@@ -54,19 +46,27 @@ void AnimationParameters::print()
 
 void AnimationParameters::reset()
 {
-    _updateValue(_end, 0u, false);
     _updateValue(_current, 0u, false);
-    _updateValue(_unit, std::string(), false);
     _updateValue(_dt, 0., false);
+    _updateValue(_numFrames, 0u, false);
+    _updateValue(_playing, false, false);
+    _updateValue(_unit, std::string(), false);
 
     // trigger the modified callback only once
     if (isModified())
         markModified();
 }
 
+void AnimationParameters::setDelta(const int32_t delta)
+{
+    if (delta == 0)
+        throw std::logic_error("Animation delta cannot be set to 0");
+    _updateValue(_delta, delta);
+}
+
 void AnimationParameters::update()
 {
-    if ((isModified() || getDelta() != 0) && _canUpdateFrame())
+    if (_playing && _canUpdateFrame())
         setFrame(getFrame() + getDelta());
 }
 
