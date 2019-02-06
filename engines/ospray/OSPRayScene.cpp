@@ -116,6 +116,7 @@ void OSPRayScene::commit()
                      << std::endl;
 
         impl.commitGeometry();
+        impl.logInformation();
 
         // add volumes to root model, because scivis renderer does not consider
         // volumes from instances
@@ -158,7 +159,6 @@ void OSPRayScene::commit()
         }
 
         impl.markInstancesClean();
-        impl.logInformation();
     }
     BRAYNS_DEBUG << "Committing root models" << std::endl;
 
@@ -251,7 +251,6 @@ bool OSPRayScene::_commitVolumeAndTransferFunction(
                 markModified(false);
             }
         }
-        modelDescriptor->getModel().updateSizeInBytes();
     }
     return rebuildScene;
 }

@@ -164,6 +164,7 @@ void OptiXScene::commit()
                      << std::endl;
 
         impl.commitGeometry();
+        impl.logInformation();
 
         if (modelDescriptor->getVisible())
         {

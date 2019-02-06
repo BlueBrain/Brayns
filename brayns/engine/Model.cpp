@@ -378,7 +378,7 @@ void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)
 
 void Model::logInformation()
 {
-    updateSizeInBytes();
+    _updateSizeInBytes();
 
     uint64_t nbSpheres = 0;
     uint64_t nbCylinders = 0;
@@ -407,7 +407,7 @@ MaterialPtr Model::getMaterial(const size_t materialId) const
     return it->second;
 }
 
-void Model::updateSizeInBytes()
+void Model::_updateSizeInBytes()
 {
     _sizeInBytes = 0;
     for (const auto& spheres : _geometries->_spheres)
@@ -425,8 +425,6 @@ void Model::updateSizeInBytes()
         _sizeInBytes += mesh.indices.size() * sizeof(Vector3ui);
         _sizeInBytes += mesh.textureCoordinates.size() * sizeof(Vector2f);
     }
-    for (const auto& volume : _geometries->_volumes)
-        _sizeInBytes += volume->getSizeInBytes();
     for (const auto& streamline : _geometries->_streamlines)
     {
         _sizeInBytes += streamline.second.indices.size() * sizeof(int32_t);
@@ -584,6 +582,14 @@ void Model::setSimulationHandler(AbstractSimulationHandlerPtr handler)
         _unbindMaterials(_simulationHandler, _materials);
     _simulationHandler = handler;
     _bindMaterials(_simulationHandler, _materials);
+}
+
+size_t Model::getSizeInBytes() const
+{
+    size_t volumeSizeInBytes = 0;
+    for (const auto& volume : _geometries->_volumes)
+        volumeSizeInBytes += volume->getSizeInBytes();
+    return _sizeInBytes + volumeSizeInBytes;
 }
 
 AbstractSimulationHandlerPtr Model::getSimulationHandler() const

@@ -424,14 +424,12 @@ public:
     BRAYNS_API void setSimulationHandler(AbstractSimulationHandlerPtr handler);
 
     /** @return the size in bytes of all geometries. */
-    size_t getSizeInBytes() const { return _sizeInBytes; }
+    size_t getSizeInBytes() const;
     void markInstancesDirty() { _instancesDirty = true; }
     void markInstancesClean() { _instancesDirty = false; }
     const Volumes& getVolumes() const { return _geometries->_volumes; }
     bool isVolumesDirty() const { return _volumesDirty; }
     void resetVolumesDirty() { _volumesDirty = false; }
-    /** @internal */
-    void updateSizeInBytes();
     void setBVHFlags(std::set<BVHFlag> bvhFlags)
     {
         _bvhFlags = std::move(bvhFlags);
@@ -442,6 +440,8 @@ public:
     void copyFrom(const Model& rhs);
 
 protected:
+    void _updateSizeInBytes();
+
     /** Factory method to create an engine-specific material. */
     BRAYNS_API virtual MaterialPtr createMaterialImpl(
         const PropertyMap& properties = {}) = 0;
