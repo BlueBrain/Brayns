@@ -12,7 +12,6 @@ import classNames from 'classnames';
 import {fromEvent} from 'file-selector';
 import {noop} from 'lodash';
 import {Subscription} from 'rxjs';
-import {mergeMap} from 'rxjs/operators';
 
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -29,9 +28,10 @@ import withWidth, {isWidthDown, WithWidth} from '@material-ui/core/withWidth';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 
 import brayns, {
-    onReady,
     withConnectionStatus,
-    WithConnectionStatus
+    WithConnectionStatus,
+    withLoaders,
+    WithLoaders
 } from '../../common/client';
 import {SlideUp} from '../../common/components';
 import {
@@ -43,13 +43,8 @@ import {
 
 import ModelList, {ModelWithLoader} from './model-list';
 import {
-    LoadersContext,
-    Provider
-} from './provider';
-import {
     defaultProps,
     findLoader,
-    getLoadersWithSchema,
     needsUserInput
 } from './utils';
 
@@ -102,10 +97,7 @@ const style = withStyles(styles);
 
 class DataPortal extends PureComponent<Props, State> {
     state: State = {
-        models: [],
-        context: {
-            loaders: []
-        }
+        models: []
     };
 
     dropzoneRef: RefObject<Dropzone> = createRef();
@@ -113,8 +105,6 @@ class DataPortal extends PureComponent<Props, State> {
         const dropzone = this.dropzoneRef.current;
         return dropzone;
     }
-
-    private subs: Subscription[] = [];
 
     onClose = () => {
         const {onClose} = this.props;
@@ -124,21 +114,21 @@ class DataPortal extends PureComponent<Props, State> {
     }
 
     import = async (files: File[]) => {
-        const {context} = this.state;
+        const {loaders} = this.props;
 
         // Notify file select close
         this.onClose();
 
-        if (needsUserInput(files, context)) {
+        if (needsUserInput(files, loaders!)) {
             dispatchKeyboardLock(true);
 
             const models = {
                 models: files.map(file => {
-                    const name = findLoader(file, context);
+                    const name = findLoader(file, loaders!);
                     return {
                         file,
                         name,
-                        properties: defaultProps(name, context.loaders!)
+                        properties: defaultProps(name, loaders!)
                     };
                 })
             };
@@ -148,11 +138,11 @@ class DataPortal extends PureComponent<Props, State> {
             });
         } else {
             const items = files.map(file => {
-                const loaderName = findLoader(file, context);
+                const loaderName = findLoader(file, loaders!);
                 return {
                     file,
                     loaderName,
-                    loaderProperties: defaultProps(loaderName, context.loaders!),
+                    loaderProperties: defaultProps(loaderName, loaders!),
                     chunkSize: Math.min(...[
                         file.size,
                         MAX_CHUNK_SIZE
@@ -223,30 +213,11 @@ class DataPortal extends PureComponent<Props, State> {
         tasks.clear();
     }
 
-    componentDidMount() {
-        this.subs.push(...[
-            onReady()
-                .pipe(mergeMap(() => getLoadersWithSchema()))
-                .subscribe(loaders => {
-                    this.setState({
-                        context: {loaders}
-                    });
-                })
-        ]);
-    }
-
     componentDidUpdate(prevProps: Readonly<Props>) {
         // Open the file dialog
         const {open} = this.props;
         if (open !== prevProps.open && open && this.dropzone) {
             this.dropzone.open();
-        }
-    }
-
-    componentWillUnmount() {
-        while (this.subs.length) {
-            const sub = this.subs.pop();
-            sub!.unsubscribe();
         }
     }
 
@@ -258,11 +229,7 @@ class DataPortal extends PureComponent<Props, State> {
             online,
             width
         } = this.props;
-        const {
-            openLoaderProps,
-            models,
-            context
-        } = this.state;
+        const {openLoaderProps, models} = this.state;
 
         const fullScreen = isWidthDown('xs', width);
         const canUpload = online && models.every(m => m.name.length > 0);
@@ -313,12 +280,10 @@ class DataPortal extends PureComponent<Props, State> {
                     fullScreen={fullScreen}
                     PaperProps={{elevation: 0}}
                 >
-                    <Provider value={context}>
-                        <ModelList
-                            models={models}
-                            onChange={this.updateModelPropsList}
-                        />
-                    </Provider>
+                    <ModelList
+                        models={models}
+                        onChange={this.updateModelPropsList}
+                    />
                     <DialogActions classes={{root: classes.dialogActions, action: classes.dialogAction}}>
                         <Button onClick={this.closeLoaderProps}>
                             Cancel
@@ -340,10 +305,14 @@ class DataPortal extends PureComponent<Props, State> {
 
 export default withWidth()(
     style(
-        withConnectionStatus(DataPortal)));
+        withConnectionStatus(
+            withLoaders(DataPortal))));
 
 
-interface Props extends WithStyles<typeof styles>, WithWidth, WithConnectionStatus {
+interface Props extends WithStyles<typeof styles>,
+    WithWidth,
+    WithConnectionStatus,
+    WithLoaders {
     className?: string;
     open?: boolean;
     onClose?(): void;
@@ -352,5 +321,4 @@ interface Props extends WithStyles<typeof styles>, WithWidth, WithConnectionStat
 interface State {
     models: ModelWithLoader[];
     openLoaderProps?: boolean;
-    context: LoadersContext;
 }

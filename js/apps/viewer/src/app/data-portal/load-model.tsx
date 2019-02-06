@@ -1,8 +1,9 @@
-import React, {ChangeEvent, PureComponent} from 'react';
+import React, {
+    ChangeEvent,
+    PureComponent
+} from 'react';
 
 import {ModelParams} from 'brayns';
-import {Subscription} from 'rxjs';
-import {mergeMap} from 'rxjs/operators';
 
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -25,19 +26,11 @@ import TextField from '@material-ui/core/TextField';
 import withWidth, {isWidthDown, WithWidth} from '@material-ui/core/withWidth';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 
-import {onReady} from '../../common/client';
+import {withLoaders, WithLoaders} from '../../common/client';
 import {SlideUp, VectorSquareIcon} from '../../common/components';
 
 import ModelLoader, {LoaderDescriptor} from './model-loader';
-import {
-    LoadersContext,
-    Provider
-} from './provider';
-import {
-    defaultProps,
-    findLoader,
-    getLoadersWithSchema
-} from './utils';
+import {defaultProps, findLoader} from './utils';
 
 
 const styles = (theme: Theme) => createStyles({
@@ -70,13 +63,8 @@ export class LoadModel extends PureComponent<Props, State> {
         loader: {
             name: '',
             properties: {}
-        },
-        context: {
-            loaders: []
         }
     };
-
-    private subs: Subscription[] = [];
 
     loadModel = async () => {
         const {onPathLoad} = this.props;
@@ -105,16 +93,13 @@ export class LoadModel extends PureComponent<Props, State> {
 
     updatePath = (evt: ChangeEvent<HTMLInputElement>) => {
         const path = evt.target.value;
-        this.setState(state => {
-            const {context} = state;
-            const name = findLoader(path, context);
-            return {
-                path,
-                loader: {
-                    name,
-                    properties: defaultProps(name, context.loaders!)
-                }
-            };
+        const {loaders} = this.props;
+        this.setState({
+            path,
+            loader: {
+                name: findLoader(path, loaders!),
+                properties: defaultProps(name, loaders!)
+            }
         });
     }
 
@@ -128,25 +113,6 @@ export class LoadModel extends PureComponent<Props, State> {
         this.setState({loader});
     }
 
-    componentDidMount() {
-        this.subs.push(...[
-            onReady()
-                .pipe(mergeMap(() => getLoadersWithSchema()))
-                .subscribe(loaders => {
-                    this.setState({
-                        context: {loaders}
-                    });
-                })
-        ]);
-    }
-
-    componentWillUnmount() {
-        while (this.subs.length) {
-            const sub = this.subs.pop();
-            sub!.unsubscribe();
-        }
-    }
-
     render() {
         const {
             disabled,
@@ -158,7 +124,6 @@ export class LoadModel extends PureComponent<Props, State> {
             path,
             visible,
             boundingBox,
-            context,
             loader
         } = this.state;
 
@@ -188,13 +153,11 @@ export class LoadModel extends PureComponent<Props, State> {
                             />
                         </FormGroup>
 
-                        <Provider value={context}>
-                            <ModelLoader
-                                className={classes.loader}
-                                value={loader}
-                                onChange={this.updateLoader}
-                            />
-                        </Provider>
+                        <ModelLoader
+                            className={classes.loader}
+                            value={loader}
+                            onChange={this.updateLoader}
+                        />
                     </DialogContent>
                     <List className={classes.list}>
                         <ListItem>
@@ -241,11 +204,11 @@ export class LoadModel extends PureComponent<Props, State> {
 }
 
 export default withWidth()(
-    style(LoadModel)
-);
+    style(
+        withLoaders(LoadModel)));
 
 
-interface Props extends WithStyles<typeof styles>, WithWidth {
+interface Props extends WithStyles<typeof styles>, WithWidth, WithLoaders {
     disabled?: boolean;
     open: boolean;
     onPathLoad?(params: Partial<ModelParams>): void;
@@ -254,6 +217,5 @@ interface Props extends WithStyles<typeof styles>, WithWidth {
 
 interface State extends Partial<ModelParams> {
     path: string;
-    context: LoadersContext;
     loader: LoaderDescriptor;
 }
