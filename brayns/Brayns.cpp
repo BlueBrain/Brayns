@@ -60,7 +60,6 @@
 
 namespace
 {
-const float DEFAULT_TEST_ANIMATION_FRAME = 10000;
 const float DEFAULT_MOTION_ACCELERATION = 1.5f;
 }
 
@@ -494,21 +493,17 @@ private:
             'g', "Enable/Disable animation playback",
             std::bind(&Brayns::Impl::_toggleAnimationPlayback, this));
         _keyboardHandler.registerKeyboardShortcut(
-            'x', "Set animation frame to " +
-                     std::to_string(DEFAULT_TEST_ANIMATION_FRAME),
-            std::bind(&Brayns::Impl::_defaultAnimationFrame, this));
-        _keyboardHandler.registerKeyboardShortcut(
             '{', "Decrease eye separation",
-            std::bind(&Brayns::Impl::_decreaseEyeSeparation, this));
+            std::bind(&Brayns::Impl::_changeEyeSeparation, this, -0.01));
         _keyboardHandler.registerKeyboardShortcut(
             '}', "Increase eye separation",
-            std::bind(&Brayns::Impl::_increaseEyeSeparation, this));
+            std::bind(&Brayns::Impl::_changeEyeSeparation, this, 0.01));
         _keyboardHandler.registerKeyboardShortcut(
             '<', "Decrease field of view",
-            std::bind(&Brayns::Impl::_decreaseFieldOfView, this));
+            std::bind(&Brayns::Impl::_changeFieldOfView, this, -1.));
         _keyboardHandler.registerKeyboardShortcut(
             '>', "Increase field of view",
-            std::bind(&Brayns::Impl::_increaseFieldOfView, this));
+            std::bind(&Brayns::Impl::_changeFieldOfView, this, 1.));
         _keyboardHandler.registerKeyboardShortcut(
             ' ', "Camera reset to initial state",
             std::bind(&Brayns::Impl::_resetCamera, this));
@@ -679,34 +674,27 @@ private:
         appParams.setDynamicLoadBalancer(!appParams.getDynamicLoadBalancer());
     }
 
-    void _decreaseFieldOfView()
+    void _changeFieldOfView(const double delta)
     {
-        _fieldOfView -= 1.;
-        _engine->getCamera().updateProperty("fovy", _fieldOfView);
-        BRAYNS_INFO << "Field of view: " << _fieldOfView << std::endl;
+        auto& camera = _engine->getCamera();
+        if (!camera.hasProperty("fovy"))
+            return;
+        auto fovy = camera.getProperty<double>("fovy");
+        fovy += delta;
+        camera.updateProperty("fovy", fovy);
+        BRAYNS_INFO << "Field of view: " << fovy << std::endl;
     }
 
-    void _increaseFieldOfView()
+    void _changeEyeSeparation(const double delta)
     {
-        _fieldOfView += 1.;
-        _engine->getCamera().updateProperty("fovy", _fieldOfView);
-        BRAYNS_INFO << "Field of view: " << _fieldOfView << std::endl;
-    }
-
-    void _decreaseEyeSeparation()
-    {
-        _eyeSeparation -= 0.01;
-        _engine->getCamera().updateProperty("interpupillaryDistance",
-                                            _eyeSeparation);
-        BRAYNS_INFO << "Eye separation: " << _eyeSeparation << std::endl;
-    }
-
-    void _increaseEyeSeparation()
-    {
-        _eyeSeparation += 0.01;
-        _engine->getCamera().updateProperty("interpupillaryDistance",
-                                            _eyeSeparation);
-        BRAYNS_INFO << "Eye separation: " << _eyeSeparation << std::endl;
+        auto& camera = _engine->getCamera();
+        if (!camera.hasProperty("interpupillaryDistance"))
+            return;
+        auto eyeSeparation =
+            camera.getProperty<double>("interpupillaryDistance");
+        eyeSeparation += delta;
+        camera.updateProperty("interpupillaryDistance", eyeSeparation);
+        BRAYNS_INFO << "Eye separation: " << eyeSeparation << std::endl;
     }
 
     void _gradientMaterials()
@@ -723,12 +711,6 @@ private:
     {
         auto& animParams = _parametersManager.getAnimationParameters();
         animParams.setDelta(animParams.getDelta() == 0 ? 1 : 0);
-    }
-
-    void _defaultAnimationFrame()
-    {
-        auto& animParams = _parametersManager.getAnimationParameters();
-        animParams.setFrame(DEFAULT_TEST_ANIMATION_FRAME);
     }
 
     void _resetCamera()
@@ -760,9 +742,6 @@ private:
     KeyboardHandler _keyboardHandler;
     std::unique_ptr<AbstractManipulator> _cameraManipulator;
     std::vector<FrameBufferPtr> _frameBuffers;
-
-    double _fieldOfView{45.};
-    double _eyeSeparation{0.0635};
 
     // protect render() vs commit() when doing all the commits
     std::mutex _renderMutex;
