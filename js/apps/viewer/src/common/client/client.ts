@@ -19,7 +19,7 @@ export function ifReady<T>(result: T) {
             map(() => result));
 }
 
-async function isReady() {
+export async function isReady() {
     const ready = await brayns.ready.pipe(take(1))
         .toPromise();
     return ready;
