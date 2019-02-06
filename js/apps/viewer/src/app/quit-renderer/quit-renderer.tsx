@@ -13,12 +13,15 @@ import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import CloudOffIcon from '@material-ui/icons/CloudOff';
 
-import brayns from '../../common/client';
+import brayns, {
+    withConnectionStatus,
+    WithConnectionStatus
+} from '../../common/client';
 import {KeyCode, TOOLTIP_DELAY} from '../../common/constants';
 import {dispatchKeyboardLock, onKeyboardLockChange} from '../../common/events';
 
 
-export default class QuitRenderer extends PureComponent<{}, State> {
+class QuitRenderer extends PureComponent<WithConnectionStatus, State> {
     state: State = {
         showDialog: false
     };
@@ -32,7 +35,7 @@ export default class QuitRenderer extends PureComponent<{}, State> {
     }
 
     quitOnKeydown = (evt: KeyboardEvent) => {
-        if (this.state.isConnected
+        if (this.props.online
             && evt.keyCode === KeyCode.Q
             && evt.ctrlKey
             && !this.keyboardLocked) {
@@ -58,11 +61,6 @@ export default class QuitRenderer extends PureComponent<{}, State> {
     componentDidMount() {
         window.addEventListener('keydown', this.quitOnKeydown, false);
         this.subs.push(...[
-            brayns.ready.subscribe(ready => {
-                this.setState({
-                    isConnected: ready
-                });
-            }),
             onKeyboardLockChange()
                 .subscribe(locked => {
                     this.keyboardLocked = locked;
@@ -78,9 +76,10 @@ export default class QuitRenderer extends PureComponent<{}, State> {
     }
 
     render() {
-        const {isConnected, showDialog} = this.state;
-        const hasError = !isConnected;
-        const title = hasError ? 'Renderer is offline' : 'Quit renderer';
+        const {online} = this.props;
+        const {showDialog} = this.state;
+        const offline = !online;
+        const title = offline ? 'Renderer is offline' : 'Quit renderer';
 
         return (
             <div>
@@ -90,7 +89,7 @@ export default class QuitRenderer extends PureComponent<{}, State> {
                             onClick={this.openDialog}
                             color="secondary"
                             aria-label="Quit renderer"
-                            disabled={hasError}
+                            disabled={offline}
                         >
                             <CloudOffIcon />
                         </IconButton>
@@ -123,8 +122,9 @@ export default class QuitRenderer extends PureComponent<{}, State> {
     }
 }
 
+export default withConnectionStatus(QuitRenderer);
+
 
 interface State {
-    isConnected?: boolean;
     showDialog: boolean;
 }

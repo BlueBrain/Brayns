@@ -498,6 +498,7 @@ export class SceneModels extends PureComponent<Props, State> {
                         return {clipPlanes};
                     });
                 }),
+            // TODO: Remove this one!
             brayns.ready.pipe(
                 filter(ready => !ready))
                 .subscribe(() => {
@@ -780,7 +781,8 @@ export class SceneModels extends PureComponent<Props, State> {
 }
 
 
-export default style(withCamera(SceneModels));
+export default style(
+        withCamera(SceneModels));
 
 
 function getSelectionNextVisibility(models: Model[], selectedModels: ModelId[]) {

@@ -15,6 +15,7 @@ import {
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 
+import {withConnectionStatus, WithConnectionStatus} from '../../common/client';
 import storage from '../../common/storage';
 
 import CameraSettings from './camera';
@@ -56,8 +57,9 @@ class RendererSettings extends PureComponent<Props, State> {
     }
 
     render() {
-        const {classes, disabled} = this.props;
+        const {classes, online} = this.props;
         const {settingsTab} = this.state;
+        const disabled = !online;
 
         return (
             <div>
@@ -91,12 +93,12 @@ class RendererSettings extends PureComponent<Props, State> {
     }
 }
 
-export default style(RendererSettings);
+export default style(
+    withConnectionStatus(RendererSettings));
 
 
-interface Props extends WithStyles<typeof styles> {
-    disabled?: boolean;
-}
+type Props = WithStyles<typeof styles>
+    & WithConnectionStatus;
 
 interface State {
     settingsTab?: number;

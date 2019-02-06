@@ -6,7 +6,12 @@ import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import FilterCenterFocusIcon from '@material-ui/icons/FilterCenterFocus';
 
-import brayns, {withCamera, WithCamera} from '../../common/client';
+import brayns, {
+    withCamera,
+    WithCamera,
+    withConnectionStatus,
+    WithConnectionStatus
+} from '../../common/client';
 import {KeyCode, TOOLTIP_DELAY} from '../../common/constants';
 import {isCmdKey} from '../../common/utils';
 
@@ -17,8 +22,7 @@ class ResetCamera extends PureComponent<Props> {
     };
 
     resetCameraOnKeydown = async (evt: KeyboardEvent) => {
-        const {disabled} = this.props;
-        if (!disabled && evt.keyCode === KeyCode.R && evt.shiftKey && !isCmdKey(evt)) {
+        if (this.props.online && evt.keyCode === KeyCode.R && evt.shiftKey && !isCmdKey(evt)) {
             evt.preventDefault();
             await this.resetCamera();
         }
@@ -32,7 +36,6 @@ class ResetCamera extends PureComponent<Props> {
     }
 
     render() {
-        const {disabled} = this.props;
         return (
             <div>
                 <Tooltip title={'Reset camera'} placement="bottom" {...TOOLTIP_DELAY}>
@@ -40,7 +43,7 @@ class ResetCamera extends PureComponent<Props> {
                         <IconButton
                             onClick={this.resetCamera}
                             aria-label="Reset camera"
-                            disabled={disabled}
+                            disabled={!this.props.online}
                         >
                             <FilterCenterFocusIcon />
                         </IconButton>
@@ -51,8 +54,8 @@ class ResetCamera extends PureComponent<Props> {
     }
 }
 
-export default withCamera(ResetCamera);
+export default withConnectionStatus(
+    withCamera(ResetCamera));
 
-interface Props extends WithCamera {
-    disabled?: boolean;
-}
+type Props = WithConnectionStatus
+    & WithCamera;

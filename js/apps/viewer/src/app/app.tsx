@@ -48,7 +48,9 @@ import brayns, {
     AnimationProvider,
     AppParamsProvider,
     CameraProvider,
-    RendererProvider
+    RendererProvider,
+    withConnectionStatus,
+    WithConnectionStatus
 } from '../common/client';
 import {GithubIcon, OwlIcon} from '../common/components';
 import {
@@ -539,12 +541,12 @@ class App extends PureComponent<Props, State> {
 
     // Keyboard interaction
     handleKeydown = (evt: KeyboardEvent) => {
-        const {isConnected} = this.state;
+        const {online} = this.props;
 
         if (!this.keyboardLocked) {
             switch (evt.keyCode) {
                 case KeyCode.L:
-                    if (evt.metaKey || evt.ctrlKey && isConnected) {
+                    if (evt.metaKey || evt.ctrlKey && online) {
                         evt.preventDefault();
                         evt.stopPropagation();
                         this.openLoadModelDialog();
@@ -563,7 +565,7 @@ class App extends PureComponent<Props, State> {
                     }
                     break;
                 case KeyCode.U:
-                    if (evt.metaKey || evt.ctrlKey && isConnected) {
+                    if (evt.metaKey || evt.ctrlKey && online) {
                         this.openFileDialog();
                     }
                     break;
@@ -576,11 +578,6 @@ class App extends PureComponent<Props, State> {
     componentDidMount() {
         window.addEventListener('keydown', this.handleKeydown, false);
         this.subs.push(...[
-            brayns.ready.subscribe(ready => {
-                this.setState({
-                    isConnected: ready
-                });
-            }),
             fromEvent(window, 'resize')
                 .pipe(debounceTime(250))
                 .subscribe(() => {
@@ -601,10 +598,9 @@ class App extends PureComponent<Props, State> {
     }
 
     render() {
-        const {classes} = this.props;
+        const {classes, online} = this.props;
         const {
             addModelMenuAnchor,
-            isConnected,
             showFileDialog,
             showLoadModelDialog,
             showModelsPanel,
@@ -618,9 +614,9 @@ class App extends PureComponent<Props, State> {
             theme
         } = this.state;
 
-        const hasSocketError = !isConnected;
-        const canShowStatistics = showStatistics && !hasSocketError;
-        const canShowNavCube = showNavCube && !hasSocketError;
+        const offline = !online;
+        const canShowStatistics = showStatistics && online;
+        const canShowNavCube = showNavCube && online;
 
         const modelsBtnTitle = showModelsPanel ? 'Hide models' : 'Show models';
         const modelsBtnColor = showModelsPanel ? 'inherit' : 'default';
@@ -676,7 +672,7 @@ class App extends PureComponent<Props, State> {
                                                             aria-label="Open add model menu"
                                                             aria-owns={addModelMenuAnchor ? 'add-model-menu' : ''}
                                                             aria-haspopup="true"
-                                                            disabled={hasSocketError}
+                                                            disabled={offline}
                                                         >
                                                             <CloudUploadIcon />
                                                         </IconButton>
@@ -698,8 +694,8 @@ class App extends PureComponent<Props, State> {
                                                     </MenuItem>
                                                 </Menu>
                                                 <span className={classes.spacer} />
-                                                <ResetCamera disabled={hasSocketError} />
-                                                <Snapshot disabled={hasSocketError} />
+                                                <ResetCamera />
+                                                <Snapshot />
                                                 <QuitRenderer />
                                                 <Tooltip title={'Report an issue'} {...TOOLTIP_DELAY}>
                                                     <IconButton
@@ -738,7 +734,6 @@ class App extends PureComponent<Props, State> {
                                             <div className={classNames(classes.content, contentShift)}>
                                                 <DataPortal
                                                     className={classes.dataPortal}
-                                                    disabled={hasSocketError}
                                                     open={showFileDialog}
                                                     onClose={this.closeFileDialog}
                                                 >
@@ -755,10 +750,10 @@ class App extends PureComponent<Props, State> {
                                                     </Fade>
 
                                                     <AnimationProvider>
-                                                        <RequestNotifications disabled={hasSocketError} />
-                                                        <AnimationPlayer disabled={hasSocketError} />
+                                                        <RequestNotifications />
+                                                        <AnimationPlayer />
                                                     </AnimationProvider>
-                                                    <ConnectionStatus open={hasSocketError} />
+                                                    <ConnectionStatus open={offline} />
                                                 </DataPortal>
                                             </div>
                                         </main>
@@ -803,7 +798,7 @@ class App extends PureComponent<Props, State> {
                                                         </IconButton>
                                                     </Tooltip>
                                                 </div>
-                                                <RendererSettings disabled={hasSocketError} />
+                                                <RendererSettings />
                                             </div>
                                         </Drawer>
                                     </div>
@@ -843,7 +838,8 @@ class App extends PureComponent<Props, State> {
 }
 
 
-export default style(App);
+export default style(
+    withConnectionStatus(App));
 
 
 function getTheme() {
@@ -855,11 +851,9 @@ function getTheme() {
 }
 
 
-type Props = WithStyles<typeof styles>;
+type Props = WithStyles<typeof styles> & WithConnectionStatus;
 
 interface State {
-    isConnected?: boolean;
-
     addModelMenuAnchor?: HTMLElement;
     showLoadModelDialog?: boolean;
     showFileDialog?: boolean;

@@ -28,7 +28,11 @@ import Typography from '@material-ui/core/Typography';
 import withWidth, {isWidthDown, WithWidth} from '@material-ui/core/withWidth';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 
-import brayns, {onReady} from '../../common/client';
+import brayns, {
+    onReady,
+    withConnectionStatus,
+    WithConnectionStatus
+} from '../../common/client';
 import {SlideUp} from '../../common/components';
 import {
     dispatchKeyboardLock,
@@ -251,7 +255,7 @@ class DataPortal extends PureComponent<Props, State> {
             children,
             classes,
             className,
-            disabled,
+            online,
             width
         } = this.props;
         const {
@@ -261,7 +265,7 @@ class DataPortal extends PureComponent<Props, State> {
         } = this.state;
 
         const fullScreen = isWidthDown('xs', width);
-        const canUpload = !disabled && models.every(m => m.name.length > 0);
+        const canUpload = online && models.every(m => m.name.length > 0);
 
         const dropzone = ({getRootProps, getInputProps, isDragActive}: DropzoneRenderArgs) => (
             <div {...getRootProps({className: classNames(classes.container, className)})}>
@@ -293,7 +297,7 @@ class DataPortal extends PureComponent<Props, State> {
                     getDataTransferItems={fromEvent}
                     onDrop={this.import}
                     onFileDialogCancel={this.onClose}
-                    disabled={disabled}
+                    disabled={!online}
                     multiple
                     disableClick
                 >
@@ -335,14 +339,13 @@ class DataPortal extends PureComponent<Props, State> {
 }
 
 export default withWidth()(
-    style(DataPortal)
-);
+    style(
+        withConnectionStatus(DataPortal)));
 
 
-interface Props extends WithStyles<typeof styles>, WithWidth {
+interface Props extends WithStyles<typeof styles>, WithWidth, WithConnectionStatus {
     className?: string;
     open?: boolean;
-    disabled?: boolean;
     onClose?(): void;
 }
 
