@@ -150,11 +150,11 @@ ospcommon::affine3f transformationToAffine3f(
 {
     // https://stackoverflow.com/a/18436193
     const auto& quat = transformation.getRotation();
-    const float x = atan2(2 * (quat.w() * quat.x() + quat.y() * quat.z()),
-                          1 - 2 * (quat.x() * quat.x() + quat.y() * quat.y()));
-    const float y = asin(2 * (quat.w() * quat.y() - quat.z() * quat.x()));
-    const float z = atan2(2 * (quat.w() * quat.z() + quat.x() * quat.y()),
-                          1 - 2 * (quat.y() * quat.y() + quat.z() * quat.z()));
+    const float x = atan2(2 * (quat.w * quat.x + quat.y * quat.z),
+                          1 - 2 * (quat.x * quat.x + quat.y * quat.y));
+    const float y = asin(2 * (quat.w * quat.y - quat.z * quat.x));
+    const float z = atan2(2 * (quat.w * quat.z + quat.x * quat.y),
+                          1 - 2 * (quat.y * quat.y + quat.z * quat.z));
 
     ospcommon::affine3f rot{ospcommon::one};
     rot = ospcommon::affine3f::rotate({1, 0, 0}, x) * rot;
@@ -165,16 +165,14 @@ ospcommon::affine3f transformationToAffine3f(
     const auto& translation = transformation.getTranslation();
     const auto& scale = transformation.getScale();
 
-    return ospcommon::affine3f::translate(
-               {float(center.x() / (1. / scale.x())),
-                float(center.y() / (1. / scale.y())),
-                float(center.z() / (1. / scale.z()))}) *
+    return ospcommon::affine3f::translate({float(center.x / (1. / scale.x)),
+                                           float(center.y / (1. / scale.y)),
+                                           float(center.z / (1. / scale.z))}) *
            rot * ospcommon::affine3f::scale(
-                     {float(scale.x()), float(scale.y()), float(scale.z())}) *
-           ospcommon::affine3f::translate(
-               {float(translation.x() - center.x()),
-                float(translation.y() - center.y()),
-                float(translation.z() - center.z())});
+                     {float(scale.x), float(scale.y), float(scale.z)}) *
+           ospcommon::affine3f::translate({float(translation.x - center.x),
+                                           float(translation.y - center.y),
+                                           float(translation.z - center.z)});
 }
 
 void addInstance(OSPModel rootModel, OSPModel modelToAdd,

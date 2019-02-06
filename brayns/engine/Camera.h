@@ -98,7 +98,7 @@ public:
     */
     void setOrientation(Quaterniond orientation)
     {
-        orientation.normalize();
+        orientation = glm::normalize(orientation);
         _updateValue(_orientation, orientation);
     }
     /**

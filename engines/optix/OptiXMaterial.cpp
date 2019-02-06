@@ -49,10 +49,10 @@ void OptiXMaterial::commit()
     if (!_optixMaterial)
         _optixMaterial = OptiXContext::get().createMaterial();
 
-    _optixMaterial["Kd"]->setFloat(_diffuseColor.x(), _diffuseColor.y(),
-                                   _diffuseColor.z());
-    _optixMaterial["Ks"]->setFloat(_specularColor.x(), _specularColor.y(),
-                                   _specularColor.z());
+    _optixMaterial["Kd"]->setFloat(_diffuseColor.x, _diffuseColor.y,
+                                   _diffuseColor.z);
+    _optixMaterial["Ks"]->setFloat(_specularColor.x, _specularColor.y,
+                                   _specularColor.z);
     _optixMaterial["phong_exp"]->setFloat(_specularExponent);
     _optixMaterial["Kr"]->setFloat(_reflectionIndex, _reflectionIndex,
                                    _reflectionIndex);

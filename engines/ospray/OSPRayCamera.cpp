@@ -40,12 +40,12 @@ void OSPRayCamera::commit()
         _createOSPCamera();
 
     const auto& position = getPosition();
-    const auto& dir = getOrientation().rotate(Vector3f(0.0f, 0.0f, -1.0f));
-    const auto& up = getOrientation().rotate(Vector3f(0.0f, 1.0f, 0.0f));
+    const auto& dir = glm::rotate(getOrientation(), Vector3d(0., 0., -1.));
+    const auto& up = glm::rotate(getOrientation(), Vector3d(0., 1., 0.));
 
-    ospSet3f(_camera, "pos", position.x(), position.y(), position.z());
-    ospSet3f(_camera, "dir", dir.x(), dir.y(), dir.z());
-    ospSet3f(_camera, "up", up.x(), up.y(), up.z());
+    ospSet3f(_camera, "pos", position.x, position.y, position.z);
+    ospSet3f(_camera, "dir", dir.x, dir.y, dir.z);
+    ospSet3f(_camera, "up", up.x, up.y, up.z);
     ospSetString(_camera, "buffer_target", getBufferTarget().c_str());
 
     toOSPRayProperties(*this, _camera);

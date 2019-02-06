@@ -93,8 +93,8 @@ void ApplicationParameters::parse(const po::variables_map& vm)
         uints values = vm[PARAM_WINDOW_SIZE].as<uints>();
         if (values.size() == 2)
         {
-            _windowSize.x() = values[0];
-            _windowSize.y() = values[1];
+            _windowSize.x = values[0];
+            _windowSize.y = values[1];
         }
     }
     markModified();

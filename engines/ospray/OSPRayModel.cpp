@@ -45,22 +45,22 @@ OSPData allocateVectorData(const std::vector<VecT>& vec,
 double interpolatedOpacity(const Vector2ds& controlPoints, const double x)
 {
     const auto& firstPoint = controlPoints.front();
-    if (x <= firstPoint.x())
-        return firstPoint.y();
+    if (x <= firstPoint.x)
+        return firstPoint.y;
 
     for (size_t i = 1; i < controlPoints.size(); ++i)
     {
         const auto& current = controlPoints[i];
         const auto& previous = controlPoints[i - 1];
-        if (x <= current.x())
+        if (x <= current.x)
         {
-            const auto t = (x - previous.x()) / (current.x() - previous.x());
-            return (1.0 - t) * previous.y() + t * current.y();
+            const auto t = (x - previous.x) / (current.x - previous.x);
+            return (1.0 - t) * previous.y + t * current.y;
         }
     }
 
     const auto& lastPoint = controlPoints.back();
-    return lastPoint.y();
+    return lastPoint.y;
 }
 }
 
@@ -117,14 +117,14 @@ void OSPRayModel::buildBoundingBox()
     const Vector3f c(0.5f);
     const float radius = 0.005f;
     const Vector3f positions[8] = {
-        {c.x() - s.x(), c.y() - s.y(), c.z() - s.z()},
-        {c.x() + s.x(), c.y() - s.y(), c.z() - s.z()}, //    6--------7
-        {c.x() - s.x(), c.y() + s.y(), c.z() - s.z()}, //   /|       /|
-        {c.x() + s.x(), c.y() + s.y(), c.z() - s.z()}, //  2--------3 |
-        {c.x() - s.x(), c.y() - s.y(), c.z() + s.z()}, //  | |      | |
-        {c.x() + s.x(), c.y() - s.y(), c.z() + s.z()}, //  | 4------|-5
-        {c.x() - s.x(), c.y() + s.y(), c.z() + s.z()}, //  |/       |/
-        {c.x() + s.x(), c.y() + s.y(), c.z() + s.z()}  //  0--------1
+        {c.x - s.x, c.y - s.y, c.z - s.z},
+        {c.x + s.x, c.y - s.y, c.z - s.z}, //    6--------7
+        {c.x - s.x, c.y + s.y, c.z - s.z}, //   /|       /|
+        {c.x + s.x, c.y + s.y, c.z - s.z}, //  2--------3 |
+        {c.x - s.x, c.y - s.y, c.z + s.z}, //  | |      | |
+        {c.x + s.x, c.y - s.y, c.z + s.z}, //  | 4------|-5
+        {c.x - s.x, c.y + s.y, c.z + s.z}, //  |/       |/
+        {c.x + s.x, c.y + s.y, c.z + s.z}  //  0--------1
     };
 
     for (size_t i = 0; i < 8; ++i)
@@ -430,7 +430,7 @@ bool OSPRayModel::_commitTransferFunction()
     // opacities
     auto tfPoints = _transferFunction.getControlPoints();
     std::sort(tfPoints.begin(), tfPoints.end(),
-              [](auto a, auto b) { return a.x() < b.x(); });
+              [](auto a, auto b) { return a.x < b.x; });
     floats opacities;
     opacities.reserve(tfPoints.size());
     constexpr size_t numSamples = 256u;
@@ -443,8 +443,8 @@ bool OSPRayModel::_commitTransferFunction()
     ospRelease(opacityData);
 
     ospSet2f(_ospTransferFunction, "valueRange",
-             _transferFunction.getValuesRange().x(),
-             _transferFunction.getValuesRange().y());
+             _transferFunction.getValuesRange().x,
+             _transferFunction.getValuesRange().y);
     ospCommit(_ospTransferFunction);
 
     _transferFunction.resetModified();

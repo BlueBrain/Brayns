@@ -52,10 +52,11 @@ freeimage::ImagePtr FrameBuffer::getImage()
     const auto colorBuffer = getColorBuffer();
     const auto& size = getSize();
 
-    freeimage::ImagePtr image(FreeImage_ConvertFromRawBits(
-        const_cast<uint8_t*>(colorBuffer), size.x(), size.y(),
-        getColorDepth() * size.x(), 8 * getColorDepth(), 0xFF0000, 0x00FF00,
-        0x0000FF, false));
+    freeimage::ImagePtr image(
+        FreeImage_ConvertFromRawBits(const_cast<uint8_t*>(colorBuffer), size.x,
+                                     size.y, getColorDepth() * size.x,
+                                     8 * getColorDepth(), 0xFF0000, 0x00FF00,
+                                     0x0000FF, false));
 
     unmap();
 

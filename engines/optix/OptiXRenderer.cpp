@@ -128,7 +128,7 @@ void OptiXRenderer::render(FrameBufferPtr frameBuffer)
     // Render
     frameBuffer->map();
     const auto size = frameBuffer->getSize();
-    context->launch(0, size.x(), size.y());
+    context->launch(0, size.x, size.y);
     frameBuffer->unmap();
 
     frameBuffer->markModified();
@@ -173,9 +173,8 @@ void OptiXRenderer::commit()
     context["radianceRayType"]->setUint(0);
     context["shadowRayType"]->setUint(1);
     context["sceneEpsilon"]->setFloat(epsilon);
-    context["ambientLightColor"]->setFloat(bgColor.x(), bgColor.y(),
-                                           bgColor.z());
-    context["bgColor"]->setFloat(bgColor.x(), bgColor.y(), bgColor.z());
+    context["ambientLightColor"]->setFloat(bgColor.x, bgColor.y, bgColor.z);
+    context["bgColor"]->setFloat(bgColor.x, bgColor.y, bgColor.z);
 
     toOptiXProperties(getPropertyMap());
     _currentRenderer = _renderingParameters.getCurrentRenderer();

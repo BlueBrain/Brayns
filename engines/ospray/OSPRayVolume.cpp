@@ -32,11 +32,10 @@ OSPRayVolume::OSPRayVolume(const Vector3ui& dimensions, const Vector3f& spacing,
     , _parameters(params)
     , _volume(ospNewVolume(volumeType.c_str()))
 {
-    const ospcommon::vec3i ospDim(dimensions.x(), dimensions.y(),
-                                  dimensions.z());
+    const ospcommon::vec3i ospDim(dimensions.x, dimensions.y, dimensions.z);
     ospSetVec3i(_volume, "dimensions", (osp::vec3i&)ospDim);
 
-    const ospcommon::vec3f ospSpacing(spacing.x(), spacing.y(), spacing.z());
+    const ospcommon::vec3f ospSpacing(spacing.x, spacing.y, spacing.z);
     ospSetVec3f(_volume, "gridSpacing", (osp::vec3f&)ospSpacing);
 
     switch (type)
@@ -105,28 +104,28 @@ OSPRaySharedDataVolume::OSPRaySharedDataVolume(
 
 void OSPRayVolume::setDataRange(const Vector2f& range)
 {
-    ospSet2f(_volume, "voxelRange", range.x(), range.y());
+    ospSet2f(_volume, "voxelRange", range.x, range.y);
     markModified();
 }
 
 void OSPRayBrickedVolume::setBrick(const void* data, const Vector3ui& position,
                                    const Vector3ui& size_)
 {
-    const ospcommon::vec3i pos{int(position.x()), int(position.y()),
-                               int(position.z())};
-    const ospcommon::vec3i size{int(size_.x()), int(size_.y()), int(size_.z())};
+    const ospcommon::vec3i pos{int(position.x), int(position.y),
+                               int(position.z)};
+    const ospcommon::vec3i size{int(size_.x), int(size_.y), int(size_.z)};
     ospSetRegion(_volume, const_cast<void*>(data), (osp::vec3i&)pos,
                  (osp::vec3i&)size);
-    BrickedVolume::_sizeInBytes += size_.product() * _dataSize;
+    BrickedVolume::_sizeInBytes += glm::compMul(size_) * _dataSize;
     markModified();
 }
 
 void OSPRaySharedDataVolume::setVoxels(const void* voxels)
 {
-    OSPData data = ospNewData(SharedDataVolume::_dimensions.product(), _ospType,
-                              voxels, OSP_DATA_SHARED_BUFFER);
+    OSPData data = ospNewData(glm::compMul(SharedDataVolume::_dimensions),
+                              _ospType, voxels, OSP_DATA_SHARED_BUFFER);
     SharedDataVolume::_sizeInBytes +=
-        SharedDataVolume::_dimensions.product() * _dataSize;
+        glm::compMul(SharedDataVolume::_dimensions) * _dataSize;
     ospSetData(_volume, "voxelData", data);
     ospRelease(data);
     markModified();
@@ -146,11 +145,11 @@ void OSPRayVolume::commit()
         ospSet1i(_volume, "preIntegration", _parameters.getPreIntegration());
         ospSet1f(_volume, "samplingRate", _parameters.getSamplingRate());
         Vector3f specular(_parameters.getSpecular());
-        ospSet3fv(_volume, "specular", &specular.x());
+        ospSet3fv(_volume, "specular", glm::value_ptr(specular));
         Vector3f clipMin(_parameters.getClipBox().getMin());
-        ospSet3fv(_volume, "volumeClippingBoxLower", &clipMin.x());
+        ospSet3fv(_volume, "volumeClippingBoxLower", glm::value_ptr(clipMin));
         Vector3f clipMax(_parameters.getClipBox().getMax());
-        ospSet3fv(_volume, "volumeClippingBoxUpper", &clipMax.x());
+        ospSet3fv(_volume, "volumeClippingBoxUpper", glm::value_ptr(clipMax));
     }
     if (isModified() || _parameters.isModified())
         ospCommit(_volume);

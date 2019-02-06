@@ -53,7 +53,7 @@ void OptiXFrameBuffer::destroy()
 
 void OptiXFrameBuffer::resize(const Vector2ui& frameSize)
 {
-    if (frameSize.product() == 0)
+    if (glm::compMul(frameSize) == 0)
         throw std::runtime_error("Invalid size for framebuffer resize");
 
     if (_frameBuffer && getSize() == frameSize)
@@ -93,13 +93,13 @@ void OptiXFrameBuffer::_recreate()
     }
 
     auto context = OptiXContext::get().getOptixContext();
-    _frameBuffer = context->createBuffer(RT_BUFFER_OUTPUT, format,
-                                         _frameSize.x(), _frameSize.y());
+    _frameBuffer = context->createBuffer(RT_BUFFER_OUTPUT, format, _frameSize.x,
+                                         _frameSize.y);
     context["output_buffer"]->set(_frameBuffer);
 
     _accumBuffer =
         context->createBuffer(RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_FLOAT4,
-                              _frameSize.x(), _frameSize.y());
+                              _frameSize.x, _frameSize.y);
     context["accum_buffer"]->set(_accumBuffer);
     clear();
     BRAYNS_DEBUG << "Frame buffer created" << std::endl;

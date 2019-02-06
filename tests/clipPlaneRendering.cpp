@@ -64,10 +64,9 @@ void testClipping(brayns::Brayns& brayns, bool orthographic = false)
     auto& camera = engine.getCamera();
 
     auto position = scene.getBounds().getCenter();
-    position.z() += scene.getBounds().getSize().find_max();
+    position.z += glm::compMax(scene.getBounds().getSize());
 
-    const brayns::Quaterniond identity;
-    camera.setInitialState(position, identity);
+    camera.setInitialState(position, glm::identity<brayns::Quaterniond>());
 
     if (orthographic)
         camera.setCurrentType("orthographic");

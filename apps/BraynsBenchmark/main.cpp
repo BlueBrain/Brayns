@@ -44,17 +44,17 @@ int main(int argc, const char** argv)
         auto& engine = brayns.getEngine();
         auto& scene = engine.getScene();
         const auto bounds = scene.getBounds();
-        const double radius = bounds.getSize().find_max();
+        const double radius = glm::compMax(bounds.getSize());
         timer.start();
         for (size_t frame = 0; frame < nbFrames; ++frame)
         {
             const brayns::Vector3d& center = bounds.getCenter();
-            const brayns::Quaterniond quat(frame * M_PI / 180.0,
-                                           brayns::Vector3d(0.0, 1.0, 0.0));
+            const auto quat = glm::angleAxis(frame * M_PI / 180.0,
+                                             brayns::Vector3d(0.0, 1.0, 0.0));
             const brayns::Vector3d dir =
-                quat.rotate(brayns::Vector3d(0.0, 0.0, -1.0));
+                glm::rotate(quat, brayns::Vector3d(0, 0, -1));
             engine.getCamera().set(center + radius * -dir, quat);
-            brayns.render();
+            brayns.commitAndRender();
         }
         timer.stop();
 

@@ -111,19 +111,19 @@ STATICJSON_DECLARE_ENUM(brayns::TextureType,
 
 // c-array to std.array: https://stackoverflow.com/questions/11205186
 template <size_t M, typename T>
-auto toArray(vmml::vector<M, T>& vec)
+auto toArray(glm::vec<M, T>& vec)
 {
-    return reinterpret_cast<std::array<T, M>*>(&(vec).array[0]);
+    return reinterpret_cast<std::array<T, M>*>(glm::value_ptr(vec));
 }
 
 template <typename T>
-auto toArray(vmml::Quaternion<T>& quat)
+auto toArray(glm::tquat<T>& quat)
 {
-    return reinterpret_cast<std::array<T, 4>*>(&(quat).array[0]);
+    return reinterpret_cast<std::array<T, 4>*>(glm::value_ptr(quat));
 }
 
 template <size_t M, typename T>
-auto toArray(std::vector<vmml::vector<M, T>>& vecVec)
+auto toArray(std::vector<glm::vec<M, T>>& vecVec)
 {
     return reinterpret_cast<std::vector<std::array<T, M>>*>(&vecVec);
 }
@@ -162,7 +162,8 @@ inline void init(brayns::ModelTransferFunction* s, ObjectHandler* h)
 inline void init(brayns::GetInstances* g, ObjectHandler* h)
 {
     h->add_property("id", &g->modelID);
-    h->add_property("result_range", toArray(g->resultRange), Flags::Optional);
+    h->add_property("result_range", toArray<2, uint32_t>(g->resultRange),
+                    Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -209,7 +210,7 @@ inline void init(brayns::SnapshotParams* s, ObjectHandler* h)
     h->add_property("quality", &s->quality, Flags::Optional);
     h->add_property("renderer", &s->renderingParams, Flags::Optional);
     h->add_property("samples_per_pixel", &s->samplesPerPixel, Flags::Optional);
-    h->add_property("size", toArray(s->size));
+    h->add_property("size", toArray<2, uint32_t>(s->size));
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -223,15 +224,16 @@ inline void init(brayns::Statistics* s, ObjectHandler* h)
 inline void init(brayns::Renderer::PickResult* p, ObjectHandler* h)
 {
     h->add_property("hit", &p->hit);
-    h->add_property("position", toArray(p->pos));
+    h->add_property("position", toArray<3, double>(p->pos));
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
 inline void init(brayns::Camera* c, ObjectHandler* h)
 {
     h->add_property("orientation", toArray(c->_orientation), Flags::Optional);
-    h->add_property("position", toArray(c->_position), Flags::Optional);
-    h->add_property("target", toArray(c->_target), Flags::Optional);
+    h->add_property("position", toArray<3, double>(c->_position),
+                    Flags::Optional);
+    h->add_property("target", toArray<3, double>(c->_target), Flags::Optional);
     h->add_property("current", &c->_currentType, Flags::Optional);
     static auto types = c->getTypes();
     h->add_property("types", &types, Flags::IgnoreRead | Flags::Optional);
@@ -247,13 +249,14 @@ inline void init(brayns::ImageGenerator::ImageBase64* i, ObjectHandler* h)
 inline void init(brayns::ColorMap* t, ObjectHandler* h)
 {
     h->add_property("name", &t->name, Flags::Optional);
-    h->add_property("colors", toArray(t->colors));
+    h->add_property("colors", toArray<3, float>(t->colors));
 }
 
 inline void init(brayns::TransferFunction* t, ObjectHandler* h)
 {
-    h->add_property("range", toArray(t->_valuesRange), Flags::Optional);
-    h->add_property("opacity_curve", toArray(t->_controlPoints),
+    h->add_property("range", toArray<2, double>(t->_valuesRange),
+                    Flags::Optional);
+    h->add_property("opacity_curve", toArray<2, double>(t->_controlPoints),
                     Flags::Optional);
     h->add_property("colormap", &t->_colorMap, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
@@ -261,17 +264,17 @@ inline void init(brayns::TransferFunction* t, ObjectHandler* h)
 
 inline void init(brayns::Boxd* b, ObjectHandler* h)
 {
-    h->add_property("min", toArray(b->_min));
-    h->add_property("max", toArray(b->_max));
+    h->add_property("min", toArray<3, double>(b->_min));
+    h->add_property("max", toArray<3, double>(b->_max));
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
 inline void init(brayns::Material* m, ObjectHandler* h)
 {
     h->add_property("name", &m->_name, Flags::Optional);
-    h->add_property("diffuse_color", toArray(m->_diffuseColor),
+    h->add_property("diffuse_color", toArray<3, double>(m->_diffuseColor),
                     Flags::Optional);
-    h->add_property("specular_color", toArray(m->_specularColor),
+    h->add_property("specular_color", toArray<3, double>(m->_specularColor),
                     Flags::Optional);
     h->add_property("specular_exponent", &m->_specularExponent,
                     Flags::Optional);
@@ -285,10 +288,10 @@ inline void init(brayns::Material* m, ObjectHandler* h)
 
 inline void init(brayns::Transformation* g, ObjectHandler* h)
 {
-    h->add_property("translation", toArray(g->_translation));
-    h->add_property("scale", toArray(g->_scale));
+    h->add_property("translation", toArray<3, double>(g->_translation));
+    h->add_property("scale", toArray<3, double>(g->_scale));
     h->add_property("rotation", toArray(g->_rotation));
-    h->add_property("rotation_center", toArray(g->_rotationCenter),
+    h->add_property("rotation_center", toArray<3, double>(g->_rotationCenter),
                     Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
@@ -350,14 +353,15 @@ inline void init(brayns::ApplicationParameters* a, ObjectHandler* h)
     h->add_property("engine", &a->_engine, Flags::IgnoreRead | Flags::Optional);
     h->add_property("jpeg_compression", &a->_jpegCompression, Flags::Optional);
     h->add_property("image_stream_fps", &a->_imageStreamFPS, Flags::Optional);
-    h->add_property("viewport", toArray(a->_windowSize), Flags::Optional);
+    h->add_property("viewport", toArray<2, double>(a->_windowSize),
+                    Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
 inline void init(brayns::RenderingParameters* r, ObjectHandler* h)
 {
     h->add_property("accumulation", &r->_accumulation, Flags::Optional);
-    h->add_property("background_color", toArray(r->_backgroundColor),
+    h->add_property("background_color", toArray<3, double>(r->_backgroundColor),
                     Flags::Optional);
     h->add_property("current", &r->_renderer, Flags::Optional);
     h->add_property("head_light", &r->_headLight, Flags::Optional);
@@ -373,11 +377,12 @@ inline void init(brayns::RenderingParameters* r, ObjectHandler* h)
 
 inline void init(brayns::VolumeParameters* v, ObjectHandler* h)
 {
-    h->add_property("volume_dimensions", toArray(v->_dimensions),
+    h->add_property("volume_dimensions", toArray<3, uint32_t>(v->_dimensions),
                     Flags::Optional);
-    h->add_property("volume_element_spacing", toArray(v->_elementSpacing),
+    h->add_property("volume_element_spacing",
+                    toArray<3, double>(v->_elementSpacing), Flags::Optional);
+    h->add_property("volume_offset", toArray<3, double>(v->_offset),
                     Flags::Optional);
-    h->add_property("volume_offset", toArray(v->_offset), Flags::Optional);
 
     h->add_property("gradient_shading", &v->_gradientShading, Flags::Optional);
     h->add_property("single_shade", &v->_singleShade, Flags::Optional);
@@ -387,7 +392,8 @@ inline void init(brayns::VolumeParameters* v, ObjectHandler* h)
     h->add_property("adaptive_sampling", &v->_adaptiveSampling,
                     Flags::Optional);
     h->add_property("sampling_rate", &v->_samplingRate, Flags::Optional);
-    h->add_property("specular", toArray(v->_specular), Flags::Optional);
+    h->add_property("specular", toArray<3, double>(v->_specular),
+                    Flags::Optional);
     h->add_property("clip_box", &v->_clipBox, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
@@ -484,7 +490,8 @@ inline bool from_json(T& obj, const std::string& json)
 template <>
 inline bool from_json(brayns::Vector2d& obj, const std::string& json)
 {
-    return staticjson::from_json_string(json.c_str(), toArray(obj), nullptr);
+    return staticjson::from_json_string(json.c_str(), toArray<2, double>(obj),
+                                        nullptr);
 }
 
 brayns::PropertyMap jsonToPropertyMap(const std::string& json);

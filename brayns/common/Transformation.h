@@ -72,20 +72,23 @@ public:
     // only applies rotation and translation, use scaling separately if needed
     Matrix4d toMatrix(bool withScale = false) const
     {
-        Matrix4d matrix(getRotation(), getTranslation());
+        Matrix4d matrix = glm::toMat4(getRotation());
+        matrix = glm::translate(matrix, getTranslation());
         if (withScale)
         {
-            matrix.scale(_scale);
-            matrix.scaleTranslation(_scale);
+            matrix = glm::scale(matrix, _scale);
+            matrix[3][0] *= _scale.x;
+            matrix[3][1] *= _scale.y;
+            matrix[3][2] *= _scale.z;
         }
         return matrix;
     }
 
 private:
-    Vector3d _translation{0., 0., 0.};
-    Vector3d _scale{1., 1., 1.};
-    Quaterniond _rotation;
-    Vector3d _rotationCenter{0., 0., 0.};
+    Vector3d _translation{0, 0, 0};
+    Vector3d _scale{1, 1, 1};
+    Quaterniond _rotation{1, 0, 0, 0};
+    Vector3d _rotationCenter{0, 0, 0};
 
     SERIALIZATION_FRIEND(Transformation)
 };
@@ -93,14 +96,16 @@ inline Transformation operator*(const Transformation& a,
                                 const Transformation& b)
 {
     const auto matrix = a.toMatrix() * b.toMatrix();
-    return {matrix.getTranslation(), a.getScale() * b.getScale(), matrix,
+    return {matrix[3], a.getScale() * b.getScale(), matrix,
             a.getRotationCenter()};
 }
 
 inline Boxd transformBox(const Boxd& box, const Transformation& transformation)
 {
     const auto& scale = transformation.getScale();
-    return {transformation.toMatrix() * box.getMin() * scale,
-            transformation.toMatrix() * box.getMax() * scale};
+    return {transformation.toMatrix() * Vector4d(box.getMin(), 1.) *
+                Vector4d(scale, 1.),
+            transformation.toMatrix() * Vector4d(box.getMax(), 1.) *
+                Vector4d(scale, 1.)};
 }
 }

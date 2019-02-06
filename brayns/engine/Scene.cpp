@@ -382,10 +382,10 @@ void Scene::buildDefault()
         material->setEmission(5.f);
         const Vector3f lampInfo = {0.15f, 0.99f, 0.15f};
         const Vector3f lampPositions[4] = {
-            {0.5f - lampInfo.x(), lampInfo.y(), 0.5f - lampInfo.z()},
-            {0.5f + lampInfo.x(), lampInfo.y(), 0.5f - lampInfo.z()},
-            {0.5f + lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z()},
-            {0.5f - lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z()}};
+            {0.5f - lampInfo.x, lampInfo.y, 0.5f - lampInfo.z},
+            {0.5f + lampInfo.x, lampInfo.y, 0.5f - lampInfo.z},
+            {0.5f + lampInfo.x, lampInfo.y, 0.5f + lampInfo.z},
+            {0.5f - lampInfo.x, lampInfo.y, 0.5f + lampInfo.z}};
         auto& trianglesMesh = model->getTrianglesMeshes()[materialId];
         for (size_t i = 0; i < 4; ++i)
             trianglesMesh.vertices.push_back(lampPositions[i]);

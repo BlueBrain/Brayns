@@ -24,6 +24,7 @@
 #include <brayns/common/types.h>
 
 #include "AbstractParameters.h"
+#include <deque>
 
 SERIALIZATION_ACCESS(RenderingParameters)
 

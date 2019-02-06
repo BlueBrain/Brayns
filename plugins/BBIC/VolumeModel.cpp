@@ -143,7 +143,7 @@ bool VolumeModel::_createVolume(const size_t lod, brayns::Model& model)
     _volumes.push_back(volume);
     volume->commit();
 
-    return dim.find_min() != vmml::vector<3, size_t>(blockSize).find_min();
+    return glm::compMin(dim) != glm::compMin(glm::vec<3, size_t>(blockSize));
 }
 
 void VolumeModel::_startUploadThread()

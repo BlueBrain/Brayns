@@ -41,12 +41,12 @@ BOOST_AUTO_TEST_CASE(render_demo)
 
     brayns::Brayns brayns(argc, argv);
 
-    const brayns::Vector3f rotCenter = {0.5f, 0.5f, 0.5f};
+    const brayns::Vector3d rotCenter = {0.5, 0.5, 0.5};
 
     auto& camera = brayns.getEngine().getCamera();
     const auto camPos = camera.getPosition();
 
-    camera.setOrientation(brayns::Quaterniond(0.0, 0.0, 0.0, 1.0));
+    camera.setOrientation(brayns::Quaterniond(1, 0, 0, 0));
     camera.setPosition(camPos - (rotCenter - camPos));
 
     brayns.commitAndRender();

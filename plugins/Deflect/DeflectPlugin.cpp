@@ -265,8 +265,8 @@ private:
         auto sizeHints = deflect::SizeHints();
         sizeHints.maxWidth = std::numeric_limits<unsigned int>::max();
         sizeHints.maxHeight = std::numeric_limits<unsigned int>::max();
-        sizeHints.minWidth = minSize.x();
-        sizeHints.minHeight = minSize.y();
+        sizeHints.minWidth = minSize.x;
+        sizeHints.minHeight = minSize.y;
 
         // only send preferred size if we have no multi-channel setup (e.g.
         // OpenDeck)
@@ -281,8 +281,8 @@ private:
             }
         }
 
-        sizeHints.preferredWidth = preferredSize.x();
-        sizeHints.preferredHeight = preferredSize.y();
+        sizeHints.preferredWidth = preferredSize.x;
+        sizeHints.preferredHeight = preferredSize.y;
         _stream->sendSizeHints(sizeHints);
     }
 
@@ -329,8 +329,7 @@ private:
     void _copyToImage(Image& image, FrameBuffer& frameBuffer)
     {
         const auto& size = frameBuffer.getSize();
-        const size_t bufferSize =
-            size.x() * size.y() * frameBuffer.getColorDepth();
+        const size_t bufferSize = size.x * size.y * frameBuffer.getColorDepth();
         const auto data = frameBuffer.getColorBuffer();
 
         image.data.resize(bufferSize);
@@ -345,8 +344,8 @@ private:
     {
         const auto format = _getDeflectImageFormat(image.format);
 
-        deflect::ImageWrapper deflectImage(image.data.data(), image.size.x(),
-                                           image.size.y(), format);
+        deflect::ImageWrapper deflectImage(image.data.data(), image.size.x,
+                                           image.size.y, format);
 
         deflectImage.view = view;
         deflectImage.channel = channel;
@@ -379,14 +378,14 @@ private:
     Vector2d _getWindowPos(const deflect::Event& event,
                            const Vector2ui& windowSize) const
     {
-        return {event.mouseX * windowSize.x(), event.mouseY * windowSize.y()};
+        return {event.mouseX * windowSize.x, event.mouseY * windowSize.y};
     }
 
     double _getZoomDelta(const deflect::Event& pinchEvent,
                          const Vector2ui& windowSize) const
     {
-        const auto dx = pinchEvent.dx * windowSize.x();
-        const auto dy = pinchEvent.dy * windowSize.y();
+        const auto dx = pinchEvent.dx * windowSize.x;
+        const auto dy = pinchEvent.dy * windowSize.y;
         return std::copysign(std::sqrt(dx * dx + dy * dy), dx + dy);
     }
 

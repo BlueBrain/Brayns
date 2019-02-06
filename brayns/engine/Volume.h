@@ -43,8 +43,8 @@ public:
     Boxd getBounds() const
     {
         return {{0, 0, 0},
-                {_dimensions.x() * _spacing.x(), _dimensions.y() * _spacing.y(),
-                 _dimensions.z() * _spacing.z()}};
+                {_dimensions.x * _spacing.x, _dimensions.y * _spacing.y,
+                 _dimensions.z * _spacing.z}};
     }
 
 protected:

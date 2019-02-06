@@ -54,7 +54,7 @@ void Camera::setInitialState(const Vector3d& position,
     _initialPosition = position;
     _initialTarget = target;
     _initialOrientation = orientation;
-    _initialOrientation.normalize();
+    _initialOrientation = glm::normalize(_initialOrientation);
     set(position, orientation, target);
 }
 
@@ -67,9 +67,6 @@ std::ostream& operator<<(std::ostream& os, Camera& camera)
 {
     const auto& position = camera.getPosition();
     const auto& orientation = camera.getOrientation();
-    os << position.x() << "," << position.y() << "," << position.z() << ","
-       << orientation.x() << "," << orientation.y() << "," << orientation.z()
-       << "," << orientation.w();
-    return os;
+    return os << position << ", " << orientation;
 }
 }

@@ -62,7 +62,7 @@ OSPRayFrameBuffer::~OSPRayFrameBuffer()
 
 void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
 {
-    if (frameSize.product() == 0)
+    if (glm::compMul(frameSize) == 0)
         throw std::runtime_error("Invalid size for framebuffer resize");
 
     if (_frameBuffer && _frameSize == frameSize)
@@ -80,7 +80,7 @@ void OSPRayFrameBuffer::_recreate()
     _unmapUnsafe();
     ospRelease(_frameBuffer);
 
-    const osp::vec2i size = {int(_frameSize.x()), int(_frameSize.y())};
+    const osp::vec2i size = {int(_frameSize.x), int(_frameSize.y)};
 
     size_t attributes = OSP_FB_COLOR | OSP_FB_DEPTH;
     if (_accumulation)
@@ -107,8 +107,7 @@ void OSPRayFrameBuffer::_recreateSubsamplingBuffer()
     if (_frameSize != subsamplingSize)
     {
         _subsamplingFrameBuffer =
-            ospNewFrameBuffer({int(subsamplingSize.x()),
-                               int(subsamplingSize.y())},
+            ospNewFrameBuffer({int(subsamplingSize.x), int(subsamplingSize.y)},
                               toOSPFrameBufferFormat(_frameBufferFormat),
                               OSP_FB_COLOR | OSP_FB_DEPTH);
         if (_pixelOp)

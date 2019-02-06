@@ -113,7 +113,7 @@ public:
         _scene->commit();
 
         _camera->updateProperty("aspect",
-                                double(_params.size.x()) / _params.size.y());
+                                double(_params.size.x) / _params.size.y);
         _camera->commit();
 
         if (_params.renderingParams)

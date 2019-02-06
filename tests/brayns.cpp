@@ -50,8 +50,7 @@ BOOST_AUTO_TEST_CASE(defaults)
     auto& camera = brayns.getEngine().getCamera();
     BOOST_CHECK_EQUAL(camera.getCurrentType(), "perspective");
     BOOST_CHECK_EQUAL(camera.getPosition(), brayns::Vector3d(0.5, 0.5, 1.5));
-    BOOST_CHECK_EQUAL(camera.getOrientation(),
-                      brayns::Quaterniond(0.0, 0.0, 0.0, 1.0));
+    BOOST_CHECK_EQUAL(camera.getOrientation(), brayns::Quaterniond(1, 0, 0, 0));
 
     auto& manipulator = brayns.getCameraManipulator();
     BOOST_CHECK(dynamic_cast<brayns::InspectCenterManipulator*>(&manipulator));
@@ -60,7 +59,7 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK(!fb.getColorBuffer());
     BOOST_CHECK_EQUAL(fb.getColorDepth(), 4);
     BOOST_CHECK(!fb.getDepthBuffer());
-    BOOST_CHECK_EQUAL(fb.getSize(), brayns::Vector2i(800, 600));
+    BOOST_CHECK_EQUAL(fb.getSize(), brayns::Vector2ui(800, 600));
 
     auto& pm = brayns.getParametersManager();
     const auto& appParams = pm.getApplicationParameters();

@@ -97,8 +97,8 @@ ImageGenerator::ImageJPEG ImageGenerator::createJPEG(
 
     const auto& frameSize = frameBuffer.getSize();
     ImageJPEG image;
-    image.data = _encodeJpeg(frameSize.x(), frameSize.y(), colorBuffer,
-                             pixelFormat, quality, image.size);
+    image.data = _encodeJpeg(frameSize.x, frameSize.y, colorBuffer, pixelFormat,
+                             quality, image.size);
     frameBuffer.unmap();
     return image;
 #else

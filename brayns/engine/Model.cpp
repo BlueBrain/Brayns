@@ -113,7 +113,7 @@ ModelDescriptor& ModelDescriptor::operator=(const ModelParams& rhs)
     const auto oldRotationCenter = _transformation.getRotationCenter();
     const auto newRotationCenter = rhs.getTransformation().getRotationCenter();
     _updateValue(_transformation, rhs.getTransformation());
-    if (newRotationCenter == Vector3f())
+    if (newRotationCenter == Vector3d(0))
         // If no rotation center is specified in the model params, the one set
         // by the model loader is used
         _transformation.setRotationCenter(oldRotationCenter);
@@ -521,8 +521,7 @@ void Model::updateBounds()
             for (size_t index = 0; index < streamline.second.vertex.size();
                  ++index)
             {
-                const auto& pos =
-                    streamline.second.vertex[index].get_sub_vector<3, 0>();
+                const auto& pos = Vector3f(streamline.second.vertex[index]);
                 const float radius = streamline.second.vertex[index][3];
                 const auto radiusVec = Vector3f(radius, radius, radius);
                 _geometries->_streamlinesBounds.merge(pos + radiusVec);

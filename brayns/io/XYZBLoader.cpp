@@ -114,7 +114,7 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
     // Find an appropriate mean radius to avoid overlaps of the spheres, see
     // https://en.wikipedia.org/wiki/Wigner%E2%80%93Seitz_radius
 
-    const auto volume = bbox.getSize().product();
+    const auto volume = glm::compMul(bbox.getSize());
     const auto density4PI =
         4 * M_PI * numlines /
         (volume > ALMOST_ZERO ? volume : _computeHalfArea(bbox));

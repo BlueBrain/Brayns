@@ -41,7 +41,6 @@ include(Common)
 # Core dependencies
 common_find_package(Boost REQUIRED COMPONENTS
   filesystem system program_options unit_test_framework)
-common_find_package(vmmlib REQUIRED)
 common_find_package(OpenMP)
 common_find_package(libuv 1.8)
 common_find_package(FreeImage)
@@ -103,7 +102,7 @@ endif()
 
 common_find_package_post()
 
-list(APPEND BRAYNS_DEPENDENT_LIBRARIES Async++ vmmlib)
+list(APPEND BRAYNS_DEPENDENT_LIBRARIES Async++ glm)
 
 add_subdirectory(deps)
 

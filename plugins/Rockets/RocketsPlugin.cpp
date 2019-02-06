@@ -1442,12 +1442,12 @@ public:
                                                            MODEL_NOT_FOUND);
 
                 const auto& instances = model->getInstances();
-                const Vector2ui range{std::min(param.resultRange.x(),
+                const Vector2ui range{std::min(param.resultRange.x,
                                                unsigned(instances.size())),
-                                      std::min(param.resultRange.y(),
+                                      std::min(param.resultRange.y,
                                                unsigned(instances.size()))};
-                return {instances.begin() + range.x(),
-                        instances.begin() + range.y()};
+                return {instances.begin() + range.x,
+                        instances.begin() + range.y};
             });
     }
 
