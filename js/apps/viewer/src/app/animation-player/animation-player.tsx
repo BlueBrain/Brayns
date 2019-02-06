@@ -13,7 +13,12 @@ import {
 } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 
-import {withAnimation, WithAnimation} from '../../common/client';
+import {
+    withAnimation,
+    WithAnimation,
+    withConnectionStatus,
+    WithConnectionStatus
+} from '../../common/client';
 import {KeyCode} from '../../common/constants';
 import {onKeyboardLockChange, onPageVisibilityChange} from '../../common/events';
 
@@ -76,7 +81,7 @@ export class AnimationPlayer extends PureComponent<Props> {
         const {hasAnimation} = this.props;
         if (hasAnimation && !this.keyboardEventsListenerAttached) {
             this.attachKeyboardEventsListener();
-        } else if (!hasAnimation && this.keyboardEventsListenerAttached) {
+        } else if ((!this.props.online || !hasAnimation) && this.keyboardEventsListenerAttached) {
             this.detachKeyboardEventsListener();
         }
     }
@@ -164,7 +169,7 @@ export class AnimationPlayer extends PureComponent<Props> {
     render() {
         const {
             classes,
-            disabled,
+            online,
             hasAnimation,
             frameCount = 0,
             animationParams = {},
@@ -174,8 +179,8 @@ export class AnimationPlayer extends PureComponent<Props> {
             onFramePrev,
             onFrameNext
         } = this.props;
-        const showPlayer = hasAnimation && !disabled;
-        const disableBtns = !hasAnimation || disabled;
+        const showPlayer = hasAnimation && online;
+        const disableBtns = !hasAnimation || !online;
 
         const totalMs = frameToTimeStr(frameCount, animationParams.dt);
         const currentMs = frameToTimeStr(animationParams.current, animationParams.dt);
@@ -213,11 +218,10 @@ export class AnimationPlayer extends PureComponent<Props> {
 }
 
 export default style(
-    withAnimation(AnimationPlayer)
-);
+    withConnectionStatus(
+        withAnimation(AnimationPlayer)));
 
 
-interface Props extends WithStyles<typeof styles>,
-    WithAnimation {
-    disabled?: boolean;
-}
+type Props = WithStyles<typeof styles>
+    & WithConnectionStatus
+    & WithAnimation;

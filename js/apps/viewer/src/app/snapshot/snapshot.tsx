@@ -40,6 +40,8 @@ import brayns, {
     WithAnimation,
     withCamera,
     WithCamera,
+    withConnectionStatus,
+    WithConnectionStatus,
     withRenderer,
     WithRenderer
 } from '../../common/client';
@@ -180,8 +182,7 @@ export class Snapshot extends Component<Props, State> {
         });
     }
     openDialogOnKeydown = (evt: KeyboardEvent) => {
-        const {disabled} = this.props;
-        if (!disabled && evt.keyCode === KeyCode.S && evt.shiftKey && !this.keyboardLocked) {
+        if (this.props.online && evt.keyCode === KeyCode.S && evt.shiftKey && !this.keyboardLocked) {
             this.openDialog();
         }
     }
@@ -247,7 +248,7 @@ export class Snapshot extends Component<Props, State> {
     render() {
         const {
             color = 'default',
-            disabled,
+            online,
             classes,
             width
         } = this.props;
@@ -263,8 +264,9 @@ export class Snapshot extends Component<Props, State> {
 
         const fullScreen = isWidthDown('xs', width);
 
+        const offline = !online;
         const hasFilenameError = !filename || !filename.length;
-        const isGenerateProhibited = disabled || hasFilenameError;
+        const isGenerateProhibited = offline || hasFilenameError;
 
         const dialogTitle = 'Take a snapshot';
         const dialogTitleId = 'snapshot-dialog-title';
@@ -304,7 +306,7 @@ export class Snapshot extends Component<Props, State> {
                             onClick={this.openDialog}
                             color={color}
                             aria-label={dialogTitle}
-                            disabled={disabled}
+                            disabled={offline}
                         >
                             <PhotoCameraIcon />
                         </IconButton>
@@ -397,9 +399,10 @@ export class Snapshot extends Component<Props, State> {
 
 export default withWidth()(
     style(
-        withRenderer(
-            withCamera(
-                withAnimation(Snapshot)))));
+        withConnectionStatus(
+            withRenderer(
+                withCamera(
+                    withAnimation(Snapshot))))));
 
 
 function setMimeType(data: string, format?: ImageFormat) {
@@ -452,11 +455,11 @@ function b64ToBlob(b64Str: string) {
 
 interface Props extends WithStyles<typeof styles>,
     WithWidth,
+    WithConnectionStatus,
     WithCamera,
     WithRenderer,
     WithAnimation {
     color?: PropTypes.Color;
-    disabled?: boolean;
 }
 
 interface State {

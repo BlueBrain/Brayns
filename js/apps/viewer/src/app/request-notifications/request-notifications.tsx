@@ -515,9 +515,8 @@ function pluralizeReqStr(count: number) {
 }
 
 
-interface Props extends WithStyles<typeof styles>, WithAnimation {
-    disabled?: boolean;
-}
+type Props = WithStyles<typeof styles>
+    & WithAnimation;
 
 interface State {
     requests: AnyRequest[];
