@@ -14,16 +14,16 @@ import {
 } from '@material-ui/core/styles';
 
 import {
+    LoaderWithSchema,
+    withLoaders,
+    WithLoaders
+} from '../../common/client';
+import {
     Change,
     SchemaFields,
     SelectField
 } from '../../common/components';
 
-import {
-    withLoaders,
-    WithLoaders
-} from './provider';
-import {LoaderWithSchema} from './types';
 import {defaultProps} from './utils';
 
 
@@ -107,8 +107,8 @@ export class ModelLoader extends PureComponent<Props> {
     }
 }
 
-const ModelLoaderWithLoaders = withLoaders(ModelLoader);
-export default style(ModelLoaderWithLoaders);
+export default style(
+    withLoaders(ModelLoader));
 
 
 function namesCacheKey(loaders: LoaderWithSchema[]) {

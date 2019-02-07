@@ -93,6 +93,7 @@ import {
     RendererParams,
     Scene,
     SchemaParams,
+    SetAnimationParameters,
     SetTransferFunctionParams,
     Snapshot,
     SnapshotParams,
@@ -201,6 +202,7 @@ export class Client {
      * @param method
      */
     request(method: GET_ANIMATION_PARAMS_TYPE): RequestTask<undefined, AnimationParameters>;
+    request(method: SET_ANIMATION_PARAMS_TYPE, params: SetAnimationParameters): RequestTask<SetAnimationParameters, boolean>;
     request(method: GET_APP_PARAMS_TYPE): RequestTask<undefined, ApplicationParameters>;
     request(method: SET_CAMERA_TYPE, params: CameraParams): RequestTask<CameraParams, boolean>;
     request(method: GET_CAMERA_TYPE): RequestTask<undefined, Camera>;
@@ -382,6 +384,7 @@ async function deserializer(evt: MessageEvent) {
 
 
 export type RequestType = GET_ANIMATION_PARAMS_TYPE
+    | SET_ANIMATION_PARAMS_TYPE
     | GET_APP_PARAMS_TYPE
     | GET_CAMERA_TYPE
     | SET_CAMERA_TYPE

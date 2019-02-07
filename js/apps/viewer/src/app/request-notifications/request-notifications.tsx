@@ -1,10 +1,8 @@
 import React, {PureComponent} from 'react';
 
 import {
-    GET_ANIMATION_PARAMS,
     LOAD_MODEL,
     PathParams,
-    SET_ANIMATION_PARAMS,
     SNAPSHOT,
     SnapshotParams,
     UPLOAD_MODEL,
@@ -13,12 +11,7 @@ import {
 import classNames from 'classnames';
 import {Request} from 'rockets-client';
 import {animationFrameScheduler, Subscription} from 'rxjs';
-import {
-    distinctUntilChanged,
-    map,
-    mergeMap,
-    observeOn
-} from 'rxjs/operators';
+import {observeOn} from 'rxjs/operators';
 
 import Avatar from '@material-ui/core/Avatar';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -47,7 +40,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import WarningIcon from '@material-ui/icons/WarningRounded';
 
-import brayns, {onReady} from '../../common/client';
+import {withAnimation, WithAnimation} from '../../common/client';
 import {
     dispatchRequestCancel,
     onRequestDone,
@@ -56,7 +49,6 @@ import {
     ProgressEvent,
     RequestDoneEvent
 } from '../../common/events';
-import {hasAnimation} from '../animation-player/utils';
 
 
 const REQUEST_PENDING = 0;
@@ -201,18 +193,6 @@ class Notifications extends PureComponent<Props, State> {
 
     componentDidMount() {
         this.subs.push(...[
-            brayns.observe(SET_ANIMATION_PARAMS).pipe(
-                map(hasAnimation),
-                distinctUntilChanged())
-                .subscribe(hasAnimation => {
-                    this.setState({hasAnimation});
-                }),
-            onReady().pipe(
-                mergeMap(() => brayns.request(GET_ANIMATION_PARAMS)),
-                map(hasAnimation))
-                .subscribe(hasAnimation => {
-                    this.setState({hasAnimation});
-                }),
             onRequestStart()
                 .subscribe(request => {
                     this.setState(state => {
@@ -267,15 +247,14 @@ class Notifications extends PureComponent<Props, State> {
     }
 
     render() {
-        const {classes} = this.props;
+        const {classes, hasAnimation} = this.props;
         const {
             requests,
             progressEvents,
             canceledRequests,
             requestDoneEvents,
             expandNotifications,
-            closeNotifications,
-            hasAnimation
+            closeNotifications
         } = this.state;
 
         const notificationsHeaderText = getNotificationsCount(progressEvents.length, requestDoneEvents.length);
@@ -328,7 +307,8 @@ class Notifications extends PureComponent<Props, State> {
 }
 
 
-export default style(Notifications);
+export default style(
+    withAnimation(Notifications));
 
 
 function renderNotifications({
@@ -535,9 +515,8 @@ function pluralizeReqStr(count: number) {
 }
 
 
-interface Props extends WithStyles<typeof styles> {
-    disabled?: boolean;
-}
+type Props = WithStyles<typeof styles>
+    & WithAnimation;
 
 interface State {
     requests: AnyRequest[];
@@ -546,7 +525,6 @@ interface State {
     canceledRequests: AnyRequest[];
     expandNotifications?: boolean;
     closeNotifications?: boolean;
-    hasAnimation?: boolean;
 }
 
 type AnyRequest = Request<SnapshotParams

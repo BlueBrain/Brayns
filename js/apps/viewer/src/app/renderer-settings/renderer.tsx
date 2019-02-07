@@ -1,28 +1,16 @@
-import React, {ChangeEvent, PureComponent} from 'react';
+import React, {
+    ChangeEvent,
+    PureComponent
+} from 'react';
 
-import {
-    EnvironmentMap,
-    GET_ENVIRONMENT_MAP,
-    GET_RENDERER,
-    GET_RENDERER_PARAMS,
-    Renderer as RendererType,
-    RENDERER_PARAMS,
-    RendererParams,
-    SCHEMA,
-    SET_ENVIRONMENT_MAP,
-    SET_RENDERER,
-    SET_RENDERER_PARAMS
-} from 'brayns';
-import {JSONSchema7} from 'json-schema';
-import {Subscription} from 'rxjs';
-import {mergeMap} from 'rxjs/operators';
+import {Renderer as RendererType} from 'brayns';
 
 import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import TextField from '@material-ui/core/TextField';
 import CloseIcon from '@material-ui/icons/Close';
 
-import brayns, {onReady} from '../../common/client';
+import {withRenderer, WithRenderer} from '../../common/client';
 import {
     ColorField,
     NumericField,
@@ -30,176 +18,80 @@ import {
     SelectField,
     SwitchField
 } from '../../common/components';
-import {dispatchNotification} from '../../common/events';
 
-import {findSchemaForType} from './utils';
 
 const MAX_ACC_FRAMES = 1000;
 
 
-export default class Renderer extends PureComponent<Props, State> {
-    state: State = {
-        current: '',
-        backgroundColor: [0, 0, 0],
-        maxAccumFrames: 0,
-        samplesPerPixel: 1,
-        subsampling: 1,
-        headLight: false,
-        environmentMap: '',
-        isEnvMapValid: true
-    };
+class Renderer extends PureComponent<Props> {
+    changeRendererType = (evt: ChangeEvent<HTMLSelectElement>) => this.props.onRendererTypeChange!(evt.target.value);
 
-    private subs: Subscription[] = [];
+    updateSamplesPerPixel = (samplesPerPixel: number) => this.props.onRendererPropsChange!({samplesPerPixel});
 
-    changeRendererType = async (evt: ChangeEvent<HTMLSelectElement>) => {
-        const type = evt.target.value;
-        const {paramsSchema} = this.state;
-        if (paramsSchema) {
-            const schema = findSchemaForType(paramsSchema, type);
-            await this.updateRenderer({
-                current: type
-            });
-            const params = await getCurrentRendererParams();
-            this.setState({
-                current: type,
-                currentRendererSchema: schema,
-                currentRendererParams: params
-            });
-        }
-    }
+    updateSubsampling = (subsampling: number) => this.props.onRendererPropsChange!({subsampling});
 
-    updateSamplesPerPixel = (samplesPerPixel: number) => {
-        this.updateRenderer({samplesPerPixel});
-    }
-
-    updateSubsampling = (subsampling: number) => {
-        this.updateRenderer({subsampling});
-    }
+    updateHeadLight = (evt: ChangeEvent<HTMLInputElement>, checked: boolean) => this.props.onRendererPropsChange!({
+        headLight: checked
+    });
 
     updateMaxAccumFrames = (value: number) => {
         const num = Math.round(value);
-        this.updateRenderer({
+        this.props.onRendererPropsChange!({
             maxAccumFrames: num < MAX_ACC_FRAMES
                 ? num
                 : MAX_ACC_FRAMES
         });
     }
 
-    updateHeadLight = (evt: ChangeEvent<HTMLInputElement>, checked: boolean) => {
-        this.updateRenderer({
-            headLight: checked
-        });
-    }
-
     updateBackgroundColor = (color: number[]) => {
-        this.setState({
-            backgroundColor: color
-        });
-        const rgb = toBraynsRgb(color);
-        this.updateRenderer({
+        const rgb = fromRgb(color);
+        this.props.onRendererPropsChange!({
             backgroundColor: rgb
-        }, false);
+        });
     }
 
     updateEnvironmentMap = (evt: ChangeEvent<HTMLInputElement>) => {
-        this.setEnvironmentMap(evt.target.value);
+        this.props.onEnvMapChange!(evt.target.value);
     }
 
     clearEnvMap = () => {
-        this.setEnvironmentMap('');
-    }
-
-    updateRenderer = async (props: RendererParams, updateState: boolean = true) => {
-        try {
-            await brayns.request(SET_RENDERER, props);
-            if (updateState) {
-                this.setState(toRendererState(props));
-            }
-        } catch (err) {
-            dispatchNotification(err);
-        }
-    }
-
-    updateRendererParams = async (params: object) => {
-        try {
-            await brayns.request(SET_RENDERER_PARAMS, params);
-            this.setState({
-                currentRendererParams: {
-                    ...this.state.currentRendererParams,
-                    ...params
-                }
-            });
-        } catch (err) {
-            dispatchNotification(err);
-        }
-    }
-
-    componentDidMount() {
-        this.subs.push(...[
-            brayns.observe(SET_RENDERER)
-                .pipe(mergeMap(withRendererParams))
-                .subscribe(([renderer, params]) => {
-                    const {paramsSchema} = this.state;
-                    if (paramsSchema) {
-                        this.setState({
-                            ...getRendererState(renderer, paramsSchema),
-                            currentRendererParams: params
-                        });
-                    }
-                }),
-            brayns.observe(SET_RENDERER_PARAMS)
-                .subscribe(params => {
-                    this.setState({
-                        currentRendererParams: params
-                    });
-                }),
-            brayns.observe(SET_ENVIRONMENT_MAP)
-                .subscribe(({filename: environmentMap}) => this.setState({environmentMap})),
-            onReady().pipe(mergeMap(() => getCurrentState()))
-                .subscribe(([renderer, schema, {filename: environmentMap}, params]) => {
-                    this.setState({
-                        ...getRendererState(renderer, schema),
-                        paramsSchema: schema,
-                        currentRendererParams: params,
-                        environmentMap
-                    });
-                })
-        ]);
-    }
-
-    componentWillUnmount() {
-        while (this.subs.length) {
-            const sub = this.subs.pop();
-            sub!.unsubscribe();
-        }
+        this.props.onEnvMapChange!('');
     }
 
     render() {
-        const {disabled} = this.props;
         const {
-            current,
-            currentRendererSchema,
-            currentRendererParams,
+            disabled,
+            envMap,
+            isEnvMapValid,
+            onRendererParamsChange: onSetRendererParams,
+            params,
+            renderer,
+            schema
+        } = this.props;
+        const {
             backgroundColor,
+            current = '',
+            headLight = false,
+            maxAccumFrames,
             samplesPerPixel,
             subsampling,
-            maxAccumFrames,
-            headLight,
-            types,
-            environmentMap,
-            isEnvMapValid
-        } = this.state;
+            types = []
+        } = renderer || {} as RendererType;
 
-        const fields = currentRendererSchema ? (
+        const rgbBg = toRgb(backgroundColor);
+
+        const envMapFile = envMap ? envMap.filename : '';
+
+        const fields = schema ? (
             <SchemaFields
-                schema={currentRendererSchema}
-                values={currentRendererParams}
-                onChange={this.updateRendererParams}
+                schema={schema}
+                values={params!}
+                onChange={onSetRendererParams!}
                 disabled={disabled}
             />
         ) : null;
 
-        const hasEnvMap = environmentMap && environmentMap.length;
+        const hasEnvMap = envMapFile && envMapFile.length;
         const envMapInputProps = {};
         if (hasEnvMap) {
             Object.assign(envMapInputProps, {
@@ -269,7 +161,7 @@ export default class Renderer extends PureComponent<Props, State> {
                     id="colorpicker"
                     label="Background"
                     ariaLabel="Open color picker"
-                    value={backgroundColor}
+                    value={rgbBg}
                     onChange={this.updateBackgroundColor}
                     margin="normal"
                     disabled={!!disableBackgroundColor}
@@ -279,7 +171,7 @@ export default class Renderer extends PureComponent<Props, State> {
                 <TextField
                     id="environmentmap"
                     label="Environment map"
-                    value={environmentMap}
+                    value={envMapFile}
                     onChange={this.updateEnvironmentMap}
                     margin="normal"
                     disabled={disabled}
@@ -302,63 +194,10 @@ export default class Renderer extends PureComponent<Props, State> {
             </div>
         );
     }
-
-    private setEnvironmentMap = (filename: string) => {
-        this.setState({environmentMap: filename}, async () => {
-            try {
-                const isEnvMapValid = await brayns.request(SET_ENVIRONMENT_MAP, {filename});
-                this.setState({isEnvMapValid});
-            } catch (err) {
-                dispatchNotification(err);
-            }
-        });
-    }
 }
 
-function getCurrentState(): Promise<CurrentState> {
-    return Promise.all([
-        brayns.request(GET_RENDERER),
-        brayns.request(SCHEMA, {endpoint: RENDERER_PARAMS}),
-        brayns.request(GET_ENVIRONMENT_MAP),
-        getCurrentRendererParams()
-    ]) as any;
-}
+export default withRenderer(Renderer);
 
-async function withRendererParams(renderer: RendererType): Promise<WithRenderer> {
-    const params = await getCurrentRendererParams();
-    return [renderer, params];
-}
-
-async function getCurrentRendererParams() {
-    const params = await brayns.request(GET_RENDERER_PARAMS);
-    return params;
-}
-
-function getRendererState(renderer: RendererType, paramsSchema: JSONSchema7) {
-    const props = withRgbBackgroundColor(renderer);
-    const currentRendererSchema = findSchemaForType(paramsSchema, renderer.current);
-    return {
-        ...props,
-        currentRendererSchema
-    };
-}
-
-function withRgbBackgroundColor(renderer: RendererType): RendererState {
-    return {
-        ...renderer,
-        backgroundColor: toRgb(renderer.backgroundColor)
-    };
-}
-
-function toRendererState(props: RendererParams): CommonRendererState {
-    if (props.backgroundColor) {
-        return {
-            ...props,
-            backgroundColor: toRgb(props.backgroundColor)
-        };
-    }
-    return props as any;
-}
 
 // TODO: Add tests?
 function toRgb(rgb?: number[]): number[] {
@@ -370,37 +209,11 @@ function toRgb(rgb?: number[]): number[] {
 }
 
 // TODO: Add tests?
-function toBraynsRgb(rgb: number[]): number[] {
+function fromRgb(rgb: number[]): number[] {
     return rgb.map(v => v / 255);
 }
 
 
-interface Props {
+interface Props extends WithRenderer {
     disabled?: boolean;
-}
-
-type CommonRendererState = RendererParams;
-
-type RendererState = Pick<RendererType, 'types'> & CommonRendererState;
-
-interface State extends Partial<RendererState> {
-    paramsSchema?: JSONSchema7;
-    currentRendererSchema?: JSONSchema7;
-    currentRendererParams?: any;
-    environmentMap?: string;
-    isEnvMapValid?: boolean;
-}
-
-interface CurrentState extends Array<JSONSchema7 | RendererType | object | EnvironmentMap> {
-    0: RendererType;
-    1: JSONSchema7;
-    2: EnvironmentMap;
-    3: object;
-    length: 4;
-}
-
-interface WithRenderer extends Array<RendererType | object> {
-    0: RendererType;
-    1: object;
-    length: 2;
 }

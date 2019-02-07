@@ -101,6 +101,7 @@ export {
     RendererParams,
     Scene,
     SchemaParams,
+    SetAnimationParameters,
     SetTransferFunctionParams,
     Snapshot,
     SnapshotParams,

@@ -1,12 +1,6 @@
 import React, {PureComponent} from 'react';
 
-import {
-    AnimationParameters,
-    GET_ANIMATION_PARAMS,
-    SET_ANIMATION_PARAMS
-} from 'brayns';
 import {Subscription} from 'rxjs';
-import {mergeMap} from 'rxjs/operators';
 
 import Slide from '@material-ui/core/Slide';
 import {
@@ -19,18 +13,18 @@ import {
 } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 
-import brayns, {isReady, onReady} from '../../common/client';
+import {
+    withAnimation,
+    WithAnimation,
+    withConnectionStatus,
+    WithConnectionStatus
+} from '../../common/client';
 import {KeyCode} from '../../common/constants';
 import {onKeyboardLockChange, onPageVisibilityChange} from '../../common/events';
 
 import Controls from './controls';
 import ProgressBar from './progress-bar';
-import {
-    currentFrame,
-    framesCount,
-    frameToTimeStr,
-    hasAnimation
-} from './utils';
+import {frameToTimeStr} from './utils';
 
 
 const controlsHeight = 15 + 48;
@@ -77,78 +71,17 @@ const theme = createMuiTheme({
 const style = withStyles(styles);
 
 
-export class AnimationPlayer extends PureComponent<Props, State> {
-    state: State = {
-        animate: false,
-        hide: false
-    };
-
+export class AnimationPlayer extends PureComponent<Props> {
     private subs: Subscription[] = [];
     private keyboardEventsListenerAttached = false;
     private keyboardLocked = false;
+    private wasAnimationSuspended = false;
 
-    playAnimation = () => {
-        this.updateAnimationParams({
-            delta: 1
-        });
-        this.setState({
-            animate: true,
-            suspended: false
-        });
-    }
-
-    stopAnimation = (suspended?: boolean) => {
-        this.updateAnimationParams({
-            delta: 0
-        });
-        this.setState({
-            suspended,
-            animate: false
-        });
-    }
-
-    togglePlay = () => {
-        this.setState(prev => {
-            const animate = !prev.animate;
-            this.updateAnimationParams({
-                delta: Number(animate)
-            });
-            return {animate};
-        });
-    }
-
-    jumpToFrame = (params: Partial<AnimationParameters>) => {
-        this.updateAnimationParams({
-            current: params.current
-        });
-    }
-    prevFrame = () => {
-        const {animationParams = {}} = this.state;
-        const current = currentFrame(animationParams);
-        const prev = current - 1;
-        if (prev >= 0) {
-            this.updateAnimationParams({
-                current: prev
-            });
-        }
-    }
-    nextFrame = () => {
-        const {animationParams = {}} = this.state;
-        const current = currentFrame(animationParams);
-        const end = animationParams.end || 0;
-        const next = current + 1;
-        if (next <= end) {
-            this.updateAnimationParams({
-                current: next
-            });
-        }
-    }
-
-    toggleKeyboardEventsListener = (params?: AnimationParameters) => {
-        const canAnimate = hasAnimation(params);
-        if (canAnimate && !this.keyboardEventsListenerAttached) {
+    toggleKeyboardEventsListener = () => {
+        const {hasAnimation} = this.props;
+        if (hasAnimation && !this.keyboardEventsListenerAttached) {
             this.attachKeyboardEventsListener();
-        } else if (!canAnimate && this.keyboardEventsListenerAttached) {
+        } else if ((!this.props.online || !hasAnimation) && this.keyboardEventsListenerAttached) {
             this.detachKeyboardEventsListener();
         }
     }
@@ -164,7 +97,7 @@ export class AnimationPlayer extends PureComponent<Props, State> {
     }
 
     handleKeydown = (evt: KeyboardEvent) => {
-        const {animate} = this.state;
+        const {isAnimating} = this.props;
 
         if (this.keyboardLocked) {
             return;
@@ -173,22 +106,22 @@ export class AnimationPlayer extends PureComponent<Props, State> {
         switch (evt.keyCode) {
             case KeyCode.Space:
                 stopBubbling();
-                if (animate) {
-                    this.stopAnimation();
+                if (isAnimating) {
+                    this.props.onStop!();
                 } else {
-                    this.playAnimation();
+                    this.props.onPlay!();
                 }
                 break;
             case KeyCode.P:
-                if (!animate && evt.shiftKey) {
+                if (!isAnimating && evt.shiftKey) {
                     stopBubbling();
-                    this.prevFrame();
+                    this.props.onFramePrev!();
                 }
                 break;
             case KeyCode.N:
-                if (!animate && evt.shiftKey) {
+                if (!isAnimating && evt.shiftKey) {
                     stopBubbling();
-                    this.nextFrame();
+                    this.props.onFrameNext!();
                 }
                 break;
             default:
@@ -201,49 +134,17 @@ export class AnimationPlayer extends PureComponent<Props, State> {
         }
     }
 
-    updateAnimationParams = async (params: Partial<AnimationParameters>) => {
-        const ready = await isReady();
-        if (!ready) {
-            return;
-        }
-        this.setState(state => ({
-            animationParams: {
-                ...state.animationParams,
-                ...params
-            }
-        }), () => {
-            brayns.notify(SET_ANIMATION_PARAMS, params);
-        });
-    }
-
     componentDidMount() {
         this.subs.push(...[
-            // Listen to animation params change
-            brayns.observe(SET_ANIMATION_PARAMS)
-                .subscribe(params => {
-                    this.toggleKeyboardEventsListener(params);
-
-                    this.setState({
-                        animationParams: params,
-                        animate: !!params.delta
-                    });
-                }),
-            // Get current request animation params
-            onReady().pipe(mergeMap(() => brayns.request(GET_ANIMATION_PARAMS)))
-                .subscribe(params => {
-                    this.toggleKeyboardEventsListener(params);
-
-                    this.setState({
-                        animationParams: params,
-                        animate: !!params.delta
-                    });
-                }),
             onPageVisibilityChange()
-                .subscribe(hidden => {
-                    if (hidden && this.state.animate) {
-                        this.stopAnimation(true);
-                    } else if (this.state.suspended) {
-                        this.playAnimation();
+                .subscribe(async hidden => {
+                    const {isAnimating} = this.props;
+                    if (hidden && isAnimating) {
+                        await this.props.onStop!();
+                        this.wasAnimationSuspended = true;
+                    } else if (!isAnimating && this.wasAnimationSuspended) {
+                        await this.props.onPlay!();
+                        this.wasAnimationSuspended = false;
                     }
                 }),
             onKeyboardLockChange()
@@ -251,6 +152,10 @@ export class AnimationPlayer extends PureComponent<Props, State> {
                     this.keyboardLocked = lock;
                 })
         ]);
+    }
+
+    componentDidUpdate() {
+        this.toggleKeyboardEventsListener();
     }
 
     componentWillUnmount() {
@@ -262,18 +167,22 @@ export class AnimationPlayer extends PureComponent<Props, State> {
     }
 
     render() {
-        const {classes, disabled} = this.props;
         const {
+            classes,
+            online,
+            hasAnimation,
+            frameCount = 0,
             animationParams = {},
-            animate,
-            hide
-        } = this.state;
-        const hasAnim = hasAnimation(animationParams);
-        const showPlayer = hasAnim && !hide && !disabled;
-        const disableBtns = !hasAnim || disabled;
+            isAnimating,
+            onToggle,
+            onFrameChange,
+            onFramePrev,
+            onFrameNext
+        } = this.props;
+        const showPlayer = hasAnimation && online;
+        const disableBtns = !hasAnimation || !online;
 
-        const total = framesCount(animationParams);
-        const totalMs = frameToTimeStr(total, animationParams.dt);
+        const totalMs = frameToTimeStr(frameCount, animationParams.dt);
         const currentMs = frameToTimeStr(animationParams.current, animationParams.dt);
 
         return (
@@ -282,15 +191,16 @@ export class AnimationPlayer extends PureComponent<Props, State> {
                     <div className={classes.bg} />
                     <ProgressBar
                         animationParams={animationParams}
-                        onFrameChange={this.jumpToFrame}
+                        onFrameChange={onFrameChange!}
+                        frameCount={frameCount}
                     />
                     <MuiThemeProvider theme={theme}>
                         <div className={classes.controls}>
                             <Controls
-                                play={!!animate}
-                                onPlayToggle={this.togglePlay}
-                                onPrev={this.prevFrame}
-                                onNext={this.nextFrame}
+                                play={!!isAnimating}
+                                onPlayToggle={onToggle!}
+                                onPrev={onFramePrev!}
+                                onNext={onFrameNext!}
                                 disablePrev={animationParams.current === 0}
                                 disableNext={animationParams.current === animationParams.end}
                                 disabled={disableBtns}
@@ -307,16 +217,11 @@ export class AnimationPlayer extends PureComponent<Props, State> {
     }
 }
 
-export default style(AnimationPlayer);
+export default style(
+    withConnectionStatus(
+        withAnimation(AnimationPlayer)));
 
 
-interface Props extends WithStyles<typeof styles> {
-    disabled?: boolean;
-}
-
-interface State {
-    animationParams?: Partial<AnimationParameters>;
-    animate?: boolean;
-    suspended?: boolean;
-    hide?: boolean;
-}
+type Props = WithStyles<typeof styles>
+    & WithConnectionStatus
+    & WithAnimation;

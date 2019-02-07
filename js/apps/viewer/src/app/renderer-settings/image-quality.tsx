@@ -4,31 +4,16 @@ import React, {PureComponent} from 'react';
 import {ApplicationParameters} from 'brayns';
 
 import {NumericField} from '../../common/components';
+import {withAppParms, WithAppParams} from '../../common/client';
 
 
-export default class ImageQuality extends PureComponent<Props> {
-    updateProp = (key: keyof CommonProps) => (value: number) => {
-        this.saveChanges(key, value);
-    }
-
-    updateJpegCompression = this.updateProp('jpegCompression');
-    updateImageStreamFps = this.updateProp('imageStreamFps');
-
-    saveChanges = (key: string, value?: any) => {
-        const {onChange} = this.props;
-        if (onChange) {
-            onChange({
-                [key]: value
-            });
-        }
-    }
+class ImageQuality extends PureComponent<Props> {
+    updateJpegCompression = (jpegCompression: number) => this.props.onAppParamsChange!({jpegCompression});
+    updateImageStreamFps = (imageStreamFps: number) => this.props.onAppParamsChange!({imageStreamFps});
 
     render() {
-        const {
-            imageStreamFps,
-            jpegCompression,
-            disabled
-        } = this.props;
+        const {appParams, disabled} = this.props;
+        const {jpegCompression, imageStreamFps} = appParams || {} as ApplicationParameters;
 
         return (
             <div>
@@ -58,10 +43,9 @@ export default class ImageQuality extends PureComponent<Props> {
     }
 }
 
+export default withAppParms(ImageQuality);
 
-type CommonProps = Pick<ApplicationParameters, 'jpegCompression' | 'imageStreamFps'>;
 
-interface Props extends Partial<CommonProps> {
+interface Props extends WithAppParams {
     disabled?: boolean;
-    onChange?(value: Partial<CommonProps>): void;
 }

@@ -1,13 +1,10 @@
 // tslint:disable: member-ordering
-import React, {ChangeEvent, Component} from 'react';
+import React, {
+    ChangeEvent,
+    Component
+} from 'react';
 
-import {
-    GET_ANIMATION_PARAMS,
-    GET_CAMERA,
-    GET_RENDERER,
-    ImageFormat,
-    SNAPSHOT
-} from 'brayns';
+import {ImageFormat, SNAPSHOT} from 'brayns';
 import classNames from 'classnames';
 import {isNumber} from 'lodash';
 import {Subscription} from 'rxjs';
@@ -38,7 +35,16 @@ import Tooltip from '@material-ui/core/Tooltip';
 import withWidth, {isWidthDown, WithWidth} from '@material-ui/core/withWidth';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 
-import brayns from '../../common/client';
+import brayns, {
+    withAnimation,
+    WithAnimation,
+    withCamera,
+    WithCamera,
+    withConnectionStatus,
+    WithConnectionStatus,
+    withRenderer,
+    WithRenderer
+} from '../../common/client';
 import {NumericField, SlideUp} from '../../common/components';
 import {
     APP_BAR_HEIGHT,
@@ -114,24 +120,18 @@ export class Snapshot extends Component<Props, State> {
             format
         } = this.state;
 
-        const [animationParameters, camera, renderer] = await Promise.all([
-            brayns.request(GET_ANIMATION_PARAMS),
-            brayns.request(GET_CAMERA),
-            brayns.request(GET_RENDERER)
-        ]);
-
         dispatchKeyboardLock(false);
         this.setState({
             showDialog: false
         });
 
         const snapshot = brayns.request(SNAPSHOT, {
-            animationParameters,
-            camera,
-            renderer,
             format,
             quality,
             samplesPerPixel,
+            camera: this.props.camera,
+            renderer: this.props.renderer,
+            animationParameters: this.props.animationParams,
             name: `${filename}.${format}`,
             size: [width, height] as number[]
         } as any);
@@ -182,8 +182,7 @@ export class Snapshot extends Component<Props, State> {
         });
     }
     openDialogOnKeydown = (evt: KeyboardEvent) => {
-        const {disabled} = this.props;
-        if (!disabled && evt.keyCode === KeyCode.S && evt.shiftKey && !this.keyboardLocked) {
+        if (this.props.online && evt.keyCode === KeyCode.S && evt.shiftKey && !this.keyboardLocked) {
             this.openDialog();
         }
     }
@@ -249,7 +248,7 @@ export class Snapshot extends Component<Props, State> {
     render() {
         const {
             color = 'default',
-            disabled,
+            online,
             classes,
             width
         } = this.props;
@@ -265,8 +264,9 @@ export class Snapshot extends Component<Props, State> {
 
         const fullScreen = isWidthDown('xs', width);
 
+        const offline = !online;
         const hasFilenameError = !filename || !filename.length;
-        const isGenerateProhibited = disabled || hasFilenameError;
+        const isGenerateProhibited = offline || hasFilenameError;
 
         const dialogTitle = 'Take a snapshot';
         const dialogTitleId = 'snapshot-dialog-title';
@@ -306,7 +306,7 @@ export class Snapshot extends Component<Props, State> {
                             onClick={this.openDialog}
                             color={color}
                             aria-label={dialogTitle}
-                            disabled={disabled}
+                            disabled={offline}
                         >
                             <PhotoCameraIcon />
                         </IconButton>
@@ -398,8 +398,11 @@ export class Snapshot extends Component<Props, State> {
 }
 
 export default withWidth()(
-    style(Snapshot)
-);
+    style(
+        withConnectionStatus(
+            withRenderer(
+                withCamera(
+                    withAnimation(Snapshot))))));
 
 
 function setMimeType(data: string, format?: ImageFormat) {
@@ -450,9 +453,13 @@ function b64ToBlob(b64Str: string) {
 }
 
 
-interface Props extends WithStyles<typeof styles>, WithWidth {
+interface Props extends WithStyles<typeof styles>,
+    WithWidth,
+    WithConnectionStatus,
+    WithCamera,
+    WithRenderer,
+    WithAnimation {
     color?: PropTypes.Color;
-    disabled?: boolean;
 }
 
 interface State {

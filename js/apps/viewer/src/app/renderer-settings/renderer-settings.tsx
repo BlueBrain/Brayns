@@ -1,14 +1,9 @@
-import React, {ChangeEvent, PureComponent} from 'react';
-
-import {
-    ApplicationParameters,
-    GET_APP_PARAMS,
-    SET_APP_PARAMS
-} from 'brayns';
+import React, {
+    ChangeEvent,
+    PureComponent
+} from 'react';
 
 import SwipeableViews from 'react-swipeable-views';
-import {Subscription} from 'rxjs';
-import {mergeMap} from 'rxjs/operators';
 
 import AppBar from '@material-ui/core/AppBar';
 import {
@@ -20,7 +15,7 @@ import {
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 
-import brayns, {onReady} from '../../common/client';
+import {withConnectionStatus, WithConnectionStatus} from '../../common/client';
 import storage from '../../common/storage';
 
 import CameraSettings from './camera';
@@ -48,8 +43,6 @@ class RendererSettings extends PureComponent<Props, State> {
         settingsTab: storage.get<number>(SELECTED_TAB_KEY) || 0
     };
 
-    private subs: Subscription[] = [];
-
     onTabChange = (evt: ChangeEvent<{}>, tab: number) => {
         storage.set(SELECTED_TAB_KEY, tab);
         this.setState({
@@ -63,46 +56,10 @@ class RendererSettings extends PureComponent<Props, State> {
         });
     }
 
-    updateAppParams = (params: Partial<ApplicationParameters>): void => {
-        brayns.notify(SET_APP_PARAMS, params);
-        this.setState({
-            appParams: {
-                ...this.state.appParams,
-                ...params
-            }
-        });
-    }
-
-    // TODO: Move each observer into its own component!
-    componentDidMount() {
-        // Listen to some events
-        this.subs.push(...[
-            brayns.observe(SET_APP_PARAMS)
-                .subscribe(params => {
-                    this.setState({
-                        appParams: params
-                    });
-                }),
-            onReady().pipe(mergeMap(() => brayns.request(GET_APP_PARAMS)))
-                .subscribe(appParams => {
-                    this.setState({
-                        appParams
-                    });
-                })
-        ]);
-    }
-    componentWillUnmount() {
-        for (const sub of this.subs) {
-            sub.unsubscribe();
-        }
-    }
-
     render() {
-        const {classes, disabled} = this.props;
-        const {
-            appParams = {},
-            settingsTab
-        } = this.state;
+        const {classes, online} = this.props;
+        const {settingsTab} = this.state;
+        const disabled = !online;
 
         return (
             <div>
@@ -128,12 +85,7 @@ class RendererSettings extends PureComponent<Props, State> {
                         <CameraSettings disabled={disabled} />
                     </div>
                     <div className={classes.tabContent}>
-                        <ImageQuality
-                            jpegCompression={appParams.jpegCompression}
-                            imageStreamFps={appParams.imageStreamFps}
-                            onChange={this.updateAppParams}
-                            disabled={disabled}
-                        />
+                        <ImageQuality disabled={disabled} />
                     </div>
                 </SwipeableViews>
             </div>
@@ -141,14 +93,13 @@ class RendererSettings extends PureComponent<Props, State> {
     }
 }
 
-export default style(RendererSettings);
+export default style(
+    withConnectionStatus(RendererSettings));
 
 
-interface Props extends WithStyles<typeof styles> {
-    disabled?: boolean;
-}
+type Props = WithStyles<typeof styles>
+    & WithConnectionStatus;
 
 interface State {
-    appParams?: Partial<ApplicationParameters>;
     settingsTab?: number;
 }

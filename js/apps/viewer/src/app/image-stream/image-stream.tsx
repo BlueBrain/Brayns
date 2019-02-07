@@ -1,13 +1,12 @@
 import React, {
+    Component,
     createRef,
-    PureComponent,
     RefObject
 } from 'react';
 
-import {IMAGE_JPEG, SET_APP_PARAMS} from 'brayns';
+import {IMAGE_JPEG} from 'brayns';
 import {isNumber} from 'lodash';
 import {
-    animationFrameScheduler,
     BehaviorSubject,
     Subject,
     Subscription
@@ -16,7 +15,6 @@ import {
     buffer,
     debounceTime,
     mergeMap,
-    observeOn,
     throttleTime
 } from 'rxjs/operators';
 
@@ -27,7 +25,12 @@ import {
     WithStyles
 } from '@material-ui/core/styles';
 
-import brayns, {ifReady, onReady} from '../../common/client';
+import brayns, {
+    ifReady,
+    onReady,
+    withAppParms,
+    WithAppParams
+} from '../../common/client';
 import {dispatchFps, onAppParamsChange} from '../../common/events';
 
 
@@ -47,7 +50,7 @@ const styles = (theme: Theme) => createStyles({
 const style = withStyles(styles);
 
 
-export class ImageStream extends PureComponent<Props> {
+export class ImageStream extends Component<Props> {
     private containerRef: RefObject<HTMLDivElement> = createRef();
     private canvasRef: RefObject<HTMLCanvasElement> = createRef();
 
@@ -75,6 +78,22 @@ export class ImageStream extends PureComponent<Props> {
         return null;
     }
 
+    updateVieport = (viewport: number[]) => {
+        // Use int for coords to avoid extra calculations to create the anti-aliasing effect
+        // See https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas
+        const [width, height] = toInt(viewport);
+
+        this.props.onAppParamsChange!({
+            viewport: [width, height]
+        });
+
+        // Set canvas size
+        if (this.ctx) {
+            this.ctx.canvas.width = width;
+            this.ctx.canvas.height = height;
+        }
+    }
+
     componentDidMount() {
         // If there's no container el we can bind the camera to,
         // there's no point in continuing
@@ -82,30 +101,8 @@ export class ImageStream extends PureComponent<Props> {
             return;
         }
 
-        // Use an offscreen canvas for drawing the image before we dump it in the DOM
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-
         // Create the smooth fps fn
         const getRenderFps = smoothFpsFn();
-
-        const updateVieport = (viewport: number[]) => {
-            // Use int for coords to avoid extra calculations to create the anti-aliasing effect
-            // See https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas
-            const [width, height] = toInt(viewport);
-
-            brayns.notify(SET_APP_PARAMS, {
-                viewport: [width, height]
-            });
-
-            // Set canvas/image size
-            if (this.ctx) {
-                this.ctx.canvas.width = width;
-                this.ctx.canvas.height = height;
-                canvas.width = width;
-                canvas.height = height;
-            }
-        };
 
         this.subs.push(...[
             // Resize viewport
@@ -113,41 +110,34 @@ export class ImageStream extends PureComponent<Props> {
                 const viewport = this.viewport;
                 if (viewport) {
                     const rect = viewport.getBoundingClientRect();
-                    updateVieport([rect.width, rect.height]);
+                    this.updateVieport([rect.width, rect.height]);
                 }
             }),
             // Draw new image
             brayns.observe(IMAGE_JPEG)
-                .pipe(observeOn(animationFrameScheduler), mergeMap(blobToImg))
+                .pipe(mergeMap(blobToImg))
                 .subscribe(img => {
                     const width = img.naturalWidth;
                     const height = img.naturalHeight;
                     const widthScaleFactor = this.canvas!.width / width;
                     const heightScaleFactor = this.canvas!.height / height;
-                    canvas.width = width;
-                    canvas.height = height;
-
-                    // Draw image on the offscreen canvas
-                    ctx.drawImage(img, 0, 0);
-
-                    // Schedule uri for revoke
-                    this.dataUri.next(img.src);
 
                     if (this.ctx) {
-                        this.ctx.drawImage(canvas, 0, 0, widthScaleFactor * width, heightScaleFactor * height);
+                        this.ctx.drawImage(img, 0, 0, widthScaleFactor * width, heightScaleFactor * height);
                     }
 
-                    // Calc the fps of decode + paint of image and emit
+                    // Calc the fps of image decode (accounts for networking)
                     const fps = getRenderFps();
                     this.imageRenderFps.next(fps);
+                    // Schedule uri for revoke
+                    this.dataUri.next(img.src);
                 }),
-            // Update the canvas (the offscreen one as well),
-            // image size (on the server as well) and renderer viewport.
+            // Update the viewport
             onAppParamsChange()
                 .pipe(mergeMap(params => ifReady(params.viewport)))
                 .subscribe(viewport => {
                     if (viewport) {
-                        updateVieport(viewport);
+                        this.updateVieport(viewport);
                     }
                 }),
             // Emit image fps updates
@@ -157,15 +147,18 @@ export class ImageStream extends PureComponent<Props> {
                 }),
             this.dataUri.pipe(
                 // Cleanup data uris 5s after there is no activity
-                buffer(this.imageRenderFps.pipe(debounceTime(5 * 1000))),
-                observeOn(animationFrameScheduler))
+                buffer(this.imageRenderFps.pipe(debounceTime(5 * 1000))))
                 .subscribe(uris => {
                     for (const uri of uris) {
-                        // Release memory for image after canvas paint
                         URL.revokeObjectURL(uri);
                     }
                 })
         ]);
+    }
+
+    // We don't need re-renders for this component
+    shouldComponentUpdate() {
+        return false;
     }
 
     componentWillUnmount() {
@@ -174,7 +167,7 @@ export class ImageStream extends PureComponent<Props> {
         }
     }
 
-    // We use moz-opaque to improve perf. of the canvas
+    // We use moz-opaque to improve the perf. of the canvas
     // See https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas
     render() {
         const {classes} = this.props;
@@ -188,7 +181,9 @@ export class ImageStream extends PureComponent<Props> {
     }
 }
 
-export default style(ImageStream);
+export default style(
+    withAppParms(ImageStream)
+);
 
 
 function toInt(viewport: number[]) {
@@ -239,4 +234,5 @@ function blobToImg(blob: Blob) {
 }
 
 
-type Props = WithStyles<typeof styles>;
+type Props = WithStyles<typeof styles>
+    & WithAppParams;
