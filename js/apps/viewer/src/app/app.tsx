@@ -9,8 +9,7 @@ import React, {
 
 import {LOAD_MODEL, ModelParams} from 'brayns';
 import classNames from 'classnames';
-import {fromEvent, Subscription} from 'rxjs';
-import {debounceTime} from 'rxjs/operators';
+import {Subscription} from 'rxjs';
 
 import AppBar from '@material-ui/core/AppBar';
 import lightBlue from '@material-ui/core/colors/lightBlue';
@@ -61,11 +60,9 @@ import {
     TOOLTIP_DELAY
 } from '../common/constants';
 import {
-    dispatchAppParams,
     dispatchKeyboardLock,
     dispatchNotification,
     dispatchRequest,
-    dispatchViewport,
     onKeyboardLockChange,
     onRequestCancel
 } from '../common/events';
@@ -244,8 +241,7 @@ const styles = (theme: Theme) => createStyles({
         top: 0,
         right: 0,
         bottom: 0,
-        left: 0,
-        display: 'flex'
+        left: 0
     },
     content: {
         position: 'relative',
@@ -517,29 +513,6 @@ class App extends PureComponent<Props, State> {
         });
     }
 
-
-    // Viewport
-    updateAppParams = () => {
-        const viewport = this.viewport;
-        if (viewport) {
-            const rect = viewport.getBoundingClientRect();
-            const size = [rect.width, rect.height];
-            dispatchViewport(size);
-            dispatchAppParams({
-                viewport: size
-            });
-        }
-    }
-
-    updateViewport = () => {
-        const viewport = this.viewport;
-        if (viewport) {
-            const rect = viewport.getBoundingClientRect();
-            const size = [rect.width, rect.height];
-            dispatchViewport(size);
-        }
-    }
-
     // Keyboard interaction
     handleKeydown = (evt: KeyboardEvent) => {
         const {online} = this.props;
@@ -579,11 +552,6 @@ class App extends PureComponent<Props, State> {
     componentDidMount() {
         window.addEventListener('keydown', this.handleKeydown, false);
         this.subs.push(...[
-            fromEvent(window, 'resize')
-                .pipe(debounceTime(250))
-                .subscribe(() => {
-                    this.updateAppParams();
-                }),
             onKeyboardLockChange()
                 .subscribe(locked => {
                     this.keyboardLocked = locked;
@@ -640,8 +608,6 @@ class App extends PureComponent<Props, State> {
         };
 
         const slideProps = {
-            onEntered: this.updateViewport,
-            onExited: this.updateViewport,
             unmountOnExit: true
         };
 

@@ -65,8 +65,7 @@ it('creates a color interpolator from the {colormap} prop', () => {
         />
     );
 
-    const interpolator = component.childAt(0)
-        .dive()
+    const interpolator = component.dive()
         .state<Scale>('interpolate');
 
     expect(typeof interpolator).toBe('function');
@@ -96,8 +95,7 @@ it('maps each of the PointCoords in {data} prop to a ControlPoint', () => {
         />
     );
 
-    const points = component.childAt(0)
-        .dive()
+    const points = component.dive()
         .state<ControlPoint[]>('points');
 
     expect(points).toHaveLength(data.length);
@@ -138,8 +136,7 @@ it('updates the color interpolator when the {colormap} prop changes', () => {
         colormap: ['#fff', '#000']
     });
 
-    const interpolator = component.childAt(0)
-        .dive()
+    const interpolator = component.dive()
         .state<Scale>('interpolate');
 
     expect(typeof interpolator).toBe('function');
@@ -177,8 +174,7 @@ it('updates the control points when the {data} prop changes', () => {
         ]
     });
 
-    const points = component.childAt(0)
-        .dive()
+    const points = component.dive()
         .state<ControlPoint[]>('points');
 
     expect(points).toHaveLength(3);
@@ -222,9 +218,7 @@ it('does not compute a new state if {data, colormap} props are set to the same v
         />
     );
 
-    const tf = component.children()
-        .at(0)
-        .dive();
+    const tf = component.dive();
 
     const points = tf.state('points');
 
@@ -284,7 +278,6 @@ it('computes the paint area from the <svg> bounding box', () => {
     );
 
     const instance: any = component.childAt(0)
-        .childAt(0)
         .childAt(0)
         .instance();
 
@@ -449,7 +442,6 @@ it('updates d3 left axis when <svg> rect {height} changes', async () => {
 
     const instance: any = component.childAt(0)
         .childAt(0)
-        .childAt(0)
         .instance();
 
     const renderAxisSpy = spyOn(instance, 'renderAxisLeft').and.callThrough();
@@ -484,7 +476,6 @@ it('updates d3 left axis when {theme} prop changes', () => {
         .prop('theme');
 
     const instance: any = component.childAt(0)
-        .childAt(0)
         .childAt(0)
         .instance();
 
@@ -551,7 +542,6 @@ it('updates d3 bottom axis when {theme} prop changes', () => {
 
     const instance: any = component.childAt(0)
         .childAt(0)
-        .childAt(0)
         .instance();
 
     const renderAxisSpy = spyOn(instance, 'renderAxisBottom').and.callThrough();
@@ -582,7 +572,6 @@ it('updates d3 bottom axis when {range} prop changes', () => {
 
     const instance: any = component.childAt(0)
         .childAt(0)
-        .childAt(0)
         .instance();
 
     const renderAxisSpy = spyOn(instance, 'renderAxisBottom').and.callThrough();
@@ -611,7 +600,6 @@ it('updates d3 bottom axis when <svg> rect {width} changes', async () => {
     );
 
     const instance: any = component.childAt(0)
-        .childAt(0)
         .childAt(0)
         .instance();
 
@@ -642,8 +630,7 @@ it('caches point update fn', () => {
         />
     );
 
-    const {createPointUpdater}: any = component.childAt(0)
-        .dive()
+    const {createPointUpdater}: any = component.dive()
         .instance();
 
     const a = createPoint(0, 0);
@@ -666,8 +653,7 @@ it('caches point remove fn', () => {
         />
     );
 
-    const {createPointRemover}: any = component.childAt(0)
-        .dive()
+    const {createPointRemover}: any = component.dive()
         .instance();
 
     const a = createPoint(0, 0);
@@ -700,8 +686,7 @@ it('emits changes debounced', async () => {
         />
     );
 
-    const tf = component.childAt(0)
-        .dive();
+    const tf = component.dive();
     const points: ControlPoint[] = tf.state('points');
     const {emitChanges} = tf.instance() as any;
 
@@ -743,8 +728,7 @@ it('does not emit any changes if nothing changed', async () => {
         />
     );
 
-    const tf = component.childAt(0)
-        .dive();
+    const tf = component.dive();
     const {emitChanges} = tf.instance() as any;
 
     emitChanges();
@@ -776,8 +760,7 @@ it('destroys rxjs subscribers on unmount', async () => {
         />
     );
 
-    const tf = component.childAt(0)
-        .dive();
+    const tf = component.dive();
 
     const instance: any = tf.instance();
 
@@ -810,8 +793,7 @@ it('adds a new control point when mousedown occurs on the canvas', () => {
         />
     );
 
-    const tf = component.childAt(0)
-        .dive();
+    const tf = component.dive();
 
     Object.defineProperty(tf.instance(), 'canvas', {
         value: createRect(100, 100)
@@ -821,7 +803,7 @@ it('adds a new control point when mousedown occurs on the canvas', () => {
     expect(initialPoints).toHaveLength(data.length);
 
     const persistSpy = jest.fn();
-    tf.simulate('mousedown', {
+    tf.find('svg').simulate('mousedown', {
         persist: persistSpy,
         preventDefault: noop,
         pageX: 50,
@@ -865,8 +847,7 @@ it('does not add a new control point when mousedown occurs outside the canvas (o
         />
     );
 
-    const tf = component.childAt(0)
-        .dive();
+    const tf = component.dive();
 
     Object.defineProperty(tf.instance(), 'canvas', {
         value: createRect(100, 100, 20, 10)
@@ -875,12 +856,13 @@ it('does not add a new control point when mousedown occurs outside the canvas (o
     const initialPoints: ControlPoint[] = tf.state('points');
     expect(initialPoints).toHaveLength(data.length);
 
-    tf.simulate('mousedown', createMouseDown(5, 50));
-    tf.simulate('mousedown', createMouseDown(50, 10));
-    tf.simulate('mousedown', createMouseDown(5, 10));
-    tf.simulate('mousedown', createMouseDown(150, 50));
-    tf.simulate('mousedown', createMouseDown(50, 150));
-    tf.simulate('mousedown', createMouseDown(150, 150));
+    const svg = tf.find('svg');
+    svg.simulate('mousedown', createMouseDown(5, 50));
+    svg.simulate('mousedown', createMouseDown(50, 10));
+    svg.simulate('mousedown', createMouseDown(5, 10));
+    svg.simulate('mousedown', createMouseDown(150, 50));
+    svg.simulate('mousedown', createMouseDown(50, 150));
+    svg.simulate('mousedown', createMouseDown(150, 150));
 
     const points: ControlPoint[] = tf.state('points');
     expect(initialPoints).toHaveLength(data.length);
@@ -907,8 +889,7 @@ it('does not add a new control point when mousedown occurs on the same axis of a
         />
     );
 
-    const tf = component.childAt(0)
-        .dive();
+    const tf = component.dive();
 
     Object.defineProperty(tf.instance(), 'canvas', {
         value: createRect(100, 100)
@@ -919,7 +900,8 @@ it('does not add a new control point when mousedown occurs on the same axis of a
 
     // Account for point size and hit area epsilon
     for (let i = -5; i <= 5; i++) {
-        tf.simulate('mousedown', createMouseDown(50 + i, 50));
+        tf.find('svg')
+            .simulate('mousedown', createMouseDown(50 + i, 50));
     }
 
     const points: ControlPoint[] = tf.state('points');
@@ -949,14 +931,14 @@ it('emits the changes after a new point is added', async () => {
         />
     );
 
-    const tf = component.childAt(0)
-        .dive();
+    const tf = component.dive();
 
     Object.defineProperty(tf.instance(), 'canvas', {
         value: createRect(100, 100)
     });
 
-    tf.simulate('mousedown', createMouseDown(50, 50));
+    tf.find('svg')
+        .simulate('mousedown', createMouseDown(50, 50));
 
     const points: ControlPoint[] = tf.state('points');
 
@@ -991,8 +973,7 @@ it('removes a control point when <Point> invokes {onRemove} cb', () => {
         />
     );
 
-    const tf = component.childAt(0)
-        .dive();
+    const tf = component.dive();
 
     const initialPoints: ControlPoint[] = tf.state('points');
     expect(initialPoints).toHaveLength(data.length);
@@ -1035,8 +1016,7 @@ it('cannot remove the first/last control point', () => {
         />
     );
 
-    const tf = component.childAt(0)
-        .dive();
+    const tf = component.dive();
 
     const initialPoints: ControlPoint[] = tf.state('points');
     expect(initialPoints).toHaveLength(data.length);
@@ -1081,8 +1061,7 @@ it('emits the changes after a point is removed', async () => {
         />
     );
 
-    const tf = component.childAt(0)
-        .dive();
+    const tf = component.dive();
 
     const pointElements = tf.find(Point);
     pointElements.at(1)
@@ -1123,8 +1102,7 @@ it('updates control point when <Point> invokes {onChange} cb', () => {
         />
     );
 
-    const tf = component.childAt(0)
-        .dive();
+    const tf = component.dive();
 
     Object.defineProperty(tf.instance(), 'canvas', {
         value: createRect(100, 100)
@@ -1183,8 +1161,7 @@ it('updates of <Point> are bounded to neighbouring right point', () => {
         />
     );
 
-    const tf = component.childAt(0)
-        .dive();
+    const tf = component.dive();
 
     Object.defineProperty(tf.instance(), 'canvas', {
         value: createRect(100, 100)
@@ -1249,8 +1226,7 @@ it('updates of <Point> are bounded to neighbouring left point', () => {
         />
     );
 
-    const tf = component.childAt(0)
-        .dive();
+    const tf = component.dive();
 
     Object.defineProperty(tf.instance(), 'canvas', {
         value: createRect(100, 100)
@@ -1312,8 +1288,7 @@ it('updates of the first/last <Point> are bounded to the Y axis', () => {
         />
     );
 
-    const tf = component.childAt(0)
-        .dive();
+    const tf = component.dive();
 
     Object.defineProperty(tf.instance(), 'canvas', {
         value: createRect(100, 100)
@@ -1384,8 +1359,7 @@ it('emits the changes after a point is updated', async () => {
         />
     );
 
-    const tf = component.childAt(0)
-        .dive();
+    const tf = component.dive();
 
     const pointElements = tf.find(Point);
     pointElements.at(1)
@@ -1419,7 +1393,7 @@ function tick(timeout: number = 100) {
 }
 
 function mockSVGRect(subject: BehaviorSubject<CanvasRect>) {
-    const spy = spyOn(SVGSVGElement.prototype, 'getBoundingClientRect').and.callFake(() => {
+    const spy = spyOn(HTMLDivElement.prototype, 'getBoundingClientRect').and.callFake(() => {
         return subject.value;
     });
     return spy;
