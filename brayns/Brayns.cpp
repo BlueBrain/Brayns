@@ -135,7 +135,6 @@ struct Brayns::Impl : public PluginAPI
         _engine->preRender();
 
         camera.commit();
-        _engine->commit();
 
         if (rp.getHeadLight())
         {
@@ -148,6 +147,8 @@ struct Brayns::Impl : public PluginAPI
                 scene.commitLights();
             }
         }
+
+        _engine->commit();
 
         if (_parametersManager.isAnyModified() || camera.isModified() ||
             scene.isModified() || renderer.isModified())

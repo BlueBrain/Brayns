@@ -122,11 +122,11 @@ public:
             _params.renderingParams->setSubsampling(1);
         }
 
+        _scene->commitLights();
+
         _renderer->setCamera(_camera);
         _renderer->setScene(_scene);
         _renderer->commit();
-
-        _scene->commitLights();
 
         std::stringstream msg;
         msg << "Render snapshot";
