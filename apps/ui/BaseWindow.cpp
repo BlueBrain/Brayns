@@ -31,6 +31,8 @@
 #include <brayns/manipulators/AbstractManipulator.h>
 #include <brayns/parameters/ParametersManager.h>
 
+#include "brayns/common/utils/utils.h"
+
 #include <assert.h>
 
 #ifdef __APPLE__
@@ -45,7 +47,7 @@ namespace
 {
 const int GLUT_WHEEL_SCROLL_UP = 3;
 const int GLUT_WHEEL_SCROLL_DOWN = 4;
-}
+} // namespace
 
 namespace brayns
 {
@@ -118,15 +120,7 @@ BaseWindow* BaseWindow::_activeWindow = nullptr;
 
 BaseWindow::BaseWindow(Brayns& brayns, const FrameBufferMode frameBufferMode)
     : _brayns(brayns)
-    , _lastMousePos(-1, -1)
-    , _currMousePos(-1, -1)
-    , _lastButtonState(0)
-    , _currButtonState(0)
-    , _currModifiers(0)
     , _frameBufferMode(frameBufferMode)
-    , _windowID(-1)
-    , _displayHelp(false)
-    , _fullScreen(false)
 {
     const auto motionSpeed = _brayns.getCameraManipulator().getMotionSpeed();
     BRAYNS_INFO << "Camera       :" << _brayns.getEngine().getCamera()
@@ -207,10 +201,7 @@ void BaseWindow::motion(const Vector2i& pos)
     _lastMousePos = _currMousePos;
 }
 
-void BaseWindow::passiveMotion(const Vector2i& pos)
-{
-    _mouse = pos;
-}
+void BaseWindow::passiveMotion(const Vector2i& /*pos*/) {}
 
 void BaseWindow::idle()
 {
@@ -323,12 +314,35 @@ void BaseWindow::display()
         offset += frameSize.x();
     }
 
-    if (_displayHelp)
+    const bool displayFPS = _brayns.getParametersManager()
+                                .getApplicationParameters()
+                                .isBenchmarking();
+
+    if (_displayHelp || displayFPS)
     {
-        auto& keyHandler = _brayns.getKeyboardHandler();
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
         glLogicOp(GL_XOR);
         glEnable(GL_COLOR_LOGIC_OP);
-        _renderBitmapString(-0.98f, 0.95f, keyHandler.help());
+
+        std::vector<std::string> lines;
+        if (displayFPS)
+        {
+            lines.push_back("Display fps: " +
+                            std::to_string(_timer.perSecondSmoothed()));
+            lines.push_back(
+                "Render fps: " +
+                std::to_string(_brayns.getEngine().getStatistics().getFPS()));
+            if (_displayHelp)
+                lines.push_back("");
+        }
+
+        if (_displayHelp)
+            for (const auto& line : _brayns.getKeyboardHandler().help())
+                lines.push_back(line);
+
+        _renderBitmapString(-0.98f, 0.95f, joinStrings(lines, "\n"));
+
         glDisable(GL_COLOR_LOGIC_OP);
     }
 
@@ -484,4 +498,4 @@ void BaseWindow::_toggleFrameBuffer()
     else
         _frameBufferMode = FrameBufferMode::DEPTH;
 }
-}
+} // namespace brayns

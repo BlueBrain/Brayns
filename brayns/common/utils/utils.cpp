@@ -136,4 +136,18 @@ bool containsString(const int length, const char** input, const char* toFind)
                return std::strcmp(arg, toFind) == 0;
            }) > 0;
 }
+
+std::string joinStrings(const std::vector<std::string>& strings,
+                        const std::string& joinWith)
+{
+    const size_t numStrings = strings.size();
+    if (numStrings == 0)
+        return "";
+
+    std::stringstream ss;
+    ss << strings[0];
+    for (size_t i = 1; i < numStrings; i++)
+        ss << joinWith << strings[i];
+    return ss.str();
 }
+} // namespace brayns
