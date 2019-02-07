@@ -63,4 +63,6 @@ std::string camelCaseToSeparated(const std::string& camelCase,
                                  const char separator);
 std::string separatedToCamelCase(const std::string& separated,
                                  const char separator);
-}
+std::string joinStrings(const std::vector<std::string>& strings,
+                        const std::string& joinWith);
+} // namespace brayns

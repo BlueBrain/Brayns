@@ -39,19 +39,7 @@ void BraynsViewer::display()
     const auto& ap = _brayns.getParametersManager().getApplicationParameters();
     std::stringstream ss;
     ss << "Brayns Viewer [" << ap.getEngine() << "] ";
-    auto animationFrame =
-        _brayns.getParametersManager().getAnimationParameters().getFrame();
-    if (animationFrame != std::numeric_limits<uint32_t>::max())
-        ss << " (frame " << animationFrame << ")";
-    if (_brayns.getParametersManager()
-            .getApplicationParameters()
-            .isBenchmarking())
-    {
-        ss << " @ " << _timer.perSecondSmoothed() << " / "
-           << _brayns.getEngine().getStatistics().getFPS() << " FPS";
-    }
     setTitle(ss.str());
-
     BaseWindow::display();
 }
-}
+} // namespace brayns

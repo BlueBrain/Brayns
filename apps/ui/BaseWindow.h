@@ -117,26 +117,23 @@ protected:
 
     Brayns& _brayns;
 
-    Vector2i _lastMousePos; /*! last mouse screen position of mouse before
-                                    current motion */
-    Vector2i _currMousePos; /*! current screen position of mouse */
-    Vector2i _mouse;
-    u_int64_t _lastButtonState;
-    u_int64_t _currButtonState;
-    u_int64_t _currModifiers;
+    Vector2i _lastMousePos{-1, -1}; /*! last mouse screen position of mouse
+                                     before current motion */
+    Vector2i _currMousePos{-1, -1}; /*! current screen position of mouse */
+    u_int64_t _lastButtonState{0};
+    u_int64_t _currButtonState{0};
+    u_int64_t _currModifiers{0};
 
     FrameBufferMode _frameBufferMode;
 
-    int _windowID;
-    Vector2ui _windowSize;
+    int _windowID{-1};
+    Vector2ui _windowSize{0, 0};
 
     Timer _timer;
 
-    uint64_t _gid;
-
-    bool _displayHelp;
-    bool _fullScreen;
-    Vector2ui _windowPosition;
+    bool _displayHelp{false};
+    bool _fullScreen{false};
+    Vector2ui _windowPosition{0, 0};
 
     GLuint _fbTexture{0};
 
@@ -157,6 +154,6 @@ private:
     friend void glut3dMouseFunc(int whichButton, int released, int x, int y);
     friend void glut3dPassiveMouseFunc(int x, int y);
 };
-}
+} // namespace brayns
 
 #endif

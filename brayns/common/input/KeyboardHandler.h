@@ -44,8 +44,6 @@ enum class SpecialKey
 class KeyboardHandler
 {
 public:
-    KeyboardHandler();
-
     void registerKeyboardShortcut(const unsigned char key,
                                   const std::string& description,
                                   std::function<void()> functor);
@@ -62,12 +60,15 @@ public:
 
     void handle(const SpecialKey key);
 
-    std::string help();
+    const std::vector<std::string>& help() const;
 
 private:
+    void _buildHelp();
+
     std::map<unsigned char, ShortcutInformation> _registeredShortcuts;
     std::map<SpecialKey, ShortcutInformation> _registeredSpecialKeys;
+    std::vector<std::string> _helpStrings;
 };
-}
+} // namespace brayns
 
 #endif // KEYBOARDHANDLER_H
