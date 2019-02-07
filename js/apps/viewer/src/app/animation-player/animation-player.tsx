@@ -22,6 +22,7 @@ import {
 import {KeyCode} from '../../common/constants';
 import {onKeyboardLockChange, onPageVisibilityChange} from '../../common/events';
 
+import AnimationSpeedController from './animation-speed-controller';
 import Controls from './controls';
 import ProgressBar from './progress-bar';
 import {frameToTimeStr} from './utils';
@@ -172,12 +173,14 @@ export class AnimationPlayer extends PureComponent<Props> {
             online,
             hasAnimation,
             frameCount = 0,
+            delta,
             animationParams = {},
             isAnimating,
             onToggle,
             onFrameChange,
             onFramePrev,
-            onFrameNext
+            onFrameNext,
+            onDeltaChange
         } = this.props;
         const showPlayer = hasAnimation && online;
         const disableBtns = !hasAnimation || !online;
@@ -208,6 +211,12 @@ export class AnimationPlayer extends PureComponent<Props> {
                             <Typography variant="caption">
                                 {currentMs} / {totalMs} {animationParams.unit}
                             </Typography>
+                            <span className={classes.spacer} />
+                            <AnimationSpeedController
+                                delta={delta}
+                                disabled={disableBtns}
+                                onDeltaChange={onDeltaChange!}
+                            />
                         </div>
                     </MuiThemeProvider>
                 </div>
