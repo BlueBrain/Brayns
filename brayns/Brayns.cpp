@@ -61,7 +61,7 @@
 namespace
 {
 const float DEFAULT_MOTION_ACCELERATION = 1.5f;
-}
+} // namespace
 
 namespace brayns
 {
@@ -256,14 +256,17 @@ struct Brayns::Impl : public PluginAPI
         _actionInterface = interface;
     }
     Scene& getScene() final { return _engine->getScene(); }
+
 private:
     void _createEngine()
     {
         auto engineName =
             _parametersManager.getApplicationParameters().getEngine();
 
-        if (engineName == "optix")
+        if (toLowercase(engineName) == "optix")
             engineName = "braynsOptixEngine";
+        else if (toLowercase(engineName) == "ospray")
+            engineName = "braynsOSPRayEngine";
 
         _engine = _engineFactory.create(engineName);
         if (!_engine)
@@ -810,4 +813,4 @@ AbstractManipulator& Brayns::getCameraManipulator()
 {
     return _impl->getCameraManipulator();
 }
-}
+} // namespace brayns
