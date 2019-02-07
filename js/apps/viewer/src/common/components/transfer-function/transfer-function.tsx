@@ -200,7 +200,7 @@ class TransferFunction extends PureComponent<Props, State> {
 
     render() {
         const {points} = this.state;
-        const {colormap, classes, disabled, rect} = this.props;
+        const {colormap, classes, disabled, rect, rectRef} = this.props;
         const canvas = this.canvas;
 
         const axisBottomTranslate = translateToBottom(canvas);
@@ -226,30 +226,32 @@ class TransferFunction extends PureComponent<Props, State> {
         });
 
         return (
-            <svg
-                className={classNames(classes.root, {[classes.disabled]: disabled})}
-                width={rect!.width}
-                height={200}
-                onMouseDown={this.addPoint}
-            >
-                <Provider value={{canvas}}>
-                    <Area
-                        points={points}
-                        colormap={colormap}
-                    />
-                    <Path points={points} />
-                    <g
-                        className={classes.axisLeft}
-                        ref={this.axisLeftRef}
-                    />
-                    <g
-                        className={classes.axisBottom}
-                        ref={this.axisBottomRef}
-                        transform={axisBottomTranslate}
-                    />
-                    <g>{pointElements}</g>
-                </Provider>
-            </svg>
+            <div ref={rectRef}>
+                <svg
+                    className={classNames(classes.root, {[classes.disabled]: disabled})}
+                    width={rect!.width}
+                    height={200}
+                    onMouseDown={this.addPoint}
+                >
+                    <Provider value={{canvas}}>
+                        <Area
+                            points={points}
+                            colormap={colormap}
+                        />
+                        <Path points={points} />
+                        <g
+                            className={classes.axisLeft}
+                            ref={this.axisLeftRef}
+                        />
+                        <g
+                            className={classes.axisBottom}
+                            ref={this.axisBottomRef}
+                            transform={axisBottomTranslate}
+                        />
+                        <g>{pointElements}</g>
+                    </Provider>
+                </svg>
+            </div>
         );
     }
 
@@ -302,9 +304,8 @@ class TransferFunction extends PureComponent<Props, State> {
     }
 }
 
-const ResponsiveTF = withResizeObserver(TransferFunction);
-
-export default style(ResponsiveTF);
+export default style(
+    withResizeObserver(TransferFunction));
 
 
 function toState(data: PointCoords[], colormap: string[]): State {

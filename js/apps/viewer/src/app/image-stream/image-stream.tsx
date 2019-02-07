@@ -8,6 +8,7 @@ import {IMAGE_JPEG} from 'brayns';
 import {isNumber} from 'lodash';
 import {
     BehaviorSubject,
+    // fromEvent,
     Subject,
     Subscription
 } from 'rxjs';
@@ -15,7 +16,8 @@ import {
     buffer,
     debounceTime,
     mergeMap,
-    throttleTime
+    throttleTime,
+    switchMap
 } from 'rxjs/operators';
 
 import {
@@ -26,20 +28,20 @@ import {
 } from '@material-ui/core/styles';
 
 import brayns, {
-    ifReady,
     onReady,
     withAppParms,
     WithAppParams
 } from '../../common/client';
-import {dispatchFps, onAppParamsChange} from '../../common/events';
+import {dispatchFps} from '../../common/events';
+import {withResizeObserver, WithRect} from '../../common/components';
 
 
 const styles = (theme: Theme) => createStyles({
     root: {
-        display: 'flex',
         position: 'relative',
-        flex: 1,
-        flexDirection: 'column'
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%'
     },
     canvas: {
         flex: 1,
@@ -51,24 +53,16 @@ const style = withStyles(styles);
 
 
 export class ImageStream extends Component<Props> {
-    private containerRef: RefObject<HTMLDivElement> = createRef();
-    private canvasRef: RefObject<HTMLCanvasElement> = createRef();
-
     // We use this image to decode the jpeg from Blob streams
     private imageRenderFps = new BehaviorSubject(0);
 
     private dataUri = new Subject<string>();
     private subs: Subscription[] = [];
 
-    get viewport() {
-        const {current} = this.containerRef;
-        return current;
-    }
-
+    private canvasRef: RefObject<HTMLCanvasElement> = createRef();
     get canvas() {
         return this.canvasRef.current;
     }
-
     get ctx() {
         const canvas = this.canvas;
         if (canvas) {
@@ -97,7 +91,7 @@ export class ImageStream extends Component<Props> {
     componentDidMount() {
         // If there's no container el we can bind the camera to,
         // there's no point in continuing
-        if (!this.viewport || !this.ctx) {
+        if (!this.ctx) {
             return;
         }
 
@@ -105,14 +99,6 @@ export class ImageStream extends Component<Props> {
         const getRenderFps = smoothFpsFn();
 
         this.subs.push(...[
-            // Resize viewport
-            onReady().subscribe(() => {
-                const viewport = this.viewport;
-                if (viewport) {
-                    const rect = viewport.getBoundingClientRect();
-                    this.updateVieport([rect.width, rect.height]);
-                }
-            }),
             // Draw new image
             brayns.observe(IMAGE_JPEG)
                 .pipe(mergeMap(blobToImg))
@@ -132,12 +118,15 @@ export class ImageStream extends Component<Props> {
                     // Schedule uri for revoke
                     this.dataUri.next(img.src);
                 }),
-            // Update the viewport
-            onAppParamsChange()
-                .pipe(mergeMap(params => ifReady(params.viewport)))
-                .subscribe(viewport => {
-                    if (viewport) {
-                        this.updateVieport(viewport);
+            // Update the viewport on window resize
+            onReady()
+                .pipe(switchMap(() => this.props.rectChanges!))
+                .subscribe(rect => {
+                    const size = [rect.width, rect.height];
+                    // If we try to set viewport props to 0,
+                    // Brayns will die
+                    if (size.every(num => num > 0)) {
+                        this.updateVieport(size);
                     }
                 }),
             // Emit image fps updates
@@ -170,10 +159,10 @@ export class ImageStream extends Component<Props> {
     // We use moz-opaque to improve the perf. of the canvas
     // See https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas
     render() {
-        const {classes} = this.props;
+        const {classes, rectRef} = this.props;
         return (
-            <div className={classes.root}>
-                <div ref={this.containerRef} className={classes.canvas}>
+            <div ref={rectRef} className={classes.root}>
+                <div className={classes.canvas}>
                     <canvas ref={this.canvasRef} moz-opaque="true" />
                 </div>
             </div>
@@ -182,7 +171,8 @@ export class ImageStream extends Component<Props> {
 }
 
 export default style(
-    withAppParms(ImageStream)
+    withAppParms(
+        withResizeObserver(ImageStream))
 );
 
 
@@ -235,4 +225,5 @@ function blobToImg(blob: Blob) {
 
 
 type Props = WithStyles<typeof styles>
-    & WithAppParams;
+    & WithAppParams
+    & WithRect;
