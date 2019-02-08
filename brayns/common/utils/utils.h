@@ -65,4 +65,5 @@ std::string separatedToCamelCase(const std::string& separated,
                                  const char separator);
 std::string joinStrings(const std::vector<std::string>& strings,
                         const std::string& joinWith);
+std::string toLowercase(const std::string input);
 } // namespace brayns
