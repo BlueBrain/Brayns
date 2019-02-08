@@ -152,6 +152,11 @@ public:
     ModelDescriptor& operator=(const ModelParams& rhs);
 
     bool getEnabled() const { return _visible || _boundingBox; }
+    void setMetadata(const ModelMetadata& metadata)
+    {
+        _metadata = metadata;
+        markModified();
+    }
     const ModelMetadata& getMetadata() const { return _metadata; }
     const Model& getModel() const { return *_model; }
     Model& getModel() { return *_model; }
