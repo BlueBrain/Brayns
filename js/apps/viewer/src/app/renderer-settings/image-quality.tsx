@@ -3,8 +3,8 @@ import React, {PureComponent} from 'react';
 
 import {ApplicationParameters} from 'brayns';
 
+import {WithAppParams, withAppParms} from '../../common/client';
 import {NumericField} from '../../common/components';
-import {withAppParms, WithAppParams} from '../../common/client';
 
 
 class ImageQuality extends PureComponent<Props> {
@@ -13,7 +13,7 @@ class ImageQuality extends PureComponent<Props> {
 
     render() {
         const {appParams, disabled} = this.props;
-        const {jpegCompression, imageStreamFps} = appParams || {} as ApplicationParameters;
+        const {jpegCompression, imageStreamFps}: Partial<ApplicationParameters> = appParams || {};
 
         return (
             <div>

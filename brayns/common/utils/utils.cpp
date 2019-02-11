@@ -25,7 +25,9 @@
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
+#include <algorithm>
 #include <set>
+#include <string>
 
 namespace brayns
 {
@@ -150,4 +152,11 @@ std::string joinStrings(const std::vector<std::string>& strings,
         ss << joinWith << strings[i];
     return ss.str();
 }
+
+std::string toLowercase(std::string input)
+{
+    std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+    return input;
+}
+
 } // namespace brayns

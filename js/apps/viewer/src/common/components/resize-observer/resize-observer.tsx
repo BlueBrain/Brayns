@@ -1,9 +1,12 @@
 import React, {
     ComponentType,
     createRef,
-    PureComponent
+    PureComponent,
+    RefObject
 } from 'react';
-import {Observable, Subscription} from 'rxjs';
+
+import {isNumber} from 'lodash';
+import {BehaviorSubject, Subscription} from 'rxjs';
 
 
 const DEFAULT_RECT: ClientRect = {
@@ -15,30 +18,37 @@ const DEFAULT_RECT: ClientRect = {
     width: 0
 };
 
+
+// TODO: Update tests!
+// TODO: Switch to hooks
 // https://reactjs.org/docs/higher-order-components.html
 // https://americanexpress.io/faccs-are-an-antipattern
 export function withResizeObserver<P>(Component: ComponentType<P & WithRect>): ComponentType<P & WithRect> {
     return class extends PureComponent<P & WithRect, State> {
         state: State = {
-            rect: DEFAULT_RECT
+            rect: {...DEFAULT_RECT}
         };
 
-        private nodeRef = createRef<HTMLDivElement>();
+        private rectRef = createRef<Element>();
+        private rectSubject?: RectSubject;
         private sub?: Subscription;
 
         componentDidMount() {
-            const parent = this.nodeRef.current;
-
-            if (parent) {
-                const child = parent.firstElementChild;
-                this.sub = createCheckSizeLoop(child!)
-                    .subscribe(rect => {
-                        this.setState({rect});
-                    });
+            const node = this.rectRef.current;
+            if (node) {
+                this.rectSubject = queueNodeForSizeCheck(node);
+                this.sub = this.rectSubject.subscribe(rect => {
+                    this.setState({rect});
+                });
             }
         }
 
         componentWillUnmount() {
+            const node = this.rectRef.current;
+            if (node) {
+                stopLoop(node);
+            }
+
             if (this.sub) {
                 this.sub.unsubscribe();
             }
@@ -48,40 +58,57 @@ export function withResizeObserver<P>(Component: ComponentType<P & WithRect>): C
             const {rect} = this.state;
 
             return (
-                <div ref={this.nodeRef}>
-                    <Component
-                        {...this.props}
-                        rect={rect}
-                    />
-                </div>
+                <Component
+                    rectRef={this.rectRef}
+                    rectChanges={this.rectSubject}
+                    rect={rect}
+                    {...this.props}
+                />
             );
         }
     };
 }
 
-function createCheckSizeLoop(node: Element) {
-    let prevRect = DEFAULT_RECT;
-    let rAFId: number;
 
-    return new Observable<ClientRect>(observer => {
-        checkSize();
+let rAFId: number | null;
+let isLoopInProgress = false;
 
-        function checkSize() {
-            rAFId = requestAnimationFrame(checkSize);
-            const rect = node.getBoundingClientRect();
+const nodes = new Map<Element, RectSubject>();
 
-            if (!compareRect(rect, prevRect)) {
-                prevRect = rect;
-                observer.next(rect);
-            }
+
+function queueNodeForSizeCheck(node: Element) {
+    const subject = new BehaviorSubject<ClientRect>({...DEFAULT_RECT});
+    if (!nodes.has(node)) {
+        nodes.set(node, subject);
+    }
+
+    if (!isLoopInProgress) {
+        isLoopInProgress = true;
+        startLoop();
+    }
+
+    return subject;
+}
+
+function startLoop() {
+    rAFId = requestAnimationFrame(startLoop);
+
+    for (const [node, subject] of nodes.entries()) {
+        const rect = node.getBoundingClientRect();
+        if (!compareRect(rect, subject.value)) {
+            subject.next(rect);
         }
+    }
+}
 
-        return () => {
-            if (rAFId) {
-                cancelAnimationFrame(rAFId);
-            }
-        };
-    });
+function stopLoop(node: Element) {
+    nodes.delete(node);
+
+    if (nodes.size === 0 && isNumber(rAFId)) {
+        cancelAnimationFrame(rAFId);
+        isLoopInProgress = false;
+        rAFId = null;
+    }
 }
 
 function compareRect(a: ClientRect, b?: ClientRect) {
@@ -96,10 +123,17 @@ function compareRect(a: ClientRect, b?: ClientRect) {
         && a.left === b.left;
 }
 
+
 interface State {
     rect: ClientRect;
 }
 
+
+export type Rect = DOMRect | ClientRect;
+export type RectSubject = BehaviorSubject<Rect>;
+
 export interface WithRect {
-    rect?: ClientRect;
+    rect?: Rect;
+    rectRef?: RefObject<any>;
+    rectChanges?: RectSubject;
 }

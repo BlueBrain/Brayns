@@ -1,7 +1,8 @@
+// tslint:disable: no-empty max-classes-per-file member-ordering
 import React, {
     Component,
-    createContext,
     ComponentType,
+    createContext,
     PureComponent
 } from 'react';
 
@@ -160,7 +161,7 @@ export class RendererProvider extends Component<{}, State> {
             <RendererContext.Provider value={context}>
                 {children}
             </RendererContext.Provider>
-        )
+        );
     }
 }
 

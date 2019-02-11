@@ -1,7 +1,7 @@
 import React, {
     Component,
-    createContext,
     ComponentType,
+    createContext,
     PureComponent
 } from 'react';
 
@@ -12,10 +12,10 @@ import {
 } from 'brayns';
 import {isNumber} from 'lodash';
 import {Subscription} from 'rxjs';
-import {mergeMap, map} from 'rxjs/operators';
+import {map, mergeMap} from 'rxjs/operators';
 
-import brayns, {onReady} from './client';
 import {dispatchNotification} from '../events';
+import brayns, {onReady} from './client';
 
 
 export const AnimationContext = createContext<AnimationContextValue>({
@@ -43,7 +43,7 @@ export class AnimationProvider extends Component<{}, State> {
 
     play = () => this.changeAnimationParams({delta: this.state.delta});
 
-    stop = () => this.changeAnimationParams({delta: 0})
+    stop = () => this.changeAnimationParams({delta: 0});
 
     toggle = async () => {
         const isAnimating = !this.state.isAnimating;
@@ -85,7 +85,7 @@ export class AnimationProvider extends Component<{}, State> {
         }
     }
 
-    changeFrame = (current: number) => this.changeAnimationParams({current})
+    changeFrame = (current: number) => this.changeAnimationParams({current});
 
     changeAnimationParams = async (params: Partial<AnimationParameters>) => {
         try {
@@ -151,11 +151,12 @@ export class AnimationProvider extends Component<{}, State> {
             <AnimationContext.Provider value={context}>
                 {children}
             </AnimationContext.Provider>
-        )
+        );
     }
 }
 
 
+// tslint:disable: max-classes-per-file
 export function withAnimation<P>(Component: ComponentType<P & WithAnimation>): ComponentType<P & WithAnimation> {
     return class extends PureComponent<P & WithAnimation> {
         render() {

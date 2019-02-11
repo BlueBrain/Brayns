@@ -321,18 +321,19 @@ export class SceneModels extends PureComponent<Props, State> {
         }
     }
 
-    updateClipPlane = async (cp: ClipPlane) => this.setState(state => {
+    updateClipPlane = async (clipPlane: ClipPlane) => this.setState(state => {
         const copy = [...state.clipPlanes];
-        const index = copy.findIndex(item => item.id === cp.id);
+        const index = copy.findIndex(item => item.id === clipPlane.id);
         if (index !== -1) {
-            copy.splice(index, 1, cp);
+            copy.splice(index, 1, clipPlane);
         }
         return {
+            clipPlane,
             clipPlanes: copy
         };
     }, async () => {
         try {
-            await brayns.request(UPDATE_CLIP_PLANE, cp);
+            await brayns.request(UPDATE_CLIP_PLANE, clipPlane);
         } catch (err) {
             dispatchNotification(err);
         }

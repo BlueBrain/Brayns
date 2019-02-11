@@ -6,7 +6,7 @@ import React, {
 
 import {INSPECT, InspectParams} from 'brayns';
 import {fromEvent, Subscription} from 'rxjs';
-import {mergeMap} from 'rxjs/operators';
+import {mergeMap, switchMap} from 'rxjs/operators';
 import {
     PerspectiveCamera,
     Quaternion,
@@ -23,10 +23,12 @@ import {
 import brayns, {
     CameraCoords,
     ifReady,
+    onReady,
     withCamera,
-    WithCamera,
+    WithCamera
 } from '../../common/client';
-import {dispatchNotification, onViewportChange} from '../../common/events';
+import {WithRect, withResizeObserver} from '../../common/components';
+import {dispatchNotification} from '../../common/events';
 import {isCmdKey} from '../../common/utils';
 
 import {EventType, TrackballControls} from './trackball-controls';
@@ -54,8 +56,6 @@ export class Camera extends PureComponent<Props> {
     private controls?: TrackballControls;
 
     private subs: Subscription[] = [];
-
-    private rootRef: RefObject<HTMLDivElement> = createRef();
 
     private container: RefObject<HTMLDivElement> = createRef();
     get viewport() {
@@ -118,7 +118,6 @@ export class Camera extends PureComponent<Props> {
             this.camera.updateProjectionMatrix();
             // Update controls
             this.controls.handleResize();
-            this.controls.update();
         }
     }
 
@@ -133,7 +132,7 @@ export class Camera extends PureComponent<Props> {
         // Attach the inspect event as a native evt listener,
         // otherwise we cannot prevent the trackball controls from also trigerring
         // See https://medium.com/@ericclemmons/react-event-preventdefault-78c28c950e46 for more details
-        const container = this.rootRef.current;
+        const container = this.props.rectRef!.current;
         if (container) {
             container.addEventListener('mousedown', this.inspect, true);
         }
@@ -171,10 +170,13 @@ export class Camera extends PureComponent<Props> {
                 this.props.onCameraCoordsChange!(change);
             }),
             // Listen to viewport size updates
-            onViewportChange()
-                .subscribe(viewport => {
-                    const [width, height] = viewport;
-                    this.resize(width, height);
+            onReady()
+                .pipe(switchMap(() => this.props.rectChanges!))
+                .subscribe(rect => {
+                    const {width, height} = rect;
+                    if (width > 0 && height > 0) {
+                        this.resize(width, height);
+                    }
                 })
         ]);
     }
@@ -185,7 +187,7 @@ export class Camera extends PureComponent<Props> {
 
     componentWillUnmount() {
         // Remove the native event listener for inspect
-        const container = this.rootRef.current;
+        const container = this.props.rectRef!.current;
         if (container) {
             container.removeEventListener('mousedown', this.inspect, true);
         }
@@ -200,9 +202,9 @@ export class Camera extends PureComponent<Props> {
     }
 
     render() {
-        const {classes} = this.props;
+        const {classes, rectRef} = this.props;
         return (
-            <div className={classes.root} ref={this.rootRef}>
+            <div className={classes.root} ref={rectRef}>
                 <div
                     ref={this.container}
                     className={classes.canvas}
@@ -213,8 +215,8 @@ export class Camera extends PureComponent<Props> {
 }
 
 export default style(
-    withCamera(Camera)
-);
+    withCamera(
+        withResizeObserver(Camera)));
 
 
 function aspectRatio(width: number, height: number): number {
@@ -238,4 +240,5 @@ function getTarget(controls: TrackballControls) {
 }
 
 type Props = WithStyles<typeof styles>
-    & WithCamera;
+    & WithCamera
+    & WithRect;
