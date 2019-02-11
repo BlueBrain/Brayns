@@ -75,17 +75,6 @@ let isLoopInProgress = false;
 
 const nodes = new Map<Element, RectSubject>();
 
-// https://caniuse.com/#feat=resizeobserver
-const ResizeObserver: ResizeObserverCtor = (window as any).ResizeObserver;
-const ro: ResizeObserver | null = ResizeObserver ? new ResizeObserver(entries => {
-    for (const entry of entries) {
-        const subject = nodes.get(entry.target);
-        if (subject) {
-            subject.next(entry.contentRect);
-        }
-    }
-}) : null;
-
 
 function queueNodeForSizeCheck(node: Element) {
     const subject = new BehaviorSubject<ClientRect>({...DEFAULT_RECT});
@@ -93,9 +82,8 @@ function queueNodeForSizeCheck(node: Element) {
         nodes.set(node, subject);
     }
 
-    if (ro) {
-        ro.observe(node);
-    } else if (!isLoopInProgress) {
+    if (!isLoopInProgress) {
+        isLoopInProgress = true;
         startLoop();
     }
 
@@ -115,15 +103,10 @@ function startLoop() {
 
 function stopLoop(node: Element) {
     nodes.delete(node);
-    const noNodesLeft = nodes.size === 0;
 
-    if (ro) {
-        ro.unobserve(node);
-        if (noNodesLeft) {
-            ro.disconnect();
-        }
-    } else if (noNodesLeft && isNumber(rAFId)) {
+    if (nodes.size === 0 && isNumber(rAFId)) {
         cancelAnimationFrame(rAFId);
+        isLoopInProgress = false;
         rAFId = null;
     }
 }
@@ -147,37 +130,10 @@ interface State {
 
 
 export type Rect = DOMRect | ClientRect;
+export type RectSubject = BehaviorSubject<Rect>;
 
 export interface WithRect {
     rect?: Rect;
     rectRef?: RefObject<any>;
     rectChanges?: RectSubject;
-}
-
-type RectSubject = BehaviorSubject<Rect>;
-
-
-// TODO: Eventually these will be implemented by the TS dom lib,
-// at that point we have to remove these.
-// https://drafts.csswg.org/resize-observer-1/#resize-observer-interface
-interface ResizeObserverCtor {
-    new (cb: (entries: ResizeObserverEntry[]) => void): ResizeObserver;
-}
-
-interface ResizeObserver {
-    observe(target: Element, options?: ResizeObserverOptions): void;
-    unobserve(target: Element): void;
-    disconnect(): void;
-}
-
-interface ResizeObserverOptions {
-    box: 'border-box'
-        | 'content-box'
-        | 'scroll-box'
-        | 'device-pixel-border-box';
-};
-
-interface ResizeObserverEntry {
-    contentRect: DOMRect;
-    target: Element;
 }
