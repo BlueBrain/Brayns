@@ -22,31 +22,41 @@ export const AnimationContext = createContext<AnimationContextValue>({
     hasAnimation: false,
     animationParams: {},
     isAnimating: false,
+    delta: 1,
     onFrameChange: () => Promise.resolve(),
     onFrameNext: () => Promise.resolve(),
     onFramePrev: () => Promise.resolve(),
     onToggle: () => Promise.resolve(),
     onPlay: () => Promise.resolve(),
-    onStop: () => Promise.resolve()
+    onStop: () => Promise.resolve(),
+    onDeltaChange: (delta: number) => Promise.resolve()
 });
 
 export class AnimationProvider extends Component<{}, State> {
     state: State = {
         animationParams: {},
-        isAnimating: false
+        isAnimating: false,
+        delta: 1
     };
 
     private subs: Subscription[] = [];
 
-    play = (delta: number = 1) => this.changeAnimationParams({delta});
+    play = () => this.changeAnimationParams({delta: this.state.delta});
 
     stop = () => this.changeAnimationParams({delta: 0});
 
     toggle = async () => {
         const isAnimating = !this.state.isAnimating;
         await this.changeAnimationParams({
-            delta: Number(isAnimating)
+            delta: isAnimating ? this.state.delta : 0
         });
+    }
+
+    onDeltaChange = async (delta: number) => {
+        this.setState({delta});
+        if (this.state.isAnimating) {
+           await this.changeAnimationParams({delta});
+        }
     }
 
     prevFrame = async () => {
@@ -120,19 +130,22 @@ export class AnimationProvider extends Component<{}, State> {
             hasAnimation,
             animationParams,
             frameCount,
-            isAnimating
+            isAnimating,
+            delta
         } = this.state;
         const context: AnimationContextValue = {
             hasAnimation,
             animationParams,
             frameCount,
             isAnimating,
+            delta,
             onFrameChange: this.changeFrame,
             onFrameNext: this.nextFrame,
             onFramePrev: this.prevFrame,
             onPlay: this.play,
             onStop: this.stop,
-            onToggle: this.toggle
+            onToggle: this.toggle,
+            onDeltaChange: this.onDeltaChange
         };
         return (
             <AnimationContext.Provider value={context}>
@@ -186,6 +199,7 @@ interface State {
     animationParams?: Partial<AnimationParameters>;
     frameCount?: number;
     isAnimating?: boolean;
+    delta?: number;
 }
 
 export type WithAnimation = Partial<AnimationContextValue>;
@@ -197,4 +211,5 @@ export interface AnimationContextValue extends State {
     onToggle(): Promise<void>;
     onPlay(delta?: number): Promise<void>;
     onStop(): Promise<void>;
+    onDeltaChange(delta: number): Promise<void>;
 }
