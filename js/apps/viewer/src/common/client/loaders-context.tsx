@@ -1,7 +1,8 @@
+// tslint:disable: max-classes-per-file member-ordering
 import React, {
     Component,
-    createContext,
     ComponentType,
+    createContext,
     PureComponent
 } from 'react';
 
@@ -10,11 +11,11 @@ import {
     Loader,
     LOADERS_SCHEMA
 } from 'brayns';
+import {JSONSchema7} from 'json-schema';
 import {Subscription} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
 
 import brayns, {onReady} from './client';
-import {JSONSchema7} from 'json-schema';
 
 
 export const LoadersContext = createContext<State>({
@@ -49,12 +50,12 @@ export class LoadersProvider extends Component<{}, State> {
     render() {
         const {children} = this.props;
         const {loaders} = this.state;
-        const context= {loaders};
+        const context = {loaders};
         return (
             <LoadersContext.Provider value={context}>
                 {children}
             </LoadersContext.Provider>
-        )
+        );
     }
 }
 

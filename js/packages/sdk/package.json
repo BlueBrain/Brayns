@@ -18,7 +18,7 @@
         "url": "https://github.com/BlueBrain/Brayns"
     },
     "scripts": {
-        "prebuild": "yarn run clean",
+        "prebuild": "yarn clean",
         "build": "npm-run-all -s compile build:umd",
         "build:umd": "rollup -c ./rollup.config.js",
         "compile": "npm-run-all -p compile:es2015 compile:es5 compile:cjs compile:types",
@@ -28,8 +28,8 @@
         "compile:types": "tsc -p ./tsconfig.types.json",
         "clean": "rm -rf dist/*",
         "lint": "tslint -c tslint.json -p ./tsconfig.spec.json -t stylish",
-        "lint:fix": "yarn run lint -- --fix",
-        "pretest:cov": "yarn run lint",
+        "lint:fix": "yarn lint -- --fix",
+        "pretest:cov": "yarn lint",
         "test:cov": "jest --coverage",
         "test": "jest --watch"
     },

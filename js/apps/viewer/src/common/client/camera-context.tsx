@@ -1,7 +1,8 @@
+// tslint:disable: no-empty max-classes-per-file member-ordering
 import React, {
     Component,
-    createContext,
     ComponentType,
+    createContext,
     PureComponent
 } from 'react';
 
@@ -148,7 +149,7 @@ export class CameraProvider extends Component<{}, State> {
             <CameraContext.Provider value={context}>
                 {children}
             </CameraContext.Provider>
-        )
+        );
     }
 }
 

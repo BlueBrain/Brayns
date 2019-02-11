@@ -27,11 +27,11 @@ import brayns, {
     withCamera,
     WithCamera
 } from '../../common/client';
+import {WithRect, withResizeObserver} from '../../common/components';
 import {dispatchNotification} from '../../common/events';
 import {isCmdKey} from '../../common/utils';
 
 import {EventType, TrackballControls} from './trackball-controls';
-import {withResizeObserver, WithRect} from '../../common/components';
 
 
 const styles = (theme: Theme) => createStyles({

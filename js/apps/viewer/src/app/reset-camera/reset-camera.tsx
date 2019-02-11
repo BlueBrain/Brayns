@@ -19,7 +19,7 @@ class ResetCamera extends PureComponent<Props> {
     resetCamera = async () => {
         const scene = await brayns.request(GET_SCENE);
         await this.props.onReset!(scene.bounds);
-    };
+    }
 
     resetCameraOnKeydown = async (evt: KeyboardEvent) => {
         if (this.props.online && evt.keyCode === KeyCode.R && evt.shiftKey && !isCmdKey(evt)) {
