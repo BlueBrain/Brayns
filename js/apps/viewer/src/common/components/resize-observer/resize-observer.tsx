@@ -66,7 +66,7 @@ export function withResizeObserver<P>(Component: ComponentType<P & WithRect>): C
                 />
             );
         }
-    }
+    };
 }
 
 

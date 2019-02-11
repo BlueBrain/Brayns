@@ -16,8 +16,8 @@ import {
     buffer,
     debounceTime,
     mergeMap,
-    throttleTime,
-    switchMap
+    switchMap,
+    throttleTime
 } from 'rxjs/operators';
 
 import {
@@ -29,11 +29,11 @@ import {
 
 import brayns, {
     onReady,
-    withAppParms,
-    WithAppParams
+    WithAppParams,
+    withAppParms
 } from '../../common/client';
+import {WithRect, withResizeObserver} from '../../common/components';
 import {dispatchFps} from '../../common/events';
-import {withResizeObserver, WithRect} from '../../common/components';
 
 
 const styles = (theme: Theme) => createStyles({

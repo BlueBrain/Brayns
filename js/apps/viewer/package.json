@@ -4,10 +4,12 @@
     "license": "LGPL-3.0+",
     "scripts": {
         "start": "react-scripts start",
+        "prebuild": "yarn clean",
         "build": "NODE_ENV=production react-scripts build",
         "clean": "rm -rf build",
         "analyze": "source-map-explorer build/static/js/main.*",
         "lint": "tslint -c tslint.json -p ./tsconfig.test.json -t stylish",
+        "pretest:cov": "yarn lint",
         "test:cov": "react-scripts test --env=jest-environment-jsdom-global --coverage",
         "test": "react-scripts test --env=jest-environment-jsdom-global"
     },

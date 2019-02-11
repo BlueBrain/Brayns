@@ -32,7 +32,7 @@ class Renderer extends PureComponent<Props> {
 
     updateHeadLight = (evt: ChangeEvent<HTMLInputElement>, checked: boolean) => this.props.onRendererPropsChange!({
         headLight: checked
-    });
+    })
 
     updateMaxAccumFrames = (value: number) => {
         const num = Math.round(value);
@@ -76,7 +76,7 @@ class Renderer extends PureComponent<Props> {
             samplesPerPixel,
             subsampling,
             types = []
-        } = renderer || {} as RendererType;
+        }: Partial<RendererType> = renderer || {};
 
         const rgbBg = toRgb(backgroundColor);
 

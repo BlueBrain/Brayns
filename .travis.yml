@@ -12,8 +12,11 @@ matrix:
           cd js
           yarn --pure-lockfile --non-interactive
       script:
-        - yarn test
-        - yarn build
+        - yarn --cwd packages/sdk test:cov
+        - yarn --cwd packages/sdk build
+        - yarn --cwd apps/viewer lint
+        - yarn --cwd apps/viewer test:cov
+        - yarn --cwd apps/viewer build
       after_success:
         - source ./scripts/set_brayns_npm_version.sh
       deploy:

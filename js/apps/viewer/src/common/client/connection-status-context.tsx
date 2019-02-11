@@ -1,7 +1,8 @@
+// tslint:disable: max-classes-per-file member-ordering
 import React, {
     Component,
-    createContext,
     ComponentType,
+    createContext,
     PureComponent
 } from 'react';
 import {Subscription} from 'rxjs';
@@ -42,7 +43,7 @@ export class ConnectionStatusProvider extends Component<{}, State> {
             <ConnectionStatusContext.Provider value={context}>
                 {children}
             </ConnectionStatusContext.Provider>
-        )
+        );
     }
 }
 
