@@ -38,22 +38,6 @@ endif()
 set(CHOOSE_PYTHON_IGNORE_BOOST ON)
 include(Common)
 
-if(NOT EXISTS ${PROJECT_SOURCE_DIR}/perceptualdiff/FindFreeImage.cmake)
-  message(FATAL_ERROR "FindFreeImage.cmake missing, run: git submodule update --init")
-endif()
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/perceptualdiff)
-
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build Async++ as a shared library" FORCE)
-add_subdirectory(async++)
-if(APPLE)
-  # std::exception derivatives are not catched otherwise, e.g. in unit tests for
-  # testing loading errors; see https://stackoverflow.com/questions/21737201
-  target_compile_options(Async++ PRIVATE -frtti)
-endif()
-list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/async++/include/async++/*'
-                         '${PROJECT_SOURCE_DIR}/async++/src/*')
-
-
 # Core dependencies
 common_find_package(Boost REQUIRED COMPONENTS
   filesystem system program_options unit_test_framework)
@@ -61,26 +45,6 @@ common_find_package(vmmlib REQUIRED)
 common_find_package(OpenMP)
 common_find_package(libuv 1.8)
 common_find_package(FreeImage)
-
-if(FreeImage_FOUND)
-  add_subdirectory(perceptualdiff)
-  list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/perceptualdiff/*')
-endif()
-
-if(libuv_FOUND)
-  # The libuv version of Ubuntu 16.04 is too old to have this definition that is
-  # required by uvw (in fact, it uses an old enough version as well to make
-  # things work, but couldn't go further).
-  if(libuv_VERSION VERSION_LESS 1.9.0)
-    add_definitions(-DUV_DISCONNECT=4)
-  endif()
-  if(NOT EXISTS ${PROJECT_SOURCE_DIR}/uvw)
-    message(FATAL_ERROR "uvw missing, run: git submodule update --init")
-  endif()
-  include_directories(SYSTEM uvw/src)
-  list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/uvw/*')
-  # TODO: use tag v1.6.0_libuv-v1.18 for Docker
-endif()
 
 # Archive loading
 common_find_package(LibArchive)
@@ -140,6 +104,18 @@ endif()
 common_find_package_post()
 
 list(APPEND BRAYNS_DEPENDENT_LIBRARIES Async++ vmmlib)
+
+add_subdirectory(deps)
+
+if(libuv_FOUND)
+  # The libuv version of Ubuntu 16.04 is too old to have this definition that is
+  # required by uvw (in fact, it uses an old enough version as well to make
+  # things work, but couldn't go further).
+  if(libuv_VERSION VERSION_LESS 1.9.0)
+    add_definitions(-DUV_DISCONNECT=4)
+  endif()
+  include_directories(SYSTEM deps/uvw/src)
+endif()
 
 # ------------------------------------------------------------------------------
 # BRAYNS applications and libraries

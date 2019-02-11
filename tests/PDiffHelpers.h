@@ -25,8 +25,8 @@
 #include <brayns/common/utils/imageUtils.h>
 #include <brayns/engine/FrameBuffer.h>
 
-#include <perceptualdiff/metric.h>
-#include <perceptualdiff/rgba_image.h>
+#include <deps/perceptualdiff/metric.h>
+#include <deps/perceptualdiff/rgba_image.h>
 
 #include <tests/paths.h>
 

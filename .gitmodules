@@ -2,13 +2,13 @@
 	path = CMake/common
 	url = https://github.com/Eyescale/CMake
 [submodule "uvw"]
-	path = uvw
+	path = deps/uvw
 	url = https://github.com/skypjack/uvw.git
 [submodule "async++"]
-	path = async++
+	path = deps/async++
 	url = https://github.com/Amanieu/asyncplusplus.git
 [submodule "perceptualdiff"]
-	path = perceptualdiff
+	path = deps/perceptualdiff
 	url = https://github.com/myint/perceptualdiff.git
 [submodule "plugins/Rockets/rapidjson"]
 	path = plugins/Rockets/rapidjson
