@@ -2,7 +2,12 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es5"
+        "target": "es5",
+        "types": [
+            "jest",
+            "json-schema",
+            "lodash"
+        ]
     },
     "include": [
         "src/**/*.ts"
