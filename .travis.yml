@@ -18,7 +18,6 @@ matrix:
       script:
         - yarn --cwd packages/sdk test:cov
         - yarn --cwd packages/sdk build
-        - yarn --cwd apps/viewer lint
         - yarn --cwd apps/viewer test:cov
         - yarn --cwd apps/viewer build
       after_success:
