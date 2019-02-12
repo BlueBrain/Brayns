@@ -5,10 +5,9 @@ import React, {
 } from 'react';
 
 import {IMAGE_JPEG} from 'brayns';
-import {isNumber} from 'lodash';
+import {isNumber, noop} from 'lodash';
 import {
     BehaviorSubject,
-    // fromEvent,
     Subject,
     Subscription
 } from 'rxjs';
@@ -216,7 +215,8 @@ function blobToImg(blob: Blob) {
         // https://medium.com/dailyjs/image-loading-with-image-decode-b03652e7d2d2
         if (img.decode) {
             img.decode()
-                .then(() => resolve(img));
+                // TODO: Figure out why decode() throws DOMException
+                .then(() => resolve(img), noop);
         } else {
             img.onload = () => resolve(img);
         }
