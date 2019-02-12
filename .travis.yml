@@ -1,5 +1,9 @@
 sudo: false
 
+# https://docs.travis-ci.com/user/customizing-the-build/#git-submodules
+git:
+  submodules: false
+
 matrix:
   include:
     # Node
