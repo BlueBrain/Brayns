@@ -14,7 +14,7 @@ matrix:
       before_install:
         - |
           cd js
-          yarn --pure-lockfile --non-interactive
+          yarn install --pure-lockfile --non-interactive
       script:
         - yarn --cwd packages/sdk test:cov
         - yarn --cwd packages/sdk build
