@@ -69,11 +69,11 @@
         "source-map-explorer": "^1.5.0",
         "tslint": "^5.9.1",
         "tslint-react": "^3.6.0",
-        "typescript": "~2.9.2"
+        "typescript": "~3.3.3"
     },
     "private": true,
     "engines": {
-        "node": ">= 7.9"
+        "node": ">= 8.15"
     },
     "browserslist": [
         ">0.2%",

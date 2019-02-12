@@ -686,5 +686,5 @@ function decodeChunks(chunks: ArrayBuffer[]) {
 
 function abToStr(buffer: ArrayBuffer): string {
     const bytes = new Uint8Array(buffer);
-    return String.fromCharCode.apply(null, bytes);
+    return String.fromCharCode.apply(null, bytes as any);
 }

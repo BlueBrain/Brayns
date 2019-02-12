@@ -302,7 +302,7 @@ export class TrackballControls extends EventDispatcher implements ThreeTrackball
             this.screen.height = window.innerHeight;
         } else {
             const box = this.domElement.getBoundingClientRect();
-            const d = this.domElement.ownerDocument.documentElement;
+            const d = this.domElement!.ownerDocument!.documentElement;
             this.screen.left = box.left + window.pageXOffset - d.clientLeft;
             this.screen.top = box.top + window.pageYOffset - d.clientTop;
             this.screen.width = box.width;
