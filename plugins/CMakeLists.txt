@@ -13,6 +13,7 @@ if(BRAYNS_NETWORKING_ENABLED)
   add_subdirectory(Rockets)
 endif()
 
+option(BRAYNS_OPENDECK_ENABLED "Activate OpenDeck plugin" OFF)
 if(BRAYNS_OPENDECK_ENABLED)
   add_subdirectory(OpenDeck)
 endif()
