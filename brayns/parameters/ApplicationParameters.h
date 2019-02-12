@@ -64,6 +64,7 @@ public:
     }
     /** Benchmarking */
     bool isBenchmarking() const { return _benchmarking; }
+    void setBenchmarking(bool enabled) { _benchmarking = enabled; }
     /** JPEG compression quality */
     void setJpegCompression(const size_t compression)
     {
@@ -92,7 +93,7 @@ public:
 protected:
     void parse(const po::variables_map& vm) final;
 
-    std::string _engine{"braynsOSPRayEngine"};
+    std::string _engine{"ospray"};
     std::vector<std::string> _modules;
     Vector2d _windowSize;
     bool _benchmarking{false};

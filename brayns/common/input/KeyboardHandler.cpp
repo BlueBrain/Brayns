@@ -103,7 +103,6 @@ void KeyboardHandler::handle(const SpecialKey key)
 void KeyboardHandler::_buildHelp()
 {
     _helpStrings.clear();
-    _helpStrings.push_back("Keyboard shortcuts:");
 
     const auto specialKeyToString = [](const SpecialKey key) {
         switch (key)

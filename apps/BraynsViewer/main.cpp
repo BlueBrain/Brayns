@@ -19,28 +19,163 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "BraynsViewer.h"
+#include <apps/ui/Application.h>
 #include <brayns/Brayns.h>
 #include <brayns/common/log.h>
 
-brayns::Brayns* braynsInstance;
+#include <brayns/parameters/ApplicationParameters.h>
+#include <brayns/parameters/ParametersManager.h>
+
+#include <deps/glfw/include/GLFW/glfw3.h>
+
+Application* appInstance;
 
 void cleanup()
 {
-    delete braynsInstance;
+    delete appInstance;
+}
+
+static void errorCallback(int error, const char* description)
+{
+    std::cerr << "Error: " << error << ": " << description << std::endl;
+}
+
+static void keyCallback(GLFWwindow* /*window*/, int key, int /*scancode*/,
+                        int action, int /*mods*/)
+{
+    appInstance->keyCallback(key, action);
+}
+
+static void cursorCallback(GLFWwindow* /*window*/, double xpos, double ypos)
+{
+    appInstance->cursorCallback(xpos, ypos);
+}
+
+static void mouseButtonCallback(GLFWwindow* /*window*/, int button, int action,
+                                int /*mods*/)
+{
+    appInstance->mouseButtonCallback(button, action);
+}
+
+static void scrollCallback(GLFWwindow* /*window*/, double xoffset,
+                           double yoffset)
+{
+    appInstance->scrollCallback(xoffset, yoffset);
+}
+
+int run(brayns::Brayns& brayns)
+{
+    int windowWidth = 800;
+    int windowHeight = 600;
+
+    glfwSetErrorCallback(errorCallback);
+
+    if (!glfwInit())
+    {
+        errorCallback(1, "GLFW failed to initialize.");
+        return 1;
+    }
+
+    const std::string windowTitle =
+        "Brayns Viewer [" +
+        brayns.getParametersManager().getApplicationParameters().getEngine() +
+        "] ";
+
+    GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight,
+                                          windowTitle.c_str(), NULL, NULL);
+    if (!window)
+    {
+        errorCallback(2, "glfwCreateWindow() failed.");
+        glfwTerminate();
+        return 2;
+    }
+
+    glfwMakeContextCurrent(window);
+
+    if (glewInit() != GL_NO_ERROR)
+    {
+        errorCallback(3, "GLEW failed to initialize.");
+        glfwTerminate();
+        return 3;
+    }
+
+    appInstance = new Application(brayns, window, windowWidth, windowHeight);
+    auto& g_app = *appInstance;
+
+    glfwSetKeyCallback(window, keyCallback);
+    glfwSetCursorPosCallback(window, cursorCallback);
+    glfwSetMouseButtonCallback(window, mouseButtonCallback);
+    glfwSetScrollCallback(window, scrollCallback);
+
+    std::array<int, 2> windowPos;
+    std::array<int, 2> windowSizePrev;
+    bool fullscreen = false;
+
+    // Main loop
+    while (!glfwWindowShouldClose(window))
+    {
+        g_app.timerEnd();
+        g_app.timerBegin();
+        if (g_app.exitCalled())
+            break;
+
+        const bool fullscreenCurr = g_app.isFullScreen();
+
+        if (fullscreen != fullscreenCurr)
+        {
+            if (fullscreenCurr)
+            {
+                // backup window position and window size
+                glfwGetWindowPos(window, &windowPos[0], &windowPos[1]);
+                glfwGetWindowSize(window, &windowSizePrev[0],
+                                  &windowSizePrev[1]);
+
+                auto monitor = glfwGetPrimaryMonitor();
+
+                // get reolution of monitor
+                const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+                // switch to full screen
+                glfwSetWindowMonitor(window, monitor, 0, 0, mode->width,
+                                     mode->height, 0);
+            }
+            else
+            {
+                // restore last window size and position
+                glfwSetWindowMonitor(window, nullptr, windowPos[0],
+                                     windowPos[1], windowSizePrev[0],
+                                     windowSizePrev[1], 0);
+            }
+
+            fullscreen = fullscreenCurr;
+        }
+
+        glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
+
+        g_app.reshape(windowWidth, windowHeight);
+
+        g_app.render();
+        g_app.guiNewFrame();
+        g_app.guiRender();
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    g_app.guiShutdown();
+
+    glfwTerminate();
+
+    return 0;
 }
 
 int main(int argc, const char** argv)
 {
     try
     {
-        braynsInstance = new brayns::Brayns(argc, argv);
-        brayns::initGLUT(&argc, argv);
-        brayns::BraynsViewer braynsViewer(*braynsInstance);
-        BRAYNS_INFO << "Initializing Application..." << std::endl;
-        braynsViewer.create("Brayns Viewer");
+        brayns::Brayns brayns(argc, argv);
         atexit(cleanup);
-        brayns::runGLUT();
+        run(brayns);
     }
     catch (const std::runtime_error& e)
     {

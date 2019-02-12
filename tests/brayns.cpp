@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(defaults)
 
     auto& pm = brayns.getParametersManager();
     const auto& appParams = pm.getApplicationParameters();
-    BOOST_CHECK(appParams.getEngine() == "braynsOSPRayEngine");
+    BOOST_CHECK(appParams.getEngine() == "ospray");
     BOOST_CHECK(appParams.getOsprayModules().empty());
     BOOST_CHECK_EQUAL(appParams.getWindowSize(), brayns::Vector2ui(800, 600));
     BOOST_CHECK(!appParams.isBenchmarking());
