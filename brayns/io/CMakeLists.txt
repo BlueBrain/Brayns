@@ -29,6 +29,12 @@ endif()
 
 if(BRAYNS_ASSIMP_ENABLED)
   list(APPEND BRAYNSIO_SOURCES MeshLoader.cpp)
+  if(assimp_VERSION VERSION_EQUAL 4.1.0)
+    list(APPEND BRAYNSIO_SOURCES assimpImporters/PlyLoader.cpp assimpImporters/PlyParser.cpp)
+    set_source_files_properties(assimpImporters/PlyLoader.cpp
+      PROPERTIES COMPILE_FLAGS -Wno-shadow
+    )
+  endif()
   list(APPEND BRAYNSIO_PUBLIC_HEADERS MeshLoader.h)
   list(APPEND BRAYNSIO_LINK_LIBRARIES
     PRIVATE ${ASSIMP_LIBRARIES} ${assimp_LIBRARIES})
@@ -36,3 +42,7 @@ endif()
 
 set(BRAYNSIO_INCLUDE_NAME brayns/io)
 common_library(braynsIO)
+
+if(BRAYNS_ASSIMP_ENABLED AND assimp_VERSION VERSION_EQUAL 4.1.0)
+  target_compile_definitions(braynsIO PRIVATE USE_CUSTOM_PLY_IMPORTER)
+endif()

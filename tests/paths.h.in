@@ -20,6 +20,8 @@ constexpr auto BRAYNS_TESTDATA_MODEL_BENNU_ZIP_PATH =
     BRAYNS_TESTDATA_PATH "modelsValid/bennu.zip";
 constexpr auto BRAYNS_TESTDATA_MODEL_MONKEY_PATH =
     BRAYNS_TESTDATA_PATH "modelsValid/monkey.xyz";
+constexpr auto BRAYNS_TESTDATA_MODEL_LUCY_PATH =
+    BRAYNS_TESTDATA_PATH "modelsValid/lucy.ply";
 constexpr auto BRAYNS_TESTDATA_MODEL_BROKEN_PATH =
     BRAYNS_TESTDATA_PATH "modelsInvalid/broken.xyz";
 constexpr auto BRAYNS_TESTDATA_MODEL_UNSUPPORTED_PATH =
