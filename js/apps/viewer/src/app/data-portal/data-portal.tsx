@@ -2,6 +2,7 @@
 import React, {
     createRef,
     Fragment,
+    KeyboardEvent,
     PureComponent,
     RefObject
 } from 'react';
@@ -34,6 +35,7 @@ import brayns, {
     WithLoaders
 } from '../../common/client';
 import {SlideUp} from '../../common/components';
+import {KeyCode} from '../../common/constants';
 import {
     dispatchKeyboardLock,
     dispatchNotification,
@@ -54,7 +56,8 @@ const MAX_CHUNK_SIZE = 1024 * 500; // 500kb
 
 const styles = (theme: Theme) => createStyles({
     container: {
-        position: 'relative'
+        position: 'relative',
+        outline: 'none'
     },
     overlay: {
         position: 'absolute',
@@ -263,6 +266,7 @@ class DataPortal extends PureComponent<Props, State> {
                     ref={this.dropzoneRef}
                     getDataTransferItems={fromEvent}
                     onDrop={this.import}
+                    onKeyDown={preventDefault}
                     onFileDialogCancel={this.onClose}
                     disabled={!online}
                     multiple
@@ -307,6 +311,13 @@ export default withWidth()(
     style(
         withConnectionStatus(
             withLoaders(DataPortal))));
+
+
+function preventDefault(evt: KeyboardEvent) {
+    if (evt.keyCode === KeyCode.Space || evt.keyCode === KeyCode.Enter) {
+        evt.preventDefault();
+    }
+}
 
 
 interface Props extends WithStyles<typeof styles>,
