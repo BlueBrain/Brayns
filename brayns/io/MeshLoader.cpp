@@ -20,12 +20,11 @@
 
 #include "MeshLoader.h"
 
-#include <assimp/Exporter.hpp>
-#include <assimp/IOSystem.hpp> // must come before Exporter.hpp
 #include <assimp/Importer.hpp>
 #include <assimp/ProgressHandler.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <assimp/version.h>
 #include <boost/filesystem.hpp>
 #include <brayns/common/log.h>
 #include <fstream>
@@ -35,29 +34,14 @@
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
+#ifdef USE_CUSTOM_PLY_IMPORTER
+#include "assimpImporters/PlyLoader.h"
+#endif
+
+namespace brayns
+{
 namespace
 {
-std::vector<std::string> getSupportedTypes()
-{
-    std::set<std::string> types;
-    std::string extensions;
-    Assimp::Importer importer;
-    importer.GetExtensionList(extensions);
-
-    std::istringstream stream(extensions);
-    std::string s;
-    while (std::getline(stream, s, ';'))
-    {
-        auto pos = s.find_last_of(".");
-        types.insert(pos == std::string::npos ? s : s.substr(pos + 1));
-    }
-
-    std::vector<std::string> output;
-    std::copy(types.begin(), types.end(), std::back_inserter(output));
-    return output;
-}
-
-using Property = brayns::Property;
 const auto PROP_GEOMETRY_QUALITY = "geometryQuality";
 
 const auto LOADER_NAME = "mesh";
@@ -65,10 +49,7 @@ const auto LOADER_NAME = "mesh";
 constexpr float TOTAL_PROGRESS = 100.f;
 constexpr float LOADING_FRACTION = 50.f;
 constexpr float POST_LOADING_FRACTION = 50.f;
-}
 
-namespace brayns
-{
 class ProgressWatcher : public Assimp::ProgressHandler
 {
 public:
@@ -93,6 +74,47 @@ private:
     std::function<void()> _cancelCheck;
     std::stringstream _msg;
 };
+
+std::vector<std::string> getSupportedTypes()
+{
+    std::set<std::string> types;
+    std::string extensions;
+    Assimp::Importer importer;
+    importer.GetExtensionList(extensions);
+
+    std::istringstream stream(extensions);
+    std::string s;
+    while (std::getline(stream, s, ';'))
+    {
+        auto pos = s.find_last_of(".");
+        types.insert(pos == std::string::npos ? s : s.substr(pos + 1));
+    }
+
+    std::vector<std::string> output;
+    std::copy(types.begin(), types.end(), std::back_inserter(output));
+    return output;
+}
+
+Assimp::Importer createImporter(const LoaderProgress& callback,
+                                const std::string& filename)
+{
+    Assimp::Importer importer;
+    importer.SetProgressHandler(new ProgressWatcher(callback, filename));
+
+// WAR for https://github.com/assimp/assimp/issues/2337; use PLY importer
+// from commit dcc5887
+#ifdef USE_CUSTOM_PLY_IMPORTER
+    {
+        auto plyImporter = importer.GetImporter("ply");
+        importer.UnregisterLoader(plyImporter);
+
+        auto ourPlyImporter = new Assimp::PLYImporter();
+        importer.RegisterLoader(ourPlyImporter);
+    }
+#endif
+    return importer;
+}
+}
 
 MeshLoader::MeshLoader(Scene& scene)
     : Loader(scene)
@@ -151,9 +173,7 @@ ModelDescriptorPtr MeshLoader::importFromBlob(
         stringToEnum<GeometryQuality>(properties.getProperty<std::string>(
             PROP_GEOMETRY_QUALITY, enumToString(GeometryQuality::high)));
 
-    Assimp::Importer importer;
-    importer.SetProgressHandler(new ProgressWatcher(callback, blob.name));
-
+    auto importer = createImporter(callback, blob.name);
     const aiScene* aiScene =
         importer.ReadFileFromMemory(blob.data.data(), blob.data.size(),
                                     _getQuality(geometryQuality),
@@ -388,8 +408,9 @@ void MeshLoader::importMesh(const std::string& fileName,
                             const GeometryQuality geometryQuality) const
 {
     const boost::filesystem::path file = fileName;
-    Assimp::Importer importer;
-    importer.SetProgressHandler(new ProgressWatcher(callback, fileName));
+
+    auto importer = createImporter(callback, fileName);
+
     if (!importer.IsExtensionSupported(file.extension().c_str()))
     {
         std::stringstream msg;
