@@ -48,7 +48,9 @@ void CylindricStereoCamera::commit()
     const auto sideBySide = stereoMode == StereoMode::OSP_STEREO_SIDE_BY_SIDE;
 
     dir = normalize(dir);
-    const auto dir_du = normalize(cross(dir, up));
+    // The tracking model of the 3d glasses is inversed 
+    // so we need to negate dir_du here.
+    const auto dir_du = -normalize(cross(dir, up));
     const auto dir_dv = normalize(up);
     dir = -dir;
 
