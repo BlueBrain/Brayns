@@ -165,6 +165,23 @@ BOOST_AUTO_TEST_CASE(render_protein_in_stereo_and_compare)
                                  *brayns.getEngine().getFrameBuffers()[1]));
 }
 
+#if BRAYNS_USE_ASSIMP
+BOOST_AUTO_TEST_CASE(render_ply_and_compare)
+{
+    auto& testSuite = boost::unit_test::framework::master_test_suite();
+
+    const char* app = testSuite.argv[0];
+    const auto path = BRAYNS_TESTDATA_MODEL_LUCY_PATH;
+    const char* argv[] = {app, path, "--disable-accumulation"};
+    const int argc = sizeof(argv) / sizeof(char*);
+
+    brayns::Brayns brayns(argc, argv);
+    brayns.commitAndRender();
+    BOOST_CHECK(compareTestImage("testdataLucy.png",
+                                 brayns.getEngine().getFrameBuffer()));
+}
+#endif
+
 #if BRAYNS_USE_LIBARCHIVE
 BOOST_AUTO_TEST_CASE(render_capsule_and_compare)
 {
