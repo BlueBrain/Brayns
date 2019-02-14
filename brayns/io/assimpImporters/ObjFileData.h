@@ -55,6 +55,7 @@ namespace ObjFile
 struct Object;
 struct Face;
 struct Material;
+typedef float ai_real;
 
 // ------------------------------------------------------------------------------------------------
 //! \struct Face

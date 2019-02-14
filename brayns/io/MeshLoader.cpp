@@ -37,6 +37,7 @@
 #ifdef USE_CUSTOM_PLY_IMPORTER
 #include "assimpImporters/PlyLoader.h"
 #endif
+#include "assimpImporters/ObjFileImporter.h"
 
 namespace brayns
 {
@@ -105,13 +106,13 @@ Assimp::Importer createImporter(const LoaderProgress& callback,
 // from commit dcc5887
 #ifdef USE_CUSTOM_PLY_IMPORTER
     {
-        auto plyImporter = importer.GetImporter("ply");
-        importer.UnregisterLoader(plyImporter);
-
-        auto ourPlyImporter = new Assimp::PLYImporter();
-        importer.RegisterLoader(ourPlyImporter);
+        importer.UnregisterLoader(importer.GetImporter("ply"));
+        importer.RegisterLoader(new Assimp::PLYImporter());
     }
 #endif
+
+    importer.UnregisterLoader(importer.GetImporter("obj"));
+    importer.RegisterLoader(new Assimp::ObjFileImporter());
     return importer;
 }
 }

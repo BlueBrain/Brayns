@@ -54,6 +54,7 @@ namespace ObjFile
 struct Model;
 struct Material;
 }
+typedef float ai_real;
 
 /**
  *  @class  ObjFileMtlImporter

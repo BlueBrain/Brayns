@@ -56,6 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp
 {
 const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
+typedef float ai_real;
 
 ObjFileParser::ObjFileParser()
     : m_DataIt()
@@ -767,7 +768,11 @@ void ObjFileParser::getMaterialLib()
     // material files if the model doesn't use any materials, so we
     // allow that.
     std::vector<char> buffer;
+#ifdef ASSIMP_VERSION_3
+    BaseImporter::TextFileToBuffer(pFile, buffer);
+#else
     BaseImporter::TextFileToBuffer(pFile, buffer, BaseImporter::ALLOW_EMPTY);
+#endif
     m_pIO->Close(pFile);
 
     // Importing the material library

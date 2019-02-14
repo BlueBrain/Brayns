@@ -290,17 +290,21 @@ public: // static utilities
         FORBID_EMPTY
     };
 
-    // -------------------------------------------------------------------
-    /** Utility for text file loaders which copies the contents of the
-     *  file into a memory buffer and converts it to our UTF8
-     *  representation.
-     *  @param stream Stream to read from.
-     *  @param data Output buffer to be resized and filled with the
-     *   converted text file data. The buffer is terminated with
-     *   a binary 0.
-     *  @param mode Whether it is OK to load empty text files. */
+// -------------------------------------------------------------------
+/** Utility for text file loaders which copies the contents of the
+ *  file into a memory buffer and converts it to our UTF8
+ *  representation.
+ *  @param stream Stream to read from.
+ *  @param data Output buffer to be resized and filled with the
+ *   converted text file data. The buffer is terminated with
+ *   a binary 0.
+ *  @param mode Whether it is OK to load empty text files. */
+#ifdef ASSIMP_VERSION_3
+    static void TextFileToBuffer(IOStream* stream, std::vector<char>& data);
+#else
     static void TextFileToBuffer(IOStream* stream, std::vector<char>& data,
                                  TextFileMode mode = FORBID_EMPTY);
+#endif
 
     // -------------------------------------------------------------------
     /** Utility function to move a std::vector into a aiScene array
