@@ -38,6 +38,7 @@ import KeyboardIcon from '@material-ui/icons/Keyboard';
 import LayersIcon from '@material-ui/icons/Layers';
 import LayersClearIcon from '@material-ui/icons/LayersClear';
 import LinkIcon from '@material-ui/icons/Link';
+import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import SettingsIcon from '@material-ui/icons/Settings';
 import ThreeSixtyIcon from '@material-ui/icons/ThreeSixty';
 import TimelineIcon from '@material-ui/icons/Timeline';
@@ -483,6 +484,22 @@ class App extends PureComponent<Props, State> {
         });
     }
 
+    // Snapshot
+    openSnapshot = () => {
+        dispatchKeyboardLock(true);
+        this.setState({
+            // ...defaultSize(this.props.width),
+            showSnapshot: true
+        });
+    }
+
+    closeSnapshot = () => {
+        dispatchKeyboardLock(false);
+        this.setState({
+            showSnapshot: false
+        });
+    }
+
     // Statistics
     toggleStatistics = () => {
         const enabled = !this.state.showStatistics;
@@ -543,6 +560,11 @@ class App extends PureComponent<Props, State> {
                         this.openFileDialog();
                     }
                     break;
+                case KeyCode.S:
+                    if (evt.shiftKey && online) {
+                        this.openSnapshot();
+                    }
+                    break;
                 default:
                     break;
             }
@@ -579,6 +601,7 @@ class App extends PureComponent<Props, State> {
             showAppSettings,
             showAppInfo,
             showShortcuts,
+            showSnapshot,
             appPreferences,
             theme
         } = this.state;
@@ -663,7 +686,19 @@ class App extends PureComponent<Props, State> {
                                                     </Menu>
                                                     <span className={classes.spacer} />
                                                     <ResetCamera />
-                                                    <Snapshot />
+
+                                                    <Tooltip title={'Take a snapshot'} placement="bottom" {...TOOLTIP_DELAY}>
+                                                        <div>
+                                                            <IconButton
+                                                                onClick={this.openSnapshot}
+                                                                aria-label={'Open the snapshot dialog'}
+                                                                disabled={offline}
+                                                            >
+                                                                <PhotoCameraIcon />
+                                                            </IconButton>
+                                                        </div>
+                                                    </Tooltip>
+
                                                     <QuitRenderer />
                                                     <Tooltip title={'Report an issue'} {...TOOLTIP_DELAY}>
                                                         <IconButton
@@ -720,6 +755,10 @@ class App extends PureComponent<Props, State> {
                                                         <AnimationProvider>
                                                             <RequestNotifications />
                                                             <AnimationPlayer />
+                                                            <Snapshot
+                                                                open={!!showSnapshot}
+                                                                onClose={this.closeSnapshot}
+                                                            />
                                                         </AnimationProvider>
                                                         <ConnectionStatus open={offline} />
                                                     </DataPortal>
@@ -833,6 +872,7 @@ interface State {
     showNavCube?: boolean;
 
     showShortcuts?: boolean;
+    showSnapshot?: boolean;
 
     showAppInfo?: boolean;
     showAppSettings?: boolean;
