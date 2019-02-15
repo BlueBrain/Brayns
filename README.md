@@ -45,10 +45,7 @@ Command line arguments are documented in the [User Guide](doc/UserGuide.md).
 
 The following platforms and build environments are tested:
 
-* Linux: Ubuntu 16.04, Debian 9, RHEL 6.8 (Makefile, x64)
-
-The [API documentation](http://bluebrain.github.io/Brayns-0.6/index.html)
-can be found on [bluebrain.github.io](http://bluebrain.github.io/).
+* Linux: Ubuntu 16.04, Debian 9, RHEL 7 (Makefile, x64)
 
 ## Using Docker images
 
@@ -94,7 +91,7 @@ Clone embree in the same folder level as ISPC compiler
   git clone https://github.com/embree/embree.git
   mkdir embree/Build
   cd embree/Build
-  git checkout v2.17.4
+  git checkout v3.2.3
   cmake .. -DCMAKE_INSTALL_PREFIX=<Brayns_installation_folder>
   make install
 ```
@@ -107,7 +104,7 @@ Clone OSPRay in the same folder level as ISPC compiler
   git clone https://github.com/ospray/OSPRay.git
   mkdir OSPRay/Build
   cd OSPRay/Build
-  git checkout v1.5.0
+  git checkout v1.7.3
   export CMAKE_PREFIX_PATH=<Brayns_installation_folder>
   cmake .. -DCMAKE_INSTALL_PREFIX=<Brayns_installation_folder>
   make install
@@ -158,7 +155,6 @@ cmake .. -DBRAYNS_VRPN_ENABLED=ON:OFF
 ```
 cmake .. -DBRAYNS_OPTIX_ENABLED=ON:OFF
 cmake .. -DBRAYNS_OPENDECK_ENABLED=ON:OFF
-cmake .. -DBRAYNS_STEREOSCOPY_ENABLED=ON:OFF
 ```
 
 ## Running Brayns viewer

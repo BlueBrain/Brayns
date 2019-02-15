@@ -24,3 +24,5 @@ CMakeFiles
 *.includes
 *.creator*
 *.user
+.vscode
+.python-version
