@@ -4,7 +4,7 @@ import {GET_SCENE} from 'brayns';
 
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
-import FilterCenterFocusIcon from '@material-ui/icons/FilterCenterFocus';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 import brayns, {
     withCamera,
@@ -45,7 +45,7 @@ class ResetCamera extends PureComponent<Props> {
                             aria-label="Reset camera"
                             disabled={!this.props.online}
                         >
-                            <FilterCenterFocusIcon />
+                            <RefreshIcon />
                         </IconButton>
                     </div>
                 </Tooltip>

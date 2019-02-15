@@ -15,7 +15,7 @@ import {
     WithStyles
 } from '@material-ui/core/styles';
 import EditIcon from '@material-ui/icons/Edit';
-import FilterCenterFocusIcon from '@material-ui/icons/FilterCenterFocus';
+import MyLocationIcon from '@material-ui/icons/MyLocation';
 import InfoIcon from '@material-ui/icons/Info';
 
 import {ModelId} from './types';
@@ -147,9 +147,9 @@ export class Model extends PureComponent<Props, State> {
                 onMouseEnter={this.toggleButtonFocus}
                 onMouseLeave={this.toggleButtonFocus}
                 disabled={disabled || (!visible && !boundingBox)}
-                aria-label="Fly to model"
+                aria-label="Focus model"
             >
-                <FilterCenterFocusIcon />
+                <MyLocationIcon />
             </IconButton>
         );
 
