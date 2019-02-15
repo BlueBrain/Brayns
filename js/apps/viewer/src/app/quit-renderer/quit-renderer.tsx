@@ -12,6 +12,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import CloudOffIcon from '@material-ui/icons/CloudOff';
+import PowerOff from '@material-ui/icons/PowerSettingsNew';
 
 import brayns, {
     withConnectionStatus,
@@ -80,6 +81,7 @@ class QuitRenderer extends PureComponent<WithConnectionStatus, State> {
         const {showDialog} = this.state;
         const offline = !online;
         const title = offline ? 'Renderer is offline' : 'Quit renderer';
+        const icon = online ? <PowerOff /> : <CloudOffIcon />;
 
         return (
             <div>
@@ -91,7 +93,7 @@ class QuitRenderer extends PureComponent<WithConnectionStatus, State> {
                             aria-label="Quit renderer"
                             disabled={offline}
                         >
-                            <CloudOffIcon />
+                            {icon}
                         </IconButton>
                     </div>
                 </Tooltip>
