@@ -124,8 +124,6 @@ private:
     std::vector<char> m_Buffer;
     //! Pointer to root object instance
     ObjFile::Object* m_pRootObject;
-    //! Absolute pathname of model in file system
-    std::string m_strAbsPath;
 };
 
 // ------------------------------------------------------------------------------------------------

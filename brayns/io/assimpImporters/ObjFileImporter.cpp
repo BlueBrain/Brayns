@@ -46,8 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IOStreamBuffer.h"
 #include "ObjFileData.h"
 #include "ObjFileParser.h"
-#include <assimp/DefaultIOSystem.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/IOSystem.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/ai_assert.h>
 #include <assimp/importerdesc.h>
@@ -76,10 +76,7 @@ using namespace std;
 ObjFileImporter::ObjFileImporter()
     : m_Buffer()
     , m_pRootObject(NULL)
-    , m_strAbsPath("")
 {
-    DefaultIOSystem io;
-    m_strAbsPath = io.getOsSeparator();
 }
 
 // ------------------------------------------------------------------------------------------------
