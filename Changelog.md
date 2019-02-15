@@ -1,5 +1,84 @@
 # Change Log
 
+## [0.8.0](https://github.com/BlueBrain/Brayns/tree/0.8.0) (26-02-2019)
+
+**Implemented enhancements:**
+
+- Remove {detectionDistance} from simulation renderer [\#522](https://github.com/BlueBrain/Brayns/issues/522)
+- Expose camera as translation vector + rotation quaternion [\#517](https://github.com/BlueBrain/Brayns/issues/517)
+- Make the UI component available [\#503](https://github.com/BlueBrain/Brayns/issues/503)
+- feat: improve ui/ux [\#726](https://github.com/BlueBrain/Brayns/pull/726)
+- Replace glut with glfw and imgui [\#718](https://github.com/BlueBrain/Brayns/pull/718)
+- Improve AnimationParameters [\#711](https://github.com/BlueBrain/Brayns/pull/711)
+- feat\(js\): Added UI to update animation speed parameter \(delta\) [\#706](https://github.com/BlueBrain/Brayns/pull/706)
+- Use glm instead of vmmlib [\#705](https://github.com/BlueBrain/Brayns/pull/705)
+- Add shorthand for using OSPRay engine [\#704](https://github.com/BlueBrain/Brayns/pull/704)
+- Draw FPS in screen instead of window title [\#699](https://github.com/BlueBrain/Brayns/pull/699)
+- Fix slow down caused by per-frame update of model size; is only necessary for volumes right now [\#697](https://github.com/BlueBrain/Brayns/pull/697)
+- feat\(js\): do not render model props if it has none [\#690](https://github.com/BlueBrain/Brayns/pull/690)
+- feat\(js\): add tooltips for icon buttons [\#687](https://github.com/BlueBrain/Brayns/pull/687)
+- Make OptiX an engine of Brayns [\#684](https://github.com/BlueBrain/Brayns/pull/684)
+- perf\(js\): use new Image.decode\(\) API to decode images off the main thread [\#682](https://github.com/BlueBrain/Brayns/pull/682)
+- Fix loading of NPOT textures, support loading raw volumes from blob [\#680](https://github.com/BlueBrain/Brayns/pull/680)
+- Refactor subsampling into its own property [\#673](https://github.com/BlueBrain/Brayns/pull/673)
+- feat: expose environment map in the UI [\#671](https://github.com/BlueBrain/Brayns/pull/671)
+- Added properties to materials [\#667](https://github.com/BlueBrain/Brayns/pull/667)
+- Add set-environment-map RPC to replace SceneParameters [\#666](https://github.com/BlueBrain/Brayns/pull/666)
+- Added SDF and Streamlines accessors to Model class [\#651](https://github.com/BlueBrain/Brayns/pull/651)
+- Implemented target string parsing [\#649](https://github.com/BlueBrain/Brayns/pull/649)
+- Add `--play-animation` switch to enable initial simulation playback for demos [\#644](https://github.com/BlueBrain/Brayns/pull/644)
+- Add the ability to scale the Opendeck camera [\#641](https://github.com/BlueBrain/Brayns/pull/641)
+- Add `--version` option [\#634](https://github.com/BlueBrain/Brayns/pull/634)
+- Set default transfer function and renderer for circuit simulations [\#629](https://github.com/BlueBrain/Brayns/pull/629)
+- Fix and move the Perspective Parallax Camera from modules to core [\#628](https://github.com/BlueBrain/Brayns/pull/628)
+- DeflectPlugin improvements [\#626](https://github.com/BlueBrain/Brayns/pull/626)
+- Add description for Property and commandline generation [\#623](https://github.com/BlueBrain/Brayns/pull/623)
+- Add BBIC volume plugin [\#619](https://github.com/BlueBrain/Brayns/pull/619)
+- Removal of metaball and layout options from morphology loading. [\#618](https://github.com/BlueBrain/Brayns/pull/618)
+- Fix VRPN plugin, add floor projection and OpenDeck plugin [\#616](https://github.com/BlueBrain/Brayns/pull/616)
+- Add support for multiple frameBuffers [\#612](https://github.com/BlueBrain/Brayns/pull/612)
+- Use property map for all loader properties [\#611](https://github.com/BlueBrain/Brayns/pull/611)
+- Moved circuit and morphology loaders to the new CircuitViewer plugin [\#606](https://github.com/BlueBrain/Brayns/pull/606)
+- Support CUDA 10 in OptiX [\#605](https://github.com/BlueBrain/Brayns/pull/605)
+- Add 'default-bvh-flag' command line option [\#599](https://github.com/BlueBrain/Brayns/pull/599)
+- Support subsampling again after OSPRay 1.7 upgrade [\#598](https://github.com/BlueBrain/Brayns/pull/598)
+- Add a target state to the camera. Bug fixes. [\#597](https://github.com/BlueBrain/Brayns/pull/597)
+- Transfer function per model [\#594](https://github.com/BlueBrain/Brayns/pull/594)
+- Replaced lookat, target, position by quaternion, position in the camera [\#591](https://github.com/BlueBrain/Brayns/pull/591)
+- Moving to OSPRay 1.7.x [\#589](https://github.com/BlueBrain/Brayns/pull/589)
+- Use rockets python client [\#587](https://github.com/BlueBrain/Brayns/pull/587)
+- Clip planes in ortho camera and new API [\#576](https://github.com/BlueBrain/Brayns/pull/576)
+
+**Fixed bugs:**
+
+- If all spheres centers are coplanar in an XYZ file, nothing gets rendererd. [\#588](https://github.com/BlueBrain/Brayns/issues/588)
+- Fix rounding issue when converting to RGB during streaming [\#730](https://github.com/BlueBrain/Brayns/pull/730)
+- Increase timer resolution to fix FPS numbers [\#721](https://github.com/BlueBrain/Brayns/pull/721)
+- Provide customized obj importer to overcome 256MB limit [\#719](https://github.com/BlueBrain/Brayns/pull/719)
+- Workaround for https://github.com/assimp/assimp/issues/2337 [\#717](https://github.com/BlueBrain/Brayns/pull/717)
+- Fix tracking glasses x-axis inversion [\#716](https://github.com/BlueBrain/Brayns/pull/716)
+- fix\(js\): prevent file select dialog open on space/enter [\#715](https://github.com/BlueBrain/Brayns/pull/715)
+- fix\(js\): do not throw when image decoding fails [\#713](https://github.com/BlueBrain/Brayns/pull/713)
+- fix\(js\): fix clip plane update [\#708](https://github.com/BlueBrain/Brayns/pull/708)
+- Fix Rockets deadlock in plugins [\#696](https://github.com/BlueBrain/Brayns/pull/696)
+- fix\(js\): ignore app bar height when calculating default snapshot height [\#689](https://github.com/BlueBrain/Brayns/pull/689)
+- fix\(js\): add temp fix for horizontal scroll due to sliders [\#683](https://github.com/BlueBrain/Brayns/pull/683)
+- Fix wrong mesh progress reporting and subsequent crash [\#668](https://github.com/BlueBrain/Brayns/pull/668)
+- Fix crash when updating property map from UI [\#631](https://github.com/BlueBrain/Brayns/pull/631)
+- Fix crash with RocketsPlugin and VRPNPlugin loaded [\#630](https://github.com/BlueBrain/Brayns/pull/630)
+- Enforce consistent stream ID when using DeflectPixelOp [\#615](https://github.com/BlueBrain/Brayns/pull/615)
+
+**Closed issues:**
+
+- Remove geometry params in favor of generic loader properties [\#500](https://github.com/BlueBrain/Brayns/issues/500)
+- Port "Circuit Viewer" use case from RTNeuron to Brayns [\#372](https://github.com/BlueBrain/Brayns/issues/372)
+
+**Merged pull requests:**
+
+- refactor\(js\): move request notifications to the bottom of the window [\#676](https://github.com/BlueBrain/Brayns/pull/676)
+- Removed Model::createMissingMaterials [\#672](https://github.com/BlueBrain/Brayns/pull/672)
+- Remove legacy scene cache file support [\#660](https://github.com/BlueBrain/Brayns/pull/660)
+
 ## [0.7.1](https://github.com/BlueBrain/Brayns/tree/0.7.1) (26-09-2018)
 
 **Implemented enhancements:**

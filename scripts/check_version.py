@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import configparser
 import json
-import sys
 import urllib.request
 
 config = configparser.ConfigParser()
