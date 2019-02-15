@@ -22,10 +22,6 @@
 #include <brayns/Brayns.h>
 #include <brayns/common/Timer.h>
 
-#if defined(_WIN32)
-#include <windows.h>
-#endif
-
 #ifndef __APPLE__
 #include <GL/glew.h>
 #if defined(_WIN32)

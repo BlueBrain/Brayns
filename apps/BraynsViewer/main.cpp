@@ -28,7 +28,9 @@
 
 #include <deps/glfw/include/GLFW/glfw3.h>
 
-Application* appInstance;
+#include <cstdlib>
+
+Application* appInstance = nullptr;
 
 void cleanup()
 {
@@ -73,7 +75,7 @@ int run(brayns::Brayns& brayns)
     if (!glfwInit())
     {
         errorCallback(1, "GLFW failed to initialize.");
-        return 1;
+        return EXIT_FAILURE;
     }
 
     const std::string windowTitle =
@@ -87,7 +89,7 @@ int run(brayns::Brayns& brayns)
     {
         errorCallback(2, "glfwCreateWindow() failed.");
         glfwTerminate();
-        return 2;
+        return EXIT_FAILURE;
     }
 
     glfwMakeContextCurrent(window);
@@ -96,7 +98,7 @@ int run(brayns::Brayns& brayns)
     {
         errorCallback(3, "GLEW failed to initialize.");
         glfwTerminate();
-        return 3;
+        return EXIT_FAILURE;
     }
 
     appInstance = new Application(brayns, window, windowWidth, windowHeight);
@@ -111,14 +113,7 @@ int run(brayns::Brayns& brayns)
     std::array<int, 2> windowSizePrev;
     bool fullscreen = false;
 
-    // Main loop
-    while (!glfwWindowShouldClose(window))
-    {
-        g_app.timerEnd();
-        g_app.timerBegin();
-        if (g_app.exitCalled())
-            break;
-
+    const auto toggleFullscreen = [&]() {
         const bool fullscreenCurr = g_app.isFullScreen();
 
         if (fullscreen != fullscreenCurr)
@@ -149,6 +144,18 @@ int run(brayns::Brayns& brayns)
 
             fullscreen = fullscreenCurr;
         }
+    };
+
+    // Main loop
+    while (!glfwWindowShouldClose(window))
+    {
+        g_app.timerEnd();
+        g_app.timerBegin();
+
+        if (g_app.exitCalled())
+            break;
+
+        toggleFullscreen();
 
         glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
 
@@ -166,7 +173,7 @@ int run(brayns::Brayns& brayns)
 
     glfwTerminate();
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 int main(int argc, const char** argv)
@@ -180,7 +187,7 @@ int main(int argc, const char** argv)
     catch (const std::runtime_error& e)
     {
         BRAYNS_ERROR << e.what() << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
-    return 0;
+    return EXIT_SUCCESS;
 }
