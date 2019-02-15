@@ -389,9 +389,10 @@ bool OSPRayModel::_commitSimulationData()
         auto& ap = _animationParameters;
         ap.setIsReadyCallback(
             [handler = _simulationHandler] { return handler->isReady(); });
-        ap.setDt(_simulationHandler->getDt());
-        ap.setUnit(_simulationHandler->getUnit());
-        ap.setNumFrames(_simulationHandler->getNbFrames());
+        ap.setDt(_simulationHandler->getDt(), false);
+        ap.setUnit(_simulationHandler->getUnit(), false);
+        ap.setNumFrames(_simulationHandler->getNbFrames(), false);
+        ap.markModified();
         _setIsReadyCallback = true;
     }
 
