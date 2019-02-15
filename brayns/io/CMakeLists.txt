@@ -36,7 +36,7 @@ if(BRAYNS_ASSIMP_ENABLED)
     )
   endif()
   if(assimp_VERSION VERSION_LESS 4)
-    list(APPEND BRAYNSIO_SOURCES assimp/DefaultIOSystem.cpp assimp/DefaultIOStream.cpp)
+    list(APPEND BRAYNSIO_SOURCES assimp/DefaultIOStream.cpp)
   endif()
   list(APPEND BRAYNSIO_PUBLIC_HEADERS MeshLoader.h)
   list(APPEND BRAYNSIO_LINK_LIBRARIES

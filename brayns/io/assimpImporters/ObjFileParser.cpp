@@ -47,8 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjFileMtlImporter.h"
 #include "ObjTools.h"
 #include "ParsingUtils.h"
-#include <assimp/DefaultIOSystem.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/IOSystem.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/material.h>
 #include <cstdlib>
