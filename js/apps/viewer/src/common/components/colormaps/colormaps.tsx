@@ -49,7 +49,8 @@ export default class ColormapAutocomplete extends PureComponent<ColormapAutocomp
             <Autocomplete
                 {...inputProps}
                 suggestions={suggestions}
-                placeholder="Colormap"
+                label="Colormap"
+                helperText="Type a colormap name to see available options"
                 onInputValueChange={this.search}
                 value={startCase(value)}
                 onChange={this.onChange}

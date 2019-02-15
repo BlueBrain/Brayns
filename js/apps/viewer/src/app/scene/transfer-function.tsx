@@ -20,6 +20,7 @@ import {
     withStyles,
     WithStyles
 } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
 
 import brayns, {onReady} from '../../common/client';
 import {
@@ -138,8 +139,13 @@ export class ModelTransferFunction extends PureComponent<Props, State> {
                     disabled={disabled}
                 />
 
+                <Typography variant="caption" color="textSecondary">
+                    * Click and drag to move points, click to add or hold SHIFT and click to remove them
+                </Typography>
+
                 <div className={classes.range}>
                     <NumericField
+                        label="Min"
                         value={min}
                         onChange={this.updateRange('min')}
                         className={classes.gutterRight}
@@ -148,6 +154,7 @@ export class ModelTransferFunction extends PureComponent<Props, State> {
                     />
 
                     <NumericField
+                        label="Max"
                         value={max}
                         onChange={this.updateRange('max')}
                         margin="normal"
