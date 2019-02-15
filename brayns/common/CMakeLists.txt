@@ -19,6 +19,7 @@ set(BRAYNSCOMMON_SOURCES
   utils/DynamicLib.cpp
   utils/imageUtils.cpp
   utils/utils.cpp
+  Timer.cpp
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
