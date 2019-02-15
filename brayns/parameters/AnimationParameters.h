@@ -48,17 +48,24 @@ public:
     /** The (frame) delta to apply for animations to select the next frame. */
     void setDelta(const int32_t delta);
     int32_t getDelta() const { return _delta; }
-    void setNumFrames(const uint32_t numFrames)
+    void setNumFrames(const uint32_t numFrames,
+                      const bool triggerCallback = true)
     {
-        _updateValue(_numFrames, numFrames);
-        _updateValue(_current, std::min(_current, _numFrames));
+        _updateValue(_numFrames, numFrames, triggerCallback);
+        _updateValue(_current, std::min(_current, _numFrames), triggerCallback);
     }
     uint32_t getNumFrames() const { return _numFrames; }
     /** The dt of a simulation. */
-    void setDt(const double dt) { _updateValue(_dt, dt); }
+    void setDt(const double dt, const bool triggerCallback = true)
+    {
+        _updateValue(_dt, dt, triggerCallback);
+    }
     double getDt() const { return _dt; }
     /** The time unit of a simulation. */
-    void setUnit(const std::string& unit) { _updateValue(_unit, unit); }
+    void setUnit(const std::string& unit, const bool triggerCallback = true)
+    {
+        _updateValue(_unit, unit, triggerCallback);
+    }
     using IsReadyCallback = std::function<bool()>;
 
     /**
