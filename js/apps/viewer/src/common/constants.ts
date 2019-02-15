@@ -1,6 +1,6 @@
 export const TOOLTIP_DELAY = {
-    enterDelay: 750,
-    leaveDelay: 150
+    enterDelay: 25,
+    leaveDelay: 50
 };
 
 export const APP_BAR_HEIGHT_XS = 56;
