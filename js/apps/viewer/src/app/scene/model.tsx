@@ -14,10 +14,12 @@ import {
     withStyles,
     WithStyles
 } from '@material-ui/core/styles';
+import Tooltip from '@material-ui/core/Tooltip';
 import EditIcon from '@material-ui/icons/Edit';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import InfoIcon from '@material-ui/icons/Info';
 
+import {TOOLTIP_DELAY} from '../../common/constants';
 import {ModelId} from './types';
 
 
@@ -118,39 +120,51 @@ export class Model extends PureComponent<Props, State> {
         };
 
         const editAction = (
-            <IconButton
-                onClick={this.showEditor}
-                onMouseEnter={this.toggleButtonFocus}
-                onMouseLeave={this.toggleButtonFocus}
-                disabled={disabled}
-                aria-label="Edit model"
-            >
-                <EditIcon />
-            </IconButton>
+            <Tooltip title={'Edit'} placement="left" {...TOOLTIP_DELAY}>
+                <div>
+                    <IconButton
+                        onClick={this.showEditor}
+                        onMouseEnter={this.toggleButtonFocus}
+                        onMouseLeave={this.toggleButtonFocus}
+                        disabled={disabled}
+                        aria-label="Edit model"
+                    >
+                        <EditIcon />
+                    </IconButton>
+                </div>
+            </Tooltip>
         );
 
         const infoAction = hasMetadata ? (
-            <IconButton
-                onClick={this.showInfo}
-                onMouseEnter={this.toggleButtonFocus}
-                onMouseLeave={this.toggleButtonFocus}
-                disabled={disabled}
-                aria-label="Show model info"
-            >
-                <InfoIcon />
-            </IconButton>
+            <Tooltip title={'Show info'} placement="bottom" {...TOOLTIP_DELAY}>
+                <div>
+                    <IconButton
+                        onClick={this.showInfo}
+                        onMouseEnter={this.toggleButtonFocus}
+                        onMouseLeave={this.toggleButtonFocus}
+                        disabled={disabled}
+                        aria-label="Show model info"
+                    >
+                        <InfoIcon />
+                    </IconButton>
+                </div>
+            </Tooltip>
         ) : null;
 
         const focusAction = (
-            <IconButton
-                onClick={this.focus}
-                onMouseEnter={this.toggleButtonFocus}
-                onMouseLeave={this.toggleButtonFocus}
-                disabled={disabled || (!visible && !boundingBox)}
-                aria-label="Focus model"
-            >
-                <MyLocationIcon />
-            </IconButton>
+            <Tooltip title={'Focus'} placement="bottom" {...TOOLTIP_DELAY}>
+                <div>
+                    <IconButton
+                        onClick={this.focus}
+                        onMouseEnter={this.toggleButtonFocus}
+                        onMouseLeave={this.toggleButtonFocus}
+                        disabled={disabled || (!visible && !boundingBox)}
+                        aria-label="Focus model"
+                    >
+                        <MyLocationIcon />
+                    </IconButton>
+                </div>
+            </Tooltip>
         );
 
         return (
@@ -178,8 +192,8 @@ export class Model extends PureComponent<Props, State> {
                 <Fade in={showActions} unmountOnExit>
                     <ListItemSecondaryAction className={classes.modelActions}>
                         {editAction}
-                        {infoAction}
                         {focusAction}
+                        {infoAction}
                     </ListItemSecondaryAction>
                 </Fade>
             </ListItem>
