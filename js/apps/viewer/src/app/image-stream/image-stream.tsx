@@ -144,11 +144,6 @@ export class ImageStream extends Component<Props> {
         ]);
     }
 
-    // We don't need re-renders for this component
-    shouldComponentUpdate() {
-        return false;
-    }
-
     componentWillUnmount() {
         for (const sub of this.subs) {
             sub.unsubscribe();
