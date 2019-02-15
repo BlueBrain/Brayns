@@ -776,8 +776,7 @@ public:
             auto errorCallback = [&, respond](const TaskRuntimeError& error) {
                 const Response response(
                     Response::Error{error.what(), error.code, error.data});
-                std::lock_guard<std::mutex> lock(_delayedNotifiesMutex);
-                _delayedNotifies.push_back(
+                this->_delayedNotify(
                     [respond, response] { respond(response); });
             };
 
@@ -785,10 +784,9 @@ public:
             {
                 // transform task result to rockets response
                 auto readyCallback = [&, respond](const R& result) {
-                    std::lock_guard<std::mutex> lock(_delayedNotifiesMutex);
                     try
                     {
-                        _delayedNotifies.push_back(
+                        this->_delayedNotify(
                             [respond, result] { respond({to_json(result)}); });
                     }
                     catch (const std::runtime_error& e)
@@ -796,7 +794,7 @@ public:
                         const Response response(
                             Response::Error{e.what(),
                                             TASK_RESULT_TO_JSON_ERROR});
-                        _delayedNotifies.push_back(
+                        this->_delayedNotify(
                             [respond, response] { respond(response); });
                     }
                 };
