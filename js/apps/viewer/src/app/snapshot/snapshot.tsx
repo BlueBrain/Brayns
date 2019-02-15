@@ -7,18 +7,17 @@ import React, {
 import {ImageFormat, SNAPSHOT} from 'brayns';
 import classNames from 'classnames';
 import {isNumber} from 'lodash';
-import {Subscription} from 'rxjs';
 import saveFile from 'save-as-file';
 
-import {PropTypes} from '@material-ui/core';
 import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
-import IconButton from '@material-ui/core/IconButton';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -31,9 +30,7 @@ import {
 } from '@material-ui/core/styles';
 import {Breakpoint} from '@material-ui/core/styles/createBreakpoints';
 import TextField from '@material-ui/core/TextField';
-import Tooltip from '@material-ui/core/Tooltip';
 import withWidth, {isWidthDown, WithWidth} from '@material-ui/core/withWidth';
-import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 
 import brayns, {
     withAnimation,
@@ -46,20 +43,16 @@ import brayns, {
     WithRenderer
 } from '../../common/client';
 import {NumericField, SlideUp} from '../../common/components';
-import {
-    APP_BAR_HEIGHT,
-    APP_BAR_HEIGHT_XS,
-    KeyCode,
-    TOOLTIP_DELAY
-} from '../../common/constants';
+import {APP_BAR_HEIGHT, APP_BAR_HEIGHT_XS} from '../../common/constants';
 import {
     dispatchKeyboardLock,
     dispatchNotification,
     dispatchRequest,
-    onKeyboardLockChange,
     onRequestCancel
 } from '../../common/events';
 
+
+const DIALOG_TITLE_ID = 'snapshot-dialog-title';
 
 const fileTypes = Object.values(ImageFormat)
     .map(type => <MenuItem key={type} value={type}>{type}</MenuItem>);
@@ -97,43 +90,38 @@ const style = withStyles(styles);
 
 export class Snapshot extends Component<Props, State> {
     state: State = {
-        ...defaultSize(this.props.width),
+        ...getViewportSize(this.props.width),
         data: undefined,
-        canShowSnackBar: true,
-        showDialog: false,
         quality: 100,
         samplesPerPixel: 8,
         filename: '',
-        format: ImageFormat.Jpeg
+        format: ImageFormat.Jpeg,
+        useViewport: true
     };
-
-    private keyboardLocked = false;
-    private subs: Subscription[] = [];
 
     takeSnapshot = async () => {
         const {
             filename,
-            width,
-            height,
             quality,
             samplesPerPixel,
             format
         } = this.state;
 
+        const {width, height} = getSnapshotSize(this.state, this.props.width);
+        const size = [width, height];
+
         dispatchKeyboardLock(false);
-        this.setState({
-            showDialog: false
-        });
+        this.props.onClose();
 
         const snapshot = brayns.request(SNAPSHOT, {
             format,
             quality,
             samplesPerPixel,
+            size,
             camera: this.props.camera,
             renderer: this.props.renderer,
             animationParameters: this.props.animationParams,
-            name: `${filename}.${format}`,
-            size: [width, height] as number[]
+            name: `${filename}.${format}`
         } as any);
 
         const sub = onRequestCancel(snapshot)
@@ -154,47 +142,10 @@ export class Snapshot extends Component<Props, State> {
             saveFile(blob, `${filename}.${format}`);
 
             sub.unsubscribe();
-
-            // Reset state
-            this.reset();
         } catch (err) {
             dispatchNotification(err);
             sub.unsubscribe();
         }
-    }
-    reset = () => {
-        // Reset the state
-        this.setState({
-            ...defaultSize(this.props.width),
-            canShowSnackBar: true,
-            filename: '',
-            format: ImageFormat.Jpeg,
-            quality: 100,
-            samplesPerPixel: 8
-        });
-    }
-
-    openDialog = () => {
-        dispatchKeyboardLock(true);
-        this.setState({
-            ...defaultSize(this.props.width),
-            showDialog: true
-        });
-    }
-    openDialogOnKeydown = (evt: KeyboardEvent) => {
-        if (this.props.online && evt.keyCode === KeyCode.S && evt.shiftKey && !this.keyboardLocked) {
-            this.openDialog();
-        }
-    }
-    closeDialog = () => {
-        dispatchKeyboardLock(false);
-        this.setState({
-            showDialog: false
-        });
-    }
-
-    closeSnackBar = () => {
-        this.reset();
     }
 
     updateFileType = (evt: ChangeEvent<HTMLSelectElement>) => {
@@ -214,7 +165,7 @@ export class Snapshot extends Component<Props, State> {
     updateFromNumber = (key: keyof Pick<State, 'width' | 'height' | 'samplesPerPixel' | 'quality'>) => (value: number) => {
         this.setState({
             [key]: value
-        });
+        } as any);
     }
 
     updateWidth = this.updateFromNumber('width');
@@ -228,48 +179,33 @@ export class Snapshot extends Component<Props, State> {
         });
     }
 
-    componentDidMount() {
-        window.addEventListener('keydown', this.openDialogOnKeydown, false);
-        this.subs.push(...[
-            onKeyboardLockChange()
-                .subscribe(locked => {
-                    this.keyboardLocked = locked;
-                })
-        ]);
-    }
-    componentWillUnmount() {
-        window.removeEventListener('keydown', this.openDialogOnKeydown);
-        while (this.subs.length) {
-            const sub = this.subs.pop();
-            sub!.unsubscribe();
-        }
+    toggleUseViewport = (evt: ChangeEvent<HTMLInputElement>, useViewport: boolean) => {
+        this.setState({useViewport});
     }
 
     render() {
         const {
-            color = 'default',
             online,
             classes,
-            width
+            width: screenWidth,
+            open,
+            onClose
         } = this.props;
         const {
-            showDialog,
             filename,
             samplesPerPixel,
             format,
             quality,
-            width: snapshotWidth,
-            height
+            useViewport
         } = this.state;
 
-        const fullScreen = isWidthDown('xs', width);
+        const fullScreen = isWidthDown('xs', screenWidth);
+
+        const {width, height} = getSnapshotSize(this.state, screenWidth);
 
         const offline = !online;
         const hasFilenameError = !filename || !filename.length;
         const isGenerateProhibited = offline || hasFilenameError;
-
-        const dialogTitle = 'Take a snapshot';
-        const dialogTitleId = 'snapshot-dialog-title';
 
         const filenameHelperText = hasFilenameError ? 'Required' : '';
 
@@ -298,101 +234,102 @@ export class Snapshot extends Component<Props, State> {
             );
         }
 
-        return (
-            <div>
-                <Tooltip title={dialogTitle} placement="bottom" {...TOOLTIP_DELAY}>
-                    <div>
-                        <IconButton
-                            onClick={this.openDialog}
-                            color={color}
-                            aria-label={dialogTitle}
-                            disabled={offline}
-                        >
-                            <PhotoCameraIcon />
-                        </IconButton>
-                    </div>
-                </Tooltip>
-                <Dialog
-                    open={showDialog as boolean}
-                    classes={{paper: classes.dialog}}
-                    onClose={this.closeDialog}
-                    TransitionComponent={SlideUp}
-                    aria-labelledby={dialogTitleId}
-                    fullScreen={fullScreen}
-                >
-                    <DialogTitle id={dialogTitleId}>Snapshot</DialogTitle>
-                    <DialogContent>
-                        <FormGroup row>
-                            <NumericField
-                                label="Width"
-                                className={classNames(classes.flex, classes.marginRight)}
-                                value={snapshotWidth}
-                                onChange={this.updateWidth}
-                                type="integer"
-                                min={sizeInputProps.min}
-                                max={sizeInputProps.max}
-                                step={sizeInputProps.step}
-                                margin="normal"
-                                noSlider
-                            />
+        const checkbox = (
+            <Checkbox
+                checked={useViewport}
+                onChange={this.toggleUseViewport}
+            />
+        );
 
-                            <NumericField
-                                label="Height"
-                                className={classes.flex}
-                                value={height}
-                                onChange={this.updateHeight}
-                                type="integer"
-                                min={sizeInputProps.min}
-                                max={sizeInputProps.max}
-                                step={sizeInputProps.step}
-                                margin="normal"
-                                noSlider
-                            />
-                        </FormGroup>
-                        <FormGroup>
-                            <NumericField
-                                label="Samples"
-                                value={samplesPerPixel}
-                                onChange={this.updateSppx}
-                                type="integer"
-                                step={1}
-                                margin="normal"
-                                fullWidth
-                            />
-                        </FormGroup>
-                        <FormGroup row>
-                            <TextField
-                                id="snapshot-filename"
-                                className={classes.marginRight}
-                                style={{flex: 3}}
-                                type="text"
-                                value={filename}
-                                onChange={this.updateFilename}
-                                margin="normal"
-                                label="File name"
-                                helperText={filenameHelperText}
-                                error={hasFilenameError}
-                                required
-                            />
-                            <FormControl className={classes.flex} margin="normal">
-                                <InputLabel htmlFor="snapshot-format">Format</InputLabel>
-                                <Select value={format} onChange={this.updateFileType} input={<Input id="snapshot-format" />}>
-                                    {fileTypes}
-                                </Select>
-                            </FormControl>
-                        </FormGroup>
-                        {qualityField}
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={this.closeDialog}>
-                            Cancel
-                        </Button>
-                        <Button onClick={this.takeSnapshot} color="primary" disabled={isGenerateProhibited}>
-                            Take
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-            </div>
+        return (
+            <Dialog
+                open={open}
+                classes={{paper: classes.dialog}}
+                onClose={onClose}
+                TransitionComponent={SlideUp}
+                aria-labelledby={DIALOG_TITLE_ID}
+                fullScreen={fullScreen}
+            >
+                <DialogTitle id={DIALOG_TITLE_ID}>Snapshot</DialogTitle>
+                <DialogContent>
+                    <FormGroup row>
+                        <NumericField
+                            label="Width"
+                            className={classNames(classes.flex, classes.marginRight)}
+                            value={width}
+                            onChange={this.updateWidth}
+                            type="integer"
+                            min={sizeInputProps.min}
+                            max={sizeInputProps.max}
+                            step={sizeInputProps.step}
+                            margin="normal"
+                            disabled={useViewport}
+                            noSlider
+                        />
+
+                        <NumericField
+                            label="Height"
+                            className={classes.flex}
+                            value={height}
+                            onChange={this.updateHeight}
+                            type="integer"
+                            min={sizeInputProps.min}
+                            max={sizeInputProps.max}
+                            step={sizeInputProps.step}
+                            margin="normal"
+                            disabled={useViewport}
+                            noSlider
+                        />
+                    </FormGroup>
+                    <FormGroup row>
+                        <FormControlLabel
+                            control={checkbox}
+                            label="Use current viewport size"
+                        />
+                    </FormGroup>
+                    <FormGroup>
+                        <NumericField
+                            label="Samples"
+                            value={samplesPerPixel}
+                            onChange={this.updateSppx}
+                            type="integer"
+                            step={1}
+                            margin="normal"
+                            fullWidth
+                        />
+                    </FormGroup>
+                    <FormGroup row>
+                        <TextField
+                            id="snapshot-filename"
+                            className={classes.marginRight}
+                            style={{flex: 3}}
+                            type="text"
+                            value={filename}
+                            onChange={this.updateFilename}
+                            margin="normal"
+                            label="File name"
+                            helperText={filenameHelperText}
+                            error={hasFilenameError}
+                            required
+                        />
+                        <FormControl className={classes.flex} margin="normal">
+                            <InputLabel htmlFor="snapshot-format">Format</InputLabel>
+                            <Select value={format} onChange={this.updateFileType} input={<Input id="snapshot-format" />}>
+                                {fileTypes}
+                            </Select>
+                        </FormControl>
+                    </FormGroup>
+                    {qualityField}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={onClose}>
+                        Cancel
+                    </Button>
+                    <Button onClick={this.takeSnapshot} color="primary" disabled={isGenerateProhibited}>
+                        Take
+                    </Button>
+                </DialogActions>
+            </Dialog>
         );
     }
 }
@@ -413,10 +350,14 @@ function setMimeType(data: string, format?: ImageFormat) {
     return data;
 }
 
-function defaultSize(currentWidth: Breakpoint): {
-    width: number;
-    height: number;
-} {
+function getSnapshotSize(state: State, screenWidth: Breakpoint): SnapshotSize {
+    return state.useViewport ? getViewportSize(screenWidth) : {
+        width: state.width,
+        height: state.height
+    };
+}
+
+function getViewportSize(currentWidth: Breakpoint): SnapshotSize {
     const [width, height] = [
         window.innerWidth,
         window.innerHeight - (isWidthDown('xs', currentWidth) ? APP_BAR_HEIGHT_XS : APP_BAR_HEIGHT)
@@ -459,17 +400,22 @@ interface Props extends WithStyles<typeof styles>,
     WithCamera,
     WithRenderer,
     WithAnimation {
-    color?: PropTypes.Color;
+    open: boolean;
+    onClose(): void;
 }
 
 interface State {
+    width: number;
+    height: number;
     data?: string;
-    showDialog?: boolean;
-    canShowSnackBar?: boolean;
     filename?: string;
-    width?: number;
-    height?: number;
     samplesPerPixel?: number;
     format?: ImageFormat;
     quality?: number;
+    useViewport?: boolean;
+}
+
+interface SnapshotSize {
+    width: number;
+    height: number;
 }
