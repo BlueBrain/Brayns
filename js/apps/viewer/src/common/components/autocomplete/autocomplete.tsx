@@ -48,11 +48,12 @@ let popperNode: HTMLElement | null;
 function Autocomplete(props: AutocompleteProps) {
     const {
         classes,
-        placeholder,
+        label,
         onInputValueChange,
         onChange,
         suggestions,
         value,
+        helperText,
         disabled,
         fullWidth,
         margin
@@ -60,8 +61,9 @@ function Autocomplete(props: AutocompleteProps) {
 
     const children = createDownshiftChildren({
         classes,
-        placeholder,
+        label,
         suggestions,
+        helperText,
         disabled,
         fullWidth,
         margin
@@ -85,13 +87,12 @@ export default style(memo(Autocomplete));
 export interface AutocompleteProps extends WithStyles<typeof styles>, AutocompleteInputProps {
     suggestions: string[];
     value?: string;
-    placeholder?: string;
     onInputValueChange?(value: string): void;
     onChange?(item: string): void;
 }
 
 
-function createDownshiftChildren({classes, placeholder, suggestions, ...inputProps}: DownshiftRenderArgs): ChildrenFunction<string> {
+function createDownshiftChildren({classes, suggestions, ...inputProps}: DownshiftRenderArgs): ChildrenFunction<string> {
     return ({
         getInputProps,
         getItemProps,
@@ -103,7 +104,7 @@ function createDownshiftChildren({classes, placeholder, suggestions, ...inputPro
         const input = renderInput({
             ...inputProps,
             classes,
-            InputProps: getInputProps({placeholder})
+            InputProps: getInputProps()
         });
         const menuProps = getMenuProps({}, {suppressRefError: true});
         const paperStyle = popperNode ? {width: popperNode.clientWidth} : {};
@@ -180,12 +181,11 @@ function renderInput(inputProps: InputRenderArgs) {
 }
 
 
-export type AutocompleteInputProps = Pick<InputRenderArgs, 'disabled' | 'margin' | 'fullWidth'>;
+export type AutocompleteInputProps = Pick<InputRenderArgs, 'label' | 'helperText' | 'disabled' | 'margin' | 'fullWidth'>;
 
 interface DownshiftRenderArgs extends AutocompleteInputProps {
     classes: Record<'container' | 'paper' | 'popper' | 'inputRoot' | 'inputInput', string>;
     suggestions: string[];
-    placeholder?: string;
 }
 
 interface SuggestionRenderArgs {
@@ -199,6 +199,8 @@ interface SuggestionRenderArgs {
 interface InputRenderArgs {
     classes: Record<'inputRoot' | 'inputInput', string>;
     InputProps: InputBaseProps;
+    label?: TextFieldProps['label'];
+    helperText?: TextFieldProps['helperText'];
     disabled?: TextFieldProps['disabled'];
     fullWidth?: TextFieldProps['fullWidth'];
     margin?: TextFieldProps['margin'];

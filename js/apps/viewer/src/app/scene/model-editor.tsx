@@ -144,6 +144,23 @@ export class ModelEditor extends PureComponent<Props, State> {
                 </ExpansionPanel>
 
                 <ExpansionPanel
+                    expanded={expanded === 'tf'}
+                    classes={{root: classes.panel}}
+                    onChange={this.createPanelToggleHandler('tf')}
+                    elevation={0}
+                >
+                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography>Transfer function</Typography>
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails>
+                        <TransferFunction
+                            id={id!}
+                            disabled={disabled}
+                        />
+                    </ExpansionPanelDetails>
+                </ExpansionPanel>
+
+                <ExpansionPanel
                     expanded={expanded === 'transform'}
                     classes={{root: classes.panel}}
                     onChange={this.createPanelToggleHandler('transform')}
@@ -159,23 +176,6 @@ export class ModelEditor extends PureComponent<Props, State> {
                             scale={scale}
                             translation={translation}
                             onChange={this.updateTranformation}
-                            disabled={disabled}
-                        />
-                    </ExpansionPanelDetails>
-                </ExpansionPanel>
-
-                <ExpansionPanel
-                    expanded={expanded === 'tf'}
-                    classes={{root: classes.panel}}
-                    onChange={this.createPanelToggleHandler('tf')}
-                    elevation={0}
-                >
-                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                        <Typography>Transfer function</Typography>
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails>
-                        <TransferFunction
-                            id={id!}
                             disabled={disabled}
                         />
                     </ExpansionPanelDetails>
