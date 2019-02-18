@@ -16,8 +16,8 @@ import {
 } from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import EditIcon from '@material-ui/icons/Edit';
-import MyLocationIcon from '@material-ui/icons/MyLocation';
 import InfoIcon from '@material-ui/icons/Info';
+import MyLocationIcon from '@material-ui/icons/MyLocation';
 
 import {TOOLTIP_DELAY} from '../../common/constants';
 import {ModelId} from './types';
