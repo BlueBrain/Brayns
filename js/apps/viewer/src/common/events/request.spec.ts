@@ -73,10 +73,7 @@ describe('dispatchRequest()', () => {
 
         source.complete();
 
-        expect(mockDispatchEvent).toHaveBeenCalledWith(REQUEST_DONE, {
-            request,
-            error: false
-        });
+        expect(mockDispatchEvent).toHaveBeenCalledWith(REQUEST_DONE, {request});
     });
 
     it('dispatches a request complete event with the request when the request throws', () => {
