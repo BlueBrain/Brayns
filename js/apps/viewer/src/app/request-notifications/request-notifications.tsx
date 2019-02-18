@@ -133,8 +133,7 @@ const styles = (theme: Theme) => createStyles({
         position: 'absolute',
         top: 12,
         left: 12,
-        zIndex: -2,
-        color: theme.palette.text.primary
+        zIndex: -2
     },
     successColor: {
         color: green[500]
@@ -361,7 +360,7 @@ function renderNotifications({
                         <CircularProgress
                             className={classes.progress}
                             variant="static"
-                            color="inherit"
+                            color="primary"
                             value={amount}
                             thickness={4}
                             size={24}
