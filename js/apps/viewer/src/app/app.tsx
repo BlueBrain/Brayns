@@ -62,7 +62,6 @@ import {
 } from '../common/constants';
 import {
     dispatchKeyboardLock,
-    dispatchNotification,
     dispatchRequest,
     onKeyboardLockChange,
     onRequestCancel
@@ -409,9 +408,7 @@ class App extends PureComponent<Props, State> {
 
             try {
                 await load;
-            } catch (err) {
-                dispatchNotification(err);
-            }
+            } catch {} // tslint:disable-line: no-empty
 
             sub.unsubscribe();
         }

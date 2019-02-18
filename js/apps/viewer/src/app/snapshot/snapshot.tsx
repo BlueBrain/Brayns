@@ -46,7 +46,6 @@ import {NumericField, SlideUp} from '../../common/components';
 import {APP_BAR_HEIGHT, APP_BAR_HEIGHT_XS} from '../../common/constants';
 import {
     dispatchKeyboardLock,
-    dispatchNotification,
     dispatchRequest,
     onRequestCancel
 } from '../../common/events';
@@ -140,12 +139,9 @@ export class Snapshot extends Component<Props, State> {
 
             // Save data as file
             saveFile(blob, `${filename}.${format}`);
+        } catch {} // tslint:disable-line: no-empty
 
-            sub.unsubscribe();
-        } catch (err) {
-            dispatchNotification(err);
-            sub.unsubscribe();
-        }
+        sub.unsubscribe();
     }
 
     updateFileType = (evt: ChangeEvent<HTMLSelectElement>) => {
