@@ -26,163 +26,22 @@
 #include <brayns/parameters/ApplicationParameters.h>
 #include <brayns/parameters/ParametersManager.h>
 
-#include <deps/glfw/include/GLFW/glfw3.h>
-
 #include <cstdlib>
-
-Application* appInstance = nullptr;
-
-void cleanup()
-{
-    delete appInstance;
-}
-
-static void errorCallback(int error, const char* description)
-{
-    std::cerr << "Error: " << error << ": " << description << std::endl;
-}
-
-static void keyCallback(GLFWwindow* /*window*/, int key, int /*scancode*/,
-                        int action, int /*mods*/)
-{
-    appInstance->keyCallback(key, action);
-}
-
-static void cursorCallback(GLFWwindow* /*window*/, double xpos, double ypos)
-{
-    appInstance->cursorCallback(xpos, ypos);
-}
-
-static void mouseButtonCallback(GLFWwindow* /*window*/, int button, int action,
-                                int /*mods*/)
-{
-    appInstance->mouseButtonCallback(button, action);
-}
-
-static void scrollCallback(GLFWwindow* /*window*/, double xoffset,
-                           double yoffset)
-{
-    appInstance->scrollCallback(xoffset, yoffset);
-}
-
-int run(brayns::Brayns& brayns)
-{
-    int windowWidth = 800;
-    int windowHeight = 600;
-
-    glfwSetErrorCallback(errorCallback);
-
-    if (!glfwInit())
-    {
-        errorCallback(1, "GLFW failed to initialize.");
-        return EXIT_FAILURE;
-    }
-
-    const std::string windowTitle =
-        "Brayns Viewer [" +
-        brayns.getParametersManager().getApplicationParameters().getEngine() +
-        "] ";
-
-    GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight,
-                                          windowTitle.c_str(), NULL, NULL);
-    if (!window)
-    {
-        errorCallback(2, "glfwCreateWindow() failed.");
-        glfwTerminate();
-        return EXIT_FAILURE;
-    }
-
-    glfwMakeContextCurrent(window);
-
-    if (glewInit() != GL_NO_ERROR)
-    {
-        errorCallback(3, "GLEW failed to initialize.");
-        glfwTerminate();
-        return EXIT_FAILURE;
-    }
-
-    appInstance = new Application(brayns, window, windowWidth, windowHeight);
-    auto& g_app = *appInstance;
-
-    glfwSetKeyCallback(window, keyCallback);
-    glfwSetCursorPosCallback(window, cursorCallback);
-    glfwSetMouseButtonCallback(window, mouseButtonCallback);
-    glfwSetScrollCallback(window, scrollCallback);
-
-    std::array<int, 2> windowPos;
-    std::array<int, 2> windowSizePrev;
-    bool fullscreen = false;
-
-    const auto toggleFullscreen = [&]() {
-        const bool fullscreenCurr = g_app.isFullScreen();
-
-        if (fullscreen != fullscreenCurr)
-        {
-            if (fullscreenCurr)
-            {
-                // backup window position and window size
-                glfwGetWindowPos(window, &windowPos[0], &windowPos[1]);
-                glfwGetWindowSize(window, &windowSizePrev[0],
-                                  &windowSizePrev[1]);
-
-                auto monitor = glfwGetPrimaryMonitor();
-
-                // get reolution of monitor
-                const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-
-                // switch to full screen
-                glfwSetWindowMonitor(window, monitor, 0, 0, mode->width,
-                                     mode->height, 0);
-            }
-            else
-            {
-                // restore last window size and position
-                glfwSetWindowMonitor(window, nullptr, windowPos[0],
-                                     windowPos[1], windowSizePrev[0],
-                                     windowSizePrev[1], 0);
-            }
-
-            fullscreen = fullscreenCurr;
-        }
-    };
-
-    // Main loop
-    while (!glfwWindowShouldClose(window))
-    {
-        g_app.timerEnd();
-        g_app.timerBegin();
-
-        if (g_app.exitCalled())
-            break;
-
-        toggleFullscreen();
-
-        glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
-
-        g_app.reshape(windowWidth, windowHeight);
-
-        g_app.render();
-        g_app.guiNewFrame();
-        g_app.guiRender();
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
-
-    g_app.guiShutdown();
-
-    glfwTerminate();
-
-    return EXIT_SUCCESS;
-}
 
 int main(int argc, const char** argv)
 {
     try
     {
         brayns::Brayns brayns(argc, argv);
-        atexit(cleanup);
-        run(brayns);
+        auto appInstance = Application::createInstance(brayns);
+        if (!appInstance->init())
+        {
+            Application::destroyInstance();
+            return EXIT_FAILURE;
+        }
+
+        appInstance->run();
+        Application::destroyInstance();
     }
     catch (const std::runtime_error& e)
     {

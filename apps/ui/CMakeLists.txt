@@ -13,7 +13,11 @@ set(BRAYNSUI_PUBLIC_HEADERS
 set(BRAYNSUI_LINK_LIBRARIES
     PUBLIC brayns braynsParameters glm
       ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
-    PRIVATE braynsManipulators ${GLEW_LIBRARIES}
+    PRIVATE braynsManipulators
+    ${OPENGL_gl_LIBRARY}
+    glfw
+    ${GLEW_LIBRARIES}
+    imgui
 )
 
 set(BRAYNSUI_OMIT_EXPORT ON)

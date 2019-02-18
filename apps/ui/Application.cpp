@@ -29,6 +29,15 @@
 #include <brayns/manipulators/AbstractManipulator.h>
 #include <brayns/parameters/ParametersManager.h>
 
+#ifndef __APPLE__
+#include <GL/glew.h>
+#if defined(_WIN32)
+#include <GL/wglew.h>
+#endif
+#endif
+
+#include <GLFW/glfw3.h>
+
 #include <imgui/imconfig.h>
 #include <imgui/imgui.h>
 // NOTE: include samples after imconfig.h and imgui.h
@@ -38,13 +47,87 @@
 #include <algorithm>
 #include <cassert>
 
-Application::Application(brayns::Brayns& brayns, GLFWwindow* window,
-                         const int width, const int height)
-    : m_brayns(brayns)
-    , m_window(window)
-    , m_width(width)
-    , m_height(height)
+Application* appInstance = nullptr;
+
+static void glfwKeyCallback(GLFWwindow* /*window*/, int key, int /*scancode*/,
+                            int action, int /*mods*/)
 {
+    appInstance->keyCallback(key, action);
+}
+
+static void glfwCursorCallback(GLFWwindow* /*window*/, double xpos, double ypos)
+{
+    appInstance->cursorCallback(xpos, ypos);
+}
+
+static void glfwMouseButtonCallback(GLFWwindow* /*window*/, int button,
+                                    int action, int /*mods*/)
+{
+    appInstance->mouseButtonCallback(button, action);
+}
+
+static void glfwScrollCallback(GLFWwindow* /*window*/, double xoffset,
+                               double yoffset)
+{
+    appInstance->scrollCallback(xoffset, yoffset);
+}
+
+static void glfwErrorCallback(int error, const char* description)
+{
+    std::cerr << "GLFW Error: " << error << ": " << description << std::endl;
+}
+
+Application* Application::createInstance(brayns::Brayns& brayns)
+{
+    delete appInstance;
+    appInstance = new Application(brayns);
+    return appInstance;
+}
+
+void Application::destroyInstance()
+{
+    delete appInstance;
+    appInstance = nullptr;
+}
+
+Application::Application(brayns::Brayns& brayns)
+    : m_brayns(brayns)
+{
+}
+
+void Application::reshape()
+{
+    int width = 0;
+    int height = 0;
+    glfwGetFramebufferSize(m_window, &width, &height);
+
+    // Zero sized interop buffers are not allowed in OptiX.
+    if (width == 0 || height == 0 || (m_width == width && m_height == height))
+        return;
+
+    auto& applicationParameters =
+        m_brayns.getParametersManager().getApplicationParameters();
+
+    // In case of 3D stereo vision, make sure the width is even
+    if (applicationParameters.isStereo())
+    {
+        if (width % 2 != 0)
+            width = (width - 1) / 2;
+        else
+            width /= 2;
+    }
+
+    m_width = width;
+    m_height = height;
+    applicationParameters.setWindowSize(
+        brayns::Vector2ui{static_cast<uint32_t>(width),
+                          static_cast<uint32_t>(height)});
+}
+
+bool Application::init()
+{
+    if (!initGLFW())
+        return false;
     initOpenGL();
     initImGUI();
 
@@ -58,41 +141,54 @@ Application::Application(brayns::Brayns& brayns, GLFWwindow* window,
     keyHandler.registerKeyboardShortcut('h', "Toggle help window", [&]() {
         m_displayHelp = !m_displayHelp;
     });
+
+    return true;
 }
 
-Application::~Application()
+bool Application::initGLFW()
 {
-    if (m_fbTexture)
+    const auto ws = m_brayns.getParametersManager()
+                        .getApplicationParameters()
+                        .getWindowSize();
+    const int windowWidth = ws.x;
+    const int windowHeight = ws.y;
+
+    glfwSetErrorCallback(glfwErrorCallback);
+
+    if (!glfwInit())
     {
-        glDeleteTextures(1, &m_fbTexture);
-        m_fbTexture = 0;
+        glfwErrorCallback(1, "GLFW failed to initialize.");
+        return false;
     }
-}
 
-void Application::reshape(int width, int height)
-{
-    if ((width != 0 &&
-         height != 0) && // Zero sized interop buffers are not allowed in OptiX.
-        (m_width != width || m_height != height))
+    const auto engineName =
+        m_brayns.getParametersManager().getApplicationParameters().getEngine();
+    const std::string windowTitle = "Brayns Viewer [" + engineName + "] ";
+
+    m_window = glfwCreateWindow(windowWidth, windowHeight, windowTitle.c_str(),
+                                NULL, NULL);
+    if (!m_window)
     {
-        auto& applicationParameters =
-            m_brayns.getParametersManager().getApplicationParameters();
-
-        // In case of 3D stereo vision, make sure the width is even
-        if (applicationParameters.isStereo())
-        {
-            if (width % 2 != 0)
-                width = (width - 1) / 2;
-            else
-                width /= 2;
-        }
-
-        m_width = width;
-        m_height = height;
-        applicationParameters.setWindowSize(
-            brayns::Vector2ui{static_cast<uint32_t>(width),
-                              static_cast<uint32_t>(height)});
+        glfwErrorCallback(2, "glfwCreateWindow() failed.");
+        glfwTerminate();
+        return false;
     }
+
+    glfwMakeContextCurrent(m_window);
+
+    if (glewInit() != GL_NO_ERROR)
+    {
+        glfwErrorCallback(3, "GLEW failed to initialize.");
+        glfwTerminate();
+        return false;
+    }
+
+    glfwSetKeyCallback(m_window, glfwKeyCallback);
+    glfwSetCursorPosCallback(m_window, glfwCursorCallback);
+    glfwSetMouseButtonCallback(m_window, glfwMouseButtonCallback);
+    glfwSetScrollCallback(m_window, glfwScrollCallback);
+
+    return true;
 }
 
 void Application::initImGUI()
@@ -108,6 +204,69 @@ void Application::initImGUI()
     // Setup Platform/Renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(m_window, false);
     ImGui_ImplOpenGL3_Init("#version 130");
+}
+
+void Application::run()
+{
+    // Main loop
+    while (!glfwWindowShouldClose(m_window))
+    {
+        m_timer.stop();
+        m_timer.start();
+
+        if (m_exit)
+            break;
+
+        toggleFullscreen();
+        reshape();
+
+        render();
+        guiNewFrame();
+        guiRender();
+
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+    }
+
+    glDeleteTextures(1, &m_fbTexture);
+    m_fbTexture = 0;
+
+    guiShutdown();
+
+    glfwDestroyWindow(m_window);
+
+    glfwTerminate();
+}
+
+void Application::toggleFullscreen()
+{
+    if (!m_toggleFullScreen)
+        return;
+
+    m_toggleFullScreen = false;
+    m_fullScreen = !m_fullScreen;
+
+    if (m_fullScreen)
+    {
+        // backup window position and window size
+        glfwGetWindowPos(m_window, &m_windowPos[0], &m_windowPos[1]);
+        glfwGetWindowSize(m_window, &m_windowSizePrev[0], &m_windowSizePrev[1]);
+
+        auto monitor = glfwGetPrimaryMonitor();
+
+        // get reolution of monitor
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+        // switch to full screen
+        glfwSetWindowMonitor(m_window, monitor, 0, 0, mode->width, mode->height,
+                             0);
+    }
+    else
+    {
+        // restore last window size and position
+        glfwSetWindowMonitor(m_window, nullptr, m_windowPos[0], m_windowPos[1],
+                             m_windowSizePrev[0], m_windowSizePrev[1], 0);
+    }
 }
 
 void Application::guiNewFrame()
@@ -268,7 +427,7 @@ void Application::keyCallback(int key, int action)
             m_brayns.getKeyboardHandler().handle(brayns::SpecialKey::DOWN);
             break;
         case GLFW_KEY_F11:
-            m_fullScreen = !m_fullScreen;
+            m_toggleFullScreen = true;
             break;
         case GLFW_MOD_ALT:
             m_altKeyDown = true;
@@ -373,13 +532,4 @@ void Application::scrollCallback(double /*xoffset*/, double yoffset)
 {
     const auto delta = yoffset > 0.0 ? 1 : -1;
     m_brayns.getCameraManipulator().wheel(m_lastMousePos, delta);
-}
-
-void Application::timerBegin()
-{
-    m_timer.start();
-}
-void Application::timerEnd()
-{
-    m_timer.stop();
 }

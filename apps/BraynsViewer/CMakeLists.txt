@@ -12,13 +12,6 @@ set(BRAYNSVIEWER_LINK_LIBRARIES
   braynsIO
   braynsParameters
   braynsUI
-  ${OPENGL_gl_LIBRARY}
-  glfw
-  ${GLEW_LIBRARIES}
-  imgui
 )
 
 common_application(braynsViewer)
-
-target_include_directories(braynsViewer PRIVATE ${PROJECT_SOURCE_DIR}/deps/glfw/include)
-target_include_directories(braynsViewer PRIVATE ${PROJECT_SOURCE_DIR}/deps)
