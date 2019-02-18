@@ -20,14 +20,14 @@ import {
 import withWidth, {isWidthDown, WithWidth} from '@material-ui/core/withWidth';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import CloudIcon from '@material-ui/icons/Cloud';
-import FilterCenterFocusIcon from '@material-ui/icons/FilterCenterFocus';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import LayersIcon from '@material-ui/icons/Layers';
 import LinkIcon from '@material-ui/icons/Link';
 import LocationSearchingIcon from '@material-ui/icons/LocationSearching';
+import PhonelinkSetupIcon from '@material-ui/icons/PhonelinkSetup';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import PlayIcon from '@material-ui/icons/PlayArrow';
-import SettingsIcon from '@material-ui/icons/Settings';
+import RefreshIcon from '@material-ui/icons/Refresh';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 
@@ -149,7 +149,7 @@ export class Shortcuts extends PureComponent<Props> {
                 <ListItem>
                     <ListItemAvatar>
                         <Avatar>
-                            <SettingsIcon />
+                            <PhonelinkSetupIcon />
                         </Avatar>
                     </ListItemAvatar>
                     <ListItemText
@@ -165,7 +165,7 @@ export class Shortcuts extends PureComponent<Props> {
                 <ListItem>
                     <ListItemAvatar>
                         <Avatar>
-                            <FilterCenterFocusIcon />
+                            <RefreshIcon />
                         </Avatar>
                     </ListItemAvatar>
                     <ListItemText
