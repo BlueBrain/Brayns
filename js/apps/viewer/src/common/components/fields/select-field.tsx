@@ -4,6 +4,7 @@ import React, {
 } from 'react';
 
 import FormControl, {FormControlProps} from '@material-ui/core/FormControl';
+import FormHelperText from '@material-ui/core/FormHelperText';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -18,6 +19,7 @@ export default class SelectField extends PureComponent<SelectFieldProps> {
             id,
             className,
             label,
+            helperText,
             options = [],
             value,
             onChange,
@@ -41,6 +43,7 @@ export default class SelectField extends PureComponent<SelectFieldProps> {
         });
 
         const inputLabelProps = shrink ? {shrink: true} : {};
+        const helper = helperText && helperText.length > 0 ? <FormHelperText>{helperText}</FormHelperText> : null;
 
         return (
             <FormControl
@@ -59,6 +62,7 @@ export default class SelectField extends PureComponent<SelectFieldProps> {
                     {children}
                     {optionItems}
                 </Select>
+                {helper}
             </FormControl>
         );
     }
@@ -68,6 +72,7 @@ export interface SelectFieldProps extends Pick<FormControlProps, FormControlProp
     id?: string;
     className?: string;
     label?: string;
+    helperText?: string;
     options?: string[];
     value?: string;
     shrink?: boolean;

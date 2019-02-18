@@ -91,6 +91,7 @@ export class ModelLoader extends PureComponent<Props> {
             <div className={className}>
                 <SelectField
                     label="Model Type"
+                    helperText={name.length ? '' : 'Please select a model type'}
                     displayName={loaderName}
                     options={options}
                     value={name}

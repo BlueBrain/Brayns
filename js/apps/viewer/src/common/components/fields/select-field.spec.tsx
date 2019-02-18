@@ -3,6 +3,7 @@ import React from 'react';
 import {createMount, createShallow} from '@material-ui/core/test-utils';
 
 import FormControl, {FormControlProps} from '@material-ui/core/FormControl';
+import FormHelperText from '@material-ui/core/FormHelperText';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -70,6 +71,27 @@ it('renders a <InputLabel> component', () => {
     expect(inputLabel.prop('htmlFor')).toBe(id);
     expect(inputLabel.prop('shrink')).toBe(true);
     expect(inputLabel.text()).toBe(label);
+
+    component.unmount();
+    mount.cleanUp();
+});
+
+it('renders a <FormHelperText> component if {helperText} is set', () => {
+    const mount = createMount();
+
+    const component = mount(<SelectField value="" />);
+
+    expect(component.find(FormHelperText)).toHaveLength(0);
+
+    const text = 'Just a hint';
+    component.setProps({
+        helperText: text
+    });
+
+    const helperText = component.find(FormHelperText);
+
+    expect(helperText).toHaveLength(1);
+    expect(helperText.text()).toBe(text);
 
     component.unmount();
     mount.cleanUp();
