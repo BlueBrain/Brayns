@@ -10,24 +10,17 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import FormGroup from '@material-ui/core/FormGroup';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import ListItemText from '@material-ui/core/ListItemText';
 import {
     createStyles,
     Theme,
     withStyles,
     WithStyles
 } from '@material-ui/core/styles';
-import Switch from '@material-ui/core/Switch';
 import TextField from '@material-ui/core/TextField';
 import withWidth, {isWidthDown, WithWidth} from '@material-ui/core/withWidth';
-import VisibilityIcon from '@material-ui/icons/Visibility';
 
 import {withLoaders, WithLoaders} from '../../common/client';
-import {SlideUp, VectorSquareIcon} from '../../common/components';
+import {SlideUp} from '../../common/components';
 
 import ModelLoader, {LoaderDescriptor} from './model-loader';
 import {defaultProps, findLoader} from './utils';
@@ -39,13 +32,8 @@ const styles = (theme: Theme) => createStyles({
             minWidth: 400
         }
     },
-    form: {},
     path: {
-        marginBottom: theme.spacing.unit,
         flex: 1
-    },
-    loader: {
-        marginTop: theme.spacing.unit * 2
     },
     list: {
         paddingTop: 0
@@ -94,19 +82,20 @@ export class LoadModel extends PureComponent<Props, State> {
     updatePath = (evt: ChangeEvent<HTMLInputElement>) => {
         const path = evt.target.value;
         const {loaders} = this.props;
-        this.setState({
-            path,
-            loader: {
-                name: findLoader(path, loaders!),
-                properties: defaultProps(name, loaders!)
+        this.setState(state => {
+            const name = findLoader(path, loaders!);
+            if (name.length && state.loader.name !== name) {
+                return {
+                    path,
+                    loader: {
+                        name,
+                        properties: defaultProps(name, loaders!)
+                    }
+                };
             }
-        });
-    }
 
-    updateProps = (prop: keyof ModelParams) => (evt: ChangeEvent<HTMLInputElement>, checked: boolean) => {
-        this.setState({
-            [prop]: checked
-        } as any);
+            return {path} as any;
+        });
     }
 
     updateLoader = (loader: LoaderDescriptor) => {
@@ -120,15 +109,11 @@ export class LoadModel extends PureComponent<Props, State> {
             classes,
             width
         } = this.props;
-        const {
-            path,
-            visible,
-            boundingBox,
-            loader
-        } = this.state;
+        const {path, loader} = this.state;
 
         const fullScreen = isWidthDown('xs', width);
-        const canLoadModel = !disabled && path.length && loader.name.length;
+        const hasPath = path.length;
+        const canLoadModel = !disabled && hasPath && loader.name.length;
 
         return (
             <div>
@@ -139,7 +124,7 @@ export class LoadModel extends PureComponent<Props, State> {
                     TransitionComponent={SlideUp}
                     fullScreen={fullScreen}
                 >
-                    <DialogContent className={classes.form}>
+                    <DialogContent>
                         <FormGroup className={classes.path}>
                             <TextField
                                 id="model-path"
@@ -147,44 +132,19 @@ export class LoadModel extends PureComponent<Props, State> {
                                 value={path}
                                 onChange={this.updatePath}
                                 label="Path"
-                                error={!path.length}
+                                helperText={hasPath ? '' : 'Please type a model path'}
+                                error={!hasPath}
                                 fullWidth
                                 required
                             />
                         </FormGroup>
 
                         <ModelLoader
-                            className={classes.loader}
                             value={loader}
                             onChange={this.updateLoader}
                         />
                     </DialogContent>
-                    <List className={classes.list}>
-                        <ListItem>
-                            <ListItemIcon>
-                                <VectorSquareIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="Bounding box" />
-                            <ListItemSecondaryAction>
-                                <Switch
-                                    onChange={this.updateProps('boundingBox')}
-                                    checked={boundingBox}
-                                />
-                            </ListItemSecondaryAction>
-                        </ListItem>
-                        <ListItem>
-                            <ListItemIcon>
-                                <VisibilityIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="Visible" />
-                            <ListItemSecondaryAction>
-                                <Switch
-                                    onChange={this.updateProps('visible')}
-                                    checked={visible}
-                                />
-                            </ListItemSecondaryAction>
-                        </ListItem>
-                    </List>
+
                     <DialogActions>
                         <Button onClick={this.closeDialog}>
                             Cancel
