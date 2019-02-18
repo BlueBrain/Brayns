@@ -60,6 +60,7 @@ private:
     void guiShutdown();
 
     void toggleFullscreen();
+    brayns::Vector2ui getWindowSize() const;
 
     brayns::Brayns& m_brayns;
     GLFWwindow* m_window{nullptr};

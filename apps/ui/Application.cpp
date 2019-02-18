@@ -150,9 +150,8 @@ bool Application::init()
 
 bool Application::initGLFW()
 {
-    const auto ws = m_brayns.getParametersManager()
-                        .getApplicationParameters()
-                        .getWindowSize();
+    const auto ws = getWindowSize();
+
     const int windowWidth = ws.x;
     const int windowHeight = ws.y;
 
@@ -270,6 +269,18 @@ void Application::toggleFullscreen()
         glfwSetWindowMonitor(m_window, nullptr, m_windowPos[0], m_windowPos[1],
                              m_windowSizePrev[0], m_windowSizePrev[1], 0);
     }
+}
+
+brayns::Vector2ui Application::getWindowSize() const
+{
+    brayns::Vector2ui newWindowSize;
+    for (auto frameBuffer : m_brayns.getEngine().getFrameBuffers())
+    {
+        newWindowSize.x += frameBuffer->getFrameSize().x;
+        newWindowSize.y =
+            std::max(newWindowSize.y, frameBuffer->getFrameSize().y);
+    }
+    return newWindowSize;
 }
 
 void Application::guiNewFrame()
