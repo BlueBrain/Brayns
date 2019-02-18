@@ -332,7 +332,7 @@ function renderNotifications({
         const requestDoneEvt = requestDoneEvents.find(evt => evt.request.id === request.id);
         const canceledRequest = canceledRequests.find(evt => evt.id === request.id);
         const state = getRequestState(progressEvt, canceledRequest, requestDoneEvt);
-        const message = getRequestStateMessage(state, progressEvt);
+        const message = getRequestStateMessage(state, progressEvt, requestDoneEvt);
 
         let action;
         const requestActionCls = state !== REQUEST_IN_PROGRESS ? classes.requestAction : '';
@@ -461,7 +461,7 @@ function getRequestState(progress?: ProgressEvent, canceledRequest?: AnyRequest,
     return REQUEST_PENDING;
 }
 
-function getRequestStateMessage(state: number, progress?: ProgressEvent) {
+function getRequestStateMessage(state: number, progress?: ProgressEvent, requestDoneEvt?: RequestDoneEvent) {
     switch (state) {
         case REQUEST_PENDING:
             return 'Pending ...';
@@ -472,7 +472,9 @@ function getRequestStateMessage(state: number, progress?: ProgressEvent) {
         case REQUEST_CANCELED:
             return 'Canceled';
         case REQUEST_ERRORED:
-            return 'Failed';
+            return requestDoneEvt && requestDoneEvt.error
+                ? requestDoneEvt.error.message
+                : 'Failed';
         case REQUEST_DONE:
         default:
             return 'Done';

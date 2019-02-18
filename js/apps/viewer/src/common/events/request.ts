@@ -1,4 +1,5 @@
 import {
+    JsonRpcError,
     Progress,
     Request,
     RequestTask
@@ -59,7 +60,7 @@ export function dispatchRequest<P, R>(task: RequestTask<P, R>) {
 }
 
 function createDone(request: Request) {
-    return (error: boolean = false) => {
+    return (error?: JsonRpcError) => {
         dispatchEvent(REQUEST_DONE, {
             request,
             error
@@ -72,6 +73,6 @@ export interface ProgressEvent extends Progress {
 }
 
 export interface RequestDoneEvent {
-    error?: any;
+    error?: JsonRpcError;
     request: Request;
 }

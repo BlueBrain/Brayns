@@ -38,7 +38,6 @@ import {SlideUp} from '../../common/components';
 import {KeyCode} from '../../common/constants';
 import {
     dispatchKeyboardLock,
-    dispatchNotification,
     dispatchRequest,
     onRequestCancel
 } from '../../common/events';
@@ -202,10 +201,7 @@ class DataPortal extends PureComponent<Props, State> {
 
             dispatchRequest(upload);
 
-            const p = upload.then(noop, err => {
-                dispatchNotification(err);
-            });
-
+            const p = upload.then(noop, noop);
             tasks.set(p, sub);
         }
 
