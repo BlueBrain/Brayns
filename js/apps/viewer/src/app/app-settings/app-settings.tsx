@@ -4,6 +4,8 @@ import React, {
     ReactElement
 } from 'react';
 
+import {isFunction} from 'lodash';
+
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -52,7 +54,7 @@ export class AppSettings extends PureComponent<Props> {
         const items = preferences.map(preference => (
             <ListItem key={preference.key}>
                 <ListItemIcon>
-                    {preference.icon}
+                    {isFunction(preference.icon) ? preference.icon(preference.checked) : preference.icon}
                 </ListItemIcon>
                 <ListItemText primary={preference.label} />
                 <ListItemSecondaryAction>
@@ -95,9 +97,11 @@ interface Props extends WithStyles<typeof styles> {
     onClose(): void;
 }
 
+type PreferenceIconFn = (checked?: boolean) => ReactElement<IconProps>;
+
 export interface Preference {
     key: string;
     label?: string;
-    icon: ReactElement<IconProps>;
+    icon: ReactElement<IconProps> | PreferenceIconFn;
     checked?: boolean;
 }

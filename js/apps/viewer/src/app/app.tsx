@@ -33,13 +33,13 @@ import Tooltip from '@material-ui/core/Tooltip';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import ComputerIcon from '@material-ui/icons/Computer';
-import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
+import DeviceUnknownIcon from '@material-ui/icons/DeviceUnknown';
 import KeyboardIcon from '@material-ui/icons/Keyboard';
 import LayersIcon from '@material-ui/icons/Layers';
 import LayersClearIcon from '@material-ui/icons/LayersClear';
 import LinkIcon from '@material-ui/icons/Link';
+import PhonelinkSetupIcon from '@material-ui/icons/PhonelinkSetup';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
-import SettingsIcon from '@material-ui/icons/Settings';
 import ThreeSixtyIcon from '@material-ui/icons/ThreeSixty';
 import TimelineIcon from '@material-ui/icons/Timeline';
 import TuneIcon from '@material-ui/icons/Tune';
@@ -53,7 +53,11 @@ import brayns, {
     withConnectionStatus,
     WithConnectionStatus
 } from '../common/client';
-import {GithubIcon, OwlIcon} from '../common/components';
+import {
+    GithubIcon,
+    LightbulbFull,
+    LightbulbOutline
+} from '../common/components';
 import {
     APP_BAR_HEIGHT,
     APP_BAR_HEIGHT_XS,
@@ -135,10 +139,10 @@ const DARK_THEME = createMuiTheme({
 
 const APP_PREFERENCES = [
     {
-        key: STATISTICS_KEY,
-        label: 'Statistics',
-        icon: <TimelineIcon />,
-        checked: !!storage.get(STATISTICS_KEY)
+        key: THEME_KEY,
+        label: 'Dark Theme',
+        icon: (checked?: boolean) => checked ? <LightbulbFull /> : <LightbulbOutline />,
+        checked: !!storage.get(THEME_KEY)
     },
     {
         key: NAV_CUBE_KEY,
@@ -147,10 +151,10 @@ const APP_PREFERENCES = [
         checked: !!storage.get(NAV_CUBE_KEY)
     },
     {
-        key: THEME_KEY,
-        label: 'Night Owl',
-        icon: <OwlIcon />,
-        checked: !!storage.get(THEME_KEY)
+        key: STATISTICS_KEY,
+        label: 'Statistics',
+        icon: <TimelineIcon />,
+        checked: !!storage.get(STATISTICS_KEY)
     }
 ];
 
@@ -610,7 +614,7 @@ class App extends PureComponent<Props, State> {
         const modelsBtnTitle = showModelsPanel ? 'Hide models' : 'Show models';
         const modelsBtnColor = showModelsPanel ? 'inherit' : 'default';
         const modelsBtnIcon = showModelsPanel ? (<LayersClearIcon />) : (<LayersIcon />);
-        const settingsBtnTitle = showSettingsPanel ? 'Hide settings' : 'Show settings';
+        const settingsBtnTitle = showSettingsPanel ? 'Hide renderer settings' : 'Show renderer settings';
         const settingsBtnColor = showSettingsPanel ? 'inherit' : 'default';
 
         const showBothDrawers = showSettingsPanel || showModelsPanel;
@@ -681,8 +685,6 @@ class App extends PureComponent<Props, State> {
                                                             From path
                                                         </MenuItem>
                                                     </Menu>
-                                                    <span className={classes.spacer} />
-                                                    <ResetCamera />
 
                                                     <Tooltip title={'Take a snapshot'} placement="bottom" {...TOOLTIP_DELAY}>
                                                         <div>
@@ -696,7 +698,28 @@ class App extends PureComponent<Props, State> {
                                                         </div>
                                                     </Tooltip>
 
+                                                    <span className={classes.spacer} />
+
+                                                    <ResetCamera />
+
                                                     <QuitRenderer />
+
+                                                    <Tooltip title={'App info'} {...TOOLTIP_DELAY}>
+                                                        <IconButton
+                                                            onClick={this.openAppInfo}
+                                                            aria-label="Show app info"
+                                                        >
+                                                            <DeviceUnknownIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                    <Tooltip title={'Shortcuts'} {...TOOLTIP_DELAY}>
+                                                        <IconButton
+                                                            onClick={this.openShortcuts}
+                                                            aria-label="Show shortcuts"
+                                                        >
+                                                            <KeyboardIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
                                                     <Tooltip title={'Report an issue'} {...TOOLTIP_DELAY}>
                                                         <IconButton
                                                             href={BRAYNS_GITHUB_URL}
@@ -705,6 +728,14 @@ class App extends PureComponent<Props, State> {
                                                             aria-label="Navigate to Brayns github issues"
                                                         >
                                                             <GithubIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                    <Tooltip title={'App settings'} {...TOOLTIP_DELAY}>
+                                                        <IconButton
+                                                            onClick={this.openAppSettings}
+                                                            aria-label="Open application settings"
+                                                        >
+                                                            <PhonelinkSetupIcon />
                                                         </IconButton>
                                                     </Tooltip>
                                                     <Tooltip title={settingsBtnTitle} {...TOOLTIP_DELAY}>
@@ -777,30 +808,6 @@ class App extends PureComponent<Props, State> {
                                                             <ChevronRightIcon />
                                                         </IconButton>
                                                         <span className={classes.spacer} />
-                                                        <Tooltip title={'App settings'} {...TOOLTIP_DELAY}>
-                                                            <IconButton
-                                                                onClick={this.openAppSettings}
-                                                                aria-label="Open settings"
-                                                            >
-                                                                <SettingsIcon />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                        <Tooltip title={'About app'} {...TOOLTIP_DELAY}>
-                                                            <IconButton
-                                                                onClick={this.openAppInfo}
-                                                                aria-label="Show app info"
-                                                            >
-                                                                <DeveloperModeIcon />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                        <Tooltip title={'Shortcuts'} {...TOOLTIP_DELAY}>
-                                                            <IconButton
-                                                                onClick={this.openShortcuts}
-                                                                aria-label="Show shortcuts"
-                                                            >
-                                                                <KeyboardIcon />
-                                                            </IconButton>
-                                                        </Tooltip>
                                                     </div>
                                                     <RendererSettings />
                                                 </div>
