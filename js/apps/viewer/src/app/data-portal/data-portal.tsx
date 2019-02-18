@@ -89,6 +89,9 @@ const styles = (theme: Theme) => createStyles({
             marginRight: theme.spacing.unit
         }
     },
+    cancel: {
+        color: theme.palette.type === 'dark' ? theme.palette.text.primary : theme.palette.background.paper
+    },
     gutterBottom: {
         marginBottom: theme.spacing.unit
     }
@@ -285,13 +288,17 @@ class DataPortal extends PureComponent<Props, State> {
                         onChange={this.updateModelPropsList}
                     />
                     <DialogActions classes={{root: classes.dialogActions, action: classes.dialogAction}}>
-                        <Button onClick={this.closeLoaderProps}>
+                        <Button
+                            className={classes.cancel}
+                            color="inherit"
+                            onClick={this.closeLoaderProps}
+                        >
                             Cancel
                         </Button>
                         <Button
                             onClick={this.uploadWithProps}
                             variant="contained"
-                            color="secondary"
+                            color="primary"
                             disabled={!canUpload}
                         >
                             Upload
