@@ -36,3 +36,23 @@ add_subdirectory(glm)
 if(CMAKE_COMPILER_IS_GNUCXX AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
   target_compile_options(glm INTERFACE -Wno-error=class-memaccess)
 endif()
+
+if(BRAYNS_VIEWER_ENABLED)
+  # GLFW
+  set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+  set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+  set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+  add_subdirectory(glfw)
+
+  # IMGUI
+  add_library(imgui STATIC
+      ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui.cpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_draw.cpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_widgets.cpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/imgui/examples/imgui_impl_glfw.cpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/imgui/examples/imgui_impl_opengl3.cpp
+    )
+  target_compile_definitions(imgui PRIVATE -DIMGUI_IMPL_OPENGL_LOADER_GLEW)
+  target_link_libraries(imgui glfw ${OPENGL_gl_LIBRARY})
+  target_include_directories(imgui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
+endif()

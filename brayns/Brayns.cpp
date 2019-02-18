@@ -518,6 +518,11 @@ private:
         _keyboardHandler.registerKeyboardShortcut(
             'c', "Display current camera information",
             std::bind(&Brayns::Impl::_displayCameraInformation, this));
+        _keyboardHandler.registerKeyboardShortcut(
+            'b', "Toggle benchmarking", [this]() {
+                auto& ap = _parametersManager.getApplicationParameters();
+                ap.setBenchmarking(!ap.isBenchmarking());
+            });
     }
 
     void _blackBackground()

@@ -4,14 +4,14 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(BRAYNSVIEWER_SOURCES BraynsViewer.cpp main.cpp)
-
-set(BRAYNSVIEWER_HEADERS
-  BraynsViewer.h
-)
+set(BRAYNSVIEWER_SOURCES main.cpp)
 
 set(BRAYNSVIEWER_LINK_LIBRARIES
-  PUBLIC brayns braynsCommon braynsIO braynsParameters braynsUI ${OPENGL_gl_LIBRARY}
+  PUBLIC brayns
+  braynsCommon
+  braynsIO
+  braynsParameters
+  braynsUI
 )
 
 common_application(braynsViewer)

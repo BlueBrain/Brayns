@@ -90,11 +90,10 @@ else()
 endif()
 
 # Brayns viewer application
-common_find_package(GLUT SYSTEM)
 common_find_package(GLEW SYSTEM)
 common_find_package(OpenGL)
 
-if(GLUT_FOUND AND GLEW_FOUND AND OPENGL_FOUND)
+if(GLEW_FOUND AND OPENGL_FOUND)
   option(BRAYNS_VIEWER_ENABLED "Brayns Viewer" ON)
 else()
   set(BRAYNS_VIEWER_ENABLED OFF)

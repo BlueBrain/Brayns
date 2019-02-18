@@ -110,5 +110,6 @@ void AbstractManipulator::rotate(const Vector3d& pivot, const double du,
     const double rotationRadius = glm::length(_camera.getPosition() - pivot);
     _camera.setPosition(pivot + rotationRadius * -dir);
     _camera.setOrientation(final);
+    _camera.setTarget(pivot);
 }
 }

@@ -19,33 +19,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "BraynsViewer.h"
+#include <apps/ui/Application.h>
 #include <brayns/Brayns.h>
 #include <brayns/common/log.h>
 
-brayns::Brayns* braynsInstance;
+#include <brayns/parameters/ApplicationParameters.h>
+#include <brayns/parameters/ParametersManager.h>
 
-void cleanup()
-{
-    delete braynsInstance;
-}
+#include <cstdlib>
 
 int main(int argc, const char** argv)
 {
     try
     {
-        braynsInstance = new brayns::Brayns(argc, argv);
-        brayns::initGLUT(&argc, argv);
-        brayns::BraynsViewer braynsViewer(*braynsInstance);
-        BRAYNS_INFO << "Initializing Application..." << std::endl;
-        braynsViewer.create("Brayns Viewer");
-        atexit(cleanup);
-        brayns::runGLUT();
+        brayns::Brayns brayns(argc, argv);
+        auto appInstance = Application::createInstance(brayns);
+        if (!appInstance->init())
+        {
+            Application::destroyInstance();
+            return EXIT_FAILURE;
+        }
+
+        appInstance->run();
+        Application::destroyInstance();
     }
     catch (const std::runtime_error& e)
     {
         BRAYNS_ERROR << e.what() << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
-    return 0;
+    return EXIT_SUCCESS;
 }
