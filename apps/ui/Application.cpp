@@ -47,6 +47,8 @@
 #include <algorithm>
 #include <cassert>
 
+namespace
+{
 Application* appInstance = nullptr;
 
 static void glfwKeyCallback(GLFWwindow* /*window*/, int key, int /*scancode*/,
@@ -75,6 +77,7 @@ static void glfwScrollCallback(GLFWwindow* /*window*/, double xoffset,
 static void glfwErrorCallback(int error, const char* description)
 {
     std::cerr << "GLFW Error: " << error << ": " << description << std::endl;
+}
 }
 
 Application* Application::createInstance(brayns::Brayns& brayns)
