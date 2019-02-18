@@ -51,30 +51,29 @@ namespace
 {
 Application* appInstance = nullptr;
 
-static void glfwKeyCallback(GLFWwindow* /*window*/, int key, int /*scancode*/,
-                            int action, int /*mods*/)
+void glfwKeyCallback(GLFWwindow* /*window*/, int key, int /*scancode*/,
+                     int action, int /*mods*/)
 {
     appInstance->keyCallback(key, action);
 }
 
-static void glfwCursorCallback(GLFWwindow* /*window*/, double xpos, double ypos)
+void glfwCursorCallback(GLFWwindow* /*window*/, double xpos, double ypos)
 {
     appInstance->cursorCallback(xpos, ypos);
 }
 
-static void glfwMouseButtonCallback(GLFWwindow* /*window*/, int button,
-                                    int action, int /*mods*/)
+void glfwMouseButtonCallback(GLFWwindow* /*window*/, int button, int action,
+                             int /*mods*/)
 {
     appInstance->mouseButtonCallback(button, action);
 }
 
-static void glfwScrollCallback(GLFWwindow* /*window*/, double xoffset,
-                               double yoffset)
+void glfwScrollCallback(GLFWwindow* /*window*/, double xoffset, double yoffset)
 {
     appInstance->scrollCallback(xoffset, yoffset);
 }
 
-static void glfwErrorCallback(int error, const char* description)
+void glfwErrorCallback(int error, const char* description)
 {
     std::cerr << "GLFW Error: " << error << ": " << description << std::endl;
 }
