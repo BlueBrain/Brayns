@@ -33,12 +33,8 @@ const std::string DEFAULT_VRPN_NAME = "DTrack@cave1";
 constexpr int VRPN_IDLE_TIMEOUT_MS = 5000;
 #endif
 
-const std::string CAMERA_TYPE = "cylindricStereoTracked";
 const std::string HEAD_POSITION_PROP = "headPosition";
 const std::string HEAD_ROTATION_PROP = "headRotation";
-
-constexpr std::array<double, 3> HEAD_INIT_POS{{0.0, 0.0, 0.0}};
-constexpr std::array<double, 4> HEAD_INIT_ROT{{0.0, 0.0, 0.0, 1.0}};
 
 constexpr std::array<double, 3> to_array_3d(const vrpn_float64* pos)
 {
@@ -47,43 +43,6 @@ constexpr std::array<double, 3> to_array_3d(const vrpn_float64* pos)
 constexpr std::array<double, 4> to_array_4d(const vrpn_float64* quat)
 {
     return {{quat[0], quat[1], quat[2], quat[3]}};
-}
-
-Property getHeadPositionProperty()
-{
-    Property headPosition{HEAD_POSITION_PROP, HEAD_INIT_POS};
-    headPosition.markReadOnly();
-    return headPosition;
-}
-
-Property getHeadRotationProperty()
-{
-    Property headRotation{HEAD_ROTATION_PROP, HEAD_INIT_ROT};
-    headRotation.markReadOnly();
-    return headRotation;
-}
-
-Property getStereoModeProperty()
-{
-    return {"stereoMode",
-            3, // side-by-side
-            {"None", "Left eye", "Right eye", "Side by side"},
-            {"Stereo mode"}};
-}
-
-Property getInterpupillaryDistanceProperty()
-{
-    return {"interpupillaryDistance", 0.0635, 0.0, 10.0, {"Eye separation"}};
-}
-
-PropertyMap getDefaultCameraProperties()
-{
-    PropertyMap properties;
-    properties.setProperty(getHeadPositionProperty());
-    properties.setProperty(getHeadRotationProperty());
-    properties.setProperty(getStereoModeProperty());
-    properties.setProperty(getInterpupillaryDistanceProperty());
-    return properties;
 }
 
 void trackerCallback(void* userData, const vrpn_TRACKERCB tracker)
@@ -115,8 +74,6 @@ VRPNPlugin::~VRPNPlugin()
 
 void VRPNPlugin::init()
 {
-    _api->getCamera().setProperties(CAMERA_TYPE, getDefaultCameraProperties());
-
     _vrpnTracker.register_change_handler(&(_api->getCamera()), trackerCallback,
                                          HEAD_SENSOR_ID);
 }
