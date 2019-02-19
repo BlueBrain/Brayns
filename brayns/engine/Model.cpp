@@ -291,7 +291,7 @@ void Model::removeVolume(VolumePtr volume)
 
 bool Model::isDirty() const
 {
-    return _areGeomtriesDirty() || _instancesDirty;
+    return _areGeometriesDirty() || _instancesDirty;
 }
 
 void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)
@@ -470,6 +470,14 @@ void Model::copyFrom(const Model& rhs)
 
     // reference only to save memory
     _geometries = rhs._geometries;
+
+    _spheresDirty = !_geometries->_spheres.empty();
+    _cylindersDirty = !_geometries->_cylinders.empty();
+    _conesDirty = !_geometries->_cones.empty();
+    _trianglesMeshesDirty = !_geometries->_trianglesMeshes.empty();
+    _streamlinesDirty = !_geometries->_streamlines.empty();
+    _sdfGeometriesDirty = !_geometries->_sdf.geometries.empty();
+    _volumesDirty = !_geometries->_volumes.empty();
 }
 
 void Model::updateBounds()
