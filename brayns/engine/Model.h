@@ -505,15 +505,15 @@ protected:
     // commitGeometry()
     std::shared_ptr<Geometries> _geometries{std::make_shared<Geometries>()};
 
-    bool _spheresDirty{true};
-    bool _cylindersDirty{true};
-    bool _conesDirty{true};
-    bool _trianglesMeshesDirty{true};
-    bool _streamlinesDirty{true};
-    bool _sdfGeometriesDirty{true};
-    bool _volumesDirty{true};
+    bool _spheresDirty{false};
+    bool _cylindersDirty{false};
+    bool _conesDirty{false};
+    bool _trianglesMeshesDirty{false};
+    bool _streamlinesDirty{false};
+    bool _sdfGeometriesDirty{false};
+    bool _volumesDirty{false};
 
-    bool _areGeomtriesDirty() const
+    bool _areGeometriesDirty() const
     {
         return _spheresDirty || _cylindersDirty || _conesDirty ||
                _trianglesMeshesDirty || _sdfGeometriesDirty;
