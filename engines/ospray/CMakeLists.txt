@@ -25,7 +25,6 @@ set(BRAYNSOSPRAYENGINE_ISPC_SOURCES
   ispc/camera/PerspectiveCamera.ispc
   ispc/camera/PerspectiveParallaxCamera.ispc
   ispc/geometry/Cones.ispc
-  ispc/geometry/Cylinders.ispc
   ispc/geometry/SDFGeometries.ispc
   ispc/render/BasicRenderer.ispc
   ispc/render/DefaultMaterial.ispc
@@ -48,7 +47,6 @@ set(BRAYNSOSPRAYENGINE_SOURCES
   ispc/camera/PerspectiveCamera.cpp
   ispc/camera/PerspectiveParallaxCamera.cpp
   ispc/geometry/Cones.cpp
-  ispc/geometry/Cylinders.cpp
   ispc/geometry/SDFGeometries.cpp
   ispc/render/BasicRenderer.cpp
   ispc/render/DefaultMaterial.cpp
@@ -78,7 +76,6 @@ set(BRAYNSOSPRAYENGINE_HEADERS
 
 set(BRAYNSOSPRAYENGINE_PUBLIC_HEADERS
   ispc/geometry/Cones.h
-  ispc/geometry/Cylinders.h
   ispc/geometry/SDFGeometries.h
 )
 
@@ -88,7 +85,9 @@ set_source_files_properties(
     PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations)
 
 set(BRAYNSOSPRAYENGINE_LINK_LIBRARIES
-    PRIVATE braynsEngine braynsParameters ${OSPRAY_LIBRARIES}
+    PRIVATE braynsEngine braynsParameters ospray::ospray_common ospray::ospray
+    # Public linkage needed for transfer function test
+    PUBLIC ospray::ospray_module_ispc
 )
 
 # reuse ispc setup and macros from ospray
@@ -96,7 +95,7 @@ list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   set(OSPRAY_DEBUG_BUILD ON)
 endif()
-include(ispc)
+include(osprayUse)
 
 # Enable/disable use of hardware randomizer
 option(BRAYNS_HARDWARE_RANDOMIZER_ENABLED "Enables hardware randomizer if supported by target CPU" OFF)
@@ -105,7 +104,7 @@ if(BRAYNS_HARDWARE_RANDOMIZER_ENABLED)
 endif()
 
 # Compile ispc code
-include_directories_ispc(${PROJECT_SOURCE_DIR} ${OSPRAY_INCLUDE_DIRS})
+include_directories_ispc(${PROJECT_SOURCE_DIR})
 ospray_ispc_compile(${BRAYNSOSPRAYENGINE_ISPC_SOURCES})
 list(APPEND BRAYNSOSPRAYENGINE_SOURCES ${ISPC_OBJECTS})
 

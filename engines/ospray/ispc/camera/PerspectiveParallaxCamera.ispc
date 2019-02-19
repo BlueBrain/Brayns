@@ -19,10 +19,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PerspectiveParallaxCamera.ih"
 #include "math/LinearSpace.ih"
 #include "math/math.ih"
 #include "math/sampling.ih"
+
+#include <ospray/SDK/camera/Camera.ih>
+
+struct PerspectiveParallaxCamera
+{
+    Camera super;
+
+    vec3f org;
+    vec3f dir_cam;
+    vec3f dir_du;
+    vec3f dir_dv;
+    float distanceToPlane;
+    float imgPlane_size_y;
+    float imgPlane_size_x;
+    float idpOffset;
+};
 
 void PerspectiveParallaxCamera_initRay(uniform Camera* uniform _self,
                                        varying Ray& ray,
@@ -50,7 +65,7 @@ void PerspectiveParallaxCamera_initRay(uniform Camera* uniform _self,
 
     const float time = Camera_shutterTime(_self, sample.time);
     org = self->org + org;
-    setRay(ray, org, normalize(dir), self->super.nearClip, infinity, time);
+    setRay(ray, org, normalize(dir), self->super.nearClip, inf, time);
 }
 
 /*! create a new ispc-side version of a StereoCamera - with given
