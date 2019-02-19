@@ -36,6 +36,57 @@ constexpr char leftWallBufferName[] = "0L";
 constexpr char rightWallBufferName[] = "0R";
 constexpr char leftFloorBufferName[] = "1L";
 constexpr char rightFloorBufferName[] = "1R";
+
+const std::string HEAD_POSITION_PROP = "headPosition";
+const std::string HEAD_ROTATION_PROP = "headRotation";
+
+constexpr std::array<double, 3> HEAD_INIT_POS{{0.0, 0.0, 0.0}};
+constexpr std::array<double, 4> HEAD_INIT_ROT{{0.0, 0.0, 0.0, 1.0}};
+
+Property getHeadPositionProperty()
+{
+    Property headPosition{HEAD_POSITION_PROP, HEAD_INIT_POS};
+    headPosition.markReadOnly();
+    return headPosition;
+}
+
+Property getHeadRotationProperty()
+{
+    Property headRotation{HEAD_ROTATION_PROP, HEAD_INIT_ROT};
+    headRotation.markReadOnly();
+    return headRotation;
+}
+
+Property getStereoModeProperty()
+{
+    return {"stereoMode",
+            3, // side-by-side
+            {"None", "Left eye", "Right eye", "Side by side"},
+            {"Stereo mode"}};
+}
+
+Property getInterpupillaryDistanceProperty()
+{
+    return {"interpupillaryDistance", 0.0635, 0.0, 10.0, {"Eye separation"}};
+}
+
+PropertyMap getCylindricStereoProperties()
+{
+    PropertyMap properties;
+    properties.setProperty(getStereoModeProperty());
+    properties.setProperty(getInterpupillaryDistanceProperty());
+    return properties;
+}
+
+PropertyMap getCylindricStereoTrackedProperties()
+{
+    PropertyMap properties;
+    properties.setProperty(getHeadPositionProperty());
+    properties.setProperty(getHeadRotationProperty());
+    properties.setProperty(getStereoModeProperty());
+    properties.setProperty(getInterpupillaryDistanceProperty());
+    return properties;
+}
 }
 
 OpenDeckPlugin::OpenDeckPlugin(const Vector2ui& wallRes,
@@ -47,27 +98,26 @@ OpenDeckPlugin::OpenDeckPlugin(const Vector2ui& wallRes,
 
 void OpenDeckPlugin::init()
 {
+    auto& engine = _api->getEngine();
 #ifdef BRAYNS_USE_OSPRAY
-    _api->getEngine().addCameraType("cylindric");
-    _api->getEngine().addCameraType("cylindricStereo");
-    _api->getEngine().addCameraType("cylindricStereoTracked");
+    engine.addCameraType("cylindric");
+    engine.addCameraType("cylindricStereo", getCylindricStereoProperties());
+    engine.addCameraType("cylindricStereoTracked",
+                         getCylindricStereoTrackedProperties());
 #endif
     FrameBufferPtr frameBuffer =
-        _api->getEngine().createFrameBuffer(leftWallBufferName, _wallRes,
-                                            FrameBufferFormat::rgba_i8);
-    _api->getEngine().addFrameBuffer(frameBuffer);
-    frameBuffer =
-        _api->getEngine().createFrameBuffer(rightWallBufferName, _wallRes,
-                                            FrameBufferFormat::rgba_i8);
-    _api->getEngine().addFrameBuffer(frameBuffer);
-    frameBuffer =
-        _api->getEngine().createFrameBuffer(leftFloorBufferName, _floorRes,
-                                            FrameBufferFormat::rgba_i8);
-    _api->getEngine().addFrameBuffer(frameBuffer);
-    frameBuffer =
-        _api->getEngine().createFrameBuffer(rightFloorBufferName, _floorRes,
-                                            FrameBufferFormat::rgba_i8);
-    _api->getEngine().addFrameBuffer(frameBuffer);
+        engine.createFrameBuffer(leftWallBufferName, _wallRes,
+                                 FrameBufferFormat::rgba_i8);
+    engine.addFrameBuffer(frameBuffer);
+    frameBuffer = engine.createFrameBuffer(rightWallBufferName, _wallRes,
+                                           FrameBufferFormat::rgba_i8);
+    engine.addFrameBuffer(frameBuffer);
+    frameBuffer = engine.createFrameBuffer(leftFloorBufferName, _floorRes,
+                                           FrameBufferFormat::rgba_i8);
+    engine.addFrameBuffer(frameBuffer);
+    frameBuffer = engine.createFrameBuffer(rightFloorBufferName, _floorRes,
+                                           FrameBufferFormat::rgba_i8);
+    engine.addFrameBuffer(frameBuffer);
 }
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
