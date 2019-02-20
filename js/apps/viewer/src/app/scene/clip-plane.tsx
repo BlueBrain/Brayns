@@ -3,16 +3,22 @@ import React, {PureComponent} from 'react';
 import {ClipPlane as ClipPlaneType} from 'brayns';
 
 import Checkbox from '@material-ui/core/Checkbox';
-import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
-import ControlCameraIcon from '@material-ui/icons/ControlCamera';
+
+import {composeEvtHandler} from './utils';
 
 
 const FLOAT_PRECISION = 2;
 
-export default class ClipPlane extends PureComponent<Props> {
+export default class ClipPlane extends PureComponent<Props, State> {
+    state: State = {
+        disableRipple: false
+    };
+
+    enableRipple = () => this.setState({disableRipple: false});
+    disableRipple = () => this.setState({disableRipple: true});
+
     edit = () => {
         const {onEdit, value} = this.props;
         if (onEdit) {
@@ -20,12 +26,12 @@ export default class ClipPlane extends PureComponent<Props> {
         }
     }
 
-    toggleChecked = () => {
+    toggleChecked = composeEvtHandler(() => {
         const {onSelectChange, value} = this.props;
         if (onSelectChange) {
             onSelectChange(value);
         }
-    }
+    })
 
     render() {
         const {
@@ -33,6 +39,7 @@ export default class ClipPlane extends PureComponent<Props> {
             selected,
             disabled
         } = this.props;
+        const {disableRipple} = this.state;
 
         const [x, y, z, d] = value.plane;
         const rotation = planeRotationStr([x, y, z]);
@@ -40,26 +47,22 @@ export default class ClipPlane extends PureComponent<Props> {
 
         return (
             <ListItem
-                button
-                onClick={this.toggleChecked}
+                onClick={this.edit}
                 disabled={disabled}
+                disableRipple={disableRipple}
+                disableTouchRipple={disableRipple}
+                button
             >
                 <Checkbox
-                    onChange={this.toggleChecked}
+                    onMouseOver={this.disableRipple}
+                    onMouseOut={this.enableRipple}
+                    onClick={this.toggleChecked}
                     checked={selected}
-                    tabIndex={-1}
-                    disableRipple
                 />
-                <ListItemText primary={rotation} secondary={distance} />
-                <ListItemSecondaryAction>
-                    <IconButton
-                        onClick={this.edit}
-                        disabled={disabled}
-                        aria-label="Move clip plane"
-                    >
-                        <ControlCameraIcon />
-                    </IconButton>
-                </ListItemSecondaryAction>
+                <ListItemText
+                    primary={rotation}
+                    secondary={distance}
+                />
             </ListItem>
         );
     }
@@ -82,4 +85,8 @@ interface Props {
     disabled?: boolean;
     onEdit?(cp: ClipPlaneType): void;
     onSelectChange?(cp: ClipPlaneType): void;
+}
+
+interface State {
+    disableRipple?: boolean;
 }

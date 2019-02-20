@@ -40,6 +40,7 @@ import {
 import {ClassNameMap} from '@material-ui/core/styles/withStyles';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
+import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 import Zoom from '@material-ui/core/Zoom';
 import AddIcon from '@material-ui/icons/Add';
@@ -51,7 +52,7 @@ import brayns, {
     WithCamera,
     withCamera
 } from '../../common/client';
-import {KeyCode} from '../../common/constants';
+import {KeyCode, TOOLTIP_DELAY} from '../../common/constants';
 import {
     dispatchKeyboardLock,
     dispatchNotification,
@@ -770,12 +771,14 @@ export class SceneModels extends PureComponent<Props, State> {
                             timeout={transitionDuration}
                             unmountOnExit
                         >
-                            <Fab
-                                className={classes.addClipPlane}
-                                onClick={this.addClipPlane}
-                            >
-                                <AddIcon />
-                            </Fab>
+                            <Tooltip title={'Add clip plane'} placement="left" {...TOOLTIP_DELAY}>
+                                <Fab
+                                    className={classes.addClipPlane}
+                                    onClick={this.addClipPlane}
+                                >
+                                    <AddIcon />
+                                </Fab>
+                            </Tooltip>
                         </Zoom>
                     </div>
                 </Drawer>

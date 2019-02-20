@@ -30,6 +30,7 @@ import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 
 import {TOOLTIP_DELAY} from '../../common/constants';
 import {ModelId} from './types';
+import {composeEvtHandler} from './utils';
 
 
 const styles = (theme: Theme) => createStyles({
@@ -239,14 +240,6 @@ export class Model extends PureComponent<Props, State> {
 
 export default style(Model);
 
-
-function composeEvtHandler(fn: (evt: MouseEvent) => void) {
-    return (evt: MouseEvent) => {
-        evt.preventDefault()
-        evt.stopPropagation()
-        fn(evt);
-    }
-}
 
 interface Props extends WithStyles<typeof styles> {
     id: ModelId;
