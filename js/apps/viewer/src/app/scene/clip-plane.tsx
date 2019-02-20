@@ -1,3 +1,4 @@
+// tslint:disable: member-ordering
 import React, {PureComponent} from 'react';
 
 import {ClipPlane as ClipPlaneType} from 'brayns';
@@ -31,7 +32,7 @@ export default class ClipPlane extends PureComponent<Props, State> {
         if (onSelectChange) {
             onSelectChange(value);
         }
-    })
+    });
 
     render() {
         const {

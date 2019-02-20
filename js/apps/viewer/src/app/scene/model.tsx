@@ -1,3 +1,4 @@
+// tslint:disable: member-ordering
 import React, {
     MouseEvent,
     PureComponent,
@@ -82,42 +83,42 @@ export class Model extends PureComponent<Props, State> {
         if (onSelectChange) {
             onSelectChange(id);
         }
-    })
+    });
 
     showEditor = composeEvtHandler(() => {
         const {id, onEdit} = this.props;
         if (onEdit) {
             onEdit(id);
         }
-    })
+    });
 
     showInfo = composeEvtHandler(() => {
         const {id, onShowInfo} = this.props;
         if (onShowInfo) {
             onShowInfo(id);
         }
-    })
+    });
 
     focus = composeEvtHandler(() => {
         const {id, onFocus} = this.props;
         if (onFocus) {
             onFocus(id);
         }
-    })
+    });
 
     hide = composeEvtHandler(() => {
         const {id, onVisibilityChange} = this.props;
         if (onVisibilityChange) {
             onVisibilityChange(id, false);
         }
-    })
+    });
 
     show = composeEvtHandler(() => {
         const {id, onVisibilityChange} = this.props;
         if (onVisibilityChange) {
             onVisibilityChange(id, true);
         }
-    })
+    });
 
     delete = () => {
         const {id, onDelete} = this.props;
@@ -142,9 +143,9 @@ export class Model extends PureComponent<Props, State> {
                         </IconButton>
                     </div>
                 </Tooltip>
-            )
+            );
         }
-    )
+    );
 
     render() {
         const {
@@ -266,8 +267,8 @@ interface State {
 interface ActionProps {
     title: string;
     ariaLabel: string;
-    cb: (evt: MouseEvent) => void;
     icon: ReactElement<IconProps>;
     disabled?: boolean;
     color?: PropTypes.Color;
+    cb(evt: MouseEvent): void;
 }
