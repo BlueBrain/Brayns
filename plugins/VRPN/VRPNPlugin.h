@@ -47,7 +47,8 @@ public:
 #endif
 
 private:
-    vrpn_Tracker_Remote _vrpnTracker;
+    std::unique_ptr<vrpn_Tracker_Remote> _vrpnTracker;
+    const std::string _vrpnName;
 
 #ifdef BRAYNSVRPN_USE_LIBUV
     struct LibuvDeleter

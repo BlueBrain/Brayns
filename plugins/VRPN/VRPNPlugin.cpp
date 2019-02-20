@@ -54,39 +54,41 @@ void trackerCallback(void* userData, const vrpn_TRACKERCB tracker)
 }
 
 VRPNPlugin::VRPNPlugin(const std::string& vrpnName)
-    : _vrpnTracker{vrpnName.c_str()}
+    : _vrpnName(vrpnName)
 {
-    if (!_vrpnTracker.connectionPtr()->doing_okay())
-        throw std::runtime_error("VRPN couldn't connect to: " + vrpnName);
-
-    BRAYNS_INFO << "VRPN successfully connected to " << vrpnName << std::endl;
-
-#ifdef BRAYNSVRPN_USE_LIBUV
-    _setupIdleTimer();
-#endif
 }
 
 VRPNPlugin::~VRPNPlugin()
 {
-    _vrpnTracker.unregister_change_handler(&(_api->getCamera()),
-                                           trackerCallback, HEAD_SENSOR_ID);
+    _vrpnTracker->unregister_change_handler(&(_api->getCamera()),
+                                            trackerCallback, HEAD_SENSOR_ID);
 }
 
 void VRPNPlugin::init()
 {
-    _vrpnTracker.register_change_handler(&(_api->getCamera()), trackerCallback,
-                                         HEAD_SENSOR_ID);
+    _vrpnTracker = std::make_unique<vrpn_Tracker_Remote>(_vrpnName.c_str());
+    if (!_vrpnTracker->connectionPtr()->doing_okay())
+        throw std::runtime_error("VRPN couldn't connect to: " + _vrpnName);
+
+    BRAYNS_INFO << "VRPN successfully connected to " << _vrpnName << std::endl;
+
+#ifdef BRAYNSVRPN_USE_LIBUV
+    _setupIdleTimer();
+#endif
+
+    _vrpnTracker->register_change_handler(&(_api->getCamera()), trackerCallback,
+                                          HEAD_SENSOR_ID);
 }
 
 void VRPNPlugin::preRender()
 {
-    _vrpnTracker.mainloop();
+    _vrpnTracker->mainloop();
 }
 
 #ifdef BRAYNSVRPN_USE_LIBUV
 void VRPNPlugin::resumeRenderingIfTrackerIsActive()
 {
-    _vrpnTracker.mainloop();
+    _vrpnTracker->mainloop();
     if (_api->getCamera().isModified())
         _api->triggerRender();
 }
