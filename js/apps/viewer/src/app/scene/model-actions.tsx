@@ -10,11 +10,14 @@ import {
     WithStyles
 } from '@material-ui/core/styles';
 import Toolbar from '@material-ui/core/Toolbar';
+import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import DeleteIcon from '@material-ui/icons/DeleteForever';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+
+import {TOOLTIP_DELAY} from '../../common/constants';
 
 
 const styles = (theme: Theme) => createStyles({
@@ -52,6 +55,7 @@ export class ModelActions extends PureComponent<Props> {
         } = this.props;
 
         const visibilityIcon = nextVisibility ? (<VisibilityIcon />) : (<VisibilityOffIcon />);
+        const visibilityActionText = nextVisibility ? 'Show models' : 'Hide models';
 
         return (
             <Fade in={open} unmountOnExit>
@@ -66,19 +70,23 @@ export class ModelActions extends PureComponent<Props> {
                         </IconButton>
                         <Typography variant="subtitle1">{count}</Typography>
                         <span className={classes.spacer} />
-                        <IconButton
-                            onClick={this.toggleVisibility}
-                            aria-label="Toggle model visibility"
-                        >
-                            {visibilityIcon}
-                        </IconButton>
-                        <IconButton
-                            color="secondary"
-                            onClick={onClear}
-                            aria-label="Delete models"
-                        >
-                            <DeleteIcon />
-                        </IconButton>
+                        <Tooltip title={visibilityActionText} {...TOOLTIP_DELAY}>
+                            <IconButton
+                                onClick={this.toggleVisibility}
+                                aria-label="Toggle model visibility"
+                            >
+                                {visibilityIcon}
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={'Delete models'} {...TOOLTIP_DELAY}>
+                            <IconButton
+                                color="secondary"
+                                onClick={onClear}
+                                aria-label="Delete models"
+                            >
+                                <DeleteIcon />
+                            </IconButton>
+                        </Tooltip>
                     </Toolbar>
                 </AppBar>
             </Fade>

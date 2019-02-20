@@ -1,9 +1,16 @@
-import React, {PureComponent} from 'react';
+import React, {
+    MouseEvent,
+    PureComponent,
+    ReactElement
+} from 'react';
 
 import classNames from 'classnames';
+import {memoize} from 'lodash';
 
+import {PropTypes} from '@material-ui/core';
 import Checkbox from '@material-ui/core/Checkbox';
 import Fade from '@material-ui/core/Fade';
+import {IconProps} from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
@@ -15,9 +22,11 @@ import {
     WithStyles
 } from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
-import EditIcon from '@material-ui/icons/Edit';
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import InfoIcon from '@material-ui/icons/Info';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
+import VisibilityOnIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 
 import {TOOLTIP_DELAY} from '../../common/constants';
 import {ModelId} from './types';
@@ -31,7 +40,6 @@ const styles = (theme: Theme) => createStyles({
         })
     },
     modelShift: {
-        paddingRight: 148,
         transition: theme.transitions.create('padding', {
             easing: theme.transitions.easing.sharp,
             duration: 100
@@ -50,56 +58,92 @@ const styles = (theme: Theme) => createStyles({
     }
 });
 
-// https://material-ui-next.com/guides/typescript/
 const style = withStyles(styles);
 
 
 export class Model extends PureComponent<Props, State> {
     state: State = {
-        showActions: false,
-        showButtonFocus: true
+        showActions: false
     };
 
-    toggleChecked = () => {
+    getListItemStyle = memoize((showActions, hasMetadata) => (showActions ? {
+        paddingRight: 48 * (hasMetadata ? 4 : 3)
+    } : undefined));
+
+    showActions = () => this.setState({showActions: true});
+    hideActions = () => this.setState({showActions: false});
+
+    enableRipple = () => this.setState({disableRipple: false});
+    disableRipple = () => this.setState({disableRipple: true});
+
+    toggleChecked = composeEvtHandler(() => {
         const {id, onSelectChange} = this.props;
-        const {showButtonFocus} = this.state;
-        if (showButtonFocus && onSelectChange) {
+        if (onSelectChange) {
             onSelectChange(id);
         }
-    }
+    })
 
-    showEditor = () => {
+    showEditor = composeEvtHandler(() => {
         const {id, onEdit} = this.props;
         if (onEdit) {
             onEdit(id);
         }
-    }
+    })
 
-    showInfo = () => {
+    showInfo = composeEvtHandler(() => {
         const {id, onShowInfo} = this.props;
         if (onShowInfo) {
             onShowInfo(id);
         }
-    }
+    })
 
-    focus = () => {
+    focus = composeEvtHandler(() => {
         const {id, onFocus} = this.props;
         if (onFocus) {
             onFocus(id);
         }
+    })
+
+    hide = composeEvtHandler(() => {
+        const {id, onVisibilityChange} = this.props;
+        if (onVisibilityChange) {
+            onVisibilityChange(id, false);
+        }
+    })
+
+    show = composeEvtHandler(() => {
+        const {id, onVisibilityChange} = this.props;
+        if (onVisibilityChange) {
+            onVisibilityChange(id, true);
+        }
+    })
+
+    delete = () => {
+        const {id, onDelete} = this.props;
+        if (onDelete) {
+            onDelete(id);
+        }
     }
 
-    toggleActionsVisibility = () => {
-        this.setState(state => ({
-            showActions: !state.showActions
-        }));
-    }
-
-    toggleButtonFocus = () => {
-        this.setState(state => ({
-            showButtonFocus: !state.showButtonFocus
-        }));
-    }
+    createAction = memoize(
+        ({title, ariaLabel, cb, icon, ...rest}: ActionProps) => {
+            return (
+                <Tooltip title={title} {...TOOLTIP_DELAY}>
+                    <div>
+                        <IconButton
+                            onClick={cb}
+                            onMouseOver={this.disableRipple}
+                            onMouseOut={this.enableRipple}
+                            aria-label={ariaLabel}
+                            {...rest}
+                        >
+                            {icon}
+                        </IconButton>
+                    </div>
+                </Tooltip>
+            )
+        }
+    )
 
     render() {
         const {
@@ -112,77 +156,67 @@ export class Model extends PureComponent<Props, State> {
             hasMetadata,
             visible
         } = this.props;
-        const {showActions, showButtonFocus} = this.state;
+        const {showActions, disableRipple} = this.state;
 
-        const itemClasses = {
-            [classes.modelShift]: showActions,
-            [classes.hideFocus]: !showButtonFocus
-        };
+        const itemStyle = this.getListItemStyle(showActions, hasMetadata);
+        const itemClasses = {[classes.modelShift]: showActions};
 
-        const editAction = (
-            <Tooltip title={'Edit'} placement="left" {...TOOLTIP_DELAY}>
-                <div>
-                    <IconButton
-                        onClick={this.showEditor}
-                        onMouseEnter={this.toggleButtonFocus}
-                        onMouseLeave={this.toggleButtonFocus}
-                        disabled={disabled}
-                        aria-label="Edit model"
-                    >
-                        <EditIcon />
-                    </IconButton>
-                </div>
-            </Tooltip>
-        );
+        const infoAction = hasMetadata ? this.createAction({
+            disabled,
+            title: 'Show info',
+            ariaLabel: 'Show model info',
+            icon: <InfoIcon />,
+            cb: this.showInfo
+        }) : null;
 
-        const infoAction = hasMetadata ? (
-            <Tooltip title={'Show info'} placement="bottom" {...TOOLTIP_DELAY}>
-                <div>
-                    <IconButton
-                        onClick={this.showInfo}
-                        onMouseEnter={this.toggleButtonFocus}
-                        onMouseLeave={this.toggleButtonFocus}
-                        disabled={disabled}
-                        aria-label="Show model info"
-                    >
-                        <InfoIcon />
-                    </IconButton>
-                </div>
-            </Tooltip>
-        ) : null;
+        const focusAction = this.createAction({
+            title: 'Focus',
+            ariaLabel: 'Focus model',
+            icon: <MyLocationIcon />,
+            cb: this.focus,
+            disabled: disabled || (!visible && !boundingBox)
+        });
 
-        const focusAction = (
-            <Tooltip title={'Focus'} placement="bottom" {...TOOLTIP_DELAY}>
-                <div>
-                    <IconButton
-                        onClick={this.focus}
-                        onMouseEnter={this.toggleButtonFocus}
-                        onMouseLeave={this.toggleButtonFocus}
-                        disabled={disabled || (!visible && !boundingBox)}
-                        aria-label="Focus model"
-                    >
-                        <MyLocationIcon />
-                    </IconButton>
-                </div>
-            </Tooltip>
-        );
+        const visibilityAction = visible ? this.createAction({
+            disabled,
+            title: 'Hide',
+            ariaLabel: 'Hide model',
+            icon: <VisibilityOffIcon />,
+            cb: this.hide
+        }) : this.createAction({
+            disabled,
+            title: 'Show',
+            ariaLabel: 'Show model',
+            icon: <VisibilityOnIcon />,
+            cb: this.show
+        });
+
+        const deleteAction = this.createAction({
+            disabled,
+            title: 'Delete',
+            ariaLabel: 'Delete model',
+            icon: <DeleteForeverIcon />,
+            cb: this.delete,
+            color: 'secondary'
+        });
 
         return (
             <ListItem
-                onClick={this.toggleChecked}
-                onMouseOver={this.toggleActionsVisibility}
-                onMouseOut={this.toggleActionsVisibility}
+                onClick={this.showEditor}
+                onMouseOver={this.showActions}
+                onMouseOut={this.hideActions}
                 className={classNames(classes.model, itemClasses)}
+                style={itemStyle}
                 disabled={disabled}
-                disableRipple={!showButtonFocus}
-                disableTouchRipple={!showButtonFocus}
+                disableRipple={disableRipple}
+                disableTouchRipple={disableRipple}
                 button
             >
                 <Checkbox
-                    onChange={this.toggleChecked}
+                    onMouseOver={this.disableRipple}
+                    onMouseOut={this.enableRipple}
+                    onClick={this.toggleChecked}
                     checked={checked}
-                    tabIndex={-1}
-                    disableRipple
                 />
                 <ListItemText
                     primary={name}
@@ -191,9 +225,10 @@ export class Model extends PureComponent<Props, State> {
                 />
                 <Fade in={showActions} unmountOnExit>
                     <ListItemSecondaryAction className={classes.modelActions}>
-                        {editAction}
                         {focusAction}
                         {infoAction}
+                        {visibilityAction}
+                        {deleteAction}
                     </ListItemSecondaryAction>
                 </Fade>
             </ListItem>
@@ -204,6 +239,14 @@ export class Model extends PureComponent<Props, State> {
 
 export default style(Model);
 
+
+function composeEvtHandler(fn: (evt: MouseEvent) => void) {
+    return (evt: MouseEvent) => {
+        evt.preventDefault()
+        evt.stopPropagation()
+        fn(evt);
+    }
+}
 
 interface Props extends WithStyles<typeof styles> {
     id: ModelId;
@@ -218,9 +261,20 @@ interface Props extends WithStyles<typeof styles> {
     onFocus?(id: ModelId): void;
     onShowInfo?(id: ModelId): void;
     onEdit?(id: ModelId): void;
+    onVisibilityChange?(id: ModelId, visible: boolean): void;
+    onDelete?(id: ModelId): void;
 }
 
 interface State {
     showActions?: boolean;
-    showButtonFocus?: boolean;
+    disableRipple?: boolean;
+}
+
+interface ActionProps {
+    title: string;
+    ariaLabel: string;
+    cb: (evt: MouseEvent) => void;
+    icon: ReactElement<IconProps>;
+    disabled?: boolean;
+    color?: PropTypes.Color;
 }
