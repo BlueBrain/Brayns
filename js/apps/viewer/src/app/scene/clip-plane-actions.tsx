@@ -10,9 +10,12 @@ import {
     WithStyles
 } from '@material-ui/core/styles';
 import Toolbar from '@material-ui/core/Toolbar';
+import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import DeleteIcon from '@material-ui/icons/DeleteForever';
+
+import {TOOLTIP_DELAY} from '../../common/constants';
 
 
 const styles = (theme: Theme) => createStyles({
@@ -54,13 +57,15 @@ export class ClipPlaneActions extends PureComponent<Props> {
                         </IconButton>
                         <Typography variant="subtitle1">{count}</Typography>
                         <span className={classes.spacer} />
-                        <IconButton
-                            color="secondary"
-                            onClick={onClear}
-                            aria-label="Delete clip planes"
-                        >
-                            <DeleteIcon />
-                        </IconButton>
+                        <Tooltip title={'Delete clip planes'} placement="left" {...TOOLTIP_DELAY}>
+                            <IconButton
+                                color="secondary"
+                                onClick={onClear}
+                                aria-label="Delete clip planes"
+                            >
+                                <DeleteIcon />
+                            </IconButton>
+                        </Tooltip>
                     </Toolbar>
                 </AppBar>
             </Fade>
