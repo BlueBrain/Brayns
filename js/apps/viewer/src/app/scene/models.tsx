@@ -25,7 +25,9 @@ export default class Models extends PureComponent<Props> {
             disabled,
             onSelectChange,
             onShowInfo,
-            onEdit
+            onEdit,
+            onVisibilityChange,
+            onDelete
         } = this.props;
 
         const items = models.map(model => {
@@ -47,6 +49,8 @@ export default class Models extends PureComponent<Props> {
                     onFocus={this.focusOnModel}
                     onShowInfo={onShowInfo}
                     onEdit={onEdit}
+                    onVisibilityChange={onVisibilityChange}
+                    onDelete={onDelete}
                 />
             );
         });
@@ -68,4 +72,6 @@ interface Props {
     onFocus?(box: BoundingBox): void;
     onShowInfo?(id: ModelId): void;
     onEdit?(id: ModelId): void;
+    onVisibilityChange?(id: ModelId, visible: boolean): void;
+    onDelete?(id: ModelId): void;
 }

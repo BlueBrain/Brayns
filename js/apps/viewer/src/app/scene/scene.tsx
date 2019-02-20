@@ -201,7 +201,7 @@ export class SceneModels extends PureComponent<Props, State> {
         }
     }
 
-    removeModel = async (id: ModelId) => {
+    deleteModel = async (id: ModelId) => {
         try {
             await brayns.request(REMOVE_MODEL, [id]);
         } catch (err) {
@@ -235,6 +235,14 @@ export class SceneModels extends PureComponent<Props, State> {
             } catch (err) {
                 dispatchNotification(err);
             }
+        }
+    }
+
+    setModelVisibility = async (id: ModelId, visible: boolean) => {
+        try {
+            await brayns.request(UPDATE_MODEL, {id, visible});
+        } catch (err) {
+            dispatchNotification(err);
         }
     }
 
@@ -708,6 +716,8 @@ export class SceneModels extends PureComponent<Props, State> {
                                             onFocus={this.focusModel}
                                             onShowInfo={this.showModelInfo}
                                             onEdit={this.showModelEditor}
+                                            onVisibilityChange={this.setModelVisibility}
+                                            onDelete={this.deleteModel}
                                         />
                                     </div>
 
