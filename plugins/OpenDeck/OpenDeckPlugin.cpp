@@ -70,6 +70,11 @@ Property getInterpupillaryDistanceProperty()
     return {"interpupillaryDistance", 0.0635, 0.0, 10.0, {"Eye separation"}};
 }
 
+Property getCameraScalingProperty(const double scaling)
+{
+    return {PARAM_CAMERA_SCALING, scaling, {"Camera scaling"}};
+}
+
 PropertyMap getCylindricStereoProperties()
 {
     PropertyMap properties;
@@ -78,22 +83,36 @@ PropertyMap getCylindricStereoProperties()
     return properties;
 }
 
-PropertyMap getCylindricStereoTrackedProperties()
+PropertyMap getCylindricStereoTrackedProperties(
+    const OpenDeckParameters& params)
 {
     PropertyMap properties;
     properties.setProperty(getHeadPositionProperty());
     properties.setProperty(getHeadRotationProperty());
     properties.setProperty(getStereoModeProperty());
     properties.setProperty(getInterpupillaryDistanceProperty());
+    properties.setProperty(getCameraScalingProperty(params.getCameraScaling()));
     return properties;
 }
 }
 
-OpenDeckPlugin::OpenDeckPlugin(const Vector2ui& wallRes,
-                               const Vector2ui& floorRes)
-    : _wallRes(wallRes)
-    , _floorRes(floorRes)
+OpenDeckPlugin::OpenDeckPlugin(OpenDeckParameters&& params)
+    : _params(std::move(params))
 {
+    if (_params.getResolutionScaling() > 1.0f ||
+        _params.getResolutionScaling() <= 0.0f)
+    {
+        throw std::runtime_error(
+            "The scale of the native OpenDeck resolution cannot be bigger "
+            "than 1.0, zero or negative.");
+    }
+    if (_params.getCameraScaling() <= 0.0)
+        throw std::runtime_error("The camera scale cannot be zero or negative");
+
+    _wallRes = Vector2ui(openDeckWallResX * _params.getResolutionScaling(),
+                         openDeckWallResY * _params.getResolutionScaling());
+    _floorRes = Vector2ui(openDeckFloorResX * _params.getResolutionScaling(),
+                          openDeckFloorResY * _params.getResolutionScaling());
 }
 
 void OpenDeckPlugin::init()
@@ -103,7 +122,7 @@ void OpenDeckPlugin::init()
     engine.addCameraType("cylindric");
     engine.addCameraType("cylindricStereo", getCylindricStereoProperties());
     engine.addCameraType("cylindricStereoTracked",
-                         getCylindricStereoTrackedProperties());
+                         getCylindricStereoTrackedProperties(_params));
 #endif
     FrameBufferPtr frameBuffer =
         engine.createFrameBuffer(leftWallBufferName, _wallRes,
@@ -123,26 +142,17 @@ void OpenDeckPlugin::init()
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
                                                          const char** argv)
 {
-    if (argc > 2)
+    brayns::OpenDeckParameters params;
+    if (!params.getPropertyMap().parse(argc, argv))
+        return nullptr;
+    try
     {
-        throw std::runtime_error(
-            "OpenDeck plugin expects at most one argument, the scale of the "
-            "native OpenDeck resolution.");
+        return new brayns::OpenDeckPlugin(std::move(params));
     }
-
-    const float scaling = (argc == 2) ? std::stof(argv[1]) : 1.0f;
-
-    if (scaling > 1.0f || scaling <= 0.0f)
+    catch (const std::runtime_error& exc)
     {
-        throw std::runtime_error(
-            "The scale of the native OpenDeck resolution cannot be bigger "
-            "than 1.0 or negative.");
+        std::cerr << exc.what() << std::endl;
+        return nullptr;
     }
-
-    const Vector2ui floorRes(openDeckFloorResX * scaling,
-                             openDeckFloorResY * scaling);
-    const Vector2ui wallRes(openDeckWallResX * scaling,
-                            openDeckWallResY * scaling);
-    return new brayns::OpenDeckPlugin(wallRes, floorRes);
 }
 }

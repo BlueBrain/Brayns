@@ -1,6 +1,5 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,23 +17,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "OpenDeckParameters.h"
 
-#include <ospray/SDK/camera/Camera.ih>
-
-struct CylindricStereoTrackedCamera
+namespace brayns
 {
-    Camera super;
-
-    vec3f org;
-    vec3f dir_cam;
-    vec3f dir_du;
-    vec3f dir_dv;
-    vec3f headPos;
-    vec3f od_dir_du;
-    float half_ipd;
-    uint8 bufferId;
-    float opendeck_radius;
-    float opendeck_height;
-    float opendeck_metal_stripe_height;
-};
+OpenDeckParameters::OpenDeckParameters()
+    : _props("OpenDeck plugin parameters")
+{
+    _props.setProperty(
+        {PARAM_RESOLUTION_SCALING, 1.0,
+         Property::MetaData{"OpenDeck native resolution scale",
+                            "OpenDeck native resolution scale"}});
+    _props.setProperty({PARAM_CAMERA_SCALING, 1.0,
+                        Property::MetaData{"OpenDeck camera scaling",
+                                           "OpenDeck camera scaling"}});
+}
+}
