@@ -111,15 +111,6 @@ public:
         markModified();
     }
 
-    /**
-     * Update or add all the properties from the given map to the given type
-     */
-    void updateProperties(const std::string& type,
-                          const PropertyMap& properties)
-    {
-        _properties[type].merge(properties);
-        markModified();
-    }
     /** @return the entire property map for the current type. */
     const auto& getPropertyMap() const { return _properties.at(_currentType); }
     /** @return the entire property map for the given type. */

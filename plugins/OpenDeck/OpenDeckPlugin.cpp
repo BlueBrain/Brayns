@@ -70,6 +70,11 @@ Property getInterpupillaryDistanceProperty()
     return {"interpupillaryDistance", 0.0635, 0.0, 10.0, {"Eye separation"}};
 }
 
+Property getCameraScalingProperty(const double scaling)
+{
+    return {PARAM_CAMERA_SCALING, scaling, {"Camera scaling"}};
+}
+
 PropertyMap getCylindricStereoProperties()
 {
     PropertyMap properties;
@@ -78,17 +83,17 @@ PropertyMap getCylindricStereoProperties()
     return properties;
 }
 
-PropertyMap getCylindricStereoTrackedProperties()
+PropertyMap getCylindricStereoTrackedProperties(
+    const OpenDeckParameters& params)
 {
     PropertyMap properties;
     properties.setProperty(getHeadPositionProperty());
     properties.setProperty(getHeadRotationProperty());
     properties.setProperty(getStereoModeProperty());
     properties.setProperty(getInterpupillaryDistanceProperty());
+    properties.setProperty(getCameraScalingProperty(params.getCameraScaling()));
     return properties;
 }
-const std::string CAMERA_TYPE = "cylindricStereoTracked";
-const std::string CAMERA_SCALING_PROP = "cameraScaling";
 }
 
 OpenDeckPlugin::OpenDeckPlugin(OpenDeckParameters&& params)
@@ -117,14 +122,8 @@ void OpenDeckPlugin::init()
     engine.addCameraType("cylindric");
     engine.addCameraType("cylindricStereo", getCylindricStereoProperties());
     engine.addCameraType("cylindricStereoTracked",
-                         getCylindricStereoTrackedProperties());
+                         getCylindricStereoTrackedProperties(_params));
 #endif
-    PropertyMap properties;
-    Property cameraScaling{CAMERA_SCALING_PROP, _params.getCameraScaling()};
-    cameraScaling.markReadOnly();
-    properties.setProperty(cameraScaling);
-    _api->getCamera().updateProperties(CAMERA_TYPE, properties);
-
     FrameBufferPtr frameBuffer =
         engine.createFrameBuffer(leftWallBufferName, _wallRes,
                                  FrameBufferFormat::rgba_i8);
@@ -146,6 +145,14 @@ extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
     brayns::OpenDeckParameters params;
     if (!params.getPropertyMap().parse(argc, argv))
         return nullptr;
-    return new brayns::OpenDeckPlugin(std::move(params));
+    try
+    {
+        return new brayns::OpenDeckPlugin(std::move(params));
+    }
+    catch (const std::runtime_error& exc)
+    {
+        std::cerr << exc.what() << std::endl;
+        return nullptr;
+    }
 }
 }
