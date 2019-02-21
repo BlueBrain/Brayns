@@ -22,8 +22,8 @@ import {
 import {KeyCode} from '../../common/constants';
 import {onKeyboardLockChange, onPageVisibilityChange} from '../../common/events';
 
-import AnimationSpeedController from './animation-speed-controller';
 import Controls from './controls';
+import FrameStep from './frame-step';
 import ProgressBar from './progress-bar';
 import {frameToTimeStr} from './utils';
 
@@ -213,7 +213,7 @@ export class AnimationPlayer extends PureComponent<Props> {
                                 {currentMs} / {totalMs} {animationParams.unit}
                             </Typography>
                             <span className={classes.spacer} />
-                            <AnimationSpeedController
+                            <FrameStep
                                 delta={animationParams.delta}
                                 disabled={disableBtns}
                                 onDeltaChange={onDeltaChange!}
