@@ -27,9 +27,27 @@ import {defaultProps, findLoader} from './utils';
 
 
 const styles = (theme: Theme) => createStyles({
+    // https://caniuse.com/#feat=css-grid
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout/Box_Alignment_in_CSS_Grid_Layout#Center_an_item_in_the_area
+    dialogContainer: {
+        [theme.breakpoints.up('sm')]: {
+            minHeight: '100vh',
+            maxHeight: '100vh',
+            height: 'initial',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateAreas: `
+                ". a a ."
+                ". a a ."
+            `
+        }
+    },
     dialog: {
         [theme.breakpoints.up('sm')]: {
-            minWidth: 400
+            width: 420,
+            gridArea: 'a',
+            alignSelf: 'center',
+            justifySelf: 'center'
         }
     },
     path: {
@@ -119,10 +137,11 @@ export class LoadModel extends PureComponent<Props, State> {
             <div>
                 <Dialog
                     open={open}
-                    classes={{paper: classes.dialog}}
+                    classes={{container: classes.dialogContainer, paper: classes.dialog}}
                     onClose={this.closeDialog}
                     TransitionComponent={SlideUp}
                     fullScreen={fullScreen}
+                    scroll="body"
                 >
                     <DialogContent>
                         <FormGroup className={classes.path}>
