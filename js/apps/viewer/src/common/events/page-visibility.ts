@@ -1,6 +1,7 @@
 import {empty, fromEvent} from 'rxjs';
 import {map} from 'rxjs/operators';
 
+// TODO: Use context to manage this
 /**
  * Observe page visibility
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API

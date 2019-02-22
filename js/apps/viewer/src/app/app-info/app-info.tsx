@@ -9,10 +9,8 @@ import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import {
@@ -23,7 +21,6 @@ import {
 } from '@material-ui/core/styles';
 
 import brayns, {onReady} from '../../common/client';
-import {GithubIcon} from '../../common/components';
 import storage from '../../common/storage';
 
 import {
@@ -112,13 +109,10 @@ export class AppInfo extends PureComponent<Props, State> {
             </ListItem>
         ));
 
-        const versionHeader = (
-            <ListSubheader component="div">
-                Version
-            </ListSubheader>
-        );
-
-        const versionName = version ? version.name : (<span>&mdash;</span>);
+        const versionName = version
+            ? version.tag
+                ? version.name : version.sha
+            : (<span>&mdash;</span>);
 
         return (
             <Dialog
@@ -128,21 +122,17 @@ export class AppInfo extends PureComponent<Props, State> {
                 classes={{paper: classes.paper}}
             >
                 <DialogTitle id="app-info-title">App info</DialogTitle>
-                <List subheader={versionHeader}>
-                    <ListItem>
-                        <ListItemText primary="Brayns C++" secondary={versionName} />
-                        <ListItemSecondaryAction>
-                            <IconButton
-                                href={version ? version.url : ''}
-                                target="_blank"
-                                rel="noopener"
-                                aria-label="Navigate to Brayns github tag"
-                            >
-                                <GithubIcon />
-                            </IconButton>
-                        </ListItemSecondaryAction>
+                <List>
+                    <ListItem
+                        component="a"
+                        href={version ? version.commit : ''}
+                        target="_blank"
+                        rel="noopener"
+                        aria-label="Navigate to commit"
+                        button
+                    >
+                        <ListItemText primary="Version" secondary={versionName} />
                     </ListItem>
-                    {/* TODO: Show current app version too */}
                 </List>
                 <List component="nav" subheader={authorsHeader}>
                     {authorItems}
@@ -204,19 +194,17 @@ async function toAuthor(contributor: Contributor) {
 }
 
 async function toGitVersion(version: Version): Promise<GitVersion> {
-    const name = versionStr(version);
+    const name = toPrettyVersion(version);
     const tags = await getTags(BRAYNS_GITHUB_REPO);
-    const match = tags.find(tag => tag.name === name);
+    const match = tags.find(tag => tag.name.indexOf(name) !== -1);
+    const commit = gitCommitUrl(version.revision);
+    const tag = match ? gitTagUrl(name) : undefined;
     return {
         name,
-        url: match
-            ? gitTagUrl(name)
-            : gitCommitUrl(version.revision)
+        commit,
+        tag,
+        sha: version.revision
     };
-}
-
-function versionStr(version: Version) {
-    return `${version.major}.${version.minor}.${version.patch}`;
 }
 
 function gitTagUrl(version: string) {
@@ -225,6 +213,10 @@ function gitTagUrl(version: string) {
 
 function gitCommitUrl(sha: string) {
     return `${BRAYNS_GITHUB_URL}/commit/${sha}`;
+}
+
+function toPrettyVersion(version: Version) {
+    return `v${version.major}.${version.minor}.${version.patch}`;
 }
 
 
@@ -240,7 +232,9 @@ interface State {
 
 interface GitVersion {
     name: string;
-    url: string;
+    commit: string;
+    sha: string;
+    tag?: string;
 }
 
 interface Author {

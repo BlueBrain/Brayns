@@ -7,6 +7,7 @@ import {
 } from './pubsub';
 
 
+// TODO: Use context to manage this
 export const NOTIFICATION = 'notification';
 
 export function onNotification() {

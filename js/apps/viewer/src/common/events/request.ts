@@ -16,7 +16,7 @@ export const REQUEST_PROGRESS = 'requestprogress';
 export const REQUEST_DONE = 'requestdone';
 export const REQUEST_CANCEL = 'requestcancel';
 
-
+// TODO: Use context to manage this
 export function onRequestStart() {
     return addEventObserver<Request>(REQUEST_START);
 }
