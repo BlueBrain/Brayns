@@ -3,6 +3,7 @@ import {
     dispatchEvent
 } from './pubsub';
 
+// TODO: Use context to manage this
 export const FPS_CHANGE = 'renderingfpschange';
 
 export function onFpsChange() {

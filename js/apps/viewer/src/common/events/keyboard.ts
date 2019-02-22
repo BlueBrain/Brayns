@@ -3,6 +3,7 @@ import {
     dispatchEvent
 } from './pubsub';
 
+// TODO: Use context to manage this
 export const KEYBOARD_LOCK_CHANGE = 'keyboardlockchange';
 
 export function onKeyboardLockChange() {
