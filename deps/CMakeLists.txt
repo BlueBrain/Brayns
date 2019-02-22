@@ -50,7 +50,7 @@ if(BRAYNS_VIEWER_ENABLED)
       ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_draw.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_widgets.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/imgui/examples/imgui_impl_glfw.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/imgui/examples/imgui_impl_opengl3.cpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/imgui/examples/imgui_impl_opengl2.cpp
     )
   target_compile_definitions(imgui PRIVATE -DIMGUI_IMPL_OPENGL_LOADER_GLEW)
   target_link_libraries(imgui glfw ${OPENGL_gl_LIBRARY})
