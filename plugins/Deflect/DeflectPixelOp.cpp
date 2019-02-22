@@ -41,7 +41,7 @@ inline unsigned char clampCvt(float f)
         f = 0.f;
     if (f > 1.f)
         f = 1.f;
-    return f * 255.f;
+    return f * 255.f + .5f;
 }
 
 const size_t ALIGNMENT = 64;
