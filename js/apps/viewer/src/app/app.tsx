@@ -141,7 +141,7 @@ const APP_PREFERENCES = [
     {
         key: THEME_KEY,
         label: 'Dark Theme',
-        icon: (checked?: boolean) => checked ? <LightbulbFull /> : <LightbulbOutline />,
+        icon: (checked?: boolean) => checked ? <LightbulbOutline /> : <LightbulbFull />,
         checked: !!storage.get(THEME_KEY)
     },
     {
