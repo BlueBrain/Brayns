@@ -29,12 +29,7 @@
 #include <brayns/manipulators/AbstractManipulator.h>
 #include <brayns/parameters/ParametersManager.h>
 
-#ifndef __APPLE__
 #include <GL/glew.h>
-#if defined(_WIN32)
-#include <GL/wglew.h>
-#endif
-#endif
 
 #include <GLFW/glfw3.h>
 
@@ -42,7 +37,7 @@
 #include <imgui/imgui.h>
 // NOTE: include samples after imconfig.h and imgui.h
 #include <imgui/examples/imgui_impl_glfw.h>
-#include <imgui/examples/imgui_impl_opengl3.h>
+#include <imgui/examples/imgui_impl_opengl2.h>
 
 #include <algorithm>
 #include <cassert>
@@ -204,7 +199,7 @@ void Application::initImGUI()
 
     // Setup Platform/Renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(m_window, false);
-    ImGui_ImplOpenGL3_Init("#version 130");
+    ImGui_ImplOpenGL2_Init();
 }
 
 void Application::run()
@@ -284,7 +279,7 @@ brayns::Vector2ui Application::getWindowSize() const
 
 void Application::guiNewFrame()
 {
-    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
@@ -314,12 +309,12 @@ void Application::guiRender()
 {
     ImGui::Render();
     glViewport(0, 0, m_width, m_height);
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 }
 
 void Application::guiShutdown()
 {
-    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplOpenGL2_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 }
