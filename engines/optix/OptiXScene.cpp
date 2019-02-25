@@ -40,15 +40,21 @@ OptiXScene::OptiXScene(AnimationParameters& animationParameters,
     , _lightBuffer(nullptr)
 {
     _backgroundMaterial = std::make_shared<OptiXMaterial>();
+    auto oc = OptiXContext::get().getOptixContext();
 
     { // Create dummy texture sampler
-        auto oc = OptiXContext::get().getOptixContext();
         ::optix::TextureSampler sampler = oc->createTextureSampler();
         sampler->setArraySize(1u);
         optix::Buffer buffer =
             oc->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT4, 1, 1);
         sampler->setBuffer(buffer);
         _dummyTextureSampler = sampler;
+    }
+
+    { // Create dummy simulation data
+        oc["use_simulation_data"]->setUint(0);
+        oc["simulation_data"]->setBuffer(
+            oc->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT, 1));
     }
 }
 
@@ -118,6 +124,13 @@ ModelPtr OptiXScene::createModel() const
 
 void OptiXScene::commit()
 {
+    // Always upload transfer function and simulation data if changed
+    for (size_t i = 0; i < _modelDescriptors.size(); ++i)
+    {
+        auto& impl = static_cast<OptiXModel&>(_modelDescriptors[i]->getModel());
+        impl.commitTransferFunction();
+    }
+
     if (!isModified())
         return;
 

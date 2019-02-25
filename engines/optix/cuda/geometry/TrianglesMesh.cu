@@ -42,6 +42,7 @@ rtDeclareVariable(float3, back_hit_point, attribute back_hit_point, );
 rtDeclareVariable(float3, front_hit_point, attribute front_hit_point, );
 
 rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
+rtDeclareVariable(unsigned long, user_data, attribute user_data, );
 
 template <bool DO_REFINE>
 static __device__ void meshIntersect(int primIdx)
@@ -86,7 +87,7 @@ static __device__ void meshIntersect(int primIdx)
                 refine_and_offset_hitpoint(ray.origin + t * ray.direction,
                                            ray.direction, geometric_normal, p0,
                                            back_hit_point, front_hit_point);
-
+            user_data = 0;
             rtReportIntersection(0);
         }
     }

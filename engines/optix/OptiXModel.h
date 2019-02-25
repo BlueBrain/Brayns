@@ -34,6 +34,8 @@ public:
     OptiXModel(AnimationParameters& animationParameters,
                VolumeParameters& volumeParameters);
 
+    ~OptiXModel();
+
     /** @copydoc Model::commit */
     void commitGeometry() final;
 
@@ -60,12 +62,17 @@ public:
         return _boundingBoxGroup;
     }
 
+    /** Commits transfer function */
+    bool commitTransferFunction();
+
 private:
     void _commitSpheres(const size_t materialId);
     void _commitCylinders(const size_t materialId);
     void _commitCones(const size_t materialId);
     void _commitMeshes(const size_t materialId);
     void _commitMaterials();
+    bool _commitSimulationData();
+    bool _commitTransferFunction();
 
     ::optix::GeometryGroup _geometryGroup{nullptr};
     ::optix::GeometryGroup _boundingBoxGroup{nullptr};
@@ -114,6 +121,19 @@ private:
     std::map<std::string, optix::Buffer> _optixTextures;
     std::map<std::string, optix::TextureSampler> _optixTextureSamplers;
 
+    // Transfer function
+    struct OptiXTransferFunction
+    {
+        optix::Buffer colors{nullptr};         // vec3fs
+        optix::Buffer opacities{nullptr};      // floats
+        optix::Buffer simulationData{nullptr}; // floats
+        bool initialized{false};
+    };
+
+    OptiXTransferFunction _tf;
     bool _boundingBoxBuilt = false;
+
+    // Whether this model has set the AnimationParameters "is ready" callback
+    bool _setIsReadyCallback{false};
 };
 } // namespace brayns

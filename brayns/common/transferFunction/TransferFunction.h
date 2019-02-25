@@ -64,6 +64,8 @@ public:
         _updateValue(_valuesRange, valuesRange);
     }
 
+    floats calculateInterpolatedOpacities() const;
+
 private:
     ColorMap _colorMap;
     Vector2ds _controlPoints;

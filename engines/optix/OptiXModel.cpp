@@ -23,33 +23,49 @@
 #include "OptiXMaterial.h"
 
 #include <brayns/common/log.h>
+#include <brayns/common/simulation/AbstractSimulationHandler.h>
+#include <brayns/parameters/AnimationParameters.h>
 
 #include <brayns/engine/Material.h>
 
 namespace brayns
 {
 template <typename T>
+void setBufferRaw(RTbuffertype bufferType, RTformat bufferFormat,
+                  optix::Handle<optix::BufferObj>& buffer,
+                  optix::Handle<optix::VariableObj> geometry, T* src,
+                  const size_t bufferSize)
+{
+    auto context = OptiXContext::get().getOptixContext();
+    if (!buffer)
+        buffer = context->createBuffer(bufferType, bufferFormat, bufferSize);
+
+    memcpy(buffer->map(), src, bufferSize);
+    buffer->unmap();
+    geometry->setBuffer(buffer);
+}
+
+template <typename T>
 void setBuffer(RTbuffertype bufferType, RTformat bufferFormat,
-               optix::Handle<optix::BufferObj> buffer,
+               optix::Handle<optix::BufferObj>& buffer,
                optix::Handle<optix::VariableObj> geometry,
                const std::vector<T>& src)
 {
     const auto bufferSize = sizeof(T) * src.size();
-    auto context = OptiXContext::get().getOptixContext();
-    if (!buffer)
-    {
-        buffer = context->createBuffer(bufferType, bufferFormat, bufferSize);
-    }
-
-    memcpy(buffer->map(), src.data(), bufferSize);
-    buffer->unmap();
-    geometry->setBuffer(buffer);
+    setBufferRaw(bufferType, bufferFormat, buffer, geometry, src.data(),
+                 bufferSize);
 }
 
 OptiXModel::OptiXModel(AnimationParameters& animationParameters,
                        VolumeParameters& volumeParameters)
     : Model(animationParameters, volumeParameters)
 {
+}
+
+OptiXModel::~OptiXModel()
+{
+    if (_setIsReadyCallback)
+        _animationParameters.removeIsReadyCallback();
 }
 
 void OptiXModel::commitGeometry()
@@ -261,6 +277,84 @@ void OptiXModel::_commitMaterials()
 
     for (auto& material : _materials)
         material.second->commit();
+}
+
+bool OptiXModel::_commitSimulationData()
+{
+    if (!_simulationHandler)
+        return false;
+
+    if (!_setIsReadyCallback && !_animationParameters.hasIsReadyCallback())
+    {
+        auto& ap = _animationParameters;
+        ap.setIsReadyCallback(
+            [handler = _simulationHandler] { return handler->isReady(); });
+        ap.setDt(_simulationHandler->getDt(), false);
+        ap.setUnit(_simulationHandler->getUnit(), false);
+        ap.setNumFrames(_simulationHandler->getNbFrames(), false);
+        ap.markModified();
+        _setIsReadyCallback = true;
+    }
+
+    const auto animationFrame = _animationParameters.getFrame();
+
+    if (_tf.initialized &&
+        _simulationHandler->getCurrentFrame() == animationFrame)
+    {
+        return false;
+    }
+
+    auto frameData =
+        static_cast<float*>(_simulationHandler->getFrameData(animationFrame));
+
+    if (!frameData)
+        return false;
+
+    auto context = OptiXContext::get().getOptixContext();
+    const size_t frameSize = _simulationHandler->getFrameSize();
+    setBufferRaw(RT_BUFFER_INPUT, RT_FORMAT_FLOAT, _tf.simulationData,
+                 context["simulation_data"], frameData,
+                 frameSize * sizeof(float));
+
+    return true;
+}
+
+bool OptiXModel::_commitTransferFunction()
+{
+    if (!_transferFunction.isModified() && _tf.initialized)
+        return false;
+
+    auto context = OptiXContext::get().getOptixContext();
+
+    setBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT3, _tf.colors, context["colors"],
+              _transferFunction.getColors());
+
+    setBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT, _tf.opacities,
+              context["opacities"],
+              _transferFunction.calculateInterpolatedOpacities());
+
+    context["value_range"]->setFloat(_transferFunction.getValuesRange().x,
+                                     _transferFunction.getValuesRange().y);
+
+    _transferFunction.resetModified();
+    return true;
+}
+
+bool OptiXModel::commitTransferFunction()
+{
+    const auto dirtyTransferFunction = _commitTransferFunction();
+    const auto dirtySimulationData = _commitSimulationData();
+
+    // Set initialized on first successful commit of both transfer function and
+    // simulation data
+    if (dirtyTransferFunction && dirtySimulationData)
+    {
+        auto context = OptiXContext::get().getOptixContext();
+        context["use_simulation_data"]->setUint(1);
+        _tf.initialized = true;
+    }
+
+    return dirtyTransferFunction || dirtySimulationData;
 }
 
 void OptiXModel::buildBoundingBox()

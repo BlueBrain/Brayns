@@ -256,3 +256,6 @@ static __host__ __device__ __inline__ optix::float3 tonemap(
 
     return mapped_rgb;
 }
+
+#define OPTIX_DUMP_FLOAT(VALUE) rtPrintf(#VALUE " %f\n", VALUE)
+#define OPTIX_DUMP_INT(VALUE) rtPrintf(#VALUE " %i\n", VALUE)
