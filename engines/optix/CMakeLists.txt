@@ -8,6 +8,11 @@
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 
 common_find_package(CUDA REQUIRED SYSTEM)
+if(CUDA_FOUND)
+  # This doesn't get called from common_find_package_post unless we export some
+  # variables to the parent scope
+  find_cuda_compatible_host_compiler()
+endif()
 message(STATUS "Using CUDA version ${CUDA_VERSION}")
 
 # Patch for cmake 3.7->3.9
