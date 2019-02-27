@@ -17,6 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "TransferFunction.h"
+
 #include <optix_world.h>
 
 struct PerRayData_radiance
@@ -48,46 +50,6 @@ rtDeclareVariable(float2, value_range, , );
 rtBuffer<float> simulation_data;
 rtDeclareVariable(unsigned long, simulation_idx, attribute simulation_idx, );
 
-template <typename T>
-static __device__ inline T interpolateValues(const float v_min,
-                                             const float v_max,
-                                             const float value,
-                                             optix::buffer<T, 1> &values)
-{
-    const int num_values = values.size() / sizeof(T);
-
-    const float v_clamped = min(v_max, max(v_min, value));
-    const float range_per_value = (v_max - v_min) / (num_values - 1);
-    const float idx_value = (v_clamped - v_min) / range_per_value;
-
-    const int index = int(floor(idx_value));
-
-    if (index == num_values - 1)
-        return values[index];
-
-    const float v_low = v_min + float(index) * range_per_value;
-    const float t = (v_clamped - v_low) / range_per_value;
-
-    return values[index] * (1.0f - t) + values[index + 1] * t;
-}
-
-static __device__ inline float3 calcTransferFunctionColor()
-{
-    const float3 WHITE = make_float3(1.f, 1.f, 1.f);
-
-    const float x_min = value_range.x;
-    const float x_max = value_range.y;
-    const float x_value = simulation_data[simulation_idx];
-
-    const float3 color_opaque =
-        interpolateValues<float3>(x_min, x_max, x_value, colors);
-
-    const float opacity =
-        interpolateValues<float>(x_min, x_max, x_value, opacities);
-
-    return opacity * color_opaque + (1.0f - opacity) * WHITE;
-}
-
 static __device__ inline void shade(bool textured)
 {
     float3 world_shading_normal =
@@ -98,12 +60,17 @@ static __device__ inline void shade(bool textured)
     float3 p_normal = optix::faceforward(world_shading_normal, -ray.direction,
                                          world_geometric_normal);
 
-    const float3 p_Kd =
-        textured ? make_float3(tex2D(diffuse_map, texcoord.x, texcoord.y)) : Kd;
-    const float3 color =
-        use_simulation_data ? calcTransferFunctionColor() : p_Kd;
+    float3 p_Kd;
+    if (use_simulation_data)
+        p_Kd = calcTransferFunctionColor(value_range.x, value_range.y,
+                                         simulation_data[simulation_idx],
+                                         colors, opacities);
+    else if (textured)
+        p_Kd = make_float3(tex2D(diffuse_map, texcoord.x, texcoord.y));
+    else
+        p_Kd = Kd;
 
-    prd.result = color * max(0.f, optix::dot(-ray.direction, p_normal));
+    prd.result = p_Kd * max(0.f, optix::dot(-ray.direction, p_normal));
 }
 
 RT_PROGRAM void any_hit_shadow()
