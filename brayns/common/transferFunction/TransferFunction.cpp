@@ -78,13 +78,15 @@ void TransferFunction::clear()
 
 floats TransferFunction::calculateInterpolatedOpacities() const
 {
+    constexpr size_t numSamples = 256;
+    constexpr double dx = 1. / (numSamples - 1);
+
     auto tfPoints = getControlPoints();
     std::sort(tfPoints.begin(), tfPoints.end(),
               [](auto a, auto b) { return a.x < b.x; });
+
     floats opacities;
-    opacities.reserve(tfPoints.size());
-    constexpr size_t numSamples = 256u;
-    constexpr double dx = 1. / (numSamples - 1);
+    opacities.reserve(numSamples);
     for (size_t i = 0; i < numSamples; ++i)
         opacities.push_back(_interpolatedOpacity(tfPoints, i * dx));
     return opacities;
