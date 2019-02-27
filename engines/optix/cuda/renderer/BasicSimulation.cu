@@ -135,10 +135,10 @@ static __device__ inline void shade(bool textured)
 
     const float3 p_Kd =
         textured ? make_float3(tex2D(diffuse_map, texcoord.x, texcoord.y)) : Kd;
+    const float3 color =
+        use_simulation_data ? calcTransferFunctionColor() : p_Kd;
 
-    prd.result = p_Kd * max(0.f, optix::dot(-ray.direction, p_normal));
-    const float3 col = use_simulation_data ? calcTransferFunctionColor() : Kd;
-    prd.result = col * max(0.f, optix::dot(-ray.direction, p_normal));
+    prd.result = color * max(0.f, optix::dot(-ray.direction, p_normal));
 }
 
 RT_PROGRAM void any_hit_shadow()
