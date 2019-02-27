@@ -42,6 +42,9 @@ OptiXScene::OptiXScene(AnimationParameters& animationParameters,
     _backgroundMaterial = std::make_shared<OptiXMaterial>();
     auto oc = OptiXContext::get().getOptixContext();
 
+    // To avoid crashes we need to initialize some buffers and variables
+    // even if they are not always used in CUDA kernels.
+
     { // Create dummy texture sampler
         ::optix::TextureSampler sampler = oc->createTextureSampler();
         sampler->setArraySize(1u);
