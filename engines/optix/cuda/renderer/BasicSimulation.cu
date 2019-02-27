@@ -46,7 +46,7 @@ rtBuffer<float3> colors;
 rtBuffer<float> opacities;
 rtDeclareVariable(float2, value_range, , );
 rtBuffer<float> simulation_data;
-rtDeclareVariable(unsigned long, user_data, attribute user_data, );
+rtDeclareVariable(unsigned long, simulation_idx, attribute simulation_idx, );
 
 struct InterpolatedValue
 {
@@ -102,7 +102,7 @@ static __device__ inline float3 calcTransferFunctionColor()
 
     const float x_min = value_range.x;
     const float x_max = value_range.y;
-    const float x_value = simulation_data[user_data];
+    const float x_value = simulation_data[simulation_idx];
 
     {
         const int num_colors = colors.size() / (sizeof(float3));
