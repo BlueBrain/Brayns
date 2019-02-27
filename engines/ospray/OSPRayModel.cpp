@@ -54,8 +54,6 @@ OSPRayModel::OSPRayModel(AnimationParameters& animationParameters,
 
 OSPRayModel::~OSPRayModel()
 {
-    if (_setIsReadyCallback)
-        _animationParameters.removeIsReadyCallback();
     ospRelease(_ospTransferFunction);
     ospRelease(_ospSimulationData);
 
@@ -358,71 +356,6 @@ void OSPRayModel::_commitSDFGeometries()
     ospRelease(neighbourData);
 }
 
-bool OSPRayModel::_commitSimulationData()
-{
-    if (!_simulationHandler)
-        return false;
-
-    if (!_setIsReadyCallback && !_animationParameters.hasIsReadyCallback())
-    {
-        auto& ap = _animationParameters;
-        ap.setIsReadyCallback(
-            [handler = _simulationHandler] { return handler->isReady(); });
-        ap.setDt(_simulationHandler->getDt(), false);
-        ap.setUnit(_simulationHandler->getUnit(), false);
-        ap.setNumFrames(_simulationHandler->getNbFrames(), false);
-        ap.markModified();
-        _setIsReadyCallback = true;
-    }
-
-    const auto animationFrame = _animationParameters.getFrame();
-
-    if (_ospSimulationData &&
-        _simulationHandler->getCurrentFrame() == animationFrame)
-    {
-        return false;
-    }
-
-    auto frameData = _simulationHandler->getFrameData(animationFrame);
-
-    if (!frameData)
-        return false;
-
-    ospRelease(_ospSimulationData);
-    _ospSimulationData =
-        ospNewData(_simulationHandler->getFrameSize(), OSP_FLOAT, frameData,
-                   _memoryManagementFlags);
-    ospCommit(_ospSimulationData);
-    return true;
-}
-
-bool OSPRayModel::_commitTransferFunction()
-{
-    if (!_transferFunction.isModified() || !_ospTransferFunction)
-        return false;
-
-    // colors
-    const auto& colors = _transferFunction.getColorMap().colors;
-    OSPData colorsData = ospNewData(colors.size(), OSP_FLOAT3, colors.data());
-    ospSetData(_ospTransferFunction, "colors", colorsData);
-    ospRelease(colorsData);
-
-    // opacities
-    floats opacities = _transferFunction.calculateInterpolatedOpacities();
-    OSPData opacityData =
-        ospNewData(opacities.size(), OSP_FLOAT, opacities.data());
-    ospSetData(_ospTransferFunction, "opacities", opacityData);
-    ospRelease(opacityData);
-
-    ospSet2f(_ospTransferFunction, "valueRange",
-             _transferFunction.getValuesRange().x,
-             _transferFunction.getValuesRange().y);
-    ospCommit(_ospTransferFunction);
-
-    _transferFunction.resetModified();
-    return true;
-}
-
 void OSPRayModel::_setBVHFlags()
 {
     ospSet1i(_primaryModel, "dynamicScene", _bvhFlags.count(BVHFlag::dynamic));
@@ -497,13 +430,6 @@ void OSPRayModel::commitGeometry()
         ospCommit(_boundingBoxModel);
 }
 
-bool OSPRayModel::commitTransferFunction()
-{
-    const auto dirtyTransferFunction = _commitTransferFunction();
-    const auto dirtySimulationData = _commitSimulationData();
-    return dirtyTransferFunction || dirtySimulationData;
-}
-
 void OSPRayModel::commitMaterials(const std::string& renderer)
 {
     if (renderer.empty())
@@ -565,5 +491,45 @@ BrickedVolumePtr OSPRayModel::createBrickedVolume(const Vector3ui& dimensions,
     return std::make_shared<OSPRayBrickedVolume>(dimensions, spacing, type,
                                                  _volumeParameters,
                                                  _ospTransferFunction);
+}
+
+void OSPRayModel::_commitTransferFunctionImpl(const Vector3fs& colors,
+                                              const floats& opacities,
+                                              const Vector2d valueRange)
+{
+    // Colors
+    OSPData colorsData = ospNewData(colors.size(), OSP_FLOAT3, colors.data());
+    ospSetData(_ospTransferFunction, "colors", colorsData);
+    ospRelease(colorsData);
+
+    // Opacities
+    OSPData opacityData =
+        ospNewData(opacities.size(), OSP_FLOAT, opacities.data());
+    ospSetData(_ospTransferFunction, "opacities", opacityData);
+    ospRelease(opacityData);
+
+    // Value range
+    ospSet2f(_ospTransferFunction, "valueRange", valueRange.x, valueRange.y);
+
+    ospCommit(_ospTransferFunction);
+}
+
+void OSPRayModel::_commitSimulationDataImpl(const float* frameData,
+                                            const size_t frameSize)
+{
+    ospRelease(_ospSimulationData);
+    _ospSimulationData =
+        ospNewData(frameSize, OSP_FLOAT, frameData, _memoryManagementFlags);
+    ospCommit(_ospSimulationData);
+}
+
+bool OSPRayModel::_hasCommitedSimulationData() const
+{
+    return _ospSimulationData != nullptr;
+}
+
+bool OSPRayModel::_hasCommitedTransferFunction() const
+{
+    return _ospTransferFunction != nullptr;
 }
 }

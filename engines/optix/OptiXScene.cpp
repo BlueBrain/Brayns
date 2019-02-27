@@ -54,11 +54,9 @@ OptiXScene::OptiXScene(AnimationParameters& animationParameters,
         _dummyTextureSampler = sampler;
     }
 
-    { // Create dummy simulation data
-        oc["use_simulation_data"]->setUint(0);
-        oc["simulation_data"]->setBuffer(
-            oc->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT, 1));
-    }
+    // Create dummy simulation data
+    oc["simulation_data"]->setBuffer(
+        oc->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT, 0));
 }
 
 OptiXScene::~OptiXScene() = default;
@@ -129,10 +127,7 @@ void OptiXScene::commit()
 {
     // Always upload transfer function and simulation data if changed
     for (size_t i = 0; i < _modelDescriptors.size(); ++i)
-    {
-        auto& impl = static_cast<OptiXModel&>(_modelDescriptors[i]->getModel());
-        impl.commitSimulation();
-    }
+        _modelDescriptors[i]->getModel().commitSimulation();
 
     if (!isModified())
         return;

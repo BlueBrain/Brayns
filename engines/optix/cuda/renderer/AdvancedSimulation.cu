@@ -43,7 +43,6 @@ rtTextureSampler<float4, 2> diffuse_map;
 rtDeclareVariable(float3, texcoord, attribute texcoord, );
 
 // Simulation data
-rtDeclareVariable(unsigned int, use_simulation_data, , );
 rtBuffer<float3> colors;
 rtBuffer<float> opacities;
 rtDeclareVariable(float2, value_range, , );
@@ -66,7 +65,7 @@ static __device__ inline void shade(bool textured)
                                   world_geometric_normal);
 
     float3 p_Kd;
-    if (use_simulation_data)
+    if (simulation_data.size() > 0)
         p_Kd = calcTransferFunctionColor(value_range.x, value_range.y,
                                          simulation_data[simulation_idx],
                                          colors, opacities);

@@ -62,12 +62,6 @@ OptiXModel::OptiXModel(AnimationParameters& animationParameters,
 {
 }
 
-OptiXModel::~OptiXModel()
-{
-    if (_setIsReadyCallback)
-        _animationParameters.removeIsReadyCallback();
-}
-
 void OptiXModel::commitGeometry()
 {
     // Materials
@@ -279,84 +273,6 @@ void OptiXModel::_commitMaterials()
         material.second->commit();
 }
 
-bool OptiXModel::_commitSimulationData()
-{
-    if (!_simulationHandler)
-        return false;
-
-    if (!_setIsReadyCallback && !_animationParameters.hasIsReadyCallback())
-    {
-        auto& ap = _animationParameters;
-        ap.setIsReadyCallback(
-            [handler = _simulationHandler] { return handler->isReady(); });
-        ap.setDt(_simulationHandler->getDt(), false);
-        ap.setUnit(_simulationHandler->getUnit(), false);
-        ap.setNumFrames(_simulationHandler->getNbFrames(), false);
-        ap.markModified();
-        _setIsReadyCallback = true;
-    }
-
-    const auto animationFrame = _animationParameters.getFrame();
-
-    if (_optixTransferFunction.initialized &&
-        _simulationHandler->getCurrentFrame() == animationFrame)
-    {
-        return false;
-    }
-
-    auto frameData =
-        static_cast<float*>(_simulationHandler->getFrameData(animationFrame));
-
-    if (!frameData)
-        return false;
-
-    auto context = OptiXContext::get().getOptixContext();
-    const size_t frameSize = _simulationHandler->getFrameSize();
-    setBufferRaw(RT_BUFFER_INPUT, RT_FORMAT_FLOAT, _simulationData,
-                 context["simulation_data"], frameData,
-                 frameSize * sizeof(float));
-
-    return true;
-}
-
-bool OptiXModel::_commitTransferFunction()
-{
-    if (!_transferFunction.isModified() && _optixTransferFunction.initialized)
-        return false;
-
-    auto context = OptiXContext::get().getOptixContext();
-
-    setBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT3, _optixTransferFunction.colors,
-              context["colors"], _transferFunction.getColors());
-
-    setBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT,
-              _optixTransferFunction.opacities, context["opacities"],
-              _transferFunction.calculateInterpolatedOpacities());
-
-    context["value_range"]->setFloat(_transferFunction.getValuesRange().x,
-                                     _transferFunction.getValuesRange().y);
-
-    _transferFunction.resetModified();
-    return true;
-}
-
-bool OptiXModel::commitSimulation()
-{
-    const auto dirtyTransferFunction = _commitTransferFunction();
-    const auto dirtySimulationData = _commitSimulationData();
-
-    // Set initialized on first successful commit of both transfer function and
-    // simulation data
-    if (dirtyTransferFunction && dirtySimulationData)
-    {
-        auto context = OptiXContext::get().getOptixContext();
-        context["use_simulation_data"]->setUint(1);
-        _optixTransferFunction.initialized = true;
-    }
-
-    return dirtyTransferFunction || dirtySimulationData;
-}
-
 void OptiXModel::buildBoundingBox()
 {
     if (_boundingBoxBuilt)
@@ -426,6 +342,41 @@ BrickedVolumePtr OptiXModel::createBrickedVolume(
 {
     throw std::runtime_error("Not implemented");
     return nullptr;
+}
+
+void OptiXModel::_commitTransferFunctionImpl(const Vector3fs& colors,
+                                             const floats& opacities,
+                                             const Vector2d valueRange)
+{
+    auto context = OptiXContext::get().getOptixContext();
+
+    setBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT3, _optixTransferFunction.colors,
+              context["colors"], colors);
+
+    setBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT,
+              _optixTransferFunction.opacities, context["opacities"],
+              opacities);
+
+    context["value_range"]->setFloat(valueRange.x, valueRange.y);
+}
+
+void OptiXModel::_commitSimulationDataImpl(const float* frameData,
+                                           const size_t frameSize)
+{
+    auto context = OptiXContext::get().getOptixContext();
+    setBufferRaw(RT_BUFFER_INPUT, RT_FORMAT_FLOAT, _simulationData,
+                 context["simulation_data"], frameData,
+                 frameSize * sizeof(float));
+}
+
+bool OptiXModel::_hasCommitedSimulationData() const
+{
+    return _simulationData;
+}
+
+bool OptiXModel::_hasCommitedTransferFunction() const
+{
+    return _optixTransferFunction.colors;
 }
 
 } // namespace brayns

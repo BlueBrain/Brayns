@@ -234,7 +234,7 @@ bool OSPRayScene::_commitVolumeAndTransferFunction(
     for (auto& modelDescriptor : modelDescriptors)
     {
         auto& model = static_cast<OSPRayModel&>(modelDescriptor->getModel());
-        if (model.commitTransferFunction())
+        if (model.commitSimulation())
             markModified(false);
         if (model.isVolumesDirty())
         {
