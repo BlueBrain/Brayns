@@ -131,7 +131,7 @@ void OptiXScene::commit()
     for (size_t i = 0; i < _modelDescriptors.size(); ++i)
     {
         auto& impl = static_cast<OptiXModel&>(_modelDescriptors[i]->getModel());
-        impl.commitTransferFunction();
+        impl.commitSimulation();
     }
 
     if (!isModified())

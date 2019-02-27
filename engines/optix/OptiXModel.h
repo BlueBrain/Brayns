@@ -62,8 +62,8 @@ public:
         return _boundingBoxGroup;
     }
 
-    /** Commits transfer function */
-    bool commitTransferFunction();
+    /** Commits transfer function and simulation data */
+    bool commitSimulation();
 
 private:
     void _commitSpheres(const size_t materialId);

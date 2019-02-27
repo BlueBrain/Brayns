@@ -340,7 +340,7 @@ bool OptiXModel::_commitTransferFunction()
     return true;
 }
 
-bool OptiXModel::commitTransferFunction()
+bool OptiXModel::commitSimulation()
 {
     const auto dirtyTransferFunction = _commitTransferFunction();
     const auto dirtySimulationData = _commitSimulationData();
