@@ -298,7 +298,7 @@ bool OptiXModel::_commitSimulationData()
 
     const auto animationFrame = _animationParameters.getFrame();
 
-    if (_tf.initialized &&
+    if (_optixTransferFunction.initialized &&
         _simulationHandler->getCurrentFrame() == animationFrame)
     {
         return false;
@@ -312,7 +312,7 @@ bool OptiXModel::_commitSimulationData()
 
     auto context = OptiXContext::get().getOptixContext();
     const size_t frameSize = _simulationHandler->getFrameSize();
-    setBufferRaw(RT_BUFFER_INPUT, RT_FORMAT_FLOAT, _tf.simulationData,
+    setBufferRaw(RT_BUFFER_INPUT, RT_FORMAT_FLOAT, _simulationData,
                  context["simulation_data"], frameData,
                  frameSize * sizeof(float));
 
@@ -321,16 +321,16 @@ bool OptiXModel::_commitSimulationData()
 
 bool OptiXModel::_commitTransferFunction()
 {
-    if (!_transferFunction.isModified() && _tf.initialized)
+    if (!_transferFunction.isModified() && _optixTransferFunction.initialized)
         return false;
 
     auto context = OptiXContext::get().getOptixContext();
 
-    setBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT3, _tf.colors, context["colors"],
-              _transferFunction.getColors());
+    setBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT3, _optixTransferFunction.colors,
+              context["colors"], _transferFunction.getColors());
 
-    setBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT, _tf.opacities,
-              context["opacities"],
+    setBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT,
+              _optixTransferFunction.opacities, context["opacities"],
               _transferFunction.calculateInterpolatedOpacities());
 
     context["value_range"]->setFloat(_transferFunction.getValuesRange().x,
@@ -351,7 +351,7 @@ bool OptiXModel::commitTransferFunction()
     {
         auto context = OptiXContext::get().getOptixContext();
         context["use_simulation_data"]->setUint(1);
-        _tf.initialized = true;
+        _optixTransferFunction.initialized = true;
     }
 
     return dirtyTransferFunction || dirtySimulationData;

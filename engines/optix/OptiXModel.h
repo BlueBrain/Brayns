@@ -122,15 +122,15 @@ private:
     std::map<std::string, optix::TextureSampler> _optixTextureSamplers;
 
     // Transfer function
-    struct OptiXTransferFunction
+    struct
     {
-        optix::Buffer colors{nullptr};         // vec3fs
-        optix::Buffer opacities{nullptr};      // floats
-        optix::Buffer simulationData{nullptr}; // floats
+        optix::Buffer colors{nullptr};
+        optix::Buffer opacities{nullptr};
         bool initialized{false};
-    };
+    } _optixTransferFunction;
 
-    OptiXTransferFunction _tf;
+    optix::Buffer _simulationData{nullptr};
+
     bool _boundingBoxBuilt = false;
 
     // Whether this model has set the AnimationParameters "is ready" callback
