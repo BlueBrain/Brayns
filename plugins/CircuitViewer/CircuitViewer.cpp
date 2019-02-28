@@ -34,6 +34,7 @@
 
 namespace brayns
 {
+#ifdef BRAYNS_USE_OSPRAY
 namespace
 {
 void _addAdvancedSimulationRenderer(Engine& engine)
@@ -68,6 +69,7 @@ void _addBasicSimulationRenderer(Engine& engine)
     engine.addRendererType("basic_simulation", properties);
 }
 }
+#endif
 
 CircuitViewer::CircuitViewer(PropertyMap&& circuitParams,
                              PropertyMap&& morphologyParams)
@@ -102,6 +104,7 @@ void CircuitViewer::init()
         std::make_unique<MorphologyLoader>(scene,
                                            std::move(_morphologyParams)));
 
+#ifdef BRAYNS_USE_OSPRAY
     if (params.getApplicationParameters().getEngine() == "ospray")
     {
         _addAdvancedSimulationRenderer(_api->getEngine());
@@ -109,6 +112,7 @@ void CircuitViewer::init()
 
         params.getRenderingParameters().setCurrentRenderer("basic_simulation");
     }
+#endif
 }
 }
 
