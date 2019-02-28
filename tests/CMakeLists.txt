@@ -92,7 +92,6 @@ else()
   )
 endif()
 
-option(BRAYNS_OPTIX_TESTS_ENABLED "Activate OptiX tests" ON)
 if(NOT BRAYNS_OPTIX_ENABLED OR NOT BRAYNS_OPTIX_TESTS_ENABLED)
     list(APPEND EXCLUDE_FROM_TESTS demoOptiX.cpp)
 endif()
