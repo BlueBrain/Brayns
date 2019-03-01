@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping_optix)
 {
     std::vector<const char*> argv = {
         "brayns", BBP_TEST_BLUECONFIG3, "--animation-frame", "50", "--engine",
-        "optix", "--plugin",
+        "optix", "--samples-per-pixel", "16", "--plugin",
         "braynsCircuitViewer --targets allmini50 --report "
         "voltages --synchronous-mode"};
 
@@ -59,9 +59,7 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping_optix)
     brayns.commit();
 
     modelDesc->getModel().getSimulationHandler()->waitReady();
-    // NOTE: Replace for-loop with samples per pixel when available in OptiX
-    for (int i = 0; i < 100; ++i)
-        brayns.render();
+    brayns.commitAndRender();
 
     BOOST_CHECK(compareTestImage("testdataallmini50basicsimulation_optix.png",
                                  brayns.getEngine().getFrameBuffer()));
