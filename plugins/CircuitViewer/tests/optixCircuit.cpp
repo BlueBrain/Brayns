@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping_optix)
 {
     std::vector<const char*> argv = {
         "brayns", BBP_TEST_BLUECONFIG3, "--animation-frame", "50", "--engine",
-        "optix", "--samples-per-pixel", "16", "--plugin",
+        "optix", "--samples-per-pixel", "64", "--plugin",
         "braynsCircuitViewer --targets allmini50 --report "
         "voltages --synchronous-mode"};
 
