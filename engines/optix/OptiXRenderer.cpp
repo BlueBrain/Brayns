@@ -168,6 +168,7 @@ void OptiXRenderer::commit()
     // Upload common properties
     auto context = OptiXContext::get().getOptixContext();
     auto bgColor = _renderingParameters.getBackgroundColor();
+    const auto samples_per_pixel = _renderingParameters.getSamplesPerPixel();
     constexpr auto epsilon = 1.0e-5f;
 
     context["radianceRayType"]->setUint(0);
@@ -175,6 +176,7 @@ void OptiXRenderer::commit()
     context["sceneEpsilon"]->setFloat(epsilon);
     context["ambientLightColor"]->setFloat(bgColor.x, bgColor.y, bgColor.z);
     context["bgColor"]->setFloat(bgColor.x, bgColor.y, bgColor.z);
+    context["samples_per_pixel"]->setUint(samples_per_pixel);
 
     toOptiXProperties(getPropertyMap());
     _currentRenderer = _renderingParameters.getCurrentRenderer();
