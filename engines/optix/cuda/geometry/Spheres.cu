@@ -33,12 +33,15 @@ rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, );
 rtDeclareVariable(float3, shading_normal, attribute shading_normal, );
 rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
 rtDeclareVariable(unsigned int, sphere_size, , );
+rtDeclareVariable(unsigned long, simulation_idx, attribute simulation_idx, );
 
 template <bool use_robust_method>
 static __device__ void intersect_sphere(int primIdx)
 {
     const int idx = primIdx * sphere_size;
 
+    const unsigned long userData =
+        *((unsigned long*)(&spheres[idx + OFFSET_USER_DATA]));
     const float3 center = {spheres[idx + OFFSET_CENTER],
                            spheres[idx + OFFSET_CENTER + 1],
                            spheres[idx + OFFSET_CENTER + 2]};
@@ -81,6 +84,7 @@ static __device__ void intersect_sphere(int primIdx)
         {
             shading_normal = geometric_normal =
                 (O + (root1 + root11) * D) / radius;
+            simulation_idx = userData;
             if (rtReportIntersection(0))
                 check_second = false;
         }
@@ -90,6 +94,7 @@ static __device__ void intersect_sphere(int primIdx)
             if (rtPotentialIntersection(root2))
             {
                 shading_normal = geometric_normal = (O + root2 * D) / radius;
+                simulation_idx = userData;
                 rtReportIntersection(0);
             }
         }

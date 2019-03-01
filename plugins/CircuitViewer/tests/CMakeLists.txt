@@ -27,9 +27,12 @@ if(BRAYNS_NETWORKING_ENABLED)
     ${PROJECT_SOURCE_DIR}/../Rockets
     ${PROJECT_SOURCE_DIR}/../Rockets/rapidjson/include
 )
-
 else()
   list(APPEND EXCLUDE_FROM_TESTS addCircuit.cpp)
+endif()
+
+if(NOT BRAYNS_OPTIX_TESTS_ENABLED)
+    list(APPEND EXCLUDE_FROM_TESTS optixCircuit.cpp)
 endif()
 
 include(CommonCTest)

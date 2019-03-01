@@ -40,9 +40,12 @@ OptiXScene::OptiXScene(AnimationParameters& animationParameters,
     , _lightBuffer(nullptr)
 {
     _backgroundMaterial = std::make_shared<OptiXMaterial>();
+    auto oc = OptiXContext::get().getOptixContext();
+
+    // To avoid crashes we need to initialize some buffers and variables
+    // even if they are not always used in CUDA kernels.
 
     { // Create dummy texture sampler
-        auto oc = OptiXContext::get().getOptixContext();
         ::optix::TextureSampler sampler = oc->createTextureSampler();
         sampler->setArraySize(1u);
         optix::Buffer buffer =
@@ -50,6 +53,10 @@ OptiXScene::OptiXScene(AnimationParameters& animationParameters,
         sampler->setBuffer(buffer);
         _dummyTextureSampler = sampler;
     }
+
+    // Create dummy simulation data
+    oc["simulation_data"]->setBuffer(
+        oc->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT, 0));
 }
 
 OptiXScene::~OptiXScene() = default;
@@ -118,6 +125,14 @@ ModelPtr OptiXScene::createModel() const
 
 void OptiXScene::commit()
 {
+    // Always upload transfer function and simulation data if changed
+    for (size_t i = 0; i < _modelDescriptors.size(); ++i)
+    {
+        auto& model = _modelDescriptors[i]->getModel();
+        model.commitTransferFunction();
+        model.commitSimulationData();
+    }
+
     if (!isModified())
         return;
 

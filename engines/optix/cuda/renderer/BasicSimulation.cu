@@ -17,6 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "TransferFunction.h"
+
 #include <optix_world.h>
 
 struct PerRayData_radiance
@@ -40,6 +42,13 @@ rtDeclareVariable(float3, shading_normal, attribute shading_normal, );
 rtTextureSampler<float4, 2> diffuse_map;
 rtDeclareVariable(float3, texcoord, attribute texcoord, );
 
+// Simulation data
+rtBuffer<float3> colors;
+rtBuffer<float> opacities;
+rtDeclareVariable(float2, value_range, , );
+rtBuffer<float> simulation_data;
+rtDeclareVariable(unsigned long, simulation_idx, attribute simulation_idx, );
+
 static __device__ inline void shade(bool textured)
 {
     float3 world_shading_normal =
@@ -50,8 +59,15 @@ static __device__ inline void shade(bool textured)
     float3 p_normal = optix::faceforward(world_shading_normal, -ray.direction,
                                          world_geometric_normal);
 
-    const float3 p_Kd =
-        textured ? make_float3(tex2D(diffuse_map, texcoord.x, texcoord.y)) : Kd;
+    float3 p_Kd;
+    if (simulation_data.size() > 0)
+        p_Kd = calcTransferFunctionColor(value_range.x, value_range.y,
+                                         simulation_data[simulation_idx],
+                                         colors, opacities);
+    else if (textured)
+        p_Kd = make_float3(tex2D(diffuse_map, texcoord.x, texcoord.y));
+    else
+        p_Kd = Kd;
 
     prd.result = p_Kd * max(0.f, optix::dot(-ray.direction, p_normal));
 }

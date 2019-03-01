@@ -37,11 +37,14 @@ rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, );
 rtDeclareVariable(float3, shading_normal, attribute shading_normal, );
 rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
 rtDeclareVariable(unsigned int, cylinder_size, , );
+rtDeclareVariable(unsigned long, simulation_idx, attribute simulation_idx, );
 
 template <bool use_robust_method>
 static __device__ void intersect_cylinder(int primIdx)
 {
     const int idx = primIdx * cylinder_size;
+    const unsigned long userData =
+        *((unsigned long*)(&cylinders[idx + OFFSET_USER_DATA]));
 
     const float3 v0 = {cylinders[idx + OFFSET_CENTER],
                        cylinders[idx + OFFSET_CENTER + 1],
@@ -90,6 +93,7 @@ static __device__ void intersect_cylinder(int primIdx)
                 const float3 P = ray.origin + t_in * ray.direction - v0;
                 const float3 V = cross(P, AB);
                 geometric_normal = shading_normal = cross(AB, V);
+                simulation_idx = userData;
                 if (rtReportIntersection(0))
                     check_second = false;
             }
@@ -105,6 +109,7 @@ static __device__ void intersect_cylinder(int primIdx)
                     const float3 P = t_out * ray.direction - A;
                     const float3 V = cross(P, AB);
                     geometric_normal = shading_normal = cross(AB, V);
+                    simulation_idx = userData;
                     rtReportIntersection(0);
                 }
             }

@@ -43,11 +43,15 @@ rtBuffer<float> cones;
 rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, );
 rtDeclareVariable(float3, shading_normal, attribute shading_normal, );
 rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
+rtDeclareVariable(unsigned long, simulation_idx, attribute simulation_idx, );
 
 template <bool use_robust_method>
 static __device__ void intersect_cone(int primIdx)
 {
     const int idx = primIdx * cone_size;
+
+    const unsigned long userData =
+        *((unsigned long*)(&cones[idx + OFFSET_USER_DATA]));
 
     float3 v0 = {cones[idx + OFFSET_CENTER], cones[idx + OFFSET_CENTER + 1],
                  cones[idx + OFFSET_CENTER + 2]};
@@ -157,6 +161,7 @@ static __device__ void intersect_cone(int primIdx)
                 const float3 surfaceVec = normalize(p1 - V);
                 geometric_normal = shading_normal =
                     cross(cross(v, surfaceVec), surfaceVec);
+                simulation_idx = userData;
                 if (rtReportIntersection(0))
                     check_second = false;
             }
@@ -176,6 +181,7 @@ static __device__ void intersect_cone(int primIdx)
                     const float3 surfaceVec = normalize(p2 - V);
                     geometric_normal = shading_normal =
                         cross(cross(v, surfaceVec), surfaceVec);
+                    simulation_idx = userData;
                     rtReportIntersection(0);
                 }
             }

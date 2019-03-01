@@ -22,6 +22,33 @@
 
 #include <brayns/common/log.h>
 
+#include <algorithm>
+
+namespace
+{
+double _interpolatedOpacity(const brayns::Vector2ds& controlPointsSorted,
+                            const double x)
+{
+    const auto& firstPoint = controlPointsSorted.front();
+    if (x <= firstPoint.x)
+        return firstPoint.y;
+
+    for (size_t i = 1; i < controlPointsSorted.size(); ++i)
+    {
+        const auto& current = controlPointsSorted[i];
+        const auto& previous = controlPointsSorted[i - 1];
+        if (x <= current.x)
+        {
+            const auto t = (x - previous.x) / (current.x - previous.x);
+            return (1.0 - t) * previous.y + t * current.y;
+        }
+    }
+
+    const auto& lastPoint = controlPointsSorted.back();
+    return lastPoint.y;
+}
+}
+
 namespace brayns
 {
 bool ColorMap::operator==(const ColorMap& rhs) const
@@ -47,5 +74,21 @@ void TransferFunction::clear()
     _controlPoints = {{0, 0}, {1, 1}};
     _valuesRange = {0, 255};
     markModified();
+}
+
+floats TransferFunction::calculateInterpolatedOpacities() const
+{
+    constexpr size_t numSamples = 256;
+    constexpr double dx = 1. / (numSamples - 1);
+
+    auto tfPoints = getControlPoints();
+    std::sort(tfPoints.begin(), tfPoints.end(),
+              [](auto a, auto b) { return a.x < b.x; });
+
+    floats opacities;
+    opacities.reserve(numSamples);
+    for (size_t i = 0; i < numSamples; ++i)
+        opacities.push_back(_interpolatedOpacity(tfPoints, i * dx));
+    return opacities;
 }
 }

@@ -223,9 +223,17 @@ public:
     Model(AnimationParameters& animationParameters,
           VolumeParameters& volumeParameters);
 
+    BRAYNS_API virtual ~Model();
+
     /** @name API for engine-specific code */
     //@{
     virtual void commitGeometry() = 0;
+
+    /** Commit transfer function */
+    bool commitTransferFunction();
+
+    /** Commit simulation data */
+    bool commitSimulationData();
 
     /** Factory method to create an engine-specific material. */
     BRAYNS_API MaterialPtr createMaterial(const size_t materialId,
@@ -251,8 +259,6 @@ public:
 
     BRAYNS_API virtual void buildBoundingBox() = 0;
     //@}
-
-    BRAYNS_API virtual ~Model() = default;
 
     /**
      * @return true if the geometry Model does not contain any geometry, false
@@ -454,6 +460,12 @@ protected:
     /** Mark all geometries as clean. */
     void _markGeometriesClean();
 
+    virtual void _commitTransferFunctionImpl(const Vector3fs& colors,
+                                             const floats& opacities,
+                                             const Vector2d valueRange) = 0;
+    virtual void _commitSimulationDataImpl(const float* frameData,
+                                           const size_t frameSize) = 0;
+
     AnimationParameters& _animationParameters;
     VolumeParameters& _volumeParameters;
 
@@ -511,6 +523,9 @@ protected:
     bool _instancesDirty{true};
     std::set<BVHFlag> _bvhFlags;
     size_t _sizeInBytes{0};
+
+    // Whether this model has set the AnimationParameters "is ready" callback
+    bool _isReadyCallbackSet{false};
 
     SERIALIZATION_FRIEND(Model)
 };

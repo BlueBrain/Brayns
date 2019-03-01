@@ -60,12 +60,21 @@ public:
         return _boundingBoxGroup;
     }
 
+protected:
+    void _commitTransferFunctionImpl(const Vector3fs& colors,
+                                     const floats& opacities,
+                                     const Vector2d valueRange) final;
+    void _commitSimulationDataImpl(const float* frameData,
+                                   const size_t frameSize) final;
+
 private:
     void _commitSpheres(const size_t materialId);
     void _commitCylinders(const size_t materialId);
     void _commitCones(const size_t materialId);
     void _commitMeshes(const size_t materialId);
     void _commitMaterials();
+    bool _commitSimulationData();
+    bool _commitTransferFunction();
 
     ::optix::GeometryGroup _geometryGroup{nullptr};
     ::optix::GeometryGroup _boundingBoxGroup{nullptr};
@@ -113,6 +122,15 @@ private:
     std::vector<size_t> _optixMaterialsMap;
     std::map<std::string, optix::Buffer> _optixTextures;
     std::map<std::string, optix::TextureSampler> _optixTextureSamplers;
+
+    // Transfer function
+    struct
+    {
+        optix::Buffer colors{nullptr};
+        optix::Buffer opacities{nullptr};
+    } _optixTransferFunction;
+
+    optix::Buffer _simulationData{nullptr};
 
     bool _boundingBoxBuilt = false;
 };

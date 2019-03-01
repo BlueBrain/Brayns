@@ -27,6 +27,7 @@
 #include <brayns/engine/Volume.h>
 
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
+#include <brayns/parameters/AnimationParameters.h>
 
 #include <boost/filesystem.hpp>
 
@@ -188,6 +189,12 @@ Model::Model(AnimationParameters& animationParameters,
     : _animationParameters(animationParameters)
     , _volumeParameters(volumeParameters)
 {
+}
+
+Model::~Model()
+{
+    if (_isReadyCallbackSet)
+        _animationParameters.removeIsReadyCallback();
 }
 
 bool Model::empty() const
@@ -594,5 +601,53 @@ size_t Model::getSizeInBytes() const
 AbstractSimulationHandlerPtr Model::getSimulationHandler() const
 {
     return _simulationHandler;
+}
+
+bool Model::commitTransferFunction()
+{
+    if (!_transferFunction.isModified())
+        return false;
+
+    _commitTransferFunctionImpl(
+        _transferFunction.getColorMap().colors,
+        _transferFunction.calculateInterpolatedOpacities(),
+        _transferFunction.getValuesRange());
+
+    _transferFunction.resetModified();
+    return true;
+}
+
+bool Model::commitSimulationData()
+{
+    if (!_simulationHandler)
+        return false;
+
+    if (!_isReadyCallbackSet && !_animationParameters.hasIsReadyCallback())
+    {
+        auto& ap = _animationParameters;
+        ap.setIsReadyCallback(
+            [handler = _simulationHandler] { return handler->isReady(); });
+        ap.setDt(_simulationHandler->getDt(), false);
+        ap.setUnit(_simulationHandler->getUnit(), false);
+        ap.setNumFrames(_simulationHandler->getNbFrames(), false);
+        ap.markModified();
+        _isReadyCallbackSet = true;
+    }
+
+    const auto animationFrame = _animationParameters.getFrame();
+
+    if (_simulationHandler->getCurrentFrame() == animationFrame)
+    {
+        return false;
+    }
+
+    auto frameData = _simulationHandler->getFrameData(animationFrame);
+
+    if (!frameData)
+        return false;
+
+    _commitSimulationDataImpl((float*)frameData,
+                              _simulationHandler->getFrameSize());
+    return true;
 }
 }

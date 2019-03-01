@@ -234,7 +234,10 @@ bool OSPRayScene::_commitVolumeAndTransferFunction(
     for (auto& modelDescriptor : modelDescriptors)
     {
         auto& model = static_cast<OSPRayModel&>(modelDescriptor->getModel());
-        if (model.commitTransferFunction())
+        const bool dirtyTransferFunction = model.commitTransferFunction();
+        const bool dirtySimulationData = model.commitSimulationData();
+
+        if (dirtyTransferFunction || dirtySimulationData)
             markModified(false);
         if (model.isVolumesDirty())
         {

@@ -16,7 +16,7 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
- 
+
 #include "../Helpers.h"
 #include "../Random.h"
 #include <optix.h>
@@ -47,6 +47,7 @@ rtDeclareVariable(uint2, launch_index, rtLaunchIndex, );
 rtDeclareVariable(float, aperture_radius, , );
 rtDeclareVariable(float, focal_scale, , );
 rtDeclareVariable(float4, jitter4, , );
+rtDeclareVariable(unsigned int, samples_per_pixel, , );
 
 rtBuffer<float4, 1> clip_planes;
 rtDeclareVariable(unsigned int, nb_clip_planes, , );
@@ -71,21 +72,18 @@ __device__ void getClippingValues(const float3& ray_origin,
     }
 }
 
-RT_PROGRAM void perspectiveCamera()
+// Pass 'seed' by reference to keep randomness state
+__device__ float3 launch(unsigned int& seed, const float2 screen,
+                         const bool use_randomness)
 {
-    size_t2 screen = output_buffer.size();
-    unsigned int seed =
-        tea<16>(screen.x * launch_index.y + launch_index.x, frame);
-
     // Subpixel jitter: send the ray through a different position inside the
     // pixel each time, to provide antialiasing.
     float2 subpixel_jitter =
-        frame == 0 ? make_float2(0.0f, 0.0f)
-                   : make_float2(rnd(seed) - 0.5f, rnd(seed) - 0.5f);
+        use_randomness ? make_float2(rnd(seed) - 0.5f, rnd(seed) - 0.5f)
+                       : make_float2(0.f, 0.f);
 
-    float2 d = (make_float2(launch_index) + subpixel_jitter) /
-                   make_float2(screen) * 2.f -
-               1.f;
+    float2 d =
+        (make_float2(launch_index) + subpixel_jitter) / screen * 2.f - 1.f;
 
     float3 ray_origin = eye;
     float3 ray_direction = d.x * U + d.y * V + W;
@@ -114,13 +112,32 @@ RT_PROGRAM void perspectiveCamera()
 
     rtTrace(top_object, ray, prd);
 
-    float4 acc_val = accum_buffer[launch_index];
+    return prd.result;
+}
 
+RT_PROGRAM void perspectiveCamera()
+{
+    const size_t2 screen = output_buffer.size();
+    const float2 screen_f = make_float2(screen);
+
+    unsigned int seed =
+        tea<16>(screen.x * launch_index.y + launch_index.x, frame);
+
+    const int num_samples = max(1, samples_per_pixel);
+    // We enable randomness if we are using subpixel sampling or accumulation
+    const bool use_randomness = frame > 0 || num_samples > 1;
+
+    float3 result = make_float3(0, 0, 0);
+    for (int i = 0; i < num_samples; i++)
+        result += launch(seed, screen_f, use_randomness);
+    result /= num_samples;
+
+    float4 acc_val = accum_buffer[launch_index];
     if (frame > 0)
-        acc_val = lerp(acc_val, make_float4(prd.result, 0.f),
+        acc_val = lerp(acc_val, make_float4(result, 0.f),
                        1.0f / static_cast<float>(frame + 1));
     else
-        acc_val = make_float4(prd.result, 1.f);
+        acc_val = make_float4(result, 1.f);
 
     output_buffer[launch_index] = make_color(make_float3(acc_val));
     accum_buffer[launch_index] = acc_val;

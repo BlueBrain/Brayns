@@ -76,7 +76,10 @@ else()
 endif()
 
 option(BRAYNS_OPTIX_ENABLED "Activate OptiX rendering engine" OFF)
+option(BRAYNS_OPTIX_TESTS_ENABLED "Activate OptiX tests" OFF)
 if(BRAYNS_OPTIX_ENABLED)
+  # We have to append OptiX ourselves since we do not use common_find_package()
+  list(APPEND COMMON_FIND_PACKAGE_DEFINES BRAYNS_USE_OPTIX)
   add_subdirectory(engines/optix)
 endif()
 

@@ -34,9 +34,9 @@
 
 namespace brayns
 {
+#ifdef BRAYNS_USE_OSPRAY
 namespace
 {
-#ifdef BRAYNS_USE_OSPRAY
 void _addAdvancedSimulationRenderer(Engine& engine)
 {
     // clang-format off
@@ -68,8 +68,8 @@ void _addBasicSimulationRenderer(Engine& engine)
         {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
     engine.addRendererType("basic_simulation", properties);
 }
-#endif
 }
+#endif
 
 CircuitViewer::CircuitViewer(PropertyMap&& circuitParams,
                              PropertyMap&& morphologyParams)
@@ -105,10 +105,13 @@ void CircuitViewer::init()
                                            std::move(_morphologyParams)));
 
 #ifdef BRAYNS_USE_OSPRAY
-    _addAdvancedSimulationRenderer(_api->getEngine());
-    _addBasicSimulationRenderer(_api->getEngine());
+    if (params.getApplicationParameters().getEngine() == "ospray")
+    {
+        _addAdvancedSimulationRenderer(_api->getEngine());
+        _addBasicSimulationRenderer(_api->getEngine());
 
-    params.getRenderingParameters().setCurrentRenderer("basic_simulation");
+        params.getRenderingParameters().setCurrentRenderer("basic_simulation");
+    }
 #endif
 }
 }

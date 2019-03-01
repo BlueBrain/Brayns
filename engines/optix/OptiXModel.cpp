@@ -23,27 +23,37 @@
 #include "OptiXMaterial.h"
 
 #include <brayns/common/log.h>
+#include <brayns/common/simulation/AbstractSimulationHandler.h>
+#include <brayns/parameters/AnimationParameters.h>
 
 #include <brayns/engine/Material.h>
 
 namespace brayns
 {
 template <typename T>
+void setBufferRaw(RTbuffertype bufferType, RTformat bufferFormat,
+                  optix::Handle<optix::BufferObj>& buffer,
+                  optix::Handle<optix::VariableObj> geometry, T* src,
+                  const size_t bufferSize)
+{
+    auto context = OptiXContext::get().getOptixContext();
+    if (!buffer)
+        buffer = context->createBuffer(bufferType, bufferFormat, bufferSize);
+
+    memcpy(buffer->map(), src, bufferSize);
+    buffer->unmap();
+    geometry->setBuffer(buffer);
+}
+
+template <typename T>
 void setBuffer(RTbuffertype bufferType, RTformat bufferFormat,
-               optix::Handle<optix::BufferObj> buffer,
+               optix::Handle<optix::BufferObj>& buffer,
                optix::Handle<optix::VariableObj> geometry,
                const std::vector<T>& src)
 {
     const auto bufferSize = sizeof(T) * src.size();
-    auto context = OptiXContext::get().getOptixContext();
-    if (!buffer)
-    {
-        buffer = context->createBuffer(bufferType, bufferFormat, bufferSize);
-    }
-
-    memcpy(buffer->map(), src.data(), bufferSize);
-    buffer->unmap();
-    geometry->setBuffer(buffer);
+    setBufferRaw(bufferType, bufferFormat, buffer, geometry, src.data(),
+                 bufferSize);
 }
 
 OptiXModel::OptiXModel(AnimationParameters& animationParameters,
@@ -334,4 +344,28 @@ BrickedVolumePtr OptiXModel::createBrickedVolume(
     return nullptr;
 }
 
+void OptiXModel::_commitTransferFunctionImpl(const Vector3fs& colors,
+                                             const floats& opacities,
+                                             const Vector2d valueRange)
+{
+    auto context = OptiXContext::get().getOptixContext();
+
+    setBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT3, _optixTransferFunction.colors,
+              context["colors"], colors);
+
+    setBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT,
+              _optixTransferFunction.opacities, context["opacities"],
+              opacities);
+
+    context["value_range"]->setFloat(valueRange.x, valueRange.y);
+}
+
+void OptiXModel::_commitSimulationDataImpl(const float* frameData,
+                                           const size_t frameSize)
+{
+    auto context = OptiXContext::get().getOptixContext();
+    setBufferRaw(RT_BUFFER_INPUT, RT_FORMAT_FLOAT, _simulationData,
+                 context["simulation_data"], frameData,
+                 frameSize * sizeof(float));
+}
 } // namespace brayns

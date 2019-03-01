@@ -36,7 +36,6 @@ public:
     void setMemoryFlags(const size_t memoryManagementFlags);
 
     void commitGeometry() final;
-    bool commitTransferFunction();
     void commitMaterials(const std::string& renderer);
 
     OSPModel getPrimaryModel() const { return _primaryModel; }
@@ -57,6 +56,13 @@ public:
         return _ospTransferFunction;
     }
 
+protected:
+    void _commitTransferFunctionImpl(const Vector3fs& colors,
+                                     const floats& opacities,
+                                     const Vector2d valueRange) final;
+    void _commitSimulationDataImpl(const float* frameData,
+                                   const size_t frameSize) final;
+
 private:
     using GeometryMap = std::map<size_t, OSPGeometry>;
 
@@ -68,14 +74,9 @@ private:
     void _commitMeshes(const size_t materialId);
     void _commitStreamlines(const size_t materialId);
     void _commitSDFGeometries();
-    bool _commitTransferFunction();
-    bool _commitSimulationData();
     void _addGeometryToModel(const OSPGeometry geometry,
                              const size_t materialId);
     void _setBVHFlags();
-
-    // Whether this model has set the AnimationParameters "is ready" callback
-    bool _setIsReadyCallback{false};
 
     // Models
     OSPModel _primaryModel{nullptr};
