@@ -522,14 +522,4 @@ void OSPRayModel::_commitSimulationDataImpl(const float* frameData,
         ospNewData(frameSize, OSP_FLOAT, frameData, _memoryManagementFlags);
     ospCommit(_ospSimulationData);
 }
-
-bool OSPRayModel::_hasCommitedSimulationData() const
-{
-    return _ospSimulationData != nullptr;
-}
-
-bool OSPRayModel::_hasCommitedTransferFunction() const
-{
-    return _ospTransferFunction != nullptr;
-}
 }

@@ -465,8 +465,6 @@ protected:
                                              const Vector2d valueRange) = 0;
     virtual void _commitSimulationDataImpl(const float* frameData,
                                            const size_t frameSize) = 0;
-    virtual bool _hasCommitedSimulationData() const = 0;
-    virtual bool _hasCommitedTransferFunction() const = 0;
 
     AnimationParameters& _animationParameters;
     VolumeParameters& _volumeParameters;

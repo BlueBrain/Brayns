@@ -368,15 +368,4 @@ void OptiXModel::_commitSimulationDataImpl(const float* frameData,
                  context["simulation_data"], frameData,
                  frameSize * sizeof(float));
 }
-
-bool OptiXModel::_hasCommitedSimulationData() const
-{
-    return _simulationData;
-}
-
-bool OptiXModel::_hasCommitedTransferFunction() const
-{
-    return _optixTransferFunction.colors;
-}
-
 } // namespace brayns

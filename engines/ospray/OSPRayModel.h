@@ -62,8 +62,6 @@ protected:
                                      const Vector2d valueRange) final;
     void _commitSimulationDataImpl(const float* frameData,
                                    const size_t frameSize) final;
-    bool _hasCommitedSimulationData() const final;
-    bool _hasCommitedTransferFunction() const final;
 
 private:
     using GeometryMap = std::map<size_t, OSPGeometry>;

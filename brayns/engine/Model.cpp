@@ -612,7 +612,7 @@ bool Model::commitSimulation()
 
 bool Model::_commitTransferFunction()
 {
-    if (!_transferFunction.isModified() && _hasCommitedTransferFunction())
+    if (!_transferFunction.isModified())
         return false;
 
     _commitTransferFunctionImpl(
@@ -643,8 +643,7 @@ bool Model::_commitSimulationData()
 
     const auto animationFrame = _animationParameters.getFrame();
 
-    if (_hasCommitedSimulationData() &&
-        _simulationHandler->getCurrentFrame() == animationFrame)
+    if (_simulationHandler->getCurrentFrame() == animationFrame)
     {
         return false;
     }
