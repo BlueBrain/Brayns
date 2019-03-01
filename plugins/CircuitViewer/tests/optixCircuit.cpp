@@ -41,22 +41,23 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping_optix)
 {
     std::vector<const char*> argv = {
         "brayns", BBP_TEST_BLUECONFIG3, "--animation-frame", "50", "--engine",
-        "optix", "--samples-per-pixel", "1", "--max-accumulation-frames", "0",
+        "optix", "--samples-per-pixel", "16", "--window-size", "200", "1000",
         "--plugin",
         "braynsCircuitViewer --targets allmini50 --report "
-        "voltages --synchronous-mode"};
+        "voltages --display-mode soma --synchronous-mode"};
 
     brayns::Brayns brayns(argv.size(), argv.data());
 
     auto modelDesc = brayns.getEngine().getScene().getModel(0);
     modelDesc->getModel().getTransferFunction().setValuesRange({-66, -62});
 
-    const auto rotCenter = modelDesc->getTransformation().getRotationCenter() -
-                           brayns::Vector3d(300.0f, 0, 0);
-    auto& camera = brayns.getEngine().getCamera();
-    const auto camPos = camera.getPosition();
-    camera.setOrientation(brayns::Quaterniond(1, 0, 0, 0));
-    camera.setPosition(camPos + 0.9 * (rotCenter - camPos));
+    // const auto rotCenter = modelDesc->getTransformation().getRotationCenter()
+    // -
+    //                       brayns::Vector3d(300.0f, 0, 0);
+    // auto& camera = brayns.getEngine().getCamera();
+    // const auto camPos = camera.getPosition();
+    // camera.setOrientation(brayns::Quaterniond(1, 0, 0, 0));
+    // camera.setPosition(camPos + 0.9 * (rotCenter - camPos));
     brayns.commit();
 
     modelDesc->getModel().getSimulationHandler()->waitReady();
