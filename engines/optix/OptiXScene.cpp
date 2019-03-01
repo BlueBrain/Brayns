@@ -127,7 +127,11 @@ void OptiXScene::commit()
 {
     // Always upload transfer function and simulation data if changed
     for (size_t i = 0; i < _modelDescriptors.size(); ++i)
-        _modelDescriptors[i]->getModel().commitSimulation();
+    {
+        auto& model = _modelDescriptors[i]->getModel();
+        model.commitTransferFunction();
+        model.commitSimulationData();
+    }
 
     if (!isModified())
         return;

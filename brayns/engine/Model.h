@@ -229,8 +229,11 @@ public:
     //@{
     virtual void commitGeometry() = 0;
 
-    /** Commit simulation and transfer function */
-    bool commitSimulation();
+    /** Commit transfer function */
+    bool commitTransferFunction();
+
+    /** Commit simulation data */
+    bool commitSimulationData();
 
     /** Factory method to create an engine-specific material. */
     BRAYNS_API MaterialPtr createMaterial(const size_t materialId,
@@ -456,9 +459,6 @@ protected:
 
     /** Mark all geometries as clean. */
     void _markGeometriesClean();
-
-    bool _commitTransferFunction();
-    bool _commitSimulationData();
 
     virtual void _commitTransferFunctionImpl(const Vector3fs& colors,
                                              const floats& opacities,

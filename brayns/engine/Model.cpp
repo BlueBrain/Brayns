@@ -603,14 +603,7 @@ AbstractSimulationHandlerPtr Model::getSimulationHandler() const
     return _simulationHandler;
 }
 
-bool Model::commitSimulation()
-{
-    const auto dirtyTransferFunction = _commitTransferFunction();
-    const auto dirtySimulationData = _commitSimulationData();
-    return dirtyTransferFunction || dirtySimulationData;
-}
-
-bool Model::_commitTransferFunction()
+bool Model::commitTransferFunction()
 {
     if (!_transferFunction.isModified())
         return false;
@@ -624,7 +617,7 @@ bool Model::_commitTransferFunction()
     return true;
 }
 
-bool Model::_commitSimulationData()
+bool Model::commitSimulationData()
 {
     if (!_simulationHandler)
         return false;
