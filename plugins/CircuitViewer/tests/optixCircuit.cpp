@@ -50,16 +50,7 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping_optix)
 
     auto modelDesc = brayns.getEngine().getScene().getModel(0);
     modelDesc->getModel().getTransferFunction().setValuesRange({-66, -62});
-
-    // const auto rotCenter = modelDesc->getTransformation().getRotationCenter()
-    // -
-    //                       brayns::Vector3d(300.0f, 0, 0);
-    // auto& camera = brayns.getEngine().getCamera();
-    // const auto camPos = camera.getPosition();
-    // camera.setOrientation(brayns::Quaterniond(1, 0, 0, 0));
-    // camera.setPosition(camPos + 0.9 * (rotCenter - camPos));
     brayns.commit();
-
     modelDesc->getModel().getSimulationHandler()->waitReady();
     brayns.commitAndRender();
 
