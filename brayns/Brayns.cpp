@@ -106,7 +106,8 @@ struct Brayns::Impl : public PluginAPI
 
     bool commit()
     {
-        std::unique_lock<std::mutex> lock{_renderMutex, std::defer_lock};
+        auto lock{_engine->getDeferredRenderScopeLock()};
+
         if (!lock.try_lock())
             return false;
 
@@ -171,7 +172,7 @@ struct Brayns::Impl : public PluginAPI
 
     void render()
     {
-        std::lock_guard<std::mutex> lock{_renderMutex};
+        auto lock{_engine->getRenderScopeLock()};
 
         _renderTimer.start();
         _engine->render();
@@ -191,6 +192,8 @@ struct Brayns::Impl : public PluginAPI
 
     void postRender(RenderOutput* output)
     {
+        auto lock{_engine->getRenderScopeLock()};
+
         if (output)
             _updateRenderOutput(*output);
 
@@ -757,9 +760,6 @@ private:
     KeyboardHandler _keyboardHandler;
     std::unique_ptr<AbstractManipulator> _cameraManipulator;
     std::vector<FrameBufferPtr> _frameBuffers;
-
-    // protect render() vs commit() when doing all the commits
-    std::mutex _renderMutex;
 
     Timer _renderTimer;
     std::atomic<double> _lastFPS;

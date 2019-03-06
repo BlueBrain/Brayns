@@ -19,6 +19,7 @@ set(BRAYNSROCKETS_HEADERS
 set(BRAYNSROCKETS_SOURCES
   ImageGenerator.cpp
   RocketsPlugin.cpp
+  SnapshotTask.cpp
   Throttle.cpp
   Timeout.cpp
   staticjson/staticjson.cpp

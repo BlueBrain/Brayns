@@ -388,6 +388,8 @@ void Application::render()
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    auto lock{m_brayns.getEngine().getRenderScopeLock()};
+
     size_t offset = 0;
     size_t bufferIdx = 0;
     for (auto frameBuffer : m_brayns.getEngine().getFrameBuffers())

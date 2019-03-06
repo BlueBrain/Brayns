@@ -70,11 +70,6 @@ void Engine::postRender()
         frameBuffer->incrementAccumFrames();
 }
 
-Renderer& Engine::getRenderer()
-{
-    return *_renderer;
-}
-
 bool Engine::continueRendering() const
 {
     auto frameBuffer = _frameBuffers[0];

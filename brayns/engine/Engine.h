@@ -24,6 +24,8 @@
 #include <brayns/common/Statistics.h>
 
 #include <functional>
+#include <mutex>
+#include <thread>
 
 namespace brayns
 {
@@ -88,9 +90,10 @@ public:
     /** Gets the camera */
     const Camera& getCamera() const { return *_camera; }
     Camera& getCamera() { return *_camera; }
+    CameraPtr getCameraPtr() { return _camera; }
     /** Gets the renderer */
-    Renderer& getRenderer();
-
+    Renderer& getRenderer() { return *_renderer; }
+    RendererPtr getRendererPtr() { return _renderer; }
     /**
      * Callback when a new frame shall be triggered. Currently called by event
      * plugins Deflect and Rockets.
@@ -115,6 +118,7 @@ public:
     bool continueRendering() const;
 
     const auto& getParametersManager() const { return _parametersManager; }
+    auto& getParametersManager() { return _parametersManager; }
     /**
      * Add the given frame buffer to the list of buffers that shall be filled
      * during rendering.
@@ -155,6 +159,19 @@ public:
     void addCameraType(const std::string& name,
                        const PropertyMap& properties = {});
 
+    /** Does the engine support generating snapshots concurrently */
+    virtual bool supportsConcurrentSnapshots() const = 0;
+
+    std::unique_lock<std::mutex> getRenderScopeLock()
+    {
+        return std::unique_lock<std::mutex>(_renderMutex);
+    }
+
+    std::unique_lock<std::mutex> getDeferredRenderScopeLock()
+    {
+        return std::unique_lock<std::mutex>(_renderMutex, std::defer_lock);
+    }
+
 protected:
     ParametersManager& _parametersManager;
     ScenePtr _scene;
@@ -162,7 +179,8 @@ protected:
     RendererPtr _renderer;
     std::vector<FrameBufferPtr> _frameBuffers;
     Statistics _statistics;
+    std::mutex _renderMutex;
 
     bool _keepRunning{true};
 };
-}
+} // namespace brayns

@@ -51,6 +51,7 @@ public:
         const AnimationParameters& animationParameters,
         const RenderingParameters& renderingParameters) const final;
 
+    bool supportsConcurrentSnapshots() const final { return false; }
 private:
     void _initializeContext();
     void _createRenderers();

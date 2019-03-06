@@ -52,7 +52,7 @@ public:
     RendererPtr createRenderer(
         const AnimationParameters& animationParameters,
         const RenderingParameters& renderingParameters) const final;
-
+    bool supportsConcurrentSnapshots() const final { return true; }
 private:
     void _createCameras();
     void _createRenderers();
