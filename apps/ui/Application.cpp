@@ -72,7 +72,7 @@ void glfwErrorCallback(int error, const char* description)
 {
     std::cerr << "GLFW Error: " << error << ": " << description << std::endl;
 }
-}
+} // namespace
 
 Application* Application::createInstance(brayns::Brayns& brayns)
 {
@@ -196,6 +196,10 @@ void Application::initImGUI()
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     // ImGui::StyleColorsClassic();
+
+    // Do not create the imgui.ini file
+    ImGuiIO& io = ImGui::GetIO();
+    io.IniFilename = nullptr;
 
     // Setup Platform/Renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(m_window, false);
