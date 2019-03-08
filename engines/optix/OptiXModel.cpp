@@ -39,9 +39,11 @@ void setBufferRaw(RTbuffertype bufferType, RTformat bufferFormat,
     auto context = OptiXContext::get().getOptixContext();
     if (!buffer)
         buffer = context->createBuffer(bufferType, bufferFormat, bufferSize);
-
-    memcpy(buffer->map(), src, bufferSize);
-    buffer->unmap();
+    if (src != nullptr && bufferSize > 0)
+    {
+        memcpy(buffer->map(), src, bufferSize);
+        buffer->unmap();
+    }
     geometry->setBuffer(buffer);
 }
 
