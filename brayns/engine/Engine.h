@@ -155,6 +155,8 @@ public:
     void addCameraType(const std::string& name,
                        const PropertyMap& properties = {});
 
+    double renderDuration{0};
+
 protected:
     ParametersManager& _parametersManager;
     ScenePtr _scene;

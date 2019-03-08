@@ -1,0 +1,45 @@
+diff --git i/libavformat/udp.c w/libavformat/udp.c
+index cf73d33..9dc47ee 100644
+--- i/libavformat/udp.c
++++ w/libavformat/udp.c
+@@ -70,8 +70,8 @@
+ #define IPV6_DROP_MEMBERSHIP IPV6_LEAVE_GROUP
+ #endif
+ 
+-#define UDP_TX_BUF_SIZE 32768
+-#define UDP_MAX_PKT_SIZE 65536
++#define UDP_TX_BUF_SIZE 3276800
++#define UDP_MAX_PKT_SIZE 6553600
+ #define UDP_HEADER_SIZE 8
+ 
+ typedef struct UDPContext {
+@@ -635,7 +635,7 @@ static int udp_open(URLContext *h, const char *uri, int flags)
+     h->is_streamed = 1;
+ 
+     is_output = !(flags & AVIO_FLAG_READ);
+-    if (s->buffer_size < 0)
++//    if (s->buffer_size < 0)
+         s->buffer_size = is_output ? UDP_TX_BUF_SIZE : UDP_MAX_PKT_SIZE;
+ 
+     if (s->sources) {
+@@ -683,9 +683,9 @@ static int udp_open(URLContext *h, const char *uri, int flags)
+         if (av_find_info_tag(buf, sizeof(buf), "pkt_size", p)) {
+             s->pkt_size = strtol(buf, NULL, 10);
+         }
+-        if (av_find_info_tag(buf, sizeof(buf), "buffer_size", p)) {
+-            s->buffer_size = strtol(buf, NULL, 10);
+-        }
++//        if (av_find_info_tag(buf, sizeof(buf), "buffer_size", p)) {
++//            s->buffer_size = strtol(buf, NULL, 10);
++//        }
+         if (av_find_info_tag(buf, sizeof(buf), "connect", p)) {
+             s->is_connected = strtol(buf, NULL, 10);
+         }
+@@ -852,6 +852,7 @@ static int udp_open(URLContext *h, const char *uri, int flags)
+     } else {
+         /* set udp recv buffer size to the requested value (default 64K) */
+         tmp = s->buffer_size;
++printf("AAAAAAAAAA %i", tmp);
+         if (setsockopt(udp_fd, SOL_SOCKET, SO_RCVBUF, &tmp, sizeof(tmp)) < 0) {
+             ff_log_net_error(h, AV_LOG_WARNING, "setsockopt(SO_RECVBUF)");
+         }

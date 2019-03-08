@@ -1,0 +1,5 @@
+Build mpv from https://github.com/mpv-player/mpv-build.git, following their instructions.
+
+Version used on cave1-8 nodes was 7608d209c3c32c8192feeee51b67c22547a1eb35
+
+Apply 'udp_buffer_size_patch' in ffmpeg subfolder to increase UDP buffer size to (almost) get rid of packet loss

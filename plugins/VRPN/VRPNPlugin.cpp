@@ -51,8 +51,9 @@ constexpr std::array<double, 4> to_array_4d(const vrpn_float64* quat)
 void trackerCallback(void* userData, const vrpn_TRACKERCB tracker)
 {
     auto camera = static_cast<Camera*>(userData);
-    camera->updateProperty(HEAD_POSITION_PROP, to_array_3d(tracker.pos));
-    camera->updateProperty(HEAD_ROTATION_PROP, to_array_4d(tracker.quat));
+    camera->updateProperty(HEAD_POSITION_PROP, to_array_3d(tracker.pos), false);
+    camera->updateProperty(HEAD_ROTATION_PROP, to_array_4d(tracker.quat),
+                           false);
 }
 
 void flyStickCallback(void* userData, const vrpn_TRACKERCB tracker)
@@ -85,13 +86,11 @@ void VRPNPlugin::init()
 {
     _vrpnTracker = std::make_unique<vrpn_Tracker_Remote>(_vrpnName.c_str());
     if (!_vrpnTracker->connectionPtr()->doing_okay())
-        throw std::runtime_error("VRPN couldn't connect to: " + _vrpnName +
-                                 " tracker");
+        return;
 
     _vrpnAnalog = std::make_unique<vrpn_Analog_Remote>(_vrpnName.c_str());
     if (!_vrpnAnalog->connectionPtr()->doing_okay())
-        throw std::runtime_error("VRPN couldn't connect to: " + _vrpnName +
-                                 " analog");
+        return;
 
     BRAYNS_INFO << "VRPN successfully connected to " << _vrpnName << std::endl;
 
@@ -108,6 +107,9 @@ void VRPNPlugin::init()
 
 void VRPNPlugin::preRender()
 {
+    if (!_vrpnTracker->connectionPtr()->doing_okay())
+        return;
+
     _timer.stop();
     _vrpnTracker->mainloop();
 

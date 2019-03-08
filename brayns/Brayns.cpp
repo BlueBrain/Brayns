@@ -176,6 +176,7 @@ struct Brayns::Impl : public PluginAPI
         _renderTimer.start();
         _engine->render();
         _renderTimer.stop();
+        _engine->renderDuration = _renderTimer.elapsed();
         _lastFPS = _renderTimer.perSecondSmoothed();
 
         const auto& params = _parametersManager.getApplicationParameters();

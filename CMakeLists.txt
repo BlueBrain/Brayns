@@ -164,6 +164,8 @@ else()
   set(BRAYNS_SERVICE_ENABLED OFF)
 endif()
 
+add_subdirectory(apps/BraynsRunner)
+
 option(BRAYNS_BENCHMARK_ENABLED "Brayns Benchmark" ON)
 if(BRAYNS_BENCHMARK_ENABLED)
   add_subdirectory(apps/BraynsBenchmark)

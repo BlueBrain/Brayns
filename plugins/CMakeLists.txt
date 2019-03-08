@@ -42,3 +42,5 @@ add_subdirectory(Example)
 if (TARGET Brayns-all)
   add_dependencies(Brayns-all exampleBraynsPlugin)
 endif()
+
+add_subdirectory(streamer)

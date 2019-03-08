@@ -211,7 +211,8 @@ RT_PROGRAM void openDeckCamera()
     else
         acc_val = make_float4(result, 1.f);
 
-    output_buffer[launch_index] = make_color(make_float3(acc_val));
+    const uint2 launch_index_inverted = make_uint2(launch_index.x, screen.y-1-launch_index.y);
+    output_buffer[launch_index_inverted] = make_color(make_float3(acc_val));
 
     if (accum_buffer.size().x > 1 && accum_buffer.size().y > 1)
         accum_buffer[launch_index] = acc_val;
