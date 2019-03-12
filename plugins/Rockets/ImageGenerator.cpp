@@ -103,7 +103,6 @@ ImageGenerator::ImageJPEG ImageGenerator::createJPEG(
     return image;
 #else
     throw std::runtime_error("Need libjpeg-turbo; cannot create any image");
-    return {};
 #endif
 }
 
