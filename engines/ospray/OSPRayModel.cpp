@@ -38,10 +38,11 @@ OSPData allocateVectorData(const std::vector<VecT>& vec,
                            const size_t memoryManagementFlags)
 {
     const size_t totBytes = vec.size() * sizeof(decltype(vec.back()));
-    return ospNewData(totBytes / ospray::sizeOf(ospType), ospType, vec.data(),
-                      memoryManagementFlags);
+    return totBytes > 0 ? ospNewData(totBytes / ospray::sizeOf(ospType),
+                                     ospType, vec.data(), memoryManagementFlags)
+                        : nullptr;
 }
-}
+} // namespace
 
 OSPRayModel::OSPRayModel(AnimationParameters& animationParameters,
                          VolumeParameters& volumeParameters)
@@ -522,4 +523,4 @@ void OSPRayModel::_commitSimulationDataImpl(const float* frameData,
         ospNewData(frameSize, OSP_FLOAT, frameData, _memoryManagementFlags);
     ospCommit(_ospSimulationData);
 }
-}
+} // namespace brayns
