@@ -39,14 +39,14 @@ void OSPRayCamera::commit()
     if (cameraChanged)
         _createOSPCamera();
 
-    const auto& position = getPosition();
-    const auto& dir = glm::rotate(getOrientation(), Vector3d(0., 0., -1.));
-    const auto& up = glm::rotate(getOrientation(), Vector3d(0., 1., 0.));
+    const auto position = getPosition();
+    const auto dir = glm::rotate(getOrientation(), Vector3d(0., 0., -1.));
+    const auto up = glm::rotate(getOrientation(), Vector3d(0., 1., 0.));
 
-    ospSet3f(_camera, "pos", position.x, position.y, position.z);
-    ospSet3f(_camera, "dir", dir.x, dir.y, dir.z);
-    ospSet3f(_camera, "up", up.x, up.y, up.z);
-    ospSetString(_camera, "buffer_target", getBufferTarget().c_str());
+    osphelper::set(_camera, "pos", position);
+    osphelper::set(_camera, "dir", dir);
+    osphelper::set(_camera, "up", up);
+    osphelper::set(_camera, "buffer_target", getBufferTarget());
 
     toOSPRayProperties(*this, _camera);
 
@@ -71,7 +71,7 @@ void OSPRayCamera::commit()
 
 void OSPRayCamera::setEnvironmentMap(const bool environmentMap)
 {
-    ospSet1i(_camera, "environmentMap", environmentMap);
+    osphelper::set(_camera, "environmentMap", environmentMap ? 1 : 0);
     ospCommit(_camera);
 }
 
@@ -95,4 +95,4 @@ void OSPRayCamera::_createOSPCamera()
     _currentOSPCamera = getCurrentType();
     markModified(false);
 }
-}
+} // namespace brayns

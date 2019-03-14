@@ -23,26 +23,10 @@
 #include <brayns/common/PropertyObject.h>
 #include <brayns/common/Transformation.h>
 #include <brayns/common/log.h>
+#include <brayns/common/utils/utils.h>
 
 namespace brayns
 {
-#define SET_SCALAR(OSP, TYPE)                                       \
-    ospSet1##OSP(ospObject, prop->name.c_str(), prop->get<TYPE>()); \
-    break;
-#define SET_ARRAY(OSP, TYPE, NUM)                           \
-    ospSet##OSP(ospObject, prop->name.c_str(),              \
-                prop->get<std::array<TYPE, NUM>>().data()); \
-    break;
-#define SET_ARRAY_FLOAT(OSP, NUM)                                \
-    {                                                            \
-        std::array<float, NUM> data;                             \
-        const auto input = prop->get<std::array<double, NUM>>(); \
-        for (size_t i = 0; i < NUM; ++i)                         \
-            data[i] = input[i];                                  \
-        ospSet##OSP(ospObject, prop->name.c_str(), data.data()); \
-        break;                                                   \
-    }
-
 void toOSPRayProperties(const PropertyMap& object, OSPObject ospObject)
 {
     try
@@ -52,25 +36,41 @@ void toOSPRayProperties(const PropertyMap& object, OSPObject ospObject)
             switch (prop->type)
             {
             case Property::Type::Double:
-                SET_SCALAR(f, double);
+                osphelper::set(ospObject, prop->name.c_str(),
+                               prop->get<double>());
+                break;
             case Property::Type::Int:
-                SET_SCALAR(i, int32_t);
+                osphelper::set(ospObject, prop->name.c_str(),
+                               prop->get<int32_t>());
+                break;
             case Property::Type::Bool:
-                SET_SCALAR(b, bool);
+                osphelper::set(ospObject, prop->name.c_str(),
+                               prop->get<bool>());
+                break;
             case Property::Type::String:
-                ospSetString(ospObject, prop->name.c_str(),
-                             prop->get<std::string>().c_str());
+                osphelper::set(ospObject, prop->name.c_str(),
+                               prop->get<std::string>());
                 break;
             case Property::Type::Vec2d:
-                SET_ARRAY_FLOAT(2fv, 2);
+                osphelper::set(ospObject, prop->name.c_str(),
+                               toGlmVec(prop->get<std::array<double, 2>>()));
+                break;
             case Property::Type::Vec2i:
-                SET_ARRAY(2iv, int32_t, 2);
+                osphelper::set(ospObject, prop->name.c_str(),
+                               toGlmVec(prop->get<std::array<int32_t, 2>>()));
+                break;
             case Property::Type::Vec3d:
-                SET_ARRAY_FLOAT(3fv, 3);
+                osphelper::set(ospObject, prop->name.c_str(),
+                               toGlmVec(prop->get<std::array<double, 3>>()));
+                break;
             case Property::Type::Vec3i:
-                SET_ARRAY(3iv, int32_t, 3);
+                osphelper::set(ospObject, prop->name.c_str(),
+                               toGlmVec(prop->get<std::array<int32_t, 3>>()));
+                break;
             case Property::Type::Vec4d:
-                SET_ARRAY_FLOAT(4fv, 4);
+                osphelper::set(ospObject, prop->name.c_str(),
+                               toGlmVec(prop->get<std::array<double, 4>>()));
+                break;
             }
         }
     }
@@ -168,8 +168,9 @@ ospcommon::affine3f transformationToAffine3f(
     return ospcommon::affine3f::translate({float(center.x / (1. / scale.x)),
                                            float(center.y / (1. / scale.y)),
                                            float(center.z / (1. / scale.z))}) *
-           rot * ospcommon::affine3f::scale(
-                     {float(scale.x), float(scale.y), float(scale.z)}) *
+           rot *
+           ospcommon::affine3f::scale(
+               {float(scale.x), float(scale.y), float(scale.z)}) *
            ospcommon::affine3f::translate({float(translation.x - center.x),
                                            float(translation.y - center.y),
                                            float(translation.z - center.z)});
@@ -193,4 +194,76 @@ void addInstance(OSPModel rootModel, OSPModel modelToAdd,
     ospAddGeometry(rootModel, instance);
     ospRelease(instance);
 }
+
+namespace osphelper
+{
+void set(OSPObject obj, const char* id, const char* s)
+{
+    ospSetString(obj, id, s);
 }
+void set(OSPObject obj, const char* id, const std::string& s)
+{
+    ospSetString(obj, id, s.c_str());
+}
+void set(OSPObject obj, const char* id, float v)
+{
+    ospSet1f(obj, id, v);
+}
+void set(OSPObject obj, const char* id, double v)
+{
+    ospSet1f(obj, id, v);
+}
+void set(OSPObject obj, const char* id, bool v)
+{
+    ospSet1b(obj, id, v);
+}
+void set(OSPObject obj, const char* id, int32_t v)
+{
+    ospSet1i(obj, id, v);
+}
+void set(OSPObject obj, const char* id, uint32_t v)
+{
+    ospSet1i(obj, id, v);
+}
+void set(OSPObject obj, const char* id, size_t v)
+{
+    ospSet1i(obj, id, v);
+}
+void set(OSPObject obj, const char* id, const Vector2f& v)
+{
+    ospSet2f(obj, id, v.x, v.y);
+}
+void set(OSPObject obj, const char* id, const Vector2d& v)
+{
+    ospSet2f(obj, id, v.x, v.y);
+}
+void set(OSPObject obj, const char* id, const Vector2i& v)
+{
+    ospSet2i(obj, id, v.x, v.y);
+}
+void set(OSPObject obj, const char* id, const Vector3f& v)
+{
+    ospSet3f(obj, id, v.x, v.y, v.z);
+}
+void set(OSPObject obj, const char* id, const Vector3i& v)
+{
+    ospSet3i(obj, id, v.x, v.y, v.z);
+}
+void set(OSPObject obj, const char* id, const Vector3ui& v)
+{
+    ospSet3i(obj, id, v.x, v.y, v.z);
+}
+void set(OSPObject obj, const char* id, const Vector3d& v)
+{
+    ospSet3f(obj, id, v.x, v.y, v.z);
+}
+void set(OSPObject obj, const char* id, const Vector4f& v)
+{
+    ospSet4f(obj, id, v.x, v.y, v.z, v.w);
+}
+void set(OSPObject obj, const char* id, const Vector4d& v)
+{
+    ospSet4f(obj, id, v.x, v.y, v.z, v.w);
+}
+} // namespace osphelper
+} // namespace brayns
