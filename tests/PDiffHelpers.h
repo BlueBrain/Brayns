@@ -94,12 +94,11 @@ inline bool compareBase64TestImage(
     const std::string& filename)
 {
     auto decodedImage = base64_decode(image.data);
-    const auto fullPath = std::string(BRAYNS_TESTDATA_IMAGES_PATH) + filename;
 
     static bool saveImages = getenv("BRAYNS_SAVE_TEST_IMAGES");
     if (saveImages)
     {
-        std::fstream file(fullPath, std::ios::out);
+        std::fstream file(filename, std::ios::out);
         file << decodedImage;
     }
 
