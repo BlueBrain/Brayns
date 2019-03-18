@@ -222,23 +222,23 @@ void set(OSPObject obj, const char* id, int32_t v)
 }
 void set(OSPObject obj, const char* id, const Vector2f& v)
 {
-    ospSet2f(obj, id, v.x, v.y);
+    ospSet2fv(obj, id, glm::value_ptr(v));
 }
 void set(OSPObject obj, const char* id, const Vector2i& v)
 {
-    ospSet2i(obj, id, v.x, v.y);
+    ospSet2iv(obj, id, glm::value_ptr(v));
 }
 void set(OSPObject obj, const char* id, const Vector3f& v)
 {
-    ospSet3f(obj, id, v.x, v.y, v.z);
+    ospSet3fv(obj, id, glm::value_ptr(v));
 }
 void set(OSPObject obj, const char* id, const Vector3i& v)
 {
-    ospSet3i(obj, id, v.x, v.y, v.z);
+    ospSet3iv(obj, id, glm::value_ptr(v));
 }
 void set(OSPObject obj, const char* id, const Vector4f& v)
 {
-    ospSet4f(obj, id, v.x, v.y, v.z, v.w);
+    ospSet4fv(obj, id, glm::value_ptr(v));
 }
 } // namespace osphelper
 } // namespace brayns
