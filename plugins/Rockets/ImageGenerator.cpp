@@ -102,7 +102,7 @@ ImageGenerator::ImageJPEG ImageGenerator::createJPEG(
     frameBuffer.unmap();
     return image;
 #else
-    return {};
+    throw std::runtime_error("Need libjpeg-turbo; cannot create any image");
 #endif
 }
 
@@ -133,4 +133,4 @@ ImageGenerator::ImageJPEG::JpegData ImageGenerator::_encodeJpeg(
     return ImageJPEG::JpegData{tjJpegBuf};
 }
 #endif
-}
+} // namespace brayns
