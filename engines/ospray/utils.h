@@ -71,22 +71,15 @@ void set(OSPObject obj, const char* id, const char* s);
 void set(OSPObject obj, const char* id, const std::string& s);
 
 void set(OSPObject obj, const char* id, float v);
-void set(OSPObject obj, const char* id, double v);
 void set(OSPObject obj, const char* id, bool v);
 void set(OSPObject obj, const char* id, int32_t v);
-void set(OSPObject obj, const char* id, uint32_t v);
-void set(OSPObject obj, const char* id, size_t v);
 
 void set(OSPObject obj, const char* id, const Vector2f& v);
-void set(OSPObject obj, const char* id, const Vector2d& v);
 void set(OSPObject obj, const char* id, const Vector2i& v);
 
 void set(OSPObject obj, const char* id, const Vector3f& v);
-void set(OSPObject obj, const char* id, const Vector3d& v);
 void set(OSPObject obj, const char* id, const Vector3i& v);
 
-void set(OSPObject obj, const char* id, const Vector3ui& v);
 void set(OSPObject obj, const char* id, const Vector4f& v);
-void set(OSPObject obj, const char* id, const Vector4d& v);
 } // namespace osphelper
 } // namespace brayns

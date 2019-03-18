@@ -43,9 +43,9 @@ void OSPRayCamera::commit()
     const auto dir = glm::rotate(getOrientation(), Vector3d(0., 0., -1.));
     const auto up = glm::rotate(getOrientation(), Vector3d(0., 1., 0.));
 
-    osphelper::set(_camera, "pos", position);
-    osphelper::set(_camera, "dir", dir);
-    osphelper::set(_camera, "up", up);
+    osphelper::set(_camera, "pos", Vector3f(position));
+    osphelper::set(_camera, "dir", Vector3f(dir));
+    osphelper::set(_camera, "up", Vector3f(up));
     osphelper::set(_camera, "buffer_target", getBufferTarget());
 
     toOSPRayProperties(*this, _camera);

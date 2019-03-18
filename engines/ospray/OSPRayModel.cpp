@@ -176,9 +176,12 @@ void OSPRayModel::_commitSpheres(const size_t materialId)
     ospSetObject(geometry, "spheres", data);
     ospRelease(data);
 
-    osphelper::set(geometry, "offset_center", offsetof(Sphere, center));
-    osphelper::set(geometry, "offset_radius", offsetof(Sphere, radius));
-    osphelper::set(geometry, "bytes_per_sphere", sizeof(Sphere));
+    osphelper::set(geometry, "offset_center",
+                   static_cast<int>(offsetof(Sphere, center)));
+    osphelper::set(geometry, "offset_radius",
+                   static_cast<int>(offsetof(Sphere, radius)));
+    osphelper::set(geometry, "bytes_per_sphere",
+                   static_cast<int>(sizeof(Sphere)));
     ospCommit(geometry);
 
     _addGeometryToModel(geometry, materialId);
@@ -193,10 +196,14 @@ void OSPRayModel::_commitCylinders(const size_t materialId)
     ospSetObject(geometry, "cylinders", data);
     ospRelease(data);
 
-    osphelper::set(geometry, "offset_v0", offsetof(Cylinder, center));
-    osphelper::set(geometry, "offset_v1", offsetof(Cylinder, up));
-    osphelper::set(geometry, "offset_radius", offsetof(Cylinder, radius));
-    osphelper::set(geometry, "bytes_per_cylinder", sizeof(Cylinder));
+    osphelper::set(geometry, "offset_v0",
+                   static_cast<int>(offsetof(Cylinder, center)));
+    osphelper::set(geometry, "offset_v1",
+                   static_cast<int>(offsetof(Cylinder, up)));
+    osphelper::set(geometry, "offset_radius",
+                   static_cast<int>(offsetof(Cylinder, radius)));
+    osphelper::set(geometry, "bytes_per_cylinder",
+                   static_cast<int>(sizeof(Cylinder)));
     ospCommit(geometry);
 
     _addGeometryToModel(geometry, materialId);
@@ -359,11 +366,11 @@ void OSPRayModel::_commitSDFGeometries()
 void OSPRayModel::_setBVHFlags()
 {
     osphelper::set(_primaryModel, "dynamicScene",
-                   _bvhFlags.count(BVHFlag::dynamic));
+                   static_cast<int>(_bvhFlags.count(BVHFlag::dynamic)));
     osphelper::set(_primaryModel, "compactMode",
-                   _bvhFlags.count(BVHFlag::compact));
+                   static_cast<int>(_bvhFlags.count(BVHFlag::compact)));
     osphelper::set(_primaryModel, "robustMode",
-                   _bvhFlags.count(BVHFlag::robust));
+                   static_cast<int>(_bvhFlags.count(BVHFlag::robust)));
 }
 
 void OSPRayModel::commitGeometry()
@@ -512,7 +519,7 @@ void OSPRayModel::_commitTransferFunctionImpl(const Vector3fs& colors,
     ospRelease(opacityData);
 
     // Value range
-    osphelper::set(_ospTransferFunction, "valueRange", valueRange);
+    osphelper::set(_ospTransferFunction, "valueRange", Vector2f(valueRange));
 
     ospCommit(_ospTransferFunction);
 }

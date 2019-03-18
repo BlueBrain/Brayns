@@ -37,7 +37,7 @@ void toOSPRayProperties(const PropertyMap& object, OSPObject ospObject)
             {
             case Property::Type::Double:
                 osphelper::set(ospObject, prop->name.c_str(),
-                               prop->get<double>());
+                               static_cast<float>(prop->get<double>()));
                 break;
             case Property::Type::Int:
                 osphelper::set(ospObject, prop->name.c_str(),
@@ -53,7 +53,8 @@ void toOSPRayProperties(const PropertyMap& object, OSPObject ospObject)
                 break;
             case Property::Type::Vec2d:
                 osphelper::set(ospObject, prop->name.c_str(),
-                               toGlmVec(prop->get<std::array<double, 2>>()));
+                               Vector2f(toGlmVec(
+                                   prop->get<std::array<double, 2>>())));
                 break;
             case Property::Type::Vec2i:
                 osphelper::set(ospObject, prop->name.c_str(),
@@ -61,7 +62,8 @@ void toOSPRayProperties(const PropertyMap& object, OSPObject ospObject)
                 break;
             case Property::Type::Vec3d:
                 osphelper::set(ospObject, prop->name.c_str(),
-                               toGlmVec(prop->get<std::array<double, 3>>()));
+                               Vector3f(toGlmVec(
+                                   prop->get<std::array<double, 3>>())));
                 break;
             case Property::Type::Vec3i:
                 osphelper::set(ospObject, prop->name.c_str(),
@@ -69,7 +71,8 @@ void toOSPRayProperties(const PropertyMap& object, OSPObject ospObject)
                 break;
             case Property::Type::Vec4d:
                 osphelper::set(ospObject, prop->name.c_str(),
-                               toGlmVec(prop->get<std::array<double, 4>>()));
+                               Vector4f(toGlmVec(
+                                   prop->get<std::array<double, 4>>())));
                 break;
             }
         }
@@ -209,10 +212,6 @@ void set(OSPObject obj, const char* id, float v)
 {
     ospSet1f(obj, id, v);
 }
-void set(OSPObject obj, const char* id, double v)
-{
-    ospSet1f(obj, id, v);
-}
 void set(OSPObject obj, const char* id, bool v)
 {
     ospSet1b(obj, id, v);
@@ -221,19 +220,7 @@ void set(OSPObject obj, const char* id, int32_t v)
 {
     ospSet1i(obj, id, v);
 }
-void set(OSPObject obj, const char* id, uint32_t v)
-{
-    ospSet1i(obj, id, v);
-}
-void set(OSPObject obj, const char* id, size_t v)
-{
-    ospSet1i(obj, id, v);
-}
 void set(OSPObject obj, const char* id, const Vector2f& v)
-{
-    ospSet2f(obj, id, v.x, v.y);
-}
-void set(OSPObject obj, const char* id, const Vector2d& v)
 {
     ospSet2f(obj, id, v.x, v.y);
 }
@@ -249,19 +236,7 @@ void set(OSPObject obj, const char* id, const Vector3i& v)
 {
     ospSet3i(obj, id, v.x, v.y, v.z);
 }
-void set(OSPObject obj, const char* id, const Vector3ui& v)
-{
-    ospSet3i(obj, id, v.x, v.y, v.z);
-}
-void set(OSPObject obj, const char* id, const Vector3d& v)
-{
-    ospSet3f(obj, id, v.x, v.y, v.z);
-}
 void set(OSPObject obj, const char* id, const Vector4f& v)
-{
-    ospSet4f(obj, id, v.x, v.y, v.z, v.w);
-}
-void set(OSPObject obj, const char* id, const Vector4d& v)
 {
     ospSet4f(obj, id, v.x, v.y, v.z, v.w);
 }

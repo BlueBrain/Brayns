@@ -106,9 +106,10 @@ void OSPRayRenderer::commit()
 
     osphelper::set(_renderer, "timestamp", static_cast<float>(ap.getFrame()));
     osphelper::set(_renderer, "randomNumber", rand() % 10000);
-    osphelper::set(_renderer, "bgColor", rp.getBackgroundColor());
-    osphelper::set(_renderer, "varianceThreshold", rp.getVarianceThreshold());
-    osphelper::set(_renderer, "spp", rp.getSamplesPerPixel());
+    osphelper::set(_renderer, "bgColor", Vector3f(rp.getBackgroundColor()));
+    osphelper::set(_renderer, "varianceThreshold",
+                   static_cast<float>(rp.getVarianceThreshold()));
+    osphelper::set(_renderer, "spp", static_cast<int>(rp.getSamplesPerPixel()));
 
     if (auto material = std::static_pointer_cast<OSPRayMaterial>(
             scene->getBackgroundMaterial()))

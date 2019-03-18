@@ -61,14 +61,16 @@ void OSPRayMaterial::commit()
     else
         ospRemoveParam(_ospMaterial, "apply_simulation");
 
-    osphelper::set(_ospMaterial, "kd", _diffuseColor);
-    osphelper::set(_ospMaterial, "ks", _specularColor);
-    osphelper::set(_ospMaterial, "ns", _specularExponent);
-    osphelper::set(_ospMaterial, "d", _opacity);
-    osphelper::set(_ospMaterial, "refraction", _refractionIndex);
-    osphelper::set(_ospMaterial, "reflection", _reflectionIndex);
-    osphelper::set(_ospMaterial, "a", _emission);
-    osphelper::set(_ospMaterial, "glossiness", _glossiness);
+    osphelper::set(_ospMaterial, "kd", Vector3f(_diffuseColor));
+    osphelper::set(_ospMaterial, "ks", Vector3f(_specularColor));
+    osphelper::set(_ospMaterial, "ns", static_cast<float>(_specularExponent));
+    osphelper::set(_ospMaterial, "d", static_cast<float>(_opacity));
+    osphelper::set(_ospMaterial, "refraction",
+                   static_cast<float>(_refractionIndex));
+    osphelper::set(_ospMaterial, "reflection",
+                   static_cast<float>(_reflectionIndex));
+    osphelper::set(_ospMaterial, "a", static_cast<float>(_emission));
+    osphelper::set(_ospMaterial, "glossiness", static_cast<float>(_glossiness));
     osphelper::set(_ospMaterial, "skybox", _isBackGroundMaterial);
 
     // Properties

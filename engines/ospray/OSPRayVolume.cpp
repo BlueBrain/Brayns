@@ -33,8 +33,8 @@ OSPRayVolume::OSPRayVolume(const Vector3ui& dimensions, const Vector3f& spacing,
     , _parameters(params)
     , _volume(ospNewVolume(volumeType.c_str()))
 {
-    osphelper::set(_volume, "dimensions", dimensions);
-    osphelper::set(_volume, "gridSpacing", spacing);
+    osphelper::set(_volume, "dimensions", Vector3i(dimensions));
+    osphelper::set(_volume, "gridSpacing", Vector3i(spacing));
 
     switch (type)
     {
@@ -136,19 +136,22 @@ void OSPRayVolume::commit()
         osphelper::set(_volume, "gradientShadingEnabled",
                        _parameters.getGradientShading());
         osphelper::set(_volume, "adaptiveMaxSamplingRate",
-                       _parameters.getAdaptiveMaxSamplingRate());
+                       static_cast<float>(
+                           _parameters.getAdaptiveMaxSamplingRate()));
         osphelper::set(_volume, "adaptiveSampling",
                        _parameters.getAdaptiveSampling() ? 1 : 0);
         osphelper::set(_volume, "singleShade",
                        _parameters.getSingleShade() ? 1 : 0);
         osphelper::set(_volume, "preIntegration",
                        _parameters.getPreIntegration() ? 1 : 0);
-        osphelper::set(_volume, "samplingRate", _parameters.getSamplingRate());
-        osphelper::set(_volume, "specular", _parameters.getSpecular());
+        osphelper::set(_volume, "samplingRate",
+                       static_cast<float>(_parameters.getSamplingRate()));
+        osphelper::set(_volume, "specular",
+                       Vector3f(_parameters.getSpecular()));
         osphelper::set(_volume, "volumeClippingBoxLower",
-                       _parameters.getClipBox().getMin());
+                       Vector3f(_parameters.getClipBox().getMin()));
         osphelper::set(_volume, "volumeClippingBoxUpper",
-                       _parameters.getClipBox().getMax());
+                       Vector3f(_parameters.getClipBox().getMax()));
     }
     if (isModified() || _parameters.isModified())
         ospCommit(_volume);
