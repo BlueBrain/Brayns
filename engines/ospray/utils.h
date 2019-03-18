@@ -63,4 +63,23 @@ std::vector<std::array<float, S>> convertVectorToFloat(
     }
     return output;
 }
-}
+
+namespace osphelper
+{
+/** Helper methods for setting properties on OSPRay object */
+void set(OSPObject obj, const char* id, const char* s);
+void set(OSPObject obj, const char* id, const std::string& s);
+
+void set(OSPObject obj, const char* id, float v);
+void set(OSPObject obj, const char* id, bool v);
+void set(OSPObject obj, const char* id, int32_t v);
+
+void set(OSPObject obj, const char* id, const Vector2f& v);
+void set(OSPObject obj, const char* id, const Vector2i& v);
+
+void set(OSPObject obj, const char* id, const Vector3f& v);
+void set(OSPObject obj, const char* id, const Vector3i& v);
+
+void set(OSPObject obj, const char* id, const Vector4f& v);
+} // namespace osphelper
+} // namespace brayns
