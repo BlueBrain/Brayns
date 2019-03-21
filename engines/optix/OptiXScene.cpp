@@ -23,9 +23,9 @@
 #include "OptiXMaterial.h"
 #include "OptiXModel.h"
 
-#include <brayns/common/light/DirectionalLight.h>
-#include <brayns/common/light/PointLight.h>
+#include <brayns/common/light/Light.h>
 #include <brayns/common/log.h>
+#include <brayns/common/utils/utils.h>
 #include <brayns/engine/Material.h>
 #include <brayns/parameters/ParametersManager.h>
 
@@ -63,41 +63,54 @@ OptiXScene::~OptiXScene() = default;
 
 bool OptiXScene::commitLights()
 {
-    if (_lights.empty())
+    if (!_lightManager.isModified())
+        return false;
+
+    _lightManager.resetModified();
+
+    if (_lightManager.getLights().empty())
     {
         BRAYNS_ERROR << "No lights are currently defined" << std::endl;
         return false;
     }
 
     _optixLights.clear();
-    for (auto light : _lights)
+
+    for (const auto& light : _lightManager.getLights())
     {
-        PointLight* pointLight = dynamic_cast<PointLight*>(light.get());
-        if (pointLight != 0)
+        switch (light->getType())
         {
-            const Vector3f& position = pointLight->getPosition();
-            const Vector3f& color = pointLight->getColor();
+        case LightType::SPHERE:
+        {
+            const Vector3f position =
+                toGlmVec(light->getProperty<std::array<double, 3>>("position"));
+            const Vector3f color =
+                toGlmVec(light->getProperty<std::array<double, 3>>("color"));
             BasicLight optixLight = {{position.x, position.y, position.z},
                                      {color.x, color.y, color.z},
                                      1, // Casts shadows
                                      BASIC_LIGHT_TYPE_POINT};
             _optixLights.push_back(optixLight);
+            break;
         }
-        else
+        case LightType::DIRECTIONAL:
         {
-            DirectionalLight* directionalLight =
-                dynamic_cast<DirectionalLight*>(light.get());
-            if (directionalLight)
-            {
-                const Vector3f& direction = directionalLight->getDirection();
-                const Vector3f& color = directionalLight->getColor();
-                BasicLight optixLight = {{direction.x, direction.y,
-                                          direction.z},
-                                         {color.x, color.y, color.z},
-                                         1, // Casts shadows
-                                         BASIC_LIGHT_TYPE_DIRECTIONAL};
-                _optixLights.push_back(optixLight);
-            }
+            const Vector3f direction = toGlmVec(
+                light->getProperty<std::array<double, 3>>("direction"));
+            const Vector3f color =
+                toGlmVec(light->getProperty<std::array<double, 3>>("color"));
+            BasicLight optixLight = {{direction.x, direction.y, direction.z},
+                                     {color.x, color.y, color.z},
+                                     1, // Casts shadows
+                                     BASIC_LIGHT_TYPE_DIRECTIONAL};
+            _optixLights.push_back(optixLight);
+            break;
+        }
+        default:
+        {
+            BRAYNS_WARN << "Unsupported light type" << std::endl;
+            break;
+        }
         }
     }
 
@@ -132,6 +145,8 @@ void OptiXScene::commit()
         model.commitTransferFunction();
         model.commitSimulationData();
     }
+
+    commitLights();
 
     if (!isModified())
         return;

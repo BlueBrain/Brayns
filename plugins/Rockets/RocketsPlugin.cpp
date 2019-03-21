@@ -36,6 +36,7 @@
 #include <uvw.hpp>
 #endif
 
+#include <rockets/jsonrpc/errorCodes.h>
 #include <rockets/jsonrpc/helpers.h>
 #include <rockets/jsonrpc/server.h>
 #include <rockets/server.h>
@@ -97,6 +98,13 @@ const std::string METHOD_SET_MODEL_TRANSFER_FUNCTION =
 const std::string METHOD_UPDATE_CLIP_PLANE = "update-clip-plane";
 const std::string METHOD_UPDATE_INSTANCE = "update-instance";
 const std::string METHOD_UPDATE_MODEL = "update-model";
+const std::string METHOD_GET_LIGHTS = "get-lights";
+const std::string METHOD_ADD_LIGHT_SPHERE = "add-light-sphere";
+const std::string METHOD_ADD_LIGHT_DIRECTIONAL = "add-light-directional";
+const std::string METHOD_ADD_LIGHT_QUAD = "add-light-quad";
+const std::string METHOD_ADD_LIGHT_SPOT = "add-light-spot";
+const std::string METHOD_REMOVE_LIGHTS = "remove-lights";
+const std::string METHOD_CLEAR_LIGHTS = "clear-lights";
 
 // JSONRPC notifications
 const std::string METHOD_CHUNK = "chunk";
@@ -108,6 +116,7 @@ const std::string LOADERS_SCHEMA = "loaders-schema";
 const std::string JSON_TYPE = "application/json";
 
 using Response = rockets::jsonrpc::Response;
+using ErrorCode = rockets::jsonrpc::ErrorCode;
 
 std::string hyphenatedToCamelCase(const std::string& hyphenated)
 {
@@ -139,7 +148,7 @@ std::string getRequestEndpointName(const std::string& endpoint)
 {
     return "get-" + endpoint;
 }
-}
+} // namespace
 
 namespace brayns
 {
@@ -621,48 +630,48 @@ public:
         // Create new throttle for that endpoint
         _throttle[endpoint];
 
-        obj.onModified(
-            [&, endpoint=getNotificationEndpointName(endpoint), throttleTime](const auto& base) {
-                auto& throttle = _throttle[endpoint];
+        obj.onModified([&, endpoint = getNotificationEndpointName(endpoint),
+                        throttleTime](const auto& base) {
+            auto& throttle = _throttle[endpoint];
 
-                // throttle itself is not thread-safe, but we can get called
-                // from different threads (c.f. async model load)
-                std::lock_guard<std::mutex> lock(throttle.first);
+            // throttle itself is not thread-safe, but we can get called
+            // from different threads (c.f. async model load)
+            std::lock_guard<std::mutex> lock(throttle.first);
 
-                const auto& castedObj = static_cast<const T&>(base);
-                const auto notify = [&rocketsServer=_rocketsServer,
-                                     clientID=_currentClientID, endpoint,
-                                     json=to_json(castedObj)]
+            const auto& castedObj = static_cast<const T&>(base);
+            const auto notify = [& rocketsServer = _rocketsServer,
+                                 clientID = _currentClientID, endpoint,
+                                 json = to_json(castedObj)] {
+                if (rocketsServer->getConnectionCount() == 0)
+                    return;
+                try
                 {
-                    if (rocketsServer->getConnectionCount() == 0)
-                        return;
-                    try
-                    {
-                        const auto& msg =
-                            rockets::jsonrpc::makeNotification(endpoint, json);
-                        if(clientID == NO_CURRENT_CLIENT)
-                            rocketsServer->broadcastText(msg);
-                        else
-                            rocketsServer->broadcastText(msg, {clientID});
-                    }
-                    catch(const std::exception& e)
-                    {
-                        BRAYNS_ERROR << "Error broadcasting notification: "
-                                  << e.what() << std::endl;
-                    }
-                };
-                const auto delayedNotify = [&, notify]{
-                    this->_delayedNotify(notify);
-                };
+                    const auto& msg =
+                        rockets::jsonrpc::makeNotification(endpoint, json);
+                    if (clientID == NO_CURRENT_CLIENT)
+                        rocketsServer->broadcastText(msg);
+                    else
+                        rocketsServer->broadcastText(msg, {clientID});
+                }
+                catch (const std::exception& e)
+                {
+                    BRAYNS_ERROR
+                        << "Error broadcasting notification: " << e.what()
+                        << std::endl;
+                }
+            };
+            const auto delayedNotify = [&, notify] {
+                this->_delayedNotify(notify);
+            };
 
-                // non-throttled, direct notify can happen directly if we are
-                // not in the middle handling an incoming message; delayed
-                // notify must be dispatched to the main thread
-                if(_currentClientID == NO_CURRENT_CLIENT)
-                    throttle.second(notify, delayedNotify, throttleTime);
-                else
-                    throttle.second(delayedNotify, delayedNotify, throttleTime);
-            });
+            // non-throttled, direct notify can happen directly if we are
+            // not in the middle handling an incoming message; delayed
+            // notify must be dispatched to the main thread
+            if (_currentClientID == NO_CURRENT_CLIENT)
+                throttle.second(notify, delayedNotify, throttleTime);
+            else
+                throttle.second(delayedNotify, delayedNotify, throttleTime);
+        });
 
         _objects.push_back(&obj);
     }
@@ -975,6 +984,10 @@ public:
                               "camera");
         _handlePropertyObject(_engine.getRenderer(), ENDPOINT_RENDERER_PARAMS,
                               "renderer");
+        _handleGetLights();
+        _handleAddLight();
+        _handleRemoveLights();
+        _handleClearLights();
 
         _endpointsRegistered = true;
     }
@@ -1135,11 +1148,10 @@ public:
 
     void _handleQuit()
     {
-        _handleRPC({METHOD_QUIT, "Quit the application"},
-                   [& engine = _engine] {
-                       engine.setKeepRunning(false);
-                       engine.triggerRender();
-                   });
+        _handleRPC({METHOD_QUIT, "Quit the application"}, [& engine = _engine] {
+            engine.setKeepRunning(false);
+            engine.triggerRender();
+        });
     }
 
     void _handleResetCamera()
@@ -1302,6 +1314,116 @@ public:
         });
     }
 
+    void _handleGetLights()
+    {
+        const RpcDescription desc{METHOD_GET_LIGHTS, "get all lights"};
+        _bindEndpoint(
+            METHOD_GET_LIGHTS,
+            [& engine = _engine](const rockets::jsonrpc::Request& /*request*/) {
+                const auto& lights =
+                    engine.getScene().getLightManager().getLights();
+
+                std::vector<std::string> jsonStrings;
+
+                for (const auto light : lights)
+                    jsonStrings.emplace_back(to_json(*light));
+
+                return Response{"[" + joinStrings(jsonStrings, ",") + "]"};
+            });
+
+        _handleSchema(METHOD_GET_LIGHTS,
+                      buildJsonRpcSchemaRequestReturnOnly<std::vector<Light>>(
+                          desc));
+    }
+
+    void _handleAddLight()
+    {
+        _handleRPC<RPCSpotLight, int>(
+            {METHOD_ADD_LIGHT_SPOT, "Add a spotlight, returns id", "light",
+             "The light and its properties"},
+            [& engine = _engine](const RPCSpotLight& l) {
+                LightManager& lightManager =
+                    engine.getScene().getLightManager();
+                auto light = lightManager.addSpotLight(
+                    toGlmVec(l.position), toGlmVec(l.direction), l.openingAngle,
+                    l.penumbraAngle, l.radius, toGlmVec(l.color), l.intensity);
+
+                engine.triggerRender();
+                return light->getId();
+            });
+
+        _handleRPC<RPCDirectionalLight, int>(
+            {METHOD_ADD_LIGHT_DIRECTIONAL, "Add a directional light", "light",
+             "The light and its properties"},
+            [& engine = _engine](const RPCDirectionalLight& l) {
+                LightManager& lightManager =
+                    engine.getScene().getLightManager();
+                auto light =
+                    lightManager.addDirectionalLight(toGlmVec(l.direction),
+                                                     toGlmVec(l.color),
+                                                     l.intensity);
+
+                engine.triggerRender();
+                return light->getId();
+            });
+
+        _handleRPC<RPCQuadLight, int>(
+            {METHOD_ADD_LIGHT_QUAD, "Add a quad light", "light",
+             "The light and its properties"},
+            [& engine = _engine](const RPCQuadLight& l) {
+                LightManager& lightManager =
+                    engine.getScene().getLightManager();
+                auto light =
+                    lightManager.addQuadLight(toGlmVec(l.position),
+                                              toGlmVec(l.edge1),
+                                              toGlmVec(l.edge2),
+                                              toGlmVec(l.color), l.intensity);
+
+                engine.triggerRender();
+                return light->getId();
+            });
+
+        _handleRPC<RPCSphereLight, int>(
+            {METHOD_ADD_LIGHT_SPHERE, "Add a sphere light", "light",
+             "The light and its properties"},
+            [& engine = _engine](const RPCSphereLight& l) {
+                LightManager& lightManager =
+                    engine.getScene().getLightManager();
+                auto light =
+                    lightManager.addSphereLight(toGlmVec(l.position), l.radius,
+                                                toGlmVec(l.color), l.intensity);
+
+                engine.triggerRender();
+                return light->getId();
+            });
+    }
+
+    void _handleRemoveLights()
+    {
+        const RpcParameterDescription desc{METHOD_REMOVE_LIGHTS,
+                                           "Remove light given their IDs",
+                                           "ids", "Array of light IDs"};
+        _handleRPC<size_ts, bool>(desc, [& engine =
+                                             _engine](const size_ts& ids) {
+            auto& lightManager = engine.getScene().getLightManager();
+            for (const auto id : ids)
+                lightManager.removeLight(id);
+            engine.triggerRender();
+            return true;
+        });
+    }
+
+    void _handleClearLights()
+    {
+        const RpcDescription desc{METHOD_CLEAR_LIGHTS,
+                                  "Remove all lights in the scene"};
+        _handleRPC(desc, [& engine = _engine]() {
+            auto& lightManager = engine.getScene().getLightManager();
+            lightManager.clearLights();
+            engine.triggerRender();
+        });
+    }
+
     void _handleAddModel()
     {
         const RpcParameterDescription desc{
@@ -1452,8 +1574,7 @@ public:
     void _handleGetLoaders()
     {
         _handleRPC<std::vector<LoaderInfo>>(
-            {METHOD_GET_LOADERS, "Get all loaders"},
-            [&]() {
+            {METHOD_GET_LOADERS, "Get all loaders"}, [&]() {
                 auto& scene = _engine.getScene();
                 return scene.getLoaderRegistry().getLoaderInfos();
             });
@@ -1649,4 +1770,4 @@ void RocketsPlugin::postRender()
 {
     _impl->postRender();
 }
-}
+} // namespace brayns

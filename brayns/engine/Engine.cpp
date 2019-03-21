@@ -20,7 +20,6 @@
 
 #include "Engine.h"
 
-#include <brayns/common/light/DirectionalLight.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/Renderer.h>
@@ -122,4 +121,4 @@ void Engine::addCameraType(const std::string& name,
     _parametersManager.getRenderingParameters().addCamera(name);
     getCamera().setProperties(name, properties);
 }
-}
+} // namespace brayns

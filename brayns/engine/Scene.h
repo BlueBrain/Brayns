@@ -24,6 +24,7 @@
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/loader/LoaderRegistry.h>
 #include <brayns/common/types.h>
+#include <brayns/engine/LightManager.h>
 
 #include <shared_mutex>
 
@@ -73,29 +74,8 @@ public:
         Returns the bounding box of the scene
     */
     const Boxd& getBounds() const { return _bounds; }
-    /**
-        Attaches a light source to the scene
-        @param light Object representing the light source
-    */
-    BRAYNS_API void addLight(LightPtr light);
-
-    /**
-        Gets a light source from the scene for a given index
-        @return Pointer to light source
-    */
-    BRAYNS_API LightPtr getLight(const size_t index);
-
-    /**
-        Removes a light source from the scene for a given index
-        @param light Light source to be removed
-    */
-    BRAYNS_API void removeLight(LightPtr light);
-
-    /**
-        Removes all light sources from the scene
-    */
-    BRAYNS_API void clearLights();
-
+    /** Gets the light manager */
+    LightManager& getLightManager() { return _lightManager; }
     /**
         Adds a model to the scene
         @throw std::runtime_error if model is empty
@@ -225,7 +205,7 @@ protected:
     ModelDescriptors _modelDescriptors;
     mutable std::shared_timed_mutex _modelMutex;
 
-    Lights _lights;
+    LightManager _lightManager;
     ClipPlanes _clipPlanes;
 
     LoaderRegistry _loaderRegistry;
@@ -234,4 +214,4 @@ protected:
 private:
     SERIALIZATION_FRIEND(Scene)
 };
-}
+} // namespace brayns

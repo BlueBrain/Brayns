@@ -152,11 +152,6 @@ class Light;
 using LightPtr = std::shared_ptr<Light>;
 using Lights = std::vector<LightPtr>;
 
-class DirectionalLight;
-using DirectionalLightPtr = std::shared_ptr<DirectionalLight>;
-
-class PointLight;
-
 class AbstractSimulationHandler;
 using AbstractSimulationHandlerPtr = std::shared_ptr<AbstractSimulationHandler>;
 
@@ -367,5 +362,5 @@ inline std::vector<std::pair<std::string, DataType>> enumMap()
             {"uint32", DataType::UINT32}, {"int8", DataType::INT8},
             {"int16", DataType::INT16},   {"int32", DataType::INT32}};
 }
-}
+} // namespace brayns
 #endif // TYPES_H

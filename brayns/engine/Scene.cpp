@@ -59,7 +59,7 @@ std::shared_ptr<T> _remove(std::vector<std::shared_ptr<T>>& list,
     list.erase(i);
     return result;
 }
-}
+} // namespace
 
 namespace brayns
 {
@@ -91,7 +91,7 @@ void Scene::copyFrom(const Scene& rhs)
     *_backgroundMaterial = *rhs._backgroundMaterial;
     _backgroundMaterial->markModified();
 
-    _lights = rhs._lights;
+    _lightManager = rhs._lightManager;
     _clipPlanes = rhs._clipPlanes;
 
     markModified();
@@ -114,31 +114,6 @@ size_t Scene::getNumModels() const
 {
     auto lock = acquireReadAccess();
     return _modelDescriptors.size();
-}
-
-void Scene::addLight(LightPtr light)
-{
-    removeLight(light);
-    _lights.push_back(light);
-}
-
-void Scene::removeLight(LightPtr light)
-{
-    Lights::iterator it = std::find(_lights.begin(), _lights.end(), light);
-    if (it != _lights.end())
-        _lights.erase(it);
-}
-
-LightPtr Scene::getLight(const size_t index)
-{
-    if (index < _lights.size())
-        return _lights[index];
-    return 0;
-}
-
-void Scene::clearLights()
-{
-    _lights.clear();
 }
 
 size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
@@ -452,4 +427,4 @@ void Scene::_computeBounds()
         // If no model is enabled. return empty bounding box
         _bounds.merge({0, 0, 0});
 }
-}
+} // namespace brayns

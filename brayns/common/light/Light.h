@@ -1,6 +1,5 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,40 +17,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef LIGHT_H
-#define LIGHT_H
+#pragma once
 
 #include <brayns/api.h>
+#include <brayns/common/PropertyObject.h>
 #include <brayns/common/types.h>
+
+SERIALIZATION_ACCESS(Light)
 
 namespace brayns
 {
 /**
-    Light object
-
-    This object is an abstract class defining a light source with a color and an
-    intensity. This is the base class for any light source available in the
-    scene (Point, Directional, etc)
+ * @brief The LightType enum defines the different types of light
  */
-class Light
+enum class LightType
+{
+    SPHERE,
+    DIRECTIONAL,
+    QUAD,
+    SPOTLIGHT
+};
+
+/**
+ * @brief The Light class defines a light source by type, id and properties
+ */
+class Light : public PropertyMap
 {
 public:
-    BRAYNS_API virtual ~Light() = 0;
+    Light() = default;
+    Light(const LightType type, const Vector3f& color, const float intensity,
+          const int id);
 
-    /** Light source RGB color */
-    BRAYNS_API void setColor(const Vector3f& color) { _color = color; }
-    BRAYNS_API const Vector3f getColor() const { return _color; }
-    /** Light source intensity */
-    BRAYNS_API void setIntensity(const float intensity)
-    {
-        _intensity = intensity;
-    }
-    BRAYNS_API float getIntensity() const { return _intensity; }
-protected:
-    BRAYNS_API Light(const Vector3f& color, float intensity);
-
-    Vector3f _color;
-    float _intensity;
+    LightType getType() const;
+    int getId() const { return _id; }
+private:
+    std::string _type;
+    int _id{-1};
+    SERIALIZATION_FRIEND(Light);
 };
-}
-#endif // LIGHT_H
+
+} // namespace brayns

@@ -7,9 +7,7 @@ set(BRAYNSCOMMON_SOURCES
   ImageManager.cpp
   PropertyMap.cpp
   input/KeyboardHandler.cpp
-  light/DirectionalLight.cpp
   light/Light.cpp
-  light/PointLight.cpp
   loader/LoaderRegistry.cpp
   material/Texture2D.cpp
   scene/ClipPlane.cpp
@@ -40,9 +38,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   geometry/Streamline.h
   geometry/TrianglesMesh.h
   input/KeyboardHandler.h
-  light/DirectionalLight.h
   light/Light.h
-  light/PointLight.h
   loader/Loader.h
   loader/LoaderRegistry.h
   log.h

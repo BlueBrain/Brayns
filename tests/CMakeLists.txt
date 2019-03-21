@@ -39,6 +39,7 @@ if(NOT BRAYNS_OSPRAY_ENABLED)
     shadows.cpp
     subsampling.cpp
     transferFunction.cpp
+    lights.cpp
   )
 endif()
 

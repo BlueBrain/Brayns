@@ -26,8 +26,7 @@
 
 #include <brayns/common/ImageManager.h>
 #include <brayns/common/Transformation.h>
-#include <brayns/common/light/DirectionalLight.h>
-#include <brayns/common/light/PointLight.h>
+#include <brayns/common/light/Light.h>
 #include <brayns/common/log.h>
 #include <brayns/engine/Model.h>
 
@@ -50,19 +49,24 @@ OSPRayScene::OSPRayScene(AnimationParameters& animationParameters,
 
 OSPRayScene::~OSPRayScene()
 {
+    _destroyLights();
+    if (_rootModel)
+        ospRelease(_rootModel);
+}
+void OSPRayScene::_destroyLights()
+{
     for (auto& light : _ospLights)
         ospRelease(light);
     _ospLights.clear();
-    if (_ospLightData)
-        ospRelease(_ospLightData);
 
-    if (_rootModel)
-        ospRelease(_rootModel);
+    ospRelease(_ospLightData);
+    _ospLightData = nullptr;
 }
 
 void OSPRayScene::commit()
 {
     Scene::commit();
+    commitLights();
 
     // copy the list to avoid locking the mutex
     ModelDescriptors modelDescriptors;
@@ -173,53 +177,52 @@ void OSPRayScene::commit()
 
 bool OSPRayScene::commitLights()
 {
-    size_t lightCount = 0;
-    for (const auto& light : _lights)
+    if (!_lightManager.isModified())
+        return false;
+
+    _lightManager.resetModified();
+
+    _destroyLights();
+
+    for (const auto& baseLight : _lightManager.getLights())
     {
-        DirectionalLight* directionalLight =
-            dynamic_cast<DirectionalLight*>(light.get());
-        if (directionalLight)
-        {
-            if (_ospLights.size() <= lightCount)
-                _ospLights.push_back(ospNewLight(nullptr, "DirectionalLight"));
+        OSPLight ospLight{nullptr};
 
-            osphelper::set(_ospLights[lightCount], "color",
-                           directionalLight->getColor());
-            osphelper::set(_ospLights[lightCount], "direction",
-                           directionalLight->getDirection());
-            osphelper::set(_ospLights[lightCount], "intensity",
-                           directionalLight->getIntensity());
-            ospCommit(_ospLights[lightCount]);
-            ++lightCount;
-        }
-        else
+        switch (baseLight->getType())
         {
-            PointLight* pointLight = dynamic_cast<PointLight*>(light.get());
-            if (pointLight)
-            {
-                if (_ospLights.size() <= lightCount)
-                    _ospLights.push_back(ospNewLight(nullptr, "PointLight"));
-
-                osphelper::set(_ospLights[lightCount], "position",
-                               pointLight->getPosition());
-                osphelper::set(_ospLights[lightCount], "color",
-                               pointLight->getColor());
-                osphelper::set(_ospLights[lightCount], "intensity",
-                               pointLight->getIntensity());
-                osphelper::set(_ospLights[lightCount], "radius",
-                               pointLight->getCutoffDistance());
-                ospCommit(_ospLights[lightCount]);
-                ++lightCount;
-            }
+        case LightType::DIRECTIONAL:
+        {
+            ospLight = ospNewLight3("distant");
+            break;
         }
+        case LightType::SPHERE:
+        {
+            ospLight = ospNewLight3("point");
+            break;
+        }
+        case LightType::QUAD:
+        {
+            ospLight = ospNewLight3("quad");
+            break;
+        }
+        case LightType::SPOTLIGHT:
+        {
+            ospLight = ospNewLight3("spot");
+            break;
+        }
+        }
+
+        assert(ospLight);
+
+        toOSPRayProperties(*baseLight, ospLight);
+        _ospLights.push_back(ospLight);
+        ospCommit(ospLight);
     }
 
-    if (!_ospLightData)
-    {
-        _ospLightData = ospNewData(_ospLights.size(), OSP_OBJECT,
-                                   &_ospLights[0], _memoryManagementFlags);
-        ospCommit(_ospLightData);
-    }
+    _ospLightData = ospNewData(_ospLights.size(), OSP_OBJECT, _ospLights.data(),
+                               _memoryManagementFlags);
+    ospCommit(_ospLightData);
+
     return true;
 }
 

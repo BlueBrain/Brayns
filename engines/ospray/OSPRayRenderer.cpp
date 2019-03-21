@@ -40,7 +40,18 @@ OSPRayRenderer::OSPRayRenderer(const AnimationParameters& animationParameters,
 
 OSPRayRenderer::~OSPRayRenderer()
 {
-    ospRelease(_renderer);
+    _destroyRenderer();
+}
+
+void OSPRayRenderer::_destroyRenderer()
+{
+    if (_renderer)
+    {
+        // The lights data is created and destroyed in the light manager, so to
+        // avoid a double-free, we do not destroy it here
+        ospRemoveParam(_renderer, "lights");
+        ospRelease(_renderer);
+    }
 }
 
 void OSPRayRenderer::render(FrameBufferPtr frameBuffer)
@@ -59,25 +70,33 @@ void OSPRayRenderer::commit()
 {
     const AnimationParameters& ap = _animationParameters;
     const RenderingParameters& rp = _renderingParameters;
+    auto scene = std::static_pointer_cast<OSPRayScene>(_scene);
+    const bool lightsChanged = _currLightsData != scene->lightData();
+    const bool rendererChanged = _currentOSPRenderer != getCurrentType();
 
     if (!ap.isModified() && !rp.isModified() && !_scene->isModified() &&
-        !isModified() && !_camera->isModified())
+        !isModified() && !_camera->isModified() && !lightsChanged &&
+        !rendererChanged)
     {
         return;
     }
 
-    const bool rendererChanged = _currentOSPRenderer != getCurrentType();
     if (rendererChanged)
         _createOSPRenderer();
 
     toOSPRayProperties(*this, _renderer);
 
-    auto scene = std::static_pointer_cast<OSPRayScene>(_scene);
+    if (lightsChanged || rendererChanged)
+    {
+        // Avoid double destruction of 'lights' buffer
+        ospRemoveParam(_renderer, "lights");
+        ospSetData(_renderer, "lights", scene->lightData());
+        _currLightsData = scene->lightData();
+    }
+
     if (isModified() || rendererChanged || _scene->isModified())
     {
         _commitRendererMaterials();
-
-        ospSetData(_renderer, "lights", scene->lightData());
 
         if (auto simulationModel = scene->getSimulatedModel())
         {
@@ -166,7 +185,7 @@ void OSPRayRenderer::_createOSPRenderer()
     if (!newRenderer)
         throw std::runtime_error(getCurrentType() +
                                  " is not a registered renderer");
-    ospRelease(_renderer);
+    _destroyRenderer();
     _renderer = newRenderer;
     if (_camera)
         ospSetObject(_renderer, "camera", _camera->impl());

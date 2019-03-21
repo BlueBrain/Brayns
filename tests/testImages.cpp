@@ -38,7 +38,6 @@
 #endif
 
 #include "PDiffHelpers.h"
-
 BOOST_AUTO_TEST_CASE(render_two_frames_and_compare_they_are_same)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();

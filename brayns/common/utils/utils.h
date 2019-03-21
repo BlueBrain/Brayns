@@ -69,4 +69,29 @@ std::string separatedToCamelCase(const std::string& separated,
 std::string joinStrings(const std::vector<std::string>& strings,
                         const std::string& joinWith);
 std::string toLowercase(const std::string input);
+
+template <typename T>
+inline bool erase_value(std::vector<T>& vec, const T& value)
+{
+    auto it = std::find(vec.begin(), vec.end(), value);
+    if (it != vec.end())
+    {
+        vec.erase(it);
+        return true;
+    }
+    return false;
+}
+
+template <typename T, typename PredicateT>
+inline bool erase_if(std::vector<T>& vec, const PredicateT predicate)
+{
+    auto it = std::find_if(vec.begin(), vec.end(), predicate);
+    if (it != vec.end())
+    {
+        vec.erase(it);
+        return true;
+    }
+    return false;
+}
+
 } // namespace brayns

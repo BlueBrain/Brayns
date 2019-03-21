@@ -49,10 +49,12 @@ private:
     OSPRenderer _renderer{nullptr};
     std::atomic<float> _variance{std::numeric_limits<float>::max()};
     std::string _currentOSPRenderer;
+    OSPData _currLightsData{nullptr};
 
     void _createOSPRenderer();
     void _commitRendererMaterials();
+    void _destroyRenderer();
 };
-}
+} // namespace brayns
 
 #endif // OSPRAYRENDERER_H
