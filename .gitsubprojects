@@ -1,18 +1,18 @@
 # -*- mode: cmake -*-
 if(BRAYNS_NETWORKING_ENABLED)
-  git_subproject(Rockets https://github.com/BlueBrain/Rockets.git cc53765)
+  git_subproject(Rockets https://github.com/BlueBrain/Rockets.git ea375c1)
 endif()
 
 # Streaming to display walls
 if(BRAYNS_DEFLECT_ENABLED)
-  git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 427458e)
+  git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 038e139)
 endif()
 
 # Data access
 if(BRAYNS_CIRCUITVIEWER_ENABLED)
-  git_subproject(Brion https://github.com/BlueBrain/Brion.git d8e7c2e)
+  git_subproject(Brion https://github.com/BlueBrain/Brion.git e581731)
 endif()
 
 if(BRAYNS_BBIC_ENABLED)
-  git_subproject(HighFive https://github.com/BlueBrain/HighFive.git 8db7f3c)
+  git_subproject(HighFive https://github.com/BlueBrain/HighFive.git 68fbe8e)
 endif()
