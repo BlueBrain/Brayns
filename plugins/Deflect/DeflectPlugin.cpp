@@ -175,6 +175,8 @@ private:
     void _setupSocketListener()
     {
 #ifdef BRAYNS_USE_LIBUV
+        assert(_stream->isConnected());
+
         auto loop = uvw::Loop::getDefault();
         _pollHandle = loop->resource<uvw::PollHandle>(_stream->getDescriptor());
 
@@ -184,6 +186,11 @@ private:
         });
 
         _pollHandle->start(uvw::PollHandle::Event::READABLE);
+
+        _stream->setDisconnectedCallback([&] {
+            _pollHandle->stop();
+            _pollHandle.reset();
+        });
 #endif
     }
 
