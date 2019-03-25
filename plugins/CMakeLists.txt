@@ -13,6 +13,11 @@ if(BRAYNS_NETWORKING_ENABLED)
   add_subdirectory(Rockets)
 endif()
 
+option(BRAYNS_MULTIVIEW_ENABLED "Activate Multiview camera plugin" OFF)
+if(BRAYNS_MULTIVIEW_ENABLED)
+  add_subdirectory(Multiview)
+endif()
+
 option(BRAYNS_OPENDECK_ENABLED "Activate OpenDeck plugin" OFF)
 if(BRAYNS_OPENDECK_ENABLED)
   add_subdirectory(OpenDeck)
