@@ -41,7 +41,7 @@ OSPData allocateVectorData(const std::vector<VecT>& vec,
     return ospNewData(totBytes / ospray::sizeOf(ospType), ospType, vec.data(),
                       memoryManagementFlags);
 }
-}
+} // namespace
 
 OSPRayModel::OSPRayModel(AnimationParameters& animationParameters,
                          VolumeParameters& volumeParameters)
@@ -176,9 +176,12 @@ void OSPRayModel::_commitSpheres(const size_t materialId)
     ospSetObject(geometry, "spheres", data);
     ospRelease(data);
 
-    ospSet1i(geometry, "offset_center", offsetof(Sphere, center));
-    ospSet1i(geometry, "offset_radius", offsetof(Sphere, radius));
-    ospSet1i(geometry, "bytes_per_sphere", sizeof(Sphere));
+    osphelper::set(geometry, "offset_center",
+                   static_cast<int>(offsetof(Sphere, center)));
+    osphelper::set(geometry, "offset_radius",
+                   static_cast<int>(offsetof(Sphere, radius)));
+    osphelper::set(geometry, "bytes_per_sphere",
+                   static_cast<int>(sizeof(Sphere)));
     ospCommit(geometry);
 
     _addGeometryToModel(geometry, materialId);
@@ -193,10 +196,14 @@ void OSPRayModel::_commitCylinders(const size_t materialId)
     ospSetObject(geometry, "cylinders", data);
     ospRelease(data);
 
-    ospSet1i(geometry, "offset_v0", offsetof(Cylinder, center));
-    ospSet1i(geometry, "offset_v1", offsetof(Cylinder, up));
-    ospSet1i(geometry, "offset_radius", offsetof(Cylinder, radius));
-    ospSet1i(geometry, "bytes_per_cylinder", sizeof(Cylinder));
+    osphelper::set(geometry, "offset_v0",
+                   static_cast<int>(offsetof(Cylinder, center)));
+    osphelper::set(geometry, "offset_v1",
+                   static_cast<int>(offsetof(Cylinder, up)));
+    osphelper::set(geometry, "offset_radius",
+                   static_cast<int>(offsetof(Cylinder, radius)));
+    osphelper::set(geometry, "bytes_per_cylinder",
+                   static_cast<int>(sizeof(Cylinder)));
     ospCommit(geometry);
 
     _addGeometryToModel(geometry, materialId);
@@ -256,8 +263,8 @@ void OSPRayModel::_commitMeshes(const size_t materialId)
         ospRelease(texCoords);
     }
 
-    ospSet1i(geometry, "alpha_type", 0);
-    ospSet1i(geometry, "alpha_component", 4);
+    osphelper::set(geometry, "alpha_type", 0);
+    osphelper::set(geometry, "alpha_component", 4);
 
     ospCommit(geometry);
 
@@ -290,7 +297,7 @@ void OSPRayModel::_commitStreamlines(const size_t materialId)
     }
 
     // Since we allow custom radius per point we always smooth
-    ospSet1i(geometry, "smooth", true);
+    osphelper::set(geometry, "smooth", 1);
 
     ospCommit(geometry);
 
@@ -358,9 +365,12 @@ void OSPRayModel::_commitSDFGeometries()
 
 void OSPRayModel::_setBVHFlags()
 {
-    ospSet1i(_primaryModel, "dynamicScene", _bvhFlags.count(BVHFlag::dynamic));
-    ospSet1i(_primaryModel, "compactMode", _bvhFlags.count(BVHFlag::compact));
-    ospSet1i(_primaryModel, "robustMode", _bvhFlags.count(BVHFlag::robust));
+    osphelper::set(_primaryModel, "dynamicScene",
+                   static_cast<int>(_bvhFlags.count(BVHFlag::dynamic)));
+    osphelper::set(_primaryModel, "compactMode",
+                   static_cast<int>(_bvhFlags.count(BVHFlag::compact)));
+    osphelper::set(_primaryModel, "robustMode",
+                   static_cast<int>(_bvhFlags.count(BVHFlag::robust)));
 }
 
 void OSPRayModel::commitGeometry()
@@ -509,7 +519,7 @@ void OSPRayModel::_commitTransferFunctionImpl(const Vector3fs& colors,
     ospRelease(opacityData);
 
     // Value range
-    ospSet2f(_ospTransferFunction, "valueRange", valueRange.x, valueRange.y);
+    osphelper::set(_ospTransferFunction, "valueRange", Vector2f(valueRange));
 
     ospCommit(_ospTransferFunction);
 }
@@ -522,4 +532,4 @@ void OSPRayModel::_commitSimulationDataImpl(const float* frameData,
         ospNewData(frameSize, OSP_FLOAT, frameData, _memoryManagementFlags);
     ospCommit(_ospSimulationData);
 }
-}
+} // namespace brayns

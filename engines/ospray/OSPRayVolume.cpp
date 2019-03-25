@@ -21,6 +21,7 @@
 #include "OSPRayVolume.h"
 
 #include <brayns/parameters/VolumeParameters.h>
+#include <engines/ospray/utils.h>
 
 namespace brayns
 {
@@ -32,36 +33,33 @@ OSPRayVolume::OSPRayVolume(const Vector3ui& dimensions, const Vector3f& spacing,
     , _parameters(params)
     , _volume(ospNewVolume(volumeType.c_str()))
 {
-    const ospcommon::vec3i ospDim(dimensions.x, dimensions.y, dimensions.z);
-    ospSetVec3i(_volume, "dimensions", (osp::vec3i&)ospDim);
-
-    const ospcommon::vec3f ospSpacing(spacing.x, spacing.y, spacing.z);
-    ospSetVec3f(_volume, "gridSpacing", (osp::vec3f&)ospSpacing);
+    osphelper::set(_volume, "dimensions", Vector3i(dimensions));
+    osphelper::set(_volume, "gridSpacing", Vector3i(spacing));
 
     switch (type)
     {
     case DataType::FLOAT:
-        ospSetString(_volume, "voxelType", "float");
+        osphelper::set(_volume, "voxelType", "float");
         _ospType = OSP_FLOAT;
         _dataSize = 4;
         break;
     case DataType::DOUBLE:
-        ospSetString(_volume, "voxelType", "double");
+        osphelper::set(_volume, "voxelType", "double");
         _ospType = OSP_DOUBLE;
         _dataSize = 8;
         break;
     case DataType::UINT8:
-        ospSetString(_volume, "voxelType", "uchar");
+        osphelper::set(_volume, "voxelType", "uchar");
         _ospType = OSP_UINT;
         _dataSize = 1;
         break;
     case DataType::UINT16:
-        ospSetString(_volume, "voxelType", "ushort");
+        osphelper::set(_volume, "voxelType", "ushort");
         _ospType = OSP_UINT2;
         _dataSize = 2;
         break;
     case DataType::INT16:
-        ospSetString(_volume, "voxelType", "short");
+        osphelper::set(_volume, "voxelType", "short");
         _ospType = OSP_INT2;
         _dataSize = 2;
         break;
@@ -104,7 +102,7 @@ OSPRaySharedDataVolume::OSPRaySharedDataVolume(
 
 void OSPRayVolume::setDataRange(const Vector2f& range)
 {
-    ospSet2f(_volume, "voxelRange", range.x, range.y);
+    osphelper::set(_volume, "voxelRange", range);
     markModified();
 }
 
@@ -135,24 +133,28 @@ void OSPRayVolume::commit()
 {
     if (_parameters.isModified())
     {
-        ospSet1i(_volume, "gradientShadingEnabled",
-                 _parameters.getGradientShading());
-        ospSet1f(_volume, "adaptiveMaxSamplingRate",
-                 _parameters.getAdaptiveMaxSamplingRate());
-        ospSet1i(_volume, "adaptiveSampling",
-                 _parameters.getAdaptiveSampling());
-        ospSet1i(_volume, "singleShade", _parameters.getSingleShade());
-        ospSet1i(_volume, "preIntegration", _parameters.getPreIntegration());
-        ospSet1f(_volume, "samplingRate", _parameters.getSamplingRate());
-        Vector3f specular(_parameters.getSpecular());
-        ospSet3fv(_volume, "specular", glm::value_ptr(specular));
-        Vector3f clipMin(_parameters.getClipBox().getMin());
-        ospSet3fv(_volume, "volumeClippingBoxLower", glm::value_ptr(clipMin));
-        Vector3f clipMax(_parameters.getClipBox().getMax());
-        ospSet3fv(_volume, "volumeClippingBoxUpper", glm::value_ptr(clipMax));
+        osphelper::set(_volume, "gradientShadingEnabled",
+                       _parameters.getGradientShading());
+        osphelper::set(_volume, "adaptiveMaxSamplingRate",
+                       static_cast<float>(
+                           _parameters.getAdaptiveMaxSamplingRate()));
+        osphelper::set(_volume, "adaptiveSampling",
+                       _parameters.getAdaptiveSampling() ? 1 : 0);
+        osphelper::set(_volume, "singleShade",
+                       _parameters.getSingleShade() ? 1 : 0);
+        osphelper::set(_volume, "preIntegration",
+                       _parameters.getPreIntegration() ? 1 : 0);
+        osphelper::set(_volume, "samplingRate",
+                       static_cast<float>(_parameters.getSamplingRate()));
+        osphelper::set(_volume, "specular",
+                       Vector3f(_parameters.getSpecular()));
+        osphelper::set(_volume, "volumeClippingBoxLower",
+                       Vector3f(_parameters.getClipBox().getMin()));
+        osphelper::set(_volume, "volumeClippingBoxUpper",
+                       Vector3f(_parameters.getClipBox().getMax()));
     }
     if (isModified() || _parameters.isModified())
         ospCommit(_volume);
     resetModified();
 }
-}
+} // namespace brayns

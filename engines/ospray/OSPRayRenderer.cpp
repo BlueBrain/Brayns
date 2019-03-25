@@ -104,13 +104,12 @@ void OSPRayRenderer::commit()
         _camera->commit();
     }
 
-    ospSet1f(_renderer, "timestamp", ap.getFrame());
-    ospSet1i(_renderer, "randomNumber", rand() % 10000);
-
-    const auto& color = rp.getBackgroundColor();
-    ospSet3f(_renderer, "bgColor", color.x, color.y, color.z);
-    ospSet1f(_renderer, "varianceThreshold", rp.getVarianceThreshold());
-    ospSet1i(_renderer, "spp", rp.getSamplesPerPixel());
+    osphelper::set(_renderer, "timestamp", static_cast<float>(ap.getFrame()));
+    osphelper::set(_renderer, "randomNumber", rand() % 10000);
+    osphelper::set(_renderer, "bgColor", Vector3f(rp.getBackgroundColor()));
+    osphelper::set(_renderer, "varianceThreshold",
+                   static_cast<float>(rp.getVarianceThreshold()));
+    osphelper::set(_renderer, "spp", static_cast<int>(rp.getSamplesPerPixel()));
 
     if (auto material = std::static_pointer_cast<OSPRayMaterial>(
             scene->getBackgroundMaterial()))
@@ -144,13 +143,13 @@ Renderer::PickResult OSPRayRenderer::pick(const Vector2f& pickPos)
     // a time > 0 (like branches that have distance to the soma for the growing
     // use-case), cannot be picked. So we make the range as large as possible to
     // make ray.time be as large as possible.
-    ospSet1f(_camera->impl(), "shutterClose", INFINITY);
+    osphelper::set(_camera->impl(), "shutterClose", INFINITY);
     ospCommit(_camera->impl());
 
     ospPick(&ospResult, _renderer, pos);
 
     // UNDO HACK
-    ospSet1f(_camera->impl(), "shutterClose", 0.f);
+    osphelper::set(_camera->impl(), "shutterClose", 0.f);
     ospCommit(_camera->impl());
 
     PickResult result;
@@ -177,8 +176,8 @@ void OSPRayRenderer::_createOSPRenderer()
 
 void OSPRayRenderer::_commitRendererMaterials()
 {
-    _scene->visitModels([& renderer = _currentOSPRenderer](Model & model) {
+    _scene->visitModels([& renderer = _currentOSPRenderer](Model& model) {
         static_cast<OSPRayModel&>(model).commitMaterials(renderer);
     });
 }
-}
+} // namespace brayns

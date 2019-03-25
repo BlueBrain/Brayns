@@ -41,7 +41,7 @@ OSPFrameBufferFormat toOSPFrameBufferFormat(
         return OSP_FB_NONE;
     }
 }
-}
+} // namespace
 OSPRayFrameBuffer::OSPRayFrameBuffer(const std::string& name,
                                      const Vector2ui& frameSize,
                                      const FrameBufferFormat frameBufferFormat)
@@ -91,7 +91,7 @@ void OSPRayFrameBuffer::_recreate()
                           attributes);
     if (_pixelOp)
         ospSetPixelOp(_frameBuffer, _pixelOp);
-    ospSetString(_frameBuffer, "name", getName().c_str());
+    osphelper::set(_frameBuffer, "name", getName());
     ospCommit(_frameBuffer);
 
     _recreateSubsamplingBuffer();
@@ -233,4 +233,4 @@ void OSPRayFrameBuffer::updatePixelOp(const PropertyMap& properties)
         ospCommit(_pixelOp);
     }
 }
-}
+} // namespace brayns

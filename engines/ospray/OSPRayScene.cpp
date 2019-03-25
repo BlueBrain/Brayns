@@ -183,14 +183,12 @@ bool OSPRayScene::commitLights()
             if (_ospLights.size() <= lightCount)
                 _ospLights.push_back(ospNewLight(nullptr, "DirectionalLight"));
 
-            const Vector3f color = directionalLight->getColor();
-            ospSet3f(_ospLights[lightCount], "color", color.x, color.y,
-                     color.z);
-            const Vector3f direction = directionalLight->getDirection();
-            ospSet3f(_ospLights[lightCount], "direction", direction.x,
-                     direction.y, direction.z);
-            ospSet1f(_ospLights[lightCount], "intensity",
-                     directionalLight->getIntensity());
+            osphelper::set(_ospLights[lightCount], "color",
+                           directionalLight->getColor());
+            osphelper::set(_ospLights[lightCount], "direction",
+                           directionalLight->getDirection());
+            osphelper::set(_ospLights[lightCount], "intensity",
+                           directionalLight->getIntensity());
             ospCommit(_ospLights[lightCount]);
             ++lightCount;
         }
@@ -202,16 +200,14 @@ bool OSPRayScene::commitLights()
                 if (_ospLights.size() <= lightCount)
                     _ospLights.push_back(ospNewLight(nullptr, "PointLight"));
 
-                const Vector3f position = pointLight->getPosition();
-                ospSet3f(_ospLights[lightCount], "position", position.x,
-                         position.y, position.z);
-                const Vector3f color = pointLight->getColor();
-                ospSet3f(_ospLights[lightCount], "color", color.x, color.y,
-                         color.z);
-                ospSet1f(_ospLights[lightCount], "intensity",
-                         pointLight->getIntensity());
-                ospSet1f(_ospLights[lightCount], "radius",
-                         pointLight->getCutoffDistance());
+                osphelper::set(_ospLights[lightCount], "position",
+                               pointLight->getPosition());
+                osphelper::set(_ospLights[lightCount], "color",
+                               pointLight->getColor());
+                osphelper::set(_ospLights[lightCount], "intensity",
+                               pointLight->getIntensity());
+                osphelper::set(_ospLights[lightCount], "radius",
+                               pointLight->getCutoffDistance());
                 ospCommit(_ospLights[lightCount]);
                 ++lightCount;
             }
@@ -276,4 +272,4 @@ ModelDescriptorPtr OSPRayScene::getSimulatedModel()
     }
     return ModelDescriptorPtr{};
 }
-}
+} // namespace brayns

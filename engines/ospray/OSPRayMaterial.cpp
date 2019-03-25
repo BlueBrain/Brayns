@@ -57,21 +57,21 @@ void OSPRayMaterial::commit()
         return;
 
     if (getCurrentType() == "simulation")
-        ospSet1i(_ospMaterial, "apply_simulation", 1);
+        osphelper::set(_ospMaterial, "apply_simulation", 1);
     else
         ospRemoveParam(_ospMaterial, "apply_simulation");
 
-    ospSet3f(_ospMaterial, "kd", _diffuseColor.x, _diffuseColor.y,
-             _diffuseColor.z);
-    ospSet3f(_ospMaterial, "ks", _specularColor.x, _specularColor.y,
-             _specularColor.z);
-    ospSet1f(_ospMaterial, "ns", _specularExponent);
-    ospSet1f(_ospMaterial, "d", _opacity);
-    ospSet1f(_ospMaterial, "refraction", _refractionIndex);
-    ospSet1f(_ospMaterial, "reflection", _reflectionIndex);
-    ospSet1f(_ospMaterial, "a", _emission);
-    ospSet1f(_ospMaterial, "glossiness", _glossiness);
-    ospSet1b(_ospMaterial, "skybox", _isBackGroundMaterial);
+    osphelper::set(_ospMaterial, "kd", Vector3f(_diffuseColor));
+    osphelper::set(_ospMaterial, "ks", Vector3f(_specularColor));
+    osphelper::set(_ospMaterial, "ns", static_cast<float>(_specularExponent));
+    osphelper::set(_ospMaterial, "d", static_cast<float>(_opacity));
+    osphelper::set(_ospMaterial, "refraction",
+                   static_cast<float>(_refractionIndex));
+    osphelper::set(_ospMaterial, "reflection",
+                   static_cast<float>(_reflectionIndex));
+    osphelper::set(_ospMaterial, "a", static_cast<float>(_emission));
+    osphelper::set(_ospMaterial, "glossiness", static_cast<float>(_glossiness));
+    osphelper::set(_ospMaterial, "skybox", _isBackGroundMaterial);
 
     // Properties
     toOSPRayProperties(*this, _ospMaterial);
@@ -136,10 +136,10 @@ OSPTexture OSPRayMaterial::_createOSPTexture2D(Texture2DPtr texture)
 
     OSPTexture ospTexture = ospNewTexture("texture2d");
 
-    const osp::vec2i size{int(texture->getWidth()), int(texture->getHeight())};
+    const Vector2i size{int(texture->getWidth()), int(texture->getHeight())};
 
-    ospSet1i(ospTexture, "type", static_cast<int>(type));
-    ospSet2i(ospTexture, "size", size.x, size.y);
+    osphelper::set(ospTexture, "type", static_cast<int>(type));
+    osphelper::set(ospTexture, "size", size);
     auto textureData =
         ospNewData(texture->getSizeInBytes(), OSP_RAW, texture->getRawData(),
                    OSP_DATA_SHARED_BUFFER);
@@ -149,4 +149,4 @@ OSPTexture OSPRayMaterial::_createOSPTexture2D(Texture2DPtr texture)
 
     return ospTexture;
 }
-}
+} // namespace brayns
