@@ -76,16 +76,17 @@ bool OptiXScene::commitLights()
 
     _optixLights.clear();
 
-    for (const auto& light : _lightManager.getLights())
+    for (const auto& kv : _lightManager.getLights())
     {
-        switch (light->getType())
+        auto baseLight = kv.second;
+
+        switch (baseLight->_type)
         {
         case LightType::SPHERE:
         {
-            const Vector3f position =
-                toGlmVec(light->getProperty<std::array<double, 3>>("position"));
-            const Vector3f color =
-                toGlmVec(light->getProperty<std::array<double, 3>>("color"));
+            const auto light = static_cast<SphereLight*>(baseLight.get());
+            const Vector3f position = light->_position;
+            const Vector3f color = light->_color;
             BasicLight optixLight = {{position.x, position.y, position.z},
                                      {color.x, color.y, color.z},
                                      1, // Casts shadows
@@ -95,10 +96,9 @@ bool OptiXScene::commitLights()
         }
         case LightType::DIRECTIONAL:
         {
-            const Vector3f direction = toGlmVec(
-                light->getProperty<std::array<double, 3>>("direction"));
-            const Vector3f color =
-                toGlmVec(light->getProperty<std::array<double, 3>>("color"));
+            const auto light = static_cast<DirectionalLight*>(baseLight.get());
+            const Vector3f direction = light->_direction;
+            const Vector3f color = light->_color;
             BasicLight optixLight = {{direction.x, direction.y, direction.z},
                                      {color.x, color.y, color.z},
                                      1, // Casts shadows

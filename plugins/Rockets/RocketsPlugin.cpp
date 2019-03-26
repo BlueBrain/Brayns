@@ -36,7 +36,6 @@
 #include <uvw.hpp>
 #endif
 
-#include <rockets/jsonrpc/errorCodes.h>
 #include <rockets/jsonrpc/helpers.h>
 #include <rockets/jsonrpc/server.h>
 #include <rockets/server.h>
@@ -103,6 +102,7 @@ const std::string METHOD_ADD_LIGHT_SPHERE = "add-light-sphere";
 const std::string METHOD_ADD_LIGHT_DIRECTIONAL = "add-light-directional";
 const std::string METHOD_ADD_LIGHT_QUAD = "add-light-quad";
 const std::string METHOD_ADD_LIGHT_SPOT = "add-light-spot";
+const std::string METHOD_ADD_LIGHT_AMBIENT = "add-light-ambient";
 const std::string METHOD_REMOVE_LIGHTS = "remove-lights";
 const std::string METHOD_CLEAR_LIGHTS = "clear-lights";
 
@@ -116,7 +116,6 @@ const std::string LOADERS_SCHEMA = "loaders-schema";
 const std::string JSON_TYPE = "application/json";
 
 using Response = rockets::jsonrpc::Response;
-using ErrorCode = rockets::jsonrpc::ErrorCode;
 
 std::string hyphenatedToCamelCase(const std::string& hyphenated)
 {
@@ -1325,76 +1324,164 @@ public:
 
                 std::vector<std::string> jsonStrings;
 
-                for (const auto light : lights)
-                    jsonStrings.emplace_back(to_json(*light));
+                for (const auto& kv : lights)
+                {
+                    RPCLight rpcLight;
+                    rpcLight.id = kv.first;
+                    auto baseLight = kv.second;
 
+                    switch (baseLight->_type)
+                    {
+                    case LightType::DIRECTIONAL:
+                    {
+                        rpcLight.type = "directional";
+                        const auto light =
+                            static_cast<DirectionalLight*>(baseLight.get());
+                        rpcLight.properties.setProperty(
+                            {"direction",
+                             toArray<3, double>(light->_direction)});
+                        break;
+                    }
+                    case LightType::SPHERE:
+                    {
+                        rpcLight.type = "sphere";
+                        const auto light =
+                            static_cast<SphereLight*>(baseLight.get());
+                        rpcLight.properties.setProperty(
+                            {"position", toArray<3, double>(light->_position)});
+                        rpcLight.properties.setProperty(
+                            {"radius", static_cast<double>(light->_radius)});
+                        break;
+                    }
+                    case LightType::QUAD:
+                    {
+                        rpcLight.type = "quad";
+                        const auto light =
+                            static_cast<QuadLight*>(baseLight.get());
+                        rpcLight.properties.setProperty(
+                            {"position", toArray<3, double>(light->_position)});
+                        rpcLight.properties.setProperty(
+                            {"edge1", toArray<3, double>(light->_edge1)});
+                        rpcLight.properties.setProperty(
+                            {"edge2", toArray<3, double>(light->_edge2)});
+                        break;
+                    }
+                    case LightType::SPOTLIGHT:
+                    {
+                        rpcLight.type = "spotlight";
+                        const auto light =
+                            static_cast<SpotLight*>(baseLight.get());
+                        rpcLight.properties.setProperty(
+                            {"position", toArray<3, double>(light->_position)});
+                        rpcLight.properties.setProperty(
+                            {"direction",
+                             toArray<3, double>(light->_direction)});
+                        rpcLight.properties.setProperty(
+                            {"openingAngle",
+                             static_cast<double>(light->_openingAngle)});
+                        rpcLight.properties.setProperty(
+                            {"penumbraAngle",
+                             static_cast<double>(light->_penumbraAngle)});
+                        rpcLight.properties.setProperty(
+                            {"radius", static_cast<double>(light->_radius)});
+                        break;
+                    }
+                    case LightType::AMBIENT:
+                    {
+                        rpcLight.type = "ambient";
+                        break;
+                    }
+                    }
+
+                    rpcLight.properties.setProperty(
+                        {"color", toArray<3, double>(baseLight->_color)});
+                    rpcLight.properties.setProperty(
+                        {"intensity",
+                         static_cast<double>(baseLight->_intensity)});
+
+                    jsonStrings.emplace_back(to_json(rpcLight));
+                }
                 return Response{"[" + joinStrings(jsonStrings, ",") + "]"};
             });
 
-        _handleSchema(METHOD_GET_LIGHTS,
-                      buildJsonRpcSchemaRequestReturnOnly<std::vector<Light>>(
-                          desc));
+        _handleSchema(
+            METHOD_GET_LIGHTS,
+            buildJsonRpcSchemaRequestReturnOnly<std::vector<RPCLight>>(desc));
     }
 
     void _handleAddLight()
     {
-        _handleRPC<RPCSpotLight, int>(
-            {METHOD_ADD_LIGHT_SPOT, "Add a spotlight, returns id", "light",
-             "The light and its properties"},
-            [& engine = _engine](const RPCSpotLight& l) {
-                LightManager& lightManager =
-                    engine.getScene().getLightManager();
-                auto light = lightManager.addSpotLight(
-                    toGlmVec(l.position), toGlmVec(l.direction), l.openingAngle,
-                    l.penumbraAngle, l.radius, toGlmVec(l.color), l.intensity);
+        _handleRPC<SpotLight, int>({METHOD_ADD_LIGHT_SPOT,
+                                    "Add a spotlight, returns id", "light",
+                                    "The light and its properties"},
+                                   [& engine = _engine](const SpotLight& l) {
+                                       LightManager& lightManager =
+                                           engine.getScene().getLightManager();
+                                       auto light =
+                                           std::make_shared<SpotLight>(l);
+                                       light->_type = LightType::SPOTLIGHT;
 
-                engine.triggerRender();
-                return light->getId();
-            });
+                                       const auto id =
+                                           lightManager.addLight(light);
+                                       engine.triggerRender();
+                                       return id;
+                                   });
 
-        _handleRPC<RPCDirectionalLight, int>(
+        _handleRPC<DirectionalLight, int>(
             {METHOD_ADD_LIGHT_DIRECTIONAL, "Add a directional light", "light",
              "The light and its properties"},
-            [& engine = _engine](const RPCDirectionalLight& l) {
+            [& engine = _engine](const DirectionalLight& l) {
                 LightManager& lightManager =
                     engine.getScene().getLightManager();
-                auto light =
-                    lightManager.addDirectionalLight(toGlmVec(l.direction),
-                                                     toGlmVec(l.color),
-                                                     l.intensity);
+                auto light = std::make_shared<DirectionalLight>(l);
+                light->_type = LightType::DIRECTIONAL;
 
+                const auto id = lightManager.addLight(light);
                 engine.triggerRender();
-                return light->getId();
+                return id;
             });
 
-        _handleRPC<RPCQuadLight, int>(
-            {METHOD_ADD_LIGHT_QUAD, "Add a quad light", "light",
-             "The light and its properties"},
-            [& engine = _engine](const RPCQuadLight& l) {
-                LightManager& lightManager =
-                    engine.getScene().getLightManager();
-                auto light =
-                    lightManager.addQuadLight(toGlmVec(l.position),
-                                              toGlmVec(l.edge1),
-                                              toGlmVec(l.edge2),
-                                              toGlmVec(l.color), l.intensity);
+        _handleRPC<QuadLight, int>({METHOD_ADD_LIGHT_QUAD, "Add a quad light",
+                                    "light", "The light and its properties"},
+                                   [& engine = _engine](const QuadLight& l) {
+                                       LightManager& lightManager =
+                                           engine.getScene().getLightManager();
+                                       auto light =
+                                           std::make_shared<QuadLight>(l);
+                                       light->_type = LightType::QUAD;
 
-                engine.triggerRender();
-                return light->getId();
-            });
+                                       const auto id =
+                                           lightManager.addLight(light);
+                                       engine.triggerRender();
+                                       return id;
+                                   });
 
-        _handleRPC<RPCSphereLight, int>(
+        _handleRPC<SphereLight, int>(
             {METHOD_ADD_LIGHT_SPHERE, "Add a sphere light", "light",
              "The light and its properties"},
-            [& engine = _engine](const RPCSphereLight& l) {
+            [& engine = _engine](const SphereLight& l) {
                 LightManager& lightManager =
                     engine.getScene().getLightManager();
-                auto light =
-                    lightManager.addSphereLight(toGlmVec(l.position), l.radius,
-                                                toGlmVec(l.color), l.intensity);
+                auto light = std::make_shared<SphereLight>(l);
+                light->_type = LightType::SPHERE;
 
+                const auto id = lightManager.addLight(light);
                 engine.triggerRender();
-                return light->getId();
+                return id;
+            });
+
+        _handleRPC<AmbientLight, int>(
+            {METHOD_ADD_LIGHT_AMBIENT, "Add an ambient light", "light",
+             "The light and its properties"},
+            [& engine = _engine](const AmbientLight& l) {
+                LightManager& lightManager =
+                    engine.getScene().getLightManager();
+                auto light = std::make_shared<AmbientLight>(l);
+                light->_type = LightType::AMBIENT;
+
+                const auto id = lightManager.addLight(light);
+                engine.triggerRender();
+                return id;
             });
     }
 

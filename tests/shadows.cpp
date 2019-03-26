@@ -102,9 +102,8 @@ BOOST_AUTO_TEST_CASE(cylinders)
     scene.addModel(modelDesc);
     scene.getLightManager().clearLights();
 
-    scene.getLightManager().addDirectionalLight(brayns::Vector3f(0.f, 0.f,
-                                                                 -1.f),
-                                                WHITE, 1.0f);
+    scene.getLightManager().addLight(std::make_unique<brayns::DirectionalLight>(
+        brayns::Vector3f(0.f, 0.f, -1.f), WHITE, 1.0f));
     scene.commitLights();
 
     auto& camera = brayns.getEngine().getCamera();

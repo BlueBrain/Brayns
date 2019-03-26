@@ -184,37 +184,64 @@ bool OSPRayScene::commitLights()
 
     _destroyLights();
 
-    for (const auto& baseLight : _lightManager.getLights())
+    for (const auto& kv : _lightManager.getLights())
     {
+        auto baseLight = kv.second;
         OSPLight ospLight{nullptr};
 
-        switch (baseLight->getType())
+        switch (baseLight->_type)
         {
         case LightType::DIRECTIONAL:
         {
             ospLight = ospNewLight3("distant");
+            const auto light = static_cast<DirectionalLight*>(baseLight.get());
+            osphelper::set(ospLight, "direction", Vector3f(light->_direction));
             break;
         }
         case LightType::SPHERE:
         {
             ospLight = ospNewLight3("point");
+            const auto light = static_cast<SphereLight*>(baseLight.get());
+            osphelper::set(ospLight, "position", Vector3f(light->_position));
+            osphelper::set(ospLight, "radius",
+                           static_cast<float>(light->_radius));
             break;
         }
         case LightType::QUAD:
         {
             ospLight = ospNewLight3("quad");
+            const auto light = static_cast<QuadLight*>(baseLight.get());
+            osphelper::set(ospLight, "position", Vector3f(light->_position));
+            osphelper::set(ospLight, "edge1", Vector3f(light->_edge1));
+            osphelper::set(ospLight, "edge2", Vector3f(light->_edge2));
             break;
         }
         case LightType::SPOTLIGHT:
         {
             ospLight = ospNewLight3("spot");
+            const auto light = static_cast<SpotLight*>(baseLight.get());
+            osphelper::set(ospLight, "position", Vector3f(light->_position));
+            osphelper::set(ospLight, "direction", Vector3f(light->_direction));
+            osphelper::set(ospLight, "openingAngle",
+                           static_cast<float>(light->_openingAngle));
+            osphelper::set(ospLight, "penumbraAngle",
+                           static_cast<float>(light->_penumbraAngle));
+            osphelper::set(ospLight, "radius",
+                           static_cast<float>(light->_radius));
+            break;
+        }
+        case LightType::AMBIENT:
+        {
+            ospLight = ospNewLight3("ambient");
             break;
         }
         }
 
         assert(ospLight);
 
-        toOSPRayProperties(*baseLight, ospLight);
+        osphelper::set(ospLight, "color", Vector3f(baseLight->_color));
+        osphelper::set(ospLight, "intensity", Vector3f(baseLight->_intensity));
+
         _ospLights.push_back(ospLight);
         ospCommit(ospLight);
     }

@@ -26,36 +26,50 @@
 
 namespace brayns
 {
-void LightManager::addLight(LightPtr light)
+size_t LightManager::addLight(LightPtr light)
 {
     removeLight(light);
-    _lights.push_back(light);
+    const size_t id = _IDctr++;
+    _lights.insert({id, light});
     markModified();
+    return id;
 }
 
 void LightManager::removeLight(const size_t id)
 {
-    erase_if(_lights, [id](const auto& light) {
-        return light->getId() == static_cast<int>(id);
-    });
-    markModified();
+    auto it = _lights.find(id);
+    if (it != _lights.end())
+    {
+        _lights.erase(it);
+        markModified();
+    }
 }
 
 void LightManager::removeLight(LightPtr light)
 {
-    erase_value(_lights, light);
-    markModified();
+    for (auto itr = _lights.begin(); itr != _lights.end(); ++itr)
+    {
+        if (itr->second == light)
+        {
+            markModified();
+            _lights.erase(itr);
+            break;
+        }
+    }
+
+    // erase_value(_lights, light);
 }
 
 LightPtr LightManager::getLight(const size_t id)
 {
-    for (auto& light : _lights)
-        if (light->getId() == static_cast<int>(id))
-            return light;
+    auto it = _lights.find(id);
+    if (it != _lights.end())
+        return it->second;
+
     return nullptr;
 }
 
-const std::vector<LightPtr>& LightManager::getLights() const
+const std::map<size_t, LightPtr>& LightManager::getLights() const
 {
     return _lights;
 }
@@ -64,60 +78,6 @@ void LightManager::clearLights()
 {
     _lights.clear();
     markModified();
-}
-
-LightPtr LightManager::addDirectionalLight(const Vector3f& direction,
-                                           const Vector3f& color,
-                                           float intensity)
-{
-    auto light = std::make_shared<Light>(LightType::DIRECTIONAL, color,
-                                         intensity, _IDctr++);
-    light->setProperty({"direction", toArray<3, double>(direction)});
-    addLight(light);
-    return light;
-}
-
-LightPtr LightManager::addSphereLight(const Vector3f& position, float radius,
-                                      const Vector3f& color, float intensity)
-{
-    auto light =
-        std::make_shared<Light>(LightType::SPHERE, color, intensity, _IDctr++);
-    light->setProperty({"position", toArray<3, double>(position)});
-    light->setProperty({"radius", static_cast<double>(radius)});
-    addLight(light);
-    return light;
-}
-
-LightPtr LightManager::addQuadLight(const Vector3f& position,
-                                    const Vector3f& edge1,
-                                    const Vector3f& edge2,
-                                    const Vector3f& color, float intensity)
-{
-    auto light =
-        std::make_shared<Light>(LightType::QUAD, color, intensity, _IDctr++);
-    light->setProperty({"position", toArray<3, double>(position)});
-    light->setProperty({"edge1", toArray<3, double>(edge1)});
-    light->setProperty({"edge2", toArray<3, double>(edge2)});
-    addLight(light);
-    return light;
-}
-
-LightPtr LightManager::addSpotLight(const Vector3f& position,
-                                    const Vector3f& direction,
-                                    const float openingAngle,
-                                    const float penumbraAngle,
-                                    const float radius, const Vector3f& color,
-                                    float intensity)
-{
-    auto light = std::make_shared<Light>(LightType::SPOTLIGHT, color, intensity,
-                                         _IDctr++);
-    light->setProperty({"position", toArray<3, double>(position)});
-    light->setProperty({"direction", toArray<3, double>(direction)});
-    light->setProperty({"openingAngle", static_cast<double>(openingAngle)});
-    light->setProperty({"penumbraAngle", static_cast<double>(penumbraAngle)});
-    light->setProperty({"radius", static_cast<double>(radius)});
-    addLight(light);
-    return light;
 }
 
 } // namespace brayns

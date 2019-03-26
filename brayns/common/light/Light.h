@@ -19,11 +19,7 @@
 
 #pragma once
 
-#include <brayns/api.h>
-#include <brayns/common/PropertyObject.h>
 #include <brayns/common/types.h>
-
-SERIALIZATION_ACCESS(Light)
 
 namespace brayns
 {
@@ -35,25 +31,128 @@ enum class LightType
     SPHERE,
     DIRECTIONAL,
     QUAD,
-    SPOTLIGHT
+    SPOTLIGHT,
+    AMBIENT
 };
 
 /**
- * @brief The Light class defines a light source by type, id and properties
+ * @brief The Light class defines the common base class for all lights
  */
-class Light : public PropertyMap
+class Light
 {
 public:
+    Light(const LightType type, const Vector3d& color, const double intensity);
     Light() = default;
-    Light(const LightType type, const Vector3f& color, const float intensity,
-          const int id);
+    virtual ~Light() = default;
 
-    LightType getType() const;
-    int getId() const { return _id; }
-private:
-    std::string _type;
-    int _id{-1};
-    SERIALIZATION_FRIEND(Light);
+    LightType _type;
+    Vector3d _color;
+    double _intensity;
+};
+
+class DirectionalLight : public Light
+{
+public:
+    /**
+     * @brief DirectionalLight Creates a light that shines from a specific
+     * direction not from a specific position. This light will behave as though
+     * it is infinitely far away and the rays produced from it are all parallel
+     * @param direction Light source direction
+     * @param color Light source RGB color
+     * @param intensity Amount of light emitted
+     */
+    DirectionalLight(const Vector3d& direction, const Vector3d& color,
+                     double intensity);
+    DirectionalLight() = default;
+
+    Vector3d _direction;
+};
+
+class SphereLight : public Light
+{
+public:
+    /**
+     * @brief SphereLight Createas a sphere light. The sphere light (or the
+     * special case point light) is a positional light emitting uniformly in all
+     * directions.
+     * @param position Light source position
+     * @param radius The size of the sphere light
+     * @param color Light source RGB color
+     * @param intensity Amount of light emitted
+     */
+    SphereLight(const Vector3d& position, double radius, const Vector3d& color,
+                double intensity);
+    SphereLight() = default;
+
+    Vector3d _position;
+    double _radius;
+};
+
+class QuadLight : public Light
+{
+public:
+    /**
+     * @brief QuadLight Creates a quad light. The quad light is a planar,
+     * procedural area light source emitting uniformly on one side into the
+     * half-space. The emission side is determined by the cross product of edge1
+     * x edge2.
+     * @param position World-space position of one vertex of the quad light
+     * @param edge1 Vector to one adjacent vertex
+     * @param edge2 Vector to the other adjacent vertex
+     * @param color Light source RGB color
+     * @param intensity Amount of light emitted
+     */
+    QuadLight(const Vector3d& position, const Vector3d& edge1,
+              const Vector3d& edge2, const Vector3d& color, double intensity);
+    QuadLight() = default;
+
+    Vector3d _position;
+    Vector3d _edge1;
+    Vector3d _edge2;
+};
+
+class SpotLight : public Light
+{
+public:
+    /**
+     * @brief SpotLight Creates a spot light. The spotlight is a light
+     * emitting into a cone of directions.
+     * @param position The center of the spotlight, in world-space
+     * @param direction  Main emission direction of the spot
+     * @param openingAngle  Full opening angle (in degree) of the spot; outside
+     * of this cone is no illumination
+     * @param penumbraAngle Size (angle in degree) of the "penumbra", the region
+     * between the rim (of the illumination cone) and full intensity of the
+     * spot; should be smaller than half of 'openingAngle'
+     * @param radius The size of the spotlight, the radius of a disk with normal
+     * 'direction'
+     * @param color Light source RGB color
+     * @param intensity Amount of light emitted
+     */
+    SpotLight(const Vector3d& position, const Vector3d& direction,
+              const double openingAngle, const double penumbraAngle,
+              const double radius, const Vector3d& color, double intensity);
+    SpotLight() = default;
+
+    Vector3d _position;
+    Vector3d _direction;
+    double _openingAngle;
+    double _penumbraAngle;
+    double _radius;
+};
+
+class AmbientLight : public Light
+{
+public:
+    /**
+     * @brief AmbientLight The ambient light surrounds the scene and illuminates
+     * it from infinity with constant radiance (determined by combining the
+     * parameters color and intensity).
+     * @param color Light source RGB color
+     * @param intensity Amount of light emitted
+     */
+    AmbientLight(const Vector3d& color, double intensity);
+    AmbientLight() = default;
 };
 
 } // namespace brayns

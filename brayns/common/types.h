@@ -152,6 +152,18 @@ class Light;
 using LightPtr = std::shared_ptr<Light>;
 using Lights = std::vector<LightPtr>;
 
+class DirectionalLight;
+using DirectionalLightPtr = std::shared_ptr<DirectionalLight>;
+
+class SphereLight;
+using SphereLightPtr = std::shared_ptr<SphereLight>;
+
+class QuadLight;
+using QuadLightPtr = std::shared_ptr<QuadLight>;
+
+class SpotLight;
+using SpotLightPtr = std::shared_ptr<SpotLight>;
+
 class AbstractSimulationHandler;
 using AbstractSimulationHandlerPtr = std::shared_ptr<AbstractSimulationHandler>;
 

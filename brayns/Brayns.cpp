@@ -143,13 +143,13 @@ struct Brayns::Impl : public PluginAPI
         if (rp.getHeadLight())
         {
             auto& lightManager = scene.getLightManager();
-            LightPtr sunLight = lightManager.getLight(0);
+            auto sunLight =
+                dynamic_cast<DirectionalLight*>(lightManager.getLight(0).get());
             if (sunLight && (camera.isModified() || rp.isModified()))
             {
                 const auto newDirection =
                     glm::rotate(camera.getOrientation(), Vector3d(0, 0, -1));
-                sunLight->updateProperty("direction",
-                                         toArray<3, double>(newDirection));
+                sunLight->_direction = newDirection;
                 lightManager.markModified();
                 scene.commitLights();
             }
@@ -280,8 +280,10 @@ private:
             throw std::runtime_error("Unsupported engine: " + engineName);
 
         // Default sun light
-        _engine->getScene().getLightManager().addDirectionalLight(
-            DEFAULT_SUN_DIRECTION, DEFAULT_SUN_COLOR, DEFAULT_SUN_INTENSITY);
+        _engine->getScene().getLightManager().addLight(
+            std::make_shared<DirectionalLight>(DEFAULT_SUN_DIRECTION,
+                                               DEFAULT_SUN_COLOR,
+                                               DEFAULT_SUN_INTENSITY));
 
         _engine->getCamera().setCurrentType(
             _parametersManager.getRenderingParameters().getCurrentCamera());

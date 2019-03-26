@@ -81,39 +81,11 @@ struct ModelTransferFunction
     TransferFunction transferFunction;
 };
 
-struct RPCDirectionalLight
+struct RPCLight
 {
-    std::array<double, 3> color;
-    double intensity;
-    std::array<double, 3> direction;
-};
-
-struct RPCSphereLight
-{
-    std::array<double, 3> color;
-    double intensity;
-    std::array<double, 3> position;
-    double radius;
-};
-
-struct RPCQuadLight
-{
-    std::array<double, 3> color;
-    double intensity;
-    std::array<double, 3> position;
-    std::array<double, 3> edge1;
-    std::array<double, 3> edge2;
-};
-
-struct RPCSpotLight
-{
-    std::array<double, 3> color;
-    double intensity;
-    std::array<double, 3> position;
-    std::array<double, 3> direction;
-    double openingAngle;
-    double penumbraAngle;
-    double radius;
+    size_t id;
+    std::string type;
+    PropertyMap properties;
 };
 
 } // namespace brayns
@@ -377,14 +349,6 @@ inline void init(brayns::ClipPlane* g, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::Light* l, ObjectHandler* h)
-{
-    h->add_property("type", &l->_type);
-    h->add_property("id", &l->_id);
-    h->add_property("properties", static_cast<brayns::PropertyMap*>(l));
-    h->set_flags(Flags::DisallowUnknownKey);
-}
-
 inline void init(brayns::Scene* s, ObjectHandler* h)
 {
     h->add_property("bounds", &s->_bounds, Flags::IgnoreRead | Flags::Optional);
@@ -462,42 +426,57 @@ inline void init(brayns::LoaderInfo* a, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::RPCDirectionalLight* a, ObjectHandler* h)
+inline void init(brayns::DirectionalLight* a, ObjectHandler* h)
 {
-    h->add_property("color", &a->color);
-    h->add_property("intensity", &a->intensity);
-    h->add_property("direction", &a->direction);
+    h->add_property("color", toArray<3, double>(a->_color));
+    h->add_property("intensity", &a->_intensity);
+    h->add_property("direction", toArray<3, double>(a->_direction));
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::RPCSphereLight* a, ObjectHandler* h)
+inline void init(brayns::SphereLight* a, ObjectHandler* h)
 {
-    h->add_property("color", &a->color);
-    h->add_property("intensity", &a->intensity);
-    h->add_property("position", &a->position);
-    h->add_property("radius", &a->radius);
+    h->add_property("color", toArray<3, double>(a->_color));
+    h->add_property("intensity", &a->_intensity);
+    h->add_property("position", toArray<3, double>(a->_position));
+    h->add_property("radius", &a->_radius);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::RPCQuadLight* a, ObjectHandler* h)
+inline void init(brayns::QuadLight* a, ObjectHandler* h)
 {
-    h->add_property("color", &a->color);
-    h->add_property("intensity", &a->intensity);
-    h->add_property("position", &a->position);
-    h->add_property("edge1", &a->edge1);
-    h->add_property("edge2", &a->edge2);
+    h->add_property("color", toArray<3, double>(a->_color));
+    h->add_property("intensity", &a->_intensity);
+    h->add_property("position", toArray<3, double>(a->_position));
+    h->add_property("edge1", toArray<3, double>(a->_edge1));
+    h->add_property("edge2", toArray<3, double>(a->_edge2));
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::RPCSpotLight* a, ObjectHandler* h)
+inline void init(brayns::SpotLight* a, ObjectHandler* h)
 {
-    h->add_property("color", &a->color);
-    h->add_property("intensity", &a->intensity);
-    h->add_property("position", &a->position);
-    h->add_property("direction", &a->direction);
-    h->add_property("openingAngle", &a->openingAngle);
-    h->add_property("penumbraAngle", &a->penumbraAngle);
-    h->add_property("radius", &a->radius);
+    h->add_property("color", toArray<3, double>(a->_color));
+    h->add_property("intensity", &a->_intensity);
+    h->add_property("position", toArray<3, double>(a->_position));
+    h->add_property("direction", toArray<3, double>(a->_direction));
+    h->add_property("openingAngle", &a->_openingAngle);
+    h->add_property("penumbraAngle", &a->_penumbraAngle);
+    h->add_property("radius", &a->_radius);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::AmbientLight* a, ObjectHandler* h)
+{
+    h->add_property("color", toArray<3, double>(a->_color));
+    h->add_property("intensity", &a->_intensity);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::RPCLight* a, ObjectHandler* h)
+{
+    h->add_property("id", &a->id);
+    h->add_property("type", &a->type);
+    h->add_property("properties", &a->properties);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -549,13 +528,6 @@ inline std::string to_json(const brayns::ModelProperties& props)
 }
 
 template <>
-inline std::string to_json(const brayns::Light& light)
-{
-    return toJSONReplacePropertyMap(light, "properties",
-                                    static_cast<brayns::PropertyMap>(light));
-}
-
-template <>
 inline std::string to_json(const brayns::ModelParams& params)
 {
     return toJSONReplacePropertyMap(params, "loader_properties",
@@ -567,6 +539,12 @@ inline std::string to_json(const brayns::BinaryParam& params)
 {
     return toJSONReplacePropertyMap(params, "loader_properties",
                                     params.getLoaderProperties());
+}
+
+template <>
+inline std::string to_json(const brayns::RPCLight& light)
+{
+    return toJSONReplacePropertyMap(light, "properties", light.properties);
 }
 
 template <class T>
@@ -639,12 +617,12 @@ inline bool from_json(brayns::ModelParams& params, const std::string& json)
 }
 
 template <>
-inline bool from_json(brayns::Light& light, const std::string& json)
+inline bool from_json(brayns::RPCLight& light, const std::string& json)
 {
     bool success;
     brayns::PropertyMap propertyMap;
     std::tie<bool, brayns::PropertyMap>(success, propertyMap) =
         fromJSONWithPropertyMap(light, json, "properties");
-    light.merge(propertyMap);
+    light.properties = propertyMap;
     return success;
 }
