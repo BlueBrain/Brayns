@@ -59,15 +59,17 @@ public:
 
 private:
     bool _commitVolumeAndTransferFunction(ModelDescriptors& modelDescriptors);
+    void _destroyLights();
 
     OSPModel _rootModel{nullptr};
 
     std::vector<OSPLight> _ospLights;
+
     OSPData _ospLightData{nullptr};
 
     size_t _memoryManagementFlags{0};
 
     ModelDescriptors _activeModels;
 };
-}
+} // namespace brayns
 #endif // OSPRAYSCENE_H

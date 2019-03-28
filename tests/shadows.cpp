@@ -21,7 +21,7 @@
 #include <brayns/Brayns.h>
 #include <tests/paths.h>
 
-#include <brayns/common/light/DirectionalLight.h>
+#include <brayns/common/light/Light.h>
 #include <brayns/common/types.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
@@ -100,13 +100,10 @@ BOOST_AUTO_TEST_CASE(cylinders)
     auto modelDesc = std::make_shared<brayns::ModelDescriptor>(std::move(model),
                                                                "Cylinders");
     scene.addModel(modelDesc);
-    scene.clearLights();
+    scene.getLightManager().clearLights();
 
-    brayns::DirectionalLightPtr sunLight(
-        new brayns::DirectionalLight(brayns::Vector3f(0.f, 0.f, -1.f), WHITE,
-                                     1.0f));
-
-    scene.addLight(sunLight);
+    scene.getLightManager().addLight(std::make_unique<brayns::DirectionalLight>(
+        brayns::Vector3f(0.f, 0.f, -1.f), WHITE, 1.0f));
     scene.commitLights();
 
     auto& camera = brayns.getEngine().getCamera();

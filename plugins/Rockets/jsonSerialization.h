@@ -22,6 +22,7 @@
 
 #include <brayns/common/Statistics.h>
 #include <brayns/common/Transformation.h>
+#include <brayns/common/light/Light.h>
 #include <brayns/common/scene/ClipPlane.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/utils/base64/base64.h>
@@ -79,7 +80,15 @@ struct ModelTransferFunction
     size_t id;
     TransferFunction transferFunction;
 };
-}
+
+struct RPCLight
+{
+    size_t id;
+    std::string type;
+    PropertyMap properties;
+};
+
+} // namespace brayns
 
 STATICJSON_DECLARE_ENUM(brayns::GeometryQuality,
                         {"low", brayns::GeometryQuality::low},
@@ -416,7 +425,62 @@ inline void init(brayns::LoaderInfo* a, ObjectHandler* h)
     h->add_property("properties", &a->properties);
     h->set_flags(Flags::DisallowUnknownKey);
 }
+
+inline void init(brayns::DirectionalLight* a, ObjectHandler* h)
+{
+    h->add_property("color", toArray<3, double>(a->_color));
+    h->add_property("intensity", &a->_intensity);
+    h->add_property("direction", toArray<3, double>(a->_direction));
+    h->set_flags(Flags::DisallowUnknownKey);
 }
+
+inline void init(brayns::SphereLight* a, ObjectHandler* h)
+{
+    h->add_property("color", toArray<3, double>(a->_color));
+    h->add_property("intensity", &a->_intensity);
+    h->add_property("position", toArray<3, double>(a->_position));
+    h->add_property("radius", &a->_radius);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::QuadLight* a, ObjectHandler* h)
+{
+    h->add_property("color", toArray<3, double>(a->_color));
+    h->add_property("intensity", &a->_intensity);
+    h->add_property("position", toArray<3, double>(a->_position));
+    h->add_property("edge1", toArray<3, double>(a->_edge1));
+    h->add_property("edge2", toArray<3, double>(a->_edge2));
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::SpotLight* a, ObjectHandler* h)
+{
+    h->add_property("color", toArray<3, double>(a->_color));
+    h->add_property("intensity", &a->_intensity);
+    h->add_property("position", toArray<3, double>(a->_position));
+    h->add_property("direction", toArray<3, double>(a->_direction));
+    h->add_property("openingAngle", &a->_openingAngle);
+    h->add_property("penumbraAngle", &a->_penumbraAngle);
+    h->add_property("radius", &a->_radius);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::AmbientLight* a, ObjectHandler* h)
+{
+    h->add_property("color", toArray<3, double>(a->_color));
+    h->add_property("intensity", &a->_intensity);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::RPCLight* a, ObjectHandler* h)
+{
+    h->add_property("id", &a->id);
+    h->add_property("type", &a->type);
+    h->add_property("properties", &a->properties);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+} // namespace staticjson
 
 // for rockets::jsonrpc
 template <class T>
@@ -424,6 +488,7 @@ inline std::string to_json(const T& obj)
 {
     return staticjson::to_json_string(obj);
 }
+
 template <>
 std::string to_json(const brayns::PropertyMap& obj);
 
@@ -440,46 +505,46 @@ inline std::string to_json(const brayns::Scene& scene)
     return staticjson::to_json_string(scene);
 }
 
-template <>
-inline std::string to_json(const brayns::ModelProperties& props)
-{
-    const auto jsonOriginal = staticjson::to_json_string(props);
-
-    const std::string propertiesJson =
-        "\"properties\":" + to_json(props.properties);
-
-    const auto result =
-        brayns::replaceFirstOccurrence(jsonOriginal, "\"properties\":{}",
-                                       propertiesJson);
-
-    return result;
-}
-
 template <typename T>
-inline std::string modelBinaryParamsToJson(const T& params)
+inline std::string toJSONReplacePropertyMap(
+    const T& params, const std::string& propertyMapName,
+    const brayns::PropertyMap& properties)
 {
     const auto jsonOriginal = staticjson::to_json_string(params);
 
-    const std::string propertiesJson =
-        "\"loader_properties\":" + to_json(params.getLoaderProperties());
+    const std::string key = "\"" + propertyMapName + "\"";
+    const std::string propertiesJson = key + ":" + to_json(properties);
 
     const auto result =
-        brayns::replaceFirstOccurrence(jsonOriginal, "\"loader_properties\":{}",
+        brayns::replaceFirstOccurrence(jsonOriginal, key + ":{}",
                                        propertiesJson);
-
     return result;
+}
+
+template <>
+inline std::string to_json(const brayns::ModelProperties& props)
+{
+    return toJSONReplacePropertyMap(props, "properties", props.properties);
 }
 
 template <>
 inline std::string to_json(const brayns::ModelParams& params)
 {
-    return modelBinaryParamsToJson(params);
+    return toJSONReplacePropertyMap(params, "loader_properties",
+                                    params.getLoaderProperties());
 }
 
 template <>
 inline std::string to_json(const brayns::BinaryParam& params)
 {
-    return modelBinaryParamsToJson(params);
+    return toJSONReplacePropertyMap(params, "loader_properties",
+                                    params.getLoaderProperties());
+}
+
+template <>
+inline std::string to_json(const brayns::RPCLight& light)
+{
+    return toJSONReplacePropertyMap(light, "properties", light.properties);
 }
 
 template <class T>
@@ -497,24 +562,27 @@ inline bool from_json(brayns::Vector2d& obj, const std::string& json)
 brayns::PropertyMap jsonToPropertyMap(const std::string& json);
 
 template <typename T>
-inline bool modelBinaryParamsFromJson(T& params, const std::string& json)
+inline std::pair<bool, brayns::PropertyMap> fromJSONWithPropertyMap(
+    T& params, const std::string& json, const std::string& propertyMapName)
 {
     using namespace rapidjson;
     Document document;
     document.Parse(json.c_str());
 
-    if (document.HasMember("loader_properties"))
+    brayns::PropertyMap propertyMap;
+
+    if (document.HasMember(propertyMapName.c_str()))
     {
-        auto& loaderProperties = document["loader_properties"];
+        auto& loaderProperties = document[propertyMapName.c_str()];
         Document propertyDoc;
         propertyDoc.CopyFrom(loaderProperties, propertyDoc.GetAllocator());
         rapidjson::StringBuffer buffer;
         rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         propertyDoc.Accept(writer);
 
-        params.setLoaderProperties(jsonToPropertyMap(buffer.GetString()));
+        propertyMap = jsonToPropertyMap(buffer.GetString());
 
-        // Clear loader_properties to be able to parse rest of values
+        // Clear property map to be able to parse rest of values
         loaderProperties.SetObject();
     }
 
@@ -522,7 +590,18 @@ inline bool modelBinaryParamsFromJson(T& params, const std::string& json)
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     document.Accept(writer);
     const auto str = buffer.GetString();
-    return staticjson::from_json_string(str, &params, nullptr);
+    return {staticjson::from_json_string(str, &params, nullptr), propertyMap};
+}
+
+template <typename T>
+inline bool modelBinaryParamsFromJson(T& params, const std::string& json)
+{
+    bool success;
+    brayns::PropertyMap propertyMap;
+    std::tie<bool, brayns::PropertyMap>(success, propertyMap) =
+        fromJSONWithPropertyMap(params, json, "loader_properties");
+    params.setLoaderProperties(propertyMap);
+    return success;
 }
 
 template <>
@@ -535,4 +614,15 @@ template <>
 inline bool from_json(brayns::ModelParams& params, const std::string& json)
 {
     return modelBinaryParamsFromJson(params, json);
+}
+
+template <>
+inline bool from_json(brayns::RPCLight& light, const std::string& json)
+{
+    bool success;
+    brayns::PropertyMap propertyMap;
+    std::tie<bool, brayns::PropertyMap>(success, propertyMap) =
+        fromJSONWithPropertyMap(light, json, "properties");
+    light.properties = propertyMap;
+    return success;
 }

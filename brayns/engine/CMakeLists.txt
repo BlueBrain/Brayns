@@ -7,6 +7,7 @@ set(BRAYNSENGINE_SOURCES
   Camera.cpp
   Engine.cpp
   FrameBuffer.cpp
+  LightManager.cpp
   Material.cpp
   Model.cpp
   Renderer.cpp
@@ -20,6 +21,7 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
   Camera.h
   Engine.h
   FrameBuffer.h
+  LightManager.h
   Material.h
   Model.h
   Renderer.h

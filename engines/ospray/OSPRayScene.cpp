@@ -26,8 +26,7 @@
 
 #include <brayns/common/ImageManager.h>
 #include <brayns/common/Transformation.h>
-#include <brayns/common/light/DirectionalLight.h>
-#include <brayns/common/light/PointLight.h>
+#include <brayns/common/light/Light.h>
 #include <brayns/common/log.h>
 #include <brayns/engine/Model.h>
 
@@ -50,19 +49,24 @@ OSPRayScene::OSPRayScene(AnimationParameters& animationParameters,
 
 OSPRayScene::~OSPRayScene()
 {
+    _destroyLights();
+    if (_rootModel)
+        ospRelease(_rootModel);
+}
+void OSPRayScene::_destroyLights()
+{
     for (auto& light : _ospLights)
         ospRelease(light);
     _ospLights.clear();
-    if (_ospLightData)
-        ospRelease(_ospLightData);
 
-    if (_rootModel)
-        ospRelease(_rootModel);
+    ospRelease(_ospLightData);
+    _ospLightData = nullptr;
 }
 
 void OSPRayScene::commit()
 {
     Scene::commit();
+    commitLights();
 
     // copy the list to avoid locking the mutex
     ModelDescriptors modelDescriptors;
@@ -173,53 +177,79 @@ void OSPRayScene::commit()
 
 bool OSPRayScene::commitLights()
 {
-    size_t lightCount = 0;
-    for (const auto& light : _lights)
+    if (!_lightManager.isModified())
+        return false;
+
+    _lightManager.resetModified();
+
+    _destroyLights();
+
+    for (const auto& kv : _lightManager.getLights())
     {
-        DirectionalLight* directionalLight =
-            dynamic_cast<DirectionalLight*>(light.get());
-        if (directionalLight)
-        {
-            if (_ospLights.size() <= lightCount)
-                _ospLights.push_back(ospNewLight(nullptr, "DirectionalLight"));
+        auto baseLight = kv.second;
+        OSPLight ospLight{nullptr};
 
-            osphelper::set(_ospLights[lightCount], "color",
-                           directionalLight->getColor());
-            osphelper::set(_ospLights[lightCount], "direction",
-                           directionalLight->getDirection());
-            osphelper::set(_ospLights[lightCount], "intensity",
-                           directionalLight->getIntensity());
-            ospCommit(_ospLights[lightCount]);
-            ++lightCount;
-        }
-        else
+        switch (baseLight->_type)
         {
-            PointLight* pointLight = dynamic_cast<PointLight*>(light.get());
-            if (pointLight)
-            {
-                if (_ospLights.size() <= lightCount)
-                    _ospLights.push_back(ospNewLight(nullptr, "PointLight"));
-
-                osphelper::set(_ospLights[lightCount], "position",
-                               pointLight->getPosition());
-                osphelper::set(_ospLights[lightCount], "color",
-                               pointLight->getColor());
-                osphelper::set(_ospLights[lightCount], "intensity",
-                               pointLight->getIntensity());
-                osphelper::set(_ospLights[lightCount], "radius",
-                               pointLight->getCutoffDistance());
-                ospCommit(_ospLights[lightCount]);
-                ++lightCount;
-            }
+        case LightType::DIRECTIONAL:
+        {
+            ospLight = ospNewLight3("distant");
+            const auto light = static_cast<DirectionalLight*>(baseLight.get());
+            osphelper::set(ospLight, "direction", Vector3f(light->_direction));
+            break;
         }
+        case LightType::SPHERE:
+        {
+            ospLight = ospNewLight3("point");
+            const auto light = static_cast<SphereLight*>(baseLight.get());
+            osphelper::set(ospLight, "position", Vector3f(light->_position));
+            osphelper::set(ospLight, "radius",
+                           static_cast<float>(light->_radius));
+            break;
+        }
+        case LightType::QUAD:
+        {
+            ospLight = ospNewLight3("quad");
+            const auto light = static_cast<QuadLight*>(baseLight.get());
+            osphelper::set(ospLight, "position", Vector3f(light->_position));
+            osphelper::set(ospLight, "edge1", Vector3f(light->_edge1));
+            osphelper::set(ospLight, "edge2", Vector3f(light->_edge2));
+            break;
+        }
+        case LightType::SPOTLIGHT:
+        {
+            ospLight = ospNewLight3("spot");
+            const auto light = static_cast<SpotLight*>(baseLight.get());
+            osphelper::set(ospLight, "position", Vector3f(light->_position));
+            osphelper::set(ospLight, "direction", Vector3f(light->_direction));
+            osphelper::set(ospLight, "openingAngle",
+                           static_cast<float>(light->_openingAngle));
+            osphelper::set(ospLight, "penumbraAngle",
+                           static_cast<float>(light->_penumbraAngle));
+            osphelper::set(ospLight, "radius",
+                           static_cast<float>(light->_radius));
+            break;
+        }
+        case LightType::AMBIENT:
+        {
+            ospLight = ospNewLight3("ambient");
+            break;
+        }
+        }
+
+        assert(ospLight);
+
+        osphelper::set(ospLight, "color", Vector3f(baseLight->_color));
+        osphelper::set(ospLight, "intensity", Vector3f(baseLight->_intensity));
+
+        _ospLights.push_back(ospLight);
+        ospCommit(ospLight);
     }
 
-    if (!_ospLightData)
-    {
-        _ospLightData = ospNewData(_ospLights.size(), OSP_OBJECT,
-                                   &_ospLights[0], _memoryManagementFlags);
-        ospCommit(_ospLightData);
-    }
+    _ospLightData = ospNewData(_ospLights.size(), OSP_OBJECT, _ospLights.data(),
+                               _memoryManagementFlags);
+    ospCommit(_ospLightData);
+
     return true;
 }
 

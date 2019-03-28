@@ -1,6 +1,5 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,15 +19,59 @@
 
 #include "Light.h"
 
+#include "brayns/common/utils/utils.h"
+
 namespace brayns
 {
-Light::~Light()
-{
-}
-
-Light::Light(const Vector3f& color, const float intensity)
-    : _color(color)
+Light::Light(const LightType type, const Vector3d& color,
+             const double intensity)
+    : _type(type)
+    , _color(color)
     , _intensity(intensity)
 {
 }
+
+DirectionalLight::DirectionalLight(const Vector3d& direction,
+                                   const Vector3d& color, double intensity)
+    : Light(LightType::DIRECTIONAL, color, intensity)
+    , _direction(direction)
+{
 }
+
+SphereLight::SphereLight(const Vector3d& position, double radius,
+                         const Vector3d& color, double intensity)
+    : Light(LightType::SPHERE, color, intensity)
+    , _position(position)
+    , _radius(radius)
+{
+}
+
+QuadLight::QuadLight(const Vector3d& position, const Vector3d& edge1,
+                     const Vector3d& edge2, const Vector3d& color,
+                     double intensity)
+    : Light(LightType::QUAD, color, intensity)
+    , _position(position)
+    , _edge1(edge1)
+    , _edge2(edge2)
+{
+}
+
+SpotLight::SpotLight(const Vector3d& position, const Vector3d& direction,
+                     const double openingAngle, const double penumbraAngle,
+                     const double radius, const Vector3d& color,
+                     double intensity)
+    : Light(LightType::SPOTLIGHT, color, intensity)
+    , _position(position)
+    , _direction(direction)
+    , _openingAngle(openingAngle)
+    , _penumbraAngle(penumbraAngle)
+    , _radius(radius)
+{
+}
+
+AmbientLight::AmbientLight(const Vector3d& color, double intensity)
+    : Light(LightType::AMBIENT, color, intensity)
+{
+}
+
+} // namespace brayns

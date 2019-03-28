@@ -26,7 +26,7 @@
 #include <brayns/common/PropertyMap.h>
 #include <brayns/common/Timer.h>
 #include <brayns/common/input/KeyboardHandler.h>
-#include <brayns/common/light/DirectionalLight.h>
+#include <brayns/common/light/Light.h>
 #include <brayns/common/log.h>
 #include <brayns/common/mathTypes.h>
 #include <brayns/common/utils/DynamicLib.h>
@@ -61,6 +61,11 @@
 namespace
 {
 const float DEFAULT_MOTION_ACCELERATION = 1.5f;
+
+const brayns::Vector3f DEFAULT_SUN_DIRECTION = {1.f, -1.f, -1.f};
+const brayns::Vector3f DEFAULT_SUN_COLOR = {0.9f, 0.9f, 0.9f};
+const brayns::Vector3f DEFAULT_SUN_POSITION = {-10.f, 10.f, -10.f};
+const float DEFAULT_SUN_INTENSITY = 1.f;
 } // namespace
 
 namespace brayns
@@ -137,12 +142,15 @@ struct Brayns::Impl : public PluginAPI
 
         if (rp.getHeadLight())
         {
-            LightPtr sunLight = scene.getLight(0);
-            auto sun = std::dynamic_pointer_cast<DirectionalLight>(sunLight);
-            if (sun && (camera.isModified() || rp.isModified()))
+            auto& lightManager = scene.getLightManager();
+            auto sunLight =
+                dynamic_cast<DirectionalLight*>(lightManager.getLight(0).get());
+            if (sunLight && (camera.isModified() || rp.isModified()))
             {
-                sun->setDirection(
-                    glm::rotate(camera.getOrientation(), Vector3d(0, 0, -1)));
+                const auto newDirection =
+                    glm::rotate(camera.getOrientation(), Vector3d(0, 0, -1));
+                sunLight->_direction = newDirection;
+                lightManager.markModified();
                 scene.commitLights();
             }
         }
@@ -272,11 +280,10 @@ private:
             throw std::runtime_error("Unsupported engine: " + engineName);
 
         // Default sun light
-        DirectionalLightPtr sunLight(
-            new DirectionalLight(DEFAULT_SUN_DIRECTION, DEFAULT_SUN_COLOR,
-                                 DEFAULT_SUN_INTENSITY));
-        _engine->getScene().addLight(sunLight);
-        _engine->getScene().commitLights();
+        _engine->getScene().getLightManager().addLight(
+            std::make_shared<DirectionalLight>(DEFAULT_SUN_DIRECTION,
+                                               DEFAULT_SUN_COLOR,
+                                               DEFAULT_SUN_INTENSITY));
 
         _engine->getCamera().setCurrentType(
             _parametersManager.getRenderingParameters().getCurrentCamera());
