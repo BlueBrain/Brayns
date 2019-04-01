@@ -242,6 +242,8 @@ bool OSPRayScene::commitLights()
         osphelper::set(ospLight, "color", Vector3f(baseLight->_color));
         osphelper::set(ospLight, "intensity",
                        static_cast<float>(baseLight->_intensity));
+        // NOTE: Bool is broken before OSPRay 1.8.3 so set it to 1 or 0
+        osphelper::set(ospLight, "isVisible", baseLight->_isVisible ? 1 : 0);
 
         _ospLights.push_back(ospLight);
         ospCommit(ospLight);

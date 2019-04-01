@@ -426,18 +426,24 @@ inline void init(brayns::LoaderInfo* a, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::DirectionalLight* a, ObjectHandler* h)
+inline void init(brayns::Light* a, ObjectHandler* h)
 {
     h->add_property("color", toArray<3, double>(a->_color));
     h->add_property("intensity", &a->_intensity);
+    h->add_property("is_visible", &a->_isVisible);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::DirectionalLight* a, ObjectHandler* h)
+{
+    init(static_cast<brayns::Light*>(a), h);
     h->add_property("direction", toArray<3, double>(a->_direction));
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
 inline void init(brayns::SphereLight* a, ObjectHandler* h)
 {
-    h->add_property("color", toArray<3, double>(a->_color));
-    h->add_property("intensity", &a->_intensity);
+    init(static_cast<brayns::Light*>(a), h);
     h->add_property("position", toArray<3, double>(a->_position));
     h->add_property("radius", &a->_radius);
     h->set_flags(Flags::DisallowUnknownKey);
@@ -445,8 +451,7 @@ inline void init(brayns::SphereLight* a, ObjectHandler* h)
 
 inline void init(brayns::QuadLight* a, ObjectHandler* h)
 {
-    h->add_property("color", toArray<3, double>(a->_color));
-    h->add_property("intensity", &a->_intensity);
+    init(static_cast<brayns::Light*>(a), h);
     h->add_property("position", toArray<3, double>(a->_position));
     h->add_property("edge1", toArray<3, double>(a->_edge1));
     h->add_property("edge2", toArray<3, double>(a->_edge2));
@@ -455,8 +460,7 @@ inline void init(brayns::QuadLight* a, ObjectHandler* h)
 
 inline void init(brayns::SpotLight* a, ObjectHandler* h)
 {
-    h->add_property("color", toArray<3, double>(a->_color));
-    h->add_property("intensity", &a->_intensity);
+    init(static_cast<brayns::Light*>(a), h);
     h->add_property("position", toArray<3, double>(a->_position));
     h->add_property("direction", toArray<3, double>(a->_direction));
     h->add_property("openingAngle", &a->_openingAngle);
@@ -467,8 +471,7 @@ inline void init(brayns::SpotLight* a, ObjectHandler* h)
 
 inline void init(brayns::AmbientLight* a, ObjectHandler* h)
 {
-    h->add_property("color", toArray<3, double>(a->_color));
-    h->add_property("intensity", &a->_intensity);
+    init(static_cast<brayns::Light*>(a), h);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
