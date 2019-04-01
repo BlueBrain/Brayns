@@ -283,7 +283,7 @@ private:
         _engine->getScene().getLightManager().addLight(
             std::make_shared<DirectionalLight>(DEFAULT_SUN_DIRECTION,
                                                DEFAULT_SUN_COLOR,
-                                               DEFAULT_SUN_INTENSITY));
+                                               DEFAULT_SUN_INTENSITY, false));
 
         _engine->getCamera().setCurrentType(
             _parametersManager.getRenderingParameters().getCurrentCamera());

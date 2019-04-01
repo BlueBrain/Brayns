@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(render_scivis_quadlight)
     brayns.getEngine().getScene().getLightManager().addLight(
         std::make_shared<brayns::QuadLight>(
             lampPositions[0], (lampPositions[3] - lampPositions[0]),
-            (lampPositions[1] - lampPositions[0]), YELLOW, 1.0f));
+            (lampPositions[1] - lampPositions[0]), YELLOW, 1.0f, true));
 
     brayns.commitAndRender();
 
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(render_scivis_spotlight)
     brayns.getEngine().getScene().getLightManager().addLight(
         std::make_shared<brayns::SpotLight>(lampCentre,
                                             brayns::Vector3f(0, -1, 0), 90.f,
-                                            10.f, lampWidth, BLUE, 1.0f));
+                                            10.f, lampWidth, BLUE, 1.0f, true));
     brayns.commitAndRender();
 
     BOOST_CHECK(compareTestImage("testLightScivisSpotLight.png",

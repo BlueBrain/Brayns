@@ -1398,6 +1398,8 @@ public:
                     rpcLight.properties.setProperty(
                         {"intensity",
                          static_cast<double>(baseLight->_intensity)});
+                    rpcLight.properties.setProperty(
+                        {"isVisible", baseLight->_isVisible});
 
                     jsonStrings.emplace_back(to_json(rpcLight));
                 }
