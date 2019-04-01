@@ -240,7 +240,8 @@ bool OSPRayScene::commitLights()
         assert(ospLight);
 
         osphelper::set(ospLight, "color", Vector3f(baseLight->_color));
-        osphelper::set(ospLight, "intensity", Vector3f(baseLight->_intensity));
+        osphelper::set(ospLight, "intensity",
+                       static_cast<float>(baseLight->_intensity));
 
         _ospLights.push_back(ospLight);
         ospCommit(ospLight);
