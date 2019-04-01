@@ -113,6 +113,19 @@ struct Brayns::Impl : public PluginAPI
         _pluginManager.preRender();
 
         auto& scene = _engine->getScene();
+        auto& lightManager = scene.getLightManager();
+        const auto& rp = _parametersManager.getRenderingParameters();
+        auto& camera = _engine->getCamera();
+
+        // Need to update head light before scene is committed
+        if (rp.getHeadLight() && (camera.isModified() || rp.isModified()))
+        {
+            const auto newDirection =
+                glm::rotate(camera.getOrientation(), Vector3d(0, 0, -1));
+            _sunLight->_direction = newDirection;
+            lightManager.addLight(_sunLight);
+        }
+
         scene.commit();
 
         _engine->getStatistics().setSceneSizeInBytes(scene.getSizeInBytes());
@@ -120,13 +133,11 @@ struct Brayns::Impl : public PluginAPI
         _parametersManager.getAnimationParameters().update();
 
         auto& renderer = _engine->getRenderer();
-        const auto& rp = _parametersManager.getRenderingParameters();
         renderer.setCurrentType(rp.getCurrentRenderer());
 
         const auto windowSize =
             _parametersManager.getApplicationParameters().getWindowSize();
 
-        auto& camera = _engine->getCamera();
         if (camera.hasProperty("aspect"))
         {
             camera.updateProperty("aspect",
@@ -140,20 +151,11 @@ struct Brayns::Impl : public PluginAPI
 
         camera.commit();
 
-        if (rp.getHeadLight() && (camera.isModified() || rp.isModified()))
-        {
-            auto& lightManager = scene.getLightManager();
-            const auto newDirection =
-                glm::rotate(camera.getOrientation(), Vector3d(0, 0, -1));
-            _sunLight->_direction = newDirection;
-            lightManager.addLight(_sunLight);
-            scene.commitLights();
-        }
-
         _engine->commit();
 
         if (_parametersManager.isAnyModified() || camera.isModified() ||
-            scene.isModified() || renderer.isModified())
+            scene.isModified() || renderer.isModified() ||
+            lightManager.isModified())
         {
             _engine->clearFrameBuffers();
         }
@@ -162,6 +164,7 @@ struct Brayns::Impl : public PluginAPI
         camera.resetModified();
         scene.resetModified();
         renderer.resetModified();
+        lightManager.resetModified();
 
         return true;
     }
