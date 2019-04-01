@@ -180,8 +180,6 @@ bool OSPRayScene::commitLights()
     if (!_lightManager.isModified())
         return false;
 
-    _lightManager.resetModified();
-
     _destroyLights();
 
     for (const auto& kv : _lightManager.getLights())
