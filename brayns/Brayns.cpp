@@ -140,19 +140,14 @@ struct Brayns::Impl : public PluginAPI
 
         camera.commit();
 
-        if (rp.getHeadLight())
+        if (rp.getHeadLight() && (camera.isModified() || rp.isModified()))
         {
             auto& lightManager = scene.getLightManager();
-            auto sunLight =
-                dynamic_cast<DirectionalLight*>(lightManager.getLight(0).get());
-            if (sunLight && (camera.isModified() || rp.isModified()))
-            {
-                const auto newDirection =
-                    glm::rotate(camera.getOrientation(), Vector3d(0, 0, -1));
-                sunLight->_direction = newDirection;
-                lightManager.markModified();
-                scene.commitLights();
-            }
+            const auto newDirection =
+                glm::rotate(camera.getOrientation(), Vector3d(0, 0, -1));
+            _sunLight->_direction = newDirection;
+            lightManager.addLight(_sunLight);
+            scene.commitLights();
         }
 
         _engine->commit();
@@ -280,10 +275,11 @@ private:
             throw std::runtime_error("Unsupported engine: " + engineName);
 
         // Default sun light
-        _engine->getScene().getLightManager().addLight(
+        _sunLight =
             std::make_shared<DirectionalLight>(DEFAULT_SUN_DIRECTION,
                                                DEFAULT_SUN_COLOR,
-                                               DEFAULT_SUN_INTENSITY, false));
+                                               DEFAULT_SUN_INTENSITY, false);
+        _engine->getScene().getLightManager().addLight(_sunLight);
 
         _engine->getCamera().setCurrentType(
             _parametersManager.getRenderingParameters().getCurrentCamera());
@@ -763,6 +759,7 @@ private:
     std::atomic<double> _lastFPS;
 
     std::shared_ptr<ActionInterface> _actionInterface;
+    std::shared_ptr<DirectionalLight> _sunLight;
 };
 
 // -----------------------------------------------------------------------------
