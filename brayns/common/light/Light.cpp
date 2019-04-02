@@ -33,10 +33,12 @@ Light::Light(LightType type, const Vector3d& color, double intensity,
 }
 
 DirectionalLight::DirectionalLight(const Vector3d& direction,
+                                   double angularDiameter,
                                    const Vector3d& color, double intensity,
                                    bool isVisible)
     : Light(LightType::DIRECTIONAL, color, intensity, isVisible)
     , _direction(direction)
+    , _angularDiameter(angularDiameter)
 {
 }
 
