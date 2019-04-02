@@ -60,15 +60,17 @@ public:
      * direction not from a specific position. This light will behave as though
      * it is infinitely far away and the rays produced from it are all parallel
      * @param direction Light source direction
+     * @param angularDiameter Apparent size (angle in degree) of the light
      * @param color Light source RGB color
      * @param intensity Amount of light emitted
      * @param isVisible Whether the light can be directly seen
      */
-    DirectionalLight(const Vector3d& direction, const Vector3d& color,
-                     double intensity, bool isVisible);
+    DirectionalLight(const Vector3d& direction, double angularDiameter,
+                     const Vector3d& color, double intensity, bool isVisible);
     DirectionalLight() = default;
 
     Vector3d _direction;
+    double _angularDiameter;
 };
 
 class SphereLight : public Light

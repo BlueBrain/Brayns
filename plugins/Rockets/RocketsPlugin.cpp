@@ -1316,95 +1316,88 @@ public:
     void _handleGetLights()
     {
         const RpcDescription desc{METHOD_GET_LIGHTS, "get all lights"};
-        _bindEndpoint(
-            METHOD_GET_LIGHTS,
-            [& engine = _engine](const rockets::jsonrpc::Request& /*request*/) {
-                const auto& lights =
-                    engine.getScene().getLightManager().getLights();
+        _bindEndpoint(METHOD_GET_LIGHTS, [& engine = _engine](
+                                             const rockets::jsonrpc::
+                                                 Request& /*request*/) {
+            const auto& lights =
+                engine.getScene().getLightManager().getLights();
 
-                std::vector<std::string> jsonStrings;
+            std::vector<std::string> jsonStrings;
 
-                for (const auto& kv : lights)
+            for (const auto& kv : lights)
+            {
+                RPCLight rpcLight;
+                rpcLight.id = kv.first;
+                auto baseLight = kv.second;
+
+                switch (baseLight->_type)
                 {
-                    RPCLight rpcLight;
-                    rpcLight.id = kv.first;
-                    auto baseLight = kv.second;
-
-                    switch (baseLight->_type)
-                    {
-                    case LightType::DIRECTIONAL:
-                    {
-                        rpcLight.type = "directional";
-                        const auto light =
-                            static_cast<DirectionalLight*>(baseLight.get());
-                        rpcLight.properties.setProperty(
-                            {"direction",
-                             toArray<3, double>(light->_direction)});
-                        break;
-                    }
-                    case LightType::SPHERE:
-                    {
-                        rpcLight.type = "sphere";
-                        const auto light =
-                            static_cast<SphereLight*>(baseLight.get());
-                        rpcLight.properties.setProperty(
-                            {"position", toArray<3, double>(light->_position)});
-                        rpcLight.properties.setProperty(
-                            {"radius", static_cast<double>(light->_radius)});
-                        break;
-                    }
-                    case LightType::QUAD:
-                    {
-                        rpcLight.type = "quad";
-                        const auto light =
-                            static_cast<QuadLight*>(baseLight.get());
-                        rpcLight.properties.setProperty(
-                            {"position", toArray<3, double>(light->_position)});
-                        rpcLight.properties.setProperty(
-                            {"edge1", toArray<3, double>(light->_edge1)});
-                        rpcLight.properties.setProperty(
-                            {"edge2", toArray<3, double>(light->_edge2)});
-                        break;
-                    }
-                    case LightType::SPOTLIGHT:
-                    {
-                        rpcLight.type = "spotlight";
-                        const auto light =
-                            static_cast<SpotLight*>(baseLight.get());
-                        rpcLight.properties.setProperty(
-                            {"position", toArray<3, double>(light->_position)});
-                        rpcLight.properties.setProperty(
-                            {"direction",
-                             toArray<3, double>(light->_direction)});
-                        rpcLight.properties.setProperty(
-                            {"openingAngle",
-                             static_cast<double>(light->_openingAngle)});
-                        rpcLight.properties.setProperty(
-                            {"penumbraAngle",
-                             static_cast<double>(light->_penumbraAngle)});
-                        rpcLight.properties.setProperty(
-                            {"radius", static_cast<double>(light->_radius)});
-                        break;
-                    }
-                    case LightType::AMBIENT:
-                    {
-                        rpcLight.type = "ambient";
-                        break;
-                    }
-                    }
-
+                case LightType::DIRECTIONAL:
+                {
+                    rpcLight.type = "directional";
+                    const auto light =
+                        static_cast<DirectionalLight*>(baseLight.get());
                     rpcLight.properties.setProperty(
-                        {"color", toArray<3, double>(baseLight->_color)});
+                        {"direction", toArray<3, double>(light->_direction)});
                     rpcLight.properties.setProperty(
-                        {"intensity",
-                         static_cast<double>(baseLight->_intensity)});
-                    rpcLight.properties.setProperty(
-                        {"isVisible", baseLight->_isVisible});
-
-                    jsonStrings.emplace_back(to_json(rpcLight));
+                        {"angularDiameter", light->_angularDiameter});
+                    break;
                 }
-                return Response{"[" + joinStrings(jsonStrings, ",") + "]"};
-            });
+                case LightType::SPHERE:
+                {
+                    rpcLight.type = "sphere";
+                    const auto light =
+                        static_cast<SphereLight*>(baseLight.get());
+                    rpcLight.properties.setProperty(
+                        {"position", toArray<3, double>(light->_position)});
+                    rpcLight.properties.setProperty({"radius", light->_radius});
+                    break;
+                }
+                case LightType::QUAD:
+                {
+                    rpcLight.type = "quad";
+                    const auto light = static_cast<QuadLight*>(baseLight.get());
+                    rpcLight.properties.setProperty(
+                        {"position", toArray<3, double>(light->_position)});
+                    rpcLight.properties.setProperty(
+                        {"edge1", toArray<3, double>(light->_edge1)});
+                    rpcLight.properties.setProperty(
+                        {"edge2", toArray<3, double>(light->_edge2)});
+                    break;
+                }
+                case LightType::SPOTLIGHT:
+                {
+                    rpcLight.type = "spotlight";
+                    const auto light = static_cast<SpotLight*>(baseLight.get());
+                    rpcLight.properties.setProperty(
+                        {"position", toArray<3, double>(light->_position)});
+                    rpcLight.properties.setProperty(
+                        {"direction", toArray<3, double>(light->_direction)});
+                    rpcLight.properties.setProperty(
+                        {"openingAngle", light->_openingAngle});
+                    rpcLight.properties.setProperty(
+                        {"penumbraAngle", light->_penumbraAngle});
+                    rpcLight.properties.setProperty({"radius", light->_radius});
+                    break;
+                }
+                case LightType::AMBIENT:
+                {
+                    rpcLight.type = "ambient";
+                    break;
+                }
+                }
+
+                rpcLight.properties.setProperty(
+                    {"color", toArray<3, double>(baseLight->_color)});
+                rpcLight.properties.setProperty(
+                    {"intensity", baseLight->_intensity});
+                rpcLight.properties.setProperty(
+                    {"isVisible", baseLight->_isVisible});
+
+                jsonStrings.emplace_back(to_json(rpcLight));
+            }
+            return Response{"[" + joinStrings(jsonStrings, ",") + "]"};
+        });
 
         _handleSchema(
             METHOD_GET_LIGHTS,

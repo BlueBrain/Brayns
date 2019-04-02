@@ -438,6 +438,7 @@ inline void init(brayns::DirectionalLight* a, ObjectHandler* h)
 {
     init(static_cast<brayns::Light*>(a), h);
     h->add_property("direction", toArray<3, double>(a->_direction));
+    h->add_property("angularDiameter", &a->_angularDiameter);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

@@ -65,7 +65,8 @@ const float DEFAULT_MOTION_ACCELERATION = 1.5f;
 const brayns::Vector3f DEFAULT_SUN_DIRECTION = {1.f, -1.f, -1.f};
 const brayns::Vector3f DEFAULT_SUN_COLOR = {0.9f, 0.9f, 0.9f};
 const brayns::Vector3f DEFAULT_SUN_POSITION = {-10.f, 10.f, -10.f};
-const float DEFAULT_SUN_INTENSITY = 1.f;
+constexpr double DEFAULT_SUN_ANGULAR_DIAMETER = 0.53;
+constexpr double DEFAULT_SUN_INTENSITY = 1.0;
 } // namespace
 
 namespace brayns
@@ -280,6 +281,7 @@ private:
         // Default sun light
         _sunLight =
             std::make_shared<DirectionalLight>(DEFAULT_SUN_DIRECTION,
+                                               DEFAULT_SUN_ANGULAR_DIAMETER,
                                                DEFAULT_SUN_COLOR,
                                                DEFAULT_SUN_INTENSITY, false);
         _engine->getScene().getLightManager().addLight(_sunLight);

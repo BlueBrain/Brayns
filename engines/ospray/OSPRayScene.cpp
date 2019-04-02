@@ -194,6 +194,8 @@ bool OSPRayScene::commitLights()
             ospLight = ospNewLight3("distant");
             const auto light = static_cast<DirectionalLight*>(baseLight.get());
             osphelper::set(ospLight, "direction", Vector3f(light->_direction));
+            osphelper::set(ospLight, "angularDiameter",
+                           static_cast<float>(light->_angularDiameter));
             break;
         }
         case LightType::SPHERE:
