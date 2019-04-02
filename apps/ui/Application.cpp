@@ -339,7 +339,8 @@ void Application::render()
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    m_brayns.commitAndRender();
+    m_brayns.commit();
+    m_brayns.render();
 
     size_t offset = 0;
     for (auto frameBuffer : m_brayns.getEngine().getFrameBuffers())
@@ -408,6 +409,8 @@ void Application::render()
         frameBuffer->unmap();
         offset += frameSize.x;
     }
+
+    m_brayns.postRender();
 }
 
 void Application::keyCallback(int key, int action)
