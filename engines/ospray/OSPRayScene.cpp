@@ -249,8 +249,11 @@ bool OSPRayScene::commitLights()
         ospCommit(ospLight);
     }
 
+    // NOTE: since the lights are shared between scene and renderer we let
+    // OSPRay allocate a new buffer to avoid use-after-free issues
+    const size_t memoryFlags = 0;
     _ospLightData = ospNewData(_ospLights.size(), OSP_OBJECT, _ospLights.data(),
-                               _memoryManagementFlags);
+                               memoryFlags);
     ospCommit(_ospLightData);
 
     return true;
