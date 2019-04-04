@@ -374,7 +374,7 @@ BOOST_AUTO_TEST_CASE(commandline_too_many_vector_values)
     const char* argv[] = {app, "--vec2i", "3", "4", "5"};
     const int argc = sizeof(argv) / sizeof(char*);
 
-    BOOST_CHECK(!properties.parse(argc, argv));
+    BOOST_CHECK(properties.parse(argc, argv));
 }
 
 BOOST_AUTO_TEST_CASE(commandline_wrong_enum_value)

@@ -46,12 +46,8 @@ OSPRayRenderer::~OSPRayRenderer()
 void OSPRayRenderer::_destroyRenderer()
 {
     if (_renderer)
-    {
-        // The lights data is created and destroyed in the light manager, so to
-        // avoid a double-free, we do not destroy it here
-        ospRemoveParam(_renderer, "lights");
         ospRelease(_renderer);
-    }
+    _renderer = nullptr;
 }
 
 void OSPRayRenderer::render(FrameBufferPtr frameBuffer)
@@ -88,8 +84,6 @@ void OSPRayRenderer::commit()
 
     if (lightsChanged || rendererChanged)
     {
-        // Avoid double destruction of 'lights' buffer
-        ospRemoveParam(_renderer, "lights");
         ospSetData(_renderer, "lights", scene->lightData());
         _currLightsData = scene->lightData();
     }
@@ -195,7 +189,7 @@ void OSPRayRenderer::_createOSPRenderer()
 
 void OSPRayRenderer::_commitRendererMaterials()
 {
-    _scene->visitModels([& renderer = _currentOSPRenderer](Model& model) {
+    _scene->visitModels([& renderer = _currentOSPRenderer](Model & model) {
         static_cast<OSPRayModel&>(model).commitMaterials(renderer);
     });
 }
