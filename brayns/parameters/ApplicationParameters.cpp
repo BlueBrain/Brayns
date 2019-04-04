@@ -1,6 +1,5 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -30,7 +29,6 @@ const std::string PARAM_HTTP_SERVER = "http-server";
 const std::string PARAM_IMAGE_STREAM_FPS = "image-stream-fps";
 const std::string PARAM_INPUT_PATHS = "input-paths";
 const std::string PARAM_JPEG_COMPRESSION = "jpeg-compression";
-const std::string PARAM_JPEG_SIZE = "jpeg-size";
 const std::string PARAM_MAX_RENDER_FPS = "max-render-fps";
 const std::string PARAM_MODULE = "module";
 const std::string PARAM_PARALLEL_RENDERING = "parallel-rendering";
@@ -64,15 +62,13 @@ ApplicationParameters::ApplicationParameters()
          "can be repeated to load multiple plugins. "
          "Arguments to plugins can be added by inserting a space followed by "
          "the arguments like: --plugin 'myPluginName arg0 arg1'") //
-        (PARAM_WINDOW_SIZE.c_str(), po::value<uints>()->multitoken(),
-         "Window size [int int]") //
+        (PARAM_WINDOW_SIZE.c_str(), po::fixed_tokens_value<uints>(2, 2),
+         "Window size [uint uint]") //
         (PARAM_BENCHMARKING.c_str(),
          po::bool_switch(&_benchmarking)->default_value(false),
          "Enable benchmarking") //
         (PARAM_JPEG_COMPRESSION.c_str(), po::value<size_t>(&_jpegCompression),
          "JPEG compression rate (100 is full quality) [int]") //
-        (PARAM_JPEG_SIZE.c_str(), po::value<uints>()->multitoken(),
-         "JPEG size [int int]") //
         (PARAM_PARALLEL_RENDERING.c_str(),
          po::bool_switch(&_parallelRendering)->default_value(false),
          "Enable parallel rendering, equivalent to --osp:mpi") //
@@ -91,11 +87,8 @@ void ApplicationParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_WINDOW_SIZE))
     {
         uints values = vm[PARAM_WINDOW_SIZE].as<uints>();
-        if (values.size() == 2)
-        {
-            _windowSize.x = values[0];
-            _windowSize.y = values[1];
-        }
+        _windowSize.x = values[0];
+        _windowSize.y = values[1];
     }
     markModified();
 }

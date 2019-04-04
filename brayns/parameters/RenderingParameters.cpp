@@ -1,6 +1,5 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -48,7 +47,7 @@ RenderingParameters::RenderingParameters()
          "Subsampling factor [uint]") //
         (PARAM_ACCUMULATION.c_str(), po::bool_switch()->default_value(false),
          "Disable accumulation") //
-        (PARAM_BACKGROUND_COLOR.c_str(), po::value<floats>()->multitoken(),
+        (PARAM_BACKGROUND_COLOR.c_str(), po::fixed_tokens_value<floats>(3, 3),
          "Background color [float float float]") //
         (PARAM_CAMERA.c_str(), po::value<std::string>(),
          "The camera to use") //
@@ -76,8 +75,7 @@ void RenderingParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_BACKGROUND_COLOR))
     {
         floats values = vm[PARAM_BACKGROUND_COLOR].as<floats>();
-        if (values.size() == 3)
-            _backgroundColor = Vector3f(values[0], values[1], values[2]);
+        _backgroundColor = Vector3f(values[0], values[1], values[2]);
     }
     if (vm.count(PARAM_CAMERA))
     {
