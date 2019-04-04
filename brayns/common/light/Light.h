@@ -41,13 +41,15 @@ enum class LightType
 class Light
 {
 public:
-    Light(const LightType type, const Vector3d& color, const double intensity);
+    Light(LightType type, const Vector3d& color, double intensity,
+          bool isVisible);
     Light() = default;
     virtual ~Light() = default;
 
     LightType _type;
     Vector3d _color;
     double _intensity;
+    bool _isVisible;
 };
 
 class DirectionalLight : public Light
@@ -58,14 +60,17 @@ public:
      * direction not from a specific position. This light will behave as though
      * it is infinitely far away and the rays produced from it are all parallel
      * @param direction Light source direction
+     * @param angularDiameter Apparent size (angle in degree) of the light
      * @param color Light source RGB color
      * @param intensity Amount of light emitted
+     * @param isVisible Whether the light can be directly seen
      */
-    DirectionalLight(const Vector3d& direction, const Vector3d& color,
-                     double intensity);
+    DirectionalLight(const Vector3d& direction, double angularDiameter,
+                     const Vector3d& color, double intensity, bool isVisible);
     DirectionalLight() = default;
 
     Vector3d _direction;
+    double _angularDiameter;
 };
 
 class SphereLight : public Light
@@ -79,9 +84,10 @@ public:
      * @param radius The size of the sphere light
      * @param color Light source RGB color
      * @param intensity Amount of light emitted
+     * @param isVisible Whether the light can be directly seen
      */
     SphereLight(const Vector3d& position, double radius, const Vector3d& color,
-                double intensity);
+                double intensity, bool isVisible);
     SphereLight() = default;
 
     Vector3d _position;
@@ -101,9 +107,11 @@ public:
      * @param edge2 Vector to the other adjacent vertex
      * @param color Light source RGB color
      * @param intensity Amount of light emitted
+     * @param isVisible Whether the light can be directly seen
      */
     QuadLight(const Vector3d& position, const Vector3d& edge1,
-              const Vector3d& edge2, const Vector3d& color, double intensity);
+              const Vector3d& edge2, const Vector3d& color, double intensity,
+              bool isVisible);
     QuadLight() = default;
 
     Vector3d _position;
@@ -128,10 +136,12 @@ public:
      * 'direction'
      * @param color Light source RGB color
      * @param intensity Amount of light emitted
+     * @param isVisible Whether the light can be directly seen
      */
     SpotLight(const Vector3d& position, const Vector3d& direction,
               const double openingAngle, const double penumbraAngle,
-              const double radius, const Vector3d& color, double intensity);
+              const double radius, const Vector3d& color, double intensity,
+              bool isVisible);
     SpotLight() = default;
 
     Vector3d _position;
@@ -150,8 +160,9 @@ public:
      * parameters color and intensity).
      * @param color Light source RGB color
      * @param intensity Amount of light emitted
+     * @param isVisible Whether the light can be directly seen
      */
-    AmbientLight(const Vector3d& color, double intensity);
+    AmbientLight(const Vector3d& color, double intensity, bool isVisible);
     AmbientLight() = default;
 };
 

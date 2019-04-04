@@ -66,8 +66,6 @@ bool OptiXScene::commitLights()
     if (!_lightManager.isModified())
         return false;
 
-    _lightManager.resetModified();
-
     if (_lightManager.getLights().empty())
     {
         BRAYNS_ERROR << "No lights are currently defined" << std::endl;

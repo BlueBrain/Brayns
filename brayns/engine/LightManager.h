@@ -24,6 +24,7 @@
 #include <brayns/common/types.h>
 
 #include <map>
+#include <unordered_map>
 
 namespace brayns
 {
@@ -71,6 +72,7 @@ public:
 
 private:
     std::map<size_t, LightPtr> _lights;
+    std::unordered_map<LightPtr, size_t> _lightsInverse;
     size_t _IDctr{0};
 };
 } // namespace brayns

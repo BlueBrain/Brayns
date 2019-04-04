@@ -28,9 +28,21 @@ namespace brayns
 {
 size_t LightManager::addLight(LightPtr light)
 {
-    removeLight(light);
+    // If light already added, return id
+    auto itInv = _lightsInverse.find(light);
+    if (itInv != _lightsInverse.end())
+    {
+        markModified();
+        return itInv->second;
+    }
+
+    // If lights are empty we reset id counter to avoid huge numbers
+    if (_lights.empty())
+        _IDctr = 0;
+
     const size_t id = _IDctr++;
     _lights.insert({id, light});
+    _lightsInverse.insert({light, id});
     markModified();
     return id;
 }
@@ -40,24 +52,31 @@ void LightManager::removeLight(const size_t id)
     auto it = _lights.find(id);
     if (it != _lights.end())
     {
+        auto light = it->second;
+
+        auto itInv = _lightsInverse.find(light);
+        assert(itInv != _lightsInverse.end());
+        if (itInv != _lightsInverse.end())
+            _lightsInverse.erase(itInv);
+
         _lights.erase(it);
+
         markModified();
     }
 }
 
 void LightManager::removeLight(LightPtr light)
 {
-    for (auto itr = _lights.begin(); itr != _lights.end(); ++itr)
-    {
-        if (itr->second == light)
-        {
-            markModified();
-            _lights.erase(itr);
-            break;
-        }
-    }
+    auto itInv = _lightsInverse.find(light);
 
-    // erase_value(_lights, light);
+    if (itInv != _lightsInverse.end())
+    {
+        const size_t id = itInv->second;
+        auto it = _lights.find(id);
+        assert(it != _lights.end());
+        if (it != _lights.end())
+            _lights.erase(it);
+    }
 }
 
 LightPtr LightManager::getLight(const size_t id)
@@ -77,6 +96,7 @@ const std::map<size_t, LightPtr>& LightManager::getLights() const
 void LightManager::clearLights()
 {
     _lights.clear();
+    _lightsInverse.clear();
     markModified();
 }
 

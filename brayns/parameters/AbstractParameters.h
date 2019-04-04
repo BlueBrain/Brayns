@@ -1,6 +1,5 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,14 +17,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ABSTRACTPARAMETERS_H
-#define ABSTRACTPARAMETERS_H
+#pragma once
 
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/log.h>
 #include <brayns/common/types.h>
 
 #include <boost/program_options.hpp>
+#include <boost/program_options/value_semantic.hpp>
+
 namespace po = boost::program_options;
 
 namespace brayns
@@ -67,4 +67,46 @@ protected:
     static std::string asString(const bool flag) { return flag ? "on" : "off"; }
 };
 }
-#endif // ABSTRACTPARAMETERS_H
+
+namespace boost
+{
+namespace program_options
+{
+/**
+ * Wrapper for supporting fixed size multitoken values
+ */
+template <typename T, typename charT = char>
+class fixed_tokens_typed_value : public typed_value<T, charT>
+{
+    const unsigned _min;
+    const unsigned _max;
+
+    typedef typed_value<T, charT> base;
+
+public:
+    fixed_tokens_typed_value(T* t, unsigned min, unsigned max)
+        : base(t)
+        , _min(min)
+        , _max(max)
+    {
+        base::multitoken();
+    }
+    unsigned min_tokens() const { return _min; }
+    unsigned max_tokens() const { return _max; }
+};
+
+template <typename T>
+inline fixed_tokens_typed_value<T>* fixed_tokens_value(unsigned min,
+                                                       unsigned max)
+{
+    return new fixed_tokens_typed_value<T>(nullptr, min, max);
+}
+
+template <typename T>
+inline fixed_tokens_typed_value<T>* fixed_tokens_value(T* t, unsigned min,
+                                                       unsigned max)
+{
+    return new fixed_tokens_typed_value<T>(t, min, max);
+}
+}
+}

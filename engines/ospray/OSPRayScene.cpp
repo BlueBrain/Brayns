@@ -180,8 +180,6 @@ bool OSPRayScene::commitLights()
     if (!_lightManager.isModified())
         return false;
 
-    _lightManager.resetModified();
-
     _destroyLights();
 
     for (const auto& kv : _lightManager.getLights())
@@ -196,6 +194,8 @@ bool OSPRayScene::commitLights()
             ospLight = ospNewLight3("distant");
             const auto light = static_cast<DirectionalLight*>(baseLight.get());
             osphelper::set(ospLight, "direction", Vector3f(light->_direction));
+            osphelper::set(ospLight, "angularDiameter",
+                           static_cast<float>(light->_angularDiameter));
             break;
         }
         case LightType::SPHERE:
@@ -240,14 +240,20 @@ bool OSPRayScene::commitLights()
         assert(ospLight);
 
         osphelper::set(ospLight, "color", Vector3f(baseLight->_color));
-        osphelper::set(ospLight, "intensity", Vector3f(baseLight->_intensity));
+        osphelper::set(ospLight, "intensity",
+                       static_cast<float>(baseLight->_intensity));
+        // NOTE: Bool is broken before OSPRay 1.8.3 so set it to 1 or 0
+        osphelper::set(ospLight, "isVisible", baseLight->_isVisible ? 1 : 0);
 
         _ospLights.push_back(ospLight);
         ospCommit(ospLight);
     }
 
+    // NOTE: since the lights are shared between scene and renderer we let
+    // OSPRay allocate a new buffer to avoid use-after-free issues
+    const size_t memoryFlags = 0;
     _ospLightData = ospNewData(_ospLights.size(), OSP_OBJECT, _ospLights.data(),
-                               _memoryManagementFlags);
+                               memoryFlags);
     ospCommit(_ospLightData);
 
     return true;

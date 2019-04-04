@@ -1,6 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
- *
- * Responsible Author: Jonas Karlsson <jonas.karlsson@epfl.ch>
+/* Copyright (c) 2015-2019, EPFL/Blue Brain Project
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -29,7 +27,7 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
-namespace po = boost::program_options;
+#include <brayns/parameters/AbstractParameters.h>
 
 namespace brayns
 {
@@ -89,13 +87,19 @@ po::options_description _toCommandlineDescription(
                 valueSemantic = po::bool_switch();
             break;
         case Property::Type::Vec2i:
+            valueSemantic = po::fixed_tokens_value<ints>(2, 2);
+            break;
         case Property::Type::Vec3i:
-            valueSemantic = po::value<std::vector<int32_t>>()->multitoken();
+            valueSemantic = po::fixed_tokens_value<ints>(3, 3);
             break;
         case Property::Type::Vec2d:
+            valueSemantic = po::fixed_tokens_value<std::vector<double>>(2, 2);
+            break;
         case Property::Type::Vec3d:
+            valueSemantic = po::fixed_tokens_value<std::vector<double>>(3, 3);
+            break;
         case Property::Type::Vec4d:
-            valueSemantic = po::value<std::vector<double>>()->multitoken();
+            valueSemantic = po::fixed_tokens_value<std::vector<double>>(4, 4);
             break;
         }
 

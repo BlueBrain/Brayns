@@ -29,7 +29,6 @@ set(BRAYNSOSPRAYENGINE_ISPC_SOURCES
   ispc/geometry/SDFGeometries.ispc
   ispc/render/BasicRenderer.ispc
   ispc/render/DefaultMaterial.ispc
-  ispc/render/PathTracingRenderer.ispc
   ispc/render/ProximityRenderer.ispc
   ispc/render/utils/RandomGenerator.ispc
   ispc/render/utils/SkyBox.ispc
@@ -53,7 +52,6 @@ set(BRAYNSOSPRAYENGINE_SOURCES
   ispc/geometry/SDFGeometries.cpp
   ispc/render/BasicRenderer.cpp
   ispc/render/DefaultMaterial.cpp
-  ispc/render/PathTracingRenderer.cpp
   ispc/render/ProximityRenderer.cpp
   ispc/render/utils/AbstractRenderer.cpp
 )
@@ -74,7 +72,6 @@ set(BRAYNSOSPRAYENGINE_HEADERS
   ispc/camera/PerspectiveParallaxCamera.h
   ispc/render/BasicRenderer.h
   ispc/render/DefaultMaterial.h
-  ispc/render/PathTracingRenderer.h
   ispc/render/ProximityRenderer.h
   ispc/render/utils/AbstractRenderer.h
 )
