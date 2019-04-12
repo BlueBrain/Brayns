@@ -32,62 +32,70 @@ void MultiviewCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
 
     vec2f screen = Camera_subRegion(_self, sample.screen);
 
-    if(screen.x < 0.5f && screen.y < 0.5f)
+    if (screen.x < 0.5f && screen.y < 0.5f)
     {
-        //left
+        // left
         const vec3f dir = make_vec3f(1.0f, 0.0f, 0.0f);
-        const vec3f pos_du = make_vec3f(0.0f, 0.0f, 1.0f) * self->height * self->aspect;
+        const vec3f pos_du =
+            make_vec3f(0.0f, 0.0f, 1.0f) * self->height * self->aspect;
         const vec3f pos_dv = make_vec3f(0.0f, 1.0f, 0.0f) * self->height;
-        const vec3f pos_00 = (self->org + make_vec3f(-self->armLength, 0.0f, 0.0f)) - 0.5f * pos_du - 0.5f * pos_dv;
+        const vec3f pos_00 =
+            (self->org + make_vec3f(-self->armLength, 0.0f, 0.0f)) -
+            0.5f * pos_du - 0.5f * pos_dv;
 
         const vec3f org =
-                pos_00 + 2.0 * screen.x * pos_du + 2.0 * screen.y * pos_dv;
+            pos_00 + 2.0 * screen.x * pos_du + 2.0 * screen.y * pos_dv;
 
         float nearClip = self->super.nearClip;
         float farClip = infinity;
         const varying vec3f direction = normalize(dir);
 
-        clipRay(self->clipPlanes, self->numClipPlanes, org, direction,
-                nearClip, farClip);
+        clipRay(self->clipPlanes, self->numClipPlanes, org, direction, nearClip,
+                farClip);
 
         const float time = Camera_shutterTime(_self, sample.time);
         setRay(ray, org, dir, nearClip, farClip, time);
     }
-    else if(screen.x < 0.5f && screen.y >= 0.5f)
+    else if (screen.x < 0.5f && screen.y >= 0.5f)
     {
-        //front
+        // front
         const vec3f dir = make_vec3f(0.0f, 0.0f, 1.0f);
-        const vec3f pos_du = make_vec3f(-1.0f, 0.0f, 0.0f) * self->height * self->aspect;
+        const vec3f pos_du =
+            make_vec3f(-1.0f, 0.0f, 0.0f) * self->height * self->aspect;
         const vec3f pos_dv = make_vec3f(0.0f, 1.0f, 0.0f) * self->height;
-        const vec3f pos_00 = (self->org + make_vec3f(0.0f, 0.0f, -self->armLength)) - 0.5f * pos_du - 0.5f * pos_dv;
+        const vec3f pos_00 =
+            (self->org + make_vec3f(0.0f, 0.0f, -self->armLength)) -
+            0.5f * pos_du - 0.5f * pos_dv;
 
         const vec3f org =
-                pos_00 + 2.0 * screen.x * pos_du + 2.0 * (screen.y - 0.5f) * pos_dv;
+            pos_00 + 2.0 * screen.x * pos_du + 2.0 * (screen.y - 0.5f) * pos_dv;
 
         float nearClip = self->super.nearClip;
         float farClip = infinity;
         const varying vec3f direction = normalize(dir);
 
-        clipRay(self->clipPlanes, self->numClipPlanes, org, direction,
-                nearClip, farClip);
+        clipRay(self->clipPlanes, self->numClipPlanes, org, direction, nearClip,
+                farClip);
 
         const float time = Camera_shutterTime(_self, sample.time);
         setRay(ray, org, dir, nearClip, farClip, time);
     }
-    else if(screen.x >= 0.5f && screen.y < 0.5f)
+    else if (screen.x >= 0.5f && screen.y < 0.5f)
     {
         vec3f org = self->org;
 
-        vec3f dir =
-            self->dir_00 + 2.0f * (screen.x - 0.5f) * self->dir_du + 2.0f * screen.y * self->dir_dv;
+        vec3f dir = self->dir_00 + 2.0f * (screen.x - 0.5f) * self->dir_du +
+                    2.0f * screen.y * self->dir_dv;
 
         if (self->super.doesDOF)
         {
-            const vec3f llp = uniformSampleDisk(self->scaledAperture, sample.lens);
-            // transform local lens point to focal plane (dir_XX are prescaled in
+            const vec3f llp =
+                uniformSampleDisk(self->scaledAperture, sample.lens);
+            // transform local lens point to focal plane (dir_XX are prescaled
+            // in
             // this case)
-            const vec3f lp =
-                (llp.x * self->dir_du) + ((llp.y * self->aspect) * self->dir_dv);
+            const vec3f lp = (llp.x * self->dir_du) +
+                             ((llp.y * self->aspect) * self->dir_dv);
             org = org + lp;
             dir = dir - lp;
         }
@@ -102,23 +110,26 @@ void MultiviewCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
         const float time = Camera_shutterTime(_self, sample.time);
         setRay(ray, org, direction, nearClip, farClip, time);
     }
-    else if(screen.x >= 0.5 && screen.y >= 0.5)
+    else if (screen.x >= 0.5 && screen.y >= 0.5)
     {
-        //top
+        // top
         const vec3f dir = make_vec3f(0.0f, -1.0f, 0.0f);
-        const vec3f pos_du = make_vec3f(1.0f, 0.0f, 0.0f) * self->height * self->aspect;
+        const vec3f pos_du =
+            make_vec3f(1.0f, 0.0f, 0.0f) * self->height * self->aspect;
         const vec3f pos_dv = make_vec3f(0.0f, 0.0f, -1.0f) * self->height;
-        const vec3f pos_00 = (self->org + make_vec3f(0.0f, self->armLength, 0.0f)) - 0.5f * pos_du - 0.5f * pos_dv;
+        const vec3f pos_00 =
+            (self->org + make_vec3f(0.0f, self->armLength, 0.0f)) -
+            0.5f * pos_du - 0.5f * pos_dv;
 
-        const vec3f org =
-                pos_00 + 2.0 * (screen.x - 0.5f) * pos_du + 2.0 * (screen.y - 0.5f) * pos_dv;
+        const vec3f org = pos_00 + 2.0 * (screen.x - 0.5f) * pos_du +
+                          2.0 * (screen.y - 0.5f) * pos_dv;
 
         float nearClip = self->super.nearClip;
         float farClip = infinity;
         const varying vec3f direction = normalize(dir);
 
-        clipRay(self->clipPlanes, self->numClipPlanes, org, direction,
-                nearClip, farClip);
+        clipRay(self->clipPlanes, self->numClipPlanes, org, direction, nearClip,
+                farClip);
 
         const float time = Camera_shutterTime(_self, sample.time);
         setRay(ray, org, dir, nearClip, farClip, time);
@@ -137,11 +148,12 @@ export void* uniform MultiviewCamera_create(void* uniform cppE)
     return self;
 }
 
-export void MultiviewCamera_set(void* uniform _self, const uniform vec3f& org, const uniform vec3f& dir_00,
-                                const uniform vec3f& dir_du, const uniform vec3f& dir_dv,
-                                const uniform float scaledAperture, const uniform float height,
-                                const uniform float aspect, const uniform float armLength,
-                                const uniform vec4f clipPlanes[], const uniform unsigned int numClipPlanes)
+export void MultiviewCamera_set(
+    void* uniform _self, const uniform vec3f& org, const uniform vec3f& dir_00,
+    const uniform vec3f& dir_du, const uniform vec3f& dir_dv,
+    const uniform float scaledAperture, const uniform float height,
+    const uniform float aspect, const uniform float armLength,
+    const uniform vec4f clipPlanes[], const uniform unsigned int numClipPlanes)
 {
     uniform MultiviewCamera* uniform self =
         (uniform MultiviewCamera * uniform)_self;
@@ -152,7 +164,7 @@ export void MultiviewCamera_set(void* uniform _self, const uniform vec3f& org, c
     self->scaledAperture = scaledAperture;
     self->super.doesDOF = scaledAperture > 0.f;
     self->aspect = aspect;
-    self->height = height * 10.0f;
+    self->height = height;
     self->armLength = armLength;
     self->clipPlanes = clipPlanes;
     self->numClipPlanes = numClipPlanes;

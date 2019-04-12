@@ -28,9 +28,11 @@ namespace brayns
 namespace
 {
 constexpr vrpn_int32 HEAD_SENSOR_ID = 0;
+constexpr double MOVING_SPEED = 1.0f;
 const std::string DEFAULT_VRPN_NAME = "DTrack@cave1";
 #ifdef BRAYNSVRPN_USE_LIBUV
 constexpr int VRPN_IDLE_TIMEOUT_MS = 5000;
+constexpr int VRPN_REPEAT_TIMEOUT_MS = 16;
 #endif
 
 const std::string HEAD_POSITION_PROP = "headPosition";
@@ -51,6 +53,13 @@ void trackerCallback(void* userData, const vrpn_TRACKERCB tracker)
     camera->updateProperty(HEAD_POSITION_PROP, to_array_3d(tracker.pos));
     camera->updateProperty(HEAD_ROTATION_PROP, to_array_4d(tracker.quat));
 }
+
+void joystickCallback(void* userData, const vrpn_ANALOGCB joystick)
+{
+    VrpnStates* states = static_cast<VrpnStates*>(userData);
+    states->axisX = joystick.channel[0];
+    states->axisZ = joystick.channel[1];
+}
 }
 
 VRPNPlugin::VRPNPlugin(const std::string& vrpnName)
@@ -68,7 +77,13 @@ void VRPNPlugin::init()
 {
     _vrpnTracker = std::make_unique<vrpn_Tracker_Remote>(_vrpnName.c_str());
     if (!_vrpnTracker->connectionPtr()->doing_okay())
-        throw std::runtime_error("VRPN couldn't connect to: " + _vrpnName);
+        throw std::runtime_error("VRPN couldn't connect to: " + _vrpnName +
+                                 " tracker");
+
+    _vrpnAnalog = std::make_unique<vrpn_Analog_Remote>(_vrpnName.c_str());
+    if (!_vrpnAnalog->connectionPtr()->doing_okay())
+        throw std::runtime_error("VRPN couldn't connect to: " + _vrpnName +
+                                 " analog");
 
     BRAYNS_INFO << "VRPN successfully connected to " << _vrpnName << std::endl;
 
@@ -78,11 +93,23 @@ void VRPNPlugin::init()
 
     _vrpnTracker->register_change_handler(&(_api->getCamera()), trackerCallback,
                                           HEAD_SENSOR_ID);
+    _vrpnAnalog->register_change_handler(&_states, joystickCallback);
 }
 
 void VRPNPlugin::preRender()
 {
+    _timer.stop();
     _vrpnTracker->mainloop();
+
+    double frameTime = _timer.seconds();
+
+    Camera& camera = _api->getCamera();
+    Vector3d pos = camera.getPosition();
+    pos += _states.axisX * MOVING_SPEED * Vector3d(1.0, 0.0, 0.0) * frameTime;
+    pos += _states.axisZ * MOVING_SPEED * Vector3d(0.0, 0.0, -1.0) * frameTime;
+    camera.setPosition(pos);
+
+    _timer.start();
 }
 
 #ifdef BRAYNSVRPN_USE_LIBUV
@@ -101,13 +128,12 @@ void VRPNPlugin::_setupIdleTimer()
         uv_timer_init(uvLoop, _idleTimer.get());
         _idleTimer->data = this;
 
-        constexpr int repeat = 1; // true
         uv_timer_start(_idleTimer.get(),
                        [](uv_timer_t* timer) {
                            auto plugin = static_cast<VRPNPlugin*>(timer->data);
                            plugin->resumeRenderingIfTrackerIsActive();
                        },
-                       VRPN_IDLE_TIMEOUT_MS, repeat);
+                       VRPN_IDLE_TIMEOUT_MS, VRPN_REPEAT_TIMEOUT_MS);
     }
 }
 #endif
