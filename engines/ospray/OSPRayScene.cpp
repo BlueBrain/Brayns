@@ -135,10 +135,14 @@ void OSPRayScene::commit()
             }
         }
 
-        for (const auto& instance : modelDescriptor->getInstances())
+        const auto& instances = modelDescriptor->getInstances();
+        for (size_t i = 0; i < instances.size(); ++i)
         {
+            const auto& instance = instances[i];
+
+            // First instance uses model transformation
             const auto instanceTransform =
-                transformation * instance.getTransformation();
+                (i == 0 ? transformation : instance.getTransformation());
 
             if (modelDescriptor->getBoundingBox() && instance.getBoundingBox())
             {
