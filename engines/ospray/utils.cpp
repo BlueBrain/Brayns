@@ -164,19 +164,22 @@ ospcommon::affine3f transformationToAffine3f(
     rot = ospcommon::affine3f::rotate({0, 1, 0}, y) * rot;
     rot = ospcommon::affine3f::rotate({0, 0, 1}, z) * rot;
 
-    const auto& center = transformation.getRotationCenter();
+    const auto& rotationCenter = transformation.getRotationCenter();
     const auto& translation = transformation.getTranslation();
     const auto& scale = transformation.getScale();
 
-    return ospcommon::affine3f::translate({float(center.x / (1. / scale.x)),
-                                           float(center.y / (1. / scale.y)),
-                                           float(center.z / (1. / scale.z))}) *
-           rot *
-           ospcommon::affine3f::scale(
+    return ospcommon::affine3f::scale(
                {float(scale.x), float(scale.y), float(scale.z)}) *
-           ospcommon::affine3f::translate({float(translation.x - center.x),
-                                           float(translation.y - center.y),
-                                           float(translation.z - center.z)});
+           ospcommon::affine3f::translate({float(translation.x),
+                                           float(translation.y),
+                                           float(translation.z)}) *
+           ospcommon::affine3f::translate({float(rotationCenter.x),
+                                           float(rotationCenter.y),
+                                           float(rotationCenter.z)}) *
+           rot *
+           ospcommon::affine3f::translate({float(-rotationCenter.x),
+                                           float(-rotationCenter.y),
+                                           float(-rotationCenter.z)});
 }
 
 void addInstance(OSPModel rootModel, OSPModel modelToAdd,
