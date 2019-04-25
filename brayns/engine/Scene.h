@@ -95,7 +95,17 @@ public:
         Builds a default scene made of a Cornell box, a reflective cube, and
         a transparent sphere
     */
-    BRAYNS_API void buildDefault();
+    BRAYNS_API void buildCornellBox();
+
+    /**
+        Builds a default scene made of 3 axis (X n red, Y in green, Z in blue)
+    */
+    BRAYNS_API void buildAxis();
+
+    /**
+        Builds a default scene made of a unity grid
+    */
+    BRAYNS_API void buildGrid();
 
     /**
      * @return true if the scene does not contain any geometry, false otherwise

@@ -263,6 +263,7 @@ struct Brayns::Impl : public PluginAPI
         _actionInterface = interface;
     }
     Scene& getScene() final { return _engine->getScene(); }
+
 private:
     void _createEngine()
     {
@@ -341,21 +342,22 @@ private:
 
         const auto& paths =
             _parametersManager.getApplicationParameters().getInputPaths();
-        if (!paths.empty())
+        if (paths.empty())
+            return;
+        for (const auto& path : paths)
         {
-            if (paths.size() == 1 && paths[0] == "demo")
+            if (path == "demo")
+                _engine->getScene().buildCornellBox();
+            else if (path == "axis")
+                _engine->getScene().buildAxis();
+            else if (path == "grid")
+                _engine->getScene().buildGrid();
+            else
             {
-                _engine->getScene().buildDefault();
-                return;
-            }
-
-            for (const auto& path : paths)
                 if (!registry.isSupportedFile(path))
                     throw std::runtime_error("No loader found for '" + path +
                                              "'");
 
-            for (const auto& path : paths)
-            {
                 int percentageLast = 0;
                 std::string msgLast;
                 auto timeLast = std::chrono::steady_clock::now();

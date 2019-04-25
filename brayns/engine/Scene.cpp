@@ -97,9 +97,7 @@ void Scene::copyFrom(const Scene& rhs)
     markModified();
 }
 
-void Scene::commit()
-{
-}
+void Scene::commit() {}
 
 size_t Scene::getSizeInBytes() const
 {
@@ -257,13 +255,124 @@ void Scene::visitModels(const std::function<void(Model&)>& functor)
         functor(modelDescriptor->getModel());
 }
 
-void Scene::buildDefault()
+void Scene::buildGrid()
 {
-    BRAYNS_INFO << "Building default Cornell Box scene" << std::endl;
+    BRAYNS_INFO << "Building Grid scene" << std::endl;
 
     auto model = createModel();
-    const Vector3f WHITE = {1.f, 1.f, 1.f};
+    const float radius = 0.0005;
+    const float gridStep = 0.2;
+    const float planeOpacity = 0.5;
 
+    const Vector3f red = {1, 0, 0};
+    const Vector3f green = {0, 1, 0};
+    const Vector3f blue = {0, 0, 1};
+    const Vector3f grey = {0.5, 0.5, 0.5};
+
+    auto material = model->createMaterial(0, "x");
+    material->setDiffuseColor(grey);
+    material = model->createMaterial(1, "y");
+    material->setDiffuseColor(grey);
+    material = model->createMaterial(2, "z");
+    material->setDiffuseColor(grey);
+
+    for (double x = -1.0; x <= 1.0; x += gridStep)
+        for (double y = -1.0; y <= 1.0; y += gridStep)
+            if (abs(x) < 0.01 || abs(y) < 0.01)
+            {
+                model->addCylinder(2, {{x, y, -1}, {x, y, 1}, radius});
+                model->addCylinder(0, {{-1, x, y}, {1, x, y}, radius});
+                model->addCylinder(1, {{x, -1, y}, {x, 1, y}, radius});
+            }
+
+    material = model->createMaterial(3, "plane_x");
+    material->setDiffuseColor(red);
+    material->setOpacity(planeOpacity);
+    auto& tmx = model->getTrianglesMeshes()[3];
+    tmx.vertices.push_back({-1, 0, -1});
+    tmx.vertices.push_back({1, 0, -1});
+    tmx.vertices.push_back({1, 0, 1});
+    tmx.vertices.push_back({-1, 0, 1});
+    tmx.indices.push_back(Vector3ui(0, 1, 2));
+    tmx.indices.push_back(Vector3ui(2, 3, 0));
+
+    material = model->createMaterial(4, "plane_y");
+    material->setDiffuseColor(green);
+    material->setOpacity(planeOpacity);
+    auto& tmy = model->getTrianglesMeshes()[4];
+    tmy.vertices.push_back({-1, -1, 0});
+    tmy.vertices.push_back({1, -1, 0});
+    tmy.vertices.push_back({1, 1, 0});
+    tmy.vertices.push_back({-1, 1, 0});
+    tmy.indices.push_back(Vector3ui(0, 1, 2));
+    tmy.indices.push_back(Vector3ui(2, 3, 0));
+
+    material = model->createMaterial(5, "plane_z");
+    material->setDiffuseColor(blue);
+    material->setOpacity(planeOpacity);
+    auto& tmz = model->getTrianglesMeshes()[5];
+    tmz.vertices.push_back({0, -1, -1});
+    tmz.vertices.push_back({0, -1, 1});
+    tmz.vertices.push_back({0, 1, 1});
+    tmz.vertices.push_back({0, 1, -1});
+    tmz.indices.push_back(Vector3ui(0, 1, 2));
+    tmz.indices.push_back(Vector3ui(2, 3, 0));
+
+    addModel(std::make_shared<ModelDescriptor>(std::move(model), "Grid"));
+}
+
+void Scene::buildAxis()
+{
+    BRAYNS_INFO << "Building Axis scene" << std::endl;
+
+    auto model = createModel();
+
+    const float smallRadius = 0.01;
+    const float largeRadius = 0.02;
+
+    // X
+    size_t materialId = 0;
+    auto material = model->createMaterial(materialId, "x_axis");
+    material->setDiffuseColor({1, 0, 0});
+    model->addCylinder(materialId, {{0, 0, 0}, {0.89f, 0, 0}, smallRadius});
+    model->addCone(materialId,
+                   {{0.89, 0, 0}, {0.9f, 0, 0}, smallRadius, largeRadius});
+    model->addCone(materialId, {{0.9, 0, 0}, {1.f, 0, 0}, largeRadius, 0});
+
+    // Y
+    materialId = 1;
+    material = model->createMaterial(materialId, "y_axis");
+    material->setDiffuseColor({0, 1, 0});
+    model->addCylinder(materialId, {{0, 0, 0}, {0, 0.89f, 0}, smallRadius});
+    model->addCone(materialId,
+                   {{0, 0.89, 0}, {0, 0.9f, 0}, smallRadius, largeRadius});
+    model->addCone(materialId, {{0, 0.9, 0}, {0, 1.f, 0}, largeRadius, 0});
+
+    // Z
+    materialId = 2;
+    material = model->createMaterial(materialId, "z_axis");
+    material->setDiffuseColor({0, 0, 1});
+    model->addCylinder(materialId, {{0, 0, 0}, {0, 0, 0.89f}, smallRadius});
+    model->addCone(materialId,
+                   {{0, 0, 0.89}, {0, 0, 0.9f}, smallRadius, largeRadius});
+    model->addCone(materialId, {{0, 0, 0.9}, {0, 0, 1.f}, largeRadius, 0});
+
+    // Origin
+    materialId = 3;
+    material = model->createMaterial(materialId, "origin");
+    material->setDiffuseColor({1, 1, 1});
+    model->addSphere(materialId, {{0, 0, 0}, smallRadius});
+
+    addModel(std::make_shared<ModelDescriptor>(std::move(model), "Axis"));
+}
+
+void Scene::buildCornellBox()
+{
+    BRAYNS_INFO << "Building Cornell Box scene" << std::endl;
+
+    auto model = createModel();
+
+    const Vector3f WHITE = {1.f, 1.f, 1.f};
     const Vector3f positions[8] = {
         {0.f, 0.f, 0.f}, {1.f, 0.f, 0.f}, //    6--------7
         {0.f, 1.f, 0.f},                  //   /|       /|
@@ -367,7 +476,6 @@ void Scene::buildDefault()
         trianglesMesh.indices.push_back(Vector3i(2, 1, 0));
         trianglesMesh.indices.push_back(Vector3i(0, 3, 2));
     }
-
     addModel(
         std::make_shared<ModelDescriptor>(std::move(model), "DefaultScene"));
 }
