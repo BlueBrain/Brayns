@@ -51,10 +51,11 @@ public:
         Blob&& blob, const LoaderProgress& callback,
         const PropertyMap& properties) const final;
 
-    void importMesh(const std::string& fileName, const LoaderProgress& callback,
-                    Model& model, const Matrix4f& transformation,
-                    const size_t defaultMaterialId,
-                    const GeometryQuality geometryQuality) const;
+    ModelMetadata importMesh(const std::string& fileName,
+                             const LoaderProgress& callback, Model& model,
+                             const Matrix4f& transformation,
+                             const size_t defaultMaterialId,
+                             const GeometryQuality geometryQuality) const;
 
 private:
     PropertyMap _defaults;
@@ -62,10 +63,11 @@ private:
     void _createMaterials(Model& model, const aiScene* aiScene,
                           const std::string& folder) const;
 
-    void _postLoad(const aiScene* aiScene, Model& model,
-                   const Matrix4f& transformation, const size_t defaultMaterial,
-                   const std::string& folder,
-                   const LoaderProgress& callback) const;
+    ModelMetadata _postLoad(const aiScene* aiScene, Model& model,
+                            const Matrix4f& transformation,
+                            const size_t defaultMaterial,
+                            const std::string& folder,
+                            const LoaderProgress& callback) const;
     size_t _getQuality(const GeometryQuality geometryQuality) const;
 };
 }
