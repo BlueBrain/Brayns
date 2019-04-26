@@ -57,7 +57,7 @@ public:
 
     // Geometry
     ::optix::Geometry createGeometry(const OptixGeometryType type);
-    ::optix::GeometryGroup createGeometryGroup();
+    ::optix::GeometryGroup createGeometryGroup(const bool compact);
     ::optix::Group createGroup();
     ::optix::Material createMaterial();
 
