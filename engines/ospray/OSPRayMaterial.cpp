@@ -57,7 +57,7 @@ void OSPRayMaterial::commit()
         return;
 
     if (getCurrentType() == "simulation")
-        osphelper::set(_ospMaterial, "apply_simulation", 1);
+        osphelper::set(_ospMaterial, "apply_simulation", true);
     else
         ospRemoveParam(_ospMaterial, "apply_simulation");
 
