@@ -44,12 +44,16 @@ public:
 
     PickResult pick(const Vector2f& pickPos) final;
 
+    void setClipPlanes(const Planes& planes);
+
 private:
     OSPRayCamera* _camera{nullptr};
     OSPRenderer _renderer{nullptr};
     std::atomic<float> _variance{std::numeric_limits<float>::max()};
     std::string _currentOSPRenderer;
     OSPData _currLightsData{nullptr};
+
+    Planes _clipPlanes;
 
     void _createOSPRenderer();
     void _commitRendererMaterials();

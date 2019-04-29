@@ -46,7 +46,8 @@ public:
     float interpupillaryDistance; // distance between the two cameras (stereo)
 
     // Clip planes
+    bool enableClippingPlanes{false};
     Ref<Data> clipPlanes;
 };
 
-} // ::ospray
+} // namespace ospray

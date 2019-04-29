@@ -109,10 +109,13 @@ void OSPRayRenderer::commit()
             ospRemoveParam(_renderer, "simulationData");
         }
 
-        // Setting the clip planes in the camera
+        // Setting the clip planes in the renderer and the camera
         Planes planes;
         for (const auto& clipPlane : _scene->getClipPlanes())
             planes.push_back(clipPlane->getPlane());
+
+        setClipPlanes(planes);
+
         _camera->setClipPlanes(planes);
         _camera->commit();
     }
@@ -130,6 +133,22 @@ void OSPRayRenderer::commit()
         material->setDiffuseColor(rp.getBackgroundColor());
         material->commit(_currentOSPRenderer);
         ospSetObject(_renderer, "bgMaterial", material->getOSPMaterial());
+    }
+
+    // Clip planes
+    if (!_clipPlanes.empty())
+    {
+        const auto clipPlanes = convertVectorToFloat(_clipPlanes);
+        auto clipPlaneData =
+            ospNewData(clipPlanes.size(), OSP_FLOAT4, clipPlanes.data());
+        ospSetData(_renderer, "clipPlanes", clipPlaneData);
+        ospRelease(clipPlaneData);
+    }
+    else
+    {
+        // ospRemoveParam leaks objects, so we set it to null first
+        ospSetData(_renderer, "clipPlanes", nullptr);
+        ospRemoveParam(_renderer, "clipPlanes");
     }
 
     ospSetObject(_renderer, "camera", _camera->impl());
@@ -189,8 +208,17 @@ void OSPRayRenderer::_createOSPRenderer()
 
 void OSPRayRenderer::_commitRendererMaterials()
 {
-    _scene->visitModels([& renderer = _currentOSPRenderer](Model & model) {
+    _scene->visitModels([& renderer = _currentOSPRenderer](Model& model) {
         static_cast<OSPRayModel&>(model).commitMaterials(renderer);
     });
 }
+
+void OSPRayRenderer::setClipPlanes(const Planes& planes)
+{
+    if (_clipPlanes == planes)
+        return;
+    _clipPlanes = planes;
+    markModified(false);
+}
+
 } // namespace brayns
