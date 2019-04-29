@@ -67,6 +67,7 @@ Four renderers are currently supported:
 | basic_simulation    | Enhances ```basic``` with transparency and simulation rendering
 | advanced_simulation | Enhances ```basic_simulation``` with reflection, refraction, volume rendering, shadows and ambient occlusion
 | proximity           | Displays information about element proximity in 3D space. Typically used to find touches between neurons.
+| pathtracer          | Path tracing renderer
 | scivis              | Scientific visualization example renderer provided by OSPRay
 
 
