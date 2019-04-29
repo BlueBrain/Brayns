@@ -50,6 +50,7 @@ private:
     OSPTexture _createOSPTexture2D(Texture2DPtr texture);
     OSPMaterial _ospMaterial{nullptr};
     bool _isBackGroundMaterial{false};
+    std::string _renderer;
 };
 }
 
