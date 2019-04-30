@@ -97,7 +97,6 @@ void DefaultMaterial::commit()
 
 OSP_REGISTER_MATERIAL(basic, DefaultMaterial, default_material);
 OSP_REGISTER_MATERIAL(BASIC, DefaultMaterial, default_material);
-OSP_REGISTER_MATERIAL(pathtracing, DefaultMaterial, default_material);
 OSP_REGISTER_MATERIAL(proximity, DefaultMaterial, default_material);
 
 } // ::brayns

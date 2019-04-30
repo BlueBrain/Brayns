@@ -139,11 +139,10 @@ void OSPRayVolume::commit()
                        static_cast<float>(
                            _parameters.getAdaptiveMaxSamplingRate()));
         osphelper::set(_volume, "adaptiveSampling",
-                       _parameters.getAdaptiveSampling() ? 1 : 0);
-        osphelper::set(_volume, "singleShade",
-                       _parameters.getSingleShade() ? 1 : 0);
+                       _parameters.getAdaptiveSampling());
+        osphelper::set(_volume, "singleShade", _parameters.getSingleShade());
         osphelper::set(_volume, "preIntegration",
-                       _parameters.getPreIntegration() ? 1 : 0);
+                       _parameters.getPreIntegration());
         osphelper::set(_volume, "samplingRate",
                        static_cast<float>(_parameters.getSamplingRate()));
         osphelper::set(_volume, "specular",

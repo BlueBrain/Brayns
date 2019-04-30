@@ -148,14 +148,6 @@ void OSPRayEngine::_createRenderers()
 
     {
         PropertyMap properties;
-        properties.setProperty({"shadows", 0., 0., 1., {"Shadow intensity"}});
-        properties.setProperty(
-            {"softShadows", 0., 0., 1., {"Shadow softness"}});
-        addRendererType("pathtracing", properties);
-    }
-
-    {
-        PropertyMap properties;
         properties.setProperty(
             {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
         properties.setProperty(

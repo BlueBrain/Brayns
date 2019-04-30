@@ -34,10 +34,12 @@ void ProximityRenderer::commit()
     _nearColor = getParam3f("detectionNearColor", ospray::vec3f(0.f, 1.f, 0.f));
     _farColor = getParam3f("detectionFarColor", ospray::vec3f(1.f, 0.f, 0.f));
     _detectionDistance = getParam1f("detectionDistance", 1.f);
-    _detectionOnDifferentMaterial =
-        bool(getParam1i("detectionOnDifferentMaterial", 0));
-    _electronShadingEnabled = getParam("electronShadingEnabled", false);
-    _surfaceShadingEnabled = getParam("surfaceShadingEnabled", false);
+
+    // FIXME(jonask): When supported by OSPRay use bool
+    _detectionOnDifferentMaterial = getParam("detectionOnDifferentMaterial", 0);
+    _electronShadingEnabled = getParam("electronShadingEnabled", 0);
+    _surfaceShadingEnabled = getParam("surfaceShadingEnabled", 0);
+
     _randomNumber = getParam1i("randomNumber", 0);
     _alphaCorrection = getParam1f("alphaCorrection", 0.5f);
 

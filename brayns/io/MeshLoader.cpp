@@ -27,7 +27,10 @@
 #include <assimp/version.h>
 #include <boost/filesystem.hpp>
 #include <brayns/common/log.h>
+
 #include <fstream>
+#include <numeric>
+#include <unordered_map>
 
 #include <brayns/common/utils/utils.h>
 #include <brayns/engine/Material.h>
@@ -151,13 +154,14 @@ ModelDescriptorPtr MeshLoader::importFromFile(
             PROP_GEOMETRY_QUALITY, enumToString(GeometryQuality::high)));
 
     auto model = _scene.createModel();
-    importMesh(fileName, callback, *model, {}, NO_MATERIAL, geometryQuality);
+    auto metadata = importMesh(fileName, callback, *model, {}, NO_MATERIAL,
+                               geometryQuality);
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
 
     auto modelDescriptor =
-        std::make_shared<ModelDescriptor>(std::move(model), fileName);
+        std::make_shared<ModelDescriptor>(std::move(model), fileName, metadata);
     modelDescriptor->setTransformation(transformation);
     return modelDescriptor;
 }
@@ -191,13 +195,15 @@ ModelDescriptorPtr MeshLoader::importFromBlob(
 
     auto model = _scene.createModel();
 
-    _postLoad(aiScene, *model, Matrix4f(1), NO_MATERIAL, "", callback);
+    auto metadata =
+        _postLoad(aiScene, *model, Matrix4f(1), NO_MATERIAL, "", callback);
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
 
     auto modelDescriptor =
-        std::make_shared<ModelDescriptor>(std::move(model), blob.name);
+        std::make_shared<ModelDescriptor>(std::move(model), blob.name,
+                                          metadata);
     modelDescriptor->setTransformation(transformation);
     return modelDescriptor;
 }
@@ -291,10 +297,11 @@ void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
     }
 }
 
-void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
-                           const Matrix4f& transformation,
-                           const size_t materialId, const std::string& folder,
-                           const LoaderProgress& callback) const
+ModelMetadata MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
+                                    const Matrix4f& transformation,
+                                    const size_t materialId,
+                                    const std::string& folder,
+                                    const LoaderProgress& callback) const
 {
     // Always create placeholder material since it is not guaranteed to exist
     model.createMaterial(materialId, "default");
@@ -302,9 +309,9 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
     if (materialId == NO_MATERIAL)
         _createMaterials(model, aiScene, folder);
 
-    size_t nbVertices = 0;
-    size_t nbFaces = 0;
-    std::map<size_t, size_t> indexOffsets;
+    std::unordered_map<size_t, size_t> nbVertices;
+    std::unordered_map<size_t, size_t> nbFaces;
+    std::unordered_map<size_t, size_t> indexOffsets;
 
     const auto trfm = aiScene->mRootNode->mTransformation;
     Matrix4f matrix{trfm.a1, trfm.b1, trfm.c1, trfm.d1, trfm.a2, trfm.b2,
@@ -317,16 +324,31 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
         auto mesh = aiScene->mMeshes[m];
         auto id =
             (materialId != NO_MATERIAL ? materialId : mesh->mMaterialIndex);
+        nbVertices[id] += mesh->mNumVertices;
+        nbFaces[id] += mesh->mNumFaces;
+    }
+
+    for (const auto& i : nbVertices)
+    {
+        auto& triangleMeshes = model.getTrianglesMeshes()[i.first];
+        triangleMeshes.vertices.reserve(i.second);
+        triangleMeshes.normals.reserve(i.second);
+        triangleMeshes.textureCoordinates.reserve(i.second);
+        triangleMeshes.colors.reserve(i.second);
+    }
+    for (const auto& i : nbFaces)
+    {
+        auto& triangleMeshes = model.getTrianglesMeshes()[i.first];
+        triangleMeshes.indices.reserve(i.second);
+    }
+
+    for (size_t m = 0; m < aiScene->mNumMeshes; ++m)
+    {
+        auto mesh = aiScene->mMeshes[m];
+        auto id =
+            (materialId != NO_MATERIAL ? materialId : mesh->mMaterialIndex);
         auto& triangleMeshes = model.getTrianglesMeshes()[id];
 
-        nbVertices += mesh->mNumVertices;
-        triangleMeshes.vertices.reserve(nbVertices);
-        if (mesh->HasNormals())
-            triangleMeshes.normals.reserve(nbVertices);
-        if (mesh->HasTextureCoords(0))
-            triangleMeshes.textureCoordinates.reserve(nbVertices);
-        if (mesh->HasVertexColors(0))
-            triangleMeshes.colors.reserve(nbVertices);
         for (size_t i = 0; i < mesh->mNumVertices; ++i)
         {
             const auto& v = mesh->mVertices[i];
@@ -355,8 +377,7 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
             }
         }
         bool nonTriangulatedFaces = false;
-        nbFaces += mesh->mNumFaces;
-        triangleMeshes.indices.reserve(nbFaces);
+
         const size_t offset = indexOffsets[mesh->mMaterialIndex];
         for (size_t f = 0; f < mesh->mNumFaces; ++f)
         {
@@ -385,8 +406,16 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
 
     callback.updateProgress("Post-processing...", 1.f);
 
-    BRAYNS_DEBUG << "Loaded " << nbVertices << " vertices and " << nbFaces
-                 << " faces" << std::endl;
+    const auto numVertices =
+        std::accumulate(nbVertices.begin(), nbVertices.end(), 0,
+                        [](auto value, auto& i) { return value + i.second; });
+    const auto numFaces =
+        std::accumulate(nbFaces.begin(), nbFaces.end(), 0,
+                        [](auto value, auto& i) { return value + i.second; });
+    ModelMetadata metadata{{"meshes", std::to_string(aiScene->mNumMeshes)},
+                           {"vertices", std::to_string(numVertices)},
+                           {"faces", std::to_string(numFaces)}};
+    return metadata;
 }
 
 size_t MeshLoader::_getQuality(const GeometryQuality geometryQuality) const
@@ -402,11 +431,10 @@ size_t MeshLoader::_getQuality(const GeometryQuality geometryQuality) const
     }
 }
 
-void MeshLoader::importMesh(const std::string& fileName,
-                            const LoaderProgress& callback, Model& model,
-                            const Matrix4f& transformation,
-                            const size_t defaultMaterialId,
-                            const GeometryQuality geometryQuality) const
+ModelMetadata MeshLoader::importMesh(
+    const std::string& fileName, const LoaderProgress& callback, Model& model,
+    const Matrix4f& transformation, const size_t defaultMaterialId,
+    const GeometryQuality geometryQuality) const
 {
     const boost::filesystem::path file = fileName;
 
@@ -443,8 +471,8 @@ void MeshLoader::importMesh(const std::string& fileName,
 
     boost::filesystem::path filepath = fileName;
 
-    _postLoad(aiScene, model, transformation, defaultMaterialId,
-              filepath.parent_path().string(), callback);
+    return _postLoad(aiScene, model, transformation, defaultMaterialId,
+                     filepath.parent_path().string(), callback);
 }
 
 std::string MeshLoader::getName() const

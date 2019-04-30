@@ -112,8 +112,9 @@ void fromOSPRayProperties(PropertyMap& object, ospray::ManagedObject& ospObject)
                 ospObject.getParam1i(prop->name.c_str(), prop->get<int32_t>()));
             break;
         case Property::Type::Bool:
-            prop->set(
-                ospObject.getParam(prop->name.c_str(), prop->get<bool>()));
+            // FIXME(jonask): When supported by OSPRay use bool
+            prop->set(ospObject.getParam(prop->name.c_str(),
+                                         static_cast<bool>(prop->get<int>())));
             break;
         case Property::Type::String:
             prop->set(ospObject.getParamString(prop->name.c_str(),
@@ -164,19 +165,21 @@ ospcommon::affine3f transformationToAffine3f(
     rot = ospcommon::affine3f::rotate({0, 1, 0}, y) * rot;
     rot = ospcommon::affine3f::rotate({0, 0, 1}, z) * rot;
 
-    const auto& center = transformation.getRotationCenter();
+    const auto& rotationCenter = transformation.getRotationCenter();
     const auto& translation = transformation.getTranslation();
     const auto& scale = transformation.getScale();
 
-    return ospcommon::affine3f::translate({float(center.x / (1. / scale.x)),
-                                           float(center.y / (1. / scale.y)),
-                                           float(center.z / (1. / scale.z))}) *
-           rot *
-           ospcommon::affine3f::scale(
+    return ospcommon::affine3f::scale(
                {float(scale.x), float(scale.y), float(scale.z)}) *
-           ospcommon::affine3f::translate({float(translation.x - center.x),
-                                           float(translation.y - center.y),
-                                           float(translation.z - center.z)});
+           ospcommon::affine3f::translate({float(translation.x),
+                                           float(translation.y),
+                                           float(translation.z)}) *
+           ospcommon::affine3f::translate({float(rotationCenter.x),
+                                           float(rotationCenter.y),
+                                           float(rotationCenter.z)}) *
+           rot * ospcommon::affine3f::translate({float(-rotationCenter.x),
+                                                 float(-rotationCenter.y),
+                                                 float(-rotationCenter.z)});
 }
 
 void addInstance(OSPModel rootModel, OSPModel modelToAdd,
@@ -214,7 +217,8 @@ void set(OSPObject obj, const char* id, float v)
 }
 void set(OSPObject obj, const char* id, bool v)
 {
-    ospSet1b(obj, id, v);
+    // FIXME(jonask): When supported by OSPRay use bool
+    ospSet1i(obj, id, static_cast<int>(v));
 }
 void set(OSPObject obj, const char* id, int32_t v)
 {

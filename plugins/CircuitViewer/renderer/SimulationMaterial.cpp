@@ -64,7 +64,8 @@ void SimulationMaterial::commit()
 
     DefaultMaterial::commit();
 
-    const bool withSimulationOffsets = getParam1i("apply_simulation", 0) == 1;
+    // FIXME(jonask): When supported by OSPRay use bool
+    const bool withSimulationOffsets = getParam1i("apply_simulation", 0);
     ispc::SimulationMaterial_set(getIE(), withSimulationOffsets);
 }
 

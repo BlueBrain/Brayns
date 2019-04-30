@@ -297,7 +297,7 @@ void OSPRayModel::_commitStreamlines(const size_t materialId)
     }
 
     // Since we allow custom radius per point we always smooth
-    osphelper::set(geometry, "smooth", 1);
+    osphelper::set(geometry, "smooth", true);
 
     ospCommit(geometry);
 

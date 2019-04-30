@@ -135,10 +135,14 @@ void OSPRayScene::commit()
             }
         }
 
-        for (const auto& instance : modelDescriptor->getInstances())
+        const auto& instances = modelDescriptor->getInstances();
+        for (size_t i = 0; i < instances.size(); ++i)
         {
+            const auto& instance = instances[i];
+
+            // First instance uses model transformation
             const auto instanceTransform =
-                transformation * instance.getTransformation();
+                (i == 0 ? transformation : instance.getTransformation());
 
             if (modelDescriptor->getBoundingBox() && instance.getBoundingBox())
             {
@@ -242,8 +246,7 @@ bool OSPRayScene::commitLights()
         osphelper::set(ospLight, "color", Vector3f(baseLight->_color));
         osphelper::set(ospLight, "intensity",
                        static_cast<float>(baseLight->_intensity));
-        // NOTE: Bool is broken before OSPRay 1.8.3 so set it to 1 or 0
-        osphelper::set(ospLight, "isVisible", baseLight->_isVisible ? 1 : 0);
+        osphelper::set(ospLight, "isVisible", baseLight->_isVisible);
 
         _ospLights.push_back(ospLight);
         ospCommit(ospLight);
