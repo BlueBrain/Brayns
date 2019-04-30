@@ -25,6 +25,7 @@
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include "BasicRenderer_ispc.h"
+#include <engines/ospray/ispc/render/DefaultMaterial.h>
 #include <engines/ospray/ispc/render/utils/AbstractRenderer.h>
 
 #include <boost/test/unit_test.hpp>
@@ -62,8 +63,7 @@ public:
             brayns::RpcParameterDescription{"notify-param",
                                             "A notification with property map",
                                             "param", "a beautiful input param"},
-            input,
-            [&](const brayns::PropertyMap& prop) {
+            input, [&](const brayns::PropertyMap& prop) {
                 if (prop.hasProperty("value"))
                     BOOST_CHECK_EQUAL(prop.getProperty<int>("value"), 42);
                 else
@@ -142,6 +142,7 @@ public:
 };
 
 OSP_REGISTER_RENDERER(MyRenderer, myrenderer);
+OSP_REGISTER_MATERIAL(myrenderer, brayns::DefaultMaterial, default_material);
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int argc,
                                                          const char** argv)

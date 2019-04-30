@@ -148,6 +148,14 @@ void OSPRayEngine::_createRenderers()
 
     {
         PropertyMap properties;
+        properties.setProperty({"rouletteDepth", 5, 0, 20, {"Roulette depth"}});
+        properties.setProperty(
+            {"maxContribution", 100000.0, 0.0, 100000.0, {"Max contribution"}});
+
+        addRendererType("pathtracer", properties);
+    }
+    {
+        PropertyMap properties;
         properties.setProperty(
             {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
         properties.setProperty(
@@ -165,6 +173,7 @@ void OSPRayEngine::_createRenderers()
             {"electronShadingEnabled", false, {"Electron shading"}});
         properties.setProperty(
             {"surfaceShadingEnabled", true, {"Surface shading"}});
+
         addRendererType("proximity", properties);
     }
     {
@@ -184,6 +193,7 @@ void OSPRayEngine::_createRenderers()
         properties.setProperty(
             {"oneSidedLighting", true, {"One-sided lighting"}});
         properties.setProperty({"shadowsEnabled", false, {"Shadows"}});
+
         addRendererType("scivis", properties);
     }
 
