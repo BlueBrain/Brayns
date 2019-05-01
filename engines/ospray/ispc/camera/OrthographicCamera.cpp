@@ -35,7 +35,7 @@ void OrthographicCamera::commit()
     // ------------------------------------------------------------------
     height = getParamf("height", 1.f); // imgPlane_size_y
     aspect = getParamf("aspect", 1.f);
-    enableClippingPlanes = getParam("enableClippingPlanes", false);
+    enableClippingPlanes = getParam("enableClippingPlanes", 0);
     clipPlanes =
         enableClippingPlanes ? getParamData("clipPlanes", nullptr) : nullptr;
 
