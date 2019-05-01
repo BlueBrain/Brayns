@@ -60,6 +60,11 @@ void Timer::stop()
     }
 }
 
+int64_t Timer::microseconds() const
+{
+    return _microseconds;
+}
+
 int64_t Timer::milliseconds() const
 {
     return _microseconds / 1000.0;

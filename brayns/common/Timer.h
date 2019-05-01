@@ -39,6 +39,9 @@ public:
     /** @return the elapsed time in seconds since the last start(). */
     double elapsed() const;
 
+    /** @return last interval from start() to stop() in microseconds. */
+    int64_t microseconds() const;
+
     /** @return last interval from start() to stop() in milliseconds. */
     int64_t milliseconds() const;
 

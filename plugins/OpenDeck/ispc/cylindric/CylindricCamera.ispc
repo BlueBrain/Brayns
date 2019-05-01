@@ -42,7 +42,7 @@ void CylindricCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
 
     const float time = Camera_shutterTime(_self, sample.time);
     vec3f org = self->org;
-    setRay(ray, org, normalize(dir), self->super.nearClip, infinity, time);
+    setRay(ray, org, normalize(dir), self->super.nearClip, inf, time);
 }
 
 /*! create a new ispc-side version of a OpenDeckcamera - with given pointer to
