@@ -21,9 +21,11 @@
 
 #include <braynsvrpn/defines.h>
 
+#include <brayns/common/Timer.h>
 #include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
+#include <vrpn_Analog.h>
 #include <vrpn_Tracker.h>
 
 #ifdef BRAYNSVRPN_USE_LIBUV
@@ -32,6 +34,12 @@
 
 namespace brayns
 {
+struct VrpnStates
+{
+    float axisX = 0.0f;
+    float axisZ = 0.0f;
+};
+
 class VRPNPlugin : public ExtensionPlugin
 {
 public:
@@ -48,7 +56,10 @@ public:
 
 private:
     std::unique_ptr<vrpn_Tracker_Remote> _vrpnTracker;
+    std::unique_ptr<vrpn_Analog_Remote> _vrpnAnalog;
     const std::string _vrpnName;
+    Timer _timer;
+    VrpnStates _states;
 
 #ifdef BRAYNSVRPN_USE_LIBUV
     struct LibuvDeleter

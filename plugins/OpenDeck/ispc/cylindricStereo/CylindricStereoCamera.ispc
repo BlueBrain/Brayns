@@ -74,7 +74,7 @@ void CylindricStereoCamera_initRay(uniform Camera* uniform _self,
             self->dir_du.z * radius * sinf(alpha);
 
     const float time = Camera_shutterTime(_self, sample.time);
-    setRay(ray, org, normalize(dir), self->super.nearClip, infinity, time);
+    setRay(ray, org, normalize(dir), self->super.nearClip, inf, time);
 }
 
 /*! create a new ispc-side version of a OpenDeckCylinderStereoCamera - with

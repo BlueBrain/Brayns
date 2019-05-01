@@ -43,7 +43,7 @@ void MultiviewCamera::commit()
     const float aspect = getParamf("aspect", 1.66667f);
     const float apertureRadius = getParamf("apertureRadius", 0.f);
     const float focusDistance = getParamf("focusDistance", 1.f);
-    const float height = getParamf("height", 1.f); // imgPlane_size_y
+    const float height = getParamf("height", 10.f); // imgPlane_size_y
     const float armLength = getParamf("armLength", 5.f);
 
     clipPlanes = getParamData("clipPlanes", nullptr);
@@ -80,8 +80,7 @@ void MultiviewCamera::commit()
                               (const ispc::vec3f&)dir_du,
                               (const ispc::vec3f&)dir_dv, scaledAperture,
                               height, aspect, armLength,
-                              (const ispc::vec4f*)clipPlaneData,
-                              numClipPlanes);
+                              (const ispc::vec4f*)clipPlaneData, numClipPlanes);
 }
 
 OSP_REGISTER_CAMERA(MultiviewCamera, multiview);

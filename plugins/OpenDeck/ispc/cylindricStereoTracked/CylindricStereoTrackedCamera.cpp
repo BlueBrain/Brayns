@@ -73,12 +73,13 @@ void CylindricStereoTrackedCamera::commit()
     const auto ipd = getInterpupillaryDistance(stereoMode);
 
     const auto headPosition = _getHeadPosition();
+
     // The tracking model of the 3d glasses is inversed
     // so we need to negate CamDu here.
     const auto openDeckCamDU = -_getOpendeckCamDU();
 
     dir = vec3f(0, 0, 1);
-    const auto org = vec3f(0, 0, 0);
+    const auto org = pos;
     const auto dir_du = vec3f(1, 0, 0);
     const auto dir_dv = vec3f(0, 1, 0);
 
