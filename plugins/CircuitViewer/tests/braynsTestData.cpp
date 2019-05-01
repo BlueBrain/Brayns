@@ -21,7 +21,9 @@
 
 #include "CircuitViewer/tests/paths.h"
 #include "tests/PDiffHelpers.h"
+#ifdef BRAYNS_USE_NETWORKING
 #include <jsonSerialization.h>
+#endif
 
 #include <brayns/Brayns.h>
 
@@ -37,6 +39,7 @@
 #include <BBP/TestDatasets.h>
 
 #define BOOST_TEST_MODULE braynsTestData
+#include <boost/test/unit_test.hpp>
 
 #ifdef BRAYNS_USE_NETWORKING
 #include "tests/ClientServer.h"
@@ -94,6 +97,7 @@ BOOST_AUTO_TEST_CASE(circuit_with_color_by_mtype)
                                  brayns.getEngine().getFrameBuffer()));
 }
 
+#ifdef BRAYNS_USE_NETWORKING
 BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping)
 {
     const std::vector<const char*> argv = {
@@ -139,7 +143,6 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping)
             .getAnimationParameters());
     params.animParams->setFrame(42);
 
-#ifdef BRAYNS_USE_NETWORKING
     auto image = clientServer.makeRequest<
         brayns::SnapshotParams, brayns::ImageGenerator::ImageBase64>("snapshot",
                                                                      params);
@@ -148,8 +151,8 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping)
         image, "testdataallmini50basicsimulation_snapshot.png"));
     BOOST_CHECK(
         !compareBase64TestImage(image, "testdataallmini50basicsimulation.png"));
-#endif
 }
+#endif
 
 void testSdfGeometries(bool dampened)
 {
