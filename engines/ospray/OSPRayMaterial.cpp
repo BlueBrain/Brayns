@@ -57,7 +57,7 @@ void OSPRayMaterial::commit()
         return;
 
     if (getCurrentType() == "simulation")
-        osphelper::set(_ospMaterial, "apply_simulation", 1);
+        osphelper::set(_ospMaterial, "apply_simulation", true);
     else
         ospRemoveParam(_ospMaterial, "apply_simulation");
 
@@ -100,10 +100,14 @@ void OSPRayMaterial::commit()
 
 void OSPRayMaterial::commit(const std::string& renderer)
 {
-    if (!isModified())
+    if (!isModified() && renderer == _renderer)
         return;
     ospRelease(_ospMaterial);
     _ospMaterial = ospNewMaterial2(renderer.c_str(), "default_material");
+    if (!_ospMaterial)
+        throw std::runtime_error("Could not create material for renderer '" +
+                                 renderer + "'");
+    _renderer = renderer;
     markModified(false); // Ensure commit recreates the ISPC object
     commit();
 }

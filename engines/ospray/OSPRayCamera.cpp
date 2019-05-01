@@ -71,7 +71,7 @@ void OSPRayCamera::commit()
 
 void OSPRayCamera::setEnvironmentMap(const bool environmentMap)
 {
-    osphelper::set(_camera, "environmentMap", environmentMap ? 1 : 0);
+    osphelper::set(_camera, "environmentMap", environmentMap);
     ospCommit(_camera);
 }
 

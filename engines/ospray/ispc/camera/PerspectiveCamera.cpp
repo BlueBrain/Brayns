@@ -44,7 +44,8 @@ void PerspectiveCamera::commit()
     aspect = getParamf("aspect", 1.f);
     apertureRadius = getParamf("apertureRadius", 0.f);
     focusDistance = getParamf("focusDistance", 1.f);
-    stereo = getParam("stereo", false);
+    // FIXME(jonask): When supported by OSPRay use bool
+    stereo = getParam("stereo", 0);
     // the default 63.5mm represents the average human IPD
     interpupillaryDistance = getParamf("interpupillaryDistance", 0.0635f);
     enableClippingPlanes = getParam("enableClippingPlanes", 0);

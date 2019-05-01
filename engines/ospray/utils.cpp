@@ -112,8 +112,9 @@ void fromOSPRayProperties(PropertyMap& object, ospray::ManagedObject& ospObject)
                 ospObject.getParam1i(prop->name.c_str(), prop->get<int32_t>()));
             break;
         case Property::Type::Bool:
-            prop->set(
-                ospObject.getParam(prop->name.c_str(), prop->get<bool>()));
+            // FIXME(jonask): When supported by OSPRay use bool
+            prop->set(ospObject.getParam(prop->name.c_str(),
+                                         static_cast<bool>(prop->get<int>())));
             break;
         case Property::Type::String:
             prop->set(ospObject.getParamString(prop->name.c_str(),
@@ -176,10 +177,9 @@ ospcommon::affine3f transformationToAffine3f(
            ospcommon::affine3f::translate({float(rotationCenter.x),
                                            float(rotationCenter.y),
                                            float(rotationCenter.z)}) *
-           rot *
-           ospcommon::affine3f::translate({float(-rotationCenter.x),
-                                           float(-rotationCenter.y),
-                                           float(-rotationCenter.z)});
+           rot * ospcommon::affine3f::translate({float(-rotationCenter.x),
+                                                 float(-rotationCenter.y),
+                                                 float(-rotationCenter.z)});
 }
 
 void addInstance(OSPModel rootModel, OSPModel modelToAdd,
@@ -217,7 +217,8 @@ void set(OSPObject obj, const char* id, float v)
 }
 void set(OSPObject obj, const char* id, bool v)
 {
-    ospSet1b(obj, id, v);
+    // FIXME(jonask): When supported by OSPRay use bool
+    ospSet1i(obj, id, static_cast<int>(v));
 }
 void set(OSPObject obj, const char* id, int32_t v)
 {
