@@ -72,6 +72,12 @@ public:
         _max = glm::max(_max, point);
     }
 
+    inline void intersect(const Box<T>& aabb)
+    {
+        _min = glm::max(_min, aabb.getMin());
+        _max = glm::min(_max, aabb.getMax());
+    }
+
     inline void reset()
     {
         _min = vec(std::numeric_limits<T>::max());
