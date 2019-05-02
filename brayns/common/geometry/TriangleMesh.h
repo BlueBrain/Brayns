@@ -18,14 +18,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef TRIANGLESMESH_H
-#define TRIANGLESMESH_H
+#ifndef TRIANGLEMESH_H
+#define TRIANGLEMESH_H
 
 #include <brayns/common/types.h>
 
 namespace brayns
 {
-struct TrianglesMesh
+struct TriangleMesh
 {
     Vector3fs vertices;
     Vector3fs normals;
@@ -35,4 +35,4 @@ struct TrianglesMesh
 };
 }
 
-#endif // TRIANGLESMESH_H
+#endif // TRIANGLEMESH_H

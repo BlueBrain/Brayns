@@ -130,8 +130,8 @@ struct Cone;
 using Cones = std::vector<Cone>;
 using ConesMap = std::map<size_t, Cones>;
 
-struct TrianglesMesh;
-using TrianglesMeshMap = std::map<size_t, TrianglesMesh>;
+struct TriangleMesh;
+using TriangleMeshMap = std::map<size_t, TriangleMesh>;
 
 struct StreamlinesData;
 using StreamlinesDataMap = std::map<size_t, StreamlinesData>;

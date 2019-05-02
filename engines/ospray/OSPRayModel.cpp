@@ -226,38 +226,38 @@ void OSPRayModel::_commitCones(const size_t materialId)
 void OSPRayModel::_commitMeshes(const size_t materialId)
 {
     auto& geometry = _createGeometry(_ospMeshes, materialId, "trianglemesh");
-    auto& trianglesMesh = _geometries->_trianglesMeshes.at(materialId);
+    auto& triangleMesh = _geometries->_triangleMeshes.at(materialId);
 
-    OSPData vertices = allocateVectorData(trianglesMesh.vertices, OSP_FLOAT3,
+    OSPData vertices = allocateVectorData(triangleMesh.vertices, OSP_FLOAT3,
                                           _memoryManagementFlags);
     ospSetObject(geometry, "position", vertices);
     ospRelease(vertices);
 
-    OSPData indices = allocateVectorData(trianglesMesh.indices, OSP_INT3,
+    OSPData indices = allocateVectorData(triangleMesh.indices, OSP_INT3,
                                          _memoryManagementFlags);
     ospSetObject(geometry, "index", indices);
     ospRelease(indices);
 
-    if (!trianglesMesh.normals.empty())
+    if (!triangleMesh.normals.empty())
     {
-        OSPData normals = allocateVectorData(trianglesMesh.normals, OSP_FLOAT3,
+        OSPData normals = allocateVectorData(triangleMesh.normals, OSP_FLOAT3,
                                              _memoryManagementFlags);
         ospSetObject(geometry, "vertex.normal", normals);
         ospRelease(normals);
     }
 
-    if (!trianglesMesh.colors.empty())
+    if (!triangleMesh.colors.empty())
     {
-        OSPData colors = allocateVectorData(trianglesMesh.colors, OSP_FLOAT3A,
+        OSPData colors = allocateVectorData(triangleMesh.colors, OSP_FLOAT3A,
                                             _memoryManagementFlags);
         ospSetObject(geometry, "vertex.color", colors);
         ospRelease(colors);
     }
 
-    if (!trianglesMesh.textureCoordinates.empty())
+    if (!triangleMesh.textureCoordinates.empty())
     {
         OSPData texCoords =
-            allocateVectorData(trianglesMesh.textureCoordinates, OSP_FLOAT2,
+            allocateVectorData(triangleMesh.textureCoordinates, OSP_FLOAT2,
                                _memoryManagementFlags);
         ospSetObject(geometry, "vertex.texcoord", texCoords);
         ospRelease(texCoords);
@@ -410,9 +410,9 @@ void OSPRayModel::commitGeometry()
             _commitCones(cones.first);
     }
 
-    if (_trianglesMeshesDirty)
+    if (_triangleMeshesDirty)
     {
-        for (const auto& meshes : _geometries->_trianglesMeshes)
+        for (const auto& meshes : _geometries->_triangleMeshes)
             _commitMeshes(meshes.first);
     }
 
