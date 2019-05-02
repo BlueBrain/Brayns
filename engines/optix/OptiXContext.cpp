@@ -25,7 +25,7 @@
 #include <engines/optix/braynsOptixEngine_generated_Cylinders.cu.ptx.h>
 #include <engines/optix/braynsOptixEngine_generated_PerspectiveCamera.cu.ptx.h>
 #include <engines/optix/braynsOptixEngine_generated_Spheres.cu.ptx.h>
-#include <engines/optix/braynsOptixEngine_generated_TrianglesMesh.cu.ptx.h>
+#include <engines/optix/braynsOptixEngine_generated_TriangleMesh.cu.ptx.h>
 
 #include <brayns/common/log.h>
 #include <brayns/common/material/Texture2D.h>
@@ -37,7 +37,7 @@ const std::string CUDA_SPHERES = braynsOptixEngine_generated_Spheres_cu_ptx;
 const std::string CUDA_CYLINDERS = braynsOptixEngine_generated_Cylinders_cu_ptx;
 const std::string CUDA_CONES = braynsOptixEngine_generated_Cones_cu_ptx;
 const std::string CUDA_TRIANGLES_MESH =
-    braynsOptixEngine_generated_TrianglesMesh_cu_ptx;
+    braynsOptixEngine_generated_TriangleMesh_cu_ptx;
 const std::string CUDA_PERSPECTIVE_CAMERA =
     braynsOptixEngine_generated_PerspectiveCamera_cu_ptx;
 const std::string CUDA_MISS = braynsOptixEngine_generated_Constantbg_cu_ptx;

@@ -34,7 +34,7 @@ set(BRAYNSOPTIXENGINE_CU
   cuda/geometry/Cones.cu
   cuda/geometry/Cylinders.cu
   cuda/geometry/Spheres.cu
-  cuda/geometry/TrianglesMesh.cu
+  cuda/geometry/TriangleMesh.cu
   cuda/renderer/AdvancedSimulation.cu
   cuda/renderer/BasicSimulation.cu
 )
@@ -51,7 +51,7 @@ set(BRAYNSOPTIXENGINE_PTX
   braynsOptixEngine_generated_Cones.cu.ptx
   braynsOptixEngine_generated_Cylinders.cu.ptx
   braynsOptixEngine_generated_Spheres.cu.ptx
-  braynsOptixEngine_generated_TrianglesMesh.cu.ptx
+  braynsOptixEngine_generated_TriangleMesh.cu.ptx
   braynsOptixEngine_generated_AdvancedSimulation.cu.ptx
   braynsOptixEngine_generated_BasicSimulation.cu.ptx
 )
