@@ -29,7 +29,7 @@
 #include <brayns/common/geometry/SDFGeometry.h>
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/geometry/Streamline.h>
-#include <brayns/common/geometry/TrianglesMesh.h>
+#include <brayns/common/geometry/TriangleMesh.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/types.h>
 
@@ -372,14 +372,14 @@ public:
     /**
         Returns triangle meshes handled by the model
     */
-    const TrianglesMeshMap& getTrianglesMeshes() const
+    const TriangleMeshMap& getTriangleMeshes() const
     {
-        return _geometries->_trianglesMeshes;
+        return _geometries->_triangleMeshes;
     }
-    TrianglesMeshMap& getTrianglesMeshes()
+    TriangleMeshMap& getTriangleMeshes()
     {
-        _trianglesMeshesDirty = true;
-        return _geometries->_trianglesMeshes;
+        _triangleMeshesDirty = true;
+        return _geometries->_triangleMeshes;
     }
 
     /** Add a volume to the model*/
@@ -479,7 +479,7 @@ protected:
         SpheresMap _spheres;
         CylindersMap _cylinders;
         ConesMap _cones;
-        TrianglesMeshMap _trianglesMeshes;
+        TriangleMeshMap _triangleMeshes;
         StreamlinesDataMap _streamlines;
         SDFGeometryData _sdf;
         Volumes _volumes;
@@ -487,7 +487,7 @@ protected:
         Boxd _sphereBounds;
         Boxd _cylindersBounds;
         Boxd _conesBounds;
-        Boxd _trianglesMeshesBounds;
+        Boxd _triangleMeshesBounds;
         Boxd _streamlinesBounds;
         Boxd _sdfGeometriesBounds;
         Boxd _volumesBounds;
@@ -495,7 +495,7 @@ protected:
         bool isEmpty() const
         {
             return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
-                   _trianglesMeshes.empty() && _sdf.geometries.empty() &&
+                   _triangleMeshes.empty() && _sdf.geometries.empty() &&
                    _streamlines.empty() && _volumes.empty();
         }
     };
@@ -508,7 +508,7 @@ protected:
     bool _spheresDirty{false};
     bool _cylindersDirty{false};
     bool _conesDirty{false};
-    bool _trianglesMeshesDirty{false};
+    bool _triangleMeshesDirty{false};
     bool _streamlinesDirty{false};
     bool _sdfGeometriesDirty{false};
     bool _volumesDirty{false};
@@ -516,7 +516,7 @@ protected:
     bool _areGeometriesDirty() const
     {
         return _spheresDirty || _cylindersDirty || _conesDirty ||
-               _trianglesMeshesDirty || _sdfGeometriesDirty;
+               _triangleMeshesDirty || _sdfGeometriesDirty;
     }
 
     Boxd _bounds;

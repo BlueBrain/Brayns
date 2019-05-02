@@ -301,14 +301,14 @@ void Scene::buildDefault()
         material->setGlossiness(i == 4 ? 0.9f : 1.f);
         material->setOpacity(1.f);
 
-        auto& trianglesMesh = model->getTrianglesMeshes()[materialId];
+        auto& triangleMesh = model->getTriangleMeshes()[materialId];
         for (size_t j = 0; j < 6; ++j)
         {
             const auto position = positions[indices[i][j]];
-            trianglesMesh.vertices.push_back(position);
+            triangleMesh.vertices.push_back(position);
         }
-        trianglesMesh.indices.push_back(Vector3ui(0, 1, 2));
-        trianglesMesh.indices.push_back(Vector3ui(3, 4, 5));
+        triangleMesh.indices.push_back(Vector3ui(0, 1, 2));
+        triangleMesh.indices.push_back(Vector3ui(3, 4, 5));
         ++materialId;
     }
 
@@ -361,11 +361,11 @@ void Scene::buildDefault()
             {0.5f + lampInfo.x, lampInfo.y, 0.5f - lampInfo.z},
             {0.5f + lampInfo.x, lampInfo.y, 0.5f + lampInfo.z},
             {0.5f - lampInfo.x, lampInfo.y, 0.5f + lampInfo.z}};
-        auto& trianglesMesh = model->getTrianglesMeshes()[materialId];
+        auto& triangleMesh = model->getTriangleMeshes()[materialId];
         for (size_t i = 0; i < 4; ++i)
-            trianglesMesh.vertices.push_back(lampPositions[i]);
-        trianglesMesh.indices.push_back(Vector3i(2, 1, 0));
-        trianglesMesh.indices.push_back(Vector3i(0, 3, 2));
+            triangleMesh.vertices.push_back(lampPositions[i]);
+        triangleMesh.indices.push_back(Vector3i(2, 1, 0));
+        triangleMesh.indices.push_back(Vector3i(0, 3, 2));
     }
 
     addModel(

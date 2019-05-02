@@ -101,8 +101,8 @@ void OptiXModel::commitGeometry()
             _commitCones(cones.first);
         }
 
-    if (_trianglesMeshesDirty)
-        for (const auto& meshes : _geometries->_trianglesMeshes)
+    if (_triangleMeshesDirty)
+        for (const auto& meshes : _geometries->_triangleMeshes)
             _commitMeshes(meshes.first);
 
     updateBounds();
@@ -222,11 +222,11 @@ void OptiXModel::_commitCones(const size_t materialId)
 
 void OptiXModel::_commitMeshes(const size_t materialId)
 {
-    if (_geometries->_trianglesMeshes.find(materialId) ==
-        _geometries->_trianglesMeshes.end())
+    if (_geometries->_triangleMeshes.find(materialId) ==
+        _geometries->_triangleMeshes.end())
         return;
 
-    const auto& meshes = _geometries->_trianglesMeshes[materialId];
+    const auto& meshes = _geometries->_triangleMeshes[materialId];
     _optixMeshes[materialId] =
         OptiXContext::get().createGeometry(OptixGeometryType::triangleMesh);
 

@@ -330,7 +330,7 @@ ModelMetadata MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
 
     for (const auto& i : nbVertices)
     {
-        auto& triangleMeshes = model.getTrianglesMeshes()[i.first];
+        auto& triangleMeshes = model.getTriangleMeshes()[i.first];
         triangleMeshes.vertices.reserve(i.second);
         triangleMeshes.normals.reserve(i.second);
         triangleMeshes.textureCoordinates.reserve(i.second);
@@ -338,7 +338,7 @@ ModelMetadata MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
     }
     for (const auto& i : nbFaces)
     {
-        auto& triangleMeshes = model.getTrianglesMeshes()[i.first];
+        auto& triangleMeshes = model.getTriangleMeshes()[i.first];
         triangleMeshes.indices.reserve(i.second);
     }
 
@@ -347,7 +347,7 @@ ModelMetadata MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
         auto mesh = aiScene->mMeshes[m];
         auto id =
             (materialId != NO_MATERIAL ? materialId : mesh->mMaterialIndex);
-        auto& triangleMeshes = model.getTrianglesMeshes()[id];
+        auto& triangleMeshes = model.getTriangleMeshes()[id];
 
         for (size_t i = 0; i < mesh->mNumVertices; ++i)
         {
