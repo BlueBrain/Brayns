@@ -35,7 +35,9 @@ void OrthographicCamera::commit()
     // ------------------------------------------------------------------
     height = getParamf("height", 1.f); // imgPlane_size_y
     aspect = getParamf("aspect", 1.f);
-    clipPlanes = getParamData("clipPlanes", nullptr);
+    enableClippingPlanes = getParam("enableClippingPlanes", 0);
+    clipPlanes =
+        enableClippingPlanes ? getParamData("clipPlanes", nullptr) : nullptr;
 
     // ------------------------------------------------------------------
     // now, update the local precomputed values
@@ -62,4 +64,4 @@ void OrthographicCamera::commit()
 
 OSP_REGISTER_CAMERA(OrthographicCamera, orthographic);
 
-} // ::ospray
+} // namespace ospray

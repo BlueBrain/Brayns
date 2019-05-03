@@ -243,6 +243,7 @@ void OSPRayEngine::_createCameras()
     Property eyeSeparation{"interpupillaryDistance",
                            0.0635,
                            {"Eye separation"}};
+    Property enableClippingPlanes{"enableClippingPlanes", true, {"Clipping"}};
 
     {
         PropertyMap properties;
@@ -255,12 +256,14 @@ void OSPRayEngine::_createCameras()
             properties.setProperty(stereoProperty);
             properties.setProperty(eyeSeparation);
         }
+        properties.setProperty(enableClippingPlanes);
         addCameraType("perspective", properties);
     }
     {
         PropertyMap properties;
         properties.setProperty({"height", 1., {"Height"}});
         properties.setProperty(aspect);
+        properties.setProperty(enableClippingPlanes);
         addCameraType("orthographic", properties);
     }
     {
@@ -278,7 +281,7 @@ void OSPRayEngine::_createCameras()
     }
     addCameraType("panoramic");
 }
-}
+} // namespace brayns
 
 extern "C" brayns::Engine* brayns_engine_create(
     int, const char**, brayns::ParametersManager& parametersManager)
