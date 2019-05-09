@@ -28,6 +28,7 @@ namespace brayns
 namespace
 {
 constexpr vrpn_int32 HEAD_SENSOR_ID = 0;
+constexpr vrpn_int32 FLYSTICK_SENSOR_ID = 1;
 constexpr double MOVING_SPEED = 1.0f;
 const std::string DEFAULT_VRPN_NAME = "DTrack@cave1";
 #ifdef BRAYNSVRPN_USE_LIBUV
@@ -52,6 +53,13 @@ void trackerCallback(void* userData, const vrpn_TRACKERCB tracker)
     auto camera = static_cast<Camera*>(userData);
     camera->updateProperty(HEAD_POSITION_PROP, to_array_3d(tracker.pos));
     camera->updateProperty(HEAD_ROTATION_PROP, to_array_4d(tracker.quat));
+}
+
+void flyStickCallback(void* userData, const vrpn_TRACKERCB tracker)
+{
+    VrpnStates* states = static_cast<VrpnStates*>(userData);
+    states->flyStickOrientation = glm::quat(tracker.quat[3], tracker.quat[0],
+                                            tracker.quat[1], tracker.quat[2]);
 }
 
 void joystickCallback(void* userData, const vrpn_ANALOGCB joystick)
@@ -93,6 +101,8 @@ void VRPNPlugin::init()
 
     _vrpnTracker->register_change_handler(&(_api->getCamera()), trackerCallback,
                                           HEAD_SENSOR_ID);
+    _vrpnTracker->register_change_handler(&_states, flyStickCallback,
+                                          HEAD_SENSOR_ID);
     _vrpnAnalog->register_change_handler(&_states, joystickCallback);
 }
 
@@ -105,8 +115,12 @@ void VRPNPlugin::preRender()
 
     Camera& camera = _api->getCamera();
     Vector3d pos = camera.getPosition();
-    pos += _states.axisX * MOVING_SPEED * Vector3d(1.0, 0.0, 0.0) * frameTime;
-    pos += _states.axisZ * MOVING_SPEED * Vector3d(0.0, 0.0, -1.0) * frameTime;
+    pos += _states.axisX * MOVING_SPEED *
+           glm::rotate(_states.flyStickOrientation, Vector3f(1.0, 0.0, 0.0)) *
+           frameTime;
+    pos += _states.axisZ * MOVING_SPEED *
+           glm::rotate(_states.flyStickOrientation, Vector3f(0.0, 0.0, -1.0)) *
+           frameTime;
     camera.setPosition(pos);
 
     _timer.start();
