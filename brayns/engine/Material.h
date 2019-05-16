@@ -30,17 +30,20 @@ SERIALIZATION_ACCESS(Material)
 
 namespace brayns
 {
-enum TextureType
+enum class TextureType : uint8_t
 {
-    TT_DIFFUSE = 0,
-    TT_NORMALS,
-    TT_BUMP,
-    TT_SPECULAR,
-    TT_EMISSIVE,
-    TT_OPACITY,
-    TT_REFLECTION,
-    TT_REFRACTION,
-    TT_OCCLUSION
+    diffuse = 0,
+    normals,
+    bump,
+    specular,
+    emissive,
+    opacity,
+    reflection,
+    refraction,
+    occlusion,
+    radiance,
+    irradiance,
+    brdf_lut
 };
 
 typedef std::map<TextureType, Texture2DPtr> TextureDescriptors;
@@ -112,6 +115,11 @@ public:
     BRAYNS_API void removeTexture(const TextureType type);
 
     BRAYNS_API Texture2DPtr getTexture(const TextureType type) const;
+    bool hasTexture(const TextureType type) const
+    {
+        return _textureDescriptors.count(type) > 0;
+    }
+    void clearTextures();
 
 protected:
     bool _loadTexture(const std::string& fileName);

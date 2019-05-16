@@ -36,14 +36,14 @@ struct TextureTypeMaterialAttribute
 };
 
 static TextureTypeMaterialAttribute textureTypeMaterialAttribute[8] = {
-    {TT_DIFFUSE, "map_kd"},
-    {TT_NORMALS, "map_bump"},
-    {TT_BUMP, "map_bump"},
-    {TT_SPECULAR, "map_ks"},
-    {TT_EMISSIVE, "map_ns"},
-    {TT_OPACITY, "map_d"},
-    {TT_REFLECTION, "map_reflection"},
-    {TT_REFRACTION, "map_refraction"}};
+    {TextureType::diffuse, "map_kd"},
+    {TextureType::normals, "map_bump"},
+    {TextureType::bump, "map_bump"},
+    {TextureType::specular, "map_ks"},
+    {TextureType::emissive, "map_ns"},
+    {TextureType::opacity, "map_d"},
+    {TextureType::reflection, "map_reflection"},
+    {TextureType::refraction, "map_refraction"}};
 
 OSPRayMaterial::~OSPRayMaterial()
 {
@@ -88,7 +88,7 @@ void OSPRayMaterial::commit()
         {
             auto ospTexture = _createOSPTexture2D(texture);
             const auto str =
-                textureTypeMaterialAttribute[texType].attribute.c_str();
+                textureTypeMaterialAttribute[int(texType)].attribute.c_str();
             ospSetObject(_ospMaterial, str, ospTexture);
             ospRelease(ospTexture);
         }

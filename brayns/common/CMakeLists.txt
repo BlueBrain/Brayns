@@ -16,6 +16,7 @@ set(BRAYNSCOMMON_SOURCES
   utils/base64/base64.cpp
   utils/DynamicLib.cpp
   utils/imageUtils.cpp
+  utils/iblUtils.cpp
   utils/utils.cpp
   Timer.cpp
 )
@@ -52,6 +53,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   transferFunction/TransferFunction.h
   types.h
   utils/enumUtils.h
+  utils/iblUtils.h
   utils/utils.h
   utils/imageUtils.h
 )

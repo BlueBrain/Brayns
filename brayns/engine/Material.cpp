@@ -40,6 +40,12 @@ Texture2DPtr Material::getTexture(const TextureType type) const
     return it->second;
 }
 
+void Material::clearTextures()
+{
+    _textureDescriptors.clear();
+    markModified();
+}
+
 bool Material::_loadTexture(const std::string& fileName)
 {
     if (_textures.find(fileName) != _textures.end())

@@ -51,6 +51,50 @@ const std::string CUDA_FUNC_PERSPECTIVE_CAMERA = "perspectiveCamera";
 const std::string CUDA_FUNC_CAMERA_EXCEPTION = "exception";
 const std::string CUDA_FUNC_CAMERA_ENVMAP_MISS = "envmap_miss";
 
+template <typename T>
+T white();
+
+template <>
+uint8 white()
+{
+    return 255;
+}
+
+template <>
+float white()
+{
+    return 1.f;
+}
+
+template <typename T>
+void textureToOptix(T* ptr_dst, const brayns::Texture2D& texture,
+                    const uint8_t mipLevel, const bool hasAlpha)
+{
+    uint16_t width = texture.getWidth();
+    uint16_t height = texture.getHeight();
+    for (uint8_t i = 0; i < mipLevel; ++i)
+    {
+        width /= 2;
+        height /= 2;
+    }
+    size_t idx_src = 0;
+    size_t idx_dst = 0;
+    const auto rawData = texture.getRawData<T>(mipLevel);
+    for (uint16_t y = 0; y < height; ++y)
+    {
+        for (uint16_t x = 0; x < width; ++x)
+        {
+            ptr_dst[idx_dst] = rawData[idx_src];
+            ptr_dst[idx_dst + 1u] = rawData[idx_src + 1u];
+            ptr_dst[idx_dst + 2u] = rawData[idx_src + 2u];
+            ptr_dst[idx_dst + 3u] =
+                hasAlpha ? rawData[idx_src + 3u] : white<T>();
+            idx_dst += 4u;
+            idx_src += hasAlpha ? 4u : 3u;
+        }
+    }
+}
+
 } // namespace
 
 #define RT_CHECK_ERROR_NO_CONTEXT(func)                            \
@@ -136,55 +180,134 @@ const OptixShaderProgram& OptiXContext::getRenderer(const std::string& name)
 
 ::optix::TextureSampler OptiXContext::createTextureSampler(Texture2DPtr texture)
 {
-    const uint16_t nx = texture->getWidth();
-    const uint16_t ny = texture->getHeight();
+    uint16_t nx = texture->getWidth();
+    uint16_t ny = texture->getHeight();
     const uint16_t channels = texture->getNbChannels();
     const uint16_t optixChannels = 4;
     const bool hasAlpha = optixChannels == channels;
 
+    const bool useFloat = texture->getDepth() == 4;
+    const bool useByte = texture->getDepth() == 1;
+
+    if (!useFloat && !useByte)
+        throw std::runtime_error("Only byte or float textures are supported");
+
+    const bool createMipmaps = texture->getMipLevels() == 1 && useByte;
+    uint16_t mipMapLevels = texture->getMipLevels();
+    if (createMipmaps)
+        mipMapLevels = texture->getPossibleMipMapsLevels();
+
+    if (createMipmaps && !useByte)
+        throw std::runtime_error(
+            "Non 8-bits textures are not supported for automatic mipmaps "
+            "generation");
+
+    RTformat optixFormat =
+        useByte ? RT_FORMAT_UNSIGNED_BYTE4 : RT_FORMAT_FLOAT4;
+
     // Create texture sampler
     ::optix::TextureSampler sampler = _optixContext->createTextureSampler();
-    sampler->setWrapMode(0, RT_WRAP_REPEAT);
-    sampler->setWrapMode(1, RT_WRAP_REPEAT);
-    sampler->setWrapMode(2, RT_WRAP_REPEAT);
+    sampler->setWrapMode(0, RT_WRAP_MIRROR);
+    sampler->setWrapMode(1, RT_WRAP_MIRROR);
+    sampler->setWrapMode(2, RT_WRAP_MIRROR);
     sampler->setIndexingMode(RT_TEXTURE_INDEX_NORMALIZED_COORDINATES);
     sampler->setReadMode(RT_TEXTURE_READ_NORMALIZED_FLOAT);
-    sampler->setMaxAnisotropy(1.0f);
-    sampler->setMipLevelCount(1u);
-    sampler->setArraySize(1u);
+    sampler->setMaxAnisotropy(8.0f);
 
     // Create buffer and populate with texture data
     optix::Buffer buffer =
-        _optixContext->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT4, nx, ny);
-    float* buffer_data = static_cast<float*>(buffer->map());
+        _optixContext->createMipmappedBuffer(RT_BUFFER_INPUT, optixFormat, nx,
+                                             ny, mipMapLevels);
 
-    size_t idx_src = 0;
-    size_t idx_dst = 0;
-    const auto rawData = texture->getRawData();
-    constexpr auto FRACTION = 1.0f / 255.f;
-    for (uint16_t y = 0; y < ny; ++y)
+    std::vector<void*> mipMapBuffers(mipMapLevels);
+    for (uint8_t currentLevel = 0u; currentLevel < mipMapLevels; ++currentLevel)
+        mipMapBuffers[currentLevel] = buffer->map(currentLevel);
+
+    if (createMipmaps)
     {
-        for (uint16_t x = 0; x < nx; ++x)
+        uint8_t* ptr_dst = (uint8_t*)mipMapBuffers[0];
+        size_t idx_src = 0;
+        size_t idx_dst = 0;
+        const auto rawData = texture->getRawData();
+        for (uint16_t y = 0; y < ny; ++y)
         {
-            buffer_data[idx_dst + 0] =
-                static_cast<float>(rawData[idx_src + 0]) * FRACTION;
-            buffer_data[idx_dst + 1] =
-                static_cast<float>(rawData[idx_src + 1]) * FRACTION;
-            buffer_data[idx_dst + 2] =
-                static_cast<float>(rawData[idx_src + 2]) * FRACTION;
-            buffer_data[idx_dst + 3] =
-                hasAlpha ? static_cast<float>(rawData[idx_src + 4]) * FRACTION
-                         : 1.f;
-            idx_dst += 4;
-            idx_src += hasAlpha ? 4 : 3;
+            for (uint16_t x = 0; x < nx; ++x)
+            {
+                ptr_dst[idx_dst] = rawData[idx_src];
+                ptr_dst[idx_dst + 1u] = rawData[idx_src + 1u];
+                ptr_dst[idx_dst + 2u] = rawData[idx_src + 2u];
+                ptr_dst[idx_dst + 3u] = hasAlpha ? rawData[idx_src + 3u] : 255u;
+                idx_dst += 4u;
+                idx_src += hasAlpha ? 4u : 3u;
+            }
+        }
+        ny /= 2u;
+        nx /= 2u;
+
+        for (uint8_t currentLevel = 1u; currentLevel < mipMapLevels;
+             ++currentLevel)
+        {
+            ptr_dst = (uint8_t*)mipMapBuffers[currentLevel];
+            uint8_t* ptr_src = (uint8_t*)mipMapBuffers[currentLevel - 1u];
+            for (uint16_t y = 0u; y < ny; ++y)
+            {
+                for (uint16_t x = 0u; x < nx; ++x)
+                {
+                    ptr_dst[(y * nx + x) * 4u] =
+                        (ptr_src[(y * 2u * nx + x) * 8u] +
+                         ptr_src[((y * 2u * nx + x) * 2u + 1u) * 4u] +
+                         ptr_src[((y * 2u + 1u) * nx + x) * 8u] +
+                         ptr_src[(((y * 2u + 1u) * nx + x) * 2u + 1u) * 4u]) /
+                        4.0f;
+                    ptr_dst[(y * nx + x) * 4u + 1u] =
+                        (ptr_src[(y * 2u * nx + x) * 8u + 1u] +
+                         ptr_src[((y * 2u * nx + x) * 2u + 1u) * 4u + 1u] +
+                         ptr_src[((y * 2u + 1u) * nx + x) * 8u + 1u] +
+                         ptr_src[(((y * 2u + 1u) * nx + x) * 2u + 1u) * 4u +
+                                 1u]) /
+                        4.0f;
+                    ptr_dst[(y * nx + x) * 4u + 2u] =
+                        (ptr_src[(y * 2u * nx + x) * 8u + 2u] +
+                         ptr_src[((y * 2u * nx + x) * 2u + 1u) * 4u + 2u] +
+                         ptr_src[((y * 2u + 1u) * nx + x) * 8u + 2u] +
+                         ptr_src[(((y * 2u + 1u) * nx + x) * 2u + 1u) * 4u +
+                                 2u]) /
+                        4.0f;
+                    ptr_dst[(y * nx + x) * 4u + 3u] =
+                        (ptr_src[(y * 2u * nx + x) * 8u + 3u] +
+                         ptr_src[((y * 2u * nx + x) * 2u + 1u) * 4u + 3u] +
+                         ptr_src[((y * 2u + 1u) * nx + x) * 8u + 3u] +
+                         ptr_src[(((y * 2u + 1u) * nx + x) * 2u + 1u) * 4u +
+                                 3u]) /
+                        4.0f;
+                }
+            }
+            ny /= 2u;
+            nx /= 2u;
         }
     }
-    buffer->unmap();
+    else
+    {
+        for (uint16_t i = 0; i < mipMapLevels; ++i)
+        {
+            if (useByte)
+                textureToOptix<uint8_t>((uint8_t*)mipMapBuffers[i], *texture, i,
+                                        hasAlpha);
+            else if (useFloat)
+                textureToOptix<float>((float*)mipMapBuffers[i], *texture, i,
+                                      hasAlpha);
+        }
+    }
+
+    for (uint8_t currentLevel = 0u; currentLevel < mipMapLevels; ++currentLevel)
+        buffer->unmap(currentLevel);
 
     // Assign buffer to sampler
     sampler->setBuffer(buffer);
     sampler->setFilteringModes(RT_FILTER_LINEAR, RT_FILTER_LINEAR,
-                               RT_FILTER_NONE);
+                               mipMapLevels > 1 ? RT_FILTER_LINEAR
+                                                : RT_FILTER_NONE);
+    sampler->validate();
     return sampler;
 }
 

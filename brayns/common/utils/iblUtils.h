@@ -17,33 +17,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <optix_world.h>
+#pragma once
 
-#include "Helpers.h"
+#include <brayns/common/types.h>
 
-struct PerRayData_radiance
+namespace brayns
 {
-    float3 result;
-    float importance;
-    int depth;
-};
-
-rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
-rtDeclareVariable(float3, bgColor, , );
-rtDeclareVariable(int, envmap, , );
-rtDeclareVariable(PerRayData_radiance, prd_radiance, rtPayload, );
-rtDeclareVariable(uint, use_envmap, , );
-
-RT_PROGRAM void envmap_miss()
+namespace iblUtils
 {
-    if (use_envmap)
-    {
-        const float2 uv = getEquirectangularUV(ray.direction);
-        prd_radiance.result = linearToSRGB(
-            tonemap(make_float3(optix::rtTex2D<float4>(envmap, uv.x, uv.y))));
-    }
-    else
-    {
-        prd_radiance.result = bgColor;
-    }
+void computeRadianceMap(const Texture2D& tex, const std::string& filename);
+void computeIrradianceMap(const Texture2D& tex, const std::string& filename);
+void computeBRDF(const std::string& filename);
 }
+} // namespace brayns

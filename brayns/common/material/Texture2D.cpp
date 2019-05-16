@@ -28,16 +28,32 @@ Texture2D::Texture2D()
     , _width(0)
     , _height(0)
 {
+    _rawData.resize(1);
 }
 
-void Texture2D::setRawData(unsigned char* data, size_t size)
+void Texture2D::setRawData(unsigned char* data, size_t size, const size_t mip)
 {
-    _rawData.clear();
-    _rawData.assign(data, data + size);
+    _rawData[mip].clear();
+    _rawData[mip].assign(data, data + size);
 }
 
-void Texture2D::setRawData(std::vector<unsigned char>&& rawData)
+void Texture2D::setRawData(std::vector<unsigned char>&& rawData,
+                           const size_t mip)
 {
-    _rawData = std::move(rawData);
+    _rawData[mip] = std::move(rawData);
+}
+
+uint8_t Texture2D::getPossibleMipMapsLevels() const
+{
+    uint8_t mipMapLevels = 1u;
+    uint32_t nx = _width;
+    uint32_t ny = _height;
+    while (nx % 2 == 0 && ny % 2 == 0)
+    {
+        nx /= 2;
+        ny /= 2;
+        ++mipMapLevels;
+    }
+    return mipMapLevels;
 }
 }

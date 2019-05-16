@@ -68,7 +68,7 @@ vec4f skyboxMapping(const uniform Renderer* uniform renderer,
     varying DifferentialGeometry dg;
     dg.st =
         make_vec2f(((atan2(-intersection.x, intersection.z) / PI) + 1.f) * .5f,
-                   -(asin(intersection.y) / PI) + .5f);
+                   (asin(intersection.y) / PI) + .5f);
 
     return get4f(bgMaterial->map_Kd.map, dg);
 }
