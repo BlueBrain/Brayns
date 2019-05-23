@@ -103,7 +103,7 @@ void OSPRayMaterial::commit(const std::string& renderer)
     if (!isModified() && renderer == _renderer)
         return;
     ospRelease(_ospMaterial);
-    _ospMaterial = ospNewMaterial2(renderer.c_str(), "default_material");
+    _ospMaterial = ospNewMaterial2(renderer.c_str(), "default");
     if (!_ospMaterial)
         throw std::runtime_error("Could not create material for renderer '" +
                                  renderer + "'");
