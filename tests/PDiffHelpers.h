@@ -35,6 +35,7 @@
 #include <boost/filesystem.hpp>
 #include <brayns/common/utils/base64/base64.h>
 #include <fstream>
+#include <iostream>
 namespace fs = boost::filesystem;
 #endif
 
@@ -68,7 +69,12 @@ inline bool _compareImage(const pdiff::RGBAImage& image,
 {
     const auto fullPath = std::string(BRAYNS_TESTDATA_IMAGES_PATH) + filename;
     const auto referenceImage{pdiff::read_from_file(fullPath)};
-    return pdiff::yee_compare(*referenceImage, image, parameters);
+    std::string errorOutput;
+    bool success = pdiff::yee_compare(*referenceImage, image, parameters,
+                                      nullptr, nullptr, &errorOutput);
+    if (!success)
+        std::cerr << "Pdiff failure reason: " << errorOutput;
+    return success;
 }
 
 inline bool compareTestImage(const std::string& filename,
