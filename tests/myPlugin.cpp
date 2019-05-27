@@ -142,7 +142,7 @@ public:
 };
 
 OSP_REGISTER_RENDERER(MyRenderer, myrenderer);
-OSP_REGISTER_MATERIAL(myrenderer, brayns::DefaultMaterial, default_material);
+OSP_REGISTER_MATERIAL(myrenderer, brayns::DefaultMaterial, default);
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int argc,
                                                          const char** argv)

@@ -69,7 +69,6 @@ void SimulationMaterial::commit()
     ispc::SimulationMaterial_set(getIE(), withSimulationOffsets);
 }
 
-OSP_REGISTER_MATERIAL(advanced_simulation, SimulationMaterial,
-                      default_material);
-OSP_REGISTER_MATERIAL(basic_simulation, SimulationMaterial, default_material);
+OSP_REGISTER_MATERIAL(advanced_simulation, SimulationMaterial, default);
+OSP_REGISTER_MATERIAL(basic_simulation, SimulationMaterial, default);
 }

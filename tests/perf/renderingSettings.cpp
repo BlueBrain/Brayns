@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     // Set default rendering parameters
     brayns::ParametersManager& params = brayns.getParametersManager();
     params.getRenderingParameters().setSamplesPerPixel(32);
-    brayns.getEngine().commit();
+    brayns.commit();
 
     // Start timer
     brayns::Timer timer;
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     auto props = renderer.getPropertyMap();
     props.updateProperty("shadows", 1.);
     renderer.updateProperties(props);
-    brayns.getEngine().commit();
+    brayns.commit();
 
     timer.start();
     brayns.render();
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
 
     props.updateProperty("softShadows", 1.);
     renderer.updateProperties(props);
-    brayns.getEngine().commit();
+    brayns.commit();
 
     timer.start();
     brayns.render();
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     props.updateProperty("softShadows", 0.);
     props.updateProperty("aoWeight", 1.);
     renderer.updateProperties(props);
-    brayns.getEngine().commit();
+    brayns.commit();
 
     timer.start();
     brayns.render();
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     props.updateProperty("softShadows", 1.);
     props.updateProperty("aoWeight", 1.);
     renderer.updateProperties(props);
-    brayns.getEngine().commit();
+    brayns.commit();
 
     timer.start();
     brayns.render();

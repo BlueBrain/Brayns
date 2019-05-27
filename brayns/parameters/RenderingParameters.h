@@ -51,7 +51,9 @@ public:
     const auto& getRenderers() const { return _renderers; }
     void addRenderer(const std::string& renderer)
     {
-        _renderers.push_front(renderer);
+        if (std::find(_renderers.begin(), _renderers.end(), renderer) ==
+            _renderers.end())
+            _renderers.push_front(renderer);
     }
     const std::string& getCurrentCamera() const { return _camera; }
     /** All registered cameras */
