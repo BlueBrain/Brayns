@@ -44,6 +44,8 @@
 
 namespace
 {
+constexpr auto MAX_FRAMEBUFFERS = 2;
+
 Application* appInstance = nullptr;
 
 void glfwKeyCallback(GLFWwindow* /*window*/, int key, int /*scancode*/,
@@ -228,8 +230,8 @@ void Application::run()
         glfwPollEvents();
     }
 
-    glDeleteTextures(1, &m_fbTexture);
-    m_fbTexture = 0;
+    for (size_t i = 0; i < MAX_FRAMEBUFFERS; i++)
+        glDeleteTextures(1, &m_fbTextures[i]);
 
     guiShutdown();
 
@@ -325,24 +327,69 @@ void Application::guiShutdown()
 
 void Application::initOpenGL()
 {
-    glGenTextures(1, &m_fbTexture);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, m_fbTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    m_fbTextures.resize(MAX_FRAMEBUFFERS, 0);
+
+    for (size_t i = 0; i < MAX_FRAMEBUFFERS; i++)
+    {
+        glGenTextures(1, &m_fbTextures[i]);
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, m_fbTextures[i]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
 }
 
 void Application::render()
 {
+    // Launch a render if not running
+    if (!m_renderFuture.valid())
+    {
+        m_renderFuture = std::async(std::launch::async, [&] {
+            // Process mouse and keyboard events
+            {
+                std::unique_lock<std::mutex> lock(m_actionLock);
+
+                for (const auto& action : m_actions)
+                {
+                    switch (action.type)
+                    {
+                    case EventType::Keyboard:
+                        handleKey(action);
+                        break;
+                    case EventType::Cursor:
+                        handleCursor(action);
+                        break;
+                    case EventType::MouseButton:
+                        handleMouseButton(action);
+                        break;
+                    case EventType::Scroll:
+                        handleScroll(action);
+                        break;
+                    }
+                }
+
+                m_actions.clear();
+            }
+
+            m_brayns.commit();
+            m_brayns.render();
+        });
+    }
+
+    const bool renderDone = m_renderFuture.wait_for(std::chrono::seconds(0)) ==
+                            std::future_status::ready;
+
+    // "Clear" future when done to trigger new render
+    if (renderDone)
+        m_renderFuture.get();
+
     glViewport(0, 0, m_width, m_height);
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    m_brayns.commit();
-    m_brayns.render();
-
     size_t offset = 0;
+    size_t bufferIdx = 0;
     for (auto frameBuffer : m_brayns.getEngine().getFrameBuffers())
     {
         GLenum format = GL_RGBA;
@@ -360,7 +407,6 @@ void Application::render()
 
         const auto& frameSize = frameBuffer->getFrameSize();
 
-        frameBuffer->map();
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glOrtho(0, frameSize.x, 0.0f, frameSize.y, -1.0f, 1.0f);
@@ -369,66 +415,126 @@ void Application::render()
         glLoadIdentity();
         glViewport(offset, 0, frameSize.x, frameSize.y);
 
-        GLenum type = GL_FLOAT;
-        const GLvoid* buffer = 0;
-        switch (m_frameBufferMode)
-        {
-        case FrameBufferMode::COLOR:
-            type = GL_UNSIGNED_BYTE;
-            buffer = frameBuffer->getColorBuffer();
-            break;
-        case FrameBufferMode::DEPTH:
-            format = GL_LUMINANCE;
-            buffer = frameBuffer->getDepthBuffer();
-            break;
-        default:
-            glClearColor(0.f, 0.f, 0.f, 1.f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        }
+        glBindTexture(GL_TEXTURE_2D, m_fbTextures[bufferIdx]);
 
-        if (buffer)
+        if (renderDone)
         {
-            glBindTexture(GL_TEXTURE_2D, m_fbTexture);
+            frameBuffer->map();
+
+            GLenum type = GL_FLOAT;
+            const GLvoid* buffer = 0;
+            switch (m_frameBufferMode)
+            {
+            case FrameBufferMode::COLOR:
+                type = GL_UNSIGNED_BYTE;
+                buffer = frameBuffer->getColorBuffer();
+                break;
+            case FrameBufferMode::DEPTH:
+                format = GL_LUMINANCE;
+                buffer = frameBuffer->getDepthBuffer();
+                break;
+            default:
+                glClearColor(0.f, 0.f, 0.f, 1.f);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            }
+
             glTexImage2D(GL_TEXTURE_2D, 0, format, frameBuffer->getSize().x,
                          frameBuffer->getSize().y, 0, format, type, buffer);
-
-            glBegin(GL_QUADS);
-            glTexCoord2f(0.f, 0.f);
-            glVertex3f(0, 0, 0);
-            glTexCoord2f(0.f, 1.f);
-            glVertex3f(0, frameSize.y, 0);
-            glTexCoord2f(1.f, 1.f);
-            glVertex3f(frameSize.x, frameSize.y, 0);
-            glTexCoord2f(1.f, 0.f);
-            glVertex3f(frameSize.x, 0, 0);
-            glEnd();
-
-            glBindTexture(GL_TEXTURE_2D, 0);
+            frameBuffer->unmap();
         }
 
-        frameBuffer->unmap();
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.f, 0.f);
+        glVertex3f(0, 0, 0);
+        glTexCoord2f(0.f, 1.f);
+        glVertex3f(0, frameSize.y, 0);
+        glTexCoord2f(1.f, 1.f);
+        glVertex3f(frameSize.x, frameSize.y, 0);
+        glTexCoord2f(1.f, 0.f);
+        glVertex3f(frameSize.x, 0, 0);
+        glEnd();
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+
         offset += frameSize.x;
+        bufferIdx += 1;
     }
 
-    m_brayns.postRender();
+    if (renderDone)
+        m_brayns.postRender();
 }
 
 void Application::keyCallback(int key, int action)
 {
-    const auto toKeyChar = [&](int k, bool shiftDown) {
-        if (!shiftDown && (k >= 65) && (k <= 90))
-            k = k + 32;
-        return static_cast<char>(k);
+    // Handle exit here so we don't have to wait for Brayns keyboard callback
+    m_exit = m_exit || (action == GLFW_PRESS &&
+                        (key == GLFW_KEY_Q || key == GLFW_KEY_ESCAPE));
+    if (m_exit)
+        return;
+
+    InputEvent event;
+    event.type = EventType::Keyboard;
+    event.action = action;
+    event.button = key;
+
+    std::unique_lock<std::mutex> lock(m_actionLock);
+    m_actions.push_back(event);
+}
+
+void Application::cursorCallback(double xpos, double ypos)
+{
+    if (ImGui::GetIO().WantCaptureMouse)
+        return;
+
+    InputEvent event;
+    event.type = EventType::Cursor;
+    event.xpos = xpos;
+    event.ypos = ypos;
+
+    std::unique_lock<std::mutex> lock(m_actionLock);
+    m_actions.push_back(event);
+}
+
+void Application::mouseButtonCallback(int button, int action)
+{
+    InputEvent event;
+    event.type = EventType::MouseButton;
+    event.button = button;
+    event.action = action;
+
+    std::unique_lock<std::mutex> lock(m_actionLock);
+    m_actions.push_back(event);
+}
+
+void Application::scrollCallback(double xoffset, double yoffset)
+{
+    InputEvent event;
+    event.type = EventType::Scroll;
+    event.xoffset = xoffset;
+    event.yoffset = yoffset;
+
+    std::unique_lock<std::mutex> lock(m_actionLock);
+    m_actions.push_back(event);
+}
+
+void Application::handleKey(InputEvent action)
+{
+    const auto toKeyChar = [&](int key, bool shiftDown) {
+        constexpr auto KEY_A = 32;      // 'a'
+        constexpr auto KEY_A_CAPS = 65; // 'A'
+        constexpr auto KEY_Z_CAPS = 90; // 'Z'
+
+        // Convert uppercase to lowercase if shift is not pressed
+        if (!shiftDown && key >= KEY_A_CAPS && key <= KEY_Z_CAPS)
+            key = key + KEY_A;
+
+        return static_cast<char>(key);
     };
 
-    if (action == GLFW_PRESS)
+    if (action.action == GLFW_PRESS)
     {
-        switch (key)
+        switch (action.button)
         {
-        case GLFW_KEY_Q:
-        case GLFW_KEY_ESCAPE:
-            m_exit = true;
-            break;
         case GLFW_KEY_LEFT:
             m_brayns.getKeyboardHandler().handle(brayns::SpecialKey::LEFT);
             break;
@@ -458,16 +564,15 @@ void Application::keyCallback(int key, int action)
             break;
         default:
             const char keyChar =
-                toKeyChar(key, m_leftShiftKeyDown || m_rightShiftKeyDown);
+                toKeyChar(action.button,
+                          m_leftShiftKeyDown || m_rightShiftKeyDown);
             m_brayns.getKeyboardHandler().handleKeyboardShortcut(keyChar);
         }
-
-        m_brayns.getEngine().commit();
     }
 
-    if (action == GLFW_RELEASE)
+    if (action.action == GLFW_RELEASE)
     {
-        switch (key)
+        switch (action.button)
         {
         case GLFW_MOD_ALT:
             m_altKeyDown = false;
@@ -487,12 +592,9 @@ void Application::keyCallback(int key, int action)
     }
 }
 
-void Application::cursorCallback(double xpos, double ypos)
+void Application::handleCursor(InputEvent action)
 {
-    if (ImGui::GetIO().WantCaptureMouse)
-        return;
-
-    const brayns::Vector2d pos{xpos, ypos};
+    const brayns::Vector2d pos{action.xpos, action.ypos};
 
     auto& manipulator = m_brayns.getCameraManipulator();
 
@@ -513,18 +615,19 @@ void Application::cursorCallback(double xpos, double ypos)
     m_lastMousePos = pos;
 }
 
-void Application::mouseButtonCallback(int button, int action)
+void Application::handleMouseButton(InputEvent action)
 {
-    if (button == GLFW_MOUSE_BUTTON_LEFT)
-        m_leftMouseButtonDown = action == GLFW_PRESS;
+    if (action.button == GLFW_MOUSE_BUTTON_LEFT)
+        m_leftMouseButtonDown = action.action == GLFW_PRESS;
 
-    if (button == GLFW_MOUSE_BUTTON_RIGHT)
-        m_rightMouseButtonDown = action == GLFW_PRESS;
+    if (action.button == GLFW_MOUSE_BUTTON_RIGHT)
+        m_rightMouseButtonDown = action.action == GLFW_PRESS;
 
-    if (button == GLFW_MOUSE_BUTTON_MIDDLE)
-        m_middleMouseButtonDown = action == GLFW_PRESS;
+    if (action.button == GLFW_MOUSE_BUTTON_MIDDLE)
+        m_middleMouseButtonDown = action.action == GLFW_PRESS;
 
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS &&
+    if (action.button == GLFW_MOUSE_BUTTON_LEFT &&
+        action.action == GLFW_PRESS &&
         (m_leftShiftKeyDown || m_rightShiftKeyDown))
     {
         const auto& windowSize = m_brayns.getParametersManager()
@@ -543,8 +646,8 @@ void Application::mouseButtonCallback(int button, int action)
     }
 }
 
-void Application::scrollCallback(double /*xoffset*/, double yoffset)
+void Application::handleScroll(InputEvent action)
 {
-    const auto delta = yoffset > 0.0 ? 1 : -1;
+    const auto delta = action.yoffset > 0.0 ? 1 : -1;
     m_brayns.getCameraManipulator().wheel(m_lastMousePos, delta);
 }

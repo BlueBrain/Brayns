@@ -22,7 +22,35 @@
 #include <brayns/Brayns.h>
 #include <brayns/common/Timer.h>
 
+#include <future>
+#include <mutex>
+
 struct GLFWwindow;
+
+enum class EventType
+{
+    Keyboard,
+    Cursor,
+    MouseButton,
+    Scroll
+};
+
+struct InputEvent
+{
+    EventType type;
+
+    // Keyboard and mouse buttons
+    int button{0};
+    int action{0};
+
+    // Cursor movement
+    double xpos{0};
+    double ypos{0};
+
+    // Scrolling
+    double xoffset{0};
+    double yoffset{0};
+};
 
 class Application
 {
@@ -62,6 +90,11 @@ private:
     void toggleFullscreen();
     brayns::Vector2ui getWindowSize() const;
 
+    void handleKey(InputEvent action);
+    void handleCursor(InputEvent action);
+    void handleMouseButton(InputEvent action);
+    void handleScroll(InputEvent action);
+
     brayns::Brayns& m_brayns;
     GLFWwindow* m_window{nullptr};
     int m_width{0};
@@ -82,8 +115,8 @@ private:
     bool m_leftShiftKeyDown{false};
     bool m_rightShiftKeyDown{false};
 
-    // OpenGL variables:
-    uint32_t m_fbTexture{0};
+    // OpenGL textures:
+    std::vector<uint32_t> m_fbTextures;
 
     FrameBufferMode m_frameBufferMode{FrameBufferMode::COLOR};
 
@@ -91,4 +124,9 @@ private:
 
     std::array<int, 2> m_windowPos{{0, 0}};
     std::array<int, 2> m_windowSizePrev{{0, 0}};
+
+    std::future<void> m_renderFuture;
+    std::mutex m_actionLock;
+
+    std::vector<InputEvent> m_actions;
 };
