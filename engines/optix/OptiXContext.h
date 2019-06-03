@@ -24,12 +24,16 @@
 
 #include <optixu/optixpp_namespace.h>
 
+#include "OptiXCameraProgram.h"
+
 #include <memory>
 #include <mutex>
 #include <unordered_map>
 
 namespace brayns
 {
+class OptiXCamera;
+
 enum class OptixGeometryType
 {
     sphere,
@@ -45,6 +49,8 @@ struct OptixShaderProgram
     ::optix::Program closest_hit_textured{nullptr};
 };
 
+using OptixShaderProgramPtr = std::shared_ptr<OptixShaderProgram>;
+
 class OptiXContext
 {
 public:
@@ -53,7 +59,9 @@ public:
 
     ::optix::Context getOptixContext() { return _optixContext; }
     // Camera
-    ::optix::Program createCamera();
+    void addCamera(const std::string& name, OptiXCameraProgramPtr program);
+    OptiXCameraProgramPtr getCamera(const std::string& name);
+    void setCamera(const std::string& name);
 
     // Geometry
     ::optix::Geometry createGeometry(const OptixGeometryType type);
@@ -65,9 +73,8 @@ public:
     ::optix::TextureSampler createTextureSampler(Texture2DPtr texture);
 
     // Others
-    void addRenderer(const std::string& name,
-                     const OptixShaderProgram& program);
-    const OptixShaderProgram& getRenderer(const std::string& name);
+    void addRenderer(const std::string& name, OptixShaderProgramPtr program);
+    OptixShaderProgramPtr getRenderer(const std::string& name);
 
     std::unique_lock<std::mutex> getScopeLock()
     {
@@ -84,7 +91,8 @@ private:
 
     ::optix::Context _optixContext{nullptr};
 
-    std::map<std::string, OptixShaderProgram> _rendererProgram;
+    std::map<std::string, std::shared_ptr<OptixShaderProgram>> _rendererProgram;
+    std::map<std::string, std::shared_ptr<OptiXCameraProgram>> _cameraProgram;
 
     std::map<OptixGeometryType, ::optix::Program> _bounds;
     std::map<OptixGeometryType, ::optix::Program> _intersects;

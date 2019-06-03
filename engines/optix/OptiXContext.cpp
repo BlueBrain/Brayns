@@ -21,9 +21,7 @@
 #include "OptiXContext.h"
 
 #include <engines/optix/braynsOptixEngine_generated_Cones.cu.ptx.h>
-#include <engines/optix/braynsOptixEngine_generated_Constantbg.cu.ptx.h>
 #include <engines/optix/braynsOptixEngine_generated_Cylinders.cu.ptx.h>
-#include <engines/optix/braynsOptixEngine_generated_PerspectiveCamera.cu.ptx.h>
 #include <engines/optix/braynsOptixEngine_generated_Spheres.cu.ptx.h>
 #include <engines/optix/braynsOptixEngine_generated_TriangleMesh.cu.ptx.h>
 
@@ -38,18 +36,11 @@ const std::string CUDA_CYLINDERS = braynsOptixEngine_generated_Cylinders_cu_ptx;
 const std::string CUDA_CONES = braynsOptixEngine_generated_Cones_cu_ptx;
 const std::string CUDA_TRIANGLES_MESH =
     braynsOptixEngine_generated_TriangleMesh_cu_ptx;
-const std::string CUDA_PERSPECTIVE_CAMERA =
-    braynsOptixEngine_generated_PerspectiveCamera_cu_ptx;
-const std::string CUDA_MISS = braynsOptixEngine_generated_Constantbg_cu_ptx;
 
 const std::string CUDA_FUNC_BOUNDS = "bounds";
 const std::string CUDA_FUNC_INTERSECTION = "intersect";
 const std::string CUDA_FUNC_ROBUST_INTERSECTION = "robust_intersect";
 const std::string CUDA_FUNC_EXCEPTION = "exception";
-
-const std::string CUDA_FUNC_PERSPECTIVE_CAMERA = "perspectiveCamera";
-const std::string CUDA_FUNC_CAMERA_EXCEPTION = "exception";
-const std::string CUDA_FUNC_CAMERA_ENVMAP_MISS = "envmap_miss";
 
 template <typename T>
 T white();
@@ -157,12 +148,12 @@ OptiXContext& OptiXContext::get()
 }
 
 void OptiXContext::addRenderer(const std::string& name,
-                               const OptixShaderProgram& program)
+                               OptixShaderProgramPtr program)
 {
     _rendererProgram[name] = program;
 }
 
-const OptixShaderProgram& OptiXContext::getRenderer(const std::string& name)
+OptixShaderProgramPtr OptiXContext::getRenderer(const std::string& name)
 {
     auto it = _rendererProgram.find(name);
     if (it == _rendererProgram.end())
@@ -171,28 +162,28 @@ const OptixShaderProgram& OptiXContext::getRenderer(const std::string& name)
     return it->second;
 }
 
-::optix::Program OptiXContext::createCamera()
+void OptiXContext::addCamera(const std::string& name,
+                             OptiXCameraProgramPtr program)
 {
-    ::optix::Program camera;
-    // Ray generation program
-    camera =
-        _optixContext->createProgramFromPTXString(CUDA_PERSPECTIVE_CAMERA,
-                                                  CUDA_FUNC_PERSPECTIVE_CAMERA);
-    _optixContext->setRayGenerationProgram(0, camera);
+    _cameraProgram[name] = program;
+}
 
-    // Miss programs
-    ::optix::Program missProgram =
-        _optixContext->createProgramFromPTXString(CUDA_MISS,
-                                                  CUDA_FUNC_CAMERA_ENVMAP_MISS);
-    _optixContext->setMissProgram(0, missProgram);
+OptiXCameraProgramPtr OptiXContext::getCamera(const std::string& name)
+{
+    auto it = _cameraProgram.find(name);
+    if (it == _cameraProgram.end())
+        throw std::runtime_error("Camera program not found for camera '" +
+                                 name + "'");
+    return it->second;
+}
 
-    // Exception program
-    _optixContext->setExceptionProgram(
-        0,
-        _optixContext->createProgramFromPTXString(CUDA_PERSPECTIVE_CAMERA,
-                                                  CUDA_FUNC_CAMERA_EXCEPTION));
-    BRAYNS_DEBUG << "Camera created" << std::endl;
-    return camera;
+void OptiXContext::setCamera(const std::string& name)
+{
+    auto camera = getCamera(name);
+    _optixContext->setRayGenerationProgram(0,
+                                           camera->getRayGenerationProgram());
+    _optixContext->setMissProgram(0, camera->getMissProgram());
+    _optixContext->setExceptionProgram(0, camera->getExceptionProgram());
 }
 
 ::optix::TextureSampler OptiXContext::createTextureSampler(Texture2DPtr texture)
