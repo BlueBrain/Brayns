@@ -12,7 +12,7 @@ set(DeflectPlugin_VERSION_ABI 1)
 include(Common)
 
 common_find_package(Deflect REQUIRED)
-common_find_package(ospray 1.7 SYSTEM)
+common_find_package(ospray 1.8 SYSTEM)
 common_find_package_post()
 
 set(BRAYNSDEFLECT_SOURCES

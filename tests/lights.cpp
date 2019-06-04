@@ -62,8 +62,8 @@ BOOST_AUTO_TEST_CASE(render_scivis_quadlight)
 
     brayns.getEngine().getScene().getLightManager().addLight(
         std::make_shared<brayns::QuadLight>(
-            lampPositions[0], (lampPositions[3] - lampPositions[0]),
-            (lampPositions[1] - lampPositions[0]), YELLOW, 1.0f, true));
+            lampPositions[0], (lampPositions[1] - lampPositions[0]),
+            (lampPositions[3] - lampPositions[0]), YELLOW, 1.0f, true));
 
     brayns.commitAndRender();
 

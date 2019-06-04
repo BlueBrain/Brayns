@@ -68,7 +68,7 @@ void PerspectiveCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
     }
 
     float nearClip = self->super.nearClip;
-    float farClip = infinity;
+    float farClip = inf;
     const varying vec3f direction = normalize(dir);
 
     clipRay(self->clipPlanes, self->numClipPlanes, org, direction, nearClip,

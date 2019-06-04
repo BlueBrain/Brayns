@@ -11,7 +11,7 @@ set(BraynsMultiview_VERSION_ABI 1)
 
 include(Common)
 
-common_find_package(ospray 1.7 SYSTEM)
+common_find_package(ospray 1.8 SYSTEM)
 common_find_package_post()
 
 set(BRAYNSMULTIVIEW_HEADERS MultiviewPlugin.h)

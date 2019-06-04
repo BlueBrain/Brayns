@@ -68,6 +68,9 @@ struct ShadingAttributes
     vec3f finalContribution;
 };
 
+// HACK: Since OSPRay 1.8 we need to increase the epsilon to avoid artifacts
+const float EPSILON_QUOTIENT = 100.f;
+
 inline bool launchRandomRay(
     const uniform AdvancedSimulationRenderer* uniform self,
     const varying ScreenSample& sample, const varying vec3f& intersection,
@@ -119,7 +122,7 @@ inline void indirectShading(
     varying vec3f& indirectShadingColor, varying float& indirectShadingPower)
 {
     vec3f backgroundColor = make_vec3f(0.f);
-    float distanceToIntersection = infinity;
+    float distanceToIntersection = inf;
     indirectShadingPower = 0.f;
 
     // Launch a random ray
@@ -901,7 +904,7 @@ inline vec3f AdvancedSimulationRenderer_shadeRay(
         }
 
         ray.org = attributes.origin;
-        ray.t0 = epsilon;
+        ray.t0 = epsilon * EPSILON_QUOTIENT;
         ray.t = inf;
         ray.primID = -1;
         ray.geomID = -1;
@@ -938,7 +941,7 @@ void AdvancedSimulationRenderer_renderSample(uniform Renderer* uniform _self,
 {
     uniform AdvancedSimulationRenderer* uniform self =
         (uniform AdvancedSimulationRenderer * uniform)_self;
-    sample.ray.time = infinity;
+    sample.ray.time = inf;
     sample.rgb = AdvancedSimulationRenderer_shadeRay(self, sample);
 }
 
@@ -954,8 +957,7 @@ export void* uniform AdvancedSimulationRenderer_create(void* uniform cppE)
 }
 
 export void AdvancedSimulationRenderer_set(
-    void* uniform _self, void* uniform bgMaterial,
-    const uniform float shadows,
+    void* uniform _self, void* uniform bgMaterial, const uniform float shadows,
     const uniform float softShadows,
     const uniform float ambientOcclusionStrength,
     const uniform float ambientOcclusionDistance,

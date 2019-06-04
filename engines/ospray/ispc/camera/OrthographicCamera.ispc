@@ -48,7 +48,7 @@ void OrthographicCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
         self->pos_00 + screen.x * self->pos_du + screen.y * self->pos_dv;
 
     float nearClip = self->super.nearClip;
-    float farClip = infinity;
+    float farClip = inf;
     const varying vec3f direction = normalize(dir);
 
     clipRay(self->clipPlanes, self->numClipPlanes, org, direction,
