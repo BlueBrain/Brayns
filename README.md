@@ -67,6 +67,16 @@ More documentation is available on DockerHub: https://hub.docker.com/r/bluebrain
 
 ## Building from Source
 
+### Ubuntu 18.04
+
+To install all dependencies needed by Brayns on Ubuntu 18.04 run:
+
+```
+sudo apt install git cmake g++ libtbb-dev libgl1-mesa-dev libxrandr-dev \
+libxinerama-dev libxcursor-dev libboost-all-dev libfreeimage-dev libglew-dev \
+libwebsockets-dev libturbojpeg libturbojpeg0-dev libassimp-dev libhdf5-dev
+```
+
 ### Prerequisites
 
 In order to ease the application compilation process, we recommend using the
@@ -74,14 +84,14 @@ following tree structure:
 
 ```
 - src
-  +- ispc-v1.9.2-linux
+  +- ispc-v1.10.0-linux
   +- OSPRay
   +- Brayns
 ```
 
 #### Intel ISPC compiler
 
-Download and extract [ISPC compiler 1.9.2 archive](https://ispc.github.io/downloads.html).
+Download and extract [ISPC compiler 1.10.0 archive](https://ispc.github.io/downloads.html).
 
 #### Embree
 
@@ -91,7 +101,7 @@ Clone embree in the same folder level as ISPC compiler
   git clone https://github.com/embree/embree.git
   mkdir embree/Build
   cd embree/Build
-  git checkout v3.2.3
+  git checkout v3.5.2
   cmake .. -DCMAKE_INSTALL_PREFIX=<Brayns_installation_folder>
   make install
 ```
@@ -104,7 +114,7 @@ Clone OSPRay in the same folder level as ISPC compiler
   git clone https://github.com/ospray/OSPRay.git
   mkdir OSPRay/Build
   cd OSPRay/Build
-  git checkout v1.7.3
+  git checkout v1.8.5
   export CMAKE_PREFIX_PATH=<Brayns_installation_folder>
   cmake .. -DCMAKE_INSTALL_PREFIX=<Brayns_installation_folder>
   make install
@@ -122,6 +132,11 @@ Clone OSPRay in the same folder level as ISPC compiler
 
 A number of dependencies are optional, and are related to some specific Brayns
 features:
+
+#### Enable/Disable [OptiX](https://developer.nvidia.com/optix)
+```
+cmake .. -DOptiX_INSTALL_DIR=<OptiX_installation_folder> -DBRAYNS_OPTIX_ENABLED=On
+```
 
 #### Enable/Disable [assimp](https://github.com/assimp/assimp) supported mesh file loader (.obj, .ply, etc.)
 ```
