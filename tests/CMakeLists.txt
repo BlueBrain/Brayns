@@ -27,20 +27,22 @@ if(NOT BRAYNS_OSPRAY_ENABLED)
     addModel.cpp
     addModelFromBlob.cpp
     background.cpp
-    clipPlaneRendering.cpp
     brayns.cpp
+    clipPlaneRendering.cpp
     model.cpp
     plugin.cpp
     renderer.cpp
+    shadows.cpp
     snapshot.cpp
     streamlines.cpp
-    testImages.cpp
-    webAPI.cpp
-    shadows.cpp
     subsampling.cpp
+    testImages.cpp
     transferFunction.cpp
+    webAPI.cpp
     lights.cpp
   )
+else()
+  list(APPEND TEST_LIBRARIES braynsOSPRayEngine)
 endif()
 
 if(NOT BRAYNS_ASSIMP_ENABLED)
@@ -58,8 +60,8 @@ endif()
 
 if(BRAYNS_NETWORKING_ENABLED AND BRAYNS_OSPRAY_ENABLED)
   list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
-  include(ispc)
-  include_directories_ispc(${PROJECT_SOURCE_DIR} ${OSPRAY_INCLUDE_DIRS})
+  include(osprayUse)
+  include_directories_ispc(${PROJECT_SOURCE_DIR})
   ospray_ispc_compile(${PROJECT_SOURCE_DIR}/engines/ospray/ispc/render/BasicRenderer.ispc)
   add_library(myPlugin SHARED
     myPlugin.cpp
@@ -70,7 +72,7 @@ if(BRAYNS_NETWORKING_ENABLED AND BRAYNS_OSPRAY_ENABLED)
     brayns
     braynsOSPRayEngine
     ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-    ${OSPRAY_LIBRARIES}
+    ospray::ospray_common ospray::ospray
   )
   target_include_directories(myPlugin SYSTEM PRIVATE
     ${PROJECT_SOURCE_DIR}/plugins/Rockets

@@ -67,10 +67,10 @@ else()
 endif()
 
 # OSPRay rendering engine
-common_find_package(ospray 1.7 SYSTEM)
+common_find_package(ospray 1.8 SYSTEM)
 option(BRAYNS_OSPRAY_ENABLED "Activate OSPRay rendering engine" ${OSPRAY_FOUND})
 if(BRAYNS_OSPRAY_ENABLED)
-  common_find_package(ospray 1.7 SYSTEM REQUIRED)
+  common_find_package(ospray 1.8 SYSTEM REQUIRED)
 else()
   common_find_package_disable(ospray)
 endif()

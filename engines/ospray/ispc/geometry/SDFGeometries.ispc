@@ -371,8 +371,7 @@ unmasked void SDFGeometries_intersect(
         ray->geomID = self->super.geomID;
         ray->instID = args->context->instID[0];
         ray->t = t_in;
-        ray->Ng = calcNormal(primitive, getIntersectionError(ray->org, t_in),
-                             pos, *self);
+        ray->Ng = calcNormal(primitive, calcEpsilon(ray->org, t_in), pos, *self);
     }
 }
 
