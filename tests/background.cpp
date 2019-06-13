@@ -36,7 +36,9 @@ BOOST_AUTO_TEST_CASE(set_environment_map)
     BOOST_CHECK(getScene().hasEnvironmentMap());
     getCamera().setPosition({0, 0, 5});
     commitAndRender();
-    BOOST_CHECK(compareTestImage("envmap.png", getFrameBuffer()));
+    pdiff::PerceptualDiffParameters parameters;
+    parameters.luminance_only = true;
+    BOOST_CHECK(compareTestImage("envmap.png", getFrameBuffer(), parameters));
 }
 
 BOOST_AUTO_TEST_CASE(unset_environment_map)

@@ -1,7 +1,6 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
- *                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,20 +18,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#ifndef TRIANGLEMESH_H
+#define TRIANGLEMESH_H
 
-#include <ospray/SDK/camera/Camera.ih>
+#include <brayns/common/types.h>
 
-struct PerspectiveParallaxCamera
+namespace brayns
 {
-    Camera super;
-
-    vec3f org;
-    vec3f dir_cam;
-    vec3f dir_du;
-    vec3f dir_dv;
-    float distanceToPlane;
-    float imgPlane_size_y;
-    float imgPlane_size_x;
-    float idpOffset;
+struct TriangleMesh
+{
+    Vector3fs vertices;
+    Vector3fs normals;
+    Vector4fs colors;
+    std::vector<Vector3ui> indices;
+    std::vector<Vector2f> textureCoordinates;
 };
+}
+
+#endif // TRIANGLEMESH_H

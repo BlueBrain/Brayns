@@ -66,10 +66,8 @@ void RenderingParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_RENDERER))
     {
         const std::string& rendererName = vm[PARAM_RENDERER].as<std::string>();
+        addRenderer(rendererName);
         _renderer = rendererName;
-        if (std::find(_renderers.begin(), _renderers.end(), rendererName) ==
-            _renderers.end())
-            _renderers.push_front(rendererName);
     }
     _accumulation = !vm[PARAM_ACCUMULATION].as<bool>();
     if (vm.count(PARAM_BACKGROUND_COLOR))

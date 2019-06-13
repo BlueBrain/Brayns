@@ -53,7 +53,8 @@ struct OSPRAY_SDK_INTERFACE OrthographicCamera : public Camera
     float aspect;
 
     // Clip planes
+    bool enableClippingPlanes{false};
     Ref<Data> clipPlanes;
 };
 
-} // ::ospray
+} // namespace ospray

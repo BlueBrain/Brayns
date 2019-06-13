@@ -390,7 +390,7 @@ void Model::logInformation()
     uint64_t nbSpheres = 0;
     uint64_t nbCylinders = 0;
     uint64_t nbCones = 0;
-    uint64_t nbMeshes = _geometries->_trianglesMeshes.size();
+    uint64_t nbMeshes = _geometries->_triangleMeshes.size();
     for (const auto& spheres : _geometries->_spheres)
         nbSpheres += spheres.second.size();
     for (const auto& cylinders : _geometries->_cylinders)
@@ -423,9 +423,9 @@ void Model::_updateSizeInBytes()
         _sizeInBytes += cylinders.second.size() * sizeof(Cylinder);
     for (const auto& cones : _geometries->_cones)
         _sizeInBytes += cones.second.size() * sizeof(Cones);
-    for (const auto& trianglesMesh : _geometries->_trianglesMeshes)
+    for (const auto& triangleMesh : _geometries->_triangleMeshes)
     {
-        const auto& mesh = trianglesMesh.second;
+        const auto& mesh = triangleMesh.second;
         _sizeInBytes += mesh.indices.size() * sizeof(Vector3f);
         _sizeInBytes += mesh.normals.size() * sizeof(Vector3f);
         _sizeInBytes += mesh.colors.size() * sizeof(Vector4f);
@@ -474,7 +474,7 @@ void Model::copyFrom(const Model& rhs)
     _spheresDirty = !_geometries->_spheres.empty();
     _cylindersDirty = !_geometries->_cylinders.empty();
     _conesDirty = !_geometries->_cones.empty();
-    _trianglesMeshesDirty = !_geometries->_trianglesMeshes.empty();
+    _triangleMeshesDirty = !_geometries->_triangleMeshes.empty();
     _streamlinesDirty = !_geometries->_streamlines.empty();
     _sdfGeometriesDirty = !_geometries->_sdf.geometries.empty();
     _volumesDirty = !_geometries->_volumes.empty();
@@ -520,13 +520,13 @@ void Model::updateBounds()
                 }
     }
 
-    if (_trianglesMeshesDirty)
+    if (_triangleMeshesDirty)
     {
-        _geometries->_trianglesMeshesBounds.reset();
-        for (const auto& mesh : _geometries->_trianglesMeshes)
+        _geometries->_triangleMeshesBounds.reset();
+        for (const auto& mesh : _geometries->_triangleMeshes)
             if (mesh.first != BOUNDINGBOX_MATERIAL_ID)
                 for (const auto& vertex : mesh.second.vertices)
-                    _geometries->_trianglesMeshesBounds.merge(vertex);
+                    _geometries->_triangleMeshesBounds.merge(vertex);
     }
 
     if (_streamlinesDirty)
@@ -562,7 +562,7 @@ void Model::updateBounds()
     _bounds.merge(_geometries->_sphereBounds);
     _bounds.merge(_geometries->_cylindersBounds);
     _bounds.merge(_geometries->_conesBounds);
-    _bounds.merge(_geometries->_trianglesMeshesBounds);
+    _bounds.merge(_geometries->_triangleMeshesBounds);
     _bounds.merge(_geometries->_streamlinesBounds);
     _bounds.merge(_geometries->_sdfGeometriesBounds);
     _bounds.merge(_geometries->_volumesBounds);
@@ -573,7 +573,7 @@ void Model::_markGeometriesClean()
     _spheresDirty = false;
     _cylindersDirty = false;
     _conesDirty = false;
-    _trianglesMeshesDirty = false;
+    _triangleMeshesDirty = false;
     _streamlinesDirty = false;
     _sdfGeometriesDirty = false;
     _volumesDirty = false;

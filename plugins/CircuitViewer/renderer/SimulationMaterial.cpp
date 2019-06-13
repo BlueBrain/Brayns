@@ -64,11 +64,11 @@ void SimulationMaterial::commit()
 
     DefaultMaterial::commit();
 
-    const bool withSimulationOffsets = getParam1i("apply_simulation", 0) == 1;
+    // FIXME(jonask): When supported by OSPRay use bool
+    const bool withSimulationOffsets = getParam1i("apply_simulation", 0);
     ispc::SimulationMaterial_set(getIE(), withSimulationOffsets);
 }
 
-OSP_REGISTER_MATERIAL(advanced_simulation, SimulationMaterial,
-                      default_material);
-OSP_REGISTER_MATERIAL(basic_simulation, SimulationMaterial, default_material);
+OSP_REGISTER_MATERIAL(advanced_simulation, SimulationMaterial, default);
+OSP_REGISTER_MATERIAL(basic_simulation, SimulationMaterial, default);
 }

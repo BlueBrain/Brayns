@@ -44,10 +44,13 @@ void PerspectiveCamera::commit()
     aspect = getParamf("aspect", 1.f);
     apertureRadius = getParamf("apertureRadius", 0.f);
     focusDistance = getParamf("focusDistance", 1.f);
-    stereo = getParam("stereo", false);
+    // FIXME(jonask): When supported by OSPRay use bool
+    stereo = getParam("stereo", 0);
     // the default 63.5mm represents the average human IPD
     interpupillaryDistance = getParamf("interpupillaryDistance", 0.0635f);
-    clipPlanes = getParamData("clipPlanes", nullptr);
+    enableClippingPlanes = getParam("enableClippingPlanes", 0);
+    clipPlanes =
+        enableClippingPlanes ? getParamData("clipPlanes", nullptr) : nullptr;
 
     // ------------------------------------------------------------------
     // now, update the local precomputed values
@@ -104,4 +107,4 @@ void PerspectiveCamera::commit()
 
 OSP_REGISTER_CAMERA(PerspectiveCamera, perspective);
 
-} // ::ospray
+} // namespace ospray

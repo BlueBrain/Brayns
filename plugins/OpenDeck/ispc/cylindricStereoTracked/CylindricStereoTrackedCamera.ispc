@@ -91,7 +91,7 @@ void CylindricStereoTrackedCamera_initRay(uniform Camera* uniform _self,
 
     const vec3f org = self->org + self->headPos - eyeDeltaPos;
     const float time = Camera_shutterTime(_self, sample.time);
-    setRay(ray, org, normalize(dir), self->super.nearClip, infinity, time);
+    setRay(ray, org, normalize(dir), self->super.nearClip, inf, time);
 }
 
 /*! create a new ispc-side version of a OpenDeckCylinderStereoCamera - with

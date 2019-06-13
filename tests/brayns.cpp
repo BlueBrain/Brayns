@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(renderParams.getCurrentCamera(), "perspective");
     BOOST_CHECK_EQUAL(renderParams.getCurrentRenderer(), "basic");
     BOOST_CHECK_EQUAL(renderParams.getCameras().size(), 4);
-    BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 5);
+    BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 6);
     BOOST_CHECK_EQUAL(renderParams.getSamplesPerPixel(), 1);
     BOOST_CHECK_EQUAL(renderParams.getBackgroundColor(),
                       brayns::Vector3d(0, 0, 0));

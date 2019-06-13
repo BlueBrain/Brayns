@@ -95,8 +95,8 @@ void DefaultMaterial::commit()
         (const ispc::LinearSpace2f&)rot_Bump);
 }
 
-OSP_REGISTER_MATERIAL(basic, DefaultMaterial, default_material);
-OSP_REGISTER_MATERIAL(BASIC, DefaultMaterial, default_material);
-OSP_REGISTER_MATERIAL(proximity, DefaultMaterial, default_material);
+OSP_REGISTER_MATERIAL(basic, DefaultMaterial, default);
+OSP_REGISTER_MATERIAL(BASIC, DefaultMaterial, default);
+OSP_REGISTER_MATERIAL(proximity, DefaultMaterial, default);
 
 } // ::brayns
