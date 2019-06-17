@@ -30,22 +30,6 @@ SERIALIZATION_ACCESS(Material)
 
 namespace brayns
 {
-enum class TextureType : uint8_t
-{
-    diffuse = 0,
-    normals,
-    bump,
-    specular,
-    emissive,
-    opacity,
-    reflection,
-    refraction,
-    occlusion,
-    radiance,
-    irradiance,
-    brdf_lut
-};
-
 typedef std::map<TextureType, Texture2DPtr> TextureDescriptors;
 
 class Material : public PropertyObject
@@ -122,7 +106,7 @@ public:
     void clearTextures();
 
 protected:
-    bool _loadTexture(const std::string& fileName);
+    bool _loadTexture(const std::string& fileName, const TextureType type);
 
     std::string _name{"undefined"};
     Vector3d _diffuseColor{1., 1., 1.};

@@ -23,7 +23,6 @@
 #include <brayns/common/Transformation.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/ClipPlane.h>
-#include <brayns/common/utils/iblUtils.h>
 #include <brayns/common/utils/utils.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
@@ -404,36 +403,7 @@ bool Scene::setEnvironmentMap(const std::string& envMap)
             success = false;
         }
 
-        try
-        {
-            auto tex = _backgroundMaterial->getTexture(TextureType::diffuse);
-
-            const auto path =
-                boost::filesystem::path(envMap).parent_path().string();
-            const auto basename = boost::filesystem::basename(envMap);
-
-            const std::string irradianceMap =
-                path + "/" + basename + "-irradiance";
-            if (!boost::filesystem::exists(irradianceMap + ".hdr"))
-                iblUtils::computeIrradianceMap(*tex, irradianceMap);
-            _backgroundMaterial->setTexture(irradianceMap + ".hdr",
-                                            TextureType::irradiance);
-
-            const std::string radianceMap = path + "/" + basename + "-radiance";
-            if (!boost::filesystem::exists(radianceMap + ".hdr"))
-                iblUtils::computeRadianceMap(*tex, radianceMap);
-            _backgroundMaterial->setTexture(radianceMap + ".hdr",
-                                            TextureType::radiance);
-
-            const std::string brdf = path + "/ibl_brdf_lut";
-            if (!boost::filesystem::exists(brdf + ".hdr"))
-                iblUtils::computeBRDF(brdf);
-            _backgroundMaterial->setTexture(brdf + ".hdr",
-                                            TextureType::brdf_lut);
-        }
-        catch (...)
-        {
-        }
+        _loadIBLMaps(envMap);
     }
 
     _updateValue(_environmentMap, success ? envMap : "");
@@ -460,5 +430,33 @@ void Scene::_computeBounds()
     if (_bounds.isEmpty())
         // If no model is enabled. return empty bounding box
         _bounds.merge({0, 0, 0});
+}
+
+void Scene::_loadIBLMaps(const std::string& envMap)
+{
+    try
+    {
+        auto tex = _backgroundMaterial->getTexture(TextureType::diffuse);
+
+        namespace fs = boost::filesystem;
+        const auto path = fs::path(envMap).parent_path();
+        const auto basename = (path / fs::basename(envMap)).string();
+
+        const std::string irradianceMap = basename + IRRADIANCE_MAP + ".hdr";
+        const std::string radianceMap = basename + RADIANCE_MAP + ".hdr";
+        const std::string brdfLUT = basename + BRDF_LUT + ".hdr";
+
+        if (fs::exists(irradianceMap) && fs::exists(radianceMap) &&
+            fs::exists(brdfLUT))
+        {
+            _backgroundMaterial->setTexture(irradianceMap,
+                                            TextureType::irradiance);
+            _backgroundMaterial->setTexture(radianceMap, TextureType::radiance);
+            _backgroundMaterial->setTexture(brdfLUT, TextureType::brdf_lut);
+        }
+    }
+    catch (...)
+    {
+    }
 }
 } // namespace brayns

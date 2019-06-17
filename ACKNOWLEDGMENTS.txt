@@ -1,3 +1,13 @@
+Shaders and OpenGL code in apps/BraynsIBL
+
+Copyright (C) 2017-2018 Joey de Vries
+
+https://github.com/JoeyDeVries/LearnOpenGL/tree/master/src/6.pbr/2.2.1.ibl_specular
+
+License: https://creativecommons.org/licenses/by-nc/4.0/legalcode
+
+----------------------------------------------------------------------
+
 base64.cpp and base64.h
 
 Copyright (C) 2004-2008 René Nyffenegger
