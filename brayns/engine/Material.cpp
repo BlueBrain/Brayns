@@ -46,20 +46,20 @@ void Material::clearTextures()
     markModified();
 }
 
-bool Material::_loadTexture(const std::string& fileName)
+bool Material::_loadTexture(const std::string& fileName, const TextureType type)
 {
     if (_textures.find(fileName) != _textures.end())
         return true;
 
-    auto texture = ImageManager::importTextureFromFile(fileName);
+    auto texture = ImageManager::importTextureFromFile(fileName, type);
     if (!texture)
         return false;
 
     _textures[fileName] = texture;
     BRAYNS_DEBUG << fileName << ": " << texture->getWidth() << "x"
-                 << texture->getHeight() << "x" << texture->getNbChannels()
-                 << "x" << texture->getDepth() << " added to the texture cache"
-                 << std::endl;
+                 << texture->getHeight() << "x" << (int)texture->getNbChannels()
+                 << "x" << (int)texture->getDepth()
+                 << " added to the texture cache" << std::endl;
     return true;
 }
 
@@ -70,7 +70,7 @@ void Material::setTexture(const std::string& fileName, const TextureType type)
         return;
 
     if (_textures.find(fileName) == _textures.end())
-        if (!_loadTexture(fileName))
+        if (!_loadTexture(fileName, type))
             throw std::runtime_error("Failed to load texture from " + fileName);
     _textureDescriptors[type] = _textures[fileName];
     markModified();

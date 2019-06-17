@@ -23,30 +23,56 @@
 #include <brayns/common/utils/imageUtils.h>
 
 #include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
 
 namespace brayns
 {
 namespace
 {
-std::vector<unsigned char> getRawData(const freeimage::ImagePtr& image)
+std::vector<unsigned char> getRawData(const freeimage::ImagePtr& image,
+                                      const bool flip = true)
 {
 #if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_BGR
     freeimage::SwapRedBlue32(image.get());
 #endif
 
+    const auto width = FreeImage_GetWidth(image.get());
     const auto height = FreeImage_GetHeight(image.get());
     const auto bpp = FreeImage_GetBPP(image.get());
-    const auto pitch = FreeImage_GetPitch(image.get());
+    const auto pitch = width * bpp / 8;
+
     std::vector<unsigned char> rawData(height * pitch);
     FreeImage_ConvertToRawBits(rawData.data(), image.get(), pitch, bpp,
                                FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK,
-                               FI_RGBA_BLUE_MASK, TRUE);
+                               FI_RGBA_BLUE_MASK, flip);
     return rawData;
+}
+
+void setRawData(Texture2DPtr texture, const freeimage::ImagePtr& image,
+                const uint8_t mip = 0)
+{
+    auto width = texture->getWidth();
+    auto height = texture->getHeight();
+    for (uint8_t i = 0; i < mip; ++i)
+    {
+        width /= 2;
+        height /= 2;
+    }
+    const bool flipFace = !texture->isCubeMap();
+    for (uint8_t face = 0; face < texture->getNumFaces(); ++face)
+    {
+        const auto offset = face * width;
+        freeimage::ImagePtr faceImg(FreeImage_CreateView(image.get(), offset, 0,
+                                                         offset + width,
+                                                         height));
+        texture->setRawData(getRawData(faceImg, flipFace), face, mip);
+    }
 }
 }
 
 Texture2DPtr ImageManager::importTextureFromFile(
-    const std::string& filename BRAYNS_UNUSED)
+    const std::string& filename BRAYNS_UNUSED,
+    const TextureType type BRAYNS_UNUSED)
 {
 #ifdef BRAYNS_USE_FREEIMAGE
     auto format = FreeImage_GetFileType(filename.c_str());
@@ -59,7 +85,7 @@ Texture2DPtr ImageManager::importTextureFromFile(
     if (!image)
         return {};
 
-    size_t depth = 1;
+    uint8_t depth = 1;
     switch (FreeImage_GetImageType(image.get()))
     {
     case FIT_BITMAP:
@@ -86,37 +112,50 @@ Texture2DPtr ImageManager::importTextureFromFile(
         return {};
     }
 
-    const auto width = FreeImage_GetWidth(image.get());
+    auto width = FreeImage_GetWidth(image.get());
     const auto height = FreeImage_GetHeight(image.get());
     const auto bytesPerPixel = FreeImage_GetBPP(image.get()) / 8;
     FreeImage_FlipVertical(image.get());
 
-    auto texture = std::make_shared<Texture2D>();
+    Texture2D::Type textureType = Texture2D::Type::default_;
+    const bool isCubeMap =
+        type == TextureType::irradiance || type == TextureType::radiance;
+    if (isCubeMap)
+    {
+        textureType = Texture2D::Type::cubemap;
+        width /= 6;
+    }
+    else if (type == TextureType::normals) // TODO: only valid for PBR
+        textureType = Texture2D::Type::normal_roughness;
+
+    auto texture = std::make_shared<Texture2D>(textureType);
     texture->setFilename(filename);
     texture->setWidth(width);
     texture->setHeight(height);
     texture->setNbChannels(bytesPerPixel / depth);
     texture->setDepth(depth);
-    texture->setRawData(getRawData(image));
+    if (isCubeMap || type == TextureType::brdf_lut)
+        texture->setWrapMode(TextureWrapMode::clamp_to_edge);
 
-    const auto path = boost::filesystem::path(filename).parent_path().string();
-    const auto basename = path + "/" + boost::filesystem::basename(filename);
-    const auto ext = boost::filesystem::extension(filename);
+    setRawData(texture, image);
 
-    size_t mipLevels = 1;
-    while (
-        boost::filesystem::exists(basename + std::to_string(mipLevels) + ext))
+    const auto path = fs::path(filename).parent_path().string();
+    const auto basename = path + "/" + fs::basename(filename);
+    const auto ext = fs::extension(filename);
+
+    uint8_t mipLevels = 1;
+    while (fs::exists(basename + std::to_string((int)mipLevels) + ext))
         ++mipLevels;
 
     texture->setMipLevels(mipLevels);
 
-    for (size_t i = 1; i < mipLevels; ++i)
+    for (uint8_t mip = 1; mip < mipLevels; ++mip)
     {
-        freeimage::ImagePtr mipImage(
-            FreeImage_Load(format,
-                           (basename + std::to_string(i) + ext).c_str()));
+        freeimage::ImagePtr mipImage(FreeImage_Load(
+            format, (basename + std::to_string((int)mip) + ext).c_str()));
         FreeImage_FlipVertical(mipImage.get());
-        texture->setRawData(getRawData(mipImage), i);
+
+        setRawData(texture, mipImage, mip);
     }
     return texture;
 #else

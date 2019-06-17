@@ -144,9 +144,9 @@ OSPTexture OSPRayMaterial::_createOSPTexture2D(Texture2DPtr texture)
 
     osphelper::set(ospTexture, "type", static_cast<int>(type));
     osphelper::set(ospTexture, "size", size);
-    auto textureData =
-        ospNewData(texture->getSizeInBytes(), OSP_RAW, texture->getRawData(),
-                   OSP_DATA_SHARED_BUFFER);
+    auto textureData = ospNewData(texture->getSizeInBytes(), OSP_RAW,
+                                  texture->getRawData<unsigned char>(),
+                                  OSP_DATA_SHARED_BUFFER);
     ospSetObject(ospTexture, "data", textureData);
     ospRelease(textureData);
     ospCommit(ospTexture);

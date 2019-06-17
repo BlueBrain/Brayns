@@ -1,6 +1,5 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -22,32 +21,40 @@
 
 namespace brayns
 {
-Texture2D::Texture2D()
-    : _nbChannels(0)
-    , _depth(0)
-    , _width(0)
-    , _height(0)
+Texture2D::Texture2D(const Type type)
+    : _type(type)
 {
-    _rawData.resize(1);
+    _rawData.resize(_type == Type::cubemap ? 6 : 1);
+    setMipLevels(1);
 }
 
-void Texture2D::setRawData(unsigned char* data, size_t size, const size_t mip)
+void Texture2D::setMipLevels(const uint8_t mips)
 {
-    _rawData[mip].clear();
-    _rawData[mip].assign(data, data + size);
+    if (mips == _mipLevels)
+        return;
+    _mipLevels = mips;
+    for (auto& data : _rawData)
+        data.resize(mips);
+}
+
+void Texture2D::setRawData(unsigned char* data, const size_t size,
+                           const uint8_t face, const uint8_t mip)
+{
+    _rawData[face][mip].clear();
+    _rawData[face][mip].assign(data, data + size);
 }
 
 void Texture2D::setRawData(std::vector<unsigned char>&& rawData,
-                           const size_t mip)
+                           const uint8_t face, const uint8_t mip)
 {
-    _rawData[mip] = std::move(rawData);
+    _rawData[face][mip] = std::move(rawData);
 }
 
 uint8_t Texture2D::getPossibleMipMapsLevels() const
 {
     uint8_t mipMapLevels = 1u;
-    uint32_t nx = _width;
-    uint32_t ny = _height;
+    size_t nx = _width;
+    size_t ny = _height;
     while (nx % 2 == 0 && ny % 2 == 0)
     {
         nx /= 2;

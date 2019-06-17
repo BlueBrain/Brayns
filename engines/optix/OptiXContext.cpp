@@ -68,7 +68,8 @@ float white()
 
 template <typename T>
 void textureToOptix(T* ptr_dst, const brayns::Texture2D& texture,
-                    const uint8_t mipLevel, const bool hasAlpha)
+                    const uint8_t face, const uint8_t mipLevel,
+                    const bool hasAlpha)
 {
     uint16_t width = texture.getWidth();
     uint16_t height = texture.getHeight();
@@ -79,7 +80,7 @@ void textureToOptix(T* ptr_dst, const brayns::Texture2D& texture,
     }
     size_t idx_src = 0;
     size_t idx_dst = 0;
-    const auto rawData = texture.getRawData<T>(mipLevel);
+    const auto rawData = texture.getRawData<T>(face, mipLevel);
     for (uint16_t y = 0; y < height; ++y)
     {
         for (uint16_t x = 0; x < width; ++x)
@@ -92,6 +93,22 @@ void textureToOptix(T* ptr_dst, const brayns::Texture2D& texture,
             idx_dst += 4u;
             idx_src += hasAlpha ? 4u : 3u;
         }
+    }
+}
+
+RTwrapmode wrapModeToOptix(const brayns::TextureWrapMode mode)
+{
+    switch (mode)
+    {
+    case brayns::TextureWrapMode::clamp_to_border:
+        return RT_WRAP_CLAMP_TO_BORDER;
+    case brayns::TextureWrapMode::clamp_to_edge:
+        return RT_WRAP_CLAMP_TO_EDGE;
+    case brayns::TextureWrapMode::mirror:
+        return RT_WRAP_MIRROR;
+    case brayns::TextureWrapMode::repeat:
+    default:
+        return RT_WRAP_REPEAT;
     }
 }
 
@@ -192,7 +209,8 @@ const OptixShaderProgram& OptiXContext::getRenderer(const std::string& name)
     if (!useFloat && !useByte)
         throw std::runtime_error("Only byte or float textures are supported");
 
-    const bool createMipmaps = texture->getMipLevels() == 1 && useByte;
+    const bool createMipmaps =
+        texture->getMipLevels() == 1 && useByte && !texture->isCubeMap();
     uint16_t mipMapLevels = texture->getMipLevels();
     if (createMipmaps)
         mipMapLevels = texture->getPossibleMipMapsLevels();
@@ -207,17 +225,23 @@ const OptixShaderProgram& OptiXContext::getRenderer(const std::string& name)
 
     // Create texture sampler
     ::optix::TextureSampler sampler = _optixContext->createTextureSampler();
-    sampler->setWrapMode(0, RT_WRAP_MIRROR);
-    sampler->setWrapMode(1, RT_WRAP_MIRROR);
-    sampler->setWrapMode(2, RT_WRAP_MIRROR);
+    const auto wrapMode = wrapModeToOptix(texture->getWrapMode());
+    sampler->setWrapMode(0, wrapMode);
+    sampler->setWrapMode(1, wrapMode);
+    sampler->setWrapMode(2, wrapMode);
     sampler->setIndexingMode(RT_TEXTURE_INDEX_NORMALIZED_COORDINATES);
     sampler->setReadMode(RT_TEXTURE_READ_NORMALIZED_FLOAT);
     sampler->setMaxAnisotropy(8.0f);
 
     // Create buffer and populate with texture data
-    optix::Buffer buffer =
-        _optixContext->createMipmappedBuffer(RT_BUFFER_INPUT, optixFormat, nx,
-                                             ny, mipMapLevels);
+    optix::Buffer buffer;
+    if (texture->isCubeMap())
+        buffer = _optixContext->createCubeBuffer(RT_BUFFER_INPUT, optixFormat,
+                                                 nx, ny, mipMapLevels);
+    else
+        buffer =
+            _optixContext->createMipmappedBuffer(RT_BUFFER_INPUT, optixFormat,
+                                                 nx, ny, mipMapLevels);
 
     std::vector<void*> mipMapBuffers(mipMapLevels);
     for (uint8_t currentLevel = 0u; currentLevel < mipMapLevels; ++currentLevel)
@@ -228,7 +252,7 @@ const OptixShaderProgram& OptiXContext::getRenderer(const std::string& name)
         uint8_t* ptr_dst = (uint8_t*)mipMapBuffers[0];
         size_t idx_src = 0;
         size_t idx_dst = 0;
-        const auto rawData = texture->getRawData();
+        const auto rawData = texture->getRawData<unsigned char>();
         for (uint16_t y = 0; y < ny; ++y)
         {
             for (uint16_t x = 0; x < nx; ++x)
@@ -288,14 +312,27 @@ const OptixShaderProgram& OptiXContext::getRenderer(const std::string& name)
     }
     else
     {
-        for (uint16_t i = 0; i < mipMapLevels; ++i)
+        for (uint8_t face = 0; face < texture->getNumFaces(); ++face)
         {
-            if (useByte)
-                textureToOptix<uint8_t>((uint8_t*)mipMapBuffers[i], *texture, i,
-                                        hasAlpha);
-            else if (useFloat)
-                textureToOptix<float>((float*)mipMapBuffers[i], *texture, i,
-                                      hasAlpha);
+            auto mipWidth = nx;
+            auto mipHeight = ny;
+            for (uint16_t mip = 0; mip < mipMapLevels; ++mip)
+            {
+                if (useByte)
+                {
+                    auto dst = (uint8_t*)mipMapBuffers[mip];
+                    dst += face * mipWidth * mipHeight * 4;
+                    textureToOptix<uint8_t>(dst, *texture, face, mip, hasAlpha);
+                }
+                else if (useFloat)
+                {
+                    auto dst = (float*)mipMapBuffers[mip];
+                    dst += face * mipWidth * mipHeight * 4;
+                    textureToOptix<float>(dst, *texture, face, mip, hasAlpha);
+                }
+                mipWidth /= 2;
+                mipHeight /= 2;
+            }
         }
     }
 
