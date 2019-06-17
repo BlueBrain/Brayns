@@ -47,7 +47,7 @@ void MultiviewCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
             pos_00 + 2.0 * screen.x * pos_du + 2.0 * screen.y * pos_dv;
 
         float nearClip = self->super.nearClip;
-        float farClip = infinity;
+        float farClip = inf;
         const varying vec3f direction = normalize(dir);
 
         clipRay(self->clipPlanes, self->numClipPlanes, org, direction, nearClip,
@@ -71,7 +71,7 @@ void MultiviewCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
             pos_00 + 2.0 * screen.x * pos_du + 2.0 * (screen.y - 0.5f) * pos_dv;
 
         float nearClip = self->super.nearClip;
-        float farClip = infinity;
+        float farClip = inf;
         const varying vec3f direction = normalize(dir);
 
         clipRay(self->clipPlanes, self->numClipPlanes, org, direction, nearClip,
@@ -101,7 +101,7 @@ void MultiviewCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
         }
 
         float nearClip = self->super.nearClip;
-        float farClip = infinity;
+        float farClip = inf;
         const varying vec3f direction = normalize(dir);
 
         clipRay(self->clipPlanes, self->numClipPlanes, org, direction, nearClip,
@@ -125,7 +125,7 @@ void MultiviewCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
                           2.0 * (screen.y - 0.5f) * pos_dv;
 
         float nearClip = self->super.nearClip;
-        float farClip = infinity;
+        float farClip = inf;
         const varying vec3f direction = normalize(dir);
 
         clipRay(self->clipPlanes, self->numClipPlanes, org, direction, nearClip,

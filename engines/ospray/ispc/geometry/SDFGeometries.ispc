@@ -45,6 +45,12 @@
 /////////////////////////////////////////////////////////////////////////////
 
 // https://en.wikipedia.org/wiki/Smoothstep
+inline float smoothstep(const float x)
+{
+    return x * x * (3 - 2 * x);
+}
+
+// https://en.wikipedia.org/wiki/Smoothstep
 inline float smootherstep(const float x)
 {
     return x * x * x * (x * (x * 6 - 15) + 10);
@@ -81,10 +87,12 @@ inline float sdConePill(const vec3f& p, const vec3f p0, const vec3f p1,
     const vec3f v = p1 - p0;
     const vec3f w = p - p0;
 
+    // distance to p0 along cone axis
     const float c1 = dot(w, v);
     if (c1 <= 0)
         return length(p - p0) - radius_bottom;
 
+    // cone length
     const float c2 = dot(v, v);
     if (c2 <= c1)
         return length(p - p1) - radius_top;
@@ -95,8 +103,7 @@ inline float sdConePill(const vec3f& p, const vec3f p0, const vec3f p1,
     const float thicknessAt = mix(radius_bottom, radius_top, b);
     const float thickness =
         useSigmoid
-            ? 0.5 * (thicknessAt +
-                     mix(radius_bottom, radius_top, smootherstep(b)))
+            ? mix(radius_bottom, radius_top, smootherstep(b))
             : thicknessAt;
 
     return length(p - Pb) - thickness;
@@ -371,8 +378,7 @@ unmasked void SDFGeometries_intersect(
         ray->geomID = self->super.geomID;
         ray->instID = args->context->instID[0];
         ray->t = t_in;
-        ray->Ng = calcNormal(primitive, getIntersectionError(ray->org, t_in),
-                             pos, *self);
+        ray->Ng = calcNormal(primitive, calcEpsilon(ray->org, t_in), pos, *self);
     }
 }
 

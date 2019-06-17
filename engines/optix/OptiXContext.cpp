@@ -62,7 +62,7 @@ const std::string CUDA_FUNC_CAMERA_ENVMAP_MISS = "envmap_miss";
                                      std::string(#func) + "'");    \
     } while (0)
 
-constexpr size_t OPTIX_STACK_SIZE = 2800;
+constexpr size_t OPTIX_STACK_SIZE = 1024;
 constexpr size_t OPTIX_RAY_TYPE_COUNT = 2;
 constexpr size_t OPTIX_ENTRY_POINT_COUNT = 1;
 
@@ -340,11 +340,16 @@ void OptiXContext::_printSystemInformation() const
     return geometry;
 }
 
-::optix::GeometryGroup OptiXContext::createGeometryGroup()
+::optix::GeometryGroup OptiXContext::createGeometryGroup(const bool compact)
 {
     auto group = _optixContext->createGeometryGroup();
-    group->setAcceleration(
-        _optixContext->createAcceleration(DEFAULT_ACCELERATION_STRUCTURE));
+    auto accel = _optixContext->createAcceleration(
+        compact ? "Sbvh" : DEFAULT_ACCELERATION_STRUCTURE);
+    accel->setProperty("vertex_buffer_name", "vertices_buffer");
+    accel->setProperty("vertex_buffer_stride", "12");
+    accel->setProperty("index_buffer_name", "indices_buffer");
+    accel->setProperty("index_buffer_stride", "12");
+    group->setAcceleration(accel);
     return group;
 }
 
