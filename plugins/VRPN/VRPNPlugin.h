@@ -38,6 +38,7 @@ struct VrpnStates
 {
     float axisX = 0.0f;
     float axisZ = 0.0f;
+    glm::quat flyStickOrientation;
 };
 
 class VRPNPlugin : public ExtensionPlugin
