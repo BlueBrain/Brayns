@@ -23,6 +23,7 @@
 #include <brayns/common/Transformation.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/ClipPlane.h>
+#include <brayns/common/utils/iblUtils.h>
 #include <brayns/common/utils/utils.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
@@ -30,6 +31,8 @@
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <fstream>
+
+#include <boost/filesystem.hpp>
 
 namespace
 {
@@ -386,19 +389,50 @@ bool Scene::setEnvironmentMap(const std::string& envMap)
 {
     bool success = true;
     if (envMap.empty())
-        _backgroundMaterial->removeTexture(TT_DIFFUSE);
+        _backgroundMaterial->clearTextures();
     else
     {
         try
         {
-            _backgroundMaterial->setTexture(envMap, TT_DIFFUSE);
+            _backgroundMaterial->setTexture(envMap, TextureType::diffuse);
         }
         catch (const std::runtime_error& e)
         {
             BRAYNS_DEBUG << "Cannot load environment map: " << e.what()
                          << std::endl;
-            _backgroundMaterial->removeTexture(TT_DIFFUSE);
+            _backgroundMaterial->clearTextures();
             success = false;
+        }
+
+        try
+        {
+            auto tex = _backgroundMaterial->getTexture(TextureType::diffuse);
+
+            const auto path =
+                boost::filesystem::path(envMap).parent_path().string();
+            const auto basename = boost::filesystem::basename(envMap);
+
+            const std::string irradianceMap =
+                path + "/" + basename + "-irradiance";
+            if (!boost::filesystem::exists(irradianceMap + ".hdr"))
+                iblUtils::computeIrradianceMap(*tex, irradianceMap);
+            _backgroundMaterial->setTexture(irradianceMap + ".hdr",
+                                            TextureType::irradiance);
+
+            const std::string radianceMap = path + "/" + basename + "-radiance";
+            if (!boost::filesystem::exists(radianceMap + ".hdr"))
+                iblUtils::computeRadianceMap(*tex, radianceMap);
+            _backgroundMaterial->setTexture(radianceMap + ".hdr",
+                                            TextureType::radiance);
+
+            const std::string brdf = path + "/ibl_brdf_lut";
+            if (!boost::filesystem::exists(brdf + ".hdr"))
+                iblUtils::computeBRDF(brdf);
+            _backgroundMaterial->setTexture(brdf + ".hdr",
+                                            TextureType::brdf_lut);
+        }
+        catch (...)
+        {
         }
     }
 

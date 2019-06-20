@@ -88,6 +88,8 @@ public:
         _updateValue(_httpServerURI, httpServerURI);
     }
 
+    const std::string& getEnvMap() const {return _envMap;}
+
     const strings& getInputPaths() const { return _inputPaths; }
     po::positional_options_description& posArgs() { return _positionalArgs; }
 protected:
@@ -104,6 +106,7 @@ protected:
     std::string _httpServerURI;
     bool _parallelRendering{false};
     bool _dynamicLoadBalancer{false};
+    std::string _envMap;
 
     strings _inputPaths;
 

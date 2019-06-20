@@ -393,7 +393,7 @@ private:
                 scene.loadModel(path, params, {progress});
             }
         }
-
+        scene.setEnvironmentMap(_parametersManager.getApplicationParameters().getEnvMap());
         scene.markModified();
     }
 

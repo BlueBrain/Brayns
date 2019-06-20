@@ -37,6 +37,7 @@ set(BRAYNSOPTIXENGINE_CU
   cuda/geometry/TriangleMesh.cu
   cuda/renderer/AdvancedSimulation.cu
   cuda/renderer/BasicSimulation.cu
+  cuda/renderer/PBR.cu
 )
 
 CUDA_GET_SOURCES_AND_OPTIONS(source_files cmake_options options ${ARGN})
@@ -54,6 +55,7 @@ set(BRAYNSOPTIXENGINE_PTX
   braynsOptixEngine_generated_TriangleMesh.cu.ptx
   braynsOptixEngine_generated_AdvancedSimulation.cu.ptx
   braynsOptixEngine_generated_BasicSimulation.cu.ptx
+  braynsOptixEngine_generated_PBR.cu.ptx
 )
 
 include(StringifyPtx)

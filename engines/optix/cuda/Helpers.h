@@ -257,5 +257,37 @@ static __host__ __device__ __inline__ optix::float3 tonemap(
     return mapped_rgb;
 }
 
+static __device__ inline optix::float3 tonemap(const optix::float3& color)
+{
+    return color / (color + make_float3(1.0f));
+}
+
+static __device__ inline optix::float2 getEquirectangularUV(
+    const optix::float3& R)
+{
+    return make_float2(atan2f(R.z, R.x) * M_1_PIf / 2.f + 0.5f,
+                       asinf(R.y) * M_1_PIf + 0.5f);
+}
+
+static __device__ inline float3 max(const float3& a, const float3& b)
+{
+    return make_float3(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z));
+}
+
+static __device__ inline float3 pow(const float3& a, const float exp)
+{
+    return make_float3(pow(a.x, exp), pow(a.y, exp), pow(a.z, exp));
+}
+
+static __device__ inline float4 SRGBtoLinear(const float4& srgb)
+{
+    return make_float4(pow(make_float3(srgb), 2.2f), srgb.w);
+}
+
+static __device__ inline float3 linearToSRGB(const float3& color)
+{
+    return pow(color, 1.f / 2.2f);
+}
+
 #define OPTIX_DUMP_FLOAT(VALUE) rtPrintf(#VALUE " %f\n", VALUE)
 #define OPTIX_DUMP_INT(VALUE) rtPrintf(#VALUE " %i\n", VALUE)

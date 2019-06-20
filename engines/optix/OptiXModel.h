@@ -107,14 +107,6 @@ private:
     std::map<size_t, TriangleMesh> _meshesBuffers;
     std::map<size_t, optix::Geometry> _optixMeshes;
 
-    // Triangle meshes
-    ::optix::Geometry _mesh{nullptr};
-    ::optix::Buffer _verticesBuffer{nullptr};
-    ::optix::Buffer _indicesBuffer{nullptr};
-    ::optix::Buffer _normalsBuffer{nullptr};
-    ::optix::Buffer _textureCoordsBuffer{nullptr};
-    ::optix::Buffer _materialsBuffer{nullptr};
-
     // Volume
     ::optix::Buffer _volumeBuffer{nullptr};
 

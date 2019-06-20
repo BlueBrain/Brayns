@@ -17,19 +17,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "../../CommonStructs.h"
 #include "../Helpers.h"
 #include "../Random.h"
 #include <optix.h>
 #include <optixu/optixu_math_namespace.h>
 
 using namespace optix;
-
-struct PerRayData_radiance
-{
-    float3 result;
-    float importance;
-    int depth;
-};
 
 rtDeclareVariable(float3, eye, , );
 rtDeclareVariable(float3, U, , );
@@ -82,14 +76,23 @@ __device__ float3 launch(unsigned int& seed, const float2 screen,
         use_randomness ? make_float2(rnd(seed) - 0.5f, rnd(seed) - 0.5f)
                        : make_float2(0.f, 0.f);
 
-    float2 d =
+    float2 p =
         (make_float2(launch_index) + subpixel_jitter) / screen * 2.f - 1.f;
 
+    // We compute approximate partial derivative according to "Tracing Ray
+    // Diffentials by Homan Igehy" paper.
     float3 ray_origin = eye;
-    float3 ray_direction = d.x * U + d.y * V + W;
+    const float fs = focal_scale == 0.f ? 1.f : focal_scale;
+    const float3 d = fs * (p.x * U + p.y * V + W);
+    const float3 ray_direction = normalize(d);
+    const float dotD = dot(d, d);
+    const float denom = pow(dotD, 1.5f);
 
-    float fs = focal_scale == 0.f ? 1.f : focal_scale;
-    float3 ray_target = ray_origin + fs * ray_direction;
+    PerRayData_radiance prd;
+    prd.importance = 1.f;
+    prd.depth = 0;
+    prd.rayDdx = (dotD * U - dot(d, U) * d) / (denom * screen.x);
+    prd.rayDdy = (dotD * V - dot(d, V) * d) / (denom * screen.y);
 
     // lens sampling
     float2 sample = optix::square_to_disk(make_float2(jitter4.z, jitter4.w));
@@ -98,17 +101,11 @@ __device__ float3 launch(unsigned int& seed, const float2 screen,
         ray_origin +
         aperture_radius * (sample.x * normalize(U) + sample.y * normalize(V));
 
-    ray_direction = normalize(ray_target - ray_origin);
-
     float near = scene_epsilon;
     float far = INFINITY;
 
     getClippingValues(ray_origin, ray_direction, near, far);
     optix::Ray ray(ray_origin, ray_direction, radiance_ray_type, near, far);
-
-    PerRayData_radiance prd;
-    prd.importance = 1.f;
-    prd.depth = 0;
 
     rtTrace(top_object, ray, prd);
 

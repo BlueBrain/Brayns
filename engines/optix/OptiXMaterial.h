@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <map>
+
 #include <brayns/engine/Material.h>
 
 #include <optixu/optixpp_namespace.h>
@@ -36,8 +38,13 @@ public:
     bool isTextured() const;
 
     ::optix::Material getOptixMaterial() { return _optixMaterial; }
+    auto getTextureSampler(const TextureType type) const
+    {
+        return _textureSamplers.at(type);
+    }
+
 private:
     ::optix::Material _optixMaterial{nullptr};
-    ::optix::TextureSampler _textureSampler{nullptr};
+    std::map<TextureType, ::optix::TextureSampler> _textureSamplers;
 };
 } // namespace brayns
