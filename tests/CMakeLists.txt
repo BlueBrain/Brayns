@@ -26,7 +26,6 @@ if(NOT BRAYNS_OSPRAY_ENABLED)
   list(APPEND EXCLUDE_FROM_TESTS
     addModel.cpp
     addModelFromBlob.cpp
-    background.cpp
     brayns.cpp
     clipPlaneRendering.cpp
     model.cpp
@@ -82,7 +81,6 @@ else()
   list(APPEND EXCLUDE_FROM_TESTS
     addModel.cpp
     addModelFromBlob.cpp
-    background.cpp
     clipPlanes.cpp
     model.cpp
     plugin.cpp
