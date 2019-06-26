@@ -25,7 +25,9 @@ set(BRAYNSOSPRAYENGINE_ISPC_SOURCES
   ispc/camera/PerspectiveCamera.ispc
   ispc/camera/PerspectiveParallaxCamera.ispc
   ispc/geometry/Cones.ispc
+  ispc/geometry/SDFBeziers.ispc
   ispc/geometry/SDFGeometries.ispc
+  ispc/geometry/RayMarching.isph
   ispc/render/BasicRenderer.ispc
   ispc/render/DefaultMaterial.ispc
   ispc/render/ProximityRenderer.ispc
@@ -47,6 +49,7 @@ set(BRAYNSOSPRAYENGINE_SOURCES
   ispc/camera/PerspectiveCamera.cpp
   ispc/camera/PerspectiveParallaxCamera.cpp
   ispc/geometry/Cones.cpp
+  ispc/geometry/SDFBeziers.cpp
   ispc/geometry/SDFGeometries.cpp
   ispc/render/BasicRenderer.cpp
   ispc/render/DefaultMaterial.cpp
@@ -76,6 +79,7 @@ set(BRAYNSOSPRAYENGINE_HEADERS
 
 set(BRAYNSOSPRAYENGINE_PUBLIC_HEADERS
   ispc/geometry/Cones.h
+  ispc/geometry/SDFBeziers.h
   ispc/geometry/SDFGeometries.h
 )
 

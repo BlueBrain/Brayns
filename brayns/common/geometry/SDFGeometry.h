@@ -35,55 +35,58 @@ enum class SDFType : uint8_t
 struct SDFGeometry
 {
     uint64_t userData;
-    Vector3f center;
     Vector3f p0;
     Vector3f p1;
-    float radius = -1.f;
-    float radius_tip = -1.f;
+    float r0 = -1.f;
+    float r1 = -1.f;
     uint64_t neighboursIndex = 0;
     uint8_t numNeighbours = 0;
     SDFType type;
 };
 
-inline SDFGeometry createSDFSphere(const Vector3f& center, const float radius,
+inline SDFGeometry createSDFSphere(const Vector3f& center,
+                                   const float radius,
                                    const uint64_t data = 0)
 {
     SDFGeometry geom;
     geom.userData = data;
-    geom.center = center;
-    geom.radius = radius;
+    geom.p0 = center;
+    geom.r0 = radius;
     geom.type = SDFType::Sphere;
     return geom;
 }
 
-inline SDFGeometry createSDFPill(const Vector3f& p0, const Vector3f& p1,
-                                 const float radius, const uint64_t data = 0)
+inline SDFGeometry createSDFPill(const Vector3f& p0,
+                                 const Vector3f& p1,
+                                 const float radius,
+                                 const uint64_t data = 0)
 {
     SDFGeometry geom;
     geom.userData = data;
     geom.p0 = p0;
     geom.p1 = p1;
-    geom.radius = radius;
+    geom.r0 = radius;
     geom.type = SDFType::Pill;
     return geom;
 }
 
-inline SDFGeometry createSDFConePill(const Vector3f& p0, const Vector3f& p1,
-                                     const float radiusBottom,
-                                     const float radiusTip,
+inline SDFGeometry createSDFConePill(const Vector3f& p0,
+                                     const Vector3f& p1,
+                                     const float r0,
+                                     const float r1,
                                      const uint64_t data = 0)
 {
     SDFGeometry geom;
     geom.userData = data;
     geom.p0 = p0;
     geom.p1 = p1;
-    geom.radius = radiusBottom;
-    geom.radius_tip = radiusTip;
+    geom.r0 = r0;
+    geom.r1 = r1;
 
-    if (radiusBottom < radiusTip)
+    if (r0 < r1)
     {
         std::swap(geom.p0, geom.p1);
-        std::swap(geom.radius, geom.radius_tip);
+        std::swap(geom.r0, geom.r1);
     }
 
     geom.type = SDFType::ConePill;
@@ -92,11 +95,11 @@ inline SDFGeometry createSDFConePill(const Vector3f& p0, const Vector3f& p1,
 
 inline SDFGeometry createSDFConePillSigmoid(const Vector3f& p0,
                                             const Vector3f& p1,
-                                            const float radiusBottom,
-                                            const float radiusTip,
+                                            const float r0,
+                                            const float r1,
                                             const uint64_t data = 0)
 {
-    SDFGeometry geom = createSDFConePill(p0, p1, radiusBottom, radiusTip, data);
+    SDFGeometry geom = createSDFConePill(p0, p1, r0, r1, data);
     geom.type = SDFType::ConePillSigmoid;
     return geom;
 }
@@ -108,25 +111,25 @@ inline Boxd getSDFBoundingBox(const SDFGeometry& geom)
     {
     case brayns::SDFType::Sphere:
     {
-        bounds.merge(geom.center - Vector3f(geom.radius));
-        bounds.merge(geom.center + Vector3f(geom.radius));
+        bounds.merge(geom.p0 - Vector3f(geom.r0));
+        bounds.merge(geom.p0 + Vector3f(geom.r0));
         break;
     }
     case brayns::SDFType::Pill:
     {
-        bounds.merge(geom.p0 - Vector3f(geom.radius));
-        bounds.merge(geom.p0 + Vector3f(geom.radius));
-        bounds.merge(geom.p1 - Vector3f(geom.radius));
-        bounds.merge(geom.p1 + Vector3f(geom.radius));
+        bounds.merge(geom.p0 - Vector3f(geom.r0));
+        bounds.merge(geom.p0 + Vector3f(geom.r0));
+        bounds.merge(geom.p1 - Vector3f(geom.r0));
+        bounds.merge(geom.p1 + Vector3f(geom.r0));
         break;
     }
     case brayns::SDFType::ConePill:
     case brayns::SDFType::ConePillSigmoid:
     {
-        bounds.merge(geom.p0 - Vector3f(geom.radius));
-        bounds.merge(geom.p0 + Vector3f(geom.radius));
-        bounds.merge(geom.p1 - Vector3f(geom.radius_tip));
-        bounds.merge(geom.p1 + Vector3f(geom.radius_tip));
+        bounds.merge(geom.p0 - Vector3f(geom.r0));
+        bounds.merge(geom.p0 + Vector3f(geom.r0));
+        bounds.merge(geom.p1 - Vector3f(geom.r1));
+        bounds.merge(geom.p1 + Vector3f(geom.r1));
         break;
     }
     default:

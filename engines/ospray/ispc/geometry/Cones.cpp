@@ -68,4 +68,4 @@ void Cones::finalize(ospray::Model* model)
 
 OSP_REGISTER_GEOMETRY(Cones, cones);
 
-} // ::brayns
+} // namespace ospray

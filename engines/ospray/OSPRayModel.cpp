@@ -223,6 +223,20 @@ void OSPRayModel::_commitCones(const size_t materialId)
     _addGeometryToModel(geometry, materialId);
 }
 
+void OSPRayModel::_commitSDFBeziers(const size_t materialId)
+{
+    auto& geometry = _createGeometry(_ospSDFBeziers, materialId, "sdfbeziers");
+    auto data = allocateVectorData(_geometries->_sdfBeziers.at(materialId),
+                                   OSP_FLOAT, _memoryManagementFlags);
+
+    ospSetObject(geometry, "sdfbeziers", data);
+    ospRelease(data);
+
+    ospCommit(geometry);
+
+    _addGeometryToModel(geometry, materialId);
+}
+
 void OSPRayModel::_commitMeshes(const size_t materialId)
 {
     auto& geometry = _createGeometry(_ospMeshes, materialId, "trianglemesh");
@@ -408,6 +422,12 @@ void OSPRayModel::commitGeometry()
     {
         for (const auto& cones : _geometries->_cones)
             _commitCones(cones.first);
+    }
+
+    if (_sdfBeziersDirty)
+    {
+        for (const auto& sdfBeziers : _geometries->_sdfBeziers)
+            _commitSDFBeziers(sdfBeziers.first);
     }
 
     if (_triangleMeshesDirty)

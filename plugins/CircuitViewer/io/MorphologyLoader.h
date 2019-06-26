@@ -64,6 +64,7 @@ struct MorphologyLoaderParams
     NeuronDisplayMode mode;
     bool dampenBranchThicknessChangerate = false;
     bool useSDFGeometries = false;
+    bool disableSDFBezierCurves = false;
     GeometryQuality geometryQuality = GeometryQuality::high;
 };
 
@@ -103,6 +104,6 @@ private:
 
     PropertyMap _defaults; // command line defaults
 };
-}
+} // namespace brayns
 
 #endif // MORPHOLOGY_LOADER_H

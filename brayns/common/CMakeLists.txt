@@ -34,6 +34,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   geometry/Cone.h
   geometry/Cylinder.h
   geometry/SDFGeometry.h
+  geometry/SDFBezier.h
   geometry/Sphere.h
   geometry/Streamline.h
   geometry/TriangleMesh.h

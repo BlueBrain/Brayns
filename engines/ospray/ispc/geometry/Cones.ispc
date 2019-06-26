@@ -52,7 +52,7 @@ struct Cones
 unmasked void Cones_bounds(const RTCBoundsFunctionArguments* uniform args)
 {
     const uniform Cones* uniform self =
-        (uniform Cones * uniform)args->geometryUserPtr;
+        (uniform Cones * uniform) args->geometryUserPtr;
     const uniform Cone* uniform conePtr =
         safeIncrement(self->useSafeIncrement, self->data, args->primID);
 
@@ -65,7 +65,7 @@ unmasked void Cones_bounds(const RTCBoundsFunctionArguments* uniform args)
     const uniform vec3f v0 = conePtr->center;
     const uniform vec3f v1 = conePtr->up;
 
-    box3fa* uniform bbox = (box3fa * uniform)args->bounds_o;
+    box3fa* uniform bbox = (box3fa * uniform) args->bounds_o;
     *bbox = make_box3fa(min(v0, v1) - make_vec3f(extent),
                         max(v0, v1) + make_vec3f(extent));
 }
@@ -74,7 +74,7 @@ unmasked void Cones_intersect(
     const RTCIntersectFunctionNArguments* uniform args)
 {
     const uniform Cones* uniform self =
-        (uniform Cones * uniform)args->geometryUserPtr;
+        (uniform Cones * uniform) args->geometryUserPtr;
     const uniform int primID = args->primID;
 
     const uniform Cone* uniform conePtr =
@@ -115,7 +115,7 @@ unmasked void Cones_intersect(
     const vec3f v = normalize(v0 - V);
 
     // Normal of the plane P determined by V and ray
-    varying Ray* uniform ray = (varying Ray * uniform)args->rayhit;
+    varying Ray* uniform ray = (varying Ray * uniform) args->rayhit;
     vec3f n = normalize(cross(ray->dir, V - ray->org));
     const float dotNV = dot(n, v);
     if (dotNV > 0.f)
@@ -212,7 +212,7 @@ static void Cones_postIntersect(uniform Geometry* uniform geometry,
                                 varying DifferentialGeometry& dg,
                                 const varying Ray& ray, uniform int64 flags)
 {
-    uniform Cones* uniform this = (uniform Cones * uniform)geometry;
+    uniform Cones* uniform this = (uniform Cones * uniform) geometry;
     dg.geometry = geometry;
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
@@ -244,8 +244,8 @@ export void* uniform Cones_create(void* uniform cppEquivalent)
 export void ConesGeometry_set(void* uniform _self, void* uniform _model,
                               void* uniform data, int uniform numPrimitives)
 {
-    uniform Cones* uniform self = (uniform Cones * uniform)_self;
-    uniform Model* uniform model = (uniform Model * uniform)_model;
+    uniform Cones* uniform self = (uniform Cones * uniform) _self;
+    uniform Model* uniform model = (uniform Model * uniform) _model;
 
     RTCGeometry geom =
         rtcNewGeometry(ispc_embreeDevice(), RTC_GEOMETRY_TYPE_USER);
@@ -254,7 +254,7 @@ export void ConesGeometry_set(void* uniform _self, void* uniform _model,
     self->super.model = model;
     self->super.geomID = geomID;
     self->super.numPrimitives = numPrimitives;
-    self->data = (uniform Cone * uniform)data;
+    self->data = (uniform Cone * uniform) data;
     self->useSafeIncrement = needsSafeIncrement(self->data, numPrimitives);
 
     rtcSetGeometryUserData(geom, self);

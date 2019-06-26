@@ -489,7 +489,6 @@ public:
                                          : _properties.targetList;
 
         auto resolveTarget = [&](std::string key) {
-
             const auto fraction = _properties.density / 100.0f;
             const auto seed = _properties.randomSeed;
 
@@ -738,7 +737,7 @@ private:
     CircuitProperties _properties;
     MorphologyLoaderParams _morphologyParams;
 };
-}
+} // namespace
 
 CircuitLoader::CircuitLoader(Scene& scene, PropertyMap defaults)
     : Loader(scene)
@@ -746,9 +745,7 @@ CircuitLoader::CircuitLoader(Scene& scene, PropertyMap defaults)
 {
 }
 
-CircuitLoader::~CircuitLoader()
-{
-}
+CircuitLoader::~CircuitLoader() {}
 bool CircuitLoader::isSupported(const std::string& filename,
                                 const std::string& extension
                                     BRAYNS_UNUSED) const
@@ -812,4 +809,4 @@ PropertyMap CircuitLoader::getCLIProperties()
     pm.setProperty(Property::makeReadOnly(PROP_SYNCHRONOUS_MODE));
     return pm;
 }
-}
+} // namespace brayns

@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+
+/* Copyright (c) 2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Author: Jafet Villafranca Diaz <jafet.villafrancadiaz@epfl.ch>
+ * Responsible Author: sebastien.speierer@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,21 +19,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include <brayns/common/geometry/SDFBezier.h>
 
-#include "ospray/SDK/geometry/Geometry.h"
-#include <brayns/common/types.h>
+#define BOOST_TEST_MODULE sdfBeziers
+#include <boost/test/unit_test.hpp>
 
-namespace ospray
+BOOST_AUTO_TEST_CASE(bezier_bounding_box)
 {
-struct Cones : public ospray::Geometry
-{
-    std::string toString() const final { return "brayns::Cones"; }
-    void finalize(ospray::Model* model) final;
+    const brayns::SDFBezier bezier = {
+        0,                   // userdata
+        {-2.0f, 0.0f, 0.0f}, // p0
+        {-2.0f, 0.0f, 0.0f}, // c0
+        1.f,                 // r0
+        {1.0f, 0.0f, 0.0f},  // p1
+        {1.0f, 0.0f, 0.0f},  // c1
+        1.0f                 // r1
+    };
 
-    ospray::Ref<ospray::Data> data;
+    const auto bbox = bezierBounds(bezier);
 
-    Cones();
-};
-
-} // namespace ospray
+    BOOST_CHECK_EQUAL(bbox.getMin(), brayns::Vector3d(-3.0, -1.0, -1.0));
+    BOOST_CHECK_EQUAL(bbox.getMax(), brayns::Vector3d(2.0, 1.0, 1.0));
+}
