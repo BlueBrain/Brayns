@@ -162,4 +162,4 @@ bool SimulationHandler::_makeFrameReady(const uint32_t frame)
     }
     return true;
 }
-}
+} // namespace brayns

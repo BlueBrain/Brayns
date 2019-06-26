@@ -224,6 +224,13 @@ uint64_t Model::addCone(const size_t materialId, const Cone& cone)
     return _geometries->_cones[materialId].size() - 1;
 }
 
+uint64_t Model::addSDFBezier(const size_t materialId, const SDFBezier& bezier)
+{
+    _sdfBeziersDirty = true;
+    _geometries->_sdfBeziers[materialId].push_back(bezier);
+    return _geometries->_sdfBeziers[materialId].size() - 1;
+}
+
 void Model::addStreamline(const size_t materialId, const Streamline& streamline)
 {
     if (streamline.position.size() < 2)
@@ -391,6 +398,7 @@ void Model::logInformation()
     uint64_t nbSpheres = 0;
     uint64_t nbCylinders = 0;
     uint64_t nbCones = 0;
+    uint64_t nbSdfBeziers = 0;
     uint64_t nbMeshes = _geometries->_triangleMeshes.size();
     for (const auto& spheres : _geometries->_spheres)
         nbSpheres += spheres.second.size();
@@ -398,9 +406,14 @@ void Model::logInformation()
         nbCylinders += cylinders.second.size();
     for (const auto& cones : _geometries->_cones)
         nbCones += cones.second.size();
+    for (const auto& sdfBeziers : _geometries->_sdfBeziers)
+        nbSdfBeziers += sdfBeziers.second.size();
 
-    BRAYNS_DEBUG << "Spheres: " << nbSpheres << ", Cylinders: " << nbCylinders
-                 << ", Cones: " << nbCones << ", Meshes: " << nbMeshes
+    BRAYNS_DEBUG << "Spheres: " << nbSpheres
+                 << ", Cylinders: " << nbCylinders
+                 << ", Cones: " << nbCones
+                 << ", SDFBeziers: " << nbSdfBeziers
+                 << ", Meshes: " << nbMeshes
                  << ", Memory: " << _sizeInBytes << " bytes ("
                  << _sizeInBytes / 1048576 << " MB), Bounds: " << _bounds
                  << std::endl;
@@ -424,6 +437,8 @@ void Model::_updateSizeInBytes()
         _sizeInBytes += cylinders.second.size() * sizeof(Cylinder);
     for (const auto& cones : _geometries->_cones)
         _sizeInBytes += cones.second.size() * sizeof(Cones);
+    for (const auto& sdfBeziers : _geometries->_sdfBeziers)
+        _sizeInBytes += sdfBeziers.second.size() * sizeof(SDFBeziers);
     for (const auto& triangleMesh : _geometries->_triangleMeshes)
     {
         const auto& mesh = triangleMesh.second;
@@ -475,6 +490,7 @@ void Model::copyFrom(const Model& rhs)
     _spheresDirty = !_geometries->_spheres.empty();
     _cylindersDirty = !_geometries->_cylinders.empty();
     _conesDirty = !_geometries->_cones.empty();
+    _sdfBeziersDirty = !_geometries->_sdfBeziers.empty();
     _triangleMeshesDirty = !_geometries->_triangleMeshes.empty();
     _streamlinesDirty = !_geometries->_streamlines.empty();
     _sdfGeometriesDirty = !_geometries->_sdf.geometries.empty();
@@ -521,6 +537,15 @@ void Model::updateBounds()
                 }
     }
 
+    if (_sdfBeziersDirty)
+    {
+        _geometries->_sdfBeziersBounds.reset();
+        for (const auto& sdfBeziers : _geometries->_sdfBeziers)
+            if (sdfBeziers.first != BOUNDINGBOX_MATERIAL_ID)
+                for (const auto& sdfBezier : sdfBeziers.second)
+                    _geometries->_sdfBeziersBounds.merge(bezierBounds(sdfBezier));
+    }
+
     if (_triangleMeshesDirty)
     {
         _geometries->_triangleMeshesBounds.reset();
@@ -563,6 +588,7 @@ void Model::updateBounds()
     _bounds.merge(_geometries->_sphereBounds);
     _bounds.merge(_geometries->_cylindersBounds);
     _bounds.merge(_geometries->_conesBounds);
+    _bounds.merge(_geometries->_sdfBeziersBounds);
     _bounds.merge(_geometries->_triangleMeshesBounds);
     _bounds.merge(_geometries->_streamlinesBounds);
     _bounds.merge(_geometries->_sdfGeometriesBounds);
@@ -574,6 +600,7 @@ void Model::_markGeometriesClean()
     _spheresDirty = false;
     _cylindersDirty = false;
     _conesDirty = false;
+    _sdfBeziersDirty = false;
     _triangleMeshesDirty = false;
     _streamlinesDirty = false;
     _sdfGeometriesDirty = false;

@@ -22,6 +22,7 @@
 
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/Cylinder.h>
+#include <brayns/common/geometry/SDFBezier.h>
 #include <brayns/common/geometry/SDFGeometry.h>
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/types.h>
@@ -36,12 +37,13 @@ struct ModelData
     // std::vector move constructor is not noexcept until C++17, if we want
     // this class to be movable we have to do it by hand.
     ModelData(ModelData&& other) noexcept
-        : spheres(std::move(other.spheres)),
-          cylinders(std::move(other.cylinders)),
-          cones(std::move(other.cones)),
-          sdfGeometries(std::move(other.sdfGeometries)),
-          sdfNeighbours(std::move(other.sdfNeighbours)),
-          sdfMaterials(std::move(other.sdfMaterials))
+        : spheres(std::move(other.spheres))
+        , cylinders(std::move(other.cylinders))
+        , cones(std::move(other.cones))
+        , sdfBeziers(std::move(other.sdfBeziers))
+        , sdfGeometries(std::move(other.sdfGeometries))
+        , sdfNeighbours(std::move(other.sdfNeighbours))
+        , sdfMaterials(std::move(other.sdfMaterials))
     {
     }
 
@@ -58,6 +60,11 @@ struct ModelData
     void addCone(const size_t materialId, const Cone& cone)
     {
         cones[materialId].push_back(cone);
+    }
+
+    void addSDFBezier(const size_t materialId, const SDFBezier& bezier)
+    {
+        sdfBeziers[materialId].push_back(bezier);
     }
 
     void addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
@@ -91,6 +98,13 @@ struct ModelData
                                            cone.second.begin(),
                                            cone.second.end());
         }
+        for (const auto& sdfBezier : sdfBeziers)
+        {
+            const auto index = sdfBezier.first;
+            model.getSDFBeziers()[index].insert(
+                model.getSDFBeziers()[index].end(), sdfBezier.second.begin(),
+                sdfBezier.second.end());
+        }
         const size_t numGeoms = sdfGeometries.size();
         std::vector<size_t> localToGlobalIndex(numGeoms, 0);
 
@@ -118,8 +132,9 @@ struct ModelData
     SpheresMap spheres;
     CylindersMap cylinders;
     ConesMap cones;
+    SDFBeziersMap sdfBeziers;
     std::vector<SDFGeometry> sdfGeometries;
     std::vector<std::vector<size_t>> sdfNeighbours;
     std::vector<size_t> sdfMaterials;
 };
-}
+} // namespace brayns

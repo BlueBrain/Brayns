@@ -91,8 +91,12 @@ TEST_CASE("circuit_with_color_by_mtype")
 TEST_CASE("circuit_with_simulation_mapping")
 {
     const std::vector<const char*> argv = {
-        BBP_TEST_BLUECONFIG3, "--samples-per-pixel", "16", "--animation-frame",
-        "50", "--plugin",
+        BBP_TEST_BLUECONFIG3,
+        "--samples-per-pixel",
+        "16",
+        "--animation-frame",
+        "50",
+        "--plugin",
         "braynsCircuitViewer --targets allmini50 --report "
         "voltages --synchronous-mode"};
 
@@ -152,11 +156,12 @@ void testSdfGeometries(bool dampened, const char* app)
                                          "--plugin"};
     if (dampened)
         argv.push_back(
-            "braynsCircuitViewer --targets Layer1 --use-sdf-geometries "
-            "--dampen-branch-thickness-changerate");
+            "braynsCircuitViewer --targets Layer1 --use-sdf-geometries"
+            "--disable-sdf-bezier-curves --dampen-branch-thickness-changerate");
     else
         argv.push_back(
-            "braynsCircuitViewer --targets Layer1 --use-sdf-geometries");
+            "braynsCircuitViewer --targets Layer1 --use-sdf-geometries"
+            " --disable-sdf-bezier-curves");
 
     const int argc = argv.size();
 
@@ -190,4 +195,43 @@ TEST_CASE("circuit_with_sdf_geometries")
 TEST_CASE("circuit_with_dampened_sdf_geometries")
 {
     testSdfGeometries(true, "circuit_with_dampened_sdf_geometries");
+}
+
+BOOST_AUTO_TEST_CASE(circuit_with_sdf_bezier_curves)
+{
+    auto& testSuite = boost::unit_test::framework::master_test_suite();
+
+    const char* app = testSuite.argv[0];
+    auto argv = std::vector<const char*>{app,
+                                         BBP_TEST_BLUECONFIG3,
+                                         "--disable-accumulation",
+                                         "--samples-per-pixel",
+                                         "16",
+                                         "--plugin"};
+
+    argv.push_back("braynsCircuitViewer --targets Layer1 --use-sdf-geometries");
+
+    const int argc = argv.size();
+
+    brayns::Brayns brayns(argc, argv.data());
+
+    brayns.getParametersManager().getRenderingParameters().setCurrentRenderer(
+        "basic");
+
+    const auto rotCenter = brayns.getEngine()
+                               .getScene()
+                               .getModel(0)
+                               ->getTransformation()
+                               .getRotationCenter();
+
+    auto& camera = brayns.getEngine().getCamera();
+    const auto camPos = camera.getPosition();
+
+    camera.setOrientation(brayns::Quaterniond(1, 0, 0, 0));
+    camera.setPosition(camPos + 0.92 * (rotCenter - camPos));
+
+    brayns.commitAndRender();
+
+    BOOST_CHECK(compareTestImage("testSdfBezierCurvesCircuit.png",
+                                 brayns.getEngine().getFrameBuffer()));
 }

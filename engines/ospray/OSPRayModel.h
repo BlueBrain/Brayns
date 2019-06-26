@@ -71,6 +71,7 @@ private:
     void _commitSpheres(const size_t materialId);
     void _commitCylinders(const size_t materialId);
     void _commitCones(const size_t materialId);
+    void _commitSDFBeziers(const size_t materialId);
     void _commitMeshes(const size_t materialId);
     void _commitStreamlines(const size_t materialId);
     void _commitSDFGeometries();
@@ -95,6 +96,7 @@ private:
     std::map<size_t, OSPGeometry> _ospSpheres;
     std::map<size_t, OSPGeometry> _ospCylinders;
     std::map<size_t, OSPGeometry> _ospCones;
+    std::map<size_t, OSPGeometry> _ospSDFBeziers;
     std::map<size_t, OSPGeometry> _ospMeshes;
     std::map<size_t, OSPGeometry> _ospStreamlines;
     std::map<size_t, OSPGeometry> _ospSDFGeometries;

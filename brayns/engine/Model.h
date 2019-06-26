@@ -26,6 +26,7 @@
 #include <brayns/common/Transformation.h>
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/Cylinder.h>
+#include <brayns/common/geometry/SDFBezier.h>
 #include <brayns/common/geometry/SDFGeometry.h>
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/geometry/Streamline.h>
@@ -79,6 +80,7 @@ public:
     size_t getModelID() const { return _modelID; }
     void setInstanceID(const size_t id) { _updateValue(_instanceID, id); }
     size_t getInstanceID() const { return _instanceID; }
+
 protected:
     size_t _modelID{0};
     size_t _instanceID{0};
@@ -116,6 +118,7 @@ public:
     const std::string& getLoaderName() const { return _loaderName; }
     const PropertyMap& getLoaderProperties() const { return _loaderProperties; }
     void setLoaderProperties(const PropertyMap& pm) { _loaderProperties = pm; }
+
 protected:
     std::string _name;
     std::string _path;
@@ -319,11 +322,33 @@ public:
     }
     /**
       Adds a cone to the model
-      @param materialId Id of the material for thecone
+      @param materialId Id of the material for the cone
       @param cone Cone to add
       @return Index of the sphere for the specified material
       */
     BRAYNS_API uint64_t addCone(const size_t materialId, const Cone& cone);
+
+    /**
+        Returns SDFBezier handled by the model
+    */
+    const SDFBeziersMap& getSDFBeziers() const
+    {
+        return _geometries->_sdfBeziers;
+    }
+
+    SDFBeziersMap& getSDFBeziers()
+    {
+        _sdfBeziersDirty = true;
+        return _geometries->_sdfBeziers;
+    }
+    /**
+      Adds a SDFBezier to the model
+      @param materialId Id of the material for the sdfBezier
+      @param sdfBezier SDFBezier to add
+      @return Index of the bezier for the specified material
+      */
+    BRAYNS_API uint64_t addSDFBezier(const size_t materialId,
+                                     const SDFBezier& sdfBezier);
 
     /**
       Adds a streamline to the model
@@ -479,6 +504,7 @@ protected:
         SpheresMap _spheres;
         CylindersMap _cylinders;
         ConesMap _cones;
+        SDFBeziersMap _sdfBeziers;
         TriangleMeshMap _triangleMeshes;
         StreamlinesDataMap _streamlines;
         SDFGeometryData _sdf;
@@ -487,6 +513,7 @@ protected:
         Boxd _sphereBounds;
         Boxd _cylindersBounds;
         Boxd _conesBounds;
+        Boxd _sdfBeziersBounds;
         Boxd _triangleMeshesBounds;
         Boxd _streamlinesBounds;
         Boxd _sdfGeometriesBounds;
@@ -495,8 +522,9 @@ protected:
         bool isEmpty() const
         {
             return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
-                   _triangleMeshes.empty() && _sdf.geometries.empty() &&
-                   _streamlines.empty() && _volumes.empty();
+                   _sdfBeziers.empty() && _triangleMeshes.empty() &&
+                   _sdf.geometries.empty() && _streamlines.empty() &&
+                   _volumes.empty();
         }
     };
 
@@ -508,6 +536,7 @@ protected:
     bool _spheresDirty{false};
     bool _cylindersDirty{false};
     bool _conesDirty{false};
+    bool _sdfBeziersDirty{false};
     bool _triangleMeshesDirty{false};
     bool _streamlinesDirty{false};
     bool _sdfGeometriesDirty{false};
@@ -516,7 +545,7 @@ protected:
     bool _areGeometriesDirty() const
     {
         return _spheresDirty || _cylindersDirty || _conesDirty ||
-               _triangleMeshesDirty || _sdfGeometriesDirty;
+               _sdfBeziersDirty || _triangleMeshesDirty || _sdfGeometriesDirty;
     }
 
     Boxd _bounds;
@@ -529,4 +558,4 @@ protected:
 
     SERIALIZATION_FRIEND(Model)
 };
-}
+} // namespace brayns

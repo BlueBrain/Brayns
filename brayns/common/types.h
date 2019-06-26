@@ -130,6 +130,10 @@ struct Cone;
 using Cones = std::vector<Cone>;
 using ConesMap = std::map<size_t, Cones>;
 
+struct SDFBezier;
+using SDFBeziers = std::vector<SDFBezier>;
+using SDFBeziersMap = std::map<size_t, SDFBeziers>;
+
 struct TriangleMesh;
 using TriangleMeshMap = std::map<size_t, TriangleMesh>;
 

@@ -19,6 +19,7 @@
  */
 
 #include "MorphologyLoader.h"
+#include "BezierFactory.h"
 #include "ModelData.h"
 #include "utils.h"
 
@@ -96,6 +97,9 @@ const Property PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE = {
 const Property PROP_USE_SDF_GEOMETRIES = {
     "useSdfGeometries", false,
     {"Use SDF geometries", "Use SDF geometries for drawing the morphologies."}};
+const Property PROP_DISABLE_SDF_BEZIER_CURVES = {
+    "disableSdfBezierCurves", false,
+    {"Disable SDF bezier curves", "Disable SDF bezier curves for drawing the morphologies."}};
 // clang-format on
 
 const auto LOADER_NAME = "morphology";
@@ -223,9 +227,9 @@ void _addSDFSample(SDFData& sdfData, const brain::neuron::Section section,
                     continue;
 
                 const auto& geom = sdfData.geometries[geomIdx];
-                const float dist0 = glm::distance2(geom.p0, bifGeom.center);
-                const float dist1 = glm::distance2(geom.p1, bifGeom.center);
-                const float radiusSum = geom.radius + bifGeom.radius;
+                const float dist0 = glm::distance2(geom.p0, bifGeom.p0);
+                const float dist1 = glm::distance2(geom.p1, bifGeom.p0);
+                const float radiusSum = geom.r0 + bifGeom.r0;
                 const float radiusSumSq = radiusSum * radiusSum;
 
                 if (dist0 < radiusSumSq || dist1 < radiusSumSq)
@@ -261,6 +265,12 @@ void _addSDFSample(SDFData& sdfData, const brain::neuron::Section section,
                 geometries, sdfData.bifurcations[section.getParent().getID()]);
         }
     }
+}
+
+void _addSDFBezierCurve(ModelData& modelData, const SDFBezier& bc,
+                        const size_t materialId)
+{
+    modelData.addSDFBezier(materialId, bc);
 }
 
 /**
@@ -323,7 +333,7 @@ void _createMaterials(Model& model, NeuronColorScheme scheme, size_t index)
         break;
     }
 }
-}
+} // namespace
 
 MorphologyLoaderParams::MorphologyLoaderParams(const PropertyMap& properties)
 {
@@ -349,6 +359,10 @@ MorphologyLoaderParams::MorphologyLoaderParams(const PropertyMap& properties)
     setVariable(dampenBranchThicknessChangerate,
                 PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE.name, false);
     setVariable(useSDFGeometries, PROP_USE_SDF_GEOMETRIES.name, false);
+
+    setVariable(disableSDFBezierCurves, PROP_DISABLE_SDF_BEZIER_CURVES.name,
+                false);
+
     setEnumVariable(geometryQuality, "geometryQuality", GeometryQuality::high);
 }
 
@@ -363,9 +377,8 @@ public:
     ModelData processMorphology(const brain::neuron::Morphology& morphology,
                                 const uint64_t index) const
     {
-        auto materialFunc =
-            [ colorScheme = _params.colorScheme, index ](auto sectionType)
-        {
+        auto materialFunc = [colorScheme = _params.colorScheme,
+                             index](auto sectionType) {
             size_t materialId = 0;
             switch (colorScheme)
             {
@@ -391,16 +404,21 @@ public:
     {
         const bool dampenThickness = _params.dampenBranchThicknessChangerate;
         const bool useSDFGeometries = _params.useSDFGeometries;
+        const bool useSDFBezierCurves =
+            useSDFGeometries && !_params.disableSDFBezierCurves;
 
         ModelData model;
         SDFData sdfData;
+
+        const auto& soma = morphology.getSoma();
+        const auto& somaChildren = soma.getChildren();
 
         // Soma
         {
             const uint64_t offset =
                 reportMapping ? reportMapping->getOffsets()[index][0] : 0;
-            _addSomaGeometry(morphology.getSoma(), offset, useSDFGeometries,
-                             materialFunc, model, sdfData);
+            _addSomaGeometry(soma, offset, useSDFGeometries, materialFunc,
+                             model, sdfData);
         }
 
         // Only the first one or two axon sections are reported, so find the
@@ -427,28 +445,73 @@ public:
              _computeTreeTraversalOrder(morphology, _params.mode))
         {
             const auto& section = morphology.getSection(sectionId);
-            const auto& samples = section.getSamples();
-            if (samples.empty())
+            const auto materialId = materialFunc(section.getType());
+            const auto& samples_ = section.getSamples();
+
+            if (samples_.empty())
                 continue;
 
-            const auto materialId = materialFunc(section.getType());
+            //////////////////////////////
+            // Compute bezier curves
+
+            std::vector<Vector4f> samples;
+            samples.reserve(samples_.size() + 1);
+
+            // add parent last sample for computing initial derivatives
+            bool useFirstSDFBezierCurves = true;
+            if (useSDFBezierCurves)
+            {
+                if (section.hasParent())
+                {
+                    const auto& parent = section.getParent();
+                    if (parent.getNumSamples() > 2)
+                    {
+                        const auto& s =
+                            parent.getSamples()[parent.getNumSamples() - 2];
+                        samples.emplace_back(s.x(), s.y(), s.z(), s.w());
+                        useFirstSDFBezierCurves = false;
+                    }
+                }
+                else if (std::find(somaChildren.begin(), somaChildren.end(),
+                                   section) != somaChildren.end())
+                {
+                    const auto& s = soma.getCentroid();
+                    samples.emplace_back(s.x(), s.y(), s.z(),
+                                         soma.getMeanRadius());
+                    useFirstSDFBezierCurves = false;
+                }
+            }
+
+            // add section's samples
+            for (size_t i = 0; i < samples_.size(); i++)
+            {
+                const auto& s = samples_[i];
+
+                // check if sample is too close to previous sample
+                bool validSample = true;
+
+                // always add first and last sample
+                if (i > 0 && i < samples_.size() - 1)
+                {
+                    Vector4f& prevSample = samples.back();
+                    const float dist =
+                        glm::distance(Vector3f(s.x(), s.y(), s.z()),
+                                      Vector3f(prevSample));
+
+                    validSample = (dist >= (s.w() + prevSample.w));
+                }
+
+                if (validSample)
+                    samples.emplace_back(s.x(), s.y(), s.z(), s.w());
+            }
 
             const size_t numSamples = samples.size();
 
-            auto previousSample = samples[0];
-            size_t step = 1;
-            switch (_params.geometryQuality)
-            {
-            case GeometryQuality::low:
-                step = numSamples - 1;
-                break;
-            case GeometryQuality::medium:
-                step = numSamples / 2;
-                step = (step == 0) ? 1 : step;
-                break;
-            default:
-                step = 1;
-            }
+            // compute the bezier curves
+            std::vector<SDFBezier> curves;
+
+            if (useSDFBezierCurves)
+                curves = compute_bezier_curves(samples);
 
             float segmentStep = 0.f;
             if (reportMapping)
@@ -459,14 +522,16 @@ public:
                 segmentStep = counts[sectionId] / float(numSamples);
             }
 
-            float previousRadius =
-                section.hasParent() ? _getLastSampleRadius(section.getParent())
-                                    : samples[0].w() * 0.5;
-            previousRadius *= _params.radiusMultiplier;
-
             bool done = false;
-            for (size_t i = step; !done && i < numSamples + step; i += step)
+            for (size_t i = 0; !done && i < numSamples + 1; i++)
             {
+                if (i == 0 && (!useSDFBezierCurves || !useFirstSDFBezierCurves))
+                    continue;
+
+                // early exit as bezier don't need last segment
+                if (useSDFBezierCurves && i == numSamples - 1)
+                    break;
+
                 if (i >= (numSamples - 1))
                 {
                     i = numSamples - 1;
@@ -488,7 +553,7 @@ public:
                     {
                         if (counts[section.getID()] > 0)
                             offset = offsets[section.getID()] +
-                                     float(i - step) * segmentStep;
+                                     float(i - 1) * segmentStep;
                         else
                         {
                             if (section.getType() ==
@@ -504,45 +569,54 @@ public:
                     }
                 }
 
-                const auto sample = samples[i];
-
-                const Vector3f position(sample.x(), sample.y(), sample.z());
-                const Vector3f target(previousSample.x(), previousSample.y(),
-                                      previousSample.z());
-                float radius = samples[i].w() * 0.5f * _params.radiusMultiplier;
-                constexpr float maxRadiusChange = 0.1f;
-
-                const float dist = glm::length(target - position);
-                // The radius of the last sample of a section is never
-                // modified
-                if (dist > 0.0001f && i != samples.size() - 1 &&
-                    dampenThickness)
+                if (useSDFBezierCurves)
                 {
-                    const float radiusChange =
-                        std::min(std::abs(previousRadius - radius),
-                                 dist * maxRadiusChange);
-                    if (radius < previousRadius)
-                        radius = previousRadius - radiusChange;
-                    else
-                        radius = previousRadius + radiusChange;
+                    auto& bc = curves[i];
+                    bc.userData = offset;
+                    _addSDFBezierCurve(model, bc, materialId);
                 }
-
-                if (radius > 0.f)
+                else
                 {
-                    if (useSDFGeometries)
+                    const auto& s0 = samples[i];
+                    const auto& s1 = samples[i - 1];
+
+                    const Vector3f p0 = Vector3f(s0);
+                    const Vector3f p1 = Vector3f(s1);
+
+                    float r0 = s0.w * 0.5f * _params.radiusMultiplier;
+                    float r1 = s1.w * 0.5f * _params.radiusMultiplier;
+
+                    constexpr float maxRadiusChange = 0.1f;
+
+                    const float dist = glm::length(p1 - p0);
+
+                    // The radius of the last sample of a section is never
+                    // modified
+                    if (dist > 0.0001f && i != samples.size() - 1 &&
+                        dampenThickness)
                     {
-                        _addSDFSample(sdfData, section, done, position, target,
-                                      radius, previousRadius, materialId,
-                                      offset);
+                        const float radiusChange =
+                            std::min(std::abs(r1 - r0), dist * maxRadiusChange);
+                        if (r0 < r1)
+                            r0 = r1 - radiusChange;
+                        else
+                            r0 = r1 + radiusChange;
                     }
-                    else
+
+                    if (r0 > 0.f)
                     {
-                        _addRegularSample(model, position, target, radius,
-                                          previousRadius, materialId, offset);
+                        if (useSDFGeometries)
+                        {
+                            _addSDFSample(sdfData, section, done, p0, p1, r0,
+                                          r1, materialId, offset);
+                        }
+                        else
+                        {
+                            _addRegularSample(model, p0, p1, r0, r1, materialId,
+                                              offset);
+                        }
                     }
                 }
-                previousSample = sample;
-                previousRadius = radius;
             }
         }
 
@@ -618,9 +692,7 @@ MorphologyLoader::MorphologyLoader(Scene& scene, PropertyMap defaults)
 {
 }
 
-MorphologyLoader::~MorphologyLoader()
-{
-}
+MorphologyLoader::~MorphologyLoader() {}
 bool MorphologyLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
                                    const std::string& extension) const
 {
@@ -701,6 +773,7 @@ PropertyMap MorphologyLoader::getCLIProperties()
     pm.setProperty(PROP_DISPLAY_MODE);
     pm.setProperty(PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE);
     pm.setProperty(PROP_USE_SDF_GEOMETRIES);
+    pm.setProperty(PROP_DISABLE_SDF_BEZIER_CURVES);
     return pm;
 }
-}
+} // namespace brayns
