@@ -102,9 +102,8 @@ inline float sdConePill(const vec3f& p, const vec3f p0, const vec3f p1,
 
     const float thicknessAt = mix(radius_bottom, radius_top, b);
     const float thickness =
-        useSigmoid
-            ? mix(radius_bottom, radius_top, smootherstep(b))
-            : thicknessAt;
+        useSigmoid ? mix(radius_bottom, radius_top, smootherstep(b))
+                   : thicknessAt;
 
     return length(p - Pb) - thickness;
 }
@@ -162,7 +161,6 @@ struct SDFGeometries
     uniform SDFGeometry* uniform geometries;
     uniform uint64* uniform geometryRefs;
     uniform uint64* uniform neighbours;
-
 
     uniform bool useSafeIncrement;
 };
@@ -378,7 +376,8 @@ unmasked void SDFGeometries_intersect(
         ray->geomID = self->super.geomID;
         ray->instID = args->context->instID[0];
         ray->t = t_in;
-        ray->Ng = calcNormal(primitive, calcEpsilon(ray->org, t_in), pos, *self);
+        ray->Ng =
+            calcNormal(primitive, calcEpsilon(ray->org, t_in), pos, *self);
     }
 }
 

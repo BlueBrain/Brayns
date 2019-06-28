@@ -24,13 +24,6 @@
 #include "../Random.h"
 #include <optix_world.h>
 
-struct PerRayData_radiance
-{
-    float3 result;
-    float importance;
-    int depth;
-};
-
 struct PerRayData_shadow
 {
     float3 attenuation;

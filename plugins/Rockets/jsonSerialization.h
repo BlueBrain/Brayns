@@ -108,15 +108,15 @@ STATICJSON_DECLARE_ENUM(brayns::MemoryMode,
                         {"replicated", brayns::MemoryMode::replicated});
 
 STATICJSON_DECLARE_ENUM(brayns::TextureType,
-                        {"diffuse", brayns::TextureType::TT_DIFFUSE},
-                        {"normals", brayns::TextureType::TT_NORMALS},
-                        {"bump", brayns::TextureType::TT_BUMP},
-                        {"specular", brayns::TextureType::TT_SPECULAR},
-                        {"emissive", brayns::TextureType::TT_EMISSIVE},
-                        {"opacity", brayns::TextureType::TT_OPACITY},
-                        {"reflection", brayns::TextureType::TT_REFLECTION},
-                        {"refraction", brayns::TextureType::TT_REFRACTION},
-                        {"occlusion", brayns::TextureType::TT_OCCLUSION});
+                        {"diffuse", brayns::TextureType::diffuse},
+                        {"normals", brayns::TextureType::normals},
+                        {"bump", brayns::TextureType::bump},
+                        {"specular", brayns::TextureType::specular},
+                        {"emissive", brayns::TextureType::emissive},
+                        {"opacity", brayns::TextureType::opacity},
+                        {"reflection", brayns::TextureType::reflection},
+                        {"refraction", brayns::TextureType::refraction},
+                        {"occlusion", brayns::TextureType::occlusion});
 
 // c-array to std.array: https://stackoverflow.com/questions/11205186
 template <size_t M, typename T>
