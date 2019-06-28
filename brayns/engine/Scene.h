@@ -193,6 +193,7 @@ protected:
     /** @return True if this scene supports scene updates from any thread. */
     virtual bool supportsConcurrentSceneUpdates() const { return false; }
     void _computeBounds();
+    void _loadIBLMaps(const std::string& envMap);
 
     AnimationParameters& _animationParameters;
     GeometryParameters& _geometryParameters;

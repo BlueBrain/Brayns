@@ -21,9 +21,7 @@
 #include "OptiXContext.h"
 
 #include <engines/optix/braynsOptixEngine_generated_Cones.cu.ptx.h>
-#include <engines/optix/braynsOptixEngine_generated_Constantbg.cu.ptx.h>
 #include <engines/optix/braynsOptixEngine_generated_Cylinders.cu.ptx.h>
-#include <engines/optix/braynsOptixEngine_generated_PerspectiveCamera.cu.ptx.h>
 #include <engines/optix/braynsOptixEngine_generated_Spheres.cu.ptx.h>
 #include <engines/optix/braynsOptixEngine_generated_TriangleMesh.cu.ptx.h>
 
@@ -38,18 +36,72 @@ const std::string CUDA_CYLINDERS = braynsOptixEngine_generated_Cylinders_cu_ptx;
 const std::string CUDA_CONES = braynsOptixEngine_generated_Cones_cu_ptx;
 const std::string CUDA_TRIANGLES_MESH =
     braynsOptixEngine_generated_TriangleMesh_cu_ptx;
-const std::string CUDA_PERSPECTIVE_CAMERA =
-    braynsOptixEngine_generated_PerspectiveCamera_cu_ptx;
-const std::string CUDA_MISS = braynsOptixEngine_generated_Constantbg_cu_ptx;
 
 const std::string CUDA_FUNC_BOUNDS = "bounds";
 const std::string CUDA_FUNC_INTERSECTION = "intersect";
 const std::string CUDA_FUNC_ROBUST_INTERSECTION = "robust_intersect";
 const std::string CUDA_FUNC_EXCEPTION = "exception";
 
-const std::string CUDA_FUNC_PERSPECTIVE_CAMERA = "perspectiveCamera";
-const std::string CUDA_FUNC_CAMERA_EXCEPTION = "exception";
-const std::string CUDA_FUNC_CAMERA_ENVMAP_MISS = "envmap_miss";
+template <typename T>
+T white();
+
+template <>
+uint8 white()
+{
+    return 255;
+}
+
+template <>
+float white()
+{
+    return 1.f;
+}
+
+template <typename T>
+void textureToOptix(T* ptr_dst, const brayns::Texture2D& texture,
+                    const uint8_t face, const uint8_t mipLevel,
+                    const bool hasAlpha)
+{
+    uint16_t width = texture.getWidth();
+    uint16_t height = texture.getHeight();
+    for (uint8_t i = 0; i < mipLevel; ++i)
+    {
+        width /= 2;
+        height /= 2;
+    }
+    size_t idx_src = 0;
+    size_t idx_dst = 0;
+    const auto rawData = texture.getRawData<T>(face, mipLevel);
+    for (uint16_t y = 0; y < height; ++y)
+    {
+        for (uint16_t x = 0; x < width; ++x)
+        {
+            ptr_dst[idx_dst] = rawData[idx_src];
+            ptr_dst[idx_dst + 1u] = rawData[idx_src + 1u];
+            ptr_dst[idx_dst + 2u] = rawData[idx_src + 2u];
+            ptr_dst[idx_dst + 3u] =
+                hasAlpha ? rawData[idx_src + 3u] : white<T>();
+            idx_dst += 4u;
+            idx_src += hasAlpha ? 4u : 3u;
+        }
+    }
+}
+
+RTwrapmode wrapModeToOptix(const brayns::TextureWrapMode mode)
+{
+    switch (mode)
+    {
+    case brayns::TextureWrapMode::clamp_to_border:
+        return RT_WRAP_CLAMP_TO_BORDER;
+    case brayns::TextureWrapMode::clamp_to_edge:
+        return RT_WRAP_CLAMP_TO_EDGE;
+    case brayns::TextureWrapMode::mirror:
+        return RT_WRAP_MIRROR;
+    case brayns::TextureWrapMode::repeat:
+    default:
+        return RT_WRAP_REPEAT;
+    }
+}
 
 } // namespace
 
@@ -62,7 +114,7 @@ const std::string CUDA_FUNC_CAMERA_ENVMAP_MISS = "envmap_miss";
                                      std::string(#func) + "'");    \
     } while (0)
 
-constexpr size_t OPTIX_STACK_SIZE = 2800;
+constexpr size_t OPTIX_STACK_SIZE = 1024;
 constexpr size_t OPTIX_RAY_TYPE_COUNT = 2;
 constexpr size_t OPTIX_ENTRY_POINT_COUNT = 1;
 
@@ -96,12 +148,12 @@ OptiXContext& OptiXContext::get()
 }
 
 void OptiXContext::addRenderer(const std::string& name,
-                               const OptixShaderProgram& program)
+                               OptiXShaderProgramPtr program)
 {
     _rendererProgram[name] = program;
 }
 
-const OptixShaderProgram& OptiXContext::getRenderer(const std::string& name)
+OptiXShaderProgramPtr OptiXContext::getRenderer(const std::string& name)
 {
     auto it = _rendererProgram.find(name);
     if (it == _rendererProgram.end())
@@ -110,81 +162,180 @@ const OptixShaderProgram& OptiXContext::getRenderer(const std::string& name)
     return it->second;
 }
 
-::optix::Program OptiXContext::createCamera()
+void OptiXContext::addCamera(const std::string& name,
+                             OptiXCameraProgramPtr program)
 {
-    ::optix::Program camera;
-    // Ray generation program
-    camera =
-        _optixContext->createProgramFromPTXString(CUDA_PERSPECTIVE_CAMERA,
-                                                  CUDA_FUNC_PERSPECTIVE_CAMERA);
-    _optixContext->setRayGenerationProgram(0, camera);
+    _cameraProgram[name] = program;
+}
 
-    // Miss programs
-    ::optix::Program missProgram =
-        _optixContext->createProgramFromPTXString(CUDA_MISS,
-                                                  CUDA_FUNC_CAMERA_ENVMAP_MISS);
-    _optixContext->setMissProgram(0, missProgram);
+OptiXCameraProgramPtr OptiXContext::getCamera(const std::string& name)
+{
+    auto it = _cameraProgram.find(name);
+    if (it == _cameraProgram.end())
+        throw std::runtime_error("Camera program not found for camera '" +
+                                 name + "'");
+    return it->second;
+}
 
-    // Exception program
-    _optixContext->setExceptionProgram(
-        0,
-        _optixContext->createProgramFromPTXString(CUDA_PERSPECTIVE_CAMERA,
-                                                  CUDA_FUNC_CAMERA_EXCEPTION));
-    BRAYNS_DEBUG << "Camera created" << std::endl;
-    return camera;
+void OptiXContext::setCamera(const std::string& name)
+{
+    auto camera = getCamera(name);
+    _optixContext->setRayGenerationProgram(0,
+                                           camera->getRayGenerationProgram());
+    _optixContext->setMissProgram(0, camera->getMissProgram());
+    _optixContext->setExceptionProgram(0, camera->getExceptionProgram());
 }
 
 ::optix::TextureSampler OptiXContext::createTextureSampler(Texture2DPtr texture)
 {
-    const uint16_t nx = texture->getWidth();
-    const uint16_t ny = texture->getHeight();
+    uint16_t nx = texture->getWidth();
+    uint16_t ny = texture->getHeight();
     const uint16_t channels = texture->getNbChannels();
     const uint16_t optixChannels = 4;
     const bool hasAlpha = optixChannels == channels;
 
+    const bool useFloat = texture->getDepth() == 4;
+    const bool useByte = texture->getDepth() == 1;
+
+    if (!useFloat && !useByte)
+        throw std::runtime_error("Only byte or float textures are supported");
+
+    const bool createMipmaps =
+        texture->getMipLevels() == 1 && useByte && !texture->isCubeMap();
+    uint16_t mipMapLevels = texture->getMipLevels();
+    if (createMipmaps)
+        mipMapLevels = texture->getPossibleMipMapsLevels();
+
+    if (createMipmaps && !useByte)
+        throw std::runtime_error(
+            "Non 8-bits textures are not supported for automatic mipmaps "
+            "generation");
+
+    RTformat optixFormat =
+        useByte ? RT_FORMAT_UNSIGNED_BYTE4 : RT_FORMAT_FLOAT4;
+
     // Create texture sampler
     ::optix::TextureSampler sampler = _optixContext->createTextureSampler();
-    sampler->setWrapMode(0, RT_WRAP_REPEAT);
-    sampler->setWrapMode(1, RT_WRAP_REPEAT);
-    sampler->setWrapMode(2, RT_WRAP_REPEAT);
+    const auto wrapMode = wrapModeToOptix(texture->getWrapMode());
+    sampler->setWrapMode(0, wrapMode);
+    sampler->setWrapMode(1, wrapMode);
+    sampler->setWrapMode(2, wrapMode);
     sampler->setIndexingMode(RT_TEXTURE_INDEX_NORMALIZED_COORDINATES);
     sampler->setReadMode(RT_TEXTURE_READ_NORMALIZED_FLOAT);
-    sampler->setMaxAnisotropy(1.0f);
-    sampler->setMipLevelCount(1u);
-    sampler->setArraySize(1u);
+    sampler->setMaxAnisotropy(8.0f);
 
     // Create buffer and populate with texture data
-    optix::Buffer buffer =
-        _optixContext->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT4, nx, ny);
-    float* buffer_data = static_cast<float*>(buffer->map());
+    optix::Buffer buffer;
+    if (texture->isCubeMap())
+        buffer = _optixContext->createCubeBuffer(RT_BUFFER_INPUT, optixFormat,
+                                                 nx, ny, mipMapLevels);
+    else
+        buffer =
+            _optixContext->createMipmappedBuffer(RT_BUFFER_INPUT, optixFormat,
+                                                 nx, ny, mipMapLevels);
 
-    size_t idx_src = 0;
-    size_t idx_dst = 0;
-    const auto rawData = texture->getRawData();
-    constexpr auto FRACTION = 1.0f / 255.f;
-    for (uint16_t y = 0; y < ny; ++y)
+    std::vector<void*> mipMapBuffers(mipMapLevels);
+    for (uint8_t currentLevel = 0u; currentLevel < mipMapLevels; ++currentLevel)
+        mipMapBuffers[currentLevel] = buffer->map(currentLevel);
+
+    if (createMipmaps)
     {
-        for (uint16_t x = 0; x < nx; ++x)
+        uint8_t* ptr_dst = (uint8_t*)mipMapBuffers[0];
+        size_t idx_src = 0;
+        size_t idx_dst = 0;
+        const auto rawData = texture->getRawData<unsigned char>();
+        for (uint16_t y = 0; y < ny; ++y)
         {
-            buffer_data[idx_dst + 0] =
-                static_cast<float>(rawData[idx_src + 0]) * FRACTION;
-            buffer_data[idx_dst + 1] =
-                static_cast<float>(rawData[idx_src + 1]) * FRACTION;
-            buffer_data[idx_dst + 2] =
-                static_cast<float>(rawData[idx_src + 2]) * FRACTION;
-            buffer_data[idx_dst + 3] =
-                hasAlpha ? static_cast<float>(rawData[idx_src + 4]) * FRACTION
-                         : 1.f;
-            idx_dst += 4;
-            idx_src += hasAlpha ? 4 : 3;
+            for (uint16_t x = 0; x < nx; ++x)
+            {
+                ptr_dst[idx_dst] = rawData[idx_src];
+                ptr_dst[idx_dst + 1u] = rawData[idx_src + 1u];
+                ptr_dst[idx_dst + 2u] = rawData[idx_src + 2u];
+                ptr_dst[idx_dst + 3u] = hasAlpha ? rawData[idx_src + 3u] : 255u;
+                idx_dst += 4u;
+                idx_src += hasAlpha ? 4u : 3u;
+            }
+        }
+        ny /= 2u;
+        nx /= 2u;
+
+        for (uint8_t currentLevel = 1u; currentLevel < mipMapLevels;
+             ++currentLevel)
+        {
+            ptr_dst = (uint8_t*)mipMapBuffers[currentLevel];
+            uint8_t* ptr_src = (uint8_t*)mipMapBuffers[currentLevel - 1u];
+            for (uint16_t y = 0u; y < ny; ++y)
+            {
+                for (uint16_t x = 0u; x < nx; ++x)
+                {
+                    ptr_dst[(y * nx + x) * 4u] =
+                        (ptr_src[(y * 2u * nx + x) * 8u] +
+                         ptr_src[((y * 2u * nx + x) * 2u + 1u) * 4u] +
+                         ptr_src[((y * 2u + 1u) * nx + x) * 8u] +
+                         ptr_src[(((y * 2u + 1u) * nx + x) * 2u + 1u) * 4u]) /
+                        4.0f;
+                    ptr_dst[(y * nx + x) * 4u + 1u] =
+                        (ptr_src[(y * 2u * nx + x) * 8u + 1u] +
+                         ptr_src[((y * 2u * nx + x) * 2u + 1u) * 4u + 1u] +
+                         ptr_src[((y * 2u + 1u) * nx + x) * 8u + 1u] +
+                         ptr_src[(((y * 2u + 1u) * nx + x) * 2u + 1u) * 4u +
+                                 1u]) /
+                        4.0f;
+                    ptr_dst[(y * nx + x) * 4u + 2u] =
+                        (ptr_src[(y * 2u * nx + x) * 8u + 2u] +
+                         ptr_src[((y * 2u * nx + x) * 2u + 1u) * 4u + 2u] +
+                         ptr_src[((y * 2u + 1u) * nx + x) * 8u + 2u] +
+                         ptr_src[(((y * 2u + 1u) * nx + x) * 2u + 1u) * 4u +
+                                 2u]) /
+                        4.0f;
+                    ptr_dst[(y * nx + x) * 4u + 3u] =
+                        (ptr_src[(y * 2u * nx + x) * 8u + 3u] +
+                         ptr_src[((y * 2u * nx + x) * 2u + 1u) * 4u + 3u] +
+                         ptr_src[((y * 2u + 1u) * nx + x) * 8u + 3u] +
+                         ptr_src[(((y * 2u + 1u) * nx + x) * 2u + 1u) * 4u +
+                                 3u]) /
+                        4.0f;
+                }
+            }
+            ny /= 2u;
+            nx /= 2u;
         }
     }
-    buffer->unmap();
+    else
+    {
+        for (uint8_t face = 0; face < texture->getNumFaces(); ++face)
+        {
+            auto mipWidth = nx;
+            auto mipHeight = ny;
+            for (uint16_t mip = 0; mip < mipMapLevels; ++mip)
+            {
+                if (useByte)
+                {
+                    auto dst = (uint8_t*)mipMapBuffers[mip];
+                    dst += face * mipWidth * mipHeight * 4;
+                    textureToOptix<uint8_t>(dst, *texture, face, mip, hasAlpha);
+                }
+                else if (useFloat)
+                {
+                    auto dst = (float*)mipMapBuffers[mip];
+                    dst += face * mipWidth * mipHeight * 4;
+                    textureToOptix<float>(dst, *texture, face, mip, hasAlpha);
+                }
+                mipWidth /= 2;
+                mipHeight /= 2;
+            }
+        }
+    }
+
+    for (uint8_t currentLevel = 0u; currentLevel < mipMapLevels; ++currentLevel)
+        buffer->unmap(currentLevel);
 
     // Assign buffer to sampler
     sampler->setBuffer(buffer);
     sampler->setFilteringModes(RT_FILTER_LINEAR, RT_FILTER_LINEAR,
-                               RT_FILTER_NONE);
+                               mipMapLevels > 1 ? RT_FILTER_LINEAR
+                                                : RT_FILTER_NONE);
+    sampler->validate();
     return sampler;
 }
 
@@ -340,11 +491,16 @@ void OptiXContext::_printSystemInformation() const
     return geometry;
 }
 
-::optix::GeometryGroup OptiXContext::createGeometryGroup()
+::optix::GeometryGroup OptiXContext::createGeometryGroup(const bool compact)
 {
     auto group = _optixContext->createGeometryGroup();
-    group->setAcceleration(
-        _optixContext->createAcceleration(DEFAULT_ACCELERATION_STRUCTURE));
+    auto accel = _optixContext->createAcceleration(
+        compact ? "Sbvh" : DEFAULT_ACCELERATION_STRUCTURE);
+    accel->setProperty("vertex_buffer_name", "vertices_buffer");
+    accel->setProperty("vertex_buffer_stride", "12");
+    accel->setProperty("index_buffer_name", "indices_buffer");
+    accel->setProperty("index_buffer_stride", "12");
+    group->setAcceleration(accel);
     return group;
 }
 

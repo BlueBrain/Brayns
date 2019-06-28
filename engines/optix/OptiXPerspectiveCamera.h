@@ -17,33 +17,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <optix_world.h>
+#pragma once
 
-#include "Helpers.h"
+#include <memory>
 
-struct PerRayData_radiance
+#include <optixu/optixpp_namespace.h>
+
+#include "OptiXCameraProgram.h"
+
+namespace brayns
 {
-    float3 result;
-    float importance;
-    int depth;
+class OptiXPerspectiveCamera : public OptiXCameraProgram
+{
+public:
+    OptiXPerspectiveCamera();
+    ~OptiXPerspectiveCamera() final = default;
+
+    void commit(const OptiXCamera& camera, ::optix::Context context) final;
 };
-
-rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
-rtDeclareVariable(float3, bgColor, , );
-rtDeclareVariable(int, envmap, , );
-rtDeclareVariable(PerRayData_radiance, prd_radiance, rtPayload, );
-rtDeclareVariable(uint, use_envmap, , );
-
-RT_PROGRAM void envmap_miss()
-{
-    if (use_envmap)
-    {
-        const float2 uv = getEquirectangularUV(ray.direction);
-        prd_radiance.result = linearToSRGB(
-            tonemap(make_float3(optix::rtTex2D<float4>(envmap, uv.x, uv.y))));
-    }
-    else
-    {
-        prd_radiance.result = bgColor;
-    }
 }

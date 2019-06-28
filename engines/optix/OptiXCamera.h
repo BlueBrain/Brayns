@@ -35,26 +35,15 @@ namespace brayns
 class OptiXCamera : public Camera
 {
 public:
-    OptiXCamera();
-    ~OptiXCamera();
-
     /**
        Commits the changes held by the camera object so that
        attributes become available to the OptiX rendering engine
     */
     void commit() final;
 
-    /**
-       Gets the OptiX implementation of the camera object
-       @return OptiX implementation of the camera object
-    */
-    optix::Program& impl() { return _camera; }
 private:
-    void _calculateCameraVariables(Vector3d& U, Vector3d& V, Vector3d& W);
-
-    optix::Program _camera{nullptr};
-
     optix::Buffer _clipPlanesBuffer{nullptr};
     Planes _clipPlanes;
+    std::string _currentCamera;
 };
 } // namespace brayns

@@ -20,6 +20,7 @@
 
 #include <engines/optix/braynsOptixEngine_generated_AdvancedSimulation.cu.ptx.h>
 #include <engines/optix/braynsOptixEngine_generated_BasicSimulation.cu.ptx.h>
+#include <engines/optix/braynsOptixEngine_generated_PBR.cu.ptx.h>
 
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/parameters/ParametersManager.h>
@@ -27,6 +28,7 @@
 #include "OptiXCamera.h"
 #include "OptiXEngine.h"
 #include "OptiXFrameBuffer.h"
+#include "OptiXPerspectiveCamera.h"
 #include "OptiXRenderer.h"
 #include "OptiXScene.h"
 
@@ -87,39 +89,26 @@ void OptiXEngine::_createCameras()
                            0.0635,
                            {"Eye separation"}};
 
+    OptiXContext& context = OptiXContext::get();
+
+    auto camera = std::make_shared<OptiXPerspectiveCamera>();
+
+    PropertyMap properties;
+    properties.setProperty(fovy);
+    properties.setProperty(aspect);
+    properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
+    properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
+    properties.setProperty({"height", 1., {"Height"}});
+    if (isStereo)
     {
-        PropertyMap properties;
-        properties.setProperty(fovy);
-        properties.setProperty(aspect);
-        properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
-        properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
-        if (isStereo)
-        {
-            properties.setProperty(stereoProperty);
-            properties.setProperty(eyeSeparation);
-        }
-        addCameraType("perspective", properties);
+        properties.setProperty(stereoProperty);
+        properties.setProperty(eyeSeparation);
+        properties.setProperty(
+            {"zeroParallaxPlane", 1., {"Zero parallax plane"}});
     }
-    {
-        PropertyMap properties;
-        properties.setProperty({"height", 1., {"Height"}});
-        properties.setProperty(aspect);
-        addCameraType("orthographic", properties);
-    }
-    {
-        PropertyMap properties;
-        properties.setProperty(fovy);
-        properties.setProperty(aspect);
-        if (isStereo)
-        {
-            properties.setProperty(stereoProperty);
-            properties.setProperty(eyeSeparation);
-            properties.setProperty(
-                {"zeroParallaxPlane", 1., {"Zero parallax plane"}});
-        }
-        addCameraType("perspectiveParallax", properties);
-    }
-    addCameraType("panoramic");
+
+    context.addCamera("perspective", camera);
+    addCameraType("perspective", properties);
 }
 
 void OptiXEngine::_createRenderers()
@@ -135,13 +124,14 @@ void OptiXEngine::_createRenderers()
 
         OptiXContext& context = OptiXContext::get();
 
-        OptixShaderProgram osp;
-        osp.closest_hit = context.getOptixContext()->createProgramFromPTXString(
-            CUDA_ADVANCED_SIMULATION, "closest_hit_radiance");
-        osp.closest_hit_textured =
+        auto osp = std::make_shared<OptixShaderProgram>();
+        osp->closest_hit =
+            context.getOptixContext()->createProgramFromPTXString(
+                CUDA_ADVANCED_SIMULATION, "closest_hit_radiance");
+        osp->closest_hit_textured =
             context.getOptixContext()->createProgramFromPTXString(
                 CUDA_ADVANCED_SIMULATION, "closest_hit_radiance_textured");
-        osp.any_hit = context.getOptixContext()->createProgramFromPTXString(
+        osp->any_hit = context.getOptixContext()->createProgramFromPTXString(
             CUDA_ADVANCED_SIMULATION, "any_hit_shadow");
 
         context.addRenderer("advanced_simulation", osp);
@@ -169,14 +159,15 @@ void OptiXEngine::_createRenderers()
             braynsOptixEngine_generated_BasicSimulation_cu_ptx;
         OptiXContext& context = OptiXContext::get();
 
-        OptixShaderProgram osp;
-        osp.closest_hit = context.getOptixContext()->createProgramFromPTXString(
-            CUDA_BASIC_SIMULATION_RENDERER, "closest_hit_radiance");
-        osp.closest_hit_textured =
+        auto osp = std::make_shared<OptixShaderProgram>();
+        osp->closest_hit =
+            context.getOptixContext()->createProgramFromPTXString(
+                CUDA_BASIC_SIMULATION_RENDERER, "closest_hit_radiance");
+        osp->closest_hit_textured =
             context.getOptixContext()->createProgramFromPTXString(
                 CUDA_BASIC_SIMULATION_RENDERER,
                 "closest_hit_radiance_textured");
-        osp.any_hit = context.getOptixContext()->createProgramFromPTXString(
+        osp->any_hit = context.getOptixContext()->createProgramFromPTXString(
             CUDA_BASIC_SIMULATION_RENDERER, "any_hit_shadow");
 
         context.addRenderer("basic_simulation", osp);
@@ -184,6 +175,26 @@ void OptiXEngine::_createRenderers()
 
         context.addRenderer("basic", osp);
         addRendererType("basic");
+    }
+
+    { // PBR renderer
+        const std::string CUDA_PBR = braynsOptixEngine_generated_PBR_cu_ptx;
+
+        OptiXContext& context = OptiXContext::get();
+
+        auto osp = std::make_shared<OptixShaderProgram>();
+        osp->closest_hit =
+            context.getOptixContext()->createProgramFromPTXString(
+                CUDA_PBR, "closest_hit_radiance");
+        osp->closest_hit_textured =
+            context.getOptixContext()->createProgramFromPTXString(
+                CUDA_PBR, "closest_hit_radiance");
+        osp->any_hit = context.getOptixContext()->createProgramFromPTXString(
+            CUDA_PBR, "any_hit_shadow");
+
+        context.addRenderer("pbr", osp);
+
+        addRendererType("pbr");
     }
 }
 
@@ -220,11 +231,9 @@ void OptiXEngine::commit()
 {
     Engine::commit();
 }
-
 void OptiXEngine::preRender()
 {
 }
-
 Vector2ui OptiXEngine::getMinimumFrameSize() const
 {
     return {1, 1};

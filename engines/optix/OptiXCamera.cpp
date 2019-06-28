@@ -24,52 +24,25 @@
 
 namespace
 {
-const std::string CUDA_ATTR_CAMERA_BAD_COLOR = "bad_color";
-const std::string CUDA_ATTR_CAMERA_OFFSET = "offset";
-const std::string CUDA_ATTR_CAMERA_EYE = "eye";
-const std::string CUDA_ATTR_CAMERA_U = "U";
-const std::string CUDA_ATTR_CAMERA_V = "V";
-const std::string CUDA_ATTR_CAMERA_W = "W";
-const std::string CUDA_ATTR_CAMERA_APERTURE_RADIUS = "aperture_radius";
-const std::string CUDA_ATTR_CAMERA_FOCAL_SCALE = "focal_scale";
-
 const std::string CUDA_CLIP_PLANES = "clip_planes";
 const std::string CUDA_NB_CLIP_PLANES = "nb_clip_planes";
 } // namespace
 
 namespace brayns
 {
-OptiXCamera::OptiXCamera()
-{
-    _camera = OptiXContext::get().createCamera();
-}
-
-OptiXCamera::~OptiXCamera()
-{
-    if (_camera)
-        _camera->destroy();
-}
-
 void OptiXCamera::commit()
 {
+    if (_currentCamera != getCurrentType())
+    {
+        _currentCamera = getCurrentType();
+        OptiXContext::get().setCamera(_currentCamera);
+    }
+
+    auto cameraProgram = OptiXContext::get().getCamera(_currentCamera);
+
     auto context = OptiXContext::get().getOptixContext();
 
-    Vector3d u, v, w;
-
-    const Vector3d& pos = getPosition();
-
-    _calculateCameraVariables(u, v, w);
-
-    context[CUDA_ATTR_CAMERA_EYE]->setFloat(pos.x, pos.y, pos.z);
-    context[CUDA_ATTR_CAMERA_U]->setFloat(u.x, u.y, u.z);
-    context[CUDA_ATTR_CAMERA_V]->setFloat(v.x, v.y, v.z);
-    context[CUDA_ATTR_CAMERA_W]->setFloat(w.x, w.y, w.z);
-    context[CUDA_ATTR_CAMERA_APERTURE_RADIUS]->setFloat(
-        getPropertyOrValue<double>("apertureRadius", 0.0));
-    context[CUDA_ATTR_CAMERA_FOCAL_SCALE]->setFloat(
-        getPropertyOrValue<double>("focusDistance", 1.0));
-    context[CUDA_ATTR_CAMERA_BAD_COLOR]->setFloat(1.f, 0.f, 1.f);
-    context[CUDA_ATTR_CAMERA_OFFSET]->setFloat(0, 0);
+    cameraProgram->commit(*this, context);
 
     if (_clipPlanesBuffer)
         _clipPlanesBuffer->destroy();
@@ -101,26 +74,6 @@ void OptiXCamera::commit()
 
     context[CUDA_CLIP_PLANES]->setBuffer(_clipPlanesBuffer);
     context[CUDA_NB_CLIP_PLANES]->setUint(numClipPlanes);
-}
-
-void OptiXCamera::_calculateCameraVariables(Vector3d& U, Vector3d& V,
-                                            Vector3d& W)
-{
-    const auto& position = getPosition();
-    const auto& up = glm::rotate(getOrientation(), Vector3d(0, 1, 0));
-
-    float ulen, vlen, wlen;
-    W = getTarget() - position;
-
-    wlen = glm::length(W);
-    U = normalize(glm::cross(W, up));
-    V = normalize(glm::cross(U, W));
-
-    vlen = wlen *
-           tanf(0.5f * getPropertyOrValue<double>("fovy", 45.0) * M_PI / 180.f);
-    V *= vlen;
-    ulen = vlen * getPropertyOrValue<double>("aspect", 1.0);
-    U *= ulen;
 }
 
 } // namespace brayns

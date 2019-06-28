@@ -22,11 +22,8 @@ endif()
 
 common_find_package(OptiX REQUIRED SYSTEM)
 
-include_directories(${OptiX_INCLUDE_DIRS})
-
 set(BRAYNSOPTIXENGINE_OMIT_LIBRARY_HEADER ON)
 set(BRAYNSOPTIXENGINE_OMIT_VERSION_HEADERS ON)
-set(BRAYNSOPTIXENGINE_EXPORT ON)
 
 set(BRAYNSOPTIXENGINE_CU
   cuda/camera/PerspectiveCamera.cu
@@ -37,34 +34,23 @@ set(BRAYNSOPTIXENGINE_CU
   cuda/geometry/TriangleMesh.cu
   cuda/renderer/AdvancedSimulation.cu
   cuda/renderer/BasicSimulation.cu
+  cuda/renderer/PBR.cu
 )
 
-CUDA_GET_SOURCES_AND_OPTIONS(source_files cmake_options options ${ARGN})
-CUDA_WRAP_SRCS(braynsOptixEngine
-  PTX generated_files ${BRAYNSOPTIXENGINE_CU} ${cmake_options}
-  OPTIONS ${options}
-)
-
-set(BRAYNSOPTIXENGINE_PTX
-  braynsOptixEngine_generated_PerspectiveCamera.cu.ptx
-  braynsOptixEngine_generated_Constantbg.cu.ptx
-  braynsOptixEngine_generated_Cones.cu.ptx
-  braynsOptixEngine_generated_Cylinders.cu.ptx
-  braynsOptixEngine_generated_Spheres.cu.ptx
-  braynsOptixEngine_generated_TriangleMesh.cu.ptx
-  braynsOptixEngine_generated_AdvancedSimulation.cu.ptx
-  braynsOptixEngine_generated_BasicSimulation.cu.ptx
-)
+CUDA_WRAP_SRCS(braynsOptixEngine PTX ptx_generated_files ${BRAYNSOPTIXENGINE_CU})
 
 include(StringifyPtx)
-stringify_ptx(${BRAYNSOPTIXENGINE_PTX})
+stringify_ptx(${ptx_generated_files})
 
 set(BRAYNSOPTIXENGINE_SOURCES
+  ${BRAYNSOPTIXENGINE_CU}
+  ${ptx_generated_files}
   ${PTX_SOURCES}
   OptiXContext.cpp
   OptiXFrameBuffer.cpp
   OptiXScene.cpp
   OptiXCamera.cpp
+  OptiXPerspectiveCamera.cpp
   OptiXRenderer.cpp
   OptiXEngine.cpp
   OptiXMaterial.cpp
@@ -76,6 +62,7 @@ set_source_files_properties(
   OptiXFrameBuffer.cpp
   OptiXScene.cpp
   OptiXCamera.cpp
+  OptiXPerspectiveCamera.cpp
   OptiXRenderer.cpp
   OptiXEngine.cpp
   OptiXMaterial.cpp
@@ -83,12 +70,14 @@ set_source_files_properties(
   PROPERTIES COMPILE_FLAGS -Wno-shadow
 )
 
-set(BRAYNSOPTIXENGINE_PUBLIC_HEADERS
+set(BRAYNSOPTIXENGINE_HEADERS
   ${PTX_HEADERS}
   OptiXContext.h
   OptiXFrameBuffer.h
   OptiXScene.h
   OptiXCamera.h
+  OptiXCameraProgram.h
+  OptiXPerspectiveCamera.h
   OptiXRenderer.h
   OptiXEngine.h
 )

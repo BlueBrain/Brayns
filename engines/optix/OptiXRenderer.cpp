@@ -146,7 +146,7 @@ void OptiXRenderer::commit()
     // the scene and update the renderer.
     if (updateMaterials)
     {
-        const auto& renderProgram = OptiXContext::get().getRenderer(
+        const auto renderProgram = OptiXContext::get().getRenderer(
             _renderingParameters.getCurrentRenderer());
 
         _scene->visitModels([&](Model& model) {
@@ -157,10 +157,10 @@ void OptiXRenderer::commit()
                 const bool textured = optixMaterial->isTextured();
 
                 optixMaterial->getOptixMaterial()->setClosestHitProgram(
-                    0, textured ? renderProgram.closest_hit_textured
-                                : renderProgram.closest_hit);
+                    0, textured ? renderProgram->closest_hit_textured
+                                : renderProgram->closest_hit);
                 optixMaterial->getOptixMaterial()->setAnyHitProgram(
-                    1, renderProgram.any_hit);
+                    1, renderProgram->any_hit);
             }
         });
     }

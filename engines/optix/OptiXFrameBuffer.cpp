@@ -95,12 +95,9 @@ void OptiXFrameBuffer::_recreate()
     auto context = OptiXContext::get().getOptixContext();
     _frameBuffer = context->createBuffer(RT_BUFFER_OUTPUT, format, _frameSize.x,
                                          _frameSize.y);
-    context["output_buffer"]->set(_frameBuffer);
-
     _accumBuffer =
         context->createBuffer(RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_FLOAT4,
                               _frameSize.x, _frameSize.y);
-    context["accum_buffer"]->set(_accumBuffer);
     clear();
     BRAYNS_DEBUG << "Frame buffer created" << std::endl;
 }
@@ -117,7 +114,10 @@ void OptiXFrameBuffer::_mapUnsafe()
 
     auto context = OptiXContext::get().getOptixContext();
     const auto frame = _accumulation ? static_cast<size_t>(_accumFrames) : 0;
+
     context["frame"]->setUint(frame);
+    context["output_buffer"]->set(_frameBuffer);
+    context["accum_buffer"]->set(_accumBuffer);
 
     switch (_frameBufferFormat)
     {
@@ -130,7 +130,6 @@ void OptiXFrameBuffer::_mapUnsafe()
     default:
         BRAYNS_ERROR << "Unsupported format" << std::endl;
     }
-    ++_accumFrames;
 }
 
 void OptiXFrameBuffer::unmap()
