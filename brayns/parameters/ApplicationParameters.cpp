@@ -35,6 +35,7 @@ const std::string PARAM_PARALLEL_RENDERING = "parallel-rendering";
 const std::string PARAM_PLUGIN = "plugin";
 const std::string PARAM_STEREO = "stereo";
 const std::string PARAM_WINDOW_SIZE = "window-size";
+const std::string PARAM_ENV_MAP = "env-map";
 
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
@@ -77,7 +78,9 @@ ApplicationParameters::ApplicationParameters()
         (PARAM_IMAGE_STREAM_FPS.c_str(), po::value<size_t>(&_imageStreamFPS),
          "Image stream FPS (60 default), [int]") //
         (PARAM_MAX_RENDER_FPS.c_str(), po::value<size_t>(&_maxRenderFPS),
-         "Max. render FPS");
+         "Max. render FPS") //
+        (PARAM_ENV_MAP.c_str(), po::value<std::string>(&_envMap),
+         "Path to environment map"); 
 
     _positionalArgs.add(PARAM_INPUT_PATHS.c_str(), -1);
 }

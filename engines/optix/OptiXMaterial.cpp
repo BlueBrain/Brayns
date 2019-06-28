@@ -25,10 +25,23 @@
 
 namespace brayns
 {
+static std::string textureTypeToString[12] = {"albedoMetallic_map",
+                                              "normalRoughness_map",
+                                              "bump_map",
+                                              "map_ks",
+                                              "map_ns",
+                                              "map_d",
+                                              "map_reflection",
+                                              "map_refraction",
+                                              "map_occlusion",
+                                              "radiance_map",
+                                              "irradiance_map",
+                                              "brdf_lut"};
+
 OptiXMaterial::~OptiXMaterial()
 {
-    if (_textureSampler)
-        _textureSampler->destroy();
+    for (auto& i : _textureSamplers)
+        i.second->destroy();
 
     if (_optixMaterial)
         _optixMaterial->destroy();
@@ -36,16 +49,11 @@ OptiXMaterial::~OptiXMaterial()
 
 bool OptiXMaterial::isTextured() const
 {
-    const brayns::TextureDescriptors& descriptors = getTextureDescriptors();
-    return descriptors.find(TT_DIFFUSE) != descriptors.end();
+    return !_textureSamplers.empty();
 }
 
 void OptiXMaterial::commit()
 {
-    const brayns::TextureDescriptors& descriptors = getTextureDescriptors();
-    auto texture_it = descriptors.find(TT_DIFFUSE);
-    const bool is_textured = texture_it != descriptors.end();
-
     if (!_optixMaterial)
         _optixMaterial = OptiXContext::get().createMaterial();
 
@@ -60,13 +68,16 @@ void OptiXMaterial::commit()
     _optixMaterial["refraction_index"]->setFloat(_refractionIndex);
     _optixMaterial["glossiness"]->setFloat(_glossiness);
 
-    if (is_textured)
+    for (const auto& i : getTextureDescriptors())
     {
-        auto texture = texture_it->second;
-        if (!_textureSampler)
-            _textureSampler = OptiXContext::get().createTextureSampler(texture);
-
-        _optixMaterial["diffuse_map"]->setTextureSampler(_textureSampler);
+        if (!_textureSamplers.count(i.first))
+        {
+            auto textureSampler =
+                OptiXContext::get().createTextureSampler(i.second);
+            _textureSamplers.insert(std::make_pair(i.first, textureSampler));
+            _optixMaterial[textureTypeToString[(uint8_t)i.first]]->setInt(
+                textureSampler->getId());
+        }
     }
 }
 } // namespace brayns

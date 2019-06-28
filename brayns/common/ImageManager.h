@@ -40,7 +40,8 @@ public:
      * @return Pointer to Texture2D object is import was successful, nullptr
      * otherwise
      */
-    static Texture2DPtr importTextureFromFile(const std::string& filename);
+    static Texture2DPtr importTextureFromFile(const std::string& filename,
+                                              const TextureType type);
 };
 }
 #endif // IMAGEMANAGER_H

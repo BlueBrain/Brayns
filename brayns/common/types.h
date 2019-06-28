@@ -219,6 +219,26 @@ const size_t NO_MATERIAL = std::numeric_limits<size_t>::max();
 const size_t BOUNDINGBOX_MATERIAL_ID = NO_MATERIAL - 1;
 const size_t SECONDARY_MODEL_MATERIAL_ID = NO_MATERIAL - 2;
 
+const std::string IRRADIANCE_MAP = "-irradiance";
+const std::string RADIANCE_MAP = "-radiance";
+const std::string BRDF_LUT = "-brdfLUT";
+
+enum class TextureType : uint8_t
+{
+    diffuse = 0,
+    normals,
+    bump,
+    specular,
+    emissive,
+    opacity,
+    reflection,
+    refraction,
+    occlusion,
+    radiance,
+    irradiance,
+    brdf_lut
+};
+
 enum class MemoryMode
 {
     shared,

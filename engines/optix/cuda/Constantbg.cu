@@ -30,7 +30,7 @@ struct PerRayData_radiance
 
 rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
 rtDeclareVariable(float3, bgColor, , );
-rtTextureSampler<float4, 2> envmap;
+rtDeclareVariable(int, envmap, , );
 rtDeclareVariable(PerRayData_radiance, prd_radiance, rtPayload, );
 rtDeclareVariable(uint, use_envmap, , );
 
@@ -38,11 +38,9 @@ RT_PROGRAM void envmap_miss()
 {
     if (use_envmap)
     {
-        float theta = atan2f(ray.direction.x, ray.direction.z);
-        float phi = M_PIf * 0.5f - acosf(ray.direction.y);
-        float u = (theta + M_PIf) * (0.5f * M_1_PIf);
-        float v = -0.5f * (1.0f + sin(phi));
-        prd_radiance.result = make_float3(tex2D(envmap, u, v));
+        const float2 uv = getEquirectangularUV(ray.direction);
+        prd_radiance.result = linearToSRGB(
+            tonemap(make_float3(optix::rtTex2D<float4>(envmap, uv.x, uv.y))));
     }
     else
     {

@@ -20,6 +20,7 @@
 
 #include <engines/optix/braynsOptixEngine_generated_AdvancedSimulation.cu.ptx.h>
 #include <engines/optix/braynsOptixEngine_generated_BasicSimulation.cu.ptx.h>
+#include <engines/optix/braynsOptixEngine_generated_PBR.cu.ptx.h>
 
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/parameters/ParametersManager.h>
@@ -184,6 +185,25 @@ void OptiXEngine::_createRenderers()
 
         context.addRenderer("basic", osp);
         addRendererType("basic");
+    }
+
+    { // PBR renderer
+        const std::string CUDA_PBR = braynsOptixEngine_generated_PBR_cu_ptx;
+
+        OptiXContext& context = OptiXContext::get();
+
+        OptixShaderProgram osp;
+        osp.closest_hit = context.getOptixContext()->createProgramFromPTXString(
+            CUDA_PBR, "closest_hit_radiance");
+        osp.closest_hit_textured =
+            context.getOptixContext()->createProgramFromPTXString(
+                CUDA_PBR, "closest_hit_radiance");
+        osp.any_hit = context.getOptixContext()->createProgramFromPTXString(
+            CUDA_PBR, "any_hit_shadow");
+
+        context.addRenderer("pbr", osp);
+
+        addRendererType("pbr");
     }
 }
 
