@@ -93,47 +93,22 @@ void OptiXEngine::_createCameras()
 
     auto camera = std::make_shared<OptiXPerspectiveCamera>();
 
+    PropertyMap properties;
+    properties.setProperty(fovy);
+    properties.setProperty(aspect);
+    properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
+    properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
+    properties.setProperty({"height", 1., {"Height"}});
+    if (isStereo)
     {
-        PropertyMap properties;
-        properties.setProperty(fovy);
-        properties.setProperty(aspect);
-        properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
-        properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
-        if (isStereo)
-        {
-            properties.setProperty(stereoProperty);
-            properties.setProperty(eyeSeparation);
-        }
-
-        context.addCamera("perspective", camera);
-        addCameraType("perspective", properties);
-    }
-    {
-        PropertyMap properties;
-        properties.setProperty({"height", 1., {"Height"}});
-        properties.setProperty(aspect);
-
-        context.addCamera("orthographic", camera);
-        addCameraType("orthographic", properties);
-    }
-    {
-        PropertyMap properties;
-        properties.setProperty(fovy);
-        properties.setProperty(aspect);
-        if (isStereo)
-        {
-            properties.setProperty(stereoProperty);
-            properties.setProperty(eyeSeparation);
-            properties.setProperty(
-                {"zeroParallaxPlane", 1., {"Zero parallax plane"}});
-        }
-
-        context.addCamera("perspectiveParallax", camera);
-        addCameraType("perspectiveParallax", properties);
+        properties.setProperty(stereoProperty);
+        properties.setProperty(eyeSeparation);
+        properties.setProperty(
+            {"zeroParallaxPlane", 1., {"Zero parallax plane"}});
     }
 
-    context.addCamera("panoramic", camera);
-    addCameraType("panoramic");
+    context.addCamera("perspective", camera);
+    addCameraType("perspective", properties);
 }
 
 void OptiXEngine::_createRenderers()

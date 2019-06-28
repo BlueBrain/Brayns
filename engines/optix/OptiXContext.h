@@ -32,8 +32,6 @@
 
 namespace brayns
 {
-class OptiXCamera;
-
 enum class OptixGeometryType
 {
     sphere,
@@ -49,7 +47,7 @@ struct OptixShaderProgram
     ::optix::Program closest_hit_textured{nullptr};
 };
 
-using OptixShaderProgramPtr = std::shared_ptr<OptixShaderProgram>;
+using OptiXShaderProgramPtr = std::shared_ptr<OptixShaderProgram>;
 
 class OptiXContext
 {
@@ -73,8 +71,8 @@ public:
     ::optix::TextureSampler createTextureSampler(Texture2DPtr texture);
 
     // Others
-    void addRenderer(const std::string& name, OptixShaderProgramPtr program);
-    OptixShaderProgramPtr getRenderer(const std::string& name);
+    void addRenderer(const std::string& name, OptiXShaderProgramPtr program);
+    OptiXShaderProgramPtr getRenderer(const std::string& name);
 
     std::unique_lock<std::mutex> getScopeLock()
     {
@@ -91,8 +89,8 @@ private:
 
     ::optix::Context _optixContext{nullptr};
 
-    std::map<std::string, std::shared_ptr<OptixShaderProgram>> _rendererProgram;
-    std::map<std::string, std::shared_ptr<OptiXCameraProgram>> _cameraProgram;
+    std::map<std::string, OptiXShaderProgramPtr> _rendererProgram;
+    std::map<std::string, OptiXCameraProgramPtr> _cameraProgram;
 
     std::map<OptixGeometryType, ::optix::Program> _bounds;
     std::map<OptixGeometryType, ::optix::Program> _intersects;

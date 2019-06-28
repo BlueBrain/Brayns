@@ -148,12 +148,12 @@ OptiXContext& OptiXContext::get()
 }
 
 void OptiXContext::addRenderer(const std::string& name,
-                               OptixShaderProgramPtr program)
+                               OptiXShaderProgramPtr program)
 {
     _rendererProgram[name] = program;
 }
 
-OptixShaderProgramPtr OptiXContext::getRenderer(const std::string& name)
+OptiXShaderProgramPtr OptiXContext::getRenderer(const std::string& name)
 {
     auto it = _rendererProgram.find(name);
     if (it == _rendererProgram.end())
