@@ -50,6 +50,7 @@ set(BRAYNSOPTIXENGINE_SOURCES
   OptiXFrameBuffer.cpp
   OptiXScene.cpp
   OptiXCamera.cpp
+  OptiXPerspectiveCamera.cpp
   OptiXRenderer.cpp
   OptiXEngine.cpp
   OptiXMaterial.cpp
@@ -61,6 +62,7 @@ set_source_files_properties(
   OptiXFrameBuffer.cpp
   OptiXScene.cpp
   OptiXCamera.cpp
+  OptiXPerspectiveCamera.cpp
   OptiXRenderer.cpp
   OptiXEngine.cpp
   OptiXMaterial.cpp
@@ -74,6 +76,8 @@ set(BRAYNSOPTIXENGINE_HEADERS
   OptiXFrameBuffer.h
   OptiXScene.h
   OptiXCamera.h
+  OptiXCameraProgram.h
+  OptiXPerspectiveCamera.h
   OptiXRenderer.h
   OptiXEngine.h
 )

@@ -1,6 +1,5 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,30 +19,20 @@
 
 #pragma once
 
-#include "OptiXContext.h"
+#include <memory>
 
-#include <brayns/engine/Camera.h>
 #include <optixu/optixpp_namespace.h>
+
+#include "OptiXCameraProgram.h"
 
 namespace brayns
 {
-/**
-   OptiX specific camera
-
-   This object is the OptiX specific implementation of a Camera
-*/
-class OptiXCamera : public Camera
+class OptiXPerspectiveCamera : public OptiXCameraProgram
 {
 public:
-    /**
-       Commits the changes held by the camera object so that
-       attributes become available to the OptiX rendering engine
-    */
-    void commit() final;
+    OptiXPerspectiveCamera();
+    ~OptiXPerspectiveCamera() final = default;
 
-private:
-    optix::Buffer _clipPlanesBuffer{nullptr};
-    Planes _clipPlanes;
-    std::string _currentCamera;
+    void commit(const OptiXCamera& camera, ::optix::Context context) final;
 };
-} // namespace brayns
+}
