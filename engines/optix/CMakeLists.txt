@@ -38,6 +38,7 @@ set(BRAYNSOPTIXENGINE_CU
   cuda/renderer/AdvancedSimulation.cu
   cuda/renderer/BasicSimulation.cu
   cuda/renderer/PBR.cu
+  cuda/renderer/BBP.cu
 )
 
 CUDA_WRAP_SRCS(braynsOptixEngine PTX ptx_generated_files ${BRAYNSOPTIXENGINE_CU})

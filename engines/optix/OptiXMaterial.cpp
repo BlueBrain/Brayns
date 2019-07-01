@@ -28,7 +28,7 @@ namespace brayns
 static std::string textureTypeToString[12] = {"albedoMetallic_map",
                                               "normalRoughness_map",
                                               "bump_map",
-                                              "map_ks",
+                                              "aoEmissive_map",
                                               "map_ns",
                                               "map_d",
                                               "map_reflection",

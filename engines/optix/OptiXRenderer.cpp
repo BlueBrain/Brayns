@@ -110,6 +110,7 @@ OptiXRenderer::OptiXRenderer(const AnimationParameters& animationParameters,
                              const RenderingParameters& renderingParameters)
     : Renderer(animationParameters, renderingParameters)
 {
+    _timer.start();
 }
 
 void OptiXRenderer::render(FrameBufferPtr frameBuffer)
@@ -177,6 +178,7 @@ void OptiXRenderer::commit()
     context["ambientLightColor"]->setFloat(bgColor.x, bgColor.y, bgColor.z);
     context["bgColor"]->setFloat(bgColor.x, bgColor.y, bgColor.z);
     context["samples_per_pixel"]->setUint(samples_per_pixel);
+    context["currentTime"]->setFloat(_timer.elapsed());
 
     toOptiXProperties(getPropertyMap());
     _currentRenderer = _renderingParameters.getCurrentRenderer();

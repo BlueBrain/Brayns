@@ -40,7 +40,8 @@ public:
     {
         default_,
         cubemap,
-        normal_roughness
+        normal_roughness,
+        aoe
     };
 
     BRAYNS_API Texture2D(const Type type = Type::default_);
@@ -76,6 +77,7 @@ public:
 
     Type getType() const { return _type; }
     bool isCubeMap() const { return _type == Type::cubemap; }
+    bool isNormalMap() const { return _type == Type::normal_roughness; }
     uint8_t getNumFaces() const { return isCubeMap() ? 6 : 1; }
     void setWrapMode(const TextureWrapMode mode) { _wrapMode = mode; }
     TextureWrapMode getWrapMode() const { return _wrapMode; }
@@ -87,7 +89,7 @@ private:
     size_t _width{0};
     size_t _height{0};
     size_t _mipLevels{0};
-    TextureWrapMode _wrapMode{TextureWrapMode::mirror};
+    TextureWrapMode _wrapMode{TextureWrapMode::repeat};
     // faces, mips, pixels
     std::vector<std::vector<std::vector<unsigned char>>> _rawData;
 };

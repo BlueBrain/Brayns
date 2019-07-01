@@ -295,6 +295,25 @@ void OptiXContext::setCamera(const std::string& name)
                          ptr_src[(((y * 2u + 1u) * nx + x) * 2u + 1u) * 4u +
                                  3u]) /
                         4.0f;
+
+                    if (texture->isNormalMap())
+                    {
+                        glm::vec3 normalized = glm::normalize(glm::vec3(
+                            2.0f * (float)ptr_dst[(y * nx + x) * 4u] / 255.0f -
+                                1.0f,
+                            2.0f * (float)ptr_dst[(y * nx + x) * 4u + 1u] /
+                                    255.0f -
+                                1.0f,
+                            2.0f * (float)ptr_dst[(y * nx + x) * 4u + 2u] /
+                                    255.0f -
+                                1.0f));
+                        ptr_dst[(y * nx + x) * 4u] =
+                            255.0f * (0.5f * normalized.x + 0.5f);
+                        ptr_dst[(y * nx + x) * 4u + 1u] =
+                            255.0f * (0.5f * normalized.y + 0.5f);
+                        ptr_dst[(y * nx + x) * 4u + 2u] =
+                            255.0f * (0.5f * normalized.z + 0.5f);
+                    }
                 }
             }
             ny /= 2u;

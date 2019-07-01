@@ -127,6 +127,8 @@ Texture2DPtr ImageManager::importTextureFromFile(
     }
     else if (type == TextureType::normals) // TODO: only valid for PBR
         textureType = Texture2D::Type::normal_roughness;
+    else if (type == TextureType::specular) // TODO: only valid for BBP
+        textureType = Texture2D::Type::aoe;
 
     auto texture = std::make_shared<Texture2D>(textureType);
     texture->setFilename(filename);
