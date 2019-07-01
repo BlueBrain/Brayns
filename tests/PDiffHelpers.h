@@ -63,16 +63,28 @@ inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
     return result;
 }
 
+inline std::unique_ptr<pdiff::RGBAImage> clonePDiffRGBAImage(
+    const pdiff::RGBAImage& image)
+{
+    auto result = std::make_unique<pdiff::RGBAImage>(image.get_width(),
+                                                     image.get_height(), "");
+    const auto dataSize = image.get_width() * image.get_height() * 4;
+    memcpy(result->get_data(), image.get_data(), dataSize);
+    return result;
+}
+
 inline bool _compareImage(const pdiff::RGBAImage& image,
                           const std::string& filename,
+                          pdiff::RGBAImage& imageDiff,
                           const pdiff::PerceptualDiffParameters& parameters =
                               pdiff::PerceptualDiffParameters())
 {
     const auto fullPath = std::string(BRAYNS_TESTDATA_IMAGES_PATH) + filename;
     const auto referenceImage{pdiff::read_from_file(fullPath)};
     std::string errorOutput;
-    bool success = pdiff::yee_compare(*referenceImage, image, parameters,
-                                      nullptr, nullptr, &errorOutput);
+    bool success =
+        pdiff::yee_compare(*referenceImage, image, parameters, nullptr, nullptr,
+                           &errorOutput, &imageDiff, nullptr);
     if (!success)
         std::cerr << "Pdiff failure reason: " << errorOutput;
     return success;
@@ -83,16 +95,23 @@ inline bool compareTestImage(const std::string& filename,
                              const pdiff::PerceptualDiffParameters& parameters =
                                  pdiff::PerceptualDiffParameters())
 {
-    static bool saveImages = getenv("BRAYNS_SAVE_TEST_IMAGES");
-    if (saveImages)
-    {
-        auto image = fb.getImage();
-        FreeImage_Save(FreeImage_GetFIFFromFilename(filename.c_str()),
-                       image.get(), filename.c_str());
-    }
+    static bool saveTestImages = getenv("BRAYNS_SAVE_TEST_IMAGES");
+    static bool saveDiffImages = getenv("BRAYNS_SAVE_DIFF_IMAGES");
+    if (saveTestImages)
+        createPDiffRGBAImage(fb)->write_to_file(filename);
 
     auto testImage = createPDiffRGBAImage(fb);
-    return _compareImage(*testImage, filename, parameters);
+    auto imageDiff = clonePDiffRGBAImage(*testImage);
+
+    bool success = _compareImage(*testImage, filename, *imageDiff, parameters);
+
+    if (!success && saveDiffImages)
+    {
+        const auto filenameDiff = ("diff_" + filename);
+        imageDiff->write_to_file(filenameDiff);
+    }
+
+    return success;
 }
 
 #ifdef BRAYNS_USE_NETWORKING
@@ -116,6 +135,7 @@ inline bool compareBase64TestImage(
         file << decodedImage;
     }
     const auto testImage{pdiff::read_from_file(newFilename)};
-    return _compareImage(*testImage, filename);
+    auto imageDiff = clonePDiffRGBAImage(*testImage);
+    return _compareImage(*testImage, filename, *imageDiff);
 }
 #endif
