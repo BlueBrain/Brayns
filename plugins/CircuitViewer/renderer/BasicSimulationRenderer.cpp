@@ -37,7 +37,7 @@ void BasicSimulationRenderer::commit()
     ispc::BasicSimulationRenderer_set(
         getIE(), (_bgMaterial ? _bgMaterial->getIE() : nullptr), spp,
         (_simulationData ? (float*)_simulationData->data : nullptr),
-        _simulationDataSize, _alphaCorrection);
+        _simulationDataSize);
 }
 
 BasicSimulationRenderer::BasicSimulationRenderer()

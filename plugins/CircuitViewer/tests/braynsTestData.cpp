@@ -149,8 +149,6 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping)
 
     BOOST_CHECK(compareBase64TestImage(
         image, "testdataallmini50basicsimulation_snapshot.png"));
-    BOOST_CHECK(
-        !compareBase64TestImage(image, "testdataallmini50basicsimulation.png"));
 }
 #endif
 
