@@ -64,8 +64,6 @@ void _addAdvancedSimulationRenderer(Engine& engine)
 void _addBasicSimulationRenderer(Engine& engine)
 {
     PropertyMap properties;
-    properties.setProperty(
-        {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
     engine.addRendererType("basic_simulation", properties);
 }
 }
