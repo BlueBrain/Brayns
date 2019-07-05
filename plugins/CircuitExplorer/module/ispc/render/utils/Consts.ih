@@ -1,0 +1,35 @@
+/* Copyright (c) 2018, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * This file is part of the circuit explorer for Brayns
+ * <https://github.com/favreau/Brayns-UC-CircuitExplorer>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#pragma once
+
+#define ALPHA_THRESHOLD (.05f)
+#define DEFAULT_LIGHT_EMISSION (2.f)
+#define DEFAULT_LIGHT_THRESHOLD (0.2f)
+
+#define NB_MAX_REBOUNDS 10
+#define NB_MAX_PATH_TRACING_REBOUNDS 5
+#define VOLUME_NB_MAX_REBOUNDS 1
+#define NB_MAX_SAMPLES_PER_RAY 32
+
+#define DEFAULT_SKY_POWER 2.f
+#define DEFAULT_SKY_POWER_ZERO_BOUNCE 4.f
+#define DEFAULT_CARTOON_GRADIENT 3

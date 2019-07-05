@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2018, Blue Brain Project
-#                          Raphael Dumusc <raphael.dumusc@epfl.ch>
-#                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+# Copyright (c) 2016-2019, Blue Brain Project
 #                          Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -22,14 +20,4 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # All rights reserved. Do not distribute without further notice.
 
-"""The Brayns python client library provides access to remote control a running Brayns instance."""
-
-from .async_client import AsyncClient
-from .client import Client
-from .plugins.circuit_explorer import CircuitExplorer
-from .plugins.diffuse_tensor_imaging import DiffuseTensorImaging
-from .helpers.camera_path_handler import CameraPathHandler
-from .version import VERSION as __version__
-
-__all__ = ['AsyncClient', 'Client', 'CircuitExplorer', 'DiffuseTensorImaging', 'CameraPathHandler',
-           '__version__']
+"""Helper classes and functions"""
