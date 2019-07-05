@@ -23,6 +23,8 @@ CMakeFiles
 *.config
 *.includes
 *.creator*
+*.cflags
+*.cxxflags
 *.user
 .vscode
 .python-version
