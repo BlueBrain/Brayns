@@ -28,6 +28,7 @@
 #include "OptiXCamera.h"
 #include "OptiXEngine.h"
 #include "OptiXFrameBuffer.h"
+#include "OptiXOpenDeckCamera.h"
 #include "OptiXPerspectiveCamera.h"
 #include "OptiXRenderer.h"
 #include "OptiXScene.h"
@@ -109,6 +110,13 @@ void OptiXEngine::_createCameras()
 
     context.addCamera("perspective", camera);
     addCameraType("perspective", properties);
+
+    {
+        PropertyMap properties;
+        properties.setProperty({"segmentId", 7});
+        context.addCamera("opendeck", std::make_shared<OptiXOpenDeckCamera>());
+        addCameraType("opendeck", properties);
+    }
 }
 
 void OptiXEngine::_createRenderers()
@@ -189,6 +197,7 @@ void OptiXEngine::_createRenderers()
         osp->closest_hit_textured =
             context.getOptixContext()->createProgramFromPTXString(
                 CUDA_PBR, "closest_hit_radiance");
+
         osp->any_hit = context.getOptixContext()->createProgramFromPTXString(
             CUDA_PBR, "any_hit_shadow");
 
