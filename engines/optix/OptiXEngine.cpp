@@ -240,9 +240,7 @@ void OptiXEngine::commit()
 {
     Engine::commit();
 }
-void OptiXEngine::preRender()
-{
-}
+
 Vector2ui OptiXEngine::getMinimumFrameSize() const
 {
     return {1, 1};

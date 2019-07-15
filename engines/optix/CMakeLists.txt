@@ -15,6 +15,8 @@ if(CUDA_FOUND)
 endif()
 message(STATUS "Using CUDA version ${CUDA_VERSION}")
 
+set(CUDA_NVCC_FLAGS "--use_fast_math")
+
 # Patch for cmake 3.7->3.9
 if(CMAKE_VERSION VERSION_GREATER "3.6" AND CMAKE_VERSION VERSION_LESS "3.10")
   set(CUDA_run_nvcc "${CMAKE_CURRENT_SOURCE_DIR}/CMake/run_nvcc.cmake")
