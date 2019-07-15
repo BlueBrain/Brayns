@@ -102,7 +102,7 @@ void VRPNPlugin::init()
     _vrpnTracker->register_change_handler(&(_api->getCamera()), trackerCallback,
                                           HEAD_SENSOR_ID);
     _vrpnTracker->register_change_handler(&_states, flyStickCallback,
-                                          HEAD_SENSOR_ID);
+                                          FLYSTICK_SENSOR_ID);
     _vrpnAnalog->register_change_handler(&_states, joystickCallback);
 }
 
