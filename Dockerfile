@@ -39,7 +39,7 @@ RUN apt-get update \
 
 # Get ISPC
 # https://ispc.github.io/downloads.html
-ARG ISPC_VERSION=1.9.2
+ARG ISPC_VERSION=1.10.0
 ARG ISPC_DIR=ispc-v${ISPC_VERSION}-linux
 ARG ISPC_PATH=/app/$ISPC_DIR
 
@@ -53,7 +53,7 @@ ENV PATH $PATH:${ISPC_PATH}
 
 # Install embree
 # https://github.com/embree/embree/releases
-ARG EMBREE_VERSION=3.2.3
+ARG EMBREE_VERSION=3.5.2
 ARG EMBREE_FILE=embree-${EMBREE_VERSION}.x86_64.linux.tar.gz
 RUN mkdir -p ${DIST_PATH} \
   && wget https://github.com/embree/embree/releases/download/v${EMBREE_VERSION}/${EMBREE_FILE} \
@@ -62,16 +62,17 @@ RUN mkdir -p ${DIST_PATH} \
 
 # Install OSPRay
 # https://github.com/ospray/ospray/releases
-ARG OSPRAY_BRANCH=release-1.7.x
+ARG OSPRAY_TAG=v1.8.5
 ARG OSPRAY_SRC=/app/ospray
 
 RUN mkdir -p ${OSPRAY_SRC} \
  && git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC} \
  && cd ${OSPRAY_SRC} \
- && git checkout ${OSPRAY_BRANCH} \
+ && git checkout ${OSPRAY_TAG} \
  && mkdir -p build \
  && cd build \
  && CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja \
+    -DOSPRAY_ENABLE_TUTORIALS=OFF \
     -DOSPRAY_ENABLE_APPS=OFF \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
  && ninja install
@@ -116,6 +117,7 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
  && cd build \
  && CMAKE_PREFIX_PATH=${DIST_PATH}:${DIST_PATH}/lib/cmake/libwebsockets \
     cmake .. -GNinja \
+    -DBRAYNS_OSPRAY_ENABLED=ON \
     -DBRAYNS_CIRCUITVIEWER_ENABLED=ON \
     -DBRAYNS_NETWORKING_ENABLED=ON \
     -DCLONE_SUBPROJECTS=ON \

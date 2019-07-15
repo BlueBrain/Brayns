@@ -23,7 +23,7 @@
 #include <brayns/common/loader/Loader.h>
 #include <brayns/parameters/GeometryParameters.h>
 
-class aiScene;
+struct aiScene;
 
 namespace brayns
 {
@@ -70,4 +70,4 @@ private:
                             const LoaderProgress& callback) const;
     size_t _getQuality(const GeometryQuality geometryQuality) const;
 };
-}
+} // namespace brayns

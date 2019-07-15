@@ -64,7 +64,6 @@ const float DEFAULT_MOTION_ACCELERATION = 1.5f;
 
 const brayns::Vector3f DEFAULT_SUN_DIRECTION = {1.f, -1.f, -1.f};
 const brayns::Vector3f DEFAULT_SUN_COLOR = {0.9f, 0.9f, 0.9f};
-const brayns::Vector3f DEFAULT_SUN_POSITION = {-10.f, 10.f, -10.f};
 constexpr double DEFAULT_SUN_ANGULAR_DIAMETER = 0.53;
 constexpr double DEFAULT_SUN_INTENSITY = 1.0;
 } // namespace
@@ -263,6 +262,7 @@ struct Brayns::Impl : public PluginAPI
         _actionInterface = interface;
     }
     Scene& getScene() final { return _engine->getScene(); }
+
 private:
     void _createEngine()
     {
@@ -393,7 +393,8 @@ private:
                 scene.loadModel(path, params, {progress});
             }
         }
-        scene.setEnvironmentMap(_parametersManager.getApplicationParameters().getEnvMap());
+        scene.setEnvironmentMap(
+            _parametersManager.getApplicationParameters().getEnvMap());
         scene.markModified();
     }
 
