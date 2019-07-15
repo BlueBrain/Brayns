@@ -201,15 +201,20 @@ RT_PROGRAM void openDeckCamera()
         result += launch(seed, screen_f, use_randomness);
     result /= num_samples;
 
-    float4 acc_val = accum_buffer[launch_index];
+    float4 acc_val;
     if (frame > 0)
+    {
+        acc_val = accum_buffer[launch_index];
         acc_val = lerp(acc_val, make_float4(result, 0.f),
                        1.0f / static_cast<float>(frame + 1));
+    }
     else
         acc_val = make_float4(result, 1.f);
 
     output_buffer[launch_index] = make_color(make_float3(acc_val));
-    accum_buffer[launch_index] = acc_val;
+
+    if(accum_buffer.size().x > 1 && accum_buffer.size().y > 1)
+        accum_buffer[launch_index] = acc_val;
 }
 
 RT_PROGRAM void exception()
