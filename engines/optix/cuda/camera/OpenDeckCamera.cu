@@ -27,7 +27,6 @@
 static const float OPENDECK_RADIUS = 2.55f;
 static const float OPENDECK_HEIGHT = 2.3f;
 static const float OPENDECK_METALSTRIPE_HEIGHT = 0.045f;
-static const float HALF_IDP = 0.065f / 2.0f;
 static const float PI = 3.141592f;
 static const float OPENDECK_BEZEL_ANGLE = PI / 180.0f * 7.98995f;
 static const float ANGLE_PER_BORDER_SEGMENT =
@@ -42,6 +41,7 @@ rtDeclareVariable(unsigned int, segmentID, , ); // even segmentsID are right eye
 rtDeclareVariable(float3, headPos, , );
 rtDeclareVariable(float3, headUVec, , );
 
+rtDeclareVariable(float, HALF_IPD, , );
 rtDeclareVariable(float3, eye, , );
 rtDeclareVariable(float3, U, , );
 rtDeclareVariable(float3, V, , );
@@ -95,7 +95,7 @@ __device__ float3 launch(unsigned int& seed, const float2 screen,
 
     if (segmentID <= 13 && segmentID % 2 == 0)
     {
-        eyeDelta = HALF_IDP;
+        eyeDelta = HALF_IPD;
         unsigned int angularOffset = segmentID / 2;
 
         if (segmentID == 0)
@@ -108,7 +108,7 @@ __device__ float3 launch(unsigned int& seed, const float2 screen,
     }
     else if (segmentID <= 13 && segmentID % 2 == 1)
     {
-        eyeDelta = -HALF_IDP;
+        eyeDelta = -HALF_IPD;
         unsigned int angularOffset = segmentID / 2;
         if (segmentID == 1)
             alpha = sample.x * FULL_ANGLE;
@@ -120,11 +120,11 @@ __device__ float3 launch(unsigned int& seed, const float2 screen,
     }
     else if (segmentID == 14)
     {
-        eyeDelta = HALF_IDP;
+        eyeDelta = HALF_IPD;
     }
     else if (segmentID == 15)
     {
-        eyeDelta = -HALF_IDP;
+        eyeDelta = -HALF_IPD;
     }
 
     float3 pixelPos;
@@ -213,7 +213,7 @@ RT_PROGRAM void openDeckCamera()
 
     output_buffer[launch_index] = make_color(make_float3(acc_val));
 
-    if(accum_buffer.size().x > 1 && accum_buffer.size().y > 1)
+    if (accum_buffer.size().x > 1 && accum_buffer.size().y > 1)
         accum_buffer[launch_index] = acc_val;
 }
 

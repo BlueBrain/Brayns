@@ -75,10 +75,26 @@ void OptiXOpenDeckCamera::commit(const OptiXCamera& camera,
     const Vector3d w =
         normalize(glm::rotate(camera.getOrientation(), Vector3d(0, 0, 1)));
 
+    const auto headPos =
+        camera.getPropertyOrValue<std::array<double, 3>>("headPosition",
+                                                         {{0., 0., 0.}});
+    const auto headRotation =
+        camera.getPropertyOrValue<std::array<double, 4>>("headRotation",
+                                                         {{0., 0., 0., 1.}});
+    const auto headUVec =
+        glm::rotate(Quaterniond(headRotation[3], headRotation[0],
+                                headRotation[1], headRotation[2]),
+                    Vector3d(1., 0., 0.));
+
     context[CUDA_ATTR_CAMERA_SEGMENT_ID]->setUint(
         camera.getPropertyOrValue<int>("segmentId", 0));
-    context[CUDA_ATTR_CAMERA_HEAD_POS]->setFloat(0.0f, 2.0f, 0.0f);
-    context[CUDA_ATTR_CAMERA_HEAD_UVEC]->setFloat(1.0f, 0.0f, 0.0f);
+    context["HALF_IPD"]->setFloat(
+        camera.getPropertyOrValue<double>("interpupillaryDistance", 0.065) /
+        2.0);
+    context[CUDA_ATTR_CAMERA_HEAD_POS]->setFloat(headPos[0], headPos[1],
+                                                 headPos[2]);
+    context[CUDA_ATTR_CAMERA_HEAD_UVEC]->setFloat(headUVec.x, headUVec.y,
+                                                  headUVec.z);
     context[CUDA_ATTR_CAMERA_EYE]->setFloat(pos.x, pos.y, pos.z);
     context[CUDA_ATTR_CAMERA_U]->setFloat(u.x, u.y, u.z);
     context[CUDA_ATTR_CAMERA_V]->setFloat(v.x, v.y, v.z);
