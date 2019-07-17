@@ -135,7 +135,7 @@ __device__ float3 launch(unsigned int& seed, const float2 screen,
         pixelPos.z = OPENDECK_RADIUS * -sinf(alpha);
 
         dPx = make_float3(FULL_ANGLE * OPENDECK_RADIUS * sinf(alpha), 0.0f,
-                          FULL_ANGLE * OPENDECK_RADIUS * cosf(alpha));
+                          FULL_ANGLE * OPENDECK_RADIUS * -cosf(alpha));
         dPy = make_float3(0.0f, OPENDECK_HEIGHT, 0.0f);
     }
     else if (segmentID > 13)
