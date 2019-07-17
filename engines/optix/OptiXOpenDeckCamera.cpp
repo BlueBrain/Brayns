@@ -91,6 +91,8 @@ void OptiXOpenDeckCamera::commit(const OptiXCamera& camera,
     context["HALF_IPD"]->setFloat(
         camera.getPropertyOrValue<double>("interpupillaryDistance", 0.065) /
         2.0);
+    context["nearClip"]->setFloat(
+        camera.getPropertyOrValue<double>("nearClip", 0.5));
     context[CUDA_ATTR_CAMERA_HEAD_POS]->setFloat(headPos[0], headPos[1],
                                                  headPos[2]);
     context[CUDA_ATTR_CAMERA_HEAD_UVEC]->setFloat(headUVec.x, headUVec.y,

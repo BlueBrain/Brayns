@@ -40,7 +40,7 @@ RT_PROGRAM void envmap_miss()
     {
         const float2 uv = getEquirectangularUV(ray.direction);
         prd_radiance.result = linearToSRGB(
-            tonemap(make_float3(optix::rtTex2D<float4>(envmap, uv.x, uv.y))));
+            make_float3(optix::rtTex2D<float4>(envmap, uv.x, uv.y)));
     }
     else
     {

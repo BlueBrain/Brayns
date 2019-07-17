@@ -253,11 +253,11 @@ ModelDescriptorPtr Scene::loadModel(const std::string& path,
     return modelDescriptor;
 }
 
-void Scene::visitModels(const std::function<void(Model&)>& functor)
+void Scene::visitModels(const std::function<void(ModelDescriptor&)>& functor)
 {
     std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
     for (const auto& modelDescriptor : _modelDescriptors)
-        functor(modelDescriptor->getModel());
+        functor(*modelDescriptor);
 }
 
 void Scene::buildDefault()

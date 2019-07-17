@@ -26,11 +26,14 @@
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 #include <vrpn_Analog.h>
+#include <vrpn_Button.h>
 #include <vrpn_Tracker.h>
 
 #ifdef BRAYNSVRPN_USE_LIBUV
 #include <uv.h>
 #endif
+
+#include <unordered_map>
 
 namespace brayns
 {
@@ -39,7 +42,12 @@ struct VrpnStates
     float axisX = 0.0f;
     float axisZ = 0.0f;
     glm::quat flyStickOrientation;
+    PluginAPI* api = nullptr;
+    bool triggerPressed = false;
+    Vector3f prevPos;
 };
+
+using FuncTable = std::unordered_map<vrpn_int32, std::function<void(bool)>>;
 
 class VRPNPlugin : public ExtensionPlugin
 {
@@ -58,9 +66,12 @@ public:
 private:
     std::unique_ptr<vrpn_Tracker_Remote> _vrpnTracker;
     std::unique_ptr<vrpn_Analog_Remote> _vrpnAnalog;
+    std::unique_ptr<vrpn_Button_Remote> _vrpnButton;
     const std::string _vrpnName;
     Timer _timer;
     VrpnStates _states;
+
+    FuncTable _buttonFuncs;
 
 #ifdef BRAYNSVRPN_USE_LIBUV
     struct LibuvDeleter

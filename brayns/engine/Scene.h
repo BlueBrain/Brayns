@@ -176,7 +176,7 @@ public:
     ModelDescriptorPtr loadModel(const std::string& path,
                                  const ModelParams& params, LoaderProgress cb);
 
-    void visitModels(const std::function<void(Model&)>& functor);
+    void visitModels(const std::function<void(ModelDescriptor&)>& functor);
 
     /** @return the registry for all supported loaders of this scene. */
     LoaderRegistry& getLoaderRegistry() { return _loaderRegistry; }

@@ -115,12 +115,15 @@ void OptiXEngine::_createCameras()
     {
         PropertyMap properties;
         properties.setProperty({"segmentId", 7});
+        properties.setProperty({"nearClip", 0.5});
         properties.setProperty(
             {"interpupillaryDistance", 0.065, {"Eye separation"}});
         properties.setProperty(
             {"headPosition", std::array<double, 3>{{0.0, 2.0, 0.0}}});
         properties.setProperty(
             {"headRotation", std::array<double, 4>{{0.0, 0.0, 0.0, 1.0}}});
+        properties.setProperty(
+            {"flystickRotation", std::array<double, 4>{{0.0, 0.0, 0.0, 1.0}}});
         context.addCamera("opendeck", std::make_shared<OptiXOpenDeckCamera>());
         addCameraType("opendeck", properties);
     }

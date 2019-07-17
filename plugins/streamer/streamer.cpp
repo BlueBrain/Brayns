@@ -27,6 +27,8 @@
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Material.h>
+#include <brayns/engine/Model.h>
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/parameters/ParametersManager.h>
@@ -313,6 +315,15 @@ void Streamer::init()
     _createFrameBuffers();
 #endif
 
+    auto model = _api->getScene().createModel();
+    auto material = model->createMaterial(0, "white");
+    material->setDiffuseColor({1.f, 1.f, 1.f});
+    material->setSpecularColor({1.f, 1.f, 1.f});
+    model->addSphere(0, {{0.f, 0.f, 0.f}, .1f});
+    _lightModel = std::make_shared<brayns::ModelDescriptor>(std::move(model),
+                                                            "LightScene");
+    _api->getScene().addModel(_lightModel);
+
     _timer.start();
 }
 
@@ -529,24 +540,36 @@ void Streamer::_syncFrame()
     camera.updateProperty("segmentId", _props.getProperty<int>("segment"),
                           false);
 
-    if (camera.isModified())
+    auto sunLight = _api->getScene().getLightManager().getLight(0);
+    auto sun = std::dynamic_pointer_cast<brayns::DirectionalLight>(sunLight);
+    if (sun)
     {
-        const auto flystickRot =
-            _api->getCamera().getPropertyOrValue<std::array<double, 4>>(
-                "flystickRotation", {{0.0, 0.0, 0.0, 1.0}});
-
-        auto sunLight = _api->getScene().getLightManager().getLight(0);
-        auto sun =
-            std::dynamic_pointer_cast<brayns::DirectionalLight>(sunLight);
-        if (sun)
-        {
-            sun->_direction =
-                glm::rotate(brayns::Quaterniond(flystickRot[3], flystickRot[0],
-                                                flystickRot[1], flystickRot[2]),
-                            brayns::Vector3d(0, 0, -1));
-            _api->getScene().getLightManager().addLight(sun);
-        }
+        brayns::Transformation transformation;
+        transformation.setTranslation(sun->_direction);
+        _lightModel->setTransformation(transformation);
+        _api->getScene().markModified();
     }
+
+    //    if (camera.isModified())
+    //    {
+    //        const auto flystickRot =
+    //            _api->getCamera().getPropertyOrValue<std::array<double, 4>>(
+    //                "flystickRotation", {{0.0, 0.0, 0.0, 1.0}});
+
+    //        auto sunLight = _api->getScene().getLightManager().getLight(0);
+    //        auto sun =
+    //            std::dynamic_pointer_cast<brayns::DirectionalLight>(sunLight);
+    //        if (sun)
+    //        {
+    //            sun->_direction =
+    //                glm::rotate(brayns::Quaterniond(flystickRot[3],
+    //                flystickRot[0],
+    //                                                flystickRot[1],
+    //                                                flystickRot[2]),
+    //                            brayns::Vector3d(0, 0, -1));
+    //            _api->getScene().getLightManager().addLight(sun);
+    //        }
+    //    }
 }
 
 void Streamer::_nextFrame()
@@ -643,6 +666,12 @@ bool Streamer::FrameData::serialize(const size_t frameNumber) const
         stream << scene.getEnvironmentMap();
     if (renderer.isModified())
         stream << renderer.getPropertyMap();
+
+    auto sunLight = scene.getLightManager().getLight(0);
+    auto sun = std::dynamic_pointer_cast<brayns::DirectionalLight>(sunLight);
+    stream << sun->_direction;
+
+    stream << scene.getModel(0)->getVisible();
     stream.flush();
     return rp.isModified();
 }
@@ -688,6 +717,17 @@ bool Streamer::FrameData::deserialize(size_t &frameNumber)
         stream >> props;
         renderer.updateProperties(props);
     }
+
+    brayns::Vector3d direction;
+    stream >> direction;
+    auto sunLight = scene.getLightManager().getLight(0);
+    auto sun = std::dynamic_pointer_cast<brayns::DirectionalLight>(sunLight);
+    sun->_direction = direction;
+    scene.getLightManager().addLight(sun);
+
+    bool visi;
+    stream >> visi;
+    scene.getModel(0)->setVisible(visi);
 
     return rpModified || camModified || sceneModified;
 }

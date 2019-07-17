@@ -188,10 +188,36 @@ void OptiXScene::commit()
     context["use_envmap"]->setUint(hasEnvironmentMap() ? 1 : 0);
 
     // Geometry
-    if (_rootGroup)
-        _rootGroup->destroy();
+    // if (_rootGroup)
+    //        _rootGroup->destroy();
 
-    _rootGroup = OptiXContext::get().createGroup();
+    if (!_rootGroup)
+    {
+        _rootGroup = OptiXContext::get().createGroup();
+    }
+    else
+    {
+        for (size_t i = 0; i < _modelDescriptors.size(); ++i)
+        {
+            auto& modelDescriptor = _modelDescriptors[i];
+
+            Matrix4f floatMat;
+            if (modelDescriptor->getEnabled())
+                floatMat = modelDescriptor->getTransformation().toMatrix();
+            else
+            {
+                Transformation trafo;
+                trafo.setTranslation({1000000, 100000, 10000});
+                floatMat = trafo.toMatrix();
+            }
+            auto matPtr = glm::value_ptr(floatMat);
+            auto xform = _rootGroup->getChild<::optix::Transform>(i);
+            xform->setMatrix(true, matPtr, 0);
+            _rootGroup->setChild<::optix::Transform>(i, xform);
+            _rootGroup->getAcceleration()->markDirty();
+        }
+        return;
+    }
 
     for (size_t i = 0; i < _modelDescriptors.size(); ++i)
     {

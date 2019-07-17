@@ -138,6 +138,80 @@ static __device__ inline float3 fresnelSchlickRoughness(float cosTheta,
 
 static __device__ inline void shade()
 {
+    const int size = 30;
+    const int size2 = 19;
+    /*float3 colormap[size] = {make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f),
+                             make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f),
+                             make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f),
+                             make_float3(0.0f, 0.0f, 1.0f), make_float3(0.1f, 0.0f, 1.0f), make_float3(0.2f, 0.0f, 1.0f), make_float3(0.4f, 0.0f, 1.0f),
+                             make_float3(0.75f, 0.0f, 1.0f), make_float3(1.0f, 0.0f, 0.9f), make_float3(1.0f, 0.0f, 0.8f), make_float3(1.0f, 0.0f, 0.6f),
+                             make_float3(1.0f, 0.0f, 0.4f), make_float3(1.0f, 0.0f, 0.2f), make_float3(1.0f, 0.0f, 0.2f), make_float3(1.0f, 0.0f, 0.0f),
+                             make_float3(1.0f, 0.0f, 0.0f), make_float3(1.0f, 0.0f, 0.0f), make_float3(1.0f, 0.0f, 0.0f), make_float3(1.0f, 0.0f, 0.0f)};*/
+       /*float powermap[size] = {1.0f, 1.0f, 1.0f, 1.0f,
+                            1.0f, 1.0f, 1.0f, 1.0f,
+                            1.0f, 1.0f, 1.0f, 1.0f,
+                            1.0f, 1.0f, 1.0f, 1.0f,
+                            1.125f, 1.25f, 1.5f, 2.0f,
+                            3.0f, 5.0f, 8.0f, 13.0f, 
+                            21.0f, 34.0f, 55.0f, 89.0f};*/
+    float3 colormap[size] = {make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f),
+                             make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f),
+                             make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f),
+                             make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f),
+                             make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f),
+                             make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f),
+                             make_float3(0.0f, 0.25f, 1.0f), make_float3(0.0f, 0.5f, 1.0f), make_float3(0.0f, 0.75f, 0.8f), make_float3(0.0f, 1.0f, 0.6f),
+                             make_float3(0.0f, 0.5f, 1.0f), make_float3(0.0f, 0.0f, 1.0f)};
+    float powermap[size] = {1.0f, 1.0f, 1.0f, 1.0f,
+                            1.0f, 1.0f, 1.0f, 1.0f,
+                            1.0f, 1.0f, 1.0f, 1.0f,
+                            1.0f, 1.0f, 1.0f, 1.0f,
+                            1.0f, 1.0f, 1.0f, 1.0f,
+                            1.0f, 1.0f, 1.0f, 1.0f, 
+                            1.0f, 1.5f, 3.0f, 7.0f, 1.9f,1.0f};
+
+    /*float3 colormap2[size2] = {make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.2f, 0.2f, 0.8f), make_float3(0.39f, 0.39f, 0.61f),
+                               make_float3(0.56f, 0.56f, 0.44f), make_float3(0.72f, 0.72f, 0.28f), make_float3(0.84f, 0.84f, 0.16f), make_float3(0.93f, 0.93f, 0.07f),
+                               make_float3(0.99f, 0.99f, 0.01f), make_float3(1.0f, 1.0f, 0.0f), make_float3(0.97f, 0.97f, 0.03f), make_float3(0.91f, 0.91f, 0.09f),
+                               make_float3(0.81f, 0.81f, 0.19f), make_float3(0.68f, 0.68f, 0.32f), make_float3(0.52f, 0.52f, 0.48f), make_float3(0.33f, 0.33f, 0.67f),
+                               make_float3(0.14f, 0.14f, 0.86f)};*/
+    float3 colormap2[size2] = {make_float3(0.0f, 0.5f, 1.0f), make_float3(0.0f, 0.5f, 1.0f), make_float3(0.0f, 0.5f, 1.0f), make_float3(0.0f, 0.5f, 1.0f),
+                               make_float3(0.0f, 0.5f, 1.0f), make_float3(0.0f, 0.5f, 1.0f), make_float3(0.0f, 0.5f, 1.0f), make_float3(0.0f, 0.5f, 1.0f),
+                               make_float3(0.0f, 0.5f, 1.0f), make_float3(0.0f, 0.5f, 1.0f), make_float3(0.0f, 0.5f, 1.0f), make_float3(0.0f, 0.5f, 1.0f),
+                               make_float3(0.0f, 0.5f, 1.0f), make_float3(0.0f, 0.5f, 1.0f), make_float3(0.0f, 0.5f, 1.0f), make_float3(0.0f, 0.5f, 1.0f),
+                               make_float3(0.0f, 0.5f, 1.0f)};
+    float powermap2[size2] = {2.0f, 2.0f, 2.0f, 3.59f, 5.12f, 6.52f, 
+                              7.74f, 8.73f, 9.45f, 9.88f, 
+                              10.0f, 9.79f, 9.27f, 8.47f, 
+                              7.4f, 6.12f, 4.68f, 3.13f, 2.0f};
+    /*float3 colormap3[size2] = {make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.2f, 0.0f, 0.8f), make_float3(0.39f, 0.0f, 0.61f),
+                               make_float3(0.56f, 0.0f, 0.44f), make_float3(0.72f, 0.0f, 0.28f), make_float3(0.84f, 0.0f, 0.16f), make_float3(0.93f, 0.0f, 0.07f),
+                               make_float3(0.99f, 0.0f, 0.01f), make_float3(1.0f, 0.0f, 0.0f), make_float3(0.97f, 0.0f, 0.03f), make_float3(0.91f, 0.0f, 0.09f),
+                               make_float3(0.81f, 0.0f, 0.19f), make_float3(0.68f, 0.0f, 0.32f), make_float3(0.52f, 0.0f, 0.48f), make_float3(0.33f, 0.0f, 0.67f),
+                               make_float3(0.14f, 0.0f, 0.86f)};*/
+
+      float3 colormap3[size2] = {make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.2f, 0.0f, 0.8f), make_float3(0.39f, 0.0f, 0.61f),
+                                 make_float3(0.56f, 0.295f, 0.44f), make_float3(0.72f, 0.56f, 0.28f), make_float3(0.84f, 0.78f, 0.16f), make_float3(0.93f, 0.93f, 0.07f),
+                                 make_float3(0.99f, 0.99f, 0.01f), make_float3(1.0f, 0.97f, 0.0f), make_float3(0.97f, 0.86f, 0.03f), make_float3(0.91f, 0.68f, 0.09f),
+                                 make_float3(0.81f, 0.43f, 0.19f), make_float3(0.68f, 0.14f, 0.32f), make_float3(0.52f, 0.0f, 0.48f), make_float3(0.33f, 0.0f, 0.67f),
+                                 make_float3(0.14f, 0.0f, 0.86f)};
+    float powermap3[size2] = {1.0f, 1.0f, 2.0f, 2.95f,
+                              3.8f, 4.6f, 5.2f, 5.65f,
+                              5.95f, 6.0f, 5.85f, 5.55f,
+                              5.05f, 4.4, 3.6f, 2.65f,
+                              1.7f};
+
+          float3 colormap4[size2] = {make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.2f, 0.0f, 0.8f), make_float3(0.39f, 0.0f, 0.61f),
+                                 make_float3(0.56f, 0.0f, 0.44f), make_float3(0.72f, 0.0f, 0.28f), make_float3(0.84f, 0.0f, 0.16f), make_float3(0.93f, 0.0f, 0.07f),
+                                 make_float3(0.99f, 0.0f, 0.01f), make_float3(1.0f, 0.0f, 0.0f), make_float3(0.97f, 0.0f, 0.03f), make_float3(0.91f, 0.0f, 0.09f),
+                                 make_float3(0.81f, 0.0f, 0.19f), make_float3(0.68f, 0.0f, 0.32f), make_float3(0.52f, 0.0f, 0.48f), make_float3(0.33f, 0.0f, 0.67f),
+                                 make_float3(0.14f, 0.0f, 0.86f)};
+/*    float powermap3[size2] = {1.0f, 1.0f, 1.2f, 1.39f,
+                              1.56f, 1.72f, 1.84f, 1.93f,
+                              1.99f, 2.0f, 1.97f, 1.91f,
+                              1.81f, 1.68f, 1.52f, 1.33f,
+                              1.14f};*/
+
     const float3 world_shading_normal =
         optix::normalize(rtTransformNormal(RT_OBJECT_TO_WORLD, shading_normal)); 
 
@@ -146,11 +220,41 @@ static __device__ inline void shade()
     const float3 WorldPos = ray.origin + t_hit * ray.direction;
     const float3 V = -ray.direction;
 
+    // Getting id
+    const uint id = rtTex2D<float4>(aoEmissive_map, 0, 0).w * 255.0f + 0.5f;
+
+    float planeSizeRatio;
+    float period;
+    float realSize;
+    float offset = 0.0f;
+    if(id == 254)
+    {
+        planeSizeRatio = /*0.11f*/ 0.69f; // must be parameter
+        period = 9.0f; // test
+        realSize = size;
+    }
+    else if(id == 255)
+    {
+        planeSizeRatio = 2.0f;
+        period = 3.0f;
+        realSize = size2;
+    }
+    else
+    {
+        planeSizeRatio = 2.0f;
+        period = 6.5f;
+        realSize = size2;
+    }
+
+    if(id == 252)
+        offset = 0.5f;
+    else if(id == 251)
+        offset = 0.2f;
+
     // ******* triplanar ********
     float3 triblend = N * N;
     triblend = triblend / (triblend.x + triblend.y + triblend.z);
 
-    const float planeSizeRatio = /*0.11f*/ 12.0f; // must be parameter
     const float3 uv = planeSizeRatio * WorldPos;
     const float3 ddxuv = planeSizeRatio * ddxWPos;
     const float3 ddyuv = planeSizeRatio * ddyWPos; 
@@ -209,7 +313,6 @@ static __device__ inline void shade()
     {
         // per-light radiance
         BasicLight light = lights[i];
-        light.pos = make_float3(5.0f, 10.0f, 15.0f);
         const float3 L = normalize(light.pos - WorldPos);
         const float3 H = normalize(V + L);
         const float attenuation = calculateAttenuation(WorldPos, light.pos);
@@ -256,28 +359,22 @@ static __device__ inline void shade()
 
         ambient = (kD * diffuse + specular) * ao;
     }
-    const int size = 28;
-    float3 colormap[size] = {make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f),
-                             make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f),
-                             make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f), make_float3(0.0f, 0.0f, 1.0f),
-                             make_float3(0.0f, 0.0f, 1.0f), make_float3(0.1f, 0.0f, 1.0f), make_float3(0.2f, 0.0f, 1.0f), make_float3(0.4f, 0.0f, 1.0f),
-                             make_float3(0.75f, 0.0f, 1.0f), make_float3(1.0f, 0.0f, 0.9f), make_float3(1.0f, 0.0f, 0.8f), make_float3(1.0f, 0.0f, 0.6f),
-                             make_float3(1.0f, 0.0f, 0.4f), make_float3(1.0f, 0.0f, 0.2f), make_float3(1.0f, 0.0f, 0.2f), make_float3(1.0f, 0.0f, 0.0f),
-                             make_float3(1.0f, 0.0f, 0.0f), make_float3(1.0f, 0.0f, 0.0f), make_float3(1.0f, 0.0f, 0.0f), make_float3(1.0f, 0.0f, 0.0f)};
-    float powermap[size] = {1.0f, 1.0f, 1.0f, 1.0f,
-                            1.0f, 1.0f, 1.0f, 1.0f,
-                            1.0f, 1.0f, 1.0f, 1.0f,
-                            1.0f, 1.0f, 1.0f, 1.0f,
-                            1.125f, 1.25f, 1.5f, 2.0f,
-                            3.0f, 5.0f, 8.0f, 13.0f, 
-                            21.0f, 34.0f, 55.0f, 89.0f};
-    float period = 15.0f;
-    float loopedTime = fmod(currentTime, period);
-    float indexfloat = (size - 1) * loopedTime / period;
+
+
+    float loopedTime = fmod(currentTime + period * offset, period);
+    float indexfloat = (realSize - 1) * loopedTime / period;
     int index = indexfloat;
     float frac = indexfloat - index;
-    float3 emmissiveColor = ((1.0f - frac) * colormap[index] + frac * colormap[index + 1]) * ((1.0f - frac) * powermap[index] + frac * powermap[index + 1]);
-    
+
+    float3 emmissiveColor;
+    if(id == 255)
+        emmissiveColor = ((1.0f - frac) * colormap2[index] + frac * colormap2[index + 1]) * ((1.0f - frac) * powermap2[index] + frac * powermap2[index + 1]);
+    else if(id == 254)
+        emmissiveColor = ((1.0f - frac) * colormap[index] + frac * colormap[index + 1]) * ((1.0f - frac) * powermap[index] + frac * powermap[index + 1]);
+    else if(id == 251)
+        emmissiveColor = ((1.0f - frac) * colormap4[index] + frac * colormap4[index + 1]) * ((1.0f - frac) * powermap3[index] + frac * powermap3[index + 1]);
+    else
+        emmissiveColor = ((1.0f - frac) * colormap3[index] + frac * colormap3[index + 1]) * ((1.0f - frac) * powermap3[index] + frac * powermap3[index + 1]);
 
     const float3 color = ambient + Lo + emissive * emmissiveColor;
     prd.result = linearToSRGB(tonemap(color));

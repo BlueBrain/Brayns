@@ -157,18 +157,32 @@ void OptiXRenderer::commit()
         const auto renderProgram = OptiXContext::get().getRenderer(
             _renderingParameters.getCurrentRenderer());
 
-        _scene->visitModels([&](Model& model) {
+        const auto basicProgram = OptiXContext::get().getRenderer("basic");
+
+        _scene->visitModels([&](auto& modelDesc) {
+            auto& model = modelDesc.getModel();
             for (const auto& kv : model.getMaterials())
             {
                 auto optixMaterial =
                     dynamic_cast<OptiXMaterial*>(kv.second.get());
                 const bool textured = optixMaterial->isTextured();
 
-                optixMaterial->getOptixMaterial()->setClosestHitProgram(
-                    0, textured ? renderProgram->closest_hit_textured
-                                : renderProgram->closest_hit);
-                optixMaterial->getOptixMaterial()->setAnyHitProgram(
-                    1, renderProgram->any_hit);
+                if (modelDesc.getName() != "LightScene")
+                {
+                    optixMaterial->getOptixMaterial()->setClosestHitProgram(
+                        0, textured ? renderProgram->closest_hit_textured
+                                    : renderProgram->closest_hit);
+                    optixMaterial->getOptixMaterial()->setAnyHitProgram(
+                        1, renderProgram->any_hit);
+                }
+                else
+                {
+                    optixMaterial->getOptixMaterial()->setClosestHitProgram(
+                        0, textured ? basicProgram->closest_hit_textured
+                                    : basicProgram->closest_hit);
+                    optixMaterial->getOptixMaterial()->setAnyHitProgram(
+                        1, basicProgram->any_hit);
+                }
             }
         });
     }

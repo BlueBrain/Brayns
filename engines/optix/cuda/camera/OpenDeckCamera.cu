@@ -42,6 +42,7 @@ rtDeclareVariable(float3, headPos, , );
 rtDeclareVariable(float3, headUVec, , );
 
 rtDeclareVariable(float, HALF_IPD, , );
+rtDeclareVariable(float, nearClip, , );
 rtDeclareVariable(float3, eye, , );
 rtDeclareVariable(float3, U, , );
 rtDeclareVariable(float3, V, , );
@@ -173,10 +174,10 @@ __device__ float3 launch(unsigned int& seed, const float2 screen,
     dir = transform * dir;
 
     const float3 org = eye + headPos - eyeDeltaPos;
-    float near = scene_epsilon;
+    float near = scene_epsilon + nearClip;
     float far = INFINITY;
 
-    getClippingValues(org, dir, near, far);
+//    getClippingValues(org, dir, near, far);
     optix::Ray ray(org, dir, radiance_ray_type, near, far);
 
     rtTrace(top_object, ray, prd);

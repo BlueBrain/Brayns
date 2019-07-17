@@ -150,6 +150,8 @@ private:
     std::thread _encodeThread;
     MTQueue<Image> _images;
 
+    brayns::ModelDescriptorPtr _lightModel;
+
     NvPipe *encoder{nullptr};
     bool _fbModified{false};
     brayns::FrameBufferPtr frameBuffers[2];

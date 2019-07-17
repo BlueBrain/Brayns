@@ -165,7 +165,6 @@ static __device__ inline void shade()
         // per-light radiance
         // const BasicLight& light = lights[i];
         BasicLight light = lights[i];
-        light.pos = make_float3(0.5f, 1.0f, 1.5f);
         const float3 L = normalize(light.pos - WorldPos);
         const float3 H = normalize(V + L);
         const float attenuation = calculateAttenuation(WorldPos, light.pos);
