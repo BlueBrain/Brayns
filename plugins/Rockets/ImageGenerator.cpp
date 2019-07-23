@@ -29,10 +29,8 @@ namespace brayns
 {
 ImageGenerator::~ImageGenerator()
 {
-#ifdef BRAYNS_USE_LIBJPEGTURBO
     if (_compressor)
         tjDestroy(_compressor);
-#endif
 }
 
 ImageGenerator::ImageBase64 ImageGenerator::createImage(
@@ -42,14 +40,11 @@ ImageGenerator::ImageBase64 ImageGenerator::createImage(
 {
 #ifdef BRAYNS_USE_FREEIMAGE
     return {freeimage::getBase64Image(frameBuffer.getImage(), format, quality)};
-#elif defined BRAYNS_USE_LIBJPEGTURBO
+#else
     BRAYNS_WARN << "No FreeImage found, will take TurboJPEG snapshot; "
                 << "ignoring format '" << format << "'" << std::endl;
     const auto& jpeg = createJPEG(frameBuffer, quality);
     return {base64_encode(jpeg.data.get(), jpeg.size)};
-#else
-    throw std::runtime_error(
-        "Neither FreeImage nor TurboJPEG available; cannot create any image");
 #endif
 }
 
@@ -58,10 +53,10 @@ ImageGenerator::ImageBase64 ImageGenerator::createImage(
     const std::string& format BRAYNS_UNUSED,
     const uint8_t quality BRAYNS_UNUSED)
 {
-#ifdef BRAYNS_USE_FREEIMAGE
     if (frameBuffers.size() == 1)
         return createImage(*frameBuffers[0], format, quality);
 
+#ifdef BRAYNS_USE_FREEIMAGE
     std::vector<freeimage::ImagePtr> images;
     for (auto frameBuffer : frameBuffers)
         images.push_back(frameBuffer->getImage());
@@ -75,7 +70,6 @@ ImageGenerator::ImageBase64 ImageGenerator::createImage(
 ImageGenerator::ImageJPEG ImageGenerator::createJPEG(
     FrameBuffer& frameBuffer BRAYNS_UNUSED, const uint8_t quality BRAYNS_UNUSED)
 {
-#ifdef BRAYNS_USE_LIBJPEGTURBO
     frameBuffer.map();
     const auto colorBuffer = frameBuffer.getColorBuffer();
     if (!colorBuffer)
@@ -101,12 +95,8 @@ ImageGenerator::ImageJPEG ImageGenerator::createJPEG(
                              quality, image.size);
     frameBuffer.unmap();
     return image;
-#else
-    throw std::runtime_error("Need libjpeg-turbo; cannot create any image");
-#endif
 }
 
-#ifdef BRAYNS_USE_LIBJPEGTURBO
 ImageGenerator::ImageJPEG::JpegData ImageGenerator::_encodeJpeg(
     const uint32_t width, const uint32_t height, const uint8_t* rawData,
     const int32_t pixelFormat, const uint8_t quality, unsigned long& dataSize)
@@ -132,5 +122,4 @@ ImageGenerator::ImageJPEG::JpegData ImageGenerator::_encodeJpeg(
     }
     return ImageJPEG::JpegData{tjJpegBuf};
 }
-#endif
 } // namespace brayns
