@@ -77,6 +77,8 @@ BOOST_AUTO_TEST_CASE(render_xyz_and_compare)
     props.updateProperty("radius", props.getProperty<double>("radius") / 2.);
     model->setProperties(props);
 
+    brayns.getEngine().getScene().markModified();
+
     brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataMonkey_smaller.png",
                                  brayns.getEngine().getFrameBuffer()));
@@ -91,11 +93,14 @@ BOOST_AUTO_TEST_CASE(render_xyz_change_radius_from_rockets)
     ClientServer clientServer(argv);
 
     auto model = clientServer.getBrayns().getEngine().getScene().getModel(0);
-    auto props = model->getProperties();
-    props.updateProperty("radius", props.getProperty<double>("radius") / 2.);
+    brayns::PropertyMap props;
+    props.setProperty(
+        {"radius", model->getProperties().getProperty<double>("radius") / 2.});
 
-    clientServer.makeNotification<brayns::PropertyMap>("set-model-properties",
-                                                       props);
+    BOOST_CHECK((clientServer.makeRequest<brayns::ModelProperties, bool>(
+        "set-model-properties", {model->getModelID(), props})));
+
+    clientServer.getBrayns().getEngine().getScene().markModified();
 
     clientServer.getBrayns().commitAndRender();
     BOOST_CHECK(compareTestImage(
