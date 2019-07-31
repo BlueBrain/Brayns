@@ -174,12 +174,15 @@ bool Application::initGLFW()
 
     glfwMakeContextCurrent(m_window);
 
+    // https://stackoverflow.com/a/11213354
+#ifndef __APPLE__
     if (glewInit() != GL_NO_ERROR)
     {
         glfwErrorCallback(3, "GLEW failed to initialize.");
         glfwTerminate();
         return false;
     }
+#endif
 
     glfwSetKeyCallback(m_window, glfwKeyCallback);
     glfwSetCursorPosCallback(m_window, glfwCursorCallback);
