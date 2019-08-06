@@ -19,13 +19,13 @@
 
 #include "VolumeLoader.h"
 
+#include <brayns/common/utils/stringUtils.h>
 #include <brayns/common/utils/utils.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/engine/SharedDataVolume.h>
 
 #include <boost/filesystem.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 using boost::property_tree::ptree;
@@ -58,16 +58,13 @@ std::string to_string(const glm::vec<M, T>& vec)
 }
 
 template <typename T>
-auto to_Vector3(const std::string& s)
+std::array<T, 3> parseArray3(const std::string& str,
+                             std::function<T(std::string)> conv)
 {
-    std::vector<T> result;
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, ' '))
-        result.push_back(boost::lexical_cast<T>(item));
-    if (result.size() != 3)
+    const auto v = brayns::string_utils::split(str, ' ');
+    if (v.size() != 3)
         throw std::runtime_error("Not exactly 3 values for mhd array");
-    return glm::vec<3, T>(result[0], result[1], result[2]);
+    return {conv(v[0]), conv(v[1]), conv(v[2])};
 }
 
 DataType dataTypeFromMET(const std::string& type)
@@ -241,10 +238,12 @@ ModelDescriptorPtr MHDVolumeLoader::importFromFile(
     if (pt.get<std::string>("ObjectType") != "Image")
         throw std::runtime_error("Wrong object type for mhd file");
 
-    const auto dimensions = toArray<3, int32_t>(
-        to_Vector3<int32_t>(pt.get<std::string>("DimSize")));
-    const auto spacing = toArray<3, int32_t>(
-        to_Vector3<double>(pt.get<std::string>("ElementSpacing")));
+    const auto dimensions =
+        parseArray3<int32_t>(pt.get<std::string>("DimSize"),
+                             [](const auto& s) { return stoi(s); });
+    const auto spacing =
+        parseArray3<double>(pt.get<std::string>("ElementSpacing"),
+                            [](const auto& s) { return stod(s); });
     const auto type = dataTypeFromMET(pt.get<std::string>("ElementType"));
 
     boost::filesystem::path path = pt.get<std::string>("ElementDataFile");

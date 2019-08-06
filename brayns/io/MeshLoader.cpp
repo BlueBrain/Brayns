@@ -32,7 +32,7 @@
 #include <numeric>
 #include <unordered_map>
 
-#include <brayns/common/utils/utils.h>
+#include <brayns/common/utils/stringUtils.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
@@ -61,7 +61,7 @@ public:
         : _callback(callback)
 
     {
-        _msg << "Loading " << shortenString(filename) << " ...";
+        _msg << "Loading " << string_utils::shortenString(filename) << " ...";
     }
 
     bool Update(const float percentage) final

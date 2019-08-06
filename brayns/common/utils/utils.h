@@ -29,22 +29,7 @@ namespace brayns
 {
 strings parseFolder(const std::string& folder, const strings& filters);
 
-std::string shortenString(const std::string& string,
-                          const size_t maxLength = 32);
-
 std::string extractExtension(const std::string& filename);
-
-std::string replaceFirstOccurrence(std::string input,
-                                   const std::string& toReplace,
-                                   const std::string& replaceWith);
-
-bool containsString(const int length, const char** input, const char* toFind);
-
-inline auto lowerCase(std::string str)
-{
-    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-    return str;
-}
 
 template <size_t M, typename T>
 inline glm::vec<M, T> toGlmVec(const std::array<T, M>& input)
@@ -61,14 +46,6 @@ inline std::array<T, M> toArray(const glm::vec<M, T>& input)
     memcpy(output.data(), glm::value_ptr(input), M * sizeof(T));
     return output;
 }
-
-std::string camelCaseToSeparated(const std::string& camelCase,
-                                 const char separator);
-std::string separatedToCamelCase(const std::string& separated,
-                                 const char separator);
-std::string joinStrings(const std::vector<std::string>& strings,
-                        const std::string& joinWith);
-std::string toLowercase(const std::string input);
 
 template <typename T>
 inline bool erase_value(std::vector<T>& vec, const T& value)

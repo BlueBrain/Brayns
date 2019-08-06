@@ -25,14 +25,11 @@
 #include "utils.h"
 
 #include <brayns/common/log.h>
-#include <brayns/common/utils/utils.h>
+#include <brayns/common/utils/stringUtils.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
 #include <brain/brain.h>
-
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
 
 #include <regex>
 #include <unordered_set>
@@ -279,13 +276,7 @@ struct CircuitProperties
         setVariable(targets, PROP_TARGETS.name, "");
         setVariable(synchronousMode, PROP_SYNCHRONOUS_MODE.name, false);
 
-        boost::char_separator<char> separator(",");
-        boost::tokenizer<boost::char_separator<char>> tokens(targets,
-                                                             separator);
-        for_each(tokens.begin(), tokens.end(),
-                 [& targetList = targetList](const std::string& s) {
-                     targetList.push_back(s);
-                 });
+        targetList = string_utils::split(targets, ',');
     }
 
     double density = 0.0;
@@ -493,7 +484,7 @@ public:
             const auto fraction = _properties.density / 100.0f;
             const auto seed = _properties.randomSeed;
 
-            boost::trim(key);
+            string_utils::trim(key);
 
             auto gids = _keyToGIDorRange(key, fraction, seed);
             if (!gids.empty())

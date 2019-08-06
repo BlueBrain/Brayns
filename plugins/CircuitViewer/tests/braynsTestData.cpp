@@ -46,10 +46,6 @@
 #else
 #endif
 
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
-#include <fstream>
-
 BOOST_AUTO_TEST_CASE(simple_circuit)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
