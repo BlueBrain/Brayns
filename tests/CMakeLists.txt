@@ -4,8 +4,7 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-                   ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
+set(TEST_LIBRARIES ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
                    brayns braynsIO braynsManipulators)
 
 configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
@@ -71,7 +70,6 @@ if(BRAYNS_NETWORKING_ENABLED AND BRAYNS_OSPRAY_ENABLED)
   target_link_libraries(myPlugin
     brayns
     braynsOSPRayEngine
-    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
     ospray::ospray_common ospray::ospray
   )
   target_include_directories(myPlugin SYSTEM PRIVATE

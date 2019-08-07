@@ -17,7 +17,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE lights
 #include <brayns/Brayns.h>
 
 #include <brayns/common/light/Light.h>
@@ -28,7 +27,8 @@
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 
 #include "PDiffHelpers.h"
 
@@ -49,12 +49,9 @@ const brayns::Vector3f lampPositions[4] = {
     {lampCentre.x - lampWidth, lampHeight, lampCentre.z + lampWidth}};
 } // namespace
 
-BOOST_AUTO_TEST_CASE(render_scivis_quadlight)
+TEST_CASE("render_scivis_quadlight")
 {
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {app,          "demo",   "--engine",       "ospray",
+    const char* argv[] = {"lights",     "demo",   "--engine",       "ospray",
                           "--renderer", "scivis", "--no-head-light"};
     const int argc = sizeof(argv) / sizeof(char*);
 
@@ -67,16 +64,13 @@ BOOST_AUTO_TEST_CASE(render_scivis_quadlight)
 
     brayns.commitAndRender();
 
-    BOOST_CHECK(compareTestImage("testLightScivisQuadLight.png",
-                                 brayns.getEngine().getFrameBuffer()));
+    CHECK(compareTestImage("testLightScivisQuadLight.png",
+                           brayns.getEngine().getFrameBuffer()));
 }
 
-BOOST_AUTO_TEST_CASE(render_scivis_spotlight)
+TEST_CASE("render_scivis_spotlight")
 {
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {app,          "demo",   "--engine",       "ospray",
+    const char* argv[] = {"lights",     "demo",   "--engine",       "ospray",
                           "--renderer", "scivis", "--no-head-light"};
     const int argc = sizeof(argv) / sizeof(char*);
 
@@ -88,6 +82,6 @@ BOOST_AUTO_TEST_CASE(render_scivis_spotlight)
                                             10.f, lampWidth, BLUE, 1.0f, true));
     brayns.commitAndRender();
 
-    BOOST_CHECK(compareTestImage("testLightScivisSpotLight.png",
-                                 brayns.getEngine().getFrameBuffer()));
+    CHECK(compareTestImage("testLightScivisSpotLight.png",
+                           brayns.getEngine().getFrameBuffer()));
 }

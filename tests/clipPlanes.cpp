@@ -18,8 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE braynsClipPlanes
-
 #include "ClientServer.h"
 
 const std::string ADD_CLIP_PLANE("add-clip-plane");
@@ -27,25 +25,23 @@ const std::string GET_CLIP_PLANES("get-clip-planes");
 const std::string REMOVE_CLIP_PLANES("remove-clip-planes");
 const std::string UPDATE_CLIP_PLANE("update-clip-plane");
 
-BOOST_GLOBAL_FIXTURE(ClientServer);
-
-BOOST_AUTO_TEST_CASE(add_plane)
+TEST_CASE_FIXTURE(ClientServer, "add_plane")
 {
-    BOOST_REQUIRE(getScene().getClipPlanes().empty());
+    REQUIRE(getScene().getClipPlanes().empty());
     const brayns::Plane equation{{1.0, 2.0, 3.0, 4.0}};
     const auto result =
         makeRequest<brayns::Plane, brayns::ClipPlane>(ADD_CLIP_PLANE, equation);
-    BOOST_CHECK_EQUAL(result.getID(), 0);
-    BOOST_CHECK(result.getPlane() == equation);
-    BOOST_REQUIRE_EQUAL(getScene().getClipPlanes().size(), 1);
-    BOOST_CHECK(getScene().getClipPlane(0)->getPlane() == equation);
-    BOOST_CHECK(getScene().getClipPlane(1) == brayns::ClipPlanePtr());
+    CHECK_EQ(result.getID(), 0);
+    CHECK(result.getPlane() == equation);
+    REQUIRE_EQ(getScene().getClipPlanes().size(), 1);
+    CHECK(getScene().getClipPlane(0)->getPlane() == equation);
+    CHECK(getScene().getClipPlane(1) == brayns::ClipPlanePtr());
 
     getScene().removeClipPlane(0);
-    BOOST_CHECK(getScene().getClipPlanes().empty());
+    CHECK(getScene().getClipPlanes().empty());
 }
 
-BOOST_AUTO_TEST_CASE(get_planes)
+TEST_CASE_FIXTURE(ClientServer, "get_planes")
 {
     const brayns::Plane equation1{{1.0, 1.0, 1.0, 1.0}};
     const brayns::Plane equation2{{2.0, 2.0, 2.0, 2.0}};
@@ -54,15 +50,15 @@ BOOST_AUTO_TEST_CASE(get_planes)
     const auto id2 = getScene().addClipPlane(equation2);
 
     const auto result = makeRequest<brayns::ClipPlanes>(GET_CLIP_PLANES);
-    BOOST_CHECK_EQUAL(result.size(), 2);
-    BOOST_CHECK(result[0]->getPlane() == equation1);
-    BOOST_CHECK(result[1]->getPlane() == equation2);
+    CHECK_EQ(result.size(), 2);
+    CHECK(result[0]->getPlane() == equation1);
+    CHECK(result[1]->getPlane() == equation2);
 
     getScene().removeClipPlane(id1);
     getScene().removeClipPlane(id2);
 }
 
-BOOST_AUTO_TEST_CASE(update_plane)
+TEST_CASE_FIXTURE(ClientServer, "update_plane")
 {
     Client client(ClientServer::instance());
 
@@ -74,11 +70,11 @@ BOOST_AUTO_TEST_CASE(update_plane)
     makeRequest<brayns::ClipPlane, bool>(UPDATE_CLIP_PLANE,
                                          brayns::ClipPlane(id1, equation2));
 
-    BOOST_CHECK(getScene().getClipPlane(id1)->getPlane() == equation2);
+    CHECK(getScene().getClipPlane(id1)->getPlane() == equation2);
     getScene().removeClipPlane(id1);
 }
 
-BOOST_AUTO_TEST_CASE(remove_planes)
+TEST_CASE_FIXTURE(ClientServer, "remove_planes")
 {
     const brayns::Plane equation{{1.0, 2.0, 3.0, 4.0}};
     const auto id1 = getScene().addClipPlane(equation);
@@ -86,10 +82,10 @@ BOOST_AUTO_TEST_CASE(remove_planes)
     const auto id3 = getScene().addClipPlane(equation);
     makeRequest<size_ts, bool>(REMOVE_CLIP_PLANES, {id2});
     makeRequest<size_ts, bool>(REMOVE_CLIP_PLANES, {id1, id3});
-    BOOST_CHECK(getScene().getClipPlanes().empty());
+    CHECK(getScene().getClipPlanes().empty());
 }
 
-BOOST_AUTO_TEST_CASE(notifications)
+TEST_CASE_FIXTURE(ClientServer, "notifications")
 {
     Client client(ClientServer::instance());
 
@@ -116,10 +112,10 @@ BOOST_AUTO_TEST_CASE(notifications)
     process();
     for (size_t attempts = 0; attempts != 100 && !called; ++attempts)
         client.process();
-    BOOST_REQUIRE(called);
+    REQUIRE(called);
 
-    BOOST_CHECK_EQUAL(notified.getID(), added.getID());
-    BOOST_CHECK(notified.getPlane() == added.getPlane());
+    CHECK_EQ(notified.getID(), added.getID());
+    CHECK(notified.getPlane() == added.getPlane());
 
     added.setPlane({{2.0, 2.0, 2.0, 2.0}});
     makeRequest<brayns::ClipPlane, bool>(UPDATE_CLIP_PLANE, added);
@@ -129,10 +125,10 @@ BOOST_AUTO_TEST_CASE(notifications)
     called = false;
     for (size_t attempts = 0; attempts != 100 && !called; ++attempts)
         client.process();
-    BOOST_REQUIRE(called);
+    REQUIRE(called);
 
-    BOOST_CHECK_EQUAL(notified.getID(), added.getID());
-    BOOST_CHECK(notified.getPlane() == added.getPlane());
+    CHECK_EQ(notified.getID(), added.getID());
+    CHECK(notified.getPlane() == added.getPlane());
 
     makeRequest<size_ts, bool>(REMOVE_CLIP_PLANES, {added.getID()});
 
@@ -140,7 +136,7 @@ BOOST_AUTO_TEST_CASE(notifications)
     called = false;
     for (size_t attempts = 0; attempts != 100 && !called; ++attempts)
         client.process();
-    BOOST_REQUIRE(called);
+    REQUIRE(called);
 
-    BOOST_CHECK(ids == size_ts{added.getID()});
+    CHECK(ids == size_ts{added.getID()});
 }

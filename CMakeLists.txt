@@ -39,8 +39,7 @@ set(CHOOSE_PYTHON_IGNORE_BOOST ON)
 include(Common)
 
 # Core dependencies
-common_find_package(Boost REQUIRED COMPONENTS
-  filesystem system program_options unit_test_framework)
+common_find_package(Boost REQUIRED COMPONENTS filesystem system program_options)
 common_find_package(OpenMP)
 common_find_package(libuv 1.8)
 common_find_package(FreeImage)

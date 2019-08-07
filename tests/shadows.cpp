@@ -32,18 +32,15 @@
 #include <brayns/engine/Scene.h>
 #include <brayns/parameters/ParametersManager.h>
 
-#define BOOST_TEST_MODULE shadows
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 
 #include "PDiffHelpers.h"
 
-BOOST_AUTO_TEST_CASE(cylinders)
+TEST_CASE("cylinders")
 {
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
     std::vector<const char*> argv = {
-        {app, "--disable-accumulation", "--window-size", "1600", "900",
+        {"shadows", "--disable-accumulation", "--window-size", "1600", "900",
          "--plugin", "braynsCircuitViewer", "--no-head-light"}};
 
     brayns::Brayns brayns(argv.size(), argv.data());
@@ -119,6 +116,6 @@ BOOST_AUTO_TEST_CASE(cylinders)
     renderer.updateProperty("shadows", 1.);
 
     brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage("shadowCylinders.png",
-                                 brayns.getEngine().getFrameBuffer()));
+    CHECK(compareTestImage("shadowCylinders.png",
+                           brayns.getEngine().getFrameBuffer()));
 }

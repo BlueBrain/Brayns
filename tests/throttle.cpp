@@ -18,9 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE throttle
-
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 
 #include <brayns/common/Timer.h>
 
@@ -60,7 +59,7 @@ private:
     brayns::Timer timer;
 };
 
-BOOST_AUTO_TEST_CASE(timeout_not_cleared)
+TEST_CASE("timeout_not_cleared")
 {
     brayns::Timeout timeout;
 
@@ -70,11 +69,11 @@ BOOST_AUTO_TEST_CASE(timeout_not_cleared)
     timeout.set([&] { timer.onCalled(); }, waitTime);
     timer.wait();
 
-    BOOST_CHECK_GE(timer.milliseconds(), waitTime);
-    BOOST_CHECK(timer.wasCalled());
+    CHECK_GE(timer.milliseconds(), waitTime);
+    CHECK(timer.wasCalled());
 }
 
-BOOST_AUTO_TEST_CASE(timeout_with_clear)
+TEST_CASE("timeout_with_clear")
 {
     brayns::Timeout timeout;
 
@@ -85,31 +84,31 @@ BOOST_AUTO_TEST_CASE(timeout_with_clear)
     timeout.clear();
     timer.wait_for(waitTime);
 
-    BOOST_CHECK(!timer.wasCalled());
+    CHECK(!timer.wasCalled());
 }
 
-BOOST_AUTO_TEST_CASE(timeout_set_while_not_cleared)
+TEST_CASE("timeout_set_while_not_cleared")
 {
     brayns::Timeout timeout;
     std::atomic_bool called{false};
     timeout.set([&called] { called = true; }, 10000);
-    BOOST_CHECK_THROW(timeout.set([&called] { called = true; }, 10000),
-                      std::logic_error);
+    CHECK_THROWS_AS(timeout.set([&called] { called = true; }, 10000),
+                    std::logic_error);
     timeout.clear();
-    BOOST_CHECK(!called);
+    CHECK(!called);
 }
 
-BOOST_AUTO_TEST_CASE(timeout_clear_while_already_done)
+TEST_CASE("timeout_clear_while_already_done")
 {
     brayns::Timeout timeout;
     TestTimer timer;
     timeout.set([&] { timer.onCalled(); }, 1);
     timer.wait();
-    BOOST_CHECK(timer.wasCalled());
-    BOOST_CHECK_NO_THROW(timeout.clear());
+    CHECK(timer.wasCalled());
+    CHECK_NOTHROW(timeout.clear());
 }
 
-BOOST_AUTO_TEST_CASE(throttle_spam_limit)
+TEST_CASE("throttle_spam_limit")
 {
     brayns::Throttle throttle;
     size_t numCalls{0};
@@ -129,10 +128,10 @@ BOOST_AUTO_TEST_CASE(throttle_spam_limit)
         ++numSpam;
     }
 
-    BOOST_CHECK_LT(numCalls, numSpam);
+    CHECK_LT(numCalls, numSpam);
 }
 
-BOOST_AUTO_TEST_CASE(throttle_spam_check_delayed_call)
+TEST_CASE("throttle_spam_check_delayed_call")
 {
     brayns::Throttle throttle;
     size_t numCalls{0};
@@ -150,16 +149,16 @@ BOOST_AUTO_TEST_CASE(throttle_spam_check_delayed_call)
             },
             5);
     timer.wait();
-    BOOST_CHECK_EQUAL(numCalls, 3);
+    CHECK_EQ(numCalls, 3);
 }
 
-BOOST_AUTO_TEST_CASE(throttle_one)
+TEST_CASE("throttle_one")
 {
     brayns::Throttle throttle;
     size_t numCalls{0};
 
     throttle([&] { ++numCalls; }, 1);
-    BOOST_CHECK_EQUAL(numCalls, 1);
+    CHECK_EQ(numCalls, 1);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    BOOST_CHECK_EQUAL(numCalls, 1);
+    CHECK_EQ(numCalls, 1);
 }

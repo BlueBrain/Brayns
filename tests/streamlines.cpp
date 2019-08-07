@@ -29,18 +29,15 @@
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
-#define BOOST_TEST_MODULE streamlines
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 
 #include "PDiffHelpers.h"
 
-BOOST_AUTO_TEST_CASE(streamlines)
+TEST_CASE("streamlines")
 {
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {app, "--disable-accumulation", "--window-size",
-                          "1600", "900"};
+    const char* argv[] = {"streamlines", "--disable-accumulation",
+                          "--window-size", "1600", "900"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
@@ -104,6 +101,6 @@ BOOST_AUTO_TEST_CASE(streamlines)
     }
 
     brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage("streamlines.png",
-                                 brayns.getEngine().getFrameBuffer()));
+    CHECK(compareTestImage("streamlines.png",
+                           brayns.getEngine().getFrameBuffer()));
 }

@@ -18,8 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE braynsRenderer
-
 #include <jsonPropertyMap.h>
 
 #include "ClientServer.h"
@@ -30,63 +28,60 @@ const std::string SET_RENDERER("set-renderer");
 const std::string GET_RENDERER_PARAMS("get-renderer-params");
 const std::string SET_RENDERER_PARAMS("set-renderer-params");
 
-BOOST_GLOBAL_FIXTURE(ClientServer);
-
-BOOST_AUTO_TEST_CASE(get_renderer)
+TEST_CASE_FIXTURE(ClientServer, "get_renderer")
 {
     auto renderer = makeRequest<brayns::RenderingParameters>(GET_RENDERER);
-    BOOST_CHECK_EQUAL(renderer.getCurrentRenderer(), "basic");
+    CHECK_EQ(renderer.getCurrentRenderer(), "basic");
 }
 
-BOOST_AUTO_TEST_CASE(get_renderer_params)
+TEST_CASE_FIXTURE(ClientServer, "get_renderer_params")
 {
-    BOOST_CHECK_EQUAL(getRenderer().getCurrentType(), "basic");
+    CHECK_EQ(getRenderer().getCurrentType(), "basic");
     auto rendererParams = makeRequest<brayns::PropertyMap>(GET_RENDERER_PARAMS);
-    BOOST_CHECK(rendererParams.getProperties().empty());
+    CHECK(rendererParams.getProperties().empty());
 }
 
-BOOST_AUTO_TEST_CASE(change_renderer_from_web_api)
+TEST_CASE_FIXTURE(ClientServer, "change_renderer_from_web_api")
 {
     auto& renderer = getRenderer();
-    BOOST_CHECK_EQUAL(renderer.getCurrentType(), "basic");
+    CHECK_EQ(renderer.getCurrentType(), "basic");
 
     auto params = ClientServer::instance()
                       .getBrayns()
                       .getParametersManager()
                       .getRenderingParameters();
     params.setCurrentRenderer("scivis");
-    BOOST_CHECK(
+    CHECK(
         (makeRequest<brayns::RenderingParameters, bool>(SET_RENDERER, params)));
-    BOOST_CHECK_EQUAL(renderer.getCurrentType(), "scivis");
+    CHECK_EQ(renderer.getCurrentType(), "scivis");
 
     brayns::PropertyMap scivisProps = renderer.getPropertyMap();
     auto rendererParams =
         makeRequestUpdate<brayns::PropertyMap>(GET_RENDERER_PARAMS,
                                                scivisProps);
-    BOOST_CHECK(!rendererParams.getProperties().empty());
-    BOOST_CHECK_EQUAL(rendererParams.getProperty<int>("aoSamples"), 1);
+    CHECK(!rendererParams.getProperties().empty());
+    CHECK_EQ(rendererParams.getProperty<int>("aoSamples"), 1);
 
     rendererParams.updateProperty("aoSamples", 42);
-    BOOST_CHECK((makeRequest<brayns::PropertyMap, bool>(SET_RENDERER_PARAMS,
-                                                        rendererParams)));
-    BOOST_CHECK_EQUAL(renderer.getPropertyMap().getProperty<int>("aoSamples"),
-                      42);
+    CHECK((makeRequest<brayns::PropertyMap, bool>(SET_RENDERER_PARAMS,
+                                                  rendererParams)));
+    CHECK_EQ(renderer.getPropertyMap().getProperty<int>("aoSamples"), 42);
 
     params.setCurrentRenderer("wrong");
-    BOOST_CHECK_THROW(
+    CHECK_THROWS_AS(
         (makeRequest<brayns::RenderingParameters, bool>(SET_RENDERER, params)),
         std::runtime_error);
-    BOOST_CHECK_EQUAL(renderer.getCurrentType(), "scivis");
+    CHECK_EQ(renderer.getCurrentType(), "scivis");
 }
 
-BOOST_AUTO_TEST_CASE(update_current_renderer_property)
+TEST_CASE_FIXTURE(ClientServer, "update_current_renderer_property")
 {
     auto& renderer = getRenderer();
-    BOOST_CHECK_EQUAL(renderer.getCurrentType(), "scivis");
+    renderer.setCurrentType("scivis");
 
-    BOOST_CHECK(renderer.hasProperty("aoWeight"));
-    BOOST_CHECK_EQUAL(renderer.getProperty<double>("aoWeight"), 0.);
+    CHECK(renderer.hasProperty("aoWeight"));
+    CHECK_EQ(renderer.getProperty<double>("aoWeight"), 0.);
 
     renderer.updateProperty("aoWeight", 1.5);
-    BOOST_CHECK_EQUAL(renderer.getProperty<double>("aoWeight"), 1.5);
+    CHECK_EQ(renderer.getProperty<double>("aoWeight"), 1.5);
 }
