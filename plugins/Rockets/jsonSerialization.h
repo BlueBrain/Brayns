@@ -26,6 +26,7 @@
 #include <brayns/common/scene/ClipPlane.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/utils/base64/base64.h>
+#include <brayns/common/utils/stringUtils.h>
 #include <brayns/common/utils/utils.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
@@ -520,8 +521,8 @@ inline std::string toJSONReplacePropertyMap(
     const std::string propertiesJson = key + ":" + to_json(properties);
 
     const auto result =
-        brayns::replaceFirstOccurrence(jsonOriginal, key + ":{}",
-                                       propertiesJson);
+        brayns::string_utils::replaceFirstOccurrence(jsonOriginal, key + ":{}",
+                                                     propertiesJson);
     return result;
 }
 

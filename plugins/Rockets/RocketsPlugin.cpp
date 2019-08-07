@@ -26,6 +26,7 @@
 
 #include <brayns/common/Timer.h>
 #include <brayns/common/tasks/Task.h>
+#include <brayns/common/utils/stringUtils.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <brayns/tasks/AddModelFromBlobTask.h>
@@ -1396,7 +1397,7 @@ public:
 
                 jsonStrings.emplace_back(to_json(rpcLight));
             }
-            return Response{"[" + joinStrings(jsonStrings, ",") + "]"};
+            return Response{"[" + string_utils::join(jsonStrings, ",") + "]"};
         });
 
         _handleSchema(

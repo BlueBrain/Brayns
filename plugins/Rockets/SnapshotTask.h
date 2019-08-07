@@ -23,7 +23,7 @@
 #include <brayns/common/tasks/Task.h>
 
 #include "ImageGenerator.h"
-#include <brayns/common/utils/utils.h>
+#include <brayns/common/utils/stringUtils.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
@@ -129,7 +129,7 @@ public:
         std::stringstream msg;
         msg << "Render snapshot";
         if (!_params.name.empty())
-            msg << " " << shortenString(_params.name);
+            msg << " " << string_utils::shortenString(_params.name);
         msg << " ...";
 
         const auto isStereo = _camera->hasProperty("stereo") &&
