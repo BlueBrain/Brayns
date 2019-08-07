@@ -33,8 +33,7 @@ set(BRAYNSCIRCUITVIEWER_SOURCES
 )
 
 set(BRAYNSCIRCUITVIEWER_LINK_LIBRARIES PRIVATE braynsCommon braynsEngine
-  braynsParameters braynsPluginAPI Brain ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+    braynsParameters braynsPluginAPI Brain ${STD_FILESYSTEM})
 
 if(OSPRAY_FOUND)
   list(APPEND BRAYNSCIRCUITVIEWER_HEADERS

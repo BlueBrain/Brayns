@@ -29,9 +29,9 @@
 
 #include <brayns/parameters/GeometryParameters.h>
 
-#include <fstream>
+#include <brayns/common/utils/filesystem.h>
 
-#include <boost/filesystem.hpp>
+#include <fstream>
 
 namespace
 {
@@ -438,9 +438,8 @@ void Scene::_loadIBLMaps(const std::string& envMap)
     {
         auto tex = _backgroundMaterial->getTexture(TextureType::diffuse);
 
-        namespace fs = boost::filesystem;
         const auto path = fs::path(envMap).parent_path();
-        const auto basename = (path / fs::basename(envMap)).string();
+        const auto basename = (path / fs::path(envMap).stem()).string();
 
         const std::string irradianceMap = basename + IRRADIANCE_MAP + ".hdr";
         const std::string radianceMap = basename + RADIANCE_MAP + ".hdr";

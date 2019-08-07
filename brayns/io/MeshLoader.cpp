@@ -25,13 +25,13 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/version.h>
-#include <boost/filesystem.hpp>
 #include <brayns/common/log.h>
 
 #include <fstream>
 #include <numeric>
 #include <unordered_map>
 
+#include <brayns/common/utils/filesystem.h>
 #include <brayns/common/utils/stringUtils.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
@@ -437,7 +437,7 @@ ModelMetadata MeshLoader::importMesh(
     const Matrix4f& transformation, const size_t defaultMaterialId,
     const GeometryQuality geometryQuality) const
 {
-    const boost::filesystem::path file = fileName;
+    const fs::path file = fileName;
 
     auto importer = createImporter(callback, fileName);
 
@@ -470,7 +470,7 @@ ModelMetadata MeshLoader::importMesh(
     callback.updateProgress("Post-processing...",
                             (LOADING_FRACTION) / TOTAL_PROGRESS);
 
-    boost::filesystem::path filepath = fileName;
+    fs::path filepath = fileName;
 
     return _postLoad(aiScene, model, transformation, defaultMaterialId,
                      filepath.parent_path().string(), callback);

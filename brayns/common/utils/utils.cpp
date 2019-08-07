@@ -21,9 +21,7 @@
 #include "utils.h"
 
 #include <brayns/common/log.h>
-
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
+#include <brayns/common/utils/filesystem.h>
 
 #include <algorithm>
 #include <set>
@@ -63,7 +61,7 @@ strings parseFolder(const std::string& folder, const strings& filters)
 
 std::string extractExtension(const std::string& filename)
 {
-    auto extension = fs::extension(filename);
+    auto extension = fs::path(filename).extension().string();
     if (!extension.empty())
         extension = extension.erase(0, 1);
 

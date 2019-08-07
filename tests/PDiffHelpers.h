@@ -34,20 +34,14 @@
 
 #ifdef BRAYNS_USE_NETWORKING
 #include <ImageGenerator.h>
-#include <boost/filesystem.hpp>
 #include <brayns/common/utils/base64/base64.h>
 #include <fstream>
-namespace fs = boost::filesystem;
 #endif
 
-inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
-    brayns::FrameBuffer& fb)
+inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(FIBITMAP* image)
 {
-    brayns::freeimage::ImagePtr image(
-        FreeImage_ConvertTo32Bits(fb.getImage().get()));
-
-    const auto w = FreeImage_GetWidth(image.get());
-    const auto h = FreeImage_GetHeight(image.get());
+    const auto w = FreeImage_GetWidth(image);
+    const auto h = FreeImage_GetHeight(image);
 
     auto result = std::make_unique<pdiff::RGBAImage>(w, h, "");
     // Copy the image over to our internal format, FreeImage has the scanlines
@@ -56,11 +50,17 @@ inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
     for (unsigned int y = 0; y < h; y++, dest += w)
     {
         const auto scanline = reinterpret_cast<const unsigned int*>(
-            FreeImage_GetScanLine(image.get(), h - y - 1));
+            FreeImage_GetScanLine(image, h - y - 1));
         memcpy(dest, scanline, sizeof(dest[0]) * w);
     }
 
     return result;
+}
+
+inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
+    brayns::FrameBuffer& fb)
+{
+    return createPDiffRGBAImage(FreeImage_ConvertTo32Bits(fb.getImage().get()));
 }
 
 inline std::unique_ptr<pdiff::RGBAImage> clonePDiffRGBAImage(
@@ -128,14 +128,19 @@ inline bool compareBase64TestImage(
         file << decodedImage;
     }
 
-    const std::string newFilename(
-        (fs::temp_directory_path() / fs::unique_path()).string());
-    {
-        std::fstream file(newFilename, std::ios::out);
-        file << decodedImage;
-    }
-    const auto testImage{pdiff::read_from_file(newFilename)};
+    auto freeImageMem =
+        FreeImage_OpenMemory((BYTE*)decodedImage.data(), decodedImage.length());
+    const auto fif = FreeImage_GetFileTypeFromMemory(freeImageMem, 0);
+    auto decodedFreeImage = FreeImage_LoadFromMemory(fif, freeImageMem, 0);
+
+    const auto testImage{createPDiffRGBAImage(decodedFreeImage)};
     auto imageDiff = clonePDiffRGBAImage(*testImage);
-    return _compareImage(*testImage, filename, *imageDiff);
+
+    auto result = _compareImage(*testImage, filename, *imageDiff);
+
+    FreeImage_Unload(decodedFreeImage);
+    FreeImage_CloseMemory(freeImageMem);
+
+    return result;
 }
 #endif

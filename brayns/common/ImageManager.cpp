@@ -20,10 +20,8 @@
 
 #include "ImageManager.h"
 #include <brayns/common/log.h>
+#include <brayns/common/utils/filesystem.h>
 #include <brayns/common/utils/imageUtils.h>
-
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
 
 namespace brayns
 {
@@ -140,8 +138,8 @@ Texture2DPtr ImageManager::importTextureFromFile(
     setRawData(texture, image);
 
     const auto path = fs::path(filename).parent_path().string();
-    const auto basename = path + "/" + fs::basename(filename);
-    const auto ext = fs::extension(filename);
+    const auto basename = path + "/" + fs::path(filename).stem().string();
+    const auto ext = fs::path(filename).extension().string();
 
     uint8_t mipLevels = 1;
     while (fs::exists(basename + std::to_string((int)mipLevels) + ext))
