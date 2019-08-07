@@ -26,18 +26,13 @@
 #include <ospray/SDK/common/Managed.h>
 #endif
 
-#define BOOST_TEST_MODULE transferFunction
-#include <boost/test/unit_test.hpp>
-
 #include "ClientServer.h"
 #include "PDiffHelpers.h"
-
-BOOST_GLOBAL_FIXTURE(ClientServer);
 
 const std::string SET_TF("set-model-transfer-function");
 const std::string GET_TF("get-model-transfer-function");
 
-BOOST_AUTO_TEST_CASE(set_transfer_function)
+TEST_CASE_FIXTURE(ClientServer, "set_transfer_function")
 {
     brayns::TransferFunction tf;
     tf.setValuesRange({0, 10});
@@ -48,41 +43,41 @@ BOOST_AUTO_TEST_CASE(set_transfer_function)
 
     const auto& newTF =
         getScene().getModel(0)->getModel().getTransferFunction();
-    BOOST_CHECK(tf.getColorMap() == newTF.getColorMap());
-    BOOST_CHECK(tf.getControlPoints() == newTF.getControlPoints());
-    BOOST_CHECK_EQUAL(tf.getValuesRange(), newTF.getValuesRange());
+    CHECK(tf.getColorMap() == newTF.getColorMap());
+    CHECK(tf.getControlPoints() == newTF.getControlPoints());
+    CHECK_EQ(tf.getValuesRange(), newTF.getValuesRange());
 }
 
-BOOST_AUTO_TEST_CASE(set_transfer_function_invalid_model)
+TEST_CASE_FIXTURE(ClientServer, "set_transfer_function_invalid_model")
 {
     brayns::TransferFunction tf;
 
-    BOOST_CHECK_THROW(
+    CHECK_THROWS_AS(
         (makeRequest<brayns::ModelTransferFunction, bool>(SET_TF, {42, tf})),
         std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE(get_transfer_function)
+TEST_CASE_FIXTURE(ClientServer, "get_transfer_function")
 {
     const auto& tf = getScene().getModel(0)->getModel().getTransferFunction();
 
     const auto rpcTF =
         makeRequest<brayns::ObjectID, brayns::TransferFunction>(GET_TF, {0});
 
-    BOOST_CHECK(tf.getColorMap() == rpcTF.getColorMap());
-    BOOST_CHECK(tf.getControlPoints() == rpcTF.getControlPoints());
-    BOOST_CHECK_EQUAL(tf.getValuesRange(), rpcTF.getValuesRange());
+    CHECK(tf.getColorMap() == rpcTF.getColorMap());
+    CHECK(tf.getControlPoints() == rpcTF.getControlPoints());
+    CHECK_EQ(tf.getValuesRange(), rpcTF.getValuesRange());
 }
 
-BOOST_AUTO_TEST_CASE(get_transfer_function_invalid_model)
+TEST_CASE_FIXTURE(ClientServer, "get_transfer_function_invalid_model")
 {
-    BOOST_CHECK_THROW(
+    CHECK_THROWS_AS(
         (makeRequest<brayns::ObjectID, brayns::TransferFunction>(GET_TF, {42})),
         std::runtime_error);
 }
 
 #ifdef BRAYNS_USE_OSPRAY
-BOOST_AUTO_TEST_CASE(validate_opacity_interpolation)
+TEST_CASE_FIXTURE(ClientServer, "validate_opacity_interpolation")
 {
     auto& model = getScene().getModel(0)->getModel();
     auto& tf = model.getTransferFunction();
@@ -94,15 +89,15 @@ BOOST_AUTO_TEST_CASE(validate_opacity_interpolation)
     auto ospTF =
         reinterpret_cast<ospray::ManagedObject*>(ospModel.transferFunction());
     auto colors = ospTF->getParamData("colors", nullptr);
-    BOOST_REQUIRE_EQUAL(colors->size(), 2);
-    BOOST_CHECK_EQUAL(brayns::Vector3f(((float*)colors->data)[0]),
-                      brayns::Vector3f(tf.getColors()[0]));
-    BOOST_CHECK_EQUAL(brayns::Vector3f(((float*)colors->data)[3]),
-                      brayns::Vector3f(tf.getColors()[1]));
+    REQUIRE_EQ(colors->size(), 2);
+    CHECK_EQ(brayns::Vector3f(((float*)colors->data)[0]),
+             brayns::Vector3f(tf.getColors()[0]));
+    CHECK_EQ(brayns::Vector3f(((float*)colors->data)[3]),
+             brayns::Vector3f(tf.getColors()[1]));
 
     auto opacities = ospTF->getParamData("opacities", nullptr);
-    BOOST_REQUIRE_EQUAL(opacities->size(), 256);
+    REQUIRE_EQ(opacities->size(), 256);
     for (size_t i = 0; i < 256; ++i)
-        BOOST_CHECK_EQUAL(((float*)opacities->data)[i], i / 255.f);
+        CHECK_EQ(((float*)opacities->data)[i], i / 255.f);
 }
 #endif

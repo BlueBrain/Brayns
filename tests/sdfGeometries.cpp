@@ -21,10 +21,10 @@
 
 #include <brayns/common/geometry/SDFGeometry.h>
 
-#define BOOST_TEST_MODULE sdfGeometries
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 
-BOOST_AUTO_TEST_CASE(bounding_box)
+TEST_CASE("bounding_box")
 {
     const auto sphere = brayns::createSDFSphere({1.0f, 1.0f, 1.0f}, 1.0f);
     const auto conePill =
@@ -37,12 +37,12 @@ BOOST_AUTO_TEST_CASE(bounding_box)
     const auto boxConePill = getSDFBoundingBox(conePill);
     const auto boxPill = getSDFBoundingBox(pill);
 
-    BOOST_CHECK_EQUAL(boxSphere.getMin(), brayns::Vector3d(0.0, 0.0, 0.0));
-    BOOST_CHECK_EQUAL(boxSphere.getMax(), brayns::Vector3d(2.0, 2.0, 2.0));
+    CHECK_EQ(boxSphere.getMin(), brayns::Vector3d(0.0, 0.0, 0.0));
+    CHECK_EQ(boxSphere.getMax(), brayns::Vector3d(2.0, 2.0, 2.0));
 
-    BOOST_CHECK_EQUAL(boxConePill.getMin(), brayns::Vector3d(-2.0, -2.0, -2.0));
-    BOOST_CHECK_EQUAL(boxConePill.getMax(), brayns::Vector3d(2.0, 2.0f, 2.0));
+    CHECK_EQ(boxConePill.getMin(), brayns::Vector3d(-2.0, -2.0, -2.0));
+    CHECK_EQ(boxConePill.getMax(), brayns::Vector3d(2.0, 2.0f, 2.0));
 
-    BOOST_CHECK_EQUAL(boxPill.getMin(), brayns::Vector3d(-2.0, -2.0, -2.0));
-    BOOST_CHECK_EQUAL(boxPill.getMax(), brayns::Vector3d(3.0, 3.0, 3.0));
+    CHECK_EQ(boxPill.getMin(), brayns::Vector3d(-2.0, -2.0, -2.0));
+    CHECK_EQ(boxPill.getMax(), brayns::Vector3d(3.0, 3.0, 3.0));
 }

@@ -18,8 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE braynsPlugin
-
 #include <jsonPropertyMap.h>
 
 #include "ClientServer.h"
@@ -27,7 +25,7 @@
 using Vec2 = std::array<unsigned, 2>;
 const Vec2 vecVal{{1, 1}};
 
-BOOST_AUTO_TEST_CASE(plugin_actions)
+TEST_CASE("plugin_actions")
 {
     ClientServer clientServer({"--plugin", "myPlugin"});
 
@@ -42,19 +40,19 @@ BOOST_AUTO_TEST_CASE(plugin_actions)
     brayns::PropertyMap output;
     output.setProperty({"result", false});
     auto result = makeRequestUpdate("request", output);
-    BOOST_CHECK(result.getProperty<bool>("result"));
+    CHECK(result.getProperty<bool>("result"));
 
     result = makeRequestUpdate("request-param", input, output);
-    BOOST_CHECK(result.getProperty<bool>("result"));
+    CHECK(result.getProperty<bool>("result"));
 
     // wrong input
-    BOOST_CHECK_THROW(makeRequestUpdate("request-param", vecVal, output),
-                      std::runtime_error);
+    CHECK_THROWS_AS(makeRequestUpdate("request-param", vecVal, output),
+                    std::runtime_error);
 
     makeNotification("hello");
     makeNotification("foo", vecVal);
-    BOOST_CHECK_EQUAL(makeRequest<std::string>("who"), "me");
-    BOOST_CHECK((makeRequest<Vec2, Vec2>("echo", vecVal) == vecVal));
+    CHECK_EQ(makeRequest<std::string>("who"), "me");
+    CHECK((makeRequest<Vec2, Vec2>("echo", vecVal) == vecVal));
 
     clientServer.getBrayns()
         .getParametersManager()
@@ -64,15 +62,15 @@ BOOST_AUTO_TEST_CASE(plugin_actions)
 
     auto props =
         clientServer.getBrayns().getEngine().getRenderer().getPropertyMap();
-    BOOST_CHECK(props.hasProperty("awesome"));
-    BOOST_CHECK_EQUAL(props.getProperty<int>("awesome"), 42);
+    CHECK(props.hasProperty("awesome"));
+    CHECK_EQ(props.getProperty<int>("awesome"), 42);
 
     props.updateProperty("awesome", 10);
 
-    BOOST_CHECK(
+    CHECK(
         (makeRequest<brayns::PropertyMap, bool>("set-renderer-params", props)));
 
     const auto& newProps =
         clientServer.getBrayns().getEngine().getRenderer().getPropertyMap();
-    BOOST_CHECK_EQUAL(newProps.getProperty<int>("awesome"), 10);
+    CHECK_EQ(newProps.getProperty<int>("awesome"), 10);
 }

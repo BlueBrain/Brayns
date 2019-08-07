@@ -18,8 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE braynsClipPlaneRendering
-
 #include "PDiffHelpers.h"
 
 #include <brayns/Brayns.h>
@@ -28,7 +26,8 @@
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/Scene.h>
 
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 
 class Demo
 {
@@ -48,8 +47,6 @@ private:
     brayns::Brayns _brayns;
 };
 brayns::Brayns* Demo::instance = nullptr;
-
-BOOST_GLOBAL_FIXTURE(Demo);
 
 void testClipping(brayns::Brayns& brayns, bool orthographic = false)
 {
@@ -73,34 +70,34 @@ void testClipping(brayns::Brayns& brayns, bool orthographic = false)
     else
         camera.setCurrentType("perspective");
     brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage(original, engine.getFrameBuffer()));
+    CHECK(compareTestImage(original, engine.getFrameBuffer()));
 
     auto id1 = scene.addClipPlane({{1.0, 0.0, 0.0, -0.5}});
     auto id2 = scene.addClipPlane({{0.0, -1.0, 0.0, 0.5}});
     brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage(clipped, engine.getFrameBuffer()));
+    CHECK(compareTestImage(clipped, engine.getFrameBuffer()));
 
     scene.removeClipPlane(id1);
     scene.removeClipPlane(id2);
     brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage(original, engine.getFrameBuffer()));
+    CHECK(compareTestImage(original, engine.getFrameBuffer()));
 
     id1 = scene.addClipPlane({{1.0, 0.0, 0.0, -0.5}});
     id2 = scene.addClipPlane({{0.0, 1.0, 0.0, 0.5}});
     scene.getClipPlane(id2)->setPlane({{0.0, -1.0, 0.0, 0.5}});
     brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage(clipped, engine.getFrameBuffer()));
+    CHECK(compareTestImage(clipped, engine.getFrameBuffer()));
 
     scene.removeClipPlane(id1);
     scene.removeClipPlane(id2);
 }
 
-BOOST_AUTO_TEST_CASE(perspective)
+TEST_CASE_FIXTURE(Demo, "perspective")
 {
     testClipping(*Demo::instance);
 }
 
-BOOST_AUTO_TEST_CASE(orthographic)
+TEST_CASE_FIXTURE(Demo, "orthographic")
 {
     testClipping(*Demo::instance, true);
 }

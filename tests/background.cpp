@@ -18,44 +18,40 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE braynsBackground
-
 #include "ClientServer.h"
 #include "PDiffHelpers.h"
 #include <tests/paths.h>
 
 const std::string SET_ENV_MAP("set-environment-map");
 
-BOOST_GLOBAL_FIXTURE(ClientServer);
-
-BOOST_AUTO_TEST_CASE(set_environment_map)
+TEST_CASE_FIXTURE(ClientServer, "set_environment_map")
 {
-    BOOST_CHECK((makeRequest<brayns::EnvironmentMapParam, bool>(
+    CHECK((makeRequest<brayns::EnvironmentMapParam, bool>(
         SET_ENV_MAP, {BRAYNS_TESTDATA_PATH "envmap.jpg"})));
 
-    BOOST_CHECK(getScene().hasEnvironmentMap());
+    CHECK(getScene().hasEnvironmentMap());
     getCamera().setPosition({0, 0, 5});
     commitAndRender();
     pdiff::PerceptualDiffParameters parameters;
     parameters.luminance_only = true;
-    BOOST_CHECK(compareTestImage("envmap.png", getFrameBuffer(), parameters));
+    CHECK(compareTestImage("envmap.png", getFrameBuffer(), parameters));
 }
 
-BOOST_AUTO_TEST_CASE(unset_environment_map)
+TEST_CASE_FIXTURE(ClientServer, "unset_environment_map")
 {
-    BOOST_CHECK(
-        (makeRequest<brayns::EnvironmentMapParam, bool>(SET_ENV_MAP, {""})));
+    CHECK((makeRequest<brayns::EnvironmentMapParam, bool>(SET_ENV_MAP, {""})));
 
-    BOOST_CHECK(!getScene().hasEnvironmentMap());
+    CHECK(!getScene().hasEnvironmentMap());
+    getCamera().setPosition({0, 0, 5});
     commitAndRender();
-    BOOST_CHECK(compareTestImage("no_envmap.png", getFrameBuffer()));
+    CHECK(compareTestImage("no_envmap.png", getFrameBuffer()));
 }
 
-BOOST_AUTO_TEST_CASE(set_invalid_environment_map)
+TEST_CASE_FIXTURE(ClientServer, "set_invalid_environment_map")
 {
-    BOOST_CHECK(
+    CHECK(
         !(makeRequest<brayns::EnvironmentMapParam, bool>(SET_ENV_MAP,
                                                          {"dont_exists.jpg"})));
 
-    BOOST_CHECK(!getScene().hasEnvironmentMap());
+    CHECK(!getScene().hasEnvironmentMap());
 }

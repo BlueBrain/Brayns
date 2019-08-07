@@ -28,14 +28,13 @@
 #include <brayns/engine/Scene.h>
 #include <brayns/parameters/ParametersManager.h>
 
-#define BOOST_TEST_MODULE brayns
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "../doctest.h"
 
-BOOST_AUTO_TEST_CASE(default_scene_benckmark)
+TEST_CASE("default_scene_benchmark")
 {
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-    brayns::Brayns brayns(testSuite.argc,
-                          const_cast<const char**>(testSuite.argv));
+    const char* argv[] = {"brayns"};
+    brayns::Brayns brayns(1, argv);
 
     uint64_t reference, shadows, softShadows, ambientOcclusion, allOptions;
 
@@ -66,8 +65,7 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
 
     // Shadows
     float t = float(shadows) / float(reference);
-    BOOST_TEST_MESSAGE("Shadows cost. expected: 165%, realized: " << t * 100.f);
-    BOOST_CHECK(t < 1.65f);
+    CHECK_MESSAGE(t < 1.65f, "Shadows cost. expected: 165%");
 
     props.updateProperty("softShadows", 1.);
     renderer.updateProperties(props);
@@ -80,9 +78,7 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
 
     // Soft shadows
     t = float(softShadows) / float(reference);
-    BOOST_TEST_MESSAGE(
-        "Soft shadows cost. expected: 185%, realized: " << t * 100.f);
-    BOOST_CHECK(t < 1.85f);
+    CHECK_MESSAGE(t < 1.85f, "Soft shadows cost. expected: 185%");
 
     // Ambient occlustion
     props.updateProperty("shadows", 0.);
@@ -98,9 +94,7 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
 
     // Ambient occlusion
     t = float(ambientOcclusion) / float(reference);
-    BOOST_TEST_MESSAGE(
-        "Ambient occlusion cost. expected: 250%, realized: " << t * 100.f);
-    BOOST_CHECK(t < 2.5f);
+    CHECK_MESSAGE(t < 2.5f, "Ambient occlusion cost. expected: 250%");
 
     // All options
     props.updateProperty("shadows", 1.);
@@ -116,7 +110,5 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
 
     // All options
     t = float(allOptions) / float(reference);
-    BOOST_TEST_MESSAGE(
-        "All options cost. expected: 350%, realized: " << t * 100.f);
-    BOOST_CHECK(t < 3.5f);
+    CHECK_MESSAGE(t < 3.5f, "All options cost. expected: 350%");
 }

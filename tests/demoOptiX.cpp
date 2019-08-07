@@ -26,17 +26,14 @@
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
-#define BOOST_TEST_MODULE demoOptiX
-#include <boost/test/unit_test.hpp>
-
 #include "PDiffHelpers.h"
 
-BOOST_AUTO_TEST_CASE(render_demo)
-{
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {app, "demo", "--engine", "optix"};
+TEST_CASE("render_demo")
+{
+    const char* argv[] = {"demoOptix", "demo", "--engine", "optix"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
@@ -51,6 +48,6 @@ BOOST_AUTO_TEST_CASE(render_demo)
 
     brayns.commitAndRender();
 
-    BOOST_CHECK(compareTestImage("testdemoOptiX.png",
-                                 brayns.getEngine().getFrameBuffer()));
+    CHECK(compareTestImage("testdemoOptiX.png",
+                           brayns.getEngine().getFrameBuffer()));
 }

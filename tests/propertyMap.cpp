@@ -18,108 +18,106 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE braynsPropertyMap
-
 #include <brayns/common/PropertyMap.h>
 
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 
-BOOST_AUTO_TEST_CASE(set_property)
+TEST_CASE("set_property")
 {
     brayns::PropertyMap properties;
     properties.setProperty({"foo", 1});
-    BOOST_REQUIRE_EQUAL(properties.getProperties().size(), 1);
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->get<int32_t>(), 1);
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->metaData.label, "");
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->metaData.description,
-                      "no-description");
+    REQUIRE_EQ(properties.getProperties().size(), 1);
+    CHECK_EQ(properties.getProperties()[0]->get<int32_t>(), 1);
+    CHECK_EQ(properties.getProperties()[0]->metaData.label, "");
+    CHECK_EQ(properties.getProperties()[0]->metaData.description,
+             "no-description");
 }
 
-BOOST_AUTO_TEST_CASE(set_property_with_metadata)
+TEST_CASE("set_property_with_metadata")
 {
     brayns::PropertyMap properties;
 
     properties.setProperty({"foo", 1, {"Foo", "Foo description"}});
-    BOOST_REQUIRE_EQUAL(properties.getProperties().size(), 1);
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->get<int32_t>(), 1);
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->metaData.label, "Foo");
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->metaData.description,
-                      "Foo description");
+    REQUIRE_EQ(properties.getProperties().size(), 1);
+    CHECK_EQ(properties.getProperties()[0]->get<int32_t>(), 1);
+    CHECK_EQ(properties.getProperties()[0]->metaData.label, "Foo");
+    CHECK_EQ(properties.getProperties()[0]->metaData.description,
+             "Foo description");
 }
 
-BOOST_AUTO_TEST_CASE(set_property_with_limits)
+TEST_CASE("set_property_with_limits")
 {
     brayns::PropertyMap properties;
     properties.setProperty({"limit", 0.5, 0., 1.});
-    BOOST_REQUIRE_EQUAL(properties.getProperties().size(), 1);
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->get<double>(), 0.5);
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->min<double>(), 0.);
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->max<double>(), 1.);
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->metaData.label, "");
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->metaData.description,
-                      "no-description");
+    REQUIRE_EQ(properties.getProperties().size(), 1);
+    CHECK_EQ(properties.getProperties()[0]->get<double>(), 0.5);
+    CHECK_EQ(properties.getProperties()[0]->min<double>(), 0.);
+    CHECK_EQ(properties.getProperties()[0]->max<double>(), 1.);
+    CHECK_EQ(properties.getProperties()[0]->metaData.label, "");
+    CHECK_EQ(properties.getProperties()[0]->metaData.description,
+             "no-description");
 }
 
-BOOST_AUTO_TEST_CASE(set_property_with_limits_and_metadata)
+TEST_CASE("set_property_with_limits_and_metadata")
 {
     brayns::PropertyMap properties;
     properties.setProperty(
         {"limit", 0.5, 0., 1., {"With limits", "Limits description"}});
-    BOOST_REQUIRE_EQUAL(properties.getProperties().size(), 1);
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->get<double>(), 0.5);
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->min<double>(), 0.);
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->max<double>(), 1.);
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->metaData.label,
-                      "With limits");
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->metaData.description,
-                      "Limits description");
+    REQUIRE_EQ(properties.getProperties().size(), 1);
+    CHECK_EQ(properties.getProperties()[0]->get<double>(), 0.5);
+    CHECK_EQ(properties.getProperties()[0]->min<double>(), 0.);
+    CHECK_EQ(properties.getProperties()[0]->max<double>(), 1.);
+    CHECK_EQ(properties.getProperties()[0]->metaData.label, "With limits");
+    CHECK_EQ(properties.getProperties()[0]->metaData.description,
+             "Limits description");
 }
 
-BOOST_AUTO_TEST_CASE(set_property_from_other_property)
+TEST_CASE("set_property_from_other_property")
 {
     brayns::PropertyMap properties;
 
     brayns::PropertyMap otherProperties;
     otherProperties.setProperty({"bar", 42.});
     properties.setProperty(*otherProperties.getProperties()[0]);
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->get<double>(), 42.);
+    CHECK_EQ(properties.getProperties()[0]->get<double>(), 42.);
 
-    BOOST_CHECK_THROW(otherProperties.setProperty(
-                          {"bar", std::string("no double")}),
-                      std::runtime_error);
+    CHECK_THROWS_AS(otherProperties.setProperty(
+                        {"bar", std::string("no double")}),
+                    std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE(update_property)
+TEST_CASE("update_property")
 {
     brayns::PropertyMap properties;
     properties.setProperty({"foo", 1});
     properties.updateProperty("foo", 42);
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->get<int32_t>(), 42);
+    CHECK_EQ(properties.getProperties()[0]->get<int32_t>(), 42);
 
-    BOOST_CHECK_THROW(properties.updateProperty("foo", false),
-                      std::runtime_error);
+    CHECK_THROWS_AS(properties.updateProperty("foo", false),
+                    std::runtime_error);
 
-    BOOST_CHECK(properties.hasProperty("foo"));
+    CHECK(properties.hasProperty("foo"));
     properties.setProperty({"foo", 0});
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->get<int32_t>(), 0);
+    CHECK_EQ(properties.getProperties()[0]->get<int32_t>(), 0);
 
-    BOOST_CHECK(!properties.hasProperty("bar"));
-    BOOST_CHECK_NO_THROW(properties.updateProperty("bar", 42));
+    CHECK(!properties.hasProperty("bar"));
+    CHECK_NOTHROW(properties.updateProperty("bar", 42));
 }
 
-BOOST_AUTO_TEST_CASE(get_property)
+TEST_CASE("get_property")
 {
     brayns::PropertyMap properties;
     properties.setProperty({"foo", 1});
 
-    BOOST_CHECK_EQUAL(properties.getProperty("foo", 5), 1);
-    BOOST_CHECK_EQUAL(properties.getProperty<int32_t>("foo"), 1);
-    BOOST_CHECK_EQUAL(properties.getProperty("bla", 5), 5);
-    BOOST_CHECK_THROW(properties.getProperty<bool>("bar"), std::runtime_error);
-    BOOST_CHECK_THROW(properties.getPropertyType("bar"), std::runtime_error);
+    CHECK_EQ(properties.getProperty("foo", 5), 1);
+    CHECK_EQ(properties.getProperty<int32_t>("foo"), 1);
+    CHECK_EQ(properties.getProperty("bla", 5), 5);
+    CHECK_THROWS_AS(properties.getProperty<bool>("bar"), std::runtime_error);
+    CHECK_THROWS_AS(properties.getPropertyType("bar"), std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE(set_and_get_all_supported_types)
+TEST_CASE("set_and_get_all_supported_types")
 {
     brayns::PropertyMap properties;
     properties.setProperty({"int", 42});
@@ -134,36 +132,36 @@ BOOST_AUTO_TEST_CASE(set_and_get_all_supported_types)
     properties.setProperty({"vec3d", std::array<double, 3>{{1, 2, 3}}});
     properties.setProperty({"vec4d", std::array<double, 4>{{1, 2, 3, 4}}});
 
-    BOOST_CHECK_EQUAL(properties.getProperty<int32_t>("int"), 42);
-    BOOST_CHECK_EQUAL(properties.getProperty<std::string>("enum"), "Zero");
-    BOOST_CHECK_EQUAL(properties.getEnums("enum").size(), 3);
-    BOOST_CHECK_EQUAL(properties.getProperty<double>("double"), 1.2);
-    BOOST_CHECK_EQUAL(properties.getProperty<std::string>("string"), "foo");
-    BOOST_CHECK(properties.getProperty<bool>("bool"));
-    BOOST_CHECK((properties.getProperty<std::array<int32_t, 2>>("vec2i") ==
-                 std::array<int32_t, 2>{{1, 2}}));
-    BOOST_CHECK((properties.getProperty<std::array<double, 2>>("vec2d") ==
-                 std::array<double, 2>{{1, 2}}));
-    BOOST_CHECK((properties.getProperty<std::array<int32_t, 3>>("vec3i") ==
-                 std::array<int32_t, 3>{{1, 2, 3}}));
-    BOOST_CHECK((properties.getProperty<std::array<double, 3>>("vec3d") ==
-                 std::array<double, 3>{{1, 2, 3}}));
-    BOOST_CHECK((properties.getProperty<std::array<double, 4>>("vec4d") ==
-                 std::array<double, 4>{{1, 2, 3, 4}}));
+    CHECK_EQ(properties.getProperty<int32_t>("int"), 42);
+    CHECK_EQ(properties.getProperty<std::string>("enum"), "Zero");
+    CHECK_EQ(properties.getEnums("enum").size(), 3);
+    CHECK_EQ(properties.getProperty<double>("double"), 1.2);
+    CHECK_EQ(properties.getProperty<std::string>("string"), "foo");
+    CHECK(properties.getProperty<bool>("bool"));
+    CHECK((properties.getProperty<std::array<int32_t, 2>>("vec2i") ==
+           std::array<int32_t, 2>{{1, 2}}));
+    CHECK((properties.getProperty<std::array<double, 2>>("vec2d") ==
+           std::array<double, 2>{{1, 2}}));
+    CHECK((properties.getProperty<std::array<int32_t, 3>>("vec3i") ==
+           std::array<int32_t, 3>{{1, 2, 3}}));
+    CHECK((properties.getProperty<std::array<double, 3>>("vec3d") ==
+           std::array<double, 3>{{1, 2, 3}}));
+    CHECK((properties.getProperty<std::array<double, 4>>("vec4d") ==
+           std::array<double, 4>{{1, 2, 3, 4}}));
 
     using Type = brayns::Property::Type;
-    BOOST_CHECK(properties.getPropertyType("int") == Type::Int);
-    BOOST_CHECK(properties.getPropertyType("double") == Type::Double);
-    BOOST_CHECK(properties.getPropertyType("string") == Type::String);
-    BOOST_CHECK(properties.getPropertyType("bool") == Type::Bool);
-    BOOST_CHECK(properties.getPropertyType("vec2i") == Type::Vec2i);
-    BOOST_CHECK(properties.getPropertyType("vec2d") == Type::Vec2d);
-    BOOST_CHECK(properties.getPropertyType("vec3i") == Type::Vec3i);
-    BOOST_CHECK(properties.getPropertyType("vec3d") == Type::Vec3d);
-    BOOST_CHECK(properties.getPropertyType("vec4d") == Type::Vec4d);
+    CHECK(properties.getPropertyType("int") == Type::Int);
+    CHECK(properties.getPropertyType("double") == Type::Double);
+    CHECK(properties.getPropertyType("string") == Type::String);
+    CHECK(properties.getPropertyType("bool") == Type::Bool);
+    CHECK(properties.getPropertyType("vec2i") == Type::Vec2i);
+    CHECK(properties.getPropertyType("vec2d") == Type::Vec2d);
+    CHECK(properties.getPropertyType("vec3i") == Type::Vec3i);
+    CHECK(properties.getPropertyType("vec3d") == Type::Vec3d);
+    CHECK(properties.getPropertyType("vec4d") == Type::Vec4d);
 }
 
-BOOST_AUTO_TEST_CASE(fill_property_map)
+TEST_CASE("fill_property_map")
 {
     using Type = brayns::Property::Type;
 
@@ -180,38 +178,38 @@ BOOST_AUTO_TEST_CASE(fill_property_map)
     propInts.merge(propDoubles);
     propDoubles.merge(propInts);
 
-    BOOST_CHECK(propInts.getPropertyType("number") == Type::Int);
-    BOOST_CHECK(propInts.getPropertyType("vec2") == Type::Vec2i);
-    BOOST_CHECK(propInts.getPropertyType("vec3") == Type::Vec3i);
+    CHECK(propInts.getPropertyType("number") == Type::Int);
+    CHECK(propInts.getPropertyType("vec2") == Type::Vec2i);
+    CHECK(propInts.getPropertyType("vec3") == Type::Vec3i);
 
-    BOOST_CHECK(propDoubles.getPropertyType("number") == Type::Double);
-    BOOST_CHECK(propDoubles.getPropertyType("vec2") == Type::Vec2d);
-    BOOST_CHECK(propDoubles.getPropertyType("vec3") == Type::Vec3d);
+    CHECK(propDoubles.getPropertyType("number") == Type::Double);
+    CHECK(propDoubles.getPropertyType("vec2") == Type::Vec2d);
+    CHECK(propDoubles.getPropertyType("vec3") == Type::Vec3d);
 
-    BOOST_CHECK_EQUAL(propInts.getProperty<int32_t>("number"),
-                      propDoubles.getProperty<double>("number"));
+    CHECK_EQ(propInts.getProperty<int32_t>("number"),
+             propDoubles.getProperty<double>("number"));
     {
         const auto aInts = propInts.getProperty<std::array<int, 2>>("vec2");
         const auto aDoubles =
             propDoubles.getProperty<std::array<double, 2>>("vec2");
-        BOOST_CHECK_EQUAL(aInts[0], aDoubles[0]);
-        BOOST_CHECK_EQUAL(aInts[1], aDoubles[1]);
+        CHECK_EQ(aInts[0], aDoubles[0]);
+        CHECK_EQ(aInts[1], aDoubles[1]);
     }
     {
         const auto aInts = propInts.getProperty<std::array<int, 3>>("vec3");
         const auto aDoubles =
             propDoubles.getProperty<std::array<double, 3>>("vec3");
-        BOOST_CHECK_EQUAL(aInts[0], aDoubles[0]);
-        BOOST_CHECK_EQUAL(aInts[1], aDoubles[1]);
-        BOOST_CHECK_EQUAL(aInts[2], aDoubles[2]);
+        CHECK_EQ(aInts[0], aDoubles[0]);
+        CHECK_EQ(aInts[1], aDoubles[1]);
+        CHECK_EQ(aInts[2], aDoubles[2]);
     }
 
     propInts.setProperty({"foo", std::string("string")});
     propDoubles.setProperty({"foo", 42});
-    BOOST_CHECK_THROW(propInts.merge(propDoubles), std::runtime_error);
+    CHECK_THROWS_AS(propInts.merge(propDoubles), std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE(update_properties)
+TEST_CASE("update_properties")
 {
     brayns::PropertyMap source;
     source.setProperty({"number", 42});
@@ -223,16 +221,16 @@ BOOST_AUTO_TEST_CASE(update_properties)
     dest.setProperty({"vec2", std::array<int32_t, 2>{{0, 1}}});
 
     dest.update(source);
-    BOOST_CHECK_EQUAL(dest.getProperty<int32_t>("number"), 42);
+    CHECK_EQ(dest.getProperty<int32_t>("number"), 42);
     const auto array = dest.getProperty<std::array<int32_t, 2>>("vec2");
-    BOOST_CHECK_EQUAL(1, array[0]);
-    BOOST_CHECK_EQUAL(2, array[1]);
+    CHECK_EQ(1, array[0]);
+    CHECK_EQ(2, array[1]);
 
     dest.setProperty({"vec3", 10});
-    BOOST_CHECK_THROW(dest.update(source), std::runtime_error);
+    CHECK_THROWS_AS(dest.update(source), std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE(merge_enums)
+TEST_CASE("merge_enums")
 {
     using Type = brayns::Property::Type;
 
@@ -246,23 +244,23 @@ BOOST_AUTO_TEST_CASE(merge_enums)
         brayns::PropertyMap propIntsTmp;
 
         propIntsTmp.update(propInts);
-        BOOST_CHECK(propIntsTmp.empty());
+        CHECK(propIntsTmp.empty());
         propIntsTmp.update(propStrings);
-        BOOST_CHECK(propIntsTmp.empty());
+        CHECK(propIntsTmp.empty());
 
         propIntsTmp.merge(propInts);
         propIntsTmp.merge(propStrings);
 
-        BOOST_CHECK(propIntsTmp.getPropertyType("abc") == Type::Int);
-        BOOST_CHECK_EQUAL(propIntsTmp.getProperty<int32_t>("abc"), 2);
+        CHECK(propIntsTmp.getPropertyType("abc") == Type::Int);
+        CHECK_EQ(propIntsTmp.getProperty<int32_t>("abc"), 2);
 
         propIntsTmp.update(propInts);
-        BOOST_CHECK(propIntsTmp.getPropertyType("abc") == Type::Int);
-        BOOST_CHECK_EQUAL(propIntsTmp.getProperty<int32_t>("abc"), 1);
+        CHECK(propIntsTmp.getPropertyType("abc") == Type::Int);
+        CHECK_EQ(propIntsTmp.getProperty<int32_t>("abc"), 1);
 
         propIntsTmp.update(propStrings);
-        BOOST_CHECK(propIntsTmp.getPropertyType("abc") == Type::Int);
-        BOOST_CHECK_EQUAL(propIntsTmp.getProperty<int32_t>("abc"), 2);
+        CHECK(propIntsTmp.getPropertyType("abc") == Type::Int);
+        CHECK_EQ(propIntsTmp.getProperty<int32_t>("abc"), 2);
     }
 
     {
@@ -270,20 +268,20 @@ BOOST_AUTO_TEST_CASE(merge_enums)
         propStringsTmp.merge(propStrings);
         propStringsTmp.merge(propInts);
 
-        BOOST_CHECK(propStringsTmp.getPropertyType("abc") == Type::String);
-        BOOST_CHECK_EQUAL(propStringsTmp.getProperty<std::string>("abc"), "b");
+        CHECK(propStringsTmp.getPropertyType("abc") == Type::String);
+        CHECK_EQ(propStringsTmp.getProperty<std::string>("abc"), "b");
 
         propStringsTmp.update(propStrings);
-        BOOST_CHECK(propStringsTmp.getPropertyType("abc") == Type::String);
-        BOOST_CHECK_EQUAL(propStringsTmp.getProperty<std::string>("abc"), "c");
+        CHECK(propStringsTmp.getPropertyType("abc") == Type::String);
+        CHECK_EQ(propStringsTmp.getProperty<std::string>("abc"), "c");
 
         propStringsTmp.update(propInts);
-        BOOST_CHECK(propStringsTmp.getPropertyType("abc") == Type::String);
-        BOOST_CHECK_EQUAL(propStringsTmp.getProperty<std::string>("abc"), "b");
+        CHECK(propStringsTmp.getPropertyType("abc") == Type::String);
+        CHECK_EQ(propStringsTmp.getProperty<std::string>("abc"), "b");
     }
 }
 
-BOOST_AUTO_TEST_CASE(commandline)
+TEST_CASE("commandline")
 {
     brayns::PropertyMap properties;
     properties.setProperty({"int", 42});
@@ -300,94 +298,89 @@ BOOST_AUTO_TEST_CASE(commandline)
     properties.setProperty({"vec3d", std::array<double, 3>{{1, 2, 3}}});
     properties.setProperty({"vec4d", std::array<double, 4>{{1, 2, 3, 4}}});
 
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {
-        app,       "--int",         "5",       "--double", "0.4",     "--enum",
-        "One",     "--int-enum",    "Three",   "--string", "bar",     "--bool",
-        "off",     "--bool-switch", "--vec2i", "3",        "4",       "--vec2d",
-        "1.2",     "2.3",           "--vec3i", "3",        "4",       "5",
-        "--vec3d", "1.2",           "2.3",     "3.4",      "--vec4d", "1.2",
-        "2.3",     "3.4",           "4.5"};
+    const char* argv[] = {"propertyMap", "--int",
+                          "5",           "--double",
+                          "0.4",         "--enum",
+                          "One",         "--int-enum",
+                          "Three",       "--string",
+                          "bar",         "--bool",
+                          "off",         "--bool-switch",
+                          "--vec2i",     "3",
+                          "4",           "--vec2d",
+                          "1.2",         "2.3",
+                          "--vec3i",     "3",
+                          "4",           "5",
+                          "--vec3d",     "1.2",
+                          "2.3",         "3.4",
+                          "--vec4d",     "1.2",
+                          "2.3",         "3.4",
+                          "4.5"};
     const int argc = sizeof(argv) / sizeof(char*);
 
-    BOOST_REQUIRE(properties.parse(argc, argv));
+    REQUIRE(properties.parse(argc, argv));
 
-    BOOST_CHECK_EQUAL(properties.getProperty<int32_t>("int"), 5);
-    BOOST_CHECK_EQUAL(properties.getProperty<double>("double"), 0.4);
-    BOOST_CHECK_EQUAL(properties.getProperty<std::string>("enum"), "One");
-    BOOST_CHECK_EQUAL(properties.getProperty<int32_t>("intEnum"), 2);
-    BOOST_CHECK_EQUAL(properties.getProperty<std::string>("string"), "bar");
-    BOOST_CHECK(!properties.getProperty<bool>("bool"));
-    BOOST_CHECK(properties.getProperty<bool>("boolSwitch"));
-    BOOST_CHECK((properties.getProperty<std::array<int32_t, 2>>("vec2i") ==
-                 std::array<int32_t, 2>{{3, 4}}));
-    BOOST_CHECK((properties.getProperty<std::array<double, 2>>("vec2d") ==
-                 std::array<double, 2>{{1.2, 2.3}}));
-    BOOST_CHECK((properties.getProperty<std::array<int32_t, 3>>("vec3i") ==
-                 std::array<int32_t, 3>{{3, 4, 5}}));
-    BOOST_CHECK((properties.getProperty<std::array<double, 3>>("vec3d") ==
-                 std::array<double, 3>{{1.2, 2.3, 3.4}}));
-    BOOST_CHECK((properties.getProperty<std::array<double, 4>>("vec4d") ==
-                 std::array<double, 4>{{1.2, 2.3, 3.4, 4.5}}));
+    CHECK_EQ(properties.getProperty<int32_t>("int"), 5);
+    CHECK_EQ(properties.getProperty<double>("double"), 0.4);
+    CHECK_EQ(properties.getProperty<std::string>("enum"), "One");
+    CHECK_EQ(properties.getProperty<int32_t>("intEnum"), 2);
+    CHECK_EQ(properties.getProperty<std::string>("string"), "bar");
+    CHECK(!properties.getProperty<bool>("bool"));
+    CHECK(properties.getProperty<bool>("boolSwitch"));
+    CHECK((properties.getProperty<std::array<int32_t, 2>>("vec2i") ==
+           std::array<int32_t, 2>{{3, 4}}));
+    CHECK((properties.getProperty<std::array<double, 2>>("vec2d") ==
+           std::array<double, 2>{{1.2, 2.3}}));
+    CHECK((properties.getProperty<std::array<int32_t, 3>>("vec3i") ==
+           std::array<int32_t, 3>{{3, 4, 5}}));
+    CHECK((properties.getProperty<std::array<double, 3>>("vec3d") ==
+           std::array<double, 3>{{1.2, 2.3, 3.4}}));
+    CHECK((properties.getProperty<std::array<double, 4>>("vec4d") ==
+           std::array<double, 4>{{1.2, 2.3, 3.4, 4.5}}));
 }
 
-BOOST_AUTO_TEST_CASE(commandline_no_option)
+TEST_CASE("commandline_no_option")
 {
     brayns::PropertyMap properties;
     properties.setProperty({"int", 42});
 
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {app};
+    const char* argv[] = {"propertyMap"};
     const int argc = sizeof(argv) / sizeof(char*);
 
-    BOOST_REQUIRE(properties.parse(argc, argv));
+    REQUIRE(properties.parse(argc, argv));
 
-    BOOST_CHECK_EQUAL(properties.getProperty<int32_t>("int"), 42);
+    CHECK_EQ(properties.getProperty<int32_t>("int"), 42);
 }
 
-BOOST_AUTO_TEST_CASE(commandline_unknown_option)
+TEST_CASE("commandline_unknown_option")
 {
     brayns::PropertyMap properties;
     properties.setProperty({"vec2i", std::array<int32_t, 2>{{1, 2}}});
 
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {app, "--vec3i", "3", "4", "5"};
+    const char* argv[] = {"propertyMap", "--vec3i", "3", "4", "5"};
     const int argc = sizeof(argv) / sizeof(char*);
 
-    BOOST_CHECK(!properties.parse(argc, argv));
+    CHECK(!properties.parse(argc, argv));
 }
 
-BOOST_AUTO_TEST_CASE(commandline_too_many_vector_values)
+TEST_CASE("commandline_too_many_vector_values")
 {
     brayns::PropertyMap properties;
     properties.setProperty({"vec2i", std::array<int32_t, 2>{{1, 2}}});
 
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {app, "--vec2i", "3", "4", "5"};
+    const char* argv[] = {"propertyMap", "--vec2i", "3", "4", "5"};
     const int argc = sizeof(argv) / sizeof(char*);
 
-    BOOST_CHECK(properties.parse(argc, argv));
+    CHECK(properties.parse(argc, argv));
 }
 
-BOOST_AUTO_TEST_CASE(commandline_wrong_enum_value)
+TEST_CASE("commandline_wrong_enum_value")
 {
     brayns::PropertyMap properties;
     properties.setProperty(
         {"enum", std::string("Zero"), {"Zero", "One", "Two"}, {}});
 
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {app, "--enum", "Four"};
+    const char* argv[] = {"propertyMap", "--enum", "Four"};
     const int argc = sizeof(argv) / sizeof(char*);
 
-    BOOST_CHECK(!properties.parse(argc, argv));
+    CHECK(!properties.parse(argc, argv));
 }
