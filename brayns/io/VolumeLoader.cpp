@@ -26,9 +26,10 @@
 #include <brayns/engine/SharedDataVolume.h>
 
 #include <boost/filesystem.hpp>
-#include <boost/property_tree/ini_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
-using boost::property_tree::ptree;
+
+#include <map>
+#include <sstream>
+#include <string>
 
 namespace
 {
@@ -65,6 +66,41 @@ std::array<T, 3> parseArray3(const std::string& str,
     if (v.size() != 3)
         throw std::runtime_error("Not exactly 3 values for mhd array");
     return {conv(v[0]), conv(v[1]), conv(v[2])};
+}
+
+std::map<std::string, std::string> parseMHD(const std::string& filename)
+{
+    if (!boost::filesystem::exists(filename))
+        throw std::runtime_error("File not found");
+
+    // Sample MHD File:
+    //
+    // ObjectType = Image
+    // DimSize = 1 2 3
+    // ElementSpacing = 0.1 0.2 0.3
+    // ElementType = MET_USHORT
+    // ElementDataFile = BS39.raw
+
+    std::map<std::string, std::string> result;
+    std::ifstream infile(filename);
+    std::string line;
+    size_t ctr = 1;
+    while (std::getline(infile, line))
+    {
+        const auto v = string_utils::split(line, '=');
+        if (v.size() != 2)
+            throw std::runtime_error("Could not parse line " +
+                                     std::to_string(ctr));
+        auto key = v[0];
+        auto value = v[1];
+        string_utils::trim(key);
+        string_utils::trim(value);
+
+        result[key] = value;
+        ++ctr;
+    }
+
+    return result;
 }
 
 DataType dataTypeFromMET(const std::string& type)
@@ -232,21 +268,26 @@ ModelDescriptorPtr MHDVolumeLoader::importFromFile(
     const PropertyMap&) const
 {
     std::string volumeFile = filename;
-    boost::property_tree::ptree pt;
-    boost::property_tree::ini_parser::read_ini(filename, pt);
+    const auto mhd = parseMHD(filename);
 
-    if (pt.get<std::string>("ObjectType") != "Image")
+    // Check all keys present
+    for (const auto key : {"ObjectType", "DimSize", "ElementSpacing",
+                           "ElementType", "ElementDataFile"})
+        if (mhd.find(key) == mhd.end())
+            throw std::runtime_error("Missing key " + std::string(key));
+
+    if (mhd.at("ObjectType") != "Image")
         throw std::runtime_error("Wrong object type for mhd file");
 
     const auto dimensions =
-        parseArray3<int32_t>(pt.get<std::string>("DimSize"),
+        parseArray3<int32_t>(mhd.at("DimSize"),
                              [](const auto& s) { return stoi(s); });
     const auto spacing =
-        parseArray3<double>(pt.get<std::string>("ElementSpacing"),
+        parseArray3<double>(mhd.at("ElementSpacing"),
                             [](const auto& s) { return stod(s); });
-    const auto type = dataTypeFromMET(pt.get<std::string>("ElementType"));
+    const auto type = dataTypeFromMET(mhd.at("ElementType"));
 
-    boost::filesystem::path path = pt.get<std::string>("ElementDataFile");
+    boost::filesystem::path path = mhd.at("ElementDataFile");
     if (!path.is_absolute())
     {
         boost::filesystem::path basePath(filename);
