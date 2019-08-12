@@ -20,8 +20,8 @@
 
 #include "../io/utils.h"
 
-#define BOOST_TEST_MODULE circuitViewerUtils
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "tests/doctest.h"
 
 using GIDSet = brion::GIDSet;
 GIDSet keyToGIDorRange(std::string s, const double fraction = 1.f,
@@ -30,26 +30,24 @@ GIDSet keyToGIDorRange(std::string s, const double fraction = 1.f,
     return brayns::_keyToGIDorRange(s, fraction, seed);
 }
 
-BOOST_AUTO_TEST_CASE(gids)
+TEST_CASE("gids")
 {
-    BOOST_CHECK(keyToGIDorRange("1") == GIDSet{1});
+    CHECK_EQ(keyToGIDorRange("1"), GIDSet{1});
 }
 
-BOOST_AUTO_TEST_CASE(gid_ranges)
+TEST_CASE("gid_ranges")
 {
-    BOOST_CHECK(keyToGIDorRange("1-1") == GIDSet{1});
-    BOOST_CHECK(keyToGIDorRange("1-2") == GIDSet({1, 2}));
-    BOOST_CHECK_EQUAL(keyToGIDorRange("1-10", 0.5, 0).size(), 5);
-    BOOST_CHECK_THROW(keyToGIDorRange("1-0"), std::runtime_error);
+    CHECK_EQ(keyToGIDorRange("1-1"), GIDSet{1});
+    CHECK_EQ(keyToGIDorRange("1-2"), GIDSet({1, 2}));
+    CHECK_EQ(keyToGIDorRange("1-10", 0.5, 0).size(), 5);
+    CHECK_THROWS(keyToGIDorRange("1-0"));
 }
 
-BOOST_AUTO_TEST_CASE(invalid)
+TEST_CASE("invalid")
 {
-    BOOST_CHECK(keyToGIDorRange("1a").empty());
-    BOOST_CHECK(keyToGIDorRange("1 a").empty());
-    BOOST_CHECK(keyToGIDorRange("1a").empty());
-    BOOST_CHECK(keyToGIDorRange("1-2a").empty());
-    BOOST_CHECK(keyToGIDorRange("1 1-2").empty());
+    CHECK(keyToGIDorRange("1a").empty());
+    CHECK(keyToGIDorRange("1 a").empty());
+    CHECK(keyToGIDorRange("1a").empty());
+    CHECK(keyToGIDorRange("1-2a").empty());
+    CHECK(keyToGIDorRange("1 1-2").empty());
 }
-
-
