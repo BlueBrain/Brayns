@@ -18,8 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE circuitViewerAddCircuit
-
 #include <jsonSerialization.h>
 
 #include <tests/ClientServer.h>
@@ -27,16 +25,17 @@
 
 #include <BBP/TestDatasets.h>
 
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "tests/doctest.h"
 
 const std::string ADD_MODEL("add-model");
 
-BOOST_AUTO_TEST_CASE(file_no_extension_blueconfig)
+TEST_CASE("file_no_extension_blueconfig")
 {
     ClientServer clientServer({"--plugin", "braynsCircuitViewer --density 1"});
 
     auto circuit = makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
         ADD_MODEL, {"circuit", BBP_TEST_BLUECONFIG});
-    BOOST_CHECK_EQUAL(circuit.getName(), "circuit");
-    BOOST_CHECK_EQUAL(circuit.getPath(), BBP_TEST_BLUECONFIG);
+    CHECK_EQ(circuit.getName(), "circuit");
+    CHECK_EQ(circuit.getPath(), BBP_TEST_BLUECONFIG);
 }

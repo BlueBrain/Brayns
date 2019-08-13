@@ -38,20 +38,17 @@
 
 #include <BBP/TestDatasets.h>
 
-#define BOOST_TEST_MODULE braynsTestData
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "tests/doctest.h"
 
 #ifdef BRAYNS_USE_NETWORKING
 #include "tests/ClientServer.h"
 #else
 #endif
 
-BOOST_AUTO_TEST_CASE(simple_circuit)
+TEST_CASE("simple_circuit")
 {
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {app,
+    const char* argv[] = {"simple_circuit",
                           BBP_TEST_BLUECONFIG3,
                           "--disable-accumulation",
                           "--samples-per-pixel",
@@ -64,17 +61,14 @@ BOOST_AUTO_TEST_CASE(simple_circuit)
     brayns.getParametersManager().getRenderingParameters().setCurrentRenderer(
         "basic");
     brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage("testdataLayer1.png",
-                                 brayns.getEngine().getFrameBuffer()));
+    CHECK(compareTestImage("testdataLayer1.png",
+                           brayns.getEngine().getFrameBuffer()));
 }
 
-BOOST_AUTO_TEST_CASE(circuit_with_color_by_mtype)
+TEST_CASE("circuit_with_color_by_mtype")
 {
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
     const char* argv[] = {
-        app,
+        "circuit_with_color_by_mtype",
         BBP_TEST_BLUECONFIG3,
         "--disable-accumulation",
         "--samples-per-pixel",
@@ -89,12 +83,12 @@ BOOST_AUTO_TEST_CASE(circuit_with_color_by_mtype)
     brayns.getEngine().getScene().setMaterialsColorMap(
         brayns::MaterialsColorMap::gradient);
     brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage("testdataMiniColumn0_mtypes.png",
-                                 brayns.getEngine().getFrameBuffer()));
+    CHECK(compareTestImage("testdataMiniColumn0_mtypes.png",
+                           brayns.getEngine().getFrameBuffer()));
 }
 
 #ifdef BRAYNS_USE_NETWORKING
-BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping)
+TEST_CASE("circuit_with_simulation_mapping")
 {
     const std::vector<const char*> argv = {
         BBP_TEST_BLUECONFIG3, "--samples-per-pixel", "16", "--animation-frame",
@@ -122,7 +116,7 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping)
     clientServer.getBrayns().commit();
     modelDesc->getModel().getSimulationHandler()->waitReady();
     clientServer.getBrayns().commitAndRender();
-    BOOST_CHECK(compareTestImage(
+    CHECK(compareTestImage(
         "testdataallmini50basicsimulation.png",
         clientServer.getBrayns().getEngine().getFrameBuffer()));
 
@@ -143,16 +137,13 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping)
         brayns::SnapshotParams, brayns::ImageGenerator::ImageBase64>("snapshot",
                                                                      params);
 
-    BOOST_CHECK(compareBase64TestImage(
+    CHECK(compareBase64TestImage(
         image, "testdataallmini50basicsimulation_snapshot.png"));
 }
 #endif
 
-void testSdfGeometries(bool dampened)
+void testSdfGeometries(bool dampened, const char* app)
 {
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
     auto argv = std::vector<const char*>{app,
                                          BBP_TEST_BLUECONFIG3,
                                          "--disable-accumulation",
@@ -186,17 +177,17 @@ void testSdfGeometries(bool dampened)
     camera.setPosition(camPos + 0.92 * (rotCenter - camPos));
 
     brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage(dampened ? "testDampenedSdfCircuit.png"
-                                          : "testSdfCircuit.png",
-                                 brayns.getEngine().getFrameBuffer()));
+    CHECK(compareTestImage(dampened ? "testDampenedSdfCircuit.png"
+                                    : "testSdfCircuit.png",
+                           brayns.getEngine().getFrameBuffer()));
 }
 
-BOOST_AUTO_TEST_CASE(circuit_with_sdf_geometries)
+TEST_CASE("circuit_with_sdf_geometries")
 {
-    testSdfGeometries(false);
+    testSdfGeometries(false, "circuit_with_sdf_geometries");
 }
 
-BOOST_AUTO_TEST_CASE(circuit_with_dampened_sdf_geometries)
+TEST_CASE("circuit_with_dampened_sdf_geometries")
 {
-    testSdfGeometries(true);
+    testSdfGeometries(true, "circuit_with_dampened_sdf_geometries");
 }
