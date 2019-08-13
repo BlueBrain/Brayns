@@ -23,6 +23,7 @@
 #include "jsonSerialization.h"
 
 #include <brayns/common/PropertyMap.h>
+#include <brayns/common/utils/stringUtils.h>
 #include <brayns/common/utils/utils.h>
 
 namespace
@@ -42,12 +43,12 @@ namespace
 {
 std::string camelCaseToSnakeCase(const std::string& camelCase)
 {
-    return camelCaseToSeparated(camelCase, '_');
+    return brayns::string_utils::camelCaseToSeparated(camelCase, '_');
 }
 
 std::string snakeCaseToCamelCase(const std::string& snakeCase)
 {
-    return separatedToCamelCase(snakeCase, '_');
+    return brayns::string_utils::separatedToCamelCase(snakeCase, '_');
 }
 
 // Make a (movable) rapidjson string

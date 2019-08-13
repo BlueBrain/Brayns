@@ -19,16 +19,17 @@
 
 #include "VolumeLoader.h"
 
+#include <brayns/common/utils/filesystem.h>
+#include <brayns/common/utils/stringUtils.h>
 #include <brayns/common/utils/utils.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/engine/SharedDataVolume.h>
 
-#include <boost/filesystem.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/property_tree/ini_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
-using boost::property_tree::ptree;
+#include <fstream>
+#include <map>
+#include <sstream>
+#include <string>
 
 namespace
 {
@@ -58,16 +59,48 @@ std::string to_string(const glm::vec<M, T>& vec)
 }
 
 template <typename T>
-auto to_Vector3(const std::string& s)
+std::array<T, 3> parseArray3(const std::string& str,
+                             std::function<T(std::string)> conv)
 {
-    std::vector<T> result;
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, ' '))
-        result.push_back(boost::lexical_cast<T>(item));
-    if (result.size() != 3)
+    const auto v = brayns::string_utils::split(str, ' ');
+    if (v.size() != 3)
         throw std::runtime_error("Not exactly 3 values for mhd array");
-    return glm::vec<3, T>(result[0], result[1], result[2]);
+    return {{conv(v[0]), conv(v[1]), conv(v[2])}};
+}
+
+std::map<std::string, std::string> parseMHD(const std::string& filename)
+{
+    std::ifstream infile(filename);
+    if (!infile.good())
+        throw std::runtime_error("Could not open file " + filename);
+
+    // Sample MHD File:
+    //
+    // ObjectType = Image
+    // DimSize = 1 2 3
+    // ElementSpacing = 0.1 0.2 0.3
+    // ElementType = MET_USHORT
+    // ElementDataFile = BS39.raw
+
+    std::map<std::string, std::string> result;
+    std::string line;
+    size_t ctr = 1;
+    while (std::getline(infile, line))
+    {
+        const auto v = string_utils::split(line, '=');
+        if (v.size() != 2)
+            throw std::runtime_error("Could not parse line " +
+                                     std::to_string(ctr));
+        auto key = v[0];
+        auto value = v[1];
+        string_utils::trim(key);
+        string_utils::trim(value);
+
+        result[key] = value;
+        ++ctr;
+    }
+
+    return result;
 }
 
 DataType dataTypeFromMET(const std::string& type)
@@ -235,23 +268,30 @@ ModelDescriptorPtr MHDVolumeLoader::importFromFile(
     const PropertyMap&) const
 {
     std::string volumeFile = filename;
-    boost::property_tree::ptree pt;
-    boost::property_tree::ini_parser::read_ini(filename, pt);
+    const auto mhd = parseMHD(filename);
 
-    if (pt.get<std::string>("ObjectType") != "Image")
+    // Check all keys present
+    for (const auto key : {"ObjectType", "DimSize", "ElementSpacing",
+                           "ElementType", "ElementDataFile"})
+        if (mhd.find(key) == mhd.end())
+            throw std::runtime_error("Missing key " + std::string(key));
+
+    if (mhd.at("ObjectType") != "Image")
         throw std::runtime_error("Wrong object type for mhd file");
 
-    const auto dimensions = toArray<3, int32_t>(
-        to_Vector3<int32_t>(pt.get<std::string>("DimSize")));
-    const auto spacing = toArray<3, int32_t>(
-        to_Vector3<double>(pt.get<std::string>("ElementSpacing")));
-    const auto type = dataTypeFromMET(pt.get<std::string>("ElementType"));
+    const auto dimensions =
+        parseArray3<int32_t>(mhd.at("DimSize"),
+                             [](const auto& s) { return stoi(s); });
+    const auto spacing =
+        parseArray3<double>(mhd.at("ElementSpacing"),
+                            [](const auto& s) { return stod(s); });
+    const auto type = dataTypeFromMET(mhd.at("ElementType"));
 
-    boost::filesystem::path path = pt.get<std::string>("ElementDataFile");
+    fs::path path = mhd.at("ElementDataFile");
     if (!path.is_absolute())
     {
-        boost::filesystem::path basePath(filename);
-        path = boost::filesystem::canonical(path, basePath.parent_path());
+        auto basePath = fs::path(filename).parent_path();
+        path = fs::canonical(basePath / path);
     }
     volumeFile = path.string();
 

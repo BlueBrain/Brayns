@@ -173,10 +173,6 @@ void OSPRayScene::commit()
     ospCommit(_rootModel);
 
     _computeBounds();
-
-    // TODO: triggers the change callback to re-broadcast the scene if the clip
-    // planes have changed. Provide an RPC to update/set clip planes.
-    markModified();
 }
 
 bool OSPRayScene::commitLights()

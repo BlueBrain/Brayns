@@ -30,7 +30,7 @@
 #include <brayns/common/log.h>
 #include <brayns/common/mathTypes.h>
 #include <brayns/common/utils/DynamicLib.h>
-#include <brayns/common/utils/utils.h>
+#include <brayns/common/utils/stringUtils.h>
 
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
@@ -262,16 +262,15 @@ struct Brayns::Impl : public PluginAPI
         _actionInterface = interface;
     }
     Scene& getScene() final { return _engine->getScene(); }
-
 private:
     void _createEngine()
     {
         auto engineName =
             _parametersManager.getApplicationParameters().getEngine();
 
-        if (toLowercase(engineName) == "optix")
+        if (string_utils::toLowercase(engineName) == "optix")
             engineName = "braynsOptixEngine";
-        else if (toLowercase(engineName) == "ospray")
+        else if (string_utils::toLowercase(engineName) == "ospray")
             engineName = "braynsOSPRayEngine";
 
         _engine = _engineFactory.create(engineName);

@@ -17,9 +17,7 @@ endif()
 
 configure_file(paths.h.in ${PROJECT_BINARY_DIR}/CircuitViewer/tests/paths.h)
 
-set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-                   ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
-                   BBPTestData brayns Brain braynsIO pdiff)
+set(TEST_LIBRARIES BBPTestData brayns Brain braynsIO pdiff)
 
 if(BRAYNS_NETWORKING_ENABLED)
   list(APPEND TEST_LIBRARIES Rockets braynsRockets)

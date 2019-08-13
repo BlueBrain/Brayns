@@ -33,8 +33,7 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
 set(BRAYNSENGINE_INCLUDE_NAME brayns/engine)
 set(BRAYNSENGINE_LINK_LIBRARIES
   PUBLIC braynsCommon
-  PRIVATE braynsParameters ${FREEIMAGE_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY}
-                           ${Boost_SYSTEM_LIBRARY}
+  PRIVATE braynsParameters ${FREEIMAGE_LIBRARIES} ${STD_FILESYSTEM}
 )
 
 common_library(braynsEngine)

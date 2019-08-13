@@ -18,13 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE braynsJson
-
 #include <plugins/Rockets/jsonSerialization.h>
 
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 
-BOOST_AUTO_TEST_CASE(loaderProperties)
+TEST_CASE("loaderProperties")
 {
     brayns::ModelParams paramsOrig;
 
@@ -42,15 +41,14 @@ BOOST_AUTO_TEST_CASE(loaderProperties)
 
     brayns::ModelParams paramsParse;
     from_json(paramsParse, jsonStr);
-    BOOST_CHECK_EQUAL(
+    CHECK_EQ(
         paramsOrig.getLoaderProperties().getProperty<std::string>("string"),
         paramsParse.getLoaderProperties().getProperty<std::string>("string"));
-    BOOST_CHECK_EQUAL(
-        paramsOrig.getLoaderProperties().getProperty<int32_t>("int"),
-        paramsParse.getLoaderProperties().getProperty<int32_t>("int"));
-    BOOST_CHECK_EQUAL(
-        paramsOrig.getLoaderProperties().getProperty<std::string>("enum"),
-        paramsParse.getLoaderProperties().getProperty<std::string>("enum"));
+    CHECK_EQ(paramsOrig.getLoaderProperties().getProperty<int32_t>("int"),
+             paramsParse.getLoaderProperties().getProperty<int32_t>("int"));
+    CHECK_EQ(paramsOrig.getLoaderProperties().getProperty<std::string>("enum"),
+             paramsParse.getLoaderProperties().getProperty<std::string>(
+                 "enum"));
 
     const auto& origArray =
         paramsOrig.getLoaderProperties().getProperty<std::array<int, 3>>(
@@ -58,6 +56,5 @@ BOOST_AUTO_TEST_CASE(loaderProperties)
     const auto& parseArray =
         paramsParse.getLoaderProperties().getProperty<std::array<int, 3>>(
             "array");
-    BOOST_CHECK_EQUAL_COLLECTIONS(origArray.begin(), origArray.end(),
-                                  parseArray.begin(), parseArray.end());
+    CHECK(origArray == parseArray);
 }

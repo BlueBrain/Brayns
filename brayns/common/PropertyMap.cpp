@@ -19,12 +19,11 @@
 #include "PropertyMap.h"
 
 #include "log.h"
-#include "utils/utils.h"
+#include "utils/stringUtils.h"
 
 #include <array>
 #include <iomanip>
 
-#include <boost/algorithm/string/join.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
 #include <brayns/parameters/AbstractParameters.h>
@@ -104,7 +103,8 @@ po::options_description _toCommandlineDescription(
         }
 
         assert(valueSemantic);
-        const auto dashCaseName = camelCaseToSeparated(property->name, '-');
+        const auto dashCaseName =
+            string_utils::camelCaseToSeparated(property->name, '-');
         desc.add(boost::make_shared<po::option_description>(
             dashCaseName.c_str(), valueSemantic,
             property->metaData.description.c_str()));
@@ -118,7 +118,7 @@ auto _validateEnumValue(const strings& enums, const std::string& value,
     auto i = std::find(enums.begin(), enums.end(), value);
     if (i == enums.end())
         throw po::error(optionName + " must be one of the following: " +
-                        boost::algorithm::join(enums, ", "));
+                        string_utils::join(enums, ", "));
     return i;
 }
 
@@ -127,7 +127,8 @@ void _commandlineToPropertyMap(const po::variables_map& vm,
 {
     for (const auto& property : propertyMap.getProperties())
     {
-        const auto dashCaseName = camelCaseToSeparated(property->name, '-');
+        const auto dashCaseName =
+            string_utils::camelCaseToSeparated(property->name, '-');
         if (!vm.count(dashCaseName))
             continue;
         switch (property->type)

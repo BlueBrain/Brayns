@@ -18,56 +18,51 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE braynsWebAPI
-
 #include <jsonPropertyMap.h>
 
 #include "ClientServer.h"
 #include <brayns/engine/Renderer.h>
 
-BOOST_GLOBAL_FIXTURE(ClientServer);
-
-BOOST_AUTO_TEST_CASE(change_fov)
+TEST_CASE_FIXTURE(ClientServer, "change_fov")
 {
     brayns::PropertyMap cameraParams;
     cameraParams.setProperty({"fovy", 10., .1, 360.});
-    BOOST_CHECK((makeRequest<brayns::PropertyMap, bool>("set-camera-params",
-                                                        cameraParams)));
+    CHECK((makeRequest<brayns::PropertyMap, bool>("set-camera-params",
+                                                  cameraParams)));
 }
 
-BOOST_AUTO_TEST_CASE(reset_camera)
+TEST_CASE_FIXTURE(ClientServer, "reset_camera")
 {
     const auto& orientation = getCamera().getOrientation();
     getCamera().setOrientation({0, 0, 0, 1});
     makeNotification("reset-camera");
-    BOOST_CHECK_EQUAL(getCamera().getOrientation(), orientation);
+    CHECK_EQ(getCamera().getOrientation(), orientation);
 }
 
-BOOST_AUTO_TEST_CASE(inspect)
+TEST_CASE_FIXTURE(ClientServer, "inspect")
 {
     auto inspectResult =
         makeRequest<std::array<double, 2>, brayns::Renderer::PickResult>(
             "inspect", {{0.5, 0.5}});
-    BOOST_CHECK(inspectResult.hit);
-    BOOST_CHECK(
+    CHECK(inspectResult.hit);
+    CHECK(
         glm::all(glm::epsilonEqual(inspectResult.pos,
-                                   {0.5, 0.5, 1.19209289550781e-7},
-                                   0.000001)));
+                                   {0.5, 0.5, 1.19209289550781e-7}, 0.000001)));
 
     auto failedInspectResult =
         makeRequest<std::array<double, 2>, brayns::Renderer::PickResult>(
             "inspect", {{10, -10}});
-    BOOST_CHECK(!failedInspectResult.hit);
+    CHECK(!failedInspectResult.hit);
 }
 
-BOOST_AUTO_TEST_CASE(schema_non_existing_endpoint)
+TEST_CASE_FIXTURE(ClientServer, "schema_non_existing_endpoint")
 {
-    BOOST_CHECK_THROW((makeRequest<brayns::SchemaParam, std::string>("schema",
-                                                                     {"foo"})),
-                      std::runtime_error);
+    CHECK_THROWS_AS((makeRequest<brayns::SchemaParam, std::string>("schema",
+                                                                   {"foo"})),
+                    std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE(schema)
+TEST_CASE_FIXTURE(ClientServer, "schema")
 {
     std::string result = makeRequestJSONReturn<brayns::SchemaParam>(
         "schema", brayns::SchemaParam{"camera"});
@@ -75,5 +70,5 @@ BOOST_AUTO_TEST_CASE(schema)
     using namespace rapidjson;
     Document json(kObjectType);
     json.Parse(result.c_str());
-    BOOST_CHECK(json.HasMember("title"));
+    CHECK(json.HasMember("title"));
 }

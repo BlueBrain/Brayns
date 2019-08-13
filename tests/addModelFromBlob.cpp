@@ -18,8 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE braynsAddModelFromBlob
-
 #include <jsonSerialization.h>
 
 #include <tests/paths.h>
@@ -31,9 +29,7 @@
 const std::string REQUEST_MODEL_UPLOAD("request-model-upload");
 const std::string CHUNK("chunk");
 
-BOOST_GLOBAL_FIXTURE(ClientServer);
-
-BOOST_AUTO_TEST_CASE(illegal_no_request)
+TEST_CASE_FIXTURE(ClientServer, "illegal_no_request")
 {
     const std::string illegal("illegal");
     getWsClient().sendBinary(illegal.data(), illegal.size());
@@ -41,38 +37,38 @@ BOOST_AUTO_TEST_CASE(illegal_no_request)
     // nothing to test, Brayns ignores the message and prints a warning
 }
 
-BOOST_AUTO_TEST_CASE(illegal_no_params)
+TEST_CASE_FIXTURE(ClientServer, "illegal_no_params")
 {
     try
     {
         makeRequest<brayns::BinaryParam, brayns::ModelDescriptor>(
             REQUEST_MODEL_UPLOAD, {});
-        BOOST_REQUIRE(false);
+        REQUIRE(false);
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_MISSING_PARAMS);
-        BOOST_CHECK(e.data.empty());
+        CHECK_EQ(e.code, brayns::ERROR_ID_MISSING_PARAMS);
+        CHECK(e.data.empty());
     }
 }
 
-BOOST_AUTO_TEST_CASE(missing_params)
+TEST_CASE_FIXTURE(ClientServer, "missing_params")
 {
     brayns::BinaryParam params;
     try
     {
         makeRequest<brayns::BinaryParam, brayns::ModelDescriptor>(
             REQUEST_MODEL_UPLOAD, {params});
-        BOOST_REQUIRE(false);
+        REQUIRE(false);
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_MISSING_PARAMS);
-        BOOST_CHECK(e.data.empty());
+        CHECK_EQ(e.code, brayns::ERROR_ID_MISSING_PARAMS);
+        CHECK(e.data.empty());
     }
 }
 
-BOOST_AUTO_TEST_CASE(invalid_size)
+TEST_CASE_FIXTURE(ClientServer, "invalid_size")
 {
     brayns::BinaryParam params;
     params.type = "xyz";
@@ -81,16 +77,16 @@ BOOST_AUTO_TEST_CASE(invalid_size)
     {
         makeRequest<brayns::BinaryParam, brayns::ModelDescriptor>(
             REQUEST_MODEL_UPLOAD, {params});
-        BOOST_REQUIRE(false);
+        REQUIRE(false);
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_MISSING_PARAMS);
-        BOOST_CHECK(e.data.empty());
+        CHECK_EQ(e.code, brayns::ERROR_ID_MISSING_PARAMS);
+        CHECK(e.data.empty());
     }
 }
 
-BOOST_AUTO_TEST_CASE(unsupported_type)
+TEST_CASE_FIXTURE(ClientServer, "unsupported_type")
 {
     brayns::BinaryParam params;
     params.type = "blub";
@@ -99,16 +95,16 @@ BOOST_AUTO_TEST_CASE(unsupported_type)
     {
         makeRequest<brayns::BinaryParam, brayns::ModelDescriptor>(
             REQUEST_MODEL_UPLOAD, {params});
-        BOOST_REQUIRE(false);
+        REQUIRE(false);
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_UNSUPPORTED_TYPE);
-        BOOST_REQUIRE(e.data.empty());
+        CHECK_EQ(e.code, brayns::ERROR_ID_UNSUPPORTED_TYPE);
+        REQUIRE(e.data.empty());
     }
 }
 
-BOOST_AUTO_TEST_CASE(xyz)
+TEST_CASE_FIXTURE(ClientServer, "xyz")
 {
     brayns::BinaryParam params;
     params.size = [] {
@@ -145,11 +141,11 @@ BOOST_AUTO_TEST_CASE(xyz)
     while (!request.is_ready())
         process();
     const auto& model = request.get();
-    BOOST_CHECK_EQUAL(model.getName(), "monkey");
-    BOOST_CHECK_EQUAL(model.getPath(), "monkey.xyz");
+    CHECK_EQ(model.getName(), "monkey");
+    CHECK_EQ(model.getPath(), "monkey.xyz");
 }
 
-BOOST_AUTO_TEST_CASE(broken_xyz)
+TEST_CASE_FIXTURE(ClientServer, "broken_xyz")
 {
     brayns::BinaryParam params;
     params.size = [] {
@@ -190,13 +186,13 @@ BOOST_AUTO_TEST_CASE(broken_xyz)
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_LOADING_BINARY_FAILED);
-        BOOST_CHECK_EQUAL(e.what(),
-                          "Invalid content in line 1: 2.500000 3.437500");
+        CHECK_EQ(e.code, brayns::ERROR_ID_LOADING_BINARY_FAILED);
+        CHECK(std::string(e.what()) ==
+              "Invalid content in line 1: 2.500000 3.437500");
     }
 }
 
-BOOST_AUTO_TEST_CASE(cancel)
+TEST_CASE_FIXTURE(ClientServer, "cancel")
 {
     brayns::BinaryParam params;
     params.size = 42;
@@ -211,10 +207,10 @@ BOOST_AUTO_TEST_CASE(cancel)
     while (!request.is_ready())
         process();
 
-    BOOST_CHECK_THROW(request.get(), std::runtime_error);
+    CHECK_THROWS_AS(request.get(), std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE(send_wrong_number_of_bytes)
+TEST_CASE_FIXTURE(ClientServer, "send_wrong_number_of_bytes")
 {
     brayns::BinaryParam params;
     params.size = 4;
@@ -232,15 +228,15 @@ BOOST_AUTO_TEST_CASE(send_wrong_number_of_bytes)
         while (!request.is_ready())
             process();
         request.get();
-        BOOST_REQUIRE(false);
+        REQUIRE(false);
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_INVALID_BINARY_RECEIVE);
+        CHECK_EQ(e.code, brayns::ERROR_ID_INVALID_BINARY_RECEIVE);
     }
 }
 
-BOOST_AUTO_TEST_CASE(cancel_while_loading)
+TEST_CASE_FIXTURE(ClientServer, "cancel_while_loading")
 {
     brayns::BinaryParam params;
     params.size = 4;
@@ -260,10 +256,10 @@ BOOST_AUTO_TEST_CASE(cancel_while_loading)
     while (!request.is_ready())
         process();
 
-    BOOST_CHECK_THROW(request.get(), std::runtime_error);
+    CHECK_THROWS_AS(request.get(), std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE(close_client_while_pending_request)
+TEST_CASE_FIXTURE(ClientServer, "close_client_while_pending_request")
 {
     auto wsClient = std::make_unique<rockets::ws::Client>();
 
@@ -279,7 +275,7 @@ BOOST_AUTO_TEST_CASE(close_client_while_pending_request)
                 REQUEST_MODEL_UPLOAD, {params});
 
     auto asyncWait =
-        std::async(std::launch::async, [&responseFuture, &wsClient] {
+        std::async(std::launch::async, [&responseFuture, &wsClient, this] {
             wsClient->process(10);
             process();
 
@@ -289,10 +285,10 @@ BOOST_AUTO_TEST_CASE(close_client_while_pending_request)
             responseFuture.get();
         });
 
-    BOOST_CHECK_THROW(asyncWait.get(), rockets::jsonrpc::response_error);
+    CHECK_THROWS_AS(asyncWait.get(), rockets::jsonrpc::response_error);
 }
 
-BOOST_AUTO_TEST_CASE(obj)
+TEST_CASE_FIXTURE(ClientServer, "obj")
 {
     brayns::BinaryParam params;
     params.size = [] {
@@ -329,10 +325,10 @@ BOOST_AUTO_TEST_CASE(obj)
     while (!request.is_ready())
         process();
     const auto& model = request.get();
-    BOOST_CHECK_EQUAL(model.getName(), "bennu");
+    CHECK_EQ(model.getName(), "bennu");
 }
 
-BOOST_AUTO_TEST_CASE(concurrent_requests)
+TEST_CASE_FIXTURE(ClientServer, "concurrent_requests")
 {
     brayns::BinaryParam xyzParams;
     xyzParams.size = [] {
@@ -433,9 +429,9 @@ BOOST_AUTO_TEST_CASE(concurrent_requests)
         process();
 
     const auto& xyzModel = xyzRequest.get();
-    BOOST_CHECK_EQUAL(xyzModel.getName(), "monkey");
-    BOOST_CHECK_EQUAL(xyzModel.getPath(), "monkey.xyz");
+    CHECK_EQ(xyzModel.getName(), "monkey");
+    CHECK_EQ(xyzModel.getPath(), "monkey.xyz");
 
     const auto& objModel = objRequest.get();
-    BOOST_CHECK_EQUAL(objModel.getName(), "bennu");
+    CHECK_EQ(objModel.getName(), "bennu");
 }

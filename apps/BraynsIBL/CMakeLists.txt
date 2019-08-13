@@ -12,14 +12,13 @@ set(BRAYNSIBL_SHADERS
   irradiance_convolution.fs
   prefilter.fs)
 set(BRAYNSIBL_LINK_LIBRARIES PRIVATE
-  ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
   ${FREEIMAGE_LIBRARIES}
   ${OPENGL_gl_LIBRARY}
   ${GLEW_LIBRARIES}
   glfw
   glm
+  ${STD_FILESYSTEM}
 )
 
 common_application(braynsIBL)

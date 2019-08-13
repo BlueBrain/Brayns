@@ -20,8 +20,23 @@
 
 #pragma once
 
-#include "types.h"
-#include <boost/any.hpp>
+#include <brayns/common/types.h>
+
+// clang-format off
+#if __has_include(<any>)
+    #include <any>
+#elif __has_include(<experimental/any>)
+    #include <experimental/any>
+    namespace std {
+        using experimental::any;
+        using experimental::any_cast;
+    }
+#else
+    #error no any support
+#endif
+// clang-format on
+
+#include <algorithm>
 #include <functional>
 #include <memory>
 #include <string>
@@ -232,9 +247,9 @@ struct Property
 private:
     friend class PropertyMap;
 
-    boost::any _data;
-    const boost::any _min;
-    const boost::any _max;
+    std::any _data;
+    const std::any _min;
+    const std::any _max;
     bool _readOnly{false};
     ModifiedCallback _modifiedCallback;
 
@@ -247,13 +262,13 @@ private:
                                      "'");
     }
     template <typename T>
-    T _castValue(const boost::any& v) const
+    T _castValue(const std::any& v) const
     {
         _checkType<T>();
-        return boost::any_cast<T>(v);
+        return std::any_cast<T>(v);
     }
 
-    void _setData(const boost::any& data)
+    void _setData(const std::any& data)
     {
         _data = data;
         if (_modifiedCallback)

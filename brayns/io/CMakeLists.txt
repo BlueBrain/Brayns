@@ -16,8 +16,7 @@ set(BRAYNSIO_PUBLIC_HEADERS
 )
 
 set(BRAYNSIO_LINK_LIBRARIES
-  PRIVATE braynsParameters braynsCommon braynsEngine
-    ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
+  PRIVATE braynsParameters braynsCommon braynsEngine ${STD_FILESYSTEM}
 )
 
 if(BRAYNS_LIBARCHIVE_ENABLED)

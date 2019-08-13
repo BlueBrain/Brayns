@@ -21,13 +21,13 @@
 #include "XYZBLoader.h"
 
 #include <brayns/common/log.h>
-#include <brayns/common/utils/utils.h>
+#include <brayns/common/utils/filesystem.h>
+#include <brayns/common/utils/stringUtils.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
 #include <fstream>
-
-#include <boost/filesystem.hpp>
+#include <sstream>
 
 namespace brayns
 {
@@ -71,7 +71,7 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
 
     auto model = _scene.createModel();
 
-    const auto name = boost::filesystem::basename({blob.name});
+    const auto name = fs::path({blob.name}).stem();
     const auto materialId = 0;
     model->createMaterial(materialId, name);
     auto& spheres = model->getSpheres()[materialId];
@@ -83,7 +83,7 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
     size_t i = 0;
     std::string line;
     std::stringstream msg;
-    msg << "Loading " << shortenString(blob.name) << " ...";
+    msg << "Loading " << string_utils::shortenString(blob.name) << " ...";
     while (std::getline(stream, line))
     {
         std::vector<float> lineData;

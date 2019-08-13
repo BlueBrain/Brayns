@@ -28,7 +28,8 @@
 
 #include <plugins/Rockets/jsonSerialization.h>
 
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 
 #include <rockets/jsonrpc/client.h>
 #include <rockets/ws/client.h>
@@ -97,9 +98,7 @@ public:
         : _wsClient{std::make_unique<rockets::ws::Client>()}
         , _client(*_wsClient)
     {
-        auto& testSuite = boost::unit_test::framework::master_test_suite();
-        const char* app = testSuite.argv[0];
-        std::vector<const char*> argv{app, "--http-server", "localhost:0"};
+        std::vector<const char*> argv{"brayns", "--http-server", "localhost:0"};
         for (const auto& arg : additionalArgv)
             argv.push_back(arg);
         const int argc = argv.size();
