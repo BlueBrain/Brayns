@@ -4,8 +4,7 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(TEST_LIBRARIES ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
-                   brayns braynsIO braynsManipulators)
+set(TEST_LIBRARIES brayns braynsIO braynsManipulators)
 
 configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
 

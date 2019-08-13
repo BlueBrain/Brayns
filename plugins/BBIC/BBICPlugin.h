@@ -39,6 +39,5 @@ public:
 
 private:
     std::list<VolumeModel> _volumeModels;
-    brayns::PluginAPI* _api{nullptr};
 };
 }

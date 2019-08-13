@@ -19,13 +19,12 @@
 
 #include "VolumeLoader.h"
 
+#include <brayns/common/utils/filesystem.h>
 #include <brayns/common/utils/stringUtils.h>
 #include <brayns/common/utils/utils.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/engine/SharedDataVolume.h>
-
-#include <boost/filesystem.hpp>
 
 #include <fstream>
 #include <map>
@@ -66,13 +65,14 @@ std::array<T, 3> parseArray3(const std::string& str,
     const auto v = brayns::string_utils::split(str, ' ');
     if (v.size() != 3)
         throw std::runtime_error("Not exactly 3 values for mhd array");
-    return {conv(v[0]), conv(v[1]), conv(v[2])};
+    return {{conv(v[0]), conv(v[1]), conv(v[2])}};
 }
 
 std::map<std::string, std::string> parseMHD(const std::string& filename)
 {
-    if (!boost::filesystem::exists(filename))
-        throw std::runtime_error("File not found");
+    std::ifstream infile(filename);
+    if (!infile.good())
+        throw std::runtime_error("Could not open file " + filename);
 
     // Sample MHD File:
     //
@@ -83,7 +83,6 @@ std::map<std::string, std::string> parseMHD(const std::string& filename)
     // ElementDataFile = BS39.raw
 
     std::map<std::string, std::string> result;
-    std::ifstream infile(filename);
     std::string line;
     size_t ctr = 1;
     while (std::getline(infile, line))
@@ -288,11 +287,11 @@ ModelDescriptorPtr MHDVolumeLoader::importFromFile(
                             [](const auto& s) { return stod(s); });
     const auto type = dataTypeFromMET(mhd.at("ElementType"));
 
-    boost::filesystem::path path = mhd.at("ElementDataFile");
+    fs::path path = mhd.at("ElementDataFile");
     if (!path.is_absolute())
     {
-        boost::filesystem::path basePath(filename);
-        path = boost::filesystem::canonical(path, basePath.parent_path());
+        auto basePath = fs::path(filename).parent_path();
+        path = fs::canonical(basePath / path);
     }
     volumeFile = path.string();
 

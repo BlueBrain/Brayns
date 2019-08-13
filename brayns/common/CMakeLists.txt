@@ -53,9 +53,10 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   transferFunction/TransferFunction.h
   types.h
   utils/enumUtils.h
+  utils/filesystem.h
+  utils/imageUtils.h
   utils/stringUtils.h
   utils/utils.h
-  utils/imageUtils.h
 )
 
 set(BRAYNSCOMMON_HEADERS
@@ -66,8 +67,7 @@ set(BRAYNSCOMMON_HEADERS
 set(BRAYNSCOMMON_INCLUDE_NAME brayns/common)
 set(BRAYNSCOMMON_LINK_LIBRARIES
   PUBLIC glm Async++
-  PRIVATE braynsParameters ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_SYSTEM_LIBRARY}
+  PRIVATE braynsParameters ${STD_FILESYSTEM} ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FREEIMAGE_LIBRARIES}
 )
 

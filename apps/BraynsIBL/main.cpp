@@ -20,7 +20,6 @@
 #include "shader.h"
 #include <FreeImage.h>
 #include <GLFW/glfw3.h>
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 #include <glm/glm.hpp>
@@ -31,6 +30,7 @@ namespace po = boost::program_options;
 #include <vector>
 
 #include <brayns/common/types.h>
+#include <brayns/common/utils/filesystem.h>
 
 #include <apps/BraynsIBL/brdf.fs.h>
 #include <apps/BraynsIBL/brdf.vs.h>
@@ -358,9 +358,8 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    namespace fs = boost::filesystem;
     const auto path = fs::path(envMap).parent_path();
-    const auto basename = (path / fs::basename(envMap)).string();
+    const auto basename = (path / fs::path(envMap).stem()).string();
 
     const std::string irradianceMapFilename = basename + brayns::IRRADIANCE_MAP;
     const std::string radianceMapFilename = basename + brayns::RADIANCE_MAP;
