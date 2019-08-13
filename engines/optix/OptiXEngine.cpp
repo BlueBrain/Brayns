@@ -19,6 +19,7 @@
  */
 
 #include <engines/optix/braynsOptixEngine_generated_AdvancedSimulation.cu.ptx.h>
+#include <engines/optix/braynsOptixEngine_generated_BBP.cu.ptx.h>
 #include <engines/optix/braynsOptixEngine_generated_BasicSimulation.cu.ptx.h>
 #include <engines/optix/braynsOptixEngine_generated_PBR.cu.ptx.h>
 
@@ -210,6 +211,26 @@ void OptiXEngine::_createRenderers()
         context.addRenderer("pbr", osp);
 
         addRendererType("pbr");
+    }
+
+    { // BBP renderer
+        const std::string CUDA_BBP = braynsOptixEngine_generated_BBP_cu_ptx;
+
+        OptiXContext& context = OptiXContext::get();
+
+        auto osp = std::make_shared<OptixShaderProgram>();
+        osp->closest_hit =
+            context.getOptixContext()->createProgramFromPTXString(
+                CUDA_BBP, "closest_hit_radiance");
+        osp->closest_hit_textured =
+            context.getOptixContext()->createProgramFromPTXString(
+                CUDA_BBP, "closest_hit_radiance");
+        osp->any_hit = context.getOptixContext()->createProgramFromPTXString(
+            CUDA_BBP, "any_hit_shadow");
+
+        context.addRenderer("bbp", osp);
+
+        addRendererType("bbp");
     }
 }
 

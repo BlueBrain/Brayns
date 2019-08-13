@@ -21,6 +21,7 @@
 #pragma once
 #include "OptiXCamera.h"
 
+#include <brayns/common/Timer.h>
 #include <brayns/common/types.h>
 #include <brayns/engine/Renderer.h>
 
@@ -45,5 +46,7 @@ public:
 
 private:
     std::string _currentRenderer;
+
+    Timer _timer;
 };
 } // namespace brayns
