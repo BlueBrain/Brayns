@@ -38,28 +38,6 @@ endif()
 set(CHOOSE_PYTHON_IGNORE_BOOST ON)
 include(Common)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-  message(FATAL_ERROR "AppleClang from Xcode is not supported. "
-                      "Please install llvm clang with\n"
-                      "> brew install llvm\n"
-                      "and set CC, CXX and LDFLAGS env variables before running cmake, e.g.\n"
-                      "> CC=/usr/local/opt/llvm/bin/clang\n"
-                      "> CXX=/usr/local/opt/llvm/bin/clang++\n"
-                      "> LDFLAGS=\"-L/usr/local/opt/llvm/lib\"")
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8 OR
-   CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7)
-  set(CMAKE_CXX_STANDARD 14)
-else()
-  set(CMAKE_CXX_STANDARD 17)
-endif()
-
-set(STD_FILESYSTEM stdc++fs)
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  set(STD_FILESYSTEM c++fs)
-endif()
-
 # Core dependencies
 common_find_package(Boost REQUIRED COMPONENTS program_options)
 common_find_package(OpenMP)
