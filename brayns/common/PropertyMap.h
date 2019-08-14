@@ -21,20 +21,8 @@
 #pragma once
 
 #include <brayns/common/types.h>
-
-// clang-format off
-#if __has_include(<any>)
-    #include <any>
-#elif __has_include(<experimental/any>)
-    #include <experimental/any>
-    namespace std {
-        using experimental::any;
-        using experimental::any_cast;
-    }
-#else
-    #error no any support
-#endif
-// clang-format on
+// NOTE: Replace with std::any when upgrading to c++17
+#include <deps/any.hpp>
 
 #include <algorithm>
 #include <functional>
@@ -247,9 +235,9 @@ struct Property
 private:
     friend class PropertyMap;
 
-    std::any _data;
-    const std::any _min;
-    const std::any _max;
+    linb::any _data;
+    const linb::any _min;
+    const linb::any _max;
     bool _readOnly{false};
     ModifiedCallback _modifiedCallback;
 
@@ -262,13 +250,13 @@ private:
                                      "'");
     }
     template <typename T>
-    T _castValue(const std::any& v) const
+    T _castValue(const linb::any& v) const
     {
         _checkType<T>();
-        return std::any_cast<T>(v);
+        return linb::any_cast<T>(v);
     }
 
-    void _setData(const std::any& data)
+    void _setData(const linb::any& data)
     {
         _data = data;
         if (_modifiedCallback)
@@ -296,8 +284,8 @@ public:
     // std::vector move constructor is not noexcept until C++17, if we want
     // this class to be movable we have to do it by hand.
     PropertyMap(PropertyMap&& other) noexcept
-        : _name(std::move(other._name)),
-          _properties(std::move(other._properties))
+        : _name(std::move(other._name))
+        , _properties(std::move(other._properties))
     {
     }
     // Assignment operator valid for both copy and move assignment.
