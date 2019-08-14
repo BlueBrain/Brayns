@@ -18,7 +18,6 @@ set(BRAYNSIBL_LINK_LIBRARIES PRIVATE
   ${GLEW_LIBRARIES}
   glfw
   glm
-  ${STD_FILESYSTEM}
 )
 
 common_application(braynsIBL)
