@@ -378,7 +378,7 @@ ModelMetadata MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
         }
         bool nonTriangulatedFaces = false;
 
-        const size_t offset = indexOffsets[mesh->mMaterialIndex];
+        const size_t offset = indexOffsets[id];
         for (size_t f = 0; f < mesh->mNumFaces; ++f)
         {
             if (mesh->mFaces[f].mNumIndices == 3)
@@ -395,7 +395,7 @@ ModelMetadata MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
             BRAYNS_DEBUG
                 << "Some faces are not triangulated and have been removed"
                 << std::endl;
-        indexOffsets[mesh->mMaterialIndex] += mesh->mNumVertices;
+        indexOffsets[id] += mesh->mNumVertices;
 
         callback.updateProgress("Post-processing...",
                                 (LOADING_FRACTION +
