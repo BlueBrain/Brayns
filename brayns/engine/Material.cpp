@@ -56,9 +56,8 @@ bool Material::_loadTexture(const std::string& fileName, const TextureType type)
         return false;
 
     _textures[fileName] = texture;
-    BRAYNS_DEBUG << fileName << ": " << texture->getWidth() << "x"
-                 << texture->getHeight() << "x" << (int)texture->getNbChannels()
-                 << "x" << (int)texture->getDepth()
+    BRAYNS_DEBUG << fileName << ": " << texture->width << "x" << texture->height
+                 << "x" << (int)texture->channels << "x" << (int)texture->depth
                  << " added to the texture cache" << std::endl;
     return true;
 }
@@ -66,7 +65,7 @@ bool Material::_loadTexture(const std::string& fileName, const TextureType type)
 void Material::setTexture(const std::string& fileName, const TextureType type)
 {
     auto i = _textureDescriptors.find(type);
-    if (i != _textureDescriptors.end() && i->second->getFilename() == fileName)
+    if (i != _textureDescriptors.end() && i->second->filename == fileName)
         return;
 
     if (_textures.find(fileName) == _textures.end())

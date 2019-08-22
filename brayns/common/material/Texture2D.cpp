@@ -21,10 +21,17 @@
 
 namespace brayns
 {
-Texture2D::Texture2D(const Type type)
-    : _type(type)
+Texture2D::Texture2D(const Type type_, const std::string& filename_,
+                     const uint8_t channels_, const uint8_t depth_,
+                     const uint32_t width_, const uint32_t height_)
+    : type(type_)
+    , filename(filename_)
+    , channels(channels_)
+    , depth(depth_)
+    , width(width_)
+    , height(height_)
 {
-    _rawData.resize(_type == Type::cubemap ? 6 : 1);
+    _rawData.resize(type == Type::cubemap ? 6 : 1);
     setMipLevels(1);
 }
 
@@ -53,8 +60,8 @@ void Texture2D::setRawData(std::vector<unsigned char>&& rawData,
 uint8_t Texture2D::getPossibleMipMapsLevels() const
 {
     uint8_t mipMapLevels = 1u;
-    size_t nx = _width;
-    size_t ny = _height;
+    auto nx = width;
+    auto ny = height;
     while (nx % 2 == 0 && ny % 2 == 0)
     {
         nx /= 2;
