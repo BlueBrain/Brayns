@@ -144,6 +144,7 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
                 {true, true, modelDescriptor->getTransformation()});
     }
 
+    _computeBounds();
     markModified();
 
     return modelDescriptor->getModelID();

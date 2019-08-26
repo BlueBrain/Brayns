@@ -196,6 +196,7 @@ TEST_CASE_FIXTURE(ClientServer, "protein_loader")
     CHECK_EQ(getScene().getNumModels(), numModels + 1);
     CHECK_EQ(model.getName(), params.getName());
     CHECK_EQ(model.getPath(), params.getPath());
+    CHECK(!model.getBounds().isEmpty());
 }
 
 TEST_CASE_FIXTURE(ClientServer, "cancel")

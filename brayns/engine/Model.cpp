@@ -156,9 +156,11 @@ ModelInstance* ModelDescriptor::getInstance(const size_t id)
 void ModelDescriptor::computeBounds()
 {
     _bounds.reset();
+    if (!_model)
+        return;
     for (const auto& instance : getInstances())
     {
-        if (!instance.getVisible() || !_model)
+        if (!instance.getVisible())
             continue;
 
         _bounds.merge(
