@@ -37,6 +37,15 @@ if(CMAKE_COMPILER_IS_GNUCXX AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
   target_compile_options(glm INTERFACE -Wno-error=class-memaccess)
 endif()
 
+option(NVPIPE_WITH_DECODER "Enables the NvPipe decoding interface." OFF)
+option(NVPIPE_WITH_OPENGL "Enables the NvPipe OpenGL interface." OFF)
+option(NVPIPE_BUILD_EXAMPLES "Builds the NvPipe example applications (requires both encoder and decoder)." OFF)
+add_subdirectory(NvPipe)
+
+# proper fix here: https://github.com/NVIDIA/NvPipe/pull/72
+configure_file(${CMAKE_CURRENT_BINARY_DIR}/NvPipe/include/NvPipe.h
+               ${CMAKE_BINARY_DIR}/include/NvPipe.h COPYONLY)
+
 if(BRAYNS_VIEWER_ENABLED)
   # GLFW
   set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)

@@ -22,3 +22,6 @@
 [submodule "deps/imgui"]
 	path = deps/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "deps/NvPipe"]
+	path = deps/NvPipe
+	url = https://github.com/NVIDIA/NvPipe.git

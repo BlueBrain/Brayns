@@ -34,7 +34,6 @@
 
 #include <brayns/common/light/Light.h>
 
-#ifdef USE_MPI
 #include <ospray/mpiCommon/MPICommon.h>
 #include <ospray/ospcommon/networking/BufferedDataStreaming.h>
 
@@ -182,7 +181,6 @@ inline ReadStream &operator>>(ReadStream &buf, brayns::PropertyMap &rh)
 }
 }
 }
-#endif
 
 #define THROW(msg)                         \
     {                                      \
@@ -195,20 +193,6 @@ inline ReadStream &operator>>(ReadStream &buf, brayns::PropertyMap &rh)
 
 #define USE_CUDA_HACK
 
-namespace
-{
-void _copyToImage(streamer::Image &image, brayns::FrameBuffer &frameBuffer)
-{
-    const auto &size = frameBuffer.getSize();
-    const size_t bufferSize = size.x * size.y * frameBuffer.getColorDepth();
-    const auto data = frameBuffer.getColorBuffer();
-
-    if (image.data.size() < bufferSize)
-        image.data.resize(bufferSize);
-    memcpy(image.data.data(), data, bufferSize);
-}
-}
-
 namespace streamer
 {
 Streamer::Streamer(const brayns::PropertyMap &props)
@@ -218,28 +202,14 @@ Streamer::Streamer(const brayns::PropertyMap &props)
 
 Streamer::~Streamer()
 {
-    if (asyncEncode())
+    if (asyncEncode() && _encodeThread.joinable())
     {
         _images.push(Image{});
         _encodeThread.join();
-        if (!useGPU())
-        {
-            ++_pkts;
-            _encodeFinishThread.join();
-        }
     }
-#ifdef USE_NVPIPE
-    if (encoder)
-        NvPipe_Destroy(encoder);
-#endif
 
     if (pkt)
         av_packet_free(&pkt);
-    if (codecContext)
-    {
-        avcodec_close(codecContext);
-        avcodec_free_context(&codecContext);
-    }
 
     if (streamContext)
     {
@@ -247,6 +217,9 @@ Streamer::~Streamer()
             avio_close(streamContext->pb);
         avformat_free_context(streamContext);
     }
+
+    if (encoder)
+        NvPipe_Destroy(encoder);
     avformat_network_deinit();
 }
 
@@ -256,8 +229,15 @@ void Streamer::init()
     if (avformat_network_init() < 0)
         THROW("Could not init stream network");
 
-    const bool useRTP = !_props.getProperty<bool>("rtsp");
     const bool useHEVC = _props.getProperty<bool>("hevc");
+    encoder =
+        NvPipe_CreateEncoder(NVPIPE_BGRA32, useHEVC ? NVPIPE_HEVC : NVPIPE_H264,
+                             NVPIPE_LOSSY, bitrate(), fps());
+    if (!encoder)
+        THROW("Failed to create encoder: " << NvPipe_GetError(nullptr));
+
+    const bool useRTP = !_props.getProperty<bool>("rtsp");
+
     const std::string filename =
         useRTP
             ? "rtp://" + _props.getProperty<std::string>("host")
@@ -290,63 +270,10 @@ void Streamer::init()
     const AVRational avFPS = {fps(), 1};
     stream->time_base = av_inv_q(avFPS);
 
-    if (useGPU())
-    {
-        stream->codecpar->codec_id = codecID;
-        stream->codecpar->codec_type = AVMEDIA_TYPE_VIDEO;
-        stream->codecpar->width = width();
-        stream->codecpar->height = height();
-
-#ifdef USE_NVPIPE
-        encoder = NvPipe_CreateEncoder(NVPIPE_RGBA32,
-                                       useHEVC ? NVPIPE_HEVC : NVPIPE_H264,
-                                       NVPIPE_LOSSY, bitrate(), fps(), width(),
-                                       height());
-        if (!encoder)
-            THROW("Failed to create encoder: " << NvPipe_GetError(nullptr));
-#endif
-    }
-    else
-    {
-        codecContext = avcodec_alloc_context3(codec);
-        if (!codecContext)
-            THROW("Could not allocate video codec context");
-
-        codecContext->codec_tag = 0;
-        codecContext->codec_id = codecID;
-        codecContext->codec_type = AVMEDIA_TYPE_VIDEO;
-        codecContext->width = width();
-        codecContext->height = height();
-        codecContext->gop_size = gop();
-        codecContext->pix_fmt = STREAM_PIX_FMT;
-        codecContext->framerate = avFPS;
-        codecContext->time_base = av_inv_q(avFPS);
-        codecContext->bit_rate = bitrate();
-        codecContext->max_b_frames = 0;
-
-        if (streamContext->oformat->flags & AVFMT_GLOBALHEADER)
-            codecContext->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
-
-        if (avcodec_parameters_from_context(stream->codecpar, codecContext) < 0)
-            THROW("Could not initialize stream codec parameters!");
-
-        AVDictionary *codec_options = nullptr;
-        av_dict_set(&codec_options, "profile", profile().c_str(), 0);
-        av_dict_set(&codec_options, "preset", "ultrafast", 0);
-        av_dict_set(&codec_options, "tune", "zerolatency", 0);
-
-        if (avcodec_open2(codecContext, codec, &codec_options) < 0)
-            THROW("Could not open video encoder!");
-        av_dict_free(&codec_options);
-
-        stream->codecpar->extradata_size = codecContext->extradata_size;
-        stream->codecpar->extradata =
-            static_cast<uint8_t *>(av_mallocz(codecContext->extradata_size));
-        memcpy(stream->codecpar->extradata, codecContext->extradata,
-               codecContext->extradata_size);
-
-        picture.init(codecContext->pix_fmt, width(), height());
-    }
+    stream->codecpar->codec_id = codecID;
+    stream->codecpar->codec_type = AVMEDIA_TYPE_VIDEO;
+    stream->codecpar->width = width();
+    stream->codecpar->height = height();
 
     if (avformat_write_header(streamContext, nullptr) !=
         AVSTREAM_INIT_IN_WRITE_HEADER)
@@ -354,10 +281,7 @@ void Streamer::init()
         THROW("Could not write stream header")
     }
 
-#ifdef USE_MPI
     _initMPI();
-#endif
-
     if (useRTP)
     {
         char buf[200000];
@@ -366,10 +290,8 @@ void Streamer::init()
 
         std::stringstream outFile;
         outFile << "/tmp/test";
-#ifdef USE_MPI
         if (useMPI())
             outFile << mpicommon::world.rank;
-#endif
         outFile << ".sdp";
         FILE *fsdp = fopen(outFile.str().c_str(), "w");
         if (fsdp)
@@ -385,9 +307,6 @@ void Streamer::init()
     {
         _encodeThread =
             std::thread(std::bind(&Streamer::_runAsyncEncode, this));
-        if (!useGPU())
-            _encodeFinishThread =
-                std::thread(std::bind(&Streamer::_runAsyncEncodeFinish, this));
     }
 
 #ifndef USE_CUDA_HACK
@@ -409,35 +328,21 @@ void Streamer::postRender()
     if (!frameBuffer)
         return;
 
-    frameBuffer->map();
-
 #ifdef USE_CUDA_HACK
     if (asyncEncode() && useCudaBuffer())
         _images.waitSize(0);
+    frameBuffer->map();
     const void *buffer = useCudaBuffer() ? frameBuffer->cudaBuffer()
                                          : frameBuffer->getColorBuffer();
 #else
+    frameBuffer->map();
     const void *buffer = frameBuffer->getColorBuffer();
 #endif
     if (asyncEncode())
     {
-        if (useGPU())
-        {
-            Image img(_frameNumber, frameBuffer->getSize());
-            img.buffer = buffer;
-            _images.push(img);
-        }
-        else
-        {
-            if (asyncCopy())
-            {
-                Image img(_frameNumber, frameBuffer->getSize());
-                _copyToImage(img, *frameBuffer);
-                _images.push(img);
-            }
-            else
-                encodeFrame(_frameNumber, frameBuffer->getSize(), buffer);
-        }
+        Image img(_frameNumber, frameBuffer->getSize());
+        img.buffer = buffer;
+        _images.push(img);
     }
     else
         encodeFrame(_frameNumber, frameBuffer->getSize(), buffer);
@@ -459,113 +364,47 @@ void Streamer::encodeFrame(const size_t frameNumber,
     const auto pts =
         av_rescale_q(frameNumber, AVRational{1, fps()}, stream->time_base);
 
-    if (useGPU())
-    {
-        static std::vector<uint8_t> compressed;
-        const size_t bufSize = size.x * size.y * 4;
-        if (compressed.size() < bufSize)
-            compressed.resize(bufSize);
+    static std::vector<uint8_t> compressed;
+    const size_t bufSize = size.x * size.y * 4;
+    if (compressed.size() < bufSize)
+        compressed.resize(bufSize);
 
-        const auto compressedSize =
-#ifdef USE_NVPIPE
-            NvPipe_Encode(encoder, data, size.x * 4, compressed.data(),
-                          compressed.size(), size.x, size.y,
-                          gop() > 0 ? frameNumber % gop() == 0 : false);
-#else
-            0;
-#endif
-        av_init_packet(pkt);
-        pkt->data = compressed.data();
-        pkt->size = compressedSize;
-        pkt->pts = pts;
-        pkt->dts = pts;
-        pkt->stream_index = stream->index;
+    const auto compressedSize =
+        NvPipe_Encode(encoder, data, size.x * 4, compressed.data(),
+                      compressed.size(), size.x, size.y,
+                      gop() > 0 ? frameNumber % gop() == 0 : false);
+    av_init_packet(pkt);
+    pkt->data = compressed.data();
+    pkt->size = compressedSize;
+    pkt->pts = pts;
+    pkt->dts = pts;
+    pkt->stream_index = stream->index;
 
-        if (!memcmp(compressed.data(), "\x00\x00\x00\x01\x67", 5))
-            pkt->flags |= AV_PKT_FLAG_KEY;
-    }
-    else
-    {
-        sws_context =
-            sws_getCachedContext(sws_context, size.x, size.y, AV_PIX_FMT_RGBA,
-                                 width(), height(), STREAM_PIX_FMT,
-                                 SWS_FAST_BILINEAR, 0, 0, 0);
-        const int stride[] = {4 * (int)size.x};
-        auto cdata = reinterpret_cast<const uint8_t *const>(data);
-        sws_scale(sws_context, &cdata, stride, 0, size.y, picture.frame->data,
-                  picture.frame->linesize);
-        picture.frame->pts = pts;
-
-        if (avcodec_send_frame(codecContext, picture.frame) < 0)
-            return;
-    }
+    if (!memcmp(compressed.data(), "\x00\x00\x00\x01\x67", 5))
+        pkt->flags |= AV_PKT_FLAG_KEY;
 
     encodeDuration = encodeTimer.elapsed();
 
-    if (asyncEncode() && !useGPU())
-        ++_pkts;
-    else
-        streamFrame(!useGPU());
+    streamFrame();
 }
 
-void Streamer::streamFrame(const bool finishEncode)
+void Streamer::streamFrame()
 {
-    if (finishEncode)
-    {
-        brayns::Timer timer;
-        timer.start();
-        const auto ret = avcodec_receive_packet(codecContext, pkt);
-        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
-            return;
-        // encodeDuration += timer.elapsed();
-        for (double g = encodeDuration;
-             !encodeDuration.compare_exchange_strong(g, g + timer.elapsed());)
-            ;
-    }
-
     _barrier();
-#if 0
-    av_write_frame(streamContext, pkt);
-    av_write_frame(streamContext, nullptr);
-#else
     av_interleaved_write_frame(streamContext, pkt);
-#endif
     av_packet_unref(pkt);
-}
-
-bool Streamer::useGPU() const
-{
-#ifdef USE_NVPIPE
-    return _props.getProperty<bool>("gpu");
-#else
-    return false;
-#endif
-}
-
-bool Streamer::useMPI() const
-{
-#ifdef USE_MPI
-    return _props.getProperty<bool>("mpi");
-#else
-    return false;
-#endif
 }
 
 bool Streamer::useCudaBuffer() const
 {
-    return useGPU() &&
-           _api->getParametersManager()
-                   .getApplicationParameters()
-                   .getEngine() == "optix";
+    return _api->getParametersManager()
+               .getApplicationParameters()
+               .getEngine() == "optix";
 }
 
 bool Streamer::isLocalOrMaster() const
 {
-#ifdef USE_MPI
     return !useMPI() || mpicommon::IamTheMaster();
-#else
-    return true;
-#endif
 }
 
 void Streamer::_runAsyncEncode()
@@ -582,21 +421,10 @@ void Streamer::_runAsyncEncode()
     }
 }
 
-void Streamer::_runAsyncEncodeFinish()
-{
-    while (_api->getEngine().getKeepRunning())
-    {
-        _pkts.waitGT(0);
-        streamFrame();
-        --_pkts;
-    }
-}
-
 void Streamer::printStats()
 {
     bool flushOnly = true;
 
-#ifdef USE_MPI
     if (useMPI())
     {
         if (_props.getProperty<bool>("master-stats"))
@@ -614,7 +442,6 @@ void Streamer::printStats()
                   << "Barrier " << int(barrierDuration * 1000) << "ms | ";
     }
     else
-#endif
         std::cout << '\r';
 
     const auto elapsed = _timer.elapsed() + double(_waitTime) / 1e6;
@@ -687,7 +514,6 @@ void Streamer::_swapFrameBuffer()
 
 void Streamer::_syncFrame()
 {
-#ifdef USE_MPI
     if (useMPI())
     {
         brayns::Timer timer;
@@ -698,7 +524,6 @@ void Streamer::_syncFrame()
             _frameData->deserialize(_frameNumber);
         mpiDuration = timer.elapsed();
     }
-#endif
 
     auto &camera = _api->getCamera();
     camera.updateProperty("segmentId", _props.getProperty<int>("segment"),
@@ -740,7 +565,6 @@ void Streamer::_nextFrame()
 
 void Streamer::_barrier()
 {
-#ifdef USE_MPI
     if (useMPI())
     {
         brayns::Timer timer;
@@ -748,10 +572,8 @@ void Streamer::_barrier()
         mpicommon::world.barrier();
         barrierDuration = timer.elapsed();
     }
-#endif
 }
 
-#ifdef USE_MPI
 void Streamer::_initMPI()
 {
     if (!useMPI())
@@ -869,7 +691,6 @@ bool Streamer::FrameData::deserialize(size_t &frameNumber)
 
     return rpModified || camModified || sceneModified;
 }
-#endif
 }
 
 extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int argc,
@@ -887,23 +708,15 @@ extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int argc,
     props.setProperty({"rtsp", false});
     props.setProperty({"hevc", false});
     props.setProperty({"async-encode", false});
-    props.setProperty({"async-copy", false}); // CPU only (sws_scale)
     props.setProperty({"stats", false});
     props.setProperty({"segment", 0});
-#ifdef USE_NVPIPE
-    props.setProperty({"gpu", false});
-#endif
-#ifdef USE_MPI
     props.setProperty({"mpi", false});
     props.setProperty({"master-stats", false});
-#endif
     if (!props.parse(argc, argv))
         return nullptr;
 
-#ifdef USE_MPI
     if (props.getProperty<bool>("mpi"))
         mpicommon::init(&argc, argv, true);
-#endif
 
     return new streamer::Streamer(props);
 }
