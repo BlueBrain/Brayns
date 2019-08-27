@@ -174,7 +174,7 @@ bool Application::initGLFW()
 
     glfwMakeContextCurrent(m_window);
 
-    // https://stackoverflow.com/a/11213354
+// https://stackoverflow.com/a/11213354
 #ifndef __APPLE__
     if (glewInit() != GL_NO_ERROR)
     {
@@ -220,7 +220,10 @@ void Application::run()
         m_timer.start();
 
         if (m_exit)
+        {
+            m_brayns.getEngine().setKeepRunning(false);
             break;
+        }
 
         toggleFullscreen();
         reshape();
