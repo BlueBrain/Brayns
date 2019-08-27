@@ -22,7 +22,7 @@
 
 #include <brayns/common/types.h>
 // NOTE: Replace with std::any when upgrading to c++17
-#include <deps/any.hpp>
+#include <brayns/common/any.hpp>
 
 #include <algorithm>
 #include <functional>
@@ -284,8 +284,8 @@ public:
     // std::vector move constructor is not noexcept until C++17, if we want
     // this class to be movable we have to do it by hand.
     PropertyMap(PropertyMap&& other) noexcept
-        : _name(std::move(other._name))
-        , _properties(std::move(other._properties))
+        : _name(std::move(other._name)),
+          _properties(std::move(other._properties))
     {
     }
     // Assignment operator valid for both copy and move assignment.
