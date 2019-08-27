@@ -22,6 +22,7 @@ set(BRAYNSCOMMON_SOURCES
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
+  any.hpp
   ActionInterface.h
   BaseObject.h
   ImageManager.h
@@ -53,7 +54,6 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   transferFunction/TransferFunction.h
   types.h
   utils/enumUtils.h
-  utils/filesystem.h
   utils/imageUtils.h
   utils/stringUtils.h
   utils/utils.h
@@ -61,6 +61,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
 
 set(BRAYNSCOMMON_HEADERS
   utils/DynamicLib.h
+  utils/filesystem.h
   utils/base64/base64.h
 )
 

@@ -1,3 +1,4 @@
+// clang-format off
 //
 // Implementation of N4562 std::experimental::any (merged into C++17) for C++11 compilers.
 //
@@ -470,3 +471,5 @@ namespace std
 }
 
 #endif
+
+// clang-format on
