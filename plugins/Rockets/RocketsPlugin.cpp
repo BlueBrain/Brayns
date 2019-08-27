@@ -1148,10 +1148,11 @@ public:
 
     void _handleQuit()
     {
-        _handleRPC({METHOD_QUIT, "Quit the application"}, [& engine = _engine] {
-            engine.setKeepRunning(false);
-            engine.triggerRender();
-        });
+        _handleRPC({METHOD_QUIT, "Quit the application"},
+                   [& engine = _engine] {
+                       engine.setKeepRunning(false);
+                       engine.triggerRender();
+                   });
     }
 
     void _handleResetCamera()
@@ -1657,7 +1658,8 @@ public:
     void _handleGetLoaders()
     {
         _handleRPC<std::vector<LoaderInfo>>(
-            {METHOD_GET_LOADERS, "Get all loaders"}, [&]() {
+            {METHOD_GET_LOADERS, "Get all loaders"},
+            [&] {
                 auto& scene = _engine.getScene();
                 return scene.getLoaderRegistry().getLoaderInfos();
             });
