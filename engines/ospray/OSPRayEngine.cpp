@@ -270,6 +270,7 @@ void OSPRayEngine::_createCameras()
         PropertyMap properties;
         properties.setProperty(fovy);
         properties.setProperty(aspect);
+        properties.setProperty(enableClippingPlanes);
         if (isStereo)
         {
             properties.setProperty(stereoProperty);
@@ -279,7 +280,17 @@ void OSPRayEngine::_createCameras()
         }
         addCameraType("perspectiveParallax", properties);
     }
-    addCameraType("panoramic");
+    {
+        PropertyMap properties;
+        properties.setProperty(enableClippingPlanes);
+        properties.setProperty({"half", true, {"Full sphere of dome"}});
+        if (isStereo)
+        {
+            properties.setProperty(stereoProperty);
+            properties.setProperty(eyeSeparation);
+        }
+        addCameraType("panoramic", properties);
+    }
 }
 } // namespace brayns
 
