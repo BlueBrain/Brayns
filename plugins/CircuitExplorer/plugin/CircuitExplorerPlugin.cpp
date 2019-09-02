@@ -239,67 +239,6 @@ void CircuitExplorerPlugin::init()
                 _setMetaballsPerSimulationValue(param);
             });
 
-        PLUGIN_INFO << "Registering 'loadCellsAsInstances' endpoint"
-                    << std::endl;
-        actionInterface->registerRequest<LoadCellsAsInstances, Result>(
-            "loadCellsAsInstances",
-            [&](const LoadCellsAsInstances& param) -> Result {
-                return _loadCellsAsInstances(param);
-            });
-
-        PLUGIN_INFO << "Registering 'importMorphology' endpoint" << std::endl;
-        actionInterface->registerRequest<ImportMorphology, Result>(
-            "importMorphology", [&](const ImportMorphology& param) -> Result {
-                return _importMorphology(param);
-            });
-
-        PLUGIN_INFO << "Registering 'importMorphologyAsSDF' endpoint"
-                    << std::endl;
-        actionInterface->registerRequest<ImportMorphology, Result>(
-            "importMorphologyAsSDF",
-            [&](const ImportMorphology& param) -> Result {
-                return _importMorphologyAsSDF(param);
-            });
-
-        PLUGIN_INFO << "Registering 'loadCells' endpoint" << std::endl;
-        actionInterface->registerRequest<LoadCells, Result>(
-            "loadCells", [&](const LoadCells& param) -> Result {
-                return _loadCells(param);
-            });
-
-        PLUGIN_INFO << "Registering 'importVolume' endpoint" << std::endl;
-        actionInterface->registerRequest<ImportVolume, Result>(
-            "importVolume", [&](const ImportVolume& param) -> Result {
-                return _importVolume(param);
-            });
-
-        PLUGIN_INFO << "Registering 'loadSomas' endpoint" << std::endl;
-        _api->getActionInterface()->registerRequest<LoadSomas, Result>(
-            "loadSomas", [&](const LoadSomas& payload) -> Result {
-                return _loadSomas(payload);
-            });
-
-        PLUGIN_INFO << "Registering 'loadSegments' endpoint" << std::endl;
-        _api->getActionInterface()->registerRequest<LoadSegments, Result>(
-            "loadSegments", [&](const LoadSegments& payload) -> Result {
-                return _loadSegments(payload);
-            });
-
-        PLUGIN_INFO << "Registering 'loadMeshes' endpoint" << std::endl;
-        _api->getActionInterface()->registerRequest<LoadMeshes, Result>(
-            "loadMeshes", [&](const LoadMeshes& payload) -> Result {
-                return _loadMeshes(payload);
-            });
-
-        PLUGIN_INFO << "Registering 'importCompartmentSimulation' endpoint"
-                    << std::endl;
-        _api->getActionInterface()
-            ->registerRequest<ImportCompartmentSimulation, Result>(
-                "importCompartmentSimulation",
-                [&](const ImportCompartmentSimulation& payload) -> Result {
-                    return _importCompartmentSimulation(payload);
-                });
-
         PLUGIN_INFO << "Registering 'setCamera' endpoint" << std::endl;
         _api->getActionInterface()->registerNotification<CameraDefinition>(
             "setCamera", [&](const CameraDefinition& s) { _setCamera(s); });

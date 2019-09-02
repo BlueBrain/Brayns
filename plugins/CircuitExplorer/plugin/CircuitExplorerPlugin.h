@@ -62,19 +62,6 @@ private:
     void _setMetaballsPerSimulationValue(const MetaballsFromSimulationValue&);
     void _saveModelToCache(const SaveModelToCache&);
 
-    // Load from DB
-    Result _loadCellsAsInstances(const LoadCellsAsInstances&);
-    Result _loadCells(const LoadCells&);
-    Result _loadSomas(const LoadSomas&);
-    Result _loadSegments(const LoadSegments&);
-    Result _loadMeshes(const LoadMeshes&);
-
-    // Importation to DB
-    Result _importVolume(const ImportVolume&);
-    Result _importMorphology(const ImportMorphology&);
-    Result _importMorphologyAsSDF(const ImportMorphology&);
-    Result _importCompartmentSimulation(const ImportCompartmentSimulation&);
-
     // Handlers
     void _attachCellGrowthHandler(const AttachCellGrowthHandler& payload);
     void _attachCircuitSimulationHandler(
