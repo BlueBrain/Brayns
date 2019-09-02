@@ -542,8 +542,12 @@ MaterialIds CircuitExplorerPlugin::_getMaterialIds(const ModelId& modelId)
     MaterialIds materialIds;
     auto modelDescriptor = _api->getScene().getModel(modelId.id);
     if (modelDescriptor)
+    {
         for (const auto& material : modelDescriptor->getModel().getMaterials())
-            materialIds.ids.push_back(material.first);
+            if (material.first != brayns::BOUNDINGBOX_MATERIAL_ID &&
+                material.first != brayns::SECONDARY_MODEL_MATERIAL_ID)
+                materialIds.ids.push_back(material.first);
+    }
     else
         PLUGIN_THROW("Invalid model ID");
     return materialIds;
