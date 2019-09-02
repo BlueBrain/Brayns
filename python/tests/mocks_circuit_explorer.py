@@ -61,7 +61,7 @@ def mock_plugin_ce_set_materials(model_ids, material_ids, diffuse_colors, specul
     return RESPONSE_OK
 
 
-def mock_plugin_ce_save_to_cache(model_id, path):
+def mock_plugin_ce_save_model_to_cache(model_id, path):
     return RESPONSE_OK
 
 
@@ -95,3 +95,29 @@ def mock_plugin_ce_cancel_frames_export():
 
 def mock_plugin_ce_add_grid(min_value, max_value, interval, radius, opacity, show_axis, colored):
     return RESPONSE_OK
+
+
+def mock_ce_rpc_request(self, method, params=None, response_timeout=None):
+    if method == 'add-model':
+        return RESPONSE_OK
+    if method == 'add-grid':
+        return RESPONSE_OK
+    if method == 'save-model-to-cache':
+        return RESPONSE_OK
+    if method == 'load-circuit':
+        return RESPONSE_OK
+    if method == 'set-material':
+        return RESPONSE_OK
+    if method == 'set-materials':
+        return RESPONSE_OK
+    if method == 'set-material-extra-attributes':
+        return RESPONSE_OK
+    if method == 'set-camera':
+        return RESPONSE_OK
+    if method == 'get-camera':
+        return RESPONSE_OK
+    if method == 'export-frames-to-disk':
+        return RESPONSE_OK
+    if method == 'cancel-frames-export':
+        return RESPONSE_OK
+    return None

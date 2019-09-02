@@ -188,91 +188,95 @@ void CircuitExplorerPlugin::init()
     auto actionInterface = _api->getActionInterface();
     if (actionInterface)
     {
-        PLUGIN_INFO << "Registering 'setMaterial' endpoint" << std::endl;
+        PLUGIN_INFO << "Registering 'set-material' endpoint" << std::endl;
         actionInterface->registerNotification<MaterialDescriptor>(
-            "setMaterial",
+            "set-material",
             [&](const MaterialDescriptor& param) { _setMaterial(param); });
 
-        PLUGIN_INFO << "Registering 'setMaterials' endpoint" << std::endl;
+        PLUGIN_INFO << "Registering 'set-materials' endpoint" << std::endl;
         actionInterface->registerNotification<MaterialsDescriptor>(
-            "setMaterials",
+            "set-materials",
             [&](const MaterialsDescriptor& param) { _setMaterials(param); });
 
-        PLUGIN_INFO << "Registering 'getMaterialIds' endpoint" << std::endl;
+        PLUGIN_INFO << "Registering 'get-material-ids' endpoint" << std::endl;
         actionInterface->registerRequest<ModelId, MaterialIds>(
-            "getMaterialIds", [&](const ModelId& modelId) -> MaterialIds {
+            "get-material-ids", [&](const ModelId& modelId) -> MaterialIds {
                 return _getMaterialIds(modelId);
             });
 
-        PLUGIN_INFO << "Registering 'setMaterialExtraAttributes' endpoint"
+        PLUGIN_INFO << "Registering 'set-material-extra-attributes' endpoint"
                     << std::endl;
         actionInterface->registerNotification<MaterialExtraAttributes>(
-            "setMaterialExtraAttributes",
+            "set-material-extra-attributes",
             [&](const MaterialExtraAttributes& param) {
                 _setMaterialExtraAttributes(param);
             });
 
-        PLUGIN_INFO << "Registering 'setSynapsesAttributes' endpoint"
+        PLUGIN_INFO << "Registering 'set-synapses-attributes' endpoint"
                     << std::endl;
         actionInterface->registerNotification<SynapseAttributes>(
-            "setSynapsesAttributes", [&](const SynapseAttributes& param) {
+            "set-synapses-attributes", [&](const SynapseAttributes& param) {
                 _setSynapseAttributes(param);
             });
 
-        PLUGIN_INFO << "Registering 'saveModelToCache' endpoint" << std::endl;
+        PLUGIN_INFO << "Registering 'save-model-to-cache' endpoint"
+                    << std::endl;
         actionInterface->registerNotification<SaveModelToCache>(
-            "saveModelToCache",
+            "save-model-to-cache",
             [&](const SaveModelToCache& param) { _saveModelToCache(param); });
 
-        PLUGIN_INFO << "Registering 'setConnectionsPerValue' endpoint"
+        PLUGIN_INFO << "Registering 'set-connections-per-value' endpoint"
                     << std::endl;
         actionInterface->registerNotification<ConnectionsPerValue>(
-            "setConnectionsPerValue", [&](const ConnectionsPerValue& param) {
+            "set-connections-per-value", [&](const ConnectionsPerValue& param) {
                 _setConnectionsPerValue(param);
             });
 
-        PLUGIN_INFO << "Registering 'setMetaballsPerSimulationValue' endpoint"
-                    << std::endl;
+        PLUGIN_INFO
+            << "Registering 'set-metaballs-per-simulation-value' endpoint"
+            << std::endl;
         actionInterface->registerNotification<MetaballsFromSimulationValue>(
-            "setMetaballsPerSimulationValue",
+            "set-metaballs-per-simulation-value",
             [&](const MetaballsFromSimulationValue& param) {
                 _setMetaballsPerSimulationValue(param);
             });
 
-        PLUGIN_INFO << "Registering 'setCamera' endpoint" << std::endl;
+        PLUGIN_INFO << "Registering 'set-camera' endpoint" << std::endl;
         _api->getActionInterface()->registerNotification<CameraDefinition>(
-            "setCamera", [&](const CameraDefinition& s) { _setCamera(s); });
+            "set-camera", [&](const CameraDefinition& s) { _setCamera(s); });
 
-        PLUGIN_INFO << "Registering 'getCamera' endpoint" << std::endl;
+        PLUGIN_INFO << "Registering 'get-camera' endpoint" << std::endl;
         _api->getActionInterface()->registerRequest<CameraDefinition>(
-            "getCamera", [&]() -> CameraDefinition { return _getCamera(); });
+            "get-camera", [&]() -> CameraDefinition { return _getCamera(); });
 
-        PLUGIN_INFO << "Registering 'attachCellGrowthHandler' endpoint"
+        PLUGIN_INFO << "Registering 'attach-cell-growth-handler' endpoint"
                     << std::endl;
         _api->getActionInterface()
             ->registerNotification<AttachCellGrowthHandler>(
-                "attachCellGrowthHandler",
+                "attach-cell-growth-handler",
                 [&](const AttachCellGrowthHandler& s) {
                     _attachCellGrowthHandler(s);
                 });
 
-        PLUGIN_INFO << "Registering 'attachCircuitSimulationHandler' endpoint"
-                    << std::endl;
+        PLUGIN_INFO
+            << "Registering 'attach-circuit-simulation-handler' endpoint"
+            << std::endl;
         _api->getActionInterface()
             ->registerNotification<AttachCircuitSimulationHandler>(
-                "attachCircuitSimulationHandler",
+                "attach-circuit-simulation-handler",
                 [&](const AttachCircuitSimulationHandler& s) {
                     _attachCircuitSimulationHandler(s);
                 });
 
-        PLUGIN_INFO << "Registering 'exportFramesToDisk' endpoint" << std::endl;
+        PLUGIN_INFO << "Registering 'export-frames-to-disk' endpoint"
+                    << std::endl;
         _api->getActionInterface()->registerNotification<ExportFramesToDisk>(
-            "exportFramesToDisk",
+            "export-frames-to-disk",
             [&](const ExportFramesToDisk& s) { _exportFramesToDisk(s); });
 
-        PLUGIN_INFO << "Registering 'addGrid' endpoint" << std::endl;
+        PLUGIN_INFO << "Registering 'add-grid' endpoint" << std::endl;
         _api->getActionInterface()->registerNotification<AddGrid>(
-            "addGrid", [&](const AddGrid& payload) { _addGrid(payload); });
+            "add-grid", [&](const AddGrid& payload) { _addGrid(payload); });
     }
 
     _addAdvancedSimulationRenderer(_api->getEngine());

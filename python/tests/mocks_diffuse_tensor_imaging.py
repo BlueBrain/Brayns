@@ -32,5 +32,7 @@ from nose.tools import assert_equal
 RESPONSE_OK = {'ok'}
 
 
-def mock_plugin_dti_add_streamlines(name, streamlines, radius=1.0, opacity=1.0):
-    return RESPONSE_OK
+def mock_dti_rpc_request(self, method, params=None, response_timeout=None):
+    if method == 'add-streamlines':
+        return RESPONSE_OK
+    return None

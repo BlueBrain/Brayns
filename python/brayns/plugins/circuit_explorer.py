@@ -75,7 +75,6 @@ class CircuitExplorer:
     def __init__(self, client):
         """Create a new Circuit Explorer instance"""
         self._client = client.rockets_client
-        self._brayns = client
 
     # pylint: disable=W0102,R0913,R0914
     def load_circuit(self, path, name='Circuit', density=1.0,
@@ -193,7 +192,12 @@ class CircuitExplorer:
         props['111LoadAfferentSynapses'] = False
         props['112LoadEfferentSynapses'] = False
 
-        return self._brayns.add_model(name=name, path=path, loader_properties=props)
+        params = dict()
+        params['name'] = name
+        params['path'] = path
+        params['loader_properties'] = props
+
+        return self._client.request(method='add-model', params=params)
 
     # pylint: disable=R0913, R0914
     def set_material(self, model_id, material_id, diffuse_color=(1.0, 1.0, 1.0),
@@ -236,7 +240,7 @@ class CircuitExplorer:
         params['shadingMode'] = shading_mode
         params['clipped'] = clipped
 
-        return self._client.request("setMaterial", params=params,
+        return self._client.request("set-material", params=params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
     # pylint: disable=W0102
@@ -292,10 +296,10 @@ class CircuitExplorer:
         params['shadingModes'] = shading_modes
         params['clips'] = clips
 
-        return self._client.request("setMaterials", params=params,
+        return self._client.request("set-materials", params=params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
-    def save_to_cache(self, model_id, path):
+    def save_model_to_cache(self, model_id, path):
         """
         Save a model to the specified cache file
 
@@ -307,24 +311,8 @@ class CircuitExplorer:
         params = dict()
         params['modelId'] = model_id
         params['path'] = path
-        return self._client.request('saveModelToCache', params=params,
+        return self._client.request('save-model-to-cache', params=params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
-
-    def get_focal_distance(self, coordinates=(0.5, 0.5)):
-        """
-        Return the focal distance for the specified normalized coordinates in the image
-
-        :param list coordinates: Coordinates in the image
-        :return: The focal distance
-        :rtype: float
-        """
-        target = self._brayns.inspect(array=coordinates)['position']
-        origin = self._brayns.camera.position.data
-        v = [0, 0, 0]
-        for k in range(3):
-            v[k] = float(target[k]) - float(origin[k])
-        import math
-        return math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])
 
     def set_material_extra_attributes(self, model_id):
         """
@@ -336,7 +324,7 @@ class CircuitExplorer:
         """
         params = dict()
         params['modelId'] = model_id
-        return self._client.request('setMaterialExtraAttributes', params=params,
+        return self._client.request('set-material-extra-attributes', params=params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
     def set_camera(self, origin, direction, up):
@@ -353,7 +341,7 @@ class CircuitExplorer:
         params['origin'] = origin
         params['direction'] = direction
         params['up'] = up
-        return self._client.request('setCamera', params,
+        return self._client.request('set-camera', params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
     def get_camera(self):
@@ -363,7 +351,7 @@ class CircuitExplorer:
         :return: A JSon representation of the origin, direction and up vectors
         :rtype: str
         """
-        return self._client.request('getCamera', response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        return self._client.request('get-camera', response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
     def add_grid(self, min_value, max_value, interval, radius=1.0, opacity=0.5, show_axis=True,
                  colored=True):
@@ -388,7 +376,7 @@ class CircuitExplorer:
         params['planeOpacity'] = opacity
         params['showAxis'] = show_axis
         params['useColors'] = colored
-        return self._client.request('addGrid', params,
+        return self._client.request('add-grid', params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
     def export_frames_to_disk(self, path, animation_frames, camera_definitions, image_format='png',
@@ -423,7 +411,7 @@ class CircuitExplorer:
             for i in range(3):
                 values.append(camera_definition[2][i])
         params['cameraInformation'] = values
-        return self._client.request('exportFramesToDisk', params,
+        return self._client.request('export-frames-to-disk', params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
     def cancel_frames_export(self):
@@ -441,5 +429,5 @@ class CircuitExplorer:
         params['startFrame'] = 0
         params['animationInformation'] = []
         params['cameraInformation'] = []
-        return self._client.request('exportFramesToDisk', params,
+        return self._client.request('export-frames-to-disk', params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)

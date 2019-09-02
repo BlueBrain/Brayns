@@ -475,3 +475,7 @@ def mock_not_in_notebook():
 
 def mock_add_model(name, path, loader_properties):
     return True
+
+
+def mock_plugin_dti_add_streamlines(name, streamlines, radius=1.0, opacity=1.0):
+    return {'ok'}

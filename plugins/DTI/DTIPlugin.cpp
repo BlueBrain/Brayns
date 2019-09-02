@@ -58,14 +58,14 @@ void DTIPlugin::init()
     registry.registerLoader(
         std::make_unique<DTILoader>(scene, DTILoader::getCLIProperties()));
 
-    PLUGIN_INFO << "Registering 'streamlines' endpoint" << std::endl;
+    PLUGIN_INFO << "Registering 'add-streamlines' endpoint" << std::endl;
     _api->getActionInterface()->registerNotification<StreamlinesDescriptor>(
-        "streamlines",
+        "add-streamlines",
         [&](const StreamlinesDescriptor &s) { _updateStreamlines(s); });
 
-    PLUGIN_INFO << "Registering 'spikeSimulation' endpoint" << std::endl;
+    PLUGIN_INFO << "Registering 'set-spike-simulation' endpoint" << std::endl;
     _api->getActionInterface()->registerNotification<SpikeSimulationDescriptor>(
-        "spikeSimulation",
+        "set-spike-simulation",
         [&](const SpikeSimulationDescriptor &s) { _updateSpikeSimulation(s); });
 }
 

@@ -58,4 +58,4 @@ class DiffuseTensorImaging:
         params['vertices'] = vertices
         params['radius'] = radius
         params['opacity'] = opacity
-        return self._client.request("streamlines", params=params)
+        return self._client.request("add-streamlines", params=params)
