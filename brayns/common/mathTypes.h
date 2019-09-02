@@ -38,7 +38,7 @@ namespace staticjson
 class ObjectHandler;
 template <typename U>
 void init(brayns::Box<U>*, ObjectHandler*);
-}
+} // namespace staticjson
 
 namespace brayns
 {
@@ -93,6 +93,7 @@ public:
     inline vec getSize() const { return _max - _min; }
     inline const vec& getMin() const { return _min; }
     inline const vec& getMax() const { return _max; }
+
 private:
     vec _min{std::numeric_limits<T>::max()};
     vec _max{-std::numeric_limits<T>::max()};
@@ -141,6 +142,6 @@ typedef std::vector<Vector2d> Vector2ds;
  * Quaternion definitions
  */
 using Quaterniond = glm::tquat<double, glm::highp>; //!< Double quaternion.
-}
+} // namespace brayns
 
 #endif // _mathTypes_h_

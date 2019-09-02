@@ -76,8 +76,7 @@ enum class ReportType
 {
     undefined = 0,
     voltages_from_file = 1,
-    voltages_from_db = 2,
-    spikes = 3
+    spikes = 2
 };
 
 /** User data type */
@@ -151,7 +150,6 @@ inline std::vector<std::pair<std::string, ReportType>> enumerateMap()
 {
     return {{"Undefined", ReportType::undefined},
             {"Voltages from file", ReportType::voltages_from_file},
-            {"Voltages from DB", ReportType::voltages_from_db},
             {"Spikes", ReportType::spikes}};
 }
 

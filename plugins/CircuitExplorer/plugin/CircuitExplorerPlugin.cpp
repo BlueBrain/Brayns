@@ -22,17 +22,17 @@
 #include "CircuitExplorerPlugin.h"
 #include <common/commonTypes.h>
 #include <common/log.h>
-#include <io/db/DBConnector.h>
-#include <io/file/AdvancedCircuitLoader.h>
-#include <io/file/BrickLoader.h>
-#include <io/file/CellGrowthHandler.h>
-#include <io/file/MeshCircuitLoader.h>
-#include <io/file/MorphologyCollageLoader.h>
-#include <io/file/MorphologyLoader.h>
-#include <io/file/PairSynapsesLoader.h>
-#include <io/file/SynapseCircuitLoader.h>
-#include <io/file/SynapseJSONLoader.h>
-#include <io/file/VoltageSimulationHandler.h>
+
+#include <io/AdvancedCircuitLoader.h>
+#include <io/BrickLoader.h>
+#include <io/CellGrowthHandler.h>
+#include <io/MeshCircuitLoader.h>
+#include <io/MorphologyCollageLoader.h>
+#include <io/MorphologyLoader.h>
+#include <io/PairSynapsesLoader.h>
+#include <io/SynapseCircuitLoader.h>
+#include <io/SynapseJSONLoader.h>
+#include <io/VoltageSimulationHandler.h>
 #include <meshing/PointCloudMesher.h>
 
 #include <brayns/common/ActionInterface.h>
@@ -721,281 +721,6 @@ void CircuitExplorerPlugin::_setMetaballsPerSimulationValue(
                     << std::endl;
 }
 
-Result CircuitExplorerPlugin::_loadCellsAsInstances(
-    const LoadCellsAsInstances& payload)
-{
-    Result result;
-    PLUGIN_INFO << "Loading cells from " << payload.connectionString
-                << std::endl;
-
-    brayns::Timer chrono;
-    DBConnector dbConnector(payload.connectionString);
-    const auto cells = dbConnector.getCells(payload.sqlStatement);
-    const auto morphologyPaths = dbConnector.getMorphologyPaths();
-
-    PLUGIN_INFO << "Circuit contains " << morphologyPaths.size()
-                << " unique morphologies" << std::endl;
-
-    if (cells.empty())
-    {
-        result.error = "No cells match the requested statement";
-        PLUGIN_ERROR << result.error << std::endl;
-        return result;
-    }
-
-    auto& scene = _api->getScene();
-    std::map<uint64_t, brayns::ModelDescriptorPtr> modelDescriptors;
-
-    std::string msg;
-    uint64_t successes = 0;
-    PLUGIN_INFO << "Processing " << cells.size() << " cells" << std::endl;
-    for (const auto& cell : cells)
-    {
-        auto iter = modelDescriptors.find(cell.morphologyId);
-        if (iter == modelDescriptors.end())
-        {
-            brayns::PropertyMap props;
-            props.setProperty({"050RadiusMultiplier", 1.0});
-            props.setProperty({"051RadiusCorrection", 0.0});
-            props.setProperty({"052SectionTypeSoma", true});
-            props.setProperty({"053SectionTypeAxon", false});
-            props.setProperty({"054SectionTypeDendrite", true});
-            props.setProperty({"055SectionTypeApicalDendrite", true});
-            props.setProperty({"070RealisticSoma", false});
-            props.setProperty(
-                {"090MorphologyQuality",
-                 enumToString<MorphologyQuality>(MorphologyQuality::high)});
-            props.setProperty(
-                {"022UserDataType", enumToString(UserDataType::undefined)});
-            props.setProperty({"060UseSdfgeometry", false});
-            props.setProperty({"061DampenBranchThicknessChangerate", false});
-            props.setProperty({"080MorphologyColorScheme",
-                               enumToString(CircuitColorScheme::none)});
-            props.setProperty({"091MaxDistanceToSoma", 1e6});
-
-            const auto path = morphologyPaths[cell.morphologyId];
-            const auto filename = payload.morphologyFolder + "/" + path + "." +
-                                  payload.morphologyExtension;
-            try
-            {
-                MorphologyLoader loader(scene, std::move(props));
-
-                auto model = scene.createModel();
-                const auto info =
-                    loader.importMorphology(props, servus::URI(filename),
-                                            *model, 0);
-                MorphologyLoader::createMissingMaterials(*model);
-                const auto& sp = info.somaPosition;
-                const brayns::Vector3d& bmin = info.bounds.getMin();
-                const brayns::Vector3d& bmax = info.bounds.getMax();
-
-                brayns::ModelMetadata metadata = {
-                    {"SomaPosition", std::to_string(sp.x) + "," +
-                                         std::to_string(sp.y) + "," +
-                                         std::to_string(sp.z)},
-                    {"Bounds", "(" + std::to_string(bmin.x) + "," +
-                                   std::to_string(bmin.y) + "," +
-                                   std::to_string(bmin.z) + "),(" +
-                                   std::to_string(bmax.x) + "," +
-                                   std::to_string(bmax.y) + "," +
-                                   std::to_string(bmax.z) + ")"}};
-                auto modelDescriptor =
-                    std::make_shared<brayns::ModelDescriptor>(std::move(model),
-                                                              filename,
-                                                              metadata);
-
-                brayns::PropertyMap materialProps;
-                materialProps.setProperty(
-                    {MATERIAL_PROPERTY_SHADING_MODE,
-                     static_cast<int>(MaterialShadingMode::diffuse)});
-
-                modelDescriptor->setTransformation(cell.transformation);
-                modelDescriptors[cell.morphologyId] = modelDescriptor;
-                ++successes;
-            }
-            catch (const std::runtime_error& e)
-            {
-                msg = msg + e.what() + '\n';
-            }
-        }
-        else
-            (*iter).second->addInstance(
-                brayns::ModelInstance(true, false, cell.transformation));
-    }
-
-    if (successes > 0)
-    {
-        PLUGIN_INFO << "Creating " << modelDescriptors.size() << " models"
-                    << std::endl;
-        for (auto& modelDescriptor : modelDescriptors)
-        {
-            brayns::ModelMetadata newMetadata(
-                modelDescriptor.second->getMetadata());
-            auto nbInstances = modelDescriptor.second->getInstances().size();
-            newMetadata["Number of instances"] =
-                std::to_string(std::max(1ul, nbInstances));
-            modelDescriptor.second->setMetadata(newMetadata);
-            _api->getScene().addModel(modelDescriptor.second);
-        }
-        result.success = true;
-    }
-    PLUGIN_TIMER(chrono.elapsed(), "Morphology successfully loaded");
-
-    result.error = msg;
-    return result;
-}
-
-Result CircuitExplorerPlugin::_importMorphology(const ImportMorphology& payload)
-{
-    Result result;
-    try
-    {
-        DBConnector connector(payload.connectionString);
-        connector.importMorphology(_api->getScene(), payload.guid,
-                                   payload.filename);
-        result.success = true;
-    }
-    catch (const std::runtime_error& e)
-    {
-        result.error = e.what();
-        PLUGIN_ERROR << result.error << std::endl;
-    }
-    return result;
-}
-
-Result CircuitExplorerPlugin::_importMorphologyAsSDF(
-    const ImportMorphology& payload)
-{
-    Result result;
-    try
-    {
-        DBConnector connector(payload.connectionString);
-        connector.importMorphologyAsSDF(_api->getScene(), payload.guid,
-                                        payload.filename);
-        result.success = true;
-    }
-    catch (const std::runtime_error& e)
-    {
-        result.error = e.what();
-        PLUGIN_ERROR << result.error << std::endl;
-    }
-    return result;
-}
-
-Result CircuitExplorerPlugin::_loadCells(const LoadCells& payload)
-{
-    Result result;
-    try
-    {
-        DBConnector connector(payload.connectionString);
-        if (payload.sdf)
-            connector.loadCellsAsSDF(_api->getScene(), payload.name,
-                                     payload.sqlCell, payload.sqlMorphology);
-        else
-            connector.loadCells(_api->getScene(), payload.name, payload.sqlCell,
-                                payload.sqlMorphology);
-        result.success = true;
-    }
-    catch (const std::runtime_error& e)
-    {
-        result.error = e.what();
-        PLUGIN_ERROR << result.error << std::endl;
-    }
-    return result;
-}
-
-Result CircuitExplorerPlugin::_importVolume(const ImportVolume& payload)
-{
-    Result result;
-    try
-    {
-        DBConnector connector(payload.connectionString);
-        const auto& d{payload.dimensions};
-        const auto& s{payload.spacing};
-        connector.importVolume(payload.guid, {d[0], d[1], d[2]},
-                               {s[0], s[1], s[2]}, payload.rawFilename);
-    }
-    catch (const std::runtime_error& e)
-    {
-        result.error = e.what();
-        PLUGIN_ERROR << result.error << std::endl;
-    }
-    return result;
-}
-
-Result CircuitExplorerPlugin::_loadSomas(const LoadSomas& payload)
-{
-    Result result;
-    DBConnector dbConnector(payload.connectionString);
-    try
-    {
-        if (payload.showOrientations)
-            dbConnector.loadCellOrientations(_api->getScene(), payload.name,
-                                             payload.sqlStatement,
-                                             payload.radius);
-        else
-            dbConnector.loadSomas(_api->getScene(), payload.name,
-                                  payload.sqlStatement, payload.radius);
-        result.success = true;
-    }
-    catch (const std::runtime_error& e)
-    {
-        result.error = e.what();
-    }
-    return result;
-}
-
-Result CircuitExplorerPlugin::_loadSegments(const LoadSegments& payload)
-{
-    Result result;
-    DBConnector dbConnector(payload.connectionString);
-    try
-    {
-        dbConnector.loadSegments(_api->getScene(), payload.name,
-                                 payload.sqlStatement, payload.radius);
-        result.success = true;
-    }
-    catch (const std::runtime_error& e)
-    {
-        result.error = e.what();
-    }
-    return result;
-}
-
-Result CircuitExplorerPlugin::_loadMeshes(const LoadMeshes& payload)
-{
-    Result result;
-    DBConnector dbConnector(payload.connectionString);
-    try
-    {
-        dbConnector.loadMeshes(_api->getScene(), payload.sqlStatement);
-        result.success = true;
-    }
-    catch (const std::runtime_error& e)
-    {
-        result.error = e.what();
-    }
-    return result;
-}
-
-Result CircuitExplorerPlugin::_importCompartmentSimulation(
-    const ImportCompartmentSimulation& payload)
-{
-    Result result;
-    DBConnector dbConnector(payload.connectionString);
-    try
-    {
-        dbConnector.importCompartmentSimulation(payload.blueConfig,
-                                                payload.reportName);
-        result.success = true;
-    }
-    catch (const std::runtime_error& e)
-    {
-        result.error = e.what();
-    }
-    return result;
-}
-
 void CircuitExplorerPlugin::_setCamera(const CameraDefinition& payload)
 {
     auto& camera = _api->getCamera();
@@ -1014,7 +739,7 @@ void CircuitExplorerPlugin::_setCamera(const CameraDefinition& payload)
     const auto& u = payload.up;
     brayns::Vector3f up{u[0], u[1], u[2]};
 
-    const Quaternionf q = glm::inverse(
+    const glm::quat q = glm::inverse(
         glm::lookAt(origin, origin + direction,
                     up)); // Not quite sure why this should be inverted?!?
     camera.setOrientation(q);

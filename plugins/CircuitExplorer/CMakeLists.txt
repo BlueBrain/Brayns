@@ -13,16 +13,9 @@ endif()
 set (CMAKE_CXX_STANDARD 14)
 
 include(Common)
-option(BRAYNS_CIRCUITEXPLORER_USE_DB "Circuit explorer uses DB storage" OFF)
-if(BRAYNS_CIRCUITEXPLORER_USE_DB)
-    find_package(HDF5 REQUIRED)
-    set(BUILD_BINDINGS OFF CACHE BOOL "Do not build python bindings" FORCE)
-    add_subdirectory(${PROJECT_SOURCE_DIR}/MorphIO)
-else()
-    # For some reason, this has to be in the root CMake in order to be
-    # automatically downloaded by the -DCLONE_SUBPROJECTS=ON cmake option
-    common_find_package(Brion REQUIRED)
-endif()
+# For some reason, this has to be in the root CMake in order to be
+# automatically downloaded by the -DCLONE_SUBPROJECTS=ON cmake option
+common_find_package(Brion REQUIRED)
 common_find_package_post()
 
 add_subdirectory(plugin)
