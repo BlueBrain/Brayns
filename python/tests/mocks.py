@@ -286,6 +286,9 @@ TEST_ARRAY_SCHEMA = {
 
 TEST_ARRAY = [1, 42, -5]
 
+TEST_ADD_MODEL = 'OK'
+
+
 VERSION_SCHEMA = {
     'title': 'Version',
     'type': 'object'
@@ -308,8 +311,10 @@ TEST_REGISTRY = {
     'test-array/schema': ['GET'],
     'test-object': ['GET', 'PUT'],
     'test-object/schema': ['GET'],
+    'add-model/schema': ['GET'],
     'version': ['GET']
 }
+
 
 def mock_batch(self, requests, response_timeout=None, make_async=False):
     mapping = {
@@ -327,6 +332,7 @@ def mock_batch(self, requests, response_timeout=None, make_async=False):
         'test-notification': TEST_RPC_NOTIFICATION,
         'test-object': TEST_OBJECT_SCHEMA,
         'test-array': TEST_ARRAY_SCHEMA,
+        'add-model': TEST_ADD_MODEL,
         'version': VERSION_SCHEMA
     }
     if make_async:
@@ -424,6 +430,8 @@ def mock_rpc_request(self, method, params=None, response_timeout=None):
         if 'fov' in params:
             return params['fov']
         return 0
+    if method == 'add-model':
+        return True
     return None
 
 
@@ -441,6 +449,7 @@ async def mock_rpc_async_notify(self, method, params=None):
 
 def mock_connected(self):
     return True
+
 
 def mock_snapshot(format, size, animation_parameters=None, camera=None, name=None, quality=None,
                   renderer=None, samples_per_pixel=None):
@@ -462,3 +471,7 @@ def mock_async_snapshot(*args, **kwargs):
 
 def mock_not_in_notebook():
     return False
+
+
+def mock_add_model(name, path, loader_properties):
+    return True

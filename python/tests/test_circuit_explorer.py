@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2016-2019, Blue Brain Project
+#                          Raphael Dumusc <raphael.dumusc@epfl.ch>
+#                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
 #                          Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -22,39 +24,46 @@
 
 from brayns.plugins.circuit_explorer import CircuitExplorer
 
-from nose.tools import assert_true, assert_equal, raises
+from mock import patch
+
 from .mocks import *
+from .mocks_circuit_explorer import *
 
 
 def get_circuit_explorer():
-    app = brayns.Client('localhost:8200')
-    ce = CircuitExplorer(app)
-    clean_models()
-    return ce
-
-
-def clean_models():
-    app = brayns.Client('localhost:8200')
-    model_ids = list()
-    for model in app.scene.models:
-        model_ids.append(model['id'])
-    app.remove_model(array=model_ids)
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.batch', new=mock_batch), \
+         patch('rockets.Client.request', new=mock_rpc_request), \
+         patch('rockets.AsyncClient.batch', new=mock_batch_async_with_sync_methods):
+        app = brayns.Client('localhost:8200')
+        app.add_model = mock_add_model
+        ce = CircuitExplorer(app)
+        ce.load_circuit = mock_plugin_ce_load_circuit_request
+        ce.set_material = mock_plugin_ce_set_material
+        ce.set_materials = mock_plugin_ce_set_materials
+        ce.save_to_cache = mock_plugin_ce_save_to_cache
+        ce.get_focal_distance = mock_plugin_ce_get_focal_distance
+        ce.set_material_extra_attributes = mock_plugin_ce_set_material_extra_attributes
+        ce.set_camera = mock_plugin_ce_set_camera
+        ce.get_camera = mock_plugin_ce_get_camera
+        ce.export_frames_to_disk = mock_plugin_ce_export_frames_to_disk
+        ce.cancel_frames_export = mock_plugin_ce_cancel_frames_export
+        ce.add_grid = mock_plugin_ce_add_grid
+        return ce
 
 
 def test_load_circuit():
     ce = get_circuit_explorer()
-    try:
-        ce.load_circuit(path='/tmp/CircuitConfig', targets=['A', 'B'])
-    except Exception as e:
-        assert_equal(e.__class__, rockets.request_error.RequestError)
-
+    ce.load_circuit(path='/tmp/CircuitConfig', targets=['A', 'B'])
 
 
 def test_set_material():
     ce = get_circuit_explorer()
     response = ce.set_material(
         model_id=0, material_id=0, diffuse_color=(1, 1, 1), specular_color=(1, 1, 1))
-    assert_equal(response, 'OK')
+    assert_equal(response, {'ok'})
 
 
 def test_set_materials():
@@ -98,19 +107,19 @@ def test_set_materials():
         diffuse_colors=diffuse_colors, specular_colors=specular_colors,
         specular_exponents=specular_exponents, glossinesses=glossinesses,
         emissions=emissions, refraction_indices=refraction_indices)
-    assert_equal(response, 'OK')
+    assert_equal(response, {'ok'})
 
 
 def test_save_to_cache():
     ce = get_circuit_explorer()
     response = ce.save_to_cache(model_id=0, path='/tmp/test')
-    assert_equal(response, 'OK')
+    assert_equal(response, {'ok'})
 
 
 def test_get_focal_distance():
     ce = get_circuit_explorer()
     response = ce.set_camera(origin=(0, 0, 0), direction=(0, 0, 1), up=(0, 1, 0))
-    assert_equal(response, 'OK')
+    assert_equal(response, {'ok'})
 
     focal_distance = ce.get_focal_distance(coordinates=(0.5, 0.5))
     assert_equal(focal_distance, 0.0)
@@ -119,19 +128,19 @@ def test_get_focal_distance():
 def test_set_material_extra_attributes():
     ce = get_circuit_explorer()
     response = ce.set_material_extra_attributes(model_id=0)
-    assert_equal(response, 'OK')
+    assert_equal(response, {'ok'})
 
 
 def test_set_camera():
     ce = get_circuit_explorer()
     response = ce.set_camera(origin=(0, 0, 0), direction=(0, 0, 1), up=(0, 1, 0))
-    assert_equal(response, 'OK')
+    assert_equal(response, {'ok'})
 
 
 def test_get_camera():
     ce = get_circuit_explorer()
     response = ce.set_camera(origin=(0, 0, 0), direction=(0, 0, 1), up=(0, 1, 0))
-    assert_equal(response, 'OK')
+    assert_equal(response, {'ok'})
 
     response = ce.get_camera()
     assert_equal(response, {
@@ -146,19 +155,20 @@ def test_export_frames_to_disk():
         path='/tmp',
         animation_frames=[0],
         camera_definitions=[[(0.0, 0.0, 0.0), (0.0, 0.0, 1.0), (0.0, 1.0, 0.0)]])
-    assert_equal(response, 'OK')
+    assert_equal(response, {'ok'})
 
 
 def test_cancel_frames_export():
     ce = get_circuit_explorer()
     response = ce.cancel_frames_export()
-    assert_equal(response, 'OK')
+    assert_equal(response, {'ok'})
 
 
 def test_add_grid():
     ce = get_circuit_explorer()
-    response = ce.add_grid(min_value=0, max_value=100, interval=10)
-    assert_equal(response, 'OK')
+    response = ce.add_grid(min_value=0, max_value=100, interval=10, radius=1, opacity=1,
+                           show_axis=True, colored=True)
+    assert_equal(response, {'ok'})
 
 
 if __name__ == '__main__':

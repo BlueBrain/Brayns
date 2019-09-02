@@ -22,34 +22,15 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # All rights reserved. Do not distribute without further notice.
 
-from brayns.plugins.diffuse_tensor_imaging import DiffuseTensorImaging
+import asyncio
+import brayns
+import rockets
 
-from mock import patch
-
-from .mocks import *
-from .mocks_diffuse_tensor_imaging import *
-
-
-def test_add_streamline():
-    with patch('rockets.AsyncClient.connected', new=mock_connected), \
-         patch('brayns.utils.http_request', new=mock_http_request), \
-         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
-         patch('rockets.Client.batch', new=mock_batch):
-        app = brayns.Client('localhost:8200')
-        dti = DiffuseTensorImaging(app)
-        dti.add_streamlines = mock_plugin_dti_add_streamlines
-        streamlines = [
-            [
-                [0, 0, 0], [1, 1, 1], [2, 2, 2]
-            ],
-            [
-                [0, 0, 0], [1, 1, 1], [2, 2, 2]
-            ]
-        ]
-        response = dti.add_streamlines(name='dti', streamlines=streamlines)
-        assert_equal(response, {'ok'})
+from nose.tools import assert_equal
 
 
-if __name__ == '__main__':
-    import nose
-    nose.run(defaultTest=__name__)
+RESPONSE_OK = {'ok'}
+
+
+def mock_plugin_dti_add_streamlines(name, streamlines, radius=1.0, opacity=1.0):
+    return RESPONSE_OK
