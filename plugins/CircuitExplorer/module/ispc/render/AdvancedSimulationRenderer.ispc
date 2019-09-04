@@ -1005,6 +1005,7 @@ inline vec3f AdvancedSimulationRenderer_shadeRay(
 
         float epsilon = 0.f;
         bool discardIntersection = false;
+        vec3f intersection;
 
         if (ray.geomID < 0)
         {
@@ -1026,6 +1027,8 @@ inline vec3f AdvancedSimulationRenderer_shadeRay(
         }
         else
         {
+            intersection = ray.org + ray.t * ray.dir;
+
             // Get intersection information
             DifferentialGeometry dg;
             postIntersect(self->super.super.super.model, dg, ray,
@@ -1121,9 +1124,10 @@ inline vec3f AdvancedSimulationRenderer_shadeRay(
             ++depth;
         }
 
-        ray.org = attributes.origin;
+        ray.org = intersection;
         ray.t0 = epsilon;
         ray.t = inf;
+
         ray.primID = -1;
         ray.geomID = -1;
         ray.instID = -1;
