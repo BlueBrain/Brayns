@@ -77,9 +77,9 @@ class CircuitExplorer:
         self._client = client.rockets_client
 
     # pylint: disable=W0102,R0913,R0914
-    def load_circuit(self, path, name='Circuit', density=1.0,
-                     random_seed=0, targets=list(), report='', report_type=REPORT_TYPE_NONE,
-                     user_data_type=USER_DATATYPE_NONE, synchronous_mode=True,
+    def load_circuit(self, path, name='Circuit', density=100.0,
+                     random_seed=0, targets=list(), report='', report_type=REPORT_TYPE_VOLTAGES_FROM_FILE,
+                     user_data_type=USER_DATATYPE_SIMULATION_OFFSET, synchronous_mode=True,
                      circuit_color_scheme=CIRCUIT_COLOR_SCHEME_NONE, mesh_folder='',
                      mesh_filename_pattern='', mesh_transformation=False, radius_multiplier=1,
                      radius_correction=0, load_soma=True, load_axon=True, load_dendrite=True,
