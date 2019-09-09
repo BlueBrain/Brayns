@@ -36,6 +36,9 @@ const std::string PARAM_PLUGIN = "plugin";
 const std::string PARAM_STEREO = "stereo";
 const std::string PARAM_WINDOW_SIZE = "window-size";
 const std::string PARAM_ENV_MAP = "env-map";
+#ifdef BRAYNS_USE_FFMPEG
+const std::string PARAM_VIDEOSTREAMING = "videostreaming";
+#endif
 
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
@@ -80,7 +83,13 @@ ApplicationParameters::ApplicationParameters()
         (PARAM_MAX_RENDER_FPS.c_str(), po::value<size_t>(&_maxRenderFPS),
          "Max. render FPS") //
         (PARAM_ENV_MAP.c_str(), po::value<std::string>(&_envMap),
-         "Path to environment map"); 
+         "Path to environment map")
+#ifdef BRAYNS_USE_FFMPEG
+            (PARAM_VIDEOSTREAMING.c_str(),
+             po::bool_switch(&_useVideoStreaming)->default_value(false),
+             "Use videostreaming over websockets instead of JPEG")
+#endif
+        ;
 
     _positionalArgs.add(PARAM_INPUT_PATHS.c_str(), -1);
 }

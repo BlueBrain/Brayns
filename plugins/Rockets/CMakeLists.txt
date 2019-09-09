@@ -32,6 +32,11 @@ set(BRAYNSROCKETS_LINK_LIBRARIES PRIVATE Rockets braynsParameters braynsTasks
 if(LibJpegTurbo_FOUND)
   list(APPEND BRAYNSROCKETS_LINK_LIBRARIES PRIVATE ${LibJpegTurbo_LIBRARIES})
 endif()
+if(FFMPEG_FOUND)
+  list(APPEND BRAYNSROCKETS_HEADERS encoder.h)
+  list(APPEND BRAYNSROCKETS_SOURCES encoder.cpp)
+  list(APPEND BRAYNSROCKETS_LINK_LIBRARIES PRIVATE ${FFMPEG_LIBRARIES})
+endif()
 
 if(libuv_FOUND)
   list(APPEND BRAYNSROCKETS_LINK_LIBRARIES PRIVATE ${libuv_LIBRARIES})
@@ -43,6 +48,10 @@ set(BRAYNSROCKETS_OMIT_EXPORT ON)
 set(BRAYNSROCKETS_INCLUDE_NAME rocketsplugin)
 common_library(braynsRockets)
 target_include_directories(braynsRockets SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS})
+
+if(FFMPEG_FOUND)
+  target_include_directories(braynsRockets SYSTEM PRIVATE ${FFMPEG_INCLUDE_DIR})
+endif()
 
 # needed for staticjson and rapidjson
 target_include_directories(braynsRockets SYSTEM PRIVATE
