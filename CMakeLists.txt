@@ -56,6 +56,7 @@ endif()
 # HTTP messaging
 common_find_package(LibJpegTurbo)
 common_find_package(Rockets)
+common_find_package(FFMPEG 3.4 SYSTEM)
 if(ROCKETS_FOUND AND ROCKETS_USE_LIBWEBSOCKETS)
   option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ON)
 else()
