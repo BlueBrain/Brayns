@@ -231,50 +231,44 @@ inline float getVolumeShadowContribution(
 }
 
 inline float getVolumeShadowContributions(
-    Volume* uniform volume,
+    Volume* uniform volume, const uniform unsigned int uniform lightIndex,
     const uniform AdvancedSimulationRenderer* uniform self,
     const varying Ray& ray, varying ScreenSample& sample, const vec3f& point,
     const float epsilon)
 {
     float shadowIntensity = 0.f;
-    for (uniform int i = 0; shadowIntensity < 1.f && self->super.super.lights &&
-                            i < self->super.super.numLights;
-         ++i)
+    const uniform Light* uniform light = self->super.super.lights[lightIndex];
+    const varying vec2f s = make_vec2f(0.5f);
+    DifferentialGeometry dg;
+    dg.P = point;
+    const varying Light_SampleRes lightSample = light->sample(light, dg, s);
+
+    Ray lightRay = ray;
+    lightRay.t = inf;
+    lightRay.t0 = epsilon;
+    lightRay.org = point;
+    lightRay.geomID = -1;
+
+    if (self->softShadows > 0.f)
+        lightRay.dir = normalize(
+            lightSample.dir +
+            self->softShadows *
+                getRandomVector(self->super.super.super.fb->size.x, sample,
+                                lightSample.dir, self->randomNumber));
+    else
+        lightRay.dir = lightSample.dir;
+
+    // Intersection with Geometry
+    traceRay(self->super.super.super.model, lightRay);
+    if (lightRay.geomID != -1)
     {
-        const uniform Light* uniform light = self->super.super.lights[i];
-        const varying vec2f s = make_vec2f(0.5f);
-        DifferentialGeometry dg;
-        dg.P = point;
-        const varying Light_SampleRes lightSample = light->sample(light, dg, s);
-
-        Ray lightRay = ray;
-        lightRay.t = inf;
-        lightRay.t0 = epsilon;
-        lightRay.org = point;
-        lightRay.geomID = -1;
-
-        if (self->softShadows > 0.f)
-            lightRay.dir = normalize(
-                lightSample.dir +
-                self->softShadows *
-                    getRandomVector(self->super.super.super.fb->size.x, sample,
-                                    lightSample.dir, self->randomNumber));
-        else
-            lightRay.dir = lightSample.dir;
-
-        // Intersection with Geometry
-
-        traceRay(self->super.super.super.model, lightRay);
-        if (lightRay.geomID != -1)
-        {
-            shadowIntensity += 1.f;
-            break;
-        }
-
-        // Intersection with volume
-        shadowIntensity +=
-            getVolumeShadowContribution(volume, self, lightRay, sample);
+        shadowIntensity += 1.f;
+        return shadowIntensity * self->shadows;
     }
+
+    // Intersection with volume
+    shadowIntensity +=
+        getVolumeShadowContribution(volume, self, lightRay, sample);
     return shadowIntensity * self->shadows;
 }
 
@@ -379,6 +373,14 @@ inline vec4f getVolumeContribution(
                     powf(max(0.f, dot(light.dir, reflectedNormal)),
                          self->volumeSpecularExponent);
                 shadedColor = shadedColor + volume->specular * cosNS;
+
+                // Shadow
+                if (shadowsEnabled)
+                    // Compute shadow contribution
+                    shadowIntensity =
+                        getVolumeShadowContributions(volume, i, self, ray,
+                                                     sample, point, epsilon);
+                shadedColor = shadedColor * (1.f - shadowIntensity);
             }
             volumeSampleColor = shadedColor;
         }
@@ -394,12 +396,6 @@ inline vec4f getVolumeContribution(
                                                         indirectColor *
                                                         indirectIntensity;
         }
-
-        if (shadowsEnabled)
-            // Compute shadow contribution
-            shadowIntensity =
-                getVolumeShadowContributions(volume, self, ray, sample, point,
-                                             epsilon);
 
         // Compose color with according alpha correction
         composite(make_vec4f(volumeSampleColor, sampleOpacity), pathColor,
