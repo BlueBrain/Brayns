@@ -16,7 +16,7 @@ common_find_package_post()
 
 set(BRAYNSMULTIVIEW_HEADERS MultiviewPlugin.h)
 set(BRAYNSMULTIVIEW_SOURCES MultiviewPlugin.cpp)
-set(BRAYNSMULTIVIEW_LINK_LIBRARIES PRIVATE braynsCommon braynsEngine braynsPluginAPI)
+set(BRAYNSMULTIVIEW_LINK_LIBRARIES PRIVATE braynsCommon braynsEngine braynsPluginAPI braynsParameters)
 
 if(OSPRAY_FOUND)
   list(APPEND BRAYNSMULTIVIEW_SOURCES
@@ -39,7 +39,7 @@ if(OSPRAY_FOUND)
   ospray_ispc_compile(${BRAYNSMULTIVIEW_ISPC_SOURCES})
   list(APPEND BRAYNSMULTIVIEW_SOURCES ${ISPC_OBJECTS})
 
-  list(APPEND BRAYNSMULTIVIEW_LINK_LIBRARIES ${OSPRAY_LIBRARIES})
+  list(APPEND BRAYNSMULTIVIEW_LINK_LIBRARIES braynsOSPRayEngine ospray::ospray_common ospray::ospray ospray::ospray_module_ispc)
 endif()
 
 set(BRAYNSMULTIVIEW_OMIT_LIBRARY_HEADER ON)

@@ -19,6 +19,7 @@
  */
 
 #include <engines/optix/braynsOptixEngine_generated_AdvancedSimulation.cu.ptx.h>
+#include <engines/optix/braynsOptixEngine_generated_BBP.cu.ptx.h>
 #include <engines/optix/braynsOptixEngine_generated_BasicSimulation.cu.ptx.h>
 #include <engines/optix/braynsOptixEngine_generated_PBR.cu.ptx.h>
 
@@ -28,6 +29,7 @@
 #include "OptiXCamera.h"
 #include "OptiXEngine.h"
 #include "OptiXFrameBuffer.h"
+#include "OptiXOpenDeckCamera.h"
 #include "OptiXPerspectiveCamera.h"
 #include "OptiXRenderer.h"
 #include "OptiXScene.h"
@@ -109,6 +111,19 @@ void OptiXEngine::_createCameras()
 
     context.addCamera("perspective", camera);
     addCameraType("perspective", properties);
+
+    {
+        PropertyMap properties;
+        properties.setProperty({"segmentId", 7});
+        properties.setProperty(
+            {"interpupillaryDistance", 0.065, {"Eye separation"}});
+        properties.setProperty(
+            {"headPosition", std::array<double, 3>{{0.0, 2.0, 0.0}}});
+        properties.setProperty(
+            {"headRotation", std::array<double, 4>{{0.0, 0.0, 0.0, 1.0}}});
+        context.addCamera("opendeck", std::make_shared<OptiXOpenDeckCamera>());
+        addCameraType("opendeck", properties);
+    }
 }
 
 void OptiXEngine::_createRenderers()
@@ -189,12 +204,33 @@ void OptiXEngine::_createRenderers()
         osp->closest_hit_textured =
             context.getOptixContext()->createProgramFromPTXString(
                 CUDA_PBR, "closest_hit_radiance");
+
         osp->any_hit = context.getOptixContext()->createProgramFromPTXString(
             CUDA_PBR, "any_hit_shadow");
 
         context.addRenderer("pbr", osp);
 
         addRendererType("pbr");
+    }
+
+    { // BBP renderer
+        const std::string CUDA_BBP = braynsOptixEngine_generated_BBP_cu_ptx;
+
+        OptiXContext& context = OptiXContext::get();
+
+        auto osp = std::make_shared<OptixShaderProgram>();
+        osp->closest_hit =
+            context.getOptixContext()->createProgramFromPTXString(
+                CUDA_BBP, "closest_hit_radiance");
+        osp->closest_hit_textured =
+            context.getOptixContext()->createProgramFromPTXString(
+                CUDA_BBP, "closest_hit_radiance");
+        osp->any_hit = context.getOptixContext()->createProgramFromPTXString(
+            CUDA_BBP, "any_hit_shadow");
+
+        context.addRenderer("bbp", osp);
+
+        addRendererType("bbp");
     }
 }
 
@@ -231,9 +267,7 @@ void OptiXEngine::commit()
 {
     Engine::commit();
 }
-void OptiXEngine::preRender()
-{
-}
+
 Vector2ui OptiXEngine::getMinimumFrameSize() const
 {
     return {1, 1};

@@ -39,8 +39,7 @@ set(CHOOSE_PYTHON_IGNORE_BOOST ON)
 include(Common)
 
 # Core dependencies
-common_find_package(Boost REQUIRED COMPONENTS
-  filesystem system program_options unit_test_framework)
+common_find_package(Boost REQUIRED COMPONENTS program_options)
 common_find_package(OpenMP)
 common_find_package(libuv 1.8)
 common_find_package(FreeImage)
@@ -59,11 +58,21 @@ common_find_package(LibJpegTurbo)
 common_find_package(Rockets)
 if(ROCKETS_FOUND AND ROCKETS_USE_LIBWEBSOCKETS)
   option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ON)
-  if(BRAYNS_NETWORKING_ENABLED)
-    list(APPEND COMMON_FIND_PACKAGE_DEFINES BRAYNS_USE_NETWORKING)
-  endif()
 else()
-  set(BRAYNS_NETWORKING_ENABLED OFF)
+  option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" OFF)
+endif()
+
+if(BRAYNS_NETWORKING_ENABLED)
+  # We require turbojpeg for networking to get image streaming working
+  common_find_package(LibJpegTurbo REQUIRED)
+  common_find_package(Rockets REQUIRED)
+  if(NOT ROCKETS_USE_LIBWEBSOCKETS)
+    message(WARNING "Could not enable networking, missing Rockets with libwebsockets")
+  endif()
+  list(APPEND COMMON_FIND_PACKAGE_DEFINES BRAYNS_USE_NETWORKING)
+else()
+  common_find_package_disable(LibJpegTurbo)
+  common_find_package_disable(Rockets)
 endif()
 
 # OSPRay rendering engine

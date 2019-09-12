@@ -27,9 +27,8 @@
 #include <brayns/engine/Volume.h>
 
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
+#include <brayns/common/utils/filesystem.h>
 #include <brayns/parameters/AnimationParameters.h>
-
-#include <boost/filesystem.hpp>
 
 #include <set>
 
@@ -56,7 +55,7 @@ void _unbindMaterials(const AbstractSimulationHandlerPtr& simulationHandler,
 }
 }
 ModelParams::ModelParams(const std::string& path)
-    : _name(boost::filesystem::basename(path))
+    : _name(fs::path(path).stem())
     , _path(path)
 {
 }
@@ -104,7 +103,7 @@ ModelDescriptor& ModelDescriptor::operator=(const ModelParams& rhs)
         return *this;
     _updateValue(_boundingBox, rhs.getBoundingBox());
     if (rhs.getName().empty())
-        _updateValue(_name, boost::filesystem::basename(rhs.getPath()));
+        _updateValue(_name, fs::path(rhs.getPath()).stem().string());
     else
         _updateValue(_name, rhs.getName());
     _updateValue(_path, rhs.getPath());
@@ -157,9 +156,11 @@ ModelInstance* ModelDescriptor::getInstance(const size_t id)
 void ModelDescriptor::computeBounds()
 {
     _bounds.reset();
+    if (!_model)
+        return;
     for (const auto& instance : getInstances())
     {
-        if (!instance.getVisible() || !_model)
+        if (!instance.getVisible())
             continue;
 
         _bounds.merge(

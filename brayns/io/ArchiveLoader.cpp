@@ -21,6 +21,7 @@
 #include "ArchiveLoader.h"
 
 #include <brayns/common/log.h>
+#include <brayns/common/utils/filesystem.h>
 #include <brayns/common/utils/utils.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
@@ -29,11 +30,6 @@
 
 #include <archive.h>
 #include <archive_entry.h>
-
-#include <boost/filesystem.hpp>
-#include <boost/range.hpp>
-
-namespace fs = boost::filesystem;
 
 namespace
 {
@@ -52,10 +48,10 @@ archive* _openArchive(const std::string& filename)
     archive_read_support_filter_all(archive);
 
     // non-tar archives like gz, bzip2, ... need to be added as raw
-    auto extension = fs::extension(filename);
+    auto extension = brayns::extractExtension(filename);
     if (!extension.empty())
     {
-        if (isSupportedArchiveType(extension.erase(0, 1)))
+        if (isSupportedArchiveType(extension))
             archive_read_support_format_raw(archive);
     }
     if (archive_read_open_filename(archive, filename.c_str(), 10240) ==
@@ -74,10 +70,10 @@ archive* _openArchive(const brayns::Blob& blob)
     archive_read_support_filter_all(archive);
 
     // non-tar archives like gz, bzip2, ... need to be added as raw
-    auto extension = fs::extension(blob.name);
+    auto extension = brayns::extractExtension(blob.name);
     if (!extension.empty())
     {
-        if (isSupportedArchiveType(extension.erase(0, 1)))
+        if (isSupportedArchiveType(extension))
             archive_read_support_format_raw(archive);
     }
     if (archive_read_open_memory(archive, (void*)blob.data.data(),
@@ -170,7 +166,7 @@ void extractFile(const std::string& filename, const std::string& destination)
     auto archive = _openArchive(filename);
     if (!archive)
         throw std::runtime_error(filename + " is not a supported archive type");
-    _extractArchive(archive, fs::basename(filename), destination);
+    _extractArchive(archive, fs::path(filename).stem().string(), destination);
 }
 
 void extractBlob(brayns::Blob&& blob, const std::string& destination)
@@ -178,10 +174,21 @@ void extractBlob(brayns::Blob&& blob, const std::string& destination)
     auto archive = _openArchive(blob);
     if (!archive)
         throw std::runtime_error("Blob is not a supported archive type");
-    _extractArchive(archive, fs::basename(blob.name), destination);
+    _extractArchive(archive, fs::path(blob.name).stem().string(), destination);
 }
 
 const auto LOADER_NAME = "archive";
+
+struct TmpFolder
+{
+    TmpFolder()
+    {
+        if (!mkdtemp((char*)path.data()))
+            throw std::runtime_error("Could not create temporary directory");
+    }
+    ~TmpFolder() { fs::remove_all(path); }
+    std::string path{"/tmp/brayns_extracted_XXXXXX"};
+};
 }
 
 namespace brayns
@@ -208,8 +215,7 @@ ModelDescriptorPtr ArchiveLoader::loadExtracted(
         loaderName.empty() ? nullptr
                            : &_registry.getSuitableLoader("", "", loaderName);
 
-    for (const auto& i :
-         boost::make_iterator_range(fs::directory_iterator(path), {}))
+    for (const auto& i : fs::directory_iterator(path))
     {
         const std::string currPath = i.path().string();
         const std::string extension = extractExtension(currPath);
@@ -232,18 +238,18 @@ ModelDescriptorPtr ArchiveLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback,
     const PropertyMap& properties) const
 {
-    fs::path path = fs::temp_directory_path() / fs::unique_path();
-    extractBlob(std::move(blob), path.string());
-    return loadExtracted(path.string(), callback, properties);
+    TmpFolder tmpFolder;
+    extractBlob(std::move(blob), tmpFolder.path);
+    return loadExtracted(tmpFolder.path, callback, properties);
 }
 
 ModelDescriptorPtr ArchiveLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
     const PropertyMap& properties) const
 {
-    fs::path path = fs::temp_directory_path() / fs::unique_path();
-    extractFile(filename, path.string());
-    return loadExtracted(path.string(), callback, properties);
+    TmpFolder tmpFolder;
+    extractFile(filename, tmpFolder.path);
+    return loadExtracted(tmpFolder.path, callback, properties);
 }
 
 std::string ArchiveLoader::getName() const

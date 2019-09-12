@@ -34,10 +34,10 @@
 
 #include <BBP/TestDatasets.h>
 
-#define BOOST_TEST_MODULE optixCircuit
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "tests/doctest.h"
 
-BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping_optix)
+TEST_CASE("circuit_with_simulation_mapping_optix")
 {
     std::vector<const char*> argv = {
         "brayns", BBP_TEST_BLUECONFIG3, "--animation-frame", "50", "--engine",
@@ -54,6 +54,6 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping_optix)
     modelDesc->getModel().getSimulationHandler()->waitReady();
     brayns.commitAndRender();
 
-    BOOST_CHECK(compareTestImage("testdataallmini50basicsimulation_optix.png",
-                                 brayns.getEngine().getFrameBuffer()));
+    CHECK(compareTestImage("testdataallmini50basicsimulation_optix.png",
+                           brayns.getEngine().getFrameBuffer()));
 }

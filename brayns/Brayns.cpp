@@ -30,7 +30,7 @@
 #include <brayns/common/log.h>
 #include <brayns/common/mathTypes.h>
 #include <brayns/common/utils/DynamicLib.h>
-#include <brayns/common/utils/utils.h>
+#include <brayns/common/utils/stringUtils.h>
 
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
@@ -64,7 +64,6 @@ const float DEFAULT_MOTION_ACCELERATION = 1.5f;
 
 const brayns::Vector3f DEFAULT_SUN_DIRECTION = {1.f, -1.f, -1.f};
 const brayns::Vector3f DEFAULT_SUN_COLOR = {0.9f, 0.9f, 0.9f};
-const brayns::Vector3f DEFAULT_SUN_POSITION = {-10.f, 10.f, -10.f};
 constexpr double DEFAULT_SUN_ANGULAR_DIAMETER = 0.53;
 constexpr double DEFAULT_SUN_INTENSITY = 1.0;
 } // namespace
@@ -269,9 +268,9 @@ private:
         auto engineName =
             _parametersManager.getApplicationParameters().getEngine();
 
-        if (toLowercase(engineName) == "optix")
+        if (string_utils::toLowercase(engineName) == "optix")
             engineName = "braynsOptixEngine";
-        else if (toLowercase(engineName) == "ospray")
+        else if (string_utils::toLowercase(engineName) == "ospray")
             engineName = "braynsOSPRayEngine";
 
         _engine = _engineFactory.create(engineName);
@@ -288,6 +287,8 @@ private:
 
         _engine->getCamera().setCurrentType(
             _parametersManager.getRenderingParameters().getCurrentCamera());
+        _engine->getRenderer().setCurrentType(
+            _parametersManager.getRenderingParameters().getCurrentRenderer());
     }
 
     void _createFrameBuffer()
@@ -393,7 +394,8 @@ private:
                 scene.loadModel(path, params, {progress});
             }
         }
-        scene.setEnvironmentMap(_parametersManager.getApplicationParameters().getEnvMap());
+        scene.setEnvironmentMap(
+            _parametersManager.getApplicationParameters().getEnvMap());
         scene.markModified();
     }
 

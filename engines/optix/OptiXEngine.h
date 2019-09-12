@@ -37,9 +37,6 @@ public:
     /** @copydoc Engine::commit */
     void commit() final;
 
-    /** @copydoc Engine::preRender */
-    void preRender() final;
-
     /** @copydoc Engine::getMinimumFrameSize */
     Vector2ui getMinimumFrameSize() const final;
 

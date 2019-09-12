@@ -18,8 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE braynsSnapshot
-
 #include <jsonSerialization.h>
 #include <tests/paths.h>
 
@@ -29,9 +27,7 @@
 
 #include "tests/PDiffHelpers.h"
 
-BOOST_GLOBAL_FIXTURE(ClientServer);
-
-BOOST_AUTO_TEST_CASE(snapshot)
+TEST_CASE_FIXTURE(ClientServer, "snapshot")
 {
     brayns::SnapshotParams params;
     params.format = "png";
@@ -42,10 +38,10 @@ BOOST_AUTO_TEST_CASE(snapshot)
         makeRequest<brayns::SnapshotParams,
                     brayns::ImageGenerator::ImageBase64>("snapshot", params);
 
-    BOOST_CHECK(compareBase64TestImage(image, "snapshot.png"));
+    CHECK(compareBase64TestImage(image, "snapshot.png"));
 }
 
-BOOST_AUTO_TEST_CASE(snapshot_with_render_params)
+TEST_CASE_FIXTURE(ClientServer, "snapshot_with_render_params")
 {
     // move far enough away to see the background
     auto camera{std::make_unique<brayns::Camera>()};
@@ -72,23 +68,23 @@ BOOST_AUTO_TEST_CASE(snapshot_with_render_params)
         makeRequest<brayns::SnapshotParams,
                     brayns::ImageGenerator::ImageBase64>("snapshot", params);
 
-    BOOST_CHECK_NE(image.data, image_with_red_background.data);
+    CHECK_NE(image.data, image_with_red_background.data);
 }
 
-BOOST_AUTO_TEST_CASE(snapshot_empty_params)
+TEST_CASE_FIXTURE(ClientServer, "snapshot_empty_params")
 {
-    BOOST_CHECK_THROW((makeRequest<brayns::SnapshotParams,
-                                   brayns::ImageGenerator::ImageBase64>(
-                          "snapshot", brayns::SnapshotParams())),
-                      rockets::jsonrpc::response_error);
+    CHECK_THROWS_AS((makeRequest<brayns::SnapshotParams,
+                                 brayns::ImageGenerator::ImageBase64>(
+                        "snapshot", brayns::SnapshotParams())),
+                    rockets::jsonrpc::response_error);
 }
 
-BOOST_AUTO_TEST_CASE(snapshot_illegal_format)
+TEST_CASE_FIXTURE(ClientServer, "snapshot_illegal_format")
 {
     brayns::SnapshotParams params;
     params.size = {5, 5};
     params.format = "";
-    BOOST_CHECK_THROW(
+    CHECK_THROWS_AS(
         (makeRequest<brayns::SnapshotParams,
                      brayns::ImageGenerator::ImageBase64>("snapshot", params)),
         rockets::jsonrpc::response_error);

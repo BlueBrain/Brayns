@@ -25,7 +25,7 @@ static __device__ inline T interpolateValues(const float v_min,
                                              const float value,
                                              optix::buffer<T, 1>& values)
 {
-    const int num_values = values.size() / sizeof(T);
+    const int num_values = values.size();
 
     const float v_clamped = min(v_max, max(v_min, value));
     const float range_per_value = (v_max - v_min) / (num_values - 1);

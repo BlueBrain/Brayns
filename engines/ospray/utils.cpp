@@ -113,8 +113,10 @@ void fromOSPRayProperties(PropertyMap& object, ospray::ManagedObject& ospObject)
             break;
         case Property::Type::Bool:
             // FIXME(jonask): When supported by OSPRay use bool
-            prop->set(ospObject.getParam(prop->name.c_str(),
-                                         static_cast<bool>(prop->get<int>())));
+            // bool's are stored as int within ospray
+            prop->set(static_cast<bool>(
+                ospObject.getParam(prop->name.c_str(),
+                                   static_cast<int>(prop->get<bool>()))));
             break;
         case Property::Type::String:
             prop->set(ospObject.getParamString(prop->name.c_str(),
@@ -217,8 +219,7 @@ void set(OSPObject obj, const char* id, float v)
 }
 void set(OSPObject obj, const char* id, bool v)
 {
-    // FIXME(jonask): When supported by OSPRay use bool
-    ospSet1i(obj, id, static_cast<int>(v));
+    ospSet1b(obj, id, v);
 }
 void set(OSPObject obj, const char* id, int32_t v)
 {

@@ -34,20 +34,14 @@
 
 #ifdef BRAYNS_USE_NETWORKING
 #include <ImageGenerator.h>
-#include <boost/filesystem.hpp>
 #include <brayns/common/utils/base64/base64.h>
 #include <fstream>
-namespace fs = boost::filesystem;
 #endif
 
-inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
-    brayns::FrameBuffer& fb)
+inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(FIBITMAP* image)
 {
-    brayns::freeimage::ImagePtr image(
-        FreeImage_ConvertTo32Bits(fb.getImage().get()));
-
-    const auto w = FreeImage_GetWidth(image.get());
-    const auto h = FreeImage_GetHeight(image.get());
+    const auto w = FreeImage_GetWidth(image);
+    const auto h = FreeImage_GetHeight(image);
 
     auto result = std::make_unique<pdiff::RGBAImage>(w, h, "");
     // Copy the image over to our internal format, FreeImage has the scanlines
@@ -56,23 +50,41 @@ inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
     for (unsigned int y = 0; y < h; y++, dest += w)
     {
         const auto scanline = reinterpret_cast<const unsigned int*>(
-            FreeImage_GetScanLine(image.get(), h - y - 1));
+            FreeImage_GetScanLine(image, h - y - 1));
         memcpy(dest, scanline, sizeof(dest[0]) * w);
     }
 
     return result;
 }
 
+inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
+    brayns::FrameBuffer& fb)
+{
+    return createPDiffRGBAImage(FreeImage_ConvertTo32Bits(fb.getImage().get()));
+}
+
+inline std::unique_ptr<pdiff::RGBAImage> clonePDiffRGBAImage(
+    const pdiff::RGBAImage& image)
+{
+    auto result = std::make_unique<pdiff::RGBAImage>(image.get_width(),
+                                                     image.get_height(), "");
+    const auto dataSize = image.get_width() * image.get_height() * 4;
+    memcpy(result->get_data(), image.get_data(), dataSize);
+    return result;
+}
+
 inline bool _compareImage(const pdiff::RGBAImage& image,
                           const std::string& filename,
+                          pdiff::RGBAImage& imageDiff,
                           const pdiff::PerceptualDiffParameters& parameters =
                               pdiff::PerceptualDiffParameters())
 {
     const auto fullPath = std::string(BRAYNS_TESTDATA_IMAGES_PATH) + filename;
     const auto referenceImage{pdiff::read_from_file(fullPath)};
     std::string errorOutput;
-    bool success = pdiff::yee_compare(*referenceImage, image, parameters,
-                                      nullptr, nullptr, &errorOutput);
+    bool success =
+        pdiff::yee_compare(*referenceImage, image, parameters, nullptr, nullptr,
+                           &errorOutput, &imageDiff, nullptr);
     if (!success)
         std::cerr << "Pdiff failure reason: " << errorOutput;
     return success;
@@ -83,16 +95,23 @@ inline bool compareTestImage(const std::string& filename,
                              const pdiff::PerceptualDiffParameters& parameters =
                                  pdiff::PerceptualDiffParameters())
 {
-    static bool saveImages = getenv("BRAYNS_SAVE_TEST_IMAGES");
-    if (saveImages)
-    {
-        auto image = fb.getImage();
-        FreeImage_Save(FreeImage_GetFIFFromFilename(filename.c_str()),
-                       image.get(), filename.c_str());
-    }
+    static bool saveTestImages = getenv("BRAYNS_SAVE_TEST_IMAGES");
+    static bool saveDiffImages = getenv("BRAYNS_SAVE_DIFF_IMAGES");
+    if (saveTestImages)
+        createPDiffRGBAImage(fb)->write_to_file(filename);
 
     auto testImage = createPDiffRGBAImage(fb);
-    return _compareImage(*testImage, filename, parameters);
+    auto imageDiff = clonePDiffRGBAImage(*testImage);
+
+    bool success = _compareImage(*testImage, filename, *imageDiff, parameters);
+
+    if (!success && saveDiffImages)
+    {
+        const auto filenameDiff = ("diff_" + filename);
+        imageDiff->write_to_file(filenameDiff);
+    }
+
+    return success;
 }
 
 #ifdef BRAYNS_USE_NETWORKING
@@ -109,13 +128,19 @@ inline bool compareBase64TestImage(
         file << decodedImage;
     }
 
-    const std::string newFilename(
-        (fs::temp_directory_path() / fs::unique_path()).string());
-    {
-        std::fstream file(newFilename, std::ios::out);
-        file << decodedImage;
-    }
-    const auto testImage{pdiff::read_from_file(newFilename)};
-    return _compareImage(*testImage, filename);
+    auto freeImageMem =
+        FreeImage_OpenMemory((BYTE*)decodedImage.data(), decodedImage.length());
+    const auto fif = FreeImage_GetFileTypeFromMemory(freeImageMem, 0);
+    auto decodedFreeImage = FreeImage_LoadFromMemory(fif, freeImageMem, 0);
+
+    const auto testImage{createPDiffRGBAImage(decodedFreeImage)};
+    auto imageDiff = clonePDiffRGBAImage(*testImage);
+
+    auto result = _compareImage(*testImage, filename, *imageDiff);
+
+    FreeImage_Unload(decodedFreeImage);
+    FreeImage_CloseMemory(freeImageMem);
+
+    return result;
 }
 #endif

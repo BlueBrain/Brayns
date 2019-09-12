@@ -22,5 +22,5 @@
 Pillow~=5.4.1
 python-jsonschema-objects~=0.3.5
 requests~=2.21.0
-rockets~=1.0.1
+rockets~=1.0.2
 semver~=2.8.1

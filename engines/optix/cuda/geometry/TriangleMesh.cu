@@ -44,6 +44,8 @@ rtDeclareVariable(float2, t1, attribute t1, );
 rtDeclareVariable(float2, t2, attribute t2, );
 rtDeclareVariable(float2, ddx, attribute ddx, );
 rtDeclareVariable(float2, ddy, attribute ddy, );
+rtDeclareVariable(float3, ddxWPos, attribute ddxWPos, );
+rtDeclareVariable(float3, ddyWPos, attribute ddyWPos, );
 rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, );
 rtDeclareVariable(float3, shading_normal, attribute shading_normal, );
 
@@ -53,6 +55,17 @@ rtDeclareVariable(float3, front_hit_point, attribute front_hit_point, );
 rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
 rtDeclareVariable(PerRayData_radiance, prd, rtPayload, );
 rtDeclareVariable(unsigned long, simulation_idx, attribute simulation_idx, );
+
+static __device__ void computeWPosDerivatives(float3& ddxwpos, float3& ddywpos,
+                                              float3 p0, float3 p1, float3 p2,
+                                              float2 betaDerivative,
+                                              float2 gammaDerivative)
+{
+    ddxwpos = p1 * betaDerivative.x + p2 * gammaDerivative.x +
+              p0 * (-betaDerivative.x - gammaDerivative.x);
+    ddywpos = p1 * betaDerivative.y + p2 * gammaDerivative.y +
+              p0 * (-betaDerivative.y - gammaDerivative.y);
+}
 
 static __device__ bool intersect_triangle_filtered(
     const Ray& ray, const float3& p0, const float3& p1, const float3& p2,
@@ -130,6 +143,8 @@ static __device__ void meshIntersect(int primIdx)
             if (texcoord_buffer.size() == 0)
             {
                 texcoord = make_float2(0.f, 0.f);
+                computeWPosDerivatives(ddxWPos, ddyWPos, p0, p1, p2,
+                                       betaDerivative, gammaDerivative);
             }
             else
             {
@@ -143,6 +158,9 @@ static __device__ void meshIntersect(int primIdx)
                       t0 * (-betaDerivative.x - gammaDerivative.x);
                 ddy = t1 * betaDerivative.y + t2 * gammaDerivative.y +
                       t0 * (-betaDerivative.y - gammaDerivative.y);
+
+                computeWPosDerivatives(ddxWPos, ddyWPos, p0, p1, p2,
+                                       betaDerivative, gammaDerivative);
             }
 
             if (DO_REFINE)

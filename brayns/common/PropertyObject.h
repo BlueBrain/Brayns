@@ -49,14 +49,15 @@ public:
     const std::string& getCurrentType() const { return _currentType; }
     /** Update the value of the given property for the current type. */
     template <typename T>
-    inline void updateProperty(const std::string& name, const T& value)
+    inline void updateProperty(const std::string& name, const T& value,
+                               const bool triggerCallback = true)
     {
-        const auto oldValue =
-            _properties.at(_currentType).getProperty<T>(name, value);
+        auto& propMap = _properties.at(_currentType);
+        const auto oldValue = propMap.getProperty<T>(name, value);
         if (!_isEqual(oldValue, value))
         {
-            _properties.at(_currentType).updateProperty(name, value);
-            markModified();
+            propMap.updateProperty(name, value);
+            markModified(triggerCallback);
         }
     }
 

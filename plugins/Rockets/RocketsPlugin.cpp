@@ -26,6 +26,7 @@
 
 #include <brayns/common/Timer.h>
 #include <brayns/common/tasks/Task.h>
+#include <brayns/common/utils/stringUtils.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <brayns/tasks/AddModelFromBlobTask.h>
@@ -1147,10 +1148,11 @@ public:
 
     void _handleQuit()
     {
-        _handleRPC({METHOD_QUIT, "Quit the application"}, [& engine = _engine] {
-            engine.setKeepRunning(false);
-            engine.triggerRender();
-        });
+        _handleRPC({METHOD_QUIT, "Quit the application"},
+                   [& engine = _engine] {
+                       engine.setKeepRunning(false);
+                       engine.triggerRender();
+                   });
     }
 
     void _handleResetCamera()
@@ -1396,7 +1398,7 @@ public:
 
                 jsonStrings.emplace_back(to_json(rpcLight));
             }
-            return Response{"[" + joinStrings(jsonStrings, ",") + "]"};
+            return Response{"[" + string_utils::join(jsonStrings, ",") + "]"};
         });
 
         _handleSchema(
@@ -1656,7 +1658,8 @@ public:
     void _handleGetLoaders()
     {
         _handleRPC<std::vector<LoaderInfo>>(
-            {METHOD_GET_LOADERS, "Get all loaders"}, [&]() {
+            {METHOD_GET_LOADERS, "Get all loaders"},
+            [&] {
                 auto& scene = _engine.getScene();
                 return scene.getLoaderRegistry().getLoaderInfos();
             });

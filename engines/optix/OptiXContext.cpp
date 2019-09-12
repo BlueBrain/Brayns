@@ -62,8 +62,8 @@ void textureToOptix(T* ptr_dst, const brayns::Texture2D& texture,
                     const uint8_t face, const uint8_t mipLevel,
                     const bool hasAlpha)
 {
-    uint16_t width = texture.getWidth();
-    uint16_t height = texture.getHeight();
+    uint16_t width = texture.width;
+    uint16_t height = texture.height;
     for (uint8_t i = 0; i < mipLevel; ++i)
     {
         width /= 2;
@@ -188,14 +188,14 @@ void OptiXContext::setCamera(const std::string& name)
 
 ::optix::TextureSampler OptiXContext::createTextureSampler(Texture2DPtr texture)
 {
-    uint16_t nx = texture->getWidth();
-    uint16_t ny = texture->getHeight();
-    const uint16_t channels = texture->getNbChannels();
+    uint16_t nx = texture->width;
+    uint16_t ny = texture->height;
+    const uint16_t channels = texture->channels;
     const uint16_t optixChannels = 4;
     const bool hasAlpha = optixChannels == channels;
 
-    const bool useFloat = texture->getDepth() == 4;
-    const bool useByte = texture->getDepth() == 1;
+    const bool useFloat = texture->depth == 4;
+    const bool useByte = texture->depth == 1;
 
     if (!useFloat && !useByte)
         throw std::runtime_error("Only byte or float textures are supported");
@@ -295,6 +295,25 @@ void OptiXContext::setCamera(const std::string& name)
                          ptr_src[(((y * 2u + 1u) * nx + x) * 2u + 1u) * 4u +
                                  3u]) /
                         4.0f;
+
+                    if (texture->isNormalMap())
+                    {
+                        glm::vec3 normalized = glm::normalize(glm::vec3(
+                            2.0f * (float)ptr_dst[(y * nx + x) * 4u] / 255.0f -
+                                1.0f,
+                            2.0f * (float)ptr_dst[(y * nx + x) * 4u + 1u] /
+                                    255.0f -
+                                1.0f,
+                            2.0f * (float)ptr_dst[(y * nx + x) * 4u + 2u] /
+                                    255.0f -
+                                1.0f));
+                        ptr_dst[(y * nx + x) * 4u] =
+                            255.0f * (0.5f * normalized.x + 0.5f);
+                        ptr_dst[(y * nx + x) * 4u + 1u] =
+                            255.0f * (0.5f * normalized.y + 0.5f);
+                        ptr_dst[(y * nx + x) * 4u + 2u] =
+                            255.0f * (0.5f * normalized.z + 0.5f);
+                    }
                 }
             }
             ny /= 2u;

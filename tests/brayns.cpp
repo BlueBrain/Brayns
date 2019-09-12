@@ -28,85 +28,76 @@
 #include <brayns/manipulators/InspectCenterManipulator.h>
 #include <brayns/parameters/ParametersManager.h>
 
-#define BOOST_TEST_MODULE brayns
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 
-BOOST_AUTO_TEST_CASE(simple_construction)
+TEST_CASE("simple_construction")
 {
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-    BOOST_CHECK_NO_THROW(
-        brayns::Brayns(testSuite.argc,
-                       const_cast<const char**>(testSuite.argv)));
+    const char* argv[] = {"brayns"};
+    CHECK_NOTHROW(brayns::Brayns(1, argv));
 }
 
-BOOST_AUTO_TEST_CASE(defaults)
+TEST_CASE("defaults")
 {
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {app, "demo"};
+    const char* argv[] = {"brayns", "demo"};
     const int argc = sizeof(argv) / sizeof(char*);
     brayns::Brayns brayns(argc, argv);
 
     auto& camera = brayns.getEngine().getCamera();
-    BOOST_CHECK_EQUAL(camera.getCurrentType(), "perspective");
-    BOOST_CHECK_EQUAL(camera.getPosition(), brayns::Vector3d(0.5, 0.5, 1.5));
-    BOOST_CHECK_EQUAL(camera.getOrientation(), brayns::Quaterniond(1, 0, 0, 0));
+    CHECK_EQ(camera.getCurrentType(), "perspective");
+    CHECK_EQ(camera.getPosition(), brayns::Vector3d(0.5, 0.5, 1.5));
+    CHECK_EQ(camera.getOrientation(), brayns::Quaterniond(1, 0, 0, 0));
 
     auto& manipulator = brayns.getCameraManipulator();
-    BOOST_CHECK(dynamic_cast<brayns::InspectCenterManipulator*>(&manipulator));
+    CHECK(dynamic_cast<brayns::InspectCenterManipulator*>(&manipulator));
 
     auto& fb = brayns.getEngine().getFrameBuffer();
-    BOOST_CHECK(!fb.getColorBuffer());
-    BOOST_CHECK_EQUAL(fb.getColorDepth(), 4);
-    BOOST_CHECK(!fb.getDepthBuffer());
-    BOOST_CHECK_EQUAL(fb.getSize(), brayns::Vector2ui(800, 600));
+    CHECK(!fb.getColorBuffer());
+    CHECK_EQ(fb.getColorDepth(), 4);
+    CHECK(!fb.getDepthBuffer());
+    CHECK_EQ(fb.getSize(), brayns::Vector2ui(800, 600));
 
     auto& pm = brayns.getParametersManager();
     const auto& appParams = pm.getApplicationParameters();
-    BOOST_CHECK(appParams.getEngine() == "ospray");
-    BOOST_CHECK(appParams.getOsprayModules().empty());
-    BOOST_CHECK_EQUAL(appParams.getWindowSize(), brayns::Vector2ui(800, 600));
-    BOOST_CHECK(!appParams.isBenchmarking());
-    BOOST_CHECK_EQUAL(appParams.getJpegCompression(), 90);
-    BOOST_CHECK_EQUAL(appParams.getImageStreamFPS(), 60);
+    CHECK(appParams.getEngine() == "ospray");
+    CHECK(appParams.getOsprayModules().empty());
+    CHECK_EQ(appParams.getWindowSize(), brayns::Vector2ui(800, 600));
+    CHECK(!appParams.isBenchmarking());
+    CHECK_EQ(appParams.getJpegCompression(), 90);
+    CHECK_EQ(appParams.getImageStreamFPS(), 60);
 
     const auto& renderParams = pm.getRenderingParameters();
-    BOOST_CHECK_EQUAL(renderParams.getCurrentCamera(), "perspective");
-    BOOST_CHECK_EQUAL(renderParams.getCurrentRenderer(), "basic");
-    BOOST_CHECK_EQUAL(renderParams.getCameras().size(), 4);
-    BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 6);
-    BOOST_CHECK_EQUAL(renderParams.getSamplesPerPixel(), 1);
-    BOOST_CHECK_EQUAL(renderParams.getBackgroundColor(),
-                      brayns::Vector3d(0, 0, 0));
+    CHECK_EQ(renderParams.getCurrentCamera(), "perspective");
+    CHECK_EQ(renderParams.getCurrentRenderer(), "basic");
+    CHECK_EQ(renderParams.getCameras().size(), 4);
+    CHECK_EQ(renderParams.getRenderers().size(), 6);
+    CHECK_EQ(renderParams.getSamplesPerPixel(), 1);
+    CHECK_EQ(renderParams.getBackgroundColor(), brayns::Vector3d(0, 0, 0));
 
     const auto& geomParams = pm.getGeometryParameters();
-    BOOST_CHECK(geomParams.getColorScheme() == brayns::ColorScheme::none);
-    BOOST_CHECK(geomParams.getGeometryQuality() ==
-                brayns::GeometryQuality::high);
+    CHECK(geomParams.getColorScheme() == brayns::ColorScheme::none);
+    CHECK(geomParams.getGeometryQuality() == brayns::GeometryQuality::high);
 
     const auto& animParams = pm.getAnimationParameters();
-    BOOST_CHECK_EQUAL(animParams.getFrame(), 0);
+    CHECK_EQ(animParams.getFrame(), 0);
 
     const auto& volumeParams = pm.getVolumeParameters();
-    BOOST_CHECK_EQUAL(volumeParams.getDimensions(), brayns::Vector3ui(0, 0, 0));
-    BOOST_CHECK_EQUAL(volumeParams.getElementSpacing(),
-                      brayns::Vector3d(1., 1., 1.));
-    BOOST_CHECK_EQUAL(volumeParams.getOffset(), brayns::Vector3d(0., 0., 0.));
+    CHECK_EQ(volumeParams.getDimensions(), brayns::Vector3ui(0, 0, 0));
+    CHECK_EQ(volumeParams.getElementSpacing(), brayns::Vector3d(1., 1., 1.));
+    CHECK_EQ(volumeParams.getOffset(), brayns::Vector3d(0., 0., 0.));
 
     auto& scene = brayns.getEngine().getScene();
     brayns::Boxd defaultBoundingBox;
     defaultBoundingBox.merge(brayns::Vector3d(0, 0, 0));
     defaultBoundingBox.merge(brayns::Vector3d(1, 1, 1));
-    BOOST_CHECK_EQUAL(scene.getBounds(), defaultBoundingBox);
-    BOOST_CHECK(geomParams.getMemoryMode() == brayns::MemoryMode::shared);
+    CHECK_EQ(scene.getBounds(), defaultBoundingBox);
+    CHECK(geomParams.getMemoryMode() == brayns::MemoryMode::shared);
 }
 
-BOOST_AUTO_TEST_CASE(bvh_type)
+TEST_CASE("bvh_type")
 {
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-    const char* app = testSuite.argv[0];
     const char* argv[] = {
-        app,       "demo", "--default-bvh-flag", "robust", "--default-bvh-flag",
+        "brayns",  "demo", "--default-bvh-flag", "robust", "--default-bvh-flag",
         "compact",
     };
     const int argc = sizeof(argv) / sizeof(char*);
@@ -115,6 +106,6 @@ BOOST_AUTO_TEST_CASE(bvh_type)
     auto model = brayns.getEngine().getScene().getModel(0);
     const auto& bvhFlags = model->getModel().getBVHFlags();
 
-    BOOST_CHECK(bvhFlags.count(brayns::BVHFlag::robust) > 0);
-    BOOST_CHECK(bvhFlags.count(brayns::BVHFlag::compact) > 0);
+    CHECK(bvhFlags.count(brayns::BVHFlag::robust) > 0);
+    CHECK(bvhFlags.count(brayns::BVHFlag::compact) > 0);
 }

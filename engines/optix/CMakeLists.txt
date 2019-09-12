@@ -15,6 +15,8 @@ if(CUDA_FOUND)
 endif()
 message(STATUS "Using CUDA version ${CUDA_VERSION}")
 
+set(CUDA_NVCC_FLAGS "--use_fast_math")
+
 # Patch for cmake 3.7->3.9
 if(CMAKE_VERSION VERSION_GREATER "3.6" AND CMAKE_VERSION VERSION_LESS "3.10")
   set(CUDA_run_nvcc "${CMAKE_CURRENT_SOURCE_DIR}/CMake/run_nvcc.cmake")
@@ -27,6 +29,7 @@ set(BRAYNSOPTIXENGINE_OMIT_VERSION_HEADERS ON)
 
 set(BRAYNSOPTIXENGINE_CU
   cuda/camera/PerspectiveCamera.cu
+  cuda/camera/OpenDeckCamera.cu
   cuda/Constantbg.cu
   cuda/geometry/Cones.cu
   cuda/geometry/Cylinders.cu
@@ -35,6 +38,7 @@ set(BRAYNSOPTIXENGINE_CU
   cuda/renderer/AdvancedSimulation.cu
   cuda/renderer/BasicSimulation.cu
   cuda/renderer/PBR.cu
+  cuda/renderer/BBP.cu
 )
 
 CUDA_WRAP_SRCS(braynsOptixEngine PTX ptx_generated_files ${BRAYNSOPTIXENGINE_CU})
@@ -51,6 +55,7 @@ set(BRAYNSOPTIXENGINE_SOURCES
   OptiXScene.cpp
   OptiXCamera.cpp
   OptiXPerspectiveCamera.cpp
+  OptiXOpenDeckCamera.cpp
   OptiXRenderer.cpp
   OptiXEngine.cpp
   OptiXMaterial.cpp
@@ -63,6 +68,7 @@ set_source_files_properties(
   OptiXScene.cpp
   OptiXCamera.cpp
   OptiXPerspectiveCamera.cpp
+  OptiXOpenDeckCamera.cpp
   OptiXRenderer.cpp
   OptiXEngine.cpp
   OptiXMaterial.cpp
@@ -77,6 +83,7 @@ set(BRAYNSOPTIXENGINE_HEADERS
   OptiXScene.h
   OptiXCamera.h
   OptiXCameraProgram.h
+  OptiXOpenDeckCamera.h
   OptiXPerspectiveCamera.h
   OptiXRenderer.h
   OptiXEngine.h

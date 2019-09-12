@@ -29,9 +29,9 @@
 
 #include <brayns/parameters/GeometryParameters.h>
 
-#include <fstream>
+#include <brayns/common/utils/filesystem.h>
 
-#include <boost/filesystem.hpp>
+#include <fstream>
 
 namespace
 {
@@ -144,6 +144,7 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
                 {true, true, modelDescriptor->getTransformation()});
     }
 
+    _computeBounds();
     markModified();
 
     return modelDescriptor->getModelID();
@@ -200,7 +201,7 @@ bool Scene::empty() const
 size_t Scene::addClipPlane(const Plane& plane)
 {
     auto clipPlane = std::make_shared<ClipPlane>(plane);
-    clipPlane->onModified([&](const BaseObject&) { markModified(); });
+    clipPlane->onModified([&](const BaseObject&) { markModified(false); });
     _clipPlanes.emplace_back(std::move(clipPlane));
     markModified();
     return _clipPlanes.back()->getID();
@@ -438,9 +439,8 @@ void Scene::_loadIBLMaps(const std::string& envMap)
     {
         auto tex = _backgroundMaterial->getTexture(TextureType::diffuse);
 
-        namespace fs = boost::filesystem;
         const auto path = fs::path(envMap).parent_path();
-        const auto basename = (path / fs::basename(envMap)).string();
+        const auto basename = (path / fs::path(envMap).stem()).string();
 
         const std::string irradianceMap = basename + IRRADIANCE_MAP + ".hdr";
         const std::string radianceMap = basename + RADIANCE_MAP + ".hdr";

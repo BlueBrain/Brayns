@@ -20,11 +20,8 @@
 
 #include "LoaderRegistry.h"
 
+#include <brayns/common/utils/filesystem.h>
 #include <brayns/common/utils/utils.h>
-
-#include <boost/filesystem.hpp>
-#include <boost/range/iterator_range_core.hpp>
-namespace fs = boost::filesystem;
 
 namespace brayns
 {

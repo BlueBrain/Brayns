@@ -28,7 +28,8 @@
 #include <engines/ospray/ispc/render/DefaultMaterial.h>
 #include <engines/ospray/ispc/render/utils/AbstractRenderer.h>
 
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 
 using Vec2 = std::array<unsigned, 2>;
 const Vec2 vecVal{{1, 1}};
@@ -50,7 +51,7 @@ public:
     void init() final
     {
         auto actions = _api->getActionInterface();
-        BOOST_REQUIRE(actions);
+        REQUIRE(actions);
 
         // test property map for actions
         actions->registerNotification(
@@ -63,9 +64,10 @@ public:
             brayns::RpcParameterDescription{"notify-param",
                                             "A notification with property map",
                                             "param", "a beautiful input param"},
-            input, [&](const brayns::PropertyMap& prop) {
+            input,
+            [&](const brayns::PropertyMap& prop) {
                 if (prop.hasProperty("value"))
-                    BOOST_CHECK_EQUAL(prop.getProperty<int>("value"), 42);
+                    CHECK_EQ(prop.getProperty<int>("value"), 42);
                 else
                     ++numFails;
                 ++numCalls;
@@ -89,7 +91,8 @@ public:
             input, output,
             [&, output = output ](const brayns::PropertyMap& prop) {
                 ++numCalls;
-                BOOST_CHECK_EQUAL(prop.getProperty<int>("value"), 42);
+                auto val = prop.getProperty<int>("value");
+                CHECK_EQ(val, 42);
                 return output;
             });
 
@@ -97,7 +100,7 @@ public:
         actions->registerNotification("hello", [&] { ++numCalls; });
         actions->registerNotification<Vec2>("foo", [&](const Vec2& vec) {
             ++numCalls;
-            BOOST_CHECK(vec == vecVal);
+            CHECK(vec == vecVal);
         });
 
         actions->registerRequest<std::string>("who", [&] {
@@ -121,8 +124,8 @@ public:
 
     ~MyPlugin()
     {
-        BOOST_REQUIRE_EQUAL(numCalls, 10);
-        BOOST_REQUIRE_EQUAL(numFails, 1);
+        REQUIRE_EQ(numCalls, 10);
+        REQUIRE_EQ(numFails, 1);
     }
     size_t numCalls{0};
     size_t numFails{0};

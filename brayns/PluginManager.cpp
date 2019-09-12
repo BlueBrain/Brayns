@@ -21,7 +21,7 @@
 #include "PluginManager.h"
 
 #include <brayns/common/log.h>
-#include <brayns/common/utils/utils.h>
+#include <brayns/common/utils/stringUtils.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #include <brayns/pluginapi/PluginAPI.h>
@@ -29,7 +29,15 @@
 #include <plugins/Rockets/RocketsPlugin.h>
 #endif
 
-#include <boost/algorithm/string.hpp>
+namespace
+{
+bool containsString(const int length, const char** input, const char* toFind)
+{
+    return std::count_if(input, input + length, [toFind](const char* arg) {
+               return std::strcmp(arg, toFind) == 0;
+           }) > 0;
+}
+}
 
 namespace brayns
 {
@@ -51,10 +59,9 @@ PluginManager::PluginManager(int argc, const char** argv)
         }
 
         std::string str(argv[i]);
-        boost::trim(str);
-        std::vector<std::string> words;
-        boost::split(words, str, boost::is_any_of(" "),
-                     boost::token_compress_on);
+        string_utils::trim(str);
+        auto words = string_utils::split(str, ' ');
+
         if (help)
             words.push_back("--help");
 

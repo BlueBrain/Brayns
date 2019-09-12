@@ -20,10 +20,8 @@
 
 #include "ImageManager.h"
 #include <brayns/common/log.h>
+#include <brayns/common/utils/filesystem.h>
 #include <brayns/common/utils/imageUtils.h>
-
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
 
 namespace brayns
 {
@@ -51,8 +49,8 @@ std::vector<unsigned char> getRawData(const freeimage::ImagePtr& image,
 void setRawData(Texture2DPtr texture, const freeimage::ImagePtr& image,
                 const uint8_t mip = 0)
 {
-    auto width = texture->getWidth();
-    auto height = texture->getHeight();
+    auto width = texture->width;
+    auto height = texture->height;
     for (uint8_t i = 0; i < mip; ++i)
     {
         width /= 2;
@@ -115,6 +113,7 @@ Texture2DPtr ImageManager::importTextureFromFile(
     auto width = FreeImage_GetWidth(image.get());
     const auto height = FreeImage_GetHeight(image.get());
     const auto bytesPerPixel = FreeImage_GetBPP(image.get()) / 8;
+    const auto channels = bytesPerPixel / depth;
     FreeImage_FlipVertical(image.get());
 
     Texture2D::Type textureType = Texture2D::Type::default_;
@@ -127,21 +126,19 @@ Texture2DPtr ImageManager::importTextureFromFile(
     }
     else if (type == TextureType::normals) // TODO: only valid for PBR
         textureType = Texture2D::Type::normal_roughness;
+    else if (type == TextureType::specular) // TODO: only valid for BBP
+        textureType = Texture2D::Type::aoe;
 
-    auto texture = std::make_shared<Texture2D>(textureType);
-    texture->setFilename(filename);
-    texture->setWidth(width);
-    texture->setHeight(height);
-    texture->setNbChannels(bytesPerPixel / depth);
-    texture->setDepth(depth);
+    auto texture = std::make_shared<Texture2D>(textureType, filename, channels,
+                                               depth, width, height);
     if (isCubeMap || type == TextureType::brdf_lut)
         texture->setWrapMode(TextureWrapMode::clamp_to_edge);
 
     setRawData(texture, image);
 
     const auto path = fs::path(filename).parent_path().string();
-    const auto basename = path + "/" + fs::basename(filename);
-    const auto ext = fs::extension(filename);
+    const auto basename = path + "/" + fs::path(filename).stem().string();
+    const auto ext = fs::path(filename).extension().string();
 
     uint8_t mipLevels = 1;
     while (fs::exists(basename + std::to_string((int)mipLevels) + ext))

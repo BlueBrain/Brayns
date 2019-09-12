@@ -20,8 +20,11 @@
 
 #pragma once
 
-#include "types.h"
-#include <boost/any.hpp>
+#include <brayns/common/types.h>
+// NOTE: Replace with std::any when upgrading to c++17
+#include <brayns/common/any.hpp>
+
+#include <algorithm>
 #include <functional>
 #include <memory>
 #include <string>
@@ -232,9 +235,9 @@ struct Property
 private:
     friend class PropertyMap;
 
-    boost::any _data;
-    const boost::any _min;
-    const boost::any _max;
+    linb::any _data;
+    const linb::any _min;
+    const linb::any _max;
     bool _readOnly{false};
     ModifiedCallback _modifiedCallback;
 
@@ -247,13 +250,13 @@ private:
                                      "'");
     }
     template <typename T>
-    T _castValue(const boost::any& v) const
+    T _castValue(const linb::any& v) const
     {
         _checkType<T>();
-        return boost::any_cast<T>(v);
+        return linb::any_cast<T>(v);
     }
 
-    void _setData(const boost::any& data)
+    void _setData(const linb::any& data)
     {
         _data = data;
         if (_modifiedCallback)

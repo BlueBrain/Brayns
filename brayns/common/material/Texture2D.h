@@ -40,25 +40,15 @@ public:
     {
         default_,
         cubemap,
-        normal_roughness
+        normal_roughness,
+        aoe
     };
 
-    BRAYNS_API Texture2D(const Type type = Type::default_);
+    BRAYNS_API Texture2D(const Type type, const std::string& filename,
+                         const uint8_t channels, const uint8_t depth,
+                         const uint32_t width, const uint32_t height);
 
-    const std::string& getFilename() const { return _filename; }
-    void setFilename(const std::string& value) { _filename = value; }
-    uint8_t getNbChannels() const { return _nbChannels; }
-    void setNbChannels(const uint8_t value) { _nbChannels = value; }
-    uint8_t getDepth() const { return _depth; }
-    void setDepth(const uint8_t value) { _depth = value; }
-    size_t getWidth() const { return _width; }
-    void setWidth(const size_t value) { _width = value; }
-    size_t getHeight() const { return _height; }
-    void setHeight(const size_t value) { _height = value; }
-    size_t getSizeInBytes() const
-    {
-        return _height * _width * _depth * _nbChannels;
-    }
+    size_t getSizeInBytes() const { return height * width * depth * channels; }
     void setMipLevels(const uint8_t mips);
 
     uint8_t getMipLevels() const { return _mipLevels; }
@@ -74,20 +64,21 @@ public:
 
     uint8_t getPossibleMipMapsLevels() const;
 
-    Type getType() const { return _type; }
-    bool isCubeMap() const { return _type == Type::cubemap; }
+    bool isCubeMap() const { return type == Type::cubemap; }
+    bool isNormalMap() const { return type == Type::normal_roughness; }
     uint8_t getNumFaces() const { return isCubeMap() ? 6 : 1; }
     void setWrapMode(const TextureWrapMode mode) { _wrapMode = mode; }
     TextureWrapMode getWrapMode() const { return _wrapMode; }
+    const Type type;
+    const std::string filename;
+    const uint8_t channels;
+    const uint8_t depth;
+    const uint32_t width;
+    const uint32_t height;
+
 private:
-    const Type _type;
-    std::string _filename;
-    uint8_t _nbChannels{0};
-    uint8_t _depth{0};
-    size_t _width{0};
-    size_t _height{0};
-    size_t _mipLevels{0};
-    TextureWrapMode _wrapMode{TextureWrapMode::mirror};
+    uint8_t _mipLevels{0};
+    TextureWrapMode _wrapMode{TextureWrapMode::repeat};
     // faces, mips, pixels
     std::vector<std::vector<std::vector<unsigned char>>> _rawData;
 };

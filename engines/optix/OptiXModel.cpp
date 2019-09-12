@@ -375,7 +375,7 @@ void OptiXModel::_commitSimulationDataImpl(const float* frameData,
 {
     auto context = OptiXContext::get().getOptixContext();
     setBufferRaw(RT_BUFFER_INPUT, RT_FORMAT_FLOAT, _simulationData,
-                 context["simulation_data"], frameData,
-                 frameSize * sizeof(float), frameSize * sizeof(float));
+                 context["simulation_data"], frameData, frameSize,
+                 frameSize * sizeof(float));
 }
 } // namespace brayns

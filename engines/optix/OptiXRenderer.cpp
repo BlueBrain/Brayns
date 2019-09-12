@@ -110,11 +110,12 @@ OptiXRenderer::OptiXRenderer(const AnimationParameters& animationParameters,
                              const RenderingParameters& renderingParameters)
     : Renderer(animationParameters, renderingParameters)
 {
+    _timer.start();
 }
 
 void OptiXRenderer::render(FrameBufferPtr frameBuffer)
 {
-    if (!frameBuffer->getAccumulation())
+    if (!frameBuffer->getAccumulation() && frameBuffer->numAccumFrames() > 0)
         return;
 
     // Provide a random seed to the renderer
@@ -124,6 +125,7 @@ void OptiXRenderer::render(FrameBufferPtr frameBuffer)
                             (float)rand() / (float)RAND_MAX};
     auto context = OptiXContext::get().getOptixContext();
     context["jitter4"]->setFloat(jitter);
+    context["frame"]->setUint(frameBuffer->numAccumFrames());
 
     // Render
     frameBuffer->map();
@@ -136,6 +138,12 @@ void OptiXRenderer::render(FrameBufferPtr frameBuffer)
 
 void OptiXRenderer::commit()
 {
+    if (!_renderingParameters.isModified() && !_scene->isModified() &&
+        !isModified())
+    {
+        return;
+    }
+
     const bool rendererChanged =
         _renderingParameters.getCurrentRenderer() != _currentRenderer;
 
@@ -177,6 +185,7 @@ void OptiXRenderer::commit()
     context["ambientLightColor"]->setFloat(bgColor.x, bgColor.y, bgColor.z);
     context["bgColor"]->setFloat(bgColor.x, bgColor.y, bgColor.z);
     context["samples_per_pixel"]->setUint(samples_per_pixel);
+    context["currentTime"]->setFloat(_timer.elapsed());
 
     toOptiXProperties(getPropertyMap());
     _currentRenderer = _renderingParameters.getCurrentRenderer();

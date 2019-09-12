@@ -95,9 +95,14 @@ void OptiXFrameBuffer::_recreate()
     auto context = OptiXContext::get().getOptixContext();
     _frameBuffer = context->createBuffer(RT_BUFFER_OUTPUT, format, _frameSize.x,
                                          _frameSize.y);
-    _accumBuffer =
-        context->createBuffer(RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_FLOAT4,
-                              _frameSize.x, _frameSize.y);
+    if (_accumulation)
+        _accumBuffer =
+            context->createBuffer(RT_BUFFER_INPUT_OUTPUT | RT_BUFFER_GPU_LOCAL,
+                                  RT_FORMAT_FLOAT4, _frameSize.x, _frameSize.y);
+    else
+        _accumBuffer =
+            context->createBuffer(RT_BUFFER_INPUT_OUTPUT | RT_BUFFER_GPU_LOCAL,
+                                  RT_FORMAT_FLOAT4, 1, 1);
     clear();
     BRAYNS_DEBUG << "Frame buffer created" << std::endl;
 }

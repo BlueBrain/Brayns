@@ -18,8 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE braynsAddModel
-
 #include <jsonSerialization.h>
 
 #include <tests/paths.h>
@@ -30,63 +28,60 @@
 
 const std::string ADD_MODEL("add-model");
 
-BOOST_GLOBAL_FIXTURE(ClientServer);
-
-BOOST_AUTO_TEST_CASE(missing_params)
+TEST_CASE_FIXTURE(ClientServer, "missing_params")
 {
     try
     {
         makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
                                                                   {});
-        BOOST_REQUIRE(false);
+        REQUIRE(false);
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_MISSING_PARAMS);
-        BOOST_CHECK(e.data.empty());
+        CHECK_EQ(e.code, brayns::ERROR_ID_MISSING_PARAMS);
+        CHECK(e.data.empty());
     }
 }
 
-BOOST_AUTO_TEST_CASE(nonexistant_file)
+TEST_CASE_FIXTURE(ClientServer, "nonexistant_file")
 {
     try
     {
         makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
             ADD_MODEL, {"wrong", "wrong.xyz"});
-        BOOST_REQUIRE(false);
+        REQUIRE(false);
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_LOADING_BINARY_FAILED);
-        BOOST_CHECK(e.data.empty());
+        CHECK_EQ(e.code, brayns::ERROR_ID_LOADING_BINARY_FAILED);
+        CHECK(e.data.empty());
     }
 }
 
-BOOST_AUTO_TEST_CASE(unsupported_type)
+TEST_CASE_FIXTURE(ClientServer, "unsupported_type")
 {
     try
     {
         makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
             ADD_MODEL, {"unsupported", BRAYNS_TESTDATA_MODEL_UNSUPPORTED_PATH});
-        BOOST_REQUIRE(false);
+        REQUIRE(false);
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_UNSUPPORTED_TYPE);
-        BOOST_REQUIRE(e.data.empty());
+        CHECK_EQ(e.code, brayns::ERROR_ID_UNSUPPORTED_TYPE);
+        REQUIRE(e.data.empty());
     }
 }
 
-BOOST_AUTO_TEST_CASE(xyz)
+TEST_CASE_FIXTURE(ClientServer, "xyz")
 {
     const auto numModels = getScene().getNumModels();
-    BOOST_CHECK_NO_THROW(
-        (makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
-            ADD_MODEL, {"monkey", BRAYNS_TESTDATA_MODEL_MONKEY_PATH})));
-    BOOST_CHECK_EQUAL(getScene().getNumModels(), numModels + 1);
+    CHECK_NOTHROW((makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
+        ADD_MODEL, {"monkey", BRAYNS_TESTDATA_MODEL_MONKEY_PATH})));
+    CHECK_EQ(getScene().getNumModels(), numModels + 1);
 }
 
-BOOST_AUTO_TEST_CASE(obj)
+TEST_CASE_FIXTURE(ClientServer, "obj")
 {
     const auto numModels = getScene().getNumModels();
     brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH};
@@ -94,59 +89,57 @@ BOOST_AUTO_TEST_CASE(obj)
     auto model =
         makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
                                                                   params);
-    BOOST_CHECK_EQUAL(getScene().getNumModels(), numModels + 1);
-    BOOST_CHECK_EQUAL(model.getName(), params.getName());
-    BOOST_CHECK_EQUAL(model.getPath(), params.getPath());
-    BOOST_CHECK(!model.getVisible());
+    CHECK_EQ(getScene().getNumModels(), numModels + 1);
+    CHECK_EQ(model.getName(), params.getName());
+    CHECK_EQ(model.getPath(), params.getPath());
+    CHECK(!model.getVisible());
 }
 
-BOOST_AUTO_TEST_CASE(xyz_obj)
+TEST_CASE_FIXTURE(ClientServer, "xyz_obj")
 {
     const auto initialNbModels = getScene().getNumModels();
-    BOOST_CHECK_NO_THROW(
-        (makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
-            ADD_MODEL, {"monkey", BRAYNS_TESTDATA_MODEL_MONKEY_PATH})));
-    BOOST_CHECK_NO_THROW(
-        (makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
-            ADD_MODEL, {"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH})));
+    CHECK_NOTHROW((makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
+        ADD_MODEL, {"monkey", BRAYNS_TESTDATA_MODEL_MONKEY_PATH})));
+    CHECK_NOTHROW((makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
+        ADD_MODEL, {"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH})));
     auto newNbModels = getScene().getNumModels();
-    BOOST_CHECK_EQUAL(initialNbModels + 2, newNbModels);
+    CHECK_EQ(initialNbModels + 2, newNbModels);
     getScene().removeModel(newNbModels - 1);
     newNbModels = getScene().getNumModels();
-    BOOST_CHECK_EQUAL(initialNbModels + 1, newNbModels);
+    CHECK_EQ(initialNbModels + 1, newNbModels);
 }
 
-BOOST_AUTO_TEST_CASE(broken_xyz)
+TEST_CASE_FIXTURE(ClientServer, "broken_xyz")
 {
     try
     {
         makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
             ADD_MODEL, {"broken", BRAYNS_TESTDATA_MODEL_BROKEN_PATH});
-        BOOST_REQUIRE(false);
+        REQUIRE(false);
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_LOADING_BINARY_FAILED);
-        BOOST_CHECK_EQUAL(e.what(),
-                          "Invalid content in line 1: 2.500000 3.437500");
+        CHECK_EQ(e.code, brayns::ERROR_ID_LOADING_BINARY_FAILED);
+        CHECK(std::string(e.what()) ==
+              "Invalid content in line 1: 2.500000 3.437500");
     }
 }
 
 #if BRAYNS_USE_LIBARCHIVE
-BOOST_AUTO_TEST_CASE(obj_zip)
+TEST_CASE_FIXTURE(ClientServer, "obj_zip")
 {
     const auto numModels = getScene().getNumModels();
     brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH};
     auto model =
         makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
                                                                   params);
-    BOOST_CHECK_EQUAL(getScene().getNumModels(), numModels + 1);
-    BOOST_CHECK_EQUAL(model.getName(), params.getName());
-    BOOST_CHECK_EQUAL(model.getPath(), params.getPath());
+    CHECK_EQ(getScene().getNumModels(), numModels + 1);
+    CHECK_EQ(model.getName(), params.getName());
+    CHECK_EQ(model.getPath(), params.getPath());
 }
 #endif
 
-BOOST_AUTO_TEST_CASE(mesh_loader_properties_valid)
+TEST_CASE_FIXTURE(ClientServer, "mesh_loader_properties_valid")
 {
     const auto numModels = getScene().getNumModels();
     brayns::PropertyMap properties;
@@ -158,12 +151,12 @@ BOOST_AUTO_TEST_CASE(mesh_loader_properties_valid)
     auto model =
         makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
                                                                   params);
-    BOOST_CHECK_EQUAL(getScene().getNumModels(), numModels + 1);
-    BOOST_CHECK_EQUAL(model.getName(), params.getName());
-    BOOST_CHECK_EQUAL(model.getPath(), params.getPath());
+    CHECK_EQ(getScene().getNumModels(), numModels + 1);
+    CHECK_EQ(model.getName(), params.getName());
+    CHECK_EQ(model.getPath(), params.getPath());
 }
 
-BOOST_AUTO_TEST_CASE(mesh_loader_properties_invalid)
+TEST_CASE_FIXTURE(ClientServer, "mesh_loader_properties_invalid")
 {
     brayns::PropertyMap properties;
     properties.setProperty({"geometryQuality", std::string("INVALID")});
@@ -174,15 +167,15 @@ BOOST_AUTO_TEST_CASE(mesh_loader_properties_invalid)
     {
         makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
                                                                   params);
-        BOOST_REQUIRE(false);
+        REQUIRE(false);
     }
     catch (std::runtime_error& e)
     {
-        BOOST_CHECK_EQUAL(e.what(), "Could not match enum 'INVALID'");
+        CHECK(std::string(e.what()) == "Could not match enum 'INVALID'");
     }
 }
 
-BOOST_AUTO_TEST_CASE(protein_loader)
+TEST_CASE_FIXTURE(ClientServer, "protein_loader")
 {
     brayns::PropertyMap properties;
     properties.setProperty({"radiusMultiplier", 2.5});
@@ -200,12 +193,13 @@ BOOST_AUTO_TEST_CASE(protein_loader)
     auto model =
         makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
                                                                   params);
-    BOOST_CHECK_EQUAL(getScene().getNumModels(), numModels + 1);
-    BOOST_CHECK_EQUAL(model.getName(), params.getName());
-    BOOST_CHECK_EQUAL(model.getPath(), params.getPath());
+    CHECK_EQ(getScene().getNumModels(), numModels + 1);
+    CHECK_EQ(model.getName(), params.getName());
+    CHECK_EQ(model.getPath(), params.getPath());
+    CHECK(!model.getBounds().isEmpty());
 }
 
-BOOST_AUTO_TEST_CASE(cancel)
+TEST_CASE_FIXTURE(ClientServer, "cancel")
 {
     auto request = getJsonRpcClient()
                        .request<brayns::ModelParams, brayns::ModelDescriptor>(
@@ -216,10 +210,10 @@ BOOST_AUTO_TEST_CASE(cancel)
     while (!request.is_ready())
         process();
 
-    BOOST_CHECK_THROW(request.get(), std::runtime_error);
+    CHECK_THROWS_AS(request.get(), std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE(close_client_while_pending_request)
+TEST_CASE_FIXTURE(ClientServer, "close_client_while_pending_request")
 {
     auto wsClient = std::make_unique<rockets::ws::Client>();
 
@@ -231,7 +225,7 @@ BOOST_AUTO_TEST_CASE(close_client_while_pending_request)
                 ADD_MODEL, {"monkey", BRAYNS_TESTDATA_MODEL_MONKEY_PATH});
 
     auto asyncWait =
-        std::async(std::launch::async, [&responseFuture, &wsClient] {
+        std::async(std::launch::async, [&responseFuture, &wsClient, this] {
             wsClient->process(10);
             process();
 
@@ -241,12 +235,12 @@ BOOST_AUTO_TEST_CASE(close_client_while_pending_request)
             responseFuture.get();
         });
 
-    BOOST_CHECK_THROW(asyncWait.get(), rockets::jsonrpc::response_error);
+    CHECK_THROWS_AS(asyncWait.get(), rockets::jsonrpc::response_error);
 }
 
-BOOST_AUTO_TEST_CASE(folder)
+TEST_CASE_FIXTURE(ClientServer, "folder")
 {
-    BOOST_CHECK_THROW(
+    CHECK_THROWS_AS(
         (makeRequest<brayns::ModelParams, brayns::ModelDescriptorPtr>(
             ADD_MODEL, {"folder", BRAYNS_TESTDATA_VALID_MODELS_PATH})),
         rockets::jsonrpc::response_error);

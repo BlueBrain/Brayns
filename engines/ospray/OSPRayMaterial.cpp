@@ -115,32 +115,32 @@ void OSPRayMaterial::commit(const std::string& renderer)
 OSPTexture OSPRayMaterial::_createOSPTexture2D(Texture2DPtr texture)
 {
     OSPTextureFormat type = OSP_TEXTURE_R8; // smallest valid type as default
-    if (texture->getDepth() == 1)
+    if (texture->depth == 1)
     {
-        if (texture->getNbChannels() == 1)
+        if (texture->channels == 1)
             type = OSP_TEXTURE_R8;
-        if (texture->getNbChannels() == 3)
+        if (texture->channels == 3)
             type = OSP_TEXTURE_RGB8;
-        if (texture->getNbChannels() == 4)
+        if (texture->channels == 4)
             type = OSP_TEXTURE_RGBA8;
     }
-    else if (texture->getDepth() == 4)
+    else if (texture->depth == 4)
     {
-        if (texture->getNbChannels() == 1)
+        if (texture->channels == 1)
             type = OSP_TEXTURE_R32F;
-        if (texture->getNbChannels() == 3)
+        if (texture->channels == 3)
             type = OSP_TEXTURE_RGB32F;
-        if (texture->getNbChannels() == 4)
+        if (texture->channels == 4)
             type = OSP_TEXTURE_RGBA32F;
     }
 
-    BRAYNS_DEBUG << "Creating OSPRay texture from " << texture->getFilename()
-                 << ": " << texture->getWidth() << "x" << texture->getHeight()
-                 << "x" << (int)type << std::endl;
+    BRAYNS_DEBUG << "Creating OSPRay texture from " << texture->filename << ": "
+                 << texture->width << "x" << texture->height << "x" << (int)type
+                 << std::endl;
 
     OSPTexture ospTexture = ospNewTexture("texture2d");
 
-    const Vector2i size{int(texture->getWidth()), int(texture->getHeight())};
+    const Vector2i size{int(texture->width), int(texture->height)};
 
     osphelper::set(ospTexture, "type", static_cast<int>(type));
     osphelper::set(ospTexture, "size", size);

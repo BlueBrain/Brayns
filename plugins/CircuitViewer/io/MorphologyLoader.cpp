@@ -25,14 +25,13 @@
 
 #include <brayns/common/types.h>
 #include <brayns/common/utils/enumUtils.h>
+#include <brayns/common/utils/filesystem.h>
 #include <brayns/common/utils/utils.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
 #include <brain/brain.h>
-
-#include <boost/filesystem.hpp>
 
 #include <unordered_map>
 
@@ -716,7 +715,7 @@ ModelDescriptorPtr MorphologyLoader::importFromFile(
     PropertyMap properties = _defaults;
     properties.merge(inProperties);
 
-    const auto modelName = boost::filesystem::basename({fileName});
+    const auto modelName = fs::path({fileName}).stem().string();
     callback.updateProgress("Loading " + modelName + " ...", 0.f);
     auto model = _scene.createModel();
     const auto params = MorphologyLoaderParams(properties);
