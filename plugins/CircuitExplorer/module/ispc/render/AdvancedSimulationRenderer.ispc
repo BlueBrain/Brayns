@@ -1124,8 +1124,8 @@ inline vec3f AdvancedSimulationRenderer_shadeRay(
             ++depth;
         }
 
-        ray.org = intersection;
-        ray.t0 = epsilon;
+        ray.org = intersection + ray.dir * epsilon;
+        ray.t0 = 0.f;
         ray.t = inf;
 
         ray.primID = -1;
