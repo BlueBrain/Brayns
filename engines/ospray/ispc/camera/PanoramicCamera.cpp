@@ -58,8 +58,7 @@ void PanoramicCamera::commit()
     // ------------------------------------------------------------------
     dir = normalize(dir);
     vec3f dirU = normalize(cross(dir, up));
-    vec3f dirV =
-        cross(dirU, dir); // rotate film to be perpendicular to 'dir'
+    vec3f dirV = cross(dirU, dir); // rotate film to be perpendicular to 'dir'
 
     vec3f org = pos;
     const vec3f ipd_offset = 0.5f * interpupillaryDistance * dirU;
@@ -80,13 +79,11 @@ void PanoramicCamera::commit()
     const size_t numClipPlanes = clipPlanes ? clipPlanes->numItems : 0;
 
     ispc::PanoramicCamera_set(getIE(), (const ispc::vec3f&)org,
-                              (const ispc::vec3f&)dir, 
-                              (const ispc::vec3f&)dirU,
+                              (const ispc::vec3f&)dir, (const ispc::vec3f&)dirU,
                               (const ispc::vec3f&)dirV,
                               (const ispc::vec3f&)ipd_offset,
-                              (const ispc::vec4f*)clipPlaneData,
-                              numClipPlanes,
-                              (const bool)half);
+                              (const ispc::vec4f*)clipPlaneData, numClipPlanes,
+                              half);
 }
 
 OSP_REGISTER_CAMERA(PanoramicCamera, panoramic);
