@@ -30,8 +30,8 @@ from nose.tools import assert_equal
 
 
 TEST_VERSION = {
-    'major': 0,
-    'minor': 8,
+    'major': 1,
+    'minor': 0,
     'patch': 0,
     'revision': 12345
 }
@@ -382,6 +382,7 @@ def mock_http_request_wrong_version(method, url, command, body=None, query_param
     if command == 'version':
         import copy
         version = copy.deepcopy(TEST_VERSION)
+        version['major'] = 0
         version['minor'] = 3
         return brayns.utils.Status(200, version)
 

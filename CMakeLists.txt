@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2018, EPFL/Blue Brain Project
+# Copyright (c) 2015-2019, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
@@ -6,7 +6,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(Brayns VERSION 0.8.0)
+project(Brayns VERSION 1.0.0)
 set(Brayns_VERSION_ABI 1)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake

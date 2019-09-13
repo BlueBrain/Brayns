@@ -77,6 +77,31 @@ struct Brayns::Impl : public PluginAPI
         , _engineFactory{argc, argv, _parametersManager}
         , _pluginManager{argc, argv}
     {
+        BRAYNS_INFO << std::endl;
+        BRAYNS_INFO << " _|_|_|" << std::endl;
+        BRAYNS_INFO
+            << " _|    _|  _|  _|_|    _|_|_|  _|    _|  _|_|_|      _|_|_|  "
+            << std::endl;
+        BRAYNS_INFO
+            << " _|_|_|    _|_|      _|    _|  _|    _|  _|    _|  _|_|     "
+            << std::endl;
+        BRAYNS_INFO
+            << " _|    _|  _|        _|    _|  _|    _|  _|    _|      _|_| "
+            << std::endl;
+        BRAYNS_INFO
+            << " _|_|_|    _|          _|_|_|    _|_|_|  _|    _|  _|_|_|   "
+            << std::endl;
+        BRAYNS_INFO
+            << "                                    _|                     "
+            << std::endl;
+        BRAYNS_INFO
+            << "                                  _|_|                       "
+            << std::endl;
+        BRAYNS_INFO << std::endl;
+        BRAYNS_INFO << "               By engineers, for researchers"
+                    << std::endl;
+        BRAYNS_INFO << std::endl;
+
         // This initialization must happen before plugin intialization.
         _createEngine();
         _registerKeyboardShortcuts();
@@ -262,6 +287,7 @@ struct Brayns::Impl : public PluginAPI
         _actionInterface = interface;
     }
     Scene& getScene() final { return _engine->getScene(); }
+
 private:
     void _createEngine()
     {
