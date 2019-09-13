@@ -19,6 +19,9 @@ set(BRAYNS_LICENSE LGPL)
 set(BRAYNS_DESCRIPTION "Hardware Agnostic Ray-Tracer")
 set(BRAYNS_PORT_DEPEND "assimp boost freeimage glew tbb")
 
+# Unit testing
+option(BRAYNS_UNIT_TESTING_ENABLED "Unit testing" ON)
+
 # Enable cloning of all optional subprojects for CI builds
 if($ENV{TRAVIS})
   if(NOT DEFINED BRAYNS_NETWORKING_ENABLED)
@@ -29,6 +32,9 @@ if($ENV{TRAVIS})
   endif()
   if(NOT DEFINED BRAYNS_CIRCUITVIEWER_ENABLED)
     option(BRAYNS_CIRCUITVIEWER_ENABLED "Activate CircuitViewer plugin" ON)
+  endif()
+  if(NOT DEFINED BRAYNS_CIRCUITEXPLORER_ENABLED)
+    option(BRAYNS_CIRCUITEXPLORER_ENABLED "Activate CircuitExplorer plugin" ON)
   endif()
   if(NOT DEFINED BRAYNS_BBIC_ENABLED)
     option(BRAYNS_BBIC_ENABLED "Activate BBIC Volume plugin" ON)
@@ -177,7 +183,9 @@ else()
 endif()
 add_subdirectory(plugins)
 add_subdirectory(brayns)
-add_subdirectory(tests)
+if(BRAYNS_UNIT_TESTING_ENABLED)
+  add_subdirectory(tests)
+endif()
 
 include(CommonCPack)
 

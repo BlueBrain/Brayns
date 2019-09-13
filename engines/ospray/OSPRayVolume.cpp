@@ -34,7 +34,7 @@ OSPRayVolume::OSPRayVolume(const Vector3ui& dimensions, const Vector3f& spacing,
     , _volume(ospNewVolume(volumeType.c_str()))
 {
     osphelper::set(_volume, "dimensions", Vector3i(dimensions));
-    osphelper::set(_volume, "gridSpacing", Vector3i(spacing));
+    osphelper::set(_volume, "gridSpacing", Vector3f(spacing));
 
     switch (type)
     {
