@@ -38,12 +38,6 @@ namespace
 const std::string SUPPORTED_EXTENTION_H5 = "h5";
 const std::string SUPPORTED_EXTENTION_SWC = "swc";
 
-const float DEFAULT_SPINE_RELATIVE_SIZE = 0.75f;
-const float DEFAULT_BUTTON_RELATIVE_SIZE = 0.25f;
-const float DEFAULT_MAX_BUTTON_SIZE = 0.40f;
-const float DEFAULT_MAX_SPINE_START_RADIUS = 0.17f;
-const float DEFAULT_POWER = 1.f;
-
 // From http://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
 template <class T>
 typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type

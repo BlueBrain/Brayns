@@ -14,11 +14,10 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../MorphIO/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../MorphIO/3rdparty/GSL_LITE/include)
 
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wshadow")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wshadow")
 
 common_find_package(CGAL)
 common_find_package(OpenMP)
-common_find_package(libpqxx REQUIRED)
 common_find_package_post()
 
 set(${NAME}_SOURCES
@@ -68,11 +67,11 @@ list(APPEND ${NAME}_PUBLIC_HEADERS
 )
 
 set(${NAME}_LINK_LIBRARIES
-  braynsParameters braynsPluginAPI pqxx
+  braynsParameters braynsPluginAPI
   ${FREEIMAGE_LIBRARIES} ${HDF5_LIBRARIES} )
 
 list(APPEND ${NAME}_LINK_LIBRARIES
-  vmmlib Brion Brain
+  glm vmmlib Brion Brain
 )
 
 if(CGAL_FOUND)

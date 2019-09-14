@@ -28,7 +28,7 @@ set(${NAME}_PUBLIC_HEADERS
 )
 
 set(${NAME}_LINK_LIBRARIES
-  braynsPluginAPI pqxx)
+  braynsPluginAPI glm)
 
 # Build type and options
 if(NOT CMAKE_BUILD_TYPE)

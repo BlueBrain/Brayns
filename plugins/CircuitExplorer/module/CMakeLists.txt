@@ -70,7 +70,7 @@ add_library(${MODULE_NAME}
 target_link_libraries(
     ${MODULE_NAME}
     ${MODULE_LINK_LIBRARIES}
-    braynsOSPRayEngine)
+    braynsOSPRayEngine glm)
 
 # Installation
 install(TARGETS ${MODULE_NAME}
