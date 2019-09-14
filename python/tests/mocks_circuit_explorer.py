@@ -112,9 +112,9 @@ def mock_ce_rpc_request(self, method, params=None, response_timeout=None):
         return RESPONSE_OK
     if method == 'set-material-extra-attributes':
         return RESPONSE_OK
-    if method == 'set-camera':
+    if method == 'set-odu-camera':
         return RESPONSE_OK
-    if method == 'get-camera':
+    if method == 'get-odu-camera':
         return RESPONSE_OK
     if method == 'export-frames-to-disk':
         return RESPONSE_OK

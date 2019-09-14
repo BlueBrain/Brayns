@@ -241,13 +241,15 @@ void CircuitExplorerPlugin::init()
                 _setMetaballsPerSimulationValue(param);
             });
 
-        PLUGIN_INFO << "Registering 'set-camera' endpoint" << std::endl;
+        PLUGIN_INFO << "Registering 'set-odu-camera' endpoint" << std::endl;
         _api->getActionInterface()->registerNotification<CameraDefinition>(
-            "set-camera", [&](const CameraDefinition& s) { _setCamera(s); });
+            "set-odu-camera",
+            [&](const CameraDefinition& s) { _setCamera(s); });
 
-        PLUGIN_INFO << "Registering 'get-camera' endpoint" << std::endl;
+        PLUGIN_INFO << "Registering 'get-odu-camera' endpoint" << std::endl;
         _api->getActionInterface()->registerRequest<CameraDefinition>(
-            "get-camera", [&]() -> CameraDefinition { return _getCamera(); });
+            "get-odu-camera",
+            [&]() -> CameraDefinition { return _getCamera(); });
 
         PLUGIN_INFO << "Registering 'attach-cell-growth-handler' endpoint"
                     << std::endl;
@@ -322,7 +324,7 @@ void CircuitExplorerPlugin::postRender()
 {
     ++_accumulationFrameNumber;
     if (_exportFramesToDiskDirty &&
-        _accumulationFrameNumber == _exportFramesToDiskPayload.spp)
+        _accumulationFrameNumber == _exportFramesToDiskPayload.spp - 1)
     {
         _doExportFrameToDisk();
         ++_frameNumber;
