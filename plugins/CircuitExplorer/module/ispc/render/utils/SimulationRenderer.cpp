@@ -24,8 +24,8 @@
 #include "SimulationRenderer.h"
 #include "SimulationRenderer_ispc.h"
 
-#include <brayns/ispc/geometry/Cones.h>
-#include <brayns/ispc/geometry/SDFGeometries.h>
+#include <engines/ospray/ispc/geometry/Cones.h>
+#include <engines/ospray/ispc/geometry/SDFGeometries.h>
 
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/Cylinder.h>
