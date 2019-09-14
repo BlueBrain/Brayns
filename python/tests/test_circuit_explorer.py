@@ -149,9 +149,6 @@ def test_get_camera():
          patch('rockets.Client.batch', new=mock_batch):
         app = brayns.Client('localhost:8200')
         ce = CircuitExplorer(app)
-        response = ce.set_camera(origin=(0, 0, 0), direction=(0, 0, 1), up=(0, 1, 0))
-        assert_equal(response, {'ok'})
-
         response = ce.get_camera()
         assert_equal(response, {'ok'})
 

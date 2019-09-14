@@ -341,7 +341,7 @@ class CircuitExplorer:
         params['origin'] = origin
         params['direction'] = direction
         params['up'] = up
-        return self._client.request('set-camera', params,
+        return self._client.request('set-odu-camera', params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
     def get_camera(self):
@@ -351,7 +351,7 @@ class CircuitExplorer:
         :return: A JSon representation of the origin, direction and up vectors
         :rtype: str
         """
-        return self._client.request('get-camera', response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        return self._client.request('get-odu-camera', response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
     def add_grid(self, min_value, max_value, interval, radius=1.0, opacity=0.5, show_axis=True,
                  colored=True):
