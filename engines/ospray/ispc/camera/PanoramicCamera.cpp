@@ -45,8 +45,8 @@ void PanoramicCamera::commit()
     // first, "parse" the additional expected parameters
     // ------------------------------------------------------------------
     // FIXME(jonask): When supported by OSPRay use bool
-    stereo = getParam("stereo", 0u);
-    half = getParam("half", 0u);
+    stereo = getParam("stereo", 0);
+    half = getParam("half", 0);
     // the default 63.5mm represents the average human IPD
     interpupillaryDistance = getParamf("interpupillaryDistance", 0.0635f);
     enableClippingPlanes = getParam("enableClippingPlanes", 0);
