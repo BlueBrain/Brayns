@@ -50,6 +50,11 @@ common_find_package(OpenMP)
 common_find_package(libuv 1.8)
 common_find_package(FreeImage)
 
+# Compiler options
+if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-class-memaccess")
+endif()
+
 # Archive loading
 common_find_package(LibArchive)
 option(BRAYNS_LIBARCHIVE_ENABLED "Activate libarchive for archive loading" ${LibArchive_FOUND})
