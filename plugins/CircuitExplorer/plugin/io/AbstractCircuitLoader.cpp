@@ -36,20 +36,15 @@
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
-#include <boost/filesystem.hpp>
-#include <boost/tokenizer.hpp>
-
 #if BRAYNS_USE_ASSIMP
 #include <brayns/io/MeshLoader.h>
 #endif
 
 namespace
 {
-const std::string SUPPORTED_EXTENTION_BLUECONFIG = "BlueConfig";
-const std::string SUPPORTED_EXTENTION_BLUECONFIG3 = "BlueConfig3";
-const std::string SUPPORTED_EXTENTION_CIRCUITCONFIG = "CircuitConfig";
-const std::string SUPPORTED_EXTENTION_CIRCUIT = "circuit";
-const std::string SUPPORTED_EXTENTION_CIRCUITCONFIG_NRN = "CircuitConfig_nrn";
+const strings LOADER_EXTENSIONS{"BlueConfig",    "BlueConfig3",
+                                "CircuitConfig", ".json",
+                                "circuit",       "CircuitConfig_nrn"};
 const std::string GID_PATTERN = "{gid}";
 const size_t NB_MATERIALS_PER_INSTANCE = 3;
 } // namespace
@@ -66,22 +61,23 @@ AbstractCircuitLoader::AbstractCircuitLoader(
 
 std::vector<std::string> AbstractCircuitLoader::getSupportedExtensions() const
 {
-    return {SUPPORTED_EXTENTION_BLUECONFIG, SUPPORTED_EXTENTION_BLUECONFIG3,
-            SUPPORTED_EXTENTION_CIRCUITCONFIG, SUPPORTED_EXTENTION_CIRCUIT,
-            SUPPORTED_EXTENTION_CIRCUITCONFIG_NRN};
+    return LOADER_EXTENSIONS;
 }
 
 bool AbstractCircuitLoader::isSupported(const std::string &filename,
                                         const std::string & /*extension*/) const
 {
-    const std::set<std::string> types = {SUPPORTED_EXTENTION_BLUECONFIG,
-                                         SUPPORTED_EXTENTION_BLUECONFIG3,
-                                         SUPPORTED_EXTENTION_CIRCUITCONFIG,
-                                         SUPPORTED_EXTENTION_CIRCUIT,
-                                         SUPPORTED_EXTENTION_CIRCUITCONFIG_NRN};
-    boost::filesystem::path pathObj(filename);
-    if (pathObj.has_stem())
-        return types.find(pathObj.stem().string()) != types.end();
+    const auto ends_with = [](const std::string &value,
+                              const std::string &ending) {
+        if (ending.size() > value.size())
+            return false;
+        return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+    };
+
+    for (const auto &name : LOADER_EXTENSIONS)
+        if (ends_with(filename, name))
+            return true;
+
     return false;
 }
 
@@ -89,10 +85,10 @@ std::vector<std::string> AbstractCircuitLoader::_getTargetsAsStrings(
     const std::string &targets) const
 {
     std::vector<std::string> result;
-    boost::char_separator<char> separator(",");
-    boost::tokenizer<boost::char_separator<char>> tokens(targets, separator);
-    for_each(tokens.begin(), tokens.end(),
-             [&result](const std::string &s) { result.push_back(s); });
+    std::string split;
+    std::istringstream ss(targets);
+    while (std::getline(ss, split, ','))
+        result.push_back(split);
     return result;
 }
 
@@ -100,11 +96,10 @@ std::vector<uint64_t> AbstractCircuitLoader::_getGIDsAsInts(
     const std::string &gids) const
 {
     std::vector<uint64_t> result;
-    boost::char_separator<char> separator(",");
-    boost::tokenizer<boost::char_separator<char>> tokens(gids, separator);
-    for_each(tokens.begin(), tokens.end(), [&result](const std::string &s) {
-        result.push_back(boost::lexical_cast<uint64_t>(s));
-    });
+    std::string split;
+    std::istringstream ss(gids);
+    while (std::getline(ss, split, ','))
+        result.push_back(atoi(split.c_str()));
     return result;
 }
 

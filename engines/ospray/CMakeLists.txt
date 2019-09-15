@@ -14,10 +14,12 @@
 if(APPLE)
   set(OSPRAY_COMPILER "CLANG" CACHE STRING "compiler to use (ICC,GCC, or CLANG)")
   set_property(CACHE OSPRAY_COMPILER PROPERTY STRINGS ICC GCC CLANG)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-variable-sized-type-not-at-end")
 else()
   set(OSPRAY_COMPILER "GCC" CACHE STRING "compiler to use (ICC or GCC)")
   set_property(CACHE OSPRAY_COMPILER PROPERTY STRINGS ICC GCC)
 endif()
+
 
 set(BRAYNSOSPRAYENGINE_ISPC_SOURCES
   ispc/camera/utils.ispc

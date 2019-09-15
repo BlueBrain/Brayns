@@ -67,8 +67,8 @@ list(APPEND ${NAME}_PUBLIC_HEADERS
 )
 
 set(${NAME}_LINK_LIBRARIES
-  braynsParameters braynsPluginAPI
-  ${FREEIMAGE_LIBRARIES} ${HDF5_LIBRARIES} )
+  braynsCommon braynsParameters braynsIO braynsEngine braynsPluginAPI
+  ${FREEIMAGE_LIBRARIES} ${HDF5_LIBRARIES})
 
 list(APPEND ${NAME}_LINK_LIBRARIES
   glm vmmlib Brion Brain

@@ -387,7 +387,8 @@ void CircuitExplorerPlugin::_setMaterial(const MaterialDescriptor& md)
                                          md.simulationDataCast ? 1 : 0);
                 material->updateProperty(MATERIAL_PROPERTY_SHADING_MODE,
                                          md.shadingMode);
-                material->updateProperty(MATERIAL_PROPERTY_CLIPPED, md.clipped);
+                material->updateProperty(MATERIAL_PROPERTY_CLIPPED,
+                                         md.clipped ? 1 : 0);
                 material->markModified(); // This is needed to apply
                                           // propery modifications
                 material->commit();
@@ -462,7 +463,7 @@ void CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
                                 md.shadingModes[id]);
                         if (!md.clips.empty())
                             material->updateProperty(MATERIAL_PROPERTY_CLIPPED,
-                                                     md.clips[id]);
+                                                     md.clips[id] ? 1 : 0);
                         material->markModified(); // This is needed to apply
                                                   // propery modifications
                         material->commit();
