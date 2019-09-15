@@ -27,10 +27,10 @@ struct PanoramicCamera
 {
     Camera super;
 
-    vec3f org;    //!< position of camera, already contains shift when
-                  //! STEREO_{LEFT|RIGHT}
-    vec3f ipd_offset;     //!< shift of camera position for left/right eye (only
-                          //! when stereo)
+    vec3f org;        //!< position of camera, already contains shift when
+                      //! STEREO_{LEFT|RIGHT}
+    vec3f ipd_offset; //!< shift of camera position for left/right eye (only
+                      //! when stereo)
     vec3f dirCam;
 
     vec3f dirU;
@@ -48,15 +48,16 @@ void PanoramicCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
                              const varying CameraSample& sample)
 {
     uniform PanoramicCamera* uniform self =
-        (uniform PanoramicCamera * uniform)_self;
+        (uniform PanoramicCamera * uniform) _self;
 
     vec2f screen = sample.screen;
     const vec3f org = self->org;
 
     screen = Camera_subRegion(_self, screen);
 
-    const float phi = two_pi * screen.x;
-    const float theta = self->half ? M_PI * screen.y / 2.0 : M_PI * screen.y;
+    const float phi =
+        M_PI / 2.f - two_pi * screen.x * (self->half ? 0.5f : 1.f);
+    const float theta = M_PI * screen.y;
 
     float sinTheta, cosTheta;
     sincos(theta, &sinTheta, &cosTheta);
@@ -73,8 +74,7 @@ void PanoramicCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
     float nearClip = self->super.nearClip;
     float farClip = inf;
 
-    clipRay(self->clipPlanes, self->numClipPlanes, org, dir, nearClip,
-            farClip);
+    clipRay(self->clipPlanes, self->numClipPlanes, org, dir, nearClip, farClip);
 
     const float time = Camera_shutterTime(_self, sample.time);
     setRay(ray, org, dir, nearClip, farClip, time);
@@ -86,8 +86,7 @@ void PanoramicCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
     parameters */
 export void* uniform PanoramicCamera_create(void* uniform cppE)
 {
-    uniform PanoramicCamera* uniform self =
-        uniform new uniform PanoramicCamera;
+    uniform PanoramicCamera* uniform self = uniform new uniform PanoramicCamera;
     self->super.cppEquivalent = cppE;
     self->super.initRay = PanoramicCamera_initRay;
     self->super.doesDOF = false;
@@ -96,17 +95,13 @@ export void* uniform PanoramicCamera_create(void* uniform cppE)
 }
 
 export void PanoramicCamera_set(
-    void* uniform _self, const uniform vec3f& org,
-    const uniform vec3f& dir,
-    const uniform vec3f& dirU,
-    const uniform vec3f& dirV, 
-    const uniform vec3f& ipd_offset, 
-    const uniform vec4f clipPlanes[],
-    const uniform unsigned int numClipPlanes,
-    const uniform bool half)
+    void* uniform _self, const uniform vec3f& org, const uniform vec3f& dir,
+    const uniform vec3f& dirU, const uniform vec3f& dirV,
+    const uniform vec3f& ipd_offset, const uniform vec4f clipPlanes[],
+    const uniform unsigned int numClipPlanes, const uniform bool& half)
 {
     uniform PanoramicCamera* uniform self =
-        (uniform PanoramicCamera * uniform)_self;
+        (uniform PanoramicCamera * uniform) _self;
     self->org = org;
     self->dirCam = dir;
     self->dirU = dirU;

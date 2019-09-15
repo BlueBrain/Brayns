@@ -40,7 +40,7 @@ public:
     // ------------------------------------------------------------------
     // the parameters we 'parsed' from our parameters
     // ------------------------------------------------------------------
-    bool stereo;
+    bool stereo{false};
     float interpupillaryDistance; // distance between the two cameras (stereo)
 
     // Clip planes

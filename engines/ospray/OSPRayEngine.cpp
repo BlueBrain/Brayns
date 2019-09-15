@@ -283,7 +283,7 @@ void OSPRayEngine::_createCameras()
     {
         PropertyMap properties;
         properties.setProperty(enableClippingPlanes);
-        properties.setProperty({"half", true, {"Full sphere of dome"}});
+        properties.setProperty({"half", true, {"Half sphere"}});
         if (isStereo)
         {
             properties.setProperty(stereoProperty);
