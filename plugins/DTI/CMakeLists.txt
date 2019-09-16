@@ -40,7 +40,12 @@ endif(NOT CMAKE_BUILD_TYPE)
 # Library
 include_directories(${BRAYNS_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR})
 add_library(${LIBRARY_NAME} SHARED ${${NAME}_SOURCES})
-target_link_libraries(${LIBRARY_NAME} ${${NAME}_LINK_LIBRARIES})
+target_link_libraries(
+    ${LIBRARY_NAME}
+    braynsCommon
+    braynsEngine
+    braynsParameters
+    ${${NAME}_LINK_LIBRARIES})
 
 # ================================================================================
 # Install binaries
