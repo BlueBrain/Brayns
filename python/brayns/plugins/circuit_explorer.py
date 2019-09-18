@@ -88,7 +88,8 @@ class CircuitExplorer:
                      metaballs_section_samples=5, metaballs_grid_size=20, metaballs_threshold=1,
                      morphology_color_scheme=MORPHOLOGY_COLOR_SCHEME_NONE,
                      morphology_quality=GEOMETRY_QUALITY_HIGH, max_distance_to_soma=1e6,
-                     cell_clipping=False):
+                     cell_clipping=False, load_afferent_synapses=False, load_efferent_synapses=False,
+                     synapse_radius=0.0):
         """
         Load a circuit from a give Blue/Circuit configuration file
 
@@ -137,6 +138,9 @@ class CircuitExplorer:
         segment loading (This is used by the growing neurons use-case)
         :param bool cell_clipping: Only load cells that are in the clipped region defined at the
         scene level
+        :param bool load_afferent_synapses: Load afferent synapses
+        :param bool load_efferent_synapses: Load efferent synapses
+        :param float synapse_radius: Synapse radius
         :return: Result of the request submission
         :rtype: str
         """
@@ -188,9 +192,9 @@ class CircuitExplorer:
         props['100CellClipping'] = cell_clipping
         props['101AreasOfInterest'] = 0
 
-        props['110SynapseRadius'] = 1.0
-        props['111LoadAfferentSynapses'] = False
-        props['112LoadEfferentSynapses'] = False
+        props['110SynapseRadius'] = synapse_radius
+        props['111LoadAfferentSynapses'] = load_afferent_synapses
+        props['112LoadEfferentSynapses'] = load_efferent_synapses
 
         params = dict()
         params['name'] = name
