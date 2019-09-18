@@ -900,18 +900,19 @@ inline void processNoiseShading(DifferentialGeometry& dg,
                                 ShadingAttributes& attributes)
 {
     processLightShading(dg, sample, ray, attributes);
-    if (ray.t < dg.epsilon * 1e5f)
+    if (ray.t < dg.epsilon * 1e6f)
     {
-        vec3f point = ray.org + ray.t * ray.dir;
+        vec3f point = attributes.specularExponent * (ray.org + ray.t * ray.dir);
         float n = noise(point);
-        if (ray.t < dg.epsilon * 1.5e4f)
-            n += worleyNoise(point, 2.f);
+        if (ray.t < dg.epsilon * 1.5e5f)
+            n += worleyNoise(point / 5.f, 2.f);
         else
             n *= 2.f;
 
         n = clamp(n, 0.f, 1.f);
         attributes.shadingContribution = n * attributes.diffuseColor;
         attributes.simulationColor = n * attributes.simulationColor;
+        attributes.normal.x += n;
     }
 }
 
