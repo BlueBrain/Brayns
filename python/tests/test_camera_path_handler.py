@@ -41,7 +41,7 @@ def test_camera_path():
         (3182.58910186726, 1779.708788705276, 2812.9496940410527),
         (-0.786236057771408, -0.26156771637033627, -0.4789228780912027),
         (-0.19494691514382148, 0.96430843110832, -0.15131914989430567)])
-    assert_equal(camera_path.get_nb_frames(), 60)
+    assert_equal(camera_path.get_nb_frames(), 40)
     try:
         camera_path.get_key_frame(100)
     except Exception as e:

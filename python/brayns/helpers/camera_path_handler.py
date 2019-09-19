@@ -46,10 +46,10 @@ class CameraPathHandler:
         origins = list()
         directions = list()
         ups = list()
-        for s in range(len(self._control_points)):
+        for s in range(len(self._control_points)-1):
 
             p0 = self._control_points[s]
-            p1 = self._control_points[(s + 1) % len(self._control_points)]
+            p1 = self._control_points[(s + 1)]
 
             for i in range(self._nb_steps_per_sequence):
                 origin = [0, 0, 0]
