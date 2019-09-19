@@ -45,7 +45,7 @@ inline vec3f BasicSimulationRenderer_shadeRay(
     const uniform Material* previousMaterial = 0;
     vec4f pathColor = make_vec4f(0.f);
 
-    while (pathColor.w < 1.f)
+    while (pathColor.w < 1.f && depth < NB_MAX_REBOUNDS)
     {
         vec4f colorContribution;
         traceRay(self->super.super.super.model, ray);
