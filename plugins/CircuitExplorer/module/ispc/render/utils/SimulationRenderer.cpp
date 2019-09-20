@@ -56,7 +56,7 @@ extern "C"
     }
 }
 
-namespace brayns
+namespace circuitExplorer
 {
 void SimulationRenderer::commit()
 {
@@ -78,4 +78,4 @@ void SimulationRenderer::commit()
                                                      transferFunction->getIE());
 }
 
-} // namespace brayns
+} // namespace circuitExplorer

@@ -23,7 +23,7 @@
 
 #include "utils/SimulationRenderer.h"
 
-namespace brayns
+namespace circuitExplorer
 {
 /**
  * @brief The AdvancedSimulationRenderer class is a renderer that can perform
@@ -62,4 +62,4 @@ private:
     // Clip planes
     ospray::Ref<ospray::Data> clipPlanes;
 };
-} // namespace brayns
+} // namespace circuitExplorer

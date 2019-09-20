@@ -87,6 +87,8 @@ void _addAdvancedSimulationRenderer(brayns::Engine& engine)
     properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
     properties.setProperty({"fogStart", 0., 0., 1e6, {"Fog start"}});
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
+    properties.setProperty(
+        {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
     engine.addRendererType("advanced_simulation", properties);
 }
 
@@ -102,6 +104,8 @@ void _addBasicSimulationRenderer(brayns::Engine& engine)
     properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
     properties.setProperty({"fogStart", 0., 0., 1e6, {"Fog start"}});
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
+    properties.setProperty(
+        {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
     engine.addRendererType("basic_simulation", properties);
 }
 

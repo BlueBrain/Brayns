@@ -29,7 +29,7 @@
 
 using namespace ospray;
 
-namespace brayns
+namespace circuitExplorer
 {
 void VoxelizedSimulationRenderer::commit()
 {
@@ -51,4 +51,4 @@ VoxelizedSimulationRenderer::VoxelizedSimulationRenderer()
 }
 
 OSP_REGISTER_RENDERER(VoxelizedSimulationRenderer, voxelized_simulation);
-} // namespace brayns
+} // namespace circuitExplorer

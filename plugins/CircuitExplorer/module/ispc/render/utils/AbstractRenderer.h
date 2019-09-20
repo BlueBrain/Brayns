@@ -32,7 +32,7 @@
 // system
 #include <vector>
 
-namespace brayns
+namespace circuitExplorer
 {
 /**
  * The AbstractRenderer class implements a base renderer for all Brayns custom
@@ -51,7 +51,8 @@ protected:
 
     brayns::obj::ExtendedMaterial* _bgMaterial;
     float _timestamp;
+    unsigned int _maxBounces;
 };
-} // namespace brayns
+} // namespace circuitExplorer
 
 #endif // ABSTRACTRENDERER_H

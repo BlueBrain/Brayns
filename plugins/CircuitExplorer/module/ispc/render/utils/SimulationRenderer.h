@@ -33,7 +33,7 @@
 // system
 #include <vector>
 
-namespace brayns
+namespace circuitExplorer
 {
 /**
  * The SimulationRenderer class implements a parent renderer for all Brayns
@@ -57,6 +57,6 @@ protected:
 
     ospray::Model* _secondaryModel;
 };
-} // namespace brayns
+} // namespace circuitExplorer
 
 #endif // SIMULATIONRENDERER_H

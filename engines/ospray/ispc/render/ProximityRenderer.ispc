@@ -68,7 +68,7 @@ inline vec3f ProximityRenderer_shadeRay(
 
         uniform Material* material = dg.material;
         uniform DefaultMaterial* objMaterial =
-           (uniform DefaultMaterial*)material;
+            (uniform DefaultMaterial*)material;
 
         vec3f normal = dg.Ns;
         const vec3f P = dg.P + dg.epsilon * dg.Ng;
@@ -174,7 +174,7 @@ void ProximityRenderer_renderSample(uniform Renderer* uniform _self,
                                     varying ScreenSample& sample)
 {
     uniform ProximityRenderer* uniform self =
-        (uniform ProximityRenderer * uniform)_self;
+        (uniform ProximityRenderer * uniform) _self;
     sample.ray.time = self->super.timestamp;
     sample.rgb = ProximityRenderer_shadeRay(self, sample);
 }
@@ -201,10 +201,10 @@ export void ProximityRenderer_set(
     uniform int32 numLights, const uniform float& alphaCorrection)
 {
     uniform ProximityRenderer* uniform self =
-        (uniform ProximityRenderer * uniform)_self;
+        (uniform ProximityRenderer * uniform) _self;
 
     self->super.super.spp = spp;
-    self->super.bgMaterial = (uniform DefaultMaterial * uniform)bgMaterial;
+    self->super.bgMaterial = (uniform DefaultMaterial * uniform) bgMaterial;
     self->super.lights = (const uniform Light* uniform* uniform)lights;
     self->super.numLights = numLights;
     self->super.timestamp = timestamp;

@@ -29,7 +29,7 @@
 
 using namespace ospray;
 
-namespace brayns
+namespace circuitExplorer
 {
 void BasicSimulationRenderer::commit()
 {
@@ -42,7 +42,7 @@ void BasicSimulationRenderer::commit()
         (_bgMaterial ? _bgMaterial->getIE() : nullptr), spp,
         (_simulationData ? (float*)_simulationData->data : nullptr),
         _simulationDataSize, _alphaCorrection, _simulationThreshold,
-        _pixelAlpha, _fogThickness, _fogStart);
+        _pixelAlpha, _fogThickness, _fogStart, _maxBounces);
 }
 
 BasicSimulationRenderer::BasicSimulationRenderer()
@@ -51,4 +51,4 @@ BasicSimulationRenderer::BasicSimulationRenderer()
 }
 
 OSP_REGISTER_RENDERER(BasicSimulationRenderer, basic_simulation);
-} // namespace brayns
+} // namespace circuitExplorer

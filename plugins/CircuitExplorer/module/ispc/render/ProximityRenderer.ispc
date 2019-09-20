@@ -47,7 +47,7 @@ inline vec3f ProximityRenderer_shadeRay(
     sample.alpha = 0.f;
 
     int iteration = 0;
-    while (color.w < 1.f && iteration < NB_MAX_REBOUNDS)
+    while (color.w < 1.f && iteration < self->super.maxBounces)
     {
         traceRay(self->super.super.model, ray);
 
