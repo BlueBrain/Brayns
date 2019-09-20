@@ -157,28 +157,6 @@ void OSPRayEngine::_createRenderers()
     {
         PropertyMap properties;
         properties.setProperty(
-            {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
-        properties.setProperty(
-            {"detectionDistance", 1., {"Detection distance"}});
-        properties.setProperty({"detectionFarColor",
-                                std::array<double, 3>{{1., 0., 0.}},
-                                {"Detection far color"}});
-        properties.setProperty({"detectionNearColor",
-                                std::array<double, 3>{{0., 1., 0.}},
-                                {"Detection near color"}});
-        properties.setProperty({"detectionOnDifferentMaterial",
-                                false,
-                                {"Detection on different material"}});
-        properties.setProperty(
-            {"electronShadingEnabled", false, {"Electron shading"}});
-        properties.setProperty(
-            {"surfaceShadingEnabled", true, {"Surface shading"}});
-
-        addRendererType("proximity", properties);
-    }
-    {
-        PropertyMap properties;
-        properties.setProperty(
             {"aoDistance", 10000., {"Ambient occlusion distance"}});
         properties.setProperty({"aoSamples",
                                 int32_t(1),
