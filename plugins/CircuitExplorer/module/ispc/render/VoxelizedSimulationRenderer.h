@@ -23,7 +23,7 @@
 
 #include "utils/SimulationRenderer.h"
 
-namespace brayns
+namespace circuitExplorer
 {
 /**
  * @brief The VoxelizedSimulationRenderer class can perform fast transparency
@@ -46,4 +46,4 @@ private:
     float _simulationThreshold;
 };
 
-} // namespace brayns
+} // namespace circuitExplorer

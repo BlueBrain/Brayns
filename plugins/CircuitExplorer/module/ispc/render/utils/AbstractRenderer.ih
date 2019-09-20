@@ -44,6 +44,7 @@ struct AbstractRenderer
     uint32 numLights;
     ExtendedMaterial* bgMaterial;
     float timestamp;
+    unsigned int maxBounces;
 };
 
 /**

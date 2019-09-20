@@ -29,7 +29,7 @@
 
 using namespace ospray;
 
-namespace brayns
+namespace circuitExplorer
 {
 void GrowthRenderer::commit()
 {
@@ -60,4 +60,4 @@ GrowthRenderer::GrowthRenderer()
 }
 
 OSP_REGISTER_RENDERER(GrowthRenderer, growth_simulation);
-} // namespace brayns
+} // namespace circuitExplorer

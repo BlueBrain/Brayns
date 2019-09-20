@@ -33,7 +33,7 @@
 
 using namespace ospray;
 
-namespace brayns
+namespace circuitExplorer
 {
 void AdvancedSimulationRenderer::commit()
 {
@@ -73,7 +73,7 @@ void AdvancedSimulationRenderer::commit()
         simulationDataSize, _samplingThreshold, _maxDistanceToSecondaryModel,
         _volumeSpecularExponent, _volumeAlphaCorrection, _pixelAlpha,
         _fogThickness, _fogStart, (const ispc::vec4f*)clipPlaneData,
-        numClipPlanes);
+        numClipPlanes, _maxBounces);
 }
 
 AdvancedSimulationRenderer::AdvancedSimulationRenderer()
@@ -82,4 +82,4 @@ AdvancedSimulationRenderer::AdvancedSimulationRenderer()
 }
 
 OSP_REGISTER_RENDERER(AdvancedSimulationRenderer, advanced_simulation);
-} // namespace brayns
+} // namespace circuitExplorer

@@ -25,7 +25,7 @@
 #include <ospray/SDK/common/Data.h>
 #include <ospray/SDK/lights/Light.h>
 
-namespace brayns
+namespace circuitExplorer
 {
 void AbstractRenderer::commit()
 {
@@ -44,6 +44,7 @@ void AbstractRenderer::commit()
     _timestamp = getParam1f("timestamp", 0.f);
     _bgMaterial =
         (brayns::obj::ExtendedMaterial*)getParamObject("bgMaterial", nullptr);
+    _maxBounces = getParam1i("maxBounces", 10);
 }
 
-} // namespace brayns
+} // namespace circuitExplorer

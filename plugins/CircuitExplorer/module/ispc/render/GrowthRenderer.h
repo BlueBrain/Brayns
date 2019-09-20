@@ -23,7 +23,7 @@
 
 #include "utils/SimulationRenderer.h"
 
-namespace brayns
+namespace circuitExplorer
 {
 /**
  * @brief The GrowthRenderer class can perform fast transparency
@@ -53,4 +53,4 @@ private:
     bool _useTransferFunctionColor;
 };
 
-} // namespace brayns
+} // namespace circuitExplorer

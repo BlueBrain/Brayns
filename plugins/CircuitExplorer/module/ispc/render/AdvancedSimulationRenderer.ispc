@@ -989,7 +989,8 @@ inline vec3f AdvancedSimulationRenderer_shadeRay(
     processBackgroundColor(sample, ray, bgAttr);
     bgColor = make_vec3f(bgAttr.bgColor);
 
-    while (moreRebounds && depth < NB_MAX_REBOUNDS && color.w < 1.f)
+    while (moreRebounds && depth < self->super.super.maxBounces &&
+           color.w < 1.f)
     {
         float totalOpacity = 0.f;
         // Shading attributes store all color contributions for the
@@ -1180,7 +1181,8 @@ export void AdvancedSimulationRenderer_set(
     const uniform float& volumeSpecularExponent,
     const uniform float& volumeAlphaCorrection, const uniform float& pixelAlpha,
     const uniform float& fogThickness, const uniform float& fogStart,
-    const uniform vec4f clipPlanes[], const uniform unsigned int numClipPlanes)
+    const uniform vec4f clipPlanes[], const uniform unsigned int numClipPlanes,
+    const uniform int& maxBounces)
 {
     uniform AdvancedSimulationRenderer* uniform self =
         (uniform AdvancedSimulationRenderer * uniform) _self;
@@ -1220,4 +1222,6 @@ export void AdvancedSimulationRenderer_set(
 
     self->clipPlanes = clipPlanes;
     self->numClipPlanes = numClipPlanes;
+
+    self->super.super.maxBounces = maxBounces;
 }

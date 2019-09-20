@@ -23,7 +23,7 @@
 
 #include "utils/SimulationRenderer.h"
 
-namespace brayns
+namespace circuitExplorer
 {
 /**
  * @brief The BasicSimulationRenderer class can perform fast transparency and
@@ -45,4 +45,4 @@ private:
     float _simulationThreshold;
 };
 
-} // namespace brayns
+} // namespace circuitExplorer
