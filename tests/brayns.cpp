@@ -70,7 +70,7 @@ TEST_CASE("defaults")
     CHECK_EQ(renderParams.getCurrentCamera(), "perspective");
     CHECK_EQ(renderParams.getCurrentRenderer(), "basic");
     CHECK_EQ(renderParams.getCameras().size(), 4);
-    CHECK_EQ(renderParams.getRenderers().size(), 6);
+    CHECK_EQ(renderParams.getRenderers().size(), 5);
     CHECK_EQ(renderParams.getSamplesPerPixel(), 1);
     CHECK_EQ(renderParams.getBackgroundColor(), brayns::Vector3d(0, 0, 0));
 

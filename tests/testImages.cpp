@@ -103,30 +103,6 @@ TEST_CASE("render_xyz_change_radius_from_rockets")
 }
 #endif
 
-TEST_CASE("render_demo_with_proximity_renderer")
-{
-    const char* argv[] = {"testImages",          "--renderer", "proximity",
-                          "--samples-per-pixel", "256",        "demo",
-                          "--window-size",       "400",        "300"};
-    const int argc = sizeof(argv) / sizeof(char*);
-
-    brayns::Brayns brayns(argc, argv);
-
-    const brayns::Vector3d rotCenter = {0.5, 0.5, 0.5};
-
-    auto& camera = brayns.getEngine().getCamera();
-    const auto camPos = camera.getPosition();
-
-    camera.setOrientation(brayns::Quaterniond(1, 0, 0, 0));
-    camera.setPosition(camPos - (rotCenter - camPos));
-
-    brayns.commitAndRender();
-    pdiff::PerceptualDiffParameters params;
-    params.luminance_only = true;
-    CHECK(compareTestImage("testdemoproximity.png",
-                           brayns.getEngine().getFrameBuffer(), params));
-}
-
 TEST_CASE("render_protein_and_compare")
 {
     const char* argv[] = {"testImages", BRAYNS_TESTDATA_MODEL_PDB_PATH,
