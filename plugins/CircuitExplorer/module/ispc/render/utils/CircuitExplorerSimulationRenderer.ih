@@ -20,11 +20,11 @@
  */
 
 // Brayns
-#include "AbstractRenderer.ih"
+#include "CircuitExplorerAbstractRenderer.ih"
 
-struct SimulationRenderer
+struct CircuitExplorerSimulationRenderer
 {
-    AbstractRenderer super;
+    CircuitExplorerAbstractRenderer super;
 
     // Transfer function attributes
     const uniform TransferFunction* uniform transferFunction;
@@ -35,7 +35,6 @@ struct SimulationRenderer
 
     // Secondary model
     float maxDistanceToSecondaryModel;
-    float pixelAlpha;
 
     // Rays
     float fogThickness;
@@ -44,15 +43,17 @@ struct SimulationRenderer
     Model* secondaryModel;
 };
 
-extern "C" unmasked uniform int SimulationRenderer_getBytesPerPrimitive(
-    const void* uniform geometry);
+extern "C" unmasked uniform int
+    CircuitExplorerSimulationRenderer_getBytesPerPrimitive(
+        const void* uniform geometry);
 
 static inline int getBytesPerPrimitive(const void* geometry)
 {
     int bytesPerPrimitive;
     foreach_unique(g in geometry)
     {
-        bytesPerPrimitive = SimulationRenderer_getBytesPerPrimitive(g);
+        bytesPerPrimitive =
+            CircuitExplorerSimulationRenderer_getBytesPerPrimitive(g);
     }
     return bytesPerPrimitive;
 }
@@ -78,9 +79,9 @@ static inline uint64 getOffset(const uniform Geometry* geometry,
     return *((const uniform uint64*)data);
 }
 
-inline vec4f getSimulationValue(const uniform SimulationRenderer* uniform self,
-                                varying DifferentialGeometry* dg,
-                                const varying int primID)
+inline vec4f getSimulationValue(
+    const uniform CircuitExplorerSimulationRenderer* uniform self,
+    varying DifferentialGeometry* dg, const varying int primID)
 {
     if (self->simulationDataSize == 0)
         return make_vec4f(1.f, 0.f, 0.f, 1.f);

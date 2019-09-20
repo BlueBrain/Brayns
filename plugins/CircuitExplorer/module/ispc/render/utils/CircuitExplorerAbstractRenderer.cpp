@@ -19,40 +19,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ABSTRACTRENDERER_H
-#define ABSTRACTRENDERER_H
-
-// obj
-#include "../ExtendedMaterial.h"
+#include "CircuitExplorerAbstractRenderer.h"
 
 // ospray
-#include <ospray/SDK/common/Material.h>
-#include <ospray/SDK/render/Renderer.h>
-
-// system
-#include <vector>
+#include <ospray/SDK/common/Data.h>
+#include <ospray/SDK/lights/Light.h>
 
 namespace circuitExplorer
 {
-/**
- * The AbstractRenderer class implements a base renderer for all Brayns custom
- * implementations
- */
-class AbstractRenderer : public ospray::Renderer
+void CircuitExplorerAbstractRenderer::commit()
 {
-public:
-    void commit() override;
+    Renderer::commit();
 
-protected:
-    std::vector<void*> _lightArray;
-    void** _lightPtr;
+    _lightData = (ospray::Data*)getParamData("lights");
+    _lightArray.clear();
 
-    ospray::Data* _lightData;
+    if (_lightData)
+        for (size_t i = 0; i < _lightData->size(); ++i)
+            _lightArray.push_back(
+                ((ospray::Light**)_lightData->data)[i]->getIE());
 
-    brayns::obj::ExtendedMaterial* _bgMaterial;
-    float _timestamp;
-    unsigned int _maxBounces;
-};
+    _lightPtr = _lightArray.empty() ? nullptr : &_lightArray[0];
+
+    _timestamp = getParam1f("timestamp", 0.f);
+    _bgMaterial =
+        (brayns::obj::CircuitExplorerMaterial*)getParamObject("bgMaterial",
+                                                              nullptr);
+    _maxBounces = getParam1i("maxBounces", 10);
+    _pixelAlpha = getParam1f("pixelAlpha", 1.f);
+}
+
 } // namespace circuitExplorer
-
-#endif // ABSTRACTRENDERER_H

@@ -21,6 +21,7 @@
  */
 
 // Brayns
+#include "../../../engines/ospray/ispc/render/utils/Consts.ih"
 #include "SimulationRenderer.ih"
 
 struct AdvancedSimulationRenderer

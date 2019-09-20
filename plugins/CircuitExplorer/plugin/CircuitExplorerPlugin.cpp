@@ -57,7 +57,7 @@
 
 void _addAdvancedSimulationRenderer(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering Advanced Simulation renderer" << std::endl;
+    PLUGIN_INFO << "Registering advanced renderer" << std::endl;
     brayns::PropertyMap properties;
     properties.setProperty(
         {"giDistance", 10000., {"Global illumination distance"}});
@@ -89,12 +89,12 @@ void _addAdvancedSimulationRenderer(brayns::Engine& engine)
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
     properties.setProperty(
         {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
-    engine.addRendererType("advanced_simulation", properties);
+    engine.addRendererType("circuit_explorer_advanced", properties);
 }
 
 void _addBasicSimulationRenderer(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering Basic Simulation renderer" << std::endl;
+    PLUGIN_INFO << "Registering basic renderer" << std::endl;
 
     brayns::PropertyMap properties;
     properties.setProperty(
@@ -106,12 +106,12 @@ void _addBasicSimulationRenderer(brayns::Engine& engine)
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
     properties.setProperty(
         {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
-    engine.addRendererType("basic_simulation", properties);
+    engine.addRendererType("circuit_explorer_basic", properties);
 }
 
 void _addVoxelizedSimulationRenderer(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering Voxelized Simulation renderer" << std::endl;
+    PLUGIN_INFO << "Registering voxelized Simulation renderer" << std::endl;
 
     brayns::PropertyMap properties;
     properties.setProperty(
@@ -121,12 +121,14 @@ void _addVoxelizedSimulationRenderer(brayns::Engine& engine)
     properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
     properties.setProperty({"fogStart", 0., 0., 1e6, {"Fog start"}});
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
-    engine.addRendererType("voxelized_simulation", properties);
+    properties.setProperty(
+        {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
+    engine.addRendererType("circuit_explorer_voxelized_simulation", properties);
 }
 
 void _addGrowthRenderer(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering growth renderer" << std::endl;
+    PLUGIN_INFO << "Registering cell growth renderer" << std::endl;
 
     brayns::PropertyMap properties;
     properties.setProperty(
@@ -145,7 +147,32 @@ void _addGrowthRenderer(brayns::Engine& engine)
     properties.setProperty(
         {"giSamples", 0, 0, 64, {"Global illumination samples"}});
     properties.setProperty({"tfColor", false, {"Use transfer function color"}});
-    engine.addRendererType("growth_simulation", properties);
+    engine.addRendererType("circuit_explorer_cell_growth", properties);
+}
+
+void _addProximityRenderer(brayns::Engine& engine)
+{
+    PLUGIN_INFO << "Registering proximity detection renderer" << std::endl;
+
+    brayns::PropertyMap properties;
+    properties.setProperty(
+        {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
+    properties.setProperty({"detectionDistance", 1., {"Detection distance"}});
+    properties.setProperty({"detectionFarColor",
+                            std::array<double, 3>{{1., 0., 0.}},
+                            {"Detection far color"}});
+    properties.setProperty({"detectionNearColor",
+                            std::array<double, 3>{{0., 1., 0.}},
+                            {"Detection near color"}});
+    properties.setProperty({"detectionOnDifferentMaterial",
+                            false,
+                            {"Detection on different material"}});
+    properties.setProperty(
+        {"surfaceShadingEnabled", true, {"Surface shading"}});
+    properties.setProperty(
+        {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
+    properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
+    engine.addRendererType("circuit_explorer_proximity_detection", properties);
 }
 
 CircuitExplorerPlugin::CircuitExplorerPlugin()
@@ -285,12 +312,14 @@ void CircuitExplorerPlugin::init()
             "add-grid", [&](const AddGrid& payload) { _addGrid(payload); });
     }
 
-    _addAdvancedSimulationRenderer(_api->getEngine());
-    _addBasicSimulationRenderer(_api->getEngine());
-    _addVoxelizedSimulationRenderer(_api->getEngine());
-    _addGrowthRenderer(_api->getEngine());
+    auto& engine = _api->getEngine();
+    _addAdvancedSimulationRenderer(engine);
+    _addBasicSimulationRenderer(engine);
+    _addVoxelizedSimulationRenderer(engine);
+    _addGrowthRenderer(engine);
+    _addProximityRenderer(engine);
     _api->getParametersManager().getRenderingParameters().setCurrentRenderer(
-        "advanced_simulation");
+        "circuit_explorer_advanced");
 }
 
 void CircuitExplorerPlugin::preRender()

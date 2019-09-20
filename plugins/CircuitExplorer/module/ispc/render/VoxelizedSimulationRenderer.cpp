@@ -33,7 +33,7 @@ namespace circuitExplorer
 {
 void VoxelizedSimulationRenderer::commit()
 {
-    SimulationRenderer::commit();
+    CircuitExplorerSimulationRenderer::commit();
 
     _simulationThreshold = getParam1f("simulationThreshold", 0.f);
 
@@ -42,7 +42,7 @@ void VoxelizedSimulationRenderer::commit()
         (_bgMaterial ? _bgMaterial->getIE() : nullptr), spp,
         (_simulationData ? (float*)_simulationData->data : nullptr),
         _simulationDataSize, _alphaCorrection, _simulationThreshold,
-        _pixelAlpha, _fogThickness, _fogStart);
+        _pixelAlpha, _fogThickness, _fogStart, _maxBounces);
 }
 
 VoxelizedSimulationRenderer::VoxelizedSimulationRenderer()
@@ -50,5 +50,6 @@ VoxelizedSimulationRenderer::VoxelizedSimulationRenderer()
     ispcEquivalent = ispc::VoxelizedSimulationRenderer_create(this);
 }
 
-OSP_REGISTER_RENDERER(VoxelizedSimulationRenderer, voxelized_simulation);
+OSP_REGISTER_RENDERER(VoxelizedSimulationRenderer,
+                      circuit_explorer_voxelized_simulation);
 } // namespace circuitExplorer

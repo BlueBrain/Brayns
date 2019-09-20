@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2018-2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -19,19 +19,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "utils/SimulationRenderer.ih"
+#include "utils/CircuitExplorerSimulationRenderer.ih"
 
-struct BasicSimulationRenderer
+struct CircuitExplorerBasicRenderer
 {
-    SimulationRenderer super;
+    CircuitExplorerSimulationRenderer super;
 
     // Shading attributes
     float alphaCorrection;
     float simulationThreshold;
 };
 
-inline vec3f BasicSimulationRenderer_shadeRay(
-    const uniform BasicSimulationRenderer* uniform self,
+inline vec3f CircuitExplorerBasicRenderer_shadeRay(
+    const uniform CircuitExplorerBasicRenderer* uniform self,
     varying ScreenSample& sample)
 {
     Ray ray = sample.ray;
@@ -77,8 +77,8 @@ inline vec3f BasicSimulationRenderer_shadeRay(
         {
             // Material attributes
             MaterialShadingMode shadingMode = diffuse;
-            const uniform ExtendedMaterial* objMaterial =
-                (const uniform ExtendedMaterial*)material;
+            const uniform CircuitExplorerMaterial* objMaterial =
+                (const uniform CircuitExplorerMaterial*)material;
 
             vec3f Kd;
             float Ns = 1;
@@ -134,10 +134,8 @@ inline vec3f BasicSimulationRenderer_shadeRay(
                     opacity *= cosNL;
                     break;
                 case cartoon:
-                    const unsigned int angleAsInt =
-                        cosNL * DEFAULT_CARTOON_GRADIENT;
-                    cosNL =
-                        (float)(angleAsInt) / (float)(DEFAULT_CARTOON_GRADIENT);
+                    const unsigned int angleAsInt = cosNL * Ns;
+                    cosNL = (float)(angleAsInt) / Ns;
                     break;
                 case perlin:
                     const vec3f point = ray.org + ray.t * ray.dir;
@@ -185,29 +183,30 @@ inline vec3f BasicSimulationRenderer_shadeRay(
     // Alpha
     sample.alpha = pathColor.w;
 
-    return make_vec3f(pathColor) * self->super.pixelAlpha;
+    return make_vec3f(pathColor) * self->super.super.pixelAlpha;
 }
 
-void BasicSimulationRenderer_renderSample(uniform Renderer* uniform _self,
-                                          void* uniform perFrameData,
-                                          varying ScreenSample& sample)
+void CircuitExplorerBasicRenderer_renderSample(uniform Renderer* uniform _self,
+                                               void* uniform perFrameData,
+                                               varying ScreenSample& sample)
 {
-    uniform BasicSimulationRenderer* uniform self =
-        (uniform BasicSimulationRenderer * uniform) _self;
-    sample.rgb = BasicSimulationRenderer_shadeRay(self, sample);
+    uniform CircuitExplorerBasicRenderer* uniform self =
+        (uniform CircuitExplorerBasicRenderer * uniform) _self;
+    sample.rgb = CircuitExplorerBasicRenderer_shadeRay(self, sample);
 }
 
 // Exports (called from C++)
-export void* uniform BasicSimulationRenderer_create(void* uniform cppE)
+export void* uniform CircuitExplorerBasicRenderer_create(void* uniform cppE)
 {
-    uniform BasicSimulationRenderer* uniform self =
-        uniform new uniform BasicSimulationRenderer;
+    uniform CircuitExplorerBasicRenderer* uniform self =
+        uniform new uniform CircuitExplorerBasicRenderer;
     Renderer_Constructor(&self->super.super.super, cppE);
-    self->super.super.super.renderSample = BasicSimulationRenderer_renderSample;
+    self->super.super.super.renderSample =
+        CircuitExplorerBasicRenderer_renderSample;
     return self;
 }
 
-export void BasicSimulationRenderer_set(
+export void CircuitExplorerBasicRenderer_set(
     void* uniform _self, void* uniform secondaryModel, void* uniform bgMaterial,
     const uniform int& spp, uniform float* uniform simulationData,
     const uniform int64 simulationDataSize,
@@ -216,12 +215,12 @@ export void BasicSimulationRenderer_set(
     const uniform float& fogThickness, const uniform float& fogStart,
     const uniform int& maxBounces)
 {
-    uniform BasicSimulationRenderer* uniform self =
-        (uniform BasicSimulationRenderer * uniform) _self;
+    uniform CircuitExplorerBasicRenderer* uniform self =
+        (uniform CircuitExplorerBasicRenderer * uniform) _self;
 
     self->super.secondaryModel = (uniform Model * uniform) secondaryModel;
     self->super.super.bgMaterial =
-        (uniform ExtendedMaterial * uniform) bgMaterial;
+        (uniform CircuitExplorerMaterial * uniform) bgMaterial;
 
     self->super.super.super.spp = spp;
 
@@ -231,7 +230,7 @@ export void BasicSimulationRenderer_set(
     self->alphaCorrection = alphaCorrection;
     self->simulationThreshold = simulationThreshold;
 
-    self->super.pixelAlpha = pixelAlpha;
+    self->super.super.pixelAlpha = pixelAlpha;
 
     self->super.fogThickness = fogThickness;
     self->super.fogStart = fogStart;

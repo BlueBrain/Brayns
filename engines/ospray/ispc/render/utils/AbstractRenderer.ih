@@ -30,7 +30,6 @@
 
 // Brayns
 #include "../DefaultMaterial.ih"
-#include "Consts.ih"
 #include "RandomGenerator.ih"
 #include "SkyBox.ih"
 

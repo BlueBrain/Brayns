@@ -19,40 +19,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#ifndef CircuitExplorerSimulationRenderer_H
+#define CircuitExplorerSimulationRenderer_H
 
-#include "../../../common/commonTypes.h"
+// obj
+#include "../CircuitExplorerMaterial.h"
+#include "CircuitExplorerAbstractRenderer.h"
 
-#include <ospray/SDK/common/Material.ih>
-#include <ospray/SDK/math/vec.ih>
-#include <ospray/SDK/texture/Texture2D.ih>
-#include <ospray/SDK/texture/TextureParam.ih>
-#include <ospray/SDK/volume/Volume.ih>
+// ospray
+#include <ospray/SDK/common/Material.h>
+#include <ospray/SDK/render/Renderer.h>
 
-struct ExtendedMaterial
+// system
+#include <vector>
+
+namespace circuitExplorer
 {
-    uniform Material super;
+/**
+ * The CircuitExplorerSimulationRenderer class implements a parent renderer for
+ * all Brayns renderers that need to render simulation data
+ */
+class CircuitExplorerSimulationRenderer : public CircuitExplorerAbstractRenderer
+{
+public:
+    void commit() override;
 
-    TextureParam map_d;
-    float d;
-    TextureParam map_Kd;
-    vec3f Kd;
-    TextureParam map_Ks;
-    vec3f Ks;
-    TextureParam map_Ns;
-    float Ns;
-    TextureParam map_Bump;
-    linear2f rot_Bump;
-    uniform Volume* uniform volume;
+protected:
+    ospray::Ref<ospray::Data> _simulationData;
+    ospray::uint64 _simulationDataSize;
 
-    float glossiness;
-    bool castSimulationData;
-    TextureParam map_a;
-    float a;
-    TextureParam map_refraction;
-    float refraction;
-    TextureParam map_reflection;
-    float reflection;
-    MaterialShadingMode shadingMode;
-    bool clipped;
+    float _alphaCorrection;
+    float _maxDistanceToSecondaryModel;
+
+    float _fogThickness;
+    float _fogStart;
+
+    ospray::Model* _secondaryModel;
 };
+} // namespace circuitExplorer
+
+#endif // CircuitExplorerSimulationRenderer_H

@@ -21,14 +21,31 @@
 
 #pragma once
 
-#define ALPHA_THRESHOLD (.05f)
-#define DEFAULT_LIGHT_EMISSION (2.f)
-#define DEFAULT_LIGHT_THRESHOLD (0.2f)
+#include "utils/CircuitExplorerSimulationRenderer.h"
 
-#define NB_MAX_PATH_TRACING_REBOUNDS 5
-#define VOLUME_NB_MAX_REBOUNDS 1
-#define NB_MAX_SAMPLES_PER_RAY 32
+namespace circuitExplorer
+{
+/**
+ * @brief The CircuitExplorerBasicRenderer class can perform fast transparency
+ * and mapping of simulation data on the geometry
+ */
+class CircuitExplorerBasicRenderer : public CircuitExplorerSimulationRenderer
+{
+public:
+    CircuitExplorerBasicRenderer();
 
-#define DEFAULT_SKY_POWER 2.f
-#define DEFAULT_SKY_POWER_ZERO_BOUNCE 4.f
-#define DEFAULT_CARTOON_GRADIENT 3
+    /**
+       Returns the class name as a string
+       @return string containing the full name of the class
+    */
+    std::string toString() const final
+    {
+        return "CircuitExplorerBasicRenderer";
+    }
+    void commit() final;
+
+private:
+    float _simulationThreshold;
+};
+
+} // namespace circuitExplorer

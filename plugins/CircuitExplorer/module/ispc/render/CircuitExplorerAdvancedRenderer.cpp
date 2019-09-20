@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AdvancedSimulationRenderer.h"
+#include "CircuitExplorerAdvancedRenderer.h"
 #include <common/log.h>
 
 // ospray
@@ -29,15 +29,15 @@
 #include <ospray/SDK/common/Model.h>
 
 // ispc exports
-#include "AdvancedSimulationRenderer_ispc.h"
+#include "CircuitExplorerAdvancedRenderer_ispc.h"
 
 using namespace ospray;
 
 namespace circuitExplorer
 {
-void AdvancedSimulationRenderer::commit()
+void CircuitExplorerAdvancedRenderer::commit()
 {
-    SimulationRenderer::commit();
+    CircuitExplorerSimulationRenderer::commit();
 
     _shadows = getParam1f("shadows", 0.f);
     _softShadows = getParam1f("softShadows", 0.f);
@@ -63,7 +63,7 @@ void AdvancedSimulationRenderer::commit()
     const auto clipPlaneData = clipPlanes ? clipPlanes->data : nullptr;
     const size_t numClipPlanes = clipPlanes ? clipPlanes->numItems : 0;
 
-    ispc::AdvancedSimulationRenderer_set(
+    ispc::CircuitExplorerAdvancedRenderer_set(
         getIE(), (_secondaryModel ? _secondaryModel->getIE() : nullptr),
         (_bgMaterial ? _bgMaterial->getIE() : nullptr), _shadows, _softShadows,
         _softShadowsSamples, _giStrength, _giDistance, _giSamples,
@@ -76,10 +76,11 @@ void AdvancedSimulationRenderer::commit()
         numClipPlanes, _maxBounces);
 }
 
-AdvancedSimulationRenderer::AdvancedSimulationRenderer()
+CircuitExplorerAdvancedRenderer::CircuitExplorerAdvancedRenderer()
 {
-    ispcEquivalent = ispc::AdvancedSimulationRenderer_create(this);
+    ispcEquivalent = ispc::CircuitExplorerAdvancedRenderer_create(this);
 }
 
-OSP_REGISTER_RENDERER(AdvancedSimulationRenderer, advanced_simulation);
+OSP_REGISTER_RENDERER(CircuitExplorerAdvancedRenderer,
+                      circuit_explorer_advanced);
 } // namespace circuitExplorer

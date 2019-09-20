@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -21,36 +21,48 @@
 
 #pragma once
 
-#include "utils/SimulationRenderer.h"
+#include "utils/CircuitExplorerSimulationRenderer.h"
 
 namespace circuitExplorer
 {
 /**
- * @brief The GrowthRenderer class can perform fast transparency
- * and
- * mapping of simulation data on the geometry
+ * @brief The CircuitExplorerAdvancedRenderer class is a renderer that can
+ * perform global illumination (light shading, shadows, ambient occlusion, color
+ * bleeding, light emission), mapping of simulation on the geometry, and
+ * advanced rendering of volumes
  */
-class GrowthRenderer : public SimulationRenderer
+class CircuitExplorerAdvancedRenderer : public CircuitExplorerSimulationRenderer
 {
 public:
-    GrowthRenderer();
+    CircuitExplorerAdvancedRenderer();
 
     /**
        Returns the class name as a string
        @return string containing the full name of the class
     */
-    std::string toString() const final { return "GrowthRenderer"; }
+    std::string toString() const final
+    {
+        return "CircuitExplorerAdvancedRenderer";
+    }
     void commit() final;
 
 private:
-    float _simulationThreshold;
-
+    // Shading
+    float _shadows;
+    float _softShadows;
+    int _softShadowsSamples;
     float _giStrength;
     float _giDistance;
     int _giSamples;
-    float _giSoftness;
+    int _randomNumber;
 
-    bool _useTransferFunctionColor;
+    // Volumes
+    ospray::int32 _volumeSamplesPerRay;
+    float _samplingThreshold;
+    float _volumeSpecularExponent;
+    float _volumeAlphaCorrection;
+
+    // Clip planes
+    ospray::Ref<ospray::Data> clipPlanes;
 };
-
 } // namespace circuitExplorer

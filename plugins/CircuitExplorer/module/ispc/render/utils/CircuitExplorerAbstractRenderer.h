@@ -19,12 +19,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef SIMULATIONRENDERER_H
-#define SIMULATIONRENDERER_H
+#ifndef CircuitExplorerAbstractRenderer_H
+#define CircuitExplorerAbstractRenderer_H
 
 // obj
-#include "../ExtendedMaterial.h"
-#include "AbstractRenderer.h"
+#include "../CircuitExplorerMaterial.h"
 
 // ospray
 #include <ospray/SDK/common/Material.h>
@@ -36,27 +35,25 @@
 namespace circuitExplorer
 {
 /**
- * The SimulationRenderer class implements a parent renderer for all Brayns
- * renderers that need to render simulation data
+ * The CircuitExplorerAbstractRenderer class implements a base renderer for all
+ * Brayns custom implementations
  */
-class SimulationRenderer : public AbstractRenderer
+class CircuitExplorerAbstractRenderer : public ospray::Renderer
 {
 public:
     void commit() override;
 
 protected:
-    ospray::Ref<ospray::Data> _simulationData;
-    ospray::uint64 _simulationDataSize;
+    std::vector<void*> _lightArray;
+    void** _lightPtr;
 
-    float _alphaCorrection;
-    float _maxDistanceToSecondaryModel;
+    ospray::Data* _lightData;
+
+    brayns::obj::CircuitExplorerMaterial* _bgMaterial;
+    float _timestamp;
+    unsigned int _maxBounces;
     float _pixelAlpha;
-
-    float _fogThickness;
-    float _fogStart;
-
-    ospray::Model* _secondaryModel;
 };
 } // namespace circuitExplorer
 
-#endif // SIMULATIONRENDERER_H
+#endif // CircuitExplorerAbstractRenderer_H

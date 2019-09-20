@@ -19,11 +19,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "utils/SimulationRenderer.ih"
+#include "utils/CircuitExplorerSimulationRenderer.ih"
 
-struct GrowthRenderer
+struct CellGrowthRenderer
 {
-    SimulationRenderer super;
+    CircuitExplorerSimulationRenderer super;
 
     // Shading attributes
     float alphaCorrection;
@@ -39,8 +39,9 @@ struct GrowthRenderer
     bool useTransferFunctionColor;
 };
 
-inline vec3f GrowthRenderer_shadeRay(const uniform GrowthRenderer* uniform self,
-                                     varying ScreenSample& sample)
+inline vec3f CellGrowthRenderer_shadeRay(
+    const uniform CellGrowthRenderer* uniform self,
+    varying ScreenSample& sample)
 {
     Ray ray = sample.ray;
     ray.time = inf;
@@ -54,6 +55,7 @@ inline vec3f GrowthRenderer_shadeRay(const uniform GrowthRenderer* uniform self,
     while (true)
     {
         vec3f Kd;
+        float Ns = 1.f;
 
         traceRay(self->super.super.super.model, ray);
 
@@ -78,8 +80,8 @@ inline vec3f GrowthRenderer_shadeRay(const uniform GrowthRenderer* uniform self,
 
         // Material management
         const uniform Material* material = dg.material;
-        const uniform ExtendedMaterial* objMaterial =
-            (const uniform ExtendedMaterial*)material;
+        const uniform CircuitExplorerMaterial* objMaterial =
+            (const uniform CircuitExplorerMaterial*)material;
         MaterialShadingMode shadingMode = diffuse;
 
         if (!objMaterial)
@@ -89,6 +91,7 @@ inline vec3f GrowthRenderer_shadeRay(const uniform GrowthRenderer* uniform self,
             {
                 shadingMode = mat->shadingMode;
                 Kd = make_vec3f(dg.color) * mat->Kd;
+                Ns = mat->Ns;
             }
 
         const vec4f colorContribution =
@@ -121,9 +124,8 @@ inline vec3f GrowthRenderer_shadeRay(const uniform GrowthRenderer* uniform self,
                 break;
             case cartoon:
                 cosNL = max(0.f, dot(lightDirection, dg.Ns));
-                const unsigned int angleAsInt =
-                    cosNL * DEFAULT_CARTOON_GRADIENT;
-                cosNL = (float)(angleAsInt) / (float)(DEFAULT_CARTOON_GRADIENT);
+                const unsigned int angleAsInt = cosNL * Ns;
+                cosNL = (float)(angleAsInt) / Ns;
                 break;
             case perlin:
                 float n = noise(intersection);
@@ -200,28 +202,29 @@ inline vec3f GrowthRenderer_shadeRay(const uniform GrowthRenderer* uniform self,
         ray.instID = -1;
     }
 
-    return make_vec3f(pathColor) * self->super.pixelAlpha;
+    return make_vec3f(pathColor) * self->super.super.pixelAlpha;
 }
 
-void GrowthRenderer_renderSample(uniform Renderer* uniform _self,
-                                 void* uniform perFrameData,
-                                 varying ScreenSample& sample)
+void CellGrowthRenderer_renderSample(uniform Renderer* uniform _self,
+                                     void* uniform perFrameData,
+                                     varying ScreenSample& sample)
 {
-    uniform GrowthRenderer* uniform self =
-        (uniform GrowthRenderer * uniform) _self;
-    sample.rgb = GrowthRenderer_shadeRay(self, sample);
+    uniform CellGrowthRenderer* uniform self =
+        (uniform CellGrowthRenderer * uniform) _self;
+    sample.rgb = CellGrowthRenderer_shadeRay(self, sample);
 }
 
 // Exports (called from C++)
-export void* uniform GrowthRenderer_create(void* uniform cppE)
+export void* uniform CellGrowthRenderer_create(void* uniform cppE)
 {
-    uniform GrowthRenderer* uniform self = uniform new uniform GrowthRenderer;
+    uniform CellGrowthRenderer* uniform self =
+        uniform new uniform CellGrowthRenderer;
     Renderer_Constructor(&self->super.super.super, cppE);
-    self->super.super.super.renderSample = GrowthRenderer_renderSample;
+    self->super.super.super.renderSample = CellGrowthRenderer_renderSample;
     return self;
 }
 
-export void GrowthRenderer_set(
+export void CellGrowthRenderer_set(
     void* uniform _self, void* uniform secondaryModel, void* uniform bgMaterial,
     const uniform int& spp, void** uniform lights,
     const uniform int32 numLights, uniform float* uniform simulationData,
@@ -233,12 +236,12 @@ export void GrowthRenderer_set(
     const uniform int& giSamples, const uniform float& giSoftness,
     const uniform bool& useTransferFunctionColor)
 {
-    uniform GrowthRenderer* uniform self =
-        (uniform GrowthRenderer * uniform) _self;
+    uniform CellGrowthRenderer* uniform self =
+        (uniform CellGrowthRenderer * uniform) _self;
 
     self->super.secondaryModel = (uniform Model * uniform) secondaryModel;
     self->super.super.bgMaterial =
-        (uniform ExtendedMaterial * uniform) bgMaterial;
+        (uniform CircuitExplorerMaterial * uniform) bgMaterial;
 
     self->super.super.super.spp = spp;
 
@@ -251,7 +254,7 @@ export void GrowthRenderer_set(
     self->alphaCorrection = alphaCorrection;
     self->simulationThreshold = simulationThreshold;
 
-    self->super.pixelAlpha = pixelAlpha;
+    self->super.super.pixelAlpha = pixelAlpha;
 
     self->super.fogThickness = fogThickness;
     self->super.fogStart = fogStart;

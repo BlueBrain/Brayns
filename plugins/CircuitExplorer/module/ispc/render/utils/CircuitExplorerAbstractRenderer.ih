@@ -28,23 +28,25 @@
 #include <ospray/SDK/texture/Texture2D.ih>
 
 // obj renderer
-#include "../ExtendedMaterial.ih"
+#include "../CircuitExplorerMaterial.ih"
 
 // Brayns
-#include "Consts.ih"
+#include "CircuitExplorerSkyBox.ih"
 #include "RandomGenerator.ih"
-#include "SkyBox.ih"
 
-struct AbstractRenderer
+#include "../../../../../../engines/ospray/ispc/render/utils/Consts.ih"
+
+struct CircuitExplorerAbstractRenderer
 {
     Renderer super;
 
     // Rendering attributes
     const uniform Light* uniform* uniform lights;
     uint32 numLights;
-    ExtendedMaterial* bgMaterial;
+    CircuitExplorerMaterial* bgMaterial;
     float timestamp;
     unsigned int maxBounces;
+    float pixelAlpha;
 };
 
 /**
