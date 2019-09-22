@@ -175,6 +175,19 @@ void _addProximityRenderer(brayns::Engine& engine)
     engine.addRendererType("circuit_explorer_proximity_detection", properties);
 }
 
+void _addPerspectiveCamera(brayns::Engine& engine)
+{
+    PLUGIN_INFO << "Registering DOF perspective camera" << std::endl;
+
+    brayns::PropertyMap properties;
+    properties.setProperty({"fovy", 45., .1, 360., {"Field of view"}});
+    properties.setProperty({"aspect", 1., {"Aspect ratio"}});
+    properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
+    properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
+    properties.setProperty({"enableClippingPlanes", true, {"Clipping"}});
+    engine.addCameraType("circuit_explorer_perspective", properties);
+}
+
 CircuitExplorerPlugin::CircuitExplorerPlugin()
     : ExtensionPlugin()
 {
@@ -318,6 +331,8 @@ void CircuitExplorerPlugin::init()
     _addVoxelizedSimulationRenderer(engine);
     _addGrowthRenderer(engine);
     _addProximityRenderer(engine);
+    _addPerspectiveCamera(engine);
+
     _api->getParametersManager().getRenderingParameters().setCurrentRenderer(
         "circuit_explorer_advanced");
 }
@@ -337,13 +352,15 @@ void CircuitExplorerPlugin::preRender()
         }
         else
         {
-            uint64_t i = 9 * _frameNumber;
+            uint64_t i = 11 * _frameNumber;
             // Camera position
             CameraDefinition cd;
             auto& ci = _exportFramesToDiskPayload.cameraInformation;
             cd.origin = {ci[i], ci[i + 1], ci[i + 2]};
             cd.direction = {ci[i + 3], ci[i + 4], ci[i + 5]};
             cd.up = {ci[i + 6], ci[i + 7], ci[i + 8]};
+            cd.apertureRadius = ci[i + 9];
+            cd.focusDistance = ci[i + 10];
             _setCamera(cd);
 
             // Animation parameters
@@ -722,15 +739,23 @@ void CircuitExplorerPlugin::_setCamera(const CameraDefinition& payload)
     const auto& u = payload.up;
     brayns::Vector3f up{u[0], u[1], u[2]};
 
+    // Orientation
     const glm::quat q = glm::inverse(
         glm::lookAt(origin, origin + direction,
                     up)); // Not quite sure why this should be inverted?!?
     camera.setOrientation(q);
 
+    // Aperture
+    camera.updateProperty("apertureRadius", payload.apertureRadius);
+
+    // Focus distance
+    camera.updateProperty("focusDistance", payload.focusDistance);
+
     _api->getCamera().markModified();
 
     PLUGIN_DEBUG << "SET: " << origin << ", " << direction << ", " << up << ", "
-                 << glm::inverse(q) << std::endl;
+                 << glm::inverse(q) << "," << payload.apertureRadius << ","
+                 << payload.focusDistance << std::endl;
 }
 
 CameraDefinition CircuitExplorerPlugin::_getCamera()
@@ -795,12 +820,23 @@ void CircuitExplorerPlugin::_exportFramesToDisk(
 {
     _exportFramesToDiskPayload = payload;
     _exportFramesToDiskDirty = true;
-    _frameNumber = 0;
-    _accumulationFrameNumber = 0;
+    _frameNumber = payload.startFrame;
+    _accumulationFrameNumber = -1;
     auto& frameBuffer = _api->getEngine().getFrameBuffer();
     frameBuffer.clear();
-    PLUGIN_INFO << "Setting movie for " << payload.animationInformation.size()
-                << " frames (" << payload.spp << " spp)" << std::endl;
+    PLUGIN_INFO << "-----------------------------------------------------------"
+                   "---------------------"
+                << std::endl;
+    PLUGIN_INFO << "Setting movie: " << std::endl;
+    PLUGIN_INFO << "- Number of frames : "
+                << payload.animationInformation.size() - payload.startFrame
+                << std::endl;
+    PLUGIN_INFO << "- Samples per pixel: " << payload.spp << std::endl;
+    PLUGIN_INFO << "- Export folder    : " << payload.path << std::endl;
+    PLUGIN_INFO << "- Start frame      : " << payload.startFrame << std::endl;
+    PLUGIN_INFO << "-----------------------------------------------------------"
+                   "---------------------"
+                << std::endl;
 }
 
 void CircuitExplorerPlugin::_doExportFrameToDisk()
@@ -830,8 +866,7 @@ void CircuitExplorerPlugin::_doExportFrameToDisk()
     FreeImage_AcquireMemory(memory.get(), &pixels, &numPixels);
 
     char frame[7];
-    sprintf(frame, "%05d",
-            _exportFramesToDiskPayload.startFrame + _frameNumber);
+    sprintf(frame, "%05d", _frameNumber);
     std::string filename = _exportFramesToDiskPayload.path + '/' + frame + "." +
                            _exportFramesToDiskPayload.format;
     std::ofstream file;

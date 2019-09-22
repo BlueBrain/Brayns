@@ -399,6 +399,8 @@ std::string to_json(const CameraDefinition& param)
         TO_JSON(param, js, origin);
         TO_JSON(param, js, direction);
         TO_JSON(param, js, up);
+        TO_JSON(param, js, apertureRadius);
+        TO_JSON(param, js, focusDistance);
         return js.dump();
     }
     catch (...)

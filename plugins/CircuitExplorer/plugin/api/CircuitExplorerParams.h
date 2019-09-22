@@ -231,6 +231,8 @@ struct CameraDefinition
     std::vector<double> origin;
     std::vector<double> direction;
     std::vector<double> up;
+    double apertureRadius;
+    double focusDistance;
 };
 bool from_json(CameraDefinition& param, const std::string& payload);
 std::string to_json(const CameraDefinition& param);

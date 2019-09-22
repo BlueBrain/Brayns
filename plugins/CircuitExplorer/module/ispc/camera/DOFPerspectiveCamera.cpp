@@ -14,10 +14,10 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
-#include "PerspectiveCamera.h"
+#include "DOFPerspectiveCamera.h"
 #include <limits>
 // ispc-side stuff
-#include "PerspectiveCamera_ispc.h"
+#include "DOFPerspectiveCamera_ispc.h"
 
 #include <ospray/SDK/common/Data.h>
 
@@ -28,12 +28,12 @@
 
 namespace ospray
 {
-PerspectiveCamera::PerspectiveCamera()
+DOFPerspectiveCamera::DOFPerspectiveCamera()
 {
-    ispcEquivalent = ispc::PerspectiveCamera_create(this);
+    ispcEquivalent = ispc::DOFPerspectiveCamera_create(this);
 }
 
-void PerspectiveCamera::commit()
+void DOFPerspectiveCamera::commit()
 {
     Camera::commit();
 
@@ -93,15 +93,15 @@ void PerspectiveCamera::commit()
     const auto clipPlaneData = clipPlanes ? clipPlanes->data : nullptr;
     const size_t numClipPlanes = clipPlanes ? clipPlanes->numItems : 0;
 
-    ispc::PerspectiveCamera_set(getIE(), (const ispc::vec3f&)org,
-                                (const ispc::vec3f&)dir_00,
-                                (const ispc::vec3f&)dir_du,
-                                (const ispc::vec3f&)dir_dv, scaledAperture,
-                                aspect, (const ispc::vec3f&)ipd_offset,
-                                (const ispc::vec4f*)clipPlaneData,
-                                numClipPlanes);
+    ispc::DOFPerspectiveCamera_set(getIE(), (const ispc::vec3f&)org,
+                                   (const ispc::vec3f&)dir_00,
+                                   (const ispc::vec3f&)dir_du,
+                                   (const ispc::vec3f&)dir_dv, scaledAperture,
+                                   aspect, (const ispc::vec3f&)ipd_offset,
+                                   (const ispc::vec4f*)clipPlaneData,
+                                   numClipPlanes);
 }
 
-OSP_REGISTER_CAMERA(PerspectiveCamera, perspective);
+OSP_REGISTER_CAMERA(DOFPerspectiveCamera, circuit_explorer_perspective);
 
 } // namespace ospray
