@@ -19,11 +19,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "utils/SimulationRenderer.ih"
+#include "utils/CircuitExplorerSimulationRenderer.ih"
 
-struct AdvancedSimulationRenderer
+struct CircuitExplorerAdvancedRenderer
 {
-    SimulationRenderer super;
+    CircuitExplorerSimulationRenderer super;
 
     // Shading attributes
     int randomNumber;
@@ -47,7 +47,7 @@ struct AdvancedSimulationRenderer
 
 struct ShadingAttributes
 {
-    const uniform AdvancedSimulationRenderer* uniform self;
+    const uniform CircuitExplorerAdvancedRenderer* uniform self;
     varying DifferentialGeometry* dg;
     vec4f bgColor;
     vec3f origin;
@@ -76,7 +76,7 @@ struct ShadingAttributes
     vec3f finalContribution;
 };
 
-bool isClipped(const uniform AdvancedSimulationRenderer* uniform self,
+bool isClipped(const uniform CircuitExplorerAdvancedRenderer* uniform self,
                const varying vec3f& position)
 {
     bool visible = true;
@@ -92,7 +92,7 @@ bool isClipped(const uniform AdvancedSimulationRenderer* uniform self,
 }
 
 inline bool launchRandomRay(
-    const uniform AdvancedSimulationRenderer* uniform self,
+    const uniform CircuitExplorerAdvancedRenderer* uniform self,
     varying ScreenSample& sample, const varying vec3f& intersection,
     const varying vec3f& normal, DifferentialGeometry& geometry,
     varying vec3f& backgroundColor, varying float& distanceToIntersection,
@@ -136,7 +136,7 @@ inline bool launchRandomRay(
 }
 
 inline void indirectShading(
-    const uniform AdvancedSimulationRenderer* uniform self,
+    const uniform CircuitExplorerAdvancedRenderer* uniform self,
     varying ScreenSample& sample, const varying vec3f& intersection,
     const varying vec3f& normal, DifferentialGeometry& geometry,
     varying vec3f& indirectShadingColor, varying float& indirectShadingPower)
@@ -160,8 +160,8 @@ inline void indirectShading(
         {
             // Determine material of intersected geometry
             const uniform Material* material = geometry.material;
-            const uniform ExtendedMaterial* objMaterial =
-                (const uniform ExtendedMaterial*)material;
+            const uniform CircuitExplorerMaterial* objMaterial =
+                (const uniform CircuitExplorerMaterial*)material;
             if (objMaterial)
                 foreach_unique(mat in objMaterial)
                 {
@@ -206,7 +206,7 @@ inline void indirectShading(
 
 inline float getVolumeShadowContribution(
     Volume* uniform volume,
-    const uniform AdvancedSimulationRenderer* uniform self,
+    const uniform CircuitExplorerAdvancedRenderer* uniform self,
     const varying Ray& ray, varying ScreenSample& sample)
 {
     // Find volume intersections
@@ -232,7 +232,7 @@ inline float getVolumeShadowContribution(
 
 inline float getVolumeShadowContributions(
     Volume* uniform volume, const uniform unsigned int uniform lightIndex,
-    const uniform AdvancedSimulationRenderer* uniform self,
+    const uniform CircuitExplorerAdvancedRenderer* uniform self,
     const varying Ray& ray, varying ScreenSample& sample, const vec3f& point,
     const float epsilon)
 {
@@ -274,8 +274,8 @@ inline float getVolumeShadowContributions(
 
 inline vec4f getVolumeContribution(
     Volume* uniform volume,
-    const uniform AdvancedSimulationRenderer* uniform self, varying Ray& ray,
-    varying ScreenSample& sample, float& firstIntersection)
+    const uniform CircuitExplorerAdvancedRenderer* uniform self,
+    varying Ray& ray, varying ScreenSample& sample, float& firstIntersection)
 {
     // Find volume intersections
     float t0, t1;
@@ -455,8 +455,9 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
 
             if (!isClipped(attributes.self, shadowingGeometry.P))
             {
-                uniform ExtendedMaterial* objMaterial =
-                    (uniform ExtendedMaterial*)shadowingGeometry.material;
+                uniform CircuitExplorerMaterial* objMaterial =
+                    (uniform CircuitExplorerMaterial*)
+                        shadowingGeometry.material;
 
                 float opacity = 1.f;
 
@@ -514,7 +515,7 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
 }
 
 inline void initializeShadingAttributes(
-    const uniform AdvancedSimulationRenderer* uniform self,
+    const uniform CircuitExplorerAdvancedRenderer* uniform self,
     ShadingAttributes& attributes)
 {
     attributes.self = self;
@@ -564,7 +565,7 @@ inline void initializeShadingAttributes(
 }
 
 inline void setGeometryShadingAttributes(
-    const uniform AdvancedSimulationRenderer* uniform self,
+    const uniform CircuitExplorerAdvancedRenderer* uniform self,
     DifferentialGeometry& dg, varying ScreenSample& sample,
     const varying Ray& ray, ShadingAttributes& attributes)
 {
@@ -585,8 +586,8 @@ inline void setGeometryShadingAttributes(
 
     // Process material attributes
     const uniform Material* material = dg.material;
-    const uniform ExtendedMaterial* objMaterial =
-        (const uniform ExtendedMaterial*)material;
+    const uniform CircuitExplorerMaterial* objMaterial =
+        (const uniform CircuitExplorerMaterial*)material;
     if (!objMaterial)
     {
         // Diffuse color
@@ -872,8 +873,7 @@ inline void processElectronTransparencyShading(varying ScreenSample& sample,
                                                ShadingAttributes& attributes)
 {
     const vec3f viewer = normalize(sample.ray.org - attributes.origin);
-    const float el = max(0.f, dot(viewer, attributes.normal));
-    //    const float cosNL = 1.f - el;
+    const float el = 1.f - max(0.f, dot(viewer, attributes.normal));
     const float cosNL = el;
     attributes.shadingContribution = cosNL * attributes.diffuseColor;
     attributes.simulationColor = cosNL * attributes.simulationColor;
@@ -886,8 +886,8 @@ inline void processCartoonShading(varying ScreenSample& sample,
 {
     const vec3f viewer = normalize(sample.ray.org - attributes.origin);
     float cosNL = max(0.f, dot(viewer, attributes.normal));
-    const unsigned int angleAsInt = cosNL * DEFAULT_CARTOON_GRADIENT;
-    cosNL = (float)(angleAsInt) / (float)(DEFAULT_CARTOON_GRADIENT);
+    const unsigned int angleAsInt = cosNL * attributes.specularExponent;
+    cosNL = (float)(angleAsInt) / attributes.specularExponent;
 
     attributes.shadingContribution = cosNL * attributes.diffuseColor;
     attributes.simulationColor = cosNL * attributes.simulationColor;
@@ -969,8 +969,8 @@ inline void processFinalContribution(ShadingAttributes& attributes)
         clamp(totalContributions, make_vec3f(0.f), make_vec3f(1.f));
 }
 
-inline vec3f AdvancedSimulationRenderer_shadeRay(
-    const uniform AdvancedSimulationRenderer* uniform self,
+inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
+    const uniform CircuitExplorerAdvancedRenderer* uniform self,
     varying ScreenSample& sample)
 {
     Ray ray = sample.ray;
@@ -1101,10 +1101,11 @@ inline vec3f AdvancedSimulationRenderer_shadeRay(
             if (doRefraction && doReflection)
             {
                 // Switch between refraction and reflection
-                const bool reflect = sample.sampleID.z % 4 == 1;
+                const bool reflect = sample.sampleID.z % 2 == 1;
                 doRefraction = !reflect;
                 doReflection = reflect;
             }
+
             if (doRefraction)
             {
                 // Refraction
@@ -1142,31 +1143,31 @@ inline vec3f AdvancedSimulationRenderer_shadeRay(
     const vec3f finalColor = make_vec3f(color) * (1.f - fog) + fog * bgColor;
 
     sample.alpha = min(1.f, color.w);
-    return make_vec3f(finalColor * self->super.pixelAlpha);
+    return make_vec3f(finalColor * self->super.super.pixelAlpha);
 }
 
-void AdvancedSimulationRenderer_renderSample(uniform Renderer* uniform _self,
-                                             void* uniform perFrameData,
-                                             varying ScreenSample& sample)
+void CircuitExplorerAdvancedRenderer_renderSample(
+    uniform Renderer* uniform _self, void* uniform perFrameData,
+    varying ScreenSample& sample)
 {
-    uniform AdvancedSimulationRenderer* uniform self =
-        (uniform AdvancedSimulationRenderer * uniform) _self;
+    uniform CircuitExplorerAdvancedRenderer* uniform self =
+        (uniform CircuitExplorerAdvancedRenderer * uniform) _self;
     sample.ray.time = inf;
-    sample.rgb = AdvancedSimulationRenderer_shadeRay(self, sample);
+    sample.rgb = CircuitExplorerAdvancedRenderer_shadeRay(self, sample);
 }
 
 // Exports (called from C++)
-export void* uniform AdvancedSimulationRenderer_create(void* uniform cppE)
+export void* uniform CircuitExplorerAdvancedRenderer_create(void* uniform cppE)
 {
-    uniform AdvancedSimulationRenderer* uniform self =
-        uniform new uniform AdvancedSimulationRenderer;
+    uniform CircuitExplorerAdvancedRenderer* uniform self =
+        uniform new uniform CircuitExplorerAdvancedRenderer;
     Renderer_Constructor(&self->super.super.super, cppE);
     self->super.super.super.renderSample =
-        AdvancedSimulationRenderer_renderSample;
+        CircuitExplorerAdvancedRenderer_renderSample;
     return self;
 }
 
-export void AdvancedSimulationRenderer_set(
+export void CircuitExplorerAdvancedRenderer_set(
     void* uniform _self, void* uniform secondaryModel, void* uniform bgMaterial,
     const uniform float& shadows, const uniform float& softShadows,
     const uniform int& softShadowsSamples, const uniform float& giStrength,
@@ -1184,13 +1185,13 @@ export void AdvancedSimulationRenderer_set(
     const uniform vec4f clipPlanes[], const uniform unsigned int numClipPlanes,
     const uniform int& maxBounces)
 {
-    uniform AdvancedSimulationRenderer* uniform self =
-        (uniform AdvancedSimulationRenderer * uniform) _self;
+    uniform CircuitExplorerAdvancedRenderer* uniform self =
+        (uniform CircuitExplorerAdvancedRenderer * uniform) _self;
 
     self->super.secondaryModel = (uniform Model * uniform) secondaryModel;
     self->super.super.super.spp = spp;
     self->super.super.bgMaterial =
-        (uniform ExtendedMaterial * uniform) bgMaterial;
+        (uniform CircuitExplorerMaterial * uniform) bgMaterial;
     self->super.super.lights = (const uniform Light* uniform* uniform)lights;
     self->super.super.numLights = numLights;
     self->super.super.timestamp = timestamp;
@@ -1215,7 +1216,7 @@ export void AdvancedSimulationRenderer_set(
     self->volumeSpecularExponent = volumeSpecularExponent;
     self->volumeAlphaCorrection = volumeAlphaCorrection;
 
-    self->super.pixelAlpha = pixelAlpha;
+    self->super.super.pixelAlpha = pixelAlpha;
 
     self->super.fogThickness = fogThickness;
     self->super.fogStart = fogStart;

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2018-2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -19,17 +19,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ExtendedMaterial.ih"
+#include "CircuitExplorerMaterial.ih"
 
-export void* uniform ExtendedMaterial_create(void* uniform cppE)
+export void* uniform CircuitExplorerMaterial_create(void* uniform cppE)
 {
-    uniform ExtendedMaterial* uniform mat =
-        uniform new uniform ExtendedMaterial;
+    uniform CircuitExplorerMaterial* uniform mat =
+        uniform new uniform CircuitExplorerMaterial;
     mat->super.cppEquivalent = cppE;
     return mat;
 }
 
-export void ExtendedMaterial_set(
+export void CircuitExplorerMaterial_set(
     void* uniform _mat, const void* uniform map_d,
     const uniform affine2f& xform_d, const uniform float& d,
     const void* uniform map_refraction,
@@ -47,8 +47,8 @@ export void ExtendedMaterial_set(
     const uniform linear2f& rot_Bump,
     const uniform MaterialShadingMode& shadingMode, const uniform bool& clipped)
 {
-    uniform ExtendedMaterial* uniform self =
-        (uniform ExtendedMaterial * uniform) _mat;
+    uniform CircuitExplorerMaterial* uniform self =
+        (uniform CircuitExplorerMaterial * uniform) _mat;
 
     self->map_d = make_TextureParam((Texture2D*)map_d, xform_d);
     self->d = d;

@@ -19,7 +19,6 @@
 #include "math/sampling.ih"
 #include "ospray/SDK/camera/Camera.ih"
 
-#ifdef BRAYNS_ISPC_USE_HARDWARE_RANDOMIZER
 inline float getRandomValue()
 {
     float r;
@@ -28,9 +27,8 @@ inline float getRandomValue()
         --nbMaxTries;
     return r;
 }
-#endif
 
-struct PerspectiveCamera
+struct DOFPerspectiveCamera
 {
     Camera super;
 
@@ -53,11 +51,12 @@ struct PerspectiveCamera
     unsigned int numClipPlanes;
 };
 
-void PerspectiveCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
-                               const varying CameraSample& sample)
+void DOFPerspectiveCamera_initRay(uniform Camera* uniform _self,
+                                  varying Ray& ray,
+                                  const varying CameraSample& sample)
 {
-    uniform PerspectiveCamera* uniform self =
-        (uniform PerspectiveCamera * uniform) _self;
+    uniform DOFPerspectiveCamera* uniform self =
+        (uniform DOFPerspectiveCamera * uniform) _self;
 
     vec2f screen = sample.screen;
     vec3f org = self->org;
@@ -70,9 +69,7 @@ void PerspectiveCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
     if (self->super.doesDOF)
     {
         float random = 1.f;
-#ifdef BRAYNS_ISPC_USE_HARDWARE_RANDOMIZER
         random = getRandomValue();
-#endif
         const vec3f llp =
             uniformSampleDisk(random * self->scaledAperture, sample.lens);
         // transform local lens point to focal plane (dir_XX are prescaled in
@@ -94,30 +91,30 @@ void PerspectiveCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
     setRay(ray, org, direction, nearClip, farClip, time);
 }
 
-/*! create a new ispc-side version of a PerspectiveCamera - with given
+/*! create a new ispc-side version of a DOFPerspectiveCamera - with given
     pointer to the c-class version - and return both class pointer and
     pointer to internal data back via the supplied reference
     parameters */
-export void* uniform PerspectiveCamera_create(void* uniform cppE)
+export void* uniform DOFPerspectiveCamera_create(void* uniform cppE)
 {
-    uniform PerspectiveCamera* uniform self =
-        uniform new uniform PerspectiveCamera;
+    uniform DOFPerspectiveCamera* uniform self =
+        uniform new uniform DOFPerspectiveCamera;
     self->super.cppEquivalent = cppE;
-    self->super.initRay = PerspectiveCamera_initRay;
+    self->super.initRay = DOFPerspectiveCamera_initRay;
     self->super.doesDOF = false;
     self->numClipPlanes = 0;
     return self;
 }
 
-export void PerspectiveCamera_set(
+export void DOFPerspectiveCamera_set(
     void* uniform _self, const uniform vec3f& org, const uniform vec3f& dir_00,
     const uniform vec3f& dir_du, const uniform vec3f& dir_dv,
     const uniform float scaledAperture, const uniform float aspect,
     const uniform vec3f& ipd_offset, const uniform vec4f clipPlanes[],
     const uniform unsigned int numClipPlanes)
 {
-    uniform PerspectiveCamera* uniform self =
-        (uniform PerspectiveCamera * uniform) _self;
+    uniform DOFPerspectiveCamera* uniform self =
+        (uniform DOFPerspectiveCamera * uniform) _self;
     self->org = org;
     self->dir_00 = dir_00;
     self->dir_du = dir_du;

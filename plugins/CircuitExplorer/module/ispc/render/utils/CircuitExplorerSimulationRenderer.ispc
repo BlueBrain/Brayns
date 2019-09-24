@@ -18,12 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SimulationRenderer.ih"
+#include "CircuitExplorerSimulationRenderer.ih"
 
-export void SimulationRenderer_setTransferFunction(void* uniform _self,
-                                                   void* uniform value)
+export void CircuitExplorerSimulationRenderer_setTransferFunction(
+    void* uniform _self, void* uniform value)
 {
-    uniform SimulationRenderer* uniform self =
-        (uniform SimulationRenderer * uniform) _self;
+    uniform CircuitExplorerSimulationRenderer* uniform self =
+        (uniform CircuitExplorerSimulationRenderer * uniform) _self;
     self->transferFunction = (TransferFunction * uniform) value;
 }

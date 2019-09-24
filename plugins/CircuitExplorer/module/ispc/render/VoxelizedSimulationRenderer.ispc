@@ -19,11 +19,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "utils/SimulationRenderer.ih"
+#include "utils/CircuitExplorerSimulationRenderer.ih"
 
 struct VoxelizedSimulationRenderer
 {
-    SimulationRenderer super;
+    CircuitExplorerSimulationRenderer super;
 
     // Shading attributes
     float alphaCorrection;
@@ -100,7 +100,7 @@ inline vec3f VoxelizedSimulationRenderer_shadeRay(
     // Alpha
     sample.alpha = pathColor.w;
 
-    return make_vec3f(pathColor) * self->super.pixelAlpha;
+    return make_vec3f(pathColor) * self->super.super.pixelAlpha;
 }
 
 void VoxelizedSimulationRenderer_renderSample(uniform Renderer* uniform _self,
@@ -129,14 +129,15 @@ export void VoxelizedSimulationRenderer_set(
     const uniform int64 simulationDataSize,
     const uniform float& alphaCorrection,
     const uniform float& simulationThreshold, const uniform float& pixelAlpha,
-    const uniform float& fogThickness, const uniform float& fogStart)
+    const uniform float& fogThickness, const uniform float& fogStart,
+    const uniform int& maxBounces)
 {
     uniform VoxelizedSimulationRenderer* uniform self =
         (uniform VoxelizedSimulationRenderer * uniform) _self;
 
     self->super.secondaryModel = (uniform Model * uniform) secondaryModel;
     self->super.super.bgMaterial =
-        (uniform ExtendedMaterial * uniform) bgMaterial;
+        (uniform CircuitExplorerMaterial * uniform) bgMaterial;
 
     self->super.super.super.spp = spp;
 
@@ -146,8 +147,9 @@ export void VoxelizedSimulationRenderer_set(
     self->alphaCorrection = alphaCorrection;
     self->simulationThreshold = simulationThreshold;
 
-    self->super.pixelAlpha = pixelAlpha;
+    self->super.super.pixelAlpha = pixelAlpha;
 
     self->super.fogThickness = fogThickness;
     self->super.fogStart = fogStart;
+    self->super.super.maxBounces = maxBounces;
 }

@@ -82,6 +82,6 @@ private:
     ExportFramesToDisk _exportFramesToDiskPayload;
     bool _exportFramesToDiskDirty{false};
     uint16_t _frameNumber{0};
-    uint16_t _accumulationFrameNumber{0};
+    int16_t _accumulationFrameNumber{0};
 };
 #endif

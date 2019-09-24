@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "utils/SimulationRenderer.h"
+#include "utils/CircuitExplorerSimulationRenderer.h"
 
 namespace circuitExplorer
 {
@@ -30,7 +30,7 @@ namespace circuitExplorer
  * and
  * mapping of simulation data on the geometry
  */
-class VoxelizedSimulationRenderer : public SimulationRenderer
+class VoxelizedSimulationRenderer : public CircuitExplorerSimulationRenderer
 {
 public:
     VoxelizedSimulationRenderer();

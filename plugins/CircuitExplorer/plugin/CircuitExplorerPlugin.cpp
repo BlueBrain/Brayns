@@ -57,7 +57,7 @@
 
 void _addAdvancedSimulationRenderer(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering Advanced Simulation renderer" << std::endl;
+    PLUGIN_INFO << "Registering advanced renderer" << std::endl;
     brayns::PropertyMap properties;
     properties.setProperty(
         {"giDistance", 10000., {"Global illumination distance"}});
@@ -89,12 +89,12 @@ void _addAdvancedSimulationRenderer(brayns::Engine& engine)
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
     properties.setProperty(
         {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
-    engine.addRendererType("advanced_simulation", properties);
+    engine.addRendererType("circuit_explorer_advanced", properties);
 }
 
 void _addBasicSimulationRenderer(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering Basic Simulation renderer" << std::endl;
+    PLUGIN_INFO << "Registering basic renderer" << std::endl;
 
     brayns::PropertyMap properties;
     properties.setProperty(
@@ -106,12 +106,12 @@ void _addBasicSimulationRenderer(brayns::Engine& engine)
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
     properties.setProperty(
         {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
-    engine.addRendererType("basic_simulation", properties);
+    engine.addRendererType("circuit_explorer_basic", properties);
 }
 
 void _addVoxelizedSimulationRenderer(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering Voxelized Simulation renderer" << std::endl;
+    PLUGIN_INFO << "Registering voxelized Simulation renderer" << std::endl;
 
     brayns::PropertyMap properties;
     properties.setProperty(
@@ -121,12 +121,14 @@ void _addVoxelizedSimulationRenderer(brayns::Engine& engine)
     properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
     properties.setProperty({"fogStart", 0., 0., 1e6, {"Fog start"}});
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
-    engine.addRendererType("voxelized_simulation", properties);
+    properties.setProperty(
+        {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
+    engine.addRendererType("circuit_explorer_voxelized_simulation", properties);
 }
 
 void _addGrowthRenderer(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering growth renderer" << std::endl;
+    PLUGIN_INFO << "Registering cell growth renderer" << std::endl;
 
     brayns::PropertyMap properties;
     properties.setProperty(
@@ -145,7 +147,45 @@ void _addGrowthRenderer(brayns::Engine& engine)
     properties.setProperty(
         {"giSamples", 0, 0, 64, {"Global illumination samples"}});
     properties.setProperty({"tfColor", false, {"Use transfer function color"}});
-    engine.addRendererType("growth_simulation", properties);
+    engine.addRendererType("circuit_explorer_cell_growth", properties);
+}
+
+void _addProximityRenderer(brayns::Engine& engine)
+{
+    PLUGIN_INFO << "Registering proximity detection renderer" << std::endl;
+
+    brayns::PropertyMap properties;
+    properties.setProperty(
+        {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
+    properties.setProperty({"detectionDistance", 1., {"Detection distance"}});
+    properties.setProperty({"detectionFarColor",
+                            std::array<double, 3>{{1., 0., 0.}},
+                            {"Detection far color"}});
+    properties.setProperty({"detectionNearColor",
+                            std::array<double, 3>{{0., 1., 0.}},
+                            {"Detection near color"}});
+    properties.setProperty({"detectionOnDifferentMaterial",
+                            false,
+                            {"Detection on different material"}});
+    properties.setProperty(
+        {"surfaceShadingEnabled", true, {"Surface shading"}});
+    properties.setProperty(
+        {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
+    properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
+    engine.addRendererType("circuit_explorer_proximity_detection", properties);
+}
+
+void _addPerspectiveCamera(brayns::Engine& engine)
+{
+    PLUGIN_INFO << "Registering DOF perspective camera" << std::endl;
+
+    brayns::PropertyMap properties;
+    properties.setProperty({"fovy", 45., .1, 360., {"Field of view"}});
+    properties.setProperty({"aspect", 1., {"Aspect ratio"}});
+    properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
+    properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
+    properties.setProperty({"enableClippingPlanes", true, {"Clipping"}});
+    engine.addCameraType("circuit_explorer_perspective", properties);
 }
 
 CircuitExplorerPlugin::CircuitExplorerPlugin()
@@ -285,12 +325,16 @@ void CircuitExplorerPlugin::init()
             "add-grid", [&](const AddGrid& payload) { _addGrid(payload); });
     }
 
-    _addAdvancedSimulationRenderer(_api->getEngine());
-    _addBasicSimulationRenderer(_api->getEngine());
-    _addVoxelizedSimulationRenderer(_api->getEngine());
-    _addGrowthRenderer(_api->getEngine());
+    auto& engine = _api->getEngine();
+    _addAdvancedSimulationRenderer(engine);
+    _addBasicSimulationRenderer(engine);
+    _addVoxelizedSimulationRenderer(engine);
+    _addGrowthRenderer(engine);
+    _addProximityRenderer(engine);
+    _addPerspectiveCamera(engine);
+
     _api->getParametersManager().getRenderingParameters().setCurrentRenderer(
-        "advanced_simulation");
+        "circuit_explorer_advanced");
 }
 
 void CircuitExplorerPlugin::preRender()
@@ -308,13 +352,15 @@ void CircuitExplorerPlugin::preRender()
         }
         else
         {
-            uint64_t i = 9 * _frameNumber;
+            uint64_t i = 11 * _frameNumber;
             // Camera position
             CameraDefinition cd;
             auto& ci = _exportFramesToDiskPayload.cameraInformation;
             cd.origin = {ci[i], ci[i + 1], ci[i + 2]};
             cd.direction = {ci[i + 3], ci[i + 4], ci[i + 5]};
             cd.up = {ci[i + 6], ci[i + 7], ci[i + 8]};
+            cd.apertureRadius = ci[i + 9];
+            cd.focusDistance = ci[i + 10];
             _setCamera(cd);
 
             // Animation parameters
@@ -693,15 +739,23 @@ void CircuitExplorerPlugin::_setCamera(const CameraDefinition& payload)
     const auto& u = payload.up;
     brayns::Vector3f up{u[0], u[1], u[2]};
 
+    // Orientation
     const glm::quat q = glm::inverse(
         glm::lookAt(origin, origin + direction,
                     up)); // Not quite sure why this should be inverted?!?
     camera.setOrientation(q);
 
+    // Aperture
+    camera.updateProperty("apertureRadius", payload.apertureRadius);
+
+    // Focus distance
+    camera.updateProperty("focusDistance", payload.focusDistance);
+
     _api->getCamera().markModified();
 
     PLUGIN_DEBUG << "SET: " << origin << ", " << direction << ", " << up << ", "
-                 << glm::inverse(q) << std::endl;
+                 << glm::inverse(q) << "," << payload.apertureRadius << ","
+                 << payload.focusDistance << std::endl;
 }
 
 CameraDefinition CircuitExplorerPlugin::_getCamera()
@@ -766,12 +820,23 @@ void CircuitExplorerPlugin::_exportFramesToDisk(
 {
     _exportFramesToDiskPayload = payload;
     _exportFramesToDiskDirty = true;
-    _frameNumber = 0;
-    _accumulationFrameNumber = 0;
+    _frameNumber = payload.startFrame;
+    _accumulationFrameNumber = -1;
     auto& frameBuffer = _api->getEngine().getFrameBuffer();
     frameBuffer.clear();
-    PLUGIN_INFO << "Setting movie for " << payload.animationInformation.size()
-                << " frames (" << payload.spp << " spp)" << std::endl;
+    PLUGIN_INFO << "-----------------------------------------------------------"
+                   "---------------------"
+                << std::endl;
+    PLUGIN_INFO << "Setting movie: " << std::endl;
+    PLUGIN_INFO << "- Number of frames : "
+                << payload.animationInformation.size() - payload.startFrame
+                << std::endl;
+    PLUGIN_INFO << "- Samples per pixel: " << payload.spp << std::endl;
+    PLUGIN_INFO << "- Export folder    : " << payload.path << std::endl;
+    PLUGIN_INFO << "- Start frame      : " << payload.startFrame << std::endl;
+    PLUGIN_INFO << "-----------------------------------------------------------"
+                   "---------------------"
+                << std::endl;
 }
 
 void CircuitExplorerPlugin::_doExportFrameToDisk()
@@ -801,8 +866,7 @@ void CircuitExplorerPlugin::_doExportFrameToDisk()
     FreeImage_AcquireMemory(memory.get(), &pixels, &numPixels);
 
     char frame[7];
-    sprintf(frame, "%05d",
-            _exportFramesToDiskPayload.startFrame + _frameNumber);
+    sprintf(frame, "%05d", _frameNumber);
     std::string filename = _exportFramesToDiskPayload.path + '/' + frame + "." +
                            _exportFramesToDiskPayload.format;
     std::ofstream file;

@@ -21,8 +21,8 @@
 
 #include <common/log.h>
 
-#include "SimulationRenderer.h"
-#include "SimulationRenderer_ispc.h"
+#include "CircuitExplorerSimulationRenderer.h"
+#include "CircuitExplorerSimulationRenderer_ispc.h"
 
 #include <engines/ospray/ispc/geometry/Cones.h>
 #include <engines/ospray/ispc/geometry/SDFGeometries.h>
@@ -40,7 +40,8 @@
 
 extern "C"
 {
-    int SimulationRenderer_getBytesPerPrimitive(const void* geometry)
+    int CircuitExplorerSimulationRenderer_getBytesPerPrimitive(
+        const void* geometry)
     {
         const ospray::Geometry* base =
             static_cast<const ospray::Geometry*>(geometry);
@@ -58,15 +59,14 @@ extern "C"
 
 namespace circuitExplorer
 {
-void SimulationRenderer::commit()
+void CircuitExplorerSimulationRenderer::commit()
 {
-    AbstractRenderer::commit();
+    CircuitExplorerAbstractRenderer::commit();
 
     _simulationData = getParamData("simulationData");
     _alphaCorrection = getParam1f("alphaCorrection", 0.5f);
     _simulationDataSize = _simulationData ? _simulationData->size() : 0;
     _secondaryModel = (ospray::Model*)getParamObject("secondaryModel", nullptr);
-    _pixelAlpha = getParam1f("pixelAlpha", 1.f);
     _fogThickness = getParam1f("fogThickness", 1e6f);
     _fogStart = getParam1f("fogStart", 0.f);
 
@@ -74,8 +74,8 @@ void SimulationRenderer::commit()
     ospray::TransferFunction* transferFunction =
         (ospray::TransferFunction*)getParamObject("transferFunction", nullptr);
     if (transferFunction)
-        ispc::SimulationRenderer_setTransferFunction(getIE(),
-                                                     transferFunction->getIE());
+        ispc::CircuitExplorerSimulationRenderer_setTransferFunction(
+            getIE(), transferFunction->getIE());
 }
 
 } // namespace circuitExplorer

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2018-2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -19,32 +19,40 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AbstractRenderer.h"
+#pragma once
 
-// ospray
-#include <ospray/SDK/common/Data.h>
-#include <ospray/SDK/lights/Light.h>
+#include "../../../common/commonTypes.h"
 
-namespace circuitExplorer
+#include <ospray/SDK/common/Material.ih>
+#include <ospray/SDK/math/vec.ih>
+#include <ospray/SDK/texture/Texture2D.ih>
+#include <ospray/SDK/texture/TextureParam.ih>
+#include <ospray/SDK/volume/Volume.ih>
+
+struct CircuitExplorerMaterial
 {
-void AbstractRenderer::commit()
-{
-    Renderer::commit();
+    uniform Material super;
 
-    _lightData = (ospray::Data*)getParamData("lights");
-    _lightArray.clear();
+    TextureParam map_d;
+    float d;
+    TextureParam map_Kd;
+    vec3f Kd;
+    TextureParam map_Ks;
+    vec3f Ks;
+    TextureParam map_Ns;
+    float Ns;
+    TextureParam map_Bump;
+    linear2f rot_Bump;
+    uniform Volume* uniform volume;
 
-    if (_lightData)
-        for (size_t i = 0; i < _lightData->size(); ++i)
-            _lightArray.push_back(
-                ((ospray::Light**)_lightData->data)[i]->getIE());
-
-    _lightPtr = _lightArray.empty() ? nullptr : &_lightArray[0];
-
-    _timestamp = getParam1f("timestamp", 0.f);
-    _bgMaterial =
-        (brayns::obj::ExtendedMaterial*)getParamObject("bgMaterial", nullptr);
-    _maxBounces = getParam1i("maxBounces", 10);
-}
-
-} // namespace circuitExplorer
+    float glossiness;
+    bool castSimulationData;
+    TextureParam map_a;
+    float a;
+    TextureParam map_refraction;
+    float refraction;
+    TextureParam map_reflection;
+    float reflection;
+    MaterialShadingMode shadingMode;
+    bool clipped;
+};

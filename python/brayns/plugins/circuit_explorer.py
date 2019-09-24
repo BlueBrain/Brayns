@@ -408,12 +408,19 @@ class CircuitExplorer:
         params['animationInformation'] = animation_frames
         values = list()
         for camera_definition in camera_definitions:
+            # Origin
             for i in range(3):
                 values.append(camera_definition[0][i])
+            # Direction
             for i in range(3):
                 values.append(camera_definition[1][i])
+            # Up
             for i in range(3):
                 values.append(camera_definition[2][i])
+            # Aperture radius
+            values.append(camera_definition[3])
+            # Focus distance
+            values.append(camera_definition[4])
         params['cameraInformation'] = values
         return self._client.request('export-frames-to-disk', params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)

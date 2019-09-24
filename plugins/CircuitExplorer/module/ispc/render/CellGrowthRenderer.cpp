@@ -19,21 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "GrowthRenderer.h"
+#include "CellGrowthRenderer.h"
 
 // ospray
 #include <ospray/SDK/common/Data.h>
 
 // ispc exports
-#include "GrowthRenderer_ispc.h"
+#include "CellGrowthRenderer_ispc.h"
 
 using namespace ospray;
 
 namespace circuitExplorer
 {
-void GrowthRenderer::commit()
+void CellGrowthRenderer::commit()
 {
-    SimulationRenderer::commit();
+    CircuitExplorerSimulationRenderer::commit();
 
     _simulationThreshold = getParam1f("simulationThreshold", 0.f);
 
@@ -44,7 +44,7 @@ void GrowthRenderer::commit()
 
     _useTransferFunctionColor = getParam("tfColor", false);
 
-    ispc::GrowthRenderer_set(
+    ispc::CellGrowthRenderer_set(
         getIE(), (_secondaryModel ? _secondaryModel->getIE() : nullptr),
         (_bgMaterial ? _bgMaterial->getIE() : nullptr), spp, _lightPtr,
         _lightArray.size(),
@@ -54,10 +54,10 @@ void GrowthRenderer::commit()
         _giSamples, _giSoftness, _useTransferFunctionColor);
 }
 
-GrowthRenderer::GrowthRenderer()
+CellGrowthRenderer::CellGrowthRenderer()
 {
-    ispcEquivalent = ispc::GrowthRenderer_create(this);
+    ispcEquivalent = ispc::CellGrowthRenderer_create(this);
 }
 
-OSP_REGISTER_RENDERER(GrowthRenderer, growth_simulation);
+OSP_REGISTER_RENDERER(CellGrowthRenderer, circuit_explorer_cell_growth);
 } // namespace circuitExplorer

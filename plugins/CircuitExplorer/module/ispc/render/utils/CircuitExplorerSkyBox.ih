@@ -19,36 +19,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "BasicSimulationRenderer.h"
+#pragma once
 
-// ospray
-#include <ospray/SDK/common/Data.h>
+#include "../CircuitExplorerMaterial.ih"
+#include <ospray/SDK/math/vec.ih>
 
-// ispc exports
-#include "BasicSimulationRenderer_ispc.h"
-
-using namespace ospray;
-
-namespace circuitExplorer
-{
-void BasicSimulationRenderer::commit()
-{
-    SimulationRenderer::commit();
-
-    _simulationThreshold = getParam1f("simulationThreshold", 0.f);
-
-    ispc::BasicSimulationRenderer_set(
-        getIE(), (_secondaryModel ? _secondaryModel->getIE() : nullptr),
-        (_bgMaterial ? _bgMaterial->getIE() : nullptr), spp,
-        (_simulationData ? (float*)_simulationData->data : nullptr),
-        _simulationDataSize, _alphaCorrection, _simulationThreshold,
-        _pixelAlpha, _fogThickness, _fogStart, _maxBounces);
-}
-
-BasicSimulationRenderer::BasicSimulationRenderer()
-{
-    ispcEquivalent = ispc::BasicSimulationRenderer_create(this);
-}
-
-OSP_REGISTER_RENDERER(BasicSimulationRenderer, basic_simulation);
-} // namespace circuitExplorer
+/**
+    Returns the color of the skybox for a given ray. If no material is defined
+   for the skybox, the background color of the renderer is returned.
+    @param renderer Pointer to current renderer
+    @param ray Current ray
+    @param bgMaterial Background material
+    @return The RGBA color of the skybox
+*/
+vec4f skyboxMapping(const uniform Renderer* uniform renderer, const Ray& ray,
+                    const uniform CircuitExplorerMaterial* uniform bgMaterial);

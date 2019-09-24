@@ -22,11 +22,12 @@
 #include <ospray/SDK/math/vec.ih>
 #include <ospray/SDK/render/Renderer.ih>
 
-#include "../ExtendedMaterial.ih"
-#include "Consts.ih"
+#include "../../../../../../engines/ospray/ispc/render/utils/Consts.ih"
+
+#include "../CircuitExplorerMaterial.ih"
 
 vec4f skyboxMapping(const uniform Renderer* uniform renderer, const Ray& ray,
-                    const uniform ExtendedMaterial* uniform bgMaterial)
+                    const uniform CircuitExplorerMaterial* uniform bgMaterial)
 {
     if (!bgMaterial)
         return make_vec4f(0.f);

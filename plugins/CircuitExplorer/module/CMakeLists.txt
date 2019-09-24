@@ -21,34 +21,30 @@ include(ispc)
 
 set(MODULE_SOURCES
     CircuitExplorer.cpp
-    ispc/camera/PerspectiveCamera.cpp
-    ispc/render/ExtendedMaterial.cpp
-    ispc/render/BasicSimulationRenderer.cpp
-    ispc/render/AdvancedSimulationRenderer.cpp
+    ispc/camera/DOFPerspectiveCamera.cpp
+    ispc/render/CircuitExplorerMaterial.cpp
+    ispc/render/CircuitExplorerBasicRenderer.cpp
+    ispc/render/CircuitExplorerAdvancedRenderer.cpp
     ispc/render/VoxelizedSimulationRenderer.cpp
-    ispc/render/GrowthRenderer.cpp
-    ispc/render/utils/AbstractRenderer.cpp
-    ispc/render/utils/SimulationRenderer.cpp
+    ispc/render/ProximityDetectionRenderer.cpp
+    ispc/render/CellGrowthRenderer.cpp
+    ispc/render/utils/CircuitExplorerAbstractRenderer.cpp
+    ispc/render/utils/CircuitExplorerSimulationRenderer.cpp
     )
 
 set(MODULE_ISPC_SOURCES
     ispc/camera/utils.ispc
-    ispc/camera/PerspectiveCamera.ispc
-    ispc/render/ExtendedMaterial.ispc
-    ispc/render/BasicSimulationRenderer.ispc
-    ispc/render/AdvancedSimulationRenderer.ispc
+    ispc/camera/DOFPerspectiveCamera.ispc
+    ispc/render/CircuitExplorerMaterial.ispc
+    ispc/render/CircuitExplorerBasicRenderer.ispc
+    ispc/render/CircuitExplorerAdvancedRenderer.ispc
     ispc/render/VoxelizedSimulationRenderer.ispc
-    ispc/render/GrowthRenderer.ispc
-    ispc/render/utils/SimulationRenderer.ispc
+    ispc/render/ProximityDetectionRenderer.ispc
+    ispc/render/CellGrowthRenderer.ispc
+    ispc/render/utils/CircuitExplorerSimulationRenderer.ispc
     ispc/render/utils/RandomGenerator.ispc
-    ispc/render/utils/SkyBox.ispc
+    ispc/render/utils/CircuitExplorerSkyBox.ispc
     )
-
-# Enable/disable use of hardware randomizer
-option(ISPC_HARDWARE_RANDOMIZER_ENABLED "Enables hardware randomizer if supported by target CPU" OFF)
-if(ISPC_HARDWARE_RANDOMIZER_ENABLED)
-  add_definitions_ispc("-DISPC_USE_HARDWARE_RANDOMIZER=ON")
-endif()
 
 # Compile ispc code
 list(APPEND ALL_ISPC_INCLUDES ${BRAYNS_RESEARCH_MODULES_DIR})

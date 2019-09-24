@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2018-2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -19,24 +19,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ExtendedMaterial.h"
-#include "ExtendedMaterial_ispc.h"
+#include "CircuitExplorerMaterial.h"
+#include "CircuitExplorerMaterial_ispc.h"
 #include <ospray/SDK/common/Data.h>
-
-#define OSP_REGISTER_EXMATERIAL(InternalClassName, external_name)          \
-    extern "C" ospray::Material* ospray_create_material__##external_name() \
-    {                                                                      \
-        return new InternalClassName;                                      \
-    }
 
 namespace brayns
 {
 namespace obj
 {
-void ExtendedMaterial::commit()
+void CircuitExplorerMaterial::commit()
 {
     if (ispcEquivalent == nullptr)
-        ispcEquivalent = ispc::ExtendedMaterial_create(this);
+        ispcEquivalent = ispc::CircuitExplorerMaterial_create(this);
 
     // Opacity
     map_d = (ospray::Texture2D*)getParamObject("map_d", nullptr);
@@ -93,7 +87,7 @@ void ExtendedMaterial::commit()
     // Clipped
     clipped = getParam1i("clipped", 0);
 
-    ispc::ExtendedMaterial_set(
+    ispc::CircuitExplorerMaterial_set(
         getIE(), map_d ? map_d->getIE() : nullptr,
         (const ispc::AffineSpace2f&)xform_d, d,
         map_Refraction ? map_Refraction->getIE() : nullptr,
@@ -113,10 +107,14 @@ void ExtendedMaterial::commit()
         (const ispc::MaterialShadingMode&)shadingMode, clipped);
 }
 
-OSP_REGISTER_MATERIAL(basic_simulation, ExtendedMaterial, default);
-OSP_REGISTER_MATERIAL(advanced_simulation, ExtendedMaterial, default);
-OSP_REGISTER_MATERIAL(voxelized_simulation, ExtendedMaterial, default);
-OSP_REGISTER_MATERIAL(growth_simulation, ExtendedMaterial, default);
-OSP_REGISTER_MATERIAL(basic, ExtendedMaterial, default);
+OSP_REGISTER_MATERIAL(circuit_explorer_basic, CircuitExplorerMaterial, default);
+OSP_REGISTER_MATERIAL(circuit_explorer_advanced, CircuitExplorerMaterial,
+                      default);
+OSP_REGISTER_MATERIAL(circuit_explorer_voxelized_simulation,
+                      CircuitExplorerMaterial, default);
+OSP_REGISTER_MATERIAL(circuit_explorer_cell_growth, CircuitExplorerMaterial,
+                      default);
+OSP_REGISTER_MATERIAL(circuit_explorer_proximity_detection,
+                      CircuitExplorerMaterial, default);
 } // namespace obj
 } // namespace brayns

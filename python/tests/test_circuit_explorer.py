@@ -164,7 +164,7 @@ def test_export_frames_to_disk():
         response = ce.export_frames_to_disk(
             path='/tmp',
             animation_frames=[0],
-            camera_definitions=[[(0.0, 0.0, 0.0), (0.0, 0.0, 1.0), (0.0, 1.0, 0.0)]])
+            camera_definitions=[[(0.0, 0.0, 0.0), (0.0, 0.0, 1.0), (0.0, 1.0, 0.0), 0.0, 100.0]])
         assert_equal(response, {'ok'})
 
 

@@ -36,7 +36,7 @@ class CameraPathHandler:
         """
         self._control_points = control_points
         self._nb_steps_per_sequence = nb_steps_per_sequence
-        self._smoothing_size = smoothing_size
+        self._smoothing_size = int(smoothing_size)
         self._smoothed_key_frames = list()
         self._build_path()
 
@@ -46,10 +46,13 @@ class CameraPathHandler:
         origins = list()
         directions = list()
         ups = list()
+        aperture_radii = list()
+        focus_distances = list()
+
         for s in range(len(self._control_points)-1):
 
             p0 = self._control_points[s]
-            p1 = self._control_points[(s + 1)]
+            p1 = self._control_points[s + 1]
 
             for i in range(self._nb_steps_per_sequence):
                 origin = [0, 0, 0]
@@ -74,21 +77,33 @@ class CameraPathHandler:
                     direction[k] = p0['direction'][k] + t_direction[k] * float(i)
                     up[k] = p0['up'][k] + t_up[k] * float(i)
 
+                t_aperture_radius = (p1['apertureRadius'] - p0['apertureRadius']) / float(self._nb_steps_per_sequence)
+                aperture_radius = p0['apertureRadius'] + t_aperture_radius * float(i)
+
+                t_focus_distance = (p1['focusDistance'] - p0['focusDistance']) / float(self._nb_steps_per_sequence)
+                focus_distance = p0['focusDistance'] + t_focus_distance * float(i)
+
                 origins.append(origin)
                 directions.append(direction)
                 ups.append(up)
+                aperture_radii.append(aperture_radius)
+                focus_distances.append(focus_distance)
 
         nb_frames = len(origins)
         for i in range(nb_frames):
             o = [0, 0, 0]
             d = [0, 0, 0]
             u = [0, 0, 0]
+            aperture_radius = 0.0
+            focus_distance = 0.0
             for j in range(int(self._smoothing_size)):
-                index = (i + j) % nb_frames
+                index = int(max(0, min(i + j - self._smoothing_size / 2, nb_frames - 1)))
                 for k in range(3):
                     o[k] = o[k] + origins[index][k]
                     d[k] = d[k] + directions[index][k]
                     u[k] = u[k] + ups[index][k]
+                aperture_radius = aperture_radius + aperture_radii[index]
+                focus_distance = focus_distance + focus_distances[index]
             self._smoothed_key_frames.append([
                 (o[0] / self._smoothing_size,
                  o[1] / self._smoothing_size,
@@ -98,7 +113,12 @@ class CameraPathHandler:
                  d[2] / self._smoothing_size),
                 (u[0] / self._smoothing_size,
                  u[1] / self._smoothing_size,
-                 u[2] / self._smoothing_size)])
+                 u[2] / self._smoothing_size),
+                aperture_radius / self._smoothing_size,
+                focus_distance / self._smoothing_size])
+        last = self._control_points[len(self._control_points)-1]
+        self._smoothed_key_frames.append(
+            (last['origin'], last['direction'], last['up'], last['apertureRadius'], last['focusDistance']))
 
     def get_nb_frames(self):
         """

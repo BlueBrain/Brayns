@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2018-2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -32,7 +32,7 @@ namespace obj
 {
 typedef ospray::vec3f Color;
 
-struct ExtendedMaterial : public ospray::Material
+struct CircuitExplorerMaterial : public ospray::Material
 {
     /*! opacity: 0 (transparent), 1 (opaque) */
     ospray::Texture2D* map_d;

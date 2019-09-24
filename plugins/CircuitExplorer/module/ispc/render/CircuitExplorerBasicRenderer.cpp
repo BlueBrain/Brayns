@@ -19,30 +19,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "CircuitExplorerBasicRenderer.h"
 
-#include "utils/SimulationRenderer.h"
+// ospray
+#include <ospray/SDK/common/Data.h>
+
+// ispc exports
+#include "CircuitExplorerBasicRenderer_ispc.h"
+
+using namespace ospray;
 
 namespace circuitExplorer
 {
-/**
- * @brief The BasicSimulationRenderer class can perform fast transparency and
- * mapping of simulation data on the geometry
- */
-class BasicSimulationRenderer : public SimulationRenderer
+void CircuitExplorerBasicRenderer::commit()
 {
-public:
-    BasicSimulationRenderer();
+    CircuitExplorerSimulationRenderer::commit();
 
-    /**
-       Returns the class name as a string
-       @return string containing the full name of the class
-    */
-    std::string toString() const final { return "BasicSimulationRenderer"; }
-    void commit() final;
+    _simulationThreshold = getParam1f("simulationThreshold", 0.f);
 
-private:
-    float _simulationThreshold;
-};
+    ispc::CircuitExplorerBasicRenderer_set(
+        getIE(), (_secondaryModel ? _secondaryModel->getIE() : nullptr),
+        (_bgMaterial ? _bgMaterial->getIE() : nullptr), spp,
+        (_simulationData ? (float*)_simulationData->data : nullptr),
+        _simulationDataSize, _alphaCorrection, _simulationThreshold,
+        _pixelAlpha, _fogThickness, _fogStart, _maxBounces);
+}
 
+CircuitExplorerBasicRenderer::CircuitExplorerBasicRenderer()
+{
+    ispcEquivalent = ispc::CircuitExplorerBasicRenderer_create(this);
+}
+
+OSP_REGISTER_RENDERER(CircuitExplorerBasicRenderer, circuit_explorer_basic);
 } // namespace circuitExplorer
