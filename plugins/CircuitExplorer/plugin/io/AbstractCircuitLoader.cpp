@@ -632,7 +632,7 @@ void AbstractCircuitLoader::_importMeshes(
         props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 1});
         props.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
                            static_cast<int>(MaterialShadingMode::diffuse)});
-        props.setProperty({MATERIAL_PROPERTY_CLIPPED, false});
+        props.setProperty({MATERIAL_PROPERTY_CLIPPED, 0});
         material.second->setProperties(props);
     }
 }

@@ -397,7 +397,7 @@ void CircuitExplorerPlugin::_setMaterialExtraAttributes(
                 props.setProperty(
                     {MATERIAL_PROPERTY_SHADING_MODE,
                      static_cast<int>(MaterialShadingMode::diffuse)});
-                props.setProperty({MATERIAL_PROPERTY_CLIPPED, false});
+                props.setProperty({MATERIAL_PROPERTY_CLIPPED, 0});
                 material.second->updateProperties(props);
             }
         }
