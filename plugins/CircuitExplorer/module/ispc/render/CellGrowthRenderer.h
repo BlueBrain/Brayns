@@ -27,8 +27,7 @@ namespace circuitExplorer
 {
 /**
  * @brief The CellGrowthRenderer class can perform fast transparency
- * and
- * mapping of simulation data on the geometry
+ * and mapping of simulation data on the geometry
  */
 class CellGrowthRenderer : public CircuitExplorerSimulationRenderer
 {
@@ -45,10 +44,9 @@ public:
 private:
     float _simulationThreshold;
 
-    float _giStrength;
-    float _giDistance;
-    int _giSamples;
-    float _giSoftness;
+    float _shadows;
+    float _softShadows;
+    float _shadowDistance;
 
     bool _useTransferFunctionColor;
 };

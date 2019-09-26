@@ -138,15 +138,11 @@ void _addGrowthRenderer(brayns::Engine& engine)
     properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
     properties.setProperty({"fogStart", 0., 0., 1e6, {"Fog start"}});
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
-    properties.setProperty(
-        {"giDistance", 10000., {"Global illumination distance"}});
-    properties.setProperty(
-        {"giWeight", 0., 1., 1., {"Global illumination weight"}});
-    properties.setProperty(
-        {"giSoftness", 0., 0., 1., {"Global illumination softness"}});
-    properties.setProperty(
-        {"giSamples", 0, 0, 64, {"Global illumination samples"}});
     properties.setProperty({"tfColor", false, {"Use transfer function color"}});
+    properties.setProperty({"shadows", 0., 0., 1., {"Shadow intensity"}});
+    properties.setProperty({"softShadows", 0., 0., 1., {"Shadow softness"}});
+    properties.setProperty(
+        {"shadowDistance", 1e4, 0., 1e4, {"Shadow distance"}});
     engine.addRendererType("circuit_explorer_cell_growth", properties);
 }
 
