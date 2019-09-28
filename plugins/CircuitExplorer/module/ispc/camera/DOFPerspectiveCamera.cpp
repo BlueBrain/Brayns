@@ -47,7 +47,9 @@ void DOFPerspectiveCamera::commit()
     stereo = getParam("stereo", false);
     // the default 63.5mm represents the average human IPD
     interpupillaryDistance = getParamf("interpupillaryDistance", 0.0635f);
-    clipPlanes = getParamData("clipPlanes", nullptr);
+    enableClippingPlanes = getParam("enableClippingPlanes", 0);
+    clipPlanes =
+        enableClippingPlanes ? getParamData("clipPlanes", nullptr) : nullptr;
 
     // ------------------------------------------------------------------
     // now, update the local precomputed values
