@@ -37,10 +37,9 @@ void CellGrowthRenderer::commit()
 
     _simulationThreshold = getParam1f("simulationThreshold", 0.f);
 
-    _giStrength = getParam1f("giWeight", 0.f);
-    _giDistance = getParam1f("giDistance", 1e20f);
-    _giSamples = getParam1i("giSamples", 1);
-    _giSoftness = getParam1f("giSoftness", 0.f);
+    _shadows = getParam1f("shadows", 0.f);
+    _softShadows = getParam1f("softShadows", 0.f);
+    _shadowDistance = getParam1f("shadowDistance", 1e4f);
 
     _useTransferFunctionColor = getParam("tfColor", false);
 
@@ -50,8 +49,8 @@ void CellGrowthRenderer::commit()
         _lightArray.size(),
         (_simulationData ? (float*)_simulationData->data : nullptr),
         _simulationDataSize, _alphaCorrection, _simulationThreshold,
-        _pixelAlpha, _fogThickness, _fogStart, _giStrength, _giDistance,
-        _giSamples, _giSoftness, _useTransferFunctionColor);
+        _pixelAlpha, _fogThickness, _fogStart, _shadows, _softShadows,
+        _shadowDistance, _useTransferFunctionColor);
 }
 
 CellGrowthRenderer::CellGrowthRenderer()

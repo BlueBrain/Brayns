@@ -121,14 +121,19 @@ inline vec3f ProximityDetectionRenderer_shadeRay(
             MaterialShadingMode shadingMode = none;
             vec3f Kd;
             float Ns = 1.f;
+            float opacity = 1.f;
             if (!objMaterial)
+            {
                 Kd = make_vec3f(dg.color);
+                opacity = dg.color.w;
+            }
             else
                 foreach_unique(mat in objMaterial)
                 {
                     Kd = mat->Kd * make_vec3f(dg.color);
                     shadingMode = mat->shadingMode;
                     Ns = mat->Ns;
+                    opacity = dg.color.w * mat->d;
                 }
 
             for (uniform int i = 0;
@@ -143,15 +148,50 @@ inline vec3f ProximityDetectionRenderer_shadeRay(
 
                 if (reduce_max(radiance) > 0.f)
                 {
-                    float cosNL = 0.f;
-                    if (shadingMode == electron)
+                    /*
+                     float cosNL = 0.f;
+                     if (shadingMode == electron)
+                     {
+                         const vec3f me = normalize(ray.org - P);
+                         const float angle = max(0.f, dot(me, normal));
+                         cosNL = 1.f - pow(angle, Ns);
+                     }
+                     else
+                         cosNL = max(0.f, dot(lightSample.dir, normal));
+
+                     */
+                    // Head-light shading
+                    float cosNL = (shadingMode == none
+                                       ? 1.f
+                                       : max(0.f, dot(neg(ray.dir), dg.Ns)));
+
+                    switch (shadingMode)
                     {
-                        const vec3f me = normalize(ray.org - P);
-                        const float angle = max(0.f, dot(me, normal));
-                        cosNL = 1.f - pow(angle, Ns);
+                    case electron:
+                    case electron_transparency:
+                        cosNL = 1.f - pow(cosNL, Ns);
+                        opacity *= (shadingMode == electron_transparency ? cosNL
+                                                                         : 1.f);
+                        break;
+                    case diffuse_transparency:
+                        opacity *= cosNL;
+                        break;
+                    case cartoon:
+                        const unsigned int angleAsInt = cosNL * Ns;
+                        cosNL = (float)(angleAsInt) / Ns;
+                        break;
+                    case perlin:
+                        const vec3f point = ray.org + ray.t * ray.dir;
+                        float n = noise(point);
+                        if (ray.t < dg.epsilon * 1.5e4f)
+                            n += worleyNoise(point, 2.f);
+                        else
+                            n *= 2.f;
+
+                        n = clamp(n, 0.f, 1.f);
+                        cosNL *= n;
+                        break;
                     }
-                    else
-                        cosNL = max(0.f, dot(lightSample.dir, normal));
 
                     const vec4f shadedColor =
                         make_vec4f(Kd * cosNL * radiance, 1.f);

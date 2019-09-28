@@ -29,15 +29,84 @@ struct CellGrowthRenderer
     float alphaCorrection;
     float simulationThreshold;
 
-    // GI attributes
-    float giStrength;
-    float giDistance;
-    int giSamples;
-    float giSoftness;
+    // Shading attributes
+    int randomNumber;
+    float shadows;
+    float softShadows;
+    float shadowDistance;
+
+    // Shadow attributes
 
     // Use transfer function color for shading
     bool useTransferFunctionColor;
 };
+
+inline float processShadows(const uniform CellGrowthRenderer* uniform self,
+                            varying ScreenSample& sample,
+                            varying DifferentialGeometry& dg)
+
+{
+    // Shadows
+    float shadowIntensity = 0.f;
+    for (uniform int i = 0;
+         shadowIntensity < 1.f && i < self->super.super.numLights; ++i)
+    {
+        const uniform Light* uniform light = self->super.super.lights[i];
+        const vec2f samplingLocation = make_vec2f(0.5f);
+        const varying Light_SampleRes lightSample =
+            light->sample(light, dg, samplingLocation);
+        const vec3f lightColor = lightSample.weight;
+        const float radiance = reduce_max(lightColor);
+        const vec3f lightDirection = lightSample.dir;
+
+        if (radiance <= 0.f)
+            continue;
+
+        vec3f ld = lightDirection;
+        if (self->softShadows > 0.f)
+            ld = normalize(
+                ld + self->softShadows *
+                         getRandomVector(self->super.super.super.fb->size.x,
+                                         sample, dg.Ns, self->randomNumber));
+
+        Ray shadowRay;
+        setRay(shadowRay, dg.P, ld);
+        shadowRay.t0 = dg.epsilon;
+        shadowRay.t = self->shadowDistance;
+        shadowRay.time = sample.ray.time;
+
+        unsigned int iteration = 0;
+        while (shadowIntensity < 1.f && iteration < NB_MAX_REBOUNDS)
+        {
+            ++iteration;
+
+            shadowRay.geomID = -1;
+            shadowRay.primID = -1;
+            shadowRay.instID = -1;
+
+            traceRay(self->super.super.super.model, shadowRay);
+
+            if (shadowRay.geomID < 0)
+                iteration = NB_MAX_REBOUNDS;
+            else
+            {
+                DifferentialGeometry shadowDg;
+                postIntersect(self->super.super.super.model, shadowDg,
+                              shadowRay, DG_NG);
+                const vec4f simulationColor =
+                    getSimulationValue(&self->super, &shadowDg,
+                                       shadowRay.primID);
+
+                if (simulationColor.w > self->simulationThreshold)
+                    shadowIntensity += self->shadows;
+
+                shadowRay.t0 = shadowRay.t + shadowDg.epsilon;
+                shadowRay.t = self->shadowDistance - shadowRay.t;
+            }
+        }
+    }
+    return shadowIntensity;
+}
 
 inline vec3f CellGrowthRenderer_shadeRay(
     const uniform CellGrowthRenderer* uniform self,
@@ -94,15 +163,15 @@ inline vec3f CellGrowthRenderer_shadeRay(
                 Ns = mat->Ns;
             }
 
-        const vec4f colorContribution =
+        const vec4f simulationColor =
             getSimulationValue(&self->super, &dg, ray.primID);
 
-        if (colorContribution.w > self->simulationThreshold)
+        if (simulationColor.w > self->simulationThreshold)
         {
             if (self->useTransferFunctionColor)
-                Kd = make_vec3f(colorContribution);
+                Kd = make_vec3f(simulationColor);
 
-            // Light
+            // Shading
             const uniform Light* uniform light = self->super.super.lights[0];
             const vec2f samplingLocation = make_vec2f(0.5f);
             const varying Light_SampleRes lightSample =
@@ -113,9 +182,7 @@ inline vec3f CellGrowthRenderer_shadeRay(
             sample.alpha = 1.f;
             const vec3f intersection = ray.org + ray.t * ray.dir;
 
-            // Head-light shading
             float cosNL = 1.f;
-
             switch (shadingMode)
             {
             case electron:
@@ -128,7 +195,7 @@ inline vec3f CellGrowthRenderer_shadeRay(
                 cosNL = (float)(angleAsInt) / Ns;
                 break;
             case perlin:
-                float n = noise(intersection);
+                float n = noise(intersection * Ns);
                 if (ray.t < dg.epsilon * 1.5e4f)
                     n += worleyNoise(intersection, 2.f);
                 else
@@ -142,55 +209,11 @@ inline vec3f CellGrowthRenderer_shadeRay(
                 cosNL = max(0.f, dot(lightDirection, dg.Ns));
             }
 
-            // Ambient occlusion
-            if (self->giSamples != 0)
-            {
-                unsigned int count = 0;
-                for (int i = 0; i < self->giSamples; ++i)
-                {
-                    // AO
-                    vec3f randomDirection = normalize(
-                        lightDirection +
-                        self->giSoftness *
-                            getRandomVector(self->super.super.super.fb->size.x,
-                                            sample, dg.Ns, i));
-                    if (dot(randomDirection, dg.Ns) < 0.f)
-                        // Invert direction of random ray direction is opposite
-                        // to surface normal
-                        randomDirection = neg(randomDirection);
+            float shadowIntensity = 0.f;
+            if (self->shadows > 0.f)
+                shadowIntensity = processShadows(self, sample, dg);
 
-                    varying Ray randomRay = sample.ray;
-                    setRay(randomRay, intersection, randomDirection);
-                    randomRay.t0 = dg.epsilon;
-                    randomRay.t = self->giDistance;
-                    randomRay.primID = -1;
-                    randomRay.geomID = -1;
-                    randomRay.instID = -1;
-
-                    traceRay(self->super.super.super.model, randomRay);
-
-                    if (randomRay.geomID >= 0)
-                    {
-                        DifferentialGeometry randomDg;
-                        postIntersect(self->super.super.super.model, randomDg,
-                                      randomRay, DG_NG);
-
-                        const vec4f colorContribution =
-                            getSimulationValue(&self->super, &randomDg,
-                                               randomRay.primID);
-
-                        if (colorContribution.w > self->simulationThreshold)
-                            ++count;
-                    }
-                }
-                if (count > 0)
-                {
-                    cosNL -= (float)count * self->giStrength;
-                    cosNL = max(0.f, cosNL);
-                }
-            }
-
-            pathColor = cosNL * Kd;
+            pathColor = cosNL * Kd * clamp(1.f - shadowIntensity, 0.f, 1.f);
             break;
         }
 
@@ -232,8 +255,8 @@ export void CellGrowthRenderer_set(
     const uniform float& alphaCorrection,
     const uniform float& simulationThreshold, const uniform float& pixelAlpha,
     const uniform float& fogThickness, const uniform float& fogStart,
-    const uniform float& giStrength, const uniform float& giDistance,
-    const uniform int& giSamples, const uniform float& giSoftness,
+    const uniform float& shadows, const uniform float& softShadows,
+    const uniform float& shadowDistance,
     const uniform bool& useTransferFunctionColor)
 {
     uniform CellGrowthRenderer* uniform self =
@@ -259,10 +282,8 @@ export void CellGrowthRenderer_set(
     self->super.fogThickness = fogThickness;
     self->super.fogStart = fogStart;
 
-    self->giStrength = giStrength;
-    self->giDistance = giDistance;
-    self->giSamples = giSamples;
-    self->giSoftness = giSoftness;
-
+    self->shadows = shadows;
+    self->softShadows = softShadows;
+    self->shadowDistance = shadowDistance;
     self->useTransferFunctionColor = useTransferFunctionColor;
 }

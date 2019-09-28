@@ -274,6 +274,15 @@ private:
         const brayns::PropertyMap& properties,
         const brain::neuron::SectionType& sectionType) const;
 
+    /**
+     * @brief Computes the distance of a segment to the soma
+     * @param section Section containing the segment
+     * @param sampleId segment index in the section
+     * @return Distance to the soma
+     */
+    float _distanceToSoma(const brain::neuron::Section& section,
+                          const size_t sampleId) const;
+
     size_t _defaultMaterialId{brayns::NO_MATERIAL};
     brayns::PropertyMap _defaults;
 };

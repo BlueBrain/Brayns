@@ -645,6 +645,39 @@ void MorphologyLoader::_addStepConeGeometry(
                        static_cast<float>(previousRadius), userDataOffset});
 }
 
+float MorphologyLoader::_distanceToSoma(const brain::neuron::Section& section,
+                                        const size_t sampleId) const
+{
+    float distance = 0.f;
+    {
+        const auto& samples = section.getSamples();
+        for (size_t i = 0; i < sampleId - 1; ++i)
+        {
+            const auto& a = samples[i];
+            const auto& b = samples[i + 1];
+            distance = distance + (b - a).length();
+        }
+    }
+
+    auto s = section;
+    while (s.hasParent())
+    {
+        s = s.getParent();
+
+        const auto& samples = s.getSamples();
+        for (size_t i = 0; i < samples.size() - 1; ++i)
+        {
+            const auto& a = samples[i];
+            const auto& b = samples[i + 1];
+            distance = distance + (b - a).length();
+        }
+    }
+
+    return distance * 10.f; // Since user data is uint64_t, we multiply by 10 to
+                            // increase the precision of the growth (first
+                            // decimal value will then be considered)
+}
+
 void MorphologyLoader::_importMorphologyFromURI(
     const brayns::PropertyMap& properties, const servus::URI& uri,
     const uint64_t index, const brayns::Matrix4f& /*transformation*/,
@@ -655,12 +688,6 @@ void MorphologyLoader::_importMorphologyFromURI(
     SDFMorphologyData sdfMorphologyData;
 
     brain::neuron::Morphology morphology(uri);
-
-    // If there is no compartment report, the offset in the simulation buffer is
-    // the index of the morphology in the circuit
-    uint64_t userDataOffset = index;
-    if (compartmentReport)
-        userDataOffset = compartmentReport->getOffsets()[index][0];
 
     // Soma
     const auto sectionTypes = getSectionTypesFromProperties(properties);
@@ -676,6 +703,12 @@ void MorphologyLoader::_importMorphologyFromURI(
         PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE.name);
     const auto maxDistanceToSoma = properties.getProperty<double>(
         PROP_MORPHOLOGY_MAX_DISTANCE_TO_SOMA.name);
+
+    // If there is no compartment report, the offset in the simulation buffer is
+    // the index of the morphology in the circuit
+    uint64_t userDataOffset = 0;
+    if (compartmentReport)
+        userDataOffset = compartmentReport->getOffsets()[index][0];
 
     if (!useRealisticSoma &&
         std::find(sectionTypes.begin(), sectionTypes.end(),
@@ -743,9 +776,6 @@ void MorphologyLoader::_importMorphologyFromURI(
             step = 1;
         }
 
-        const auto distanceToSoma = section.getDistanceToSoma();
-        const auto& distancesToSoma = section.getSampleDistancesToSoma();
-
         double segmentStep = 0;
         if (compartmentReport)
         {
@@ -770,17 +800,18 @@ void MorphologyLoader::_importMorphologyFromURI(
                 done = true;
             }
 
-            if (distanceToSoma + distancesToSoma[i] > maxDistanceToSoma)
+            const auto distanceToSoma = _distanceToSoma(section, i);
+            if (distanceToSoma > maxDistanceToSoma)
                 continue;
 
             model.morphologyInfo.maxDistanceToSoma =
                 std::max(model.morphologyInfo.maxDistanceToSoma,
-                         distanceToSoma + distancesToSoma[i]);
+                         distanceToSoma);
 
             switch (userDataType)
             {
             case UserDataType::distance_to_soma:
-                userDataOffset = distanceToSoma + distancesToSoma[i];
+                userDataOffset = distanceToSoma;
                 break;
 
             case UserDataType::simulation_offset:
