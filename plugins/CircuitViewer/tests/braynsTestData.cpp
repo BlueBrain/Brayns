@@ -197,12 +197,9 @@ TEST_CASE("circuit_with_dampened_sdf_geometries")
     testSdfGeometries(true, "circuit_with_dampened_sdf_geometries");
 }
 
-BOOST_AUTO_TEST_CASE(circuit_with_sdf_bezier_curves)
+TEST_CASE("circuit_with_sdf_bezier_curves")
 {
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
-    auto argv = std::vector<const char*>{app,
+    auto argv = std::vector<const char*>{"circuit_with_sdf_bezier_curves",
                                          BBP_TEST_BLUECONFIG3,
                                          "--disable-accumulation",
                                          "--samples-per-pixel",
@@ -232,6 +229,6 @@ BOOST_AUTO_TEST_CASE(circuit_with_sdf_bezier_curves)
 
     brayns.commitAndRender();
 
-    BOOST_CHECK(compareTestImage("testSdfBezierCurvesCircuit.png",
-                                 brayns.getEngine().getFrameBuffer()));
+    CHECK(compareTestImage("testSdfBezierCurvesCircuit.png",
+                           brayns.getEngine().getFrameBuffer()));
 }

@@ -21,10 +21,10 @@
 
 #include <brayns/common/geometry/SDFBezier.h>
 
-#define BOOST_TEST_MODULE sdfBeziers
-#include <boost/test/unit_test.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "tests/doctest.h"
 
-BOOST_AUTO_TEST_CASE(bezier_bounding_box)
+TEST_CASE("bezier_bounding_box")
 {
     const brayns::SDFBezier bezier = {
         0,                   // userdata
@@ -38,6 +38,6 @@ BOOST_AUTO_TEST_CASE(bezier_bounding_box)
 
     const auto bbox = bezierBounds(bezier);
 
-    BOOST_CHECK_EQUAL(bbox.getMin(), brayns::Vector3d(-3.0, -1.0, -1.0));
-    BOOST_CHECK_EQUAL(bbox.getMax(), brayns::Vector3d(2.0, 1.0, 1.0));
+    CHECK_EQ(bbox.getMin(), brayns::Vector3d(-3.0, -1.0, -1.0));
+    CHECK_EQ(bbox.getMax(), brayns::Vector3d(2.0, 1.0, 1.0));
 }
