@@ -20,7 +20,7 @@
  */
 
 #include "CircuitExplorerParams.h"
-#include "json.hpp"
+#include <plugin/json.hpp>
 
 #define FROM_JSON(PARAM, JSON, NAME) \
     PARAM.NAME = JSON[#NAME].get<decltype(PARAM.NAME)>()

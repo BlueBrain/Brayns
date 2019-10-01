@@ -22,8 +22,8 @@
 #ifndef MEMBRANELESS_ORGANELLES_PLUGIN_H
 #define MEMBRANELESS_ORGANELLES_PLUGIN_H
 
-#include <api/CircuitExplorerParams.h>
-#include <io/AbstractCircuitLoader.h>
+#include <plugin/api/CircuitExplorerParams.h>
+#include <plugin/io/AbstractCircuitLoader.h>
 
 #include <array>
 #include <brayns/common/types.h>

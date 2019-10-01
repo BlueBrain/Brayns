@@ -28,7 +28,7 @@
 #include <common/commonTypes.h>
 #include <common/log.h>
 #include <common/types.h>
-#include <io/CellGrowthHandler.h>
+#include <plugin/io/CellGrowthHandler.h>
 
 #include <brayns/common/Timer.h>
 #include <brayns/common/scene/ClipPlane.h>

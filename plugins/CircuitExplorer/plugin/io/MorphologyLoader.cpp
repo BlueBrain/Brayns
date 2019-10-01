@@ -21,9 +21,9 @@
 
 #include "MorphologyLoader.h"
 #include "Utils.h"
-#include "meshing/MetaballsGenerator.h"
 #include <common/log.h>
 #include <common/types.h>
+#include <plugin/meshing/MetaballsGenerator.h>
 
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/types.h>

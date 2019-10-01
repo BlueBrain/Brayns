@@ -22,8 +22,8 @@
 #pragma once
 
 #include "MorphologyLoader.h"
-#include "api/CircuitExplorerParams.h"
 #include <common/types.h>
+#include <plugin/api/CircuitExplorerParams.h>
 
 #include <brayns/common/loader/Loader.h>
 #include <brayns/common/types.h>

@@ -23,17 +23,17 @@
 #include <common/commonTypes.h>
 #include <common/log.h>
 
-#include <io/AdvancedCircuitLoader.h>
-#include <io/BrickLoader.h>
-#include <io/CellGrowthHandler.h>
-#include <io/MeshCircuitLoader.h>
-#include <io/MorphologyCollageLoader.h>
-#include <io/MorphologyLoader.h>
-#include <io/PairSynapsesLoader.h>
-#include <io/SynapseCircuitLoader.h>
-#include <io/SynapseJSONLoader.h>
-#include <io/VoltageSimulationHandler.h>
-#include <meshing/PointCloudMesher.h>
+#include <plugin/io/AdvancedCircuitLoader.h>
+#include <plugin/io/BrickLoader.h>
+#include <plugin/io/CellGrowthHandler.h>
+#include <plugin/io/MeshCircuitLoader.h>
+#include <plugin/io/MorphologyCollageLoader.h>
+#include <plugin/io/MorphologyLoader.h>
+#include <plugin/io/PairSynapsesLoader.h>
+#include <plugin/io/SynapseCircuitLoader.h>
+#include <plugin/io/SynapseJSONLoader.h>
+#include <plugin/io/VoltageSimulationHandler.h>
+#include <plugin/meshing/PointCloudMesher.h>
 
 #include <brayns/common/ActionInterface.h>
 #include <brayns/common/Progress.h>
