@@ -45,6 +45,10 @@
 #include "ImageGenerator.h"
 #include "Throttle.h"
 
+#ifdef BRAYNS_USE_FFMPEG
+#include "encoder.h"
+#endif
+
 namespace
 {
 constexpr int64_t INTERACTIVE_THROTTLE = 1;
@@ -56,6 +60,8 @@ const int INSTANCE_NOT_FOUND = -12346;
 const int TASK_RESULT_TO_JSON_ERROR = -12347;
 const int SCHEMA_RPC_ENDPOINT_NOT_FOUND = -12348;
 const int PARAMETER_FROM_JSON_ERROR = -12349;
+const int VIDEOSTREAMING_NOT_SUPPORTED = -12350;
+const int VIDEOSTREAMING_NOT_ENABLED = -12351;
 
 // REST PUT & GET, JSONRPC set-* notification, JSONRPC get-* request
 const std::string ENDPOINT_ANIMATION_PARAMS = "animation-parameters";
@@ -85,6 +91,7 @@ const std::string METHOD_GET_LOADERS = "get-loaders";
 const std::string METHOD_GET_MODEL_PROPERTIES = "get-model-properties";
 const std::string METHOD_GET_MODEL_TRANSFER_FUNCTION =
     "get-model-transfer-function";
+const std::string METHOD_GET_VIDEOSTREAM = "get-videostream";
 const std::string METHOD_IMAGE_JPEG = "image-jpeg";
 const std::string METHOD_INSPECT = "inspect";
 const std::string METHOD_MODEL_PROPERTIES_SCHEMA = "model-properties-schema";
@@ -95,6 +102,7 @@ const std::string METHOD_SET_ENVIRONMENT_MAP = "set-environment-map";
 const std::string METHOD_SET_MODEL_PROPERTIES = "set-model-properties";
 const std::string METHOD_SET_MODEL_TRANSFER_FUNCTION =
     "set-model-transfer-function";
+const std::string METHOD_SET_VIDEOSTREAM = "set-videostream";
 const std::string METHOD_UPDATE_CLIP_PLANE = "update-clip-plane";
 const std::string METHOD_UPDATE_INSTANCE = "update-instance";
 const std::string METHOD_UPDATE_MODEL = "update-model";
@@ -148,6 +156,13 @@ std::string getRequestEndpointName(const std::string& endpoint)
 {
     return "get-" + endpoint;
 }
+
+const Response::Error VIDEOSTREAM_NOT_ENABLED_ERROR{
+    "Brayns was not started with videostream support enabled",
+    VIDEOSTREAMING_NOT_ENABLED};
+const Response::Error VIDEOSTREAM_NOT_SUPPORTED_ERROR{
+    "Brayns was not build with videostream support",
+    VIDEOSTREAMING_NOT_SUPPORTED};
 } // namespace
 
 namespace brayns
@@ -266,7 +281,12 @@ public:
         if (!_rocketsServer || _rocketsServer->getConnectionCount() == 0)
             return;
 
-        _broadcastImageJpeg();
+        if (!_parametersManager.getApplicationParameters().useVideoStreaming())
+            _broadcastImageJpeg();
+#ifdef BRAYNS_USE_FFMPEG
+        else
+            _broadcastVideo();
+#endif
     }
 
     void registerNotification(const RpcParameterDescription& desc,
@@ -960,6 +980,9 @@ public:
         _handleSetEnvironmentMap();
         _handleGetEnvironmentMap();
 
+        _handleSetVideostream();
+        _handleGetVideostream();
+
         _handleAddModel();
         _handleRemoveModel();
         _handleUpdateModel();
@@ -1040,6 +1063,58 @@ public:
             _rocketsServer->broadcastBinary((const char*)image.data.get(),
                                             image.size);
     }
+
+#ifdef BRAYNS_USE_FFMPEG
+    void _broadcastVideo()
+    {
+        if (!_videoParams.enabled)
+        {
+            _encoder.reset();
+            if (_videoUpdatedResponse)
+                _videoUpdatedResponse();
+            _videoUpdatedResponse = nullptr;
+            return;
+        }
+
+        const auto& params = _parametersManager.getApplicationParameters();
+        const auto fps = params.getImageStreamFPS();
+        if (fps == 0)
+            return;
+
+        if (_encoder && _encoder->kbps != _videoParams.kbps)
+            _encoder.reset();
+
+        auto& frameBuffer = _engine.getFrameBuffer();
+        if (!_encoder)
+        {
+            int width = frameBuffer.getFrameSize().x;
+            if (width % 2 != 0)
+                width += 1;
+            int height = frameBuffer.getFrameSize().y;
+            if (height % 2 != 0)
+                height += 1;
+
+            _encoder =
+                std::make_unique<Encoder>(width, height, fps, _videoParams.kbps,
+                                          [& rs = _rocketsServer](auto a,
+                                                                  auto b) {
+                                              rs->broadcastBinary(a, b);
+                                          });
+        }
+
+        if (_videoUpdatedResponse)
+            _videoUpdatedResponse();
+        _videoUpdatedResponse = nullptr;
+
+        if (frameBuffer.getFrameBufferFormat() == FrameBufferFormat::none ||
+            !frameBuffer.isModified())
+        {
+            return;
+        }
+
+        _encoder->encode(frameBuffer);
+    }
+#endif
 
     void _handleVersion()
     {
@@ -1798,6 +1873,65 @@ public:
         });
     }
 
+    void _handleSetVideostream()
+    {
+        const RpcParameterDescription desc{METHOD_SET_VIDEOSTREAM,
+                                           "Set the video streaming parameters",
+                                           "params", "videostream parameters"};
+
+        auto action = [&](const VideoStreamParam& params BRAYNS_UNUSED,
+                          auto clientID BRAYNS_UNUSED, auto respond, auto) {
+            if (!_parametersManager.getApplicationParameters()
+                     .useVideoStreaming())
+            {
+                respond(
+                    Response{Response::Error(VIDEOSTREAM_NOT_ENABLED_ERROR)});
+                return rockets::jsonrpc::CancelRequestCallback();
+            }
+
+#ifdef BRAYNS_USE_FFMPEG
+            this->_rebroadcast(METHOD_SET_VIDEOSTREAM, to_json(params),
+                               {clientID});
+
+            const bool changed = params != _videoParams;
+            if (!changed)
+            {
+                respond(Response{to_json(false)});
+                return rockets::jsonrpc::CancelRequestCallback();
+            }
+
+            _engine.triggerRender();
+            _videoParams = params;
+            _videoUpdatedResponse = [respond] {
+                respond(Response{to_json(true)});
+            };
+            return rockets::jsonrpc::CancelRequestCallback();
+#else
+            respond(Response{Response::Error(VIDEOSTREAM_NOT_SUPPORTED_ERROR)});
+            return rockets::jsonrpc::CancelRequestCallback();
+#endif
+        };
+        _handleAsyncRPC<VideoStreamParam, bool>(desc, action);
+    }
+
+    void _handleGetVideostream()
+    {
+        const RpcDescription desc{METHOD_GET_VIDEOSTREAM,
+                                  "Get the videostream parameters"};
+
+        _handleRPC<VideoStreamParam>(desc, [&]() -> VideoStreamParam {
+#ifdef BRAYNS_USE_FFMPEG
+            if (!_parametersManager.getApplicationParameters()
+                     .useVideoStreaming())
+                throw rockets::jsonrpc::response_error(
+                    VIDEOSTREAM_NOT_ENABLED_ERROR);
+            return _videoParams;
+#else
+            throw rockets::jsonrpc::response_error(VIDEOSTREAM_NOT_SUPPORTED_ERROR);
+#endif
+        });
+    }
+
     Engine& _engine;
 
     std::unordered_map<std::string, std::pair<std::mutex, Throttle>> _throttle;
@@ -1834,6 +1968,12 @@ public:
     bool _endpointsRegistered{false};
 
     std::vector<BaseObject*> _objects;
+
+#ifdef BRAYNS_USE_FFMPEG
+    std::unique_ptr<Encoder> _encoder;
+    VideoStreamParam _videoParams;
+    std::function<void()> _videoUpdatedResponse;
+#endif
 };
 
 RocketsPlugin::~RocketsPlugin()

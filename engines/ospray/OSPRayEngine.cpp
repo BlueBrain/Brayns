@@ -157,28 +157,6 @@ void OSPRayEngine::_createRenderers()
     {
         PropertyMap properties;
         properties.setProperty(
-            {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
-        properties.setProperty(
-            {"detectionDistance", 1., {"Detection distance"}});
-        properties.setProperty({"detectionFarColor",
-                                std::array<double, 3>{{1., 0., 0.}},
-                                {"Detection far color"}});
-        properties.setProperty({"detectionNearColor",
-                                std::array<double, 3>{{0., 1., 0.}},
-                                {"Detection near color"}});
-        properties.setProperty({"detectionOnDifferentMaterial",
-                                false,
-                                {"Detection on different material"}});
-        properties.setProperty(
-            {"electronShadingEnabled", false, {"Electron shading"}});
-        properties.setProperty(
-            {"surfaceShadingEnabled", true, {"Surface shading"}});
-
-        addRendererType("proximity", properties);
-    }
-    {
-        PropertyMap properties;
-        properties.setProperty(
             {"aoDistance", 10000., {"Ambient occlusion distance"}});
         properties.setProperty({"aoSamples",
                                 int32_t(1),
@@ -270,6 +248,7 @@ void OSPRayEngine::_createCameras()
         PropertyMap properties;
         properties.setProperty(fovy);
         properties.setProperty(aspect);
+        properties.setProperty(enableClippingPlanes);
         if (isStereo)
         {
             properties.setProperty(stereoProperty);
@@ -279,7 +258,17 @@ void OSPRayEngine::_createCameras()
         }
         addCameraType("perspectiveParallax", properties);
     }
-    addCameraType("panoramic");
+    {
+        PropertyMap properties;
+        properties.setProperty(enableClippingPlanes);
+        properties.setProperty({"half", true, {"Half sphere"}});
+        if (isStereo)
+        {
+            properties.setProperty(stereoProperty);
+            properties.setProperty(eyeSeparation);
+        }
+        addCameraType("panoramic", properties);
+    }
 }
 } // namespace brayns
 

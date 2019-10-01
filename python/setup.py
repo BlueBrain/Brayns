@@ -24,7 +24,7 @@
 
 """setup.py"""
 import os
-from setuptools import setup
+from setuptools import find_packages, setup
 
 try: # for pip >= 10
     from pip._internal.req import parse_requirements
@@ -54,7 +54,7 @@ with open(os.path.join(this_directory, 'README.md')) as f:
     long_description = f.read()
 
 setup(
-    packages=['brayns'],
+    packages=find_packages(),
     install_requires=REQS,
     long_description=long_description,
     long_description_content_type='text/markdown'

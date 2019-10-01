@@ -65,6 +65,22 @@ struct EnvironmentMapParam
     std::string filename;
 };
 
+struct VideoStreamParam
+{
+    bool enabled{false};
+    uint32_t kbps{5000};
+
+    bool operator==(const VideoStreamParam& rhs) const
+    {
+        return enabled == rhs.enabled && kbps == rhs.kbps;
+    }
+
+    bool operator!=(const VideoStreamParam& rhs) const
+    {
+        return !(*this == rhs);
+    }
+};
+
 struct ObjectID
 {
     size_t id;
@@ -186,6 +202,13 @@ inline void init(brayns::SchemaParam* s, ObjectHandler* h)
 inline void init(brayns::EnvironmentMapParam* s, ObjectHandler* h)
 {
     h->add_property("filename", &s->filename);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::VideoStreamParam* s, ObjectHandler* h)
+{
+    h->add_property("enabled", &s->enabled, Flags::Optional);
+    h->add_property("kbps", &s->kbps, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

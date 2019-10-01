@@ -78,7 +78,9 @@ set(BRAYNSCIRCUITVIEWER_OMIT_VERSION_HEADERS ON)
 set(BRAYNSCIRCUITVIEWER_OMIT_EXPORT ON)
 common_library(braynsCircuitViewer)
 
-add_subdirectory(tests)
+if(BRAYNS_UNIT_TESTING_ENABLED)
+  add_subdirectory(tests)
+endif()
 
 if (TARGET Brayns-all)
   add_dependencies(Brayns-all BraynsCircuitViewer-all)

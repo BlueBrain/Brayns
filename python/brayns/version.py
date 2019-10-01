@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2018, Blue Brain Project
+# Copyright (c) 2016-2019, Blue Brain Project
 #                          Raphael Dumusc <raphael.dumusc@epfl.ch>
 #                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
 #                          Cyrille Favreau <cyrille.favreau@epfl.ch>
@@ -30,4 +30,4 @@ try:
 except DistributionNotFound:  # pragma: no cover
     VERSION = 'brayns-local'
 
-MINIMAL_VERSION = '0.8.0'
+MINIMAL_VERSION = '1.0.0'

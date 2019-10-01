@@ -33,6 +33,16 @@ if (BRAYNS_CIRCUITVIEWER_ENABLED)
   add_subdirectory(CircuitViewer)
 endif()
 
+option(BRAYNS_CIRCUITEXPLORER_ENABLED "Activate CircuitExplorer plugin" OFF)
+if (BRAYNS_CIRCUITEXPLORER_ENABLED)
+  add_subdirectory(CircuitExplorer)
+endif()
+
+option(BRAYNS_DTI_ENABLED "Activate DTI plugin" OFF)
+if (BRAYNS_DTI_ENABLED)
+  add_subdirectory(DTI)
+endif()
+
 option(BRAYNS_BBIC_ENABLED "Activate BBIC Volume plugin" OFF)
 if(BRAYNS_BBIC_ENABLED)
   add_subdirectory(BBIC)

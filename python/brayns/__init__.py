@@ -26,6 +26,10 @@
 
 from .async_client import AsyncClient
 from .client import Client
+from .plugins.circuit_explorer import CircuitExplorer
+from .plugins.diffuse_tensor_imaging import DiffuseTensorImaging
+from .helpers.camera_path_handler import CameraPathHandler
 from .version import VERSION as __version__
 
-__all__ = ['AsyncClient', 'Client']
+__all__ = ['AsyncClient', 'Client', 'CircuitExplorer', 'DiffuseTensorImaging', 'CameraPathHandler',
+           '__version__']

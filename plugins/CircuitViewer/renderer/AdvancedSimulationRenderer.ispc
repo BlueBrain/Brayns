@@ -21,6 +21,7 @@
  */
 
 // Brayns
+#include "../../../engines/ospray/ispc/render/utils/Consts.ih"
 #include "SimulationRenderer.ih"
 
 struct AdvancedSimulationRenderer
@@ -342,10 +343,9 @@ inline vec4f getVolumeContribution(
                      gradient.z == 0.f)
                         ? 1.f
                         : abs(dot(safe_normalize(light.dir), gradient));
-                shadedColor =
-                    clamp(shadedColor +
-                              volumeSampleColor * cosNL * light.weight,
-                          make_vec3f(0.f), make_vec3f(1.f));
+                shadedColor = clamp(shadedColor + volumeSampleColor * cosNL *
+                                                      light.weight,
+                                    make_vec3f(0.f), make_vec3f(1.f));
 
                 // Specular
                 const vec3f reflectedNormal = normalize(
@@ -365,9 +365,9 @@ inline vec4f getVolumeContribution(
             float indirectIntensity;
             indirectShading(self, sample, point, gradient, dg, indirectColor,
                             indirectIntensity);
-            volumeSampleColor =
-                volumeSampleColor +
-                sampleOpacity * indirectColor * indirectIntensity;
+            volumeSampleColor = volumeSampleColor + sampleOpacity *
+                                                        indirectColor *
+                                                        indirectIntensity;
         }
 
         if (shadowsEnabled)
@@ -940,7 +940,7 @@ void AdvancedSimulationRenderer_renderSample(uniform Renderer* uniform _self,
                                              varying ScreenSample& sample)
 {
     uniform AdvancedSimulationRenderer* uniform self =
-        (uniform AdvancedSimulationRenderer * uniform)_self;
+        (uniform AdvancedSimulationRenderer * uniform) _self;
     sample.ray.time = inf;
     sample.rgb = AdvancedSimulationRenderer_shadeRay(self, sample);
 }
@@ -971,11 +971,11 @@ export void AdvancedSimulationRenderer_set(
     const uniform float volumeAlphaCorrection)
 {
     uniform AdvancedSimulationRenderer* uniform self =
-        (uniform AdvancedSimulationRenderer * uniform)_self;
+        (uniform AdvancedSimulationRenderer * uniform) _self;
 
     self->super.super.super.spp = spp;
     self->super.super.bgMaterial =
-        (uniform DefaultMaterial * uniform)bgMaterial;
+        (uniform DefaultMaterial * uniform) bgMaterial;
     self->super.super.lights = (const uniform Light* uniform* uniform)lights;
     self->super.super.numLights = numLights;
     self->super.super.timestamp = timestamp;

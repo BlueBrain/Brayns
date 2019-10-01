@@ -1,0 +1,98 @@
+/* Copyright (c) 2018, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * This file is part of the circuit explorer for Brayns
+ * <https://github.com/favreau/Brayns-UC-CircuitExplorer>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+// Brayns
+#include "CircuitExplorerAbstractRenderer.ih"
+
+struct CircuitExplorerSimulationRenderer
+{
+    CircuitExplorerAbstractRenderer super;
+
+    // Transfer function attributes
+    const uniform TransferFunction* uniform transferFunction;
+
+    // Simulation data
+    uniform float* uniform simulationData;
+    uint64 simulationDataSize;
+
+    // Secondary model
+    float maxDistanceToSecondaryModel;
+
+    // Rays
+    float fogThickness;
+    float fogStart;
+
+    Model* secondaryModel;
+};
+
+extern "C" unmasked uniform int
+    CircuitExplorerSimulationRenderer_getBytesPerPrimitive(
+        const void* uniform geometry);
+
+static inline int getBytesPerPrimitive(const void* geometry)
+{
+    int bytesPerPrimitive;
+    foreach_unique(g in geometry)
+    {
+        bytesPerPrimitive =
+            CircuitExplorerSimulationRenderer_getBytesPerPrimitive(g);
+    }
+    return bytesPerPrimitive;
+}
+
+static inline uint64 getOffset(const uniform Geometry* geometry,
+                               const varying int primID)
+{
+    if (!geometry)
+        return 0;
+
+    // The data pointer in all "derived" geometries is just after data members
+    // of the base Geometry struct. That's why array index starts at 1
+    const uniform uint8* data = *((const uniform uint8**)&geometry[1]);
+
+    const int bytesPerPrimitive = getBytesPerPrimitive(geometry->cppEquivalent);
+    const uint64 bytesPerPrimitive64 = (uint64)bytesPerPrimitive;
+    if (primID * bytesPerPrimitive64 > 0x7FFFFFFF)
+        data =
+            (const uniform uint8*)((uint64)data + bytesPerPrimitive64 * primID);
+    else
+        data += bytesPerPrimitive * primID;
+
+    return *((const uniform uint64*)data);
+}
+
+inline vec4f getSimulationValue(
+    const uniform CircuitExplorerSimulationRenderer* uniform self,
+    varying DifferentialGeometry* dg, const varying int primID)
+{
+    if (self->simulationDataSize == 0)
+        return make_vec4f(1.f, 0.f, 0.f, 1.f);
+
+    const uint64 offset = getOffset(dg->geometry, primID);
+    if (offset < self->simulationDataSize)
+    {
+        const varying float value = self->simulationData[offset];
+        const uniform TransferFunction* uniform tf = self->transferFunction;
+        return make_vec4f(tf->getColorForValue(tf, value),
+                          tf->getOpacityForValue(tf, value));
+    }
+    return make_vec4f(1.f, 0.f, 0.f, 1.f);
+}

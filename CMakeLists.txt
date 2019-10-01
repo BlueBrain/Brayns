@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2018, EPFL/Blue Brain Project
+# Copyright (c) 2015-2019, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
@@ -6,7 +6,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(Brayns VERSION 0.8.0)
+project(Brayns VERSION 1.0.0)
 set(Brayns_VERSION_ABI 1)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
@@ -19,6 +19,9 @@ set(BRAYNS_LICENSE LGPL)
 set(BRAYNS_DESCRIPTION "Hardware Agnostic Ray-Tracer")
 set(BRAYNS_PORT_DEPEND "assimp boost freeimage glew tbb")
 
+# Unit testing
+option(BRAYNS_UNIT_TESTING_ENABLED "Unit testing" ON)
+
 # Enable cloning of all optional subprojects for CI builds
 if($ENV{TRAVIS})
   if(NOT DEFINED BRAYNS_NETWORKING_ENABLED)
@@ -29,6 +32,9 @@ if($ENV{TRAVIS})
   endif()
   if(NOT DEFINED BRAYNS_CIRCUITVIEWER_ENABLED)
     option(BRAYNS_CIRCUITVIEWER_ENABLED "Activate CircuitViewer plugin" ON)
+  endif()
+  if(NOT DEFINED BRAYNS_CIRCUITEXPLORER_ENABLED)
+    option(BRAYNS_CIRCUITEXPLORER_ENABLED "Activate CircuitExplorer plugin" ON)
   endif()
   if(NOT DEFINED BRAYNS_BBIC_ENABLED)
     option(BRAYNS_BBIC_ENABLED "Activate BBIC Volume plugin" ON)
@@ -44,6 +50,11 @@ common_find_package(OpenMP)
 common_find_package(libuv 1.8)
 common_find_package(FreeImage)
 
+# Compiler options
+if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-class-memaccess")
+endif()
+
 # Archive loading
 common_find_package(LibArchive)
 option(BRAYNS_LIBARCHIVE_ENABLED "Activate libarchive for archive loading" ${LibArchive_FOUND})
@@ -56,6 +67,7 @@ endif()
 # HTTP messaging
 common_find_package(LibJpegTurbo)
 common_find_package(Rockets)
+common_find_package(FFMPEG 3.4 SYSTEM)
 if(ROCKETS_FOUND AND ROCKETS_USE_LIBWEBSOCKETS)
   option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ON)
 else()
@@ -176,7 +188,9 @@ else()
 endif()
 add_subdirectory(plugins)
 add_subdirectory(brayns)
-add_subdirectory(tests)
+if(BRAYNS_UNIT_TESTING_ENABLED)
+  add_subdirectory(tests)
+endif()
 
 include(CommonCPack)
 
