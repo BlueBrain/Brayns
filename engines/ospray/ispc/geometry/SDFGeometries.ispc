@@ -108,6 +108,7 @@ inline float sdConePill(const vec3f& p, const vec3f p0, const vec3f p1,
 struct SDFGeometry
 {
     uint64 userData;
+    vec3f center; // TO BE REMOVED, for v3 cache compatibility only
     vec3f p0;
     vec3f p1;
     float r0;

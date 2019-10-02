@@ -410,7 +410,6 @@ struct ParallelModelContainer
             }
         for (auto& s : sdfGeometries)
         {
-            s.center = translation + rotation * s.center;
             s.p0 = translation + rotation * s.p0;
             s.p1 = translation + rotation * s.p1;
         }

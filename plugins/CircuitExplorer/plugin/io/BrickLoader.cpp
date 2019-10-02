@@ -231,6 +231,15 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
     {
         file.read((char*)&materialId, sizeof(size_t));
         file.read((char*)&nbElements, sizeof(size_t));
+
+        struct SphereV1
+        {
+            brayns::Vector3f center;
+            float radius;
+            float timestamp;
+            float value;
+        };
+
         if (props.getProperty<bool>(PROP_LOAD_SPHERES.name))
         {
             callback.updateProgress("Spheres (" + std::to_string(i + 1) + "/" +
@@ -246,14 +255,6 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
             }
             else
             {
-                struct SphereV1
-                {
-                    brayns::Vector3f center;
-                    float radius;
-                    float timestamp;
-                    float value;
-                };
-
                 std::vector<SphereV1> spheresV1;
                 spheresV1.resize(nbElements);
                 bufferSize = nbElements * sizeof(SphereV1);
@@ -263,7 +264,13 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
             }
         }
         else
+        {
+            if (version >= CACHE_VERSION_2)
+                bufferSize = nbElements * sizeof(brayns::Sphere);
+            else
+                bufferSize = nbElements * sizeof(SphereV1);
             file.ignore(bufferSize);
+        }
     }
 
     // Cylinders
@@ -272,6 +279,16 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
     {
         file.read((char*)&materialId, sizeof(size_t));
         file.read((char*)&nbElements, sizeof(size_t));
+
+        struct CylinderV1
+        {
+            brayns::Vector3f center;
+            brayns::Vector3f up;
+            float radius;
+            float timestamp;
+            float value;
+        };
+
         if (props.getProperty<bool>(PROP_LOAD_CYLINDERS.name))
         {
             callback.updateProgress("Cylinders (" + std::to_string(i + 1) +
@@ -287,15 +304,6 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
             }
             else
             {
-                struct CylinderV1
-                {
-                    brayns::Vector3f center;
-                    brayns::Vector3f up;
-                    float radius;
-                    float timestamp;
-                    float value;
-                };
-
                 std::vector<CylinderV1> cylindersV1(nbElements);
                 bufferSize = nbElements * sizeof(CylinderV1);
                 file.read((char*)cylindersV1.data(), bufferSize);
@@ -305,7 +313,13 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
             }
         }
         else
+        {
+            if (version >= CACHE_VERSION_2)
+                bufferSize = nbElements * sizeof(brayns::Cylinder);
+            else
+                bufferSize = nbElements * sizeof(CylinderV1);
             file.ignore(bufferSize);
+        }
     }
 
     // Cones
@@ -314,6 +328,17 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
     {
         file.read((char*)&materialId, sizeof(size_t));
         file.read((char*)&nbElements, sizeof(size_t));
+
+        struct ConeV1
+        {
+            brayns::Vector3f center;
+            brayns::Vector3f up;
+            float centerRadius;
+            float upRadius;
+            float timestamp;
+            float value;
+        };
+
         if (props.getProperty<bool>(PROP_LOAD_CONES.name))
         {
             callback.updateProgress("Cones (" + std::to_string(i + 1) + "/" +
@@ -328,16 +353,6 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
             }
             else
             {
-                struct ConeV1
-                {
-                    brayns::Vector3f center;
-                    brayns::Vector3f up;
-                    float centerRadius;
-                    float upRadius;
-                    float timestamp;
-                    float value;
-                };
-
                 std::vector<ConeV1> conesV1(nbElements);
                 bufferSize = nbElements * sizeof(ConeV1);
                 file.read((char*)conesV1.data(), bufferSize);
@@ -347,7 +362,14 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
             }
         }
         else
+        {
+            if (version >= CACHE_VERSION_2)
+                bufferSize = nbElements * sizeof(brayns::Cone);
+            else
+                bufferSize = nbElements * sizeof(ConeV1);
+
             file.ignore(bufferSize);
+        }
     }
 
     // Meshes

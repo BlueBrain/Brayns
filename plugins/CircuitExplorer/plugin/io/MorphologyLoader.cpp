@@ -320,11 +320,9 @@ void MorphologyLoader::_connectSDFBifurcations(
                         continue;
 
                     const auto& geom = sdfMorphologyData.geometries[geomIdx];
-                    const double dist0 =
-                        glm::distance2(geom.p0, bifGeom.center);
-                    const double dist1 =
-                        glm::distance2(geom.p1, bifGeom.center);
-                    const double radiusSum = geom.radius + bifGeom.radius;
+                    const double dist0 = glm::distance2(geom.p0, bifGeom.p0);
+                    const double dist1 = glm::distance2(geom.p1, bifGeom.p0);
+                    const double radiusSum = geom.r0 + bifGeom.r0;
                     const double radiusSumSq = radiusSum * radiusSum;
 
                     if (dist0 < radiusSumSq || dist1 < radiusSumSq)
