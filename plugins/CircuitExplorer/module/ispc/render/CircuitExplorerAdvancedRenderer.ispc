@@ -128,7 +128,8 @@ inline bool launchRandomRay(
     }
 
     // Random ray hits a primitive
-    distanceToIntersection = randomRay.t;
+    distanceToIntersection = randomRay.t * randomRay.t;
+
     postIntersect(self->super.super.super.model, geometry, randomRay,
                   DG_NG | DG_NS | DG_NORMALIZE | DG_MATERIALID | DG_COLOR |
                       DG_TEXCOORD);
@@ -138,8 +139,8 @@ inline bool launchRandomRay(
 inline void indirectShading(
     const uniform CircuitExplorerAdvancedRenderer* uniform self,
     varying ScreenSample& sample, const varying vec3f& intersection,
-    const varying vec3f& normal, DifferentialGeometry& geometry,
-    varying vec3f& indirectShadingColor, varying float& indirectShadingPower)
+    const varying vec3f& normal, varying vec3f& indirectShadingColor,
+    varying float& indirectShadingPower)
 {
     if (self->giSamples == 0)
         return;
@@ -147,13 +148,14 @@ inline void indirectShading(
     vec3f backgroundColor = make_vec3f(0.f);
     float distanceToIntersection = inf;
 
-    for (int32 i = 0; i < self->giSamples; ++i)
-    {
-        float shadingPower = 0.f;
-        vec3f shadingColor = make_vec3f(0.f);
+    float shadingPower = 0.f;
+    vec3f shadingColor = make_vec3f(0.f);
 
+    for (uint32 i = 0; i < self->giSamples; ++i)
+    {
         // Launch a random ray
         vec3f randomDirection;
+        DifferentialGeometry geometry;
         if (launchRandomRay(self, sample, intersection, normal, geometry,
                             backgroundColor, distanceToIntersection,
                             randomDirection, i))
@@ -165,43 +167,36 @@ inline void indirectShading(
             if (objMaterial)
                 foreach_unique(mat in objMaterial)
                 {
-                    // Color bleeding
-                    shadingColor = mat->Kd;
-                    if (valid(mat->map_Kd))
-                        shadingColor = get3f(mat->map_Kd, geometry);
-                    shadingPower = mat->d;
-
-                    // Emission
                     if (mat->a > 0.f)
                     {
-                        shadingPower = mat->a;
+                        if (valid(mat->map_Kd))
+                            shadingColor =
+                                shadingColor + get3f(mat->map_Kd, geometry);
+                        else
+                            shadingColor = shadingColor + mat->Kd;
+
+                        // Emission
                         if (valid(mat->map_a))
                         {
                             vec3f Ka = get3f(mat->map_a, geometry);
-                            shadingPower = reduce_max(Ka);
+                            shadingPower = shadingPower + reduce_max(Ka);
                         }
+                        else
+                            shadingPower = shadingPower + mat->a;
                     }
                 }
-            else
-            {
-                // Color bleeding
-                shadingColor = make_vec3f(geometry.color);
-                shadingPower = geometry.color.w;
-            }
         }
         else
         {
-            shadingColor = backgroundColor;
-            shadingPower = DEFAULT_SKY_POWER;
+            shadingColor = shadingColor + backgroundColor;
+            shadingPower = shadingPower + DEFAULT_SKY_POWER;
         }
-
-        indirectShadingColor = indirectShadingColor + shadingColor;
-        indirectShadingPower = indirectShadingPower + shadingPower;
     }
 
-    indirectShadingColor = indirectShadingColor / (float)(self->giSamples);
-    indirectShadingPower =
-        self->giStrength * indirectShadingPower / (float)(self->giSamples);
+    indirectShadingColor =
+        indirectShadingColor + shadingColor / (float)(self->giSamples);
+    indirectShadingPower = self->giStrength * indirectShadingPower +
+                           shadingPower / (float)(self->giSamples);
 }
 
 inline float getVolumeShadowContribution(
@@ -390,7 +385,7 @@ inline vec4f getVolumeContribution(
             // Compute ambient occlusion contribution
             vec3f indirectColor;
             float indirectIntensity;
-            indirectShading(self, sample, point, gradient, dg, indirectColor,
+            indirectShading(self, sample, point, gradient, indirectColor,
                             indirectIntensity);
             volumeSampleColor = volumeSampleColor + sampleOpacity *
                                                         indirectColor *
@@ -769,7 +764,7 @@ inline void computeIndirectShading(DifferentialGeometry& dg,
         return;
 
     indirectShading(attributes.self, sample, attributes.origin,
-                    attributes.normal, dg, attributes.indirectColor,
+                    attributes.normal, attributes.indirectColor,
                     attributes.indirectIntensity);
 }
 
@@ -835,7 +830,8 @@ inline void processLightShading(DifferentialGeometry& dg,
         if (attributes.shadingMode != none)
         {
             // Phong + Blinn shading
-            cosNL = max(0.f, dot(lightDirection, attributes.normal));
+            if (attributes.shadingMode != perlin)
+                cosNL = max(0.f, dot(lightDirection, attributes.normal));
 
             // Specular color
             const float cosLR = dot(lightDirection, attributes.reflectedNormal);
@@ -899,21 +895,24 @@ inline void processNoiseShading(DifferentialGeometry& dg,
                                 const varying Ray& ray,
                                 ShadingAttributes& attributes)
 {
-    processLightShading(dg, sample, ray, attributes);
-    if (ray.t < dg.epsilon * 1e6f)
-    {
-        vec3f point = attributes.specularExponent * (ray.org + ray.t * ray.dir);
-        float n = noise(point);
-        if (ray.t < dg.epsilon * 1.5e5f)
-            n += worleyNoise(point / 5.f, 2.f);
-        else
-            n *= 2.f;
+    vec3f point = (0.01f * attributes.specularExponent) * dg.P;
 
-        n = clamp(n, 0.f, 1.f);
-        attributes.shadingContribution = n * attributes.diffuseColor;
-        attributes.simulationColor = n * attributes.simulationColor;
-        attributes.normal.x += n;
-    }
+    const float n1 = 0.25f + 0.75f * clamp(worleyNoise(point, 2.f), 0.f, 1.f);
+
+    attributes.diffuseColor = n1 * attributes.diffuseColor;
+    attributes.simulationColor = n1 * attributes.simulationColor;
+
+    attributes.normal.x += n1;
+    attributes.normal.y += 0.5f - n1;
+    attributes.normal.z += 0.25f - n1;
+    attributes.normal = normalize(attributes.normal);
+
+    attributes.reflectedNormal =
+        ray.dir - 2.f * dot(ray.dir, attributes.normal) * attributes.normal;
+
+    //    attributes.shadingMode = none;
+    processLightShading(dg, sample, ray, attributes);
+    //    attributes.specularColor = make_vec3f(0.f);
 }
 
 inline void processVolumeContribution(varying ScreenSample& sample,
@@ -1119,8 +1118,6 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
                 ray.dir = attributes.reflectedNormal;
             else
                 moreRebounds = false;
-
-            ++depth;
         }
 
         ray.org = intersection + ray.dir * epsilon;
@@ -1130,6 +1127,7 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
         ray.primID = -1;
         ray.geomID = -1;
         ray.instID = -1;
+        ++depth;
     }
 
     // Fog attenuation
