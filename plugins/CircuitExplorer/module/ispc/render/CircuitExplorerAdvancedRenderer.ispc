@@ -1027,8 +1027,7 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
             // Initialize geometry shading attributes
             setGeometryShadingAttributes(self, dg, sample, ray, attributes);
 
-            const bool isClipped = attributes.clipped && isClipped(self, dg.P);
-            if (isClipped)
+            if (attributes.clipped && isClipped(self, dg.P))
                 // Geometry is clipped, discard intersection
                 discardIntersection = true;
             else
@@ -1045,14 +1044,12 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
             }
 
             if (discardIntersection)
+            {
                 // Continue along the same ray
                 ray.t0 = ray.t + dg.epsilon;
+            }
             else
             {
-                // Prepare next ray
-                ray.org = dg.P;
-                ray.t0 = dg.epsilon;
-
                 // Compute indirect lighting contribution
                 computeIndirectShading(dg, sample, attributes);
 
@@ -1113,13 +1110,18 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
                     ray.dir = attributes.reflectedNormal;
                 else
                     moreRebounds = false;
+
+                // Prepare next ray
+                ray.org = dg.P + ray.dir * dg.epsilon;
+                ray.t0 = dg.epsilon;
+                ++depth;
             }
+
+            ray.t = inf;
+            ray.primID = -1;
+            ray.geomID = -1;
+            ray.instID = -1;
         }
-        ray.t = inf;
-        ray.primID = -1;
-        ray.geomID = -1;
-        ray.instID = -1;
-        ++depth;
     }
 
     // Fog attenuation
