@@ -225,7 +225,7 @@ inline vec3f CellGrowthRenderer_shadeRay(
         ray.instID = -1;
     }
 
-    return make_vec3f(pathColor) * self->super.super.pixelAlpha;
+    return make_vec3f(pathColor) * self->super.super.exposure;
 }
 
 void CellGrowthRenderer_renderSample(uniform Renderer* uniform _self,
@@ -253,7 +253,7 @@ export void CellGrowthRenderer_set(
     const uniform int32 numLights, uniform float* uniform simulationData,
     const uniform int64 simulationDataSize,
     const uniform float& alphaCorrection,
-    const uniform float& simulationThreshold, const uniform float& pixelAlpha,
+    const uniform float& simulationThreshold, const uniform float& exposure,
     const uniform float& fogThickness, const uniform float& fogStart,
     const uniform float& shadows, const uniform float& softShadows,
     const uniform float& shadowDistance,
@@ -277,7 +277,7 @@ export void CellGrowthRenderer_set(
     self->alphaCorrection = alphaCorrection;
     self->simulationThreshold = simulationThreshold;
 
-    self->super.super.pixelAlpha = pixelAlpha;
+    self->super.super.exposure = exposure;
 
     self->super.fogThickness = fogThickness;
     self->super.fogStart = fogStart;

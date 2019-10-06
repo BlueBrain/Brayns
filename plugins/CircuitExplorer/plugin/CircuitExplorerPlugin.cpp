@@ -67,6 +67,8 @@ void _addAdvancedSimulationRenderer(brayns::Engine& engine)
         {"giSamples", 0, 0, 64, {"Global illumination samples"}});
     properties.setProperty({"shadows", 0., 0., 1., {"Shadow intensity"}});
     properties.setProperty({"softShadows", 0., 0., 1., {"Shadow softness"}});
+    properties.setProperty(
+        {"softShadowsSamples", 1, 1, 64, {"Soft shadow samples"}});
     properties.setProperty({"samplingThreshold",
                             0.001,
                             0.001,
@@ -84,11 +86,11 @@ void _addAdvancedSimulationRenderer(brayns::Engine& engine)
                             0.1,
                             100.,
                             {"Maximum distance to secondary model"}});
-    properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
+    properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
     properties.setProperty({"fogStart", 0., 0., 1e6, {"Fog start"}});
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
     properties.setProperty(
-        {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
+        {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
     engine.addRendererType("circuit_explorer_advanced", properties);
 }
 
@@ -101,11 +103,14 @@ void _addBasicSimulationRenderer(brayns::Engine& engine)
         {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
     properties.setProperty(
         {"simulationThreshold", 0., 0., 1., {"Simulation threshold"}});
-    properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
-    properties.setProperty({"fogStart", 0., 0., 1e6, {"Fog start"}});
-    properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
+    properties.setProperty({"maxDistanceToSecondaryModel",
+                            30.,
+                            0.1,
+                            100.,
+                            {"Maximum distance to secondary model"}});
+    properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
     properties.setProperty(
-        {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
+        {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
     engine.addRendererType("circuit_explorer_basic", properties);
 }
 
@@ -118,11 +123,11 @@ void _addVoxelizedSimulationRenderer(brayns::Engine& engine)
         {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
     properties.setProperty(
         {"simulationThreshold", 0., 0., 1., {"Simulation threshold"}});
-    properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
+    properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
     properties.setProperty({"fogStart", 0., 0., 1e6, {"Fog start"}});
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
     properties.setProperty(
-        {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
+        {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
     engine.addRendererType("circuit_explorer_voxelized_simulation", properties);
 }
 
@@ -135,7 +140,7 @@ void _addGrowthRenderer(brayns::Engine& engine)
         {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
     properties.setProperty(
         {"simulationThreshold", 0., 0., 1., {"Simulation threshold"}});
-    properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
+    properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
     properties.setProperty({"fogStart", 0., 0., 1e6, {"Fog start"}});
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
     properties.setProperty({"tfColor", false, {"Use transfer function color"}});
@@ -166,8 +171,8 @@ void _addProximityRenderer(brayns::Engine& engine)
     properties.setProperty(
         {"surfaceShadingEnabled", true, {"Surface shading"}});
     properties.setProperty(
-        {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
-    properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
+        {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
+    properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
     engine.addRendererType("circuit_explorer_proximity_detection", properties);
 }
 

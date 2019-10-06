@@ -26,7 +26,7 @@ struct CircuitExplorerAdvancedRenderer
     CircuitExplorerSimulationRenderer super;
 
     // Shading attributes
-    int randomNumber;
+    uint32 randomNumber;
     float shadows;
     float softShadows;
     uint32 softShadowsSamples;
@@ -42,7 +42,7 @@ struct CircuitExplorerAdvancedRenderer
 
     // Clip planes
     const uniform vec4f* clipPlanes;
-    unsigned int numClipPlanes;
+    uint32 numClipPlanes;
 };
 
 struct ShadingAttributes
@@ -80,7 +80,7 @@ bool isClipped(const uniform CircuitExplorerAdvancedRenderer* uniform self,
                const varying vec3f& position)
 {
     bool visible = true;
-    for (int i = 0; i < self->numClipPlanes && visible; ++i)
+    for (uint32 i = 0; i < self->numClipPlanes && visible; ++i)
     {
         const vec3f normal = {self->clipPlanes[i].x, self->clipPlanes[i].y,
                               self->clipPlanes[i].z};
@@ -96,7 +96,7 @@ inline bool launchRandomRay(
     varying ScreenSample& sample, const varying vec3f& intersection,
     const varying vec3f& normal, DifferentialGeometry& geometry,
     varying vec3f& backgroundColor, varying float& distanceToIntersection,
-    varying vec3f& randomDirection, const int iteration)
+    varying vec3f& randomDirection, const uint32 iteration)
 {
     randomDirection =
         getRandomVector(self->super.super.super.fb->size.x, sample, normal,
@@ -108,7 +108,7 @@ inline bool launchRandomRay(
         // normal
         randomDirection = neg(randomDirection);
 
-    varying Ray randomRay = sample.ray;
+    Ray randomRay = sample.ray;
     setRay(randomRay, intersection, randomDirection);
     randomRay.t0 = geometry.epsilon;
     randomRay.t = self->giDistance;
@@ -226,7 +226,7 @@ inline float getVolumeShadowContribution(
 }
 
 inline float getVolumeShadowContributions(
-    Volume* uniform volume, const uniform unsigned int uniform lightIndex,
+    Volume* uniform volume, const uniform uint32 uniform lightIndex,
     const uniform CircuitExplorerAdvancedRenderer* uniform self,
     const varying Ray& ray, varying ScreenSample& sample, const vec3f& point,
     const float epsilon)
@@ -282,7 +282,7 @@ inline vec4f getVolumeContribution(
     float shadowIntensity = 0.f;
 
     // Ray marching
-    unsigned int shadingOccurence = 0;
+    uint32 shadingOccurence = 0;
     for (float t = t0 + epsilon /** (sample.sampleID.z % 100)*/;
          t < t1 && pathColor.w < 1.f; t += epsilon)
     {
@@ -296,8 +296,7 @@ inline vec4f getVolumeContribution(
 
         if (sampleOpacity <= self->samplingThreshold)
             // Continue walking for as long as voxel opacity is below
-            // sampling
-            // threshold
+            // sampling threshold
             continue;
 
         if (shadingOccurence == 0)
@@ -345,7 +344,7 @@ inline vec4f getVolumeContribution(
         {
             // Compute light contributions
             vec3f shadedColor = make_vec3f(0.f);
-            for (uniform int i = 0; i < self->super.super.numLights; ++i)
+            for (uniform uint32 i = 0; i < self->super.super.numLights; ++i)
             {
                 const vec2f samplingLocation = make_vec2f(0.5f);
                 const Light_SampleRes light =
@@ -691,8 +690,8 @@ inline void setGeometryShadingAttributes(
 */
 inline void processSimulationContribution(varying ScreenSample& sample,
                                           ShadingAttributes& attributes,
-                                          const int materialID,
-                                          const varying int primID)
+                                          const uint32 materialID,
+                                          const varying uint32 primID)
 {
     if (!attributes.castSimulationData)
         return;
@@ -772,7 +771,7 @@ inline void processShadows(DifferentialGeometry& dg,
                            varying ScreenSample& sample, const varying Ray& ray,
                            ShadingAttributes& attributes)
 {
-    for (uniform int i = 0; i < attributes.self->super.super.numLights; ++i)
+    for (uniform uint32 i = 0; i < attributes.self->super.super.numLights; ++i)
     {
         const uniform Light* uniform light =
             attributes.self->super.super.lights[i];
@@ -811,7 +810,7 @@ inline void processLightShading(DifferentialGeometry& dg,
     vec3f accSimulation = make_vec3f(0.f);
     vec3f accSpecular = make_vec3f(0.f);
 
-    for (uniform int i = 0; i < attributes.self->super.super.numLights; ++i)
+    for (uniform uint32 i = 0; i < attributes.self->super.super.numLights; ++i)
     {
         const uniform Light* uniform light =
             attributes.self->super.super.lights[i];
@@ -882,7 +881,7 @@ inline void processCartoonShading(varying ScreenSample& sample,
 {
     const vec3f viewer = normalize(sample.ray.org - attributes.origin);
     float cosNL = max(0.f, dot(viewer, attributes.normal));
-    const unsigned int angleAsInt = cosNL * attributes.specularExponent;
+    const uint32 angleAsInt = cosNL * attributes.specularExponent;
     cosNL = (float)(angleAsInt) / attributes.specularExponent;
 
     attributes.shadingContribution = cosNL * attributes.diffuseColor;
@@ -899,8 +898,8 @@ inline void processNoiseShading(DifferentialGeometry& dg,
 
     const float n1 = 0.25f + 0.75f * clamp(worleyNoise(point, 2.f), 0.f, 1.f);
 
-    attributes.diffuseColor = n1 * attributes.diffuseColor;
-    attributes.simulationColor = n1 * attributes.simulationColor;
+    attributes.diffuseColor = (1.f - n1) * attributes.diffuseColor;
+    attributes.simulationColor = (1.f - n1) * attributes.simulationColor;
 
     attributes.normal.x += n1;
     attributes.normal.y += 0.5f - n1;
@@ -910,9 +909,7 @@ inline void processNoiseShading(DifferentialGeometry& dg,
     attributes.reflectedNormal =
         ray.dir - 2.f * dot(ray.dir, attributes.normal) * attributes.normal;
 
-    //    attributes.shadingMode = none;
     processLightShading(dg, sample, ray, attributes);
-    //    attributes.specularColor = make_vec3f(0.f);
 }
 
 inline void processVolumeContribution(varying ScreenSample& sample,
@@ -973,11 +970,10 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
     varying ScreenSample& sample)
 {
     Ray ray = sample.ray;
-    vec3f rayOrigin = ray.org;
     vec4f color = make_vec4f(0.f);
     vec3f bgColor = make_vec3f(0.f);
 
-    unsigned int depth = 0;
+    uint32 depth = 0;
     float oldlocalRefraction = 1.f;
     bool moreRebounds = true;
 
@@ -997,13 +993,11 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
         ShadingAttributes attributes;
         initializeShadingAttributes(self, attributes);
 
+        bool discardIntersection = false;
+        float firstIntersection = inf;
+
         // Trace ray
         traceRay(self->super.super.super.model, ray);
-
-        float epsilon = 0.f;
-        bool discardIntersection = false;
-        vec3f intersection;
-
         if (ray.geomID < 0)
         {
             // Background contribution
@@ -1011,7 +1005,6 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
             bgColor = make_vec3f(attributes.bgColor);
 
             // Volume contribution
-            float firstIntersection = inf;
             processVolumeContribution(sample, ray, attributes,
                                       firstIntersection);
             sample.z = min(sample.z, firstIntersection);
@@ -1019,13 +1012,11 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
             // Alpha
             totalOpacity += attributes.volumeIntensity;
 
-            // No Geometry intersection. No need to iterate more
+            // No Geometry intersection. No need to iterate anymore
             moreRebounds = false;
         }
         else
         {
-            intersection = ray.org + ray.t * ray.dir;
-
             // Get intersection information
             DifferentialGeometry dg;
             postIntersect(self->super.super.super.model, dg, ray,
@@ -1036,94 +1027,95 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
             // Initialize geometry shading attributes
             setGeometryShadingAttributes(self, dg, sample, ray, attributes);
 
-            epsilon = dg.epsilon;
-
-            float firstIntersection = inf;
-            if (attributes.clipped && isClipped(self, dg.P))
+            const bool isClipped = attributes.clipped && isClipped(self, dg.P);
+            if (isClipped)
+                // Geometry is clipped, discard intersection
                 discardIntersection = true;
             else
             {
+                // Geometry is not clipped, proceed with shading
+
                 // Compute simulation contribution
                 processSimulationContribution(sample, attributes, dg.materialID,
                                               ray.primID);
 
-                if (attributes.opacity > self->samplingThreshold &&
-                    moreRebounds)
-                {
-                    // Compute indirect lighting contribution
-                    computeIndirectShading(dg, sample, attributes);
-
-                    // Compute surface shading
-                    if (attributes.shadingMode == electron)
-                        processElectronShading(sample, attributes);
-                    else if (attributes.shadingMode == cartoon)
-                        processCartoonShading(sample, attributes);
-                    else if (attributes.shadingMode == electron_transparency)
-                        processElectronTransparencyShading(sample, attributes);
-                    else if (attributes.shadingMode == perlin)
-                        processNoiseShading(dg, sample, ray, attributes);
-                    else
-                        processLightShading(dg, sample, ray, attributes);
-
-                    // Compute shadows
-                    if (attributes.self->shadows > 0.f)
-                        processShadows(dg, sample, ray, attributes);
-
-                    // Compute volume contribution
-                    processVolumeContribution(sample, ray, attributes,
-                                              firstIntersection);
-                }
-                else
-                    // Fully transparent object. Ignore intersection
+                if (attributes.opacity < self->samplingThreshold)
+                    // Fully transparent object. Discard intersection
                     discardIntersection = true;
+            }
 
+            if (discardIntersection)
+                // Continue along the same ray
+                ray.t0 = ray.t + dg.epsilon;
+            else
+            {
+                // Prepare next ray
+                ray.org = dg.P;
+                ray.t0 = dg.epsilon;
+
+                // Compute indirect lighting contribution
+                computeIndirectShading(dg, sample, attributes);
+
+                // Compute surface shading
+                if (attributes.shadingMode == electron)
+                    processElectronShading(sample, attributes);
+                else if (attributes.shadingMode == cartoon)
+                    processCartoonShading(sample, attributes);
+                else if (attributes.shadingMode == electron_transparency)
+                    processElectronTransparencyShading(sample, attributes);
+                else if (attributes.shadingMode == perlin)
+                    processNoiseShading(dg, sample, ray, attributes);
+                else
+                    processLightShading(dg, sample, ray, attributes);
+
+                // Compute shadows
+                if (attributes.self->shadows > 0.f)
+                    processShadows(dg, sample, ray, attributes);
+
+                // Compute volume contribution
+                processVolumeContribution(sample, ray, attributes,
+                                          firstIntersection);
                 // Z-Depth
                 if (depth == 0)
                     sample.z = min(ray.t, firstIntersection);
 
                 // Alpha
                 totalOpacity += attributes.opacity + attributes.volumeIntensity;
+
+                // Combine all contributions
+                processFinalContribution(attributes);
+
+                composite(make_vec4f(attributes.finalContribution,
+                                     totalOpacity),
+                          color, self->volumeAlphaCorrection);
+
+                // Prepare ray for next iteration
+                bool doRefraction = (attributes.opacity < 1.f);
+                bool doReflection = (attributes.reflection > 0.f);
+                if (doRefraction && doReflection)
+                {
+                    // Switch between refraction and reflection
+                    const bool reflect = sample.sampleID.z % 2 == 1;
+                    doRefraction = !reflect;
+                    doReflection = reflect;
+                }
+
+                if (doRefraction)
+                {
+                    // Refraction
+                    ray.dir = refractedVector(ray.dir, attributes.normal,
+                                              oldlocalRefraction,
+                                              attributes.refraction);
+                    oldlocalRefraction = attributes.refraction;
+                }
+                else if (doReflection)
+                    // Reflection
+                    ray.dir = attributes.reflectedNormal;
+                else
+                    moreRebounds = false;
             }
         }
-
-        if (!discardIntersection)
-        {
-            // Combine all contributions
-            processFinalContribution(attributes);
-
-            composite(make_vec4f(attributes.finalContribution, totalOpacity),
-                      color, self->volumeAlphaCorrection);
-
-            // Prepare ray for next iteration
-            bool doRefraction = (attributes.opacity < 1.f);
-            bool doReflection = (attributes.reflection > 0.f);
-            if (doRefraction && doReflection)
-            {
-                // Switch between refraction and reflection
-                const bool reflect = sample.sampleID.z % 2 == 1;
-                doRefraction = !reflect;
-                doReflection = reflect;
-            }
-
-            if (doRefraction)
-            {
-                // Refraction
-                ray.dir =
-                    refractedVector(ray.dir, attributes.normal,
-                                    oldlocalRefraction, attributes.refraction);
-                oldlocalRefraction = attributes.refraction;
-            }
-            else if (doReflection)
-                // Reflection
-                ray.dir = attributes.reflectedNormal;
-            else
-                moreRebounds = false;
-        }
-
-        ray.org = intersection + ray.dir * epsilon;
-        ray.t0 = 0.f;
         ray.t = inf;
-
         ray.primID = -1;
         ray.geomID = -1;
         ray.instID = -1;
@@ -1140,8 +1132,9 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
     const float fog = 1.f - color.w * (1.f - fogAttenuation);
     const vec3f finalColor = make_vec3f(color) * (1.f - fog) + fog * bgColor;
 
+    // Final color
     sample.alpha = min(1.f, color.w);
-    return make_vec3f(finalColor * self->super.super.pixelAlpha);
+    return make_vec3f(finalColor * self->super.super.exposure);
 }
 
 void CircuitExplorerAdvancedRenderer_renderSample(
@@ -1166,61 +1159,67 @@ export void* uniform CircuitExplorerAdvancedRenderer_create(void* uniform cppE)
 }
 
 export void CircuitExplorerAdvancedRenderer_set(
-    void* uniform _self, void* uniform secondaryModel, void* uniform bgMaterial,
-    const uniform float& shadows, const uniform float& softShadows,
-    const uniform int& softShadowsSamples, const uniform float& giStrength,
-    const uniform float& giDistance, const uniform int& giSamples,
-    const uniform int& randomNumber, const uniform float& timestamp,
-    const uniform int& spp, void** uniform lights,
-    const uniform int32 numLights, const uniform int32& volumeSamplesPerRay,
+    void* uniform _self, void* uniform secondaryModel,
+    const uniform float maxDistanceToSecondaryModel, void* uniform bgMaterial,
+    const uniform float shadows, const uniform float softShadows,
+    const uniform uint32 softShadowsSamples, const uniform float giStrength,
+    const uniform float giDistance, const uniform uint32 giSamples,
+    const uniform uint32 randomNumber, const uniform float timestamp,
+    const uniform uint32 spp, void** uniform lights,
+    const uniform uint32 numLights, const uniform uint32 volumeSamplesPerRay,
     uniform float* uniform simulationData,
-    const uniform uint64& simulationDataSize,
-    const uniform float& samplingThreshold,
-    const uniform float& maxDistanceToSecondaryModel,
-    const uniform float& volumeSpecularExponent,
-    const uniform float& volumeAlphaCorrection, const uniform float& pixelAlpha,
-    const uniform float& fogThickness, const uniform float& fogStart,
-    const uniform vec4f clipPlanes[], const uniform unsigned int numClipPlanes,
-    const uniform int& maxBounces)
+    const uniform uint64 simulationDataSize,
+    const uniform float samplingThreshold,
+    const uniform float volumeSpecularExponent,
+    const uniform float volumeAlphaCorrection, const uniform float exposure,
+    const uniform float fogThickness, const uniform float fogStart,
+    const uniform vec4f clipPlanes[], const uniform uint32 numClipPlanes,
+    const uniform uint32 maxBounces)
 {
     uniform CircuitExplorerAdvancedRenderer* uniform self =
         (uniform CircuitExplorerAdvancedRenderer * uniform) _self;
 
-    self->super.secondaryModel = (uniform Model * uniform) secondaryModel;
+    // OSPRay
     self->super.super.super.spp = spp;
+
+    // Abstract
     self->super.super.bgMaterial =
         (uniform CircuitExplorerMaterial * uniform) bgMaterial;
+
     self->super.super.lights = (const uniform Light* uniform* uniform)lights;
     self->super.super.numLights = numLights;
+
     self->super.super.timestamp = timestamp;
+    self->super.super.maxBounces = maxBounces;
+    self->super.super.exposure = exposure;
 
-    self->shadows = shadows;
-    self->softShadows = softShadows;
-    self->softShadowsSamples = softShadowsSamples;
-    self->giStrength = giStrength;
-    self->giDistance = giDistance;
-    self->giSamples = giSamples;
-    self->randomNumber = randomNumber;
-
-    self->volumeSamplesPerRay = volumeSamplesPerRay;
+    // Simulation
+    self->super.secondaryModel = (uniform Model * uniform) secondaryModel;
+    self->super.maxDistanceToSecondaryModel = maxDistanceToSecondaryModel;
 
     self->super.simulationData = (uniform float* uniform)simulationData;
     self->super.simulationDataSize = simulationDataSize;
 
-    self->super.maxDistanceToSecondaryModel = maxDistanceToSecondaryModel;
-
-    self->samplingThreshold = samplingThreshold;
-
-    self->volumeSpecularExponent = volumeSpecularExponent;
-    self->volumeAlphaCorrection = volumeAlphaCorrection;
-
-    self->super.super.pixelAlpha = pixelAlpha;
-
     self->super.fogThickness = fogThickness;
     self->super.fogStart = fogStart;
 
+    // Advanced
+    self->shadows = shadows;
+    self->softShadows = softShadows;
+    self->softShadowsSamples = softShadowsSamples;
+
+    self->giStrength = giStrength;
+    self->giDistance = giDistance;
+    self->giSamples = giSamples;
+
+    self->randomNumber = randomNumber;
+
+    self->samplingThreshold = samplingThreshold;
+
+    self->volumeSamplesPerRay = volumeSamplesPerRay;
+    self->volumeSpecularExponent = volumeSpecularExponent;
+    self->volumeAlphaCorrection = volumeAlphaCorrection;
+
     self->clipPlanes = clipPlanes;
     self->numClipPlanes = numClipPlanes;
-
-    self->super.super.maxBounces = maxBounces;
 }

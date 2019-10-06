@@ -45,7 +45,7 @@ public:
     void commit() final;
 
 private:
-    float _simulationThreshold;
+    float _simulationThreshold{0.f};
 };
 
 } // namespace circuitExplorer

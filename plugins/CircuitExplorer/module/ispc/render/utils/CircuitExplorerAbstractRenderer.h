@@ -46,13 +46,13 @@ public:
 protected:
     std::vector<void*> _lightArray;
     void** _lightPtr;
-
     ospray::Data* _lightData;
 
     brayns::obj::CircuitExplorerMaterial* _bgMaterial;
-    float _timestamp;
-    unsigned int _maxBounces;
-    float _pixelAlpha;
+
+    float _timestamp{0.f};
+    ospray::uint32 _maxBounces{10};
+    float _exposure{1.f};
 };
 } // namespace circuitExplorer
 

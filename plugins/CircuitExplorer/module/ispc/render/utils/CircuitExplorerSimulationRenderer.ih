@@ -34,13 +34,12 @@ struct CircuitExplorerSimulationRenderer
     uint64 simulationDataSize;
 
     // Secondary model
+    Model* secondaryModel;
     float maxDistanceToSecondaryModel;
 
-    // Rays
+    // Fog
     float fogThickness;
     float fogStart;
-
-    Model* secondaryModel;
 };
 
 extern "C" unmasked uniform int
