@@ -33,9 +33,6 @@ inline float rotate(float x, const float dx)
     return x;
 }
 
-uniform bool seedInitialized = false;
-struct RNGState rngState;
-
 inline float getRandomValue(const varying ScreenSample&, const int)
 {
     float r;
@@ -62,12 +59,6 @@ inline vec3f getRandomVector(const unsigned int /*frameBufferWidth*/,
                              const varying ScreenSample& sample,
                              const vec3f& normal, const int randomNumber)
 {
-    if (!seedInitialized)
-    {
-        seed_rng(&rngState, programIndex);
-        seedInitialized = true;
-    }
-
     const float rx = getRandomValue(sample, randomNumber) - 0.5f;
     const float ry = getRandomValue(sample, randomNumber) - 0.5f;
     const float rz = getRandomValue(sample, randomNumber) - 0.5f;
