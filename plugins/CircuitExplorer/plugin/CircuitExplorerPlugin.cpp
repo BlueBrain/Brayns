@@ -69,6 +69,7 @@ void _addAdvancedSimulationRenderer(brayns::Engine& engine)
     properties.setProperty({"softShadows", 0., 0., 1., {"Shadow softness"}});
     properties.setProperty(
         {"softShadowsSamples", 1, 1, 64, {"Soft shadow samples"}});
+    properties.setProperty({"epsilonFactor", 1., 1., 100., {"Epsilon factor"}});
     properties.setProperty({"samplingThreshold",
                             0.001,
                             0.001,

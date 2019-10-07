@@ -46,6 +46,7 @@ void CircuitExplorerAdvancedRenderer::commit()
     _giStrength = getParam1f("giWeight", 0.f);
     _giDistance = getParam1f("giDistance", 1e20f);
     _giSamples = getParam1i("giSamples", 1);
+    _epsilonFactor = getParam1f("epsilonFactor", 1.f);
 
     _randomNumber = getParam1i("randomNumber", 0);
     _samplingThreshold = getParam1f("samplingThreshold", 0.001f);
@@ -70,7 +71,8 @@ void CircuitExplorerAdvancedRenderer::commit()
         _simulationData ? (float*)_simulationData->data : nullptr,
         simulationDataSize, _samplingThreshold, _volumeSpecularExponent,
         _volumeAlphaCorrection, _exposure, _fogThickness, _fogStart,
-        (const ispc::vec4f*)clipPlaneData, numClipPlanes, _maxBounces);
+        (const ispc::vec4f*)clipPlaneData, numClipPlanes, _maxBounces,
+        _epsilonFactor);
 }
 
 CircuitExplorerAdvancedRenderer::CircuitExplorerAdvancedRenderer()

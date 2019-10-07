@@ -54,6 +54,7 @@ private:
     float _giStrength{0.f};
     float _giDistance{1e6f};
     ospray::uint32 _giSamples{0};
+    float _epsilonFactor{1.f};
 
     ospray::uint32 _randomNumber{0};
 

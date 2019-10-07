@@ -33,6 +33,7 @@ struct CircuitExplorerAdvancedRenderer
     float giStrength;
     float giDistance;
     uint32 giSamples;
+    float epsilonFactor;
 
     // Volumes
     uint32 volumeSamplesPerRay;
@@ -336,7 +337,7 @@ inline vec4f getVolumeContribution(
             gradient = safe_normalize(volume->computeGradient(volume, point));
             // Setup differential geometry for the volume sample point.
             dg.P = point;
-            dg.epsilon = epsilon;
+            dg.epsilon = self->epsilonFactor * epsilon;
             dg.Ns = gradient;
         }
 
@@ -430,7 +431,7 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
 
         Ray shadowRay = ray;
         setRay(shadowRay, dg.P, ld);
-        shadowRay.t0 = dg.epsilon;
+        shadowRay.t0 = attributes.self->epsilonFactor * dg.epsilon;
         shadowRay.t = attributes.self->giDistance;
         shadowRay.time = sample.ray.time;
         shadowRay.geomID = -1;
@@ -1046,7 +1047,7 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
             if (discardIntersection)
             {
                 // Continue along the same ray
-                ray.t0 = ray.t + dg.epsilon;
+                ray.t0 = ray.t + self->epsilonFactor * dg.epsilon;
             }
             else
             {
@@ -1112,8 +1113,8 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
                     moreRebounds = false;
 
                 // Prepare next ray
-                ray.org = dg.P + ray.dir * dg.epsilon;
-                ray.t0 = dg.epsilon;
+                ray.org = dg.P + ray.dir * self->epsilonFactor * dg.epsilon;
+                ray.t0 = self->epsilonFactor * dg.epsilon;
                 ++depth;
             }
 
@@ -1176,7 +1177,7 @@ export void CircuitExplorerAdvancedRenderer_set(
     const uniform float volumeAlphaCorrection, const uniform float exposure,
     const uniform float fogThickness, const uniform float fogStart,
     const uniform vec4f clipPlanes[], const uniform uint32 numClipPlanes,
-    const uniform uint32 maxBounces)
+    const uniform uint32 maxBounces, const uniform float epsilonFactor)
 {
     uniform CircuitExplorerAdvancedRenderer* uniform self =
         (uniform CircuitExplorerAdvancedRenderer * uniform) _self;
@@ -1213,6 +1214,7 @@ export void CircuitExplorerAdvancedRenderer_set(
     self->giStrength = giStrength;
     self->giDistance = giDistance;
     self->giSamples = giSamples;
+    self->epsilonFactor = epsilonFactor;
 
     self->randomNumber = randomNumber;
 
