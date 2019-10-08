@@ -61,13 +61,13 @@ public:
     virtual void commit();
 
 private:
-    ospray::vec3f _nearColor;
-    ospray::vec3f _farColor;
-    float _detectionDistance;
-    bool _detectionOnDifferentMaterial;
-    bool _surfaceShadingEnabled;
-    int _randomNumber;
-    float _alphaCorrection;
+    ospray::vec3f _nearColor{0.f, 1.f, 0.f};
+    ospray::vec3f _farColor{1.f, 0.f, 0.f};
+    float _detectionDistance{1.f};
+    bool _detectionOnDifferentMaterial{true};
+    bool _surfaceShadingEnabled{true};
+    ospray::uint32 _randomNumber{0};
+    float _alphaCorrection{0.5f};
 };
 } // namespace circuitExplorer
 

@@ -37,7 +37,6 @@ public:
     CircuitExplorerAdvancedRenderer();
 
     /**
-       Returns the class name as a string
        @return string containing the full name of the class
     */
     std::string toString() const final
@@ -48,19 +47,22 @@ public:
 
 private:
     // Shading
-    float _shadows;
-    float _softShadows;
-    int _softShadowsSamples;
-    float _giStrength;
-    float _giDistance;
-    int _giSamples;
-    int _randomNumber;
+    float _shadows{0.f};
+    float _softShadows{0.f};
+    ospray::uint32 _softShadowsSamples{0};
+
+    float _giStrength{0.f};
+    float _giDistance{1e6f};
+    ospray::uint32 _giSamples{0};
+    float _epsilonFactor{1.f};
+
+    ospray::uint32 _randomNumber{0};
 
     // Volumes
-    ospray::int32 _volumeSamplesPerRay;
-    float _samplingThreshold;
-    float _volumeSpecularExponent;
-    float _volumeAlphaCorrection;
+    float _samplingThreshold{1.f};
+    ospray::int32 _volumeSamplesPerRay{32};
+    float _volumeSpecularExponent{10.f};
+    float _volumeAlphaCorrection{0.5f};
 
     // Clip planes
     ospray::Ref<ospray::Data> clipPlanes;

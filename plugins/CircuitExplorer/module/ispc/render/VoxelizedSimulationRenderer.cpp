@@ -41,8 +41,8 @@ void VoxelizedSimulationRenderer::commit()
         getIE(), (_secondaryModel ? _secondaryModel->getIE() : nullptr),
         (_bgMaterial ? _bgMaterial->getIE() : nullptr), spp,
         (_simulationData ? (float*)_simulationData->data : nullptr),
-        _simulationDataSize, _alphaCorrection, _simulationThreshold,
-        _pixelAlpha, _fogThickness, _fogStart, _maxBounces);
+        _simulationDataSize, _alphaCorrection, _simulationThreshold, _exposure,
+        _fogThickness, _fogStart, _maxBounces);
 }
 
 VoxelizedSimulationRenderer::VoxelizedSimulationRenderer()

@@ -45,8 +45,8 @@ struct CircuitExplorerAbstractRenderer
     uint32 numLights;
     CircuitExplorerMaterial* bgMaterial;
     float timestamp;
-    unsigned int maxBounces;
-    float pixelAlpha;
+    uint32 maxBounces;
+    float exposure;
 };
 
 /**

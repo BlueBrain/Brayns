@@ -43,7 +43,10 @@ inline vec3f ProximityDetectionRenderer_shadeRay(
     const uniform ProximityDetectionRenderer* uniform self,
     varying ScreenSample& sample)
 {
-    Ray ray = sample.ray;
+    if (!self->super.super.model->embreeSceneHandle)
+        return make_vec3f(1.f, 1.f, 0.f);
+
+    varying Ray ray = sample.ray;
     vec4f color = make_vec4f(0.f);
     sample.alpha = 0.f;
 
@@ -58,7 +61,7 @@ inline vec3f ProximityDetectionRenderer_shadeRay(
                 skyboxMapping((Renderer*)self, ray, self->super.bgMaterial);
             bgColor.w = 1.f;
             composite(bgColor, color, self->alphaCorrection);
-            return make_vec3f(color) * self->super.pixelAlpha;
+            return make_vec3f(color) * self->super.exposure;
         }
 
         sample.alpha = 1.f;
@@ -82,7 +85,7 @@ inline vec3f ProximityDetectionRenderer_shadeRay(
             getRandomVector(self->super.super.fb->size.x, sample, normal,
                             self->randomNumber);
 
-        Ray ao_ray = ray;
+        Ray ao_ray;
         ao_ray.org = P;
         ao_ray.dir = ao_dir;
         ao_ray.t0 = dg.epsilon;
@@ -97,10 +100,12 @@ inline vec3f ProximityDetectionRenderer_shadeRay(
             // If AO ray hits a geometry, no surface is shading required
             processSurfaceShading = false;
 
-            postIntersect(self->super.super.model, dg, ao_ray, DG_MATERIALID);
+            DifferentialGeometry ao_dg;
+            postIntersect(self->super.super.model, ao_dg, ao_ray,
+                          DG_MATERIALID);
 
             const bool doDetectionTest = self->detectionOnDifferentMaterial
-                                             ? material != dg.material
+                                             ? material != ao_dg.material
                                              : true;
             if (doDetectionTest)
             {
@@ -210,7 +215,7 @@ inline vec3f ProximityDetectionRenderer_shadeRay(
         ++depth;
     }
 
-    return make_vec3f(color) * self->super.pixelAlpha;
+    return make_vec3f(color) * self->super.exposure;
 }
 
 void ProximityDetectionRenderer_renderSample(uniform Renderer* uniform _self,
@@ -237,32 +242,35 @@ export void* uniform ProximityDetectionRenderer_create(void* uniform cppE)
 export void ProximityDetectionRenderer_set(
     void* uniform _self, void* uniform bgMaterial,
     const uniform vec3f& nearColor, const uniform vec3f& farColor,
-    const uniform float& detectionDistance,
-    const uniform bool& detectionOnDifferentMaterial,
-    const uniform int& randomNumber, const uniform float& timestamp,
-    const uniform int& spp, const uniform bool& surfaceShadingEnabled,
-    void** uniform lights, uniform int32 numLights,
-    const uniform float& alphaCorrection, const uniform int& maxBounces,
-    const uniform float& pixelAlpha)
+    const uniform float detectionDistance,
+    const uniform bool detectionOnDifferentMaterial,
+    const uniform uint32 randomNumber, const uniform float timestamp,
+    const uniform uint32 spp, const uniform bool surfaceShadingEnabled,
+    void** uniform lights, uniform uint32 numLights,
+    const uniform float alphaCorrection, const uniform uint32 maxBounces,
+    const uniform float exposure)
 {
     uniform ProximityDetectionRenderer* uniform self =
         (uniform ProximityDetectionRenderer * uniform) _self;
 
+    // OSPRay
     self->super.super.spp = spp;
+
+    // Abstract
     self->super.bgMaterial =
         (uniform CircuitExplorerMaterial * uniform) bgMaterial;
     self->super.lights = (const uniform Light* uniform* uniform)lights;
     self->super.numLights = numLights;
+    self->super.maxBounces = maxBounces;
+    self->super.exposure = exposure;
     self->super.timestamp = timestamp;
 
+    // Proximity detection
     self->randomNumber = randomNumber;
     self->surfaceShadingEnabled = surfaceShadingEnabled;
     self->nearColor = nearColor;
     self->farColor = farColor;
     self->detectionDistance = detectionDistance;
     self->detectionOnDifferentMaterial = detectionOnDifferentMaterial;
-
     self->alphaCorrection = alphaCorrection;
-    self->super.maxBounces = maxBounces;
-    self->super.pixelAlpha = pixelAlpha;
 }

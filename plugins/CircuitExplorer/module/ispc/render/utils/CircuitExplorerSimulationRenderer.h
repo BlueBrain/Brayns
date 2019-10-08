@@ -45,16 +45,16 @@ public:
     void commit() override;
 
 protected:
+    ospray::Model* _secondaryModel;
+    float _maxDistanceToSecondaryModel{30.f};
+
     ospray::Ref<ospray::Data> _simulationData;
     ospray::uint64 _simulationDataSize;
 
-    float _alphaCorrection;
-    float _maxDistanceToSecondaryModel;
+    float _alphaCorrection{0.5f};
 
-    float _fogThickness;
-    float _fogStart;
-
-    ospray::Model* _secondaryModel;
+    float _fogThickness{1e6f};
+    float _fogStart{0.f};
 };
 } // namespace circuitExplorer
 

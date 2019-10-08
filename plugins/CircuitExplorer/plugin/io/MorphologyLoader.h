@@ -22,7 +22,7 @@
 #ifndef MORPHOLOGY_LOADER_H
 #define MORPHOLOGY_LOADER_H
 
-#include <api/CircuitExplorerParams.h>
+#include <plugin/api/CircuitExplorerParams.h>
 
 #include <brayns/common/geometry/SDFGeometry.h>
 #include <brayns/common/loader/Loader.h>

@@ -193,6 +193,18 @@ def test_add_grid():
         assert_equal(response, {'ok'})
 
 
+def test_add_column():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.add_column(radius=1)
+        assert_equal(response, {'ok'})
+
+
 if __name__ == '__main__':
     import nose
     nose.run(defaultTest=__name__)

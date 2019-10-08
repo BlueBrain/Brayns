@@ -22,8 +22,8 @@
 #ifndef MEMBRANELESS_ORGANELLES_PLUGIN_H
 #define MEMBRANELESS_ORGANELLES_PLUGIN_H
 
-#include <api/CircuitExplorerParams.h>
-#include <io/AbstractCircuitLoader.h>
+#include <plugin/api/CircuitExplorerParams.h>
+#include <plugin/io/AbstractCircuitLoader.h>
 
 #include <array>
 #include <brayns/common/types.h>
@@ -73,6 +73,7 @@ private:
 
     // Predefined models
     void _addGrid(const AddGrid& payload);
+    void _addColumn(const AddColumn& payload);
 
     MaterialIds _getMaterialIds(const ModelId& modelId);
     SynapseAttributes _synapseAttributes;

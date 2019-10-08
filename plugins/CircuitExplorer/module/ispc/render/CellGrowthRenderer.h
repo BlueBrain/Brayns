@@ -42,13 +42,13 @@ public:
     void commit() final;
 
 private:
-    float _simulationThreshold;
+    float _simulationThreshold{0.f};
 
-    float _shadows;
-    float _softShadows;
-    float _shadowDistance;
+    float _shadows{0.f};
+    float _softShadows{0.f};
+    float _shadowDistance{1e6f};
 
-    bool _useTransferFunctionColor;
+    bool _useTransferFunctionColor{false};
 };
 
 } // namespace circuitExplorer

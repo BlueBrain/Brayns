@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2018-2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -27,8 +27,7 @@ namespace circuitExplorer
 {
 /**
  * @brief The VoxelizedSimulationRenderer class can perform fast transparency
- * and
- * mapping of simulation data on the geometry
+ * and mapping of simulation data on the geometry
  */
 class VoxelizedSimulationRenderer : public CircuitExplorerSimulationRenderer
 {
@@ -43,7 +42,7 @@ public:
     void commit() final;
 
 private:
-    float _simulationThreshold;
+    float _simulationThreshold{0.f};
 };
 
 } // namespace circuitExplorer

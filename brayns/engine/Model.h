@@ -48,7 +48,7 @@ struct SDFGeometryData
     std::vector<SDFGeometry> geometries;
     std::map<size_t, std::vector<uint64_t>> geometryIndices;
 
-    std::vector<std::vector<size_t>> neighbours;
+    std::vector<std::vector<uint64_t>> neighbours;
     std::vector<uint64_t> neighboursFlat;
 };
 

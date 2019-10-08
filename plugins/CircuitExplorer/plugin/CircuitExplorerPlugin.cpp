@@ -23,17 +23,17 @@
 #include <common/commonTypes.h>
 #include <common/log.h>
 
-#include <io/AdvancedCircuitLoader.h>
-#include <io/BrickLoader.h>
-#include <io/CellGrowthHandler.h>
-#include <io/MeshCircuitLoader.h>
-#include <io/MorphologyCollageLoader.h>
-#include <io/MorphologyLoader.h>
-#include <io/PairSynapsesLoader.h>
-#include <io/SynapseCircuitLoader.h>
-#include <io/SynapseJSONLoader.h>
-#include <io/VoltageSimulationHandler.h>
-#include <meshing/PointCloudMesher.h>
+#include <plugin/io/AdvancedCircuitLoader.h>
+#include <plugin/io/BrickLoader.h>
+#include <plugin/io/CellGrowthHandler.h>
+#include <plugin/io/MeshCircuitLoader.h>
+#include <plugin/io/MorphologyCollageLoader.h>
+#include <plugin/io/MorphologyLoader.h>
+#include <plugin/io/PairSynapsesLoader.h>
+#include <plugin/io/SynapseCircuitLoader.h>
+#include <plugin/io/SynapseJSONLoader.h>
+#include <plugin/io/VoltageSimulationHandler.h>
+#include <plugin/meshing/PointCloudMesher.h>
 
 #include <brayns/common/ActionInterface.h>
 #include <brayns/common/Progress.h>
@@ -67,6 +67,10 @@ void _addAdvancedSimulationRenderer(brayns::Engine& engine)
         {"giSamples", 0, 0, 64, {"Global illumination samples"}});
     properties.setProperty({"shadows", 0., 0., 1., {"Shadow intensity"}});
     properties.setProperty({"softShadows", 0., 0., 1., {"Shadow softness"}});
+    properties.setProperty(
+        {"softShadowsSamples", 1, 1, 64, {"Soft shadow samples"}});
+    properties.setProperty(
+        {"epsilonFactor", 1., 1., 1000., {"Epsilon factor"}});
     properties.setProperty({"samplingThreshold",
                             0.001,
                             0.001,
@@ -84,11 +88,11 @@ void _addAdvancedSimulationRenderer(brayns::Engine& engine)
                             0.1,
                             100.,
                             {"Maximum distance to secondary model"}});
-    properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
+    properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
     properties.setProperty({"fogStart", 0., 0., 1e6, {"Fog start"}});
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
     properties.setProperty(
-        {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
+        {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
     engine.addRendererType("circuit_explorer_advanced", properties);
 }
 
@@ -101,11 +105,14 @@ void _addBasicSimulationRenderer(brayns::Engine& engine)
         {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
     properties.setProperty(
         {"simulationThreshold", 0., 0., 1., {"Simulation threshold"}});
-    properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
-    properties.setProperty({"fogStart", 0., 0., 1e6, {"Fog start"}});
-    properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
+    properties.setProperty({"maxDistanceToSecondaryModel",
+                            30.,
+                            0.1,
+                            100.,
+                            {"Maximum distance to secondary model"}});
+    properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
     properties.setProperty(
-        {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
+        {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
     engine.addRendererType("circuit_explorer_basic", properties);
 }
 
@@ -118,11 +125,11 @@ void _addVoxelizedSimulationRenderer(brayns::Engine& engine)
         {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
     properties.setProperty(
         {"simulationThreshold", 0., 0., 1., {"Simulation threshold"}});
-    properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
+    properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
     properties.setProperty({"fogStart", 0., 0., 1e6, {"Fog start"}});
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
     properties.setProperty(
-        {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
+        {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
     engine.addRendererType("circuit_explorer_voxelized_simulation", properties);
 }
 
@@ -135,7 +142,7 @@ void _addGrowthRenderer(brayns::Engine& engine)
         {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
     properties.setProperty(
         {"simulationThreshold", 0., 0., 1., {"Simulation threshold"}});
-    properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
+    properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
     properties.setProperty({"fogStart", 0., 0., 1e6, {"Fog start"}});
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
     properties.setProperty({"tfColor", false, {"Use transfer function color"}});
@@ -166,8 +173,8 @@ void _addProximityRenderer(brayns::Engine& engine)
     properties.setProperty(
         {"surfaceShadingEnabled", true, {"Surface shading"}});
     properties.setProperty(
-        {"maxBounces", 10, 1, 100, {"Maximum number of ray bounces"}});
-    properties.setProperty({"pixelAlpha", 1., 0.01, 10., {"Pixel alpha"}});
+        {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
+    properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
     engine.addRendererType("circuit_explorer_proximity_detection", properties);
 }
 
@@ -319,6 +326,11 @@ void CircuitExplorerPlugin::init()
         PLUGIN_INFO << "Registering 'add-grid' endpoint" << std::endl;
         _api->getActionInterface()->registerNotification<AddGrid>(
             "add-grid", [&](const AddGrid& payload) { _addGrid(payload); });
+
+        PLUGIN_INFO << "Registering 'add-column' endpoint" << std::endl;
+        _api->getActionInterface()->registerNotification<AddColumn>(
+            "add-column",
+            [&](const AddColumn& payload) { _addColumn(payload); });
     }
 
     auto& engine = _api->getEngine();
@@ -995,6 +1007,60 @@ void CircuitExplorerPlugin::_addGrid(const AddGrid& payload)
 
     scene.addModel(
         std::make_shared<brayns::ModelDescriptor>(std::move(model), "Grid"));
+}
+
+void CircuitExplorerPlugin::_addColumn(const AddColumn& payload)
+{
+    BRAYNS_INFO << "Building Column model" << std::endl;
+
+    auto& scene = _api->getScene();
+    auto model = scene.createModel();
+
+    //    const brayns::Vector3f grey = {0.5, 0.5, 0.5};
+    const brayns::Vector3f white = {1.f, 1.f, 1.F};
+
+    brayns::PropertyMap props;
+    props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 0});
+    props.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
+                       static_cast<int>(MaterialShadingMode::diffuse)});
+
+    auto material = model->createMaterial(0, "column");
+    material->setDiffuseColor(white);
+    material->setProperties(props);
+
+    const brayns::Vector3fs verticesBottom = {
+        {-0.25f, -1.0f, -0.5f}, {0.25f, -1.0f, -0.5f}, {0.5f, -1.0f, -0.25f},
+        {0.5f, -1.0f, 0.25f},   {0.5f, -1.0f, -0.25f}, {0.5f, -1.0f, 0.25f},
+        {0.25f, -1.0f, 0.5f},   {-0.25f, -1.0f, 0.5f}, {-0.5f, -1.0f, 0.25f},
+        {-0.5f, -1.0f, -0.25f}};
+    const brayns::Vector3fs verticesTop = {
+        {-0.25f, 1.f, -0.5f}, {0.25f, 1.f, -0.5f}, {0.5f, 1.f, -0.25f},
+        {0.5f, 1.f, 0.25f},   {0.5f, 1.f, -0.25f}, {0.5f, 1.f, 0.25f},
+        {0.25f, 1.f, 0.5f},   {-0.25f, 1.f, 0.5f}, {-0.5f, 1.f, 0.25f},
+        {-0.5f, 1.f, -0.25f}};
+
+    const auto r = payload.radius;
+    for (size_t i = 0; i < verticesBottom.size(); ++i)
+    {
+        model->addCylinder(0, {verticesBottom[i],
+                               verticesBottom[(i + 1) % verticesBottom.size()],
+                               r / 2.f});
+        model->addSphere(0, {verticesBottom[i], r});
+    }
+
+    for (size_t i = 0; i < verticesTop.size(); ++i)
+    {
+        model->addCylinder(0, {verticesTop[i],
+                               verticesTop[(i + 1) % verticesTop.size()],
+                               r / 2.f});
+        model->addSphere(0, {verticesTop[i], r});
+    }
+
+    for (size_t i = 0; i < verticesTop.size(); ++i)
+        model->addCylinder(0, {verticesBottom[i], verticesTop[i], r / 2.f});
+
+    scene.addModel(
+        std::make_shared<brayns::ModelDescriptor>(std::move(model), "Column"));
 }
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int /*argc*/,

@@ -100,7 +100,7 @@ inline vec3f VoxelizedSimulationRenderer_shadeRay(
     // Alpha
     sample.alpha = pathColor.w;
 
-    return make_vec3f(pathColor) * self->super.super.pixelAlpha;
+    return make_vec3f(pathColor) * self->super.super.exposure;
 }
 
 void VoxelizedSimulationRenderer_renderSample(uniform Renderer* uniform _self,
@@ -125,31 +125,40 @@ export void* uniform VoxelizedSimulationRenderer_create(void* uniform cppE)
 
 export void VoxelizedSimulationRenderer_set(
     void* uniform _self, void* uniform secondaryModel, void* uniform bgMaterial,
-    const uniform int& spp, uniform float* uniform simulationData,
-    const uniform int64 simulationDataSize,
-    const uniform float& alphaCorrection,
-    const uniform float& simulationThreshold, const uniform float& pixelAlpha,
-    const uniform float& fogThickness, const uniform float& fogStart,
-    const uniform int& maxBounces)
+    const uniform uint32 spp, uniform float* uniform simulationData,
+    const uniform uint64 simulationDataSize,
+    const uniform float alphaCorrection,
+    const uniform float simulationThreshold, const uniform float exposure,
+    const uniform float fogThickness, const uniform float fogStart,
+    const uniform uint32 maxBounces)
 {
     uniform VoxelizedSimulationRenderer* uniform self =
         (uniform VoxelizedSimulationRenderer * uniform) _self;
 
-    self->super.secondaryModel = (uniform Model * uniform) secondaryModel;
+    // OSPRay
+    self->super.super.super.spp = spp;
+
+    // Abstract
     self->super.super.bgMaterial =
         (uniform CircuitExplorerMaterial * uniform) bgMaterial;
 
-    self->super.super.super.spp = spp;
+    self->super.super.lights = 0;
+    self->super.super.numLights = 0;
 
+    self->super.super.timestamp = 0.f;
+    self->super.super.maxBounces = maxBounces;
+    self->super.super.exposure = exposure;
+
+    // Simulation
     self->super.simulationData = (uniform float* uniform)simulationData;
     self->super.simulationDataSize = simulationDataSize;
 
-    self->alphaCorrection = alphaCorrection;
-    self->simulationThreshold = simulationThreshold;
-
-    self->super.super.pixelAlpha = pixelAlpha;
+    self->super.secondaryModel = (uniform Model * uniform) secondaryModel;
 
     self->super.fogThickness = fogThickness;
     self->super.fogStart = fogStart;
-    self->super.super.maxBounces = maxBounces;
+
+    // Volexized simulation
+    self->alphaCorrection = alphaCorrection;
+    self->simulationThreshold = simulationThreshold;
 }

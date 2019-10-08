@@ -46,6 +46,7 @@ void CircuitExplorerAdvancedRenderer::commit()
     _giStrength = getParam1f("giWeight", 0.f);
     _giDistance = getParam1f("giDistance", 1e20f);
     _giSamples = getParam1i("giSamples", 1);
+    _epsilonFactor = getParam1f("epsilonFactor", 1.f);
 
     _randomNumber = getParam1i("randomNumber", 0);
     _samplingThreshold = getParam1f("samplingThreshold", 0.001f);
@@ -53,27 +54,25 @@ void CircuitExplorerAdvancedRenderer::commit()
     _volumeSpecularExponent = getParam1f("volumeSpecularExponent", 20.f);
     _volumeAlphaCorrection = getParam1f("volumeAlphaCorrection", 0.5f);
 
-    _maxDistanceToSecondaryModel =
-        getParam1f("maxDistanceToSecondaryModel", 30.f);
-
-    const auto simulationDataSize =
+    const uint64 simulationDataSize =
         _simulationData ? _simulationData->size() : 0;
 
     clipPlanes = getParamData("clipPlanes", nullptr);
     const auto clipPlaneData = clipPlanes ? clipPlanes->data : nullptr;
-    const size_t numClipPlanes = clipPlanes ? clipPlanes->numItems : 0;
+    const uint32 numClipPlanes = clipPlanes ? clipPlanes->numItems : 0;
 
     ispc::CircuitExplorerAdvancedRenderer_set(
         getIE(), (_secondaryModel ? _secondaryModel->getIE() : nullptr),
+        _maxDistanceToSecondaryModel,
         (_bgMaterial ? _bgMaterial->getIE() : nullptr), _shadows, _softShadows,
         _softShadowsSamples, _giStrength, _giDistance, _giSamples,
         _randomNumber, _timestamp, spp, _lightPtr, _lightArray.size(),
         _volumeSamplesPerRay,
-        _simulationData ? (float*)_simulationData->data : NULL,
-        simulationDataSize, _samplingThreshold, _maxDistanceToSecondaryModel,
-        _volumeSpecularExponent, _volumeAlphaCorrection, _pixelAlpha,
-        _fogThickness, _fogStart, (const ispc::vec4f*)clipPlaneData,
-        numClipPlanes, _maxBounces);
+        _simulationData ? (float*)_simulationData->data : nullptr,
+        simulationDataSize, _samplingThreshold, _volumeSpecularExponent,
+        _volumeAlphaCorrection, _exposure, _fogThickness, _fogStart,
+        (const ispc::vec4f*)clipPlaneData, numClipPlanes, _maxBounces,
+        _epsilonFactor);
 }
 
 CircuitExplorerAdvancedRenderer::CircuitExplorerAdvancedRenderer()

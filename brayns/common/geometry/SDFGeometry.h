@@ -35,6 +35,7 @@ enum class SDFType : uint8_t
 struct SDFGeometry
 {
     uint64_t userData;
+    Vector3f center; // TO BE REMOVED, for v3 cache compatibility only
     Vector3f p0;
     Vector3f p1;
     float r0 = -1.f;
@@ -44,8 +45,7 @@ struct SDFGeometry
     SDFType type;
 };
 
-inline SDFGeometry createSDFSphere(const Vector3f& center,
-                                   const float radius,
+inline SDFGeometry createSDFSphere(const Vector3f& center, const float radius,
                                    const uint64_t data = 0)
 {
     SDFGeometry geom;
@@ -56,10 +56,8 @@ inline SDFGeometry createSDFSphere(const Vector3f& center,
     return geom;
 }
 
-inline SDFGeometry createSDFPill(const Vector3f& p0,
-                                 const Vector3f& p1,
-                                 const float radius,
-                                 const uint64_t data = 0)
+inline SDFGeometry createSDFPill(const Vector3f& p0, const Vector3f& p1,
+                                 const float radius, const uint64_t data = 0)
 {
     SDFGeometry geom;
     geom.userData = data;
@@ -70,10 +68,8 @@ inline SDFGeometry createSDFPill(const Vector3f& p0,
     return geom;
 }
 
-inline SDFGeometry createSDFConePill(const Vector3f& p0,
-                                     const Vector3f& p1,
-                                     const float r0,
-                                     const float r1,
+inline SDFGeometry createSDFConePill(const Vector3f& p0, const Vector3f& p1,
+                                     const float r0, const float r1,
                                      const uint64_t data = 0)
 {
     SDFGeometry geom;
@@ -94,8 +90,7 @@ inline SDFGeometry createSDFConePill(const Vector3f& p0,
 }
 
 inline SDFGeometry createSDFConePillSigmoid(const Vector3f& p0,
-                                            const Vector3f& p1,
-                                            const float r0,
+                                            const Vector3f& p1, const float r0,
                                             const float r1,
                                             const uint64_t data = 0)
 {

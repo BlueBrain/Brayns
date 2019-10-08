@@ -39,10 +39,11 @@ void CircuitExplorerBasicRenderer::commit()
 
     ispc::CircuitExplorerBasicRenderer_set(
         getIE(), (_secondaryModel ? _secondaryModel->getIE() : nullptr),
+        _maxDistanceToSecondaryModel,
         (_bgMaterial ? _bgMaterial->getIE() : nullptr), spp,
         (_simulationData ? (float*)_simulationData->data : nullptr),
-        _simulationDataSize, _alphaCorrection, _simulationThreshold,
-        _pixelAlpha, _fogThickness, _fogStart, _maxBounces);
+        _simulationDataSize, _alphaCorrection, _simulationThreshold, _exposure,
+        _fogThickness, _fogStart, _maxBounces);
 }
 
 CircuitExplorerBasicRenderer::CircuitExplorerBasicRenderer()

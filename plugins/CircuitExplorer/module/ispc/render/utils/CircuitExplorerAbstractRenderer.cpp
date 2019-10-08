@@ -46,7 +46,7 @@ void CircuitExplorerAbstractRenderer::commit()
         (brayns::obj::CircuitExplorerMaterial*)getParamObject("bgMaterial",
                                                               nullptr);
     _maxBounces = getParam1i("maxBounces", 10);
-    _pixelAlpha = getParam1f("pixelAlpha", 1.f);
+    _exposure = getParam1f("exposure", 1.f);
 }
 
 } // namespace circuitExplorer

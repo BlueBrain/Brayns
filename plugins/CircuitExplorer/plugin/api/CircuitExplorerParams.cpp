@@ -20,7 +20,7 @@
  */
 
 #include "CircuitExplorerParams.h"
-#include "json.hpp"
+#include <plugin/json.hpp>
 
 #define FROM_JSON(PARAM, JSON, NAME) \
     PARAM.NAME = JSON[#NAME].get<decltype(PARAM.NAME)>()
@@ -475,6 +475,20 @@ bool from_json(AddGrid& param, const std::string& payload)
         FROM_JSON(param, js, planeOpacity);
         FROM_JSON(param, js, showAxis);
         FROM_JSON(param, js, useColors);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool from_json(AddColumn& param, const std::string& payload)
+{
+    try
+    {
+        auto js = nlohmann::json::parse(payload);
+        FROM_JSON(param, js, radius);
     }
     catch (...)
     {

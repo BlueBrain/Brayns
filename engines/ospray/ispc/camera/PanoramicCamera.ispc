@@ -56,7 +56,7 @@ void PanoramicCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
     screen = Camera_subRegion(_self, screen);
 
     const float phi =
-        M_PI / 2.f - two_pi * screen.x * (self->half ? 0.5f : 1.f);
+        self->half ? M_PI / 2.f - two_pi * screen.x * 0.5f : two_pi * screen.x;
     const float theta = M_PI * screen.y;
 
     float sinTheta, cosTheta;

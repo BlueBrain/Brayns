@@ -63,10 +63,14 @@ void CircuitExplorerSimulationRenderer::commit()
 {
     CircuitExplorerAbstractRenderer::commit();
 
-    _simulationData = getParamData("simulationData");
-    _alphaCorrection = getParam1f("alphaCorrection", 0.5f);
-    _simulationDataSize = _simulationData ? _simulationData->size() : 0;
     _secondaryModel = (ospray::Model*)getParamObject("secondaryModel", nullptr);
+    _maxDistanceToSecondaryModel =
+        getParam1f("maxDistanceToSecondaryModel", 30.f);
+
+    _simulationData = getParamData("simulationData");
+    _simulationDataSize = _simulationData ? _simulationData->size() : 0;
+
+    _alphaCorrection = getParam1f("alphaCorrection", 0.5f);
     _fogThickness = getParam1f("fogThickness", 1e6f);
     _fogStart = getParam1f("fogStart", 0.f);
 

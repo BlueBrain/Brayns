@@ -22,8 +22,8 @@
 #ifndef VOLTAGESIMULATIONHANDLER_H
 #define VOLTAGESIMULATIONHANDLER_H
 
-#include <api/CircuitExplorerParams.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
+#include <plugin/api/CircuitExplorerParams.h>
 
 #include <brayns/api.h>
 #include <brayns/common/types.h>
