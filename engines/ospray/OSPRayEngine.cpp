@@ -269,6 +269,15 @@ void OSPRayEngine::_createCameras()
         }
         addCameraType("panoramic", properties);
     }
+    {
+        PropertyMap properties;
+        properties.setProperty(fovy);
+        properties.setProperty(aspect);
+        properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
+        properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
+        properties.setProperty(enableClippingPlanes);
+        addCameraType("fisheye", properties);
+    }
 }
 } // namespace brayns
 

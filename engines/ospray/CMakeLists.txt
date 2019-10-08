@@ -26,6 +26,7 @@ set(BRAYNSOSPRAYENGINE_ISPC_SOURCES
   ispc/camera/OrthographicCamera.ispc
   ispc/camera/PanoramicCamera.ispc
   ispc/camera/PerspectiveCamera.ispc
+  ispc/camera/FishEyeCamera.ispc
   ispc/camera/PerspectiveParallaxCamera.ispc
   ispc/geometry/Cones.ispc
   ispc/geometry/SDFBeziers.ispc
@@ -49,6 +50,7 @@ set(BRAYNSOSPRAYENGINE_SOURCES
   utils.cpp
   ispc/camera/OrthographicCamera.cpp
   ispc/camera/PanoramicCamera.cpp
+  ispc/camera/FishEyeCamera.cpp
   ispc/camera/PerspectiveCamera.cpp
   ispc/camera/PerspectiveParallaxCamera.cpp
   ispc/geometry/Cones.cpp
@@ -73,6 +75,7 @@ set(BRAYNSOSPRAYENGINE_HEADERS
   ispc/camera/OrthographicCamera.h
   ispc/camera/PanoramicCamera.h 
   ispc/camera/PerspectiveCamera.h
+  ispc/camera/FishEyeCamera.h
   ispc/camera/PerspectiveParallaxCamera.h
   ispc/render/BasicRenderer.h
   ispc/render/DefaultMaterial.h
