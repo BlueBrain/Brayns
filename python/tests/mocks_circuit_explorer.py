@@ -102,6 +102,8 @@ def mock_ce_rpc_request(self, method, params=None, response_timeout=None):
         return RESPONSE_OK
     if method == 'add-grid':
         return RESPONSE_OK
+    if method == 'add-column':
+        return RESPONSE_OK
     if method == 'save-model-to-cache':
         return RESPONSE_OK
     if method == 'load-circuit':

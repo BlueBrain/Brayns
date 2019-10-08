@@ -278,4 +278,10 @@ struct AddGrid
 };
 bool from_json(AddGrid& param, const std::string& payload);
 
+struct AddColumn
+{
+    float radius;
+};
+bool from_json(AddColumn& param, const std::string& payload);
+
 #endif // CIRCUITVIEWERPARAMS_H

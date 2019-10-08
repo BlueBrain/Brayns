@@ -383,6 +383,19 @@ class CircuitExplorer:
         return self._client.request('add-grid', params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
+    def add_column(self, radius=0.01):
+        """
+        Adds a reference column to the scene
+
+        :param float radius: Radius of column spheres, cylinders radii are half size.
+        :return: Result of the request submission
+        :rtype: str
+        """
+        params = dict()
+        params['radius'] = radius
+        return self._client.request('add-column', params,
+                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+
     def export_frames_to_disk(self, path, animation_frames, camera_definitions, image_format='png',
                               quality=100, samples_per_pixel=1, start_frame=0):
         """

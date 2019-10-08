@@ -73,6 +73,7 @@ private:
 
     // Predefined models
     void _addGrid(const AddGrid& payload);
+    void _addColumn(const AddColumn& payload);
 
     MaterialIds _getMaterialIds(const ModelId& modelId);
     SynapseAttributes _synapseAttributes;

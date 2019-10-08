@@ -482,3 +482,17 @@ bool from_json(AddGrid& param, const std::string& payload)
     }
     return true;
 }
+
+bool from_json(AddColumn& param, const std::string& payload)
+{
+    try
+    {
+        auto js = nlohmann::json::parse(payload);
+        FROM_JSON(param, js, radius);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}

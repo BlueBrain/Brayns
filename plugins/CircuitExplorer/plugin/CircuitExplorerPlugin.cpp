@@ -69,7 +69,8 @@ void _addAdvancedSimulationRenderer(brayns::Engine& engine)
     properties.setProperty({"softShadows", 0., 0., 1., {"Shadow softness"}});
     properties.setProperty(
         {"softShadowsSamples", 1, 1, 64, {"Soft shadow samples"}});
-    properties.setProperty({"epsilonFactor", 1., 1., 100., {"Epsilon factor"}});
+    properties.setProperty(
+        {"epsilonFactor", 1., 1., 1000., {"Epsilon factor"}});
     properties.setProperty({"samplingThreshold",
                             0.001,
                             0.001,
@@ -325,6 +326,11 @@ void CircuitExplorerPlugin::init()
         PLUGIN_INFO << "Registering 'add-grid' endpoint" << std::endl;
         _api->getActionInterface()->registerNotification<AddGrid>(
             "add-grid", [&](const AddGrid& payload) { _addGrid(payload); });
+
+        PLUGIN_INFO << "Registering 'add-column' endpoint" << std::endl;
+        _api->getActionInterface()->registerNotification<AddColumn>(
+            "add-column",
+            [&](const AddColumn& payload) { _addColumn(payload); });
     }
 
     auto& engine = _api->getEngine();
@@ -1001,6 +1007,60 @@ void CircuitExplorerPlugin::_addGrid(const AddGrid& payload)
 
     scene.addModel(
         std::make_shared<brayns::ModelDescriptor>(std::move(model), "Grid"));
+}
+
+void CircuitExplorerPlugin::_addColumn(const AddColumn& payload)
+{
+    BRAYNS_INFO << "Building Column model" << std::endl;
+
+    auto& scene = _api->getScene();
+    auto model = scene.createModel();
+
+    //    const brayns::Vector3f grey = {0.5, 0.5, 0.5};
+    const brayns::Vector3f white = {1.f, 1.f, 1.F};
+
+    brayns::PropertyMap props;
+    props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 0});
+    props.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
+                       static_cast<int>(MaterialShadingMode::diffuse)});
+
+    auto material = model->createMaterial(0, "column");
+    material->setDiffuseColor(white);
+    material->setProperties(props);
+
+    const brayns::Vector3fs verticesBottom = {
+        {-0.25f, -1.0f, -0.5f}, {0.25f, -1.0f, -0.5f}, {0.5f, -1.0f, -0.25f},
+        {0.5f, -1.0f, 0.25f},   {0.5f, -1.0f, -0.25f}, {0.5f, -1.0f, 0.25f},
+        {0.25f, -1.0f, 0.5f},   {-0.25f, -1.0f, 0.5f}, {-0.5f, -1.0f, 0.25f},
+        {-0.5f, -1.0f, -0.25f}};
+    const brayns::Vector3fs verticesTop = {
+        {-0.25f, 1.f, -0.5f}, {0.25f, 1.f, -0.5f}, {0.5f, 1.f, -0.25f},
+        {0.5f, 1.f, 0.25f},   {0.5f, 1.f, -0.25f}, {0.5f, 1.f, 0.25f},
+        {0.25f, 1.f, 0.5f},   {-0.25f, 1.f, 0.5f}, {-0.5f, 1.f, 0.25f},
+        {-0.5f, 1.f, -0.25f}};
+
+    const auto r = payload.radius;
+    for (size_t i = 0; i < verticesBottom.size(); ++i)
+    {
+        model->addCylinder(0, {verticesBottom[i],
+                               verticesBottom[(i + 1) % verticesBottom.size()],
+                               r / 2.f});
+        model->addSphere(0, {verticesBottom[i], r});
+    }
+
+    for (size_t i = 0; i < verticesTop.size(); ++i)
+    {
+        model->addCylinder(0, {verticesTop[i],
+                               verticesTop[(i + 1) % verticesTop.size()],
+                               r / 2.f});
+        model->addSphere(0, {verticesTop[i], r});
+    }
+
+    for (size_t i = 0; i < verticesTop.size(); ++i)
+        model->addCylinder(0, {verticesBottom[i], verticesTop[i], r / 2.f});
+
+    scene.addModel(
+        std::make_shared<brayns::ModelDescriptor>(std::move(model), "Column"));
 }
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int /*argc*/,
