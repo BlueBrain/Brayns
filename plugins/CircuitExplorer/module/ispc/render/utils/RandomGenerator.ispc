@@ -43,7 +43,7 @@ inline float getRandomValue(const varying ScreenSample&, const int)
 #else
     rdrand(&r);
 #endif
-    return r;
+    return r * 10.f;
 }
 
 void getTangentVectors(const vec3f& normal, vec3f& tangent, vec3f& biTangent)

@@ -70,6 +70,7 @@ void DOFPerspectiveCamera_initRay(uniform Camera* uniform _self,
     {
         float random = 1.f;
         random = getRandomValue();
+        random = (random == 0.f ? 0.001f : random);
         const vec3f llp =
             uniformSampleDisk(random * self->scaledAperture, sample.lens);
         // transform local lens point to focal plane (dir_XX are prescaled in
