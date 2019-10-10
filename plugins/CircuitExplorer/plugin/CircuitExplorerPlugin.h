@@ -70,6 +70,7 @@ private:
     // Movie production
     void _exportFramesToDisk(const ExportFramesToDisk& payload);
     void _doExportFrameToDisk();
+    FrameExportProgress _getFrameExportProgress();
 
     // Predefined models
     void _addGrid(const AddGrid& payload);

@@ -33,6 +33,15 @@ struct Result
 
 std::string to_json(const Result& param);
 
+/** Progress of the last issued frame export operation */
+struct FrameExportProgress
+{
+    uint16_t frameNumber;
+    bool done;
+};
+
+std::string to_json(const FrameExportProgress& frameNumber);
+
 /** Save model to cache */
 struct SaveModelToCache
 {

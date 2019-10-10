@@ -455,3 +455,18 @@ class CircuitExplorer:
         params['cameraInformation'] = []
         return self._client.request('export-frames-to-disk', params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+
+    def get_export_frames_progress(self):
+
+        """
+        Queries the progress of the last export of frames to disk request
+
+        :return: Dictionary with the result: "frameNumber" with the number of
+        the last written-to-disk frame, and "done", a boolean flag stating wether
+        the exporting is finished or is still in progress
+        :rtype: dict
+        """
+
+
+        return self._client.request('get-export-frames-progress',
+                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)

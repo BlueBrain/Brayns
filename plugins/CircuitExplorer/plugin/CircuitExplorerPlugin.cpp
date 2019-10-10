@@ -323,6 +323,13 @@ void CircuitExplorerPlugin::init()
             "export-frames-to-disk",
             [&](const ExportFramesToDisk& s) { _exportFramesToDisk(s); });
 
+        PLUGIN_INFO << "Registering 'get-export-frames-progress' endpoint"
+                    << std::endl;
+        actionInterface->registerRequest<FrameExportProgress>(
+            "get-export-frames-progress", [&](void) -> FrameExportProgress {
+                return _getFrameExportProgress();
+            });
+
         PLUGIN_INFO << "Registering 'add-grid' endpoint" << std::endl;
         _api->getActionInterface()->registerNotification<AddGrid>(
             "add-grid", [&](const AddGrid& payload) { _addGrid(payload); });
@@ -888,6 +895,14 @@ void CircuitExplorerPlugin::_doExportFrameToDisk()
     frameBuffer.clear();
 
     PLUGIN_INFO << "Frame saved to " << filename << std::endl;
+}
+
+FrameExportProgress CircuitExplorerPlugin::_getFrameExportProgress()
+{
+    FrameExportProgress result;
+    result.frameNumber = _frameNumber;
+    result.done = !_exportFramesToDiskDirty;
+    return result;
 }
 
 void CircuitExplorerPlugin::_addGrid(const AddGrid& payload)

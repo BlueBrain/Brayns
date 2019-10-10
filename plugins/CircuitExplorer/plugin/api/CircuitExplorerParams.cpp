@@ -59,6 +59,22 @@ std::string to_json(const Result& param)
     return "";
 }
 
+std::string to_json(const FrameExportProgress& frameExprtProg)
+{
+    try
+    {
+        nlohmann::json json;
+        TO_JSON(frameExprtProg, json, frameNumber);
+        TO_JSON(frameExprtProg, json, done);
+        return json.dump();
+    }
+    catch (...)
+    {
+        return "";
+    }
+    return "";
+}
+
 bool from_json(SaveModelToCache& param, const std::string& payload)
 {
     try
