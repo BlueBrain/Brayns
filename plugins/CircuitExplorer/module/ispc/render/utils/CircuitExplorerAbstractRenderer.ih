@@ -31,8 +31,8 @@
 #include "../CircuitExplorerMaterial.ih"
 
 // Brayns
+#include "CircuitExplorerRandomGenerator.ih"
 #include "CircuitExplorerSkyBox.ih"
-#include "RandomGenerator.ih"
 
 #include "../../../../../../engines/ospray/ispc/render/utils/Consts.ih"
 
