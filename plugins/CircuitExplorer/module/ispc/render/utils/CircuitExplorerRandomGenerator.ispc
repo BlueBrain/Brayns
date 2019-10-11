@@ -21,9 +21,12 @@
 #include <ospray/SDK/render/Renderer.ih>
 #include <ospray/SDK/render/util.ih>
 
-#include "RandomGenerator.ih"
+#include "CircuitExplorerRandomGenerator.ih"
 
 #define HIGH_QUALITY_RANDOM
+
+uniform bool seedInitialized = false;
+struct RNGState rngState;
 
 inline float rotate(float x, const float dx)
 {
@@ -35,7 +38,13 @@ inline float rotate(float x, const float dx)
 
 inline float getRandomValue(const varying ScreenSample&, const int)
 {
-    float r;
+    if (!seedInitialized && programIndex == 0)
+    {
+        seed_rng(&rngState, programIndex);
+        seedInitialized = true;
+    }
+
+    float r = 0.f;
 #ifdef HIGH_QUALITY_RANDOM
     int nbMaxTries = 10;
     while (nbMaxTries >= 0 && rdrand(&r) == false)
@@ -43,7 +52,7 @@ inline float getRandomValue(const varying ScreenSample&, const int)
 #else
     rdrand(&r);
 #endif
-    return r * 10.f;
+    return r;
 }
 
 void getTangentVectors(const vec3f& normal, vec3f& tangent, vec3f& biTangent)

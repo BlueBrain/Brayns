@@ -88,7 +88,7 @@ set(BRAYNSCIRCUITEXPLORER_ISPC_SOURCES
     module/ispc/render/ProximityDetectionRenderer.ispc
     module/ispc/render/CellGrowthRenderer.ispc
     module/ispc/render/utils/CircuitExplorerSimulationRenderer.ispc
-    module/ispc/render/utils/RandomGenerator.ispc
+    module/ispc/render/utils/CircuitExplorerRandomGenerator.ispc
     module/ispc/render/utils/CircuitExplorerSkyBox.ispc
 )
 

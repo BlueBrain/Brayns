@@ -109,10 +109,12 @@ inline bool launchRandomRay(
         // normal
         randomDirection = neg(randomDirection);
 
-    Ray randomRay = sample.ray;
-    setRay(randomRay, intersection, randomDirection);
+    Ray randomRay;
+    randomRay.org = intersection;
+    randomRay.dir = randomDirection;
     randomRay.t0 = geometry.epsilon;
     randomRay.t = self->giDistance;
+    randomRay.time = inf;
     randomRay.primID = -1;
     randomRay.geomID = -1;
     randomRay.instID = -1;
@@ -429,12 +431,15 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
                              sample, attributes.normal,
                              s + attributes.self->randomNumber));
 
-        Ray shadowRay = ray;
-        setRay(shadowRay, dg.P, ld);
+        Ray shadowRay;
+        shadowRay.org = dg.P;
+        shadowRay.dir = ld;
         shadowRay.t0 = attributes.self->epsilonFactor * dg.epsilon;
         shadowRay.t = attributes.self->giDistance;
-        shadowRay.time = sample.ray.time;
+        shadowRay.time = inf;
         shadowRay.geomID = -1;
+        shadowRay.primID = -1;
+        shadowRay.instID = -1;
 
         while (shadowIntensity < 1.f)
         {
@@ -970,7 +975,7 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
     const uniform CircuitExplorerAdvancedRenderer* uniform self,
     varying ScreenSample& sample)
 {
-    Ray ray = sample.ray;
+    varying Ray ray = sample.ray;
     vec4f color = make_vec4f(0.f);
     vec3f bgColor = make_vec3f(0.f);
 
