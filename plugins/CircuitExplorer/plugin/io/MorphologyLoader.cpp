@@ -646,10 +646,11 @@ void MorphologyLoader::_addStepConeGeometry(
 float MorphologyLoader::_distanceToSoma(const brain::neuron::Section& section,
                                         const size_t sampleId) const
 {
-    float distance = 0.f;
+    float distance = 0.0;
+    if (sampleId > 0)
     {
         const auto& samples = section.getSamples();
-        for (size_t i = 0; i < sampleId - 1; ++i)
+        for (size_t i = 0; i < std::min(samples.size(), sampleId) - 1; ++i)
         {
             const auto& a = samples[i];
             const auto& b = samples[i + 1];
@@ -671,9 +672,9 @@ float MorphologyLoader::_distanceToSoma(const brain::neuron::Section& section,
         }
     }
 
-    return distance * 10.f; // Since user data is uint64_t, we multiply by 10 to
-                            // increase the precision of the growth (first
-                            // decimal value will then be considered)
+    return distance * 10.f; // Since user data is uint64_t, we multiply by
+                            // 10 to increase the precision of the growth
+                            // (first decimal value will then be considered)
 }
 
 void MorphologyLoader::_importMorphologyFromURI(
@@ -702,8 +703,8 @@ void MorphologyLoader::_importMorphologyFromURI(
     const auto maxDistanceToSoma = properties.getProperty<double>(
         PROP_MORPHOLOGY_MAX_DISTANCE_TO_SOMA.name);
 
-    // If there is no compartment report, the offset in the simulation buffer is
-    // the index of the morphology in the circuit
+    // If there is no compartment report, the offset in the simulation
+    // buffer is the index of the morphology in the circuit
     uint64_t userDataOffset = 0;
     if (compartmentReport)
         userDataOffset = compartmentReport->getOffsets()[index][0];
@@ -779,7 +780,7 @@ void MorphologyLoader::_importMorphologyFromURI(
         {
             const auto& counts =
                 compartmentReport->getCompartmentCounts()[index];
-            // Number of compartments usually differs from number of  samples
+            // Number of compartments usually differs from number of samples
             segmentStep = counts[section.getID()] / double(numSamples);
         }
 
@@ -820,10 +821,10 @@ void MorphologyLoader::_importMorphologyFromURI(
                     const auto& counts =
                         compartmentReport->getCompartmentCounts()[index];
 
-                    // Update the offset if we have enough compartments aka a
-                    // full compartment report. Otherwise we keep the soma
-                    // offset which happens for soma reports and use this for
-                    // all the sections
+                    // Update the offset if we have enough compartments aka
+                    // a full compartment report. Otherwise we keep the soma
+                    // offset which happens for soma reports and use this
+                    // for all the sections
                     if (section.getID() < counts.size())
                     {
                         if (counts[section.getID()] > 0)
@@ -835,8 +836,9 @@ void MorphologyLoader::_importMorphologyFromURI(
                                 brain::neuron::SectionType::axon)
                                 userDataOffset = offsets[lastAxon];
                             else
-                                // This should never happen, but just in case
-                                // use an invalid value to show an error color
+                                // This should never happen, but just in
+                                // case use an invalid value to show an
+                                // error color
                                 userDataOffset =
                                     std::numeric_limits<uint64_t>::max();
                         }
@@ -947,10 +949,12 @@ brayns::ModelDescriptorPtr MorphologyLoader::importFromFile(
     const std::string& fileName, const brayns::LoaderProgress& /*callback*/,
     const brayns::PropertyMap& properties) const
 {
-    // TODO: This needs to be done to work around wrong types coming from the UI
+    // TODO: This needs to be done to work around wrong types coming from
+    // the UI
     brayns::PropertyMap props = _defaults;
     props.merge(properties);
-    // TODO: This needs to be done to work around wrong types coming from the UI
+    // TODO: This needs to be done to work around wrong types coming from
+    // the UI
 
     auto model = _scene.createModel();
     importMorphology(props, servus::URI(fileName), *model, 0);
