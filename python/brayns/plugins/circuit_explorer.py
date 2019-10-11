@@ -77,8 +77,9 @@ class CircuitExplorer:
         self._client = client.rockets_client
 
     # pylint: disable=W0102,R0913,R0914
-    def load_circuit(self, path, name='Circuit', density=100.0,
-                     random_seed=0, targets=list(), report='', report_type=REPORT_TYPE_VOLTAGES_FROM_FILE,
+    def load_circuit(self, path, name='Circuit', density=100.0, gids=list(),
+                     random_seed=0, targets=list(), report='',
+                     report_type=REPORT_TYPE_VOLTAGES_FROM_FILE,
                      user_data_type=USER_DATATYPE_SIMULATION_OFFSET, synchronous_mode=True,
                      circuit_color_scheme=CIRCUIT_COLOR_SCHEME_NONE, mesh_folder='',
                      mesh_filename_pattern='', mesh_transformation=False, radius_multiplier=1,
@@ -88,7 +89,8 @@ class CircuitExplorer:
                      metaballs_section_samples=5, metaballs_grid_size=20, metaballs_threshold=1,
                      morphology_color_scheme=MORPHOLOGY_COLOR_SCHEME_NONE,
                      morphology_quality=GEOMETRY_QUALITY_HIGH, max_distance_to_soma=1e6,
-                     cell_clipping=False, load_afferent_synapses=False, load_efferent_synapses=False,
+                     cell_clipping=False, load_afferent_synapses=False,
+                     load_efferent_synapses=False,
                      synapse_radius=0.0):
         """
         Load a circuit from a give Blue/Circuit configuration file
@@ -96,6 +98,7 @@ class CircuitExplorer:
         :param str path: Path to the CircuitConfig or BlueConfig configuration file
         :param str name: Name of the model
         :param float density: Circuit density (Value between 0 and 100)
+        :param list gids: List of GIDs to load
         :param int random_seed: Random seed used if circuit density is different from 100
         :param list targets: List of targets to load
         :param str report: Name of the simulation report, if applicable
@@ -155,7 +158,13 @@ class CircuitExplorer:
                 targets_as_string += ','
             targets_as_string += target
         props['010Targets'] = targets_as_string
-        props['011Gids'] = ''
+
+        gids_as_string = ''
+        for gid in gids:
+            if gids_as_string != '':
+                gids_as_string += ','
+            gids_as_string += str(gid)
+        props['011Gids'] = gids_as_string
         props['012PreNeuron'] = ''
         props['013PostNeuron'] = ''
 

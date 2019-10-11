@@ -24,6 +24,7 @@
 #include <common/log.h>
 
 #include <plugin/io/AdvancedCircuitLoader.h>
+#include <plugin/io/AstrocyteLoader.h>
 #include <plugin/io/BrickLoader.h>
 #include <plugin/io/CellGrowthHandler.h>
 #include <plugin/io/MeshCircuitLoader.h>
@@ -231,6 +232,10 @@ void CircuitExplorerPlugin::init()
     registry.registerLoader(std::make_unique<PairSynapsesLoader>(
         scene, pm.getApplicationParameters(),
         PairSynapsesLoader::getCLIProperties()));
+
+    registry.registerLoader(
+        std::make_unique<AstrocyteLoader>(scene, pm.getApplicationParameters(),
+                                          AstrocyteLoader::getCLIProperties()));
 
     auto actionInterface = _api->getActionInterface();
     if (actionInterface)

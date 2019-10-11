@@ -51,6 +51,7 @@ set(BRAYNSCIRCUITEXPLORER_SOURCES
     plugin/io/AbstractCircuitLoader.cpp
     plugin/io/MeshCircuitLoader.cpp
     plugin/io/AdvancedCircuitLoader.cpp
+    plugin/io/AstrocyteLoader.cpp
     plugin/io/SynapseCircuitLoader.cpp
     plugin/io/BrickLoader.cpp
     plugin/io/MorphologyLoader.cpp
@@ -72,6 +73,7 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     plugin/io/MeshCircuitLoader.h
     plugin/io/MorphologyCollageLoader.h
     plugin/io/AdvancedCircuitLoader.h
+    plugin/io/AstrocyteLoader.h
     plugin/io/SynapseCircuitLoader.h
     plugin/io/MorphologyLoader.h
     plugin/io/SynapseJSONLoader.h
