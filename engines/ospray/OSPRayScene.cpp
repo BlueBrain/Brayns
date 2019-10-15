@@ -151,9 +151,8 @@ void OSPRayScene::commit()
                 const auto& modelBounds =
                     modelDescriptor->getModel().getBounds();
                 Transformation modelTransform;
-                modelTransform.setTranslation(modelBounds.getCenter() /
-                                                  modelBounds.getSize() -
-                                              Vector3d(0.5));
+                modelTransform.setTranslation(modelBounds.getCenter() -
+                                              0.5 * modelBounds.getSize());
                 modelTransform.setScale(modelBounds.getSize());
 
                 addInstance(_rootModel, impl.getBoundingBoxModel(),
