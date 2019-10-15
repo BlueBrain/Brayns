@@ -22,7 +22,6 @@
 #define ClipPlane_H
 
 #include <brayns/api.h>
-#include <brayns/common/BaseObject.h>
 #include <brayns/common/types.h>
 
 SERIALIZATION_ACCESS(ClipPlane)
@@ -56,5 +55,5 @@ private:
     Plane _plane = {{0}};
     SERIALIZATION_FRIEND(ClipPlane);
 };
-}
+} // namespace brayns
 #endif // Model_H

@@ -47,6 +47,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   log.h
   material/Texture2D.h
   mathTypes.h
+  macros.h
   scene/ClipPlane.h
   simulation/AbstractSimulationHandler.h
   tasks/Task.h

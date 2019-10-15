@@ -28,6 +28,9 @@
 #include <glm/gtx/io.hpp>
 #include <vector>
 
+#include <brayns/common/BaseObject.h>
+#include <brayns/common/macros.h>
+
 namespace brayns
 {
 template <typename T>
@@ -94,10 +97,18 @@ public:
     inline const vec& getMin() const { return _min; }
     inline const vec& getMax() const { return _max; }
 
+#ifdef __INTEL_COMPILER // Workaround for ICC. Make members public
+public:
+    vec _min{std::numeric_limits<T>::max()};
+    vec _max{-std::numeric_limits<T>::max()};
+#else
 private:
     vec _min{std::numeric_limits<T>::max()};
     vec _max{-std::numeric_limits<T>::max()};
-    friend void staticjson::init(Box<double>*, staticjson::ObjectHandler*);
+
+    SERIALIZATION_FRIEND(Box<double>)
+    SERIALIZATION_FRIEND(Box<float>)
+#endif
 };
 
 template <typename T>
