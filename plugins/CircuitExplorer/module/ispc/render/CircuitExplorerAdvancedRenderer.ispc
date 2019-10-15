@@ -431,6 +431,9 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
                              sample, attributes.normal,
                              s + attributes.self->randomNumber));
 
+        if (dot(ld, lightDirection) < 0.f)
+            ld = neg(ld);
+
         Ray shadowRay;
         shadowRay.org = dg.P;
         shadowRay.dir = ld;
@@ -906,10 +909,12 @@ inline void processNoiseShading(DifferentialGeometry& dg,
 
     attributes.diffuseColor = (1.f - n1) * attributes.diffuseColor;
     attributes.simulationColor = (1.f - n1) * attributes.simulationColor;
+    attributes.specularColor = (1.f - n1) * attributes.specularColor;
+    attributes.specularExponent = 20.f;
 
-    attributes.normal.x += n1;
-    attributes.normal.y += 0.5f - n1;
-    attributes.normal.z += 0.25f - n1;
+    attributes.normal.x += 0.5f * n1;
+    attributes.normal.y += 0.5f * (0.5f - n1);
+    attributes.normal.z += 0.5f * (0.25f - n1);
     attributes.normal = normalize(attributes.normal);
 
     attributes.reflectedNormal =

@@ -52,16 +52,16 @@ public:
         const brayns::ApplicationParameters &applicationParameters,
         brayns::PropertyMap &&loaderParams);
 
-    brayns::PropertyMap getProperties() const;
+    brayns::PropertyMap getProperties() const final;
 
-    std::vector<std::string> getSupportedExtensions() const final;
+    std::vector<std::string> getSupportedExtensions() const;
 
     bool isSupported(const std::string &filename,
-                     const std::string &extension) const final;
+                     const std::string &extension) const;
 
     brayns::ModelDescriptorPtr importFromBlob(
         brayns::Blob &&blob, const brayns::LoaderProgress &callback,
-        const brayns::PropertyMap &properties) const final;
+        const brayns::PropertyMap &properties) const;
 
     /**
      * @brief Imports morphology from a circuit for the given target name

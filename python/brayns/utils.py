@@ -39,6 +39,7 @@ HTTP_METHOD_GET = 'GET'
 HTTP_METHOD_DELETE = 'DELETE'
 HTTP_METHOD_POST = 'POST'
 HTTP_STATUS_OK = 200
+HTTP_RESPONSE_TIMEOUT = 3600
 
 HTTP_PREFIX = 'http://'
 HTTPS_PREFIX = 'https://'
@@ -77,23 +78,28 @@ def http_request(method, url, command, body=None, query_params=None):  # pragma:
     try:
         if method == HTTP_METHOD_POST:
             if body == '':
-                request = requests.post(full_url, params=query_params)
+                request = requests.post(full_url, params=query_params,
+                                        timeout=HTTP_RESPONSE_TIMEOUT)
             else:
-                request = requests.post(full_url, data=body, params=query_params)
+                request = requests.post(full_url, data=body, params=query_params,
+                                        timeout=HTTP_RESPONSE_TIMEOUT)
         elif method == HTTP_METHOD_PUT:
             if body == '':
-                request = requests.put(full_url, params=query_params)
+                request = requests.put(full_url, params=query_params, timeout=HTTP_RESPONSE_TIMEOUT)
             else:
-                request = requests.put(full_url, data=body, params=query_params)
+                request = requests.put(full_url, data=body, params=query_params,
+                                       timeout=HTTP_RESPONSE_TIMEOUT)
         elif method == HTTP_METHOD_GET:
-            request = requests.get(full_url, params=query_params)
+            request = requests.get(full_url, params=query_params, timeout=HTTP_RESPONSE_TIMEOUT)
             if request.status_code == 502:
                 raise requests.exceptions.ConnectionError('Bad Gateway 502')
         elif method == HTTP_METHOD_DELETE:
             if body == '':
-                request = requests.delete(full_url, params=query_params)
+                request = requests.delete(full_url, params=query_params,
+                                          timeout=HTTP_RESPONSE_TIMEOUT)
             else:
-                request = requests.delete(full_url, data=body, params=query_params)
+                request = requests.delete(full_url, data=body, params=query_params,
+                                          timeout=HTTP_RESPONSE_TIMEOUT)
         js = ''
         if request.content:
             if request.status_code == 200:

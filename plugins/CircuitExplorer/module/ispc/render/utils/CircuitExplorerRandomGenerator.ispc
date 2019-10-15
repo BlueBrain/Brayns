@@ -40,7 +40,9 @@ inline float getRandomValue(const varying ScreenSample&, const int)
 {
     if (!seedInitialized && programIndex == 0)
     {
-        seed_rng(&rngState, programIndex);
+        float seed;
+        rdrand(&seed);
+        seed_rng(&rngState, seed);
         seedInitialized = true;
     }
 
