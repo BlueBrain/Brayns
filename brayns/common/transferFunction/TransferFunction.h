@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <brayns/common/BaseObject.h>
 #include <brayns/common/types.h>
 
 SERIALIZATION_ACCESS(TransferFunction)
@@ -73,4 +72,4 @@ private:
 
     SERIALIZATION_FRIEND(TransferFunction)
 };
-}
+} // namespace brayns

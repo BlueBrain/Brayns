@@ -21,15 +21,6 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#define SERIALIZATION_ACCESS(type)            \
-    namespace staticjson                      \
-    {                                         \
-    class ObjectHandler;                      \
-    void init(brayns::type*, ObjectHandler*); \
-    }
-#define SERIALIZATION_FRIEND(type) \
-    friend void staticjson::init(type*, staticjson::ObjectHandler*);
-
 #include <brayns/common/mathTypes.h>
 #include <brayns/common/utils/enumUtils.h>
 
@@ -63,14 +54,6 @@ typedef std::vector<uint32_t> uint32_ts;
 typedef std::vector<int64_t> int64_ts;
 typedef std::vector<uint64_t> uint64_ts;
 typedef std::vector<size_t> size_ts;
-
-#ifdef __GNUC__
-#define BRAYNS_UNUSED __attribute__((unused))
-#else
-#define BRAYNS_UNUSED
-#endif
-
-#define BRAYNS_UNUSED_VAR(x) (void)x;
 
 namespace brayns
 {
