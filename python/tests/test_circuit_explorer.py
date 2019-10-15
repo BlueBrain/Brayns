@@ -38,7 +38,7 @@ def test_load_circuit():
          patch('rockets.Client.batch', new=mock_batch):
         app = brayns.Client('localhost:8200')
         ce = CircuitExplorer(app)
-        response = ce.load_circuit(path='/tmp/CircuitConfig', targets=['A', 'B'])
+        response = ce.load_circuit(path='/tmp/CircuitConfig', targets=['A', 'B'], gids=[1, 2])
         assert_equal(response, {'ok'})
 
 
