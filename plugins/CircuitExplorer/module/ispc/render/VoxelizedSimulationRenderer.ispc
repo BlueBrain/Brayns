@@ -90,7 +90,7 @@ inline vec3f VoxelizedSimulationRenderer_shadeRay(
         previousMaterial = material;
 
         // Next ray
-        ray.t0 = ray.t + dg.epsilon;
+        ray.t0 = max(0.f, ray.t + dg.epsilon);
         ray.t = inf;
         ray.primID = -1;
         ray.geomID = -1;

@@ -112,7 +112,7 @@ inline bool launchRandomRay(
     Ray randomRay;
     randomRay.org = intersection;
     randomRay.dir = randomDirection;
-    randomRay.t0 = geometry.epsilon;
+    randomRay.t0 = max(0.f, geometry.epsilon);
     randomRay.t = self->giDistance;
     randomRay.time = inf;
     randomRay.primID = -1;
@@ -243,7 +243,7 @@ inline float getVolumeShadowContributions(
 
     Ray lightRay = ray;
     lightRay.t = inf;
-    lightRay.t0 = epsilon;
+    lightRay.t0 = max(0.f, epsilon);
     lightRay.org = point;
     lightRay.geomID = -1;
 
@@ -437,7 +437,7 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
         Ray shadowRay;
         shadowRay.org = dg.P;
         shadowRay.dir = ld;
-        shadowRay.t0 = attributes.self->epsilonFactor * dg.epsilon;
+        shadowRay.t0 = max(0.f, attributes.self->epsilonFactor * dg.epsilon);
         shadowRay.t = attributes.self->giDistance;
         shadowRay.time = inf;
         shadowRay.geomID = -1;
@@ -486,7 +486,7 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
                 shadowIntensity += opacity;
             }
 
-            shadowRay.t0 = shadowRay.t + shadowingGeometry.epsilon;
+            shadowRay.t0 = max(0.f, shadowRay.t + shadowingGeometry.epsilon);
             shadowRay.t = inf;
             shadowRay.primID = -1;
             shadowRay.geomID = -1;
@@ -496,7 +496,7 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
 
         // Volume shadows
         shadowRay.org = dg.P;
-        shadowRay.t0 = dg.epsilon;
+        shadowRay.t0 = max(0.f, dg.epsilon);
 
         for (uniform uint32 i = 0;
              shadowIntensity < 1.f &&
@@ -1055,10 +1055,8 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
             }
 
             if (discardIntersection)
-            {
                 // Continue along the same ray
-                ray.t0 = ray.t + self->epsilonFactor * dg.epsilon;
-            }
+                ray.t0 = max(0.f, ray.t + self->epsilonFactor * dg.epsilon);
             else
             {
                 // Compute indirect lighting contribution
@@ -1124,7 +1122,7 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
 
                 // Prepare next ray
                 ray.org = dg.P + ray.dir * self->epsilonFactor * dg.epsilon;
-                ray.t0 = self->epsilonFactor * dg.epsilon;
+                ray.t0 = max(0.f, self->epsilonFactor * dg.epsilon);
                 ++depth;
             }
 

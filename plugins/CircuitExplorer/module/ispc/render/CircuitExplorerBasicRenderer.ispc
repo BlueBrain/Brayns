@@ -164,7 +164,7 @@ inline vec3f CircuitExplorerBasicRenderer_shadeRay(
 
         // Next ray
         ray.org = intersection;
-        ray.t0 = dg.epsilon;
+        ray.t0 = max(0.f, dg.epsilon);
         ray.t = inf;
 
         ray.primID = -1;
