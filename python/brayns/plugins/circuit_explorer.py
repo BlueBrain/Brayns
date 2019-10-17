@@ -470,3 +470,29 @@ class CircuitExplorer:
 
         return self._client.request('get-export-frames-progress',
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+
+    def make_movie(self, output_movie_name, fps_rate, frames_folder_path, frame_name_format="%05d.png", dimensions=[1920,1080]):
+
+        """
+        Request to create a media video file from a set of frames
+
+        :param str output_movie_name: Full path to the media video to store the movie (it will be created if it does not exists). 
+        It must include extension, as it will be used to determine the codec to be used (By default it should be .mp4)
+        :param int fps_rate: Desired frame rate in the video
+        :param str frames_folder_path: Path to the folder containing the frames to be used to create the video
+        :param str frame_name_format: Format expression of the name of the frames to be used (By default, if the images are 
+        stored in png format, it should be %05d.png)
+        :param list dimensions: Desired width and height of the video to be created
+        : return: Result of the request submission
+        :rtype: str
+        """
+        params = dict()
+        params['dimensions'] = dimensions
+        params['framesFolderPath'] = frames_folder_path
+        params['frameNameFormat'] = frame_name_format
+        params['fpsRate'] = fps_rate
+        params['outputMovieName'] = output_movie_name
+
+        return self._client.request('make-movie', params,
+                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+

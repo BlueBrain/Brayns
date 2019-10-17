@@ -92,6 +92,14 @@ def mock_plugin_ce_export_frames_to_disk(path, animation_frames, camera_definiti
 def mock_plugin_ce_cancel_frames_export():
     return RESPONSE_OK
 
+def mock_plugin_ce_get_export_frames_progress():
+    return {
+        'frameNumber': 0,
+        'done' : False
+    }
+
+def mock_plugin_ce_make_movie():
+    return RESPONSE_OK
 
 def mock_plugin_ce_add_grid(min_value, max_value, interval, radius, opacity, show_axis, colored):
     return RESPONSE_OK
@@ -121,5 +129,9 @@ def mock_ce_rpc_request(self, method, params=None, response_timeout=None):
     if method == 'export-frames-to-disk':
         return RESPONSE_OK
     if method == 'cancel-frames-export':
+        return RESPONSE_OK
+    if method == 'get-export-frames-progress':
+        return RESPONSE_OK
+    if method == 'make-movie':
         return RESPONSE_OK
     return None

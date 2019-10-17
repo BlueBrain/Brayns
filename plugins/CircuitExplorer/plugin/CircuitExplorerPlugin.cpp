@@ -957,6 +957,18 @@ void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
     PLUGIN_INFO << "Creating movie with " << command << std::endl;
 
     system(command.c_str());
+
+    unsigned long dotPos = params.frameNameFormat.find_first_of('.');
+
+    if(dotPos == params.frameNameFormat.npos)
+    {
+        throw std::runtime_error("_makeMovie: The frame name format does not include file extension");
+    }
+
+    std::string extension = params.frameNameFormat.substr(dotPos, params.frameNameFormat.size());
+
+    const std::string cleanUpCmd = "ls -d "+ params.framesFolderPath +"/* | grep -P \"[0-9]{5}" + extension + "\" | xargs -d\"\\n\" rm";
+    system(cleanUpCmd.c_str());
 }
 
 void CircuitExplorerPlugin::_addGrid(const AddGrid& payload)

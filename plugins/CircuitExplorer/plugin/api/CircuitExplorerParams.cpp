@@ -488,8 +488,6 @@ bool from_json(MakeMovieParameters& movieParams, const std::string& payload)
         FROM_JSON(movieParams, json, frameNameFormat);
         FROM_JSON(movieParams, json, framesFolderPath);
         FROM_JSON(movieParams, json, fpsRate);
-        FROM_JSON(movieParams, json, frameStart);
-        FROM_JSON(movieParams, json, frameEnd);
         FROM_JSON(movieParams, json, outputMovieName);
     }
     catch (...)

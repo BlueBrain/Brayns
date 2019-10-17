@@ -281,8 +281,6 @@ struct MakeMovieParameters
     std::string framesFolderPath;
     std::string frameNameFormat;
     uint32_t fpsRate;
-    uint32_t frameStart;
-    uint32_t frameEnd;
     std::string outputMovieName;
 };
 
