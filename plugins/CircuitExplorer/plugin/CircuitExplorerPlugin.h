@@ -71,6 +71,7 @@ private:
     void _exportFramesToDisk(const ExportFramesToDisk& payload);
     void _doExportFrameToDisk();
     FrameExportProgress _getFrameExportProgress();
+    void _makeMovie(const MakeMovieParameters& params);
 
     // Predefined models
     void _addGrid(const AddGrid& payload);

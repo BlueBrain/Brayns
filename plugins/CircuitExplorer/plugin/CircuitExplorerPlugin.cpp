@@ -330,6 +330,12 @@ void CircuitExplorerPlugin::init()
                 return _getFrameExportProgress();
             });
 
+        PLUGIN_INFO << "Registering 'make-movie' endpoint" << std::endl;
+        actionInterface->registerNotification<MakeMovieParameters>(
+             "make-movie", [&](const MakeMovieParameters& params) {
+                _makeMovie(params);
+            });
+
         PLUGIN_INFO << "Registering 'add-grid' endpoint" << std::endl;
         _api->getActionInterface()->registerNotification<AddGrid>(
             "add-grid", [&](const AddGrid& payload) { _addGrid(payload); });
@@ -903,6 +909,54 @@ FrameExportProgress CircuitExplorerPlugin::_getFrameExportProgress()
     result.frameNumber = _frameNumber;
     result.done = !_exportFramesToDiskDirty;
     return result;
+}
+
+void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
+{
+    std::vector<std::string> commandTokens;
+    // ffmpeg command
+    commandTokens.emplace_back("ffmpeg");
+
+    // Force overwrite if output file exists
+    commandTokens.emplace_back("-y");
+
+    // Make ffmpeg quiet
+    commandTokens.emplace_back("-hide_banner -loglevel panic");
+
+    // frame rate
+    commandTokens.emplace_back("-r " + std::to_string(params.fpsRate));
+
+    // Input frames
+    const std::string framesFolder = params.framesFolderPath;
+    const std::string slash = framesFolder[framesFolder.length() - 1] == '/'? "" : "/";
+    commandTokens.emplace_back("-i " + framesFolder + slash + params.frameNameFormat);
+
+    // Filter
+    const std::string filter = "scale="
+                               +std::to_string(static_cast<int>(params.dimensions[0]))
+                               +":"
+                               +std::to_string(static_cast<int>(params.dimensions[1]))
+                               +",format=yuv420p";
+    commandTokens.emplace_back("-vf \""+filter+"\"");
+
+    // Quality
+    commandTokens.emplace_back("-crf 0");
+
+    // Codec
+    commandTokens.emplace_back("-codec:v libx264");
+
+    // Output file
+    commandTokens.emplace_back(params.outputMovieName);
+
+    std::string command = "";
+    for(const auto & token : commandTokens)
+    {
+        command += token + " ";
+    }
+
+    PLUGIN_INFO << "Creating movie with " << command << std::endl;
+
+    system(command.c_str());
 }
 
 void CircuitExplorerPlugin::_addGrid(const AddGrid& payload)

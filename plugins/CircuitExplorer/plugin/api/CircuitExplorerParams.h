@@ -33,15 +33,6 @@ struct Result
 
 std::string to_json(const Result& param);
 
-/** Progress of the last issued frame export operation */
-struct FrameExportProgress
-{
-    uint16_t frameNumber;
-    bool done;
-};
-
-std::string to_json(const FrameExportProgress& frameNumber);
-
 /** Save model to cache */
 struct SaveModelToCache
 {
@@ -274,6 +265,29 @@ struct ExportFramesToDisk
     std::vector<double> cameraInformation;
 };
 bool from_json(ExportFramesToDisk& param, const std::string& payload);
+
+/** Progress of the last issued frame export operation */
+struct FrameExportProgress
+{
+    uint16_t frameNumber;
+    bool done;
+};
+
+std::string to_json(const FrameExportProgress& frameNumber);
+
+struct MakeMovieParameters
+{
+    std::vector<uint16_t> dimensions;
+    std::string framesFolderPath;
+    std::string frameNameFormat;
+    uint32_t fpsRate;
+    uint32_t frameStart;
+    uint32_t frameEnd;
+    std::string outputMovieName;
+};
+
+bool from_json(MakeMovieParameters& movieParams, const std::string& payload);
+
 
 struct AddGrid
 {

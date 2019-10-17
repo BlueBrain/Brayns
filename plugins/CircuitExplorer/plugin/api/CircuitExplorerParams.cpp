@@ -59,22 +59,6 @@ std::string to_json(const Result& param)
     return "";
 }
 
-std::string to_json(const FrameExportProgress& frameExprtProg)
-{
-    try
-    {
-        nlohmann::json json;
-        TO_JSON(frameExprtProg, json, frameNumber);
-        TO_JSON(frameExprtProg, json, done);
-        return json.dump();
-    }
-    catch (...)
-    {
-        return "";
-    }
-    return "";
-}
-
 bool from_json(SaveModelToCache& param, const std::string& payload)
 {
     try
@@ -471,6 +455,42 @@ bool from_json(ExportFramesToDisk& param, const std::string& payload)
         FROM_JSON(param, js, startFrame);
         FROM_JSON(param, js, animationInformation);
         FROM_JSON(param, js, cameraInformation);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+std::string to_json(const FrameExportProgress& frameExprtProg)
+{
+    try
+    {
+        nlohmann::json json;
+        TO_JSON(frameExprtProg, json, frameNumber)
+        TO_JSON(frameExprtProg, json, done)
+        return json.dump();
+    }
+    catch (...)
+    {
+        return "";
+    }
+    return "";
+}
+
+bool from_json(MakeMovieParameters& movieParams, const std::string& payload)
+{
+    try
+    {
+        auto json = nlohmann::json::parse(payload);
+        FROM_JSON(movieParams, json, dimensions);
+        FROM_JSON(movieParams, json, frameNameFormat);
+        FROM_JSON(movieParams, json, framesFolderPath);
+        FROM_JSON(movieParams, json, fpsRate);
+        FROM_JSON(movieParams, json, frameStart);
+        FROM_JSON(movieParams, json, frameEnd);
+        FROM_JSON(movieParams, json, outputMovieName);
     }
     catch (...)
     {
