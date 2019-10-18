@@ -100,7 +100,8 @@ inline bool launchRandomRay(
     varying vec3f& randomDirection, const uint32 iteration)
 {
     randomDirection =
-        getRandomVector(self->super.super.super.fb->size.x, sample, normal,
+        getRandomVector(self->super.super.useHardwareRandomizer,
+                        self->super.super.super.fb->size.x, sample, normal,
                         iteration + self->randomNumber);
     backgroundColor = make_vec3f(0.f);
 
@@ -251,7 +252,8 @@ inline float getVolumeShadowContributions(
         lightRay.dir = normalize(
             lightSample.dir +
             self->softShadows *
-                getRandomVector(self->super.super.super.fb->size.x, sample,
+                getRandomVector(self->super.super.useHardwareRandomizer,
+                                self->super.super.super.fb->size.x, sample,
                                 lightSample.dir, self->randomNumber));
     else
         lightRay.dir = lightSample.dir;
@@ -307,7 +309,8 @@ inline vec4f getVolumeContribution(
             firstIntersection = t;
             ray.t = t;
             // Introduce a bit of randomness to smooth the shading
-            t += getRandomValue(sample, self->randomNumber) *
+            t += getRandomValue(self->super.super.useHardwareRandomizer, sample,
+                                self->randomNumber) *
                  ((t1 - t0) * 0.01f);
         }
 
@@ -427,6 +430,7 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
             ld = normalize(
                 ld + attributes.self->softShadows *
                          getRandomVector(
+                             attributes.self->super.super.useHardwareRandomizer,
                              attributes.self->super.super.super.fb->size.x,
                              sample, attributes.normal,
                              s + attributes.self->randomNumber));
@@ -611,7 +615,8 @@ inline void setGeometryShadingAttributes(
             attributes.glossiness = mat->glossiness;
             const vec3f randomNormal =
                 (1.f - mat->glossiness) *
-                getRandomVector(self->super.super.super.fb->size.x, sample,
+                getRandomVector(self->super.super.useHardwareRandomizer,
+                                self->super.super.super.fb->size.x, sample,
                                 attributes.normal, self->randomNumber);
             attributes.normal = normalize(attributes.normal + randomNormal);
         }
@@ -721,7 +726,8 @@ inline void processSimulationContribution(varying ScreenSample& sample,
     Ray colorRay;
     colorRay.org = attributes.origin;
     colorRay.dir =
-        getRandomVector(attributes.self->super.super.super.fb->size.x, sample,
+        getRandomVector(attributes.self->super.super.useHardwareRandomizer,
+                        attributes.self->super.super.super.fb->size.x, sample,
                         neg(attributes.normal), attributes.self->randomNumber);
     colorRay.t0 = 0.f;
     colorRay.time = inf;
@@ -1185,7 +1191,8 @@ export void CircuitExplorerAdvancedRenderer_set(
     const uniform float volumeAlphaCorrection, const uniform float exposure,
     const uniform float fogThickness, const uniform float fogStart,
     const uniform vec4f clipPlanes[], const uniform uint32 numClipPlanes,
-    const uniform uint32 maxBounces, const uniform float epsilonFactor)
+    const uniform uint32 maxBounces, const uniform float epsilonFactor,
+    const uniform bool useHardwareRandomizer)
 {
     uniform CircuitExplorerAdvancedRenderer* uniform self =
         (uniform CircuitExplorerAdvancedRenderer * uniform) _self;
@@ -1203,6 +1210,7 @@ export void CircuitExplorerAdvancedRenderer_set(
     self->super.super.timestamp = timestamp;
     self->super.super.maxBounces = maxBounces;
     self->super.super.exposure = exposure;
+    self->super.super.useHardwareRandomizer = useHardwareRandomizer;
 
     // Simulation
     self->super.secondaryModel = (uniform Model * uniform) secondaryModel;

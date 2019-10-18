@@ -102,6 +102,9 @@ void _addAdvancedSimulationRenderer(brayns::Engine& engine)
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
     properties.setProperty(
         {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
+    properties.setProperty({"useHardwareRandomizer",
+                            false,
+                            {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_advanced", properties);
 }
 
@@ -122,6 +125,9 @@ void _addBasicSimulationRenderer(brayns::Engine& engine)
     properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
     properties.setProperty(
         {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
+    properties.setProperty({"useHardwareRandomizer",
+                            false,
+                            {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_basic", properties);
 }
 
@@ -139,6 +145,9 @@ void _addVoxelizedSimulationRenderer(brayns::Engine& engine)
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
     properties.setProperty(
         {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
+    properties.setProperty({"useHardwareRandomizer",
+                            false,
+                            {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_voxelized_simulation", properties);
 }
 
@@ -159,6 +168,9 @@ void _addGrowthRenderer(brayns::Engine& engine)
     properties.setProperty({"softShadows", 0., 0., 1., {"Shadow softness"}});
     properties.setProperty(
         {"shadowDistance", 1e4, 0., 1e4, {"Shadow distance"}});
+    properties.setProperty({"useHardwareRandomizer",
+                            false,
+                            {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_cell_growth", properties);
 }
 
@@ -184,6 +196,9 @@ void _addProximityRenderer(brayns::Engine& engine)
     properties.setProperty(
         {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
     properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
+    properties.setProperty({"useHardwareRandomizer",
+                            false,
+                            {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_proximity_detection", properties);
 }
 

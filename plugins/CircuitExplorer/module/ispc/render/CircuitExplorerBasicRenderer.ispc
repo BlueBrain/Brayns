@@ -214,7 +214,7 @@ export void CircuitExplorerBasicRenderer_set(
     const uniform float alphaCorrection,
     const uniform float simulationThreshold, const uniform float exposure,
     const uniform float fogThickness, const uniform float fogStart,
-    const uniform uint32 maxBounces)
+    const uniform uint32 maxBounces, const uniform bool useHardwareRandomizer)
 {
     uniform CircuitExplorerBasicRenderer* uniform self =
         (uniform CircuitExplorerBasicRenderer * uniform) _self;
@@ -232,6 +232,7 @@ export void CircuitExplorerBasicRenderer_set(
     self->super.super.timestamp = 0.f;
     self->super.super.maxBounces = maxBounces;
     self->super.super.exposure = exposure;
+    self->super.super.useHardwareRandomizer = useHardwareRandomizer;
 
     // Simulation
     self->super.secondaryModel = (uniform Model * uniform) secondaryModel;

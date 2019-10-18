@@ -130,7 +130,7 @@ export void VoxelizedSimulationRenderer_set(
     const uniform float alphaCorrection,
     const uniform float simulationThreshold, const uniform float exposure,
     const uniform float fogThickness, const uniform float fogStart,
-    const uniform uint32 maxBounces)
+    const uniform uint32 maxBounces, const uniform bool useHardwareRandomizer)
 {
     uniform VoxelizedSimulationRenderer* uniform self =
         (uniform VoxelizedSimulationRenderer * uniform) _self;
@@ -148,6 +148,7 @@ export void VoxelizedSimulationRenderer_set(
     self->super.super.timestamp = 0.f;
     self->super.super.maxBounces = maxBounces;
     self->super.super.exposure = exposure;
+    self->super.super.useHardwareRandomizer = useHardwareRandomizer;
 
     // Simulation
     self->super.simulationData = (uniform float* uniform)simulationData;

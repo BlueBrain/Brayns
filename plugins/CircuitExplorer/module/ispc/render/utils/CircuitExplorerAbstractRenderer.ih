@@ -40,6 +40,9 @@ struct CircuitExplorerAbstractRenderer
 {
     Renderer super;
 
+    // System attributes
+    bool useHardwareRandomizer;
+
     // Rendering attributes
     const uniform Light* uniform* uniform lights;
     uint32 numLights;

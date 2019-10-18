@@ -82,7 +82,8 @@ inline vec3f ProximityDetectionRenderer_shadeRay(
 
         bool processSurfaceShading = true;
         varying vec3f ao_dir =
-            getRandomVector(self->super.super.fb->size.x, sample, normal,
+            getRandomVector(self->super.useHardwareRandomizer,
+                            self->super.super.fb->size.x, sample, normal,
                             self->randomNumber);
 
         Ray ao_ray;
@@ -236,7 +237,7 @@ export void ProximityDetectionRenderer_set(
     const uniform uint32 spp, const uniform bool surfaceShadingEnabled,
     void** uniform lights, uniform uint32 numLights,
     const uniform float alphaCorrection, const uniform uint32 maxBounces,
-    const uniform float exposure)
+    const uniform float exposure, const uniform bool useHardwareRandomizer)
 {
     uniform ProximityDetectionRenderer* uniform self =
         (uniform ProximityDetectionRenderer * uniform) _self;
@@ -252,6 +253,7 @@ export void ProximityDetectionRenderer_set(
     self->super.maxBounces = maxBounces;
     self->super.exposure = exposure;
     self->super.timestamp = timestamp;
+    self->super.useHardwareRandomizer = useHardwareRandomizer;
 
     // Proximity detection
     self->randomNumber = randomNumber;
