@@ -463,6 +463,41 @@ bool from_json(ExportFramesToDisk& param, const std::string& payload)
     return true;
 }
 
+std::string to_json(const FrameExportProgress& exportProgress)
+{
+    try
+    {
+        nlohmann::json json;
+        TO_JSON(exportProgress, json, frameNumber);
+        TO_JSON(exportProgress, json, done);
+        return json.dump();
+    }
+    catch(...)
+    {
+        return "";
+    }
+    return "";
+}
+
+bool from_json(MakeMovieParameters& movieParams, const std::string& payload)
+{
+    try
+    {
+        auto json = nlohmann::json::parse(payload);
+        FROM_JSON(movieParams, json, dimensions);
+        FROM_JSON(movieParams, json, framesFolderPath);
+        FROM_JSON(movieParams, json, framesFileExtension);
+        FROM_JSON(movieParams, json, fpsRate);
+        FROM_JSON(movieParams, json, outputMoviePath);
+        FROM_JSON(movieParams, json, eraseFrames);
+    }
+    catch(...)
+    {
+        return false;
+    }
+    return true;
+}
+
 bool from_json(AddGrid& param, const std::string& payload)
 {
     try

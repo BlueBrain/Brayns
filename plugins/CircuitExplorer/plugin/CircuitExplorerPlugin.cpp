@@ -51,7 +51,15 @@
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <brion/brion.h>
+
+#include <cstdio>
+#include <dirent.h>
 #include <fstream>
+#include <regex>
+#include <unistd.h>
+
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define REGISTER_LOADER(LOADER, FUNC) \
     registry.registerLoader({std::bind(&LOADER::getSupportedDataTypes), FUNC});
@@ -192,6 +200,32 @@ void _addPerspectiveCamera(brayns::Engine& engine)
     engine.addCameraType("circuit_explorer_perspective", properties);
 }
 
+std::string _sanitizeString(const std::string& input)
+{
+    static const std::vector<std::string> sanitetizeItems = {"\"", "\\", "'", ";", "&", "|", "`"};
+
+    std::string result = "";
+
+    for(size_t i = 0; i < input.size(); i++)
+    {
+        bool found = false;
+        for(const auto & token : sanitetizeItems)
+        {
+            if(std::string(1, input[i]) == token)
+            {
+                result += "\\" + token;
+                found = true;
+                break;
+            }
+        }
+        if(!found)
+        {
+            result += std::string(1, input[i]);
+        }
+    }
+    return result;
+}
+
 CircuitExplorerPlugin::CircuitExplorerPlugin()
     : ExtensionPlugin()
 {
@@ -327,6 +361,19 @@ void CircuitExplorerPlugin::init()
         _api->getActionInterface()->registerNotification<ExportFramesToDisk>(
             "export-frames-to-disk",
             [&](const ExportFramesToDisk& s) { _exportFramesToDisk(s); });
+
+        PLUGIN_INFO << "Registering 'get-export-frames-progress' endpoint"
+                    << std::endl;
+        actionInterface->registerRequest<FrameExportProgress>(
+            "get-export-frames-progress", [&](void) -> FrameExportProgress {
+                return _getFrameExportProgress();
+            });
+
+        PLUGIN_INFO << "Registering 'make-movie' endpoint" << std::endl;
+        actionInterface->registerNotification<MakeMovieParameters>(
+             "make-movie", [&](const MakeMovieParameters& params) {
+                _makeMovie(params);
+            });
 
         PLUGIN_INFO << "Registering 'add-grid' endpoint" << std::endl;
         _api->getActionInterface()->registerNotification<AddGrid>(
@@ -893,6 +940,119 @@ void CircuitExplorerPlugin::_doExportFrameToDisk()
     frameBuffer.clear();
 
     PLUGIN_INFO << "Frame saved to " << filename << std::endl;
+}
+
+FrameExportProgress CircuitExplorerPlugin::_getFrameExportProgress()
+{
+    FrameExportProgress result;
+    result.frameNumber = _frameNumber;
+    result.done = !_exportFramesToDiskDirty;
+    return result;
+}
+
+void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
+{
+    //static const std::string root = "/gpfs/bbp.cscs.ch/project";
+
+    // Find ffmpeg executable path
+    std::array<char, 256> buffer;
+    std::string ffmpegPath;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen("which ffmpeg", "r"), pclose);
+    if (!pipe) {
+        PLUGIN_ERROR << "Could not launch movie creation: ffmpeg not found" << std::endl;
+        return;
+    }
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+        ffmpegPath += buffer.data();
+    }
+
+    // Remove new lines
+    size_t pos = std::string::npos;
+    do
+    {
+        pos = ffmpegPath.find("\n");
+        if(pos != std::string::npos)
+        {
+            ffmpegPath.replace(pos, pos + 2, "");
+        }
+    } while(pos != std::string::npos);
+
+    // Get sanitetized string inputs
+    std::string sanitizedFramesFolder = params.framesFolderPath;
+    const std::string slash = sanitizedFramesFolder[sanitizedFramesFolder.length() - 1] == '/'? "" : "/";
+
+    std::string sanitizedFramesExt = params.framesFileExtension;
+    std::string sanitizedOutputPath = params.outputMoviePath;
+
+    sanitizedFramesFolder = _sanitizeString(sanitizedFramesFolder);
+    sanitizedFramesExt = _sanitizeString(sanitizedFramesExt);
+    sanitizedOutputPath = _sanitizeString(sanitizedOutputPath);
+
+    const std::string inputParam = sanitizedFramesFolder+slash+"%05d."+sanitizedFramesExt;
+    const std::string filterParam = "scale="
+                                    +std::to_string(static_cast<int>(params.dimensions[0]))
+                                    +":"
+                                    +std::to_string(static_cast<int>(params.dimensions[1]))
+                                    +",format=yuv420p";
+    const pid_t pid = fork();
+
+    if(pid == 0)
+    {
+        execl(ffmpegPath.c_str(),
+              "ffmpeg",
+              "-y",
+              "-hide_banner",
+              "-loglevel",
+              "0",
+              "-r",
+              std::to_string(params.fpsRate).c_str(),
+              "-i",
+              inputParam.c_str(),
+              "-vf",
+              filterParam.c_str(),
+              "-crf",
+              "0",
+              "-codec:v",
+              "libx264",
+              sanitizedOutputPath.c_str(),
+              static_cast<char*>(nullptr));
+    }
+    else
+    {
+        int status = 0;
+        wait(&status);
+        if(status != 0)
+        {
+            // If we could not make the movie, inform and stop execution
+            PLUGIN_ERROR << "Could not create media video file. FFMPEG returned with error " << status << std::endl;
+            return;
+        }
+    }
+
+    if(params.eraseFrames)
+    {
+        DIR *dir;
+        struct dirent *ent;
+        const std::regex fileNameRegex ("[0-9]{5}." + params.framesFileExtension);
+        if ((dir = opendir (params.framesFolderPath.c_str())) != nullptr)
+        {
+          while ((ent = readdir (dir)) != nullptr)
+          {
+            std::string fileName(ent->d_name);
+            if(std::regex_match(fileName, fileNameRegex))
+            {
+                const std::string fullPath = sanitizedFramesFolder + slash + fileName;
+                PLUGIN_INFO << "Cleaning frame " << fullPath << std::endl;
+                remove(fullPath.c_str());
+            }
+          }
+          closedir (dir);
+        }
+        else
+        {
+          PLUGIN_ERROR << "make-movie: Could not clean up frames" << std::endl;
+        }
+    }
 }
 
 void CircuitExplorerPlugin::_addGrid(const AddGrid& payload)

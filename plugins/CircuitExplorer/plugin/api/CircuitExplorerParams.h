@@ -266,6 +266,24 @@ struct ExportFramesToDisk
 };
 bool from_json(ExportFramesToDisk& param, const std::string& payload);
 
+struct FrameExportProgress
+{
+    uint16_t frameNumber;
+    bool done;
+};
+std::string to_json(const FrameExportProgress& exportProgress);
+
+struct MakeMovieParameters
+{
+    std::vector<uint16_t> dimensions;
+    std::string framesFolderPath;
+    std::string framesFileExtension;
+    uint32_t fpsRate;
+    std::string outputMoviePath;
+    bool eraseFrames;
+};
+bool from_json(MakeMovieParameters& movieParams, const std::string& payload);
+
 struct AddGrid
 {
     float minValue;

@@ -447,6 +447,47 @@ class CircuitExplorer:
         return self._client.request('export-frames-to-disk', params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
+    def get_export_frames_progress(self):
+
+        """
+        Queries the progress of the last export of frames to disk request
+
+        :return: Dictionary with the result: "frameNumber" with the number of
+        the last written-to-disk frame, and "done", a boolean flag stating wether
+        the exporting is finished or is still in progress
+        :rtype: dict
+        """
+
+
+        return self._client.request('get-export-frames-progress',
+                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+
+    def make_movie(self, output_movie_path, fps_rate, frames_folder_path, frame_file_extension="png", dimensions=[1920,1080], erase_frames=True):
+
+        """
+        Request to create a media video file from a set of frames
+
+        :param str output_movie_name: Full path to the media video to store the movie (it will be created if it does not exists).
+        It must include extension, as it will be used to determine the codec to be used (By default it should be .mp4)
+        :param int fps_rate: Desired frame rate in the video
+        :param str frames_folder_path: Path to the folder containing the frames to be used to create the video
+        :param str frame_name_format: Format expression of the name of the frames to be used (By default, if the images are
+        stored in png format, it should be %05d.png)
+        :param list dimensions: Desired width and height of the video to be created
+        : return: Result of the request submission
+        :rtype: str
+        """
+        params = dict()
+        params['dimensions'] = dimensions
+        params['framesFolderPath'] = frames_folder_path
+        params['framesFileExtension'] = frame_file_extension
+        params['fpsRate'] = fps_rate
+        params['outputMoviePath'] = output_movie_path
+        params['eraseFrames'] = erase_frames
+
+        return self._client.request('make-movie', params,
+                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+
     def cancel_frames_export(self):
         """
         Cancel the exports of frames to disk
