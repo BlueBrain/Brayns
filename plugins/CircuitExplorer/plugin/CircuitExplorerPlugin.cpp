@@ -631,7 +631,7 @@ void CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
 MaterialIds CircuitExplorerPlugin::_getMaterialIds(const ModelId& modelId)
 {
     MaterialIds materialIds;
-    auto modelDescriptor = _api->getScene().getModel(modelId.id);
+    auto modelDescriptor = _api->getScene().getModel(modelId.modelId);
     if (modelDescriptor)
     {
         for (const auto& material : modelDescriptor->getModel().getMaterials())

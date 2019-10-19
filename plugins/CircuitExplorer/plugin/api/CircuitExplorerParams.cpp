@@ -131,7 +131,7 @@ bool from_json(ModelId& param, const std::string& payload)
     try
     {
         auto js = nlohmann::json::parse(payload);
-        FROM_JSON(param, js, id);
+        FROM_JSON(param, js, modelId);
     }
     catch (...)
     {

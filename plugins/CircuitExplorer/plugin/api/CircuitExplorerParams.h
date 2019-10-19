@@ -85,7 +85,7 @@ bool from_json(MaterialsDescriptor& materialsDescriptor,
 // Material IDs for a given model
 struct ModelId
 {
-    size_t id;
+    size_t modelId;
 };
 
 bool from_json(ModelId& modelId, const std::string& payload);
