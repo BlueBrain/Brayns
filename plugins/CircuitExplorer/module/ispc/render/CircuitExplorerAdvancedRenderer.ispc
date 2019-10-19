@@ -422,9 +422,7 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
 
     for (uint32 s = 0; s < nbSamples; ++s)
     {
-        float shadowIntensity = 0.f;
-
-        vec3f ld = lightDirection;
+        vec3f ld = neg(lightDirection);
         if (attributes.self->softShadows > 0.f)
             // Slightly alter light direction for Soft shadows
             ld = normalize(
@@ -443,13 +441,14 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
         shadowRay.dir = ld;
         shadowRay.t0 = max(0.f, attributes.self->epsilonFactor * dg.epsilon);
         shadowRay.t = attributes.self->giDistance;
-        shadowRay.time = inf;
+        shadowRay.time = ray.time;
         shadowRay.geomID = -1;
         shadowRay.primID = -1;
         shadowRay.instID = -1;
 
-        while (shadowIntensity < 1.f)
+        while (intensity < nbSamples)
         {
+            float epsilon = dg.epsilon;
             traceRay(attributes.self->super.super.super.model, shadowRay);
 
             if (shadowRay.geomID == -1)
@@ -458,18 +457,27 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
             DifferentialGeometry shadowingGeometry;
             postIntersect(attributes.self->super.super.super.model,
                           shadowingGeometry, shadowRay,
-                          DG_MATERIALID | DG_TEXCOORD | DG_COLOR);
+                          DG_NG | DG_NS | DG_NORMALIZE | DG_MATERIALID |
+                              DG_COLOR | DG_TEXCOORD);
 
-            if (!isClipped(attributes.self, shadowingGeometry.P))
+            epsilon = shadowingGeometry.epsilon;
+
+            uniform CircuitExplorerMaterial* objMaterial =
+                (uniform CircuitExplorerMaterial*)shadowingGeometry.material;
+
+            bool discardIntersection =
+                isClipped(attributes.self, shadowingGeometry.P);
+
+            if (discardIntersection && objMaterial)
+                foreach_unique(mat in objMaterial) discardIntersection =
+                    mat->clipped;
+
+            if (!discardIntersection)
             {
-                uniform CircuitExplorerMaterial* objMaterial =
-                    (uniform CircuitExplorerMaterial*)
-                        shadowingGeometry.material;
+                float opacity;
 
-                float opacity = 1.f;
-
-                if (objMaterial == 0)
-                    opacity = 1.f - shadowingGeometry.color.w;
+                if (!objMaterial)
+                    opacity = shadowingGeometry.color.w;
                 else
                     foreach_unique(mat in objMaterial)
                     {
@@ -483,37 +491,42 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
                         {
                             vec4f localDiffuseColor_map =
                                 get4f(mat->map_Kd, shadowingGeometry);
-                            opacity = 1.f - localDiffuseColor_map.w;
+                            opacity = localDiffuseColor_map.w;
                         }
                     }
 
-                shadowIntensity += opacity;
+                intensity += opacity;
             }
 
-            shadowRay.t0 = max(0.f, shadowRay.t + shadowingGeometry.epsilon);
-            shadowRay.t = inf;
+            shadowRay.t0 =
+                max(epsilon,
+                    shadowRay.t + attributes.self->epsilonFactor * epsilon);
+            shadowRay.t =
+                max(epsilon, attributes.self->giDistance - shadowRay.t0);
             shadowRay.primID = -1;
             shadowRay.geomID = -1;
             shadowRay.instID = -1;
         }
-        intensity += shadowIntensity;
 
-        // Volume shadows
-        shadowRay.org = dg.P;
-        shadowRay.t0 = max(0.f, dg.epsilon);
-
-        for (uniform uint32 i = 0;
-             shadowIntensity < 1.f &&
-             i < attributes.self->super.super.super.model->volumeCount;
-             ++i)
+        if (intensity < nbSamples)
         {
-            Volume* uniform volume =
-                attributes.self->super.super.super.model->volumes[i];
+            // Volume shadows
+            shadowRay.org = dg.P;
+            shadowRay.t0 =
+                max(0.f, attributes.self->epsilonFactor * dg.epsilon);
 
-            shadowIntensity +=
-                getVolumeShadowContribution(volume, attributes.self, shadowRay,
-                                            sample) *
-                attributes.self->shadows;
+            for (uniform uint32 i = 0;
+                 intensity < nbSamples &&
+                 i < attributes.self->super.super.super.model->volumeCount;
+                 ++i)
+            {
+                Volume* uniform volume =
+                    attributes.self->super.super.super.model->volumes[i];
+
+                intensity +=
+                    getVolumeShadowContribution(volume, attributes.self,
+                                                shadowRay, sample);
+            }
         }
     }
     intensity /= (float)nbSamples;
