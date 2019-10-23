@@ -45,6 +45,13 @@
 #include "ImageGenerator.h"
 #include "Throttle.h"
 
+#include <dirent.h>
+#include <fstream>
+#include <limits.h>
+#include <unistd.h>
+
+#include <sys/stat.h>
+
 #ifdef BRAYNS_USE_FFMPEG
 #include "encoder.h"
 #endif
@@ -114,6 +121,11 @@ const std::string METHOD_ADD_LIGHT_SPOT = "add-light-spot";
 const std::string METHOD_ADD_LIGHT_AMBIENT = "add-light-ambient";
 const std::string METHOD_REMOVE_LIGHTS = "remove-lights";
 const std::string METHOD_CLEAR_LIGHTS = "clear-lights";
+
+const std::string METHOD_FS_EXISTS = "fs-exists";
+const std::string METHOD_FS_GET_CONTENT = "fs-get-content";
+const std::string METHOD_FS_GET_ROOT = "fs-get-root";
+const std::string METHOD_FS_LIST_DIR = "fs-list-dir";
 
 // JSONRPC notifications
 const std::string METHOD_CHUNK = "chunk";
@@ -1012,6 +1024,11 @@ public:
         _handleRemoveLights();
         _handleClearLights();
 
+        _handleFsExists();
+        _handleFsGetContent();
+        _handleFsGetRoot();
+        _handleFsGetListDir();
+
         _endpointsRegistered = true;
     }
 
@@ -1580,6 +1597,238 @@ public:
             auto& lightManager = engine.getScene().getLightManager();
             lightManager.clearLights();
             engine.triggerRender();
+        });
+    }
+
+    FileStats _getFileStats(const std::string& path)
+    {
+        FileStats ft;
+        ft.type = "none";
+        ft.error = 0;
+        ft.sizeBytes = 0;
+
+        // Make sure the requested file is within the sandbox path
+        // TODO: Unhardcode sandbox path and add as braynsService input param
+        size_t pos = path.find("/gpfs/bbp.cscs.ch/project");
+        if(pos != 0)
+        {
+            ft.error = 1;
+            ft.message = "Path falls outside the sandbox: /gpfs/bbp.cscs.ch/project";
+            return ft;
+        }
+
+        struct stat s;
+        int err = stat(path.c_str(), &s);
+        if(err == 0)
+        {
+            // Path is a regular file
+            if( s.st_mode & S_IFREG )
+            {
+                // Test permissions with fopen
+                FILE* permissionTest = fopen(path.c_str(), "r");
+                int openError = errno;
+                if(permissionTest != nullptr)
+                    fclose(permissionTest);
+                if(openError == EACCES)
+                {
+                    ft.error = 2;
+                    ft.message = "Permission for " + path + " denied";
+                    return ft;
+                }
+
+                // If we reached this point, file is accessible
+                ft.type = "file";
+                ft.sizeBytes = s.st_size;
+            }
+            // Path is a folder
+            else if( s.st_mode & S_IFDIR )
+            {
+                // Test permissions with access
+                if(access(path.c_str(), X_OK) < 0)
+                {
+                    if(errno == EACCES)
+                    {
+                        ft.error = 2;
+                        ft.message = "Permission for " + path + " denied";
+                        return ft;
+                    }
+                    else
+                    {
+                        ft.error = 3;
+                        ft.message = "Unknown error";
+                        return ft;
+                    }
+                }
+
+                // If we reached this point, folder is accessible
+                ft.type = "directory";
+            }
+            else
+            {
+                ft.message = "Unknown type of element";
+            }
+        }
+        else if(err > 0)
+        {
+            if(err == EACCES)
+            {
+                ft.error = 2;
+                ft.message = "Permission for " + path + " denied";
+            }
+            else
+            {
+                ft.error = 3;
+                ft.message = "Unknown error";
+            }
+        }
+
+        return ft;
+    }
+
+    void _handleFsExists()
+    {
+        const RpcParameterDescription desc{METHOD_FS_EXISTS,
+                                           "Return the type of filer (file or folder) if a given path exists, or none if it does not exists",
+                                           "path", "Absolute path to the filer to check"};
+        _handleRPC<InputPath, FileType>(desc, [&](const auto& inputPath) {
+            this->_rebroadcast(METHOD_FS_EXISTS, to_json(inputPath),
+                               {_currentClientID});
+            FileStats fs = this->_getFileStats(inputPath.path);
+            FileType ft;
+            ft.type = fs.type;
+            ft.error = fs.error;
+            ft.message = fs.message;
+            return ft;
+        });
+    }
+
+    void _handleFsGetContent()
+    {
+        const RpcParameterDescription desc{METHOD_FS_GET_CONTENT,
+                                           "Return the content of a file if possible, or an error otherwise",
+                                           "path", "Absolute path to the file"};
+        _handleRPC<InputPath, FileContent>(desc, [&](const auto& inputPath) {
+            this->_rebroadcast(METHOD_FS_GET_CONTENT, to_json(inputPath),
+                               {_currentClientID});
+            // Stat the requested file
+            FileStats ft = this->_getFileStats(inputPath.path);
+            FileContent fc;
+
+            fc.error = ft.error;
+            fc.message = ft.message;
+
+            // Continue only if its accessible and its a file
+            if(fc.error == 0 && ft.type == "file")
+            {
+                std::ifstream file(inputPath.path);
+                if(file)
+                {
+                    // Read file
+                    file.seekg(0, file.end);
+                    long len = file.tellg();
+                    file.seekg(0, file.beg);
+                    std::vector<char> buffer(static_cast<unsigned long>(len));
+                    file.read(&buffer[0], len);
+                    file.close();
+                    fc.content = std::string(buffer.begin(), buffer.end());
+                }
+                else
+                {
+                    fc.error = 3;
+                    fc.message = "An unknown error occurred when reading the file " + inputPath.path;
+                }
+            }
+
+            return fc;
+        });
+    }
+
+    void _handleFsGetRoot()
+    {
+        const RpcDescription desc{METHOD_FS_GET_ROOT,
+                                  "Return the root path of the current execution environment (sandbox)"};
+        _bindEndpoint(METHOD_FS_GET_ROOT, [&](const rockets::jsonrpc::Request&) {
+
+            FileRoot fr;
+            fr.root = "/gpfs/bbp.cscs.ch/project";
+
+            return Response{to_json(fr)};
+        });
+
+        _handleSchema(
+            METHOD_GET_LIGHTS,
+            buildJsonRpcSchemaRequestReturnOnly<FileRoot>(desc));
+    }
+
+    void _handleFsGetListDir()
+    {
+        const RpcParameterDescription desc{METHOD_FS_LIST_DIR,
+                                           "Return the content of a file if possible, or an error otherwise",
+                                           "path", "Absolute path to the file"};
+        _handleRPC<InputPath, DirectoryFileList>(desc, [&](const auto& inputPath) {
+            this->_rebroadcast(METHOD_FS_LIST_DIR, to_json(inputPath),
+                               {_currentClientID});
+
+            // Stat the requested path
+            FileStats ft = this->_getFileStats(inputPath.path);
+
+            DirectoryFileList dfl;
+            dfl.error = ft.error;
+            dfl.message = ft.message;
+
+            // Continue only if its a directory and is accessible
+            const bool isDirectory = ft.type == "directory";
+            if(ft.error == 0 && isDirectory)
+            {
+                DIR *dir;
+                struct dirent *ent;
+                if ((dir = opendir (inputPath.path.c_str())) != nullptr)
+                {
+                  // Iterate over each entry of the directory
+                  std::string slash = inputPath.path[inputPath.path.size() - 1] == '/'? "" : "/";
+                  while ((ent = readdir (dir)) != nullptr)
+                  {
+                    const std::string fileName(ent->d_name);
+
+                    // Discard dots
+                    if(fileName == "." || fileName == "..")
+                        continue;
+
+                    // Get file status to known if accessible, type, and size
+                    const std::string filePath = inputPath.path + slash + fileName;
+                    FileStats fileStats = this->_getFileStats(filePath);
+
+                    if(fileStats.error == 0)
+                    {
+                        if(fileStats.type == "directory")
+                        {
+                            dfl.dirs.push_back(fileName);
+                        }
+                        else if(fileStats.type == "file")
+                        {
+                            // Calc size in octets
+                            size_t totalBits = static_cast<size_t>(fileStats.sizeBytes) * static_cast<size_t>(CHAR_BIT);
+                            size_t totalOctets = totalBits / 8;
+                            dfl.files.names.push_back(fileName);
+                            dfl.files.sizes.push_back(totalOctets);
+                        }
+                    }
+                  }
+                  closedir (dir);
+                }
+                else
+                {
+                  dfl.error = 3;
+                  dfl.message = "Unknown error when reading contents of directory " + inputPath.path;
+                }
+            }
+            else if(!isDirectory)
+            {
+                dfl.error = 4;
+                dfl.message = "The path " + inputPath.path + " is not a directory";
+            }
+
+            return dfl;
         });
     }
 
