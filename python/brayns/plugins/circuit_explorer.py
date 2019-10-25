@@ -62,6 +62,11 @@ class CircuitExplorer:
     SHADING_MODE_PERLIN = 5
     SHADING_MODE_DIFFUSE_TRANSPARENCY = 6
 
+    # Clipping modes
+    CLIPPING_MODE_NONE = 0
+    CLIPPING_MODE_PLANE = 1
+    CLIPPING_MODE_SPHERE = 2
+
     # Simulation report types
     REPORT_TYPE_NONE = 'Undefined'
     REPORT_TYPE_VOLTAGES_FROM_FILE = 'Voltages from file'
@@ -216,7 +221,8 @@ class CircuitExplorer:
     def set_material(self, model_id, material_id, diffuse_color=(1.0, 1.0, 1.0),
                      specular_color=(1.0, 1.0, 1.0), specular_exponent=20.0, opacity=1.0,
                      reflection_index=0.0, refraction_index=1.0, simulation_data_cast=True,
-                     glossiness=1.0, shading_mode=SHADING_MODE_NONE, emission=0.0, clipped=False):
+                     glossiness=1.0, shading_mode=SHADING_MODE_NONE, emission=0.0,
+                     clipping_mode=CLIPPING_MODE_NONE):
         """
         Set a material on a specified model
 
@@ -234,7 +240,8 @@ class CircuitExplorer:
         SHADING_MODE_ELECTRON, SHADING_MODE_CARTOON, SHADING_MODE_ELECTRON_TRANSPARENCY,
         SHADING_MODE_PERLIN or SHADING_MODE_DIFFUSE_TRANSPARENCY)
         :param float emission: Light emission intensity
-        :param bool clipped: Clipped against clipping planes defined at the scene level
+        :param bool clipping_mode: Clipped against clipping planes/spheres defined at the scene
+        level
         :return: Result of the request submission
         :rtype: str
         """
@@ -251,7 +258,7 @@ class CircuitExplorer:
         params['glossiness'] = glossiness
         params['simulationDataCast'] = simulation_data_cast
         params['shadingMode'] = shading_mode
-        params['clipped'] = clipped
+        params['clippingMode'] = clipping_mode
 
         return self._client.request("set-material", params=params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
@@ -260,7 +267,7 @@ class CircuitExplorer:
     def set_materials(self, model_ids, material_ids, diffuse_colors, specular_colors,
                       specular_exponents=list(), opacities=list(), reflection_indices=list(),
                       refraction_indices=list(), simulation_data_casts=list(), glossinesses=list(),
-                      shading_modes=list(), emissions=list(), clips=list()):
+                      shading_modes=list(), emissions=list(), clipping_modes=list()):
         """
         Set a list of material on a specified list of models
 
@@ -278,8 +285,8 @@ class CircuitExplorer:
         SHADING_MODE_ELECTRON, SHADING_MODE_CARTOON, SHADING_MODE_ELECTRON_TRANSPARENCY,
         SHADING_MODE_PERLIN or SHADING_MODE_DIFFUSE_TRANSPARENCY)
         :param list emissions: List of light emission intensities
-        :param list clips: List of boolean values defining if materials should be clipped against
-        clipping planes defined at the scene level
+        :param list clipping mode: List of clipping modes defining if materials should be clipped
+        against clipping planes, spheres, etc, defined at the scene level
         :return: Result of the request submission
         :rtype: str
         """
@@ -307,7 +314,7 @@ class CircuitExplorer:
         params['glossinesses'] = glossinesses
         params['simulationDataCasts'] = simulation_data_casts
         params['shadingModes'] = shading_modes
-        params['clips'] = clips
+        params['clippingModes'] = clipping_modes
 
         return self._client.request("set-materials", params=params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)

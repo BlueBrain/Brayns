@@ -165,6 +165,8 @@ void AstrocyteLoader::_importMorphologiesFromURIs(
     materialProps.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 0});
     materialProps.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
                                static_cast<int>(MaterialShadingMode::diffuse)});
-    materialProps.setProperty({MATERIAL_PROPERTY_CLIPPED, 0});
+    materialProps.setProperty(
+        {MATERIAL_PROPERTY_CLIPPING_MODE,
+         static_cast<int>(MaterialClippingMode::no_clipping)});
     MorphologyLoader::createMissingMaterials(model, materialProps);
 }

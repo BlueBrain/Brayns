@@ -91,7 +91,7 @@ bool from_json(MaterialDescriptor& param, const std::string& payload)
         FROM_JSON(param, js, glossiness);
         FROM_JSON(param, js, simulationDataCast);
         FROM_JSON(param, js, shadingMode);
-        FROM_JSON(param, js, clipped);
+        FROM_JSON(param, js, clippingMode);
     }
     catch (...)
     {
@@ -117,7 +117,7 @@ bool from_json(MaterialsDescriptor& param, const std::string& payload)
         FROM_JSON(param, js, glossinesses);
         FROM_JSON(param, js, simulationDataCasts);
         FROM_JSON(param, js, shadingModes);
-        FROM_JSON(param, js, clips);
+        FROM_JSON(param, js, clippingModes);
     }
     catch (...)
     {

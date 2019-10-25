@@ -33,4 +33,11 @@ enum MaterialShadingMode
     diffuse_transparency = 6,
 };
 
+enum MaterialClippingMode
+{
+    no_clipping = 0,
+    plane = 1,
+    sphere = 2
+};
+
 #endif // COMMONTYPES_H

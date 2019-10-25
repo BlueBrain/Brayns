@@ -85,7 +85,9 @@ void CircuitExplorerMaterial::commit()
         getParam1i("shading_mode",
                    static_cast<int>(MaterialShadingMode::none)));
     // Clipped
-    clipped = getParam1i("clipped", 0);
+    clippingMode = static_cast<MaterialClippingMode>(
+        getParam1i("clipping_mode",
+                   static_cast<int>(MaterialClippingMode::no_clipping)));
 
     ispc::CircuitExplorerMaterial_set(
         getIE(), map_d ? map_d->getIE() : nullptr,
@@ -104,7 +106,8 @@ void CircuitExplorerMaterial::commit()
         map_Bump ? map_Bump->getIE() : nullptr,
         (const ispc::AffineSpace2f&)xform_Bump,
         (const ispc::LinearSpace2f&)rot_Bump,
-        (const ispc::MaterialShadingMode&)shadingMode, clipped);
+        (const ispc::MaterialShadingMode&)shadingMode,
+        (const ispc::MaterialClippingMode&)clippingMode);
 }
 
 OSP_REGISTER_MATERIAL(circuit_explorer_basic, CircuitExplorerMaterial, default);

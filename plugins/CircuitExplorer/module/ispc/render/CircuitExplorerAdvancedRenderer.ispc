@@ -65,7 +65,7 @@ struct ShadingAttributes
     float lightEmissionIntensity;
     float shadowIntensity;
     bool castSimulationData;
-    bool clipped;
+    MaterialClippingMode clippingMode;
     MaterialShadingMode shadingMode;
     vec3f simulationColor;
     float simulationIntensity;
@@ -78,16 +78,27 @@ struct ShadingAttributes
 };
 
 bool isClipped(const uniform CircuitExplorerAdvancedRenderer* uniform self,
-               const varying vec3f& position)
+               const varying vec3f& position,
+               const MaterialClippingMode clippingMode)
 {
     bool visible = true;
     for (uint32 i = 0; i < self->numClipPlanes && visible; ++i)
     {
-        const vec3f normal = {self->clipPlanes[i].x, self->clipPlanes[i].y,
-                              self->clipPlanes[i].z};
-        const float d = self->clipPlanes[i].w;
-        const float distance = dot(normal, position) + d;
-        visible &= (distance > 0.f);
+        if (clippingMode == plane)
+        {
+            const vec3f normal = {self->clipPlanes[i].x, self->clipPlanes[i].y,
+                                  self->clipPlanes[i].z};
+            const float d = self->clipPlanes[i].w;
+            const float distance = dot(normal, position) + d;
+            visible &= (distance > 0.f);
+        }
+        else if (clippingMode == sphere)
+        {
+            const vec3f center = {self->clipPlanes[i].x, self->clipPlanes[i].y,
+                                  self->clipPlanes[i].z};
+            const float radius = self->clipPlanes[i].w;
+            visible &= length(center - position) < radius;
+        }
     }
     return !visible;
 }
@@ -218,7 +229,7 @@ inline float getVolumeShadowContribution(
     for (float t = t1; t > epsilon && shadowIntensity < 1.f; t -= epsilon)
     {
         const vec3f point = ray.org + ray.dir * t;
-        if (isClipped(self, point))
+        if (isClipped(self, point, plane))
             continue;
         const float sample = volume->sample(volume, point);
 
@@ -460,7 +471,8 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
                           shadowingGeometry, shadowRay,
                           DG_MATERIALID | DG_TEXCOORD | DG_COLOR);
 
-            if (!isClipped(attributes.self, shadowingGeometry.P))
+            if (!isClipped(attributes.self, shadowingGeometry.P,
+                           attributes.clippingMode))
             {
                 uniform CircuitExplorerMaterial* objMaterial =
                     (uniform CircuitExplorerMaterial*)
@@ -537,7 +549,7 @@ inline void initializeShadingAttributes(
     attributes.simulationIntensity = 0.f;
 
     // Clipping planes
-    attributes.clipped = false;
+    attributes.clippingMode = no_clipping;
 
     // Indirect light contribution
     attributes.indirectColor = make_vec3f(0.f);
@@ -682,7 +694,7 @@ inline void setGeometryShadingAttributes(
         attributes.shadingMode = mat->shadingMode;
 
         // Clipping planes
-        attributes.clipped = mat->clipped;
+        attributes.clippingMode = mat->clippingMode;
     }
 
     // Update reflected shading normal
@@ -1044,7 +1056,8 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
             // Initialize geometry shading attributes
             setGeometryShadingAttributes(self, dg, sample, ray, attributes);
 
-            if (attributes.clipped && isClipped(self, dg.P))
+            if (attributes.clippingMode != no_clipping &&
+                isClipped(self, dg.P, attributes.clippingMode))
                 // Geometry is clipped, discard intersection
                 discardIntersection = true;
             else

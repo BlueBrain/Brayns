@@ -85,7 +85,7 @@ struct CircuitExplorerMaterial : public ospray::Material
 
     /*! If enabled, geometry intersection is discarded if outside of scene
      * clipping planes */
-    bool clipped;
+    MaterialClippingMode clippingMode;
 
     std::string toString() const final { return "default_material"; }
     void commit() final;

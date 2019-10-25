@@ -492,7 +492,9 @@ void CircuitExplorerPlugin::_setMaterialExtraAttributes(
                 props.setProperty(
                     {MATERIAL_PROPERTY_SHADING_MODE,
                      static_cast<int>(MaterialShadingMode::diffuse)});
-                props.setProperty({MATERIAL_PROPERTY_CLIPPED, 0});
+                props.setProperty(
+                    {MATERIAL_PROPERTY_CLIPPING_MODE,
+                     static_cast<int>(MaterialClippingMode::no_clipping)});
                 material.second->updateProperties(props);
             }
         }
@@ -532,8 +534,8 @@ void CircuitExplorerPlugin::_setMaterial(const MaterialDescriptor& md)
                                          md.simulationDataCast ? 1 : 0);
                 material->updateProperty(MATERIAL_PROPERTY_SHADING_MODE,
                                          md.shadingMode);
-                material->updateProperty(MATERIAL_PROPERTY_CLIPPED,
-                                         md.clipped ? 1 : 0);
+                material->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE,
+                                         md.clippingMode);
                 material->markModified(); // This is needed to apply
                                           // propery modifications
                 material->commit();
@@ -606,9 +608,10 @@ void CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
                             material->updateProperty(
                                 MATERIAL_PROPERTY_SHADING_MODE,
                                 md.shadingModes[id]);
-                        if (!md.clips.empty())
-                            material->updateProperty(MATERIAL_PROPERTY_CLIPPED,
-                                                     md.clips[id] ? 1 : 0);
+                        if (!md.clippingModes.empty())
+                            material->updateProperty(
+                                MATERIAL_PROPERTY_CLIPPING_MODE,
+                                md.clippingModes[id]);
                         material->markModified(); // This is needed to apply
                                                   // propery modifications
                         material->commit();
@@ -1354,6 +1357,8 @@ void CircuitExplorerPlugin::_addGrid(const AddGrid& payload)
     props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 0});
     props.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
                        static_cast<int>(MaterialShadingMode::none)});
+    props.setProperty({MATERIAL_PROPERTY_CLIPPING_MODE,
+                       static_cast<int>(MaterialClippingMode::no_clipping)});
 
     auto material = model->createMaterial(0, "x");
     material->setDiffuseColor(grey);
@@ -1471,6 +1476,8 @@ void CircuitExplorerPlugin::_addColumn(const AddColumn& payload)
     props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 0});
     props.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
                        static_cast<int>(MaterialShadingMode::diffuse)});
+    props.setProperty({MATERIAL_PROPERTY_CLIPPING_MODE,
+                       static_cast<int>(MaterialClippingMode::no_clipping)});
 
     auto material = model->createMaterial(0, "column");
     material->setDiffuseColor(white);
