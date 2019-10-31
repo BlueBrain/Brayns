@@ -90,6 +90,7 @@ public:
     }
 
     const std::string& getEnvMap() const { return _envMap; }
+    const std::string& getSandboxPath() const { return _sandBoxPath; }
     const strings& getInputPaths() const { return _inputPaths; }
     po::positional_options_description& posArgs() { return _positionalArgs; }
 protected:
@@ -108,6 +109,7 @@ protected:
     bool _dynamicLoadBalancer{false};
     bool _useVideoStreaming{false};
     std::string _envMap;
+    std::string _sandBoxPath;
 
     strings _inputPaths;
 
