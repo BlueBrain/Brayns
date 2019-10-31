@@ -17,6 +17,10 @@ endif()
 
 set(BRAYNS_LICENSE LGPL)
 set(BRAYNS_DESCRIPTION "Hardware Agnostic Ray-Tracer")
+set(BRAYNS_MAINTAINER_NAME "Blue Brain Project")
+set(BRAYNS_MAINTAINER_EMAIL "<bbp-open-source@googlegroups.com>")
+set(BRAYNS_MAINTAINER "${BRAYNS_MAINTAINER_NAME} ${BRAYNS_MAINTAINER_EMAIL}")
+
 set(BRAYNS_PORT_DEPEND "assimp boost freeimage glew tbb")
 
 # Unit testing
