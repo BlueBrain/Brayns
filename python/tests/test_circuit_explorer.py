@@ -167,6 +167,32 @@ def test_export_frames_to_disk():
             camera_definitions=[[(0.0, 0.0, 0.0), (0.0, 0.0, 1.0), (0.0, 1.0, 0.0), 0.0, 100.0]])
         assert_equal(response, {'ok'})
 
+def test_get_export_frames_progress():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.get_export_frames_progress()
+        assert_equal(response, {'ok'})
+
+def test_make_movie():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.make_movie(
+            output_movie_path='/tmp',
+            fps_rate=0,
+            frames_folder_path='/tmp',
+            erase_frames=False)
+        assert_equal(response, {'ok'})
+
 
 def test_cancel_frames_export():
     with patch('rockets.AsyncClient.connected', new=mock_connected), \

@@ -88,6 +88,14 @@ def mock_plugin_ce_get_camera():
 def mock_plugin_ce_export_frames_to_disk(path, animation_frames, camera_definitions):
     return RESPONSE_OK
 
+def mock_plugin_ce_get_export_frames_progress():
+    return {
+        'frameNumber': 0,
+        'done': False
+    }
+
+def mock_plugin_ce_make_movie(output_movie_path, fps_rate, frames_folder_path):
+    return RESPONSE_OK
 
 def mock_plugin_ce_cancel_frames_export():
     return RESPONSE_OK
@@ -119,6 +127,10 @@ def mock_ce_rpc_request(self, method, params=None, response_timeout=None):
     if method == 'get-odu-camera':
         return RESPONSE_OK
     if method == 'export-frames-to-disk':
+        return RESPONSE_OK
+    if method == 'get-export-frames-progress':
+        return RESPONSE_OK
+    if method == 'make-movie':
         return RESPONSE_OK
     if method == 'cancel-frames-export':
         return RESPONSE_OK
