@@ -132,7 +132,7 @@ void DTIPlugin::_updateStreamlines(const StreamlinesDescriptor &streamlines)
         }
         const auto colors =
             DTILoader::getColorsFromPoints(points, streamlines.opacity,
-                                           ColorScheme::by_normal);
+                                           streamlines.colorScheme);
 
         brayns::Streamline streamline(points, colors, radii);
         model->addStreamline(materialId, streamline);

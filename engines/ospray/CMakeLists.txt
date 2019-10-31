@@ -94,7 +94,7 @@ set_source_files_properties(
     PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations)
 
 set(BRAYNSOSPRAYENGINE_LINK_LIBRARIES
-    PRIVATE braynsEngine braynsParameters ospray::ospray_common ospray::ospray
+    PRIVATE braynsEngine braynsParameters braynsCommon ospray::ospray_common ospray::ospray
     # Public linkage needed for transfer function test
     PUBLIC ospray::ospray_module_ispc
 )
