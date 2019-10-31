@@ -212,7 +212,7 @@ void _addDOFPerspectiveCamera(brayns::Engine& engine)
     properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
     properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
     properties.setProperty({"enableClippingPlanes", true, {"Clipping"}});
-    engine.addCameraType("circuit_explorer_dof_perspective_camera", properties);
+    engine.addCameraType("circuit_explorer_dof_perspective", properties);
 }
 
 void _addSphereClippingPerspectiveCamera(brayns::Engine& engine)
@@ -226,7 +226,7 @@ void _addSphereClippingPerspectiveCamera(brayns::Engine& engine)
     properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
     properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
     properties.setProperty({"enableClippingPlanes", true, {"Clipping"}});
-    engine.addCameraType("circuit_explorer_sphere_clipping_camera", properties);
+    engine.addCameraType("circuit_explorer_sphere_clipping", properties);
 }
 
 std::string _sanitizeString(const std::string& input)

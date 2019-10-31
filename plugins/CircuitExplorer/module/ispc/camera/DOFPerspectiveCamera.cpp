@@ -104,7 +104,6 @@ void DOFPerspectiveCamera::commit()
                                    numClipPlanes);
 }
 
-OSP_REGISTER_CAMERA(DOFPerspectiveCamera,
-                    circuit_explorer_dof_perspective_camera);
+OSP_REGISTER_CAMERA(DOFPerspectiveCamera, circuit_explorer_dof_perspective);
 
 } // namespace ospray

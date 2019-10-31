@@ -103,6 +103,6 @@ void SphereClippingPerspectiveCamera::commit()
 }
 
 OSP_REGISTER_CAMERA(SphereClippingPerspectiveCamera,
-                    circuit_explorer_sphere_clipping_camera);
+                    circuit_explorer_sphere_clipping);
 
 } // namespace ospray
