@@ -383,6 +383,26 @@ void CircuitExplorerPlugin::init()
         _api->getActionInterface()->registerNotification<AddColumn>(
             "add-column",
             [&](const AddColumn& payload) { _addColumn(payload); });
+
+        PLUGIN_INFO << "Registering 'add-sphere' endpoint" << std::endl;
+        _api->getActionInterface()->registerRequest<AddSphere, AddShapeResult>(
+            "add-sphere",
+            [&](const AddSphere& payload) { return _addSphere(payload); });
+
+        PLUGIN_INFO << "Registering 'add-pill' endpoint" << std::endl;
+        _api->getActionInterface()->registerRequest<AddPill, AddShapeResult>(
+            "add-pill",
+            [&](const AddPill& payload) { return _addPill(payload); });
+
+        PLUGIN_INFO << "Registering 'add-cylinder' endpoint" << std::endl;
+        _api->getActionInterface()->registerRequest<AddCylinder, AddShapeResult>(
+            "add-cylinder",
+            [&](const AddCylinder& payload) { return _addCylinder(payload); });
+
+        PLUGIN_INFO << "Registering 'add-box' endpoint" << std::endl;
+        _api->getActionInterface()->registerRequest<AddBox, AddShapeResult>(
+            "add-box",
+            [&](const AddBox& payload) { return _addBox(payload); });
     }
 
     auto& engine = _api->getEngine();
@@ -1053,6 +1073,254 @@ void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
           PLUGIN_ERROR << "make-movie: Could not clean up frames" << std::endl;
         }
     }
+}
+
+void CircuitExplorerPlugin::_createShapeMaterial(brayns::ModelPtr& model,
+                                                 const size_t id,
+                                                 const brayns::Vector3d& color,
+                                                 const double& opacity)
+{
+   brayns::MaterialPtr mptr = model->createMaterial(id, std::to_string(id));
+   mptr->setDiffuseColor(color);
+   mptr->setOpacity(opacity);
+   mptr->setSpecularExponent(0.0);
+
+   brayns::PropertyMap props;
+   props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 0});
+   props.setProperty(
+       {MATERIAL_PROPERTY_SHADING_MODE,
+        static_cast<int>(MaterialShadingMode::diffuse_transparency)});
+   props.setProperty({MATERIAL_PROPERTY_CLIPPED, 0});
+
+   mptr->updateProperties(props);
+
+   mptr->markModified();
+   mptr->commit();
+}
+
+AddShapeResult CircuitExplorerPlugin::_addSphere(const AddSphere &payload)
+{
+    AddShapeResult result;
+    result.error = 0;
+    result.message = "";
+
+    if(payload.center.size() < 3)
+    {
+        result.error = 1;
+        result.message = "Sphere center has the wrong number of parameters (3 necessary)";
+        return result;
+    }
+
+    if(payload.color.size() < 4)
+    {
+        result.error = 2;
+        result.message = "Sphere color has the wrong number of parameters (RGBA, 4 necessary)";
+        return result;
+    }
+
+    if(payload.radius < 0.0f)
+    {
+        result.error = 3;
+        result.message = "Negative radius passed for sphere creation";
+        return result;
+    }
+
+    brayns::ModelPtr modelptr = _api->getScene().createModel();
+
+    const size_t matId = 1;
+    const brayns::Vector3d color (payload.color[0], payload.color[1], payload.color[2]);
+    const double opacity = payload.color[3];
+    _createShapeMaterial(modelptr, matId, color, opacity);
+
+    const brayns::Vector3f center (payload.center[0], payload.center[1], payload.center[2]);
+    modelptr->addSphere(matId, {center, payload.radius});
+
+    size_t numModels = _api->getScene().getNumModels();
+    const std::string name = payload.name.empty()? "sphere_" + std::to_string(numModels) : payload.name;
+    result.id = _api->getScene().addModel(std::make_shared<brayns::ModelDescriptor>(std::move(modelptr), name));
+    _api->getScene().markModified();
+
+    _api->getEngine().triggerRender();
+
+    _dirty = true;
+    return result;
+}
+
+AddShapeResult CircuitExplorerPlugin::_addPill(const AddPill &payload)
+{
+    AddShapeResult result;
+    result.error = 0;
+    result.message = "";
+
+    if(payload.p1.size() < 3)
+    {
+        result.error = 1;
+        result.message = "Pill point 1 has the wrong number of parameters (3 necessary)";
+        return result;
+    }
+    if(payload.p2.size() < 3)
+    {
+        result.error = 2;
+        result.message = "Pill point 2 has the wrong number of parameters (3 necessary)";
+        return result;
+    }
+    if(payload.color.size() < 4)
+    {
+        result.error = 3;
+        result.message = "Pill color has the wrong number of parameters (RGBA, 4 necessary)";
+        return result;
+    }
+    if(payload.type != "pill" && payload.type != "conepill" && payload.type != "sigmoidpill")
+    {
+        result.error = 4;
+        result.message = "Unknown pill type parameter. Must be either \"pill\", \"conepill\", or \"sigmoidpill\"";
+        return result;
+    }
+    if(payload.radius1 < 0.0f || payload.radius2 < 0.0f)
+    {
+        result.error = 5;
+        result.message = "Negative radius passed for the pill creation";
+        return result;
+    }
+
+    brayns::ModelPtr modelptr = _api->getScene().createModel();
+
+    size_t matId = 1;
+    const brayns::Vector3d color (payload.color[0], payload.color[1], payload.color[2]);
+    const double opacity = payload.color[3];
+    _createShapeMaterial(modelptr, matId, color, opacity);
+
+    const brayns::Vector3f p0 (payload.p1[0], payload.p1[1], payload.p1[2]);
+    const brayns::Vector3f p1 (payload.p2[0], payload.p2[1], payload.p2[2]);
+    brayns::SDFGeometry sdf;
+    if(payload.type == "pill")
+    {
+        sdf = brayns::createSDFPill(p0, p1, payload.radius1);
+    }
+    else if(payload.type == "conepill")
+    {
+        sdf = brayns::createSDFConePill(p0, p1, payload.radius1, payload.radius2);
+    }
+    else if(payload.type == "sigmoidpill")
+    {
+        sdf = brayns::createSDFConePillSigmoid(p0, p1, payload.radius1, payload.radius2);
+    }
+
+    modelptr->addSDFGeometry(matId, sdf, {});
+
+    size_t numModels = _api->getScene().getNumModels();
+    const std::string name = payload.name.empty()? payload.type + "_" + std::to_string(numModels) : payload.name;
+    result.id = _api->getScene().addModel(std::make_shared<brayns::ModelDescriptor>(std::move(modelptr), name));
+    _api->getScene().markModified();
+    _api->getEngine().triggerRender();
+
+    _dirty = true;
+
+    return result;
+}
+
+AddShapeResult CircuitExplorerPlugin::_addCylinder(const AddCylinder &payload)
+{
+    AddShapeResult result;
+    result.error = 0;
+    result.message = "";
+
+    if(payload.center.size() < 3)
+    {
+        result.error = 1;
+        result.message = "Cylinder center has the wrong number of parameters (3 necessary)";
+        return result;;
+    }
+    if(payload.up.size() < 3)
+    {
+        result.error = 2;
+        result.message = "Cylinder up has the wrong number of parameters (3 necessary)";
+        return result;
+    }
+    if(payload.color.size() < 4)
+    {
+        result.error = 3;
+        result.message = "Cylinder color has the wrong number of parameters (RGBA, 4 necessary)";
+        return result;
+    }
+    if(payload.radius < 0.0f)
+    {
+        result.error = 4;
+        result.message = "Negative radius passed for cylinder creation";
+        return result;
+    }
+
+    brayns::ModelPtr modelptr = _api->getScene().createModel();
+
+    const size_t matId = 1;
+    const brayns::Vector3d color (payload.color[0], payload.color[1], payload.color[2]);
+    const double opacity = payload.color[3];
+    _createShapeMaterial(modelptr, matId, color, opacity);
+
+    const brayns::Vector3f center (payload.center[0], payload.center[1], payload.center[2]);
+    const brayns::Vector3f up (payload.up[0], payload.up[1], payload.up[2]);
+    modelptr->addCylinder(matId, {center, up, payload.radius});
+
+    size_t numModels = _api->getScene().getNumModels();
+    const std::string name = payload.name.empty()? "cylinder_" + std::to_string(numModels) : payload.name;
+    result.id = _api->getScene().addModel(std::make_shared<brayns::ModelDescriptor>(std::move(modelptr), name));
+    _api->getScene().markModified();
+    _api->getEngine().triggerRender();
+
+    _dirty = true;
+
+    return result;
+}
+
+AddShapeResult CircuitExplorerPlugin::_addBox(const AddBox &payload)
+{
+    AddShapeResult result;
+    result.error = 0;
+    result.message = "";
+
+    if(payload.minCorner.size() < 3)
+    {
+        result.error = 1;
+        result.message = "Box minCorner has the wrong number of parameters (3 necessary)";
+        return result;
+    }
+    if(payload.maxCorner.size() < 3)
+    {
+        result.error = 2;
+        result.message = "Box maxCorner has the wrong number of parameters (3 necesary)";
+        return result;
+    }
+    if(payload.color.size() < 4)
+    {
+        result.error = 3;
+        result.message = "Box color has the wrong number of parameters (RGBA, 4 necesary)";
+        return result;
+    }
+
+    brayns::ModelPtr modelptr = _api->getScene().createModel();
+
+    const size_t matId = 1;
+    const brayns::Vector3d color (payload.color[0], payload.color[1], payload.color[2]);
+    const double opacity = payload.color[3];
+    _createShapeMaterial(modelptr, matId, color, opacity);
+
+    const brayns::Vector3f minCorner (payload.minCorner[0], payload.minCorner[1], payload.minCorner[2]);
+    const brayns::Vector3f maxCorner (payload.maxCorner[0], payload.maxCorner[1], payload.maxCorner[2]);
+
+    brayns::TriangleMesh mesh = brayns::createBox(minCorner, maxCorner);
+
+    modelptr->getTriangleMeshes()[matId] = mesh;
+    modelptr->markInstancesDirty();
+
+    size_t numModels = _api->getScene().getNumModels();
+    const std::string name = payload.name.empty()? "box_" + std::to_string(numModels) : payload.name;
+    result.id = _api->getScene().addModel(std::make_shared<brayns::ModelDescriptor>(std::move(modelptr), name));
+    _api->getScene().markModified();
+    _api->getEngine().triggerRender();
+
+    _dirty = true;
+
+    return result;
 }
 
 void CircuitExplorerPlugin::_addGrid(const AddGrid& payload)

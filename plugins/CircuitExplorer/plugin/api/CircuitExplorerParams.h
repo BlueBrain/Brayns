@@ -302,4 +302,52 @@ struct AddColumn
 };
 bool from_json(AddColumn& param, const std::string& payload);
 
+struct AddSphere
+{
+    std::string name;
+    std::vector<float> center;
+    float radius;
+    std::vector<double> color;
+};
+bool from_json(AddSphere& param, const std::string& payload);
+
+struct AddPill
+{
+    std::string name;
+    std::string type;
+    std::vector<float> p1;
+    std::vector<float> p2;
+    float radius1;
+    float radius2;
+    std::vector<double> color;
+};
+bool from_json(AddPill& param, const std::string& payload);
+
+struct AddCylinder
+{
+    std::string name;
+    std::vector<float> center;
+    std::vector<float> up;
+    float radius;
+    std::vector<double> color;
+};
+bool from_json(AddCylinder& param, const std::string& payload);
+
+struct AddBox
+{
+    std::string name;
+    std::vector<float> minCorner;
+    std::vector<float> maxCorner;
+    std::vector<double> color;
+};
+bool from_json(AddBox& param, const std::string& payload);
+
+struct AddShapeResult
+{
+    size_t id;
+    int error;
+    std::string message;
+};
+std::string to_json(const AddShapeResult& addResult);
+
 #endif // CIRCUITVIEWERPARAMS_H

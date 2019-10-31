@@ -104,6 +104,23 @@ def mock_plugin_ce_cancel_frames_export():
 def mock_plugin_ce_add_grid(min_value, max_value, interval, radius, opacity, show_axis, colored):
     return RESPONSE_OK
 
+def mock_plugin_ce_add_sphere(center, radius, color, name):
+    return RESPONSE_OK
+
+def mock_plugin_ce_add_pill(p1, p2, radius, color, name):
+    return RESPONSE_OK
+
+def mock_plugin_ce_add_conepill(p1, p2, radius1, radius2, color, name):
+    return RESPONSE_OK
+
+def mock_plugin_ce_add_sigmoidpill(p1, p2, radius1, radius2, color, name):
+    return RESPONSE_OK
+
+def mock_plugin_ce_add_cylinder(center, up, radius, color, name):
+    return RESPONSE_OK
+
+def mock_plugin_ce_add_box(minCorner, maxCorner, color, name):
+    return RESPONSE_OK
 
 def mock_ce_rpc_request(self, method, params=None, response_timeout=None):
     if method == 'add-model':
@@ -133,5 +150,13 @@ def mock_ce_rpc_request(self, method, params=None, response_timeout=None):
     if method == 'make-movie':
         return RESPONSE_OK
     if method == 'cancel-frames-export':
+        return RESPONSE_OK
+    if method == 'add-sphere':
+        return RESPONSE_OK
+    if method == 'add-pill':
+        return RESPONSE_OK
+    if method == 'add-cylinder':
+        return RESPONSE_OK
+    if method == 'add-box':
         return RESPONSE_OK
     return None

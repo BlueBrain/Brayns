@@ -531,3 +531,92 @@ bool from_json(AddColumn& param, const std::string& payload)
     }
     return true;
 }
+
+bool from_json(AddSphere& param, const std::string& payload)
+{
+    try
+    {
+        auto js = nlohmann::json::parse(payload);
+        FROM_JSON(param, js, name);
+        FROM_JSON(param, js, center);
+        FROM_JSON(param, js, radius);
+        FROM_JSON(param, js, color);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool from_json(AddPill& param, const std::string& payload)
+{
+    try
+    {
+        auto js = nlohmann::json::parse(payload);
+        FROM_JSON(param, js, name);
+        FROM_JSON(param, js, type);
+        FROM_JSON(param, js, p1);
+        FROM_JSON(param, js, p2);
+        FROM_JSON(param, js, radius1);
+        FROM_JSON(param, js, radius2);
+        FROM_JSON(param, js, color);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool from_json(AddCylinder& param, const std::string& payload)
+{
+    try
+    {
+        auto js = nlohmann::json::parse(payload);
+        FROM_JSON(param, js, name);
+        FROM_JSON(param, js, center);
+        FROM_JSON(param, js, up);
+        FROM_JSON(param, js, radius);
+        FROM_JSON(param, js, color);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool from_json(AddBox& param, const std::string& payload)
+{
+    try
+    {
+        auto js = nlohmann::json::parse(payload);
+        FROM_JSON(param, js, name);
+        FROM_JSON(param, js, minCorner);
+        FROM_JSON(param, js, maxCorner);
+        FROM_JSON(param, js, color);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+std::string to_json(const AddShapeResult& addResult)
+{
+    try
+    {
+        nlohmann::json json;
+        TO_JSON(addResult, json, id);
+        TO_JSON(addResult, json, error);
+        TO_JSON(addResult, json, message);
+        return json.dump();
+    }
+    catch(...)
+    {
+        return "";
+    }
+    return "";
+}
