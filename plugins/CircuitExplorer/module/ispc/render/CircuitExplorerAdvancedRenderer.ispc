@@ -81,6 +81,9 @@ bool isClipped(const uniform CircuitExplorerAdvancedRenderer* uniform self,
                const varying vec3f& position,
                const MaterialClippingMode clippingMode)
 {
+    if (clippingMode == no_clipping)
+        return false;
+
     bool visible = true;
     for (uint32 i = 0; i < self->numClipPlanes && visible; ++i)
     {
@@ -1056,8 +1059,7 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
             // Initialize geometry shading attributes
             setGeometryShadingAttributes(self, dg, sample, ray, attributes);
 
-            if (attributes.clippingMode != no_clipping &&
-                isClipped(self, dg.P, attributes.clippingMode))
+            if (isClipped(self, dg.P, attributes.clippingMode))
                 // Geometry is clipped, discard intersection
                 discardIntersection = true;
             else
