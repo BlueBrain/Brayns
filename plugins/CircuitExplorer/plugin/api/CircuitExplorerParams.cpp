@@ -469,10 +469,11 @@ std::string to_json(const FrameExportProgress& exportProgress)
     {
         nlohmann::json json;
         TO_JSON(exportProgress, json, frameNumber);
+        TO_JSON(exportProgress, json, perFrameProgress);
         TO_JSON(exportProgress, json, done);
         return json.dump();
     }
-    catch(...)
+    catch (...)
     {
         return "";
     }
@@ -491,7 +492,7 @@ bool from_json(MakeMovieParameters& movieParams, const std::string& payload)
         FROM_JSON(movieParams, json, outputMoviePath);
         FROM_JSON(movieParams, json, eraseFrames);
     }
-    catch(...)
+    catch (...)
     {
         return false;
     }
@@ -614,7 +615,7 @@ std::string to_json(const AddShapeResult& addResult)
         TO_JSON(addResult, json, message);
         return json.dump();
     }
-    catch(...)
+    catch (...)
     {
         return "";
     }

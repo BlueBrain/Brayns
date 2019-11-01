@@ -258,9 +258,9 @@ struct ExportFramesToDisk
 {
     std::string path;
     std::string format;
-    uint16_t quality;
-    uint16_t spp;
-    uint16_t startFrame;
+    uint16_t quality{100};
+    uint16_t spp{0};
+    uint16_t startFrame{0};
     std::vector<uint64_t> animationInformation;
     std::vector<double> cameraInformation;
 };
@@ -269,6 +269,7 @@ bool from_json(ExportFramesToDisk& param, const std::string& payload);
 struct FrameExportProgress
 {
     uint16_t frameNumber;
+    float perFrameProgress;
     bool done;
 };
 std::string to_json(const FrameExportProgress& exportProgress);
