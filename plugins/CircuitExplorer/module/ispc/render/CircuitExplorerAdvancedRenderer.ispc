@@ -1107,7 +1107,9 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
                     sample.z = min(ray.t, firstIntersection);
 
                 // Alpha
-                totalOpacity += attributes.opacity + attributes.volumeIntensity;
+                totalOpacity +=
+                    (1.f - attributes.reflection) *
+                    (attributes.opacity + attributes.volumeIntensity);
 
                 // Combine all contributions
                 processFinalContribution(attributes);
@@ -1122,7 +1124,7 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
                 if (doRefraction && doReflection)
                 {
                     // Switch between refraction and reflection
-                    const bool reflect = sample.sampleID.z % 2 == 1;
+                    const bool reflect = sample.sampleID.z % 4 == 1;
                     doRefraction = !reflect;
                     doReflection = reflect;
                 }
