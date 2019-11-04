@@ -87,6 +87,9 @@ struct CircuitExplorerMaterial : public ospray::Material
      * clipping planes */
     MaterialClippingMode clippingMode;
 
+    /*! User parameter */
+    float userParameter;
+
     std::string toString() const final { return "default_material"; }
     void commit() final;
 };

@@ -67,6 +67,7 @@ struct ShadingAttributes
     bool castSimulationData;
     MaterialClippingMode clippingMode;
     MaterialShadingMode shadingMode;
+    float userParameter;
     vec3f simulationColor;
     float simulationIntensity;
     vec3f indirectColor;
@@ -698,6 +699,9 @@ inline void setGeometryShadingAttributes(
 
         // Clipping planes
         attributes.clippingMode = mat->clippingMode;
+
+        // User parameter
+        attributes.userParameter = mat->userParameter;
     }
 
     // Update reflected shading normal
@@ -924,14 +928,13 @@ inline void processNoiseShading(DifferentialGeometry& dg,
                                 const varying Ray& ray,
                                 ShadingAttributes& attributes)
 {
-    vec3f point = (0.01f * attributes.specularExponent) * dg.P;
+    vec3f point = (0.01f * attributes.userParameter) * dg.P;
 
     const float n1 = 0.25f + 0.75f * clamp(worleyNoise(point, 2.f), 0.f, 1.f);
 
     attributes.diffuseColor = (1.f - n1) * attributes.diffuseColor;
     attributes.simulationColor = (1.f - n1) * attributes.simulationColor;
     attributes.specularColor = (1.f - n1) * attributes.specularColor;
-    attributes.specularExponent = 20.f;
 
     attributes.normal.x += 0.5f * n1;
     attributes.normal.y += 0.5f * (0.5f - n1);
@@ -941,6 +944,24 @@ inline void processNoiseShading(DifferentialGeometry& dg,
     attributes.reflectedNormal =
         ray.dir - 2.f * dot(ray.dir, attributes.normal) * attributes.normal;
 
+    processLightShading(dg, sample, ray, attributes);
+}
+
+inline void processCheckerShading(DifferentialGeometry& dg,
+                                  varying ScreenSample& sample,
+                                  const varying Ray& ray,
+                                  ShadingAttributes& attributes)
+{
+    const vec3i point =
+        make_vec3i(attributes.userParameter * (dg.P + make_vec3f(1e2f)));
+    const vec3i p = make_vec3i(point.x % 2, point.y % 2, point.z % 2);
+    if ((p.x == p.y && p.z == 1) || (p.x != p.y && p.z == 0))
+    {
+        attributes.diffuseColor = make_vec3f(1.f) - attributes.diffuseColor;
+        attributes.simulationColor =
+            make_vec3f(1.f) - attributes.simulationColor;
+        attributes.specularColor = make_vec3f(1.f) - attributes.specularColor;
+    }
     processLightShading(dg, sample, ray, attributes);
 }
 
@@ -1092,6 +1113,8 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
                     processElectronTransparencyShading(sample, attributes);
                 else if (attributes.shadingMode == perlin)
                     processNoiseShading(dg, sample, ray, attributes);
+                else if (attributes.shadingMode == checker)
+                    processCheckerShading(dg, sample, ray, attributes);
                 else
                     processLightShading(dg, sample, ray, attributes);
 

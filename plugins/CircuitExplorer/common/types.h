@@ -40,6 +40,7 @@
 const std::string MATERIAL_PROPERTY_CAST_USER_DATA = "cast_simulation_data";
 const std::string MATERIAL_PROPERTY_SHADING_MODE = "shading_mode";
 const std::string MATERIAL_PROPERTY_CLIPPING_MODE = "clipping_mode";
+const std::string MATERIAL_PROPERTY_USER_PARAMETER = "user_parameter";
 
 /** Voltage Simulation handlers */
 class AbstractUserDataHandler;

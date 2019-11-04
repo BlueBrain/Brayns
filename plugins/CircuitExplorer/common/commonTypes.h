@@ -31,7 +31,7 @@ enum MaterialShadingMode
     electron_transparency = 4,
     perlin = 5,
     diffuse_transparency = 6,
-    checkboard = 7
+    checker = 7
 };
 
 enum MaterialClippingMode

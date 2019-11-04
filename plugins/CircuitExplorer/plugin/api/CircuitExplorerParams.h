@@ -57,6 +57,7 @@ struct MaterialDescriptor
     bool simulationDataCast;
     int32_t shadingMode;
     int32_t clippingMode;
+    float userParameter;
 };
 
 bool from_json(MaterialDescriptor& materialDescriptor,
@@ -77,6 +78,7 @@ struct MaterialsDescriptor
     std::vector<bool> simulationDataCasts;
     std::vector<int32_t> shadingModes;
     std::vector<int32_t> clippingModes;
+    std::vector<float> userParameters;
 };
 
 bool from_json(MaterialsDescriptor& materialsDescriptor,

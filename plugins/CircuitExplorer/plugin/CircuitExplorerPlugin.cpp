@@ -512,6 +512,7 @@ void CircuitExplorerPlugin::_setMaterialExtraAttributes(
                 props.setProperty(
                     {MATERIAL_PROPERTY_CLIPPING_MODE,
                      static_cast<int>(MaterialClippingMode::no_clipping)});
+                props.setProperty({MATERIAL_PROPERTY_USER_PARAMETER, 1.0});
                 material.second->updateProperties(props);
             }
         }
@@ -553,6 +554,8 @@ void CircuitExplorerPlugin::_setMaterial(const MaterialDescriptor& md)
                                          md.shadingMode);
                 material->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE,
                                          md.clippingMode);
+                material->updateProperty(MATERIAL_PROPERTY_USER_PARAMETER,
+                                         static_cast<double>(md.userParameter));
                 material->markModified(); // This is needed to apply
                                           // propery modifications
                 material->commit();
@@ -629,6 +632,10 @@ void CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
                             material->updateProperty(
                                 MATERIAL_PROPERTY_CLIPPING_MODE,
                                 md.clippingModes[id]);
+                        if (!md.userParameters.empty())
+                            material->updateProperty(
+                                MATERIAL_PROPERTY_USER_PARAMETER,
+                                static_cast<double>(md.userParameters[id]));
                         material->markModified(); // This is needed to apply
                                                   // propery modifications
                         material->commit();
@@ -1147,7 +1154,8 @@ AddShapeResult CircuitExplorerPlugin::_addSphere(const AddSphere& payload)
     {
         result.error = 1;
         result.message =
-            "Sphere center has the wrong number of parameters (3 necessary)";
+            "Sphere center has the wrong number of parameters (3 "
+            "necessary)";
         return result;
     }
 
@@ -1217,7 +1225,8 @@ AddShapeResult CircuitExplorerPlugin::_addPill(const AddPill& payload)
     {
         result.error = 3;
         result.message =
-            "Pill color has the wrong number of parameters (RGBA, 4 necessary)";
+            "Pill color has the wrong number of parameters (RGBA, 4 "
+            "necessary)";
         return result;
     }
     if (payload.type != "pill" && payload.type != "conepill" &&
@@ -1288,7 +1297,8 @@ AddShapeResult CircuitExplorerPlugin::_addCylinder(const AddCylinder& payload)
     {
         result.error = 1;
         result.message =
-            "Cylinder center has the wrong number of parameters (3 necessary)";
+            "Cylinder center has the wrong number of parameters (3 "
+            "necessary)";
         return result;
         ;
     }
@@ -1351,7 +1361,8 @@ AddShapeResult CircuitExplorerPlugin::_addBox(const AddBox& payload)
     {
         result.error = 1;
         result.message =
-            "Box minCorner has the wrong number of parameters (3 necessary)";
+            "Box minCorner has the wrong number of parameters (3 "
+            "necessary)";
         return result;
     }
     if (payload.maxCorner.size() < 3)
@@ -1365,7 +1376,8 @@ AddShapeResult CircuitExplorerPlugin::_addBox(const AddBox& payload)
     {
         result.error = 3;
         result.message =
-            "Box color has the wrong number of parameters (RGBA, 4 necesary)";
+            "Box color has the wrong number of parameters (RGBA, 4 "
+            "necesary)";
         return result;
     }
 

@@ -55,4 +55,5 @@ struct CircuitExplorerMaterial
     float reflection;
     MaterialShadingMode shadingMode;
     MaterialClippingMode clippingMode;
+    float userParameter;
 };

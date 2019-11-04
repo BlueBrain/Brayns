@@ -46,7 +46,8 @@ export void CircuitExplorerMaterial_set(
     const void* uniform map_Bump, const uniform affine2f& xform_Bump,
     const uniform linear2f& rot_Bump,
     const uniform MaterialShadingMode& shadingMode,
-    const uniform MaterialClippingMode& clippingMode)
+    const uniform MaterialClippingMode& clippingMode,
+    const uniform float& userParameter)
 {
     uniform CircuitExplorerMaterial* uniform self =
         (uniform CircuitExplorerMaterial * uniform) _mat;
@@ -74,4 +75,5 @@ export void CircuitExplorerMaterial_set(
     self->volume = 0;
     self->shadingMode = shadingMode;
     self->clippingMode = clippingMode;
+    self->userParameter = userParameter;
 }
