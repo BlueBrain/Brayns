@@ -892,7 +892,7 @@ inline void processElectronShading(varying ScreenSample& sample,
 {
     const vec3f viewer = normalize(sample.ray.org - attributes.origin);
     const float el = max(0.f, dot(viewer, attributes.normal));
-    const float cosNL = 1.f - pow(el, attributes.specularExponent);
+    const float cosNL = 1.f - pow(el, attributes.userParameter);
     attributes.shadingContribution = cosNL * attributes.diffuseColor;
     attributes.simulationColor = cosNL * attributes.simulationColor;
     attributes.specularColor = make_vec3f(0.f);
@@ -903,7 +903,7 @@ inline void processElectronTransparencyShading(varying ScreenSample& sample,
 {
     const vec3f viewer = normalize(sample.ray.org - attributes.origin);
     const float el = 1.f - max(0.f, dot(viewer, attributes.normal));
-    const float cosNL = 1.f - pow(el, attributes.specularExponent);
+    const float cosNL = 1.f - pow(el, attributes.userParameter);
     attributes.shadingContribution = cosNL * attributes.diffuseColor;
     attributes.simulationColor = cosNL * attributes.simulationColor;
     attributes.specularColor = make_vec3f(0.f);
@@ -915,8 +915,8 @@ inline void processCartoonShading(varying ScreenSample& sample,
 {
     const vec3f viewer = normalize(sample.ray.org - attributes.origin);
     float cosNL = max(0.f, dot(viewer, attributes.normal));
-    const uint32 angleAsInt = cosNL * attributes.specularExponent;
-    cosNL = (float)(angleAsInt) / attributes.specularExponent;
+    const uint32 angleAsInt = cosNL * attributes.userParameter;
+    cosNL = (float)(angleAsInt) / attributes.userParameter;
 
     attributes.shadingContribution = cosNL * attributes.diffuseColor;
     attributes.simulationColor = cosNL * attributes.simulationColor;
@@ -928,7 +928,7 @@ inline void processNoiseShading(DifferentialGeometry& dg,
                                 const varying Ray& ray,
                                 ShadingAttributes& attributes)
 {
-    vec3f point = (0.01f * attributes.userParameter) * dg.P;
+    vec3f point = attributes.userParameter * dg.P;
 
     const float n1 = 0.25f + 0.75f * clamp(worleyNoise(point, 2.f), 0.f, 1.f);
 
@@ -1034,8 +1034,6 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
 
     ShadingAttributes bgAttr;
     bgAttr.self = self;
-    processBackgroundColor(sample, ray, bgAttr);
-    bgColor = make_vec3f(bgAttr.bgColor);
 
     while (moreRebounds && depth < self->super.super.maxBounces &&
            color.w < 1.f)
@@ -1134,13 +1132,6 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
                     (1.f - attributes.reflection) *
                     (attributes.opacity + attributes.volumeIntensity);
 
-                // Combine all contributions
-                processFinalContribution(attributes);
-
-                composite(make_vec4f(attributes.finalContribution,
-                                     totalOpacity),
-                          color, self->volumeAlphaCorrection);
-
                 // Prepare ray for next iteration
                 bool doRefraction = (attributes.opacity < 1.f);
                 bool doReflection = (attributes.reflection > 0.f);
@@ -1177,6 +1168,12 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
             ray.geomID = -1;
             ray.instID = -1;
         }
+
+        // Combine all contributions
+        processFinalContribution(attributes);
+
+        composite(make_vec4f(attributes.finalContribution, totalOpacity), color,
+                  self->volumeAlphaCorrection);
     }
 
     // Fog attenuation

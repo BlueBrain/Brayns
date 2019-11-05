@@ -1011,8 +1011,6 @@ FrameExportProgress CircuitExplorerPlugin::_getFrameExportProgress()
     result.perFrameProgress = (float(_accumulationFrameNumber + 1) /
                                float(_exportFramesToDiskPayload.spp));
 
-    PLUGIN_ERROR << _accumulationFrameNumber << " / "
-                 << _exportFramesToDiskPayload.spp << std::endl;
     result.done = !_exportFramesToDiskDirty;
     return result;
 }
