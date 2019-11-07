@@ -56,7 +56,8 @@ struct MaterialDescriptor
     float glossiness;
     bool simulationDataCast;
     int32_t shadingMode;
-    bool clipped;
+    int32_t clippingMode;
+    float userParameter;
 };
 
 bool from_json(MaterialDescriptor& materialDescriptor,
@@ -76,7 +77,8 @@ struct MaterialsDescriptor
     std::vector<float> glossinesses;
     std::vector<bool> simulationDataCasts;
     std::vector<int32_t> shadingModes;
-    std::vector<bool> clips;
+    std::vector<int32_t> clippingModes;
+    std::vector<float> userParameters;
 };
 
 bool from_json(MaterialsDescriptor& materialsDescriptor,
@@ -85,7 +87,7 @@ bool from_json(MaterialsDescriptor& materialsDescriptor,
 // Material IDs for a given model
 struct ModelId
 {
-    size_t id;
+    size_t modelId;
 };
 
 bool from_json(ModelId& modelId, const std::string& payload);
@@ -258,9 +260,9 @@ struct ExportFramesToDisk
 {
     std::string path;
     std::string format;
-    uint16_t quality;
-    uint16_t spp;
-    uint16_t startFrame;
+    uint16_t quality{100};
+    uint16_t spp{0};
+    uint16_t startFrame{0};
     std::vector<uint64_t> animationInformation;
     std::vector<double> cameraInformation;
 };
@@ -268,8 +270,7 @@ bool from_json(ExportFramesToDisk& param, const std::string& payload);
 
 struct FrameExportProgress
 {
-    uint16_t frameNumber;
-    bool done;
+    float progress;
 };
 std::string to_json(const FrameExportProgress& exportProgress);
 

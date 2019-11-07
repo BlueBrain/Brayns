@@ -47,6 +47,8 @@ void CircuitExplorerAbstractRenderer::commit()
                                                               nullptr);
     _maxBounces = getParam1i("maxBounces", 10);
     _exposure = getParam1f("exposure", 1.f);
+
+    _useHardwareRandomizer = getParam("useHardwareRandomizer", 0);
 }
 
 } // namespace circuitExplorer

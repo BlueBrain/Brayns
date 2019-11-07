@@ -54,5 +54,6 @@ struct CircuitExplorerMaterial
     TextureParam map_reflection;
     float reflection;
     MaterialShadingMode shadingMode;
-    bool clipped;
+    MaterialClippingMode clippingMode;
+    float userParameter;
 };

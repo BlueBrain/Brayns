@@ -167,6 +167,7 @@ def test_export_frames_to_disk():
             camera_definitions=[[(0.0, 0.0, 0.0), (0.0, 0.0, 1.0), (0.0, 1.0, 0.0), 0.0, 100.0]])
         assert_equal(response, {'ok'})
 
+
 def test_get_export_frames_progress():
     with patch('rockets.AsyncClient.connected', new=mock_connected), \
          patch('brayns.utils.http_request', new=mock_http_request), \
@@ -177,6 +178,7 @@ def test_get_export_frames_progress():
         ce = CircuitExplorer(app)
         response = ce.get_export_frames_progress()
         assert_equal(response, {'ok'})
+
 
 def test_make_movie():
     with patch('rockets.AsyncClient.connected', new=mock_connected), \
@@ -230,6 +232,7 @@ def test_add_column():
         response = ce.add_column(radius=1)
         assert_equal(response, {'ok'})
 
+
 def test_add_sphere():
     with patch('rockets.AsyncClient.connected', new=mock_connected), \
          patch('brayns.utils.http_request', new=mock_http_request), \
@@ -243,6 +246,7 @@ def test_add_sphere():
             radius=1.0,
             color=(1,1,1,1))
         assert_equal(response, {'ok'})
+
 
 def test_add_pill():
     with patch('rockets.AsyncClient.connected', new=mock_connected), \
@@ -258,6 +262,7 @@ def test_add_pill():
             radius=1.0,
             color=(1,1,1,1))
         assert_equal(response, {'ok'})
+
 
 def test_add_conepill():
     with patch('rockets.AsyncClient.connected', new=mock_connected), \
@@ -291,6 +296,7 @@ def test_add_sigmoidpill():
             color=(1,1,1,1))
         assert_equal(response, {'ok'})
 
+
 def test_add_cylinder():
     with patch('rockets.AsyncClient.connected', new=mock_connected), \
          patch('brayns.utils.http_request', new=mock_http_request), \
@@ -306,6 +312,7 @@ def test_add_cylinder():
             color=(1,1,1,1))
         assert_equal(response, {'ok'})
 
+
 def test_add_box():
     with patch('rockets.AsyncClient.connected', new=mock_connected), \
          patch('brayns.utils.http_request', new=mock_http_request), \
@@ -319,6 +326,19 @@ def test_add_box():
             maxCorner=(1,1,1),
             color=(1,1,1,1))
         assert_equal(response, {'ok'})
+
+
+def test_get_material_ids():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.get_material_ids(0)
+        assert_equal(response, {'ok'})
+
 
 if __name__ == '__main__':
     import nose

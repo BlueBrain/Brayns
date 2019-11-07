@@ -39,7 +39,7 @@ void clipRay(const uniform vec4f* clipPlanes, const unsigned int numClipPlanes,
             // on the visible side
             if (distance < 0)
             {
-                near = far = 0.0;
+                near = far = 0.f;
                 return;
             }
         }
@@ -47,9 +47,9 @@ void clipRay(const uniform vec4f* clipPlanes, const unsigned int numClipPlanes,
         {
             const float t = -distance / cosAngle;
             if (cosAngle > 0.f) // same direction plane
-                near = max(near, t);
+                near = max(0.f, max(near, t));
             else
-                far = min(far, t);
+                far = max(0.f, min(far, t));
         }
     }
 }

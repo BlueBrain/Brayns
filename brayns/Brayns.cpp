@@ -98,9 +98,6 @@ struct Brayns::Impl : public PluginAPI
             << "                                  _|_|                       "
             << std::endl;
         BRAYNS_INFO << std::endl;
-        BRAYNS_INFO << "               By engineers, for researchers"
-                    << std::endl;
-        BRAYNS_INFO << std::endl;
 
         // This initialization must happen before plugin intialization.
         _createEngine();

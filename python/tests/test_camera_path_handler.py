@@ -53,6 +53,41 @@ def test_camera_path():
         assert_equal(e.__class__, KeyError)
 
 
+def test_get_orbit_around_target():
+
+    class TestScene:
+
+        def __init__(self):
+            self.models = list()
+
+    class TestBrayns:
+
+        def __init__(self):
+            self.scene = TestScene()
+
+    brayns = TestBrayns()
+    brayns.scene.models = [
+        {
+            'bounding_box': False,
+            'bounds': {
+                'max': [1.0, 1.0, 1.0],
+                'min': [0.0, 0.0, 0.0]
+            },
+            'id': 0, 'metadata': {}, 'name': 'DefaultScene', 'path': 'DefaultScene',
+            'transformation': {
+                'rotation': [0.0, 0.0, 0.0, 1.0], 'rotation_center': [0.0, 0.0, 0.0],
+                'scale': [1.0, 1.0, 1.0], 'translation': [0.0, 0.0, 0.0]
+            },
+            'visible': True}
+    ]
+
+    camera_key_frames = CameraPathHandler.get_orbit_around_target(brayns, 0, 2)
+    assert_equal(camera_key_frames, [
+        [[2.0, 0.5, 0.5], [-1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+        [[-1.0, 0.5, 0.5000000000000002], [1.0, 0.0, -1.4802973661668753e-16], [0.0, 1.0, 0.0]]
+    ])
+
+
 if __name__ == '__main__':
     import nose
     nose.run(defaultTest=__name__)

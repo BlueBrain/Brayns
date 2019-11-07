@@ -44,6 +44,8 @@ public:
     void commit() override;
 
 protected:
+    bool _useHardwareRandomizer;
+
     std::vector<void*> _lightArray;
     void** _lightPtr;
     ospray::Data* _lightData;

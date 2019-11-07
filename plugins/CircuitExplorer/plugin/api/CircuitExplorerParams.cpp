@@ -91,7 +91,8 @@ bool from_json(MaterialDescriptor& param, const std::string& payload)
         FROM_JSON(param, js, glossiness);
         FROM_JSON(param, js, simulationDataCast);
         FROM_JSON(param, js, shadingMode);
-        FROM_JSON(param, js, clipped);
+        FROM_JSON(param, js, clippingMode);
+        FROM_JSON(param, js, userParameter);
     }
     catch (...)
     {
@@ -117,7 +118,8 @@ bool from_json(MaterialsDescriptor& param, const std::string& payload)
         FROM_JSON(param, js, glossinesses);
         FROM_JSON(param, js, simulationDataCasts);
         FROM_JSON(param, js, shadingModes);
-        FROM_JSON(param, js, clips);
+        FROM_JSON(param, js, clippingModes);
+        FROM_JSON(param, js, userParameters);
     }
     catch (...)
     {
@@ -131,7 +133,7 @@ bool from_json(ModelId& param, const std::string& payload)
     try
     {
         auto js = nlohmann::json::parse(payload);
-        FROM_JSON(param, js, id);
+        FROM_JSON(param, js, modelId);
     }
     catch (...)
     {
@@ -468,11 +470,10 @@ std::string to_json(const FrameExportProgress& exportProgress)
     try
     {
         nlohmann::json json;
-        TO_JSON(exportProgress, json, frameNumber);
-        TO_JSON(exportProgress, json, done);
+        TO_JSON(exportProgress, json, progress);
         return json.dump();
     }
-    catch(...)
+    catch (...)
     {
         return "";
     }
@@ -491,7 +492,7 @@ bool from_json(MakeMovieParameters& movieParams, const std::string& payload)
         FROM_JSON(movieParams, json, outputMoviePath);
         FROM_JSON(movieParams, json, eraseFrames);
     }
-    catch(...)
+    catch (...)
     {
         return false;
     }
@@ -614,7 +615,7 @@ std::string to_json(const AddShapeResult& addResult)
         TO_JSON(addResult, json, message);
         return json.dump();
     }
-    catch(...)
+    catch (...)
     {
         return "";
     }
