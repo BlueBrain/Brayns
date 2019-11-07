@@ -457,17 +457,15 @@ void CircuitExplorerPlugin::preRender()
 
     if (_exportFramesToDiskDirty && _accumulationFrameNumber == 0)
     {
-        auto& ai = _exportFramesToDiskPayload.animationInformation;
+        const auto& ai = _exportFramesToDiskPayload.animationInformation;
         if (_frameNumber >= ai.size())
-        {
             _exportFramesToDiskDirty = false;
-        }
         else
         {
-            uint64_t i = 11 * _frameNumber;
+            const uint64_t i = 11 * _frameNumber;
             // Camera position
             CameraDefinition cd;
-            auto& ci = _exportFramesToDiskPayload.cameraInformation;
+            const auto& ci = _exportFramesToDiskPayload.cameraInformation;
             cd.origin = {ci[i], ci[i + 1], ci[i + 2]};
             cd.direction = {ci[i + 3], ci[i + 4], ci[i + 5]};
             cd.up = {ci[i + 6], ci[i + 7], ci[i + 8]};
@@ -484,14 +482,15 @@ void CircuitExplorerPlugin::preRender()
 
 void CircuitExplorerPlugin::postRender()
 {
-    ++_accumulationFrameNumber;
     if (_exportFramesToDiskDirty &&
-        _accumulationFrameNumber == _exportFramesToDiskPayload.spp - 1)
+        _accumulationFrameNumber == _exportFramesToDiskPayload.spp)
     {
         _doExportFrameToDisk();
         ++_frameNumber;
         _accumulationFrameNumber = 0;
     }
+    else
+        ++_accumulationFrameNumber;
 }
 
 void CircuitExplorerPlugin::_setMaterialExtraAttributes(
@@ -943,17 +942,19 @@ void CircuitExplorerPlugin::_exportFramesToDisk(
     _exportFramesToDiskPayload = payload;
     _exportFramesToDiskDirty = true;
     _frameNumber = payload.startFrame;
-    _accumulationFrameNumber = -1;
+    _accumulationFrameNumber = 0;
     auto& frameBuffer = _api->getEngine().getFrameBuffer();
     frameBuffer.clear();
     PLUGIN_INFO << "-----------------------------------------------------------"
                    "---------------------"
                 << std::endl;
-    PLUGIN_INFO << "Setting movie: " << std::endl;
+    PLUGIN_INFO << "Movie settings     :" << std::endl;
     PLUGIN_INFO << "- Number of frames : "
                 << payload.animationInformation.size() - payload.startFrame
                 << std::endl;
     PLUGIN_INFO << "- Samples per pixel: " << payload.spp << std::endl;
+    PLUGIN_INFO << "- Frame size       : " << frameBuffer.getSize()
+                << std::endl;
     PLUGIN_INFO << "- Export folder    : " << payload.path << std::endl;
     PLUGIN_INFO << "- Start frame      : " << payload.startFrame << std::endl;
     PLUGIN_INFO << "-----------------------------------------------------------"
@@ -1007,18 +1008,20 @@ void CircuitExplorerPlugin::_doExportFrameToDisk()
 FrameExportProgress CircuitExplorerPlugin::_getFrameExportProgress()
 {
     FrameExportProgress result;
-    result.frameNumber = _frameNumber;
-    result.perFrameProgress = (float(_accumulationFrameNumber + 1) /
-                               float(_exportFramesToDiskPayload.spp));
+    const size_t totalNumberOfFrames =
+        (_exportFramesToDiskPayload.animationInformation.size() -
+         _exportFramesToDiskPayload.startFrame) *
+        _exportFramesToDiskPayload.spp;
+    const float currentProgress =
+        _frameNumber * _exportFramesToDiskPayload.spp +
+        _accumulationFrameNumber;
 
-    result.done = !_exportFramesToDiskDirty;
+    result.progress = currentProgress / float(totalNumberOfFrames);
     return result;
 }
 
 void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
 {
-    // static const std::string root = "/gpfs/bbp.cscs.ch/project";
-
     // Find ffmpeg executable path
     std::array<char, 256> buffer;
     std::string ffmpegPath;

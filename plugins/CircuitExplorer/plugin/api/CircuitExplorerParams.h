@@ -270,9 +270,7 @@ bool from_json(ExportFramesToDisk& param, const std::string& payload);
 
 struct FrameExportProgress
 {
-    uint16_t frameNumber;
-    float perFrameProgress;
-    bool done;
+    float progress;
 };
 std::string to_json(const FrameExportProgress& exportProgress);
 
