@@ -34,6 +34,7 @@ struct StreamlinesDescriptor
     Vertices vertices;
     float radius{1.f};
     float opacity{1.f};
+    ColorScheme colorScheme;
 };
 
 bool from_json(StreamlinesDescriptor &param, const std::string &payload);
@@ -52,25 +53,5 @@ struct SpikeSimulationDescriptor
 };
 
 bool from_json(SpikeSimulationDescriptor &param, const std::string &payload);
-
-// DB import
-struct ImportStreamlines
-{
-    std::string connectionString;
-    std::string filename;
-};
-bool from_json(ImportStreamlines &param, const std::string &payload);
-
-// Streamlines
-struct LoadStreamlines
-{
-    std::string connectionString;
-    std::string sqlStatement;
-    std::string name;
-    float radius{1.f};
-    size_t colorScheme{0};
-    size_t nbMaxPoints{0};
-};
-bool from_json(LoadStreamlines &param, const std::string &payload);
 
 #endif // DTIPARAMS_H

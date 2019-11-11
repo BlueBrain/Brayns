@@ -33,6 +33,7 @@ bool from_json(StreamlinesDescriptor &param, const std::string &payload)
         FROM_JSON(param, js, vertices);
         FROM_JSON(param, js, radius);
         FROM_JSON(param, js, opacity);
+        FROM_JSON(param, js, colorScheme);
     }
     catch (...)
     {
@@ -55,40 +56,6 @@ bool from_json(SpikeSimulationDescriptor &param, const std::string &payload)
         FROM_JSON(param, js, decaySpeed);
         FROM_JSON(param, js, restIntensity);
         FROM_JSON(param, js, spikeIntensity);
-    }
-    catch (...)
-    {
-        return false;
-    }
-    return true;
-}
-
-bool from_json(ImportStreamlines &param, const std::string &payload)
-{
-    try
-    {
-        auto js = nlohmann::json::parse(payload);
-        FROM_JSON(param, js, connectionString);
-        FROM_JSON(param, js, filename);
-    }
-    catch (...)
-    {
-        return false;
-    }
-    return true;
-}
-
-bool from_json(LoadStreamlines &param, const std::string &payload)
-{
-    try
-    {
-        auto js = nlohmann::json::parse(payload);
-        FROM_JSON(param, js, connectionString);
-        FROM_JSON(param, js, sqlStatement);
-        FROM_JSON(param, js, name);
-        FROM_JSON(param, js, radius);
-        FROM_JSON(param, js, colorScheme);
-        FROM_JSON(param, js, nbMaxPoints);
     }
     catch (...)
     {

@@ -26,11 +26,15 @@
 class DiffuseTensorImaging:
     """DiffuseTensorImaging is a class that wraps the API exposed by the braynsDTI plug-in"""
 
+    COLOR_SCHEME_NONE = 0
+    COLOR_SCHEME_BY_ID = 1
+    COLOR_SCHEME_DIRECTIONAL = 2
+
     def __init__(self, client):
         """Create a new Diffuse Tensor Imaging instance"""
         self._client = client.rockets_client
 
-    def add_streamlines(self, name, streamlines, radius=1.0, opacity=1.0):
+    def add_streamlines(self, name, streamlines, radius=1.0, opacity=1.0, color_scheme=COLOR_SCHEME_DIRECTIONAL):
         """
         Adds streamlines to the scene. All streamlines are added to a single model
 
@@ -58,4 +62,5 @@ class DiffuseTensorImaging:
         params['vertices'] = vertices
         params['radius'] = radius
         params['opacity'] = opacity
+        params['colorScheme'] = color_scheme
         return self._client.request("add-streamlines", params=params)

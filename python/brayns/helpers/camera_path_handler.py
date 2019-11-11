@@ -141,3 +141,48 @@ class CameraPathHandler:
         if frame < len(self._smoothed_key_frames):
             return self._smoothed_key_frames[frame]
         raise KeyError
+
+    @staticmethod
+    def get_orbit_around_target(brayns, model_index, nb_frames, radius=0):
+        cameras = list()
+
+        def get_target():
+            model = brayns.scene.models[model_index]
+            min_bounds = model['bounds']['min']
+            max_bounds = model['bounds']['max']
+            center_bounds = [0, 0, 0]
+            size_bounds = [0, 0, 0]
+            for k in range(3):
+                center_bounds[k] = (min_bounds[k] + max_bounds[k]) / 2.0
+                size_bounds[k] = max_bounds[k] - min_bounds[k]
+            return [center_bounds, 1.5 * max(size_bounds[0], max(size_bounds[1], size_bounds[2]))]
+
+        target = get_target()
+        t = target[0]
+        r = radius
+        if r == 0:
+            r = target[1]
+
+        import math
+        x = 360 / nb_frames * math.pi / 180.0
+
+        for i in range(nb_frames):
+            o = [0, 0, 0]
+            u = [0.0, 1.0, 0.0]
+
+            o[0] = t[0] + r * math.cos(float(i) * x)
+            o[1] = t[1]
+            o[2] = t[2] + r * math.sin(float(i) * x)
+
+            d = [0, 0, 0]
+            length = 0.0
+            for k in range(3):
+                d[k] = t[k] - o[k]
+                length += d[k] * d[k]
+            length = math.sqrt(length)
+            for k in range(3):
+                d[k] /= length
+
+            c = [o, d, u]
+            cameras.append(c)
+        return cameras

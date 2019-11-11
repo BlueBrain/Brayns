@@ -44,7 +44,7 @@ void ProximityDetectionRenderer::commit()
         (ispc::vec3f&)_nearColor, (ispc::vec3f&)_farColor, _detectionDistance,
         _detectionOnDifferentMaterial, _randomNumber, _timestamp, spp,
         _surfaceShadingEnabled, _lightPtr, _lightArray.size(), _alphaCorrection,
-        _maxBounces, _exposure);
+        _maxBounces, _exposure, _useHardwareRandomizer);
 }
 
 ProximityDetectionRenderer::ProximityDetectionRenderer()

@@ -83,6 +83,7 @@ inline vec3f CircuitExplorerBasicRenderer_shadeRay(
             vec3f Kd;
             float Ns = 1;
             float opacity;
+            float userParam = 1.f;
 
             if (!objMaterial)
             {
@@ -96,6 +97,7 @@ inline vec3f CircuitExplorerBasicRenderer_shadeRay(
                     Ns = mat->Ns;
                     opacity = dg.color.w * mat->d;
                     shadingMode = mat->shadingMode;
+                    userParam = mat->userParameter;
                     if (opacity < 1.f)
                     {
                         ray.dir = refractedVector(ray.dir, dg.Ns, oldRefraction,
@@ -126,7 +128,7 @@ inline vec3f CircuitExplorerBasicRenderer_shadeRay(
                 {
                 case electron:
                 case electron_transparency:
-                    cosNL = 1.f - pow(cosNL, Ns);
+                    cosNL = 1.f - pow(cosNL, userParam);
                     opacity *=
                         (shadingMode == electron_transparency ? cosNL : 1.f);
                     break;
@@ -134,17 +136,12 @@ inline vec3f CircuitExplorerBasicRenderer_shadeRay(
                     opacity *= cosNL;
                     break;
                 case cartoon:
-                    const unsigned int angleAsInt = cosNL * Ns;
-                    cosNL = (float)(angleAsInt) / Ns;
+                    const unsigned int angleAsInt = cosNL * userParam;
+                    cosNL = (float)(angleAsInt) / userParam;
                     break;
                 case perlin:
                     const vec3f point = ray.org + ray.t * ray.dir;
-                    float n = noise(point);
-                    if (ray.t < dg.epsilon * 1.5e4f)
-                        n += worleyNoise(point, 2.f);
-                    else
-                        n *= 2.f;
-
+                    float n = noise(userParam * point);
                     n = clamp(n, 0.f, 1.f);
                     cosNL *= n;
                     break;
@@ -164,7 +161,7 @@ inline vec3f CircuitExplorerBasicRenderer_shadeRay(
 
         // Next ray
         ray.org = intersection;
-        ray.t0 = dg.epsilon;
+        ray.t0 = max(0.f, dg.epsilon);
         ray.t = inf;
 
         ray.primID = -1;
@@ -214,7 +211,7 @@ export void CircuitExplorerBasicRenderer_set(
     const uniform float alphaCorrection,
     const uniform float simulationThreshold, const uniform float exposure,
     const uniform float fogThickness, const uniform float fogStart,
-    const uniform uint32 maxBounces)
+    const uniform uint32 maxBounces, const uniform bool useHardwareRandomizer)
 {
     uniform CircuitExplorerBasicRenderer* uniform self =
         (uniform CircuitExplorerBasicRenderer * uniform) _self;
@@ -232,6 +229,7 @@ export void CircuitExplorerBasicRenderer_set(
     self->super.super.timestamp = 0.f;
     self->super.super.maxBounces = maxBounces;
     self->super.super.exposure = exposure;
+    self->super.super.useHardwareRandomizer = useHardwareRandomizer;
 
     // Simulation
     self->super.secondaryModel = (uniform Model * uniform) secondaryModel;

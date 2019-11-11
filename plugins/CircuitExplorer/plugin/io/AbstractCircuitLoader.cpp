@@ -439,7 +439,9 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
              : 0});
     materialProps.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
                                static_cast<int>(MaterialShadingMode::diffuse)});
-    materialProps.setProperty({MATERIAL_PROPERTY_CLIPPED, 0});
+    materialProps.setProperty(
+        {MATERIAL_PROPERTY_CLIPPING_MODE,
+         static_cast<int>(MaterialClippingMode::no_clipping)});
     MorphologyLoader::createMissingMaterials(*model, materialProps);
 
     // Apply default colotmap
@@ -632,7 +634,9 @@ void AbstractCircuitLoader::_importMeshes(
         props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 1});
         props.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
                            static_cast<int>(MaterialShadingMode::diffuse)});
-        props.setProperty({MATERIAL_PROPERTY_CLIPPED, 0});
+        props.setProperty(
+            {MATERIAL_PROPERTY_CLIPPING_MODE,
+             static_cast<int>(MaterialClippingMode::no_clipping)});
         material.second->setProperties(props);
     }
 }

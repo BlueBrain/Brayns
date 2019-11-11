@@ -41,6 +41,7 @@ namespace
 const size_t CACHE_VERSION_1 = 1;
 const size_t CACHE_VERSION_2 = 2;
 const size_t CACHE_VERSION_3 = 3;
+const size_t CACHE_VERSION_4 = 4;
 
 const std::string LOADER_NAME = "Pre-computed brick loader";
 const std::string SUPPORTED_EXTENTION_BRAYNS = "brayns";
@@ -214,11 +215,19 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
                                      shadingMode);
         }
 
-        if (version >= CACHE_VERSION_3)
+        if (version == CACHE_VERSION_3)
         {
             bool clipped;
             file.read((char*)&clipped, sizeof(bool));
-            material->updateProperty(MATERIAL_PROPERTY_CLIPPED, clipped);
+            material->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE, clipped);
+        }
+
+        if (version >= CACHE_VERSION_4)
+        {
+            int32_t clippingMode;
+            file.read((char*)&clippingMode, sizeof(int32_t));
+            material->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE,
+                                     clippingMode);
         }
     }
 
@@ -745,11 +754,13 @@ void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
         {
         }
         file.write((char*)&shadingMode, sizeof(int32_t));
+
+        // TODO: Change bool to int32_t for Version 4
         bool clipped = false;
         try
         {
-            clipped =
-                material.second->getProperty<bool>(MATERIAL_PROPERTY_CLIPPED);
+            clipped = material.second->getProperty<bool>(
+                MATERIAL_PROPERTY_CLIPPING_MODE);
         }
         catch (const std::runtime_error&)
         {

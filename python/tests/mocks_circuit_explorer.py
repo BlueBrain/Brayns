@@ -88,14 +88,17 @@ def mock_plugin_ce_get_camera():
 def mock_plugin_ce_export_frames_to_disk(path, animation_frames, camera_definitions):
     return RESPONSE_OK
 
+
 def mock_plugin_ce_get_export_frames_progress():
     return {
         'frameNumber': 0,
         'done': False
     }
 
+
 def mock_plugin_ce_make_movie(output_movie_path, fps_rate, frames_folder_path):
     return RESPONSE_OK
+
 
 def mock_plugin_ce_cancel_frames_export():
     return RESPONSE_OK
@@ -104,23 +107,36 @@ def mock_plugin_ce_cancel_frames_export():
 def mock_plugin_ce_add_grid(min_value, max_value, interval, radius, opacity, show_axis, colored):
     return RESPONSE_OK
 
+
 def mock_plugin_ce_add_sphere(center, radius, color, name):
     return RESPONSE_OK
+
 
 def mock_plugin_ce_add_pill(p1, p2, radius, color, name):
     return RESPONSE_OK
 
+
 def mock_plugin_ce_add_conepill(p1, p2, radius1, radius2, color, name):
     return RESPONSE_OK
+
 
 def mock_plugin_ce_add_sigmoidpill(p1, p2, radius1, radius2, color, name):
     return RESPONSE_OK
 
+
 def mock_plugin_ce_add_cylinder(center, up, radius, color, name):
     return RESPONSE_OK
 
+
 def mock_plugin_ce_add_box(minCorner, maxCorner, color, name):
     return RESPONSE_OK
+
+
+def mock_plugin_ce_get_material_ids(model_id):
+    return {
+        'ids': [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    }
+
 
 def mock_ce_rpc_request(self, method, params=None, response_timeout=None):
     if method == 'add-model':
@@ -158,5 +174,7 @@ def mock_ce_rpc_request(self, method, params=None, response_timeout=None):
     if method == 'add-cylinder':
         return RESPONSE_OK
     if method == 'add-box':
+        return RESPONSE_OK
+    if method == 'get-material-ids':
         return RESPONSE_OK
     return None
