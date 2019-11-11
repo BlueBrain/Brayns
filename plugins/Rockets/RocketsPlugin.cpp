@@ -1609,11 +1609,23 @@ public:
 
         // Make sure the requested file is within the sandbox path
         // TODO: Unhardcode sandbox path and add as braynsService input param
-        size_t pos = path.find("/gpfs/bbp.cscs.ch/project");
+        const std::string& sandboxPath = _engine.getParametersManager()
+                                                .getApplicationParameters()
+                                                .getSandboxPath();
+        size_t pos = path.find(sandboxPath);
         if(pos != 0)
         {
             ft.error = 1;
-            ft.message = "Path falls outside the sandbox: /gpfs/bbp.cscs.ch/project";
+            ft.message = "Path falls outside the sandbox: " + sandboxPath;
+            return ft;
+        }
+
+        if(path.find("../") == 0
+           || path.find("/../") != std::string::npos
+           || path.rfind("/..") == 4)
+        {
+            ft.error = 3;
+            ft.message = "Illegal path detected";
             return ft;
         }
 
@@ -1747,11 +1759,10 @@ public:
     {
         const RpcDescription desc{METHOD_FS_GET_ROOT,
                                   "Return the root path of the current execution environment (sandbox)"};
-        _bindEndpoint(METHOD_FS_GET_ROOT, [&](const rockets::jsonrpc::Request&) {
+        _bindEndpoint(METHOD_FS_GET_ROOT, [& engine = _engine](const rockets::jsonrpc::Request&) {
 
             FileRoot fr;
-            fr.root = "/gpfs/bbp.cscs.ch/project";
-
+            fr.root = engine.getParametersManager().getApplicationParameters().getSandboxPath();
             return Response{to_json(fr)};
         });
 
@@ -1822,7 +1833,7 @@ public:
                   dfl.message = "Unknown error when reading contents of directory " + inputPath.path;
                 }
             }
-            else if(!isDirectory)
+            else if(!isDirectory && ft.error == 0)
             {
                 dfl.error = 4;
                 dfl.message = "The path " + inputPath.path + " is not a directory";

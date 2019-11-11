@@ -36,6 +36,7 @@ const std::string PARAM_PLUGIN = "plugin";
 const std::string PARAM_STEREO = "stereo";
 const std::string PARAM_WINDOW_SIZE = "window-size";
 const std::string PARAM_ENV_MAP = "env-map";
+const std::string PARAM_SANDBOX_PATH = "sandbox-path";
 #ifdef BRAYNS_USE_FFMPEG
 const std::string PARAM_VIDEOSTREAMING = "videostreaming";
 #endif
@@ -43,6 +44,7 @@ const std::string PARAM_VIDEOSTREAMING = "videostreaming";
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
 const size_t DEFAULT_JPEG_COMPRESSION = 90;
+const std::string DEFAULT_SANDBOX_PATH = "/gpfs/bbp.cscs.ch/project";
 }
 
 namespace brayns
@@ -51,6 +53,7 @@ ApplicationParameters::ApplicationParameters()
     : AbstractParameters("Application")
     , _windowSize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT)
     , _jpegCompression(DEFAULT_JPEG_COMPRESSION)
+    , _sandBoxPath(DEFAULT_SANDBOX_PATH)
 {
     _parameters.add_options() //
         (PARAM_ENGINE.c_str(), po::value<std::string>(&_engine),
@@ -84,6 +87,8 @@ ApplicationParameters::ApplicationParameters()
          "Max. render FPS") //
         (PARAM_ENV_MAP.c_str(), po::value<std::string>(&_envMap),
          "Path to environment map")
+        (PARAM_SANDBOX_PATH.c_str(), po::value<std::string>(&_sandBoxPath),
+         "Path to sandbox directory")
 #ifdef BRAYNS_USE_FFMPEG
             (PARAM_VIDEOSTREAMING.c_str(),
              po::bool_switch(&_useVideoStreaming)->default_value(false),
@@ -120,6 +125,8 @@ void ApplicationParameters::print()
     BRAYNS_INFO << "Image stream FPS            : " << _imageStreamFPS
                 << std::endl;
     BRAYNS_INFO << "Max. render  FPS            : " << _maxRenderFPS
+                << std::endl;
+    BRAYNS_INFO << "Sandbox directory           : " << _sandBoxPath
                 << std::endl;
 }
 }
