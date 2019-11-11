@@ -1081,13 +1081,25 @@ void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
     else
     {
         int status = 0;
-        wait(&status);
-        if (status != 0)
+        if (waitpid(pid, &status, 0) > 0)
         {
             // If we could not make the movie, inform and stop execution
-            PLUGIN_ERROR << "Could not create media video file. FFMPEG "
-                            "returned with error "
-                         << status << std::endl;
+            if(WIFEXITED(status) && WEXITSTATUS(status))
+            {
+                if(WEXITSTATUS(status) == 127)
+                {
+                    PLUGIN_ERROR << "Could not create media video file. FFMPEG "
+                                    "returned with error "
+                                 << status << std::endl;
+                    return;
+                }
+            }
+        }
+        else
+        {
+            PLUGIN_ERROR << "Could not create media video file. "
+                            "Could not launch FFMPEG."
+                         << std::endl;
             return;
         }
     }
