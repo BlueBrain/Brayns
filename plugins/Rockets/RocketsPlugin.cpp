@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+﻿/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -100,6 +100,8 @@ const std::string METHOD_GET_MODEL_TRANSFER_FUNCTION =
     "get-model-transfer-function";
 const std::string METHOD_GET_VIDEOSTREAM = "get-videostream";
 const std::string METHOD_IMAGE_JPEG = "image-jpeg";
+const std::string METHOD_SET_STREAMING_METHOD = "image-streaming-mode";
+const std::string METHOD_TRIGGER_JPEG_STREAM = "trigger-jpeg-stream";
 const std::string METHOD_INSPECT = "inspect";
 const std::string METHOD_MODEL_PROPERTIES_SCHEMA = "model-properties-schema";
 const std::string METHOD_REMOVE_CLIP_PLANES = "remove-clip-planes";
@@ -294,7 +296,12 @@ public:
             return;
 
         if (!_parametersManager.getApplicationParameters().useVideoStreaming())
-            _broadcastImageJpeg();
+        {
+            if(_useControlledStream)
+                _broadcastControlledImageJpeg();
+            else
+                _broadcastImageJpeg();
+        }
 #ifdef BRAYNS_USE_FFMPEG
         else
             _broadcastVideo();
@@ -966,6 +973,8 @@ public:
         _handleAnimationParams();
         _handleCamera();
         _handleImageJPEG();
+        _handleTriggerImageStream();
+        _handleSetImageStreamingMode();
         _handleRenderer();
         _handleVersion();
 
@@ -1072,6 +1081,31 @@ public:
         for (; _leftover > duration;)
             _leftover -= duration;
         _timer.start();
+
+        const auto image =
+            _imageGenerator.createJPEG(frameBuffer,
+                                       params.getJpegCompression());
+        if (image.size > 0)
+            _rocketsServer->broadcastBinary((const char*)image.data.get(),
+                                            image.size);
+    }
+
+    void _broadcastControlledImageJpeg()
+    {
+        if(!_controlledStreamingFlag)
+        {
+            return;
+        }
+
+        auto& frameBuffer = _engine.getFrameBuffer();
+        if (frameBuffer.getFrameBufferFormat() == FrameBufferFormat::none ||
+            !frameBuffer.isModified())
+        {
+            return;
+        }
+
+        _controlledStreamingFlag = false;
+        const auto& params = _parametersManager.getApplicationParameters();
 
         const auto image =
             _imageGenerator.createJPEG(frameBuffer,
@@ -1272,6 +1306,31 @@ public:
                 SnapshotFunctor{engine, std::move(params), imageGenerator});
         };
         _handleTask<SnapshotParams, ImageGenerator::ImageBase64>(desc, func);
+    }
+
+    void _handleTriggerImageStream()
+    {
+        _handleRPC({METHOD_TRIGGER_JPEG_STREAM,
+                    "Triggers the engine to stream a frame to the clients"},
+                   [&] {
+                       _triggerControlledStreaming();
+                   });
+    }
+
+    void _handleSetImageStreamingMode()
+    {
+        _handleRPC<ImageStreamingMethod>({METHOD_SET_STREAMING_METHOD,
+                    "Set the image streaming method between automatic or "
+                    "controlled", "type", "Streaming type, either \"stream\" or \"quanta\""},
+                    [&](const ImageStreamingMethod& method){
+                        if(method.type == "quanta")
+                        {
+                            _useControlledStream = true;
+                            _controlledStreamingFlag = false;
+                        }
+                        else
+                            _useControlledStream = false;
+                    });
     }
 
     void _handleRequestModelUpload()
@@ -2192,6 +2251,12 @@ public:
         });
     }
 
+    void _triggerControlledStreaming()
+    {
+        _controlledStreamingFlag = true;
+        _engine.triggerRender();
+    }
+
     Engine& _engine;
 
     std::unordered_map<std::string, std::pair<std::mutex, Throttle>> _throttle;
@@ -2226,6 +2291,9 @@ public:
     // need to delay those as we are initialized first, but other plugins might
     // alter the list of renderers for instance
     bool _endpointsRegistered{false};
+
+    bool _useControlledStream{false};
+    bool _controlledStreamingFlag{false};
 
     std::vector<BaseObject*> _objects;
 
