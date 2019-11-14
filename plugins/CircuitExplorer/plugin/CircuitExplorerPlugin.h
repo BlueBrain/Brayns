@@ -54,6 +54,7 @@ private:
     CameraDefinition _getCamera();
     void _setMaterial(const MaterialDescriptor&);
     void _setMaterials(const MaterialsDescriptor&);
+    void _setMaterialRange(const MaterialRangeDescriptor&);
     void _setMaterialExtraAttributes(const MaterialExtraAttributes&);
 
     // Experimental
@@ -72,6 +73,9 @@ private:
     void _doExportFrameToDisk();
     FrameExportProgress _getFrameExportProgress();
     void _makeMovie(const MakeMovieParameters& params);
+
+    // Anterograde tracing
+    AnterogradeTracingResult _traceAnterogrades(const AnterogradeTracing& payload);
 
     // Add geometry
     void _createShapeMaterial(brayns::ModelPtr& model,

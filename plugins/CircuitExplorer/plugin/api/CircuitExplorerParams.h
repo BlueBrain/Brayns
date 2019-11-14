@@ -84,6 +84,27 @@ struct MaterialsDescriptor
 bool from_json(MaterialsDescriptor& materialsDescriptor,
                const std::string& payload);
 
+struct MaterialRangeDescriptor
+{
+    int32_t modelId;
+    std::vector<int32_t> materialIds;
+    std::vector<float> diffuseColor;
+    std::vector<float> specularColor;
+    float specularExponent;
+    float reflectionIndex;
+    float opacity;
+    float refractionIndex;
+    float emission;
+    float glossiness;
+    bool simulationDataCast;
+    int32_t shadingMode;
+    int32_t clippingMode;
+    float userParameter;
+};
+
+bool from_json(MaterialRangeDescriptor& materialRangeDescriptor,
+               const std::string& payload);
+
 // Material IDs for a given model
 struct ModelId
 {
@@ -302,6 +323,24 @@ struct AddColumn
     float radius;
 };
 bool from_json(AddColumn& param, const std::string& payload);
+
+struct AnterogradeTracing
+{
+    int32_t modelId;
+    std::vector<uint32_t> cellGIDs;
+    std::vector<uint32_t> targetCellGIDs;
+    std::vector<double> sourceCellColor;
+    std::vector<double> connectedCellsColor;
+    std::vector<double> nonConnectedCellsColor;
+};
+bool from_json(AnterogradeTracing& param, const std::string& payload);
+
+struct AnterogradeTracingResult
+{
+    int error;
+    std::string message;
+};
+std::string to_json(const AnterogradeTracingResult& result);
 
 struct AddSphere
 {
