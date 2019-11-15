@@ -104,6 +104,18 @@ def test_set_materials():
             emissions=emissions, refraction_indices=refraction_indices)
         assert_equal(response, {'ok'})
 
+def test_set_material_range():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.set_material_range(
+            model_id=0, material_ids=[0], diffuse_color=(1, 1, 1), specular_color=(1, 1, 1))
+        assert_equal(response, {'ok'})
+
 
 def test_save_to_cache():
     with patch('rockets.AsyncClient.connected', new=mock_connected), \
@@ -205,6 +217,20 @@ def test_cancel_frames_export():
         app = brayns.Client('localhost:8200')
         ce = CircuitExplorer(app)
         response = ce.cancel_frames_export()
+        assert_equal(response, {'ok'})
+
+def test_trace_anterograde():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.trace_anterograde(
+            model_id=0,
+            source_cells_gid=list(),
+            target_cells_gid=list())
         assert_equal(response, {'ok'})
 
 

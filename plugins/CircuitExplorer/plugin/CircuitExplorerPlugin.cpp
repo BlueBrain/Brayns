@@ -64,6 +64,10 @@
 #define REGISTER_LOADER(LOADER, FUNC) \
     registry.registerLoader({std::bind(&LOADER::getSupportedDataTypes), FUNC});
 
+const std::string ANTEROGRADE_TYPE_AFFERENT = "afferent";
+const std::string ANTEROGRADE_TYPE_AFFERENTEXTERNAL = "projection";
+const std::string ANTEROGRADE_TYPE_EFFERENT = "efferent";
+
 void _addAdvancedSimulationRenderer(brayns::Engine& engine)
 {
     PLUGIN_INFO << "Registering advanced renderer" << std::endl;
@@ -315,6 +319,11 @@ void CircuitExplorerPlugin::init()
             "set-materials",
             [&](const MaterialsDescriptor& param) { _setMaterials(param); });
 
+        PLUGIN_INFO << "Registering 'set-material-range' endpoint" << std::endl;
+        actionInterface->registerNotification<MaterialRangeDescriptor>(
+            "set-material-range",
+            [&](const MaterialRangeDescriptor& param) { _setMaterialRange(param); });
+
         PLUGIN_INFO << "Registering 'get-material-ids' endpoint" << std::endl;
         actionInterface->registerRequest<ModelId, MaterialIds>(
             "get-material-ids", [&](const ModelId& modelId) -> MaterialIds {
@@ -404,6 +413,14 @@ void CircuitExplorerPlugin::init()
         actionInterface->registerNotification<MakeMovieParameters>(
             "make-movie",
             [&](const MakeMovieParameters& params) { _makeMovie(params); });
+
+        PLUGIN_INFO << "Registering 'trace-anterograde' endpoint" << std::endl;
+        _api->getActionInterface()
+               ->registerRequest<AnterogradeTracing, AnterogradeTracingResult>(
+            "trace-anterograde",
+            [&](const AnterogradeTracing& payload) {
+                return _traceAnterogrades(payload);
+            });
 
         PLUGIN_INFO << "Registering 'add-grid' endpoint" << std::endl;
         _api->getActionInterface()->registerNotification<AddGrid>(
@@ -652,6 +669,72 @@ void CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
             PLUGIN_INFO << "Model " << modelId << " is not registered"
                         << std::endl;
     }
+}
+
+void CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescriptor& mrd)
+{
+    auto modelDescriptor = _api->getScene().getModel(mrd.modelId);
+    if (modelDescriptor)
+    {
+        std::vector<size_t> matIds;
+        if(mrd.materialIds.empty())
+        {
+            matIds.reserve(modelDescriptor->getModel().getMaterials().size());
+            for(const auto& mat : modelDescriptor->getModel().getMaterials())
+                matIds.push_back(mat.first);
+        }
+        else
+        {
+            matIds.reserve(mrd.materialIds.size());
+            for(const auto& id : mrd.materialIds)
+                matIds.push_back(static_cast<size_t>(id));
+        }
+
+        for (const auto materialId : matIds)
+        {
+            try
+            {
+                auto material =
+                    modelDescriptor->getModel().getMaterial(materialId);
+                if (material)
+                {
+                    material->setDiffuseColor({mrd.diffuseColor[0],
+                                               mrd.diffuseColor[1],
+                                               mrd.diffuseColor[2]});
+                    material->setSpecularColor({mrd.specularColor[0],
+                                                mrd.specularColor[1],
+                                                mrd.specularColor[2]});
+
+                    material->setSpecularExponent(mrd.specularExponent);
+                    material->setReflectionIndex(mrd.reflectionIndex);
+                    material->setOpacity(mrd.opacity);
+                    material->setRefractionIndex(mrd.refractionIndex);
+                    material->setEmission(mrd.emission);
+                    material->setGlossiness(mrd.glossiness);
+                    material->updateProperty(MATERIAL_PROPERTY_CAST_USER_DATA,
+                                             mrd.simulationDataCast ? 1 : 0);
+                    material->updateProperty(MATERIAL_PROPERTY_SHADING_MODE,
+                                             mrd.shadingMode);
+                    material->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE,
+                                             mrd.clippingMode);
+                    material->updateProperty(MATERIAL_PROPERTY_USER_PARAMETER,
+                                             static_cast<double>(mrd.userParameter));
+                    material->markModified(); // This is needed to apply
+                                              // propery modifications
+                    material->commit();
+
+                }
+            }
+            catch (const std::runtime_error& e)
+            {
+                PLUGIN_INFO << e.what() << std::endl;
+            }
+        }
+        _dirty = true;
+    }
+    else
+        PLUGIN_INFO << "Model " << mrd.modelId << " is not registered"
+                    << std::endl;
 }
 
 MaterialIds CircuitExplorerPlugin::_getMaterialIds(const ModelId& modelId)
@@ -1131,6 +1214,173 @@ void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
                          << std::endl;
         }
     }
+}
+
+AnterogradeTracingResult CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTracing &payload)
+{
+    AnterogradeTracingResult result;
+    result.error = 0;
+
+    if(payload.cellGIDs.empty())
+    {
+        result.error = 1;
+        result.message = "No input cell GIDs specified";
+        return result;
+    }
+    if(payload.sourceCellColor.size() < 4)
+    {
+        result.error = 2;
+        result.message = "Source cell stain color must have "
+                         "4 components (RGBA)";
+        return result;
+    }
+    if(payload.connectedCellsColor.size() < 4)
+    {
+        result.error = 3;
+        result.message = "Connected cell stain color must have "
+                         "4 components (RGBA)";
+        return result;
+    }
+    if(payload.nonConnectedCellsColor.size() < 4)
+    {
+        result.error = 4;
+        result.message = "Non connected cell stain color must have "
+                         "4 components (RGBA)";
+        return result;
+    }
+
+    auto modelDescriptor = _api->getScene().getModel(static_cast<size_t>(payload.modelId));
+    if(modelDescriptor)
+    {
+        const brion::BlueConfig blueConfiguration (modelDescriptor->getPath());
+        const brain::Circuit circuit (blueConfiguration);
+
+        // Parse loaded targets
+        const brayns::ModelMetadata& metaData = modelDescriptor->getMetadata();
+        auto targetsIt = metaData.find("Targets");
+        std::vector<std::string> targets;
+        if(targetsIt != metaData.end())
+        {
+            const std::string& targetsString = targetsIt->second;
+            if(!targetsString.empty())
+            {
+                if(targetsString.find(',') == std::string::npos)
+                    targets.push_back(targetsString);
+                else
+                {
+                    std::string split;
+                    std::istringstream ss(targetsString);
+                    while (std::getline(ss, split, ','))
+                        targets.push_back(split);
+                }
+            }
+        }
+
+        // Gather all GIDs from loaded targets
+        brion::GIDSet allGIDs;
+        if(!targets.empty())
+        {
+            for(const auto& targetName : targets)
+            {
+                brion::GIDSet targetGids = circuit.getGIDs(targetName);
+                allGIDs.insert(targetGids.begin(), targetGids.end());
+            }
+        }
+        else
+            allGIDs = circuit.getGIDs();
+
+        // Map GIDs to material IDs
+        std::unordered_map<uint32_t, size_t> gidMaterialMap;
+        size_t counter = 0;
+        for(auto gid : allGIDs)
+        {
+            gidMaterialMap[gid] = counter++;
+        }
+
+        const size_t totalSynapses = payload.targetCellGIDs.size();
+        result.message = "Tracing returned "
+                         + std::to_string(totalSynapses)
+                         + " connected cells";
+
+        // If there is any GID, modify the scene materials
+        if(totalSynapses > 0)
+        {
+            std::vector<uint8_t> matMods (gidMaterialMap.size(), 0);
+
+            // Mark connections in the matMods
+            for(auto gid : payload.targetCellGIDs)
+            {
+                auto it = gidMaterialMap.find(gid);
+                if(it != gidMaterialMap.end())
+                    matMods[it->second] = 2;
+            }
+
+            const std::set<uint32_t> gidsSet (payload.cellGIDs.begin(), payload.cellGIDs.end());
+            // Mark sources in the mat mods
+            for(auto source : gidsSet)
+            {
+                auto it = gidMaterialMap.find(source);
+                if(it != gidMaterialMap.end())
+                    matMods[it->second] = 1;
+            }
+
+            // Enable CircuitExplorer extra parameters on materials
+            MaterialExtraAttributes mea;
+            mea.modelId = payload.modelId;
+            _setMaterialExtraAttributes(mea);
+
+            // Modify materials according to cell status (source, connected, non connected)
+            auto materials = modelDescriptor->getModel().getMaterials();
+            size_t i = 0;
+            for(auto& material : materials)
+            {
+                // Non connected
+                if(matMods[i] == 0)
+                {
+                    material.second->setDiffuseColor({payload.nonConnectedCellsColor[0] * 5.0,
+                                                     payload.nonConnectedCellsColor[1] * 5.0,
+                                                     payload.nonConnectedCellsColor[2] * 5.0});
+                    material.second->setOpacity(payload.nonConnectedCellsColor[3]);
+                }
+                // Source cell
+                else if(matMods[i] == 1)
+                {
+                    material.second->setDiffuseColor({payload.sourceCellColor[0] * 5.0,
+                                                     payload.sourceCellColor[1] * 5.0,
+                                                     payload.sourceCellColor[2] * 5.0});
+                    material.second->setOpacity(payload.sourceCellColor[3]);
+                }
+                // Connected cell
+                else
+                {
+                    material.second->setDiffuseColor({payload.connectedCellsColor[0],
+                                                     payload.connectedCellsColor[1],
+                                                     payload.connectedCellsColor[2]});
+                    material.second->setOpacity(payload.connectedCellsColor[3]);
+                }
+
+                material.second->setSpecularExponent(0.0);
+                material.second->updateProperty(MATERIAL_PROPERTY_SHADING_MODE,
+                                                static_cast<int>(MaterialShadingMode::diffuse_transparency));
+
+                material.second->markModified();
+                material.second->commit();
+
+                i++;
+            }
+
+            _api->getEngine().triggerRender();
+            _dirty = true;
+        }
+    }
+    else
+    {
+        result.error = 5;
+        result.message = "The given model ID does not correspond "
+                         "to any existing scene model";
+    }
+
+    return result;
 }
 
 void CircuitExplorerPlugin::_createShapeMaterial(brayns::ModelPtr& model,

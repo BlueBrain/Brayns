@@ -60,6 +60,13 @@ def mock_plugin_ce_set_materials(model_ids, material_ids, diffuse_colors, specul
                       shading_modes=list(), emissions=list(), clips=list()):
     return RESPONSE_OK
 
+def mock_plugin_ce_set_material_range(self, model_id, material_ids, diffuse_color=(1.0, 1.0, 1.0),
+                       specular_color=(1.0, 1.0, 1.0), specular_exponent=20.0, opacity=1.0,
+                       reflection_index=0.0, refraction_index=1.0, simulation_data_cast=True,
+                       glossiness=1.0, shading_mode=0, emission=0.0,
+                       clipping_mode=0, user_parameter=0.0):
+    return RESPONSE_OK
+
 
 def mock_plugin_ce_save_model_to_cache(model_id, path):
     return RESPONSE_OK
@@ -107,6 +114,8 @@ def mock_plugin_ce_cancel_frames_export():
 def mock_plugin_ce_add_grid(min_value, max_value, interval, radius, opacity, show_axis, colored):
     return RESPONSE_OK
 
+def mock_plugin_ce_trace_anterograde(model_id, source_cells_gid,  target_cells_gid, source_cells_color, target_cells_color, non_connected_color):
+    return RESPONSE_OK
 
 def mock_plugin_ce_add_sphere(center, radius, color, name):
     return RESPONSE_OK
@@ -153,6 +162,8 @@ def mock_ce_rpc_request(self, method, params=None, response_timeout=None):
         return RESPONSE_OK
     if method == 'set-materials':
         return RESPONSE_OK
+    if method == 'set-material-range':
+        return RESPONSE_OK
     if method == 'set-material-extra-attributes':
         return RESPONSE_OK
     if method == 'set-odu-camera':
@@ -166,6 +177,8 @@ def mock_ce_rpc_request(self, method, params=None, response_timeout=None):
     if method == 'make-movie':
         return RESPONSE_OK
     if method == 'cancel-frames-export':
+        return RESPONSE_OK
+    if method == 'trace-anterograde':
         return RESPONSE_OK
     if method == 'add-sphere':
         return RESPONSE_OK

@@ -322,6 +322,53 @@ class CircuitExplorer:
         return self._client.request("set-materials", params=params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
+    # pylint: disable=R0913, R0914
+    def set_material_range(self, model_id, material_ids, diffuse_color=(1.0, 1.0, 1.0),
+                           specular_color=(1.0, 1.0, 1.0), specular_exponent=20.0, opacity=1.0,
+                           reflection_index=0.0, refraction_index=1.0, simulation_data_cast=True,
+                           glossiness=1.0, shading_mode=SHADING_MODE_NONE, emission=0.0,
+                           clipping_mode=CLIPPING_MODE_NONE, user_parameter=0.0):
+        """
+        Set a range of materials on a specified model
+
+        :param int model_id: ID of the model
+        :param list material_ids: IDs of the material to change
+        :param list diffuse_color: Diffuse color (3 values between 0 and 1)
+        :param list specular_color: Specular color (3 values between 0 and 1)
+        :param list specular_exponent: Diffuse exponent
+        :param float opacity: Opacity
+        :param float reflection_index: Reflection index (value between 0 and 1)
+        :param float refraction_index: Refraction index
+        :param bool simulation_data_cast: Casts simulation information
+        :param float glossiness: Glossiness (value between 0 and 1)
+        :param int shading_mode: Shading mode (SHADING_MODE_NONE, SHADING_MODE_DIFFUSE,
+        SHADING_MODE_ELECTRON, SHADING_MODE_CARTOON, SHADING_MODE_ELECTRON_TRANSPARENCY,
+        SHADING_MODE_PERLIN or SHADING_MODE_DIFFUSE_TRANSPARENCY)
+        :param float emission: Light emission intensity
+        :param bool clipping_mode: Clipped against clipping planes/spheres defined at the scene
+        level
+        :param float user_parameter: Convenience parameter used by some of the shaders
+        :return: Result of the request submission
+        :rtype: str
+        """
+        params = dict()
+        params['modelId'] = model_id
+        params['materialId'] = material_ids
+        params['diffuseColor'] = diffuse_color
+        params['specularColor'] = specular_color
+        params['specularExponent'] = specular_exponent
+        params['reflectionIndex'] = reflection_index
+        params['opacity'] = opacity
+        params['refractionIndex'] = refraction_index
+        params['emission'] = emission
+        params['glossiness'] = glossiness
+        params['simulationDataCast'] = simulation_data_cast
+        params['shadingMode'] = shading_mode
+        params['clippingMode'] = clipping_mode
+        params['userParameter'] = user_parameter
+        return self._client.request("set-material-range", params=params,
+                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+
     def save_model_to_cache(self, model_id, path):
         """
         Save a model to the specified cache file
@@ -514,6 +561,30 @@ class CircuitExplorer:
         params['animationInformation'] = []
         params['cameraInformation'] = []
         return self._client.request('export-frames-to-disk', params,
+                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+
+    def trace_anterograde(self, model_id, source_cells_gid, target_cells_gid, source_cells_color=(5,5,0,1), target_cells_color=(5,0,0,1), non_connected_color=(0.5,0.5,0.5,1.0)):
+        """
+        Stain the cells based on their synapses
+
+        :param int model_id ID of the model to trace
+        :param list source_cells_gid list of cell GIDs as source of the connections
+        :param list target_cells_gid list of cell GIDs connected to the source(s)
+        :param source_cell_color RGBA 4 floating point list as color for source cells
+        :param target_cell_color RGBA 4 floating point list as color for target cells
+        :param non_connected_color RGBA 4 floating point list as color for non connected cells
+        : return: Result of the request submission as a dictionary {error:int, message:string}
+        :rtype dict
+        """
+
+        params = dict()
+        params['modelId'] = model_id
+        params['cellGIDs'] = source_cells_gid
+        params['targetCellGIDs'] = target_cells_gid
+        params['sourceCellColor'] = source_cells_color
+        params['connectedCellsColor'] = target_cells_color
+        params['nonConnectedCellsColor'] = non_connected_color
+        return self._client.request('trace-anterograde', params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
     def add_sphere(self, center, radius, color, name=""):
