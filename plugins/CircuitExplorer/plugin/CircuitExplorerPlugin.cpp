@@ -261,6 +261,17 @@ std::string _sanitizeString(const std::string& input)
     return result;
 }
 
+std::vector<std::string> _splitString(const std::string& source, const char token)
+{
+    std::vector<std::string> result;
+    std::string split;
+    std::istringstream ss(source);
+    while (std::getline(ss, split, token))
+        result.push_back(split);
+
+    return result;
+}
+
 CircuitExplorerPlugin::CircuitExplorerPlugin()
     : ExtensionPlugin()
 {
@@ -1268,33 +1279,63 @@ AnterogradeTracingResult CircuitExplorerPlugin::_traceAnterogrades(const Anterog
                     targets.push_back(targetsString);
                 else
                 {
-                    std::string split;
-                    std::istringstream ss(targetsString);
-                    while (std::getline(ss, split, ','))
-                        targets.push_back(split);
+                    targets = _splitString(targetsString, ',');
                 }
             }
         }
 
-        // Gather all GIDs from loaded targets
+        auto densityIt = metaData.find("Density");
+        const double density = std::stod(densityIt->second);
+        auto randomIt = metaData.find("RandomSeed");
+        const double randomSeed = std::stod(randomIt->second);
+
+        auto gidsMetaIt = metaData.find("GIDs");
+        const std::string& gidsStr = gidsMetaIt->second;
+
         brion::GIDSet allGIDs;
-        if(!targets.empty())
+
+        if(!gidsStr.empty())
         {
-            for(const auto& targetName : targets)
+            std::vector<std::string> tempStrGids = _splitString(gidsStr, ',');
+            for(const auto& gidStrTok : tempStrGids)
             {
-                brion::GIDSet targetGids = circuit.getGIDs(targetName);
-                allGIDs.insert(targetGids.begin(), targetGids.end());
+                allGIDs.insert(static_cast<uint32_t>(std::stoul(gidStrTok)));
             }
         }
         else
-            allGIDs = circuit.getGIDs();
+        {
+            // Gather all GIDs from loaded targets
+            if(!targets.empty())
+            {
+                for(const auto& targetName : targets)
+                {
+                    if(density < 1.0)
+                    {
+                        brion::GIDSet targetGids = circuit.getRandomGIDs(density, targetName, randomSeed);
+                        allGIDs.insert(targetGids.begin(), targetGids.end());
+                    }
+                    else
+                    {
+                        brion::GIDSet targetGids = circuit.getGIDs(targetName);
+                        allGIDs.insert(targetGids.begin(), targetGids.end());
+                    }
+
+                }
+            }
+            else if(density < 1.0)
+                allGIDs = circuit.getRandomGIDs(density, "", randomSeed);
+            else
+                allGIDs = circuit.getGIDs();
+        }
 
         // Map GIDs to material IDs
         std::unordered_map<uint32_t, size_t> gidMaterialMap;
-        size_t counter = 0;
-        for(auto gid : allGIDs)
+        auto materials = modelDescriptor->getModel().getMaterials();
+        auto itGids = allGIDs.begin();
+        auto itMats = materials.begin();
+        for(; itMats != materials.end(); ++itMats, ++itGids)
         {
-            gidMaterialMap[gid] = counter++;
+            gidMaterialMap[*itGids] = itMats->first;
         }
 
         const size_t totalSynapses = payload.targetCellGIDs.size();
@@ -1305,72 +1346,70 @@ AnterogradeTracingResult CircuitExplorerPlugin::_traceAnterogrades(const Anterog
         // If there is any GID, modify the scene materials
         if(totalSynapses > 0)
         {
-            std::vector<uint8_t> matMods (gidMaterialMap.size(), 0);
-
-            // Mark connections in the matMods
-            for(auto gid : payload.targetCellGIDs)
-            {
-                auto it = gidMaterialMap.find(gid);
-                if(it != gidMaterialMap.end())
-                    matMods[it->second] = 2;
-            }
-
-            const std::set<uint32_t> gidsSet (payload.cellGIDs.begin(), payload.cellGIDs.end());
-            // Mark sources in the mat mods
-            for(auto source : gidsSet)
-            {
-                auto it = gidMaterialMap.find(source);
-                if(it != gidMaterialMap.end())
-                    matMods[it->second] = 1;
-            }
-
             // Enable CircuitExplorer extra parameters on materials
             MaterialExtraAttributes mea;
             mea.modelId = payload.modelId;
             _setMaterialExtraAttributes(mea);
 
-            // Modify materials according to cell status (source, connected, non connected)
-            auto materials = modelDescriptor->getModel().getMaterials();
-            size_t i = 0;
-            for(auto& material : materials)
+            // Reset all cells to default color
+            MaterialRangeDescriptor mrd;
+            mrd.modelId = payload.modelId;
+            mrd.opacity = static_cast<float>(payload.nonConnectedCellsColor[3]);
+            mrd.diffuseColor =
             {
-                // Non connected
-                if(matMods[i] == 0)
-                {
-                    material.second->setDiffuseColor({payload.nonConnectedCellsColor[0] * 5.0,
-                                                     payload.nonConnectedCellsColor[1] * 5.0,
-                                                     payload.nonConnectedCellsColor[2] * 5.0});
-                    material.second->setOpacity(payload.nonConnectedCellsColor[3]);
-                }
-                // Source cell
-                else if(matMods[i] == 1)
-                {
-                    material.second->setDiffuseColor({payload.sourceCellColor[0] * 5.0,
-                                                     payload.sourceCellColor[1] * 5.0,
-                                                     payload.sourceCellColor[2] * 5.0});
-                    material.second->setOpacity(payload.sourceCellColor[3]);
-                }
-                // Connected cell
-                else
-                {
-                    material.second->setDiffuseColor({payload.connectedCellsColor[0],
-                                                     payload.connectedCellsColor[1],
-                                                     payload.connectedCellsColor[2]});
-                    material.second->setOpacity(payload.connectedCellsColor[3]);
-                }
+                static_cast<float>(payload.nonConnectedCellsColor[0]),
+                static_cast<float>(payload.nonConnectedCellsColor[1]),
+                static_cast<float>(payload.nonConnectedCellsColor[2])
+            };
 
-                material.second->setSpecularExponent(0.0);
-                material.second->updateProperty(MATERIAL_PROPERTY_SHADING_MODE,
-                                                static_cast<int>(MaterialShadingMode::diffuse_transparency));
+            mrd.specularColor = {0.f, 0.f, 0.f};
+            mrd.specularExponent = 0.f;
+            mrd.glossiness = 0.f;
+            mrd.shadingMode = static_cast<int>(MaterialShadingMode::diffuse_transparency);
+            _setMaterialRange(mrd);
 
-                material.second->markModified();
-                material.second->commit();
-
-                i++;
+            // Mark connections
+            MaterialRangeDescriptor connectedMrd = mrd;
+            mrd.diffuseColor =
+            {
+                static_cast<float>(payload.connectedCellsColor[0]),
+                static_cast<float>(payload.connectedCellsColor[1]),
+                static_cast<float>(payload.connectedCellsColor[2])
+            };
+            mrd.opacity = 1.0f;
+            mrd.modelId = payload.modelId;
+            mrd.materialIds.reserve(payload.targetCellGIDs.size());
+            for(auto gid : payload.targetCellGIDs)
+            {
+                auto it = gidMaterialMap.find(gid);
+                if(it != gidMaterialMap.end())
+                    mrd.materialIds.push_back(it->second);
             }
+            _setMaterialRange(connectedMrd);
 
+            // Mark sources
+            const std::set<uint32_t> gidsSet (payload.cellGIDs.begin(), payload.cellGIDs.end());
+            MaterialRangeDescriptor sourcesMrd = mrd;
+            mrd.diffuseColor =
+            {
+                static_cast<float>(payload.sourceCellColor[0]),
+                static_cast<float>(payload.sourceCellColor[1]),
+                static_cast<float>(payload.sourceCellColor[2])
+            };
+            mrd.opacity = 1.f;
+            mrd.modelId = payload.modelId;
+            mrd.materialIds.reserve(gidsSet.size());
+            for(auto source : gidsSet)
+            {
+                auto it = gidMaterialMap.find(source);
+                if(it != gidMaterialMap.end())
+                    mrd.materialIds.push_back(it->second);
+            }
+            _setMaterialRange(sourcesMrd);
+
+            _api->getScene().markModified();
             _api->getEngine().triggerRender();
-            _dirty = true;
+            //_dirty = true;
         }
     }
     else

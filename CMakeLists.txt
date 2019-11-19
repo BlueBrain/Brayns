@@ -26,6 +26,12 @@ set(BRAYNS_PORT_DEPEND "assimp boost freeimage glew tbb")
 # Unit testing
 option(BRAYNS_UNIT_TESTING_ENABLED "Unit testing" ON)
 
+# JSON message live debugging
+option(BRAYNS_DEBUG_JSON_ENABLED "Catch JSON exceptions during runtime" OFF)
+if(BRAYNS_DEBUG_JSON_ENABLED)
+    add_definitions(-DBRAYNS_DEBUG_JSON_ENABLED)
+endif(BRAYNS_DEBUG_JSON_ENABLED)
+
 # Enable cloning of all optional subprojects for CI builds
 if($ENV{TRAVIS})
   if(NOT DEFINED BRAYNS_NETWORKING_ENABLED)

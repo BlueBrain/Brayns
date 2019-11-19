@@ -466,7 +466,9 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
         {"Mesh folder", meshFolder},
         {"Morphology quality",
          enumToString<MorphologyQuality>(morphologyQuality)},
-        {"Number of neurons", std::to_string(allGids.size())}};
+        {"Number of neurons", std::to_string(allGids.size())},
+        {"Density", std::to_string(properties.getProperty<double>(PROP_DENSITY.name))},
+        {"RandomSeed", std::to_string(properties.getProperty<double>(PROP_RANDOM_SEED.name))}};
 
     brayns::ModelDescriptorPtr modelDescriptor;
     brayns::Transformation transformation;
