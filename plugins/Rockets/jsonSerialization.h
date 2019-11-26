@@ -156,6 +156,11 @@ struct ImageStreamingMethod
     std::string type;
 };
 
+struct ExitLaterSchedule
+{
+    uint32_t minutes;
+};
+
 } // namespace brayns
 
 STATICJSON_DECLARE_ENUM(brayns::GeometryQuality,
@@ -605,6 +610,12 @@ inline void init(brayns::DirectoryFileList* a, ObjectHandler* h)
 inline void init(brayns::ImageStreamingMethod* a, ObjectHandler* h)
 {
     h->add_property("type", &a->type);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::ExitLaterSchedule* a, ObjectHandler* h)
+{
+    h->add_property("minutes", &a->minutes);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

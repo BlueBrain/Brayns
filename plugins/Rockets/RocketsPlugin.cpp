@@ -45,6 +45,7 @@
 #include "ImageGenerator.h"
 #include "Throttle.h"
 
+#include <atomic>
 #include <dirent.h>
 #include <fstream>
 #include <limits.h>
@@ -132,6 +133,7 @@ const std::string METHOD_FS_LIST_DIR = "fs-list-dir";
 // JSONRPC notifications
 const std::string METHOD_CHUNK = "chunk";
 const std::string METHOD_QUIT = "quit";
+const std::string METHOD_EXIT_LATER = "exit-later";
 const std::string METHOD_RESET_CAMERA = "reset-camera";
 
 const std::string LOADERS_SCHEMA = "loaders-schema";
@@ -992,6 +994,7 @@ public:
 
         _handleInspect();
         _handleQuit();
+        _handleExitLater();
         _handleResetCamera();
         _handleSnapshot();
 
@@ -1092,7 +1095,7 @@ public:
 
     void _broadcastControlledImageJpeg()
     {
-        if(!_controlledStreamingFlag)
+        if(!_controlledStreamingFlag.load())
         {
             return;
         }
@@ -1279,6 +1282,42 @@ public:
                        engine.setKeepRunning(false);
                        engine.triggerRender();
                    });
+    }
+
+    void _handleExitLater()
+    {
+        _handleRPC<ExitLaterSchedule>({METHOD_EXIT_LATER,
+                    "Schedules Brayns to shutdown after a given amount of minutes",
+                    "minutes", "Number of minutes after which Brayns will shut down"},
+                    [&](const ExitLaterSchedule& schedule){
+                        std::lock_guard<std::mutex> lock(_scheduleMutex);
+                        if(schedule.minutes > 0)
+                        {
+                            if(_scheduledShutdownActive)
+                            {
+                                _cancelScheduledShutdown = true;
+                                _monitor.notify_all();
+                                _shutDownWorker->join();
+                                _shutDownWorker.reset();
+                                _cancelScheduledShutdown = false;
+                                _scheduledShutdownActive = false;
+                            }
+
+                            _scheduledShutdownActive = true;
+                            const uint32_t mins = schedule.minutes;
+                            _shutDownWorker = std::unique_ptr<std::thread>(new std::thread([&, mins]()
+                            {
+                                std::chrono::milliseconds timeToWait (mins * 60000);
+                                std::unique_lock<std::mutex> threadLock(_waitLock);
+                                _monitor.wait_for(threadLock, timeToWait);
+                                if(!_cancelScheduledShutdown)
+                                {
+                                    _engine.setKeepRunning(false);
+                                    _engine.triggerRender();
+                                }
+                            }));
+                        }
+                    });
     }
 
     void _handleResetCamera()
@@ -2292,8 +2331,22 @@ public:
     // alter the list of renderers for instance
     bool _endpointsRegistered{false};
 
+    // Wether to use controlled stream (true = client request frames, false = continous stream of frames)
     bool _useControlledStream{false};
-    bool _controlledStreamingFlag{false};
+    // Flag used to control the frame send when _useControlledStream = true
+    std::atomic<bool> _controlledStreamingFlag{false};
+
+    // Wether a scheduled shutdown is running at the momment
+    bool _scheduledShutdownActive{false};
+    // Flag to cancel current scheduled shutdown
+    bool _cancelScheduledShutdown{false};
+    // Worker in charge of shutdown
+    std::unique_ptr<std::thread> _shutDownWorker;
+    // Lock for safe schedule
+    std::mutex _scheduleMutex;
+    // Schedule mechanism
+    std::mutex _waitLock;
+    std::condition_variable _monitor;
 
     std::vector<BaseObject*> _objects;
 
