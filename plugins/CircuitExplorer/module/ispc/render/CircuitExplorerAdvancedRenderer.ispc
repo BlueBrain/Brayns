@@ -650,10 +650,10 @@ inline void setGeometryShadingAttributes(
         attributes.diffuseColor = mat->Kd * make_vec3f(dg.color);
         if (valid(mat->map_Kd))
         {
-            const vec4f diffuseColorFromMap = get4f(mat->map_Kd, dg);
+            const vec3f diffuseColorFromMap = get3f(mat->map_Kd, dg);
             attributes.diffuseColor =
                 attributes.diffuseColor * make_vec3f(diffuseColorFromMap);
-            attributes.opacity *= diffuseColorFromMap.w;
+            //            attributes.opacity *= diffuseColorFromMap.w;
         }
 
         // Specular color

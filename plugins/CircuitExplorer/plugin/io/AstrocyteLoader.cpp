@@ -162,7 +162,7 @@ void AstrocyteLoader::_importMorphologiesFromURIs(
                                 (float)i / (float)uris.size());
     }
     brayns::PropertyMap materialProps;
-    materialProps.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 0});
+    materialProps.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, false});
     materialProps.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
                                static_cast<int>(MaterialShadingMode::diffuse)});
     materialProps.setProperty(

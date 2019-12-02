@@ -177,10 +177,7 @@ ospcommon::affine3f transformationToAffine3f(
                 float(translation.z + rotationCenter.z)}) *
            rot *
            ospcommon::affine3f::scale(
-               {float(scale.x), float(scale.y), float(scale.z)}) *
-           ospcommon::affine3f::translate({float(-rotationCenter.x),
-                                           float(-rotationCenter.y),
-                                           float(-rotationCenter.z)});
+               {float(scale.x), float(scale.y), float(scale.z)});
 }
 
 void addInstance(OSPModel rootModel, OSPModel modelToAdd,

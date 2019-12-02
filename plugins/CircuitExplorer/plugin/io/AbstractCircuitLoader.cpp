@@ -633,7 +633,7 @@ void AbstractCircuitLoader::_importMeshes(
     for (auto &material : model.getMaterials())
     {
         brayns::PropertyMap props;
-        props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 1});
+        props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, true});
         props.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
                            static_cast<int>(MaterialShadingMode::diffuse)});
         props.setProperty(
