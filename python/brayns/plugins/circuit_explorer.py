@@ -353,7 +353,7 @@ class CircuitExplorer:
         """
         params = dict()
         params['modelId'] = model_id
-        params['materialId'] = material_ids
+        params['materialIds'] = material_ids
         params['diffuseColor'] = diffuse_color
         params['specularColor'] = specular_color
         params['specularExponent'] = specular_exponent

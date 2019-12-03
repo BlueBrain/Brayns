@@ -55,6 +55,7 @@
 #include <cstdio>
 #include <dirent.h>
 #include <fstream>
+#include <random>
 #include <regex>
 #include <unistd.h>
 
@@ -701,6 +702,14 @@ void CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescriptor& mrd
                 matIds.push_back(static_cast<size_t>(id));
         }
 
+        if(mrd.diffuseColor.size() % 3 != 0)
+        {
+            PLUGIN_ERROR << "set-material-range: The diffuse colors component is not a multiple of 3" << std::endl;
+            return;
+        }
+
+        const size_t numColors = mrd.diffuseColor.size() / 3;
+
         for (const auto materialId : matIds)
         {
             try
@@ -709,9 +718,10 @@ void CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescriptor& mrd
                     modelDescriptor->getModel().getMaterial(materialId);
                 if (material)
                 {
-                    material->setDiffuseColor({mrd.diffuseColor[0],
-                                               mrd.diffuseColor[1],
-                                               mrd.diffuseColor[2]});
+                    const size_t randomIndex = (rand() % numColors) * 3;
+                    material->setDiffuseColor({mrd.diffuseColor[randomIndex],
+                                               mrd.diffuseColor[randomIndex + 1],
+                                               mrd.diffuseColor[randomIndex + 2]});
                     material->setSpecularColor({mrd.specularColor[0],
                                                 mrd.specularColor[1],
                                                 mrd.specularColor[2]});
