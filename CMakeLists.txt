@@ -49,12 +49,6 @@ if($ENV{TRAVIS})
   if(NOT DEFINED BRAYNS_BBIC_ENABLED)
     option(BRAYNS_BBIC_ENABLED "Activate BBIC Volume plugin" ON)
   endif()
-  if(NOT DEFINED BRAYNS_CIRCUITINFO_ENABLED)
-      option(BRAYNS_CIRCUITINFO_ENABLED "Activate CircuitInfo plugin" ON)
-  endif()
-  if(NOT DEFINED BRAYNS_CIRCUITRENDERER_ENABLED)
-      option(BRAYNS_CIRCUITRENDERER_ENABLED "Activate CircuitRenderer plugin" ON)
-  endif()
 endif()
 
 set(CHOOSE_PYTHON_IGNORE_BOOST ON)
@@ -68,7 +62,7 @@ common_find_package(FreeImage)
 
 # Compiler options
 if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-class-memaccess -Wno-deprecated-copy -Wno-ignored-qualifiers")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-class-memaccess -Wno-deprecated-copy")
 endif()
 
 # Archive loading
