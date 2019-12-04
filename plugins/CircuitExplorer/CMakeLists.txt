@@ -93,12 +93,12 @@ set(BRAYNSCIRCUITEXPLORER_ISPC_SOURCES
     module/ispc/render/CellGrowthRenderer.ispc
     module/ispc/render/utils/CircuitExplorerSimulationRenderer.ispc
     module/ispc/render/utils/CircuitExplorerRandomGenerator.ispc
-    module/ispc/render/utils/CircuitExplorerSkyBox.ispc
 )
 
 # Compile ispc code
-list(APPEND ALL_ISPC_INCLUDES ${OSPRAY_INCLUDE_DIRS})
-include_directories_ispc(${ALL_ISPC_INCLUDES})
+set(BRAYNS_SOURCE_DIR ${PROJECT_SOURCE_DIR}/../..)
+list(APPEND ALL_ISPC_INCLUDES ${OSPRAY_INCLUDE_DIRS} ${BRAYNS_SOURCE_DIR})
+include_directories_ispc(${ALL_ISPC_INCLUDES} )
 ospray_ispc_compile(${BRAYNSCIRCUITEXPLORER_ISPC_SOURCES})
 list(APPEND BRAYNSCIRCUITEXPLORER_SOURCES ${ISPC_OBJECTS})
 

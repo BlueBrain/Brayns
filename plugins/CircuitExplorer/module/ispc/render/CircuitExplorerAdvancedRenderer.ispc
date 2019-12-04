@@ -140,9 +140,9 @@ inline bool launchRandomRay(
     if (randomRay.geomID < 0)
     {
         // No intersection
-        backgroundColor =
-            make_vec3f(skyboxMapping((Renderer*)self, randomRay,
-                                     self->super.super.bgMaterial));
+        backgroundColor = make_vec3f(
+            skyboxMapping((Renderer*)self, randomRay,
+                          (DefaultMaterial*)self->super.super.bgMaterial));
         return false;
     }
 
@@ -783,8 +783,9 @@ inline void processBackgroundColor(varying ScreenSample& sample,
                                    ShadingAttributes& attributes)
 {
     // No intersection. Return volume contribution + skybox color
-    attributes.bgColor = skyboxMapping((Renderer*)attributes.self, ray,
-                                       attributes.self->super.super.bgMaterial);
+    attributes.bgColor = skyboxMapping(
+        (Renderer*)attributes.self, ray,
+        (DefaultMaterial*)attributes.self->super.super.bgMaterial);
     attributes.shadingContribution = make_vec3f(attributes.bgColor);
 }
 

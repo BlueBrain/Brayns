@@ -58,7 +58,8 @@ inline vec3f ProximityDetectionRenderer_shadeRay(
         if (ray.geomID < 0)
         {
             vec4f bgColor =
-                skyboxMapping((Renderer*)self, ray, self->super.bgMaterial);
+                skyboxMapping((Renderer*)self, ray,
+                              (DefaultMaterial*)self->super.bgMaterial);
             bgColor.w = 1.f;
             composite(bgColor, color, self->alphaCorrection);
             return make_vec3f(color) * self->super.exposure;
