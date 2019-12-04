@@ -22,9 +22,22 @@
 #include "CircuitExplorerParams.h"
 #include <plugin/json.hpp>
 
+#include <common/log.h>
+
+#ifndef BRAYNS_DEBUG_JSON_ENABLED
 #define FROM_JSON(PARAM, JSON, NAME) \
     PARAM.NAME = JSON[#NAME].get<decltype(PARAM.NAME)>()
-#define TO_JSON(PARAM, JSON, NAME) JSON[#NAME] = PARAM.NAME;
+#else
+#define FROM_JSON(PARAM, JSON, NAME) \
+    try { \
+        PARAM.NAME = JSON[#NAME].get<decltype(PARAM.NAME)>(); \
+    } \
+    catch(...){ \
+        PLUGIN_ERROR << "JSON parsing error for attribute '" << #NAME<< "'!" << std::endl; \
+        throw; \
+    }
+#endif
+#define TO_JSON(PARAM, JSON, NAME) JSON[#NAME] = PARAM.NAME
 
 bool from_json(Result& param, const std::string& payload)
 {
@@ -91,7 +104,8 @@ bool from_json(MaterialDescriptor& param, const std::string& payload)
         FROM_JSON(param, js, glossiness);
         FROM_JSON(param, js, simulationDataCast);
         FROM_JSON(param, js, shadingMode);
-        FROM_JSON(param, js, clipped);
+        FROM_JSON(param, js, clippingMode);
+        FROM_JSON(param, js, userParameter);
     }
     catch (...)
     {
@@ -117,7 +131,36 @@ bool from_json(MaterialsDescriptor& param, const std::string& payload)
         FROM_JSON(param, js, glossinesses);
         FROM_JSON(param, js, simulationDataCasts);
         FROM_JSON(param, js, shadingModes);
-        FROM_JSON(param, js, clips);
+        FROM_JSON(param, js, clippingModes);
+        FROM_JSON(param, js, userParameters);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool from_json(MaterialRangeDescriptor& param,
+               const std::string& payload)
+{
+    try
+    {
+        auto js = nlohmann::json::parse(payload);
+        FROM_JSON(param, js, modelId);
+        FROM_JSON(param, js, materialIds);
+        FROM_JSON(param, js, diffuseColor);
+        FROM_JSON(param, js, specularColor);
+        FROM_JSON(param, js, specularExponent);
+        FROM_JSON(param, js, reflectionIndex);
+        FROM_JSON(param, js, opacity);
+        FROM_JSON(param, js, refractionIndex);
+        FROM_JSON(param, js, emission);
+        FROM_JSON(param, js, glossiness);
+        FROM_JSON(param, js, simulationDataCast);
+        FROM_JSON(param, js, shadingMode);
+        FROM_JSON(param, js, clippingMode);
+        FROM_JSON(param, js, userParameter);
     }
     catch (...)
     {
@@ -131,7 +174,7 @@ bool from_json(ModelId& param, const std::string& payload)
     try
     {
         auto js = nlohmann::json::parse(payload);
-        FROM_JSON(param, js, id);
+        FROM_JSON(param, js, modelId);
     }
     catch (...)
     {
@@ -463,6 +506,40 @@ bool from_json(ExportFramesToDisk& param, const std::string& payload)
     return true;
 }
 
+std::string to_json(const FrameExportProgress& exportProgress)
+{
+    try
+    {
+        nlohmann::json json;
+        TO_JSON(exportProgress, json, progress);
+        return json.dump();
+    }
+    catch (...)
+    {
+        return "";
+    }
+    return "";
+}
+
+bool from_json(MakeMovieParameters& movieParams, const std::string& payload)
+{
+    try
+    {
+        auto json = nlohmann::json::parse(payload);
+        FROM_JSON(movieParams, json, dimensions);
+        FROM_JSON(movieParams, json, framesFolderPath);
+        FROM_JSON(movieParams, json, framesFileExtension);
+        FROM_JSON(movieParams, json, fpsRate);
+        FROM_JSON(movieParams, json, outputMoviePath);
+        FROM_JSON(movieParams, json, eraseFrames);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
 bool from_json(AddGrid& param, const std::string& payload)
 {
     try
@@ -495,4 +572,128 @@ bool from_json(AddColumn& param, const std::string& payload)
         return false;
     }
     return true;
+}
+
+bool from_json(AnterogradeTracing& param, const std::string& payload)
+{
+    try
+    {
+        auto js = nlohmann::json::parse(payload);
+        FROM_JSON(param, js, modelId);
+        FROM_JSON(param, js, cellGIDs);
+        FROM_JSON(param, js, targetCellGIDs);
+        FROM_JSON(param, js, sourceCellColor);
+        FROM_JSON(param, js, connectedCellsColor);
+        FROM_JSON(param, js, nonConnectedCellsColor);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+std::string to_json(const AnterogradeTracingResult& result)
+{
+    try
+    {
+        nlohmann::json json;
+        TO_JSON(result, json, error);
+        TO_JSON(result, json, message);
+        return json.dump();
+    }
+    catch (...)
+    {
+        return "";
+    }
+    return "";
+}
+
+bool from_json(AddSphere& param, const std::string& payload)
+{
+    try
+    {
+        auto js = nlohmann::json::parse(payload);
+        FROM_JSON(param, js, name);
+        FROM_JSON(param, js, center);
+        FROM_JSON(param, js, radius);
+        FROM_JSON(param, js, color);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool from_json(AddPill& param, const std::string& payload)
+{
+    try
+    {
+        auto js = nlohmann::json::parse(payload);
+        FROM_JSON(param, js, name);
+        FROM_JSON(param, js, type);
+        FROM_JSON(param, js, p1);
+        FROM_JSON(param, js, p2);
+        FROM_JSON(param, js, radius1);
+        FROM_JSON(param, js, radius2);
+        FROM_JSON(param, js, color);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool from_json(AddCylinder& param, const std::string& payload)
+{
+    try
+    {
+        auto js = nlohmann::json::parse(payload);
+        FROM_JSON(param, js, name);
+        FROM_JSON(param, js, center);
+        FROM_JSON(param, js, up);
+        FROM_JSON(param, js, radius);
+        FROM_JSON(param, js, color);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool from_json(AddBox& param, const std::string& payload)
+{
+    try
+    {
+        auto js = nlohmann::json::parse(payload);
+        FROM_JSON(param, js, name);
+        FROM_JSON(param, js, minCorner);
+        FROM_JSON(param, js, maxCorner);
+        FROM_JSON(param, js, color);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+std::string to_json(const AddShapeResult& addResult)
+{
+    try
+    {
+        nlohmann::json json;
+        TO_JSON(addResult, json, id);
+        TO_JSON(addResult, json, error);
+        TO_JSON(addResult, json, message);
+        return json.dump();
+    }
+    catch (...)
+    {
+        return "";
+    }
+    return "";
 }

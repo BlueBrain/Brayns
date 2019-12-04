@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+﻿/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -44,6 +44,14 @@
 #include "BinaryRequests.h"
 #include "ImageGenerator.h"
 #include "Throttle.h"
+
+#include <atomic>
+#include <dirent.h>
+#include <fstream>
+#include <limits.h>
+#include <unistd.h>
+
+#include <sys/stat.h>
 
 #ifdef BRAYNS_USE_FFMPEG
 #include "encoder.h"
@@ -93,6 +101,8 @@ const std::string METHOD_GET_MODEL_TRANSFER_FUNCTION =
     "get-model-transfer-function";
 const std::string METHOD_GET_VIDEOSTREAM = "get-videostream";
 const std::string METHOD_IMAGE_JPEG = "image-jpeg";
+const std::string METHOD_SET_STREAMING_METHOD = "image-streaming-mode";
+const std::string METHOD_TRIGGER_JPEG_STREAM = "trigger-jpeg-stream";
 const std::string METHOD_INSPECT = "inspect";
 const std::string METHOD_MODEL_PROPERTIES_SCHEMA = "model-properties-schema";
 const std::string METHOD_REMOVE_CLIP_PLANES = "remove-clip-planes";
@@ -115,9 +125,15 @@ const std::string METHOD_ADD_LIGHT_AMBIENT = "add-light-ambient";
 const std::string METHOD_REMOVE_LIGHTS = "remove-lights";
 const std::string METHOD_CLEAR_LIGHTS = "clear-lights";
 
+const std::string METHOD_FS_EXISTS = "fs-exists";
+const std::string METHOD_FS_GET_CONTENT = "fs-get-content";
+const std::string METHOD_FS_GET_ROOT = "fs-get-root";
+const std::string METHOD_FS_LIST_DIR = "fs-list-dir";
+
 // JSONRPC notifications
 const std::string METHOD_CHUNK = "chunk";
 const std::string METHOD_QUIT = "quit";
+const std::string METHOD_EXIT_LATER = "exit-later";
 const std::string METHOD_RESET_CAMERA = "reset-camera";
 
 const std::string LOADERS_SCHEMA = "loaders-schema";
@@ -282,7 +298,12 @@ public:
             return;
 
         if (!_parametersManager.getApplicationParameters().useVideoStreaming())
-            _broadcastImageJpeg();
+        {
+            if(_useControlledStream)
+                _broadcastControlledImageJpeg();
+            else
+                _broadcastImageJpeg();
+        }
 #ifdef BRAYNS_USE_FFMPEG
         else
             _broadcastVideo();
@@ -954,6 +975,8 @@ public:
         _handleAnimationParams();
         _handleCamera();
         _handleImageJPEG();
+        _handleTriggerImageStream();
+        _handleSetImageStreamingMode();
         _handleRenderer();
         _handleVersion();
 
@@ -971,6 +994,7 @@ public:
 
         _handleInspect();
         _handleQuit();
+        _handleExitLater();
         _handleResetCamera();
         _handleSnapshot();
 
@@ -1011,6 +1035,11 @@ public:
         _handleAddLight();
         _handleRemoveLights();
         _handleClearLights();
+
+        _handleFsExists();
+        _handleFsGetContent();
+        _handleFsGetRoot();
+        _handleFsGetListDir();
 
         _endpointsRegistered = true;
     }
@@ -1055,6 +1084,31 @@ public:
         for (; _leftover > duration;)
             _leftover -= duration;
         _timer.start();
+
+        const auto image =
+            _imageGenerator.createJPEG(frameBuffer,
+                                       params.getJpegCompression());
+        if (image.size > 0)
+            _rocketsServer->broadcastBinary((const char*)image.data.get(),
+                                            image.size);
+    }
+
+    void _broadcastControlledImageJpeg()
+    {
+        if(!_controlledStreamingFlag.load())
+        {
+            return;
+        }
+
+        auto& frameBuffer = _engine.getFrameBuffer();
+        if (frameBuffer.getFrameBufferFormat() == FrameBufferFormat::none ||
+            !frameBuffer.isModified())
+        {
+            return;
+        }
+
+        _controlledStreamingFlag = false;
+        const auto& params = _parametersManager.getApplicationParameters();
 
         const auto image =
             _imageGenerator.createJPEG(frameBuffer,
@@ -1230,6 +1284,42 @@ public:
                    });
     }
 
+    void _handleExitLater()
+    {
+        _handleRPC<ExitLaterSchedule>({METHOD_EXIT_LATER,
+                    "Schedules Brayns to shutdown after a given amount of minutes",
+                    "minutes", "Number of minutes after which Brayns will shut down"},
+                    [&](const ExitLaterSchedule& schedule){
+                        std::lock_guard<std::mutex> lock(_scheduleMutex);
+                        if(schedule.minutes > 0)
+                        {
+                            if(_scheduledShutdownActive)
+                            {
+                                _cancelScheduledShutdown = true;
+                                _monitor.notify_all();
+                                _shutDownWorker->join();
+                                _shutDownWorker.reset();
+                                _cancelScheduledShutdown = false;
+                                _scheduledShutdownActive = false;
+                            }
+
+                            _scheduledShutdownActive = true;
+                            const uint32_t mins = schedule.minutes;
+                            _shutDownWorker = std::unique_ptr<std::thread>(new std::thread([&, mins]()
+                            {
+                                std::chrono::milliseconds timeToWait (mins * 60000);
+                                std::unique_lock<std::mutex> threadLock(_waitLock);
+                                _monitor.wait_for(threadLock, timeToWait);
+                                if(!_cancelScheduledShutdown)
+                                {
+                                    _engine.setKeepRunning(false);
+                                    _engine.triggerRender();
+                                }
+                            }));
+                        }
+                    });
+    }
+
     void _handleResetCamera()
     {
         _handleRPC({METHOD_RESET_CAMERA,
@@ -1255,6 +1345,31 @@ public:
                 SnapshotFunctor{engine, std::move(params), imageGenerator});
         };
         _handleTask<SnapshotParams, ImageGenerator::ImageBase64>(desc, func);
+    }
+
+    void _handleTriggerImageStream()
+    {
+        _handleRPC({METHOD_TRIGGER_JPEG_STREAM,
+                    "Triggers the engine to stream a frame to the clients"},
+                   [&] {
+                       _triggerControlledStreaming();
+                   });
+    }
+
+    void _handleSetImageStreamingMode()
+    {
+        _handleRPC<ImageStreamingMethod>({METHOD_SET_STREAMING_METHOD,
+                    "Set the image streaming method between automatic or "
+                    "controlled", "type", "Streaming type, either \"stream\" or \"quanta\""},
+                    [&](const ImageStreamingMethod& method){
+                        if(method.type == "quanta")
+                        {
+                            _useControlledStream = true;
+                            _controlledStreamingFlag = false;
+                        }
+                        else
+                            _useControlledStream = false;
+                    });
     }
 
     void _handleRequestModelUpload()
@@ -1580,6 +1695,249 @@ public:
             auto& lightManager = engine.getScene().getLightManager();
             lightManager.clearLights();
             engine.triggerRender();
+        });
+    }
+
+    FileStats _getFileStats(const std::string& path)
+    {
+        FileStats ft;
+        ft.type = "none";
+        ft.error = 0;
+        ft.sizeBytes = 0;
+
+        // Make sure the requested file is within the sandbox path
+        // TODO: Unhardcode sandbox path and add as braynsService input param
+        const std::string& sandboxPath = _engine.getParametersManager()
+                                                .getApplicationParameters()
+                                                .getSandboxPath();
+        size_t pos = path.find(sandboxPath);
+        if(pos != 0)
+        {
+            ft.error = 1;
+            ft.message = "Path falls outside the sandbox: " + sandboxPath;
+            return ft;
+        }
+
+        if(path.find("../") == 0
+           || path.find("/../") != std::string::npos
+           || path.rfind("/..") == 4)
+        {
+            ft.error = 3;
+            ft.message = "Illegal path detected";
+            return ft;
+        }
+
+        struct stat s;
+        int err = stat(path.c_str(), &s);
+        if(err == 0)
+        {
+            // Path is a regular file
+            if( s.st_mode & S_IFREG )
+            {
+                // Test permissions with fopen
+                FILE* permissionTest = fopen(path.c_str(), "r");
+                int openError = errno;
+                if(permissionTest != nullptr)
+                    fclose(permissionTest);
+                if(openError == EACCES)
+                {
+                    ft.error = 2;
+                    ft.message = "Permission for " + path + " denied";
+                    return ft;
+                }
+
+                // If we reached this point, file is accessible
+                ft.type = "file";
+                ft.sizeBytes = s.st_size;
+            }
+            // Path is a folder
+            else if( s.st_mode & S_IFDIR )
+            {
+                // Test permissions with access
+                if(access(path.c_str(), X_OK) < 0)
+                {
+                    if(errno == EACCES)
+                    {
+                        ft.error = 2;
+                        ft.message = "Permission for " + path + " denied";
+                        return ft;
+                    }
+                    else
+                    {
+                        ft.error = 3;
+                        ft.message = "Unknown error";
+                        return ft;
+                    }
+                }
+
+                // If we reached this point, folder is accessible
+                ft.type = "directory";
+            }
+            else
+            {
+                ft.message = "Unknown type of element";
+            }
+        }
+        else if(err > 0)
+        {
+            if(err == EACCES)
+            {
+                ft.error = 2;
+                ft.message = "Permission for " + path + " denied";
+            }
+            else
+            {
+                ft.error = 3;
+                ft.message = "Unknown error";
+            }
+        }
+
+        return ft;
+    }
+
+    void _handleFsExists()
+    {
+        const RpcParameterDescription desc{METHOD_FS_EXISTS,
+                                           "Return the type of filer (file or folder) if a given path exists, or none if it does not exists",
+                                           "path", "Absolute path to the filer to check"};
+        _handleRPC<InputPath, FileType>(desc, [&](const auto& inputPath) {
+            this->_rebroadcast(METHOD_FS_EXISTS, to_json(inputPath),
+                               {_currentClientID});
+            FileStats fs = this->_getFileStats(inputPath.path);
+            FileType ft;
+            ft.type = fs.type;
+            ft.error = fs.error;
+            ft.message = fs.message;
+            return ft;
+        });
+    }
+
+    void _handleFsGetContent()
+    {
+        const RpcParameterDescription desc{METHOD_FS_GET_CONTENT,
+                                           "Return the content of a file if possible, or an error otherwise",
+                                           "path", "Absolute path to the file"};
+        _handleRPC<InputPath, FileContent>(desc, [&](const auto& inputPath) {
+            this->_rebroadcast(METHOD_FS_GET_CONTENT, to_json(inputPath),
+                               {_currentClientID});
+            // Stat the requested file
+            FileStats ft = this->_getFileStats(inputPath.path);
+            FileContent fc;
+
+            fc.error = ft.error;
+            fc.message = ft.message;
+
+            // Continue only if its accessible and its a file
+            if(fc.error == 0 && ft.type == "file")
+            {
+                std::ifstream file(inputPath.path);
+                if(file)
+                {
+                    // Read file
+                    file.seekg(0, file.end);
+                    long len = file.tellg();
+                    file.seekg(0, file.beg);
+                    std::vector<char> buffer(static_cast<unsigned long>(len));
+                    file.read(&buffer[0], len);
+                    file.close();
+                    fc.content = std::string(buffer.begin(), buffer.end());
+                }
+                else
+                {
+                    fc.error = 3;
+                    fc.message = "An unknown error occurred when reading the file " + inputPath.path;
+                }
+            }
+
+            return fc;
+        });
+    }
+
+    void _handleFsGetRoot()
+    {
+        const RpcDescription desc{METHOD_FS_GET_ROOT,
+                                  "Return the root path of the current execution environment (sandbox)"};
+        _bindEndpoint(METHOD_FS_GET_ROOT, [& engine = _engine](const rockets::jsonrpc::Request&) {
+
+            FileRoot fr;
+            fr.root = engine.getParametersManager().getApplicationParameters().getSandboxPath();
+            return Response{to_json(fr)};
+        });
+
+        _handleSchema(
+            METHOD_GET_LIGHTS,
+            buildJsonRpcSchemaRequestReturnOnly<FileRoot>(desc));
+    }
+
+    void _handleFsGetListDir()
+    {
+        const RpcParameterDescription desc{METHOD_FS_LIST_DIR,
+                                           "Return the content of a file if possible, or an error otherwise",
+                                           "path", "Absolute path to the file"};
+        _handleRPC<InputPath, DirectoryFileList>(desc, [&](const auto& inputPath) {
+            this->_rebroadcast(METHOD_FS_LIST_DIR, to_json(inputPath),
+                               {_currentClientID});
+
+            // Stat the requested path
+            FileStats ft = this->_getFileStats(inputPath.path);
+
+            DirectoryFileList dfl;
+            dfl.error = ft.error;
+            dfl.message = ft.message;
+
+            // Continue only if its a directory and is accessible
+            const bool isDirectory = ft.type == "directory";
+            if(ft.error == 0 && isDirectory)
+            {
+                DIR *dir;
+                struct dirent *ent;
+                if ((dir = opendir (inputPath.path.c_str())) != nullptr)
+                {
+                  // Iterate over each entry of the directory
+                  std::string slash = inputPath.path[inputPath.path.size() - 1] == '/'? "" : "/";
+                  while ((ent = readdir (dir)) != nullptr)
+                  {
+                    const std::string fileName(ent->d_name);
+
+                    // Discard dots
+                    if(fileName == "." || fileName == "..")
+                        continue;
+
+                    // Get file status to known if accessible, type, and size
+                    const std::string filePath = inputPath.path + slash + fileName;
+                    FileStats fileStats = this->_getFileStats(filePath);
+
+                    if(fileStats.error == 0)
+                    {
+                        if(fileStats.type == "directory")
+                        {
+                            dfl.dirs.push_back(fileName);
+                        }
+                        else if(fileStats.type == "file")
+                        {
+                            // Calc size in octets
+                            size_t totalBits = static_cast<size_t>(fileStats.sizeBytes) * static_cast<size_t>(CHAR_BIT);
+                            size_t totalOctets = totalBits / 8;
+                            dfl.files.names.push_back(fileName);
+                            dfl.files.sizes.push_back(totalOctets);
+                        }
+                    }
+                  }
+                  closedir (dir);
+                }
+                else
+                {
+                  dfl.error = 3;
+                  dfl.message = "Unknown error when reading contents of directory " + inputPath.path;
+                }
+            }
+            else if(!isDirectory && ft.error == 0)
+            {
+                dfl.error = 4;
+                dfl.message = "The path " + inputPath.path + " is not a directory";
+            }
+
+            return dfl;
         });
     }
 
@@ -1932,6 +2290,12 @@ public:
         });
     }
 
+    void _triggerControlledStreaming()
+    {
+        _controlledStreamingFlag = true;
+        _engine.triggerRender();
+    }
+
     Engine& _engine;
 
     std::unordered_map<std::string, std::pair<std::mutex, Throttle>> _throttle;
@@ -1966,6 +2330,23 @@ public:
     // need to delay those as we are initialized first, but other plugins might
     // alter the list of renderers for instance
     bool _endpointsRegistered{false};
+
+    // Wether to use controlled stream (true = client request frames, false = continous stream of frames)
+    bool _useControlledStream{false};
+    // Flag used to control the frame send when _useControlledStream = true
+    std::atomic<bool> _controlledStreamingFlag{false};
+
+    // Wether a scheduled shutdown is running at the momment
+    bool _scheduledShutdownActive{false};
+    // Flag to cancel current scheduled shutdown
+    bool _cancelScheduledShutdown{false};
+    // Worker in charge of shutdown
+    std::unique_ptr<std::thread> _shutDownWorker;
+    // Lock for safe schedule
+    std::mutex _scheduleMutex;
+    // Schedule mechanism
+    std::mutex _waitLock;
+    std::condition_variable _monitor;
 
     std::vector<BaseObject*> _objects;
 

@@ -51,10 +51,23 @@
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <brion/brion.h>
+
+#include <cstdio>
+#include <dirent.h>
 #include <fstream>
+#include <random>
+#include <regex>
+#include <unistd.h>
+
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define REGISTER_LOADER(LOADER, FUNC) \
     registry.registerLoader({std::bind(&LOADER::getSupportedDataTypes), FUNC});
+
+const std::string ANTEROGRADE_TYPE_AFFERENT = "afferent";
+const std::string ANTEROGRADE_TYPE_AFFERENTEXTERNAL = "projection";
+const std::string ANTEROGRADE_TYPE_EFFERENT = "efferent";
 
 void _addAdvancedSimulationRenderer(brayns::Engine& engine)
 {
@@ -94,6 +107,9 @@ void _addAdvancedSimulationRenderer(brayns::Engine& engine)
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
     properties.setProperty(
         {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
+    properties.setProperty({"useHardwareRandomizer",
+                            false,
+                            {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_advanced", properties);
 }
 
@@ -114,6 +130,9 @@ void _addBasicSimulationRenderer(brayns::Engine& engine)
     properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
     properties.setProperty(
         {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
+    properties.setProperty({"useHardwareRandomizer",
+                            false,
+                            {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_basic", properties);
 }
 
@@ -131,6 +150,9 @@ void _addVoxelizedSimulationRenderer(brayns::Engine& engine)
     properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
     properties.setProperty(
         {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
+    properties.setProperty({"useHardwareRandomizer",
+                            false,
+                            {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_voxelized_simulation", properties);
 }
 
@@ -151,6 +173,9 @@ void _addGrowthRenderer(brayns::Engine& engine)
     properties.setProperty({"softShadows", 0., 0., 1., {"Shadow softness"}});
     properties.setProperty(
         {"shadowDistance", 1e4, 0., 1e4, {"Shadow distance"}});
+    properties.setProperty({"useHardwareRandomizer",
+                            false,
+                            {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_cell_growth", properties);
 }
 
@@ -176,10 +201,13 @@ void _addProximityRenderer(brayns::Engine& engine)
     properties.setProperty(
         {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
     properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
+    properties.setProperty({"useHardwareRandomizer",
+                            false,
+                            {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_proximity_detection", properties);
 }
 
-void _addPerspectiveCamera(brayns::Engine& engine)
+void _addDOFPerspectiveCamera(brayns::Engine& engine)
 {
     PLUGIN_INFO << "Registering DOF perspective camera" << std::endl;
 
@@ -189,7 +217,60 @@ void _addPerspectiveCamera(brayns::Engine& engine)
     properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
     properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
     properties.setProperty({"enableClippingPlanes", true, {"Clipping"}});
-    engine.addCameraType("circuit_explorer_perspective", properties);
+    engine.addCameraType("circuit_explorer_dof_perspective", properties);
+}
+
+void _addSphereClippingPerspectiveCamera(brayns::Engine& engine)
+{
+    PLUGIN_INFO << "Registering sphere clipping perspective camera"
+                << std::endl;
+
+    brayns::PropertyMap properties;
+    properties.setProperty({"fovy", 45., .1, 360., {"Field of view"}});
+    properties.setProperty({"aspect", 1., {"Aspect ratio"}});
+    properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
+    properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
+    properties.setProperty({"enableClippingPlanes", true, {"Clipping"}});
+    engine.addCameraType("circuit_explorer_sphere_clipping", properties);
+}
+
+std::string _sanitizeString(const std::string& input)
+{
+    static const std::vector<std::string> sanitetizeItems = {"\"", "\\", "'",
+                                                             ";",  "&",  "|",
+                                                             "`"};
+
+    std::string result = "";
+
+    for (size_t i = 0; i < input.size(); i++)
+    {
+        bool found = false;
+        for (const auto& token : sanitetizeItems)
+        {
+            if (std::string(1, input[i]) == token)
+            {
+                result += "\\" + token;
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+        {
+            result += std::string(1, input[i]);
+        }
+    }
+    return result;
+}
+
+std::vector<std::string> _splitString(const std::string& source, const char token)
+{
+    std::vector<std::string> result;
+    std::string split;
+    std::istringstream ss(source);
+    while (std::getline(ss, split, token))
+        result.push_back(split);
+
+    return result;
 }
 
 CircuitExplorerPlugin::CircuitExplorerPlugin()
@@ -249,6 +330,11 @@ void CircuitExplorerPlugin::init()
         actionInterface->registerNotification<MaterialsDescriptor>(
             "set-materials",
             [&](const MaterialsDescriptor& param) { _setMaterials(param); });
+
+        PLUGIN_INFO << "Registering 'set-material-range' endpoint" << std::endl;
+        actionInterface->registerNotification<MaterialRangeDescriptor>(
+            "set-material-range",
+            [&](const MaterialRangeDescriptor& param) { _setMaterialRange(param); });
 
         PLUGIN_INFO << "Registering 'get-material-ids' endpoint" << std::endl;
         actionInterface->registerRequest<ModelId, MaterialIds>(
@@ -328,6 +414,26 @@ void CircuitExplorerPlugin::init()
             "export-frames-to-disk",
             [&](const ExportFramesToDisk& s) { _exportFramesToDisk(s); });
 
+        PLUGIN_INFO << "Registering 'get-export-frames-progress' endpoint"
+                    << std::endl;
+        actionInterface->registerRequest<FrameExportProgress>(
+            "get-export-frames-progress", [&](void) -> FrameExportProgress {
+                return _getFrameExportProgress();
+            });
+
+        PLUGIN_INFO << "Registering 'make-movie' endpoint" << std::endl;
+        actionInterface->registerNotification<MakeMovieParameters>(
+            "make-movie",
+            [&](const MakeMovieParameters& params) { _makeMovie(params); });
+
+        PLUGIN_INFO << "Registering 'trace-anterograde' endpoint" << std::endl;
+        _api->getActionInterface()
+               ->registerRequest<AnterogradeTracing, AnterogradeTracingResult>(
+            "trace-anterograde",
+            [&](const AnterogradeTracing& payload) {
+                return _traceAnterogrades(payload);
+            });
+
         PLUGIN_INFO << "Registering 'add-grid' endpoint" << std::endl;
         _api->getActionInterface()->registerNotification<AddGrid>(
             "add-grid", [&](const AddGrid& payload) { _addGrid(payload); });
@@ -336,6 +442,27 @@ void CircuitExplorerPlugin::init()
         _api->getActionInterface()->registerNotification<AddColumn>(
             "add-column",
             [&](const AddColumn& payload) { _addColumn(payload); });
+
+        PLUGIN_INFO << "Registering 'add-sphere' endpoint" << std::endl;
+        _api->getActionInterface()->registerRequest<AddSphere, AddShapeResult>(
+            "add-sphere",
+            [&](const AddSphere& payload) { return _addSphere(payload); });
+
+        PLUGIN_INFO << "Registering 'add-pill' endpoint" << std::endl;
+        _api->getActionInterface()->registerRequest<AddPill, AddShapeResult>(
+            "add-pill",
+            [&](const AddPill& payload) { return _addPill(payload); });
+
+        PLUGIN_INFO << "Registering 'add-cylinder' endpoint" << std::endl;
+        _api->getActionInterface()
+            ->registerRequest<AddCylinder, AddShapeResult>(
+                "add-cylinder", [&](const AddCylinder& payload) {
+                    return _addCylinder(payload);
+                });
+
+        PLUGIN_INFO << "Registering 'add-box' endpoint" << std::endl;
+        _api->getActionInterface()->registerRequest<AddBox, AddShapeResult>(
+            "add-box", [&](const AddBox& payload) { return _addBox(payload); });
     }
 
     auto& engine = _api->getEngine();
@@ -344,7 +471,8 @@ void CircuitExplorerPlugin::init()
     _addVoxelizedSimulationRenderer(engine);
     _addGrowthRenderer(engine);
     _addProximityRenderer(engine);
-    _addPerspectiveCamera(engine);
+    _addDOFPerspectiveCamera(engine);
+    _addSphereClippingPerspectiveCamera(engine);
 
     _api->getParametersManager().getRenderingParameters().setCurrentRenderer(
         "circuit_explorer_advanced");
@@ -358,17 +486,15 @@ void CircuitExplorerPlugin::preRender()
 
     if (_exportFramesToDiskDirty && _accumulationFrameNumber == 0)
     {
-        auto& ai = _exportFramesToDiskPayload.animationInformation;
+        const auto& ai = _exportFramesToDiskPayload.animationInformation;
         if (_frameNumber >= ai.size())
-        {
             _exportFramesToDiskDirty = false;
-        }
         else
         {
-            uint64_t i = 11 * _frameNumber;
+            const uint64_t i = 11 * _frameNumber;
             // Camera position
             CameraDefinition cd;
-            auto& ci = _exportFramesToDiskPayload.cameraInformation;
+            const auto& ci = _exportFramesToDiskPayload.cameraInformation;
             cd.origin = {ci[i], ci[i + 1], ci[i + 2]};
             cd.direction = {ci[i + 3], ci[i + 4], ci[i + 5]};
             cd.up = {ci[i + 6], ci[i + 7], ci[i + 8]};
@@ -385,14 +511,15 @@ void CircuitExplorerPlugin::preRender()
 
 void CircuitExplorerPlugin::postRender()
 {
-    ++_accumulationFrameNumber;
     if (_exportFramesToDiskDirty &&
-        _accumulationFrameNumber == _exportFramesToDiskPayload.spp - 1)
+        _accumulationFrameNumber == _exportFramesToDiskPayload.spp)
     {
         _doExportFrameToDisk();
         ++_frameNumber;
         _accumulationFrameNumber = 0;
     }
+    else
+        ++_accumulationFrameNumber;
 }
 
 void CircuitExplorerPlugin::_setMaterialExtraAttributes(
@@ -410,7 +537,10 @@ void CircuitExplorerPlugin::_setMaterialExtraAttributes(
                 props.setProperty(
                     {MATERIAL_PROPERTY_SHADING_MODE,
                      static_cast<int>(MaterialShadingMode::diffuse)});
-                props.setProperty({MATERIAL_PROPERTY_CLIPPED, 0});
+                props.setProperty(
+                    {MATERIAL_PROPERTY_CLIPPING_MODE,
+                     static_cast<int>(MaterialClippingMode::no_clipping)});
+                props.setProperty({MATERIAL_PROPERTY_USER_PARAMETER, 1.0});
                 material.second->updateProperties(props);
             }
         }
@@ -450,8 +580,10 @@ void CircuitExplorerPlugin::_setMaterial(const MaterialDescriptor& md)
                                          md.simulationDataCast ? 1 : 0);
                 material->updateProperty(MATERIAL_PROPERTY_SHADING_MODE,
                                          md.shadingMode);
-                material->updateProperty(MATERIAL_PROPERTY_CLIPPED,
-                                         md.clipped ? 1 : 0);
+                material->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE,
+                                         md.clippingMode);
+                material->updateProperty(MATERIAL_PROPERTY_USER_PARAMETER,
+                                         static_cast<double>(md.userParameter));
                 material->markModified(); // This is needed to apply
                                           // propery modifications
                 material->commit();
@@ -524,9 +656,14 @@ void CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
                             material->updateProperty(
                                 MATERIAL_PROPERTY_SHADING_MODE,
                                 md.shadingModes[id]);
-                        if (!md.clips.empty())
-                            material->updateProperty(MATERIAL_PROPERTY_CLIPPED,
-                                                     md.clips[id] ? 1 : 0);
+                        if (!md.clippingModes.empty())
+                            material->updateProperty(
+                                MATERIAL_PROPERTY_CLIPPING_MODE,
+                                md.clippingModes[id]);
+                        if (!md.userParameters.empty())
+                            material->updateProperty(
+                                MATERIAL_PROPERTY_USER_PARAMETER,
+                                static_cast<double>(md.userParameters[id]));
                         material->markModified(); // This is needed to apply
                                                   // propery modifications
                         material->commit();
@@ -546,10 +683,85 @@ void CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
     }
 }
 
+void CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescriptor& mrd)
+{
+    auto modelDescriptor = _api->getScene().getModel(mrd.modelId);
+    if (modelDescriptor)
+    {
+        std::vector<size_t> matIds;
+        if(mrd.materialIds.empty())
+        {
+            matIds.reserve(modelDescriptor->getModel().getMaterials().size());
+            for(const auto& mat : modelDescriptor->getModel().getMaterials())
+                matIds.push_back(mat.first);
+        }
+        else
+        {
+            matIds.reserve(mrd.materialIds.size());
+            for(const auto& id : mrd.materialIds)
+                matIds.push_back(static_cast<size_t>(id));
+        }
+
+        if(mrd.diffuseColor.size() % 3 != 0)
+        {
+            PLUGIN_ERROR << "set-material-range: The diffuse colors component is not a multiple of 3" << std::endl;
+            return;
+        }
+
+        const size_t numColors = mrd.diffuseColor.size() / 3;
+
+        for (const auto materialId : matIds)
+        {
+            try
+            {
+                auto material =
+                    modelDescriptor->getModel().getMaterial(materialId);
+                if (material)
+                {
+                    const size_t randomIndex = (rand() % numColors) * 3;
+                    material->setDiffuseColor({mrd.diffuseColor[randomIndex],
+                                               mrd.diffuseColor[randomIndex + 1],
+                                               mrd.diffuseColor[randomIndex + 2]});
+                    material->setSpecularColor({mrd.specularColor[0],
+                                                mrd.specularColor[1],
+                                                mrd.specularColor[2]});
+
+                    material->setSpecularExponent(mrd.specularExponent);
+                    material->setReflectionIndex(mrd.reflectionIndex);
+                    material->setOpacity(mrd.opacity);
+                    material->setRefractionIndex(mrd.refractionIndex);
+                    material->setEmission(mrd.emission);
+                    material->setGlossiness(mrd.glossiness);
+                    material->updateProperty(MATERIAL_PROPERTY_CAST_USER_DATA,
+                                             mrd.simulationDataCast ? 1 : 0);
+                    material->updateProperty(MATERIAL_PROPERTY_SHADING_MODE,
+                                             mrd.shadingMode);
+                    material->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE,
+                                             mrd.clippingMode);
+                    material->updateProperty(MATERIAL_PROPERTY_USER_PARAMETER,
+                                             static_cast<double>(mrd.userParameter));
+                    material->markModified(); // This is needed to apply
+                                              // propery modifications
+                    material->commit();
+
+                }
+            }
+            catch (const std::runtime_error& e)
+            {
+                PLUGIN_INFO << e.what() << std::endl;
+            }
+        }
+        _dirty = true;
+    }
+    else
+        PLUGIN_INFO << "Model " << mrd.modelId << " is not registered"
+                    << std::endl;
+}
+
 MaterialIds CircuitExplorerPlugin::_getMaterialIds(const ModelId& modelId)
 {
     MaterialIds materialIds;
-    auto modelDescriptor = _api->getScene().getModel(modelId.id);
+    auto modelDescriptor = _api->getScene().getModel(modelId.modelId);
     if (modelDescriptor)
     {
         for (const auto& material : modelDescriptor->getModel().getMaterials())
@@ -834,17 +1046,19 @@ void CircuitExplorerPlugin::_exportFramesToDisk(
     _exportFramesToDiskPayload = payload;
     _exportFramesToDiskDirty = true;
     _frameNumber = payload.startFrame;
-    _accumulationFrameNumber = -1;
+    _accumulationFrameNumber = 0;
     auto& frameBuffer = _api->getEngine().getFrameBuffer();
     frameBuffer.clear();
     PLUGIN_INFO << "-----------------------------------------------------------"
                    "---------------------"
                 << std::endl;
-    PLUGIN_INFO << "Setting movie: " << std::endl;
+    PLUGIN_INFO << "Movie settings     :" << std::endl;
     PLUGIN_INFO << "- Number of frames : "
                 << payload.animationInformation.size() - payload.startFrame
                 << std::endl;
     PLUGIN_INFO << "- Samples per pixel: " << payload.spp << std::endl;
+    PLUGIN_INFO << "- Frame size       : " << frameBuffer.getSize()
+                << std::endl;
     PLUGIN_INFO << "- Export folder    : " << payload.path << std::endl;
     PLUGIN_INFO << "- Start frame      : " << payload.startFrame << std::endl;
     PLUGIN_INFO << "-----------------------------------------------------------"
@@ -895,6 +1109,622 @@ void CircuitExplorerPlugin::_doExportFrameToDisk()
     PLUGIN_INFO << "Frame saved to " << filename << std::endl;
 }
 
+FrameExportProgress CircuitExplorerPlugin::_getFrameExportProgress()
+{
+    FrameExportProgress result;
+    const size_t totalNumberOfFrames =
+        (_exportFramesToDiskPayload.animationInformation.size() -
+         _exportFramesToDiskPayload.startFrame) *
+        _exportFramesToDiskPayload.spp;
+    const float currentProgress =
+        _frameNumber * _exportFramesToDiskPayload.spp +
+        _accumulationFrameNumber;
+
+    result.progress = currentProgress / float(totalNumberOfFrames);
+    return result;
+}
+
+void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
+{
+    // Find ffmpeg executable path
+    std::array<char, 256> buffer;
+    std::string ffmpegPath;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen("which ffmpeg", "r"),
+                                                  pclose);
+    if (!pipe)
+    {
+        PLUGIN_ERROR << "Could not launch movie creation: ffmpeg not found"
+                     << std::endl;
+        return;
+    }
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+    {
+        ffmpegPath += buffer.data();
+    }
+
+    // Remove new lines
+    size_t pos = std::string::npos;
+    do
+    {
+        pos = ffmpegPath.find("\n");
+        if (pos != std::string::npos)
+        {
+            ffmpegPath.replace(pos, pos + 2, "");
+        }
+    } while (pos != std::string::npos);
+
+    // Get sanitetized string inputs
+    std::string sanitizedFramesFolder = params.framesFolderPath;
+    const std::string slash =
+        sanitizedFramesFolder[sanitizedFramesFolder.length() - 1] == '/' ? ""
+                                                                         : "/";
+
+    std::string sanitizedFramesExt = params.framesFileExtension;
+    std::string sanitizedOutputPath = params.outputMoviePath;
+
+    sanitizedFramesFolder = _sanitizeString(sanitizedFramesFolder);
+    sanitizedFramesExt = _sanitizeString(sanitizedFramesExt);
+    sanitizedOutputPath = _sanitizeString(sanitizedOutputPath);
+
+    const std::string inputParam =
+        sanitizedFramesFolder + slash + "%05d." + sanitizedFramesExt;
+    const std::string filterParam =
+        "scale=" + std::to_string(static_cast<int>(params.dimensions[0])) +
+        ":" + std::to_string(static_cast<int>(params.dimensions[1])) +
+        ",format=yuv420p";
+    const pid_t pid = fork();
+
+    if (pid == 0)
+    {
+        execl(ffmpegPath.c_str(), "ffmpeg", "-y", "-hide_banner", "-loglevel",
+              "0", "-r", std::to_string(params.fpsRate).c_str(), "-i",
+              inputParam.c_str(), "-vf", filterParam.c_str(), "-crf", "0",
+              "-codec:v", "libx264", sanitizedOutputPath.c_str(),
+              static_cast<char*>(nullptr));
+    }
+    else
+    {
+        int status = 0;
+        if (waitpid(pid, &status, 0) > 0)
+        {
+            // If we could not make the movie, inform and stop execution
+            if(WIFEXITED(status) && WEXITSTATUS(status))
+            {
+                if(WEXITSTATUS(status) == 127)
+                {
+                    PLUGIN_ERROR << "Could not create media video file. FFMPEG "
+                                    "returned with error "
+                                 << status << std::endl;
+                    return;
+                }
+            }
+        }
+        else
+        {
+            PLUGIN_ERROR << "Could not create media video file. "
+                            "Could not launch FFMPEG."
+                         << std::endl;
+            return;
+        }
+    }
+
+    if (params.eraseFrames)
+    {
+        DIR* dir;
+        struct dirent* ent;
+        const std::regex fileNameRegex("[0-9]{5}." +
+                                       params.framesFileExtension);
+        if ((dir = opendir(params.framesFolderPath.c_str())) != nullptr)
+        {
+            while ((ent = readdir(dir)) != nullptr)
+            {
+                std::string fileName(ent->d_name);
+                if (std::regex_match(fileName, fileNameRegex))
+                {
+                    const std::string fullPath =
+                        sanitizedFramesFolder + slash + fileName;
+                    PLUGIN_INFO << "Cleaning frame " << fullPath << std::endl;
+                    remove(fullPath.c_str());
+                }
+            }
+            closedir(dir);
+        }
+        else
+        {
+            PLUGIN_ERROR << "make-movie: Could not clean up frames"
+                         << std::endl;
+        }
+    }
+}
+
+AnterogradeTracingResult CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTracing &payload)
+{
+    AnterogradeTracingResult result;
+    result.error = 0;
+
+    if(payload.cellGIDs.empty())
+    {
+        result.error = 1;
+        result.message = "No input cell GIDs specified";
+        return result;
+    }
+    if(payload.sourceCellColor.size() < 4)
+    {
+        result.error = 2;
+        result.message = "Source cell stain color must have "
+                         "4 components (RGBA)";
+        return result;
+    }
+    if(payload.connectedCellsColor.size() < 4)
+    {
+        result.error = 3;
+        result.message = "Connected cell stain color must have "
+                         "4 components (RGBA)";
+        return result;
+    }
+    if(payload.nonConnectedCellsColor.size() < 4)
+    {
+        result.error = 4;
+        result.message = "Non connected cell stain color must have "
+                         "4 components (RGBA)";
+        return result;
+    }
+
+    auto modelDescriptor = _api->getScene().getModel(static_cast<size_t>(payload.modelId));
+    if(modelDescriptor)
+    {
+        const brion::BlueConfig blueConfiguration (modelDescriptor->getPath());
+        const brain::Circuit circuit (blueConfiguration);
+
+        // Parse loaded targets
+        const brayns::ModelMetadata& metaData = modelDescriptor->getMetadata();
+        auto targetsIt = metaData.find("Targets");
+        std::vector<std::string> targets;
+        if(targetsIt != metaData.end())
+        {
+            const std::string& targetsString = targetsIt->second;
+            if(!targetsString.empty())
+            {
+                if(targetsString.find(',') == std::string::npos)
+                    targets.push_back(targetsString);
+                else
+                {
+                    targets = _splitString(targetsString, ',');
+                }
+            }
+        }
+
+        auto densityIt = metaData.find("Density");
+        const double density = std::stod(densityIt->second);
+        auto randomIt = metaData.find("RandomSeed");
+        const double randomSeed = std::stod(randomIt->second);
+
+        auto gidsMetaIt = metaData.find("GIDs");
+        const std::string& gidsStr = gidsMetaIt->second;
+
+        brion::GIDSet allGIDs;
+
+        if(!gidsStr.empty())
+        {
+            std::vector<std::string> tempStrGids = _splitString(gidsStr, ',');
+            for(const auto& gidStrTok : tempStrGids)
+            {
+                allGIDs.insert(static_cast<uint32_t>(std::stoul(gidStrTok)));
+            }
+        }
+        else
+        {
+            // Gather all GIDs from loaded targets
+            if(!targets.empty())
+            {
+                for(const auto& targetName : targets)
+                {
+                    if(density < 1.0)
+                    {
+                        brion::GIDSet targetGids = circuit.getRandomGIDs(density, targetName, randomSeed);
+                        allGIDs.insert(targetGids.begin(), targetGids.end());
+                    }
+                    else
+                    {
+                        brion::GIDSet targetGids = circuit.getGIDs(targetName);
+                        allGIDs.insert(targetGids.begin(), targetGids.end());
+                    }
+
+                }
+            }
+            else if(density < 1.0)
+                allGIDs = circuit.getRandomGIDs(density, "", randomSeed);
+            else
+                allGIDs = circuit.getGIDs();
+        }
+
+        // Map GIDs to material IDs
+        std::unordered_map<uint32_t, size_t> gidMaterialMap;
+        auto materials = modelDescriptor->getModel().getMaterials();
+        auto itGids = allGIDs.begin();
+        auto itMats = materials.begin();
+        for(; itMats != materials.end(); ++itMats, ++itGids)
+        {
+            gidMaterialMap[*itGids] = itMats->first;
+        }
+
+        const size_t totalSynapses = payload.targetCellGIDs.size();
+        result.message = "Tracing returned "
+                         + std::to_string(totalSynapses)
+                         + " connected cells";
+
+        // If there is any GID, modify the scene materials
+        if(totalSynapses > 0)
+        {
+            // Enable CircuitExplorer extra parameters on materials
+            MaterialExtraAttributes mea;
+            mea.modelId = payload.modelId;
+            _setMaterialExtraAttributes(mea);
+
+            // Reset all cells to default color
+            MaterialRangeDescriptor mrd;
+            mrd.modelId = payload.modelId;
+            mrd.opacity = static_cast<float>(payload.nonConnectedCellsColor[3]);
+            mrd.diffuseColor =
+            {
+                static_cast<float>(payload.nonConnectedCellsColor[0]),
+                static_cast<float>(payload.nonConnectedCellsColor[1]),
+                static_cast<float>(payload.nonConnectedCellsColor[2])
+            };
+
+            mrd.specularColor = {0.f, 0.f, 0.f};
+            mrd.specularExponent = 0.f;
+            mrd.glossiness = 0.f;
+            mrd.shadingMode = static_cast<int>(MaterialShadingMode::diffuse_transparency);
+            _setMaterialRange(mrd);
+
+            // Mark connections
+            MaterialRangeDescriptor connectedMrd = mrd;
+            mrd.diffuseColor =
+            {
+                static_cast<float>(payload.connectedCellsColor[0]),
+                static_cast<float>(payload.connectedCellsColor[1]),
+                static_cast<float>(payload.connectedCellsColor[2])
+            };
+            mrd.opacity = 1.0f;
+            mrd.modelId = payload.modelId;
+            mrd.materialIds.reserve(payload.targetCellGIDs.size());
+            for(auto gid : payload.targetCellGIDs)
+            {
+                auto it = gidMaterialMap.find(gid);
+                if(it != gidMaterialMap.end())
+                    mrd.materialIds.push_back(it->second);
+            }
+            _setMaterialRange(connectedMrd);
+
+            // Mark sources
+            const std::set<uint32_t> gidsSet (payload.cellGIDs.begin(), payload.cellGIDs.end());
+            MaterialRangeDescriptor sourcesMrd = mrd;
+            mrd.diffuseColor =
+            {
+                static_cast<float>(payload.sourceCellColor[0]),
+                static_cast<float>(payload.sourceCellColor[1]),
+                static_cast<float>(payload.sourceCellColor[2])
+            };
+            mrd.opacity = 1.f;
+            mrd.modelId = payload.modelId;
+            mrd.materialIds.reserve(gidsSet.size());
+            for(auto source : gidsSet)
+            {
+                auto it = gidMaterialMap.find(source);
+                if(it != gidMaterialMap.end())
+                    mrd.materialIds.push_back(it->second);
+            }
+            _setMaterialRange(sourcesMrd);
+
+            _api->getScene().markModified();
+            _api->getEngine().triggerRender();
+            //_dirty = true;
+        }
+    }
+    else
+    {
+        result.error = 5;
+        result.message = "The given model ID does not correspond "
+                         "to any existing scene model";
+    }
+
+    return result;
+}
+
+void CircuitExplorerPlugin::_createShapeMaterial(brayns::ModelPtr& model,
+                                                 const size_t id,
+                                                 const brayns::Vector3d& color,
+                                                 const double& opacity)
+{
+    brayns::MaterialPtr mptr = model->createMaterial(id, std::to_string(id));
+    mptr->setDiffuseColor(color);
+    mptr->setOpacity(opacity);
+    mptr->setSpecularExponent(0.0);
+
+    brayns::PropertyMap props;
+    props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 0});
+    props.setProperty(
+        {MATERIAL_PROPERTY_SHADING_MODE,
+         static_cast<int>(MaterialShadingMode::diffuse_transparency)});
+    props.setProperty({MATERIAL_PROPERTY_CLIPPING_MODE,
+                       static_cast<int>(MaterialClippingMode::no_clipping)});
+
+    mptr->updateProperties(props);
+
+    mptr->markModified();
+    mptr->commit();
+}
+
+AddShapeResult CircuitExplorerPlugin::_addSphere(const AddSphere& payload)
+{
+    AddShapeResult result;
+    result.error = 0;
+    result.message = "";
+
+    if (payload.center.size() < 3)
+    {
+        result.error = 1;
+        result.message =
+            "Sphere center has the wrong number of parameters (3 "
+            "necessary)";
+        return result;
+    }
+
+    if (payload.color.size() < 4)
+    {
+        result.error = 2;
+        result.message =
+            "Sphere color has the wrong number of parameters (RGBA, 4 "
+            "necessary)";
+        return result;
+    }
+
+    if (payload.radius < 0.0f)
+    {
+        result.error = 3;
+        result.message = "Negative radius passed for sphere creation";
+        return result;
+    }
+
+    brayns::ModelPtr modelptr = _api->getScene().createModel();
+
+    const size_t matId = 1;
+    const brayns::Vector3d color(payload.color[0], payload.color[1],
+                                 payload.color[2]);
+    const double opacity = payload.color[3];
+    _createShapeMaterial(modelptr, matId, color, opacity);
+
+    const brayns::Vector3f center(payload.center[0], payload.center[1],
+                                  payload.center[2]);
+    modelptr->addSphere(matId, {center, payload.radius});
+
+    size_t numModels = _api->getScene().getNumModels();
+    const std::string name = payload.name.empty()
+                                 ? "sphere_" + std::to_string(numModels)
+                                 : payload.name;
+    result.id = _api->getScene().addModel(
+        std::make_shared<brayns::ModelDescriptor>(std::move(modelptr), name));
+    _api->getScene().markModified();
+
+    _api->getEngine().triggerRender();
+
+    _dirty = true;
+    return result;
+}
+
+AddShapeResult CircuitExplorerPlugin::_addPill(const AddPill& payload)
+{
+    AddShapeResult result;
+    result.error = 0;
+    result.message = "";
+
+    if (payload.p1.size() < 3)
+    {
+        result.error = 1;
+        result.message =
+            "Pill point 1 has the wrong number of parameters (3 necessary)";
+        return result;
+    }
+    if (payload.p2.size() < 3)
+    {
+        result.error = 2;
+        result.message =
+            "Pill point 2 has the wrong number of parameters (3 necessary)";
+        return result;
+    }
+    if (payload.color.size() < 4)
+    {
+        result.error = 3;
+        result.message =
+            "Pill color has the wrong number of parameters (RGBA, 4 "
+            "necessary)";
+        return result;
+    }
+    if (payload.type != "pill" && payload.type != "conepill" &&
+        payload.type != "sigmoidpill")
+    {
+        result.error = 4;
+        result.message =
+            "Unknown pill type parameter. Must be either \"pill\", "
+            "\"conepill\", or \"sigmoidpill\"";
+        return result;
+    }
+    if (payload.radius1 < 0.0f || payload.radius2 < 0.0f)
+    {
+        result.error = 5;
+        result.message = "Negative radius passed for the pill creation";
+        return result;
+    }
+
+    brayns::ModelPtr modelptr = _api->getScene().createModel();
+
+    size_t matId = 1;
+    const brayns::Vector3d color(payload.color[0], payload.color[1],
+                                 payload.color[2]);
+    const double opacity = payload.color[3];
+    _createShapeMaterial(modelptr, matId, color, opacity);
+
+    const brayns::Vector3f p0(payload.p1[0], payload.p1[1], payload.p1[2]);
+    const brayns::Vector3f p1(payload.p2[0], payload.p2[1], payload.p2[2]);
+    brayns::SDFGeometry sdf;
+    if (payload.type == "pill")
+    {
+        sdf = brayns::createSDFPill(p0, p1, payload.radius1);
+    }
+    else if (payload.type == "conepill")
+    {
+        sdf =
+            brayns::createSDFConePill(p0, p1, payload.radius1, payload.radius2);
+    }
+    else if (payload.type == "sigmoidpill")
+    {
+        sdf = brayns::createSDFConePillSigmoid(p0, p1, payload.radius1,
+                                               payload.radius2);
+    }
+
+    modelptr->addSDFGeometry(matId, sdf, {});
+
+    size_t numModels = _api->getScene().getNumModels();
+    const std::string name =
+        payload.name.empty() ? payload.type + "_" + std::to_string(numModels)
+                             : payload.name;
+    result.id = _api->getScene().addModel(
+        std::make_shared<brayns::ModelDescriptor>(std::move(modelptr), name));
+    _api->getScene().markModified();
+    _api->getEngine().triggerRender();
+
+    _dirty = true;
+
+    return result;
+}
+
+AddShapeResult CircuitExplorerPlugin::_addCylinder(const AddCylinder& payload)
+{
+    AddShapeResult result;
+    result.error = 0;
+    result.message = "";
+
+    if (payload.center.size() < 3)
+    {
+        result.error = 1;
+        result.message =
+            "Cylinder center has the wrong number of parameters (3 "
+            "necessary)";
+        return result;
+        ;
+    }
+    if (payload.up.size() < 3)
+    {
+        result.error = 2;
+        result.message =
+            "Cylinder up has the wrong number of parameters (3 necessary)";
+        return result;
+    }
+    if (payload.color.size() < 4)
+    {
+        result.error = 3;
+        result.message =
+            "Cylinder color has the wrong number of parameters (RGBA, 4 "
+            "necessary)";
+        return result;
+    }
+    if (payload.radius < 0.0f)
+    {
+        result.error = 4;
+        result.message = "Negative radius passed for cylinder creation";
+        return result;
+    }
+
+    brayns::ModelPtr modelptr = _api->getScene().createModel();
+
+    const size_t matId = 1;
+    const brayns::Vector3d color(payload.color[0], payload.color[1],
+                                 payload.color[2]);
+    const double opacity = payload.color[3];
+    _createShapeMaterial(modelptr, matId, color, opacity);
+
+    const brayns::Vector3f center(payload.center[0], payload.center[1],
+                                  payload.center[2]);
+    const brayns::Vector3f up(payload.up[0], payload.up[1], payload.up[2]);
+    modelptr->addCylinder(matId, {center, up, payload.radius});
+
+    size_t numModels = _api->getScene().getNumModels();
+    const std::string name = payload.name.empty()
+                                 ? "cylinder_" + std::to_string(numModels)
+                                 : payload.name;
+    result.id = _api->getScene().addModel(
+        std::make_shared<brayns::ModelDescriptor>(std::move(modelptr), name));
+    _api->getScene().markModified();
+    _api->getEngine().triggerRender();
+
+    _dirty = true;
+
+    return result;
+}
+
+AddShapeResult CircuitExplorerPlugin::_addBox(const AddBox& payload)
+{
+    AddShapeResult result;
+    result.error = 0;
+    result.message = "";
+
+    if (payload.minCorner.size() < 3)
+    {
+        result.error = 1;
+        result.message =
+            "Box minCorner has the wrong number of parameters (3 "
+            "necessary)";
+        return result;
+    }
+    if (payload.maxCorner.size() < 3)
+    {
+        result.error = 2;
+        result.message =
+            "Box maxCorner has the wrong number of parameters (3 necesary)";
+        return result;
+    }
+    if (payload.color.size() < 4)
+    {
+        result.error = 3;
+        result.message =
+            "Box color has the wrong number of parameters (RGBA, 4 "
+            "necesary)";
+        return result;
+    }
+
+    brayns::ModelPtr modelptr = _api->getScene().createModel();
+
+    const size_t matId = 1;
+    const brayns::Vector3d color(payload.color[0], payload.color[1],
+                                 payload.color[2]);
+    const double opacity = payload.color[3];
+    _createShapeMaterial(modelptr, matId, color, opacity);
+
+    const brayns::Vector3f minCorner(payload.minCorner[0], payload.minCorner[1],
+                                     payload.minCorner[2]);
+    const brayns::Vector3f maxCorner(payload.maxCorner[0], payload.maxCorner[1],
+                                     payload.maxCorner[2]);
+
+    brayns::TriangleMesh mesh = brayns::createBox(minCorner, maxCorner);
+
+    modelptr->getTriangleMeshes()[matId] = mesh;
+    modelptr->markInstancesDirty();
+
+    size_t numModels = _api->getScene().getNumModels();
+    const std::string name = payload.name.empty()
+                                 ? "box_" + std::to_string(numModels)
+                                 : payload.name;
+    result.id = _api->getScene().addModel(
+        std::make_shared<brayns::ModelDescriptor>(std::move(modelptr), name));
+    _api->getScene().markModified();
+    _api->getEngine().triggerRender();
+
+    _dirty = true;
+
+    return result;
+}
+
 void CircuitExplorerPlugin::_addGrid(const AddGrid& payload)
 {
     BRAYNS_INFO << "Building Grid scene" << std::endl;
@@ -911,6 +1741,8 @@ void CircuitExplorerPlugin::_addGrid(const AddGrid& payload)
     props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 0});
     props.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
                        static_cast<int>(MaterialShadingMode::none)});
+    props.setProperty({MATERIAL_PROPERTY_CLIPPING_MODE,
+                       static_cast<int>(MaterialClippingMode::no_clipping)});
 
     auto material = model->createMaterial(0, "x");
     material->setDiffuseColor(grey);
@@ -1028,6 +1860,8 @@ void CircuitExplorerPlugin::_addColumn(const AddColumn& payload)
     props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 0});
     props.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
                        static_cast<int>(MaterialShadingMode::diffuse)});
+    props.setProperty({MATERIAL_PROPERTY_CLIPPING_MODE,
+                       static_cast<int>(MaterialClippingMode::no_clipping)});
 
     auto material = model->createMaterial(0, "column");
     material->setDiffuseColor(white);

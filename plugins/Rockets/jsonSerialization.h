@@ -105,6 +105,62 @@ struct RPCLight
     PropertyMap properties;
 };
 
+struct InputPath
+{
+    std::string path;
+};
+
+struct FileStats
+{
+    std::string type;
+    long sizeBytes;
+    int error;
+    std::string message;
+};
+
+struct FileType
+{
+    std::string type;
+    int error;
+    std::string message;
+};
+
+struct FileContent
+{
+    std::string content;
+    int error;
+    std::string message;
+};
+
+struct FileRoot
+{
+    std::string root;
+};
+
+struct DirectoryFiles
+{
+    strings names;
+    uint64_ts sizes;
+};
+
+struct DirectoryFileList
+{
+    DirectoryFiles files;
+    strings dirs;
+    int error;
+    std::string message;
+};
+
+struct ImageStreamingMethod
+{
+    std::string type;
+};
+
+struct ExitLaterSchedule
+{
+    uint32_t minutes;
+};
+
 } // namespace brayns
 
 STATICJSON_DECLARE_ENUM(brayns::GeometryQuality,
@@ -505,6 +561,61 @@ inline void init(brayns::RPCLight* a, ObjectHandler* h)
     h->add_property("id", &a->id);
     h->add_property("type", &a->type);
     h->add_property("properties", &a->properties);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::InputPath* a, ObjectHandler* h)
+{
+    h->add_property("path", &a->path);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::FileType* a, ObjectHandler* h)
+{
+    h->add_property("type", &a->type);
+    h->add_property("error", &a->error);
+    h->add_property("message", &a->message);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::FileContent* a, ObjectHandler* h)
+{
+    h->add_property("content", &a->content);
+    h->add_property("error", &a->error);
+    h->add_property("message", &a->message);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::FileRoot* a, ObjectHandler* h)
+{
+    h->add_property("root", &a->root);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::DirectoryFiles* a, ObjectHandler* h)
+{
+    h->add_property("names", &a->names);
+    h->add_property("sizes", &a->sizes);
+}
+
+inline void init(brayns::DirectoryFileList* a, ObjectHandler* h)
+{
+    h->add_property("files", &a->files);
+    h->add_property("dirs", &a->dirs);
+    h->add_property("error", &a->error);
+    h->add_property("message", &a->message);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::ImageStreamingMethod* a, ObjectHandler* h)
+{
+    h->add_property("type", &a->type);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::ExitLaterSchedule* a, ObjectHandler* h)
+{
+    h->add_property("minutes", &a->minutes);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

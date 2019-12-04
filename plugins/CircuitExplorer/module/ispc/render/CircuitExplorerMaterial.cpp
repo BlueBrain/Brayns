@@ -21,6 +21,8 @@
 
 #include "CircuitExplorerMaterial.h"
 #include "CircuitExplorerMaterial_ispc.h"
+
+#include <common/types.h>
 #include <ospray/SDK/common/Data.h>
 
 namespace brayns
@@ -78,14 +80,20 @@ void CircuitExplorerMaterial::commit()
     glossiness = getParam1f("glossiness", 1.f);
 
     // Cast simulation data
-    castSimulationData = getParam1i("cast_simulation_data", 0);
+    castSimulationData =
+        getParam1i(MATERIAL_PROPERTY_CAST_USER_DATA.c_str(), 0);
 
     // Shading mode
     shadingMode = static_cast<MaterialShadingMode>(
-        getParam1i("shading_mode",
+        getParam1i(MATERIAL_PROPERTY_SHADING_MODE.c_str(),
                    static_cast<int>(MaterialShadingMode::none)));
-    // Clipped
-    clipped = getParam1i("clipped", 0);
+    // Clipping mode
+    clippingMode = static_cast<MaterialClippingMode>(
+        getParam1i(MATERIAL_PROPERTY_CLIPPING_MODE.c_str(),
+                   static_cast<int>(MaterialClippingMode::no_clipping)));
+
+    // User parameter
+    userParameter = getParam1f(MATERIAL_PROPERTY_USER_PARAMETER.c_str(), 1.f);
 
     ispc::CircuitExplorerMaterial_set(
         getIE(), map_d ? map_d->getIE() : nullptr,
@@ -104,7 +112,8 @@ void CircuitExplorerMaterial::commit()
         map_Bump ? map_Bump->getIE() : nullptr,
         (const ispc::AffineSpace2f&)xform_Bump,
         (const ispc::LinearSpace2f&)rot_Bump,
-        (const ispc::MaterialShadingMode&)shadingMode, clipped);
+        (const ispc::MaterialShadingMode&)shadingMode,
+        (const ispc::MaterialClippingMode&)clippingMode, userParameter);
 }
 
 OSP_REGISTER_MATERIAL(circuit_explorer_basic, CircuitExplorerMaterial, default);

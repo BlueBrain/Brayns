@@ -31,6 +31,7 @@ include(ispc)
 set(BRAYNSCIRCUITEXPLORER_SOURCES
     module/CircuitExplorer.cpp
     module/ispc/camera/DOFPerspectiveCamera.cpp
+    module/ispc/camera/SphereClippingPerspectiveCamera.cpp
     module/ispc/render/CircuitExplorerMaterial.cpp
     module/ispc/render/CircuitExplorerBasicRenderer.cpp
     module/ispc/render/CircuitExplorerAdvancedRenderer.cpp
@@ -83,6 +84,7 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
 set(BRAYNSCIRCUITEXPLORER_ISPC_SOURCES
     module/ispc/camera/utils.ispc
     module/ispc/camera/DOFPerspectiveCamera.ispc
+    module/ispc/camera/SphereClippingPerspectiveCamera.ispc
     module/ispc/render/CircuitExplorerMaterial.ispc
     module/ispc/render/CircuitExplorerBasicRenderer.ispc
     module/ispc/render/CircuitExplorerAdvancedRenderer.ispc

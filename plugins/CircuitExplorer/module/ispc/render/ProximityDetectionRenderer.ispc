@@ -82,13 +82,14 @@ inline vec3f ProximityDetectionRenderer_shadeRay(
 
         bool processSurfaceShading = true;
         varying vec3f ao_dir =
-            getRandomVector(self->super.super.fb->size.x, sample, normal,
+            getRandomVector(self->super.useHardwareRandomizer,
+                            self->super.super.fb->size.x, sample, normal,
                             self->randomNumber);
 
         Ray ao_ray;
         ao_ray.org = P;
         ao_ray.dir = ao_dir;
-        ao_ray.t0 = dg.epsilon;
+        ao_ray.t0 = max(0.f, dg.epsilon);
         ao_ray.t = self->detectionDistance;
         ao_ray.primID = -1;
         ao_ray.geomID = -1;
@@ -153,18 +154,6 @@ inline vec3f ProximityDetectionRenderer_shadeRay(
 
                 if (reduce_max(radiance) > 0.f)
                 {
-                    /*
-                     float cosNL = 0.f;
-                     if (shadingMode == electron)
-                     {
-                         const vec3f me = normalize(ray.org - P);
-                         const float angle = max(0.f, dot(me, normal));
-                         cosNL = 1.f - pow(angle, Ns);
-                     }
-                     else
-                         cosNL = max(0.f, dot(lightSample.dir, normal));
-
-                     */
                     // Head-light shading
                     float cosNL = (shadingMode == none
                                        ? 1.f
@@ -207,7 +196,7 @@ inline vec3f ProximityDetectionRenderer_shadeRay(
             break;
         }
 
-        ray.t0 = ray.t + dg.epsilon;
+        ray.t0 = max(0.f, ray.t + dg.epsilon);
         ray.t = inf;
         ray.primID = -1;
         ray.geomID = -1;
@@ -248,7 +237,7 @@ export void ProximityDetectionRenderer_set(
     const uniform uint32 spp, const uniform bool surfaceShadingEnabled,
     void** uniform lights, uniform uint32 numLights,
     const uniform float alphaCorrection, const uniform uint32 maxBounces,
-    const uniform float exposure)
+    const uniform float exposure, const uniform bool useHardwareRandomizer)
 {
     uniform ProximityDetectionRenderer* uniform self =
         (uniform ProximityDetectionRenderer * uniform) _self;
@@ -264,6 +253,7 @@ export void ProximityDetectionRenderer_set(
     self->super.maxBounces = maxBounces;
     self->super.exposure = exposure;
     self->super.timestamp = timestamp;
+    self->super.useHardwareRandomizer = useHardwareRandomizer;
 
     // Proximity detection
     self->randomNumber = randomNumber;

@@ -43,7 +43,7 @@ void CircuitExplorerBasicRenderer::commit()
         (_bgMaterial ? _bgMaterial->getIE() : nullptr), spp,
         (_simulationData ? (float*)_simulationData->data : nullptr),
         _simulationDataSize, _alphaCorrection, _simulationThreshold, _exposure,
-        _fogThickness, _fogStart, _maxBounces);
+        _fogThickness, _fogStart, _maxBounces, _useHardwareRandomizer);
 }
 
 CircuitExplorerBasicRenderer::CircuitExplorerBasicRenderer()

@@ -65,9 +65,11 @@ inline float processShadows(const uniform CellGrowthRenderer* uniform self,
         vec3f ld = lightDirection;
         if (self->softShadows > 0.f)
             ld = normalize(
-                ld + self->softShadows *
-                         getRandomVector(self->super.super.super.fb->size.x,
-                                         sample, dg.Ns, self->randomNumber));
+                ld +
+                self->softShadows *
+                    getRandomVector(self->super.super.useHardwareRandomizer,
+                                    self->super.super.super.fb->size.x, sample,
+                                    dg.Ns, self->randomNumber));
 
         Ray shadowRay;
         setRay(shadowRay, dg.P, ld);
@@ -249,39 +251,41 @@ export void* uniform CellGrowthRenderer_create(void* uniform cppE)
 
 export void CellGrowthRenderer_set(
     void* uniform _self, void* uniform secondaryModel, void* uniform bgMaterial,
-    const uniform int& spp, void** uniform lights,
-    const uniform int32 numLights, uniform float* uniform simulationData,
-    const uniform int64 simulationDataSize,
-    const uniform float& alphaCorrection,
-    const uniform float& simulationThreshold, const uniform float& exposure,
-    const uniform float& fogThickness, const uniform float& fogStart,
-    const uniform float& shadows, const uniform float& softShadows,
-    const uniform float& shadowDistance,
-    const uniform bool& useTransferFunctionColor)
+    const uniform int spp, void** uniform lights, const uniform int32 numLights,
+    uniform float* uniform simulationData,
+    const uniform int64 simulationDataSize, const uniform float alphaCorrection,
+    const uniform float simulationThreshold, const uniform float exposure,
+    const uniform float fogThickness, const uniform float fogStart,
+    const uniform float shadows, const uniform float softShadows,
+    const uniform float shadowDistance,
+    const uniform bool useTransferFunctionColor,
+    const uniform bool useHardwareRandomizer)
 {
     uniform CellGrowthRenderer* uniform self =
         (uniform CellGrowthRenderer * uniform) _self;
 
-    self->super.secondaryModel = (uniform Model * uniform) secondaryModel;
-    self->super.super.bgMaterial =
-        (uniform CircuitExplorerMaterial * uniform) bgMaterial;
-
+    // OSPRay
     self->super.super.super.spp = spp;
 
+    // Abstract
+    self->super.super.bgMaterial =
+        (uniform CircuitExplorerMaterial * uniform) bgMaterial;
     self->super.super.lights = (const uniform Light* uniform* uniform)lights;
     self->super.super.numLights = numLights;
+    self->super.super.useHardwareRandomizer = useHardwareRandomizer;
 
+    // Simulation
+    self->super.secondaryModel = (uniform Model * uniform) secondaryModel;
     self->super.simulationData = (uniform float* uniform)simulationData;
     self->super.simulationDataSize = simulationDataSize;
-
-    self->alphaCorrection = alphaCorrection;
-    self->simulationThreshold = simulationThreshold;
-
     self->super.super.exposure = exposure;
 
     self->super.fogThickness = fogThickness;
     self->super.fogStart = fogStart;
 
+    // Growth
+    self->alphaCorrection = alphaCorrection;
+    self->simulationThreshold = simulationThreshold;
     self->shadows = shadows;
     self->softShadows = softShadows;
     self->shadowDistance = shadowDistance;

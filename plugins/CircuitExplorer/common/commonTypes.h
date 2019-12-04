@@ -31,6 +31,14 @@ enum MaterialShadingMode
     electron_transparency = 4,
     perlin = 5,
     diffuse_transparency = 6,
+    checker = 7
+};
+
+enum MaterialClippingMode
+{
+    no_clipping = 0,
+    plane = 1,
+    sphere = 2
 };
 
 #endif // COMMONTYPES_H

@@ -50,7 +50,7 @@ void CellGrowthRenderer::commit()
         (_simulationData ? (float*)_simulationData->data : nullptr),
         _simulationDataSize, _alphaCorrection, _simulationThreshold, _exposure,
         _fogThickness, _fogStart, _shadows, _softShadows, _shadowDistance,
-        _useTransferFunctionColor);
+        _useTransferFunctionColor, _useHardwareRandomizer);
 }
 
 CellGrowthRenderer::CellGrowthRenderer()

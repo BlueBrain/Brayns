@@ -104,6 +104,18 @@ def test_set_materials():
             emissions=emissions, refraction_indices=refraction_indices)
         assert_equal(response, {'ok'})
 
+def test_set_material_range():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.set_material_range(
+            model_id=0, material_ids=[0], diffuse_color=(1, 1, 1), specular_color=(1, 1, 1))
+        assert_equal(response, {'ok'})
+
 
 def test_save_to_cache():
     with patch('rockets.AsyncClient.connected', new=mock_connected), \
@@ -168,6 +180,34 @@ def test_export_frames_to_disk():
         assert_equal(response, {'ok'})
 
 
+def test_get_export_frames_progress():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.get_export_frames_progress()
+        assert_equal(response, {'ok'})
+
+
+def test_make_movie():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.make_movie(
+            output_movie_path='/tmp',
+            fps_rate=0,
+            frames_folder_path='/tmp',
+            erase_frames=False)
+        assert_equal(response, {'ok'})
+
+
 def test_cancel_frames_export():
     with patch('rockets.AsyncClient.connected', new=mock_connected), \
          patch('brayns.utils.http_request', new=mock_http_request), \
@@ -177,6 +217,20 @@ def test_cancel_frames_export():
         app = brayns.Client('localhost:8200')
         ce = CircuitExplorer(app)
         response = ce.cancel_frames_export()
+        assert_equal(response, {'ok'})
+
+def test_trace_anterograde():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.trace_anterograde(
+            model_id=0,
+            source_cells_gid=list(),
+            target_cells_gid=list())
         assert_equal(response, {'ok'})
 
 
@@ -202,6 +256,113 @@ def test_add_column():
         app = brayns.Client('localhost:8200')
         ce = CircuitExplorer(app)
         response = ce.add_column(radius=1)
+        assert_equal(response, {'ok'})
+
+
+def test_add_sphere():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.add_sphere(
+            center=(0,0,0),
+            radius=1.0,
+            color=(1,1,1,1))
+        assert_equal(response, {'ok'})
+
+
+def test_add_pill():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.add_pill(
+            p1=(-1,0,0),
+            p2=(1,0,0),
+            radius=1.0,
+            color=(1,1,1,1))
+        assert_equal(response, {'ok'})
+
+
+def test_add_conepill():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.add_conepill(
+            p1=(-1,0,0),
+            p2=(1,0,0),
+            radius1=1.0,
+            radius2=1.0,
+            color=(1,1,1,1))
+        assert_equal(response, {'ok'})
+
+def test_add_sigmoidpill():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.add_sigmoidpill(
+            p1=(-1,0,0),
+            p2=(1,0,0),
+            radius1=1.0,
+            radius2=1.0,
+            color=(1,1,1,1))
+        assert_equal(response, {'ok'})
+
+
+def test_add_cylinder():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.add_cylinder(
+            center=(0,0,0),
+            up=(1,0,0),
+            radius=1.0,
+            color=(1,1,1,1))
+        assert_equal(response, {'ok'})
+
+
+def test_add_box():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.add_box(
+            minCorner=(-1,-1,-1),
+            maxCorner=(1,1,1),
+            color=(1,1,1,1))
+        assert_equal(response, {'ok'})
+
+
+def test_get_material_ids():
+    with patch('rockets.AsyncClient.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.utils.in_notebook', new=mock_not_in_notebook), \
+         patch('rockets.Client.request', new=mock_ce_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        ce = CircuitExplorer(app)
+        response = ce.get_material_ids(0)
         assert_equal(response, {'ok'})
 
 

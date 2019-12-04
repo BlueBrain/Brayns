@@ -72,7 +72,7 @@ void CircuitExplorerAdvancedRenderer::commit()
         simulationDataSize, _samplingThreshold, _volumeSpecularExponent,
         _volumeAlphaCorrection, _exposure, _fogThickness, _fogStart,
         (const ispc::vec4f*)clipPlaneData, numClipPlanes, _maxBounces,
-        _epsilonFactor);
+        _epsilonFactor, _useHardwareRandomizer);
 }
 
 CircuitExplorerAdvancedRenderer::CircuitExplorerAdvancedRenderer()

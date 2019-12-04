@@ -65,8 +65,9 @@ struct ShadingAttributes
     float lightEmissionIntensity;
     float shadowIntensity;
     bool castSimulationData;
-    bool clipped;
+    MaterialClippingMode clippingMode;
     MaterialShadingMode shadingMode;
+    float userParameter;
     vec3f simulationColor;
     float simulationIntensity;
     vec3f indirectColor;
@@ -78,16 +79,30 @@ struct ShadingAttributes
 };
 
 bool isClipped(const uniform CircuitExplorerAdvancedRenderer* uniform self,
-               const varying vec3f& position)
+               const varying vec3f& position,
+               const MaterialClippingMode clippingMode)
 {
+    if (clippingMode == no_clipping)
+        return false;
+
     bool visible = true;
     for (uint32 i = 0; i < self->numClipPlanes && visible; ++i)
     {
-        const vec3f normal = {self->clipPlanes[i].x, self->clipPlanes[i].y,
-                              self->clipPlanes[i].z};
-        const float d = self->clipPlanes[i].w;
-        const float distance = dot(normal, position) + d;
-        visible &= (distance > 0.f);
+        if (clippingMode == plane)
+        {
+            const vec3f normal = {self->clipPlanes[i].x, self->clipPlanes[i].y,
+                                  self->clipPlanes[i].z};
+            const float d = self->clipPlanes[i].w;
+            const float distance = dot(normal, position) + d;
+            visible &= (distance > 0.f);
+        }
+        else if (clippingMode == sphere)
+        {
+            const vec3f center = {self->clipPlanes[i].x, self->clipPlanes[i].y,
+                                  self->clipPlanes[i].z};
+            const float radius = self->clipPlanes[i].w;
+            visible &= length(center - position) < radius;
+        }
     }
     return !visible;
 }
@@ -100,7 +115,8 @@ inline bool launchRandomRay(
     varying vec3f& randomDirection, const uint32 iteration)
 {
     randomDirection =
-        getRandomVector(self->super.super.super.fb->size.x, sample, normal,
+        getRandomVector(self->super.super.useHardwareRandomizer,
+                        self->super.super.super.fb->size.x, sample, normal,
                         iteration + self->randomNumber);
     backgroundColor = make_vec3f(0.f);
 
@@ -112,7 +128,7 @@ inline bool launchRandomRay(
     Ray randomRay;
     randomRay.org = intersection;
     randomRay.dir = randomDirection;
-    randomRay.t0 = geometry.epsilon;
+    randomRay.t0 = max(0.f, geometry.epsilon);
     randomRay.t = self->giDistance;
     randomRay.time = inf;
     randomRay.primID = -1;
@@ -217,7 +233,7 @@ inline float getVolumeShadowContribution(
     for (float t = t1; t > epsilon && shadowIntensity < 1.f; t -= epsilon)
     {
         const vec3f point = ray.org + ray.dir * t;
-        if (isClipped(self, point))
+        if (isClipped(self, point, plane))
             continue;
         const float sample = volume->sample(volume, point);
 
@@ -243,7 +259,7 @@ inline float getVolumeShadowContributions(
 
     Ray lightRay = ray;
     lightRay.t = inf;
-    lightRay.t0 = epsilon;
+    lightRay.t0 = max(0.f, epsilon);
     lightRay.org = point;
     lightRay.geomID = -1;
 
@@ -251,7 +267,8 @@ inline float getVolumeShadowContributions(
         lightRay.dir = normalize(
             lightSample.dir +
             self->softShadows *
-                getRandomVector(self->super.super.super.fb->size.x, sample,
+                getRandomVector(self->super.super.useHardwareRandomizer,
+                                self->super.super.super.fb->size.x, sample,
                                 lightSample.dir, self->randomNumber));
     else
         lightRay.dir = lightSample.dir;
@@ -307,7 +324,8 @@ inline vec4f getVolumeContribution(
             firstIntersection = t;
             ray.t = t;
             // Introduce a bit of randomness to smooth the shading
-            t += getRandomValue(sample, self->randomNumber) *
+            t += getRandomValue(self->super.super.useHardwareRandomizer, sample,
+                                self->randomNumber) *
                  ((t1 - t0) * 0.01f);
         }
 
@@ -427,6 +445,7 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
             ld = normalize(
                 ld + attributes.self->softShadows *
                          getRandomVector(
+                             attributes.self->super.super.useHardwareRandomizer,
                              attributes.self->super.super.super.fb->size.x,
                              sample, attributes.normal,
                              s + attributes.self->randomNumber));
@@ -437,7 +456,7 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
         Ray shadowRay;
         shadowRay.org = dg.P;
         shadowRay.dir = ld;
-        shadowRay.t0 = attributes.self->epsilonFactor * dg.epsilon;
+        shadowRay.t0 = max(0.f, attributes.self->epsilonFactor * dg.epsilon);
         shadowRay.t = attributes.self->giDistance;
         shadowRay.time = inf;
         shadowRay.geomID = -1;
@@ -456,7 +475,8 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
                           shadowingGeometry, shadowRay,
                           DG_MATERIALID | DG_TEXCOORD | DG_COLOR);
 
-            if (!isClipped(attributes.self, shadowingGeometry.P))
+            if (!isClipped(attributes.self, shadowingGeometry.P,
+                           attributes.clippingMode))
             {
                 uniform CircuitExplorerMaterial* objMaterial =
                     (uniform CircuitExplorerMaterial*)
@@ -486,7 +506,7 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
                 shadowIntensity += opacity;
             }
 
-            shadowRay.t0 = shadowRay.t + shadowingGeometry.epsilon;
+            shadowRay.t0 = max(0.f, shadowRay.t + shadowingGeometry.epsilon);
             shadowRay.t = inf;
             shadowRay.primID = -1;
             shadowRay.geomID = -1;
@@ -496,7 +516,7 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
 
         // Volume shadows
         shadowRay.org = dg.P;
-        shadowRay.t0 = dg.epsilon;
+        shadowRay.t0 = max(0.f, dg.epsilon);
 
         for (uniform uint32 i = 0;
              shadowIntensity < 1.f &&
@@ -533,7 +553,7 @@ inline void initializeShadingAttributes(
     attributes.simulationIntensity = 0.f;
 
     // Clipping planes
-    attributes.clipped = false;
+    attributes.clippingMode = no_clipping;
 
     // Indirect light contribution
     attributes.indirectColor = make_vec3f(0.f);
@@ -611,7 +631,8 @@ inline void setGeometryShadingAttributes(
             attributes.glossiness = mat->glossiness;
             const vec3f randomNormal =
                 (1.f - mat->glossiness) *
-                getRandomVector(self->super.super.super.fb->size.x, sample,
+                getRandomVector(self->super.super.useHardwareRandomizer,
+                                self->super.super.super.fb->size.x, sample,
                                 attributes.normal, self->randomNumber);
             attributes.normal = normalize(attributes.normal + randomNormal);
         }
@@ -677,7 +698,10 @@ inline void setGeometryShadingAttributes(
         attributes.shadingMode = mat->shadingMode;
 
         // Clipping planes
-        attributes.clipped = mat->clipped;
+        attributes.clippingMode = mat->clippingMode;
+
+        // User parameter
+        attributes.userParameter = mat->userParameter;
     }
 
     // Update reflected shading normal
@@ -721,7 +745,8 @@ inline void processSimulationContribution(varying ScreenSample& sample,
     Ray colorRay;
     colorRay.org = attributes.origin;
     colorRay.dir =
-        getRandomVector(attributes.self->super.super.super.fb->size.x, sample,
+        getRandomVector(attributes.self->super.super.useHardwareRandomizer,
+                        attributes.self->super.super.super.fb->size.x, sample,
                         neg(attributes.normal), attributes.self->randomNumber);
     colorRay.t0 = 0.f;
     colorRay.time = inf;
@@ -867,7 +892,7 @@ inline void processElectronShading(varying ScreenSample& sample,
 {
     const vec3f viewer = normalize(sample.ray.org - attributes.origin);
     const float el = max(0.f, dot(viewer, attributes.normal));
-    const float cosNL = 1.f - pow(el, attributes.specularExponent);
+    const float cosNL = 1.f - pow(el, attributes.userParameter);
     attributes.shadingContribution = cosNL * attributes.diffuseColor;
     attributes.simulationColor = cosNL * attributes.simulationColor;
     attributes.specularColor = make_vec3f(0.f);
@@ -878,7 +903,7 @@ inline void processElectronTransparencyShading(varying ScreenSample& sample,
 {
     const vec3f viewer = normalize(sample.ray.org - attributes.origin);
     const float el = 1.f - max(0.f, dot(viewer, attributes.normal));
-    const float cosNL = 1.f - pow(el, attributes.specularExponent);
+    const float cosNL = 1.f - pow(el, attributes.userParameter);
     attributes.shadingContribution = cosNL * attributes.diffuseColor;
     attributes.simulationColor = cosNL * attributes.simulationColor;
     attributes.specularColor = make_vec3f(0.f);
@@ -890,8 +915,8 @@ inline void processCartoonShading(varying ScreenSample& sample,
 {
     const vec3f viewer = normalize(sample.ray.org - attributes.origin);
     float cosNL = max(0.f, dot(viewer, attributes.normal));
-    const uint32 angleAsInt = cosNL * attributes.specularExponent;
-    cosNL = (float)(angleAsInt) / attributes.specularExponent;
+    const uint32 angleAsInt = cosNL * attributes.userParameter;
+    cosNL = (float)(angleAsInt) / attributes.userParameter;
 
     attributes.shadingContribution = cosNL * attributes.diffuseColor;
     attributes.simulationColor = cosNL * attributes.simulationColor;
@@ -903,14 +928,13 @@ inline void processNoiseShading(DifferentialGeometry& dg,
                                 const varying Ray& ray,
                                 ShadingAttributes& attributes)
 {
-    vec3f point = (0.01f * attributes.specularExponent) * dg.P;
+    vec3f point = attributes.userParameter * dg.P;
 
     const float n1 = 0.25f + 0.75f * clamp(worleyNoise(point, 2.f), 0.f, 1.f);
 
     attributes.diffuseColor = (1.f - n1) * attributes.diffuseColor;
     attributes.simulationColor = (1.f - n1) * attributes.simulationColor;
     attributes.specularColor = (1.f - n1) * attributes.specularColor;
-    attributes.specularExponent = 20.f;
 
     attributes.normal.x += 0.5f * n1;
     attributes.normal.y += 0.5f * (0.5f - n1);
@@ -920,6 +944,24 @@ inline void processNoiseShading(DifferentialGeometry& dg,
     attributes.reflectedNormal =
         ray.dir - 2.f * dot(ray.dir, attributes.normal) * attributes.normal;
 
+    processLightShading(dg, sample, ray, attributes);
+}
+
+inline void processCheckerShading(DifferentialGeometry& dg,
+                                  varying ScreenSample& sample,
+                                  const varying Ray& ray,
+                                  ShadingAttributes& attributes)
+{
+    const vec3i point =
+        make_vec3i(attributes.userParameter * (dg.P + make_vec3f(1e2f)));
+    const vec3i p = make_vec3i(point.x % 2, point.y % 2, point.z % 2);
+    if ((p.x == p.y && p.z == 1) || (p.x != p.y && p.z == 0))
+    {
+        attributes.diffuseColor = make_vec3f(1.f) - attributes.diffuseColor;
+        attributes.simulationColor =
+            make_vec3f(1.f) - attributes.simulationColor;
+        attributes.specularColor = make_vec3f(1.f) - attributes.specularColor;
+    }
     processLightShading(dg, sample, ray, attributes);
 }
 
@@ -992,8 +1034,6 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
 
     ShadingAttributes bgAttr;
     bgAttr.self = self;
-    processBackgroundColor(sample, ray, bgAttr);
-    bgColor = make_vec3f(bgAttr.bgColor);
 
     while (moreRebounds && depth < self->super.super.maxBounces &&
            color.w < 1.f)
@@ -1038,7 +1078,7 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
             // Initialize geometry shading attributes
             setGeometryShadingAttributes(self, dg, sample, ray, attributes);
 
-            if (attributes.clipped && isClipped(self, dg.P))
+            if (isClipped(self, dg.P, attributes.clippingMode))
                 // Geometry is clipped, discard intersection
                 discardIntersection = true;
             else
@@ -1055,10 +1095,8 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
             }
 
             if (discardIntersection)
-            {
                 // Continue along the same ray
-                ray.t0 = ray.t + self->epsilonFactor * dg.epsilon;
-            }
+                ray.t0 = max(0.f, ray.t + self->epsilonFactor * dg.epsilon);
             else
             {
                 // Compute indirect lighting contribution
@@ -1073,6 +1111,8 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
                     processElectronTransparencyShading(sample, attributes);
                 else if (attributes.shadingMode == perlin)
                     processNoiseShading(dg, sample, ray, attributes);
+                else if (attributes.shadingMode == checker)
+                    processCheckerShading(dg, sample, ray, attributes);
                 else
                     processLightShading(dg, sample, ray, attributes);
 
@@ -1088,14 +1128,9 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
                     sample.z = min(ray.t, firstIntersection);
 
                 // Alpha
-                totalOpacity += attributes.opacity + attributes.volumeIntensity;
-
-                // Combine all contributions
-                processFinalContribution(attributes);
-
-                composite(make_vec4f(attributes.finalContribution,
-                                     totalOpacity),
-                          color, self->volumeAlphaCorrection);
+                totalOpacity +=
+                    (1.f - attributes.reflection) *
+                    (attributes.opacity + attributes.volumeIntensity);
 
                 // Prepare ray for next iteration
                 bool doRefraction = (attributes.opacity < 1.f);
@@ -1103,7 +1138,7 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
                 if (doRefraction && doReflection)
                 {
                     // Switch between refraction and reflection
-                    const bool reflect = sample.sampleID.z % 2 == 1;
+                    const bool reflect = sample.sampleID.z % 4 == 1;
                     doRefraction = !reflect;
                     doReflection = reflect;
                 }
@@ -1124,7 +1159,7 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
 
                 // Prepare next ray
                 ray.org = dg.P + ray.dir * self->epsilonFactor * dg.epsilon;
-                ray.t0 = self->epsilonFactor * dg.epsilon;
+                ray.t0 = max(0.f, self->epsilonFactor * dg.epsilon);
                 ++depth;
             }
 
@@ -1133,6 +1168,12 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
             ray.geomID = -1;
             ray.instID = -1;
         }
+
+        // Combine all contributions
+        processFinalContribution(attributes);
+
+        composite(make_vec4f(attributes.finalContribution, totalOpacity), color,
+                  self->volumeAlphaCorrection);
     }
 
     // Fog attenuation
@@ -1187,7 +1228,8 @@ export void CircuitExplorerAdvancedRenderer_set(
     const uniform float volumeAlphaCorrection, const uniform float exposure,
     const uniform float fogThickness, const uniform float fogStart,
     const uniform vec4f clipPlanes[], const uniform uint32 numClipPlanes,
-    const uniform uint32 maxBounces, const uniform float epsilonFactor)
+    const uniform uint32 maxBounces, const uniform float epsilonFactor,
+    const uniform bool useHardwareRandomizer)
 {
     uniform CircuitExplorerAdvancedRenderer* uniform self =
         (uniform CircuitExplorerAdvancedRenderer * uniform) _self;
@@ -1205,6 +1247,7 @@ export void CircuitExplorerAdvancedRenderer_set(
     self->super.super.timestamp = timestamp;
     self->super.super.maxBounces = maxBounces;
     self->super.super.exposure = exposure;
+    self->super.super.useHardwareRandomizer = useHardwareRandomizer;
 
     // Simulation
     self->super.secondaryModel = (uniform Model * uniform) secondaryModel;

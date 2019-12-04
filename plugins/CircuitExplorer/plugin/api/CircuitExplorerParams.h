@@ -56,7 +56,8 @@ struct MaterialDescriptor
     float glossiness;
     bool simulationDataCast;
     int32_t shadingMode;
-    bool clipped;
+    int32_t clippingMode;
+    float userParameter;
 };
 
 bool from_json(MaterialDescriptor& materialDescriptor,
@@ -76,16 +77,38 @@ struct MaterialsDescriptor
     std::vector<float> glossinesses;
     std::vector<bool> simulationDataCasts;
     std::vector<int32_t> shadingModes;
-    std::vector<bool> clips;
+    std::vector<int32_t> clippingModes;
+    std::vector<float> userParameters;
 };
 
 bool from_json(MaterialsDescriptor& materialsDescriptor,
                const std::string& payload);
 
+struct MaterialRangeDescriptor
+{
+    int32_t modelId;
+    std::vector<int32_t> materialIds;
+    std::vector<float> diffuseColor;
+    std::vector<float> specularColor;
+    float specularExponent;
+    float reflectionIndex;
+    float opacity;
+    float refractionIndex;
+    float emission;
+    float glossiness;
+    bool simulationDataCast;
+    int32_t shadingMode;
+    int32_t clippingMode;
+    float userParameter;
+};
+
+bool from_json(MaterialRangeDescriptor& materialRangeDescriptor,
+               const std::string& payload);
+
 // Material IDs for a given model
 struct ModelId
 {
-    size_t id;
+    size_t modelId;
 };
 
 bool from_json(ModelId& modelId, const std::string& payload);
@@ -258,13 +281,30 @@ struct ExportFramesToDisk
 {
     std::string path;
     std::string format;
-    uint16_t quality;
-    uint16_t spp;
-    uint16_t startFrame;
+    uint16_t quality{100};
+    uint16_t spp{0};
+    uint16_t startFrame{0};
     std::vector<uint64_t> animationInformation;
     std::vector<double> cameraInformation;
 };
 bool from_json(ExportFramesToDisk& param, const std::string& payload);
+
+struct FrameExportProgress
+{
+    float progress;
+};
+std::string to_json(const FrameExportProgress& exportProgress);
+
+struct MakeMovieParameters
+{
+    std::vector<uint16_t> dimensions;
+    std::string framesFolderPath;
+    std::string framesFileExtension;
+    uint32_t fpsRate;
+    std::string outputMoviePath;
+    bool eraseFrames;
+};
+bool from_json(MakeMovieParameters& movieParams, const std::string& payload);
 
 struct AddGrid
 {
@@ -283,5 +323,71 @@ struct AddColumn
     float radius;
 };
 bool from_json(AddColumn& param, const std::string& payload);
+
+struct AnterogradeTracing
+{
+    int32_t modelId;
+    std::vector<uint32_t> cellGIDs;
+    std::vector<uint32_t> targetCellGIDs;
+    std::vector<double> sourceCellColor;
+    std::vector<double> connectedCellsColor;
+    std::vector<double> nonConnectedCellsColor;
+};
+bool from_json(AnterogradeTracing& param, const std::string& payload);
+
+struct AnterogradeTracingResult
+{
+    int error;
+    std::string message;
+};
+std::string to_json(const AnterogradeTracingResult& result);
+
+struct AddSphere
+{
+    std::string name;
+    std::vector<float> center;
+    float radius;
+    std::vector<double> color;
+};
+bool from_json(AddSphere& param, const std::string& payload);
+
+struct AddPill
+{
+    std::string name;
+    std::string type;
+    std::vector<float> p1;
+    std::vector<float> p2;
+    float radius1;
+    float radius2;
+    std::vector<double> color;
+};
+bool from_json(AddPill& param, const std::string& payload);
+
+struct AddCylinder
+{
+    std::string name;
+    std::vector<float> center;
+    std::vector<float> up;
+    float radius;
+    std::vector<double> color;
+};
+bool from_json(AddCylinder& param, const std::string& payload);
+
+struct AddBox
+{
+    std::string name;
+    std::vector<float> minCorner;
+    std::vector<float> maxCorner;
+    std::vector<double> color;
+};
+bool from_json(AddBox& param, const std::string& payload);
+
+struct AddShapeResult
+{
+    size_t id;
+    int error;
+    std::string message;
+};
+std::string to_json(const AddShapeResult& addResult);
 
 #endif // CIRCUITVIEWERPARAMS_H
