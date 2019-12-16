@@ -162,8 +162,7 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
 
         brayns::PropertyMap materialProps;
         auto name = _readString(file);
-        materialProps.setProperty(
-            {MATERIAL_PROPERTY_CAST_USER_DATA, int32_t(0)});
+        materialProps.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, false});
         materialProps.setProperty(
             {MATERIAL_PROPERTY_SHADING_MODE,
              static_cast<int32_t>(MaterialShadingMode::diffuse)});
@@ -207,7 +206,7 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
             int32_t userData;
             file.read((char*)&userData, sizeof(int32_t));
             material->updateProperty(MATERIAL_PROPERTY_CAST_USER_DATA,
-                                     userData);
+                                     static_cast<bool>(userData));
 
             int32_t shadingMode;
             file.read((char*)&shadingMode, sizeof(int32_t));

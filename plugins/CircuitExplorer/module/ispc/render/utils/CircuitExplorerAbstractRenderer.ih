@@ -32,9 +32,9 @@
 
 // Brayns
 #include "CircuitExplorerRandomGenerator.ih"
-#include "CircuitExplorerSkyBox.ih"
 
-#include "../../../../../../engines/ospray/ispc/render/utils/Consts.ih"
+#include <engines/ospray/ispc/render/utils/Consts.ih>
+#include <engines/ospray/ispc/render/utils/SkyBox.ih>
 
 struct CircuitExplorerAbstractRenderer
 {

@@ -533,7 +533,7 @@ void CircuitExplorerPlugin::_setMaterialExtraAttributes(
             for (auto& material : materials)
             {
                 brayns::PropertyMap props;
-                props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 0});
+                props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, false});
                 props.setProperty(
                     {MATERIAL_PROPERTY_SHADING_MODE,
                      static_cast<int>(MaterialShadingMode::diffuse)});
@@ -577,7 +577,7 @@ void CircuitExplorerPlugin::_setMaterial(const MaterialDescriptor& md)
                 material->setEmission(md.emission);
                 material->setGlossiness(md.glossiness);
                 material->updateProperty(MATERIAL_PROPERTY_CAST_USER_DATA,
-                                         md.simulationDataCast ? 1 : 0);
+                                         md.simulationDataCast);
                 material->updateProperty(MATERIAL_PROPERTY_SHADING_MODE,
                                          md.shadingMode);
                 material->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE,
@@ -651,7 +651,7 @@ void CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
                         if (!md.simulationDataCasts.empty())
                             material->updateProperty(
                                 MATERIAL_PROPERTY_CAST_USER_DATA,
-                                md.simulationDataCasts[id] ? 1 : 0);
+                                md.simulationDataCasts[id]);
                         if (!md.shadingModes.empty())
                             material->updateProperty(
                                 MATERIAL_PROPERTY_SHADING_MODE,
@@ -1443,7 +1443,7 @@ void CircuitExplorerPlugin::_createShapeMaterial(brayns::ModelPtr& model,
     mptr->setSpecularExponent(0.0);
 
     brayns::PropertyMap props;
-    props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 0});
+    props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, false});
     props.setProperty(
         {MATERIAL_PROPERTY_SHADING_MODE,
          static_cast<int>(MaterialShadingMode::diffuse_transparency)});
@@ -1738,7 +1738,7 @@ void CircuitExplorerPlugin::_addGrid(const AddGrid& payload)
     const brayns::Vector3f grey = {0.5, 0.5, 0.5};
 
     brayns::PropertyMap props;
-    props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 0});
+    props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, false});
     props.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
                        static_cast<int>(MaterialShadingMode::none)});
     props.setProperty({MATERIAL_PROPERTY_CLIPPING_MODE,
@@ -1806,7 +1806,7 @@ void CircuitExplorerPlugin::_addGrid(const AddGrid& payload)
         const float l2 = l * 0.90;
 
         brayns::PropertyMap diffuseProps;
-        diffuseProps.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 0});
+        diffuseProps.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, false});
         diffuseProps.setProperty(
             {MATERIAL_PROPERTY_SHADING_MODE,
              static_cast<int>(MaterialShadingMode::diffuse)});
@@ -1857,7 +1857,7 @@ void CircuitExplorerPlugin::_addColumn(const AddColumn& payload)
     const brayns::Vector3f white = {1.f, 1.f, 1.F};
 
     brayns::PropertyMap props;
-    props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, 0});
+    props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, false});
     props.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
                        static_cast<int>(MaterialShadingMode::diffuse)});
     props.setProperty({MATERIAL_PROPERTY_CLIPPING_MODE,

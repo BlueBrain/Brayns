@@ -54,7 +54,7 @@ inline vec3f VoxelizedSimulationRenderer_shadeRay(
             // No intersection
             vec4f colorContribution =
                 skyboxMapping((Renderer*)self, ray,
-                              self->super.super.bgMaterial);
+                              (DefaultMaterial*)self->super.super.bgMaterial);
             colorContribution.w = 1.f;
             composite(colorContribution, pathColor, self->alphaCorrection);
             break;
