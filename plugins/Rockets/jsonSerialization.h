@@ -300,6 +300,7 @@ inline void init(brayns::SnapshotParams* s, ObjectHandler* h)
     h->add_property("renderer", &s->renderingParams, Flags::Optional);
     h->add_property("samples_per_pixel", &s->samplesPerPixel, Flags::Optional);
     h->add_property("size", toArray<2, uint32_t>(s->size));
+    h->add_property("filePath", &s->filePath, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

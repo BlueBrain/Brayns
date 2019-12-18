@@ -48,6 +48,16 @@ if(BRAYNS_BBIC_ENABLED)
   add_subdirectory(BBIC)
 endif()
 
+option(BRAYNS_CIRCUITINFO_ENABLED "Activate CircuitInfo plugin" OFF)
+if(BRAYNS_CIRCUITINFO_ENABLED)
+    add_subdirectory(CircuitInfo)
+endif()
+
+option(BRAYNS_CIRCUITRENDERER_ENABLED "Activate CircuitRenderer plugin" OFF)
+if(BRAYNS_CIRCUITRENDERER_ENABLED)
+    add_subdirectory(CircuitRenderer)
+endif()
+
 add_subdirectory(Example)
 if (TARGET Brayns-all)
   add_dependencies(Brayns-all exampleBraynsPlugin)

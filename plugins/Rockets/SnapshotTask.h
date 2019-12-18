@@ -32,6 +32,8 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
+#include <fstream>
+
 namespace brayns
 {
 struct SnapshotParams
@@ -46,6 +48,7 @@ struct SnapshotParams
     size_t quality{100};
     std::string format; // FreeImage formats apply
     std::string name;
+    std::string filePath;
 };
 
 /**
@@ -159,11 +162,59 @@ public:
                          _params.samplesPerPixel);
         }
 
-        return _imageGenerator.createImage(frameBuffers, _params.format,
-                                           _params.quality);
+        if(!_params.filePath.empty() && frameBuffers.size() == 1)
+        {
+            auto& fb = *frameBuffers[0];
+            _writeToDisk(fb);
+
+            return ImageGenerator::ImageBase64();
+        }
+        else
+            return _imageGenerator.createImage(frameBuffers, _params.format,
+                                            _params.quality);
     }
 
 private:
+    void _writeToDisk(FrameBuffer& fb)
+    {
+        auto image = fb.getImage();
+        auto fif = _params.format == "jpg"
+                ? FIF_JPEG
+                : FreeImage_GetFIFFromFormat(_params.format.c_str());
+
+        if (fif == FIF_JPEG)
+            image.reset(FreeImage_ConvertTo24Bits(image.get()));
+        else if (fif == FIF_UNKNOWN)
+        {
+            std::cerr << "Unknown format: " << _params.format << std::endl;
+            return;
+        }
+
+        int flags = _params.quality;
+        if (fif == FIF_TIFF)
+            flags = TIFF_NONE;
+
+        brayns::freeimage::MemoryPtr memory(FreeImage_OpenMemory());
+
+        FreeImage_SaveToMemory(fif, image.get(), memory.get(), flags);
+
+        BYTE* pixels = nullptr;
+        DWORD numPixels = 0;
+        FreeImage_AcquireMemory(memory.get(), &pixels, &numPixels);
+
+        std::ofstream file;
+        const std::string path = _params.filePath + "." + _params.format;
+        file.open(path, std::ios_base::binary);
+        if (!file.is_open())
+        {
+            std::cerr << "Failed to create " << path << std::endl;
+            return;
+        }
+
+        file.write((char*)pixels, numPixels);
+        file.close();
+    }
+
     SnapshotParams _params;
     FrameBufferPtr _frameBuffer;
     CameraPtr _camera;
