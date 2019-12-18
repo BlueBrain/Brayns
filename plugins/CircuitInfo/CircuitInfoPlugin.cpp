@@ -21,8 +21,8 @@
 #include "CircuitInfoPlugin.h"
 #include "Log.h"
 
-#include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 
 #include <brayns/common/ActionInterface.h>
 #include <brayns/engine/Model.h>
