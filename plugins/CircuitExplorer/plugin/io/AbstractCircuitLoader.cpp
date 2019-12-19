@@ -42,6 +42,7 @@
 
 namespace
 {
+const strings LOADER_KEYWORDS{"BlueConfig", "CircuitConfig"};
 const strings LOADER_EXTENSIONS{"BlueConfig",    "BlueConfig3",
                                 "CircuitConfig", ".json",
                                 "circuit",       "CircuitConfig_nrn"};
@@ -76,6 +77,22 @@ bool AbstractCircuitLoader::isSupported(const std::string &filename,
 
     for (const auto &name : LOADER_EXTENSIONS)
         if (ends_with(filename, name))
+            return true;
+
+    const auto contains = [](const std::string &value,
+                             const std::string &keyword) {
+        if(value.size() < keyword.size())
+            return false;
+
+        const auto lastSlash = value.find_last_of("/");
+        std::string compareTo = value;
+        if(lastSlash != std::string::npos)
+            compareTo = value.substr(lastSlash + 1);
+        return compareTo.find(keyword) != std::string::npos;
+    };
+
+    for(const auto& keyw : LOADER_KEYWORDS)
+        if(contains(filename, keyw))
             return true;
 
     return false;
@@ -468,7 +485,8 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
          enumToString<MorphologyQuality>(morphologyQuality)},
         {"Number of neurons", std::to_string(allGids.size())},
         {"Density", std::to_string(properties.getProperty<double>(PROP_DENSITY.name))},
-        {"RandomSeed", std::to_string(properties.getProperty<double>(PROP_RANDOM_SEED.name))}};
+        {"RandomSeed", std::to_string(properties.getProperty<double>(PROP_RANDOM_SEED.name))},
+        {"CircuitPath", circuitConfiguration}};
 
     brayns::ModelDescriptorPtr modelDescriptor;
     brayns::Transformation transformation;

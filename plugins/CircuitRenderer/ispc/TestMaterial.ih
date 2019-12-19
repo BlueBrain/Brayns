@@ -1,0 +1,21 @@
+#ifndef TESTMATERIAL_IH
+#define TESTMATERIAL_IH
+
+#include <ospray/SDK/common/Material.ih>
+#include <ospray/SDK/math/vec.ih>
+
+struct TestMaterial
+{
+    uniform Material super;
+
+    float opacity;
+    float refraction;
+    float reflection;
+    vec3f Kd;
+    vec3f Ks;
+    float specularExponent;
+    float glossiness;
+
+};
+
+#endif

@@ -663,9 +663,15 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
 
     file.close();
 
+    // Restore original circuit config file from cache metadata, if present
+    std::string path = filename;
+    auto cpIt = metadata.find("CircuitPath");
+    if(cpIt != metadata.end())
+        path = cpIt->second;
+
     auto modelDescriptor =
         std::make_shared<brayns::ModelDescriptor>(std::move(model), "Brick",
-                                                  filename, metadata);
+                                                  path, metadata);
     return modelDescriptor;
 }
 
