@@ -1,6 +1,6 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of the circuit explorer for Brayns
  * <https://github.com/favreau/Brayns-UC-CircuitExplorer>
@@ -19,18 +19,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#ifndef TESTRENDERER_H
+#define TESTRENDERER_H
 
-#include "../CircuitExplorerMaterial.ih"
-#include <ospray/SDK/math/vec.ih>
+#include "TestMaterial.h"
 
-/**
-    Returns the color of the skybox for a given ray. If no material is defined
-   for the skybox, the background color of the renderer is returned.
-    @param renderer Pointer to current renderer
-    @param ray Current ray
-    @param bgMaterial Background material
-    @return The RGBA color of the skybox
-*/
-vec4f skyboxMapping(const uniform Renderer* uniform renderer, const Ray& ray,
-                    const uniform CircuitExplorerMaterial* uniform bgMaterial);
+#include <ospray/SDK/common/Material.h>
+#include <ospray/SDK/render/Renderer.h>
+
+namespace circuitRenderer
+{
+class TestRenderer : public ospray::Renderer
+{
+public:
+    TestRenderer();
+
+    std::string toString() const final
+    {
+        return "circuitRenderer::TestRenderer";
+    }
+
+    void commit() override final;
+
+protected:
+    std::vector<void*> _lights;
+    void** _lightPtr;
+    ospray::Data* _lightData;
+
+    TestMaterial* _backgroundMaterial;
+};
+}
+
+#endif

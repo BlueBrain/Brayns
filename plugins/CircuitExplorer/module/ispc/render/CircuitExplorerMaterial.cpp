@@ -80,8 +80,7 @@ void CircuitExplorerMaterial::commit()
     glossiness = getParam1f("glossiness", 1.f);
 
     // Cast simulation data
-    castSimulationData =
-        getParam1i(MATERIAL_PROPERTY_CAST_USER_DATA.c_str(), 0);
+    castSimulationData = getParam(MATERIAL_PROPERTY_CAST_USER_DATA.c_str(), 0);
 
     // Shading mode
     shadingMode = static_cast<MaterialShadingMode>(
