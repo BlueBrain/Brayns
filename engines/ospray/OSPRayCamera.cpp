@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Scene.h>
 
 #include "OSPRayCamera.h"
 #include "utils.h"

@@ -22,12 +22,12 @@
 #include <tests/paths.h>
 
 #include <brayns/common/types.h>
-#include <brayns/engine/Camera.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/FrameBuffer.h>
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Camera.h>
+#include <brayns/engineapi/Engine.h>
+#include <brayns/engineapi/FrameBuffer.h>
+#include <brayns/engineapi/Material.h>
+#include <brayns/engineapi/Model.h>
+#include <brayns/engineapi/Scene.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"

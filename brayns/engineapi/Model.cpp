@@ -23,8 +23,8 @@
 #include <brayns/common/Transformation.h>
 #include <brayns/common/log.h>
 #include <brayns/common/material/Texture2D.h>
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Volume.h>
+#include <brayns/engineapi/Material.h>
+#include <brayns/engineapi/Volume.h>
 
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/utils/filesystem.h>
@@ -263,7 +263,7 @@ void Model::addStreamline(const size_t materialId, const Streamline& streamline)
 }
 
 uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
-                               const std::vector<size_t>& neighbourIndices)
+                               const uint64_ts& neighbourIndices)
 {
     const uint64_t geomIdx = _geometries->_sdf.geometries.size();
     _geometries->_sdf.geometryIndices[materialId].push_back(geomIdx);
@@ -274,7 +274,7 @@ uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
 }
 
 void Model::updateSDFGeometryNeighbours(
-    size_t geometryIdx, const std::vector<size_t>& neighbourIndices)
+    size_t geometryIdx, const uint64_ts& neighbourIndices)
 {
     _geometries->_sdf.neighbours[geometryIdx] = neighbourIndices;
     _sdfGeometriesDirty = true;

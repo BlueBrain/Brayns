@@ -18,8 +18,8 @@
 
 #include "VolumeModel.h"
 
-#include <brayns/engine/BrickedVolume.h>
-#include <brayns/engine/Model.h>
+#include <brayns/engineapi/BrickedVolume.h>
+#include <brayns/engineapi/Model.h>
 
 namespace
 {

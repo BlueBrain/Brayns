@@ -21,7 +21,7 @@
 #ifndef OSPRAYCAMERA_H
 #define OSPRAYCAMERA_H
 
-#include <brayns/engine/Camera.h>
+#include <brayns/engineapi/Camera.h>
 #include <ospray.h>
 
 namespace brayns

@@ -24,10 +24,10 @@
 
 #include <brayns/common/Transformation.h>
 #include <brayns/common/utils/utils.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Engine.h>
+#include <brayns/engineapi/Material.h>
+#include <brayns/engineapi/Model.h>
+#include <brayns/engineapi/Scene.h>
 #include <brayns/parameters/AnimationParameters.h>
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/ParametersManager.h>

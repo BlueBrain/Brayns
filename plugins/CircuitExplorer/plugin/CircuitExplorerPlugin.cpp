@@ -41,14 +41,14 @@
 #include <brayns/common/Timer.h>
 #include <brayns/common/geometry/Streamline.h>
 #include <brayns/common/utils/imageUtils.h>
-#include <brayns/engine/Camera.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/FrameBuffer.h>
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Camera.h>
+#include <brayns/engineapi/Engine.h>
+#include <brayns/engineapi/FrameBuffer.h>
+#include <brayns/engineapi/Material.h>
+#include <brayns/engineapi/Model.h>
+#include <brayns/engineapi/Scene.h>
 #include <brayns/parameters/ParametersManager.h>
-#include <brayns/pluginapi/PluginAPI.h>
+#include <brayns/pluginapi/Plugin.h>
 
 #include <brion/brion.h>
 
@@ -649,9 +649,12 @@ void CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
                         if (!md.glossinesses.empty())
                             material->setGlossiness(md.glossinesses[id]);
                         if (!md.simulationDataCasts.empty())
+                        {
+                            const bool value = md.simulationDataCasts[id];
                             material->updateProperty(
                                 MATERIAL_PROPERTY_CAST_USER_DATA,
-                                md.simulationDataCasts[id]);
+                                value);
+                        }
                         if (!md.shadingModes.empty())
                             material->updateProperty(
                                 MATERIAL_PROPERTY_SHADING_MODE,

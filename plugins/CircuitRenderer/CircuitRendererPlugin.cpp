@@ -23,8 +23,8 @@
 
 #include <brayns/common/ActionInterface.h>
 #include <brayns/common/PropertyMap.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/pluginapi/PluginAPI.h>
+#include <brayns/engineapi/Engine.h>
+#include <brayns/pluginapi/Plugin.h>
 
 void _addTestRenderer(brayns::Engine& engine)
 {

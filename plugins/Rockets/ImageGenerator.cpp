@@ -22,7 +22,7 @@
 
 #include <brayns/common/utils/base64/base64.h>
 #include <brayns/common/utils/imageUtils.h>
-#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engineapi/FrameBuffer.h>
 #include <brayns/parameters/ApplicationParameters.h>
 
 namespace brayns

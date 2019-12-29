@@ -24,7 +24,7 @@
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/loader/LoaderRegistry.h>
 #include <brayns/common/types.h>
-#include <brayns/engine/LightManager.h>
+#include <brayns/engineapi/LightManager.h>
 
 #include <shared_mutex>
 

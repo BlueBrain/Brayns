@@ -23,7 +23,7 @@
 #include "../../common/log.h"
 
 #include "MetaballsGenerator.h"
-#include <brayns/engine/Model.h>
+#include <brayns/engineapi/Model.h>
 
 #if (CIRCUITEXPLORER_USE_CGAL)
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>

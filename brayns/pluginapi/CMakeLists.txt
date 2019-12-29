@@ -5,7 +5,7 @@
 
 set(BRAYNSPLUGINAPI_PUBLIC_HEADERS
   ExtensionPlugin.h
-  PluginAPI.h
+  Plugin.h
 )
 
 set(BRAYNSPLUGINAPI_INCLUDE_NAME brayns/pluginapi)

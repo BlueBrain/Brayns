@@ -20,25 +20,43 @@
 
 #pragma once
 
-#include <brayns/engine/Volume.h>
+#include <brayns/engineapi/Volume.h>
 
 namespace brayns
 {
-/** A volume type where the voxels are copied for each added brick. */
-class BrickedVolume : public virtual Volume
+/**
+ * A volume type where the voxels are set once and only referenced from the
+ * source location.
+ */
+class SharedDataVolume : public virtual Volume
 {
 public:
     /** @name API for engine-specific code */
     //@{
-    virtual void setBrick(const void* data, const Vector3ui& position,
-                          const Vector3ui& size) = 0;
+    virtual void setVoxels(const void* voxels) = 0;
     //@}
 
+    /**
+     * Convenience functions to use voxels from given file and pass them to
+     * setVoxels().
+     */
+    void mapData(const std::string& filename);
+    void mapData(const uint8_ts& buffer);
+    void mapData(uint8_ts&& buffer);
+
 protected:
-    BrickedVolume(const Vector3ui& dimensions, const Vector3f& spacing,
-                  const DataType type)
+    SharedDataVolume(const Vector3ui& dimensions, const Vector3f& spacing,
+                     const DataType type)
         : Volume(dimensions, spacing, type)
     {
     }
+
+    ~SharedDataVolume();
+
+private:
+    uint8_ts _memoryBuffer;
+    void* _memoryMapPtr{nullptr};
+    int _cacheFileDescriptor{-1};
+    size_t _size{0};
 };
 }

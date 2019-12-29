@@ -21,7 +21,7 @@
 #ifndef OSPRAYENGINE_H
 #define OSPRAYENGINE_H
 
-#include <brayns/engine/Engine.h>
+#include <brayns/engineapi/Engine.h>
 
 namespace brayns
 {

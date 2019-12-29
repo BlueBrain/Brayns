@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/Model.h>
+#include <brayns/engineapi/Model.h>
 
 #include <ospray.h>
 

@@ -27,7 +27,7 @@
 #include <brayns/common/Timer.h>
 #include <brayns/common/tasks/Task.h>
 #include <brayns/common/utils/stringUtils.h>
-#include <brayns/pluginapi/PluginAPI.h>
+#include <brayns/pluginapi/Plugin.h>
 
 #include <brayns/tasks/AddModelFromBlobTask.h>
 #include <brayns/tasks/AddModelTask.h>

@@ -27,7 +27,7 @@
 
 #include <brayns/api.h>
 #include <brayns/common/types.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Scene.h>
 #include <brion/brion.h>
 
 typedef std::shared_ptr<brion::CompartmentReport> CompartmentReportPtr;

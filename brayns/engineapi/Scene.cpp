@@ -24,8 +24,8 @@
 #include <brayns/common/log.h>
 #include <brayns/common/scene/ClipPlane.h>
 #include <brayns/common/utils/utils.h>
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
+#include <brayns/engineapi/Material.h>
+#include <brayns/engineapi/Model.h>
 
 #include <brayns/parameters/GeometryParameters.h>
 

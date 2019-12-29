@@ -27,9 +27,9 @@
 #include <common/log.h>
 #include <common/types.h>
 
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Material.h>
+#include <brayns/engineapi/Model.h>
+#include <brayns/engineapi/Scene.h>
 
 #include <brain/brain.h>
 #include <brion/brion.h>
@@ -193,7 +193,7 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
             bool userData;
             file.read((char*)&userData, sizeof(bool));
             material->updateProperty(MATERIAL_PROPERTY_CAST_USER_DATA,
-                                     static_cast<int32_t>(userData));
+                                     userData);
 
             size_t shadingMode;
             file.read((char*)&shadingMode, sizeof(size_t));
@@ -741,7 +741,7 @@ void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
         int32_t simulation = 0;
         try
         {
-            simulation = material.second->getProperty<int32_t>(
+            simulation = material.second->getProperty<bool>(
                 MATERIAL_PROPERTY_CAST_USER_DATA);
         }
         catch (const std::runtime_error&)

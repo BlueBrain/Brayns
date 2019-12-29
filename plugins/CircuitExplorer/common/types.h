@@ -29,7 +29,7 @@
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/mathTypes.h>
 #include <brayns/common/types.h>
-#include <brayns/engine/Model.h>
+#include <brayns/engineapi/Model.h>
 
 #include <memory>
 #include <vector>
@@ -370,10 +370,10 @@ struct ParallelModelContainer
                 model.addSDFGeometry(sdfMaterials[i], sdfGeometries[i], {});
 
         // Write the neighbours using global indices
-        std::vector<size_t> neighboursTmp;
-        for (size_t i = 0; i < numGeoms; i++)
+        uint64_ts neighboursTmp;
+        for (uint64_t i = 0; i < numGeoms; i++)
         {
-            const size_t globalIndex = localToGlobalIndex[i];
+            const uint64_t globalIndex = localToGlobalIndex[i];
             neighboursTmp.clear();
 
             for (auto localNeighbourIndex : sdfNeighbours[i])

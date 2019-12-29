@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/engine/BrickedVolume.h>
-#include <brayns/engine/SharedDataVolume.h>
+#include <brayns/engineapi/BrickedVolume.h>
+#include <brayns/engineapi/SharedDataVolume.h>
 
 #include <ospray/SDK/volume/Volume.h>
 

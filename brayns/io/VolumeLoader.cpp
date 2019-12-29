@@ -22,9 +22,9 @@
 #include <brayns/common/utils/filesystem.h>
 #include <brayns/common/utils/stringUtils.h>
 #include <brayns/common/utils/utils.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
-#include <brayns/engine/SharedDataVolume.h>
+#include <brayns/engineapi/Model.h>
+#include <brayns/engineapi/Scene.h>
+#include <brayns/engineapi/SharedDataVolume.h>
 
 #include <fstream>
 #include <map>

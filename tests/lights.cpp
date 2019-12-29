@@ -20,12 +20,12 @@
 #include <brayns/Brayns.h>
 
 #include <brayns/common/light/Light.h>
-#include <brayns/engine/Camera.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/FrameBuffer.h>
-#include <brayns/engine/LightManager.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Camera.h>
+#include <brayns/engineapi/Engine.h>
+#include <brayns/engineapi/FrameBuffer.h>
+#include <brayns/engineapi/LightManager.h>
+#include <brayns/engineapi/Model.h>
+#include <brayns/engineapi/Scene.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"

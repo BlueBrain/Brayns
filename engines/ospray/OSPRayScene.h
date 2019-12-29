@@ -22,7 +22,7 @@
 #define OSPRAYSCENE_H
 
 #include <brayns/common/types.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Scene.h>
 
 #include <ospray.h>
 

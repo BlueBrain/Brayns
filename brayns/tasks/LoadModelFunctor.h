@@ -23,7 +23,7 @@
 #include <brayns/common/loader/Loader.h>
 #include <brayns/common/tasks/TaskFunctor.h>
 #include <brayns/common/types.h>
-#include <brayns/engine/Model.h>
+#include <brayns/engineapi/Model.h>
 
 namespace brayns
 {

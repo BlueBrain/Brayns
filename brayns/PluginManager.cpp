@@ -24,7 +24,7 @@
 #include <brayns/common/utils/stringUtils.h>
 #include <brayns/parameters/ParametersManager.h>
 
-#include <brayns/pluginapi/PluginAPI.h>
+#include <brayns/pluginapi/Plugin.h>
 #ifdef BRAYNS_USE_NETWORKING
 #include <plugins/Rockets/RocketsPlugin.h>
 #endif

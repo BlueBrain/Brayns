@@ -20,10 +20,10 @@
 #include "MultiviewPlugin.h"
 
 #include <brayns/common/log.h>
-#include <brayns/engine/Camera.h>
-#include <brayns/engine/Engine.h>
+#include <brayns/engineapi/Camera.h>
+#include <brayns/engineapi/Engine.h>
 #include <brayns/parameters/ParametersManager.h>
-#include <brayns/pluginapi/PluginAPI.h>
+#include <brayns/pluginapi/Plugin.h>
 
 constexpr auto PARAM_ARM_LENGTH = "armLength";
 constexpr auto PARAM_HEIGHT = "height";

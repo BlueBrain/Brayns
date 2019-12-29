@@ -20,7 +20,7 @@
 
 #include <brayns/common/log.h>
 #include <brayns/common/scene/ClipPlane.h>
-#include <brayns/engine/Model.h>
+#include <brayns/engineapi/Model.h>
 
 #include "OSPRayCamera.h"
 #include "OSPRayFrameBuffer.h"

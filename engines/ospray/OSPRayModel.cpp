@@ -24,8 +24,8 @@
 #include "utils.h"
 
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Material.h>
+#include <brayns/engineapi/Scene.h>
 #include <brayns/parameters/AnimationParameters.h>
 
 namespace brayns

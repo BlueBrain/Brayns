@@ -21,8 +21,8 @@
 
 #include "AstrocyteLoader.h"
 
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Model.h>
+#include <brayns/engineapi/Scene.h>
 #include <common/commonTypes.h>
 #include <common/log.h>
 

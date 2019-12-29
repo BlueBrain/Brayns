@@ -22,11 +22,11 @@
 #include <brayns/Brayns.h>
 #include <tests/paths.h>
 
-#include <brayns/engine/Camera.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/FrameBuffer.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Camera.h>
+#include <brayns/engineapi/Engine.h>
+#include <brayns/engineapi/FrameBuffer.h>
+#include <brayns/engineapi/Model.h>
+#include <brayns/engineapi/Scene.h>
 
 #include <brayns/defines.h>
 #ifdef BRAYNS_USE_NETWORKING

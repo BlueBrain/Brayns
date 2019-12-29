@@ -21,7 +21,7 @@
 #include "EngineFactory.h"
 
 #include <brayns/common/log.h>
-#include <brayns/engine/Engine.h>
+#include <brayns/engineapi/Engine.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #if (BRAYNS_USE_OSPRAY)

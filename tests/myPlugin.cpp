@@ -22,7 +22,7 @@
 
 #include <brayns/common/ActionInterface.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
-#include <brayns/pluginapi/PluginAPI.h>
+#include <brayns/pluginapi/Plugin.h>
 
 #include "BasicRenderer_ispc.h"
 #include <engines/ospray/ispc/render/DefaultMaterial.h>

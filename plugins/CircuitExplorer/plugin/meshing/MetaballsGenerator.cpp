@@ -26,7 +26,7 @@
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/geometry/TriangleMesh.h>
 #include <brayns/common/log.h>
-#include <brayns/engine/Material.h>
+#include <brayns/engineapi/Material.h>
 
 const size_t NB_EDGES = 12;
 

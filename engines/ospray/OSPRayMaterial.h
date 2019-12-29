@@ -21,7 +21,7 @@
 #ifndef OSPRAYMATERIAL_H
 #define OSPRAYMATERIAL_H
 
-#include <brayns/engine/Material.h>
+#include <brayns/engineapi/Material.h>
 #include <ospray.h>
 
 namespace brayns

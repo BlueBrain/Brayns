@@ -20,8 +20,8 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engineapi/Engine.h>
+#include <brayns/engineapi/FrameBuffer.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"

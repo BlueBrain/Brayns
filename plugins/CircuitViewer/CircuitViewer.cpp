@@ -26,11 +26,11 @@
 #include "renderer/AdvancedSimulationRenderer.h" // enum Shading
 #endif
 
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/Renderer.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Engine.h>
+#include <brayns/engineapi/Renderer.h>
+#include <brayns/engineapi/Scene.h>
 #include <brayns/parameters/ParametersManager.h>
-#include <brayns/pluginapi/PluginAPI.h>
+#include <brayns/pluginapi/Plugin.h>
 
 namespace brayns
 {

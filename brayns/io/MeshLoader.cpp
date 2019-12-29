@@ -33,9 +33,9 @@
 
 #include <brayns/common/utils/filesystem.h>
 #include <brayns/common/utils/stringUtils.h>
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Material.h>
+#include <brayns/engineapi/Model.h>
+#include <brayns/engineapi/Scene.h>
 
 #ifdef USE_CUSTOM_PLY_IMPORTER
 #include "assimpImporters/PlyLoader.h"

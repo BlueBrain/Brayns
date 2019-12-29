@@ -32,9 +32,9 @@
 
 #include <brayns/common/Timer.h>
 #include <brayns/common/scene/ClipPlane.h>
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Material.h>
+#include <brayns/engineapi/Model.h>
+#include <brayns/engineapi/Scene.h>
 
 #if BRAYNS_USE_ASSIMP
 #include <brayns/io/MeshLoader.h>
@@ -451,9 +451,7 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
     materialProps.setProperty(
         {MATERIAL_PROPERTY_CAST_USER_DATA,
          (compartmentReport || userDataType == UserDataType::distance_to_soma ||
-          reportType == ReportType::spikes)
-             ? 1
-             : 0});
+          reportType == ReportType::spikes)});
     materialProps.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
                                static_cast<int>(MaterialShadingMode::diffuse)});
     materialProps.setProperty(
@@ -661,10 +659,13 @@ void AbstractCircuitLoader::_importMeshes(
     }
 }
 #else
-void AbstractCircuitLoader::_importMeshes(
-    brayns::Model &, const brain::GIDSet &, const brayns::Matrix4s &,
-    const GIDOffsets &, const size_ts &, const size_ts &, const size_ts &,
-    const CircuitColorScheme &, const brayns::LoaderProgress &) const
+void AbstractCircuitLoader::_importMeshes(const brayns::PropertyMap &/*props*/, brayns::Model &/*model*/,
+                                          const brain::GIDSet &/*gids*/,
+                                          const Matrix4fs &/*transformations*/,
+                                          const GIDOffsets &/*targetGIDOffsets*/,
+                                          const size_ts &/*layerIds*/, const size_ts &/*morphologyTypes*/,
+                                          const size_ts &/*electrophysiologyTypes*/,
+                                          const brayns::LoaderProgress &/*callback*/) const
 {
 }
 #endif

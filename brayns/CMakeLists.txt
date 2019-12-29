@@ -6,7 +6,7 @@
 
 add_subdirectory(parameters)
 add_subdirectory(common)
-add_subdirectory(engine)
+add_subdirectory(engineapi)
 add_subdirectory(manipulators)
 add_subdirectory(io)
 add_subdirectory(tasks)

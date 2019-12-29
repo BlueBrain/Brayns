@@ -375,7 +375,7 @@ public:
       @return Global index of the geometry
       */
     uint64_t addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
-                            const std::vector<size_t>& neighbourIndices);
+                            const uint64_ts& neighbourIndices);
 
     /**
      * Returns SDF geometry data handled by the model
@@ -392,7 +392,7 @@ public:
       together with
       */
     void updateSDFGeometryNeighbours(
-        size_t geometryIdx, const std::vector<size_t>& neighbourIndices);
+        size_t geometryIdx, const uint64_ts& neighbourIndices);
 
     /**
         Returns triangle meshes handled by the model

@@ -22,8 +22,8 @@
 
 #include <brayns/Brayns.h>
 #include <brayns/common/loader/Loader.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Engine.h>
+#include <brayns/engineapi/Scene.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #include <plugins/Rockets/jsonSerialization.h>

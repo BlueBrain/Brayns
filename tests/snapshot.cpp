@@ -22,8 +22,8 @@
 #include <tests/paths.h>
 
 #include "ClientServer.h"
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/Renderer.h>
+#include <brayns/engineapi/Engine.h>
+#include <brayns/engineapi/Renderer.h>
 
 #include "tests/PDiffHelpers.h"
 

@@ -22,12 +22,12 @@
 #include "BBICFile.h"
 #include "BBICPlugin.h"
 
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Model.h>
+#include <brayns/engineapi/Scene.h>
 
-#include <brayns/engine/BrickedVolume.h>
-#include <brayns/engine/Camera.h>
-#include <brayns/pluginapi/PluginAPI.h>
+#include <brayns/engineapi/BrickedVolume.h>
+#include <brayns/engineapi/Camera.h>
+#include <brayns/pluginapi/Plugin.h>
 
 namespace bbic
 {

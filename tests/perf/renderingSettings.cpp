@@ -21,11 +21,11 @@
 #include <brayns/Brayns.h>
 
 #include <brayns/common/Timer.h>
-#include <brayns/engine/Camera.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/FrameBuffer.h>
-#include <brayns/engine/Renderer.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Camera.h>
+#include <brayns/engineapi/Engine.h>
+#include <brayns/engineapi/FrameBuffer.h>
+#include <brayns/engineapi/Renderer.h>
+#include <brayns/engineapi/Scene.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN

@@ -23,7 +23,7 @@
 #include <brayns/Brayns.h>
 
 #include <brayns/common/utils/imageUtils.h>
-#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engineapi/FrameBuffer.h>
 
 #include <deps/perceptualdiff/metric.h>
 #include <deps/perceptualdiff/rgba_image.h>

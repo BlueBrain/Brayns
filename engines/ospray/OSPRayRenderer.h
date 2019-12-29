@@ -22,7 +22,7 @@
 #define OSPRAYRENDERER_H
 
 #include <brayns/common/types.h>
-#include <brayns/engine/Renderer.h>
+#include <brayns/engineapi/Renderer.h>
 
 #include <ospray.h>
 

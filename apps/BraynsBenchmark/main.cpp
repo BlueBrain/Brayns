@@ -22,9 +22,9 @@
 #include <brayns/common/Timer.h>
 #include <brayns/common/log.h>
 #include <brayns/common/types.h>
-#include <brayns/engine/Camera.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Camera.h>
+#include <brayns/engineapi/Engine.h>
+#include <brayns/engineapi/Scene.h>
 
 int main(int argc, const char** argv)
 {

@@ -21,7 +21,7 @@
 #include "SimulationHandler.h"
 
 #include <brayns/common/log.h>
-#include <brayns/engine/Material.h>
+#include <brayns/engineapi/Material.h>
 
 #include <brain/compartmentReport.h>
 #include <brain/compartmentReportMapping.h>

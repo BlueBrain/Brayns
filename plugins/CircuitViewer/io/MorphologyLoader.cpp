@@ -27,9 +27,9 @@
 #include <brayns/common/utils/enumUtils.h>
 #include <brayns/common/utils/filesystem.h>
 #include <brayns/common/utils/utils.h>
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Material.h>
+#include <brayns/engineapi/Model.h>
+#include <brayns/engineapi/Scene.h>
 
 #include <brain/brain.h>
 
@@ -134,10 +134,10 @@ bool _isVisible(const SectionType type, const NeuronDisplayMode mode)
     }
 }
 
-inline float _getLastSampleRadius(const brain::neuron::Section& section)
-{
-    return section[-1][3] * 0.5;
-}
+//inline float _getLastSampleRadius(const brain::neuron::Section& section)
+//{
+//    return section[-1][3] * 0.5;
+//}
 
 /* Morphology tree processing */
 

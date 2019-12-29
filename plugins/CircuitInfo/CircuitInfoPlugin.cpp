@@ -25,9 +25,9 @@
 #include <boost/filesystem.hpp>
 
 #include <brayns/common/ActionInterface.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
-#include <brayns/pluginapi/PluginAPI.h>
+#include <brayns/engineapi/Model.h>
+#include <brayns/engineapi/Scene.h>
+#include <brayns/pluginapi/Plugin.h>
 
 #include <brain/brain.h>
 #include <brion/brion.h>

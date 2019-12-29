@@ -23,10 +23,10 @@
 #include <brayns/common/log.h>
 #include <brayns/common/types.h>
 #include <brayns/common/utils/utils.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engineapi/Engine.h>
+#include <brayns/engineapi/Material.h>
+#include <brayns/engineapi/Model.h>
+#include <brayns/engineapi/Scene.h>
 
 #include <assert.h>
 #include <fstream>

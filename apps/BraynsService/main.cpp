@@ -22,8 +22,8 @@
 #include <brayns/common/Timer.h>
 #include <brayns/common/log.h>
 #include <brayns/common/types.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/Renderer.h>
+#include <brayns/engineapi/Engine.h>
+#include <brayns/engineapi/Renderer.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #include <uvw.hpp>

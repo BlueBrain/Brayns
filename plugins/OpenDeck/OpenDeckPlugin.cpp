@@ -20,9 +20,9 @@
 #include "OpenDeckPlugin.h"
 
 #include <brayns/common/log.h>
-#include <brayns/engine/Camera.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/pluginapi/PluginAPI.h>
+#include <brayns/engineapi/Camera.h>
+#include <brayns/engineapi/Engine.h>
+#include <brayns/pluginapi/Plugin.h>
 
 namespace brayns
 {

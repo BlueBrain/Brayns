@@ -28,7 +28,7 @@
 #include <brayns/common/Transformation.h>
 #include <brayns/common/light/Light.h>
 #include <brayns/common/log.h>
-#include <brayns/engine/Model.h>
+#include <brayns/engineapi/Model.h>
 
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/VolumeParameters.h>

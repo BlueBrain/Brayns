@@ -21,7 +21,7 @@
 #include <jsonPropertyMap.h>
 
 #include "ClientServer.h"
-#include <brayns/engine/Renderer.h>
+#include <brayns/engineapi/Renderer.h>
 
 TEST_CASE_FIXTURE(ClientServer, "change_fov")
 {
