@@ -10,7 +10,7 @@ endif()
 
 # Data access
 if(BRAYNS_CIRCUITVIEWER_ENABLED)
-  git_subproject(Brion https://github.com/BlueBrain/Brion.git e581731)
+  git_subproject(Brion https://github.com/BlueBrain/Brion.git 551fbb0)
 endif()
 
 if(BRAYNS_BBIC_ENABLED)
