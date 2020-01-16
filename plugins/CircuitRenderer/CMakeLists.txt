@@ -17,6 +17,7 @@ endif()
 
 include(Common)
 common_find_package(ospray 1.8 SYSTEM)
+common_find_package(vmmlib REQUIRED)
 common_find_package_post()
 
 list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
