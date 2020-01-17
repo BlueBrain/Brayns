@@ -733,7 +733,7 @@ void CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescriptor& mrd
                     material->setEmission(mrd.emission);
                     material->setGlossiness(mrd.glossiness);
                     material->updateProperty(MATERIAL_PROPERTY_CAST_USER_DATA,
-                                             mrd.simulationDataCast ? 1 : 0);
+                                             mrd.simulationDataCast);
                     material->updateProperty(MATERIAL_PROPERTY_SHADING_MODE,
                                              mrd.shadingMode);
                     material->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE,
