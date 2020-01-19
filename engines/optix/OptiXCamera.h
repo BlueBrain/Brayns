@@ -22,7 +22,7 @@
 
 #include "OptiXContext.h"
 
-#include <brayns/engine/Camera.h>
+#include <brayns/engineapi/Camera.h>
 #include <optixu/optixpp_namespace.h>
 
 namespace brayns

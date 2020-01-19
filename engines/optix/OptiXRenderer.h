@@ -23,7 +23,7 @@
 
 #include <brayns/common/Timer.h>
 #include <brayns/common/types.h>
-#include <brayns/engine/Renderer.h>
+#include <brayns/engineapi/Renderer.h>
 
 namespace brayns
 {

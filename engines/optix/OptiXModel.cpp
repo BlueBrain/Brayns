@@ -26,7 +26,7 @@
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/parameters/AnimationParameters.h>
 
-#include <brayns/engine/Material.h>
+#include <brayns/engineapi/Material.h>
 
 namespace brayns
 {

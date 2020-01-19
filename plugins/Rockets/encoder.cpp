@@ -20,7 +20,7 @@
 #include "encoder.h"
 
 #include <brayns/common/log.h>
-#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engineapi/FrameBuffer.h>
 
 int custom_io_write(void *opaque, uint8_t *buffer, int32_t buffer_size)
 {
@@ -218,4 +218,4 @@ void Encoder::_toPicture(const uint8_t *const data, const int width_,
     sws_scale(sws_context, &data, stride, 0, height_, picture.frame->data,
               picture.frame->linesize);
 }
-}
+} // namespace brayns

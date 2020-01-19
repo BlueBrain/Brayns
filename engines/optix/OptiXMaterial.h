@@ -22,7 +22,7 @@
 
 #include <map>
 
-#include <brayns/engine/Material.h>
+#include <brayns/engineapi/Material.h>
 
 #include <optixu/optixpp_namespace.h>
 

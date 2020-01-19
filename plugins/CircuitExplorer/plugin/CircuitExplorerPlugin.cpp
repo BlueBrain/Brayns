@@ -262,7 +262,8 @@ std::string _sanitizeString(const std::string& input)
     return result;
 }
 
-std::vector<std::string> _splitString(const std::string& source, const char token)
+std::vector<std::string> _splitString(const std::string& source,
+                                      const char token)
 {
     std::vector<std::string> result;
     std::string split;
@@ -333,8 +334,9 @@ void CircuitExplorerPlugin::init()
 
         PLUGIN_INFO << "Registering 'set-material-range' endpoint" << std::endl;
         actionInterface->registerNotification<MaterialRangeDescriptor>(
-            "set-material-range",
-            [&](const MaterialRangeDescriptor& param) { _setMaterialRange(param); });
+            "set-material-range", [&](const MaterialRangeDescriptor& param) {
+                _setMaterialRange(param);
+            });
 
         PLUGIN_INFO << "Registering 'get-material-ids' endpoint" << std::endl;
         actionInterface->registerRequest<ModelId, MaterialIds>(
@@ -428,11 +430,10 @@ void CircuitExplorerPlugin::init()
 
         PLUGIN_INFO << "Registering 'trace-anterograde' endpoint" << std::endl;
         _api->getActionInterface()
-               ->registerRequest<AnterogradeTracing, AnterogradeTracingResult>(
-            "trace-anterograde",
-            [&](const AnterogradeTracing& payload) {
-                return _traceAnterogrades(payload);
-            });
+            ->registerRequest<AnterogradeTracing, AnterogradeTracingResult>(
+                "trace-anterograde", [&](const AnterogradeTracing& payload) {
+                    return _traceAnterogrades(payload);
+                });
 
         PLUGIN_INFO << "Registering 'add-grid' endpoint" << std::endl;
         _api->getActionInterface()->registerNotification<AddGrid>(
@@ -652,8 +653,7 @@ void CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
                         {
                             const bool value = md.simulationDataCasts[id];
                             material->updateProperty(
-                                MATERIAL_PROPERTY_CAST_USER_DATA,
-                                value);
+                                MATERIAL_PROPERTY_CAST_USER_DATA, value);
                         }
                         if (!md.shadingModes.empty())
                             material->updateProperty(
@@ -686,28 +686,31 @@ void CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
     }
 }
 
-void CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescriptor& mrd)
+void CircuitExplorerPlugin::_setMaterialRange(
+    const MaterialRangeDescriptor& mrd)
 {
     auto modelDescriptor = _api->getScene().getModel(mrd.modelId);
     if (modelDescriptor)
     {
         std::vector<size_t> matIds;
-        if(mrd.materialIds.empty())
+        if (mrd.materialIds.empty())
         {
             matIds.reserve(modelDescriptor->getModel().getMaterials().size());
-            for(const auto& mat : modelDescriptor->getModel().getMaterials())
+            for (const auto& mat : modelDescriptor->getModel().getMaterials())
                 matIds.push_back(mat.first);
         }
         else
         {
             matIds.reserve(mrd.materialIds.size());
-            for(const auto& id : mrd.materialIds)
+            for (const auto& id : mrd.materialIds)
                 matIds.push_back(static_cast<size_t>(id));
         }
 
-        if(mrd.diffuseColor.size() % 3 != 0)
+        if (mrd.diffuseColor.size() % 3 != 0)
         {
-            PLUGIN_ERROR << "set-material-range: The diffuse colors component is not a multiple of 3" << std::endl;
+            PLUGIN_ERROR << "set-material-range: The diffuse colors component "
+                            "is not a multiple of 3"
+                         << std::endl;
             return;
         }
 
@@ -722,9 +725,10 @@ void CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescriptor& mrd
                 if (material)
                 {
                     const size_t randomIndex = (rand() % numColors) * 3;
-                    material->setDiffuseColor({mrd.diffuseColor[randomIndex],
-                                               mrd.diffuseColor[randomIndex + 1],
-                                               mrd.diffuseColor[randomIndex + 2]});
+                    material->setDiffuseColor(
+                        {mrd.diffuseColor[randomIndex],
+                         mrd.diffuseColor[randomIndex + 1],
+                         mrd.diffuseColor[randomIndex + 2]});
                     material->setSpecularColor({mrd.specularColor[0],
                                                 mrd.specularColor[1],
                                                 mrd.specularColor[2]});
@@ -742,11 +746,11 @@ void CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescriptor& mrd
                     material->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE,
                                              mrd.clippingMode);
                     material->updateProperty(MATERIAL_PROPERTY_USER_PARAMETER,
-                                             static_cast<double>(mrd.userParameter));
+                                             static_cast<double>(
+                                                 mrd.userParameter));
                     material->markModified(); // This is needed to apply
                                               // propery modifications
                     material->commit();
-
                 }
             }
             catch (const std::runtime_error& e)
@@ -1191,9 +1195,9 @@ void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
         if (waitpid(pid, &status, 0) > 0)
         {
             // If we could not make the movie, inform and stop execution
-            if(WIFEXITED(status) && WEXITSTATUS(status))
+            if (WIFEXITED(status) && WEXITSTATUS(status))
             {
-                if(WEXITSTATUS(status) == 127)
+                if (WEXITSTATUS(status) == 127)
                 {
                     PLUGIN_ERROR << "Could not create media video file. FFMPEG "
                                     "returned with error "
@@ -1240,55 +1244,60 @@ void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
     }
 }
 
-AnterogradeTracingResult CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTracing &payload)
+AnterogradeTracingResult CircuitExplorerPlugin::_traceAnterogrades(
+    const AnterogradeTracing& payload)
 {
     AnterogradeTracingResult result;
     result.error = 0;
 
-    if(payload.cellGIDs.empty())
+    if (payload.cellGIDs.empty())
     {
         result.error = 1;
         result.message = "No input cell GIDs specified";
         return result;
     }
-    if(payload.sourceCellColor.size() < 4)
+    if (payload.sourceCellColor.size() < 4)
     {
         result.error = 2;
-        result.message = "Source cell stain color must have "
-                         "4 components (RGBA)";
+        result.message =
+            "Source cell stain color must have "
+            "4 components (RGBA)";
         return result;
     }
-    if(payload.connectedCellsColor.size() < 4)
+    if (payload.connectedCellsColor.size() < 4)
     {
         result.error = 3;
-        result.message = "Connected cell stain color must have "
-                         "4 components (RGBA)";
+        result.message =
+            "Connected cell stain color must have "
+            "4 components (RGBA)";
         return result;
     }
-    if(payload.nonConnectedCellsColor.size() < 4)
+    if (payload.nonConnectedCellsColor.size() < 4)
     {
         result.error = 4;
-        result.message = "Non connected cell stain color must have "
-                         "4 components (RGBA)";
+        result.message =
+            "Non connected cell stain color must have "
+            "4 components (RGBA)";
         return result;
     }
 
-    auto modelDescriptor = _api->getScene().getModel(static_cast<size_t>(payload.modelId));
-    if(modelDescriptor)
+    auto modelDescriptor =
+        _api->getScene().getModel(static_cast<size_t>(payload.modelId));
+    if (modelDescriptor)
     {
-        const brion::BlueConfig blueConfiguration (modelDescriptor->getPath());
-        const brain::Circuit circuit (blueConfiguration);
+        const brion::BlueConfig blueConfiguration(modelDescriptor->getPath());
+        const brain::Circuit circuit(blueConfiguration);
 
         // Parse loaded targets
         const brayns::ModelMetadata& metaData = modelDescriptor->getMetadata();
         auto targetsIt = metaData.find("Targets");
         std::vector<std::string> targets;
-        if(targetsIt != metaData.end())
+        if (targetsIt != metaData.end())
         {
             const std::string& targetsString = targetsIt->second;
-            if(!targetsString.empty())
+            if (!targetsString.empty())
             {
-                if(targetsString.find(',') == std::string::npos)
+                if (targetsString.find(',') == std::string::npos)
                     targets.push_back(targetsString);
                 else
                 {
@@ -1307,10 +1316,10 @@ AnterogradeTracingResult CircuitExplorerPlugin::_traceAnterogrades(const Anterog
 
         brion::GIDSet allGIDs;
 
-        if(!gidsStr.empty())
+        if (!gidsStr.empty())
         {
             std::vector<std::string> tempStrGids = _splitString(gidsStr, ',');
-            for(const auto& gidStrTok : tempStrGids)
+            for (const auto& gidStrTok : tempStrGids)
             {
                 allGIDs.insert(static_cast<uint32_t>(std::stoul(gidStrTok)));
             }
@@ -1318,13 +1327,15 @@ AnterogradeTracingResult CircuitExplorerPlugin::_traceAnterogrades(const Anterog
         else
         {
             // Gather all GIDs from loaded targets
-            if(!targets.empty())
+            if (!targets.empty())
             {
-                for(const auto& targetName : targets)
+                for (const auto& targetName : targets)
                 {
-                    if(density < 1.0)
+                    if (density < 1.0)
                     {
-                        brion::GIDSet targetGids = circuit.getRandomGIDs(density, targetName, randomSeed);
+                        brion::GIDSet targetGids =
+                            circuit.getRandomGIDs(density, targetName,
+                                                  randomSeed);
                         allGIDs.insert(targetGids.begin(), targetGids.end());
                     }
                     else
@@ -1332,10 +1343,9 @@ AnterogradeTracingResult CircuitExplorerPlugin::_traceAnterogrades(const Anterog
                         brion::GIDSet targetGids = circuit.getGIDs(targetName);
                         allGIDs.insert(targetGids.begin(), targetGids.end());
                     }
-
                 }
             }
-            else if(density < 1.0)
+            else if (density < 1.0)
                 allGIDs = circuit.getRandomGIDs(density, "", randomSeed);
             else
                 allGIDs = circuit.getGIDs();
@@ -1346,18 +1356,17 @@ AnterogradeTracingResult CircuitExplorerPlugin::_traceAnterogrades(const Anterog
         auto materials = modelDescriptor->getModel().getMaterials();
         auto itGids = allGIDs.begin();
         auto itMats = materials.begin();
-        for(; itMats != materials.end(); ++itMats, ++itGids)
+        for (; itMats != materials.end(); ++itMats, ++itGids)
         {
             gidMaterialMap[*itGids] = itMats->first;
         }
 
         const size_t totalSynapses = payload.targetCellGIDs.size();
-        result.message = "Tracing returned "
-                         + std::to_string(totalSynapses)
-                         + " connected cells";
+        result.message = "Tracing returned " + std::to_string(totalSynapses) +
+                         " connected cells";
 
         // If there is any GID, modify the scene materials
-        if(totalSynapses > 0)
+        if (totalSynapses > 0)
         {
             // Enable CircuitExplorer extra parameters on materials
             MaterialExtraAttributes mea;
@@ -1368,54 +1377,49 @@ AnterogradeTracingResult CircuitExplorerPlugin::_traceAnterogrades(const Anterog
             MaterialRangeDescriptor mrd;
             mrd.modelId = payload.modelId;
             mrd.opacity = static_cast<float>(payload.nonConnectedCellsColor[3]);
-            mrd.diffuseColor =
-            {
+            mrd.diffuseColor = {
                 static_cast<float>(payload.nonConnectedCellsColor[0]),
                 static_cast<float>(payload.nonConnectedCellsColor[1]),
-                static_cast<float>(payload.nonConnectedCellsColor[2])
-            };
+                static_cast<float>(payload.nonConnectedCellsColor[2])};
 
             mrd.specularColor = {0.f, 0.f, 0.f};
             mrd.specularExponent = 0.f;
             mrd.glossiness = 0.f;
-            mrd.shadingMode = static_cast<int>(MaterialShadingMode::diffuse_transparency);
+            mrd.shadingMode =
+                static_cast<int>(MaterialShadingMode::diffuse_transparency);
             _setMaterialRange(mrd);
 
             // Mark connections
             MaterialRangeDescriptor connectedMrd = mrd;
-            mrd.diffuseColor =
-            {
+            mrd.diffuseColor = {
                 static_cast<float>(payload.connectedCellsColor[0]),
                 static_cast<float>(payload.connectedCellsColor[1]),
-                static_cast<float>(payload.connectedCellsColor[2])
-            };
+                static_cast<float>(payload.connectedCellsColor[2])};
             mrd.opacity = 1.0f;
             mrd.modelId = payload.modelId;
             mrd.materialIds.reserve(payload.targetCellGIDs.size());
-            for(auto gid : payload.targetCellGIDs)
+            for (auto gid : payload.targetCellGIDs)
             {
                 auto it = gidMaterialMap.find(gid);
-                if(it != gidMaterialMap.end())
+                if (it != gidMaterialMap.end())
                     mrd.materialIds.push_back(it->second);
             }
             _setMaterialRange(connectedMrd);
 
             // Mark sources
-            const std::set<uint32_t> gidsSet (payload.cellGIDs.begin(), payload.cellGIDs.end());
+            const std::set<uint32_t> gidsSet(payload.cellGIDs.begin(),
+                                             payload.cellGIDs.end());
             MaterialRangeDescriptor sourcesMrd = mrd;
-            mrd.diffuseColor =
-            {
-                static_cast<float>(payload.sourceCellColor[0]),
-                static_cast<float>(payload.sourceCellColor[1]),
-                static_cast<float>(payload.sourceCellColor[2])
-            };
+            mrd.diffuseColor = {static_cast<float>(payload.sourceCellColor[0]),
+                                static_cast<float>(payload.sourceCellColor[1]),
+                                static_cast<float>(payload.sourceCellColor[2])};
             mrd.opacity = 1.f;
             mrd.modelId = payload.modelId;
             mrd.materialIds.reserve(gidsSet.size());
-            for(auto source : gidsSet)
+            for (auto source : gidsSet)
             {
                 auto it = gidMaterialMap.find(source);
-                if(it != gidMaterialMap.end())
+                if (it != gidMaterialMap.end())
                     mrd.materialIds.push_back(it->second);
             }
             _setMaterialRange(sourcesMrd);
@@ -1428,8 +1432,9 @@ AnterogradeTracingResult CircuitExplorerPlugin::_traceAnterogrades(const Anterog
     else
     {
         result.error = 5;
-        result.message = "The given model ID does not correspond "
-                         "to any existing scene model";
+        result.message =
+            "The given model ID does not correspond "
+            "to any existing scene model";
     }
 
     return result;

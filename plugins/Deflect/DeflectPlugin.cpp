@@ -26,13 +26,13 @@
 #include <brayns/common/PropertyMap.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/utils/utils.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engineapi/Engine.h>
+#include <brayns/engineapi/FrameBuffer.h>
 #include <brayns/manipulators/AbstractManipulator.h>
 
 #include <brayns/parameters/ParametersManager.h>
 
-#include <brayns/pluginapi/PluginAPI.h>
+#include <brayns/pluginapi/Plugin.h>
 
 #ifdef BRAYNS_USE_LIBUV
 #include <uvw.hpp>
@@ -180,10 +180,10 @@ private:
         auto loop = uvw::Loop::getDefault();
         _pollHandle = loop->resource<uvw::PollHandle>(_stream->getDescriptor());
 
-        _pollHandle->on<uvw::PollEvent>([& engine = _engine](const auto&,
-                                                             auto&) {
-            engine.triggerRender();
-        });
+        _pollHandle->on<uvw::PollEvent>(
+            [& engine = _engine](const auto&, auto&) {
+                engine.triggerRender();
+            });
 
         _pollHandle->start(uvw::PollHandle::Event::READABLE);
 
@@ -443,7 +443,7 @@ void DeflectPlugin::postRender()
 {
     _impl->postRender();
 }
-}
+} // namespace brayns
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
                                                          const char** argv)

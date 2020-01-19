@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
+#include <brayns/engineapi/Engine.h>
 
 namespace brayns
 {

@@ -26,7 +26,7 @@
 #include <brayns/common/light/Light.h>
 #include <brayns/common/log.h>
 #include <brayns/common/utils/utils.h>
-#include <brayns/engine/Material.h>
+#include <brayns/engineapi/Material.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #include <optixu/optixu_math_stream_namespace.h>
