@@ -452,8 +452,8 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
         {MATERIAL_PROPERTY_CAST_USER_DATA,
          (compartmentReport || userDataType == UserDataType::distance_to_soma ||
           reportType == ReportType::spikes)
-             ? 1
-             : 0});
+             ? true
+             : false});
     materialProps.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
                                static_cast<int>(MaterialShadingMode::diffuse)});
     materialProps.setProperty(
