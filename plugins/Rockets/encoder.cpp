@@ -137,7 +137,7 @@ void Encoder::encode(FrameBuffer &fb)
         return;
 
     fb.map();
-    auto cdata = reinterpret_cast<const uint8_t *const>(fb.getColorBuffer());
+    auto cdata = reinterpret_cast<const uint8_t *>(fb.getColorBuffer());
     if (_async)
     {
         auto &image = _image[_currentImage];
