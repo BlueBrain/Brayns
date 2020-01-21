@@ -34,6 +34,7 @@
 #endif
 
 #include <unordered_map>
+#include <functional>
 
 namespace brayns
 {
