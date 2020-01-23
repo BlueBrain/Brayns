@@ -449,6 +449,7 @@ public:
         {
             BRAYNS_ERROR << "Rockets server could not be initialized: '"
                          << e.what() << "'" << std::endl;
+            exit(-1);
             return;
         }
 
@@ -681,18 +682,23 @@ public:
 
             const auto& castedObj = static_cast<const T&>(base);
             const auto notify = [& rocketsServer = _rocketsServer,
-                                 clientID = _currentClientID, endpoint,
+                                 /*clientID = _currentClientID,*/ endpoint,
                                  json = to_json(castedObj)] {
+
                 if (rocketsServer->getConnectionCount() == 0)
                     return;
                 try
                 {
                     const auto& msg =
                         rockets::jsonrpc::makeNotification(endpoint, json);
+
+                    rocketsServer->broadcastText(msg);
+                    /*
                     if (clientID == NO_CURRENT_CLIENT)
                         rocketsServer->broadcastText(msg);
                     else
                         rocketsServer->broadcastText(msg, {clientID});
+                    */
                 }
                 catch (const std::exception& e)
                 {
@@ -1369,6 +1375,9 @@ public:
                         }
                         else
                             _useControlledStream = false;
+
+                        _engine.getParametersManager().getApplicationParameters()
+                                .setUseQuantaRenderControl(_useControlledStream);
                     });
     }
 

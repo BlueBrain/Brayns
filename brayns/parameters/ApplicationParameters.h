@@ -93,6 +93,11 @@ public:
     const std::string& getSandboxPath() const { return _sandBoxPath; }
     const strings& getInputPaths() const { return _inputPaths; }
     po::positional_options_description& posArgs() { return _positionalArgs; }
+    bool getUseQuantaRenderControl() const { return _useQuantaRenderControl; }
+    void setUseQuantaRenderControl(bool value)
+    {
+        _updateValue(_useQuantaRenderControl, value);
+    }
 protected:
     void parse(const po::variables_map& vm) final;
 
@@ -110,6 +115,7 @@ protected:
     bool _useVideoStreaming{false};
     std::string _envMap;
     std::string _sandBoxPath;
+    bool _useQuantaRenderControl;
 
     strings _inputPaths;
 

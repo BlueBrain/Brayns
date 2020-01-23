@@ -115,6 +115,8 @@ public:
     bool continueRendering() const;
 
     const auto& getParametersManager() const { return _parametersManager; }
+    auto& getParametersManager() { return _parametersManager; }
+
     /**
      * Add the given frame buffer to the list of buffers that shall be filled
      * during rendering.
@@ -154,6 +156,9 @@ public:
      */
     void addCameraType(const std::string& name,
                        const PropertyMap& properties = {});
+
+private:
+    bool mustRender();
 
 protected:
     ParametersManager& _parametersManager;

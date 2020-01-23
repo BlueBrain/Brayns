@@ -43,6 +43,9 @@ void Engine::commit()
 
 void Engine::preRender()
 {
+    if(!mustRender())
+        return;
+
     const auto& renderParams = _parametersManager.getRenderingParameters();
     if (!renderParams.isModified())
         return;
@@ -55,6 +58,9 @@ void Engine::preRender()
 
 void Engine::render()
 {
+    if(!mustRender())
+        return;
+
     for (auto frameBuffer : _frameBuffers)
     {
         _camera->setBufferTarget(frameBuffer->getName());
@@ -66,6 +72,9 @@ void Engine::render()
 
 void Engine::postRender()
 {
+    if(!mustRender())
+        return;
+
     for (auto frameBuffer : _frameBuffers)
         frameBuffer->incrementAccumFrames();
 }
@@ -120,5 +129,25 @@ void Engine::addCameraType(const std::string& name,
 {
     _parametersManager.getRenderingParameters().addCamera(name);
     getCamera().setProperties(name, properties);
+}
+
+bool Engine::mustRender()
+{
+    if(_parametersManager.getApplicationParameters().getUseQuantaRenderControl())
+    {
+        // Seems to work even for animations. If not, add check:
+        // if (_parametersManager.getAnimationParameters().isPlaying()) return true;
+
+        // Do not render if camera hasnt been modified and either there is no
+        // accumulation frames or they are completed for the current pass
+        auto frameBuffer = _frameBuffers[0];
+        if(!_camera->isModified() &&
+            (!frameBuffer->getAccumulation()
+             || (frameBuffer->getAccumulation() && frameBuffer->numAccumFrames()
+              >= _parametersManager.getRenderingParameters().getMaxAccumFrames())))
+            return false;
+    }
+
+    return true;
 }
 } // namespace brayns

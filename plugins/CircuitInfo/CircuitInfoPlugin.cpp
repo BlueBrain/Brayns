@@ -136,11 +136,11 @@ CellGIDList CircuitInfoPlugin::_getCellGIDs(const CellGIDListRequest& request)
         return result;
     }
 
-    const brion::BlueConfig config(request.path);
-    const brain::Circuit circuit (config);
-
     try
     {
+        const brion::BlueConfig config(request.path);
+        const brain::Circuit circuit (config);
+
         brion::GIDSet gids;
         if(request.targets.empty())
             gids = circuit.getGIDs();
@@ -154,10 +154,10 @@ CellGIDList CircuitInfoPlugin::_getCellGIDs(const CellGIDListRequest& request)
         }
         result.ids = uint32_ts(gids.begin(), gids.end());
     }
-    catch(...)
+    catch(std::exception& e)
     {
         result.error = 2;
-        result.message = "Unknown error while parsing circuit";
+        result.message = std::string(e.what());
     }
 
     return result;
@@ -219,8 +219,16 @@ ReportList CircuitInfoPlugin::_getReportList(const ReportListRequest& request)
     }
 
     // Reports can be obtained as the names of the "report" section from the BlueConfig file
-    const brion::BlueConfig config(request.path);
-    result.reports = config.getSectionNames(brion::CONFIGSECTION_REPORT);
+    try
+    {
+        const brion::BlueConfig config(request.path);
+        result.reports = config.getSectionNames(brion::CONFIGSECTION_REPORT);
+    }
+    catch (std::exception& e)
+    {
+        result.error = 2;
+        result.message = std::string(e.what());
+    }
 
     return result;
 }
@@ -239,18 +247,26 @@ TargetList CircuitInfoPlugin::_getTargetList(const TargetListRequest& request)
     }
 
     // Gather all the targets for each type of target available
-    const brion::BlueConfig config(request.path);
-    const std::vector<brion::Target> targetParsers =  config.getTargets();
-    const std::vector<brion::TargetType> targetTypes = {brion::TargetType::TARGET_CELL,
-                                                         brion::TargetType::TARGET_COMPARTMENT,
-                                                         brion::TargetType::TARGET_ALL};
-    for(const brion::Target& t : targetParsers)
+    try
     {
-        for(const auto& tt : targetTypes)
+        const brion::BlueConfig config(request.path);
+        const std::vector<brion::Target> targetParsers =  config.getTargets();
+        const std::vector<brion::TargetType> targetTypes = {brion::TargetType::TARGET_CELL,
+                                                             brion::TargetType::TARGET_COMPARTMENT,
+                                                             brion::TargetType::TARGET_ALL};
+        for(const brion::Target& t : targetParsers)
         {
-            const brion::Strings& targetList = t.getTargetNames(tt);
-            result.targets.insert(result.targets.end(), targetList.begin(), targetList.end());
+            for(const auto& tt : targetTypes)
+            {
+                const brion::Strings& targetList = t.getTargetNames(tt);
+                result.targets.insert(result.targets.end(), targetList.begin(), targetList.end());
+            }
         }
+    }
+    catch (std::exception& e)
+    {
+        result.error = 2;
+        result.message = std::string(e.what());
     }
 
     return result;
@@ -269,17 +285,25 @@ AfferentGIDList CircuitInfoPlugin::_getAfferentGIDList(const AfferentGIDListRequ
     }
     else
     {
-        const brion::BlueConfig config(request.path);
-        const brain::Circuit circuit (config);
-        const brion::GIDSet uniqueSources (request.sources.begin(), request.sources.end());
-        brain::SynapsesStream ss = circuit.getAfferentSynapses(uniqueSources);
-        std::future<brain::Synapses> future = ss.read(ss.getRemaining());
-        future.wait();
-        const brain::Synapses afferentGIDs = future.get();
-        const uint32_t* pgids = afferentGIDs.preGIDs();
-        // Filter to have only unique ids
-        const std::set<uint32_t> uniqueGIDs (pgids, pgids + afferentGIDs.size());
-        result.ids = uint32_ts(uniqueGIDs.begin(), uniqueGIDs.end());
+        try
+        {
+            const brion::BlueConfig config(request.path);
+            const brain::Circuit circuit (config);
+            const brion::GIDSet uniqueSources (request.sources.begin(), request.sources.end());
+            brain::SynapsesStream ss = circuit.getAfferentSynapses(uniqueSources);
+            std::future<brain::Synapses> future = ss.read(ss.getRemaining());
+            future.wait();
+            const brain::Synapses afferentGIDs = future.get();
+            const uint32_t* pgids = afferentGIDs.preGIDs();
+            // Filter to have only unique ids
+            const std::set<uint32_t> uniqueGIDs (pgids, pgids + afferentGIDs.size());
+            result.ids = uint32_ts(uniqueGIDs.begin(), uniqueGIDs.end());
+        }
+        catch(std::exception& e)
+        {
+            result.error = 2;
+            result.message = std::string(e.what());
+        }
     }
 
     return result;
@@ -298,17 +322,25 @@ EfferentGIDList CircuitInfoPlugin::_getEfferentGIDList(const EfferentGIDListRequ
     }
     else
     {
-        const brion::BlueConfig config(request.path);
-        const brain::Circuit circuit (config);
-        const brion::GIDSet uniqueSources (request.sources.begin(), request.sources.end());
-        brain::SynapsesStream ss = circuit.getEfferentSynapses(uniqueSources);
-        std::future<brain::Synapses> future = ss.read(ss.getRemaining());
-        future.wait();
-        const brain::Synapses efferentGIDs = future.get();
-        const uint32_t* pgids = efferentGIDs.postGIDs();
-        // Filter to have only unique ids
-        const std::set<uint32_t> uniqueGIDs (pgids, pgids + efferentGIDs.size());
-        result.ids = uint32_ts(uniqueGIDs.begin(), uniqueGIDs.end());
+        try
+        {
+            const brion::BlueConfig config(request.path);
+            const brain::Circuit circuit (config);
+            const brion::GIDSet uniqueSources (request.sources.begin(), request.sources.end());
+            brain::SynapsesStream ss = circuit.getEfferentSynapses(uniqueSources);
+            std::future<brain::Synapses> future = ss.read(ss.getRemaining());
+            future.wait();
+            const brain::Synapses efferentGIDs = future.get();
+            const uint32_t* pgids = efferentGIDs.postGIDs();
+            // Filter to have only unique ids
+            const std::set<uint32_t> uniqueGIDs (pgids, pgids + efferentGIDs.size());
+            result.ids = uint32_ts(uniqueGIDs.begin(), uniqueGIDs.end());
+        }
+        catch(std::exception& e)
+        {
+            result.error = 2;
+            result.message = std::string(e.what());
+        }
     }
 
     return result;
@@ -327,8 +359,16 @@ ProjectionList CircuitInfoPlugin::_getProjectionList(const ProjectionListRequest
         return result;
     }
 
-    const brion::BlueConfig config(request.path);
-    result.projections = config.getSectionNames(brion::CONFIGSECTION_PROJECTION);
+    try
+    {
+        const brion::BlueConfig config(request.path);
+        result.projections = config.getSectionNames(brion::CONFIGSECTION_PROJECTION);
+    }
+    catch(std::exception& e)
+    {
+        result.error = 2;
+        result.message = std::string(e.what());
+    }
 
     return result;
 }
@@ -347,26 +387,34 @@ CircuitInfoPlugin::_getProjectionAfferentGIDList(const ProjectionAfferentGIDList
         return result;
     }
 
-    const brion::BlueConfig config(request.path);
-    const std::string nrnPath = config.get(brion::CONFIGSECTION_PROJECTION, request.projection, "Path");
-
-    if(nrnPath.empty())
+    try
     {
-        result.error = 1;
-        result.message = "Projection not found";
-        return result;
-    }
+        const brion::BlueConfig config(request.path);
+        const std::string nrnPath = config.get(brion::CONFIGSECTION_PROJECTION, request.projection, "Path");
 
-    const brain::Circuit circuit (config);
-    const brion::GIDSet uniqueSources (request.sources.begin(), request.sources.end());
-    brain::SynapsesStream ss = circuit.getExternalAfferentSynapses(uniqueSources, request.projection);
-    std::future<brain::Synapses> future = ss.read(ss.getRemaining());
-    future.wait();
-    const brain::Synapses afferentGIDs = future.get();
-    const uint32_t* pgids = afferentGIDs.preGIDs();
-    // Filter to have only unique ids
-    const std::set<uint32_t> uniqueGIDs (pgids, pgids + afferentGIDs.size());
-    result.ids = uint32_ts(uniqueGIDs.begin(), uniqueGIDs.end());
+        if(nrnPath.empty())
+        {
+            result.error = 1;
+            result.message = "Projection not found";
+            return result;
+        }
+
+        const brain::Circuit circuit (config);
+        const brion::GIDSet uniqueSources (request.sources.begin(), request.sources.end());
+        brain::SynapsesStream ss = circuit.getExternalAfferentSynapses(uniqueSources, request.projection);
+        std::future<brain::Synapses> future = ss.read(ss.getRemaining());
+        future.wait();
+        const brain::Synapses afferentGIDs = future.get();
+        const uint32_t* pgids = afferentGIDs.preGIDs();
+        // Filter to have only unique ids
+        const std::set<uint32_t> uniqueGIDs (pgids, pgids + afferentGIDs.size());
+        result.ids = uint32_ts(uniqueGIDs.begin(), uniqueGIDs.end());
+    }
+    catch(std::exception& e)
+    {
+        result.error = 2;
+        result.message = std::string(e.what());
+    }
 
     return result;
 }
@@ -385,21 +433,29 @@ CircuitInfoPlugin::_getProjectionEfferentGIDList(const ProjectionEfferentGIDList
         return result;
     }
 
-    const brion::BlueConfig config(request.path);
-    const std::string nrnPath = config.get(brion::CONFIGSECTION_PROJECTION, request.projection, "Path");
-
-    if(nrnPath.empty())
+    try
     {
-        result.error = 1;
-        result.message = "Projection not found";
-        return result;
-    }
+        const brion::BlueConfig config(request.path);
+        const std::string nrnPath = config.get(brion::CONFIGSECTION_PROJECTION, request.projection, "Path");
 
-    const brain::Circuit circuit (config);
-    const brion::GIDSet uniqueSources (request.sources.begin(), request.sources.end());
-    const uint32_ts gids = circuit.getProjectedEfferentGIDs(uniqueSources, request.projection);
-    const std::set<uint32_t> uniqueGIDs (gids.begin(), gids.end());
-    result.ids = uint32_ts(uniqueGIDs.begin(), uniqueGIDs.end());
+        if(nrnPath.empty())
+        {
+            result.error = 1;
+            result.message = "Projection not found";
+            return result;
+        }
+
+        const brain::Circuit circuit (config);
+        const brion::GIDSet uniqueSources (request.sources.begin(), request.sources.end());
+        const uint32_ts gids = circuit.getProjectedEfferentGIDs(uniqueSources, request.projection);
+        const std::set<uint32_t> uniqueGIDs (gids.begin(), gids.end());
+        result.ids = uint32_ts(uniqueGIDs.begin(), uniqueGIDs.end());
+    }
+    catch(std::exception& e)
+    {
+        result.error = 2;
+        result.message = std::string(e.what());
+    }
 
     return result;
 }
