@@ -135,8 +135,12 @@ bool Engine::mustRender()
 {
     if(_parametersManager.getApplicationParameters().getUseQuantaRenderControl())
     {
-        // Seems to work even for animations. If not, add check:
-        // if (_parametersManager.getAnimationParameters().isPlaying()) return true;
+        // When playing an animation:
+        //  - A frame data from the animation gets loaded (Model::commitSimulationData())
+        //      - This triggers the scene to be marked as modified
+        //          - This triggers Brayns to clear the frame buffer accumation frames
+        //  This is way the animations keep working even though the camera might
+        //  be fixed at a specific location and direction
 
         // Do not render if camera hasnt been modified and either there is no
         // accumulation frames or they are completed for the current pass
