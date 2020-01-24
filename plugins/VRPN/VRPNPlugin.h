@@ -33,8 +33,8 @@
 #include <uv.h>
 #endif
 
-#include <unordered_map>
 #include <functional>
+#include <unordered_map>
 
 namespace brayns
 {
