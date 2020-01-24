@@ -20,5 +20,5 @@ set(BRAYNSIBL_LINK_LIBRARIES PRIVATE
   glm
 )
 
-common_application(braynsIBL)
+common_application(braynsIBL NOHELP) 
 target_include_directories(braynsIBL PRIVATE ${PROJECT_SOURCE_DIR} ${CMAKE_BINARY_DIR})
