@@ -138,6 +138,45 @@ void DTIPlugin::_updateStreamlines(const StreamlinesDescriptor &streamlines)
         model->addStreamline(materialId, streamline);
         startIndex = endIndex;
 
+        // Start model
+        if (streamlines.startModelId != -1)
+        {
+            auto modelDescriptor =
+                _api->getScene().getModel(streamlines.startModelId);
+            if (modelDescriptor)
+            {
+                const size_t index = 0;
+                const auto direction = points[index] - points[index + 1];
+                brayns::Quaterniond rot =
+                    glm::quatLookAt(direction, {0.f, 1.f, 0.f});
+                brayns::Transformation tf;
+                tf.setTranslation(points[0]);
+                tf.setRotationCenter(points[0]);
+                tf.setRotation(rot);
+                brayns::ModelInstance inst(true, false, tf);
+                modelDescriptor->addInstance(inst);
+            }
+        }
+        // End model
+        if (streamlines.endModelId != -1)
+        {
+            auto modelDescriptor =
+                _api->getScene().getModel(streamlines.endModelId);
+            if (modelDescriptor)
+            {
+                const size_t index = points.size() - 1;
+                const auto direction = points[index] - points[index - 1];
+                brayns::Quaterniond rot =
+                    glm::quatLookAt(direction, {0.f, 1.f, 0.f});
+                brayns::Transformation tf;
+                tf.setTranslation(points[index]);
+                tf.setRotationCenter(points[index]);
+                tf.setRotation(rot);
+                brayns::ModelInstance inst(true, false, tf);
+                modelDescriptor->addInstance(inst);
+            }
+        }
+
         ++nbStreamlines;
     }
 

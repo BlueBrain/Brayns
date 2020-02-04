@@ -35,6 +35,8 @@ struct StreamlinesDescriptor
     float radius{1.f};
     float opacity{1.f};
     ColorScheme colorScheme;
+    int startModelId{-1};
+    int endModelId{-1};
 };
 
 bool from_json(StreamlinesDescriptor &param, const std::string &payload);

@@ -34,7 +34,8 @@ class DiffuseTensorImaging:
         """Create a new Diffuse Tensor Imaging instance"""
         self._client = client.rockets_client
 
-    def add_streamlines(self, name, streamlines, radius=1.0, opacity=1.0, color_scheme=COLOR_SCHEME_DIRECTIONAL):
+    def add_streamlines(self, name, streamlines, radius=1.0, opacity=1.0, color_scheme=COLOR_SCHEME_DIRECTIONAL,
+                        start_model_id=-1, end_model_id=-1):
         """
         Adds streamlines to the scene. All streamlines are added to a single model
 
@@ -63,4 +64,6 @@ class DiffuseTensorImaging:
         params['radius'] = radius
         params['opacity'] = opacity
         params['colorScheme'] = color_scheme
+        params['startModelId'] = start_model_id
+        params['endModelId'] = end_model_id
         return self._client.request("add-streamlines", params=params)

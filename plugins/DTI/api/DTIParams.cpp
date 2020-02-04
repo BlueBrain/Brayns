@@ -34,6 +34,8 @@ bool from_json(StreamlinesDescriptor &param, const std::string &payload)
         FROM_JSON(param, js, radius);
         FROM_JSON(param, js, opacity);
         FROM_JSON(param, js, colorScheme);
+        FROM_JSON(param, js, startModelId);
+        FROM_JSON(param, js, endModelId);
     }
     catch (...)
     {

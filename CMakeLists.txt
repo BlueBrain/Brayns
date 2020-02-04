@@ -38,27 +38,24 @@ if($ENV{TRAVIS})
     option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ON)
   endif()
   if(NOT DEFINED BRAYNS_DEFLECT_ENABLED)
-    option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" ON)
+    option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" OFF)
   endif()
   if(NOT DEFINED BRAYNS_CIRCUITVIEWER_ENABLED)
-    option(BRAYNS_CIRCUITVIEWER_ENABLED "Activate CircuitViewer plugin" ON)
+    option(BRAYNS_CIRCUITVIEWER_ENABLED "Activate CircuitViewer plugin" OFF)
   endif()
   if(NOT DEFINED BRAYNS_CIRCUITEXPLORER_ENABLED)
     option(BRAYNS_CIRCUITEXPLORER_ENABLED "Activate CircuitExplorer plugin" ON)
   endif()
+  if(NOT DEFINED BRAYNS_DTI_ENABLED)
+    option(BRAYNS_DTI_ENABLED "Activate DTI plugin" ON)
+  endif()
   if(NOT DEFINED BRAYNS_BBIC_ENABLED)
-    option(BRAYNS_BBIC_ENABLED "Activate BBIC Volume plugin" ON)
+    option(BRAYNS_BBIC_ENABLED "Activate BBIC Volume plugin" OFF)
   endif()
 endif()
 
 set(CHOOSE_PYTHON_IGNORE_BOOST ON)
 include(Common)
-
-# Core dependencies
-common_find_package(Boost REQUIRED COMPONENTS program_options)
-common_find_package(OpenMP)
-common_find_package(libuv 1.8)
-common_find_package(FreeImage)
 
 # Compiler options
 if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
@@ -68,6 +65,12 @@ endif()
 if ((CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 9.0) OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-copy")
 endif()
+
+# Core dependencies
+common_find_package(Boost REQUIRED COMPONENTS program_options)
+common_find_package(OpenMP)
+common_find_package(libuv 1.8)
+common_find_package(FreeImage)
 
 # Archive loading
 common_find_package(LibArchive)
