@@ -115,7 +115,7 @@ protected:
     bool _useVideoStreaming{false};
     std::string _envMap;
     std::string _sandBoxPath;
-    bool _useQuantaRenderControl;
+    bool _useQuantaRenderControl{false};
 
     strings _inputPaths;
 
