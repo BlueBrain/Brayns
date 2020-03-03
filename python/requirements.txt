@@ -21,6 +21,8 @@
 
 Pillow~=5.4.1
 python-jsonschema-objects~=0.3.5
-requests~=2.22.0
+requests~=2.23.0
 rockets~=1.0.2
 semver~=2.8.1
+ipython~=7.13.0
+ipywidgets~=7.5.1

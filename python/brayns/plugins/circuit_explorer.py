@@ -269,7 +269,8 @@ class CircuitExplorer:
     def set_materials(self, model_ids, material_ids, diffuse_colors, specular_colors,
                       specular_exponents=list(), opacities=list(), reflection_indices=list(),
                       refraction_indices=list(), simulation_data_casts=list(), glossinesses=list(),
-                      shading_modes=list(), emissions=list(), clipping_modes=list(), user_parameters=list()):
+                      shading_modes=list(), emissions=list(), clipping_modes=list(),
+                      user_parameters=list()):
         """
         Set a list of material on a specified list of models
 
@@ -287,9 +288,9 @@ class CircuitExplorer:
         SHADING_MODE_ELECTRON, SHADING_MODE_CARTOON, SHADING_MODE_ELECTRON_TRANSPARENCY,
         SHADING_MODE_PERLIN or SHADING_MODE_DIFFUSE_TRANSPARENCY)
         :param list emissions: List of light emission intensities
-        :param list clipping mode: List of clipping modes defining if materials should be clipped
+        :param list clipping_modes: List of clipping modes defining if materials should be clipped
         against clipping planes, spheres, etc, defined at the scene level
-        :param list user_parameter: List of convenience parameter used by some of the shaders
+        :param list user_parameters: List of convenience parameter used by some of the shaders
         :return: Result of the request submission
         :rtype: str
         """
@@ -421,7 +422,8 @@ class CircuitExplorer:
         :return: A JSon representation of the origin, direction and up vectors
         :rtype: str
         """
-        return self._client.request('get-odu-camera', response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        return self._client.request('get-odu-camera',
+                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
     def add_grid(self, min_value, max_value, interval, radius=1.0, opacity=0.5, show_axis=True,
                  colored=True):
@@ -505,7 +507,6 @@ class CircuitExplorer:
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
     def get_export_frames_progress(self):
-
         """
         Queries the progress of the last export of frames to disk request
 
@@ -514,24 +515,24 @@ class CircuitExplorer:
         the exporting is finished or is still in progress
         :rtype: dict
         """
-
-
         return self._client.request('get-export-frames-progress',
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
-    def make_movie(self, output_movie_path, fps_rate, frames_folder_path, frame_file_extension="png", dimensions=[1920,1080], erase_frames=True):
-
+    def make_movie(self, output_movie_path, fps_rate, frames_folder_path,
+                   frame_file_extension="png", dimensions=[1920, 1080], erase_frames=True):
         """
         Request to create a media video file from a set of frames
 
-        :param str output_movie_name: Full path to the media video to store the movie (it will be created if it does not exists).
-        It must include extension, as it will be used to determine the codec to be used (By default it should be .mp4)
+        :param str output_movie_path: Full path to the media video to store the movie
+        (it will be created if it does not exists). It must include extension, as it will be used
+        to determine the codec to be used (By default it should be .mp4)
         :param int fps_rate: Desired frame rate in the video
-        :param str frames_folder_path: Path to the folder containing the frames to be used to create the video
-        :param str frame_name_format: Format expression of the name of the frames to be used (By default, if the images are
-        stored in png format, it should be %05d.png)
+        :param str frames_folder_path: Path to the folder containing the frames to be used to
+        create the video
+        :param str frame_file_extension: Image format to use (png, jpg)
         :param list dimensions: Desired width and height of the video to be created
-        : return: Result of the request submission
+        :param bool erase_frames: Wether to remove the frames after the video
+        :return: Result of the request submission
         :rtype: str
         """
         params = dict()
@@ -563,7 +564,9 @@ class CircuitExplorer:
         return self._client.request('export-frames-to-disk', params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
-    def trace_anterograde(self, model_id, source_cells_gid, target_cells_gid, source_cells_color=(5,5,0,1), target_cells_color=(5,0,0,1), non_connected_color=(0.5,0.5,0.5,1.0)):
+    def trace_anterograde(self, model_id, source_cells_gid, target_cells_gid,
+                          source_cells_color=(5, 5, 0, 1), target_cells_color=(5, 0, 0, 1),
+                          non_connected_color=(0.5, 0.5, 0.5, 1.0)):
         """
         Stain the cells based on their synapses
 
@@ -573,10 +576,9 @@ class CircuitExplorer:
         :param source_cell_color RGBA 4 floating point list as color for source cells
         :param target_cell_color RGBA 4 floating point list as color for target cells
         :param non_connected_color RGBA 4 floating point list as color for non connected cells
-        : return: Result of the request submission as a dictionary {error:int, message:string}
+        :return Result of the request submission as a dictionary {error:int, message:string}
         :rtype dict
         """
-
         params = dict()
         params['modelId'] = model_id
         params['cellGIDs'] = source_cells_gid
@@ -588,17 +590,16 @@ class CircuitExplorer:
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
     def add_sphere(self, center, radius, color, name=""):
-
         """
         Creates and adds a sphere to the scene
 
         :param list center: Position (in global coordinates) of the sphere center.
         :param float radius: Radius of the sphere
         :param list color: Color with transparency of the sphere (RGBA)
-        : return: Result of the request submission
+        :param str name: Name to give to the model to add
+        :return: Result of the request submission
         :rtype: str
         """
-
         params = dict()
         params['center'] = center
         params['radius'] = radius
@@ -607,21 +608,18 @@ class CircuitExplorer:
         return self._client.request('add-sphere', params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
-
     def add_pill(self, p1, p2, radius, color, name=""):
-
         """
-        Creates and adds a pill shape to the scene, using two points to generate
-        the pill shape around of
+        Creates and adds a pill shape to the scene
 
         :param list p1: Position (in global coordinates) of the first pivot
         :param list p2: Position (in global coordinates) of the second pivot.
         :param float radius: Radius of the pill sides
         :param list color: Color with transparency of the pill (RGBA)
-        : return: Result of the request submission
+        :param str name: Name to give to the model to add
+        :return: Result of the request submission
         :rtype: str
         """
-
         params = dict()
         params['type'] = 'pill'
         params['p1'] = p1
@@ -633,22 +631,19 @@ class CircuitExplorer:
         return self._client.request('add-pill', params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
-
     def add_conepill(self, p1, p2, radius1, radius2, color, name=""):
-
         """
-        Creates and adds a cone pill shape to the scene, using two points to generate
-        the pill shape around of
+        Creates and adds a cone pill shape to the scene
 
         :param list p1: Position (in global coordinates) of the first pivot
         :param list p2: Position (in global coordinates) of the second pivot.
         :param float radius1: Radius to use around p1
         :param float radius2: Radius to use around p2
         :param list color: Color with transparency of the cone pill (RGBA)
-        : return: Result of the request submission
+        :param str name: Name to give to the model to add
+        :return: Result of the request submission
         :rtype: str
         """
-
         params = dict()
         params['type'] = 'conepill'
         params['p1'] = p1
@@ -661,20 +656,18 @@ class CircuitExplorer:
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
     def add_sigmoidpill(self, p1, p2, radius1, radius2, color, name=""):
-
         """
-        Creates and adds a sigmoid pill (smoothed) shape to the scene, using two points to generate
-        the pill shape around of
+        Creates and adds a sigmoid pill (smoothed) shape to the scene
 
         :param list p1: Position (in global coordinates) of the first pivot
         :param list p2: Position (in global coordinates) of the second pivot.
         :param float radius1: Radius to use around p1
         :param float radius2: Radius to use around p2
         :param list color: Color with transparency of the sigmoid pill (RGBA)
-        : return: Result of the request submission
+        :param str name: Name to give to the model to add
+        :return: Result of the request submission
         :rtype: str
         """
-
         params = dict()
         params['type'] = 'sigmoidpill'
         params['p1'] = p1
@@ -687,7 +680,6 @@ class CircuitExplorer:
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
     def add_cylinder(self, center, up, radius, color, name=""):
-
         """
         Creates and adds a cylinder shape to the scene
 
@@ -695,10 +687,10 @@ class CircuitExplorer:
         :param list up: Position of the center of the top of the cylinder
         :param float radius: Radius of the cylinder
         :param list color: Color with transparency of the cylinder (RGBA)
-        : return: Result of the request submission
+        :param str name: Name to give to the model to add
+        :return: Result of the request submission
         :rtype: str
         """
-
         params = dict()
         params['center'] = center
         params['up'] = up
@@ -715,10 +707,10 @@ class CircuitExplorer:
         :param list minCorner: Position of the minimun corner of the box
         :param list maxCorner: Position of the maximum corner of the box
         :param list color: Color with transparency of the box (RGBA)
-        : return: Result of the request submission
+        :param str name: Name to give to the model to add
+        :return: Result of the request submission
         :rtype: str
         """
-
         params = dict()
         params['minCorner'] = minCorner
         params['maxCorner'] = maxCorner
@@ -728,6 +720,13 @@ class CircuitExplorer:
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
     def get_material_ids(self, model_id):
+        """
+        Return the list of material ids for the given model
+
+        :param int model_id: Id of the model to query for material ids
+        :return: list List of material ids
+        :rtype: str
+        """
         params = dict()
         params['modelId'] = model_id
         return self._client.request('get-material-ids', params,

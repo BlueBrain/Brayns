@@ -34,7 +34,8 @@ class DiffuseTensorImaging:
         """Create a new Diffuse Tensor Imaging instance"""
         self._client = client.rockets_client
 
-    def add_streamlines(self, name, streamlines, radius=1.0, opacity=1.0, color_scheme=COLOR_SCHEME_DIRECTIONAL):
+    def add_streamlines(self, name, streamlines, radius=1.0, opacity=1.0,
+                        color_scheme=COLOR_SCHEME_DIRECTIONAL):
         """
         Adds streamlines to the scene. All streamlines are added to a single model
 
@@ -42,6 +43,7 @@ class DiffuseTensorImaging:
         :param float streamlines: Streamlines
         :param float radius: Radius of the streamlines
         :param float opacity: Opacity of the streamlines
+        :param int color_scheme: The scheme to color the streamlines
         :return: Result of the request submission
         :rtype: str
         """

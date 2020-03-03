@@ -77,10 +77,12 @@ class CameraPathHandler:
                     direction[k] = p0['direction'][k] + t_direction[k] * float(i)
                     up[k] = p0['up'][k] + t_up[k] * float(i)
 
-                t_aperture_radius = (p1['apertureRadius'] - p0['apertureRadius']) / float(self._nb_steps_per_sequence)
+                nbsteps = float(self._nb_steps_per_sequence)
+                t_aperture_radius = (p1['apertureRadius'] - p0['apertureRadius']) / nbsteps
+
                 aperture_radius = p0['apertureRadius'] + t_aperture_radius * float(i)
 
-                t_focus_distance = (p1['focusDistance'] - p0['focusDistance']) / float(self._nb_steps_per_sequence)
+                t_focus_distance = (p1['focusDistance'] - p0['focusDistance']) / nbsteps
                 focus_distance = p0['focusDistance'] + t_focus_distance * float(i)
 
                 origins.append(origin)
@@ -118,7 +120,8 @@ class CameraPathHandler:
                 focus_distance / self._smoothing_size])
         last = self._control_points[len(self._control_points)-1]
         self._smoothed_key_frames.append(
-            (last['origin'], last['direction'], last['up'], last['apertureRadius'], last['focusDistance']))
+            (last['origin'], last['direction'], last['up'],
+             last['apertureRadius'], last['focusDistance']))
 
     def get_nb_frames(self):
         """
@@ -144,6 +147,16 @@ class CameraPathHandler:
 
     @staticmethod
     def get_orbit_around_target(brayns, model_index, nb_frames, radius=0):
+        """
+        Returns a list of points the camera has to pass through
+
+        :param Brayns brayns: The brayns client object
+        :param int model_index: The model id to orbit around of
+        :param int nb_frames : Number of frames it should last
+        :param float radius: Radius of the orbit
+        :return: The smoothed camera information for the given frame
+        :rtype: list
+        """
         cameras = list()
 
         def get_target():
