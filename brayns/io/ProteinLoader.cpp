@@ -36,7 +36,7 @@ namespace
 const auto PROP_RADIUS_MULTIPLIER = "radiusMultiplier";
 const auto PROP_COLOR_SCHEME = "colorScheme";
 const auto LOADER_NAME = "protein";
-}
+} // namespace
 
 namespace brayns
 {
@@ -326,7 +326,7 @@ ProteinLoader::ProteinLoader(Scene& scene, const GeometryParameters& params)
 {
     _defaults.setProperty({PROP_COLOR_SCHEME,
                            enumToString(params.getColorScheme()),
-                           brayns::enumNames<brayns::ColorScheme>(),
+                           brayns::enumNames<brayns::ProteinColorScheme>(),
                            {"Color scheme"}});
     _defaults.setProperty({PROP_RADIUS_MULTIPLIER,
                            static_cast<double>(params.getRadiusMultiplier()),
@@ -351,7 +351,7 @@ ModelDescriptorPtr ProteinLoader::importFromFile(
     const double radiusMultiplier =
         properties.getProperty<double>(PROP_RADIUS_MULTIPLIER, 1.0);
 
-    const auto colorScheme = stringToEnum<ColorScheme>(
+    const auto colorScheme = stringToEnum<ProteinColorScheme>(
         properties.getProperty<std::string>(PROP_COLOR_SCHEME));
 
     std::ifstream file(fileName.c_str());
@@ -434,10 +434,10 @@ ModelDescriptorPtr ProteinLoader::importFromFile(
                     found = true;
                     switch (colorScheme)
                     {
-                    case ColorScheme::protein_chains:
+                    case ProteinColorScheme::protein_chains:
                         atom.materialId = abs(atom.chainId);
                         break;
-                    case ColorScheme::protein_residues:
+                    case ProteinColorScheme::protein_residues:
                         atom.materialId = atom.residue;
                         break;
                     default:
@@ -510,4 +510,4 @@ PropertyMap ProteinLoader::getProperties() const
 {
     return _defaults;
 }
-}
+} // namespace brayns

@@ -39,7 +39,7 @@ const std::map<std::string, brayns::BVHFlag> BVH_TYPES = {
     {"dynamic", brayns::BVHFlag::dynamic},
     {"compact", brayns::BVHFlag::compact},
     {"robust", brayns::BVHFlag::robust}};
-}
+} // namespace
 
 namespace brayns
 {
@@ -72,7 +72,7 @@ void GeometryParameters::parse(const po::variables_map& vm)
 {
     if (vm.count(PARAM_COLOR_SCHEME))
     {
-        _colorScheme = ColorScheme::none;
+        _colorScheme = ProteinColorScheme::none;
         const auto& colorScheme = vm[PARAM_COLOR_SCHEME].as<std::string>();
         if (!colorScheme.empty())
         {
@@ -82,7 +82,7 @@ void GeometryParameters::parse(const po::variables_map& vm)
                 throw po::error("No match for color scheme '" + colorScheme);
 
             const auto index = std::distance(COLOR_SCHEMES.begin(), it);
-            _colorScheme = static_cast<ColorScheme>(index);
+            _colorScheme = static_cast<ProteinColorScheme>(index);
         }
     }
     if (vm.count(PARAM_GEOMETRY_QUALITY))
@@ -139,4 +139,4 @@ void GeometryParameters::print()
                 << (_memoryMode == MemoryMode::shared ? "Shared" : "Replicated")
                 << std::endl;
 }
-}
+} // namespace brayns

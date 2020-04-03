@@ -75,7 +75,7 @@ TEST_CASE("defaults")
     CHECK_EQ(renderParams.getBackgroundColor(), brayns::Vector3d(0, 0, 0));
 
     const auto& geomParams = pm.getGeometryParameters();
-    CHECK(geomParams.getColorScheme() == brayns::ColorScheme::none);
+    CHECK(geomParams.getColorScheme() == brayns::ProteinColorScheme::none);
     CHECK(geomParams.getGeometryQuality() == brayns::GeometryQuality::high);
 
     const auto& animParams = pm.getAnimationParameters();

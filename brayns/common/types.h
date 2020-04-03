@@ -182,7 +182,7 @@ enum class FrameBufferFormat
 };
 
 /** Define the color scheme to be applied to the geometry */
-enum class ColorScheme
+enum class ProteinColorScheme
 {
     none = 0,
     by_id = 1,
@@ -356,13 +356,13 @@ enum class BVHFlag
 ///////////////////////////////////////////////////////////////////////////
 
 template <>
-inline std::vector<std::pair<std::string, ColorScheme>> enumMap()
+inline std::vector<std::pair<std::string, ProteinColorScheme>> enumMap()
 {
-    return {{"none", ColorScheme::none},
-            {"by_id", ColorScheme::by_id},
-            {"protein_atoms", ColorScheme::protein_atoms},
-            {"protein_chains", ColorScheme::protein_chains},
-            {"protein_residues", ColorScheme::protein_residues}};
+    return {{"none", ProteinColorScheme::none},
+            {"by_id", ProteinColorScheme::by_id},
+            {"protein_atoms", ProteinColorScheme::protein_atoms},
+            {"protein_chains", ProteinColorScheme::protein_chains},
+            {"protein_residues", ProteinColorScheme::protein_residues}};
 }
 
 template <>

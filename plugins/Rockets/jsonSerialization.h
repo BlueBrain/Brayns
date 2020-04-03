@@ -168,13 +168,12 @@ STATICJSON_DECLARE_ENUM(brayns::GeometryQuality,
                         {"medium", brayns::GeometryQuality::medium},
                         {"high", brayns::GeometryQuality::high});
 
-STATICJSON_DECLARE_ENUM(brayns::ColorScheme,
-                        {"none", brayns::ColorScheme::none},
-                        {"by_id", brayns::ColorScheme::by_id},
-                        {"protein_atoms", brayns::ColorScheme::protein_atoms},
-                        {"protein_chains", brayns::ColorScheme::protein_chains},
-                        {"protein_residues",
-                         brayns::ColorScheme::protein_residues});
+STATICJSON_DECLARE_ENUM(
+    brayns::ProteinColorScheme, {"none", brayns::ProteinColorScheme::none},
+    {"by_id", brayns::ProteinColorScheme::by_id},
+    {"protein_atoms", brayns::ProteinColorScheme::protein_atoms},
+    {"protein_chains", brayns::ProteinColorScheme::protein_chains},
+    {"protein_residues", brayns::ProteinColorScheme::protein_residues});
 
 STATICJSON_DECLARE_ENUM(brayns::MemoryMode,
                         {"shared", brayns::MemoryMode::shared},

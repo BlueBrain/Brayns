@@ -42,7 +42,7 @@ public:
     /** @copydoc AbstractParameters::print */
     void print() final;
 
-    ColorScheme getColorScheme() const { return _colorScheme; }
+    ProteinColorScheme getColorScheme() const { return _colorScheme; }
     GeometryQuality getGeometryQuality() const { return _geometryQuality; }
     float getRadiusMultiplier() const { return _radiusMultiplier; }
     /**
@@ -62,7 +62,7 @@ protected:
     std::set<BVHFlag> _defaultBVHFlags;
 
     // Geometry
-    ColorScheme _colorScheme{ColorScheme::none};
+    ProteinColorScheme _colorScheme{ProteinColorScheme::none};
     GeometryQuality _geometryQuality{GeometryQuality::high};
     float _radiusMultiplier{1};
 
@@ -71,5 +71,5 @@ protected:
 
     SERIALIZATION_FRIEND(GeometryParameters)
 };
-}
+} // namespace brayns
 #endif // GEOMETRYPARAMETERS_H

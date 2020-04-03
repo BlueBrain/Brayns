@@ -181,8 +181,8 @@ TEST_CASE_FIXTURE(ClientServer, "protein_loader")
     properties.setProperty({"radiusMultiplier", 2.5});
     properties.setProperty(
         {"colorScheme",
-         brayns::enumToString(brayns::ColorScheme::protein_chains),
-         brayns::enumNames<brayns::ColorScheme>(),
+         brayns::enumToString(brayns::ProteinColorScheme::protein_chains),
+         brayns::enumNames<brayns::ProteinColorScheme>(),
          {}});
 
     const auto numModels = getScene().getNumModels();
