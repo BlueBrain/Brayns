@@ -171,22 +171,18 @@ ospcommon::affine3f transformationToAffine3f(
     const auto& translation = transformation.getTranslation();
     const auto& scale = transformation.getScale();
 
-    // We start scaling the object,
-    // then we move it at `translation` location,
-    // and we rotate it around `rotationCenter`.
-    //
-    // To make the object rotate around its own center,
-    // juste set `rotationCenter` to be equal to `translation`.
-    return ospcommon::affine3f::translate({float(rotationCenter.x),
+    return ospcommon::affine3f::scale(
+               {float(scale.x), float(scale.y), float(scale.z)}) *
+           ospcommon::affine3f::translate({float(translation.x),
+                                           float(translation.y),
+                                           float(translation.z)}) *
+           ospcommon::affine3f::translate({float(rotationCenter.x),
                                            float(rotationCenter.y),
                                            float(rotationCenter.z)}) *
            rot *
-           ospcommon::affine3f::translate(
-               {float(translation.x - rotationCenter.x),
-                float(translation.y - rotationCenter.y),
-                float(translation.z - rotationCenter.z)}) *
-           ospcommon::affine3f::scale(
-               {float(scale.x), float(scale.y), float(scale.z)});
+           ospcommon::affine3f::translate({float(-rotationCenter.x),
+                                           float(-rotationCenter.y),
+                                           float(-rotationCenter.z)});
 }
 
 void addInstance(OSPModel rootModel, OSPModel modelToAdd,
