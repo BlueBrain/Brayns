@@ -43,6 +43,9 @@ void Engine::commit()
 
 void Engine::preRender()
 {
+    if(!mustRender())
+        return;
+
     const auto& renderParams = _parametersManager.getRenderingParameters();
     if (!renderParams.isModified())
         return;
@@ -55,6 +58,9 @@ void Engine::preRender()
 
 void Engine::render()
 {
+    if(!mustRender())
+        return;
+
     for (auto frameBuffer : _frameBuffers)
     {
         _camera->setBufferTarget(frameBuffer->getName());
@@ -66,6 +72,9 @@ void Engine::render()
 
 void Engine::postRender()
 {
+    if(!mustRender())
+        return;
+
     for (auto frameBuffer : _frameBuffers)
         frameBuffer->incrementAccumFrames();
 }
@@ -120,5 +129,29 @@ void Engine::addCameraType(const std::string& name,
 {
     _parametersManager.getRenderingParameters().addCamera(name);
     getCamera().setProperties(name, properties);
+}
+
+bool Engine::mustRender()
+{
+    if(_parametersManager.getApplicationParameters().getUseQuantaRenderControl())
+    {
+        // When playing an animation:
+        //  - A frame data from the animation gets loaded (Model::commitSimulationData())
+        //      - This triggers the scene to be marked as modified
+        //          - This triggers Brayns to clear the frame buffer accumation frames
+        //  This is way the animations keep working even though the camera might
+        //  be fixed at a specific location and direction
+
+        // Do not render if camera hasnt been modified and either there is no
+        // accumulation frames or they are completed for the current pass
+        auto frameBuffer = _frameBuffers[0];
+        if(!_camera->isModified() &&
+            (!frameBuffer->getAccumulation()
+             || (frameBuffer->getAccumulation() && frameBuffer->numAccumFrames()
+              >= _parametersManager.getRenderingParameters().getMaxAccumFrames())))
+            return false;
+    }
+
+    return true;
 }
 } // namespace brayns

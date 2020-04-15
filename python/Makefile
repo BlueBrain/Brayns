@@ -41,7 +41,7 @@ FIND_LINT_PY=`find brayns -name "*.py" -not -path "*/*test*"`
 LINT_PYFILES := $(shell find $(FIND_LINT_PY))
 
 $(VENV):
-	virtualenv --system-site-packages $(VENV)
+	virtualenv --system-site-packages -p `which python3` $(VENV)
 
 $(VENV_INSTALLED): $(VENV)
 	$(VENV_BIN)/pip install --upgrade pip
