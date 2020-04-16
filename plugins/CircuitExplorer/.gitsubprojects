@@ -1,3 +1,5 @@
 # -*- mode: cmake -*-
-git_subproject(HighFive https://github.com/BlueBrain/HighFive.git 68fbe8e)
-git_subproject(Brion https://github.com/BlueBrain/Brion.git 551fbb0)
+git_subproject(Brion https://github.com/BlueBrain/Brion.git 39ad3483)
+if(NOT TARGET HighFive)
+    git_subproject(HighFive https://github.com/BlueBrain/HighFive.git 68fbe8e)
+endif()

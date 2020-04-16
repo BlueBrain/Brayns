@@ -209,11 +209,13 @@ ModelDescriptorPtr MeshLoader::importFromBlob(
 }
 
 void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
-                                  const std::string& folder) const
+                                  const std::string& folder,
+                                  MaterialInfoList& list) const
 {
     BRAYNS_DEBUG << "Loading " << aiScene->mNumMaterials << " materials"
                  << std::endl;
 
+    list.resize(aiScene->mNumMaterials);
     for (size_t m = 0; m < aiScene->mNumMaterials; ++m)
     {
         aiMaterial* aimaterial = aiScene->mMaterials[m];
@@ -222,6 +224,9 @@ void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
         aimaterial->Get(AI_MATKEY_NAME, valueString);
         std::string name{valueString.C_Str()};
         auto material = model.createMaterial(m, name);
+
+        list[m].name = name;
+        list[m].materialId = m;
 
         struct TextureTypeMapping
         {
@@ -306,8 +311,9 @@ ModelMetadata MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
     // Always create placeholder material since it is not guaranteed to exist
     model.createMaterial(materialId, "default");
 
+    MaterialInfoList matInfoList;
     if (materialId == NO_MATERIAL)
-        _createMaterials(model, aiScene, folder);
+        _createMaterials(model, aiScene, folder, matInfoList);
 
     std::unordered_map<size_t, size_t> nbVertices;
     std::unordered_map<size_t, size_t> nbFaces;
@@ -409,12 +415,27 @@ ModelMetadata MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
     const auto numVertices =
         std::accumulate(nbVertices.begin(), nbVertices.end(), 0,
                         [](auto value, auto& i) { return value + i.second; });
+
+    std::string materialInfo = "";
+    if(!matInfoList.empty())
+    {
+        materialInfo += "[";
+        for(size_t i = 0; i < matInfoList.size(); i++)
+        {
+            const auto& mi = matInfoList[i];
+            const std::string ending = (i + 1 < matInfoList.size())? "," : "";
+            materialInfo += "{\"name\":\""+mi.name+"\",\"ids\":["+std::to_string(mi.materialId)+"]}" + ending;
+        }
+        materialInfo += "]";
+    }
+
     const auto numFaces =
         std::accumulate(nbFaces.begin(), nbFaces.end(), 0,
                         [](auto value, auto& i) { return value + i.second; });
     ModelMetadata metadata{{"meshes", std::to_string(aiScene->mNumMeshes)},
                            {"vertices", std::to_string(numVertices)},
-                           {"faces", std::to_string(numFaces)}};
+                           {"faces", std::to_string(numFaces)},
+                           {"materialGroups", materialInfo}};
     return metadata;
 }
 

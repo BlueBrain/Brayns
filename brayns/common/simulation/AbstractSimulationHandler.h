@@ -45,6 +45,13 @@ public:
 
     /** @return the current loaded frame for the simulation. */
     uint32_t getCurrentFrame() const { return _currentFrame; }
+
+    /**
+     * @brief Sets the current frame played by this simulation handler
+     * @param newFrame unsigned integer.
+     */
+    void setCurrentFrame(const uint32_t newFrame) { _currentFrame = newFrame; }
+
     /**
      * @brief returns a void pointer to the simulation data for the given frame
      * or nullptr if the frame is not loaded yet.

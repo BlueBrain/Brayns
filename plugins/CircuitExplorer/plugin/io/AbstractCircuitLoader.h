@@ -23,6 +23,7 @@
 
 #include "MorphologyLoader.h"
 #include <common/types.h>
+#include <plugin/api/CellObjectMapper.h>
 #include <plugin/api/CircuitExplorerParams.h>
 
 #include <brayns/common/loader/Loader.h>
@@ -39,6 +40,8 @@ namespace servus
 class URI;
 }
 
+class CircuitExplorerPlugin;
+
 using Matrix4fs = std::vector<brayns::Matrix4f>;
 
 /**
@@ -50,7 +53,8 @@ public:
     AbstractCircuitLoader(
         brayns::Scene &scene,
         const brayns::ApplicationParameters &applicationParameters,
-        brayns::PropertyMap &&loaderParams);
+        brayns::PropertyMap &&loaderParams,
+        CircuitExplorerPlugin* pluginPtr);
 
     brayns::PropertyMap getProperties() const final;
 
@@ -78,10 +82,13 @@ public:
      * currently only supported for the MVD2 format.
      * @param blueConfig Configuration of the circuit
      * @param gids GIDs of the neurons
+     * @param result SchemeItem where the ids and layer names will be
+     * sotred
      */
-    size_ts _populateLayerIds(const brayns::PropertyMap &props,
-                              const brion::BlueConfig &blueConfig,
-                              const brain::GIDSet &gids) const;
+    void _populateLayerIds(const brayns::PropertyMap &props,
+                           const brion::BlueConfig &blueConfig,
+                           const brain::GIDSet &gids,
+                           SchemeItem& result) const;
 
     static void setSimulationTransferFunction(brayns::TransferFunction &tf,
                                               const float finalOpacity = 1.f);
@@ -92,6 +99,7 @@ protected:
     brayns::PropertyMap _fixedDefaults;
 
 private:
+
     std::vector<std::string> _getTargetsAsStrings(
         const std::string &targets) const;
 
@@ -100,7 +108,7 @@ private:
     brain::GIDSet _getGids(const brayns::PropertyMap &properties,
                            const brion::BlueConfig &blueConfiguration,
                            const brain::Circuit &circuit,
-                           GIDOffsets &targetGIDOffsets) const;
+                           SchemeItem& targets) const;
 
     std::string _getMeshFilenameFromGID(const brayns::PropertyMap &props,
                                         const uint64_t gid) const;
@@ -108,9 +116,8 @@ private:
     float _importMorphologies(
         const brayns::PropertyMap &props, const brain::Circuit &circuit,
         brayns::Model &model, const brain::GIDSet &gids,
-        const Matrix4fs &transformations, const GIDOffsets &targetGIDOffsets,
-        CompartmentReportPtr compartmentReport, const size_ts &layerIds,
-        const size_ts &morphologyTypes, const size_ts &electrophysiologyTypes,
+        const Matrix4fs &transformations, CellObjectMapper& mapper,
+        CompartmentReportPtr compartmentReport,
         const brayns::LoaderProgress &callback,
         const size_t materialId = brayns::NO_MATERIAL) const;
 
@@ -126,18 +133,14 @@ private:
      */
     size_t _getMaterialFromCircuitAttributes(
         const brayns::PropertyMap &props, const uint64_t index,
-        const size_t material, const GIDOffsets &targetGIDOffsets,
-        const size_ts &layerIds, const size_ts &morphologyTypes,
-        const size_ts &electrophysiologyTypes,
-        const bool forSimulationModel) const;
+        const size_t material, const bool forSimulationModel,
+        CircuitSchemeData* data = nullptr) const;
 
     void _importMeshes(const brayns::PropertyMap &props, brayns::Model &model,
                        const brain::GIDSet &gids,
                        const Matrix4fs &transformations,
-                       const GIDOffsets &targetGIDOffsets,
-                       const size_ts &layerIds, const size_ts &morphologyTypes,
-                       const size_ts &electrophysiologyTypes,
-                       const brayns::LoaderProgress &callback) const;
+                       const brayns::LoaderProgress &callback,
+                       CellObjectMapper& mapper) const;
 
     CompartmentReportPtr _attachSimulationHandler(
         const brayns::PropertyMap &properties,
@@ -173,4 +176,6 @@ private:
                           const bool loadAfferentSynapses,
                           const bool loadEfferentSynapses,
                           brayns::Model &model) const;
+
+    CircuitExplorerPlugin* _pluginPtr{nullptr};
 };

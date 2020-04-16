@@ -61,6 +61,22 @@ std::shared_ptr<T> _remove(std::vector<std::shared_ptr<T>>& list,
     list.erase(i);
     return result;
 }
+
+template<typename T, typename U = T>
+std::shared_ptr<T> _replace(std::vector<std::shared_ptr<T>>& list,
+                            const size_t id,
+                            std::shared_ptr<T> newObj,
+                            size_t (U::*getID)() const = &T::getID)
+{
+    auto i = std::find_if(list.begin(), list.end(), [id, getID](auto x) {
+        return id == ((*x).*getID)();
+    });
+    if (i == list.end())
+        return std::shared_ptr<T>{};
+    auto result = *i;
+    *i = newObj;
+    return result;
+}
 } // namespace
 
 namespace brayns
@@ -150,6 +166,35 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
     return modelDescriptor->getModelID();
 }
 
+void Scene::addModel(const size_t id, ModelDescriptorPtr modelDescriptor)
+{
+    auto& model = modelDescriptor->getModel();
+    if (model.empty())
+        throw std::runtime_error("Empty models not supported.");
+
+    const auto defaultBVHFlags = _geometryParameters.getDefaultBVHFlags();
+
+    model.setBVHFlags(defaultBVHFlags);
+    model.buildBoundingBox();
+
+    // Since models can be added concurrently we check if that is supported
+    if (supportsConcurrentSceneUpdates())
+        model.commitGeometry();
+
+    {
+        if(replaceModel(id, modelDescriptor))
+            modelDescriptor->setModelID(id);
+
+        // add default instance of this model to render something
+        if (modelDescriptor->getInstances().empty())
+            modelDescriptor->addInstance(
+                {true, true, modelDescriptor->getTransformation()});
+    }
+
+    _computeBounds();
+    markModified();
+}
+
 bool Scene::removeModel(const size_t id)
 {
     ModelDescriptorPtr model = nullptr;
@@ -175,6 +220,45 @@ bool Scene::removeModel(const size_t id)
     }
 
     if (model)
+    {
+        markModified();
+        return true;
+    }
+
+    return false;
+}
+
+bool Scene::isMarkedForReplacement(const size_t id)
+{
+    auto it = _markedForReplacement.find(id);
+    return it != _markedForReplacement.end();
+}
+
+bool Scene::replaceModel(const size_t id, ModelDescriptorPtr modelDescriptor)
+{
+    ModelDescriptorPtr model = nullptr;
+
+    if(supportsConcurrentSceneUpdates())
+    {
+        {
+            std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+            model =
+                _replace(_modelDescriptors, id,
+                         modelDescriptor, &ModelDescriptor::getModelID);
+        }
+    }
+    else
+    {
+        {
+            std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+            model = _find(_modelDescriptors, id, &ModelDescriptor::getModelID);
+        }
+        // Make sure it exists
+        if (model)
+            _markedForReplacement[id] = modelDescriptor;
+    }
+
+    if(model)
     {
         markModified();
         return true;

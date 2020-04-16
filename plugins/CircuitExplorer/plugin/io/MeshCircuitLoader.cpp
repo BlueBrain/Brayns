@@ -29,9 +29,9 @@ const double DEFAULT_RADIUS_MULTIPLIER = 2.0;
 MeshCircuitLoader::MeshCircuitLoader(
     brayns::Scene &scene,
     const brayns::ApplicationParameters &applicationParameters,
-    brayns::PropertyMap &&loaderParams)
+    brayns::PropertyMap &&loaderParams, CircuitExplorerPlugin* plugin)
     : AbstractCircuitLoader(scene, applicationParameters,
-                            std::move(loaderParams))
+                            std::move(loaderParams), plugin)
 {
     PLUGIN_INFO << "Registering " << LOADER_NAME << std::endl;
     _fixedDefaults.setProperty(

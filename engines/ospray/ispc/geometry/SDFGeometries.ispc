@@ -94,9 +94,8 @@ inline float sdConePill(const vec3f& p, const vec3f p0, const vec3f p1,
     const float b = c1 / c2;
     const vec3f Pb = p0 + b * v;
 
-    const float thicknessAt = lerp(b, r0, r1);
     const float thickness =
-        useSigmoid ? lerp(smootherstep(b), r0, r1) : thicknessAt;
+        useSigmoid ? lerp(smootherstep(b), r0, r1) : lerp(b, r0, r1);
 
     return length(p - Pb) - thickness;
 }

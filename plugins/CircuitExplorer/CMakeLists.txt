@@ -40,6 +40,7 @@ set(BRAYNSCIRCUITEXPLORER_SOURCES
     module/ispc/render/CellGrowthRenderer.cpp
     module/ispc/render/utils/CircuitExplorerAbstractRenderer.cpp
     module/ispc/render/utils/CircuitExplorerSimulationRenderer.cpp
+    plugin/api/CellObjectMapper.cpp
     plugin/api/CircuitExplorerParams.cpp
     plugin/meshing/MetaballsGenerator.cpp
     plugin/meshing/PointCloudMesher.cpp
@@ -61,7 +62,9 @@ set(BRAYNSCIRCUITEXPLORER_SOURCES
 )
 
 set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
+    plugin/api/CellObjectMapper.h
     plugin/api/CircuitExplorerParams.h
+    plugin/api/MorphologyMap.h
     plugin/meshing/MetaballsGenerator.h
     plugin/meshing/PointCloudMesher.h
     plugin/CircuitExplorerPlugin.h
