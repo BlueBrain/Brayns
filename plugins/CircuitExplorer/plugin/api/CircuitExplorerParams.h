@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CIRCUITVIEWERPARAMS_H
-#define CIRCUITVIEWERPARAMS_H
+#ifndef CIRCUITEXPLORERPARAMS_H
+#define CIRCUITEXPLORERPARAMS_H
 
 #include "../../common/types.h"
 #include <brayns/common/types.h>
@@ -33,16 +33,26 @@ struct Result
 
 std::string to_json(const Result& param);
 
+struct MessageResult
+{
+    int error{0};
+    std::string message{""};
+};
+
+std::string to_json(const MessageResult& result);
+
 /** Save model to cache */
 struct SaveModelToCache
 {
     int32_t modelId;
     std::string path;
+    bool parsed{true};
+    std::string parseError{""};
 };
 
 bool from_json(SaveModelToCache& modelSave, const std::string& payload);
 
-struct MaterialDescriptor
+struct MaterialDescriptor : public MessageResult
 {
     int32_t modelId;
     int32_t materialId;
@@ -58,10 +68,13 @@ struct MaterialDescriptor
     int32_t shadingMode;
     int32_t clippingMode;
     float userParameter;
+    bool parsed{true};
+    std::string parseError{""};
 };
 
 bool from_json(MaterialDescriptor& materialDescriptor,
                const std::string& payload);
+std::string to_json(const MaterialDescriptor& payload);
 
 struct MaterialsDescriptor
 {
@@ -79,6 +92,8 @@ struct MaterialsDescriptor
     std::vector<int32_t> shadingModes;
     std::vector<int32_t> clippingModes;
     std::vector<float> userParameters;
+    bool parsed{true};
+    std::string parseError{""};
 };
 
 bool from_json(MaterialsDescriptor& materialsDescriptor,
@@ -100,6 +115,8 @@ struct MaterialRangeDescriptor
     int32_t shadingMode;
     int32_t clippingMode;
     float userParameter;
+    bool parsed{true};
+    std::string parseError{""};
 };
 
 bool from_json(MaterialRangeDescriptor& materialRangeDescriptor,
@@ -109,11 +126,21 @@ bool from_json(MaterialRangeDescriptor& materialRangeDescriptor,
 struct ModelId
 {
     size_t modelId;
+    bool parsed{true};
+    std::string parseError{""};
 };
-
 bool from_json(ModelId& modelId, const std::string& payload);
 
-struct MaterialIds
+struct ModelMaterialId
+{
+    size_t modelId;
+    size_t materialId;
+    bool parsed{true};
+    std::string parseError{""};
+};
+bool from_json(ModelMaterialId& mmId, const std::string& payload);
+
+struct MaterialIds : public MessageResult
 {
     std::vector<size_t> ids;
 };
@@ -128,6 +155,8 @@ struct SynapseAttributes
     std::vector<std::string> htmlColors;
     float lightEmission;
     float radius;
+    bool parsed{true};
+    std::string parseError{""};
 };
 
 bool from_json(SynapseAttributes& synapseAttributes,
@@ -137,6 +166,8 @@ bool from_json(SynapseAttributes& synapseAttributes,
 struct CircuitBoundingBox
 {
     std::vector<double> aabb{0, 0, 0, 0, 0, 0};
+    bool parsed{true};
+    std::string parseError{""};
 };
 
 bool from_json(CircuitBoundingBox& circuitBoundingBox,
@@ -149,6 +180,8 @@ struct ConnectionsPerValue
     int32_t frame;
     double value;
     double epsilon;
+    bool parsed{true};
+    std::string parseError{""};
 };
 
 bool from_json(ConnectionsPerValue& connectionsPerValue,
@@ -163,6 +196,8 @@ struct MetaballsFromSimulationValue
     double epsilon;
     int32_t gridSize;
     double threshold;
+    bool parsed{true};
+    std::string parseError{""};
 };
 
 bool from_json(MetaballsFromSimulationValue& param, const std::string& payload);
@@ -171,6 +206,8 @@ bool from_json(MetaballsFromSimulationValue& param, const std::string& payload);
 struct MaterialExtraAttributes
 {
     int32_t modelId;
+    bool parsed{true};
+    std::string parseError{""};
 };
 
 bool from_json(MaterialExtraAttributes& param, const std::string& payload);
@@ -184,6 +221,8 @@ struct LoadCellsAsInstances
     std::string description;
     std::string morphologyFolder;
     std::string morphologyExtension;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(LoadCellsAsInstances& param, const std::string& payload);
 
@@ -192,6 +231,8 @@ struct ImportMorphology
     std::string connectionString;
     uint64_t guid;
     std::string filename;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(ImportMorphology& param, const std::string& payload);
 
@@ -202,6 +243,8 @@ struct LoadCells
     std::string sqlCell;
     std::string sqlMorphology;
     bool sdf;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(LoadCells& param, const std::string& payload);
 
@@ -212,6 +255,8 @@ struct LoadSomas
     std::string name;
     float radius{1.f};
     bool showOrientations;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(LoadSomas& param, const std::string& payload);
 
@@ -221,6 +266,8 @@ struct LoadSegments
     std::string sqlStatement;
     std::string name;
     float radius{1.f};
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(LoadSegments& param, const std::string& payload);
 
@@ -228,6 +275,8 @@ struct LoadMeshes
 {
     std::string connectionString;
     std::string sqlStatement;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(LoadMeshes& param, const std::string& payload);
 
@@ -238,6 +287,8 @@ struct ImportVolume
     std::vector<uint16_t> dimensions;
     std::vector<float> spacing;
     std::string rawFilename;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(ImportVolume& param, const std::string& payload);
 
@@ -246,16 +297,20 @@ struct ImportCompartmentSimulation
     std::string connectionString;
     std::string blueConfig;
     std::string reportName;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(ImportCompartmentSimulation& param, const std::string& payload);
 
-struct CameraDefinition
+struct CameraDefinition : public MessageResult
 {
     std::vector<double> origin;
     std::vector<double> direction;
     std::vector<double> up;
     double apertureRadius;
     double focusDistance;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(CameraDefinition& param, const std::string& payload);
 std::string to_json(const CameraDefinition& param);
@@ -264,6 +319,8 @@ struct AttachCellGrowthHandler
 {
     uint64_t modelId;
     uint64_t nbFrames;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(AttachCellGrowthHandler& param, const std::string& payload);
 
@@ -273,6 +330,8 @@ struct AttachCircuitSimulationHandler
     std::string circuitConfiguration;
     std::string reportName;
     bool synchronousMode;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(AttachCircuitSimulationHandler& param,
                const std::string& payload);
@@ -286,14 +345,34 @@ struct ExportFramesToDisk
     uint16_t startFrame{0};
     std::vector<uint64_t> animationInformation;
     std::vector<double> cameraInformation;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(ExportFramesToDisk& param, const std::string& payload);
 
-struct FrameExportProgress
+struct FrameExportProgress : public MessageResult
 {
     float progress;
 };
 std::string to_json(const FrameExportProgress& exportProgress);
+
+struct ExportLayerToDisk
+{
+    std::string path;
+    std::string name;
+    uint32_t startFrame;
+    uint32_t framesCount;
+    std::string data;
+    bool parsed{true};
+    std::string parseError{""};
+};
+bool from_json(ExportLayerToDisk& param, const std::string& payload);
+
+struct ExportLayerToDiskResult : public MessageResult
+{
+    std::vector<uint32_t> frames;
+};
+std::string to_json(const ExportLayerToDiskResult& result);
 
 struct MakeMovieParameters
 {
@@ -303,6 +382,9 @@ struct MakeMovieParameters
     uint32_t fpsRate;
     std::string outputMoviePath;
     bool eraseFrames;
+    strings layers;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(MakeMovieParameters& movieParams, const std::string& payload);
 
@@ -315,12 +397,16 @@ struct AddGrid
     float planeOpacity;
     bool showAxis;
     bool useColors;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(AddGrid& param, const std::string& payload);
 
 struct AddColumn
 {
     float radius;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(AddColumn& param, const std::string& payload);
 
@@ -332,15 +418,10 @@ struct AnterogradeTracing
     std::vector<double> sourceCellColor;
     std::vector<double> connectedCellsColor;
     std::vector<double> nonConnectedCellsColor;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(AnterogradeTracing& param, const std::string& payload);
-
-struct AnterogradeTracingResult
-{
-    int error;
-    std::string message;
-};
-std::string to_json(const AnterogradeTracingResult& result);
 
 struct AddSphere
 {
@@ -348,6 +429,8 @@ struct AddSphere
     std::vector<float> center;
     float radius;
     std::vector<double> color;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(AddSphere& param, const std::string& payload);
 
@@ -360,6 +443,8 @@ struct AddPill
     float radius1;
     float radius2;
     std::vector<double> color;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(AddPill& param, const std::string& payload);
 
@@ -370,6 +455,8 @@ struct AddCylinder
     std::vector<float> up;
     float radius;
     std::vector<double> color;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(AddCylinder& param, const std::string& payload);
 
@@ -379,15 +466,24 @@ struct AddBox
     std::vector<float> minCorner;
     std::vector<float> maxCorner;
     std::vector<double> color;
+    bool parsed{true};
+    std::string parseError{""};
 };
 bool from_json(AddBox& param, const std::string& payload);
 
-struct AddShapeResult
+struct AddShapeResult : public MessageResult
 {
     size_t id;
-    int error;
-    std::string message;
 };
 std::string to_json(const AddShapeResult& addResult);
+
+struct RemapCircuit
+{
+    uint32_t modelId;
+    std::string scheme;
+    bool parsed{true};
+    std::string parseError{""};
+};
+bool from_json(RemapCircuit& param, const std::string& payload);
 
 #endif // CIRCUITVIEWERPARAMS_H

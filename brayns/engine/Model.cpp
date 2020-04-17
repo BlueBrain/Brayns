@@ -399,6 +399,7 @@ void Model::logInformation()
     uint64_t nbCylinders = 0;
     uint64_t nbCones = 0;
     uint64_t nbSdfBeziers = 0;
+    uint64_t nbSdfGeoms = 0;
     uint64_t nbMeshes = _geometries->_triangleMeshes.size();
     for (const auto& spheres : _geometries->_spheres)
         nbSpheres += spheres.second.size();
@@ -408,11 +409,14 @@ void Model::logInformation()
         nbCones += cones.second.size();
     for (const auto& sdfBeziers : _geometries->_sdfBeziers)
         nbSdfBeziers += sdfBeziers.second.size();
+    for (const auto& sdfGeoms : _geometries->_sdf.geometryIndices)
+        nbSdfGeoms += sdfGeoms.second.size();
 
     BRAYNS_DEBUG << "Spheres: " << nbSpheres
                  << ", Cylinders: " << nbCylinders
                  << ", Cones: " << nbCones
                  << ", SDFBeziers: " << nbSdfBeziers
+                 << ", SDFGeometries: " << nbSdfGeoms
                  << ", Meshes: " << nbMeshes
                  << ", Memory: " << _sizeInBytes << " bytes ("
                  << _sizeInBytes / 1048576 << " MB), Bounds: " << _bounds
@@ -469,7 +473,12 @@ void Model::copyFrom(const Model& rhs)
         return;
 
     if (rhs._simulationHandler)
+    {
         _simulationHandler = rhs._simulationHandler->clone();
+        // Reset simulation handler current frame so the simulation data gets commited
+        // (current frame != animation params current frame)
+        _simulationHandler->setCurrentFrame(std::numeric_limits<uint32_t>::max());
+    }
 
     _transferFunction = rhs._transferFunction;
     _materials.clear();

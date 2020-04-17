@@ -58,10 +58,18 @@ public:
                              const GeometryQuality geometryQuality) const;
 
 private:
+    struct MaterialInfo
+    {
+        std::string name;
+        size_t materialId;
+    };
+    typedef std::vector<MaterialInfo> MaterialInfoList;
+
     PropertyMap _defaults;
 
     void _createMaterials(Model& model, const aiScene* aiScene,
-                          const std::string& folder) const;
+                          const std::string& folder,
+                          MaterialInfoList& list) const;
 
     ModelMetadata _postLoad(const aiScene* aiScene, Model& model,
                             const Matrix4f& transformation,

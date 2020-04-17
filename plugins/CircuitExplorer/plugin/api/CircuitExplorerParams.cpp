@@ -24,6 +24,8 @@
 
 #include <common/log.h>
 
+#include <exception>
+
 #ifndef BRAYNS_DEBUG_JSON_ENABLED
 #define FROM_JSON(PARAM, JSON, NAME) \
     PARAM.NAME = JSON[#NAME].get<decltype(PARAM.NAME)>()
@@ -34,7 +36,7 @@
     } \
     catch(...){ \
         PLUGIN_ERROR << "JSON parsing error for attribute '" << #NAME<< "'!" << std::endl; \
-        throw; \
+        throw std::runtime_error("AttributeError: " + std::string(#NAME)); \
     }
 #endif
 #define TO_JSON(PARAM, JSON, NAME) JSON[#NAME] = PARAM.NAME
@@ -72,6 +74,23 @@ std::string to_json(const Result& param)
     return "";
 }
 
+std::string to_json(const MessageResult& result)
+{
+    try
+    {
+        nlohmann::json js;
+
+        TO_JSON(result, js, error);
+        TO_JSON(result, js, message);
+        return js.dump();
+    }
+    catch (...)
+    {
+        return "";
+    }
+    return "";
+}
+
 bool from_json(SaveModelToCache& param, const std::string& payload)
 {
     try
@@ -80,9 +99,10 @@ bool from_json(SaveModelToCache& param, const std::string& payload)
         FROM_JSON(param, js, modelId);
         FROM_JSON(param, js, path);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -107,11 +127,42 @@ bool from_json(MaterialDescriptor& param, const std::string& payload)
         FROM_JSON(param, js, clippingMode);
         FROM_JSON(param, js, userParameter);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
+}
+
+std::string to_json(const MaterialDescriptor& payload)
+{
+    try
+    {
+        nlohmann::json js;
+        TO_JSON(payload, js, modelId);
+        TO_JSON(payload, js, materialId);
+        TO_JSON(payload, js, diffuseColor);
+        TO_JSON(payload, js, specularColor);
+        TO_JSON(payload, js, specularExponent);
+        TO_JSON(payload, js, reflectionIndex);
+        TO_JSON(payload, js, opacity);
+        TO_JSON(payload, js, refractionIndex);
+        TO_JSON(payload, js, emission);
+        TO_JSON(payload, js, glossiness);
+        TO_JSON(payload, js, simulationDataCast);
+        TO_JSON(payload, js, shadingMode);
+        TO_JSON(payload, js, clippingMode);
+        TO_JSON(payload, js, userParameter);
+        TO_JSON(payload, js, error);
+        TO_JSON(payload, js, message);
+        return js.dump();
+    }
+    catch (...)
+    {
+        return "";
+    }
+    return "";
 }
 
 bool from_json(MaterialsDescriptor& param, const std::string& payload)
@@ -134,9 +185,10 @@ bool from_json(MaterialsDescriptor& param, const std::string& payload)
         FROM_JSON(param, js, clippingModes);
         FROM_JSON(param, js, userParameters);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -162,9 +214,10 @@ bool from_json(MaterialRangeDescriptor& param,
         FROM_JSON(param, js, clippingMode);
         FROM_JSON(param, js, userParameter);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -176,9 +229,26 @@ bool from_json(ModelId& param, const std::string& payload)
         auto js = nlohmann::json::parse(payload);
         FROM_JSON(param, js, modelId);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
+    }
+    return true;
+}
+
+bool from_json(ModelMaterialId& mmId, const std::string& payload)
+{
+    try
+    {
+        auto js = nlohmann::json::parse(payload);
+        FROM_JSON(mmId, js, modelId);
+        FROM_JSON(mmId, js, materialId);
+    }
+    catch (const std::exception& e)
+    {
+        mmId.parsed = false;
+        mmId.parseError = std::string(e.what());
     }
     return true;
 }
@@ -189,6 +259,8 @@ std::string to_json(const MaterialIds& param)
     {
         nlohmann::json js;
         TO_JSON(param, js, ids);
+        TO_JSON(param, js, error);
+        TO_JSON(param, js, message);
         return js.dump();
     }
     catch (...)
@@ -209,9 +281,10 @@ bool from_json(SynapseAttributes& param, const std::string& payload)
         FROM_JSON(param, js, lightEmission);
         FROM_JSON(param, js, radius);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -223,9 +296,10 @@ bool from_json(CircuitBoundingBox& param, const std::string& payload)
         auto js = nlohmann::json::parse(payload);
         FROM_JSON(param, js, aabb);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -240,9 +314,10 @@ bool from_json(ConnectionsPerValue& param, const std::string& payload)
         FROM_JSON(param, js, value);
         FROM_JSON(param, js, epsilon);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -259,9 +334,10 @@ bool from_json(MetaballsFromSimulationValue& param, const std::string& payload)
         FROM_JSON(param, js, gridSize);
         FROM_JSON(param, js, threshold);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -273,9 +349,10 @@ bool from_json(MaterialExtraAttributes& param, const std::string& payload)
         auto js = nlohmann::json::parse(payload);
         FROM_JSON(param, js, modelId);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -292,9 +369,10 @@ bool from_json(LoadCellsAsInstances& param, const std::string& payload)
         FROM_JSON(param, js, morphologyFolder);
         FROM_JSON(param, js, morphologyExtension);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -308,9 +386,10 @@ bool from_json(ImportMorphology& param, const std::string& payload)
         FROM_JSON(param, js, guid);
         FROM_JSON(param, js, filename);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -326,9 +405,10 @@ bool from_json(LoadCells& param, const std::string& payload)
         FROM_JSON(param, js, sqlMorphology);
         FROM_JSON(param, js, sdf);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -344,9 +424,10 @@ bool from_json(LoadSomas& param, const std::string& payload)
         FROM_JSON(param, js, radius);
         FROM_JSON(param, js, showOrientations);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -361,9 +442,10 @@ bool from_json(LoadSegments& param, const std::string& payload)
         FROM_JSON(param, js, name);
         FROM_JSON(param, js, radius);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -376,9 +458,10 @@ bool from_json(LoadMeshes& param, const std::string& payload)
         FROM_JSON(param, js, connectionString);
         FROM_JSON(param, js, sqlStatement);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -394,9 +477,10 @@ bool from_json(ImportVolume& param, const std::string& payload)
         FROM_JSON(param, js, spacing);
         FROM_JSON(param, js, rawFilename);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -410,9 +494,10 @@ bool from_json(ImportCompartmentSimulation& param, const std::string& payload)
         FROM_JSON(param, js, blueConfig);
         FROM_JSON(param, js, reportName);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -426,9 +511,10 @@ bool from_json(CameraDefinition& param, const std::string& payload)
         FROM_JSON(param, js, direction);
         FROM_JSON(param, js, up);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -444,6 +530,8 @@ std::string to_json(const CameraDefinition& param)
         TO_JSON(param, js, up);
         TO_JSON(param, js, apertureRadius);
         TO_JSON(param, js, focusDistance);
+        TO_JSON(param, js, error);
+        TO_JSON(param, js, message);
         return js.dump();
     }
     catch (...)
@@ -461,9 +549,10 @@ bool from_json(AttachCellGrowthHandler& param, const std::string& payload)
         FROM_JSON(param, js, modelId);
         FROM_JSON(param, js, nbFrames);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -479,9 +568,10 @@ bool from_json(AttachCircuitSimulationHandler& param,
         FROM_JSON(param, js, reportName);
         FROM_JSON(param, js, synchronousMode);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -499,9 +589,10 @@ bool from_json(ExportFramesToDisk& param, const std::string& payload)
         FROM_JSON(param, js, animationInformation);
         FROM_JSON(param, js, cameraInformation);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -512,6 +603,44 @@ std::string to_json(const FrameExportProgress& exportProgress)
     {
         nlohmann::json json;
         TO_JSON(exportProgress, json, progress);
+        TO_JSON(exportProgress, json, error);
+        TO_JSON(exportProgress, json, message);
+        return json.dump();
+    }
+    catch (...)
+    {
+        return "";
+    }
+    return "";
+}
+
+bool from_json(ExportLayerToDisk& param, const std::string& payload)
+{
+    try
+    {
+        auto json = nlohmann::json::parse(payload);
+        FROM_JSON(param, json, path);
+        FROM_JSON(param, json, name);
+        FROM_JSON(param, json, startFrame);
+        FROM_JSON(param, json, framesCount);
+        FROM_JSON(param, json, data);
+    }
+    catch (const std::exception& e)
+    {
+        param.parsed = false;
+        param.parseError = std::string(e.what());
+    }
+    return true;
+}
+
+std::string to_json(const ExportLayerToDiskResult& result)
+{
+    try
+    {
+        nlohmann::json json;
+        TO_JSON(result, json, frames);
+        TO_JSON(result, json, error);
+        TO_JSON(result, json, message);
         return json.dump();
     }
     catch (...)
@@ -532,10 +661,12 @@ bool from_json(MakeMovieParameters& movieParams, const std::string& payload)
         FROM_JSON(movieParams, json, fpsRate);
         FROM_JSON(movieParams, json, outputMoviePath);
         FROM_JSON(movieParams, json, eraseFrames);
+        FROM_JSON(movieParams, json, layers);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        movieParams.parsed = false;
+        movieParams.parseError = std::string(e.what());
     }
     return true;
 }
@@ -553,9 +684,10 @@ bool from_json(AddGrid& param, const std::string& payload)
         FROM_JSON(param, js, showAxis);
         FROM_JSON(param, js, useColors);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -567,9 +699,10 @@ bool from_json(AddColumn& param, const std::string& payload)
         auto js = nlohmann::json::parse(payload);
         FROM_JSON(param, js, radius);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -586,27 +719,12 @@ bool from_json(AnterogradeTracing& param, const std::string& payload)
         FROM_JSON(param, js, connectedCellsColor);
         FROM_JSON(param, js, nonConnectedCellsColor);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
-}
-
-std::string to_json(const AnterogradeTracingResult& result)
-{
-    try
-    {
-        nlohmann::json json;
-        TO_JSON(result, json, error);
-        TO_JSON(result, json, message);
-        return json.dump();
-    }
-    catch (...)
-    {
-        return "";
-    }
-    return "";
 }
 
 bool from_json(AddSphere& param, const std::string& payload)
@@ -619,9 +737,10 @@ bool from_json(AddSphere& param, const std::string& payload)
         FROM_JSON(param, js, radius);
         FROM_JSON(param, js, color);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -639,9 +758,10 @@ bool from_json(AddPill& param, const std::string& payload)
         FROM_JSON(param, js, radius2);
         FROM_JSON(param, js, color);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -657,9 +777,10 @@ bool from_json(AddCylinder& param, const std::string& payload)
         FROM_JSON(param, js, radius);
         FROM_JSON(param, js, color);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -674,9 +795,10 @@ bool from_json(AddBox& param, const std::string& payload)
         FROM_JSON(param, js, maxCorner);
         FROM_JSON(param, js, color);
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        return false;
+        param.parsed = false;
+        param.parseError = std::string(e.what());
     }
     return true;
 }
@@ -696,4 +818,20 @@ std::string to_json(const AddShapeResult& addResult)
         return "";
     }
     return "";
+}
+
+bool from_json(RemapCircuit& param, const std::string& payload)
+{
+    try
+    {
+        auto js = nlohmann::json::parse(payload);
+        FROM_JSON(param, js, modelId);
+        FROM_JSON(param, js, scheme);
+    }
+    catch (const std::exception& e)
+    {
+        param.parsed = false;
+        param.parseError = std::string(e.what());
+    }
+    return true;
 }

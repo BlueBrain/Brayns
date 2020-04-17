@@ -30,7 +30,8 @@ public:
     MeshCircuitLoader(
         brayns::Scene &scene,
         const brayns::ApplicationParameters &applicationParameters,
-        brayns::PropertyMap &&loaderParams);
+        brayns::PropertyMap &&loaderParams,
+        CircuitExplorerPlugin* plugin);
 
     std::string getName() const final;
 

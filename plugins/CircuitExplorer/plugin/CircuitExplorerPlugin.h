@@ -22,6 +22,7 @@
 #ifndef MEMBRANELESS_ORGANELLES_PLUGIN_H
 #define MEMBRANELESS_ORGANELLES_PLUGIN_H
 
+#include <plugin/api/CellObjectMapper.h>
 #include <plugin/api/CircuitExplorerParams.h>
 #include <plugin/io/AbstractCircuitLoader.h>
 
@@ -48,34 +49,38 @@ public:
     void preRender() final;
     void postRender() final;
 
+    CellObjectMapper& getMapperForCircuit(const std::string& circuitFilePath);
+    void releaseCircuitMapper(const std::string& circuitFilePath);
+
 private:
     // Rendering
-    void _setCamera(const CameraDefinition&);
+    MessageResult _setCamera(const CameraDefinition&);
     CameraDefinition _getCamera();
-    void _setMaterial(const MaterialDescriptor&);
-    void _setMaterials(const MaterialsDescriptor&);
-    void _setMaterialRange(const MaterialRangeDescriptor&);
-    void _setMaterialExtraAttributes(const MaterialExtraAttributes&);
+    MessageResult _setMaterial(const MaterialDescriptor&);
+    MessageResult _setMaterials(const MaterialsDescriptor&);
+    MessageResult _setMaterialRange(const MaterialRangeDescriptor&);
+    MessageResult _setMaterialExtraAttributes(const MaterialExtraAttributes&);
 
     // Experimental
-    void _setSynapseAttributes(const SynapseAttributes&);
-    void _setConnectionsPerValue(const ConnectionsPerValue&);
-    void _setMetaballsPerSimulationValue(const MetaballsFromSimulationValue&);
-    void _saveModelToCache(const SaveModelToCache&);
+    MessageResult _setSynapseAttributes(const SynapseAttributes&);
+    MessageResult _setConnectionsPerValue(const ConnectionsPerValue&);
+    MessageResult _setMetaballsPerSimulationValue(const MetaballsFromSimulationValue&);
+    MessageResult _saveModelToCache(const SaveModelToCache&);
 
     // Handlers
-    void _attachCellGrowthHandler(const AttachCellGrowthHandler& payload);
-    void _attachCircuitSimulationHandler(
+    MessageResult _attachCellGrowthHandler(const AttachCellGrowthHandler& payload);
+    MessageResult _attachCircuitSimulationHandler(
         const AttachCircuitSimulationHandler& payload);
 
     // Movie production
-    void _exportFramesToDisk(const ExportFramesToDisk& payload);
+    MessageResult _exportFramesToDisk(const ExportFramesToDisk& payload);
     void _doExportFrameToDisk();
     FrameExportProgress _getFrameExportProgress();
-    void _makeMovie(const MakeMovieParameters& params);
+    ExportLayerToDiskResult _exportLayerToDisk(const ExportLayerToDisk& payload);
+    MessageResult _makeMovie(const MakeMovieParameters& params);
 
     // Anterograde tracing
-    AnterogradeTracingResult _traceAnterogrades(const AnterogradeTracing& payload);
+    MessageResult _traceAnterogrades(const AnterogradeTracing& payload);
 
     // Add geometry
     void _createShapeMaterial(brayns::ModelPtr& model,
@@ -89,10 +94,16 @@ private:
 
 
     // Predefined models
-    void _addGrid(const AddGrid& payload);
-    void _addColumn(const AddColumn& payload);
+    MessageResult _addGrid(const AddGrid& payload);
+    MessageResult _addColumn(const AddColumn& payload);
 
+    // Get material information
     MaterialIds _getMaterialIds(const ModelId& modelId);
+    MaterialDescriptor _getMaterial(const ModelMaterialId& mmId);
+
+    // Remap circuit colors to a specific scheme
+    MessageResult _remapCircuitToScheme(const RemapCircuit& payload);
+
     SynapseAttributes _synapseAttributes;
 
     bool _dirty{false};
@@ -101,5 +112,7 @@ private:
     bool _exportFramesToDiskDirty{false};
     uint16_t _frameNumber{0};
     int16_t _accumulationFrameNumber{0};
+
+    std::unordered_map<std::string, CellObjectMapper> _circuitMappers;
 };
 #endif

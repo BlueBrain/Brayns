@@ -40,12 +40,14 @@
 #include <brayns/common/Progress.h>
 #include <brayns/common/Timer.h>
 #include <brayns/common/geometry/Streamline.h>
+#include <brayns/common/utils/base64/base64.h>
 #include <brayns/common/utils/imageUtils.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
+#include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
@@ -61,6 +63,13 @@
 
 #include <sys/types.h>
 #include <sys/wait.h>
+
+#define HANDLE_NOT_PARSED(payload, result) \
+    if(!payload.parsed) { \
+        result.error = 9; \
+        result.message = payload.parseError; \
+        return result; \
+    }
 
 #define REGISTER_LOADER(LOADER, FUNC) \
     registry.registerLoader({std::bind(&LOADER::getSupportedDataTypes), FUNC});
@@ -293,48 +302,54 @@ void CircuitExplorerPlugin::init()
 
     registry.registerLoader(std::make_unique<SynapseCircuitLoader>(
         scene, pm.getApplicationParameters(),
-        SynapseCircuitLoader::getCLIProperties()));
+        SynapseCircuitLoader::getCLIProperties(), this));
 
     registry.registerLoader(std::make_unique<MorphologyLoader>(
         scene, MorphologyLoader::getCLIProperties()));
 
     registry.registerLoader(std::make_unique<AdvancedCircuitLoader>(
         scene, pm.getApplicationParameters(),
-        AdvancedCircuitLoader::getCLIProperties()));
+        AdvancedCircuitLoader::getCLIProperties(), this));
 
     registry.registerLoader(std::make_unique<MorphologyCollageLoader>(
         scene, pm.getApplicationParameters(),
-        MorphologyCollageLoader::getCLIProperties()));
+        MorphologyCollageLoader::getCLIProperties(), this));
 
     registry.registerLoader(std::make_unique<MeshCircuitLoader>(
         scene, pm.getApplicationParameters(),
-        MeshCircuitLoader::getCLIProperties()));
+        MeshCircuitLoader::getCLIProperties(), this));
 
     registry.registerLoader(std::make_unique<PairSynapsesLoader>(
         scene, pm.getApplicationParameters(),
-        PairSynapsesLoader::getCLIProperties()));
+        PairSynapsesLoader::getCLIProperties(), this));
 
     registry.registerLoader(
         std::make_unique<AstrocyteLoader>(scene, pm.getApplicationParameters(),
-                                          AstrocyteLoader::getCLIProperties()));
+                                          AstrocyteLoader::getCLIProperties(), this));
 
     auto actionInterface = _api->getActionInterface();
     if (actionInterface)
     {
         PLUGIN_INFO << "Registering 'set-material' endpoint" << std::endl;
-        actionInterface->registerNotification<MaterialDescriptor>(
+        actionInterface->registerRequest<MaterialDescriptor, MessageResult>(
             "set-material",
-            [&](const MaterialDescriptor& param) { _setMaterial(param); });
+            [&](const MaterialDescriptor& param) {
+                return _setMaterial(param);
+        });
 
         PLUGIN_INFO << "Registering 'set-materials' endpoint" << std::endl;
-        actionInterface->registerNotification<MaterialsDescriptor>(
+        actionInterface->registerRequest<MaterialsDescriptor, MessageResult>(
             "set-materials",
-            [&](const MaterialsDescriptor& param) { _setMaterials(param); });
+            [&](const MaterialsDescriptor& param) {
+                return _setMaterials(param);
+        });
 
         PLUGIN_INFO << "Registering 'set-material-range' endpoint" << std::endl;
-        actionInterface->registerNotification<MaterialRangeDescriptor>(
+        actionInterface->registerRequest<MaterialRangeDescriptor, MessageResult>(
             "set-material-range",
-            [&](const MaterialRangeDescriptor& param) { _setMaterialRange(param); });
+            [&](const MaterialRangeDescriptor& param) {
+                return _setMaterialRange(param);
+        });
 
         PLUGIN_INFO << "Registering 'get-material-ids' endpoint" << std::endl;
         actionInterface->registerRequest<ModelId, MaterialIds>(
@@ -342,47 +357,57 @@ void CircuitExplorerPlugin::init()
                 return _getMaterialIds(modelId);
             });
 
+        PLUGIN_INFO << "Registering 'get-material' endpoint" << std::endl;
+        actionInterface->registerRequest<ModelMaterialId, MaterialDescriptor>(
+            "get-material", [&](const ModelMaterialId& modelId) -> MaterialDescriptor {
+                return _getMaterial(modelId);
+            });
+
         PLUGIN_INFO << "Registering 'set-material-extra-attributes' endpoint"
                     << std::endl;
-        actionInterface->registerNotification<MaterialExtraAttributes>(
+        actionInterface->registerRequest<MaterialExtraAttributes, MessageResult>(
             "set-material-extra-attributes",
             [&](const MaterialExtraAttributes& param) {
-                _setMaterialExtraAttributes(param);
+                return _setMaterialExtraAttributes(param);
             });
 
         PLUGIN_INFO << "Registering 'set-synapses-attributes' endpoint"
                     << std::endl;
-        actionInterface->registerNotification<SynapseAttributes>(
+        actionInterface->registerRequest<SynapseAttributes, MessageResult>(
             "set-synapses-attributes", [&](const SynapseAttributes& param) {
-                _setSynapseAttributes(param);
+                return _setSynapseAttributes(param);
             });
 
         PLUGIN_INFO << "Registering 'save-model-to-cache' endpoint"
                     << std::endl;
-        actionInterface->registerNotification<SaveModelToCache>(
+        actionInterface->registerRequest<SaveModelToCache, MessageResult>(
             "save-model-to-cache",
-            [&](const SaveModelToCache& param) { _saveModelToCache(param); });
+            [&](const SaveModelToCache& param) {
+                return _saveModelToCache(param);
+        });
 
         PLUGIN_INFO << "Registering 'set-connections-per-value' endpoint"
                     << std::endl;
-        actionInterface->registerNotification<ConnectionsPerValue>(
+        actionInterface->registerRequest<ConnectionsPerValue, MessageResult>(
             "set-connections-per-value", [&](const ConnectionsPerValue& param) {
-                _setConnectionsPerValue(param);
+                return _setConnectionsPerValue(param);
             });
 
         PLUGIN_INFO
             << "Registering 'set-metaballs-per-simulation-value' endpoint"
             << std::endl;
-        actionInterface->registerNotification<MetaballsFromSimulationValue>(
+        actionInterface->registerRequest
+                <MetaballsFromSimulationValue, MessageResult>(
             "set-metaballs-per-simulation-value",
             [&](const MetaballsFromSimulationValue& param) {
-                _setMetaballsPerSimulationValue(param);
+                return _setMetaballsPerSimulationValue(param);
             });
 
         PLUGIN_INFO << "Registering 'set-odu-camera' endpoint" << std::endl;
-        _api->getActionInterface()->registerNotification<CameraDefinition>(
+        _api->getActionInterface()->registerRequest
+                <CameraDefinition, MessageResult>(
             "set-odu-camera",
-            [&](const CameraDefinition& s) { _setCamera(s); });
+            [&](const CameraDefinition& s) { return _setCamera(s); });
 
         PLUGIN_INFO << "Registering 'get-odu-camera' endpoint" << std::endl;
         _api->getActionInterface()->registerRequest<CameraDefinition>(
@@ -392,27 +417,28 @@ void CircuitExplorerPlugin::init()
         PLUGIN_INFO << "Registering 'attach-cell-growth-handler' endpoint"
                     << std::endl;
         _api->getActionInterface()
-            ->registerNotification<AttachCellGrowthHandler>(
+            ->registerRequest<AttachCellGrowthHandler, MessageResult>(
                 "attach-cell-growth-handler",
                 [&](const AttachCellGrowthHandler& s) {
-                    _attachCellGrowthHandler(s);
+                    return _attachCellGrowthHandler(s);
                 });
 
         PLUGIN_INFO
             << "Registering 'attach-circuit-simulation-handler' endpoint"
             << std::endl;
         _api->getActionInterface()
-            ->registerNotification<AttachCircuitSimulationHandler>(
+            ->registerRequest<AttachCircuitSimulationHandler, MessageResult>(
                 "attach-circuit-simulation-handler",
                 [&](const AttachCircuitSimulationHandler& s) {
-                    _attachCircuitSimulationHandler(s);
+                    return _attachCircuitSimulationHandler(s);
                 });
 
         PLUGIN_INFO << "Registering 'export-frames-to-disk' endpoint"
                     << std::endl;
-        _api->getActionInterface()->registerNotification<ExportFramesToDisk>(
+        _api->getActionInterface()->registerRequest
+                <ExportFramesToDisk, MessageResult>(
             "export-frames-to-disk",
-            [&](const ExportFramesToDisk& s) { _exportFramesToDisk(s); });
+            [&](const ExportFramesToDisk& s) { return _exportFramesToDisk(s); });
 
         PLUGIN_INFO << "Registering 'get-export-frames-progress' endpoint"
                     << std::endl;
@@ -421,27 +447,34 @@ void CircuitExplorerPlugin::init()
                 return _getFrameExportProgress();
             });
 
+        PLUGIN_INFO << "Registering 'export-layer-to-disk' endpoint"
+                    << std::endl;
+        actionInterface->registerRequest<ExportLayerToDisk, ExportLayerToDiskResult>(
+            "export-layer-to-disk", [&](const ExportLayerToDisk& s) {
+                return _exportLayerToDisk(s);
+            });
+
         PLUGIN_INFO << "Registering 'make-movie' endpoint" << std::endl;
-        actionInterface->registerNotification<MakeMovieParameters>(
+        actionInterface->registerRequest<MakeMovieParameters, MessageResult>(
             "make-movie",
-            [&](const MakeMovieParameters& params) { _makeMovie(params); });
+            [&](const MakeMovieParameters& params) { return _makeMovie(params); });
 
         PLUGIN_INFO << "Registering 'trace-anterograde' endpoint" << std::endl;
         _api->getActionInterface()
-               ->registerRequest<AnterogradeTracing, AnterogradeTracingResult>(
+               ->registerRequest<AnterogradeTracing, MessageResult>(
             "trace-anterograde",
             [&](const AnterogradeTracing& payload) {
                 return _traceAnterogrades(payload);
             });
 
         PLUGIN_INFO << "Registering 'add-grid' endpoint" << std::endl;
-        _api->getActionInterface()->registerNotification<AddGrid>(
-            "add-grid", [&](const AddGrid& payload) { _addGrid(payload); });
+        _api->getActionInterface()->registerRequest<AddGrid, MessageResult>(
+            "add-grid", [&](const AddGrid& payload) { return _addGrid(payload); });
 
         PLUGIN_INFO << "Registering 'add-column' endpoint" << std::endl;
-        _api->getActionInterface()->registerNotification<AddColumn>(
+        _api->getActionInterface()->registerRequest<AddColumn, MessageResult>(
             "add-column",
-            [&](const AddColumn& payload) { _addColumn(payload); });
+            [&](const AddColumn& payload) { return _addColumn(payload); });
 
         PLUGIN_INFO << "Registering 'add-sphere' endpoint" << std::endl;
         _api->getActionInterface()->registerRequest<AddSphere, AddShapeResult>(
@@ -463,6 +496,12 @@ void CircuitExplorerPlugin::init()
         PLUGIN_INFO << "Registering 'add-box' endpoint" << std::endl;
         _api->getActionInterface()->registerRequest<AddBox, AddShapeResult>(
             "add-box", [&](const AddBox& payload) { return _addBox(payload); });
+
+        PLUGIN_INFO << "Registering 'remap-circuit-color' endpoint" << std::endl;
+        _api->getActionInterface()
+            ->registerRequest<RemapCircuit, MessageResult>(
+            "remap-circuit-color",
+            [&](const RemapCircuit& s) { return _remapCircuitToScheme(s); });
     }
 
     auto& engine = _api->getEngine();
@@ -522,9 +561,25 @@ void CircuitExplorerPlugin::postRender()
         ++_accumulationFrameNumber;
 }
 
-void CircuitExplorerPlugin::_setMaterialExtraAttributes(
+CellObjectMapper& CircuitExplorerPlugin::getMapperForCircuit(const std::string &circuitFilePath)
+{
+    return _circuitMappers[circuitFilePath];
+}
+
+void CircuitExplorerPlugin::releaseCircuitMapper(const std::string &circuitFilePath)
+{
+    auto it = _circuitMappers.find(circuitFilePath);
+    if(it != _circuitMappers.end())
+        _circuitMappers.erase(it);
+}
+
+MessageResult CircuitExplorerPlugin::_setMaterialExtraAttributes(
     const MaterialExtraAttributes& mea)
 {
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(mea, result)
+
     auto modelDescriptor = _api->getScene().getModel(mea.modelId);
     if (modelDescriptor)
         try
@@ -547,14 +602,27 @@ void CircuitExplorerPlugin::_setMaterialExtraAttributes(
         catch (const std::runtime_error& e)
         {
             PLUGIN_INFO << e.what() << std::endl;
+            result.error = 3;
+            result.message = std::string(e.what());
         }
     else
+    {
         PLUGIN_INFO << "Model " << mea.modelId << " is not registered"
                     << std::endl;
+        result.error = 2;
+        result.message = "Model " + std::to_string(mea.modelId)
+                         + " is not registered";
+    }
+
+    return result;
 }
 
-void CircuitExplorerPlugin::_setMaterial(const MaterialDescriptor& md)
+MessageResult CircuitExplorerPlugin::_setMaterial(const MaterialDescriptor& md)
 {
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(md, result)
+
     auto modelDescriptor = _api->getScene().getModel(md.modelId);
     if (modelDescriptor)
         try
@@ -591,21 +659,40 @@ void CircuitExplorerPlugin::_setMaterial(const MaterialDescriptor& md)
                 _dirty = true;
             }
             else
+            {
                 PLUGIN_INFO << "Material " << md.materialId
                             << " is not registered in model " << md.modelId
                             << std::endl;
+                result.error = 4;
+                result.message = "Material " + std::to_string(md.materialId)
+                                 + " is not registered in model "
+                                 + std::to_string(md.modelId);
+            }
         }
         catch (const std::runtime_error& e)
         {
             PLUGIN_INFO << e.what() << std::endl;
+            result.error = 3;
+            result.message = std::string(e.what());
         }
     else
+    {
         PLUGIN_INFO << "Model " << md.modelId << " is not registered"
                     << std::endl;
+        result.error = 2;
+        result.message = "Model " + std::to_string(md.modelId)
+                         + " is not registered";
+    }
+
+    return result;
 }
 
-void CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
+MessageResult CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
 {
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(md, result)
+
     for (const auto modelId : md.modelIds)
     {
         auto modelDescriptor = _api->getScene().getModel(modelId);
@@ -672,19 +759,32 @@ void CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
                 catch (const std::runtime_error& e)
                 {
                     PLUGIN_INFO << e.what() << std::endl;
+                    result.error = 2;
+                    result.message = std::string(e.what());
                 }
                 ++id;
             }
             _dirty = true;
         }
         else
+        {
             PLUGIN_INFO << "Model " << modelId << " is not registered"
                         << std::endl;
+            result.error = 1;
+            result.message = "Model " + std::to_string(modelId) + "is not "
+                             + "registered";
+        }
     }
+
+    return result;
 }
 
-void CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescriptor& mrd)
+MessageResult CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescriptor& mrd)
 {
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(mrd, result)
+
     auto modelDescriptor = _api->getScene().getModel(mrd.modelId);
     if (modelDescriptor)
     {
@@ -704,8 +804,11 @@ void CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescriptor& mrd
 
         if(mrd.diffuseColor.size() % 3 != 0)
         {
-            PLUGIN_ERROR << "set-material-range: The diffuse colors component is not a multiple of 3" << std::endl;
-            return;
+            PLUGIN_ERROR << "set-material-range: The diffuse colors "
+                         << "component is not a multiple of 3" << std::endl;
+            result.error = 3;
+            result.message = "The diffuse colors component size is not multiple of 3";
+            return result;
         }
 
         const size_t numColors = mrd.diffuseColor.size() / 3;
@@ -749,18 +852,30 @@ void CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescriptor& mrd
             catch (const std::runtime_error& e)
             {
                 PLUGIN_INFO << e.what() << std::endl;
+                result.error = 2;
+                result.message = std::string(e.what());
             }
         }
         _dirty = true;
     }
     else
+    {
         PLUGIN_INFO << "Model " << mrd.modelId << " is not registered"
                     << std::endl;
+        result.error = 1;
+        result.message = "Model " + std::to_string(mrd.modelId)
+                         + " is not registered";
+    }
+
+    return result;
 }
 
 MaterialIds CircuitExplorerPlugin::_getMaterialIds(const ModelId& modelId)
 {
     MaterialIds materialIds;
+
+    HANDLE_NOT_PARSED(modelId, materialIds)
+
     auto modelDescriptor = _api->getScene().getModel(modelId.modelId);
     if (modelDescriptor)
     {
@@ -770,13 +885,122 @@ MaterialIds CircuitExplorerPlugin::_getMaterialIds(const ModelId& modelId)
                 materialIds.ids.push_back(material.first);
     }
     else
-        PLUGIN_THROW("Invalid model ID");
+    {
+       materialIds.error = 1;
+       materialIds.message = "Model " + std::to_string(modelId.modelId)
+                             + " is not registered";
+    }
     return materialIds;
 }
 
-void CircuitExplorerPlugin::_setSynapseAttributes(
+MaterialDescriptor CircuitExplorerPlugin::_getMaterial(const ModelMaterialId& mmId)
+{
+    MaterialDescriptor result;
+
+    HANDLE_NOT_PARSED(mmId, result)
+
+    auto modelDescriptor = _api->getScene().getModel(mmId.modelId);
+    if (modelDescriptor)
+        try
+        {
+            const auto material =
+                modelDescriptor->getModel().getMaterial(mmId.materialId);
+            if (material)
+            {
+                result.modelId = static_cast<int32_t>(mmId.modelId);
+                result.materialId = static_cast<int32_t>(mmId.materialId);
+
+                const auto& dc = material->getDiffuseColor();
+                result.diffuseColor = {static_cast<float>(dc.r),
+                                       static_cast<float>(dc.g),
+                                       static_cast<float>(dc.b)};
+
+
+                const auto& sc = material->getSpecularColor();
+                result.specularColor = {static_cast<float>(sc.r),
+                                        static_cast<float>(sc.g),
+                                        static_cast<float>(sc.b)};
+
+                result.specularExponent = static_cast<float>(material->getSpecularExponent());
+                result.reflectionIndex = static_cast<float>(material->getReflectionIndex());
+                result.opacity = static_cast<float>(material->getOpacity());
+                result.refractionIndex = static_cast<float>(material->getRefractionIndex());
+                result.emission = static_cast<float>(material->getEmission());
+                result.glossiness = static_cast<float>(material->getGlossiness());
+                result.simulationDataCast = material->getProperty<bool>(MATERIAL_PROPERTY_CAST_USER_DATA);
+                result.shadingMode = material->getProperty<int32_t>(MATERIAL_PROPERTY_SHADING_MODE);
+                result.clippingMode = material->getProperty<int32_t>(MATERIAL_PROPERTY_CLIPPING_MODE);
+                result.userParameter = static_cast<float>(
+                            material->getProperty<double>(MATERIAL_PROPERTY_USER_PARAMETER));
+            }
+            else
+            {
+                PLUGIN_INFO << "Material " << mmId.materialId
+                            << " is not registered in model " << mmId.modelId
+                            << std::endl;
+                result.error = 3;
+                result.message = "Material " + std::to_string(mmId.materialId)
+                                 + " is not registered in model "
+                                 + std::to_string(mmId.modelId);
+            }
+        }
+        catch (const std::runtime_error& e)
+        {
+            PLUGIN_INFO << e.what() << std::endl;
+            result.error = 2;
+            result.message = std::string(e.what());
+        }
+    else
+    {
+        PLUGIN_INFO << "Model " << mmId.modelId << " is not registered"
+                    << std::endl;
+        result.error = 1;
+        result.message = "Model " + std::to_string(mmId.modelId) + " is not"
+                         + " registered";
+    }
+
+    return result;
+}
+
+MessageResult CircuitExplorerPlugin::_remapCircuitToScheme(const RemapCircuit& payload)
+{
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(payload, result)
+
+    auto modelDescriptor = _api->getScene().getModel(payload.modelId);
+    if(modelDescriptor)
+    {
+        const std::string& path = modelDescriptor->getPath();
+        auto it = _circuitMappers.find(path);
+        if(it != _circuitMappers.end())
+        {
+            const auto schemeEnum =
+                    stringToEnum<CircuitColorScheme>(payload.scheme);
+            auto remapResult = it->second.remapCircuitColors(schemeEnum, _api->getScene());
+            result.error = remapResult.error;
+            result.message = remapResult.message;
+            _dirty = true;
+            _api->getEngine().triggerRender();
+        }
+    }
+    else
+    {
+        result.error = 1;
+        result.message = "The model with ID "
+                         + std::to_string(payload.modelId)
+                         + " does not exists";
+    }
+    return result;
+}
+
+MessageResult CircuitExplorerPlugin::_setSynapseAttributes(
     const SynapseAttributes& param)
 {
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(param, result)
+
     try
     {
         _synapseAttributes = param;
@@ -809,17 +1033,27 @@ void CircuitExplorerPlugin::_setSynapseAttributes(
     catch (const std::runtime_error& e)
     {
         PLUGIN_ERROR << e.what() << std::endl;
+        result.error = 1;
+        result.message = std::string(e.what());
     }
     catch (...)
     {
         PLUGIN_ERROR
             << "Unexpected exception occured in _updateMaterialFromJson"
             << std::endl;
+        result.error = 2;
+        result.message = "Unexpected exception occured in _setSynapseAttribute";
     }
+
+    return result;
 }
 
-void CircuitExplorerPlugin::_saveModelToCache(const SaveModelToCache& saveModel)
+MessageResult CircuitExplorerPlugin::_saveModelToCache(const SaveModelToCache& saveModel)
 {
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(saveModel, result)
+
     auto modelDescriptor = _api->getScene().getModel(saveModel.modelId);
     if (modelDescriptor)
     {
@@ -827,13 +1061,24 @@ void CircuitExplorerPlugin::_saveModelToCache(const SaveModelToCache& saveModel)
         brickLoader.exportToFile(modelDescriptor, saveModel.path);
     }
     else
+    {
         PLUGIN_ERROR << "Model " << saveModel.modelId << " is not registered"
                      << std::endl;
+        result.error = 1;
+        result.message = "Model " + std::to_string(saveModel.modelId) + " is"
+                         + " not registered";
+    }
+
+    return result;
 }
 
-void CircuitExplorerPlugin::_setConnectionsPerValue(
+MessageResult CircuitExplorerPlugin::_setConnectionsPerValue(
     const ConnectionsPerValue& cpv)
 {
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(cpv, result)
+
     PointCloud pointCloud;
 
     auto modelDescriptor = _api->getScene().getModel(cpv.modelId);
@@ -844,7 +1089,9 @@ void CircuitExplorerPlugin::_setConnectionsPerValue(
         if (!simulationHandler)
         {
             BRAYNS_ERROR << "Scene has not user data handler" << std::endl;
-            return;
+            result.error = 1;
+            result.message = "Scene has no user data handler";
+            return result;
         }
 
         auto& model = modelDescriptor->getModel();
@@ -877,17 +1124,33 @@ void CircuitExplorerPlugin::_setConnectionsPerValue(
             }
         }
         else
+        {
             PLUGIN_INFO << "No connections added for value "
                         << std::to_string(cpv.value) << std::endl;
+            result.error = 2;
+            result.message = "No connections added for value "
+                             + std::to_string(cpv.value);
+        }
     }
     else
+    {
         PLUGIN_INFO << "Model " << cpv.modelId << " is not registered"
                     << std::endl;
+        result.error = 3;
+        result.message = "Model " + std::to_string(cpv.modelId) + " is"
+                         + " not registered";
+    }
+
+    return result;
 }
 
-void CircuitExplorerPlugin::_setMetaballsPerSimulationValue(
+MessageResult CircuitExplorerPlugin::_setMetaballsPerSimulationValue(
     const MetaballsFromSimulationValue& mpsv)
 {
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(mpsv, result)
+
     PointCloud pointCloud;
 
     auto modelDescriptor = _api->getScene().getModel(mpsv.modelId);
@@ -898,7 +1161,9 @@ void CircuitExplorerPlugin::_setMetaballsPerSimulationValue(
         if (!simulationHandler)
         {
             BRAYNS_ERROR << "Scene has not user data handler" << std::endl;
-            return;
+            result.error = 1;
+            result.message = "Scene has no user data handler";
+            return result;
         }
 
         auto& model = modelDescriptor->getModel();
@@ -934,20 +1199,41 @@ void CircuitExplorerPlugin::_setMetaballsPerSimulationValue(
                 _dirty = true;
             }
             else
+            {
                 PLUGIN_INFO << "No mesh was created for value "
                             << std::to_string(mpsv.value) << std::endl;
+                result.error = 2;
+                result.message = "No mesh was created for value "
+                                 + std::to_string(mpsv.value);
+            }
         }
         else
+        {
             PLUGIN_INFO << "No connections added for value "
                         << std::to_string(mpsv.value) << std::endl;
+            result.error = 3;
+            result.message = "No connections added for value "
+                             + std::to_string(mpsv.value);
+        }
     }
     else
+    {
         PLUGIN_INFO << "Model " << mpsv.modelId << " is not registered"
                     << std::endl;
+        result.error = 4;
+        result.message = "Model " + std::to_string(mpsv.modelId) + " is"
+                         + " not registered";
+    }
+
+    return result;
 }
 
-void CircuitExplorerPlugin::_setCamera(const CameraDefinition& payload)
+MessageResult CircuitExplorerPlugin::_setCamera(const CameraDefinition& payload)
 {
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(payload, result)
+
     auto& camera = _api->getCamera();
 
     // Origin
@@ -981,6 +1267,8 @@ void CircuitExplorerPlugin::_setCamera(const CameraDefinition& payload)
     PLUGIN_DEBUG << "SET: " << origin << ", " << direction << ", " << up << ", "
                  << glm::inverse(q) << "," << payload.apertureRadius << ","
                  << payload.focusDistance << std::endl;
+
+    return result;
 }
 
 CameraDefinition CircuitExplorerPlugin::_getCamera()
@@ -1001,9 +1289,13 @@ CameraDefinition CircuitExplorerPlugin::_getCamera()
     return cd;
 }
 
-void CircuitExplorerPlugin::_attachCellGrowthHandler(
+MessageResult CircuitExplorerPlugin::_attachCellGrowthHandler(
     const AttachCellGrowthHandler& payload)
 {
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(payload, result)
+
     PLUGIN_INFO << "Attaching Cell Growth Handler to model " << payload.modelId
                 << std::endl;
     auto modelDescriptor = _api->getScene().getModel(payload.modelId);
@@ -1012,11 +1304,17 @@ void CircuitExplorerPlugin::_attachCellGrowthHandler(
         auto handler = std::make_shared<CellGrowthHandler>(payload.nbFrames);
         modelDescriptor->getModel().setSimulationHandler(handler);
     }
+
+    return result;
 }
 
-void CircuitExplorerPlugin::_attachCircuitSimulationHandler(
+MessageResult CircuitExplorerPlugin::_attachCircuitSimulationHandler(
     const AttachCircuitSimulationHandler& payload)
 {
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(payload, result)
+
     PLUGIN_INFO << "Attaching Circuit Simulation Handler to model "
                 << payload.modelId << std::endl;
     auto modelDescriptor = _api->getScene().getModel(payload.modelId);
@@ -1037,12 +1335,21 @@ void CircuitExplorerPlugin::_attachCircuitSimulationHandler(
     {
         PLUGIN_ERROR << "Model " << payload.modelId << " does not exist"
                      << std::endl;
+        result.error = 1;
+        result.message = "Model " + std::to_string(payload.modelId)
+                         + " does not exist";
     }
+
+    return result;
 }
 
-void CircuitExplorerPlugin::_exportFramesToDisk(
+MessageResult CircuitExplorerPlugin::_exportFramesToDisk(
     const ExportFramesToDisk& payload)
 {
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(payload, result)
+
     _exportFramesToDiskPayload = payload;
     _exportFramesToDiskDirty = true;
     _frameNumber = payload.startFrame;
@@ -1064,6 +1371,8 @@ void CircuitExplorerPlugin::_exportFramesToDisk(
     PLUGIN_INFO << "-----------------------------------------------------------"
                    "---------------------"
                 << std::endl;
+
+    return result;
 }
 
 void CircuitExplorerPlugin::_doExportFrameToDisk()
@@ -1124,8 +1433,61 @@ FrameExportProgress CircuitExplorerPlugin::_getFrameExportProgress()
     return result;
 }
 
-void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
+ExportLayerToDiskResult CircuitExplorerPlugin::_exportLayerToDisk(const ExportLayerToDisk& payload)
 {
+    ExportLayerToDiskResult result;
+
+    HANDLE_NOT_PARSED(payload, result)
+
+    const uint32_t end = payload.startFrame + payload.framesCount;
+    for(uint32_t i = payload.startFrame; i < end; i++)
+    {
+        char frame[7];
+        sprintf(frame, "%05d", i);
+        const std::string frameFileName(frame);
+        const std::string slash = payload.path.at(payload.path.length() - 1) == '/'? "" : "/";
+        const std::string srcFramePath = payload.path + slash + frameFileName + ".png";
+
+        std::ifstream testSourceFrame (srcFramePath);
+        const bool state = testSourceFrame.good();
+        testSourceFrame.close();
+
+        // Do not write layer if the corresponding frame does not exists
+        if(!state) continue;
+
+        const std::string layerPath = payload.path + slash + payload.name + frameFileName + ".png";
+        const std::string decodedImage = base64_decode(payload.data);
+
+        std::ofstream outFileWriter (layerPath, std::ofstream::out | std::ofstream::trunc);
+        outFileWriter << decodedImage;
+        outFileWriter.flush();
+        outFileWriter.close();
+
+        result.frames.push_back(i);
+    }
+
+    return result;
+}
+
+MessageResult CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
+{
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(params, result)
+
+    std::set<std::string> uniqueLayers;
+    uniqueLayers.insert(params.layers.begin(), params.layers.end());
+
+    auto defaultIt = uniqueLayers.find("movie");
+    if(defaultIt == uniqueLayers.end())
+    {
+        PLUGIN_ERROR << "MakeMovie: Default layer \"movie\" not present. Aborting."
+                     << std::endl;
+        result.error = 1;
+        result.message = "Default layer \"movie\" not present";
+        return result;
+    }
+
     // Find ffmpeg executable path
     std::array<char, 256> buffer;
     std::string ffmpegPath;
@@ -1135,7 +1497,9 @@ void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
     {
         PLUGIN_ERROR << "Could not launch movie creation: ffmpeg not found"
                      << std::endl;
-        return;
+        result.error = 2;
+        result.message = "Could not launch movie creation: ffmpeg not found";
+        return result;
     }
     while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
     {
@@ -1168,6 +1532,24 @@ void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
 
     const std::string inputParam =
         sanitizedFramesFolder + slash + "%05d." + sanitizedFramesExt;
+
+    std::string inputLayer = "";
+    if(params.layers.size() > 1)
+    {
+        std::string layerName;
+        // Pick the first layer whose name is not the default one
+        for(const auto& ln : uniqueLayers)
+        {
+            if(ln != "movie")
+            {
+                layerName = ln;
+                break;
+            }
+        }
+
+        inputLayer = sanitizedFramesFolder + slash + layerName + "%05d." + sanitizedFramesExt;
+    }
+
     const std::string filterParam =
         "scale=" + std::to_string(static_cast<int>(params.dimensions[0])) +
         ":" + std::to_string(static_cast<int>(params.dimensions[1])) +
@@ -1176,11 +1558,19 @@ void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
 
     if (pid == 0)
     {
-        execl(ffmpegPath.c_str(), "ffmpeg", "-y", "-hide_banner", "-loglevel",
-              "0", "-r", std::to_string(params.fpsRate).c_str(), "-i",
-              inputParam.c_str(), "-vf", filterParam.c_str(), "-crf", "0",
-              "-codec:v", "libx264", sanitizedOutputPath.c_str(),
-              static_cast<char*>(nullptr));
+        if(inputLayer.empty())
+            execl(ffmpegPath.c_str(), "ffmpeg", "-y", "-hide_banner", "-loglevel",
+                  "0", "-r", std::to_string(params.fpsRate).c_str(), "-i",
+                  inputParam.c_str(), "-vf", filterParam.c_str(), "-crf", "0",
+                  "-codec:v", "libx264", sanitizedOutputPath.c_str(),
+                  static_cast<char*>(nullptr));
+        else
+            execl(ffmpegPath.c_str(), "ffmpeg", "-y", "-hide_banner", "-loglevel",
+                  "0", "-r", std::to_string(params.fpsRate).c_str(), "-i",
+                  inputParam.c_str(), "-i", inputLayer.c_str(), "-filter_complex",
+                  "'[0:v][1:v]hstack[vid]'", "-map", "[vid]", "-vf", filterParam.c_str(),
+                  "-crf", "0", "-codec:v", "libx264", sanitizedOutputPath.c_str(),
+                  static_cast<char*>(nullptr));
     }
     else
     {
@@ -1195,7 +1585,10 @@ void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
                     PLUGIN_ERROR << "Could not create media video file. FFMPEG "
                                     "returned with error "
                                  << status << std::endl;
-                    return;
+                    result.error = 3;
+                    result.message = "Could not create media file. FFMPEG returned "
+                                     + std::to_string(status);
+                    return result;
                 }
             }
         }
@@ -1204,7 +1597,10 @@ void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
             PLUGIN_ERROR << "Could not create media video file. "
                             "Could not launch FFMPEG."
                          << std::endl;
-            return;
+            result.error = 4;
+            result.message = "Could not create media video file. "
+                             "Could not launch FFMPEG";
+            return result;
         }
     }
 
@@ -1233,14 +1629,20 @@ void CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
         {
             PLUGIN_ERROR << "make-movie: Could not clean up frames"
                          << std::endl;
+            result.error = 5;
+            result.message = "Could not clean up frames";
+            return result;
         }
     }
+
+    return result;
 }
 
-AnterogradeTracingResult CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTracing &payload)
+MessageResult CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTracing &payload)
 {
-    AnterogradeTracingResult result;
-    result.error = 0;
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(payload, result)
 
     if(payload.cellGIDs.empty())
     {
@@ -1459,8 +1861,8 @@ void CircuitExplorerPlugin::_createShapeMaterial(brayns::ModelPtr& model,
 AddShapeResult CircuitExplorerPlugin::_addSphere(const AddSphere& payload)
 {
     AddShapeResult result;
-    result.error = 0;
-    result.message = "";
+
+    HANDLE_NOT_PARSED(payload, result)
 
     if (payload.center.size() < 3)
     {
@@ -1516,8 +1918,8 @@ AddShapeResult CircuitExplorerPlugin::_addSphere(const AddSphere& payload)
 AddShapeResult CircuitExplorerPlugin::_addPill(const AddPill& payload)
 {
     AddShapeResult result;
-    result.error = 0;
-    result.message = "";
+
+    HANDLE_NOT_PARSED(payload, result)
 
     if (payload.p1.size() < 3)
     {
@@ -1602,8 +2004,8 @@ AddShapeResult CircuitExplorerPlugin::_addPill(const AddPill& payload)
 AddShapeResult CircuitExplorerPlugin::_addCylinder(const AddCylinder& payload)
 {
     AddShapeResult result;
-    result.error = 0;
-    result.message = "";
+
+    HANDLE_NOT_PARSED(payload, result)
 
     if (payload.center.size() < 3)
     {
@@ -1666,8 +2068,8 @@ AddShapeResult CircuitExplorerPlugin::_addCylinder(const AddCylinder& payload)
 AddShapeResult CircuitExplorerPlugin::_addBox(const AddBox& payload)
 {
     AddShapeResult result;
-    result.error = 0;
-    result.message = "";
+
+    HANDLE_NOT_PARSED(payload, result)
 
     if (payload.minCorner.size() < 3)
     {
@@ -1725,8 +2127,12 @@ AddShapeResult CircuitExplorerPlugin::_addBox(const AddBox& payload)
     return result;
 }
 
-void CircuitExplorerPlugin::_addGrid(const AddGrid& payload)
+MessageResult CircuitExplorerPlugin::_addGrid(const AddGrid& payload)
 {
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(payload, result)
+
     BRAYNS_INFO << "Building Grid scene" << std::endl;
 
     auto& scene = _api->getScene();
@@ -1844,10 +2250,16 @@ void CircuitExplorerPlugin::_addGrid(const AddGrid& payload)
 
     scene.addModel(
         std::make_shared<brayns::ModelDescriptor>(std::move(model), "Grid"));
+
+    return result;
 }
 
-void CircuitExplorerPlugin::_addColumn(const AddColumn& payload)
+MessageResult CircuitExplorerPlugin::_addColumn(const AddColumn& payload)
 {
+    MessageResult result;
+
+    HANDLE_NOT_PARSED(payload, result)
+
     BRAYNS_INFO << "Building Column model" << std::endl;
 
     auto& scene = _api->getScene();
@@ -1900,6 +2312,8 @@ void CircuitExplorerPlugin::_addColumn(const AddColumn& payload)
 
     scene.addModel(
         std::make_shared<brayns::ModelDescriptor>(std::move(model), "Column"));
+
+    return result;
 }
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int /*argc*/,

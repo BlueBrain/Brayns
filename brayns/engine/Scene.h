@@ -83,11 +83,34 @@ public:
     BRAYNS_API size_t addModel(ModelDescriptorPtr model);
 
     /**
+     * @brief Adds a model to the scene with the specific model id
+     * @param id to be used as model identifier
+     * @param model the model itself
+     */
+    BRAYNS_API void addModel(const size_t id, ModelDescriptorPtr model);
+
+    /**
         Removes a model from the scene
         @param id id of the model (descriptor)
         @return True if model was found and removed, false otherwise
       */
     BRAYNS_API bool removeModel(const size_t id);
+
+    /**
+     * @brief Check wether a model has been marked for replacement
+     *        for a new model
+     * @param id the ID of the model to replace the current one
+     * @return true if the model is on the list to be replaced
+     */
+    BRAYNS_API bool isMarkedForReplacement(const size_t id);
+
+    /**
+     * @brief Replaces an existing model (given its ID) for a new one
+     * @param id the ID of the model to replace
+     * @param modelDescriptor The model which will replace the current one
+     * @return True if the model was found and replace, false otherwise
+     */
+    BRAYNS_API bool replaceModel(const size_t id, ModelDescriptorPtr modelDescriptor);
 
     BRAYNS_API ModelDescriptorPtr getModel(const size_t id) const;
 
@@ -205,6 +228,8 @@ protected:
     size_t _modelID{0};
     ModelDescriptors _modelDescriptors;
     mutable std::shared_timed_mutex _modelMutex;
+
+    std::unordered_map<size_t, ModelDescriptorPtr> _markedForReplacement;
 
     LightManager _lightManager;
     ClipPlanes _clipPlanes;
