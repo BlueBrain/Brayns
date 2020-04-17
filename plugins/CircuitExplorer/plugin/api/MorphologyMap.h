@@ -22,12 +22,12 @@
 #ifndef MORPHOLOGYMAP_H
 #define MORPHOLOGYMAP_H
 
-#include <brayns/common/geometry/Sphere.h>
-#include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/Cone.h>
+#include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/SDFBezier.h>
-#include <brayns/common/geometry/TriangleMesh.h>
 #include <brayns/common/geometry/SDFGeometry.h>
+#include <brayns/common/geometry/Sphere.h>
+#include <brayns/common/geometry/TriangleMesh.h>
 #include <brayns/common/types.h>
 
 #include <unordered_map>

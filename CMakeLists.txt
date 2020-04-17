@@ -9,6 +9,9 @@ cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(Brayns VERSION 1.0.1)
 set(Brayns_VERSION_ABI 1)
 
+set(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
+set(OpenGL_GL_PREFERENCE LEGACY)
+
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
                               ${CMAKE_SOURCE_DIR}/CMake/common)
 if(NOT EXISTS ${CMAKE_SOURCE_DIR}/CMake/common/Common.cmake)
