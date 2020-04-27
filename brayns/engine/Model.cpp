@@ -273,6 +273,13 @@ uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
     return geomIdx;
 }
 
+uint64_t Model::addMetaObject(const size_t materialId, const PropertyMap &metaObject)
+{
+    _geometries->_metaObjects[materialId].push_back(metaObject);
+    _metaObjectsDirty = true;
+    return _geometries->_metaObjects.size() - 1;
+}
+
 void Model::updateSDFGeometryNeighbours(
     size_t geometryIdx, const std::vector<size_t>& neighbourIndices)
 {
@@ -401,6 +408,7 @@ void Model::logInformation()
     uint64_t nbSdfBeziers = 0;
     uint64_t nbSdfGeoms = 0;
     uint64_t nbMeshes = _geometries->_triangleMeshes.size();
+    uint64_t nbMetaObjects = 0;
     for (const auto& spheres : _geometries->_spheres)
         nbSpheres += spheres.second.size();
     for (const auto& cylinders : _geometries->_cylinders)
@@ -411,6 +419,8 @@ void Model::logInformation()
         nbSdfBeziers += sdfBeziers.second.size();
     for (const auto& sdfGeoms : _geometries->_sdf.geometryIndices)
         nbSdfGeoms += sdfGeoms.second.size();
+    for(const auto& metaObj : _geometries->_metaObjects)
+        nbMetaObjects += metaObj.second.size();
 
     BRAYNS_DEBUG << "Spheres: " << nbSpheres
                  << ", Cylinders: " << nbCylinders
@@ -418,6 +428,7 @@ void Model::logInformation()
                  << ", SDFBeziers: " << nbSdfBeziers
                  << ", SDFGeometries: " << nbSdfGeoms
                  << ", Meshes: " << nbMeshes
+                 << ", Meta Objects: " << nbMetaObjects
                  << ", Memory: " << _sizeInBytes << " bytes ("
                  << _sizeInBytes / 1048576 << " MB), Bounds: " << _bounds
                  << std::endl;
@@ -465,6 +476,9 @@ void Model::_updateSizeInBytes()
         _sizeInBytes += sdfIndices.second.size() * sizeof(uint64_t);
     for (const auto& sdfNeighbours : _geometries->_sdf.neighbours)
         _sizeInBytes += sdfNeighbours.size() * sizeof(size_t);
+    for(const auto& metaObjList : _geometries->_metaObjects)
+        for(const auto& metaObj : metaObjList.second)
+            _sizeInBytes += sizeof(metaObj);
 }
 
 void Model::copyFrom(const Model& rhs)
@@ -504,6 +518,7 @@ void Model::copyFrom(const Model& rhs)
     _streamlinesDirty = !_geometries->_streamlines.empty();
     _sdfGeometriesDirty = !_geometries->_sdf.geometries.empty();
     _volumesDirty = !_geometries->_volumes.empty();
+    _metaObjectsDirty = !_geometries->_metaObjects.empty();
 }
 
 void Model::updateBounds()
@@ -614,6 +629,7 @@ void Model::_markGeometriesClean()
     _streamlinesDirty = false;
     _sdfGeometriesDirty = false;
     _volumesDirty = false;
+    _metaObjectsDirty = false;
 }
 
 MaterialPtr Model::createMaterial(const size_t materialId,

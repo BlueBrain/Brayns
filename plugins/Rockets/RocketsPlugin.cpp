@@ -50,6 +50,7 @@
 #include <fstream>
 #include <limits.h>
 #include <unistd.h>
+#include <unordered_set>
 
 #include <sys/stat.h>
 
@@ -125,10 +126,15 @@ const std::string METHOD_ADD_LIGHT_AMBIENT = "add-light-ambient";
 const std::string METHOD_REMOVE_LIGHTS = "remove-lights";
 const std::string METHOD_CLEAR_LIGHTS = "clear-lights";
 
+// Filesystem query
 const std::string METHOD_FS_EXISTS = "fs-exists";
 const std::string METHOD_FS_GET_CONTENT = "fs-get-content";
 const std::string METHOD_FS_GET_ROOT = "fs-get-root";
 const std::string METHOD_FS_LIST_DIR = "fs-list-dir";
+
+// Material manipulation
+const std::string METHOD_GET_MATERIAL = "get-mat";
+const std::string METHOD_SET_MATERIAL = "set-mat";
 
 // JSONRPC notifications
 const std::string METHOD_CHUNK = "chunk";
@@ -1047,6 +1053,8 @@ public:
         _handleFsGetRoot();
         _handleFsGetListDir();
 
+        _handleMaterial();
+
         _endpointsRegistered = true;
     }
 
@@ -1947,6 +1955,131 @@ public:
             }
 
             return dfl;
+        });
+    }
+
+    void _handleMaterial()
+    {
+        const RpcParameterDescription desc{METHOD_GET_MATERIAL,
+                                           "Return the properties of a material",
+                                           "requestMaterial", "Id of the model that holds the material and the material Id"};
+        _handleRPC<RequestMaterial, ModifyMaterial>(desc, [&](const auto& reqMat) {
+            ModifyMaterial result;
+            result.error = 0;
+            result.message = "";
+            result.modelId = reqMat.modelId;
+            result.materialId = reqMat.materialId;
+
+            auto modelPtr = this->_engine.getScene().getModel(reqMat.modelId);
+            if(!modelPtr)
+            {
+                result.error = 1;
+                result.message = "The given model Id does not correspond with any existing model";
+                return result;
+            }
+
+            const auto& materials = modelPtr->getModel().getMaterials();
+            auto it = materials.find(reqMat.materialId);
+            if(it == materials.end())
+            {
+                result.error = 2;
+                result.message = "The given model does not have a material with the given material ID";
+                return result;
+            }
+
+            auto materialPtr = it->second;
+
+            result.modelId = reqMat.modelId;
+            result.materialId = reqMat.materialId;
+
+            const auto& difC = materialPtr->getDiffuseColor();
+            const auto& speC = materialPtr->getSpecularColor();
+            result.materialProperties.setProperty({"diffuse_color", std::array<double, 3>{difC.r, difC.g, difC.b}, {"Diffuse Color"}});
+            result.materialProperties.setProperty({"specular_color", std::array<double, 3>{speC.r, speC.g, speC.b}, {"Specular Color"}});
+            result.materialProperties.setProperty({"specular_exponent", materialPtr->getSpecularExponent(), {"Specular Exponent"}});
+            result.materialProperties.setProperty({"reflection_index", materialPtr->getReflectionIndex(), {"Reflection Index"}});
+            result.materialProperties.setProperty({"opacity", materialPtr->getOpacity(), {"Opacity"}});
+            result.materialProperties.setProperty({"refraction_index", materialPtr->getRefractionIndex(), {"Refraction Index"}});
+            result.materialProperties.setProperty({"light_emission", materialPtr->getEmission(), {"Emission"}});
+            result.materialProperties.setProperty({"glossiness", materialPtr->getGlossiness(), {"Glossiness"}});
+
+            for(const auto& p : materialPtr->getPropertyMap().getProperties())
+                result.materialProperties.setProperty(*p);
+
+            return result;
+        });
+
+        const RpcParameterDescription desc2{METHOD_SET_MATERIAL,
+                                           "Set the material propertiese for the given model and material",
+                                           "ModifyMaterial", "Id of the model that holds the material, the material Id and the information"};
+        _handleRPC<ModifyMaterial, ModifyMaterialResult>(desc2, [&](const ModifyMaterial& mat) {
+            ModifyMaterialResult result;
+            result.error = 0;
+            result.message = "";
+
+            auto modelPtr = this->_engine.getScene().getModel(mat.modelId);
+            if(!modelPtr)
+            {
+                result.error = 1;
+                result.message = "The given model Id does not correspond with any existing model";
+                return result;
+            }
+
+            const auto& materials = modelPtr->getModel().getMaterials();
+            auto it = materials.find(mat.materialId);
+            if(it == materials.end())
+            {
+                result.error = 2;
+                result.message = "The given model does not have a material with the given material ID";
+                return result;
+            }
+
+            auto materialPtr = it->second;
+
+            static const std::unordered_set<std::string> baseProperties =
+            {
+                "diffuseColor",
+                "specularColor",
+                "specularExponent",
+                "reflectionIndex",
+                "opacity",
+                "refractionIndex",
+                "lightEmission",
+                "glossiness"
+            };
+
+            const auto difC = mat.materialProperties.getProperty<std::array<double, 3>>("diffuseColor", {1., 1., 1.});
+            const auto speC = mat.materialProperties.getProperty<std::array<double, 3>>("specularColor", {1., 1., 1.});
+            const auto specularExpnt = mat.materialProperties.getProperty<double>("specularExponent", 10.);
+            const auto reflectionIdx = mat.materialProperties.getProperty<double>("reflectionIndex", 0.);
+            const auto opacity = mat.materialProperties.getProperty<double>("opacity", 1.);
+            const auto refractionIdx = mat.materialProperties.getProperty<double>("refractionIndex", 1.);
+            const auto lightEmission = mat.materialProperties.getProperty<double>("lightEmission", 0.);
+            const auto glossiness = mat.materialProperties.getProperty<double>("glossiness", 1.);
+
+            materialPtr->setDiffuseColor(Vector3d(difC[0], difC[1], difC[2]));
+            materialPtr->setSpecularColor(Vector3d(speC[0], speC[1], speC[2]));
+            materialPtr->setSpecularExponent(specularExpnt);
+            materialPtr->setReflectionIndex(reflectionIdx);
+            materialPtr->setOpacity(opacity);
+            materialPtr->setRefractionIndex(refractionIdx);
+            materialPtr->setEmission(lightEmission);
+            materialPtr->setGlossiness(glossiness);
+
+            PropertyMap newProperties;
+            for(const auto& prop : mat.materialProperties.getProperties())
+            {
+                if(baseProperties.find(prop->name) != baseProperties.end())
+                    continue;
+
+                newProperties.setProperty(*prop);
+            }
+
+            materialPtr->setProperties(newProperties);
+            materialPtr->markModified();
+        this->_engine.getScene().markModified();
+
+            return result;
         });
     }
 

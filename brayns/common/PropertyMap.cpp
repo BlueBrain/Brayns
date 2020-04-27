@@ -100,6 +100,30 @@ po::options_description _toCommandlineDescription(
         case Property::Type::Vec4d:
             valueSemantic = po::fixed_tokens_value<std::vector<double>>(4, 4);
             break;
+        case Property::Type::DoubleVector:
+            {
+                auto max = static_cast<uint32_t>(std::numeric_limits<uint32_t>::max() - 1);
+                valueSemantic = po::fixed_tokens_value<std::vector<double>>(1, max);
+            }
+            break;
+        case Property::Type::FloatVector:
+            {
+                auto max = static_cast<uint32_t>(std::numeric_limits<uint32_t>::max() - 1);
+                valueSemantic = po::fixed_tokens_value<std::vector<float>>(1, max);
+            }
+            break;
+        case Property::Type::IntVector:
+            {
+                auto max = static_cast<uint32_t>(std::numeric_limits<uint32_t>::max() - 1);
+                valueSemantic = po::fixed_tokens_value<std::vector<int32_t>>(1, max);
+            }
+            break;
+        case Property::Type::UIntVector:
+            {
+                auto max = static_cast<uint32_t>(std::numeric_limits<uint32_t>::max() - 1);
+                valueSemantic = po::fixed_tokens_value<std::vector<uint32_t>>(1, max);
+            }
+            break;
         }
 
         assert(valueSemantic);
@@ -181,6 +205,18 @@ void _commandlineToPropertyMap(const po::variables_map& vm,
             property->set(_toStdArray<double, 4>(
                 vm[dashCaseName].as<std::vector<double>>()));
             break;
+        case Property::Type::DoubleVector:
+            property->set(vm[dashCaseName].as<std::vector<double>>());
+            break;
+        case Property::Type::FloatVector:
+            property->set(vm[dashCaseName].as<std::vector<float>>());
+            break;
+        case Property::Type::IntVector:
+            property->set(vm[dashCaseName].as<std::vector<int32_t>>());
+            break;
+        case Property::Type::UIntVector:
+            property->set(vm[dashCaseName].as<std::vector<uint32_t>>());
+            break;
         }
     }
 }
@@ -213,6 +249,18 @@ void Property::_copy(const Property& from)
             dest.set<std::array<double, 3>>(_convertArray<double, int32_t, 3>(
                 src.get<std::array<int32_t, 3>>()));
             break;
+        case Property::Type::DoubleVector:
+            dest.set<std::vector<double>>(src.get<std::vector<double>>());
+            break;
+        case Property::Type::FloatVector:
+            dest.set<std::vector<float>>(src.get<std::vector<float>>());
+            break;
+        case Property::Type::IntVector:
+            dest.set<std::vector<int32_t>>(src.get<std::vector<int32_t>>());
+            break;
+        case Property::Type::UIntVector:
+            dest.set<std::vector<uint32_t>>(src.get<std::vector<uint32_t>>());
+            break;
         default:
             break;
         };
@@ -224,7 +272,11 @@ void Property::_copy(const Property& from)
                (t0 == Property::Type::Vec2i && t1 == Property::Type::Vec2d) ||
                (t0 == Property::Type::Vec2d && t1 == Property::Type::Vec2i) ||
                (t0 == Property::Type::Vec3i && t1 == Property::Type::Vec3d) ||
-               (t0 == Property::Type::Vec3d && t1 == Property::Type::Vec3i);
+               (t0 == Property::Type::Vec3d && t1 == Property::Type::Vec3i)  ||
+               (t0 == Property::Type::DoubleVector && t1 == Property::Type::DoubleVector) ||
+               (t0 == Property::Type::FloatVector && t1 == Property::Type::FloatVector) ||
+               (t0 == Property::Type::IntVector && t1 == Property::Type::IntVector) ||
+               (t0 == Property::Type::UIntVector && t1 == Property::Type::UIntVector);
     };
 
     const auto compatibleEnums = [](const Property& dest, const Property& src) {

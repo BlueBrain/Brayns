@@ -49,7 +49,11 @@ struct Property
         Vec2d,
         Vec3i,
         Vec3d,
-        Vec4d
+        Vec4d,
+        DoubleVector,
+        FloatVector,
+        IntVector,
+        UIntVector
     };
 
     struct MetaData
@@ -75,7 +79,11 @@ struct Property
                           std::is_same<T, std::array<int32_t, 2>>::value ||
                           std::is_same<T, std::array<double, 3>>::value ||
                           std::is_same<T, std::array<int32_t, 3>>::value ||
-                          std::is_same<T, std::array<double, 4>>::value,
+                          std::is_same<T, std::array<double, 4>>::value ||
+                          std::is_same<T, std::vector<double>>::value ||
+                          std::is_same<T, std::vector<int32_t>>::value ||
+                          std::is_same<T, std::vector<uint32_t>>::value ||
+                          std::is_same<T, std::vector<float>>::value,
                       "Invalid property type.");
     }
 
@@ -110,6 +118,14 @@ struct Property
             return Property::Type::Vec3i;
         if (std::is_same<T, std::array<double, 4>>::value)
             return Property::Type::Vec4d;
+        if (std::is_same<T, std::vector<double>>::value)
+            return Property::Type::DoubleVector;
+        if (std::is_same<T, std::vector<float>>::value)
+            return Property::Type::FloatVector;
+        if (std::is_same<T, std::vector<int32_t>>::value)
+            return Property::Type::IntVector;
+        if (std::is_same<T, std::vector<uint32_t>>::value)
+            return Property::Type::UIntVector;
         throw std::runtime_error("Could not match type for '" + name + "'");
     }
 
@@ -194,6 +210,14 @@ struct Property
     {
         assertValidType<T>();
         return _castValue<T>(_data);
+    }
+
+    template <typename T>
+    const T& getRef() const
+    {
+        assertValidType<T>();
+        _checkType<T>();
+        return linb::any_cast<const T&>(_data);
     }
 
     template <typename T>
@@ -349,6 +373,14 @@ public:
     {
         if (auto property = find(name))
             return property->get<T>();
+        throw std::runtime_error("No property found with name " + name);
+    }
+
+    template<typename T>
+    inline const T& getPropertyRef(const std::string& name) const
+    {
+        if(auto property = find(name))
+            return property->getRef<T>();
         throw std::runtime_error("No property found with name " + name);
     }
 

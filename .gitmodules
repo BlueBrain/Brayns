@@ -23,3 +23,11 @@
 	path = CMake/common
 	url = https://github.com/BlueBrain/CMake.git
 	branch = brayns_recursive_submodules
+[submodule "deps/pbrt-v3"]
+	path = deps/pbrt-v3
+	url = https://github.com/BlueBrain/pbrt-v3
+	branch = brayns_integration
+[submodule "deps/pbrt-v2"]
+	path = deps/pbrt-v2
+	url = https://github.com/BlueBrain/pbrt-v2
+	branch = brayns_integration

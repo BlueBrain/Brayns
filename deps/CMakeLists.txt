@@ -56,3 +56,13 @@ if(BRAYNS_VIEWER_ENABLED)
   target_link_libraries(imgui glfw ${OPENGL_gl_LIBRARY})
   target_include_directories(imgui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
 endif()
+
+# PBRT V3
+if(BRAYNS_PBRT_ENABLED)
+    add_subdirectory(pbrt-v3)
+endif()
+
+# PBRT V2
+if(BRAYNS_PBRTV2_ENABLED)
+    add_subdirectory(pbrt-v2)
+endif()

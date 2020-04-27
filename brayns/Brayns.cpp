@@ -295,6 +295,10 @@ private:
             engineName = "braynsOptixEngine";
         else if (string_utils::toLowercase(engineName) == "ospray")
             engineName = "braynsOSPRayEngine";
+        else if(string_utils::toLowercase(engineName) == "pbrt")
+            engineName = "braynsPBRTEngine";
+        else if(string_utils::toLowercase(engineName) == "pbrtv2")
+            engineName = "braynsPBRTV2Engine";
 
         _engine = _engineFactory.create(engineName);
         if (!_engine)

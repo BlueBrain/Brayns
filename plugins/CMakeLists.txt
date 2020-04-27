@@ -58,6 +58,14 @@ if(BRAYNS_CIRCUITRENDERER_ENABLED)
     add_subdirectory(CircuitRenderer)
 endif()
 
+if(BRAYNS_PBRTV2_ENABLED)
+    add_subdirectory(Fluorescence)
+endif()
+
+if(BRAYNS_PBRT_ENABLED OR BRAYNS_PBRTV2_ENABLED)
+    add_subdirectory(PBRVolumes)
+endif()
+
 add_subdirectory(Example)
 if (TARGET Brayns-all)
   add_dependencies(Brayns-all exampleBraynsPlugin)
