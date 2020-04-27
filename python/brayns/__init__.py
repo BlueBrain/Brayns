@@ -27,9 +27,11 @@
 from .async_client import AsyncClient
 from .client import Client
 from .plugins.circuit_explorer import CircuitExplorer
+from .plugins.fluorescence import Fluorescence
+from .plugins.pbr_volumes import PBRVolumes
 from .plugins.diffuse_tensor_imaging import DiffuseTensorImaging
 from .helpers.camera_path_handler import CameraPathHandler
 from .version import VERSION as __version__
 
 __all__ = ['AsyncClient', 'Client', 'CircuitExplorer', 'DiffuseTensorImaging', 'CameraPathHandler',
-           '__version__']
+           'Fluorescence', 'PBRVolumes', '__version__']

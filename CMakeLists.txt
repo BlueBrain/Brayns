@@ -115,11 +115,18 @@ else()
   common_find_package_disable(ospray)
 endif()
 
+# OPTIX Rendering engine
 option(BRAYNS_OPTIX_ENABLED "Activate OptiX rendering engine" OFF)
 option(BRAYNS_OPTIX_TESTS_ENABLED "Activate OptiX tests" OFF)
 if(BRAYNS_OPTIX_ENABLED)
   add_subdirectory(engines/optix)
 endif()
+
+# PBRT V3 Rendering engine
+option(BRAYNS_PBRT_ENABLED "Activate PBRT-v3 rendering engine" OFF)
+
+# PBRT V2 Rendering engine
+option(BRAYNS_PBRTV2_ENABLED "Activate PBRT-v2 rendering engine" OFF)
 
 # Mesh loading
 common_find_package(assimp SYSTEM)
@@ -205,6 +212,15 @@ if(BRAYNS_OSPRAY_ENABLED)
 else()
   message(WARNING "OSPRay not found or enabled. Brayns cannot work without an engine" )
 endif()
+
+if(BRAYNS_PBRT_ENABLED)
+    add_subdirectory(engines/pbrt)
+endif()
+
+if(BRAYNS_PBRTV2_ENABLED)
+    add_subdirectory(engines/pbrtv2)
+endif()
+
 add_subdirectory(plugins)
 add_subdirectory(brayns)
 if(BRAYNS_UNIT_TESTING_ENABLED)
