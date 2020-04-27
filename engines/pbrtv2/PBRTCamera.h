@@ -24,8 +24,8 @@
 #include <brayns/engine/Camera.h>
 
 #include <pbrtv2/core/camera.h>
-#include <pbrtv2/core/filter.h>
 #include <pbrtv2/core/film.h>
+#include <pbrtv2/core/filter.h>
 
 #include <string>
 

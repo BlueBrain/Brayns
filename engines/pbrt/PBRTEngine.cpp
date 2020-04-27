@@ -18,9 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "PBRTEngine.h"
 #include "PBRTCamera.h"
 #include "PBRTConstants.h"
-#include "PBRTEngine.h"
 #include "PBRTFrameBuffer.h"
 #include "PBRTRenderer.h"
 #include "PBRTScene.h"

@@ -21,8 +21,8 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <brayns/common/types.h>
 #include <brayns/common/mathTypes.h>
+#include <brayns/common/types.h>
 
 #include <pbrt/core/geometry.h>
 

@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PBRTMaterial.h"
 #include "PBRTModel.h"
+#include "PBRTMaterial.h"
 #include "util/PBRTSDFGeometryShape.h"
 #include "util/Util.h"
 

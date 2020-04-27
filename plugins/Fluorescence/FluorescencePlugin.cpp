@@ -310,6 +310,8 @@ RequestResponse FluorescencePlugin::_addFluorescentVolume(const AddFluorescentVo
                                                                         name));
     _api->getScene().markModified();
     _api->getEngine().triggerRender();
+
+    return resp;
 }
 
 RequestResponse
@@ -383,6 +385,8 @@ FluorescencePlugin::_addFluorescentAnnotatedVolume(const AddFluorescentAnnotated
                                                                         name));
     _api->getScene().markModified();
     _api->getEngine().triggerRender();
+
+    return resp;
 }
 
 RequestResponse
@@ -432,6 +436,8 @@ FluorescencePlugin::_addFluorescentBinaryVolume(const AddFluorescentBinaryVolume
                                                                         name));
     _api->getScene().markModified();
     _api->getEngine().triggerRender();
+
+    return resp;
 }
 
 RequestResponse
@@ -481,6 +487,8 @@ FluorescencePlugin::_addFluorescentGridVolumeFromFile(const AddFluorescentGridFr
                                                                         name));
     _api->getScene().markModified();
     _api->getEngine().triggerRender();
+
+    return resp;
 }
 
 RequestResponse FluorescencePlugin::_addFluorescentGridVolume(const AddFluorescentGridVolume& req)
@@ -539,6 +547,8 @@ RequestResponse FluorescencePlugin::_addFluorescentGridVolume(const AddFluoresce
                                                                         name));
     _api->getScene().markModified();
     _api->getEngine().triggerRender();
+
+    return resp;
 }
 
 RequestResponse
@@ -617,6 +627,8 @@ FluorescencePlugin::_addFluorescentScatteringVolume(const AddFluorescentScatteri
                                                                         name));
     _api->getScene().markModified();
     _api->getEngine().triggerRender();
+
+    return resp;
 }
 
 RequestResponse
@@ -705,6 +717,8 @@ FluorescencePlugin::_addFluorescentScatteringGridVolume(
                                                                         name));
     _api->getScene().markModified();
     _api->getEngine().triggerRender();
+
+    return resp;
 }
 
 RequestResponse
@@ -783,6 +797,8 @@ FluorescencePlugin::_addFluorescentScatteringGridVolumeFromFile(
                                                                         name));
     _api->getScene().markModified();
     _api->getEngine().triggerRender();
+
+    return resp;
 }
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int /*argc*/,

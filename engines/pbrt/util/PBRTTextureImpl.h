@@ -20,8 +20,8 @@
 #ifndef PBRTTEXTUREIMPL_H
 #define PBRTTEXTUREIMPL_H
 
-#include <brayns/common/types.h>
 #include <brayns/common/material/Texture2D.h>
+#include <brayns/common/types.h>
 
 #include <pbrt/core/mipmap.h>
 #include <pbrt/core/spectrum.h>

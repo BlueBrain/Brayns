@@ -18,9 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "PBRTScene.h"
 #include "PBRTMaterial.h"
 #include "PBRTModel.h"
-#include "PBRTScene.h"
 #include "util/Util.h"
 
 #include <brayns/common/light/Light.h>
@@ -32,8 +32,8 @@
 #include <pbrtv2/core/paramset.h>
 #include <pbrtv2/core/volume.h>
 
-#include <pbrtv2/lights/distant.h>
 #include <pbrtv2/lights/diffuse.h>
+#include <pbrtv2/lights/distant.h>
 #include <pbrtv2/lights/infinite.h>
 #include <pbrtv2/lights/spot.h>
 

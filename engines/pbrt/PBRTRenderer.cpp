@@ -18,10 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "PBRTRenderer.h"
 #include "PBRTConstants.h"
 #include "PBRTFrameBuffer.h"
 #include "PBRTModel.h"
-#include "PBRTRenderer.h"
 #include "PBRTScene.h"
 #include "util/PBRTDebugIntegrator.h"
 
