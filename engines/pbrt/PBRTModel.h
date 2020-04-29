@@ -95,7 +95,6 @@ private:
     static std::unordered_map<std::string, MediaFactory> _mediaFactories;
     // Media object
     std::shared_ptr<pbrt::Medium> _modelMedium {nullptr};
-    size_t _mediumMatId;
 
     // Model global transforms
     pbrt::Transform _objectToWorld;

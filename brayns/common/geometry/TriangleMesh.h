@@ -47,10 +47,10 @@ inline TriangleMesh createBox(const Vector3f& minCorner, const Vector3f& maxCorn
     result.vertices.emplace_back(maxCorner);
     result.vertices.emplace_back(minCorner.x, minCorner.y, maxCorner.z);
     result.vertices.emplace_back(maxCorner.x, minCorner.y, maxCorner.z);
-    result.normals.emplace_back(0.f, 0.f, -1.f);
-    result.normals.emplace_back(0.f, 0.f, -1.f);
-    result.normals.emplace_back(0.f, 0.f, -1.f);
-    result.normals.emplace_back(0.f, 0.f, -1.f);
+    result.normals.emplace_back(0.f, 0.f, 1.f);
+    result.normals.emplace_back(0.f, 0.f, 1.f);
+    result.normals.emplace_back(0.f, 0.f, 1.f);
+    result.normals.emplace_back(0.f, 0.f, 1.f);
     result.indices.emplace_back(0, 2, 1);
     result.indices.emplace_back(1, 2, 3);
     // Back face
@@ -58,10 +58,10 @@ inline TriangleMesh createBox(const Vector3f& minCorner, const Vector3f& maxCorn
     result.vertices.emplace_back(maxCorner.x, maxCorner.y, minCorner.z);
     result.vertices.emplace_back(minCorner);
     result.vertices.emplace_back(maxCorner.x, minCorner.y, minCorner.z);
-    result.normals.emplace_back(0.f, 0.f, 1.f);
-    result.normals.emplace_back(0.f, 0.f, 1.f);
-    result.normals.emplace_back(0.f, 0.f, 1.f);
-    result.normals.emplace_back(0.f, 0.f, 1.f);
+    result.normals.emplace_back(0.f, 0.f, -1.f);
+    result.normals.emplace_back(0.f, 0.f, -1.f);
+    result.normals.emplace_back(0.f, 0.f, -1.f);
+    result.normals.emplace_back(0.f, 0.f, -1.f);
     result.indices.emplace_back(4, 6, 5);
     result.indices.emplace_back(5, 6, 7);
     // Left face

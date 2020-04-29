@@ -53,8 +53,8 @@ class PBRVolumes:
         """
         params = dict()
         params["name"] = name
-        params["absorption"] = sig_s
-        params["scattering"] = sig_a
+        params["absorption"] = sig_a
+        params["scattering"] = sig_s
         params["scale"] = scale
         params["g"] = g
         params["Le"] = Le
@@ -84,8 +84,8 @@ class PBRVolumes:
         """
         params = dict()
         params["name"] = name
-        params["absorption"] = sig_s
-        params["scattering"] = sig_a
+        params["absorption"] = sig_a
+        params["scattering"] = sig_s
         params["scale"] = scale
         params["g"] = g
         params["Le"] = Le
@@ -116,8 +116,8 @@ class PBRVolumes:
         """
         params = dict()
         params["name"] = name
-        params["absorption"] = sig_s
-        params["scattering"] = sig_a
+        params["absorption"] = sig_a
+        params["scattering"] = sig_s
         params["scale"] = scale
         params["g"] = g
         params["Le"] = Le
@@ -154,8 +154,8 @@ class PBRVolumes:
         """
         params = dict()
         params["name"] = name
-        params["absorption"] = sig_s
-        params["scattering"] = sig_a
+        params["absorption"] = sig_a
+        params["scattering"] = sig_s
         params["scale"] = scale
         params["g"] = g
         params["Le"] = Le
