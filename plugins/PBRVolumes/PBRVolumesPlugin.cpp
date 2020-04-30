@@ -109,12 +109,11 @@ inline void addCommonParams(const Request& req, brayns::PropertyMap& metaObject)
 }
 
 template<typename Request>
-inline void addBoxParams(const Request& req, brayns::PropertyMap& metaObject)
+inline void createBoxMesh(const Request& req, brayns::Model& model)
 {
-    const std::array<double, 3> p0 = {req.p0[0], req.p0[1], req.p0[2]};
-    metaObject.setProperty({"p0", p0});
-    const std::array<double, 3> p1 = {req.p1[0], req.p1[1], req.p1[2]};
-    metaObject.setProperty({"p1", p1});
+    const brayns::Vector3f min (req.p0[0], req.p0[1], req.p0[2]);
+    const brayns::Vector3f max (req.p1[0], req.p1[1], req.p1[2]);
+    model.getTriangleMeshes()[brayns::NO_MATERIAL] = brayns::createBox(min, max);
 }
 
 PBRVolumesPlugin::PBRVolumesPlugin()
@@ -176,9 +175,11 @@ AddVolumeResponse PBRVolumesPlugin::_addHomogeneusVolume(const AddHomogeneusVolu
     metaObject.setProperty({"volume_type", std::string("homogeneus")});
     metaObject.setProperty({"density", static_cast<double>(req.density)});
     addCommonParams(req, metaObject);
-    addBoxParams(req, metaObject);
 
     auto modelPtr = _api->getScene().createModel();
+
+    createBoxMesh(req, *modelPtr);
+
     modelPtr->addMetaObject(brayns::NO_MATERIAL, metaObject);
     const std::string name = req.name.empty()? "Volume" : req.name;
     _api->getScene().addModel(std::make_shared<brayns::ModelDescriptor>(std::move(modelPtr),
@@ -243,9 +244,11 @@ AddVolumeResponse PBRVolumesPlugin::_addHeterogeneusVolume(const AddHeterogeneus
     metaObject.setProperty({"min_density", static_cast<double>(req.minDensity)});
     metaObject.setProperty({"max_density", static_cast<double>(req.maxDensity)});
     addCommonParams(req, metaObject);
-    addBoxParams(req, metaObject);
 
     auto modelPtr = _api->getScene().createModel();
+
+    createBoxMesh(req, *modelPtr);
+
     modelPtr->addMetaObject(brayns::NO_MATERIAL, metaObject);
     const std::string name = req.name.empty()? "Volume" : req.name;
     _api->getScene().addModel(std::make_shared<brayns::ModelDescriptor>(std::move(modelPtr),
@@ -294,9 +297,11 @@ AddVolumeResponse PBRVolumesPlugin::_addGridVolume(const AddGridVolume& req)
     metaObject.setProperty({"ny", req.ny});
     metaObject.setProperty({"nz", req.nz});
     addCommonParams(req, metaObject);
-    addBoxParams(req, metaObject);
 
     auto modelPtr = _api->getScene().createModel();
+
+    createBoxMesh(req, *modelPtr);
+
     modelPtr->addMetaObject(brayns::NO_MATERIAL, metaObject);
     const std::string name = req.name.empty()? "Volume" : req.name;
     _api->getScene().addModel(std::make_shared<brayns::ModelDescriptor>(std::move(modelPtr),

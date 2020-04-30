@@ -820,7 +820,7 @@ void PBRTMaterial::commit(const std::string& renderer)
     _renderer = renderer;
 
     // If we cannot commit it, it will result on a crash
-    auto matClass = PBRTMaterialClass::MATERIAL_PLASTIC;
+    auto matClass = PBRTMaterialClass::MATERIAL_MATTE;
     if(hasProperty("materialClass"))
         matClass = static_cast<PBRTMaterialClass>
                                 (getProperty<int>("materialClass"));
@@ -836,9 +836,9 @@ void PBRTMaterial::commit(const std::string& renderer)
     {
         BRAYNS_WARN << "PBRT: material " << materialClassToString(matClass)
                     << " unsupported for integrator "
-                    << _renderer << ", switching to plastic" << std::endl;
+                    << _renderer << ", switching to matte" << std::endl;
 
-        matClass = PBRTMaterialClass::MATERIAL_PLASTIC;
+        matClass = PBRTMaterialClass::MATERIAL_MATTE;
     }
 
     pbrt::Material* rawMat = _instantiateMaterial(matClass);

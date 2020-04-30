@@ -45,7 +45,7 @@ pbrt::Medium* HomogeneusMediumFactory(pbrt::Transform*, const PropertyMap& meta)
     const auto g = static_cast<pbrt::Float>(meta.getProperty<double>("g", 0.0));
     const auto sigADArr = meta.getProperty<std::array<double, 3>>("sig_a",
                                                                   {.0011f, .0024f, .014f});
-    const auto sigSDArr = meta.getProperty<std::array<double, 3>>("sig_a",
+    const auto sigSDArr = meta.getProperty<std::array<double, 3>>("sig_s",
                                                                   {2.55f, 3.21f, 3.77f});
     const auto density = static_cast<pbrt::Float>(meta.getProperty<double>("density", 1.0));
     const auto scale = static_cast<pbrt::Float>(meta.getProperty<double>("scale", 1.0));
@@ -55,7 +55,6 @@ pbrt::Medium* HomogeneusMediumFactory(pbrt::Transform*, const PropertyMap& meta)
     const pbrt::Float sigSRGB[3] = {static_cast<float>(sigSDArr[0]),
                                     static_cast<float>(sigSDArr[1]),
                                     static_cast<float>(sigSDArr[2])};
-
 
     const auto sigASpec = (pbrt::Spectrum::FromRGB(sigARGB) * scale * density);
     const auto sigSSpec = (pbrt::Spectrum::FromRGB(sigSRGB) * scale * density);
@@ -68,7 +67,7 @@ pbrt::Medium* HeterogeneusMediumFactory(pbrt::Transform*, const PropertyMap& met
     const auto g = static_cast<pbrt::Float>(meta.getProperty<double>("g", 0.0));
     const auto sigADArr = meta.getProperty<std::array<double, 3>>("sig_a",
                                                                   {.0011f, .0024f, .014f});
-    const auto sigSDArr = meta.getProperty<std::array<double, 3>>("sig_a",
+    const auto sigSDArr = meta.getProperty<std::array<double, 3>>("sig_s",
                                                                   {2.55f, 3.21f, 3.77f});
     const auto minDensity = static_cast<pbrt::Float>(meta.getProperty<double>("min_density", 1.0));
     const auto maxDensity = static_cast<pbrt::Float>(meta.getProperty<double>("max_density", 1.0));
@@ -105,7 +104,7 @@ pbrt::Medium* GridMediumFactory(pbrt::Transform* otw, const PropertyMap& meta)
     const auto g = static_cast<pbrt::Float>(meta.getProperty<double>("g", 0.0));
     const auto sigADArr = meta.getProperty<std::array<double, 3>>("sig_a",
                                                                   {.0011f, .0024f, .014f});
-    const auto sigSDArr = meta.getProperty<std::array<double, 3>>("sig_a",
+    const auto sigSDArr = meta.getProperty<std::array<double, 3>>("sig_s",
                                                                   {2.55f, 3.21f, 3.77f});
 
     const auto scale = static_cast<pbrt::Float>(meta.getProperty<double>("scale", 1.0));
@@ -132,7 +131,6 @@ std::unordered_map<std::string, PBRTModel::MediaFactory> PBRTModel::_mediaFactor
 PBRTModel::PBRTModel(AnimationParameters& animationParameters,
                      VolumeParameters& volumeParameters)
     : Model(animationParameters, volumeParameters)
-    , _mediumMatId(brayns::NO_MATERIAL)
 {
 }
 
@@ -213,7 +211,7 @@ MaterialPtr PBRTModel::createMaterialImpl(const PropertyMap& properties)
 bool PBRTModel::materialsDirty() const
 {
     for(const auto& m : getMaterials())
-        if(m.second->isModified())
+        if(m.first != NO_MATERIAL && m.second->isModified())
             return true;
 
     return false;
@@ -223,11 +221,14 @@ void PBRTModel::_commitMaterials(const std::string& renderer)
 {
     for(auto m : _materials)
     {
-        PBRTMaterial* pbrtM = static_cast<PBRTMaterial*>(m.second.get());
-        if(!pbrtM)
-            continue;
+        if(m.first != NO_MATERIAL)
+        {
+            PBRTMaterial* pbrtM = static_cast<PBRTMaterial*>(m.second.get());
+            if(!pbrtM)
+                continue;
 
-        pbrtM->commit(renderer);
+            pbrtM->commit(renderer);
+        }
     }
 }
 
@@ -243,7 +244,7 @@ PBRTModel::_createSpheres(pbrt::Transform* otw, pbrt::Transform* wto)
     for(const auto& sphereList : getSpheres())
     {
         std::shared_ptr<pbrt::Material> pbrtMat = nullptr;
-        if(sphereList.first != NO_MATERIAL)
+        if(sphereList.first != NO_MATERIAL && !_modelMedium)
         {
             const auto& mat = getMaterial(sphereList.first);
             PBRTMaterial& impl = static_cast<PBRTMaterial&>(*mat.get());
@@ -300,7 +301,7 @@ PBRTModel::_createCylinders(pbrt::Transform* otw, pbrt::Transform* wto)
     for(const auto& cylinderList : getCylinders())
     {
         std::shared_ptr<pbrt::Material> pbrtMaterial {nullptr};
-        if(cylinderList.first != NO_MATERIAL)
+        if(cylinderList.first != NO_MATERIAL && !_modelMedium)
         {
             const auto& mat = getMaterial(cylinderList.first);
             PBRTMaterial& impl = static_cast<PBRTMaterial&>(*mat.get());
@@ -380,7 +381,7 @@ PBRTModel::_createCones(pbrt::Transform* otw, pbrt::Transform* wto)
     for(const auto& coneList : getCones())
     {
         std::shared_ptr<pbrt::Material> pbrtMaterial {nullptr};
-        if(coneList.first != NO_MATERIAL)
+        if(coneList.first != NO_MATERIAL && !_modelMedium)
         {
             const auto& mat = getMaterial(coneList.first);
             PBRTMaterial& impl = static_cast<PBRTMaterial&>(*mat.get());
@@ -447,12 +448,13 @@ PBRTModel::_createMeshes(pbrt::Transform* otw, pbrt::Transform* wto)
     Primitives result;
 
     const pbrt::MediumInterface dummyMI (_modelMedium.get(), nullptr);
+
     const std::shared_ptr<pbrt::AreaLight> dummyAL;
 
     for(const auto& meshList : getTriangleMeshes())
     {
         std::shared_ptr<pbrt::Material> pbrtMaterial {nullptr};
-        if(meshList.first != NO_MATERIAL)
+        if(meshList.first != NO_MATERIAL && !_modelMedium)
         {
             const auto& mat = getMaterial(meshList.first);
             PBRTMaterial& impl = static_cast<PBRTMaterial&>(*mat.get());
@@ -530,7 +532,7 @@ PBRTModel::_createSDFGeometries(pbrt::Transform* otw, pbrt::Transform* wto)
     for(const auto& geometryList : getSDFGeometryData().geometryIndices)
     {
         std::shared_ptr<pbrt::Material> pbrtMaterial {nullptr};
-        if(geometryList.first != NO_MATERIAL)
+        if(geometryList.first != NO_MATERIAL && !_modelMedium)
         {
             const auto& mat = getMaterial(geometryList.first);
             PBRTMaterial& impl = static_cast<PBRTMaterial&>(*mat.get());
@@ -604,27 +606,6 @@ void PBRTModel::_parseMedium(pbrt::Transform *otw)
             {
                 _modelMedium.reset(mediaPtr);
                 foundValid = true;
-            }
-
-            // Create a box shape if the minimum and maximum bounds are present
-            // and we sucessfully created the medium
-            if(foundValid && metaObject.hasProperty("p0") && metaObject.hasProperty("p1"))
-            {
-                const auto p0arr = metaObject.getProperty<std::array<double, 3>>("p0");
-                const auto p1arr = metaObject.getProperty<std::array<double, 3>>("p1");
-                const Vector3f p0 (static_cast<float>(p0arr[0]),
-                                   static_cast<float>(p0arr[1]),
-                                   static_cast<float>(p0arr[2]));
-                const Vector3f p1 (static_cast<float>(p1arr[0]),
-                                   static_cast<float>(p1arr[1]),
-                                   static_cast<float>(p1arr[2]));
-                const auto meshShape = brayns::createBox(p0, p1);
-                if(_mediumMatId == brayns::NO_MATERIAL)
-                {
-                    _mediumMatId = _materials.size();
-                    createMaterial(_mediumMatId, "medium_material");
-                }
-                _geometries->_triangleMeshes[_mediumMatId] = meshShape;
             }
         }
     }
