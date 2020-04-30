@@ -59,7 +59,7 @@ pbrt::VolumeRegion* HomogeneusVolumeFactory(pbrt::Transform* otw, const Property
     const auto g = static_cast<float>(meta.getProperty<double>("g", 0.0));
     const auto sigADArr = meta.getProperty<std::array<double, 3>>("sig_a",
                                                                   {.0011f, .0024f, .014f});
-    const auto sigSDArr = meta.getProperty<std::array<double, 3>>("sig_a",
+    const auto sigSDArr = meta.getProperty<std::array<double, 3>>("sig_s",
                                                                   {2.55f, 3.21f, 3.77f});
     const auto density = static_cast<float>(meta.getProperty<double>("density", 1.0));
     const auto LeDArr = meta.getProperty<std::array<double, 3>>("Le", {1., 1., 1.});
@@ -95,7 +95,7 @@ pbrt::VolumeRegion* HeterogeneusVolumeFactory(pbrt::Transform* otw, const Proper
     const auto g = static_cast<float>(meta.getProperty<double>("g", 0.0));
     const auto sigADArr = meta.getProperty<std::array<double, 3>>("sig_a",
                                                                   {.0011f, .0024f, .014f});
-    const auto sigSDArr = meta.getProperty<std::array<double, 3>>("sig_a",
+    const auto sigSDArr = meta.getProperty<std::array<double, 3>>("sig_s",
                                                                   {2.55f, 3.21f, 3.77f});
     const auto minDensity = static_cast<float>(meta.getProperty<double>("min_density", 0.0));
     const auto maxDensity = static_cast<float>(meta.getProperty<double>("max_density", 1.0));
@@ -132,7 +132,7 @@ pbrt::VolumeRegion* GridVolumeFactory(pbrt::Transform* otw, const PropertyMap& m
     const auto g = static_cast<float>(meta.getProperty<double>("g", 0.0));
     const auto sigADArr = meta.getProperty<std::array<double, 3>>("sig_a",
                                                                   {.0011f, .0024f, .014f});
-    const auto sigSDArr = meta.getProperty<std::array<double, 3>>("sig_a",
+    const auto sigSDArr = meta.getProperty<std::array<double, 3>>("sig_s",
                                                                   {2.55f, 3.21f, 3.77f});
     const auto density = meta.getProperty<std::vector<float>>("density", std::vector<float>());
     const auto nx = meta.getProperty<int>("nx", 0);

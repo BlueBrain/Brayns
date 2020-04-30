@@ -719,7 +719,7 @@ pbrt::Material* PBRTMaterial::_instantiateMaterial(const PBRTMaterialClass matCl
 void PBRTMaterial::commit()
 {
     // If we cannot commit it, it will result on a crash
-    auto matClass = PBRTMaterialClass::MATERIAL_PLASTIC;
+    auto matClass = PBRTMaterialClass::MATERIAL_MATTE;
     if(hasProperty("materialClass"))
         matClass = static_cast<PBRTMaterialClass>
                                 (getProperty<int>("materialClass"));
