@@ -128,7 +128,7 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
     -DBUILD_PYTHON_BINDINGS=OFF \
-    -DEXTLIB_FROM_SUBMODULES=ON \
+    -DEXTLIB_FROM_SUBMODULES=ON || exit 0 \
  && ninja mvd-tool perceptualdiff Brayns-install Brayns-tests \
  && rm -rf ${DIST_PATH}/include ${DIST_PATH}/cmake ${DIST_PATH}/share
 
