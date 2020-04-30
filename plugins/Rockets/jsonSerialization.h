@@ -161,6 +161,34 @@ struct ExitLaterSchedule
     uint32_t minutes;
 };
 
+struct RequestMaterial
+{
+    uint32_t modelId;
+    size_t materialId;
+};
+
+struct MaterialInfo
+{
+    int error;
+    std::string message;
+    PropertyMap materialProperties;
+};
+
+struct ModifyMaterial
+{
+    uint32_t modelId;
+    size_t materialId;
+    int error;
+    std::string message;
+    PropertyMap materialProperties;
+};
+
+struct ModifyMaterialResult
+{
+    int error;
+    std::string message;
+};
+
 } // namespace brayns
 
 STATICJSON_DECLARE_ENUM(brayns::GeometryQuality,
@@ -620,6 +648,38 @@ inline void init(brayns::ExitLaterSchedule* a, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
+inline void init(brayns::RequestMaterial* a, ObjectHandler* h)
+{
+    h->add_property("modelId", &a->modelId);
+    h->add_property("materialId", &a->materialId);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::MaterialInfo* a, ObjectHandler* h)
+{
+    h->add_property("error", &a->error);
+    h->add_property("message", &a->message);
+    h->add_property("materialProperties", &a->materialProperties);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::ModifyMaterial* a, ObjectHandler* h)
+{
+    h->add_property("modelId", &a->modelId);
+    h->add_property("materialId", &a->materialId);
+    h->add_property("error", &a->error);
+    h->add_property("message", &a->message);
+    h->add_property("materialProperties", &a->materialProperties);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::ModifyMaterialResult* a, ObjectHandler* h)
+{
+    h->add_property("error", &a->error);
+    h->add_property("message", &a->message);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
 } // namespace staticjson
 
 // for rockets::jsonrpc
@@ -659,6 +719,12 @@ inline std::string toJSONReplacePropertyMap(
         brayns::string_utils::replaceFirstOccurrence(jsonOriginal, key + ":{}",
                                                      propertiesJson);
     return result;
+}
+
+template<>
+inline std::string  to_json(const brayns::MaterialInfo& mat)
+{
+    return toJSONReplacePropertyMap(mat, "materialProperties", mat.materialProperties);
 }
 
 template <>
@@ -764,5 +830,16 @@ inline bool from_json(brayns::RPCLight& light, const std::string& json)
     std::tie<bool, brayns::PropertyMap>(success, propertyMap) =
         fromJSONWithPropertyMap(light, json, "properties");
     light.properties = propertyMap;
+    return success;
+}
+
+template<>
+inline bool from_json(brayns::ModifyMaterial& mat, const std::string& json)
+{
+    bool success;
+    brayns::PropertyMap propertyMap;
+    std::tie<bool, brayns::PropertyMap>(success, propertyMap) =
+        fromJSONWithPropertyMap(mat, json, "materialProperties");
+    mat.materialProperties = propertyMap;
     return success;
 }

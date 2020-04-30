@@ -69,6 +69,10 @@ public:
                               const MorphologyColorScheme& mScheme);
 
     CircuitSchemeData& getSchemeData();
+    const std::unordered_map<size_t, MorphologyMap>& getMapping() const
+    {
+        return _cellToRenderableMap;
+    }
 
 private:
     size_t _computeMaterialId(const CircuitColorScheme scheme,

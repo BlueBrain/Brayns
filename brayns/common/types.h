@@ -59,6 +59,7 @@ namespace brayns
 {
 // Forward declarations
 class Brayns;
+class PropertyMap;
 
 class ActionInterface;
 using ActionInterfacePtr = std::shared_ptr<ActionInterface>;
@@ -130,6 +131,8 @@ using VolumePtr = std::shared_ptr<Volume>;
 using SharedDataVolumePtr = std::shared_ptr<SharedDataVolume>;
 using BrickedVolumePtr = std::shared_ptr<BrickedVolume>;
 using Volumes = std::vector<VolumePtr>;
+
+using MetaObjects = std::map<size_t, std::vector<PropertyMap>>;
 
 class Texture2D;
 using Texture2DPtr = std::shared_ptr<Texture2D>;

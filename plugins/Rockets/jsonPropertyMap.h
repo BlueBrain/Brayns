@@ -132,6 +132,50 @@ void addDefaultValue(rapidjson::Document& document,
     addDefaultValueArray(document, allocator, value);
 }
 
+template<>
+void addDefaultValue(rapidjson::Document& document,
+                     rapidjson::Document::AllocatorType& allocator,
+                     const std::vector<double>& value)
+{
+    rapidjson::Value arr(rapidjson::kArrayType);
+    for (const auto v : value)
+        arr.PushBack(v, allocator);
+    document.AddMember(rapidjson::StringRef("default"), arr, allocator);
+}
+
+template<>
+void addDefaultValue(rapidjson::Document& document,
+                     rapidjson::Document::AllocatorType& allocator,
+                     const std::vector<float>& value)
+{
+    rapidjson::Value arr(rapidjson::kArrayType);
+    for (const auto v : value)
+        arr.PushBack(v, allocator);
+    document.AddMember(rapidjson::StringRef("default"), arr, allocator);
+}
+
+template<>
+void addDefaultValue(rapidjson::Document& document,
+                     rapidjson::Document::AllocatorType& allocator,
+                     const std::vector<int32_t>& value)
+{
+    rapidjson::Value arr(rapidjson::kArrayType);
+    for (const auto v : value)
+        arr.PushBack(v, allocator);
+    document.AddMember(rapidjson::StringRef("default"), arr, allocator);
+}
+
+template<>
+void addDefaultValue(rapidjson::Document& document,
+                     rapidjson::Document::AllocatorType& allocator,
+                     const std::vector<uint32_t>& value)
+{
+    rapidjson::Value arr(rapidjson::kArrayType);
+    for (const auto v : value)
+        arr.PushBack(v, allocator);
+    document.AddMember(rapidjson::StringRef("default"), arr, allocator);
+}
+
 // Create JSON schema for given property and add it to the given properties
 // parent.
 template <typename T>
@@ -250,6 +294,146 @@ void _addPropertySchema<std::string>(
                          jsonSchema, allocator);
 }
 
+template<>
+void _addPropertySchema<std::vector<double>>(
+    const Property& prop, rapidjson::Value& properties,
+    rapidjson::Document::AllocatorType& allocator)
+{
+    using namespace rapidjson;
+
+    const bool isEnum = !prop.enums.empty();
+    auto value = prop.get<std::vector<double>>();
+
+    Document jsonSchema;
+
+    if (isEnum)
+    {
+        jsonSchema.SetObject();
+        jsonSchema.AddMember(StringRef("type"), StringRef("DoubleVector"), allocator);
+        Value enumerations(kArrayType);
+        for (const auto& name : prop.enums)
+            enumerations.PushBack(StringRef(name.data(), name.size()),
+                                  allocator);
+        jsonSchema.AddMember(StringRef("enum"), enumerations, allocator);
+    }
+    else
+    {
+        jsonSchema = staticjson::export_json_schema(&value, &allocator);
+    }
+
+    addDefaultValue(jsonSchema, allocator, value);
+    jsonSchema.AddMember(StringRef("readOnly"), prop.readOnly(), allocator);
+    jsonSchema.AddMember(StringRef("title"),
+                         StringRef(prop.metaData.label.c_str()), allocator);
+    properties.AddMember(make_json_string(prop.name, allocator).Move(),
+                         jsonSchema, allocator);
+}
+
+template<>
+void _addPropertySchema<std::vector<float>>(
+    const Property& prop, rapidjson::Value& properties,
+    rapidjson::Document::AllocatorType& allocator)
+{
+    using namespace rapidjson;
+
+    const bool isEnum = !prop.enums.empty();
+    auto value = prop.get<std::vector<float>>();
+
+    Document jsonSchema;
+
+    if (isEnum)
+    {
+        jsonSchema.SetObject();
+        jsonSchema.AddMember(StringRef("type"), StringRef("FloatVector"), allocator);
+        Value enumerations(kArrayType);
+        for (const auto& name : prop.enums)
+            enumerations.PushBack(StringRef(name.data(), name.size()),
+                                  allocator);
+        jsonSchema.AddMember(StringRef("enum"), enumerations, allocator);
+    }
+    else
+    {
+        jsonSchema = staticjson::export_json_schema(&value, &allocator);
+    }
+
+    addDefaultValue(jsonSchema, allocator, value);
+    jsonSchema.AddMember(StringRef("readOnly"), prop.readOnly(), allocator);
+    jsonSchema.AddMember(StringRef("title"),
+                         StringRef(prop.metaData.label.c_str()), allocator);
+    properties.AddMember(make_json_string(prop.name, allocator).Move(),
+                         jsonSchema, allocator);
+}
+
+template<>
+void _addPropertySchema<std::vector<int32_t>>(
+    const Property& prop, rapidjson::Value& properties,
+    rapidjson::Document::AllocatorType& allocator)
+{
+    using namespace rapidjson;
+
+    const bool isEnum = !prop.enums.empty();
+    auto value = prop.get<std::vector<int32_t>>();
+
+    Document jsonSchema;
+
+    if (isEnum)
+    {
+        jsonSchema.SetObject();
+        jsonSchema.AddMember(StringRef("type"), StringRef("IntVector"), allocator);
+        Value enumerations(kArrayType);
+        for (const auto& name : prop.enums)
+            enumerations.PushBack(StringRef(name.data(), name.size()),
+                                  allocator);
+        jsonSchema.AddMember(StringRef("enum"), enumerations, allocator);
+    }
+    else
+    {
+        jsonSchema = staticjson::export_json_schema(&value, &allocator);
+    }
+
+    addDefaultValue(jsonSchema, allocator, value);
+    jsonSchema.AddMember(StringRef("readOnly"), prop.readOnly(), allocator);
+    jsonSchema.AddMember(StringRef("title"),
+                         StringRef(prop.metaData.label.c_str()), allocator);
+    properties.AddMember(make_json_string(prop.name, allocator).Move(),
+                         jsonSchema, allocator);
+}
+
+template<>
+void _addPropertySchema<std::vector<uint32_t>>(
+    const Property& prop, rapidjson::Value& properties,
+    rapidjson::Document::AllocatorType& allocator)
+{
+    using namespace rapidjson;
+
+    const bool isEnum = !prop.enums.empty();
+    auto value = prop.get<std::vector<uint32_t>>();
+
+    Document jsonSchema;
+
+    if (isEnum)
+    {
+        jsonSchema.SetObject();
+        jsonSchema.AddMember(StringRef("type"), StringRef("UIntVector"), allocator);
+        Value enumerations(kArrayType);
+        for (const auto& name : prop.enums)
+            enumerations.PushBack(StringRef(name.data(), name.size()),
+                                  allocator);
+        jsonSchema.AddMember(StringRef("enum"), enumerations, allocator);
+    }
+    else
+    {
+        jsonSchema = staticjson::export_json_schema(&value, &allocator);
+    }
+
+    addDefaultValue(jsonSchema, allocator, value);
+    jsonSchema.AddMember(StringRef("readOnly"), prop.readOnly(), allocator);
+    jsonSchema.AddMember(StringRef("title"),
+                         StringRef(prop.metaData.label.c_str()), allocator);
+    properties.AddMember(make_json_string(prop.name, allocator).Move(),
+                         jsonSchema, allocator);
+}
+
 // Create JSON schema for given array property and add it to the given
 // properties parent.
 template <typename T, int S>
@@ -274,6 +458,19 @@ void _arrayPropertyToJson(rapidjson::Document& document, Property& prop)
     rapidjson::Value array(rapidjson::kArrayType);
     for (const auto& val : prop.get<T>())
         array.PushBack(val, document.GetAllocator());
+
+    document.AddMember(
+        make_json_string(prop.name, document.GetAllocator()).Move(), array,
+        document.GetAllocator());
+}
+
+template <typename T>
+void _vectorPropertyToJson(rapidjson::Document& document, Property& prop)
+{
+    rapidjson::Value array(rapidjson::kArrayType);
+    const auto vec = prop.get<std::vector<T>>();
+    for(const auto& v : vec)
+        array.PushBack(v, document.GetAllocator());
 
     document.AddMember(
         make_json_string(prop.name, document.GetAllocator()).Move(), array,
@@ -324,6 +521,18 @@ void _addPropertyMapSchema(const PropertyMap& propertyMap,
             break;
         case Property::Type::Vec4d:
             _addArrayPropertySchema<double, 4>(*prop, properties, allocator);
+            break;
+        case Property::Type::DoubleVector:
+            _addPropertySchema<std::vector<double>>(*prop, properties, allocator);
+            break;
+        case Property::Type::FloatVector:
+            _addPropertySchema<std::vector<float>>(*prop, properties, allocator);
+            break;
+        case Property::Type::IntVector:
+            _addPropertySchema<std::vector<int32_t>>(*prop, properties, allocator);
+            break;
+        case Property::Type::UIntVector:
+            _addPropertySchema<std::vector<uint32_t>>(*prop, properties, allocator);
             break;
         }
     }
@@ -571,6 +780,18 @@ inline std::string to_json(const brayns::PropertyMap& obj)
             break;
         case Property::Type::Vec4d:
             brayns::_arrayPropertyToJson<std::array<double, 4>>(json, *prop);
+            break;
+        case Property::Type::DoubleVector:
+            brayns::_vectorPropertyToJson<double>(json, *prop);
+            break;
+        case Property::Type::FloatVector:
+            brayns::_vectorPropertyToJson<float>(json, *prop);
+            break;
+        case Property::Type::IntVector:
+            brayns::_vectorPropertyToJson<int32_t>(json, *prop);
+            break;
+        case Property::Type::UIntVector:
+            brayns::_vectorPropertyToJson<uint32_t>(json, *prop);
             break;
         }
     }

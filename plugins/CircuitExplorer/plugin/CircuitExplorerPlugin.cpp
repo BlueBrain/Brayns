@@ -60,6 +60,7 @@
 #include <random>
 #include <regex>
 #include <unistd.h>
+#include <unordered_set>
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -1673,163 +1674,121 @@ MessageResult CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTracing
     }
 
     auto modelDescriptor = _api->getScene().getModel(static_cast<size_t>(payload.modelId));
-    if(modelDescriptor)
-    {
-        const brion::BlueConfig blueConfiguration (modelDescriptor->getPath());
-        const brain::Circuit circuit (blueConfiguration);
-
-        // Parse loaded targets
-        const brayns::ModelMetadata& metaData = modelDescriptor->getMetadata();
-        auto targetsIt = metaData.find("Targets");
-        std::vector<std::string> targets;
-        if(targetsIt != metaData.end())
-        {
-            const std::string& targetsString = targetsIt->second;
-            if(!targetsString.empty())
-            {
-                if(targetsString.find(',') == std::string::npos)
-                    targets.push_back(targetsString);
-                else
-                {
-                    targets = _splitString(targetsString, ',');
-                }
-            }
-        }
-
-        auto densityIt = metaData.find("Density");
-        const double density = std::stod(densityIt->second);
-        auto randomIt = metaData.find("RandomSeed");
-        const double randomSeed = std::stod(randomIt->second);
-
-        auto gidsMetaIt = metaData.find("GIDs");
-        const std::string& gidsStr = gidsMetaIt->second;
-
-        brion::GIDSet allGIDs;
-
-        if(!gidsStr.empty())
-        {
-            std::vector<std::string> tempStrGids = _splitString(gidsStr, ',');
-            for(const auto& gidStrTok : tempStrGids)
-            {
-                allGIDs.insert(static_cast<uint32_t>(std::stoul(gidStrTok)));
-            }
-        }
-        else
-        {
-            // Gather all GIDs from loaded targets
-            if(!targets.empty())
-            {
-                for(const auto& targetName : targets)
-                {
-                    if(density < 1.0)
-                    {
-                        brion::GIDSet targetGids = circuit.getRandomGIDs(density, targetName, randomSeed);
-                        allGIDs.insert(targetGids.begin(), targetGids.end());
-                    }
-                    else
-                    {
-                        brion::GIDSet targetGids = circuit.getGIDs(targetName);
-                        allGIDs.insert(targetGids.begin(), targetGids.end());
-                    }
-
-                }
-            }
-            else if(density < 1.0)
-                allGIDs = circuit.getRandomGIDs(density, "", randomSeed);
-            else
-                allGIDs = circuit.getGIDs();
-        }
-
-        // Map GIDs to material IDs
-        std::unordered_map<uint32_t, size_t> gidMaterialMap;
-        auto materials = modelDescriptor->getModel().getMaterials();
-        auto itGids = allGIDs.begin();
-        auto itMats = materials.begin();
-        for(; itMats != materials.end(); ++itMats, ++itGids)
-        {
-            gidMaterialMap[*itGids] = itMats->first;
-        }
-
-        const size_t totalSynapses = payload.targetCellGIDs.size();
-        result.message = "Tracing returned "
-                         + std::to_string(totalSynapses)
-                         + " connected cells";
-
-        // If there is any GID, modify the scene materials
-        if(totalSynapses > 0)
-        {
-            // Enable CircuitExplorer extra parameters on materials
-            MaterialExtraAttributes mea;
-            mea.modelId = payload.modelId;
-            _setMaterialExtraAttributes(mea);
-
-            // Reset all cells to default color
-            MaterialRangeDescriptor mrd;
-            mrd.modelId = payload.modelId;
-            mrd.opacity = static_cast<float>(payload.nonConnectedCellsColor[3]);
-            mrd.diffuseColor =
-            {
-                static_cast<float>(payload.nonConnectedCellsColor[0]),
-                static_cast<float>(payload.nonConnectedCellsColor[1]),
-                static_cast<float>(payload.nonConnectedCellsColor[2])
-            };
-
-            mrd.specularColor = {0.f, 0.f, 0.f};
-            mrd.specularExponent = 0.f;
-            mrd.glossiness = 0.f;
-            mrd.shadingMode = static_cast<int>(MaterialShadingMode::diffuse_transparency);
-            _setMaterialRange(mrd);
-
-            // Mark connections
-            MaterialRangeDescriptor connectedMrd = mrd;
-            mrd.diffuseColor =
-            {
-                static_cast<float>(payload.connectedCellsColor[0]),
-                static_cast<float>(payload.connectedCellsColor[1]),
-                static_cast<float>(payload.connectedCellsColor[2])
-            };
-            mrd.opacity = 1.0f;
-            mrd.modelId = payload.modelId;
-            mrd.materialIds.reserve(payload.targetCellGIDs.size());
-            for(auto gid : payload.targetCellGIDs)
-            {
-                auto it = gidMaterialMap.find(gid);
-                if(it != gidMaterialMap.end())
-                    mrd.materialIds.push_back(it->second);
-            }
-            _setMaterialRange(connectedMrd);
-
-            // Mark sources
-            const std::set<uint32_t> gidsSet (payload.cellGIDs.begin(), payload.cellGIDs.end());
-            MaterialRangeDescriptor sourcesMrd = mrd;
-            mrd.diffuseColor =
-            {
-                static_cast<float>(payload.sourceCellColor[0]),
-                static_cast<float>(payload.sourceCellColor[1]),
-                static_cast<float>(payload.sourceCellColor[2])
-            };
-            mrd.opacity = 1.f;
-            mrd.modelId = payload.modelId;
-            mrd.materialIds.reserve(gidsSet.size());
-            for(auto source : gidsSet)
-            {
-                auto it = gidMaterialMap.find(source);
-                if(it != gidMaterialMap.end())
-                    mrd.materialIds.push_back(it->second);
-            }
-            _setMaterialRange(sourcesMrd);
-
-            _api->getScene().markModified();
-            _api->getEngine().triggerRender();
-            //_dirty = true;
-        }
-    }
-    else
+    if(!modelDescriptor)
     {
         result.error = 5;
         result.message = "The given model ID does not correspond "
                          "to any existing scene model";
+        return result;
     }
+
+    auto cellMapperIt = this->_circuitMappers.find(modelDescriptor->getPath());
+    if(cellMapperIt == _circuitMappers.end())
+    {
+        result.error = 6;
+        result.message = "There is not cell mapping information for the given circuit";
+        return result;
+    }
+
+    const auto& mapper = cellMapperIt->second;
+    const auto& cellMaterialMap = mapper.getMapping();
+
+    // Function to search for material ids based on cell GIDs using the mapper
+    const std::function<void(std::unordered_set<int32_t>&,
+                             const std::vector<uint32_t>&,
+                             const std::unordered_map<size_t, MorphologyMap>&)> searchFunc =
+    [](std::unordered_set<int32_t>& buffer,
+       const std::vector<uint32_t>& src,
+       const std::unordered_map<size_t, MorphologyMap>& m)
+    {
+        for(const auto& cellId : src)
+        {
+            auto morphologyMapIt = m.find(cellId);
+            if(morphologyMapIt != m.end())
+            {
+                const auto& morphologyMap = morphologyMapIt->second;
+                if(morphologyMap._hasMesh)
+                    buffer.insert(static_cast<int32_t>(morphologyMap._triangleIndx));
+                for(const auto& kvp : morphologyMap._coneMap)
+                    buffer.insert(static_cast<int32_t>(kvp.first));
+                for(const auto& kvp : morphologyMap._sphereMap)
+                    buffer.insert(static_cast<int32_t>(kvp.first));
+                for(const auto& kvp : morphologyMap._cylinderMap)
+                    buffer.insert(static_cast<int32_t>(kvp.first));
+                for(const auto& kvp : morphologyMap._sdfGeometryMap)
+                    buffer.insert(static_cast<int32_t>(kvp.first));
+            }
+        }
+    };
+
+    // Gather material ids for the source and target cells
+    std::unordered_set<int32_t> sourceCellMaterialIds;
+    searchFunc(sourceCellMaterialIds, payload.cellGIDs, cellMaterialMap);
+    std::unordered_set<int32_t> targetCellMaterialIds;
+    searchFunc(targetCellMaterialIds, payload.targetCellGIDs, cellMaterialMap);
+
+    // Enable extra attributes on materials
+    MaterialExtraAttributes mea;
+    mea.modelId = payload.modelId;
+    _setMaterialExtraAttributes(mea);
+
+    // Reset all cells to non-stained color
+    MaterialRangeDescriptor mrd;
+    mrd.modelId = payload.modelId;
+    mrd.diffuseColor =
+    {
+        static_cast<float>(payload.nonConnectedCellsColor[0]),
+        static_cast<float>(payload.nonConnectedCellsColor[1]),
+        static_cast<float>(payload.nonConnectedCellsColor[2])
+    };
+
+    mrd.specularColor = {1.f, 1.f, 1.f};
+    mrd.specularExponent = 20.f;
+    mrd.glossiness = 1.f;
+    mrd.reflectionIndex = 0.f;
+    mrd.refractionIndex = 0.f;
+    mrd.opacity = std::max<float>(std::max<float>(payload.nonConnectedCellsColor[4], 0.1f), 1.f);
+    mrd.shadingMode = static_cast<int>(MaterialShadingMode::none);
+    mrd.clippingMode = static_cast<int>(MaterialClippingMode::no_clipping);
+    mrd.simulationDataCast = true;
+    _setMaterialRange(mrd);
+
+    // Stain (if any) source cell
+    if(sourceCellMaterialIds.size() > 0)
+    {
+        MaterialRangeDescriptor sourcesMrd = mrd;
+        sourcesMrd.diffuseColor =
+        {
+            static_cast<float>(payload.sourceCellColor[0]),
+            static_cast<float>(payload.sourceCellColor[1]),
+            static_cast<float>(payload.sourceCellColor[2])
+        };
+        sourcesMrd.opacity = 1.f;
+        sourcesMrd.materialIds.insert(sourcesMrd.materialIds.end(),
+                               sourceCellMaterialIds.begin(),
+                               sourceCellMaterialIds.end());
+        _setMaterialRange(sourcesMrd);
+    }
+
+    if(targetCellMaterialIds.size() > 0)
+    {
+        MaterialRangeDescriptor targetsMrd = mrd;
+        targetsMrd.diffuseColor =
+        {
+            static_cast<float>(payload.connectedCellsColor[0]),
+            static_cast<float>(payload.connectedCellsColor[1]),
+            static_cast<float>(payload.connectedCellsColor[2])
+        };
+        targetsMrd.opacity = 1.f;
+        targetsMrd.materialIds.insert(targetsMrd.materialIds.end(),
+                               targetCellMaterialIds.begin(),
+                               targetCellMaterialIds.end());
+        _setMaterialRange(targetsMrd);
+    }
+
+    modelDescriptor->markModified();
+    _api->getScene().markModified();
+    _api->triggerRender();
 
     return result;
 }

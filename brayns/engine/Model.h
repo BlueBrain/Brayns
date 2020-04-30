@@ -386,6 +386,25 @@ public:
         return _geometries->_sdf;
     }
 
+    /**
+     * @brief Add a metaobject to the scene
+     * @param materialId Id of the material that this metaobject will use
+     * @param metaObject object descriptor in the form of a property map
+     * @return The meta object index for the given material
+     */
+    BRAYNS_API uint64_t addMetaObject(const size_t materialId,
+                                      const PropertyMap& metaObject);
+
+    /**
+     * @brief Return the list of metaobjects that this model contains
+     * @return List of metaobjects in the form of PropertyMap
+     */
+    MetaObjects& getMetaObjects()
+    {
+        _metaObjectsDirty = true;
+        return _geometries->_metaObjects;
+    }
+
     /** Update the list of neighbours for a SDF geometry
       @param geometryIdx Index of the geometry
       @param neighbourIndices Global indices of the geometries to smoothly blend
@@ -509,6 +528,7 @@ protected:
         StreamlinesDataMap _streamlines;
         SDFGeometryData _sdf;
         Volumes _volumes;
+        MetaObjects _metaObjects;
 
         Boxd _sphereBounds;
         Boxd _cylindersBounds;
@@ -518,13 +538,14 @@ protected:
         Boxd _streamlinesBounds;
         Boxd _sdfGeometriesBounds;
         Boxd _volumesBounds;
+        Boxd _metaObjectBounds;
 
         bool isEmpty() const
         {
             return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
                    _sdfBeziers.empty() && _triangleMeshes.empty() &&
                    _sdf.geometries.empty() && _streamlines.empty() &&
-                   _volumes.empty();
+                   _volumes.empty() && _metaObjects.empty();
         }
     };
 
@@ -541,11 +562,13 @@ protected:
     bool _streamlinesDirty{false};
     bool _sdfGeometriesDirty{false};
     bool _volumesDirty{false};
+    bool _metaObjectsDirty{false};
 
     bool _areGeometriesDirty() const
     {
         return _spheresDirty || _cylindersDirty || _conesDirty ||
-               _sdfBeziersDirty || _triangleMeshesDirty || _sdfGeometriesDirty;
+               _sdfBeziersDirty || _triangleMeshesDirty || _sdfGeometriesDirty ||
+               _metaObjectsDirty;
     }
 
     Boxd _bounds;

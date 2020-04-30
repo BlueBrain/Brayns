@@ -59,14 +59,6 @@ void CircuitInfoPlugin::init()
     auto actionInterface = _api->getActionInterface();
     if(actionInterface)
     {
-        PLUGIN_INFO << "Registering 'test-request' endpoint" << std::endl;
-        actionInterface->registerRequest<TestRequest, TestResponse>(
-            "test-request", [](const TestRequest& request){
-            TestResponse resp;
-            resp.answer = std::string(request.message.rbegin(), request.message.rend());
-            return resp;
-        });
-
         PLUGIN_INFO << "Registering 'ci-get-cell-ids' endpoint" << std::endl;
         actionInterface->registerRequest<CellGIDListRequest, CellGIDList>(
             "ci-get-cell-ids", [&](const CellGIDListRequest& request){

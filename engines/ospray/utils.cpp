@@ -74,6 +74,11 @@ void toOSPRayProperties(const PropertyMap& object, OSPObject ospObject)
                                Vector4f(toGlmVec(
                                    prop->get<std::array<double, 4>>())));
                 break;
+            case Property::Type::DoubleVector:
+            case Property::Type::FloatVector:
+            case Property::Type::IntVector:
+            case Property::Type::UIntVector:
+                break;
             }
         }
     }
@@ -147,6 +152,11 @@ void fromOSPRayProperties(PropertyMap& object, ospray::ManagedObject& ospObject)
                 ospObject.getParam<ospcommon::vec4f>(prop->name.c_str(),
                                                      ospcommon::vec4f())));
             break;
+        case Property::Type::DoubleVector:
+        case Property::Type::FloatVector:
+        case Property::Type::IntVector:
+        case Property::Type::UIntVector:
+           break;
         }
     }
 }
