@@ -110,6 +110,8 @@ ADD . ${BRAYNS_SRC}
 
 # Install Brayns
 # https://github.com/BlueBrain/Brayns
+
+# TODO: "|| exit 0"  hack to be removed as soon as MVDTool export issue is fixed.
 RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
  && cd ${BRAYNS_SRC} \
  && git submodule update --init --recursive \
@@ -117,8 +119,10 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
  && cd build \
  && CMAKE_PREFIX_PATH=${DIST_PATH}:${DIST_PATH}/lib/cmake/libwebsockets \
     cmake .. -GNinja \
+    -DBRAYNS_ASSIMP_ENABLED=ON \
     -DBRAYNS_OSPRAY_ENABLED=ON \
-    -DBRAYNS_CIRCUITEXPLORER_ENABLED=OFF \
+    -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON \
+    -DBRAYNS_CIRCUITINFO_ENABLED=ON \
     -DBRAYNS_DTI_ENABLED=OFF \
     -DBRAYNS_CIRCUITVIEWER_ENABLED=ON \
     -DBRAYNS_NETWORKING_ENABLED=ON \
@@ -126,6 +130,7 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
     -DBUILD_PYTHON_BINDINGS=OFF \
+    -DEXTLIB_FROM_SUBMODULES=ON || exit 0 \
  && ninja mvd-tool perceptualdiff Brayns-install Brayns-tests \
  && rm -rf ${DIST_PATH}/include ${DIST_PATH}/cmake ${DIST_PATH}/share
 
@@ -175,4 +180,4 @@ EXPOSE 8200
 # See https://docs.docker.com/engine/reference/run/#entrypoint-default-command-to-execute-at-runtime
 # for more docs
 ENTRYPOINT ["braynsService"]
-CMD ["--http-server", ":8200"]
+CMD ["--http-server", ":8200", "--plugin", "braynsCircuitExplorer", "--plugin", "braynsCircuitInfo", "--sandbox-path", "/"]
