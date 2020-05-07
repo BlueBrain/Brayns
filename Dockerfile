@@ -118,7 +118,7 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
  && mkdir -p build \
  && cd build \
  && CMAKE_PREFIX_PATH=${DIST_PATH}:${DIST_PATH}/lib/cmake/libwebsockets \
-    cmake .. -GNinja \
+    cmake ..  \
     -DBRAYNS_ASSIMP_ENABLED=ON \
     -DBRAYNS_OSPRAY_ENABLED=ON \
     -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON \
@@ -130,8 +130,9 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
     -DBUILD_PYTHON_BINDINGS=OFF \
-    -DEXTLIB_FROM_SUBMODULES=ON || exit 0 \
- && ninja mvd-tool perceptualdiff Brayns-install Brayns-tests \
+    -DEXTLIB_FROM_SUBMODULES=ON || exit 0
+
+RUN cd ${BRAYNS_SRC}/build && make -j install \
  && rm -rf ${DIST_PATH}/include ${DIST_PATH}/cmake ${DIST_PATH}/share
 
 # Final image, containing only Brayns and libraries required to run it
