@@ -27,8 +27,6 @@
 #include <brayns/common/types.h>
 
 brayns::Vector3f get_translation(const brayns::Matrix4f& matrix);
-brain::Matrix4f glm_to_vmmlib(const brayns::Matrix4f& matrix);
-brayns::Matrix4f vmmlib_to_glm(const brain::Matrix4f& matrix);
 bool inBox(const brayns::Vector3f& point, const brayns::Boxf& box);
 
 #endif // CIRCUIT_EXPLORER_UTILS_H

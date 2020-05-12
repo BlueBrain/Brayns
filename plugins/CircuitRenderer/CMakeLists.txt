@@ -17,7 +17,6 @@ endif()
 
 include(Common)
 common_find_package(ospray 1.8 SYSTEM)
-common_find_package(vmmlib REQUIRED)
 common_find_package_post()
 
 list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
@@ -59,7 +58,7 @@ include_directories(
 
 set(BRAYNSCIRCUITRENDERER_LINK_LIBRARIES
     PUBLIC ${OSPRAY_LIBRARIES}
-    PRIVATE braynsCommon braynsParameters braynsEngine braynsPluginAPI braynsOSPRayEngine glm vmmlib)
+    PRIVATE braynsCommon braynsParameters braynsEngine braynsPluginAPI braynsOSPRayEngine glm)
 
 set(BRAYNSCIRCUITRENDERER_OMIT_LIBRARY_HEADER ON)
 set(BRAYNSCIRCUITRENDERER_OMIT_VERSION_HEADERS ON)

@@ -550,7 +550,7 @@ public:
         auto positions = circuit.getPositions(allGids);
         Boxf center;
         for (const auto& position : positions)
-            center.merge(glm::make_vec3(position.array));
+            center.merge(position);
 
         Transformation transformation;
         transformation.setRotationCenter(center.getCenter());
@@ -653,8 +653,7 @@ private:
                 reportMapping ? reportMapping->getOffsets()[i][0] : 0;
             const float radius =
                 mtypeRadii[mtypes[i]] * _morphologyParams.radiusMultiplier;
-            model.addSphere(materialId, {glm::make_vec3(positions[i].array),
-                                         radius, offset});
+            model.addSphere(materialId, {positions[i], radius, offset});
             callback.updateProgress(message.str(), i / float(gids.size()));
         }
     }

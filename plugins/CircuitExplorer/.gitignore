@@ -5,11 +5,9 @@ debug/
 release/
 Brion/
 HighFive/
-Keyv/
 Lunchbox/
 MVDTool/
 Servus/
-vmmlib/
 CMakeFiles
 .DS_Store
 *~

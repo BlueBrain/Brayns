@@ -1747,7 +1747,7 @@ MessageResult CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTracing
     mrd.glossiness = 1.f;
     mrd.reflectionIndex = 0.f;
     mrd.refractionIndex = 0.f;
-    mrd.opacity = std::max<float>(std::max<float>(payload.nonConnectedCellsColor[4], 0.1f), 1.f);
+    mrd.opacity = std::min<float>(std::max<float>(payload.nonConnectedCellsColor[4], 0.1f), 1.f);
     mrd.shadingMode = static_cast<int>(MaterialShadingMode::none);
     mrd.clippingMode = static_cast<int>(MaterialClippingMode::no_clipping);
     mrd.simulationDataCast = true;

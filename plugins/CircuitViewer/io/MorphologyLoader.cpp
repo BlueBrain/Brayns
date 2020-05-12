@@ -466,18 +466,15 @@ public:
                     const auto& parent = section.getParent();
                     if (parent.getNumSamples() > 2)
                     {
-                        const auto& s =
-                            parent.getSamples()[parent.getNumSamples() - 2];
-                        samples.emplace_back(s.x(), s.y(), s.z(), s.w());
+                        samples.emplace_back(parent.getSamples()[parent.getNumSamples() - 2]);
                         useFirstSDFBezierCurves = false;
                     }
                 }
                 else if (std::find(somaChildren.begin(), somaChildren.end(),
                                    section) != somaChildren.end())
                 {
-                    const auto& s = soma.getCentroid();
-                    samples.emplace_back(s.x(), s.y(), s.z(),
-                                         soma.getMeanRadius());
+                    const auto s = soma.getCentroid();
+                    samples.emplace_back(s.x, s.y, s.z, soma.getMeanRadius());
                     useFirstSDFBezierCurves = false;
                 }
             }
@@ -493,16 +490,14 @@ public:
                 // always add first and last sample
                 if (i > 0 && i < samples_.size() - 1)
                 {
-                    Vector4f& prevSample = samples.back();
-                    const float dist =
-                        glm::distance(Vector3f(s.x(), s.y(), s.z()),
-                                      Vector3f(prevSample));
+                    const Vector4f& prevSample = samples.back();
+                    const float dist = glm::distance(Vector3f(s), Vector3f(prevSample));
 
-                    validSample = (dist >= (s.w() + prevSample.w));
+                    validSample = (dist >= (s.w + prevSample.w));
                 }
 
                 if (validSample)
-                    samples.emplace_back(s.x(), s.y(), s.z(), s.w());
+                    samples.emplace_back(s);
             }
 
             const size_t numSamples = samples.size();
@@ -641,13 +636,12 @@ private:
         for (const auto& child : somaChildren)
         {
             const auto& samples = child.getSamples();
-            const Vector3f sample{samples[0].x(), samples[0].y(),
-                                  samples[0].z()};
+            const Vector3f& sample = samples[0];
 
             // Create a sigmoid cone with half of soma radius to center of soma
             // to give it an organic look.
             const float radiusEnd =
-                samples[0].w() * 0.5f * _params.radiusMultiplier;
+                samples[0].w * 0.5f * _params.radiusMultiplier;
             const size_t geomIdx =
                 _addSDFGeometry(sdfData,
                                 createSDFConePillSigmoid(somaPosition, sample,
@@ -670,7 +664,7 @@ private:
     {
         const size_t materialId =
             materialFunc(brain::neuron::SectionType::soma);
-        const auto somaPosition = glm::make_vec3(soma.getCentroid().array);
+        const auto somaPosition = soma.getCentroid();
         const float somaRadius =
             soma.getMeanRadius() * _params.radiusMultiplier;
         const auto& children = soma.getChildren();
@@ -731,8 +725,7 @@ ModelDescriptorPtr MorphologyLoader::importFromFile(
     callback.updateProgress("Loading " + modelName + " ...", 1.f);
 
     Transformation transformation;
-    transformation.setRotationCenter(
-        glm::make_vec3(morphology.getSoma().getCentroid().array));
+    transformation.setRotationCenter(morphology.getSoma().getCentroid());
     auto modelDescriptor =
         std::make_shared<ModelDescriptor>(std::move(model), fileName);
     modelDescriptor->setTransformation(transformation);
