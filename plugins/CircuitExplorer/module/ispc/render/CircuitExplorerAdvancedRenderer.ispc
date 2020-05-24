@@ -1048,14 +1048,14 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
         bool discardIntersection = false;
         float firstIntersection = inf;
 
+        // Background contribution
+        processBackgroundColor(sample, ray, attributes);
+        bgColor = make_vec3f(attributes.bgColor);
+
         // Trace ray
         traceRay(self->super.super.super.model, ray);
         if (ray.geomID < 0)
         {
-            // Background contribution
-            processBackgroundColor(sample, ray, attributes);
-            bgColor = make_vec3f(attributes.bgColor);
-
             // Volume contribution
             processVolumeContribution(sample, ray, attributes,
                                       firstIntersection);
