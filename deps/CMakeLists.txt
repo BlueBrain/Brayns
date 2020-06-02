@@ -26,6 +26,7 @@ if(libuv_FOUND)
 endif()
 
 if(NOT TARGET glm)
+    message(STATUS "Gathering GLM from submodules")
     option(GLM_QUIET "No CMake Message" ON)
     option(GLM_TEST_ENABLE "Build unit tests" OFF)
     option(GLM_TEST_ENABLE_CXX_14 "Enable C++ 14" ON)
@@ -67,4 +68,15 @@ endif()
 # PBRT V2
 if(BRAYNS_PBRTV2_ENABLED)
     add_subdirectory(pbrt-v2)
+endif()
+
+# Brion if needed
+if(BRAYNS_CIRCUITVIEWER_ENABLED OR BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED)
+    common_find_package(Brion)
+    if((NOT Brion_FOUND AND NOT BRION_BOUND) OR NOT TARGET Brion)
+        message(STATUS "Brion not found, gathering from submodules")
+        add_subdirectory(Brion)
+    else()
+        message(STATUS "Found Brion")
+    endif()
 endif()

@@ -29,8 +29,9 @@
 #include <brayns/engine/Scene.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
-#include <brain/brain.h>
+#include <brion/types.h>
 #include <brion/brion.h>
+#include <brain/brain.h>
 
 #include <set>
 

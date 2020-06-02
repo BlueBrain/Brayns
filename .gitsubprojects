@@ -8,11 +8,6 @@ if(BRAYNS_DEFLECT_ENABLED)
   git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 038e139)
 endif()
 
-# Data access
-if(BRAYNS_CIRCUITVIEWER_ENABLED)
-  git_subproject(Brion https://github.com/BlueBrain/Brion.git ba846d60)
-endif()
-
 if(BRAYNS_BBIC_ENABLED AND NOT TARGET HighFive)
-  git_subproject(HighFive https://github.com/BlueBrain/HighFive.git 68fbe8e)
+  git_subproject(HighFive https://github.com/BlueBrain/HighFive.git 67f5b3a6)
 endif()

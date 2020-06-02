@@ -714,7 +714,7 @@ ModelDescriptorPtr MorphologyLoader::importFromFile(
     auto model = _scene.createModel();
     const auto params = MorphologyLoaderParams(properties);
 
-    brain::neuron::Morphology morphology{servus::URI(fileName)};
+    brain::neuron::Morphology morphology{brion::URI(fileName)};
 
     auto impl = MorphologyLoader::Impl(params);
 

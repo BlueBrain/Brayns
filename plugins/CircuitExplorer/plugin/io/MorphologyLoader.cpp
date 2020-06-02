@@ -83,7 +83,7 @@ bool MorphologyLoader::isSupported(const std::string& /*filename*/,
 }
 
 MorphologyInfo MorphologyLoader::importMorphology(
-    const brayns::PropertyMap& properties, const servus::URI& source,
+    const brayns::PropertyMap& properties, const brion::URI& source,
     brayns::Model& model, const uint64_t index,
     const brayns::Matrix4f& transformation, brain::Synapses* afferentSynapses,
     brain::Synapses* efferentSynapses,
@@ -103,7 +103,7 @@ MorphologyInfo MorphologyLoader::importMorphology(
 }
 
 void MorphologyLoader::_importMorphology(
-    const brayns::PropertyMap& properties, const servus::URI& source,
+    const brayns::PropertyMap& properties, const brion::URI& source,
     const uint64_t index, ParallelModelContainer& model,
     const brayns::Matrix4f& transformation,
     CompartmentReportPtr compartmentReport, brain::Synapses* afferentSynapses,
@@ -156,7 +156,7 @@ void MorphologyLoader::_importMorphologyAsPoint(
 }
 
 void MorphologyLoader::_createRealisticSoma(
-    const brayns::PropertyMap& properties, const servus::URI& uri,
+    const brayns::PropertyMap& properties, const brion::URI& uri,
     ParallelModelContainer& model) const
 {
     brain::neuron::SectionTypes sectionTypes;
@@ -673,7 +673,7 @@ float MorphologyLoader::_distanceToSoma(const brain::neuron::Section& section,
 }
 
 void MorphologyLoader::_importMorphologyFromURI(
-    const brayns::PropertyMap& properties, const servus::URI& uri,
+    const brayns::PropertyMap& properties, const brion::URI& uri,
     const uint64_t index, const brayns::Matrix4f& /*transformation*/,
     CompartmentReportPtr compartmentReport, ParallelModelContainer& model,
     brain::Synapses* /*afferentSynapses*/,
@@ -952,7 +952,7 @@ brayns::ModelDescriptorPtr MorphologyLoader::importFromFile(
     // the UI
 
     auto model = _scene.createModel();
-    importMorphology(props, servus::URI(fileName), *model, 0);
+    importMorphology(props, brion::URI(fileName), *model, 0);
     createMissingMaterials(*model);
 
     auto modelDescriptor =
