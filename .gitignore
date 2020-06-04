@@ -3,16 +3,10 @@ Build/
 build/
 debug/
 release/
-Brion/
 Deflect/
-Lunchbox/
 MVDTool/
-Pydoxine/
 Rockets/
-Servus/
-vmmlib/
 HighFive/
-Keyv/
 plugins/extensions/usecases/
 CMakeFiles
 .DS_Store

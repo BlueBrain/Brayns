@@ -25,7 +25,7 @@
 
 #include <brayns/parameters/AnimationParameters.h>
 
-#include <servus/types.h>
+#include <brion/types.h>
 
 VoltageSimulationHandler::VoltageSimulationHandler(
     const std::string& reportPath, const brion::GIDSet& gids,

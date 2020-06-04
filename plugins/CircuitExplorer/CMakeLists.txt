@@ -15,7 +15,7 @@ if(NOT EXISTS ${CMAKE_SOURCE_DIR}/CMake/common/Common.cmake)
 endif()
 
 include(Common)
-common_find_package(Brion REQUIRED)
+common_find_package(Brion)
 common_find_package(ospray 1.8 SYSTEM)
 common_find_package(CGAL)
 common_find_package(OpenMP)
@@ -116,7 +116,7 @@ include_directories(
 set(BRAYNSCIRCUITEXPLORER_LINK_LIBRARIES
     PUBLIC ${OSPRAY_LIBRARIES}
     PRIVATE braynsCommon braynsParameters braynsIO braynsEngine braynsPluginAPI
-    braynsOSPRayEngine glm vmmlib Brion Brain
+    braynsOSPRayEngine glm Brion Brain
     ${FREEIMAGE_LIBRARIES} ${HDF5_LIBRARIES}
 )
 

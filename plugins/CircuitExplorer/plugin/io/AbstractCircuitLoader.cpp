@@ -394,9 +394,7 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
                                  reportType, allGids);
 
     // Cell transformations
-    Matrix4fs allTransformations;
-    for (const auto &transformation : circuit.getTransforms(allGids))
-        allTransformations.push_back(vmmlib_to_glm(transformation));
+    Matrix4fs allTransformations = circuit.getTransforms(allGids);
 
     // Filter out guids according to clipping planes
     if (cellClipping)
@@ -1041,20 +1039,14 @@ void AbstractCircuitLoader::_buildAfferentSynapses(
     const brain::Synapse &synapse, const size_t materialId, const float radius,
     brayns::Model &model) const
 {
-    const brayns::Vector3f from(synapse.getPostsynapticSurfacePosition().x(),
-                                synapse.getPostsynapticSurfacePosition().y(),
-                                synapse.getPostsynapticSurfacePosition().z());
-    model.addSphere(materialId, {from, radius});
+    model.addSphere(materialId, {synapse.getPostsynapticSurfacePosition(), radius});
 }
 
 void AbstractCircuitLoader::_buildEfferentSynapses(
     const brain::Synapse &synapse, const size_t materialId, const float radius,
     brayns::Model &model) const
 {
-    const brayns::Vector3f from(synapse.getPresynapticSurfacePosition().x(),
-                                synapse.getPresynapticSurfacePosition().y(),
-                                synapse.getPresynapticSurfacePosition().z());
-    model.addSphere(materialId, {from, radius});
+    model.addSphere(materialId, {synapse.getPresynapticSurfacePosition(), radius});
 }
 
 brayns::ModelDescriptorPtr AbstractCircuitLoader::importFromBlob(

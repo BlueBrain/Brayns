@@ -25,11 +25,6 @@
 
 #include <vector>
 
-namespace servus
-{
-class URI;
-}
-
 namespace brayns
 {
 /**

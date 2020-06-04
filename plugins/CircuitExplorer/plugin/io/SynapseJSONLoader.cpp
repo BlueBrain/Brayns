@@ -109,9 +109,7 @@ brayns::ModelDescriptorPtr SynapseJSONLoader::importSynapsesFromGIDs(
                                      MaterialShadingMode::none));
         material->setEmission(synapseAttributes.lightEmission);
 
-        const auto pre = synapse.getPresynapticCenterPosition();
-        const auto radius = _synapseAttributes.radius;
-        model->addSphere(i, {{pre.x(), pre.y(), pre.z()}, radius});
+        model->addSphere(i, {synapse.getPresynapticCenterPosition(), _synapseAttributes.radius});
         ++i;
     }
 

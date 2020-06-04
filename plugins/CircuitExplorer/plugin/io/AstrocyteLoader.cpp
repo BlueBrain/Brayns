@@ -147,7 +147,7 @@ void AstrocyteLoader::_importMorphologiesFromURIs(
 
     for (uint64_t i = 0; i < uris.size(); ++i)
     {
-        const auto uri = servus::URI(uris[i]);
+        const auto uri = brion::URI(uris[i]);
         const auto materialId =
             (colorScheme == MorphologyColorScheme::none ? i
                                                         : brayns::NO_MATERIAL);

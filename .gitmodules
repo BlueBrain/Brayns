@@ -31,3 +31,6 @@
 	path = deps/pbrt-v2
 	url = https://github.com/BlueBrain/pbrt-v2
 	branch = brayns_integration
+[submodule "deps/Brion"]
+	path = deps/Brion
+	url = https://github.com/BlueBrain/Brion.git

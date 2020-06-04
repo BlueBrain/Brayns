@@ -83,7 +83,7 @@ bool MorphologyLoader::isSupported(const std::string& /*filename*/,
 }
 
 MorphologyInfo MorphologyLoader::importMorphology(
-    const brayns::PropertyMap& properties, const servus::URI& source,
+    const brayns::PropertyMap& properties, const brion::URI& source,
     brayns::Model& model, const uint64_t index,
     const brayns::Matrix4f& transformation, brain::Synapses* afferentSynapses,
     brain::Synapses* efferentSynapses,
@@ -103,7 +103,7 @@ MorphologyInfo MorphologyLoader::importMorphology(
 }
 
 void MorphologyLoader::_importMorphology(
-    const brayns::PropertyMap& properties, const servus::URI& source,
+    const brayns::PropertyMap& properties, const brion::URI& source,
     const uint64_t index, ParallelModelContainer& model,
     const brayns::Matrix4f& transformation,
     CompartmentReportPtr compartmentReport, brain::Synapses* afferentSynapses,
@@ -156,7 +156,7 @@ void MorphologyLoader::_importMorphologyAsPoint(
 }
 
 void MorphologyLoader::_createRealisticSoma(
-    const brayns::PropertyMap& properties, const servus::URI& uri,
+    const brayns::PropertyMap& properties, const brion::URI& uri,
     ParallelModelContainer& model) const
 {
     brain::neuron::SectionTypes sectionTypes;
@@ -186,8 +186,7 @@ void MorphologyLoader::_createRealisticSoma(
     {
         // Soma
         const auto& soma = morphology.getSoma();
-        model.morphologyInfo.somaPosition =
-            glm::make_vec3(morphology.getSoma().getCentroid().array);
+        model.morphologyInfo.somaPosition = morphology.getSoma().getCentroid();
         const auto radius =
             _getCorrectedRadius(properties, soma.getMeanRadius());
         metaballs.push_back({model.morphologyInfo.somaPosition.x,
@@ -215,9 +214,9 @@ void MorphologyLoader::_createRealisticSoma(
         for (size_t i = 0; i < samplesToProcess; ++i)
         {
             const auto& sample = samples[i];
-            const brayns::Vector3f position(sample.x(), sample.y(), sample.z());
+            const brayns::Vector3f position(sample);
             const auto radius =
-                _getCorrectedRadius(properties, sample.w() * 0.5f);
+                _getCorrectedRadius(properties, sample.w * 0.5f);
             if (radius > 0.f)
                 metaballs.push_back(
                     {position.x, position.y, position.z, radius});
@@ -260,13 +259,12 @@ void MorphologyLoader::_connectSDFSomaChildren(
     for (const auto& child : somaChildren)
     {
         const auto& samples = child.getSamples();
-        const brayns::Vector3f sample{samples[0].x(), samples[0].y(),
-                                      samples[0].z()};
+        const brayns::Vector3f sample(samples[0]);
 
         // Create a sigmoid cone with half of soma radius to center of soma
         // to give it an organic look.
         const auto radiusEnd =
-            _getCorrectedRadius(properties, samples[0].w() * 0.5f);
+            _getCorrectedRadius(properties, samples[0].w * 0.5f);
         const size_t geomIdx =
             _addSDFGeometry(sdfMorphologyData,
                             brayns::createSDFConePillSigmoid(
@@ -444,9 +442,9 @@ MorphologyTreeStructure MorphologyLoader::_calculateMorphologyTreeStructure(
             const auto& sample = samples[0];
 
             const auto radius =
-                _getCorrectedRadius(properties, sample.w() * 0.5f);
+                 _getCorrectedRadius(properties, sample.w * 0.5f);
 
-            const brayns::Vector3f position(sample.x(), sample.y(), sample.z());
+            const brayns::Vector3f position(sample);
 
             bifurcationPosition[sectionI].first = radius;
             bifurcationPosition[sectionI].second = position;
@@ -454,9 +452,8 @@ MorphologyTreeStructure MorphologyLoader::_calculateMorphologyTreeStructure(
 
         { // Branch end
             const auto& sample = samples.back();
-            const auto radius =
-                _getCorrectedRadius(properties, sample.w() * 0.5f);
-            const brayns::Vector3f position(sample.x(), sample.y(), sample.z());
+            const auto radius = _getCorrectedRadius(properties, sample.w * 0.5f);
+            const brayns::Vector3f position(sample);
             sectionEndPosition[sectionI].first = radius;
             sectionEndPosition[sectionI].second = position;
         }
@@ -543,8 +540,7 @@ void MorphologyLoader::_addSomaGeometry(const brayns::PropertyMap& properties,
     const size_t materialId =
         _getMaterialIdFromColorScheme(properties,
                                       brain::neuron::SectionType::soma);
-    model.morphologyInfo.somaPosition =
-        glm::make_vec3(soma.getCentroid().array);
+    model.morphologyInfo.somaPosition = soma.getCentroid();
     const double somaRadius =
         _getCorrectedRadius(properties, soma.getMeanRadius());
     const auto& children = soma.getChildren();
@@ -568,12 +564,11 @@ void MorphologyLoader::_addSomaGeometry(const brayns::PropertyMap& properties,
             for (const auto& child : children)
             {
                 const auto& samples = child.getSamples();
-                const brayns::Vector3f sample{samples[0].x(), samples[0].y(),
-                                              samples[0].z()};
+                const brayns::Vector3f sample(samples[0]);
 
                 model.morphologyInfo.bounds.merge(sample);
                 const double sampleRadius =
-                    _getCorrectedRadius(properties, samples[0].w() * 0.5f);
+                    _getCorrectedRadius(properties, samples[0].w * 0.5f);
 
                 model.addCone(materialId,
                               {model.morphologyInfo.somaPosition, sample,
@@ -678,7 +673,7 @@ float MorphologyLoader::_distanceToSoma(const brain::neuron::Section& section,
 }
 
 void MorphologyLoader::_importMorphologyFromURI(
-    const brayns::PropertyMap& properties, const servus::URI& uri,
+    const brayns::PropertyMap& properties, const brion::URI& uri,
     const uint64_t index, const brayns::Matrix4f& /*transformation*/,
     CompartmentReportPtr compartmentReport, ParallelModelContainer& model,
     brain::Synapses* /*afferentSynapses*/,
@@ -788,7 +783,7 @@ void MorphologyLoader::_importMorphologyFromURI(
             _getCorrectedRadius(properties,
                                 section.hasParent()
                                     ? _getLastSampleRadius(section.getParent())
-                                    : samples[0].w() * 0.5f);
+                                    : samples[0].w * 0.5f);
 
         bool done = false;
         for (size_t i = step; !done && i < numSamples + step; i += step)
@@ -851,15 +846,15 @@ void MorphologyLoader::_importMorphologyFromURI(
             }
 
             const auto sample = samples[i];
-            brayns::Vector3f position(sample.x(), sample.y(), sample.z());
-            brayns::Vector3f target(previousSample.x(), previousSample.y(),
-                                    previousSample.z());
+            brayns::Vector3f position(sample);
+            brayns::Vector3f target(previousSample);
+
 
             model.morphologyInfo.bounds.merge(position);
             model.morphologyInfo.bounds.merge(target);
 
             auto radius =
-                _getCorrectedRadius(properties, samples[i].w() * 0.5f);
+                _getCorrectedRadius(properties, samples[i].w * 0.5f);
             const double maxRadiusChange = 0.1f;
 
             const double dist = glm::length(target - position);
@@ -957,7 +952,7 @@ brayns::ModelDescriptorPtr MorphologyLoader::importFromFile(
     // the UI
 
     auto model = _scene.createModel();
-    importMorphology(props, servus::URI(fileName), *model, 0);
+    importMorphology(props, brion::URI(fileName), *model, 0);
     createMissingMaterials(*model);
 
     auto modelDescriptor =

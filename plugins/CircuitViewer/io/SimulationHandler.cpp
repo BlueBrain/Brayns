@@ -26,7 +26,7 @@
 #include <brain/compartmentReport.h>
 #include <brain/compartmentReportMapping.h>
 
-#include <servus/types.h>
+#include <brion/types.h>
 
 namespace brayns
 {

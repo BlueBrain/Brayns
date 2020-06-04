@@ -35,11 +35,6 @@
 #include <set>
 #include <vector>
 
-namespace servus
-{
-class URI;
-}
-
 class CircuitExplorerPlugin;
 
 using Matrix4fs = std::vector<brayns::Matrix4f>;

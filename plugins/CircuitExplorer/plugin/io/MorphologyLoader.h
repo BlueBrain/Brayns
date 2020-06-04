@@ -35,11 +35,6 @@
 #include <unordered_map>
 #include <vector>
 
-namespace servus
-{
-class URI;
-}
-
 class AdvancedCircuitLoader;
 struct ParallelModelContainer;
 using GIDOffsets = std::vector<uint64_t>;
@@ -105,7 +100,7 @@ public:
      * @return Information about the morphology
      */
     MorphologyInfo importMorphology(
-        const brayns::PropertyMap& properties, const servus::URI& source,
+        const brayns::PropertyMap& properties, const brion::URI& source,
         brayns::Model& model, const uint64_t index,
         const brayns::Matrix4f& transformation = brayns::Matrix4f(),
         brain::Synapses* afferentSynapses = nullptr,
@@ -143,7 +138,7 @@ private:
                                const double radius) const;
 
     void _importMorphology(const brayns::PropertyMap& properties,
-                           const servus::URI& source, const uint64_t index,
+                           const brion::URI& source, const uint64_t index,
                            ParallelModelContainer& model,
                            const brayns::Matrix4f& transformation,
                            CompartmentReportPtr compartmentReport,
@@ -174,7 +169,7 @@ private:
      * @param scene Scene to which the morphology should be loaded into
      */
     void _createRealisticSoma(const brayns::PropertyMap& properties,
-                              const servus::URI& uri,
+                              const brion::URI& uri,
                               ParallelModelContainer& model) const;
 
     size_t _addSDFGeometry(SDFMorphologyData& sdfMorphologyData,
@@ -258,7 +253,7 @@ private:
      * into
      */
     void _importMorphologyFromURI(
-        const brayns::PropertyMap& properties, const servus::URI& uri,
+        const brayns::PropertyMap& properties, const brion::URI& uri,
         const uint64_t index, const brayns::Matrix4f& transformation,
         CompartmentReportPtr compartmentReport, ParallelModelContainer& model,
         brain::Synapses* afferentSynapses = nullptr,
