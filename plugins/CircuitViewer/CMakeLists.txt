@@ -10,7 +10,7 @@ set(BraynsCircuitViewer_VERSION_ABI 1)
 
 include(Common)
 
-common_find_package(Brion REQUIRED)
+common_find_package(Brion)
 common_find_package(ospray 1.8 SYSTEM)
 # For unit tests
 common_find_package(BBPTestData)

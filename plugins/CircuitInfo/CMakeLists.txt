@@ -16,7 +16,7 @@ if(NOT EXISTS ${CMAKE_SOURCE_DIR}/CMake/common/Common.cmake)
 endif()
 
 include(Common)
-common_find_package(Brion REQUIRED)
+common_find_package(Brion)
 common_find_package_post()
 
 

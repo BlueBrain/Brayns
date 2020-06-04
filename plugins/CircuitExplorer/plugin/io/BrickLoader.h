@@ -30,11 +30,6 @@
 #include <set>
 #include <vector>
 
-namespace servus
-{
-class URI;
-}
-
 /**
  * Load circuit from BlueConfig or CircuitConfig file, including simulation.
  */

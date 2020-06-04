@@ -73,7 +73,7 @@ endif()
 # Brion if needed
 if(BRAYNS_CIRCUITVIEWER_ENABLED OR BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED)
     common_find_package(Brion)
-    if((NOT Brion_FOUND AND NOT BRION_BOUND) OR NOT TARGET Brion)
+    if((NOT Brion_FOUND AND NOT BRION_FOUND) OR NOT TARGET Brion)
         message(STATUS "Brion not found, gathering from submodules")
         add_subdirectory(Brion)
     else()

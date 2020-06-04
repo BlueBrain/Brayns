@@ -3,11 +3,8 @@ Build/
 build/
 debug/
 release/
-Brion/
 HighFive/
-Lunchbox/
 MVDTool/
-Servus/
 CMakeFiles
 .DS_Store
 *~
