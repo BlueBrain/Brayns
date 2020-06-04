@@ -105,6 +105,9 @@ struct RPCLight
     PropertyMap properties;
 };
 
+// ====================================================
+// Structs to query the filesystem in which brayns is running
+
 struct InputPath
 {
     std::string path;
@@ -151,15 +154,24 @@ struct DirectoryFileList
     std::string message;
 };
 
+// ====================================================
+// Used to set the streaming method
+
 struct ImageStreamingMethod
 {
     std::string type;
 };
 
+// ====================================================
+// Used to schedule brayns service exit
+
 struct ExitLaterSchedule
 {
     uint32_t minutes;
 };
+
+// ====================================================
+// Global material manipulation structures
 
 struct RequestMaterial
 {
@@ -188,6 +200,29 @@ struct ModifyMaterialResult
     int error;
     std::string message;
 };
+
+// ====================================================
+// Structs to handle client state
+
+struct ClientStateEntry
+{
+    std::string key;
+    std::string value;
+};
+
+struct ClientStateGetRequest
+{
+    std::string key;
+};
+
+struct ClientStateGetAllResponse
+{
+    strings keys;
+    strings values;
+};
+
+// ====================================================
+
 
 } // namespace brayns
 
@@ -677,6 +712,26 @@ inline void init(brayns::ModifyMaterialResult* a, ObjectHandler* h)
 {
     h->add_property("error", &a->error);
     h->add_property("message", &a->message);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::ClientStateEntry* a, ObjectHandler* h)
+{
+    h->add_property("key", &a->key);
+    h->add_property("value", &a->value);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::ClientStateGetRequest* a, ObjectHandler* h)
+{
+    h->add_property("key", &a->key);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::ClientStateGetAllResponse* a, ObjectHandler* h)
+{
+    h->add_property("keys", &a->keys);
+    h->add_property("values", &a->values);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

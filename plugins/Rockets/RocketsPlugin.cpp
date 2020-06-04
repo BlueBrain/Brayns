@@ -136,6 +136,10 @@ const std::string METHOD_FS_LIST_DIR = "fs-list-dir";
 const std::string METHOD_GET_MATERIAL = "get-mat";
 const std::string METHOD_SET_MATERIAL = "set-mat";
 
+const std::string METHOD_CLIENTSTATE_SET = "client-state-set";
+const std::string METHOD_CLIENTSTATE_GET = "client-state-get";
+const std::string METHOD_CLIENTSTATE_GET_ALL = "client-state-get-all";
+
 // JSONRPC notifications
 const std::string METHOD_CHUNK = "chunk";
 const std::string METHOD_QUIT = "quit";
@@ -1055,6 +1059,8 @@ public:
 
         _handleMaterial();
 
+        _handleClientState();
+
         _endpointsRegistered = true;
     }
 
@@ -1872,8 +1878,11 @@ public:
 
     void _handleFsGetRoot()
     {
-        const RpcDescription desc{METHOD_FS_GET_ROOT,
-                                  "Return the root path of the current execution environment (sandbox)"};
+        const RpcDescription desc
+        {
+            METHOD_FS_GET_ROOT,
+            "Return the root path of the current execution environment (sandbox)"
+        };
         _bindEndpoint(METHOD_FS_GET_ROOT, [& engine = _engine](const rockets::jsonrpc::Request&) {
 
             FileRoot fr;
@@ -1882,7 +1891,7 @@ public:
         });
 
         _handleSchema(
-            METHOD_GET_LIGHTS,
+            METHOD_FS_GET_ROOT,
             buildJsonRpcSchemaRequestReturnOnly<FileRoot>(desc));
     }
 
@@ -2081,6 +2090,71 @@ public:
 
             return result;
         });
+    }
+
+    void _handleClientState()
+    {
+        // SETS AN ENTRY INTO THE CLIENTSTATE MAP
+        const RpcParameterDescription descSetState
+        {
+            METHOD_CLIENTSTATE_SET,
+            "Sets a key-value entry into a common persistent map to all clients",
+            "entry", "A key-value entry to add to the client state map"
+        };
+        _bindEndpoint(METHOD_CLIENTSTATE_SET, [&](const rockets::jsonrpc::Request& req)
+        {
+            ClientStateEntry entry;
+            if(!::from_json(entry, req.message))
+                return Response::invalidParams();
+
+            _clientState[entry.key] = entry.value;
+
+            return Response{to_json(true)};
+        });
+        _handleSchema(
+            METHOD_CLIENTSTATE_SET,
+            buildJsonRpcSchemaNotify<ClientStateEntry>(descSetState));
+
+        // RETRIEVS AN EMPTY (OR EMPTY IF NOT EXISTS) FROM THE CLIENTSTATE MAP
+        const RpcParameterDescription descGetState
+        {
+            METHOD_CLIENTSTATE_GET,
+            "Gets a key-value entry from the clientstate map given an entry key, if exists",
+            "entryKey", "A key from the clientsate map"
+        };
+        _handleRPC<ClientStateGetRequest, ClientStateEntry>(descGetState,
+                                                            [&](const ClientStateGetRequest& req)
+        {
+           auto it = _clientState.find(req.key);
+           ClientStateEntry result;
+           result.key = req.key;
+           result.value = (it != _clientState.end())? it->second : "";
+           return result;
+        });
+
+        // RETURN TWO LIST WITH ALL THE KEYS AND VALUES OF THE CLIENTSTATE MAP
+        const RpcDescription descGetStateAll
+        {
+            METHOD_CLIENTSTATE_GET_ALL,
+            "Gets a key-value list containing all entries from the cientstate map"
+        };
+        _bindEndpoint(METHOD_CLIENTSTATE_GET_ALL, [&](const rockets::jsonrpc::Request&) {
+
+            ClientStateGetAllResponse result;
+            result.keys.reserve(_clientState.size());
+            result.values.reserve(_clientState.size());
+            for(const auto& kvpair : _clientState)
+            {
+                result.keys.push_back(kvpair.first);
+                result.values.push_back(kvpair.second);
+            }
+            return Response{to_json(result)};
+        });
+
+        _handleSchema(
+            METHOD_CLIENTSTATE_GET_ALL,
+            buildJsonRpcSchemaRequestReturnOnly<ClientStateGetAllResponse>(descGetStateAll));
+
     }
 
     void _handleAddModel()
@@ -2489,6 +2563,8 @@ public:
     // Schedule mechanism
     std::mutex _waitLock;
     std::condition_variable _monitor;
+
+    std::unordered_map<std::string, std::string> _clientState;
 
     std::vector<BaseObject*> _objects;
 
