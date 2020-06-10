@@ -294,6 +294,10 @@ void CircuitExplorerPlugin::init()
     auto& registry = scene.getLoaderRegistry();
     auto& pm = _api->getParametersManager();
 
+    // Store the current accumulation settings
+    _prevAccumulationSetting = _api->getParametersManager().getRenderingParameters()
+                                                           .getMaxAccumFrames();
+
     registry.registerLoader(
         std::make_unique<BrickLoader>(scene, BrickLoader::getCLIProperties()));
 
@@ -528,7 +532,13 @@ void CircuitExplorerPlugin::preRender()
     {
         const auto& ai = _exportFramesToDiskPayload.animationInformation;
         if (_frameNumber >= ai.size())
+        {
             _exportFramesToDiskDirty = false;
+            // Re-establish the old accumulation settings after we are done with the
+            // frame export
+            _api->getParametersManager().getRenderingParameters()
+                                        .setMaxAccumFrames(_prevAccumulationSetting);
+        }
         else
         {
             const uint64_t i = 11 * _frameNumber;
@@ -560,12 +570,6 @@ void CircuitExplorerPlugin::postRender()
     }
     else
         ++_accumulationFrameNumber;
-
-    // Re-establish the old accumulation settings after we are done with the
-    // frame export
-    if(!_exportFramesToDiskDirty)
-        _api->getParametersManager().getRenderingParameters()
-                                    .setMaxAccumFrames(_prevAccumulationSetting);
 }
 
 CellObjectMapper& CircuitExplorerPlugin::getMapperForCircuit(const std::string &circuitFilePath)
@@ -1357,6 +1361,11 @@ MessageResult CircuitExplorerPlugin::_exportFramesToDisk(
 
     HANDLE_NOT_PARSED(payload, result)
 
+    // Store the current accumulation settings
+    if(!_exportFramesToDiskDirty)
+        _prevAccumulationSetting = _api->getParametersManager().getRenderingParameters()
+                                                               .getMaxAccumFrames();
+
     _exportFramesToDiskPayload = payload;
     _exportFramesToDiskDirty = true;
     _frameNumber = payload.startFrame;
@@ -1365,13 +1374,8 @@ MessageResult CircuitExplorerPlugin::_exportFramesToDisk(
     frameBuffer.clear();
 
     // Store the current accumulation settings
-    _prevAccumulationSetting = _api->getParametersManager().getRenderingParameters()
-                                                           .getMaxAccumFrames();
-    if(_prevAccumulationSetting <= payload.spp)
-    {
-        _api->getParametersManager().getRenderingParameters()
-                                    .setMaxAccumFrames(static_cast<size_t>(payload.spp) + 1);
-    }
+    _api->getParametersManager().getRenderingParameters()
+                                .setMaxAccumFrames(static_cast<size_t>(payload.spp) + 1);
 
     PLUGIN_INFO << "-----------------------------------------------------------"
                    "---------------------"
