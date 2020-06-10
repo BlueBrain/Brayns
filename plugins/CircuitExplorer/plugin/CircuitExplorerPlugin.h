@@ -112,6 +112,7 @@ private:
     bool _exportFramesToDiskDirty{false};
     uint16_t _frameNumber{0};
     int16_t _accumulationFrameNumber{0};
+    size_t _prevAccumulationSetting;
 
     std::unordered_map<std::string, CellObjectMapper> _circuitMappers;
 };

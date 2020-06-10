@@ -560,6 +560,12 @@ void CircuitExplorerPlugin::postRender()
     }
     else
         ++_accumulationFrameNumber;
+
+    // Re-establish the old accumulation settings after we are done with the
+    // frame export
+    if(!_exportFramesToDiskDirty)
+        _api->getParametersManager().getRenderingParameters()
+                                    .setMaxAccumFrames(_prevAccumulationSetting);
 }
 
 CellObjectMapper& CircuitExplorerPlugin::getMapperForCircuit(const std::string &circuitFilePath)
@@ -1357,6 +1363,16 @@ MessageResult CircuitExplorerPlugin::_exportFramesToDisk(
     _accumulationFrameNumber = 0;
     auto& frameBuffer = _api->getEngine().getFrameBuffer();
     frameBuffer.clear();
+
+    // Store the current accumulation settings
+    _prevAccumulationSetting = _api->getParametersManager().getRenderingParameters()
+                                                           .getMaxAccumFrames();
+    if(_prevAccumulationSetting <= payload.spp)
+    {
+        _api->getParametersManager().getRenderingParameters()
+                                    .setMaxAccumFrames(static_cast<size_t>(payload.spp) + 1);
+    }
+
     PLUGIN_INFO << "-----------------------------------------------------------"
                    "---------------------"
                 << std::endl;
