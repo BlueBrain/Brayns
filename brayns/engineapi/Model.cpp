@@ -53,7 +53,7 @@ void _unbindMaterials(const AbstractSimulationHandlerPtr& simulationHandler,
     for (const auto& material : materials)
         simulationHandler->unbind(material.second);
 }
-}
+} // namespace
 ModelParams::ModelParams(const std::string& path)
     : _name(fs::path(path).stem())
     , _path(path)
@@ -109,7 +109,9 @@ ModelDescriptor& ModelDescriptor::operator=(const ModelParams& rhs)
     _updateValue(_path, rhs.getPath());
     _updateValue(_visible, rhs.getVisible());
 
+#if 0 // WTF ?!?
     // Transformation
+    std::cout << rhs.getTransformation().getTranslation() << std::endl;
     const auto oldRotationCenter = _transformation.getRotationCenter();
     const auto newRotationCenter = rhs.getTransformation().getRotationCenter();
     _updateValue(_transformation, rhs.getTransformation());
@@ -117,6 +119,7 @@ ModelDescriptor& ModelDescriptor::operator=(const ModelParams& rhs)
         // If no rotation center is specified in the model params, the one set
         // by the model loader is used
         _transformation.setRotationCenter(oldRotationCenter);
+#endif
 
     return *this;
 }
@@ -273,8 +276,8 @@ uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
     return geomIdx;
 }
 
-void Model::updateSDFGeometryNeighbours(
-    size_t geometryIdx, const uint64_ts& neighbourIndices)
+void Model::updateSDFGeometryNeighbours(size_t geometryIdx,
+                                        const uint64_ts& neighbourIndices)
 {
     _geometries->_sdf.neighbours[geometryIdx] = neighbourIndices;
     _sdfGeometriesDirty = true;
@@ -409,14 +412,11 @@ void Model::logInformation()
     for (const auto& sdfBeziers : _geometries->_sdfBeziers)
         nbSdfBeziers += sdfBeziers.second.size();
 
-    BRAYNS_DEBUG << "Spheres: " << nbSpheres
-                 << ", Cylinders: " << nbCylinders
-                 << ", Cones: " << nbCones
-                 << ", SDFBeziers: " << nbSdfBeziers
-                 << ", Meshes: " << nbMeshes
-                 << ", Memory: " << _sizeInBytes << " bytes ("
-                 << _sizeInBytes / 1048576 << " MB), Bounds: " << _bounds
-                 << std::endl;
+    BRAYNS_DEBUG << "Spheres: " << nbSpheres << ", Cylinders: " << nbCylinders
+                 << ", Cones: " << nbCones << ", SDFBeziers: " << nbSdfBeziers
+                 << ", Meshes: " << nbMeshes << ", Memory: " << _sizeInBytes
+                 << " bytes (" << _sizeInBytes / 1048576
+                 << " MB), Bounds: " << _bounds << std::endl;
 }
 
 MaterialPtr Model::getMaterial(const size_t materialId) const
@@ -543,7 +543,8 @@ void Model::updateBounds()
         for (const auto& sdfBeziers : _geometries->_sdfBeziers)
             if (sdfBeziers.first != BOUNDINGBOX_MATERIAL_ID)
                 for (const auto& sdfBezier : sdfBeziers.second)
-                    _geometries->_sdfBeziersBounds.merge(bezierBounds(sdfBezier));
+                    _geometries->_sdfBeziersBounds.merge(
+                        bezierBounds(sdfBezier));
     }
 
     if (_triangleMeshesDirty)
@@ -686,4 +687,4 @@ bool Model::commitSimulationData()
                               _simulationHandler->getFrameSize());
     return true;
 }
-}
+} // namespace brayns

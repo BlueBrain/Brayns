@@ -361,6 +361,10 @@ public:
     /**
         Returns streamlines handled by the model
     */
+    const StreamlinesDataMap& getStreamlines() const
+    {
+        return _geometries->_streamlines;
+    }
     StreamlinesDataMap& getStreamlines()
     {
         _streamlinesDirty = true;
@@ -380,6 +384,10 @@ public:
     /**
      * Returns SDF geometry data handled by the model
      */
+    const SDFGeometryData& getSDFGeometryData() const
+    {
+        return _geometries->_sdf;
+    }
     SDFGeometryData& getSDFGeometryData()
     {
         _sdfGeometriesDirty = true;
@@ -391,8 +399,8 @@ public:
       @param neighbourIndices Global indices of the geometries to smoothly blend
       together with
       */
-    void updateSDFGeometryNeighbours(
-        size_t geometryIdx, const uint64_ts& neighbourIndices);
+    void updateSDFGeometryNeighbours(size_t geometryIdx,
+                                     const uint64_ts& neighbourIndices);
 
     /**
         Returns triangle meshes handled by the model
