@@ -89,6 +89,10 @@ public:
       */
     BRAYNS_API bool removeModel(const size_t id);
 
+    BRAYNS_API const ModelDescriptors& getModelDescriptors() const
+    {
+        return _modelDescriptors;
+    }
     BRAYNS_API ModelDescriptorPtr getModel(const size_t id) const;
 
     /**
