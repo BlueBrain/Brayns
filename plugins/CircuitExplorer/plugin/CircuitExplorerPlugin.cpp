@@ -572,16 +572,14 @@ void CircuitExplorerPlugin::postRender()
         ++_accumulationFrameNumber;
 }
 
-CellObjectMapper& CircuitExplorerPlugin::getMapperForCircuit(const std::string &circuitFilePath)
+void CircuitExplorerPlugin::releaseCircuitMapper(const size_t modelId)
 {
-    return _circuitMappers[circuitFilePath];
-}
-
-void CircuitExplorerPlugin::releaseCircuitMapper(const std::string &circuitFilePath)
-{
-    auto it = _circuitMappers.find(circuitFilePath);
-    if(it != _circuitMappers.end())
-        _circuitMappers.erase(it);
+    _mappers.erase(std::remove_if(_mappers.begin(),
+                                  _mappers.end(),
+                                  [mid = modelId](const std::unique_ptr<CellObjectMapper>& mapper)
+    {
+        return mapper->getSourceModelId() == mid;
+    }), _mappers.end());
 }
 
 MessageResult CircuitExplorerPlugin::_setMaterialExtraAttributes(
@@ -982,13 +980,12 @@ MessageResult CircuitExplorerPlugin::_remapCircuitToScheme(const RemapCircuit& p
     auto modelDescriptor = _api->getScene().getModel(payload.modelId);
     if(modelDescriptor)
     {
-        const std::string& path = modelDescriptor->getPath();
-        auto it = _circuitMappers.find(path);
-        if(it != _circuitMappers.end())
+        CellObjectMapper* mapper = getMapperForCircuit(payload.modelId);
+        if(mapper)
         {
             const auto schemeEnum =
                     stringToEnum<CircuitColorScheme>(payload.scheme);
-            auto remapResult = it->second.remapCircuitColors(schemeEnum, _api->getScene());
+            auto remapResult = mapper->remapCircuitColors(schemeEnum, _api->getScene());
             result.error = remapResult.error;
             result.message = remapResult.message;
             _dirty = true;
@@ -1702,16 +1699,15 @@ MessageResult CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTracing
         return result;
     }
 
-    auto cellMapperIt = this->_circuitMappers.find(modelDescriptor->getPath());
-    if(cellMapperIt == _circuitMappers.end())
+    auto cellMapper = getMapperForCircuit(payload.modelId);
+    if(!cellMapper)
     {
         result.error = 6;
         result.message = "There is not cell mapping information for the given circuit";
         return result;
     }
 
-    const auto& mapper = cellMapperIt->second;
-    const auto& cellMaterialMap = mapper.getMapping();
+    const auto& cellMaterialMap = cellMapper->getMapping();
 
     // Function to search for material ids based on cell GIDs using the mapper
     const std::function<void(std::unordered_set<int32_t>&,

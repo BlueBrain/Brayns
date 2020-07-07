@@ -542,6 +542,7 @@ class CircuitExplorer:
         params['fpsRate'] = fps_rate
         params['outputMoviePath'] = output_movie_path
         params['eraseFrames'] = erase_frames
+        params['layers'] = ["movie"]
 
         return self._client.request('make-movie', params,
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)

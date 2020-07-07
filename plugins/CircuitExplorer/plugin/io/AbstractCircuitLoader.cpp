@@ -41,6 +41,8 @@
 #include <brayns/io/MeshLoader.h>
 #endif
 
+#include <unordered_set>
+
 
 namespace
 {
@@ -377,7 +379,7 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
     const brain::Circuit circuit(blueConfiguration);
 
     // Circuit mapper. Morphology info will be gathered during loading
-    CellObjectMapper& objMapper = _pluginPtr->getMapperForCircuit(circuitConfiguration);
+    CellObjectMapper objMapper;
     // Circuit schema data will be stored here
     CircuitSchemeData& data = objMapper.getSchemeData();
 
@@ -407,29 +409,14 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
 
     // Import meshes and morphologies
     callback.updateProgress("Identifying layer ids...", 0);
-    _populateLayerIds(properties, blueConfiguration,
-                      colorScheme == CircuitColorScheme::by_target
-                      ? allGids: brain::GIDSet(),
-                      data.layers);
+    _populateLayerIds(blueConfiguration, circuit, allGids, data.layers);
 
     callback.updateProgress("Identifying electro-physiology types...", 0);
-    data.etypes.ids = circuit.getElectrophysiologyTypes(
-        colorScheme == CircuitColorScheme::by_etype ? allGids
-                                                    : brain::GIDSet());
+    data.etypes.ids = circuit.getElectrophysiologyTypes(allGids);
     //data.etypes.names = circuit.getElectrophysiologyTypeNames();
 
     callback.updateProgress("Getting morphology types...", 0);
-    strings mTypeNames;
-    if (colorScheme == CircuitColorScheme::by_mtype
-         || colorScheme == CircuitColorScheme::by_layer) // We will use the m-type to retrive layers in case
-                                                         // we cannot load them from a mvd3 file
-    {
-        data.mtypes.ids = circuit.getMorphologyTypes(allGids);
-        mTypeNames = circuit.getMorphologyTypeNames();
-        std::set<std::string> uniqueMTypes (mTypeNames.begin(), mTypeNames.end());
-        // Not needed by now
-        //data.mtypes.names = circuit.getMorphologyTypeNames();
-    }
+    data.mtypes.ids = circuit.getMorphologyTypes(allGids);
 
     callback.updateProgress("Importing morphologies...", 0);
     float maxMorphologyLength = 0.f;
@@ -512,8 +499,16 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
                                                   metadata);
     modelDescriptor->setTransformation(transformation);
 
+    // Clean the circuit mapper associated with this model
+    modelDescriptor->onRemoved([plptr = _pluginPtr](const brayns::ModelDescriptor& remMod)
+    {
+        plptr->releaseCircuitMapper(remMod.getModelID());
+    });
+
     objMapper.setSourceModel(modelDescriptor);
     objMapper.onCircuitColorFinish(colorScheme, morphologyScheme);
+
+    this->_pluginPtr->addCircuitMapper(std::move(objMapper));
 
     return modelDescriptor;
 }
@@ -574,8 +569,9 @@ size_t AbstractCircuitLoader::_getMaterialFromCircuitAttributes(
     case CircuitColorScheme::by_layer:
         if (data && index < data->layers.ids.size())
         {
-            const auto layerId = data->layers.ids[index];
-            materialId = NB_MATERIALS_PER_INSTANCE * layerId;
+            const auto& layerId = data->layers.ids[index];
+            auto vi = data->layers.virtualIndex[layerId];
+            materialId = NB_MATERIALS_PER_INSTANCE * vi;
             data->layers.materialMap[layerId] = materialId;
         }
         else
@@ -587,32 +583,18 @@ size_t AbstractCircuitLoader::_getMaterialFromCircuitAttributes(
     return materialId;
 }
 
-void AbstractCircuitLoader::_populateLayerIds(
-    const brayns::PropertyMap &properties, const brion::BlueConfig &blueConfig,
-    const brain::GIDSet &gids, SchemeItem& result) const
+void AbstractCircuitLoader::_populateLayerIds(const brion::BlueConfig &blueConfig,
+                                              const brain::Circuit& circuit,
+                                              const brain::GIDSet &gids,
+                                              LayerSchemeItem& result) const
 {
-    size_ts layerIds;
-    try
-    {
-        brion::Circuit brionCircuit(blueConfig.getCircuitSource());
-        for (const auto &a : brionCircuit.get(gids, brion::NEURON_LAYER))
-        {
-            auto id = std::stoul(a[0]);
-            result.ids.push_back(id);
-            result.nameMap[id] = "Layer " + std::to_string(id + 1);
-        }
-    }
-    catch (...)
-    {
-        const auto colorScheme = stringToEnum<CircuitColorScheme>(
-            properties.getProperty<std::string>(
-                PROP_CIRCUIT_COLOR_SCHEME.name));
-        if (colorScheme == CircuitColorScheme::by_layer)
-            PLUGIN_ERROR << "Only MVD2 format is currently supported by Brion "
-                            "circuits. Color scheme by layer not available for "
-                            "this circuit"
-                         << std::endl;
-    }
+    const auto& tsvFile = blueConfig.get(brion::BlueConfigSection::CONFIGSECTION_RUN,
+                                         "Default", "MEComboInfoFile");
+    result.ids = circuit.getLayers(gids, tsvFile);
+    std::unordered_set<std::string> uniqueLayers(result.ids.begin(), result.ids.end());
+    size_t idx = 0;
+    for(const auto& uniqueLayer : uniqueLayers)
+        result.virtualIndex[uniqueLayer] = idx++;
 }
 
 std::string AbstractCircuitLoader::_getMeshFilenameFromGID(
@@ -950,6 +932,7 @@ float AbstractCircuitLoader::_importMorphologies(
         func(newMap._cylinderMap,    id,    startCylinders,  endCylinders);
         func(newMap._sdfGeometryMap, id,    startSDFGeoms,   endSDFGeoms);
         func(newMap._sdfBezierMap,   id,    startSDFBeziers, endSDFBeziers);
+        newMap._linealIndex = i;
         mapper.add(gid, newMap);
 
         maxDistanceToSoma =
@@ -960,6 +943,7 @@ float AbstractCircuitLoader::_importMorphologies(
 
         ++i;
     }
+
 
     // Synapses
     const bool loadAfferentSynapses =

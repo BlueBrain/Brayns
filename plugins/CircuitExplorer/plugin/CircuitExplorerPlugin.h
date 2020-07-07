@@ -49,10 +49,27 @@ public:
     void preRender() final;
     void postRender() final;
 
-    CellObjectMapper& getMapperForCircuit(const std::string& circuitFilePath);
-    void releaseCircuitMapper(const std::string& circuitFilePath);
+    template<class T,
+             typename = std::enable_if_t<std::is_base_of<CellObjectMapper, T>::value>
+            >
+    void addCircuitMapper(T&& mapper)
+    {
+        _mappers.emplace_back(std::make_unique<T>(std::forward<T>(mapper)));
+    }
+    void releaseCircuitMapper(const size_t modelId);
 
 private:
+    CellObjectMapper* getMapperForCircuit(const size_t modelId) noexcept
+    {
+        for(auto& mapper : _mappers)
+        {
+            if(mapper->getSourceModelId() == modelId)
+                return mapper.get();
+        }
+
+        return nullptr;
+    }
+
     // Rendering
     MessageResult _setCamera(const CameraDefinition&);
     CameraDefinition _getCamera();
@@ -114,6 +131,6 @@ private:
     int16_t _accumulationFrameNumber{0};
     size_t _prevAccumulationSetting;
 
-    std::unordered_map<std::string, CellObjectMapper> _circuitMappers;
+    std::vector<std::unique_ptr<CellObjectMapper>> _mappers;
 };
 #endif

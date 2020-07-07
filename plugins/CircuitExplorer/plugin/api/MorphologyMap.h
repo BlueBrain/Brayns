@@ -34,6 +34,9 @@
 
 struct MorphologyMap
 {
+    // Index generated when loading and processing the morphology
+    size_t _linealIndex;
+
     // material Id -> list of spheres for this morhpology
     std::unordered_map<size_t, std::vector<size_t>> _sphereMap;
 
