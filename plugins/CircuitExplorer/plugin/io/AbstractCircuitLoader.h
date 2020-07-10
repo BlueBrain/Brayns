@@ -76,14 +76,15 @@ public:
      * @brief _populateLayerIds populates the neuron layer IDs. This is
      * currently only supported for the MVD2 format.
      * @param blueConfig Configuration of the circuit
+     * @param circuit Circuit used to read the layers
      * @param gids GIDs of the neurons
      * @param result SchemeItem where the ids and layer names will be
      * sotred
      */
-    void _populateLayerIds(const brayns::PropertyMap &props,
-                           const brion::BlueConfig &blueConfig,
+    void _populateLayerIds(const brion::BlueConfig &blueConfig,
+                           const brain::Circuit& circuit,
                            const brain::GIDSet &gids,
-                           SchemeItem& result) const;
+                           LayerSchemeItem& result) const;
 
     static void setSimulationTransferFunction(brayns::TransferFunction &tf,
                                               const float finalOpacity = 1.f);

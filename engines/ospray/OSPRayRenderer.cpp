@@ -121,7 +121,7 @@ void OSPRayRenderer::commit()
     }
 
     osphelper::set(_renderer, "timestamp", static_cast<float>(ap.getFrame()));
-    osphelper::set(_renderer, "randomNumber", rand() % 10000);
+    osphelper::set(_renderer, "randomNumber", 1);
     osphelper::set(_renderer, "bgColor", Vector3f(rp.getBackgroundColor()));
     osphelper::set(_renderer, "varianceThreshold",
                    static_cast<float>(rp.getVarianceThreshold()));

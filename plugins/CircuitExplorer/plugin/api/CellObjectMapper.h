@@ -33,9 +33,23 @@
 
 struct SchemeItem
 {
-  size_ts ids;
-  std::unordered_map<size_t, size_t> materialMap;
-  std::unordered_map<size_t, std::string> nameMap;
+    // Holds the ids of the element they represent for each GID
+    // (ids of all targets, ids of all mtypes, etc)
+    size_ts ids;
+    // Holds a map element id to material id in brayns
+    std::unordered_map<size_t, size_t> materialMap;
+    // Holds a map of element id to representative name
+    std::unordered_map<size_t, std::string> nameMap;
+};
+
+struct LayerSchemeItem
+{
+    // Holds a list of all layers for each GID
+    strings ids;
+    // Holds a virtual unique index for each layer
+    std::unordered_map<std::string, size_t> virtualIndex;
+    // Holds a map of layer name to material id
+    std::unordered_map<std::string, size_t> materialMap;
 };
 
 struct CircuitSchemeData
@@ -43,7 +57,7 @@ struct CircuitSchemeData
     SchemeItem targets;
     SchemeItem etypes;
     SchemeItem mtypes;
-    SchemeItem layers;
+    LayerSchemeItem layers;
 };
 
 struct RemapCircuitResult
@@ -69,9 +83,14 @@ public:
                               const MorphologyColorScheme& mScheme);
 
     CircuitSchemeData& getSchemeData();
-    const std::unordered_map<size_t, MorphologyMap>& getMapping() const
+    const std::unordered_map<size_t, MorphologyMap>& getMapping() const noexcept
     {
         return _cellToRenderableMap;
+    }
+
+    size_t getSourceModelId() const
+    {
+        return _model->getModelID();
     }
 
 private:
