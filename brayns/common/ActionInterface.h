@@ -22,8 +22,8 @@
 #pragma once
 
 #include <brayns/common/ActionMessage.h>
-#include <brayns/common/log.h>
 #include <brayns/common/PropertyMap.h>
+#include <brayns/common/log.h>
 #include <brayns/common/types.h>
 
 #include <functional>
