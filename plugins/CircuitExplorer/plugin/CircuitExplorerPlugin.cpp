@@ -1518,10 +1518,8 @@ ExportLayerToDiskResult CircuitExplorerPlugin::_exportLayerToDisk(const ExportLa
     return result;
 }
 
-brayns::Message CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
+inline bool _createMediaFile(const MakeMovieParameters& params, brayns::Message& result)
 {
-    brayns::Message result;
-
     std::set<std::string> uniqueLayers;
     uniqueLayers.insert(params.layers.begin(), params.layers.end());
 
@@ -1531,7 +1529,7 @@ brayns::Message CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& par
         PLUGIN_ERROR << "MakeMovie: Default layer \"movie\" not present. Aborting."
                      << std::endl;
         result.setError(1, "Default layer \"movie\" not present");
-        return result;
+        return false;
     }
 
     // Find ffmpeg executable path
@@ -1544,7 +1542,7 @@ brayns::Message CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& par
         PLUGIN_ERROR << "Could not launch movie creation: ffmpeg not found"
                      << std::endl;
         result.setError(2, "Could not launch movie creation: ffmpeg not found");
-        return result;
+        return false;
     }
     while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
     {
@@ -1632,7 +1630,7 @@ brayns::Message CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& par
                                  << status << std::endl;
                     result.setError(3, "Could not create media file. FFMPEG returned "
                                        + std::to_string(status));
-                    return result;
+                    return false;
                 }
             }
         }
@@ -1642,12 +1640,26 @@ brayns::Message CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& par
                             "Could not launch FFMPEG."
                          << std::endl;
             result.setError(4, "Could not create media video file. Could not launch FFMPEG");
-            return result;
+            return false;
         }
     }
 
+    return true;
+}
+
+brayns::Message CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
+{
+    brayns::Message result;
+
+    bool ffmpegError = _createMediaFile(params, result);
+    
     if (params.eraseFrames)
     {
+        std::string sanitizedFramesFolder = params.framesFolderPath;
+        const std::string slash =
+        sanitizedFramesFolder[sanitizedFramesFolder.length() - 1] == '/' ? ""
+                                                                         : "/";
+        sanitizedFramesFolder = _sanitizeString(sanitizedFramesFolder);
         DIR* dir;
         struct dirent* ent;
         const std::regex fileNameRegex("[0-9]{5}." +
@@ -1671,8 +1683,8 @@ brayns::Message CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& par
         {
             PLUGIN_ERROR << "make-movie: Could not clean up frames"
                          << std::endl;
-            result.setError(5, "Could not clean up frames");
-            return result;
+            if(!ffmpegError)
+                result.setError(5, "Could not clean up frames");
         }
     }
 

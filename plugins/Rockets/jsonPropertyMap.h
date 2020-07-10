@@ -1252,6 +1252,9 @@ brayns::PropertyMap jsonToPropertyMap(const std::string& json,
             enforceSetProperty(m, map, schema.getPropertyType(propName));
         else if(schema.empty()) // Only accept non schema values when theres no schema
             trySetProperty(m, map);
+        else
+            throw std::runtime_error("Unknown property \"" + std::string(m.name.GetString())
+                                     + "\"");
     }
 
     return map;
