@@ -28,44 +28,6 @@
 #include <brayns/common/ActionMessage.h>
 #include <brayns/common/types.h>
 
-struct TestRequestStruct : public brayns::Message
-{
-    MESSAGE_BEGIN(TestRequestStruct)
-    MESSAGE_ENTRY(int, myIntVar, "An integer input variable")
-    MESSAGE_ENTRY(std::vector<int32_t>, myListVar, "A int list")
-    MESSAGE_ENTRY(std::vector<float>, myFloatList, "A float list")
-    MESSAGE_ENTRY(std::vector<std::string>, myStringList, "A string list")
-    MESSAGE_ENTRY(std::vector<bool>, myBoolList, "A bool list")
-    MESSAGE_ENTRY(std::vector<double>, myDoubleList, "A list of doubles")
-};
-
-struct TestResponseStruct : public brayns::Message
-{
-    MESSAGE_BEGIN(TestResponseStruct)
-    MESSAGE_ENTRY(bool, myBoolVar, "A bool output variable")
-    MESSAGE_ENTRY(std::vector<int32_t>, myOutListVar, "A list output variable");
-    MESSAGE_ENTRY(std::vector<bool>, myOutBoolList, "A bool list output variable")
-};
-
-struct TestNotification : public brayns::Message
-{
-    MESSAGE_BEGIN(TestNotification)
-    MESSAGE_ENTRY(int, myIntVar, "An integer input variable")
-};
-
-struct TestResponse : public brayns::Message
-{
-    MESSAGE_BEGIN(TestResponse)
-    MESSAGE_ENTRY(double, myFloatVar, "A float output variable")
-};
-
-struct Result : public brayns::Message
-{
-    MESSAGE_BEGIN(Result)
-    MESSAGE_ENTRY(bool, sucess, "Wether the last request was successful or not")
-    MESSAGE_ENTRY(std::string, error, "A string describing the error, if any")
-};
-
 struct SaveModelToCache : public brayns::Message
 {
     MESSAGE_BEGIN(SaveModelToCache)

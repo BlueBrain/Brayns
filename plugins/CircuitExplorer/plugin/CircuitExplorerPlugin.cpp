@@ -540,68 +540,6 @@ void CircuitExplorerPlugin::init()
                  "Scheme to which remap the circuits colors to"},
                 [&](const RemapCircuit& s) { return _remapCircuitToScheme(s); });
 
-           actionInterface->registerRequest<TestRequestStruct, TestResponseStruct>(
-                {"test-message",
-                  "A test purpose message with input parameters and return value",
-                  "Test parameter",
-                  "Test parameter description"},
-                 [](const TestRequestStruct& request)
-                 {
-                    std::cout << "Received " << request.myIntVar << std::endl;
-                    std::cout << "List length " << request.myListVar.size() << std::endl;
-                    std::cout << "Float length " << request.myFloatList.size() << std::endl;
-                    for(const auto v : request.myFloatList)
-                        std::cout << v << " ";
-                    std::cout << std::endl;
-
-                    std::cout << "Double lenght " << request.myDoubleList.size() << std::endl;
-                    for(const auto v : request.myDoubleList)
-                        std::cout << v << " ";
-                    std::cout << std::endl;
-
-                    std::cout << "String list length " << request.myStringList.size() << std::endl;
-                    for(const auto& s : request.myStringList)
-                        std::cout << "\t" << s << std::endl;
-                    std::cout << "Bool list length " << request.myBoolList.size() << std::endl;
-
-                    TestResponseStruct response;
-                    response.myBoolVar = (request.myIntVar > 0? true : false);
-                    for(const auto i : request.myListVar)
-                        response.myOutListVar.push_back(-i);
-                    for(auto val : request.myBoolList)
-                        response.myOutBoolList.push_back(!val);
-                    return response;
-                });
-
-            actionInterface->registerNotification<TestNotification>(
-                {"test-notification",
-                 "A test purpose notification with input parameters and no return value",
-                 "Test parameter",
-                 "Test parameter description"},
-                 [](const TestNotification& n)
-                 {
-                    std::cout << "Notification received " << n.myIntVar << std::endl;
-                 });
-
-            actionInterface->registerRequest<TestResponse>(
-                {"test-request",
-                 "A test purpose request with no input parameters and return value"},
-                []()
-                {
-                    std::cout << "Request no input received" << std::endl;
-                    TestResponse tr;
-                    tr.myFloatVar = 152.6f;
-                    return tr;
-                });
-
-            actionInterface->registerNotification(
-            brayns::RpcDescription
-            {"test-notification-empty",
-             "A test purpose notification with no input parameters and no return value"},
-             []()
-            {
-                std::cout << "Received a notification!" << std::endl;
-            });
         } // if (actionInterface)
 
     auto& engine = _api->getEngine();
