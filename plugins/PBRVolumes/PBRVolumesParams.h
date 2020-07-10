@@ -21,23 +21,17 @@
 #ifndef PBRVOLUMES_H
 #define PBRVOLUMES_H
 
+#include <brayns/common/ActionMessage.h>
 #include <brayns/common/types.h>
-
-// Commom parameters used to give information
-// about wether the request was sucessfuly parsed
-// from JSON
-#define COMMON_PARAMS \
-    bool parsed{true}; \
-    std::string parseMessage{""}; \
 
 // Commom parameters for all type of volumes
 #define COMMON_VOLUME_PROPS \
-    std::string name; \
-    floats absorption; \
-    floats scattering; \
-    float scale; \
-    float g; \
-    floats Le; \
+    MESSAGE_ENTRY(std::string, name, "Volume scene name") \
+    MESSAGE_ENTRY(std::vector<float>, absorption, "Absorption spectrum") \
+    MESSAGE_ENTRY(std::vector<float>, scattering, "Scattering spectrum") \
+    MESSAGE_ENTRY(double, scale, "Spectrums scale") \
+    MESSAGE_ENTRY(double, g, "Anisotropy parameter") \
+    MESSAGE_ENTRY(std::vector<float>, Le, "Radiance spectrum") \
 
 /**
  * @brief The AddHomogeneusVolume struct
@@ -45,29 +39,27 @@
  * enclosed in a box defined by p0 (min) and
  * p1 (max)
  */
-struct AddHomogeneusVolume
+struct AddHomogeneusVolume : public brayns::Message
 {
-    COMMON_PARAMS
+    MESSAGE_BEGIN(AddHomogeneusVolume)
     COMMON_VOLUME_PROPS
-    float density;
-    floats p0;
-    floats p1;
+    MESSAGE_ENTRY(double, density, "Constant volume density")
+    MESSAGE_ENTRY(std::vector<float>, p0, "Volume minimum bound")
+    MESSAGE_ENTRY(std::vector<float>, p1, "Volume maximum bound")
 };
-bool from_json(AddHomogeneusVolume& request, const std::string& payload);
 
 /**
  * @brief The AddHomogeneusVolumeToModel struct
  * Struct to add a constant density volume enclosed
  * in the shapes of the model defined by its model ID
  */
-struct AddHomogeneusVolumeToModel
+struct AddHomogeneusVolumeToModel : public brayns::Message
 {
-    COMMON_PARAMS
+    MESSAGE_BEGIN(AddHomogeneusVolumeToModel)
     COMMON_VOLUME_PROPS
-    float density;
-    int32_t modelId;
+    MESSAGE_ENTRY(double, density, "Constant volume density")
+    MESSAGE_ENTRY(int32_t, modelId, "Model to which to add the volume")
 };
-bool from_json(AddHomogeneusVolumeToModel& request, const std::string& payload);
 
 /**
  * @brief The AddHeterogeneusVolume struct
@@ -78,16 +70,15 @@ bool from_json(AddHomogeneusVolumeToModel& request, const std::string& payload);
  * will convert it into a Homogeneus volume taking as
  * density (scale) the middle value between min and max
  */
-struct AddHeterogeneusVolume
+struct AddHeterogeneusVolume : public brayns::Message
 {
-    COMMON_PARAMS
+    MESSAGE_BEGIN(AddHeterogeneusVolume)
     COMMON_VOLUME_PROPS
-    float minDensity;
-    float maxDensity;
-    floats p0;
-    floats p1;
+    MESSAGE_ENTRY(double, minDensity, "Density minimum value")
+    MESSAGE_ENTRY(double, maxDensity, "Density maximum value")
+    MESSAGE_ENTRY(std::vector<float>, p0, "Volume minimum bound")
+    MESSAGE_ENTRY(std::vector<float>, p1, "Volume maximum bound")
 };
-bool from_json(AddHeterogeneusVolume& request, const std::string& payload);
 
 /**
  * @brief The AddGridVolume struct
@@ -99,32 +90,17 @@ bool from_json(AddHeterogeneusVolume& request, const std::string& payload);
  * the gridType property defines the type of grid
  * ('grid', 'binarygrid', 'vsdgrid')
  */
-struct AddGridVolume
+struct AddGridVolume : public brayns::Message
 {
-    COMMON_PARAMS
+    MESSAGE_BEGIN(AddGridVolume)
     COMMON_VOLUME_PROPS
-    std::string gridType;
-    floats p0;
-    floats p1;
-    floats density;
-    int32_t nx;
-    int32_t ny;
-    int32_t nz;
+    MESSAGE_ENTRY(std::string, gridType, "Type of grid (PBRT-V2 only, values \"grid\" or \"vsd\"")
+    MESSAGE_ENTRY(std::vector<float>, p0, "Volume minimum bound")
+    MESSAGE_ENTRY(std::vector<float>, p1, "Volume maximum bound")
+    MESSAGE_ENTRY(std::vector<float>, density, "Volume grid density values")
+    MESSAGE_ENTRY(int32_t, nx, "Grid X dimension")
+    MESSAGE_ENTRY(int32_t, ny, "Grid Y dimension")
+    MESSAGE_ENTRY(int32_t, nz, "Grid Z dimension")
 };
-bool from_json(AddGridVolume& request, const std::string& payload);
-
-/**
- * @brief The AddVolumeResponse struct
- * Data returned after requesting to add a volume.
- * An error 0 indicates the operation was sucessful.
- * Any other value indicates an error and the message
- * field will carry information about the error.
- */
-struct AddVolumeResponse
-{
-    int error;
-    std::string message;
-};
-std::string to_json(const AddVolumeResponse& response);
 
 #endif

@@ -65,13 +65,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#define HANDLE_NOT_PARSED(payload, result) \
-    if(!payload.parsed) { \
-        result.error = 9; \
-        result.message = payload.parseError; \
-        return result; \
-    }
-
 #define REGISTER_LOADER(LOADER, FUNC) \
     registry.registerLoader({std::bind(&LOADER::getSupportedDataTypes), FUNC});
 
@@ -333,181 +326,283 @@ void CircuitExplorerPlugin::init()
                                           AstrocyteLoader::getCLIProperties(), this));
 
     auto actionInterface = _api->getActionInterface();
-    if (actionInterface)
-    {
-        PLUGIN_INFO << "Registering 'set-material' endpoint" << std::endl;
-        actionInterface->registerRequest<MaterialDescriptor, MessageResult>(
-            "set-material",
-            [&](const MaterialDescriptor& param) {
-                return _setMaterial(param);
-        });
-
-        PLUGIN_INFO << "Registering 'set-materials' endpoint" << std::endl;
-        actionInterface->registerRequest<MaterialsDescriptor, MessageResult>(
-            "set-materials",
-            [&](const MaterialsDescriptor& param) {
-                return _setMaterials(param);
-        });
-
-        PLUGIN_INFO << "Registering 'set-material-range' endpoint" << std::endl;
-        actionInterface->registerRequest<MaterialRangeDescriptor, MessageResult>(
-            "set-material-range",
-            [&](const MaterialRangeDescriptor& param) {
-                return _setMaterialRange(param);
-        });
-
-        PLUGIN_INFO << "Registering 'get-material-ids' endpoint" << std::endl;
-        actionInterface->registerRequest<ModelId, MaterialIds>(
-            "get-material-ids", [&](const ModelId& modelId) -> MaterialIds {
-                return _getMaterialIds(modelId);
+        if (actionInterface)
+        {
+            actionInterface->registerRequest<MaterialDescriptor, brayns::Message>(
+                {"set-material",
+                 "Modifies a specific material",
+                 "MaterialDescriptor",
+                 "The data to identify and modify the material"},
+                [&](const MaterialDescriptor& param) {
+                    return _setMaterial(param);
             });
 
-        PLUGIN_INFO << "Registering 'get-material' endpoint" << std::endl;
-        actionInterface->registerRequest<ModelMaterialId, MaterialDescriptor>(
-            "get-material", [&](const ModelMaterialId& modelId) -> MaterialDescriptor {
-                return _getMaterial(modelId);
+            actionInterface->registerRequest<MaterialsDescriptor, brayns::Message>(
+                {"set-materials",
+                 "Set a set of materials from one or more models",
+                 "MaterialsDescriptor",
+                 "The data to identify and modify the materials of the given models"},
+                [&](const MaterialsDescriptor& param) {
+                    return _setMaterials(param);
             });
 
-        PLUGIN_INFO << "Registering 'set-material-extra-attributes' endpoint"
-                    << std::endl;
-        actionInterface->registerRequest<MaterialExtraAttributes, MessageResult>(
-            "set-material-extra-attributes",
-            [&](const MaterialExtraAttributes& param) {
-                return _setMaterialExtraAttributes(param);
+            actionInterface->registerRequest<MaterialRangeDescriptor, brayns::Message>(
+                {"set-material-range",
+                 "Sets a set of materials of a single model with common material data",
+                 "MaterialRangeDescriptor",
+                 "The"},
+                [&](const MaterialRangeDescriptor& param) {
+                    return _setMaterialRange(param);
             });
 
-        PLUGIN_INFO << "Registering 'set-synapses-attributes' endpoint"
-                    << std::endl;
-        actionInterface->registerRequest<SynapseAttributes, MessageResult>(
-            "set-synapses-attributes", [&](const SynapseAttributes& param) {
-                return _setSynapseAttributes(param);
+            actionInterface->registerRequest<ModelId, MaterialIds>(
+                {"get-material-ids",
+                 "Returns all the material IDs of a given model",
+                 "ModelId",
+                 "The ID of the model to query"},
+                [&](const ModelId& modelId) -> MaterialIds {
+                    return _getMaterialIds(modelId);
+                });
+
+            actionInterface->registerRequest<ModelMaterialId, MaterialDescriptor>(
+                {"get-material",
+                  "Returns the properties from the given model and material",
+                  "ModelMaterialId",
+                  "The ID of the model and of the material to be queried"},
+                [&](const ModelMaterialId& modelId) -> MaterialDescriptor {
+                    return _getMaterial(modelId);
+                });
+
+            actionInterface->registerRequest<MaterialExtraAttributes, brayns::Message>(
+                {"set-material-extra-attributes",
+                 "Sets the extra material attributes necessary for the Circuit Explorer renderer",
+                 "MaterialExtraAttributes",
+                 "Id of the model to which the material attributes should be extended"},
+                [&](const MaterialExtraAttributes& param) {
+                    return _setMaterialExtraAttributes(param);
+                });
+
+            actionInterface->registerRequest<SynapseAttributes, brayns::Message>(
+                {"set-synapses-attributes",
+                 "Sets sypnapse specific attributes for a given model",
+                 "SynapseAttributes",
+                 "The model and synapse attributes to modify"},
+                [&](const SynapseAttributes& param) {
+                    return _setSynapseAttributes(param);
+                });
+
+            actionInterface->registerRequest<SaveModelToCache, brayns::Message>(
+                {"save-model-to-cache",
+                 "Builds and saves a Brayns cache model from a given loaded model",
+                 "SaveModelToCache",
+                 "Model to be saved and parameters for the build of the cache file"},
+                [&](const SaveModelToCache& param) {
+                    return _saveModelToCache(param);
             });
 
-        PLUGIN_INFO << "Registering 'save-model-to-cache' endpoint"
-                    << std::endl;
-        actionInterface->registerRequest<SaveModelToCache, MessageResult>(
-            "save-model-to-cache",
-            [&](const SaveModelToCache& param) {
-                return _saveModelToCache(param);
-        });
+            actionInterface->registerRequest<ConnectionsPerValue, brayns::Message>(
+                {"set-connections-per-value",
+                 "Draws a point cloud representing the number of connections for a given frame"
+                 " and simulation value",
+                 "ConnectionsPerValue",
+                 "Model, frame, and value to build the point cloude"},
+                [&](const ConnectionsPerValue& param) {
+                    return _setConnectionsPerValue(param);
+                });
 
-        PLUGIN_INFO << "Registering 'set-connections-per-value' endpoint"
-                    << std::endl;
-        actionInterface->registerRequest<ConnectionsPerValue, MessageResult>(
-            "set-connections-per-value", [&](const ConnectionsPerValue& param) {
-                return _setConnectionsPerValue(param);
-            });
+            actionInterface->registerRequest<MetaballsFromSimulationValue, brayns::Message>(
+                {"set-metaballs-per-simulation-value",
+                 "Adds a metaballs model representing the number of connections for a given frame"
+                 " and simulation value",
+                 "MetaballsFromSimulationValue",
+                 "Model, frame, and value to build the metaballs"},
+                [&](const MetaballsFromSimulationValue& param) {
+                    return _setMetaballsPerSimulationValue(param);
+                });
 
-        PLUGIN_INFO
-            << "Registering 'set-metaballs-per-simulation-value' endpoint"
-            << std::endl;
-        actionInterface->registerRequest
-                <MetaballsFromSimulationValue, MessageResult>(
-            "set-metaballs-per-simulation-value",
-            [&](const MetaballsFromSimulationValue& param) {
-                return _setMetaballsPerSimulationValue(param);
-            });
+            actionInterface->registerRequest<CameraDefinition, brayns::Message>(
+                {"set-odu-camera",
+                  "Set the camera in a position and with an specific orientation towards the scene",
+                  "CameraDefinition",
+                  "Camera data to modify the current camera"},
+                [&](const CameraDefinition& s) { return _setCamera(s); });
 
-        PLUGIN_INFO << "Registering 'set-odu-camera' endpoint" << std::endl;
-        _api->getActionInterface()->registerRequest
-                <CameraDefinition, MessageResult>(
-            "set-odu-camera",
-            [&](const CameraDefinition& s) { return _setCamera(s); });
+            actionInterface->registerRequest<CameraDefinition>(
+                {"get-odu-camera",
+                 "Returns the properties of the current camera"},
+                [&]() -> CameraDefinition { return _getCamera(); });
 
-        PLUGIN_INFO << "Registering 'get-odu-camera' endpoint" << std::endl;
-        _api->getActionInterface()->registerRequest<CameraDefinition>(
-            "get-odu-camera",
-            [&]() -> CameraDefinition { return _getCamera(); });
-
-        PLUGIN_INFO << "Registering 'attach-cell-growth-handler' endpoint"
-                    << std::endl;
-        _api->getActionInterface()
-            ->registerRequest<AttachCellGrowthHandler, MessageResult>(
-                "attach-cell-growth-handler",
+            actionInterface->registerRequest<AttachCellGrowthHandler, brayns::Message>(
+                {"attach-cell-growth-handler",
+                 "Attach a dynamic cell growing rendering system for a given model",
+                 "AttachCellGrowthHandler",
+                 "Model to which to attach the handler, and number of frames the growth should span"},
                 [&](const AttachCellGrowthHandler& s) {
                     return _attachCellGrowthHandler(s);
                 });
 
-        PLUGIN_INFO
-            << "Registering 'attach-circuit-simulation-handler' endpoint"
-            << std::endl;
-        _api->getActionInterface()
-            ->registerRequest<AttachCircuitSimulationHandler, MessageResult>(
-                "attach-circuit-simulation-handler",
-                [&](const AttachCircuitSimulationHandler& s) {
-                    return _attachCircuitSimulationHandler(s);
+            actionInterface->registerRequest<AttachCircuitSimulationHandler, brayns::Message>(
+                    {"attach-circuit-simulation-handler",
+                     "Dynamically loads and attach a simulation to a loaded model",
+                     "AttachCircuitSimulationHandler",
+                     "Model to which attach, and simulation information to fetch"},
+                    [&](const AttachCircuitSimulationHandler& s) {
+                        return _attachCircuitSimulationHandler(s);
+                    });
+
+            actionInterface->registerRequest<ExportFramesToDisk, brayns::Message>(
+                {"export-frames-to-disk",
+                 "Export a set of frames from a simulation as images written to disk",
+                 "ExportFramesToDisk",
+                 "Configuration of the simulation to render and image store specifications"},
+                [&](const ExportFramesToDisk& s) { return _exportFramesToDisk(s); });
+
+            actionInterface->registerRequest<FrameExportProgress>(
+                {"get-export-frames-progress",
+                 "Returns the progress of the last issued export frames to disk request"},
+                [&](void) -> FrameExportProgress {
+                    return _getFrameExportProgress();
                 });
 
-        PLUGIN_INFO << "Registering 'export-frames-to-disk' endpoint"
-                    << std::endl;
-        _api->getActionInterface()->registerRequest
-                <ExportFramesToDisk, MessageResult>(
-            "export-frames-to-disk",
-            [&](const ExportFramesToDisk& s) { return _exportFramesToDisk(s); });
-
-        PLUGIN_INFO << "Registering 'get-export-frames-progress' endpoint"
-                    << std::endl;
-        actionInterface->registerRequest<FrameExportProgress>(
-            "get-export-frames-progress", [&](void) -> FrameExportProgress {
-                return _getFrameExportProgress();
-            });
-
-        PLUGIN_INFO << "Registering 'export-layer-to-disk' endpoint"
-                    << std::endl;
-        actionInterface->registerRequest<ExportLayerToDisk, ExportLayerToDiskResult>(
-            "export-layer-to-disk", [&](const ExportLayerToDisk& s) {
-                return _exportLayerToDisk(s);
-            });
-
-        PLUGIN_INFO << "Registering 'make-movie' endpoint" << std::endl;
-        actionInterface->registerRequest<MakeMovieParameters, MessageResult>(
-            "make-movie",
-            [&](const MakeMovieParameters& params) { return _makeMovie(params); });
-
-        PLUGIN_INFO << "Registering 'trace-anterograde' endpoint" << std::endl;
-        _api->getActionInterface()
-               ->registerRequest<AnterogradeTracing, MessageResult>(
-            "trace-anterograde",
-            [&](const AnterogradeTracing& payload) {
-                return _traceAnterogrades(payload);
-            });
-
-        PLUGIN_INFO << "Registering 'add-grid' endpoint" << std::endl;
-        _api->getActionInterface()->registerRequest<AddGrid, MessageResult>(
-            "add-grid", [&](const AddGrid& payload) { return _addGrid(payload); });
-
-        PLUGIN_INFO << "Registering 'add-column' endpoint" << std::endl;
-        _api->getActionInterface()->registerRequest<AddColumn, MessageResult>(
-            "add-column",
-            [&](const AddColumn& payload) { return _addColumn(payload); });
-
-        PLUGIN_INFO << "Registering 'add-sphere' endpoint" << std::endl;
-        _api->getActionInterface()->registerRequest<AddSphere, AddShapeResult>(
-            "add-sphere",
-            [&](const AddSphere& payload) { return _addSphere(payload); });
-
-        PLUGIN_INFO << "Registering 'add-pill' endpoint" << std::endl;
-        _api->getActionInterface()->registerRequest<AddPill, AddShapeResult>(
-            "add-pill",
-            [&](const AddPill& payload) { return _addPill(payload); });
-
-        PLUGIN_INFO << "Registering 'add-cylinder' endpoint" << std::endl;
-        _api->getActionInterface()
-            ->registerRequest<AddCylinder, AddShapeResult>(
-                "add-cylinder", [&](const AddCylinder& payload) {
-                    return _addCylinder(payload);
+            actionInterface->registerRequest<ExportLayerToDisk, ExportLayerToDiskResult>(
+                {"export-layer-to-disk",
+                 "Export 1 or various layers to disk to be used in composition when generating a"
+                 " movie",
+                 "ExportLayerToDisk",
+                 "Information to store the layer on disk, and image data to store in base64 format"},
+                [&](const ExportLayerToDisk& s) {
+                    return _exportLayerToDisk(s);
                 });
 
-        PLUGIN_INFO << "Registering 'add-box' endpoint" << std::endl;
-        _api->getActionInterface()->registerRequest<AddBox, AddShapeResult>(
-            "add-box", [&](const AddBox& payload) { return _addBox(payload); });
+            actionInterface->registerRequest<MakeMovieParameters, brayns::Message>(
+                {"make-movie",
+                 "Builds a movie file from a set of frames stored on disk",
+                 "MakeMovieParameters",
+                 "Information to find the frames, and how to compose them into a media file"},
+                [&](const MakeMovieParameters& params) { return _makeMovie(params); });
 
-        PLUGIN_INFO << "Registering 'remap-circuit-color' endpoint" << std::endl;
-        _api->getActionInterface()
-            ->registerRequest<RemapCircuit, MessageResult>(
-            "remap-circuit-color",
-            [&](const RemapCircuit& s) { return _remapCircuitToScheme(s); });
-    }
+            actionInterface->registerRequest<AnterogradeTracing, brayns::Message>(
+                {"trace-anterograde",
+                 "Performs neuronal tracing; Showing efferent and afferent synapse relationship "
+                 " between cells (including projections)",
+                 "AnterogradeTracing",
+                 "Data in which to base the cell highlight"},
+                [&](const AnterogradeTracing& payload) {
+                    return _traceAnterogrades(payload);
+                });
+
+            actionInterface->registerRequest<AddGrid, brayns::Message>(
+                {"add-grid",
+                 "Adds a visual 3D grid to the scene",
+                 "AddGrid",
+                 "Data necessary to build and render the grid"},
+                [&](const AddGrid& payload) { return _addGrid(payload); });
+
+            actionInterface->registerRequest<AddColumn, brayns::Message>(
+                {"add-column",
+                 "Adds a visual 3D column as a cylinder to the scene",
+                 "AddColumn",
+                 "Parameters to build and add the column to the scene"},
+                [&](const AddColumn& payload) { return _addColumn(payload); });
+
+            actionInterface->registerRequest<AddSphere, AddShapeResult>(
+                {"add-sphere",
+                 "Adds a visual 3D sphere to the scene",
+                 "AddSphere",
+                 "Data to build, place and color the sphere"},
+                [&](const AddSphere& payload) { return _addSphere(payload); });
+
+            actionInterface->registerRequest<AddPill, AddShapeResult>(
+                {"add-pill",
+                 "Adds a pill shape to the scene",
+                 "AddPill",
+                 "The data to choose and build a type of pill"},
+                [&](const AddPill& payload) { return _addPill(payload); });
+
+            actionInterface->registerRequest<AddCylinder, AddShapeResult>(
+                {"add-cylinder",
+                 "Adds a cylinder to the scene",
+                 "AddCylinder",
+                 "The data to build and color the cylinder"},
+                [&](const AddCylinder& payload) { return _addCylinder(payload); });
+
+            actionInterface->registerRequest<AddBox, AddShapeResult>(
+                {"add-box",
+                 "Adds an axis algined box to the scene",
+                 "AddBox",
+                 "The data to build and color the box"},
+                [&](const AddBox& payload) { return _addBox(payload); });
+
+            actionInterface->registerRequest<RemapCircuit, brayns::Message>(
+                {"remap-circuit-color",
+                 "Remap the circuit colors to the specified scheme",
+                 "RemapCircuit",
+                 "Scheme to which remap the circuits colors to"},
+                [&](const RemapCircuit& s) { return _remapCircuitToScheme(s); });
+
+           actionInterface->registerRequest<TestRequestStruct, TestResponseStruct>(
+                {"test-message",
+                  "A test purpose message with input parameters and return value",
+                  "Test parameter",
+                  "Test parameter description"},
+                 [](const TestRequestStruct& request)
+                 {
+                    std::cout << "Received " << request.myIntVar << std::endl;
+                    std::cout << "List length " << request.myListVar.size() << std::endl;
+                    std::cout << "Float length " << request.myFloatList.size() << std::endl;
+                    for(const auto v : request.myFloatList)
+                        std::cout << v << " ";
+                    std::cout << std::endl;
+
+                    std::cout << "Double lenght " << request.myDoubleList.size() << std::endl;
+                    for(const auto v : request.myDoubleList)
+                        std::cout << v << " ";
+                    std::cout << std::endl;
+
+                    std::cout << "String list length " << request.myStringList.size() << std::endl;
+                    for(const auto& s : request.myStringList)
+                        std::cout << "\t" << s << std::endl;
+                    std::cout << "Bool list length " << request.myBoolList.size() << std::endl;
+
+                    TestResponseStruct response;
+                    response.myBoolVar = (request.myIntVar > 0? true : false);
+                    for(const auto i : request.myListVar)
+                        response.myOutListVar.push_back(-i);
+                    for(auto val : request.myBoolList)
+                        response.myOutBoolList.push_back(!val);
+                    return response;
+                });
+
+            actionInterface->registerNotification<TestNotification>(
+                {"test-notification",
+                 "A test purpose notification with input parameters and no return value",
+                 "Test parameter",
+                 "Test parameter description"},
+                 [](const TestNotification& n)
+                 {
+                    std::cout << "Notification received " << n.myIntVar << std::endl;
+                 });
+
+            actionInterface->registerRequest<TestResponse>(
+                {"test-request",
+                 "A test purpose request with no input parameters and return value"},
+                []()
+                {
+                    std::cout << "Request no input received" << std::endl;
+                    TestResponse tr;
+                    tr.myFloatVar = 152.6f;
+                    return tr;
+                });
+
+            actionInterface->registerNotification(
+            brayns::RpcDescription
+            {"test-notification-empty",
+             "A test purpose notification with no input parameters and no return value"},
+             []()
+            {
+                std::cout << "Received a notification!" << std::endl;
+            });
+        } // if (actionInterface)
 
     auto& engine = _api->getEngine();
     _addAdvancedSimulationRenderer(engine);
@@ -582,12 +677,10 @@ void CircuitExplorerPlugin::releaseCircuitMapper(const size_t modelId)
     }), _mappers.end());
 }
 
-MessageResult CircuitExplorerPlugin::_setMaterialExtraAttributes(
+brayns::Message CircuitExplorerPlugin::_setMaterialExtraAttributes(
     const MaterialExtraAttributes& mea)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(mea, result)
+    brayns::Message result;
 
     auto modelDescriptor = _api->getScene().getModel(mea.modelId);
     if (modelDescriptor)
@@ -611,26 +704,22 @@ MessageResult CircuitExplorerPlugin::_setMaterialExtraAttributes(
         catch (const std::runtime_error& e)
         {
             PLUGIN_INFO << e.what() << std::endl;
-            result.error = 3;
-            result.message = std::string(e.what());
+            result.setError(3, e.what());
         }
     else
     {
         PLUGIN_INFO << "Model " << mea.modelId << " is not registered"
                     << std::endl;
-        result.error = 2;
-        result.message = "Model " + std::to_string(mea.modelId)
-                         + " is not registered";
+        result.setError(2, "Model " + std::to_string(mea.modelId)
+                           + " is not registered");
     }
 
     return result;
 }
 
-MessageResult CircuitExplorerPlugin::_setMaterial(const MaterialDescriptor& md)
+brayns::Message CircuitExplorerPlugin::_setMaterial(const MaterialDescriptor& md)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(md, result)
+    brayns::Message result;
 
     auto modelDescriptor = _api->getScene().getModel(md.modelId);
     if (modelDescriptor)
@@ -672,35 +761,30 @@ MessageResult CircuitExplorerPlugin::_setMaterial(const MaterialDescriptor& md)
                 PLUGIN_INFO << "Material " << md.materialId
                             << " is not registered in model " << md.modelId
                             << std::endl;
-                result.error = 4;
-                result.message = "Material " + std::to_string(md.materialId)
-                                 + " is not registered in model "
-                                 + std::to_string(md.modelId);
+                result.setError(4, "Material " + std::to_string(md.materialId)
+                                   + " is not registered in model "
+                                   + std::to_string(md.modelId));
             }
         }
         catch (const std::runtime_error& e)
         {
             PLUGIN_INFO << e.what() << std::endl;
-            result.error = 3;
-            result.message = std::string(e.what());
+            result.setError(3, e.what());
         }
     else
     {
         PLUGIN_INFO << "Model " << md.modelId << " is not registered"
                     << std::endl;
-        result.error = 2;
-        result.message = "Model " + std::to_string(md.modelId)
-                         + " is not registered";
+        result.setError(2, "Model " + std::to_string(md.modelId)
+                           + " is not registered");
     }
 
     return result;
 }
 
-MessageResult CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
+brayns::Message CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(md, result)
+    brayns::Message result;
 
     for (const auto modelId : md.modelIds)
     {
@@ -768,8 +852,7 @@ MessageResult CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md
                 catch (const std::runtime_error& e)
                 {
                     PLUGIN_INFO << e.what() << std::endl;
-                    result.error = 2;
-                    result.message = std::string(e.what());
+                    result.setError(2, e.what());
                 }
                 ++id;
             }
@@ -779,20 +862,17 @@ MessageResult CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md
         {
             PLUGIN_INFO << "Model " << modelId << " is not registered"
                         << std::endl;
-            result.error = 1;
-            result.message = "Model " + std::to_string(modelId) + "is not "
-                             + "registered";
+            result.setError(1, "Model " + std::to_string(modelId) + "is not "
+                               + "registered");
         }
     }
 
     return result;
 }
 
-MessageResult CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescriptor& mrd)
+brayns::Message CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescriptor& mrd)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(mrd, result)
+    brayns::Message result;
 
     auto modelDescriptor = _api->getScene().getModel(mrd.modelId);
     if (modelDescriptor)
@@ -815,8 +895,7 @@ MessageResult CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescri
         {
             PLUGIN_ERROR << "set-material-range: The diffuse colors "
                          << "component is not a multiple of 3" << std::endl;
-            result.error = 3;
-            result.message = "The diffuse colors component size is not multiple of 3";
+            result.setError(3, "The diffuse colors component size is not multiple of 3");
             return result;
         }
 
@@ -861,8 +940,7 @@ MessageResult CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescri
             catch (const std::runtime_error& e)
             {
                 PLUGIN_INFO << e.what() << std::endl;
-                result.error = 2;
-                result.message = std::string(e.what());
+                result.setError(2, e.what());
             }
         }
         _dirty = true;
@@ -871,9 +949,8 @@ MessageResult CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescri
     {
         PLUGIN_INFO << "Model " << mrd.modelId << " is not registered"
                     << std::endl;
-        result.error = 1;
-        result.message = "Model " + std::to_string(mrd.modelId)
-                         + " is not registered";
+        result.setError(1, "Model " + std::to_string(mrd.modelId)
+                           + " is not registered");
     }
 
     return result;
@@ -882,8 +959,6 @@ MessageResult CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescri
 MaterialIds CircuitExplorerPlugin::_getMaterialIds(const ModelId& modelId)
 {
     MaterialIds materialIds;
-
-    HANDLE_NOT_PARSED(modelId, materialIds)
 
     auto modelDescriptor = _api->getScene().getModel(modelId.modelId);
     if (modelDescriptor)
@@ -895,9 +970,8 @@ MaterialIds CircuitExplorerPlugin::_getMaterialIds(const ModelId& modelId)
     }
     else
     {
-       materialIds.error = 1;
-       materialIds.message = "Model " + std::to_string(modelId.modelId)
-                             + " is not registered";
+       materialIds.setError(1, "Model " + std::to_string(modelId.modelId)
+                               + " is not registered");
     }
     return materialIds;
 }
@@ -905,8 +979,6 @@ MaterialIds CircuitExplorerPlugin::_getMaterialIds(const ModelId& modelId)
 MaterialDescriptor CircuitExplorerPlugin::_getMaterial(const ModelMaterialId& mmId)
 {
     MaterialDescriptor result;
-
-    HANDLE_NOT_PARSED(mmId, result)
 
     auto modelDescriptor = _api->getScene().getModel(mmId.modelId);
     if (modelDescriptor)
@@ -947,35 +1019,30 @@ MaterialDescriptor CircuitExplorerPlugin::_getMaterial(const ModelMaterialId& mm
                 PLUGIN_INFO << "Material " << mmId.materialId
                             << " is not registered in model " << mmId.modelId
                             << std::endl;
-                result.error = 3;
-                result.message = "Material " + std::to_string(mmId.materialId)
-                                 + " is not registered in model "
-                                 + std::to_string(mmId.modelId);
+                result.setError(3, "Material " + std::to_string(mmId.materialId)
+                                   + " is not registered in model "
+                                   + std::to_string(mmId.modelId));
             }
         }
         catch (const std::runtime_error& e)
         {
             PLUGIN_INFO << e.what() << std::endl;
-            result.error = 2;
-            result.message = std::string(e.what());
+            result.setError(2, e.what());
         }
     else
     {
         PLUGIN_INFO << "Model " << mmId.modelId << " is not registered"
                     << std::endl;
-        result.error = 1;
-        result.message = "Model " + std::to_string(mmId.modelId) + " is not"
-                         + " registered";
+        result.setError(1, "Model " + std::to_string(mmId.modelId) + " is not"
+                           + " registered");
     }
 
     return result;
 }
 
-MessageResult CircuitExplorerPlugin::_remapCircuitToScheme(const RemapCircuit& payload)
+brayns::Message CircuitExplorerPlugin::_remapCircuitToScheme(const RemapCircuit& payload)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(payload, result)
+    brayns::Message result;
 
     auto modelDescriptor = _api->getScene().getModel(payload.modelId);
     if(modelDescriptor)
@@ -986,28 +1053,23 @@ MessageResult CircuitExplorerPlugin::_remapCircuitToScheme(const RemapCircuit& p
             const auto schemeEnum =
                     stringToEnum<CircuitColorScheme>(payload.scheme);
             auto remapResult = mapper->remapCircuitColors(schemeEnum, _api->getScene());
-            result.error = remapResult.error;
-            result.message = remapResult.message;
+            result.setError(remapResult.error, remapResult.message);
             _dirty = true;
             _api->getEngine().triggerRender();
         }
     }
     else
     {
-        result.error = 1;
-        result.message = "The model with ID "
-                         + std::to_string(payload.modelId)
-                         + " does not exists";
+        result.setError(1, "The model with ID " + std::to_string(payload.modelId)
+                           + " does not exists");
     }
     return result;
 }
 
-MessageResult CircuitExplorerPlugin::_setSynapseAttributes(
+brayns::Message CircuitExplorerPlugin::_setSynapseAttributes(
     const SynapseAttributes& param)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(param, result)
+    brayns::Message result;
 
     try
     {
@@ -1041,26 +1103,22 @@ MessageResult CircuitExplorerPlugin::_setSynapseAttributes(
     catch (const std::runtime_error& e)
     {
         PLUGIN_ERROR << e.what() << std::endl;
-        result.error = 1;
-        result.message = std::string(e.what());
+        result.setError(1, e.what());
     }
     catch (...)
     {
         PLUGIN_ERROR
             << "Unexpected exception occured in _updateMaterialFromJson"
             << std::endl;
-        result.error = 2;
-        result.message = "Unexpected exception occured in _setSynapseAttribute";
+        result.setError(2, "Unexpected exception occured in _setSynapseAttribute");
     }
 
     return result;
 }
 
-MessageResult CircuitExplorerPlugin::_saveModelToCache(const SaveModelToCache& saveModel)
+brayns::Message CircuitExplorerPlugin::_saveModelToCache(const SaveModelToCache& saveModel)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(saveModel, result)
+    brayns::Message result;
 
     auto modelDescriptor = _api->getScene().getModel(saveModel.modelId);
     if (modelDescriptor)
@@ -1072,20 +1130,17 @@ MessageResult CircuitExplorerPlugin::_saveModelToCache(const SaveModelToCache& s
     {
         PLUGIN_ERROR << "Model " << saveModel.modelId << " is not registered"
                      << std::endl;
-        result.error = 1;
-        result.message = "Model " + std::to_string(saveModel.modelId) + " is"
-                         + " not registered";
+        result.setError(1, "Model " + std::to_string(saveModel.modelId) + " is"
+                           + " not registered");
     }
 
     return result;
 }
 
-MessageResult CircuitExplorerPlugin::_setConnectionsPerValue(
+brayns::Message CircuitExplorerPlugin::_setConnectionsPerValue(
     const ConnectionsPerValue& cpv)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(cpv, result)
+    brayns::Message result;
 
     PointCloud pointCloud;
 
@@ -1097,8 +1152,7 @@ MessageResult CircuitExplorerPlugin::_setConnectionsPerValue(
         if (!simulationHandler)
         {
             BRAYNS_ERROR << "Scene has not user data handler" << std::endl;
-            result.error = 1;
-            result.message = "Scene has no user data handler";
+            result.setError(1, "Scene has no user data handler");
             return result;
         }
 
@@ -1135,29 +1189,25 @@ MessageResult CircuitExplorerPlugin::_setConnectionsPerValue(
         {
             PLUGIN_INFO << "No connections added for value "
                         << std::to_string(cpv.value) << std::endl;
-            result.error = 2;
-            result.message = "No connections added for value "
-                             + std::to_string(cpv.value);
+            result.setError(2, "No connections added for value "
+                               + std::to_string(cpv.value));
         }
     }
     else
     {
         PLUGIN_INFO << "Model " << cpv.modelId << " is not registered"
                     << std::endl;
-        result.error = 3;
-        result.message = "Model " + std::to_string(cpv.modelId) + " is"
-                         + " not registered";
+        result.setError(3, "Model " + std::to_string(cpv.modelId) + " is"
+                           + " not registered");
     }
 
     return result;
 }
 
-MessageResult CircuitExplorerPlugin::_setMetaballsPerSimulationValue(
+brayns::Message CircuitExplorerPlugin::_setMetaballsPerSimulationValue(
     const MetaballsFromSimulationValue& mpsv)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(mpsv, result)
+    brayns::Message result;
 
     PointCloud pointCloud;
 
@@ -1169,8 +1219,7 @@ MessageResult CircuitExplorerPlugin::_setMetaballsPerSimulationValue(
         if (!simulationHandler)
         {
             BRAYNS_ERROR << "Scene has not user data handler" << std::endl;
-            result.error = 1;
-            result.message = "Scene has no user data handler";
+            result.setError(1, "Scene has no user data handler");
             return result;
         }
 
@@ -1210,37 +1259,29 @@ MessageResult CircuitExplorerPlugin::_setMetaballsPerSimulationValue(
             {
                 PLUGIN_INFO << "No mesh was created for value "
                             << std::to_string(mpsv.value) << std::endl;
-                result.error = 2;
-                result.message = "No mesh was created for value "
-                                 + std::to_string(mpsv.value);
+                result.setError(2, "No mesh was created for value "
+                                   + std::to_string(mpsv.value));
             }
         }
         else
         {
             PLUGIN_INFO << "No connections added for value "
                         << std::to_string(mpsv.value) << std::endl;
-            result.error = 3;
-            result.message = "No connections added for value "
-                             + std::to_string(mpsv.value);
+            result.setError(3, "No connections added for value " + std::to_string(mpsv.value));
         }
     }
     else
     {
-        PLUGIN_INFO << "Model " << mpsv.modelId << " is not registered"
-                    << std::endl;
-        result.error = 4;
-        result.message = "Model " + std::to_string(mpsv.modelId) + " is"
-                         + " not registered";
+        PLUGIN_INFO << "Model " << mpsv.modelId << " is not registered" << std::endl;
+        result.setError(4, "Model " + std::to_string(mpsv.modelId) + " is not registered");
     }
 
     return result;
 }
 
-MessageResult CircuitExplorerPlugin::_setCamera(const CameraDefinition& payload)
+brayns::Message CircuitExplorerPlugin::_setCamera(const CameraDefinition& payload)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(payload, result)
+    brayns::Message result;
 
     auto& camera = _api->getCamera();
 
@@ -1297,12 +1338,10 @@ CameraDefinition CircuitExplorerPlugin::_getCamera()
     return cd;
 }
 
-MessageResult CircuitExplorerPlugin::_attachCellGrowthHandler(
+brayns::Message CircuitExplorerPlugin::_attachCellGrowthHandler(
     const AttachCellGrowthHandler& payload)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(payload, result)
+    brayns::Message result;
 
     PLUGIN_INFO << "Attaching Cell Growth Handler to model " << payload.modelId
                 << std::endl;
@@ -1316,12 +1355,10 @@ MessageResult CircuitExplorerPlugin::_attachCellGrowthHandler(
     return result;
 }
 
-MessageResult CircuitExplorerPlugin::_attachCircuitSimulationHandler(
+brayns::Message CircuitExplorerPlugin::_attachCircuitSimulationHandler(
     const AttachCircuitSimulationHandler& payload)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(payload, result)
+    brayns::Message result;
 
     PLUGIN_INFO << "Attaching Circuit Simulation Handler to model "
                 << payload.modelId << std::endl;
@@ -1343,20 +1380,16 @@ MessageResult CircuitExplorerPlugin::_attachCircuitSimulationHandler(
     {
         PLUGIN_ERROR << "Model " << payload.modelId << " does not exist"
                      << std::endl;
-        result.error = 1;
-        result.message = "Model " + std::to_string(payload.modelId)
-                         + " does not exist";
+        result.setError(1, "Model " + std::to_string(payload.modelId) + " does not exist");
     }
 
     return result;
 }
 
-MessageResult CircuitExplorerPlugin::_exportFramesToDisk(
+brayns::Message CircuitExplorerPlugin::_exportFramesToDisk(
     const ExportFramesToDisk& payload)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(payload, result)
+    brayns::Message result;
 
     // Store the current accumulation settings
     if(!_exportFramesToDiskDirty)
@@ -1455,8 +1488,6 @@ ExportLayerToDiskResult CircuitExplorerPlugin::_exportLayerToDisk(const ExportLa
 {
     ExportLayerToDiskResult result;
 
-    HANDLE_NOT_PARSED(payload, result)
-
     const uint32_t end = payload.startFrame + payload.framesCount;
     for(uint32_t i = payload.startFrame; i < end; i++)
     {
@@ -1487,11 +1518,9 @@ ExportLayerToDiskResult CircuitExplorerPlugin::_exportLayerToDisk(const ExportLa
     return result;
 }
 
-MessageResult CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
+brayns::Message CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(params, result)
+    brayns::Message result;
 
     std::set<std::string> uniqueLayers;
     uniqueLayers.insert(params.layers.begin(), params.layers.end());
@@ -1501,8 +1530,7 @@ MessageResult CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& param
     {
         PLUGIN_ERROR << "MakeMovie: Default layer \"movie\" not present. Aborting."
                      << std::endl;
-        result.error = 1;
-        result.message = "Default layer \"movie\" not present";
+        result.setError(1, "Default layer \"movie\" not present");
         return result;
     }
 
@@ -1515,8 +1543,7 @@ MessageResult CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& param
     {
         PLUGIN_ERROR << "Could not launch movie creation: ffmpeg not found"
                      << std::endl;
-        result.error = 2;
-        result.message = "Could not launch movie creation: ffmpeg not found";
+        result.setError(2, "Could not launch movie creation: ffmpeg not found");
         return result;
     }
     while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
@@ -1603,9 +1630,8 @@ MessageResult CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& param
                     PLUGIN_ERROR << "Could not create media video file. FFMPEG "
                                     "returned with error "
                                  << status << std::endl;
-                    result.error = 3;
-                    result.message = "Could not create media file. FFMPEG returned "
-                                     + std::to_string(status);
+                    result.setError(3, "Could not create media file. FFMPEG returned "
+                                       + std::to_string(status));
                     return result;
                 }
             }
@@ -1615,9 +1641,7 @@ MessageResult CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& param
             PLUGIN_ERROR << "Could not create media video file. "
                             "Could not launch FFMPEG."
                          << std::endl;
-            result.error = 4;
-            result.message = "Could not create media video file. "
-                             "Could not launch FFMPEG";
+            result.setError(4, "Could not create media video file. Could not launch FFMPEG");
             return result;
         }
     }
@@ -1647,8 +1671,7 @@ MessageResult CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& param
         {
             PLUGIN_ERROR << "make-movie: Could not clean up frames"
                          << std::endl;
-            result.error = 5;
-            result.message = "Could not clean up frames";
+            result.setError(5, "Could not clean up frames");
             return result;
         }
     }
@@ -1656,54 +1679,42 @@ MessageResult CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& param
     return result;
 }
 
-MessageResult CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTracing &payload)
+brayns::Message CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTracing &payload)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(payload, result)
+    brayns::Message result;
 
     if(payload.cellGIDs.empty())
     {
-        result.error = 1;
-        result.message = "No input cell GIDs specified";
+        result.setError(1, "No input cell GIDs specified");
         return result;
     }
     if(payload.sourceCellColor.size() < 4)
     {
-        result.error = 2;
-        result.message = "Source cell stain color must have "
-                         "4 components (RGBA)";
+        result.setError(2, "Source cell stain color must have 4 components (RGBA)");
         return result;
     }
     if(payload.connectedCellsColor.size() < 4)
     {
-        result.error = 3;
-        result.message = "Connected cell stain color must have "
-                         "4 components (RGBA)";
+        result.setError(3, "Connected cell stain color must have 4 components (RGBA)");
         return result;
     }
     if(payload.nonConnectedCellsColor.size() < 4)
     {
-        result.error = 4;
-        result.message = "Non connected cell stain color must have "
-                         "4 components (RGBA)";
+        result.setError(4, "Non connected cell stain color must have 4 components (RGBA)");
         return result;
     }
 
     auto modelDescriptor = _api->getScene().getModel(static_cast<size_t>(payload.modelId));
     if(!modelDescriptor)
     {
-        result.error = 5;
-        result.message = "The given model ID does not correspond "
-                         "to any existing scene model";
+        result.setError(5, "The given model ID does not correspond to any existing scene model");
         return result;
     }
 
     auto cellMapper = getMapperForCircuit(payload.modelId);
     if(!cellMapper)
     {
-        result.error = 6;
-        result.message = "There is not cell mapping information for the given circuit";
+        result.setError(6, "There is not cell mapping information for the given circuit");
         return result;
     }
 
@@ -1837,30 +1848,21 @@ AddShapeResult CircuitExplorerPlugin::_addSphere(const AddSphere& payload)
 {
     AddShapeResult result;
 
-    HANDLE_NOT_PARSED(payload, result)
-
     if (payload.center.size() < 3)
     {
-        result.error = 1;
-        result.message =
-            "Sphere center has the wrong number of parameters (3 "
-            "necessary)";
+        result.setError(1, "Sphere center has the wrong number of parameters (3 necessary)");
         return result;
     }
 
     if (payload.color.size() < 4)
     {
-        result.error = 2;
-        result.message =
-            "Sphere color has the wrong number of parameters (RGBA, 4 "
-            "necessary)";
+        result.setError(2, "Sphere color has the wrong number of coefficents (RGBA, 4 necessary)");
         return result;
     }
 
     if (payload.radius < 0.0f)
     {
-        result.error = 3;
-        result.message = "Negative radius passed for sphere creation";
+        result.setError(3, "Negative radius passed for sphere creation");
         return result;
     }
 
@@ -1874,7 +1876,7 @@ AddShapeResult CircuitExplorerPlugin::_addSphere(const AddSphere& payload)
 
     const brayns::Vector3f center(payload.center[0], payload.center[1],
                                   payload.center[2]);
-    modelptr->addSphere(matId, {center, payload.radius});
+    modelptr->addSphere(matId, {center, static_cast<float>(payload.radius)});
 
     size_t numModels = _api->getScene().getNumModels();
     const std::string name = payload.name.empty()
@@ -1894,43 +1896,31 @@ AddShapeResult CircuitExplorerPlugin::_addPill(const AddPill& payload)
 {
     AddShapeResult result;
 
-    HANDLE_NOT_PARSED(payload, result)
-
     if (payload.p1.size() < 3)
     {
-        result.error = 1;
-        result.message =
-            "Pill point 1 has the wrong number of parameters (3 necessary)";
+        result.setError(1, "Pill point 1 has the wrong number of parameters (3 necessary)");
         return result;
     }
     if (payload.p2.size() < 3)
     {
-        result.error = 2;
-        result.message =
-            "Pill point 2 has the wrong number of parameters (3 necessary)";
+        result.setError(2, "Pill point 2 has the wrong number of parameters (3 necessary)");
         return result;
     }
     if (payload.color.size() < 4)
     {
-        result.error = 3;
-        result.message =
-            "Pill color has the wrong number of parameters (RGBA, 4 "
-            "necessary)";
+        result.setError(3, "Pill color has the wrong number of parameters (RGBA, 4 necessary)");
         return result;
     }
     if (payload.type != "pill" && payload.type != "conepill" &&
         payload.type != "sigmoidpill")
     {
-        result.error = 4;
-        result.message =
-            "Unknown pill type parameter. Must be either \"pill\", "
-            "\"conepill\", or \"sigmoidpill\"";
+        result.setError(4, "Unknown pill type parameter. Must be either \"pill\", "
+                           "\"conepill\", or \"sigmoidpill\"");
         return result;
     }
     if (payload.radius1 < 0.0f || payload.radius2 < 0.0f)
     {
-        result.error = 5;
-        result.message = "Negative radius passed for the pill creation";
+        result.setError(5, "Negative radius passed for the pill creation");
         return result;
     }
 
@@ -1946,19 +1936,13 @@ AddShapeResult CircuitExplorerPlugin::_addPill(const AddPill& payload)
     const brayns::Vector3f p1(payload.p2[0], payload.p2[1], payload.p2[2]);
     brayns::SDFGeometry sdf;
     if (payload.type == "pill")
-    {
         sdf = brayns::createSDFPill(p0, p1, payload.radius1);
-    }
     else if (payload.type == "conepill")
-    {
         sdf =
             brayns::createSDFConePill(p0, p1, payload.radius1, payload.radius2);
-    }
     else if (payload.type == "sigmoidpill")
-    {
         sdf = brayns::createSDFConePillSigmoid(p0, p1, payload.radius1,
                                                payload.radius2);
-    }
 
     modelptr->addSDFGeometry(matId, sdf, {});
 
@@ -1980,36 +1964,25 @@ AddShapeResult CircuitExplorerPlugin::_addCylinder(const AddCylinder& payload)
 {
     AddShapeResult result;
 
-    HANDLE_NOT_PARSED(payload, result)
-
     if (payload.center.size() < 3)
     {
-        result.error = 1;
-        result.message =
-            "Cylinder center has the wrong number of parameters (3 "
-            "necessary)";
+        result.setError(1, "Cylinder center has the wrong number of parameters (3 necessary)");
         return result;
         ;
     }
     if (payload.up.size() < 3)
     {
-        result.error = 2;
-        result.message =
-            "Cylinder up has the wrong number of parameters (3 necessary)";
+        result.setError(2, "Cylinder up has the wrong number of parameters (3 necessary)");
         return result;
     }
     if (payload.color.size() < 4)
     {
-        result.error = 3;
-        result.message =
-            "Cylinder color has the wrong number of parameters (RGBA, 4 "
-            "necessary)";
+        result.setError(3, "Cylinder color has the wrong number of parameters (RGBA, 4 necessary)");
         return result;
     }
     if (payload.radius < 0.0f)
     {
-        result.error = 4;
-        result.message = "Negative radius passed for cylinder creation";
+        result.setError(4, "Negative radius passed for cylinder creation");
         return result;
     }
 
@@ -2024,7 +1997,7 @@ AddShapeResult CircuitExplorerPlugin::_addCylinder(const AddCylinder& payload)
     const brayns::Vector3f center(payload.center[0], payload.center[1],
                                   payload.center[2]);
     const brayns::Vector3f up(payload.up[0], payload.up[1], payload.up[2]);
-    modelptr->addCylinder(matId, {center, up, payload.radius});
+    modelptr->addCylinder(matId, {center, up, static_cast<float>(payload.radius)});
 
     size_t numModels = _api->getScene().getNumModels();
     const std::string name = payload.name.empty()
@@ -2044,29 +2017,20 @@ AddShapeResult CircuitExplorerPlugin::_addBox(const AddBox& payload)
 {
     AddShapeResult result;
 
-    HANDLE_NOT_PARSED(payload, result)
-
     if (payload.minCorner.size() < 3)
     {
-        result.error = 1;
-        result.message =
-            "Box minCorner has the wrong number of parameters (3 "
-            "necessary)";
+        result.setError(1, "Box minCorner has the wrong number of parameters (3 necessary)");
         return result;
     }
     if (payload.maxCorner.size() < 3)
     {
-        result.error = 2;
-        result.message =
-            "Box maxCorner has the wrong number of parameters (3 necesary)";
+        result.setError(2, "Box maxCorner has the wrong number of parameters (3 necesary)");
         return result;
     }
     if (payload.color.size() < 4)
     {
-        result.error = 3;
-        result.message =
-            "Box color has the wrong number of parameters (RGBA, 4 "
-            "necesary)";
+        result.setError(3, "Box color has the wrong number of parameters (RGBA, 4 "
+                           "necesary)");
         return result;
     }
 
@@ -2102,11 +2066,9 @@ AddShapeResult CircuitExplorerPlugin::_addBox(const AddBox& payload)
     return result;
 }
 
-MessageResult CircuitExplorerPlugin::_addGrid(const AddGrid& payload)
+brayns::Message CircuitExplorerPlugin::_addGrid(const AddGrid& payload)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(payload, result)
+    brayns::Message result;
 
     BRAYNS_INFO << "Building Grid scene" << std::endl;
 
@@ -2229,11 +2191,9 @@ MessageResult CircuitExplorerPlugin::_addGrid(const AddGrid& payload)
     return result;
 }
 
-MessageResult CircuitExplorerPlugin::_addColumn(const AddColumn& payload)
+brayns::Message CircuitExplorerPlugin::_addColumn(const AddColumn& payload)
 {
-    MessageResult result;
-
-    HANDLE_NOT_PARSED(payload, result)
+    brayns::Message result;
 
     BRAYNS_INFO << "Building Column model" << std::endl;
 
@@ -2265,7 +2225,7 @@ MessageResult CircuitExplorerPlugin::_addColumn(const AddColumn& payload)
         {0.25f, 1.f, 0.5f},   {-0.25f, 1.f, 0.5f}, {-0.5f, 1.f, 0.25f},
         {-0.5f, 1.f, -0.25f}};
 
-    const auto r = payload.radius;
+    const auto r = static_cast<float>(payload.radius);
     for (size_t i = 0; i < verticesBottom.size(); ++i)
     {
         model->addCylinder(0, {verticesBottom[i],

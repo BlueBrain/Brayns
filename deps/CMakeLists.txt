@@ -63,11 +63,15 @@ endif()
 # PBRT V3
 if(BRAYNS_PBRT_ENABLED)
     add_subdirectory(pbrt-v3)
+    # Disable compilation warnings
+    target_compile_options(pbrt PUBLIC -w)
 endif()
 
 # PBRT V2
 if(BRAYNS_PBRTV2_ENABLED)
     add_subdirectory(pbrt-v2)
+    # Disable compilation warnings
+    target_compile_options(pbrtlibv2 PUBLIC -w)
 endif()
 
 # Brion if needed

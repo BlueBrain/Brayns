@@ -45,35 +45,35 @@ private:
      *
      * @return RequestResponse with the sucess status of the request
      */
-    RequestResponse _addRectangleSensor(const AddRectangleSensorRequest&);
+    brayns::Message _addRectangleSensor(const AddRectangleSensorRequest&);
 
     /**
      * @brief Adds a disk shaped sensor to the scene
      *
      * @return RequestResponse with the sucess status of the request
      */
-    RequestResponse _addDiskSensor(const AddDiskSensorRequest&);
+    brayns::Message _addDiskSensor(const AddDiskSensorRequest&);
 
     /**
      * @brief Adds a Fluorescent homogeneus volume to the scene
      *
      * @return RequestResponse with the sucess status of the request
      */
-    RequestResponse _addFluorescentVolume(const AddFluorescentVolume&);
+    brayns::Message _addFluorescentVolume(const AddFluorescentVolume&);
 
     /**
      * @brief Adds a Fluorescent annotated volume to the scene
      *
      * @return RequestResponse with the sucess status of the request
      */
-    RequestResponse _addFluorescentAnnotatedVolume(const AddFluorescentAnnotatedVolume&);
+    brayns::Message _addFluorescentAnnotatedVolume(const AddFluorescentAnnotatedVolume&);
 
     /**
      * @brief Adds a Fluorescent binary volume to the scene
      *
      * @return RequestResponse with the sucess status of the request
      */
-    RequestResponse _addFluorescentBinaryVolume(const AddFluorescentBinaryVolume&);
+    brayns::Message _addFluorescentBinaryVolume(const AddFluorescentBinaryVolume&);
 
     /**
      * @brief Adds a Fluorescent grid volume to the scene, whose data is loaded
@@ -81,21 +81,21 @@ private:
      *
      * @return RequestResponse with the sucess status of the request
      */
-    RequestResponse _addFluorescentGridVolumeFromFile(const AddFluorescentGridFromFileVolume&);
+    brayns::Message _addFluorescentGridVolumeFromFile(const AddFluorescentGridFromFileVolume&);
 
     /**
      * @brief Adds a Fluorescent grid volume whose data is provided in the parameters
      *
      * @return RequestResponse with the sucess status of the request
      */
-    RequestResponse _addFluorescentGridVolume(const AddFluorescentGridVolume&);
+    brayns::Message _addFluorescentGridVolume(const AddFluorescentGridVolume&);
 
     /**
      * @brief Adds a Fluorescent scattering volume to the scene
      *
      * @return RequestResponse with the sucess status of the request
      */
-    RequestResponse _addFluorescentScatteringVolume(const AddFluorescentScatteringVolume&);
+    brayns::Message _addFluorescentScatteringVolume(const AddFluorescentScatteringVolume&);
 
     /**
      * @brief Adds a Fluorescent scattering grid volume to the scene, whose data
@@ -103,7 +103,7 @@ private:
      *
      * @return RequestResponse with the sucess status of the request
      */
-    RequestResponse _addFluorescentScatteringGridVolume(const AddFluorescentScatteringGridVolume&);
+    brayns::Message _addFluorescentScatteringGridVolume(const AddFluorescentScatteringGridVolume&);
 
     /**
      * @brief Adds a Fluorescent scattering grid volume to the scene, whose data
@@ -111,7 +111,7 @@ private:
      *
      * @return RequestResponse with the sucess status of the request
      */
-    RequestResponse
+    brayns::Message
     _addFluorescentScatteringGridVolumeFromFile(const AddFluorescentScatteringGridFromFileVolume&);
 
 };

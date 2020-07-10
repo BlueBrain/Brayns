@@ -12,12 +12,10 @@ set(braynsFluorescence_VERSION_ABI 1)
 set(BRAYNSFLUORESCENCE_HEADERS
   FluorescenceParams.h
   FluorescencePlugin.h
-  json.hpp
   Log.h
 )
 
 set(BRAYNSFLUORESCENCE_SOURCES
-  FluorescenceParams.cpp
   FluorescencePlugin.cpp
 )
 

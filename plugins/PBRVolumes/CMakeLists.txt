@@ -12,12 +12,10 @@ set(braynsPBRVolumes_VERSION_ABI 1)
 set(BRAYNSPBRVOLUMES_HEADERS
   PBRVolumesParams.h
   PBRVolumesPlugin.h
-  json.hpp
   Log.h
 )
 
 set(BRAYNSPBRVOLUMES_SOURCES
-  PBRVolumesParams.cpp
   PBRVolumesPlugin.cpp
 )
 

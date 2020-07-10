@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  *
- * Responsible Author: Daniel.Nachbaur@epfl.ch
+ * Responsible Author(s): Daniel.Nachbaur@epfl.ch
+ *                        Nadir Román Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -32,6 +33,7 @@
 
 namespace brayns
 {
+
 /**
  * Defines a single property which always has a name, a label for e.g. UIs
  * and a typed value. Additionally, a user-defined minimum and maximum value
@@ -42,6 +44,8 @@ struct Property
     enum class Type
     {
         Int,
+        UInt,
+        UInt64,
         Double,
         String,
         Bool,
@@ -53,7 +57,10 @@ struct Property
         DoubleVector,
         FloatVector,
         IntVector,
-        UIntVector
+        UIntVector,
+        UInt64Vector,
+        StringVector,
+        BoolVector
     };
 
     struct MetaData
@@ -73,6 +80,8 @@ struct Property
     {
         static_assert(std::is_same<T, double>::value ||
                           std::is_same<T, int32_t>::value ||
+                          std::is_same<T, uint32_t>::value ||
+                          std::is_same<T, uint64_t>::value ||
                           std::is_same<T, std::string>::value ||
                           std::is_same<T, bool>::value ||
                           std::is_same<T, std::array<double, 2>>::value ||
@@ -81,9 +90,12 @@ struct Property
                           std::is_same<T, std::array<int32_t, 3>>::value ||
                           std::is_same<T, std::array<double, 4>>::value ||
                           std::is_same<T, std::vector<double>>::value ||
+                          std::is_same<T, std::vector<float>>::value ||
                           std::is_same<T, std::vector<int32_t>>::value ||
                           std::is_same<T, std::vector<uint32_t>>::value ||
-                          std::is_same<T, std::vector<float>>::value,
+                          std::is_same<T, std::vector<uint64_t>>::value ||
+                          std::is_same<T, std::vector<std::string>>::value ||
+                          std::is_same<T, std::vector<bool>>::value,
                       "Invalid property type.");
     }
 
@@ -104,6 +116,10 @@ struct Property
             return Property::Type::Double;
         if (std::is_same<T, int32_t>::value)
             return Property::Type::Int;
+        if (std::is_same<T, uint32_t>::value)
+            return Property::Type::UInt;
+        if (std::is_same<T, uint64_t>::value)
+            return Property::Type::UInt64;
         if (std::is_same<T, std::string>::value)
             return Property::Type::String;
         if (std::is_same<T, bool>::value)
@@ -126,6 +142,12 @@ struct Property
             return Property::Type::IntVector;
         if (std::is_same<T, std::vector<uint32_t>>::value)
             return Property::Type::UIntVector;
+        if (std::is_same<T, std::vector<uint64_t>>::value)
+            return Property::Type::UInt64Vector;
+        if (std::is_same<T, std::vector<std::string>>::value)
+            return Property::Type::StringVector;
+        if (std::is_same<T, std::vector<bool>>::value)
+            return Property::Type::BoolVector;
         throw std::runtime_error("Could not match type for '" + name + "'");
     }
 
@@ -269,10 +291,11 @@ private:
     void _checkType() const
     {
         const auto requestedType = getType<T>();
+
         if (requestedType != type)
-            throw std::runtime_error("Type mismatch for property '" + name +
-                                     "'");
+            throw std::runtime_error("Type mismatch for property '" + name + "'");
     }
+
     template <typename T>
     T _castValue(const linb::any& v) const
     {

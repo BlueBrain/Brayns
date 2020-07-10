@@ -33,7 +33,6 @@ set(BRAYNSCIRCUITRENDERER_SOURCES
 
 set(BRAYNSCIRCUITRENDERER_HEADERS
   CircuitRendererPlugin.h
-  json.hpp
   Log.h
 )
 

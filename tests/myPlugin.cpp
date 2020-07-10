@@ -31,12 +31,25 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
-using Vec2 = std::array<unsigned, 2>;
+using Vec2 = std::array<int32_t, 2>;
 const Vec2 vecVal{{1, 1}};
 
 class MyPlugin : public brayns::ExtensionPlugin
 {
 public:
+    struct Vec2Param : public brayns::Message
+    {
+      MESSAGE_BEGIN(Vec2Param)
+      using array2D = std::array<int32_t, 2>;
+      MESSAGE_ENTRY(array2D, param, "A vec2 param")
+    };
+
+    struct StringParam : public brayns::Message
+    {
+        MESSAGE_BEGIN(StringParam)
+        MESSAGE_ENTRY(std::string, param, "A string param");
+    };
+
     MyPlugin(const int argc, const char** argv)
     {
         if (argc > 0)
@@ -98,16 +111,24 @@ public:
 
         // test "arbitrary" objects for actions
         actions->registerNotification("hello", [&] { ++numCalls; });
-        actions->registerNotification<Vec2>("foo", [&](const Vec2& vec) {
+        actions->registerNotification<Vec2Param>({"foo",
+                                             "Notification Test",
+                                             "Vec2", "A 2D vector"},
+                                            [&](const Vec2Param& vec) {
             ++numCalls;
-            CHECK(vec == vecVal);
+            CHECK(vec.param == vecVal);
         });
 
-        actions->registerRequest<std::string>("who", [&] {
+        actions->registerRequest<StringParam>({"who", "Request Test"}, [&] {
             ++numCalls;
-            return "me";
+            StringParam result;
+            result.param = std::string("me");
+            return result;
         });
-        actions->registerRequest<Vec2, Vec2>("echo", [&](const Vec2& vec) {
+        actions->registerRequest<Vec2Param, Vec2Param>({"echo",
+                                                        "Echo test",
+                                                        "Vec2Param",
+                                                        "2D Integer vector to echo"}, [&](const Vec2Param& vec) {
             ++numCalls;
             return vec;
         });

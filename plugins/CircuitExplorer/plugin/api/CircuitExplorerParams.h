@@ -1,6 +1,7 @@
 /* Copyright (c) 2018-2019, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Authors: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                      Nadir Román Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of the circuit explorer for Brayns
  * <https://github.com/favreau/Brayns-UC-CircuitExplorer>
@@ -23,467 +24,465 @@
 #define CIRCUITEXPLORERPARAMS_H
 
 #include "../../common/types.h"
+
+#include <brayns/common/ActionMessage.h>
 #include <brayns/common/types.h>
 
-struct Result
+struct TestRequestStruct : public brayns::Message
 {
-    bool success{false};
-    std::string error;
+    MESSAGE_BEGIN(TestRequestStruct)
+    MESSAGE_ENTRY(int, myIntVar, "An integer input variable")
+    MESSAGE_ENTRY(std::vector<int32_t>, myListVar, "A int list")
+    MESSAGE_ENTRY(std::vector<float>, myFloatList, "A float list")
+    MESSAGE_ENTRY(std::vector<std::string>, myStringList, "A string list")
+    MESSAGE_ENTRY(std::vector<bool>, myBoolList, "A bool list")
+    MESSAGE_ENTRY(std::vector<double>, myDoubleList, "A list of doubles")
 };
 
-std::string to_json(const Result& param);
-
-struct MessageResult
+struct TestResponseStruct : public brayns::Message
 {
-    int error{0};
-    std::string message{""};
+    MESSAGE_BEGIN(TestResponseStruct)
+    MESSAGE_ENTRY(bool, myBoolVar, "A bool output variable")
+    MESSAGE_ENTRY(std::vector<int32_t>, myOutListVar, "A list output variable");
+    MESSAGE_ENTRY(std::vector<bool>, myOutBoolList, "A bool list output variable")
 };
 
-std::string to_json(const MessageResult& result);
-
-/** Save model to cache */
-struct SaveModelToCache
+struct TestNotification : public brayns::Message
 {
-    int32_t modelId;
-    std::string path;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(TestNotification)
+    MESSAGE_ENTRY(int, myIntVar, "An integer input variable")
 };
 
-bool from_json(SaveModelToCache& modelSave, const std::string& payload);
-
-struct MaterialDescriptor : public MessageResult
+struct TestResponse : public brayns::Message
 {
-    int32_t modelId;
-    int32_t materialId;
-    std::vector<float> diffuseColor;
-    std::vector<float> specularColor;
-    float specularExponent;
-    float reflectionIndex;
-    float opacity;
-    float refractionIndex;
-    float emission;
-    float glossiness;
-    bool simulationDataCast;
-    int32_t shadingMode;
-    int32_t clippingMode;
-    float userParameter;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(TestResponse)
+    MESSAGE_ENTRY(double, myFloatVar, "A float output variable")
 };
 
-bool from_json(MaterialDescriptor& materialDescriptor,
-               const std::string& payload);
-std::string to_json(const MaterialDescriptor& payload);
-
-struct MaterialsDescriptor
+struct Result : public brayns::Message
 {
-    std::vector<int32_t> modelIds;
-    std::vector<int32_t> materialIds;
-    std::vector<float> diffuseColors;
-    std::vector<float> specularColors;
-    std::vector<float> specularExponents;
-    std::vector<float> reflectionIndices;
-    std::vector<float> opacities;
-    std::vector<float> refractionIndices;
-    std::vector<float> emissions;
-    std::vector<float> glossinesses;
-    std::vector<bool> simulationDataCasts;
-    std::vector<int32_t> shadingModes;
-    std::vector<int32_t> clippingModes;
-    std::vector<float> userParameters;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(Result)
+    MESSAGE_ENTRY(bool, sucess, "Wether the last request was successful or not")
+    MESSAGE_ENTRY(std::string, error, "A string describing the error, if any")
 };
 
-bool from_json(MaterialsDescriptor& materialsDescriptor,
-               const std::string& payload);
-
-struct MaterialRangeDescriptor
+struct SaveModelToCache : public brayns::Message
 {
-    int32_t modelId;
-    std::vector<int32_t> materialIds;
-    std::vector<float> diffuseColor;
-    std::vector<float> specularColor;
-    float specularExponent;
-    float reflectionIndex;
-    float opacity;
-    float refractionIndex;
-    float emission;
-    float glossiness;
-    bool simulationDataCast;
-    int32_t shadingMode;
-    int32_t clippingMode;
-    float userParameter;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(SaveModelToCache)
+    MESSAGE_ENTRY(uint64_t, modelId, "The model to save to a cache file")
+    MESSAGE_ENTRY(std::string, path, "The path to save the cache file")
+    MESSAGE_ENTRY(bool, parsed, "A flag indicating wether the parsing was successful")
+    MESSAGE_ENTRY(std::string, parseError, "A descriptive string in case the parse failed")
 };
 
-bool from_json(MaterialRangeDescriptor& materialRangeDescriptor,
-               const std::string& payload);
-
-// Material IDs for a given model
-struct ModelId
+struct MaterialDescriptor : public brayns::Message
 {
-    size_t modelId;
-    bool parsed{true};
-    std::string parseError{""};
-};
-bool from_json(ModelId& modelId, const std::string& payload);
-
-struct ModelMaterialId
-{
-    size_t modelId;
-    size_t materialId;
-    bool parsed{true};
-    std::string parseError{""};
-};
-bool from_json(ModelMaterialId& mmId, const std::string& payload);
-
-struct MaterialIds : public MessageResult
-{
-    std::vector<size_t> ids;
-};
-
-std::string to_json(const MaterialIds& param);
-
-// Synapse attributes
-struct SynapseAttributes
-{
-    std::string circuitConfiguration;
-    int32_t gid;
-    std::vector<std::string> htmlColors;
-    float lightEmission;
-    float radius;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(MaterialDescriptor)
+    MESSAGE_ENTRY(uint64_t, modelId, "The model to which this material belongs to")
+    MESSAGE_ENTRY(uint64_t, materialId, "The ID that identifies this material")
+    MESSAGE_ENTRY(std::vector<float>, diffuseColor,
+                  "A 3 component normalized color (RGB) describing the diffuse reflection")
+    MESSAGE_ENTRY(std::vector<float>, specularColor,
+                  "A 3 component normalized color (RGB) describing the specular reflection")
+    MESSAGE_ENTRY(double, specularExponent,
+                  "The specular exponent to sharpen the specular reflection")
+    MESSAGE_ENTRY(double, reflectionIndex, "The index of reflection of the material surface")
+    MESSAGE_ENTRY(double, opacity, "The transparency of the material (0 to 1)")
+    MESSAGE_ENTRY(double, refractionIndex, "The index of refraction of a transparent material")
+    MESSAGE_ENTRY(double, emission, "The emissive property of a material")
+    MESSAGE_ENTRY(double, glossiness, "The glossy component of a material")
+    MESSAGE_ENTRY(bool, simulationDataCast, "Wether to cast the user parameter for simulation")
+    MESSAGE_ENTRY(int32_t, shadingMode,
+                  "The choosen shading mode (0 = none, 1 = by id, 2 = by type, 3 = by layer, "
+                  "4 = by mtype, 5 = by etype, 6 = by target)")
+    MESSAGE_ENTRY(int32_t, clippingMode,
+                  "The choosen material clipping mode (0 = no clipping, 1 = clip by plane, "
+                  "2 = clip by sphere)")
+    MESSAGE_ENTRY(double, userParameter, "A custom parameter passed to the simulation")
 };
 
-bool from_json(SynapseAttributes& synapseAttributes,
-               const std::string& payload);
-
-/** Circuit bounding box */
-struct CircuitBoundingBox
+struct MaterialsDescriptor : public brayns::Message
 {
-    std::vector<double> aabb{0, 0, 0, 0, 0, 0};
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(MaterialsDescriptor)
+    MESSAGE_ENTRY(std::vector<uint64_t>, modelIds,
+                  "The list of models to which the list of materials belongs to")
+    MESSAGE_ENTRY(std::vector<uint64_t>, materialIds,
+                  "The IDs that identifies these materials (1 per model id)")
+    MESSAGE_ENTRY(std::vector<float>, diffuseColors,
+                  "A 3 component normalized color (RGB) describing the diffuse reflection"
+                  " (1 per material)")
+    MESSAGE_ENTRY(std::vector<float>, specularColors,
+                  "A 3 component normalized color (RGB) describing the specular reflection"
+                  " (1 per material)")
+    MESSAGE_ENTRY(std::vector<float>, specularExponents,
+                  "The specular exponent to sharpen the specular reflection (1 per material)")
+    MESSAGE_ENTRY(std::vector<float>, reflectionIndices,
+                  "The index of reflection of the material surface (1 per material)")
+    MESSAGE_ENTRY(std::vector<float>, opacities,
+                  "The transparency of the material (0 to 1) (1 per material)")
+    MESSAGE_ENTRY(std::vector<float>, refractionIndices,
+                  "The index of refraction of a transparent material (1 per material)")
+    MESSAGE_ENTRY(std::vector<float>, emissions,
+                  "The emissive property of a material (1 per material)")
+    MESSAGE_ENTRY(std::vector<float>, glossinesses,
+                  "The glossy component of a material (1 per material)")
+    MESSAGE_ENTRY(std::vector<bool>, simulationDataCasts,
+                  "Wether to cast the user parameter for simulation (1 per material)")
+    MESSAGE_ENTRY(std::vector<int32_t>, shadingModes,
+                  "The choosen shading mode (0 = none, 1 = by id, 2 = by type, 3 = by layer, "
+                  "4 = by mtype, 5 = by etype, 6 = by target) (1 per material)")
+    MESSAGE_ENTRY(std::vector<int32_t>, clippingModes,
+                  "The choosen material clipping mode (0 = no clipping, 1 = clip by plane, "
+                  "2 = clip by sphere) (1 per material)")
+    MESSAGE_ENTRY(std::vector<float>, userParameters,
+                  "A custom parameter passed to the simulation (1 per material)")
 };
 
-bool from_json(CircuitBoundingBox& circuitBoundingBox,
-               const std::string& payload);
-
-/** Connections per value */
-struct ConnectionsPerValue
+struct MaterialRangeDescriptor : public brayns::Message
 {
-    int32_t modelId;
-    int32_t frame;
-    double value;
-    double epsilon;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(MaterialRangeDescriptor)
+    MESSAGE_ENTRY(uint64_t, modelId, "The model to which these materials belongs to")
+    MESSAGE_ENTRY(std::vector<uint64_t>, materialIds,
+                  "The IDs that identifies the materials to modify of the given"
+                  " model (an empty list will modify all materials)")
+    MESSAGE_ENTRY(std::vector<float>, diffuseColor,
+                  "A 3 component normalized color (RGB) describing the diffuse "
+                  "reflection (minimum 1)")
+    MESSAGE_ENTRY(std::vector<float>, specularColor,
+                  "A 3 component normalized color (RGB) describing the specular "
+                  "reflection (minimum 1)")
+    MESSAGE_ENTRY(double, specularExponent,
+                  "The specular exponent to sharpen the specular reflection")
+    MESSAGE_ENTRY(double, reflectionIndex, "The index of reflection of the material surface")
+    MESSAGE_ENTRY(double, opacity, "The transparency of the material (0 to 1)")
+    MESSAGE_ENTRY(double, refractionIndex, "The index of refraction of a transparent material")
+    MESSAGE_ENTRY(double, emission, "The emissive property of a material")
+    MESSAGE_ENTRY(double, glossiness, "The glossy component of a material")
+    MESSAGE_ENTRY(bool, simulationDataCast, "Wether to cast the user parameter for simulation")
+    MESSAGE_ENTRY(int32_t, shadingMode,
+                  "The choosen shading mode (0 = none, 1 = by id, 2 = by type, 3 = by layer,"
+                  " 4 = by mtype, 5 = by etype, 6 = by target)")
+    MESSAGE_ENTRY(int32_t, clippingMode,
+                  "The choosen material clipping mode (0 = no clipping, 1 = clip by plane, "
+                  "2 = clip by sphere)")
+    MESSAGE_ENTRY(double, userParameter, "A custom parameter passed to the simulation")
 };
 
-bool from_json(ConnectionsPerValue& connectionsPerValue,
-               const std::string& payload);
-
-/** Metaballs per simulation value */
-struct MetaballsFromSimulationValue
+struct ModelId : brayns::Message
 {
-    int32_t modelId;
-    int32_t frame;
-    double value;
-    double epsilon;
-    int32_t gridSize;
-    double threshold;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(ModelId)
+    MESSAGE_ENTRY(uint64_t, modelId, "The id of the model")
 };
 
-bool from_json(MetaballsFromSimulationValue& param, const std::string& payload);
-
-/** Set extra attributes to materials */
-struct MaterialExtraAttributes
+struct ModelMaterialId : public brayns::Message
 {
-    int32_t modelId;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(ModelMaterialId)
+    MESSAGE_ENTRY(uint64_t, modelId, "The id of the model")
+    MESSAGE_ENTRY(uint64_t, materialId, "The id of the material")
 };
 
-bool from_json(MaterialExtraAttributes& param, const std::string& payload);
-
-// DB API
-struct LoadCellsAsInstances
+struct MaterialIds : public brayns::Message
 {
-    std::string connectionString;
-    std::string sqlStatement;
-    std::string name;
-    std::string description;
-    std::string morphologyFolder;
-    std::string morphologyExtension;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(MaterialIds)
+    MESSAGE_ENTRY(std::vector<uint64_t>, ids, "The list of material ids")
 };
-bool from_json(LoadCellsAsInstances& param, const std::string& payload);
 
-struct ImportMorphology
+struct SynapseAttributes : public brayns::Message
 {
-    std::string connectionString;
-    uint64_t guid;
-    std::string filename;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(SynapseAttributes)
+    MESSAGE_ENTRY(std::string, circuitConfiguration, "Path to the circuit configuration file")
+    MESSAGE_ENTRY(int32_t, gid, "Target cell GID")
+    MESSAGE_ENTRY(std::vector<std::string>, htmlColors, "List of rgb colors in hexadecimal")
+    MESSAGE_ENTRY(double, lightEmission, "Emission parameter for the synapse material")
+    MESSAGE_ENTRY(double, radius, "Synapse geometry radius")
 };
-bool from_json(ImportMorphology& param, const std::string& payload);
 
-struct LoadCells
+struct CircuitBoundingBox : public brayns::Message
 {
-    std::string connectionString;
-    std::string name;
-    std::string sqlCell;
-    std::string sqlMorphology;
-    bool sdf;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(CircuitBoundingBox)
+    MESSAGE_ENTRY(std::vector<double>, aabb, "The bounding box definition")
 };
-bool from_json(LoadCells& param, const std::string& payload);
 
-struct LoadSomas
+struct ConnectionsPerValue : public brayns::Message
 {
-    std::string connectionString;
-    std::string sqlStatement;
-    std::string name;
-    float radius{1.f};
-    bool showOrientations;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(ConnectionsPerValue)
+    MESSAGE_ENTRY(uint64_t, modelId, "The model to which apply the connections per value setting")
+    MESSAGE_ENTRY(uint32_t, frame, "The frame of the simulation in which to apply")
+    MESSAGE_ENTRY(double, value, "The value")
+    MESSAGE_ENTRY(double, epsilon, "The value epsilon")
 };
-bool from_json(LoadSomas& param, const std::string& payload);
 
-struct LoadSegments
+struct MetaballsFromSimulationValue : public brayns::Message
 {
-    std::string connectionString;
-    std::string sqlStatement;
-    std::string name;
-    float radius{1.f};
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(MetaballsFromSimulationValue)
+    MESSAGE_ENTRY(uint64_t, modelId, "The model to which apply the metaballs setting")
+    MESSAGE_ENTRY(uint32_t, frame, "The frame in which the setting will be applied")
+    MESSAGE_ENTRY(double, value, "The value for the metaballs generation")
+    MESSAGE_ENTRY(double, epsilon, "The value epsilon")
+    MESSAGE_ENTRY(uint32_t, gridSize, "The size of a regular grid")
+    MESSAGE_ENTRY(double, threshold, "The threshold")
 };
-bool from_json(LoadSegments& param, const std::string& payload);
 
-struct LoadMeshes
+struct MaterialExtraAttributes : public brayns::Message
 {
-    std::string connectionString;
-    std::string sqlStatement;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(MaterialExtraAttributes)
+    MESSAGE_ENTRY(uint32_t, modelId,
+                  "The model from which the materials will have the extra attributes setted")
 };
-bool from_json(LoadMeshes& param, const std::string& payload);
 
-struct ImportVolume
+struct LoadCellsAsInstances : public brayns::Message
 {
-    std::string connectionString;
-    uint64_t guid;
-    std::vector<uint16_t> dimensions;
-    std::vector<float> spacing;
-    std::string rawFilename;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(LoadCellsAsInstances)
+    MESSAGE_ENTRY(std::string, connectionString, "The sql statement to connect to the database")
+    MESSAGE_ENTRY(std::string, sqlStatement, "The sql statement to query the database")
+    MESSAGE_ENTRY(std::string, name, "The name")
+    MESSAGE_ENTRY(std::string, description, "The description")
+    MESSAGE_ENTRY(std::string, morphologyFolder, "The folder in which to find the morphologies")
+    MESSAGE_ENTRY(std::string, morphologyExtension, "The morphology file format extension")
 };
-bool from_json(ImportVolume& param, const std::string& payload);
 
-struct ImportCompartmentSimulation
+struct ImportMorphology : public brayns::Message
 {
-    std::string connectionString;
-    std::string blueConfig;
-    std::string reportName;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(ImportMorphology)
+    MESSAGE_ENTRY(std::string, connectionString, "The sql statement to connect to the database");
+    MESSAGE_ENTRY(uint64_t, guid, "The global unique identifier")
+    MESSAGE_ENTRY(std::string, fileName, "The path to the file of the morphology")
 };
-bool from_json(ImportCompartmentSimulation& param, const std::string& payload);
 
-struct CameraDefinition : public MessageResult
+struct LoadCells : public brayns::Message
 {
-    std::vector<double> origin;
-    std::vector<double> direction;
-    std::vector<double> up;
-    double apertureRadius;
-    double focusDistance;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(LoadCells)
+    MESSAGE_ENTRY(std::string, connectionString, "The sql statement to connect to the database")
+    MESSAGE_ENTRY(std::string, name, "The name")
+    MESSAGE_ENTRY(std::string, sqlCell, "The sql statement to query the cells")
+    MESSAGE_ENTRY(std::string, sqlMorphology, "The sql statement to query the morphologies")
+    MESSAGE_ENTRY(bool, sdf, "Wether to use signed distance field functions to render the cells")
 };
-bool from_json(CameraDefinition& param, const std::string& payload);
-std::string to_json(const CameraDefinition& param);
 
-struct AttachCellGrowthHandler
+struct LoadSomas : public brayns::Message
 {
-    uint64_t modelId;
-    uint64_t nbFrames;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(LoadSomas)
+    MESSAGE_ENTRY(std::string, connectionString, "The sql statement to connect to the database")
+    MESSAGE_ENTRY(std::string, sqlStatement, "The sql statement to query the database")
+    MESSAGE_ENTRY(std::string, name, "The name")
+    MESSAGE_ENTRY(double, radius, "The radius to apply to soma rendering")
+    MESSAGE_ENTRY(bool, showOrientations, "Wether to render proxies to show the orientation")
 };
-bool from_json(AttachCellGrowthHandler& param, const std::string& payload);
 
-struct AttachCircuitSimulationHandler
+struct LoadSegments : public brayns::Message
 {
-    uint64_t modelId;
-    std::string circuitConfiguration;
-    std::string reportName;
-    bool synchronousMode;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(LoadSegments)
+    MESSAGE_ENTRY(std::string, connectionString, "The sql statement to connect to the database")
+    MESSAGE_ENTRY(std::string, sqlStatement, "The sql statement to query the database")
+    MESSAGE_ENTRY(std::string, name, "The name")
+    MESSAGE_ENTRY(double, radius, "The radius to apply to the segments rendering")
 };
-bool from_json(AttachCircuitSimulationHandler& param,
-               const std::string& payload);
 
-struct ExportFramesToDisk
+struct LoadMeshes : public brayns::Message
 {
-    std::string path;
-    std::string format;
-    uint16_t quality{100};
-    uint16_t spp{0};
-    uint16_t startFrame{0};
-    std::vector<uint64_t> animationInformation;
-    std::vector<double> cameraInformation;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(LoadMeshes)
+    MESSAGE_ENTRY(std::string, connectionString, "The sql statement to connect to the database")
+    MESSAGE_ENTRY(std::string, sqlStatement, "The sql statement to query the database")
 };
-bool from_json(ExportFramesToDisk& param, const std::string& payload);
 
-struct FrameExportProgress : public MessageResult
+struct ImportVolume : public brayns::Message
 {
-    float progress;
+    MESSAGE_BEGIN(ImportVolume)
+    MESSAGE_ENTRY(std::string, connectionString, "The sql statement to connect to the database")
+    MESSAGE_ENTRY(uint64_t, guid, "The global unique identifier")
+    MESSAGE_ENTRY(std::vector<uint32_t>, dimensions, "The volume dimensions")
+    MESSAGE_ENTRY(std::vector<float>, spacing, "The volume spacing")
+    MESSAGE_ENTRY(std::string, rawFilename, "The path to the volume file")
 };
-std::string to_json(const FrameExportProgress& exportProgress);
 
-struct ExportLayerToDisk
+struct ImportCompartmentSimulation : public brayns::Message
 {
-    std::string path;
-    std::string name;
-    uint32_t startFrame;
-    uint32_t framesCount;
-    std::string data;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(ImportCompartmentSimulation)
+    MESSAGE_ENTRY(std::string, connectionString, "The sql statement to connect to the database")
+    MESSAGE_ENTRY(std::string, blueConfig,
+                  "The path to the Blue Brain configuration file with the report")
+    MESSAGE_ENTRY(std::string, reportName, "The name of the report to load")
 };
-bool from_json(ExportLayerToDisk& param, const std::string& payload);
 
-struct ExportLayerToDiskResult : public MessageResult
+struct CameraDefinition : public brayns::Message
 {
-    std::vector<uint32_t> frames;
+    MESSAGE_BEGIN(CameraDefinition)
+    MESSAGE_ENTRY(std::vector<double>, origin, "The position of the camera")
+    MESSAGE_ENTRY(std::vector<double>, direction,
+                  "A normalized vector in the direction the camera is facing")
+    MESSAGE_ENTRY(std::vector<double>, up,
+                  "A normalized vector, perpendicular to the direction, that points to the camera"
+                  " upwards")
+    MESSAGE_ENTRY(double, apertureRadius, "The camera aperture")
+    MESSAGE_ENTRY(double, focusDistance,
+                  "The distance from the origin, in the direction, at which the camera will focus")
 };
-std::string to_json(const ExportLayerToDiskResult& result);
 
-struct MakeMovieParameters
+struct AttachCellGrowthHandler : public brayns::Message
 {
-    std::vector<uint16_t> dimensions;
-    std::string framesFolderPath;
-    std::string framesFileExtension;
-    uint32_t fpsRate;
-    std::string outputMoviePath;
-    bool eraseFrames;
-    strings layers;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(AttachCellGrowthHandler)
+    MESSAGE_ENTRY(uint64_t, modelId, "The model to which to attach the handler")
+    MESSAGE_ENTRY(uint64_t, nbFrames, "The number of frames to perform the growth")
 };
-bool from_json(MakeMovieParameters& movieParams, const std::string& payload);
 
-struct AddGrid
+struct AttachCircuitSimulationHandler : public brayns::Message
 {
-    float minValue;
-    float maxValue;
-    float steps;
-    float radius;
-    float planeOpacity;
-    bool showAxis;
-    bool useColors;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(AttachCircuitSimulationHandler)
+    MESSAGE_ENTRY(uint64_t, modelId, "The model to which to attach the handler")
+    MESSAGE_ENTRY(std::string, circuitConfiguration,
+                  "The path to the Blue Brain config file which contains the simulation")
+    MESSAGE_ENTRY(std::string, reportName, "The name of the report to attach")
+    MESSAGE_ENTRY(bool, synchronousMode, "Wether to perform the load synchronously (blocking)")
 };
-bool from_json(AddGrid& param, const std::string& payload);
 
-struct AddColumn
+struct ExportFramesToDisk : public brayns::Message
 {
-    float radius;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(ExportFramesToDisk)
+    MESSAGE_ENTRY(std::string, path, "Path to the directory where the frames will be saved")
+    MESSAGE_ENTRY(std::string, format, "The image format (PNG or JPEG)")
+    MESSAGE_ENTRY(uint32_t, quality, "The quality at which the images will be stored")
+    MESSAGE_ENTRY(uint32_t, spp,
+                  "Samples per pixels (The more, the better visual result and the slower the"
+                  " rendering)")
+    MESSAGE_ENTRY(uint32_t, startFrame, "The frame at which to start exporting frames")
+    MESSAGE_ENTRY(std::vector<uint64_t>, animationInformation, "A list of frame numbers to render")
+    MESSAGE_ENTRY(std::vector<double>, cameraInformation,
+                  "A list of camera definitions. Each camera definition contains origin, "
+                  "direction, up, apperture and radius. (1 entry per animation information entry)")
 };
-bool from_json(AddColumn& param, const std::string& payload);
 
-struct AnterogradeTracing
+struct FrameExportProgress : public brayns::Message
 {
-    int32_t modelId;
-    std::vector<uint32_t> cellGIDs;
-    std::vector<uint32_t> targetCellGIDs;
-    std::vector<double> sourceCellColor;
-    std::vector<double> connectedCellsColor;
-    std::vector<double> nonConnectedCellsColor;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(FrameExportProgress)
+    MESSAGE_ENTRY(double, progress, "The normalized progress (0.0 to 1.0) of the last export "
+                                    "frames to disk request")
 };
-bool from_json(AnterogradeTracing& param, const std::string& payload);
 
-struct AddSphere
+struct ExportLayerToDisk : public brayns::Message
 {
-    std::string name;
-    std::vector<float> center;
-    float radius;
-    std::vector<double> color;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(ExportLayerToDisk)
+    MESSAGE_ENTRY(std::string, path, "Path where to store the frames")
+    MESSAGE_ENTRY(std::string, name, "Name to give to the layer frames")
+    MESSAGE_ENTRY(uint32_t, startFrame, "The frame number of the first frame to store "
+                                        "(For instance: name00025.png")
+    MESSAGE_ENTRY(uint32_t, framesCount, "Number of frames to store, starting at startFrame")
+    MESSAGE_ENTRY(std::string, data, "Base64 layer image data to store on every frame")
 };
-bool from_json(AddSphere& param, const std::string& payload);
 
-struct AddPill
+struct ExportLayerToDiskResult : public brayns::Message
 {
-    std::string name;
-    std::string type;
-    std::vector<float> p1;
-    std::vector<float> p2;
-    float radius1;
-    float radius2;
-    std::vector<double> color;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(ExportLayerToDiskResult)
+    MESSAGE_ENTRY(std::vector<uint32_t>, frames, "List of frames that were successfully stored"
+                                                 " from the last export layer to disk request")
 };
-bool from_json(AddPill& param, const std::string& payload);
 
-struct AddCylinder
+struct MakeMovieParameters : public brayns::Message
 {
-    std::string name;
-    std::vector<float> center;
-    std::vector<float> up;
-    float radius;
-    std::vector<double> color;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(MakeMovieParameters)
+    MESSAGE_ENTRY(std::vector<uint32_t>, dimensions, "Video dimensions (width,height)")
+    MESSAGE_ENTRY(std::string, framesFolderPath, "Path to where to fetch the frames to create the"
+                                                 " video")
+    MESSAGE_ENTRY(std::string, framesFileExtension, "The extension of the frame files to fetch "
+                                                    "(png, jpg)")
+    MESSAGE_ENTRY(uint32_t, fpsRate, "The frames per second rate at which to create the video")
+    MESSAGE_ENTRY(std::string, outputMoviePath, "The path to where the movie will be created."
+                                                " Must include filename and extension")
+    MESSAGE_ENTRY(bool, eraseFrames, "Wether to clean up the frame image files after generating"
+                                     " the video file")
+    MESSAGE_ENTRY(std::vector<std::string>, layers, "List of layer names to compose in the video")
 };
-bool from_json(AddCylinder& param, const std::string& payload);
 
-struct AddBox
+struct AddGrid : public brayns::Message
 {
-    std::string name;
-    std::vector<float> minCorner;
-    std::vector<float> maxCorner;
-    std::vector<double> color;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(AddGrid)
+    MESSAGE_ENTRY(double, minValue, "")
+    MESSAGE_ENTRY(double, maxValue, "")
+    MESSAGE_ENTRY(double, steps, "")
+    MESSAGE_ENTRY(double, radius, "")
+    MESSAGE_ENTRY(double, planeOpacity, "Opacity of the grid mesh material")
+    MESSAGE_ENTRY(bool, showAxis, "Wether to show a world aligned axis")
+    MESSAGE_ENTRY(bool, useColors, "")
 };
-bool from_json(AddBox& param, const std::string& payload);
 
-struct AddShapeResult : public MessageResult
+struct AddColumn : public brayns::Message
 {
-    size_t id;
+    MESSAGE_BEGIN(AddColumn)
+    MESSAGE_ENTRY(double, radius, "Radium of the cylinder column to add")
 };
-std::string to_json(const AddShapeResult& addResult);
 
-struct RemapCircuit
+struct AnterogradeTracing : public brayns::Message
 {
-    uint32_t modelId;
-    std::string scheme;
-    bool parsed{true};
-    std::string parseError{""};
+    MESSAGE_BEGIN(AnterogradeTracing)
+    MESSAGE_ENTRY(uint64_t, modelId, "Model where to perform the neuronal tracing")
+    MESSAGE_ENTRY(std::vector<uint32_t>, cellGIDs, "List of cell GIDs to use a source of the "
+                                                   "tracing")
+    MESSAGE_ENTRY(std::vector<uint32_t>, targetCellGIDs, "List of cells GIDs which are the result"
+                                                         " of the given tracing mode")
+    MESSAGE_ENTRY(std::vector<double>, sourceCellColor, "A 4 component normalized color (RGBA) to "
+                                                        "apply to the source cell geometry")
+    MESSAGE_ENTRY(std::vector<double>, connectedCellsColor, "A 4 component normalized color (RGBA) "
+                                                            "to apply to the target cells geometry")
+    MESSAGE_ENTRY(std::vector<double>, nonConnectedCellsColor, "A 4 component normalized color (RGBA)"
+                                                               " to apply to the rest of cells")
 };
-bool from_json(RemapCircuit& param, const std::string& payload);
 
-#endif // CIRCUITVIEWERPARAMS_H
+struct AddSphere : public brayns::Message
+{
+    MESSAGE_BEGIN(AddSphere)
+    MESSAGE_ENTRY(std::string, name, "Name to give to the added model")
+    MESSAGE_ENTRY(std::vector<double>, center, "The coordinates of the sphere center (X,Y,Z)")
+    MESSAGE_ENTRY(double, radius, "Radius of the sphere")
+    MESSAGE_ENTRY(std::vector<double>, color, "A 4 component normalized color (RGBA) to apply"
+                                              " to the sphere surface")
+};
+
+struct AddPill : public brayns::Message
+{
+    MESSAGE_BEGIN(AddPill)
+    MESSAGE_ENTRY(std::string, name, "Name to give to the added model")
+    MESSAGE_ENTRY(std::string, type, "Type of pill (pill, conepill or sigmoidpill)")
+    MESSAGE_ENTRY(std::vector<double>, p1, "Center of the lower pill circunference")
+    MESSAGE_ENTRY(std::vector<double>, p2, "Center of the upper pill circunference")
+    MESSAGE_ENTRY(double, radius1, "Radius of the lower pill circunference")
+    MESSAGE_ENTRY(double, radius2, "Radius of the upper pill circunference")
+    MESSAGE_ENTRY(std::vector<double>, color, "A 4 component normalized color (RGBA) to apply"
+                                              " to the pill surface")
+};
+
+struct AddCylinder : public brayns::Message
+{
+    MESSAGE_BEGIN(AddCylinder)
+    MESSAGE_ENTRY(std::string, name, "Name to give to the added model")
+    MESSAGE_ENTRY(std::vector<double>, center, "Center of the lower cylinder circunference")
+    MESSAGE_ENTRY(std::vector<double>, up, "Center of the upper cylinder circunference")
+    MESSAGE_ENTRY(double, radius, "Radius of the cylinder")
+    MESSAGE_ENTRY(std::vector<double>, color, "A 4 component normalized color (RGBA) to apply"
+                                              " to the cylinder surface")
+};
+
+struct AddBox : public brayns::Message
+{
+    MESSAGE_BEGIN(AddBox)
+    MESSAGE_ENTRY(std::string, name, "Name to give to the added model")
+    MESSAGE_ENTRY(std::vector<double>, minCorner, "Axis aligned minimum bound of the box")
+    MESSAGE_ENTRY(std::vector<double>, maxCorner, "Axis aligned maximum bound of the box")
+    MESSAGE_ENTRY(std::vector<double>, color, "A 4 component normalized color (RGBA) to apply"
+                                              " to the box surface")
+};
+
+struct AddShapeResult : public brayns::Message
+{
+    MESSAGE_BEGIN(AddShapeResult)
+    MESSAGE_ENTRY(uint64_t, id, "The id of the added model")
+};
+
+struct RemapCircuit : public brayns::Message
+{
+    MESSAGE_BEGIN(RemapCircuit)
+    MESSAGE_ENTRY(uint64_t, modelId, "The model to remap")
+    MESSAGE_ENTRY(std::string, scheme, "Color scheme to remap a circuit to (Possible values: "
+                                       "\"By id\", \"By layer\", \"By mtype\", \"By etype\", "
+                                       "\"By target\")")
+};
+
+#endif // CIRCUITEXLORERPARAMS_H

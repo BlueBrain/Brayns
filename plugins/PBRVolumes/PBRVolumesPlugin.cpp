@@ -32,34 +32,24 @@
 
 #include <brayns/pluginapi/PluginAPI.h>
 
-#define HANDLE_NOT_PARSED(req, resp) \
-    if(!req.parsed) { \
-        resp.error = 1; \
-        resp.message = req.parseMessage; \
-        return resp; \
-    } \
-
 template<typename Request>
-inline bool handleCommonParams(const Request& req, AddVolumeResponse& resp)
+inline bool handleCommonParams(const Request& req, brayns::Message& resp)
 {
     if(req.absorption.size() < 3)
     {
-        resp.error = 2;
-        resp.message = "Absroption coefficent requires 3 float numbers";
+        resp.setError(2, "Absroption coefficent requires 3 float numbers");
         return false;
     }
 
     if(req.scattering.size() < 3)
     {
-        resp.error = 3;
-        resp.message = "Scattering coefficent requires 3 float numbers";
+        resp.setError(3, "Scattering coefficent requires 3 float numbers");
         return false;
     }
 
     if(req.Le.size() < 3)
     {
-        resp.error = 4;
-        resp.message = "Le parameter requires 3 float numbers";
+        resp.setError(4, "Le parameter requires 3 float numbers");
         return false;
     }
 
@@ -67,19 +57,17 @@ inline bool handleCommonParams(const Request& req, AddVolumeResponse& resp)
 }
 
 template<typename Request>
-inline bool handleBoxParams(const Request& req, AddVolumeResponse& resp)
+inline bool handleBoxParams(const Request& req, brayns::Message& resp)
 {
     if(req.p0.size() < 3)
     {
-        resp.error = 5;
-        resp.message = "Minimum bound (p0) parameter requires 3 floats";
+        resp.setError(5, "Minimum bound (p0) parameter requires 3 floats");
         return false;
     }
 
     if(req.p1.size() < 3)
     {
-        resp.error = 6;
-        resp.message = "Maximum bound (p1) parameter requires 3 floats";
+        resp.setError(6, "Maximum bound (p1) parameter requires 3 floats");
         return false;
     }
 
@@ -99,8 +87,8 @@ inline void addCommonParams(const Request& req, brayns::PropertyMap& metaObject)
                                               req.scattering[2]};
     metaObject.setProperty({"sig_s", scattering});
 
-    metaObject.setProperty({"scale", static_cast<double>(req.scale)});
-    metaObject.setProperty({"g", static_cast<double>(req.g)});
+    metaObject.setProperty({"scale", req.scale});
+    metaObject.setProperty({"g", req.g});
 
     const std::array<double, 3> Le = {req.Le[0],
                                       req.Le[1],
@@ -130,39 +118,47 @@ void PBRVolumesPlugin::init()
     auto actionInterface = _api->getActionInterface();
     if(actionInterface)
     {
-        PLUGIN_INFO << "Registering 'add-homogeneus-volume' endpoint" << std::endl;
-        actionInterface->registerRequest<AddHomogeneusVolume, AddVolumeResponse>(
-            "add-homogeneus-volume", [&](const AddHomogeneusVolume& request){
+        actionInterface->registerRequest<AddHomogeneusVolume, brayns::Message>(
+            {"add-homogeneus-volume",
+             "Adds a constant density volume to the scene",
+             "AddHomogeneusVolume",
+             "Parameters to define the homogeneus volume"},
+             [&](const AddHomogeneusVolume& request){
                 return _addHomogeneusVolume(request);
         });
 
-        PLUGIN_INFO << "Registering 'add-homogeneus-volume-model' endpoint" << std::endl;
-        actionInterface->registerRequest<AddHomogeneusVolumeToModel, AddVolumeResponse>(
-            "add-homogeneus-volume-model", [&](const AddHomogeneusVolumeToModel& request){
+        actionInterface->registerRequest<AddHomogeneusVolumeToModel, brayns::Message>(
+            {"add-homogeneus-volume-model",
+             "Adds a constant density volume to an already loaded model in the scene",
+             "AddHomogeneusVolumeToModel",
+             "Parameters to define the homogeneus volume, and the model to add it to"},
+            [&](const AddHomogeneusVolumeToModel& request){
                 return _addHomogeneusVolumeToModel(request);
         });
 
-        PLUGIN_INFO << "Registering 'add-heterogeneus-volume' endpoint" << std::endl;
-        actionInterface->registerRequest<AddHeterogeneusVolume, AddVolumeResponse>(
-            "add-heterogeneus-volume", [&](const AddHeterogeneusVolume& request){
+        actionInterface->registerRequest<AddHeterogeneusVolume, brayns::Message>(
+            {"add-heterogeneus-volume",
+             "Adds a non constant density volume to the scene",
+             "AddHeterogeneusVolume",
+             "Parameters to define the heterogeneus volume"},
+            [&](const AddHeterogeneusVolume& request){
                 return _addHeterogeneusVolume(request);
         });
 
-        PLUGIN_INFO << "Registering 'add-grid-volume' endpoint" << std::endl;
-        actionInterface->registerRequest<AddGridVolume, AddVolumeResponse>(
-            "add-grid-volume", [&](const AddGridVolume& request){
+        actionInterface->registerRequest<AddGridVolume, brayns::Message>(
+            {"add-grid-volume",
+             "Adds a grid based volume to the scene, in which each cell has its own density",
+             "AddGridVolume",
+             "Parameters to define the grid and the volume inside it"},
+            [&](const AddGridVolume& request){
                 return _addGridVolume(request);
         });
     }
 }
 
-AddVolumeResponse PBRVolumesPlugin::_addHomogeneusVolume(const AddHomogeneusVolume& req)
+brayns::Message PBRVolumesPlugin::_addHomogeneusVolume(const AddHomogeneusVolume& req)
 {
-    AddVolumeResponse resp;
-    resp.error = 0;
-    resp.message = "";
-
-    HANDLE_NOT_PARSED(req, resp)
+    brayns::Message resp;
 
     if(!handleCommonParams(req, resp))
         return resp;
@@ -173,7 +169,7 @@ AddVolumeResponse PBRVolumesPlugin::_addHomogeneusVolume(const AddHomogeneusVolu
     brayns::PropertyMap metaObject;
 
     metaObject.setProperty({"volume_type", std::string("homogeneus")});
-    metaObject.setProperty({"density", static_cast<double>(req.density)});
+    metaObject.setProperty({"density", req.density});
     addCommonParams(req, metaObject);
 
     auto modelPtr = _api->getScene().createModel();
@@ -190,14 +186,10 @@ AddVolumeResponse PBRVolumesPlugin::_addHomogeneusVolume(const AddHomogeneusVolu
     return resp;
 }
 
-AddVolumeResponse
+brayns::Message
 PBRVolumesPlugin::_addHomogeneusVolumeToModel(const AddHomogeneusVolumeToModel& req)
 {
-    AddVolumeResponse resp;
-    resp.error = 0;
-    resp.message = "";
-
-    HANDLE_NOT_PARSED(req, resp)
+    brayns::Message resp;
 
     if(!handleCommonParams(req, resp))
         return resp;
@@ -206,14 +198,13 @@ PBRVolumesPlugin::_addHomogeneusVolumeToModel(const AddHomogeneusVolumeToModel& 
     auto modelPtr = _api->getScene().getModel(modelId);
     if(!modelPtr)
     {
-        resp.error = 5;
-        resp.message = "The given model ID does not exist";
+        resp.setError(5, "The given model ID does not exist");
         return resp;
     }
 
     brayns::PropertyMap metaObject;
     metaObject.setProperty({"volume_type", std::string("homogeneus")});
-    metaObject.setProperty({"density", static_cast<double>(req.density)});
+    metaObject.setProperty({"density", req.density});
     addCommonParams(req, metaObject);
 
     modelPtr->getModel().addMetaObject(brayns::NO_MATERIAL, metaObject);
@@ -224,13 +215,9 @@ PBRVolumesPlugin::_addHomogeneusVolumeToModel(const AddHomogeneusVolumeToModel& 
     return resp;
 }
 
-AddVolumeResponse PBRVolumesPlugin::_addHeterogeneusVolume(const AddHeterogeneusVolume& req)
+brayns::Message PBRVolumesPlugin::_addHeterogeneusVolume(const AddHeterogeneusVolume& req)
 {
-    AddVolumeResponse resp;
-    resp.error = 0;
-    resp.message = "";
-
-    HANDLE_NOT_PARSED(req, resp)
+    brayns::Message resp;
 
     if(!handleCommonParams(req, resp))
         return resp;
@@ -241,8 +228,8 @@ AddVolumeResponse PBRVolumesPlugin::_addHeterogeneusVolume(const AddHeterogeneus
     brayns::PropertyMap metaObject;
 
     metaObject.setProperty({"volume_type", std::string("heterogeneus")});
-    metaObject.setProperty({"min_density", static_cast<double>(req.minDensity)});
-    metaObject.setProperty({"max_density", static_cast<double>(req.maxDensity)});
+    metaObject.setProperty({"min_density", req.minDensity});
+    metaObject.setProperty({"max_density", req.maxDensity});
     addCommonParams(req, metaObject);
 
     auto modelPtr = _api->getScene().createModel();
@@ -259,13 +246,9 @@ AddVolumeResponse PBRVolumesPlugin::_addHeterogeneusVolume(const AddHeterogeneus
     return resp;
 }
 
-AddVolumeResponse PBRVolumesPlugin::_addGridVolume(const AddGridVolume& req)
+brayns::Message PBRVolumesPlugin::_addGridVolume(const AddGridVolume& req)
 {
-    AddVolumeResponse resp;
-    resp.error = 0;
-    resp.message = "";
-
-    HANDLE_NOT_PARSED(req, resp)
+    brayns::Message resp;
 
     if(!handleCommonParams(req, resp))
         return resp;
@@ -275,16 +258,14 @@ AddVolumeResponse PBRVolumesPlugin::_addGridVolume(const AddGridVolume& req)
 
     if(req.nx < 1 || req.ny < 1 || req.nz < 1)
     {
-        resp.error = 7;
-        resp.message = "The grid dimensions must be positive non zero values";
+        resp.setError(7, "The grid dimensions must be positive non zero values");
         return resp;
     }
 
     if(static_cast<size_t>(req.nx * req.ny * req.nz) != req.density.size())
     {
-        resp.error = 8;
-        resp.message = "The grid dimensions (nx x ny x nz) must match the number of denisty"
-                       " values";
+        resp.setError(8, "The grid dimensions (nx x ny x nz) must match the number of denisty"
+                         " values");
         return resp;
     }
 

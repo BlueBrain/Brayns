@@ -16,7 +16,6 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
 set(${NAME}_SOURCES
   io/DTILoader.cpp
   io/DTISimulationHandler.cpp
-  api/DTIParams.cpp
   DTIPlugin.cpp
 )
 

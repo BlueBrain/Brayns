@@ -71,33 +71,33 @@ private:
     }
 
     // Rendering
-    MessageResult _setCamera(const CameraDefinition&);
+    brayns::Message _setCamera(const CameraDefinition&);
     CameraDefinition _getCamera();
-    MessageResult _setMaterial(const MaterialDescriptor&);
-    MessageResult _setMaterials(const MaterialsDescriptor&);
-    MessageResult _setMaterialRange(const MaterialRangeDescriptor&);
-    MessageResult _setMaterialExtraAttributes(const MaterialExtraAttributes&);
+    brayns::Message _setMaterial(const MaterialDescriptor&);
+    brayns::Message _setMaterials(const MaterialsDescriptor&);
+    brayns::Message _setMaterialRange(const MaterialRangeDescriptor&);
+    brayns::Message _setMaterialExtraAttributes(const MaterialExtraAttributes&);
 
     // Experimental
-    MessageResult _setSynapseAttributes(const SynapseAttributes&);
-    MessageResult _setConnectionsPerValue(const ConnectionsPerValue&);
-    MessageResult _setMetaballsPerSimulationValue(const MetaballsFromSimulationValue&);
-    MessageResult _saveModelToCache(const SaveModelToCache&);
+    brayns::Message _setSynapseAttributes(const SynapseAttributes&);
+    brayns::Message _setConnectionsPerValue(const ConnectionsPerValue&);
+    brayns::Message _setMetaballsPerSimulationValue(const MetaballsFromSimulationValue&);
+    brayns::Message _saveModelToCache(const SaveModelToCache&);
 
     // Handlers
-    MessageResult _attachCellGrowthHandler(const AttachCellGrowthHandler& payload);
-    MessageResult _attachCircuitSimulationHandler(
+    brayns::Message _attachCellGrowthHandler(const AttachCellGrowthHandler& payload);
+    brayns::Message _attachCircuitSimulationHandler(
         const AttachCircuitSimulationHandler& payload);
 
     // Movie production
-    MessageResult _exportFramesToDisk(const ExportFramesToDisk& payload);
+    brayns::Message _exportFramesToDisk(const ExportFramesToDisk& payload);
     void _doExportFrameToDisk();
     FrameExportProgress _getFrameExportProgress();
     ExportLayerToDiskResult _exportLayerToDisk(const ExportLayerToDisk& payload);
-    MessageResult _makeMovie(const MakeMovieParameters& params);
+    brayns::Message _makeMovie(const MakeMovieParameters& params);
 
     // Anterograde tracing
-    MessageResult _traceAnterogrades(const AnterogradeTracing& payload);
+    brayns::Message _traceAnterogrades(const AnterogradeTracing& payload);
 
     // Add geometry
     void _createShapeMaterial(brayns::ModelPtr& model,
@@ -111,15 +111,15 @@ private:
 
 
     // Predefined models
-    MessageResult _addGrid(const AddGrid& payload);
-    MessageResult _addColumn(const AddColumn& payload);
+    brayns::Message _addGrid(const AddGrid& payload);
+    brayns::Message _addColumn(const AddColumn& payload);
 
     // Get material information
     MaterialIds _getMaterialIds(const ModelId& modelId);
     MaterialDescriptor _getMaterial(const ModelMaterialId& mmId);
 
     // Remap circuit colors to a specific scheme
-    MessageResult _remapCircuitToScheme(const RemapCircuit& payload);
+    brayns::Message _remapCircuitToScheme(const RemapCircuit& payload);
 
     SynapseAttributes _synapseAttributes;
 
@@ -128,7 +128,7 @@ private:
     ExportFramesToDisk _exportFramesToDiskPayload;
     bool _exportFramesToDiskDirty{false};
     uint16_t _frameNumber{0};
-    int16_t _accumulationFrameNumber{0};
+    uint32_t _accumulationFrameNumber{0};
     size_t _prevAccumulationSetting;
 
     std::vector<std::unique_ptr<CellObjectMapper>> _mappers;
