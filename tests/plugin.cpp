@@ -22,7 +22,7 @@
 
 #include "ClientServer.h"
 
-using Vec2 = std::array<unsigned, 2>;
+using Vec2 = std::array<int32_t, 2>;
 const Vec2 vecVal{{1, 1}};
 
 TEST_CASE("plugin_actions")
@@ -46,13 +46,26 @@ TEST_CASE("plugin_actions")
     CHECK(result.getProperty<bool>("result"));
 
     // wrong input
-    CHECK_THROWS_AS(makeRequestUpdate("request-param", vecVal, output),
-                    std::runtime_error);
+    result = makeRequestUpdate("request-param", vecVal, output);
+    CHECK(result.getProperty<int>("error") == -1);
+
 
     makeNotification("hello");
-    makeNotification("foo", vecVal);
-    CHECK_EQ(makeRequest<std::string>("who"), "me");
-    CHECK((makeRequest<Vec2, Vec2>("echo", vecVal) == vecVal));
+    brayns::PropertyMap vecValInput;
+    vecValInput.setProperty({"param", vecVal, {""}});
+    makeNotification("foo", vecValInput);
+
+    brayns::PropertyMap whoOutput;
+    whoOutput.setProperty({"param", std::string(), {""}});
+    makeRequestUpdate("who", whoOutput);
+    CHECK_EQ(whoOutput.getProperty<std::string>("param"), std::string("me"));
+
+    brayns::PropertyMap echoInput;
+    echoInput.setProperty({"param", vecVal, {""}});
+    brayns::PropertyMap echoOutput;
+    echoOutput.setProperty({"param", Vec2(), {""}});
+    echoOutput = makeRequestUpdate("echo", echoInput, echoOutput);
+    CHECK(vecVal == echoOutput.getProperty<Vec2>("param"));
 
     clientServer.getBrayns()
         .getParametersManager()

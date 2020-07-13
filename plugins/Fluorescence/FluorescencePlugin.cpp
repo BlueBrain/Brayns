@@ -30,34 +30,24 @@
 
 #include <brayns/pluginapi/PluginAPI.h>
 
-#define HANDLE_NOT_PARSED(req, resp) \
-    if(!req.parsed) { \
-        resp.error = 1; \
-        resp.message = req.parseMessage; \
-        return resp; \
-    } \
-
 template<typename Request>
-inline bool handleCommonSensorParams(const Request& req, RequestResponse& resp)
+inline bool handleCommonSensorParams(const Request& req, brayns::Message& resp)
 {
     if(req.rotation.size() < 4)
     {
-        resp.error = 2;
-        resp.message = "Rotation param requires 4 float numbers (angle + axis)";
+        resp.setError(2, "Rotation param requires 4 float numbers (angle + axis)");
         return false;
     }
 
     if(req.translation.size() < 3)
     {
-        resp.error = 3;
-        resp.message = "Translation param requires 3 float numbers";
+        resp.setError(3, "Translation param requires 3 float numbers");
         return false;
     }
 
     if(req.scale.size() < 3)
     {
-        resp.error = 4;
-        resp.message = "Scale param requires 3 float numbers";
+        resp.setError(4, "Scale param requires 3 float numbers");
         return false;
     }
 
@@ -65,19 +55,17 @@ inline bool handleCommonSensorParams(const Request& req, RequestResponse& resp)
 }
 
 template<typename Request>
-inline bool handleCommonVolumeParams(const Request& req, RequestResponse& resp)
+inline bool handleCommonVolumeParams(const Request& req, brayns::Message& resp)
 {
     if(req.p0.size() < 3)
     {
-        resp.error = 2;
-        resp.message = "Volume minimun bound (p0) requires 3 float values";
+        resp.setError(2, "Volume minimun bound (p0) requires 3 float values");
         return false;
     }
 
     if(req.p1.size() < 3)
     {
-        resp.error = 3;
-        resp.message = "Volume maximun bound (p1) requires 3 float values";
+        resp.setError(3, "Volume maximun bound (p1) requires 3 float values");
         return false;
     }
 
@@ -112,7 +100,7 @@ inline void addCommonSensorParams(const Request& req, brayns::PropertyMap& metaO
 template<typename Request>
 inline void addCommonVolumeParams(const Request& req, brayns::PropertyMap& metaObject)
 {
-    const std::array<double, 3> p0 = {req.p0[0], req.p0[1], req.p1[2]};
+    const std::array<double, 3> p0 = {req.p0[0], req.p0[1], req.p0[2]};
     metaObject.setProperty({"p0", p0});
     const std::array<double, 3> p1 = {req.p1[0], req.p1[1], req.p1[2]};
     metaObject.setProperty({"p1", p1});
@@ -132,81 +120,107 @@ void FluorescencePlugin::init()
     auto actionInterface = _api->getActionInterface();
     if(actionInterface)
     {
-        PLUGIN_INFO << "Registering 'add-rectangle-sensor' endpoint" << std::endl;
-        actionInterface->registerRequest<AddRectangleSensorRequest, RequestResponse>(
-            "add-rectangle-sensor", [&](const AddRectangleSensorRequest& request){
+        actionInterface->registerRequest<AddRectangleSensorRequest, brayns::Message>(
+            {"add-rectangle-sensor",
+             "Adds a rectangle shaped sensor to the scene",
+             "AddRectangleSensorRequest",
+             "Parameters to define the rectangle sensor"},
+             [&](const AddRectangleSensorRequest& request){
                 return _addRectangleSensor(request);
         });
 
-        PLUGIN_INFO << "Registering 'add-disk-sensor' endpoint" << std::endl;
-        actionInterface->registerRequest<AddDiskSensorRequest, RequestResponse>(
-            "add-disk-sensor", [&](const AddDiskSensorRequest& request){
+        actionInterface->registerRequest<AddDiskSensorRequest, brayns::Message>(
+            {"add-disk-sensor",
+             "Adds a disk shaped sensor to the scene",
+             "AddDiskSensorRequest",
+             "Parameters to define the disk sensor"},
+             [&](const AddDiskSensorRequest& request){
                 return _addDiskSensor(request);
         });
 
-        PLUGIN_INFO << "Registering 'add-fluorescent-volume' endpoint" << std::endl;
-        actionInterface->registerRequest<AddFluorescentVolume, RequestResponse>(
-            "add-fluorescent-volume", [&](const AddFluorescentVolume& request){
+        actionInterface->registerRequest<AddFluorescentVolume, brayns::Message>(
+            {"add-fluorescent-volume",
+             "Adds a constant density fluorescent volume to the scene",
+             "AddFluorescentVolume",
+             "Parameters to define the fluorescent volume"},
+             [&](const AddFluorescentVolume& request){
                 return _addFluorescentVolume(request);
         });
 
-        PLUGIN_INFO << "Registering 'add-fluorescent-ann-volume' endpoint" << std::endl;
-        actionInterface->registerRequest<AddFluorescentAnnotatedVolume, RequestResponse>(
-            "add-fluorescent-ann-volume", [&](const AddFluorescentAnnotatedVolume& request){
+        actionInterface->registerRequest<AddFluorescentAnnotatedVolume, brayns::Message>(
+            {"add-fluorescent-ann-volume",
+             "Adds an annotated fluorescent volume to the scene",
+             "AddFluorescentAnnotatedVolume",
+             "Parameters to define an annotated fluorescent volume"},
+             [&](const AddFluorescentAnnotatedVolume& request){
                 return _addFluorescentAnnotatedVolume(request);
         });
 
-        PLUGIN_INFO << "Registering 'add-fluorescent-bin-volume' endpoint" << std::endl;
-        actionInterface->registerRequest<AddFluorescentBinaryVolume, RequestResponse>(
-            "add-fluorescent-bin-volume", [&](const AddFluorescentBinaryVolume& request){
+        actionInterface->registerRequest<AddFluorescentBinaryVolume, brayns::Message>(
+            {"add-fluorescent-bin-volume",
+             "Adds a constant density binary fluorescent volume to the scene",
+             "AddFluorescentBinaryVolume",
+             "Parameters to define a binary fluorescent volume"},
+             [&](const AddFluorescentBinaryVolume& request){
                 return _addFluorescentBinaryVolume(request);
         });
 
-        PLUGIN_INFO << "Registering 'add-fluorescent-grid-file-volume' endpoint" << std::endl;
-        actionInterface->registerRequest<AddFluorescentGridFromFileVolume, RequestResponse>(
-            "add-fluorescent-grid-file-volume",
-                    [&](const AddFluorescentGridFromFileVolume& request){
+        actionInterface->registerRequest<AddFluorescentGridFromFileVolume, brayns::Message>(
+            {"add-fluorescent-grid-file-volume",
+             "Adds a fluorescent grid volume, whose density values are loaded from a file on disk",
+             "AddFluorescentGridFromFileVolume",
+             "Parameters to define a fluorescent volume and the path to the density file"},
+             [&](const AddFluorescentGridFromFileVolume& request){
                 return _addFluorescentGridVolumeFromFile(request);
         });
 
-        PLUGIN_INFO << "Registering 'add-fluorescent-grid-volume' endpoint" << std::endl;
-        actionInterface->registerRequest<AddFluorescentGridVolume, RequestResponse>(
-            "add-fluorescent-grid-volume", [&](const AddFluorescentGridVolume& request){
+        actionInterface->registerRequest<AddFluorescentGridVolume, brayns::Message>(
+            {"add-fluorescent-grid-volume",
+             "Adds a fluorescent grid volume, whose density values are specified in the request",
+             "AddFluorescentGridVolume",
+             "Parameters to define a fluorescent grid volume, and density values and dimension of"
+             " the grid"},
+             [&](const AddFluorescentGridVolume& request){
                 return _addFluorescentGridVolume(request);
         });
 
-        PLUGIN_INFO << "Registering 'add-fluorescent-scatter-volume' endpoint" << std::endl;
-        actionInterface->registerRequest<AddFluorescentScatteringVolume, RequestResponse>(
-            "add-fluorescent-scatter-volume", [&](const AddFluorescentScatteringVolume& request){
+        actionInterface->registerRequest<AddFluorescentScatteringVolume, brayns::Message>(
+            {"add-fluorescent-scatter-volume",
+             "Adds a constant density fluorescent scattering volume to the scene",
+             "AddFluorescentScatteringVolume",
+             "Parameters to define the fluorescent scattering volume"},
+             [&](const AddFluorescentScatteringVolume& request){
                 return _addFluorescentScatteringVolume(request);
         });
 
-        PLUGIN_INFO << "Registering 'add-fluorescent-scattergrid-volume' endpoint" << std::endl;
-        actionInterface->registerRequest<AddFluorescentScatteringGridVolume, RequestResponse>(
-            "add-fluorescent-scattergrid-volume",
+        actionInterface->registerRequest<AddFluorescentScatteringGridVolume, brayns::Message>(
+            {"add-fluorescent-scattergrid-volume",
+             "Adds a fluorescent grid scattering volume to the scene",
+             "AddFluorescentScatteringGridVolume",
+             "Parameters to define a fluorescent scattering grid volume, and the density values"
+             " and dimensions of the grid"},
                     [&](const AddFluorescentScatteringGridVolume& request){
                 return _addFluorescentScatteringGridVolume(request);
         });
 
-        PLUGIN_INFO << "Registering 'add-fluorescent-scattergridfile-volume' endpoint"
-                    << std::endl;
         actionInterface->
-                registerRequest<AddFluorescentScatteringGridFromFileVolume, RequestResponse>(
-            "add-fluorescent-scattergridfile-volume",
-                    [&](const AddFluorescentScatteringGridFromFileVolume& request){
+                registerRequest<AddFluorescentScatteringGridFromFileVolume, brayns::Message>(
+            {"add-fluorescent-scattergridfile-volume",
+              "Adds a fluorescent scattering volume to the scene, whose values are loaded from a "
+              "file on disk",
+              "AddFluorescentScatteringGridFromFileVolume",
+              "Parameters to define the fluorescent scattering grid volume, and the path to the "
+              "density file"},
+              [&](const AddFluorescentScatteringGridFromFileVolume& request){
                 return _addFluorescentScatteringGridVolumeFromFile(request);
         });
     }
 }
 
-RequestResponse
+brayns::Message
 FluorescencePlugin::_addRectangleSensor(const AddRectangleSensorRequest& req)
 {
-    RequestResponse resp;
-    resp.error = 0;
-    resp.message = "";
-
-    HANDLE_NOT_PARSED(req, resp)
+    brayns::Message resp;
 
     if(!handleCommonSensorParams(req, resp))
         return resp;
@@ -217,9 +231,9 @@ FluorescencePlugin::_addRectangleSensor(const AddRectangleSensorRequest& req)
 
     addCommonSensorParams(req, metaObject);
 
-    metaObject.setProperty({"sensor_shape_height", static_cast<double>(req.height)});
-    metaObject.setProperty({"sensor_shape_x", static_cast<double>(req.x)});
-    metaObject.setProperty({"sensor_shape_y", static_cast<double>(req.y)});
+    metaObject.setProperty({"sensor_shape_height", req.height});
+    metaObject.setProperty({"sensor_shape_x", req.x});
+    metaObject.setProperty({"sensor_shape_y", req.y});
 
     auto modelPtr = _api->getScene().createModel();
     modelPtr->addMetaObject(brayns::NO_MATERIAL, metaObject);
@@ -232,13 +246,9 @@ FluorescencePlugin::_addRectangleSensor(const AddRectangleSensorRequest& req)
     return resp;
 }
 
-RequestResponse FluorescencePlugin::_addDiskSensor(const AddDiskSensorRequest& req)
+brayns::Message FluorescencePlugin::_addDiskSensor(const AddDiskSensorRequest& req)
 {
-    RequestResponse resp;
-    resp.error = 0;
-    resp.message = "";
-
-    HANDLE_NOT_PARSED(req, resp)
+    brayns::Message resp;
 
     if(!handleCommonSensorParams(req, resp))
         return resp;
@@ -249,10 +259,10 @@ RequestResponse FluorescencePlugin::_addDiskSensor(const AddDiskSensorRequest& r
 
     addCommonSensorParams(req, metaObject);
 
-    metaObject.setProperty({"sensor_shape_height", static_cast<double>(req.height)});
-    metaObject.setProperty({"sensor_shape_radius", static_cast<double>(req.radius)});
-    metaObject.setProperty({"sensor_shape_innerradius", static_cast<double>(req.innerRadius)});
-    metaObject.setProperty({"sensor_shape_phimax", static_cast<double>(req.phi)});
+    metaObject.setProperty({"sensor_shape_height", req.height});
+    metaObject.setProperty({"sensor_shape_radius", req.radius});
+    metaObject.setProperty({"sensor_shape_innerradius", req.innerRadius});
+    metaObject.setProperty({"sensor_shape_phimax", req.phi});
 
     auto modelPtr = _api->getScene().createModel();
     modelPtr->addMetaObject(brayns::NO_MATERIAL, metaObject);
@@ -265,27 +275,21 @@ RequestResponse FluorescencePlugin::_addDiskSensor(const AddDiskSensorRequest& r
     return resp;
 }
 
-RequestResponse FluorescencePlugin::_addFluorescentVolume(const AddFluorescentVolume& req)
+brayns::Message FluorescencePlugin::_addFluorescentVolume(const AddFluorescentVolume& req)
 {
-    RequestResponse resp;
-    resp.error = 0;
-    resp.message = "";
-
-    HANDLE_NOT_PARSED(req, resp);
+    brayns::Message resp;
 
     if(!handleCommonVolumeParams(req, resp))
         return resp;
 
     if(req.fex.size() < 3)
     {
-        resp.error = 4;
-        resp.message = "Fex parameter requires 3 floats";
+        resp.setError(4, "Fex parameter requires 3 floats");
         return resp;
     }
     if(req.fem.size() < 3)
     {
-        resp.error = 5;
-        resp.message = "Fem parameter requires 3 floats";
+        resp.setError(5, "Fem parameter requires 3 floats");
         return resp;
     }
 
@@ -298,10 +302,10 @@ RequestResponse FluorescencePlugin::_addFluorescentVolume(const AddFluorescentVo
     const std::array<double, 3> fem = {req.fem[0], req.fem[1], req.fem[2]};
     metaObject.setProperty({"fem", fem});
 
-    metaObject.setProperty({"epsilon", static_cast<double>(req.epsilon)});
-    metaObject.setProperty({"c", static_cast<double>(req.c)});
-    metaObject.setProperty({"yield", static_cast<double>(req.yield)});
-    metaObject.setProperty({"gf", static_cast<double>(req.gf)});
+    metaObject.setProperty({"epsilon", req.epsilon});
+    metaObject.setProperty({"c", req.c});
+    metaObject.setProperty({"yield", req.yield});
+    metaObject.setProperty({"gf", req.gf});
 
     auto modelPtr = _api->getScene().createModel();
     modelPtr->addMetaObject(brayns::NO_MATERIAL, metaObject);
@@ -314,62 +318,52 @@ RequestResponse FluorescencePlugin::_addFluorescentVolume(const AddFluorescentVo
     return resp;
 }
 
-RequestResponse
+brayns::Message
 FluorescencePlugin::_addFluorescentAnnotatedVolume(const AddFluorescentAnnotatedVolume& req)
 {
-    RequestResponse resp;
-    resp.error = 0;
-    resp.message = "";
-
-    HANDLE_NOT_PARSED(req, resp);
+    brayns::Message resp;
 
     if(!handleCommonVolumeParams(req, resp))
         return resp;
 
     if(req.fexs.size() % 3 != req.ntags)
     {
-        resp.error = 4;
-        resp.message = "The number of fex elements must be multiple of 3 and the same amount "
-                       "as ntags";
+        resp.setError(4, "The number of fex elements must be multiple of 3 and the same amount "
+                         "as ntags");
         return resp;
     }
     if(req.fems.size() % 3 != req.ntags)
     {
-        resp.error = 5;
-        resp.message = "The number of fem elements must be multiple of 3 and the same amount "
-                       "as ntags";
+        resp.setError(5, "The number of fem elements must be multiple of 3 and the same amount "
+                         "as ntags");
         return resp;
     }
-    if(static_cast<int>(req.epsilons.size()) != req.ntags)
+    if(static_cast<int32_t>(req.epsilons.size()) != req.ntags)
     {
-        resp.error = 6;
-        resp.message = "The number of epsilon elements must be the same as ntags";
+        resp.setError(6, "The number of epsilon elements must be the same as ntags");
         return resp;
     }
-    if(static_cast<int>(req.cs.size()) != req.ntags)
+    if(static_cast<int32_t>(req.cs.size()) != req.ntags)
     {
-        resp.error = 7;
-        resp.message = "The number of c elements must be the same as ntags";
+        resp.setError(7, "The number of c elements must be the same as ntags");
         return resp;
     }
-    if(static_cast<int>(req.yields.size()) != req.ntags)
+    if(static_cast<int32_t>(req.yields.size()) != req.ntags)
     {
-        resp.error = 8;
-        resp.message = "The number of yield elements must be the same as ntags";
+        resp.setError(8, "The number of yield elements must be the same as ntags");
         return resp;
     }
     if(static_cast<int>(req.gfs.size()) != req.ntags)
     {
-        resp.error = 9;
-        resp.message = "The number of gf elements must be the same as ntags";
+        resp.setError(9, "The number of gf elements must be the same as ntags");
         return resp;
     }
 
     brayns::PropertyMap metaObject;
     addCommonVolumeParams(req, metaObject);
     metaObject.setProperty({"volume_type", std::string("fluorescence_annotated")});
-    metaObject.setProperty({"g", static_cast<double>(req.g)});
-    metaObject.setProperty({"ntags", static_cast<int>(req.ntags)});
+    metaObject.setProperty({"g", req.g});
+    metaObject.setProperty({"ntags", req.ntags});
     metaObject.setProperty({"fexs", req.fexs});
     metaObject.setProperty({"fems", req.fems});
     metaObject.setProperty({"epsilons", req.epsilons});
@@ -389,28 +383,22 @@ FluorescencePlugin::_addFluorescentAnnotatedVolume(const AddFluorescentAnnotated
     return resp;
 }
 
-RequestResponse
+brayns::Message
 FluorescencePlugin::_addFluorescentBinaryVolume(const AddFluorescentBinaryVolume& req)
 {
-    RequestResponse resp;
-    resp.error = 0;
-    resp.message = "";
-
-    HANDLE_NOT_PARSED(req, resp);
+    brayns::Message resp;
 
     if(!handleCommonVolumeParams(req, resp))
         return resp;
 
     if(req.fex.size() < 3)
     {
-        resp.error = 4;
-        resp.message = "Fex parameter requires 3 floats";
+        resp.setError(4, "Fex parameter requires 3 floats");
         return resp;
     }
     if(req.fem.size() < 3)
     {
-        resp.error = 5;
-        resp.message = "Fem parameter requires 3 floats";
+        resp.setError(5, "Fem parameter requires 3 floats");
         return resp;
     }
 
@@ -423,10 +411,10 @@ FluorescencePlugin::_addFluorescentBinaryVolume(const AddFluorescentBinaryVolume
     const std::array<double, 3> fem = {req.fem[0], req.fem[1], req.fem[2]};
     metaObject.setProperty({"fem", fem});
 
-    metaObject.setProperty({"epsilon", static_cast<double>(req.epsilon)});
-    metaObject.setProperty({"c", static_cast<double>(req.c)});
-    metaObject.setProperty({"yield", static_cast<double>(req.yield)});
-    metaObject.setProperty({"gf", static_cast<double>(req.gf)});
+    metaObject.setProperty({"epsilon", req.epsilon});
+    metaObject.setProperty({"c", req.c});
+    metaObject.setProperty({"yield", req.yield});
+    metaObject.setProperty({"gf", req.gf});
     metaObject.setProperty({"prefix", req.prefix});
 
     auto modelPtr = _api->getScene().createModel();
@@ -440,28 +428,22 @@ FluorescencePlugin::_addFluorescentBinaryVolume(const AddFluorescentBinaryVolume
     return resp;
 }
 
-RequestResponse
+brayns::Message
 FluorescencePlugin::_addFluorescentGridVolumeFromFile(const AddFluorescentGridFromFileVolume& req)
 {
-    RequestResponse resp;
-    resp.error = 0;
-    resp.message = "";
-
-    HANDLE_NOT_PARSED(req, resp);
+    brayns::Message resp;
 
     if(!handleCommonVolumeParams(req, resp))
         return resp;
 
     if(req.fex.size() < 3)
     {
-        resp.error = 4;
-        resp.message = "Fex parameter requires 3 floats";
+        resp.setError(4, "Fex parameter requires 3 floats");
         return resp;
     }
     if(req.fem.size() < 3)
     {
-        resp.error = 5;
-        resp.message = "Fem parameter requires 3 floats";
+        resp.setError(5, "Fem parameter requires 3 floats");
         return resp;
     }
 
@@ -474,10 +456,10 @@ FluorescencePlugin::_addFluorescentGridVolumeFromFile(const AddFluorescentGridFr
     const std::array<double, 3> fem = {req.fem[0], req.fem[1], req.fem[2]};
     metaObject.setProperty({"fem", fem});
 
-    metaObject.setProperty({"epsilon", static_cast<double>(req.epsilon)});
-    metaObject.setProperty({"c", static_cast<double>(req.c)});
-    metaObject.setProperty({"yield", static_cast<double>(req.yield)});
-    metaObject.setProperty({"gf", static_cast<double>(req.gf)});
+    metaObject.setProperty({"epsilon", req.epsilon});
+    metaObject.setProperty({"c", req.c});
+    metaObject.setProperty({"yield", req.yield});
+    metaObject.setProperty({"gf", req.gf});
     metaObject.setProperty({"prefix", req.prefix});
 
     auto modelPtr = _api->getScene().createModel();
@@ -491,34 +473,27 @@ FluorescencePlugin::_addFluorescentGridVolumeFromFile(const AddFluorescentGridFr
     return resp;
 }
 
-RequestResponse FluorescencePlugin::_addFluorescentGridVolume(const AddFluorescentGridVolume& req)
+brayns::Message FluorescencePlugin::_addFluorescentGridVolume(const AddFluorescentGridVolume& req)
 {
-    RequestResponse resp;
-    resp.error = 0;
-    resp.message = "";
-
-    HANDLE_NOT_PARSED(req, resp);
+    brayns::Message resp;
 
     if(!handleCommonVolumeParams(req, resp))
         return resp;
 
     if(req.fex.size() < 3)
     {
-        resp.error = 4;
-        resp.message = "Fex parameter requires 3 floats";
+        resp.setError(4, "Fex parameter requires 3 floats");
         return resp;
     }
     if(req.fem.size() < 3)
     {
-        resp.error = 5;
-        resp.message = "Fem parameter requires 3 floats";
+        resp.setError(5, "Fem parameter requires 3 floats");
         return resp;
     }
-    if((req.nx * req.ny * req.nz) != static_cast<int>(req.density.size()))
+    if((req.nx * req.ny * req.nz) != static_cast<int32_t>(req.density.size()))
     {
-        resp.error = 6;
-        resp.message = "The grid dimensions (nx * ny * nz) must be equal to the number of "
-                       "density elements";
+        resp.setError(6, "The grid dimensions (nx * ny * nz) must be equal to the number of "
+                         "density elements");
         return resp;
     }
 
@@ -531,10 +506,10 @@ RequestResponse FluorescencePlugin::_addFluorescentGridVolume(const AddFluoresce
     const std::array<double, 3> fem = {req.fem[0], req.fem[1], req.fem[2]};
     metaObject.setProperty({"fem", fem});
 
-    metaObject.setProperty({"epsilon", static_cast<double>(req.epsilon)});
-    metaObject.setProperty({"c", static_cast<double>(req.c)});
-    metaObject.setProperty({"yield", static_cast<double>(req.yield)});
-    metaObject.setProperty({"gf", static_cast<double>(req.gf)});
+    metaObject.setProperty({"epsilon", req.epsilon});
+    metaObject.setProperty({"c", req.c});
+    metaObject.setProperty({"yield", req.yield});
+    metaObject.setProperty({"gf", req.gf});
     metaObject.setProperty({"density", req.density});
     metaObject.setProperty({"nx", req.nx});
     metaObject.setProperty({"ny", req.ny});
@@ -551,46 +526,37 @@ RequestResponse FluorescencePlugin::_addFluorescentGridVolume(const AddFluoresce
     return resp;
 }
 
-RequestResponse
+brayns::Message
 FluorescencePlugin::_addFluorescentScatteringVolume(const AddFluorescentScatteringVolume& req)
 {
-    RequestResponse resp;
-    resp.error = 0;
-    resp.message = "";
-
-    HANDLE_NOT_PARSED(req, resp);
+    brayns::Message resp;
 
     if(!handleCommonVolumeParams(req, resp))
         return resp;
 
     if(req.fex.size() < 3)
     {
-        resp.error = 4;
-        resp.message = "Fex parameter requires 3 floats";
+        resp.setError(4, "Fex parameter requires 3 floats");
         return resp;
     }
     if(req.fem.size() < 3)
     {
-        resp.error = 5;
-        resp.message = "Fem parameter requires 3 floats";
+        resp.setError(5, "Fem parameter requires 3 floats");
         return resp;
     }
     if(req.absorption.size() < 3)
     {
-        resp.error = 6;
-        resp.message = "Absorption parameter requires 3 floats";
+        resp.setError(6, "Absorption parameter requires 3 floats");
         return resp;
     }
     if(req.scattering.size() < 3)
     {
-        resp.error = 7;
-        resp.message = "Scattering parameter requires 3 floats";
+        resp.setError(7, "Scattering parameter requires 3 floats");
         return resp;
     }
     if(req.Le.size() < 3)
     {
-        resp.error = 8;
-        resp.message = "Le parameter requires 3 floats";
+        resp.setError(8, "Le parameter requires 3 floats");
         return resp;
     }
 
@@ -609,15 +575,15 @@ FluorescencePlugin::_addFluorescentScatteringVolume(const AddFluorescentScatteri
     const std::array<double, 3> Le = {req.Le[0], req.Le[1], req.Le[2]};
     metaObject.setProperty({"Le", Le});
 
-    metaObject.setProperty({"mweight", static_cast<double>(req.mweight)});
-    metaObject.setProperty({"epsilon", static_cast<double>(req.epsilon)});
-    metaObject.setProperty({"c", static_cast<double>(req.c)});
-    metaObject.setProperty({"yield", static_cast<double>(req.yield)});
-    metaObject.setProperty({"sscale", static_cast<double>(req.sscale)});
-    metaObject.setProperty({"fscale", static_cast<double>(req.fscale)});
-    metaObject.setProperty({"g", static_cast<double>(req.g)});
-    metaObject.setProperty({"gf", static_cast<double>(req.gf)});
-    metaObject.setProperty({"density", static_cast<double>(req.density)});
+    metaObject.setProperty({"mweight", req.mweight});
+    metaObject.setProperty({"epsilon", req.epsilon});
+    metaObject.setProperty({"c", req.c});
+    metaObject.setProperty({"yield", req.yield});
+    metaObject.setProperty({"sscale", req.sscale});
+    metaObject.setProperty({"fscale", req.fscale});
+    metaObject.setProperty({"g", req.g});
+    metaObject.setProperty({"gf", req.gf});
+    metaObject.setProperty({"density", req.density});
 
 
     auto modelPtr = _api->getScene().createModel();
@@ -631,54 +597,44 @@ FluorescencePlugin::_addFluorescentScatteringVolume(const AddFluorescentScatteri
     return resp;
 }
 
-RequestResponse
+brayns::Message
 FluorescencePlugin::_addFluorescentScatteringGridVolume(
         const AddFluorescentScatteringGridVolume& req)
 {
-    RequestResponse resp;
-    resp.error = 0;
-    resp.message = "";
-
-    HANDLE_NOT_PARSED(req, resp);
+    brayns::Message resp;
 
     if(!handleCommonVolumeParams(req, resp))
         return resp;
 
     if(req.fex.size() < 3)
     {
-        resp.error = 4;
-        resp.message = "Fex parameter requires 3 floats";
+        resp.setError(4, "Fex parameter requires 3 floats");
         return resp;
     }
     if(req.fem.size() < 3)
     {
-        resp.error = 5;
-        resp.message = "Fem parameter requires 3 floats";
+        resp.setError(5, "Fem parameter requires 3 floats");
         return resp;
     }
     if(req.absorption.size() < 3)
     {
-        resp.error = 6;
-        resp.message = "Absorption parameter requires 3 floats";
+        resp.setError(6, "Absorption parameter requires 3 floats");
         return resp;
     }
     if(req.scattering.size() < 3)
     {
-        resp.error = 7;
-        resp.message = "Scattering parameter requires 3 floats";
+        resp.setError(7, "Scattering parameter requires 3 floats");
         return resp;
     }
     if(req.Le.size() < 3)
     {
-        resp.error = 8;
-        resp.message = "Le parameter requires 3 floats";
+        resp.setError(8, "Le parameter requires 3 floats");
         return resp;
     }
-    if((req.nx * req.ny * req.nz) != static_cast<int>(req.density.size()))
+    if((req.nx * req.ny * req.nz) != static_cast<int32_t>(req.density.size()))
     {
-        resp.error = 9;
-        resp.message = "The grid dimensions (nx * ny * nz) must be equal to the number of "
-                       "density elements";
+        resp.setError(9, "The grid dimensions (nx * ny * nz) must be equal to the number of "
+                         "density elements");
         return resp;
     }
 
@@ -721,47 +677,38 @@ FluorescencePlugin::_addFluorescentScatteringGridVolume(
     return resp;
 }
 
-RequestResponse
+brayns::Message
 FluorescencePlugin::_addFluorescentScatteringGridVolumeFromFile(
         const AddFluorescentScatteringGridFromFileVolume& req)
 {
-    RequestResponse resp;
-    resp.error = 0;
-    resp.message = "";
-
-    HANDLE_NOT_PARSED(req, resp);
+    brayns::Message resp;
 
     if(!handleCommonVolumeParams(req, resp))
         return resp;
 
     if(req.fex.size() < 3)
     {
-        resp.error = 4;
-        resp.message = "Fex parameter requires 3 floats";
+        resp.setError(4, "Fex parameter requires 3 floats");
         return resp;
     }
     if(req.fem.size() < 3)
     {
-        resp.error = 5;
-        resp.message = "Fem parameter requires 3 floats";
+        resp.setError(5, "Fem parameter requires 3 floats");
         return resp;
     }
     if(req.absorption.size() < 3)
     {
-        resp.error = 6;
-        resp.message = "Absorption parameter requires 3 floats";
+        resp.setError(6, "Absorption parameter requires 3 floats");
         return resp;
     }
     if(req.scattering.size() < 3)
     {
-        resp.error = 7;
-        resp.message = "Scattering parameter requires 3 floats";
+        resp.setError(7, "Scattering parameter requires 3 floats");
         return resp;
     }
     if(req.Le.size() < 3)
     {
-        resp.error = 8;
-        resp.message = "Le parameter requires 3 floats";
+        resp.setError(8, "Le parameter requires 3 floats");
         return resp;
     }
 
@@ -780,14 +727,14 @@ FluorescencePlugin::_addFluorescentScatteringGridVolumeFromFile(
     const std::array<double, 3> Le = {req.Le[0], req.Le[1], req.Le[2]};
     metaObject.setProperty({"Le", Le});
 
-    metaObject.setProperty({"mweight", static_cast<double>(req.mweight)});
-    metaObject.setProperty({"epsilon", static_cast<double>(req.epsilon)});
-    metaObject.setProperty({"c", static_cast<double>(req.c)});
-    metaObject.setProperty({"yield", static_cast<double>(req.yield)});
-    metaObject.setProperty({"sscale", static_cast<double>(req.sscale)});
-    metaObject.setProperty({"fscale", static_cast<double>(req.fscale)});
-    metaObject.setProperty({"g", static_cast<double>(req.g)});
-    metaObject.setProperty({"gf", static_cast<double>(req.gf)});
+    metaObject.setProperty({"mweight", req.mweight});
+    metaObject.setProperty({"epsilon", req.epsilon});
+    metaObject.setProperty({"c", req.c});
+    metaObject.setProperty({"yield", req.yield});
+    metaObject.setProperty({"sscale", req.sscale});
+    metaObject.setProperty({"fscale", req.fscale});
+    metaObject.setProperty({"g", req.g});
+    metaObject.setProperty({"gf", req.gf});
     metaObject.setProperty({"prefix", req.prefix});
 
     auto modelPtr = _api->getScene().createModel();

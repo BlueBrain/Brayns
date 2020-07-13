@@ -41,7 +41,6 @@ set(BRAYNSCIRCUITEXPLORER_SOURCES
     module/ispc/render/utils/CircuitExplorerAbstractRenderer.cpp
     module/ispc/render/utils/CircuitExplorerSimulationRenderer.cpp
     plugin/api/CellObjectMapper.cpp
-    plugin/api/CircuitExplorerParams.cpp
     plugin/meshing/MetaballsGenerator.cpp
     plugin/meshing/PointCloudMesher.cpp
     plugin/CircuitExplorerPlugin.cpp

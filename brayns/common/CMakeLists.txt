@@ -24,6 +24,7 @@ set(BRAYNSCOMMON_SOURCES
 set(BRAYNSCOMMON_PUBLIC_HEADERS
   any.hpp
   ActionInterface.h
+  ActionMessage.h
   BaseObject.h
   ImageManager.h
   Progress.h

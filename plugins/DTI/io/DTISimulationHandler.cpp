@@ -50,7 +50,7 @@ DTISimulationHandler::DTISimulationHandler(
 {
     _frameSize = indices[indices.size() - 1];
     _dt = _spikeSimulation.dt;
-    _nbFrames = _spikeSimulation.endTime / _spikeSimulation.dt;
+    _nbFrames = _spikeSimulation.endTime / _dt;
     _unit = "ms";
 
     _data.resize(_frameSize, 0.f);
@@ -90,7 +90,7 @@ void* DTISimulationHandler::getFrameData(const uint32_t frame)
                 value = _spikeSimulation.restIntensity +
                         _spikeSimulation.spikeIntensity -
                         _spikeSimulation.spikeIntensity *
-                            std::min(1.f, std::max(_spikeSimulation.decaySpeed *
+                            std::min(1.f, std::max(static_cast<float>(_spikeSimulation.decaySpeed) *
                                                        (frame - timestamp),
                                                    0.f));
             }

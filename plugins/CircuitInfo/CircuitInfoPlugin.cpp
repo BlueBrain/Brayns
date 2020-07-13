@@ -59,58 +59,91 @@ void CircuitInfoPlugin::init()
     auto actionInterface = _api->getActionInterface();
     if(actionInterface)
     {
-        PLUGIN_INFO << "Registering 'ci-get-cell-ids' endpoint" << std::endl;
         actionInterface->registerRequest<CellGIDListRequest, CellGIDList>(
-            "ci-get-cell-ids", [&](const CellGIDListRequest& request){
-            return _getCellGIDs(request);
+            {"ci-get-cell-ids",
+             "Return the list of GIDs from a circuit",
+             "CellGIDListRequest",
+             "Circuit from which to extract the GIDs, optionally from a list of targets"},
+            [&](const CellGIDListRequest& request){
+                return _getCellGIDs(request);
         });
 
-        PLUGIN_INFO << "Registering 'ci-get-cell-ids-from-model' endpoint" << std::endl;
         actionInterface->registerRequest<ModelCellGIDListRequest, CellGIDList>(
-            "ci-get-cell-ids-from-model", [&](const ModelCellGIDListRequest& request){
+            {"ci-get-cell-ids-from-model",
+             "Return the list of GIDs from a loaded circuit",
+             "ModelCellGIDListREquest",
+             "The model from which to retrieve the GID list, optionally from a list of targets"},
+            [&](const ModelCellGIDListRequest& request){
             return _getCellGIDsFromModel(request);
         });
 
-        PLUGIN_INFO << "Registering 'ci-get-reports' endpoint" << std::endl;
         actionInterface->registerRequest<ReportListRequest, ReportList>(
-            "ci-get-reports", [&](const ReportListRequest& request){
-            return _getReportList(request);
+            {"ci-get-reports",
+             "Return a list of reports from a circuit",
+             "ReportListRequest",
+             "The circuit from which to retrieve the list of reports"},
+            [&](const ReportListRequest& request){
+                return _getReportList(request);
         });
 
-        PLUGIN_INFO << "Registering 'ci-get-targets' endpoint" << std::endl;
+        actionInterface->registerRequest<ReportInfoRequest, ReportInfo>(
+            {"ci-get-report-info",
+             "Return information about a specific report from a given circuit",
+             "ReportInfoRequest",
+             "The circuit and the report from which to get the information"},
+            [&](const ReportInfoRequest& request){
+                return _getReportInfo(request);
+        });
+
         actionInterface->registerRequest<TargetListRequest, TargetList>(
-            "ci-get-targets", [&](const TargetListRequest& request){
-            return _getTargetList(request);
+            {"ci-get-targets",
+             "Return a list of targets from a cricuit",
+             "TargetListRequest",
+             "The circuit from which to retrieve the list of targets"},
+             [&](const TargetListRequest& request){
+                return _getTargetList(request);
         });
 
-        PLUGIN_INFO << "Registering 'ci-get-afferent-cell-ids' endpoint" << std::endl;
         actionInterface->registerRequest<AfferentGIDListRequest, AfferentGIDList>(
-            "ci-get-afferent-cell-ids", [&](const AfferentGIDListRequest& request){
-            return _getAfferentGIDList(request);
+            {"ci-get-afferent-cell-ids",
+             "Return a list of afferent synapses cell GIDs from a circuit and a set of source "
+             "cells",
+             "AfferentGIDListRequest",
+             "The circuit and list of source cell GIDs from which to return the afferent "
+             "syanpses cell GIDs"},
+             [&](const AfferentGIDListRequest& request){
+                return _getAfferentGIDList(request);
         });
 
-        PLUGIN_INFO << "Registering 'ci-get-efferent-cell-ids' endpoint" << std::endl;
         actionInterface->registerRequest<EfferentGIDListRequest, EfferentGIDList>(
-            "ci-get-efferent-cell-ids", [&](const EfferentGIDListRequest& request){
-            return _getEfferentGIDList(request);
+            {"ci-get-efferent-cell-ids",
+             "Return a list of efferent synapses cell GIDs from a circuit and set of source "
+             "cells",
+             "EfferentGIDListRequest",
+             "The circuit and list of source cell GIDs from which to return the efferent "
+             "synapses cell GIDs"},
+             [&](const EfferentGIDListRequest& request){
+                return _getEfferentGIDList(request);
         });
 
-        PLUGIN_INFO << "Registering 'ci-get-projections' endpoint" << std::endl;
         actionInterface->registerRequest<ProjectionListRequest, ProjectionList>(
-            "ci-get-projections", [&](const ProjectionListRequest& request){
-            return _getProjectionList(request);
+            {"ci-get-projections",
+             "Return a list of projection names available on a circuit",
+             "ProjectionListRequest",
+             "The circuit from which to return the list of projection names"},
+             [&](const ProjectionListRequest& request){
+                return _getProjectionList(request);
         });
-/*
-        PLUGIN_INFO << "Registering 'ci-get-projection-afferent-cell-ids' endpoint" << std::endl;
-        actionInterface->registerRequest<ProjectionAfferentGIDListRequest, ProjectionAfferentGIDList>(
-            "ci-get-projection-afferent-cell-ids", [&](const ProjectionAfferentGIDListRequest& request){
-            return _getProjectionAfferentGIDList(request);
-        });
-*/
-        PLUGIN_INFO << "Registering 'ci-get-projection-efferent-cell-ids' endpoint" << std::endl;
+
         actionInterface->registerRequest<ProjectionEfferentGIDListRequest, ProjectionEfferentGIDList>(
-            "ci-get-projection-efferent-cell-ids", [&](const ProjectionEfferentGIDListRequest& request){
-            return _getProjectionEfferentGIDList(request);
+            {"ci-get-projection-efferent-cell-ids",
+             "Return a list of efferent projected synapses cell GIDs from a circuit and a set "
+             "of source cells",
+             "ProjectionEfferentGIDListRequest",
+             "The circuit, the projection name and a set of source cells from which to return "
+             "the list of projected efferent synapses cell GIDs"},
+             [&](const ProjectionEfferentGIDListRequest& request){
+                return _getProjectionEfferentGIDList(request);
         });
     }
 }
@@ -118,13 +151,10 @@ void CircuitInfoPlugin::init()
 CellGIDList CircuitInfoPlugin::_getCellGIDs(const CellGIDListRequest& request)
 {
     CellGIDList result;
-    result.error = 0;
-    result.message = "";
 
     if (!boost::filesystem::exists(request.path))
     {
-        result.error = 9;
-        result.message = "Circuit not found";
+        result.setError(9, "Circuit not found");
         return result;
     }
 
@@ -144,12 +174,11 @@ CellGIDList CircuitInfoPlugin::_getCellGIDs(const CellGIDListRequest& request)
                 gids.insert(temp.begin(), temp.end());
             }
         }
-        result.ids = uint32_ts(gids.begin(), gids.end());
+        result.ids.insert(result.ids.end(), gids.begin(), gids.end());
     }
     catch(std::exception& e)
     {
-        result.error = 2;
-        result.message = std::string(e.what());
+        result.setError(2, e.what());
     }
 
     return result;
@@ -158,8 +187,6 @@ CellGIDList CircuitInfoPlugin::_getCellGIDs(const CellGIDListRequest& request)
 CellGIDList CircuitInfoPlugin::_getCellGIDsFromModel(const ModelCellGIDListRequest& request)
 {
     CellGIDList result;
-    result.error = 0;
-    result.message = "";
 
     // Gather circuit path and targets from loaded model
     auto modelDescriptor = _api->getScene().getModel(static_cast<size_t>(request.modelId));
@@ -174,6 +201,7 @@ CellGIDList CircuitInfoPlugin::_getCellGIDsFromModel(const ModelCellGIDListReque
         if(targetsIt != metaData.end())
         {
             const std::string& targetsString = targetsIt->second;
+            std::vector<std::string> targets;
             if(!targetsString.empty())
             {
                 if(targetsString.find(',') == std::string::npos)
@@ -190,8 +218,7 @@ CellGIDList CircuitInfoPlugin::_getCellGIDsFromModel(const ModelCellGIDListReque
     }
     else
     {
-        result.error = 9;
-        result.message = "Model not found";
+        result.setError(9, "Model not found");
     }
 
     return result;
@@ -200,13 +227,10 @@ CellGIDList CircuitInfoPlugin::_getCellGIDsFromModel(const ModelCellGIDListReque
 ReportList CircuitInfoPlugin::_getReportList(const ReportListRequest& request)
 {
     ReportList result;
-    result.error = 0;
-    result.message = "";
 
     if(!boost::filesystem::exists(request.path))
     {
-        result.error = 9;
-        result.message = "Circuit not found";
+        result.setError(9, "Circuit not found");
         return result;
     }
 
@@ -218,8 +242,47 @@ ReportList CircuitInfoPlugin::_getReportList(const ReportListRequest& request)
     }
     catch (std::exception& e)
     {
-        result.error = 2;
-        result.message = std::string(e.what());
+        result.setError(2, e.what());
+    }
+
+    return result;
+}
+
+ReportInfo CircuitInfoPlugin::_getReportInfo(const ReportInfoRequest& request)
+{
+    ReportInfo result;
+
+    if(!boost::filesystem::exists(request.path))
+    {
+        result.setError(9, "Circuit not found");
+        return result;
+    }
+
+    // Reports can be obtained as the names of the "report" section from the BlueConfig file
+    try
+    {
+        const brion::BlueConfig config(request.path);
+        const auto& reports = config.getSectionNames(brion::CONFIGSECTION_REPORT);
+        auto it = std::find(reports.begin(), reports.end(), request.report);
+        if(it == reports.end())
+        {
+            result.setError(1, "Report not found");
+            return result;
+        }
+
+        const brion::URI reportPath = config.getReportSource(request.report);
+        const brion::CompartmentReport report(reportPath, brion::AccessMode::MODE_READ);
+        result.startTime = report.getStartTime();
+        result.endTime = report.getEndTime();
+        result.timeStep = report.getTimestep();
+        result.dataUnit = report.getDataUnit();
+        result.timeUnit = report.getTimeUnit();
+        result.frameCount = report.getFrameCount();
+        result.frameSize = report.getFrameSize();
+    }
+    catch (std::exception& e)
+    {
+        result.setError(2, e.what());
     }
 
     return result;
@@ -228,13 +291,10 @@ ReportList CircuitInfoPlugin::_getReportList(const ReportListRequest& request)
 TargetList CircuitInfoPlugin::_getTargetList(const TargetListRequest& request)
 {
     TargetList result;
-    result.error = 0;
-    result.message = "";
 
     if(!boost::filesystem::exists(request.path))
     {
-        result.error = 9;
-        result.message = "Circuit not found";
+        result.setError(9, "Circuit not found");
         return result;
     }
 
@@ -257,8 +317,7 @@ TargetList CircuitInfoPlugin::_getTargetList(const TargetListRequest& request)
     }
     catch (std::exception& e)
     {
-        result.error = 2;
-        result.message = std::string(e.what());
+        result.setError(2, e.what());
     }
 
     return result;
@@ -267,13 +326,10 @@ TargetList CircuitInfoPlugin::_getTargetList(const TargetListRequest& request)
 AfferentGIDList CircuitInfoPlugin::_getAfferentGIDList(const AfferentGIDListRequest& request)
 {
     AfferentGIDList result;
-    result.error = 0;
-    result.message = "";
 
     if(!boost::filesystem::exists(request.path))
     {
-        result.error = 9;
-        result.message = "Circuit not found";
+        result.setError(9, "Circuit not found");
     }
     else
     {
@@ -289,12 +345,11 @@ AfferentGIDList CircuitInfoPlugin::_getAfferentGIDList(const AfferentGIDListRequ
             const uint32_t* pgids = afferentGIDs.preGIDs();
             // Filter to have only unique ids
             const std::set<uint32_t> uniqueGIDs (pgids, pgids + afferentGIDs.size());
-            result.ids = uint32_ts(uniqueGIDs.begin(), uniqueGIDs.end());
+            result.ids.insert(result.ids.end(), uniqueGIDs.begin(), uniqueGIDs.end());
         }
         catch(std::exception& e)
         {
-            result.error = 2;
-            result.message = std::string(e.what());
+            result.setError(2, std::string(e.what()));
         }
     }
 
@@ -304,13 +359,10 @@ AfferentGIDList CircuitInfoPlugin::_getAfferentGIDList(const AfferentGIDListRequ
 EfferentGIDList CircuitInfoPlugin::_getEfferentGIDList(const EfferentGIDListRequest& request)
 {
     EfferentGIDList result;
-    result.error = 0;
-    result.message = "";
 
     if(!boost::filesystem::exists(request.path))
     {
-        result.error = 9;
-        result.message = "Circuit not found";
+        result.setError(9, "Circuit not found");
     }
     else
     {
@@ -326,12 +378,11 @@ EfferentGIDList CircuitInfoPlugin::_getEfferentGIDList(const EfferentGIDListRequ
             const uint32_t* pgids = efferentGIDs.postGIDs();
             // Filter to have only unique ids
             const std::set<uint32_t> uniqueGIDs (pgids, pgids + efferentGIDs.size());
-            result.ids = uint32_ts(uniqueGIDs.begin(), uniqueGIDs.end());
+            result.ids.insert(result.ids.end(), uniqueGIDs.begin(), uniqueGIDs.end());
         }
         catch(std::exception& e)
         {
-            result.error = 2;
-            result.message = std::string(e.what());
+            result.setError(2, std::string(e.what()));
         }
     }
 
@@ -341,13 +392,10 @@ EfferentGIDList CircuitInfoPlugin::_getEfferentGIDList(const EfferentGIDListRequ
 ProjectionList CircuitInfoPlugin::_getProjectionList(const ProjectionListRequest& request)
 {
     ProjectionList result;
-    result.error = 0;
-    result.message = "";
 
     if(!boost::filesystem::exists(request.path))
     {
-        result.error = 9;
-        result.message = "Circuit not found";
+        result.setError(9, "Circuit not found");
         return result;
     }
 
@@ -358,8 +406,7 @@ ProjectionList CircuitInfoPlugin::_getProjectionList(const ProjectionListRequest
     }
     catch(std::exception& e)
     {
-        result.error = 2;
-        result.message = std::string(e.what());
+        result.setError(2, std::string(e.what()));
     }
 
     return result;
@@ -369,25 +416,22 @@ ProjectionAfferentGIDList
 CircuitInfoPlugin::_getProjectionAfferentGIDList(const ProjectionAfferentGIDListRequest& request)
 {
     ProjectionAfferentGIDList result;
-    result.error = 0;
-    result.message = "";
 
     if(!boost::filesystem::exists(request.path))
     {
-        result.error = 9;
-        result.message = "Circuit not found";
+        result.setError(9, "Circuit not found");
         return result;
     }
 
     try
     {
         const brion::BlueConfig config(request.path);
-        const std::string nrnPath = config.get(brion::CONFIGSECTION_PROJECTION, request.projection, "Path");
+        const std::string nrnPath = config.get(brion::CONFIGSECTION_PROJECTION,
+                                               request.projection, "Path");
 
         if(nrnPath.empty())
         {
-            result.error = 1;
-            result.message = "Projection not found";
+            result.setError(1, "Projection not found");
             return result;
         }
 
@@ -400,12 +444,11 @@ CircuitInfoPlugin::_getProjectionAfferentGIDList(const ProjectionAfferentGIDList
         const uint32_t* pgids = afferentGIDs.preGIDs();
         // Filter to have only unique ids
         const std::set<uint32_t> uniqueGIDs (pgids, pgids + afferentGIDs.size());
-        result.ids = uint32_ts(uniqueGIDs.begin(), uniqueGIDs.end());
+        result.ids.insert(result.ids.end(), uniqueGIDs.begin(), uniqueGIDs.end());
     }
     catch(std::exception& e)
     {
-        result.error = 2;
-        result.message = std::string(e.what());
+        result.setError(2, std::string(e.what()));
     }
 
     return result;
@@ -415,25 +458,22 @@ ProjectionEfferentGIDList
 CircuitInfoPlugin::_getProjectionEfferentGIDList(const ProjectionEfferentGIDListRequest& request)
 {
     ProjectionEfferentGIDList result;
-    result.error = 0;
-    result.message = "";
 
     if(!boost::filesystem::exists(request.path))
     {
-        result.error = 9;
-        result.message = "Circuit not found";
+        result.setError(9, "Circuit not found");
         return result;
     }
 
     try
     {
         const brion::BlueConfig config(request.path);
-        const std::string nrnPath = config.get(brion::CONFIGSECTION_PROJECTION, request.projection, "Path");
+        const std::string nrnPath = config.get(brion::CONFIGSECTION_PROJECTION,
+                                               request.projection, "Path");
 
         if(nrnPath.empty())
         {
-            result.error = 1;
-            result.message = "Projection not found";
+            result.setError(1, "Projection not found");
             return result;
         }
 
@@ -441,12 +481,11 @@ CircuitInfoPlugin::_getProjectionEfferentGIDList(const ProjectionEfferentGIDList
         const brion::GIDSet uniqueSources (request.sources.begin(), request.sources.end());
         const uint32_ts gids = circuit.getProjectedEfferentGIDs(uniqueSources, request.projection);
         const std::set<uint32_t> uniqueGIDs (gids.begin(), gids.end());
-        result.ids = uint32_ts(uniqueGIDs.begin(), uniqueGIDs.end());
+        result.ids.insert(result.ids.end(), uniqueGIDs.begin(), uniqueGIDs.end());
     }
     catch(std::exception& e)
     {
-        result.error = 2;
-        result.message = std::string(e.what());
+        result.setError(2, e.what());
     }
 
     return result;

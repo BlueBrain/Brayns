@@ -21,74 +21,67 @@
 #ifndef FLUORESCENCEPARAMS_H
 #define FLUORESCENCEPARAMS_H
 
+#include <brayns/common/ActionMessage.h>
 #include <brayns/common/types.h>
 
-#define COMMON_PARAMS \
-    bool parsed{true}; \
-    std::string parseMessage{""}; \
-
-
 #define COMMON_SENSOR_PROPS \
-    floats rotation; \
-    floats translation; \
-    floats scale; \
-    std::string reference; \
-    int xpixels; \
-    int ypixels; \
-    float fov; \
+    MESSAGE_ENTRY(std::vector<float>, rotation, "Sensor 3D Rotation") \
+    MESSAGE_ENTRY(std::vector<float>, translation, "Sensor 3D Translation") \
+    MESSAGE_ENTRY(std::vector<float>, scale, "Sensor 3D Scale") \
+    MESSAGE_ENTRY(std::string, reference, "Sensor name") \
+    MESSAGE_ENTRY(int32_t, xpixels, "Sensor pixel capture width") \
+    MESSAGE_ENTRY(int32_t, ypixels, "Sensor pixel capture height") \
+    MESSAGE_ENTRY(double, fov, "Sensor capture field of view") \
 
 
 #define COMMON_VOLUME_PROPS \
-    floats p0; \
-    floats p1; \
-    std::string name; \
+    MESSAGE_ENTRY(std::vector<float>, p0, "Minimum axis-aligned volume bound") \
+    MESSAGE_ENTRY(std::vector<float>, p1, "Maximum axis-aligned volume bound") \
+    MESSAGE_ENTRY(std::string, name, "Volume scene name") \
 
 /**
  * @brief The AddDiskSensorRequest struct
  * Struct to add a disk shaped sensor to the scene
  */
-struct AddDiskSensorRequest
+struct AddDiskSensorRequest : public brayns::Message
 {
-    COMMON_PARAMS
+    MESSAGE_BEGIN(AddDiskSensorRequest)
     COMMON_SENSOR_PROPS
-    float height;
-    float radius;
-    float innerRadius;
-    float phi;
+    MESSAGE_ENTRY(double, height, "Sensor disk height")
+    MESSAGE_ENTRY(double, radius, "Sensor disk radius")
+    MESSAGE_ENTRY(double, innerRadius, "Sensor disk inner radius")
+    MESSAGE_ENTRY(double, phi, "Sensor available surface (Max = 2*PI)")
 };
-bool from_json(AddDiskSensorRequest& request, const std::string& payload);
 
 /**
  * @brief The AddRectangleSensorRequest struct
  * Struct to add a rectangle shaped sensor to the scene
  */
-struct AddRectangleSensorRequest
+struct AddRectangleSensorRequest : public brayns::Message
 {
-    COMMON_PARAMS
+    MESSAGE_BEGIN(AddRectangleSensorRequest)
     COMMON_SENSOR_PROPS
-    float height;
-    float x;
-    float y;
+    MESSAGE_ENTRY(double, height, "Sensor rectangle height")
+    MESSAGE_ENTRY(double, x, "Sensor rectangle width")
+    MESSAGE_ENTRY(double, y, "Sensor rectangle height")
 };
-bool from_json(AddRectangleSensorRequest& request, const std::string& payload);
 
 /**
  * @brief The AddFluorescentVolume struct
  * Struct to add a Fluorescent homogeneous volume
  * enclosed in a box
  */
-struct AddFluorescentVolume
+struct AddFluorescentVolume : public brayns::Message
 {
-    COMMON_PARAMS
+    MESSAGE_BEGIN(AddFluorescentVolume)
     COMMON_VOLUME_PROPS
-    floats fex;
-    floats fem;
-    float epsilon;
-    float c;
-    float yield;
-    float gf;
+    MESSAGE_ENTRY(std::vector<float>, fex, "Fluorescence excitatory spectrum")
+    MESSAGE_ENTRY(std::vector<float>, fem, "Fluorescence emissive spectrum")
+    MESSAGE_ENTRY(double, epsilon, "Fluorescence epsilon treshold")
+    MESSAGE_ENTRY(double, c, "Fluorescence concentration")
+    MESSAGE_ENTRY(double, yield, "Fluorescence quantum yield")
+    MESSAGE_ENTRY(double, gf, "Fluorescence anisotropy parameter")
 };
-bool from_json(AddFluorescentVolume& request, const std::string& payload);
 
 /**
  * @brief The AddFluorescentAnnotatedVolume struct
@@ -96,21 +89,20 @@ bool from_json(AddFluorescentVolume& request, const std::string& payload);
  * multiple tags, enclosed in a box. Data is loaded
  * from a a file given a path.
  */
-struct AddFluorescentAnnotatedVolume
+struct AddFluorescentAnnotatedVolume : public brayns::Message
 {
-    COMMON_PARAMS
+    MESSAGE_BEGIN(AddFluorescentAnnotatedVolume)
     COMMON_VOLUME_PROPS
-    float g;
-    int32_t ntags;
-    floats fexs;
-    floats fems;
-    floats epsilons;
-    floats cs;
-    floats yields;
-    floats gfs;
-    std::string prefix;
+    MESSAGE_ENTRY(double, g, "Anisotropy parameter")
+    MESSAGE_ENTRY(int32_t, ntags, "Number of tags")
+    MESSAGE_ENTRY(std::vector<float>, fexs, "Fluorescence exictatory spectrums")
+    MESSAGE_ENTRY(std::vector<float>, fems, "Fluorescence emissive spectrums")
+    MESSAGE_ENTRY(std::vector<float>, epsilons, "Fluorescence epsilon tresholds")
+    MESSAGE_ENTRY(std::vector<float>, cs, "Fluorescence concentrations")
+    MESSAGE_ENTRY(std::vector<float>, yields, "Fluorescence quantum yields")
+    MESSAGE_ENTRY(std::vector<float>, gfs, "Fluorescence anisotropy parameters")
+    MESSAGE_ENTRY(std::string, prefix, "Path to volume density file")
 };
-bool from_json(AddFluorescentAnnotatedVolume& request, const std::string& payload);
 
 /**
  * @brief The AddFluorescentBinaryVolume struct
@@ -118,20 +110,19 @@ bool from_json(AddFluorescentAnnotatedVolume& request, const std::string& payloa
  * enclosed in a box. Data is loaded from a file given a
  * path
  */
-struct AddFluorescentBinaryVolume
+struct AddFluorescentBinaryVolume : public brayns::Message
 {
-    COMMON_PARAMS
+    MESSAGE_BEGIN(AddFluorescentBinaryVolume)
     COMMON_VOLUME_PROPS
-    float g;
-    floats fex;
-    floats fem;
-    float epsilon;
-    float c;
-    float yield;
-    float gf;
-    std::string prefix;
+    MESSAGE_ENTRY(double, g, "Anisotropy parameter")
+    MESSAGE_ENTRY(std::vector<float>, fex, "Fluorescence exictatory spectrum")
+    MESSAGE_ENTRY(std::vector<float>, fem, "Fluorescence emissive spectrum")
+    MESSAGE_ENTRY(double, epsilon, "Fluorescence epsilon treshold")
+    MESSAGE_ENTRY(double, c, "Fluorescence concentration")
+    MESSAGE_ENTRY(double, yield, "Fluorescence quantum yield")
+    MESSAGE_ENTRY(double, gf, "Fluorescence anisotropy parameter")
+    MESSAGE_ENTRY(std::string, prefix, "Path to the volume density file")
 };
-bool from_json(AddFluorescentBinaryVolume& request, const std::string& payload);
 
 /**
  * @brief The AddFluorescentGridFromFileVolume struct
@@ -139,20 +130,19 @@ bool from_json(AddFluorescentBinaryVolume& request, const std::string& payload);
  * be loaded from disk given a path. The volume will be enclosed
  * in a box
  */
-struct AddFluorescentGridFromFileVolume
+struct AddFluorescentGridFromFileVolume : public brayns::Message
 {
-    COMMON_PARAMS
+    MESSAGE_BEGIN(AddFluorescentGridFromFileVolume)
     COMMON_VOLUME_PROPS
-    float g;
-    floats fex;
-    floats fem;
-    float epsilon;
-    float c;
-    float yield;
-    float gf;
-    std::string prefix;
+    MESSAGE_ENTRY(double, g, "Anisotropy parameter")
+    MESSAGE_ENTRY(std::vector<float>, fex, "Fluorescence excitatory spectrum")
+    MESSAGE_ENTRY(std::vector<float>, fem, "Fluorescence emissive spectrum")
+    MESSAGE_ENTRY(double, epsilon, "Fluorescence epsilon treshold")
+    MESSAGE_ENTRY(double, c, "Fluorescence concentration")
+    MESSAGE_ENTRY(double, yield, "Fluorescence quantum yield")
+    MESSAGE_ENTRY(double, gf, "Fluorescence anysotropy parameter")
+    MESSAGE_ENTRY(std::string, prefix, "Path to the volume density file")
 };
-bool from_json(AddFluorescentGridFromFileVolume& request, const std::string& payload);
 
 /**
  * @brief The AddFluorescentGridVolume struct
@@ -161,49 +151,47 @@ bool from_json(AddFluorescentGridFromFileVolume& request, const std::string& pay
  * in size the number of density elements. The volume will be enclosed
  * in a box
  */
-struct AddFluorescentGridVolume
+struct AddFluorescentGridVolume : public brayns::Message
 {
-    COMMON_PARAMS
+    MESSAGE_BEGIN(AddFluorescentGridVolume)
     COMMON_VOLUME_PROPS
-    float g;
-    floats fex;
-    floats fem;
-    float epsilon;
-    float c;
-    float yield;
-    float gf;
-    floats density;
-    int nx;
-    int ny;
-    int nz;
+    MESSAGE_ENTRY(double, g, "Anisotropy parameter")
+    MESSAGE_ENTRY(std::vector<float>, fex, "Fluorescence exictatory spectrum")
+    MESSAGE_ENTRY(std::vector<float>, fem, "Fluorescence emissive spectrum")
+    MESSAGE_ENTRY(double, epsilon, "Fluorescence epsilon treshold")
+    MESSAGE_ENTRY(double, c, "Fluorescence concentration")
+    MESSAGE_ENTRY(double, yield, "Fluorescence quantum yield")
+    MESSAGE_ENTRY(double, gf, "Fluorescence anisotropy parameter")
+    MESSAGE_ENTRY(std::vector<float>, density, "Density grid value")
+    MESSAGE_ENTRY(int32_t, nx, "Gird x dimension")
+    MESSAGE_ENTRY(int32_t, ny, "Grid y dimension")
+    MESSAGE_ENTRY(int32_t, nz, "Grid z dimension")
 };
-bool from_json(AddFluorescentGridVolume& request, const std::string& payload);
 
 /**
  * @brief The AddFluorescentScatteringVolume struct
  * Struct used to add a homogeneus fluorescence scattering volume.
  * The volume will be enclosed in a box.
  */
-struct AddFluorescentScatteringVolume
+struct AddFluorescentScatteringVolume : public brayns::Message
 {
-    COMMON_PARAMS
+    MESSAGE_BEGIN(AddFluorescentScatteringVolume)
     COMMON_VOLUME_PROPS
-    floats absorption;
-    floats scattering;
-    floats fem;
-    floats fex;
-    float mweight;
-    float epsilon;
-    float c;
-    float yield;
-    float sscale;
-    float fscale;
-    float g;
-    float gf;
-    float density;
-    floats Le;
+    MESSAGE_ENTRY(std::vector<float>, absorption, "Absoption spectrum")
+    MESSAGE_ENTRY(std::vector<float>, scattering, "Scattering spectrum")
+    MESSAGE_ENTRY(std::vector<float>, fem, "Fluorescence emissive spectrum")
+    MESSAGE_ENTRY(std::vector<float>, fex, "Fluorescence excitatory spectrum")
+    MESSAGE_ENTRY(double, mweight, "Weight")
+    MESSAGE_ENTRY(double, epsilon, "Fluorescence epsilon treshold")
+    MESSAGE_ENTRY(double, c, "Fluorescence concentration")
+    MESSAGE_ENTRY(double, yield, "Fluorescence quantum yield")
+    MESSAGE_ENTRY(double, sscale, "Scattering scaling")
+    MESSAGE_ENTRY(double, fscale, "Fluorescence scaling")
+    MESSAGE_ENTRY(double, g, "Anisotropy parameter")
+    MESSAGE_ENTRY(double, gf, "Fluorescence anisotropy parameter")
+    MESSAGE_ENTRY(double, density, "Constant volume density")
+    MESSAGE_ENTRY(std::vector<float>, Le, "Radiance spectrum")
 };
-bool from_json(AddFluorescentScatteringVolume& request, const std::string& payload);
 
 /**
  * @brief The AddFluorescentScatteringGridFromFileVolume struct
@@ -211,26 +199,25 @@ bool from_json(AddFluorescentScatteringVolume& request, const std::string& paylo
  * The volume will be enclosed in a box. The data will be loaded
  * from disk from the given path
  */
-struct AddFluorescentScatteringGridFromFileVolume
+struct AddFluorescentScatteringGridFromFileVolume : public brayns::Message
 {
-    COMMON_PARAMS
+    MESSAGE_BEGIN(AddFluorescentScatteringGridFromFileVolume)
     COMMON_VOLUME_PROPS
-    floats absorption;
-    floats scattering;
-    floats fem;
-    floats fex;
-    float mweight;
-    float epsilon;
-    float c;
-    float yield;
-    float sscale;
-    float fscale;
-    float g;
-    float gf;
-    floats Le;
-    std::string prefix;
+    MESSAGE_ENTRY(std::vector<float>, absorption, "Absoption spectrum")
+    MESSAGE_ENTRY(std::vector<float>, scattering, "Scattering spectrum")
+    MESSAGE_ENTRY(std::vector<float>, fem, "Fluorescence emissive spectrum")
+    MESSAGE_ENTRY(std::vector<float>, fex, "Fluorescence excitatory spectrum")
+    MESSAGE_ENTRY(double, mweight, "Weight")
+    MESSAGE_ENTRY(double, epsilon, "Fluorescence epsilon treshold")
+    MESSAGE_ENTRY(double, c, "Fluorescence concentration")
+    MESSAGE_ENTRY(double, yield, "Fluorescence quantum yield")
+    MESSAGE_ENTRY(double, sscale, "Scattering scaling")
+    MESSAGE_ENTRY(double, fscale, "Fluorescence scaling")
+    MESSAGE_ENTRY(double, g, "Anisotropy parameter")
+    MESSAGE_ENTRY(double, gf, "Fluorescence anisotropy parameter")
+    MESSAGE_ENTRY(std::vector<float>, Le, "Radiance spectrum")
+    MESSAGE_ENTRY(std::string, prefix, "Path to volume density file")
 };
-bool from_json(AddFluorescentScatteringGridFromFileVolume& request, const std::string& payload);
 
 /**
  * @brief The AddFluorescentScatteringGridFromFileVolume struct
@@ -239,42 +226,27 @@ bool from_json(AddFluorescentScatteringGridFromFileVolume& request, const std::s
  * on a per cell basis. The grid dimensions are given as well,
  * and must match, in size, the number of density elements
  */
-struct AddFluorescentScatteringGridVolume
+struct AddFluorescentScatteringGridVolume : public brayns::Message
 {
-    COMMON_PARAMS
+    MESSAGE_BEGIN(AddFluorescentScatteringGridVolume)
     COMMON_VOLUME_PROPS
-    floats absorption;
-    floats scattering;
-    floats fem;
-    floats fex;
-    float mweight;
-    float epsilon;
-    float c;
-    float yield;
-    float sscale;
-    float fscale;
-    float g;
-    float gf;
-    floats Le;
-    floats density;
-    int nx;
-    int ny;
-    int nz;
-
+    MESSAGE_ENTRY(std::vector<float>, absorption, "Absoption spectrum")
+    MESSAGE_ENTRY(std::vector<float>, scattering, "Scattering spectrum")
+    MESSAGE_ENTRY(std::vector<float>, fem, "Fluorescence emissive spectrum")
+    MESSAGE_ENTRY(std::vector<float>, fex, "Fluorescence excitatory spectrum")
+    MESSAGE_ENTRY(double, mweight, "Weight")
+    MESSAGE_ENTRY(double, epsilon, "Fluorescence epsilon treshold")
+    MESSAGE_ENTRY(double, c, "Fluorescence concentration")
+    MESSAGE_ENTRY(double, yield, "Fluorescence quantum yield")
+    MESSAGE_ENTRY(double, sscale, "Scattering scaling")
+    MESSAGE_ENTRY(double, fscale, "Fluorescence scaling")
+    MESSAGE_ENTRY(double, g, "Anisotropy parameter")
+    MESSAGE_ENTRY(double, gf, "Fluorescence anisotropy parameter")
+    MESSAGE_ENTRY(std::vector<float>, Le, "Radiance spectrum")
+    MESSAGE_ENTRY(std::vector<float>, density, "Grid density values")
+    MESSAGE_ENTRY(int32_t, nx, "Gird x dimension")
+    MESSAGE_ENTRY(int32_t, ny, "Grid y dimension")
+    MESSAGE_ENTRY(int32_t, nz, "Grid z dimension")
 };
-bool from_json(AddFluorescentScatteringGridVolume& request, const std::string& payload);
-
-/**
- * @brief The RequestResponse struct
- * Struct to send back the result of a given request. The error field will hold
- * a numerical value. If it is different than 0, an error occoured and the message
- * field will carry further information.
- */
-struct RequestResponse
-{
-    int error;
-    std::string message;
-};
-std::string to_json(const RequestResponse& response);
 
 #endif

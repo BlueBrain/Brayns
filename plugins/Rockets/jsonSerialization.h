@@ -637,16 +637,16 @@ inline void init(brayns::InputPath* a, ObjectHandler* h)
 inline void init(brayns::FileType* a, ObjectHandler* h)
 {
     h->add_property("type", &a->type);
-    h->add_property("error", &a->error);
-    h->add_property("message", &a->message);
+    h->add_property("error", &a->error, Flags::Optional);
+    h->add_property("message", &a->message, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
 inline void init(brayns::FileContent* a, ObjectHandler* h)
 {
     h->add_property("content", &a->content);
-    h->add_property("error", &a->error);
-    h->add_property("message", &a->message);
+    h->add_property("error", &a->error, Flags::Optional);
+    h->add_property("message", &a->message, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -666,8 +666,8 @@ inline void init(brayns::DirectoryFileList* a, ObjectHandler* h)
 {
     h->add_property("files", &a->files);
     h->add_property("dirs", &a->dirs);
-    h->add_property("error", &a->error);
-    h->add_property("message", &a->message);
+    h->add_property("error", &a->error, Flags::Optional);
+    h->add_property("message", &a->message, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -820,7 +820,7 @@ inline bool from_json(brayns::Vector2d& obj, const std::string& json)
                                         nullptr);
 }
 
-brayns::PropertyMap jsonToPropertyMap(const std::string& json);
+brayns::PropertyMap jsonToPropertyMap(const std::string& json, const brayns::PropertyMap& schema = brayns::PropertyMap());
 
 template <typename T>
 inline std::pair<bool, brayns::PropertyMap> fromJSONWithPropertyMap(

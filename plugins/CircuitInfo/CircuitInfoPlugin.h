@@ -44,6 +44,8 @@ private:
     CellGIDList _getCellGIDsFromModel(const ModelCellGIDListRequest& request);
 
     ReportList _getReportList(const ReportListRequest& request);
+    ReportInfo _getReportInfo(const ReportInfoRequest& request);
+
     TargetList _getTargetList(const TargetListRequest& request);
 
     AfferentGIDList _getAfferentGIDList(const AfferentGIDListRequest& request);

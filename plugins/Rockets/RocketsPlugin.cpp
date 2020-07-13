@@ -324,10 +324,12 @@ public:
                               const PropertyMap& input,
                               const std::function<void(PropertyMap)>& action)
     {
-        _jsonrpcServer->connect(desc.methodName, [action,
+        _jsonrpcServer->connect(desc.methodName, [name = desc.methodName,
+                                                  action,
+                                                  input,
                                                   this](const auto& request) {
             ScopedCurrentClient scope(this->_currentClientID, request.clientID);
-            action(jsonToPropertyMap(request.message));
+            action(jsonToPropertyMap(request.message, input));
         });
 
         _handleSchema(desc.methodName,
@@ -351,17 +353,21 @@ public:
                          const std::function<PropertyMap(PropertyMap)>& action)
     {
         _bindEndpoint(desc.methodName, [ name = desc.methodName,
+                                         input,
                                          action ](const auto& request) {
             try
             {
                 return Response{
-                    to_json(action(jsonToPropertyMap(request.message)))};
+                    to_json(action(jsonToPropertyMap(request.message, input)))};
             }
-            catch (...)
+            catch (const std::exception& e)
             {
-                return Response{
-                    Response::Error{"from_json for " + name + " failed",
-                                    PARAMETER_FROM_JSON_ERROR}};
+                PropertyMap errorResponse;
+                errorResponse.setProperty({"error", -1, {}});
+                const std::string msg = "from_json for " + name + " failed: "
+                        + std::string(e.what());
+                errorResponse.setProperty({"message", msg, {}});
+                return Response{to_json(errorResponse)};
             }
         });
 
@@ -373,10 +379,23 @@ public:
     void registerRequest(const RpcDescription& desc, const PropertyMap& output,
                          const std::function<PropertyMap()>& action)
     {
-        _jsonrpcServer->bind(desc.methodName, [action,
+        _jsonrpcServer->bind(desc.methodName, [name = desc.methodName,
+                                               action,
                                                this](const auto& request) {
             ScopedCurrentClient scope(this->_currentClientID, request.clientID);
-            return Response{to_json(action())};
+            try
+            {
+                return Response{to_json(action())};
+            }
+            catch (const std::exception& e)
+            {
+                PropertyMap errorResponse;
+                errorResponse.setProperty({"error", -1, {}});
+                const std::string msg = "from_json for " + name + " failed: "
+                        + std::string(e.what());
+                errorResponse.setProperty({"message", msg, {}});
+                return Response{to_json(errorResponse)};
+            }
         });
 
         _handleSchema(desc.methodName,

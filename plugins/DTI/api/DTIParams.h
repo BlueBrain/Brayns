@@ -20,38 +20,38 @@
 #define DTIPARAMS_H
 
 #include "../io/DTITypes.h"
+
+#include <brayns/common/ActionMessage.h>
 #include <brayns/common/types.h>
 
 /**
  * @brief The Streamlines struct handles a set of streamlines. Indices are used
  * to specify the first point of each streamline
  */
-struct StreamlinesDescriptor
+struct StreamlinesDescriptor : public brayns::Message
 {
-    std::string name;
-    Gids gids;
-    Indices indices;
-    Vertices vertices;
-    float radius{1.f};
-    float opacity{1.f};
-    ColorScheme colorScheme;
+    MESSAGE_BEGIN(StreamlinesDescriptor)
+    MESSAGE_ENTRY(std::string, name, "Model name")
+    MESSAGE_ENTRY(std::vector<uint64_t>, gids, "List of cell GIDs")
+    MESSAGE_ENTRY(std::vector<uint64_t>, indices, "List of indices")
+    MESSAGE_ENTRY(std::vector<float>, vertices, "List of vertices (3 components per vertex)")
+    MESSAGE_ENTRY(double, radius, "Streamline tube radius")
+    MESSAGE_ENTRY(double, opacity, "Color opacity")
+    MESSAGE_ENTRY(int32_t, colorScheme, "Color scheme to draw the streamlines")
 };
 
-bool from_json(StreamlinesDescriptor &param, const std::string &payload);
-
-struct SpikeSimulationDescriptor
+struct SpikeSimulationDescriptor : public brayns::Message
 {
-    size_t modelId;
-    Gids gids;
-    std::vector<float> timestamps;
-    float dt{0.1f};
-    float endTime{1.f};
-    float timeScale{1.f};
-    float decaySpeed{0.1f};
-    float restIntensity{0.25f};
-    float spikeIntensity{0.75f};
+    MESSAGE_BEGIN(SpikeSimulationDescriptor)
+    MESSAGE_ENTRY(uint64_t, modelId, "The ID of the loaded model")
+    MESSAGE_ENTRY(std::vector<uint64_t>, gids, "List of cel GIDs")
+    MESSAGE_ENTRY(std::vector<float>, timestamps, "List of spike timestamps")
+    MESSAGE_ENTRY(double, dt, "Simulation time step")
+    MESSAGE_ENTRY(double, endTime, "Simulation normalized end time")
+    MESSAGE_ENTRY(double, timeScale, "Time scale")
+    MESSAGE_ENTRY(double, decaySpeed, "Speed of spike decay")
+    MESSAGE_ENTRY(double, restIntensity, "Rest intensity")
+    MESSAGE_ENTRY(double, spikeIntensity, "Spike intensity")
 };
-
-bool from_json(SpikeSimulationDescriptor &param, const std::string &payload);
 
 #endif // DTIPARAMS_H

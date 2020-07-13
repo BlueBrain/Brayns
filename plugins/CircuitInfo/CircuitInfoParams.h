@@ -21,151 +21,137 @@
 #ifndef CIRCUITINFOPARAMS_H
 #define CIRCUITINFOPARAMS_H
 
+#include <brayns/common/ActionMessage.h>
 #include <brayns/common/types.h>
 
-struct TestRequest
+struct CellGIDListRequest : public brayns::Message
 {
-    std::string message;
+    MESSAGE_BEGIN(CellGIDListRequest)
+    MESSAGE_ENTRY(std::string, path, "Path to the circuit configuration file")
+    MESSAGE_ENTRY(std::vector<std::string>, targets, "List of targets to query")
 };
-bool from_json(TestRequest& request, const std::string& payload);
 
-struct TestResponse
+struct ModelCellGIDListRequest : public brayns::Message
 {
-    std::string answer;
+    MESSAGE_BEGIN(ModelCellGIDListRequest)
+    MESSAGE_ENTRY(uint32_t, modelId, "The ID of the model to query for cell GIDs")
 };
-std::string to_json(const TestResponse& response);
 
-// Request a list of cell GIDs from a list of reports
-struct CellGIDListRequest
+struct CellGIDList : public brayns::Message
 {
-    std::string path;
-    strings targets;
+    MESSAGE_BEGIN(CellGIDList)
+    MESSAGE_ENTRY(std::vector<unsigned>, ids, "List of cell GIDs")
 };
-bool from_json(CellGIDListRequest& request, const std::string& payload);
 
-struct ModelCellGIDListRequest
+struct ReportListRequest : public brayns::Message
 {
-    uint32_t modelId;
+    MESSAGE_BEGIN(ReportListRequest)
+    MESSAGE_ENTRY(std::string, path, "Path to the circuit config to query for reports")
 };
-bool from_json(ModelCellGIDListRequest& request, const std::string& payload);
 
-struct CellGIDList
+struct ReportList : public brayns::Message
 {
-    uint32_ts ids;
-    int error;
-    std::string message;
+    MESSAGE_BEGIN(ReportList)
+    MESSAGE_ENTRY(std::vector<std::string>, reports, "List of report names")
 };
-std::string to_json(const CellGIDList& list);
 
-// Request a list of reports contained in a given circuit config file
-struct ReportListRequest
+struct ReportInfoRequest : public brayns::Message
 {
-    std::string path;
+    MESSAGE_BEGIN(ReportInfoRequest)
+    MESSAGE_ENTRY(std::string, path, "Path to the circuit BlueConfig from which to get the report")
+    MESSAGE_ENTRY(std::string, report, "Name of the report from where to get the information")
 };
-bool from_json(ReportListRequest& request, const std::string& payload);
 
-struct ReportList
+struct ReportInfo : public brayns::Message
 {
-    strings reports;
-    int error;
-    std::string message;
+    MESSAGE_BEGIN(ReportInfo)
+    MESSAGE_ENTRY(double, startTime, "Time at which the simulation starts")
+    MESSAGE_ENTRY(double, endTime, "Time at which the simulation ends")
+    MESSAGE_ENTRY(double, timeStep, "Time between two consecutive simulation frames")
+    MESSAGE_ENTRY(std::string, dataUnit, "Unit of the report values. Can be \"mV\", \"mA\", ...")
+    MESSAGE_ENTRY(std::string, timeUnit, "Unit of the report time values")
+    MESSAGE_ENTRY(uint64_t, frameCount, "Number of simulation frames in the report")
+    MESSAGE_ENTRY(uint64_t, frameSize, "Number of values per frame in the report")
 };
-std::string to_json(const ReportList& list);
 
-// Request a list of targets contained in a given circuit config file
-struct TargetListRequest
+struct TargetListRequest : public brayns::Message
 {
-    std::string path;
+    MESSAGE_BEGIN(TargetListRequest)
+    MESSAGE_ENTRY(std::string, path, "Path to the circuit config to query for targets")
 };
-bool from_json(TargetListRequest& request, const std::string& payload);
 
-struct TargetList
+struct TargetList : public brayns::Message
 {
-    strings targets;
-    int error;
-    std::string message;
+    MESSAGE_BEGIN(TargetList)
+    MESSAGE_ENTRY(std::vector<std::string>, targets, "List of target names")
 };
-std::string to_json(const TargetList& list);
 
-// Request a list of afferent cells from a list of source synapses cells from inside the circuit
-struct AfferentGIDListRequest
+struct AfferentGIDListRequest : public brayns::Message
 {
-    std::string path;
-    uint32_ts sources;
+    MESSAGE_BEGIN(AfferentGIDListRequest)
+    MESSAGE_ENTRY(std::string, path, "Path to the circuit config to query for afferent synapses")
+    MESSAGE_ENTRY(std::vector<unsigned>, sources, "List of synapse source cell GIDs")
 };
-bool from_json(AfferentGIDListRequest& request, const std::string& payload);
 
-struct AfferentGIDList
+struct AfferentGIDList : public brayns::Message
 {
-    uint32_ts ids;
-    int error;
-    std::string message;
+    MESSAGE_BEGIN(AfferentGIDList)
+    MESSAGE_ENTRY(std::vector<unsigned>, ids, "List of afferent synapses cell GIDs")
 };
-std::string to_json(const AfferentGIDList& list);
 
-// Request a list of efferent cells from a list of source synapses cells from inside the circuit
-struct EfferentGIDListRequest
+struct EfferentGIDListRequest : public brayns::Message
 {
-    std::string path;
-    uint32_ts sources;
+    MESSAGE_BEGIN(EfferentGIDListRequest)
+    MESSAGE_ENTRY(std::string, path, "Path to the circuit config to query for efferent synapses")
+    MESSAGE_ENTRY(std::vector<unsigned>, sources, "List of synapse target cell GIDs")
 };
-bool from_json(EfferentGIDListRequest& request, const std::string& payload);
 
-struct EfferentGIDList
+struct EfferentGIDList : public brayns::Message
 {
-    uint32_ts ids;
-    int error;
-    std::string message;
+    MESSAGE_BEGIN(EfferentGIDList)
+    MESSAGE_ENTRY(std::vector<unsigned>, ids, "List of efferent synapses cell GIDs")
 };
-std::string to_json(const EfferentGIDList& list);
 
-// Request a list of projections present on a given circuit configuration file
-struct ProjectionListRequest
+struct ProjectionListRequest : public brayns::Message
 {
-    std::string path;
+    MESSAGE_BEGIN(ProjectionListRequest)
+    MESSAGE_ENTRY(std::string, path, "Path to the circuit config to query for projection names")
 };
-bool from_json(ProjectionListRequest& request, const std::string& payload);
 
-struct ProjectionList
+struct ProjectionList : public brayns::Message
 {
-    strings projections;
-    int error;
-    std::string message;
+    MESSAGE_BEGIN(ProjectionList)
+    MESSAGE_ENTRY(std::vector<std::string>, projections, "List of projection names")
 };
-std::string to_json(const ProjectionList& list);
 
-// Request the list of afferent cells from a list of source synapses cells from the given projection
-struct ProjectionAfferentGIDListRequest
+struct ProjectionAfferentGIDListRequest : public brayns::Message
 {
-    std::string path;
-    std::string projection;
-    uint32_ts sources;
+    MESSAGE_BEGIN(ProjectionAfferentGIDListRequest)
+    MESSAGE_ENTRY(std::string, path, "Path to the circuit config to query for projected afferent"
+                                     " synapses")
+    MESSAGE_ENTRY(std::string, projection, "Projection name to query for")
+    MESSAGE_ENTRY(std::vector<unsigned>, sources, "Projected source cell GIDs")
 };
-bool from_json(ProjectionAfferentGIDListRequest& request, const std::string& payload);
 
-struct ProjectionAfferentGIDList
+struct ProjectionAfferentGIDList : public brayns::Message
 {
-    uint32_ts ids;
-    int error;
-    std::string message;
+    MESSAGE_BEGIN(ProjectionAfferentGIDList)
+    MESSAGE_ENTRY(std::vector<unsigned>, ids, "List of projected afferent synapses cell GIDs")
 };
-std::string to_json(const ProjectionAfferentGIDList& list);
 
-// Request the list of efferent cells from a list of source synapses cells from the given projection
-struct ProjectionEfferentGIDListRequest
+struct ProjectionEfferentGIDListRequest : public brayns::Message
 {
-    std::string path;
-    std::string projection;
-    uint32_ts sources;
+    MESSAGE_BEGIN(ProjectionEfferentGIDListRequest)
+    MESSAGE_ENTRY(std::string, path, "Path to the circuit config to query for projected efferent"
+                                     " synapses")
+    MESSAGE_ENTRY(std::string, projection, "Projection name to query for")
+    MESSAGE_ENTRY(std::vector<unsigned>, sources, "Projected target cell GIDs")
 };
-bool from_json(ProjectionEfferentGIDListRequest& request, const std::string& payload);
 
-struct ProjectionEfferentGIDList
+struct ProjectionEfferentGIDList : public brayns::Message
 {
-    uint32_ts ids;
-    int error;
-    std::string message;
+    MESSAGE_BEGIN(ProjectionEfferentGIDList)
+    MESSAGE_ENTRY(std::vector<unsigned>, ids, "List of projected efferent synapses cell GIDs")
 };
-std::string to_json(const ProjectionEfferentGIDList& list);
 
 #endif

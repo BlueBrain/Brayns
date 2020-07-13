@@ -70,6 +70,26 @@ po::options_description _toCommandlineDescription(
                     property->enums[property->get<int32_t>()]);
             break;
         }
+        case Property::Type::UInt:
+        {
+            if (property->enums.empty())
+                valueSemantic = po::value<uint32_t>()->default_value(
+                    property->get<uint32_t>());
+            else
+                valueSemantic = po::value<std::string>()->default_value(
+                    property->enums[property->get<uint32_t>()]);
+            break;
+        }
+        case Property::Type::UInt64:
+        {
+            if (property->enums.empty())
+                valueSemantic = po::value<uint64_t>()->default_value(
+                    property->get<uint64_t>());
+            else
+                valueSemantic = po::value<std::string>()->default_value(
+                    property->enums[property->get<uint64_t>()]);
+            break;
+        }
         case Property::Type::Double:
             valueSemantic =
                 po::value<double>()->default_value(property->get<double>());
@@ -124,6 +144,24 @@ po::options_description _toCommandlineDescription(
                 valueSemantic = po::fixed_tokens_value<std::vector<uint32_t>>(1, max);
             }
             break;
+        case Property::Type::UInt64Vector:
+            {
+                auto max = static_cast<uint32_t>(std::numeric_limits<uint32_t>::max() - 1);
+                valueSemantic = po::fixed_tokens_value<std::vector<uint64_t>>(1, max);
+            }
+            break;
+        case Property::Type::StringVector:
+            {
+                auto max = static_cast<unsigned>(std::numeric_limits<uint32_t>::max() - 1);
+                valueSemantic = po::fixed_tokens_value<std::vector<std::string>>(1, max);
+            }
+            break;
+        case Property::Type::BoolVector:
+            {
+                auto max = static_cast<uint32_t>(std::numeric_limits<uint32_t>::max() - 1);
+                valueSemantic = po::fixed_tokens_value<std::vector<bool>>(1, max);
+            }
+            break;
         }
 
         assert(valueSemantic);
@@ -166,6 +204,28 @@ void _commandlineToPropertyMap(const po::variables_map& vm,
                 auto i =
                     _validateEnumValue(property->enums, value, dashCaseName);
                 property->set((int32_t)(i - property->enums.begin()));
+            }
+            break;
+        case Property::Type::UInt:
+            if (property->enums.empty())
+                property->set(vm[dashCaseName].as<uint32_t>());
+            else
+            {
+                const auto value = vm[dashCaseName].as<std::string>();
+                auto i =
+                    _validateEnumValue(property->enums, value, dashCaseName);
+                property->set((uint32_t)(i - property->enums.begin()));
+            }
+            break;
+        case Property::Type::UInt64:
+            if (property->enums.empty())
+                property->set(vm[dashCaseName].as<uint64_t>());
+            else
+            {
+                const auto value = vm[dashCaseName].as<std::string>();
+                auto i =
+                    _validateEnumValue(property->enums, value, dashCaseName);
+                property->set((uint64_t)(i - property->enums.begin()));
             }
             break;
         case Property::Type::Double:
@@ -217,6 +277,15 @@ void _commandlineToPropertyMap(const po::variables_map& vm,
         case Property::Type::UIntVector:
             property->set(vm[dashCaseName].as<std::vector<uint32_t>>());
             break;
+        case Property::Type::UInt64Vector:
+            property->set(vm[dashCaseName].as<std::vector<uint64_t>>());
+            break;
+        case Property::Type::StringVector:
+            property->set(vm[dashCaseName].as<std::vector<std::string>>());
+            break;
+        case Property::Type::BoolVector:
+            property->set(vm[dashCaseName].as<std::vector<bool>>());
+            break;
         }
     }
 }
@@ -229,6 +298,12 @@ void Property::_copy(const Property& from)
         {
         case Property::Type::Int:
             dest.set<int32_t>(static_cast<int32_t>(src.get<double>()));
+            break;
+        case Property::Type::UInt:
+            dest.set<uint32_t>(static_cast<uint32_t>(src.get<double>()));
+            break;
+        case Property::Type::UInt64:
+            dest.set<uint64_t>(static_cast<uint64_t>(src.get<double>()));
             break;
         case Property::Type::Double:
             dest.set<double>(static_cast<double>(src.get<int32_t>()));
@@ -249,18 +324,6 @@ void Property::_copy(const Property& from)
             dest.set<std::array<double, 3>>(_convertArray<double, int32_t, 3>(
                 src.get<std::array<int32_t, 3>>()));
             break;
-        case Property::Type::DoubleVector:
-            dest.set<std::vector<double>>(src.get<std::vector<double>>());
-            break;
-        case Property::Type::FloatVector:
-            dest.set<std::vector<float>>(src.get<std::vector<float>>());
-            break;
-        case Property::Type::IntVector:
-            dest.set<std::vector<int32_t>>(src.get<std::vector<int32_t>>());
-            break;
-        case Property::Type::UIntVector:
-            dest.set<std::vector<uint32_t>>(src.get<std::vector<uint32_t>>());
-            break;
         default:
             break;
         };
@@ -272,11 +335,7 @@ void Property::_copy(const Property& from)
                (t0 == Property::Type::Vec2i && t1 == Property::Type::Vec2d) ||
                (t0 == Property::Type::Vec2d && t1 == Property::Type::Vec2i) ||
                (t0 == Property::Type::Vec3i && t1 == Property::Type::Vec3d) ||
-               (t0 == Property::Type::Vec3d && t1 == Property::Type::Vec3i)  ||
-               (t0 == Property::Type::DoubleVector && t1 == Property::Type::DoubleVector) ||
-               (t0 == Property::Type::FloatVector && t1 == Property::Type::FloatVector) ||
-               (t0 == Property::Type::IntVector && t1 == Property::Type::IntVector) ||
-               (t0 == Property::Type::UIntVector && t1 == Property::Type::UIntVector);
+               (t0 == Property::Type::Vec3d && t1 == Property::Type::Vec3i);
     };
 
     const auto compatibleEnums = [](const Property& dest, const Property& src) {
@@ -310,7 +369,7 @@ void Property::_copy(const Property& from)
         else
         {
             const auto idx = src.get<int32_t>();
-            dest.set<std::string>(dest.enums[idx]);
+            dest.set(dest.enums[idx]);
         }
     };
 

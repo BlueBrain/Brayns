@@ -23,12 +23,10 @@ common_find_package_post()
 set(BRAYNSCIRCUITINFO_HEADERS
   CircuitInfoParams.h
   CircuitInfoPlugin.h
-  json.hpp
   Log.h
 )
 
 set(BRAYNSCIRCUITINFO_SOURCES
-  CircuitInfoParams.cpp
   CircuitInfoPlugin.cpp
 )
 

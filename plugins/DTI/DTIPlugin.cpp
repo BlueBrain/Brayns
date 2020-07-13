@@ -58,14 +58,18 @@ void DTIPlugin::init()
     registry.registerLoader(
         std::make_unique<DTILoader>(scene, DTILoader::getCLIProperties()));
 
-    PLUGIN_INFO << "Registering 'add-streamlines' endpoint" << std::endl;
-    _api->getActionInterface()->registerNotification<StreamlinesDescriptor>(
-        "add-streamlines",
+     _api->getActionInterface()->registerNotification<StreamlinesDescriptor>(
+        {"add-streamlines",
+         "Adds a streamline representation to the scene",
+         "StreamlineDescriptor",
+         "Parameters to generate the streamline representation"},
         [&](const StreamlinesDescriptor &s) { _updateStreamlines(s); });
 
-    PLUGIN_INFO << "Registering 'set-spike-simulation' endpoint" << std::endl;
     _api->getActionInterface()->registerNotification<SpikeSimulationDescriptor>(
-        "set-spike-simulation",
+        {"set-spike-simulation",
+         "Adds a spike simulation to a model",
+         "SpikeSimulationDescriptor",
+         "Description of the spike report"},
         [&](const SpikeSimulationDescriptor &s) { _updateSpikeSimulation(s); });
 }
 
@@ -87,7 +91,7 @@ void DTIPlugin::preRender()
 
 void DTIPlugin::_updateStreamlines(const StreamlinesDescriptor &streamlines)
 {
-    const std::string name = streamlines.name;
+    const std::string& name = streamlines.name;
     PLUGIN_INFO << "Loading streamlines <" << name << "> from Json"
                 << std::endl;
 
@@ -95,7 +99,7 @@ void DTIPlugin::_updateStreamlines(const StreamlinesDescriptor &streamlines)
     auto model = _api->getScene().createModel();
 
     const auto nbIndices = streamlines.indices.size();
-    const auto nbVertices = streamlines.vertices.size() / 3;
+    //const auto nbVertices = streamlines.getvertices().size() / 3;
 
     uint64_t startIndex = 0;
     for (size_t index = 0; index < nbIndices; ++index)
@@ -132,7 +136,7 @@ void DTIPlugin::_updateStreamlines(const StreamlinesDescriptor &streamlines)
         }
         const auto colors =
             DTILoader::getColorsFromPoints(points, streamlines.opacity,
-                                           streamlines.colorScheme);
+                                           static_cast<ColorScheme>(streamlines.colorScheme));
 
         brayns::Streamline streamline(points, colors, radii);
         model->addStreamline(materialId, streamline);

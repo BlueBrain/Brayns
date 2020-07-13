@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  *
- * Responsible Author: Daniel.Nachbaur@epfl.ch
+ * Responsible Authors: Daniel.Nachbaur@epfl.ch
+ *                      Nadir Román Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,6 +21,9 @@
 
 #pragma once
 
+#include <brayns/common/ActionMessage.h>
+#include <brayns/common/PropertyMap.h>
+#include <brayns/common/log.h>
 #include <brayns/common/types.h>
 
 #include <functional>
@@ -105,38 +109,56 @@ public:
         _registerNotification(name, [action] { action(); });
     }
 
-    /** Register an action with a parameter and no return value. */
-    template <typename Params>
-    void registerNotification(const std::string& name,
-                              const std::function<void(Params)>& action)
+    template <typename Params,
+              typename = std::enable_if_t<std::is_base_of<Message, Params>::value>>
+    void registerNotification(const RpcParameterDescription& desc,
+                             const std::function<void(Params)>& action)
     {
-        _registerNotification(name, [action](const std::string& param) {
-            Params params;
-            if (!from_json(params, param))
-                throw std::runtime_error("from_json failed");
-            action(params);
+        Params p;
+        BRAYNS_INFO << "Registering notification " << desc.methodName << std::endl;
+        registerNotification(desc, p.getPropertyMap(), [action](PropertyMap map)
+        {
+            Params par(map);
+            par.fromPropertyMap();
+            action(par);
         });
     }
 
-    /** Register an action with a parameter and a return value. */
-    template <typename Params, typename RetVal>
-    void registerRequest(const std::string& name,
-                         const std::function<RetVal(Params)>& action)
-    {
-        _registerRequest(name, [action](const std::string& param) {
-            Params params;
-            if (!from_json(params, param))
-                throw std::runtime_error("from_json failed");
-            return to_json(action(params));
-        });
-    }
-
-    /** Register an action with no parameter and a return value. */
-    template <typename RetVal>
-    void registerRequest(const std::string& name,
+    template <typename RetVal,
+              typename = std::enable_if_t<std::is_base_of<Message, RetVal>::value>>
+    void registerRequest(const RpcDescription& desc,
                          const std::function<RetVal()>& action)
     {
-        _registerRequest(name, [action] { return to_json(action()); });
+        RetVal rv;
+        BRAYNS_INFO << "Registering request " << desc.methodName << std::endl;
+        registerRequest(desc, rv.getPropertyMap(), [action]()
+        {
+            RetVal retVal = action();
+            retVal.toPropertyMap();
+            return retVal.getPropertyMap();
+        });
+    }
+
+    template <typename Params,
+              typename RetVal,
+              typename = std::enable_if_t<std::is_base_of<Message, Params>::value &&
+                                          std::is_base_of<Message, RetVal>::value>>
+    void registerRequest(const RpcParameterDescription& desc,
+                         const std::function<RetVal(Params)>& action)
+    {
+        Params p;
+        RetVal rv;
+        BRAYNS_INFO << "Registering request " << desc.methodName << std::endl;
+        registerRequest(desc, p.getPropertyMap(), rv.getPropertyMap(), [action](PropertyMap map)
+        {
+            Params par(map);
+            par.fromPropertyMap();
+
+            RetVal retVal = action(par);
+            retVal.toPropertyMap();
+
+            return retVal.getPropertyMap();
+        });
     }
 
 protected:

@@ -93,6 +93,8 @@ void toOptiXProperties(const brayns::PropertyMap& object)
                                               static_cast<float>(v[3]));
                 break;
             }
+            default:
+                break;
             }
         }
     }

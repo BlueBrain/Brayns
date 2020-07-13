@@ -43,31 +43,31 @@ private:
     /**
      * @brief Adds a new model with a homogeneus (constant) density
      *        volume to the scene, enclosed in a regular grid
-     * @return AddVolumeResponse with information about request sucess
+     * @return brayns::Message with information about request sucess
      */
-    AddVolumeResponse _addHomogeneusVolume(const AddHomogeneusVolume&);
+    brayns::Message _addHomogeneusVolume(const AddHomogeneusVolume&);
 
     /**
      * @brief Adds a homogeneus (constant) density volume to be enclosed
      *        inside the shapes of a given model
-     * @return AddVolumeResponse with information about request sucess
+     * @return brayns::Message with information about request sucess
      */
-    AddVolumeResponse _addHomogeneusVolumeToModel(const AddHomogeneusVolumeToModel&);
+    brayns::Message _addHomogeneusVolumeToModel(const AddHomogeneusVolumeToModel&);
 
     /**
      * @brief Adds a new model with a heterogeneus (non constant) density
      *        volume to the scene, enclosed in a regular grid
-     * @return AddVolumeResponse with information about request sucess
+     * @return brayns::Message with information about request sucess
      */
-    AddVolumeResponse _addHeterogeneusVolume(const AddHeterogeneusVolume&);
+    brayns::Message _addHeterogeneusVolume(const AddHeterogeneusVolume&);
 
     /**
      * @brief Adds a new model with a grid volume (the density
      *        is specified on a per grid cell basis) to the scene,
      *        enclosed in a regular grid
-     * @return AddVolumeResponse with information about request sucess
+     * @return brayns::Message with information about request sucess
      */
-    AddVolumeResponse _addGridVolume(const AddGridVolume&);
+    brayns::Message _addGridVolume(const AddGridVolume&);
 };
 
 #endif
