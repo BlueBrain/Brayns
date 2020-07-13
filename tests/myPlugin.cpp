@@ -81,8 +81,6 @@ public:
             [&](const brayns::PropertyMap& prop) {
                 if (prop.hasProperty("value"))
                     CHECK_EQ(prop.getProperty<int>("value"), 42);
-                else
-                    ++numFails;
                 ++numCalls;
             });
 
@@ -146,10 +144,8 @@ public:
     ~MyPlugin()
     {
         REQUIRE_EQ(numCalls, 10);
-        REQUIRE_EQ(numFails, 1);
     }
     size_t numCalls{0};
-    size_t numFails{0};
 };
 
 class MyRenderer : public brayns::AbstractRenderer
