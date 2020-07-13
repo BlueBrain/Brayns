@@ -1591,7 +1591,7 @@ brayns::Message CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& par
 
     bool ffmpegError = _createMediaFile(params, result);
     
-    if (params.eraseFrames)
+    if (!ffmpegError && params.eraseFrames)
     {
         std::string sanitizedFramesFolder = params.framesFolderPath;
         const std::string slash =
@@ -1621,8 +1621,7 @@ brayns::Message CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& par
         {
             PLUGIN_ERROR << "make-movie: Could not clean up frames"
                          << std::endl;
-            if(!ffmpegError)
-                result.setError(5, "Could not clean up frames");
+            result.setError(5, "Could not clean up frames");
         }
     }
 
