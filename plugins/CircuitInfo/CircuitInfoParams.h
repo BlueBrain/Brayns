@@ -74,6 +74,19 @@ struct ReportInfo : public brayns::Message
     MESSAGE_ENTRY(uint64_t, frameSize, "Number of values per frame in the report")
 };
 
+struct SpikeReportRequest : public brayns::Message
+{
+    MESSAGE_BEGIN(SpikeReportRequest)
+    MESSAGE_ENTRY(std::string, path, "Path to the circuit to test");
+};
+
+struct SpikeReportInfo : public brayns::Message
+{
+    MESSAGE_BEGIN(SpikeReportInfo)
+    MESSAGE_ENTRY(std::string, path, "Path to the spike report")
+    MESSAGE_ENTRY(int32_t, exists, "Flag indicating wether there is a spike report")
+};
+
 struct TargetListRequest : public brayns::Message
 {
     MESSAGE_BEGIN(TargetListRequest)

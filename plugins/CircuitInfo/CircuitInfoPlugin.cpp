@@ -95,6 +95,16 @@ void CircuitInfoPlugin::init()
                 return _getReportInfo(request);
         });
 
+        actionInterface->registerRequest<SpikeReportRequest, SpikeReportInfo>(
+            {"ci-get-spike-report-info",
+             "Return wether the circuit has a spike report, and the path to it"
+             " if exists",
+             "SpikeReportRequest",
+             "The circuit to which to query the spike report information"},
+             [&](const SpikeReportRequest& request) {
+                 return _getSpikeReportInfo(request);
+        });
+
         actionInterface->registerRequest<TargetListRequest, TargetList>(
             {"ci-get-targets",
              "Return a list of targets from a cricuit",
@@ -281,6 +291,31 @@ ReportInfo CircuitInfoPlugin::_getReportInfo(const ReportInfoRequest& request)
         result.frameSize = report.getFrameSize();
     }
     catch (std::exception& e)
+    {
+        result.setError(2, e.what());
+    }
+
+    return result;
+}
+
+SpikeReportInfo CircuitInfoPlugin::_getSpikeReportInfo(const SpikeReportRequest& request)
+{
+    SpikeReportInfo result;
+
+    if(!boost::filesystem::exists(request.path))
+    {
+        result.setError(9, "Circuit not found");
+        return result;
+    }
+
+    // Reports can be obtained as the names of the "report" section from the BlueConfig file
+    try
+    {
+        const brion::BlueConfig config(request.path);
+        result.path = config.getSpikeSource().getPath();
+        result.exists = !result.path.empty() && boost::filesystem::exists(result.path);
+    }
+    catch (const std::exception& e)
     {
         result.setError(2, e.what());
     }
