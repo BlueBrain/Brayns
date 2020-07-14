@@ -33,10 +33,12 @@ const float DEFAULT_DECAY_SPEED = 1.f;
 } // namespace
 
 SpikeSimulationHandler::SpikeSimulationHandler(const std::string& reportPath,
-                                               const brion::GIDSet& gids)
+                                               const brion::GIDSet& gids,
+                                               const float transitionTime)
     : brayns::AbstractSimulationHandler()
     , _reportPath(reportPath)
     , _gids(gids)
+    , _transition(transitionTime)
     , _spikeReport(new brain::SpikeReportReader(brain::URI(reportPath), gids))
 {
     uint64_t c{0};
@@ -84,23 +86,38 @@ void* SpikeSimulationHandler::getFrameData(const uint32_t frame)
     const auto boundedFrame = _getBoundedFrame(frame);
     if (_currentFrame != boundedFrame)
     {
-        for (size_t i = 0; i < _frameSize; ++i)
+        std::fill(_frameData.begin(), _frameData.end(), DEFAULT_REST_VALUE);
+
+        const float currentFrameTime = static_cast<float>(boundedFrame) * _dt;
+        const auto trStart = currentFrameTime - _transition;
+        const auto trEnd = currentFrameTime + _transition;
+        const auto spikes = _spikeReport->getSpikes(trStart, trEnd);
+        for (const auto& spike : spikes)
         {
-            if (_frameData[i] > DEFAULT_REST_VALUE)
-                _frameData[i] -= DEFAULT_DECAY_SPEED;
+            const auto gid = _gidMap[spike.second];
+            const auto spikeTime = spike.first;
+
+
+            // Spike in the future - start growth
+            if(spikeTime > currentFrameTime)
+            {
+                auto alpha = (spikeTime - currentFrameTime) / _transition;
+                alpha = std::min(std::max(0.f, alpha), 1.f);
+                _frameData[gid] = DEFAULT_REST_VALUE * alpha +
+                                  DEFAULT_SPIKING_VALUE * (1.f - alpha);
+            }
+            // Spike in the past - start fading
+            else if(spikeTime < currentFrameTime)
+            {
+                auto alpha = (currentFrameTime - spikeTime) / _transition;
+                alpha = std::min(std::max(0.f, alpha), 1.f);
+                _frameData[gid] = DEFAULT_REST_VALUE * alpha +
+                                  DEFAULT_SPIKING_VALUE * (1.f - alpha);
+            }
+            // Spiking neuron
             else
-                _frameData[i] = DEFAULT_REST_VALUE;
+                _frameData[_gidMap[gid]] = DEFAULT_SPIKING_VALUE;
         }
-
-        const float ts = boundedFrame * _dt;
-        const float endTime = _spikeReport->getEndTime() - _dt;
-        const auto& spikes =
-            _spikeReport->getSpikes(std::min(ts, endTime),
-                                    std::min(ts + 1.f, endTime));
-
-        for (const auto spike : spikes)
-            _frameData[_gidMap[spike.second]] = DEFAULT_SPIKING_VALUE;
-
         _currentFrame = boundedFrame;
     }
 

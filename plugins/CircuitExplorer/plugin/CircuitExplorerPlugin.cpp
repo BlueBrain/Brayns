@@ -1589,9 +1589,9 @@ brayns::Message CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& par
 {
     brayns::Message result;
 
-    bool ffmpegError = _createMediaFile(params, result);
+    bool ffmpegSucessful = _createMediaFile(params, result);
     
-    if (!ffmpegError && params.eraseFrames)
+    if (ffmpegSucessful && params.eraseFrames)
     {
         std::string sanitizedFramesFolder = params.framesFolderPath;
         const std::string slash =

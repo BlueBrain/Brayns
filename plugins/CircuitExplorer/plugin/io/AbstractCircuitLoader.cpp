@@ -244,10 +244,13 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
     case ReportType::spikes:
     {
         const auto &spikeReport = blueConfiguration.getSpikeSource();
+        const auto transitionTime = properties.getProperty<double>
+                (PROP_SPIKE_TRANSITION_TIME.name);
         PLUGIN_INFO << "Spike report: " << spikeReport << std::endl;
         auto handler =
             std::make_shared<SpikeSimulationHandler>(spikeReport.getPath(),
-                                                     gids);
+                                                     gids,
+                                                     static_cast<float>(transitionTime));
         model.setSimulationHandler(handler);
         simulationHandler = handler;
         setSimulationTransferFunction(model.getTransferFunction());
