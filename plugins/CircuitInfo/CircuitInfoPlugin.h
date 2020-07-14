@@ -45,6 +45,7 @@ private:
 
     ReportList _getReportList(const ReportListRequest& request);
     ReportInfo _getReportInfo(const ReportInfoRequest& request);
+    SpikeReportInfo _getSpikeReportInfo(const SpikeReportRequest& request);
 
     TargetList _getTargetList(const TargetListRequest& request);
 
