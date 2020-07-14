@@ -34,7 +34,8 @@ class SpikeSimulationHandler : public brayns::AbstractSimulationHandler
 {
 public:
     SpikeSimulationHandler(const std::string& reportPath,
-                           const brain::GIDSet& gids);
+                           const brain::GIDSet& gids,
+                           const float transitionTime = 0.5f);
     SpikeSimulationHandler(const SpikeSimulationHandler& rhs);
 
     void* getFrameData(const uint32_t frame) final;
@@ -47,6 +48,7 @@ public:
 private:
     std::string _reportPath;
     brain::GIDSet _gids;
+    float _transition;
     SpikeReportReaderPtr _spikeReport;
 
     std::map<uint64_t, uint64_t> _gidMap;
