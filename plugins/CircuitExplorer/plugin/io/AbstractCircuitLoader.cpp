@@ -206,10 +206,6 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
     const auto userDataType = stringToEnum<UserDataType>(
         properties.getProperty<std::string>(PROP_USER_DATA_TYPE.name));
 
-    if (report.empty() && (userDataType == UserDataType::simulation_offset ||
-                           userDataType == UserDataType::undefined))
-        return nullptr;
-
     const auto dbConnectionString =
         properties.getProperty<std::string>(PROP_DB_CONNECTION_STRING.name);
     const auto synchronousMode =
@@ -220,6 +216,10 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
     {
     case ReportType::voltages_from_file:
     {
+        if (report.empty() && (userDataType == UserDataType::simulation_offset ||
+                               userDataType == UserDataType::undefined))
+            return nullptr;
+
         PLUGIN_INFO << "Loading simulation data in "
                     << (synchronousMode ? "a" : "") << "synchronous mode"
                     << std::endl;
