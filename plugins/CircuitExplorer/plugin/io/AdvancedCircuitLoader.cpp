@@ -64,6 +64,7 @@ brayns::PropertyMap AdvancedCircuitLoader::getCLIProperties()
     pm.setProperty(PROP_DENSITY);
     pm.setProperty(PROP_REPORT);
     pm.setProperty(PROP_REPORT_TYPE);
+    pm.setProperty(PROP_SPIKE_TRANSITION_TIME);
     pm.setProperty(PROP_SYNCHRONOUS_MODE);
     pm.setProperty(PROP_TARGETS);
     pm.setProperty(PROP_GIDS);
