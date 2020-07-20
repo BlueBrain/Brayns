@@ -178,6 +178,7 @@ class CircuitExplorer:
         props['021ReportType'] = report_type
         props['022UserDataType'] = user_data_type
         props['023SynchronousMode'] = synchronous_mode
+        props['024SpikeTransitionTime'] = 1.0
 
         props['030CircuitColorScheme'] = circuit_color_scheme
 

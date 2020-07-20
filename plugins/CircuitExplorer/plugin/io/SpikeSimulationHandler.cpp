@@ -64,7 +64,7 @@ SpikeSimulationHandler::SpikeSimulationHandler(const std::string& reportPath,
                 << std::endl;
     PLUGIN_INFO << "Time interval         : " << DEFAULT_TIME_INTERVAL
                 << std::endl;
-    PLUGIN_INFO << "Decay speed           : " << DEFAULT_DECAY_SPEED
+    PLUGIN_INFO << "Transition time       : " << _transition
                 << std::endl;
     PLUGIN_INFO << "Number of frames      : " << _nbFrames << std::endl;
     PLUGIN_INFO << "-----------------------------------------------------------"
