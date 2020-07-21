@@ -50,6 +50,7 @@ public:
 private:
     void _updateStreamlines(const StreamlinesDescriptor &);
     void _updateSpikeSimulation(const SpikeSimulationDescriptor &);
+    void _updateSpikeSimulationFromFile(const SpikeSimulationFromFile&);
     void _updateSpikeSimulation();
     void _updateSimulationFrame();
 
