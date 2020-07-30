@@ -707,6 +707,7 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
         const brayns::ModelInstance instance(true, false, tf);
         modelDescriptor->addInstance(instance);
     }
+    PLUGIN_INFO << transformations.size() << " instance(s) loaded" << std::endl;
     return modelDescriptor;
 }
 

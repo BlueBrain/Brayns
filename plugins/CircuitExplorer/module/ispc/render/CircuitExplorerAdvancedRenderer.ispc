@@ -158,8 +158,8 @@ inline bool launchRandomRay(
 inline void indirectShading(
     const uniform CircuitExplorerAdvancedRenderer* uniform self,
     varying ScreenSample& sample, const varying vec3f& intersection,
-    const varying vec3f& normal, varying vec3f& indirectShadingColor,
-    varying float& indirectShadingPower)
+    const varying vec3f& normal, varying vec3f& indirectColor,
+    varying float& indirectIntensity)
 {
     if (self->giSamples == 0)
         return;
@@ -169,6 +169,7 @@ inline void indirectShading(
 
     float shadingPower = 0.f;
     vec3f shadingColor = make_vec3f(0.f);
+    uint32 counter = 1;
 
     for (uint32 i = 0; i < self->giSamples; ++i)
     {
@@ -202,6 +203,8 @@ inline void indirectShading(
                         }
                         else
                             shadingPower = shadingPower + mat->a;
+
+                        ++counter;
                     }
                 }
         }
@@ -209,13 +212,12 @@ inline void indirectShading(
         {
             shadingColor = shadingColor + backgroundColor;
             shadingPower = shadingPower + DEFAULT_SKY_POWER;
+            ++counter;
         }
     }
 
-    indirectShadingColor =
-        indirectShadingColor + shadingColor / (float)(self->giSamples);
-    indirectShadingPower = self->giStrength * indirectShadingPower +
-                           shadingPower / (float)(self->giSamples);
+    indirectColor = indirectColor + shadingColor / (float)(counter);
+    indirectIntensity = indirectIntensity + shadingPower / (float)(counter);
 }
 
 inline float getVolumeShadowContribution(
@@ -404,7 +406,7 @@ inline vec4f getVolumeContribution(
         {
             // Compute ambient occlusion contribution
             vec3f indirectColor;
-            float indirectIntensity;
+            float indirectIntensity = 1.f;
             indirectShading(self, sample, point, gradient, indirectColor,
                             indirectIntensity);
             volumeSampleColor = volumeSampleColor + sampleOpacity *
@@ -543,6 +545,9 @@ inline void initializeShadingAttributes(
 {
     attributes.self = self;
     attributes.dg = 0;
+
+    // Background color
+    attributes.bgColor = make_vec4f(0.f);
 
     // Final contribution
     attributes.finalContribution = make_vec3f(0.f);
@@ -893,7 +898,8 @@ inline void processElectronShading(varying ScreenSample& sample,
 {
     const vec3f viewer = normalize(sample.ray.org - attributes.origin);
     const float el = max(0.f, dot(viewer, attributes.normal));
-    const float cosNL = 1.f - pow(el, attributes.userParameter);
+    //    const float cosNL = 1.f - pow(el, attributes.userParameter);
+    const float cosNL = pow(el, attributes.userParameter);
     attributes.shadingContribution = cosNL * attributes.diffuseColor;
     attributes.simulationColor = cosNL * attributes.simulationColor;
     attributes.specularColor = make_vec3f(0.f);
@@ -995,17 +1001,19 @@ inline void processFinalContribution(ShadingAttributes& attributes)
             (1.f - attributes.simulationIntensity) +
         attributes.specularColor;
 
-    // Indirect light contribution
-    totalContributions = totalContributions + attributes.indirectColor *
-                                                  attributes.indirectIntensity;
-
     // Shadow contribution
     totalContributions =
         totalContributions * make_vec3f(1.f - attributes.shadowIntensity);
 
+    // Indirect light contribution
+    totalContributions =
+        totalContributions +
+        attributes.self->giStrength *
+            (attributes.indirectColor * attributes.indirectIntensity);
+
     // Light emission contribution
     totalContributions =
-        make_vec3f(totalContributions) +
+        totalContributions +
         attributes.lightEmissionIntensity * attributes.lightEmissionColor;
 
     // Volume contribution
@@ -1049,8 +1057,11 @@ inline vec3f CircuitExplorerAdvancedRenderer_shadeRay(
         float firstIntersection = inf;
 
         // Background contribution
-        processBackgroundColor(sample, ray, attributes);
-        bgColor = make_vec3f(attributes.bgColor);
+        if (depth > 0)
+        {
+            processBackgroundColor(sample, ray, attributes);
+            bgColor = make_vec3f(attributes.bgColor);
+        }
 
         // Trace ray
         traceRay(self->super.super.super.model, ray);

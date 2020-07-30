@@ -111,7 +111,6 @@ ModelDescriptor& ModelDescriptor::operator=(const ModelParams& rhs)
 
 #if 0 // WTF ?!?
     // Transformation
-    std::cout << rhs.getTransformation().getTranslation() << std::endl;
     const auto oldRotationCenter = _transformation.getRotationCenter();
     const auto newRotationCenter = rhs.getTransformation().getRotationCenter();
     _updateValue(_transformation, rhs.getTransformation());
