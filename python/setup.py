@@ -5,6 +5,7 @@
 #                          Raphael Dumusc <raphael.dumusc@epfl.ch>
 #                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
 #                          Cyrille Favreau <cyrille.favreau@epfl.ch>
+#                          Nadir Roman <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -29,33 +30,17 @@ import pkg_resources
 import setuptools
 from setuptools import find_packages, setup
 
-#try: # for pip >= 10
-#    from pip._internal.req import parse_requirements
-#    from pip._internal.download import PipSession
-#except ImportError: # for pip <= 9.0.3
-#    from pip.req import parse_requirements
-#    from pip.download import PipSession
-#from optparse import Option
-
 BASEDIR = os.path.dirname(os.path.abspath(__file__))
 
-
-#def parse_reqs(reqs_file):
-#    ''' parse the requirements '''
-#    options = Option("--workaround")
-#    options.skip_requirements_regex = None
-#    options.isolated_mode = True
-#    install_reqs = parse_requirements(reqs_file, options=options, session=PipSession())
-#    return [str(ir.req) for ir in install_reqs]
 
 def parse_reqs(reqs_file):
     ''' parse the requirements '''
     install_reqs = list()
     with pathlib.Path(reqs_file).open() as requirements_txt:
-      install_reqs = [  str(requirement) 
-                        for requirement 
+        install_reqs = [str(requirement)
+                        for requirement
                         in pkg_resources.parse_requirements(requirements_txt)]
-   
+
     return install_reqs
 
 REQS = parse_reqs(os.path.join(BASEDIR, "requirements.txt"))
@@ -68,6 +53,13 @@ with open(os.path.join(this_directory, 'README.md')) as f:
 setup(
     packages=find_packages(),
     install_requires=REQS,
+    description="The Brayns renderer python API",
     long_description=long_description,
-    long_description_content_type='text/markdown'
+    long_description_content_type='text/markdown',
+    url='https://github.com/BlueBrain/Brayns',
+    download_url='https://github.com/BlueBrain/Brayns',
+    project_urls={
+            "Tracker": "https://bbpteam.epfl.ch/project/issues/projects/BRAYNS/issues",
+            "Source": "https://github.com/BlueBrain/Brayns",
+    }
 )

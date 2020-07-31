@@ -304,7 +304,7 @@ brayns::Message FluorescencePlugin::_addFluorescentVolume(const AddFluorescentVo
 
     metaObject.setProperty({"epsilon", req.epsilon});
     metaObject.setProperty({"c", req.c});
-    metaObject.setProperty({"yield", req.yield});
+    metaObject.setProperty({"yield", req.yieldV});
     metaObject.setProperty({"gf", req.gf});
 
     auto modelPtr = _api->getScene().createModel();
@@ -413,7 +413,7 @@ FluorescencePlugin::_addFluorescentBinaryVolume(const AddFluorescentBinaryVolume
 
     metaObject.setProperty({"epsilon", req.epsilon});
     metaObject.setProperty({"c", req.c});
-    metaObject.setProperty({"yield", req.yield});
+    metaObject.setProperty({"yield", req.yieldV});
     metaObject.setProperty({"gf", req.gf});
     metaObject.setProperty({"prefix", req.prefix});
 
@@ -458,7 +458,7 @@ FluorescencePlugin::_addFluorescentGridVolumeFromFile(const AddFluorescentGridFr
 
     metaObject.setProperty({"epsilon", req.epsilon});
     metaObject.setProperty({"c", req.c});
-    metaObject.setProperty({"yield", req.yield});
+    metaObject.setProperty({"yield", req.yieldV});
     metaObject.setProperty({"gf", req.gf});
     metaObject.setProperty({"prefix", req.prefix});
 
@@ -508,7 +508,7 @@ brayns::Message FluorescencePlugin::_addFluorescentGridVolume(const AddFluoresce
 
     metaObject.setProperty({"epsilon", req.epsilon});
     metaObject.setProperty({"c", req.c});
-    metaObject.setProperty({"yield", req.yield});
+    metaObject.setProperty({"yield", req.yieldV});
     metaObject.setProperty({"gf", req.gf});
     metaObject.setProperty({"density", req.density});
     metaObject.setProperty({"nx", req.nx});
@@ -578,7 +578,7 @@ FluorescencePlugin::_addFluorescentScatteringVolume(const AddFluorescentScatteri
     metaObject.setProperty({"mweight", req.mweight});
     metaObject.setProperty({"epsilon", req.epsilon});
     metaObject.setProperty({"c", req.c});
-    metaObject.setProperty({"yield", req.yield});
+    metaObject.setProperty({"yield", req.yieldV});
     metaObject.setProperty({"sscale", req.sscale});
     metaObject.setProperty({"fscale", req.fscale});
     metaObject.setProperty({"g", req.g});
@@ -656,7 +656,7 @@ FluorescencePlugin::_addFluorescentScatteringGridVolume(
     metaObject.setProperty({"mweight", static_cast<double>(req.mweight)});
     metaObject.setProperty({"epsilon", static_cast<double>(req.epsilon)});
     metaObject.setProperty({"c", static_cast<double>(req.c)});
-    metaObject.setProperty({"yield", static_cast<double>(req.yield)});
+    metaObject.setProperty({"yield", static_cast<double>(req.yieldV)});
     metaObject.setProperty({"sscale", static_cast<double>(req.sscale)});
     metaObject.setProperty({"fscale", static_cast<double>(req.fscale)});
     metaObject.setProperty({"g", static_cast<double>(req.g)});
@@ -730,7 +730,7 @@ FluorescencePlugin::_addFluorescentScatteringGridVolumeFromFile(
     metaObject.setProperty({"mweight", req.mweight});
     metaObject.setProperty({"epsilon", req.epsilon});
     metaObject.setProperty({"c", req.c});
-    metaObject.setProperty({"yield", req.yield});
+    metaObject.setProperty({"yield", req.yieldV});
     metaObject.setProperty({"sscale", req.sscale});
     metaObject.setProperty({"fscale", req.fscale});
     metaObject.setProperty({"g", req.g});
