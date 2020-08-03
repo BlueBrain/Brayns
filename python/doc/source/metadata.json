@@ -12,5 +12,6 @@
     "bugs": {
       "url": "https://github.com/BlueBrain/Brayns/issues"
     },
-    "homepage": "https://github.com/BlueBrain/Brayns"
+    "homepage": "https://github.com/BlueBrain/Brayns",
+    "contributors":["Daniel Nachbaur", "Cyrille Favreau", "Jonas Karlsson", "Roland Groza", "Nadir Roman", "Grigori Chevtchenko", "Pawel Podhajski", "Adrien Devresse", "Sebastien Speierer", "Fabien Petitjean"]
   }
