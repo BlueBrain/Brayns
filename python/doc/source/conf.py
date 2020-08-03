@@ -20,6 +20,8 @@ from version import VERSION
 from os import path
 sys.path.insert(0, path.dirname(path.dirname(path.abspath('../python'))))
 
+print(VERSION)
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
