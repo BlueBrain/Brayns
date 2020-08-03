@@ -70,7 +70,7 @@ lint: run_pycodestyle run_pydocstyle run_pylint
 test: lint run_tests
 
 doc: $(VENV_INSTALLED)
-	make SPHINXBUILD=$(VENV_BIN)/sphinx-build -C doc html
+	$(VENV_BIN)/sphinx-build -b html -d $(ROOT_DIR)/sphinx/doctrees -T $(ROOT_DIR)/doc/source sphinx/html
 
 doc_pdf: $(VENV_INSTALLED)
 	make SPHINXBUILD=$(VENV_BIN)/sphinx-build -C doc latexpdf

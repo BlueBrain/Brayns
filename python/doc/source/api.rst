@@ -1,8 +1,12 @@
 Python API
-==================================
+==========
 
 .. toctree::
-   :maxdepth: 3
+   :hidden:
 
-.. automodule:: brayns
-   :members:
+   api_core
+   api_circuitexplorer
+   api_circuitinfo
+   api_dti
+   api_fluorescence
+   api_pbrvolumes

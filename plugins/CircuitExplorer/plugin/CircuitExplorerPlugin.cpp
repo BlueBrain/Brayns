@@ -1777,13 +1777,13 @@ void CircuitExplorerPlugin::_createShapeMaterial(brayns::ModelPtr& model,
     brayns::MaterialPtr mptr = model->createMaterial(id, std::to_string(id));
     mptr->setDiffuseColor(color);
     mptr->setOpacity(opacity);
-    mptr->setSpecularExponent(0.0);
+    mptr->setSpecularExponent(20.0);
 
     brayns::PropertyMap props;
     props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, false});
     props.setProperty(
         {MATERIAL_PROPERTY_SHADING_MODE,
-         static_cast<int>(MaterialShadingMode::diffuse_transparency)});
+         static_cast<int>(MaterialShadingMode::diffuse)});
     props.setProperty({MATERIAL_PROPERTY_CLIPPING_MODE,
                        static_cast<int>(MaterialClippingMode::no_clipping)});
 

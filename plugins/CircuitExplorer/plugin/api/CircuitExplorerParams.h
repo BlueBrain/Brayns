@@ -351,19 +351,19 @@ struct MakeMovieParameters : public brayns::Message
                                                 " Must include filename and extension")
     MESSAGE_ENTRY(bool, eraseFrames, "Wether to clean up the frame image files after generating"
                                      " the video file")
-    MESSAGE_ENTRY(std::vector<std::string>, layers, "List of layer names to compose in the video")
+    MESSAGE_ENTRY(std::vector<std::string>, layers, "List of layer names to compose in the video. Layer name \"movie\" must be always present")
 };
 
 struct AddGrid : public brayns::Message
 {
     MESSAGE_BEGIN(AddGrid)
-    MESSAGE_ENTRY(double, minValue, "")
-    MESSAGE_ENTRY(double, maxValue, "")
-    MESSAGE_ENTRY(double, steps, "")
-    MESSAGE_ENTRY(double, radius, "")
+    MESSAGE_ENTRY(double, minValue, "Negative square grid length from world origin")
+    MESSAGE_ENTRY(double, maxValue, "Positive square grid length from world origin")
+    MESSAGE_ENTRY(double, steps, "Number of divisions")
+    MESSAGE_ENTRY(double, radius, "Radius of the cylinder that will be placed at each cell")
     MESSAGE_ENTRY(double, planeOpacity, "Opacity of the grid mesh material")
     MESSAGE_ENTRY(bool, showAxis, "Wether to show a world aligned axis")
-    MESSAGE_ENTRY(bool, useColors, "")
+    MESSAGE_ENTRY(bool, useColors, "Use colors on the grid axes")
 };
 
 struct AddColumn : public brayns::Message

@@ -1,10 +1,12 @@
+.. _examples-label:
+
 Examples
 ========
 
-Find some common use-cases as examples below how to interact with Brayns from python.
-
 .. toctree::
-   :maxdepth: 2
+   :hidden:
 
-   snapshot.ipynb
-   load_model.ipynb
+   example_get_desired_camera_view
+   example_load_circuit_spike_report
+   example_load_full_morphologies_and_somas_only
+   example_record_simulation_compartment_report

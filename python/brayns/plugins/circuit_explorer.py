@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2016-2019, Blue Brain Project
@@ -86,73 +86,97 @@ class CircuitExplorer:
     def load_circuit(self, path, name='Circuit', density=100.0, gids=list(),
                      random_seed=0, targets=list(), report='',
                      report_type=REPORT_TYPE_VOLTAGES_FROM_FILE,
-                     user_data_type=USER_DATATYPE_SIMULATION_OFFSET, synchronous_mode=True,
-                     circuit_color_scheme=CIRCUIT_COLOR_SCHEME_NONE, mesh_folder='',
-                     mesh_filename_pattern='', mesh_transformation=False, radius_multiplier=1,
-                     radius_correction=0, load_soma=True, load_axon=True, load_dendrite=True,
-                     load_apical_dendrite=True, use_sdf=False,
-                     dampen_branch_thickness_changerate=True, use_metaballs_for_soma=False,
-                     metaballs_section_samples=5, metaballs_grid_size=20, metaballs_threshold=1,
+                     user_data_type=USER_DATATYPE_SIMULATION_OFFSET,
+                     synchronous_mode=True,
+                     circuit_color_scheme=CIRCUIT_COLOR_SCHEME_NONE,
+                     mesh_folder='', mesh_filename_pattern='',
+                     mesh_transformation=False, radius_multiplier=1,
+                     radius_correction=0, load_soma=True, load_axon=True,
+                     load_dendrite=True, load_apical_dendrite=True,
+                     use_sdf=False, dampen_branch_thickness_changerate=True,
+                     use_metaballs_for_soma=False,
+                     metaballs_section_samples=5, metaballs_grid_size=20,
+                     metaballs_threshold=1,
                      morphology_color_scheme=MORPHOLOGY_COLOR_SCHEME_NONE,
-                     morphology_quality=GEOMETRY_QUALITY_HIGH, max_distance_to_soma=1e6,
-                     cell_clipping=False, load_afferent_synapses=False,
-                     load_efferent_synapses=False,
-                     synapse_radius=0.0):
+                     morphology_quality=GEOMETRY_QUALITY_HIGH,
+                     max_distance_to_soma=1e6, cell_clipping=False,
+                     load_afferent_synapses=False,
+                     load_efferent_synapses=False, synapse_radius=0.0):
         """
-        Load a circuit from a give Blue/Circuit configuration file
+        Load a circuit from a give Blue/Circuit configuration file.
 
-        :param str path: Path to the CircuitConfig or BlueConfig configuration file
-        :param str name: Name of the model
-        :param float density: Circuit density (Value between 0 and 100)
-        :param list gids: List of GIDs to load
-        :param int random_seed: Random seed used if circuit density is different from 100
-        :param list targets: List of targets to load
-        :param str report: Name of the simulation report, if applicable
-        :param int report_type: Report type (REPORT_TYPE_NONE, REPORT_TYPE_VOLTAGES_FROM_FILE,
-        REPORT_TYPE_SPIKES)
-        :param int user_data_type: Type of data mapped to the neuron surface (USER_DATATYPE_NONE,
-        USER_DATATYPE_SIMULATION_OFFSET, USER_DATATYPE_DISTANCE_TO_SOMA)
-        :param bool synchronous_mode: Defines if the simulation report should be loaded
-        synchronously or not
+        :param str path: Path to the CircuitConfig or BlueConfig configuration
+               file.
+        :param str name: Name of the model.
+        :param float density: Circuit density (Value between 0 and 100).
+        :param list gids: List of GIDs to load.
+        :param int random_seed: Random seed used if circuit density is
+             different from 100.
+        :param list targets: List of targets to load.
+        :param str report: Name of the simulation report, if applicable.
+        :param int report_type: Report type (REPORT_TYPE_NONE,
+            REPORT_TYPE_VOLTAGES_FROM_FILE, REPORT_TYPE_SPIKES).
+        :param int user_data_type: Type of data mapped to the neuron surface
+            (USER_DATATYPE_NONE, USER_DATATYPE_SIMULATION_OFFSET,
+            USER_DATATYPE_DISTANCE_TO_SOMA).
+        :param bool synchronous_mode: Defines if the simulation report should
+            be loaded synchronously or not.
         :param int circuit_color_scheme: Color scheme to apply to the circuit (
-        CIRCUIT_COLOR_SCHEME_NONE, CIRCUIT_COLOR_SCHEME_NEURON_BY_ID,
-        CIRCUIT_COLOR_SCHEME_NEURON_BY_LAYER, CIRCUIT_COLOR_SCHEME_NEURON_BY_MTYPE,
-        CIRCUIT_COLOR_SCHEME_NEURON_BY_ETYPE, CIRCUIT_COLOR_SCHEME_NEURON_BY_TARGET)
-        :param str mesh_folder: Folder containing meshes (if applicable)
-        :param str mesh_filename_pattern: Filename pattern used to load the meshes ({guid} is
-        replaced by the correponding GID during the loading of the circuit. e.g. mesh_{gid}.obj)
-        :param bool mesh_transformation: Boolean defining is circuit transformation should be
-        applied to the meshes
-        :param float radius_multiplier: Multiplies morphology radius by the specified value
-        :param float radius_correction: Forces morphology radii to the specified value
-        :param bool load_soma: Defines if the somas should be loaded
-        :param bool load_axon: Defines if the axons should be loaded
-        :param bool load_dendrite: Defines if the dendrites should be loaded
-        :param bool load_apical_dendrite: Defines if the apical dendrites should be loaded
-        :param bool use_sdf: Defines if signed distance field geometries should be used
-        :param bool dampen_branch_thickness_changerate: Defines if the dampen branch
-        thicknesschangerate option should be used (Only application is use_sdf is True)
-        :param bool use_metaballs_for_soma: Defines if metaballs should be used to build the soma
-        :param int metaballs_section_samples: Defines how many sections from the soma should be used
-        to build the soma with metaballs (Only application if use_metaballs_for_soma is True)
-        :param int metaballs_grid_size: Defines the size of grid to build the soma with metaballs (
-        Only application if use_metaballs_for_soma is True)
-        :param float metaballs_threshold: Defines the threshold to build the soma with metaballs (
-        Only application if use_metaballs_for_soma is True)
-        :param int morphology_color_scheme: Defines the color scheme to apply to the morphologies (
-        MORPHOLOGY_COLOR_SCHEME_NONE, MORPHOLOGY_COLOR_SCHEME_BY_SECTION_TYPE)
-        :param int morphology_quality: Defines the level of quality for each geometry (
-        GEOMETRY_QUALITY_LOW, GEOMETRY_QUALITY_MEDIUM, GEOMETRY_QUALITY_HIGH)
-        :param float max_distance_to_soma: Defines the maximum distance to the soma for section/
-        segment loading (This is used by the growing neurons use-case)
-        :param bool cell_clipping: Only load cells that are in the clipped region defined at the
-        scene level
-        :param bool load_afferent_synapses: Load afferent synapses
-        :param bool load_efferent_synapses: Load efferent synapses
-        :param float synapse_radius: Synapse radius
-        :return: Result of the request submission
-        :rtype: str
+            CIRCUIT_COLOR_SCHEME_NONE, CIRCUIT_COLOR_SCHEME_NEURON_BY_ID,
+            CIRCUIT_COLOR_SCHEME_NEURON_BY_LAYER,
+            CIRCUIT_COLOR_SCHEME_NEURON_BY_MTYPE,
+            CIRCUIT_COLOR_SCHEME_NEURON_BY_ETYPE,
+            CIRCUIT_COLOR_SCHEME_NEURON_BY_TARGET).
+        :param str mesh_folder: Folder containing meshes (if applicable).
+        :param str mesh_filename_pattern: Filename pattern used to load the
+            meshes ({guid} is replaced by the correponding GID during the
+            loading of the circuit. e.g. mesh_{gid}.obj).
+        :param bool mesh_transformation: Boolean defining is circuit
+            transformation should be applied to the meshes.
+        :param float radius_multiplier: Multiplies morphology radius by the
+            specified value.
+        :param float radius_correction: Forces morphology radii to the
+            specified value.
+        :param bool load_soma: Defines if the somas should be loaded.
+        :param bool load_axon: Defines if the axons should be loaded.
+        :param bool load_dendrite: Defines if the dendrites should be loaded.
+        :param bool load_apical_dendrite: Defines if the apical dendrites
+            should be loaded.
+        :param bool use_sdf: Defines if signed distance field geometries
+            should be used.
+        :param bool dampen_branch_thickness_changerate: Defines if the dampen
+            branch thickness change rate option should be used (Only
+            application is use_sdf is True).
+        :param bool use_metaballs_for_soma: Defines if metaballs should be
+            used to build the soma.
+        :param int metaballs_section_samples: Defines how many sections from
+            the soma should be used to build the soma with metaballs (Only
+            application if use_metaballs_for_soma is True).
+        :param int metaballs_grid_size: Defines the size of grid to build the
+            soma with metaballs (Only application if use_metaballs_for_soma is
+            True).
+        :param float metaballs_threshold: Defines the threshold to build the
+            soma with metaballs (Only application if use_metaballs_for_soma is
+            True).
+        :param int morphology_color_scheme: Defines the color scheme to apply
+            to the morphologies (MORPHOLOGY_COLOR_SCHEME_NONE,
+            MORPHOLOGY_COLOR_SCHEME_BY_SECTION_TYPE).
+        :param int morphology_quality: Defines the level of quality for each
+            geometry (GEOMETRY_QUALITY_LOW, GEOMETRY_QUALITY_MEDIUM,
+            GEOMETRY_QUALITY_HIGH).
+        :param float max_distance_to_soma: Defines the maximum distance to the
+            soma for section/segment loading (This is used by the growing
+            neurons use-case).
+        :param bool cell_clipping: Only load cells that are in the clipped
+            region defined at the scene level.
+        :param bool load_afferent_synapses: Load afferent synapses.
+        :param bool load_efferent_synapses: Load efferent synapses.
+        :param float synapse_radius: Synapse radius.
+
+        :return: Model metadata if successful.
+        :rtype: dict
         """
+
         props = dict()
         props['000DbConnectionString'] = ''  # Currently not used
         props['001Density'] = density / 100.0
@@ -178,6 +202,7 @@ class CircuitExplorer:
         props['021ReportType'] = report_type
         props['022UserDataType'] = user_data_type
         props['023SynchronousMode'] = synchronous_mode
+        props['024SpikeTransitionTime'] = 1.0
 
         props['030CircuitColorScheme'] = circuit_color_scheme
 
@@ -510,9 +535,9 @@ class CircuitExplorer:
         """
         Queries the progress of the last export of frames to disk request
 
-        :return: Dictionary with the result: "frameNumber" with the number of
-        the last written-to-disk frame, and "done", a boolean flag stating wether
-        the exporting is finished or is still in progress
+        :return: Dictionary with the result: "progress" with the normalized
+            progress of the frame export. 1.0 or higher value means the export
+            has finished.
         :rtype: dict
         """
         return self._client.request('get-export-frames-progress',
@@ -571,14 +596,14 @@ class CircuitExplorer:
         """
         Stain the cells based on their synapses
 
-        :param int model_id ID of the model to trace
-        :param list source_cells_gid list of cell GIDs as source of the connections
-        :param list target_cells_gid list of cell GIDs connected to the source(s)
-        :param source_cell_color RGBA 4 floating point list as color for source cells
-        :param target_cell_color RGBA 4 floating point list as color for target cells
-        :param non_connected_color RGBA 4 floating point list as color for non connected cells
-        :return Result of the request submission as a dictionary {error:int, message:string}
-        :rtype dict
+        :param int model_id: ID of the model to trace
+        :param list source_cells_gid: list of cell GIDs as source of the connections
+        :param list target_cells_gid: list of cell GIDs connected to the source(s)
+        :param list source_cell_color: RGBA 4 floating point list as color for source cells
+        :param list target_cell_color: RGBA 4 floating point list as color for target cells
+        :param list non_connected_color: RGBA 4 floating point list as color for non connected cells
+        :return: Result of the request submission as a dictionary {error:int, message:string}
+        :rtype: dict
         """
         params = dict()
         params['modelId'] = model_id
