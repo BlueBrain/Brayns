@@ -111,7 +111,8 @@ html_theme = 'sphinx-bluebrain-theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    "metadata_distribution": "brayns"
+    "metadata_distribution": "brayns",
+    "metadata_file": "metadata.json"
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
