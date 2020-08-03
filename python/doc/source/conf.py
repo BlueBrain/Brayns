@@ -15,12 +15,10 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../../brayns'))
 
-from version import VERSION
+from version import MINIMAL_VERSION
 
 from os import path
 sys.path.insert(0, path.dirname(path.dirname(path.abspath('../python'))))
-
-print(VERSION)
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -61,7 +59,7 @@ project = u'Brayns'
 # built documents.
 #
 # The short X.Y version.
-version = VERSION
+version = MINIMAL_VERSION
 # The full version, including alpha/beta/rc tags.
 release = version
 
