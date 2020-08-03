@@ -36,8 +36,7 @@ Once we have access WebBrayns, we will see a screen like this:
    :align: center
 
 By clicking on ``LOAD MODEL`` (1), we will access the loading system. We will be presented with
-WebBrayns file browser. On it, we have to navigate to the directory containing the model/CircuitConfig/
-BlueConfig:
+WebBrayns file browser. On it, we have to navigate to the directory containing the model/CircuitConfig/BlueConfig:
 
 .. image:: _static/found_circuitconfig.png
    :width: 100%

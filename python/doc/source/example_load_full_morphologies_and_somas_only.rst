@@ -41,7 +41,7 @@ Gather GIDs information
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Brayns cannot load a circuit with different morphology configuration. This means that
-we will actually load the circuit twize: One for the targets with full morpholgies, and
+we will actually load the circuit twice: One for the targets with full morpholgies, and
 another for the rest of the targets with somas only.
 
 To achieve this, we will use the Circuit Info API to:

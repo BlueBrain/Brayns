@@ -60,7 +60,7 @@ characters, for example: ``r2i2n11``. You will need it to connect to the ``brayn
 
 .. code-block:: console
 
-    $ cd /gpfs/bbp.cscs.ch/home/nroman/software/install/linux-rhel7-x86_64/gcc-8.3.0/brayns-latest-s44b7v/bin/braynsService
+    $ cd /gpfs/bbp.cscs.ch/home/nroman/software/install/linux-rhel7-x86_64/gcc-8.3.0/brayns-latest-s44b7v/bin
     $ ./braynsService --http-server :5000 --plugin braynsCircuitExplorer --plugin braynsCircuitInfo --plugin braynsDTI
 
 The last command will launch a Brayns backend service with remote access needed for the python client (``--http-server``)
