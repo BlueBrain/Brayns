@@ -210,11 +210,22 @@ void OptiXScene::commit()
         if (modelDescriptor->getVisible())
         {
             const auto geometryGroup = impl.getGeometryGroup();
-            ::optix::Transform xform = context->createTransform();
-            xform->setMatrix(false, ::optix::Matrix4x4::identity().getData(),
-                             0); // TODO
-            xform->setChild(geometryGroup);
-            _rootGroup->addChild(xform);
+            const auto& instances = modelDescriptor->getInstances();
+            size_t count{0};
+            for (const auto& instance : instances)
+            {
+                auto transformation = instance.getTransformation();
+                if (count == 0)
+                    transformation = modelDescriptor->getTransformation();
+                const ::glm::mat4 matrix = transformation.toMatrix(true);
+                ::optix::Matrix4x4 optixMatrix(glm::value_ptr(matrix));
+                ::optix::Transform xform = context->createTransform();
+                xform->setChild(geometryGroup);
+                xform->setMatrix(true, optixMatrix.getData(),
+                                 optixMatrix.inverse().getData());
+                _rootGroup->addChild(xform);
+                ++count;
+            }
             BRAYNS_DEBUG << "Group has " << geometryGroup->getChildCount()
                          << " children" << std::endl;
         }

@@ -83,25 +83,34 @@ void OptiXModel::commitGeometry()
     size_t nbCylinders = 0;
     size_t nbCones = 0;
     if (_spheresDirty)
+    {
         for (const auto& spheres : _geometries->_spheres)
         {
             nbSpheres += spheres.second.size();
             _commitSpheres(spheres.first);
         }
+        BRAYNS_DEBUG << nbSpheres << " spheres" << std::endl;
+    }
 
     if (_cylindersDirty)
+    {
         for (const auto& cylinders : _geometries->_cylinders)
         {
             nbCylinders += cylinders.second.size();
             _commitCylinders(cylinders.first);
         }
+        BRAYNS_DEBUG << nbCylinders << " cylinders" << std::endl;
+    }
 
     if (_conesDirty)
+    {
         for (const auto& cones : _geometries->_cones)
         {
             nbCones += cones.second.size();
             _commitCones(cones.first);
         }
+        BRAYNS_DEBUG << nbCones << " cones" << std::endl;
+    }
 
     if (_triangleMeshesDirty)
         for (const auto& meshes : _geometries->_triangleMeshes)
@@ -113,9 +122,6 @@ void OptiXModel::commitGeometry()
     // handled by the scene
     _instancesDirty = false;
 
-    BRAYNS_DEBUG << nbSpheres << " spheres" << std::endl;
-    BRAYNS_DEBUG << nbCylinders << " cylinders" << std::endl;
-    BRAYNS_DEBUG << nbCones << " cones" << std::endl;
     BRAYNS_DEBUG << "Geometry group has " << _geometryGroup->getChildCount()
                  << " children instances" << std::endl;
     BRAYNS_DEBUG << "Bounding box group has "

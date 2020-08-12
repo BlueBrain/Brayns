@@ -28,9 +28,9 @@ SERIALIZATION_ACCESS(Transformation)
 namespace brayns
 {
 /**
-* @brief Defines the translation, rotation and scale parameters to be applied
-* to a scene asset.
-*/
+ * @brief Defines the translation, rotation and scale parameters to be applied
+ * to a scene asset.
+ */
 class Transformation : public BaseObject
 {
 public:
@@ -72,8 +72,11 @@ public:
     // only applies rotation and translation, use scaling separately if needed
     Matrix4d toMatrix(bool withScale = false) const
     {
-        Matrix4d matrix = glm::toMat4(getRotation());
-        matrix = glm::translate(matrix, getTranslation());
+        Matrix4d matrix;
+        matrix = matrix * glm::translate(_translation);
+        matrix = matrix * glm::translate(_rotationCenter);
+        matrix = matrix * glm::toMat4(_rotation);
+        matrix = matrix * glm::translate(-1.0 * _rotationCenter);
         if (withScale)
         {
             matrix = glm::scale(matrix, _scale);
@@ -108,4 +111,4 @@ inline Boxd transformBox(const Boxd& box, const Transformation& transformation)
             transformation.toMatrix() * Vector4d(box.getMax(), 1.) *
                 Vector4d(scale, 1.)};
 }
-}
+} // namespace brayns

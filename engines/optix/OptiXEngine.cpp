@@ -148,6 +148,13 @@ void OptiXEngine::_createRenderers()
                 CUDA_ADVANCED_SIMULATION, "closest_hit_radiance_textured");
         osp->any_hit = context.getOptixContext()->createProgramFromPTXString(
             CUDA_ADVANCED_SIMULATION, "any_hit_shadow");
+        // Exception program
+        osp->exception_program =
+            context.getOptixContext()->createProgramFromPTXString(
+                CUDA_ADVANCED_SIMULATION, "exception");
+        context.getOptixContext()->setExceptionProgram(0,
+                                                       osp->exception_program);
+        context.getOptixContext()["bad_color"]->setFloat(1.0f, 0.0f, 0.0f);
 
         context.addRenderer("advanced_simulation", osp);
 
@@ -164,7 +171,7 @@ void OptiXEngine::_createRenderers()
                                 1.,
                                 {"Ambient occlusion strength"}});
         properties.setProperty(
-            {"maxDepth", 10, 0, 20, {"Max ray recursion depth"}});
+            {"maxDepth", 3, 1, 20, {"Max ray recursion depth"}});
 
         addRendererType("advanced_simulation", properties);
     }

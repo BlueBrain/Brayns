@@ -1,7 +1,6 @@
-/* Copyright (c) 2019, EPFL/Blue Brain Project
+/* Copyright (c) 2020, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -24,6 +23,9 @@
 #include <optixu/optixu_math_namespace.h>
 
 using namespace optix;
+
+// System
+rtDeclareVariable(float3, bad_color, , );
 
 // Material attributes
 rtDeclareVariable(float3, Ka, , );
@@ -64,7 +66,7 @@ static __device__ inline void shade(bool textured)
     float3 ffnormal = faceforward(world_shading_normal, -ray.direction,
                                   world_geometric_normal);
 
-    float3 p_Kd;
+    float3 p_Kd = Kd;
     if (simulation_data.size() > 0)
         p_Kd = calcTransferFunctionColor(value_range.x, value_range.y,
                                          simulation_data[simulation_idx],
@@ -72,11 +74,9 @@ static __device__ inline void shade(bool textured)
     else if (textured)
         p_Kd = make_float3(
             optix::rtTex2D<float4>(albedoMetallic_map, texcoord.x, texcoord.y));
-    else
-        p_Kd = Kd;
 
     phongShade(p_Kd, Ka, Ks, Kr, Ko, refraction_index, phong_exp, glossiness,
-               ffnormal, ray.tmax);
+               ffnormal);
 }
 
 RT_PROGRAM void closest_hit_radiance()
@@ -87,4 +87,9 @@ RT_PROGRAM void closest_hit_radiance()
 RT_PROGRAM void closest_hit_radiance_textured()
 {
     shade(true);
+}
+
+RT_PROGRAM void exception()
+{
+    output_buffer[launch_index] = make_color( bad_color );
 }

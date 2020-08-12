@@ -472,6 +472,7 @@ void OSPRayModel::commitMaterials(const std::string& renderer)
             auto& material = *kv.second;
             static_cast<OSPRayMaterial&>(material).commit(renderer);
         }
+
         _renderer = renderer;
 
         for (auto& map : {_ospSpheres, _ospCylinders, _ospCones, _ospMeshes,
@@ -496,6 +497,14 @@ void OSPRayModel::commitMaterials(const std::string& renderer)
                 ospCommit(geomIt->second);
                 ++geomIt;
             }
+        }
+    }
+    else
+    {
+        for (auto kv : _materials)
+        {
+            auto& material = *kv.second;
+            static_cast<OSPRayMaterial&>(material).commit();
         }
     }
 }

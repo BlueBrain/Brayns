@@ -102,7 +102,7 @@ void toOptiXProperties(const brayns::PropertyMap& object)
                      << e.what() << std::endl;
     }
 }
-}
+} // namespace
 
 namespace brayns
 {
@@ -177,7 +177,7 @@ void OptiXRenderer::commit()
     auto context = OptiXContext::get().getOptixContext();
     auto bgColor = _renderingParameters.getBackgroundColor();
     const auto samples_per_pixel = _renderingParameters.getSamplesPerPixel();
-    constexpr auto epsilon = 1.0e-5f;
+    constexpr auto epsilon = 1e-5f;
 
     context["radianceRayType"]->setUint(0);
     context["shadowRayType"]->setUint(1);
@@ -191,7 +191,5 @@ void OptiXRenderer::commit()
     _currentRenderer = _renderingParameters.getCurrentRenderer();
 }
 
-void OptiXRenderer::setCamera(CameraPtr /*camera*/)
-{
-}
+void OptiXRenderer::setCamera(CameraPtr /*camera*/) {}
 } // namespace brayns

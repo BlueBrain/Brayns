@@ -111,7 +111,6 @@ private:
     ::optix::Buffer _volumeBuffer{nullptr};
 
     // Materials and textures
-    std::vector<size_t> _optixMaterialsMap;
     std::map<std::string, optix::Buffer> _optixTextures;
     std::map<std::string, optix::TextureSampler> _optixTextureSamplers;
 

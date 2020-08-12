@@ -45,6 +45,7 @@ struct OptixShaderProgram
     ::optix::Program any_hit{nullptr};
     ::optix::Program closest_hit{nullptr};
     ::optix::Program closest_hit_textured{nullptr};
+    ::optix::Program exception_program{nullptr};
 };
 
 using OptiXShaderProgramPtr = std::shared_ptr<OptixShaderProgram>;

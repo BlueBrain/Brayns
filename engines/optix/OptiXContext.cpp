@@ -114,7 +114,7 @@ RTwrapmode wrapModeToOptix(const brayns::TextureWrapMode mode)
                                      std::string(#func) + "'");    \
     } while (0)
 
-constexpr size_t OPTIX_STACK_SIZE = 1024;
+constexpr size_t OPTIX_STACK_SIZE = 4096;
 constexpr size_t OPTIX_RAY_TYPE_COUNT = 2;
 constexpr size_t OPTIX_ENTRY_POINT_COUNT = 1;
 
