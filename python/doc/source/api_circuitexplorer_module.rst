@@ -27,7 +27,7 @@ using the following parameter:
 
     --plugin braynsCircuitExplorer
 
-The module exopses the following API.
+The module exposes the following API.
 
 ----
 

@@ -11,8 +11,15 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import os
 import sys
-from brayns.version import VERSION
+sys.path.insert(0, os.path.abspath('../../brayns'))
+
+from version import MINIMAL_VERSION
+
+from os import path
+sys.path.insert(0, path.dirname(path.dirname(path.abspath('../python'))))
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -52,7 +59,7 @@ project = u'Brayns'
 # built documents.
 #
 # The short X.Y version.
-version = VERSION
+version = MINIMAL_VERSION
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -104,7 +111,7 @@ html_theme = 'sphinx-bluebrain-theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    "metadata_distribution": "brayns"
+    "metadata_file": "metadata.json"
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
