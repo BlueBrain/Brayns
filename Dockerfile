@@ -120,14 +120,30 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
     -DBRAYNS_OSPRAY_ENABLED=ON \
     -DBRAYNS_CIRCUITEXPLORER_ENABLED=OFF \
     -DBRAYNS_DTI_ENABLED=OFF \
-    -DBRAYNS_CIRCUITVIEWER_ENABLED=ON \
+    -DBRAYNS_CIRCUITVIEWER_ENABLED=OFF \
     -DBRAYNS_NETWORKING_ENABLED=ON \
     -DCLONE_SUBPROJECTS=ON \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
     -DBUILD_PYTHON_BINDINGS=OFF \
- && ninja mvd-tool perceptualdiff Brayns-install Brayns-tests \
+ && ninja mvd-tool perceptualdiff Brayns-install \
  && rm -rf ${DIST_PATH}/include ${DIST_PATH}/cmake ${DIST_PATH}/share
+
+# Install BioExplorer
+# https://github.com/favreau/BioExplorer
+ARG BIOEXPLORER_TAG=0.6.0
+ARG BIOEXPLORER_SRC=/app/bioexplorer
+
+RUN mkdir -p ${OSPRAY_SRC} \
+ && git clone https://github.com/favreau/BioExplorer ${BIOEXPLORER_SRC} \
+ && cd ${BIOEXPLORER_SRC} \
+ && git checkout ${BIOEXPLORER_TAG} \
+ && mkdir -p build \
+ && cd build \
+ && CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja \
+    -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
+ && ninja install
+
 
 # Final image, containing only Brayns and libraries required to run it
 FROM debian:buster-slim
@@ -175,4 +191,4 @@ EXPOSE 8200
 # See https://docs.docker.com/engine/reference/run/#entrypoint-default-command-to-execute-at-runtime
 # for more docs
 ENTRYPOINT ["braynsService"]
-CMD ["--http-server", ":8200"]
+CMD ["--http-server --plugin BioExplorer", ":8200"]
