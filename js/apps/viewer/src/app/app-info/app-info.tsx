@@ -1,7 +1,6 @@
 import React, {PureComponent} from 'react';
 
 import {GET_VERSION, Version} from 'brayns';
-import {isObject} from 'lodash';
 import {from, Subscription} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
 
@@ -21,25 +20,14 @@ import {
 } from '@material-ui/core/styles';
 
 import brayns, {onReady} from '../../common/client';
-import storage from '../../common/storage';
 
 import {
     BRAYNS_GITHUB_REPO,
     BRAYNS_GITHUB_URL
 } from './constants';
 import {
-    Contributor,
-    getContributors,
     getTags,
-    getUser
 } from './github';
-
-
-const AUTHORS_KEY = 'authors';
-const EXCLUDED_CONTRIBUTORS = [
-    'eile',
-    'adevress'
-];
 
 
 const styles = (theme: Theme) => createStyles({
@@ -109,11 +97,6 @@ export class AppInfo extends PureComponent<Props, State> {
             </ListItem>
         ));
 
-        const versionName = version
-            ? version.tag
-                ? version.name : version.sha
-            : (<span>&mdash;</span>);
-
         return (
             <Dialog
                 open={!!open}
@@ -130,9 +113,7 @@ export class AppInfo extends PureComponent<Props, State> {
                         rel="noopener"
                         aria-label="Navigate to commit"
                         button
-                    >
-                        <ListItemText primary="Version" secondary={versionName} />
-                    </ListItem>
+                    />
                 </List>
                 <List component="nav" subheader={authorsHeader}>
                     {authorItems}
@@ -151,46 +132,23 @@ export default style(AppInfo);
 
 
 async function getAuthors(): Promise<Author[]> {
-    const today = Date.now();
-    const cache = storage.get<AuthorsList>(AUTHORS_KEY);
-    if (cache) {
-        const diff = today - cache.updatedOn;
-        if (diff <= (60 * 60 * 1000)) {
-            return sortByContributions(cache.authors);
-        }
-    }
 
-    const contributors = await getContributors(BRAYNS_GITHUB_REPO);
-    const authors = await Promise.all(contributors.filter(
-            contributor => contributor.contributions > 2 && !EXCLUDED_CONTRIBUTORS.includes(contributor.login))
-        .map(toAuthor));
-    const data = authors.filter(isObject) as Author[];
-
-    // Cache results
-    // https://developer.github.com/v3/#rate-limiting
-    storage.set(AUTHORS_KEY, {
-        authors: data,
-        updatedOn: today
-    });
+    const data = [
+        {name: "Cyrille Favreau", url: "https://github.com/favreau", contributions: 8}, 
+        {name: "Daniel Nachbaur", url: "https://github.com/tribal-tec", contributions: 7}, 
+        {name: "Jonas Karlsson", url: "https://github.com/karjonas", contributions: 6}, 
+        {name: "Roland Groza", url: "https://github.com/rolandjitsu", contributions: 5}, 
+        {name: "Grigori Chevtchenko", url: "https://github.com/chevtche", contributions: 4}, 
+        {name: "Juan Hernando Vieites", url: "https://github.com/BlueBrain", contributions: 3}, 
+        {name: "Raphael Dumusc", url: "https://github.com/BlueBrain", contributions: 2}, 
+        {name: "Pawel Podhajski", url: "https://github.com/ppodhajski", contributions: 1}, 
+    ];
 
     return sortByContributions(data);
 }
 
 function sortByContributions(authors: Author[]) {
     return authors.sort((a, b) => b.contributions - a.contributions);
-}
-
-async function toAuthor(contributor: Contributor) {
-    const user = await getUser(contributor.login);
-    if (user) {
-        const {name} = user;
-        return {
-            name: name && name.length > 0 ? name : user.login,
-            url: user.html_url,
-            contributions: contributor.contributions
-        };
-    }
-    return;
 }
 
 async function toGitVersion(version: Version): Promise<GitVersion> {
@@ -241,9 +199,4 @@ interface Author {
     name: string;
     url: string;
     contributions: number;
-}
-
-interface AuthorsList {
-    authors: Author[];
-    updatedOn: number;
 }
