@@ -357,18 +357,19 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
         properties.getProperty<std::string>(PROP_MORPHOLOGY_COLOR_SCHEME.name));
     const auto morphologyQuality = stringToEnum<MorphologyQuality>(
         properties.getProperty<std::string>(PROP_MORPHOLOGY_QUALITY.name));
-    const auto meshFolder =
-        properties.getProperty<std::string>(PROP_MESH_FOLDER.name);
+    const auto meshFolder = properties.getProperty<std::string>(PROP_MESH_FOLDER.name);
     const auto meshFilenamePattern =
         properties.getProperty<std::string>(PROP_MESH_FILENAME_PATTERN.name);
     const auto reportType = stringToEnum<ReportType>(
         properties.getProperty<std::string>(PROP_REPORT_TYPE.name));
     const auto userDataType = stringToEnum<UserDataType>(
         properties.getProperty<std::string>(PROP_USER_DATA_TYPE.name));
-    const auto cellClipping =
-        properties.getProperty<bool>(PROP_CELL_CLIPPING.name);
-    const auto areasOfInterest =
-        properties.getProperty<int>(PROP_AREAS_OF_INTEREST.name);
+    const auto cellClipping = properties.getProperty<bool>(PROP_CELL_CLIPPING.name);
+    const auto areasOfInterest = properties.getProperty<int>(PROP_AREAS_OF_INTEREST.name);
+    const auto loadLayers = properties.getProperty<bool>(PROP_LOAD_LAYERS.name, true);
+    const auto loadEtypes = properties.getProperty<bool>(PROP_LOAD_ETYPES.name, true);
+    const auto loadMtypes = properties.getProperty<bool>(PROP_LOAD_MTYPES.name, true);
+
 
     // Model (one for the whole circuit)
     auto model = _scene.createModel();
@@ -411,15 +412,24 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
                                        allTransformations);
 
     // Import meshes and morphologies
-    callback.updateProgress("Identifying layer ids...", 0);
-    _populateLayerIds(blueConfiguration, circuit, allGids, data.layers);
+    if(loadLayers || colorScheme == CircuitColorScheme::by_layer)
+    {
+        callback.updateProgress("Identifying layer ids...", 0);
+        _populateLayerIds(blueConfiguration, circuit, allGids, data.layers);
+    }
 
-    callback.updateProgress("Identifying electro-physiology types...", 0);
-    data.etypes.ids = circuit.getElectrophysiologyTypes(allGids);
-    //data.etypes.names = circuit.getElectrophysiologyTypeNames();
+    if(loadEtypes || colorScheme == CircuitColorScheme::by_etype)
+    {
+        callback.updateProgress("Identifying electro-physiology types...", 0);
+        data.etypes.ids = circuit.getElectrophysiologyTypes(allGids);
+        //data.etypes.names = circuit.getElectrophysiologyTypeNames();
+    }
 
-    callback.updateProgress("Getting morphology types...", 0);
-    data.mtypes.ids = circuit.getMorphologyTypes(allGids);
+    if(loadMtypes || colorScheme == CircuitColorScheme::by_mtype)
+    {
+        callback.updateProgress("Getting morphology types...", 0);
+        data.mtypes.ids = circuit.getMorphologyTypes(allGids);
+    }
 
     callback.updateProgress("Importing morphologies...", 0);
     float maxMorphologyLength = 0.f;

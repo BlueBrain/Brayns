@@ -292,6 +292,15 @@ const brayns::Property PROP_LOAD_AFFERENT_SYNAPSES = {
     "111LoadAfferentSynapses", false, {"Loads afferent synapses"}};
 const brayns::Property PROP_LOAD_EFFERENT_SYNAPSES = {
     "112LoadEfferentSynapses", false, {"Loads efferent synapses"}};
+const brayns::Property PROP_LOAD_LAYERS = {
+    "120LoadLayers", true,
+    { "Load circuit layer data for coloring"}};
+const brayns::Property PROP_LOAD_ETYPES = {
+    "121LoadEtypes", true,
+    { "Load circuit e-types for coloring"}};
+const brayns::Property PROP_LOAD_MTYPES = {
+    "122LoadMtypes", true,
+    { "Load circuit m-types for coloring"}};
 // clang-format on
 
 struct MorphologyInfo

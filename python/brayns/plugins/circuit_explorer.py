@@ -101,7 +101,8 @@ class CircuitExplorer:
                      morphology_quality=GEOMETRY_QUALITY_HIGH,
                      max_distance_to_soma=1e6, cell_clipping=False,
                      load_afferent_synapses=False,
-                     load_efferent_synapses=False, synapse_radius=0.0):
+                     load_efferent_synapses=False, synapse_radius=0.0,
+                     load_layers=True, load_etypes=True, load_mtypes=True):
         """
         Load a circuit from a give Blue/Circuit configuration file.
 
@@ -172,6 +173,15 @@ class CircuitExplorer:
         :param bool load_afferent_synapses: Load afferent synapses.
         :param bool load_efferent_synapses: Load efferent synapses.
         :param float synapse_radius: Synapse radius.
+        :param bool load_layers: Load layer data for coloring the circuit.
+            If False, speed up circuit loading. Ignored if circuit_color_scheme
+            is CIRCUIT_COLOR_SCHEME_NEURON_BY_LAYER
+        :param bool load_etypes: Load etypes for coloring the circuit.
+            if False, speed up circuit loading. Ignored if circuit_color_scheme
+            is CIRCUIT_COLOR_SCHEME_NEURON_BY_ETYPE
+        :param bool load_mtypes: Load mtypes for coloring the circuit.
+            if False, speed up circuit loading. Ignored if circuit_color_scheme
+            is CIRCUIT_COLOR_SCHEME_NEURON_BY_MTYPE
 
         :return: Model metadata if successful.
         :rtype: dict
@@ -235,6 +245,10 @@ class CircuitExplorer:
         props['110SynapseRadius'] = synapse_radius
         props['111LoadAfferentSynapses'] = load_afferent_synapses
         props['112LoadEfferentSynapses'] = load_efferent_synapses
+
+        props['120LoadLayers'] = load_layers
+        props['121LoadEtypes'] = load_etypes
+        props['122LoadMtypes'] = load_mtypes;
 
         params = dict()
         params['name'] = name
