@@ -143,6 +143,7 @@ void OSPRayEngine::_createRenderers()
         _parametersManager.getAnimationParameters(),
         _parametersManager.getRenderingParameters());
 
+#if 0
     addRendererType("raycast_Ng");
     addRendererType("raycast_Ns");
 
@@ -154,6 +155,7 @@ void OSPRayEngine::_createRenderers()
 
         addRendererType("pathtracer", properties);
     }
+#endif
     {
         PropertyMap properties;
         properties.setProperty(
