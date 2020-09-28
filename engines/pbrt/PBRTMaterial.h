@@ -37,7 +37,7 @@ class PBRTMaterial : public Material
 {
 public:
     PBRTMaterial(const PropertyMap& properties = {});
-    ~PBRTMaterial();
+    ~PBRTMaterial() = default;
 
     void commit(const std::string& renderer);
 

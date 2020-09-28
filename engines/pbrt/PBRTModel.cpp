@@ -134,12 +134,9 @@ PBRTModel::PBRTModel(AnimationParameters& animationParameters,
 {
 }
 
-PBRTModel::~PBRTModel()
-{
-}
-
 void PBRTModel::commitGeometry()
 {
+    updateBounds();
     // DO NOTHING, WE NEED THE TRANSFORMATION AT THE
     // CREATION TIME OF THE SHAPES.
 }

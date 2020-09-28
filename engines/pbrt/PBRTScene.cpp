@@ -71,10 +71,6 @@ PBRTScene::PBRTScene(AnimationParameters& animationParameters,
     _backgroundMaterial = std::shared_ptr<PBRTMaterial>(new PBRTMaterial());
 }
 
-PBRTScene::~PBRTScene()
-{
-}
-
 void PBRTScene::commit()
 {
     Scene::commit();
@@ -104,8 +100,6 @@ void PBRTScene::commit()
         if (!doUpdate)
             return;
     }
-
-    _needsRender = true;
 
     // Release current scene
     _pbrtScene.reset(nullptr);
@@ -145,8 +139,6 @@ void PBRTScene::commit()
 
     // Create scene with primitives + lights
     _pbrtScene.reset(new pbrt::Scene(bvh, _lights));
-
-    resetModified();
 }
 
 bool PBRTScene::commitLights()

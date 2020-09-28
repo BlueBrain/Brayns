@@ -38,7 +38,7 @@ class PBRTModel : public Model
 public:
     PBRTModel(AnimationParameters& animationParameters,
               VolumeParameters& volumeParameters);
-    ~PBRTModel();
+    ~PBRTModel() = default;
 
     void commitGeometry() final;
 

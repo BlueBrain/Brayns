@@ -32,13 +32,13 @@ public:
     PBRTScene(AnimationParameters& animationParameters,
               GeometryParameters& geometryParameters,
               VolumeParameters& volumeParameters);
-    ~PBRTScene();
+    ~PBRTScene() = default;
 
     void commit() final;
 
     bool commitLights() final;
 
-    bool supportsConcurrentSceneUpdates() const final { return false; }
+    bool supportsConcurrentSceneUpdates() const final { return true; }
 
     ModelPtr createModel() const final;
 
@@ -46,16 +46,11 @@ public:
 
     const pbrt::Scene* getPBRTScene() const { return _pbrtScene.get(); }
 
-    bool needsToRender() const { return _needsRender; }
-    void setNeedsToRender(const bool v) { _needsRender = v; }
-
 private:
-    bool _needsRender{true};
     std::unique_ptr<pbrt::Scene> _pbrtScene {nullptr};
     std::vector<std::shared_ptr<pbrt::Light>> _lights;
     std::vector<std::shared_ptr<pbrt::GeometricPrimitive>> _lightShapes;
 
-    //TransformPool _transformPool;
     std::vector<std::unique_ptr<pbrt::Transform>> _transformPool;
 
     std::string _currentRenderer;

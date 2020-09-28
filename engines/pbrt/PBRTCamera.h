@@ -88,8 +88,6 @@ public:
     const std::shared_ptr<const pbrt::Camera>& impl() const { return _pbrtCamera; }
     pbrt::Film* getFilm() { return _film; }
     pbrt::Film* getFilm() const { return _film; }
-    bool needsToRender() const { return _needsRender; }
-    void setNeedsToRender(const bool v) const { _needsRender = v; }
     bool cameraChanged() const { return _cameraChanged || isModified(); }
     void setCameraChanged(const bool v) const { _cameraChanged = v; }
 
@@ -110,7 +108,6 @@ private:
 
     brayns::Vector2ui _currentRes {16,16};
 
-    mutable bool _needsRender{true};
     mutable bool _cameraChanged{true};
 };
 }

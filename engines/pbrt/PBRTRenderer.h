@@ -40,7 +40,7 @@ class PBRTRenderer : public Renderer
 public:
     PBRTRenderer(const AnimationParameters&,
                  const RenderingParameters&);
-    ~PBRTRenderer();
+    ~PBRTRenderer() = default;
 
     void render(FrameBufferPtr frameBuffer) final;
     void commit() final;
