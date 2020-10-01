@@ -120,7 +120,7 @@ protected:
     Vector3d _backgroundColor{0., 0., 0.};
     bool _headLight{true};
     double _varianceThreshold{-1.};
-    size_t _maxAccumFrames{100};
+    size_t _maxAccumFrames{10};
 
     SERIALIZATION_FRIEND(RenderingParameters)
 };

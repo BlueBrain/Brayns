@@ -42,9 +42,23 @@ public:
 
     ModelPtr createModel() const final;
 
-    void setCurrentRenderer(const std::string& renderer) { _currentRenderer = renderer; }
+    void setCurrentRenderer(const std::string& renderer)
+    {
+        if(renderer != _currentRenderer)
+        {
+            _currentRenderer = renderer;
+            markModified();
+            commit();
+        }
+    }
 
     const pbrt::Scene* getPBRTScene() const { return _pbrtScene.get(); }
+
+    void copyFromImpl(const Scene& rhs)
+    {
+        const PBRTScene& pbrtRhs = dynamic_cast<const PBRTScene&>(rhs);
+        _currentRenderer = pbrtRhs._currentRenderer;
+    }
 
 private:
     std::unique_ptr<pbrt::Scene> _pbrtScene {nullptr};

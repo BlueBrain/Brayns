@@ -27,6 +27,7 @@
 #include <brayns/common/geometry/TriangleMesh.h>
 
 #include <brayns/engine/Engine.h>
+#include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
@@ -47,7 +48,7 @@ inline bool handleCommonParams(const Request& req, brayns::Message& resp)
         return false;
     }
 
-    if(req.Le.size() < 3)
+    if(req.le.size() < 3)
     {
         resp.setError(4, "Le parameter requires 3 float numbers");
         return false;
@@ -90,9 +91,9 @@ inline void addCommonParams(const Request& req, brayns::PropertyMap& metaObject)
     metaObject.setProperty({"scale", req.scale});
     metaObject.setProperty({"g", req.g});
 
-    const std::array<double, 3> Le = {req.Le[0],
-                                      req.Le[1],
-                                      req.Le[2]};
+    const std::array<double, 3> Le = {req.le[0],
+                                      req.le[1],
+                                      req.le[2]};
     metaObject.setProperty({"Le", Le});
 }
 
@@ -101,7 +102,11 @@ inline void createBoxMesh(const Request& req, brayns::Model& model)
 {
     const brayns::Vector3f min (req.p0[0], req.p0[1], req.p0[2]);
     const brayns::Vector3f max (req.p1[0], req.p1[1], req.p1[2]);
-    model.getTriangleMeshes()[brayns::NO_MATERIAL] = brayns::createBox(min, max);
+    brayns::MaterialPtr mptr = model.createMaterial(1, "1");
+    mptr->markModified();
+    mptr->commit();
+    model.getTriangleMeshes()[1] = brayns::createBox(min, max);
+    model.markInstancesDirty();
 }
 
 PBRVolumesPlugin::PBRVolumesPlugin()

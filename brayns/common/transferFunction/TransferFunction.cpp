@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Authors: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -90,5 +91,25 @@ floats TransferFunction::calculateInterpolatedOpacities() const
     for (size_t i = 0; i < numSamples; ++i)
         opacities.push_back(_interpolatedOpacity(tfPoints, i * dx));
     return opacities;
+}
+
+Vector3f TransferFunction::getColorForValue(const double v) const
+{
+    if(v <= _valuesRange.x)
+        return *_colorMap.colors.begin();
+
+    if(v >= _valuesRange.y)
+        return *_colorMap.colors.end();
+
+    const auto normValue = (v - _valuesRange.x) / (_valuesRange.y - _valuesRange.x);
+    const size_t index = static_cast<size_t>(floor(normValue * _colorMap.colors.size()));
+    const size_t nextIndex = std::min(index + 1, _colorMap.colors.size() - 1);
+
+    const double remainder = normValue - floor(normValue);
+
+    const auto& color1 = _colorMap.colors[index];
+    const auto& color2 = _colorMap.colors[nextIndex];
+
+    return (1.0 - remainder) * color1 + remainder * color2;
 }
 }

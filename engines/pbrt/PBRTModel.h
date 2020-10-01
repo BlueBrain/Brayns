@@ -62,24 +62,20 @@ public:
 
     bool materialsDirty() const;
 
+    const std::vector<std::shared_ptr<pbrt::Light>>& getModelLights()
+    {
+        return _modelLights;
+    }
+
 protected:
-    // Simulations will require a custom integrator
-    // Disabled by now
     void _commitSimulationDataImpl(const float *frameData, const size_t frameSize) final
     {
-        (void)frameData;
-        (void)frameSize;
-        BRAYNS_WARN << "PBRTModel commitSimulationDataImpl: "
-                    << "Simulations not supported yet for PBRT" << std::endl;
+        _simulationData = std::vector<float>(frameData, frameData + frameSize);
     }
-    void _commitTransferFunctionImpl(const Vector3fs &colors, const floats &opacities,
-                                     const Vector2d valueRange) final
+
+    void _commitTransferFunctionImpl(const Vector3fs&, const floats&, const Vector2d) final
     {
-        (void)colors;
-        (void)opacities;
-        (void)valueRange;
-        BRAYNS_WARN << "PBRTModel commitSimulationDataImpl: "
-                    << "Simulations not supported yet for PBRT" << std::endl;
+        // Do nothing, we simply access the model transfer function
     }
 private:
     // Material commitment function.
@@ -109,6 +105,9 @@ private:
     Primitives _createSDFGeometries(pbrt::Transform* otw, pbrt::Transform* wto);
 
     void _parseMedium(pbrt::Transform* otw);
+
+    std::vector<float> _simulationData;
+    std::vector<std::shared_ptr<pbrt::Light>> _modelLights;
 };
 }
 

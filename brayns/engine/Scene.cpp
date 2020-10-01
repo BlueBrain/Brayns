@@ -112,6 +112,8 @@ void Scene::copyFrom(const Scene& rhs)
     _lightManager = rhs._lightManager;
     _clipPlanes = rhs._clipPlanes;
 
+    copyFromImpl(rhs);
+
     markModified();
 }
 

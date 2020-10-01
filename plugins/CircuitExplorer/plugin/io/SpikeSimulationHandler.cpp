@@ -76,6 +76,7 @@ SpikeSimulationHandler::SpikeSimulationHandler(
     : brayns::AbstractSimulationHandler(rhs)
     , _reportPath(rhs._reportPath)
     , _gids(rhs._gids)
+    , _transition(rhs._transition)
     , _spikeReport(rhs._spikeReport)
     , _gidMap(rhs._gidMap)
 {

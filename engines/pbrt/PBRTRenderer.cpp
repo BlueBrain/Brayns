@@ -439,8 +439,6 @@ void PBRTRenderer::commit()
         });
         auto pbrtScene = static_cast<PBRTScene*>(_scene.get());
         pbrtScene->setCurrentRenderer(_currentRenderer);
-        _scene->markModified();
-        _scene->commit();
 
         cam.setCameraChanged(false);
     }

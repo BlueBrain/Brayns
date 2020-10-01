@@ -23,11 +23,15 @@
 #include "util/PBRTSDFGeometryShape.h"
 #include "util/Util.h"
 
+#include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/engine/Material.h>
+#include <brayns/parameters/AnimationParameters.h>
 
 #include <pbrt/core/paramset.h>
 #include <pbrt/core/primitive.h>
 #include <pbrt/core/transform.h>
+
+#include <pbrt/lights/diffuse.h>
 
 #include <pbrt/media/grid.h>
 #include <pbrt/media/homogeneous.h>
@@ -40,6 +44,8 @@
 namespace brayns
 {
 
+namespace
+{
 pbrt::Medium* HomogeneusMediumFactory(pbrt::Transform*, const PropertyMap& meta)
 {
     const auto g = static_cast<pbrt::Float>(meta.getProperty<double>("g", 0.0));
@@ -122,6 +128,35 @@ pbrt::Medium* GridMediumFactory(pbrt::Transform* otw, const PropertyMap& meta)
     return new pbrt::GridDensityMedium(sigASpec, sigSSpec, g, nx, ny, nz, *otw, density.data());
 }
 
+template<class ShapeType>
+std::shared_ptr<pbrt::AreaLight> createLightForShape(std::shared_ptr<ShapeType>& shape,
+                                                     const brayns::TransferFunction& tf,
+                                                     const float value)
+{
+    pbrt::ParamSet params;
+
+        const brayns::Vector3f color = tf.getColorForValue(value);
+    const auto cvalue = glm::clamp(static_cast<double>(value),
+                                   tf.getValuesRange().x,
+                                   tf.getValuesRange().y);
+    const float intensity = static_cast<float>((cvalue - tf.getValuesRange().x)
+                                               / (tf.getValuesRange().y - tf.getValuesRange().x));
+
+    pbrt::Float rgb[] = {color.r, color.b, color.g};
+    pbrt::Spectrum tempL = pbrt::Spectrum::FromRGB(rgb, pbrt::SpectrumType::Illuminant) * intensity;
+    std::unique_ptr<pbrt::Float[]> L (new pbrt::Float[3]);
+    tempL.ToRGB(L.get());
+    params.AddRGBSpectrum("L", std::move(L), 3);
+
+    std::unique_ptr<int[]> nsamples (new int[1]);
+    nsamples.get()[0] = 8;
+    params.AddInt("samples", std::move(nsamples), 1);
+
+    return pbrt::CreateDiffuseAreaLight(pbrt::Transform(), nullptr, params, shape);
+}
+
+} // namespace
+
 std::unordered_map<std::string, PBRTModel::MediaFactory> PBRTModel::_mediaFactories = {
     {"homogeneus", HomogeneusMediumFactory},
     {"heterogeneus", HeterogeneusMediumFactory},
@@ -144,6 +179,8 @@ void PBRTModel::commitGeometry()
 std::vector<std::shared_ptr<pbrt::GeometricPrimitive>>
 PBRTModel::commitToPBRT(const Transformation &transform, const std::string& renderer)
 {
+    _modelLights.clear();
+
     // Create materials before shapes, as they are required when building those
     _commitMaterials(renderer);
 
@@ -236,14 +273,19 @@ PBRTModel::_createSpheres(pbrt::Transform* otw, pbrt::Transform* wto)
     Primitives result;
 
     const pbrt::MediumInterface dummyMI (_modelMedium.get(), nullptr);
-    const std::shared_ptr<pbrt::AreaLight> dummyAL;
 
     for(const auto& sphereList : getSpheres())
     {
         std::shared_ptr<pbrt::Material> pbrtMat = nullptr;
         if(sphereList.first != NO_MATERIAL && !_modelMedium)
         {
-            const auto& mat = getMaterial(sphereList.first);
+            auto& mat = _materials[sphereList.first];
+
+            // If we have simulation data, leave it white
+            // Simulation light will update its color.
+            if(!_simulationData.empty())
+                mat->setDiffuseColor({1., 1., 1.});
+
             PBRTMaterial& impl = static_cast<PBRTMaterial&>(*mat.get());
             pbrtMat = impl.getPBRTMaterial();
         }
@@ -275,6 +317,15 @@ PBRTModel::_createSpheres(pbrt::Transform* otw, pbrt::Transform* wto)
 
             auto sphereShape = pbrt::CreateSphereShape(otwFinalPtr, wtoFinalPtr, false, params);
 
+            // Generate a light if we have simulation
+            std::shared_ptr<pbrt::AreaLight> dummyAL {nullptr};
+            if(!_simulationData.empty())
+            {
+                dummyAL = createLightForShape(sphereShape, _transferFunction,
+                                              _simulationData[sphere.userData]);
+                _modelLights.push_back(dummyAL);
+            }
+
             result.push_back(std::shared_ptr<pbrt::GeometricPrimitive>(
                                  new pbrt::GeometricPrimitive(
                                                         sphereShape,
@@ -293,14 +344,19 @@ PBRTModel::_createCylinders(pbrt::Transform* otw, pbrt::Transform* wto)
     Primitives result;
 
     const pbrt::MediumInterface dummyMI (_modelMedium.get(), nullptr);
-    const std::shared_ptr<pbrt::AreaLight> dummyAL;
 
     for(const auto& cylinderList : getCylinders())
     {
         std::shared_ptr<pbrt::Material> pbrtMaterial {nullptr};
         if(cylinderList.first != NO_MATERIAL && !_modelMedium)
         {
-            const auto& mat = getMaterial(cylinderList.first);
+            auto& mat = _materials[cylinderList.first];
+
+            // If we have simulation data, leave it white
+            // Simulation light will update its color.
+            if(!_simulationData.empty())
+                mat->setDiffuseColor({1., 1., 1.});
+
             PBRTMaterial& impl = static_cast<PBRTMaterial&>(*mat.get());
             pbrtMaterial = impl.getPBRTMaterial();
         }
@@ -355,6 +411,15 @@ PBRTModel::_createCylinders(pbrt::Transform* otw, pbrt::Transform* wto)
             auto cylinderShape = pbrt::CreateCylinderShape(otwFinalPtr, wtoFinalPtr,
                                                            false, params);
 
+            // Generate a light if we have simulation
+            std::shared_ptr<pbrt::AreaLight> dummyAL {nullptr};
+            if(!_simulationData.empty())
+            {
+                dummyAL = createLightForShape(cylinderShape, _transferFunction,
+                                              _simulationData[cylinder.userData]);
+                _modelLights.push_back(dummyAL);
+            }
+
             result.push_back(std::shared_ptr<pbrt::GeometricPrimitive>(
                                  new pbrt::GeometricPrimitive(
                                                         cylinderShape,
@@ -373,14 +438,14 @@ PBRTModel::_createCones(pbrt::Transform* otw, pbrt::Transform* wto)
     Primitives result;
 
     const pbrt::MediumInterface dummyMI (_modelMedium.get(), nullptr);
-    const std::shared_ptr<pbrt::AreaLight> dummyAL;
 
     for(const auto& coneList : getCones())
     {
+        std::shared_ptr<Material> mat {nullptr};
         std::shared_ptr<pbrt::Material> pbrtMaterial {nullptr};
         if(coneList.first != NO_MATERIAL && !_modelMedium)
         {
-            const auto& mat = getMaterial(coneList.first);
+            mat = _materials[coneList.first];
             PBRTMaterial& impl = static_cast<PBRTMaterial&>(*mat.get());
             pbrtMaterial = impl.getPBRTMaterial();
         }
@@ -426,6 +491,14 @@ PBRTModel::_createCones(pbrt::Transform* otw, pbrt::Transform* wto)
             params.AddFloat("height", std::move(height), 1);
 
             auto coneShape = pbrt::CreateConeShape(otwFinalPtr, wtoFinalPtr, false, params);
+
+            // Generate a light if we have simulation
+            std::shared_ptr<pbrt::AreaLight> dummyAL {nullptr};
+            if(!_simulationData.empty())
+            {
+                auto color = _transferFunction.getColorForValue(_simulationData[cone.userData]);
+                mat->setDiffuseColor({color.r, color.g, color.b});
+            }
 
             result.push_back(std::shared_ptr<pbrt::GeometricPrimitive>(
                                  new pbrt::GeometricPrimitive(

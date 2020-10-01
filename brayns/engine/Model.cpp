@@ -698,9 +698,7 @@ bool Model::commitSimulationData()
     const auto animationFrame = _animationParameters.getFrame();
 
     if (_simulationHandler->getCurrentFrame() == animationFrame)
-    {
         return false;
-    }
 
     auto frameData = _simulationHandler->getFrameData(animationFrame);
 
@@ -709,6 +707,7 @@ bool Model::commitSimulationData()
 
     _commitSimulationDataImpl((float*)frameData,
                               _simulationHandler->getFrameSize());
+
     return true;
 }
 }

@@ -212,6 +212,8 @@ public:
     /** @internal */
     BRAYNS_API void copyFrom(const Scene& rhs);
 
+    virtual void copyFromImpl(const Scene&) { }
+
 protected:
     /** @return True if this scene supports scene updates from any thread. */
     virtual bool supportsConcurrentSceneUpdates() const { return false; }
