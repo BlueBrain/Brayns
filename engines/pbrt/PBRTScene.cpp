@@ -149,9 +149,6 @@ void PBRTScene::commit()
 
 bool PBRTScene::commitLights()
 {
-    if(!_lightManager.isModified())
-        return false;
-
     _lights.clear();
     _lightShapes.clear();
 

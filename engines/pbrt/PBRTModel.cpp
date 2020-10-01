@@ -125,24 +125,40 @@ pbrt::Medium* GridMediumFactory(pbrt::Transform* otw, const PropertyMap& meta)
     const auto sigASpec = (pbrt::Spectrum::FromRGB(sigARGB) * scale);
     const auto sigSSpec = (pbrt::Spectrum::FromRGB(sigSRGB) * scale);
 
-    return new pbrt::GridDensityMedium(sigASpec, sigSSpec, g, nx, ny, nz, *otw, density.data());
+    std::vector<pbrt::Float> pbrtDensity (density.begin(), density.end());
+    return new pbrt::GridDensityMedium(sigASpec, sigSSpec, g, nx, ny, nz, *otw, pbrtDensity.data());
 }
 
 template<class ShapeType>
 std::shared_ptr<pbrt::AreaLight> createLightForShape(std::shared_ptr<ShapeType>& shape,
                                                      const brayns::TransferFunction& tf,
+                                                     MaterialPtr& mat,
                                                      const float value)
 {
-    pbrt::ParamSet params;
-
-        const brayns::Vector3f color = tf.getColorForValue(value);
     const auto cvalue = glm::clamp(static_cast<double>(value),
                                    tf.getValuesRange().x,
                                    tf.getValuesRange().y);
     const float intensity = static_cast<float>((cvalue - tf.getValuesRange().x)
                                                / (tf.getValuesRange().y - tf.getValuesRange().x));
 
-    pbrt::Float rgb[] = {color.r, color.b, color.g};
+    // Do not add light if the intensity is below a given threshold
+    if(intensity < 0.1f)
+    {
+        if(mat)
+            mat->setDiffuseColor({1., 1., 1.});
+        return std::shared_ptr<pbrt::AreaLight>{nullptr};
+    }
+
+    const brayns::Vector3f color = tf.getColorForValue(value);
+
+    if(mat)
+        mat->setDiffuseColor({color.r, color.g, color.b});
+
+    pbrt::ParamSet params;
+
+    pbrt::Float rgb[] = {pbrt::Float(std::fabs(color.r)),
+                         pbrt::Float(std::fabs(color.g)),
+                         pbrt::Float(std::fabs(color.b))};
     pbrt::Spectrum tempL = pbrt::Spectrum::FromRGB(rgb, pbrt::SpectrumType::Illuminant) * intensity;
     std::unique_ptr<pbrt::Float[]> L (new pbrt::Float[3]);
     tempL.ToRGB(L.get());
@@ -276,16 +292,11 @@ PBRTModel::_createSpheres(pbrt::Transform* otw, pbrt::Transform* wto)
 
     for(const auto& sphereList : getSpheres())
     {
+        MaterialPtr mat {nullptr};
         std::shared_ptr<pbrt::Material> pbrtMat = nullptr;
         if(sphereList.first != NO_MATERIAL && !_modelMedium)
         {
-            auto& mat = _materials[sphereList.first];
-
-            // If we have simulation data, leave it white
-            // Simulation light will update its color.
-            if(!_simulationData.empty())
-                mat->setDiffuseColor({1., 1., 1.});
-
+            mat = _materials[sphereList.first];
             PBRTMaterial& impl = static_cast<PBRTMaterial&>(*mat.get());
             pbrtMat = impl.getPBRTMaterial();
         }
@@ -321,9 +332,10 @@ PBRTModel::_createSpheres(pbrt::Transform* otw, pbrt::Transform* wto)
             std::shared_ptr<pbrt::AreaLight> dummyAL {nullptr};
             if(!_simulationData.empty())
             {
-                dummyAL = createLightForShape(sphereShape, _transferFunction,
+                dummyAL = createLightForShape(sphereShape, _transferFunction, mat,
                                               _simulationData[sphere.userData]);
-                _modelLights.push_back(dummyAL);
+                if(dummyAL)
+                    _modelLights.push_back(dummyAL);
             }
 
             result.push_back(std::shared_ptr<pbrt::GeometricPrimitive>(
@@ -347,16 +359,11 @@ PBRTModel::_createCylinders(pbrt::Transform* otw, pbrt::Transform* wto)
 
     for(const auto& cylinderList : getCylinders())
     {
+        MaterialPtr mat {nullptr};
         std::shared_ptr<pbrt::Material> pbrtMaterial {nullptr};
         if(cylinderList.first != NO_MATERIAL && !_modelMedium)
         {
-            auto& mat = _materials[cylinderList.first];
-
-            // If we have simulation data, leave it white
-            // Simulation light will update its color.
-            if(!_simulationData.empty())
-                mat->setDiffuseColor({1., 1., 1.});
-
+            mat = _materials[cylinderList.first];
             PBRTMaterial& impl = static_cast<PBRTMaterial&>(*mat.get());
             pbrtMaterial = impl.getPBRTMaterial();
         }
@@ -415,9 +422,10 @@ PBRTModel::_createCylinders(pbrt::Transform* otw, pbrt::Transform* wto)
             std::shared_ptr<pbrt::AreaLight> dummyAL {nullptr};
             if(!_simulationData.empty())
             {
-                dummyAL = createLightForShape(cylinderShape, _transferFunction,
+                dummyAL = createLightForShape(cylinderShape, _transferFunction, mat,
                                               _simulationData[cylinder.userData]);
-                _modelLights.push_back(dummyAL);
+                if(dummyAL)
+                    _modelLights.push_back(dummyAL);
             }
 
             result.push_back(std::shared_ptr<pbrt::GeometricPrimitive>(
