@@ -15,6 +15,7 @@ set(BRAYNSPBRTENGINE_SOURCES
   PBRTModel.cpp
   PBRTRenderer.cpp
   PBRTScene.cpp
+  util/PBRTCustomCone.cpp
   util/PBRTDebugIntegrator.cpp
   util/TransformPool.cpp
   util/Util.cpp
@@ -29,6 +30,7 @@ set(BRAYNSPBRTENGINE_HEADERS
   PBRTModel.h
   PBRTRenderer.h
   PBRTScene.h
+  util/PBRTCustomCone.h
   util/PBRTDebugIntegrator.h
   util/PBRTSDFGeometryShape.h
   util/PBRTTextureImpl.h

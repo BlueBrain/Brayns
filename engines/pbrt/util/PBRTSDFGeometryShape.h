@@ -405,18 +405,18 @@ pbrt::Float PBRTSDFGeometryShape<SDFType::ConePillSigmoid>::shapeDistance(const 
 template<>
 pbrt::Float PBRTSDFGeometryShape<SDFType::Sphere>::Area() const
 {
-    return PBRT_M_PI * 4.0f * _srcGeom->r0 * _srcGeom->r0;
+    return PBRT_M_PI * pbrt::Float(4) * _srcGeom->r0 * _srcGeom->r0;
 }
 
 template<>
 pbrt::Float PBRTSDFGeometryShape<SDFType::Pill>::Area() const
 {
-    const auto h = glm::length(_srcGeom->p1 - _srcGeom->p0);
+    const auto h = static_cast<pbrt::Float>(glm::length(_srcGeom->p1 - _srcGeom->p0));
 
     //const auto sphere = pbrt::Pi * 4.0 * geom.r0 * geom.r0;
     //const auto cylinder = pbrt::Pi * 2.0 * geom.r0 * h;
 
-    return PBRT_M_PI * 2.f * _srcGeom->r0 * (_srcGeom->r0 * 2.f + h);
+    return PBRT_M_PI * pbrt::Float(2) * _srcGeom->r0 * (_srcGeom->r0 * pbrt::Float(2) + h);
 }
 
 template<>

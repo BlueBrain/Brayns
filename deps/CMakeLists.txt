@@ -62,6 +62,7 @@ endif()
 
 # PBRT V3
 if(BRAYNS_PBRT_ENABLED)
+    SET(PBRT_FLOAT_AS_DOUBLE ON CACHE BOOL "Use 64-bit floats")
     add_subdirectory(pbrt-v3)
     # Disable compilation warnings
     target_compile_options(pbrt PUBLIC -w)

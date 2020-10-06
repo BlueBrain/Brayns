@@ -20,6 +20,7 @@
 
 #include "PBRTModel.h"
 #include "PBRTMaterial.h"
+#include "util/PBRTCustomCone.h"
 #include "util/PBRTSDFGeometryShape.h"
 #include "util/Util.h"
 
@@ -36,7 +37,6 @@
 #include <pbrt/media/grid.h>
 #include <pbrt/media/homogeneous.h>
 
-#include <pbrt/shapes/cone.h>
 #include <pbrt/shapes/cylinder.h>
 #include <pbrt/shapes/sphere.h>
 #include <pbrt/shapes/triangle.h>
@@ -135,6 +135,10 @@ std::shared_ptr<pbrt::AreaLight> createLightForShape(std::shared_ptr<ShapeType>&
                                                      MaterialPtr& mat,
                                                      const float value)
 {
+    const brayns::Vector3f color = tf.getColorForValue(value);
+    if(mat)
+        mat->setDiffuseColor({color.r, color.g, color.b});
+
     const auto cvalue = glm::clamp(static_cast<double>(value),
                                    tf.getValuesRange().x,
                                    tf.getValuesRange().y);
@@ -143,23 +147,15 @@ std::shared_ptr<pbrt::AreaLight> createLightForShape(std::shared_ptr<ShapeType>&
 
     // Do not add light if the intensity is below a given threshold
     if(intensity < 0.1f)
-    {
-        if(mat)
-            mat->setDiffuseColor({1., 1., 1.});
         return std::shared_ptr<pbrt::AreaLight>{nullptr};
-    }
-
-    const brayns::Vector3f color = tf.getColorForValue(value);
-
-    if(mat)
-        mat->setDiffuseColor({color.r, color.g, color.b});
 
     pbrt::ParamSet params;
 
     pbrt::Float rgb[] = {pbrt::Float(std::fabs(color.r)),
                          pbrt::Float(std::fabs(color.g)),
                          pbrt::Float(std::fabs(color.b))};
-    pbrt::Spectrum tempL = pbrt::Spectrum::FromRGB(rgb, pbrt::SpectrumType::Illuminant) * intensity;
+    pbrt::Spectrum
+            tempL = pbrt::Spectrum::FromRGB(rgb, pbrt::SpectrumType::Illuminant) * intensity;
     std::unique_ptr<pbrt::Float[]> L (new pbrt::Float[3]);
     tempL.ToRGB(L.get());
     params.AddRGBSpectrum("L", std::move(L), 3);
@@ -498,14 +494,16 @@ PBRTModel::_createCones(pbrt::Transform* otw, pbrt::Transform* wto)
             height.get()[0] = glm::length(cone.up - cone.center);
             params.AddFloat("height", std::move(height), 1);
 
-            auto coneShape = pbrt::CreateConeShape(otwFinalPtr, wtoFinalPtr, false, params);
+            auto coneShape = CreateCustomConeShape(otwFinalPtr, wtoFinalPtr, false, params);
 
             // Generate a light if we have simulation
             std::shared_ptr<pbrt::AreaLight> dummyAL {nullptr};
             if(!_simulationData.empty())
             {
-                auto color = _transferFunction.getColorForValue(_simulationData[cone.userData]);
-                mat->setDiffuseColor({color.r, color.g, color.b});
+                dummyAL = createLightForShape<CustomCone>(coneShape, _transferFunction,
+                                                          mat, _simulationData[cone.userData]);
+                if(dummyAL)
+                    _modelLights.push_back(dummyAL);
             }
 
             result.push_back(std::shared_ptr<pbrt::GeometricPrimitive>(
