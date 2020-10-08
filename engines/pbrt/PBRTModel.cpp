@@ -138,20 +138,27 @@ std::shared_ptr<pbrt::AreaLight> createLightForShape(std::shared_ptr<ShapeType>&
     const auto cvalue = glm::clamp(static_cast<double>(value),
                                    tf.getValuesRange().x,
                                    tf.getValuesRange().y);
-    const float intensity = static_cast<float>((cvalue - tf.getValuesRange().x)
+    float intensity = static_cast<float>((cvalue - tf.getValuesRange().x)
                                                / (tf.getValuesRange().y - tf.getValuesRange().x));
-
-    // Do not add light if the intensity is below a given threshold
-    if(intensity < 0.1f)
-    {
-        if(mat)
-            mat->setDiffuseColor({1.f, 1.f, 1.f});
-        return std::shared_ptr<pbrt::AreaLight>{nullptr};
-    }
 
     const brayns::Vector3f color = tf.getColorForValue(value);
     if(mat)
-        mat->setDiffuseColor({color.r, color.g, color.b});
+    {
+        if(intensity < 0.1f)
+            mat->setDiffuseColor({1.f, 1.f, 1.f});
+        else
+            mat->setDiffuseColor({color.r, color.g, color.b});
+    }
+
+    // Do not add light if the intensity is below a given threshold
+    if(intensity < 0.75f)
+        return std::shared_ptr<pbrt::AreaLight>{nullptr};
+
+    // remap intensity if we are adding light
+    intensity = (intensity - 0.75f) / 0.25f;
+    // smoothsetep light intensity
+    const float lightIntensity = (intensity*intensity*intensity*
+                                 (intensity*(intensity * 6 - 15) + 10)) * 3.f;
 
     pbrt::ParamSet params;
 
@@ -159,7 +166,7 @@ std::shared_ptr<pbrt::AreaLight> createLightForShape(std::shared_ptr<ShapeType>&
                          pbrt::Float(std::fabs(color.g)),
                          pbrt::Float(std::fabs(color.b))};
     pbrt::Spectrum
-            tempL = pbrt::Spectrum::FromRGB(rgb, pbrt::SpectrumType::Illuminant) * intensity;
+            tempL = pbrt::Spectrum::FromRGB(rgb, pbrt::SpectrumType::Illuminant) * lightIntensity;
     std::unique_ptr<pbrt::Float[]> L (new pbrt::Float[3]);
     tempL.ToRGB(L.get());
     params.AddRGBSpectrum("L", std::move(L), 3);
