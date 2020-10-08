@@ -594,15 +594,16 @@ void CircuitExplorerPlugin::preRender()
 
 void CircuitExplorerPlugin::postRender()
 {
-    if (_exportFramesToDiskDirty &&
-        _accumulationFrameNumber == _exportFramesToDiskPayload.spp)
+    if(_exportFramesToDiskDirty)
     {
-        _doExportFrameToDisk();
-        ++_frameNumber;
-        _accumulationFrameNumber = 0;
-    }
-    else
         ++_accumulationFrameNumber;
+        if (_accumulationFrameNumber == _exportFramesToDiskPayload.spp)
+        {
+            _doExportFrameToDisk();
+            ++_frameNumber;
+            _accumulationFrameNumber = 0;
+        }
+    }
 }
 
 void CircuitExplorerPlugin::releaseCircuitMapper(const size_t modelId)
