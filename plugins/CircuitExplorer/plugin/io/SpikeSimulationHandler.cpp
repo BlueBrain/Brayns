@@ -117,7 +117,7 @@ void* SpikeSimulationHandler::getFrameData(const uint32_t frame)
             }
             // Spiking neuron
             else
-                _frameData[_gidMap[gid]] = DEFAULT_SPIKING_VALUE;
+                _frameData[gid] = DEFAULT_SPIKING_VALUE;
         }
         _currentFrame = boundedFrame;
     }
