@@ -99,7 +99,7 @@ Vector3f TransferFunction::getColorForValue(const double v) const
         return *_colorMap.colors.begin();
 
     if(v >= _valuesRange.y)
-        return *_colorMap.colors.end();
+        return _colorMap.colors.back();
 
     const auto normValue = (v - _valuesRange.x) / (_valuesRange.y - _valuesRange.x);
     const size_t index = static_cast<size_t>(floor(normValue * _colorMap.colors.size()));
