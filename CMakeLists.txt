@@ -68,6 +68,7 @@ common_find_package(Boost REQUIRED COMPONENTS program_options)
 common_find_package(OpenMP)
 common_find_package(libuv 1.8)
 common_find_package(FreeImage)
+find_package(glm QUIET)
 
 # Compiler options
 if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)

@@ -1392,7 +1392,9 @@ void CircuitExplorerPlugin::_doExportFrameToDisk()
     FreeImage_AcquireMemory(memory.get(), &pixels, &numPixels);
 
     char frame[7];
-    sprintf(frame, "%05d", _frameNumber);
+    sprintf(frame, "%05d",
+            static_cast<int32_t>(_exportFramesToDiskPayload.animationInformation[_frameNumber]));
+
     std::string filename = _exportFramesToDiskPayload.path + '/' + frame + "." +
                            _exportFramesToDiskPayload.format;
     std::ofstream file;

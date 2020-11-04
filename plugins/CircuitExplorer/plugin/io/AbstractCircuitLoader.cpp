@@ -256,6 +256,10 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
         setSimulationTransferFunction(model.getTransferFunction());
         break;
     }
+    case ReportType::undefined:
+    {
+        return compartmentReport;
+    }
     default:
         if (userDataType == UserDataType::distance_to_soma)
         {

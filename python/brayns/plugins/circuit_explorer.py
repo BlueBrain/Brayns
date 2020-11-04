@@ -375,7 +375,7 @@ class CircuitExplorer:
         :param list material_ids: IDs of the material to change
         :param list diffuse_color: Diffuse color (3 values between 0 and 1)
         :param list specular_color: Specular color (3 values between 0 and 1)
-        :param list specular_exponent: Diffuse exponent
+        :param float specular_exponent: Diffuse exponent
         :param float opacity: Opacity
         :param float reflection_index: Reflection index (value between 0 and 1)
         :param float refraction_index: Refraction index
@@ -385,7 +385,7 @@ class CircuitExplorer:
         SHADING_MODE_ELECTRON, SHADING_MODE_CARTOON, SHADING_MODE_ELECTRON_TRANSPARENCY,
         SHADING_MODE_PERLIN or SHADING_MODE_DIFFUSE_TRANSPARENCY)
         :param float emission: Light emission intensity
-        :param bool clipping_mode: Clipped against clipping planes/spheres defined at the scene
+        :param int clipping_mode: Clipped against clipping planes/spheres defined at the scene
         level
         :param float user_parameter: Convenience parameter used by some of the shaders
         :return: Result of the request submission

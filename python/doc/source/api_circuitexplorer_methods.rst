@@ -389,7 +389,7 @@ Return value:
   * ``opacity``: ``number``, The transparency of the material (0 to 1)
   * ``reflection_index``: ``number``, The index of reflection of the material surface
   * ``refraction_index``: ``number``, The index of refraction of a transparent material
-  * ``shading_mode``: ``integer``, The choosen shading mode (0 = none, 1 = by id, 2 = by type, 3 = by layer, 4 = by mtype, 5 = by etype, 6 = by target)
+  * ``shading_mode``: ``integer``, The choosen shading mode (0 = none, 1 = diffuse, 2 = electron, 3 = cartoon, 4 = electron transparency, 5 = perlin, 6 = diffuse transparency 7 = checker
   * ``simulation_data_cast``: ``boolean``, Wether to cast the user parameter for simulation
   * ``specular_color``: ``array``, A 3 component normalized color (RGB) describing the specular reflection
   * ``specular_exponent``: ``number``, The specular exponent to sharpen the specular reflection
@@ -605,7 +605,7 @@ Parameters:
 * ``opacity``: ``number``, The transparency of the material (0 to 1)
 * ``reflection_index``: ``number``, The index of reflection of the material surface
 * ``refraction_index``: ``number``, The index of refraction of a transparent material
-* ``shading_mode``: ``integer``, The choosen shading mode (0 = none, 1 = by id, 2 = by type, 3 = by layer, 4 = by mtype, 5 = by etype, 6 = by target)
+* ``shading_mode``: ``integer``, The choosen shading mode (0 = none, 1 = diffuse, 2 = electron, 3 = cartoon, 4 = electron transparency, 5 = perlin, 6 = diffuse transparency 7 = checker
 * ``simulation_data_cast``: ``boolean``, Wether to cast the user parameter for simulation
 * ``specular_color``: ``array``, A 3 component normalized color (RGB) describing the specular reflection
 * ``specular_exponent``: ``number``, The specular exponent to sharpen the specular reflection
@@ -670,7 +670,7 @@ Parameters:
 * ``opacity``: ``number``, The transparency of the material (0 to 1)
 * ``reflection_index``: ``number``, The index of reflection of the material surface
 * ``refraction_index``: ``number``, The index of refraction of a transparent material
-* ``shading_mode``: ``integer``, The choosen shading mode (0 = none, 1 = by id, 2 = by type, 3 = by layer, 4 = by mtype, 5 = by etype, 6 = by target)
+* ``shading_mode``: ``integer``, The choosen shading mode (0 = none, 1 = diffuse, 2 = electron, 3 = cartoon, 4 = electron transparency, 5 = perlin, 6 = diffuse transparency 7 = checker
 * ``simulation_data_cast``: ``boolean``, Wether to cast the user parameter for simulation
 * ``specular_color``: ``array``, A 3 component normalized color (RGB) describing the specular reflection (minimum 1)
 * ``specular_exponent``: ``number``, The specular exponent to sharpen the specular reflection
@@ -708,7 +708,7 @@ Parameters:
 * ``opacities``: ``array``, The transparency of the material (0 to 1) (1 per material)
 * ``reflection_indices``: ``array``, The index of reflection of the material surface (1 per material)
 * ``refraction_indices``: ``array``, The index of refraction of a transparent material (1 per material)
-* ``shading_modes``: ``array``, The choosen shading mode (0 = none, 1 = by id, 2 = by type, 3 = by layer, 4 = by mtype, 5 = by etype, 6 = by target) (1 per material)
+* ``shading_modes``: ``array``, The choosen shading mode (0 = none, 1 = diffuse, 2 = electron, 3 = cartoon, 4 = electron transparency, 5 = perlin, 6 = diffuse transparency 7 = checker) (1 per material)
 * ``simulation_data_casts``: ``array``, Wether to cast the user parameter for simulation (1 per material)
 * ``specular_colors``: ``array``, A 3 component normalized color (RGB) describing the specular reflection (1 per material)
 * ``specular_exponents``: ``array``, The specular exponent to sharpen the specular reflection (1 per material)

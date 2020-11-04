@@ -55,8 +55,8 @@ struct MaterialDescriptor : public brayns::Message
     MESSAGE_ENTRY(double, glossiness, "The glossy component of a material")
     MESSAGE_ENTRY(bool, simulationDataCast, "Wether to cast the user parameter for simulation")
     MESSAGE_ENTRY(int32_t, shadingMode,
-                  "The choosen shading mode (0 = none, 1 = by id, 2 = by type, 3 = by layer, "
-                  "4 = by mtype, 5 = by etype, 6 = by target)")
+                  "The choosen shading mode (0 = none, 1 = diffuse, 2 = electron, 3 = cartoon, "
+                  "4 = electron transparency, 5 = perlin, 6 = diffuse transparency 7 = checker)")
     MESSAGE_ENTRY(int32_t, clippingMode,
                   "The choosen material clipping mode (0 = no clipping, 1 = clip by plane, "
                   "2 = clip by sphere)")
@@ -91,8 +91,9 @@ struct MaterialsDescriptor : public brayns::Message
     MESSAGE_ENTRY(std::vector<bool>, simulationDataCasts,
                   "Wether to cast the user parameter for simulation (1 per material)")
     MESSAGE_ENTRY(std::vector<int32_t>, shadingModes,
-                  "The choosen shading mode (0 = none, 1 = by id, 2 = by type, 3 = by layer, "
-                  "4 = by mtype, 5 = by etype, 6 = by target) (1 per material)")
+                  "The choosen shading mode (0 = none, 1 = diffuse, 2 = electron, 3 = cartoon, "
+                  "4 = electron transparency, 5 = perlin, 6 = diffuse transparency 7 = checker) "
+                  "(1 per material)")
     MESSAGE_ENTRY(std::vector<int32_t>, clippingModes,
                   "The choosen material clipping mode (0 = no clipping, 1 = clip by plane, "
                   "2 = clip by sphere) (1 per material)")
@@ -122,8 +123,8 @@ struct MaterialRangeDescriptor : public brayns::Message
     MESSAGE_ENTRY(double, glossiness, "The glossy component of a material")
     MESSAGE_ENTRY(bool, simulationDataCast, "Wether to cast the user parameter for simulation")
     MESSAGE_ENTRY(int32_t, shadingMode,
-                  "The choosen shading mode (0 = none, 1 = by id, 2 = by type, 3 = by layer,"
-                  " 4 = by mtype, 5 = by etype, 6 = by target)")
+                  "The choosen shading mode (0 = none, 1 = diffuse, 2 = electron, 3 = cartoon, "
+                  "4 = electron transparency, 5 = perlin, 6 = diffuse transparency 7 = checker)")
     MESSAGE_ENTRY(int32_t, clippingMode,
                   "The choosen material clipping mode (0 = no clipping, 1 = clip by plane, "
                   "2 = clip by sphere)")
