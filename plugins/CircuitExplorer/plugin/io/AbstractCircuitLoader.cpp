@@ -1013,6 +1013,7 @@ void AbstractCircuitLoader::_loadAllSynapses(
 {
     uint64_t i = 0;
 
+    auto uris = circuit.getMorphologyURIs(gids);
     if(compartmentReport)
     {
         for (const auto &gid : gids)
@@ -1026,6 +1027,8 @@ void AbstractCircuitLoader::_loadAllSynapses(
             const auto& counts =
                 compartmentReport->getCompartmentCounts()[i];
 
+            brain::neuron::Morphology morphology(uris[i]);
+
 
             if (loadAfferentSynapses)
             {
@@ -1036,7 +1039,44 @@ void AbstractCircuitLoader::_loadAllSynapses(
                     uint64_t userDataOffset = i;
                     auto sectionId = synapse.getPostsynapticSectionID();
                     if (sectionId < counts.size() && counts[sectionId] > 0)
-                        userDataOffset = offsets[sectionId];
+                    {
+                        auto sections = morphology.getSections({brain::neuron::SectionType::apicalDendrite,
+                                                                brain::neuron::SectionType::dendrite,
+                                                                brain::neuron::SectionType::axon});
+                        brain::neuron::Section* section = nullptr;
+                        for(auto& s : sections)
+                        {
+                            if(s.getID() == sectionId)
+                            {
+                                section = &s;
+                                break;
+                            }
+                        }
+
+                        if (section)
+                        {
+                            auto samples = section->getSamples();
+                            uint64_t j = 0, chosen = 0;
+                            double closer = 99999999.9;
+                            for(const auto& sample : samples)
+                            {
+                                glm::vec3 v3sample (sample);
+                                auto dist = glm::length(v3sample - synapse.getPostsynapticSurfacePosition());
+                                if(dist < closer)
+                                {
+                                    closer = dist;
+                                    chosen = j;
+                                }
+                                ++j;
+                            }
+
+                            const auto segCounts = counts[sectionId];
+                            const auto alpha = static_cast<double>(chosen) / static_cast<double>(segCounts);
+                            const auto extra = static_cast<uint64_t>(floor(segCounts * alpha));
+
+                            userDataOffset = offsets[sectionId] + extra;
+                        }
+                    }
 
                     _buildAfferentSynapses(synapse, id + 1, synapseRadius, model, userDataOffset);
                 }
@@ -1049,9 +1089,46 @@ void AbstractCircuitLoader::_loadAllSynapses(
                 for (const brain::Synapse &synapse : efferentSynapses)
                 {
                     uint64_t userDataOffset = i;
-                    auto sectionId = synapse.getPostsynapticSectionID();
+                    const auto sectionId = synapse.getPresynapticSectionID();
                     if (sectionId < counts.size() && counts[sectionId] > 0)
-                        userDataOffset = offsets[sectionId];
+                    {
+                        auto sections = morphology.getSections({brain::neuron::SectionType::apicalDendrite,
+                                                                brain::neuron::SectionType::dendrite,
+                                                                brain::neuron::SectionType::axon});
+                        brain::neuron::Section* section = nullptr;
+                        for(auto& s : sections)
+                        {
+                            if(s.getID() == sectionId)
+                            {
+                                section = &s;
+                                break;
+                            }
+                        }
+
+                        if (section)
+                        {
+                            const auto samples = section->getSamples();
+                            uint64_t j = 0, chosen = 0;
+                            double closer = 99999999.9;
+                            for(const auto& sample : samples)
+                            {
+                                glm::vec3 v3sample (sample);
+                                auto dist = glm::length(v3sample - synapse.getPresynapticSurfacePosition());
+                                if(dist < closer)
+                                {
+                                    closer = dist;
+                                    chosen = j;
+                                }
+                                ++j;
+                            }
+
+                            const auto segCounts = counts[sectionId];
+                            const auto alpha = static_cast<double>(chosen) / static_cast<double>(segCounts);
+                            const auto extra = static_cast<uint64_t>(floor(segCounts * alpha));
+
+                            userDataOffset = offsets[sectionId] + extra;
+                        }
+                    }
                     _buildEfferentSynapses(synapse, id + 2, synapseRadius, model, userDataOffset);
                 }
             }
