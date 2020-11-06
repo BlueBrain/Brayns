@@ -978,7 +978,7 @@ float AbstractCircuitLoader::_importMorphologies(
                           stoi(postSynapticGID), synapseRadius, model);
     else
         _loadAllSynapses(properties, circuit, gids, static_cast<float>(synapseRadius),
-                         loadAfferentSynapses, loadEfferentSynapses, model);
+                         loadAfferentSynapses, loadEfferentSynapses, model, compartmentReport);
 
     PLUGIN_TIMER(chrono.elapsed(), "Loading of " << gids.size() << " cells");
     return maxDistanceToSoma;
@@ -1009,45 +1009,95 @@ void AbstractCircuitLoader::_loadAllSynapses(
     const brayns::PropertyMap &properties, const brain::Circuit &circuit,
     const brain::GIDSet &gids, const float synapseRadius,
     const bool loadAfferentSynapses, const bool loadEfferentSynapses,
-    brayns::Model &model) const
+    brayns::Model &model, CompartmentReportPtr compartmentReport) const
 {
     uint64_t i = 0;
-    for (const auto &gid : gids)
-    {
-        const size_t id =
-            _getMaterialFromCircuitAttributes(properties, i,
-                                              brayns::NO_MATERIAL, false);
-        if (loadAfferentSynapses)
-        {
-            const brain::Synapses &afferentSynapses(
-                circuit.getAfferentSynapses({gid}));
-            for (const brain::Synapse &synapse : afferentSynapses)
-                _buildAfferentSynapses(synapse, id + 1, synapseRadius, model);
-        }
 
-        if (loadEfferentSynapses)
+    if(compartmentReport)
+    {
+        for (const auto &gid : gids)
         {
-            const brain::Synapses &efferentSynapses(
-                circuit.getEfferentSynapses({gid}));
-            for (const brain::Synapse &synapse : efferentSynapses)
-                _buildEfferentSynapses(synapse, id + 2, synapseRadius, model);
+            const size_t id =
+                _getMaterialFromCircuitAttributes(properties, i,
+                                                  brayns::NO_MATERIAL, false);
+
+            const auto& offsets =
+                compartmentReport->getOffsets()[i];
+            const auto& counts =
+                compartmentReport->getCompartmentCounts()[i];
+
+
+            if (loadAfferentSynapses)
+            {
+                const brain::Synapses &afferentSynapses(
+                    circuit.getAfferentSynapses({gid}));
+                for (const brain::Synapse &synapse : afferentSynapses)
+                {
+                    uint64_t userDataOffset = i;
+                    auto sectionId = synapse.getPostsynapticSectionID();
+                    if (sectionId < counts.size() && counts[sectionId] > 0)
+                        userDataOffset = offsets[sectionId];
+
+                    _buildAfferentSynapses(synapse, id + 1, synapseRadius, model, userDataOffset);
+                }
+            }
+
+            if (loadEfferentSynapses)
+            {
+                const brain::Synapses &efferentSynapses(
+                    circuit.getEfferentSynapses({gid}));
+                for (const brain::Synapse &synapse : efferentSynapses)
+                {
+                    uint64_t userDataOffset = i;
+                    auto sectionId = synapse.getPostsynapticSectionID();
+                    if (sectionId < counts.size() && counts[sectionId] > 0)
+                        userDataOffset = offsets[sectionId];
+                    _buildEfferentSynapses(synapse, id + 2, synapseRadius, model, userDataOffset);
+                }
+            }
+            ++i;
         }
-        ++i;
+    }
+    else
+    {
+        for (const auto &gid : gids)
+        {
+            const size_t id =
+                _getMaterialFromCircuitAttributes(properties, i,
+                                                  brayns::NO_MATERIAL, false);
+
+            if (loadAfferentSynapses)
+            {
+                const brain::Synapses &afferentSynapses(
+                    circuit.getAfferentSynapses({gid}));
+                for (const brain::Synapse &synapse : afferentSynapses)
+                    _buildAfferentSynapses(synapse, id + 1, synapseRadius, model);
+            }
+
+            if (loadEfferentSynapses)
+            {
+                const brain::Synapses &efferentSynapses(
+                    circuit.getEfferentSynapses({gid}));
+                for (const brain::Synapse &synapse : efferentSynapses)
+                    _buildEfferentSynapses(synapse, id + 2, synapseRadius, model);
+            }
+            ++i;
+        }
     }
 }
 
 void AbstractCircuitLoader::_buildAfferentSynapses(
     const brain::Synapse &synapse, const size_t materialId, const float radius,
-    brayns::Model &model) const
+    brayns::Model &model, const uint64_t userData) const
 {
-    model.addSphere(materialId, {synapse.getPostsynapticSurfacePosition(), radius});
+    model.addSphere(materialId, {synapse.getPostsynapticSurfacePosition(), radius, userData});
 }
 
 void AbstractCircuitLoader::_buildEfferentSynapses(
     const brain::Synapse &synapse, const size_t materialId, const float radius,
-    brayns::Model &model) const
+    brayns::Model &model, const uint64_t userData) const
 {
-    model.addSphere(materialId, {synapse.getPresynapticSurfacePosition(), radius});
+    model.addSphere(materialId, {synapse.getPresynapticSurfacePosition(), radius, userData});
 }
 
 brayns::ModelDescriptorPtr AbstractCircuitLoader::importFromBlob(
