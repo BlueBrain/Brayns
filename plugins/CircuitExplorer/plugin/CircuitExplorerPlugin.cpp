@@ -1362,6 +1362,16 @@ brayns::Message CircuitExplorerPlugin::_exportFramesToDisk(
                    "---------------------"
                 << std::endl;
 
+    // Update the camera with the first frame information
+    CameraDefinition cd;
+    const auto& ci = _exportFramesToDiskPayload.cameraInformation;
+    cd.origin = {ci[0], ci[1], ci[2]};
+    cd.direction = {ci[3], ci[4], ci[5]};
+    cd.up = {ci[6], ci[7], ci[8]};
+    cd.apertureRadius = ci[9];
+    cd.focusDistance = ci[10];
+    _setCamera(cd);
+
     return result;
 }
 
