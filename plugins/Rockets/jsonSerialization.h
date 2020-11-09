@@ -202,6 +202,27 @@ struct ModifyMaterialResult
 };
 
 // ====================================================
+// Structs to handle active simulation model
+
+struct SetActiveSimulationModel
+{
+    size_t modelId;
+};
+
+struct SetActiveSimulationModelResponse
+{
+    int error;
+    std::string message;
+};
+
+struct GetActiveSimulationModel
+{
+    size_t modelId;
+    int error;
+    std::string message;
+};
+
+// ====================================================
 // Structs to handle client state
 
 struct ClientStateEntry
@@ -710,6 +731,27 @@ inline void init(brayns::ModifyMaterial* a, ObjectHandler* h)
 
 inline void init(brayns::ModifyMaterialResult* a, ObjectHandler* h)
 {
+    h->add_property("error", &a->error);
+    h->add_property("message", &a->message);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline  void init(brayns::SetActiveSimulationModel* a, ObjectHandler* h)
+{
+    h->add_property("modelId", &a->modelId);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::SetActiveSimulationModelResponse* a, ObjectHandler* h)
+{
+    h->add_property("error", &a->error);
+    h->add_property("message", &a->message);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::GetActiveSimulationModel* a, ObjectHandler* h)
+{
+    h->add_property("modelId", &a->modelId);
     h->add_property("error", &a->error);
     h->add_property("message", &a->message);
     h->set_flags(Flags::DisallowUnknownKey);

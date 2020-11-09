@@ -185,6 +185,11 @@ ModelDescriptorPtr ModelDescriptor::clone(ModelPtr model) const
     return newModelDesc;
 }
 
+void ModelDescriptor::setActiveSimulatedModel(bool val)
+{
+    _simulatedModel = val;
+}
+
 Model::Model(AnimationParameters& animationParameters,
              VolumeParameters& volumeParameters)
     : _animationParameters(animationParameters)

@@ -136,6 +136,9 @@ const std::string METHOD_FS_LIST_DIR = "fs-list-dir";
 const std::string METHOD_GET_MATERIAL = "get-mat";
 const std::string METHOD_SET_MATERIAL = "set-mat";
 
+const std::string METHOD_GET_ACTIVE_SIMULATED_MODEL = "get-active-simulation-model";
+const std::string METHOD_SET_ACTIVE_SIMULATED_MODEL = "set-active-simulation-model";
+
 const std::string METHOD_CLIENTSTATE_SET = "client-state-set";
 const std::string METHOD_CLIENTSTATE_GET = "client-state-get";
 const std::string METHOD_CLIENTSTATE_GET_ALL = "client-state-get-all";
@@ -1077,6 +1080,8 @@ public:
         _handleFsGetListDir();
 
         _handleMaterial();
+
+        _handleActiveSimulationModel();
 
         _handleClientState();
 
@@ -2109,6 +2114,61 @@ public:
 
             return result;
         });
+    }
+
+    void _handleActiveSimulationModel()
+    {
+        const RpcParameterDescription descSetSimModel
+        {
+            METHOD_SET_ACTIVE_SIMULATED_MODEL,
+            "Sets the active model for simulation",
+            "SetActiveSimulationModel", "The ID of the model to set as active"
+        };
+        _handleRPC<SetActiveSimulationModel, SetActiveSimulationModelResponse>
+                (descSetSimModel, [&](const SetActiveSimulationModel& req)
+        {
+            SetActiveSimulationModelResponse result;
+            result.error = 0;
+
+            try
+            {
+                _engine.getScene().setActiveSimulatedModel(req.modelId);
+                _engine.getScene().markModified();
+            }
+            catch(const std::exception& e)
+            {
+                result.error = 1;
+                result.message = std::string(e.what());
+            }
+
+            return result;
+        });
+
+        const RpcDescription desc
+        {
+            METHOD_GET_ACTIVE_SIMULATED_MODEL,
+            "Return the ID of the model selected for simulation"
+        };
+        _bindEndpoint(METHOD_GET_ACTIVE_SIMULATED_MODEL, [&]
+                      (const rockets::jsonrpc::Request&)
+        {
+            GetActiveSimulationModel res;
+            try
+            {
+                res.modelId = _engine.getScene().getActiveSimulatedModel();
+            }
+            catch(const std::exception& e)
+            {
+                res.error = 1;
+                res.message = std::string(e.what());
+            }
+
+            return Response{to_json(res)};
+        });
+
+        _handleSchema(
+            METHOD_GET_ACTIVE_SIMULATED_MODEL,
+            buildJsonRpcSchemaRequestReturnOnly<GetActiveSimulationModel>(desc));
     }
 
     void _handleClientState()
