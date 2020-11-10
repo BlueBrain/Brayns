@@ -700,7 +700,7 @@ void MorphologyLoader::_importMorphologyFromURI(
 
     // If there is no compartment report, the offset in the simulation
     // buffer is the index of the morphology in the circuit
-    uint64_t userDataOffset = 0;
+    uint64_t userDataOffset = index;
     if (compartmentReport)
         userDataOffset = compartmentReport->getOffsets()[index][0];
 
@@ -841,7 +841,7 @@ void MorphologyLoader::_importMorphologyFromURI(
                 }
                 break;
             case UserDataType::undefined:
-                userDataOffset = 0;
+                userDataOffset = index;
                 break;
             }
 
