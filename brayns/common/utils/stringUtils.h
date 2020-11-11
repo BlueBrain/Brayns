@@ -33,7 +33,8 @@ std::string replaceFirstOccurrence(std::string input,
                                    const std::string& replaceWith);
 
 std::string camelCaseToSeparated(const std::string& camelCase,
-                                 const char separator);
+                                 const char separator,
+                                 bool separateNumericals = true);
 
 std::string separatedToCamelCase(const std::string& separated,
                                  const char separator);
