@@ -266,6 +266,34 @@ In the event of an error, the return value will be a ``dictionary``, contain 2 e
 
 ----
 
+color_cells
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Parameters:
+
+.. code-block:: python
+
+    color_cells(model_id, gids, colors)
+
+Sets the color of the geometry of cells given by GID.
+
+Parameters:
+
+* ``model_id``: ``integer``, The model to which apply the color
+* ``gid``: ``array``, List of GID ranges as string. Each string represents a batch of cells that will be mapped to the color in the same index. Examples of ranges: "80", "1-100,510".
+* ``colors``: ``array``, Contiguous list of RGB values to apply. This list must be 3 times the size of the gid list. Example of color list (red, blue): [1,0,0,0,0,1]
+
+Error:
+
+In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
+
+* ``error``: ``integer``, an error code that identifies the problem.
+* ``messge``: ``str``, a description of the error.
+
+
+----
+
 export_frames_to_disk
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -433,6 +461,28 @@ In the event of an error, the return value will be a ``dictionary``, contain 2 e
 
 * ``error``: ``integer``, an error code that identifies the problem.
 * ``messge``: ``str``, a description of the error.
+
+
+----
+
+get_material_properties
+~~~~~~~~~~~~~~~~
+
+
+Parameters:
+
+.. code-block:: python
+
+    get_material_ids()
+
+Returns all the editable material property names and their data types
+
+Return value:
+
+* ``dictionary`` with the following entries:
+
+ * ``properties``: ``array``, The list of material property names
+ * ``property_types``: ``array``, The list of material property data types names
 
 
 ----
@@ -833,6 +883,35 @@ Parameters:
 * ``non_connected_cells_color``: ``array``, A 4 component normalized color (RGBA) to apply to the rest of cells
 * ``source_cell_color``: ``array``, A 4 component normalized color (RGBA) to apply to the source cell geometry
 * ``target_cell_gids``: ``array``, List of cells GIDs which are the result of the given tracing mode
+
+Error:
+
+In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
+
+* ``error``: ``integer``, an error code that identifies the problem.
+* ``messge``: ``str``, a description of the error.
+
+
+----
+
+update_material_properties
+~~~~~~~~~~~~~~~~~
+
+
+Parameters:
+
+.. code-block:: python
+
+    update_material_properties(model_id, material_ids, property_names, property_values)
+
+Update only the specified properties with the specified values for the given model and materials.
+
+Parameters:
+
+* ``model_id``: ``integer``, ID of the model to which apply the material modification
+* ``material_ids``: ``array``, List of material ids belonging to the given model. If empty, all materials of the given model will be modified.
+* ``property_names``: ``array``, List of property names to update. The names must match those returned by `get_material_properties()`
+* ``property_values``: ``array``, List of property values as string corresponding to the specified properties. Must be convertible to the types returned by `get_material_properties()`
 
 Error:
 
