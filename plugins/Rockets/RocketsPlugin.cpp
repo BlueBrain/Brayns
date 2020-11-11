@@ -1866,12 +1866,12 @@ public:
         const RpcParameterDescription desc{METHOD_FS_GET_CONTENT,
                                            "Return the content of a file if possible, or an error otherwise",
                                            "path", "Absolute path to the file"};
-        _handleRPC<InputPath, FileContent>(desc, [&](const auto& inputPath) {
+        _handleRPC<GetFileContent, GetFileContentResult>(desc, [&](const auto& inputPath) {
             this->_rebroadcast(METHOD_FS_GET_CONTENT, to_json(inputPath),
                                {_currentClientID});
             // Stat the requested file
             FileStats ft = this->_getFileStats(inputPath.path);
-            FileContent fc;
+            GetFileContentResult fc;
 
             fc.error = ft.error;
             fc.message = ft.message;
@@ -1889,9 +1889,12 @@ public:
                     std::vector<char> buffer(static_cast<size_t>(len));
                     file.read(&buffer[0], len);
                     file.close();
-                    fc.content = base64_encode(reinterpret_cast<unsigned char*>(buffer.data()),
-                                               buffer.size());
-                    fc.base64 = true;
+                    if(inputPath.base64)
+                        fc.content = base64_encode(reinterpret_cast<unsigned char*>(buffer.data()),
+                                                   buffer.size());
+                    else
+                        fc.content = std::string(buffer.begin(), buffer.end());
+
                 }
                 else
                 {

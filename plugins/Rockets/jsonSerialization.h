@@ -128,9 +128,14 @@ struct FileType
     std::string message;
 };
 
-struct FileContent
+struct GetFileContent
 {
+    std::string path;
     bool base64;
+};
+
+struct GetFileContentResult
+{
     std::string content;
     int error;
     std::string message;
@@ -677,9 +682,15 @@ inline void init(brayns::FileType* a, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::FileContent* a, ObjectHandler* h)
+inline void init(brayns::GetFileContent* a, ObjectHandler* h)
 {
+    h->add_property("path", &a->path);
     h->add_property("base64", &a->base64);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::GetFileContentResult* a, ObjectHandler* h)
+{
     h->add_property("content", &a->content);
     h->add_property("error", &a->error, Flags::Optional);
     h->add_property("message", &a->message, Flags::Optional);

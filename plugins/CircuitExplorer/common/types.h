@@ -192,7 +192,8 @@ const brayns::Property PROP_DB_CONNECTION_STRING = {
     {"Connection string to the database"}};
 const brayns::Property PROP_DENSITY = {
     "001Density", 1.0,
-    {"Density of cells in the circuit in percent"}};
+    {"Density of cells in the circuit in percent",
+     "Will not have effect if a list of GIDs is specified."}};
 const brayns::Property PROP_RANDOM_SEED = {
     "002RandomSeed", 0.0,
     {"Random seed for target subsetting"}};
@@ -200,8 +201,9 @@ const brayns::Property PROP_TARGETS = {
     "010Targets",  std::string(""),
     {"Circuit targets [comma separated list of labels]"}};
 const brayns::Property PROP_GIDS = {
-    "011Gids",  std::string(""),
-    {"Circuit GIDs [comma separated list of GIDs]"}};
+    "011Gids", std::string(""),
+    {"Circuit GIDs [comma separated list of GIDs]",
+     "Invalidates the density parameter when used."}};
 const brayns::Property PROP_PRESYNAPTIC_NEURON_GID = {
     "012PreNeuron",  std::string(""),
     {"Pre-synaptic neuron GID"}};

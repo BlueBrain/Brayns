@@ -204,7 +204,7 @@ void addDefaultValue(rapidjson::Document& document,
                      const std::vector<std::string>& value)
 {
     rapidjson::Value arr(rapidjson::kArrayType);
-    for (const auto v : value)
+    for (const auto& v : value)
         arr.PushBack(make_value_string(v, allocator).Move(), allocator);
     document.AddMember(rapidjson::StringRef("default"), arr, allocator);
 }
@@ -268,6 +268,12 @@ void _addPropertySchema(const Property& prop, rapidjson::Value& properties,
                                   allocator);
         jsonSchema.AddMember(StringRef("enum"), enumerations, allocator);
     }
+    // Add description, if any
+    if(!prop.metaData.description.empty()
+            && prop.metaData.description != "no-description")
+        jsonSchema.AddMember(StringRef("description"),
+                             StringRef(prop.metaData.description.c_str()), allocator);
+
     properties.AddMember(make_json_string(prop.name, allocator).Move(),
                          jsonSchema, allocator);
 }
@@ -284,6 +290,10 @@ void _addPropertySchema<bool>(const Property& prop,
     auto jsonSchema = staticjson::export_json_schema(&value, &allocator);
     jsonSchema.AddMember(StringRef("title"),
                          StringRef(prop.metaData.label.c_str()), allocator);
+    if(!prop.metaData.description.empty()
+            && prop.metaData.description != "no-description")
+        jsonSchema.AddMember(StringRef("description"),
+                             StringRef(prop.metaData.description.c_str()), allocator);
     addDefaultValue(jsonSchema, allocator, value);
     jsonSchema.AddMember(StringRef("readOnly"), prop.readOnly(), allocator);
     properties.AddMember(make_json_string(prop.name, allocator).Move(),
@@ -323,6 +333,10 @@ void _addPropertySchema<std::string>(
     jsonSchema.AddMember(StringRef("readOnly"), prop.readOnly(), allocator);
     jsonSchema.AddMember(StringRef("title"),
                          StringRef(prop.metaData.label.c_str()), allocator);
+    if(!prop.metaData.description.empty()
+            && prop.metaData.description != "no-description")
+        jsonSchema.AddMember(StringRef("description"),
+                             StringRef(prop.metaData.description.c_str()), allocator);
     properties.AddMember(make_json_string(prop.name, allocator).Move(),
                          jsonSchema, allocator);
 }
@@ -338,6 +352,10 @@ void _addArrayPropertySchema(const Property& prop, rapidjson::Value& properties,
     auto jsonSchema = staticjson::export_json_schema(&value, &allocator);
     jsonSchema.AddMember(StringRef("title"),
                          StringRef(prop.metaData.label.c_str()), allocator);
+    if(!prop.metaData.description.empty()
+            && prop.metaData.description != "no-description")
+        jsonSchema.AddMember(StringRef("description"),
+                             StringRef(prop.metaData.description.c_str()), allocator);
     addDefaultValue(jsonSchema, allocator, value);
 
     properties.AddMember(make_json_string(prop.name, allocator).Move(),
@@ -353,6 +371,10 @@ void _addVectorPropertySchema(const Property& prop, rapidjson::Value& properties
     auto jsonSchema = staticjson::export_json_schema(&value, &allocator);
     jsonSchema.AddMember(StringRef("title"),
                          StringRef(prop.metaData.label.c_str()), allocator);
+    if(!prop.metaData.description.empty()
+            && prop.metaData.description != "no-description")
+        jsonSchema.AddMember(StringRef("description"),
+                             StringRef(prop.metaData.description.c_str()), allocator);
     addDefaultValue(jsonSchema, allocator, value);
 
     properties.AddMember(make_json_string(prop.name, allocator).Move(),
@@ -371,6 +393,10 @@ void _addBoolVectorPropertySchema(const Property& prop, rapidjson::Value& proper
     auto jsonSchema = staticjson::export_json_schema(&value, &allocator);
     jsonSchema.AddMember(StringRef("title"),
                          StringRef(prop.metaData.label.c_str()), allocator);
+    if(!prop.metaData.description.empty()
+            && prop.metaData.description != "no-description")
+        jsonSchema.AddMember(StringRef("description"),
+                             StringRef(prop.metaData.description.c_str()), allocator);
     addDefaultValue(jsonSchema, allocator, value);
 
     properties.AddMember(make_json_string(prop.name, allocator).Move(),
