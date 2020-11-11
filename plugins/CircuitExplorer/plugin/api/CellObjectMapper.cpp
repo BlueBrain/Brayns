@@ -298,7 +298,7 @@ void CellObjectMapper::onCircuitColorFinish(const CircuitColorScheme& scheme,
             std::set<std::string> uniqueIds;
             uniqueIds.insert(si.ids.begin(), si.ids.end());
             size_t counter = 0;
-            for(const auto id : uniqueIds)
+            for(const auto& id : uniqueIds)
             {
                 auto matIdIt = si.materialMap.find(id);
                 if(matIdIt != si.materialMap.end())

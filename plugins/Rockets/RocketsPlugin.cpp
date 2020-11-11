@@ -129,6 +129,7 @@ const std::string METHOD_CLEAR_LIGHTS = "clear-lights";
 // Filesystem query
 const std::string METHOD_FS_EXISTS = "fs-exists";
 const std::string METHOD_FS_GET_CONTENT = "fs-get-content";
+const std::string METHOD_FS_SET_CONTENT = "fs-set-content";
 const std::string METHOD_FS_GET_ROOT = "fs-get-root";
 const std::string METHOD_FS_LIST_DIR = "fs-list-dir";
 
@@ -1076,6 +1077,7 @@ public:
 
         _handleFsExists();
         _handleFsGetContent();
+        _handleFsSetContent();
         _handleFsGetRoot();
         _handleFsGetListDir();
 
@@ -1897,6 +1899,49 @@ public:
             }
 
             return fc;
+        });
+    }
+
+    void _handleFsSetContent()
+    {
+        const RpcParameterDescription desc{METHOD_FS_SET_CONTENT,
+                                           "Creates a file and sets its content. "
+                                           "If the file exists, it will be truncated",
+                                           "SetFileContent", "Path, content and content type of the"
+                                                             " file."};
+        _handleRPC<SetFileContent, SetFileContentResult>(desc, [&](const SetFileContent& fc)
+        {
+            SetFileContentResult result;
+            result.error = 0;
+
+            FileStats stats = _getFileStats(fc.path);
+            if(stats.type == "directory")
+            {
+                result.error = 1;
+                result.message = "The path " + fc.path + " denotes a directory";
+                return result;
+            }
+
+            try
+            {
+                std::string finalContent = fc.base64Encoded? base64_decode(fc.content)
+                                                           : fc.content;
+                auto flags = fc.binary? (std::ios::binary | std::ios::trunc)
+                                      : std::ios::trunc;
+
+
+                std::ofstream outFile (fc.path, flags);
+                outFile << finalContent;
+                outFile.flush();
+                outFile.close();
+            }
+            catch(const std::exception& e)
+            {
+                result.error = 1;
+                result.message = std::string(e.what());
+            }
+
+            return result;
         });
     }
 

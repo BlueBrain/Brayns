@@ -131,6 +131,27 @@ struct MaterialRangeDescriptor : public brayns::Message
     MESSAGE_ENTRY(double, userParameter, "A custom parameter passed to the simulation")
 };
 
+struct MaterialProperties : public brayns::Message
+{
+    MESSAGE_BEGIN(MaterialProperties)
+    MESSAGE_ENTRY(std::vector<std::string>, properties, "List of available material property names")
+    MESSAGE_ENTRY(std::vector<std::string>, propertyTypes, "Data type of the available properties")
+};
+
+struct UpdateMaterialProperties : public brayns::Message
+{
+    MESSAGE_BEGIN(UpdateMaterialProperties)
+    MESSAGE_ENTRY(uint64_t, modelId, "Id of the model to update")
+    MESSAGE_ENTRY(std::vector<uint64_t>, materialIds, "Id of the materials to update. If empty, "
+                                                      "all model materials will be updated.")
+    MESSAGE_ENTRY(std::vector<std::string>, propertyNames, "List of property names to update "
+                                                           "in the material")
+    MESSAGE_ENTRY(std::vector<std::string>, propertyValues, "Lost of all property values to "
+                                                            "update in the material. Must be in the"
+                                                            "same order as the property name list")
+
+};
+
 struct ModelId : brayns::Message
 {
     MESSAGE_BEGIN(ModelId)
@@ -446,6 +467,15 @@ struct RemapCircuit : public brayns::Message
     MESSAGE_ENTRY(std::string, scheme, "Color scheme to remap a circuit to (Possible values: "
                                        "\"By id\", \"By layer\", \"By mtype\", \"By etype\", "
                                        "\"By target\")")
+};
+
+struct ColorCells : public brayns::Message
+{
+    MESSAGE_BEGIN(ColorCells)
+    MESSAGE_ENTRY(uint64_t, modelId, "The model to which apply the coloring")
+    MESSAGE_ENTRY(std::vector<uint64_t>, gids, "List of cell GIDs to color")
+    MESSAGE_ENTRY(std::vector<double>, colors, "List of RGB colors, in the same order as "
+                                               "the GIDs were specified")
 };
 
 #endif // CIRCUITEXLORERPARAMS_H

@@ -135,6 +135,20 @@ struct FileContent
     std::string message;
 };
 
+struct SetFileContent
+{
+    std::string path;
+    bool binary;
+    bool base64Encoded;
+    std::string content;
+};
+
+struct SetFileContentResult
+{
+    int error;
+    std::string message;
+};
+
 struct FileRoot
 {
     std::string root;
@@ -666,6 +680,22 @@ inline void init(brayns::FileType* a, ObjectHandler* h)
 inline void init(brayns::FileContent* a, ObjectHandler* h)
 {
     h->add_property("content", &a->content);
+    h->add_property("error", &a->error, Flags::Optional);
+    h->add_property("message", &a->message, Flags::Optional);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::SetFileContent* a, ObjectHandler* h)
+{
+    h->add_property("path", &a->path);
+    h->add_property("binary", &a->binary);
+    h->add_property("base64Encoded", &a->base64Encoded);
+    h->add_property("content", &a->content);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::SetFileContentResult* a, ObjectHandler* h)
+{
     h->add_property("error", &a->error, Flags::Optional);
     h->add_property("message", &a->message, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);

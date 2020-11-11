@@ -350,9 +350,24 @@ void CircuitExplorerPlugin::init()
                 {"set-material-range",
                  "Sets a set of materials of a single model with common material data",
                  "MaterialRangeDescriptor",
-                 "The"},
+                 "The common data with which to update the material"},
                 [&](const MaterialRangeDescriptor& param) {
                     return _setMaterialRange(param);
+            });
+
+            actionInterface->registerRequest<MaterialProperties>(
+                {"get-material-properties",
+                 "Returns the properties of the current camera"},
+                [&]() -> MaterialProperties { return _getMaterialProperties(); });
+
+            actionInterface->registerRequest<UpdateMaterialProperties, brayns::Message>(
+                {"update-material-properties",
+                 "Update selected properties of a set of materials of a single model with "
+                 "common material data",
+                 "UpdateMaterialProperties",
+                 "The properties and values to update in the materials"},
+                [&](const UpdateMaterialProperties& param) {
+                    return _updateMaterialProperties(param);
             });
 
             actionInterface->registerRequest<ModelId, MaterialIds>(
@@ -540,6 +555,15 @@ void CircuitExplorerPlugin::init()
                  "Scheme to which remap the circuits colors to"},
                 [&](const RemapCircuit& s) { return _remapCircuitToScheme(s); });
 
+            actionInterface->registerRequest<ColorCells, brayns::Message>(
+                {"color-cells",
+                 "Color specific cells, given by GID, with specific "
+                 "colors given in RGB",
+                 "ColorCells",
+                 "Information about the model, cells and color to "
+                 "update"},
+                [&](const ColorCells& cc) { return _colorCells(cc); });
+
         } // if (actionInterface)
 
     auto& engine = _api->getEngine();
@@ -567,6 +591,7 @@ void CircuitExplorerPlugin::preRender()
         if (_frameNumber >= ai.size())
         {
             _exportFramesToDiskDirty = false;
+            _exportFramesToDiskStartFlag = false;
             // Re-establish the old accumulation settings after we are done with the
             // frame export
             _api->getParametersManager().getRenderingParameters()
@@ -574,6 +599,7 @@ void CircuitExplorerPlugin::preRender()
         }
         else
         {
+            _exportFramesToDiskStartFlag = true;
             const uint64_t i = 11 * _frameNumber;
             // Camera position
             CameraDefinition cd;
@@ -594,7 +620,7 @@ void CircuitExplorerPlugin::preRender()
 
 void CircuitExplorerPlugin::postRender()
 {
-    if(_exportFramesToDiskDirty)
+    if(_exportFramesToDiskDirty && _exportFramesToDiskStartFlag)
     {
         ++_accumulationFrameNumber;
         if (_accumulationFrameNumber == _exportFramesToDiskPayload.spp)
@@ -895,6 +921,206 @@ brayns::Message CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDesc
     return result;
 }
 
+MaterialProperties CircuitExplorerPlugin::_getMaterialProperties()
+{
+    // diffuseColor, specularColor, specularExponent, reflectionIndex, refractionIndex,
+    // Opacity, Emission, Glossiness, simulationDataCast, shadingMode, clippingMode, userParameter
+    MaterialProperties result;
+    result.properties = { "diffuse_color", "specular_color", "specular_exponent",
+                          "reflection_index", "refraction_index", "opacity", "emission",
+                          "glossiness", "simulation_data_cast", "shading_mode",
+                          "clipping_mode", "user_parameter"};
+    result.propertyTypes = { "array", "array", "float",
+                             "float", "float", "float", "float",
+                             "float", "bool", "int", "int", "float"};
+
+    return result;
+}
+
+brayns::Vector3d arrayFromString(const std::string& str)
+{
+    brayns::Vector3d result;
+
+    std::string s (str);
+    size_t index = 0;
+    static const std::regex regexExpr("([0-9]+\\.?[0-9]*)");
+    std::smatch pieces;
+    while(std::regex_search(s, pieces, regexExpr) && index < 3)
+    {
+        result[index] = std::stod(pieces.str());
+        s = pieces.suffix();
+        ++index;
+    }
+
+    return result;
+}
+
+brayns::Message CircuitExplorerPlugin::_updateMaterialProperties(const UpdateMaterialProperties& r)
+{
+    brayns::Message result;
+
+    auto model = _api->getScene().getModel(r.modelId);
+    if(!model)
+    {
+        result.setError(1, "Model ID " + std::to_string(r.modelId) + " does not exists");
+        return result;
+    }
+
+    if(!r.materialIds.empty())
+    {
+        const auto& materials = model->getModel().getMaterials();
+        for(const auto matId : r.materialIds)
+        {
+            if(materials.find(matId) == materials.end())
+            {
+                result.setError(2, "One or more material IDs does not belong to the given model");
+                return result;
+            }
+        }
+    }
+
+    if(r.propertyNames.size() != r.propertyValues.size())
+    {
+        result.setError(3, "Property list length does not match property value list");
+        return result;
+    }
+
+    MaterialExtraAttributes mea;
+    mea.modelId = r.modelId;
+    _setMaterialExtraAttributes(mea);
+
+    std::vector<std::function<void(brayns::MaterialPtr& m)>> updates;
+    for(size_t i = 0; i < r.propertyNames.size(); ++i)
+    {
+        const auto& prop = r.propertyNames[i];
+        const auto& strVal = r.propertyValues[i];
+
+        if(prop == "diffuse_color")
+        {
+            updates.push_back([arr = arrayFromString(strVal)](brayns::MaterialPtr& m)
+            {
+                m->setDiffuseColor(arr);
+            });
+        }
+        else if(prop == "specular_color")
+        {
+            updates.push_back([arr = arrayFromString(strVal)](brayns::MaterialPtr& m)
+            {
+                m->setSpecularColor(arr);
+            });
+        }
+        else if(prop == "specular_exponent")
+        {
+            updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+            {
+                m->setSpecularExponent(v);
+            });
+        }
+        else if(prop == "refraction_index")
+        {
+            updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+            {
+                m->setRefractionIndex(v);
+            });
+        }
+        else if(prop == "reflection_index")
+        {
+            updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+            {
+                m->setReflectionIndex(v);
+            });
+        }
+        else if(prop == "opacity")
+        {
+            updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+            {
+                m->setOpacity(v);
+            });
+        }
+        else if(prop == "emission")
+        {
+            updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+            {
+                m->setEmission(v);
+            });
+        }
+        else if(prop == "glossiness")
+        {
+            updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+            {
+                m->setGlossiness(v);
+            });
+        }
+        else if(prop == "simulation_data_cast")
+        {
+            auto copyVal = strVal;
+            std::transform(copyVal.begin(), copyVal.end(), copyVal.begin(),
+                           [](unsigned char c){ return std::tolower(c); });
+            updates.push_back([v = copyVal](brayns::MaterialPtr& m)
+            {
+                m->updateProperty(MATERIAL_PROPERTY_CAST_USER_DATA,
+                                  v == "true");
+            });
+        }
+        else if(prop == "shading_mode")
+        {
+            updates.push_back([v = std::stoi(strVal)](brayns::MaterialPtr& m)
+            {
+                m->updateProperty(MATERIAL_PROPERTY_SHADING_MODE,
+                                  v);
+            });
+        }
+        else if(prop == "clipping_mode")
+        {
+            updates.push_back([v = std::stoi(strVal)](brayns::MaterialPtr& m)
+            {
+                m->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE,
+                                  v);
+            });
+        }
+        else if(prop == "user_parameter")
+        {
+            updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+            {
+                m->updateProperty(MATERIAL_PROPERTY_USER_PARAMETER,
+                                  v);
+            });
+        }
+    }
+
+    std::vector<size_t> matIds;
+    if(r.materialIds.empty())
+    {
+        matIds.reserve(model->getModel().getMaterials().size());
+        for(const auto& mat : model->getModel().getMaterials())
+            matIds.push_back(mat.first);
+    }
+    else
+    {
+        matIds.reserve(r.materialIds.size());
+        for(const auto& id : r.materialIds)
+            matIds.push_back(static_cast<size_t>(id));
+    }
+
+    for (const auto materialId : matIds)
+    {
+        auto material =
+            model->getModel().getMaterial(materialId);
+        if (material)
+        {
+            for(const auto& update : updates)
+                update(material);
+            material->markModified();
+            material->commit();
+        }
+    }
+    model->markModified();
+    _api->getScene().markModified();
+    _api->triggerRender();
+
+    return result;
+}
+
 MaterialIds CircuitExplorerPlugin::_getMaterialIds(const ModelId& modelId)
 {
     MaterialIds materialIds;
@@ -1002,6 +1228,74 @@ brayns::Message CircuitExplorerPlugin::_remapCircuitToScheme(const RemapCircuit&
         result.setError(1, "The model with ID " + std::to_string(payload.modelId)
                            + " does not exists");
     }
+    return result;
+}
+
+brayns::Message CircuitExplorerPlugin::_colorCells(const ColorCells& payload)
+{
+    brayns::Message result;
+
+    if(payload.gids.size() * 3 != payload.colors.size())
+    {
+        result.setError(1, "There must be 3 color components for each GID");
+        return result;
+    }
+
+    const auto updateMatColor = [](brayns::ModelDescriptorPtr& model,
+                                   size_t matId,
+                                   const brayns::Vector3d& color)
+    {
+        auto mat = model->getModel().getMaterial(matId);
+        if(mat)
+        {
+            mat->setDiffuseColor(color);
+            mat->markModified();
+            mat->commit();
+        }
+
+    };
+
+    auto modelDescriptor = _api->getScene().getModel(payload.modelId);
+    if(!modelDescriptor)
+    {
+        result.setError(2, "The model with ID " + std::to_string(payload.modelId)
+                           + " does not exists");
+        return result;
+    }
+
+    CellObjectMapper* mapper = getMapperForCircuit(payload.modelId);
+    if(mapper)
+    {
+        const auto& mapping = mapper->getMapping();
+        for(size_t i = 0; i < payload.gids.size(); ++i)
+        {
+            const auto cellGID = payload.gids[i];
+            const auto colorIndx = i * 3;
+            const brayns::Vector3d color {payload.colors[colorIndx],
+                                          payload.colors[colorIndx + 1],
+                                          payload.colors[colorIndx + 2]};
+            auto it = mapping.find(cellGID);
+            if(it != mapping.end())
+            {
+                const MorphologyMap& mmap = it->second;
+                for(const auto& kv : mmap._coneMap)
+                    updateMatColor(modelDescriptor, kv.first, color);
+                for(const auto& kv : mmap._cylinderMap)
+                    updateMatColor(modelDescriptor, kv.first, color);
+                for(const auto& kv : mmap._sdfBezierMap)
+                    updateMatColor(modelDescriptor, kv.first, color);
+                for(const auto& kv : mmap._sdfGeometryMap)
+                    updateMatColor(modelDescriptor, kv.first, color);
+                for(const auto& kv : mmap._sphereMap)
+                    updateMatColor(modelDescriptor, kv.first, color);
+            }
+        }
+
+        modelDescriptor->markModified();
+        _api->getScene().markModified();
+        _api->triggerRender();
+    }
+
     return result;
 }
 
@@ -1337,6 +1631,7 @@ brayns::Message CircuitExplorerPlugin::_exportFramesToDisk(
 
     _exportFramesToDiskPayload = payload;
     _exportFramesToDiskDirty = true;
+    _exportFramesToDiskStartFlag = false;
     _frameNumber = payload.startFrame;
     _accumulationFrameNumber = 0;
     auto& frameBuffer = _api->getEngine().getFrameBuffer();
@@ -1361,16 +1656,6 @@ brayns::Message CircuitExplorerPlugin::_exportFramesToDisk(
     PLUGIN_INFO << "-----------------------------------------------------------"
                    "---------------------"
                 << std::endl;
-
-    // Update the camera with the first frame information
-    CameraDefinition cd;
-    const auto& ci = _exportFramesToDiskPayload.cameraInformation;
-    cd.origin = {ci[0], ci[1], ci[2]};
-    cd.direction = {ci[3], ci[4], ci[5]};
-    cd.up = {ci[6], ci[7], ci[8]};
-    cd.apertureRadius = ci[9];
-    cd.focusDistance = ci[10];
-    _setCamera(cd);
 
     return result;
 }

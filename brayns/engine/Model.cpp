@@ -693,6 +693,7 @@ bool Model::commitSimulationData()
         auto& ap = _animationParameters;
         ap.setIsReadyCallback(
             [handler = _simulationHandler] { return handler->isReady(); });
+        ap.setFrame(0);
         ap.setDt(_simulationHandler->getDt(), false);
         ap.setUnit(_simulationHandler->getUnit(), false);
         ap.setNumFrames(_simulationHandler->getNbFrames(), false);

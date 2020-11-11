@@ -159,7 +159,7 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
         _modelDescriptors.push_back(modelDescriptor);
 
         // Set as active simulated model, if it has simulation
-        _updateSimulatedModel(modelDescriptor);
+        _updateSimulatedModel(modelDescriptor, false);
 
         // add default instance of this model to render something
         if (modelDescriptor->getInstances().empty())
@@ -591,12 +591,17 @@ void Scene::_loadIBLMaps(const std::string& envMap)
     }
 }
 
-void Scene::_updateSimulatedModel(ModelDescriptorPtr& model)
+void Scene::_updateSimulatedModel(ModelDescriptorPtr& model, bool forceSim)
 {
     auto simHandler = model->getModel().getSimulationHandler();
     if(!simHandler)
+    {
+        if(!forceSim)
+            return;
+
         BRAYNS_THROW(std::runtime_error("Model with ID " + std::to_string(model->getModelID())
                                         + " does not have simulation"))
+    }
 
     for(auto& m : _modelDescriptors)
         m->setActiveSimulatedModel(false);
@@ -605,6 +610,8 @@ void Scene::_updateSimulatedModel(ModelDescriptorPtr& model)
     auto& ap = _animationParameters;
     ap.setIsReadyCallback(
         [handler = simHandler] { return handler->isReady(); });
+
+    ap.setFrame(simHandler->getCurrentFrame());
     ap.setDt(simHandler->getDt(), false);
     ap.setUnit(simHandler->getUnit(), false);
     ap.setNumFrames(simHandler->getNbFrames(), false);
