@@ -689,7 +689,7 @@ inline void init(brayns::FileContent* a, ObjectHandler* h)
 inline void init(brayns::SetFileContent* a, ObjectHandler* h)
 {
     h->add_property("path", &a->path);
-    h->add_property("base64Encoded", &a->base64);
+    h->add_property("base64", &a->base64);
     h->add_property("content", &a->content);
     h->set_flags(Flags::DisallowUnknownKey);
 }
