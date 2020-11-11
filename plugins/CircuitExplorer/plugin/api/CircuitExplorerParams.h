@@ -473,7 +473,7 @@ struct ColorCells : public brayns::Message
 {
     MESSAGE_BEGIN(ColorCells)
     MESSAGE_ENTRY(uint64_t, modelId, "The model to which apply the coloring")
-    MESSAGE_ENTRY(std::vector<uint64_t>, gids, "List of cell GIDs to color")
+    MESSAGE_ENTRY(std::vector<std::string>, gids, "List of cell GIDs to color")
     MESSAGE_ENTRY(std::vector<double>, colors, "List of RGB colors, in the same order as "
                                                "the GIDs were specified")
 };

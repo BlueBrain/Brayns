@@ -42,6 +42,7 @@
 #include <brayns/common/geometry/Streamline.h>
 #include <brayns/common/utils/base64/base64.h>
 #include <brayns/common/utils/imageUtils.h>
+#include <brayns/common/utils/stringUtils.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
@@ -1273,28 +1274,70 @@ brayns::Message CircuitExplorerPlugin::_colorCells(const ColorCells& payload)
     CellObjectMapper* mapper = getMapperForCircuit(payload.modelId);
     if(mapper)
     {
-        const auto& mapping = mapper->getMapping();
-        for(size_t i = 0; i < payload.gids.size(); ++i)
+        // Parse ranges
+        std::vector<std::vector<uint64_t>> gidBatches (payload.gids.size());
+        std::vector<brayns::Vector3d> gidColors (payload.gids.size());
+
+        for(size_t j = 0; j < payload.gids.size(); ++j)
         {
-            const auto cellGID = payload.gids[i];
-            const auto colorIndx = i * 3;
-            const brayns::Vector3d color {payload.colors[colorIndx],
-                                          payload.colors[colorIndx + 1],
-                                          payload.colors[colorIndx + 2]};
-            auto it = mapping.find(cellGID);
-            if(it != mapping.end())
+            const auto& gidBatchStr = payload.gids[j];
+            const std::vector<std::string> tokens = brayns::string_utils::split(gidBatchStr, ',');
+            std::vector<uint64_t>& batchGids = gidBatches[j];
+            // Parse sub-ranges
+            for(const auto& batchToken : tokens)
             {
-                const MorphologyMap& mmap = it->second;
-                for(const auto& kv : mmap._coneMap)
-                    updateMatColor(modelDescriptor, kv.first, color);
-                for(const auto& kv : mmap._cylinderMap)
-                    updateMatColor(modelDescriptor, kv.first, color);
-                for(const auto& kv : mmap._sdfBezierMap)
-                    updateMatColor(modelDescriptor, kv.first, color);
-                for(const auto& kv : mmap._sdfGeometryMap)
-                    updateMatColor(modelDescriptor, kv.first, color);
-                for(const auto& kv : mmap._sphereMap)
-                    updateMatColor(modelDescriptor, kv.first, color);
+                auto dashPos = batchToken.find('-');
+                // single value
+                if(dashPos == std::string::npos)
+                    batchGids.push_back(std::stoul(batchToken));
+                else
+                {
+                    auto rangeStart = std::stoul(batchToken.substr(0, dashPos));
+                    auto rangeEnd = std::stoul(batchToken.substr(dashPos + 1));
+                    for(uint64_t i = rangeStart; i <= rangeEnd; ++i)
+                        batchGids.push_back(i);
+                }
+            }
+
+            // Add color for the range in the same index
+            const size_t colorIndex = j * 3;
+            gidColors[j] = brayns::Vector3d(payload.colors[colorIndex],
+                                            payload.colors[colorIndex + 1],
+                                            payload.colors[colorIndex + 2]);
+        }
+
+        // This should not happen
+        if(gidColors.size() != gidBatches.size())
+        {
+            result.setError(9, "After parsing, the number of gid batches and colors does "
+                               "not match");
+            return result;
+        }
+
+        // Color cells
+        const auto& mapping = mapper->getMapping();
+        for(size_t i = 0; i < gidBatches.size(); ++i)
+        {
+            const std::vector<uint64_t>& gidBatch = gidBatches[i];
+            const brayns::Vector3d& color = gidColors[i];
+
+            for(const auto cellGID : gidBatch)
+            {
+                auto it = mapping.find(cellGID);
+                if(it != mapping.end())
+                {
+                    const MorphologyMap& mmap = it->second;
+                    for(const auto& kv : mmap._coneMap)
+                        updateMatColor(modelDescriptor, kv.first, color);
+                    for(const auto& kv : mmap._cylinderMap)
+                        updateMatColor(modelDescriptor, kv.first, color);
+                    for(const auto& kv : mmap._sdfBezierMap)
+                        updateMatColor(modelDescriptor, kv.first, color);
+                    for(const auto& kv : mmap._sdfGeometryMap)
+                        updateMatColor(modelDescriptor, kv.first, color);
+                    for(const auto& kv : mmap._sphereMap)
+                        updateMatColor(modelDescriptor, kv.first, color);
+                }
             }
         }
 
