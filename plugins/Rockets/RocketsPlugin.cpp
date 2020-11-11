@@ -1934,7 +1934,7 @@ public:
             {
                 std::string finalContent = fc.base64? base64_decode(fc.content)
                                                     : fc.content;
-                auto flags = fc.binary? (std::ios::binary | std::ios::trunc)
+                auto flags = fc.base64? (std::ios::binary | std::ios::trunc)
                                       : std::ios::trunc;
 
 

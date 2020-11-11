@@ -990,102 +990,109 @@ brayns::Message CircuitExplorerPlugin::_updateMaterialProperties(const UpdateMat
     _setMaterialExtraAttributes(mea);
 
     std::vector<std::function<void(brayns::MaterialPtr& m)>> updates;
-    for(size_t i = 0; i < r.propertyNames.size(); ++i)
+    try
     {
-        const auto& prop = r.propertyNames[i];
-        const auto& strVal = r.propertyValues[i];
+        for(size_t i = 0; i < r.propertyNames.size(); ++i)
+        {
+            const auto& prop = r.propertyNames[i];
+            const auto& strVal = r.propertyValues[i];
 
-        if(prop == "diffuse_color")
-        {
-            updates.push_back([arr = arrayFromString(strVal)](brayns::MaterialPtr& m)
+            if(prop == "diffuse_color")
             {
-                m->setDiffuseColor(arr);
-            });
-        }
-        else if(prop == "specular_color")
-        {
-            updates.push_back([arr = arrayFromString(strVal)](brayns::MaterialPtr& m)
+                updates.push_back([arr = arrayFromString(strVal)](brayns::MaterialPtr& m)
+                {
+                    m->setDiffuseColor(arr);
+                });
+            }
+            else if(prop == "specular_color")
             {
-                m->setSpecularColor(arr);
-            });
-        }
-        else if(prop == "specular_exponent")
-        {
-            updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+                updates.push_back([arr = arrayFromString(strVal)](brayns::MaterialPtr& m)
+                {
+                    m->setSpecularColor(arr);
+                });
+            }
+            else if(prop == "specular_exponent")
             {
-                m->setSpecularExponent(v);
-            });
-        }
-        else if(prop == "refraction_index")
-        {
-            updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+                updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+                {
+                    m->setSpecularExponent(v);
+                });
+            }
+            else if(prop == "refraction_index")
             {
-                m->setRefractionIndex(v);
-            });
-        }
-        else if(prop == "reflection_index")
-        {
-            updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+                updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+                {
+                    m->setRefractionIndex(v);
+                });
+            }
+            else if(prop == "reflection_index")
             {
-                m->setReflectionIndex(v);
-            });
-        }
-        else if(prop == "opacity")
-        {
-            updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+                updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+                {
+                    m->setReflectionIndex(v);
+                });
+            }
+            else if(prop == "opacity")
             {
-                m->setOpacity(v);
-            });
-        }
-        else if(prop == "emission")
-        {
-            updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+                updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+                {
+                    m->setOpacity(v);
+                });
+            }
+            else if(prop == "emission")
             {
-                m->setEmission(v);
-            });
-        }
-        else if(prop == "glossiness")
-        {
-            updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+                updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+                {
+                    m->setEmission(v);
+                });
+            }
+            else if(prop == "glossiness")
             {
-                m->setGlossiness(v);
-            });
-        }
-        else if(prop == "simulation_data_cast")
-        {
-            auto copyVal = strVal;
-            std::transform(copyVal.begin(), copyVal.end(), copyVal.begin(),
-                           [](unsigned char c){ return std::tolower(c); });
-            updates.push_back([v = copyVal](brayns::MaterialPtr& m)
+                updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+                {
+                    m->setGlossiness(v);
+                });
+            }
+            else if(prop == "simulation_data_cast")
             {
-                m->updateProperty(MATERIAL_PROPERTY_CAST_USER_DATA,
-                                  v == "true");
-            });
-        }
-        else if(prop == "shading_mode")
-        {
-            updates.push_back([v = std::stoi(strVal)](brayns::MaterialPtr& m)
+                auto copyVal = strVal;
+                std::transform(copyVal.begin(), copyVal.end(), copyVal.begin(),
+                               [](unsigned char c){ return std::tolower(c); });
+                updates.push_back([v = copyVal](brayns::MaterialPtr& m)
+                {
+                    m->updateProperty(MATERIAL_PROPERTY_CAST_USER_DATA,
+                                      v == "true");
+                });
+            }
+            else if(prop == "shading_mode")
             {
-                m->updateProperty(MATERIAL_PROPERTY_SHADING_MODE,
-                                  v);
-            });
-        }
-        else if(prop == "clipping_mode")
-        {
-            updates.push_back([v = std::stoi(strVal)](brayns::MaterialPtr& m)
+                updates.push_back([v = std::stoi(strVal)](brayns::MaterialPtr& m)
+                {
+                    m->updateProperty(MATERIAL_PROPERTY_SHADING_MODE,
+                                      v);
+                });
+            }
+            else if(prop == "clipping_mode")
             {
-                m->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE,
-                                  v);
-            });
-        }
-        else if(prop == "user_parameter")
-        {
-            updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+                updates.push_back([v = std::stoi(strVal)](brayns::MaterialPtr& m)
+                {
+                    m->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE,
+                                      v);
+                });
+            }
+            else if(prop == "user_parameter")
             {
-                m->updateProperty(MATERIAL_PROPERTY_USER_PARAMETER,
-                                  v);
-            });
+                updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
+                {
+                    m->updateProperty(MATERIAL_PROPERTY_USER_PARAMETER,
+                                      v);
+                });
+            }
         }
+    }
+    catch(const std::exception& e)
+    {
+        result.setError(4, e.what());
     }
 
     std::vector<size_t> matIds;

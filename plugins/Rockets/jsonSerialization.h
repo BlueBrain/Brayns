@@ -139,7 +139,6 @@ struct FileContent
 struct SetFileContent
 {
     std::string path;
-    bool binary;
     bool base64;
     std::string content;
 };
@@ -690,7 +689,6 @@ inline void init(brayns::FileContent* a, ObjectHandler* h)
 inline void init(brayns::SetFileContent* a, ObjectHandler* h)
 {
     h->add_property("path", &a->path);
-    h->add_property("binary", &a->binary);
     h->add_property("base64Encoded", &a->base64);
     h->add_property("content", &a->content);
     h->set_flags(Flags::DisallowUnknownKey);
