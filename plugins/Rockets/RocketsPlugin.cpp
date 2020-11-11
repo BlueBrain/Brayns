@@ -1886,10 +1886,12 @@ public:
                     file.seekg(0, file.end);
                     long len = file.tellg();
                     file.seekg(0, file.beg);
-                    std::vector<char> buffer(static_cast<unsigned long>(len));
+                    std::vector<char> buffer(static_cast<size_t>(len));
                     file.read(&buffer[0], len);
                     file.close();
-                    fc.content = std::string(buffer.begin(), buffer.end());
+                    fc.content = base64_encode(reinterpret_cast<unsigned char*>(buffer.data()),
+                                               buffer.size());
+                    fc.base64 = true;
                 }
                 else
                 {
@@ -1921,11 +1923,17 @@ public:
                 result.message = "The path " + fc.path + " denotes a directory";
                 return result;
             }
+            else if(stats.error == 1 || stats.error == 3)
+            {
+                result.error = 2;
+                result.message = "Out of sandbox or illegal path detected";
+                return result;
+            }
 
             try
             {
-                std::string finalContent = fc.base64Encoded? base64_decode(fc.content)
-                                                           : fc.content;
+                std::string finalContent = fc.base64? base64_decode(fc.content)
+                                                    : fc.content;
                 auto flags = fc.binary? (std::ios::binary | std::ios::trunc)
                                       : std::ios::trunc;
 
@@ -1937,7 +1945,7 @@ public:
             }
             catch(const std::exception& e)
             {
-                result.error = 1;
+                result.error = 3;
                 result.message = std::string(e.what());
             }
 
