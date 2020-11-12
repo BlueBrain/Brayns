@@ -22,8 +22,8 @@
 
 #include <brayns/common/Transformation.h>
 #include <brayns/common/log.h>
-#include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/scene/ClipPlane.h>
+#include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/utils/utils.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
