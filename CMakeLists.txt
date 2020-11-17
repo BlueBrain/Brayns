@@ -29,6 +29,9 @@ set(BRAYNS_PORT_DEPEND "assimp boost freeimage glew tbb")
 # Unit testing
 option(BRAYNS_UNIT_TESTING_ENABLED "Unit testing" ON)
 
+# Use GLM from submodules or system package
+option(BRAYNS_USE_SYSTEM_GLM "Use GLM library from system packages" OFF)
+
 # JSON message live debugging
 option(BRAYNS_DEBUG_JSON_ENABLED "Catch JSON exceptions during runtime" OFF)
 if(BRAYNS_DEBUG_JSON_ENABLED)
@@ -68,7 +71,10 @@ common_find_package(Boost REQUIRED COMPONENTS program_options)
 common_find_package(OpenMP)
 common_find_package(libuv 1.8)
 common_find_package(FreeImage)
-find_package(glm QUIET)
+
+if(BRAYNS_USE_SYSTEM_GLM)
+  find_package(glm REQUIRED)
+endif()
 
 # Compiler options
 if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
