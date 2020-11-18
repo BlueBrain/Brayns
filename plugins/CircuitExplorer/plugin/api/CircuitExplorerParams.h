@@ -324,6 +324,7 @@ struct ExportFramesToDisk : public brayns::Message
     MESSAGE_BEGIN(ExportFramesToDisk)
     MESSAGE_ENTRY(std::string, path, "Path to the directory where the frames will be saved")
     MESSAGE_ENTRY(std::string, format, "The image format (PNG or JPEG)")
+    MESSAGE_ENTRY(bool, nameAfterStep, "Name the file on disk after the simulation step index")
     MESSAGE_ENTRY(uint32_t, quality, "The quality at which the images will be stored")
     MESSAGE_ENTRY(uint32_t, spp,
                   "Samples per pixels (The more, the better visual result and the slower the"
