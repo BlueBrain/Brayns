@@ -50,7 +50,6 @@ pbrt::Transform pbrtTransform(const Transformation& t)
     a.w = quatRot.w;
 
     const auto trRot = a.ToTransform();
-
     const auto trTrans = pbrt::Translate(pbrt::Vector3f(static_cast<pbrt::Float>(trans.x),
                                                         static_cast<pbrt::Float>(trans.y),
                                                         static_cast<pbrt::Float>(trans.z)));
