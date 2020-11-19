@@ -40,26 +40,27 @@ pbrt::Transform pbrtTransform(const Transformation& t)
     //auto m = t.toMatrix();
 
     const auto& trans = t.getTranslation();
-
     const auto& quatRot = t.getRotation();
-    auto euler = glm::eulerAngles(quatRot) * glm::pi<double>() * 180.0;
     const auto& scale = t.getScale();
 
-    pbrt::Transform temp;
-    auto trRotX = pbrt::RotateX(static_cast<pbrt::Float>(euler.x));
-    auto trRotY = pbrt::RotateX(static_cast<pbrt::Float>(euler.y));
-    auto trRotZ = pbrt::RotateX(static_cast<pbrt::Float>(euler.z));
-    auto rotMatrix = pbrt::Matrix4x4::Mul(pbrt::Matrix4x4::Mul(trRotX.GetMatrix(), trRotY.GetMatrix()),
-                                          trRotZ.GetMatrix());
-    auto trTrans = pbrt::Translate(pbrt::Vector3f(static_cast<pbrt::Float>(trans.x),
-                                                  static_cast<pbrt::Float>(trans.y),
-                                                  static_cast<pbrt::Float>(trans.z)));
-    auto trScale = pbrt::Scale(static_cast<pbrt::Float>(scale.x),
-                               static_cast<pbrt::Float>(scale.y),
-                               static_cast<pbrt::Float>(scale.z));
+    pbrt::Quaternion a;
+    a.v.x = quatRot.x;
+    a.v.y = quatRot.y;
+    a.v.z = quatRot.z;
+    a.w = quatRot.w;
 
-    auto finalMatrix = pbrt::Matrix4x4::Mul(pbrt::Matrix4x4::Mul(rotMatrix, trTrans.GetMatrix()),
-                                            trScale.GetMatrix());
+    const auto trRot = a.ToTransform();
+
+    const auto trTrans = pbrt::Translate(pbrt::Vector3f(static_cast<pbrt::Float>(trans.x),
+                                                        static_cast<pbrt::Float>(trans.y),
+                                                        static_cast<pbrt::Float>(trans.z)));
+    const auto trScale = pbrt::Scale(static_cast<pbrt::Float>(scale.x),
+                                     static_cast<pbrt::Float>(scale.y),
+                                     static_cast<pbrt::Float>(scale.z));
+
+    const auto finalMatrix = pbrt::Matrix4x4::Mul(pbrt::Matrix4x4::Mul(trRot.GetMatrix(),
+                                                                       trTrans.GetMatrix()),
+                                                  trScale.GetMatrix());
 
     return pbrt::Transform (finalMatrix);
 }

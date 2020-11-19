@@ -26,7 +26,6 @@
 #include <brayns/common/light/Light.h>
 #include <brayns/engine/Model.h>
 
-#include <pbrt/accelerators/bvh.h>
 #include <pbrt/core/light.h>
 #include <pbrt/core/paramset.h>
 #include <pbrt/lights/diffuse.h>
@@ -82,14 +81,15 @@ void PBRTScene::commit()
         modelDescriptors = _modelDescriptors;
     }
 
+    const bool lightsDirty = commitLights();
+
     bool simDirty = false;
     for(auto& modelDescriptor : modelDescriptors)
         simDirty = simDirty || modelDescriptor->getModel().commitSimulationData();
 
-    const bool rebuildScene = isModified() || _lightManager.isModified();
-    if(!rebuildScene && !simDirty)
+    bool sceneDirty = isModified();
+    if(!sceneDirty && !simDirty)
     {
-        bool doUpdate = false;
         for (auto& modelDescriptor : modelDescriptors)
         {
             auto& model = modelDescriptor->getModel();
@@ -98,57 +98,63 @@ void PBRTScene::commit()
             {
                 // need to continue re-adding the models to update the bounding
                 // box model to reflect the new model size
-                doUpdate = true;
+                sceneDirty = true;
+                break;
             }
         }
-        if (!doUpdate)
-            return;
     }
+
+    if(!sceneDirty && !simDirty && !lightsDirty)
+        return;
 
     // Release current scene
     _pbrtScene.reset(nullptr);
 
-    // Create lights
-    commitLights();
-
-    std::vector<std::shared_ptr<pbrt::Primitive>> allPrims;
-    for (auto modelDescriptor : modelDescriptors)
+    if(sceneDirty || simDirty)
     {
-        if (!modelDescriptor->getEnabled())
-            continue;
+        std::vector<std::shared_ptr<pbrt::Primitive>> allPrims;
+        for (auto modelDescriptor : modelDescriptors)
+        {
+            if (!modelDescriptor->getEnabled())
+                continue;
 
-        auto& impl = static_cast<PBRTModel&>(modelDescriptor->getModel());
-        const auto& transformation = modelDescriptor->getTransformation();
+            auto& impl = static_cast<PBRTModel&>(modelDescriptor->getModel());
+            const auto& transformation = modelDescriptor->getTransformation();
 
-        BRAYNS_DEBUG << "Committing " << modelDescriptor->getName()
-                     << std::endl;
+            BRAYNS_DEBUG << "Committing " << modelDescriptor->getName()
+                         << std::endl;
 
-        // Add model shapes using pbrt specific commit function
-        auto prims = impl.commitToPBRT(transformation, _currentRenderer);
-        allPrims.insert(allPrims.end(), prims.begin(), prims.end());
-        const auto& modelLights = impl.getModelLights();
-        _lights.insert(_lights.end(), modelLights.begin(), modelLights.end());
+            // Add model shapes using pbrt specific commit function
+            auto prims = impl.commitToPBRT(transformation, _currentRenderer);
+            allPrims.insert(allPrims.end(), prims.begin(), prims.end());
+            const auto& modelLights = impl.getModelLights();
+            _lights.insert(_lights.end(), modelLights.begin(), modelLights.end());
 
-        impl.logInformation();
-        impl.markInstancesClean();
+            impl.logInformation();
+            impl.markInstancesClean();
+        }
+
+        // Add light source shapes so they are visible
+        allPrims.insert(allPrims.end(), _lightShapes.begin(), _lightShapes.end());
+
+        BRAYNS_DEBUG << "Committing root models" << std::endl;
+
+       _bvh.reset();
+       _bvh = pbrt::CreateBVHAccelerator(allPrims, pbrt::ParamSet());
+
+       // Compute scene bounds with all the objects information
+       _computeBounds();
     }
 
-    // Add light source shapes so they are visible
-    allPrims.insert(allPrims.end(), _lightShapes.begin(), _lightShapes.end());
-
-    BRAYNS_DEBUG << "Committing root models" << std::endl;
-
-   auto bvh = pbrt::CreateBVHAccelerator(allPrims, pbrt::ParamSet());
-
-    // Compute scene bounds with all the objects information
-    _computeBounds();
-
     // Create scene with primitives + lights
-    _pbrtScene.reset(new pbrt::Scene(bvh, _lights));
+    _pbrtScene.reset(new pbrt::Scene(_bvh, _lights));
 }
 
 bool PBRTScene::commitLights()
 {
+    if(!_lightManager.isModified())
+        return false;
+
     _lights.clear();
     _lightShapes.clear();
 

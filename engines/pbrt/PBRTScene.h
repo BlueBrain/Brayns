@@ -22,6 +22,7 @@
 
 #include <brayns/engine/Scene.h>
 
+#include <pbrt/accelerators/bvh.h>
 #include <pbrt/core/scene.h>
 
 namespace brayns
@@ -62,6 +63,7 @@ public:
 
 private:
     std::unique_ptr<pbrt::Scene> _pbrtScene {nullptr};
+    std::shared_ptr<pbrt::BVHAccel> _bvh;
     std::vector<std::shared_ptr<pbrt::Light>> _lights;
     std::vector<std::shared_ptr<pbrt::GeometricPrimitive>> _lightShapes;
 
