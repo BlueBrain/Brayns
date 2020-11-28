@@ -135,6 +135,9 @@ std::shared_ptr<pbrt::AreaLight> createLightForShape(std::shared_ptr<ShapeType>&
                                                      MaterialPtr& mat,
                                                      const float value)
 {
+    static constexpr float NO_LIGHT_THRESHOLD = 0.1f;
+    static constexpr float INTENSITY_THRESHOLD = 0.3f;
+
     const auto cvalue = glm::clamp(static_cast<double>(value),
                                    tf.getValuesRange().x,
                                    tf.getValuesRange().y);
@@ -144,18 +147,18 @@ std::shared_ptr<pbrt::AreaLight> createLightForShape(std::shared_ptr<ShapeType>&
     const brayns::Vector3f color = tf.getColorForValue(value);
     if(mat)
     {
-        if(intensity < 0.1f)
+        if(intensity < NO_LIGHT_THRESHOLD)
             mat->setDiffuseColor({1.f, 1.f, 1.f});
         else
             mat->setDiffuseColor({color.r, color.g, color.b});
     }
 
     // Do not add light if the intensity is below a given threshold
-    if(intensity < 0.75f)
+    if(intensity < INTENSITY_THRESHOLD)
         return std::shared_ptr<pbrt::AreaLight>{nullptr};
 
     // remap intensity if we are adding light
-    intensity = (intensity - 0.75f) / 0.25f;
+    intensity = (intensity - INTENSITY_THRESHOLD) / (1.f - INTENSITY_THRESHOLD);
     // smoothsetep light intensity
     const float lightIntensity = (intensity*intensity*intensity*
                                  (intensity*(intensity * 6 - 15) + 10)) * 3.f;
