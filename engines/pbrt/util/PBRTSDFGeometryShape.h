@@ -188,16 +188,18 @@ public:
     {
       return _bounds;
     }
-
+/*
     pbrt::Bounds3f WorldBound() const final
     {
-      return _bounds;
+      return *ObjectToWorld(_bounds);
     }
-
-    bool Intersect(const pbrt::Ray& ray, pbrt::Float* tHit, pbrt::SurfaceInteraction* isect,
+*/
+    bool Intersect(const pbrt::Ray& r, pbrt::Float* tHit, pbrt::SurfaceInteraction* isect,
                    bool testAlphaTexture = true) const final
     {
       (void)testAlphaTexture;
+      pbrt::Vector3f oErr, dErr;
+      pbrt::Ray ray = (*WorldToObject)(r, &oErr, &dErr);
 
       *tHit = raymarch(ray);
       if(*tHit > 0.f && *tHit < ray.tMax)
@@ -231,9 +233,11 @@ public:
       return false;
     }
 
-    bool IntersectP(const pbrt::Ray& ray, bool testAlphaTexture = true) const final
+    bool IntersectP(const pbrt::Ray& r, bool testAlphaTexture = true) const final
     {
         (void)testAlphaTexture;
+        pbrt::Vector3f oErr, dErr;
+        const pbrt::Ray ray = (*WorldToObject)(r, &oErr, &dErr);
         const pbrt::Float t = raymarch(ray);
         return t > 0.f && t < ray.tMax;
     }

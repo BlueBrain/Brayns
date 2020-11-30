@@ -624,6 +624,17 @@ PBRTModel::_createSDFGeometries(pbrt::Transform* otw, pbrt::Transform* wto)
     const pbrt::MediumInterface dummyMI (_modelMedium.get(), nullptr);
     const std::shared_ptr<pbrt::AreaLight> dummyAL;
 
+    std::unique_ptr<pbrt::Transform> otwFinal
+            (new pbrt::Transform(otw->GetMatrix(), otw->GetInverseMatrix()));
+    std::unique_ptr<pbrt::Transform> wtoFinal
+            (new pbrt::Transform(otwFinal->GetInverseMatrix(), otwFinal->GetMatrix()));
+
+    auto otwFinalPtr = otwFinal.get();
+    auto wtoFinalPtr = wtoFinal.get();
+
+    _transformPool.push_back(std::move(otwFinal));
+    _transformPool.push_back(std::move(wtoFinal));
+
     for(const auto& geometryList : getSDFGeometryData().geometryIndices)
     {
         std::shared_ptr<pbrt::Material> pbrtMaterial {nullptr};
@@ -642,16 +653,31 @@ PBRTModel::_createSDFGeometries(pbrt::Transform* otw, pbrt::Transform* wto)
             switch(geom.type)
             {
                 case SDFType::Sphere:
-                    shape = std::make_shared<PBRTSDFGeometryShape<SDFType::Sphere>>(otw, wto, false, &geom, &getSDFGeometryData());
+                    shape = std::make_shared<PBRTSDFGeometryShape<SDFType::Sphere>>(otwFinalPtr,
+                                                                                    wtoFinalPtr,
+                                                                                    false,
+                                                                                    &geom,
+                                                                                    &getSDFGeometryData());
                     break;
                 case SDFType::Pill:
-                    shape = std::make_shared<PBRTSDFGeometryShape<SDFType::Pill>>(otw, wto, false, &geom, &getSDFGeometryData());
+                    shape = std::make_shared<PBRTSDFGeometryShape<SDFType::Pill>>(otwFinalPtr,
+                                                                                  wtoFinalPtr,
+                                                                                  false,
+                                                                                  &geom,
+                                                                                  &getSDFGeometryData());
                     break;
                 case SDFType::ConePill:
-                    shape = std::make_shared<PBRTSDFGeometryShape<SDFType::ConePill>>(otw, wto, false, &geom, &getSDFGeometryData());
+                    shape = std::make_shared<PBRTSDFGeometryShape<SDFType::ConePill>>(otwFinalPtr,
+                                                                                      wtoFinalPtr,
+                                                                                      false,
+                                                                                      &geom, &getSDFGeometryData());
                     break;
                 case SDFType::ConePillSigmoid:
-                    shape = std::make_shared<PBRTSDFGeometryShape<SDFType::ConePillSigmoid>>(otw, wto, false, &geom, &getSDFGeometryData());
+                    shape = std::make_shared<PBRTSDFGeometryShape<SDFType::ConePillSigmoid>>(otwFinalPtr,
+                                                                                             wtoFinalPtr,
+                                                                                             false,
+                                                                                             &geom,
+                                                                                             &getSDFGeometryData());
                     break;
 
             }            
