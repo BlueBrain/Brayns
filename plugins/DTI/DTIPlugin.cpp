@@ -37,6 +37,9 @@
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
+#include <brain/brain.h>
+#include <brion/brion.h>
+
 namespace
 {
 const size_t DEFAULT_MATERIAL_ID = 0;
@@ -71,6 +74,13 @@ void DTIPlugin::init()
          "SpikeSimulationDescriptor",
          "Description of the spike report"},
         [&](const SpikeSimulationDescriptor &s) { _updateSpikeSimulation(s); });
+
+    _api->getActionInterface()->registerNotification<SpikeSimulationFromFile>(
+        {"set-spike-simulation-from-file",
+         "Adds a spike simulation loaded from a file to a model",
+         "SpikeSimulationFromFile",
+         "Path and extra parameters for the spike report"},
+        [&](const SpikeSimulationFromFile& s) { _updateSpikeSimulationFromFile(s); });
 }
 
 void DTIPlugin::preRender()
@@ -251,6 +261,55 @@ void DTIPlugin::_updateSpikeSimulation(
         return;
     }
     _spikeSimulation = spikeSimulation;
+    _simulationDirty = true;
+}
+
+void DTIPlugin::_updateSpikeSimulationFromFile(const SpikeSimulationFromFile& src)
+{
+    auto modelDescriptor = _api->getScene().getModel(src.modelId);
+    if (!modelDescriptor)
+    {
+        PLUGIN_ERROR << src.modelId << " is an invalid model ID"
+                     << std::endl;
+        return;
+    }
+
+    std::unique_ptr<brion::BlueConfig> config {nullptr};
+    try
+    {
+       config = std::make_unique<brion::BlueConfig>(src.path);
+    }
+    catch (...)
+    {
+        PLUGIN_ERROR << "Could not read BlueConfig file " << src.path << std::endl;
+    }
+    std::unique_ptr<brain::SpikeReportReader> spikeReport {nullptr};
+    try
+    {
+        spikeReport = std::make_unique<brain::SpikeReportReader>(config->getSpikeSource());
+    }
+    catch(const std::exception& e)
+    {
+        PLUGIN_ERROR << "Could not read Spike report: " << e.what() << std::endl;
+    }
+
+    _spikeSimulation.dt = src.dt;
+    _spikeSimulation.endTime = spikeReport->getEndTime() + src.decaySpeed;
+    _spikeSimulation.modelId = src.modelId;
+    _spikeSimulation.timeScale = src.timeScale;
+    _spikeSimulation.decaySpeed = src.decaySpeed;
+    _spikeSimulation.restIntensity = src.restIntensity;
+    _spikeSimulation.spikeIntensity = src.spikeIntensity;
+
+    auto spikes = spikeReport->getSpikes(0.f, spikeReport->getEndTime());
+    _spikeSimulation.gids.resize(spikes.size());
+    _spikeSimulation.timestamps.resize(spikes.size());
+    for(size_t i = 0; i < spikes.size(); ++i)
+        _spikeSimulation.timestamps[i] = spikes[i].first;
+
+    for(size_t i = 0; i < spikes.size(); ++i)
+        _spikeSimulation.gids[i] = spikes[i].second;
+
     _simulationDirty = true;
 }
 

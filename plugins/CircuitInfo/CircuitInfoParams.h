@@ -24,6 +24,43 @@
 #include <brayns/common/ActionMessage.h>
 #include <brayns/common/types.h>
 
+struct CircuitInfoRequest : public brayns::Message
+{
+    MESSAGE_BEGIN(CircuitInfoRequest)
+    MESSAGE_ENTRY(std::string, path, "Path to an existing circuit configuration file")
+};
+
+struct CircuitInfo : public brayns::Message
+{
+    MESSAGE_BEGIN(CircuitInfo)
+    MESSAGE_ENTRY(uint64_t, cellsCount, "Number of cells in this circuit")
+    MESSAGE_ENTRY(std::vector<std::string>, cellsProperties, "List of available cell properties")
+    MESSAGE_ENTRY(std::vector<std::string>, mTypes, "List of morphology types available in this circuit")
+    MESSAGE_ENTRY(std::vector<std::string>, eTypes, "List of electrical types available in this circuit")
+    MESSAGE_ENTRY(std::vector<std::string>, targets, "List of target names")
+    MESSAGE_ENTRY(std::vector<std::string>, reports, "List of report names")
+    MESSAGE_ENTRY(std::string, spikeReport, "Path to the spike report file")
+};
+
+struct CellDataRequest : public brayns::Message
+{
+    MESSAGE_BEGIN(CellDataRequest)
+    MESSAGE_ENTRY(std::string, path, "Path to an existing circuit configuration file")
+    MESSAGE_ENTRY(std::vector<uint64_t>, ids, "List of cell IDs")
+    MESSAGE_ENTRY(std::vector<std::string>, properties, "List of wanted properties")
+};
+
+struct CellData : public brayns::Message
+{
+    MESSAGE_BEGIN(CellData)
+    MESSAGE_ENTRY(std::vector<std::string>, etypes, "Requested cell e-types")
+    MESSAGE_ENTRY(std::vector<std::string>, mtypes, "Requested cell m-types")
+    MESSAGE_ENTRY(std::vector<std::string>, morphologyClasses, "Requested cell morphology classes")
+    MESSAGE_ENTRY(std::vector<std::string>, layers, "Requested cell layers")
+    MESSAGE_ENTRY(std::vector<double>, positions, "Requested cell positions")
+    MESSAGE_ENTRY(std::vector<double>, orientations, "Requested cell orientations")
+};
+
 struct CellGIDListRequest : public brayns::Message
 {
     MESSAGE_BEGIN(CellGIDListRequest)

@@ -62,6 +62,7 @@ endif()
 
 # PBRT V3
 if(BRAYNS_PBRT_ENABLED)
+    SET(PBRT_FLOAT_AS_DOUBLE ON CACHE BOOL "Use 64-bit floats")
     add_subdirectory(pbrt-v3)
     # Disable compilation warnings
     target_compile_options(pbrt PUBLIC -w)
@@ -77,7 +78,7 @@ endif()
 # Brion if needed
 if(BRAYNS_CIRCUITVIEWER_ENABLED OR BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED)
     common_find_package(Brion)
-    if((NOT Brion_FOUND AND NOT BRION_FOUND) OR NOT TARGET Brion)
+    if((NOT Brion_FOUND AND NOT BRION_FOUND) AND NOT TARGET Brion)
         message(STATUS "Brion not found, gathering from submodules")
         add_subdirectory(Brion)
     else()

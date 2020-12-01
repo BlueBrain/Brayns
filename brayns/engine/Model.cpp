@@ -185,6 +185,11 @@ ModelDescriptorPtr ModelDescriptor::clone(ModelPtr model) const
     return newModelDesc;
 }
 
+void ModelDescriptor::setActiveSimulatedModel(bool val)
+{
+    _simulatedModel = val;
+}
+
 Model::Model(AnimationParameters& animationParameters,
              VolumeParameters& volumeParameters)
     : _animationParameters(animationParameters)
@@ -688,6 +693,7 @@ bool Model::commitSimulationData()
         auto& ap = _animationParameters;
         ap.setIsReadyCallback(
             [handler = _simulationHandler] { return handler->isReady(); });
+        ap.setFrame(0);
         ap.setDt(_simulationHandler->getDt(), false);
         ap.setUnit(_simulationHandler->getUnit(), false);
         ap.setNumFrames(_simulationHandler->getNbFrames(), false);
@@ -698,9 +704,7 @@ bool Model::commitSimulationData()
     const auto animationFrame = _animationParameters.getFrame();
 
     if (_simulationHandler->getCurrentFrame() == animationFrame)
-    {
         return false;
-    }
 
     auto frameData = _simulationHandler->getFrameData(animationFrame);
 
@@ -709,6 +713,7 @@ bool Model::commitSimulationData()
 
     _commitSimulationDataImpl((float*)frameData,
                               _simulationHandler->getFrameSize());
+
     return true;
 }
 }

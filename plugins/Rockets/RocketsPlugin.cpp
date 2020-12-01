@@ -129,12 +129,16 @@ const std::string METHOD_CLEAR_LIGHTS = "clear-lights";
 // Filesystem query
 const std::string METHOD_FS_EXISTS = "fs-exists";
 const std::string METHOD_FS_GET_CONTENT = "fs-get-content";
+const std::string METHOD_FS_SET_CONTENT = "fs-set-content";
 const std::string METHOD_FS_GET_ROOT = "fs-get-root";
 const std::string METHOD_FS_LIST_DIR = "fs-list-dir";
 
 // Material manipulation
 const std::string METHOD_GET_MATERIAL = "get-mat";
 const std::string METHOD_SET_MATERIAL = "set-mat";
+
+const std::string METHOD_GET_ACTIVE_SIMULATED_MODEL = "get-active-simulation-model";
+const std::string METHOD_SET_ACTIVE_SIMULATED_MODEL = "set-active-simulation-model";
 
 const std::string METHOD_CLIENTSTATE_SET = "client-state-set";
 const std::string METHOD_CLIENTSTATE_GET = "client-state-get";
@@ -1073,10 +1077,13 @@ public:
 
         _handleFsExists();
         _handleFsGetContent();
+        _handleFsSetContent();
         _handleFsGetRoot();
         _handleFsGetListDir();
 
         _handleMaterial();
+
+        _handleActiveSimulationModel();
 
         _handleClientState();
 
@@ -1859,12 +1866,12 @@ public:
         const RpcParameterDescription desc{METHOD_FS_GET_CONTENT,
                                            "Return the content of a file if possible, or an error otherwise",
                                            "path", "Absolute path to the file"};
-        _handleRPC<InputPath, FileContent>(desc, [&](const auto& inputPath) {
+        _handleRPC<GetFileContent, GetFileContentResult>(desc, [&](const auto& inputPath) {
             this->_rebroadcast(METHOD_FS_GET_CONTENT, to_json(inputPath),
                                {_currentClientID});
             // Stat the requested file
             FileStats ft = this->_getFileStats(inputPath.path);
-            FileContent fc;
+            GetFileContentResult fc;
 
             fc.error = ft.error;
             fc.message = ft.message;
@@ -1879,10 +1886,15 @@ public:
                     file.seekg(0, file.end);
                     long len = file.tellg();
                     file.seekg(0, file.beg);
-                    std::vector<char> buffer(static_cast<unsigned long>(len));
+                    std::vector<char> buffer(static_cast<size_t>(len));
                     file.read(&buffer[0], len);
                     file.close();
-                    fc.content = std::string(buffer.begin(), buffer.end());
+                    if(inputPath.base64)
+                        fc.content = base64_encode(reinterpret_cast<unsigned char*>(buffer.data()),
+                                                   buffer.size());
+                    else
+                        fc.content = std::string(buffer.begin(), buffer.end());
+
                 }
                 else
                 {
@@ -1892,6 +1904,55 @@ public:
             }
 
             return fc;
+        });
+    }
+
+    void _handleFsSetContent()
+    {
+        const RpcParameterDescription desc{METHOD_FS_SET_CONTENT,
+                                           "Creates a file and sets its content. "
+                                           "If the file exists, it will be truncated",
+                                           "SetFileContent", "Path, content and content type of the"
+                                                             " file."};
+        _handleRPC<SetFileContent, SetFileContentResult>(desc, [&](const SetFileContent& fc)
+        {
+            SetFileContentResult result;
+            result.error = 0;
+
+            FileStats stats = _getFileStats(fc.path);
+            if(stats.type == "directory")
+            {
+                result.error = 1;
+                result.message = "The path " + fc.path + " denotes a directory";
+                return result;
+            }
+            else if(stats.error == 1 || stats.error == 3)
+            {
+                result.error = 2;
+                result.message = "Out of sandbox or illegal path detected";
+                return result;
+            }
+
+            try
+            {
+                std::string finalContent = fc.base64? base64_decode(fc.content)
+                                                    : fc.content;
+                auto flags = fc.base64? (std::ios::binary | std::ios::trunc)
+                                      : std::ios::trunc;
+
+
+                std::ofstream outFile (fc.path, flags);
+                outFile << finalContent;
+                outFile.flush();
+                outFile.close();
+            }
+            catch(const std::exception& e)
+            {
+                result.error = 3;
+                result.message = std::string(e.what());
+            }
+
+            return result;
         });
     }
 
@@ -2109,6 +2170,61 @@ public:
 
             return result;
         });
+    }
+
+    void _handleActiveSimulationModel()
+    {
+        const RpcParameterDescription descSetSimModel
+        {
+            METHOD_SET_ACTIVE_SIMULATED_MODEL,
+            "Sets the active model for simulation",
+            "SetActiveSimulationModel", "The ID of the model to set as active"
+        };
+        _handleRPC<SetActiveSimulationModel, SetActiveSimulationModelResponse>
+                (descSetSimModel, [&](const SetActiveSimulationModel& req)
+        {
+            SetActiveSimulationModelResponse result;
+            result.error = 0;
+
+            try
+            {
+                _engine.getScene().setActiveSimulatedModel(req.modelId);
+                _engine.getScene().markModified();
+            }
+            catch(const std::exception& e)
+            {
+                result.error = 1;
+                result.message = std::string(e.what());
+            }
+
+            return result;
+        });
+
+        const RpcDescription desc
+        {
+            METHOD_GET_ACTIVE_SIMULATED_MODEL,
+            "Return the ID of the model selected for simulation"
+        };
+        _bindEndpoint(METHOD_GET_ACTIVE_SIMULATED_MODEL, [&]
+                      (const rockets::jsonrpc::Request&)
+        {
+            GetActiveSimulationModel res;
+            try
+            {
+                res.modelId = _engine.getScene().getActiveSimulatedModel();
+            }
+            catch(const std::exception& e)
+            {
+                res.error = 1;
+                res.message = std::string(e.what());
+            }
+
+            return Response{to_json(res)};
+        });
+
+        _handleSchema(
+            METHOD_GET_ACTIVE_SIMULATED_MODEL,
+            buildJsonRpcSchemaRequestReturnOnly<GetActiveSimulationModel>(desc));
     }
 
     void _handleClientState()

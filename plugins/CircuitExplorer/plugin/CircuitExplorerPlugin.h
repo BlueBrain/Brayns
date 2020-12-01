@@ -77,6 +77,8 @@ private:
     brayns::Message _setMaterials(const MaterialsDescriptor&);
     brayns::Message _setMaterialRange(const MaterialRangeDescriptor&);
     brayns::Message _setMaterialExtraAttributes(const MaterialExtraAttributes&);
+    MaterialProperties _getMaterialProperties();
+    brayns::Message _updateMaterialProperties(const UpdateMaterialProperties&);
 
     // Experimental
     brayns::Message _setSynapseAttributes(const SynapseAttributes&);
@@ -120,6 +122,7 @@ private:
 
     // Remap circuit colors to a specific scheme
     brayns::Message _remapCircuitToScheme(const RemapCircuit& payload);
+    brayns::Message _colorCells(const ColorCells& payload);
 
     SynapseAttributes _synapseAttributes;
 
@@ -127,6 +130,8 @@ private:
 
     ExportFramesToDisk _exportFramesToDiskPayload;
     bool _exportFramesToDiskDirty{false};
+    // Flag used to avoid the first frame to be rendered with the wrong camera parameters
+    bool _exportFramesToDiskStartFlag{false};
     uint16_t _frameNumber{0};
     uint32_t _accumulationFrameNumber{0};
     size_t _prevAccumulationSetting;

@@ -11,6 +11,8 @@ set (CMAKE_CXX_STANDARD 14)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
                               ${CMAKE_SOURCE_DIR}/CMake)
 
+find_package(Brion QUIET)
+
 
 # Source
 set(${NAME}_SOURCES
@@ -40,11 +42,13 @@ endif(NOT CMAKE_BUILD_TYPE)
 include_directories(${BRAYNS_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR})
 add_library(${LIBRARY_NAME} SHARED ${${NAME}_SOURCES})
 target_link_libraries(
-    ${LIBRARY_NAME}
+    ${LIBRARY_NAME} PUBLIC
     braynsCommon
     braynsEngine
     braynsParameters
     ${${NAME}_LINK_LIBRARIES})
+
+target_link_libraries(${LIBRARY_NAME} PRIVATE Brion Brain)
 
 # ================================================================================
 # Install binaries

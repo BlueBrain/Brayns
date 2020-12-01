@@ -40,6 +40,9 @@ public:
     void init() final;
 
 private:
+    CircuitInfo _getCircuitInfo(const CircuitInfoRequest& request);
+    CellData _getCellData(const CellDataRequest& request);
+
     CellGIDList _getCellGIDs(const CellGIDListRequest& request);
     CellGIDList _getCellGIDsFromModel(const ModelCellGIDListRequest& request);
 

@@ -285,8 +285,7 @@ TEST_CASE("commandline")
 {
     brayns::PropertyMap properties;
     properties.setProperty({"int", 42});
-    properties.setProperty(
-        {"enum", std::string("Zero"), {"Zero", "One", "Two"}, {}});
+    properties.setProperty({"enum", std::string("Zero"), {"Zero", "One", "Two"}, {}});
     properties.setProperty({"intEnum", 1, {"One", "Two", "Three"}, {}});
     properties.setProperty({"double", 1.2});
     properties.setProperty({"string", std::string("foo")});
@@ -298,23 +297,19 @@ TEST_CASE("commandline")
     properties.setProperty({"vec3d", std::array<double, 3>{{1, 2, 3}}});
     properties.setProperty({"vec4d", std::array<double, 4>{{1, 2, 3, 4}}});
 
-    const char* argv[] = {"propertyMap", "--int",
-                          "5",           "--double",
-                          "0.4",         "--enum",
-                          "One",         "--int-enum",
-                          "Three",       "--string",
-                          "bar",         "--bool",
-                          "off",         "--bool-switch",
-                          "--vec2i",     "3",
-                          "4",           "--vec2d",
-                          "1.2",         "2.3",
-                          "--vec3i",     "3",
-                          "4",           "5",
-                          "--vec3d",     "1.2",
-                          "2.3",         "3.4",
-                          "--vec4d",     "1.2",
-                          "2.3",         "3.4",
-                          "4.5"};
+    const char* argv[] = {"propertyMap",
+                          "--int",      "5",
+                          "--double",   "0.4",
+                          "--enum",     "One",
+                          "--int-enum", "Three",
+                          "--string",   "bar",
+                          "--bool",     "off",
+                          "--bool-switch",
+                          "--vec2i",     "3", "4",
+                          "--vec2d",     "1.2", "2.3",
+                          "--vec3i",     "3", "4", "5",
+                          "--vec3d",     "1.2", "2.3", "3.4",
+                          "--vec4d",     "1.2", "2.3", "3.4", "4.5"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     REQUIRE(properties.parse(argc, argv));

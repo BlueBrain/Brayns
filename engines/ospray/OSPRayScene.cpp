@@ -265,7 +265,9 @@ bool OSPRayScene::_commitVolumeAndTransferFunction(
     {
         auto& model = static_cast<OSPRayModel&>(modelDescriptor->getModel());
         const bool dirtyTransferFunction = model.commitTransferFunction();
-        const bool dirtySimulationData = model.commitSimulationData();
+        bool dirtySimulationData = false;
+        if(isActiveSimulatedModel(modelDescriptor))
+            dirtySimulationData = model.commitSimulationData();
 
         if (dirtyTransferFunction || dirtySimulationData)
             markModified(false);
@@ -299,10 +301,12 @@ ModelDescriptorPtr OSPRayScene::getSimulatedModel()
     auto lock = acquireReadAccess();
     for (auto model : _modelDescriptors)
     {
-        const auto& ospModel =
+        if(isActiveSimulatedModel(model))
+            return model;
+        /*const auto& ospModel =
             static_cast<const OSPRayModel&>(model->getModel());
         if (ospModel.simulationData())
-            return model;
+            return model;*/
     }
     return ModelDescriptorPtr{};
 }

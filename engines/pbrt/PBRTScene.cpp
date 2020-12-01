@@ -71,10 +71,6 @@ PBRTScene::PBRTScene(AnimationParameters& animationParameters,
     _backgroundMaterial = std::shared_ptr<PBRTMaterial>(new PBRTMaterial());
 }
 
-PBRTScene::~PBRTScene()
-{
-}
-
 void PBRTScene::commit()
 {
     Scene::commit();
@@ -86,8 +82,12 @@ void PBRTScene::commit()
         modelDescriptors = _modelDescriptors;
     }
 
+    bool simDirty = false;
+    for(auto& modelDescriptor : modelDescriptors)
+        simDirty = simDirty || modelDescriptor->getModel().commitSimulationData();
+
     const bool rebuildScene = isModified() || _lightManager.isModified();
-    if(!rebuildScene)
+    if(!rebuildScene && !simDirty)
     {
         bool doUpdate = false;
         for (auto& modelDescriptor : modelDescriptors)
@@ -105,10 +105,11 @@ void PBRTScene::commit()
             return;
     }
 
-    _needsRender = true;
-
     // Release current scene
     _pbrtScene.reset(nullptr);
+
+    // Create lights
+    commitLights();
 
     std::vector<std::shared_ptr<pbrt::Primitive>> allPrims;
     for (auto modelDescriptor : modelDescriptors)
@@ -125,35 +126,29 @@ void PBRTScene::commit()
         // Add model shapes using pbrt specific commit function
         auto prims = impl.commitToPBRT(transformation, _currentRenderer);
         allPrims.insert(allPrims.end(), prims.begin(), prims.end());
+        const auto& modelLights = impl.getModelLights();
+        _lights.insert(_lights.end(), modelLights.begin(), modelLights.end());
 
         impl.logInformation();
         impl.markInstancesClean();
     }
-
-    // Create lights
-    commitLights();
 
     // Add light source shapes so they are visible
     allPrims.insert(allPrims.end(), _lightShapes.begin(), _lightShapes.end());
 
     BRAYNS_DEBUG << "Committing root models" << std::endl;
 
-    auto bvh = pbrt::CreateBVHAccelerator(allPrims, pbrt::ParamSet());
+   auto bvh = pbrt::CreateBVHAccelerator(allPrims, pbrt::ParamSet());
 
     // Compute scene bounds with all the objects information
     _computeBounds();
 
     // Create scene with primitives + lights
     _pbrtScene.reset(new pbrt::Scene(bvh, _lights));
-
-    resetModified();
 }
 
 bool PBRTScene::commitLights()
 {
-    if(!_lightManager.isModified())
-        return false;
-
     _lights.clear();
     _lightShapes.clear();
 
@@ -200,7 +195,7 @@ bool PBRTScene::commitLights()
             auto sphereShape = CreateSphere(static_cast<float>(radius), center, _transformPool);
 
             std::unique_ptr<int[]> nsamples (new int[1]);
-            nsamples.get()[0] = 16;
+            nsamples.get()[0] = 8;
             params.AddInt("samples", std::move(nsamples), 1);
 
             params.AddRGBSpectrum("L", std::move(L), 3);

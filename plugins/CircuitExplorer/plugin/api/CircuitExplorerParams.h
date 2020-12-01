@@ -55,8 +55,8 @@ struct MaterialDescriptor : public brayns::Message
     MESSAGE_ENTRY(double, glossiness, "The glossy component of a material")
     MESSAGE_ENTRY(bool, simulationDataCast, "Wether to cast the user parameter for simulation")
     MESSAGE_ENTRY(int32_t, shadingMode,
-                  "The choosen shading mode (0 = none, 1 = by id, 2 = by type, 3 = by layer, "
-                  "4 = by mtype, 5 = by etype, 6 = by target)")
+                  "The choosen shading mode (0 = none, 1 = diffuse, 2 = electron, 3 = cartoon, "
+                  "4 = electron transparency, 5 = perlin, 6 = diffuse transparency 7 = checker)")
     MESSAGE_ENTRY(int32_t, clippingMode,
                   "The choosen material clipping mode (0 = no clipping, 1 = clip by plane, "
                   "2 = clip by sphere)")
@@ -91,8 +91,9 @@ struct MaterialsDescriptor : public brayns::Message
     MESSAGE_ENTRY(std::vector<bool>, simulationDataCasts,
                   "Wether to cast the user parameter for simulation (1 per material)")
     MESSAGE_ENTRY(std::vector<int32_t>, shadingModes,
-                  "The choosen shading mode (0 = none, 1 = by id, 2 = by type, 3 = by layer, "
-                  "4 = by mtype, 5 = by etype, 6 = by target) (1 per material)")
+                  "The choosen shading mode (0 = none, 1 = diffuse, 2 = electron, 3 = cartoon, "
+                  "4 = electron transparency, 5 = perlin, 6 = diffuse transparency 7 = checker) "
+                  "(1 per material)")
     MESSAGE_ENTRY(std::vector<int32_t>, clippingModes,
                   "The choosen material clipping mode (0 = no clipping, 1 = clip by plane, "
                   "2 = clip by sphere) (1 per material)")
@@ -122,12 +123,33 @@ struct MaterialRangeDescriptor : public brayns::Message
     MESSAGE_ENTRY(double, glossiness, "The glossy component of a material")
     MESSAGE_ENTRY(bool, simulationDataCast, "Wether to cast the user parameter for simulation")
     MESSAGE_ENTRY(int32_t, shadingMode,
-                  "The choosen shading mode (0 = none, 1 = by id, 2 = by type, 3 = by layer,"
-                  " 4 = by mtype, 5 = by etype, 6 = by target)")
+                  "The choosen shading mode (0 = none, 1 = diffuse, 2 = electron, 3 = cartoon, "
+                  "4 = electron transparency, 5 = perlin, 6 = diffuse transparency 7 = checker)")
     MESSAGE_ENTRY(int32_t, clippingMode,
                   "The choosen material clipping mode (0 = no clipping, 1 = clip by plane, "
                   "2 = clip by sphere)")
     MESSAGE_ENTRY(double, userParameter, "A custom parameter passed to the simulation")
+};
+
+struct MaterialProperties : public brayns::Message
+{
+    MESSAGE_BEGIN(MaterialProperties)
+    MESSAGE_ENTRY(std::vector<std::string>, properties, "List of available material property names")
+    MESSAGE_ENTRY(std::vector<std::string>, propertyTypes, "Data type of the available properties")
+};
+
+struct UpdateMaterialProperties : public brayns::Message
+{
+    MESSAGE_BEGIN(UpdateMaterialProperties)
+    MESSAGE_ENTRY(uint64_t, modelId, "Id of the model to update")
+    MESSAGE_ENTRY(std::vector<uint64_t>, materialIds, "Id of the materials to update. If empty, "
+                                                      "all model materials will be updated.")
+    MESSAGE_ENTRY(std::vector<std::string>, propertyNames, "List of property names to update "
+                                                           "in the material")
+    MESSAGE_ENTRY(std::vector<std::string>, propertyValues, "Lost of all property values to "
+                                                            "update in the material. Must be in the"
+                                                            "same order as the property name list")
+
 };
 
 struct ModelId : brayns::Message
@@ -445,6 +467,15 @@ struct RemapCircuit : public brayns::Message
     MESSAGE_ENTRY(std::string, scheme, "Color scheme to remap a circuit to (Possible values: "
                                        "\"By id\", \"By layer\", \"By mtype\", \"By etype\", "
                                        "\"By target\")")
+};
+
+struct ColorCells : public brayns::Message
+{
+    MESSAGE_BEGIN(ColorCells)
+    MESSAGE_ENTRY(uint64_t, modelId, "The model to which apply the coloring")
+    MESSAGE_ENTRY(std::vector<std::string>, gids, "List of cell GIDs to color")
+    MESSAGE_ENTRY(std::vector<double>, colors, "List of RGB colors, in the same order as "
+                                               "the GIDs were specified")
 };
 
 #endif // CIRCUITEXLORERPARAMS_H

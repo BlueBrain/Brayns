@@ -63,8 +63,6 @@ void PBRTCamera::manualCommit(const Vector2ui& resolution)
     if(!isModified() && _currentRes == resolution && !typeChanged)
         return;
 
-    _needsRender = true;
-
     const auto& srcPos = getPosition();
     const pbrt::Point3f pos = glmToPbrt3<pbrt::Point3f>(srcPos);
 

@@ -34,10 +34,10 @@ public:
                         const pbrt::Bounds2i& pb)
         : pbrt::SamplerIntegrator(cam, sam, pb)
     {
-        constexpr float whiteRGB[3] = {1.f,1.f,1.f};
+        constexpr pbrt::Float whiteRGB[3] = {pbrt::Float(1), pbrt::Float(1), pbrt::Float(1)};
         _white = pbrt::Spectrum::FromRGB(whiteRGB);
 
-        constexpr float greenRGB[3] = {0.f,0.5f,0.f};
+        constexpr pbrt::Float greenRGB[3] = {pbrt::Float(0), pbrt::Float(0.5), pbrt::Float(0)};
         _green = pbrt::Spectrum::FromRGB(greenRGB);
     }
 

@@ -406,7 +406,8 @@ load_circuit
                  morphology_color_scheme='None', morphology_quality=2,
                  max_distance_to_soma=1000000.0, cell_clipping=False,
                  load_afferent_synapses=False, load_efferent_synapses=False,
-                 synapse_radius=0.0)
+                 synapse_radius=0.0, load_layers=True, load_etypes=True,
+                 load_mtypes=True)
 
 Load a circuit from a give Blue/Circuit configuration file.
 
@@ -446,6 +447,9 @@ Parameters:
 * ``load_afferent_synapses``: ``bool``,  Load afferent synapses.
 * ``load_efferent_synapses``: ``bool``,  Load efferent synapses.
 * ``synapse_radius``: ``float``,  Synapse radius.
+* ``load_layers``: ``bool``, Load layer data for coloring the circuit. If False, speed up circuit loading. Ignored if circuit_color_scheme is CIRCUIT_COLOR_SCHEME_NEURON_BY_LAYER
+* ``load_etypes``: ``bool``, Load etypes for coloring the circuit. If False, speed up circuit loading. Ignored if circuit_color_scheme is CIRCUIT_COLOR_SCHEME_NEURON_BY_ETYPE
+* ``load_mtypes``: ``bool``, Load mtypes for coloring the circuit. If False, speed up circuit loading. Ignored if circuit_color_scheme is CIRCUIT_COLOR_SCHEME_NEURON_BY_MTYPE
 
 Return value:
 

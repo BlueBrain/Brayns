@@ -35,25 +35,19 @@ PBRTFrameBuffer::PBRTFrameBuffer(const std::string& name, const Vector2ui& frame
 
 }
 
-PBRTFrameBuffer::~PBRTFrameBuffer()
-{
-    // Film object is released by PBRT Camera
-}
-
 void PBRTFrameBuffer::fillColorBuffer(const std::vector<pbrt::Float>& src)
 {
-    uint8_t* dst = &_colorBuffer[0];
+    std::fill(_colorBuffer.begin(), _colorBuffer.end(), 255u);
+
+#pragma omp parallel for
     for (uint32_t x = 0; x < _frameSize.x; ++x)
     {
         for (uint32_t y = 0; y < _frameSize.y; ++y)
         {
-            //dst = &_colorBuffer[x * _frameSize.y + y + getColorDepth()];
+            uint8_t* dst = &_colorBuffer[x * (_frameSize.y * getColorDepth()) + (y * getColorDepth())];
             dst[0] = BRAYNS_PBRT_TO_BYTE(src[3 * (x * _frameSize.y + y) + 0]);
             dst[1] = BRAYNS_PBRT_TO_BYTE(src[3 * (x * _frameSize.y + y) + 1]);
             dst[2] = BRAYNS_PBRT_TO_BYTE(src[3 * (x * _frameSize.y + y) + 2]);
-            if(getColorDepth() == 4)
-                dst[3] = 255u;
-            dst += getColorDepth();
         }
     }
 }

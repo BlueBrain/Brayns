@@ -344,10 +344,6 @@ PBRTRenderer::PBRTRenderer(const AnimationParameters& animP,
     _samplerFactory[PBRT_SAMPLER_ZEROTWOSEQUENCE] = ZeroTwoSequenceSamplerFactory;
 }
 
-PBRTRenderer::~PBRTRenderer()
-{
-}
-
 void PBRTRenderer::render(FrameBufferPtr frameBuffer)
 {
     if(!_pbrtRenderer || !_camera)
@@ -356,11 +352,6 @@ void PBRTRenderer::render(FrameBufferPtr frameBuffer)
     PBRTCamera& pbrtCam = *_camera;
 
     PBRTScene& pbrtScene = static_cast<PBRTScene&>(*_scene.get());
-    if(!pbrtScene.needsToRender() && !pbrtCam.needsToRender())
-    {
-        frameBuffer->markModified();
-        return;
-    }
 
     auto pbrtFrameBuffer =
         std::static_pointer_cast<PBRTFrameBuffer>(frameBuffer);
@@ -379,8 +370,6 @@ void PBRTRenderer::render(FrameBufferPtr frameBuffer)
         PBRTFrameBuffer* pbrtFB = static_cast<PBRTFrameBuffer*>(frameBuffer.get());
         pbrtFB->fillColorBuffer(pbrtCam.getFilm()->_rgb);
         frameBuffer->markModified();
-        pbrtScene.setNeedsToRender(false);
-        pbrtCam.setNeedsToRender(false);
         pbrtCam.getFilm()->Clear();
     }
     else
@@ -450,8 +439,6 @@ void PBRTRenderer::commit()
         });
         auto pbrtScene = static_cast<PBRTScene*>(_scene.get());
         pbrtScene->setCurrentRenderer(_currentRenderer);
-        _scene->markModified();
-        _scene->commit();
 
         cam.setCameraChanged(false);
     }

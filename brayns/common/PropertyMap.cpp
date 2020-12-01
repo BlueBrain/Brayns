@@ -166,7 +166,7 @@ po::options_description _toCommandlineDescription(
 
         assert(valueSemantic);
         const auto dashCaseName =
-            string_utils::camelCaseToSeparated(property->name, '-');
+            string_utils::camelCaseToSeparated(property->name, '-', false);
         desc.add(boost::make_shared<po::option_description>(
             dashCaseName.c_str(), valueSemantic,
             property->metaData.description.c_str()));
@@ -190,7 +190,7 @@ void _commandlineToPropertyMap(const po::variables_map& vm,
     for (const auto& property : propertyMap.getProperties())
     {
         const auto dashCaseName =
-            string_utils::camelCaseToSeparated(property->name, '-');
+            string_utils::camelCaseToSeparated(property->name, '-', false);
         if (!vm.count(dashCaseName))
             continue;
         switch (property->type)

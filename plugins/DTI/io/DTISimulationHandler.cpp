@@ -62,8 +62,8 @@ DTISimulationHandler::DTISimulationHandler(
                 << std::endl;
     PLUGIN_INFO << "Spike simulation information" << std::endl;
     PLUGIN_INFO << "----------------------" << std::endl;
-    PLUGIN_INFO << "End time             : " << _nbFrames << std::endl;
-    PLUGIN_INFO << "Number of frames     : " << _nbFrames / _dt << std::endl;
+    PLUGIN_INFO << "End time             : " << _spikeSimulation.endTime << std::endl;
+    PLUGIN_INFO << "Number of frames     : " << _nbFrames << std::endl;
     PLUGIN_INFO << "-----------------------------------------------------------"
                 << std::endl;
 }

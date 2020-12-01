@@ -157,10 +157,10 @@ private:
     // Synapses
     void _buildAfferentSynapses(const brain::Synapse &synapse,
                                 const size_t materialId, const float radius,
-                                brayns::Model &model) const;
+                                brayns::Model &model, const uint64_t userData = 0) const;
     void _buildEfferentSynapses(const brain::Synapse &synapse,
                                 const size_t materialId, const float radius,
-                                brayns::Model &model) const;
+                                brayns::Model &model, const uint64_t userData = 0) const;
     void _loadPairSynapses(const brayns::PropertyMap &properties,
                            const brain::Circuit &circuit,
                            const uint32_t &preGid, const uint32_t &postGid,
@@ -171,7 +171,7 @@ private:
                           const brain::GIDSet &gids, const float synapseRadius,
                           const bool loadAfferentSynapses,
                           const bool loadEfferentSynapses,
-                          brayns::Model &model) const;
+                          brayns::Model &model, CompartmentReportPtr compartmentReport) const;
 
     CircuitExplorerPlugin* _pluginPtr{nullptr};
 };

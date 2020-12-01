@@ -52,6 +52,8 @@ struct SDFGeometryData
     std::vector<uint64_t> neighboursFlat;
 };
 
+class Scene;
+
 class ModelInstance : public BaseObject
 {
 public:
@@ -201,11 +203,30 @@ public:
     ModelDescriptorPtr clone(ModelPtr model) const;
 
 private:
+    friend class Scene;
+
+    /**
+     * @brief isAciveSimulationModel Returns wether this model is the one being simulated
+     * When multiple models with simulation are loaded, only one will be simulated.
+     * @return bool True if this model is the active simulation model, false otherwise.
+     */
+    bool isAciveSimulationModel()
+    {
+        return _simulatedModel;
+    }
+
+    /**
+     * @brief setActiveSimulatedModel Sets this model to be the actively simulated model
+     * @param val
+     */
+    void setActiveSimulatedModel(bool val);
+
     size_t _nextInstanceID{0};
     Boxd _bounds;
     ModelMetadata _metadata;
     ModelPtr _model;
     ModelInstances _instances;
+    bool _simulatedModel{false};
     PropertyMap _properties;
     RemovedCallback _onRemovedCallback;
     bool _markedForRemoval = false;

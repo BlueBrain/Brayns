@@ -256,6 +256,10 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
         setSimulationTransferFunction(model.getTransferFunction());
         break;
     }
+    case ReportType::undefined:
+    {
+        return compartmentReport;
+    }
     default:
         if (userDataType == UserDataType::distance_to_soma)
         {
@@ -357,18 +361,19 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
         properties.getProperty<std::string>(PROP_MORPHOLOGY_COLOR_SCHEME.name));
     const auto morphologyQuality = stringToEnum<MorphologyQuality>(
         properties.getProperty<std::string>(PROP_MORPHOLOGY_QUALITY.name));
-    const auto meshFolder =
-        properties.getProperty<std::string>(PROP_MESH_FOLDER.name);
+    const auto meshFolder = properties.getProperty<std::string>(PROP_MESH_FOLDER.name);
     const auto meshFilenamePattern =
         properties.getProperty<std::string>(PROP_MESH_FILENAME_PATTERN.name);
     const auto reportType = stringToEnum<ReportType>(
         properties.getProperty<std::string>(PROP_REPORT_TYPE.name));
     const auto userDataType = stringToEnum<UserDataType>(
         properties.getProperty<std::string>(PROP_USER_DATA_TYPE.name));
-    const auto cellClipping =
-        properties.getProperty<bool>(PROP_CELL_CLIPPING.name);
-    const auto areasOfInterest =
-        properties.getProperty<int>(PROP_AREAS_OF_INTEREST.name);
+    const auto cellClipping = properties.getProperty<bool>(PROP_CELL_CLIPPING.name);
+    const auto areasOfInterest = properties.getProperty<int>(PROP_AREAS_OF_INTEREST.name);
+    const auto loadLayers = properties.getProperty<bool>(PROP_LOAD_LAYERS.name, true);
+    const auto loadEtypes = properties.getProperty<bool>(PROP_LOAD_ETYPES.name, true);
+    const auto loadMtypes = properties.getProperty<bool>(PROP_LOAD_MTYPES.name, true);
+
 
     // Model (one for the whole circuit)
     auto model = _scene.createModel();
@@ -411,15 +416,24 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
                                        allTransformations);
 
     // Import meshes and morphologies
-    callback.updateProgress("Identifying layer ids...", 0);
-    _populateLayerIds(blueConfiguration, circuit, allGids, data.layers);
+    if(loadLayers || colorScheme == CircuitColorScheme::by_layer)
+    {
+        callback.updateProgress("Identifying layer ids...", 0);
+        _populateLayerIds(blueConfiguration, circuit, allGids, data.layers);
+    }
 
-    callback.updateProgress("Identifying electro-physiology types...", 0);
-    data.etypes.ids = circuit.getElectrophysiologyTypes(allGids);
-    //data.etypes.names = circuit.getElectrophysiologyTypeNames();
+    if(loadEtypes || colorScheme == CircuitColorScheme::by_etype)
+    {
+        callback.updateProgress("Identifying electro-physiology types...", 0);
+        data.etypes.ids = circuit.getElectrophysiologyTypes(allGids);
+        //data.etypes.names = circuit.getElectrophysiologyTypeNames();
+    }
 
-    callback.updateProgress("Getting morphology types...", 0);
-    data.mtypes.ids = circuit.getMorphologyTypes(allGids);
+    if(loadMtypes || colorScheme == CircuitColorScheme::by_mtype)
+    {
+        callback.updateProgress("Getting morphology types...", 0);
+        data.mtypes.ids = circuit.getMorphologyTypes(allGids);
+    }
 
     callback.updateProgress("Importing morphologies...", 0);
     float maxMorphologyLength = 0.f;
@@ -964,7 +978,7 @@ float AbstractCircuitLoader::_importMorphologies(
                           stoi(postSynapticGID), synapseRadius, model);
     else
         _loadAllSynapses(properties, circuit, gids, static_cast<float>(synapseRadius),
-                         loadAfferentSynapses, loadEfferentSynapses, model);
+                         loadAfferentSynapses, loadEfferentSynapses, model, compartmentReport);
 
     PLUGIN_TIMER(chrono.elapsed(), "Loading of " << gids.size() << " cells");
     return maxDistanceToSoma;
@@ -995,45 +1009,172 @@ void AbstractCircuitLoader::_loadAllSynapses(
     const brayns::PropertyMap &properties, const brain::Circuit &circuit,
     const brain::GIDSet &gids, const float synapseRadius,
     const bool loadAfferentSynapses, const bool loadEfferentSynapses,
-    brayns::Model &model) const
+    brayns::Model &model, CompartmentReportPtr compartmentReport) const
 {
     uint64_t i = 0;
-    for (const auto &gid : gids)
-    {
-        const size_t id =
-            _getMaterialFromCircuitAttributes(properties, i,
-                                              brayns::NO_MATERIAL, false);
-        if (loadAfferentSynapses)
-        {
-            const brain::Synapses &afferentSynapses(
-                circuit.getAfferentSynapses({gid}));
-            for (const brain::Synapse &synapse : afferentSynapses)
-                _buildAfferentSynapses(synapse, id + 1, synapseRadius, model);
-        }
 
-        if (loadEfferentSynapses)
+    auto uris = circuit.getMorphologyURIs(gids);
+    if(compartmentReport)
+    {
+        for (const auto &gid : gids)
         {
-            const brain::Synapses &efferentSynapses(
-                circuit.getEfferentSynapses({gid}));
-            for (const brain::Synapse &synapse : efferentSynapses)
-                _buildEfferentSynapses(synapse, id + 2, synapseRadius, model);
+            const size_t id =
+                _getMaterialFromCircuitAttributes(properties, i,
+                                                  brayns::NO_MATERIAL, false);
+
+            const auto& offsets =
+                compartmentReport->getOffsets()[i];
+            const auto& counts =
+                compartmentReport->getCompartmentCounts()[i];
+
+            brain::neuron::Morphology morphology(uris[i]);
+
+
+            if (loadAfferentSynapses)
+            {
+                const brain::Synapses &afferentSynapses(
+                    circuit.getAfferentSynapses({gid}));
+                for (const brain::Synapse &synapse : afferentSynapses)
+                {
+                    uint64_t userDataOffset = i;
+                    auto sectionId = synapse.getPostsynapticSectionID();
+                    if (sectionId < counts.size() && counts[sectionId] > 0)
+                    {
+                        auto sections = morphology.getSections({brain::neuron::SectionType::apicalDendrite,
+                                                                brain::neuron::SectionType::dendrite,
+                                                                brain::neuron::SectionType::axon});
+                        brain::neuron::Section* section = nullptr;
+                        for(auto& s : sections)
+                        {
+                            if(s.getID() == sectionId)
+                            {
+                                section = &s;
+                                break;
+                            }
+                        }
+
+                        if (section)
+                        {
+                            auto samples = section->getSamples();
+                            uint64_t j = 0, chosen = 0;
+                            double closer = 99999999.9;
+                            for(const auto& sample : samples)
+                            {
+                                glm::vec3 v3sample (sample);
+                                auto dist = glm::length(v3sample - synapse.getPostsynapticSurfacePosition());
+                                if(dist < closer)
+                                {
+                                    closer = dist;
+                                    chosen = j;
+                                }
+                                ++j;
+                            }
+
+                            const auto segCounts = counts[sectionId];
+                            const auto alpha = static_cast<double>(chosen) / static_cast<double>(segCounts);
+                            const auto extra = static_cast<uint64_t>(floor(segCounts * alpha));
+
+                            userDataOffset = offsets[sectionId] + extra;
+                        }
+                    }
+
+                    _buildAfferentSynapses(synapse, id + 1, synapseRadius, model, userDataOffset);
+                }
+            }
+
+            if (loadEfferentSynapses)
+            {
+                const brain::Synapses &efferentSynapses(
+                    circuit.getEfferentSynapses({gid}));
+                for (const brain::Synapse &synapse : efferentSynapses)
+                {
+                    uint64_t userDataOffset = i;
+                    const auto sectionId = synapse.getPresynapticSectionID();
+                    if (sectionId < counts.size() && counts[sectionId] > 0)
+                    {
+                        auto sections = morphology.getSections({brain::neuron::SectionType::apicalDendrite,
+                                                                brain::neuron::SectionType::dendrite,
+                                                                brain::neuron::SectionType::axon});
+                        brain::neuron::Section* section = nullptr;
+                        for(auto& s : sections)
+                        {
+                            if(s.getID() == sectionId)
+                            {
+                                section = &s;
+                                break;
+                            }
+                        }
+
+                        if (section)
+                        {
+                            const auto samples = section->getSamples();
+                            uint64_t j = 0, chosen = 0;
+                            double closer = 99999999.9;
+                            for(const auto& sample : samples)
+                            {
+                                glm::vec3 v3sample (sample);
+                                auto dist = glm::length(v3sample - synapse.getPresynapticSurfacePosition());
+                                if(dist < closer)
+                                {
+                                    closer = dist;
+                                    chosen = j;
+                                }
+                                ++j;
+                            }
+
+                            const auto segCounts = counts[sectionId];
+                            const auto alpha = static_cast<double>(chosen) / static_cast<double>(segCounts);
+                            const auto extra = static_cast<uint64_t>(floor(segCounts * alpha));
+
+                            userDataOffset = offsets[sectionId] + extra;
+                        }
+                    }
+                    _buildEfferentSynapses(synapse, id + 2, synapseRadius, model, userDataOffset);
+                }
+            }
+            ++i;
         }
-        ++i;
+    }
+    else
+    {
+        for (const auto &gid : gids)
+        {
+            const size_t id =
+                _getMaterialFromCircuitAttributes(properties, i,
+                                                  brayns::NO_MATERIAL, false);
+
+            if (loadAfferentSynapses)
+            {
+                const brain::Synapses &afferentSynapses(
+                    circuit.getAfferentSynapses({gid}));
+                for (const brain::Synapse &synapse : afferentSynapses)
+                    _buildAfferentSynapses(synapse, id + 1, synapseRadius, model);
+            }
+
+            if (loadEfferentSynapses)
+            {
+                const brain::Synapses &efferentSynapses(
+                    circuit.getEfferentSynapses({gid}));
+                for (const brain::Synapse &synapse : efferentSynapses)
+                    _buildEfferentSynapses(synapse, id + 2, synapseRadius, model);
+            }
+            ++i;
+        }
     }
 }
 
 void AbstractCircuitLoader::_buildAfferentSynapses(
     const brain::Synapse &synapse, const size_t materialId, const float radius,
-    brayns::Model &model) const
+    brayns::Model &model, const uint64_t userData) const
 {
-    model.addSphere(materialId, {synapse.getPostsynapticSurfacePosition(), radius});
+    model.addSphere(materialId, {synapse.getPostsynapticSurfacePosition(), radius, userData});
 }
 
 void AbstractCircuitLoader::_buildEfferentSynapses(
     const brain::Synapse &synapse, const size_t materialId, const float radius,
-    brayns::Model &model) const
+    brayns::Model &model, const uint64_t userData) const
 {
-    model.addSphere(materialId, {synapse.getPresynapticSurfacePosition(), radius});
+    model.addSphere(materialId, {synapse.getPresynapticSurfacePosition(), radius, userData});
 }
 
 brayns::ModelDescriptorPtr AbstractCircuitLoader::importFromBlob(

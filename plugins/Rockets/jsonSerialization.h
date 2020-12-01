@@ -128,9 +128,28 @@ struct FileType
     std::string message;
 };
 
-struct FileContent
+struct GetFileContent
+{
+    std::string path;
+    bool base64;
+};
+
+struct GetFileContentResult
 {
     std::string content;
+    int error;
+    std::string message;
+};
+
+struct SetFileContent
+{
+    std::string path;
+    bool base64;
+    std::string content;
+};
+
+struct SetFileContentResult
+{
     int error;
     std::string message;
 };
@@ -197,6 +216,27 @@ struct ModifyMaterial
 
 struct ModifyMaterialResult
 {
+    int error;
+    std::string message;
+};
+
+// ====================================================
+// Structs to handle active simulation model
+
+struct SetActiveSimulationModel
+{
+    size_t modelId;
+};
+
+struct SetActiveSimulationModelResponse
+{
+    int error;
+    std::string message;
+};
+
+struct GetActiveSimulationModel
+{
+    size_t modelId;
     int error;
     std::string message;
 };
@@ -642,9 +682,31 @@ inline void init(brayns::FileType* a, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::FileContent* a, ObjectHandler* h)
+inline void init(brayns::GetFileContent* a, ObjectHandler* h)
+{
+    h->add_property("path", &a->path);
+    h->add_property("base64", &a->base64);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::GetFileContentResult* a, ObjectHandler* h)
 {
     h->add_property("content", &a->content);
+    h->add_property("error", &a->error, Flags::Optional);
+    h->add_property("message", &a->message, Flags::Optional);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::SetFileContent* a, ObjectHandler* h)
+{
+    h->add_property("path", &a->path);
+    h->add_property("base64", &a->base64);
+    h->add_property("content", &a->content);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::SetFileContentResult* a, ObjectHandler* h)
+{
     h->add_property("error", &a->error, Flags::Optional);
     h->add_property("message", &a->message, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
@@ -710,6 +772,27 @@ inline void init(brayns::ModifyMaterial* a, ObjectHandler* h)
 
 inline void init(brayns::ModifyMaterialResult* a, ObjectHandler* h)
 {
+    h->add_property("error", &a->error);
+    h->add_property("message", &a->message);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline  void init(brayns::SetActiveSimulationModel* a, ObjectHandler* h)
+{
+    h->add_property("modelId", &a->modelId);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::SetActiveSimulationModelResponse* a, ObjectHandler* h)
+{
+    h->add_property("error", &a->error);
+    h->add_property("message", &a->message);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::GetActiveSimulationModel* a, ObjectHandler* h)
+{
+    h->add_property("modelId", &a->modelId);
     h->add_property("error", &a->error);
     h->add_property("message", &a->message);
     h->set_flags(Flags::DisallowUnknownKey);

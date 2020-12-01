@@ -176,6 +176,37 @@ public:
     /** @return true if an environment map is currently set in the scene. */
     bool hasEnvironmentMap() const;
 
+    /**
+     * @brief setActiveSimulatedModel Sets the model defined by its ID as the active simulated model
+     *        When there are multiple models with simulation, only the one marked as active simulated
+     *        will have it's simulation played.
+     * @param modelId size_t, ID of the model to set active
+     */
+    void setActiveSimulatedModel(const size_t modelId);
+
+    /**
+     * @brief isActiveSimulatedModel Returns true whether the given model is the active
+     *        simulated model.
+     * @param model ModelDescriptor pointer
+     * @return bool, True if it is the active simulated model
+     */
+    bool isActiveSimulatedModel(const ModelDescriptorPtr& model) const;
+
+    /**
+     * @brief isActiveSimulatedModel Returns true whether the given model is the active
+     *        simulated model.
+     * @param modelID Model ID
+     * @return bool, True if it is the active simulated model
+     */
+    bool isActiveSimulatedModel(const size_t modelID) const;
+
+    /**
+     * @brief getActiveSimulatedModel Returns the ID of the model being simulated
+     * @return size_t ID of the model actively simulated
+     */
+    size_t getActiveSimulatedModel() const;
+
+
     MaterialPtr getBackgroundMaterial() const { return _backgroundMaterial; }
     /**
      * Load the model from the given blob.
@@ -212,11 +243,14 @@ public:
     /** @internal */
     BRAYNS_API void copyFrom(const Scene& rhs);
 
+    virtual void copyFromImpl(const Scene&) { }
+
 protected:
     /** @return True if this scene supports scene updates from any thread. */
     virtual bool supportsConcurrentSceneUpdates() const { return false; }
     void _computeBounds();
     void _loadIBLMaps(const std::string& envMap);
+    void _updateSimulatedModel(ModelDescriptorPtr& model, bool forceSim = true);
 
     AnimationParameters& _animationParameters;
     GeometryParameters& _geometryParameters;

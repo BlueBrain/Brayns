@@ -31,7 +31,7 @@
     MESSAGE_ENTRY(std::vector<float>, scattering, "Scattering spectrum") \
     MESSAGE_ENTRY(double, scale, "Spectrums scale") \
     MESSAGE_ENTRY(double, g, "Anisotropy parameter") \
-    MESSAGE_ENTRY(std::vector<float>, Le, "Radiance spectrum") \
+    MESSAGE_ENTRY(std::vector<float>, le, "Radiance spectrum") \
 
 /**
  * @brief The AddHomogeneusVolume struct

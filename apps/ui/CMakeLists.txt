@@ -15,7 +15,7 @@ set(BRAYNSUI_LINK_LIBRARIES
     PRIVATE braynsManipulators
     ${OPENGL_gl_LIBRARY}
     glfw
-    ${GLEW_LIBRARIES}
+    GLEW#${GLEW_LIBRARIES}
     imgui
 )
 

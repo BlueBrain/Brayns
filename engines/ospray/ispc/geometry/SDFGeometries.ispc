@@ -278,7 +278,7 @@ unmasked void SDFGeometries_intersect(
     {
         const vec3f pos = ray->org + t_in * ray->dir;
 
-        ray->primID = args->primID;
+        ray->primID = idx;
         ray->geomID = geo->super.geomID;
         ray->instID = args->context->instID[0];
         ray->t = t_in;

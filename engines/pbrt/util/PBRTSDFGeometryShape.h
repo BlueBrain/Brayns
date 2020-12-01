@@ -77,19 +77,23 @@ inline pbrt::Float smoothstep(const float x)
 // https://en.wikipedia.org/wiki/Smoothstep
 inline pbrt::Float smootherstep(const pbrt::Float x)
 {
-    return x * x * x * (x * (x * 6 - 15) + 10);
+    return static_cast<pbrt::Float>(x * x * x * (x * (x * 6 - 15) + 10));
 }
 
 // polynomial smooth min (k = 0.1);
 inline pbrt::Float sminPoly(const pbrt::Float a, const pbrt::Float b, const pbrt::Float k)
 {
-    const pbrt::Float h = glm::clamp(0.5f + 0.5f * (b - a) / k, 0.f, 1.f);
-    return glm::lerp(b, a, h) - k * h * (1.f - h);
+    //const float h = glm::clamp(0.5f + 0.5f * (b - a) / k, 0.f, 1.f);
+    //return static_cast<pbrt::Float>(glm::lerp(b, a, h) - k * h * (1.f - h));
+    const pbrt::Float h = pbrt::Clamp(pbrt::Float(0.5) + pbrt::Float(0.5) * (b - a) / k,
+                                      pbrt::Float(0),
+                                      pbrt::Float(1));
+    return pbrt::Lerp(h, b, a) - k * h * (pbrt::Float(1) - h);
 }
 
 inline pbrt::Float sdSphere(const Vector3f& p, const Vector3f& c, pbrt::Float r)
 {
-    return glm::length(p - c) - r;
+    return static_cast<pbrt::Float>(glm::length(p - c) - r);
 }
 
 inline pbrt::Float sdCapsule(const Vector3f& p, const Vector3f& a, const Vector3f& b, pbrt::Float r)
@@ -262,8 +266,8 @@ private:
 
               const pbrt::Float dOther = calcDistance(neighbour, p);
               const pbrt::Float r1 = neighbour.r0;
-              const pbrt::Float blendFactor =
-                  glm::lerp(std::min(r0, r1), std::max(r0, r1), PBRT_SDF_BLEND_LERP_FACTOR);
+              const pbrt::Float blendFactor = pbrt::Lerp(pbrt::Float(PBRT_SDF_BLEND_LERP_FACTOR), std::min(r0, r1), std::max(r0, r1));
+                  //glm::lerp(std::min(r0, r1), std::max(r0, r1), PBRT_SDF_BLEND_LERP_FACTOR);
 
               d = sminPoly(dOther, d, blendFactor * PBRT_SDF_BLEND_FACTOR);
           }
@@ -401,18 +405,18 @@ pbrt::Float PBRTSDFGeometryShape<SDFType::ConePillSigmoid>::shapeDistance(const 
 template<>
 pbrt::Float PBRTSDFGeometryShape<SDFType::Sphere>::Area() const
 {
-    return PBRT_M_PI * 4.0f * _srcGeom->r0 * _srcGeom->r0;
+    return PBRT_M_PI * pbrt::Float(4) * _srcGeom->r0 * _srcGeom->r0;
 }
 
 template<>
 pbrt::Float PBRTSDFGeometryShape<SDFType::Pill>::Area() const
 {
-    const auto h = glm::length(_srcGeom->p1 - _srcGeom->p0);
+    const auto h = static_cast<pbrt::Float>(glm::length(_srcGeom->p1 - _srcGeom->p0));
 
     //const auto sphere = pbrt::Pi * 4.0 * geom.r0 * geom.r0;
     //const auto cylinder = pbrt::Pi * 2.0 * geom.r0 * h;
 
-    return PBRT_M_PI * 2.f * _srcGeom->r0 * (_srcGeom->r0 * 2.f + h);
+    return PBRT_M_PI * pbrt::Float(2) * _srcGeom->r0 * (_srcGeom->r0 * pbrt::Float(2) + h);
 }
 
 template<>
@@ -562,7 +566,8 @@ PBRTSDFGeometryShape<SDFType::ConePill>::Sample(const pbrt::Point2f& u,
 
         // Adjust radius based on height
         auto normaHeight = (sampledLen - _srcGeom->r0) / h;
-        const auto rad = glm::lerp(_srcGeom->r0, _srcGeom->r1, normaHeight);
+        const auto rad = pbrt::Lerp(normaHeight, _srcGeom->r0, _srcGeom->r1);
+        //const auto rad = glm::lerp(_srcGeom->r0, _srcGeom->r1, normaHeight);
         auto sample = _srcGeom->p0 + rotated * rad;
 
         // Adjust position along the fustrum cone
@@ -631,7 +636,8 @@ PBRTSDFGeometryShape<SDFType::ConePillSigmoid>::Sample(const pbrt::Point2f& u,
 
         // Adjust radius based on height
         auto normaHeight = (sampledLen - _srcGeom->r0) / h;
-        const auto rad = glm::lerp(_srcGeom->r0, _srcGeom->r1, normaHeight);
+        //const auto rad = glm::lerp(_srcGeom->r0, _srcGeom->r1, normaHeight);
+        const auto rad = pbrt::Lerp(normaHeight, _srcGeom->r0, _srcGeom->r1);
         auto sample = _srcGeom->p0 + rotated * rad;
 
         // Adjust position along the fustrum cone

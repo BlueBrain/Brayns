@@ -12,6 +12,44 @@ following parameter:
 
     --plugin braynsCircuitInfo
 
+
+----
+
+ci_info
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Parameters:
+
+.. code-block:: python
+
+    ci_info(path)
+
+Return general information about a circuit specified by the given path
+
+Parameters:
+
+* ``path``: ``string``, Path to the circuit's CircuitConfig/BlueConfig to query
+
+Return value:
+
+* ``dictionary`` containing the following entries
+
+  * ``cells_count``: ``integer``, Number of cells in this circuit
+  * ``cells_properties``: ``array``, List of available cell properties"
+  * ``m_types``: ``array``, List of morphology types available in this circuit
+  * ``e_types``: ``array``, List of electrical types available in this circuit
+  * ``targets``: ``array``, List of target names
+  * ``reports``: ``array``, List of report names
+  * ``spike_report``: ``string``, Path to the spike report file
+
+Error:
+
+In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
+
+* ``error``: ``integer``, an error code that identifies the problem.
+* ``messge``: ``str``, a description of the error.
+
 ----
 
 ci_get_afferent_cell_ids
@@ -36,6 +74,44 @@ Return value:
 * ``dictionary`` containing the following entries
 
   * ``ids``: ``array``, List of afferent synapses cell GIDs
+
+Error:
+
+In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
+
+* ``error``: ``integer``, an error code that identifies the problem.
+* ``messge``: ``str``, a description of the error.
+
+----
+
+ci_get_cell_data
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Parameters:
+
+.. code-block:: python
+
+    ci_get_cell_data(path, ids, properties)
+
+Return the value of the specified properties for the specified cells.
+
+Parameters:
+
+* ``path``: ``string``, Path to the circuit's CircuitConfig/BlueConfig to query.
+* ``ids``:``array``, List of cell GIDs.
+* ``properties``:``array``, List of wanted property names. Must match those returned by `ci_info(path)['cell_properties']`.
+
+Return value:
+
+* ``dictionary`` containing the following entries
+
+  * ``mtypes``: ``array``, Requested cell m-types
+  * ``etypes``: ``array``, Requested cell e-types
+  * ``morphology_classes``: ``array``, Requested cell morphology classes
+  * ``layers``: ``array``, Requested cell layer ids
+  * ``positions``: ``array``, Requested cell 3D positions. Each position takes 3 elements of the list, and its index can be calculated as `index in ids array x 3`
+  * ``orientations``: ``array``, Requested cell orientations as quaternions. Each quaternions takes 4 elements of the list, and its index can be calculated as `index in ids array x 4`
 
 Error:
 

@@ -33,7 +33,7 @@ class PBRTFrameBuffer : public FrameBuffer
 public:
     PBRTFrameBuffer(const std::string& name, const Vector2ui& frameSize,
                     const FrameBufferFormat frameBufferFormat);
-    ~PBRTFrameBuffer();
+    ~PBRTFrameBuffer() = default;
 
     void resize(const Vector2ui& frameSize) final;
 

@@ -54,4 +54,16 @@ struct SpikeSimulationDescriptor : public brayns::Message
     MESSAGE_ENTRY(double, spikeIntensity, "Spike intensity")
 };
 
+struct SpikeSimulationFromFile : public brayns::Message
+{
+    MESSAGE_BEGIN(SpikeSimulationFromFile)
+    MESSAGE_ENTRY(uint64_t, modelId, "The ID of the loaded model")
+    MESSAGE_ENTRY(double, dt, "Simulation time step")
+    MESSAGE_ENTRY(double, timeScale, "Simulation time scale")
+    MESSAGE_ENTRY(double, decaySpeed, "Speed of spike decay")
+    MESSAGE_ENTRY(double, restIntensity, "Rest intensity")
+    MESSAGE_ENTRY(double, spikeIntensity, "Spike intensity")
+    MESSAGE_ENTRY(std::string, path, "Path to BlueConfig file")
+};
+
 #endif // DTIPARAMS_H

@@ -344,13 +344,14 @@ fs_get_content
 
 .. code-block:: python
 
-    fs_get_content(path)
+    fs_get_content(path, base64)
 
 Return the content of a file if possible, or an error otherwise.
 
 Parameters:
 
 * ``path``: ``string``, path to a file within the backend's reachable filesystem.
+* ``base64``: ``bool``, Flag indicating wether the result must be returned as a base64 encoded string.
 
 Return value:
 
@@ -404,6 +405,31 @@ Return value:
 
     * ``names``: array of ``string``, upon success, returns the child files of the given path (non-recursive).
     * ``sizes``: array of ``integers``, upon success, returns the size of each child file, in octets.
+
+
+----
+
+fs_set_content
+~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+    fs_set_content(path, content, base64)
+
+Creates a file and sets its contents. If the file does not exists, it will be truncated.
+
+Parameters:
+
+* ``path``: ``string``, path to a file within the backend's reachable filesystem.
+* ``content``: ``string``, content to append to the newly created/truncated file.
+* ``base64``: ``bool``, Flag indicating wether the given content is a binary base64 encoded string.
+
+Return value:
+
+* ``dictionary`` with the following entries:
+
+  * ``error``: ``integer``, an error code if something went wrong. 0 means the request was successful.
+  * ``message``: ``string``, a descriptive message of the error if the error code was non-zero.
 
 ----
 

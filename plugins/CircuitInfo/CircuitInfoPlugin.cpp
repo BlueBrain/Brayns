@@ -59,6 +59,24 @@ void CircuitInfoPlugin::init()
     auto actionInterface = _api->getActionInterface();
     if(actionInterface)
     {
+        actionInterface->registerRequest<CircuitInfoRequest, CircuitInfo>(
+            {"ci-info",
+             "Return general info about a circuit",
+             "CircuitInfoRequest",
+             "Circuit from which to extract the requested information"},
+            [&](const CircuitInfoRequest& request){
+                return _getCircuitInfo(request);
+        });
+
+        actionInterface->registerRequest<CellDataRequest, CellData>(
+            {"ci-get-cell-data",
+             "Return data attached to one or many cells",
+             "CellDataRequest",
+             "List of cells and properties that wants to be extracted"},
+            [&](const CellDataRequest& request) {
+                return _getCellData(request);
+        });
+
         actionInterface->registerRequest<CellGIDListRequest, CellGIDList>(
             {"ci-get-cell-ids",
              "Return the list of GIDs from a circuit",
@@ -157,6 +175,130 @@ void CircuitInfoPlugin::init()
         });
     }
 }
+
+CircuitInfo CircuitInfoPlugin::_getCircuitInfo(const CircuitInfoRequest& request)
+{
+    CircuitInfo result;
+    if (!boost::filesystem::exists(request.path))
+    {
+        result.setError(9, "Circuit not found");
+        return result;
+    }
+
+    try
+    {
+        const brion::BlueConfig config(request.path);
+        const brain::Circuit circuit (config);
+
+        auto allGids = circuit.getGIDs();
+
+        result.cellsCount = circuit.getNumNeurons();
+        result.cellsProperties = { "etype", "mtype", "morphology_class", "layer", "position", "orientation" };
+        result.eTypes = circuit.getElectrophysiologyTypeNames();
+        result.mTypes = circuit.getMorphologyTypeNames();
+        result.reports = config.getSectionNames(brion::CONFIGSECTION_REPORT);
+        result.spikeReport = config.getSpikeSource().getPath();
+
+        const std::vector<brion::Target> targetParsers =  config.getTargets();
+        const std::vector<brion::TargetType> targetTypes = {brion::TargetType::TARGET_CELL,
+                                                             brion::TargetType::TARGET_COMPARTMENT,
+                                                             brion::TargetType::TARGET_ALL};
+        for(const auto& t : targetParsers)
+        {
+            for(const auto& tt : targetTypes)
+            {
+                const brion::Strings& targetList = t.getTargetNames(tt);
+                result.targets.insert(result.targets.end(), targetList.begin(), targetList.end());
+            }
+        }
+    }
+    catch(std::exception& e)
+    {
+        result.setError(2, e.what());
+    }
+
+    return result;
+}
+
+template<typename String,
+         typename = std::enable_if<std::is_constructible<std::string, String>::value>
+        >
+inline bool propertyRequested(const CellDataRequest& request, String&& propName)
+{
+    auto it = std::find(request.properties.begin(), request.properties.end(), propName);
+    return it != request.properties.end();
+}
+
+CellData CircuitInfoPlugin::_getCellData(const CellDataRequest& request)
+{
+    CellData result;
+
+    if (!boost::filesystem::exists(request.path))
+    {
+        result.setError(9, "Circuit not found");
+        return result;
+    }
+
+    const brion::BlueConfig config(request.path);
+    const brain::Circuit circuit (config);
+    const brion::GIDSet gids (request.ids.begin(), request.ids.end());
+
+    if(propertyRequested(request, "etype"))
+    {
+        auto etypeNames = circuit.getElectrophysiologyTypeNames();
+        auto etypeIndices = circuit.getElectrophysiologyTypes(gids);
+        result.etypes.reserve(etypeIndices.size());
+        for(const auto index : etypeIndices)
+            result.etypes.push_back(etypeNames[index]);
+    }
+
+    if(propertyRequested(request, "mtype"))
+    {
+        auto mtypeNames = circuit.getMorphologyTypeNames();
+        auto mtypeIndices = circuit.getMorphologyTypes(gids);
+        result.mtypes.reserve(mtypeIndices.size());
+        for(const auto index : mtypeIndices)
+            result.mtypes.push_back(mtypeNames[index]);
+    }
+
+    if(propertyRequested(request, "morphology_class"))
+        result.morphologyClasses = circuit.getMorphologyNames(gids);
+
+    if(propertyRequested(request, "layer"))
+    {
+        const auto& tsvFile = config.get(brion::BlueConfigSection::CONFIGSECTION_RUN,
+                                         "Default", "MEComboInfoFile");
+        result.layers = circuit.getLayers(gids, tsvFile);
+    }
+
+    if(propertyRequested(request, "position"))
+    {
+        auto positions = circuit.getPositions(gids);
+        result.positions.reserve(positions.size() * 3);
+        for(const auto& pos : positions)
+        {
+            result.positions.push_back(pos.x);
+            result.positions.push_back(pos.y);
+            result.positions.push_back(pos.z);
+        }
+    }
+
+    if(propertyRequested(request, "orientation"))
+    {
+        auto orientations = circuit.getRotations(gids);
+        result.orientations.reserve(orientations.size() * 4);
+        for(const auto& o : orientations)
+        {
+            result.orientations.push_back(o.w);
+            result.orientations.push_back(o.x);
+            result.orientations.push_back(o.y);
+            result.orientations.push_back(o.z);
+        }
+    }
+
+    return result;
+}
+
 
 CellGIDList CircuitInfoPlugin::_getCellGIDs(const CellGIDListRequest& request)
 {

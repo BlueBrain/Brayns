@@ -810,10 +810,6 @@ PBRTMaterial::PBRTMaterial(const PropertyMap& properties)
 {
 }
 
-PBRTMaterial::~PBRTMaterial()
-{
-}
-
 void PBRTMaterial::commit(const std::string& renderer)
 {
     // Update new renderer (even if its the same)
