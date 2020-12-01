@@ -81,8 +81,6 @@ void PBRTScene::commit()
         modelDescriptors = _modelDescriptors;
     }
 
-    const bool lightsDirty = commitLights();
-
     bool simDirty = false;
     for(auto& modelDescriptor : modelDescriptors)
         simDirty = simDirty || modelDescriptor->getModel().commitSimulationData();
@@ -104,11 +102,13 @@ void PBRTScene::commit()
         }
     }
 
-    if(!sceneDirty && !simDirty && !lightsDirty)
+    if(!sceneDirty && !simDirty && !_lightManager.isModified())
         return;
 
     // Release current scene
     _pbrtScene.reset(nullptr);
+
+    commitLights();
 
     if(sceneDirty || simDirty)
     {
@@ -152,9 +152,6 @@ void PBRTScene::commit()
 
 bool PBRTScene::commitLights()
 {
-    if(!_lightManager.isModified())
-        return false;
-
     _lights.clear();
     _lightShapes.clear();
 

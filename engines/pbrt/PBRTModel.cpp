@@ -466,7 +466,6 @@ PBRTModel::_createCones(pbrt::Transform* otw, pbrt::Transform*)
             pbrtMaterial = impl.getPBRTMaterial();
         }
 
-
         for(const auto& cone : coneList.second)
         {
             // Compute PBRT Transform from Brayns Transform
@@ -482,15 +481,6 @@ PBRTModel::_createCones(pbrt::Transform* otw, pbrt::Transform*)
             const pbrt::Transform conTrans(pbrtMat);
 
             // Multiply by model transformation
-            /*
-            std::unique_ptr<pbrt::Transform> wtoFinal
-                    (new pbrt::Transform(pbrt::Matrix4x4::Mul(otw->GetMatrix(),
-                                                              conTrans.GetMatrix())));
-            std::unique_ptr<pbrt::Transform> otwFinal
-                    (new pbrt::Transform(pbrt::Matrix4x4::Mul(wto->GetMatrix(),
-                                                              conTrans.GetInverseMatrix())));
-            */
-
             std::unique_ptr<pbrt::Transform> otwFinal
                     (new pbrt::Transform(pbrt::Matrix4x4::Mul(otw->GetMatrix(), conTrans.GetInverseMatrix())));
             std::unique_ptr<pbrt::Transform> wtoFinal
@@ -622,7 +612,7 @@ PBRTModel::_createSDFGeometries(pbrt::Transform* otw, pbrt::Transform* wto)
     Primitives result;
 
     const pbrt::MediumInterface dummyMI (_modelMedium.get(), nullptr);
-    const std::shared_ptr<pbrt::AreaLight> dummyAL;
+    std::shared_ptr<pbrt::AreaLight> dummyAL;
 
     std::unique_ptr<pbrt::Transform> otwFinal
             (new pbrt::Transform(otw->GetMatrix(), otw->GetInverseMatrix()));
@@ -637,10 +627,11 @@ PBRTModel::_createSDFGeometries(pbrt::Transform* otw, pbrt::Transform* wto)
 
     for(const auto& geometryList : getSDFGeometryData().geometryIndices)
     {
+        std::shared_ptr<Material> mat {nullptr};
         std::shared_ptr<pbrt::Material> pbrtMaterial {nullptr};
         if(geometryList.first != NO_MATERIAL && !_modelMedium)
         {
-            const auto& mat = getMaterial(geometryList.first);
+            mat = _materials[geometryList.first];
             PBRTMaterial& impl = static_cast<PBRTMaterial&>(*mat.get());
             pbrtMaterial = impl.getPBRTMaterial();
         }
@@ -680,7 +671,14 @@ PBRTModel::_createSDFGeometries(pbrt::Transform* otw, pbrt::Transform* wto)
                                                                                              &getSDFGeometryData());
                     break;
 
-            }            
+            }
+
+            if(!_simulationData.empty())
+            {
+                dummyAL = createLightForShape(shape, _transferFunction, mat, _simulationData[geom.userData]);
+                if(dummyAL)
+                    _modelLights.push_back(dummyAL);
+            }
 
             result.push_back(std::make_shared<pbrt::GeometricPrimitive>(
                                                         shape,
