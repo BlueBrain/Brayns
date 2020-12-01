@@ -37,17 +37,36 @@ PBRTFrameBuffer::PBRTFrameBuffer(const std::string& name, const Vector2ui& frame
 
 void PBRTFrameBuffer::fillColorBuffer(const std::vector<pbrt::Float>& src)
 {
-    std::fill(_colorBuffer.begin(), _colorBuffer.end(), 255u);
+    const size_t colorDepth = getColorDepth();
+    if(colorDepth == 0)
+        throw std::runtime_error("PBRTFrameBuffer: 0 depth color is not supported");
+
+    if((colorDepth == 3 && _colorBuffer.size() % 3 != 0)
+       || (colorDepth == 4 && _colorBuffer.size() % 4 != 0))
+        throw std::runtime_error("PBRTFrameBuffer: Color buffer does not match color depth");
+
+    for(size_t i = 0; i < _colorBuffer.size(); ++i)
+        _colorBuffer[i] = _backgroundColor[i % colorDepth];
+
+    //std::fill(_colorBuffer.begin(), _colorBuffer.end(), 255u);
 
 #pragma omp parallel for
     for (uint32_t x = 0; x < _frameSize.x; ++x)
     {
         for (uint32_t y = 0; y < _frameSize.y; ++y)
         {
-            uint8_t* dst = &_colorBuffer[x * (_frameSize.y * getColorDepth()) + (y * getColorDepth())];
-            dst[0] = BRAYNS_PBRT_TO_BYTE(src[3 * (x * _frameSize.y + y) + 0]);
-            dst[1] = BRAYNS_PBRT_TO_BYTE(src[3 * (x * _frameSize.y + y) + 1]);
-            dst[2] = BRAYNS_PBRT_TO_BYTE(src[3 * (x * _frameSize.y + y) + 2]);
+            auto r = BRAYNS_PBRT_TO_BYTE(src[3 * (x * _frameSize.y + y) + 0]);
+            auto g = BRAYNS_PBRT_TO_BYTE(src[3 * (x * _frameSize.y + y) + 1]);
+            auto b = BRAYNS_PBRT_TO_BYTE(src[3 * (x * _frameSize.y + y) + 2]);
+            if(r > 0 && g > 0 && b > 0)
+            {
+                uint8_t* dst = &_colorBuffer[x * (_frameSize.y * colorDepth) + (y * colorDepth)];
+                dst[0] = r;
+                dst[1] = g;
+                dst[2] = b;
+                if(colorDepth == 4)
+                    dst[3] = 255;
+            }
         }
     }
 }
