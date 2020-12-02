@@ -212,8 +212,6 @@ PBRTModel::commitToPBRT(const Transformation &transform, const std::string& rend
 
     // Both ways transforms
     _objectToWorld = pbrtTransform(transform);
-    _worldToObject = pbrt::Transform (_objectToWorld.GetInverseMatrix(),
-                                      _objectToWorld.GetMatrix());
 
     // Parse medium which will be added *inside* the model shapes
     _parseMedium(&_objectToWorld);
@@ -221,11 +219,11 @@ PBRTModel::commitToPBRT(const Transformation &transform, const std::string& rend
     _transformPool.clear();
 
     // Create shapes
-    auto spheres = _createSpheres(&_objectToWorld, &_worldToObject);
-    auto cylinders = _createCylinders(&_objectToWorld, &_worldToObject);
-    auto cones = _createCones(&_objectToWorld, &_worldToObject);
-    auto meshes = _createMeshes(&_objectToWorld, &_worldToObject);
-    auto sdfGeoms = _createSDFGeometries(&_objectToWorld, &_worldToObject);
+    auto spheres = _createSpheres(_objectToWorld);
+    auto cylinders = _createCylinders(_objectToWorld);
+    auto cones = _createCones(_objectToWorld);
+    auto meshes = _createMeshes(_objectToWorld);
+    auto sdfGeoms = _createSDFGeometries(_objectToWorld);
 
     // Insert all into the result
     Primitives result;
@@ -296,10 +294,9 @@ void PBRTModel::_commitMaterials(const std::string& renderer)
 
 
 std::vector<std::shared_ptr<pbrt::GeometricPrimitive>>
-PBRTModel::_createSpheres(pbrt::Transform* otw, pbrt::Transform*)
+PBRTModel::_createSpheres(const pbrt::Transform& transform)
 {
     Primitives result;
-
     const pbrt::MediumInterface dummyMI (_modelMedium.get(), nullptr);
 
     for(const auto& sphereList : getSpheres())
@@ -322,9 +319,11 @@ PBRTModel::_createSpheres(pbrt::Transform* otw, pbrt::Transform*)
                                                              sphere.center.z));
 
             std::unique_ptr<pbrt::Transform> otwFinal
-                    (new pbrt::Transform(pbrt::Matrix4x4::Mul(otw->GetMatrix(), otwS.GetMatrix())));
+                    (new pbrt::Transform(pbrt::Matrix4x4::Mul(transform.GetMatrix(),
+                                                              otwS.GetMatrix())));
             std::unique_ptr<pbrt::Transform> wtoFinal
-                    (new pbrt::Transform(otwFinal->GetInverseMatrix(), otwFinal->GetMatrix()));
+                    (new pbrt::Transform(otwFinal->GetInverseMatrix(),
+                                         otwFinal->GetMatrix()));
 
             auto otwFinalPtr = otwFinal.get();
             auto wtoFinalPtr = wtoFinal.get();
@@ -361,10 +360,9 @@ PBRTModel::_createSpheres(pbrt::Transform* otw, pbrt::Transform*)
 }
 
 std::vector<std::shared_ptr<pbrt::GeometricPrimitive>>
-PBRTModel::_createCylinders(pbrt::Transform* otw, pbrt::Transform*)
+PBRTModel::_createCylinders(const pbrt::Transform& transform)
 {
     Primitives result;
-
     const pbrt::MediumInterface dummyMI (_modelMedium.get(), nullptr);
 
     for(const auto& cylinderList : getCylinders())
@@ -387,18 +385,15 @@ PBRTModel::_createCylinders(pbrt::Transform* otw, pbrt::Transform*)
             if (direction == theoreticalUp)
                 theoreticalUp = glm::vec3(1.f, 0.f, 0.f);
             auto rUp = glm::normalize(glm::cross(direction, theoreticalUp));
-            auto pbrtMat = pbrt::LookAt(pbrt::Point3f(cylinder.center.x,
-                                                      cylinder.center.y,
-                                                      cylinder.center.z),
-                                        pbrt::Point3f(cylinder.up.x,
-                                                      cylinder.up.y,
-                                                      cylinder.up.z),
-                                        pbrt::Vector3f(rUp.x, rUp.y, rUp.z));
+            auto pbrtMat = pbrt::LookAt(TO_PBRT_P3(cylinder.center),
+                                        TO_PBRT_P3(cylinder.up),
+                                        TO_PBRT_V3(rUp));
 
             const pbrt::Transform cylTrans(pbrtMat);
 
             std::unique_ptr<pbrt::Transform> otwFinal
-                    (new pbrt::Transform(pbrt::Matrix4x4::Mul(otw->GetMatrix(), cylTrans.GetInverseMatrix())));
+                    (new pbrt::Transform(pbrt::Matrix4x4::Mul(transform.GetMatrix(),
+                                                              cylTrans.GetInverseMatrix())));
             std::unique_ptr<pbrt::Transform> wtoFinal
                     (new pbrt::Transform(otwFinal->GetInverseMatrix(), otwFinal->GetMatrix()));
 
@@ -449,10 +444,9 @@ PBRTModel::_createCylinders(pbrt::Transform* otw, pbrt::Transform*)
 }
 
 std::vector<std::shared_ptr<pbrt::GeometricPrimitive>>
-PBRTModel::_createCones(pbrt::Transform* otw, pbrt::Transform*)
+PBRTModel::_createCones(const pbrt::Transform& transform)
 {
     Primitives result;
-
     const pbrt::MediumInterface dummyMI (_modelMedium.get(), nullptr);
 
     for(const auto& coneList : getCones())
@@ -474,17 +468,19 @@ PBRTModel::_createCones(pbrt::Transform* otw, pbrt::Transform*)
             if (direction == theoreticalUp)
                 theoreticalUp = glm::vec3(1.f, 0.f, 0.f);
             auto rUp = glm::normalize(glm::cross(direction, theoreticalUp));
-            auto pbrtMat = pbrt::LookAt(pbrt::Point3f(cone.center.x, cone.center.y, cone.center.z),
-                                        pbrt::Point3f(cone.up.x, cone.up.y, cone.up.z),
-                                        pbrt::Vector3f(rUp.x, rUp.y, rUp.z));
+            auto pbrtMat = pbrt::LookAt(TO_PBRT_P3(cone.center),
+                                        TO_PBRT_P3(cone.up),
+                                        TO_PBRT_V3(rUp));
 
             const pbrt::Transform conTrans(pbrtMat);
 
             // Multiply by model transformation
             std::unique_ptr<pbrt::Transform> otwFinal
-                    (new pbrt::Transform(pbrt::Matrix4x4::Mul(otw->GetMatrix(), conTrans.GetInverseMatrix())));
+                    (new pbrt::Transform(pbrt::Matrix4x4::Mul(transform.GetMatrix(),
+                                                              conTrans.GetInverseMatrix())));
             std::unique_ptr<pbrt::Transform> wtoFinal
-                    (new pbrt::Transform(otwFinal->GetInverseMatrix(), otwFinal->GetMatrix()));
+                    (new pbrt::Transform(otwFinal->GetInverseMatrix(),
+                                         otwFinal->GetMatrix()));
 
             auto otwFinalPtr = otwFinal.get();
             auto wtoFinalPtr = wtoFinal.get();
@@ -528,9 +524,18 @@ PBRTModel::_createCones(pbrt::Transform* otw, pbrt::Transform*)
 }
 
 std::vector<std::shared_ptr<pbrt::GeometricPrimitive>>
-PBRTModel::_createMeshes(pbrt::Transform* otw, pbrt::Transform* wto)
+PBRTModel::_createMeshes(const pbrt::Transform& transform)
 {
     Primitives result;
+
+    std::unique_ptr<pbrt::Transform> otw = std::make_unique<pbrt::Transform>(
+                transform.GetMatrix(), transform.GetInverseMatrix());
+    std::unique_ptr<pbrt::Transform> wto = std::make_unique<pbrt::Transform>(
+                transform.GetInverseMatrix(), transform.GetMatrix());
+    auto otwPtr = otw.get();
+    auto wtoPtr = wto.get();
+    _transformPool.push_back(std::move(otw));
+    _transformPool.push_back(std::move(wto));
 
     const pbrt::MediumInterface dummyMI (_modelMedium.get(), nullptr);
 
@@ -593,7 +598,7 @@ PBRTModel::_createMeshes(pbrt::Transform* otw, pbrt::Transform* wto)
             params.AddNormal3f("N", std::move(normals), static_cast<int>(mesh.normals.size()));
         }
 
-        auto pbrtMeshList = pbrt::CreateTriangleMeshShape(otw, wto, false, params);
+        auto pbrtMeshList = pbrt::CreateTriangleMeshShape(otwPtr, wtoPtr, false, params);
         for(auto& meshObj : pbrtMeshList)
             result.push_back(std::shared_ptr<pbrt::GeometricPrimitive>(
                                  new pbrt::GeometricPrimitive(
@@ -607,7 +612,7 @@ PBRTModel::_createMeshes(pbrt::Transform* otw, pbrt::Transform* wto)
 }
 
 std::vector<std::shared_ptr<pbrt::GeometricPrimitive>>
-PBRTModel::_createSDFGeometries(pbrt::Transform* otw, pbrt::Transform* wto)
+PBRTModel::_createSDFGeometries(const pbrt::Transform& transform)
 {
     Primitives result;
 
@@ -615,7 +620,7 @@ PBRTModel::_createSDFGeometries(pbrt::Transform* otw, pbrt::Transform* wto)
     std::shared_ptr<pbrt::AreaLight> dummyAL;
 
     std::unique_ptr<pbrt::Transform> otwFinal
-            (new pbrt::Transform(otw->GetMatrix(), otw->GetInverseMatrix()));
+            (new pbrt::Transform(transform.GetMatrix(), transform.GetInverseMatrix()));
     std::unique_ptr<pbrt::Transform> wtoFinal
             (new pbrt::Transform(otwFinal->GetInverseMatrix(), otwFinal->GetMatrix()));
 

@@ -26,23 +26,12 @@
 
 #include <pbrt/core/geometry.h>
 
+#define TO_PBRT_P3(v) pbrt::Point3f(v.x, v.y, v.z)
+#define TO_PBRT_V3(v) pbrt::Vector3f(v.x, v.y, v.z)
+#define T0_PBRT_N3(v) pbrt::Normal3f(v.x, v.y, v.z)
+
 namespace brayns
 {
-template<class T>
-T glmToPbrt3(const glm::vec3& p)
-{
-    return T(
-        static_cast<pbrt::Float>(p.x),
-        static_cast<pbrt::Float>(p.y),
-        static_cast<pbrt::Float>(p.z));
-}
-
-template<class T>
-glm::vec3 pbrtToGlm3(const T& p)
-{
-    return glm::vec3(p.x, p.y, p.z);
-}
-
 pbrt::Transform pbrtTranslation(const Vector3f& v);
 
 pbrt::Transform pbrtTransform(const Transformation& t);

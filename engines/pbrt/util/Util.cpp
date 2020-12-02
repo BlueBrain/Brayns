@@ -39,28 +39,25 @@ pbrt::Transform pbrtTransform(const Transformation& t)
 {
     //auto m = t.toMatrix();
 
-    const auto& trans = t.getTranslation();
+    const pbrt::Vector3f trans (t.getTranslation().x,
+                                t.getTranslation().y,
+                                t.getTranslation().z);
+    const pbrt::Vector3f rotCenter (t.getRotationCenter().x,
+                                    t.getRotationCenter().y,
+                                    t.getRotationCenter().z);
     const auto& quatRot = t.getRotation();
-    const auto& scale = t.getScale();
-
     pbrt::Quaternion a;
     a.v.x = quatRot.x;
     a.v.y = quatRot.y;
     a.v.z = quatRot.z;
     a.w = quatRot.w;
+    const pbrt::Vector3f scale (t.getScale().x, t.getScale().y, t.getScale().z);
 
     const auto trRot = a.ToTransform();
-    const auto trTrans = pbrt::Translate(pbrt::Vector3f(static_cast<pbrt::Float>(trans.x),
-                                                        static_cast<pbrt::Float>(trans.y),
-                                                        static_cast<pbrt::Float>(trans.z)));
-    const auto trScale = pbrt::Scale(static_cast<pbrt::Float>(scale.x),
-                                     static_cast<pbrt::Float>(scale.y),
-                                     static_cast<pbrt::Float>(scale.z));
+    const auto trTrans = pbrt::Translate(trans - rotCenter);
+    const auto trScale = pbrt::Scale(scale.x, scale.y, scale.z);
+    const auto trTransRotCent = pbrt::Translate(rotCenter);
 
-    const auto finalMatrix = pbrt::Matrix4x4::Mul(pbrt::Matrix4x4::Mul(trRot.GetMatrix(),
-                                                                       trTrans.GetMatrix()),
-                                                  trScale.GetMatrix());
-
-    return pbrt::Transform (finalMatrix);
+    return trTransRotCent * trRot * trTrans * trScale;
 }
 }

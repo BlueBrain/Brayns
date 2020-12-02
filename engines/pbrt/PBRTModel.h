@@ -98,11 +98,11 @@ private:
 
     // Auxiliary functions to translate Brayns objects into PBRT objects
     using Primitives = std::vector<std::shared_ptr<pbrt::GeometricPrimitive>>;
-    Primitives _createSpheres(pbrt::Transform* otw, pbrt::Transform* wto);
-    Primitives _createCylinders(pbrt::Transform* otw, pbrt::Transform* wto);
-    Primitives _createCones(pbrt::Transform* otw, pbrt::Transform* wto);
-    Primitives _createMeshes(pbrt::Transform* otw, pbrt::Transform* wto);
-    Primitives _createSDFGeometries(pbrt::Transform* otw, pbrt::Transform* wto);
+    Primitives _createSpheres(const pbrt::Transform& transform);
+    Primitives _createCylinders(const pbrt::Transform& transform);
+    Primitives _createCones(const pbrt::Transform& transform);
+    Primitives _createMeshes(const pbrt::Transform& transform);
+    Primitives _createSDFGeometries(const pbrt::Transform& transform);
 
     void _parseMedium(pbrt::Transform* otw);
 

@@ -34,6 +34,7 @@
 #include <cmath>
 
 #include "../PBRTConstants.h"
+#include "Util.h"
 
 #define PBRT_MAX_MARCHING_ITERATIONS 32
 #define PBRT_MAX_MARCH_FIX_ITERATIONS 16
@@ -44,9 +45,6 @@
 #define PBRT_MAX_NORMAL_FIX_ITERATIONS 6
 #define PBRT_SURFACE_DISTANCE_TRESHOLD 2.0
 #define PBRT_M_PI static_cast<pbrt::Float>(M_PI)
-
-#define TO_PBRT_P3(v) pbrt::Point3f(v.x, v.y, v.z)
-#define TO_PBRT_V3(v) pbrt::Vector3f(v.x, v.y, vz)
 
 namespace brayns
 {

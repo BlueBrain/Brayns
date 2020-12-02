@@ -64,15 +64,15 @@ void PBRTCamera::manualCommit(const Vector2ui& resolution)
         return;
 
     const auto& srcPos = getPosition();
-    const pbrt::Point3f pos = glmToPbrt3<pbrt::Point3f>(srcPos);
+    const pbrt::Point3f pos = TO_PBRT_P3(srcPos);
 
     const auto srcDir = glm::rotate(getOrientation(), Vector3d(0., 0., -1.));
 
     const auto srcLook = srcPos + srcDir * 100.0;
-    const pbrt::Point3f look = glmToPbrt3<pbrt::Point3f>(srcLook);
+    const pbrt::Point3f look = TO_PBRT_P3(srcLook);
 
     const auto srcUp = glm::normalize(glm::rotate(getOrientation(), Vector3d(0., -1., 0.)));
-    const pbrt::Vector3f up = glmToPbrt3<pbrt::Vector3f>(srcUp);
+    const pbrt::Vector3f up = TO_PBRT_V3(srcUp);
 
     _camToWorldMatrix = pbrt::LookAt(pos, look, up);
     _worldToCamMatrix = pbrt::Transform(_camToWorldMatrix.GetInverseMatrix(),
