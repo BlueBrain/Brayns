@@ -1736,9 +1736,11 @@ void CircuitExplorerPlugin::_doExportFrameToDisk()
     DWORD numPixels = 0;
     FreeImage_AcquireMemory(memory.get(), &pixels, &numPixels);
 
+    auto fn = _frameNumber;
+    if(_exportFramesToDiskPayload.nameAfterStep)
+        fn = _exportFramesToDiskPayload.animationInformation[_frameNumber];
     char frame[7];
-    sprintf(frame, "%05d",
-            static_cast<int32_t>(_exportFramesToDiskPayload.animationInformation[_frameNumber]));
+    sprintf(frame, "%05d", static_cast<int32_t>(fn));
 
     std::string filename = _exportFramesToDiskPayload.path + '/' + frame + "." +
                            _exportFramesToDiskPayload.format;

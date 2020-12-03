@@ -294,7 +294,7 @@ void DTIPlugin::_updateSpikeSimulationFromFile(const SpikeSimulationFromFile& sr
     }
 
     _spikeSimulation.dt = src.dt;
-    _spikeSimulation.endTime = spikeReport->getEndTime() + src.decaySpeed;
+    _spikeSimulation.endTime = spikeReport->getEndTime();
     _spikeSimulation.modelId = src.modelId;
     _spikeSimulation.timeScale = src.timeScale;
     _spikeSimulation.decaySpeed = src.decaySpeed;

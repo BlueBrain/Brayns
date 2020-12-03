@@ -291,6 +291,7 @@ Parameters:
 * ``quality``: ``float``,  Quality of the exported image (Between 0 and 100).
 * ``samples_per_pixel``: ``int``,  Number of samples per pixels.
 * ``start_frame``: ``int``,  Optional value if the rendering should start at a specific frame.
+* ``name_after_step``: ``bool``, Name the file on disk after the simulation step index.
 
 Error:
 

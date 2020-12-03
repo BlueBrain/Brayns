@@ -315,6 +315,7 @@ Parameters:
 * ``quality``: ``integer``, The quality at which the images will be stored
 * ``spp``: ``integer``, Samples per pixels (The more, the better visual result and the slower the rendering)
 * ``start_frame``: ``integer``, The frame at which to start exporting frames
+* ``name_after_step``: ``bool``, Name the file on disk after the simulation step index.
 
 Error:
 

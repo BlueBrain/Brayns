@@ -504,7 +504,7 @@ class CircuitExplorer:
                                     response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
 
     def export_frames_to_disk(self, path, animation_frames, camera_definitions, image_format='png',
-                              quality=100, samples_per_pixel=1, start_frame=0):
+                              quality=100, samples_per_pixel=1, start_frame=0, name_after_step=False):
         """
         Exports frames to disk. Frames are named using a 6 digit representation of the frame number
 
@@ -515,6 +515,7 @@ class CircuitExplorer:
         :param float quality: Quality of the exported image (Between 0 and 100)
         :param int samples_per_pixel: Number of samples per pixels
         :param int start_frame: Optional value if the rendering should start at a specific frame.
+        :param bool name_after_step: Name the file on disk after the simulation step index.
         This is used to resume the rendering of a previously canceled sequence)
         :return: Result of the request submission
         :rtype: str
@@ -522,6 +523,7 @@ class CircuitExplorer:
         params = dict()
         params['path'] = path
         params['format'] = image_format
+        params['nameAfterStep'] = name_after_step
         params['quality'] = quality
         params['spp'] = samples_per_pixel
         params['startFrame'] = start_frame
