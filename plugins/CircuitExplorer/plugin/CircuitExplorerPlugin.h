@@ -124,6 +124,8 @@ private:
     brayns::Message _remapCircuitToScheme(const RemapCircuit& payload);
     brayns::Message _colorCells(const ColorCells& payload);
 
+    brayns::Message _mirrorModel(const MirrorModel& payload);
+
     SynapseAttributes _synapseAttributes;
 
     bool _dirty{false};

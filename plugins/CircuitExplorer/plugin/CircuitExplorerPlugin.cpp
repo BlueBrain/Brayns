@@ -565,6 +565,13 @@ void CircuitExplorerPlugin::init()
                  "update"},
                 [&](const ColorCells& cc) { return _colorCells(cc); });
 
+            actionInterface->registerRequest<MirrorModel, brayns::Message>(
+                {"mirror-model",
+                 "Mirrors a model along a given axis",
+                 "MirrorModel",
+                 "Model ID and axis along which to mirror the first."},
+                [&](const MirrorModel& mm) { return _mirrorModel(mm); });
+
         } // if (actionInterface)
 
     auto& engine = _api->getEngine();
@@ -2546,6 +2553,104 @@ brayns::Message CircuitExplorerPlugin::_addColumn(const AddColumn& payload)
 
     scene.addModel(
         std::make_shared<brayns::ModelDescriptor>(std::move(model), "Column"));
+
+    return result;
+}
+
+brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
+{
+    brayns::Message result;
+
+    auto modelPtr = _api->getScene().getModel(payload.modelId);
+    if(!modelPtr)
+    {
+        result.setError(1, "The given model ID does not exists");
+        return result;
+    }
+
+    brayns::Model& model = modelPtr->getModel();
+
+    std::vector<uint32_t> skipMirrorAxis;
+    for(uint32_t axis = 0; axis < 3; ++axis)
+    {
+        if(!(payload.mirrorAxis & axis))
+            skipMirrorAxis.push_back(axis);
+    }
+
+    const brayns::Boxd& bounds = model.getBounds();
+    const brayns::Vector3f center (bounds.getCenter());
+
+    brayns::SpheresMap& sphereMap = model.getSpheres();
+    for(auto& entry : sphereMap)
+    {
+        for(brayns::Sphere& sphere : entry.second)
+        {
+            auto toCenter = (center - sphere.center) * 2.f;
+            for(const auto skipAxis : skipMirrorAxis)
+                toCenter[skipAxis] = 0.f;
+            sphere.center += toCenter;
+        }
+    }
+    brayns::ConesMap& conesMap = model.getCones();
+    for(auto& entry : conesMap)
+    {
+        for(brayns::Cone& cone : entry.second)
+        {
+            auto toCenter = (center - cone.center) * 2.f;
+            auto toUp = (center - cone.up) * 2.f;
+            for(const auto skipAxis : skipMirrorAxis)
+            {
+                toCenter[skipAxis] = 0.f;
+                toUp[skipAxis] = 0.f;
+            }
+            cone.center += toCenter;
+            cone.up += toUp;
+        }
+    }
+    brayns::CylindersMap& cylindersMap = model.getCylinders();
+    for(auto& entry : cylindersMap)
+    {
+        for(brayns::Cylinder& cylinder : entry.second)
+        {
+            auto toCenter = (center - cylinder.center) * 2.f;
+            auto toUp = (center - cylinder.up) * 2.f;
+            for(const auto skipAxis : skipMirrorAxis)
+            {
+                toCenter[skipAxis] = 0.f;
+                toUp[skipAxis] = 0.f;
+            }
+            cylinder.center += toCenter;
+            cylinder.up += toUp;
+        }
+    }
+    brayns::SDFGeometryData& sdfGeometry = model.getSDFGeometryData();
+    for(brayns::SDFGeometry& geom : sdfGeometry.geometries)
+    {
+        auto toP0 = (center - geom.p0) * 2.f;
+        auto toP1 = (center - geom.p1) * 2.f;
+        for(const auto skipAxis: skipMirrorAxis)
+        {
+            toP0[skipAxis] = 0.f;
+            toP1[skipAxis] = 0.f;
+        }
+        geom.p0 += toP0;
+        geom.p1 += toP1;
+    }
+    brayns::TriangleMeshMap& triangleMap = model.getTriangleMeshes();
+    for(auto entry : triangleMap)
+    {
+        brayns::TriangleMesh& mesh = entry.second;
+        for(brayns::Vector3f& vertex : mesh.vertices)
+        {
+            auto toCenter = (center - vertex) * 2.f;
+            for(const auto skipAxis : skipMirrorAxis)
+                toCenter[skipAxis] = 0.f;
+            vertex += toCenter;
+        }
+    }
+
+    modelPtr->markModified();
+    _api->getScene().markModified();
 
     return result;
 }
