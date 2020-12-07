@@ -5,7 +5,7 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 project(Brayns VERSION 1.0.1)
 set(Brayns_VERSION_ABI 1)
 
