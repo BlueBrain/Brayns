@@ -52,9 +52,19 @@ public:
         return std::unique_lock<std::mutex>(_mapMutex);
     }
 
+    void setBackgroundColor(const Vector3d& color)
+    {
+        _backgroundColor[0] = static_cast<uint8_t>(color.x * 255.0);
+        _backgroundColor[1] = static_cast<uint8_t>(color.y * 255.0);
+        _backgroundColor[2] = static_cast<uint8_t>(color.z * 255.0);
+        _backgroundColor[3] = 0;
+    }
+
 private:
     uint8_ts _colorBuffer;
     std::mutex _mapMutex;
+
+    std::array<uint8_t, 4> _backgroundColor {0, 0, 0, 0};
 };
 }
 

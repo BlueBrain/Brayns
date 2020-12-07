@@ -368,6 +368,7 @@ void PBRTRenderer::render(FrameBufferPtr frameBuffer)
     {
         this->_pbrtRenderer->Render(*pbrtSceneImpl);
         PBRTFrameBuffer* pbrtFB = static_cast<PBRTFrameBuffer*>(frameBuffer.get());
+        pbrtFB->setBackgroundColor(_renderingParameters.getBackgroundColor());
         pbrtFB->fillColorBuffer(pbrtCam.getFilm()->_rgb);
         frameBuffer->markModified();
         pbrtCam.getFilm()->Clear();
