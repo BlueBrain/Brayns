@@ -109,7 +109,7 @@ std::unique_ptr<Assimp::Importer> createImporter(const LoaderProgress& callback,
 // from commit dcc5887
 #ifdef USE_CUSTOM_PLY_IMPORTER
     {
-        importer->UnregisterLoader(importer.GetImporter("ply"));
+        importer->UnregisterLoader(importer->GetImporter("ply"));
         importer->RegisterLoader(new Assimp::PLYImporter());
     }
 #endif
