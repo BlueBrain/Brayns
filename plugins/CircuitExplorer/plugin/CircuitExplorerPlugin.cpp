@@ -2576,33 +2576,46 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
     }
 
     brayns::Model& model = modelPtr->getModel();
+    const brayns::Boxd& bounds = model.getBounds();
+    const brayns::Vector3d dimensions = (bounds.getMax() - bounds.getMin());
+    brayns::Vector3d min = bounds.getMin();
+    brayns::Vector3d max = bounds.getMax();
 
     std::vector<uint32_t> skipMirrorAxis;
     for(uint32_t axis = 0; axis < 3; ++axis)
     {
-        const uint32_t testAxis = 1 << axis;
-        if(!(payload.mirrorAxis & testAxis))
+        if(payload.mirrorAxis[axis] == 0)
             skipMirrorAxis.push_back(axis);
+
+        const double axisF = static_cast<double>(payload.mirrorAxis[axis]);
+        if(axisF < 0.)
+            min[axis] -= dimensions[axis];
+        else
+            max[axis] += dimensions[axis];
     }
 
-    const brayns::Boxd& bounds = model.getBounds();
-    const brayns::Vector3f center (bounds.getCenter());
+    const brayns::Vector3f center ((max + min) * 0.5);
 
     brayns::SpheresMap& sphereMap = model.getSpheres();
     for(auto& entry : sphereMap)
     {
-        for(brayns::Sphere& sphere : entry.second)
+        std::vector<brayns::Sphere> tempBuf;
+        tempBuf.reserve(entry.second.size());
+        for(const brayns::Sphere& sphere : entry.second)
         {
             auto toCenter = (center - sphere.center) * 2.f;
             for(const auto skipAxis : skipMirrorAxis)
                 toCenter[skipAxis] = 0.f;
-            sphere.center += toCenter;
+            tempBuf.emplace_back(sphere.center + toCenter, sphere.radius, sphere.userData);
         }
+        entry.second.insert(entry.second.end(), tempBuf.begin(), tempBuf.end());
     }
     brayns::ConesMap& conesMap = model.getCones();
     for(auto& entry : conesMap)
     {
-        for(brayns::Cone& cone : entry.second)
+        std::vector<brayns::Cone> tempBuf;
+        tempBuf.reserve(entry.second.size());
+        for(const brayns::Cone& cone : entry.second)
         {
             auto toCenter = (center - cone.center) * 2.f;
             auto toUp = (center - cone.up) * 2.f;
@@ -2611,13 +2624,19 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
                 toCenter[skipAxis] = 0.f;
                 toUp[skipAxis] = 0.f;
             }
-            cone.center += toCenter;
-            cone.up += toUp;
+            tempBuf.emplace_back(cone.center + toCenter,
+                                 cone.up + toUp,
+                                 cone.centerRadius,
+                                 cone.upRadius,
+                                 cone.userData);
         }
+        entry.second.insert(entry.second.end(), tempBuf.begin(), tempBuf.end());
     }
     brayns::CylindersMap& cylindersMap = model.getCylinders();
     for(auto& entry : cylindersMap)
     {
+        std::vector<brayns::Cylinder> tempBuf;
+        tempBuf.reserve(entry.second.size());
         for(brayns::Cylinder& cylinder : entry.second)
         {
             auto toCenter = (center - cylinder.center) * 2.f;
@@ -2627,38 +2646,56 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
                 toCenter[skipAxis] = 0.f;
                 toUp[skipAxis] = 0.f;
             }
-            cylinder.center += toCenter;
-            cylinder.up += toUp;
+            tempBuf.emplace_back(cylinder.center + toCenter,
+                                 cylinder.up + toUp,
+                                 cylinder.radius,
+                                 cylinder.userData);
         }
-    }
-    brayns::SDFGeometryData& sdfGeometry = model.getSDFGeometryData();
-    for(brayns::SDFGeometry& geom : sdfGeometry.geometries)
-    {
-        auto toP0 = (center - geom.p0) * 2.f;
-        auto toP1 = (center - geom.p1) * 2.f;
-        for(const auto skipAxis: skipMirrorAxis)
-        {
-            toP0[skipAxis] = 0.f;
-            toP1[skipAxis] = 0.f;
-        }
-        geom.p0 += toP0;
-        geom.p1 += toP1;
-    }
-    brayns::TriangleMeshMap& triangleMap = model.getTriangleMeshes();
-    for(auto entry : triangleMap)
-    {
-        brayns::TriangleMesh& mesh = entry.second;
-        for(brayns::Vector3f& vertex : mesh.vertices)
-        {
-            auto toCenter = (center - vertex) * 2.f;
-            for(const auto skipAxis : skipMirrorAxis)
-                toCenter[skipAxis] = 0.f;
-            vertex += toCenter;
-        }
+        entry.second.insert(entry.second.end(), tempBuf.begin(), tempBuf.end());
     }
 
+    brayns::SDFGeometryData& sdfGeometry = model.getSDFGeometryData();
+    const size_t originalOffset = sdfGeometry.geometries.size();
+    std::vector<brayns::SDFGeometry> tempBuf;
+    tempBuf.reserve(originalOffset);
+    for(const auto& entry : sdfGeometry.geometryIndices)
+    {
+        for(const auto geomIndex : entry.second)
+        {
+            const brayns::SDFGeometry& geom = sdfGeometry.geometries[geomIndex];
+            auto toP0 = (center - geom.p0) * 2.f;
+            auto toP1 = (center - geom.p1) * 2.f;
+            for(const auto skipAxis: skipMirrorAxis)
+            {
+                toP0[skipAxis] = 0.f;
+                toP1[skipAxis] = 0.f;
+            }
+            // Update geometry indices (materials)
+            sdfGeometry.geometryIndices[entry.first].push_back(originalOffset + tempBuf.size());
+            // Update neighbours
+            std::vector<uint64_t> newNeighbours = sdfGeometry.neighbours[geomIndex];
+            for(size_t i = 0; i < newNeighbours.size(); ++i)
+                newNeighbours[i] += originalOffset;
+            sdfGeometry.neighbours.push_back(newNeighbours);
+            // Insert the new geometry
+            tempBuf.emplace_back();
+            brayns::SDFGeometry& last = tempBuf.back();
+            last = geom;
+            last.p0 += toP0;
+            last.p1 += toP1;
+        }
+    }
+    sdfGeometry.geometries.insert(sdfGeometry.geometries.end(),
+                                  tempBuf.begin(),
+                                  tempBuf.end());
+
+    tempBuf.clear();
+    model.markInstancesDirty();
+
+    model.updateBounds();
     modelPtr->markModified();
     _api->getScene().markModified();
+    _api->getEngine().triggerRender();
 
     return result;
 }
