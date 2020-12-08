@@ -487,4 +487,11 @@ struct MirrorModel : public brayns::Message
                                         "(bitmask with X=0, Y=1, Z=2)")
 };
 
+struct CircuitThickness : public brayns::Message
+{
+    MESSAGE_BEGIN(CircuitThickness)
+    MESSAGE_ENTRY(uint64_t, modelId, "The model to which to apply the thickness change")
+    MESSAGE_ENTRY(double, radiusMultiplier, "The facto by which to multiply the geometry radiuses")
+};
+
 #endif // CIRCUITEXLORERPARAMS_H

@@ -125,6 +125,7 @@ private:
     brayns::Message _colorCells(const ColorCells& payload);
 
     brayns::Message _mirrorModel(const MirrorModel& payload);
+    brayns::Message _changeCircuitThickness(const CircuitThickness& payload);
 
     SynapseAttributes _synapseAttributes;
 

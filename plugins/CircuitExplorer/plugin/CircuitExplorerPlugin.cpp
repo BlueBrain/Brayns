@@ -572,6 +572,13 @@ void CircuitExplorerPlugin::init()
                  "Model ID and axis along which to mirror the first."},
                 [&](const MirrorModel& mm) { return _mirrorModel(mm); });
 
+            actionInterface->registerRequest<CircuitThickness, brayns::Message>(
+                {"set-circuit-thickness",
+                 "Modify the geometry radiuses (spheres, cones, cylinders and SDF geometries)",
+                 "CircuitThickness",
+                 "Model ID and radius multiplier to apply"},
+                [&](const CircuitThickness& cc) { return _changeCircuitThickness(cc); });
+
         } // if (actionInterface)
 
     auto& engine = _api->getEngine();
@@ -2651,6 +2658,54 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
 
     modelPtr->markModified();
     _api->getScene().markModified();
+
+    return result;
+}
+
+brayns::Message CircuitExplorerPlugin::_changeCircuitThickness(const CircuitThickness& payload)
+{
+    brayns::Message result;
+
+    auto modelPtr = _api->getScene().getModel(payload.modelId);
+    if(!modelPtr)
+    {
+        result.setError(1, "The given model ID does not exists");
+        return result;
+    }
+
+    brayns::Model& model = modelPtr->getModel();
+
+    brayns::SpheresMap& sphereMap = model.getSpheres();
+    for(auto& entry : sphereMap)
+    {
+        for(brayns::Sphere& sphere : entry.second)
+            sphere.radius *= payload.radiusMultiplier;
+    }
+    brayns::ConesMap& conesMap = model.getCones();
+    for(auto& entry : conesMap)
+    {
+        for(brayns::Cone& cone : entry.second)
+        {
+            cone.centerRadius *= payload.radiusMultiplier;
+            cone.upRadius *= payload.radiusMultiplier;
+        }
+    }
+    brayns::CylindersMap& cylindersMap = model.getCylinders();
+    for(auto& entry : cylindersMap)
+    {
+        for(brayns::Cylinder& cylinder : entry.second)
+            cylinder.radius *= payload.radiusMultiplier;
+    }
+    brayns::SDFGeometryData& sdfGeometry = model.getSDFGeometryData();
+    for(brayns::SDFGeometry& geom : sdfGeometry.geometries)
+    {
+        geom.r0 *= payload.radiusMultiplier;
+        geom.r1 *= payload.radiusMultiplier;
+    }
+
+    modelPtr->markModified();
+    _api->getScene().markModified();
+    _api->getEngine().triggerRender();
 
     return result;
 }
