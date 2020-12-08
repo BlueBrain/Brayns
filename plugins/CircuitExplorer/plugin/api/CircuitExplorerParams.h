@@ -484,7 +484,7 @@ struct MirrorModel : public brayns::Message
     MESSAGE_BEGIN(MirrorModel)
     MESSAGE_ENTRY(uint64_t, modelId, "The model to which to mirror")
     MESSAGE_ENTRY(uint32_t, mirrorAxis, "The axis to use for mirroring "
-                                        "(bitmask with X=0, Y=1, Z=2)")
+                                        "(bitmask with X=1, Y=2, Z=4)")
 };
 
 struct CircuitThickness : public brayns::Message

@@ -2580,7 +2580,8 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
     std::vector<uint32_t> skipMirrorAxis;
     for(uint32_t axis = 0; axis < 3; ++axis)
     {
-        if(!(payload.mirrorAxis & axis))
+        const uint32_t testAxis = 1 << axis;
+        if(!(payload.mirrorAxis & testAxis))
             skipMirrorAxis.push_back(axis);
     }
 
