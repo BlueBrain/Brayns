@@ -38,7 +38,7 @@ VoltageSimulationHandler::VoltageSimulationHandler(
 {
     // Load simulation information from compartment reports
     _dt = _compartmentReport->getTimestep();
-    _nbFrames = _compartmentReport->getEndTime() / _dt;
+    _nbFrames = (_compartmentReport->getEndTime() - _compartmentReport->getStartTime()) / _dt;
     _unit = _compartmentReport->getTimeUnit();
     _frameSize = _compartmentReport->getFrameSize();
 
@@ -46,7 +46,8 @@ VoltageSimulationHandler::VoltageSimulationHandler(
                 << std::endl;
     PLUGIN_INFO << "Voltage simulation information" << std::endl;
     PLUGIN_INFO << "----------------------" << std::endl;
-    PLUGIN_INFO << "End time             : " << _nbFrames * _dt << std::endl;
+    PLUGIN_INFO << "Start time           : " << _compartmentReport->getStartTime() << std::endl;
+    PLUGIN_INFO << "End time             : " << _compartmentReport->getEndTime() << std::endl;
     PLUGIN_INFO << "Steps between frames : " << _dt << std::endl;
     PLUGIN_INFO << "Number of frames     : " << _nbFrames << std::endl;
     PLUGIN_INFO << "Frame size           : " << _frameSize << std::endl;
@@ -90,7 +91,7 @@ void* VoltageSimulationHandler::getFrameData(const uint32_t frame)
 
 void VoltageSimulationHandler::_triggerLoading(const uint32_t frame)
 {
-    float timestamp = frame * _dt;
+    float timestamp = frame * _dt + _compartmentReport->getStartTime();
     timestamp = std::min(static_cast<float>(_nbFrames), timestamp);
 
     if (_currentFrameFuture.valid())
