@@ -346,6 +346,9 @@ size_t CellObjectMapper::_computeMaterialId(const CircuitColorScheme scheme,
     size_t materialId = 0;
     switch (scheme)
     {
+    case CircuitColorScheme::single_color:
+        materialId = 1;
+        break;
     case CircuitColorScheme::by_id:
         materialId = NB_MATERIALS_PER_INSTANCE * index;
         break;
