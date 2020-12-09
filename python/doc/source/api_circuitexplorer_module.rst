@@ -425,7 +425,7 @@ Parameters:
 * ``report_type``: ``int``,  Report type (REPORT_TYPE_NONE, REPORT_TYPE_VOLTAGES_FROM_FILE, REPORT_TYPE_SPIKES).
 * ``user_data_type``: ``int``,  Type of data mapped to the neuron surface (USER_DATATYPE_NONE, USER_DATATYPE_SIMULATION_OFFSET, USER_DATATYPE_DISTANCE_TO_SOMA).
 * ``synchronous_mode``: ``bool``,  Defines if the simulation report should be loaded synchronously or not.
-* ``circuit_color_scheme``: ``int``,  Color scheme to apply to the circuit ( CIRCUIT_COLOR_SCHEME_NONE, CIRCUIT_COLOR_SCHEME_NEURON_BY_ID, CIRCUIT_COLOR_SCHEME_NEURON_BY_LAYER, CIRCUIT_COLOR_SCHEME_NEURON_BY_MTYPE, CIRCUIT_COLOR_SCHEME_NEURON_BY_ETYPE, CIRCUIT_COLOR_SCHEME_NEURON_BY_TARGET).
+* ``circuit_color_scheme``: ``int``,  Color scheme to apply to the circuit ( CIRCUIT_COLOR_SCHEME_NONE, CIRCUIT_COLOR_SCHEME_NEURON_BY_ID, CIRCUIT_COLOR_SCHEME_NEURON_BY_LAYER, CIRCUIT_COLOR_SCHEME_NEURON_BY_MTYPE, CIRCUIT_COLOR_SCHEME_NEURON_BY_ETYPE, CIRCUIT_COLOR_SCHEME_NEURON_BY_TARGET, CIRCUIT_COLOR_SCHEME_NEURON_SINGLE_COLOR).
 * ``mesh_folder``: ``str``,  Folder containing meshes (if applicable).
 * ``mesh_filename_pattern``: ``str``,  Filename pattern used to load the meshes ({guid} is replaced by the correponding GID during the loading of the circuit. e.g. mesh_{gid}.obj).
 * ``mesh_transformation``: ``bool``,  Boolean defining is circuit transformation should be applied to the meshes.
