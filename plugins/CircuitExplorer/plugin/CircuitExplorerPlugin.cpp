@@ -2658,8 +2658,10 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
     const size_t originalOffset = sdfGeometry.geometries.size();
     std::vector<brayns::SDFGeometry> tempBuf;
     tempBuf.reserve(originalOffset);
-    for(const auto& entry : sdfGeometry.geometryIndices)
+    for(auto& entry : sdfGeometry.geometryIndices)
     {
+        std::vector<uint64_t> extraIndices;
+        extraIndices.reserve(entry.second.size());
         for(const auto geomIndex : entry.second)
         {
             const brayns::SDFGeometry& geom = sdfGeometry.geometries[geomIndex];
@@ -2671,7 +2673,7 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
                 toP1[skipAxis] = 0.f;
             }
             // Update geometry indices (materials)
-            sdfGeometry.geometryIndices[entry.first].push_back(originalOffset + tempBuf.size());
+            extraIndices.push_back(originalOffset + tempBuf.size());
             // Update neighbours
             std::vector<uint64_t> newNeighbours = sdfGeometry.neighbours[geomIndex];
             for(size_t i = 0; i < newNeighbours.size(); ++i)
@@ -2684,14 +2686,13 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
             last.p0 += toP0;
             last.p1 += toP1;
         }
+        entry.second.insert(entry.second.end(), extraIndices.begin(), extraIndices.end());
     }
     sdfGeometry.geometries.insert(sdfGeometry.geometries.end(),
                                   tempBuf.begin(),
                                   tempBuf.end());
 
     tempBuf.clear();
-    model.markInstancesDirty();
-
     model.updateBounds();
     modelPtr->markModified();
     _api->getScene().markModified();
