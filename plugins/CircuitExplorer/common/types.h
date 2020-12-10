@@ -64,7 +64,7 @@ enum class CircuitColorScheme
     by_mtype = 4,
     by_etype = 5,
     by_target = 6,
-    single_color = 7,
+    single_color = 7
 };
 
 /** Morphology color scheme */

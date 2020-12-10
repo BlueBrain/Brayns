@@ -2692,6 +2692,10 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
                                   tempBuf.begin(),
                                   tempBuf.end());
 
+    brayns::Transformation tr = modelPtr->getTransformation();
+    tr.setRotationCenter((max + min) * 0.5);
+    modelPtr->setTransformation(tr);
+
     tempBuf.clear();
     model.updateBounds();
     modelPtr->markModified();
