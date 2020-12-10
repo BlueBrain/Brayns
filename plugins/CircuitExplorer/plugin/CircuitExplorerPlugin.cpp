@@ -2584,14 +2584,12 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
     std::vector<uint32_t> skipMirrorAxis;
     for(uint32_t axis = 0; axis < 3; ++axis)
     {
-        if(payload.mirrorAxis[axis] == 0)
-            skipMirrorAxis.push_back(axis);
-
-        const double axisF = static_cast<double>(payload.mirrorAxis[axis]);
-        if(axisF < 0.)
+        if(payload.mirrorAxis[axis] < 0)
             min[axis] -= dimensions[axis];
-        else
+        else if(payload.mirrorAxis[axis] > 0)
             max[axis] += dimensions[axis];
+        else
+            skipMirrorAxis.push_back(axis);
     }
 
     const brayns::Vector3f center ((max + min) * 0.5);
@@ -2691,13 +2689,14 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
     sdfGeometry.geometries.insert(sdfGeometry.geometries.end(),
                                   tempBuf.begin(),
                                   tempBuf.end());
+    tempBuf.clear();
+
+    model.updateBounds();
 
     brayns::Transformation tr = modelPtr->getTransformation();
     tr.setRotationCenter((max + min) * 0.5);
     modelPtr->setTransformation(tr);
-
-    tempBuf.clear();
-    model.updateBounds();
+    modelPtr->computeBounds();
     modelPtr->markModified();
     _api->getScene().markModified();
     _api->getEngine().triggerRender();

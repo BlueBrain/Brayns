@@ -247,7 +247,7 @@ void OptiXScene::commit()
                                           Vector3d(0.5));
             modelTransform.setScale(modelBounds.getSize());
 
-            Matrix4f mtxd = modelTransform.toMatrix(true);
+            Matrix4f mtxd = modelTransform.toMatrix();
             mtxd = glm::transpose(mtxd);
             auto trf = glm::value_ptr(mtxd);
 
