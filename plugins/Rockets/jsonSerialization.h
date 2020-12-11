@@ -523,6 +523,7 @@ inline void init(brayns::ModelDescriptor* g, ObjectHandler* h)
     h->add_property("path", &g->_path, Flags::Optional);
     h->add_property("transformation", &g->_transformation, Flags::Optional);
     h->add_property("visible", &g->_visible, Flags::Optional);
+    h->add_property("loader_properties", &g->_loaderProperties, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -873,6 +874,13 @@ inline std::string to_json(const brayns::ModelProperties& props)
 
 template <>
 inline std::string to_json(const brayns::ModelParams& params)
+{
+    return toJSONReplacePropertyMap(params, "loader_properties",
+                                    params.getLoaderProperties());
+}
+
+template<>
+inline std::string to_json(const brayns::ModelDescriptor& params)
 {
     return toJSONReplacePropertyMap(params, "loader_properties",
                                     params.getLoaderProperties());

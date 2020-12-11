@@ -118,6 +118,8 @@ ModelDescriptor& ModelDescriptor::operator=(const ModelParams& rhs)
         // by the model loader is used
         _transformation.setRotationCenter(oldRotationCenter);
 
+    _loaderProperties = rhs.getLoaderProperties();
+
     return *this;
 }
 
@@ -183,6 +185,7 @@ ModelDescriptorPtr ModelDescriptor::clone(ModelPtr model) const
     newModelDesc->_properties = _properties;
     newModelDesc->_model->buildBoundingBox();
     newModelDesc->_simulatedModel = _simulatedModel;
+    newModelDesc->_loaderProperties = _loaderProperties;
     return newModelDesc;
 }
 
