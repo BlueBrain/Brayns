@@ -483,7 +483,7 @@ struct MirrorModel : public brayns::Message
 {
     MESSAGE_BEGIN(MirrorModel)
     MESSAGE_ENTRY(uint64_t, modelId, "The model to which to mirror")
-    MESSAGE_ENTRY(std::vector<int32_t>, mirrorAxis, "The axis to use for mirroring")
+    MESSAGE_ENTRY(std::vector<double>, mirrorAxis, "The axis to use for mirroring")
 };
 
 struct CircuitThickness : public brayns::Message
