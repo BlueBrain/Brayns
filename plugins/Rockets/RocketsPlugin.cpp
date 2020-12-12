@@ -2336,6 +2336,7 @@ public:
                           if (auto model = scene.getModel(newDesc.getModelID()))
                           {
                               ::from_json(*model, request.message);
+                              model->computeBounds();
                               scene.markModified();
                               engine.triggerRender();
                               return Response{to_json(true)};
