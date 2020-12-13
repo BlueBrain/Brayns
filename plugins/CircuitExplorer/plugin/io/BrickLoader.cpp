@@ -148,28 +148,6 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
     for (size_t i = 0; i < nbElements; ++i)
         metadata[_readString(file)] = _readString(file);
 
-    // Instances
-    std::vector<brayns::Transformation> transformations;
-    file.read((char*)&nbElements, sizeof(size_t));
-    for (size_t i = 0; i < nbElements; ++i)
-    {
-        brayns::Transformation tf;
-        brayns::Vector3d t;
-        brayns::Vector3d rc;
-        brayns::Vector3d s;
-        brayns::Quaterniond q;
-
-        file.read((char*)&t, sizeof(brayns::Vector3d));
-        tf.setTranslation(t);
-        file.read((char*)&rc, sizeof(brayns::Vector3d));
-        tf.setRotationCenter(rc);
-        file.read((char*)&q, sizeof(brayns::Quaterniond));
-        tf.setRotation(q);
-        file.read((char*)&s, sizeof(brayns::Vector3d));
-        tf.setScale(s);
-        transformations.push_back(tf);
-    }
-
     size_t nbMaterials;
     file.read((char*)&nbMaterials, sizeof(size_t));
 
@@ -215,7 +193,7 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
             bool userData;
             file.read((char*)&userData, sizeof(bool));
             material->updateProperty(MATERIAL_PROPERTY_CAST_USER_DATA,
-                                     userData);
+                                     static_cast<int32_t>(userData));
 
             size_t shadingMode;
             file.read((char*)&shadingMode, sizeof(size_t));
@@ -694,20 +672,6 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
     auto modelDescriptor =
         std::make_shared<brayns::ModelDescriptor>(std::move(model), "Brick",
                                                   path, metadata);
-
-    bool first{true};
-    for (const auto& tf : transformations)
-    {
-        if (first)
-        {
-            modelDescriptor->setTransformation(tf);
-            first = false;
-        }
-
-        const brayns::ModelInstance instance(true, false, tf);
-        modelDescriptor->addInstance(instance);
-    }
-    PLUGIN_INFO << transformations.size() << " instance(s) loaded" << std::endl;
     return modelDescriptor;
 }
 
@@ -722,11 +686,11 @@ void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
         PLUGIN_THROW(msg);
     }
 
-    const size_t version = CACHE_VERSION_4;
+    const size_t version = CACHE_VERSION_3;
     file.write((char*)&version, sizeof(size_t));
 
     // Save geometry
-    const auto& model = modelDescriptor->getModel();
+    auto& model = modelDescriptor->getModel();
     uint64_t bufferSize{0};
 
     // Metadata
@@ -743,46 +707,11 @@ void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
         file.write((char*)data.second.c_str(), size);
     }
 
-    // Instances
-    const auto& instances = modelDescriptor->getInstances();
-    nbElements = instances.size();
-    PLUGIN_INFO << "Saving " << nbElements << " instances" << std::endl;
-    file.write((char*)&nbElements, sizeof(size_t));
-    bool first{true};
-    for (const auto& instance : instances)
-    {
-        brayns::Vector3d t;
-        brayns::Vector3d rc;
-        brayns::Vector3d s;
-        brayns::Quaterniond q;
-        if (first)
-        {
-            const auto& tf = modelDescriptor->getTransformation();
-            t = tf.getTranslation();
-            rc = tf.getRotationCenter();
-            q = tf.getRotation();
-            s = tf.getScale();
-            first = false;
-        }
-        else
-        {
-            const auto& tf = instance.getTransformation();
-            t = tf.getTranslation();
-            rc = tf.getRotationCenter();
-            q = tf.getRotation();
-            s = tf.getScale();
-        }
-        file.write((char*)&t, sizeof(brayns::Vector3d));
-        file.write((char*)&rc, sizeof(brayns::Vector3d));
-        file.write((char*)&q, sizeof(brayns::Quaterniond));
-        file.write((char*)&s, sizeof(brayns::Vector3d));
-    }
-
-    // Materials
     const auto& materials = model.getMaterials();
-    nbElements = materials.size();
-    PLUGIN_INFO << "Saving " << nbElements << " materials" << std::endl;
-    file.write((char*)&nbElements, sizeof(size_t));
+    const auto nbMaterials = materials.size();
+    file.write((char*)&nbMaterials, sizeof(size_t));
+
+    // Save materials
     for (const auto& material : materials)
     {
         file.write((char*)&material.first, sizeof(size_t));
@@ -812,7 +741,7 @@ void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
         int32_t simulation = 0;
         try
         {
-            simulation = material.second->getProperty<bool>(
+            simulation = material.second->getProperty<int32_t>(
                 MATERIAL_PROPERTY_CAST_USER_DATA);
         }
         catch (const std::runtime_error&)
@@ -831,24 +760,23 @@ void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
         }
         file.write((char*)&shadingMode, sizeof(int32_t));
 
-        int32_t clipped = 0;
+        // TODO: Change bool to int32_t for Version 4
+        bool clipped = false;
         try
         {
-            clipped = material.second->getProperty<int32_t>(
+            clipped = material.second->getProperty<bool>(
                 MATERIAL_PROPERTY_CLIPPING_MODE);
         }
         catch (const std::runtime_error&)
         {
         }
-        file.write((char*)&clipped, sizeof(int32_t));
+        file.write((char*)&clipped, sizeof(bool));
     }
 
     // Spheres
-    const auto& spheresMap = model.getSpheres();
-    nbElements = spheresMap.size();
-    PLUGIN_INFO << "Saving " << nbElements << " spheres" << std::endl;
+    nbElements = model.getSpheres().size();
     file.write((char*)&nbElements, sizeof(size_t));
-    for (const auto& spheres : spheresMap)
+    for (auto& spheres : model.getSpheres())
     {
         const auto materialId = spheres.first;
         file.write((char*)&materialId, sizeof(size_t));
@@ -861,11 +789,9 @@ void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
     }
 
     // Cylinders
-    const auto& cylindersMap = model.getCylinders();
-    nbElements = cylindersMap.size();
-    PLUGIN_INFO << "Saving " << nbElements << " cylinders" << std::endl;
+    nbElements = model.getCylinders().size();
     file.write((char*)&nbElements, sizeof(size_t));
-    for (const auto& cylinders : cylindersMap)
+    for (auto& cylinders : model.getCylinders())
     {
         const auto materialId = cylinders.first;
         file.write((char*)&materialId, sizeof(size_t));
@@ -878,11 +804,9 @@ void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
     }
 
     // Cones
-    const auto& conesMap = model.getCones();
-    nbElements = conesMap.size();
-    PLUGIN_INFO << "Saving " << nbElements << " cones" << std::endl;
+    nbElements = model.getCones().size();
     file.write((char*)&nbElements, sizeof(size_t));
-    for (const auto& cones : conesMap)
+    for (auto& cones : model.getCones())
     {
         const auto materialId = cones.first;
         file.write((char*)&materialId, sizeof(size_t));
@@ -895,11 +819,9 @@ void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
     }
 
     // Meshes
-    const auto& trianglesMap = model.getTriangleMeshes();
-    nbElements = trianglesMap.size();
+    nbElements = model.getTriangleMeshes().size();
     file.write((char*)&nbElements, sizeof(size_t));
-    PLUGIN_INFO << "Saving " << nbElements << " meshes" << std::endl;
-    for (const auto& meshes : trianglesMap)
+    for (const auto& meshes : model.getTriangleMeshes())
     {
         const auto materialId = meshes.first;
         file.write((char*)&materialId, sizeof(size_t));
@@ -934,7 +856,6 @@ void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
     // Streamlines
     const auto& streamlines = model.getStreamlines();
     nbElements = streamlines.size();
-    PLUGIN_INFO << "Saving " << nbElements << " streamlines" << std::endl;
     file.write((char*)&nbElements, sizeof(size_t));
     for (const auto& streamline : streamlines)
     {
@@ -965,7 +886,6 @@ void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
     // SDF geometry
     const auto& sdfData = model.getSDFGeometryData();
     nbElements = sdfData.geometries.size();
-    PLUGIN_INFO << "Saving " << nbElements << " SDF geometries" << std::endl;
     file.write((char*)&nbElements, sizeof(size_t));
 
     if (nbElements > 0)
@@ -1073,8 +993,6 @@ void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
     // Transfer function
     nbElements = 1;
     file.write((char*)&nbElements, sizeof(size_t));
-    PLUGIN_INFO << "Saving " << nbElements << " transfer function(s)"
-                << std::endl;
     const auto& tf = model.getTransferFunction();
     {
         // Values range
