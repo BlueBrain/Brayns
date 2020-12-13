@@ -46,7 +46,6 @@ public:
      * @brief preRender Updates the scene according to latest data load
      */
     void preRender() final;
-    void postRender() final;
 
 private:
     // Rendering
@@ -68,25 +67,18 @@ private:
     void _attachCircuitSimulationHandler(
         const AttachCircuitSimulationHandler& payload);
 
-    // Movie production
-    void _exportFramesToDisk(const ExportFramesToDisk& payload);
-    void _doExportFrameToDisk();
-    FrameExportProgress _getFrameExportProgress();
-    void _makeMovie(const MakeMovieParameters& params);
-
     // Anterograde tracing
-    AnterogradeTracingResult _traceAnterogrades(const AnterogradeTracing& payload);
+    AnterogradeTracingResult _traceAnterogrades(
+        const AnterogradeTracing& payload);
 
     // Add geometry
-    void _createShapeMaterial(brayns::ModelPtr& model,
-                              const size_t id,
+    void _createShapeMaterial(brayns::ModelPtr& model, const size_t id,
                               const brayns::Vector3d& color,
                               const double& opacity);
     AddShapeResult _addSphere(const AddSphere& payload);
     AddShapeResult _addPill(const AddPill& payload);
     AddShapeResult _addCylinder(const AddCylinder& payload);
     AddShapeResult _addBox(const AddBox& payload);
-
 
     // Predefined models
     void _addGrid(const AddGrid& payload);
@@ -96,10 +88,5 @@ private:
     SynapseAttributes _synapseAttributes;
 
     bool _dirty{false};
-
-    ExportFramesToDisk _exportFramesToDiskPayload;
-    bool _exportFramesToDiskDirty{false};
-    uint16_t _frameNumber{0};
-    int16_t _accumulationFrameNumber{0};
 };
 #endif
