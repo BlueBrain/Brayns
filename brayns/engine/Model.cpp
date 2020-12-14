@@ -119,6 +119,7 @@ ModelDescriptor& ModelDescriptor::operator=(const ModelParams& rhs)
         _transformation.setRotationCenter(oldRotationCenter);
 
     _loaderProperties = rhs.getLoaderProperties();
+    _loaderName = rhs.getLoaderName();
 
     return *this;
 }

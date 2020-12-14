@@ -523,6 +523,7 @@ inline void init(brayns::ModelDescriptor* g, ObjectHandler* h)
     h->add_property("path", &g->_path, Flags::Optional);
     h->add_property("transformation", &g->_transformation, Flags::Optional);
     h->add_property("visible", &g->_visible, Flags::Optional);
+    h->add_property("loader_name", &g->_loaderName, Flags::Optional);
     h->add_property("loader_properties", &g->_loaderProperties, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
