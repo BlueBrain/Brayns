@@ -1696,6 +1696,8 @@ brayns::Message CircuitExplorerPlugin::_exportFramesToDisk(
     _exportFramesToDiskPayload = payload;
     _exportFramesToDiskDirty = true;
     _exportFramesToDiskStartFlag = false;
+    _exportFrameError = false;
+    _exportFrameErrorMessage = "";
     _frameNumber = payload.startFrame;
     _accumulationFrameNumber = 0;
     auto& frameBuffer = _api->getEngine().getFrameBuffer();
@@ -1759,9 +1761,26 @@ void CircuitExplorerPlugin::_doExportFrameToDisk()
     std::string filename = _exportFramesToDiskPayload.path + '/' + frame + "." +
                            _exportFramesToDiskPayload.format;
     std::ofstream file;
-    file.open(filename, std::ios_base::binary);
+
+    try
+    {
+        file.open(filename, std::ios_base::binary);
+    }
+    catch (const std::exception& e)
+    {
+        frameBuffer.clear();
+        _exportFrameError = true;
+        _exportFrameErrorMessage = std::string(e.what());
+        return;
+    }
+
     if (!file.is_open())
-        PLUGIN_THROW("Failed to create " + filename);
+    {
+        frameBuffer.clear();
+        _exportFrameError = true;
+        _exportFrameErrorMessage = "Failed to create " + filename;
+        return;
+    }
 
     file.write((char*)pixels, numPixels);
     file.close();
@@ -1774,15 +1793,26 @@ void CircuitExplorerPlugin::_doExportFrameToDisk()
 FrameExportProgress CircuitExplorerPlugin::_getFrameExportProgress()
 {
     FrameExportProgress result;
-    const size_t totalNumberOfFrames =
-        (_exportFramesToDiskPayload.animationInformation.size() -
-         _exportFramesToDiskPayload.startFrame) *
-        _exportFramesToDiskPayload.spp;
-    const float currentProgress =
-        _frameNumber * _exportFramesToDiskPayload.spp +
-        _accumulationFrameNumber;
 
-    result.progress = currentProgress / float(totalNumberOfFrames);
+    if(!_exportFramesToDiskStartFlag)
+        result.progress = 0.f;
+    else
+    {
+        const size_t totalNumberOfFrames =
+            (_exportFramesToDiskPayload.animationInformation.size() -
+             _exportFramesToDiskPayload.startFrame) *
+            _exportFramesToDiskPayload.spp;
+        const float currentProgress =
+            _frameNumber * _exportFramesToDiskPayload.spp +
+            _accumulationFrameNumber;
+
+        result.progress = currentProgress / float(totalNumberOfFrames);
+    }
+
+    if(_exportFrameError)
+        result.setError(1, _exportFrameErrorMessage);
+    else
+        result.setError(0, "");
     return result;
 }
 

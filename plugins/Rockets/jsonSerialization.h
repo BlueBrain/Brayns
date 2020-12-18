@@ -624,7 +624,7 @@ inline void init(brayns::DirectionalLight* a, ObjectHandler* h)
 {
     init(static_cast<brayns::Light*>(a), h);
     h->add_property("direction", toArray<3, double>(a->_direction));
-    h->add_property("angularDiameter", &a->_angularDiameter);
+    h->add_property("angular_diameter", &a->_angularDiameter);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -650,8 +650,8 @@ inline void init(brayns::SpotLight* a, ObjectHandler* h)
     init(static_cast<brayns::Light*>(a), h);
     h->add_property("position", toArray<3, double>(a->_position));
     h->add_property("direction", toArray<3, double>(a->_direction));
-    h->add_property("openingAngle", &a->_openingAngle);
-    h->add_property("penumbraAngle", &a->_penumbraAngle);
+    h->add_property("opening_angle", &a->_openingAngle);
+    h->add_property("penumbra_angle", &a->_penumbraAngle);
     h->add_property("radius", &a->_radius);
     h->set_flags(Flags::DisallowUnknownKey);
 }

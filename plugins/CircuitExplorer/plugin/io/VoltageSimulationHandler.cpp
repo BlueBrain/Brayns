@@ -51,6 +51,7 @@ VoltageSimulationHandler::VoltageSimulationHandler(
     PLUGIN_INFO << "Steps between frames : " << _dt << std::endl;
     PLUGIN_INFO << "Number of frames     : " << _nbFrames << std::endl;
     PLUGIN_INFO << "Frame size           : " << _frameSize << std::endl;
+    PLUGIN_INFO << "Mode                 : " << (_synchronousMode? "Synchronous" : "Asynchronous" ) << std::endl;
     PLUGIN_INFO << "-----------------------------------------------------------"
                 << std::endl;
 }
@@ -92,7 +93,7 @@ void* VoltageSimulationHandler::getFrameData(const uint32_t frame)
 void VoltageSimulationHandler::_triggerLoading(const uint32_t frame)
 {
     float timestamp = frame * _dt + _compartmentReport->getStartTime();
-    timestamp = std::min(static_cast<float>(_nbFrames), timestamp);
+    timestamp = std::min(static_cast<float>(_compartmentReport->getEndTime()), timestamp);
 
     if (_currentFrameFuture.valid())
         _currentFrameFuture.wait();

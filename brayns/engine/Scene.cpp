@@ -107,7 +107,7 @@ void Scene::copyFrom(const Scene& rhs)
         {
             _modelDescriptors.push_back(modelDesc->clone(createModel()));
             if(modelDesc->isAciveSimulationModel())
-                _updateSimulatedModel(_modelDescriptors.back());
+                _updateSimulatedModel(_modelDescriptors.back(), false, false);
         }
 
     }
@@ -164,7 +164,7 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
         _modelDescriptors.push_back(modelDescriptor);
 
         // Set as active simulated model, if it has simulation
-        _updateSimulatedModel(modelDescriptor, false);
+        _updateSimulatedModel(modelDescriptor, false, true);
 
         // add default instance of this model to render something
         if (modelDescriptor->getInstances().empty())
@@ -526,7 +526,7 @@ void Scene::setActiveSimulatedModel(const size_t modelId)
 
         std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
 
-        _updateSimulatedModel(model);
+        _updateSimulatedModel(model, true, true);
     }
 }
 
@@ -596,7 +596,7 @@ void Scene::_loadIBLMaps(const std::string& envMap)
     }
 }
 
-void Scene::_updateSimulatedModel(ModelDescriptorPtr& model, bool forceSim)
+void Scene::_updateSimulatedModel(ModelDescriptorPtr& model, bool forceSim, bool updateParams)
 {
     auto simHandler = model->getModel().getSimulationHandler();
     if(!simHandler)
@@ -612,14 +612,18 @@ void Scene::_updateSimulatedModel(ModelDescriptorPtr& model, bool forceSim)
         m->setActiveSimulatedModel(false);
     model->setActiveSimulatedModel(true);
 
-    auto& ap = _animationParameters;
-    ap.setIsReadyCallback(
-        [handler = simHandler] { return handler->isReady(); });
 
-    ap.setFrame(simHandler->getCurrentFrame());
-    ap.setDt(simHandler->getDt(), false);
-    ap.setUnit(simHandler->getUnit(), false);
-    ap.setNumFrames(simHandler->getNbFrames(), false);
+    auto& ap = _animationParameters;
+    if(updateParams)
+    {
+        ap.setIsReadyCallback(
+            [handler = simHandler] { return handler->isReady(); });
+
+        ap.setFrame(simHandler->getCurrentFrame());
+        ap.setDt(simHandler->getDt(), false);
+        ap.setUnit(simHandler->getUnit(), false);
+        ap.setNumFrames(simHandler->getNbFrames(), false);
+    }
     ap.markModified();
 }
 

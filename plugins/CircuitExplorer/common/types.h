@@ -224,7 +224,7 @@ const brayns::Property PROP_USER_DATA_TYPE = {
     enumerateNames<UserDataType>(),
     {"Type of data attached to morphology segments"}};
 const brayns::Property PROP_SYNCHRONOUS_MODE = {
-    "023SynchronousMode", false, {"Synchronous mode"}};
+    "023SynchronousMode", true, {"Synchronous mode"}};
 const brayns::Property PROP_SPIKE_TRANSITION_TIME = {
     "024SpikeTransitionTime", 1.0, {"Growth and fade of spike in seconds"}};
 const brayns::Property PROP_CIRCUIT_COLOR_SCHEME = {

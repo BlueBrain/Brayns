@@ -138,6 +138,8 @@ private:
     uint16_t _frameNumber{0};
     uint32_t _accumulationFrameNumber{0};
     size_t _prevAccumulationSetting;
+    bool _exportFrameError {false};
+    std::string _exportFrameErrorMessage;
 
     std::vector<std::unique_ptr<CellObjectMapper>> _mappers;
 };
