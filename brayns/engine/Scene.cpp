@@ -104,7 +104,12 @@ void Scene::copyFrom(const Scene& rhs)
         _modelDescriptors.clear();
         _modelDescriptors.reserve(rhs._modelDescriptors.size());
         for (const auto& modelDesc : rhs._modelDescriptors)
+        {
             _modelDescriptors.push_back(modelDesc->clone(createModel()));
+            if(modelDesc->isAciveSimulationModel())
+                _updateSimulatedModel(_modelDescriptors.back());
+        }
+
     }
     _computeBounds();
 

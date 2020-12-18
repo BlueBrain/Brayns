@@ -99,23 +99,23 @@ std::vector<std::string> getSupportedTypes()
     return output;
 }
 
-Assimp::Importer createImporter(const LoaderProgress& callback,
-                                const std::string& filename)
+std::unique_ptr<Assimp::Importer> createImporter(const LoaderProgress& callback,
+                                                 const std::string& filename)
 {
-    Assimp::Importer importer;
-    importer.SetProgressHandler(new ProgressWatcher(callback, filename));
+    std::unique_ptr<Assimp::Importer> importer = std::make_unique<Assimp::Importer>();
+    importer->SetProgressHandler(new ProgressWatcher(callback, filename));
 
 // WAR for https://github.com/assimp/assimp/issues/2337; use PLY importer
 // from commit dcc5887
 #ifdef USE_CUSTOM_PLY_IMPORTER
     {
-        importer.UnregisterLoader(importer.GetImporter("ply"));
-        importer.RegisterLoader(new Assimp::PLYImporter());
+        importer->UnregisterLoader(importer->GetImporter("ply"));
+        importer->RegisterLoader(new Assimp::PLYImporter());
     }
 #endif
 
-    importer.UnregisterLoader(importer.GetImporter("obj"));
-    importer.RegisterLoader(new Assimp::ObjFileImporter());
+    importer->UnregisterLoader(importer->GetImporter("obj"));
+    importer->RegisterLoader(new Assimp::ObjFileImporter());
     return importer;
 }
 }
@@ -178,7 +178,8 @@ ModelDescriptorPtr MeshLoader::importFromBlob(
         stringToEnum<GeometryQuality>(properties.getProperty<std::string>(
             PROP_GEOMETRY_QUALITY, enumToString(GeometryQuality::high)));
 
-    auto importer = createImporter(callback, blob.name);
+    auto importer_ptr = createImporter(callback, blob.name);
+    Assimp::Importer& importer = *(importer_ptr.get());
     const aiScene* aiScene =
         importer.ReadFileFromMemory(blob.data.data(), blob.data.size(),
                                     _getQuality(geometryQuality),
@@ -460,8 +461,8 @@ ModelMetadata MeshLoader::importMesh(
 {
     const fs::path file = fileName;
 
-    auto importer = createImporter(callback, fileName);
-
+    auto importer_ptr = createImporter(callback, fileName);
+    Assimp::Importer& importer = *(importer_ptr.get());
     if (!importer.IsExtensionSupported(file.extension().c_str()))
     {
         std::stringstream msg;
