@@ -403,7 +403,7 @@ inline void init(brayns::SnapshotParams* s, ObjectHandler* h)
     h->add_property("renderer", &s->renderingParams, Flags::Optional);
     h->add_property("samples_per_pixel", &s->samplesPerPixel, Flags::Optional);
     h->add_property("size", toArray<2, uint32_t>(s->size));
-    h->add_property("filePath", &s->filePath, Flags::Optional);
+    h->add_property("file_path", &s->filePath, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -749,8 +749,8 @@ inline void init(brayns::ExitLaterSchedule* a, ObjectHandler* h)
 
 inline void init(brayns::RequestMaterial* a, ObjectHandler* h)
 {
-    h->add_property("modelId", &a->modelId);
-    h->add_property("materialId", &a->materialId);
+    h->add_property("model_id", &a->modelId);
+    h->add_property("material_id", &a->materialId);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -758,7 +758,7 @@ inline void init(brayns::MaterialInfo* a, ObjectHandler* h)
 {
     h->add_property("error", &a->error);
     h->add_property("message", &a->message);
-    h->add_property("materialProperties", &a->materialProperties);
+    h->add_property("material_properties", &a->materialProperties);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -781,7 +781,7 @@ inline void init(brayns::ModifyMaterialResult* a, ObjectHandler* h)
 
 inline  void init(brayns::SetActiveSimulationModel* a, ObjectHandler* h)
 {
-    h->add_property("modelId", &a->modelId);
+    h->add_property("model_id", &a->modelId);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -794,7 +794,7 @@ inline void init(brayns::SetActiveSimulationModelResponse* a, ObjectHandler* h)
 
 inline void init(brayns::GetActiveSimulationModel* a, ObjectHandler* h)
 {
-    h->add_property("modelId", &a->modelId);
+    h->add_property("model_id", &a->modelId);
     h->add_property("error", &a->error);
     h->add_property("message", &a->message);
     h->set_flags(Flags::DisallowUnknownKey);
@@ -864,7 +864,7 @@ inline std::string toJSONReplacePropertyMap(
 template<>
 inline std::string  to_json(const brayns::MaterialInfo& mat)
 {
-    return toJSONReplacePropertyMap(mat, "materialProperties", mat.materialProperties);
+    return toJSONReplacePropertyMap(mat, "material_properties", mat.materialProperties);
 }
 
 template <>
