@@ -601,6 +601,8 @@ inline void init(brayns::AnimationParameters* a, ObjectHandler* h)
     h->add_property("dt", &a->_dt, Flags::Optional);
     h->add_property("playing", &a->_playing, Flags::Optional);
     h->add_property("unit", &a->_unit, Flags::Optional);
+    // Adjust the frame number to be always within the simulation
+    a->_current = a->_adjustedCurrent(a->_current);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
