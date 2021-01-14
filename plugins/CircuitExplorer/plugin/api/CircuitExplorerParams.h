@@ -399,9 +399,9 @@ struct AnterogradeTracing : public brayns::Message
 {
     MESSAGE_BEGIN(AnterogradeTracing)
     MESSAGE_ENTRY(uint64_t, modelId, "Model where to perform the neuronal tracing")
-    MESSAGE_ENTRY(std::vector<uint32_t>, cellGIDs, "List of cell GIDs to use a source of the "
+    MESSAGE_ENTRY(std::vector<uint32_t>, cellGids, "List of cell GIDs to use a source of the "
                                                    "tracing")
-    MESSAGE_ENTRY(std::vector<uint32_t>, targetCellGIDs, "List of cells GIDs which are the result"
+    MESSAGE_ENTRY(std::vector<uint32_t>, targetCellGids, "List of cells GIDs which are the result"
                                                          " of the given tracing mode")
     MESSAGE_ENTRY(std::vector<double>, sourceCellColor, "A 4 component normalized color (RGBA) to "
                                                         "apply to the source cell geometry")

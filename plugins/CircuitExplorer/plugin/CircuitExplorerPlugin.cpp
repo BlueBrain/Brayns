@@ -2026,7 +2026,7 @@ brayns::Message CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTraci
 {
     brayns::Message result;
 
-    if(payload.cellGIDs.empty())
+    if(payload.cellGids.empty())
     {
         result.setError(1, "No input cell GIDs specified");
         return result;
@@ -2093,9 +2093,9 @@ brayns::Message CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTraci
 
     // Gather material ids for the source and target cells
     std::unordered_set<int32_t> sourceCellMaterialIds;
-    searchFunc(sourceCellMaterialIds, payload.cellGIDs, cellMaterialMap);
+    searchFunc(sourceCellMaterialIds, payload.cellGids, cellMaterialMap);
     std::unordered_set<int32_t> targetCellMaterialIds;
-    searchFunc(targetCellMaterialIds, payload.targetCellGIDs, cellMaterialMap);
+    searchFunc(targetCellMaterialIds, payload.targetCellGids, cellMaterialMap);
 
     // Enable extra attributes on materials
     MaterialExtraAttributes mea;
@@ -2117,10 +2117,10 @@ brayns::Message CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTraci
     mrd.glossiness = 1.f;
     mrd.reflectionIndex = 0.f;
     mrd.refractionIndex = 0.f;
-    mrd.opacity = std::min<float>(std::max<float>(payload.nonConnectedCellsColor[4], 0.1f), 1.f);
-    mrd.shadingMode = static_cast<int>(MaterialShadingMode::none);
+    mrd.opacity = std::min<float>(std::max<float>(payload.nonConnectedCellsColor[3], 0.1f), 1.f);
+    mrd.shadingMode = static_cast<int>(MaterialShadingMode::diffuse);
     mrd.clippingMode = static_cast<int>(MaterialClippingMode::no_clipping);
-    mrd.simulationDataCast = true;
+    mrd.simulationDataCast = false;
     _setMaterialRange(mrd);
 
     // Stain (if any) source cell
