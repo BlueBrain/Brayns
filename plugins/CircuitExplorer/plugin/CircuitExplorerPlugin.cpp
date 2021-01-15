@@ -549,7 +549,7 @@ void CircuitExplorerPlugin::init()
                  "The data to build and color the box"},
                 [&](const AddBox& payload) { return _addBox(payload); });
 
-            actionInterface->registerRequest<RemapCircuit, brayns::Message>(
+            actionInterface->registerRequest<RemapCircuit, RemapCircuitResult>(
                 {"remap-circuit-color",
                  "Remap the circuit colors to the specified scheme",
                  "RemapCircuit",
@@ -1227,9 +1227,10 @@ MaterialDescriptor CircuitExplorerPlugin::_getMaterial(const ModelMaterialId& mm
     return result;
 }
 
-brayns::Message CircuitExplorerPlugin::_remapCircuitToScheme(const RemapCircuit& payload)
+RemapCircuitResult CircuitExplorerPlugin::_remapCircuitToScheme(const RemapCircuit& payload)
 {
-    brayns::Message result;
+    RemapCircuitResult result;
+    result.updated = false;
 
     auto modelDescriptor = _api->getScene().getModel(payload.modelId);
     if(modelDescriptor)
@@ -1240,7 +1241,9 @@ brayns::Message CircuitExplorerPlugin::_remapCircuitToScheme(const RemapCircuit&
             const auto schemeEnum =
                     stringToEnum<CircuitColorScheme>(payload.scheme);
             auto remapResult = mapper->remapCircuitColors(schemeEnum, _api->getScene());
-            result.setError(remapResult.error, remapResult.message);
+            if(remapResult.error > 0)
+                result.setError(remapResult.error, remapResult.message);
+            result.updated = remapResult.updated;
             _dirty = true;
             _api->getEngine().triggerRender();
         }

@@ -470,6 +470,13 @@ struct RemapCircuit : public brayns::Message
                                        "\"By target\")")
 };
 
+struct RemapCircuitResult: public brayns::Message
+{
+    MESSAGE_BEGIN(RemapCircuitResult)
+    MESSAGE_ENTRY(bool, updated, "Wether the colors of the model changed because of the "
+                                 "remapping.")
+};
+
 struct ColorCells : public brayns::Message
 {
     MESSAGE_BEGIN(ColorCells)

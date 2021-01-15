@@ -121,7 +121,7 @@ private:
     MaterialDescriptor _getMaterial(const ModelMaterialId& mmId);
 
     // Remap circuit colors to a specific scheme
-    brayns::Message _remapCircuitToScheme(const RemapCircuit& payload);
+    RemapCircuitResult _remapCircuitToScheme(const RemapCircuit& payload);
     brayns::Message _colorCells(const ColorCells& payload);
 
     brayns::Message _mirrorModel(const MirrorModel& payload);

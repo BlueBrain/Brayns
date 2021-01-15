@@ -29,18 +29,18 @@ void CellObjectMapper::remove(const size_t gid)
         _cellToRenderableMap.erase(it);
 }
 
-RemapCircuitResult
+RemapResult
 CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
                                      brayns::Scene& scene)
 {
-    RemapCircuitResult result;
+    RemapResult result;
     result.error = 0;
     result.message = "";
+    result.updated = true;
 
     if(scheme == _lastScheme)
     {
-        result.error = 2;
-        result.message = "The requested scheme matches the active one";
+        result.updated = false;
         return result;
     }
 
