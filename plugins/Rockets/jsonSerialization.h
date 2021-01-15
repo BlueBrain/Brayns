@@ -766,11 +766,11 @@ inline void init(brayns::MaterialInfo* a, ObjectHandler* h)
 
 inline void init(brayns::ModifyMaterial* a, ObjectHandler* h)
 {
-    h->add_property("modelId", &a->modelId);
-    h->add_property("materialId", &a->materialId);
+    h->add_property("model_id", &a->modelId);
+    h->add_property("material_id", &a->materialId);
     h->add_property("error", &a->error);
     h->add_property("message", &a->message);
-    h->add_property("materialProperties", &a->materialProperties);
+    h->add_property("material_properties", &a->materialProperties);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -988,7 +988,7 @@ inline bool from_json(brayns::ModifyMaterial& mat, const std::string& json)
     bool success;
     brayns::PropertyMap propertyMap;
     std::tie<bool, brayns::PropertyMap>(success, propertyMap) =
-        fromJSONWithPropertyMap(mat, json, "materialProperties");
+        fromJSONWithPropertyMap(mat, json, "material_properties");
     mat.materialProperties = propertyMap;
     return success;
 }
