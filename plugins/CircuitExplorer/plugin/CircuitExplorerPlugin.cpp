@@ -1195,11 +1195,11 @@ MaterialDescriptor CircuitExplorerPlugin::_getMaterial(const ModelMaterialId& mm
                 result.refractionIndex = static_cast<float>(material->getRefractionIndex());
                 result.emission = static_cast<float>(material->getEmission());
                 result.glossiness = static_cast<float>(material->getGlossiness());
-                result.simulationDataCast = material->getProperty<bool>(MATERIAL_PROPERTY_CAST_USER_DATA);
-                result.shadingMode = material->getProperty<int32_t>(MATERIAL_PROPERTY_SHADING_MODE);
-                result.clippingMode = material->getProperty<int32_t>(MATERIAL_PROPERTY_CLIPPING_MODE);
+                result.simulationDataCast = material->getPropertyOrValue<bool>(MATERIAL_PROPERTY_CAST_USER_DATA, false);
+                result.shadingMode = material->getPropertyOrValue<int32_t>(MATERIAL_PROPERTY_SHADING_MODE, 0);
+                result.clippingMode = material->getPropertyOrValue<int32_t>(MATERIAL_PROPERTY_CLIPPING_MODE, 0);
                 result.userParameter = static_cast<float>(
-                            material->getProperty<double>(MATERIAL_PROPERTY_USER_PARAMETER));
+                            material->getPropertyOrValue<double>(MATERIAL_PROPERTY_USER_PARAMETER, 0.0));
             }
             else
             {
