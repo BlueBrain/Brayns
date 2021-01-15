@@ -76,10 +76,12 @@ CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
         // Copy the simulation handler
         auto sh = _model->getModel().getSimulationHandler();
         if(sh)
+        {
             newModel->setSimulationHandler(sh);
-        // Reset frame to 0, animation parameters will set the appropiate frame number later,
-        // tiggering in the process the frame upload
-        sh->setCurrentFrame(std::numeric_limits<uint32_t>::max());
+            // Reset frame to 0, animation parameters will set the appropiate frame number later,
+            // tiggering in the process the frame upload
+            sh->setCurrentFrame(std::numeric_limits<uint32_t>::max());
+        }
 
         // Copy the transfer function (only use for simulation)
         auto& tf = _model->getModel().getTransferFunction();
