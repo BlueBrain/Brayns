@@ -600,7 +600,17 @@ void CircuitExplorerPlugin::preRender()
         _api->getScene().markModified();
     _dirty = false;
 
-    if (_exportFramesToDiskDirty && _accumulationFrameNumber == 0)
+    // If there was an error during the last frame export, stop the export process
+    if(_exportFrameError)
+    {
+        _exportFramesToDiskDirty = false;
+        _exportFramesToDiskStartFlag = false;
+        // Re-establish the old accumulation settings after we are done with the
+        // frame export
+        _api->getParametersManager().getRenderingParameters()
+                                    .setMaxAccumFrames(_prevAccumulationSetting);
+    }
+    else if (_exportFramesToDiskDirty && _accumulationFrameNumber == 0)
     {
         const auto& ai = _exportFramesToDiskPayload.animationInformation;
         if (_frameNumber >= ai.size())
@@ -1805,20 +1815,16 @@ FrameExportProgress CircuitExplorerPlugin::_getFrameExportProgress()
 {
     FrameExportProgress result;
 
-    if(!_exportFramesToDiskStartFlag)
-        result.progress = 0.f;
-    else
-    {
-        const size_t totalNumberOfFrames =
-            (_exportFramesToDiskPayload.animationInformation.size() -
-             _exportFramesToDiskPayload.startFrame) *
-            _exportFramesToDiskPayload.spp;
-        const float currentProgress =
-            _frameNumber * _exportFramesToDiskPayload.spp +
-            _accumulationFrameNumber;
+    const size_t totalNumberOfFrames =
+        (_exportFramesToDiskPayload.animationInformation.size() -
+         _exportFramesToDiskPayload.startFrame) *
+        _exportFramesToDiskPayload.spp;
+    const float currentProgress =
+        _frameNumber * _exportFramesToDiskPayload.spp +
+        _accumulationFrameNumber;
 
-        result.progress = currentProgress / float(totalNumberOfFrames);
-    }
+    result.progress = std::min(
+                static_cast<double>(currentProgress / float(totalNumberOfFrames)), 1.0);
 
     if(_exportFrameError)
         result.setError(1, _exportFrameErrorMessage);
