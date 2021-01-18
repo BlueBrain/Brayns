@@ -1136,6 +1136,14 @@ brayns::Message CircuitExplorerPlugin::_updateMaterialProperties(const UpdateMat
             material->commit();
         }
     }
+
+    // If we have simulation, set the current frame to the numeric limits,
+    // this way, the next time the scene is committed, it will trigger the
+    // commitment of the simulation data as well.
+    auto simHandler = model->getModel().getSimulationHandler();
+    if(simHandler)
+        simHandler->setCurrentFrame(std::numeric_limits<uint32_t>::max());
+
     model->markModified();
     _api->getScene().markModified();
     _api->triggerRender();
