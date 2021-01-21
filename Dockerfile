@@ -18,14 +18,6 @@ RUN apt-get update \
     ninja-build \
     libarchive-dev \
     libassimp-dev \
-    libboost-date-time-dev \
-    libboost-filesystem-dev \
-    libboost-iostreams-dev \
-    libboost-program-options-dev \
-    libboost-regex-dev \
-    libboost-serialization-dev \
-    libboost-system-dev \
-    libboost-test-dev \
     libfreeimage-dev \
     libhdf5-serial-dev \
     libtbb-dev \
@@ -34,17 +26,19 @@ RUN apt-get update \
     pkg-config \
     wget \
     ca-certificates \
+    libssl-dev \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Get ISPC
 # https://ispc.github.io/downloads.html
-ARG ISPC_VERSION=1.10.0
+
+ARG ISPC_VERSION=1.10.0b
 ARG ISPC_DIR=ispc-v${ISPC_VERSION}-linux
-ARG ISPC_PATH=/app/$ISPC_DIR
+ARG ISPC_PATH=/app/ispc-v1.10.0-linux
 
 RUN mkdir -p ${ISPC_PATH} \
- && wget http://netix.dl.sourceforge.net/project/ispcmirror/v${ISPC_VERSION}/${ISPC_DIR}.tar.gz \
+ && wget https://github.com/ispc/ispc/releases/download/v1.10.0/${ISPC_DIR}.tar.gz \
  && tar zxvf ${ISPC_DIR}.tar.gz -C ${ISPC_PATH} --strip-components=1 \
  && rm -rf ${ISPC_PATH}/${ISPC_DIR}/examples
 
@@ -101,6 +95,21 @@ RUN mkdir -p ${LWS_SRC} \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
  && ninja install
 
+ARG BOOST_SRC=/app/boost
+
+RUN mkdir ${BOOST_SRC} \
+ && cd ${BOOST_SRC}  \
+ && wget https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.gz \
+ && tar -xzf boost_1_70_0.tar.gz  \
+ && cd ./boost_1_70_0  \
+ &&  ./bootstrap.sh  \
+ && ./b2 install -j 10
+
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.18.5/cmake-3.18.5.tar.gz \
+  && tar xf cmake-3.18.5.tar.gz \
+  && cd cmake-3.18.5 \
+  && ./configure \
+  && make -j 10 install
 
 # Set working dir and copy Brayns assets
 ARG BRAYNS_SRC=/app/brayns
@@ -130,7 +139,7 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
     -DBUILD_PYTHON_BINDINGS=OFF \
-    -DEXTLIB_FROM_SUBMODULES=ON || exit 0
+    -DEXTLIB_FROM_SUBMODULES=ON
 
 RUN cd ${BRAYNS_SRC}/build && make -j install \
  && rm -rf ${DIST_PATH}/include ${DIST_PATH}/cmake ${DIST_PATH}/share
@@ -143,12 +152,6 @@ RUN apt-get update \
  && apt-get -y --no-install-recommends install \
     libarchive13 \
     libassimp4 \
-    libboost-filesystem1.67.0 \
-    libboost-program-options1.67.0 \
-    libboost-regex1.67.0 \
-    libboost-serialization1.67.0 \
-    libboost-system1.67.0 \
-    libboost-iostreams1.67.0 \
     libfreeimage3 \
     libgomp1 \
     libhdf5-103 \
@@ -163,10 +166,13 @@ RUN apt-get update \
 # 2. create a new image layer containing the
 #    /app/dist directory of this new container
 #    Equivalent to the `docker copy` command.
+ARG BOOST_LIB=/usr/local/lib
+
 COPY --from=builder ${DIST_PATH} ${DIST_PATH}
+COPY --from=builder ${BOOST_LIB} ${BOOST_LIB}
 
 # Add binaries from dist to the PATH
-ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:${DIST_PATH}/lib
+ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:${DIST_PATH}/lib:${BOOST_LIB}
 ENV PATH ${DIST_PATH}/bin:$PATH
 
 # Expose a port from the container
