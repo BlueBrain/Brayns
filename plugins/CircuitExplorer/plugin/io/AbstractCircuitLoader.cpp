@@ -547,7 +547,7 @@ size_t AbstractCircuitLoader::_getMaterialFromCircuitAttributes(
     size_t materialId = 0;
     switch (colorScheme)
     {
-    case CircuitColorScheme::single_color:
+    case CircuitColorScheme::single_material:
         materialId = 1;
         break;
     case CircuitColorScheme::by_id:

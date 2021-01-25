@@ -78,8 +78,8 @@ CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
         if(sh)
         {
             newModel->setSimulationHandler(sh);
-            // Reset frame to 0, animation parameters will set the appropiate frame number later,
-            // tiggering in the process the frame upload
+            // Reset simulation handler current frame so the simulation data gets commited
+            // (current frame != animation params current frame)
             sh->setCurrentFrame(std::numeric_limits<uint32_t>::max());
         }
 
@@ -351,7 +351,7 @@ size_t CellObjectMapper::_computeMaterialId(const CircuitColorScheme scheme,
     size_t materialId = 0;
     switch (scheme)
     {
-    case CircuitColorScheme::single_color:
+    case CircuitColorScheme::single_material:
         materialId = 1;
         break;
     case CircuitColorScheme::by_id:

@@ -64,7 +64,7 @@ enum class CircuitColorScheme
     by_mtype = 4,
     by_etype = 5,
     by_target = 6,
-    single_color = 7
+    single_material = 7
 };
 
 /** Morphology color scheme */
@@ -145,7 +145,7 @@ inline std::vector<std::pair<std::string, CircuitColorScheme>> enumerateMap()
             {"By mtype", CircuitColorScheme::by_mtype},
             {"By etype", CircuitColorScheme::by_etype},
             {"By target", CircuitColorScheme::by_target},
-            {"Single color", CircuitColorScheme::single_color}};
+            {"Single material", CircuitColorScheme::single_material}};
 }
 
 template <>
@@ -228,7 +228,7 @@ const brayns::Property PROP_SYNCHRONOUS_MODE = {
 const brayns::Property PROP_SPIKE_TRANSITION_TIME = {
     "024SpikeTransitionTime", 1.0, {"Growth and fade of spike in seconds"}};
 const brayns::Property PROP_CIRCUIT_COLOR_SCHEME = {
-    "030CircuitColorScheme", enumToString(CircuitColorScheme::single_color),
+    "030CircuitColorScheme", enumToString(CircuitColorScheme::single_material),
     enumerateNames<CircuitColorScheme>(),
     {"Color scheme to be applied to the circuit"}};
 const brayns::Property PROP_MESH_FOLDER = {
