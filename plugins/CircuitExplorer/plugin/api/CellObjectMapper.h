@@ -60,8 +60,9 @@ struct CircuitSchemeData
     LayerSchemeItem layers;
 };
 
-struct RemapCircuitResult
+struct RemapResult
 {
+    bool updated;
     int error;
     std::string message;
 };
@@ -75,8 +76,7 @@ public:
     void add(const size_t gid, const MorphologyMap& mm);
     void remove(const size_t gid);
 
-    RemapCircuitResult remapCircuitColors(const CircuitColorScheme scheme,
-                                          brayns::Scene& scene);
+    RemapResult remapCircuitColors(const CircuitColorScheme scheme, brayns::Scene& scene);
     void remapMorphologyColors(const MorphologyColorScheme scheme);
 
     void onCircuitColorFinish(const CircuitColorScheme& scheme,

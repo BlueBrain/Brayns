@@ -97,6 +97,7 @@ const std::string METHOD_GET_CLIP_PLANES = "get-clip-planes";
 const std::string METHOD_GET_ENVIRONMENT_MAP = "get-environment-map";
 const std::string METHOD_GET_INSTANCES = "get-instances";
 const std::string METHOD_GET_LOADERS = "get-loaders";
+const std::string METHOD_GET_MODEL = "get-model";
 const std::string METHOD_GET_MODEL_PROPERTIES = "get-model-properties";
 const std::string METHOD_GET_MODEL_TRANSFER_FUNCTION =
     "get-model-transfer-function";
@@ -1049,6 +1050,7 @@ public:
         _handleAddModel();
         _handleRemoveModel();
         _handleUpdateModel();
+        _handleGetModel();
         _handleSetModelProperties();
         _handleGetModelProperties();
         _handleModelPropertiesSchema();
@@ -2334,6 +2336,7 @@ public:
                           if (auto model = scene.getModel(newDesc.getModelID()))
                           {
                               ::from_json(*model, request.message);
+                              model->computeBounds();
                               scene.markModified();
                               engine.triggerRender();
                               return Response{to_json(true)};
@@ -2345,6 +2348,34 @@ public:
             "model", "Model descriptor"};
         _handleSchema(METHOD_UPDATE_MODEL,
                       buildJsonRpcSchemaRequest<ModelDescriptor, bool>(desc));
+    }
+
+    void _handleGetModel()
+    {
+        const RpcParameterDescription desc{
+            METHOD_GET_MODEL,
+            "Get all the information of the given model", "modelId", "the model ID"};
+
+        _bindEndpoint(
+            METHOD_GET_MODEL,
+            [&](const rockets::jsonrpc::Request& request) {
+                ObjectID newDesc;
+                if (!::from_json(newDesc, request.message))
+                    return Response::invalidParams();
+
+                auto& scene = _engine.getScene();
+                auto model = scene.getModel(newDesc.id);
+                if (!model)
+                    throw rockets::jsonrpc::response_error("Model not found",
+                                                           MODEL_NOT_FOUND);
+
+
+
+                return Response{to_json(*model)};
+            });
+
+        _handleSchema(METHOD_GET_MODEL,
+                      buildJsonRpcSchemaRequest<ObjectID, ModelDescriptor>(desc));
     }
 
     void _handleGetModelProperties()

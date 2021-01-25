@@ -250,7 +250,7 @@ protected:
     virtual bool supportsConcurrentSceneUpdates() const { return false; }
     void _computeBounds();
     void _loadIBLMaps(const std::string& envMap);
-    void _updateSimulatedModel(ModelDescriptorPtr& model, bool forceSim = true);
+    void _updateSimulatedModel(ModelDescriptorPtr& model, bool forceSim, bool updateParams);
 
     AnimationParameters& _animationParameters;
     GeometryParameters& _geometryParameters;

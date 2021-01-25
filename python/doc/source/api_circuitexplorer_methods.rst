@@ -41,7 +41,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
 
@@ -66,7 +66,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
 
@@ -101,7 +101,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
 
@@ -132,7 +132,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -170,7 +170,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -205,7 +205,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -232,7 +232,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -261,7 +261,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -289,7 +289,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -322,7 +322,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -358,7 +358,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -383,7 +383,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -429,7 +429,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -461,7 +461,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -512,7 +512,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -544,9 +544,37 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
+
+
+mirror_model
+~~~~~~~~~~
+
+
+Parameters:
+
+.. code-block:: python
+
+    mirror_model(model_id, mirror_axis)
+
+Generates a copy the geometry inside a circuit, mirrored respect a center of a bounding box whose measures has been doubled in the non zero directions of the mirror axis.
+
+Parameters:
+
+* ``model_id``: ``integer``, Model ID to which to copy and mirror its geometry.
+* ``mirror_axis``: ``array``, 3-components array of integers representing XYZ, indicating whether not to mirror in that axis (0) or to mirror it (1 or -1)
+
+Error:
+
+In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
+
+* ``error``: ``integer``, an error code that identifies the problem.
+* ``message``: ``str``, a description of the error.
+
+----
+
 
 remap_circuit_color
 ~~~~~~~~~~~~~~~~~~~
@@ -563,14 +591,14 @@ Remap the circuit colors to the specified scheme
 Parameters:
 
 * ``model_id``: ``integer``, The model to remap
-* ``scheme``: ``string``, Color scheme to remap a circuit to (Possible values: "By id", "By layer", "By mtype", "By etype", "By target")
+* ``scheme``: ``string``, Color scheme to remap a circuit to (Possible values: "By id", "By layer", "By mtype", "By etype", "By target", "Single color")
 
 Error:
 
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -599,7 +627,34 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
+
+
+----
+
+set_circuit_thickness
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Parameters:
+
+.. code-block:: python
+
+    set_circuit_thickness(model_id, radius_multiplier)
+
+Multiplies the radius of the geometric pieces that form the circuit by the given radius multiplier, effectively modifying the thickness of the cells. Subsequent calls will be based on the last computed radius value, not the original one.
+
+Parameters:
+
+* ``model_id``: ``integer``, The model to which apply the thickness change.
+* ``radius_multiplier``: ``number``, The factor by which to multiply the radii of the geometry.
+
+Error:
+
+In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
+
+* ``error``: ``integer``, an error code that identifies the problem.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -628,7 +683,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -667,7 +722,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -693,7 +748,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -732,7 +787,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -770,7 +825,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -801,7 +856,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
 
@@ -830,7 +885,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -860,7 +915,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
 
@@ -890,7 +945,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 
 ----
@@ -919,5 +974,5 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 

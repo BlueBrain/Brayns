@@ -209,7 +209,7 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
     const auto dbConnectionString =
         properties.getProperty<std::string>(PROP_DB_CONNECTION_STRING.name);
     const auto synchronousMode =
-        !properties.getProperty<bool>(PROP_SYNCHRONOUS_MODE.name);
+        properties.getProperty<bool>(PROP_SYNCHRONOUS_MODE.name);
 
     brayns::AbstractSimulationHandlerPtr simulationHandler{nullptr};
     switch (reportType)
@@ -547,6 +547,9 @@ size_t AbstractCircuitLoader::_getMaterialFromCircuitAttributes(
     size_t materialId = 0;
     switch (colorScheme)
     {
+    case CircuitColorScheme::single_material:
+        materialId = 1;
+        break;
     case CircuitColorScheme::by_id:
         materialId = NB_MATERIALS_PER_INSTANCE * index;
         break;

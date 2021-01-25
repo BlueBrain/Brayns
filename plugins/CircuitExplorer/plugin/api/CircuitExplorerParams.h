@@ -399,9 +399,9 @@ struct AnterogradeTracing : public brayns::Message
 {
     MESSAGE_BEGIN(AnterogradeTracing)
     MESSAGE_ENTRY(uint64_t, modelId, "Model where to perform the neuronal tracing")
-    MESSAGE_ENTRY(std::vector<uint32_t>, cellGIDs, "List of cell GIDs to use a source of the "
+    MESSAGE_ENTRY(std::vector<uint32_t>, cellGids, "List of cell GIDs to use a source of the "
                                                    "tracing")
-    MESSAGE_ENTRY(std::vector<uint32_t>, targetCellGIDs, "List of cells GIDs which are the result"
+    MESSAGE_ENTRY(std::vector<uint32_t>, targetCellGids, "List of cells GIDs which are the result"
                                                          " of the given tracing mode")
     MESSAGE_ENTRY(std::vector<double>, sourceCellColor, "A 4 component normalized color (RGBA) to "
                                                         "apply to the source cell geometry")
@@ -470,6 +470,13 @@ struct RemapCircuit : public brayns::Message
                                        "\"By target\")")
 };
 
+struct RemapCircuitResult: public brayns::Message
+{
+    MESSAGE_BEGIN(RemapCircuitResult)
+    MESSAGE_ENTRY(bool, updated, "Wether the colors of the model changed because of the "
+                                 "remapping.")
+};
+
 struct ColorCells : public brayns::Message
 {
     MESSAGE_BEGIN(ColorCells)
@@ -477,6 +484,20 @@ struct ColorCells : public brayns::Message
     MESSAGE_ENTRY(std::vector<std::string>, gids, "List of cell GIDs to color")
     MESSAGE_ENTRY(std::vector<double>, colors, "List of RGB colors, in the same order as "
                                                "the GIDs were specified")
+};
+
+struct MirrorModel : public brayns::Message
+{
+    MESSAGE_BEGIN(MirrorModel)
+    MESSAGE_ENTRY(uint64_t, modelId, "The model to which to mirror")
+    MESSAGE_ENTRY(std::vector<double>, mirrorAxis, "The axis to use for mirroring")
+};
+
+struct CircuitThickness : public brayns::Message
+{
+    MESSAGE_BEGIN(CircuitThickness)
+    MESSAGE_ENTRY(uint64_t, modelId, "The model to which to apply the thickness change")
+    MESSAGE_ENTRY(double, radiusMultiplier, "The facto by which to multiply the geometry radiuses")
 };
 
 #endif // CIRCUITEXLORERPARAMS_H

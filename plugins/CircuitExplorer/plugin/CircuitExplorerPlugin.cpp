@@ -549,7 +549,7 @@ void CircuitExplorerPlugin::init()
                  "The data to build and color the box"},
                 [&](const AddBox& payload) { return _addBox(payload); });
 
-            actionInterface->registerRequest<RemapCircuit, brayns::Message>(
+            actionInterface->registerRequest<RemapCircuit, RemapCircuitResult>(
                 {"remap-circuit-color",
                  "Remap the circuit colors to the specified scheme",
                  "RemapCircuit",
@@ -564,6 +564,20 @@ void CircuitExplorerPlugin::init()
                  "Information about the model, cells and color to "
                  "update"},
                 [&](const ColorCells& cc) { return _colorCells(cc); });
+
+            actionInterface->registerRequest<MirrorModel, brayns::Message>(
+                {"mirror-model",
+                 "Mirrors a model along a given axis",
+                 "MirrorModel",
+                 "Model ID and axis along which to mirror the first."},
+                [&](const MirrorModel& mm) { return _mirrorModel(mm); });
+
+            actionInterface->registerRequest<CircuitThickness, brayns::Message>(
+                {"set-circuit-thickness",
+                 "Modify the geometry radiuses (spheres, cones, cylinders and SDF geometries)",
+                 "CircuitThickness",
+                 "Model ID and radius multiplier to apply"},
+                [&](const CircuitThickness& cc) { return _changeCircuitThickness(cc); });
 
         } // if (actionInterface)
 
@@ -586,7 +600,17 @@ void CircuitExplorerPlugin::preRender()
         _api->getScene().markModified();
     _dirty = false;
 
-    if (_exportFramesToDiskDirty && _accumulationFrameNumber == 0)
+    // If there was an error during the last frame export, stop the export process
+    if(_exportFrameError)
+    {
+        _exportFramesToDiskDirty = false;
+        _exportFramesToDiskStartFlag = false;
+        // Re-establish the old accumulation settings after we are done with the
+        // frame export
+        _api->getParametersManager().getRenderingParameters()
+                                    .setMaxAccumFrames(_prevAccumulationSetting);
+    }
+    else if (_exportFramesToDiskDirty && _accumulationFrameNumber == 0)
     {
         const auto& ai = _exportFramesToDiskPayload.animationInformation;
         if (_frameNumber >= ai.size())
@@ -1122,6 +1146,14 @@ brayns::Message CircuitExplorerPlugin::_updateMaterialProperties(const UpdateMat
             material->commit();
         }
     }
+
+    // If we have simulation, set the current frame to the numeric limits,
+    // this way, the next time the scene is committed, it will trigger the
+    // commitment of the simulation data as well.
+    auto simHandler = model->getModel().getSimulationHandler();
+    if(simHandler)
+        simHandler->setCurrentFrame(std::numeric_limits<uint32_t>::max());
+
     model->markModified();
     _api->getScene().markModified();
     _api->triggerRender();
@@ -1181,11 +1213,11 @@ MaterialDescriptor CircuitExplorerPlugin::_getMaterial(const ModelMaterialId& mm
                 result.refractionIndex = static_cast<float>(material->getRefractionIndex());
                 result.emission = static_cast<float>(material->getEmission());
                 result.glossiness = static_cast<float>(material->getGlossiness());
-                result.simulationDataCast = material->getProperty<bool>(MATERIAL_PROPERTY_CAST_USER_DATA);
-                result.shadingMode = material->getProperty<int32_t>(MATERIAL_PROPERTY_SHADING_MODE);
-                result.clippingMode = material->getProperty<int32_t>(MATERIAL_PROPERTY_CLIPPING_MODE);
+                result.simulationDataCast = material->getPropertyOrValue<bool>(MATERIAL_PROPERTY_CAST_USER_DATA, false);
+                result.shadingMode = material->getPropertyOrValue<int32_t>(MATERIAL_PROPERTY_SHADING_MODE, 0);
+                result.clippingMode = material->getPropertyOrValue<int32_t>(MATERIAL_PROPERTY_CLIPPING_MODE, 0);
                 result.userParameter = static_cast<float>(
-                            material->getProperty<double>(MATERIAL_PROPERTY_USER_PARAMETER));
+                            material->getPropertyOrValue<double>(MATERIAL_PROPERTY_USER_PARAMETER, 0.0));
             }
             else
             {
@@ -1213,9 +1245,10 @@ MaterialDescriptor CircuitExplorerPlugin::_getMaterial(const ModelMaterialId& mm
     return result;
 }
 
-brayns::Message CircuitExplorerPlugin::_remapCircuitToScheme(const RemapCircuit& payload)
+RemapCircuitResult CircuitExplorerPlugin::_remapCircuitToScheme(const RemapCircuit& payload)
 {
-    brayns::Message result;
+    RemapCircuitResult result;
+    result.updated = false;
 
     auto modelDescriptor = _api->getScene().getModel(payload.modelId);
     if(modelDescriptor)
@@ -1226,7 +1259,9 @@ brayns::Message CircuitExplorerPlugin::_remapCircuitToScheme(const RemapCircuit&
             const auto schemeEnum =
                     stringToEnum<CircuitColorScheme>(payload.scheme);
             auto remapResult = mapper->remapCircuitColors(schemeEnum, _api->getScene());
-            result.setError(remapResult.error, remapResult.message);
+            if(remapResult.error > 0)
+                result.setError(remapResult.error, remapResult.message);
+            result.updated = remapResult.updated;
             _dirty = true;
             _api->getEngine().triggerRender();
         }
@@ -1682,6 +1717,8 @@ brayns::Message CircuitExplorerPlugin::_exportFramesToDisk(
     _exportFramesToDiskPayload = payload;
     _exportFramesToDiskDirty = true;
     _exportFramesToDiskStartFlag = false;
+    _exportFrameError = false;
+    _exportFrameErrorMessage = "";
     _frameNumber = payload.startFrame;
     _accumulationFrameNumber = 0;
     auto& frameBuffer = _api->getEngine().getFrameBuffer();
@@ -1745,9 +1782,26 @@ void CircuitExplorerPlugin::_doExportFrameToDisk()
     std::string filename = _exportFramesToDiskPayload.path + '/' + frame + "." +
                            _exportFramesToDiskPayload.format;
     std::ofstream file;
-    file.open(filename, std::ios_base::binary);
+
+    try
+    {
+        file.open(filename, std::ios_base::binary);
+    }
+    catch (const std::exception& e)
+    {
+        frameBuffer.clear();
+        _exportFrameError = true;
+        _exportFrameErrorMessage = std::string(e.what());
+        return;
+    }
+
     if (!file.is_open())
-        PLUGIN_THROW("Failed to create " + filename);
+    {
+        frameBuffer.clear();
+        _exportFrameError = true;
+        _exportFrameErrorMessage = "Failed to create " + filename;
+        return;
+    }
 
     file.write((char*)pixels, numPixels);
     file.close();
@@ -1760,6 +1814,7 @@ void CircuitExplorerPlugin::_doExportFrameToDisk()
 FrameExportProgress CircuitExplorerPlugin::_getFrameExportProgress()
 {
     FrameExportProgress result;
+
     const size_t totalNumberOfFrames =
         (_exportFramesToDiskPayload.animationInformation.size() -
          _exportFramesToDiskPayload.startFrame) *
@@ -1768,7 +1823,13 @@ FrameExportProgress CircuitExplorerPlugin::_getFrameExportProgress()
         _frameNumber * _exportFramesToDiskPayload.spp +
         _accumulationFrameNumber;
 
-    result.progress = currentProgress / float(totalNumberOfFrames);
+    result.progress = std::min(
+                static_cast<double>(currentProgress / float(totalNumberOfFrames)), 1.0);
+
+    if(_exportFrameError)
+        result.setError(1, _exportFrameErrorMessage);
+    else
+        result.setError(0, "");
     return result;
 }
 
@@ -1835,6 +1896,14 @@ inline bool _createMediaFile(const MakeMovieParameters& params, brayns::Message&
     while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
     {
         ffmpegPath += buffer.data();
+    }
+
+    if(ffmpegPath.find("/") != 0)
+    {
+        PLUGIN_ERROR << "Could not launch movie creation: ffmpeg not found"
+                     << std::endl;
+        result.setError(5, "Could not launch movie creation: ffmpeg not found");
+        return false;
     }
 
     // Remove new lines
@@ -1982,7 +2051,7 @@ brayns::Message CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTraci
 {
     brayns::Message result;
 
-    if(payload.cellGIDs.empty())
+    if(payload.cellGids.empty())
     {
         result.setError(1, "No input cell GIDs specified");
         return result;
@@ -2049,9 +2118,9 @@ brayns::Message CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTraci
 
     // Gather material ids for the source and target cells
     std::unordered_set<int32_t> sourceCellMaterialIds;
-    searchFunc(sourceCellMaterialIds, payload.cellGIDs, cellMaterialMap);
+    searchFunc(sourceCellMaterialIds, payload.cellGids, cellMaterialMap);
     std::unordered_set<int32_t> targetCellMaterialIds;
-    searchFunc(targetCellMaterialIds, payload.targetCellGIDs, cellMaterialMap);
+    searchFunc(targetCellMaterialIds, payload.targetCellGids, cellMaterialMap);
 
     // Enable extra attributes on materials
     MaterialExtraAttributes mea;
@@ -2073,10 +2142,10 @@ brayns::Message CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTraci
     mrd.glossiness = 1.f;
     mrd.reflectionIndex = 0.f;
     mrd.refractionIndex = 0.f;
-    mrd.opacity = std::min<float>(std::max<float>(payload.nonConnectedCellsColor[4], 0.1f), 1.f);
-    mrd.shadingMode = static_cast<int>(MaterialShadingMode::none);
+    mrd.opacity = std::min<float>(std::max<float>(payload.nonConnectedCellsColor[3], 0.1f), 1.f);
+    mrd.shadingMode = static_cast<int>(MaterialShadingMode::diffuse);
     mrd.clippingMode = static_cast<int>(MaterialClippingMode::no_clipping);
-    mrd.simulationDataCast = true;
+    mrd.simulationDataCast = false;
     _setMaterialRange(mrd);
 
     // Stain (if any) source cell
@@ -2546,6 +2615,194 @@ brayns::Message CircuitExplorerPlugin::_addColumn(const AddColumn& payload)
 
     scene.addModel(
         std::make_shared<brayns::ModelDescriptor>(std::move(model), "Column"));
+
+    return result;
+}
+
+brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
+{
+    brayns::Message result;
+
+    auto modelPtr = _api->getScene().getModel(payload.modelId);
+    if(!modelPtr)
+    {
+        result.setError(1, "The given model ID does not exists");
+        return result;
+    }
+
+    brayns::Model& model = modelPtr->getModel();
+    const brayns::Boxd& bounds = model.getBounds();
+    const brayns::Vector3d dimensions = (bounds.getMax() - bounds.getMin());
+    brayns::Vector3d min = bounds.getMin();
+    brayns::Vector3d max = bounds.getMax();
+
+    std::vector<uint32_t> skipMirrorAxis;
+    for(uint32_t axis = 0; axis < 3; ++axis)
+    {
+        if(payload.mirrorAxis[axis] < 0.)
+            min[axis] -= dimensions[axis] * std::fabs(payload.mirrorAxis[axis]);
+        else if(payload.mirrorAxis[axis] > 0)
+            max[axis] += dimensions[axis] * std::fabs(payload.mirrorAxis[axis]);
+        else
+            skipMirrorAxis.push_back(axis);
+    }
+
+    const brayns::Vector3f center ((max + min) * 0.5);
+
+    brayns::SpheresMap& sphereMap = model.getSpheres();
+    for(auto& entry : sphereMap)
+    {
+        std::vector<brayns::Sphere> tempBuf;
+        tempBuf.reserve(entry.second.size());
+        for(const brayns::Sphere& sphere : entry.second)
+        {
+            auto toCenter = (center - sphere.center) * 2.f;
+            for(const auto skipAxis : skipMirrorAxis)
+                toCenter[skipAxis] = 0.f;
+            tempBuf.emplace_back(sphere.center + toCenter, sphere.radius, sphere.userData);
+        }
+        entry.second.insert(entry.second.end(), tempBuf.begin(), tempBuf.end());
+    }
+    brayns::ConesMap& conesMap = model.getCones();
+    for(auto& entry : conesMap)
+    {
+        std::vector<brayns::Cone> tempBuf;
+        tempBuf.reserve(entry.second.size());
+        for(const brayns::Cone& cone : entry.second)
+        {
+            auto toCenter = (center - cone.center) * 2.f;
+            auto toUp = (center - cone.up) * 2.f;
+            for(const auto skipAxis : skipMirrorAxis)
+            {
+                toCenter[skipAxis] = 0.f;
+                toUp[skipAxis] = 0.f;
+            }
+            tempBuf.emplace_back(cone.center + toCenter,
+                                 cone.up + toUp,
+                                 cone.centerRadius,
+                                 cone.upRadius,
+                                 cone.userData);
+        }
+        entry.second.insert(entry.second.end(), tempBuf.begin(), tempBuf.end());
+    }
+    brayns::CylindersMap& cylindersMap = model.getCylinders();
+    for(auto& entry : cylindersMap)
+    {
+        std::vector<brayns::Cylinder> tempBuf;
+        tempBuf.reserve(entry.second.size());
+        for(brayns::Cylinder& cylinder : entry.second)
+        {
+            auto toCenter = (center - cylinder.center) * 2.f;
+            auto toUp = (center - cylinder.up) * 2.f;
+            for(const auto skipAxis : skipMirrorAxis)
+            {
+                toCenter[skipAxis] = 0.f;
+                toUp[skipAxis] = 0.f;
+            }
+            tempBuf.emplace_back(cylinder.center + toCenter,
+                                 cylinder.up + toUp,
+                                 cylinder.radius,
+                                 cylinder.userData);
+        }
+        entry.second.insert(entry.second.end(), tempBuf.begin(), tempBuf.end());
+    }
+
+    brayns::SDFGeometryData& sdfGeometry = model.getSDFGeometryData();
+    const size_t originalOffset = sdfGeometry.geometries.size();
+    std::vector<brayns::SDFGeometry> tempBuf;
+    tempBuf.reserve(originalOffset);
+    for(auto& entry : sdfGeometry.geometryIndices)
+    {
+        std::vector<uint64_t> extraIndices;
+        extraIndices.reserve(entry.second.size());
+        for(const auto geomIndex : entry.second)
+        {
+            const brayns::SDFGeometry& geom = sdfGeometry.geometries[geomIndex];
+            auto toP0 = (center - geom.p0) * 2.f;
+            auto toP1 = (center - geom.p1) * 2.f;
+            for(const auto skipAxis: skipMirrorAxis)
+            {
+                toP0[skipAxis] = 0.f;
+                toP1[skipAxis] = 0.f;
+            }
+            // Update geometry indices (materials)
+            extraIndices.push_back(originalOffset + tempBuf.size());
+            // Update neighbours
+            std::vector<uint64_t> newNeighbours = sdfGeometry.neighbours[geomIndex];
+            for(size_t i = 0; i < newNeighbours.size(); ++i)
+                newNeighbours[i] += originalOffset;
+            sdfGeometry.neighbours.push_back(newNeighbours);
+            // Insert the new geometry
+            tempBuf.emplace_back();
+            brayns::SDFGeometry& last = tempBuf.back();
+            last = geom;
+            last.p0 += toP0;
+            last.p1 += toP1;
+        }
+        entry.second.insert(entry.second.end(), extraIndices.begin(), extraIndices.end());
+    }
+    sdfGeometry.geometries.insert(sdfGeometry.geometries.end(),
+                                  tempBuf.begin(),
+                                  tempBuf.end());
+    tempBuf.clear();
+
+    model.updateBounds();
+
+    brayns::Transformation tr = modelPtr->getTransformation();
+    tr.setRotationCenter((max + min) * 0.5);
+    modelPtr->setTransformation(tr);
+    modelPtr->computeBounds();
+    modelPtr->markModified();
+    _api->getScene().markModified();
+    _api->getEngine().triggerRender();
+
+    return result;
+}
+
+brayns::Message CircuitExplorerPlugin::_changeCircuitThickness(const CircuitThickness& payload)
+{
+    brayns::Message result;
+
+    auto modelPtr = _api->getScene().getModel(payload.modelId);
+    if(!modelPtr)
+    {
+        result.setError(1, "The given model ID does not exists");
+        return result;
+    }
+
+    brayns::Model& model = modelPtr->getModel();
+
+    brayns::SpheresMap& sphereMap = model.getSpheres();
+    for(auto& entry : sphereMap)
+    {
+        for(brayns::Sphere& sphere : entry.second)
+            sphere.radius *= payload.radiusMultiplier;
+    }
+    brayns::ConesMap& conesMap = model.getCones();
+    for(auto& entry : conesMap)
+    {
+        for(brayns::Cone& cone : entry.second)
+        {
+            cone.centerRadius *= payload.radiusMultiplier;
+            cone.upRadius *= payload.radiusMultiplier;
+        }
+    }
+    brayns::CylindersMap& cylindersMap = model.getCylinders();
+    for(auto& entry : cylindersMap)
+    {
+        for(brayns::Cylinder& cylinder : entry.second)
+            cylinder.radius *= payload.radiusMultiplier;
+    }
+    brayns::SDFGeometryData& sdfGeometry = model.getSDFGeometryData();
+    for(brayns::SDFGeometry& geom : sdfGeometry.geometries)
+    {
+        geom.r0 *= payload.radiusMultiplier;
+        geom.r1 *= payload.radiusMultiplier;
+    }
+
+    modelPtr->markModified();
+    _api->getScene().markModified();
+    _api->getEngine().triggerRender();
 
     return result;
 }

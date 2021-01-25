@@ -118,6 +118,9 @@ ModelDescriptor& ModelDescriptor::operator=(const ModelParams& rhs)
         // by the model loader is used
         _transformation.setRotationCenter(oldRotationCenter);
 
+    _loaderProperties = rhs.getLoaderProperties();
+    _loaderName = rhs.getLoaderName();
+
     return *this;
 }
 
@@ -183,6 +186,7 @@ ModelDescriptorPtr ModelDescriptor::clone(ModelPtr model) const
     newModelDesc->_properties = _properties;
     newModelDesc->_model->buildBoundingBox();
     newModelDesc->_simulatedModel = _simulatedModel;
+    newModelDesc->_loaderProperties = _loaderProperties;
     return newModelDesc;
 }
 
@@ -694,7 +698,6 @@ bool Model::commitSimulationData()
         auto& ap = _animationParameters;
         ap.setIsReadyCallback(
             [handler = _simulationHandler] { return handler->isReady(); });
-        ap.setFrame(_simulationHandler->getCurrentFrame());
         ap.setDt(_simulationHandler->getDt(), false);
         ap.setUnit(_simulationHandler->getUnit(), false);
         ap.setNumFrames(_simulationHandler->getNbFrames(), false);

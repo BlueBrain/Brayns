@@ -121,8 +121,11 @@ private:
     MaterialDescriptor _getMaterial(const ModelMaterialId& mmId);
 
     // Remap circuit colors to a specific scheme
-    brayns::Message _remapCircuitToScheme(const RemapCircuit& payload);
+    RemapCircuitResult _remapCircuitToScheme(const RemapCircuit& payload);
     brayns::Message _colorCells(const ColorCells& payload);
+
+    brayns::Message _mirrorModel(const MirrorModel& payload);
+    brayns::Message _changeCircuitThickness(const CircuitThickness& payload);
 
     SynapseAttributes _synapseAttributes;
 
@@ -135,6 +138,8 @@ private:
     uint16_t _frameNumber{0};
     uint32_t _accumulationFrameNumber{0};
     size_t _prevAccumulationSetting;
+    bool _exportFrameError {false};
+    std::string _exportFrameErrorMessage;
 
     std::vector<std::unique_ptr<CellObjectMapper>> _mappers;
 };

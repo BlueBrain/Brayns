@@ -69,19 +69,13 @@ public:
                _scale == rhs._scale && _rotationCenter == rhs._rotationCenter;
     }
     bool operator!=(const Transformation& rhs) const { return !(*this == rhs); }
-    // only applies rotation and translation, use scaling separately if needed
-    Matrix4d toMatrix(bool withScale = false) const
+
+    Matrix4d toMatrix() const
     {
-        Matrix4d matrix = glm::toMat4(getRotation());
-        matrix = glm::translate(matrix, getTranslation());
-        if (withScale)
-        {
-            matrix = glm::scale(matrix, _scale);
-            matrix[3][0] *= _scale.x;
-            matrix[3][1] *= _scale.y;
-            matrix[3][2] *= _scale.z;
-        }
-        return matrix;
+        return glm::translate(Matrix4d(1.), _rotationCenter)
+                * (glm::toMat4(_rotation)
+                   * (glm::translate(Matrix4d(1.), _translation - _rotationCenter)
+                      * glm::scale(Matrix4d(1.), _scale)));
     }
 
 private:
@@ -95,17 +89,13 @@ private:
 inline Transformation operator*(const Transformation& a,
                                 const Transformation& b)
 {
-    const auto matrix = a.toMatrix() * b.toMatrix();
-    return {matrix[3], a.getScale() * b.getScale(), matrix,
-            a.getRotationCenter()};
+    return {a.getTranslation() + b.getTranslation(), a.getScale() * b.getScale(),
+            a.getRotation() * b.getRotation(), a.getRotationCenter()};
 }
 
 inline Boxd transformBox(const Boxd& box, const Transformation& transformation)
 {
-    const auto& scale = transformation.getScale();
-    return {transformation.toMatrix() * Vector4d(box.getMin(), 1.) *
-                Vector4d(scale, 1.),
-            transformation.toMatrix() * Vector4d(box.getMax(), 1.) *
-                Vector4d(scale, 1.)};
+    const brayns::Matrix4d matrix = transformation.toMatrix();
+    return {matrix * Vector4d(box.getMin(), 1.), matrix * Vector4d(box.getMax(), 1.)};
 }
 }
