@@ -1898,6 +1898,14 @@ inline bool _createMediaFile(const MakeMovieParameters& params, brayns::Message&
         ffmpegPath += buffer.data();
     }
 
+    if(ffmpegPath.find("/") != 0)
+    {
+        PLUGIN_ERROR << "Could not launch movie creation: ffmpeg not found"
+                     << std::endl;
+        result.setError(5, "Could not launch movie creation: ffmpeg not found");
+        return false;
+    }
+
     // Remove new lines
     size_t pos = std::string::npos;
     do
