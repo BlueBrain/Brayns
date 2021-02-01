@@ -29,8 +29,8 @@
 #include <brayns/common/light/Light.h>
 #include <brayns/common/log.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
-#include <brayns/parameters/AnimationParameters.h>
 #include <brayns/engine/Model.h>
+#include <brayns/parameters/AnimationParameters.h>
 
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/VolumeParameters.h>

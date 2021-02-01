@@ -2183,7 +2183,7 @@ public:
             "SetActiveSimulationModel", "The ID of the model to set as active"
         };
         _handleRPC<SetActiveSimulationModel, SetActiveSimulationModelResponse>
-                (descSetSimModel, [&](const SetActiveSimulationModel& req)
+                (descSetSimModel, [&](const SetActiveSimulationModel&)
         {
             SetActiveSimulationModelResponse result;
             result.error = 0;
