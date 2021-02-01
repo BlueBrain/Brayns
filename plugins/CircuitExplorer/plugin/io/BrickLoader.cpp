@@ -636,7 +636,7 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
         file.read((char*)&nbElements, sizeof(size_t));
         if (nbElements == 1)
         {
-            auto& tf = model->getTransferFunction();
+            auto& tf = _scene.getTransferFunction();
             // Values range
             brayns::Vector2d valuesRange;
             file.read((char*)&valuesRange, sizeof(brayns::Vector2d));
@@ -993,7 +993,7 @@ void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
     // Transfer function
     nbElements = 1;
     file.write((char*)&nbElements, sizeof(size_t));
-    const auto& tf = model.getTransferFunction();
+    const auto& tf = _scene.getTransferFunction();
     {
         // Values range
         const brayns::Vector2d& valuesRange = tf.getValuesRange();

@@ -31,7 +31,6 @@
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/geometry/Streamline.h>
 #include <brayns/common/geometry/TriangleMesh.h>
-#include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/types.h>
 
 #include <set>
@@ -203,30 +202,11 @@ public:
     ModelDescriptorPtr clone(ModelPtr model) const;
 
 private:
-    friend class Scene;
-
-    /**
-     * @brief isAciveSimulationModel Returns wether this model is the one being simulated
-     * When multiple models with simulation are loaded, only one will be simulated.
-     * @return bool True if this model is the active simulation model, false otherwise.
-     */
-    bool isAciveSimulationModel()
-    {
-        return _simulatedModel;
-    }
-
-    /**
-     * @brief setActiveSimulatedModel Sets this model to be the actively simulated model
-     * @param val
-     */
-    void setActiveSimulatedModel(bool val);
-
     size_t _nextInstanceID{0};
     Boxd _bounds;
     ModelMetadata _metadata;
     ModelPtr _model;
     ModelInstances _instances;
-    bool _simulatedModel{false};
     PropertyMap _properties;
     RemovedCallback _onRemovedCallback;
     bool _markedForRemoval = false;
@@ -252,12 +232,6 @@ public:
     /** @name API for engine-specific code */
     //@{
     virtual void commitGeometry() = 0;
-
-    /** Commit transfer function */
-    bool commitTransferFunction();
-
-    /** Commit simulation data */
-    bool commitSimulationData();
 
     /** Factory method to create an engine-specific material. */
     BRAYNS_API MaterialPtr createMaterial(const size_t materialId,
@@ -481,14 +455,6 @@ public:
      */
     BRAYNS_API MaterialPtr getMaterial(const size_t materialId) const;
 
-    /** @return the transfer function used for volumes and simulations. */
-    TransferFunction& getTransferFunction() { return _transferFunction; }
-    /** @return the transfer function used for volumes and simulations. */
-    const TransferFunction& getTransferFunction() const
-    {
-        return _transferFunction;
-    }
-
     /**
         Returns the simulutation handler
     */
@@ -511,6 +477,10 @@ public:
         _bvhFlags = std::move(bvhFlags);
     }
     const std::set<BVHFlag>& getBVHFlags() const { return _bvhFlags; }
+
+    void setSimulationEnabled(const bool v) { _simulationEnabled = v; }
+    bool isSimulationEnabled() const { return _simulationEnabled; }
+
     void updateBounds();
     /** @internal */
     void copyFrom(const Model& rhs);
@@ -525,17 +495,11 @@ protected:
     /** Mark all geometries as clean. */
     void _markGeometriesClean();
 
-    virtual void _commitTransferFunctionImpl(const Vector3fs& colors,
-                                             const floats& opacities,
-                                             const Vector2d valueRange) = 0;
-    virtual void _commitSimulationDataImpl(const float* frameData,
-                                           const size_t frameSize) = 0;
-
     AnimationParameters& _animationParameters;
     VolumeParameters& _volumeParameters;
 
     AbstractSimulationHandlerPtr _simulationHandler;
-    TransferFunction _transferFunction;
+    bool _simulationEnabled {true};
 
     MaterialMap _materials;
 

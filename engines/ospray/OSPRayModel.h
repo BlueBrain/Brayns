@@ -24,19 +24,23 @@
 
 #include <ospray.h>
 
+#include "ispc/model/OSPRayISPCModel.h"
+
 namespace brayns
 {
 class OSPRayModel : public Model
 {
 public:
     OSPRayModel(AnimationParameters& animationParameters,
-                VolumeParameters& volumeParameters);
+                VolumeParameters& volumeParameters,
+                OSPTransferFunction transferFunc);
     ~OSPRayModel() final;
 
     void setMemoryFlags(const size_t memoryManagementFlags);
 
     void commitGeometry() final;
     void commitMaterials(const std::string& renderer);
+    void commitSimulationParams();
 
     OSPModel getPrimaryModel() const { return _primaryModel; }
     OSPModel getSecondaryModel() const { return _secondaryModel; }
@@ -50,18 +54,7 @@ public:
 
     void buildBoundingBox() final;
 
-    OSPData simulationData() const { return _ospSimulationData; }
-    OSPTransferFunction transferFunction() const
-    {
-        return _ospTransferFunction;
-    }
-
-protected:
-    void _commitTransferFunctionImpl(const Vector3fs& colors,
-                                     const floats& opacities,
-                                     const Vector2d valueRange) final;
-    void _commitSimulationDataImpl(const float* frameData,
-                                   const size_t frameSize) final;
+    void setSimulationOffset(const uint64_t offset) { _simulationOffset = offset; }
 
 private:
     using GeometryMap = std::map<size_t, OSPGeometry>;
@@ -87,8 +80,8 @@ private:
     // Bounding box
     size_t _boudingBoxMaterialId{0};
 
-    // Simulation model
-    OSPData _ospSimulationData{nullptr};
+    // Simulation offset within the simulation buffer
+    uint64_t _simulationOffset {0};
 
     OSPTransferFunction _ospTransferFunction{nullptr};
 

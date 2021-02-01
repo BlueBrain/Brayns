@@ -49,8 +49,10 @@ DTISimulationHandler::DTISimulationHandler(
     , _spikeSimulation(spikeSimulation)
 {
     _frameSize = indices[indices.size() - 1];
+    _startTime = 0.0;
+    _endTime = _spikeSimulation.endTime;
     _dt = _spikeSimulation.dt;
-    _nbFrames = _spikeSimulation.endTime / _dt;
+    _nbFrames = _endTime / _dt;
     _unit = "ms";
 
     _data.resize(_frameSize, 0.f);
@@ -62,13 +64,13 @@ DTISimulationHandler::DTISimulationHandler(
                 << std::endl;
     PLUGIN_INFO << "Spike simulation information" << std::endl;
     PLUGIN_INFO << "----------------------" << std::endl;
-    PLUGIN_INFO << "End time             : " << _spikeSimulation.endTime << std::endl;
+    PLUGIN_INFO << "End time             : " << _endTime << std::endl;
     PLUGIN_INFO << "Number of frames     : " << _nbFrames << std::endl;
     PLUGIN_INFO << "-----------------------------------------------------------"
                 << std::endl;
 }
 
-void* DTISimulationHandler::getFrameData(const uint32_t frame)
+void* DTISimulationHandler::getFrameDataImpl(const uint32_t frame)
 {
     if (_currentFrame == frame)
         return (void*)_data.data();

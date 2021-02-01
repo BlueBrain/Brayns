@@ -1,6 +1,6 @@
-/* Copyright (c) 2018-2019, EPFL/Blue Brain Project
+/* Copyright (c) 2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of the circuit explorer for Brayns
  * <https://github.com/favreau/Brayns-UC-CircuitExplorer>
@@ -19,33 +19,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CELLGROWTHHANDLER_H
-#define CELLGROWTHHANDLER_H
+#pragma once
 
-#include <brayns/common/simulation/AbstractSimulationHandler.h>
+#include <ospray/SDK/common/Model.h>
 
-#include <brayns/api.h>
-#include <brayns/common/types.h>
-
-/**
- * @brief The CellGrowthHandler class handles distance to the soma
- */
-class CellGrowthHandler : public brayns::AbstractSimulationHandler
+namespace brayns
+{
+class OSPRayISPCModel : public ospray::Model
 {
 public:
-    /**
-     * @brief Default constructor
-     */
-    CellGrowthHandler(const uint32_t nbFrames);
-    CellGrowthHandler(const CellGrowthHandler& rhs);
-    ~CellGrowthHandler();
+    OSPRayISPCModel();
+    virtual ~OSPRayISPCModel() final;
 
-    void* getFrameDataImpl(const uint32_t) final;
+    std::string toString() const final;
+    void commit() final;
 
-    bool isReady() const final { return true; }
-
-    brayns::AbstractSimulationHandlerPtr clone() const final;
+public:
+    bool simEnabled {false};
+    ospray::uint64 simOffset {0};
 };
-typedef std::shared_ptr<CellGrowthHandler> CellGrowthHandlerPtr;
-
-#endif // CELLGROWTHHANDLER_H
+}

@@ -83,12 +83,6 @@ CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
             sh->setCurrentFrame(std::numeric_limits<uint32_t>::max());
         }
 
-        // Copy the transfer function (only use for simulation)
-        auto& tf = _model->getModel().getTransferFunction();
-        newModel->getTransferFunction().setControlPoints(tf.getControlPoints());
-        newModel->getTransferFunction().setColorMap(tf.getColorMap());
-        newModel->getTransferFunction().setValuesRange(tf.getValuesRange());
-
         // Create the new materials given the new scheme
         brayns::PropertyMap materialProps;
         materialProps.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, sh? true : false});

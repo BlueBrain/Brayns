@@ -1459,9 +1459,9 @@ public:
 
         _bindModelEndpoint(METHOD_SET_MODEL_TRANSFER_FUNCTION,
                            "transfer_function", [&](const std::string& json,
-                                                    ModelDescriptorPtr model) {
+                                                    ModelDescriptorPtr) {
                                auto& tf =
-                                   model->getModel().getTransferFunction();
+                                   _engine.getScene().getTransferFunction();
                                if (!::from_json(tf, json))
                                    return false;
 
@@ -1487,7 +1487,7 @@ public:
                 if (!model)
                     throw rockets::jsonrpc::response_error("Model not found",
                                                            MODEL_NOT_FOUND);
-                return model->getModel().getTransferFunction();
+                return engine.getScene().getTransferFunction();
             });
 
         _handleSchema(METHOD_GET_MODEL_TRANSFER_FUNCTION,
@@ -2187,18 +2187,6 @@ public:
         {
             SetActiveSimulationModelResponse result;
             result.error = 0;
-
-            try
-            {
-                _engine.getScene().setActiveSimulatedModel(req.modelId);
-                _engine.getScene().markModified();
-            }
-            catch(const std::exception& e)
-            {
-                result.error = 1;
-                result.message = std::string(e.what());
-            }
-
             return result;
         });
 
@@ -2211,15 +2199,7 @@ public:
                       (const rockets::jsonrpc::Request&)
         {
             GetActiveSimulationModel res;
-            try
-            {
-                res.modelId = _engine.getScene().getActiveSimulatedModel();
-            }
-            catch(const std::exception& e)
-            {
-                res.error = 1;
-                res.message = std::string(e.what());
-            }
+            res.modelId = 0;
 
             return Response{to_json(res)};
         });

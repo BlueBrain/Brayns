@@ -238,7 +238,7 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
         model.setSimulationHandler(handler);
 
         simulationHandler = handler;
-        setSimulationTransferFunction(model.getTransferFunction());
+        setSimulationTransferFunction(_scene.getTransferFunction());
         break;
     }
     case ReportType::spikes:
@@ -253,7 +253,7 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
                                                      static_cast<float>(transitionTime));
         model.setSimulationHandler(handler);
         simulationHandler = handler;
-        setSimulationTransferFunction(model.getTransferFunction());
+        setSimulationTransferFunction(_scene.getTransferFunction());
         break;
     }
     case ReportType::undefined:
@@ -265,7 +265,7 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
         {
             auto handler = std::make_shared<CellGrowthHandler>(100);
             model.setSimulationHandler(handler);
-            setSimulationTransferFunction(model.getTransferFunction(), 0.f);
+            setSimulationTransferFunction(_scene.getTransferFunction(), 0.f);
         }
         else
             PLUGIN_THROW("Unknown report type. Simulation ignored");
@@ -459,7 +459,7 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
     if (userDataType == UserDataType::distance_to_soma)
     {
         // Update cell growth information
-        model->getTransferFunction().setValuesRange({0.f, maxMorphologyLength});
+        _scene.getTransferFunction().setValuesRange({0.f, maxMorphologyLength});
         const auto frameSize = uint64_t(maxMorphologyLength) + 1;
         model->getSimulationHandler()->setFrameSize(frameSize);
         model->getSimulationHandler()->setNbFrames(frameSize);

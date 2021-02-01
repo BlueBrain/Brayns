@@ -1692,7 +1692,7 @@ brayns::Message CircuitExplorerPlugin::_attachCircuitSimulationHandler(
         auto& model = modelDescriptor->getModel();
         model.setSimulationHandler(handler);
         AdvancedCircuitLoader::setSimulationTransferFunction(
-            model.getTransferFunction());
+            _api->getScene().getTransferFunction());
     }
     else
     {

@@ -25,6 +25,8 @@ CellGrowthHandler::CellGrowthHandler(const uint32_t nbFrames)
     : brayns::AbstractSimulationHandler()
 {
     // Load simulation information from compartment reports
+    _startTime = 0.0;
+    _endTime = static_cast<double>(nbFrames);
     _dt = 1.f;
     _nbFrames = nbFrames;
     _unit = "microns";
@@ -38,7 +40,7 @@ CellGrowthHandler::CellGrowthHandler(const CellGrowthHandler& rhs)
 
 CellGrowthHandler::~CellGrowthHandler() {}
 
-void* CellGrowthHandler::getFrameData(const uint32_t frame)
+void* CellGrowthHandler::getFrameDataImpl(const uint32_t frame)
 {
     if (_currentFrame != frame)
     {

@@ -53,7 +53,7 @@ public:
     VoltageSimulationHandler(const VoltageSimulationHandler& rhs);
     ~VoltageSimulationHandler();
 
-    void* getFrameData(const uint32_t frame) final;
+    void* getFrameDataImpl(const uint32_t frame) final;
 
     const std::string& getReportPath() const { return _reportPath; }
     CompartmentReportPtr getReport() const { return _compartmentReport; }

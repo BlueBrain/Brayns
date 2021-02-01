@@ -24,6 +24,8 @@
 #include <brayns/common/types.h>
 #include <brayns/engine/Scene.h>
 
+#include "ispc/model/OSPRayISPCModel.h"
+
 #include <ospray.h>
 
 namespace brayns
@@ -55,13 +57,21 @@ public:
 
     OSPModel getModel() { return _rootModel; }
     OSPData lightData() { return _ospLightData; }
-    ModelDescriptorPtr getSimulatedModel();
+    OSPData getSimulationData() { return _ospSimulationData; }
+    OSPTransferFunction getTransferFunctionImpl() { return _ospTransferFunction; }
 
 private:
-    bool _commitVolumeAndTransferFunction(ModelDescriptors& modelDescriptors);
+    bool _commitVolumes(ModelDescriptors& modelDescriptors);
+    void _commitTransferFunction();
+    void _commitSimulationData(ModelDescriptors& modelDescriptors);
     void _destroyLights();
 
     OSPModel _rootModel{nullptr};
+
+    std::vector<float> _simData;
+    //uint32_t _lastFrame {std::numeric_limits<uint32_t>::max()};
+    OSPData _ospSimulationData{nullptr};
+    OSPTransferFunction _ospTransferFunction {nullptr};
 
     std::vector<OSPLight> _ospLights;
 
