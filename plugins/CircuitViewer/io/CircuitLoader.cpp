@@ -527,7 +527,7 @@ public:
             allGids = compartmentReport->getGIDs();
             reportMapping = &compartmentReport->getMapping();
 
-            _setSimulationTransferFunction(model->getTransferFunction());
+            _setSimulationTransferFunction(_scene.getTransferFunction());
         }
 
         const auto perCellMaterialIds =
