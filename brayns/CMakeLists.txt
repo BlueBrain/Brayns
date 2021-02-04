@@ -24,9 +24,4 @@ set(BRAYNS_LINK_LIBRARIES
   PUBLIC braynsParameters braynsCommon braynsEngine
   PRIVATE braynsIO braynsPluginAPI braynsManipulators braynsTasks)
 
-if(TARGET braynsRockets)
-  list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE braynsRockets)
-endif()
-
-set(BRAYNS_OMIT_EXPORT ON)
 common_library(brayns)

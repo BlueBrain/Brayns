@@ -14,4 +14,8 @@ set(BRAYNSVIEWER_LINK_LIBRARIES
   braynsUI
 )
 
+if(BRAYNS_NETWORKING_ENABLED)
+  list(APPEND BRAYNSVIEWER_LINK_LIBRARIES PRIVATE braynsRockets)
+endif()
+
 common_application(braynsViewer)

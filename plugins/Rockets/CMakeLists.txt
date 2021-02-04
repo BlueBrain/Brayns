@@ -44,7 +44,6 @@ endif()
 
 set(BRAYNSROCKETS_OMIT_LIBRARY_HEADER ON)
 set(BRAYNSROCKETS_OMIT_VERSION_HEADERS ON)
-set(BRAYNSROCKETS_OMIT_EXPORT ON)
 set(BRAYNSROCKETS_INCLUDE_NAME rocketsplugin)
 common_library(braynsRockets)
 target_include_directories(braynsRockets SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS})
