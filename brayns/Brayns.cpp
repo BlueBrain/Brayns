@@ -418,7 +418,7 @@ private:
 
                 // No properties passed, use command line defaults.
                 ModelParams params(path, path, {});
-                scene.loadModel(path, params, {progress});
+                scene.loadModels(path, params, {progress});
             }
         }
         scene.setEnvironmentMap(

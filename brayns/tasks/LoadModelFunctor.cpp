@@ -39,19 +39,19 @@ LoadModelFunctor::LoadModelFunctor(Engine& engine, const ModelParams& params)
 {
 }
 
-ModelDescriptorPtr LoadModelFunctor::operator()(Blob&& blob)
+std::vector<ModelDescriptorPtr> LoadModelFunctor::operator()(Blob&& blob)
 {
     return _performLoad([&] { return _loadData(std::move(blob), _params); });
 }
 
-ModelDescriptorPtr LoadModelFunctor::operator()()
+std::vector<ModelDescriptorPtr> LoadModelFunctor::operator()()
 {
     const auto& path = _params.getPath();
     return _performLoad([&] { return _loadData(path, _params); });
 }
 
-ModelDescriptorPtr LoadModelFunctor::_performLoad(
-    const std::function<ModelDescriptorPtr()>& loadData)
+std::vector<ModelDescriptorPtr> LoadModelFunctor::_performLoad(
+    const std::function<std::vector<ModelDescriptorPtr>()>& loadData)
 {
     try
     {
@@ -65,17 +65,17 @@ ModelDescriptorPtr LoadModelFunctor::_performLoad(
     }
 }
 
-ModelDescriptorPtr LoadModelFunctor::_loadData(Blob&& blob,
-                                               const ModelParams& params)
+std::vector<ModelDescriptorPtr> LoadModelFunctor::_loadData(Blob&& blob,
+                                                            const ModelParams& params)
 {
-    return _engine.getScene().loadModel(std::move(blob), params,
-                                        {_getProgressFunc()});
+    return _engine.getScene().loadModels(std::move(blob), params,
+                                         {_getProgressFunc()});
 }
 
-ModelDescriptorPtr LoadModelFunctor::_loadData(const std::string& path,
-                                               const ModelParams& params)
+std::vector<ModelDescriptorPtr> LoadModelFunctor::_loadData(const std::string& path,
+                                                            const ModelParams& params)
 {
-    return _engine.getScene().loadModel(path, params, {_getProgressFunc()});
+    return _engine.getScene().loadModels(path, params, {_getProgressFunc()});
 }
 
 void LoadModelFunctor::_updateProgress(const std::string& message,

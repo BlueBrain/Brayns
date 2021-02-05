@@ -195,8 +195,8 @@ public:
      * @param cb the callback for progress updates from the loader
      * @return the model that has been added to the scene
      */
-    ModelDescriptorPtr loadModel(Blob&& blob, const ModelParams& params,
-                                 LoaderProgress cb);
+    std::vector<ModelDescriptorPtr> loadModels(Blob&& blob, const ModelParams& params,
+                                               LoaderProgress cb);
 
     /**
      * Load the model from the given file.
@@ -206,8 +206,8 @@ public:
      * @param cb the callback for progress updates from the loader
      * @return the model that has been added to the scene
      */
-    ModelDescriptorPtr loadModel(const std::string& path,
-                                 const ModelParams& params, LoaderProgress cb);
+    std::vector<ModelDescriptorPtr> loadModels(const std::string& path,
+                                               const ModelParams& params, LoaderProgress cb);
 
     void visitModels(const std::function<void(Model&)>& functor);
 

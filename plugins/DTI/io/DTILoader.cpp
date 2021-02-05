@@ -104,7 +104,7 @@ DTIConfiguration DTILoader::_readConfiguration(
     return configuration;
 }
 
-brayns::ModelDescriptorPtr DTILoader::importFromBlob(
+std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromBlob(
     brayns::Blob&& /*blob*/, const brayns::LoaderProgress& /*callback*/,
     const brayns::PropertyMap& /*properties*/) const
 {
@@ -143,7 +143,7 @@ Colors DTILoader::getColorsFromPoints(const brayns::Vector3fs& points,
     return colors;
 }
 
-brayns::ModelDescriptorPtr DTILoader::importFromFile(
+std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
     const std::string& filename, const brayns::LoaderProgress& callback,
     const brayns::PropertyMap& properties) const
 {
@@ -255,7 +255,7 @@ brayns::ModelDescriptorPtr DTILoader::importFromFile(
         std::make_shared<brayns::ModelDescriptor>(std::move(model), "DTI",
                                                   metadata);
     callback.updateProgress("Done", 1.f);
-    return modelDescriptor;
+    return {modelDescriptor};
 }
 
 brayns::PropertyMap DTILoader::getProperties() const

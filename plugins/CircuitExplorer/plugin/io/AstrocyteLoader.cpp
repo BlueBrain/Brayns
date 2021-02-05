@@ -89,7 +89,7 @@ bool AstrocyteLoader::isSupported(const std::string & /*filename*/,
     return types.find(extension) != types.end();
 }
 
-brayns::ModelDescriptorPtr AstrocyteLoader::importFromFile(
+std::vector<brayns::ModelDescriptorPtr> AstrocyteLoader::importFromFile(
     const std::string &filename, const brayns::LoaderProgress &callback,
     const brayns::PropertyMap &properties) const
 {
@@ -114,7 +114,7 @@ brayns::ModelDescriptorPtr AstrocyteLoader::importFromFile(
     _importMorphologiesFromURIs(props, uris, callback, *model);
     modelDescriptor =
         std::make_shared<brayns::ModelDescriptor>(std::move(model), filename);
-    return modelDescriptor;
+    return {modelDescriptor};
 }
 
 std::string AstrocyteLoader::getName() const

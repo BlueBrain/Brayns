@@ -1180,7 +1180,7 @@ void AbstractCircuitLoader::_buildEfferentSynapses(
     model.addSphere(materialId, {synapse.getPresynapticSurfacePosition(), radius, userData});
 }
 
-brayns::ModelDescriptorPtr AbstractCircuitLoader::importFromBlob(
+std::vector<brayns::ModelDescriptorPtr> AbstractCircuitLoader::importFromBlob(
     brayns::Blob && /*blob*/, const brayns::LoaderProgress & /*callback*/,
     const brayns::PropertyMap & /*properties*/) const
 {

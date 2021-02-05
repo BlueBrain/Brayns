@@ -1432,7 +1432,7 @@ public:
             Execution::async, "param",
             "size, type, name, transformation, etc."};
 
-        _handleTask<BinaryParam, ModelDescriptorPtr>(
+        _handleTask<BinaryParam, std::vector<ModelDescriptorPtr>>(
             desc, std::bind(&BinaryRequests::createTask,
                             std::ref(_binaryRequests), std::placeholders::_1,
                             std::placeholders::_2, std::ref(_engine)));
@@ -2285,7 +2285,7 @@ public:
         auto func = [&](const ModelParams& modelParams, const auto) {
             return std::make_shared<AddModelTask>(modelParams, _engine);
         };
-        _handleTask<ModelParams, ModelDescriptorPtr>(desc, func);
+        _handleTask<ModelParams, std::vector<ModelDescriptorPtr>>(desc, func);
     }
 
     void _handleRemoveModel()

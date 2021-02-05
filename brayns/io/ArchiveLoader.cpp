@@ -234,22 +234,22 @@ ModelDescriptorPtr ArchiveLoader::loadExtracted(
     throw std::runtime_error("No loader found for archive.");
 }
 
-ModelDescriptorPtr ArchiveLoader::importFromBlob(
+std::vector<ModelDescriptorPtr> ArchiveLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback,
     const PropertyMap& properties) const
 {
     TmpFolder tmpFolder;
     extractBlob(std::move(blob), tmpFolder.path);
-    return loadExtracted(tmpFolder.path, callback, properties);
+    return {loadExtracted(tmpFolder.path, callback, properties)};
 }
 
-ModelDescriptorPtr ArchiveLoader::importFromFile(
+std::vector<ModelDescriptorPtr> ArchiveLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
     const PropertyMap& properties) const
 {
     TmpFolder tmpFolder;
     extractFile(filename, tmpFolder.path);
-    return loadExtracted(tmpFolder.path, callback, properties);
+    return {loadExtracted(tmpFolder.path, callback, properties)};
 }
 
 std::string ArchiveLoader::getName() const

@@ -88,7 +88,7 @@ bool BrickLoader::isSupported(const std::string& /*filename*/,
     return types.find(extension) != types.end();
 }
 
-brayns::ModelDescriptorPtr BrickLoader::importFromBlob(
+std::vector<brayns::ModelDescriptorPtr> BrickLoader::importFromBlob(
     brayns::Blob&& /*blob*/, const brayns::LoaderProgress& /*callback*/,
     const brayns::PropertyMap& /*properties*/) const
 {
@@ -107,7 +107,7 @@ std::string BrickLoader::_readString(std::ifstream& f) const
     return s;
 }
 
-brayns::ModelDescriptorPtr BrickLoader::importFromFile(
+std::vector<brayns::ModelDescriptorPtr> BrickLoader::importFromFile(
     const std::string& filename, const brayns::LoaderProgress& callback,
     const brayns::PropertyMap& properties) const
 {
@@ -672,7 +672,7 @@ brayns::ModelDescriptorPtr BrickLoader::importFromFile(
     auto modelDescriptor =
         std::make_shared<brayns::ModelDescriptor>(std::move(model), "Brick",
                                                   path, metadata);
-    return modelDescriptor;
+    return {modelDescriptor};
 }
 
 void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,

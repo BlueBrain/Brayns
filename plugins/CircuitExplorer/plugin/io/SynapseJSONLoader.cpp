@@ -62,14 +62,14 @@ bool SynapseJSONLoader::isSupported(const std::string& /*filename*/,
     return types.find(extension) != types.end();
 }
 
-brayns::ModelDescriptorPtr SynapseJSONLoader::importFromBlob(
+std::vector<brayns::ModelDescriptorPtr> SynapseJSONLoader::importFromBlob(
     brayns::Blob&& /*blob*/, const brayns::LoaderProgress& /*callback*/,
     const brayns::PropertyMap& /*properties*/) const
 {
     throw std::runtime_error("Loading circuit from blob is not supported");
 }
 
-brayns::ModelDescriptorPtr SynapseJSONLoader::importFromFile(
+std::vector<brayns::ModelDescriptorPtr> SynapseJSONLoader::importFromFile(
     const std::string& /*filename*/, const brayns::LoaderProgress& /*callback*/,
     const brayns::PropertyMap& /*properties*/) const
 {

@@ -772,14 +772,14 @@ bool CircuitLoader::isSupported(const std::string& filename,
     return false;
 }
 
-ModelDescriptorPtr CircuitLoader::importFromBlob(
+std::vector<ModelDescriptorPtr> CircuitLoader::importFromBlob(
     Blob&& /*blob*/, const LoaderProgress& /*callback*/,
     const PropertyMap& /*properties*/) const
 {
     throw std::runtime_error("Loading circuit from blob is not supported");
 }
 
-ModelDescriptorPtr CircuitLoader::importFromFile(
+std::vector<ModelDescriptorPtr> CircuitLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
     const PropertyMap& inProperties) const
 {
@@ -789,7 +789,7 @@ ModelDescriptorPtr CircuitLoader::importFromFile(
     PropertyMap properties = _defaults;
     properties.merge(inProperties);
     auto impl = Impl(_scene, std::move(properties));
-    return impl.importCircuit(filename, callback);
+    return {impl.importCircuit(filename, callback)};
 }
 
 std::string CircuitLoader::getName() const

@@ -315,8 +315,8 @@ void Scene::removeClipPlane(const size_t id)
         markModified();
 }
 
-ModelDescriptorPtr Scene::loadModel(Blob&& blob, const ModelParams& params,
-                                    LoaderProgress cb)
+std::vector<ModelDescriptorPtr> Scene::loadModels(Blob&& blob, const ModelParams& params,
+                                                  LoaderProgress cb)
 {
     const auto& loader =
         _loaderRegistry.getSuitableLoader("", blob.type,
@@ -325,29 +325,62 @@ ModelDescriptorPtr Scene::loadModel(Blob&& blob, const ModelParams& params,
     // HACK: Add loader name in properties for archive loader
     auto propCopy = params.getLoaderProperties();
     propCopy.setProperty({"loaderName", params.getLoaderName()});
-    auto modelDescriptor = loader.importFromBlob(std::move(blob), cb, propCopy);
-    if (!modelDescriptor)
+
+    // Load the models
+    auto modelDescriptors = loader.importFromBlob(std::move(blob), cb, propCopy);
+
+    // Check for models correctness
+    if (modelDescriptors.empty())
         throw std::runtime_error("No model returned by loader");
-    *modelDescriptor = params;
-    addModel(modelDescriptor);
-    return modelDescriptor;
+    for(auto& md: modelDescriptors)
+    {
+        if(!md)
+            throw std::runtime_error("No model returned by loader");
+    }
+
+    // Update loaded model with loader properties (so we can have the information
+    // with which it was loaded)
+    for(auto& md : modelDescriptors)
+    {
+        *md = params;
+        addModel(md);
+    }
+
+    return modelDescriptors;
 }
 
-ModelDescriptorPtr Scene::loadModel(const std::string& path,
-                                    const ModelParams& params,
-                                    LoaderProgress cb)
+std::vector<ModelDescriptorPtr> Scene::loadModels(const std::string& path,
+                                                  const ModelParams& params,
+                                                  LoaderProgress cb)
 {
     const auto& loader =
         _loaderRegistry.getSuitableLoader(path, "", params.getLoaderName());
     // HACK: Add loader name in properties for archive loader
     auto propCopy = params.getLoaderProperties();
     propCopy.setProperty({"loaderName", params.getLoaderName()});
-    auto modelDescriptor = loader.importFromFile(path, cb, propCopy);
-    if (!modelDescriptor)
+
+    // Load the models
+    auto modelDescriptors = loader.importFromFile(path, cb, propCopy);
+
+    // Check for models correctness
+    if (modelDescriptors.empty())
         throw std::runtime_error("No model returned by loader");
-    *modelDescriptor = params;
-    addModel(modelDescriptor);
-    return modelDescriptor;
+
+    for(auto& md: modelDescriptors)
+    {
+        if(!md)
+            throw std::runtime_error("No model returned by loader");
+    }
+
+    // Update loaded model with loader properties (so we can have the information
+    // with which it was loaded)
+    for(auto& md : modelDescriptors)
+    {
+        *md = params;
+        addModel(md);
+    }
+
+    return modelDescriptors;
 }
 
 void Scene::visitModels(const std::function<void(Model&)>& functor)
