@@ -30,4 +30,4 @@ try:
 except DistributionNotFound:  # pragma: no cover
     VERSION = 'brayns-local'
 
-MINIMAL_VERSION = '1.0.1'
+MINIMAL_VERSION = '1.1.0'
