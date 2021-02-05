@@ -41,7 +41,7 @@ TEST_CASE_FIXTURE(ClientServer, "illegal_no_params")
 {
     try
     {
-        makeRequest<brayns::BinaryParam, brayns::ModelDescriptor>(
+        makeRequest<brayns::BinaryParam, std::vector<brayns::ModelDescriptor>>(
             REQUEST_MODEL_UPLOAD, {});
         REQUIRE(false);
     }
@@ -57,7 +57,7 @@ TEST_CASE_FIXTURE(ClientServer, "missing_params")
     brayns::BinaryParam params;
     try
     {
-        makeRequest<brayns::BinaryParam, brayns::ModelDescriptor>(
+        makeRequest<brayns::BinaryParam, std::vector<brayns::ModelDescriptor>>(
             REQUEST_MODEL_UPLOAD, {params});
         REQUIRE(false);
     }
@@ -75,7 +75,7 @@ TEST_CASE_FIXTURE(ClientServer, "invalid_size")
     params.size = 0;
     try
     {
-        makeRequest<brayns::BinaryParam, brayns::ModelDescriptor>(
+        makeRequest<brayns::BinaryParam, std::vector<brayns::ModelDescriptor>>(
             REQUEST_MODEL_UPLOAD, {params});
         REQUIRE(false);
     }
@@ -93,7 +93,7 @@ TEST_CASE_FIXTURE(ClientServer, "unsupported_type")
     params.size = 4;
     try
     {
-        makeRequest<brayns::BinaryParam, brayns::ModelDescriptor>(
+        makeRequest<brayns::BinaryParam, std::vector<brayns::ModelDescriptor>>(
             REQUEST_MODEL_UPLOAD, {params});
         REQUIRE(false);
     }
@@ -116,7 +116,7 @@ TEST_CASE_FIXTURE(ClientServer, "xyz")
     params.setPath("monkey.xyz");
 
     auto request = getJsonRpcClient()
-                       .request<brayns::BinaryParam, brayns::ModelDescriptor>(
+                       .request<brayns::BinaryParam, std::vector<brayns::ModelDescriptor>>(
                            REQUEST_MODEL_UPLOAD, {params});
 
     std::ifstream file(BRAYNS_TESTDATA_MODEL_MONKEY_PATH, std::ios::binary);
@@ -140,9 +140,9 @@ TEST_CASE_FIXTURE(ClientServer, "xyz")
 
     while (!request.is_ready())
         process();
-    const auto& model = request.get();
-    CHECK_EQ(model.getName(), "monkey");
-    CHECK_EQ(model.getPath(), "monkey.xyz");
+    const auto& models = request.get();
+    CHECK_EQ(models[0].getName(), "monkey");
+    CHECK_EQ(models[0].getPath(), "monkey.xyz");
 }
 
 TEST_CASE_FIXTURE(ClientServer, "broken_xyz")
@@ -156,7 +156,7 @@ TEST_CASE_FIXTURE(ClientServer, "broken_xyz")
     params.type = "xyz";
 
     auto request = getJsonRpcClient()
-                       .request<brayns::BinaryParam, brayns::ModelDescriptor>(
+                       .request<brayns::BinaryParam, std::vector<brayns::ModelDescriptor>>(
                            REQUEST_MODEL_UPLOAD, {params});
 
     std::ifstream file(BRAYNS_TESTDATA_MODEL_BROKEN_PATH, std::ios::binary);
@@ -199,7 +199,7 @@ TEST_CASE_FIXTURE(ClientServer, "cancel")
     params.type = "xyz";
 
     auto request = getJsonRpcClient()
-                       .request<brayns::BinaryParam, brayns::ModelDescriptor>(
+                       .request<brayns::BinaryParam, std::vector<brayns::ModelDescriptor>>(
                            REQUEST_MODEL_UPLOAD, {params});
 
     request.cancel();
@@ -217,7 +217,7 @@ TEST_CASE_FIXTURE(ClientServer, "send_wrong_number_of_bytes")
     params.type = "xyz";
 
     auto request = getJsonRpcClient()
-                       .request<brayns::BinaryParam, brayns::ModelDescriptor>(
+                       .request<brayns::BinaryParam, std::vector<brayns::ModelDescriptor>>(
                            REQUEST_MODEL_UPLOAD, {params});
 
     const std::string wrong("not_four_bytes");
@@ -243,7 +243,7 @@ TEST_CASE_FIXTURE(ClientServer, "cancel_while_loading")
     params.type = "forever";
 
     auto request = getJsonRpcClient()
-                       .request<brayns::BinaryParam, brayns::ModelDescriptor>(
+                       .request<brayns::BinaryParam, std::vector<brayns::ModelDescriptor>>(
                            REQUEST_MODEL_UPLOAD, {params});
 
     const std::string fourBytes("four");
@@ -271,7 +271,7 @@ TEST_CASE_FIXTURE(ClientServer, "close_client_while_pending_request")
 
     auto responseFuture =
         rockets::jsonrpc::Client<rockets::ws::Client>{*wsClient}
-            .request<brayns::BinaryParam, brayns::ModelDescriptor>(
+            .request<brayns::BinaryParam, std::vector<brayns::ModelDescriptor>>(
                 REQUEST_MODEL_UPLOAD, {params});
 
     auto asyncWait =
@@ -300,7 +300,7 @@ TEST_CASE_FIXTURE(ClientServer, "obj")
     params.setName("bennu");
 
     auto request = getJsonRpcClient()
-                       .request<brayns::BinaryParam, brayns::ModelDescriptor>(
+                       .request<brayns::BinaryParam, std::vector<brayns::ModelDescriptor>>(
                            REQUEST_MODEL_UPLOAD, {params});
 
     std::ifstream file(BRAYNS_TESTDATA_MODEL_BENNU_PATH, std::ios::binary);
@@ -324,8 +324,8 @@ TEST_CASE_FIXTURE(ClientServer, "obj")
 
     while (!request.is_ready())
         process();
-    const auto& model = request.get();
-    CHECK_EQ(model.getName(), "bennu");
+    const auto& models = request.get();
+    CHECK_EQ(models[0].getName(), "bennu");
 }
 
 TEST_CASE_FIXTURE(ClientServer, "concurrent_requests")
@@ -342,7 +342,7 @@ TEST_CASE_FIXTURE(ClientServer, "concurrent_requests")
 
     auto xyzRequest =
         getJsonRpcClient()
-            .request<brayns::BinaryParam, brayns::ModelDescriptor>(
+            .request<brayns::BinaryParam, std::vector<brayns::ModelDescriptor>>(
                 REQUEST_MODEL_UPLOAD, {xyzParams});
 
     std::ifstream xyzFile(BRAYNS_TESTDATA_MODEL_MONKEY_PATH, std::ios::binary);
@@ -361,7 +361,7 @@ TEST_CASE_FIXTURE(ClientServer, "concurrent_requests")
 
     auto objRequest =
         getJsonRpcClient()
-            .request<brayns::BinaryParam, brayns::ModelDescriptor>(
+            .request<brayns::BinaryParam, std::vector<brayns::ModelDescriptor>>(
                 REQUEST_MODEL_UPLOAD, {objParams});
 
     std::ifstream objFile(BRAYNS_TESTDATA_MODEL_BENNU_PATH, std::ios::binary);
@@ -428,10 +428,10 @@ TEST_CASE_FIXTURE(ClientServer, "concurrent_requests")
     while (!xyzRequest.is_ready() || !objRequest.is_ready())
         process();
 
-    const auto& xyzModel = xyzRequest.get();
-    CHECK_EQ(xyzModel.getName(), "monkey");
-    CHECK_EQ(xyzModel.getPath(), "monkey.xyz");
+    const auto& xyzModels = xyzRequest.get();
+    CHECK_EQ(xyzModels[0].getName(), "monkey");
+    CHECK_EQ(xyzModels[0].getPath(), "monkey.xyz");
 
-    const auto& objModel = objRequest.get();
-    CHECK_EQ(objModel.getName(), "bennu");
+    const auto& objModels = objRequest.get();
+    CHECK_EQ(objModels[0].getName(), "bennu");
 }
