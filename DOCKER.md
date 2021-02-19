@@ -50,5 +50,6 @@ Provide other flags (or env vars) to `braynsService`:
 ```bash
 docker run -ti --rm -p 8300:8300 brayns \
     --http-server :8300 \
-    --plugin braynsCircuitViewer
+    --plugin braynsCircuitExplorer \
+    --plugin braynsCircuitInfo
 ```
