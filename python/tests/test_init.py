@@ -37,7 +37,7 @@ def test_init():
         app = brayns.Client('localhost:8200')
         assert_equal(app.http_url, 'http://localhost:8200/')
         assert_equal(app.version.as_dict(), TEST_VERSION)
-        assert_equal(str(app), 'Brayns version 1.0.1 running on http://localhost:8200/')
+        assert_equal(str(app), 'Brayns version 1.1.0 running on http://localhost:8200/')
 
 
 def test_async_init():
@@ -47,7 +47,7 @@ def test_async_init():
         app = asyncio.get_event_loop().run_until_complete(brayns.AsyncClient('localhost:8200'))
         assert_equal(app.http_url, 'http://localhost:8200/')
         assert_equal(app.version.as_dict(), TEST_VERSION)
-        assert_equal(str(app), 'Brayns version 1.0.1 running on http://localhost:8200/')
+        assert_equal(str(app), 'Brayns version 1.1.0 running on http://localhost:8200/')
 
 
 @raises(Exception)
