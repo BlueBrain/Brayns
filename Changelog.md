@@ -85,6 +85,7 @@
 - Update minimum required CMake version [\#903](https://github.com/BlueBrain/Brayns/pull/903)
 - Update DockerFile to accomodate recent Brayns changes [\#905](https://github.com/BlueBrain/Brayns/pull/905)
 - Needed additions and fixes in preparation for the MOOC [\#904](https://github.com/BlueBrain/Brayns/pull/904)
+- Bumped Brion submodule to 3.3.1 [\#909](https://github.com/BlueBrain/Brayns/pull/909)
 
 ## [1.0.0](https://github.com/BlueBrain/Brayns/tree/1.0.0) (13-09-2019)
 **Implemented enhancements:**
