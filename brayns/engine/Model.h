@@ -499,7 +499,7 @@ protected:
     VolumeParameters& _volumeParameters;
 
     AbstractSimulationHandlerPtr _simulationHandler;
-    bool _simulationEnabled {true};
+    bool _simulationEnabled {false};
 
     MaterialMap _materials;
 

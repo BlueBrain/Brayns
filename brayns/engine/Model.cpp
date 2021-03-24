@@ -646,6 +646,7 @@ MaterialPtr Model::createMaterial(const size_t materialId,
 
 void Model::setSimulationHandler(AbstractSimulationHandlerPtr handler)
 {
+    _simulationEnabled = handler != nullptr;
     if (_simulationHandler != handler)
         _unbindMaterials(_simulationHandler, _materials);
     _simulationHandler = handler;

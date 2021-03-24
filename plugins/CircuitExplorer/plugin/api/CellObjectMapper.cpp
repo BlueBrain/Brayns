@@ -77,7 +77,7 @@ CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
         auto sh = _model->getModel().getSimulationHandler();
         if(sh)
         {
-            newModel->setSimulationHandler(sh);
+            newModel->setSimulationHandler(sh->clone());
             // Reset simulation handler current frame so the simulation data gets commited
             // (current frame != animation params current frame)
             sh->setCurrentFrame(std::numeric_limits<uint32_t>::max());

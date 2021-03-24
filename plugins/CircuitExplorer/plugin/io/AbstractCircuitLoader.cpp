@@ -208,8 +208,11 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
 
     const auto dbConnectionString =
         properties.getProperty<std::string>(PROP_DB_CONNECTION_STRING.name);
+
+    std::cout << 3 << std::endl;
     const auto synchronousMode =
         properties.getProperty<bool>(PROP_SYNCHRONOUS_MODE.name);
+    std::cout << 4 << std::endl;
 
     brayns::AbstractSimulationHandlerPtr simulationHandler{nullptr};
     switch (reportType)
@@ -355,6 +358,15 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
     const brayns::PropertyMap &properties,
     const brayns::LoaderProgress &callback) const
 {
+    const brion::BlueConfig blueConfiguration(circuitConfiguration);
+    return importCircuitFromBlueConfig(blueConfiguration, properties, callback);
+}
+
+brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuitFromBlueConfig(
+    const brion::BlueConfig& blueConfiguration,
+    const brayns::PropertyMap &properties,
+    const brayns::LoaderProgress &callback) const
+{
     const auto colorScheme = stringToEnum<CircuitColorScheme>(
         properties.getProperty<std::string>(PROP_CIRCUIT_COLOR_SCHEME.name));
     const auto morphologyScheme = stringToEnum<MorphologyColorScheme>(
@@ -381,8 +393,6 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
         PLUGIN_THROW("Failed to create model");
 
     // Open Circuit and select GIDs according to specified target
-    callback.updateProgress("Open Brion circuit ...", 0);
-    const brion::BlueConfig blueConfiguration(circuitConfiguration);
     callback.updateProgress("Open Brain circuit ...", 0);
     const brain::Circuit circuit(blueConfiguration);
 
@@ -398,13 +408,21 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
 
     callback.updateProgress("Attaching to simulation data...", 0);
 
+    std::cout << 2 << std::endl;
     // Attach simulation handler
     const auto compartmentReport =
         _attachSimulationHandler(properties, blueConfiguration, *model,
                                  reportType, allGids);
 
+    std::cout << 5 << std::endl;
+
+    for(auto gid : allGids)
+        std::cout << "\t" << gid << std::endl;
+
     // Cell transformations
     Matrix4fs allTransformations = circuit.getTransforms(allGids);
+
+    std::cout << 6 << std::endl;
 
     // Filter out guids according to clipping planes
     if (cellClipping)
@@ -505,14 +523,14 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
         {"Number of neurons", std::to_string(allGids.size())},
         {"Density", std::to_string(properties.getProperty<double>(PROP_DENSITY.name))},
         {"RandomSeed", std::to_string(properties.getProperty<double>(PROP_RANDOM_SEED.name))},
-        {"CircuitPath", circuitConfiguration}};
+        {"CircuitPath", blueConfiguration.getSource()}};
 
     brayns::ModelDescriptorPtr modelDescriptor;
     brayns::Transformation transformation;
     transformation.setRotationCenter(circuitCenter.getCenter());
     modelDescriptor =
         std::make_shared<brayns::ModelDescriptor>(std::move(model), "Circuit",
-                                                  circuitConfiguration,
+                                                  blueConfiguration.getSource(),
                                                   metadata);
     modelDescriptor->setTransformation(transformation);
 

@@ -94,6 +94,10 @@ protected:
     brayns::PropertyMap _defaults;
     brayns::PropertyMap _fixedDefaults;
 
+    brayns::ModelDescriptorPtr importCircuitFromBlueConfig(
+                const brion::BlueConfig& config, const brayns::PropertyMap& oproperties,
+                const brayns::LoaderProgress& callback) const;
+
 private:
 
     std::vector<std::string> _getTargetsAsStrings(

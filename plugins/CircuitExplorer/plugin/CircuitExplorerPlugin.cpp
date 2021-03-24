@@ -31,6 +31,7 @@
 #include <plugin/io/MorphologyCollageLoader.h>
 #include <plugin/io/MorphologyLoader.h>
 #include <plugin/io/PairSynapsesLoader.h>
+#include <plugin/io/SonataLoader.h>
 #include <plugin/io/SynapseCircuitLoader.h>
 #include <plugin/io/SynapseJSONLoader.h>
 #include <plugin/io/VoltageSimulationHandler.h>
@@ -325,6 +326,10 @@ void CircuitExplorerPlugin::init()
     registry.registerLoader(
         std::make_unique<AstrocyteLoader>(scene, pm.getApplicationParameters(),
                                           AstrocyteLoader::getCLIProperties(), this));
+
+    registry.registerLoader(
+        std::make_unique<SonataLoader>(scene, pm.getApplicationParameters(),
+                                       SonataLoader::getCLIProperties(), this));
 
     auto actionInterface = _api->getActionInterface();
         if (actionInterface)

@@ -57,6 +57,7 @@ set(BRAYNSCIRCUITEXPLORER_SOURCES
     plugin/io/BrickLoader.cpp
     plugin/io/MorphologyLoader.cpp
     plugin/io/SynapseJSONLoader.cpp
+    plugin/io/SonataLoader.cpp
     plugin/io/Utils.cpp
 )
 
@@ -80,6 +81,7 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     plugin/io/SynapseCircuitLoader.h
     plugin/io/MorphologyLoader.h
     plugin/io/SynapseJSONLoader.h
+    plugin/io/SonataLoader.h
     plugin/io/Utils.h
 )
 
