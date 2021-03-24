@@ -206,8 +206,9 @@ bool preUpdate(const std::string&, PRE,
 }
 
 template <class T, class PRE, class POST>
-inline bool from_json(T& obj, const std::string& json,
-                      PRE preUpdateFunc = [] {}, POST postUpdateFunc = [] {})
+inline bool from_json(
+    T& obj, const std::string& json, PRE preUpdateFunc = [] {},
+    POST postUpdateFunc = [] {})
 {
     staticjson::ParseStatus status;
 
@@ -299,7 +300,7 @@ public:
 
         if (!_parametersManager.getApplicationParameters().useVideoStreaming())
         {
-            if(_useControlledStream)
+            if (_useControlledStream)
                 _broadcastControlledImageJpeg();
             else
                 _broadcastImageJpeg();
@@ -340,8 +341,8 @@ public:
                          const PropertyMap& input, const PropertyMap& output,
                          const std::function<PropertyMap(PropertyMap)>& action)
     {
-        _bindEndpoint(desc.methodName, [ name = desc.methodName,
-                                         action ](const auto& request) {
+        _bindEndpoint(desc.methodName, [name = desc.methodName,
+                                        action](const auto& request) {
             try
             {
                 return Response{
@@ -521,6 +522,7 @@ public:
         }
 
         ~ScopedCurrentClient() { _currentClientID = NO_CURRENT_CLIENT; }
+
     private:
         uintptr_t& _currentClientID;
     };
@@ -680,7 +682,7 @@ public:
             std::lock_guard<std::mutex> lock(throttle.first);
 
             const auto& castedObj = static_cast<const T&>(base);
-            const auto notify = [& rocketsServer = _rocketsServer,
+            const auto notify = [&rocketsServer = _rocketsServer,
                                  clientID = _currentClientID, endpoint,
                                  json = to_json(castedObj)] {
                 if (rocketsServer->getConnectionCount() == 0)
@@ -729,14 +731,15 @@ public:
                     POST postUpdateFunc)
     {
         using namespace rockets::http;
-        _rocketsServer->handle(Method::PUT, endpoint, [&obj, preUpdateFunc,
-                                                       postUpdateFunc](
-                                                          const Request& req) {
-            return make_ready_response(
-                from_json(obj, req.body, preUpdateFunc, postUpdateFunc)
-                    ? Code::OK
-                    : Code::BAD_REQUEST);
-        });
+        _rocketsServer->handle(Method::PUT, endpoint,
+                               [&obj, preUpdateFunc,
+                                postUpdateFunc](const Request& req) {
+                                   return make_ready_response(
+                                       from_json(obj, req.body, preUpdateFunc,
+                                                 postUpdateFunc)
+                                           ? Code::OK
+                                           : Code::BAD_REQUEST);
+                               });
 
         _handleObjectSchema(endpoint, obj);
 
@@ -863,9 +866,8 @@ public:
                     auto progressUpdate =
                         uvw::Loop::getDefault()->resource<uvw::TimerHandle>();
 
-                    auto sendProgress =
-                        [ progressCb, &progress = task->progress ]
-                    {
+                    auto sendProgress = [progressCb,
+                                         &progress = task->progress] {
                         progress.consume(progressCb);
                     };
                     progressUpdate->on<uvw::TimerEvent>(
@@ -986,7 +988,12 @@ public:
                 _parametersManager.getVolumeParameters());
 
         // following endpoints need a valid engine
-        _handle(ENDPOINT_SCENE, _engine.getScene());
+        const bool disableBroadcasting =
+            std::getenv("ROCKETS_DISABLE_SCENE_BROADCASTING") != nullptr;
+        if (disableBroadcasting)
+            BRAYNS_WARN << "Scene broadcasting has been disabled" << std::endl;
+        else
+            _handle(ENDPOINT_SCENE, _engine.getScene());
 
         _handleGET(ENDPOINT_STATISTICS, _engine.getStatistics(), SLOW_THROTTLE);
 
@@ -1095,7 +1102,7 @@ public:
 
     void _broadcastControlledImageJpeg()
     {
-        if(!_controlledStreamingFlag.load())
+        if (!_controlledStreamingFlag.load())
         {
             return;
         }
@@ -1150,8 +1157,8 @@ public:
 
             _encoder =
                 std::make_unique<Encoder>(width, height, fps, _videoParams.kbps,
-                                          [& rs = _rocketsServer](auto a,
-                                                                  auto b) {
+                                          [&rs = _rocketsServer](auto a,
+                                                                 auto b) {
                                               rs->broadcastBinary(a, b);
                                           });
         }
@@ -1181,10 +1188,9 @@ public:
                                            JSON_TYPE);
             });
 
-        _jsonrpcServer->bind(getRequestEndpointName(ENDPOINT_VERSION),
-                             (std::function<brayns::Version()>)[] {
-                                 return brayns::Version();
-                             });
+        _jsonrpcServer->bind(
+            getRequestEndpointName(ENDPOINT_VERSION),
+            (std::function<brayns::Version()>)[] { return brayns::Version(); });
 
         _handleSchema(ENDPOINT_VERSION, version.getSchema());
     }
@@ -1204,8 +1210,7 @@ public:
     void _handleCamera()
     {
         auto& camera = _engine.getCamera();
-        auto preUpdate = [types = camera.getTypes()](const Camera& obj)
-        {
+        auto preUpdate = [types = camera.getTypes()](const Camera& obj) {
             if (obj.getCurrentType().empty())
                 return true;
             return std::find(types.begin(), types.end(),
@@ -1225,8 +1230,7 @@ public:
                              rp.getCurrentRenderer()) !=
                    params.getRenderers().end();
         };
-        auto postUpdate = [& renderer = _engine.getRenderer()](auto& rp)
-        {
+        auto postUpdate = [&renderer = _engine.getRenderer()](auto& rp) {
             renderer.setCurrentType(rp.getCurrentRenderer());
         };
         _handleGET(ENDPOINT_RENDERER, params);
@@ -1240,7 +1244,7 @@ public:
             Execution::sync, "endpoint",
             "name of the endpoint to get its schema"};
 
-        _jsonrpcServer->bind(METHOD_SCHEMA, [& schemas = _schemas](
+        _jsonrpcServer->bind(METHOD_SCHEMA, [&schemas = _schemas](
                                                 const auto& request) {
             SchemaParam param;
             if (::from_json(param, request.message))
@@ -1269,7 +1273,7 @@ public:
             Execution::sync, "position",
             "x-y position in normalized coordinates"};
         _handleRPC<Position, Renderer::PickResult>(
-            desc, [& engine = _engine](const auto& position) {
+            desc, [&engine = _engine](const auto& position) {
                 return engine.getRenderer().pick(
                     {float(position[0]), float(position[1])});
             });
@@ -1277,54 +1281,54 @@ public:
 
     void _handleQuit()
     {
-        _handleRPC({METHOD_QUIT, "Quit the application"},
-                   [& engine = _engine] {
-                       engine.setKeepRunning(false);
-                       engine.triggerRender();
-                   });
+        _handleRPC({METHOD_QUIT, "Quit the application"}, [&engine = _engine] {
+            engine.setKeepRunning(false);
+            engine.triggerRender();
+        });
     }
 
     void _handleExitLater()
     {
-        _handleRPC<ExitLaterSchedule>({METHOD_EXIT_LATER,
-                    "Schedules Brayns to shutdown after a given amount of minutes",
-                    "minutes", "Number of minutes after which Brayns will shut down"},
-                    [&](const ExitLaterSchedule& schedule){
-                        std::lock_guard<std::mutex> lock(_scheduleMutex);
-                        if(schedule.minutes > 0)
-                        {
-                            if(_scheduledShutdownActive)
-                            {
-                                _cancelScheduledShutdown = true;
-                                _monitor.notify_all();
-                                _shutDownWorker->join();
-                                _shutDownWorker.reset();
-                                _cancelScheduledShutdown = false;
-                                _scheduledShutdownActive = false;
-                            }
+        _handleRPC<ExitLaterSchedule>(
+            {METHOD_EXIT_LATER,
+             "Schedules Brayns to shutdown after a given amount of minutes",
+             "minutes", "Number of minutes after which Brayns will shut down"},
+            [&](const ExitLaterSchedule& schedule) {
+                std::lock_guard<std::mutex> lock(_scheduleMutex);
+                if (schedule.minutes > 0)
+                {
+                    if (_scheduledShutdownActive)
+                    {
+                        _cancelScheduledShutdown = true;
+                        _monitor.notify_all();
+                        _shutDownWorker->join();
+                        _shutDownWorker.reset();
+                        _cancelScheduledShutdown = false;
+                        _scheduledShutdownActive = false;
+                    }
 
-                            _scheduledShutdownActive = true;
-                            const uint32_t mins = schedule.minutes;
-                            _shutDownWorker = std::unique_ptr<std::thread>(new std::thread([&, mins]()
+                    _scheduledShutdownActive = true;
+                    const uint32_t mins = schedule.minutes;
+                    _shutDownWorker = std::unique_ptr<std::thread>(
+                        new std::thread([&, mins]() {
+                            std::chrono::milliseconds timeToWait(mins * 60000);
+                            std::unique_lock<std::mutex> threadLock(_waitLock);
+                            _monitor.wait_for(threadLock, timeToWait);
+                            if (!_cancelScheduledShutdown)
                             {
-                                std::chrono::milliseconds timeToWait (mins * 60000);
-                                std::unique_lock<std::mutex> threadLock(_waitLock);
-                                _monitor.wait_for(threadLock, timeToWait);
-                                if(!_cancelScheduledShutdown)
-                                {
-                                    _engine.setKeepRunning(false);
-                                    _engine.triggerRender();
-                                }
-                            }));
-                        }
-                    });
+                                _engine.setKeepRunning(false);
+                                _engine.triggerRender();
+                            }
+                        }));
+                }
+            });
     }
 
     void _handleResetCamera()
     {
         _handleRPC({METHOD_RESET_CAMERA,
                     "Resets the camera to its initial values"},
-                   [& engine = _engine] {
+                   [&engine = _engine] {
                        engine.getCamera().reset();
                        engine.triggerRender();
                    });
@@ -1336,10 +1340,9 @@ public:
             METHOD_SNAPSHOT, "Make a snapshot of the current view",
             Execution::async, "settings",
             "Snapshot settings for quality and size"};
-        auto func =
-            [& engine = _engine,
-             &imageGenerator = _imageGenerator ](auto&& params, const auto)
-        {
+        auto func = [&engine = _engine,
+                     &imageGenerator = _imageGenerator](auto&& params,
+                                                        const auto) {
             using SnapshotTask = DeferredTask<ImageGenerator::ImageBase64>;
             return std::make_shared<SnapshotTask>(
                 SnapshotFunctor{engine, std::move(params), imageGenerator});
@@ -1351,25 +1354,25 @@ public:
     {
         _handleRPC({METHOD_TRIGGER_JPEG_STREAM,
                     "Triggers the engine to stream a frame to the clients"},
-                   [&] {
-                       _triggerControlledStreaming();
-                   });
+                   [&] { _triggerControlledStreaming(); });
     }
 
     void _handleSetImageStreamingMode()
     {
-        _handleRPC<ImageStreamingMethod>({METHOD_SET_STREAMING_METHOD,
-                    "Set the image streaming method between automatic or "
-                    "controlled", "type", "Streaming type, either \"stream\" or \"quanta\""},
-                    [&](const ImageStreamingMethod& method){
-                        if(method.type == "quanta")
-                        {
-                            _useControlledStream = true;
-                            _controlledStreamingFlag = false;
-                        }
-                        else
-                            _useControlledStream = false;
-                    });
+        _handleRPC<ImageStreamingMethod>(
+            {METHOD_SET_STREAMING_METHOD,
+             "Set the image streaming method between automatic or "
+             "controlled",
+             "type", "Streaming type, either \"stream\" or \"quanta\""},
+            [&](const ImageStreamingMethod& method) {
+                if (method.type == "quanta")
+                {
+                    _useControlledStream = true;
+                    _controlledStreamingFlag = false;
+                }
+                else
+                    _useControlledStream = false;
+            });
     }
 
     void _handleRequestModelUpload()
@@ -1394,7 +1397,7 @@ public:
             "Indicate sending of a binary chunk after this message", "chunk",
             "object with an ID of the chunk"};
 
-        _handleRPC<Chunk>(desc, [& req = _binaryRequests](const auto& chunk) {
+        _handleRPC<Chunk>(desc, [&req = _binaryRequests](const auto& chunk) {
             req.setNextChunkID(chunk.id);
         });
     }
@@ -1407,8 +1410,9 @@ public:
             "model ID and the new transfer function"};
 
         _bindModelEndpoint(METHOD_SET_MODEL_TRANSFER_FUNCTION,
-                           "transfer_function", [&](const std::string& json,
-                                                    ModelDescriptorPtr model) {
+                           "transfer_function",
+                           [&](const std::string& json,
+                               ModelDescriptorPtr model) {
                                auto& tf =
                                    model->getModel().getTransferFunction();
                                if (!::from_json(tf, json))
@@ -1431,7 +1435,7 @@ public:
             "the model ID"};
 
         _jsonrpcServer->bind<ObjectID, TransferFunction>(
-            desc.methodName, [& engine = _engine](const ObjectID& id) {
+            desc.methodName, [&engine = _engine](const ObjectID& id) {
                 auto model = engine.getScene().getModel(id.id);
                 if (!model)
                     throw rockets::jsonrpc::response_error("Model not found",
@@ -1463,7 +1467,7 @@ public:
     void _handleGetClipPlanes()
     {
         _handleRPC<ClipPlanes>({METHOD_GET_CLIP_PLANES, "Get all clip planes"},
-                               [& engine = _engine]() {
+                               [&engine = _engine]() {
                                    auto& scene = engine.getScene();
                                    return scene.getClipPlanes();
                                });
@@ -1508,7 +1512,7 @@ public:
     void _handleGetLights()
     {
         const RpcDescription desc{METHOD_GET_LIGHTS, "get all lights"};
-        _bindEndpoint(METHOD_GET_LIGHTS, [& engine = _engine](
+        _bindEndpoint(METHOD_GET_LIGHTS, [&engine = _engine](
                                              const rockets::jsonrpc::
                                                  Request& /*request*/) {
             const auto& lights =
@@ -1601,7 +1605,7 @@ public:
         _handleRPC<SpotLight, int>({METHOD_ADD_LIGHT_SPOT,
                                     "Add a spotlight, returns id", "light",
                                     "The light and its properties"},
-                                   [& engine = _engine](const SpotLight& l) {
+                                   [&engine = _engine](const SpotLight& l) {
                                        LightManager& lightManager =
                                            engine.getScene().getLightManager();
                                        auto light =
@@ -1617,7 +1621,7 @@ public:
         _handleRPC<DirectionalLight, int>(
             {METHOD_ADD_LIGHT_DIRECTIONAL, "Add a directional light", "light",
              "The light and its properties"},
-            [& engine = _engine](const DirectionalLight& l) {
+            [&engine = _engine](const DirectionalLight& l) {
                 LightManager& lightManager =
                     engine.getScene().getLightManager();
                 auto light = std::make_shared<DirectionalLight>(l);
@@ -1630,7 +1634,7 @@ public:
 
         _handleRPC<QuadLight, int>({METHOD_ADD_LIGHT_QUAD, "Add a quad light",
                                     "light", "The light and its properties"},
-                                   [& engine = _engine](const QuadLight& l) {
+                                   [&engine = _engine](const QuadLight& l) {
                                        LightManager& lightManager =
                                            engine.getScene().getLightManager();
                                        auto light =
@@ -1646,7 +1650,7 @@ public:
         _handleRPC<SphereLight, int>(
             {METHOD_ADD_LIGHT_SPHERE, "Add a sphere light", "light",
              "The light and its properties"},
-            [& engine = _engine](const SphereLight& l) {
+            [&engine = _engine](const SphereLight& l) {
                 LightManager& lightManager =
                     engine.getScene().getLightManager();
                 auto light = std::make_shared<SphereLight>(l);
@@ -1660,7 +1664,7 @@ public:
         _handleRPC<AmbientLight, int>(
             {METHOD_ADD_LIGHT_AMBIENT, "Add an ambient light", "light",
              "The light and its properties"},
-            [& engine = _engine](const AmbientLight& l) {
+            [&engine = _engine](const AmbientLight& l) {
                 LightManager& lightManager =
                     engine.getScene().getLightManager();
                 auto light = std::make_shared<AmbientLight>(l);
@@ -1677,7 +1681,7 @@ public:
         const RpcParameterDescription desc{METHOD_REMOVE_LIGHTS,
                                            "Remove light given their IDs",
                                            "ids", "Array of light IDs"};
-        _handleRPC<size_ts, bool>(desc, [& engine =
+        _handleRPC<size_ts, bool>(desc, [&engine =
                                              _engine](const size_ts& ids) {
             auto& lightManager = engine.getScene().getLightManager();
             for (const auto id : ids)
@@ -1691,7 +1695,7 @@ public:
     {
         const RpcDescription desc{METHOD_CLEAR_LIGHTS,
                                   "Remove all lights in the scene"};
-        _handleRPC(desc, [& engine = _engine]() {
+        _handleRPC(desc, [&engine = _engine]() {
             auto& lightManager = engine.getScene().getLightManager();
             lightManager.clearLights();
             engine.triggerRender();
@@ -1708,19 +1712,18 @@ public:
         // Make sure the requested file is within the sandbox path
         // TODO: Unhardcode sandbox path and add as braynsService input param
         const std::string& sandboxPath = _engine.getParametersManager()
-                                                .getApplicationParameters()
-                                                .getSandboxPath();
+                                             .getApplicationParameters()
+                                             .getSandboxPath();
         size_t pos = path.find(sandboxPath);
-        if(pos != 0)
+        if (pos != 0)
         {
             ft.error = 1;
             ft.message = "Path falls outside the sandbox: " + sandboxPath;
             return ft;
         }
 
-        if(path.find("../") == 0
-           || path.find("/../") != std::string::npos
-           || path.rfind("/..") == 4)
+        if (path.find("../") == 0 || path.find("/../") != std::string::npos ||
+            path.rfind("/..") == 4)
         {
             ft.error = 3;
             ft.message = "Illegal path detected";
@@ -1729,17 +1732,17 @@ public:
 
         struct stat s;
         int err = stat(path.c_str(), &s);
-        if(err == 0)
+        if (err == 0)
         {
             // Path is a regular file
-            if( s.st_mode & S_IFREG )
+            if (s.st_mode & S_IFREG)
             {
                 // Test permissions with fopen
                 FILE* permissionTest = fopen(path.c_str(), "r");
                 int openError = errno;
-                if(permissionTest != nullptr)
+                if (permissionTest != nullptr)
                     fclose(permissionTest);
-                if(openError == EACCES)
+                if (openError == EACCES)
                 {
                     ft.error = 2;
                     ft.message = "Permission for " + path + " denied";
@@ -1751,12 +1754,12 @@ public:
                 ft.sizeBytes = s.st_size;
             }
             // Path is a folder
-            else if( s.st_mode & S_IFDIR )
+            else if (s.st_mode & S_IFDIR)
             {
                 // Test permissions with access
-                if(access(path.c_str(), X_OK) < 0)
+                if (access(path.c_str(), X_OK) < 0)
                 {
-                    if(errno == EACCES)
+                    if (errno == EACCES)
                     {
                         ft.error = 2;
                         ft.message = "Permission for " + path + " denied";
@@ -1778,9 +1781,9 @@ public:
                 ft.message = "Unknown type of element";
             }
         }
-        else if(err > 0)
+        else if (err > 0)
         {
-            if(err == EACCES)
+            if (err == EACCES)
             {
                 ft.error = 2;
                 ft.message = "Permission for " + path + " denied";
@@ -1797,9 +1800,11 @@ public:
 
     void _handleFsExists()
     {
-        const RpcParameterDescription desc{METHOD_FS_EXISTS,
-                                           "Return the type of filer (file or folder) if a given path exists, or none if it does not exists",
-                                           "path", "Absolute path to the filer to check"};
+        const RpcParameterDescription desc{
+            METHOD_FS_EXISTS,
+            "Return the type of filer (file or folder) if a given path exists, "
+            "or none if it does not exists",
+            "path", "Absolute path to the filer to check"};
         _handleRPC<InputPath, FileType>(desc, [&](const auto& inputPath) {
             this->_rebroadcast(METHOD_FS_EXISTS, to_json(inputPath),
                                {_currentClientID});
@@ -1814,9 +1819,10 @@ public:
 
     void _handleFsGetContent()
     {
-        const RpcParameterDescription desc{METHOD_FS_GET_CONTENT,
-                                           "Return the content of a file if possible, or an error otherwise",
-                                           "path", "Absolute path to the file"};
+        const RpcParameterDescription desc{
+            METHOD_FS_GET_CONTENT,
+            "Return the content of a file if possible, or an error otherwise",
+            "path", "Absolute path to the file"};
         _handleRPC<InputPath, FileContent>(desc, [&](const auto& inputPath) {
             this->_rebroadcast(METHOD_FS_GET_CONTENT, to_json(inputPath),
                                {_currentClientID});
@@ -1828,10 +1834,10 @@ public:
             fc.message = ft.message;
 
             // Continue only if its accessible and its a file
-            if(fc.error == 0 && ft.type == "file")
+            if (fc.error == 0 && ft.type == "file")
             {
                 std::ifstream file(inputPath.path);
-                if(file)
+                if (file)
                 {
                     // Read file
                     file.seekg(0, file.end);
@@ -1845,7 +1851,9 @@ public:
                 else
                 {
                     fc.error = 3;
-                    fc.message = "An unknown error occurred when reading the file " + inputPath.path;
+                    fc.message =
+                        "An unknown error occurred when reading the file " +
+                        inputPath.path;
                 }
             }
 
@@ -1856,25 +1864,29 @@ public:
     void _handleFsGetRoot()
     {
         const RpcDescription desc{METHOD_FS_GET_ROOT,
-                                  "Return the root path of the current execution environment (sandbox)"};
-        _bindEndpoint(METHOD_FS_GET_ROOT, [& engine = _engine](const rockets::jsonrpc::Request&) {
+                                  "Return the root path of the current "
+                                  "execution environment (sandbox)"};
+        _bindEndpoint(METHOD_FS_GET_ROOT,
+                      [&engine = _engine](const rockets::jsonrpc::Request&) {
+                          FileRoot fr;
+                          fr.root = engine.getParametersManager()
+                                        .getApplicationParameters()
+                                        .getSandboxPath();
+                          return Response{to_json(fr)};
+                      });
 
-            FileRoot fr;
-            fr.root = engine.getParametersManager().getApplicationParameters().getSandboxPath();
-            return Response{to_json(fr)};
-        });
-
-        _handleSchema(
-            METHOD_GET_LIGHTS,
-            buildJsonRpcSchemaRequestReturnOnly<FileRoot>(desc));
+        _handleSchema(METHOD_GET_LIGHTS,
+                      buildJsonRpcSchemaRequestReturnOnly<FileRoot>(desc));
     }
 
     void _handleFsGetListDir()
     {
-        const RpcParameterDescription desc{METHOD_FS_LIST_DIR,
-                                           "Return the content of a file if possible, or an error otherwise",
-                                           "path", "Absolute path to the file"};
-        _handleRPC<InputPath, DirectoryFileList>(desc, [&](const auto& inputPath) {
+        const RpcParameterDescription desc{
+            METHOD_FS_LIST_DIR,
+            "Return the content of a file if possible, or an error otherwise",
+            "path", "Absolute path to the file"};
+        _handleRPC<InputPath, DirectoryFileList>(desc, [&](const auto&
+                                                               inputPath) {
             this->_rebroadcast(METHOD_FS_LIST_DIR, to_json(inputPath),
                                {_currentClientID});
 
@@ -1887,54 +1899,63 @@ public:
 
             // Continue only if its a directory and is accessible
             const bool isDirectory = ft.type == "directory";
-            if(ft.error == 0 && isDirectory)
+            if (ft.error == 0 && isDirectory)
             {
-                DIR *dir;
-                struct dirent *ent;
-                if ((dir = opendir (inputPath.path.c_str())) != nullptr)
+                DIR* dir;
+                struct dirent* ent;
+                if ((dir = opendir(inputPath.path.c_str())) != nullptr)
                 {
-                  // Iterate over each entry of the directory
-                  std::string slash = inputPath.path[inputPath.path.size() - 1] == '/'? "" : "/";
-                  while ((ent = readdir (dir)) != nullptr)
-                  {
-                    const std::string fileName(ent->d_name);
-
-                    // Discard dots
-                    if(fileName == "." || fileName == "..")
-                        continue;
-
-                    // Get file status to known if accessible, type, and size
-                    const std::string filePath = inputPath.path + slash + fileName;
-                    FileStats fileStats = this->_getFileStats(filePath);
-
-                    if(fileStats.error == 0)
+                    // Iterate over each entry of the directory
+                    std::string slash =
+                        inputPath.path[inputPath.path.size() - 1] == '/' ? ""
+                                                                         : "/";
+                    while ((ent = readdir(dir)) != nullptr)
                     {
-                        if(fileStats.type == "directory")
+                        const std::string fileName(ent->d_name);
+
+                        // Discard dots
+                        if (fileName == "." || fileName == "..")
+                            continue;
+
+                        // Get file status to known if accessible, type, and
+                        // size
+                        const std::string filePath =
+                            inputPath.path + slash + fileName;
+                        FileStats fileStats = this->_getFileStats(filePath);
+
+                        if (fileStats.error == 0)
                         {
-                            dfl.dirs.push_back(fileName);
-                        }
-                        else if(fileStats.type == "file")
-                        {
-                            // Calc size in octets
-                            size_t totalBits = static_cast<size_t>(fileStats.sizeBytes) * static_cast<size_t>(CHAR_BIT);
-                            size_t totalOctets = totalBits / 8;
-                            dfl.files.names.push_back(fileName);
-                            dfl.files.sizes.push_back(totalOctets);
+                            if (fileStats.type == "directory")
+                            {
+                                dfl.dirs.push_back(fileName);
+                            }
+                            else if (fileStats.type == "file")
+                            {
+                                // Calc size in octets
+                                size_t totalBits =
+                                    static_cast<size_t>(fileStats.sizeBytes) *
+                                    static_cast<size_t>(CHAR_BIT);
+                                size_t totalOctets = totalBits / 8;
+                                dfl.files.names.push_back(fileName);
+                                dfl.files.sizes.push_back(totalOctets);
+                            }
                         }
                     }
-                  }
-                  closedir (dir);
+                    closedir(dir);
                 }
                 else
                 {
-                  dfl.error = 3;
-                  dfl.message = "Unknown error when reading contents of directory " + inputPath.path;
+                    dfl.error = 3;
+                    dfl.message =
+                        "Unknown error when reading contents of directory " +
+                        inputPath.path;
                 }
             }
-            else if(!isDirectory && ft.error == 0)
+            else if (!isDirectory && ft.error == 0)
             {
                 dfl.error = 4;
-                dfl.message = "The path " + inputPath.path + " is not a directory";
+                dfl.message =
+                    "The path " + inputPath.path + " is not a directory";
             }
 
             return dfl;
@@ -1962,7 +1983,7 @@ public:
             "Remove the model(s) with the given ID(s) from the scene", "ids",
             "Array of model IDs"};
         _handleRPC<size_ts, bool>(desc,
-                                  [& engine = _engine](const size_ts& ids) {
+                                  [&engine = _engine](const size_ts& ids) {
                                       for (const auto id : ids)
                                           engine.getScene().removeModel(id);
                                       engine.triggerRender();
@@ -1973,7 +1994,7 @@ public:
     void _handleUpdateModel()
     {
         _bindEndpoint(METHOD_UPDATE_MODEL,
-                      [& engine =
+                      [&engine =
                            _engine](const rockets::jsonrpc::Request& request) {
                           ModelDescriptor newDesc;
                           if (!::from_json(newDesc, request.message))
@@ -2003,7 +2024,7 @@ public:
             "Get the properties of the given model", "id", "the model ID"};
 
         _jsonrpcServer->bind<ObjectID, PropertyMap>(
-            desc.methodName, [& engine = _engine](const ObjectID& id) {
+            desc.methodName, [&engine = _engine](const ObjectID& id) {
                 auto model = engine.getScene().getModel(id.id);
                 if (!model)
                     throw rockets::jsonrpc::response_error("Model not found",
@@ -2044,7 +2065,7 @@ public:
 
         _jsonrpcServer->bind(
             METHOD_MODEL_PROPERTIES_SCHEMA,
-            [& engine = _engine](const auto& request) {
+            [&engine = _engine](const auto& request) {
                 ObjectID modelID;
                 if (::from_json(modelID, request.message))
                 {
@@ -2070,7 +2091,7 @@ public:
                                            "Model id and result range"};
         _handleRPC<GetInstances, ModelInstances>(
             desc,
-            [& engine = _engine](const GetInstances& param)->ModelInstances {
+            [&engine = _engine](const GetInstances& param) -> ModelInstances {
                 auto id = param.modelID;
                 auto& scene = engine.getScene();
                 auto model = scene.getModel(id);
@@ -2091,8 +2112,7 @@ public:
     void _handleGetLoaders()
     {
         _handleRPC<std::vector<LoaderInfo>>(
-            {METHOD_GET_LOADERS, "Get all loaders"},
-            [&] {
+            {METHOD_GET_LOADERS, "Get all loaders"}, [&] {
                 auto& scene = _engine.getScene();
                 return scene.getLoaderRegistry().getLoaderInfos();
             });
@@ -2142,7 +2162,7 @@ public:
         const auto requestEndpoint = getRequestEndpointName(endpoint);
         const auto notifyEndpoint = getNotificationEndpointName(endpoint);
 
-        _jsonrpcServer->bind<PropertyMap>(requestEndpoint, [& object = object] {
+        _jsonrpcServer->bind<PropertyMap>(requestEndpoint, [&object = object] {
             return object.getPropertyMap();
         });
 
@@ -2331,7 +2351,8 @@ public:
     // alter the list of renderers for instance
     bool _endpointsRegistered{false};
 
-    // Wether to use controlled stream (true = client request frames, false = continous stream of frames)
+    // Wether to use controlled stream (true = client request frames, false =
+    // continous stream of frames)
     bool _useControlledStream{false};
     // Flag used to control the frame send when _useControlledStream = true
     std::atomic<bool> _controlledStreamingFlag{false};
