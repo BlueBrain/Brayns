@@ -209,11 +209,9 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
     const auto dbConnectionString =
         properties.getProperty<std::string>(PROP_DB_CONNECTION_STRING.name);
 
-    std::cout << 3 << std::endl;
     const auto synchronousMode =
         properties.getProperty<bool>(PROP_SYNCHRONOUS_MODE.name);
-    std::cout << 4 << std::endl;
-
+    
     brayns::AbstractSimulationHandlerPtr simulationHandler{nullptr};
     switch (reportType)
     {
@@ -408,21 +406,13 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuitFromBlueConfig(
 
     callback.updateProgress("Attaching to simulation data...", 0);
 
-    std::cout << 2 << std::endl;
     // Attach simulation handler
     const auto compartmentReport =
         _attachSimulationHandler(properties, blueConfiguration, *model,
                                  reportType, allGids);
 
-    std::cout << 5 << std::endl;
-
-    for(auto gid : allGids)
-        std::cout << "\t" << gid << std::endl;
-
     // Cell transformations
     Matrix4fs allTransformations = circuit.getTransforms(allGids);
-
-    std::cout << 6 << std::endl;
 
     // Filter out guids according to clipping planes
     if (cellClipping)
