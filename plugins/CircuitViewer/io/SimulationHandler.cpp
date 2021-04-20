@@ -103,10 +103,8 @@ void SimulationHandler::waitReady() const
         _currentFrameFuture.wait();
 }
 
-void* SimulationHandler::getFrameData(uint32_t frame)
+void* SimulationHandler::getFrameDataImpl(uint32_t frame)
 {
-    frame = _getBoundedFrame(frame);
-
     if (!_currentFrameFuture.valid() && _currentFrame != frame)
         _triggerLoading(frame);
 

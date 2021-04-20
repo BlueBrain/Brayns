@@ -1,6 +1,6 @@
-/* Copyright (c) 2018-2019, EPFL/Blue Brain Project
+/* Copyright (c) 2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of the circuit explorer for Brayns
  * <https://github.com/favreau/Brayns-UC-CircuitExplorer>
@@ -19,27 +19,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ADVANCEDCIRCUITLOADER_H
-#define ADVANCEDCIRCUITLOADER_H
+#pragma once
 
-#include "AbstractCircuitLoader.h"
+#include <ospray/SDK/common/Model.h>
 
-class AdvancedCircuitLoader : public AbstractCircuitLoader
+namespace brayns
+{
+class OSPRayISPCModel : public ospray::Model
 {
 public:
-    AdvancedCircuitLoader(
-        brayns::Scene &scene,
-        const brayns::ApplicationParameters &applicationParameters,
-        brayns::PropertyMap &&loaderParams,
-        CircuitExplorerPlugin* plugin);
+    OSPRayISPCModel();
+    virtual ~OSPRayISPCModel() final;
 
-    std::string getName() const final;
+    std::string toString() const final;
+    void commit() final;
 
-    static brayns::PropertyMap getCLIProperties();
-
-    std::vector<brayns::ModelDescriptorPtr> importFromFile(
-        const std::string &filename, const brayns::LoaderProgress &callback,
-        const brayns::PropertyMap &properties) const final;
+public:
+    bool simEnabled {false};
+    ospray::uint64 simOffset {0};
 };
-
-#endif // ADVANCEDCIRCUITLOADER_H
+}

@@ -185,14 +185,8 @@ ModelDescriptorPtr ModelDescriptor::clone(ModelPtr model) const
     newModelDesc->_instances = _instances;
     newModelDesc->_properties = _properties;
     newModelDesc->_model->buildBoundingBox();
-    newModelDesc->_simulatedModel = _simulatedModel;
     newModelDesc->_loaderProperties = _loaderProperties;
     return newModelDesc;
-}
-
-void ModelDescriptor::setActiveSimulatedModel(bool val)
-{
-    _simulatedModel = val;
 }
 
 Model::Model(AnimationParameters& animationParameters,
@@ -204,8 +198,6 @@ Model::Model(AnimationParameters& animationParameters,
 
 Model::~Model()
 {
-    if (_isReadyCallbackSet)
-        _animationParameters.removeIsReadyCallback();
 }
 
 bool Model::empty() const
@@ -504,7 +496,6 @@ void Model::copyFrom(const Model& rhs)
         _simulationHandler->setCurrentFrame(std::numeric_limits<uint32_t>::max());
     }
 
-    _transferFunction = rhs._transferFunction;
     _materials.clear();
     for (const auto& material : rhs._materials)
     {
@@ -655,6 +646,7 @@ MaterialPtr Model::createMaterial(const size_t materialId,
 
 void Model::setSimulationHandler(AbstractSimulationHandlerPtr handler)
 {
+    _simulationEnabled = handler != nullptr;
     if (_simulationHandler != handler)
         _unbindMaterials(_simulationHandler, _materials);
     _simulationHandler = handler;
@@ -672,52 +664,5 @@ size_t Model::getSizeInBytes() const
 AbstractSimulationHandlerPtr Model::getSimulationHandler() const
 {
     return _simulationHandler;
-}
-
-bool Model::commitTransferFunction()
-{
-    if (!_transferFunction.isModified())
-        return false;
-
-    _commitTransferFunctionImpl(
-        _transferFunction.getColorMap().colors,
-        _transferFunction.calculateInterpolatedOpacities(),
-        _transferFunction.getValuesRange());
-
-    _transferFunction.resetModified();
-    return true;
-}
-
-bool Model::commitSimulationData()
-{
-    if (!_simulationHandler)
-        return false;
-
-    if (!_isReadyCallbackSet && !_animationParameters.hasIsReadyCallback())
-    {
-        auto& ap = _animationParameters;
-        ap.setIsReadyCallback(
-            [handler = _simulationHandler] { return handler->isReady(); });
-        ap.setDt(_simulationHandler->getDt(), false);
-        ap.setUnit(_simulationHandler->getUnit(), false);
-        ap.setNumFrames(_simulationHandler->getNbFrames(), false);
-        ap.markModified();
-        _isReadyCallbackSet = true;
-    }
-
-    const auto animationFrame = _animationParameters.getFrame();
-
-    if (_simulationHandler->getCurrentFrame() == animationFrame)
-        return false;
-
-    auto frameData = _simulationHandler->getFrameData(animationFrame);
-
-    if (!frameData)
-        return false;
-
-    _commitSimulationDataImpl((float*)frameData,
-                              _simulationHandler->getFrameSize());
-
-    return true;
 }
 }

@@ -28,7 +28,9 @@
 #include <brayns/common/Transformation.h>
 #include <brayns/common/light/Light.h>
 #include <brayns/common/log.h>
+#include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/engine/Model.h>
+#include <brayns/parameters/AnimationParameters.h>
 
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/VolumeParameters.h>
@@ -45,10 +47,17 @@ OSPRayScene::OSPRayScene(AnimationParameters& animationParameters,
                                  : 0)
 {
     _backgroundMaterial = std::make_shared<OSPRayMaterial>(PropertyMap(), true);
+
+    _ospTransferFunction = ospNewTransferFunction("piecewise_linear");
+    if (_ospTransferFunction)
+        ospCommit(_ospTransferFunction);
 }
 
 OSPRayScene::~OSPRayScene()
 {
+    ospRelease(_ospSimulationData);
+    ospRelease(_ospTransferFunction);
+
     _destroyLights();
     if (_rootModel)
         ospRelease(_rootModel);
@@ -76,8 +85,12 @@ void OSPRayScene::commit()
     }
 
     const bool rebuildScene = isModified();
-    const bool addRemoveVolumes =
-        _commitVolumeAndTransferFunction(modelDescriptors);
+    // Commit volumes
+    const bool addRemoveVolumes = _commitVolumes(modelDescriptors);
+    // Commit simulations
+
+    _commitTransferFunction();
+    _commitSimulationData(modelDescriptors);
 
     if (!rebuildScene && !addRemoveVolumes)
     {
@@ -85,7 +98,8 @@ void OSPRayScene::commit()
         bool doUpdate = false;
         for (auto& modelDescriptor : modelDescriptors)
         {
-            auto& model = modelDescriptor->getModel();
+            auto& model = static_cast<OSPRayModel&>(modelDescriptor->getModel());
+            model.commitSimulationParams();
             if (model.isDirty())
             {
                 model.commitGeometry();
@@ -102,7 +116,7 @@ void OSPRayScene::commit()
 
     if (_rootModel)
         ospRelease(_rootModel);
-    _rootModel = ospNewModel();
+    _rootModel = (OSPModel)new OSPRayISPCModel;
 
     for (auto modelDescriptor : modelDescriptors)
     {
@@ -116,10 +130,10 @@ void OSPRayScene::commit()
         auto& impl = static_cast<OSPRayModel&>(modelDescriptor->getModel());
         const auto& transformation = modelDescriptor->getTransformation();
 
-        BRAYNS_DEBUG << "Committing " << modelDescriptor->getName()
-                     << std::endl;
+        BRAYNS_DEBUG << "Committing " << modelDescriptor->getName() << std::endl;
 
         impl.commitGeometry();
+        impl.commitSimulationParams();
         impl.logInformation();
 
         // add volumes to root model, because scivis renderer does not consider
@@ -129,8 +143,7 @@ void OSPRayScene::commit()
             modelDescriptor->getModel().commitGeometry();
             for (auto volume : modelDescriptor->getModel().getVolumes())
             {
-                auto ospVolume =
-                    std::dynamic_pointer_cast<OSPRayVolume>(volume);
+                auto ospVolume = std::dynamic_pointer_cast<OSPRayVolume>(volume);
                 ospAddVolume(_rootModel, ospVolume->impl());
             }
         }
@@ -148,11 +161,9 @@ void OSPRayScene::commit()
             {
                 // scale and move the unit-sized bounding box geometry to the
                 // model size/scale first, then apply the instance transform
-                const auto& modelBounds =
-                    modelDescriptor->getModel().getBounds();
+                const auto& modelBounds = modelDescriptor->getModel().getBounds();
                 Transformation modelTransform;
-                modelTransform.setTranslation(modelBounds.getCenter() -
-                                              0.5 * modelBounds.getSize());
+                modelTransform.setTranslation(modelBounds.getCenter() - .5* modelBounds.getSize());
                 modelTransform.setScale(modelBounds.getSize());
 
                 addInstance(_rootModel, impl.getBoundingBoxModel(),
@@ -161,8 +172,7 @@ void OSPRayScene::commit()
             }
 
             if (modelDescriptor->getVisible() && instance.getVisible())
-                addInstance(_rootModel, impl.getPrimaryModel(),
-                            instanceTransform);
+                addInstance(_rootModel, impl.getPrimaryModel(), instanceTransform);
         }
 
         impl.markInstancesClean();
@@ -257,20 +267,49 @@ bool OSPRayScene::commitLights()
     return true;
 }
 
-bool OSPRayScene::_commitVolumeAndTransferFunction(
-    ModelDescriptors& modelDescriptors)
+ModelPtr OSPRayScene::createModel() const
+{
+    return std::make_unique<OSPRayModel>(_animationParameters,
+                                         _volumeParameters,
+                                         _ospTransferFunction);
+}
+
+void OSPRayScene::_commitTransferFunction()
+{
+    if (!_transferFunction.isModified())
+        return;
+
+    const auto& colors = _transferFunction.getColors();
+    auto opacities = _transferFunction.calculateInterpolatedOpacities();
+    const auto& valueRange = _transferFunction.getValuesRange();
+
+    // Colors
+    OSPData colorsData = ospNewData(colors.size(), OSP_FLOAT3, colors.data());
+    ospSetData(_ospTransferFunction, "colors", colorsData);
+    ospRelease(colorsData);
+
+    // Opacities
+    OSPData opacityData = ospNewData(opacities.size(), OSP_FLOAT, opacities.data());
+    ospSetData(_ospTransferFunction, "opacities", opacityData);
+    ospRelease(opacityData);
+
+    // Value range
+    osphelper::set(_ospTransferFunction, "valueRange", Vector2f(valueRange));
+
+    ospCommit(_ospTransferFunction);
+
+    markModified(false);
+
+    _transferFunction.resetModified();
+}
+
+bool OSPRayScene::_commitVolumes(ModelDescriptors& modelDescriptors)
 {
     bool rebuildScene = false;
     for (auto& modelDescriptor : modelDescriptors)
     {
         auto& model = static_cast<OSPRayModel&>(modelDescriptor->getModel());
-        const bool dirtyTransferFunction = model.commitTransferFunction();
-        bool dirtySimulationData = false;
-        if(isActiveSimulatedModel(modelDescriptor))
-            dirtySimulationData = model.commitSimulationData();
 
-        if (dirtyTransferFunction || dirtySimulationData)
-            markModified(false);
         if (model.isVolumesDirty())
         {
             rebuildScene = true;
@@ -290,24 +329,45 @@ bool OSPRayScene::_commitVolumeAndTransferFunction(
     return rebuildScene;
 }
 
-ModelPtr OSPRayScene::createModel() const
+void OSPRayScene::_commitSimulationData(ModelDescriptors& modelDescriptors)
 {
-    return std::make_unique<OSPRayModel>(_animationParameters,
-                                         _volumeParameters);
+    auto currentFrame = _animationParameters.getFrame();
+
+    //if(_lastFrame == currentFrame && !isModified())
+    //    return;
+
+    //_lastFrame = currentFrame;
+
+    _simData.clear();
+
+    uint64_t offset = 0;
+    for (auto& model : modelDescriptors)
+    {
+        if(!model->getModel().isSimulationEnabled())
+            continue;
+
+        auto handler = model->getModel().getSimulationHandler();
+        if(!handler)
+            continue;
+
+        auto& modelImpl = static_cast<OSPRayModel&>(model->getModel());
+        modelImpl.setSimulationOffset(offset);
+
+        const float* data = static_cast<float*>(handler->getFrameData(currentFrame));
+        const uint64_t dataSize = handler->getFrameSize();
+
+        _simData.insert(_simData.end(), data, data + dataSize);
+        offset += dataSize;
+    }
+
+    ospRelease(_ospSimulationData);
+    _ospSimulationData = nullptr;
+    if(_simData.empty())
+        return;
+
+    _ospSimulationData =
+        ospNewData(_simData.size(), OSP_FLOAT, _simData.data(), OSP_DATA_SHARED_BUFFER);
+    ospCommit(_ospSimulationData);
 }
 
-ModelDescriptorPtr OSPRayScene::getSimulatedModel()
-{
-    auto lock = acquireReadAccess();
-    for (auto model : _modelDescriptors)
-    {
-        if(isActiveSimulatedModel(model))
-            return model;
-        /*const auto& ospModel =
-            static_cast<const OSPRayModel&>(model->getModel());
-        if (ospModel.simulationData())
-            return model;*/
-    }
-    return ModelDescriptorPtr{};
-}
 } // namespace brayns

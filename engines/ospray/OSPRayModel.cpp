@@ -44,19 +44,15 @@ OSPData allocateVectorData(const std::vector<VecT>& vec,
 } // namespace
 
 OSPRayModel::OSPRayModel(AnimationParameters& animationParameters,
-                         VolumeParameters& volumeParameters)
+                         VolumeParameters& volumeParameters,
+                         OSPTransferFunction transferFunc)
     : Model(animationParameters, volumeParameters)
+    , _ospTransferFunction(transferFunc)
 {
-    _ospTransferFunction = ospNewTransferFunction("piecewise_linear");
-    if (_ospTransferFunction)
-        ospCommit(_ospTransferFunction);
 }
 
 OSPRayModel::~OSPRayModel()
 {
-    ospRelease(_ospTransferFunction);
-    ospRelease(_ospSimulationData);
-
     const auto releaseAndClearGeometry = [](auto& geometryMap) {
         for (auto geom : geometryMap)
             ospRelease(geom.second);
@@ -84,7 +80,7 @@ void OSPRayModel::buildBoundingBox()
 {
     if (_boundingBoxModel)
         return;
-    _boundingBoxModel = ospNewModel();
+    _boundingBoxModel = (OSPModel)new OSPRayISPCModel;//ospNewModel();
 
     auto material = createMaterial(BOUNDINGBOX_MATERIAL_ID, "bounding_box");
     material->setDiffuseColor({1, 1, 1});
@@ -134,7 +130,7 @@ void OSPRayModel::_addGeometryToModel(const OSPGeometry geometry,
     case SECONDARY_MODEL_MATERIAL_ID:
     {
         if (!_secondaryModel)
-            _secondaryModel = ospNewModel();
+            _secondaryModel = (OSPModel)new OSPRayISPCModel;//ospNewModel();
         ospAddGeometry(_secondaryModel, geometry);
         break;
     }
@@ -399,7 +395,7 @@ void OSPRayModel::commitGeometry()
         return;
 
     if (!_primaryModel)
-        _primaryModel = ospNewModel();
+        _primaryModel = (OSPModel)new OSPRayISPCModel;
 
     // Materials
     for (auto material : _materials)
@@ -500,6 +496,25 @@ void OSPRayModel::commitMaterials(const std::string& renderer)
     }
 }
 
+void OSPRayModel::commitSimulationParams()
+{
+    if(_simulationEnabled)
+    {
+        if (_secondaryModel)
+        {
+            osphelper::set(_secondaryModel, "simEnabled", _simulationEnabled);
+            osphelper::set(_secondaryModel, "simOffset", static_cast<int32_t>(_simulationOffset));
+            ospCommit(_secondaryModel);
+        }
+        else
+        {
+            osphelper::set(_primaryModel, "simEnabled", _simulationEnabled);
+            osphelper::set(_primaryModel, "simOffset", static_cast<int32_t>(_simulationOffset));
+            ospCommit(_primaryModel);
+        }
+    }
+}
+
 MaterialPtr OSPRayModel::createMaterialImpl(const PropertyMap& properties)
 {
     return std::make_shared<OSPRayMaterial>(properties);
@@ -523,33 +538,4 @@ BrickedVolumePtr OSPRayModel::createBrickedVolume(const Vector3ui& dimensions,
                                                  _ospTransferFunction);
 }
 
-void OSPRayModel::_commitTransferFunctionImpl(const Vector3fs& colors,
-                                              const floats& opacities,
-                                              const Vector2d valueRange)
-{
-    // Colors
-    OSPData colorsData = ospNewData(colors.size(), OSP_FLOAT3, colors.data());
-    ospSetData(_ospTransferFunction, "colors", colorsData);
-    ospRelease(colorsData);
-
-    // Opacities
-    OSPData opacityData =
-        ospNewData(opacities.size(), OSP_FLOAT, opacities.data());
-    ospSetData(_ospTransferFunction, "opacities", opacityData);
-    ospRelease(opacityData);
-
-    // Value range
-    osphelper::set(_ospTransferFunction, "valueRange", Vector2f(valueRange));
-
-    ospCommit(_ospTransferFunction);
-}
-
-void OSPRayModel::_commitSimulationDataImpl(const float* frameData,
-                                            const size_t frameSize)
-{
-    ospRelease(_ospSimulationData);
-    _ospSimulationData =
-        ospNewData(frameSize, OSP_FLOAT, frameData, _memoryManagementFlags);
-    ospCommit(_ospSimulationData);
-}
 } // namespace brayns

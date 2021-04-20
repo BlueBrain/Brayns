@@ -694,14 +694,14 @@ bool MorphologyLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
     return types.find(extension) != types.end();
 }
 
-ModelDescriptorPtr MorphologyLoader::importFromBlob(
+std::vector<ModelDescriptorPtr> MorphologyLoader::importFromBlob(
     Blob&& /*blob*/, const LoaderProgress& /*callback*/,
     const PropertyMap& /*properties*/) const
 {
     throw std::runtime_error("Load morphology from memory not supported");
 }
 
-ModelDescriptorPtr MorphologyLoader::importFromFile(
+std::vector<ModelDescriptorPtr> MorphologyLoader::importFromFile(
     const std::string& fileName, const LoaderProgress& callback,
     const PropertyMap& inProperties) const
 {
@@ -729,7 +729,7 @@ ModelDescriptorPtr MorphologyLoader::importFromFile(
     auto modelDescriptor =
         std::make_shared<ModelDescriptor>(std::move(model), fileName);
     modelDescriptor->setTransformation(transformation);
-    return modelDescriptor;
+    return {modelDescriptor};
 }
 
 ModelData MorphologyLoader::processMorphology(

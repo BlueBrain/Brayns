@@ -61,7 +61,7 @@ SynapseCircuitLoader::SynapseCircuitLoader(
     _fixedDefaults.setProperty({PROP_AREAS_OF_INTEREST.name, 0});
 }
 
-brayns::ModelDescriptorPtr SynapseCircuitLoader::importFromFile(
+std::vector<brayns::ModelDescriptorPtr> SynapseCircuitLoader::importFromFile(
     const std::string &filename, const brayns::LoaderProgress &callback,
     const brayns::PropertyMap &properties) const
 {
@@ -70,7 +70,7 @@ brayns::ModelDescriptorPtr SynapseCircuitLoader::importFromFile(
     brayns::PropertyMap props = _defaults;
     props.merge(_fixedDefaults);
     props.merge(properties);
-    return importCircuit(filename, props, callback);
+    return {importCircuit(filename, props, callback)};
 }
 
 std::string SynapseCircuitLoader::getName() const

@@ -104,20 +104,19 @@ void Scene::copyFrom(const Scene& rhs)
         _modelDescriptors.clear();
         _modelDescriptors.reserve(rhs._modelDescriptors.size());
         for (const auto& modelDesc : rhs._modelDescriptors)
-        {
             _modelDescriptors.push_back(modelDesc->clone(createModel()));
-            if(modelDesc->isAciveSimulationModel())
-                _updateSimulatedModel(_modelDescriptors.back(), false, false);
-        }
 
     }
     _computeBounds();
+    _updateAnimationParameters();
 
     *_backgroundMaterial = *rhs._backgroundMaterial;
     _backgroundMaterial->markModified();
 
     _lightManager = rhs._lightManager;
     _clipPlanes = rhs._clipPlanes;
+
+    _transferFunction = rhs._transferFunction;
 
     copyFromImpl(rhs);
 
@@ -163,14 +162,13 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
         modelDescriptor->setModelID(_modelID++);
         _modelDescriptors.push_back(modelDescriptor);
 
-        // Set as active simulated model, if it has simulation
-        _updateSimulatedModel(modelDescriptor, false, true);
-
         // add default instance of this model to render something
         if (modelDescriptor->getInstances().empty())
             modelDescriptor->addInstance(
                 {true, true, modelDescriptor->getTransformation()});
     }
+
+    _updateAnimationParameters();
 
     _computeBounds();
     markModified();
@@ -203,6 +201,8 @@ void Scene::addModel(const size_t id, ModelDescriptorPtr modelDescriptor)
                 {true, true, modelDescriptor->getTransformation()});
     }
 
+    _updateAnimationParameters();
+
     _computeBounds();
     markModified();
 }
@@ -234,6 +234,7 @@ bool Scene::removeModel(const size_t id)
     if (model)
     {
         markModified();
+        _updateAnimationParameters();
         return true;
     }
 
@@ -314,8 +315,8 @@ void Scene::removeClipPlane(const size_t id)
         markModified();
 }
 
-ModelDescriptorPtr Scene::loadModel(Blob&& blob, const ModelParams& params,
-                                    LoaderProgress cb)
+std::vector<ModelDescriptorPtr> Scene::loadModels(Blob&& blob, const ModelParams& params,
+                                                  LoaderProgress cb)
 {
     const auto& loader =
         _loaderRegistry.getSuitableLoader("", blob.type,
@@ -324,29 +325,62 @@ ModelDescriptorPtr Scene::loadModel(Blob&& blob, const ModelParams& params,
     // HACK: Add loader name in properties for archive loader
     auto propCopy = params.getLoaderProperties();
     propCopy.setProperty({"loaderName", params.getLoaderName()});
-    auto modelDescriptor = loader.importFromBlob(std::move(blob), cb, propCopy);
-    if (!modelDescriptor)
+
+    // Load the models
+    auto modelDescriptors = loader.importFromBlob(std::move(blob), cb, propCopy);
+
+    // Check for models correctness
+    if (modelDescriptors.empty())
         throw std::runtime_error("No model returned by loader");
-    *modelDescriptor = params;
-    addModel(modelDescriptor);
-    return modelDescriptor;
+    for(auto& md: modelDescriptors)
+    {
+        if(!md)
+            throw std::runtime_error("No model returned by loader");
+    }
+
+    // Update loaded model with loader properties (so we can have the information
+    // with which it was loaded)
+    for(auto& md : modelDescriptors)
+    {
+        *md = params;
+        addModel(md);
+    }
+
+    return modelDescriptors;
 }
 
-ModelDescriptorPtr Scene::loadModel(const std::string& path,
-                                    const ModelParams& params,
-                                    LoaderProgress cb)
+std::vector<ModelDescriptorPtr> Scene::loadModels(const std::string& path,
+                                                  const ModelParams& params,
+                                                  LoaderProgress cb)
 {
     const auto& loader =
         _loaderRegistry.getSuitableLoader(path, "", params.getLoaderName());
     // HACK: Add loader name in properties for archive loader
     auto propCopy = params.getLoaderProperties();
     propCopy.setProperty({"loaderName", params.getLoaderName()});
-    auto modelDescriptor = loader.importFromFile(path, cb, propCopy);
-    if (!modelDescriptor)
+
+    // Load the models
+    auto modelDescriptors = loader.importFromFile(path, cb, propCopy);
+
+    // Check for models correctness
+    if (modelDescriptors.empty())
         throw std::runtime_error("No model returned by loader");
-    *modelDescriptor = params;
-    addModel(modelDescriptor);
-    return modelDescriptor;
+
+    for(auto& md: modelDescriptors)
+    {
+        if(!md)
+            throw std::runtime_error("No model returned by loader");
+    }
+
+    // Update loaded model with loader properties (so we can have the information
+    // with which it was loaded)
+    for(auto& md : modelDescriptors)
+    {
+        *md = params;
+        addModel(md);
+    }
+
+    return modelDescriptors;
 }
 
 void Scene::visitModels(const std::function<void(Model&)>& functor)
@@ -514,46 +548,6 @@ bool Scene::hasEnvironmentMap() const
     return !_environmentMap.empty();
 }
 
-void Scene::setActiveSimulatedModel(const size_t modelId)
-{
-    if(isActiveSimulatedModel(modelId))
-        return;
-
-    {
-        auto model = getModel(modelId);
-        if(!model)
-            BRAYNS_THROW(std::runtime_error("Could not find the given model ID"))
-
-        std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-
-        _updateSimulatedModel(model, true, true);
-    }
-}
-
-bool Scene::isActiveSimulatedModel(const ModelDescriptorPtr& model) const
-{
-    return model->isAciveSimulationModel();
-}
-
-bool Scene::isActiveSimulatedModel(const size_t modelID) const
-{
-    auto model = getModel(modelID);
-    if(!model)
-        return false;
-    return model->isAciveSimulationModel();
-}
-
-size_t Scene::getActiveSimulatedModel() const
-{
-    for(const auto& model : _modelDescriptors)
-    {
-        if(model->_simulatedModel)
-            return model->_modelID;
-    }
-
-    throw std::runtime_error("There is no actively simulated model");
-}
-
 void Scene::_computeBounds()
 {
     std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
@@ -596,35 +590,49 @@ void Scene::_loadIBLMaps(const std::string& envMap)
     }
 }
 
-void Scene::_updateSimulatedModel(ModelDescriptorPtr& model, bool forceSim, bool updateParams)
+void Scene::_updateAnimationParameters()
 {
-    auto simHandler = model->getModel().getSimulationHandler();
-    if(!simHandler)
+    std::vector<AbstractSimulationHandler*> handlers;
+    uint32_t numFrames = 0;
     {
-        if(!forceSim)
-            return;
+        std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+        for(auto& modelDesc : _modelDescriptors)
+        {
+            if(modelDesc->isMarkedForRemoval())
+                continue;
 
-        BRAYNS_THROW(std::runtime_error("Model with ID " + std::to_string(model->getModelID())
-                                        + " does not have simulation"))
+            auto simHandler = modelDesc->getModel().getSimulationHandler().get();
+            if(simHandler)
+            {
+                handlers.push_back(modelDesc->getModel().getSimulationHandler().get());
+                if(simHandler->getNbFrames() > numFrames)
+                    numFrames = simHandler->getNbFrames();
+            }
+        }
     }
-
-    for(auto& m : _modelDescriptors)
-        m->setActiveSimulatedModel(false);
-    model->setActiveSimulatedModel(true);
-
 
     auto& ap = _animationParameters;
-    if(updateParams)
+
+    if(handlers.empty())
+        ap.removeIsReadyCallback();
+    else
     {
         ap.setIsReadyCallback(
-            [handler = simHandler] { return handler->isReady(); });
+            [handlersV = handlers]
+            {
+                for(auto handler : handlersV)
+                {
+                    if(!handler->isReady())
+                        return false;
+                }
+                return true;
+            });
 
-        ap.setFrame(simHandler->getCurrentFrame());
-        ap.setDt(simHandler->getDt(), false);
-        ap.setUnit(simHandler->getUnit(), false);
-        ap.setNumFrames(simHandler->getNbFrames(), false);
+        ap.setDt(handlers[0]->getDt(), false);
+        ap.setUnit(handlers[0]->getUnit(), false);
+        ap.setNumFrames(numFrames, false);
+        ap.markModified();
     }
-    ap.markModified();
 }
 
 } // namespace brayns

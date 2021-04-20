@@ -49,7 +49,7 @@ struct BinaryParam : ModelParams
  * A task which receives a file blob, triggers loading of the received blob
  * and adds the loaded model to the engines' scene.
  */
-class AddModelFromBlobTask : public Task<ModelDescriptorPtr>
+class AddModelFromBlobTask : public Task<std::vector<ModelDescriptorPtr>>
 {
 public:
     AddModelFromBlobTask(const BinaryParam& param, Engine& engine);
@@ -69,8 +69,8 @@ private:
     }
 
     async::event_task<Blob> _chunkEvent;
-    async::event_task<ModelDescriptorPtr> _errorEvent;
-    std::vector<async::task<ModelDescriptorPtr>> _finishTasks;
+    async::event_task<std::vector<ModelDescriptorPtr>> _errorEvent;
+    std::vector<async::task<std::vector<ModelDescriptorPtr>>> _finishTasks;
     uint8_ts _blob;
     BinaryParam _param;
     size_t _receivedBytes{0};

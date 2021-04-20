@@ -51,7 +51,7 @@ public:
 
     void unbind(const MaterialPtr& material) final;
 
-    void* getFrameData(uint32_t frame) final;
+    void* getFrameDataImpl(uint32_t frame) final;
 
     CompartmentReportPtr getCompartmentReport() { return _compartmentReport; }
     bool isReady() const final;

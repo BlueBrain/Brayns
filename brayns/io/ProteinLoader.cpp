@@ -340,7 +340,7 @@ bool ProteinLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
     return types.find(extension) != types.end();
 }
 
-ModelDescriptorPtr ProteinLoader::importFromFile(
+std::vector<ModelDescriptorPtr> ProteinLoader::importFromFile(
     const std::string& fileName, const LoaderProgress&,
     const PropertyMap& inProperties) const
 {
@@ -493,7 +493,7 @@ ModelDescriptorPtr ProteinLoader::importFromFile(
     auto modelDescriptor =
         std::make_shared<ModelDescriptor>(std::move(model), fileName);
     modelDescriptor->setTransformation(transformation);
-    return modelDescriptor;
+    return {modelDescriptor};
 }
 
 std::string ProteinLoader::getName() const

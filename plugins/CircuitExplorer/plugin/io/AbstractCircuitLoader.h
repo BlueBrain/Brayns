@@ -58,7 +58,7 @@ public:
     bool isSupported(const std::string &filename,
                      const std::string &extension) const;
 
-    brayns::ModelDescriptorPtr importFromBlob(
+    std::vector<brayns::ModelDescriptorPtr> importFromBlob(
         brayns::Blob &&blob, const brayns::LoaderProgress &callback,
         const brayns::PropertyMap &properties) const;
 
@@ -93,6 +93,10 @@ protected:
     const brayns::ApplicationParameters &_applicationParameters;
     brayns::PropertyMap _defaults;
     brayns::PropertyMap _fixedDefaults;
+
+    brayns::ModelDescriptorPtr importCircuitFromBlueConfig(
+                const brion::BlueConfig& config, const brayns::PropertyMap& oproperties,
+                const brayns::LoaderProgress& callback) const;
 
 private:
 

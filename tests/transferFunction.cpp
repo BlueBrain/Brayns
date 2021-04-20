@@ -22,6 +22,7 @@
 
 #ifdef BRAYNS_USE_OSPRAY
 #include <engines/ospray/OSPRayModel.h>
+#include <engines/ospray/OSPRayScene.h>
 #include <ospray/SDK/common/Data.h>
 #include <ospray/SDK/common/Managed.h>
 #endif
@@ -42,7 +43,7 @@ TEST_CASE_FIXTURE(ClientServer, "set_transfer_function")
     makeNotification<brayns::ModelTransferFunction>(SET_TF, {0, tf});
 
     const auto& newTF =
-        getScene().getModel(0)->getModel().getTransferFunction();
+        getScene().getTransferFunction();
     CHECK(tf.getColorMap() == newTF.getColorMap());
     CHECK(tf.getControlPoints() == newTF.getControlPoints());
     CHECK_EQ(tf.getValuesRange(), newTF.getValuesRange());
@@ -59,7 +60,7 @@ TEST_CASE_FIXTURE(ClientServer, "set_transfer_function_invalid_model")
 
 TEST_CASE_FIXTURE(ClientServer, "get_transfer_function")
 {
-    const auto& tf = getScene().getModel(0)->getModel().getTransferFunction();
+    const auto& tf = getScene().getTransferFunction();
 
     const auto rpcTF =
         makeRequest<brayns::ObjectID, brayns::TransferFunction>(GET_TF, {0});
@@ -79,15 +80,15 @@ TEST_CASE_FIXTURE(ClientServer, "get_transfer_function_invalid_model")
 #ifdef BRAYNS_USE_OSPRAY
 TEST_CASE_FIXTURE(ClientServer, "validate_opacity_interpolation")
 {
-    auto& model = getScene().getModel(0)->getModel();
-    auto& tf = model.getTransferFunction();
+    auto& scene = getScene();
+    auto& tf = scene.getTransferFunction();
     tf.clear();
 
     commitAndRender();
 
-    auto& ospModel = static_cast<brayns::OSPRayModel&>(model);
+    auto& ospScene = static_cast<brayns::OSPRayScene&>(scene);
     auto ospTF =
-        reinterpret_cast<ospray::ManagedObject*>(ospModel.transferFunction());
+        reinterpret_cast<ospray::ManagedObject*>(ospScene.getTransferFunctionImpl());
     auto colors = ospTF->getParamData("colors", nullptr);
     REQUIRE_EQ(colors->size(), 2);
     CHECK_EQ(brayns::Vector3f(((float*)colors->data)[0]),

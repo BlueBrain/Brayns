@@ -36,16 +36,16 @@ class LoadModelFunctor : public TaskFunctor
 public:
     LoadModelFunctor(Engine& engine, const ModelParams& params);
     LoadModelFunctor(LoadModelFunctor&&) = default;
-    ModelDescriptorPtr operator()(Blob&& blob);
-    ModelDescriptorPtr operator()();
+    std::vector<ModelDescriptorPtr> operator()(Blob&& blob);
+    std::vector<ModelDescriptorPtr> operator()();
 
 private:
-    ModelDescriptorPtr _performLoad(
-        const std::function<ModelDescriptorPtr()>& loadData);
+    std::vector<ModelDescriptorPtr> _performLoad(
+        const std::function<std::vector<ModelDescriptorPtr>()>& loadData);
 
-    ModelDescriptorPtr _loadData(Blob&& blob, const ModelParams& params);
-    ModelDescriptorPtr _loadData(const std::string& path,
-                                 const ModelParams& params);
+    std::vector<ModelDescriptorPtr> _loadData(Blob&& blob, const ModelParams& params);
+    std::vector<ModelDescriptorPtr> _loadData(const std::string& path,
+                                              const ModelParams& params);
 
     void _updateProgress(const std::string& message, const size_t increment);
 

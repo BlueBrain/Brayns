@@ -40,7 +40,7 @@ public:
     CellGrowthHandler(const CellGrowthHandler& rhs);
     ~CellGrowthHandler();
 
-    void* getFrameData(const uint32_t) final;
+    void* getFrameDataImpl(const uint32_t) final;
 
     bool isReady() const final { return true; }
 

@@ -55,7 +55,7 @@ bool XYZBLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
     return types.find(extension) != types.end();
 }
 
-ModelDescriptorPtr XYZBLoader::importFromBlob(
+std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback,
     const PropertyMap& properties BRAYNS_UNUSED) const
 {
@@ -147,10 +147,10 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
     PropertyMap modelProperties;
     modelProperties.setProperty(radiusProperty);
     modelDescriptor->setProperties(modelProperties);
-    return modelDescriptor;
+    return {modelDescriptor};
 }
 
-ModelDescriptorPtr XYZBLoader::importFromFile(
+std::vector<ModelDescriptorPtr> XYZBLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
     const PropertyMap& properties) const
 {

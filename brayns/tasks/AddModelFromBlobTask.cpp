@@ -51,7 +51,7 @@ AddModelFromBlobTask::AddModelFromBlobTask(const BinaryParam& param,
     _finishTasks.emplace_back(_chunkEvent.get_task().then(std::move(functor)));
     _task = async::when_any(_finishTasks)
                 .then([&engine](async::when_any_result<
-                                std::vector<async::task<ModelDescriptorPtr>>>
+                                std::vector<async::task<std::vector<ModelDescriptorPtr>>>>
                                     results) {
                     engine.triggerRender();
                     return results.tasks[results.index].get();

@@ -43,11 +43,11 @@ public:
     bool isSupported(const std::string& filename,
                      const std::string& extension) const final;
 
-    ModelDescriptorPtr importFromFile(
+    std::vector<ModelDescriptorPtr> importFromFile(
         const std::string& fileName, const LoaderProgress& callback,
         const PropertyMap& properties) const final;
 
-    ModelDescriptorPtr importFromBlob(
+    std::vector<ModelDescriptorPtr> importFromBlob(
         Blob&& blob, const LoaderProgress& callback,
         const PropertyMap& properties) const final;
 

@@ -37,8 +37,10 @@ VoltageSimulationHandler::VoltageSimulationHandler(
                                                       brion::MODE_READ, gids))
 {
     // Load simulation information from compartment reports
+    _startTime = _compartmentReport->getStartTime();
+    _endTime = _compartmentReport->getEndTime();
     _dt = _compartmentReport->getTimestep();
-    _nbFrames = (_compartmentReport->getEndTime() - _compartmentReport->getStartTime()) / _dt;
+    _nbFrames = _endTime / _dt;
     _unit = _compartmentReport->getTimeUnit();
     _frameSize = _compartmentReport->getFrameSize();
 
@@ -46,8 +48,8 @@ VoltageSimulationHandler::VoltageSimulationHandler(
                 << std::endl;
     PLUGIN_INFO << "Voltage simulation information" << std::endl;
     PLUGIN_INFO << "----------------------" << std::endl;
-    PLUGIN_INFO << "Start time           : " << _compartmentReport->getStartTime() << std::endl;
-    PLUGIN_INFO << "End time             : " << _compartmentReport->getEndTime() << std::endl;
+    PLUGIN_INFO << "Start time           : " << _startTime << std::endl;
+    PLUGIN_INFO << "End time             : " << _endTime << std::endl;
     PLUGIN_INFO << "Steps between frames : " << _dt << std::endl;
     PLUGIN_INFO << "Number of frames     : " << _nbFrames << std::endl;
     PLUGIN_INFO << "Frame size           : " << _frameSize << std::endl;
@@ -77,14 +79,12 @@ bool VoltageSimulationHandler::isReady() const
     return _ready;
 }
 
-void* VoltageSimulationHandler::getFrameData(const uint32_t frame)
+void* VoltageSimulationHandler::getFrameDataImpl(const uint32_t frame)
 {
-    const auto boundedFrame = _getBoundedFrame(frame);
+    if (!_currentFrameFuture.valid() && _currentFrame != frame)
+        _triggerLoading(frame);
 
-    if (!_currentFrameFuture.valid() && _currentFrame != boundedFrame)
-        _triggerLoading(boundedFrame);
-
-    if (!_makeFrameReady(boundedFrame))
+    if (!_makeFrameReady(frame))
         return nullptr;
 
     return _frameData.data();

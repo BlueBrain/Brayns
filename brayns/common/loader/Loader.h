@@ -102,7 +102,7 @@ public:
      * @param properties Properties used for loading
      * @return the model that has been created by the loader
      */
-    virtual ModelDescriptorPtr importFromBlob(
+    virtual std::vector<ModelDescriptorPtr> importFromBlob(
         Blob&& blob, const LoaderProgress& callback,
         const PropertyMap& properties) const = 0;
 
@@ -114,7 +114,7 @@ public:
      * @param properties Properties used for loading
      * @return the model that has been created by the loader
      */
-    virtual ModelDescriptorPtr importFromFile(
+    virtual std::vector<ModelDescriptorPtr> importFromFile(
         const std::string& filename, const LoaderProgress& callback,
         const PropertyMap& properties) const = 0;
 

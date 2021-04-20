@@ -32,6 +32,7 @@ set(BRAYNSOSPRAYENGINE_ISPC_SOURCES
   ispc/geometry/SDFBeziers.ispc
   ispc/geometry/SDFGeometries.ispc
   ispc/geometry/RayMarching.isph
+  ispc/model/OSPRayISPCModel.ispc
   ispc/render/BasicRenderer.ispc
   ispc/render/DefaultMaterial.ispc
   ispc/render/utils/RandomGenerator.ispc
@@ -56,6 +57,7 @@ set(BRAYNSOSPRAYENGINE_SOURCES
   ispc/geometry/Cones.cpp
   ispc/geometry/SDFBeziers.cpp
   ispc/geometry/SDFGeometries.cpp
+  ispc/model/OSPRayISPCModel.cpp
   ispc/render/BasicRenderer.cpp
   ispc/render/DefaultMaterial.cpp
   ispc/render/utils/AbstractRenderer.cpp
@@ -77,6 +79,7 @@ set(BRAYNSOSPRAYENGINE_HEADERS
   ispc/camera/PerspectiveCamera.h
   ispc/camera/FishEyeCamera.h
   ispc/camera/PerspectiveParallaxCamera.h
+  ispc/model/OSPRayISPCModel.h
   ispc/render/BasicRenderer.h
   ispc/render/DefaultMaterial.h
   ispc/render/utils/AbstractRenderer.h

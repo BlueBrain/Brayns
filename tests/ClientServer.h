@@ -59,7 +59,7 @@ public:
     std::vector<std::string> getSupportedExtensions() const { return {}; }
     std::string getName() const { return "forever"; }
     brayns::PropertyMap getProperties() const { return {}; }
-    brayns::ModelDescriptorPtr importFromBlob(
+    std::vector<brayns::ModelDescriptorPtr> importFromBlob(
         brayns::Blob&&, const brayns::LoaderProgress& callback,
         const brayns::PropertyMap& properties BRAYNS_UNUSED) const final
     {
@@ -71,7 +71,7 @@ public:
         return {};
     }
 
-    brayns::ModelDescriptorPtr importFromFile(
+    std::vector<brayns::ModelDescriptorPtr> importFromFile(
         const std::string&, const brayns::LoaderProgress& callback,
         const brayns::PropertyMap& properties BRAYNS_UNUSED) const final
     {

@@ -32,8 +32,8 @@ TEST_CASE_FIXTURE(ClientServer, "missing_params")
 {
     try
     {
-        makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
-                                                                  {});
+        makeRequest<brayns::ModelParams, std::vector<brayns::ModelDescriptor>>(
+                    ADD_MODEL, {});
         REQUIRE(false);
     }
     catch (const rockets::jsonrpc::response_error& e)
@@ -47,7 +47,7 @@ TEST_CASE_FIXTURE(ClientServer, "nonexistant_file")
 {
     try
     {
-        makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
+        makeRequest<brayns::ModelParams, std::vector<brayns::ModelDescriptor>>(
             ADD_MODEL, {"wrong", "wrong.xyz"});
         REQUIRE(false);
     }
@@ -62,7 +62,7 @@ TEST_CASE_FIXTURE(ClientServer, "unsupported_type")
 {
     try
     {
-        makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
+        makeRequest<brayns::ModelParams, std::vector<brayns::ModelDescriptor>>(
             ADD_MODEL, {"unsupported", BRAYNS_TESTDATA_MODEL_UNSUPPORTED_PATH});
         REQUIRE(false);
     }
@@ -76,7 +76,7 @@ TEST_CASE_FIXTURE(ClientServer, "unsupported_type")
 TEST_CASE_FIXTURE(ClientServer, "xyz")
 {
     const auto numModels = getScene().getNumModels();
-    CHECK_NOTHROW((makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
+    CHECK_NOTHROW((makeRequest<brayns::ModelParams, std::vector<brayns::ModelDescriptor>>(
         ADD_MODEL, {"monkey", BRAYNS_TESTDATA_MODEL_MONKEY_PATH})));
     CHECK_EQ(getScene().getNumModels(), numModels + 1);
 }
@@ -86,21 +86,21 @@ TEST_CASE_FIXTURE(ClientServer, "obj")
     const auto numModels = getScene().getNumModels();
     brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH};
     params.setVisible(false);
-    auto model =
-        makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
-                                                                  params);
+    auto models =
+        makeRequest<brayns::ModelParams, std::vector<brayns::ModelDescriptor>>
+            (ADD_MODEL, params);
     CHECK_EQ(getScene().getNumModels(), numModels + 1);
-    CHECK_EQ(model.getName(), params.getName());
-    CHECK_EQ(model.getPath(), params.getPath());
-    CHECK(!model.getVisible());
+    CHECK_EQ(models[0].getName(), params.getName());
+    CHECK_EQ(models[0].getPath(), params.getPath());
+    CHECK(!models[0].getVisible());
 }
 
 TEST_CASE_FIXTURE(ClientServer, "xyz_obj")
 {
     const auto initialNbModels = getScene().getNumModels();
-    CHECK_NOTHROW((makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
+    CHECK_NOTHROW((makeRequest<brayns::ModelParams, std::vector<brayns::ModelDescriptor>>(
         ADD_MODEL, {"monkey", BRAYNS_TESTDATA_MODEL_MONKEY_PATH})));
-    CHECK_NOTHROW((makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
+    CHECK_NOTHROW((makeRequest<brayns::ModelParams, std::vector<brayns::ModelDescriptor>>(
         ADD_MODEL, {"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH})));
     auto newNbModels = getScene().getNumModels();
     CHECK_EQ(initialNbModels + 2, newNbModels);
@@ -113,7 +113,7 @@ TEST_CASE_FIXTURE(ClientServer, "broken_xyz")
 {
     try
     {
-        makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
+        makeRequest<brayns::ModelParams, std::vector<brayns::ModelDescriptor>>(
             ADD_MODEL, {"broken", BRAYNS_TESTDATA_MODEL_BROKEN_PATH});
         REQUIRE(false);
     }
@@ -130,12 +130,12 @@ TEST_CASE_FIXTURE(ClientServer, "obj_zip")
 {
     const auto numModels = getScene().getNumModels();
     brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH};
-    auto model =
-        makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
-                                                                  params);
+    auto models =
+        makeRequest<brayns::ModelParams, std::vector<brayns::ModelDescriptor>>(
+                ADD_MODEL, params);
     CHECK_EQ(getScene().getNumModels(), numModels + 1);
-    CHECK_EQ(model.getName(), params.getName());
-    CHECK_EQ(model.getPath(), params.getPath());
+    CHECK_EQ(models[0].getName(), params.getName());
+    CHECK_EQ(models[0].getPath(), params.getPath());
 }
 #endif
 
@@ -148,12 +148,12 @@ TEST_CASE_FIXTURE(ClientServer, "mesh_loader_properties_valid")
     brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH,
                                properties};
 
-    auto model =
-        makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
-                                                                  params);
+    auto models =
+        makeRequest<brayns::ModelParams, std::vector<brayns::ModelDescriptor>>(
+                ADD_MODEL, params);
     CHECK_EQ(getScene().getNumModels(), numModels + 1);
-    CHECK_EQ(model.getName(), params.getName());
-    CHECK_EQ(model.getPath(), params.getPath());
+    CHECK_EQ(models[0].getName(), params.getName());
+    CHECK_EQ(models[0].getPath(), params.getPath());
 }
 
 TEST_CASE_FIXTURE(ClientServer, "mesh_loader_properties_invalid")
@@ -165,8 +165,8 @@ TEST_CASE_FIXTURE(ClientServer, "mesh_loader_properties_invalid")
 
     try
     {
-        makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
-                                                                  params);
+        makeRequest<brayns::ModelParams, std::vector<brayns::ModelDescriptor>>(
+                    ADD_MODEL, params);
         REQUIRE(false);
     }
     catch (std::runtime_error& e)
@@ -190,19 +190,19 @@ TEST_CASE_FIXTURE(ClientServer, "protein_loader")
     brayns::ModelParams params{"1mbs", BRAYNS_TESTDATA_MODEL_PDB_PATH,
                                properties};
 
-    auto model =
-        makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
-                                                                  params);
+    auto models =
+        makeRequest<brayns::ModelParams, std::vector<brayns::ModelDescriptor>>(
+                ADD_MODEL, params);
     CHECK_EQ(getScene().getNumModels(), numModels + 1);
-    CHECK_EQ(model.getName(), params.getName());
-    CHECK_EQ(model.getPath(), params.getPath());
-    CHECK(!model.getBounds().isEmpty());
+    CHECK_EQ(models[0].getName(), params.getName());
+    CHECK_EQ(models[0].getPath(), params.getPath());
+    CHECK(!models[0].getBounds().isEmpty());
 }
 
 TEST_CASE_FIXTURE(ClientServer, "cancel")
 {
     auto request = getJsonRpcClient()
-                       .request<brayns::ModelParams, brayns::ModelDescriptor>(
+                       .request<brayns::ModelParams, std::vector<brayns::ModelDescriptor>>(
                            ADD_MODEL, {"forever", "forever"});
 
     request.cancel();
@@ -221,7 +221,7 @@ TEST_CASE_FIXTURE(ClientServer, "close_client_while_pending_request")
 
     auto responseFuture =
         rockets::jsonrpc::Client<rockets::ws::Client>{*wsClient}
-            .request<brayns::ModelParams, brayns::ModelDescriptor>(
+            .request<brayns::ModelParams, std::vector<brayns::ModelDescriptor>>(
                 ADD_MODEL, {"monkey", BRAYNS_TESTDATA_MODEL_MONKEY_PATH});
 
     auto asyncWait =
@@ -241,7 +241,7 @@ TEST_CASE_FIXTURE(ClientServer, "close_client_while_pending_request")
 TEST_CASE_FIXTURE(ClientServer, "folder")
 {
     CHECK_THROWS_AS(
-        (makeRequest<brayns::ModelParams, brayns::ModelDescriptorPtr>(
+        (makeRequest<brayns::ModelParams, std::vector<brayns::ModelDescriptor>>(
             ADD_MODEL, {"folder", BRAYNS_TESTDATA_VALID_MODELS_PATH})),
         rockets::jsonrpc::response_error);
 }
