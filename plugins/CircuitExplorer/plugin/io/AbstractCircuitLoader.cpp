@@ -710,9 +710,9 @@ void AbstractCircuitLoader::_importMeshes(
 }
 #else
 void AbstractCircuitLoader::_importMeshes(
-    brayns::Model &, const brain::GIDSet &, const brayns::Matrix4s &,
-    const GIDOffsets &, const size_ts &, const size_ts &, const size_ts &,
-    const CircuitColorScheme &, const brayns::LoaderProgress &) const
+    const brayns::PropertyMap &properties, brayns::Model &model,
+    const brain::GIDSet &gids, const Matrix4fs &transformations,
+    const brayns::LoaderProgress &callback, CellObjectMapper& mapper) const
 {
 }
 #endif

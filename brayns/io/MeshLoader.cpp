@@ -37,11 +37,6 @@
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
-#ifdef USE_CUSTOM_PLY_IMPORTER
-#include "assimpImporters/PlyLoader.h"
-#endif
-#include "assimpImporters/ObjFileImporter.h"
-
 namespace brayns
 {
 namespace
@@ -104,18 +99,6 @@ std::unique_ptr<Assimp::Importer> createImporter(const LoaderProgress& callback,
 {
     std::unique_ptr<Assimp::Importer> importer = std::make_unique<Assimp::Importer>();
     importer->SetProgressHandler(new ProgressWatcher(callback, filename));
-
-// WAR for https://github.com/assimp/assimp/issues/2337; use PLY importer
-// from commit dcc5887
-#ifdef USE_CUSTOM_PLY_IMPORTER
-    {
-        importer->UnregisterLoader(importer->GetImporter("ply"));
-        importer->RegisterLoader(new Assimp::PLYImporter());
-    }
-#endif
-
-    importer->UnregisterLoader(importer->GetImporter("obj"));
-    importer->RegisterLoader(new Assimp::ObjFileImporter());
     return importer;
 }
 }
