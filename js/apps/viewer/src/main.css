@@ -1,9 +1,0 @@
-body {
-    /**
-     * TODO: We need to do this because Material UI
-     * If we have tooltips inside a persistent drawer the scrollbar on Y will be visible
-     * @see https://github.com/mui-org/material-ui/issues/10881,
-     * https://github.com/mui-org/material-ui/issues/9362
-     */
-    overflow: hidden;
-}
