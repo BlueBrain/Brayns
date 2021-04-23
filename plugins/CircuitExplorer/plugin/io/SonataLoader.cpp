@@ -33,7 +33,6 @@ brayns::PropertyMap SonataLoader::getCLIProperties()
     properties.setProperty({"populations", std::vector<std::string>(), {"Populations to load"}});
     properties.setProperty({"reports", std::vector<std::string>(), {"Reports to load"}});
     properties.setProperty({"reportTypes", std::vector<std::string>(), {"Report types to load"}});
-    //properties.setProperty({"densities", std::vector<double>(), {"Normalized population densities"}});
     auto pm = AdvancedCircuitLoader::getCLIProperties();
     properties.merge(pm);
     return properties;
@@ -62,8 +61,7 @@ SonataLoader::_loadFromBlueConfig(const std::string& file, const brayns::LoaderP
             props.getPropertyRef<std::vector<std::string>>("reports");
     const std::vector<std::string>& populationReportTypes =
             props.getPropertyRef<std::vector<std::string>>("reportTypes");
-    //const std::vector<double>& populationDensities =
-    //        props.getProperty<std::vector<double>>("densities");
+    const double density = props.getProperty<double>(PROP_DENSITY.name);
 
     if(populationNames.size() != populationReports.size()
         || populationNames.size() != populationReportTypes.size())
@@ -74,13 +72,14 @@ SonataLoader::_loadFromBlueConfig(const std::string& file, const brayns::LoaderP
         // Default properties used for each loaded population
         brayns::PropertyMap defaultProperties = AdvancedCircuitLoader::getCLIProperties();
         defaultProperties.updateProperty(PROP_SECTION_TYPE_APICAL_DENDRITE.name, true);
-        defaultProperties.updateProperty(PROP_SECTION_TYPE_AXON.name, true);
+        defaultProperties.updateProperty(PROP_SECTION_TYPE_AXON.name, false);
         defaultProperties.updateProperty(PROP_SECTION_TYPE_DENDRITE.name, true);
         defaultProperties.updateProperty(PROP_SECTION_TYPE_SOMA.name, true);
         defaultProperties.updateProperty(PROP_USER_DATA_TYPE.name, std::string("Simulation offset"));
         defaultProperties.updateProperty(PROP_LOAD_LAYERS.name, false);
         defaultProperties.updateProperty(PROP_LOAD_ETYPES.name, false);
         defaultProperties.updateProperty(PROP_LOAD_MTYPES.name, false);
+        defaultProperties.updateProperty(PROP_USE_SDF_GEOMETRY.name, true);
         defaultProperties.setProperty(PROP_PRESYNAPTIC_NEURON_GID);
         defaultProperties.setProperty(PROP_POSTSYNAPTIC_NEURON_GID);
 
@@ -88,7 +87,6 @@ SonataLoader::_loadFromBlueConfig(const std::string& file, const brayns::LoaderP
         const auto& populationName = populationNames[i];
         const auto& populationReport = populationReports[i];
         const auto& populationReportType = populationReportTypes[i];
-        const auto density = 1.0;
 
         PLUGIN_INFO << "Loading population " << populationName << std::endl;
 
@@ -106,8 +104,6 @@ SonataLoader::_loadFromBlueConfig(const std::string& file, const brayns::LoaderP
         else
             config = std::make_unique<brion::BlueConfig>(
                         file, brion::BlueConfigSection::CONFIGSECTION_CIRCUIT, populationName);
-
-        std::cout << 1 << std::endl;
 
         // Import the model
         auto model = importCircuitFromBlueConfig(*config, defaultProperties, cb);
