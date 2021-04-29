@@ -46,7 +46,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exceptional.h"
 
 #include <assimp/ProgressHandler.hpp>
+#include <assimp/ai_assert.h>
 #include <assimp/types.h>
+#include <map>
 #include <set>
 #include <vector>
 
@@ -80,6 +82,11 @@ class ASSIMP_API BaseImporter
 {
     friend class Importer;
 
+#ifdef ASSIMP_VERSION_5_0_1
+private:
+    /* Pushes state into importer for the importer scale */
+    virtual void UpdateImporterScale(Importer* pImp);
+#endif
 public:
     /** Constructor to be privately used by #Importer */
     BaseImporter();
@@ -137,6 +144,7 @@ public:
      * string if there was no error.
      */
     const std::string& GetErrorText() const { return m_ErrorText; }
+
     // -------------------------------------------------------------------
     /** Called prior to ReadFile().
      * The function is a request to the importer to update its configuration
@@ -150,6 +158,49 @@ public:
      *  some loader features. Importers must provide this information. */
     virtual const aiImporterDesc* GetInfo() const = 0;
 
+#ifdef ASSIMP_VERSION_5_0_1
+    /**
+     * Will be called only by scale process when scaling is requested.
+     */
+    virtual void SetFileScale(double scale) { fileScale = scale; }
+
+    virtual double GetFileScale() const { return fileScale; }
+
+    enum ImporterUnits
+    {
+        M,
+        MM,
+        CM,
+        INCHES,
+        FEET
+    };
+
+    /**
+     * Assimp Importer
+     * unit conversions available
+     * if you need another measurment unit add it below.
+     * it's currently defined in assimp that we prefer meters.
+     * */
+    std::map<ImporterUnits, double> importerUnits = {{ImporterUnits::M, 1},
+                                                     {ImporterUnits::CM, 0.01},
+                                                     {ImporterUnits::MM, 0.001},
+                                                     {ImporterUnits::INCHES,
+                                                      0.0254},
+                                                     {ImporterUnits::FEET,
+                                                      0.3048}};
+
+    virtual void SetApplicationUnits(const ImporterUnits& unit)
+    {
+        importerScale = importerUnits[unit];
+        applicationUnits = unit;
+    }
+
+    virtual const ImporterUnits& GetApplicationUnits()
+    {
+        return applicationUnits;
+    }
+#endif
+
     // -------------------------------------------------------------------
     /** Called by #Importer::GetExtensionList for each loaded importer.
      *  Take the extension list contained in the structure returned by
@@ -158,6 +209,12 @@ public:
     void GetExtensionList(std::set<std::string>& extensions);
 
 protected:
+#ifdef ASSIMP_VERSION_5_0_1
+    ImporterUnits applicationUnits = ImporterUnits::M;
+    double importerScale = 1.0;
+    double fileScale = 1.0;
+#endif
+
     // -------------------------------------------------------------------
     /** Imports the given file into the given scene structure. The
      * function is expected to throw an ImportErrorException if there is
@@ -302,8 +359,7 @@ public: // static utilities
      * ignored.
      *
      *  @param data File buffer to be converted from UTF8 to ISO-8859-1. The
-     * buffer
-     *  is resized as appropriate. */
+     * buffer is resized as appropriate. */
     static void ConvertUTF8toISO8859_1(std::string& data);
 
     // -------------------------------------------------------------------
