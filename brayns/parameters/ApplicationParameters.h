@@ -92,6 +92,7 @@ public:
     const std::string& getEnvMap() const { return _envMap; }
     const std::string& getSandboxPath() const { return _sandBoxPath; }
     const strings& getInputPaths() const { return _inputPaths; }
+    const strings& getPlugins() const { return _plugins; }
     po::positional_options_description& posArgs() { return _positionalArgs; }
     bool getUseQuantaRenderControl() const { return _useQuantaRenderControl; }
     void setUseQuantaRenderControl(bool value)
@@ -118,6 +119,7 @@ protected:
     bool _useQuantaRenderControl{false};
 
     strings _inputPaths;
+    strings _plugins;
 
     po::positional_options_description _positionalArgs;
 
