@@ -56,7 +56,12 @@ public:
      * @brief returns a void pointer to the simulation data for the given frame
      * or nullptr if the frame is not loaded yet.
      */
-    virtual void* getFrameData(uint32_t frame BRAYNS_UNUSED)
+    void* getFrameData(uint32_t frame)
+    {
+        return getFrameDataImpl(_getBoundedFrame(frame));
+    }
+
+    virtual void* getFrameDataImpl(uint32_t frame BRAYNS_UNUSED)
     {
         return _frameData.data();
     }
@@ -77,6 +82,19 @@ public:
      * @brief setNbFrames sets the number of frame for the current simulation
      */
     void setNbFrames(const uint32_t nbFrames) { _nbFrames = nbFrames; }
+
+    /**
+     * @brief getStartTime Return the time at which the simulation begins
+     * @return double
+     */
+    double getStartTime() const { return _startTime; }
+
+    /**
+     * @brief getEndTime Return the time at which the simulation ends
+     * @return double
+     */
+    double getEndTime() const { return _endTime; }
+
     /**
      * @return the dt of the simulation in getUnit() time unit; 0 if not
      *         reported
@@ -95,6 +113,8 @@ protected:
     uint32_t _currentFrame{std::numeric_limits<uint32_t>::max()};
     uint32_t _nbFrames{0};
     uint64_t _frameSize{0};
+    double _startTime {0};
+    double _endTime{0};
     double _dt{0};
     std::string _unit;
 

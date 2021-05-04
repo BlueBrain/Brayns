@@ -1,10 +1,13 @@
 # Change Log
 
+## [1.1.0](https://github.com/BlueBrain/Brayns/tree/1.1.0)
+
 **Implemented enhancements:**
 
 - Hot circuit color scheme switch [\#873](https://github.com/BlueBrain/Brayns/pull/873)
 - PBRT Engines integration [\#877](https://github.com/BlueBrain/Brayns/pull/877)
 - JSon engine update and some improvements [\#888](https://github.com/BlueBrain/Brayns/pull/888)
+- Simulation rendering improvements in OSPRay and PBRT [\#899](https://github.com/BlueBrain/Brayns/pull/899)
 
 **Fixed bugs:**
 
@@ -41,6 +44,10 @@
 - Brion update and misc fixes [\#887](https://github.com/BlueBrain/Brayns/pull/887)
 - Improvements and fixes [\#889](https://github.com/BlueBrain/Brayns/pull/889)
 - Added missing default property for spike transition time to advanced circuit loader [\#891](https://github.com/BlueBrain/Brayns/pull/891)
+- Fixed read the docs python documentation build [\#893](https://github.com/BlueBrain/Brayns/pull/893)
+- Fixed full morphology spike report rendering [\#895](https://github.com/BlueBrain/Brayns/pull/895)
+- DTI Plugin and export frames to disk fixes [\#900](https://github.com/BlueBrain/Brayns/pull/900)
+- Simulation rendering fixes on PBRT engine [\#902](https://github.com/BlueBrain/Brayns/pull/902)
 
 **Merged pull requests:**
 
@@ -74,6 +81,11 @@
 - Bumping Brion version to 3.2.0 [\#883](https://github.com/BlueBrain/Brayns/pull/883)
 - Adding clientstate support [\#884](https://github.com/BlueBrain/Brayns/pull/884)
 - Adding ci-get-spike-report-info entry point to CircuitInfo plugin [\#890](https://github.com/BlueBrain/Brayns/pull/890)
+- Bumping submodule Brion to newer version [\#897](https://github.com/BlueBrain/Brayns/pull/897)
+- Update minimum required CMake version [\#903](https://github.com/BlueBrain/Brayns/pull/903)
+- Update DockerFile to accomodate recent Brayns changes [\#905](https://github.com/BlueBrain/Brayns/pull/905)
+- Needed additions and fixes in preparation for the MOOC [\#904](https://github.com/BlueBrain/Brayns/pull/904)
+- Bumped Brion submodule to 3.3.1 [\#909](https://github.com/BlueBrain/Brayns/pull/909)
 
 ## [1.0.0](https://github.com/BlueBrain/Brayns/tree/1.0.0) (13-09-2019)
 **Implemented enhancements:**

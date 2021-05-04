@@ -166,21 +166,21 @@ bool RawVolumeLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
     return extension == "raw";
 }
 
-ModelDescriptorPtr RawVolumeLoader::importFromBlob(
+std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback,
     const PropertyMap& properties) const
 {
-    return _loadVolume(blob.name, callback, properties, [&blob](auto volume) {
+    return {_loadVolume(blob.name, callback, properties, [&blob](auto volume) {
         volume->mapData(std::move(blob.data));
-    });
+    })};
 }
 
-ModelDescriptorPtr RawVolumeLoader::importFromFile(
+std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
     const PropertyMap& properties) const
 {
-    return _loadVolume(filename, callback, properties,
-                       [filename](auto volume) { volume->mapData(filename); });
+    return {_loadVolume(filename, callback, properties,
+                       [filename](auto volume) { volume->mapData(filename); })};
 }
 
 ModelDescriptorPtr RawVolumeLoader::_loadVolume(
@@ -256,14 +256,14 @@ bool MHDVolumeLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
     return extension == "mhd";
 }
 
-ModelDescriptorPtr MHDVolumeLoader::importFromBlob(
+std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromBlob(
     Blob&& blob BRAYNS_UNUSED, const LoaderProgress&,
     const PropertyMap& properties BRAYNS_UNUSED) const
 {
     throw std::runtime_error("Volume loading from blob is not supported");
 }
 
-ModelDescriptorPtr MHDVolumeLoader::importFromFile(
+std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
     const PropertyMap&) const
 {

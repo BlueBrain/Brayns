@@ -37,18 +37,18 @@ public:
 
     bool isSupported(const std::string& filename,
                      const std::string& extension) const final;
-    ModelDescriptorPtr importFromBlob(
+    std::vector<ModelDescriptorPtr> importFromBlob(
         Blob&& blob, const LoaderProgress& callback,
         const PropertyMap& properties) const final;
 
-    ModelDescriptorPtr importFromFile(
+    std::vector<ModelDescriptorPtr> importFromFile(
         const std::string& filename, const LoaderProgress& callback,
         const PropertyMap& properties) const final;
 
 private:
-    ModelDescriptorPtr loadExtracted(const std::string& path,
-                                     const LoaderProgress& callback,
-                                     const PropertyMap& properties) const;
+    std::vector<ModelDescriptorPtr> loadExtracted(const std::string& path,
+                                                  const LoaderProgress& callback,
+                                                  const PropertyMap& properties) const;
     LoaderRegistry& _registry;
 };
 }

@@ -41,7 +41,7 @@ public:
 
     static brayns::PropertyMap getCLIProperties();
 
-    brayns::ModelDescriptorPtr importFromFile(
+   std::vector<brayns::ModelDescriptorPtr> importFromFile(
         const std::string &filename, const brayns::LoaderProgress &callback,
         const brayns::PropertyMap &properties) const final;
 

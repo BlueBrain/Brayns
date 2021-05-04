@@ -41,11 +41,11 @@ public:
 
     bool isSupported(const std::string& filename,
                      const std::string& extension) const final;
-    ModelDescriptorPtr importFromFile(
+    std::vector<ModelDescriptorPtr> importFromFile(
         const std::string& fileName, const LoaderProgress& callback,
         const PropertyMap& properties) const final;
 
-    ModelDescriptorPtr importFromBlob(Blob&&, const LoaderProgress&,
+    std::vector<ModelDescriptorPtr> importFromBlob(Blob&&, const LoaderProgress&,
                                       const PropertyMap&) const final
     {
         throw std::runtime_error("Loading from blob not supported");

@@ -141,7 +141,7 @@ bool MeshLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
     return std::find(types.begin(), types.end(), extension) != types.end();
 }
 
-ModelDescriptorPtr MeshLoader::importFromFile(
+std::vector<ModelDescriptorPtr> MeshLoader::importFromFile(
     const std::string& fileName, const LoaderProgress& callback,
     const PropertyMap& inProperties) const
 {
@@ -163,10 +163,10 @@ ModelDescriptorPtr MeshLoader::importFromFile(
     auto modelDescriptor =
         std::make_shared<ModelDescriptor>(std::move(model), fileName, metadata);
     modelDescriptor->setTransformation(transformation);
-    return modelDescriptor;
+    return {modelDescriptor};
 }
 
-ModelDescriptorPtr MeshLoader::importFromBlob(
+std::vector<ModelDescriptorPtr> MeshLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback,
     const PropertyMap& propertiesTmp) const
 {
@@ -206,7 +206,7 @@ ModelDescriptorPtr MeshLoader::importFromBlob(
         std::make_shared<ModelDescriptor>(std::move(model), blob.name,
                                           metadata);
     modelDescriptor->setTransformation(transformation);
-    return modelDescriptor;
+    return {modelDescriptor};
 }
 
 void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,

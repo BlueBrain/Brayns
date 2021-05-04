@@ -82,12 +82,12 @@ public:
     brayns::PropertyMap getProperties() const final;
 
     /** @copydoc Loader::importFromBlob */
-    brayns::ModelDescriptorPtr importFromBlob(
+    std::vector<brayns::ModelDescriptorPtr> importFromBlob(
         brayns::Blob&& blob, const brayns::LoaderProgress& callback,
         const brayns::PropertyMap& properties) const final;
 
     /** @copydoc Loader::importFromFile */
-    brayns::ModelDescriptorPtr importFromFile(
+    std::vector<brayns::ModelDescriptorPtr> importFromFile(
         const std::string& filename, const brayns::LoaderProgress& callback,
         const brayns::PropertyMap& properties) const final;
 

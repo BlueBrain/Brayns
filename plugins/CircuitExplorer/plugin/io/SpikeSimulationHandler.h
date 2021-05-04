@@ -38,7 +38,7 @@ public:
                            const float transitionTime = 0.5f);
     SpikeSimulationHandler(const SpikeSimulationHandler& rhs);
 
-    void* getFrameData(const uint32_t frame) final;
+    void* getFrameDataImpl(const uint32_t frame) final;
 
     const std::string& getReportPath() const { return _reportPath; }
     SpikeReportReaderPtr getReport() const { return _spikeReport; }

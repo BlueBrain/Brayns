@@ -22,6 +22,8 @@
 // Brayns
 #include "CircuitExplorerAbstractRenderer.ih"
 
+#include <engines/ospray/ispc/model/OSPRayISPCModel.ih>
+
 struct CircuitExplorerSimulationRenderer
 {
     CircuitExplorerAbstractRenderer super;
@@ -81,11 +83,14 @@ static inline uint64 getOffset(const uniform Geometry* geometry,
 inline vec4f getSimulationValue(
     const uniform CircuitExplorerSimulationRenderer* uniform self,
     varying DifferentialGeometry* dg, const varying int primID)
-{
+{   
     if (self->simulationDataSize == 0)
         return make_vec4f(1.f, 0.f, 0.f, 1.f);
 
-    const uint64 offset = getOffset(dg->geometry, primID);
+    const uniform Geometry* geometry = dg->geometry;
+    const uniform OSPRayISPCModel* model = (const uniform OSPRayISPCModel*)geometry->model;
+
+    const uint64 offset = getOffset(dg->geometry, primID) + model->simOffset;
     if (offset < self->simulationDataSize)
     {
         const varying float value = self->simulationData[offset];

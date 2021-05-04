@@ -29,18 +29,18 @@ void CellObjectMapper::remove(const size_t gid)
         _cellToRenderableMap.erase(it);
 }
 
-RemapCircuitResult
+RemapResult
 CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
                                      brayns::Scene& scene)
 {
-    RemapCircuitResult result;
+    RemapResult result;
     result.error = 0;
     result.message = "";
+    result.updated = true;
 
     if(scheme == _lastScheme)
     {
-        result.error = 2;
-        result.message = "The requested scheme matches the active one";
+        result.updated = false;
         return result;
     }
 
@@ -76,13 +76,12 @@ CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
         // Copy the simulation handler
         auto sh = _model->getModel().getSimulationHandler();
         if(sh)
-            newModel->setSimulationHandler(sh);
-
-        // Copy the transfer function (only use for simulation)
-        auto& tf = _model->getModel().getTransferFunction();
-        newModel->getTransferFunction().setControlPoints(tf.getControlPoints());
-        newModel->getTransferFunction().setColorMap(tf.getColorMap());
-        newModel->getTransferFunction().setValuesRange(tf.getValuesRange());
+        {
+            newModel->setSimulationHandler(sh->clone());
+            // Reset simulation handler current frame so the simulation data gets commited
+            // (current frame != animation params current frame)
+            sh->setCurrentFrame(std::numeric_limits<uint32_t>::max());
+        }
 
         // Create the new materials given the new scheme
         brayns::PropertyMap materialProps;
@@ -346,6 +345,9 @@ size_t CellObjectMapper::_computeMaterialId(const CircuitColorScheme scheme,
     size_t materialId = 0;
     switch (scheme)
     {
+    case CircuitColorScheme::single_material:
+        materialId = 1;
+        break;
     case CircuitColorScheme::by_id:
         materialId = NB_MATERIALS_PER_INSTANCE * index;
         break;

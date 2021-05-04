@@ -29,7 +29,7 @@ namespace
 const float DEFAULT_REST_VALUE = -80.f;
 const float DEFAULT_SPIKING_VALUE = -1.f;
 const float DEFAULT_TIME_INTERVAL = 0.01f;
-const float DEFAULT_DECAY_SPEED = 1.f;
+
 } // namespace
 
 SpikeSimulationHandler::SpikeSimulationHandler(const std::string& reportPath,
@@ -49,7 +49,9 @@ SpikeSimulationHandler::SpikeSimulationHandler(const std::string& reportPath,
     }
 
     // Load simulation information from compartment reports
-    _nbFrames = _spikeReport->getEndTime() / DEFAULT_TIME_INTERVAL;
+    _startTime = 0.0;
+    _endTime = _spikeReport->getEndTime();
+    _nbFrames = _endTime / DEFAULT_TIME_INTERVAL;
     _dt = DEFAULT_TIME_INTERVAL;
     _frameSize = _gids.size();
     _frameData.resize(_frameSize, DEFAULT_REST_VALUE);
@@ -60,7 +62,7 @@ SpikeSimulationHandler::SpikeSimulationHandler(const std::string& reportPath,
     PLUGIN_INFO << "----------------------" << std::endl;
     PLUGIN_INFO << "Report path           : " << _reportPath << std::endl;
     PLUGIN_INFO << "Frame size (# of GIDs): " << _frameSize << std::endl;
-    PLUGIN_INFO << "End time              : " << _spikeReport->getEndTime()
+    PLUGIN_INFO << "End time              : " << _endTime
                 << std::endl;
     PLUGIN_INFO << "Time interval         : " << DEFAULT_TIME_INTERVAL
                 << std::endl;
@@ -82,14 +84,13 @@ SpikeSimulationHandler::SpikeSimulationHandler(
 {
 }
 
-void* SpikeSimulationHandler::getFrameData(const uint32_t frame)
+void* SpikeSimulationHandler::getFrameDataImpl(const uint32_t frame)
 {
-    const auto boundedFrame = _getBoundedFrame(frame);
-    if (_currentFrame != boundedFrame)
+    if (_currentFrame != frame)
     {
         std::fill(_frameData.begin(), _frameData.end(), DEFAULT_REST_VALUE);
 
-        const float currentFrameTime = static_cast<float>(boundedFrame) * _dt;
+        const float currentFrameTime = static_cast<float>(frame) * _dt;
         const auto trStart = currentFrameTime - _transition;
         const auto trEnd = currentFrameTime + _transition;
         const auto spikes = _spikeReport->getSpikes(trStart, trEnd);
@@ -119,7 +120,7 @@ void* SpikeSimulationHandler::getFrameData(const uint32_t frame)
             else
                 _frameData[gid] = DEFAULT_SPIKING_VALUE;
         }
-        _currentFrame = boundedFrame;
+        _currentFrame = frame;
     }
 
     return _frameData.data();

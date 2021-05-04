@@ -48,7 +48,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
 
@@ -80,7 +80,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
 
@@ -118,7 +118,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
 
@@ -150,7 +150,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
 
@@ -181,7 +181,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
 
@@ -213,7 +213,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
 
@@ -246,7 +246,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
 
@@ -277,7 +277,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
 
@@ -315,7 +315,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
 
@@ -346,7 +346,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
 
@@ -378,7 +378,7 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.
 
 ----
 
@@ -409,4 +409,4 @@ Error:
 In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
 
 * ``error``: ``integer``, an error code that identifies the problem.
-* ``messge``: ``str``, a description of the error.
+* ``message``: ``str``, a description of the error.

@@ -208,9 +208,10 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
 
     const auto dbConnectionString =
         properties.getProperty<std::string>(PROP_DB_CONNECTION_STRING.name);
-    const auto synchronousMode =
-        !properties.getProperty<bool>(PROP_SYNCHRONOUS_MODE.name);
 
+    const auto synchronousMode =
+        properties.getProperty<bool>(PROP_SYNCHRONOUS_MODE.name);
+    
     brayns::AbstractSimulationHandlerPtr simulationHandler{nullptr};
     switch (reportType)
     {
@@ -238,7 +239,7 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
         model.setSimulationHandler(handler);
 
         simulationHandler = handler;
-        setSimulationTransferFunction(model.getTransferFunction());
+        setSimulationTransferFunction(_scene.getTransferFunction());
         break;
     }
     case ReportType::spikes:
@@ -253,7 +254,7 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
                                                      static_cast<float>(transitionTime));
         model.setSimulationHandler(handler);
         simulationHandler = handler;
-        setSimulationTransferFunction(model.getTransferFunction());
+        setSimulationTransferFunction(_scene.getTransferFunction());
         break;
     }
     case ReportType::undefined:
@@ -265,7 +266,7 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
         {
             auto handler = std::make_shared<CellGrowthHandler>(100);
             model.setSimulationHandler(handler);
-            setSimulationTransferFunction(model.getTransferFunction(), 0.f);
+            setSimulationTransferFunction(_scene.getTransferFunction(), 0.f);
         }
         else
             PLUGIN_THROW("Unknown report type. Simulation ignored");
@@ -355,6 +356,15 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
     const brayns::PropertyMap &properties,
     const brayns::LoaderProgress &callback) const
 {
+    const brion::BlueConfig blueConfiguration(circuitConfiguration);
+    return importCircuitFromBlueConfig(blueConfiguration, properties, callback);
+}
+
+brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuitFromBlueConfig(
+    const brion::BlueConfig& blueConfiguration,
+    const brayns::PropertyMap &properties,
+    const brayns::LoaderProgress &callback) const
+{
     const auto colorScheme = stringToEnum<CircuitColorScheme>(
         properties.getProperty<std::string>(PROP_CIRCUIT_COLOR_SCHEME.name));
     const auto morphologyScheme = stringToEnum<MorphologyColorScheme>(
@@ -381,8 +391,6 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
         PLUGIN_THROW("Failed to create model");
 
     // Open Circuit and select GIDs according to specified target
-    callback.updateProgress("Open Brion circuit ...", 0);
-    const brion::BlueConfig blueConfiguration(circuitConfiguration);
     callback.updateProgress("Open Brain circuit ...", 0);
     const brain::Circuit circuit(blueConfiguration);
 
@@ -459,7 +467,7 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
     if (userDataType == UserDataType::distance_to_soma)
     {
         // Update cell growth information
-        model->getTransferFunction().setValuesRange({0.f, maxMorphologyLength});
+        _scene.getTransferFunction().setValuesRange({0.f, maxMorphologyLength});
         const auto frameSize = uint64_t(maxMorphologyLength) + 1;
         model->getSimulationHandler()->setFrameSize(frameSize);
         model->getSimulationHandler()->setNbFrames(frameSize);
@@ -505,14 +513,14 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
         {"Number of neurons", std::to_string(allGids.size())},
         {"Density", std::to_string(properties.getProperty<double>(PROP_DENSITY.name))},
         {"RandomSeed", std::to_string(properties.getProperty<double>(PROP_RANDOM_SEED.name))},
-        {"CircuitPath", circuitConfiguration}};
+        {"CircuitPath", blueConfiguration.getSource()}};
 
     brayns::ModelDescriptorPtr modelDescriptor;
     brayns::Transformation transformation;
     transformation.setRotationCenter(circuitCenter.getCenter());
     modelDescriptor =
         std::make_shared<brayns::ModelDescriptor>(std::move(model), "Circuit",
-                                                  circuitConfiguration,
+                                                  blueConfiguration.getSource(),
                                                   metadata);
     modelDescriptor->setTransformation(transformation);
 
@@ -547,6 +555,9 @@ size_t AbstractCircuitLoader::_getMaterialFromCircuitAttributes(
     size_t materialId = 0;
     switch (colorScheme)
     {
+    case CircuitColorScheme::single_material:
+        materialId = 1;
+        break;
     case CircuitColorScheme::by_id:
         materialId = NB_MATERIALS_PER_INSTANCE * index;
         break;
@@ -699,9 +710,9 @@ void AbstractCircuitLoader::_importMeshes(
 }
 #else
 void AbstractCircuitLoader::_importMeshes(
-    brayns::Model &, const brain::GIDSet &, const brayns::Matrix4s &,
-    const GIDOffsets &, const size_ts &, const size_ts &, const size_ts &,
-    const CircuitColorScheme &, const brayns::LoaderProgress &) const
+    const brayns::PropertyMap &properties, brayns::Model &model,
+    const brain::GIDSet &gids, const Matrix4fs &transformations,
+    const brayns::LoaderProgress &callback, CellObjectMapper &mapper) const
 {
 }
 #endif
@@ -1177,7 +1188,7 @@ void AbstractCircuitLoader::_buildEfferentSynapses(
     model.addSphere(materialId, {synapse.getPresynapticSurfacePosition(), radius, userData});
 }
 
-brayns::ModelDescriptorPtr AbstractCircuitLoader::importFromBlob(
+std::vector<brayns::ModelDescriptorPtr> AbstractCircuitLoader::importFromBlob(
     brayns::Blob && /*blob*/, const brayns::LoaderProgress & /*callback*/,
     const brayns::PropertyMap & /*properties*/) const
 {

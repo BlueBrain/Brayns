@@ -29,7 +29,7 @@ namespace brayns
  * A task which loads data from the path of the given params and adds the loaded
  * model to the engines' scene.
  */
-class AddModelTask : public Task<ModelDescriptorPtr>
+class AddModelTask : public Task<std::vector<ModelDescriptorPtr>>
 {
 public:
     AddModelTask(const ModelParams& model, Engine& engine);

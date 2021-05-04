@@ -19,19 +19,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ADVANCEDCIRCUITLOADER_H
-#define ADVANCEDCIRCUITLOADER_H
+#pragma once
 
 #include "AbstractCircuitLoader.h"
 
-class AdvancedCircuitLoader : public AbstractCircuitLoader
+class SonataLoader : public AbstractCircuitLoader
 {
 public:
-    AdvancedCircuitLoader(
-        brayns::Scene &scene,
-        const brayns::ApplicationParameters &applicationParameters,
-        brayns::PropertyMap &&loaderParams,
-        CircuitExplorerPlugin* plugin);
+    SonataLoader(brayns::Scene &scene,
+                 const brayns::ApplicationParameters &applicationParameters,
+                 brayns::PropertyMap &&loaderParams,
+                 CircuitExplorerPlugin* plugin);
 
     std::string getName() const final;
 
@@ -40,6 +38,9 @@ public:
     std::vector<brayns::ModelDescriptorPtr> importFromFile(
         const std::string &filename, const brayns::LoaderProgress &callback,
         const brayns::PropertyMap &properties) const final;
-};
 
-#endif // ADVANCEDCIRCUITLOADER_H
+private:
+    std::vector<brayns::ModelDescriptorPtr>
+    _loadFromBlueConfig(const std::string& file, const brayns::LoaderProgress& cb,
+                        const brayns::PropertyMap& props) const;
+};

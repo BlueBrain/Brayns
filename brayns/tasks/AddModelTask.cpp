@@ -50,7 +50,7 @@ AddModelTask::AddModelTask(const ModelParams& modelParams, Engine& engine)
 
     // load data, return model descriptor
     _task = async::spawn(std::move(functor))
-                .then([&engine](async::task<ModelDescriptorPtr> result) {
+                .then([&engine](async::task<std::vector<ModelDescriptorPtr>> result) {
                     engine.triggerRender();
                     return result.get();
                 });

@@ -40,7 +40,7 @@ AdvancedCircuitLoader::AdvancedCircuitLoader(
         {PROP_POSTSYNAPTIC_NEURON_GID.name, std::string("")});
 }
 
-brayns::ModelDescriptorPtr AdvancedCircuitLoader::importFromFile(
+std::vector<brayns::ModelDescriptorPtr> AdvancedCircuitLoader::importFromFile(
     const std::string &filename, const brayns::LoaderProgress &callback,
     const brayns::PropertyMap &properties) const
 {
@@ -49,7 +49,7 @@ brayns::ModelDescriptorPtr AdvancedCircuitLoader::importFromFile(
     brayns::PropertyMap props = _defaults;
     props.merge(_fixedDefaults);
     props.merge(properties);
-    return importCircuit(filename, props, callback);
+    return {importCircuit(filename, props, callback)};
 }
 
 std::string AdvancedCircuitLoader::getName() const

@@ -52,7 +52,7 @@ bool Loader::isSupported(const std::string&, const std::string& extension) const
     return extension == "h5";
 }
 
-brayns::ModelDescriptorPtr Loader::importFromFile(
+std::vector<brayns::ModelDescriptorPtr> Loader::importFromFile(
     const std::string& fileName, const brayns::LoaderProgress& callback,
     const brayns::PropertyMap& /*properties*/) const
 {
@@ -64,6 +64,6 @@ brayns::ModelDescriptorPtr Loader::importFromFile(
         plugin->removeModel(modelDesc_.getModelID());
     });
 
-    return modelDesc;
+    return {modelDesc};
 }
 }

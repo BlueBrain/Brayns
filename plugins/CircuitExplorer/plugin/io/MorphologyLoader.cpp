@@ -933,14 +933,14 @@ size_t MorphologyLoader::_getMaterialIdFromColorScheme(
     return materialId;
 }
 
-brayns::ModelDescriptorPtr MorphologyLoader::importFromBlob(
+std::vector<brayns::ModelDescriptorPtr> MorphologyLoader::importFromBlob(
     brayns::Blob&& /*blob*/, const brayns::LoaderProgress& /*callback*/,
     const brayns::PropertyMap& /*properties*/) const
 {
     throw std::runtime_error("Load morphology from memory not supported");
 }
 
-brayns::ModelDescriptorPtr MorphologyLoader::importFromFile(
+std::vector<brayns::ModelDescriptorPtr> MorphologyLoader::importFromFile(
     const std::string& fileName, const brayns::LoaderProgress& /*callback*/,
     const brayns::PropertyMap& properties) const
 {
@@ -957,7 +957,7 @@ brayns::ModelDescriptorPtr MorphologyLoader::importFromFile(
 
     auto modelDescriptor =
         std::make_shared<brayns::ModelDescriptor>(std::move(model), fileName);
-    return modelDescriptor;
+    return {modelDescriptor};
 }
 
 brayns::PropertyMap MorphologyLoader::getProperties() const

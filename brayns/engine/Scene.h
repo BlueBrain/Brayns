@@ -23,6 +23,7 @@
 #include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/loader/LoaderRegistry.h>
+#include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/types.h>
 #include <brayns/engine/LightManager.h>
 
@@ -176,38 +177,16 @@ public:
     /** @return true if an environment map is currently set in the scene. */
     bool hasEnvironmentMap() const;
 
-    /**
-     * @brief setActiveSimulatedModel Sets the model defined by its ID as the active simulated model
-     *        When there are multiple models with simulation, only the one marked as active simulated
-     *        will have it's simulation played.
-     * @param modelId size_t, ID of the model to set active
-     */
-    void setActiveSimulatedModel(const size_t modelId);
-
-    /**
-     * @brief isActiveSimulatedModel Returns true whether the given model is the active
-     *        simulated model.
-     * @param model ModelDescriptor pointer
-     * @return bool, True if it is the active simulated model
-     */
-    bool isActiveSimulatedModel(const ModelDescriptorPtr& model) const;
-
-    /**
-     * @brief isActiveSimulatedModel Returns true whether the given model is the active
-     *        simulated model.
-     * @param modelID Model ID
-     * @return bool, True if it is the active simulated model
-     */
-    bool isActiveSimulatedModel(const size_t modelID) const;
-
-    /**
-     * @brief getActiveSimulatedModel Returns the ID of the model being simulated
-     * @return size_t ID of the model actively simulated
-     */
-    size_t getActiveSimulatedModel() const;
-
-
     MaterialPtr getBackgroundMaterial() const { return _backgroundMaterial; }
+
+    /** @return the transfer function used for volumes and simulations. */
+    TransferFunction& getTransferFunction() { return _transferFunction; }
+    /** @return the transfer function used for volumes and simulations. */
+    const TransferFunction& getTransferFunction() const
+    {
+        return _transferFunction;
+    }
+
     /**
      * Load the model from the given blob.
      *
@@ -216,8 +195,8 @@ public:
      * @param cb the callback for progress updates from the loader
      * @return the model that has been added to the scene
      */
-    ModelDescriptorPtr loadModel(Blob&& blob, const ModelParams& params,
-                                 LoaderProgress cb);
+    std::vector<ModelDescriptorPtr> loadModels(Blob&& blob, const ModelParams& params,
+                                               LoaderProgress cb);
 
     /**
      * Load the model from the given file.
@@ -227,8 +206,8 @@ public:
      * @param cb the callback for progress updates from the loader
      * @return the model that has been added to the scene
      */
-    ModelDescriptorPtr loadModel(const std::string& path,
-                                 const ModelParams& params, LoaderProgress cb);
+    std::vector<ModelDescriptorPtr> loadModels(const std::string& path,
+                                               const ModelParams& params, LoaderProgress cb);
 
     void visitModels(const std::function<void(Model&)>& functor);
 
@@ -250,13 +229,16 @@ protected:
     virtual bool supportsConcurrentSceneUpdates() const { return false; }
     void _computeBounds();
     void _loadIBLMaps(const std::string& envMap);
-    void _updateSimulatedModel(ModelDescriptorPtr& model, bool forceSim = true);
+
+    void _updateAnimationParameters();
 
     AnimationParameters& _animationParameters;
     GeometryParameters& _geometryParameters;
     VolumeParameters& _volumeParameters;
     MaterialPtr _backgroundMaterial;
     std::string _environmentMap;
+
+    TransferFunction _transferFunction;
 
     // Model
     size_t _modelID{0};

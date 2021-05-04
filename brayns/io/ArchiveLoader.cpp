@@ -205,7 +205,7 @@ bool ArchiveLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
     return isSupportedArchiveType(extension);
 }
 
-ModelDescriptorPtr ArchiveLoader::loadExtracted(
+std::vector<ModelDescriptorPtr> ArchiveLoader::loadExtracted(
     const std::string& path, const LoaderProgress& callback,
     const PropertyMap& properties) const
 {
@@ -234,7 +234,7 @@ ModelDescriptorPtr ArchiveLoader::loadExtracted(
     throw std::runtime_error("No loader found for archive.");
 }
 
-ModelDescriptorPtr ArchiveLoader::importFromBlob(
+std::vector<ModelDescriptorPtr> ArchiveLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback,
     const PropertyMap& properties) const
 {
@@ -243,7 +243,7 @@ ModelDescriptorPtr ArchiveLoader::importFromBlob(
     return loadExtracted(tmpFolder.path, callback, properties);
 }
 
-ModelDescriptorPtr ArchiveLoader::importFromFile(
+std::vector<ModelDescriptorPtr> ArchiveLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
     const PropertyMap& properties) const
 {

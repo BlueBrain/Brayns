@@ -65,7 +65,7 @@ PairSynapsesLoader::PairSynapsesLoader(
     _fixedDefaults.setProperty({PROP_LOAD_EFFERENT_SYNAPSES.name, true});
 }
 
-brayns::ModelDescriptorPtr PairSynapsesLoader::importFromFile(
+std::vector<brayns::ModelDescriptorPtr> PairSynapsesLoader::importFromFile(
     const std::string &filename, const brayns::LoaderProgress &callback,
     const brayns::PropertyMap &properties) const
 {
@@ -74,7 +74,7 @@ brayns::ModelDescriptorPtr PairSynapsesLoader::importFromFile(
     brayns::PropertyMap props = _defaults;
     props.merge(_fixedDefaults);
     props.merge(properties);
-    return importCircuit(filename, props, callback);
+    return {importCircuit(filename, props, callback)};
 }
 
 std::string PairSynapsesLoader::getName() const

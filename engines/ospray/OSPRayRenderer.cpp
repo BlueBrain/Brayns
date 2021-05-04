@@ -92,15 +92,13 @@ void OSPRayRenderer::commit()
     {
         _commitRendererMaterials();
 
-        if (auto simulationModel = scene->getSimulatedModel())
+        auto simulationData = scene->getSimulationData();
+        auto transferFunc = scene->getTransferFunctionImpl();
+        if (simulationData != nullptr && transferFunc != nullptr)
         {
-            auto& model =
-                static_cast<OSPRayModel&>(simulationModel->getModel());
-            ospSetObject(_renderer, "secondaryModel",
-                         model.getSecondaryModel());
-            ospSetData(_renderer, "simulationData", model.simulationData());
-            ospSetObject(_renderer, "transferFunction",
-                         model.transferFunction());
+            ospSetData(_renderer, "simulationData", simulationData);
+            ospSetObject(_renderer, "transferFunction", transferFunc);
+            ospSetObject(_renderer, "secondaryModel", nullptr);
         }
         else
         {

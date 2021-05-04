@@ -97,6 +97,7 @@ const std::string METHOD_GET_CLIP_PLANES = "get-clip-planes";
 const std::string METHOD_GET_ENVIRONMENT_MAP = "get-environment-map";
 const std::string METHOD_GET_INSTANCES = "get-instances";
 const std::string METHOD_GET_LOADERS = "get-loaders";
+const std::string METHOD_GET_MODEL = "get-model";
 const std::string METHOD_GET_MODEL_PROPERTIES = "get-model-properties";
 const std::string METHOD_GET_MODEL_TRANSFER_FUNCTION =
     "get-model-transfer-function";
@@ -1049,6 +1050,7 @@ public:
         _handleAddModel();
         _handleRemoveModel();
         _handleUpdateModel();
+        _handleGetModel();
         _handleSetModelProperties();
         _handleGetModelProperties();
         _handleModelPropertiesSchema();
@@ -1430,7 +1432,7 @@ public:
             Execution::async, "param",
             "size, type, name, transformation, etc."};
 
-        _handleTask<BinaryParam, ModelDescriptorPtr>(
+        _handleTask<BinaryParam, std::vector<ModelDescriptorPtr>>(
             desc, std::bind(&BinaryRequests::createTask,
                             std::ref(_binaryRequests), std::placeholders::_1,
                             std::placeholders::_2, std::ref(_engine)));
@@ -1457,9 +1459,9 @@ public:
 
         _bindModelEndpoint(METHOD_SET_MODEL_TRANSFER_FUNCTION,
                            "transfer_function", [&](const std::string& json,
-                                                    ModelDescriptorPtr model) {
+                                                    ModelDescriptorPtr) {
                                auto& tf =
-                                   model->getModel().getTransferFunction();
+                                   _engine.getScene().getTransferFunction();
                                if (!::from_json(tf, json))
                                    return false;
 
@@ -1485,7 +1487,7 @@ public:
                 if (!model)
                     throw rockets::jsonrpc::response_error("Model not found",
                                                            MODEL_NOT_FOUND);
-                return model->getModel().getTransferFunction();
+                return engine.getScene().getTransferFunction();
             });
 
         _handleSchema(METHOD_GET_MODEL_TRANSFER_FUNCTION,
@@ -2181,22 +2183,10 @@ public:
             "SetActiveSimulationModel", "The ID of the model to set as active"
         };
         _handleRPC<SetActiveSimulationModel, SetActiveSimulationModelResponse>
-                (descSetSimModel, [&](const SetActiveSimulationModel& req)
+                (descSetSimModel, [&](const SetActiveSimulationModel&)
         {
             SetActiveSimulationModelResponse result;
             result.error = 0;
-
-            try
-            {
-                _engine.getScene().setActiveSimulatedModel(req.modelId);
-                _engine.getScene().markModified();
-            }
-            catch(const std::exception& e)
-            {
-                result.error = 1;
-                result.message = std::string(e.what());
-            }
-
             return result;
         });
 
@@ -2209,15 +2199,7 @@ public:
                       (const rockets::jsonrpc::Request&)
         {
             GetActiveSimulationModel res;
-            try
-            {
-                res.modelId = _engine.getScene().getActiveSimulatedModel();
-            }
-            catch(const std::exception& e)
-            {
-                res.error = 1;
-                res.message = std::string(e.what());
-            }
+            res.modelId = 0;
 
             return Response{to_json(res)};
         });
@@ -2303,7 +2285,7 @@ public:
         auto func = [&](const ModelParams& modelParams, const auto) {
             return std::make_shared<AddModelTask>(modelParams, _engine);
         };
-        _handleTask<ModelParams, ModelDescriptorPtr>(desc, func);
+        _handleTask<ModelParams, std::vector<ModelDescriptorPtr>>(desc, func);
     }
 
     void _handleRemoveModel()
@@ -2334,6 +2316,7 @@ public:
                           if (auto model = scene.getModel(newDesc.getModelID()))
                           {
                               ::from_json(*model, request.message);
+                              model->computeBounds();
                               scene.markModified();
                               engine.triggerRender();
                               return Response{to_json(true)};
@@ -2345,6 +2328,34 @@ public:
             "model", "Model descriptor"};
         _handleSchema(METHOD_UPDATE_MODEL,
                       buildJsonRpcSchemaRequest<ModelDescriptor, bool>(desc));
+    }
+
+    void _handleGetModel()
+    {
+        const RpcParameterDescription desc{
+            METHOD_GET_MODEL,
+            "Get all the information of the given model", "modelId", "the model ID"};
+
+        _bindEndpoint(
+            METHOD_GET_MODEL,
+            [&](const rockets::jsonrpc::Request& request) {
+                ObjectID newDesc;
+                if (!::from_json(newDesc, request.message))
+                    return Response::invalidParams();
+
+                auto& scene = _engine.getScene();
+                auto model = scene.getModel(newDesc.id);
+                if (!model)
+                    throw rockets::jsonrpc::response_error("Model not found",
+                                                           MODEL_NOT_FOUND);
+
+
+
+                return Response{to_json(*model)};
+            });
+
+        _handleSchema(METHOD_GET_MODEL,
+                      buildJsonRpcSchemaRequest<ObjectID, ModelDescriptor>(desc));
     }
 
     void _handleGetModelProperties()

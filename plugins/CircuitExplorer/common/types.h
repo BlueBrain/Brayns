@@ -63,7 +63,8 @@ enum class CircuitColorScheme
     by_layer = 3,
     by_mtype = 4,
     by_etype = 5,
-    by_target = 6
+    by_target = 6,
+    single_material = 7
 };
 
 /** Morphology color scheme */
@@ -143,7 +144,8 @@ inline std::vector<std::pair<std::string, CircuitColorScheme>> enumerateMap()
             {"By layer", CircuitColorScheme::by_layer},
             {"By mtype", CircuitColorScheme::by_mtype},
             {"By etype", CircuitColorScheme::by_etype},
-            {"By target", CircuitColorScheme::by_target}};
+            {"By target", CircuitColorScheme::by_target},
+            {"Single material", CircuitColorScheme::single_material}};
 }
 
 template <>
@@ -222,11 +224,11 @@ const brayns::Property PROP_USER_DATA_TYPE = {
     enumerateNames<UserDataType>(),
     {"Type of data attached to morphology segments"}};
 const brayns::Property PROP_SYNCHRONOUS_MODE = {
-    "023SynchronousMode", false, {"Synchronous mode"}};
+    "023SynchronousMode", true, {"Synchronous mode"}};
 const brayns::Property PROP_SPIKE_TRANSITION_TIME = {
     "024SpikeTransitionTime", 1.0, {"Growth and fade of spike in seconds"}};
 const brayns::Property PROP_CIRCUIT_COLOR_SCHEME = {
-    "030CircuitColorScheme", enumToString(CircuitColorScheme::none),
+    "030CircuitColorScheme", enumToString(CircuitColorScheme::single_material),
     enumerateNames<CircuitColorScheme>(),
     {"Color scheme to be applied to the circuit"}};
 const brayns::Property PROP_MESH_FOLDER = {

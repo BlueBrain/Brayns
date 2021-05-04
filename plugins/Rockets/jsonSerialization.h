@@ -403,7 +403,7 @@ inline void init(brayns::SnapshotParams* s, ObjectHandler* h)
     h->add_property("renderer", &s->renderingParams, Flags::Optional);
     h->add_property("samples_per_pixel", &s->samplesPerPixel, Flags::Optional);
     h->add_property("size", toArray<2, uint32_t>(s->size));
-    h->add_property("filePath", &s->filePath, Flags::Optional);
+    h->add_property("file_path", &s->filePath, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -523,6 +523,8 @@ inline void init(brayns::ModelDescriptor* g, ObjectHandler* h)
     h->add_property("path", &g->_path, Flags::Optional);
     h->add_property("transformation", &g->_transformation, Flags::Optional);
     h->add_property("visible", &g->_visible, Flags::Optional);
+    h->add_property("loader_name", &g->_loaderName, Flags::Optional);
+    h->add_property("loader_properties", &g->_loaderProperties, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -544,6 +546,8 @@ inline void init(brayns::Scene* s, ObjectHandler* h)
 inline void init(brayns::ApplicationParameters* a, ObjectHandler* h)
 {
     h->add_property("engine", &a->_engine, Flags::IgnoreRead | Flags::Optional);
+    h->add_property("plugins", &a->_plugins,
+                    Flags::IgnoreRead | Flags::Optional);
     h->add_property("jpeg_compression", &a->_jpegCompression, Flags::Optional);
     h->add_property("image_stream_fps", &a->_imageStreamFPS, Flags::Optional);
     h->add_property("viewport", toArray<2, double>(a->_windowSize),
@@ -599,6 +603,8 @@ inline void init(brayns::AnimationParameters* a, ObjectHandler* h)
     h->add_property("dt", &a->_dt, Flags::Optional);
     h->add_property("playing", &a->_playing, Flags::Optional);
     h->add_property("unit", &a->_unit, Flags::Optional);
+    // Adjust the frame number to be always within the simulation
+    a->_current = a->_adjustedCurrent(a->_current);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -622,7 +628,7 @@ inline void init(brayns::DirectionalLight* a, ObjectHandler* h)
 {
     init(static_cast<brayns::Light*>(a), h);
     h->add_property("direction", toArray<3, double>(a->_direction));
-    h->add_property("angularDiameter", &a->_angularDiameter);
+    h->add_property("angular_diameter", &a->_angularDiameter);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -648,8 +654,8 @@ inline void init(brayns::SpotLight* a, ObjectHandler* h)
     init(static_cast<brayns::Light*>(a), h);
     h->add_property("position", toArray<3, double>(a->_position));
     h->add_property("direction", toArray<3, double>(a->_direction));
-    h->add_property("openingAngle", &a->_openingAngle);
-    h->add_property("penumbraAngle", &a->_penumbraAngle);
+    h->add_property("opening_angle", &a->_openingAngle);
+    h->add_property("penumbra_angle", &a->_penumbraAngle);
     h->add_property("radius", &a->_radius);
     h->set_flags(Flags::DisallowUnknownKey);
 }
@@ -747,8 +753,8 @@ inline void init(brayns::ExitLaterSchedule* a, ObjectHandler* h)
 
 inline void init(brayns::RequestMaterial* a, ObjectHandler* h)
 {
-    h->add_property("modelId", &a->modelId);
-    h->add_property("materialId", &a->materialId);
+    h->add_property("model_id", &a->modelId);
+    h->add_property("material_id", &a->materialId);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -756,17 +762,17 @@ inline void init(brayns::MaterialInfo* a, ObjectHandler* h)
 {
     h->add_property("error", &a->error);
     h->add_property("message", &a->message);
-    h->add_property("materialProperties", &a->materialProperties);
+    h->add_property("material_properties", &a->materialProperties);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
 inline void init(brayns::ModifyMaterial* a, ObjectHandler* h)
 {
-    h->add_property("modelId", &a->modelId);
-    h->add_property("materialId", &a->materialId);
+    h->add_property("model_id", &a->modelId);
+    h->add_property("material_id", &a->materialId);
     h->add_property("error", &a->error);
     h->add_property("message", &a->message);
-    h->add_property("materialProperties", &a->materialProperties);
+    h->add_property("material_properties", &a->materialProperties);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -779,7 +785,7 @@ inline void init(brayns::ModifyMaterialResult* a, ObjectHandler* h)
 
 inline  void init(brayns::SetActiveSimulationModel* a, ObjectHandler* h)
 {
-    h->add_property("modelId", &a->modelId);
+    h->add_property("model_id", &a->modelId);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -792,7 +798,7 @@ inline void init(brayns::SetActiveSimulationModelResponse* a, ObjectHandler* h)
 
 inline void init(brayns::GetActiveSimulationModel* a, ObjectHandler* h)
 {
-    h->add_property("modelId", &a->modelId);
+    h->add_property("model_id", &a->modelId);
     h->add_property("error", &a->error);
     h->add_property("message", &a->message);
     h->set_flags(Flags::DisallowUnknownKey);
@@ -862,7 +868,7 @@ inline std::string toJSONReplacePropertyMap(
 template<>
 inline std::string  to_json(const brayns::MaterialInfo& mat)
 {
-    return toJSONReplacePropertyMap(mat, "materialProperties", mat.materialProperties);
+    return toJSONReplacePropertyMap(mat, "material_properties", mat.materialProperties);
 }
 
 template <>
@@ -873,6 +879,13 @@ inline std::string to_json(const brayns::ModelProperties& props)
 
 template <>
 inline std::string to_json(const brayns::ModelParams& params)
+{
+    return toJSONReplacePropertyMap(params, "loader_properties",
+                                    params.getLoaderProperties());
+}
+
+template<>
+inline std::string to_json(const brayns::ModelDescriptor& params)
 {
     return toJSONReplacePropertyMap(params, "loader_properties",
                                     params.getLoaderProperties());
@@ -977,7 +990,7 @@ inline bool from_json(brayns::ModifyMaterial& mat, const std::string& json)
     bool success;
     brayns::PropertyMap propertyMap;
     std::tie<bool, brayns::PropertyMap>(success, propertyMap) =
-        fromJSONWithPropertyMap(mat, json, "materialProperties");
+        fromJSONWithPropertyMap(mat, json, "material_properties");
     mat.materialProperties = propertyMap;
     return success;
 }

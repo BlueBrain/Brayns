@@ -36,6 +36,7 @@ class CircuitExplorer:
     CIRCUIT_COLOR_SCHEME_NEURON_BY_MTYPE = 'By mtype'
     CIRCUIT_COLOR_SCHEME_NEURON_BY_ETYPE = 'By etype'
     CIRCUIT_COLOR_SCHEME_NEURON_BY_TARGET = 'By target'
+    CIRCUIT_COLOR_SCHEME_NEURON_SINGLE_COLOR = 'Single color'
 
     # Morphology color schemes
     MORPHOLOGY_COLOR_SCHEME_NONE = 'None'
