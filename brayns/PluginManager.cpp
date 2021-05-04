@@ -33,7 +33,7 @@ namespace
 {
 bool containsString(const int length, const char** input, const char* toFind)
 {
-    return std::count_if(input, input + length, [toFind](const char* arg) {
+        return std::count_if(input, input + length, [toFind](const char* arg) {
                return std::strcmp(arg, toFind) == 0;
            }) > 0;
 }
