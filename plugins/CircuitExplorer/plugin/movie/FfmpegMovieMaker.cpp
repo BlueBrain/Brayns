@@ -49,8 +49,8 @@ private:
 
     static AVPixelFormat getFormat(const MovieInfo& info)
     {
-        return ffmpeg::VideoInfo::getFormat(
-            info.format.empty() ? "yuv420p" : info.format);
+        return ffmpeg::VideoInfo::getFormat(info.format.empty() ? "yuv420p"
+                                                                : info.format);
     }
 };
 } // namespace
