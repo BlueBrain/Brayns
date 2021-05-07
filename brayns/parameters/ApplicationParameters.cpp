@@ -64,7 +64,7 @@ ApplicationParameters::ApplicationParameters()
          "HTTP interface") //
         (PARAM_INPUT_PATHS.c_str(), po::value<strings>(&_inputPaths),
          "List of files/folders to load data from") //
-        (PARAM_PLUGIN.c_str(), po::value<strings>()->composing(),
+        (PARAM_PLUGIN.c_str(), po::value<strings>(&_plugins)->composing(),
          "Dynamic plugin to load from LD_LIBRARY_PATH; "
          "can be repeated to load multiple plugins. "
          "Arguments to plugins can be added by inserting a space followed by "
@@ -117,6 +117,9 @@ void ApplicationParameters::print()
     BRAYNS_INFO << "Ospray modules              : " << std::endl;
     for (const auto& module : _modules)
         BRAYNS_INFO << "- " << module << std::endl;
+    BRAYNS_INFO << "Plugins                     : " << std::endl;
+    for (const auto& plugin : _plugins)
+        BRAYNS_INFO << "- " << plugin << std::endl;
     BRAYNS_INFO << "Window size                 : " << _windowSize << std::endl;
     BRAYNS_INFO << "Benchmarking                : " << asString(_benchmarking)
                 << std::endl;
