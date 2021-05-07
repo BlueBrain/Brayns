@@ -36,6 +36,8 @@
 #include <plugin/io/SynapseJSONLoader.h>
 #include <plugin/io/VoltageSimulationHandler.h>
 #include <plugin/meshing/PointCloudMesher.h>
+#include <plugin/movie/MovieMaker.h>
+#include <plugin/movie/FileSystemHelper.h>
 
 #include <brayns/common/ActionInterface.h>
 #include <brayns/common/Progress.h>
@@ -2013,6 +2015,41 @@ brayns::Message CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& par
 {
     brayns::Message result;
 
+    auto& frameFolder = params.framesFolderPath;
+
+    if (!FileSystemHelper::isDirectory(frameFolder))
+    {
+        result.setError(0, "Invalid frame folder: '" + frameFolder + "'");
+        return result;
+    }
+
+    MovieInfo movie;
+    movie.outputFile = params.outputMoviePath;
+    movie.inputFiles =
+        FileSystemHelper::getSortedDirectoryFiles(frameFolder,
+                                                  params.framesFileExtension);
+    movie.width = params.dimensions[0];
+    movie.height = params.dimensions[1];
+    movie.framerate = params.fpsRate;
+
+    try
+    {
+        MovieMaker::createMovie(movie);
+    }
+    catch (const MovieMakerException& e)
+    {
+        result.setError(0, e.what());
+    }
+
+    if (params.eraseFrames)
+    {
+        FileSystemHelper::removeFiles(movie.inputFiles);
+    }
+    
+    return result;
+
+    /*brayns::Message result;
+
     bool ffmpegSucessful = _createMediaFile(params, result);
     
     if (ffmpegSucessful && params.eraseFrames)
@@ -2049,7 +2086,7 @@ brayns::Message CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& par
         }
     }
 
-    return result;
+    return result;*/
 }
 
 brayns::Message CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTracing &payload)
