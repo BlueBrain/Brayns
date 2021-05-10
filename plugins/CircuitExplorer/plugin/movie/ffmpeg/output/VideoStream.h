@@ -5,8 +5,8 @@
 #include "../Exception.h"
 #include "../Status.h"
 #include "../VideoInfo.h"
-#include "../common/FramePtr.h"
-#include "../common/PacketPtr.h"
+#include "../common/Frame.h"
+#include "../common/Packet.h"
 #include "Encoder.h"
 #include "OutputContext.h"
 #include "OutputVideoStream.h"
@@ -38,7 +38,7 @@ public:
     void write(AVFrame* frame)
     {
         _encoder.sendFrame(frame);
-        auto packet = PacketPtr::create();
+        auto packet = Packet::create();
         if (!_encoder.receivePacket(packet.get()))
         {
             return;
@@ -73,11 +73,11 @@ private:
     void _flushEncoder()
     {
         _encoder.flush();
-        auto packet = PacketPtr::create();
+        auto packet = Packet::create();
         while (_encoder.receivePacket(packet.get()))
         {
             _writePacket(packet.get());
-            packet = PacketPtr::create();
+            packet = Packet::create();
         }
     }
 

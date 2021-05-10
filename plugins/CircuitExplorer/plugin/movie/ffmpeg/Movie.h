@@ -67,8 +67,7 @@ public:
         catch (const Exception& e)
         {
             std::ostringstream message;
-            message << "Error while closing output file '"
-                    << "': " << e.getMessage();
+            message << "Error while closing output file: " << e.getMessage();
             throw Exception(message.str(), e.getStatus());
         }
     }

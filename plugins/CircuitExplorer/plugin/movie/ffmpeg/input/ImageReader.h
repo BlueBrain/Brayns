@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include "../common/FramePtr.h"
-#include "../common/PacketPtr.h"
+#include "../common/Frame.h"
+#include "../common/Packet.h"
 #include "Decoder.h"
 #include "ImageDecoder.h"
 #include "InputContext.h"
@@ -26,13 +26,13 @@ public:
 private:
     static CodecContextPtr _createCodec(AVFormatContext* context)
     {
-        auto parameters = InputVideoStream::findCodecParameters(context);
-        return Decoder::create(parameters);
+        auto codec = InputVideoStream::findCodec(context);
+        return Decoder::create(codec);
     }
 
     static PacketPtr _readRawImage(AVFormatContext* context)
     {
-        auto packet = PacketPtr::create();
+        auto packet = Packet::create();
         _readPacket(context, packet.get());
         return packet;
     }
@@ -51,7 +51,7 @@ private:
         ImageDecoder decoder(codec);
         decoder.sendPacket(packet);
         decoder.flush();
-        auto frame = FramePtr::create();
+        auto frame = Frame::create();
         decoder.receiveFrame(frame.get());
         return frame;
     }

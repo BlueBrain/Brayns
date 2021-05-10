@@ -9,7 +9,7 @@ extern "C"
 
 #include "../Exception.h"
 #include "../Status.h"
-#include "../common/FormatContextPtr.h"
+#include "../common/FormatContext.h"
 
 namespace ffmpeg
 {

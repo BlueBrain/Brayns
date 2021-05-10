@@ -7,8 +7,8 @@ extern "C"
 
 #include "../Exception.h"
 #include "../Status.h"
-#include "../common/FramePtr.h"
-#include "ConversionContextPtr.h"
+#include "../common/Frame.h"
+#include "ConversionContext.h"
 #include "ConversionInfo.h"
 
 namespace ffmpeg
@@ -19,9 +19,9 @@ public:
     static FramePtr convert(const AVFrame* frame, const ConversionInfo& info)
     {
         auto context = _createContext(frame, info);
-        auto newFrame = FramePtr::create();
+        auto newFrame = Frame::create();
         _setupNewFrame(newFrame.get(), info);
-        _convert(context, frame, newFrame.get());
+        _convert(context.get(), frame, newFrame.get());
         return newFrame;
     }
 
@@ -30,7 +30,7 @@ private:
                                                const ConversionInfo& info)
     {
         auto frameInfo = ConversionInfo::fromFrame(frame);
-        return ConversionContextPtr::create(frameInfo, info);
+        return ConversionContext::create(frameInfo, info);
     }
 
     static void _setupNewFrame(AVFrame* frame, const ConversionInfo& info)
@@ -43,8 +43,8 @@ private:
         }
     }
 
-    static void _convert(const ConversionContextPtr& context,
-                         const AVFrame* source, AVFrame* destination)
+    static void _convert(SwsContext* context, const AVFrame* source,
+                         AVFrame* destination)
     {
         sws_scale(context, source->data, source->linesize, 0, source->height,
                   destination->data, destination->linesize);

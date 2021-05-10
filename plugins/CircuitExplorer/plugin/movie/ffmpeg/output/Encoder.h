@@ -7,7 +7,7 @@ extern "C"
 }
 
 #include "../Exception.h"
-#include "../common/CodecContextPtr.h"
+#include "../common/CodecContext.h"
 #include "EncoderInfo.h"
 
 namespace ffmpeg
@@ -17,7 +17,7 @@ class Encoder
 public:
     static CodecContextPtr create(const EncoderInfo& info)
     {
-        auto context = CodecContextPtr::create(info.codec);
+        auto context = CodecContext::create(info.codec);
         _setup(context.get(), info.stream->codecpar);
         _loadInfo(context.get(), info);
         _openContext(context.get(), info.codec);

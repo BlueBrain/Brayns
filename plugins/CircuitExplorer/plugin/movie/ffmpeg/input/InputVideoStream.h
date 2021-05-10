@@ -12,7 +12,7 @@ namespace ffmpeg
 class InputVideoStream
 {
 public:
-    static AVCodecParameters* findCodecParameters(AVFormatContext* context)
+    static AVCodecParameters* findCodec(AVFormatContext* context)
     {
         return find(context)->codecpar;
     }

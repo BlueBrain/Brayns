@@ -6,7 +6,7 @@ extern "C"
 }
 
 #include "../Exception.h"
-#include "../common/CodecContextPtr.h"
+#include "../common/CodecContext.h"
 
 namespace ffmpeg
 {
@@ -16,7 +16,7 @@ public:
     static CodecContextPtr create(AVCodecParameters* parameters)
     {
         auto codec = _findDecoder(parameters);
-        auto context = CodecContextPtr::create(codec);
+        auto context = CodecContext::create(codec);
         _setupContext(context.get(), parameters);
         _openContext(context.get(), codec);
         return context;
