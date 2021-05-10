@@ -36,9 +36,10 @@ private:
 
     static int64_t getBitrate(const MovieInfo& info)
     {
-        return info.bitrate == 0
-                   ? info.bitrate
-                   : 3 * info.width * info.height * info.framerate;
+        return info.bitrate <= 0
+                   ? int64_t(3) * int64_t(info.width) * int64_t(info.height) *
+                         int64_t(info.framerate)
+                   : info.bitrate;
     }
 
     static AVCodec* getCodec(const MovieInfo& info)
