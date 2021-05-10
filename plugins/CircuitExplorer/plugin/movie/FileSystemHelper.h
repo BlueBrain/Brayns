@@ -31,15 +31,19 @@ public:
         boost::filesystem::remove_all(path);
     }
 
-    static bool hasExtension(const std::string& path,
-                             const std::string& extension)
+    static std::string getExtensionWithDot(const std::string& extension)
     {
-        return boost::algorithm::ends_with(path, extension);
+        if (extension.empty() || extension[0] == '.')
+        {
+            return extension;
+        }
+        return "." + extension;
     }
 
     static std::vector<std::string> getDirectoryFiles(
         const std::string& path, const std::string& extension)
     {
+        auto extensionWithDot = getExtensionWithDot(extension);
         std::vector<std::string> entries;
         for (const auto& entry : DirectoryIterator(path))
         {
@@ -47,12 +51,12 @@ public:
             {
                 continue;
             }
-            auto& native = entry.path().native();
-            if (!hasExtension(native, extension))
+            auto& path = entry.path();
+            if (path.extension() != extensionWithDot)
             {
                 continue;
             }
-            entries.push_back(native);
+            entries.push_back(path.native());
         }
         return entries;
     }
