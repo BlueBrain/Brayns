@@ -99,7 +99,7 @@ ARG BOOST_SRC=/app/boost
 
 RUN mkdir ${BOOST_SRC} \
  && cd ${BOOST_SRC}  \
- && wget https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.gz \
+ && wget https://boostorg.jfrog.io/artifactory/main/release/1.70.0/source/boost_1_70_0.tar.gz \
  && tar -xzf boost_1_70_0.tar.gz  \
  && cd ./boost_1_70_0  \
  &&  ./bootstrap.sh  \
