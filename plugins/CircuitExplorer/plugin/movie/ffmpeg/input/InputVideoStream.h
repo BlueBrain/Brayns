@@ -29,7 +29,7 @@ public:
 
     static AVStream* tryFind(AVFormatContext* context)
     {
-        for (int i = 0; i < context->nb_streams; ++i)
+        for (unsigned int i = 0; i < context->nb_streams; ++i)
         {
             auto stream = context->streams[i];
             if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)

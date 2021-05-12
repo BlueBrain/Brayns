@@ -36,8 +36,8 @@
 #include <plugin/io/SynapseJSONLoader.h>
 #include <plugin/io/VoltageSimulationHandler.h>
 #include <plugin/meshing/PointCloudMesher.h>
-#include <plugin/movie/MovieMaker.h>
 #include <plugin/movie/FileSystemHelper.h>
+#include <plugin/movie/MovieMaker.h>
 
 #include <brayns/common/ActionInterface.h>
 #include <brayns/common/Progress.h>
