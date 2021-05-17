@@ -1,6 +1,6 @@
 # -*- mode: cmake -*-
 if(BRAYNS_NETWORKING_ENABLED)
-  git_subproject(Rockets https://github.com/BlueBrain/Rockets.git ea375c1)
+  git_subproject(Rockets https://github.com/BlueBrain/Rockets.git 52443933)
 endif()
 
 # Streaming to display walls
