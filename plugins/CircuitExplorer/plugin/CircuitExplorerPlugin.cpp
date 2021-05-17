@@ -269,7 +269,8 @@ std::string _sanitizeString(const std::string& input)
     return result;
 }
 
-std::vector<std::string> _splitString(const std::string& source, const char token)
+std::vector<std::string> _splitString(const std::string& source,
+                                      const char token)
 {
     std::vector<std::string> result;
     std::string split;
@@ -292,8 +293,9 @@ void CircuitExplorerPlugin::init()
     auto& pm = _api->getParametersManager();
 
     // Store the current accumulation settings
-    _prevAccumulationSetting = _api->getParametersManager().getRenderingParameters()
-                                                           .getMaxAccumFrames();
+    _prevAccumulationSetting = _api->getParametersManager()
+                                   .getRenderingParameters()
+                                   .getMaxAccumFrames();
 
     registry.registerLoader(
         std::make_unique<BrickLoader>(scene, BrickLoader::getCLIProperties()));
@@ -327,115 +329,124 @@ void CircuitExplorerPlugin::init()
 
     registry.registerLoader(
         std::make_unique<AstrocyteLoader>(scene, pm.getApplicationParameters(),
-                                          AstrocyteLoader::getCLIProperties(), this));
+                                          AstrocyteLoader::getCLIProperties(),
+                                          this));
 
     registry.registerLoader(
         std::make_unique<SonataLoader>(scene, pm.getApplicationParameters(),
                                        SonataLoader::getCLIProperties(), this));
 
     auto actionInterface = _api->getActionInterface();
-        if (actionInterface)
-        {
-            actionInterface->registerRequest<MaterialDescriptor, brayns::Message>(
-                {"set-material",
-                 "Modifies a specific material",
-                 "MaterialDescriptor",
-                 "The data to identify and modify the material"},
-                [&](const MaterialDescriptor& param) {
-                    return _setMaterial(param);
+    if (actionInterface)
+    {
+        actionInterface->registerRequest<MaterialDescriptor, brayns::Message>(
+            {"set-material", "Modifies a specific material",
+             "MaterialDescriptor",
+             "The data to identify and modify the material"},
+            [&](const MaterialDescriptor& param) {
+                return _setMaterial(param);
             });
 
-            actionInterface->registerRequest<MaterialsDescriptor, brayns::Message>(
-                {"set-materials",
-                 "Set a set of materials from one or more models",
-                 "MaterialsDescriptor",
-                 "The data to identify and modify the materials of the given models"},
-                [&](const MaterialsDescriptor& param) {
-                    return _setMaterials(param);
+        actionInterface->registerRequest<MaterialsDescriptor, brayns::Message>(
+            {"set-materials", "Set a set of materials from one or more models",
+             "MaterialsDescriptor",
+             "The data to identify and modify the materials of the given "
+             "models"},
+            [&](const MaterialsDescriptor& param) {
+                return _setMaterials(param);
             });
 
-            actionInterface->registerRequest<MaterialRangeDescriptor, brayns::Message>(
+        actionInterface
+            ->registerRequest<MaterialRangeDescriptor, brayns::Message>(
                 {"set-material-range",
-                 "Sets a set of materials of a single model with common material data",
+                 "Sets a set of materials of a single model with common "
+                 "material data",
                  "MaterialRangeDescriptor",
                  "The common data with which to update the material"},
                 [&](const MaterialRangeDescriptor& param) {
                     return _setMaterialRange(param);
-            });
+                });
 
-            actionInterface->registerRequest<MaterialProperties>(
-                {"get-material-properties",
-                 "Returns the properties of the current camera"},
-                [&]() -> MaterialProperties { return _getMaterialProperties(); });
+        actionInterface->registerRequest<MaterialProperties>(
+            {"get-material-properties",
+             "Returns the properties of the current camera"},
+            [&]() -> MaterialProperties { return _getMaterialProperties(); });
 
-            actionInterface->registerRequest<UpdateMaterialProperties, brayns::Message>(
+        actionInterface
+            ->registerRequest<UpdateMaterialProperties, brayns::Message>(
                 {"update-material-properties",
-                 "Update selected properties of a set of materials of a single model with "
+                 "Update selected properties of a set of materials of a single "
+                 "model with "
                  "common material data",
                  "UpdateMaterialProperties",
                  "The properties and values to update in the materials"},
                 [&](const UpdateMaterialProperties& param) {
                     return _updateMaterialProperties(param);
+                });
+
+        actionInterface->registerRequest<ModelId, MaterialIds>(
+            {"get-material-ids",
+             "Returns all the material IDs of a given model", "ModelId",
+             "The ID of the model to query"},
+            [&](const ModelId& modelId) -> MaterialIds {
+                return _getMaterialIds(modelId);
             });
 
-            actionInterface->registerRequest<ModelId, MaterialIds>(
-                {"get-material-ids",
-                 "Returns all the material IDs of a given model",
-                 "ModelId",
-                 "The ID of the model to query"},
-                [&](const ModelId& modelId) -> MaterialIds {
-                    return _getMaterialIds(modelId);
-                });
+        actionInterface->registerRequest<ModelMaterialId, MaterialDescriptor>(
+            {"get-material",
+             "Returns the properties from the given model and material",
+             "ModelMaterialId",
+             "The ID of the model and of the material to be queried"},
+            [&](const ModelMaterialId& modelId) -> MaterialDescriptor {
+                return _getMaterial(modelId);
+            });
 
-            actionInterface->registerRequest<ModelMaterialId, MaterialDescriptor>(
-                {"get-material",
-                  "Returns the properties from the given model and material",
-                  "ModelMaterialId",
-                  "The ID of the model and of the material to be queried"},
-                [&](const ModelMaterialId& modelId) -> MaterialDescriptor {
-                    return _getMaterial(modelId);
-                });
-
-            actionInterface->registerRequest<MaterialExtraAttributes, brayns::Message>(
+        actionInterface
+            ->registerRequest<MaterialExtraAttributes, brayns::Message>(
                 {"set-material-extra-attributes",
-                 "Sets the extra material attributes necessary for the Circuit Explorer renderer",
+                 "Sets the extra material attributes necessary for the Circuit "
+                 "Explorer renderer",
                  "MaterialExtraAttributes",
-                 "Id of the model to which the material attributes should be extended"},
+                 "Id of the model to which the material attributes should be "
+                 "extended"},
                 [&](const MaterialExtraAttributes& param) {
                     return _setMaterialExtraAttributes(param);
                 });
 
-            actionInterface->registerRequest<SynapseAttributes, brayns::Message>(
-                {"set-synapses-attributes",
-                 "Sets sypnapse specific attributes for a given model",
-                 "SynapseAttributes",
-                 "The model and synapse attributes to modify"},
-                [&](const SynapseAttributes& param) {
-                    return _setSynapseAttributes(param);
-                });
-
-            actionInterface->registerRequest<SaveModelToCache, brayns::Message>(
-                {"save-model-to-cache",
-                 "Builds and saves a Brayns cache model from a given loaded model",
-                 "SaveModelToCache",
-                 "Model to be saved and parameters for the build of the cache file"},
-                [&](const SaveModelToCache& param) {
-                    return _saveModelToCache(param);
+        actionInterface->registerRequest<SynapseAttributes, brayns::Message>(
+            {"set-synapses-attributes",
+             "Sets sypnapse specific attributes for a given model",
+             "SynapseAttributes", "The model and synapse attributes to modify"},
+            [&](const SynapseAttributes& param) {
+                return _setSynapseAttributes(param);
             });
 
-            actionInterface->registerRequest<ConnectionsPerValue, brayns::Message>(
-                {"set-connections-per-value",
-                 "Draws a point cloud representing the number of connections for a given frame"
-                 " and simulation value",
-                 "ConnectionsPerValue",
-                 "Model, frame, and value to build the point cloude"},
-                [&](const ConnectionsPerValue& param) {
-                    return _setConnectionsPerValue(param);
-                });
+        actionInterface->registerRequest<SaveModelToCache, brayns::Message>(
+            {"save-model-to-cache",
+             "Builds and saves a Brayns cache model from a given loaded model",
+             "SaveModelToCache",
+             "Model to be saved and parameters for the build of the cache "
+             "file"},
+            [&](const SaveModelToCache& param) {
+                return _saveModelToCache(param);
+            });
 
-            actionInterface->registerRequest<MetaballsFromSimulationValue, brayns::Message>(
+        actionInterface->registerRequest<ConnectionsPerValue, brayns::Message>(
+            {"set-connections-per-value",
+             "Draws a point cloud representing the number of connections for a "
+             "given frame"
+             " and simulation value",
+             "ConnectionsPerValue",
+             "Model, frame, and value to build the point cloude"},
+            [&](const ConnectionsPerValue& param) {
+                return _setConnectionsPerValue(param);
+            });
+
+        actionInterface
+            ->registerRequest<MetaballsFromSimulationValue, brayns::Message>(
                 {"set-metaballs-per-simulation-value",
-                 "Adds a metaballs model representing the number of connections for a given frame"
+                 "Adds a metaballs model representing the number of "
+                 "connections for a given frame"
                  " and simulation value",
                  "MetaballsFromSimulationValue",
                  "Model, frame, and value to build the metaballs"},
@@ -443,150 +454,152 @@ void CircuitExplorerPlugin::init()
                     return _setMetaballsPerSimulationValue(param);
                 });
 
-            actionInterface->registerRequest<CameraDefinition, brayns::Message>(
-                {"set-odu-camera",
-                  "Set the camera in a position and with an specific orientation towards the scene",
-                  "CameraDefinition",
-                  "Camera data to modify the current camera"},
-                [&](const CameraDefinition& s) { return _setCamera(s); });
+        actionInterface->registerRequest<CameraDefinition, brayns::Message>(
+            {"set-odu-camera",
+             "Set the camera in a position and with an specific orientation "
+             "towards the scene",
+             "CameraDefinition", "Camera data to modify the current camera"},
+            [&](const CameraDefinition& s) { return _setCamera(s); });
 
-            actionInterface->registerRequest<CameraDefinition>(
-                {"get-odu-camera",
-                 "Returns the properties of the current camera"},
-                [&]() -> CameraDefinition { return _getCamera(); });
+        actionInterface->registerRequest<CameraDefinition>(
+            {"get-odu-camera", "Returns the properties of the current camera"},
+            [&]() -> CameraDefinition { return _getCamera(); });
 
-            actionInterface->registerRequest<AttachCellGrowthHandler, brayns::Message>(
-                {"attach-cell-growth-handler",
-                 "Attach a dynamic cell growing rendering system for a given model",
-                 "AttachCellGrowthHandler",
-                 "Model to which to attach the handler, and number of frames the growth should span"},
-                [&](const AttachCellGrowthHandler& s) {
-                    return _attachCellGrowthHandler(s);
+        actionInterface->registerRequest<AttachCellGrowthHandler,
+                                         brayns::Message>(
+            {"attach-cell-growth-handler",
+             "Attach a dynamic cell growing rendering system for a given model",
+             "AttachCellGrowthHandler",
+             "Model to which to attach the handler, and number of frames the "
+             "growth should span"},
+            [&](const AttachCellGrowthHandler& s) {
+                return _attachCellGrowthHandler(s);
+            });
+
+        actionInterface
+            ->registerRequest<AttachCircuitSimulationHandler, brayns::Message>(
+                {"attach-circuit-simulation-handler",
+                 "Dynamically loads and attach a simulation to a loaded model",
+                 "AttachCircuitSimulationHandler",
+                 "Model to which attach, and simulation information to fetch"},
+                [&](const AttachCircuitSimulationHandler& s) {
+                    return _attachCircuitSimulationHandler(s);
                 });
 
-            actionInterface->registerRequest<AttachCircuitSimulationHandler, brayns::Message>(
-                    {"attach-circuit-simulation-handler",
-                     "Dynamically loads and attach a simulation to a loaded model",
-                     "AttachCircuitSimulationHandler",
-                     "Model to which attach, and simulation information to fetch"},
-                    [&](const AttachCircuitSimulationHandler& s) {
-                        return _attachCircuitSimulationHandler(s);
-                    });
+        actionInterface->registerRequest<ExportFramesToDisk, brayns::Message>(
+            {"export-frames-to-disk",
+             "Export a set of frames from a simulation as images written to "
+             "disk",
+             "ExportFramesToDisk",
+             "Configuration of the simulation to render and image store "
+             "specifications"},
+            [&](const ExportFramesToDisk& s) {
+                return _exportFramesToDisk(s);
+            });
 
-            actionInterface->registerRequest<ExportFramesToDisk, brayns::Message>(
-                {"export-frames-to-disk",
-                 "Export a set of frames from a simulation as images written to disk",
-                 "ExportFramesToDisk",
-                 "Configuration of the simulation to render and image store specifications"},
-                [&](const ExportFramesToDisk& s) { return _exportFramesToDisk(s); });
+        actionInterface->registerRequest<FrameExportProgress>(
+            {"get-export-frames-progress",
+             "Returns the progress of the last issued export frames to disk "
+             "request"},
+            [&](void) -> FrameExportProgress {
+                return _getFrameExportProgress();
+            });
 
-            actionInterface->registerRequest<FrameExportProgress>(
-                {"get-export-frames-progress",
-                 "Returns the progress of the last issued export frames to disk request"},
-                [&](void) -> FrameExportProgress {
-                    return _getFrameExportProgress();
-                });
-
-            actionInterface->registerRequest<ExportLayerToDisk, ExportLayerToDiskResult>(
+        actionInterface
+            ->registerRequest<ExportLayerToDisk, ExportLayerToDiskResult>(
                 {"export-layer-to-disk",
-                 "Export 1 or various layers to disk to be used in composition when generating a"
+                 "Export 1 or various layers to disk to be used in composition "
+                 "when generating a"
                  " movie",
                  "ExportLayerToDisk",
-                 "Information to store the layer on disk, and image data to store in base64 format"},
+                 "Information to store the layer on disk, and image data to "
+                 "store in base64 format"},
                 [&](const ExportLayerToDisk& s) {
                     return _exportLayerToDisk(s);
                 });
 
-            actionInterface->registerRequest<MakeMovieParameters, brayns::Message>(
-                {"make-movie",
-                 "Builds a movie file from a set of frames stored on disk",
-                 "MakeMovieParameters",
-                 "Information to find the frames, and how to compose them into a media file"},
-                [&](const MakeMovieParameters& params) { return _makeMovie(params); });
+        actionInterface->registerRequest<MakeMovieParameters, brayns::Message>(
+            {"make-movie",
+             "Builds a movie file from a set of frames stored on disk",
+             "MakeMovieParameters",
+             "Information to find the frames, and how to compose them into a "
+             "media file"},
+            [&](const MakeMovieParameters& params) {
+                return _makeMovie(params);
+            });
 
-            actionInterface->registerRequest<AnterogradeTracing, brayns::Message>(
-                {"trace-anterograde",
-                 "Performs neuronal tracing; Showing efferent and afferent synapse relationship "
-                 " between cells (including projections)",
-                 "AnterogradeTracing",
-                 "Data in which to base the cell highlight"},
-                [&](const AnterogradeTracing& payload) {
-                    return _traceAnterogrades(payload);
-                });
+        actionInterface->registerRequest<AnterogradeTracing, brayns::Message>(
+            {"trace-anterograde",
+             "Performs neuronal tracing; Showing efferent and afferent synapse "
+             "relationship "
+             " between cells (including projections)",
+             "AnterogradeTracing", "Data in which to base the cell highlight"},
+            [&](const AnterogradeTracing& payload) {
+                return _traceAnterogrades(payload);
+            });
 
-            actionInterface->registerRequest<AddGrid, brayns::Message>(
-                {"add-grid",
-                 "Adds a visual 3D grid to the scene",
-                 "AddGrid",
-                 "Data necessary to build and render the grid"},
-                [&](const AddGrid& payload) { return _addGrid(payload); });
+        actionInterface->registerRequest<AddGrid, brayns::Message>(
+            {"add-grid", "Adds a visual 3D grid to the scene", "AddGrid",
+             "Data necessary to build and render the grid"},
+            [&](const AddGrid& payload) { return _addGrid(payload); });
 
-            actionInterface->registerRequest<AddColumn, brayns::Message>(
-                {"add-column",
-                 "Adds a visual 3D column as a cylinder to the scene",
-                 "AddColumn",
-                 "Parameters to build and add the column to the scene"},
-                [&](const AddColumn& payload) { return _addColumn(payload); });
+        actionInterface->registerRequest<AddColumn, brayns::Message>(
+            {"add-column", "Adds a visual 3D column as a cylinder to the scene",
+             "AddColumn",
+             "Parameters to build and add the column to the scene"},
+            [&](const AddColumn& payload) { return _addColumn(payload); });
 
-            actionInterface->registerRequest<AddSphere, AddShapeResult>(
-                {"add-sphere",
-                 "Adds a visual 3D sphere to the scene",
-                 "AddSphere",
-                 "Data to build, place and color the sphere"},
-                [&](const AddSphere& payload) { return _addSphere(payload); });
+        actionInterface->registerRequest<AddSphere, AddShapeResult>(
+            {"add-sphere", "Adds a visual 3D sphere to the scene", "AddSphere",
+             "Data to build, place and color the sphere"},
+            [&](const AddSphere& payload) { return _addSphere(payload); });
 
-            actionInterface->registerRequest<AddPill, AddShapeResult>(
-                {"add-pill",
-                 "Adds a pill shape to the scene",
-                 "AddPill",
-                 "The data to choose and build a type of pill"},
-                [&](const AddPill& payload) { return _addPill(payload); });
+        actionInterface->registerRequest<AddPill, AddShapeResult>(
+            {"add-pill", "Adds a pill shape to the scene", "AddPill",
+             "The data to choose and build a type of pill"},
+            [&](const AddPill& payload) { return _addPill(payload); });
 
-            actionInterface->registerRequest<AddCylinder, AddShapeResult>(
-                {"add-cylinder",
-                 "Adds a cylinder to the scene",
-                 "AddCylinder",
-                 "The data to build and color the cylinder"},
-                [&](const AddCylinder& payload) { return _addCylinder(payload); });
+        actionInterface->registerRequest<AddCylinder, AddShapeResult>(
+            {"add-cylinder", "Adds a cylinder to the scene", "AddCylinder",
+             "The data to build and color the cylinder"},
+            [&](const AddCylinder& payload) { return _addCylinder(payload); });
 
-            actionInterface->registerRequest<AddBox, AddShapeResult>(
-                {"add-box",
-                 "Adds an axis algined box to the scene",
-                 "AddBox",
-                 "The data to build and color the box"},
-                [&](const AddBox& payload) { return _addBox(payload); });
+        actionInterface->registerRequest<AddBox, AddShapeResult>(
+            {"add-box", "Adds an axis algined box to the scene", "AddBox",
+             "The data to build and color the box"},
+            [&](const AddBox& payload) { return _addBox(payload); });
 
-            actionInterface->registerRequest<RemapCircuit, RemapCircuitResult>(
-                {"remap-circuit-color",
-                 "Remap the circuit colors to the specified scheme",
-                 "RemapCircuit",
-                 "Scheme to which remap the circuits colors to"},
-                [&](const RemapCircuit& s) { return _remapCircuitToScheme(s); });
+        actionInterface->registerRequest<RemapCircuit, RemapCircuitResult>(
+            {"remap-circuit-color",
+             "Remap the circuit colors to the specified scheme", "RemapCircuit",
+             "Scheme to which remap the circuits colors to"},
+            [&](const RemapCircuit& s) { return _remapCircuitToScheme(s); });
 
-            actionInterface->registerRequest<ColorCells, brayns::Message>(
-                {"color-cells",
-                 "Color specific cells, given by GID, with specific "
-                 "colors given in RGB",
-                 "ColorCells",
-                 "Information about the model, cells and color to "
-                 "update"},
-                [&](const ColorCells& cc) { return _colorCells(cc); });
+        actionInterface->registerRequest<ColorCells, brayns::Message>(
+            {"color-cells",
+             "Color specific cells, given by GID, with specific "
+             "colors given in RGB",
+             "ColorCells",
+             "Information about the model, cells and color to "
+             "update"},
+            [&](const ColorCells& cc) { return _colorCells(cc); });
 
-            actionInterface->registerRequest<MirrorModel, brayns::Message>(
-                {"mirror-model",
-                 "Mirrors a model along a given axis",
-                 "MirrorModel",
-                 "Model ID and axis along which to mirror the first."},
-                [&](const MirrorModel& mm) { return _mirrorModel(mm); });
+        actionInterface->registerRequest<MirrorModel, brayns::Message>(
+            {"mirror-model", "Mirrors a model along a given axis",
+             "MirrorModel",
+             "Model ID and axis along which to mirror the first."},
+            [&](const MirrorModel& mm) { return _mirrorModel(mm); });
 
-            actionInterface->registerRequest<CircuitThickness, brayns::Message>(
-                {"set-circuit-thickness",
-                 "Modify the geometry radiuses (spheres, cones, cylinders and SDF geometries)",
-                 "CircuitThickness",
-                 "Model ID and radius multiplier to apply"},
-                [&](const CircuitThickness& cc) { return _changeCircuitThickness(cc); });
+        actionInterface->registerRequest<CircuitThickness, brayns::Message>(
+            {"set-circuit-thickness",
+             "Modify the geometry radiuses (spheres, cones, cylinders and SDF "
+             "geometries)",
+             "CircuitThickness", "Model ID and radius multiplier to apply"},
+            [&](const CircuitThickness& cc) {
+                return _changeCircuitThickness(cc);
+            });
 
-        } // if (actionInterface)
+    } // if (actionInterface)
 
     auto& engine = _api->getEngine();
     _addAdvancedSimulationRenderer(engine);
@@ -607,15 +620,16 @@ void CircuitExplorerPlugin::preRender()
         _api->getScene().markModified();
     _dirty = false;
 
-    // If there was an error during the last frame export, stop the export process
-    if(_exportFrameError)
+    // If there was an error during the last frame export, stop the export
+    // process
+    if (_exportFrameError)
     {
         _exportFramesToDiskDirty = false;
         _exportFramesToDiskStartFlag = false;
         // Re-establish the old accumulation settings after we are done with the
         // frame export
-        _api->getParametersManager().getRenderingParameters()
-                                    .setMaxAccumFrames(_prevAccumulationSetting);
+        _api->getParametersManager().getRenderingParameters().setMaxAccumFrames(
+            _prevAccumulationSetting);
     }
     else if (_exportFramesToDiskDirty && _accumulationFrameNumber == 0)
     {
@@ -624,10 +638,11 @@ void CircuitExplorerPlugin::preRender()
         {
             _exportFramesToDiskDirty = false;
             _exportFramesToDiskStartFlag = false;
-            // Re-establish the old accumulation settings after we are done with the
-            // frame export
-            _api->getParametersManager().getRenderingParameters()
-                                        .setMaxAccumFrames(_prevAccumulationSetting);
+            // Re-establish the old accumulation settings after we are done with
+            // the frame export
+            _api->getParametersManager()
+                .getRenderingParameters()
+                .setMaxAccumFrames(_prevAccumulationSetting);
         }
         else
         {
@@ -652,7 +667,7 @@ void CircuitExplorerPlugin::preRender()
 
 void CircuitExplorerPlugin::postRender()
 {
-    if(_exportFramesToDiskDirty && _exportFramesToDiskStartFlag)
+    if (_exportFramesToDiskDirty && _exportFramesToDiskStartFlag)
     {
         ++_accumulationFrameNumber;
         if (_accumulationFrameNumber == _exportFramesToDiskPayload.spp)
@@ -666,12 +681,13 @@ void CircuitExplorerPlugin::postRender()
 
 void CircuitExplorerPlugin::releaseCircuitMapper(const size_t modelId)
 {
-    _mappers.erase(std::remove_if(_mappers.begin(),
-                                  _mappers.end(),
-                                  [mid = modelId](const std::unique_ptr<CellObjectMapper>& mapper)
-    {
-        return mapper->getSourceModelId() == mid;
-    }), _mappers.end());
+    _mappers.erase(
+        std::remove_if(_mappers.begin(), _mappers.end(),
+                       [mid = modelId](
+                           const std::unique_ptr<CellObjectMapper>& mapper) {
+                           return mapper->getSourceModelId() == mid;
+                       }),
+        _mappers.end());
 }
 
 brayns::Message CircuitExplorerPlugin::_setMaterialExtraAttributes(
@@ -707,14 +723,15 @@ brayns::Message CircuitExplorerPlugin::_setMaterialExtraAttributes(
     {
         PLUGIN_INFO << "Model " << mea.modelId << " is not registered"
                     << std::endl;
-        result.setError(2, "Model " + std::to_string(mea.modelId)
-                           + " is not registered");
+        result.setError(2, "Model " + std::to_string(mea.modelId) +
+                               " is not registered");
     }
 
     return result;
 }
 
-brayns::Message CircuitExplorerPlugin::_setMaterial(const MaterialDescriptor& md)
+brayns::Message CircuitExplorerPlugin::_setMaterial(
+    const MaterialDescriptor& md)
 {
     brayns::Message result;
 
@@ -758,9 +775,9 @@ brayns::Message CircuitExplorerPlugin::_setMaterial(const MaterialDescriptor& md
                 PLUGIN_INFO << "Material " << md.materialId
                             << " is not registered in model " << md.modelId
                             << std::endl;
-                result.setError(4, "Material " + std::to_string(md.materialId)
-                                   + " is not registered in model "
-                                   + std::to_string(md.modelId));
+                result.setError(4, "Material " + std::to_string(md.materialId) +
+                                       " is not registered in model " +
+                                       std::to_string(md.modelId));
             }
         }
         catch (const std::runtime_error& e)
@@ -772,14 +789,15 @@ brayns::Message CircuitExplorerPlugin::_setMaterial(const MaterialDescriptor& md
     {
         PLUGIN_INFO << "Model " << md.modelId << " is not registered"
                     << std::endl;
-        result.setError(2, "Model " + std::to_string(md.modelId)
-                           + " is not registered");
+        result.setError(2, "Model " + std::to_string(md.modelId) +
+                               " is not registered");
     }
 
     return result;
 }
 
-brayns::Message CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& md)
+brayns::Message CircuitExplorerPlugin::_setMaterials(
+    const MaterialsDescriptor& md)
 {
     brayns::Message result;
 
@@ -859,15 +877,16 @@ brayns::Message CircuitExplorerPlugin::_setMaterials(const MaterialsDescriptor& 
         {
             PLUGIN_INFO << "Model " << modelId << " is not registered"
                         << std::endl;
-            result.setError(1, "Model " + std::to_string(modelId) + "is not "
-                               + "registered");
+            result.setError(1, "Model " + std::to_string(modelId) + "is not " +
+                                   "registered");
         }
     }
 
     return result;
 }
 
-brayns::Message CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDescriptor& mrd)
+brayns::Message CircuitExplorerPlugin::_setMaterialRange(
+    const MaterialRangeDescriptor& mrd)
 {
     brayns::Message result;
 
@@ -875,24 +894,25 @@ brayns::Message CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDesc
     if (modelDescriptor)
     {
         std::vector<size_t> matIds;
-        if(mrd.materialIds.empty())
+        if (mrd.materialIds.empty())
         {
             matIds.reserve(modelDescriptor->getModel().getMaterials().size());
-            for(const auto& mat : modelDescriptor->getModel().getMaterials())
+            for (const auto& mat : modelDescriptor->getModel().getMaterials())
                 matIds.push_back(mat.first);
         }
         else
         {
             matIds.reserve(mrd.materialIds.size());
-            for(const auto& id : mrd.materialIds)
+            for (const auto& id : mrd.materialIds)
                 matIds.push_back(static_cast<size_t>(id));
         }
 
-        if(mrd.diffuseColor.size() % 3 != 0)
+        if (mrd.diffuseColor.size() % 3 != 0)
         {
             PLUGIN_ERROR << "set-material-range: The diffuse colors "
                          << "component is not a multiple of 3" << std::endl;
-            result.setError(3, "The diffuse colors component size is not multiple of 3");
+            result.setError(
+                3, "The diffuse colors component size is not multiple of 3");
             return result;
         }
 
@@ -907,9 +927,10 @@ brayns::Message CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDesc
                 if (material)
                 {
                     const size_t randomIndex = (rand() % numColors) * 3;
-                    material->setDiffuseColor({mrd.diffuseColor[randomIndex],
-                                               mrd.diffuseColor[randomIndex + 1],
-                                               mrd.diffuseColor[randomIndex + 2]});
+                    material->setDiffuseColor(
+                        {mrd.diffuseColor[randomIndex],
+                         mrd.diffuseColor[randomIndex + 1],
+                         mrd.diffuseColor[randomIndex + 2]});
                     material->setSpecularColor({mrd.specularColor[0],
                                                 mrd.specularColor[1],
                                                 mrd.specularColor[2]});
@@ -927,11 +948,11 @@ brayns::Message CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDesc
                     material->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE,
                                              mrd.clippingMode);
                     material->updateProperty(MATERIAL_PROPERTY_USER_PARAMETER,
-                                             static_cast<double>(mrd.userParameter));
+                                             static_cast<double>(
+                                                 mrd.userParameter));
                     material->markModified(); // This is needed to apply
                                               // propery modifications
                     material->commit();
-
                 }
             }
             catch (const std::runtime_error& e)
@@ -946,8 +967,8 @@ brayns::Message CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDesc
     {
         PLUGIN_INFO << "Model " << mrd.modelId << " is not registered"
                     << std::endl;
-        result.setError(1, "Model " + std::to_string(mrd.modelId)
-                           + " is not registered");
+        result.setError(1, "Model " + std::to_string(mrd.modelId) +
+                               " is not registered");
     }
 
     return result;
@@ -955,16 +976,18 @@ brayns::Message CircuitExplorerPlugin::_setMaterialRange(const MaterialRangeDesc
 
 MaterialProperties CircuitExplorerPlugin::_getMaterialProperties()
 {
-    // diffuseColor, specularColor, specularExponent, reflectionIndex, refractionIndex,
-    // Opacity, Emission, Glossiness, simulationDataCast, shadingMode, clippingMode, userParameter
+    // diffuseColor, specularColor, specularExponent, reflectionIndex,
+    // refractionIndex, Opacity, Emission, Glossiness, simulationDataCast,
+    // shadingMode, clippingMode, userParameter
     MaterialProperties result;
-    result.properties = { "diffuse_color", "specular_color", "specular_exponent",
-                          "reflection_index", "refraction_index", "opacity", "emission",
-                          "glossiness", "simulation_data_cast", "shading_mode",
-                          "clipping_mode", "user_parameter"};
-    result.propertyTypes = { "array", "array", "float",
-                             "float", "float", "float", "float",
-                             "float", "bool", "int", "int", "float"};
+    result.properties = {
+        "diffuse_color",    "specular_color",   "specular_exponent",
+        "reflection_index", "refraction_index", "opacity",
+        "emission",         "glossiness",       "simulation_data_cast",
+        "shading_mode",     "clipping_mode",    "user_parameter"};
+    result.propertyTypes = {"array", "array", "float", "float",
+                            "float", "float", "float", "float",
+                            "bool",  "int",   "int",   "float"};
 
     return result;
 }
@@ -973,11 +996,11 @@ brayns::Vector3d arrayFromString(const std::string& str)
 {
     brayns::Vector3d result;
 
-    std::string s (str);
+    std::string s(str);
     size_t index = 0;
     static const std::regex regexExpr("([0-9]+\\.?[0-9]*)");
     std::smatch pieces;
-    while(std::regex_search(s, pieces, regexExpr) && index < 3)
+    while (std::regex_search(s, pieces, regexExpr) && index < 3)
     {
         result[index] = std::stod(pieces.str());
         s = pieces.suffix();
@@ -987,33 +1010,38 @@ brayns::Vector3d arrayFromString(const std::string& str)
     return result;
 }
 
-brayns::Message CircuitExplorerPlugin::_updateMaterialProperties(const UpdateMaterialProperties& r)
+brayns::Message CircuitExplorerPlugin::_updateMaterialProperties(
+    const UpdateMaterialProperties& r)
 {
     brayns::Message result;
 
     auto model = _api->getScene().getModel(r.modelId);
-    if(!model)
+    if (!model)
     {
-        result.setError(1, "Model ID " + std::to_string(r.modelId) + " does not exists");
+        result.setError(1, "Model ID " + std::to_string(r.modelId) +
+                               " does not exists");
         return result;
     }
 
-    if(!r.materialIds.empty())
+    if (!r.materialIds.empty())
     {
         const auto& materials = model->getModel().getMaterials();
-        for(const auto matId : r.materialIds)
+        for (const auto matId : r.materialIds)
         {
-            if(materials.find(matId) == materials.end())
+            if (materials.find(matId) == materials.end())
             {
-                result.setError(2, "One or more material IDs does not belong to the given model");
+                result.setError(2,
+                                "One or more material IDs does not belong to "
+                                "the given model");
                 return result;
             }
         }
     }
 
-    if(r.propertyNames.size() != r.propertyValues.size())
+    if (r.propertyNames.size() != r.propertyValues.size())
     {
-        result.setError(3, "Property list length does not match property value list");
+        result.setError(
+            3, "Property list length does not match property value list");
         return result;
     }
 
@@ -1021,133 +1049,128 @@ brayns::Message CircuitExplorerPlugin::_updateMaterialProperties(const UpdateMat
     mea.modelId = r.modelId;
     _setMaterialExtraAttributes(mea);
 
-    std::vector<std::function<void(brayns::MaterialPtr& m)>> updates;
+    std::vector<std::function<void(brayns::MaterialPtr & m)>> updates;
     try
     {
-        for(size_t i = 0; i < r.propertyNames.size(); ++i)
+        for (size_t i = 0; i < r.propertyNames.size(); ++i)
         {
             const auto& prop = r.propertyNames[i];
             const auto& strVal = r.propertyValues[i];
 
-            if(prop == "diffuse_color")
+            if (prop == "diffuse_color")
             {
-                updates.push_back([arr = arrayFromString(strVal)](brayns::MaterialPtr& m)
-                {
-                    m->setDiffuseColor(arr);
-                });
+                updates.push_back(
+                    [arr = arrayFromString(strVal)](brayns::MaterialPtr& m) {
+                        m->setDiffuseColor(arr);
+                    });
             }
-            else if(prop == "specular_color")
+            else if (prop == "specular_color")
             {
-                updates.push_back([arr = arrayFromString(strVal)](brayns::MaterialPtr& m)
-                {
-                    m->setSpecularColor(arr);
-                });
+                updates.push_back(
+                    [arr = arrayFromString(strVal)](brayns::MaterialPtr& m) {
+                        m->setSpecularColor(arr);
+                    });
             }
-            else if(prop == "specular_exponent")
+            else if (prop == "specular_exponent")
             {
-                updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
-                {
-                    m->setSpecularExponent(v);
-                });
+                updates.push_back(
+                    [v = std::stod(strVal)](brayns::MaterialPtr& m) {
+                        m->setSpecularExponent(v);
+                    });
             }
-            else if(prop == "refraction_index")
+            else if (prop == "refraction_index")
             {
-                updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
-                {
-                    m->setRefractionIndex(v);
-                });
+                updates.push_back(
+                    [v = std::stod(strVal)](brayns::MaterialPtr& m) {
+                        m->setRefractionIndex(v);
+                    });
             }
-            else if(prop == "reflection_index")
+            else if (prop == "reflection_index")
             {
-                updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
-                {
-                    m->setReflectionIndex(v);
-                });
+                updates.push_back(
+                    [v = std::stod(strVal)](brayns::MaterialPtr& m) {
+                        m->setReflectionIndex(v);
+                    });
             }
-            else if(prop == "opacity")
+            else if (prop == "opacity")
             {
-                updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
-                {
-                    m->setOpacity(v);
-                });
+                updates.push_back(
+                    [v = std::stod(strVal)](brayns::MaterialPtr& m) {
+                        m->setOpacity(v);
+                    });
             }
-            else if(prop == "emission")
+            else if (prop == "emission")
             {
-                updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
-                {
-                    m->setEmission(v);
-                });
+                updates.push_back(
+                    [v = std::stod(strVal)](brayns::MaterialPtr& m) {
+                        m->setEmission(v);
+                    });
             }
-            else if(prop == "glossiness")
+            else if (prop == "glossiness")
             {
-                updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
-                {
-                    m->setGlossiness(v);
-                });
+                updates.push_back(
+                    [v = std::stod(strVal)](brayns::MaterialPtr& m) {
+                        m->setGlossiness(v);
+                    });
             }
-            else if(prop == "simulation_data_cast")
+            else if (prop == "simulation_data_cast")
             {
                 auto copyVal = strVal;
                 std::transform(copyVal.begin(), copyVal.end(), copyVal.begin(),
-                               [](unsigned char c){ return std::tolower(c); });
-                updates.push_back([v = copyVal](brayns::MaterialPtr& m)
-                {
+                               [](unsigned char c) { return std::tolower(c); });
+                updates.push_back([v = copyVal](brayns::MaterialPtr& m) {
                     m->updateProperty(MATERIAL_PROPERTY_CAST_USER_DATA,
                                       v == "true");
                 });
             }
-            else if(prop == "shading_mode")
+            else if (prop == "shading_mode")
             {
-                updates.push_back([v = std::stoi(strVal)](brayns::MaterialPtr& m)
-                {
-                    m->updateProperty(MATERIAL_PROPERTY_SHADING_MODE,
-                                      v);
-                });
+                updates.push_back(
+                    [v = std::stoi(strVal)](brayns::MaterialPtr& m) {
+                        m->updateProperty(MATERIAL_PROPERTY_SHADING_MODE, v);
+                    });
             }
-            else if(prop == "clipping_mode")
+            else if (prop == "clipping_mode")
             {
-                updates.push_back([v = std::stoi(strVal)](brayns::MaterialPtr& m)
-                {
-                    m->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE,
-                                      v);
-                });
+                updates.push_back(
+                    [v = std::stoi(strVal)](brayns::MaterialPtr& m) {
+                        m->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE, v);
+                    });
             }
-            else if(prop == "user_parameter")
+            else if (prop == "user_parameter")
             {
-                updates.push_back([v = std::stod(strVal)](brayns::MaterialPtr& m)
-                {
-                    m->updateProperty(MATERIAL_PROPERTY_USER_PARAMETER,
-                                      v);
-                });
+                updates.push_back(
+                    [v = std::stod(strVal)](brayns::MaterialPtr& m) {
+                        m->updateProperty(MATERIAL_PROPERTY_USER_PARAMETER, v);
+                    });
             }
         }
     }
-    catch(const std::exception& e)
+    catch (const std::exception& e)
     {
         result.setError(4, e.what());
     }
 
     std::vector<size_t> matIds;
-    if(r.materialIds.empty())
+    if (r.materialIds.empty())
     {
         matIds.reserve(model->getModel().getMaterials().size());
-        for(const auto& mat : model->getModel().getMaterials())
+        for (const auto& mat : model->getModel().getMaterials())
             matIds.push_back(mat.first);
     }
     else
     {
         matIds.reserve(r.materialIds.size());
-        for(const auto& id : r.materialIds)
+        for (const auto& id : r.materialIds)
             matIds.push_back(static_cast<size_t>(id));
     }
 
     for (const auto materialId : matIds)
     {
-        auto material =
-            model->getModel().getMaterial(materialId);
+        auto material = model->getModel().getMaterial(materialId);
         if (material)
         {
-            for(const auto& update : updates)
+            for (const auto& update : updates)
                 update(material);
             material->markModified();
             material->commit();
@@ -1158,7 +1181,7 @@ brayns::Message CircuitExplorerPlugin::_updateMaterialProperties(const UpdateMat
     // this way, the next time the scene is committed, it will trigger the
     // commitment of the simulation data as well.
     auto simHandler = model->getModel().getSimulationHandler();
-    if(simHandler)
+    if (simHandler)
         simHandler->setCurrentFrame(std::numeric_limits<uint32_t>::max());
 
     model->markModified();
@@ -1182,13 +1205,14 @@ MaterialIds CircuitExplorerPlugin::_getMaterialIds(const ModelId& modelId)
     }
     else
     {
-       materialIds.setError(1, "Model " + std::to_string(modelId.modelId)
-                               + " is not registered");
+        materialIds.setError(1, "Model " + std::to_string(modelId.modelId) +
+                                    " is not registered");
     }
     return materialIds;
 }
 
-MaterialDescriptor CircuitExplorerPlugin::_getMaterial(const ModelMaterialId& mmId)
+MaterialDescriptor CircuitExplorerPlugin::_getMaterial(
+    const ModelMaterialId& mmId)
 {
     MaterialDescriptor result;
 
@@ -1208,32 +1232,40 @@ MaterialDescriptor CircuitExplorerPlugin::_getMaterial(const ModelMaterialId& mm
                                        static_cast<float>(dc.g),
                                        static_cast<float>(dc.b)};
 
-
                 const auto& sc = material->getSpecularColor();
                 result.specularColor = {static_cast<float>(sc.r),
                                         static_cast<float>(sc.g),
                                         static_cast<float>(sc.b)};
 
-                result.specularExponent = static_cast<float>(material->getSpecularExponent());
-                result.reflectionIndex = static_cast<float>(material->getReflectionIndex());
+                result.specularExponent =
+                    static_cast<float>(material->getSpecularExponent());
+                result.reflectionIndex =
+                    static_cast<float>(material->getReflectionIndex());
                 result.opacity = static_cast<float>(material->getOpacity());
-                result.refractionIndex = static_cast<float>(material->getRefractionIndex());
+                result.refractionIndex =
+                    static_cast<float>(material->getRefractionIndex());
                 result.emission = static_cast<float>(material->getEmission());
-                result.glossiness = static_cast<float>(material->getGlossiness());
-                result.simulationDataCast = material->getPropertyOrValue<bool>(MATERIAL_PROPERTY_CAST_USER_DATA, false);
-                result.shadingMode = material->getPropertyOrValue<int32_t>(MATERIAL_PROPERTY_SHADING_MODE, 0);
-                result.clippingMode = material->getPropertyOrValue<int32_t>(MATERIAL_PROPERTY_CLIPPING_MODE, 0);
-                result.userParameter = static_cast<float>(
-                            material->getPropertyOrValue<double>(MATERIAL_PROPERTY_USER_PARAMETER, 0.0));
+                result.glossiness =
+                    static_cast<float>(material->getGlossiness());
+                result.simulationDataCast = material->getPropertyOrValue<bool>(
+                    MATERIAL_PROPERTY_CAST_USER_DATA, false);
+                result.shadingMode = material->getPropertyOrValue<int32_t>(
+                    MATERIAL_PROPERTY_SHADING_MODE, 0);
+                result.clippingMode = material->getPropertyOrValue<int32_t>(
+                    MATERIAL_PROPERTY_CLIPPING_MODE, 0);
+                result.userParameter =
+                    static_cast<float>(material->getPropertyOrValue<double>(
+                        MATERIAL_PROPERTY_USER_PARAMETER, 0.0));
             }
             else
             {
                 PLUGIN_INFO << "Material " << mmId.materialId
                             << " is not registered in model " << mmId.modelId
                             << std::endl;
-                result.setError(3, "Material " + std::to_string(mmId.materialId)
-                                   + " is not registered in model "
-                                   + std::to_string(mmId.modelId));
+                result.setError(3, "Material " +
+                                       std::to_string(mmId.materialId) +
+                                       " is not registered in model " +
+                                       std::to_string(mmId.modelId));
             }
         }
         catch (const std::runtime_error& e)
@@ -1245,28 +1277,30 @@ MaterialDescriptor CircuitExplorerPlugin::_getMaterial(const ModelMaterialId& mm
     {
         PLUGIN_INFO << "Model " << mmId.modelId << " is not registered"
                     << std::endl;
-        result.setError(1, "Model " + std::to_string(mmId.modelId) + " is not"
-                           + " registered");
+        result.setError(1, "Model " + std::to_string(mmId.modelId) + " is not" +
+                               " registered");
     }
 
     return result;
 }
 
-RemapCircuitResult CircuitExplorerPlugin::_remapCircuitToScheme(const RemapCircuit& payload)
+RemapCircuitResult CircuitExplorerPlugin::_remapCircuitToScheme(
+    const RemapCircuit& payload)
 {
     RemapCircuitResult result;
     result.updated = false;
 
     auto modelDescriptor = _api->getScene().getModel(payload.modelId);
-    if(modelDescriptor)
+    if (modelDescriptor)
     {
         CellObjectMapper* mapper = getMapperForCircuit(payload.modelId);
-        if(mapper)
+        if (mapper)
         {
             const auto schemeEnum =
-                    stringToEnum<CircuitColorScheme>(payload.scheme);
-            auto remapResult = mapper->remapCircuitColors(schemeEnum, _api->getScene());
-            if(remapResult.error > 0)
+                stringToEnum<CircuitColorScheme>(payload.scheme);
+            auto remapResult =
+                mapper->remapCircuitColors(schemeEnum, _api->getScene());
+            if (remapResult.error > 0)
                 result.setError(remapResult.error, remapResult.message);
             result.updated = remapResult.updated;
             _dirty = true;
@@ -1275,8 +1309,9 @@ RemapCircuitResult CircuitExplorerPlugin::_remapCircuitToScheme(const RemapCircu
     }
     else
     {
-        result.setError(1, "The model with ID " + std::to_string(payload.modelId)
-                           + " does not exists");
+        result.setError(1, "The model with ID " +
+                               std::to_string(payload.modelId) +
+                               " does not exists");
     }
     return result;
 }
@@ -1285,7 +1320,7 @@ brayns::Message CircuitExplorerPlugin::_colorCells(const ColorCells& payload)
 {
     brayns::Message result;
 
-    if(payload.gids.size() * 3 != payload.colors.size())
+    if (payload.gids.size() * 3 != payload.colors.size())
     {
         result.setError(1, "There must be 3 color components for each GID");
         return result;
@@ -1293,50 +1328,50 @@ brayns::Message CircuitExplorerPlugin::_colorCells(const ColorCells& payload)
 
     const auto updateMatColor = [](brayns::ModelDescriptorPtr& model,
                                    size_t matId,
-                                   const brayns::Vector3d& color)
-    {
+                                   const brayns::Vector3d& color) {
         auto mat = model->getModel().getMaterial(matId);
-        if(mat)
+        if (mat)
         {
             mat->setDiffuseColor(color);
             mat->markModified();
             mat->commit();
         }
-
     };
 
     auto modelDescriptor = _api->getScene().getModel(payload.modelId);
-    if(!modelDescriptor)
+    if (!modelDescriptor)
     {
-        result.setError(2, "The model with ID " + std::to_string(payload.modelId)
-                           + " does not exists");
+        result.setError(2, "The model with ID " +
+                               std::to_string(payload.modelId) +
+                               " does not exists");
         return result;
     }
 
     CellObjectMapper* mapper = getMapperForCircuit(payload.modelId);
-    if(mapper)
+    if (mapper)
     {
         // Parse ranges
-        std::vector<std::vector<uint64_t>> gidBatches (payload.gids.size());
-        std::vector<brayns::Vector3d> gidColors (payload.gids.size());
+        std::vector<std::vector<uint64_t>> gidBatches(payload.gids.size());
+        std::vector<brayns::Vector3d> gidColors(payload.gids.size());
 
-        for(size_t j = 0; j < payload.gids.size(); ++j)
+        for (size_t j = 0; j < payload.gids.size(); ++j)
         {
             const auto& gidBatchStr = payload.gids[j];
-            const std::vector<std::string> tokens = brayns::string_utils::split(gidBatchStr, ',');
+            const std::vector<std::string> tokens =
+                brayns::string_utils::split(gidBatchStr, ',');
             std::vector<uint64_t>& batchGids = gidBatches[j];
             // Parse sub-ranges
-            for(const auto& batchToken : tokens)
+            for (const auto& batchToken : tokens)
             {
                 auto dashPos = batchToken.find('-');
                 // single value
-                if(dashPos == std::string::npos)
+                if (dashPos == std::string::npos)
                     batchGids.push_back(std::stoul(batchToken));
                 else
                 {
                     auto rangeStart = std::stoul(batchToken.substr(0, dashPos));
                     auto rangeEnd = std::stoul(batchToken.substr(dashPos + 1));
-                    for(uint64_t i = rangeStart; i <= rangeEnd; ++i)
+                    for (uint64_t i = rangeStart; i <= rangeEnd; ++i)
                         batchGids.push_back(i);
                 }
             }
@@ -1349,35 +1384,37 @@ brayns::Message CircuitExplorerPlugin::_colorCells(const ColorCells& payload)
         }
 
         // This should not happen
-        if(gidColors.size() != gidBatches.size())
+        if (gidColors.size() != gidBatches.size())
         {
-            result.setError(9, "After parsing, the number of gid batches and colors does "
-                               "not match");
+            result.setError(
+                9,
+                "After parsing, the number of gid batches and colors does "
+                "not match");
             return result;
         }
 
         // Color cells
         const auto& mapping = mapper->getMapping();
-        for(size_t i = 0; i < gidBatches.size(); ++i)
+        for (size_t i = 0; i < gidBatches.size(); ++i)
         {
             const std::vector<uint64_t>& gidBatch = gidBatches[i];
             const brayns::Vector3d& color = gidColors[i];
 
-            for(const auto cellGID : gidBatch)
+            for (const auto cellGID : gidBatch)
             {
                 auto it = mapping.find(cellGID);
-                if(it != mapping.end())
+                if (it != mapping.end())
                 {
                     const MorphologyMap& mmap = it->second;
-                    for(const auto& kv : mmap._coneMap)
+                    for (const auto& kv : mmap._coneMap)
                         updateMatColor(modelDescriptor, kv.first, color);
-                    for(const auto& kv : mmap._cylinderMap)
+                    for (const auto& kv : mmap._cylinderMap)
                         updateMatColor(modelDescriptor, kv.first, color);
-                    for(const auto& kv : mmap._sdfBezierMap)
+                    for (const auto& kv : mmap._sdfBezierMap)
                         updateMatColor(modelDescriptor, kv.first, color);
-                    for(const auto& kv : mmap._sdfGeometryMap)
+                    for (const auto& kv : mmap._sdfGeometryMap)
                         updateMatColor(modelDescriptor, kv.first, color);
-                    for(const auto& kv : mmap._sphereMap)
+                    for (const auto& kv : mmap._sphereMap)
                         updateMatColor(modelDescriptor, kv.first, color);
                 }
             }
@@ -1435,13 +1472,15 @@ brayns::Message CircuitExplorerPlugin::_setSynapseAttributes(
         PLUGIN_ERROR
             << "Unexpected exception occured in _updateMaterialFromJson"
             << std::endl;
-        result.setError(2, "Unexpected exception occured in _setSynapseAttribute");
+        result.setError(2,
+                        "Unexpected exception occured in _setSynapseAttribute");
     }
 
     return result;
 }
 
-brayns::Message CircuitExplorerPlugin::_saveModelToCache(const SaveModelToCache& saveModel)
+brayns::Message CircuitExplorerPlugin::_saveModelToCache(
+    const SaveModelToCache& saveModel)
 {
     brayns::Message result;
 
@@ -1455,8 +1494,8 @@ brayns::Message CircuitExplorerPlugin::_saveModelToCache(const SaveModelToCache&
     {
         PLUGIN_ERROR << "Model " << saveModel.modelId << " is not registered"
                      << std::endl;
-        result.setError(1, "Model " + std::to_string(saveModel.modelId) + " is"
-                           + " not registered");
+        result.setError(1, "Model " + std::to_string(saveModel.modelId) +
+                               " is" + " not registered");
     }
 
     return result;
@@ -1514,16 +1553,16 @@ brayns::Message CircuitExplorerPlugin::_setConnectionsPerValue(
         {
             PLUGIN_INFO << "No connections added for value "
                         << std::to_string(cpv.value) << std::endl;
-            result.setError(2, "No connections added for value "
-                               + std::to_string(cpv.value));
+            result.setError(2, "No connections added for value " +
+                                   std::to_string(cpv.value));
         }
     }
     else
     {
         PLUGIN_INFO << "Model " << cpv.modelId << " is not registered"
                     << std::endl;
-        result.setError(3, "Model " + std::to_string(cpv.modelId) + " is"
-                           + " not registered");
+        result.setError(3, "Model " + std::to_string(cpv.modelId) + " is" +
+                               " not registered");
     }
 
     return result;
@@ -1584,27 +1623,31 @@ brayns::Message CircuitExplorerPlugin::_setMetaballsPerSimulationValue(
             {
                 PLUGIN_INFO << "No mesh was created for value "
                             << std::to_string(mpsv.value) << std::endl;
-                result.setError(2, "No mesh was created for value "
-                                   + std::to_string(mpsv.value));
+                result.setError(2, "No mesh was created for value " +
+                                       std::to_string(mpsv.value));
             }
         }
         else
         {
             PLUGIN_INFO << "No connections added for value "
                         << std::to_string(mpsv.value) << std::endl;
-            result.setError(3, "No connections added for value " + std::to_string(mpsv.value));
+            result.setError(3, "No connections added for value " +
+                                   std::to_string(mpsv.value));
         }
     }
     else
     {
-        PLUGIN_INFO << "Model " << mpsv.modelId << " is not registered" << std::endl;
-        result.setError(4, "Model " + std::to_string(mpsv.modelId) + " is not registered");
+        PLUGIN_INFO << "Model " << mpsv.modelId << " is not registered"
+                    << std::endl;
+        result.setError(4, "Model " + std::to_string(mpsv.modelId) +
+                               " is not registered");
     }
 
     return result;
 }
 
-brayns::Message CircuitExplorerPlugin::_setCamera(const CameraDefinition& payload)
+brayns::Message CircuitExplorerPlugin::_setCamera(
+    const CameraDefinition& payload)
 {
     brayns::Message result;
 
@@ -1705,7 +1748,8 @@ brayns::Message CircuitExplorerPlugin::_attachCircuitSimulationHandler(
     {
         PLUGIN_ERROR << "Model " << payload.modelId << " does not exist"
                      << std::endl;
-        result.setError(1, "Model " + std::to_string(payload.modelId) + " does not exist");
+        result.setError(1, "Model " + std::to_string(payload.modelId) +
+                               " does not exist");
     }
 
     return result;
@@ -1717,9 +1761,10 @@ brayns::Message CircuitExplorerPlugin::_exportFramesToDisk(
     brayns::Message result;
 
     // Store the current accumulation settings
-    if(!_exportFramesToDiskDirty)
-        _prevAccumulationSetting = _api->getParametersManager().getRenderingParameters()
-                                                               .getMaxAccumFrames();
+    if (!_exportFramesToDiskDirty)
+        _prevAccumulationSetting = _api->getParametersManager()
+                                       .getRenderingParameters()
+                                       .getMaxAccumFrames();
 
     _exportFramesToDiskPayload = payload;
     _exportFramesToDiskDirty = true;
@@ -1732,8 +1777,8 @@ brayns::Message CircuitExplorerPlugin::_exportFramesToDisk(
     frameBuffer.clear();
 
     // Store the current accumulation settings
-    _api->getParametersManager().getRenderingParameters()
-                                .setMaxAccumFrames(static_cast<size_t>(payload.spp) + 1);
+    _api->getParametersManager().getRenderingParameters().setMaxAccumFrames(
+        static_cast<size_t>(payload.spp) + 1);
 
     PLUGIN_INFO << "-----------------------------------------------------------"
                    "---------------------"
@@ -1781,7 +1826,7 @@ void CircuitExplorerPlugin::_doExportFrameToDisk()
     FreeImage_AcquireMemory(memory.get(), &pixels, &numPixels);
 
     auto fn = _frameNumber;
-    if(_exportFramesToDiskPayload.nameAfterStep)
+    if (_exportFramesToDiskPayload.nameAfterStep)
         fn = _exportFramesToDiskPayload.animationInformation[_frameNumber];
     char frame[7];
     sprintf(frame, "%05d", static_cast<int32_t>(fn));
@@ -1830,40 +1875,47 @@ FrameExportProgress CircuitExplorerPlugin::_getFrameExportProgress()
         _frameNumber * _exportFramesToDiskPayload.spp +
         _accumulationFrameNumber;
 
-    result.progress = std::min(
-                static_cast<double>(currentProgress / float(totalNumberOfFrames)), 1.0);
+    result.progress = std::min(static_cast<double>(currentProgress /
+                                                   float(totalNumberOfFrames)),
+                               1.0);
 
-    if(_exportFrameError)
+    if (_exportFrameError)
         result.setError(1, _exportFrameErrorMessage);
     else
         result.setError(0, "");
     return result;
 }
 
-ExportLayerToDiskResult CircuitExplorerPlugin::_exportLayerToDisk(const ExportLayerToDisk& payload)
+ExportLayerToDiskResult CircuitExplorerPlugin::_exportLayerToDisk(
+    const ExportLayerToDisk& payload)
 {
     ExportLayerToDiskResult result;
 
     const uint32_t end = payload.startFrame + payload.framesCount;
-    for(uint32_t i = payload.startFrame; i < end; i++)
+    for (uint32_t i = payload.startFrame; i < end; i++)
     {
         char frame[7];
         sprintf(frame, "%05d", i);
         const std::string frameFileName(frame);
-        const std::string slash = payload.path.at(payload.path.length() - 1) == '/'? "" : "/";
-        const std::string srcFramePath = payload.path + slash + frameFileName + ".png";
+        const std::string slash =
+            payload.path.at(payload.path.length() - 1) == '/' ? "" : "/";
+        const std::string srcFramePath =
+            payload.path + slash + frameFileName + ".png";
 
-        std::ifstream testSourceFrame (srcFramePath);
+        std::ifstream testSourceFrame(srcFramePath);
         const bool state = testSourceFrame.good();
         testSourceFrame.close();
 
         // Do not write layer if the corresponding frame does not exists
-        if(!state) continue;
+        if (!state)
+            continue;
 
-        const std::string layerPath = payload.path + slash + payload.name + frameFileName + ".png";
+        const std::string layerPath =
+            payload.path + slash + payload.name + frameFileName + ".png";
         const std::string decodedImage = base64_decode(payload.data);
 
-        std::ofstream outFileWriter (layerPath, std::ofstream::out | std::ofstream::trunc);
+        std::ofstream outFileWriter(layerPath,
+                                    std::ofstream::out | std::ofstream::trunc);
         outFileWriter << decodedImage;
         outFileWriter.flush();
         outFileWriter.close();
@@ -1874,7 +1926,8 @@ ExportLayerToDiskResult CircuitExplorerPlugin::_exportLayerToDisk(const ExportLa
     return result;
 }
 
-brayns::Message CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& params)
+brayns::Message CircuitExplorerPlugin::_makeMovie(
+    const MakeMovieParameters& params)
 {
     brayns::Message result;
 
@@ -1912,42 +1965,50 @@ brayns::Message CircuitExplorerPlugin::_makeMovie(const MakeMovieParameters& par
     return result;
 }
 
-brayns::Message CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTracing &payload)
+brayns::Message CircuitExplorerPlugin::_traceAnterogrades(
+    const AnterogradeTracing& payload)
 {
     brayns::Message result;
 
-    if(payload.cellGids.empty())
+    if (payload.cellGids.empty())
     {
         result.setError(1, "No input cell GIDs specified");
         return result;
     }
-    if(payload.sourceCellColor.size() < 4)
+    if (payload.sourceCellColor.size() < 4)
     {
-        result.setError(2, "Source cell stain color must have 4 components (RGBA)");
+        result.setError(
+            2, "Source cell stain color must have 4 components (RGBA)");
         return result;
     }
-    if(payload.connectedCellsColor.size() < 4)
+    if (payload.connectedCellsColor.size() < 4)
     {
-        result.setError(3, "Connected cell stain color must have 4 components (RGBA)");
+        result.setError(
+            3, "Connected cell stain color must have 4 components (RGBA)");
         return result;
     }
-    if(payload.nonConnectedCellsColor.size() < 4)
+    if (payload.nonConnectedCellsColor.size() < 4)
     {
-        result.setError(4, "Non connected cell stain color must have 4 components (RGBA)");
+        result.setError(
+            4, "Non connected cell stain color must have 4 components (RGBA)");
         return result;
     }
 
-    auto modelDescriptor = _api->getScene().getModel(static_cast<size_t>(payload.modelId));
-    if(!modelDescriptor)
+    auto modelDescriptor =
+        _api->getScene().getModel(static_cast<size_t>(payload.modelId));
+    if (!modelDescriptor)
     {
-        result.setError(5, "The given model ID does not correspond to any existing scene model");
+        result.setError(5,
+                        "The given model ID does not correspond to any "
+                        "existing scene model");
         return result;
     }
 
     auto cellMapper = getMapperForCircuit(payload.modelId);
-    if(!cellMapper)
+    if (!cellMapper)
     {
-        result.setError(6, "There is not cell mapping information for the given circuit");
+        result.setError(
+            6, "There is not cell mapping information for the given circuit");
         return result;
     }
 
@@ -1956,30 +2017,30 @@ brayns::Message CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTraci
     // Function to search for material ids based on cell GIDs using the mapper
     const std::function<void(std::unordered_set<int32_t>&,
                              const std::vector<uint32_t>&,
-                             const std::unordered_map<size_t, MorphologyMap>&)> searchFunc =
-    [](std::unordered_set<int32_t>& buffer,
-       const std::vector<uint32_t>& src,
-       const std::unordered_map<size_t, MorphologyMap>& m)
-    {
-        for(const auto& cellId : src)
-        {
-            auto morphologyMapIt = m.find(cellId);
-            if(morphologyMapIt != m.end())
+                             const std::unordered_map<size_t, MorphologyMap>&)>
+        searchFunc = [](std::unordered_set<int32_t>& buffer,
+                        const std::vector<uint32_t>& src,
+                        const std::unordered_map<size_t, MorphologyMap>& m) {
+            for (const auto& cellId : src)
             {
-                const auto& morphologyMap = morphologyMapIt->second;
-                if(morphologyMap._hasMesh)
-                    buffer.insert(static_cast<int32_t>(morphologyMap._triangleIndx));
-                for(const auto& kvp : morphologyMap._coneMap)
-                    buffer.insert(static_cast<int32_t>(kvp.first));
-                for(const auto& kvp : morphologyMap._sphereMap)
-                    buffer.insert(static_cast<int32_t>(kvp.first));
-                for(const auto& kvp : morphologyMap._cylinderMap)
-                    buffer.insert(static_cast<int32_t>(kvp.first));
-                for(const auto& kvp : morphologyMap._sdfGeometryMap)
-                    buffer.insert(static_cast<int32_t>(kvp.first));
+                auto morphologyMapIt = m.find(cellId);
+                if (morphologyMapIt != m.end())
+                {
+                    const auto& morphologyMap = morphologyMapIt->second;
+                    if (morphologyMap._hasMesh)
+                        buffer.insert(
+                            static_cast<int32_t>(morphologyMap._triangleIndx));
+                    for (const auto& kvp : morphologyMap._coneMap)
+                        buffer.insert(static_cast<int32_t>(kvp.first));
+                    for (const auto& kvp : morphologyMap._sphereMap)
+                        buffer.insert(static_cast<int32_t>(kvp.first));
+                    for (const auto& kvp : morphologyMap._cylinderMap)
+                        buffer.insert(static_cast<int32_t>(kvp.first));
+                    for (const auto& kvp : morphologyMap._sdfGeometryMap)
+                        buffer.insert(static_cast<int32_t>(kvp.first));
+                }
             }
-        }
-    };
+        };
 
     // Gather material ids for the source and target cells
     std::unordered_set<int32_t> sourceCellMaterialIds;
@@ -1995,54 +2056,48 @@ brayns::Message CircuitExplorerPlugin::_traceAnterogrades(const AnterogradeTraci
     // Reset all cells to non-stained color
     MaterialRangeDescriptor mrd;
     mrd.modelId = payload.modelId;
-    mrd.diffuseColor =
-    {
-        static_cast<float>(payload.nonConnectedCellsColor[0]),
-        static_cast<float>(payload.nonConnectedCellsColor[1]),
-        static_cast<float>(payload.nonConnectedCellsColor[2])
-    };
+    mrd.diffuseColor = {static_cast<float>(payload.nonConnectedCellsColor[0]),
+                        static_cast<float>(payload.nonConnectedCellsColor[1]),
+                        static_cast<float>(payload.nonConnectedCellsColor[2])};
 
     mrd.specularColor = {1.f, 1.f, 1.f};
     mrd.specularExponent = 20.f;
     mrd.glossiness = 1.f;
     mrd.reflectionIndex = 0.f;
     mrd.refractionIndex = 0.f;
-    mrd.opacity = std::min<float>(std::max<float>(payload.nonConnectedCellsColor[3], 0.1f), 1.f);
+    mrd.opacity = std::min<float>(
+        std::max<float>(payload.nonConnectedCellsColor[3], 0.1f), 1.f);
     mrd.shadingMode = static_cast<int>(MaterialShadingMode::diffuse);
     mrd.clippingMode = static_cast<int>(MaterialClippingMode::no_clipping);
     mrd.simulationDataCast = false;
     _setMaterialRange(mrd);
 
     // Stain (if any) source cell
-    if(sourceCellMaterialIds.size() > 0)
+    if (sourceCellMaterialIds.size() > 0)
     {
         MaterialRangeDescriptor sourcesMrd = mrd;
-        sourcesMrd.diffuseColor =
-        {
+        sourcesMrd.diffuseColor = {
             static_cast<float>(payload.sourceCellColor[0]),
             static_cast<float>(payload.sourceCellColor[1]),
-            static_cast<float>(payload.sourceCellColor[2])
-        };
+            static_cast<float>(payload.sourceCellColor[2])};
         sourcesMrd.opacity = 1.f;
         sourcesMrd.materialIds.insert(sourcesMrd.materialIds.end(),
-                               sourceCellMaterialIds.begin(),
-                               sourceCellMaterialIds.end());
+                                      sourceCellMaterialIds.begin(),
+                                      sourceCellMaterialIds.end());
         _setMaterialRange(sourcesMrd);
     }
 
-    if(targetCellMaterialIds.size() > 0)
+    if (targetCellMaterialIds.size() > 0)
     {
         MaterialRangeDescriptor targetsMrd = mrd;
-        targetsMrd.diffuseColor =
-        {
+        targetsMrd.diffuseColor = {
             static_cast<float>(payload.connectedCellsColor[0]),
             static_cast<float>(payload.connectedCellsColor[1]),
-            static_cast<float>(payload.connectedCellsColor[2])
-        };
+            static_cast<float>(payload.connectedCellsColor[2])};
         targetsMrd.opacity = 1.f;
         targetsMrd.materialIds.insert(targetsMrd.materialIds.end(),
-                               targetCellMaterialIds.begin(),
-                               targetCellMaterialIds.end());
+                                      targetCellMaterialIds.begin(),
+                                      targetCellMaterialIds.end());
         _setMaterialRange(targetsMrd);
     }
 
@@ -2065,9 +2120,8 @@ void CircuitExplorerPlugin::_createShapeMaterial(brayns::ModelPtr& model,
 
     brayns::PropertyMap props;
     props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, false});
-    props.setProperty(
-        {MATERIAL_PROPERTY_SHADING_MODE,
-         static_cast<int>(MaterialShadingMode::diffuse)});
+    props.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
+                       static_cast<int>(MaterialShadingMode::diffuse)});
     props.setProperty({MATERIAL_PROPERTY_CLIPPING_MODE,
                        static_cast<int>(MaterialClippingMode::no_clipping)});
 
@@ -2083,13 +2137,17 @@ AddShapeResult CircuitExplorerPlugin::_addSphere(const AddSphere& payload)
 
     if (payload.center.size() < 3)
     {
-        result.setError(1, "Sphere center has the wrong number of parameters (3 necessary)");
+        result.setError(
+            1,
+            "Sphere center has the wrong number of parameters (3 necessary)");
         return result;
     }
 
     if (payload.color.size() < 4)
     {
-        result.setError(2, "Sphere color has the wrong number of coefficents (RGBA, 4 necessary)");
+        result.setError(2,
+                        "Sphere color has the wrong number of coefficents "
+                        "(RGBA, 4 necessary)");
         return result;
     }
 
@@ -2131,24 +2189,29 @@ AddShapeResult CircuitExplorerPlugin::_addPill(const AddPill& payload)
 
     if (payload.p1.size() < 3)
     {
-        result.setError(1, "Pill point 1 has the wrong number of parameters (3 necessary)");
+        result.setError(
+            1, "Pill point 1 has the wrong number of parameters (3 necessary)");
         return result;
     }
     if (payload.p2.size() < 3)
     {
-        result.setError(2, "Pill point 2 has the wrong number of parameters (3 necessary)");
+        result.setError(
+            2, "Pill point 2 has the wrong number of parameters (3 necessary)");
         return result;
     }
     if (payload.color.size() < 4)
     {
-        result.setError(3, "Pill color has the wrong number of parameters (RGBA, 4 necessary)");
+        result.setError(3,
+                        "Pill color has the wrong number of parameters (RGBA, "
+                        "4 necessary)");
         return result;
     }
     if (payload.type != "pill" && payload.type != "conepill" &&
         payload.type != "sigmoidpill")
     {
-        result.setError(4, "Unknown pill type parameter. Must be either \"pill\", "
-                           "\"conepill\", or \"sigmoidpill\"");
+        result.setError(4,
+                        "Unknown pill type parameter. Must be either \"pill\", "
+                        "\"conepill\", or \"sigmoidpill\"");
         return result;
     }
     if (payload.radius1 < 0.0f || payload.radius2 < 0.0f)
@@ -2199,18 +2262,23 @@ AddShapeResult CircuitExplorerPlugin::_addCylinder(const AddCylinder& payload)
 
     if (payload.center.size() < 3)
     {
-        result.setError(1, "Cylinder center has the wrong number of parameters (3 necessary)");
+        result.setError(
+            1,
+            "Cylinder center has the wrong number of parameters (3 necessary)");
         return result;
         ;
     }
     if (payload.up.size() < 3)
     {
-        result.setError(2, "Cylinder up has the wrong number of parameters (3 necessary)");
+        result.setError(
+            2, "Cylinder up has the wrong number of parameters (3 necessary)");
         return result;
     }
     if (payload.color.size() < 4)
     {
-        result.setError(3, "Cylinder color has the wrong number of parameters (RGBA, 4 necessary)");
+        result.setError(3,
+                        "Cylinder color has the wrong number of parameters "
+                        "(RGBA, 4 necessary)");
         return result;
     }
     if (payload.radius < 0.0f)
@@ -2230,7 +2298,8 @@ AddShapeResult CircuitExplorerPlugin::_addCylinder(const AddCylinder& payload)
     const brayns::Vector3f center(payload.center[0], payload.center[1],
                                   payload.center[2]);
     const brayns::Vector3f up(payload.up[0], payload.up[1], payload.up[2]);
-    modelptr->addCylinder(matId, {center, up, static_cast<float>(payload.radius)});
+    modelptr->addCylinder(matId,
+                          {center, up, static_cast<float>(payload.radius)});
 
     size_t numModels = _api->getScene().getNumModels();
     const std::string name = payload.name.empty()
@@ -2252,18 +2321,22 @@ AddShapeResult CircuitExplorerPlugin::_addBox(const AddBox& payload)
 
     if (payload.minCorner.size() < 3)
     {
-        result.setError(1, "Box minCorner has the wrong number of parameters (3 necessary)");
+        result.setError(
+            1,
+            "Box minCorner has the wrong number of parameters (3 necessary)");
         return result;
     }
     if (payload.maxCorner.size() < 3)
     {
-        result.setError(2, "Box maxCorner has the wrong number of parameters (3 necesary)");
+        result.setError(
+            2, "Box maxCorner has the wrong number of parameters (3 necesary)");
         return result;
     }
     if (payload.color.size() < 4)
     {
-        result.setError(3, "Box color has the wrong number of parameters (RGBA, 4 "
-                           "necesary)");
+        result.setError(3,
+                        "Box color has the wrong number of parameters (RGBA, 4 "
+                        "necesary)");
         return result;
     }
 
@@ -2489,7 +2562,7 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
     brayns::Message result;
 
     auto modelPtr = _api->getScene().getModel(payload.modelId);
-    if(!modelPtr)
+    if (!modelPtr)
     {
         result.setError(1, "The given model ID does not exists");
         return result;
@@ -2502,72 +2575,69 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
     brayns::Vector3d max = bounds.getMax();
 
     std::vector<uint32_t> skipMirrorAxis;
-    for(uint32_t axis = 0; axis < 3; ++axis)
+    for (uint32_t axis = 0; axis < 3; ++axis)
     {
-        if(payload.mirrorAxis[axis] < 0.)
+        if (payload.mirrorAxis[axis] < 0.)
             min[axis] -= dimensions[axis] * std::fabs(payload.mirrorAxis[axis]);
-        else if(payload.mirrorAxis[axis] > 0)
+        else if (payload.mirrorAxis[axis] > 0)
             max[axis] += dimensions[axis] * std::fabs(payload.mirrorAxis[axis]);
         else
             skipMirrorAxis.push_back(axis);
     }
 
-    const brayns::Vector3f center ((max + min) * 0.5);
+    const brayns::Vector3f center((max + min) * 0.5);
 
     brayns::SpheresMap& sphereMap = model.getSpheres();
-    for(auto& entry : sphereMap)
+    for (auto& entry : sphereMap)
     {
         std::vector<brayns::Sphere> tempBuf;
         tempBuf.reserve(entry.second.size());
-        for(const brayns::Sphere& sphere : entry.second)
+        for (const brayns::Sphere& sphere : entry.second)
         {
             auto toCenter = (center - sphere.center) * 2.f;
-            for(const auto skipAxis : skipMirrorAxis)
+            for (const auto skipAxis : skipMirrorAxis)
                 toCenter[skipAxis] = 0.f;
-            tempBuf.emplace_back(sphere.center + toCenter, sphere.radius, sphere.userData);
+            tempBuf.emplace_back(sphere.center + toCenter, sphere.radius,
+                                 sphere.userData);
         }
         entry.second.insert(entry.second.end(), tempBuf.begin(), tempBuf.end());
     }
     brayns::ConesMap& conesMap = model.getCones();
-    for(auto& entry : conesMap)
+    for (auto& entry : conesMap)
     {
         std::vector<brayns::Cone> tempBuf;
         tempBuf.reserve(entry.second.size());
-        for(const brayns::Cone& cone : entry.second)
+        for (const brayns::Cone& cone : entry.second)
         {
             auto toCenter = (center - cone.center) * 2.f;
             auto toUp = (center - cone.up) * 2.f;
-            for(const auto skipAxis : skipMirrorAxis)
+            for (const auto skipAxis : skipMirrorAxis)
             {
                 toCenter[skipAxis] = 0.f;
                 toUp[skipAxis] = 0.f;
             }
-            tempBuf.emplace_back(cone.center + toCenter,
-                                 cone.up + toUp,
-                                 cone.centerRadius,
-                                 cone.upRadius,
+            tempBuf.emplace_back(cone.center + toCenter, cone.up + toUp,
+                                 cone.centerRadius, cone.upRadius,
                                  cone.userData);
         }
         entry.second.insert(entry.second.end(), tempBuf.begin(), tempBuf.end());
     }
     brayns::CylindersMap& cylindersMap = model.getCylinders();
-    for(auto& entry : cylindersMap)
+    for (auto& entry : cylindersMap)
     {
         std::vector<brayns::Cylinder> tempBuf;
         tempBuf.reserve(entry.second.size());
-        for(brayns::Cylinder& cylinder : entry.second)
+        for (brayns::Cylinder& cylinder : entry.second)
         {
             auto toCenter = (center - cylinder.center) * 2.f;
             auto toUp = (center - cylinder.up) * 2.f;
-            for(const auto skipAxis : skipMirrorAxis)
+            for (const auto skipAxis : skipMirrorAxis)
             {
                 toCenter[skipAxis] = 0.f;
                 toUp[skipAxis] = 0.f;
             }
-            tempBuf.emplace_back(cylinder.center + toCenter,
-                                 cylinder.up + toUp,
-                                 cylinder.radius,
-                                 cylinder.userData);
+            tempBuf.emplace_back(cylinder.center + toCenter, cylinder.up + toUp,
+                                 cylinder.radius, cylinder.userData);
         }
         entry.second.insert(entry.second.end(), tempBuf.begin(), tempBuf.end());
     }
@@ -2576,16 +2646,16 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
     const size_t originalOffset = sdfGeometry.geometries.size();
     std::vector<brayns::SDFGeometry> tempBuf;
     tempBuf.reserve(originalOffset);
-    for(auto& entry : sdfGeometry.geometryIndices)
+    for (auto& entry : sdfGeometry.geometryIndices)
     {
         std::vector<uint64_t> extraIndices;
         extraIndices.reserve(entry.second.size());
-        for(const auto geomIndex : entry.second)
+        for (const auto geomIndex : entry.second)
         {
             const brayns::SDFGeometry& geom = sdfGeometry.geometries[geomIndex];
             auto toP0 = (center - geom.p0) * 2.f;
             auto toP1 = (center - geom.p1) * 2.f;
-            for(const auto skipAxis: skipMirrorAxis)
+            for (const auto skipAxis : skipMirrorAxis)
             {
                 toP0[skipAxis] = 0.f;
                 toP1[skipAxis] = 0.f;
@@ -2593,8 +2663,9 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
             // Update geometry indices (materials)
             extraIndices.push_back(originalOffset + tempBuf.size());
             // Update neighbours
-            std::vector<uint64_t> newNeighbours = sdfGeometry.neighbours[geomIndex];
-            for(size_t i = 0; i < newNeighbours.size(); ++i)
+            std::vector<uint64_t> newNeighbours =
+                sdfGeometry.neighbours[geomIndex];
+            for (size_t i = 0; i < newNeighbours.size(); ++i)
                 newNeighbours[i] += originalOffset;
             sdfGeometry.neighbours.push_back(newNeighbours);
             // Insert the new geometry
@@ -2604,10 +2675,10 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
             last.p0 += toP0;
             last.p1 += toP1;
         }
-        entry.second.insert(entry.second.end(), extraIndices.begin(), extraIndices.end());
+        entry.second.insert(entry.second.end(), extraIndices.begin(),
+                            extraIndices.end());
     }
-    sdfGeometry.geometries.insert(sdfGeometry.geometries.end(),
-                                  tempBuf.begin(),
+    sdfGeometry.geometries.insert(sdfGeometry.geometries.end(), tempBuf.begin(),
                                   tempBuf.end());
     tempBuf.clear();
 
@@ -2624,12 +2695,13 @@ brayns::Message CircuitExplorerPlugin::_mirrorModel(const MirrorModel& payload)
     return result;
 }
 
-brayns::Message CircuitExplorerPlugin::_changeCircuitThickness(const CircuitThickness& payload)
+brayns::Message CircuitExplorerPlugin::_changeCircuitThickness(
+    const CircuitThickness& payload)
 {
     brayns::Message result;
 
     auto modelPtr = _api->getScene().getModel(payload.modelId);
-    if(!modelPtr)
+    if (!modelPtr)
     {
         result.setError(1, "The given model ID does not exists");
         return result;
@@ -2638,28 +2710,28 @@ brayns::Message CircuitExplorerPlugin::_changeCircuitThickness(const CircuitThic
     brayns::Model& model = modelPtr->getModel();
 
     brayns::SpheresMap& sphereMap = model.getSpheres();
-    for(auto& entry : sphereMap)
+    for (auto& entry : sphereMap)
     {
-        for(brayns::Sphere& sphere : entry.second)
+        for (brayns::Sphere& sphere : entry.second)
             sphere.radius *= payload.radiusMultiplier;
     }
     brayns::ConesMap& conesMap = model.getCones();
-    for(auto& entry : conesMap)
+    for (auto& entry : conesMap)
     {
-        for(brayns::Cone& cone : entry.second)
+        for (brayns::Cone& cone : entry.second)
         {
             cone.centerRadius *= payload.radiusMultiplier;
             cone.upRadius *= payload.radiusMultiplier;
         }
     }
     brayns::CylindersMap& cylindersMap = model.getCylinders();
-    for(auto& entry : cylindersMap)
+    for (auto& entry : cylindersMap)
     {
-        for(brayns::Cylinder& cylinder : entry.second)
+        for (brayns::Cylinder& cylinder : entry.second)
             cylinder.radius *= payload.radiusMultiplier;
     }
     brayns::SDFGeometryData& sdfGeometry = model.getSDFGeometryData();
-    for(brayns::SDFGeometry& geom : sdfGeometry.geometries)
+    for (brayns::SDFGeometry& geom : sdfGeometry.geometries)
     {
         geom.r0 *= payload.radiusMultiplier;
         geom.r1 *= payload.radiusMultiplier;
