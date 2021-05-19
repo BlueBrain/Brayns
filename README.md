@@ -196,7 +196,7 @@ find new issues which have not already been reported in
 already reported problem, please update the corresponding issue with your inputs
 and outputs.
 
-## Acknowledgements
+## Funding & Acknowledgment
 
 The development of this software was supported by funding to the Blue Brain Project, a research center of the École polytechnique fédérale de Lausanne (EPFL), from the Swiss government’s ETH Board of the Swiss Federal Institutes of Technology
 
