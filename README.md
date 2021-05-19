@@ -195,3 +195,9 @@ find new issues which have not already been reported in
 [Bug Report](https://github.com/BlueBrain/Brayns/issues) page. If you find an
 already reported problem, please update the corresponding issue with your inputs
 and outputs.
+
+## Acknowledgements
+
+The development of this software was supported by funding to the Blue Brain Project, a research center of the École polytechnique fédérale de Lausanne (EPFL), from the Swiss government’s ETH Board of the Swiss Federal Institutes of Technology
+
+Copyright (c) 2021 Blue Brain Project/EPFL
