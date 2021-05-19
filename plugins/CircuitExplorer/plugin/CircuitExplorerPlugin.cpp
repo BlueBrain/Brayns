@@ -36,7 +36,6 @@
 #include <plugin/io/SynapseJSONLoader.h>
 #include <plugin/io/VoltageSimulationHandler.h>
 #include <plugin/meshing/PointCloudMesher.h>
-#include <plugin/movie/FileSystemHelper.h>
 #include <plugin/movie/MovieMaker.h>
 
 #include <brayns/common/ActionInterface.h>
@@ -58,6 +57,7 @@
 
 #include <brion/brion.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <dirent.h>
 #include <fstream>
@@ -68,6 +68,8 @@
 
 #include <sys/types.h>
 #include <sys/wait.h>
+
+#include <boost/filesystem.hpp>
 
 #define REGISTER_LOADER(LOADER, FUNC) \
     registry.registerLoader({std::bind(&LOADER::getSupportedDataTypes), FUNC});
@@ -1931,35 +1933,67 @@ brayns::Message CircuitExplorerPlugin::_makeMovie(
 {
     brayns::Message result;
 
+    // The folder the frames image files are stored in
     auto& frameFolder = params.framesFolderPath;
 
-    if (!FileSystemHelper::isDirectory(frameFolder))
+    // Return an error if the directory provided doesn't exist
+    if (!boost::filesystem::is_directory(frameFolder))
     {
         result.setError(0, "Invalid frame folder: '" + frameFolder + "'");
         return result;
     }
 
+    // Make sure the extension has a dot as in boost::filesystem
+    std::string extension = params.framesFileExtension;
+    if (!extension.empty() && extension[0] != '.')
+    {
+        extension = "." + extension;
+    }
+
+    // Extract video frames from folder and extension
+    std::vector<std::string> frames;
+    for (const auto& entry : boost::filesystem::directory_iterator(frameFolder))
+    {
+        if (!boost::filesystem::is_regular_file(entry))
+        {
+            continue;
+        }
+        auto& path = entry.path();
+        if (path.extension() != extension)
+        {
+            continue;
+        }
+        frames.push_back(path.native());
+    }
+
+    // Use the name to guess frame position in the video (ex: frame_0001.png)
+    std::sort(frames.begin(), frames.end());
+
+    // Fill movie parameters for the movie maker
     MovieInfo movie;
     movie.outputFile = params.outputMoviePath;
-    movie.inputFiles =
-        FileSystemHelper::getSortedDirectoryFiles(frameFolder,
-                                                  params.framesFileExtension);
+    movie.inputFiles = std::move(frames);
     movie.width = params.dimensions[0];
     movie.height = params.dimensions[1];
     movie.framerate = params.fpsRate;
 
+    // Create the movie and report any errors
     try
     {
         MovieMaker::createMovie(movie);
     }
-    catch (const MovieMakerException& e)
+    catch (const MovieCreationException& e)
     {
         result.setError(0, e.what());
     }
 
+    // Remove frames image files from disk if asked to save space
     if (params.eraseFrames)
     {
-        FileSystemHelper::removeFiles(movie.inputFiles);
+        for (const auto& frame : movie.inputFiles)
+        {
+            boost::filesystem::remove(frame);
+        }
     }
 
     return result;
