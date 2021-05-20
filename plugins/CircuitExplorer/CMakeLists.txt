@@ -124,4 +124,51 @@ set(BRAYNSCIRCUITEXPLORER_LINK_LIBRARIES
 set(BRAYNSCIRCUITEXPLORER_OMIT_LIBRARY_HEADER ON)
 set(BRAYNSCIRCUITEXPLORER_OMIT_VERSION_HEADERS ON)
 set(BRAYNSCIRCUITEXPLORER_OMIT_EXPORT ON)
+
+# Movie generation with FFmpeg
+find_library(AVFORMAT_LIBRARY avformat)
+find_library(AVCODEC_LIBRARY avcodec)
+find_library(AVUTIL_LIBRARY avutil)
+find_library(SWSCALE_LIBRARY swscale)
+
+set(FFMPEG_FOUND ON)
+
+if(NOT AVFORMAT_LIBRARY)
+    message(STATUS "libavformat not found")
+    set(FFMPEG_FOUND OFF)
+endif()
+
+if(NOT AVCODEC_LIBRARY)
+    message(STATUS "libavcodec not found")
+    set(FFMPEG_FOUND OFF)
+endif()
+
+if(NOT AVUTIL_LIBRARY)
+    message(STATUS "libavutil not found")
+    set(FFMPEG_FOUND OFF)
+endif()
+
+if(NOT SWSCALE_LIBRARY)
+    message(STATUS "libswscale not found")
+    set(FFMPEG_FOUND OFF)
+endif()
+
+if(FFMPEG_FOUND)
+    message(STATUS "FFmpeg dev libraries found, enable movie generation")
+    list(APPEND BRAYNSCIRCUITEXPLORER_LINK_LIBRARIES
+        ${AVFORMAT_LIBRARY}
+        ${AVCODEC_LIBRARY}
+        ${AVUTIL_LIBRARY}
+        ${SWSCALE_LIBRARY}
+    )
+else()
+    message(STATUS "One or more FFmpeg dev libraries not found, disable movie generation")
+endif()
+
+list(APPEND BRAYNSCIRCUITEXPLORER_SOURCES plugin/movie/MovieMaker.cpp)
+
 common_library(braynsCircuitExplorer)
+
+if(FFMPEG_FOUND)
+    target_compile_definitions(braynsCircuitExplorer PRIVATE BRAYNS_USE_FFMPEG)
+endif()
