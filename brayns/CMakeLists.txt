@@ -11,6 +11,7 @@ add_subdirectory(manipulators)
 add_subdirectory(io)
 add_subdirectory(tasks)
 add_subdirectory(pluginapi)
+add_subdirectory(network)
 
 set(BRAYNS_PUBLIC_HEADERS Brayns.h)
 set(BRAYNS_HEADERS EngineFactory.h)
