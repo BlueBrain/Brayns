@@ -25,6 +25,18 @@ if(libuv_FOUND)
   list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/deps/uvw/*')
 endif()
 
+# Both Poco and GLM create "uninstall" targets. But GLM check wether the
+# target exists before or not, whereas POCO doesnt give a damn.
+set(ENABLE_REDIS OFF CACHE BOOL "Enable Redis")
+set(ENABLE_ENCODINGS OFF CACHE BOOL "Enable Encodings")
+set(ENABLE_MONGODB OFF CACHE BOOL "Enable MongoDB")
+set(ENABLE_DATA_SQLITE OFF CACHE BOOL "Enable Data SQlite")
+set(ENABLE_ZIP OFF CACHE BOOL "Enable Zip")
+set(ENABLE_PAGECOMPILER OFF CACHE BOOL "Enable PageCompiler")
+set(ENABLE_PAGECOMPILER_FILE2PAGE OFF CACHE BOOL "Enable File2Page")
+set(BUILD_SHARED_LIBS ON)
+add_subdirectory(poco)
+
 if(NOT TARGET glm)
     message(STATUS "Gathering GLM from submodules")
     option(GLM_QUIET "No CMake Message" ON)

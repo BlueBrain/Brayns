@@ -33,3 +33,6 @@
 [submodule "deps/pbrt-v3"]
 	path = deps/pbrt-v3
 	url = https://github.com/BlueBrain/pbrt-v3
+[submodule "deps/poco"]
+	path = deps/poco
+	url = https://github.com/pocoproject/poco.git
