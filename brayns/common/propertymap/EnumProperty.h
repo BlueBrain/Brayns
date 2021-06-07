@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cassert>
 #include <string>
 #include <vector>
@@ -88,7 +89,7 @@ public:
      */
     const std::string& toString() const
     {
-        return isValidIndex(_index) ? _values[_index] : _emptyString;
+        return isValidIndex(_index) ? _values[_index] : _getEmptyString();
     }
 
     /**
@@ -192,6 +193,12 @@ public:
     }
 
 private:
+    static const std::string& _getEmptyString()
+    {
+        static const std::string emptyString;
+        return emptyString;
+    }
+
     void _assignOrThrow(const std::string& value)
     {
         auto index = getIndex(value);
@@ -214,13 +221,9 @@ private:
                                  std::to_string(index) + "'");
     }
 
-    static const std::string _emptyString;
-
     int _index = -1;
     std::vector<std::string> _values;
 };
-
-inline const std::string EnumProperty::_emptyString;
 
 /**
  * @brief Converter to convert an enumeration to string.
