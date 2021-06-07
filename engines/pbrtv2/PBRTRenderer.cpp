@@ -84,11 +84,11 @@ inline int getInt(PBRTRenderer& r, const std::string& prop, int defValue)
 }
 
 inline pbrt::Spectrum getSpectrum(PBRTRenderer& r, const std::string& prop, 
-                                  const std::array<float, 3>& defValue)
+                                  const Vector3f& defValue)
 {
     if(r.hasProperty(prop))
     {
-        const auto p = r.getProperty<std::array<double, 3>>(prop);
+        const auto p = r.getProperty<Vector3d>(prop);
         float fltP[3] = {
             static_cast<float>(p[0]),
             static_cast<float>(p[1]),

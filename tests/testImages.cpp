@@ -68,7 +68,7 @@ TEST_CASE("render_xyz_and_compare")
 
     auto model = brayns.getEngine().getScene().getModel(0);
     auto props = model->getProperties();
-    props.updateProperty("radius", props.getProperty<double>("radius") / 2.);
+    props.update("radius", props["radius"].as<double>() / 2.);
     model->setProperties(props);
 
     brayns.getEngine().getScene().markModified();
@@ -88,8 +88,7 @@ TEST_CASE("render_xyz_change_radius_from_rockets")
 
     auto model = clientServer.getBrayns().getEngine().getScene().getModel(0);
     brayns::PropertyMap props;
-    props.setProperty(
-        {"radius", model->getProperties().getProperty<double>("radius") / 2.});
+    props.add({"radius", model->getProperties()["radius"].as<double>() / 2.});
 
     CHECK((clientServer.makeRequest<brayns::ModelProperties, bool>(
         "set-model-properties", {model->getModelID(), props})));

@@ -158,7 +158,7 @@ std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
     const auto radius = props.getProperty<double>(PROP_RADIUS.name);
     const auto opacity = props.getProperty<double>(PROP_OPACITY.name);
     const auto colorScheme = stringToEnum<ColorScheme>(
-        properties.getProperty<std::string>(PROP_COLOR_SCHEME.name));
+        properties[PROP_COLOR_SCHEME.name].to<std::string>());
 
     // Check files
     std::ifstream gidRowfile(config.gid_to_streamline, std::ios::in);

@@ -263,7 +263,6 @@ struct ClientStateGetAllResponse
 
 // ====================================================
 
-
 } // namespace brayns
 
 STATICJSON_DECLARE_ENUM(brayns::GeometryQuality,
@@ -293,25 +292,6 @@ STATICJSON_DECLARE_ENUM(brayns::TextureType,
                         {"reflection", brayns::TextureType::reflection},
                         {"refraction", brayns::TextureType::refraction},
                         {"occlusion", brayns::TextureType::occlusion});
-
-// c-array to std.array: https://stackoverflow.com/questions/11205186
-template <size_t M, typename T>
-auto toArray(glm::vec<M, T>& vec)
-{
-    return reinterpret_cast<std::array<T, M>*>(glm::value_ptr(vec));
-}
-
-template <typename T>
-auto toArray(glm::tquat<T>& quat)
-{
-    return reinterpret_cast<std::array<T, 4>*>(glm::value_ptr(quat));
-}
-
-template <size_t M, typename T>
-auto toArray(std::vector<glm::vec<M, T>>& vecVec)
-{
-    return reinterpret_cast<std::vector<std::array<T, M>>*>(&vecVec);
-}
 
 namespace staticjson
 {
@@ -524,14 +504,15 @@ inline void init(brayns::ModelDescriptor* g, ObjectHandler* h)
     h->add_property("transformation", &g->_transformation, Flags::Optional);
     h->add_property("visible", &g->_visible, Flags::Optional);
     h->add_property("loader_name", &g->_loaderName, Flags::Optional);
-    h->add_property("loader_properties", &g->_loaderProperties, Flags::Optional);
+    h->add_property("loader_properties", &g->_loaderProperties,
+                    Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
 inline void init(brayns::ClipPlane* g, ObjectHandler* h)
 {
     h->add_property("id", &g->_id);
-    h->add_property("plane", &g->_plane);
+    h->add_property("plane", toArray(g->_plane));
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -783,7 +764,7 @@ inline void init(brayns::ModifyMaterialResult* a, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline  void init(brayns::SetActiveSimulationModel* a, ObjectHandler* h)
+inline void init(brayns::SetActiveSimulationModel* a, ObjectHandler* h)
 {
     h->add_property("model_id", &a->modelId);
     h->set_flags(Flags::DisallowUnknownKey);
@@ -823,7 +804,6 @@ inline void init(brayns::ClientStateGetAllResponse* a, ObjectHandler* h)
     h->add_property("values", &a->values);
     h->set_flags(Flags::DisallowUnknownKey);
 }
-
 } // namespace staticjson
 
 // for rockets::jsonrpc
@@ -865,10 +845,11 @@ inline std::string toJSONReplacePropertyMap(
     return result;
 }
 
-template<>
-inline std::string  to_json(const brayns::MaterialInfo& mat)
+template <>
+inline std::string to_json(const brayns::MaterialInfo& mat)
 {
-    return toJSONReplacePropertyMap(mat, "material_properties", mat.materialProperties);
+    return toJSONReplacePropertyMap(mat, "material_properties",
+                                    mat.materialProperties);
 }
 
 template <>
@@ -884,7 +865,7 @@ inline std::string to_json(const brayns::ModelParams& params)
                                     params.getLoaderProperties());
 }
 
-template<>
+template <>
 inline std::string to_json(const brayns::ModelDescriptor& params)
 {
     return toJSONReplacePropertyMap(params, "loader_properties",
@@ -904,19 +885,27 @@ inline std::string to_json(const brayns::RPCLight& light)
     return toJSONReplacePropertyMap(light, "properties", light.properties);
 }
 
+template <typename T, int S>
+inline std::string to_json(const glm::vec<S, T>& value)
+{
+    return staticjson::to_json_string(*toArray(value));
+}
+
 template <class T>
 inline bool from_json(T& obj, const std::string& json)
 {
     return staticjson::from_json_string(json.c_str(), &obj, nullptr);
 }
-template <>
-inline bool from_json(brayns::Vector2d& obj, const std::string& json)
+
+template <typename T, int S>
+inline bool from_json(glm::vec<S, T>& obj, const std::string& json)
 {
-    return staticjson::from_json_string(json.c_str(), toArray<2, double>(obj),
-                                        nullptr);
+    return staticjson::from_json_string(json.c_str(), toArray(obj), nullptr);
 }
 
-brayns::PropertyMap jsonToPropertyMap(const std::string& json, const brayns::PropertyMap& schema = brayns::PropertyMap());
+brayns::PropertyMap jsonToPropertyMap(
+    const std::string& json,
+    const brayns::PropertyMap& schema = brayns::PropertyMap());
 
 template <typename T>
 inline std::pair<bool, brayns::PropertyMap> fromJSONWithPropertyMap(
@@ -984,7 +973,7 @@ inline bool from_json(brayns::RPCLight& light, const std::string& json)
     return success;
 }
 
-template<>
+template <>
 inline bool from_json(brayns::ModifyMaterial& mat, const std::string& json)
 {
     bool success;

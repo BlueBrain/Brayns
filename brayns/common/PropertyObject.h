@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/common/BaseObject.h>
-#include <brayns/common/PropertyMap.h>
+#include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/types.h>
 
 #include <map>
@@ -53,10 +53,10 @@ public:
                                const bool triggerCallback = true)
     {
         auto& propMap = _properties.at(_currentType);
-        const auto oldValue = propMap.getProperty<T>(name, value);
+        const auto oldValue = propMap.valueOr(name, value);
         if (!_isEqual(oldValue, value))
         {
-            propMap.updateProperty(name, value);
+            propMap.update(name, value);
             markModified(triggerCallback);
         }
     }
@@ -67,7 +67,7 @@ public:
      */
     bool hasProperty(const std::string& name) const
     {
-        return _properties.at(_currentType).hasProperty(name);
+        return _properties.at(_currentType).find(name);
     }
 
     /**
@@ -77,7 +77,7 @@ public:
     template <typename T>
     inline T getProperty(const std::string& name) const
     {
-        return _properties.at(_currentType).getProperty<T>(name);
+        return _properties.at(_currentType)[name].as<T>();
     }
 
     /**
@@ -137,11 +137,11 @@ public:
         for (const auto& kv : obj._properties)
         {
             const auto& key = kv.first;
-            const auto& properties = kv.second.getProperties();
+            const auto& properties = kv.second;
 
             PropertyMap propertyMapClone;
             for (const auto& property : properties)
-                propertyMapClone.setProperty(*property);
+                propertyMapClone.add(property);
 
             _properties[key] = propertyMapClone;
         }

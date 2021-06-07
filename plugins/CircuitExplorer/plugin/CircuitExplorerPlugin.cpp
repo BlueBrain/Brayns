@@ -82,43 +82,29 @@ void _addAdvancedSimulationRenderer(brayns::Engine& engine)
 {
     PLUGIN_INFO << "Registering advanced renderer" << std::endl;
     brayns::PropertyMap properties;
-    properties.setProperty(
-        {"giDistance", 10000., {"Global illumination distance"}});
-    properties.setProperty(
-        {"giWeight", 0., 1., 1., {"Global illumination weight"}});
-    properties.setProperty(
-        {"giSamples", 0, 0, 64, {"Global illumination samples"}});
-    properties.setProperty({"shadows", 0., 0., 1., {"Shadow intensity"}});
-    properties.setProperty({"softShadows", 0., 0., 1., {"Shadow softness"}});
-    properties.setProperty(
-        {"softShadowsSamples", 1, 1, 64, {"Soft shadow samples"}});
-    properties.setProperty(
-        {"epsilonFactor", 1., 1., 1000., {"Epsilon factor"}});
-    properties.setProperty({"samplingThreshold",
-                            0.001,
-                            0.001,
-                            1.,
-                            {"Threshold under which sampling is ignored"}});
-    properties.setProperty({"volumeSpecularExponent",
-                            20.,
-                            1.,
-                            100.,
-                            {"Volume specular exponent"}});
-    properties.setProperty(
-        {"volumeAlphaCorrection", 0.5, 0.001, 1., {"Volume alpha correction"}});
-    properties.setProperty({"maxDistanceToSecondaryModel",
-                            30.,
-                            0.1,
-                            100.,
-                            {"Maximum distance to secondary model"}});
-    properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
-    properties.setProperty({"fogStart", 0., 0., 1e6, {"Fog start"}});
-    properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
-    properties.setProperty(
-        {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
-    properties.setProperty({"useHardwareRandomizer",
-                            false,
-                            {"Use hardware accelerated randomizer"}});
+    properties.add({"giDistance", 10000., {"Global illumination distance"}});
+    properties.add({"giWeight", 0., {"Global illumination weight"}});
+    properties.add({"giSamples", 0, {"Global illumination samples"}});
+    properties.add({"shadows", 0., {"Shadow intensity"}});
+    properties.add({"softShadows", 0., {"Shadow softness"}});
+    properties.add({"softShadowsSamples", 1, {"Soft shadow samples"}});
+    properties.add({"epsilonFactor", 1., {"Epsilon factor"}});
+    properties.add({"samplingThreshold",
+                    0.001,
+                    {"Threshold under which sampling is ignored"}});
+    properties.add(
+        {"volumeSpecularExponent", 20., {"Volume specular exponent"}});
+    properties.add({"volumeAlphaCorrection", 0.5, {"Volume alpha correction"}});
+    properties.add({"maxDistanceToSecondaryModel",
+                    30.,
+                    {"Maximum distance to secondary model"}});
+    properties.add({"exposure", 1., {"Exposure"}});
+    properties.add({"fogStart", 0., {"Fog start"}});
+    properties.add({"fogThickness", 1e6, {"Fog thickness"}});
+    properties.add({"maxBounces", 3, {"Maximum number of ray bounces"}});
+    properties.add({"useHardwareRandomizer",
+                    false,
+                    {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_advanced", properties);
 }
 
@@ -127,21 +113,16 @@ void _addBasicSimulationRenderer(brayns::Engine& engine)
     PLUGIN_INFO << "Registering basic renderer" << std::endl;
 
     brayns::PropertyMap properties;
-    properties.setProperty(
-        {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
-    properties.setProperty(
-        {"simulationThreshold", 0., 0., 1., {"Simulation threshold"}});
-    properties.setProperty({"maxDistanceToSecondaryModel",
-                            30.,
-                            0.1,
-                            100.,
-                            {"Maximum distance to secondary model"}});
-    properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
-    properties.setProperty(
-        {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
-    properties.setProperty({"useHardwareRandomizer",
-                            false,
-                            {"Use hardware accelerated randomizer"}});
+    properties.add({"alphaCorrection", 0.5, {"Alpha correction"}});
+    properties.add({"simulationThreshold", 0., {"Simulation threshold"}});
+    properties.add({"maxDistanceToSecondaryModel",
+                    30.,
+                    {"Maximum distance to secondary model"}});
+    properties.add({"exposure", 1., {"Exposure"}});
+    properties.add({"maxBounces", 3, {"Maximum number of ray bounces"}});
+    properties.add({"useHardwareRandomizer",
+                    false,
+                    {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_basic", properties);
 }
 
@@ -150,18 +131,15 @@ void _addVoxelizedSimulationRenderer(brayns::Engine& engine)
     PLUGIN_INFO << "Registering voxelized Simulation renderer" << std::endl;
 
     brayns::PropertyMap properties;
-    properties.setProperty(
-        {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
-    properties.setProperty(
-        {"simulationThreshold", 0., 0., 1., {"Simulation threshold"}});
-    properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
-    properties.setProperty({"fogStart", 0., 0., 1e6, {"Fog start"}});
-    properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
-    properties.setProperty(
-        {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
-    properties.setProperty({"useHardwareRandomizer",
-                            false,
-                            {"Use hardware accelerated randomizer"}});
+    properties.add({"alphaCorrection", 0.5, {"Alpha correction"}});
+    properties.add({"simulationThreshold", 0., {"Simulation threshold"}});
+    properties.add({"exposure", 1., {"Exposure"}});
+    properties.add({"fogStart", 0., {"Fog start"}});
+    properties.add({"fogThickness", 1e6, {"Fog thickness"}});
+    properties.add({"maxBounces", 3, {"Maximum number of ray bounces"}});
+    properties.add({"useHardwareRandomizer",
+                    false,
+                    {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_voxelized_simulation", properties);
 }
 
@@ -170,21 +148,18 @@ void _addGrowthRenderer(brayns::Engine& engine)
     PLUGIN_INFO << "Registering cell growth renderer" << std::endl;
 
     brayns::PropertyMap properties;
-    properties.setProperty(
-        {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
-    properties.setProperty(
-        {"simulationThreshold", 0., 0., 1., {"Simulation threshold"}});
-    properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
-    properties.setProperty({"fogStart", 0., 0., 1e6, {"Fog start"}});
-    properties.setProperty({"fogThickness", 1e6, 1e6, 1e6, {"Fog thickness"}});
-    properties.setProperty({"tfColor", false, {"Use transfer function color"}});
-    properties.setProperty({"shadows", 0., 0., 1., {"Shadow intensity"}});
-    properties.setProperty({"softShadows", 0., 0., 1., {"Shadow softness"}});
-    properties.setProperty(
-        {"shadowDistance", 1e4, 0., 1e4, {"Shadow distance"}});
-    properties.setProperty({"useHardwareRandomizer",
-                            false,
-                            {"Use hardware accelerated randomizer"}});
+    properties.add({"alphaCorrection", 0.5, {"Alpha correction"}});
+    properties.add({"simulationThreshold", 0., {"Simulation threshold"}});
+    properties.add({"exposure", 1., {"Exposure"}});
+    properties.add({"fogStart", 0., {"Fog start"}});
+    properties.add({"fogThickness", 1e6, {"Fog thickness"}});
+    properties.add({"tfColor", false, {"Use transfer function color"}});
+    properties.add({"shadows", 0., {"Shadow intensity"}});
+    properties.add({"softShadows", 0., {"Shadow softness"}});
+    properties.add({"shadowDistance", 1e4, {"Shadow distance"}});
+    properties.add({"useHardwareRandomizer",
+                    false,
+                    {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_cell_growth", properties);
 }
 
@@ -193,26 +168,23 @@ void _addProximityRenderer(brayns::Engine& engine)
     PLUGIN_INFO << "Registering proximity detection renderer" << std::endl;
 
     brayns::PropertyMap properties;
-    properties.setProperty(
-        {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
-    properties.setProperty({"detectionDistance", 1., {"Detection distance"}});
-    properties.setProperty({"detectionFarColor",
-                            std::array<double, 3>{{1., 0., 0.}},
-                            {"Detection far color"}});
-    properties.setProperty({"detectionNearColor",
-                            std::array<double, 3>{{0., 1., 0.}},
-                            {"Detection near color"}});
-    properties.setProperty({"detectionOnDifferentMaterial",
-                            false,
-                            {"Detection on different material"}});
-    properties.setProperty(
-        {"surfaceShadingEnabled", true, {"Surface shading"}});
-    properties.setProperty(
-        {"maxBounces", 3, 1, 100, {"Maximum number of ray bounces"}});
-    properties.setProperty({"exposure", 1., 0.01, 10., {"Exposure"}});
-    properties.setProperty({"useHardwareRandomizer",
-                            false,
-                            {"Use hardware accelerated randomizer"}});
+    properties.add({"alphaCorrection", 0.5, {"Alpha correction"}});
+    properties.add({"detectionDistance", 1., {"Detection distance"}});
+    properties.add({"detectionFarColor",
+                    brayns::Vector3d{1., 0., 0.},
+                    {"Detection far color"}});
+    properties.add({"detectionNearColor",
+                    brayns::Vector3d{0., 1., 0.},
+                    {"Detection near color"}});
+    properties.add({"detectionOnDifferentMaterial",
+                    false,
+                    {"Detection on different material"}});
+    properties.add({"surfaceShadingEnabled", true, {"Surface shading"}});
+    properties.add({"maxBounces", 3, {"Maximum number of ray bounces"}});
+    properties.add({"exposure", 1., {"Exposure"}});
+    properties.add({"useHardwareRandomizer",
+                    false,
+                    {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_proximity_detection", properties);
 }
 
@@ -221,11 +193,11 @@ void _addDOFPerspectiveCamera(brayns::Engine& engine)
     PLUGIN_INFO << "Registering DOF perspective camera" << std::endl;
 
     brayns::PropertyMap properties;
-    properties.setProperty({"fovy", 45., .1, 360., {"Field of view"}});
-    properties.setProperty({"aspect", 1., {"Aspect ratio"}});
-    properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
-    properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
-    properties.setProperty({"enableClippingPlanes", true, {"Clipping"}});
+    properties.add({"fovy", 45., {"Field of view"}});
+    properties.add({"aspect", 1., {"Aspect ratio"}});
+    properties.add({"apertureRadius", 0., {"Aperture radius"}});
+    properties.add({"focusDistance", 1., {"Focus Distance"}});
+    properties.add({"enableClippingPlanes", true, {"Clipping"}});
     engine.addCameraType("circuit_explorer_dof_perspective", properties);
 }
 
@@ -235,11 +207,11 @@ void _addSphereClippingPerspectiveCamera(brayns::Engine& engine)
                 << std::endl;
 
     brayns::PropertyMap properties;
-    properties.setProperty({"fovy", 45., .1, 360., {"Field of view"}});
-    properties.setProperty({"aspect", 1., {"Aspect ratio"}});
-    properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
-    properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
-    properties.setProperty({"enableClippingPlanes", true, {"Clipping"}});
+    properties.add({"fovy", 45., {"Field of view"}});
+    properties.add({"aspect", 1., {"Aspect ratio"}});
+    properties.add({"apertureRadius", 0., {"Aperture radius"}});
+    properties.add({"focusDistance", 1., {"Focus Distance"}});
+    properties.add({"enableClippingPlanes", true, {"Clipping"}});
     engine.addCameraType("circuit_explorer_sphere_clipping", properties);
 }
 
@@ -345,18 +317,16 @@ void CircuitExplorerPlugin::init()
             {"set-material", "Modifies a specific material",
              "MaterialDescriptor",
              "The data to identify and modify the material"},
-            [&](const MaterialDescriptor& param) {
-                return _setMaterial(param);
-            });
+            [&](const MaterialDescriptor& param)
+            { return _setMaterial(param); });
 
         actionInterface->registerRequest<MaterialsDescriptor, brayns::Message>(
             {"set-materials", "Set a set of materials from one or more models",
              "MaterialsDescriptor",
              "The data to identify and modify the materials of the given "
              "models"},
-            [&](const MaterialsDescriptor& param) {
-                return _setMaterials(param);
-            });
+            [&](const MaterialsDescriptor& param)
+            { return _setMaterials(param); });
 
         actionInterface
             ->registerRequest<MaterialRangeDescriptor, brayns::Message>(
@@ -365,9 +335,8 @@ void CircuitExplorerPlugin::init()
                  "material data",
                  "MaterialRangeDescriptor",
                  "The common data with which to update the material"},
-                [&](const MaterialRangeDescriptor& param) {
-                    return _setMaterialRange(param);
-                });
+                [&](const MaterialRangeDescriptor& param)
+                { return _setMaterialRange(param); });
 
         actionInterface->registerRequest<MaterialProperties>(
             {"get-material-properties",
@@ -382,26 +351,23 @@ void CircuitExplorerPlugin::init()
                  "common material data",
                  "UpdateMaterialProperties",
                  "The properties and values to update in the materials"},
-                [&](const UpdateMaterialProperties& param) {
-                    return _updateMaterialProperties(param);
-                });
+                [&](const UpdateMaterialProperties& param)
+                { return _updateMaterialProperties(param); });
 
         actionInterface->registerRequest<ModelId, MaterialIds>(
             {"get-material-ids",
              "Returns all the material IDs of a given model", "ModelId",
              "The ID of the model to query"},
-            [&](const ModelId& modelId) -> MaterialIds {
-                return _getMaterialIds(modelId);
-            });
+            [&](const ModelId& modelId) -> MaterialIds
+            { return _getMaterialIds(modelId); });
 
         actionInterface->registerRequest<ModelMaterialId, MaterialDescriptor>(
             {"get-material",
              "Returns the properties from the given model and material",
              "ModelMaterialId",
              "The ID of the model and of the material to be queried"},
-            [&](const ModelMaterialId& modelId) -> MaterialDescriptor {
-                return _getMaterial(modelId);
-            });
+            [&](const ModelMaterialId& modelId) -> MaterialDescriptor
+            { return _getMaterial(modelId); });
 
         actionInterface
             ->registerRequest<MaterialExtraAttributes, brayns::Message>(
@@ -411,17 +377,15 @@ void CircuitExplorerPlugin::init()
                  "MaterialExtraAttributes",
                  "Id of the model to which the material attributes should be "
                  "extended"},
-                [&](const MaterialExtraAttributes& param) {
-                    return _setMaterialExtraAttributes(param);
-                });
+                [&](const MaterialExtraAttributes& param)
+                { return _setMaterialExtraAttributes(param); });
 
         actionInterface->registerRequest<SynapseAttributes, brayns::Message>(
             {"set-synapses-attributes",
              "Sets sypnapse specific attributes for a given model",
              "SynapseAttributes", "The model and synapse attributes to modify"},
-            [&](const SynapseAttributes& param) {
-                return _setSynapseAttributes(param);
-            });
+            [&](const SynapseAttributes& param)
+            { return _setSynapseAttributes(param); });
 
         actionInterface->registerRequest<SaveModelToCache, brayns::Message>(
             {"save-model-to-cache",
@@ -429,9 +393,8 @@ void CircuitExplorerPlugin::init()
              "SaveModelToCache",
              "Model to be saved and parameters for the build of the cache "
              "file"},
-            [&](const SaveModelToCache& param) {
-                return _saveModelToCache(param);
-            });
+            [&](const SaveModelToCache& param)
+            { return _saveModelToCache(param); });
 
         actionInterface->registerRequest<ConnectionsPerValue, brayns::Message>(
             {"set-connections-per-value",
@@ -440,9 +403,8 @@ void CircuitExplorerPlugin::init()
              " and simulation value",
              "ConnectionsPerValue",
              "Model, frame, and value to build the point cloude"},
-            [&](const ConnectionsPerValue& param) {
-                return _setConnectionsPerValue(param);
-            });
+            [&](const ConnectionsPerValue& param)
+            { return _setConnectionsPerValue(param); });
 
         actionInterface
             ->registerRequest<MetaballsFromSimulationValue, brayns::Message>(
@@ -452,9 +414,8 @@ void CircuitExplorerPlugin::init()
                  " and simulation value",
                  "MetaballsFromSimulationValue",
                  "Model, frame, and value to build the metaballs"},
-                [&](const MetaballsFromSimulationValue& param) {
-                    return _setMetaballsPerSimulationValue(param);
-                });
+                [&](const MetaballsFromSimulationValue& param)
+                { return _setMetaballsPerSimulationValue(param); });
 
         actionInterface->registerRequest<CameraDefinition, brayns::Message>(
             {"set-odu-camera",
@@ -474,9 +435,8 @@ void CircuitExplorerPlugin::init()
              "AttachCellGrowthHandler",
              "Model to which to attach the handler, and number of frames the "
              "growth should span"},
-            [&](const AttachCellGrowthHandler& s) {
-                return _attachCellGrowthHandler(s);
-            });
+            [&](const AttachCellGrowthHandler& s)
+            { return _attachCellGrowthHandler(s); });
 
         actionInterface
             ->registerRequest<AttachCircuitSimulationHandler, brayns::Message>(
@@ -484,9 +444,8 @@ void CircuitExplorerPlugin::init()
                  "Dynamically loads and attach a simulation to a loaded model",
                  "AttachCircuitSimulationHandler",
                  "Model to which attach, and simulation information to fetch"},
-                [&](const AttachCircuitSimulationHandler& s) {
-                    return _attachCircuitSimulationHandler(s);
-                });
+                [&](const AttachCircuitSimulationHandler& s)
+                { return _attachCircuitSimulationHandler(s); });
 
         actionInterface->registerRequest<ExportFramesToDisk, brayns::Message>(
             {"export-frames-to-disk",
@@ -495,17 +454,15 @@ void CircuitExplorerPlugin::init()
              "ExportFramesToDisk",
              "Configuration of the simulation to render and image store "
              "specifications"},
-            [&](const ExportFramesToDisk& s) {
-                return _exportFramesToDisk(s);
-            });
+            [&](const ExportFramesToDisk& s)
+            { return _exportFramesToDisk(s); });
 
         actionInterface->registerRequest<FrameExportProgress>(
             {"get-export-frames-progress",
              "Returns the progress of the last issued export frames to disk "
              "request"},
-            [&](void) -> FrameExportProgress {
-                return _getFrameExportProgress();
-            });
+            [&](void) -> FrameExportProgress
+            { return _getFrameExportProgress(); });
 
         actionInterface
             ->registerRequest<ExportLayerToDisk, ExportLayerToDiskResult>(
@@ -516,9 +473,8 @@ void CircuitExplorerPlugin::init()
                  "ExportLayerToDisk",
                  "Information to store the layer on disk, and image data to "
                  "store in base64 format"},
-                [&](const ExportLayerToDisk& s) {
-                    return _exportLayerToDisk(s);
-                });
+                [&](const ExportLayerToDisk& s)
+                { return _exportLayerToDisk(s); });
 
         actionInterface->registerRequest<MakeMovieParameters, brayns::Message>(
             {"make-movie",
@@ -526,9 +482,8 @@ void CircuitExplorerPlugin::init()
              "MakeMovieParameters",
              "Information to find the frames, and how to compose them into a "
              "media file"},
-            [&](const MakeMovieParameters& params) {
-                return _makeMovie(params);
-            });
+            [&](const MakeMovieParameters& params)
+            { return _makeMovie(params); });
 
         actionInterface->registerRequest<AnterogradeTracing, brayns::Message>(
             {"trace-anterograde",
@@ -536,9 +491,8 @@ void CircuitExplorerPlugin::init()
              "relationship "
              " between cells (including projections)",
              "AnterogradeTracing", "Data in which to base the cell highlight"},
-            [&](const AnterogradeTracing& payload) {
-                return _traceAnterogrades(payload);
-            });
+            [&](const AnterogradeTracing& payload)
+            { return _traceAnterogrades(payload); });
 
         actionInterface->registerRequest<AddGrid, brayns::Message>(
             {"add-grid", "Adds a visual 3D grid to the scene", "AddGrid",
@@ -597,9 +551,8 @@ void CircuitExplorerPlugin::init()
              "Modify the geometry radiuses (spheres, cones, cylinders and SDF "
              "geometries)",
              "CircuitThickness", "Model ID and radius multiplier to apply"},
-            [&](const CircuitThickness& cc) {
-                return _changeCircuitThickness(cc);
-            });
+            [&](const CircuitThickness& cc)
+            { return _changeCircuitThickness(cc); });
 
     } // if (actionInterface)
 
@@ -686,9 +639,8 @@ void CircuitExplorerPlugin::releaseCircuitMapper(const size_t modelId)
     _mappers.erase(
         std::remove_if(_mappers.begin(), _mappers.end(),
                        [mid = modelId](
-                           const std::unique_ptr<CellObjectMapper>& mapper) {
-                           return mapper->getSourceModelId() == mid;
-                       }),
+                           const std::unique_ptr<CellObjectMapper>& mapper)
+                       { return mapper->getSourceModelId() == mid; }),
         _mappers.end());
 }
 
@@ -705,14 +657,13 @@ brayns::Message CircuitExplorerPlugin::_setMaterialExtraAttributes(
             for (auto& material : materials)
             {
                 brayns::PropertyMap props;
-                props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, false});
-                props.setProperty(
-                    {MATERIAL_PROPERTY_SHADING_MODE,
-                     static_cast<int>(MaterialShadingMode::diffuse)});
-                props.setProperty(
+                props.add({MATERIAL_PROPERTY_CAST_USER_DATA, false});
+                props.add({MATERIAL_PROPERTY_SHADING_MODE,
+                           static_cast<int>(MaterialShadingMode::diffuse)});
+                props.add(
                     {MATERIAL_PROPERTY_CLIPPING_MODE,
                      static_cast<int>(MaterialClippingMode::no_clipping)});
-                props.setProperty({MATERIAL_PROPERTY_USER_PARAMETER, 1.0});
+                props.add({MATERIAL_PROPERTY_USER_PARAMETER, 1.0});
                 material.second->updateProperties(props);
             }
         }
@@ -1062,82 +1013,73 @@ brayns::Message CircuitExplorerPlugin::_updateMaterialProperties(
             if (prop == "diffuse_color")
             {
                 updates.push_back(
-                    [arr = arrayFromString(strVal)](brayns::MaterialPtr& m) {
-                        m->setDiffuseColor(arr);
-                    });
+                    [arr = arrayFromString(strVal)](brayns::MaterialPtr& m)
+                    { m->setDiffuseColor(arr); });
             }
             else if (prop == "specular_color")
             {
                 updates.push_back(
-                    [arr = arrayFromString(strVal)](brayns::MaterialPtr& m) {
-                        m->setSpecularColor(arr);
-                    });
+                    [arr = arrayFromString(strVal)](brayns::MaterialPtr& m)
+                    { m->setSpecularColor(arr); });
             }
             else if (prop == "specular_exponent")
             {
                 updates.push_back(
-                    [v = std::stod(strVal)](brayns::MaterialPtr& m) {
-                        m->setSpecularExponent(v);
-                    });
+                    [v = std::stod(strVal)](brayns::MaterialPtr& m)
+                    { m->setSpecularExponent(v); });
             }
             else if (prop == "refraction_index")
             {
                 updates.push_back(
-                    [v = std::stod(strVal)](brayns::MaterialPtr& m) {
-                        m->setRefractionIndex(v);
-                    });
+                    [v = std::stod(strVal)](brayns::MaterialPtr& m)
+                    { m->setRefractionIndex(v); });
             }
             else if (prop == "reflection_index")
             {
                 updates.push_back(
-                    [v = std::stod(strVal)](brayns::MaterialPtr& m) {
-                        m->setReflectionIndex(v);
-                    });
+                    [v = std::stod(strVal)](brayns::MaterialPtr& m)
+                    { m->setReflectionIndex(v); });
             }
             else if (prop == "opacity")
             {
                 updates.push_back(
-                    [v = std::stod(strVal)](brayns::MaterialPtr& m) {
-                        m->setOpacity(v);
-                    });
+                    [v = std::stod(strVal)](brayns::MaterialPtr& m)
+                    { m->setOpacity(v); });
             }
             else if (prop == "emission")
             {
                 updates.push_back(
-                    [v = std::stod(strVal)](brayns::MaterialPtr& m) {
-                        m->setEmission(v);
-                    });
+                    [v = std::stod(strVal)](brayns::MaterialPtr& m)
+                    { m->setEmission(v); });
             }
             else if (prop == "glossiness")
             {
                 updates.push_back(
-                    [v = std::stod(strVal)](brayns::MaterialPtr& m) {
-                        m->setGlossiness(v);
-                    });
+                    [v = std::stod(strVal)](brayns::MaterialPtr& m)
+                    { m->setGlossiness(v); });
             }
             else if (prop == "simulation_data_cast")
             {
                 auto copyVal = strVal;
                 std::transform(copyVal.begin(), copyVal.end(), copyVal.begin(),
                                [](unsigned char c) { return std::tolower(c); });
-                updates.push_back([v = copyVal](brayns::MaterialPtr& m) {
-                    m->updateProperty(MATERIAL_PROPERTY_CAST_USER_DATA,
-                                      v == "true");
-                });
+                updates.push_back(
+                    [v = copyVal](brayns::MaterialPtr& m) {
+                        m->updateProperty(MATERIAL_PROPERTY_CAST_USER_DATA,
+                                          v == "true");
+                    });
             }
             else if (prop == "shading_mode")
             {
                 updates.push_back(
-                    [v = std::stoi(strVal)](brayns::MaterialPtr& m) {
-                        m->updateProperty(MATERIAL_PROPERTY_SHADING_MODE, v);
-                    });
+                    [v = std::stoi(strVal)](brayns::MaterialPtr& m)
+                    { m->updateProperty(MATERIAL_PROPERTY_SHADING_MODE, v); });
             }
             else if (prop == "clipping_mode")
             {
                 updates.push_back(
-                    [v = std::stoi(strVal)](brayns::MaterialPtr& m) {
-                        m->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE, v);
-                    });
+                    [v = std::stoi(strVal)](brayns::MaterialPtr& m)
+                    { m->updateProperty(MATERIAL_PROPERTY_CLIPPING_MODE, v); });
             }
             else if (prop == "user_parameter")
             {
@@ -1329,8 +1271,8 @@ brayns::Message CircuitExplorerPlugin::_colorCells(const ColorCells& payload)
     }
 
     const auto updateMatColor = [](brayns::ModelDescriptorPtr& model,
-                                   size_t matId,
-                                   const brayns::Vector3d& color) {
+                                   size_t matId, const brayns::Vector3d& color)
+    {
         auto mat = model->getModel().getMaterial(matId);
         if (mat)
         {
@@ -2054,27 +1996,28 @@ brayns::Message CircuitExplorerPlugin::_traceAnterogrades(
                              const std::unordered_map<size_t, MorphologyMap>&)>
         searchFunc = [](std::unordered_set<int32_t>& buffer,
                         const std::vector<uint32_t>& src,
-                        const std::unordered_map<size_t, MorphologyMap>& m) {
-            for (const auto& cellId : src)
+                        const std::unordered_map<size_t, MorphologyMap>& m)
+    {
+        for (const auto& cellId : src)
+        {
+            auto morphologyMapIt = m.find(cellId);
+            if (morphologyMapIt != m.end())
             {
-                auto morphologyMapIt = m.find(cellId);
-                if (morphologyMapIt != m.end())
-                {
-                    const auto& morphologyMap = morphologyMapIt->second;
-                    if (morphologyMap._hasMesh)
-                        buffer.insert(
-                            static_cast<int32_t>(morphologyMap._triangleIndx));
-                    for (const auto& kvp : morphologyMap._coneMap)
-                        buffer.insert(static_cast<int32_t>(kvp.first));
-                    for (const auto& kvp : morphologyMap._sphereMap)
-                        buffer.insert(static_cast<int32_t>(kvp.first));
-                    for (const auto& kvp : morphologyMap._cylinderMap)
-                        buffer.insert(static_cast<int32_t>(kvp.first));
-                    for (const auto& kvp : morphologyMap._sdfGeometryMap)
-                        buffer.insert(static_cast<int32_t>(kvp.first));
-                }
+                const auto& morphologyMap = morphologyMapIt->second;
+                if (morphologyMap._hasMesh)
+                    buffer.insert(
+                        static_cast<int32_t>(morphologyMap._triangleIndx));
+                for (const auto& kvp : morphologyMap._coneMap)
+                    buffer.insert(static_cast<int32_t>(kvp.first));
+                for (const auto& kvp : morphologyMap._sphereMap)
+                    buffer.insert(static_cast<int32_t>(kvp.first));
+                for (const auto& kvp : morphologyMap._cylinderMap)
+                    buffer.insert(static_cast<int32_t>(kvp.first));
+                for (const auto& kvp : morphologyMap._sdfGeometryMap)
+                    buffer.insert(static_cast<int32_t>(kvp.first));
             }
-        };
+        }
+    };
 
     // Gather material ids for the source and target cells
     std::unordered_set<int32_t> sourceCellMaterialIds;
@@ -2153,11 +2096,11 @@ void CircuitExplorerPlugin::_createShapeMaterial(brayns::ModelPtr& model,
     mptr->setSpecularExponent(20.0);
 
     brayns::PropertyMap props;
-    props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, false});
-    props.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
-                       static_cast<int>(MaterialShadingMode::diffuse)});
-    props.setProperty({MATERIAL_PROPERTY_CLIPPING_MODE,
-                       static_cast<int>(MaterialClippingMode::no_clipping)});
+    props.add({MATERIAL_PROPERTY_CAST_USER_DATA, false});
+    props.add({MATERIAL_PROPERTY_SHADING_MODE,
+               static_cast<int>(MaterialShadingMode::diffuse)});
+    props.add({MATERIAL_PROPERTY_CLIPPING_MODE,
+               static_cast<int>(MaterialClippingMode::no_clipping)});
 
     mptr->updateProperties(props);
 
@@ -2421,11 +2364,11 @@ brayns::Message CircuitExplorerPlugin::_addGrid(const AddGrid& payload)
     const brayns::Vector3f grey = {0.5, 0.5, 0.5};
 
     brayns::PropertyMap props;
-    props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, false});
-    props.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
-                       static_cast<int>(MaterialShadingMode::none)});
-    props.setProperty({MATERIAL_PROPERTY_CLIPPING_MODE,
-                       static_cast<int>(MaterialClippingMode::no_clipping)});
+    props.add({MATERIAL_PROPERTY_CAST_USER_DATA, false});
+    props.add({MATERIAL_PROPERTY_SHADING_MODE,
+               static_cast<int>(MaterialShadingMode::none)});
+    props.add({MATERIAL_PROPERTY_CLIPPING_MODE,
+               static_cast<int>(MaterialClippingMode::no_clipping)});
 
     auto material = model->createMaterial(0, "x");
     material->setDiffuseColor(grey);
@@ -2489,10 +2432,9 @@ brayns::Message CircuitExplorerPlugin::_addGrid(const AddGrid& payload)
         const float l2 = l * 0.90;
 
         brayns::PropertyMap diffuseProps;
-        diffuseProps.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, false});
-        diffuseProps.setProperty(
-            {MATERIAL_PROPERTY_SHADING_MODE,
-             static_cast<int>(MaterialShadingMode::diffuse)});
+        diffuseProps.add({MATERIAL_PROPERTY_CAST_USER_DATA, false});
+        diffuseProps.add({MATERIAL_PROPERTY_SHADING_MODE,
+                          static_cast<int>(MaterialShadingMode::diffuse)});
 
         // X
         material = model->createMaterial(4, "x_axis");
@@ -2544,11 +2486,11 @@ brayns::Message CircuitExplorerPlugin::_addColumn(const AddColumn& payload)
     const brayns::Vector3f white = {1.f, 1.f, 1.F};
 
     brayns::PropertyMap props;
-    props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, false});
-    props.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
-                       static_cast<int>(MaterialShadingMode::diffuse)});
-    props.setProperty({MATERIAL_PROPERTY_CLIPPING_MODE,
-                       static_cast<int>(MaterialClippingMode::no_clipping)});
+    props.add({MATERIAL_PROPERTY_CAST_USER_DATA, false});
+    props.add({MATERIAL_PROPERTY_SHADING_MODE,
+               static_cast<int>(MaterialShadingMode::diffuse)});
+    props.add({MATERIAL_PROPERTY_CLIPPING_MODE,
+               static_cast<int>(MaterialClippingMode::no_clipping)});
 
     auto material = model->createMaterial(0, "column");
     material->setDiffuseColor(white);

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/common/PropertyMap.h>
+#include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/loader/Loader.h>
 
 #include <set>

@@ -26,7 +26,7 @@
 TEST_CASE_FIXTURE(ClientServer, "change_fov")
 {
     brayns::PropertyMap cameraParams;
-    cameraParams.setProperty({"fovy", 10., .1, 360.});
+    cameraParams.add({"fovy", 10.0});
     CHECK((makeRequest<brayns::PropertyMap, bool>("set-camera-params",
                                                   cameraParams)));
 }
@@ -42,16 +42,16 @@ TEST_CASE_FIXTURE(ClientServer, "reset_camera")
 TEST_CASE_FIXTURE(ClientServer, "inspect")
 {
     auto inspectResult =
-        makeRequest<std::array<double, 2>, brayns::Renderer::PickResult>(
-            "inspect", {{0.5, 0.5}});
+        makeRequest<brayns::Vector2d, brayns::Renderer::PickResult>(
+            "inspect", {0.5, 0.5});
     CHECK(inspectResult.hit);
     CHECK(
         glm::all(glm::epsilonEqual(inspectResult.pos,
                                    {0.5, 0.5, 1.19209289550781e-7}, 0.000001)));
 
     auto failedInspectResult =
-        makeRequest<std::array<double, 2>, brayns::Renderer::PickResult>(
-            "inspect", {{10, -10}});
+        makeRequest<brayns::Vector2d, brayns::Renderer::PickResult>(
+            "inspect", {10, -10});
     CHECK(!failedInspectResult.hit);
 }
 

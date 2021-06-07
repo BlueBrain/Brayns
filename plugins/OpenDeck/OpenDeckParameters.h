@@ -20,7 +20,7 @@
 #pragma once
 
 #include <brayns/common/BaseObject.h>
-#include <brayns/common/PropertyMap.h>
+#include <brayns/common/propertymap/PropertyMap.h>
 
 namespace brayns
 {
@@ -34,7 +34,7 @@ public:
 
     double getResolutionScaling() const
     {
-        return _props.getProperty<double>(PARAM_RESOLUTION_SCALING);
+        return _props[PARAM_RESOLUTION_SCALING].as<double>();
     }
     void setResolutionScaling(const double resScaling)
     {
@@ -43,7 +43,7 @@ public:
 
     double getCameraScaling() const
     {
-        return _props.getProperty<double>(PARAM_CAMERA_SCALING);
+        return _props[PARAM_CAMERA_SCALING].as<double>();
     }
     void setCameraScaling(const double cameraScaling)
     {
@@ -52,17 +52,18 @@ public:
 
     const PropertyMap& getPropertyMap() const { return _props; }
     PropertyMap& getPropertyMap() { return _props; }
+
 private:
     PropertyMap _props;
 
     template <typename T>
     void _updateProperty(const char* property, const T& newValue)
     {
-        if (!_isEqual(_props.getProperty<T>(property), newValue))
+        if (!_isEqual(_props[property].as<T>(), newValue))
         {
-            _props.updateProperty(property, newValue);
+            _props.update(property, newValue);
             markModified();
         }
     }
 };
-}
+} // namespace brayns

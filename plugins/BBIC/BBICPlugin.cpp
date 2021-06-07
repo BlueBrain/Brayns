@@ -19,7 +19,6 @@
 #include "BBICPlugin.h"
 #include "BBICLoader.h"
 
-#include <brayns/common/PropertyMap.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/pluginapi/PluginAPI.h>

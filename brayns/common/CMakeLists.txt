@@ -5,7 +5,7 @@
 
 set(BRAYNSCOMMON_SOURCES
   ImageManager.cpp
-  PropertyMap.cpp
+  propertymap/ConversionRegistry.cpp
   input/KeyboardHandler.cpp
   light/Light.cpp
   loader/LoaderRegistry.cpp
@@ -22,13 +22,16 @@ set(BRAYNSCOMMON_SOURCES
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
-  any.hpp
   ActionInterface.h
   ActionMessage.h
   BaseObject.h
   ImageManager.h
   Progress.h
-  PropertyMap.h
+  propertymap/Any.h
+  propertymap/Converter.h
+  propertymap/ConversionRegistry.h
+  propertymap/EnumProperty.h
+  propertymap/PropertyMap.h
   PropertyObject.h
   Statistics.h
   Timer.h

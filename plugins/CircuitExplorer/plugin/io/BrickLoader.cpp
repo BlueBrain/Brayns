@@ -162,10 +162,9 @@ std::vector<brayns::ModelDescriptorPtr> BrickLoader::importFromFile(
 
         brayns::PropertyMap materialProps;
         auto name = _readString(file);
-        materialProps.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, false});
-        materialProps.setProperty(
-            {MATERIAL_PROPERTY_SHADING_MODE,
-             static_cast<int32_t>(MaterialShadingMode::diffuse)});
+        materialProps.add({MATERIAL_PROPERTY_CAST_USER_DATA, false});
+        materialProps.add({MATERIAL_PROPERTY_SHADING_MODE,
+                           static_cast<int32_t>(MaterialShadingMode::diffuse)});
 
         auto material = model->createMaterial(materialId, name, materialProps);
 
@@ -248,7 +247,7 @@ std::vector<brayns::ModelDescriptorPtr> BrickLoader::importFromFile(
             float value;
         };
 
-        if (props.getProperty<bool>(PROP_LOAD_SPHERES.name))
+        if (props[PROP_LOAD_SPHERES.getName()].as<bool>())
         {
             callback.updateProgress("Spheres (" + std::to_string(i + 1) + "/" +
                                         std::to_string(nbSpheres) + ")",
@@ -297,7 +296,7 @@ std::vector<brayns::ModelDescriptorPtr> BrickLoader::importFromFile(
             float value;
         };
 
-        if (props.getProperty<bool>(PROP_LOAD_CYLINDERS.name))
+        if (props[PROP_LOAD_CYLINDERS.getName()].as<bool>())
         {
             callback.updateProgress("Cylinders (" + std::to_string(i + 1) +
                                         "/" + std::to_string(nbCylinders) + ")",
@@ -347,7 +346,7 @@ std::vector<brayns::ModelDescriptorPtr> BrickLoader::importFromFile(
             float value;
         };
 
-        if (props.getProperty<bool>(PROP_LOAD_CONES.name))
+        if (props[PROP_LOAD_CONES.getName()].as<bool>())
         {
             callback.updateProgress("Cones (" + std::to_string(i + 1) + "/" +
                                         std::to_string(nbCones) + ")",
@@ -381,7 +380,7 @@ std::vector<brayns::ModelDescriptorPtr> BrickLoader::importFromFile(
     }
 
     // Meshes
-    bool load = props.getProperty<bool>(PROP_LOAD_MESHES.name);
+    bool load = props[PROP_LOAD_MESHES.getName()].as<bool>();
     file.read((char*)&nbMeshes, sizeof(size_t));
     for (size_t i = 0; i < nbMeshes; ++i)
     {
@@ -450,7 +449,7 @@ std::vector<brayns::ModelDescriptorPtr> BrickLoader::importFromFile(
     }
 
     // Streamlines
-    load = props.getProperty<bool>(PROP_LOAD_STREAMLINES.name);
+    load = props[PROP_LOAD_STREAMLINES.getName()].as<bool>();
     size_t nbStreamlines;
     auto& streamlines = model->getStreamlines();
     file.read((char*)&nbStreamlines, sizeof(size_t));
@@ -503,7 +502,7 @@ std::vector<brayns::ModelDescriptorPtr> BrickLoader::importFromFile(
     }
 
     // SDF geometry
-    load = props.getProperty<bool>(PROP_LOAD_SDF.name);
+    load = props[PROP_LOAD_SDF.getName()].as<bool>();
     auto& sdfData = model->getSDFGeometryData();
     file.read((char*)&nbElements, sizeof(size_t));
 
@@ -570,7 +569,7 @@ std::vector<brayns::ModelDescriptorPtr> BrickLoader::importFromFile(
             file.ignore(bufferSize);
     }
 
-    load = props.getProperty<bool>(PROP_LOAD_SIMULATION.name);
+    load = props[PROP_LOAD_SIMULATION.getName()].as<bool>();
     if (version >= CACHE_VERSION_3 && load)
     {
         // Simulation Handler
@@ -666,7 +665,7 @@ std::vector<brayns::ModelDescriptorPtr> BrickLoader::importFromFile(
     // Restore original circuit config file from cache metadata, if present
     std::string path = filename;
     auto cpIt = metadata.find("CircuitPath");
-    if(cpIt != metadata.end())
+    if (cpIt != metadata.end())
         path = cpIt->second;
 
     auto modelDescriptor =
@@ -1029,12 +1028,12 @@ brayns::PropertyMap BrickLoader::getProperties() const
 brayns::PropertyMap BrickLoader::getCLIProperties()
 {
     brayns::PropertyMap pm("CircuitExplorer");
-    pm.setProperty(PROP_LOAD_SPHERES);
-    pm.setProperty(PROP_LOAD_CYLINDERS);
-    pm.setProperty(PROP_LOAD_CONES);
-    pm.setProperty(PROP_LOAD_MESHES);
-    pm.setProperty(PROP_LOAD_STREAMLINES);
-    pm.setProperty(PROP_LOAD_SDF);
-    pm.setProperty(PROP_LOAD_SIMULATION);
+    pm.add(PROP_LOAD_SPHERES);
+    pm.add(PROP_LOAD_CYLINDERS);
+    pm.add(PROP_LOAD_CONES);
+    pm.add(PROP_LOAD_MESHES);
+    pm.add(PROP_LOAD_STREAMLINES);
+    pm.add(PROP_LOAD_SDF);
+    pm.add(PROP_LOAD_SIMULATION);
     return pm;
 }

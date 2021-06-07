@@ -22,8 +22,7 @@
 
 #include "ClientServer.h"
 
-using Vec2 = std::array<int32_t, 2>;
-const Vec2 vecVal{{1, 1}};
+const brayns::Vector2i vecVal{1, 1};
 
 TEST_CASE("plugin_actions")
 {
@@ -31,42 +30,40 @@ TEST_CASE("plugin_actions")
 
     makeNotification("notify");
     brayns::PropertyMap input;
-    input.setProperty({"value", 42});
+    input.add({"value", 42});
     makeNotification("notify-param", input);
 
     // wrong input, cannot test though
     makeNotification("notify-param", vecVal);
 
     brayns::PropertyMap output;
-    output.setProperty({"result", false});
+    output.add({"result", false});
     auto result = makeRequestUpdate("request", output);
-    CHECK(result.getProperty<bool>("result"));
+    CHECK(result["result"].as<bool>());
 
     result = makeRequestUpdate("request-param", input, output);
-    CHECK(result.getProperty<bool>("result"));
+    CHECK(result["result"].as<bool>());
 
     // wrong input
     result = makeRequestUpdate("request-param", vecVal, output);
-    CHECK(result.getProperty<int>("error") == -1);
-
+    CHECK(result["error"].as<int>() == -1);
 
     makeNotification("hello");
     brayns::PropertyMap vecValInput;
-    vecValInput.setProperty({"param", vecVal, {""}});
+    vecValInput.add({"param", vecVal, {""}});
     makeNotification("foo", vecValInput);
 
     brayns::PropertyMap whoOutput;
-    whoOutput.setProperty({"param", std::string(), {""}});
+    whoOutput.add({"param", std::string(), {""}});
     makeRequestUpdate("who", whoOutput);
-    CHECK_EQ(whoOutput.getProperty<std::string>("param"), std::string("me"));
+    CHECK_EQ(whoOutput["param"].as<std::string>(), "me");
 
     brayns::PropertyMap echoInput;
-    echoInput.setProperty({"param", vecVal, {""}});
+    echoInput.add({"param", vecVal, {""}});
     brayns::PropertyMap echoOutput;
-    echoOutput.setProperty({"param", Vec2(), {""}});
+    echoOutput.add({"param", brayns::Vector2i(), {""}});
     echoOutput = makeRequestUpdate("echo", echoInput, echoOutput);
-    CHECK(vecVal == echoOutput.getProperty<Vec2>("param"));
-
+    CHECK(vecVal == echoOutput["param"].as<brayns::Vector2i>());
     clientServer.getBrayns()
         .getParametersManager()
         .getRenderingParameters()
@@ -75,15 +72,15 @@ TEST_CASE("plugin_actions")
 
     auto props =
         clientServer.getBrayns().getEngine().getRenderer().getPropertyMap();
-    CHECK(props.hasProperty("awesome"));
-    CHECK_EQ(props.getProperty<int>("awesome"), 42);
+    CHECK(props.find("awesome"));
+    CHECK_EQ(props["awesome"].as<int>(), 42);
 
-    props.updateProperty("awesome", 10);
+    props.update("awesome", 10);
 
     CHECK(
         (makeRequest<brayns::PropertyMap, bool>("set-renderer-params", props)));
 
     const auto& newProps =
         clientServer.getBrayns().getEngine().getRenderer().getPropertyMap();
-    CHECK_EQ(newProps.getProperty<int>("awesome"), 10);
+    CHECK_EQ(newProps["awesome"].as<int>(), 10);
 }

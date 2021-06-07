@@ -40,8 +40,8 @@ constexpr char rightFloorBufferName[] = "1R";
 const std::string HEAD_POSITION_PROP = "headPosition";
 const std::string HEAD_ROTATION_PROP = "headRotation";
 
-constexpr std::array<double, 3> HEAD_INIT_POS{{0.0, 2.0, 0.0}};
-constexpr std::array<double, 4> HEAD_INIT_ROT{{0.0, 0.0, 0.0, 1.0}};
+constexpr Vector3d HEAD_INIT_POS = {0.0, 2.0, 0.0};
+constexpr Vector4d HEAD_INIT_ROT = {0.0, 0.0, 0.0, 1.0};
 
 Property getHeadPositionProperty()
 {

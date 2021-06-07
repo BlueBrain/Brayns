@@ -22,7 +22,7 @@
 
 #include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
-#include <brayns/common/PropertyMap.h>
+#include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/Transformation.h>
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/Cylinder.h>

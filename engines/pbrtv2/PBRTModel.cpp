@@ -57,14 +57,14 @@ namespace brayns
 pbrt::VolumeRegion* HomogeneusVolumeFactory(pbrt::Transform* otw, const PropertyMap& meta)
 {
     const auto g = static_cast<float>(meta.getProperty<double>("g", 0.0));
-    const auto sigADArr = meta.getProperty<std::array<double, 3>>("sig_a",
+    const auto sigADArr = meta.getProperty<Vector3d>("sig_a",
                                                                   {.0011f, .0024f, .014f});
-    const auto sigSDArr = meta.getProperty<std::array<double, 3>>("sig_s",
+    const auto sigSDArr = meta.getProperty<Vector3d>("sig_s",
                                                                   {2.55f, 3.21f, 3.77f});
     const auto density = static_cast<float>(meta.getProperty<double>("density", 1.0));
-    const auto LeDArr = meta.getProperty<std::array<double, 3>>("Le", {1., 1., 1.});
-    const auto p0Arr = meta.getProperty<std::array<double, 3>>("p0", {0., 0., 0.});
-    const auto p1Arr = meta.getProperty<std::array<double, 3>>("p1", {1., 1., 1.});
+    const auto LeDArr = meta.getProperty<Vector3d>("Le", {1., 1., 1.});
+    const auto p0Arr = meta.getProperty<Vector3d>("p0", {0., 0., 0.});
+    const auto p1Arr = meta.getProperty<Vector3d>("p1", {1., 1., 1.});
 
     const float sigARGB[3] = {static_cast<float>(sigADArr[0]),
                               static_cast<float>(sigADArr[1]),
@@ -93,15 +93,15 @@ pbrt::VolumeRegion* HomogeneusVolumeFactory(pbrt::Transform* otw, const Property
 pbrt::VolumeRegion* HeterogeneusVolumeFactory(pbrt::Transform* otw, const PropertyMap& meta)
 {
     const auto g = static_cast<float>(meta.getProperty<double>("g", 0.0));
-    const auto sigADArr = meta.getProperty<std::array<double, 3>>("sig_a",
+    const auto sigADArr = meta.getProperty<Vector3d>("sig_a",
                                                                   {.0011f, .0024f, .014f});
-    const auto sigSDArr = meta.getProperty<std::array<double, 3>>("sig_s",
+    const auto sigSDArr = meta.getProperty<Vector3d>("sig_s",
                                                                   {2.55f, 3.21f, 3.77f});
     const auto minDensity = static_cast<float>(meta.getProperty<double>("min_density", 0.0));
     const auto maxDensity = static_cast<float>(meta.getProperty<double>("max_density", 1.0));
-    const auto LeDArr = meta.getProperty<std::array<double, 3>>("Le", {1., 1., 1.});
-    const auto p0Arr = meta.getProperty<std::array<double, 3>>("p0", {0., 0., 0.});
-    const auto p1Arr = meta.getProperty<std::array<double, 3>>("p1", {1., 1., 1.});
+    const auto LeDArr = meta.getProperty<Vector3d>("Le", {1., 1., 1.});
+    const auto p0Arr = meta.getProperty<Vector3d>("p0", {0., 0., 0.});
+    const auto p1Arr = meta.getProperty<Vector3d>("p1", {1., 1., 1.});
 
     const float sigARGB[3] = {static_cast<float>(sigADArr[0]),
                               static_cast<float>(sigADArr[1]),
@@ -130,17 +130,17 @@ pbrt::VolumeRegion* HeterogeneusVolumeFactory(pbrt::Transform* otw, const Proper
 pbrt::VolumeRegion* GridVolumeFactory(pbrt::Transform* otw, const PropertyMap& meta)
 {
     const auto g = static_cast<float>(meta.getProperty<double>("g", 0.0));
-    const auto sigADArr = meta.getProperty<std::array<double, 3>>("sig_a",
+    const auto sigADArr = meta.getProperty<Vector3d>("sig_a",
                                                                   {.0011f, .0024f, .014f});
-    const auto sigSDArr = meta.getProperty<std::array<double, 3>>("sig_s",
+    const auto sigSDArr = meta.getProperty<Vector3d>("sig_s",
                                                                   {2.55f, 3.21f, 3.77f});
     const auto density = meta.getProperty<std::vector<float>>("density", std::vector<float>());
     const auto nx = meta.getProperty<int>("nx", 0);
     const auto ny = meta.getProperty<int>("ny", 0);
     const auto nz = meta.getProperty<int>("nz", 0);
-    const auto LeDArr = meta.getProperty<std::array<double, 3>>("Le", {1., 1., 1.});
-    const auto p0Arr = meta.getProperty<std::array<double, 3>>("p0", {0., 0., 0.});
-    const auto p1Arr = meta.getProperty<std::array<double, 3>>("p1", {1., 1., 1.});
+    const auto LeDArr = meta.getProperty<Vector3d>("Le", {1., 1., 1.});
+    const auto p0Arr = meta.getProperty<Vector3d>("p0", {0., 0., 0.});
+    const auto p1Arr = meta.getProperty<Vector3d>("p1", {1., 1., 1.});
 
     const float sigARGB[3] = {static_cast<float>(sigADArr[0]),
                               static_cast<float>(sigADArr[1]),
@@ -181,20 +181,20 @@ pbrt::VolumeRegion* GridVolumeFactory(pbrt::Transform* otw, const PropertyMap& m
 
 pbrt::VolumeRegion* FluorescentVolumeFactory(pbrt::Transform* otw, const PropertyMap& meta)
 {
-    const auto p0Arr = meta.getProperty<std::array<double, 3>>("p0", {0., 0., 0.});
-    const auto p1Arr = meta.getProperty<std::array<double, 3>>("p1", {1., 1., 1.});
+    const auto p0Arr = meta.getProperty<Vector3d>("p0", {0., 0., 0.});
+    const auto p1Arr = meta.getProperty<Vector3d>("p1", {1., 1., 1.});
     const pbrt::Point p0 (static_cast<float>(p0Arr[0]),
                           static_cast<float>(p0Arr[1]),
                           static_cast<float>(p0Arr[2]));
     const pbrt::Point p1 (static_cast<float>(p1Arr[0]),
                           static_cast<float>(p1Arr[1]),
                           static_cast<float>(p1Arr[2]));
-    const auto fexArr = meta.getProperty<std::array<double, 3>>("fex");
+    const auto fexArr = meta.getProperty<Vector3d>("fex");
     const float fexRGB[3] = {static_cast<float>(fexArr[0]),
                              static_cast<float>(fexArr[1]),
                              static_cast<float>(fexArr[2])};
     const auto fex = pbrt::Spectrum::FromRGB(fexRGB);
-    const auto femArr = meta.getProperty<std::array<double, 3>>("fem");
+    const auto femArr = meta.getProperty<Vector3d>("fem");
     const float femRGB[3] = {static_cast<float>(femArr[0]),
                              static_cast<float>(femArr[1]),
                              static_cast<float>(femArr[2])};
@@ -212,8 +212,8 @@ pbrt::VolumeRegion* FluorescentVolumeFactory(pbrt::Transform* otw, const Propert
 pbrt::VolumeRegion*
 FluorescentAnnotatedVolumeFactory(pbrt::Transform* otw, const PropertyMap& meta)
 {
-    const auto p0Arr = meta.getProperty<std::array<double, 3>>("p0", {0., 0., 0.});
-    const auto p1Arr = meta.getProperty<std::array<double, 3>>("p1", {1., 1., 1.});
+    const auto p0Arr = meta.getProperty<Vector3d>("p0", {0., 0., 0.});
+    const auto p1Arr = meta.getProperty<Vector3d>("p1", {1., 1., 1.});
     const pbrt::Point p0 (static_cast<float>(p0Arr[0]),
                           static_cast<float>(p0Arr[1]),
                           static_cast<float>(p0Arr[2]));
@@ -263,20 +263,20 @@ FluorescentAnnotatedVolumeFactory(pbrt::Transform* otw, const PropertyMap& meta)
 
 pbrt::VolumeRegion* FluorescentBinaryVolumeFactory(pbrt::Transform* otw, const PropertyMap& meta)
 {
-    const auto p0Arr = meta.getProperty<std::array<double, 3>>("p0", {0., 0., 0.});
-    const auto p1Arr = meta.getProperty<std::array<double, 3>>("p1", {1., 1., 1.});
+    const auto p0Arr = meta.getProperty<Vector3d>("p0", {0., 0., 0.});
+    const auto p1Arr = meta.getProperty<Vector3d>("p1", {1., 1., 1.});
     const pbrt::Point p0 (static_cast<float>(p0Arr[0]),
                           static_cast<float>(p0Arr[1]),
                           static_cast<float>(p0Arr[2]));
     const pbrt::Point p1 (static_cast<float>(p1Arr[0]),
                           static_cast<float>(p1Arr[1]),
                           static_cast<float>(p1Arr[2]));
-    const auto fexArr = meta.getProperty<std::array<double, 3>>("fex");
+    const auto fexArr = meta.getProperty<Vector3d>("fex");
     const float fexRGB[3] = {static_cast<float>(fexArr[0]),
                              static_cast<float>(fexArr[1]),
                              static_cast<float>(fexArr[2])};
     const auto fex = pbrt::Spectrum::FromRGB(fexRGB);
-    const auto femArr = meta.getProperty<std::array<double, 3>>("fem");
+    const auto femArr = meta.getProperty<Vector3d>("fem");
     const float femRGB[3] = {static_cast<float>(femArr[0]),
                              static_cast<float>(femArr[1]),
                              static_cast<float>(femArr[2])};
@@ -297,20 +297,20 @@ pbrt::VolumeRegion* FluorescentBinaryVolumeFactory(pbrt::Transform* otw, const P
 
 pbrt::VolumeRegion* FluorescentGridVolumeFactory(pbrt::Transform* otw, const PropertyMap& meta)
 {
-    const auto p0Arr = meta.getProperty<std::array<double, 3>>("p0", {0., 0., 0.});
-    const auto p1Arr = meta.getProperty<std::array<double, 3>>("p1", {1., 1., 1.});
+    const auto p0Arr = meta.getProperty<Vector3d>("p0", {0., 0., 0.});
+    const auto p1Arr = meta.getProperty<Vector3d>("p1", {1., 1., 1.});
     const pbrt::Point p0 (static_cast<float>(p0Arr[0]),
                           static_cast<float>(p0Arr[1]),
                           static_cast<float>(p0Arr[2]));
     const pbrt::Point p1 (static_cast<float>(p1Arr[0]),
                           static_cast<float>(p1Arr[1]),
                           static_cast<float>(p1Arr[2]));
-    const auto fexArr = meta.getProperty<std::array<double, 3>>("fex");
+    const auto fexArr = meta.getProperty<Vector3d>("fex");
     const float fexRGB[3] = {static_cast<float>(fexArr[0]),
                              static_cast<float>(fexArr[1]),
                              static_cast<float>(fexArr[2])};
     const auto fex = pbrt::Spectrum::FromRGB(fexRGB);
-    const auto femArr = meta.getProperty<std::array<double, 3>>("fem");
+    const auto femArr = meta.getProperty<Vector3d>("fem");
     const float femRGB[3] = {static_cast<float>(femArr[0]),
                              static_cast<float>(femArr[1]),
                              static_cast<float>(femArr[2])};
@@ -347,35 +347,35 @@ pbrt::VolumeRegion* FluorescentGridVolumeFactory(pbrt::Transform* otw, const Pro
 pbrt::VolumeRegion*
 FluorescentScatteringVolumeFactory(pbrt::Transform* otw, const PropertyMap& meta)
 {
-    const auto p0Arr = meta.getProperty<std::array<double, 3>>("p0", {0., 0., 0.});
-    const auto p1Arr = meta.getProperty<std::array<double, 3>>("p1", {1., 1., 1.});
+    const auto p0Arr = meta.getProperty<Vector3d>("p0", {0., 0., 0.});
+    const auto p1Arr = meta.getProperty<Vector3d>("p1", {1., 1., 1.});
     const pbrt::Point p0 (static_cast<float>(p0Arr[0]),
                           static_cast<float>(p0Arr[1]),
                           static_cast<float>(p0Arr[2]));
     const pbrt::Point p1 (static_cast<float>(p1Arr[0]),
                           static_cast<float>(p1Arr[1]),
                           static_cast<float>(p1Arr[2]));
-    const auto fexArr = meta.getProperty<std::array<double, 3>>("fex");
+    const auto fexArr = meta.getProperty<Vector3d>("fex");
     const float fexRGB[3] = {static_cast<float>(fexArr[0]),
                              static_cast<float>(fexArr[1]),
                              static_cast<float>(fexArr[2])};
     const auto fex = pbrt::Spectrum::FromRGB(fexRGB);
-    const auto femArr = meta.getProperty<std::array<double, 3>>("fem");
+    const auto femArr = meta.getProperty<Vector3d>("fem");
     const float femRGB[3] = {static_cast<float>(femArr[0]),
                              static_cast<float>(femArr[1]),
                              static_cast<float>(femArr[2])};
     const auto fem = pbrt::Spectrum::FromRGB(femRGB);
-    const auto sigaArr = meta.getProperty<std::array<double, 3>>("a");
+    const auto sigaArr = meta.getProperty<Vector3d>("a");
     const float sigaRGB[3] = {static_cast<float>(sigaArr[0]),
                               static_cast<float>(sigaArr[1]),
                               static_cast<float>(sigaArr[2])};
     const auto siga = pbrt::Spectrum::FromRGB(sigaRGB);
-    const auto sigsArr = meta.getProperty<std::array<double, 3>>("s");
+    const auto sigsArr = meta.getProperty<Vector3d>("s");
     const float sigsRGB[3] = {static_cast<float>(sigsArr[0]),
                               static_cast<float>(sigsArr[1]),
                               static_cast<float>(sigsArr[2])};
     const auto sigs = pbrt::Spectrum::FromRGB(sigsRGB);
-    const auto LeArr = meta.getProperty<std::array<double, 3>>("Le");
+    const auto LeArr = meta.getProperty<Vector3d>("Le");
     const float LeRGB[3] = {static_cast<float>(LeArr[0]),
                             static_cast<float>(LeArr[1]),
                             static_cast<float>(LeArr[2])};
@@ -399,35 +399,35 @@ FluorescentScatteringVolumeFactory(pbrt::Transform* otw, const PropertyMap& meta
 pbrt::VolumeRegion*
 FluorescentScatteringGridVolumeFactory(pbrt::Transform* otw, const PropertyMap& meta)
 {
-    const auto p0Arr = meta.getProperty<std::array<double, 3>>("p0", {0., 0., 0.});
-    const auto p1Arr = meta.getProperty<std::array<double, 3>>("p1", {1., 1., 1.});
+    const auto p0Arr = meta.getProperty<Vector3d>("p0", {0., 0., 0.});
+    const auto p1Arr = meta.getProperty<Vector3d>("p1", {1., 1., 1.});
     const pbrt::Point p0 (static_cast<float>(p0Arr[0]),
                           static_cast<float>(p0Arr[1]),
                           static_cast<float>(p0Arr[2]));
     const pbrt::Point p1 (static_cast<float>(p1Arr[0]),
                           static_cast<float>(p1Arr[1]),
                           static_cast<float>(p1Arr[2]));
-    const auto fexArr = meta.getProperty<std::array<double, 3>>("fex");
+    const auto fexArr = meta.getProperty<Vector3d>("fex");
     const float fexRGB[3] = {static_cast<float>(fexArr[0]),
                              static_cast<float>(fexArr[1]),
                              static_cast<float>(fexArr[2])};
     const auto fex = pbrt::Spectrum::FromRGB(fexRGB);
-    const auto femArr = meta.getProperty<std::array<double, 3>>("fem");
+    const auto femArr = meta.getProperty<Vector3d>("fem");
     const float femRGB[3] = {static_cast<float>(femArr[0]),
                              static_cast<float>(femArr[1]),
                              static_cast<float>(femArr[2])};
     const auto fem = pbrt::Spectrum::FromRGB(femRGB);
-    const auto sigaArr = meta.getProperty<std::array<double, 3>>("a");
+    const auto sigaArr = meta.getProperty<Vector3d>("a");
     const float sigaRGB[3] = {static_cast<float>(sigaArr[0]),
                               static_cast<float>(sigaArr[1]),
                               static_cast<float>(sigaArr[2])};
     const auto siga = pbrt::Spectrum::FromRGB(sigaRGB);
-    const auto sigsArr = meta.getProperty<std::array<double, 3>>("s");
+    const auto sigsArr = meta.getProperty<Vector3d>("s");
     const float sigsRGB[3] = {static_cast<float>(sigsArr[0]),
                               static_cast<float>(sigsArr[1]),
                               static_cast<float>(sigsArr[2])};
     const auto sigs = pbrt::Spectrum::FromRGB(sigsRGB);
-    const auto LeArr = meta.getProperty<std::array<double, 3>>("Le");
+    const auto LeArr = meta.getProperty<Vector3d>("Le");
     const float LeRGB[3] = {static_cast<float>(LeArr[0]),
                             static_cast<float>(LeArr[1]),
                             static_cast<float>(LeArr[2])};
@@ -933,13 +933,13 @@ PBRTModel::_createSensors(pbrt::Transform* otw, pbrt::Transform* wto)
                                      static_cast<float>(sensorRotation[3]));
 
             const auto sensorPos =
-                   sensorProps.getProperty<std::array<double, 3>>("sensor_translation",
+                   sensorProps.getProperty<Vector3d>("sensor_translation",
                                                                   {0.0,0.0,0.0});
             const pbrt::Vector trans (static_cast<float>(sensorPos[0]),
                                       static_cast<float>(sensorPos[1]),
                                       static_cast<float>(sensorPos[2]));
             const auto sensorScale =
-                    sensorProps.getProperty<std::array<double, 3>>("sensor_scale",
+                    sensorProps.getProperty<Vector3d>("sensor_scale",
                                                                    {1.0,1.0,1.0});
             const pbrt::Vector scale (static_cast<float>(sensorScale[0]),
                                       static_cast<float>(sensorScale[1]),

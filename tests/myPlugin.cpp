@@ -31,17 +31,13 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
-using Vec2 = std::array<int32_t, 2>;
-const Vec2 vecVal{{1, 1}};
-
 class MyPlugin : public brayns::ExtensionPlugin
 {
 public:
     struct Vec2Param : public brayns::Message
     {
-      MESSAGE_BEGIN(Vec2Param)
-      using array2D = std::array<int32_t, 2>;
-      MESSAGE_ENTRY(array2D, param, "A vec2 param")
+        MESSAGE_BEGIN(Vec2Param)
+        MESSAGE_ENTRY(brayns::Vector2i, param, "A vec2 param")
     };
 
     struct StringParam : public brayns::Message
@@ -72,24 +68,27 @@ public:
             [&] { ++numCalls; });
 
         brayns::PropertyMap input;
-        input.setProperty({"value", 0});
+        input.add({"value", 0});
         actions->registerNotification(
             brayns::RpcParameterDescription{"notify-param",
                                             "A notification with property map",
                                             "param", "a beautiful input param"},
             input,
-            [&](const brayns::PropertyMap& prop) {
-                if (prop.hasProperty("value"))
-                    CHECK_EQ(prop.getProperty<int>("value"), 42);
+            [&](const brayns::PropertyMap& prop)
+            {
+                if (prop.find("value"))
+                    CHECK_EQ(prop["value"].as<int>(), 42);
                 ++numCalls;
             });
 
         brayns::PropertyMap output;
-        output.setProperty({"result", true});
+        output.add({"result", true});
         actions->registerRequest(
             brayns::RpcDescription{"request",
                                    "A request returning a property map"},
-            output, [&, output = output ] {
+            output,
+            [&, output = output]
+            {
                 ++numCalls;
                 return output;
             });
@@ -100,51 +99,50 @@ public:
                 "A request with a param and returning a property map", "param",
                 "another nice input param"},
             input, output,
-            [&, output = output ](const brayns::PropertyMap& prop) {
+            [&, output = output](const brayns::PropertyMap& prop)
+            {
                 ++numCalls;
-                auto val = prop.getProperty<int>("value");
+                auto val = prop["value"].as<int>();
                 CHECK_EQ(val, 42);
                 return output;
             });
 
         // test "arbitrary" objects for actions
         actions->registerNotification("hello", [&] { ++numCalls; });
-        actions->registerNotification<Vec2Param>({"foo",
-                                             "Notification Test",
-                                             "Vec2", "A 2D vector"},
-                                            [&](const Vec2Param& vec) {
-            ++numCalls;
-            CHECK(vec.param == vecVal);
-        });
+        actions->registerNotification<Vec2Param>(
+            {"foo", "Notification Test", "Vec2", "A 2D vector"},
+            [&](const Vec2Param& vec)
+            {
+                ++numCalls;
+                CHECK(vec.param == brayns::Vector2i{1, 1});
+            });
 
-        actions->registerRequest<StringParam>({"who", "Request Test"}, [&] {
-            ++numCalls;
-            StringParam result;
-            result.param = std::string("me");
-            return result;
-        });
-        actions->registerRequest<Vec2Param, Vec2Param>({"echo",
-                                                        "Echo test",
-                                                        "Vec2Param",
-                                                        "2D Integer vector to echo"}, [&](const Vec2Param& vec) {
-            ++numCalls;
-            return vec;
-        });
+        actions->registerRequest<StringParam>({"who", "Request Test"},
+                                              [&]
+                                              {
+                                                  ++numCalls;
+                                                  StringParam result;
+                                                  result.param =
+                                                      std::string("me");
+                                                  return result;
+                                              });
+        actions->registerRequest<Vec2Param, Vec2Param>(
+            {"echo", "Echo test", "Vec2Param", "2D Integer vector to echo"},
+            [&](const Vec2Param& vec)
+            {
+                ++numCalls;
+                return vec;
+            });
 
         // test properties from custom renderer
         brayns::PropertyMap props;
-        props.setProperty({"awesome",
-                           int32_t(42),
-                           0,
-                           50,
-                           {"Best property", "Because it's the best"}});
+        props.add({"awesome",
+                   int32_t(42),
+                   {"Best property", "Because it's the best"}});
         _api->getRenderer().setProperties("myrenderer", props);
     }
 
-    ~MyPlugin()
-    {
-        REQUIRE_EQ(numCalls, 10);
-    }
+    ~MyPlugin() { REQUIRE_EQ(numCalls, 10); }
     size_t numCalls{0};
 };
 

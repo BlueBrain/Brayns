@@ -22,7 +22,7 @@
 #ifndef BRAYNS_COMMON_ACTIONMESSAGE_H
 #define BRAYNS_COMMON_ACTIONMESSAGE_H
 
-#include <brayns/common/PropertyMap.h>
+#include <brayns/common/propertymap/PropertyMap.h>
 
 #include <type_traits>
 
@@ -32,15 +32,16 @@ namespace brayns
  * Class used to add the property to the property map, so it is
  * always present as soon as the message is created
  */
-template<typename T, typename Name, typename Description>
+template <typename T, typename Name, typename Description>
 struct MessageEntry
 {
-    template <typename = std::enable_if_t<std::is_constructible<std::string, Name>::value &&
-                                          std::is_constructible<std::string, Description>::value>>
+    template <typename = std::enable_if_t<
+                  std::is_constructible<std::string, Name>::value &&
+                  std::is_constructible<std::string, Description>::value>>
     MessageEntry(PropertyMap& map, Name&& name, Description&& descr)
     {
-        if(!map.hasProperty(name))
-            map.setProperty({name, T(), {descr}});
+        if (!map.find(name))
+            map.add({name, T(), {descr}});
     }
 };
 
@@ -51,86 +52,95 @@ struct MessageEntry
  */
 struct MessageEntryRegisterer
 {
-    MessageEntryRegisterer(std::vector<std::function<void(void*, PropertyMap&)>>& toPropList,
-                           const std::function<void(void*, PropertyMap&)>& toPropMap,
-                           std::vector<std::function<void(void*, PropertyMap&)>>& fromPropList,
-                           const std::function<void(void*, PropertyMap&)>& fromPropMap)
+    MessageEntryRegisterer(
+        std::vector<std::function<void(void*, PropertyMap&)>>& toPropList,
+        const std::function<void(void*, PropertyMap&)>& toPropMap,
+        std::vector<std::function<void(void*, PropertyMap&)>>& fromPropList,
+        const std::function<void(void*, PropertyMap&)>& fromPropMap)
     {
         toPropList.push_back(toPropMap);
         fromPropList.push_back(fromPropMap);
     }
 };
 
-
-#define MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION) \
-    public: \
-    TYPE NAME; \
-    private: \
-    brayns::MessageEntry<TYPE, \
-                         decltype(#NAME), \
-                         decltype(DESCRIPTION)> NAME##Entry {_map, #NAME, DESCRIPTION}; \
-    brayns::MessageEntryRegisterer NAME##Registerer {_toProp,\
-                                                     [](void* ptr, brayns::PropertyMap& map) \
-                                                     { \
-                                                        MsgType* msg = static_cast<MsgType*>(ptr); \
-                                                        map.updateProperty<TYPE>(#NAME, msg->NAME); \
-                                                     }, \
-                                                     _fromProp, \
-                                                     [](void* ptr, brayns::PropertyMap& map) \
-                                                     { \
-                                                        MsgType* msg = static_cast<MsgType*>(ptr); \
-                                                        msg->NAME = map.getProperty<TYPE>(#NAME); } \
-                                                    }; \
+#define MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION)                         \
+public:                                                                \
+    TYPE NAME;                                                         \
+                                                                       \
+private:                                                               \
+    brayns::MessageEntry<TYPE, decltype(#NAME), decltype(DESCRIPTION)> \
+        NAME##Entry{_map, #NAME, DESCRIPTION};                         \
+    brayns::MessageEntryRegisterer NAME##Registerer{                   \
+        _toProp,                                                       \
+        [](void* ptr, brayns::PropertyMap& map)                        \
+        {                                                              \
+            MsgType* msg = static_cast<MsgType*>(ptr);                 \
+            map.update(#NAME, msg->NAME);                              \
+        },                                                             \
+        _fromProp,                                                     \
+        [](void* ptr, brayns::PropertyMap& map)                        \
+        {                                                              \
+            MsgType* msg = static_cast<MsgType*>(ptr);                 \
+            msg->NAME = map[#NAME].as<TYPE>();                         \
+        }};
 
 struct Message
 {
 public:
-    Message() { }
-    Message(const PropertyMap& map) :_map(map) {}
+    Message() {}
+    Message(const PropertyMap& map)
+        : _map(map)
+    {
+    }
 
     void fromPropertyMap()
     {
-        for(const auto& fp : _fromProp)
+        for (const auto& fp : _fromProp)
             fp(this, _map);
     }
 
     void toPropertyMap()
     {
-        for(const auto& tp : _toProp)
+        for (const auto& tp : _toProp)
             tp(this, _map);
     }
 
     const PropertyMap& getPropertyMap() const { return _map; }
 
-    template<typename Message,
-             typename = std::enable_if_t<std::is_constructible<std::string,
-                                                               Message>::value
-                                        >
-            >
-    void setError(int32_t error, Message&& message)
+    template <typename Message,
+              typename = std::enable_if_t<
+                  std::is_constructible<std::string, Message>::value>>
+    void setError(int32_t code, Message&& message)
     {
-        if(!_map.hasProperty("error") && !_map.hasProperty("message"))
+        if (!_map.find("error") && !_map.find("message"))
         {
-            Property errorP {"error", error, {""}};
-            errorP.markReadOnly();
-            Property errorM {"message", std::string(message), {}};
-            errorM.markReadOnly();
-            _map.setProperty(errorP);
-            _map.setProperty(errorM);
+            Property error{"error", code, {""}};
+            error.setReadOnly(true);
+            Property errorMessage{"message", std::string(message), {}};
+            errorMessage.setReadOnly(true);
+            _map.add(error);
+            _map.add(errorMessage);
         }
     }
+
 protected:
     PropertyMap _map;
     std::vector<std::function<void(void*, PropertyMap&)>> _toProp;
     std::vector<std::function<void(void*, PropertyMap&)>> _fromProp;
 };
 
-#define MESSAGE_BEGIN(CLASS) \
-    public: \
-    CLASS() : brayns::Message() { } \
-    CLASS(const brayns::PropertyMap& map) : brayns::Message(map) { } \
-    using MsgType = CLASS; \
+#define MESSAGE_BEGIN(CLASS)              \
+public:                                   \
+    CLASS()                               \
+        : brayns::Message()               \
+    {                                     \
+    }                                     \
+    CLASS(const brayns::PropertyMap& map) \
+        : brayns::Message(map)            \
+    {                                     \
+    }                                     \
+    using MsgType = CLASS;
 
-}
+} // namespace brayns
 
 #endif // BRAYNS_COMMON_ACTIONMESSAGE_H

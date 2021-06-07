@@ -38,15 +38,15 @@ TEST_CASE_FIXTURE(ClientServer, "set_properties")
     auto model = getScene().getModel(0);
 
     brayns::PropertyMap props;
-    props.setProperty({"bla", 0});
+    props.add({"bla", 0});
     model->setProperties(props);
 
     brayns::PropertyMap propsNew;
-    propsNew.setProperty({"bla", 42});
+    propsNew.add({"bla", 42});
     CHECK((makeRequest<brayns::ModelProperties, bool>(
         SET_PROPERTIES, {model->getModelID(), propsNew})));
 
-    CHECK_EQ(model->getProperties().getProperty<int32_t>("bla"), 42);
+    CHECK_EQ(model->getProperties()["bla"].as<int32_t>(), 42);
 
     SUBCASE("get_model_properties_schema")
     {
@@ -64,8 +64,8 @@ TEST_CASE_FIXTURE(ClientServer, "set_properties")
     {
         auto result = makeRequestUpdate<brayns::ObjectID, brayns::PropertyMap>(
             GET_PROPERTIES, {model->getModelID()}, props);
-        REQUIRE(result.hasProperty("bla"));
-        CHECK_EQ(result.getProperty<int32_t>("bla"), 42);
+        REQUIRE(result.find("bla"));
+        CHECK_EQ(result["bla"].as<int32_t>(), 42);
     }
 }
 

@@ -52,7 +52,7 @@ public:
 private:
     static size_t _nextID;
     size_t _id = 0;
-    Plane _plane = {{0}};
+    Plane _plane{0.0};
     SERIALIZATION_FRIEND(ClipPlane);
 };
 } // namespace brayns

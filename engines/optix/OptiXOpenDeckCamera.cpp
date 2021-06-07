@@ -76,10 +76,10 @@ void OptiXOpenDeckCamera::commit(const OptiXCamera& camera,
         normalize(glm::rotate(camera.getOrientation(), Vector3d(0, 0, 1)));
 
     const auto headPos =
-        camera.getPropertyOrValue<std::array<double, 3>>("headPosition",
+        camera.getPropertyOrValue<Vector3d>("headPosition",
                                                          {{0., 0., 0.}});
     const auto headRotation =
-        camera.getPropertyOrValue<std::array<double, 4>>("headRotation",
+        camera.getPropertyOrValue<Vector4d>("headRotation",
                                                          {{0., 0., 0., 1.}});
     const auto headUVec =
         glm::rotate(Quaterniond(headRotation[3], headRotation[0],

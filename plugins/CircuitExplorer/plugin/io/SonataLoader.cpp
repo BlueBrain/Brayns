@@ -7,19 +7,19 @@
 
 #include <brion/blueConfig.h>
 
-SonataLoader::SonataLoader(brayns::Scene &scene,
-                           const brayns::ApplicationParameters &applicationParameters,
-                           brayns::PropertyMap &&loaderParams,
-                           CircuitExplorerPlugin* plugin)
+SonataLoader::SonataLoader(
+    brayns::Scene& scene,
+    const brayns::ApplicationParameters& applicationParameters,
+    brayns::PropertyMap&& loaderParams, CircuitExplorerPlugin* plugin)
     : AbstractCircuitLoader(scene, applicationParameters,
                             std::move(loaderParams), plugin)
 {
     PLUGIN_INFO << "Registering " << getName() << std::endl;
-    _fixedDefaults.setProperty(
-        {PROP_PRESYNAPTIC_NEURON_GID.name, std::string("")});
-    _fixedDefaults.setProperty(
-        {PROP_POSTSYNAPTIC_NEURON_GID.name, std::string("")});
-    _fixedDefaults.setProperty(PROP_SYNCHRONOUS_MODE);
+    _fixedDefaults.add(
+        {PROP_PRESYNAPTIC_NEURON_GID.getName(), std::string("")});
+    _fixedDefaults.add(
+        {PROP_POSTSYNAPTIC_NEURON_GID.getName(), std::string("")});
+    _fixedDefaults.add(PROP_SYNCHRONOUS_MODE);
 }
 
 std::string SonataLoader::getName() const
@@ -30,9 +30,12 @@ std::string SonataLoader::getName() const
 brayns::PropertyMap SonataLoader::getCLIProperties()
 {
     brayns::PropertyMap properties;
-    properties.setProperty({"populations", std::vector<std::string>(), {"Populations to load"}});
-    properties.setProperty({"reports", std::vector<std::string>(), {"Reports to load"}});
-    properties.setProperty({"reportTypes", std::vector<std::string>(), {"Report types to load"}});
+    properties.add(
+        {"populations", std::vector<std::string>(), {"Populations to load"}});
+    properties.add(
+        {"reports", std::vector<std::string>(), {"Reports to load"}});
+    properties.add(
+        {"reportTypes", std::vector<std::string>(), {"Report types to load"}});
     auto pm = AdvancedCircuitLoader::getCLIProperties();
     properties.merge(pm);
     return properties;
@@ -42,46 +45,48 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
     const std::string& filename, const brayns::LoaderProgress& callback,
     const brayns::PropertyMap& properties) const
 {
-    if(filename.find("BlueConfig") != std::string::npos
-            || filename.find("CircuitConfig") != std::string::npos)
+    if (filename.find("BlueConfig") != std::string::npos ||
+        filename.find("CircuitConfig") != std::string::npos)
         return _loadFromBlueConfig(filename, callback, properties);
 
     return std::vector<brayns::ModelDescriptorPtr>();
 }
 
-std::vector<brayns::ModelDescriptorPtr>
-SonataLoader::_loadFromBlueConfig(const std::string& file, const brayns::LoaderProgress& cb,
-                                  const brayns::PropertyMap& props) const
+std::vector<brayns::ModelDescriptorPtr> SonataLoader::_loadFromBlueConfig(
+    const std::string& file, const brayns::LoaderProgress& cb,
+    const brayns::PropertyMap& props) const
 {
     std::vector<brayns::ModelDescriptorPtr> result;
 
-    const std::vector<std::string>& populationNames =
-            props.getPropertyRef<std::vector<std::string>>("populations");
-    const std::vector<std::string>& populationReports =
-            props.getPropertyRef<std::vector<std::string>>("reports");
-    const std::vector<std::string>& populationReportTypes =
-            props.getPropertyRef<std::vector<std::string>>("reportTypes");
-    const double density = props.getProperty<double>(PROP_DENSITY.name);
+    auto& populationNames = props["populations"].as<std::vector<std::string>>();
+    auto& populationReports = props["reports"].as<std::vector<std::string>>();
+    auto& populationReportTypes =
+        props["reportTypes"].as<std::vector<std::string>>();
+    const double density = props[PROP_DENSITY.getName()].as<double>();
 
-    if(populationNames.size() != populationReports.size()
-        || populationNames.size() != populationReportTypes.size())
-        PLUGIN_THROW("Population name count must match report name, report type count")
+    if (populationNames.size() != populationReports.size() ||
+        populationNames.size() != populationReportTypes.size())
+        PLUGIN_THROW(
+            "Population name count must match report name, report type count")
 
-    for(size_t i = 0; i < populationNames.size(); ++i)
+    for (size_t i = 0; i < populationNames.size(); ++i)
     {
         // Default properties used for each loaded population
-        brayns::PropertyMap defaultProperties = AdvancedCircuitLoader::getCLIProperties();
-        defaultProperties.updateProperty(PROP_SECTION_TYPE_APICAL_DENDRITE.name, true);
-        defaultProperties.updateProperty(PROP_SECTION_TYPE_AXON.name, false);
-        defaultProperties.updateProperty(PROP_SECTION_TYPE_DENDRITE.name, true);
-        defaultProperties.updateProperty(PROP_SECTION_TYPE_SOMA.name, true);
-        defaultProperties.updateProperty(PROP_USER_DATA_TYPE.name, std::string("Simulation offset"));
-        defaultProperties.updateProperty(PROP_LOAD_LAYERS.name, false);
-        defaultProperties.updateProperty(PROP_LOAD_ETYPES.name, false);
-        defaultProperties.updateProperty(PROP_LOAD_MTYPES.name, false);
-        defaultProperties.updateProperty(PROP_USE_SDF_GEOMETRY.name, true);
-        defaultProperties.setProperty(PROP_PRESYNAPTIC_NEURON_GID);
-        defaultProperties.setProperty(PROP_POSTSYNAPTIC_NEURON_GID);
+        brayns::PropertyMap defaultProperties =
+            AdvancedCircuitLoader::getCLIProperties();
+        defaultProperties.update(PROP_SECTION_TYPE_APICAL_DENDRITE.getName(),
+                                 true);
+        defaultProperties.update(PROP_SECTION_TYPE_AXON.getName(), false);
+        defaultProperties.update(PROP_SECTION_TYPE_DENDRITE.getName(), true);
+        defaultProperties.update(PROP_SECTION_TYPE_SOMA.getName(), true);
+        defaultProperties.update(PROP_USER_DATA_TYPE.getName(),
+                                 std::string("Simulation offset"));
+        defaultProperties.update(PROP_LOAD_LAYERS.getName(), false);
+        defaultProperties.update(PROP_LOAD_ETYPES.getName(), false);
+        defaultProperties.update(PROP_LOAD_MTYPES.getName(), false);
+        defaultProperties.update(PROP_USE_SDF_GEOMETRY.getName(), true);
+        defaultProperties.add(PROP_PRESYNAPTIC_NEURON_GID);
+        defaultProperties.add(PROP_POSTSYNAPTIC_NEURON_GID);
 
         // Population variables
         const auto& populationName = populationNames[i];
@@ -90,26 +95,29 @@ SonataLoader::_loadFromBlueConfig(const std::string& file, const brayns::LoaderP
 
         PLUGIN_INFO << "Loading population " << populationName << std::endl;
 
-        // Use the default parameters and update the variable ones for each population
-        defaultProperties.updateProperty(PROP_DENSITY.name, density);
-        defaultProperties.updateProperty(PROP_REPORT.name, populationReport);
-        defaultProperties.updateProperty(PROP_REPORT_TYPE.name, populationReportType);
+        // Use the default parameters and update the variable ones for each
+        // population
+        defaultProperties.update(PROP_DENSITY.getName(), density);
+        defaultProperties.update(PROP_REPORT.getName(), populationReport);
+        defaultProperties.update(PROP_REPORT_TYPE.getName(),
+                                 populationReportType);
 
         // Load the BlueConfig/CircuitConfig
         std::unique_ptr<brion::BlueConfig> config;
         // Section Run Default
-        if(populationName == "Default")
+        if (populationName == "Default")
             config = std::make_unique<brion::BlueConfig>(file);
         // Section Circuit <population name>
         else
             config = std::make_unique<brion::BlueConfig>(
-                        file, brion::BlueConfigSection::CONFIGSECTION_CIRCUIT, populationName);
+                file, brion::BlueConfigSection::CONFIGSECTION_CIRCUIT,
+                populationName);
 
         // Import the model
-        auto model = importCircuitFromBlueConfig(*config, defaultProperties, cb);
-        if(model)
+        auto model =
+            importCircuitFromBlueConfig(*config, defaultProperties, cb);
+        if (model)
             result.push_back(model);
-
     }
 
     return result;

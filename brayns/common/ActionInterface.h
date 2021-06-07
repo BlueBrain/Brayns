@@ -22,8 +22,8 @@
 #pragma once
 
 #include <brayns/common/ActionMessage.h>
-#include <brayns/common/PropertyMap.h>
 #include <brayns/common/log.h>
+#include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/types.h>
 
 #include <functional>
@@ -109,56 +109,60 @@ public:
         _registerNotification(name, [action] { action(); });
     }
 
-    template <typename Params,
-              typename = std::enable_if_t<std::is_base_of<Message, Params>::value>>
+    template <typename Params, typename = std::enable_if_t<
+                                   std::is_base_of<Message, Params>::value>>
     void registerNotification(const RpcParameterDescription& desc,
-                             const std::function<void(Params)>& action)
+                              const std::function<void(Params)>& action)
     {
         Params p;
-        BRAYNS_INFO << "Registering notification " << desc.methodName << std::endl;
-        registerNotification(desc, p.getPropertyMap(), [action](PropertyMap map)
-        {
-            Params par(map);
-            par.fromPropertyMap();
-            action(par);
-        });
+        BRAYNS_INFO << "Registering notification " << desc.methodName
+                    << std::endl;
+        registerNotification(desc, p.getPropertyMap(),
+                             [action](PropertyMap map)
+                             {
+                                 Params par(map);
+                                 par.fromPropertyMap();
+                                 action(par);
+                             });
     }
 
-    template <typename RetVal,
-              typename = std::enable_if_t<std::is_base_of<Message, RetVal>::value>>
+    template <typename RetVal, typename = std::enable_if_t<
+                                   std::is_base_of<Message, RetVal>::value>>
     void registerRequest(const RpcDescription& desc,
                          const std::function<RetVal()>& action)
     {
         RetVal rv;
         BRAYNS_INFO << "Registering request " << desc.methodName << std::endl;
-        registerRequest(desc, rv.getPropertyMap(), [action]()
-        {
-            RetVal retVal = action();
-            retVal.toPropertyMap();
-            return retVal.getPropertyMap();
-        });
+        registerRequest(desc, rv.getPropertyMap(),
+                        [action]()
+                        {
+                            RetVal retVal = action();
+                            retVal.toPropertyMap();
+                            return retVal.getPropertyMap();
+                        });
     }
 
-    template <typename Params,
-              typename RetVal,
-              typename = std::enable_if_t<std::is_base_of<Message, Params>::value &&
-                                          std::is_base_of<Message, RetVal>::value>>
+    template <
+        typename Params, typename RetVal,
+        typename = std::enable_if_t<std::is_base_of<Message, Params>::value &&
+                                    std::is_base_of<Message, RetVal>::value>>
     void registerRequest(const RpcParameterDescription& desc,
                          const std::function<RetVal(Params)>& action)
     {
         Params p;
         RetVal rv;
         BRAYNS_INFO << "Registering request " << desc.methodName << std::endl;
-        registerRequest(desc, p.getPropertyMap(), rv.getPropertyMap(), [action](PropertyMap map)
-        {
-            Params par(map);
-            par.fromPropertyMap();
+        registerRequest(desc, p.getPropertyMap(), rv.getPropertyMap(),
+                        [action](PropertyMap map)
+                        {
+                            Params par(map);
+                            par.fromPropertyMap();
 
-            RetVal retVal = action(par);
-            retVal.toPropertyMap();
+                            RetVal retVal = action(par);
+                            retVal.toPropertyMap();
 
-            return retVal.getPropertyMap();
-        });
+                            return retVal.getPropertyMap();
+                        });
     }
 
 protected:
@@ -173,4 +177,4 @@ private:
     virtual void _registerNotification(const std::string&, const ParamFunc&) {}
     virtual void _registerNotification(const std::string&, const VoidFunc&) {}
 };
-}
+} // namespace brayns

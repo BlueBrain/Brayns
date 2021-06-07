@@ -257,7 +257,7 @@ enum class CameraMode
  * in absolute value of the coordinate system. Values are stored
  * in a Vector4, with the following order: nx, ny, nz and d
  */
-using Plane = std::array<double, 4>;
+using Plane = Vector4d;
 using Planes = std::vector<Plane>;
 
 struct RenderInput

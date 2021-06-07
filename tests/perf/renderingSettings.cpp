@@ -54,7 +54,7 @@ TEST_CASE("default_scene_benchmark")
 
     // Shadows
     auto props = renderer.getPropertyMap();
-    props.updateProperty("shadows", 1.);
+    props.update("shadows", 1.);
     renderer.updateProperties(props);
     brayns.commit();
 
@@ -67,7 +67,7 @@ TEST_CASE("default_scene_benchmark")
     float t = float(shadows) / float(reference);
     CHECK_MESSAGE(t < 1.65f, "Shadows cost. expected: 165%");
 
-    props.updateProperty("softShadows", 1.);
+    props.update("softShadows", 1.);
     renderer.updateProperties(props);
     brayns.commit();
 
@@ -81,9 +81,9 @@ TEST_CASE("default_scene_benchmark")
     CHECK_MESSAGE(t < 1.85f, "Soft shadows cost. expected: 185%");
 
     // Ambient occlustion
-    props.updateProperty("shadows", 0.);
-    props.updateProperty("softShadows", 0.);
-    props.updateProperty("aoWeight", 1.);
+    props.update("shadows", 0.);
+    props.update("softShadows", 0.);
+    props.update("aoWeight", 1.);
     renderer.updateProperties(props);
     brayns.commit();
 
@@ -97,9 +97,9 @@ TEST_CASE("default_scene_benchmark")
     CHECK_MESSAGE(t < 2.5f, "Ambient occlusion cost. expected: 250%");
 
     // All options
-    props.updateProperty("shadows", 1.);
-    props.updateProperty("softShadows", 1.);
-    props.updateProperty("aoWeight", 1.);
+    props.update("shadows", 1.);
+    props.update("softShadows", 1.);
+    props.update("aoWeight", 1.);
     renderer.updateProperties(props);
     brayns.commit();
 

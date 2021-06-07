@@ -41,7 +41,7 @@ float _computeHalfArea(const Boxf& bbox)
     const auto size = bbox.getSize();
     return size[0] * size[1] + size[0] * size[2] + size[1] * size[2];
 }
-}
+} // namespace
 
 XYZBLoader::XYZBLoader(Scene& scene)
     : Loader(scene)
@@ -133,19 +133,21 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
         std::make_shared<ModelDescriptor>(std::move(model), blob.name);
     modelDescriptor->setTransformation(transformation);
 
-    Property radiusProperty("radius", meanRadius, 0., meanRadius * 2.,
-                            {"Point size"});
-    radiusProperty.onModified([modelDesc = std::weak_ptr<ModelDescriptor>(
-                                   modelDescriptor)](const auto& property) {
-        if (auto modelDesc_ = modelDesc.lock())
+    Property radiusProperty("radius", meanRadius, {"Point size"});
+    radiusProperty.onModified(
+        [modelDesc = std::weak_ptr<ModelDescriptor>(modelDescriptor)](
+            const Property& property)
         {
-            const auto newRadius = property.template get<double>();
-            for (auto& sphere : modelDesc_->getModel().getSpheres()[materialId])
-                sphere.radius = newRadius;
-        }
-    });
+            if (auto modelDesc_ = modelDesc.lock())
+            {
+                const auto newRadius = property.as<double>();
+                for (auto& sphere :
+                     modelDesc_->getModel().getSpheres()[materialId])
+                    sphere.radius = newRadius;
+            }
+        });
     PropertyMap modelProperties;
-    modelProperties.setProperty(radiusProperty);
+    modelProperties.add(radiusProperty);
     modelDescriptor->setProperties(modelProperties);
     return {modelDescriptor};
 }
@@ -173,4 +175,4 @@ std::vector<std::string> XYZBLoader::getSupportedExtensions() const
 {
     return {"xyz"};
 }
-}
+} // namespace brayns

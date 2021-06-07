@@ -32,6 +32,47 @@
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 
+#include "brayns/common/mathTypes.h"
+
+// c-array to std.array: https://stackoverflow.com/questions/11205186
+template <int S, typename T>
+auto toArray(glm::vec<S, T>& vec)
+{
+    return reinterpret_cast<std::array<T, size_t(S)>*>(glm::value_ptr(vec));
+}
+
+template <int S, typename T>
+auto toArray(const glm::vec<S, T>& vec)
+{
+    return reinterpret_cast<const std::array<T, size_t(S)>*>(glm::value_ptr(vec));
+}
+
+template <typename T>
+auto toArray(glm::tquat<T>& quat)
+{
+    return reinterpret_cast<std::array<T, 4>*>(glm::value_ptr(quat));
+}
+
+template <int S, typename T>
+auto toArray(std::vector<glm::vec<S, T>>& vecVec)
+{
+    return reinterpret_cast<std::vector<std::array<T, size_t(S)>>*>(&vecVec);
+}
+
+// Export glm types as array (didn't find a cleaner way)
+namespace staticjson
+{
+template <typename T, int S>
+Document export_json_schema(glm::vec<S, T>* value,
+                                   Document::AllocatorType* allocator = nullptr)
+{
+    Handler<std::array<T, size_t(S)>> h(toArray(*value));
+    Document d;
+    h.generate_schema(d, allocator ? *allocator : d.GetAllocator());
+    return d;
+}
+}
+
 namespace brayns
 {
 /** @return JSON schema from JSON-serializable type */

@@ -28,7 +28,7 @@ const std::string UPDATE_CLIP_PLANE("update-clip-plane");
 TEST_CASE_FIXTURE(ClientServer, "add_plane")
 {
     REQUIRE(getScene().getClipPlanes().empty());
-    const brayns::Plane equation{{1.0, 2.0, 3.0, 4.0}};
+    const brayns::Plane equation{1.0, 2.0, 3.0, 4.0};
     const auto result =
         makeRequest<brayns::Plane, brayns::ClipPlane>(ADD_CLIP_PLANE, equation);
     CHECK_EQ(result.getID(), 0);
@@ -43,8 +43,8 @@ TEST_CASE_FIXTURE(ClientServer, "add_plane")
 
 TEST_CASE_FIXTURE(ClientServer, "get_planes")
 {
-    const brayns::Plane equation1{{1.0, 1.0, 1.0, 1.0}};
-    const brayns::Plane equation2{{2.0, 2.0, 2.0, 2.0}};
+    const brayns::Plane equation1{1.0, 1.0, 1.0, 1.0};
+    const brayns::Plane equation2{2.0, 2.0, 2.0, 2.0};
 
     const auto id1 = getScene().addClipPlane(equation1);
     const auto id2 = getScene().addClipPlane(equation2);
@@ -62,8 +62,8 @@ TEST_CASE_FIXTURE(ClientServer, "update_plane")
 {
     Client client(ClientServer::instance());
 
-    const brayns::Plane equation1{{1.0, 1.0, 1.0, 1.0}};
-    const brayns::Plane equation2{{2.0, 2.0, 2.0, 2.0}};
+    const brayns::Plane equation1{1.0, 1.0, 1.0, 1.0};
+    const brayns::Plane equation2{2.0, 2.0, 2.0, 2.0};
 
     const auto id1 = getScene().addClipPlane(equation1);
 
@@ -76,7 +76,7 @@ TEST_CASE_FIXTURE(ClientServer, "update_plane")
 
 TEST_CASE_FIXTURE(ClientServer, "remove_planes")
 {
-    const brayns::Plane equation{{1.0, 2.0, 3.0, 4.0}};
+    const brayns::Plane equation{1.0, 2.0, 3.0, 4.0};
     const auto id1 = getScene().addClipPlane(equation);
     const auto id2 = getScene().addClipPlane(equation);
     const auto id3 = getScene().addClipPlane(equation);
@@ -107,7 +107,7 @@ TEST_CASE_FIXTURE(ClientServer, "notifications")
 
     auto added =
         makeRequest<brayns::Plane, brayns::ClipPlane>(ADD_CLIP_PLANE,
-                                                      {{1.0, 1.0, 1.0, 1.0}});
+                                                      {1.0, 1.0, 1.0, 1.0});
 
     process();
     for (size_t attempts = 0; attempts != 100 && !called; ++attempts)
@@ -117,7 +117,7 @@ TEST_CASE_FIXTURE(ClientServer, "notifications")
     CHECK_EQ(notified.getID(), added.getID());
     CHECK(notified.getPlane() == added.getPlane());
 
-    added.setPlane({{2.0, 2.0, 2.0, 2.0}});
+    added.setPlane({2.0, 2.0, 2.0, 2.0});
     makeRequest<brayns::ClipPlane, bool>(UPDATE_CLIP_PLANE, added);
     notified = brayns::ClipPlane();
 

@@ -324,7 +324,7 @@ std::vector<ModelDescriptorPtr> Scene::loadModels(Blob&& blob, const ModelParams
 
     // HACK: Add loader name in properties for archive loader
     auto propCopy = params.getLoaderProperties();
-    propCopy.setProperty({"loaderName", params.getLoaderName()});
+    propCopy.add({"loaderName", params.getLoaderName()});
 
     // Load the models
     auto modelDescriptors = loader.importFromBlob(std::move(blob), cb, propCopy);
@@ -357,7 +357,7 @@ std::vector<ModelDescriptorPtr> Scene::loadModels(const std::string& path,
         _loaderRegistry.getSuitableLoader(path, "", params.getLoaderName());
     // HACK: Add loader name in properties for archive loader
     auto propCopy = params.getLoaderProperties();
-    propCopy.setProperty({"loaderName", params.getLoaderName()});
+    propCopy.add({"loaderName", params.getLoaderName()});
 
     // Load the models
     auto modelDescriptors = loader.importFromFile(path, cb, propCopy);

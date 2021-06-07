@@ -22,7 +22,7 @@
 #include "Log.h"
 
 #include <brayns/common/ActionInterface.h>
-#include <brayns/common/PropertyMap.h>
+#include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
@@ -39,9 +39,7 @@ CircuitRendererPlugin::CircuitRendererPlugin()
 {
 }
 
-CircuitRendererPlugin::~CircuitRendererPlugin()
-{
-}
+CircuitRendererPlugin::~CircuitRendererPlugin() {}
 
 void CircuitRendererPlugin::init()
 {
@@ -62,4 +60,3 @@ extern "C" void ospray_init_module_braynsCircuitRenderer()
     PLUGIN_INFO << "Initializing circuit renderer module" << std::endl;
 }
 } // namespace ospray
-

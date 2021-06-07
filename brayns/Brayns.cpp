@@ -23,7 +23,6 @@
 #include "EngineFactory.h"
 #include "PluginManager.h"
 
-#include <brayns/common/PropertyMap.h>
 #include <brayns/common/Timer.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/light/Light.h>

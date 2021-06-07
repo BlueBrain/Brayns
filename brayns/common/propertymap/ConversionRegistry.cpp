@@ -1,5 +1,6 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
+/* Copyright (c) 2021 EPFL/Blue Brain Project
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -17,19 +18,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "OpenDeckParameters.h"
+#include "ConversionRegistry.h"
+
+#include "AnyConverter.h"
+#include "Converter.h"
+#include "EnumProperty.h"
+
+namespace
+{
+brayns::AnyConverterMap _registerConverters()
+{
+    brayns::AnyConverterMap converters;
+    converters.addexn2<int, double>();
+    converters.addex2<int, brayns::EnumProperty>();
+    converters.addex2<std::string, brayns::EnumProperty>();
+    return converters;
+}
+
+brayns::AnyConverterMap _converters = _registerConverters();
+} // namespace
 
 namespace brayns
 {
-OpenDeckParameters::OpenDeckParameters()
-    : _props("OpenDeck plugin parameters")
+bool ConversionRegistry::convert(const Any& from, Any& to)
 {
-    _props.setProperty(
-        {PARAM_RESOLUTION_SCALING, 1.0,
-         Property::MetaData{"OpenDeck native resolution scale",
-                            "OpenDeck native resolution scale"}});
-    _props.setProperty({PARAM_CAMERA_SCALING, 1.0,
-                        Property::MetaData{"OpenDeck camera scaling",
-                                           "OpenDeck camera scaling"}});
+    return _converters.convert(from, to);
 }
 } // namespace brayns

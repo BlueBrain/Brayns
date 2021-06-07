@@ -111,7 +111,7 @@ void MorphologyLoader::_importMorphology(
 {
     const auto sectionTypes = getSectionTypesFromProperties(properties);
     const auto useRealisticSoma =
-        properties.getProperty<bool>(PROP_USE_REALISTIC_SOMA.name);
+        properties[PROP_USE_REALISTIC_SOMA.getName()].as<bool>();
 
     if (sectionTypes.size() == 1 &&
         sectionTypes[0] == brain::neuron::SectionType::soma)
@@ -128,9 +128,9 @@ double MorphologyLoader::_getCorrectedRadius(
     const brayns::PropertyMap& properties, const double radius) const
 {
     const double radiusCorrection =
-        properties.getProperty<double>(PROP_RADIUS_CORRECTION.name);
+        properties[PROP_RADIUS_CORRECTION.getName()].as<double>();
     const double radiusMultiplier =
-        properties.getProperty<double>(PROP_RADIUS_MULTIPLIER.name);
+        properties[PROP_RADIUS_MULTIPLIER.getName()].as<double>();
     return (radiusCorrection != 0.0 ? radiusCorrection
                                     : radius * radiusMultiplier * 0.5);
 }
@@ -146,7 +146,7 @@ void MorphologyLoader::_importMorphologyAsPoint(
         userDataOffset = compartmentReport->getOffsets()[index][0];
 
     const double radiusMultiplier =
-        properties.getProperty<double>(PROP_RADIUS_MULTIPLIER.name);
+        properties[PROP_RADIUS_MULTIPLIER.getName()].as<double>();
     const size_t materialId =
         _getMaterialIdFromColorScheme(properties,
                                       brain::neuron::SectionType::soma);
@@ -160,20 +160,20 @@ void MorphologyLoader::_createRealisticSoma(
     ParallelModelContainer& model) const
 {
     brain::neuron::SectionTypes sectionTypes;
-    if (properties.getProperty<bool>(PROP_SECTION_TYPE_SOMA.name))
+    if (properties[PROP_SECTION_TYPE_SOMA.getName()].as<bool>())
         sectionTypes.push_back(brain::neuron::SectionType::soma);
-    if (properties.getProperty<bool>(PROP_SECTION_TYPE_AXON.name))
+    if (properties[PROP_SECTION_TYPE_AXON.getName()].as<bool>())
         sectionTypes.push_back(brain::neuron::SectionType::axon);
-    if (properties.getProperty<bool>(PROP_SECTION_TYPE_DENDRITE.name))
+    if (properties[PROP_SECTION_TYPE_DENDRITE.getName()].as<bool>())
         sectionTypes.push_back(brain::neuron::SectionType::dendrite);
-    if (properties.getProperty<bool>(PROP_SECTION_TYPE_APICAL_DENDRITE.name))
+    if (properties[PROP_SECTION_TYPE_APICAL_DENDRITE.getName()].as<bool>())
         sectionTypes.push_back(brain::neuron::SectionType::apicalDendrite);
     const size_t metaballsSamplesFromSoma =
-        properties.getProperty<int>(PROP_METABALLS_SAMPLES_FROM_SOMA.name);
+        properties[PROP_METABALLS_SAMPLES_FROM_SOMA.getName()].as<int>();
     const auto metaballsGridSize =
-        properties.getProperty<int>(PROP_METABALLS_GRID_SIZE.name);
+        properties[PROP_METABALLS_GRID_SIZE.getName()].as<int>();
     const auto metaballsThreshold =
-        properties.getProperty<double>(PROP_METABALLS_THRESHOLD.name);
+        properties[PROP_METABALLS_THRESHOLD.getName()].as<double>();
 
     brain::neuron::Morphology morphology(uri);
     const auto& st = sectionTypes;
@@ -307,31 +307,29 @@ void MorphologyLoader::_connectSDFBifurcations(
         // Function for connecting overlapping geometries with current
         // bifurcation
         const auto connectGeometriesToBifurcation =
-            [&](const std::vector<size_t>& geometries) {
-                const auto& bifGeom =
-                    sdfMorphologyData.geometries[bifurcationId];
+            [&](const std::vector<size_t>& geometries)
+        {
+            const auto& bifGeom = sdfMorphologyData.geometries[bifurcationId];
 
-                for (size_t geomIdx : geometries)
+            for (size_t geomIdx : geometries)
+            {
+                // Do not blend yourself
+                if (geomIdx == bifurcationId)
+                    continue;
+
+                const auto& geom = sdfMorphologyData.geometries[geomIdx];
+                const double dist0 = glm::distance2(geom.p0, bifGeom.p0);
+                const double dist1 = glm::distance2(geom.p1, bifGeom.p0);
+                const double radiusSum = geom.r0 + bifGeom.r0;
+                const double radiusSumSq = radiusSum * radiusSum;
+
+                if (dist0 < radiusSumSq || dist1 < radiusSumSq)
                 {
-                    // Do not blend yourself
-                    if (geomIdx == bifurcationId)
-                        continue;
-
-                    const auto& geom = sdfMorphologyData.geometries[geomIdx];
-                    const double dist0 = glm::distance2(geom.p0, bifGeom.p0);
-                    const double dist1 = glm::distance2(geom.p1, bifGeom.p0);
-                    const double radiusSum = geom.r0 + bifGeom.r0;
-                    const double radiusSumSq = radiusSum * radiusSum;
-
-                    if (dist0 < radiusSumSq || dist1 < radiusSumSq)
-                    {
-                        sdfMorphologyData.neighbours[bifurcationId].insert(
-                            geomIdx);
-                        sdfMorphologyData.neighbours[geomIdx].insert(
-                            bifurcationId);
-                    }
+                    sdfMorphologyData.neighbours[bifurcationId].insert(geomIdx);
+                    sdfMorphologyData.neighbours[geomIdx].insert(bifurcationId);
                 }
-            };
+            }
+        };
 
         // Connect all child sections
         for (const size_t sectionChild : mts.sectionChildren[section])
@@ -397,8 +395,9 @@ MorphologyTreeStructure MorphologyLoader::_calculateMorphologyTreeStructure(
 {
     const size_t numSections = sections.size();
 
-    const auto dampenBranchThicknessChangerate = properties.getProperty<bool>(
-        PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE.name);
+    const auto dampenBranchThicknessChangerate =
+        properties[PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE.getName()]
+            .as<bool>();
     if (!dampenBranchThicknessChangerate)
     {
         MorphologyTreeStructure mts;
@@ -442,7 +441,7 @@ MorphologyTreeStructure MorphologyLoader::_calculateMorphologyTreeStructure(
             const auto& sample = samples[0];
 
             const auto radius =
-                 _getCorrectedRadius(properties, sample.w * 0.5f);
+                _getCorrectedRadius(properties, sample.w * 0.5f);
 
             const brayns::Vector3f position(sample);
 
@@ -452,7 +451,8 @@ MorphologyTreeStructure MorphologyLoader::_calculateMorphologyTreeStructure(
 
         { // Branch end
             const auto& sample = samples.back();
-            const auto radius = _getCorrectedRadius(properties, sample.w * 0.5f);
+            const auto radius =
+                _getCorrectedRadius(properties, sample.w * 0.5f);
             const brayns::Vector3f position(sample);
             sectionEndPosition[sectionI].first = radius;
             sectionEndPosition[sectionI].second = position;
@@ -460,7 +460,8 @@ MorphologyTreeStructure MorphologyLoader::_calculateMorphologyTreeStructure(
     }
 
     const auto overlaps = [](const std::pair<double, brayns::Vector3f>& p0,
-                             const std::pair<double, brayns::Vector3f>& p1) {
+                             const std::pair<double, brayns::Vector3f>& p1)
+    {
         const double d = (p0.second - p1.second).length();
         const double r = p0.first + p1.first;
 
@@ -545,7 +546,7 @@ void MorphologyLoader::_addSomaGeometry(const brayns::PropertyMap& properties,
         _getCorrectedRadius(properties, soma.getMeanRadius());
     const auto& children = soma.getChildren();
     const bool useSDFGeometry =
-        properties.getProperty<bool>(PROP_USE_SDF_GEOMETRY.name);
+        properties[PROP_USE_SDF_GEOMETRY.getName()].as<bool>();
 
     if (useSDFGeometry)
         _connectSDFSomaChildren(properties, model.morphologyInfo.somaPosition,
@@ -686,17 +687,18 @@ void MorphologyLoader::_importMorphologyFromURI(
     // Soma
     const auto sectionTypes = getSectionTypesFromProperties(properties);
     const auto useRealisticSoma =
-        properties.getProperty<bool>(PROP_USE_REALISTIC_SOMA.name);
+        properties[PROP_USE_REALISTIC_SOMA.getName()].as<bool>();
     const auto morphologyQuality = stringToEnum<MorphologyQuality>(
-        properties.getProperty<std::string>(PROP_MORPHOLOGY_QUALITY.name));
+        properties[PROP_MORPHOLOGY_QUALITY.getName()].to<std::string>());
     const auto userDataType = stringToEnum<UserDataType>(
-        properties.getProperty<std::string>(PROP_USER_DATA_TYPE.name));
+        properties[PROP_USER_DATA_TYPE.getName()].to<std::string>());
     const auto useSDFGeometry =
-        properties.getProperty<bool>(PROP_USE_SDF_GEOMETRY.name);
-    const auto dampenBranchThicknessChangerate = properties.getProperty<bool>(
-        PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE.name);
-    const auto maxDistanceToSoma = properties.getProperty<double>(
-        PROP_MORPHOLOGY_MAX_DISTANCE_TO_SOMA.name);
+        properties[PROP_USE_SDF_GEOMETRY.getName()].as<bool>();
+    const auto dampenBranchThicknessChangerate =
+        properties[PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE.getName()]
+            .as<bool>();
+    const auto maxDistanceToSoma =
+        properties[PROP_MORPHOLOGY_MAX_DISTANCE_TO_SOMA.getName()].as<double>();
 
     // If there is no compartment report, the offset in the simulation
     // buffer is the index of the morphology in the circuit
@@ -849,12 +851,10 @@ void MorphologyLoader::_importMorphologyFromURI(
             brayns::Vector3f position(sample);
             brayns::Vector3f target(previousSample);
 
-
             model.morphologyInfo.bounds.merge(position);
             model.morphologyInfo.bounds.merge(target);
 
-            auto radius =
-                _getCorrectedRadius(properties, samples[i].w * 0.5f);
+            auto radius = _getCorrectedRadius(properties, samples[i].w * 0.5f);
             const double maxRadiusChange = 0.1f;
 
             const double dist = glm::length(target - position);
@@ -904,7 +904,7 @@ size_t MorphologyLoader::_getMaterialIdFromColorScheme(
 
     size_t materialId = 0;
     const auto colorScheme = stringToEnum<MorphologyColorScheme>(
-        properties.getProperty<std::string>(PROP_MORPHOLOGY_COLOR_SCHEME.name));
+        properties[PROP_MORPHOLOGY_COLOR_SCHEME.getName()].to<std::string>());
     switch (colorScheme)
     {
     case MorphologyColorScheme::neuron_by_segment_type:
@@ -968,22 +968,22 @@ brayns::PropertyMap MorphologyLoader::getProperties() const
 brayns::PropertyMap MorphologyLoader::getCLIProperties()
 {
     brayns::PropertyMap pm("MorphologyLoader");
-    pm.setProperty(PROP_RADIUS_MULTIPLIER);
-    pm.setProperty(PROP_RADIUS_CORRECTION);
-    pm.setProperty(PROP_SECTION_TYPE_SOMA);
-    pm.setProperty(PROP_SECTION_TYPE_AXON);
-    pm.setProperty(PROP_SECTION_TYPE_DENDRITE);
-    pm.setProperty(PROP_SECTION_TYPE_APICAL_DENDRITE);
-    pm.setProperty(PROP_USE_SDF_GEOMETRY);
-    pm.setProperty(PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE);
-    pm.setProperty(PROP_USE_REALISTIC_SOMA);
-    pm.setProperty(PROP_METABALLS_SAMPLES_FROM_SOMA);
-    pm.setProperty(PROP_METABALLS_GRID_SIZE);
-    pm.setProperty(PROP_METABALLS_THRESHOLD);
-    pm.setProperty(PROP_USER_DATA_TYPE);
-    pm.setProperty(PROP_MORPHOLOGY_COLOR_SCHEME);
-    pm.setProperty(PROP_MORPHOLOGY_QUALITY);
-    pm.setProperty(PROP_MORPHOLOGY_MAX_DISTANCE_TO_SOMA);
+    pm.add(PROP_RADIUS_MULTIPLIER);
+    pm.add(PROP_RADIUS_CORRECTION);
+    pm.add(PROP_SECTION_TYPE_SOMA);
+    pm.add(PROP_SECTION_TYPE_AXON);
+    pm.add(PROP_SECTION_TYPE_DENDRITE);
+    pm.add(PROP_SECTION_TYPE_APICAL_DENDRITE);
+    pm.add(PROP_USE_SDF_GEOMETRY);
+    pm.add(PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE);
+    pm.add(PROP_USE_REALISTIC_SOMA);
+    pm.add(PROP_METABALLS_SAMPLES_FROM_SOMA);
+    pm.add(PROP_METABALLS_GRID_SIZE);
+    pm.add(PROP_METABALLS_THRESHOLD);
+    pm.add(PROP_USER_DATA_TYPE);
+    pm.add(PROP_MORPHOLOGY_COLOR_SCHEME);
+    pm.add(PROP_MORPHOLOGY_QUALITY);
+    pm.add(PROP_MORPHOLOGY_MAX_DISTANCE_TO_SOMA);
     return pm;
 }
 
@@ -992,13 +992,13 @@ const brain::neuron::SectionTypes
         const brayns::PropertyMap& properties)
 {
     brain::neuron::SectionTypes sectionTypes;
-    if (properties.getProperty<bool>(PROP_SECTION_TYPE_SOMA.name))
+    if (properties[PROP_SECTION_TYPE_SOMA.getName()].as<bool>())
         sectionTypes.push_back(brain::neuron::SectionType::soma);
-    if (properties.getProperty<bool>(PROP_SECTION_TYPE_AXON.name))
+    if (properties[PROP_SECTION_TYPE_AXON.getName()].as<bool>())
         sectionTypes.push_back(brain::neuron::SectionType::axon);
-    if (properties.getProperty<bool>(PROP_SECTION_TYPE_DENDRITE.name))
+    if (properties[PROP_SECTION_TYPE_DENDRITE.getName()].as<bool>())
         sectionTypes.push_back(brain::neuron::SectionType::dendrite);
-    if (properties.getProperty<bool>(PROP_SECTION_TYPE_APICAL_DENDRITE.name))
+    if (properties[PROP_SECTION_TYPE_APICAL_DENDRITE.getName()].as<bool>())
         sectionTypes.push_back(brain::neuron::SectionType::apicalDendrite);
     return sectionTypes;
 }

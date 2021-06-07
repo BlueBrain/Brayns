@@ -38,7 +38,7 @@ TEST_CASE_FIXTURE(ClientServer, "get_renderer_params")
 {
     CHECK_EQ(getRenderer().getCurrentType(), "basic");
     auto rendererParams = makeRequest<brayns::PropertyMap>(GET_RENDERER_PARAMS);
-    CHECK(rendererParams.getProperties().empty());
+    CHECK(rendererParams.empty());
 }
 
 TEST_CASE_FIXTURE(ClientServer, "change_renderer_from_web_api")
@@ -59,13 +59,13 @@ TEST_CASE_FIXTURE(ClientServer, "change_renderer_from_web_api")
     auto rendererParams =
         makeRequestUpdate<brayns::PropertyMap>(GET_RENDERER_PARAMS,
                                                scivisProps);
-    CHECK(!rendererParams.getProperties().empty());
-    CHECK_EQ(rendererParams.getProperty<int>("aoSamples"), 1);
+    CHECK(!rendererParams.empty());
+    CHECK_EQ(rendererParams["aoSamples"].as<int>(), 1);
 
-    rendererParams.updateProperty("aoSamples", 42);
+    rendererParams.update("aoSamples", 42);
     CHECK((makeRequest<brayns::PropertyMap, bool>(SET_RENDERER_PARAMS,
                                                   rendererParams)));
-    CHECK_EQ(renderer.getPropertyMap().getProperty<int>("aoSamples"), 42);
+    CHECK_EQ(renderer.getPropertyMap()["aoSamples"].as<int>(), 42);
 
     params.setCurrentRenderer("wrong");
     CHECK_THROWS_AS(

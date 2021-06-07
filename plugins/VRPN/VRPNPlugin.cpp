@@ -39,13 +39,13 @@ constexpr int VRPN_REPEAT_TIMEOUT_MS = 16;
 const std::string HEAD_POSITION_PROP = "headPosition";
 const std::string HEAD_ROTATION_PROP = "headRotation";
 
-constexpr std::array<double, 3> to_array_3d(const vrpn_float64* pos)
+constexpr Vector3d to_array_3d(const vrpn_float64* pos)
 {
-    return {{pos[0], pos[1], pos[2]}};
+    return {pos[0], pos[1], pos[2]};
 }
-constexpr std::array<double, 4> to_array_4d(const vrpn_float64* quat)
+constexpr Vector4d to_array_4d(const vrpn_float64* quat)
 {
-    return {{quat[0], quat[1], quat[2], quat[3]}};
+    return {quat[0], quat[1], quat[2], quat[3]};
 }
 
 void trackerCallback(void* userData, const vrpn_TRACKERCB tracker)

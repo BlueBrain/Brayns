@@ -138,8 +138,10 @@ const std::string METHOD_FS_LIST_DIR = "fs-list-dir";
 const std::string METHOD_GET_MATERIAL = "get-mat";
 const std::string METHOD_SET_MATERIAL = "set-mat";
 
-const std::string METHOD_GET_ACTIVE_SIMULATED_MODEL = "get-active-simulation-model";
-const std::string METHOD_SET_ACTIVE_SIMULATED_MODEL = "set-active-simulation-model";
+const std::string METHOD_GET_ACTIVE_SIMULATED_MODEL =
+    "get-active-simulation-model";
+const std::string METHOD_SET_ACTIVE_SIMULATED_MODEL =
+    "set-active-simulation-model";
 
 const std::string METHOD_CLIENTSTATE_SET = "client-state-set";
 const std::string METHOD_CLIENTSTATE_GET = "client-state-get";
@@ -221,8 +223,9 @@ bool preUpdate(const std::string&, PRE,
 }
 
 template <class T, class PRE, class POST>
-inline bool from_json(T& obj, const std::string& json,
-                      PRE preUpdateFunc = [] {}, POST postUpdateFunc = [] {})
+inline bool from_json(
+    T& obj, const std::string& json, PRE preUpdateFunc = [] {},
+    POST postUpdateFunc = [] {})
 {
     staticjson::ParseStatus status;
 
@@ -314,7 +317,7 @@ public:
 
         if (!_parametersManager.getApplicationParameters().useVideoStreaming())
         {
-            if(_useControlledStream)
+            if (_useControlledStream)
                 _broadcastControlledImageJpeg();
             else
                 _broadcastImageJpeg();
@@ -329,13 +332,14 @@ public:
                               const PropertyMap& input,
                               const std::function<void(PropertyMap)>& action)
     {
-        _jsonrpcServer->connect(desc.methodName, [name = desc.methodName,
-                                                  action,
-                                                  input,
-                                                  this](const auto& request) {
-            ScopedCurrentClient scope(this->_currentClientID, request.clientID);
-            action(jsonToPropertyMap(request.message, input));
-        });
+        _jsonrpcServer->connect(
+            desc.methodName,
+            [name = desc.methodName, action, input, this](const auto& request)
+            {
+                ScopedCurrentClient scope(this->_currentClientID,
+                                          request.clientID);
+                action(jsonToPropertyMap(request.message, input));
+            });
 
         _handleSchema(desc.methodName,
                       buildJsonRpcSchemaNotifyPropertyMap(desc, input));
@@ -344,11 +348,14 @@ public:
     void registerNotification(const RpcDescription& desc,
                               const std::function<void()>& action)
     {
-        _jsonrpcServer->connect(desc.methodName, [action,
-                                                  this](const auto& request) {
-            ScopedCurrentClient scope(this->_currentClientID, request.clientID);
-            action();
-        });
+        _jsonrpcServer->connect(desc.methodName,
+                                [action, this](const auto& request)
+                                {
+                                    ScopedCurrentClient scope(
+                                        this->_currentClientID,
+                                        request.clientID);
+                                    action();
+                                });
 
         _handleSchema(desc.methodName, buildJsonRpcSchemaNotify(desc));
     }
@@ -357,24 +364,26 @@ public:
                          const PropertyMap& input, const PropertyMap& output,
                          const std::function<PropertyMap(PropertyMap)>& action)
     {
-        _bindEndpoint(desc.methodName, [ name = desc.methodName,
-                                         input,
-                                         action ](const auto& request) {
-            try
-            {
-                return Response{
-                    to_json(action(jsonToPropertyMap(request.message, input)))};
-            }
-            catch (const std::exception& e)
-            {
-                PropertyMap errorResponse;
-                errorResponse.setProperty({"error", -1, {}});
-                const std::string msg = "from_json for " + name + " failed: "
-                        + std::string(e.what());
-                errorResponse.setProperty({"message", msg, {}});
-                return Response{to_json(errorResponse)};
-            }
-        });
+        _bindEndpoint(desc.methodName,
+                      [name = desc.methodName, input,
+                       action](const auto& request)
+                      {
+                          try
+                          {
+                              return Response{to_json(action(
+                                  jsonToPropertyMap(request.message, input)))};
+                          }
+                          catch (const std::exception& e)
+                          {
+                              PropertyMap errorResponse;
+                              errorResponse.add({"error", -1, {}});
+                              const std::string msg =
+                                  "from_json for " + name +
+                                  " failed: " + std::string(e.what());
+                              errorResponse.add({"message", msg, {}});
+                              return Response{to_json(errorResponse)};
+                          }
+                      });
 
         _handleSchema(desc.methodName,
                       buildJsonRpcSchemaRequestPropertyMap(desc, input,
@@ -384,24 +393,26 @@ public:
     void registerRequest(const RpcDescription& desc, const PropertyMap& output,
                          const std::function<PropertyMap()>& action)
     {
-        _jsonrpcServer->bind(desc.methodName, [name = desc.methodName,
-                                               action,
-                                               this](const auto& request) {
-            ScopedCurrentClient scope(this->_currentClientID, request.clientID);
-            try
+        _jsonrpcServer->bind(
+            desc.methodName,
+            [name = desc.methodName, action, this](const auto& request)
             {
-                return Response{to_json(action())};
-            }
-            catch (const std::exception& e)
-            {
-                PropertyMap errorResponse;
-                errorResponse.setProperty({"error", -1, {}});
-                const std::string msg = "from_json for " + name + " failed: "
-                        + std::string(e.what());
-                errorResponse.setProperty({"message", msg, {}});
-                return Response{to_json(errorResponse)};
-            }
-        });
+                ScopedCurrentClient scope(this->_currentClientID,
+                                          request.clientID);
+                try
+                {
+                    return Response{to_json(action())};
+                }
+                catch (const std::exception& e)
+                {
+                    PropertyMap errorResponse;
+                    errorResponse.add({"error", -1, {}});
+                    const std::string msg = "from_json for " + name +
+                                            " failed: " + std::string(e.what());
+                    errorResponse.add({"message", msg, {}});
+                    return Response{to_json(errorResponse)};
+                }
+            });
 
         _handleSchema(desc.methodName,
                       buildJsonRpcSchemaRequestPropertyMap(desc, output));
@@ -409,34 +420,48 @@ public:
 
     void _registerRequest(const std::string& name, const RetParamFunc& action)
     {
-        _jsonrpcServer->bind(name, [action, this](const auto& request) {
-            ScopedCurrentClient scope(this->_currentClientID, request.clientID);
-            return Response{action(request.message)};
-        });
+        _jsonrpcServer->bind(name,
+                             [action, this](const auto& request)
+                             {
+                                 ScopedCurrentClient scope(
+                                     this->_currentClientID, request.clientID);
+                                 return Response{action(request.message)};
+                             });
     }
 
     void _registerRequest(const std::string& name, const RetFunc& action)
     {
-        _jsonrpcServer->bind(name, [action, this](const auto& request) {
-            ScopedCurrentClient scope(this->_currentClientID, request.clientID);
-            return Response{action()};
-        });
+        _jsonrpcServer->bind(name,
+                             [action, this](const auto& request)
+                             {
+                                 ScopedCurrentClient scope(
+                                     this->_currentClientID, request.clientID);
+                                 return Response{action()};
+                             });
     }
 
     void _registerNotification(const std::string& name, const ParamFunc& action)
     {
-        _jsonrpcServer->connect(name, [action, this](const auto& request) {
-            ScopedCurrentClient scope(this->_currentClientID, request.clientID);
-            action(request.message);
-        });
+        _jsonrpcServer->connect(name,
+                                [action, this](const auto& request)
+                                {
+                                    ScopedCurrentClient scope(
+                                        this->_currentClientID,
+                                        request.clientID);
+                                    action(request.message);
+                                });
     }
 
     void _registerNotification(const std::string& name, const VoidFunc& action)
     {
-        _jsonrpcServer->connect(name, [action, this](const auto& request) {
-            ScopedCurrentClient scope(this->_currentClientID, request.clientID);
-            action();
-        });
+        _jsonrpcServer->connect(name,
+                                [action, this](const auto& request)
+                                {
+                                    ScopedCurrentClient scope(
+                                        this->_currentClientID,
+                                        request.clientID);
+                                    action();
+                                });
     }
 
     void processDelayedNotifies()
@@ -493,10 +518,12 @@ public:
 
     void _setupWebsocket()
     {
-        _rocketsServer->handleClose([this](const uintptr_t clientID) {
-            _binaryRequests.removeRequest(clientID);
-            return std::vector<rockets::ws::Response>{};
-        });
+        _rocketsServer->handleClose(
+            [this](const uintptr_t clientID)
+            {
+                _binaryRequests.removeRequest(clientID);
+                return std::vector<rockets::ws::Response>{};
+            });
 
         _rocketsServer->handleBinary(std::bind(&BinaryRequests::processMessage,
                                                std::ref(_binaryRequests),
@@ -524,23 +551,26 @@ public:
     void _rebroadcast(const std::string& endpoint, const std::string& message,
                       const std::set<uintptr_t>& filter)
     {
-        _delayedNotify([&, message, filter] {
-            if (_rocketsServer->getConnectionCount() > 1)
+        _delayedNotify(
+            [&, message, filter]
             {
-                try
+                if (_rocketsServer->getConnectionCount() > 1)
                 {
-                    const auto& msg =
-                        rockets::jsonrpc::makeNotification(endpoint, message);
-                    _rocketsServer->broadcastText(msg, filter);
+                    try
+                    {
+                        const auto& msg =
+                            rockets::jsonrpc::makeNotification(endpoint,
+                                                               message);
+                        _rocketsServer->broadcastText(msg, filter);
+                    }
+                    catch (const std::exception& e)
+                    {
+                        BRAYNS_ERROR
+                            << "Error rebroadcasting notification: " << e.what()
+                            << std::endl;
+                    }
                 }
-                catch (const std::exception& e)
-                {
-                    BRAYNS_ERROR
-                        << "Error rebroadcasting notification: " << e.what()
-                        << std::endl;
-                }
-            }
-        });
+            });
     }
 
     // Utilty to change current client while we are handling a message to skip
@@ -556,6 +586,7 @@ public:
         }
 
         ~ScopedCurrentClient() { _currentClientID = NO_CURRENT_CLIENT; }
+
     private:
         uintptr_t& _currentClientID;
     };
@@ -563,122 +594,135 @@ public:
     void _bindEndpoint(const std::string& method,
                        rockets::jsonrpc::ResponseCallback action)
     {
-        _jsonrpcServer->bind(method, [&, action](
-                                         rockets::jsonrpc::Request request) {
-            ScopedCurrentClient scope(_currentClientID, request.clientID);
-            return action(request);
-        });
+        _jsonrpcServer->bind(method,
+                             [&, action](rockets::jsonrpc::Request request)
+                             {
+                                 ScopedCurrentClient scope(_currentClientID,
+                                                           request.clientID);
+                                 return action(request);
+                             });
     }
 
     template <typename Params, typename RetVal>
     void _bindEndpoint(const std::string& method,
                        std::function<RetVal(Params)> action)
     {
-        _jsonrpcServer->bind(method, [&, action](
-                                         rockets::jsonrpc::Request request) {
-            ScopedCurrentClient scope(_currentClientID, request.clientID);
+        _jsonrpcServer->bind(
+            method,
+            [&, action](rockets::jsonrpc::Request request)
+            {
+                ScopedCurrentClient scope(_currentClientID, request.clientID);
 
-            Params params;
-            if (!::from_json(params, request.message))
-                return Response::invalidParams();
-            try
-            {
-                const auto& ret = action(std::move(params));
-                return Response{to_json(ret)};
-            }
-            catch (const rockets::jsonrpc::response_error& e)
-            {
-                return Response{Response::Error{e.what(), e.code}};
-            }
-        });
+                Params params;
+                if (!::from_json(params, request.message))
+                    return Response::invalidParams();
+                try
+                {
+                    const auto& ret = action(std::move(params));
+                    return Response{to_json(ret)};
+                }
+                catch (const rockets::jsonrpc::response_error& e)
+                {
+                    return Response{Response::Error{e.what(), e.code}};
+                }
+            });
     }
 
     template <typename RetVal>
     void _bindEndpoint(const std::string& method,
                        std::function<RetVal()> action)
     {
-        _jsonrpcServer->bind(method, [&, action](
-                                         rockets::jsonrpc::Request request) {
-            ScopedCurrentClient scope(_currentClientID, request.clientID);
+        _jsonrpcServer->bind(
+            method,
+            [&, action](rockets::jsonrpc::Request request)
+            {
+                ScopedCurrentClient scope(_currentClientID, request.clientID);
 
-            try
-            {
-                const auto& ret = action();
-                return Response{to_json(ret)};
-            }
-            catch (const rockets::jsonrpc::response_error& e)
-            {
-                return Response{Response::Error{e.what(), e.code}};
-            }
-        });
+                try
+                {
+                    const auto& ret = action();
+                    return Response{to_json(ret)};
+                }
+                catch (const rockets::jsonrpc::response_error& e)
+                {
+                    return Response{Response::Error{e.what(), e.code}};
+                }
+            });
     }
 
     template <typename Params>
     void _bindEndpoint(const std::string& method,
                        std::function<void(Params)> action)
     {
-        _jsonrpcServer->bind(method, [&, action](
-                                         rockets::jsonrpc::Request request) {
-            ScopedCurrentClient scope(_currentClientID, request.clientID);
+        _jsonrpcServer->bind(method,
+                             [&, action](rockets::jsonrpc::Request request)
+                             {
+                                 ScopedCurrentClient scope(_currentClientID,
+                                                           request.clientID);
 
-            Params params;
-            if (!::from_json(params, request.message))
-                return Response::invalidParams();
-            action(std::move(params));
-            return Response{"\"OK\""};
-        });
+                                 Params params;
+                                 if (!::from_json(params, request.message))
+                                     return Response::invalidParams();
+                                 action(std::move(params));
+                                 return Response{"\"OK\""};
+                             });
     }
 
     void _bindEndpoint(const std::string& method,
                        rockets::jsonrpc::VoidCallback action)
     {
-        _jsonrpcServer->connect(method, [&, action](
-                                            rockets::jsonrpc::Request request) {
-            ScopedCurrentClient scope(_currentClientID, request.clientID);
-            action();
-            return Response{"\"OK\""};
-        });
+        _jsonrpcServer->connect(method,
+                                [&, action](rockets::jsonrpc::Request request)
+                                {
+                                    ScopedCurrentClient scope(_currentClientID,
+                                                              request.clientID);
+                                    action();
+                                    return Response{"\"OK\""};
+                                });
     }
 
     void _bindModelEndpoint(
         const std::string& method, const std::string& key,
         std::function<bool(std::string, ModelDescriptorPtr)> action)
     {
-        _jsonrpcServer->bind(method, [&, key, action](
-                                         rockets::jsonrpc::Request request) {
-            ScopedCurrentClient scope(_currentClientID, request.clientID);
-
-            using namespace rapidjson;
-            Document document;
-            document.Parse(request.message.c_str());
-
-            if (!document.HasMember("id") || !document.HasMember(key.c_str()))
-                return Response::invalidParams();
-
-            const auto modelID = document["id"].GetInt();
-            auto model = _engine.getScene().getModel(modelID);
-            if (!model)
+        _jsonrpcServer->bind(
+            method,
+            [&, key, action](rockets::jsonrpc::Request request)
             {
-                return Response{
-                    Response::Error{"Model not found", MODEL_NOT_FOUND}};
-            }
+                ScopedCurrentClient scope(_currentClientID, request.clientID);
 
-            // get the actual property object from the model message (e.g.
-            // transfer function) and pass it as a JSON string to the provided
-            // action to consume it.
-            Document propertyDoc;
-            propertyDoc.SetObject() = document[key.c_str()].GetObject();
-            rapidjson::StringBuffer buffer;
-            rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-            propertyDoc.Accept(writer);
+                using namespace rapidjson;
+                Document document;
+                document.Parse(request.message.c_str());
 
-            if (!action(buffer.GetString(), model))
-                return Response::invalidParams();
+                if (!document.HasMember("id") ||
+                    !document.HasMember(key.c_str()))
+                    return Response::invalidParams();
 
-            _engine.triggerRender();
-            _rebroadcast(method, request.message, {request.clientID});
-            return Response{to_json(true)};
-        });
+                const auto modelID = document["id"].GetInt();
+                auto model = _engine.getScene().getModel(modelID);
+                if (!model)
+                {
+                    return Response{
+                        Response::Error{"Model not found", MODEL_NOT_FOUND}};
+                }
+
+                // get the actual property object from the model message (e.g.
+                // transfer function) and pass it as a JSON string to the
+                // provided action to consume it.
+                Document propertyDoc;
+                propertyDoc.SetObject() = document[key.c_str()].GetObject();
+                rapidjson::StringBuffer buffer;
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                propertyDoc.Accept(writer);
+
+                if (!action(buffer.GetString(), model))
+                    return Response::invalidParams();
+
+                _engine.triggerRender();
+                _rebroadcast(method, request.message, {request.clientID});
+                return Response{to_json(true)};
+            });
     }
 
     template <class T>
@@ -687,9 +731,12 @@ public:
     {
         using namespace rockets::http;
 
-        _rocketsServer->handle(Method::GET, endpoint, [&obj](const Request&) {
-            return make_ready_response(Code::OK, to_json(obj), JSON_TYPE);
-        });
+        _rocketsServer->handle(Method::GET, endpoint,
+                               [&obj](const Request&) {
+                                   return make_ready_response(Code::OK,
+                                                              to_json(obj),
+                                                              JSON_TYPE);
+                               });
 
         _handleObjectSchema(endpoint, obj);
 
@@ -706,53 +753,54 @@ public:
         // Create new throttle for that endpoint
         _throttle[endpoint];
 
-        obj.onModified([&, endpoint = getNotificationEndpointName(endpoint),
-                        throttleTime](const auto& base) {
-            auto& throttle = _throttle[endpoint];
+        obj.onModified(
+            [&, endpoint = getNotificationEndpointName(endpoint),
+             throttleTime](const auto& base)
+            {
+                auto& throttle = _throttle[endpoint];
 
-            // throttle itself is not thread-safe, but we can get called
-            // from different threads (c.f. async model load)
-            std::lock_guard<std::mutex> lock(throttle.first);
+                // throttle itself is not thread-safe, but we can get called
+                // from different threads (c.f. async model load)
+                std::lock_guard<std::mutex> lock(throttle.first);
 
-            const auto& castedObj = static_cast<const T&>(base);
-            const auto notify = [& rocketsServer = _rocketsServer,
-                                 /*clientID = _currentClientID,*/ endpoint,
-                                 json = to_json(castedObj)] {
-
-                if (rocketsServer->getConnectionCount() == 0)
-                    return;
-                try
+                const auto& castedObj = static_cast<const T&>(base);
+                const auto notify = [&rocketsServer = _rocketsServer,
+                                     /*clientID = _currentClientID,*/ endpoint,
+                                     json = to_json(castedObj)]
                 {
-                    const auto& msg =
-                        rockets::jsonrpc::makeNotification(endpoint, json);
+                    if (rocketsServer->getConnectionCount() == 0)
+                        return;
+                    try
+                    {
+                        const auto& msg =
+                            rockets::jsonrpc::makeNotification(endpoint, json);
 
-                    rocketsServer->broadcastText(msg);
-                    /*
-                    if (clientID == NO_CURRENT_CLIENT)
                         rocketsServer->broadcastText(msg);
-                    else
-                        rocketsServer->broadcastText(msg, {clientID});
-                    */
-                }
-                catch (const std::exception& e)
-                {
-                    BRAYNS_ERROR
-                        << "Error broadcasting notification: " << e.what()
-                        << std::endl;
-                }
-            };
-            const auto delayedNotify = [&, notify] {
-                this->_delayedNotify(notify);
-            };
+                        /*
+                        if (clientID == NO_CURRENT_CLIENT)
+                            rocketsServer->broadcastText(msg);
+                        else
+                            rocketsServer->broadcastText(msg, {clientID});
+                        */
+                    }
+                    catch (const std::exception& e)
+                    {
+                        BRAYNS_ERROR
+                            << "Error broadcasting notification: " << e.what()
+                            << std::endl;
+                    }
+                };
+                const auto delayedNotify = [&, notify]
+                { this->_delayedNotify(notify); };
 
-            // non-throttled, direct notify can happen directly if we are
-            // not in the middle handling an incoming message; delayed
-            // notify must be dispatched to the main thread
-            if (_currentClientID == NO_CURRENT_CLIENT)
-                throttle.second(notify, delayedNotify, throttleTime);
-            else
-                throttle.second(delayedNotify, delayedNotify, throttleTime);
-        });
+                // non-throttled, direct notify can happen directly if we are
+                // not in the middle handling an incoming message; delayed
+                // notify must be dispatched to the main thread
+                if (_currentClientID == NO_CURRENT_CLIENT)
+                    throttle.second(notify, delayedNotify, throttleTime);
+                else
+                    throttle.second(delayedNotify, delayedNotify, throttleTime);
+            });
 
         _objects.push_back(&obj);
     }
@@ -769,29 +817,33 @@ public:
                     POST postUpdateFunc)
     {
         using namespace rockets::http;
-        _rocketsServer->handle(Method::PUT, endpoint, [&obj, preUpdateFunc,
-                                                       postUpdateFunc](
-                                                          const Request& req) {
-            return make_ready_response(
-                from_json(obj, req.body, preUpdateFunc, postUpdateFunc)
-                    ? Code::OK
-                    : Code::BAD_REQUEST);
-        });
+        _rocketsServer->handle(Method::PUT, endpoint,
+                               [&obj, preUpdateFunc,
+                                postUpdateFunc](const Request& req)
+                               {
+                                   return make_ready_response(
+                                       from_json(obj, req.body, preUpdateFunc,
+                                                 postUpdateFunc)
+                                           ? Code::OK
+                                           : Code::BAD_REQUEST);
+                               });
 
         _handleObjectSchema(endpoint, obj);
 
         const std::string rpcEndpoint = getNotificationEndpointName(endpoint);
 
-        _bindEndpoint(rpcEndpoint, [&, rpcEndpoint, preUpdateFunc,
-                                    postUpdateFunc](
-                                       rockets::jsonrpc::Request request) {
-            if (from_json(obj, request.message, preUpdateFunc, postUpdateFunc))
-            {
-                _engine.triggerRender();
-                return rockets::jsonrpc::Response{to_json(true)};
-            }
-            return rockets::jsonrpc::Response::invalidParams();
-        });
+        _bindEndpoint(rpcEndpoint,
+                      [&, rpcEndpoint, preUpdateFunc,
+                       postUpdateFunc](rockets::jsonrpc::Request request)
+                      {
+                          if (from_json(obj, request.message, preUpdateFunc,
+                                        postUpdateFunc))
+                          {
+                              _engine.triggerRender();
+                              return rockets::jsonrpc::Response{to_json(true)};
+                          }
+                          return rockets::jsonrpc::Response::invalidParams();
+                      });
         const RpcParameterDescription desc{rpcEndpoint,
                                            "Set the new state of " + endpoint,
                                            "param", endpoint};
@@ -861,40 +913,42 @@ public:
         // - wire the cancel request from rockets to the task
 
         auto action = [&, createTask](P params, auto clientID, auto respond,
-                                      auto progressCb BRAYNS_UNUSED) {
+                                      auto progressCb BRAYNS_UNUSED)
+        {
             // transform task error to rockets error response
-            auto errorCallback = [&, respond](const TaskRuntimeError& error) {
+            auto errorCallback = [&, respond](const TaskRuntimeError& error)
+            {
                 const Response response(
                     Response::Error{error.what(), error.code, error.data});
-                this->_delayedNotify(
-                    [respond, response] { respond(response); });
+                this->_delayedNotify([respond, response]
+                                     { respond(response); });
             };
 
             try
             {
                 // transform task result to rockets response
-                auto readyCallback = [&, respond](const R& result) {
+                auto readyCallback = [&, respond](const R& result)
+                {
                     try
                     {
-                        this->_delayedNotify(
-                            [respond, result] { respond({to_json(result)}); });
+                        this->_delayedNotify([respond, result]
+                                             { respond({to_json(result)}); });
                     }
                     catch (const std::runtime_error& e)
                     {
                         const Response response(
                             Response::Error{e.what(),
                                             TASK_RESULT_TO_JSON_ERROR});
-                        this->_delayedNotify(
-                            [respond, response] { respond(response); });
+                        this->_delayedNotify([respond, response]
+                                             { respond(response); });
                     }
                 };
 
                 // create the task that shall be executed for this request
                 auto task = createTask(std::move(params), clientID);
 
-                std::function<void()> finishProgress = [task] {
-                    task->progress.update("Done", 1.f);
-                };
+                std::function<void()> finishProgress = [task]
+                { task->progress.update("Done", 1.f); };
 
 // setup periodic progress reporting if we have libuv running
 #ifdef BRAYNS_USE_LIBUV
@@ -903,15 +957,13 @@ public:
                     auto progressUpdate =
                         uvw::Loop::getDefault()->resource<uvw::TimerHandle>();
 
-                    auto sendProgress =
-                        [ progressCb, &progress = task->progress ]
-                    {
-                        progress.consume(progressCb);
-                    };
+                    auto sendProgress = [progressCb, &progress = task->progress]
+                    { progress.consume(progressCb); };
                     progressUpdate->on<uvw::TimerEvent>(
                         [sendProgress](const auto&, auto&) { sendProgress(); });
 
-                    finishProgress = [task, progressUpdate, sendProgress] {
+                    finishProgress = [task, progressUpdate, sendProgress]
+                    {
                         task->progress.update("Done", 1.f);
                         sendProgress();
                         progressUpdate->stop();
@@ -928,7 +980,8 @@ public:
                 auto responseTask =
                     std::make_shared<async::task<void>>(task->get().then(
                         [&, readyCallback, errorCallback, task,
-                         finishProgress](typename Task<R>::Type result) {
+                         finishProgress](typename Task<R>::Type result)
+                        {
                             finishProgress();
 
                             try
@@ -962,9 +1015,8 @@ public:
                 _tasks.emplace(task, responseTask);
 
                 // forward the cancel request from rockets to the task
-                auto cancel = [task, responseTask](auto done) {
-                    task->cancel(done);
-                };
+                auto cancel = [task, responseTask](auto done)
+                { task->cancel(done); };
 
                 task->schedule();
 
@@ -1095,13 +1147,15 @@ public:
     void _handleImageJPEG()
     {
         _jsonrpcServer->bind(METHOD_IMAGE_JPEG,
-                             std::function<ImageGenerator::ImageBase64()>([&] {
-                                 return _imageGenerator.createImage(
-                                     _engine.getFrameBuffer(), "jpg",
-                                     _parametersManager
-                                         .getApplicationParameters()
-                                         .getJpegCompression());
-                             }));
+                             std::function<ImageGenerator::ImageBase64()>(
+                                 [&]
+                                 {
+                                     return _imageGenerator.createImage(
+                                         _engine.getFrameBuffer(), "jpg",
+                                         _parametersManager
+                                             .getApplicationParameters()
+                                             .getJpegCompression());
+                                 }));
         _handleSchema(
             METHOD_IMAGE_JPEG,
             buildJsonRpcSchemaRequestReturnOnly<ImageGenerator::ImageBase64>(
@@ -1143,7 +1197,7 @@ public:
 
     void _broadcastControlledImageJpeg()
     {
-        if(!_controlledStreamingFlag.load())
+        if (!_controlledStreamingFlag.load())
         {
             return;
         }
@@ -1198,10 +1252,8 @@ public:
 
             _encoder =
                 std::make_unique<Encoder>(width, height, fps, _videoParams.kbps,
-                                          [& rs = _rocketsServer](auto a,
-                                                                  auto b) {
-                                              rs->broadcastBinary(a, b);
-                                          });
+                                          [&rs = _rocketsServer](auto a, auto b)
+                                          { rs->broadcastBinary(a, b); });
         }
 
         if (_videoUpdatedResponse)
@@ -1223,16 +1275,16 @@ public:
         static brayns::Version version;
         using namespace rockets::http;
         _rocketsServer->handleGET(ENDPOINT_VERSION, version);
-        _rocketsServer->handle(
-            Method::GET, ENDPOINT_VERSION + "/schema", [&](const Request&) {
-                return make_ready_response(Code::OK, version.getSchema(),
-                                           JSON_TYPE);
-            });
+        _rocketsServer->handle(Method::GET, ENDPOINT_VERSION + "/schema",
+                               [&](const Request&) {
+                                   return make_ready_response(
+                                       Code::OK, version.getSchema(),
+                                       JSON_TYPE);
+                               });
 
-        _jsonrpcServer->bind(getRequestEndpointName(ENDPOINT_VERSION),
-                             (std::function<brayns::Version()>)[] {
-                                 return brayns::Version();
-                             });
+        _jsonrpcServer->bind(
+            getRequestEndpointName(ENDPOINT_VERSION),
+            (std::function<brayns::Version()>)[] { return brayns::Version(); });
 
         _handleSchema(ENDPOINT_VERSION, version.getSchema());
     }
@@ -1240,9 +1292,8 @@ public:
     void _handleAnimationParams()
     {
         auto& animParams = _parametersManager.getAnimationParameters();
-        auto preUpdate = [](const AnimationParameters& obj) {
-            return obj.getDelta() != 0;
-        };
+        auto preUpdate = [](const AnimationParameters& obj)
+        { return obj.getDelta() != 0; };
 
         _handleGET(ENDPOINT_ANIMATION_PARAMS, animParams, INTERACTIVE_THROTTLE);
         _handlePUT(ENDPOINT_ANIMATION_PARAMS, animParams, preUpdate,
@@ -1267,16 +1318,15 @@ public:
     void _handleRenderer()
     {
         auto& params = _parametersManager.getRenderingParameters();
-        auto preUpdate = [&params](const auto& rp) {
+        auto preUpdate = [&params](const auto& rp)
+        {
             return std::find(params.getRenderers().begin(),
                              params.getRenderers().end(),
                              rp.getCurrentRenderer()) !=
                    params.getRenderers().end();
         };
-        auto postUpdate = [& renderer = _engine.getRenderer()](auto& rp)
-        {
-            renderer.setCurrentType(rp.getCurrentRenderer());
-        };
+        auto postUpdate = [&renderer = _engine.getRenderer()](auto& rp)
+        { renderer.setCurrentType(rp.getCurrentRenderer()); };
         _handleGET(ENDPOINT_RENDERER, params);
         _handlePUT(ENDPOINT_RENDERER, params, preUpdate, postUpdate);
     }
@@ -1288,21 +1338,22 @@ public:
             Execution::sync, "endpoint",
             "name of the endpoint to get its schema"};
 
-        _jsonrpcServer->bind(METHOD_SCHEMA, [& schemas = _schemas](
-                                                const auto& request) {
-            SchemaParam param;
-            if (::from_json(param, request.message))
-            {
-                if (schemas.count(param.endpoint) == 0)
-                    return Response{
-                        Response::Error{"Endpoint not found",
-                                        SCHEMA_RPC_ENDPOINT_NOT_FOUND}};
+        _jsonrpcServer->bind(METHOD_SCHEMA,
+                             [&schemas = _schemas](const auto& request)
+                             {
+                                 SchemaParam param;
+                                 if (::from_json(param, request.message))
+                                 {
+                                     if (schemas.count(param.endpoint) == 0)
+                                         return Response{Response::Error{
+                                             "Endpoint not found",
+                                             SCHEMA_RPC_ENDPOINT_NOT_FOUND}};
 
-                auto schema = schemas[param.endpoint];
-                return Response{std::move(schema)};
-            }
-            return Response::invalidParams();
-        });
+                                     auto schema = schemas[param.endpoint];
+                                     return Response{std::move(schema)};
+                                 }
+                                 return Response::invalidParams();
+                             });
 
         _handleSchema(METHOD_SCHEMA,
                       buildJsonRpcSchemaRequest<SchemaParam, std::string>(
@@ -1311,13 +1362,14 @@ public:
 
     void _handleInspect()
     {
-        using Position = std::array<double, 2>;
         const RpcParameterDescription desc{
             METHOD_INSPECT, "Inspect the scene at x-y position",
             Execution::sync, "position",
             "x-y position in normalized coordinates"};
-        _handleRPC<Position, Renderer::PickResult>(
-            desc, [& engine = _engine](const auto& position) {
+        _handleRPC<Vector2d, Renderer::PickResult>(
+            desc,
+            [&engine = _engine](const auto& position)
+            {
                 return engine.getRenderer().pick(
                     {float(position[0]), float(position[1])});
             });
@@ -1326,7 +1378,8 @@ public:
     void _handleQuit()
     {
         _handleRPC({METHOD_QUIT, "Quit the application"},
-                   [& engine = _engine] {
+                   [&engine = _engine]
+                   {
                        engine.setKeepRunning(false);
                        engine.triggerRender();
                    });
@@ -1334,45 +1387,52 @@ public:
 
     void _handleExitLater()
     {
-        _handleRPC<ExitLaterSchedule>({METHOD_EXIT_LATER,
-                    "Schedules Brayns to shutdown after a given amount of minutes",
-                    "minutes", "Number of minutes after which Brayns will shut down"},
-                    [&](const ExitLaterSchedule& schedule){
-                        std::lock_guard<std::mutex> lock(_scheduleMutex);
-                        if(schedule.minutes > 0)
-                        {
-                            if(_scheduledShutdownActive)
-                            {
-                                _cancelScheduledShutdown = true;
-                                _monitor.notify_all();
-                                _shutDownWorker->join();
-                                _shutDownWorker.reset();
-                                _cancelScheduledShutdown = false;
-                                _scheduledShutdownActive = false;
-                            }
+        _handleRPC<ExitLaterSchedule>(
+            {METHOD_EXIT_LATER,
+             "Schedules Brayns to shutdown after a given amount of minutes",
+             "minutes", "Number of minutes after which Brayns will shut down"},
+            [&](const ExitLaterSchedule& schedule)
+            {
+                std::lock_guard<std::mutex> lock(_scheduleMutex);
+                if (schedule.minutes > 0)
+                {
+                    if (_scheduledShutdownActive)
+                    {
+                        _cancelScheduledShutdown = true;
+                        _monitor.notify_all();
+                        _shutDownWorker->join();
+                        _shutDownWorker.reset();
+                        _cancelScheduledShutdown = false;
+                        _scheduledShutdownActive = false;
+                    }
 
-                            _scheduledShutdownActive = true;
-                            const uint32_t mins = schedule.minutes;
-                            _shutDownWorker = std::unique_ptr<std::thread>(new std::thread([&, mins]()
+                    _scheduledShutdownActive = true;
+                    const uint32_t mins = schedule.minutes;
+                    _shutDownWorker =
+                        std::unique_ptr<std::thread>(new std::thread(
+                            [&, mins]()
                             {
-                                std::chrono::milliseconds timeToWait (mins * 60000);
-                                std::unique_lock<std::mutex> threadLock(_waitLock);
+                                std::chrono::milliseconds timeToWait(mins *
+                                                                     60000);
+                                std::unique_lock<std::mutex> threadLock(
+                                    _waitLock);
                                 _monitor.wait_for(threadLock, timeToWait);
-                                if(!_cancelScheduledShutdown)
+                                if (!_cancelScheduledShutdown)
                                 {
                                     _engine.setKeepRunning(false);
                                     _engine.triggerRender();
                                 }
                             }));
-                        }
-                    });
+                }
+            });
     }
 
     void _handleResetCamera()
     {
         _handleRPC({METHOD_RESET_CAMERA,
                     "Resets the camera to its initial values"},
-                   [& engine = _engine] {
+                   [&engine = _engine]
+                   {
                        engine.getCamera().reset();
                        engine.triggerRender();
                    });
@@ -1385,8 +1445,8 @@ public:
             Execution::async, "settings",
             "Snapshot settings for quality and size"};
         auto func =
-            [& engine = _engine,
-             &imageGenerator = _imageGenerator ](auto&& params, const auto)
+            [&engine = _engine,
+             &imageGenerator = _imageGenerator](auto&& params, const auto)
         {
             using SnapshotTask = DeferredTask<ImageGenerator::ImageBase64>;
             return std::make_shared<SnapshotTask>(
@@ -1399,28 +1459,30 @@ public:
     {
         _handleRPC({METHOD_TRIGGER_JPEG_STREAM,
                     "Triggers the engine to stream a frame to the clients"},
-                   [&] {
-                       _triggerControlledStreaming();
-                   });
+                   [&] { _triggerControlledStreaming(); });
     }
 
     void _handleSetImageStreamingMode()
     {
-        _handleRPC<ImageStreamingMethod>({METHOD_SET_STREAMING_METHOD,
-                    "Set the image streaming method between automatic or "
-                    "controlled", "type", "Streaming type, either \"stream\" or \"quanta\""},
-                    [&](const ImageStreamingMethod& method){
-                        if(method.type == "quanta")
-                        {
-                            _useControlledStream = true;
-                            _controlledStreamingFlag = false;
-                        }
-                        else
-                            _useControlledStream = false;
+        _handleRPC<ImageStreamingMethod>(
+            {METHOD_SET_STREAMING_METHOD,
+             "Set the image streaming method between automatic or "
+             "controlled",
+             "type", "Streaming type, either \"stream\" or \"quanta\""},
+            [&](const ImageStreamingMethod& method)
+            {
+                if (method.type == "quanta")
+                {
+                    _useControlledStream = true;
+                    _controlledStreamingFlag = false;
+                }
+                else
+                    _useControlledStream = false;
 
-                        _engine.getParametersManager().getApplicationParameters()
-                                .setUseQuantaRenderControl(_useControlledStream);
-                    });
+                _engine.getParametersManager()
+                    .getApplicationParameters()
+                    .setUseQuantaRenderControl(_useControlledStream);
+            });
     }
 
     void _handleRequestModelUpload()
@@ -1445,9 +1507,8 @@ public:
             "Indicate sending of a binary chunk after this message", "chunk",
             "object with an ID of the chunk"};
 
-        _handleRPC<Chunk>(desc, [& req = _binaryRequests](const auto& chunk) {
-            req.setNextChunkID(chunk.id);
-        });
+        _handleRPC<Chunk>(desc, [&req = _binaryRequests](const auto& chunk)
+                          { req.setNextChunkID(chunk.id); });
     }
 
     void _handleSetModelTransferFunction()
@@ -1458,8 +1519,9 @@ public:
             "model ID and the new transfer function"};
 
         _bindModelEndpoint(METHOD_SET_MODEL_TRANSFER_FUNCTION,
-                           "transfer_function", [&](const std::string& json,
-                                                    ModelDescriptorPtr) {
+                           "transfer_function",
+                           [&](const std::string& json, ModelDescriptorPtr)
+                           {
                                auto& tf =
                                    _engine.getScene().getTransferFunction();
                                if (!::from_json(tf, json))
@@ -1482,7 +1544,9 @@ public:
             "the model ID"};
 
         _jsonrpcServer->bind<ObjectID, TransferFunction>(
-            desc.methodName, [& engine = _engine](const ObjectID& id) {
+            desc.methodName,
+            [&engine = _engine](const ObjectID& id)
+            {
                 auto model = engine.getScene().getModel(id.id);
                 if (!model)
                     throw rockets::jsonrpc::response_error("Model not found",
@@ -1502,19 +1566,23 @@ public:
             "Add a clip plane; returns the clip plane descriptor", "plane",
             "An array of 4 floats"};
 
-        _handleRPC<Plane, ClipPlanePtr>(desc, [&](const Plane& plane) {
-            auto& scene = _engine.getScene();
-            auto clipPlane = scene.getClipPlane(scene.addClipPlane(plane));
-            _rebroadcast(METHOD_UPDATE_CLIP_PLANE, to_json(clipPlane),
-                         {_currentClientID});
-            return clipPlane;
-        });
+        _handleRPC<Plane, ClipPlanePtr>(
+            desc,
+            [&](const Plane& plane)
+            {
+                auto& scene = _engine.getScene();
+                auto clipPlane = scene.getClipPlane(scene.addClipPlane(plane));
+                _rebroadcast(METHOD_UPDATE_CLIP_PLANE, to_json(clipPlane),
+                             {_currentClientID});
+                return clipPlane;
+            });
     }
 
     void _handleGetClipPlanes()
     {
         _handleRPC<ClipPlanes>({METHOD_GET_CLIP_PLANES, "Get all clip planes"},
-                               [& engine = _engine]() {
+                               [&engine = _engine]()
+                               {
                                    auto& scene = engine.getScene();
                                    return scene.getClipPlanes();
                                });
@@ -1526,18 +1594,21 @@ public:
             METHOD_UPDATE_CLIP_PLANE,
             "Update a clip plane with the given coefficients", "clip_plane",
             "Plane id and equation"};
-        _handleRPC<ClipPlane, bool>(desc, [&](const ClipPlane& newPlane) {
-            auto& scene = _engine.getScene();
-            if (auto plane = scene.getClipPlane(newPlane.getID()))
+        _handleRPC<ClipPlane, bool>(
+            desc,
+            [&](const ClipPlane& newPlane)
             {
-                plane->setPlane(newPlane.getPlane());
-                _rebroadcast(METHOD_UPDATE_CLIP_PLANE, to_json(newPlane),
-                             {_currentClientID});
-                _engine.triggerRender();
-                return true;
-            }
-            return false;
-        });
+                auto& scene = _engine.getScene();
+                if (auto plane = scene.getClipPlane(newPlane.getID()))
+                {
+                    plane->setPlane(newPlane.getPlane());
+                    _rebroadcast(METHOD_UPDATE_CLIP_PLANE, to_json(newPlane),
+                                 {_currentClientID});
+                    _engine.triggerRender();
+                    return true;
+                }
+                return false;
+            });
     }
 
     void _handleRemoveClipPlanes()
@@ -1546,101 +1617,103 @@ public:
             METHOD_REMOVE_CLIP_PLANES,
             "Remove clip planes from the scene given their gids", "ids",
             "Array of clip planes IDs"};
-        _handleRPC<size_ts, bool>(desc, [&](const size_ts& ids) {
-            for (const auto id : ids)
-                _engine.getScene().removeClipPlane(id);
-            _rebroadcast(METHOD_REMOVE_CLIP_PLANES, to_json(ids),
-                         {_currentClientID});
-            _engine.triggerRender();
-            return true;
-        });
+        _handleRPC<size_ts, bool>(desc,
+                                  [&](const size_ts& ids)
+                                  {
+                                      for (const auto id : ids)
+                                          _engine.getScene().removeClipPlane(
+                                              id);
+                                      _rebroadcast(METHOD_REMOVE_CLIP_PLANES,
+                                                   to_json(ids),
+                                                   {_currentClientID});
+                                      _engine.triggerRender();
+                                      return true;
+                                  });
     }
 
     void _handleGetLights()
     {
         const RpcDescription desc{METHOD_GET_LIGHTS, "get all lights"};
-        _bindEndpoint(METHOD_GET_LIGHTS, [& engine = _engine](
-                                             const rockets::jsonrpc::
-                                                 Request& /*request*/) {
-            const auto& lights =
-                engine.getScene().getLightManager().getLights();
-
-            std::vector<std::string> jsonStrings;
-
-            for (const auto& kv : lights)
+        _bindEndpoint(
+            METHOD_GET_LIGHTS,
+            [&engine = _engine](const rockets::jsonrpc::Request& /*request*/)
             {
-                RPCLight rpcLight;
-                rpcLight.id = kv.first;
-                auto baseLight = kv.second;
+                const auto& lights =
+                    engine.getScene().getLightManager().getLights();
 
-                switch (baseLight->_type)
-                {
-                case LightType::DIRECTIONAL:
-                {
-                    rpcLight.type = "directional";
-                    const auto light =
-                        static_cast<DirectionalLight*>(baseLight.get());
-                    rpcLight.properties.setProperty(
-                        {"direction", toArray<3, double>(light->_direction)});
-                    rpcLight.properties.setProperty(
-                        {"angularDiameter", light->_angularDiameter});
-                    break;
-                }
-                case LightType::SPHERE:
-                {
-                    rpcLight.type = "sphere";
-                    const auto light =
-                        static_cast<SphereLight*>(baseLight.get());
-                    rpcLight.properties.setProperty(
-                        {"position", toArray<3, double>(light->_position)});
-                    rpcLight.properties.setProperty({"radius", light->_radius});
-                    break;
-                }
-                case LightType::QUAD:
-                {
-                    rpcLight.type = "quad";
-                    const auto light = static_cast<QuadLight*>(baseLight.get());
-                    rpcLight.properties.setProperty(
-                        {"position", toArray<3, double>(light->_position)});
-                    rpcLight.properties.setProperty(
-                        {"edge1", toArray<3, double>(light->_edge1)});
-                    rpcLight.properties.setProperty(
-                        {"edge2", toArray<3, double>(light->_edge2)});
-                    break;
-                }
-                case LightType::SPOTLIGHT:
-                {
-                    rpcLight.type = "spotlight";
-                    const auto light = static_cast<SpotLight*>(baseLight.get());
-                    rpcLight.properties.setProperty(
-                        {"position", toArray<3, double>(light->_position)});
-                    rpcLight.properties.setProperty(
-                        {"direction", toArray<3, double>(light->_direction)});
-                    rpcLight.properties.setProperty(
-                        {"openingAngle", light->_openingAngle});
-                    rpcLight.properties.setProperty(
-                        {"penumbraAngle", light->_penumbraAngle});
-                    rpcLight.properties.setProperty({"radius", light->_radius});
-                    break;
-                }
-                case LightType::AMBIENT:
-                {
-                    rpcLight.type = "ambient";
-                    break;
-                }
-                }
+                std::vector<std::string> jsonStrings;
 
-                rpcLight.properties.setProperty(
-                    {"color", toArray<3, double>(baseLight->_color)});
-                rpcLight.properties.setProperty(
-                    {"intensity", baseLight->_intensity});
-                rpcLight.properties.setProperty(
-                    {"isVisible", baseLight->_isVisible});
+                for (const auto& kv : lights)
+                {
+                    RPCLight rpcLight;
+                    rpcLight.id = kv.first;
+                    auto baseLight = kv.second;
 
-                jsonStrings.emplace_back(to_json(rpcLight));
-            }
-            return Response{"[" + string_utils::join(jsonStrings, ",") + "]"};
-        });
+                    switch (baseLight->_type)
+                    {
+                    case LightType::DIRECTIONAL:
+                    {
+                        rpcLight.type = "directional";
+                        const auto light =
+                            static_cast<DirectionalLight*>(baseLight.get());
+                        rpcLight.properties.add(
+                            {"direction", light->_direction});
+                        rpcLight.properties.add(
+                            {"angularDiameter", light->_angularDiameter});
+                        break;
+                    }
+                    case LightType::SPHERE:
+                    {
+                        rpcLight.type = "sphere";
+                        const auto light =
+                            static_cast<SphereLight*>(baseLight.get());
+                        rpcLight.properties.add({"position", light->_position});
+                        rpcLight.properties.add({"radius", light->_radius});
+                        break;
+                    }
+                    case LightType::QUAD:
+                    {
+                        rpcLight.type = "quad";
+                        const auto light =
+                            static_cast<QuadLight*>(baseLight.get());
+                        rpcLight.properties.add({"position", light->_position});
+                        rpcLight.properties.add({"edge1", light->_edge1});
+                        rpcLight.properties.add({"edge2", light->_edge2});
+                        break;
+                    }
+                    case LightType::SPOTLIGHT:
+                    {
+                        rpcLight.type = "spotlight";
+                        const auto light =
+                            static_cast<SpotLight*>(baseLight.get());
+                        rpcLight.properties.add({"position", light->_position});
+                        rpcLight.properties.add(
+                            {"direction", light->_direction});
+                        rpcLight.properties.add(
+                            {"openingAngle", light->_openingAngle});
+                        rpcLight.properties.add(
+                            {"penumbraAngle", light->_penumbraAngle});
+                        rpcLight.properties.add({"radius", light->_radius});
+                        break;
+                    }
+                    case LightType::AMBIENT:
+                    {
+                        rpcLight.type = "ambient";
+                        break;
+                    }
+                    }
+
+                    rpcLight.properties.add({"color", baseLight->_color});
+                    rpcLight.properties.add(
+                        {"intensity", baseLight->_intensity});
+                    rpcLight.properties.add(
+                        {"isVisible", baseLight->_isVisible});
+
+                    jsonStrings.emplace_back(to_json(rpcLight));
+                }
+                return Response{"[" + string_utils::join(jsonStrings, ",") +
+                                "]"};
+            });
 
         _handleSchema(
             METHOD_GET_LIGHTS,
@@ -1652,7 +1725,8 @@ public:
         _handleRPC<SpotLight, int>({METHOD_ADD_LIGHT_SPOT,
                                     "Add a spotlight, returns id", "light",
                                     "The light and its properties"},
-                                   [& engine = _engine](const SpotLight& l) {
+                                   [&engine = _engine](const SpotLight& l)
+                                   {
                                        LightManager& lightManager =
                                            engine.getScene().getLightManager();
                                        auto light =
@@ -1668,7 +1742,8 @@ public:
         _handleRPC<DirectionalLight, int>(
             {METHOD_ADD_LIGHT_DIRECTIONAL, "Add a directional light", "light",
              "The light and its properties"},
-            [& engine = _engine](const DirectionalLight& l) {
+            [&engine = _engine](const DirectionalLight& l)
+            {
                 LightManager& lightManager =
                     engine.getScene().getLightManager();
                 auto light = std::make_shared<DirectionalLight>(l);
@@ -1681,7 +1756,8 @@ public:
 
         _handleRPC<QuadLight, int>({METHOD_ADD_LIGHT_QUAD, "Add a quad light",
                                     "light", "The light and its properties"},
-                                   [& engine = _engine](const QuadLight& l) {
+                                   [&engine = _engine](const QuadLight& l)
+                                   {
                                        LightManager& lightManager =
                                            engine.getScene().getLightManager();
                                        auto light =
@@ -1697,7 +1773,8 @@ public:
         _handleRPC<SphereLight, int>(
             {METHOD_ADD_LIGHT_SPHERE, "Add a sphere light", "light",
              "The light and its properties"},
-            [& engine = _engine](const SphereLight& l) {
+            [&engine = _engine](const SphereLight& l)
+            {
                 LightManager& lightManager =
                     engine.getScene().getLightManager();
                 auto light = std::make_shared<SphereLight>(l);
@@ -1711,7 +1788,8 @@ public:
         _handleRPC<AmbientLight, int>(
             {METHOD_ADD_LIGHT_AMBIENT, "Add an ambient light", "light",
              "The light and its properties"},
-            [& engine = _engine](const AmbientLight& l) {
+            [&engine = _engine](const AmbientLight& l)
+            {
                 LightManager& lightManager =
                     engine.getScene().getLightManager();
                 auto light = std::make_shared<AmbientLight>(l);
@@ -1728,25 +1806,29 @@ public:
         const RpcParameterDescription desc{METHOD_REMOVE_LIGHTS,
                                            "Remove light given their IDs",
                                            "ids", "Array of light IDs"};
-        _handleRPC<size_ts, bool>(desc, [& engine =
-                                             _engine](const size_ts& ids) {
-            auto& lightManager = engine.getScene().getLightManager();
-            for (const auto id : ids)
-                lightManager.removeLight(id);
-            engine.triggerRender();
-            return true;
-        });
+        _handleRPC<size_ts, bool>(desc,
+                                  [&engine = _engine](const size_ts& ids)
+                                  {
+                                      auto& lightManager =
+                                          engine.getScene().getLightManager();
+                                      for (const auto id : ids)
+                                          lightManager.removeLight(id);
+                                      engine.triggerRender();
+                                      return true;
+                                  });
     }
 
     void _handleClearLights()
     {
         const RpcDescription desc{METHOD_CLEAR_LIGHTS,
                                   "Remove all lights in the scene"};
-        _handleRPC(desc, [& engine = _engine]() {
-            auto& lightManager = engine.getScene().getLightManager();
-            lightManager.clearLights();
-            engine.triggerRender();
-        });
+        _handleRPC(desc,
+                   [&engine = _engine]()
+                   {
+                       auto& lightManager = engine.getScene().getLightManager();
+                       lightManager.clearLights();
+                       engine.triggerRender();
+                   });
     }
 
     FileStats _getFileStats(const std::string& path)
@@ -1759,19 +1841,18 @@ public:
         // Make sure the requested file is within the sandbox path
         // TODO: Unhardcode sandbox path and add as braynsService input param
         const std::string& sandboxPath = _engine.getParametersManager()
-                                                .getApplicationParameters()
-                                                .getSandboxPath();
+                                             .getApplicationParameters()
+                                             .getSandboxPath();
         size_t pos = path.find(sandboxPath);
-        if(pos != 0)
+        if (pos != 0)
         {
             ft.error = 1;
             ft.message = "Path falls outside the sandbox: " + sandboxPath;
             return ft;
         }
 
-        if(path.find("../") == 0
-           || path.find("/../") != std::string::npos
-           || path.rfind("/..") == 4)
+        if (path.find("../") == 0 || path.find("/../") != std::string::npos ||
+            path.rfind("/..") == 4)
         {
             ft.error = 3;
             ft.message = "Illegal path detected";
@@ -1780,17 +1861,17 @@ public:
 
         struct stat s;
         int err = stat(path.c_str(), &s);
-        if(err == 0)
+        if (err == 0)
         {
             // Path is a regular file
-            if( s.st_mode & S_IFREG )
+            if (s.st_mode & S_IFREG)
             {
                 // Test permissions with fopen
                 FILE* permissionTest = fopen(path.c_str(), "r");
                 int openError = errno;
-                if(permissionTest != nullptr)
+                if (permissionTest != nullptr)
                     fclose(permissionTest);
-                if(openError == EACCES)
+                if (openError == EACCES)
                 {
                     ft.error = 2;
                     ft.message = "Permission for " + path + " denied";
@@ -1802,12 +1883,12 @@ public:
                 ft.sizeBytes = s.st_size;
             }
             // Path is a folder
-            else if( s.st_mode & S_IFDIR )
+            else if (s.st_mode & S_IFDIR)
             {
                 // Test permissions with access
-                if(access(path.c_str(), X_OK) < 0)
+                if (access(path.c_str(), X_OK) < 0)
                 {
-                    if(errno == EACCES)
+                    if (errno == EACCES)
                     {
                         ft.error = 2;
                         ft.message = "Permission for " + path + " denied";
@@ -1829,9 +1910,9 @@ public:
                 ft.message = "Unknown type of element";
             }
         }
-        else if(err > 0)
+        else if (err > 0)
         {
-            if(err == EACCES)
+            if (err == EACCES)
             {
                 ft.error = 2;
                 ft.message = "Permission for " + path + " denied";
@@ -1848,430 +1929,504 @@ public:
 
     void _handleFsExists()
     {
-        const RpcParameterDescription desc{METHOD_FS_EXISTS,
-                                           "Return the type of filer (file or folder) if a given path exists, or none if it does not exists",
-                                           "path", "Absolute path to the filer to check"};
-        _handleRPC<InputPath, FileType>(desc, [&](const auto& inputPath) {
-            this->_rebroadcast(METHOD_FS_EXISTS, to_json(inputPath),
-                               {_currentClientID});
-            FileStats fs = this->_getFileStats(inputPath.path);
-            FileType ft;
-            ft.type = fs.type;
-            ft.error = fs.error;
-            ft.message = fs.message;
-            return ft;
-        });
+        const RpcParameterDescription desc{
+            METHOD_FS_EXISTS,
+            "Return the type of filer (file or folder) if a given path exists, "
+            "or none if it does not exists",
+            "path", "Absolute path to the filer to check"};
+        _handleRPC<InputPath, FileType>(
+            desc,
+            [&](const auto& inputPath)
+            {
+                this->_rebroadcast(METHOD_FS_EXISTS, to_json(inputPath),
+                                   {_currentClientID});
+                FileStats fs = this->_getFileStats(inputPath.path);
+                FileType ft;
+                ft.type = fs.type;
+                ft.error = fs.error;
+                ft.message = fs.message;
+                return ft;
+            });
     }
 
     void _handleFsGetContent()
     {
-        const RpcParameterDescription desc{METHOD_FS_GET_CONTENT,
-                                           "Return the content of a file if possible, or an error otherwise",
-                                           "path", "Absolute path to the file"};
-        _handleRPC<GetFileContent, GetFileContentResult>(desc, [&](const auto& inputPath) {
-            this->_rebroadcast(METHOD_FS_GET_CONTENT, to_json(inputPath),
-                               {_currentClientID});
-            // Stat the requested file
-            FileStats ft = this->_getFileStats(inputPath.path);
-            GetFileContentResult fc;
-
-            fc.error = ft.error;
-            fc.message = ft.message;
-
-            // Continue only if its accessible and its a file
-            if(fc.error == 0 && ft.type == "file")
+        const RpcParameterDescription desc{
+            METHOD_FS_GET_CONTENT,
+            "Return the content of a file if possible, or an error otherwise",
+            "path", "Absolute path to the file"};
+        _handleRPC<GetFileContent, GetFileContentResult>(
+            desc,
+            [&](const auto& inputPath)
             {
-                std::ifstream file(inputPath.path);
-                if(file)
+                this->_rebroadcast(METHOD_FS_GET_CONTENT, to_json(inputPath),
+                                   {_currentClientID});
+                // Stat the requested file
+                FileStats ft = this->_getFileStats(inputPath.path);
+                GetFileContentResult fc;
+
+                fc.error = ft.error;
+                fc.message = ft.message;
+
+                // Continue only if its accessible and its a file
+                if (fc.error == 0 && ft.type == "file")
                 {
-                    // Read file
-                    file.seekg(0, file.end);
-                    long len = file.tellg();
-                    file.seekg(0, file.beg);
-                    std::vector<char> buffer(static_cast<size_t>(len));
-                    file.read(&buffer[0], len);
-                    file.close();
-                    if(inputPath.base64)
-                        fc.content = base64_encode(reinterpret_cast<unsigned char*>(buffer.data()),
-                                                   buffer.size());
+                    std::ifstream file(inputPath.path);
+                    if (file)
+                    {
+                        // Read file
+                        file.seekg(0, file.end);
+                        long len = file.tellg();
+                        file.seekg(0, file.beg);
+                        std::vector<char> buffer(static_cast<size_t>(len));
+                        file.read(&buffer[0], len);
+                        file.close();
+                        if (inputPath.base64)
+                            fc.content =
+                                base64_encode(reinterpret_cast<unsigned char*>(
+                                                  buffer.data()),
+                                              buffer.size());
+                        else
+                            fc.content =
+                                std::string(buffer.begin(), buffer.end());
+                    }
                     else
-                        fc.content = std::string(buffer.begin(), buffer.end());
-
+                    {
+                        fc.error = 3;
+                        fc.message =
+                            "An unknown error occurred when reading the file " +
+                            inputPath.path;
+                    }
                 }
-                else
-                {
-                    fc.error = 3;
-                    fc.message = "An unknown error occurred when reading the file " + inputPath.path;
-                }
-            }
 
-            return fc;
-        });
+                return fc;
+            });
     }
 
     void _handleFsSetContent()
     {
-        const RpcParameterDescription desc{METHOD_FS_SET_CONTENT,
-                                           "Creates a file and sets its content. "
-                                           "If the file exists, it will be truncated",
-                                           "SetFileContent", "Path, content and content type of the"
-                                                             " file."};
-        _handleRPC<SetFileContent, SetFileContentResult>(desc, [&](const SetFileContent& fc)
-        {
-            SetFileContentResult result;
-            result.error = 0;
-
-            FileStats stats = _getFileStats(fc.path);
-            if(stats.type == "directory")
+        const RpcParameterDescription desc{
+            METHOD_FS_SET_CONTENT,
+            "Creates a file and sets its content. "
+            "If the file exists, it will be truncated",
+            "SetFileContent",
+            "Path, content and content type of the"
+            " file."};
+        _handleRPC<SetFileContent, SetFileContentResult>(
+            desc,
+            [&](const SetFileContent& fc)
             {
-                result.error = 1;
-                result.message = "The path " + fc.path + " denotes a directory";
+                SetFileContentResult result;
+                result.error = 0;
+
+                FileStats stats = _getFileStats(fc.path);
+                if (stats.type == "directory")
+                {
+                    result.error = 1;
+                    result.message =
+                        "The path " + fc.path + " denotes a directory";
+                    return result;
+                }
+                else if (stats.error == 1 || stats.error == 3)
+                {
+                    result.error = 2;
+                    result.message = "Out of sandbox or illegal path detected";
+                    return result;
+                }
+
+                try
+                {
+                    std::string finalContent =
+                        fc.base64 ? base64_decode(fc.content) : fc.content;
+                    auto flags = fc.base64
+                                     ? (std::ios::binary | std::ios::trunc)
+                                     : std::ios::trunc;
+
+                    std::ofstream outFile(fc.path, flags);
+                    outFile << finalContent;
+                    outFile.flush();
+                    outFile.close();
+                }
+                catch (const std::exception& e)
+                {
+                    result.error = 3;
+                    result.message = std::string(e.what());
+                }
+
                 return result;
-            }
-            else if(stats.error == 1 || stats.error == 3)
-            {
-                result.error = 2;
-                result.message = "Out of sandbox or illegal path detected";
-                return result;
-            }
-
-            try
-            {
-                std::string finalContent = fc.base64? base64_decode(fc.content)
-                                                    : fc.content;
-                auto flags = fc.base64? (std::ios::binary | std::ios::trunc)
-                                      : std::ios::trunc;
-
-
-                std::ofstream outFile (fc.path, flags);
-                outFile << finalContent;
-                outFile.flush();
-                outFile.close();
-            }
-            catch(const std::exception& e)
-            {
-                result.error = 3;
-                result.message = std::string(e.what());
-            }
-
-            return result;
-        });
+            });
     }
 
     void _handleFsGetRoot()
     {
-        const RpcDescription desc
-        {
-            METHOD_FS_GET_ROOT,
-            "Return the root path of the current execution environment (sandbox)"
-        };
-        _bindEndpoint(METHOD_FS_GET_ROOT, [& engine = _engine](const rockets::jsonrpc::Request&) {
+        const RpcDescription desc{METHOD_FS_GET_ROOT,
+                                  "Return the root path of the current "
+                                  "execution environment (sandbox)"};
+        _bindEndpoint(METHOD_FS_GET_ROOT,
+                      [&engine = _engine](const rockets::jsonrpc::Request&)
+                      {
+                          FileRoot fr;
+                          fr.root = engine.getParametersManager()
+                                        .getApplicationParameters()
+                                        .getSandboxPath();
+                          return Response{to_json(fr)};
+                      });
 
-            FileRoot fr;
-            fr.root = engine.getParametersManager().getApplicationParameters().getSandboxPath();
-            return Response{to_json(fr)};
-        });
-
-        _handleSchema(
-            METHOD_FS_GET_ROOT,
-            buildJsonRpcSchemaRequestReturnOnly<FileRoot>(desc));
+        _handleSchema(METHOD_FS_GET_ROOT,
+                      buildJsonRpcSchemaRequestReturnOnly<FileRoot>(desc));
     }
 
     void _handleFsGetListDir()
     {
-        const RpcParameterDescription desc{METHOD_FS_LIST_DIR,
-                                           "Return the content of a file if possible, or an error otherwise",
-                                           "path", "Absolute path to the file"};
-        _handleRPC<InputPath, DirectoryFileList>(desc, [&](const auto& inputPath) {
-            this->_rebroadcast(METHOD_FS_LIST_DIR, to_json(inputPath),
-                               {_currentClientID});
-
-            // Stat the requested path
-            FileStats ft = this->_getFileStats(inputPath.path);
-
-            DirectoryFileList dfl;
-            dfl.error = ft.error;
-            dfl.message = ft.message;
-
-            // Continue only if its a directory and is accessible
-            const bool isDirectory = ft.type == "directory";
-            if(ft.error == 0 && isDirectory)
+        const RpcParameterDescription desc{
+            METHOD_FS_LIST_DIR,
+            "Return the content of a file if possible, or an error otherwise",
+            "path", "Absolute path to the file"};
+        _handleRPC<InputPath, DirectoryFileList>(
+            desc,
+            [&](const auto& inputPath)
             {
-                DIR *dir;
-                struct dirent *ent;
-                if ((dir = opendir (inputPath.path.c_str())) != nullptr)
+                this->_rebroadcast(METHOD_FS_LIST_DIR, to_json(inputPath),
+                                   {_currentClientID});
+
+                // Stat the requested path
+                FileStats ft = this->_getFileStats(inputPath.path);
+
+                DirectoryFileList dfl;
+                dfl.error = ft.error;
+                dfl.message = ft.message;
+
+                // Continue only if its a directory and is accessible
+                const bool isDirectory = ft.type == "directory";
+                if (ft.error == 0 && isDirectory)
                 {
-                  // Iterate over each entry of the directory
-                  std::string slash = inputPath.path[inputPath.path.size() - 1] == '/'? "" : "/";
-                  while ((ent = readdir (dir)) != nullptr)
-                  {
-                    const std::string fileName(ent->d_name);
-
-                    // Discard dots
-                    if(fileName == "." || fileName == "..")
-                        continue;
-
-                    // Get file status to known if accessible, type, and size
-                    const std::string filePath = inputPath.path + slash + fileName;
-                    FileStats fileStats = this->_getFileStats(filePath);
-
-                    if(fileStats.error == 0)
+                    DIR* dir;
+                    struct dirent* ent;
+                    if ((dir = opendir(inputPath.path.c_str())) != nullptr)
                     {
-                        if(fileStats.type == "directory")
+                        // Iterate over each entry of the directory
+                        std::string slash =
+                            inputPath.path[inputPath.path.size() - 1] == '/'
+                                ? ""
+                                : "/";
+                        while ((ent = readdir(dir)) != nullptr)
                         {
-                            dfl.dirs.push_back(fileName);
-                        }
-                        else if(fileStats.type == "file")
-                        {
-                            // Calc size in octets
-                            size_t totalBits = static_cast<size_t>(fileStats.sizeBytes) * static_cast<size_t>(CHAR_BIT);
-                            size_t totalOctets = totalBits / 8;
-                            dfl.files.names.push_back(fileName);
-                            dfl.files.sizes.push_back(totalOctets);
-                        }
-                    }
-                  }
-                  closedir (dir);
-                }
-                else
-                {
-                  dfl.error = 3;
-                  dfl.message = "Unknown error when reading contents of directory " + inputPath.path;
-                }
-            }
-            else if(!isDirectory && ft.error == 0)
-            {
-                dfl.error = 4;
-                dfl.message = "The path " + inputPath.path + " is not a directory";
-            }
+                            const std::string fileName(ent->d_name);
 
-            return dfl;
-        });
+                            // Discard dots
+                            if (fileName == "." || fileName == "..")
+                                continue;
+
+                            // Get file status to known if accessible, type, and
+                            // size
+                            const std::string filePath =
+                                inputPath.path + slash + fileName;
+                            FileStats fileStats = this->_getFileStats(filePath);
+
+                            if (fileStats.error == 0)
+                            {
+                                if (fileStats.type == "directory")
+                                {
+                                    dfl.dirs.push_back(fileName);
+                                }
+                                else if (fileStats.type == "file")
+                                {
+                                    // Calc size in octets
+                                    size_t totalBits =
+                                        static_cast<size_t>(
+                                            fileStats.sizeBytes) *
+                                        static_cast<size_t>(CHAR_BIT);
+                                    size_t totalOctets = totalBits / 8;
+                                    dfl.files.names.push_back(fileName);
+                                    dfl.files.sizes.push_back(totalOctets);
+                                }
+                            }
+                        }
+                        closedir(dir);
+                    }
+                    else
+                    {
+                        dfl.error = 3;
+                        dfl.message =
+                            "Unknown error when reading contents of "
+                            "directory " +
+                            inputPath.path;
+                    }
+                }
+                else if (!isDirectory && ft.error == 0)
+                {
+                    dfl.error = 4;
+                    dfl.message =
+                        "The path " + inputPath.path + " is not a directory";
+                }
+
+                return dfl;
+            });
     }
 
     void _handleMaterial()
     {
-        const RpcParameterDescription desc{METHOD_GET_MATERIAL,
-                                           "Return the properties of a material",
-                                           "requestMaterial", "Id of the model that holds the material and the material Id"};
-        _handleRPC<RequestMaterial, ModifyMaterial>(desc, [&](const auto& reqMat) {
-            ModifyMaterial result;
-            result.error = 0;
-            result.message = "";
-            result.modelId = reqMat.modelId;
-            result.materialId = reqMat.materialId;
-
-            auto modelPtr = this->_engine.getScene().getModel(reqMat.modelId);
-            if(!modelPtr)
+        const RpcParameterDescription desc{
+            METHOD_GET_MATERIAL, "Return the properties of a material",
+            "requestMaterial",
+            "Id of the model that holds the material and the material Id"};
+        _handleRPC<RequestMaterial, ModifyMaterial>(
+            desc,
+            [&](const auto& reqMat)
             {
-                result.error = 1;
-                result.message = "The given model Id does not correspond with any existing model";
+                ModifyMaterial result;
+                result.error = 0;
+                result.message = "";
+                result.modelId = reqMat.modelId;
+                result.materialId = reqMat.materialId;
+
+                auto modelPtr =
+                    this->_engine.getScene().getModel(reqMat.modelId);
+                if (!modelPtr)
+                {
+                    result.error = 1;
+                    result.message =
+                        "The given model Id does not correspond with any "
+                        "existing model";
+                    return result;
+                }
+
+                const auto& materials = modelPtr->getModel().getMaterials();
+                auto it = materials.find(reqMat.materialId);
+                if (it == materials.end())
+                {
+                    result.error = 2;
+                    result.message =
+                        "The given model does not have a material with the "
+                        "given material ID";
+                    return result;
+                }
+
+                auto materialPtr = it->second;
+
+                result.modelId = reqMat.modelId;
+                result.materialId = reqMat.materialId;
+
+                const auto& difC = materialPtr->getDiffuseColor();
+                const auto& speC = materialPtr->getSpecularColor();
+                result.materialProperties.add({"diffuse_color",
+                                               Vector3d{difC.r, difC.g, difC.b},
+                                               {"Diffuse Color"}});
+                result.materialProperties.add({"specular_color",
+                                               Vector3d{speC.r, speC.g, speC.b},
+                                               {"Specular Color"}});
+                result.materialProperties.add(
+                    {"specular_exponent",
+                     materialPtr->getSpecularExponent(),
+                     {"Specular Exponent"}});
+                result.materialProperties.add(
+                    {"reflection_index",
+                     materialPtr->getReflectionIndex(),
+                     {"Reflection Index"}});
+                result.materialProperties.add(
+                    {"opacity", materialPtr->getOpacity(), {"Opacity"}});
+                result.materialProperties.add(
+                    {"refraction_index",
+                     materialPtr->getRefractionIndex(),
+                     {"Refraction Index"}});
+                result.materialProperties.add({"light_emission",
+                                               materialPtr->getEmission(),
+                                               {"Emission"}});
+                result.materialProperties.add({"glossiness",
+                                               materialPtr->getGlossiness(),
+                                               {"Glossiness"}});
+
+                for (const auto& p : materialPtr->getPropertyMap())
+                    result.materialProperties.add(p);
+
                 return result;
-            }
+            });
 
-            const auto& materials = modelPtr->getModel().getMaterials();
-            auto it = materials.find(reqMat.materialId);
-            if(it == materials.end())
+        const RpcParameterDescription desc2{
+            METHOD_SET_MATERIAL,
+            "Set the material propertiese for the given model and material",
+            "ModifyMaterial",
+            "Id of the model that holds the material, the material Id and the "
+            "information"};
+        _handleRPC<ModifyMaterial, ModifyMaterialResult>(
+            desc2,
+            [&](const ModifyMaterial& mat)
             {
-                result.error = 2;
-                result.message = "The given model does not have a material with the given material ID";
+                ModifyMaterialResult result;
+                result.error = 0;
+                result.message = "";
+
+                auto modelPtr = this->_engine.getScene().getModel(mat.modelId);
+                if (!modelPtr)
+                {
+                    result.error = 1;
+                    result.message =
+                        "The given model Id does not correspond with any "
+                        "existing model";
+                    return result;
+                }
+
+                const auto& materials = modelPtr->getModel().getMaterials();
+                auto it = materials.find(mat.materialId);
+                if (it == materials.end())
+                {
+                    result.error = 2;
+                    result.message =
+                        "The given model does not have a material with the "
+                        "given material ID";
+                    return result;
+                }
+
+                auto materialPtr = it->second;
+
+                static const std::unordered_set<std::string> baseProperties = {
+                    "diffuseColor",    "specularColor", "specularExponent",
+                    "reflectionIndex", "opacity",       "refractionIndex",
+                    "lightEmission",   "glossiness"};
+
+                const auto difC =
+                    mat.materialProperties.valueOr("diffuseColor",
+                                                   Vector3d{1., 1., 1.});
+                const auto speC =
+                    mat.materialProperties.valueOr("specularColor",
+                                                   Vector3d{1., 1., 1.});
+                const auto specularExpnt =
+                    mat.materialProperties.valueOr("specularExponent", 10.);
+                const auto reflectionIdx =
+                    mat.materialProperties.valueOr("reflectionIndex", 0.);
+                const auto opacity =
+                    mat.materialProperties.valueOr("opacity", 1.);
+                const auto refractionIdx =
+                    mat.materialProperties.valueOr("refractionIndex", 1.);
+                const auto lightEmission =
+                    mat.materialProperties.valueOr("lightEmission", 0.);
+                const auto glossiness =
+                    mat.materialProperties.valueOr("glossiness", 1.);
+
+                materialPtr->setDiffuseColor(
+                    Vector3d(difC[0], difC[1], difC[2]));
+                materialPtr->setSpecularColor(
+                    Vector3d(speC[0], speC[1], speC[2]));
+                materialPtr->setSpecularExponent(specularExpnt);
+                materialPtr->setReflectionIndex(reflectionIdx);
+                materialPtr->setOpacity(opacity);
+                materialPtr->setRefractionIndex(refractionIdx);
+                materialPtr->setEmission(lightEmission);
+                materialPtr->setGlossiness(glossiness);
+
+                PropertyMap newProperties;
+                for (const auto& prop : mat.materialProperties)
+                {
+                    if (baseProperties.find(prop.getName()) !=
+                        baseProperties.end())
+                        continue;
+
+                    newProperties.add(prop);
+                }
+
+                materialPtr->setProperties(newProperties);
+                materialPtr->markModified();
+                this->_engine.getScene().markModified();
+
                 return result;
-            }
-
-            auto materialPtr = it->second;
-
-            result.modelId = reqMat.modelId;
-            result.materialId = reqMat.materialId;
-
-            const auto& difC = materialPtr->getDiffuseColor();
-            const auto& speC = materialPtr->getSpecularColor();
-            result.materialProperties.setProperty({"diffuse_color", std::array<double, 3>{difC.r, difC.g, difC.b}, {"Diffuse Color"}});
-            result.materialProperties.setProperty({"specular_color", std::array<double, 3>{speC.r, speC.g, speC.b}, {"Specular Color"}});
-            result.materialProperties.setProperty({"specular_exponent", materialPtr->getSpecularExponent(), {"Specular Exponent"}});
-            result.materialProperties.setProperty({"reflection_index", materialPtr->getReflectionIndex(), {"Reflection Index"}});
-            result.materialProperties.setProperty({"opacity", materialPtr->getOpacity(), {"Opacity"}});
-            result.materialProperties.setProperty({"refraction_index", materialPtr->getRefractionIndex(), {"Refraction Index"}});
-            result.materialProperties.setProperty({"light_emission", materialPtr->getEmission(), {"Emission"}});
-            result.materialProperties.setProperty({"glossiness", materialPtr->getGlossiness(), {"Glossiness"}});
-
-            for(const auto& p : materialPtr->getPropertyMap().getProperties())
-                result.materialProperties.setProperty(*p);
-
-            return result;
-        });
-
-        const RpcParameterDescription desc2{METHOD_SET_MATERIAL,
-                                           "Set the material propertiese for the given model and material",
-                                           "ModifyMaterial", "Id of the model that holds the material, the material Id and the information"};
-        _handleRPC<ModifyMaterial, ModifyMaterialResult>(desc2, [&](const ModifyMaterial& mat) {
-            ModifyMaterialResult result;
-            result.error = 0;
-            result.message = "";
-
-            auto modelPtr = this->_engine.getScene().getModel(mat.modelId);
-            if(!modelPtr)
-            {
-                result.error = 1;
-                result.message = "The given model Id does not correspond with any existing model";
-                return result;
-            }
-
-            const auto& materials = modelPtr->getModel().getMaterials();
-            auto it = materials.find(mat.materialId);
-            if(it == materials.end())
-            {
-                result.error = 2;
-                result.message = "The given model does not have a material with the given material ID";
-                return result;
-            }
-
-            auto materialPtr = it->second;
-
-            static const std::unordered_set<std::string> baseProperties =
-            {
-                "diffuseColor",
-                "specularColor",
-                "specularExponent",
-                "reflectionIndex",
-                "opacity",
-                "refractionIndex",
-                "lightEmission",
-                "glossiness"
-            };
-
-            const auto difC = mat.materialProperties.getProperty<std::array<double, 3>>("diffuseColor", {1., 1., 1.});
-            const auto speC = mat.materialProperties.getProperty<std::array<double, 3>>("specularColor", {1., 1., 1.});
-            const auto specularExpnt = mat.materialProperties.getProperty<double>("specularExponent", 10.);
-            const auto reflectionIdx = mat.materialProperties.getProperty<double>("reflectionIndex", 0.);
-            const auto opacity = mat.materialProperties.getProperty<double>("opacity", 1.);
-            const auto refractionIdx = mat.materialProperties.getProperty<double>("refractionIndex", 1.);
-            const auto lightEmission = mat.materialProperties.getProperty<double>("lightEmission", 0.);
-            const auto glossiness = mat.materialProperties.getProperty<double>("glossiness", 1.);
-
-            materialPtr->setDiffuseColor(Vector3d(difC[0], difC[1], difC[2]));
-            materialPtr->setSpecularColor(Vector3d(speC[0], speC[1], speC[2]));
-            materialPtr->setSpecularExponent(specularExpnt);
-            materialPtr->setReflectionIndex(reflectionIdx);
-            materialPtr->setOpacity(opacity);
-            materialPtr->setRefractionIndex(refractionIdx);
-            materialPtr->setEmission(lightEmission);
-            materialPtr->setGlossiness(glossiness);
-
-            PropertyMap newProperties;
-            for(const auto& prop : mat.materialProperties.getProperties())
-            {
-                if(baseProperties.find(prop->name) != baseProperties.end())
-                    continue;
-
-                newProperties.setProperty(*prop);
-            }
-
-            materialPtr->setProperties(newProperties);
-            materialPtr->markModified();
-        this->_engine.getScene().markModified();
-
-            return result;
-        });
+            });
     }
 
     void _handleActiveSimulationModel()
     {
-        const RpcParameterDescription descSetSimModel
-        {
+        const RpcParameterDescription descSetSimModel{
             METHOD_SET_ACTIVE_SIMULATED_MODEL,
-            "Sets the active model for simulation",
-            "SetActiveSimulationModel", "The ID of the model to set as active"
-        };
-        _handleRPC<SetActiveSimulationModel, SetActiveSimulationModelResponse>
-                (descSetSimModel, [&](const SetActiveSimulationModel&)
-        {
-            SetActiveSimulationModelResponse result;
-            result.error = 0;
-            return result;
-        });
+            "Sets the active model for simulation", "SetActiveSimulationModel",
+            "The ID of the model to set as active"};
+        _handleRPC<SetActiveSimulationModel, SetActiveSimulationModelResponse>(
+            descSetSimModel,
+            [&](const SetActiveSimulationModel&)
+            {
+                SetActiveSimulationModelResponse result;
+                result.error = 0;
+                return result;
+            });
 
-        const RpcDescription desc
-        {
+        const RpcDescription desc{
             METHOD_GET_ACTIVE_SIMULATED_MODEL,
-            "Return the ID of the model selected for simulation"
-        };
-        _bindEndpoint(METHOD_GET_ACTIVE_SIMULATED_MODEL, [&]
-                      (const rockets::jsonrpc::Request&)
-        {
-            GetActiveSimulationModel res;
-            res.modelId = 0;
+            "Return the ID of the model selected for simulation"};
+        _bindEndpoint(METHOD_GET_ACTIVE_SIMULATED_MODEL,
+                      [&](const rockets::jsonrpc::Request&)
+                      {
+                          GetActiveSimulationModel res;
+                          res.modelId = 0;
 
-            return Response{to_json(res)};
-        });
+                          return Response{to_json(res)};
+                      });
 
         _handleSchema(
             METHOD_GET_ACTIVE_SIMULATED_MODEL,
-            buildJsonRpcSchemaRequestReturnOnly<GetActiveSimulationModel>(desc));
+            buildJsonRpcSchemaRequestReturnOnly<GetActiveSimulationModel>(
+                desc));
     }
 
     void _handleClientState()
     {
         // SETS AN ENTRY INTO THE CLIENTSTATE MAP
-        const RpcParameterDescription descSetState
-        {
+        const RpcParameterDescription descSetState{
             METHOD_CLIENTSTATE_SET,
-            "Sets a key-value entry into a common persistent map to all clients",
-            "entry", "A key-value entry to add to the client state map"
-        };
-        _bindEndpoint(METHOD_CLIENTSTATE_SET, [&](const rockets::jsonrpc::Request& req)
-        {
-            ClientStateEntry entry;
-            if(!::from_json(entry, req.message))
-                return Response::invalidParams();
+            "Sets a key-value entry into a common persistent map to all "
+            "clients",
+            "entry", "A key-value entry to add to the client state map"};
+        _bindEndpoint(METHOD_CLIENTSTATE_SET,
+                      [&](const rockets::jsonrpc::Request& req)
+                      {
+                          ClientStateEntry entry;
+                          if (!::from_json(entry, req.message))
+                              return Response::invalidParams();
 
-            _clientState[entry.key] = entry.value;
+                          _clientState[entry.key] = entry.value;
 
-            return Response{to_json(true)};
-        });
-        _handleSchema(
-            METHOD_CLIENTSTATE_SET,
-            buildJsonRpcSchemaNotify<ClientStateEntry>(descSetState));
+                          return Response{to_json(true)};
+                      });
+        _handleSchema(METHOD_CLIENTSTATE_SET,
+                      buildJsonRpcSchemaNotify<ClientStateEntry>(descSetState));
 
         // RETRIEVS AN EMPTY (OR EMPTY IF NOT EXISTS) FROM THE CLIENTSTATE MAP
-        const RpcParameterDescription descGetState
-        {
+        const RpcParameterDescription descGetState{
             METHOD_CLIENTSTATE_GET,
-            "Gets a key-value entry from the clientstate map given an entry key, if exists",
-            "entryKey", "A key from the clientsate map"
-        };
-        _handleRPC<ClientStateGetRequest, ClientStateEntry>(descGetState,
-                                                            [&](const ClientStateGetRequest& req)
-        {
-           auto it = _clientState.find(req.key);
-           ClientStateEntry result;
-           result.key = req.key;
-           result.value = (it != _clientState.end())? it->second : "";
-           return result;
-        });
+            "Gets a key-value entry from the clientstate map given an entry "
+            "key, if exists",
+            "entryKey", "A key from the clientsate map"};
+        _handleRPC<ClientStateGetRequest, ClientStateEntry>(
+            descGetState,
+            [&](const ClientStateGetRequest& req)
+            {
+                auto it = _clientState.find(req.key);
+                ClientStateEntry result;
+                result.key = req.key;
+                result.value = (it != _clientState.end()) ? it->second : "";
+                return result;
+            });
 
         // RETURN TWO LIST WITH ALL THE KEYS AND VALUES OF THE CLIENTSTATE MAP
-        const RpcDescription descGetStateAll
-        {
+        const RpcDescription descGetStateAll{
             METHOD_CLIENTSTATE_GET_ALL,
-            "Gets a key-value list containing all entries from the cientstate map"
-        };
-        _bindEndpoint(METHOD_CLIENTSTATE_GET_ALL, [&](const rockets::jsonrpc::Request&) {
-
-            ClientStateGetAllResponse result;
-            result.keys.reserve(_clientState.size());
-            result.values.reserve(_clientState.size());
-            for(const auto& kvpair : _clientState)
-            {
-                result.keys.push_back(kvpair.first);
-                result.values.push_back(kvpair.second);
-            }
-            return Response{to_json(result)};
-        });
+            "Gets a key-value list containing all entries from the cientstate "
+            "map"};
+        _bindEndpoint(METHOD_CLIENTSTATE_GET_ALL,
+                      [&](const rockets::jsonrpc::Request&)
+                      {
+                          ClientStateGetAllResponse result;
+                          result.keys.reserve(_clientState.size());
+                          result.values.reserve(_clientState.size());
+                          for (const auto& kvpair : _clientState)
+                          {
+                              result.keys.push_back(kvpair.first);
+                              result.values.push_back(kvpair.second);
+                          }
+                          return Response{to_json(result)};
+                      });
 
         _handleSchema(
             METHOD_CLIENTSTATE_GET_ALL,
-            buildJsonRpcSchemaRequestReturnOnly<ClientStateGetAllResponse>(descGetStateAll));
-
+            buildJsonRpcSchemaRequestReturnOnly<ClientStateGetAllResponse>(
+                descGetStateAll));
     }
 
     void _handleAddModel()
@@ -2282,9 +2437,8 @@ public:
             Execution::async, "model_param",
             "Model parameters including name, path, transformation, etc."};
 
-        auto func = [&](const ModelParams& modelParams, const auto) {
-            return std::make_shared<AddModelTask>(modelParams, _engine);
-        };
+        auto func = [&](const ModelParams& modelParams, const auto)
+        { return std::make_shared<AddModelTask>(modelParams, _engine); };
         _handleTask<ModelParams, std::vector<ModelDescriptorPtr>>(desc, func);
     }
 
@@ -2295,7 +2449,8 @@ public:
             "Remove the model(s) with the given ID(s) from the scene", "ids",
             "Array of model IDs"};
         _handleRPC<size_ts, bool>(desc,
-                                  [& engine = _engine](const size_ts& ids) {
+                                  [&engine = _engine](const size_ts& ids)
+                                  {
                                       for (const auto id : ids)
                                           engine.getScene().removeModel(id);
                                       engine.triggerRender();
@@ -2306,8 +2461,9 @@ public:
     void _handleUpdateModel()
     {
         _bindEndpoint(METHOD_UPDATE_MODEL,
-                      [& engine =
-                           _engine](const rockets::jsonrpc::Request& request) {
+                      [&engine =
+                           _engine](const rockets::jsonrpc::Request& request)
+                      {
                           ModelDescriptor newDesc;
                           if (!::from_json(newDesc, request.message))
                               return Response::invalidParams();
@@ -2333,29 +2489,28 @@ public:
     void _handleGetModel()
     {
         const RpcParameterDescription desc{
-            METHOD_GET_MODEL,
-            "Get all the information of the given model", "modelId", "the model ID"};
+            METHOD_GET_MODEL, "Get all the information of the given model",
+            "modelId", "the model ID"};
 
-        _bindEndpoint(
-            METHOD_GET_MODEL,
-            [&](const rockets::jsonrpc::Request& request) {
-                ObjectID newDesc;
-                if (!::from_json(newDesc, request.message))
-                    return Response::invalidParams();
+        _bindEndpoint(METHOD_GET_MODEL,
+                      [&](const rockets::jsonrpc::Request& request)
+                      {
+                          ObjectID newDesc;
+                          if (!::from_json(newDesc, request.message))
+                              return Response::invalidParams();
 
-                auto& scene = _engine.getScene();
-                auto model = scene.getModel(newDesc.id);
-                if (!model)
-                    throw rockets::jsonrpc::response_error("Model not found",
-                                                           MODEL_NOT_FOUND);
+                          auto& scene = _engine.getScene();
+                          auto model = scene.getModel(newDesc.id);
+                          if (!model)
+                              throw rockets::jsonrpc::response_error(
+                                  "Model not found", MODEL_NOT_FOUND);
 
-
-
-                return Response{to_json(*model)};
-            });
+                          return Response{to_json(*model)};
+                      });
 
         _handleSchema(METHOD_GET_MODEL,
-                      buildJsonRpcSchemaRequest<ObjectID, ModelDescriptor>(desc));
+                      buildJsonRpcSchemaRequest<ObjectID, ModelDescriptor>(
+                          desc));
     }
 
     void _handleGetModelProperties()
@@ -2365,7 +2520,9 @@ public:
             "Get the properties of the given model", "id", "the model ID"};
 
         _jsonrpcServer->bind<ObjectID, PropertyMap>(
-            desc.methodName, [& engine = _engine](const ObjectID& id) {
+            desc.methodName,
+            [&engine = _engine](const ObjectID& id)
+            {
                 auto model = engine.getScene().getModel(id.id);
                 if (!model)
                     throw rockets::jsonrpc::response_error("Model not found",
@@ -2386,7 +2543,8 @@ public:
 
         _bindModelEndpoint(METHOD_SET_MODEL_PROPERTIES, "properties",
                            [&](const std::string& json,
-                               ModelDescriptorPtr model) {
+                               ModelDescriptorPtr model)
+                           {
                                auto props = model->getProperties();
                                props.merge(jsonToPropertyMap(json));
                                model->setProperties(props);
@@ -2406,7 +2564,8 @@ public:
 
         _jsonrpcServer->bind(
             METHOD_MODEL_PROPERTIES_SCHEMA,
-            [& engine = _engine](const auto& request) {
+            [&engine = _engine](const auto& request)
+            {
                 ObjectID modelID;
                 if (::from_json(modelID, request.message))
                 {
@@ -2432,7 +2591,8 @@ public:
                                            "Model id and result range"};
         _handleRPC<GetInstances, ModelInstances>(
             desc,
-            [& engine = _engine](const GetInstances& param)->ModelInstances {
+            [&engine = _engine](const GetInstances& param) -> ModelInstances
+            {
                 auto id = param.modelID;
                 auto& scene = engine.getScene();
                 auto model = scene.getModel(id);
@@ -2454,7 +2614,8 @@ public:
     {
         _handleRPC<std::vector<LoaderInfo>>(
             {METHOD_GET_LOADERS, "Get all loaders"},
-            [&] {
+            [&]
+            {
                 auto& scene = _engine.getScene();
                 return scene.getLoaderRegistry().getLoaderInfos();
             });
@@ -2464,7 +2625,8 @@ public:
     {
         _bindEndpoint(
             METHOD_UPDATE_INSTANCE,
-            [&](const rockets::jsonrpc::Request& request) {
+            [&](const rockets::jsonrpc::Request& request)
+            {
                 ModelInstance newDesc;
                 if (!::from_json(newDesc, request.message))
                     return Response::invalidParams();
@@ -2504,17 +2666,19 @@ public:
         const auto requestEndpoint = getRequestEndpointName(endpoint);
         const auto notifyEndpoint = getNotificationEndpointName(endpoint);
 
-        _jsonrpcServer->bind<PropertyMap>(requestEndpoint, [& object = object] {
-            return object.getPropertyMap();
-        });
+        _jsonrpcServer->bind<PropertyMap>(requestEndpoint, [&object = object]
+                                          { return object.getPropertyMap(); });
 
-        _bindEndpoint(notifyEndpoint, [&, notifyEndpoint](const auto& request) {
-            object.updateProperties(jsonToPropertyMap(request.message));
-            _engine.triggerRender();
-            this->_rebroadcast(notifyEndpoint, request.message,
-                               {request.clientID});
-            return Response{to_json(true)};
-        });
+        _bindEndpoint(notifyEndpoint,
+                      [&, notifyEndpoint](const auto& request)
+                      {
+                          object.updateProperties(
+                              jsonToPropertyMap(request.message));
+                          _engine.triggerRender();
+                          this->_rebroadcast(notifyEndpoint, request.message,
+                                             {request.clientID});
+                          return Response{to_json(true)};
+                      });
 
         std::vector<std::pair<std::string, PropertyMap>> props;
         for (const auto& type : object.getTypes())
@@ -2547,7 +2711,9 @@ public:
                                   "Get the schema for all loaders"};
 
         _bindEndpoint(
-            LOADERS_SCHEMA, [&](const rockets::jsonrpc::Request& /*request*/) {
+            LOADERS_SCHEMA,
+            [&](const rockets::jsonrpc::Request& /*request*/)
+            {
                 const auto& loaderInfos =
                     _engine.getScene().getLoaderRegistry().getLoaderInfos();
 
@@ -2571,16 +2737,19 @@ public:
                                            "filename",
                                            "environment map texture file"};
 
-        _handleRPC<EnvironmentMapParam, bool>(desc, [&](const auto& envMap) {
-            this->_rebroadcast(METHOD_SET_ENVIRONMENT_MAP, to_json(envMap),
-                               {_currentClientID});
-            if (_engine.getScene().setEnvironmentMap(envMap.filename))
+        _handleRPC<EnvironmentMapParam, bool>(
+            desc,
+            [&](const auto& envMap)
             {
-                _engine.triggerRender();
-                return true;
-            }
-            return false;
-        });
+                this->_rebroadcast(METHOD_SET_ENVIRONMENT_MAP, to_json(envMap),
+                                   {_currentClientID});
+                if (_engine.getScene().setEnvironmentMap(envMap.filename))
+                {
+                    _engine.triggerRender();
+                    return true;
+                }
+                return false;
+            });
     }
 
     void _handleGetEnvironmentMap()
@@ -2588,9 +2757,10 @@ public:
         const RpcDescription desc{METHOD_GET_ENVIRONMENT_MAP,
                                   "Get the environment map from the scene"};
 
-        _handleRPC<EnvironmentMapParam>(desc, [&]() -> EnvironmentMapParam {
-            return {_engine.getScene().getEnvironmentMap()};
-        });
+        _handleRPC<EnvironmentMapParam>(
+            desc,
+            [&]() -> EnvironmentMapParam
+            { return {_engine.getScene().getEnvironmentMap()}; });
     }
 
     void _handleSetVideostream()
@@ -2600,7 +2770,8 @@ public:
                                            "params", "videostream parameters"};
 
         auto action = [&](const VideoStreamParam& params BRAYNS_UNUSED,
-                          auto clientID BRAYNS_UNUSED, auto respond, auto) {
+                          auto clientID BRAYNS_UNUSED, auto respond, auto)
+        {
             if (!_parametersManager.getApplicationParameters()
                      .useVideoStreaming())
             {
@@ -2622,9 +2793,8 @@ public:
 
             _engine.triggerRender();
             _videoParams = params;
-            _videoUpdatedResponse = [respond] {
-                respond(Response{to_json(true)});
-            };
+            _videoUpdatedResponse = [respond]
+            { respond(Response{to_json(true)}); };
             return rockets::jsonrpc::CancelRequestCallback();
 #else
             respond(Response{Response::Error(VIDEOSTREAM_NOT_SUPPORTED_ERROR)});
@@ -2639,17 +2809,21 @@ public:
         const RpcDescription desc{METHOD_GET_VIDEOSTREAM,
                                   "Get the videostream parameters"};
 
-        _handleRPC<VideoStreamParam>(desc, [&]() -> VideoStreamParam {
+        _handleRPC<VideoStreamParam>(
+            desc,
+            [&]() -> VideoStreamParam
+            {
 #ifdef BRAYNS_USE_FFMPEG
-            if (!_parametersManager.getApplicationParameters()
-                     .useVideoStreaming())
-                throw rockets::jsonrpc::response_error(
-                    VIDEOSTREAM_NOT_ENABLED_ERROR);
-            return _videoParams;
+                if (!_parametersManager.getApplicationParameters()
+                         .useVideoStreaming())
+                    throw rockets::jsonrpc::response_error(
+                        VIDEOSTREAM_NOT_ENABLED_ERROR);
+                return _videoParams;
 #else
-            throw rockets::jsonrpc::response_error(VIDEOSTREAM_NOT_SUPPORTED_ERROR);
+                throw rockets::jsonrpc::response_error(
+                    VIDEOSTREAM_NOT_SUPPORTED_ERROR);
 #endif
-        });
+            });
     }
 
     void _triggerControlledStreaming()
@@ -2693,7 +2867,8 @@ public:
     // alter the list of renderers for instance
     bool _endpointsRegistered{false};
 
-    // Wether to use controlled stream (true = client request frames, false = continous stream of frames)
+    // Wether to use controlled stream (true = client request frames, false =
+    // continous stream of frames)
     bool _useControlledStream{false};
     // Flag used to control the frame send when _useControlledStream = true
     std::atomic<bool> _controlledStreamingFlag{false};

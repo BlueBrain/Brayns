@@ -22,12 +22,12 @@
 #ifndef CIRCUIT_EXPLORER_TYPES_H
 #define CIRCUIT_EXPLORER_TYPES_H
 
-#include <brayns/common/PropertyMap.h>
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/SDFGeometry.h>
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/mathTypes.h>
+#include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/types.h>
 #include <brayns/engine/Model.h>
 
@@ -216,20 +216,20 @@ const brayns::Property PROP_REPORT{
     "020Report", std::string(),
     {"Circuit report"}};
 const brayns::Property PROP_REPORT_TYPE = {
-    "021ReportType", enumToString(ReportType::undefined),
-    enumerateNames<ReportType>(),
+    "021ReportType", {enumToString(ReportType::undefined),
+    enumerateNames<ReportType>()},
     {"Type of simulation report"}};
 const brayns::Property PROP_USER_DATA_TYPE = {
-    "022UserDataType", enumToString(UserDataType::undefined),
-    enumerateNames<UserDataType>(),
+    "022UserDataType", {enumToString(UserDataType::undefined),
+    enumerateNames<UserDataType>()},
     {"Type of data attached to morphology segments"}};
 const brayns::Property PROP_SYNCHRONOUS_MODE = {
     "023SynchronousMode", true, {"Synchronous mode"}};
 const brayns::Property PROP_SPIKE_TRANSITION_TIME = {
     "024SpikeTransitionTime", 1.0, {"Growth and fade of spike in seconds"}};
 const brayns::Property PROP_CIRCUIT_COLOR_SCHEME = {
-    "030CircuitColorScheme", enumToString(CircuitColorScheme::single_material),
-    enumerateNames<CircuitColorScheme>(),
+    "030CircuitColorScheme", {enumToString(CircuitColorScheme::single_material),
+    enumerateNames<CircuitColorScheme>()},
     {"Color scheme to be applied to the circuit"}};
 const brayns::Property PROP_MESH_FOLDER = {
     "040MeshFolder", std::string(), {"Folder constaining meshes"}};
@@ -274,12 +274,12 @@ const brayns::Property PROP_METABALLS_THRESHOLD = {
     "073MetaballsThreshold", 1.,
     {"Threshold used to compute metaballs"}};
 const brayns::Property PROP_MORPHOLOGY_COLOR_SCHEME = {
-    "080MorphologyColorScheme", enumToString(MorphologyColorScheme::none),
-    enumerateNames<MorphologyColorScheme>(),
+    "080MorphologyColorScheme", {enumToString(MorphologyColorScheme::none),
+    enumerateNames<MorphologyColorScheme>()},
     {"Color scheme to be applied to the morphology"}};
 const brayns::Property PROP_MORPHOLOGY_QUALITY = {
-    "090MorphologyQuality", enumToString(MorphologyQuality::high),
-    enumerateNames<MorphologyQuality>(),
+    "090MorphologyQuality", {enumToString(MorphologyQuality::high),
+    enumerateNames<MorphologyQuality>()},
     {"Quality of the morphology"}};
 const brayns::Property PROP_MORPHOLOGY_MAX_DISTANCE_TO_SOMA = {
     "091MaxDistanceToSoma", std::numeric_limits<double>::max(),
@@ -291,7 +291,7 @@ const brayns::Property PROP_AREAS_OF_INTEREST = {
     "101AreasOfInterest", 0,
     {"Loads only one cell per area of interest"}};
 const brayns::Property PROP_SYNAPSE_RADIUS = {
-    "110SynapseRadius", 1.0, 0.1, 5.0, {"Synapse radius"}};
+    "110SynapseRadius", 1.0, {"Synapse radius"}};
 const brayns::Property PROP_LOAD_AFFERENT_SYNAPSES = {
     "111LoadAfferentSynapses", false, {"Loads afferent synapses"}};
 const brayns::Property PROP_LOAD_EFFERENT_SYNAPSES = {

@@ -72,8 +72,8 @@ void testClipping(brayns::Brayns& brayns, bool orthographic = false)
     brayns.commitAndRender();
     CHECK(compareTestImage(original, engine.getFrameBuffer()));
 
-    auto id1 = scene.addClipPlane({{1.0, 0.0, 0.0, -0.5}});
-    auto id2 = scene.addClipPlane({{0.0, -1.0, 0.0, 0.5}});
+    auto id1 = scene.addClipPlane({1.0, 0.0, 0.0, -0.5});
+    auto id2 = scene.addClipPlane({0.0, -1.0, 0.0, 0.5});
     brayns.commitAndRender();
     CHECK(compareTestImage(clipped, engine.getFrameBuffer()));
 
@@ -82,9 +82,9 @@ void testClipping(brayns::Brayns& brayns, bool orthographic = false)
     brayns.commitAndRender();
     CHECK(compareTestImage(original, engine.getFrameBuffer()));
 
-    id1 = scene.addClipPlane({{1.0, 0.0, 0.0, -0.5}});
-    id2 = scene.addClipPlane({{0.0, 1.0, 0.0, 0.5}});
-    scene.getClipPlane(id2)->setPlane({{0.0, -1.0, 0.0, 0.5}});
+    id1 = scene.addClipPlane({1.0, 0.0, 0.0, -0.5});
+    id2 = scene.addClipPlane({0.0, 1.0, 0.0, 0.5});
+    scene.getClipPlane(id2)->setPlane({0.0, -1.0, 0.0, 0.5});
     brayns.commitAndRender();
     CHECK(compareTestImage(clipped, engine.getFrameBuffer()));
 

@@ -1,5 +1,6 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
+/* Copyright (c) 2021 EPFL/Blue Brain Project
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,20 +20,28 @@
 
 #pragma once
 
-#include <brayns/common/propertymap/PropertyMap.h>
-#include <brayns/common/types.h>
-#include <brayns/pluginapi/ExtensionPlugin.h>
+#include "Any.h"
 
 namespace brayns
 {
-class MultiviewPlugin : public ExtensionPlugin
+/**
+ * @brief Static class used to store all runtime conversions between Any
+ * objects without changing the stored type. For example, a conversion from
+ * Any(1.0) to Any(-1) gives Any(1)
+ *
+ */
+class ConversionRegistry
 {
 public:
-    MultiviewPlugin(PropertyMap&& properties);
-
-    void init() final;
-
-private:
-    PropertyMap _properties;
+    /**
+     * @brief Convert the value contained in the source object into the
+     * destination object current type and store it inside the destination.
+     *
+     * @param from The source object.
+     * @param to The destination object.
+     * @return true A converter has been found to perform the conversion.
+     * @return false No converter found to perform the conversion.
+     */
+    static bool convert(const Any& from, Any& to);
 };
 } // namespace brayns

@@ -29,11 +29,11 @@ TEST_CASE("loaderProperties")
 
     {
         brayns::PropertyMap properties;
-        properties.setProperty({"string", std::string("string")});
-        properties.setProperty({"int", 42});
-        properties.setProperty(
-            {"enum", std::string("b"), {"a", "b", "c", "d"}, {}});
-        properties.setProperty({"array", std::array<int, 3>{{1, 2, 3}}});
+        properties.add({"string", std::string("string")});
+        properties.add({"int", 42});
+        properties.add(
+            {"enum", {"b", {"a", "b", "c", "d"}}});
+        properties.add({"array", brayns::Vector3i{1, 2, 3}});
         paramsOrig.setLoaderProperties(properties);
     }
 
@@ -41,20 +41,15 @@ TEST_CASE("loaderProperties")
 
     brayns::ModelParams paramsParse;
     from_json(paramsParse, jsonStr);
-    CHECK_EQ(
-        paramsOrig.getLoaderProperties().getProperty<std::string>("string"),
-        paramsParse.getLoaderProperties().getProperty<std::string>("string"));
-    CHECK_EQ(paramsOrig.getLoaderProperties().getProperty<int32_t>("int"),
-             paramsParse.getLoaderProperties().getProperty<int32_t>("int"));
-    CHECK_EQ(paramsOrig.getLoaderProperties().getProperty<std::string>("enum"),
-             paramsParse.getLoaderProperties().getProperty<std::string>(
-                 "enum"));
-
-    const auto& origArray =
-        paramsOrig.getLoaderProperties().getProperty<std::array<int, 3>>(
-            "array");
-    const auto& parseArray =
-        paramsParse.getLoaderProperties().getProperty<std::array<int, 3>>(
-            "array");
-    CHECK(origArray == parseArray);
+    CHECK_EQ(paramsOrig.getLoaderProperties()["string"].as<std::string>(),
+             paramsParse.getLoaderProperties()["string"].as<std::string>());
+    CHECK_EQ(paramsOrig.getLoaderProperties()["int"].as<int32_t>(),
+             paramsParse.getLoaderProperties()["int"].as<int32_t>());
+    CHECK_EQ(paramsOrig.getLoaderProperties()["enum"]
+                 .as<brayns::EnumProperty>()
+                 .toString(),
+             paramsParse.getLoaderProperties()["enum"]
+                 .as<std::string>());
+    CHECK(paramsOrig.getLoaderProperties()["array"].as<brayns::Vector3i>() ==
+          paramsParse.getLoaderProperties()["array"].as<brayns::Vector3i>());
 }

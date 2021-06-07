@@ -33,7 +33,7 @@ namespace brayns
 MultiviewPlugin::MultiviewPlugin(PropertyMap&& properties)
     : _properties(std::move(properties))
 {
-    const double armLength = _properties.getProperty<double>(PARAM_ARM_LENGTH);
+    const double armLength = _properties[PARAM_ARM_LENGTH].as<double>();
     if (armLength <= 0.0f)
     {
         throw std::runtime_error(
@@ -52,24 +52,19 @@ void MultiviewPlugin::init()
         throw std::runtime_error(
             "The multiview camera is only available for ospray engine");
 }
-}
+} // namespace brayns
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
                                                          const char** argv)
 {
     brayns::PropertyMap properties;
-    properties.setProperty(
-        {PARAM_ARM_LENGTH,
-         5.0,
-         0.0,
-         100.0,
-         {"Arm length",
-          "The distance between the cameras and the view center"}});
-    properties.setProperty(
+    properties.add({PARAM_ARM_LENGTH,
+                    5.0,
+                    {"Arm length",
+                     "The distance between the cameras and the view center"}});
+    properties.add(
         {PARAM_HEIGHT,
          10.0,
-         0.0,
-         100.0,
          {"View height", "The height of the viewport in world space"}});
 
     if (!properties.parse(argc, argv))
