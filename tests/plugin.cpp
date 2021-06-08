@@ -56,7 +56,7 @@ TEST_CASE("plugin_actions")
     brayns::PropertyMap whoOutput;
     whoOutput.add({"param", std::string(), {""}});
     makeRequestUpdate("who", whoOutput);
-    CHECK_EQ(whoOutput["param"].as<std::string>(), "me");
+    CHECK(whoOutput["param"].as<std::string>() == "me");
 
     brayns::PropertyMap echoInput;
     echoInput.add({"param", vecVal, {""}});
