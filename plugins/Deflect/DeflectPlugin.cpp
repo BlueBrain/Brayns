@@ -449,7 +449,7 @@ extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
                                                          const char** argv)
 {
     brayns::DeflectParameters params;
-    if (!params.getPropertyMap().parse(argc, argv))
-        return nullptr;
+    /*if (!params.getPropertyMap().parse(argc, argv))
+        return nullptr;*/
     return new brayns::DeflectPlugin(std::move(params));
 }
