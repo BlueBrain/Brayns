@@ -120,37 +120,37 @@ TEST_CASE("set_and_get_all_supported_types")
 
 TEST_CASE("fill_property_map")
 {
-    PropertyMap ints;
-    ints.add({"number", 42});
-    ints.add({"vec2", Vector2i{1, 2}});
-    ints.add({"vec3", Vector3i{1, 2, 3}});
+    PropertyMap integers;
+    integers.add({"number", 42});
+    integers.add({"vec2", Vector2i{1, 2}});
+    integers.add({"vec3", Vector3i{1, 2, 3}});
 
     PropertyMap doubles;
     doubles.add({"number", -42.0});
     doubles.add({"vec2", Vector2d{-1, -2}});
     doubles.add({"vec3", Vector3d{-1, -2, -3}});
 
-    ints.merge(doubles);
-    doubles.merge(ints);
+    integers.merge(doubles);
+    doubles.merge(integers);
 
-    CHECK(ints["number"].is<int32_t>());
-    CHECK(ints["vec2"].is<Vector2i>());
-    CHECK(ints["vec3"].is<Vector3i>());
+    CHECK(integers["number"].is<int32_t>());
+    CHECK(integers["vec2"].is<Vector2i>());
+    CHECK(integers["vec3"].is<Vector3i>());
 
     CHECK(doubles["number"].is<double>());
     CHECK(doubles["vec2"].is<Vector2d>());
     CHECK(doubles["vec3"].is<Vector3d>());
 
-    CHECK(ints["number"].as<int32_t>() == doubles["number"].as<double>());
-    CHECK(ints["vec2"].as<Vector2i>()[0] == doubles["vec2"].as<Vector2d>()[0]);
-    CHECK(ints["vec2"].as<Vector2i>()[1] == doubles["vec2"].as<Vector2d>()[1]);
-    CHECK(ints["vec3"].as<Vector3i>()[0] == doubles["vec3"].as<Vector3d>()[0]);
-    CHECK(ints["vec3"].as<Vector3i>()[1] == doubles["vec3"].as<Vector3d>()[1]);
-    CHECK(ints["vec3"].as<Vector3i>()[2] == doubles["vec3"].as<Vector3d>()[2]);
+    CHECK(integers["number"].as<int32_t>() == doubles["number"].as<double>());
+    CHECK(integers["vec2"].as<Vector2i>()[0] == doubles["vec2"].as<Vector2d>()[0]);
+    CHECK(integers["vec2"].as<Vector2i>()[1] == doubles["vec2"].as<Vector2d>()[1]);
+    CHECK(integers["vec3"].as<Vector3i>()[0] == doubles["vec3"].as<Vector3d>()[0]);
+    CHECK(integers["vec3"].as<Vector3i>()[1] == doubles["vec3"].as<Vector3d>()[1]);
+    CHECK(integers["vec3"].as<Vector3i>()[2] == doubles["vec3"].as<Vector3d>()[2]);
 
-    ints.add({"foo", std::string("string")});
+    integers.add({"foo", std::string("string")});
     doubles.add({"foo", 42});
-    CHECK_THROWS(ints.merge(doubles));
+    CHECK_THROWS(integers.merge(doubles));
 }
 
 TEST_CASE("update_properties")
@@ -176,33 +176,33 @@ TEST_CASE("merge_enums")
 {
     const std::vector<std::string> enums = {"a", "b", "c"};
 
-    PropertyMap ints;
-    ints.add({"abc", {1, enums}});
+    PropertyMap integers;
+    integers.add({"abc", {1, enums}});
 
-    PropertyMap strings;
-    strings.add({"abc", {"c", enums}});
+    PropertyMap labels;
+    labels.add({"abc", {"c", enums}});
 
     {
         PropertyMap tmp;
 
-        tmp.update(ints);
+        tmp.update(integers);
         CHECK(tmp.empty());
-        tmp.update(strings);
+        tmp.update(labels);
         CHECK(tmp.empty());
 
-        tmp.merge(ints);
-        tmp.merge(strings);
+        tmp.merge(integers);
+        tmp.merge(labels);
 
         CHECK(tmp["abc"].is<EnumProperty>());
         CHECK(tmp["abc"].to<int32_t>() == 2);
         CHECK(tmp["abc"].as<EnumProperty>().toInt() == 2);
 
-        tmp.update(ints);
+        tmp.update(integers);
         CHECK(tmp["abc"].is<EnumProperty>());
         CHECK(tmp["abc"].to<int32_t>() == 1);
         CHECK(tmp["abc"].as<EnumProperty>().toInt() == 1);
 
-        tmp.update(strings);
+        tmp.update(labels);
         CHECK(tmp["abc"].is<EnumProperty>());
         CHECK(tmp["abc"].to<int32_t>() == 2);
         CHECK(tmp["abc"].as<EnumProperty>().toInt() == 2);
@@ -210,19 +210,19 @@ TEST_CASE("merge_enums")
 
     {
         PropertyMap tmp;
-        tmp.merge(strings);
-        tmp.merge(ints);
+        tmp.merge(labels);
+        tmp.merge(integers);
 
         CHECK(tmp["abc"].is<EnumProperty>());
         CHECK(tmp["abc"].to<std::string>() == "b");
         CHECK(tmp["abc"].as<EnumProperty>().toString() == "b");
 
-        tmp.update(strings);
+        tmp.update(labels);
         CHECK(tmp["abc"].is<EnumProperty>());
         CHECK(tmp["abc"].to<std::string>() == "c");
         CHECK(tmp["abc"].as<EnumProperty>().toString() == "c");
 
-        tmp.update(ints);
+        tmp.update(integers);
         CHECK(tmp["abc"].is<EnumProperty>());
         CHECK(tmp["abc"].to<std::string>() == "b");
         CHECK(tmp["abc"].as<EnumProperty>().toString() == "b");
