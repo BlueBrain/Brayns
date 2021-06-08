@@ -33,6 +33,11 @@ namespace brayns
 void toOSPRayProperties(const PropertyObject& object, OSPObject ospObject);
 void toOSPRayProperties(const PropertyMap& object, OSPObject ospObject);
 
+/** Update all the properties in the property map from the given ospray object.
+ */
+void fromOSPRayProperties(PropertyMap& object,
+                          ospray::ManagedObject& ospObject);
+
 /** Convert a brayns::Transformation to an ospcommon::affine3f. */
 ospcommon::affine3f transformationToAffine3f(
     const Transformation& transformation);

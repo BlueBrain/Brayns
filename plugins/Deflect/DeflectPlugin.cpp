@@ -23,8 +23,8 @@
 #include "utils.h"
 
 #include <brayns/common/ActionInterface.h>
-#include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/input/KeyboardHandler.h>
+#include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/utils/utils.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
@@ -61,7 +61,8 @@ public:
                                                Execution::sync, "param",
                                                "Stream parameters"};
             ai->registerNotification(desc, _params.getPropertyMap(),
-                                     [&](const PropertyMap& prop) {
+                                     [&](const PropertyMap& prop)
+                                     {
                                          _params.getPropertyMap().merge(prop);
                                          _params.markModified();
                                          _engine.triggerRender();
@@ -180,17 +181,17 @@ private:
         auto loop = uvw::Loop::getDefault();
         _pollHandle = loop->resource<uvw::PollHandle>(_stream->getDescriptor());
 
-        _pollHandle->on<uvw::PollEvent>([& engine = _engine](const auto&,
-                                                             auto&) {
-            engine.triggerRender();
-        });
+        _pollHandle->on<uvw::PollEvent>([&engine = _engine](const auto&, auto&)
+                                        { engine.triggerRender(); });
 
         _pollHandle->start(uvw::PollHandle::Event::READABLE);
 
-        _stream->setDisconnectedCallback([&] {
-            _pollHandle->stop();
-            _pollHandle.reset();
-        });
+        _stream->setDisconnectedCallback(
+            [&]
+            {
+                _pollHandle->stop();
+                _pollHandle.reset();
+            });
 #endif
     }
 
@@ -443,10 +444,10 @@ void DeflectPlugin::postRender()
 {
     _impl->postRender();
 }
-}
+} // namespace brayns
 
-extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
-                                                         const char** argv)
+extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int,
+                                                         const char**)
 {
     brayns::DeflectParameters params;
     /*if (!params.getPropertyMap().parse(argc, argv))

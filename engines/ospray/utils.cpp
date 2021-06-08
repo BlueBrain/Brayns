@@ -58,6 +58,79 @@ void toOSPRayProperties(const PropertyObject& object, OSPObject ospObject)
     toOSPRayProperties(object.getPropertyMap(), ospObject);
 }
 
+template <typename T, typename U, int S>
+auto _toGlm(const ospcommon::vec_t<U, S>& input)
+{
+    glm::vec<S, T> glm;
+    for (int i = 0; i < S; ++i)
+    {
+        glm[i] = T(input[i]);
+    }
+    return glm;
+}
+
+void fromOSPRayProperties(PropertyMap& object, ospray::ManagedObject& ospObject)
+{
+    for (auto& prop : object)
+    {
+        auto name = prop.getName().c_str();
+        prop.visit<double>(
+            [&](const auto& value)
+            {
+                double newValue = ospObject.getParam1f(name, float(value));
+                prop.setValue(newValue);
+            });
+        prop.visit<int>(
+            [&](const auto& value)
+            {
+                int newValue = ospObject.getParam1i(name, value);
+                prop.setValue(newValue);
+            });
+        prop.visit<bool>(
+            [&](const auto& value)
+            {
+                bool newValue = ospObject.getParam(name, int(value));
+                prop.setValue(newValue);
+            });
+        prop.visit<std::string>(
+            [&](const auto& value)
+            {
+                auto newValue = ospObject.getParam(name, value);
+                prop.setValue(newValue);
+            });
+        prop.visit<Vector2d>(
+            [&](const auto& value)
+            {
+                auto newValue = ospObject.getParam(name, ospcommon::vec2f());
+                prop.setValue(_toGlm<double>(newValue));
+            });
+        prop.visit<Vector2i>(
+            [&](const auto& value)
+            {
+                auto newValue = ospObject.getParam(name, ospcommon::vec2i());
+                prop.setValue(_toGlm<int>(newValue));
+            });
+        prop.visit<Vector3d>(
+            [&](const auto& value)
+            {
+                auto newValue = ospObject.getParam(name, ospcommon::vec3f());
+                prop.setValue(_toGlm<double>(newValue));
+            });
+        prop.visit<Vector3i>(
+            [&](const auto& value)
+            {
+                auto newValue = ospObject.getParam(name, ospcommon::vec3i());
+                prop.setValue(_toGlm<int>(newValue));
+            });
+        prop.visit<Vector4d>(
+            [&](const auto& value)
+            {
+                auto newValue = ospObject.getParam(name, ospcommon::vec4f());
+                prop.setValue(_toGlm<double>(newValue));
+            });
+    }
+}
+
 ospcommon::affine3f transformationToAffine3f(
     const Transformation& transformation)
 {
