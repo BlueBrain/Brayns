@@ -396,25 +396,11 @@ void _vectorPropertyToJson(rapidjson::Document& document, Property& prop)
         document.GetAllocator());
 }
 
-void _stringVectorPropertyToJson(rapidjson::Document& document, Property& prop)
-{
-    rapidjson::Value array(rapidjson::kArrayType);
-    const auto vec = prop.as<std::vector<std::string>>();
-    for (const auto& v : vec)
-        array.PushBack(make_value_string(v, document.GetAllocator()).Move(),
-                       document.GetAllocator());
-
-    document.AddMember(
-        make_json_string(prop.getName(), document.GetAllocator()).Move(), array,
-        document.GetAllocator());
-}
-
 template<typename T, int S>
 constexpr int _getGlmVecSize(const glm::vec<S, T>&)
 {
     return S;
 }
-
 } // namespace
 
 // Create JSON schema for a property map and add it to the given propSchema
@@ -453,7 +439,7 @@ void _addPropertyMapSchema(const PropertyMap& propertyMap,
             _addVectorPropertySchema<T>(prop, properties, allocator);
         };
 
-        auto addBoolVector = [&](const auto& value)
+        auto addBoolVector = [&](const auto&)
         { return _addBoolVectorPropertySchema(prop, properties, allocator); };
 
         prop.visit<double>(addScalar);
