@@ -210,7 +210,7 @@ std::vector<ModelDescriptorPtr> ArchiveLoader::loadExtracted(
     const PropertyMap& properties) const
 {
     const auto loaderName =
-        properties.getProperty<std::string>("loaderName", "");
+        properties.valueOr("loaderName", std::string());
     const Loader* loader =
         loaderName.empty() ? nullptr
                            : &_registry.getSuitableLoader("", "", loaderName);
