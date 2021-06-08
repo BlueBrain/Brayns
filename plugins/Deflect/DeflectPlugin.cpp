@@ -23,7 +23,7 @@
 #include "utils.h"
 
 #include <brayns/common/ActionInterface.h>
-#include <brayns/common/PropertyMap.h>
+#include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/utils/utils.h>
 #include <brayns/engine/Engine.h>
