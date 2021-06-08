@@ -97,7 +97,8 @@ struct Converter<glm::vec<L1, From>, glm::vec<L2, To>>
      */
     static void convert(const glm::vec<L1, From>& from, glm::vec<L2, To>& to)
     {
-        for (size_t i = 0; i < std::min(from.length(), to.length()); ++i)
+        auto itemCount = std::min(from.length(), to.length());
+        for (glm::length_t i = 0; i < itemCount; ++i)
         {
             Converter<From, To>::convert(from[i], to[i]);
         }
