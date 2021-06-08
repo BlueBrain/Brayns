@@ -99,31 +99,31 @@ void fromOSPRayProperties(PropertyMap& object, ospray::ManagedObject& ospObject)
                 prop.setValue(newValue);
             });
         prop.visit<Vector2d>(
-            [&](const auto& value)
+            [&](const auto&)
             {
                 auto newValue = ospObject.getParam(name, ospcommon::vec2f());
                 prop.setValue(_toGlm<double>(newValue));
             });
         prop.visit<Vector2i>(
-            [&](const auto& value)
+            [&](const auto&)
             {
                 auto newValue = ospObject.getParam(name, ospcommon::vec2i());
                 prop.setValue(_toGlm<int>(newValue));
             });
         prop.visit<Vector3d>(
-            [&](const auto& value)
+            [&](const auto&)
             {
                 auto newValue = ospObject.getParam(name, ospcommon::vec3f());
                 prop.setValue(_toGlm<double>(newValue));
             });
         prop.visit<Vector3i>(
-            [&](const auto& value)
+            [&](const auto&)
             {
                 auto newValue = ospObject.getParam(name, ospcommon::vec3i());
                 prop.setValue(_toGlm<int>(newValue));
             });
         prop.visit<Vector4d>(
-            [&](const auto& value)
+            [&](const auto&)
             {
                 auto newValue = ospObject.getParam(name, ospcommon::vec4f());
                 prop.setValue(_toGlm<double>(newValue));
