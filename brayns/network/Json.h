@@ -21,7 +21,6 @@
 #pragma once
 
 #include <algorithm>
-#include <cassert>
 #include <functional>
 #include <sstream>
 #include <string>
@@ -39,7 +38,7 @@
 namespace brayns
 {
 /**
- * @brief SON value (object, array, string, number, bool, null).
+ * @brief JSON value (object, array, string, number, bool, null).
  *
  */
 using JsonValue = Poco::Dynamic::Var;
@@ -51,7 +50,7 @@ using JsonValue = Poco::Dynamic::Var;
 using JsonArray = Poco::JSON::Array;
 
 /**
- * @brief JSON object (map of string and JsonValue).
+ * @brief JSON object (map of string to JsonValue).
  *
  */
 using JsonObject = Poco::JSON::Object;
@@ -67,6 +66,13 @@ using JsonObject = Poco::JSON::Object;
 template <typename T>
 struct JsonSerializer
 {
+    static constexpr bool isValidType =
+        std::is_arithmetic<T>::value || std::is_same<T, std::string>::value;
+
+    static_assert(isValidType,
+                  "JSON serialization is not supported for this type, please "
+                  "provide a specialization of JsonSerializer<T>");
+
     /**
      * @brief Serialize an object to a provided JsonValue.
      *
@@ -90,7 +96,7 @@ struct JsonSerializer
 /**
  * @brief High level class to serialize / deserialize JSON for custom types. A
  * valid specialization of JsonSerializer<T> is required.
- * 
+ *
  */
 struct Json
 {
@@ -233,10 +239,10 @@ struct JsonSerializer<std::vector<T>>
  * @brief Partial specialization of JsonSerializer for glm::vec<S, T>.
  *
  * @tparam S The size of the vector.
- * @tparam T The type of the vector items.
+ * @tparam T The type of the vector components.
  */
 template <glm::length_t S, typename T>
-struct JsonSerializer<vec<S, T>>
+struct JsonSerializer<glm::vec<S, T>>
 {
     /**
      * @brief Create a JsonArray::Ptr, serialize all elements of the vector

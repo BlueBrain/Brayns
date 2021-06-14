@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <cassert>
 #include <functional>
 #include <string>
 #include <vector>
@@ -29,7 +30,7 @@
 namespace brayns
 {
 /**
- * @brief Performs the serialization of a message entry. Used to remember an
+ * @brief Perform the serialization of a message entry. Used to remember an
  * entry type and its position in a message to serialize / deserialize it later.
  *
  */
@@ -54,12 +55,19 @@ public:
     template <typename T, typename U>
     EntrySerializer(const T& message, const U& entry)
     {
+        _messageType = typeid(T);
         _offset = reinterpret_cast<const char*>(&entry) -
                   reinterpret_cast<const char*>(&message);
         _serialize = [](const void* value, JsonValue& json)
-        { JsonSerializer<U>::serialize(*static_cast<const U*>(value), json); };
+        {
+            auto& entry = *static_cast<const U*>(value);
+            JsonSerializer<U>::serialize(entry, json);
+        };
         _deserialize = [](const JsonValue& json, void* value)
-        { JsonSerializer<U>::deserialize(json, *static_cast<U*>(value)); };
+        {
+            auto& entry = *static_cast<U*>(value);
+            JsonSerializer<U>::deserialize(json, entry);
+        };
     }
 
     /**
@@ -68,13 +76,15 @@ public:
      *
      * @tparam T The type of the message holding the entry (must be the same a
      * the one at construction).
-     * @param message The message holding the entry registered at construction.
+     * @param message The message holding the entry to serialize.
      * @param json The output json value.
      */
     template <typename T>
     void serialize(const T& message, JsonValue& json) const
     {
-        _serialize(reinterpret_cast<const char*>(&message) + _offset, json);
+        assert(_messageType == typeid(T));
+        auto entry = reinterpret_cast<const char*>(&message) + _offset;
+        _serialize(entry, json);
     }
 
     /**
@@ -89,10 +99,13 @@ public:
     template <typename T>
     void deserialize(const JsonValue& json, T& message) const
     {
-        _deserialize(json, reinterpret_cast<char*>(&message) + _offset);
+        assert(_messageType == typeid(T));
+        auto entry = reinterpret_cast<char*>(&message) + _offset;
+        _deserialize(json, entry);
     }
 
 private:
+    std::type_index _messageType = typeid(void);
     size_t _offset = 0;
     std::function<void(const void*, JsonValue&)> _serialize;
     std::function<void(const JsonValue&, void*)> _deserialize;
@@ -137,39 +150,44 @@ struct MessageInfo
 };
 
 /**
- * @brief Template used to identify messages inside templates to provide a
- * custom JsonSerializer for them. All messages are a specialization of this
- * type.
+ * @brief Template used to identify messages inside templates to provide
+ * automatically a custom JsonSerializer for them. All messages are a
+ * specialization of this template.
  *
- * @tparam T A tag type to specialize uniquely this template.
+ * @tparam TagType A tag type to specialize uniquely this template.
  */
-template <typename T>
+template <typename TagType>
 struct Message
 {
 };
 
 /**
- * @brief Custom JSON serializer for Message specializations. Use
+ * @brief Custom JSON serializer for Message specializations. Use internally
  * getMessageInfo() method to perform the serialization.
  *
- * @tparam T The tag type provided to Message<T> to identify the message at
- * compile-time.
+ * @tparam TagType The tag type provided to Message<TagType> to identify the
+ * message at compile-time.
  */
-template <typename T>
-struct JsonSerializer<Message<T>>
+template <typename TagType>
+struct JsonSerializer<Message<TagType>>
 {
     /**
+     * @brief Alias for the serialized message type.
+     *
+     */
+    using Message = Message<TagType>;
+
+    /**
      * @brief Create a JsonObject::Ptr, fill it using name and serializer of
-     * entries inside the getMessageInfo() method of value and put it inside the
-     * provided value.
+     * entries inside getMessageInfo() and put it inside the provided value.
      *
      * @param value The message to serialize (declared with macros
      * MESSAGE_BEGIN, MESSAGE_ENTRY and MESSAGE_END).
      * @param json The output JSON value.
      */
-    static void serialize(const Message<T>& value, JsonValue& json)
+    static void serialize(const Message& value, JsonValue& json)
     {
-        auto& message = value.getMessageInfo();
+        auto& message = Message::getMessageInfo();
         auto object = Poco::makeShared<JsonObject>();
         for (const auto& entry : message.entries)
         {
@@ -182,7 +200,7 @@ struct JsonSerializer<Message<T>>
 
     /**
      * @brief Extract a JsonObject::Ptr from json, fetch all entries provided by
-     * value.getMessageInfo() using name and serializer and put it inside value.
+     * getMessageInfo() using name and serializer and put it inside value.
      * If json is not an object, value is left unchanged, non-matching keys are
      * ignored.
      *
@@ -190,13 +208,13 @@ struct JsonSerializer<Message<T>>
      * @param value The message to deserialize (declared with macros
      * MESSAGE_BEGIN, MESSAGE_ENTRY and MESSAGE_END).
      */
-    static void deserialize(const JsonValue& json, Message<T>& value)
+    static void deserialize(const JsonValue& json, Message& value)
     {
         if (json.type() != typeid(JsonObject::Ptr))
         {
             return;
         }
-        auto& message = value.getMessageInfo();
+        auto& message = Message::getMessageInfo();
         auto& object = *json.extract<JsonObject::Ptr>();
         for (const auto& entry : message.entries)
         {
@@ -211,74 +229,70 @@ struct JsonSerializer<Message<T>>
 };
 
 /**
- * @brief Helper class to add an entry to a message at construction.
- *
- */
-struct EntryBuilder
-{
-    /**
-     * @brief Add entry to message.
-     *
-     * @param entry The entry to add to message.
-     * @param message The message receiveing entry.
-     */
-    EntryBuilder(EntryInfo entry, MessageInfo& message)
-    {
-        message.entries.push_back(std::move(entry));
-    }
-};
-
-/**
  * @brief Macro to declare a new message. The resulting message will have the
  * symbol declared in MESSAGE_BEGIN and can be used in JSON serialization with
  * no additional code. A static instance of MessageInfo will be stored inside
- * the resulting message that can be queried with getMessageInfo() (non-static).
+ * the resulting message type and can be queried with the static method
+ * getMessageInfo().
  *
  * Example:
  * @code {.cpp}
+ * // Declaration
  * MESSAGE_BEGIN(MyMessage)
  * MESSAGE_ENTRY(int, anEntry)
  * MESSAGE_ENTRY(std::vector<std::string>, someEntries)
  * MESSAGE_END()
+ *
+ * // Usage
+ * std::string json = Json::stringify(MyMessage());
+ * MyMessage message = Json::parse<MyMessage>(json);
  * @endcode
  *
  */
-#define MESSAGE_BEGIN(TYPE)                   \
-    struct _##TYPE                            \
-    {                                         \
-    };                                        \
-    using TYPE = Message<_##TYPE>;            \
-    template <>                               \
-    struct Message<_##TYPE>                   \
-    {                                         \
-    private:                                  \
-        static MessageInfo& _getMessageInfo() \
-        {                                     \
-            static MessageInfo info;          \
-            return info;                      \
-        }                                     \
-                                              \
-    public:                                   \
-        const MessageInfo& getMessageInfo() const { return _getMessageInfo(); }
+#define MESSAGE_BEGIN(TYPE)                        \
+    struct TYPE##Tag                               \
+    {                                              \
+    };                                             \
+    using TYPE = Message<TYPE##Tag>;               \
+    template <>                                    \
+    struct Message<TYPE##Tag>                      \
+    {                                              \
+    private:                                       \
+        static MessageInfo& _getMessageInfo()      \
+        {                                          \
+            static MessageInfo info;               \
+            return info;                           \
+        }                                          \
+                                                   \
+    public:                                        \
+        static const MessageInfo& getMessageInfo() \
+        {                                          \
+            static const TYPE buildMessageInfo;    \
+            return _getMessageInfo();              \
+        }
 
 /**
  * @brief Add an entry to the message being built. Must be called only after
  * BEGIN_MESSAGE(...). The active message will have a public attribute called
- * NAME, the given description and will be serialized using
+ * NAME of type TYPE, the given description and will be serialized using
  * JsonSerializer<TYPE>.
  *
  */
-#define MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION)                           \
-private:                                                                 \
-    TYPE _build##NAME()                                                  \
-    {                                                                    \
-        static EntryBuilder builder({#NAME, DESCRIPTION, {*this, NAME}}, \
-                                    _getMessageInfo());                  \
-        return TYPE{};                                                   \
-    }                                                                    \
-                                                                         \
-public:                                                                  \
-    TYPE NAME = _build##NAME();
+#define MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION)         \
+    TYPE NAME = [&]                                    \
+    {                                                  \
+        static const int addEntry = [&]                \
+        {                                              \
+            EntryInfo entry;                           \
+            entry.name = #NAME;                        \
+            entry.description = DESCRIPTION;           \
+            entry.serializer = {*this, NAME};          \
+            auto& entries = _getMessageInfo().entries; \
+            entries.push_back(std::move(entry));       \
+            return 0;                                  \
+        }();                                           \
+        return TYPE{};                                 \
+    }();
 
 /**
  * @brief Must be called after MESSAGE_BEGIN and a set of MESSAGE_ENTRY to

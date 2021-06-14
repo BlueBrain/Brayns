@@ -20,17 +20,36 @@
 
 #pragma once
 
-#include "BaseEntryPoint.h"
+#include "IEntryPoint.h"
 
 namespace brayns
 {
-template<typename RequestType, typename ReplyType>
-class EntryPoint : public BaseEntryPoint
+/**
+ * @brief Template base class to map template code to entrypoint interface.
+ *
+ * @tparam RequestType The type of the request the entrypoint handles.
+ * @tparam ReplyType The type of the reply the entrypoint returns.
+ */
+template <typename RequestType, typename ReplyType>
+class EntryPoint : public IEntryPoint
 {
 public:
-    virtual ReplyType run(const RequestType& request) const = 0;
+    /**
+     * @brief Must handle the request and return a reply.
+     *
+     * @param request The request sent by the client.
+     * @return ReplyType The reply to send to the client.
+     */
+    virtual ReplyType handleRequest(const RequestType& request) const = 0;
 
-    virtual JsonValue run(const JsonValue& json) const
+    /**
+     * @brief Overrides the base class method to handle the JSON serialization
+     * using the Request / Reply types.
+     *
+     * @param json The JSON request.
+     * @return JsonValue The JSON repy.
+     */
+    virtual JsonValue handleRequest(const JsonValue& json) const override
     {
         auto request = Json::deserialize<RequestType>(json);
         auto reply = run(request);
