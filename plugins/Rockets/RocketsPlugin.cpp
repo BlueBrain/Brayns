@@ -328,6 +328,8 @@ public:
 #endif
     }
 
+    virtual void addEntryPoint(EntryPointPtr entryPoint) override {}
+
     void registerNotification(const RpcParameterDescription& desc,
                               const PropertyMap& input,
                               const std::function<void(PropertyMap)>& action)

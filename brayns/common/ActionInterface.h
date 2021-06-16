@@ -26,6 +26,8 @@
 #include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/types.h>
 
+#include <brayns/network/EntryPoint.h>
+
 #include <functional>
 #include <string>
 
@@ -54,13 +56,34 @@ public:
     virtual ~ActionInterface() = default;
 
     /**
+     * @brief Register an entrypoint implementing EntryPoint.
+     *
+     * @param entryPoint Pointer to an EntryPoint implementation.
+     */
+    virtual void addEntryPoint(EntryPointPtr entryPoint) = 0;
+
+    /**
+     * @brief Shortcut to add an entrypoint from its type.
+     *
+     * @tparam T Concrete type of the entrypoint.
+     * @tparam Args Types of the arguments to pass to the constructor of T.
+     * @param args Arguments to pass to the constructor of T.
+     */
+    template<typename T, typename... Args>
+    void addEntryPoint(Args&&... args)
+    {
+        static_assert(std::is_base_of<EntryPoint, T>());
+        addEntryPoint(std::make_unique<T>(std::forward<Args>(args)...));
+    }
+
+    /**
      * Register an action with no parameter and no return value.
      *
      * @param desc description of the action/RPC
      * @param action the action to perform on an incoming notification
      */
     virtual void registerNotification(const RpcDescription& desc,
-                                      const std::function<void()>& action) = 0;
+                                      const std::function<void()>& action){};
 
     /**
      * Register an action with a property map as the parameter and no return
@@ -72,7 +95,7 @@ public:
      */
     virtual void registerNotification(
         const RpcParameterDescription& desc, const PropertyMap& input,
-        const std::function<void(PropertyMap)>& action) = 0;
+        const std::function<void(PropertyMap)>& action){};
 
     /**
      * Register an action with a property map as the parameter and a property
@@ -87,7 +110,7 @@ public:
     virtual void registerRequest(
         const RpcParameterDescription& desc, const PropertyMap& input,
         const PropertyMap& output,
-        const std::function<PropertyMap(PropertyMap)>& action) = 0;
+        const std::function<PropertyMap(PropertyMap)>& action){};
 
     /**
      * Register an action with no parameter and a property map as the return
@@ -98,9 +121,9 @@ public:
      *               request
      * @param action the action to perform on an incoming request
      */
-    virtual void registerRequest(
-        const RpcDescription& desc, const PropertyMap& output,
-        const std::function<PropertyMap()>& action) = 0;
+    virtual void registerRequest(const RpcDescription& desc,
+                                 const PropertyMap& output,
+                                 const std::function<PropertyMap()>& action){};
 
     /** Register an action with no parameter and no return value. */
     void registerNotification(const std::string& name,

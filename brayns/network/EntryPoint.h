@@ -20,40 +20,71 @@
 
 #pragma once
 
-#include "IEntryPoint.h"
+#include <memory>
+#include <string>
+
+#include "Json.h"
 
 namespace brayns
 {
+class PluginAPI;
+class NetworkRequest;
+class EntryPoint;
+
 /**
- * @brief Template base class to map template code to entrypoint interface.
+ * @brief EntryPoint holder.
  *
- * @tparam RequestType The type of the request the entrypoint handles.
- * @tparam ReplyType The type of the reply the entrypoint returns.
  */
-template <typename RequestType, typename ReplyType>
-class EntryPoint : public IEntryPoint
+using EntryPointPtr = std::unique_ptr<EntryPoint>;
+
+/**
+ * @brief Entrypoint common interface.
+ *
+ */
+class EntryPoint
 {
 public:
-    /**
-     * @brief Must handle the request and return a reply.
-     *
-     * @param request The request sent by the client.
-     * @return ReplyType The reply to send to the client.
-     */
-    virtual ReplyType handleRequest(const RequestType& request) const = 0;
+    virtual ~EntryPoint() = default;
 
     /**
-     * @brief Overrides the base class method to handle the JSON serialization
-     * using the Request / Reply types.
+     * @brief Used by the manager to setup API reference.
      *
-     * @param json The JSON request.
-     * @return JsonValue The JSON repy.
+     * @param api A reference to Brayns API context.
      */
-    virtual JsonValue handleRequest(const JsonValue& json) const override
-    {
-        auto request = Json::deserialize<RequestType>(json);
-        auto reply = run(request);
-        return Json::serialize(reply);
-    }
+    virtual void setApi(PluginAPI& api) = 0;
+
+    /**
+     * @brief Called once the entrypoint is ready to be used.
+     *
+     */
+    virtual void onCreate() {}
+
+    /**
+     * @brief Must return the name of the entrypoint.
+     *
+     * @return std::string The name (path) of the entrypoint.
+     */
+    virtual std::string getName() const = 0;
+
+    /**
+     * @brief Must return a description of the entrypoint.
+     *
+     * @return std::string A user-defined description.
+     */
+    virtual std::string getDescription() const = 0;
+
+    /**
+     * @brief Must return the JSON schema of the entrypoint.
+     *
+     * @return JsonValue The entrypoint JSON schema.
+     */
+    virtual JsonValue getSchema() const = 0;
+
+    /**
+     * @brief Called each time the client sends a request to the entrypoint.
+     *
+     * @param request Request received from the client.
+     */
+    virtual void processRequest(NetworkRequest& request) const = 0;
 };
 } // namespace brayns

@@ -26,8 +26,11 @@ namespace brayns
 class NetworkManager : public ExtensionPlugin
 {
 public:
-    NetworkManager() noexcept;
+    virtual ~NetworkManager();
 
     void init() final;
+
+private:
+    ActionInterfacePtr _actionInterface;
 };
 }

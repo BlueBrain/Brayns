@@ -46,27 +46,27 @@ public:
     /**
      * @brief Construct a serializer from a message and an entry.
      *
-     * @tparam T The message type that holds the entry.
-     * @tparam U The type of the entry that will be serialized.
+     * @tparam MessageType The message type that holds the entry.
+     * @tparam EntryType The type of the entry that will be serialized.
      * @param message An instance of the message type.
      * @param entry An instance of the the entry type (used to compute offset
      * from the parent message).
      */
-    template <typename T, typename U>
-    EntrySerializer(const T& message, const U& entry)
+    template <typename MessageType, typename EntryType>
+    EntrySerializer(const MessageType& message, const EntryType& entry)
     {
-        _messageType = typeid(T);
+        _messageType = typeid(MessageType);
         _offset = reinterpret_cast<const char*>(&entry) -
                   reinterpret_cast<const char*>(&message);
         _serialize = [](const void* value, JsonValue& json)
         {
-            auto& entry = *static_cast<const U*>(value);
-            JsonSerializer<U>::serialize(entry, json);
+            auto& entry = *static_cast<const EntryType*>(value);
+            JsonSerializer<EntryType>::serialize(entry, json);
         };
         _deserialize = [](const JsonValue& json, void* value)
         {
-            auto& entry = *static_cast<U*>(value);
-            JsonSerializer<U>::deserialize(json, entry);
+            auto& entry = *static_cast<EntryType*>(value);
+            JsonSerializer<EntryType>::deserialize(json, entry);
         };
     }
 
@@ -178,8 +178,10 @@ struct JsonSerializer<Message<TagType>>
     using Message = Message<TagType>;
 
     /**
-     * @brief Create a JsonObject::Ptr, fill it using name and serializer of
-     * entries inside getMessageInfo() and put it inside the provided value.
+     * @brief Create a JsonObject::Ptr.
+     *
+     * Fill it using name and serializer of entries inside getMessageInfo() and
+     * put it inside the provided value.
      *
      * @param value The message to serialize (declared with macros
      * MESSAGE_BEGIN, MESSAGE_ENTRY and MESSAGE_END).
@@ -199,10 +201,11 @@ struct JsonSerializer<Message<TagType>>
     }
 
     /**
-     * @brief Extract a JsonObject::Ptr from json, fetch all entries provided by
-     * getMessageInfo() using name and serializer and put it inside value.
-     * If json is not an object, value is left unchanged, non-matching keys are
-     * ignored.
+     * @brief Extract a JsonObject::Ptr from json.
+     *
+     * Fetch all entries provided by getMessageInfo() using name and serializer
+     * and put it inside value. If json is not an object, value is left
+     * unchanged, non-matching keys are ignored.
      *
      * @param json The source JSON value.
      * @param value The message to deserialize (declared with macros
@@ -229,11 +232,12 @@ struct JsonSerializer<Message<TagType>>
 };
 
 /**
- * @brief Macro to declare a new message. The resulting message will have the
- * symbol declared in MESSAGE_BEGIN and can be used in JSON serialization with
- * no additional code. A static instance of MessageInfo will be stored inside
- * the resulting message type and can be queried with the static method
- * getMessageInfo().
+ * @brief Macro to declare a new message.
+ *
+ * The resulting message will have the symbol declared in MESSAGE_BEGIN and can
+ * be used in JSON serialization with no additional code. A static instance of
+ * MessageInfo will be stored inside the resulting message type and can be
+ * retreived with the static method getMessageInfo().
  *
  * Example:
  * @code {.cpp}
@@ -272,10 +276,11 @@ struct JsonSerializer<Message<TagType>>
         }
 
 /**
- * @brief Add an entry to the message being built. Must be called only after
- * BEGIN_MESSAGE(...). The active message will have a public attribute called
- * NAME of type TYPE, the given description and will be serialized using
- * JsonSerializer<TYPE>.
+ * @brief Add an entry to the message being built.
+ *
+ * Must be called only after BEGIN_MESSAGE(...). The active message will have a
+ * public attribute called NAME of type TYPE, the given description and will be
+ * serialized using JsonSerializer<TYPE>.
  *
  */
 #define MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION)         \

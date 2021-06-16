@@ -57,7 +57,8 @@ using JsonObject = Poco::JSON::Object;
 
 /**
  * @brief Template used to serialize and deserialize JSON.
- * @note The default implementation calls Poco serialization and works for all
+ *
+ * The default implementation calls Poco serialization and works for all
  * basic types and std::string (see Poco::Dynamic::Var). Will not compile for
  * other types and must hence be specialized.
  *
@@ -67,7 +68,7 @@ template <typename T>
 struct JsonSerializer
 {
     static constexpr bool isValidType =
-        std::is_arithmetic<T>::value || std::is_same<T, std::string>::value;
+        std::is_arithmetic<T>() || std::is_same<T, std::string>();
 
     static_assert(isValidType,
                   "JSON serialization is not supported for this type, please "
@@ -245,9 +246,10 @@ template <glm::length_t S, typename T>
 struct JsonSerializer<glm::vec<S, T>>
 {
     /**
-     * @brief Create a JsonArray::Ptr, serialize all elements of the vector
-     * using JsonSerializer<T>::serialize and put the array inside the provided
-     * JsonValue.
+     * @brief Create a JsonArray::Ptr.
+     *
+     * Derialize all elements of the vector using JsonSerializer<T>::serialize
+     * and put the array inside the provided JsonValue.
      *
      * @param value The vector to serialize.
      * @param json The output JsonValue.
@@ -263,8 +265,9 @@ struct JsonSerializer<glm::vec<S, T>>
     }
 
     /**
-     * @brief Extract a JsonArray::Ptr from the provided JsonValue and
-     * deserialize all elements in the provided vector using
+     * @brief Extract a JsonArray::Ptr from the provided JsonValue.
+     *
+     * Deserialize all elements in the provided vector using
      * JsonSerializer<T>::deserialize. If the json is not a JsonArray::Ptr, the
      * value is left unchanged, if its size is not S, only the common indices
      * will be updated (range = min(S, array.size())).
