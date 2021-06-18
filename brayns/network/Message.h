@@ -157,7 +157,7 @@ struct MessageInfo
  * @tparam TagType A tag type to specialize uniquely this template.
  */
 template <typename TagType>
-struct Message
+struct MessageHolder
 {
 };
 
@@ -169,13 +169,13 @@ struct Message
  * message at compile-time.
  */
 template <typename TagType>
-struct JsonSerializer<Message<TagType>>
+struct JsonSerializer<MessageHolder<TagType>>
 {
     /**
      * @brief Alias for the serialized message type.
      *
      */
-    using Message = Message<TagType>;
+    using Message = MessageHolder<TagType>;
 
     /**
      * @brief Create a JsonObject::Ptr.
@@ -242,10 +242,10 @@ struct JsonSerializer<Message<TagType>>
  * Example:
  * @code {.cpp}
  * // Declaration
- * MESSAGE_BEGIN(MyMessage)
- * MESSAGE_ENTRY(int, anEntry)
- * MESSAGE_ENTRY(std::vector<std::string>, someEntries)
- * MESSAGE_END()
+ * BRAYNS_MESSAGE_BEGIN(MyMessage)
+ * BRAYNS_MESSAGE_ENTRY(int, anEntry)
+ * BRAYNS_MESSAGE_ENTRY(std::vector<std::string>, someEntries)
+ * BRAYNS_MESSAGE_END()
  *
  * // Usage
  * std::string json = Json::stringify(MyMessage());
@@ -253,13 +253,13 @@ struct JsonSerializer<Message<TagType>>
  * @endcode
  *
  */
-#define MESSAGE_BEGIN(TYPE)                        \
+#define BRAYNS_MESSAGE_BEGIN(TYPE)                 \
     struct TYPE##Tag                               \
     {                                              \
     };                                             \
-    using TYPE = Message<TYPE##Tag>;               \
+    using TYPE = MessageHolder<TYPE##Tag>;         \
     template <>                                    \
-    struct Message<TYPE##Tag>                      \
+    struct MessageHolder<TYPE##Tag>                \
     {                                              \
     private:                                       \
         static MessageInfo& _getMessageInfo()      \
@@ -271,19 +271,23 @@ struct JsonSerializer<Message<TagType>>
     public:                                        \
         static const MessageInfo& getMessageInfo() \
         {                                          \
-            static const TYPE buildMessageInfo;    \
+            static const int buildMessageInfo = [] \
+            {                                      \
+                TYPE();                            \
+                return 0;                          \
+            }();                                   \
             return _getMessageInfo();              \
         }
 
 /**
- * @brief Add an entry to the message being built.
+ * @brief Add an entry to the current message.
  *
  * Must be called only after BEGIN_MESSAGE(...). The active message will have a
  * public attribute called NAME of type TYPE, the given description and will be
  * serialized using JsonSerializer<TYPE>.
  *
  */
-#define MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION)         \
+#define BRAYNS_MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION)  \
     TYPE NAME = [&]                                    \
     {                                                  \
         static const int addEntry = [&]                \
@@ -300,11 +304,11 @@ struct JsonSerializer<Message<TagType>>
     }();
 
 /**
- * @brief Must be called after MESSAGE_BEGIN and a set of MESSAGE_ENTRY to
- * generate valid code.
+ * @brief Must be called after BRAYNS_MESSAGE_BEGIN and a set of
+ * BRAYNS_MESSAGE_ENTRY to generate valid code.
  *
  */
-#define MESSAGE_END() \
-    }                 \
+#define BRAYNS_MESSAGE_END() \
+    }                        \
     ;
 } // namespace brayns

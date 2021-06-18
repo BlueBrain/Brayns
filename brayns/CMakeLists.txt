@@ -23,7 +23,7 @@ set(BRAYNS_SOURCES
 
 set(BRAYNS_LINK_LIBRARIES
   PUBLIC braynsParameters braynsCommon braynsEngine
-  PRIVATE braynsIO braynsPluginAPI braynsManipulators braynsTasks)
+  PRIVATE braynsIO braynsPluginAPI braynsManipulators braynsTasks braynsNetwork)
 
 if(TARGET braynsRockets)
   list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE braynsRockets)

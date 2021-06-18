@@ -22,93 +22,63 @@
 
 #include <string>
 
-#include <Poco/Net/WebSocket.h>
+#include "MessageFactory.h"
+#include "NetworkSocket.h"
 
 namespace brayns
 {
-/**
- * @brief Wrapper around a WebSocket to send and receive text frames.
- * 
- */
 class NetworkRequest
 {
 public:
-    /**
-     * @brief Underlying socket.
-     * 
-     */
-    using Socket = Poco::Net::WebSocket;
-
-    /**
-     * @brief Construct a network request to a given entrypoint.
-     * 
-     * A high max payload will be setup to avoid DoS attacks.
-     * 
-     * @param name Name of the entrypoint the request addresses.
-     * @param socket The socket to use for message exchange.
-     */
-    NetworkRequest(std::string name, Socket& socket)
-        : _name(std::move(name))
-        , _socket(&socket)
+    NetworkRequest(NetworkSocket& socket)
+        : _socket(&socket)
     {
-        _protectAgainstMemoryExhaustion();
     }
 
-    /**
-     * @brief Get the name of the entrypoint the request addresses.
-     * 
-     * @return const std::string& Name of the entrypoint.
-     */
-    const std::string& getName() const { return _name; }
+    const RequestMessage& getMessage() const { return _message; }
 
-    /**
-     * @brief Receive a text frame from the underlying socket.
-     * 
-     * @return std::string Raw text frame.
-     * @throw std::runtime_error The frame cannot be received or is not text.
-     */
-    std::string receive()
+    const std::string& getId() const { return _message.id; }
+
+    const std::string& getMethod() const { return _message.method; }
+
+    const JsonValue& getParams() const { return _message.params; }
+
+    void setMessage(RequestMessage message) { _message = std::move(message); }
+
+    void sendProgress(const std::string& operation, double amount) const
     {
-        Poco::Buffer<char> buffer(1024);
-        int flags = 0;
-        auto size = _socket->receiveFrame(buffer, flags);
-        if (size <= 0)
-        {
-            throw std::runtime_error("Failed to receive frame");
-        }
-        if (!(flags & Socket::FRAME_OP_TEXT))
-        {
-            throw std::runtime_error("Not a text frame");
-        }
-        return buffer.begin();
+        auto progress = MessageFactory::createProgressMessage(_message);
+        progress.params.operation = operation;
+        progress.params.amount = amount;
+        _send(progress);
     }
 
-    /**
-     * @brief Send a text frame through the underlying socket.
-     * 
-     * @param data Raw text frame.
-     * @throw std::runtime_error Cannot send the frame.
-     */
-    void send(const std::string& data)
+    void sendError(int code, const std::string& message) const
     {
-        if (data.empty())
-        {
-            return;
-        }
-        auto size = _socket->sendFrame(data.data(), int(data.size()));
-        if (size <= 0)
-        {
-            throw std::runtime_error("Failed to send frame");
-        }
+        auto error = MessageFactory::createErrorMessage(_message);
+        error.error.code = code;
+        error.error.message = message;
+        _send(error);
+    }
+
+    void sendReply(const ReplyMessage& reply) const { _send(reply); }
+
+    template<typename MessageType>
+    void sendReply(const MessageType& message) const
+    {
+        auto reply = MessageFactory::createReplyMessage(_message);
+        reply.result = Json::serialize(message);
+        _send(reply);
     }
 
 private:
-    void _protectAgainstMemoryExhaustion()
+    template<typename MessageType>
+    void _send(const MessageType& message) const
     {
-        _socket->setMaxPayloadSize(int(1e6));
+        _socket->send(Json::stringify(message));
     }
 
-    std::string _name;
-    Socket* _socket;
+    RequestMessage _message;
+    NetworkSocket* _socket;
 };
 } // namespace brayns

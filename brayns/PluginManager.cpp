@@ -26,6 +26,7 @@
 
 #include <brayns/pluginapi/PluginAPI.h>
 #ifdef BRAYNS_USE_NETWORKING
+#include <brayns/network/NetworkManager.h>
 #include <plugins/Rockets/RocketsPlugin.h>
 #endif
 
@@ -33,11 +34,11 @@ namespace
 {
 bool containsString(const int length, const char** input, const char* toFind)
 {
-    return std::count_if(input, input + length, [toFind](const char* arg) {
-               return std::strcmp(arg, toFind) == 0;
-           }) > 0;
+    return std::count_if(input, input + length,
+                         [toFind](const char* arg)
+                         { return std::strcmp(arg, toFind) == 0; }) > 0;
 }
-}
+} // namespace
 
 namespace brayns
 {
@@ -87,8 +88,10 @@ void PluginManager::initPlugins(PluginAPI* api)
 #ifdef BRAYNS_USE_NETWORKING
         // Since the Rockets plugin provides the ActionInterface, it must be
         // initialized before anything else
+        /*_extensions.insert(_extensions.begin(),
+                           std::make_unique<RocketsPlugin>());*/
         _extensions.insert(_extensions.begin(),
-                           std::make_unique<RocketsPlugin>());
+                           std::make_unique<NetworkManager>());
 #else
         throw std::runtime_error(
             "BRAYNS_NETWORKING_ENABLED was not set, but HTTP server URI "
@@ -147,4 +150,4 @@ void PluginManager::_loadPlugin(const char* name, int argc, const char* argv[])
         BRAYNS_ERROR << exc.what() << std::endl;
     }
 }
-}
+} // namespace brayns

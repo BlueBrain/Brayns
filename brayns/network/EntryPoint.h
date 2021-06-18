@@ -27,9 +27,9 @@
 
 namespace brayns
 {
-class PluginAPI;
-class NetworkRequest;
 class EntryPoint;
+class NetworkRequest;
+class PluginAPI;
 
 /**
  * @brief EntryPoint holder.
@@ -60,31 +60,32 @@ public:
     virtual void onCreate() {}
 
     /**
-     * @brief Must return the name of the entrypoint.
+     * @brief Return the name of the entrypoint.
      *
-     * @return std::string The name (path) of the entrypoint.
+     * @return const std::string& The name (path) of the entrypoint.
      */
-    virtual std::string getName() const = 0;
+    virtual const std::string& getName() const = 0;
 
     /**
-     * @brief Must return a description of the entrypoint.
+     * @brief Return a description of the entrypoint.
      *
-     * @return std::string A user-defined description.
+     * @return const std::string& A user-defined description.
      */
-    virtual std::string getDescription() const = 0;
+    virtual const std::string& getDescription() const = 0;
 
     /**
-     * @brief Must return the JSON schema of the entrypoint.
+     * @brief Return the JSON schema of the entrypoint.
      *
-     * @return JsonValue The entrypoint JSON schema.
+     * @return const JsonValue& The entrypoint JSON schema.
      */
-    virtual JsonValue getSchema() const = 0;
+    virtual const JsonValue& getSchema() const = 0;
 
     /**
      * @brief Called each time the client sends a request to the entrypoint.
      *
-     * @param request Request received from the client.
+     * @param request Request received from the client used to retreive request
+     * info and send and receive text frames.
      */
-    virtual void processRequest(NetworkRequest& request) const = 0;
+    virtual void processRequest(const NetworkRequest& request) const = 0;
 };
 } // namespace brayns

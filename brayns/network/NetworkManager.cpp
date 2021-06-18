@@ -24,76 +24,27 @@
 #include <type_traits>
 #include <unordered_map>
 
+#include "Poco/Net/HTTPClientSession.h"
+#include "Poco/Net/HTTPServer.h"
+
 #include <brayns/common/ActionInterface.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
-#include "NetworkRequest.h"
+#include "ClientInterface.h"
+#include "ServerInterface.h"
+#include "entrypoints/TestEntryPoint.h"
 
 using namespace brayns;
 
 namespace
 {
-class NetworkInterface : public ActionInterface
-{
-public:
-    NetworkInterface(PluginAPI& api)
-        : _api(&api)
-    {
-    }
-
-    void processRequest(NetworkRequest& request) const
-    {
-        auto& name = request.getName();
-        auto i = _entryPoints.find(name);
-        if (i == _entryPoints.end())
-        {
-            throw std::runtime_error("Unknown entry point: " + name);
-        }
-        auto& entryPoint = *i->second;
-        entryPoint.processRequest(request);
-    }
-
-    virtual void addEntryPoint(EntryPointPtr entryPoint) override
-    {
-        assert(entryPoint);
-        entryPoint->setApi(*_api);
-        entryPoint->onCreate();
-        auto name = entryPoint->getName();
-        _entryPoints[name] = std::move(entryPoint);
-    }
-
-private:
-    PluginAPI* _api;
-    std::unordered_map<std::string, EntryPointPtr> _entryPoints;
-};
-
-class ClientInterface : public NetworkInterface
-{
-public:
-    ClientInterface(PluginAPI& api)
-        : NetworkInterface(api)
-    {
-        // Setup client thread.
-    }
-};
-
-class ServerInterface : public NetworkInterface
-{
-public:
-    ServerInterface(PluginAPI& api)
-        : NetworkInterface(api)
-    {
-        // Setup server thread.
-    }
-};
-
 class ActionInterfaceFactory
 {
 public:
     static ActionInterfacePtr createActionInterface(PluginAPI& api)
     {
-        if (isClient(api))
+        if (_isClient(api))
         {
             return std::make_shared<ClientInterface>(api);
         }
@@ -101,7 +52,16 @@ public:
     }
 
 private:
-    static bool isClient(PluginAPI&) { return false; }
+    static bool _isClient(PluginAPI&) { return false; }
+};
+
+class EntryPointManager
+{
+public:
+    static void registerEntryPoints(ActionInterface& interface)
+    {
+        interface.addEntryPoint<TestEntryPoint>();
+    }
 };
 } // namespace
 
@@ -119,5 +79,6 @@ void NetworkManager::init()
 {
     _actionInterface = ActionInterfaceFactory::createActionInterface(*_api);
     _api->setActionInterface(_actionInterface);
+    EntryPointManager::registerEntryPoints(*_actionInterface);
 }
 } // namespace brayns

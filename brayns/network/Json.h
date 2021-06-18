@@ -189,6 +189,36 @@ struct Json
 };
 
 /**
+ * @brief Specialization to do nothing if value is already JSON.
+ *
+ */
+template <>
+struct JsonSerializer<JsonValue>
+{
+    /**
+     * @brief Copy value into json.
+     *
+     * @param value The input JSON.
+     * @param json The output JSON.
+     */
+    static void serialize(const JsonValue& value, JsonValue& json)
+    {
+        json = value;
+    }
+
+    /**
+     * @brief Copy json into value.
+     *
+     * @param json The input JSON.
+     * @param value The output JSON.
+     */
+    static void deserialize(const JsonValue& json, JsonValue& value)
+    {
+        value = json;
+    }
+};
+
+/**
  * @brief Specialization of JsonSerializer for vector<T>.
  *
  * @tparam T The type of the vector items.

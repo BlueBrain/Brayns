@@ -16,7 +16,7 @@ add_library(braynsNetwork SHARED ${BRAYNSNETWORK_SOURCES} ${BRAYNSNETWORK_HEADER
 target_compile_options(braynsNetwork PRIVATE "-Werror")
 target_include_directories(braynsNetwork PUBLIC $<BUILD_INTERFACE:${BRAYNSNETWORK_INCLUDE_DIR}>
                                                 $<INSTALL_INTERFACE:include>)
-target_link_libraries(braynsNetwork PRIVATE braynsCommon braynsParameters braynsPluginAPI)
+target_link_libraries(braynsNetwork PRIVATE braynsCommon braynsParameters braynsPluginAPI Poco::Foundation Poco::Net Poco::JSON)
 
 set_target_properties(braynsNetwork
     PROPERTIES
