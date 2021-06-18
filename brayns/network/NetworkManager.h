@@ -23,14 +23,26 @@
 
 namespace brayns
 {
+/**
+ * @brief Network manager plugin providing the network action interface.
+ *
+ */
 class NetworkManager : public ExtensionPlugin
 {
 public:
+    /**
+     * @brief Remove the action interface if still the active one.
+     *
+     */
     virtual ~NetworkManager();
 
+    /**
+     * @brief Register base entrypoints and setup ActionInterface.
+     *
+     */
     void init() final;
 
 private:
     ActionInterfacePtr _actionInterface;
 };
-}
+} // namespace brayns

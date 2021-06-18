@@ -49,7 +49,7 @@ public:
         }
         catch (std::exception& e)
         {
-            std::cout << e.what() << '\n';
+            BRAYNS_DEBUG << e.what() << '\n';
         }
     }
 

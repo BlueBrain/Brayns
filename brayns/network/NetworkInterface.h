@@ -20,7 +20,6 @@
 #pragma once
 
 #include <cassert>
-#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -97,7 +96,7 @@ private:
         auto packet = socket.receive();
         if (packet.isClose())
         {
-            throw NetworkException("Connection closed");
+            throw ConnectionClosedException("Connection closed");
         }
         if (!packet.isText())
         {
@@ -147,9 +146,9 @@ public:
         {
             request.sendError(e.getCode(), e.what());
         }
-        catch (NetworkException& e)
+        catch (ConnectionClosedException& e)
         {
-            std::cout << e.what() << '\n';
+            BRAYNS_DEBUG << e.what() << '\n';
             return false;
         }
         catch (std::exception& e)

@@ -95,10 +95,10 @@ private:
     int _flags = 0;
 };
 
-class NetworkException : public std::runtime_error
+class ConnectionClosedException : public std::runtime_error
 {
 public:
-    NetworkException(const std::string& message)
+    ConnectionClosedException(const std::string& message)
         : std::runtime_error(message)
     {
     }
@@ -125,11 +125,11 @@ public:
         }
         catch (Poco::Exception& e)
         {
-            throw NetworkException(e.displayText());
+            throw ConnectionClosedException(e.displayText());
         }
         if (size <= 0)
         {
-            throw NetworkException("Failed to receive frame");
+            throw ConnectionClosedException("Failed to receive frame");
         }
         return {buffer, flags};
     }
@@ -144,11 +144,11 @@ public:
         }
         catch (Poco::Exception& e)
         {
-            throw NetworkException(e.displayText());
+            throw ConnectionClosedException(e.displayText());
         }
         if (size < frame.getSize())
         {
-            throw NetworkException("Failed to send frame");
+            throw ConnectionClosedException("Failed to send frame");
         }
     }
 

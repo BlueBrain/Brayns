@@ -19,16 +19,6 @@
 
 #include "NetworkManager.h"
 
-#include <cassert>
-#include <memory>
-#include <type_traits>
-#include <unordered_map>
-
-#include "Poco/Net/HTTPClientSession.h"
-#include "Poco/Net/HTTPServer.h"
-
-#include <brayns/common/ActionInterface.h>
-#include <brayns/parameters/ParametersManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include "ClientInterface.h"

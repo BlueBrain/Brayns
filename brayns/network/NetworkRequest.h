@@ -45,13 +45,7 @@ public:
 
     void setMessage(RequestMessage message) { _message = std::move(message); }
 
-    void sendProgress(const std::string& operation, double amount) const
-    {
-        auto progress = MessageFactory::createProgressMessage(_message);
-        progress.params.operation = operation;
-        progress.params.amount = amount;
-        _send(progress);
-    }
+    void sendReply(const ReplyMessage& reply) const { _send(reply); }
 
     void sendError(int code, const std::string& message) const
     {
@@ -61,9 +55,15 @@ public:
         _send(error);
     }
 
-    void sendReply(const ReplyMessage& reply) const { _send(reply); }
+    void sendProgress(const std::string& operation, double amount) const
+    {
+        auto progress = MessageFactory::createProgressMessage(_message);
+        progress.params.operation = operation;
+        progress.params.amount = amount;
+        _send(progress);
+    }
 
-    template<typename MessageType>
+    template <typename MessageType>
     void sendReply(const MessageType& message) const
     {
         auto reply = MessageFactory::createReplyMessage(_message);
@@ -72,7 +72,7 @@ public:
     }
 
 private:
-    template<typename MessageType>
+    template <typename MessageType>
     void _send(const MessageType& message) const
     {
         _socket->send(Json::stringify(message));

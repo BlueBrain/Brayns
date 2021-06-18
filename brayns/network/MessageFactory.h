@@ -28,7 +28,7 @@ namespace brayns
 {
 /**
  * @brief Message used to send a request to brayns.
- * 
+ *
  */
 BRAYNS_MESSAGE_BEGIN(RequestMessage)
 BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
@@ -39,7 +39,7 @@ BRAYNS_MESSAGE_END()
 
 /**
  * @brief Message used by brayns to send the reply.
- * 
+ *
  */
 BRAYNS_MESSAGE_BEGIN(ReplyMessage)
 BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
@@ -50,7 +50,7 @@ BRAYNS_MESSAGE_END()
 
 /**
  * @brief Description of an error used in error message.
- * 
+ *
  */
 BRAYNS_MESSAGE_BEGIN(ErrorDescriptionMessage)
 BRAYNS_MESSAGE_ENTRY(int, code, "Error code")
@@ -59,7 +59,7 @@ BRAYNS_MESSAGE_END()
 
 /**
  * @brief Message used by brayns to send an error reply.
- * 
+ *
  */
 BRAYNS_MESSAGE_BEGIN(ErrorMessage)
 BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
@@ -70,7 +70,7 @@ BRAYNS_MESSAGE_END()
 
 /**
  * @brief Message send spontaneously by brayns.
- * 
+ *
  */
 BRAYNS_MESSAGE_BEGIN(UpdateMessage)
 BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
@@ -80,7 +80,7 @@ BRAYNS_MESSAGE_END()
 
 /**
  * @brief Progress info used in progress messages.
- * 
+ *
  */
 BRAYNS_MESSAGE_BEGIN(ProgressInfoMessage)
 BRAYNS_MESSAGE_ENTRY(std::string, id, "Request ID")
@@ -90,7 +90,7 @@ BRAYNS_MESSAGE_END()
 
 /**
  * @brief Progress message sent during a request processing.
- * 
+ *
  */
 BRAYNS_MESSAGE_BEGIN(ProgressMessage)
 BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
