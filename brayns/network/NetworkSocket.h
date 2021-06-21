@@ -111,6 +111,8 @@ public:
                   Poco::Net::HTTPServerResponse& response)
         : _socket(request, response)
     {
+        _socket.setSendTimeout(0);
+        _socket.setReceiveTimeout(0);
         _protectAgainstMemoryExhaustion();
     }
 
