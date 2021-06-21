@@ -20,7 +20,7 @@
 
 #include "../plugins/Rockets/jsonSerialization.h"
 
-#include <brayns/common/ActionInterface.h>
+#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 #include <brayns/pluginapi/PluginAPI.h>
 

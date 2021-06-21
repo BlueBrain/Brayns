@@ -4,6 +4,15 @@ project(braynsNetwork VERSION 0.1.0)
 
 set(BRAYNSNETWORK_HEADERS
   NetworkManager.h
+  entrypoint/BaseEntryPoint.h
+  entrypoint/BasicEntryPoint.h
+  entrypoint/EntryPoint.h
+  entrypoint/EntryPointException.h
+  interface/ActionInterface.h
+  messages/ActionMessage.h
+  messages/Json.h
+  messages/Message.h
+  messages/MessageFactory.h
 )
 
 set(BRAYNSNETWORK_SOURCES

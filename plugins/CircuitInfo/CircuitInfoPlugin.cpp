@@ -24,7 +24,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 
-#include <brayns/common/ActionInterface.h>
+#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/pluginapi/PluginAPI.h>

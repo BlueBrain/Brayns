@@ -21,12 +21,12 @@
 
 #pragma once
 
-#include <brayns/common/ActionMessage.h>
 #include <brayns/common/log.h>
 #include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/types.h>
 
-#include <brayns/network/interface/EntryPoint.h>
+#include <brayns/network/entrypoint/EntryPoint.h>
+#include <brayns/network/messages/ActionMessage.h>
 
 #include <functional>
 #include <string>
@@ -49,6 +49,8 @@ namespace brayns
  * @code
  * std::string to_json(const RetVal&)
  * @endcode
+ *
+ * The new way of registering entrypoint is using the EntryPoint interface.
  */
 class ActionInterface
 {
@@ -69,7 +71,7 @@ public:
      * @tparam Args Types of the arguments to pass to the constructor of T.
      * @param args Arguments to pass to the constructor of T.
      */
-    template<typename T, typename... Args>
+    template <typename T, typename... Args>
     void addEntryPoint(Args&&... args)
     {
         static_assert(std::is_base_of<EntryPoint, T>());

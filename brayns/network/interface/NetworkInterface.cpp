@@ -20,12 +20,11 @@
 #include <cassert>
 
 #include <brayns/common/log.h>
-
+#include <brayns/network/entrypoint/EntryPoint.h>
+#include <brayns/network/entrypoint/EntryPointException.h>
+#include <brayns/network/interface/NetworkInterface.h>
 #include <brayns/network/messages/MessageFactory.h>
-
-#include "EntryPointException.h"
-#include "NetworkInterface.h"
-#include "NetworkRequest.h"
+#include <brayns/network/socket/NetworkRequest.h>
 
 using namespace brayns;
 

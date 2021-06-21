@@ -22,12 +22,11 @@
 #include <string>
 #include <unordered_map>
 
-#include <brayns/common/ActionInterface.h>
-
+#include <brayns/network/entrypoint/EntryPoint.h>
+#include <brayns/network/socket/NetworkSocket.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
-#include "EntryPoint.h"
-#include "NetworkSocket.h"
+#include "ActionInterface.h"
 
 namespace brayns
 {
@@ -56,8 +55,8 @@ public:
 
     /**
      * @brief Register and setup the given entrypoint (API access).
-     * 
-     * @param entryPoint 
+     *
+     * @param entryPoint
      */
     void add(EntryPointPtr entryPoint);
 

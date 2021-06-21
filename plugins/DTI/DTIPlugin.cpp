@@ -26,7 +26,7 @@
 #include <io/DTITypes.h>
 #include <log.h>
 
-#include <brayns/common/ActionInterface.h>
+#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/common/Progress.h>
 #include <brayns/common/geometry/Streamline.h>
 #include <brayns/engine/Camera.h>

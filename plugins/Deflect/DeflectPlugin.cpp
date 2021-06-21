@@ -22,7 +22,7 @@
 #include "DeflectParameters.h"
 #include "utils.h"
 
-#include <brayns/common/ActionInterface.h>
+#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/utils/utils.h>

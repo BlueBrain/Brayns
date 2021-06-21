@@ -27,8 +27,7 @@ namespace brayns
 /**
  * @brief Basic entrypoint implementation.
  *
- * A basic entrypoint takes the request "params" object as input and returns the
- * reply "returns" object.
+ * A basic entrypoint process a single request and returns a single reply.
  *
  * @tparam RequestType Type of the "params" object in client request.
  * @tparam ReplyType Type of the "returns" object in server reply.
@@ -46,13 +45,7 @@ public:
     virtual ReplyType run(const RequestType& request) const = 0;
 
     /**
-     * @brief Process the request using child classes implementation.
-     * 
-     * - Extract request content.
-     * - Deserialize it.
-     * - Forward it to run(RequestType) to get the reply.
-     * - Serialize the reply.
-     * - Send the reply to the client.
+     * @brief Process request and send reply using child implementation.
      *
      * @param request Client request.
      */

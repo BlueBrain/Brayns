@@ -20,10 +20,8 @@
 #include "NetworkManager.h"
 
 #include <brayns/pluginapi/PluginAPI.h>
-
-#include "entrypoints/TestEntryPoint.h"
-
-#include "interface/ServerInterface.h"
+#include <brayns/network/entrypoints/TestEntryPoint.h>
+#include <brayns/network/interface/ServerInterface.h>
 
 using namespace brayns;
 

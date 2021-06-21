@@ -29,8 +29,6 @@
 #include <Poco/Net/HTTPServerResponse.h>
 
 #include <brayns/common/log.h>
-
-#include <brayns/parameters/ApplicationParameters.h>
 #include <brayns/parameters/ParametersManager.h>
 
 using namespace brayns;

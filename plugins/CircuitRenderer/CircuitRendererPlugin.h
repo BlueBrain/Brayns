@@ -21,7 +21,7 @@
 #ifndef CIRCUITRENDERERPLUGIN_H
 #define CIRCUITRENDERERPLUGIN_H
 
-#include <brayns/common/ActionInterface.h>
+#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 

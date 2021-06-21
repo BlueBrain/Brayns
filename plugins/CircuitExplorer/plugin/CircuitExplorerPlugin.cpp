@@ -38,7 +38,7 @@
 #include <plugin/meshing/PointCloudMesher.h>
 #include <plugin/movie/MovieMaker.h>
 
-#include <brayns/common/ActionInterface.h>
+#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/common/Progress.h>
 #include <brayns/common/Timer.h>
 #include <brayns/common/geometry/Streamline.h>

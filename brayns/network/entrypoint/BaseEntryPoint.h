@@ -20,11 +20,12 @@
 
 #pragma once
 
-#include <brayns/network/interface/EntryPoint.h>
-#include <brayns/network/interface/EntryPointException.h>
-#include <brayns/network/interface/NetworkRequest.h>
+#include <brayns/network/socket/NetworkRequest.h>
 
 #include <brayns/pluginapi/PluginAPI.h>
+
+#include "EntryPoint.h"
+#include "EntryPointException.h"
 
 namespace brayns
 {

@@ -21,7 +21,7 @@
 #include "PBRVolumesPlugin.h"
 #include "Log.h"
 
-#include <brayns/common/ActionInterface.h>
+#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/common/propertymap/PropertyMap.h>
 
 #include <brayns/common/geometry/TriangleMesh.h>

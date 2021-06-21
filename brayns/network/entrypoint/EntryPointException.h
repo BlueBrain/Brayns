@@ -28,7 +28,7 @@ namespace brayns
 /**
  * @brief Exception used to throw during the execution of a request inside an
  * entrypoint.
- * 
+ *
  * Contains the necessary info to build an error message and send it
  * to the client.
  *
@@ -38,7 +38,7 @@ class EntryPointException : public std::runtime_error
 public:
     /**
      * @brief Construct an exception with only a description (code = 0).
-     * 
+     *
      * @param message Error description.
      */
     EntryPointException(const std::string& message)
@@ -48,7 +48,7 @@ public:
 
     /**
      * @brief Construct an exception with a code and a description.
-     * 
+     *
      * @param code Error code.
      * @param message Error description.
      */
@@ -60,7 +60,7 @@ public:
 
     /**
      * @brief Get the error code of the exception.
-     * 
+     *
      * @return int Error code.
      */
     int getCode() const { return _code; }

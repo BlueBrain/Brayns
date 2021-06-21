@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/BasicEntryPoint.h"
+#include <brayns/network/entrypoint/BasicEntryPoint.h>
 
 namespace brayns
 {
