@@ -26,7 +26,7 @@
 
 #include <brayns/pluginapi/PluginAPI.h>
 #ifdef BRAYNS_USE_NETWORKING
-#include <brayns/network/NetworkManager.h>
+#include <brayns/network/plugin/NetworkManager.h>
 #include <plugins/Rockets/RocketsPlugin.h>
 #endif
 

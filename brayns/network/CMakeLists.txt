@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 project(braynsNetwork VERSION 0.1.0)
 
 set(BRAYNSNETWORK_HEADERS
-  NetworkManager.h
   entrypoint/BaseEntryPoint.h
   entrypoint/BasicEntryPoint.h
   entrypoint/EntryPoint.h
@@ -13,12 +12,13 @@ set(BRAYNSNETWORK_HEADERS
   messages/Json.h
   messages/Message.h
   messages/MessageFactory.h
+  plugin/NetworkManager.h
 )
 
 set(BRAYNSNETWORK_SOURCES
-  NetworkManager.cpp
   interface/NetworkInterface.cpp
   interface/ServerInterface.cpp
+  plugin/NetworkManager.cpp
 )
 
 set(BRAYNSNETWORK_INCLUDE_DIR ${PROJECT_SOURCE_DIR})
