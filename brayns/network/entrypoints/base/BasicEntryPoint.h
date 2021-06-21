@@ -24,34 +24,43 @@
 
 namespace brayns
 {
-struct JsonSchema
-{
-    template <typename RequestType, typename ReplyType>
-    static JsonValue from()
-    {
-        return {};
-    }
-};
-
-struct JsonSchemaValidator
-{
-    static void validate(const JsonValue& schema, const JsonValue& json) {}
-};
-
+/**
+ * @brief Basic entrypoint implementation.
+ *
+ * A basic entrypoint takes the request "params" object as input and returns the
+ * reply "returns" object.
+ *
+ * @tparam RequestType Type of the "params" object in client request.
+ * @tparam ReplyType Type of the "returns" object in server reply.
+ */
 template <typename RequestType, typename ReplyType>
 class BasicEntryPoint : public BaseEntryPoint
 {
 public:
-    BasicEntryPoint() { setSchema(JsonSchema::from<RequestType, ReplyType>()); }
+    /**
+     * @brief Process the given request body.
+     *
+     * @param request Request content.
+     * @return ReplyType Reply content.
+     */
+    virtual ReplyType run(const RequestType& request) const = 0;
 
-    virtual ReplyType processRequest(const RequestType& request) const = 0;
-
-    virtual void processRequest(const NetworkRequest& request) const override
+    /**
+     * @brief Process the request using child classes implementation.
+     * 
+     * - Extract request content.
+     * - Deserialize it.
+     * - Forward it to run(RequestType) to get the reply.
+     * - Serialize the reply.
+     * - Send the reply to the client.
+     *
+     * @param request Client request.
+     */
+    virtual void run(const NetworkRequest& request) const override
     {
         auto& params = request.getParams();
-        JsonSchemaValidator::validate(getSchema(), params);
         auto message = Json::deserialize<RequestType>(params);
-        auto reply = processRequest(message);
+        auto reply = run(message);
         request.sendReply(reply);
     }
 };

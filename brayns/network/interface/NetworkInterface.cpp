@@ -17,70 +17,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
 #include <cassert>
-#include <stdexcept>
-#include <string>
-#include <unordered_map>
 
-#include <brayns/common/ActionInterface.h>
-#include <brayns/parameters/ParametersManager.h>
-#include <brayns/pluginapi/PluginAPI.h>
+#include <brayns/common/log.h>
 
+#include <brayns/network/messages/MessageFactory.h>
+
+#include "EntryPointException.h"
+#include "NetworkInterface.h"
 #include "NetworkRequest.h"
 
-namespace brayns
+using namespace brayns;
+
+namespace
 {
-class EntryPoints
-{
-public:
-    EntryPoints(PluginAPI& api)
-        : _api(&api)
-    {
-    }
-
-    const EntryPoint* find(const std::string& name) const
-    {
-        auto i = _entryPoints.find(name);
-        return i == _entryPoints.end() ? nullptr : i->second.get();
-    }
-
-    void add(EntryPointPtr entryPoint)
-    {
-        assert(entryPoint);
-        entryPoint->setApi(*_api);
-        entryPoint->onCreate();
-        auto& name = entryPoint->getName();
-        assert(!name.empty());
-        _entryPoints[name] = std::move(entryPoint);
-    }
-
-private:
-    PluginAPI* _api;
-    std::unordered_map<std::string, EntryPointPtr> _entryPoints;
-};
-
-class EntryPointException : public std::runtime_error
-{
-public:
-    EntryPointException(const std::string& message)
-        : std::runtime_error(message)
-    {
-    }
-
-    EntryPointException(int code, const std::string& message)
-        : std::runtime_error(message)
-        , _code(code)
-    {
-    }
-
-    int getCode() const { return _code; }
-
-private:
-    int _code = 0;
-};
-
 class MessageReceiver
 {
 public:
@@ -94,10 +44,6 @@ private:
     static InputPacket _receivePacket(NetworkSocket& socket)
     {
         auto packet = socket.receive();
-        if (packet.isClose())
-        {
-            throw ConnectionClosedException("Connection closed");
-        }
         if (!packet.isText())
         {
             throw EntryPointException("Text frame expected");
@@ -167,31 +113,49 @@ private:
         {
             throw EntryPointException("Invalid entrypoint: " + method);
         }
-        entryPoint->processRequest(request);
+        entryPoint->run(request);
     }
 };
+} // namespace
 
-class NetworkInterface : public ActionInterface
+namespace brayns
 {
-public:
-    NetworkInterface(PluginAPI& api)
-        : _entryPoints(api)
+EntryPoints::EntryPoints(PluginAPI& api)
+    : _api(&api)
+{
+}
+
+const EntryPoint* EntryPoints::find(const std::string& name) const
+{
+    auto i = _entryPoints.find(name);
+    return i == _entryPoints.end() ? nullptr : i->second.get();
+}
+
+void EntryPoints::add(EntryPointPtr entryPoint)
+{
+    assert(entryPoint);
+    entryPoint->setApi(*_api);
+    entryPoint->onCreate();
+    auto& name = entryPoint->getName();
+    assert(!name.empty());
+    _entryPoints[name] = std::move(entryPoint);
+}
+
+NetworkInterface::NetworkInterface(PluginAPI& api)
+    : _entryPoints(api)
+{
+}
+
+void NetworkInterface::run(NetworkSocket& socket)
+{
+    while (NetworkTransaction::run(_entryPoints, socket))
     {
     }
+}
 
-    void run(NetworkSocket& socket)
-    {
-        while (NetworkTransaction::run(_entryPoints, socket))
-        {
-        }
-    }
+void NetworkInterface::addEntryPoint(EntryPointPtr entryPoint)
+{
+    _entryPoints.add(std::move(entryPoint));
+}
 
-    virtual void addEntryPoint(EntryPointPtr entryPoint) override
-    {
-        _entryPoints.add(std::move(entryPoint));
-    }
-
-private:
-    EntryPoints _entryPoints;
-};
 } // namespace brayns

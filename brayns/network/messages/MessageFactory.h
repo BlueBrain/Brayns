@@ -98,9 +98,22 @@ BRAYNS_MESSAGE_ENTRY(std::string, method, "EntryPoint name")
 BRAYNS_MESSAGE_ENTRY(ProgressInfoMessage, params, "Progression info")
 BRAYNS_MESSAGE_END()
 
+/**
+ * @brief Helper class to create standard messages.
+ *
+ */
 class MessageFactory
 {
 public:
+    /**
+     * @brief Create a ReplyMessage corresponding to a RequestMessage.
+     *
+     * The resulting reply message will have the same attributes as the request
+     * (id, method, etc) and empty params (to be filled with message content).
+     *
+     * @param request Request message containing the transaction info.
+     * @return ReplyMessage The reply message corresponding to request.
+     */
     static ReplyMessage createReplyMessage(const RequestMessage& request)
     {
         ReplyMessage reply;
@@ -110,6 +123,16 @@ public:
         return reply;
     }
 
+    /**
+     * @brief Create an ErrorMessage corresponding to a RequestMessage.
+     *
+     * The resulting error message will have the same attributes as the request
+     * (id, method, etc) and an empty description (to be filled with error
+     * info).
+     *
+     * @param request Request message containing the transaction info.
+     * @return ErrorMessage The error message corresponding to request.
+     */
     static ErrorMessage createErrorMessage(const RequestMessage& request)
     {
         ErrorMessage error;
@@ -119,6 +142,15 @@ public:
         return error;
     }
 
+    /**
+     * @brief Create an UpdateMessage corresponding to a RequestMessage.
+     *
+     * The resulting update message will have the same attributes as the request
+     * (method, etc) and empty params (to be filled with update info).
+     *
+     * @param request Request message containing the transaction info.
+     * @return UpdateMessage The error message corresponding to request.
+     */
     static UpdateMessage createUpdateMessage(const RequestMessage& request)
     {
         UpdateMessage update;
@@ -127,6 +159,16 @@ public:
         return update;
     }
 
+    /**
+     * @brief Create a ProgressMessage corresponding to a RequestMessage.
+     *
+     * The resulting progress message will have the same attributes as the
+     * request (id, method, etc) and empty description and amount (to be filled
+     * with message content).
+     *
+     * @param request Request message containing the transaction info.
+     * @return ReplyMessage The reply message corresponding to request.
+     */
     static ProgressMessage createProgressMessage(const RequestMessage& request)
     {
         ProgressMessage progress;

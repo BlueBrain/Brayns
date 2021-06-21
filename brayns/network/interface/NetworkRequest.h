@@ -22,31 +22,74 @@
 
 #include <string>
 
-#include "MessageFactory.h"
+#include <brayns/network/messages/MessageFactory.h>
+
 #include "NetworkSocket.h"
 
 namespace brayns
 {
+/**
+ * @brief Represent a client request sent to brayns.
+ *
+ * Used to store request content and send messages (reply, error, update).
+ *
+ */
 class NetworkRequest
 {
 public:
+    /**
+     * @brief Construct a request from the socket opened with the client.
+     *
+     * @param socket The socket opened by the client using HTTP.
+     */
     NetworkRequest(NetworkSocket& socket)
         : _socket(&socket)
     {
     }
 
+    /**
+     * @brief Get the message of the client request.
+     *
+     * @return const RequestMessage& The message sent by the client.
+     */
     const RequestMessage& getMessage() const { return _message; }
 
+    /**
+     * @brief Get the ID of the request from the message.
+     *
+     * @return const std::string& Request ID.
+     */
     const std::string& getId() const { return _message.id; }
 
+    /**
+     * @brief Get the method of the request (entrypoint name) from the message.
+     *
+     * @return const std::string& The name of the requested method.
+     */
     const std::string& getMethod() const { return _message.method; }
 
+    /**
+     * @brief Get the content of the message (parameters).
+     *
+     * @return const JsonValue& Message content in JSON format.
+     */
     const JsonValue& getParams() const { return _message.params; }
 
+    /**
+     * @brief Setup the client message.
+     *
+     * @param message Client message.
+     */
     void setMessage(RequestMessage message) { _message = std::move(message); }
 
-    void sendReply(const ReplyMessage& reply) const { _send(reply); }
-
+    /**
+     * @brief Send an error message to the client.
+     *
+     * Used to provide error description to the client in case of failure.
+     *
+     * @param code Error code.
+     * @param message Error description.
+     */
     void sendError(int code, const std::string& message) const
     {
         auto error = MessageFactory::createErrorMessage(_message);
@@ -55,6 +98,14 @@ public:
         _send(error);
     }
 
+    /**
+     * @brief Send a progress message to the client.
+     *
+     * Used to provide feedback to the client during the request processing.
+     *
+     * @param operation Current step description.
+     * @param amount Completion percentage.
+     */
     void sendProgress(const std::string& operation, double amount) const
     {
         auto progress = MessageFactory::createProgressMessage(_message);
@@ -63,6 +114,16 @@ public:
         _send(progress);
     }
 
+    /**
+     * @brief Send a reply message in case of success.
+     *
+     * The ReplyMessage sent will be formatted according to the RequestMessage
+     * stored in the instance.
+     *
+     * @tparam MessageType Type of the message stored in the "result" field of
+     * the reply.
+     * @param message Message content stored under "result" in the reply.
+     */
     template <typename MessageType>
     void sendReply(const MessageType& message) const
     {

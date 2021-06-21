@@ -26,7 +26,7 @@
 #include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/types.h>
 
-#include <brayns/network/EntryPoint.h>
+#include <brayns/network/interface/EntryPoint.h>
 
 #include <functional>
 #include <string>

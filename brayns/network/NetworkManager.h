@@ -40,7 +40,7 @@ public:
      * @brief Register base entrypoints and setup ActionInterface.
      *
      */
-    void init() final;
+    virtual void init() override;
 
 private:
     ActionInterfacePtr _actionInterface;

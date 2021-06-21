@@ -8,15 +8,27 @@ set(BRAYNSNETWORK_HEADERS
 
 set(BRAYNSNETWORK_SOURCES
   NetworkManager.cpp
+  interface/NetworkInterface.cpp
+  interface/ServerInterface.cpp
 )
 
 set(BRAYNSNETWORK_INCLUDE_DIR ${PROJECT_SOURCE_DIR})
 
 add_library(braynsNetwork SHARED ${BRAYNSNETWORK_SOURCES} ${BRAYNSNETWORK_HEADERS})
+
 target_compile_options(braynsNetwork PRIVATE "-Werror")
-target_include_directories(braynsNetwork PUBLIC $<BUILD_INTERFACE:${BRAYNSNETWORK_INCLUDE_DIR}>
-                                                $<INSTALL_INTERFACE:include>)
-target_link_libraries(braynsNetwork PRIVATE braynsCommon braynsParameters braynsPluginAPI Poco::Foundation Poco::Net Poco::JSON)
+
+target_include_directories(braynsNetwork PUBLIC
+  $<BUILD_INTERFACE:${BRAYNSNETWORK_INCLUDE_DIR}>
+  $<INSTALL_INTERFACE:include>)
+
+target_link_libraries(braynsNetwork PRIVATE
+  braynsCommon
+  braynsParameters
+  braynsPluginAPI
+  Poco::Foundation
+  Poco::Net Poco::JSON
+)
 
 set_target_properties(braynsNetwork
     PROPERTIES

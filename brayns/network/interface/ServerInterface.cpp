@@ -17,19 +17,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ServerInterface.h"
 
-#include <memory>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
 #include <Poco/Net/HTTPRequestHandler.h>
 #include <Poco/Net/HTTPRequestHandlerFactory.h>
-#include <Poco/Net/HTTPServer.h>
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPServerResponse.h>
 
-#include "NetworkInterface.h"
+#include <brayns/common/log.h>
 
-namespace brayns
+#include <brayns/parameters/ApplicationParameters.h>
+#include <brayns/parameters/ParametersManager.h>
+
+using namespace brayns;
+
+namespace
 {
 class RequestHandler : public Poco::Net::HTTPRequestHandler
 {
@@ -75,34 +81,23 @@ private:
     NetworkInterface* _interface;
 };
 
-class ServerFactory
+class ServerUri
 {
 public:
-    static std::unique_ptr<Poco::Net::HTTPServer> createServer(
-        PluginAPI& api, NetworkInterface& interface)
-    {
-        return std::make_unique<Poco::Net::HTTPServer>(createFactory(interface),
-                                                       getPort(api),
-                                                       createSettings(api));
-    }
-
-private:
-    static Poco::Net::HTTPRequestHandlerFactory::Ptr createFactory(
-        NetworkInterface& interface)
-    {
-        return Poco::makeShared<RequestHandlerFactory>(interface);
-    }
-
-    static const std::string& getUri(PluginAPI& api)
+    static const std::string& fromApi(PluginAPI& api)
     {
         auto& manager = api.getParametersManager();
         auto& application = manager.getApplicationParameters();
         return application.getHttpServerURI();
     }
+};
 
-    static Poco::UInt16 getPort(PluginAPI& api)
+class ServerPort
+{
+public:
+    static Poco::UInt16 fromApi(PluginAPI& api)
     {
-        auto& uri = getUri(api);
+        auto& uri = ServerUri::fromApi(api);
         auto i = uri.find(':');
         if (i >= uri.size() - 1)
         {
@@ -117,28 +112,40 @@ private:
         }
         return port;
     }
+};
 
-    static Poco::Net::HTTPServerParams::Ptr createSettings(PluginAPI& api)
+class ServerParams
+{
+public:
+    static Poco::Net::HTTPServerParams::Ptr fromApi(PluginAPI& api)
     {
         auto settings = Poco::makeAuto<Poco::Net::HTTPServerParams>();
         settings->setMaxThreads(1);
         settings->setMaxQueued(10000);
-        settings->setServerName(getUri(api));
         return settings;
     }
 };
 
-class ServerInterface : public NetworkInterface
+class ServerFactory
 {
 public:
-    ServerInterface(PluginAPI& api)
-        : NetworkInterface(api)
-        , _server(ServerFactory::createServer(api, *this))
+    static std::unique_ptr<Poco::Net::HTTPServer> createServer(
+        PluginAPI& api, NetworkInterface& interface)
     {
-        _server->start();
+        return std::make_unique<Poco::Net::HTTPServer>(
+            Poco::makeShared<RequestHandlerFactory>(interface),
+            ServerPort::fromApi(api),
+            ServerParams::fromApi(api));
     }
-
-private:
-    std::unique_ptr<Poco::Net::HTTPServer> _server;
 };
+} // namespace
+
+namespace brayns
+{
+ServerInterface::ServerInterface(PluginAPI& api)
+    : NetworkInterface(api)
+    , _server(ServerFactory::createServer(api, *this))
+{
+    _server->start();
 }
+} // namespace brayns

@@ -23,7 +23,7 @@
 #include <memory>
 #include <string>
 
-#include "Json.h"
+#include <brayns/network/messages/Json.h>
 
 namespace brayns
 {
@@ -86,6 +86,6 @@ public:
      * @param request Request received from the client used to retreive request
      * info and send and receive text frames.
      */
-    virtual void processRequest(const NetworkRequest& request) const = 0;
+    virtual void run(const NetworkRequest& request) const = 0;
 };
 } // namespace brayns

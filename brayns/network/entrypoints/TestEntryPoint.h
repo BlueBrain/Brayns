@@ -1,6 +1,6 @@
 #pragma once
 
-#include <brayns/network/BasicEntryPoint.h>
+#include "base/BasicEntryPoint.h"
 
 namespace brayns
 {
@@ -21,7 +21,7 @@ public:
         setDescription("This is a test");
     }
 
-    virtual TestReply processRequest(const TestRequest& request) const override
+    virtual TestReply run(const TestRequest& request) const override
     {
         TestReply reply;
         reply.test = "Success";

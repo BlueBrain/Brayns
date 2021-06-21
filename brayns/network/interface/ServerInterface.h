@@ -19,19 +19,34 @@
 
 #pragma once
 
-#include <Poco/Net/HTTPClientSession.h>
+#include <memory>
+
+#include <Poco/Net/HTTPServer.h>
 
 #include "NetworkInterface.h"
 
 namespace brayns
 {
-class ClientInterface : public NetworkInterface
+/**
+ * @brief Server side implementation of the Network interface.
+ *
+ */
+class ServerInterface : public NetworkInterface
 {
 public:
-    ClientInterface(PluginAPI& api)
-        : NetworkInterface(api)
-    {
-        // Setup client thread.
-    }
+    /**
+     * @brief Construct the server interface.
+     *
+     * Start an HTTP server in a separated thread that listen on Brayns HTTP
+     * server port. On each client request, a WebSocket communication is opened
+     * using the HTTP request and response and forwarded to the base class run
+     * method.
+     *
+     * @param api Brayns API reference.
+     */
+    ServerInterface(PluginAPI& api);
+
+private:
+    std::unique_ptr<Poco::Net::HTTPServer> _server;
 };
-}
+} // namespace brayns

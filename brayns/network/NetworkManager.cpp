@@ -21,9 +21,9 @@
 
 #include <brayns/pluginapi/PluginAPI.h>
 
-#include "ClientInterface.h"
-#include "ServerInterface.h"
 #include "entrypoints/TestEntryPoint.h"
+
+#include "interface/ServerInterface.h"
 
 using namespace brayns;
 
@@ -34,15 +34,8 @@ class ActionInterfaceFactory
 public:
     static ActionInterfacePtr createActionInterface(PluginAPI& api)
     {
-        if (_isClient(api))
-        {
-            return std::make_shared<ClientInterface>(api);
-        }
         return std::make_shared<ServerInterface>(api);
     }
-
-private:
-    static bool _isClient(PluginAPI&) { return false; }
 };
 
 class EntryPointManager
