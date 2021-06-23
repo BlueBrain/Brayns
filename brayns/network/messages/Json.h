@@ -56,6 +56,26 @@ using JsonArray = Poco::JSON::Array;
 using JsonObject = Poco::JSON::Object;
 
 /**
+ * @brief Check if a type is a primitive JSON type (bool, number, string).
+ * 
+ * @tparam T Type to check.
+ */
+template<typename T>
+struct JsonType
+{
+    /**
+     * @brief Check if T is a primitive JSON type.
+     * 
+     * @return true T is bool, number or string.
+     * @return false T is a complex type (array or object).
+     */
+    static constexpr bool isPrimitive()
+    {
+        return std::is_arithmetic<T>() || std::is_same<T, std::string>();
+    }
+};
+
+/**
  * @brief Template used to serialize and deserialize JSON.
  *
  * The default implementation calls Poco serialization and works for all
@@ -67,10 +87,7 @@ using JsonObject = Poco::JSON::Object;
 template <typename T>
 struct JsonSerializer
 {
-    static constexpr bool isValidType =
-        std::is_arithmetic<T>() || std::is_same<T, std::string>();
-
-    static_assert(isValidType,
+    static_assert(JsonType<T>::isPrimitive(),
                   "JSON serialization is not supported for this type, please "
                   "provide a specialization of JsonSerializer<T>");
 
@@ -90,6 +107,10 @@ struct JsonSerializer
      */
     static void deserialize(const JsonValue& json, T& value)
     {
+        if (!json.isNumeric() && !json.isString())
+        {
+            return;
+        }
         value = json.convert<T>();
     }
 };
@@ -132,15 +153,15 @@ struct Json
      * @brief Serialize a given type to a JsonValue using the
      * JsonSerializer<T>::serialize (must have a valid specialization).
      *
-     * @tparam T The type of the object to serialize.
-     * @param data The object to serialize.
-     * @return JsonValue The JSON representation of the object.
+     * @tparam T Type of the object to serialize.
+     * @param value Object to serialize.
+     * @return JsonValue JSON source.
      */
     template <typename T>
-    static JsonValue serialize(const T& data)
+    static JsonValue serialize(const T& value)
     {
         JsonValue json;
-        JsonSerializer<T>::serialize(data, json);
+        JsonSerializer<T>::serialize(value, json);
         return json;
     }
 
@@ -149,29 +170,42 @@ struct Json
      * stringify.
      *
      * @tparam T The type of the object to serialize.
-     * @param data The object to serialize.
+     * @param value The object to serialize.
      * @return std::string JSON string representing the object.
      */
     template <typename T>
-    static std::string stringify(const T& data)
+    static std::string stringify(const T& value)
     {
-        return stringify(serialize(data));
+        return stringify(serialize(value));
     }
 
     /**
      * @brief Convert a JsonValue to a given type using
      * JsonSerializer<T>::serialize (must have a valid specialization).
      *
-     * @tparam T The type of the resulting object.
-     * @param json The JsonValue containing the object data.
-     * @return T The deserialized object.
+     * @tparam T Type of the resulting object.
+     * @param json JsonValue containing the object value.
+     * @return T Deserialized object.
      */
     template <typename T>
     static T deserialize(const JsonValue& json)
     {
-        T data;
-        JsonSerializer<T>::deserialize(json, data);
-        return data;
+        T value;
+        JsonSerializer<T>::deserialize(json, value);
+        return value;
+    }
+
+    /**
+     * @brief Deserialize with default value.
+     *
+     * @tparam T Type of the resulting object.
+     * @param json JsonValue containing the object value.
+     * @return T Deserialized object.
+     */
+    template <typename T>
+    static void deserialize(const JsonValue& json, T& value)
+    {
+        JsonSerializer<T>::deserialize(json, value);
     }
 
     /**

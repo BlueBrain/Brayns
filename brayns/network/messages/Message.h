@@ -26,129 +26,10 @@
 #include <vector>
 
 #include "Json.h"
+#include "JsonSchema.h"
 
 namespace brayns
 {
-/**
- * @brief Perform the serialization of a message entry. Used to remember an
- * entry type and its position in a message to serialize / deserialize it later.
- *
- */
-class EntrySerializer
-{
-public:
-    /**
-     * @brief Construct an invalid serializer.
-     *
-     */
-    EntrySerializer() = default;
-
-    /**
-     * @brief Construct a serializer from a message and an entry.
-     *
-     * @tparam MessageType The message type that holds the entry.
-     * @tparam EntryType The type of the entry that will be serialized.
-     * @param message An instance of the message type.
-     * @param entry An instance of the the entry type (used to compute offset
-     * from the parent message).
-     */
-    template <typename MessageType, typename EntryType>
-    EntrySerializer(const MessageType& message, const EntryType& entry)
-    {
-        _messageType = typeid(MessageType);
-        _offset = reinterpret_cast<const char*>(&entry) -
-                  reinterpret_cast<const char*>(&message);
-        _serialize = [](const void* value, JsonValue& json)
-        {
-            auto& entry = *static_cast<const EntryType*>(value);
-            JsonSerializer<EntryType>::serialize(entry, json);
-        };
-        _deserialize = [](const JsonValue& json, void* value)
-        {
-            auto& entry = *static_cast<EntryType*>(value);
-            JsonSerializer<EntryType>::deserialize(json, entry);
-        };
-    }
-
-    /**
-     * @brief Serialize the entry of the provided message registered during
-     * construction to the provided JsonValue.
-     *
-     * @tparam T The type of the message holding the entry (must be the same a
-     * the one at construction).
-     * @param message The message holding the entry to serialize.
-     * @param json The output json value.
-     */
-    template <typename T>
-    void serialize(const T& message, JsonValue& json) const
-    {
-        assert(_messageType == typeid(T));
-        auto entry = reinterpret_cast<const char*>(&message) + _offset;
-        _serialize(entry, json);
-    }
-
-    /**
-     * @brief Deserialize a JsonValue to the registered entry in the provided
-     * message.
-     *
-     * @tparam T The type of the message (must be the same a the one at
-     * construction).
-     * @param json The input json value.
-     * @param message The message holding the entry to update.
-     */
-    template <typename T>
-    void deserialize(const JsonValue& json, T& message) const
-    {
-        assert(_messageType == typeid(T));
-        auto entry = reinterpret_cast<char*>(&message) + _offset;
-        _deserialize(json, entry);
-    }
-
-private:
-    std::type_index _messageType = typeid(void);
-    size_t _offset = 0;
-    std::function<void(const void*, JsonValue&)> _serialize;
-    std::function<void(const JsonValue&, void*)> _deserialize;
-};
-
-/**
- * @brief Describe a message entry and how to serialize it to JSON.
- *
- */
-struct EntryInfo
-{
-    /**
-     * @brief The name (JSON key) of the entry.
-     *
-     */
-    std::string name;
-
-    /**
-     * @brief A description of the entry.
-     *
-     */
-    std::string description;
-
-    /**
-     * @brief A serializer that holds the entry serialization info.
-     *
-     */
-    EntrySerializer serializer;
-};
-
-/**
- * @brief Describe a message as a set of EntryInfo.
- *
- */
-struct MessageInfo
-{
-    /**
-     * @brief The list of all message entries.
-     *
-     */
-    std::vector<EntryInfo> entries;
-};
-
 /**
  * @brief Template used to identify messages inside templates to provide
  * automatically a custom JsonSerializer for them. All messages are a
@@ -189,15 +70,7 @@ struct JsonSerializer<MessageHolder<TagType>>
      */
     static void serialize(const Message& value, JsonValue& json)
     {
-        auto& message = Message::getMessageInfo();
-        auto object = Poco::makeShared<JsonObject>();
-        for (const auto& entry : message.entries)
-        {
-            JsonValue child;
-            entry.serializer.serialize(value, child);
-            object->set(entry.name, child);
-        }
-        json = object;
+        Message::serialize(value, json);
     }
 
     /**
@@ -213,22 +86,76 @@ struct JsonSerializer<MessageHolder<TagType>>
      */
     static void deserialize(const JsonValue& json, Message& value)
     {
+        Message::deserialize(json, value);
+    }
+};
+
+template <typename TagType>
+struct JsonSchemaFactory<MessageHolder<TagType>>
+{
+    using Message = MessageHolder<TagType>;
+
+    static JsonSchema createJsonSchema() { return Message::getJsonSchema(); }
+};
+
+class MessageInfo
+{
+public:
+    using Serializer = std::function<void(const void*, JsonObject&)>;
+    using Deserializer = std::function<void(const JsonObject&, void*)>;
+
+    MessageInfo() { _schema.type = JsonTypeName::ofObject(); }
+
+    const JsonSchema& getJsonSchema() const { return _schema; }
+
+    void serialize(const void* value, JsonValue& json) const
+    {
+        auto object = Poco::makeShared<JsonObject>();
+        for (const auto& serializer : _serializers)
+        {
+            serializer(value, *object);
+        }
+        json = object;
+    }
+
+    void deserialize(const JsonValue& json, void* value) const
+    {
         if (json.type() != typeid(JsonObject::Ptr))
         {
             return;
         }
-        auto& message = Message::getMessageInfo();
         auto& object = *json.extract<JsonObject::Ptr>();
-        for (const auto& entry : message.entries)
+        for (const auto& deserializer : _deserializers)
         {
-            if (!object.has(entry.name))
-            {
-                continue;
-            }
-            auto child = object.get(entry.name);
-            entry.serializer.deserialize(child, value);
+            deserializer(object, value);
         }
     }
+
+    void addSerializer(Serializer serializer)
+    {
+        _serializers.push_back(std::move(serializer));
+    }
+
+    void addDeserializer(Deserializer deserializer)
+    {
+        _deserializers.push_back(std::move(deserializer));
+    }
+
+    template <typename T>
+    JsonSchema& addProperty(std::string name, std::string description)
+    {
+        auto& properties = _schema.properties;
+        auto schema = JsonSchemaFactory<T>::createJsonSchema();
+        properties.emplace_back(std::move(name), std::move(schema));
+        auto& property = properties.back().second;
+        property.description = std::move(description);
+        return property;
+    }
+
+private:
+    JsonSchema _schema;
+    std::vector<Serializer> _serializers;
+    std::vector<Deserializer> _deserializers;
 };
 
 /**
@@ -253,30 +180,45 @@ struct JsonSerializer<MessageHolder<TagType>>
  * @endcode
  *
  */
-#define BRAYNS_MESSAGE_BEGIN(TYPE)                 \
-    struct TYPE##Tag                               \
-    {                                              \
-    };                                             \
-    using TYPE = MessageHolder<TYPE##Tag>;         \
-    template <>                                    \
-    struct MessageHolder<TYPE##Tag>                \
-    {                                              \
-    private:                                       \
-        static MessageInfo& _getMessageInfo()      \
-        {                                          \
-            static MessageInfo info;               \
-            return info;                           \
-        }                                          \
-                                                   \
-    public:                                        \
-        static const MessageInfo& getMessageInfo() \
-        {                                          \
-            static const int buildMessageInfo = [] \
-            {                                      \
-                TYPE();                            \
-                return 0;                          \
-            }();                                   \
-            return _getMessageInfo();              \
+#define BRAYNS_MESSAGE_BEGIN(TYPE)                                  \
+    struct TYPE##Tag                                                \
+    {                                                               \
+    };                                                              \
+    using TYPE = MessageHolder<TYPE##Tag>;                          \
+    template <>                                                     \
+    struct MessageHolder<TYPE##Tag>                                 \
+    {                                                               \
+    private:                                                        \
+        static MessageInfo& _getMessageInfo()                       \
+        {                                                           \
+            static MessageInfo info;                                \
+            return info;                                            \
+        }                                                           \
+                                                                    \
+        static const MessageInfo& _setupAndGetMessageInfo()         \
+        {                                                           \
+            static const int buildMessageInfo = []                  \
+            {                                                       \
+                TYPE();                                             \
+                return 0;                                           \
+            }();                                                    \
+            return _getMessageInfo();                               \
+        }                                                           \
+                                                                    \
+    public:                                                         \
+        static const JsonSchema& getJsonSchema()                    \
+        {                                                           \
+            return _setupAndGetMessageInfo().getJsonSchema();       \
+        }                                                           \
+                                                                    \
+        static void serialize(const TYPE& value, JsonValue& json)   \
+        {                                                           \
+            _setupAndGetMessageInfo().serialize(&value, json);      \
+        }                                                           \
+                                                                    \
+        static void deserialize(const JsonValue& json, TYPE& value) \
+        {                                                           \
+            _setupAndGetMessageInfo().deserialize(json, &value);    \
         }
 
 /**
@@ -287,20 +229,29 @@ struct JsonSerializer<MessageHolder<TagType>>
  * serialized using JsonSerializer<TYPE>.
  *
  */
-#define BRAYNS_MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION)  \
-    TYPE NAME = [&]                                    \
-    {                                                  \
-        static const int addEntry = [&]                \
-        {                                              \
-            EntryInfo entry;                           \
-            entry.name = #NAME;                        \
-            entry.description = DESCRIPTION;           \
-            entry.serializer = {*this, NAME};          \
-            auto& entries = _getMessageInfo().entries; \
-            entries.push_back(std::move(entry));       \
-            return 0;                                  \
-        }();                                           \
-        return TYPE{};                                 \
+#define BRAYNS_MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION)                        \
+    TYPE NAME = []                                                           \
+    {                                                                        \
+        static const int registerEntry = []                                  \
+        {                                                                    \
+            using MessageType = std::decay_t<decltype(*this)>;               \
+            auto& info = _getMessageInfo();                                  \
+            info.addProperty<TYPE>(#NAME, DESCRIPTION);                      \
+            info.addSerializer(                                              \
+                [](const void* value, JsonObject& object)                    \
+                {                                                            \
+                    auto& message = *static_cast<const MessageType*>(value); \
+                    object.set(#NAME, Json::serialize(message.NAME));        \
+                });                                                          \
+            info.addDeserializer(                                            \
+                [](const JsonObject& object, void* value)                    \
+                {                                                            \
+                    auto& message = *static_cast<MessageType*>(value);       \
+                    Json::deserialize(object.get(#NAME), message.NAME);      \
+                });                                                          \
+            return 0;                                                        \
+        }();                                                                 \
+        return TYPE{};                                                       \
     }();
 
 /**
