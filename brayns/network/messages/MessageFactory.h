@@ -99,6 +99,13 @@ BRAYNS_MESSAGE_ENTRY(ProgressInfoMessage, params, "Progression info")
 BRAYNS_MESSAGE_END()
 
 /**
+ * @brief Empty message if no requests or replies are needed.
+ *
+ */
+BRAYNS_MESSAGE_BEGIN(EmptyMessage)
+BRAYNS_MESSAGE_END()
+
+/**
  * @brief Helper class to create standard messages.
  *
  */

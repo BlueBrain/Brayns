@@ -18,6 +18,7 @@ set(BRAYNSNETWORK_HEADERS
 set(BRAYNSNETWORK_SOURCES
   interface/NetworkInterface.cpp
   interface/ServerInterface.cpp
+  messages/JsonSchemaValidator.cpp
   plugin/NetworkManager.cpp
 )
 

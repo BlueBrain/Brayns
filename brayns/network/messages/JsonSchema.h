@@ -45,6 +45,8 @@ struct JsonSchema
     std::vector<std::string> required;
     std::vector<JsonSchema> items;
 
+    bool isEmpty() const { return type.empty(); }
+
     bool requires(const std::string& key) const
     {
         for (const auto& value : required)

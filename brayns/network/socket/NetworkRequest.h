@@ -80,7 +80,7 @@ public:
      *
      * @param message Client message.
      */
-    void setMessage(RequestMessage message) { _message = std::move(message); }
+    void setMessage(const RequestMessage& message) { _message = message; }
 
     /**
      * @brief Send an error message to the client.

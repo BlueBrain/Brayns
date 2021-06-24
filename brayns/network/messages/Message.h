@@ -46,8 +46,8 @@ struct MessageHolder
  * @brief Custom JSON serializer for Message specializations. Use internally
  * getMessageInfo() method to perform the serialization.
  *
- * @tparam TagType The tag type provided to Message<TagType> to identify the
- * message at compile-time.
+ * @tparam TagType The tag type provided to MessageHolder<TagType> to identify
+ * the message at compile-time.
  */
 template <typename TagType>
 struct JsonSerializer<MessageHolder<TagType>>
@@ -90,11 +90,25 @@ struct JsonSerializer<MessageHolder<TagType>>
     }
 };
 
+/**
+ * @brief Message JSON schemas are created using static method getJsonSchema().
+ *
+ * @tparam TagType TagType identifying message type in MessageHolder<TagType>.
+ */
 template <typename TagType>
 struct JsonSchemaFactory<MessageHolder<TagType>>
 {
+    /**
+     * @brief Alias for the serialized message type.
+     *
+     */
     using Message = MessageHolder<TagType>;
 
+    /**
+     * @brief Create a JSON schema using Message::getJsonSchema static method.
+     *
+     * @return JsonSchema JSON schema of the message.
+     */
     static JsonSchema createJsonSchema() { return Message::getJsonSchema(); }
 };
 
@@ -131,25 +145,25 @@ public:
         }
     }
 
-    void addSerializer(Serializer serializer)
+    void addSerializer(const Serializer& serializer)
     {
-        _serializers.push_back(std::move(serializer));
+        _serializers.push_back(serializer);
     }
 
-    void addDeserializer(Deserializer deserializer)
+    void addDeserializer(const Deserializer& deserializer)
     {
-        _deserializers.push_back(std::move(deserializer));
+        _deserializers.push_back(deserializer);
     }
 
     template <typename T>
-    JsonSchema& addProperty(std::string name, std::string description)
+    void addProperty(const std::string& name,
+                            const std::string& description)
     {
+        _schema.required.push_back(name);
         auto& properties = _schema.properties;
         auto schema = JsonSchemaFactory<T>::createJsonSchema();
-        properties.emplace_back(std::move(name), std::move(schema));
-        auto& property = properties.back().second;
-        property.description = std::move(description);
-        return property;
+        schema.description = description;
+        properties.emplace_back(name, std::move(schema));;
     }
 
 private:

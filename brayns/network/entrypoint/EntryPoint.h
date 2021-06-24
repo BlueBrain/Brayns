@@ -23,13 +23,12 @@
 #include <memory>
 #include <string>
 
-#include <brayns/network/messages/Json.h>
-
 namespace brayns
 {
 class EntryPoint;
 class NetworkRequest;
 class PluginAPI;
+struct EntryPointSchema;
 
 /**
  * @brief EntryPoint holder.
@@ -57,7 +56,7 @@ public:
      * @brief Called once the entrypoint is ready to be used.
      *
      */
-    virtual void onCreate() {}
+    virtual void init() {}
 
     /**
      * @brief Return the name of the entrypoint.
@@ -76,9 +75,9 @@ public:
     /**
      * @brief Return the JSON schema of the entrypoint.
      *
-     * @return const JsonValue& The entrypoint JSON schema.
+     * @return const JsonSchema& The entrypoint JSON schema.
      */
-    virtual const JsonValue& getSchema() const = 0;
+    virtual const EntryPointSchema& getSchema() const = 0;
 
     /**
      * @brief Called each time the client sends a request to the entrypoint.

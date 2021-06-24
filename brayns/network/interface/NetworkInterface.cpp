@@ -20,9 +20,12 @@
 #include <cassert>
 
 #include <brayns/common/log.h>
+#include <brayns/common/utils/stringUtils.h>
 #include <brayns/network/entrypoint/EntryPoint.h>
 #include <brayns/network/entrypoint/EntryPointException.h>
+#include <brayns/network/entrypoint/EntryPointSchema.h>
 #include <brayns/network/interface/NetworkInterface.h>
+#include <brayns/network/messages/JsonSchemaValidator.h>
 #include <brayns/network/messages/MessageFactory.h>
 #include <brayns/network/socket/NetworkRequest.h>
 
@@ -78,14 +81,14 @@ private:
 class NetworkTransaction
 {
 public:
-    static bool run(const EntryPoints& entryPoints, NetworkSocket& socket)
+    static bool run(const NetworkInterface& interface, NetworkSocket& socket)
     {
         NetworkRequest request(socket);
         try
         {
             auto message = MessageReceiver::receive(socket);
-            request.setMessage(std::move(message));
-            _run(entryPoints, request);
+            request.setMessage(message);
+            _run(interface, request);
         }
         catch (EntryPointException& e)
         {
@@ -104,57 +107,66 @@ public:
     }
 
 private:
-    static void _run(const EntryPoints& entryPoints, NetworkRequest& request)
+    static void _run(const NetworkInterface& interface, NetworkRequest& request)
     {
         auto& method = request.getMethod();
-        auto entryPoint = entryPoints.find(method);
+        auto entryPoint = interface.findEntryPoint(method);
         if (!entryPoint)
         {
             throw EntryPointException("Invalid entrypoint: " + method);
         }
+        _validateSchema(*entryPoint, request);
         entryPoint->run(request);
+    }
+
+    static void _validateSchema(const EntryPoint& entryPoint,
+                                NetworkRequest& request)
+    {
+        auto& schema = entryPoint.getSchema();
+        if (schema.params.isEmpty())
+        {
+            return;
+        }
+        auto& params = request.getParams();
+        auto errors = JsonSchemaValidator::validate(params, schema.params);
+        if (errors.isEmpty())
+        {
+            return;
+        }
+        throw EntryPointException("JSON schema errors:\n" + errors.toString());
     }
 };
 } // namespace
 
 namespace brayns
 {
-EntryPoints::EntryPoints(PluginAPI& api)
+NetworkInterface::NetworkInterface(PluginAPI& api)
     : _api(&api)
 {
 }
 
-const EntryPoint* EntryPoints::find(const std::string& name) const
+const EntryPoint* NetworkInterface::findEntryPoint(
+    const std::string& name) const
 {
     auto i = _entryPoints.find(name);
     return i == _entryPoints.end() ? nullptr : i->second.get();
 }
 
-void EntryPoints::add(EntryPointPtr entryPoint)
-{
-    assert(entryPoint);
-    entryPoint->setApi(*_api);
-    entryPoint->onCreate();
-    auto& name = entryPoint->getName();
-    assert(!name.empty());
-    _entryPoints[name] = std::move(entryPoint);
-}
-
-NetworkInterface::NetworkInterface(PluginAPI& api)
-    : _entryPoints(api)
-{
-}
-
 void NetworkInterface::run(NetworkSocket& socket)
 {
-    while (NetworkTransaction::run(_entryPoints, socket))
+    while (NetworkTransaction::run(*this, socket))
     {
     }
 }
 
 void NetworkInterface::addEntryPoint(EntryPointPtr entryPoint)
 {
-    _entryPoints.add(std::move(entryPoint));
+    assert(entryPoint);
+    entryPoint->setApi(*_api);
+    entryPoint->init();
+    auto& name = entryPoint->getName();
+    assert(!name.empty());
+    _entryPoints[name] = std::move(entryPoint);
 }
 
 } // namespace brayns

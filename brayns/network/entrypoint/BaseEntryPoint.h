@@ -20,12 +20,15 @@
 
 #pragma once
 
+#include <brayns/network/messages/Json.h>
+#include <brayns/network/messages/JsonSchema.h>
 #include <brayns/network/socket/NetworkRequest.h>
 
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include "EntryPoint.h"
 #include "EntryPointException.h"
+#include "EntryPointSchema.h"
 
 namespace brayns
 {
@@ -48,16 +51,16 @@ public:
      *
      * @param name Name of the entrypoint.
      */
-    void setName(std::string name) { _name = std::move(name); }
+    void setName(const std::string& name) { _name = name; }
 
     /**
      * @brief Setup the description of the entrypoint.
      *
      * @param description Description of the entrypoint.
      */
-    void setDescription(std::string description)
+    void setDescription(const std::string& description)
     {
-        _description = std::move(description);
+        _description = description;
     }
 
     /**
@@ -65,7 +68,7 @@ public:
      *
      * @param schema Schema of the entrypoint.
      */
-    void setSchema(JsonValue schema) { _schema = std::move(schema); }
+    void setSchema(const EntryPointSchema& schema) { _schema = schema; }
 
     /**
      * @brief Store the API reference inside instance for child reuse.
@@ -94,14 +97,17 @@ public:
     /**
      * @brief Must return the JSON schema of the entrypoint.
      *
-     * @return const JsonValue& The entrypoint JSON schema.
+     * @return const EntryPointSchema& The entrypoint JSON schema.
      */
-    virtual const JsonValue& getSchema() const override { return _schema; }
+    virtual const EntryPointSchema& getSchema() const override
+    {
+        return _schema;
+    }
 
 private:
     PluginAPI* _api = nullptr;
     std::string _name;
     std::string _description;
-    JsonValue _schema;
+    EntryPointSchema _schema;
 };
 } // namespace brayns

@@ -31,41 +31,6 @@
 namespace brayns
 {
 /**
- * @brief Storage class for entrypoints.
- *
- */
-class EntryPoints
-{
-public:
-    /**
-     * @brief Construct an entrypoint registry with API access.
-     *
-     * @param api Brayns API reference.
-     */
-    EntryPoints(PluginAPI& api);
-
-    /**
-     * @brief Find an entrypoint with the given name.
-     *
-     * @param name EntryPoint name (method in request).
-     * @return const EntryPoint* Pointer to the corresponding entrypoint or null
-     * if not found.
-     */
-    const EntryPoint* find(const std::string& name) const;
-
-    /**
-     * @brief Register and setup the given entrypoint (API access).
-     *
-     * @param entryPoint
-     */
-    void add(EntryPointPtr entryPoint);
-
-private:
-    PluginAPI* _api;
-    std::unordered_map<std::string, EntryPointPtr> _entryPoints;
-};
-
-/**
  * @brief Base implementation of ActionInterface to register entrypoints.
  *
  * Registered entrypoints will be stored inside the instance and fetched when a
@@ -87,6 +52,15 @@ public:
     NetworkInterface(PluginAPI& api);
 
     /**
+     * @brief Find an entrypoint with the given name.
+     *
+     * @param name EntryPoint name (method in request).
+     * @return const EntryPoint* Pointer to the corresponding entrypoint or null
+     * if not found.
+     */
+    const EntryPoint* findEntryPoint(const std::string& name) const;
+
+    /**
      * @brief Receive requests and send reply to the client until connection is
      * closed.
      *
@@ -102,6 +76,7 @@ public:
     virtual void addEntryPoint(EntryPointPtr entryPoint) override;
 
 private:
-    EntryPoints _entryPoints;
+    PluginAPI* _api;
+    std::unordered_map<std::string, EntryPointPtr> _entryPoints;
 };
 } // namespace brayns

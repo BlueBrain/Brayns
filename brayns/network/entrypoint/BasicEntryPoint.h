@@ -22,6 +22,8 @@
 
 #include "BaseEntryPoint.h"
 
+#include <brayns/network/messages/JsonSchemaValidator.h>
+
 namespace brayns
 {
 /**
@@ -36,6 +38,11 @@ template <typename RequestType, typename ReplyType>
 class BasicEntryPoint : public BaseEntryPoint
 {
 public:
+    BasicEntryPoint()
+    {
+        setSchema(EntryPointSchema::from<RequestType, ReplyType>());
+    }
+
     /**
      * @brief Process the given request body.
      *
