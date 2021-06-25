@@ -19,18 +19,21 @@
 
 #include "NetworkManager.h"
 
-#include <brayns/pluginapi/PluginAPI.h>
 #include <brayns/network/entrypoints/TestEntryPoint.h>
+#include <brayns/network/entrypoints/SchemaEntryPoint.h>
 #include <brayns/network/interface/ServerInterface.h>
+#include <brayns/pluginapi/PluginAPI.h>
 
 using namespace brayns;
 
 namespace
 {
-class ActionInterfaceFactory
+using NetworkInterfacePtr = std::shared_ptr<NetworkInterface>;
+
+class NetworkInterfaceFactory
 {
 public:
-    static ActionInterfacePtr createActionInterface(PluginAPI& api)
+    static NetworkInterfacePtr createNetworkInterface(PluginAPI& api)
     {
         return std::make_shared<ServerInterface>(api);
     }
@@ -39,9 +42,10 @@ public:
 class EntryPointManager
 {
 public:
-    static void registerEntryPoints(ActionInterface& interface)
+    static void registerEntryPoints(NetworkInterface& interface)
     {
-        interface.addEntryPoint<TestEntryPoint>();
+        interface.add<TestEntryPoint>();
+        interface.add<SchemaEntryPoint>();
     }
 };
 } // namespace
@@ -58,8 +62,9 @@ NetworkManager::~NetworkManager()
 
 void NetworkManager::init()
 {
-    _actionInterface = ActionInterfaceFactory::createActionInterface(*_api);
+    auto interface = NetworkInterfaceFactory::createNetworkInterface(*_api);
+    _actionInterface = interface;
     _api->setActionInterface(_actionInterface);
-    EntryPointManager::registerEntryPoints(*_actionInterface);
+    EntryPointManager::registerEntryPoints(*interface);
 }
 } // namespace brayns

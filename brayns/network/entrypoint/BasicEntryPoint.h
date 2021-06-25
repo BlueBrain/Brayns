@@ -40,7 +40,11 @@ class BasicEntryPoint : public BaseEntryPoint
 public:
     BasicEntryPoint()
     {
-        setSchema(EntryPointSchema::from<RequestType, ReplyType>());
+        EntryPointSchema schema;
+        schema.params = {JsonSchemaFactory<RequestType>::createSchema()};
+        schema.params[0].name = "param";
+        schema.returns = JsonSchemaFactory<ReplyType>::createSchema();
+        setSchema(schema);
     }
 
     /**

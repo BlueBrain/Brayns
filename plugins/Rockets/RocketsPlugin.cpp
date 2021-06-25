@@ -330,6 +330,12 @@ public:
 
     virtual void addEntryPoint(EntryPointPtr entryPoint) override {}
 
+    virtual const EntryPoint* findEntryPoint(
+        const std::string& name) const override
+    {
+        return nullptr;
+    }
+
     void registerNotification(const RpcParameterDescription& desc,
                               const PropertyMap& input,
                               const std::function<void(PropertyMap)>& action)

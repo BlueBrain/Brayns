@@ -52,21 +52,22 @@ public:
     NetworkInterface(PluginAPI& api);
 
     /**
-     * @brief Find an entrypoint with the given name.
-     *
-     * @param name EntryPoint name (method in request).
-     * @return const EntryPoint* Pointer to the corresponding entrypoint or null
-     * if not found.
-     */
-    const EntryPoint* findEntryPoint(const std::string& name) const;
-
-    /**
      * @brief Receive requests and send reply to the client until connection is
      * closed.
      *
      * @param socket Socket used for communication.
      */
     void run(NetworkSocket& socket);
+
+    /**
+     * @brief Find an entrypoint with the given name.
+     *
+     * @param name EntryPoint name (method in request).
+     * @return const EntryPoint* Pointer to the corresponding entrypoint or null
+     * if not found.
+     */
+    virtual const EntryPoint* findEntryPoint(
+        const std::string& name) const override;
 
     /**
      * @brief Register an entrypoint.

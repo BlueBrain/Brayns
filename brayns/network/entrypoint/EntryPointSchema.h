@@ -20,39 +20,35 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include <brayns/network/messages/JsonSchema.h>
 
 namespace brayns
 {
 struct EntryPointSchema
 {
-    JsonSchema params;
+    std::string title;
+    std::string description;
+    std::string type = "method";
+    bool async = false;
+    std::vector<JsonSchema> params;
     JsonSchema returns;
-
-    template<typename RequestType, typename ReplyType>
-    static EntryPointSchema from()
-    {
-        EntryPointSchema schema;
-        schema.params = JsonSchemaFactory<RequestType>::createJsonSchema();
-        schema.returns = JsonSchemaFactory<ReplyType>::createJsonSchema();
-        return schema;
-    }
 };
 
-template<>
+template <>
 struct JsonSerializer<EntryPointSchema>
 {
     static void serialize(const EntryPointSchema& value, JsonValue& json)
     {
         auto object = Poco::makeShared<JsonObject>();
-        if (!value.params.isEmpty())
-        {
-            object->set("params", Json::serialize(value.params));
-        }
-        if (!value.returns.isEmpty())
-        {
-            object->set("returns", Json::serialize(value.returns));
-        }
+        object->set("title", value.title);
+        object->set("description", value.description);
+        object->set("type", value.type);
+        object->set("async", value.async);
+        object->set("params", Json::serialize(value.params));
+        object->set("returns", Json::serialize(value.returns));
         json = object;
     }
 
@@ -63,6 +59,10 @@ struct JsonSerializer<EntryPointSchema>
             return;
         }
         auto& object = *json.extract<JsonObject::Ptr>();
+        Json::deserialize(object.get("title"), value.title);
+        Json::deserialize(object.get("description"), value.description);
+        Json::deserialize(object.get("type"), value.type);
+        Json::deserialize(object.get("async"), value.async);
         Json::deserialize(object.get("params"), value.params);
         Json::deserialize(object.get("returns"), value.returns);
     }

@@ -248,7 +248,7 @@ public:
 
     /**
      * @brief Send an output packet to the connected client.
-     * 
+     *
      * @param packet Packet containing the data to send to the client.
      */
     void send(const OutputPacket& packet)

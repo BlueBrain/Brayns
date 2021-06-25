@@ -99,14 +99,14 @@ public:
         auto i = uri.find(':');
         if (i >= uri.size() - 1)
         {
-            throw std::runtime_error("Invalid server URI: " + uri);
+            throw std::runtime_error("Invalid server URI: '" + uri + "'");
         }
         Poco::UInt16 port = 0;
         std::istringstream stream(uri.c_str() + i + 1);
         stream >> port;
         if (stream.fail())
         {
-            throw std::runtime_error("Invalid server port: " + uri);
+            throw std::runtime_error("Invalid server port: '" + uri + "'");
         }
         return port;
     }
@@ -132,8 +132,7 @@ public:
     {
         return std::make_unique<Poco::Net::HTTPServer>(
             Poco::makeShared<RequestHandlerFactory>(interface),
-            ServerPort::fromApi(api),
-            ServerParams::fromApi(api));
+            ServerPort::fromApi(api), ServerParams::fromApi(api));
     }
 };
 } // namespace
@@ -142,8 +141,15 @@ namespace brayns
 {
 ServerInterface::ServerInterface(PluginAPI& api)
     : NetworkInterface(api)
-    , _server(ServerFactory::createServer(api, *this))
 {
-    _server->start();
+    try
+    {
+        _server = ServerFactory::createServer(api, *this);
+        _server->start();
+    }
+    catch (Poco::Exception& e)
+    {
+        throw std::runtime_error("Cannot start server: " + e.displayText());
+    }
 }
 } // namespace brayns

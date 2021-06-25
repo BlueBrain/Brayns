@@ -67,8 +67,8 @@ private:
         }
         if (message.jsonrpc != "2.0")
         {
-            throw EntryPointException("Unsupported JSON-RPC version: " +
-                                      message.jsonrpc);
+            throw EntryPointException("Unsupported JSON-RPC version: '" +
+                                      message.jsonrpc + "'");
         }
         if (message.id.empty())
         {
@@ -113,7 +113,7 @@ private:
         auto entryPoint = interface.findEntryPoint(method);
         if (!entryPoint)
         {
-            throw EntryPointException("Invalid entrypoint: " + method);
+            throw EntryPointException("Invalid entrypoint: '" + method + "'");
         }
         _validateSchema(*entryPoint, request);
         entryPoint->run(request);
@@ -123,17 +123,22 @@ private:
                                 NetworkRequest& request)
     {
         auto& schema = entryPoint.getSchema();
-        if (schema.params.isEmpty())
+        if (schema.params.empty())
+        {
+            return;
+        }
+        auto& schemaParams = schema.params[0];
+        if (JsonSchemaInfo::isEmpty(schemaParams))
         {
             return;
         }
         auto& params = request.getParams();
-        auto errors = JsonSchemaValidator::validate(params, schema.params);
+        auto errors = JsonSchemaValidator::validate(params, schemaParams);
         if (errors.isEmpty())
         {
             return;
         }
-        throw EntryPointException("JSON schema errors:\n" + errors.toString());
+        throw EntryPointException(errors.toString());
     }
 };
 } // namespace

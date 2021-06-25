@@ -50,7 +50,15 @@ public:
 
     bool isEmpty() const { return _errors.empty(); }
 
-    std::string toString() const { return string_utils::join(_errors, "\n"); }
+    std::string toString() const
+    {
+        return "JSON schema errors:\n\t" + join("\n\t");
+    }
+
+    std::string join(const std::string& separator) const
+    {
+        return string_utils::join(_errors, separator);
+    }
 
 private:
     std::vector<std::string> _errors;
@@ -64,6 +72,6 @@ class JsonSchemaValidator
 {
 public:
     static JsonSchemaErrorList validate(const JsonValue& json,
-                                     const JsonSchema& schema);
+                                        const JsonSchema& schema);
 };
 } // namespace brayns

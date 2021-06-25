@@ -57,15 +57,15 @@ using JsonObject = Poco::JSON::Object;
 
 /**
  * @brief Check if a type is a primitive JSON type (bool, number, string).
- * 
+ *
  * @tparam T Type to check.
  */
-template<typename T>
+template <typename T>
 struct JsonType
 {
     /**
      * @brief Check if T is a primitive JSON type.
-     * 
+     *
      * @return true T is bool, number or string.
      * @return false T is a complex type (array or object).
      */
@@ -190,7 +190,7 @@ struct Json
     template <typename T>
     static T deserialize(const JsonValue& json)
     {
-        T value;
+        auto value = T{};
         JsonSerializer<T>::deserialize(json, value);
         return value;
     }

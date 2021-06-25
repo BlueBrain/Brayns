@@ -26,40 +26,14 @@
 #include <utility>
 #include <vector>
 
+#include <boost/optional.hpp>
+
 #include <brayns/common/mathTypes.h>
 
 #include "Json.h"
 
 namespace brayns
 {
-/**
- * @brief Representation of a JSON schema.
- *
- */
-struct JsonSchema
-{
-    std::string title;
-    std::string description;
-    std::string type;
-    std::vector<std::pair<std::string, JsonSchema>> properties;
-    std::vector<std::string> required;
-    std::vector<JsonSchema> items;
-
-    bool isEmpty() const { return type.empty(); }
-
-    bool requires(const std::string& key) const
-    {
-        for (const auto& value : required)
-        {
-            if (value == key)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-};
-
 /**
  * @brief Helper class to store JSON type names.
  *
@@ -112,7 +86,6 @@ public:
     template <typename T>
     static const std::string& ofPrimitive()
     {
-        static_assert(JsonType<T>::isPrimitive(), "Not a JSON primitive");
         if (std::is_same<T, bool>())
         {
             return ofBoolean();
@@ -137,10 +110,10 @@ public:
  * @brief Helper class to get JSON type name from a JSON value.
  *
  */
-class JsonTypeHelper
+class JsonValueType
 {
 public:
-    static const std::string& getJsonTypeName(const JsonValue& json)
+    static const std::string& of(const JsonValue& json)
     {
         if (json.isBoolean())
         {
@@ -170,6 +143,66 @@ public:
     }
 };
 
+struct JsonSchema;
+using JsonProperty = std::pair<std::string, JsonSchema>;
+using JsonProperties = std::vector<JsonProperty>;
+
+/**
+ * @brief Representation of a JSON schema.
+ *
+ */
+struct JsonSchema
+{
+    std::string name;
+    std::string description;
+    std::string type;
+    boost::optional<double> minimum;
+    boost::optional<double> maximum;
+    JsonProperties properties;
+    bool additionalProperties = false;
+    std::vector<std::string> required;
+    std::vector<JsonSchema> items;
+    boost::optional<size_t> minItems;
+    boost::optional<size_t> maxItems;
+};
+
+/**
+ * @brief Helper class to get some basic info about a JSON schema.
+ *
+ */
+struct JsonSchemaInfo
+{
+    static bool isEmpty(const JsonSchema& schema)
+    {
+        return schema.type.empty();
+    }
+
+    static bool isNumber(const JsonSchema& schema)
+    {
+        return schema.type == JsonTypeName::ofInteger() ||
+               schema.type == JsonTypeName::ofNumber();
+    }
+
+    static bool isObject(const JsonSchema& schema)
+    {
+        return schema.type == JsonTypeName::ofObject();
+    }
+
+    static bool isArray(const JsonSchema& schema)
+    {
+        return schema.type == JsonTypeName::ofArray();
+    }
+
+    static bool isRequired(const std::string& key, const JsonSchema& schema)
+    {
+        auto first = schema.properties.begin();
+        auto last = schema.properties.end();
+        return std::find_if(first, last,
+                            [&](const auto& property)
+                            { return property.first == key; }) != last;
+    }
+};
+
 /**
  * @brief Create JSON schema for a given type (can be specialized).
  *
@@ -180,26 +213,19 @@ public:
 template <typename T>
 struct JsonSchemaFactory
 {
-    static_assert(JsonType<T>::isPrimitive(),
-                  "JSON schema creation is not supported for this type, please "
-                  "provide a specialization of JsonSchemaFactory<T>");
-
-    static JsonSchema createJsonSchema()
+    static JsonSchema createSchema()
     {
         JsonSchema schema;
-        schema.type = JsonTypeName::ofPrimitive<T>();
+        if (JsonType<T>::isPrimitive())
+        {
+            schema.type = JsonTypeName::ofPrimitive<T>();
+        }
+        if (std::is_unsigned<T>())
+        {
+            schema.minimum = 0;
+        }
         return schema;
     }
-};
-
-/**
- * @brief Empty schema for JSON value (treated as any).
- *
- */
-template <>
-struct JsonSchemaFactory<JsonValue>
-{
-    static JsonSchema createJsonSchema() { return {}; }
 };
 
 /**
@@ -214,8 +240,8 @@ struct JsonArraySchema
     {
         JsonSchema schema;
         schema.type = JsonTypeName::ofArray();
-        auto items = JsonSchemaFactory<ItemType>::createJsonSchema();
-        schema.items.push_back(std::move(items));
+        auto itemSchema = JsonSchemaFactory<ItemType>::createSchema();
+        schema.items.push_back(std::move(itemSchema));
         return schema;
     }
 };
@@ -228,10 +254,7 @@ struct JsonArraySchema
 template <typename T>
 struct JsonSchemaFactory<std::vector<T>>
 {
-    static JsonSchema createJsonSchema()
-    {
-        return JsonArraySchema<T>::create();
-    }
+    static JsonSchema createSchema() { return JsonArraySchema<T>::create(); }
 };
 
 /**
@@ -243,118 +266,12 @@ struct JsonSchemaFactory<std::vector<T>>
 template <glm::length_t S, typename T>
 struct JsonSchemaFactory<glm::vec<S, T>>
 {
-    static JsonSchema createJsonSchema()
+    static JsonSchema createSchema()
     {
-        return JsonArraySchema<T>::create();
-    }
-};
-
-/**
- * @brief Helper to serialize JSON schemas.
- *
- */
-class JsonSchemaSerializer
-{
-public:
-    static JsonObject::Ptr serialize(const JsonSchema& schema)
-    {
-        auto object = Poco::makeShared<JsonObject>();
-        _addInfo(schema, *object);
-        _addProperties(schema, *object);
-        _addItems(schema, *object);
-        return object;
-    }
-
-private:
-    static void _addInfo(const JsonSchema& schema, JsonObject& object)
-    {
-        if (!schema.title.empty())
-        {
-            object.set("title", schema.title);
-        }
-        if (!schema.description.empty())
-        {
-            object.set("description", schema.description);
-        }
-        if (!schema.type.empty())
-        {
-            object.set("type", schema.type);
-        }
-    }
-
-    static void _addProperties(const JsonSchema& schema, JsonObject& object)
-    {
-        if (schema.properties.empty())
-        {
-            return;
-        }
-        auto properties = Poco::makeShared<JsonObject>();
-        for (const auto& pair : schema.properties)
-        {
-            properties->set(pair.first, Json::serialize(pair.second));
-        }
-        object.set("properties", properties);
-    }
-
-    static void _addItems(const JsonSchema& schema, JsonObject& object)
-    {
-        if (schema.items.empty())
-        {
-            return;
-        }
-        object.set("items", Json::serialize(schema.items[0]));
-    }
-};
-
-/**
- * @brief Helper to deserialize JSON schemas.
- *
- */
-class JsonSchemaDeserializer
-{
-public:
-    static void deserialize(const JsonObject& object, JsonSchema& schema)
-    {
-        _addInfo(object, schema);
-        _addProperties(object, schema);
-        _addItems(object, schema);
-    }
-
-private:
-    static void _addInfo(const JsonObject& object, JsonSchema& schema)
-    {
-        Json::deserialize(object.get("title"), schema.title);
-        Json::deserialize(object.get("description"), schema.description);
-        Json::deserialize(object.get("type"), schema.type);
-    }
-
-    static void _addProperties(const JsonObject& object, JsonSchema& schema)
-    {
-        auto properties = object.getObject("properties");
-        if (!properties)
-        {
-            return;
-        }
-        schema.properties.clear();
-        for (const auto& pair : *properties)
-        {
-            schema.properties.emplace_back();
-            auto& property = schema.properties.back();
-            property.first = pair.first;
-            Json::deserialize(pair.second, property.second);
-        }
-    }
-
-    static void _addItems(const JsonObject& object, JsonSchema& schema)
-    {
-        auto items = object.get("items");
-        if (items.isEmpty())
-        {
-            return;
-        }
-        schema.items.clear();
-        schema.items.emplace_back();
-        Json::deserialize(items, schema.items.back());
+        auto schema = JsonArraySchema<T>::create();
+        schema.minItems = S;
+        schema.maxItems = S;
+        return schema;
     }
 };
 
@@ -365,19 +282,7 @@ private:
 template <>
 struct JsonSerializer<JsonSchema>
 {
-    static void serialize(const JsonSchema& value, JsonValue& json)
-    {
-        json = JsonSchemaSerializer::serialize(value);
-    }
-
-    static void deserialize(const JsonValue& json, JsonSchema& value)
-    {
-        if (json.type() != typeid(JsonObject::Ptr))
-        {
-            return;
-        }
-        auto& object = *json.extract<JsonObject::Ptr>();
-        JsonSchemaDeserializer::deserialize(object, value);
-    }
+    static void serialize(const JsonSchema& value, JsonValue& json);
+    static void deserialize(const JsonValue& json, JsonSchema& value);
 };
 } // namespace brayns

@@ -58,7 +58,16 @@ public:
     virtual ~ActionInterface() = default;
 
     /**
-     * @brief Register an entrypoint implementing EntryPoint.
+     * @brief Find an entrypoint with the given name.
+     *
+     * @param name EntryPoint name (method in request).
+     * @return const EntryPoint* Pointer to the corresponding entrypoint or null
+     * if not found.
+     */
+    virtual const EntryPoint* findEntryPoint(const std::string& name) const = 0;
+
+    /**
+     * @brief Register an entrypoint implementing EntryPoint interface.
      *
      * @param entryPoint Pointer to an EntryPoint implementation.
      */
@@ -67,12 +76,12 @@ public:
     /**
      * @brief Shortcut to add an entrypoint from its type.
      *
-     * @tparam T Concrete type of the entrypoint.
+     * @tparam T Concrete type of the entrypoint (subclass of EntryPoint).
      * @tparam Args Types of the arguments to pass to the constructor of T.
      * @param args Arguments to pass to the constructor of T.
      */
     template <typename T, typename... Args>
-    void addEntryPoint(Args&&... args)
+    void add(Args&&... args)
     {
         static_assert(std::is_base_of<EntryPoint, T>());
         addEntryPoint(std::make_unique<T>(std::forward<Args>(args)...));

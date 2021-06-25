@@ -24,28 +24,33 @@
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(TestRequest)
-BRAYNS_MESSAGE_ENTRY(int, test, "Test int")
+BRAYNS_MESSAGE_BEGIN(SchemaRequest)
+BRAYNS_MESSAGE_ENTRY(std::string, endpoint, "Name of the endpoint")
 BRAYNS_MESSAGE_END()
 
-BRAYNS_MESSAGE_BEGIN(TestReply)
-BRAYNS_MESSAGE_ENTRY(std::string, test, "Test string")
-BRAYNS_MESSAGE_END()
-
-class TestEntryPoint : public BasicEntryPoint<TestRequest, TestReply>
+class SchemaEntryPoint : public BasicEntryPoint<SchemaRequest, EntryPointSchema>
 {
 public:
-    TestEntryPoint()
+    SchemaEntryPoint()
     {
-        setName("test");
-        setDescription("This is a test");
+        setName("schema");
+        setDescription("Get the schema of the given endpoint");
     }
 
-    virtual TestReply run(const TestRequest& request) const override
+    virtual EntryPointSchema run(const SchemaRequest& request) const override
     {
-        TestReply reply;
-        reply.test = std::to_string(request.test);
-        return reply;
+        auto interface = getApi().getActionInterface();
+        if (!interface)
+        {
+            throw EntryPointException("No network interface registered");
+        }
+        auto& endpoint = request.endpoint;
+        auto entryPoint = interface->findEntryPoint(endpoint);
+        if (!entryPoint)
+        {
+            throw EntryPointException("Invalid endpoint: '" + endpoint + "'");
+        }
+        return entryPoint->getSchema();
     }
 };
 } // namespace brayns

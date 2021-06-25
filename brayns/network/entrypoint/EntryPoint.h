@@ -23,12 +23,13 @@
 #include <memory>
 #include <string>
 
+#include "EntryPointSchema.h"
+
 namespace brayns
 {
 class EntryPoint;
 class NetworkRequest;
 class PluginAPI;
-struct EntryPointSchema;
 
 /**
  * @brief EntryPoint holder.
@@ -59,20 +60,6 @@ public:
     virtual void init() {}
 
     /**
-     * @brief Return the name of the entrypoint.
-     *
-     * @return const std::string& The name (path) of the entrypoint.
-     */
-    virtual const std::string& getName() const = 0;
-
-    /**
-     * @brief Return a description of the entrypoint.
-     *
-     * @return const std::string& A user-defined description.
-     */
-    virtual const std::string& getDescription() const = 0;
-
-    /**
      * @brief Return the JSON schema of the entrypoint.
      *
      * @return const JsonSchema& The entrypoint JSON schema.
@@ -86,5 +73,12 @@ public:
      * info and send and receive text frames.
      */
     virtual void run(const NetworkRequest& request) const = 0;
+
+    /**
+     * @brief Shortcut to get the name of the entrypoint from the schema.
+     * 
+     * @return const std::string& Name of the entrypoint.
+     */
+    const std::string& getName() const { return getSchema().title; }
 };
 } // namespace brayns

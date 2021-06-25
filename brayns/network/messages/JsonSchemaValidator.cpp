@@ -31,29 +31,24 @@ class JsonPath
 public:
     void clear() { _path.clear(); }
 
-    void push(const std::string& key) { _path.push_back(key); }
-
-    void pop() { _path.pop_back(); }
-
-    std::string toString() const
+    void push(const std::string& key)
     {
         if (_path.empty())
         {
-            return {};
+            _path.push_back(key);
+            return;
         }
-        std::ostringstream stream;
-        stream << _path[0];
-        for (size_t i = 1; i < _path.size(); ++i)
-        {
-            auto& key = _path[i];
-            if (key.empty() || key[0] != '[')
-            {
-                stream << '.';
-            }
-            stream << key;
-        }
-        return stream.str();
+        _path.push_back("." + key);
     }
+
+    void push(size_t index)
+    {
+        _path.push_back("[" + std::to_string(index) + "]");
+    }
+
+    void pop() { _path.pop_back(); }
+
+    std::string toString() const { return string_utils::join(_path, {}); }
 
 private:
     std::vector<std::string> _path;
@@ -64,12 +59,7 @@ class JsonValidatorContext
 public:
     void push(const std::string& key) { _path.push(key); }
 
-    void push(size_t index)
-    {
-        std::ostringstream stream;
-        stream << '[' << index << ']';
-        push(stream.str());
-    }
+    void push(size_t index) { _path.push(index); }
 
     void pop() { _path.pop(); }
 
@@ -82,15 +72,47 @@ public:
         auto path = _path.toString();
         if (!path.empty())
         {
-            stream << " at " << path;
+            stream << " at '" << path << "'";
         }
-        stream << ": expected " << schemaType << " got " << type;
+        stream << ": expected '" << schemaType << "' got '" << type << "'";
+        _errors.push_back(stream.str());
+    }
+
+    void addBelowMinimum(double value, double minimum)
+    {
+        std::ostringstream stream;
+        stream << "'" << _path.toString() << "' is below minimum value '"
+               << minimum << "'";
+        _errors.push_back(stream.str());
+    }
+
+    void addAboveMaximum(double value, double maximum)
+    {
+        std::ostringstream stream;
+        stream << "'" << _path.toString() << "' is above maximum value '"
+               << maximum << "'";
         _errors.push_back(stream.str());
     }
 
     void addMissingProperty()
     {
-        _errors.push_back("Missing required property: " + _path.toString());
+        _errors.push_back("Missing property: '" + _path.toString() + "'");
+    }
+
+    void addNotEnoughItems(size_t size, size_t minItems)
+    {
+        std::ostringstream stream;
+        stream << "Not enough items in '" << _path.toString()
+               << "' expected >= '" << minItems << "' got '" << size << "'";
+        _errors.push_back(stream.str());
+    }
+
+    void addTooMuchItems(size_t size, size_t maxItems)
+    {
+        std::ostringstream stream;
+        stream << "Too much items in '" << _path.toString()
+               << "' expected <= '" << maxItems << "' got '" << size << "'";
+        _errors.push_back(stream.str());
     }
 
 private:
@@ -101,7 +123,8 @@ private:
 class JsonValidator
 {
 public:
-    JsonSchemaErrorList validate(const JsonValue& json, const JsonSchema& schema)
+    JsonSchemaErrorList validate(const JsonValue& json,
+                                 const JsonSchema& schema)
     {
         _context = {};
         _validate(json, schema);
@@ -111,97 +134,102 @@ public:
 private:
     void _validate(const JsonValue& json, const JsonSchema& schema)
     {
-        if (!_validateType(json, schema))
+        if (JsonSchemaInfo::isEmpty(schema))
         {
             return;
         }
-        if (_validateProperties(json, schema))
+        _validateType(json, schema);
+        if (JsonSchemaInfo::isNumber(schema))
         {
+            _validateLimits(json, schema);
             return;
         }
-        _validateItems(json, schema);
+        if (JsonSchemaInfo::isObject(schema))
+        {
+            _validateProperties(json, schema);
+            return;
+        }
+        if (JsonSchemaInfo::isArray(schema))
+        {
+            _validateItems(json, schema);
+        }
     }
 
-    bool _validateType(const JsonValue& json, const JsonSchema& schema)
+    void _validateType(const JsonValue& json, const JsonSchema& schema)
     {
-        if (schema.type.empty())
-        {
-            return false;
-        }
-        auto& type = JsonTypeHelper::getJsonTypeName(json);
+        auto& type = JsonValueType::of(json);
         if (type != schema.type)
         {
             _context.addInvalidType(type, schema.type);
-            return false;
         }
-        return true;
     }
 
-    bool _validateProperties(const JsonValue& json, const JsonSchema& schema)
+    void _validateLimits(const JsonValue& json, const JsonSchema& schema)
     {
-        if (schema.type != JsonTypeName::ofObject())
+        auto value = json.convert<double>();
+        if (schema.minimum && value < *schema.minimum)
         {
-            return false;
+            _context.addBelowMinimum(value, *schema.minimum);
+            return;
         }
-        if (schema.properties.empty())
+        if (schema.maximum && value > *schema.maximum)
         {
-            return false;
+            _context.addAboveMaximum(value, *schema.maximum);
         }
-        if (json.type() != typeid(JsonObject::Ptr))
-        {
-            return false;
-        }
+    }
+
+    void _validateProperties(const JsonValue& json, const JsonSchema& schema)
+    {
         auto& object = *json.extract<JsonObject::Ptr>();
-        _validateProperties(object, schema);
-        return true;
-    }
-
-    void _validateProperties(const JsonObject& object, const JsonSchema& schema)
-    {
         for (const auto& property : schema.properties)
         {
             _context.push(property.first);
-            auto child = object.get(property.first);
-            if (!child.isEmpty())
-            {
-                _validate(child, property.second);
-                _context.pop();
-                continue;
-            }
-            if (schema.requires(property.first))
-            {
-                _context.addMissingProperty();
-            }
+            _validateProperty(property, object, schema);
             _context.pop();
         }
     }
 
-    bool _validateItems(const JsonValue& json, const JsonSchema& schema)
+    void _validateProperty(const JsonProperty& property,
+                           const JsonObject& object, const JsonSchema& schema)
     {
-        if (schema.type != JsonTypeName::ofArray())
+        auto json = object.get(property.first);
+        if (!json.isEmpty())
         {
-            return false;
+            _validate(json, property.second);
+            return;
         }
-        if (schema.items.empty())
+        if (JsonSchemaInfo::isRequired(property.first, schema))
         {
-            return false;
+            _context.addMissingProperty();
         }
-        if (json.type() != typeid(JsonArray::Ptr))
-        {
-            return false;
-        }
-        auto& array = *json.extract<JsonArray::Ptr>();
-        _validateItems(array, schema.items[0]);
-        return true;
     }
 
-    void _validateItems(const JsonArray& array, const JsonSchema& schema)
+    void _validateItems(const JsonValue& json, const JsonSchema& schema)
     {
+        if (schema.items.empty())
+        {
+            return;
+        }
+        auto& array = *json.extract<JsonArray::Ptr>();
+        _validateItemLimits(array.size(), schema);
         for (size_t i = 0; i < array.size(); ++i)
         {
             _context.push(i);
-            _validate(array.get(i), schema);
+            _validate(array.get(i), schema.items[0]);
             _context.pop();
+        }
+    }
+
+    void _validateItemLimits(size_t size, const JsonSchema& schema)
+    {
+        if (schema.minItems && size < *schema.minItems)
+        {
+            _context.addNotEnoughItems(size, *schema.minItems);
+            return;
+        }
+        if (schema.maxItems && size > *schema.maxItems)
+        {
+            _context.addTooMuchItems(size, *schema.maxItems);
         }
     }
 
@@ -212,7 +240,7 @@ private:
 namespace brayns
 {
 JsonSchemaErrorList JsonSchemaValidator::validate(const JsonValue& json,
-                                               const JsonSchema& schema)
+                                                  const JsonSchema& schema)
 {
     JsonValidator validator;
     return validator.validate(json, schema);

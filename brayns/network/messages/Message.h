@@ -91,7 +91,7 @@ struct JsonSerializer<MessageHolder<TagType>>
 };
 
 /**
- * @brief Message JSON schemas are created using static method getJsonSchema().
+ * @brief Message JSON schemas are created using static method getSchema().
  *
  * @tparam TagType TagType identifying message type in MessageHolder<TagType>.
  */
@@ -105,13 +105,17 @@ struct JsonSchemaFactory<MessageHolder<TagType>>
     using Message = MessageHolder<TagType>;
 
     /**
-     * @brief Create a JSON schema using Message::getJsonSchema static method.
+     * @brief Create a JSON schema using Message::getSchema static method.
      *
      * @return JsonSchema JSON schema of the message.
      */
-    static JsonSchema createJsonSchema() { return Message::getJsonSchema(); }
+    static JsonSchema createSchema() { return Message::getSchema(); }
 };
 
+/**
+ * @brief Message metadata.
+ * 
+ */
 class MessageInfo
 {
 public:
@@ -120,7 +124,7 @@ public:
 
     MessageInfo() { _schema.type = JsonTypeName::ofObject(); }
 
-    const JsonSchema& getJsonSchema() const { return _schema; }
+    const JsonSchema& getSchema() const { return _schema; }
 
     void serialize(const void* value, JsonValue& json) const
     {
@@ -156,14 +160,13 @@ public:
     }
 
     template <typename T>
-    void addProperty(const std::string& name,
-                            const std::string& description)
+    void addProperty(const std::string& name, const std::string& description)
     {
         _schema.required.push_back(name);
-        auto& properties = _schema.properties;
-        auto schema = JsonSchemaFactory<T>::createJsonSchema();
+        auto schema = JsonSchemaFactory<T>::createSchema();
+        schema.name = name;
         schema.description = description;
-        properties.emplace_back(name, std::move(schema));;
+        _schema.properties.emplace_back(name, std::move(schema));
     }
 
 private:
@@ -220,9 +223,9 @@ private:
         }                                                           \
                                                                     \
     public:                                                         \
-        static const JsonSchema& getJsonSchema()                    \
+        static const JsonSchema& getSchema()                        \
         {                                                           \
-            return _setupAndGetMessageInfo().getJsonSchema();       \
+            return _setupAndGetMessageInfo().getSchema();           \
         }                                                           \
                                                                     \
         static void serialize(const TYPE& value, JsonValue& json)   \
@@ -238,9 +241,9 @@ private:
 /**
  * @brief Add an entry to the current message.
  *
- * Must be called only after BEGIN_MESSAGE(...). The active message will have a
- * public attribute called NAME of type TYPE, the given description and will be
- * serialized using JsonSerializer<TYPE>.
+ * Must be called only after BRAYNS_BEGIN_MESSAGE(...). The active message will
+ * have a public attribute called NAME of type TYPE, the given description and
+ * will be serialized using JsonSerializer<TYPE>.
  *
  */
 #define BRAYNS_MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION)                        \

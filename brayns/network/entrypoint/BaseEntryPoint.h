@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/network/messages/Json.h>
 #include <brayns/network/messages/JsonSchema.h>
 #include <brayns/network/socket/NetworkRequest.h>
@@ -47,24 +48,24 @@ public:
     PluginAPI& getApi() const { return *_api; }
 
     /**
-     * @brief Setup the name of the entrypoint.
+     * @brief Load the title in entrypoint schema.
      *
      * @param name Name of the entrypoint.
      */
-    void setName(const std::string& name) { _name = name; }
+    void setName(const std::string& name) { _schema.title = name; }
 
     /**
-     * @brief Setup the description of the entrypoint.
+     * @brief Load the description in the entrypoint schema.
      *
      * @param description Description of the entrypoint.
      */
     void setDescription(const std::string& description)
     {
-        _description = description;
+        _schema.description = description;
     }
 
     /**
-     * @brief Setup the schema of the entrypoint.
+     * @brief Load the schema of the entrypoint (override old one).
      *
      * @param schema Schema of the entrypoint.
      */
@@ -78,26 +79,9 @@ public:
     virtual void setApi(PluginAPI& api) override { _api = &api; }
 
     /**
-     * @brief Must return the name of the entrypoint.
+     * @brief Return the schema of the entrypoint stored in the instance.
      *
-     * @return const std::string& The name (path) of the entrypoint.
-     */
-    virtual const std::string& getName() const override { return _name; }
-
-    /**
-     * @brief Must return a description of the entrypoint.
-     *
-     * @return const std::string& A user-defined description.
-     */
-    virtual const std::string& getDescription() const override
-    {
-        return _description;
-    }
-
-    /**
-     * @brief Must return the JSON schema of the entrypoint.
-     *
-     * @return const EntryPointSchema& The entrypoint JSON schema.
+     * @return const EntryPointSchema& The entrypoint schema.
      */
     virtual const EntryPointSchema& getSchema() const override
     {
@@ -106,8 +90,6 @@ public:
 
 private:
     PluginAPI* _api = nullptr;
-    std::string _name;
-    std::string _description;
     EntryPointSchema _schema;
 };
 } // namespace brayns
