@@ -28,6 +28,8 @@
 #include <typeindex>
 #include <vector>
 
+#include <boost/optional.hpp>
+
 #include <Poco/JSON/Array.h>
 #include <Poco/JSON/Object.h>
 #include <Poco/JSON/Parser.h>
@@ -76,6 +78,44 @@ struct JsonType
 };
 
 /**
+ * @brief Helper class to extract JSON object / array from JsonValue.
+ * 
+ */
+class JsonExtractor
+{
+public:
+    /**
+     * @brief Extract a JSON array from a JsonValue if this one is an array.
+     * 
+     * @param json JSON value.
+     * @return JsonArray::Ptr JSON array or null if JSON is not an array.
+     */
+    static JsonArray::Ptr extractArray(const JsonValue& json)
+    {
+        if (json.type() != typeid(JsonArray::Ptr))
+        {
+            return nullptr;
+        }
+        return json.extract<JsonArray::Ptr>();
+    }
+
+    /**
+     * @brief Extract a JSON object from a JsonValue if this one is an object.
+     *
+     * @param json JSON value.
+     * @return JsoObject::Ptr JSON object or null if JSON is not an object.
+     */
+    static JsonObject::Ptr extractObject(const JsonValue& json)
+    {
+        if (json.type() != typeid(JsonObject::Ptr))
+        {
+            return nullptr;
+        }
+        return json.extract<JsonObject::Ptr>();
+    }
+};
+
+/**
  * @brief Template used to serialize and deserialize JSON.
  *
  * The default implementation calls Poco serialization and works for all
@@ -96,22 +136,31 @@ struct JsonSerializer
      *
      * @param value The object to serialize (basic type or std::string).
      * @param json The output json value that will contain the object.
+     * @return true if success, false if failure, the output value is left
+     * unchanged in this case.
      */
-    static void serialize(const T& value, JsonValue& json) { json = value; }
+    static bool serialize(const T& value, JsonValue& json)
+    {
+        json = value;
+        return true;
+    }
 
     /**
      * @brief Deserialize a JsonValue to a provided object.
      *
      * @param json The source JSON.
      * @param value The output object (basic type or std::string).
+     * @return true if success, false if failure, the output value is left
+     * unchanged in this case.
      */
-    static void deserialize(const JsonValue& json, T& value)
+    static bool deserialize(const JsonValue& json, T& value)
     {
         if (!json.isNumeric() && !json.isString())
         {
-            return;
+            return false;
         }
         value = json.convert<T>();
+        return true;
     }
 };
 
@@ -166,6 +215,20 @@ struct Json
     }
 
     /**
+     * @brief Serialize with default value.
+     *
+     * @tparam T Type of the input object.
+     * @param json JsonValue to serialize.
+     * @return true if success, false if failure, the output value is left
+     * unchanged in this case.
+     */
+    template <typename T>
+    static bool serialize(const T& value, JsonValue& json)
+    {
+        return JsonSerializer<T>::serialize(value, json);
+    }
+
+    /**
      * @brief Convert a custom object to JSON string using serialize and
      * stringify.
      *
@@ -200,10 +263,11 @@ struct Json
      *
      * @tparam T Type of the resulting object.
      * @param json JsonValue containing the object value.
-     * @return T Deserialized object.
+     * @return true if success, false if failure, the output value is left
+     * unchanged in this case.
      */
     template <typename T>
-    static void deserialize(const JsonValue& json, T& value)
+    static bool deserialize(const JsonValue& json, T& value)
     {
         JsonSerializer<T>::deserialize(json, value);
     }
@@ -234,10 +298,13 @@ struct JsonSerializer<JsonValue>
      *
      * @param value The input JSON.
      * @param json The output JSON.
+     * @return true if success, false if failure, the output value is left
+     * unchanged in this case.
      */
-    static void serialize(const JsonValue& value, JsonValue& json)
+    static bool serialize(const JsonValue& value, JsonValue& json)
     {
         json = value;
+        return true;
     }
 
     /**
@@ -245,10 +312,13 @@ struct JsonSerializer<JsonValue>
      *
      * @param json The input JSON.
      * @param value The output JSON.
+     * @return true if success, false if failure, the output value is left
+     * unchanged in this case.
      */
-    static void deserialize(const JsonValue& json, JsonValue& value)
+    static bool deserialize(const JsonValue& json, JsonValue& value)
     {
         value = json;
+        return true;
     }
 };
 
@@ -266,15 +336,23 @@ struct JsonSerializer<std::vector<T>>
      *
      * @param value The value to serialize.
      * @param json The output JsonValue.
+     * @return true if success, false if failure, the output value is left
+     * unchanged in this case.
      */
-    static void serialize(const std::vector<T>& value, JsonValue& json)
+    static bool serialize(const std::vector<T>& value, JsonValue& json)
     {
         auto array = Poco::makeShared<JsonArray>();
         for (const auto& item : value)
         {
-            array->add(Json::serialize(item));
+            JsonValue child;
+            if (!Json::serialize(item, child))
+            {
+                return false;
+            }
+            array->add(child);
         }
         json = array;
+        return true;
     }
 
     /**
@@ -284,19 +362,26 @@ struct JsonSerializer<std::vector<T>>
      *
      * @param json The JsonValue to deserialize.
      * @param value The output vector.
+     * @return true if success, false if failure, the output value is left
+     * unchanged in this case.
      */
-    static void deserialize(const JsonValue& json, std::vector<T>& value)
+    static bool deserialize(const JsonValue& json, std::vector<T>& value)
     {
-        if (json.type() != typeid(JsonArray::Ptr))
+        auto array = JsonExtractor::extractArray(json);
+        if (!array)
         {
-            return;
+            return false;
         }
-        auto& array = *json.extract<JsonArray::Ptr>();
-        value.resize(array.size());
+        std::vector<T> buffer(array->size());
         for (size_t i = 0; i < value.size(); ++i)
         {
-            JsonSerializer<T>::deserialize(array.get(i), value[i]);
+            if (!JsonSerializer<T>::deserialize(array->get(i), value[i]))
+            {
+                return false;
+            }
         }
+        value = std::move(buffer);
+        return true;
     }
 };
 
@@ -317,15 +402,23 @@ struct JsonSerializer<glm::vec<S, T>>
      *
      * @param value The vector to serialize.
      * @param json The output JsonValue.
+     * @return true if success, false if failure, the output value is left
+     * unchanged in this case.
      */
-    static void serialize(const glm::vec<S, T>& value, JsonValue& json)
+    static bool serialize(const glm::vec<S, T>& value, JsonValue& json)
     {
         auto array = Poco::makeShared<JsonArray>();
         for (glm::length_t i = 0; i < S; ++i)
         {
-            array->add(Json::serialize(value[i]));
+            JsonValue child;
+            if (!Json::serialize(value[i], child))
+            {
+                return false;
+            }
+            array->add(child);
         }
         json = array;
+        return true;
     }
 
     /**
@@ -338,19 +431,72 @@ struct JsonSerializer<glm::vec<S, T>>
      *
      * @param json The JsonValue to deserialize.
      * @param value The output vector.
+     * @return true if success, false if failure, the output value is left
+     * unchanged in this case.
      */
-    static void deserialize(const JsonValue& json, glm::vec<S, T>& value)
+    static bool deserialize(const JsonValue& json, glm::vec<S, T>& value)
     {
-        if (json.type() != typeid(JsonArray::Ptr))
+        auto array = JsonExtractor::extractArray(json);
+        if (!array)
         {
-            return;
+            return false;
         }
-        auto& array = *json.extract<JsonArray::Ptr>();
-        auto size = std::min(S, glm::length_t(array.size()));
+        glm::vec<S, T> buffer;
+        auto size = std::min(S, glm::length_t(array->size()));
         for (glm::length_t i = 0; i < size; ++i)
         {
-            JsonSerializer<T>::deserialize(array.get(i), value[i]);
+            if (!JsonSerializer<T>::deserialize(array->get(i), buffer[i]))
+            {
+                return false;
+            }
         }
+        value = buffer;
+        return true;
+    }
+};
+
+/**
+ * @brief Partial specialization of JsonSerializer for optional.
+ *
+ * @tparam T Contained type.
+ */
+template <typename T>
+struct JsonSerializer<boost::optional<T>>
+{
+    /**
+     * @brief Serialize contained value if not null.
+     *
+     * @param value The value to serialize.
+     * @param json The output JsonValue.
+     * @return true if success, false if failure, the output value is left
+     * unchanged in this case.
+     */
+    static bool serialize(const boost::optional<T>& value, JsonValue& json)
+    {
+        if (!value)
+        {
+            return false;
+        }
+        return Json::serialize(*value, json);
+    }
+
+    /**
+     * @brief Deserialize contained value or set it to null.
+     *
+     * @param json The JsonValue to deserialize.
+     * @param value The output value.
+     * @return true if success, false if failure, value is null in this case.
+     */
+    static bool deserialize(const JsonValue& json, boost::optional<T>& value)
+    {
+        T buffer = T{};
+        if (!Json::deserialize(json, buffer))
+        {
+            value = {};
+            return false;
+        }
+        value = std::move(buffer);
+        return true;
     }
 };
 } // namespace brayns

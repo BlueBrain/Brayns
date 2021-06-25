@@ -296,7 +296,7 @@ struct JsonSchemaFactory<glm::vec<S, T>>
 template <>
 struct JsonSerializer<JsonSchema>
 {
-    static void serialize(const JsonSchema& value, JsonValue& json);
-    static void deserialize(const JsonValue& json, JsonSchema& value);
+    static bool serialize(const JsonSchema& value, JsonValue& json);
+    static bool deserialize(const JsonValue& json, JsonSchema& value);
 };
 } // namespace brayns

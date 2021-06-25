@@ -48,19 +48,6 @@ public:
         }
         object.set(key, *value);
     }
-
-    template <typename T>
-    static void getIfPresent(const JsonObject& object, const std::string& key,
-                             boost::optional<T>& value)
-    {
-        auto json = object.get(key);
-        if (json.isEmpty())
-        {
-            value = {};
-            return;
-        }
-        value = Json::deserialize<T>(json);
-    }
 };
 
 class JsonSchemaSerializer
@@ -128,8 +115,8 @@ private:
         Json::deserialize(object.get("name"), schema.name);
         Json::deserialize(object.get("description"), schema.description);
         Json::deserialize(object.get("type"), schema.type);
-        JsonHelper::getIfPresent(object, "minimum", schema.minimum);
-        JsonHelper::getIfPresent(object, "maximum", schema.maximum);
+        Json::deserialize(object.get("minimum"), schema.minimum);
+        Json::deserialize(object.get("maximum"), schema.maximum);
     }
 
     static void _addProperties(const JsonObject& object, JsonSchema& schema)
@@ -162,28 +149,30 @@ private:
         {
             schema.items = {Json::deserialize<JsonSchema>(items)};
         }
-        JsonHelper::getIfPresent(object, "minItems", schema.minItems);
-        JsonHelper::getIfPresent(object, "maxItems", schema.maxItems);
+        Json::deserialize(object.get("minItems"), schema.minItems);
+        Json::deserialize(object.get("maxItems"), schema.maxItems);
     }
 };
 } // namespace
 
 namespace brayns
 {
-void JsonSerializer<JsonSchema>::serialize(const JsonSchema& value,
+bool JsonSerializer<JsonSchema>::serialize(const JsonSchema& value,
                                            JsonValue& json)
 {
     json = JsonSchemaSerializer::serialize(value);
+    return true;
 }
 
-void JsonSerializer<JsonSchema>::deserialize(const JsonValue& json,
+bool JsonSerializer<JsonSchema>::deserialize(const JsonValue& json,
                                              JsonSchema& value)
 {
-    if (json.type() != typeid(JsonObject::Ptr))
+    auto object = JsonExtractor::extractObject(json);
+    if (!object)
     {
-        return;
+        return false;
     }
-    auto& object = *json.extract<JsonObject::Ptr>();
-    JsonSchemaDeserializer::deserialize(object, value);
+    JsonSchemaDeserializer::deserialize(*object, value);
+    return true;
 }
 } // namespace brayns

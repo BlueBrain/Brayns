@@ -67,10 +67,13 @@ struct JsonSerializer<MessageHolder<TagType>>
      * @param value The message to serialize (declared with macros
      * MESSAGE_BEGIN, MESSAGE_ENTRY and MESSAGE_END).
      * @param json The output JSON value.
+     * @return true if success, false if failure, the output value is left
+     * unchanged in this case.
      */
-    static void serialize(const Message& value, JsonValue& json)
+    static bool serialize(const Message& value, JsonValue& json)
     {
         Message::serialize(value, json);
+        return true;
     }
 
     /**
@@ -83,10 +86,13 @@ struct JsonSerializer<MessageHolder<TagType>>
      * @param json The source JSON value.
      * @param value The message to deserialize (declared with macros
      * MESSAGE_BEGIN, MESSAGE_ENTRY and MESSAGE_END).
+     * @return true if success, false if failure, the output value is left
+     * unchanged in this case.
      */
-    static void deserialize(const JsonValue& json, Message& value)
+    static bool deserialize(const JsonValue& json, Message& value)
     {
         Message::deserialize(json, value);
+        return true;
     }
 };
 
@@ -138,14 +144,14 @@ public:
 
     void deserialize(const JsonValue& json, void* value) const
     {
-        if (json.type() != typeid(JsonObject::Ptr))
+        auto object = JsonExtractor::extractObject(json);
+        if (!object)
         {
             return;
         }
-        auto& object = *json.extract<JsonObject::Ptr>();
         for (const auto& deserializer : _deserializers)
         {
-            deserializer(object, value);
+            deserializer(*object, value);
         }
     }
 

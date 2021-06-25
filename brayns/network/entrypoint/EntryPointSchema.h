@@ -40,7 +40,7 @@ struct EntryPointSchema
 template <>
 struct JsonSerializer<EntryPointSchema>
 {
-    static void serialize(const EntryPointSchema& value, JsonValue& json)
+    static bool serialize(const EntryPointSchema& value, JsonValue& json)
     {
         auto object = Poco::makeShared<JsonObject>();
         object->set("title", value.title);
@@ -50,21 +50,23 @@ struct JsonSerializer<EntryPointSchema>
         object->set("params", Json::serialize(value.params));
         object->set("returns", Json::serialize(value.returns));
         json = object;
+        return true;
     }
 
-    static void deserialize(const JsonValue& json, EntryPointSchema& value)
+    static bool deserialize(const JsonValue& json, EntryPointSchema& value)
     {
-        if (json.type() != typeid(JsonObject::Ptr))
+        auto object = JsonExtractor::extractObject(json);
+        if (!object)
         {
-            return;
+            return false;
         }
-        auto& object = *json.extract<JsonObject::Ptr>();
-        Json::deserialize(object.get("title"), value.title);
-        Json::deserialize(object.get("description"), value.description);
-        Json::deserialize(object.get("type"), value.type);
-        Json::deserialize(object.get("async"), value.async);
-        Json::deserialize(object.get("params"), value.params);
-        Json::deserialize(object.get("returns"), value.returns);
+        Json::deserialize(object->get("title"), value.title);
+        Json::deserialize(object->get("description"), value.description);
+        Json::deserialize(object->get("type"), value.type);
+        Json::deserialize(object->get("async"), value.async);
+        Json::deserialize(object->get("params"), value.params);
+        Json::deserialize(object->get("returns"), value.returns);
+        return true;
     }
 };
 } // namespace brayns
