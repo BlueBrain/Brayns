@@ -26,10 +26,13 @@ namespace brayns
 {
 BRAYNS_MESSAGE_BEGIN(TestRequest)
 BRAYNS_MESSAGE_ENTRY(int, test, "Test int")
+BRAYNS_MESSAGE_ENTRY(Vector3d, vec, "Test vec3")
+BRAYNS_MESSAGE_ENTRY(std::vector<std::string>, strings, "Test strings")
 BRAYNS_MESSAGE_END()
 
 BRAYNS_MESSAGE_BEGIN(TestReply)
 BRAYNS_MESSAGE_ENTRY(std::string, test, "Test string")
+BRAYNS_MESSAGE_ENTRY(size_t, size, "Test size")
 BRAYNS_MESSAGE_END()
 
 class TestEntryPoint : public BasicEntryPoint<TestRequest, TestReply>
@@ -45,6 +48,7 @@ public:
     {
         TestReply reply;
         reply.test = std::to_string(request.test);
+        reply.size = request.strings.size();
         return reply;
     }
 };

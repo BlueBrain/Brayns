@@ -83,6 +83,11 @@ public:
         return name;
     }
 
+    static bool isNumber(const std::string& name)
+    {
+        return name == ofInteger() || name == ofNumber();
+    }
+
     template <typename T>
     static const std::string& ofPrimitive()
     {
@@ -193,13 +198,22 @@ struct JsonSchemaInfo
         return schema.type == JsonTypeName::ofArray();
     }
 
-    static bool isRequired(const std::string& key, const JsonSchema& schema)
+    static bool requires(const JsonSchema& schema, const std::string& key)
     {
         auto first = schema.properties.begin();
         auto last = schema.properties.end();
         return std::find_if(first, last,
                             [&](const auto& property)
                             { return property.first == key; }) != last;
+    }
+
+    static bool hasType(const JsonSchema& schema, const std::string& type)
+    {
+        if (schema.type == JsonTypeName::ofNumber())
+        {
+            return JsonTypeName::isNumber(type);
+        }
+        return type == schema.type;
     }
 };
 

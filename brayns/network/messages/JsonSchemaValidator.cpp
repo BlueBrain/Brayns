@@ -103,7 +103,7 @@ public:
     {
         std::ostringstream stream;
         stream << "Not enough items in '" << _path.toString()
-               << "' expected >= '" << minItems << "' got '" << size << "'";
+               << "': min '" << minItems << "' got '" << size << "'";
         _errors.push_back(stream.str());
     }
 
@@ -111,7 +111,7 @@ public:
     {
         std::ostringstream stream;
         stream << "Too much items in '" << _path.toString()
-               << "' expected <= '" << maxItems << "' got '" << size << "'";
+               << "': max '" << maxItems << "' got '" << size << "'";
         _errors.push_back(stream.str());
     }
 
@@ -158,7 +158,7 @@ private:
     void _validateType(const JsonValue& json, const JsonSchema& schema)
     {
         auto& type = JsonValueType::of(json);
-        if (type != schema.type)
+        if (!JsonSchemaInfo::hasType(schema, type))
         {
             _context.addInvalidType(type, schema.type);
         }
@@ -198,7 +198,7 @@ private:
             _validate(json, property.second);
             return;
         }
-        if (JsonSchemaInfo::isRequired(property.first, schema))
+        if (JsonSchemaInfo::requires(schema, property.first))
         {
             _context.addMissingProperty();
         }
