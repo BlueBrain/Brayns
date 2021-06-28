@@ -25,9 +25,11 @@
 
 #include <brayns/network/messages/JsonSchema.h>
 
+#include "IEntrypoint.h"
+
 namespace brayns
 {
-struct EntryPointSchema
+struct EntrypointSchema
 {
     std::string title;
     std::string description;
@@ -37,10 +39,29 @@ struct EntryPointSchema
     JsonSchema returns;
 };
 
-template <>
-struct JsonSerializer<EntryPointSchema>
+class EntrypointSchemaFactory
 {
-    static bool serialize(const EntryPointSchema& value, JsonValue& json)
+public:
+    static EntrypointSchema createSchema(const IEntrypoint& entrypoint)
+    {
+        EntrypointSchema schema;
+        schema.title = entrypoint.getName();
+        schema.description = entrypoint.getDescription();
+        schema.async = entrypoint.isAsync();
+        auto params = entrypoint.getParamsSchema();
+        if (!JsonSchemaInfo::isEmpty(params))
+        {
+            schema.params.push_back(std::move(params));
+        }
+        schema.returns = entrypoint.getResultSchema();
+        return schema;
+    }
+};
+
+template <>
+struct JsonSerializer<EntrypointSchema>
+{
+    static bool serialize(const EntrypointSchema& value, JsonValue& json)
     {
         auto object = Poco::makeShared<JsonObject>();
         object->set("title", value.title);
@@ -53,7 +74,7 @@ struct JsonSerializer<EntryPointSchema>
         return true;
     }
 
-    static bool deserialize(const JsonValue& json, EntryPointSchema& value)
+    static bool deserialize(const JsonValue& json, EntrypointSchema& value)
     {
         auto object = JsonExtractor::extractObject(json);
         if (!object)

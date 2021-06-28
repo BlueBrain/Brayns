@@ -161,6 +161,7 @@ struct JsonSchema
     std::string name;
     std::string description;
     std::string type;
+    std::vector<JsonSchema> oneOf;
     boost::optional<double> minimum;
     boost::optional<double> maximum;
     JsonProperties properties;

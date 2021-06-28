@@ -90,9 +90,9 @@ public:
      * @param code Error code.
      * @param message Error description.
      */
-    void sendError(int code, const std::string& message) const
+    void error(int code, const std::string& message) const
     {
-        auto error = MessageFactory::createErrorMessage(_message);
+        auto error = MessageFactory::createError(_message);
         error.error.code = code;
         error.error.message = message;
         _send(error);
@@ -106,9 +106,9 @@ public:
      * @param operation Current step description.
      * @param amount Completion percentage.
      */
-    void sendProgress(const std::string& operation, double amount) const
+    void progress(const std::string& operation, double amount) const
     {
-        auto progress = MessageFactory::createProgressMessage(_message);
+        auto progress = MessageFactory::createProgress(_message);
         progress.params.operation = operation;
         progress.params.amount = amount;
         _send(progress);
@@ -125,9 +125,9 @@ public:
      * @param message Message content stored under "result" in the reply.
      */
     template <typename MessageType>
-    void sendReply(const MessageType& message) const
+    void reply(const MessageType& message) const
     {
-        auto reply = MessageFactory::createReplyMessage(_message);
+        auto reply = MessageFactory::createReply(_message);
         reply.result = Json::serialize(message);
         _send(reply);
     }

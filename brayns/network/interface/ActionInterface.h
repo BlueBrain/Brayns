@@ -25,7 +25,7 @@
 #include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/types.h>
 
-#include <brayns/network/entrypoint/EntryPoint.h>
+#include <brayns/network/entrypoint/EntrypointHolder.h>
 #include <brayns/network/messages/ActionMessage.h>
 
 #include <functional>
@@ -50,7 +50,7 @@ namespace brayns
  * std::string to_json(const RetVal&)
  * @endcode
  *
- * The new way of registering entrypoint is using the EntryPoint interface.
+ * The new way of registering entrypoint is using the IEntrypoint interface.
  */
 class ActionInterface
 {
@@ -60,31 +60,32 @@ public:
     /**
      * @brief Find an entrypoint with the given name.
      *
-     * @param name EntryPoint name (method in request).
-     * @return const EntryPoint* Pointer to the corresponding entrypoint or null
-     * if not found.
+     * @param name Entrypoint name (method in request).
+     * @return const EntrypointHolder* Pointer to the corresponding entrypoint
+     * or null if not found.
      */
-    virtual const EntryPoint* findEntryPoint(const std::string& name) const = 0;
+    virtual const EntrypointHolder* findEntrypoint(
+        const std::string& name) const = 0;
 
     /**
-     * @brief Register an entrypoint implementing EntryPoint interface.
+     * @brief Register an entrypoint implementing IEntrypoint interface.
      *
-     * @param entryPoint Pointer to an EntryPoint implementation.
+     * @param entrypoint Pointer to an IEntrypoint implementation.
      */
-    virtual void addEntryPoint(EntryPointPtr entryPoint) = 0;
+    virtual void addEntrypoint(EntrypointPtr entrypoint) = 0;
 
     /**
      * @brief Shortcut to add an entrypoint from its type.
      *
-     * @tparam T Concrete type of the entrypoint (subclass of EntryPoint).
+     * @tparam T Concrete type of the entrypoint (subclass of IEntrypoint).
      * @tparam Args Types of the arguments to pass to the constructor of T.
      * @param args Arguments to pass to the constructor of T.
      */
     template <typename T, typename... Args>
     void add(Args&&... args)
     {
-        static_assert(std::is_base_of<EntryPoint, T>());
-        addEntryPoint(std::make_unique<T>(std::forward<Args>(args)...));
+        static_assert(std::is_base_of<IEntrypoint, T>());
+        addEntrypoint(std::make_unique<T>(std::forward<Args>(args)...));
     }
 
     /**

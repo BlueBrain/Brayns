@@ -33,7 +33,7 @@ namespace brayns
 BRAYNS_MESSAGE_BEGIN(RequestMessage)
 BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
 BRAYNS_MESSAGE_ENTRY(std::string, id, "Message ID")
-BRAYNS_MESSAGE_ENTRY(std::string, method, "EntryPoint name")
+BRAYNS_MESSAGE_ENTRY(std::string, method, "Entrypoint name")
 BRAYNS_MESSAGE_ENTRY(JsonValue, params, "Request content")
 BRAYNS_MESSAGE_END()
 
@@ -44,7 +44,7 @@ BRAYNS_MESSAGE_END()
 BRAYNS_MESSAGE_BEGIN(ReplyMessage)
 BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
 BRAYNS_MESSAGE_ENTRY(std::string, id, "Message ID")
-BRAYNS_MESSAGE_ENTRY(std::string, method, "EntryPoint name")
+BRAYNS_MESSAGE_ENTRY(std::string, method, "Entrypoint name")
 BRAYNS_MESSAGE_ENTRY(JsonValue, result, "Reply content")
 BRAYNS_MESSAGE_END()
 
@@ -64,18 +64,8 @@ BRAYNS_MESSAGE_END()
 BRAYNS_MESSAGE_BEGIN(ErrorMessage)
 BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
 BRAYNS_MESSAGE_ENTRY(std::string, id, "Message ID")
-BRAYNS_MESSAGE_ENTRY(std::string, method, "EntryPoint name")
+BRAYNS_MESSAGE_ENTRY(std::string, method, "Entrypoint name")
 BRAYNS_MESSAGE_ENTRY(ErrorDescriptionMessage, error, "Error description")
-BRAYNS_MESSAGE_END()
-
-/**
- * @brief Message send spontaneously by brayns.
- *
- */
-BRAYNS_MESSAGE_BEGIN(UpdateMessage)
-BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
-BRAYNS_MESSAGE_ENTRY(std::string, method, "EntryPoint name")
-BRAYNS_MESSAGE_ENTRY(JsonValue, params, "Message content")
 BRAYNS_MESSAGE_END()
 
 /**
@@ -94,15 +84,18 @@ BRAYNS_MESSAGE_END()
  */
 BRAYNS_MESSAGE_BEGIN(ProgressMessage)
 BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
-BRAYNS_MESSAGE_ENTRY(std::string, method, "EntryPoint name")
+BRAYNS_MESSAGE_ENTRY(std::string, method, "Entrypoint name")
 BRAYNS_MESSAGE_ENTRY(ProgressInfoMessage, params, "Progression info")
 BRAYNS_MESSAGE_END()
 
 /**
- * @brief Empty message if no requests or replies are needed.
+ * @brief Message send spontaneously by brayns.
  *
  */
-BRAYNS_MESSAGE_BEGIN(EmptyMessage)
+BRAYNS_MESSAGE_BEGIN(NotificationMessage)
+BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
+BRAYNS_MESSAGE_ENTRY(std::string, method, "Entrypoint name")
+BRAYNS_MESSAGE_ENTRY(JsonValue, params, "Message content")
 BRAYNS_MESSAGE_END()
 
 /**
@@ -121,7 +114,7 @@ public:
      * @param request Request message containing the transaction info.
      * @return ReplyMessage The reply message corresponding to request.
      */
-    static ReplyMessage createReplyMessage(const RequestMessage& request)
+    static ReplyMessage createReply(const RequestMessage& request)
     {
         ReplyMessage reply;
         reply.jsonrpc = request.jsonrpc;
@@ -140,30 +133,13 @@ public:
      * @param request Request message containing the transaction info.
      * @return ErrorMessage The error message corresponding to request.
      */
-    static ErrorMessage createErrorMessage(const RequestMessage& request)
+    static ErrorMessage createError(const RequestMessage& request)
     {
         ErrorMessage error;
         error.jsonrpc = request.jsonrpc;
         error.id = request.id;
         error.method = request.method;
         return error;
-    }
-
-    /**
-     * @brief Create an UpdateMessage corresponding to a RequestMessage.
-     *
-     * The resulting update message will have the same attributes as the request
-     * (method, etc) and empty params (to be filled with update info).
-     *
-     * @param request Request message containing the transaction info.
-     * @return UpdateMessage The error message corresponding to request.
-     */
-    static UpdateMessage createUpdateMessage(const RequestMessage& request)
-    {
-        UpdateMessage update;
-        update.jsonrpc = request.jsonrpc;
-        update.method = request.method;
-        return update;
     }
 
     /**
@@ -176,7 +152,7 @@ public:
      * @param request Request message containing the transaction info.
      * @return ReplyMessage The reply message corresponding to request.
      */
-    static ProgressMessage createProgressMessage(const RequestMessage& request)
+    static ProgressMessage createProgress(const RequestMessage& request)
     {
         ProgressMessage progress;
         progress.jsonrpc = request.jsonrpc;

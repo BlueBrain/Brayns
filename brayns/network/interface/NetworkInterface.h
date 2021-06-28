@@ -22,7 +22,7 @@
 #include <string>
 #include <unordered_map>
 
-#include <brayns/network/entrypoint/EntryPoint.h>
+#include <brayns/network/entrypoint/IEntrypoint.h>
 #include <brayns/network/socket/NetworkSocket.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
@@ -62,22 +62,23 @@ public:
     /**
      * @brief Find an entrypoint with the given name.
      *
-     * @param name EntryPoint name (method in request).
-     * @return const EntryPoint* Pointer to the corresponding entrypoint or null
-     * if not found.
+     * @param name Entrypoint name (method in request).
+     * @return const EntrypointHolder* Pointer to the corresponding entrypoint
+     * or null if not found.
      */
-    virtual const EntryPoint* findEntryPoint(
+    virtual const EntrypointHolder* findEntrypoint(
         const std::string& name) const override;
 
     /**
      * @brief Register an entrypoint.
      *
-     * @param entryPoint EntryPoint to register.
+     * @param entrypoint IEntrypoint to register.
      */
-    virtual void addEntryPoint(EntryPointPtr entryPoint) override;
+    virtual void addEntrypoint(EntrypointPtr entrypoint) override;
 
 private:
     PluginAPI* _api;
-    std::unordered_map<std::string, EntryPointPtr> _entryPoints;
+    std::unordered_map<std::string, EntrypointHolder> _entrypoints;
+    NetworkClientList _clients;
 };
 } // namespace brayns

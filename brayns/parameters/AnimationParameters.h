@@ -66,6 +66,8 @@ public:
     {
         _updateValue(_unit, unit, triggerCallback);
     }
+
+    const std::string& getUnit() const { return _unit; }
     using IsReadyCallback = std::function<bool()>;
 
     /**

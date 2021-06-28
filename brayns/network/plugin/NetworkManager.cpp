@@ -19,8 +19,9 @@
 
 #include "NetworkManager.h"
 
-#include <brayns/network/entrypoints/TestEntryPoint.h>
-#include <brayns/network/entrypoints/SchemaEntryPoint.h>
+#include <brayns/network/entrypoints/GetAnimationParametersEntrypoint.h>
+#include <brayns/network/entrypoints/SchemaEntrypoint.h>
+#include <brayns/network/entrypoints/TestEntrypoint.h>
 #include <brayns/network/interface/ServerInterface.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
@@ -39,13 +40,14 @@ public:
     }
 };
 
-class EntryPointManager
+class EntrypointManager
 {
 public:
-    static void registerEntryPoints(NetworkInterface& interface)
+    static void registerEntrypoints(NetworkInterface& interface)
     {
-        interface.add<TestEntryPoint>();
-        interface.add<SchemaEntryPoint>();
+        interface.add<GetAnimationParametersEntrypoint>();
+        interface.add<SchemaEntrypoint>();
+        interface.add<TestEntrypoint>();
     }
 };
 } // namespace
@@ -65,6 +67,6 @@ void NetworkManager::init()
     auto interface = NetworkInterfaceFactory::createNetworkInterface(*_api);
     _actionInterface = interface;
     _api->setActionInterface(_actionInterface);
-    EntryPointManager::registerEntryPoints(*interface);
+    EntrypointManager::registerEntrypoints(*interface);
 }
 } // namespace brayns

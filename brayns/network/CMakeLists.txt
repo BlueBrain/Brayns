@@ -3,10 +3,9 @@ cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 project(braynsNetwork VERSION 0.1.0)
 
 set(BRAYNSNETWORK_HEADERS
-  entrypoint/BaseEntryPoint.h
-  entrypoint/BasicEntryPoint.h
-  entrypoint/EntryPoint.h
-  entrypoint/EntryPointException.h
+  entrypoint/Entrypoint.h
+  entrypoint/IEntrypoint.h
+  entrypoint/EntrypointException.h
   interface/ActionInterface.h
   messages/ActionMessage.h
   messages/Json.h

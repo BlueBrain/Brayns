@@ -213,9 +213,7 @@ public:
                   Poco::Net::HTTPServerResponse& response)
         : _socket(request, response)
     {
-        _socket.setSendTimeout(0);
-        _socket.setReceiveTimeout(0);
-        _protectAgainstMemoryExhaustion();
+        _setupSocket();
     }
 
     /**
@@ -270,9 +268,11 @@ public:
     }
 
 private:
-    void _protectAgainstMemoryExhaustion()
+    void _setupSocket()
     {
-        _socket.setMaxPayloadSize(int(1e6));
+        _socket.setMaxPayloadSize(int(1e7));
+        _socket.setSendTimeout(0);
+        _socket.setReceiveTimeout(0);
     }
 
     Poco::Net::WebSocket _socket;

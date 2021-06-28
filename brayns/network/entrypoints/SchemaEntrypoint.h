@@ -20,37 +20,42 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/BasicEntryPoint.h>
+#include <brayns/network/entrypoint/Entrypoint.h>
+
+#include <brayns/network/entrypoint/EntrypointSchema.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(SchemaRequest)
+BRAYNS_MESSAGE_BEGIN(SchemaParams)
 BRAYNS_MESSAGE_ENTRY(std::string, endpoint, "Name of the endpoint")
 BRAYNS_MESSAGE_END()
 
-class SchemaEntryPoint : public BasicEntryPoint<SchemaRequest, EntryPointSchema>
+class SchemaEntrypoint : public Entrypoint<SchemaParams, EntrypointSchema>
 {
 public:
-    SchemaEntryPoint()
+    virtual std::string getName() const override { return "schema"; }
+
+    virtual std::string getDescription() const override
     {
-        setName("schema");
-        setDescription("Get the schema of the given endpoint");
+        return "Get the JSON schema of the given entrypoint";
     }
 
-    virtual EntryPointSchema run(const SchemaRequest& request) const override
+    virtual void onRequest(const Request& request) const override
     {
         auto interface = getApi().getActionInterface();
         if (!interface)
         {
-            throw EntryPointException("No network interface registered");
+            throw EntrypointException("No network interface registered");
         }
-        auto& endpoint = request.endpoint;
-        auto entryPoint = interface->findEntryPoint(endpoint);
-        if (!entryPoint)
+        auto& params = request.getParams();
+        auto& endpoint = params.endpoint;
+        auto entrypoint = interface->findEntrypoint(endpoint);
+        if (!entrypoint)
         {
-            throw EntryPointException("Invalid endpoint: '" + endpoint + "'");
+            throw EntrypointException("Invalid endpoint: '" + endpoint + "'");
         }
-        return entryPoint->getSchema();
+        auto& schema = entrypoint->getSchema();
+        request.reply(schema);
     }
 };
 } // namespace brayns

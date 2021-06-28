@@ -33,7 +33,7 @@ namespace brayns
  * to the client.
  *
  */
-class EntryPointException : public std::runtime_error
+class EntrypointException : public std::runtime_error
 {
 public:
     /**
@@ -41,7 +41,7 @@ public:
      *
      * @param message Error description.
      */
-    EntryPointException(const std::string& message)
+    EntrypointException(const std::string& message)
         : std::runtime_error(message)
     {
     }
@@ -52,7 +52,7 @@ public:
      * @param code Error code.
      * @param message Error description.
      */
-    EntryPointException(int code, const std::string& message)
+    EntrypointException(int code, const std::string& message)
         : std::runtime_error(message)
         , _code(code)
     {

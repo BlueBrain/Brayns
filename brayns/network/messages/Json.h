@@ -79,14 +79,14 @@ struct JsonType
 
 /**
  * @brief Helper class to extract JSON object / array from JsonValue.
- * 
+ *
  */
 class JsonExtractor
 {
 public:
     /**
      * @brief Extract a JSON array from a JsonValue if this one is an array.
-     * 
+     *
      * @param json JSON value.
      * @return JsonArray::Ptr JSON array or null if JSON is not an array.
      */

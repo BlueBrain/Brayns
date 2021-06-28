@@ -20,36 +20,46 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/BasicEntryPoint.h>
+#include <algorithm>
+#include <mutex>
+#include <vector>
+
+#include "NetworkSocket.h"
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(TestRequest)
-BRAYNS_MESSAGE_ENTRY(int, test, "Test int")
-BRAYNS_MESSAGE_ENTRY(Vector3d, vec, "Test vec3")
-BRAYNS_MESSAGE_ENTRY(std::vector<std::string>, strings, "Test strings")
-BRAYNS_MESSAGE_END()
-
-BRAYNS_MESSAGE_BEGIN(TestReply)
-BRAYNS_MESSAGE_ENTRY(std::string, test, "Test string")
-BRAYNS_MESSAGE_ENTRY(size_t, size, "Test size")
-BRAYNS_MESSAGE_END()
-
-class TestEntryPoint : public BasicEntryPoint<TestRequest, TestReply>
+class NetworkClientList
 {
 public:
-    TestEntryPoint()
+    void add(NetworkSocket& socket)
     {
-        setName("test");
-        setDescription("This is a test");
+        std::lock_guard<std::mutex> lock(_mutex);
+        _sockets.push_back(&socket);
     }
 
-    virtual TestReply run(const TestRequest& request) const override
+    void remove(NetworkSocket& socket)
     {
-        TestReply reply;
-        reply.test = std::to_string(request.test);
-        reply.size = request.strings.size();
-        return reply;
+        std::lock_guard<std::mutex> lock(_mutex);
+        auto first = _sockets.begin();
+        auto last = _sockets.end();
+        auto i = std::find(first, last, &socket);
+        if (i != last)
+        {
+            _sockets.erase(i);
+        }
     }
+
+    void broadcast(const OutputPacket& packet)
+    {
+        std::lock_guard<std::mutex> lock(_mutex);
+        for (auto socket : _sockets)
+        {
+            socket->send(packet);
+        }
+    }
+
+private:
+    std::mutex _mutex;
+    std::vector<NetworkSocket*> _sockets;
 };
 } // namespace brayns

@@ -65,7 +65,7 @@ struct JsonSerializer<MessageHolder<TagType>>
      * put it inside the provided value.
      *
      * @param value The message to serialize (declared with macros
-     * MESSAGE_BEGIN, MESSAGE_ENTRY and MESSAGE_END).
+     * BRAYNS_MESSAGE_BEGIN, BRAYNS_MESSAGE_ENTRY and BRAYNS_MESSAGE_END).
      * @param json The output JSON value.
      * @return true if success, false if failure, the output value is left
      * unchanged in this case.
@@ -85,7 +85,7 @@ struct JsonSerializer<MessageHolder<TagType>>
      *
      * @param json The source JSON value.
      * @param value The message to deserialize (declared with macros
-     * MESSAGE_BEGIN, MESSAGE_ENTRY and MESSAGE_END).
+     * BRAYNS_MESSAGE_BEGIN, BRAYNS_MESSAGE_ENTRY and BRAYNS_MESSAGE_END).
      * @return true if success, false if failure, the output value is left
      * unchanged in this case.
      */

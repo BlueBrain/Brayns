@@ -68,6 +68,7 @@ private:
         JsonHelper::setIfNotEmpty(object, "name", schema.name);
         JsonHelper::setIfNotEmpty(object, "description", schema.description);
         JsonHelper::setIfNotEmpty(object, "type", schema.type);
+        JsonHelper::setIfNotEmpty(object, "oneOf", schema.oneOf);
         JsonHelper::setIfNotNull(object, "minimum", schema.minimum);
         JsonHelper::setIfNotNull(object, "maximum", schema.maximum);
     }
@@ -115,6 +116,7 @@ private:
         Json::deserialize(object.get("name"), schema.name);
         Json::deserialize(object.get("description"), schema.description);
         Json::deserialize(object.get("type"), schema.type);
+        Json::deserialize(object.get("oneOf"), schema.oneOf);
         Json::deserialize(object.get("minimum"), schema.minimum);
         Json::deserialize(object.get("maximum"), schema.maximum);
     }
@@ -122,7 +124,7 @@ private:
     static void _addProperties(const JsonObject& object, JsonSchema& schema)
     {
         auto properties = object.getObject("properties");
-        if (!properties)
+        if (properties)
         {
             _loadProperties(*properties, schema);
         }
