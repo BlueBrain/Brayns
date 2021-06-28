@@ -138,7 +138,10 @@ private:
         {
             return;
         }
-        _validateType(json, schema);
+        if (!_validateType(json, schema))
+        {
+            return;
+        }
         if (JsonSchemaInfo::isNumber(schema))
         {
             _validateLimits(json, schema);
@@ -155,13 +158,15 @@ private:
         }
     }
 
-    void _validateType(const JsonValue& json, const JsonSchema& schema)
+    bool _validateType(const JsonValue& json, const JsonSchema& schema)
     {
         auto& type = JsonValueType::of(json);
         if (!JsonSchemaInfo::hasType(schema, type))
         {
             _context.addInvalidType(type, schema.type);
+            return false;
         }
+        return true;
     }
 
     void _validateLimits(const JsonValue& json, const JsonSchema& schema)

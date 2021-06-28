@@ -271,8 +271,8 @@ private:
     void _setupSocket()
     {
         _socket.setMaxPayloadSize(int(1e7));
-        _socket.setSendTimeout(0);
-        _socket.setReceiveTimeout(0);
+        _socket.setSendTimeout(Poco::Timespan());
+        _socket.setReceiveTimeout(Poco::Timespan());
     }
 
     Poco::Net::WebSocket _socket;
