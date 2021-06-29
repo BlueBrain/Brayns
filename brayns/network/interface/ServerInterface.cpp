@@ -53,7 +53,7 @@ public:
         }
         catch (std::exception& e)
         {
-            BRAYNS_DEBUG << e.what() << '\n';
+            BRAYNS_ERROR << e.what() << '\n';
         }
     }
 
@@ -72,6 +72,7 @@ public:
     virtual Poco::Net::HTTPRequestHandler* createRequestHandler(
         const Poco::Net::HTTPServerRequest& request) override
     {
+        BRAYNS_DEBUG << "New connection from '" << request.getHost() << "'\n";
         return new RequestHandler(*_interface);
     }
 

@@ -199,7 +199,7 @@ struct JsonSchemaInfo
         return schema.type == JsonTypeName::ofArray();
     }
 
-    static bool requires(const JsonSchema& schema, const std::string& key)
+    static bool isRequired(const JsonSchema& schema, const std::string& key)
     {
         auto first = schema.properties.begin();
         auto last = schema.properties.end();

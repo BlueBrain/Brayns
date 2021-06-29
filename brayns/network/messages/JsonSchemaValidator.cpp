@@ -203,7 +203,7 @@ private:
             _validate(json, property.second);
             return;
         }
-        if (JsonSchemaInfo::requires(schema, property.first))
+        if (JsonSchemaInfo::isRequired(schema, property.first))
         {
             _context.addMissingProperty();
         }
