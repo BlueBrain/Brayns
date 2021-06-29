@@ -65,7 +65,7 @@ public:
 private:
     static void _addInfo(const JsonSchema& schema, JsonObject& object)
     {
-        JsonHelper::setIfNotEmpty(object, "name", schema.name);
+        JsonHelper::setIfNotEmpty(object, "title", schema.title);
         JsonHelper::setIfNotEmpty(object, "description", schema.description);
         JsonHelper::setIfNotEmpty(object, "type", schema.type);
         JsonHelper::setIfNotEmpty(object, "oneOf", schema.oneOf);
@@ -80,9 +80,9 @@ private:
             return;
         }
         auto properties = Poco::makeShared<JsonObject>();
-        for (const auto& pair : schema.properties)
+        for (const auto& property : schema.properties)
         {
-            properties->set(pair.first, Json::serialize(pair.second));
+            properties->set(property.name, Json::serialize(property));
         }
         object.set("properties", properties);
         object.set("additionalProperties", schema.additionalProperties);
@@ -113,7 +113,7 @@ public:
 private:
     static void _addInfo(const JsonObject& object, JsonSchema& schema)
     {
-        Json::deserialize(object.get("name"), schema.name);
+        Json::deserialize(object.get("title"), schema.title);
         Json::deserialize(object.get("description"), schema.description);
         Json::deserialize(object.get("type"), schema.type);
         Json::deserialize(object.get("oneOf"), schema.oneOf);
@@ -139,8 +139,8 @@ private:
         {
             schema.properties.emplace_back();
             auto& property = schema.properties.back();
-            property.first = pair.first;
-            Json::deserialize(pair.second, property.second);
+            property.name = pair.first;
+            Json::deserialize(pair.second, property);
         }
     }
 

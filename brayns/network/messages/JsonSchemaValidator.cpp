@@ -188,22 +188,22 @@ private:
         auto& object = *json.extract<JsonObject::Ptr>();
         for (const auto& property : schema.properties)
         {
-            _context.push(property.first);
+            _context.push(property.name);
             _validateProperty(property, object, schema);
             _context.pop();
         }
     }
 
-    void _validateProperty(const JsonProperty& property,
+    void _validateProperty(const JsonSchema& property,
                            const JsonObject& object, const JsonSchema& schema)
     {
-        auto json = object.get(property.first);
+        auto json = object.get(property.name);
         if (!json.isEmpty())
         {
-            _validate(json, property.second);
+            _validate(json, property);
             return;
         }
-        if (JsonSchemaInfo::isRequired(schema, property.first))
+        if (JsonSchemaInfo::isRequired(schema, property.name))
         {
             _context.addMissingProperty();
         }

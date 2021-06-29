@@ -148,10 +148,6 @@ public:
     }
 };
 
-struct JsonSchema;
-using JsonProperty = std::pair<std::string, JsonSchema>;
-using JsonProperties = std::vector<JsonProperty>;
-
 /**
  * @brief Representation of a JSON schema.
  *
@@ -159,12 +155,13 @@ using JsonProperties = std::vector<JsonProperty>;
 struct JsonSchema
 {
     std::string name;
+    std::string title;
     std::string description;
     std::string type;
     std::vector<JsonSchema> oneOf;
     boost::optional<double> minimum;
     boost::optional<double> maximum;
-    JsonProperties properties;
+    std::vector<JsonSchema> properties;
     bool additionalProperties = false;
     std::vector<std::string> required;
     std::vector<JsonSchema> items;
@@ -205,7 +202,7 @@ struct JsonSchemaInfo
         auto last = schema.properties.end();
         return std::find_if(first, last,
                             [&](const auto& property)
-                            { return property.first == key; }) != last;
+                            { return property.name == key; }) != last;
     }
 
     static bool hasType(const JsonSchema& schema, const std::string& type)

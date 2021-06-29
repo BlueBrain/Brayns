@@ -120,7 +120,7 @@ struct JsonSchemaFactory<MessageHolder<TagType>>
 
 /**
  * @brief Message metadata.
- * 
+ *
  */
 class MessageInfo
 {
@@ -128,7 +128,11 @@ public:
     using Serializer = std::function<void(const void*, JsonObject&)>;
     using Deserializer = std::function<void(const JsonObject&, void*)>;
 
-    MessageInfo() { _schema.type = JsonTypeName::ofObject(); }
+    MessageInfo(const std::string& title)
+    {
+        _schema.title = title;
+        _schema.type = JsonTypeName::ofObject();
+    }
 
     const JsonSchema& getSchema() const { return _schema; }
 
@@ -172,7 +176,7 @@ public:
         auto schema = JsonSchemaFactory<T>::createSchema();
         schema.name = name;
         schema.description = description;
-        _schema.properties.emplace_back(name, std::move(schema));
+        _schema.properties.push_back(std::move(schema));
     }
 
 private:
@@ -214,7 +218,7 @@ private:
     private:                                                        \
         static MessageInfo& _getMessageInfo()                       \
         {                                                           \
-            static MessageInfo info;                                \
+            static MessageInfo info(#TYPE);                         \
             return info;                                            \
         }                                                           \
                                                                     \
