@@ -37,8 +37,8 @@ class EntrypointRequest
 {
 public:
     EntrypointRequest(const NetworkRequest& request)
-        : _request(&request),
-        _params(Json::deserialize<ParamsType>(request.getParams()))
+        : _request(&request)
+        , _params(Json::deserialize<ParamsType>(request.getParams()))
     {
     }
 
@@ -125,7 +125,7 @@ public:
 
     /**
      * @brief Shortcut to process the request with the message already parsed.
-     * 
+     *
      * @param request Request with socket and parsed message.
      */
     virtual void onRequest(const Request& request) const = 0;
@@ -134,20 +134,33 @@ public:
      * @brief Broadcast a notification to all connected clients.
      *
      * @tparam MessageType Notification message type.
-     * @param message Message to send (params).
+     * @param params Message to send ("params" field).
      */
-    template <typename MessageType>
-    void notify(const MessageType& message) const
+    template <typename T>
+    void notify(const T& params) const
+    {
+        try
+        {
+            _sendNotification(params);
+        }
+        catch (std::exception& e)
+        {
+            BRAYNS_ERROR << "Error during notification: " << e.what() << '\n';
+        }
+    }
+
+private:
+    template <typename T>
+    void _sendNotification(const T& params) const
     {
         NotificationMessage notification;
         notification.jsonrpc = "2.0";
         notification.method = getName();
-        notification.params = Json::serialize(message);
+        notification.params = Json::serialize(params);
         auto json = Json::stringify(notification);
         _clients->broadcast(json);
     }
 
-private:
     PluginAPI* _api = nullptr;
     NetworkClientList* _clients;
 };
