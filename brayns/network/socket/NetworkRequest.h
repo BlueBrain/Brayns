@@ -22,7 +22,7 @@
 
 #include <string>
 
-#include <brayns/network/messages/MessageFactory.h>
+#include <brayns/network/message/MessageFactory.h>
 
 #include "NetworkSocket.h"
 
@@ -83,6 +83,21 @@ public:
     void setMessage(const RequestMessage& message) { _message = message; }
 
     /**
+     * @brief Send a reply message in case of success.
+     *
+     * The message sent will be formatted according to the RequestMessage
+     * stored in the instance.
+     *
+     * @param result Message content stored under "result" in the reply.
+     */
+    void reply(const JsonValue& result) const
+    {
+        auto reply = MessageFactory::createReply(_message);
+        reply.result = result;
+        _send(reply);
+    }
+
+    /**
      * @brief Send an error message to the client.
      *
      * Used to provide error description to the client in case of failure.
@@ -122,14 +137,12 @@ public:
      *
      * @tparam MessageType Type of the message stored in the "result" field of
      * the reply.
-     * @param message Message content stored under "result" in the reply.
+     * @param result Message content stored under "result" in the reply.
      */
     template <typename MessageType>
-    void reply(const MessageType& message) const
+    void reply(const MessageType& result) const
     {
-        auto reply = MessageFactory::createReply(_message);
-        reply.result = Json::serialize(message);
-        _send(reply);
+        reply(Json::serialize(result));
     }
 
 private:

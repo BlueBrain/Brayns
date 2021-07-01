@@ -20,11 +20,13 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/message/Message.h>
+
+#include <brayns/parameters/AnimationParameters.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(GetAnimationParametersResult)
+BRAYNS_MESSAGE_BEGIN(AnimationParametersParams)
 BRAYNS_MESSAGE_ENTRY(uint32_t, frame_count, "Animation frame count");
 BRAYNS_MESSAGE_ENTRY(uint32_t, current, "Current frame index");
 BRAYNS_MESSAGE_ENTRY(int32_t, delta, "Frame delta");
@@ -33,32 +35,5 @@ BRAYNS_MESSAGE_ENTRY(bool, playing, "Animation is playing");
 BRAYNS_MESSAGE_ENTRY(std::string, unit, "Time unit");
 BRAYNS_MESSAGE_END()
 
-class GetAnimationParametersEntrypoint
-    : public Entrypoint<NoParams, GetAnimationParametersResult>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "get-animation-parameters";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the current state of the animation parameters";
-    }
-
-    virtual void onRequest(const Request& request) const override
-    {
-        auto& manager = getApi().getParametersManager();
-        auto& animation = manager.getAnimationParameters();
-        GetAnimationParametersResult result;
-        result.frame_count = animation.getNumFrames();
-        result.current = animation.getFrame();
-        result.delta = animation.getDelta();
-        result.dt = animation.getDt();
-        result.playing = animation.isPlaying();
-        result.unit = animation.getUnit();
-        request.reply(result);
-    }
-};
+using AnimationParametersResult = AnimationParametersParams;
 } // namespace brayns

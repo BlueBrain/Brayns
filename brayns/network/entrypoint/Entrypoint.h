@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/network/interface/ActionInterface.h>
-#include <brayns/network/messages/MessageFactory.h>
+#include <brayns/network/message/MessageFactory.h>
 
 #include <brayns/parameters/ParametersManager.h>
 
@@ -54,7 +54,7 @@ public:
         _request->progress(operation, amount);
     }
 
-    void reply(const ResultType& message) const { _request->reply(message); }
+    void reply(const ResultType& result) const { _request->reply(result); }
 
 private:
     const NetworkRequest* _request;
@@ -69,9 +69,9 @@ template <typename ParamsType, typename ResultType>
 class Entrypoint : public IEntrypoint
 {
 public:
-    using Request = EntrypointRequest<ParamsType, ResultType>;
     using Params = ParamsType;
     using Result = ResultType;
+    using Request = EntrypointRequest<Params, Result>;
 
     /**
      * @brief Get a reference to Brayns API.

@@ -25,8 +25,8 @@
 #include <brayns/network/entrypoint/EntrypointSchema.h>
 #include <brayns/network/entrypoint/IEntrypoint.h>
 #include <brayns/network/interface/NetworkInterface.h>
-#include <brayns/network/messages/JsonSchemaValidator.h>
-#include <brayns/network/messages/MessageFactory.h>
+#include <brayns/network/message/JsonSchemaValidator.h>
+#include <brayns/network/message/MessageFactory.h>
 #include <brayns/network/socket/NetworkRequest.h>
 
 using namespace brayns;

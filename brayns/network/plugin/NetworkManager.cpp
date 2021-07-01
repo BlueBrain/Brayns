@@ -19,7 +19,7 @@
 
 #include "NetworkManager.h"
 
-#include <brayns/network/entrypoints/GetAnimationParametersEntrypoint.h>
+#include <brayns/network/entrypoints/AnimationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/SchemaEntrypoint.h>
 #include <brayns/network/entrypoints/TestEntrypoint.h>
 #include <brayns/network/interface/ServerInterface.h>
@@ -46,6 +46,7 @@ public:
     static void registerEntrypoints(NetworkInterface& interface)
     {
         interface.add<GetAnimationParametersEntrypoint>();
+        interface.add<SetAnimationParametersEntrypoint>();
         interface.add<SchemaEntrypoint>();
         interface.add<TestEntrypoint>();
     }

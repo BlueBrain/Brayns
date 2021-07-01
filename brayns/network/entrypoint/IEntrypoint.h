@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 
-#include <brayns/network/messages/JsonSchema.h>
+#include <brayns/network/message/JsonSchema.h>
 #include <brayns/network/socket/NetworkClientList.h>
 #include <brayns/network/socket/NetworkRequest.h>
 

@@ -22,15 +22,11 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <brayns/network/entrypoint/EntrypointSchema.h>
+#include <brayns/network/messages/SchemaMessage.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(SchemaParams)
-BRAYNS_MESSAGE_ENTRY(std::string, endpoint, "Name of the endpoint")
-BRAYNS_MESSAGE_END()
-
-class SchemaEntrypoint : public Entrypoint<SchemaParams, EntrypointSchema>
+class SchemaEntrypoint : public Entrypoint<SchemaParams, SchemaResult>
 {
 public:
     virtual std::string getName() const override { return "schema"; }
@@ -52,7 +48,7 @@ public:
         auto entrypoint = interface->findEntrypoint(endpoint);
         if (!entrypoint)
         {
-            throw EntrypointException("Invalid endpoint: '" + endpoint + "'");
+            throw EntrypointException("Unknown entrypoint '" + endpoint + "'");
         }
         auto& schema = entrypoint->getSchema();
         request.reply(schema);

@@ -26,7 +26,7 @@
 #include <brayns/common/types.h>
 
 #include <brayns/network/entrypoint/EntrypointHolder.h>
-#include <brayns/network/messages/ActionMessage.h>
+#include <brayns/network/message/ActionMessage.h>
 
 #include <functional>
 #include <string>

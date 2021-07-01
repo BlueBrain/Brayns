@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 
-#include <brayns/network/messages/JsonSchema.h>
+#include <brayns/network/message/JsonSchema.h>
 
 #include "IEntrypoint.h"
 

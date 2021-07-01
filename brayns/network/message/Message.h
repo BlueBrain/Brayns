@@ -114,16 +114,6 @@ struct JsonSchemaFactory<MessageHolder<TagType>>
  */
 struct MessageProperty
 {
-    template <typename T>
-    static MessageProperty create(std::string name, std::string description)
-    {
-        MessageProperty property;
-        property.schema = JsonSchemaFactory<T>::createSchema();
-        property.schema.name = std::move(name);
-        property.schema.description = std::move(description);
-        return property;
-    }
-
     JsonSchema schema;
     bool required = true;
     std::function<void(const void*, JsonValue&)> serialize;

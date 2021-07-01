@@ -21,7 +21,7 @@
 #ifndef FLUORESCENCEPARAMS_H
 #define FLUORESCENCEPARAMS_H
 
-#include <brayns/network/messages/ActionMessage.h>
+#include <brayns/network/message/ActionMessage.h>
 #include <brayns/common/types.h>
 
 #define COMMON_SENSOR_PROPS \
