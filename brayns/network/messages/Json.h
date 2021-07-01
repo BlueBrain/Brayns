@@ -58,9 +58,9 @@ using JsonArray = Poco::JSON::Array;
 using JsonObject = Poco::JSON::Object;
 
 /**
- * @brief Check if a type is a primitive JSON type (bool, number, string).
+ * @brief Helper class to get JSON info about a type.
  *
- * @tparam T Type to check.
+ * @tparam T Type to analyze.
  */
 template <typename T>
 struct JsonType
@@ -253,7 +253,7 @@ struct Json
     template <typename T>
     static T deserialize(const JsonValue& json)
     {
-        auto value = T{};
+        T value = {};
         JsonSerializer<T>::deserialize(json, value);
         return value;
     }
@@ -344,12 +344,12 @@ struct JsonSerializer<std::vector<T>>
         auto array = Poco::makeShared<JsonArray>();
         for (const auto& item : value)
         {
-            JsonValue child;
-            if (!Json::serialize(item, child))
+            JsonValue jsonItem;
+            if (!Json::serialize(item, jsonItem))
             {
                 return false;
             }
-            array->add(child);
+            array->add(jsonItem);
         }
         json = array;
         return true;
@@ -375,7 +375,7 @@ struct JsonSerializer<std::vector<T>>
         std::vector<T> buffer(array->size());
         for (size_t i = 0; i < value.size(); ++i)
         {
-            if (!JsonSerializer<T>::deserialize(array->get(i), value[i]))
+            if (!Json::deserialize(array->get(i), value[i]))
             {
                 return false;
             }
@@ -410,12 +410,12 @@ struct JsonSerializer<glm::vec<S, T>>
         auto array = Poco::makeShared<JsonArray>();
         for (glm::length_t i = 0; i < S; ++i)
         {
-            JsonValue child;
-            if (!Json::serialize(value[i], child))
+            JsonValue jsonItem;
+            if (!Json::serialize(value[i], jsonItem))
             {
                 return false;
             }
-            array->add(child);
+            array->add(jsonItem);
         }
         json = array;
         return true;
@@ -445,7 +445,7 @@ struct JsonSerializer<glm::vec<S, T>>
         auto size = std::min(S, glm::length_t(array->size()));
         for (glm::length_t i = 0; i < size; ++i)
         {
-            if (!JsonSerializer<T>::deserialize(array->get(i), buffer[i]))
+            if (!Json::deserialize(array->get(i), buffer[i]))
             {
                 return false;
             }
@@ -489,7 +489,7 @@ struct JsonSerializer<boost::optional<T>>
      */
     static bool deserialize(const JsonValue& json, boost::optional<T>& value)
     {
-        T buffer = T{};
+        T buffer = {};
         if (!Json::deserialize(json, buffer))
         {
             value = {};

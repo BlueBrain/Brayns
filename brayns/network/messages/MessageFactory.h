@@ -99,6 +99,18 @@ BRAYNS_MESSAGE_ENTRY(JsonValue, params, "Message content")
 BRAYNS_MESSAGE_END()
 
 /**
+ * @brief Placeholder if the entrypoint has no input params.
+ * 
+ */
+using NoParams = JsonValue;
+
+/**
+ * @brief Placeholder if the entrypoint has no output result.
+ * 
+ */
+using NoResult = JsonValue;
+
+/**
  * @brief Helper class to create standard messages.
  *
  */

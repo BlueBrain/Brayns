@@ -218,7 +218,9 @@ struct JsonSchemaInfo
 /**
  * @brief Create JSON schema for a given type (can be specialized).
  *
- * The default implementation is for basic types and hence only have a type.
+ * The default implementation returns an empty schema. For basic types (bool,
+ * integer, number, string), the type is filled and for unsigned types, a
+ * minimum of 0 is set.
  *
  * @tparam T Type to get JSON schema from.
  */
@@ -234,7 +236,7 @@ struct JsonSchemaFactory
         }
         if (std::is_unsigned<T>())
         {
-            schema.minimum = 0;
+            schema.minimum = 0.0;
         }
         return schema;
     }
