@@ -25,7 +25,8 @@
 #include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/types.h>
 
-#include <brayns/network/entrypoint/EntrypointHolder.h>
+#include <brayns/network/entrypoint/EntrypointRef.h>
+
 #include <brayns/network/message/ActionMessage.h>
 
 #include <functional>
@@ -64,7 +65,7 @@ public:
      * @return const EntrypointHolder* Pointer to the corresponding entrypoint
      * or null if not found.
      */
-    virtual const EntrypointHolder* findEntrypoint(
+    virtual const EntrypointRef* findEntrypoint(
         const std::string& name) const = 0;
 
     /**
@@ -72,7 +73,7 @@ public:
      *
      * @param entrypoint Pointer to an IEntrypoint implementation.
      */
-    virtual void addEntrypoint(EntrypointPtr entrypoint) = 0;
+    virtual void addEntrypoint(EntrypointRef entrypoint) = 0;
 
     /**
      * @brief Shortcut to add an entrypoint from its type.
@@ -85,7 +86,7 @@ public:
     void add(Args&&... args)
     {
         static_assert(std::is_base_of<IEntrypoint, T>());
-        addEntrypoint(std::make_unique<T>(std::forward<Args>(args)...));
+        addEntrypoint(EntrypointRef::of<T>(std::forward<Args>(args)...));
     }
 
     /**

@@ -149,7 +149,7 @@ NetworkInterface::NetworkInterface(PluginAPI& api)
 {
 }
 
-const EntrypointHolder* NetworkInterface::findEntrypoint(
+const EntrypointRef* NetworkInterface::findEntrypoint(
     const std::string& name) const
 {
     auto i = _entrypoints.find(name);
@@ -165,15 +165,14 @@ void NetworkInterface::run(NetworkSocket& socket)
     _clients.remove(socket);
 }
 
-void NetworkInterface::addEntrypoint(EntrypointPtr entrypoint)
+void NetworkInterface::addEntrypoint(EntrypointRef entrypoint)
 {
-    assert(entrypoint);
-    entrypoint->setApi(*_api);
-    entrypoint->setClientList(_clients);
-    entrypoint->onCreate();
-    auto name = entrypoint->getName();
+    entrypoint.setApi(*_api);
+    entrypoint.setClientList(_clients);
+    entrypoint.create();
+    auto name = entrypoint.getName();
     assert(!name.empty());
-    _entrypoints[name] = std::move(entrypoint);
+    assert(_entrypoints.find(name) == _entrypoints.end());
+    _entrypoints.emplace(name, std::move(entrypoint));
 }
-
 } // namespace brayns

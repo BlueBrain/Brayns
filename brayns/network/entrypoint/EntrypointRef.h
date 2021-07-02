@@ -20,21 +20,40 @@
 
 #pragma once
 
-#include "IEntrypoint.h"
+#include <cassert>
+#include <memory>
+#include <type_traits>
+
 #include "EntrypointSchema.h"
+#include "IEntrypoint.h"
 
 namespace brayns
 {
-class EntrypointHolder
+class EntrypointRef
 {
 public:
-    EntrypointHolder() = default;
-
-    EntrypointHolder(EntrypointPtr entrypoint)
-        : _entrypoint(std::move(entrypoint))
-        , _schema(EntrypointSchemaFactory::createSchema(*_entrypoint))
+    template <typename T, typename... Args>
+    static EntrypointRef of(Args&&... args)
     {
+        static_assert(std::is_base_of<IEntrypoint, T>());
+        return EntrypointRef(std::make_unique<T>(std::forward<Args>(args)...));
     }
+
+    EntrypointRef(std::unique_ptr<IEntrypoint> entrypoint)
+        : _entrypoint(std::move(entrypoint))
+    {
+        assert(_entrypoint);
+        _schema = EntrypointSchemaFactory::createSchema(*_entrypoint);
+    }
+
+    void setApi(PluginAPI& api) { _entrypoint->setApi(api); }
+
+    void setClientList(NetworkClientList& clients)
+    {
+        _entrypoint->setClientList(clients);
+    }
+
+    void create() { _entrypoint->onCreate(); }
 
     void processRequest(const NetworkRequest& request) const
     {
@@ -52,7 +71,7 @@ public:
     const JsonSchema& getResultSchema() const { return _schema.returns; }
 
 private:
-    EntrypointPtr _entrypoint;
+    std::unique_ptr<IEntrypoint> _entrypoint;
     EntrypointSchema _schema;
 };
 } // namespace brayns

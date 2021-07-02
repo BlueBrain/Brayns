@@ -63,10 +63,10 @@ public:
      * @brief Find an entrypoint with the given name.
      *
      * @param name Entrypoint name (method in request).
-     * @return const EntrypointHolder* Pointer to the corresponding entrypoint
+     * @return const EntrypointRef* Pointer to the corresponding entrypoint
      * or null if not found.
      */
-    virtual const EntrypointHolder* findEntrypoint(
+    virtual const EntrypointRef* findEntrypoint(
         const std::string& name) const override;
 
     /**
@@ -74,11 +74,11 @@ public:
      *
      * @param entrypoint IEntrypoint to register.
      */
-    virtual void addEntrypoint(EntrypointPtr entrypoint) override;
+    virtual void addEntrypoint(EntrypointRef entrypoint) override;
 
 private:
     PluginAPI* _api;
-    std::unordered_map<std::string, EntrypointHolder> _entrypoints;
+    std::unordered_map<std::string, EntrypointRef> _entrypoints;
     NetworkClientList _clients;
 };
 } // namespace brayns

@@ -328,9 +328,9 @@ public:
 #endif
     }
 
-    virtual void addEntrypoint(EntrypointPtr entrypoint) override {}
+    virtual void addEntrypoint(EntrypointRef entrypoint) override {}
 
-    virtual const EntrypointHolder* findEntrypoint(
+    virtual const EntrypointRef* findEntrypoint(
         const std::string& name) const override
     {
         return nullptr;

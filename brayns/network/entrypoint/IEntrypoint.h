@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <deque>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -32,14 +30,6 @@
 namespace brayns
 {
 class PluginAPI;
-
-class IEntrypoint;
-
-/**
- * @brief Entrypoint holder.
- *
- */
-using EntrypointPtr = std::unique_ptr<IEntrypoint>;
 
 /**
  * @brief IEntrypoint interface.
