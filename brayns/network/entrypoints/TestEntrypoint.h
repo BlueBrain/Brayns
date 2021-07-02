@@ -45,12 +45,16 @@ public:
     virtual void onRequest(const Request& request) const override
     {
         auto& params = request.getParams();
-        request.progress("processing", 0.0);
+        request.progress("This is a 0% progress", 0.0);
         TestResult result;
         result.test = "Success";
         notify(std::string("This is a notification"));
         result.size = params.strings.size();
-        request.progress("processing", 1.0);
+        if (result.size == 0)
+        {
+            throw EntrypointException("This is an error");
+        }
+        request.progress("This is a 100% progress", 1.0);
         request.reply(result);
     }
 };

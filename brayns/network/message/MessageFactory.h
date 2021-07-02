@@ -99,16 +99,40 @@ BRAYNS_MESSAGE_ENTRY(JsonValue, params, "Message content")
 BRAYNS_MESSAGE_END()
 
 /**
- * @brief Placeholder if the entrypoint has no input params.
- * 
+ * @brief Empty message when no params or result is needed.
+ *
  */
-using NoParams = JsonValue;
+BRAYNS_MESSAGE_BEGIN(EmptyMessage)
+BRAYNS_MESSAGE_END()
 
 /**
- * @brief Placeholder if the entrypoint has no output result.
- * 
+ * @brief Serialize empty message as empty object.
+ *
  */
-using NoResult = JsonValue;
+template<>
+struct JsonSerializer<EmptyMessage>
+{
+    static bool serialize(const EmptyMessage& value, JsonValue& json)
+    {
+        json = Poco::makeShared<JsonObject>();
+        return true;
+    }
+
+    static bool deserialize(const JsonValue& json, EmptyMessage& value)
+    {
+        return true;
+    }
+};
+
+/**
+ * @brief Empty schema if no message.
+ *  
+ */
+template<>
+struct JsonSchemaFactory<EmptyMessage>
+{
+    static JsonSchema createSchema() { return {}; }
+};
 
 /**
  * @brief Helper class to create standard messages.

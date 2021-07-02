@@ -23,9 +23,11 @@
 #include <brayns/network/interface/ActionInterface.h>
 #include <brayns/network/message/MessageFactory.h>
 
+#include <brayns/pluginapi/PluginAPI.h>
+
 #include <brayns/parameters/ParametersManager.h>
 
-#include <brayns/pluginapi/PluginAPI.h>
+#include <brayns/engine/Engine.h>
 
 #include "EntrypointException.h"
 #include "IEntrypoint.h"
@@ -69,9 +71,7 @@ template <typename ParamsType, typename ResultType>
 class Entrypoint : public IEntrypoint
 {
 public:
-    using Params = ParamsType;
-    using Result = ResultType;
-    using Request = EntrypointRequest<Params, Result>;
+    using Request = EntrypointRequest<ParamsType, ResultType>;
 
     /**
      * @brief Get a reference to Brayns API.

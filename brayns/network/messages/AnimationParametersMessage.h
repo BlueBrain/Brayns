@@ -20,13 +20,11 @@
 
 #pragma once
 
-#include <brayns/network/message/Message.h>
-
-#include <brayns/parameters/AnimationParameters.h>
+#include <brayns/network/message/MessageExtractor.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(AnimationParametersParams)
+BRAYNS_MESSAGE_BEGIN(AnimationParametersMessage)
 BRAYNS_MESSAGE_ENTRY(uint32_t, frame_count, "Animation frame count");
 BRAYNS_MESSAGE_ENTRY(uint32_t, current, "Current frame index");
 BRAYNS_MESSAGE_ENTRY(int32_t, delta, "Frame delta");
@@ -34,6 +32,4 @@ BRAYNS_MESSAGE_ENTRY(double, dt, "Frame time");
 BRAYNS_MESSAGE_ENTRY(bool, playing, "Animation is playing");
 BRAYNS_MESSAGE_ENTRY(std::string, unit, "Time unit");
 BRAYNS_MESSAGE_END()
-
-using AnimationParametersResult = AnimationParametersParams;
 } // namespace brayns

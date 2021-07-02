@@ -24,7 +24,11 @@
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(SchemaMessage)
-BRAYNS_MESSAGE_ENTRY(std::string, endpoint, "Name of the endpoint")
+BRAYNS_MESSAGE_BEGIN(CameraMessage)
+BRAYNS_MESSAGE_ENTRY(Quaterniond, orientation, "Camera orientation XYZW");
+BRAYNS_MESSAGE_ENTRY(Vector3d, position, "Camera position XYZ");
+BRAYNS_MESSAGE_ENTRY(Vector3d, target, "Camera target XYZ");
+BRAYNS_MESSAGE_ENTRY(std::string, current, "Camera current type");
+BRAYNS_MESSAGE_ENTRY(std::vector<std::string>, types, "Available camera types");
 BRAYNS_MESSAGE_END()
 } // namespace brayns

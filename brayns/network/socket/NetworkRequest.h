@@ -114,6 +114,13 @@ public:
     }
 
     /**
+     * @brief Shortcut for errors with no code.
+     *
+     * @param message Error message.
+     */
+    void error(const std::string& message) const { error(0, message); }
+
+    /**
      * @brief Send a progress message to the client.
      *
      * Used to provide feedback to the client during the request processing.

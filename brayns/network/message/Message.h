@@ -200,49 +200,49 @@ private:
  * @endcode
  *
  */
-#define BRAYNS_MESSAGE_BEGIN(TYPE)                                      \
-    struct TYPE##Tag                                                    \
-    {                                                                   \
-    };                                                                  \
-                                                                        \
-    using TYPE = MessageHolder<TYPE##Tag>;                              \
-                                                                        \
-    template <>                                                         \
-    struct MessageHolder<TYPE##Tag>                                     \
-    {                                                                   \
-    private:                                                            \
-        using MessageType = TYPE;                                       \
-                                                                        \
-        static MessageInfo& _getMessageInfo()                           \
-        {                                                               \
-            static MessageInfo info(#TYPE);                             \
-            return info;                                                \
-        }                                                               \
-                                                                        \
-        static const MessageInfo& _setupAndGetMessageInfo()             \
-        {                                                               \
-            static const int buildMessageInfo = []                      \
-            {                                                           \
-                TYPE();                                                 \
-                return 0;                                               \
-            }();                                                        \
-            return _getMessageInfo();                                   \
-        }                                                               \
-                                                                        \
-    public:                                                             \
-        static const JsonSchema& getSchema()                            \
-        {                                                               \
-            return _setupAndGetMessageInfo().getSchema();               \
-        }                                                               \
-                                                                        \
-        static bool serialize(const TYPE& value, JsonValue& json)       \
-        {                                                               \
-            return _setupAndGetMessageInfo().serialize(&value, json);   \
-        }                                                               \
-                                                                        \
-        static bool deserialize(const JsonValue& json, TYPE& value)     \
-        {                                                               \
-            return _setupAndGetMessageInfo().deserialize(json, &value); \
+#define BRAYNS_MESSAGE_BEGIN(TYPE)                                  \
+    struct TYPE##Tag                                                \
+    {                                                               \
+    };                                                              \
+                                                                    \
+    using TYPE = MessageHolder<TYPE##Tag>;                          \
+                                                                    \
+    template <>                                                     \
+    struct MessageHolder<TYPE##Tag>                                 \
+    {                                                               \
+    private:                                                        \
+        using MessageType = TYPE;                                   \
+                                                                    \
+        static MessageInfo& _getInfo()                              \
+        {                                                           \
+            static MessageInfo info(#TYPE);                         \
+            return info;                                            \
+        }                                                           \
+                                                                    \
+        static const MessageInfo& _loadInfo()                       \
+        {                                                           \
+            static const int buildMessageInfo = []                  \
+            {                                                       \
+                TYPE();                                             \
+                return 0;                                           \
+            }();                                                    \
+            return _getInfo();                                      \
+        }                                                           \
+                                                                    \
+    public:                                                         \
+        static const JsonSchema& getSchema()                        \
+        {                                                           \
+            return _loadInfo().getSchema();                         \
+        }                                                           \
+                                                                    \
+        static bool serialize(const TYPE& value, JsonValue& json)   \
+        {                                                           \
+            return _loadInfo().serialize(&value, json);             \
+        }                                                           \
+                                                                    \
+        static bool deserialize(const JsonValue& json, TYPE& value) \
+        {                                                           \
+            return _loadInfo().deserialize(json, &value);           \
         }
 
 /**
@@ -272,7 +272,7 @@ private:
                 auto& message = *static_cast<MessageType*>(value);        \
                 Json::deserialize(json, message.NAME);                    \
             };                                                            \
-            _getMessageInfo().addProperty(property);                      \
+            _getInfo().addProperty(property);                             \
             return 0;                                                     \
         }();                                                              \
         return TYPE{};                                                    \

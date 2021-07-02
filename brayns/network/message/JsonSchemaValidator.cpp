@@ -57,6 +57,12 @@ private:
 class JsonValidatorContext
 {
 public:
+    void clear()
+    {
+        _path.clear();
+        _errors.clear();
+    }
+
     void push(const std::string& key) { _path.push(key); }
 
     void push(size_t index) { _path.push(index); }
@@ -107,10 +113,10 @@ public:
         _errors.push_back(stream.str());
     }
 
-    void addTooMuchItems(size_t size, size_t maxItems)
+    void addTooManyItems(size_t size, size_t maxItems)
     {
         std::ostringstream stream;
-        stream << "Too much items in '" << _path.toString()
+        stream << "Too many items in '" << _path.toString()
                << "': max '" << maxItems << "' got '" << size << "'";
         _errors.push_back(stream.str());
     }
@@ -126,7 +132,7 @@ public:
     JsonSchemaErrorList validate(const JsonValue& json,
                                  const JsonSchema& schema)
     {
-        _context = {};
+        _context.clear();
         _validate(json, schema);
         return _context.getErrors();
     }
@@ -135,6 +141,10 @@ private:
     void _validate(const JsonValue& json, const JsonSchema& schema)
     {
         if (JsonSchemaInfo::isEmpty(schema))
+        {
+            return;
+        }
+        if (JsonSchemaInfo::isOneOf(schema))
         {
             return;
         }
@@ -234,7 +244,7 @@ private:
         }
         if (schema.maxItems && size > *schema.maxItems)
         {
-            _context.addTooMuchItems(size, *schema.maxItems);
+            _context.addTooManyItems(size, *schema.maxItems);
         }
     }
 

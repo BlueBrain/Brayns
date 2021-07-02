@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -27,6 +28,7 @@
 #include <vector>
 
 #include <boost/optional.hpp>
+#include <boost/variant.hpp>
 
 #include <brayns/common/mathTypes.h>
 
@@ -177,7 +179,12 @@ struct JsonSchemaInfo
 {
     static bool isEmpty(const JsonSchema& schema)
     {
-        return schema.type.empty();
+        return schema.type.empty() && schema.oneOf.empty();
+    }
+
+    static bool isOneOf(const JsonSchema& schema)
+    {
+        return !schema.oneOf.empty();
     }
 
     static bool isNumber(const JsonSchema& schema)
@@ -212,6 +219,21 @@ struct JsonSchemaInfo
             return JsonTypeName::isNumber(type);
         }
         return type == schema.type;
+    }
+};
+
+struct JsonSchemaHelper
+{
+    static void remove(JsonSchema& schema, const std::string& property)
+    {
+        auto& properties = schema.properties;
+        properties.erase(std::remove_if(properties.begin(), properties.end(),
+                                        [&](const auto& item)
+                                        { return item.name == property; }),
+                         properties.end());
+        auto& required = schema.required;
+        required.erase(std::remove(required.begin(), required.end(), property),
+                       required.end());
     }
 };
 
@@ -286,6 +308,51 @@ struct JsonSchemaFactory<glm::vec<S, T>>
         schema.minItems = S;
         schema.maxItems = S;
         return schema;
+    }
+};
+
+/**
+ * @brief Specialization to create JSON schema for GLM quaternion.
+ *
+ * @tparam T Quaternion item type.
+ */
+template <typename T>
+struct JsonSchemaFactory<glm::qua<T>>
+{
+    static JsonSchema createSchema()
+    {
+        auto schema = JsonArraySchema<T>::create();
+        schema.minItems = 4;
+        schema.maxItems = 4;
+        return schema;
+    }
+};
+
+template <typename... Types>
+using OneOf = boost::variant<Types...>;
+
+template <typename... Types>
+struct JsonSchemaFactory<OneOf<Types...>>
+{
+    static JsonSchema createSchema()
+    {
+        JsonSchema schema;
+        addOneOf<Types...>(schema);
+        return schema;
+    }
+
+    template <typename T, typename... Others>
+    static void addOneOf(JsonSchema& schema)
+    {
+        addOneOf<T>(schema);
+        addOneOf<Others...>(schema);
+    }
+
+    template <typename T>
+    static void addOneOf(JsonSchema& schema)
+    {
+        auto oneOf = JsonSchemaFactory<T>::createSchema();
+        schema.oneOf.push_back(std::move(oneOf));
     }
 };
 

@@ -28,7 +28,7 @@
 namespace brayns
 {
 class GetAnimationParametersEntrypoint
-    : public Entrypoint<NoParams, AnimationParametersResult>
+    : public Entrypoint<EmptyMessage, AnimationParametersMessage>
 {
 public:
     virtual std::string getName() const override
@@ -48,8 +48,8 @@ public:
         animationParameters.onModified(
             [this](const auto& object)
             {
-                auto result = extractAnimationParameters();
-                notify(result);
+                auto params = extractAnimationParameters();
+                notify(params);
             });
     }
 
@@ -60,11 +60,11 @@ public:
     }
 
 private:
-    AnimationParametersResult extractAnimationParameters() const
+    AnimationParametersMessage extractAnimationParameters() const
     {
         auto& manager = getApi().getParametersManager();
         auto& animationParameters = manager.getAnimationParameters();
-        AnimationParametersResult result;
+        AnimationParametersMessage result;
         result.frame_count = animationParameters.getNumFrames();
         result.current = animationParameters.getFrame();
         result.delta = animationParameters.getDelta();
@@ -76,7 +76,7 @@ private:
 };
 
 class SetAnimationParametersEntrypoint
-    : public Entrypoint<AnimationParametersParams, NoResult>
+    : public Entrypoint<AnimationParametersMessage, EmptyMessage>
 {
 public:
     virtual std::string getName() const override
@@ -100,7 +100,7 @@ public:
         animationParameters.setDt(params.dt);
         animationParameters.setPlaying(params.playing);
         animationParameters.setUnit(params.unit);
-        request.reply(NoResult());
+        request.reply(EmptyMessage());
     }
 };
 } // namespace brayns

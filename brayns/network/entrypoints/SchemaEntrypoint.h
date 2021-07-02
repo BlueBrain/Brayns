@@ -21,12 +21,13 @@
 #pragma once
 
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/entrypoint/EntrypointSchema.h>
 
 #include <brayns/network/messages/SchemaMessage.h>
 
 namespace brayns
 {
-class SchemaEntrypoint : public Entrypoint<SchemaParams, SchemaResult>
+class SchemaEntrypoint : public Entrypoint<SchemaMessage, EntrypointSchema>
 {
 public:
     virtual std::string getName() const override { return "schema"; }

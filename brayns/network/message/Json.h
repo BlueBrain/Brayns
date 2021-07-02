@@ -372,7 +372,7 @@ struct JsonSerializer<std::vector<T>>
         {
             return false;
         }
-        std::vector<T> buffer(array->size());
+        std::vector<T> buffer(value.size());
         for (size_t i = 0; i < value.size(); ++i)
         {
             if (!Json::deserialize(array->get(i), value[i]))
@@ -381,6 +381,43 @@ struct JsonSerializer<std::vector<T>>
             }
         }
         value = std::move(buffer);
+        return true;
+    }
+};
+
+/**
+ * @brief Helper class to serialize GLM types to a JSON array.
+ *
+ */
+struct GlmJsonSerializer
+{
+    template <typename T>
+    static bool serialize(const T& value, JsonValue& json)
+    {
+        auto array = Poco::makeShared<JsonArray>();
+        for (glm::length_t i = 0; i < value.length(); ++i)
+        {
+            JsonValue jsonItem;
+            Json::serialize(value[i], jsonItem);
+            array->add(jsonItem);
+        }
+        json = array;
+        return true;
+    }
+
+    template <typename T>
+    static bool deserialize(const JsonValue& json, T& value)
+    {
+        auto array = JsonExtractor::extractArray(json);
+        if (!array)
+        {
+            return false;
+        }
+        auto size = std::min(value.length(), glm::length_t(array->size()));
+        for (glm::length_t i = 0; i < size; ++i)
+        {
+            Json::deserialize(array->get(i), value[i]);
+        }
         return true;
     }
 };
@@ -407,18 +444,7 @@ struct JsonSerializer<glm::vec<S, T>>
      */
     static bool serialize(const glm::vec<S, T>& value, JsonValue& json)
     {
-        auto array = Poco::makeShared<JsonArray>();
-        for (glm::length_t i = 0; i < S; ++i)
-        {
-            JsonValue jsonItem;
-            if (!Json::serialize(value[i], jsonItem))
-            {
-                return false;
-            }
-            array->add(jsonItem);
-        }
-        json = array;
-        return true;
+        return GlmJsonSerializer::serialize(value, json);
     }
 
     /**
@@ -436,22 +462,21 @@ struct JsonSerializer<glm::vec<S, T>>
      */
     static bool deserialize(const JsonValue& json, glm::vec<S, T>& value)
     {
-        auto array = JsonExtractor::extractArray(json);
-        if (!array)
-        {
-            return false;
-        }
-        glm::vec<S, T> buffer;
-        auto size = std::min(S, glm::length_t(array->size()));
-        for (glm::length_t i = 0; i < size; ++i)
-        {
-            if (!Json::deserialize(array->get(i), buffer[i]))
-            {
-                return false;
-            }
-        }
-        value = buffer;
-        return true;
+        return GlmJsonSerializer::deserialize(json, value);
+    }
+};
+
+template <typename T>
+struct JsonSerializer<glm::qua<T>>
+{
+    static bool serialize(const glm::qua<T>& value, JsonValue& json)
+    {
+        return GlmJsonSerializer::serialize(value, json);
+    }
+
+    static bool deserialize(const JsonValue& json, glm::qua<T>& value)
+    {
+        return GlmJsonSerializer::deserialize(json, value);
     }
 };
 
