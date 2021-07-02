@@ -25,6 +25,7 @@
 #include <brayns/common/light/Light.h>
 #include <brayns/common/scene/ClipPlane.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
+#include <brayns/common/utils/ImageGenerator.h>
 #include <brayns/common/utils/base64/base64.h>
 #include <brayns/common/utils/stringUtils.h>
 #include <brayns/common/utils/utils.h>
@@ -42,7 +43,6 @@
 #include <brayns/tasks/errors.h>
 #include <brayns/version.h>
 
-#include "ImageGenerator.h"
 #include "SnapshotTask.h"
 
 #include "jsonUtils.h"

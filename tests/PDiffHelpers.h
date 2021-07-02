@@ -33,7 +33,7 @@
 #include <iostream>
 
 #ifdef BRAYNS_USE_NETWORKING
-#include <ImageGenerator.h>
+#include <brayns/common/utils/ImageGenerator.h>
 #include <brayns/common/utils/base64/base64.h>
 #include <fstream>
 #endif

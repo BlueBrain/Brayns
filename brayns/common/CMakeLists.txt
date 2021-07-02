@@ -16,6 +16,7 @@ set(BRAYNSCOMMON_SOURCES
   utils/base64/base64.cpp
   utils/DynamicLib.cpp
   utils/imageUtils.cpp
+  utils/ImageGenerator.cpp
   utils/stringUtils.cpp
   utils/utils.cpp
   Timer.cpp
@@ -59,6 +60,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   types.h
   utils/enumUtils.h
   utils/imageUtils.h
+  utils/ImageGenerator.h
   utils/stringUtils.h
   utils/utils.h
 )

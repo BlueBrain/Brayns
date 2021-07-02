@@ -24,6 +24,7 @@
 
 #include "RocketsPlugin.h"
 
+#include <brayns/common/utils/ImageGenerator.h>
 #include <brayns/common/Timer.h>
 #include <brayns/common/tasks/Task.h>
 #include <brayns/common/utils/stringUtils.h>
@@ -42,7 +43,6 @@
 #include <rockets/server.h>
 
 #include "BinaryRequests.h"
-#include "ImageGenerator.h"
 #include "Throttle.h"
 
 #include <atomic>

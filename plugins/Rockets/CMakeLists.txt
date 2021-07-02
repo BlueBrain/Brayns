@@ -6,7 +6,6 @@
 
 set(BRAYNSROCKETS_HEADERS
   BinaryRequests.h
-  ImageGenerator.h
   RocketsPlugin.h
   SnapshotTask.h
   Throttle.h
@@ -17,7 +16,6 @@ set(BRAYNSROCKETS_HEADERS
 )
 
 set(BRAYNSROCKETS_SOURCES
-  ImageGenerator.cpp
   RocketsPlugin.cpp
   Throttle.cpp
   Timeout.cpp

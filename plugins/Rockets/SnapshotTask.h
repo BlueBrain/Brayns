@@ -22,8 +22,7 @@
 
 #include <brayns/common/tasks/Task.h>
 
-#include "ImageGenerator.h"
-#include <brayns/common/utils/stringUtils.h>
+#include <brayns/common/utils/ImageGenerator.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
@@ -162,7 +161,7 @@ public:
                          _params.samplesPerPixel);
         }
 
-        if(!_params.filePath.empty() && frameBuffers.size() == 1)
+        if (!_params.filePath.empty() && frameBuffers.size() == 1)
         {
             auto& fb = *frameBuffers[0];
             _writeToDisk(fb);
@@ -171,7 +170,7 @@ public:
         }
         else
             return _imageGenerator.createImage(frameBuffers, _params.format,
-                                            _params.quality);
+                                               _params.quality);
     }
 
 private:
@@ -179,8 +178,8 @@ private:
     {
         auto image = fb.getImage();
         auto fif = _params.format == "jpg"
-                ? FIF_JPEG
-                : FreeImage_GetFIFFromFormat(_params.format.c_str());
+                       ? FIF_JPEG
+                       : FreeImage_GetFIFFromFormat(_params.format.c_str());
 
         if (fif == FIF_JPEG)
             image.reset(FreeImage_ConvertTo24Bits(image.get()));
