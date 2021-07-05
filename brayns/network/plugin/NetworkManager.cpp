@@ -36,7 +36,7 @@ using NetworkInterfacePtr = std::shared_ptr<NetworkInterface>;
 class NetworkInterfaceFactory
 {
 public:
-    static NetworkInterfacePtr createNetworkInterface(PluginAPI& api)
+    static NetworkInterfacePtr createInterface(PluginAPI& api)
     {
         return std::make_shared<ServerInterface>(api);
     }
@@ -52,7 +52,7 @@ public:
         interface.add<GetCameraEntrypoint>();
         interface.add<SetCameraEntrypoint>();
         interface.add<ImageJpegEntrypoint>();
-        interface.add<SchemaEntrypoint>();
+        interface.add<SchemaEntrypoint>(interface.getEntrypoints());
         interface.add<TestEntrypoint>();
     }
 };
@@ -70,7 +70,7 @@ NetworkManager::~NetworkManager()
 
 void NetworkManager::init()
 {
-    auto interface = NetworkInterfaceFactory::createNetworkInterface(*_api);
+    auto interface = NetworkInterfaceFactory::createInterface(*_api);
     _actionInterface = interface;
     _api->setActionInterface(_actionInterface);
     EntrypointManager::registerEntrypoints(*interface);

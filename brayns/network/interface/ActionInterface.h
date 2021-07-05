@@ -59,16 +59,6 @@ public:
     virtual ~ActionInterface() = default;
 
     /**
-     * @brief Find an entrypoint with the given name.
-     *
-     * @param name Entrypoint name (method in request).
-     * @return const EntrypointHolder* Pointer to the corresponding entrypoint
-     * or null if not found.
-     */
-    virtual const EntrypointRef* findEntrypoint(
-        const std::string& name) const = 0;
-
-    /**
      * @brief Register an entrypoint implementing IEntrypoint interface.
      *
      * @param entrypoint Pointer to an IEntrypoint implementation.

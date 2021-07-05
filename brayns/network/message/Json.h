@@ -372,10 +372,10 @@ struct JsonSerializer<std::vector<T>>
         {
             return false;
         }
-        std::vector<T> buffer(value.size());
-        for (size_t i = 0; i < value.size(); ++i)
+        std::vector<T> buffer(array->size());
+        for (size_t i = 0; i < array->size(); ++i)
         {
-            if (!Json::deserialize(array->get(i), value[i]))
+            if (!Json::deserialize(array->get(i), buffer[i]))
             {
                 return false;
             }

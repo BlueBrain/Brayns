@@ -28,7 +28,7 @@
 
 namespace brayns
 {
-class NetworkClientList
+class ClientRegistry
 {
 public:
     void add(NetworkSocket& socket)

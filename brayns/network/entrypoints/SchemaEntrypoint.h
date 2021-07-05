@@ -21,6 +21,7 @@
 #pragma once
 
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/entrypoint/EntrypointRegistry.h>
 #include <brayns/network/entrypoint/EntrypointSchema.h>
 
 #include <brayns/network/messages/SchemaMessage.h>
@@ -30,6 +31,11 @@ namespace brayns
 class SchemaEntrypoint : public Entrypoint<SchemaMessage, EntrypointSchema>
 {
 public:
+    SchemaEntrypoint(const EntrypointRegistry& entrypoints)
+        : _entrypoints(&entrypoints)
+    {
+    }
+
     virtual std::string getName() const override { return "schema"; }
 
     virtual std::string getDescription() const override
@@ -46,7 +52,7 @@ public:
         }
         auto& params = request.getParams();
         auto& endpoint = params.endpoint;
-        auto entrypoint = interface->findEntrypoint(endpoint);
+        auto entrypoint = _entrypoints->find(endpoint);
         if (!entrypoint)
         {
             throw EntrypointException("Unknown entrypoint '" + endpoint + "'");
@@ -54,5 +60,8 @@ public:
         auto& schema = entrypoint->getSchema();
         request.reply(schema);
     }
+
+private:
+    const EntrypointRegistry* _entrypoints;
 };
 } // namespace brayns

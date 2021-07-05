@@ -92,7 +92,7 @@ public:
      *
      * @param clients Connected client list (don't take ownership).
      */
-    virtual void setClientList(NetworkClientList& clients) override
+    virtual void setClientRegistry(ClientRegistry& clients) override
     {
         _clients = &clients;
     }
@@ -162,6 +162,6 @@ private:
     }
 
     PluginAPI* _api = nullptr;
-    NetworkClientList* _clients;
+    ClientRegistry* _clients;
 };
 } // namespace brayns

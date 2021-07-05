@@ -159,7 +159,7 @@ private:
         _socket->send(Json::stringify(message));
     }
 
-    RequestMessage _message;
     NetworkSocket* _socket;
+    RequestMessage _message;
 };
 } // namespace brayns

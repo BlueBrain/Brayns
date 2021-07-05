@@ -46,14 +46,12 @@ public:
         _schema = EntrypointSchemaFactory::createSchema(*_entrypoint);
     }
 
-    void setApi(PluginAPI& api) { _entrypoint->setApi(api); }
-
-    void setClientList(NetworkClientList& clients)
+    void setup(PluginAPI& api, ClientRegistry& clients)
     {
-        _entrypoint->setClientList(clients);
+        _entrypoint->setApi(api);
+        _entrypoint->setClientRegistry(clients);
+        _entrypoint->onCreate();
     }
-
-    void create() { _entrypoint->onCreate(); }
 
     void processRequest(const NetworkRequest& request) const
     {

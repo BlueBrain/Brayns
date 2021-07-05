@@ -33,38 +33,33 @@ using namespace brayns;
 
 namespace
 {
-class MessageReceiver
+class MessageParser
 {
 public:
-    static RequestMessage receive(NetworkSocket& socket)
+    static RequestMessage parse(const InputPacket& packet)
     {
-        auto packet = _receivePacket(socket);
-        return _parseMessage(packet);
-    }
-
-private:
-    static InputPacket _receivePacket(NetworkSocket& socket)
-    {
-        auto packet = socket.receive();
         if (!packet.isText())
         {
             throw EntrypointException("Text frame expected");
         }
-        return packet;
-    }
-
-    static RequestMessage _parseMessage(const InputPacket& packet)
-    {
-        RequestMessage message;
+        auto& json = packet.getData();
         try
         {
-            message = Json::parse<RequestMessage>(packet.getData());
+            return Json::parse<RequestMessage>(json);
         }
         catch (Poco::JSON::JSONException& e)
         {
             throw EntrypointException("Failed to parse JSON request: " +
                                       e.displayText());
         }
+    }
+};
+
+class MessageValidator
+{
+public:
+    static void validateHeader(const RequestMessage& message)
+    {
         if (message.jsonrpc != "2.0")
         {
             throw EntrypointException("Unsupported JSON-RPC version: '" +
@@ -74,21 +69,65 @@ private:
         {
             throw EntrypointException("Missing message ID");
         }
-        return message;
+    }
+
+    static void validateParams(const JsonValue& params,
+                               const EntrypointSchema& schema)
+    {
+        if (schema.params.empty())
+        {
+            return;
+        }
+        auto& paramsSchema = schema.params[0];
+        if (JsonSchemaInfo::isEmpty(paramsSchema))
+        {
+            return;
+        }
+        auto errors = JsonSchemaValidator::validate(params, paramsSchema);
+        if (!errors.isEmpty())
+        {
+            throw EntrypointException(errors.toString());
+        }
     }
 };
 
-class NetworkTransaction
+class MessageDispatcher
 {
 public:
-    static bool run(const NetworkInterface& interface, NetworkSocket& socket)
+    static void dispatch(NetworkRequest& request,
+                         const EntrypointRegistry& entrypoints)
+    {
+        auto& method = request.getMethod();
+        auto entrypoint = entrypoints.find(method);
+        if (!entrypoint)
+        {
+            throw EntrypointException("Invalid entrypoint: '" + method + "'");
+        }
+        _validateSchema(request, *entrypoint);
+        entrypoint->processRequest(request);
+    }
+
+private:
+    static void _validateSchema(NetworkRequest& request,
+                                const EntrypointRef& entrypoint)
+    {
+        auto& schema = entrypoint.getSchema();
+        auto& params = request.getParams();
+        MessageValidator::validateParams(params, schema);
+    }
+};
+
+class MessageReceiver
+{
+public:
+    static bool receive(NetworkSocket& socket,
+                        const EntrypointRegistry& entrypoints)
     {
         NetworkRequest request(socket);
         try
         {
-            auto message = MessageReceiver::receive(socket);
-            request.setMessage(message);
-            _run(interface, request);
+            _receive(socket, request);
+            MessageDispatcher::dispatch(request, entrypoints);
         }
         catch (EntrypointException& e)
         {
@@ -107,37 +146,11 @@ public:
     }
 
 private:
-    static void _run(const NetworkInterface& interface, NetworkRequest& request)
+    static void _receive(NetworkSocket& socket, NetworkRequest& request)
     {
-        auto& method = request.getMethod();
-        auto entrypoint = interface.findEntrypoint(method);
-        if (!entrypoint)
-        {
-            throw EntrypointException("Invalid entrypoint: '" + method + "'");
-        }
-        auto& schema = entrypoint->getSchema();
-        _validateSchema(schema, request);
-        entrypoint->processRequest(request);
-    }
-
-    static void _validateSchema(const EntrypointSchema& schema,
-                                NetworkRequest& request)
-    {
-        if (schema.params.empty())
-        {
-            return;
-        }
-        auto& schemaParams = schema.params[0];
-        if (JsonSchemaInfo::isEmpty(schemaParams))
-        {
-            return;
-        }
-        auto& params = request.getParams();
-        auto errors = JsonSchemaValidator::validate(params, schemaParams);
-        if (!errors.isEmpty())
-        {
-            throw EntrypointException(errors.toString());
-        }
+        auto packet = socket.receive();
+        auto message = MessageParser::parse(packet);
+        request.setMessage(message);
     }
 };
 } // namespace
@@ -145,21 +158,14 @@ private:
 namespace brayns
 {
 NetworkInterface::NetworkInterface(PluginAPI& api)
-    : _api(&api)
+    : _entrypoints(api, _clients)
 {
-}
-
-const EntrypointRef* NetworkInterface::findEntrypoint(
-    const std::string& name) const
-{
-    auto i = _entrypoints.find(name);
-    return i == _entrypoints.end() ? nullptr : &i->second;
 }
 
 void NetworkInterface::run(NetworkSocket& socket)
 {
     _clients.add(socket);
-    while (NetworkTransaction::run(*this, socket))
+    while (MessageReceiver::receive(socket, _entrypoints))
     {
     }
     _clients.remove(socket);
@@ -167,12 +173,6 @@ void NetworkInterface::run(NetworkSocket& socket)
 
 void NetworkInterface::addEntrypoint(EntrypointRef entrypoint)
 {
-    entrypoint.setApi(*_api);
-    entrypoint.setClientList(_clients);
-    entrypoint.create();
-    auto name = entrypoint.getName();
-    assert(!name.empty());
-    assert(_entrypoints.find(name) == _entrypoints.end());
-    _entrypoints.emplace(name, std::move(entrypoint));
+    _entrypoints.add(std::move(entrypoint));
 }
 } // namespace brayns

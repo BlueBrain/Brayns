@@ -19,11 +19,11 @@
 
 #pragma once
 
-#include <string>
-#include <unordered_map>
-
-#include <brayns/network/entrypoint/IEntrypoint.h>
+#include <brayns/network/entrypoint/EntrypointRef.h>
+#include <brayns/network/entrypoint/EntrypointRegistry.h>
+#include <brayns/network/socket/ClientRegistry.h>
 #include <brayns/network/socket/NetworkSocket.h>
+
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include "ActionInterface.h"
@@ -52,22 +52,15 @@ public:
     NetworkInterface(PluginAPI& api);
 
     /**
-     * @brief Receive requests and send reply to the client until connection is
-     * closed.
+     * @brief Receive requests and send replies to the client until the
+     * connection is closed.
+     *
+     * Can be used by child class when a new connection is opened to delegate
+     * clients management.
      *
      * @param socket Socket used for communication.
      */
     void run(NetworkSocket& socket);
-
-    /**
-     * @brief Find an entrypoint with the given name.
-     *
-     * @param name Entrypoint name (method in request).
-     * @return const EntrypointRef* Pointer to the corresponding entrypoint
-     * or null if not found.
-     */
-    virtual const EntrypointRef* findEntrypoint(
-        const std::string& name) const override;
 
     /**
      * @brief Register an entrypoint.
@@ -76,9 +69,15 @@ public:
      */
     virtual void addEntrypoint(EntrypointRef entrypoint) override;
 
+    /**
+     * @brief Get the registered entrypoints.
+     * 
+     * @return const EntrypointRegistry& Entrypoint registry.
+     */
+    const EntrypointRegistry& getEntrypoints() const { return _entrypoints; }
+
 private:
-    PluginAPI* _api;
-    std::unordered_map<std::string, EntrypointRef> _entrypoints;
-    NetworkClientList _clients;
+    ClientRegistry _clients;
+    EntrypointRegistry _entrypoints;
 };
 } // namespace brayns

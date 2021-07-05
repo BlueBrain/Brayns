@@ -24,7 +24,7 @@
 #include <vector>
 
 #include <brayns/network/message/JsonSchema.h>
-#include <brayns/network/socket/NetworkClientList.h>
+#include <brayns/network/socket/ClientRegistry.h>
 #include <brayns/network/socket/NetworkRequest.h>
 
 namespace brayns
@@ -52,7 +52,7 @@ public:
      *
      * @param clients A reference to the list of connected clients.
      */
-    virtual void setClientList(NetworkClientList& clients) = 0;
+    virtual void setClientRegistry(ClientRegistry& clients) = 0;
 
     /**
      * @brief Return the name of the entrypoint (unique ID).
