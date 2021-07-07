@@ -20,10 +20,10 @@
 
 #include "JsonSchema.h"
 
-using namespace brayns;
-
 namespace
 {
+using namespace brayns;
+
 class JsonHelper
 {
 public:

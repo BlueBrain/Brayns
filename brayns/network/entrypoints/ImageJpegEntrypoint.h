@@ -21,13 +21,13 @@
 #pragma once
 
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/ImageJpegMessage.h>
+#include <brayns/network/messages/ImageBase64Message.h>
 
 #include <brayns/common/utils/ImageGenerator.h>
 
 namespace brayns
 {
-class ImageJpegEntrypoint : public Entrypoint<EmptyMessage, ImageJpegMessage>
+class ImageJpegEntrypoint : public Entrypoint<EmptyMessage, ImageBase64Message>
 {
 public:
     virtual std::string getName() const override { return "image-jpeg"; }
@@ -47,7 +47,7 @@ public:
         auto compression = uint8_t(parameters.getJpegCompression());
         ImageGenerator generator;
         auto image = generator.createImage(framebuffer, "jpg", compression);
-        ImageJpegMessage result;
+        ImageBase64Message result;
         result.data = std::move(image.data);
         request.reply(result);
     }

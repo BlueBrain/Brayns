@@ -24,7 +24,7 @@
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(ImageJpegMessage)
+BRAYNS_MESSAGE_BEGIN(ImageBase64Message)
 BRAYNS_MESSAGE_ENTRY(std::string, data, "Image data");
 BRAYNS_MESSAGE_END()
 } // namespace brayns

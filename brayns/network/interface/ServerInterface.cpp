@@ -31,10 +31,10 @@
 #include <brayns/common/log.h>
 #include <brayns/parameters/ParametersManager.h>
 
-using namespace brayns;
-
 namespace
 {
+using namespace brayns;
+
 class RequestHandler : public Poco::Net::HTTPRequestHandler
 {
 public:

@@ -44,6 +44,11 @@ class ControlledJpegStream
 public:
     static void broadcast(NetworkContext& context)
     {
+        auto& streamController = context.getStreamController();
+        if (!streamController.isTriggered())
+        {
+            return;
+        }
     }
 };
 
@@ -58,9 +63,7 @@ public:
         }
         if (_useVideoStream(context))
         {
-#ifdef BRAYNS_USE_FFMPEG
             VideoStream::broadcast(context);
-#endif
             return;
         }
         if (_isControlled(context))

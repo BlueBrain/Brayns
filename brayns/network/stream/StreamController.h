@@ -37,10 +37,6 @@ public:
 
     void trigger()
     {
-        if (!_controlled)
-        {
-            return;
-        }
         _triggered = true;
     }
 

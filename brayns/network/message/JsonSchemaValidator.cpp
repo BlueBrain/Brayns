@@ -22,10 +22,10 @@
 
 #include <sstream>
 
-using namespace brayns;
-
 namespace
 {
+using namespace brayns;
+
 class JsonPath
 {
 public:

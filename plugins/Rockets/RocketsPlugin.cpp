@@ -55,7 +55,7 @@
 #include <sys/stat.h>
 
 #ifdef BRAYNS_USE_FFMPEG
-#include "encoder.h"
+#include <brayns/common/utils/encoder.h>
 #endif
 
 namespace
