@@ -31,11 +31,6 @@ namespace brayns
 class SchemaEntrypoint : public Entrypoint<SchemaMessage, EntrypointSchema>
 {
 public:
-    SchemaEntrypoint(const EntrypointRegistry& entrypoints)
-        : _entrypoints(&entrypoints)
-    {
-    }
-
     virtual std::string getName() const override { return "schema"; }
 
     virtual std::string getDescription() const override
@@ -45,14 +40,10 @@ public:
 
     virtual void onRequest(const Request& request) const override
     {
-        auto interface = getApi().getActionInterface();
-        if (!interface)
-        {
-            throw EntrypointException("No network interface registered");
-        }
         auto& params = request.getParams();
         auto& endpoint = params.endpoint;
-        auto entrypoint = _entrypoints->find(endpoint);
+        auto& entrypoints = getContext().getEntrypoints();
+        auto entrypoint = entrypoints.find(endpoint);
         if (!entrypoint)
         {
             throw EntrypointException("Unknown entrypoint '" + endpoint + "'");
@@ -60,8 +51,5 @@ public:
         auto& schema = entrypoint->getSchema();
         request.reply(schema);
     }
-
-private:
-    const EntrypointRegistry* _entrypoints;
 };
 } // namespace brayns

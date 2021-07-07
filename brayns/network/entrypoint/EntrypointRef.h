@@ -33,7 +33,7 @@ class EntrypointRef
 {
 public:
     template <typename T, typename... Args>
-    static EntrypointRef of(Args&&... args)
+    static EntrypointRef create(Args&&... args)
     {
         static_assert(std::is_base_of<IEntrypoint, T>());
         return EntrypointRef(std::make_unique<T>(std::forward<Args>(args)...));
@@ -43,15 +43,16 @@ public:
         : _entrypoint(std::move(entrypoint))
     {
         assert(_entrypoint);
+    }
+
+    void setup(NetworkContext& context)
+    {
+        _entrypoint->setContext(context);
+        _entrypoint->onCreate();
         _schema = EntrypointSchemaFactory::createSchema(*_entrypoint);
     }
 
-    void setup(PluginAPI& api, ClientRegistry& clients)
-    {
-        _entrypoint->setApi(api);
-        _entrypoint->setClientRegistry(clients);
-        _entrypoint->onCreate();
-    }
+    void update() const { _entrypoint->onUpdate(); }
 
     void processRequest(const NetworkRequest& request) const
     {

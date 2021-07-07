@@ -19,12 +19,11 @@
 
 #pragma once
 
+#include <brayns/network/context/NetworkContext.h>
 #include <brayns/network/entrypoint/EntrypointRef.h>
 #include <brayns/network/entrypoint/EntrypointRegistry.h>
 #include <brayns/network/socket/ClientRegistry.h>
 #include <brayns/network/socket/NetworkSocket.h>
-
-#include <brayns/pluginapi/PluginAPI.h>
 
 #include "ActionInterface.h"
 
@@ -45,11 +44,11 @@ class NetworkInterface : public ActionInterface
 {
 public:
     /**
-     * @brief Construct an interface with Brayns API access.
+     * @brief Construct an interface with context and API access.
      *
-     * @param api Brayns API reference.
+     * @param context Network context reference.
      */
-    NetworkInterface(PluginAPI& api);
+    NetworkInterface(NetworkContext& context);
 
     /**
      * @brief Receive requests and send replies to the client until the
@@ -65,19 +64,17 @@ public:
     /**
      * @brief Register an entrypoint.
      *
-     * @param entrypoint IEntrypoint to register.
+     * @param entrypoint Entrypoint to register.
      */
     virtual void addEntrypoint(EntrypointRef entrypoint) override;
 
-    /**
-     * @brief Get the registered entrypoints.
-     * 
-     * @return const EntrypointRegistry& Entrypoint registry.
-     */
-    const EntrypointRegistry& getEntrypoints() const { return _entrypoints; }
-
 private:
-    ClientRegistry _clients;
-    EntrypointRegistry _entrypoints;
+    NetworkContext* _context;
 };
+
+/**
+ * @brief Shorcut for shared_ptr on the interface.
+ * 
+ */
+using NetworkInterfacePtr = std::shared_ptr<NetworkInterface>;
 } // namespace brayns

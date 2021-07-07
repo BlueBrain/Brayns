@@ -37,26 +37,26 @@ public:
         return "Get the current state of the camera";
     }
 
-    virtual void onCreate() override
+    virtual void onUpdate() const override
     {
         auto& engine = getApi().getEngine();
         auto& camera = engine.getCamera();
-        camera.onModified(
-            [this](const auto& object)
-            {
-                auto params = extractCamera();
-                notify(params);
-            });
+        if (!camera.isModified())
+        {
+            return;
+        }
+        auto params = _extractCamera();
+        notify(params);
     }
 
     virtual void onRequest(const Request& request) const override
     {
-        auto result = extractCamera();
+        auto result = _extractCamera();
         request.reply(result);
     }
 
 private:
-    CameraMessage extractCamera() const
+    CameraMessage _extractCamera() const
     {
         auto& engine = getApi().getEngine();
         auto& camera = engine.getCamera();

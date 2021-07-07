@@ -40,27 +40,27 @@ public:
     {
         return "Get the current state of the animation parameters";
     }
-
-    virtual void onCreate() override
+    
+    virtual void onUpdate() const override
     {
         auto& manager = getApi().getParametersManager();
         auto& animationParameters = manager.getAnimationParameters();
-        animationParameters.onModified(
-            [this](const auto& object)
-            {
-                auto params = extractAnimationParameters();
-                notify(params);
-            });
+        if (!animationParameters.isModified())
+        {
+            return;
+        }
+        auto params = _extractAnimationParameters();
+        notify(params);
     }
 
     virtual void onRequest(const Request& request) const override
     {
-        auto result = extractAnimationParameters();
+        auto result = _extractAnimationParameters();
         request.reply(result);
     }
 
 private:
-    AnimationParametersMessage extractAnimationParameters() const
+    AnimationParametersMessage _extractAnimationParameters() const
     {
         auto& manager = getApi().getParametersManager();
         auto& animationParameters = manager.getAnimationParameters();

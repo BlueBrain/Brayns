@@ -24,7 +24,10 @@ namespace brayns
 class StreamController
 {
 public:
-    bool isControlled() const { return _controlled; }
+    bool isControlled() const
+    {
+        return _controlled;
+    }
 
     bool setControlled(bool controlled)
     {
@@ -41,12 +44,8 @@ public:
         _triggered = true;
     }
 
-    bool isEnabled()
+    bool isTriggered()
     {
-        if (!_controlled)
-        {
-            return true;
-        }
         if (_triggered)
         {
             _triggered = false;

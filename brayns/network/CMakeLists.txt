@@ -20,6 +20,7 @@ set(BRAYNSNETWORK_SOURCES
   message/JsonSchema.cpp
   message/JsonSchemaValidator.cpp
   plugin/NetworkManager.cpp
+  stream/StreamManager.cpp
 )
 
 set(BRAYNSNETWORK_INCLUDE_DIR ${PROJECT_SOURCE_DIR})

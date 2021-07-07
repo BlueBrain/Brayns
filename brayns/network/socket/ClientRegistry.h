@@ -21,7 +21,6 @@
 #pragma once
 
 #include <algorithm>
-#include <mutex>
 #include <vector>
 
 #include "NetworkSocket.h"
@@ -31,15 +30,18 @@ namespace brayns
 class ClientRegistry
 {
 public:
+    bool isEmpty() const
+    {
+        return _sockets.empty();
+    }
+
     void add(NetworkSocket& socket)
     {
-        std::lock_guard<std::mutex> lock(_mutex);
         _sockets.push_back(&socket);
     }
 
     void remove(NetworkSocket& socket)
     {
-        std::lock_guard<std::mutex> lock(_mutex);
         auto first = _sockets.begin();
         auto last = _sockets.end();
         auto i = std::find(first, last, &socket);
@@ -49,9 +51,8 @@ public:
         }
     }
 
-    void broadcast(const OutputPacket& packet)
+    void broadcast(const OutputPacket& packet) const
     {
-        std::lock_guard<std::mutex> lock(_mutex);
         for (auto socket : _sockets)
         {
             socket->send(packet);
@@ -59,7 +60,6 @@ public:
     }
 
 private:
-    std::mutex _mutex;
     std::vector<NetworkSocket*> _sockets;
 };
 } // namespace brayns

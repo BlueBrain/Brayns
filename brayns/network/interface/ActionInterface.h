@@ -75,8 +75,7 @@ public:
     template <typename T, typename... Args>
     void add(Args&&... args)
     {
-        static_assert(std::is_base_of<IEntrypoint, T>());
-        addEntrypoint(EntrypointRef::of<T>(std::forward<Args>(args)...));
+        addEntrypoint(EntrypointRef::create<T>(std::forward<Args>(args)...));
     }
 
     /**

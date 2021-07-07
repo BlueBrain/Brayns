@@ -19,34 +19,13 @@
 
 #pragma once
 
-#include <memory>
-
-#include <Poco/Net/HTTPServer.h>
-
-#include "NetworkInterface.h"
+#include <brayns/network/context/NetworkContext.h>
 
 namespace brayns
 {
-/**
- * @brief Server side implementation of the Network interface.
- *
- */
-class ServerInterface : public NetworkInterface
+class StreamManager
 {
 public:
-    /**
-     * @brief Construct the server interface.
-     *
-     * Start an HTTP server in a separated thread that listen on Brayns HTTP
-     * server port. On each client request, a WebSocket communication is opened
-     * using the HTTP request and response and forwarded to the base class run
-     * method.
-     *
-     * @param context Network context reference.
-     */
-    ServerInterface(NetworkContext& context);
-
-private:
-    std::unique_ptr<Poco::Net::HTTPServer> _server;
+    static void broadcast(NetworkContext& context);
 };
-} // namespace brayns
+}

@@ -21,35 +21,51 @@
 #pragma once
 
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/ImageJpegMessage.h>
-
-#include <brayns/common/utils/ImageGenerator.h>
+#include <brayns/network/messages/ImageStreamingModeMessage.h>
+#include <brayns/network/stream/StreamController.h>
 
 namespace brayns
 {
-class ImageJpegEntrypoint : public Entrypoint<EmptyMessage, ImageJpegMessage>
+class ImageStreamingModeEntrypoint
+    : public Entrypoint<ImageStreamingModeMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override { return "image-jpeg"; }
+    virtual std::string getName() const override
+    {
+        return "image-streaming-mode";
+    }
 
     virtual std::string getDescription() const override
     {
-        return "Take a snapshot at JPEG format";
+        return "Set the image streaming method between automatic or controlled";
     }
 
     virtual void onRequest(const Request& request) const override
     {
-        auto& api = getApi();
-        auto& engine = api.getEngine();
-        auto& framebuffer = engine.getFrameBuffer();
-        auto& manager = api.getParametersManager();
+        bool controlled = _isControlled(request);
+        auto& streamController = getContext().getStreamController();
+        streamController.setControlled(controlled);
+        auto& engine = getApi().getEngine();
+        auto& manager = engine.getParametersManager();
         auto& parameters = manager.getApplicationParameters();
-        auto compression = uint8_t(parameters.getJpegCompression());
-        ImageGenerator generator;
-        auto image = generator.createImage(framebuffer, "jpg", compression);
-        ImageJpegMessage result;
-        result.data = std::move(image.data);
-        request.reply(result);
+        parameters.setUseQuantaRenderControl(controlled);
+        request.reply(EmptyMessage());
+    }
+
+private:
+    bool _isControlled(const Request& request) const
+    {
+        auto& params = request.getParams();
+        auto& type = params.type;
+        if (type == "quanta")
+        {
+            return true;
+        }
+        if (type == "stream")
+        {
+            return false;
+        }
+        throw EntrypointException("Unknown type: '" + type + "'");
     }
 };
 } // namespace brayns

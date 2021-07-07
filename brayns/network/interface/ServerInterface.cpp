@@ -53,7 +53,8 @@ public:
         }
         catch (std::exception& e)
         {
-            BRAYNS_ERROR << e.what() << '\n';
+            BRAYNS_ERROR << "Unexpected exception in request handler: "
+                         << e.what() << '\n';
         }
     }
 
@@ -140,12 +141,12 @@ public:
 
 namespace brayns
 {
-ServerInterface::ServerInterface(PluginAPI& api)
-    : NetworkInterface(api)
+ServerInterface::ServerInterface(NetworkContext& context)
+    : NetworkInterface(context)
 {
     try
     {
-        _server = ServerFactory::createServer(api, *this);
+        _server = ServerFactory::createServer(context.getApi(), *this);
         _server->start();
     }
     catch (Poco::Exception& e)

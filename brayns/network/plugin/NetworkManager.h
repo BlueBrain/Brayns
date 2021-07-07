@@ -19,10 +19,14 @@
 
 #pragma once
 
+#include <memory>
+
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 namespace brayns
 {
+class NetworkContext;
+
 /**
  * @brief Network manager plugin providing the network action interface.
  *
@@ -30,6 +34,12 @@ namespace brayns
 class NetworkManager : public ExtensionPlugin
 {
 public:
+    /**
+     * @brief Construct the object.
+     * 
+     */
+    NetworkManager();
+
     /**
      * @brief Remove the action interface if still the active one.
      *
@@ -42,7 +52,14 @@ public:
      */
     virtual void init() override;
 
+    /**
+     * @brief Update entrypoints and broadcast images.
+     * 
+     */
+    virtual void postRender() override;
+
 private:
-    ActionInterfacePtr _actionInterface;
+    std::unique_ptr<NetworkContext> _context;
+    ActionInterfacePtr _interface;
 };
 } // namespace brayns

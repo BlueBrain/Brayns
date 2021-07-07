@@ -29,10 +29,10 @@
 #include <brayns/network/message/MessageFactory.h>
 #include <brayns/network/socket/NetworkRequest.h>
 
-using namespace brayns;
-
 namespace
 {
+using namespace brayns;
+
 class MessageParser
 {
 public:
@@ -94,16 +94,17 @@ public:
 class MessageDispatcher
 {
 public:
-    static void dispatch(NetworkRequest& request,
-                         const EntrypointRegistry& entrypoints)
+    static void dispatch(NetworkRequest& request, NetworkContext& context)
     {
         auto& method = request.getMethod();
+        auto& entrypoints = context.getEntrypoints();
         auto entrypoint = entrypoints.find(method);
         if (!entrypoint)
         {
             throw EntrypointException("Invalid entrypoint: '" + method + "'");
         }
         _validateSchema(request, *entrypoint);
+        auto lock = context.lock();
         entrypoint->processRequest(request);
     }
 
@@ -120,26 +121,27 @@ private:
 class MessageReceiver
 {
 public:
-    static bool receive(NetworkSocket& socket,
-                        const EntrypointRegistry& entrypoints)
+    static bool receive(NetworkSocket& socket, NetworkContext& context)
     {
         NetworkRequest request(socket);
         try
         {
             _receive(socket, request);
-            MessageDispatcher::dispatch(request, entrypoints);
+            MessageDispatcher::dispatch(request, context);
         }
         catch (EntrypointException& e)
         {
+            BRAYNS_DEBUG << "Entrypoint error: " << e.what() << '\n';
             request.error(e.getCode(), e.what());
         }
         catch (ConnectionClosedException& e)
         {
-            BRAYNS_DEBUG << "Transaction finished: " << e.what() << '\n';
+            BRAYNS_DEBUG << "Connection closed: " << e.what() << '\n';
             return false;
         }
         catch (std::exception& e)
         {
+            BRAYNS_DEBUG << "Unknown error: " << e.what() << '\n';
             request.error(0, e.what());
         }
         return true;
@@ -148,31 +150,59 @@ public:
 private:
     static void _receive(NetworkSocket& socket, NetworkRequest& request)
     {
+        BRAYNS_DEBUG << "Waiting for client request\n";
         auto packet = socket.receive();
+        BRAYNS_DEBUG << "Message received: " << packet.getData() << '\n';
         auto message = MessageParser::parse(packet);
         request.setMessage(message);
+    }
+};
+
+class ClientManager
+{
+public:
+    static void run(NetworkSocket& socket, NetworkContext& context)
+    {
+        _addClient(socket, context);
+        while (MessageReceiver::receive(socket, context))
+        {
+        }
+        _removeClient(socket, context);
+    }
+
+private:
+    static void _addClient(NetworkSocket& socket, NetworkContext& context)
+    {
+        auto& clients = context.getClients();
+        auto lock = context.lock();
+        clients.add(socket);
+    }
+
+    static void _removeClient(NetworkSocket& socket, NetworkContext& context)
+    {
+        auto& clients = context.getClients();
+        auto lock = context.lock();
+        clients.remove(socket);
     }
 };
 } // namespace
 
 namespace brayns
 {
-NetworkInterface::NetworkInterface(PluginAPI& api)
-    : _entrypoints(api, _clients)
+NetworkInterface::NetworkInterface(NetworkContext& context)
+    : _context(&context)
 {
 }
 
 void NetworkInterface::run(NetworkSocket& socket)
 {
-    _clients.add(socket);
-    while (MessageReceiver::receive(socket, _entrypoints))
-    {
-    }
-    _clients.remove(socket);
+    ClientManager::run(socket, *_context);
 }
 
 void NetworkInterface::addEntrypoint(EntrypointRef entrypoint)
 {
-    _entrypoints.add(std::move(entrypoint));
+    auto lock = _context->lock();
+    auto& entrypoints = _context->getEntrypoints();
+    entrypoints.add(std::move(entrypoint));
 }
 } // namespace brayns

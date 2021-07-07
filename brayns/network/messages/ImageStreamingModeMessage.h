@@ -24,12 +24,8 @@
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(AnimationParametersMessage)
-BRAYNS_MESSAGE_ENTRY(uint32_t, frame_count, "Animation frame count");
-BRAYNS_MESSAGE_ENTRY(uint32_t, current, "Current frame index");
-BRAYNS_MESSAGE_ENTRY(int32_t, delta, "Frame delta");
-BRAYNS_MESSAGE_ENTRY(double, dt, "Frame time");
-BRAYNS_MESSAGE_ENTRY(bool, playing, "Animation is playing");
-BRAYNS_MESSAGE_ENTRY(std::string, unit, "Time unit");
+BRAYNS_MESSAGE_BEGIN(ImageStreamingModeMessage)
+BRAYNS_MESSAGE_ENTRY(std::string, type,
+                     "Streaming type, either 'stream' or 'quanta'");
 BRAYNS_MESSAGE_END()
 } // namespace brayns

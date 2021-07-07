@@ -25,18 +25,16 @@
 #include <unordered_map>
 
 #include <brayns/network/entrypoint/EntrypointRef.h>
-#include <brayns/network/socket/ClientRegistry.h>
-
-#include <brayns/pluginapi/PluginAPI.h>
 
 namespace brayns
 {
+class NetworkContext;
+
 class EntrypointRegistry
 {
 public:
-    EntrypointRegistry(PluginAPI& api, ClientRegistry& clients)
-        : _api(&api)
-        , _clients(&clients)
+    EntrypointRegistry(NetworkContext& context)
+        : _context(&context)
     {
     }
 
@@ -48,16 +46,23 @@ public:
 
     void add(EntrypointRef entrypoint)
     {
-        entrypoint.setup(*_api, *_clients);
+        entrypoint.setup(*_context);
         auto& name = entrypoint.getName();
         assert(!name.empty());
-        assert(_entrypoints.find(name) == _entrypoints.end());
+        assert(!find(name));
         _entrypoints.emplace(name, std::move(entrypoint));
     }
 
+    void update() const
+    {
+        for (const auto& entrypoint : _entrypoints)
+        {
+            entrypoint.second.update();
+        }
+    }
+
 private:
-    PluginAPI* _api;
-    ClientRegistry* _clients;
+    NetworkContext* _context;
     std::unordered_map<std::string, EntrypointRef> _entrypoints;
 };
 } // namespace brayns

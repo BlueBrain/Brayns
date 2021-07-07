@@ -20,14 +20,8 @@
 
 #pragma once
 
-#include <brayns/network/interface/ActionInterface.h>
+#include <brayns/network/context/NetworkContext.h>
 #include <brayns/network/message/MessageFactory.h>
-
-#include <brayns/pluginapi/PluginAPI.h>
-
-#include <brayns/parameters/ParametersManager.h>
-
-#include <brayns/engine/Engine.h>
 
 #include "EntrypointException.h"
 #include "IEntrypoint.h"
@@ -50,6 +44,8 @@ public:
     {
         _request->error(code, message);
     }
+
+    void error(const std::string& message) const { _request->error(message); }
 
     void progress(const std::string& operation, double amount) const
     {
@@ -74,27 +70,27 @@ public:
     using Request = EntrypointRequest<ParamsType, ResultType>;
 
     /**
-     * @brief Get a reference to Brayns API.
+     * @brief Get the Network context assigned to the entrypoint.
      *
-     * @return PluginAPI& Stored reference to Brayns API.
+     * @return NetworkContext& Network context.
      */
-    PluginAPI& getApi() const { return *_api; }
+    NetworkContext& getContext() const { return *_context; }
 
     /**
-     * @brief Store the API reference inside instance for child reuse.
+     * @brief Shortcut to get a reference to Brayns API.
      *
-     * @param api A reference to Brayns API context.
+     * @return PluginAPI& Brayns API access.
      */
-    virtual void setApi(PluginAPI& api) override { _api = &api; }
+    PluginAPI& getApi() const { return _context->getApi(); }
 
     /**
-     * @brief Store a reference to the client list inside the instance.
+     * @brief Store the network context reference inside instance.
      *
-     * @param clients Connected client list (don't take ownership).
+     * @param context A reference to the network context.
      */
-    virtual void setClientRegistry(ClientRegistry& clients) override
+    virtual void setContext(NetworkContext& context) override
     {
-        _clients = &clients;
+        _context = &context;
     }
 
     /**
@@ -158,10 +154,10 @@ private:
         notification.method = getName();
         notification.params = Json::serialize(params);
         auto json = Json::stringify(notification);
-        _clients->broadcast(json);
+        auto& clients = _context->getClients();
+        clients.broadcast(json);
     }
 
-    PluginAPI* _api = nullptr;
-    ClientRegistry* _clients;
+    NetworkContext* _context = nullptr;
 };
 } // namespace brayns

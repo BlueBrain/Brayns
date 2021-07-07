@@ -21,15 +21,13 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
 #include <brayns/network/message/JsonSchema.h>
-#include <brayns/network/socket/ClientRegistry.h>
 #include <brayns/network/socket/NetworkRequest.h>
 
 namespace brayns
 {
-class PluginAPI;
+class NetworkContext;
 
 /**
  * @brief IEntrypoint interface.
@@ -41,29 +39,22 @@ public:
     virtual ~IEntrypoint() = default;
 
     /**
-     * @brief Used by the manager to setup API reference.
+     * @brief Used by the manager give context access.
      *
-     * @param api A reference to Brayns API context.
+     * @param context A reference to the current network context.
      */
-    virtual void setApi(PluginAPI& api) = 0;
-
-    /**
-     * @brief Used by the manager to setup client list reference.
-     *
-     * @param clients A reference to the list of connected clients.
-     */
-    virtual void setClientRegistry(ClientRegistry& clients) = 0;
+    virtual void setContext(NetworkContext& context) = 0;
 
     /**
      * @brief Return the name of the entrypoint (unique ID).
-     * 
+     *
      * @return std::string Name of the entrypoint.
      */
     virtual std::string getName() const = 0;
 
     /**
      * @brief Return a description of the entrypoint.
-     * 
+     *
      * @return std::string Description of the entrypoint.
      */
     virtual std::string getDescription() const = 0;
@@ -77,16 +68,19 @@ public:
 
     /**
      * @brief Return the schema of the entrypoint reply (result field).
-     * 
+     *
      * @return JsonSchema Schema of the entrypoint reply.
      */
     virtual JsonSchema getResultSchema() const = 0;
 
     /**
-     * @brief Check if the entrypoint replies asynchronously.
-     * 
-     * @return true Async.
-     * @return false Sync.
+     * @brief Return true if the entrypoint takes a long time and must be
+     * executed in a separated thread.
+     *
+     * @return true The entrypoint will be executed asynchonously in a separated
+     * thread.
+     * @return false The entrypoint will be executed directly on each client
+     * request.
      */
     virtual bool isAsync() const { return false; }
 
@@ -95,6 +89,12 @@ public:
      *
      */
     virtual void onCreate() {}
+
+    /**
+     * @brief Called each time a frame is rendered.
+     * 
+     */
+    virtual void onUpdate() const {}
 
     /**
      * @brief Called each time the client sends a request to the entrypoint.

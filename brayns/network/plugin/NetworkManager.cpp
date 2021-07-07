@@ -19,40 +19,35 @@
 
 #include "NetworkManager.h"
 
+#include <brayns/network/context/NetworkContext.h>
+#include <brayns/network/interface/ServerInterface.h>
+#include <brayns/network/stream/StreamManager.h>
+
 #include <brayns/network/entrypoints/AnimationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
 #include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
+#include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
 #include <brayns/network/entrypoints/SchemaEntrypoint.h>
 #include <brayns/network/entrypoints/TestEntrypoint.h>
-#include <brayns/network/interface/ServerInterface.h>
-#include <brayns/pluginapi/PluginAPI.h>
-
-using namespace brayns;
+#include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
 
 namespace
 {
-using NetworkInterfacePtr = std::shared_ptr<NetworkInterface>;
-
-class NetworkInterfaceFactory
-{
-public:
-    static NetworkInterfacePtr createInterface(PluginAPI& api)
-    {
-        return std::make_shared<ServerInterface>(api);
-    }
-};
+using namespace brayns;
 
 class EntrypointManager
 {
 public:
-    static void registerEntrypoints(NetworkInterface& interface)
+    static void registerEntrypoints(ActionInterface& interface)
     {
         interface.add<GetAnimationParametersEntrypoint>();
         interface.add<SetAnimationParametersEntrypoint>();
         interface.add<GetCameraEntrypoint>();
         interface.add<SetCameraEntrypoint>();
         interface.add<ImageJpegEntrypoint>();
-        interface.add<SchemaEntrypoint>(interface.getEntrypoints());
+        interface.add<TriggerJpegStreamEntrypoint>();
+        interface.add<ImageStreamingModeEntrypoint>();
+        interface.add<SchemaEntrypoint>();
         interface.add<TestEntrypoint>();
     }
 };
@@ -60,19 +55,30 @@ public:
 
 namespace brayns
 {
+NetworkManager::NetworkManager() {}
+
 NetworkManager::~NetworkManager()
 {
-    if (_api->getActionInterface() == _actionInterface.get())
+    if (_api->getActionInterface() != _interface.get())
     {
-        _api->setActionInterface(nullptr);
+        return;
     }
+    _api->setActionInterface(nullptr);
 }
 
 void NetworkManager::init()
 {
-    auto interface = NetworkInterfaceFactory::createInterface(*_api);
-    _actionInterface = interface;
-    _api->setActionInterface(_actionInterface);
-    EntrypointManager::registerEntrypoints(*interface);
+    _context = std::make_unique<NetworkContext>(*_api);
+    _interface = std::make_shared<ServerInterface>(*_context);
+    _api->setActionInterface(_interface);
+    EntrypointManager::registerEntrypoints(*_interface);
+}
+
+void NetworkManager::postRender()
+{
+    auto lock = _context->lock();
+    auto& entrypoints = _context->getEntrypoints();
+    entrypoints.update();
+    StreamManager::broadcast(*_context);
 }
 } // namespace brayns

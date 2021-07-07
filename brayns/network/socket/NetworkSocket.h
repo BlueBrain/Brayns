@@ -237,9 +237,13 @@ public:
             throw ConnectionClosedException(e.displayText());
         }
         InputPacket packet(buffer, flags);
-        if (packet.isEmpty() || packet.isClose())
+        if (packet.isEmpty())
         {
-            throw ConnectionClosedException("Connection closed");
+            throw ConnectionClosedException("Empty frame received");
+        }
+        if (packet.isClose())
+        {
+            throw ConnectionClosedException("Close packet received");
         }
         return packet;
     }
@@ -263,7 +267,7 @@ public:
         }
         if (size < packet.getSize())
         {
-            throw ConnectionClosedException("Failed to send frame");
+            throw ConnectionClosedException("Incomplete frame received");
         }
     }
 

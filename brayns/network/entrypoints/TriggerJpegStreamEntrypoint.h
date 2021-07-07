@@ -21,35 +21,32 @@
 #pragma once
 
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/ImageJpegMessage.h>
 
-#include <brayns/common/utils/ImageGenerator.h>
+#include <brayns/network/stream/StreamController.h>
 
 namespace brayns
 {
-class ImageJpegEntrypoint : public Entrypoint<EmptyMessage, ImageJpegMessage>
+class TriggerJpegStreamEntrypoint
+    : public Entrypoint<EmptyMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override { return "image-jpeg"; }
+    virtual std::string getName() const override
+    {
+        return "trigger-jpeg-stream";
+    }
 
     virtual std::string getDescription() const override
     {
-        return "Take a snapshot at JPEG format";
+        return "Triggers the engine to stream a frame to the clients";
     }
 
     virtual void onRequest(const Request& request) const override
     {
-        auto& api = getApi();
-        auto& engine = api.getEngine();
-        auto& framebuffer = engine.getFrameBuffer();
-        auto& manager = api.getParametersManager();
-        auto& parameters = manager.getApplicationParameters();
-        auto compression = uint8_t(parameters.getJpegCompression());
-        ImageGenerator generator;
-        auto image = generator.createImage(framebuffer, "jpg", compression);
-        ImageJpegMessage result;
-        result.data = std::move(image.data);
-        request.reply(result);
+        auto& streamController = getContext().getStreamController();
+        streamController.trigger();
+        auto& engine = getApi().getEngine();
+        engine.triggerRender();
+        request.reply(EmptyMessage());
     }
 };
 } // namespace brayns
