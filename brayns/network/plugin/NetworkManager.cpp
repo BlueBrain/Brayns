@@ -35,7 +35,7 @@ namespace
 {
 using namespace brayns;
 
-class EntrypointManager
+class EntrypointRegistry
 {
 public:
     static void registerEntrypoints(ActionInterface& interface)
@@ -50,6 +50,117 @@ public:
         interface.add<SchemaEntrypoint>();
         interface.add<TestEntrypoint>();
     }
+};
+
+class MessageBuilder
+{
+public:
+    static RequestMessage build(const InputPacket& packet)
+    {
+        auto message = _parse(packet);
+        _validateHeader(message);
+        return message;
+    }
+
+private:
+    static RequestMessage _parse(const InputPacket& packet)
+    {
+        if (!packet.isText())
+        {
+            throw EntrypointException("Text frame expected");
+        }
+        auto& json = packet.getData();
+        try
+        {
+            return Json::parse<RequestMessage>(json);
+        }
+        catch (const Poco::JSON::JSONException& e)
+        {
+            throw EntrypointException("Failed to parse JSON request: " +
+                                      e.displayText());
+        }
+    }
+
+    static void _validateHeader(const RequestMessage& message)
+    {
+        if (message.jsonrpc != "2.0")
+        {
+            throw EntrypointException("Unsupported JSON-RPC version: '" +
+                                      message.jsonrpc + "'");
+        }
+        if (message.id.empty())
+        {
+            throw EntrypointException("Missing message ID");
+        }
+    }
+};
+
+class RequestManager
+{
+public:
+    RequestManager(NetworkContext& context)
+        : _context(&context)
+    {
+    }
+
+    void processRequests()
+    {
+        auto& connections = _context->getConnections();
+        auto buffer = connections.extractRequestBuffer();
+        for (const auto& request : buffer)
+        {
+            processRequest(request);
+        }
+    }
+
+    void processRequest(const RequestData& data)
+    {
+        auto request = _createRequest(data);
+        try
+        {
+            _processRequest(request, data);
+        }
+        catch (const EntrypointException& e)
+        {
+            request.error(e.getCode(), e.what());
+        }
+        catch (const std::exception& e)
+        {
+            request.error(e.what());
+        }
+        catch (...)
+        {
+            BRAYNS_ERROR << "Unexpected failure during request processing\n";
+        }
+    }
+
+private:
+    NetworkRequest _createRequest(const RequestData& data)
+    {
+        auto& connections = _context->getConnections();
+        return {data.id, connections};
+    }
+
+    void _processRequest(NetworkRequest& request, const RequestData& data)
+    {
+        auto message = _buildMessage(data);
+        request.setMessage(std::move(message));
+        _dispatchToEntrypoints(request);
+    }
+
+    RequestMessage _buildMessage(const RequestData& data)
+    {
+        auto& packet = data.packet;
+        return MessageBuilder::build(packet);
+    }
+
+    void _dispatchToEntrypoints(const NetworkRequest& request)
+    {
+        auto& entrypoints = _context->getEntrypoints();
+        entrypoints.processRequest(request);
+    }
+
+    NetworkContext* _context;
 };
 } // namespace
 
@@ -71,14 +182,20 @@ void NetworkManager::init()
     _context = std::make_unique<NetworkContext>(*_api);
     _interface = std::make_shared<ServerInterface>(*_context);
     _api->setActionInterface(_interface);
-    EntrypointManager::registerEntrypoints(*_interface);
+    EntrypointRegistry::registerEntrypoints(*_interface);
+}
+
+void NetworkManager::preRender()
+{
+    RequestManager manager(*_context);
+    manager.processRequests();
 }
 
 void NetworkManager::postRender()
 {
-    auto lock = _context->lock();
     auto& entrypoints = _context->getEntrypoints();
     entrypoints.update();
-    StreamManager::broadcast(*_context);
+    auto& stream = _context->getStream();
+    stream.broadcast();
 }
 } // namespace brayns

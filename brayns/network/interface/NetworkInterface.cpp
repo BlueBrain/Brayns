@@ -17,173 +17,58 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <cassert>
+#include "NetworkInterface.h"
 
 #include <brayns/common/log.h>
-#include <brayns/common/utils/stringUtils.h>
-#include <brayns/network/entrypoint/EntrypointException.h>
-#include <brayns/network/entrypoint/EntrypointSchema.h>
-#include <brayns/network/entrypoint/IEntrypoint.h>
-#include <brayns/network/interface/NetworkInterface.h>
-#include <brayns/network/message/JsonSchemaValidator.h>
-#include <brayns/network/message/MessageFactory.h>
-#include <brayns/network/socket/NetworkRequest.h>
+
+#include <brayns/network/context/NetworkContext.h>
 
 namespace
 {
 using namespace brayns;
 
-class MessageParser
-{
-public:
-    static RequestMessage parse(const InputPacket& packet)
-    {
-        if (!packet.isText())
-        {
-            throw EntrypointException("Text frame expected");
-        }
-        auto& json = packet.getData();
-        try
-        {
-            return Json::parse<RequestMessage>(json);
-        }
-        catch (Poco::JSON::JSONException& e)
-        {
-            throw EntrypointException("Failed to parse JSON request: " +
-                                      e.displayText());
-        }
-    }
-};
-
-class MessageValidator
-{
-public:
-    static void validateHeader(const RequestMessage& message)
-    {
-        if (message.jsonrpc != "2.0")
-        {
-            throw EntrypointException("Unsupported JSON-RPC version: '" +
-                                      message.jsonrpc + "'");
-        }
-        if (message.id.empty())
-        {
-            throw EntrypointException("Missing message ID");
-        }
-    }
-
-    static void validateParams(const JsonValue& params,
-                               const EntrypointSchema& schema)
-    {
-        if (schema.params.empty())
-        {
-            return;
-        }
-        auto& paramsSchema = schema.params[0];
-        if (JsonSchemaInfo::isEmpty(paramsSchema))
-        {
-            return;
-        }
-        auto errors = JsonSchemaValidator::validate(params, paramsSchema);
-        if (!errors.isEmpty())
-        {
-            throw EntrypointException(errors.toString());
-        }
-    }
-};
-
-class MessageDispatcher
-{
-public:
-    static void dispatch(NetworkRequest& request, NetworkContext& context)
-    {
-        auto& method = request.getMethod();
-        auto& entrypoints = context.getEntrypoints();
-        auto entrypoint = entrypoints.find(method);
-        if (!entrypoint)
-        {
-            throw EntrypointException("Invalid entrypoint: '" + method + "'");
-        }
-        _validateSchema(request, *entrypoint);
-        auto lock = context.lock();
-        entrypoint->processRequest(request);
-    }
-
-private:
-    static void _validateSchema(NetworkRequest& request,
-                                const EntrypointRef& entrypoint)
-    {
-        auto& schema = entrypoint.getSchema();
-        auto& params = request.getParams();
-        MessageValidator::validateParams(params, schema);
-    }
-};
-
 class MessageReceiver
 {
 public:
-    static bool receive(NetworkSocket& socket, NetworkContext& context)
+    MessageReceiver(const NetworkSocket& socket, ConnectionManager& connections)
+        : _socket(socket)
+        , _connections(&connections)
     {
-        NetworkRequest request(socket);
+        _connections->add(socket);
+    }
+
+    ~MessageReceiver() { _connections->remove(_socket); }
+
+    bool receive()
+    {
         try
         {
-            _receive(socket, request);
-            MessageDispatcher::dispatch(request, context);
+            _receive();
         }
-        catch (EntrypointException& e)
-        {
-            BRAYNS_DEBUG << "Entrypoint error: " << e.what() << '\n';
-            request.error(e.getCode(), e.what());
-        }
-        catch (ConnectionClosedException& e)
+        catch (const ConnectionClosedException& e)
         {
             BRAYNS_DEBUG << "Connection closed: " << e.what() << '\n';
             return false;
         }
-        catch (std::exception& e)
+        catch (const std::exception& e)
         {
-            BRAYNS_DEBUG << "Unknown error: " << e.what() << '\n';
-            request.error(0, e.what());
+            BRAYNS_DEBUG << "Unknown receive error: " << e.what() << '\n';
+            return false;
         }
         return true;
     }
 
 private:
-    static void _receive(NetworkSocket& socket, NetworkRequest& request)
+    void _receive()
     {
         BRAYNS_DEBUG << "Waiting for client request\n";
-        auto packet = socket.receive();
+        auto packet = _socket.receive();
         BRAYNS_DEBUG << "Message received: " << packet.getData() << '\n';
-        auto message = MessageParser::parse(packet);
-        request.setMessage(message);
-    }
-};
-
-class ClientManager
-{
-public:
-    static void run(NetworkSocket& socket, NetworkContext& context)
-    {
-        _addClient(socket, context);
-        while (MessageReceiver::receive(socket, context))
-        {
-        }
-        _removeClient(socket, context);
+        _connections->bufferRequest(_socket, packet);
     }
 
-private:
-    static void _addClient(NetworkSocket& socket, NetworkContext& context)
-    {
-        auto& clients = context.getClients();
-        auto lock = context.lock();
-        clients.add(socket);
-    }
-
-    static void _removeClient(NetworkSocket& socket, NetworkContext& context)
-    {
-        auto& clients = context.getClients();
-        auto lock = context.lock();
-        clients.remove(socket);
-    }
+    NetworkSocket _socket;
+    ConnectionManager* _connections;
 };
 } // namespace
 
@@ -196,12 +81,14 @@ NetworkInterface::NetworkInterface(NetworkContext& context)
 
 void NetworkInterface::run(NetworkSocket& socket)
 {
-    ClientManager::run(socket, *_context);
+    MessageReceiver receiver(socket, _context->getConnections());
+    while (receiver.receive())
+    {
+    }
 }
 
 void NetworkInterface::addEntrypoint(EntrypointRef entrypoint)
 {
-    auto lock = _context->lock();
     auto& entrypoints = _context->getEntrypoints();
     entrypoints.add(std::move(entrypoint));
 }

@@ -29,7 +29,10 @@
 #include <Poco/Net/HTTPServerResponse.h>
 
 #include <brayns/common/log.h>
+
 #include <brayns/parameters/ParametersManager.h>
+
+#include <brayns/network/context/NetworkContext.h>
 
 namespace
 {

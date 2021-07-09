@@ -50,6 +50,7 @@ public:
         _entrypoint->setContext(context);
         _entrypoint->onCreate();
         _schema = EntrypointSchemaFactory::createSchema(*_entrypoint);
+        _async = _entrypoint->isAsync();
     }
 
     void update() const { _entrypoint->onUpdate(); }
@@ -69,8 +70,11 @@ public:
 
     const JsonSchema& getResultSchema() const { return _schema.returns; }
 
+    bool isAsync() const { return _async; }
+
 private:
     std::unique_ptr<IEntrypoint> _entrypoint;
     EntrypointSchema _schema;
+    bool _async = false;
 };
 } // namespace brayns

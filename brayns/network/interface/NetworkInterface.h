@@ -19,16 +19,15 @@
 
 #pragma once
 
-#include <brayns/network/context/NetworkContext.h>
 #include <brayns/network/entrypoint/EntrypointRef.h>
-#include <brayns/network/entrypoint/EntrypointRegistry.h>
-#include <brayns/network/socket/ClientRegistry.h>
 #include <brayns/network/socket/NetworkSocket.h>
 
 #include "ActionInterface.h"
 
 namespace brayns
 {
+class NetworkContext;
+
 /**
  * @brief Base implementation of ActionInterface to register entrypoints.
  *
@@ -44,7 +43,7 @@ class NetworkInterface : public ActionInterface
 {
 public:
     /**
-     * @brief Construct an interface with context and API access.
+     * @brief Construct an interface with context access.
      *
      * @param context Network context reference.
      */

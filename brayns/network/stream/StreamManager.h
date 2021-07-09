@@ -19,13 +19,45 @@
 
 #pragma once
 
-#include <brayns/network/context/NetworkContext.h>
+#include <memory>
 
 namespace brayns
 {
+class NetworkContext;
+class Encoder;
+
+struct ImageStreamInfo
+{
+    bool controlled = false;
+    bool triggered = false;
+};
+
+struct VideoStreamInfo
+{
+    bool enabled = false;
+    int64_t encoderKbps = 5000;
+};
+
 class StreamManager
 {
 public:
-    static void broadcast(NetworkContext& context);
+    StreamManager(NetworkContext& context);
+    ~StreamManager();
+
+    void setImageStreamControlled(bool controlled);
+    void triggerImageStream();
+    void setVideoStreamEnabled(bool enabled);
+    void setVideoEncoderKbps(int64_t kbps);
+    void broadcast();
+
+    const ImageStreamInfo& getImageStreamInfo() const { return _image; }
+
+    const VideoStreamInfo& getVideoStreamInfo() const { return _video; }
+
+private:
+    NetworkContext* _context;
+    ImageStreamInfo _image;
+    VideoStreamInfo _video;
+    std::unique_ptr<Encoder> _encoder;
 };
 }

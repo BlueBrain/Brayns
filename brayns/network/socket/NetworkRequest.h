@@ -24,7 +24,7 @@
 
 #include <brayns/network/message/MessageFactory.h>
 
-#include "NetworkSocket.h"
+#include "ConnectionManager.h"
 
 namespace brayns
 {
@@ -42,8 +42,9 @@ public:
      *
      * @param socket The socket opened by the client using HTTP.
      */
-    NetworkRequest(NetworkSocket& socket)
-        : _socket(&socket)
+    NetworkRequest(ConnectionId id, ConnectionManager& manager)
+        : _id(id)
+        , _manager(&manager)
     {
     }
 
@@ -80,7 +81,7 @@ public:
      *
      * @param message Client message.
      */
-    void setMessage(const RequestMessage& message) { _message = message; }
+    void setMessage(RequestMessage message) { _message = std::move(message); }
 
     /**
      * @brief Send a reply message in case of success.
@@ -121,9 +122,9 @@ public:
     void error(const std::string& message) const { error(0, message); }
 
     /**
-     * @brief Send a progress message to the client.
+     * @brief Send a progress message to all clients.
      *
-     * Used to provide feedback to the client during the request processing.
+     * Used to provide feedback during the request processing.
      *
      * @param operation Current step description.
      * @param amount Completion percentage.
@@ -133,7 +134,8 @@ public:
         auto progress = MessageFactory::createProgress(_message);
         progress.params.operation = operation;
         progress.params.amount = amount;
-        _send(progress);
+        auto packet = Json::stringify(progress);
+        _manager->broadcast(std::move(packet));
     }
 
     /**
@@ -156,10 +158,12 @@ private:
     template <typename MessageType>
     void _send(const MessageType& message) const
     {
-        _socket->send(Json::stringify(message));
+        auto packet = Json::stringify(message);
+        _manager->send(_id, packet);
     }
 
-    NetworkSocket* _socket;
+    ConnectionId _id;
+    ConnectionManager* _manager;
     RequestMessage _message;
 };
 } // namespace brayns

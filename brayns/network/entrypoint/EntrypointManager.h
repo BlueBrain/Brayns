@@ -20,46 +20,29 @@
 
 #pragma once
 
-#include <algorithm>
-#include <vector>
+#include <string>
+#include <unordered_map>
 
-#include "NetworkSocket.h"
+#include <brayns/network/entrypoint/EntrypointRef.h>
 
 namespace brayns
 {
-class ClientRegistry
+class NetworkContext;
+
+using EntrypointMap = std::unordered_map<std::string, EntrypointRef>;
+
+class EntrypointManager
 {
 public:
-    bool isEmpty() const
-    {
-        return _sockets.empty();
-    }
+    EntrypointManager(NetworkContext& context);
 
-    void add(NetworkSocket& socket)
-    {
-        _sockets.push_back(&socket);
-    }
-
-    void remove(NetworkSocket& socket)
-    {
-        auto first = _sockets.begin();
-        auto last = _sockets.end();
-        auto i = std::find(first, last, &socket);
-        if (i != last)
-        {
-            _sockets.erase(i);
-        }
-    }
-
-    void broadcast(const OutputPacket& packet) const
-    {
-        for (auto socket : _sockets)
-        {
-            socket->send(packet);
-        }
-    }
+    const EntrypointRef* find(const std::string& name) const;
+    void add(EntrypointRef entrypoint);
+    void update() const;
+    void processRequest(const NetworkRequest& request) const;
 
 private:
-    std::vector<NetworkSocket*> _sockets;
+    NetworkContext* _context;
+    EntrypointMap _entrypoints;
 };
 } // namespace brayns

@@ -22,8 +22,6 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <brayns/network/stream/StreamController.h>
-
 namespace brayns
 {
 class TriggerJpegStreamEntrypoint
@@ -42,8 +40,7 @@ public:
 
     virtual void onRequest(const Request& request) const override
     {
-        auto& streamController = getContext().getStreamController();
-        streamController.trigger();
+        getStream().triggerImageStream();
         auto& engine = getApi().getEngine();
         engine.triggerRender();
         request.reply(EmptyMessage());

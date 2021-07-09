@@ -79,8 +79,7 @@ public:
      *
      * @return true The entrypoint will be executed asynchonously in a separated
      * thread.
-     * @return false The entrypoint will be executed directly on each client
-     * request.
+     * @return false The entrypoint will be executed in the main loop.
      */
     virtual bool isAsync() const { return false; }
 

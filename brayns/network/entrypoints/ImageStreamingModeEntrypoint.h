@@ -22,7 +22,6 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/ImageStreamingModeMessage.h>
-#include <brayns/network/stream/StreamController.h>
 
 namespace brayns
 {
@@ -43,8 +42,7 @@ public:
     virtual void onRequest(const Request& request) const override
     {
         bool controlled = _isControlled(request);
-        auto& streamController = getContext().getStreamController();
-        streamController.setControlled(controlled);
+        getStream().setImageStreamControlled(controlled);
         auto& engine = getApi().getEngine();
         auto& manager = engine.getParametersManager();
         auto& parameters = manager.getApplicationParameters();

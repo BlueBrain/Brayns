@@ -53,7 +53,13 @@ public:
     virtual void init() override;
 
     /**
-     * @brief Update entrypoints and broadcast images.
+     * @brief Process request buffer.
+     * 
+     */
+    virtual void preRender() override;
+
+    /**
+     * @brief Broadcast images.
      * 
      */
     virtual void postRender() override;

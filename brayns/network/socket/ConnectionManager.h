@@ -20,49 +20,51 @@
 
 #pragma once
 
-#include <cassert>
-#include <string>
+#include <mutex>
 #include <unordered_map>
+#include <vector>
 
-#include <brayns/network/entrypoint/EntrypointRef.h>
+#include "NetworkSocket.h"
 
 namespace brayns
 {
-class NetworkContext;
+using ConnectionId = size_t;
 
-class EntrypointRegistry
+struct RequestData
+{
+    ConnectionId id = 0;
+    InputPacket packet;
+};
+
+using RequestBuffer = std::vector<RequestData>;
+
+struct Connection
+{
+    Connection(const NetworkSocket& socket)
+        : socket(socket)
+    {
+    }
+
+    NetworkSocket socket;
+    std::vector<InputPacket> buffer;
+};
+
+class ConnectionManager
 {
 public:
-    EntrypointRegistry(NetworkContext& context)
-        : _context(&context)
-    {
-    }
-
-    const EntrypointRef* find(const std::string& name) const
-    {
-        auto i = _entrypoints.find(name);
-        return i == _entrypoints.end() ? nullptr : &i->second;
-    }
-
-    void add(EntrypointRef entrypoint)
-    {
-        entrypoint.setup(*_context);
-        auto& name = entrypoint.getName();
-        assert(!name.empty());
-        assert(!find(name));
-        _entrypoints.emplace(name, std::move(entrypoint));
-    }
-
-    void update() const
-    {
-        for (const auto& entrypoint : _entrypoints)
-        {
-            entrypoint.second.update();
-        }
-    }
+    bool isEmpty();
+    size_t size();
+    ConnectionId add(const NetworkSocket& socket);
+    void remove(const NetworkSocket& socket);
+    void remove(ConnectionId id);
+    void bufferRequest(const NetworkSocket& socket, InputPacket packet);
+    void bufferRequest(ConnectionId id, InputPacket packet);
+    void send(ConnectionId id, const OutputPacket& packet);
+    void broadcast(const OutputPacket& packet);
+    RequestBuffer extractRequestBuffer();
 
 private:
-    NetworkContext* _context;
-    std::unordered_map<std::string, EntrypointRef> _entrypoints;
+    std::mutex _mutex;
+    std::unordered_map<ConnectionId, Connection> _connections;
 };
 } // namespace brayns

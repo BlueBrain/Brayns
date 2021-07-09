@@ -33,8 +33,6 @@ namespace brayns
 /**
  * @brief Input data packet received from a WebSocket.
  *
- * Own the packet content.
- *
  */
 class InputPacket
 {
@@ -190,6 +188,11 @@ private:
 class ConnectionClosedException : public std::runtime_error
 {
 public:
+    /**
+     * @brief Construct an exception instance.
+     *
+     * @param message Description of the reason why the connection was closed.
+     */
     ConnectionClosedException(const std::string& message)
         : std::runtime_error(message)
     {
@@ -237,13 +240,13 @@ public:
             throw ConnectionClosedException(e.displayText());
         }
         InputPacket packet(buffer, flags);
-        if (packet.isEmpty())
-        {
-            throw ConnectionClosedException("Empty frame received");
-        }
         if (packet.isClose())
         {
             throw ConnectionClosedException("Close packet received");
+        }
+        if (packet.isEmpty())
+        {
+            throw ConnectionClosedException("Empty frame received");
         }
         return packet;
     }
@@ -270,6 +273,16 @@ public:
             throw ConnectionClosedException("Incomplete frame received");
         }
     }
+
+    /**
+     * @brief Return a unique ID for the undelying socket implementation.
+     *
+     * As sockets share their implementation, this ID will remain unique as long
+     * as a copy of the socket maintain the implementation alive.
+     *
+     * @return size_t Unique ID for the socket.
+     */
+    size_t getId() const { return size_t(_socket.impl()); }
 
 private:
     void _setupSocket()

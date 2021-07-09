@@ -19,13 +19,12 @@
 
 #pragma once
 
-#include <mutex>
-
 #include <brayns/engine/Engine.h>
+#include <brayns/engine/FrameBuffer.h>
 
-#include <brayns/network/entrypoint/EntrypointRegistry.h>
-#include <brayns/network/socket/ClientRegistry.h>
-#include <brayns/network/stream/StreamController.h>
+#include <brayns/network/entrypoint/EntrypointManager.h>
+#include <brayns/network/socket/ConnectionManager.h>
+#include <brayns/network/stream/StreamManager.h>
 
 #include <brayns/parameters/ParametersManager.h>
 
@@ -39,27 +38,22 @@ public:
     NetworkContext(PluginAPI& api)
         : _api(&api)
         , _entrypoints(*this)
+        , _stream(*this)
     {
     }
 
     PluginAPI& getApi() { return *_api; }
 
-    std::unique_lock<std::mutex> lock()
-    {
-        return std::unique_lock<std::mutex>(_mutex);
-    }
+    EntrypointManager& getEntrypoints() { return _entrypoints; }
 
-    EntrypointRegistry& getEntrypoints() { return _entrypoints; }
+    ConnectionManager& getConnections() { return _connections; }
 
-    ClientRegistry& getClients() { return _clients; }
-
-    StreamController& getStreamController() { return _streamController; }
+    StreamManager& getStream() { return _stream; }
 
 private:
     PluginAPI* _api;
-    std::mutex _mutex;
-    EntrypointRegistry _entrypoints;
-    ClientRegistry _clients;
-    StreamController _streamController;
+    EntrypointManager _entrypoints;
+    ConnectionManager _connections;
+    StreamManager _stream;
 };
 } // namespace brayns

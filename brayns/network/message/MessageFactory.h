@@ -192,7 +192,7 @@ public:
     {
         ProgressMessage progress;
         progress.jsonrpc = request.jsonrpc;
-        progress.method = request.method;
+        progress.method = "progress";
         progress.params.id = request.id;
         return progress;
     }

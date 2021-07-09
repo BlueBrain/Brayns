@@ -84,6 +84,33 @@ public:
     PluginAPI& getApi() const { return _context->getApi(); }
 
     /**
+     * @brief Shortcut to get the Entrypoint list.
+     *
+     * @return EntrypointManager& Entrypoint manager.
+     */
+    EntrypointManager& getEntrypoints() const
+    {
+        return _context->getEntrypoints();
+    }
+
+    /**
+     * @brief Shortcut to get the connection list.
+     *
+     * @return ConnectionManager& Client connection manager.
+     */
+    ConnectionManager& getConnections() const
+    {
+        return _context->getConnections();
+    }
+
+    /**
+     * @brief Shortcut to get the stream manager.
+     *
+     * @return StreamManager& Stream manager.
+     */
+    StreamManager& getStream() const { return _context->getStream(); }
+
+    /**
      * @brief Store the network context reference inside instance.
      *
      * @param context A reference to the network context.
@@ -154,8 +181,8 @@ private:
         notification.method = getName();
         notification.params = Json::serialize(params);
         auto json = Json::stringify(notification);
-        auto& clients = _context->getClients();
-        clients.broadcast(json);
+        auto& connections = _context->getConnections();
+        connections.broadcast(json);
     }
 
     NetworkContext* _context = nullptr;

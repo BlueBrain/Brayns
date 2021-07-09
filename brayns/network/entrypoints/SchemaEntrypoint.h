@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/entrypoint/EntrypointRegistry.h>
+#include <brayns/network/entrypoint/EntrypointManager.h>
 #include <brayns/network/entrypoint/EntrypointSchema.h>
 
 #include <brayns/network/messages/SchemaMessage.h>
@@ -42,8 +42,7 @@ public:
     {
         auto& params = request.getParams();
         auto& endpoint = params.endpoint;
-        auto& entrypoints = getContext().getEntrypoints();
-        auto entrypoint = entrypoints.find(endpoint);
+        auto entrypoint = getEntrypoints().find(endpoint);
         if (!entrypoint)
         {
             throw EntrypointException("Unknown entrypoint '" + endpoint + "'");

@@ -4,6 +4,7 @@ project(braynsNetwork VERSION 0.1.0)
 
 set(BRAYNSNETWORK_HEADERS
   entrypoint/Entrypoint.h
+  entrypoint/EntrypointManager.h
   entrypoint/IEntrypoint.h
   entrypoint/EntrypointException.h
   interface/ActionInterface.h
@@ -15,11 +16,13 @@ set(BRAYNSNETWORK_HEADERS
 )
 
 set(BRAYNSNETWORK_SOURCES
+  entrypoint/EntrypointManager.cpp
   interface/NetworkInterface.cpp
   interface/ServerInterface.cpp
   message/JsonSchema.cpp
   message/JsonSchemaValidator.cpp
   plugin/NetworkManager.cpp
+  socket/ConnectionManager.cpp
   stream/StreamManager.cpp
 )
 

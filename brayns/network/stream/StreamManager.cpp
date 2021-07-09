@@ -19,6 +19,17 @@
 
 #include "StreamManager.h"
 
+//#include <brayns/common/utils/encoder.h>
+
+namespace brayns
+{
+class Encoder
+{
+};
+} // namespace brayns
+
+#include <brayns/network/context/NetworkContext.h>
+
 namespace
 {
 using namespace brayns;
@@ -28,28 +39,63 @@ class VideoStream
 public:
     static void broadcast(NetworkContext& context)
     {
-    }
-};
+        /*if (!_videoParams.enabled)
+        {
+            _encoder.reset();
+            if (_videoUpdatedResponse)
+                _videoUpdatedResponse();
+            _videoUpdatedResponse = nullptr;
+            return;
+        }
 
-class JpegStream
-{
-public:
-    static void broadcast(NetworkContext& context)
-    {
-    }
-};
+        const auto& params = _parametersManager.getApplicationParameters();
+        const auto fps = params.getImageStreamFPS();
+        if (fps == 0)
+            return;
 
-class ControlledJpegStream
-{
-public:
-    static void broadcast(NetworkContext& context)
-    {
-        auto& streamController = context.getStreamController();
-        if (!streamController.isTriggered())
+        if (_encoder && _encoder->kbps != _videoParams.kbps)
+            _encoder.reset();
+
+        auto& frameBuffer = _engine.getFrameBuffer();
+        if (!_encoder)
+        {
+            int width = frameBuffer.getFrameSize().x;
+            if (width % 2 != 0)
+                width += 1;
+            int height = frameBuffer.getFrameSize().y;
+            if (height % 2 != 0)
+                height += 1;
+
+            _encoder =
+                std::make_unique<Encoder>(width, height, fps, _videoParams.kbps,
+                                          [&rs = _rocketsServer](auto a, auto b)
+                                          { rs->broadcastBinary(a, b); });
+        }
+
+        if (_videoUpdatedResponse)
+            _videoUpdatedResponse();
+        _videoUpdatedResponse = nullptr;
+
+        if (frameBuffer.getFrameBufferFormat() == FrameBufferFormat::none ||
+            !frameBuffer.isModified())
         {
             return;
         }
+
+        _encoder->encode(frameBuffer);*/
     }
+};
+
+class ImageStream
+{
+public:
+    static void broadcast(NetworkContext& context) {}
+};
+
+class ControlledImageStream
+{
+public:
+    static void broadcast(NetworkContext& context) {}
 };
 
 class StreamDispatcher
@@ -57,7 +103,7 @@ class StreamDispatcher
 public:
     static void broadcast(NetworkContext& context)
     {
-        if (!_hasClients(context))
+        if (!_needsBroadcast(context))
         {
             return;
         }
@@ -66,19 +112,19 @@ public:
             VideoStream::broadcast(context);
             return;
         }
-        if (_isControlled(context))
+        if (_isImageStreamControlled(context))
         {
-            ControlledJpegStream::broadcast(context);
+            ControlledImageStream::broadcast(context);
             return;
         }
-        JpegStream::broadcast(context);
+        ImageStream::broadcast(context);
     }
 
 private:
-    static bool _hasClients(NetworkContext& context)
+    static bool _needsBroadcast(NetworkContext& context)
     {
-        auto& clients = context.getClients();
-        return !clients.isEmpty();
+        auto& connections = context.getConnections();
+        return !connections.isEmpty();
     }
 
     static bool _useVideoStream(NetworkContext& context)
@@ -89,18 +135,47 @@ private:
         return parameters.useVideoStreaming();
     }
 
-    static bool _isControlled(NetworkContext& context)
+    static bool _isImageStreamControlled(NetworkContext& context)
     {
-        auto& streamController = context.getStreamController();
-        return streamController.isControlled();
+        auto& stream = context.getStream();
+        auto& info = stream.getImageStreamInfo();
+        return info.controlled;
     }
 };
-}
+} // namespace
 
 namespace brayns
 {
-void StreamManager::broadcast(NetworkContext& context)
+StreamManager::StreamManager(NetworkContext& context)
+    : _context(&context)
 {
-    StreamDispatcher::broadcast(context);
 }
+
+StreamManager::~StreamManager() {}
+
+void StreamManager::setImageStreamControlled(bool controlled)
+{
+    _image.controlled = controlled;
+    _image.triggered = false;
 }
+
+void StreamManager::triggerImageStream()
+{
+    _image.triggered = true;
+}
+
+void StreamManager::setVideoStreamEnabled(bool enabled)
+{
+    _video.enabled = enabled;
+}
+
+void StreamManager::setVideoEncoderKbps(int64_t kbps)
+{
+    _video.encoderKbps = kbps;
+}
+
+void StreamManager::broadcast()
+{
+    StreamDispatcher::broadcast(*_context);
+}
+} // namespace brayns
