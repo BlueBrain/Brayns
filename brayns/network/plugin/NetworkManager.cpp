@@ -24,6 +24,7 @@
 #include <brayns/network/stream/StreamManager.h>
 
 #include <brayns/network/entrypoints/AnimationParametersEntrypoint.h>
+#include <brayns/network/entrypoints/ApplicationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
 #include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
 #include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
@@ -52,6 +53,8 @@ public:
         interface.add<GetRendererEntrypoint>();
         interface.add<SetRendererEntrypoint>();
         interface.add<VersionEntrypoint>();
+        interface.add<GetApplicationParametersEntrypoint>();
+        interface.add<SetApplicationParametersEntrypoint>();
         interface.add<SchemaEntrypoint>();
         interface.add<TestEntrypoint>();
     }
