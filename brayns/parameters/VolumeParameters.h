@@ -46,6 +46,7 @@ public:
     }
     /** Volume offset */
     const Vector3d& getOffset() const { return _offset; }
+    void setOffset(const Vector3d& offset) { _updateValue(_offset, offset); }
     void setGradientShading(const bool enabled)
     {
         _updateValue(_gradientShading, enabled);

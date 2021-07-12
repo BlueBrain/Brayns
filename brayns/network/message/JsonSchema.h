@@ -222,21 +222,6 @@ struct JsonSchemaInfo
     }
 };
 
-struct JsonSchemaHelper
-{
-    static void remove(JsonSchema& schema, const std::string& property)
-    {
-        auto& properties = schema.properties;
-        properties.erase(std::remove_if(properties.begin(), properties.end(),
-                                        [&](const auto& item)
-                                        { return item.name == property; }),
-                         properties.end());
-        auto& required = schema.required;
-        required.erase(std::remove(required.begin(), required.end(), property),
-                       required.end());
-    }
-};
-
 /**
  * @brief Create JSON schema for a given type (can be specialized).
  *
@@ -256,11 +241,35 @@ struct JsonSchemaFactory
         {
             schema.type = JsonTypeName::ofPrimitive<T>();
         }
-        if (std::is_unsigned<T>())
+        if (!std::is_same<T, bool>() && std::is_unsigned<T>())
         {
             schema.minimum = 0.0;
         }
         return schema;
+    }
+};
+
+struct JsonProperty
+{
+    static void remove(JsonSchema& schema, const std::string& name)
+    {
+        auto& properties = schema.properties;
+        properties.erase(std::remove_if(properties.begin(), properties.end(),
+                                        [&](const auto& item)
+                                        { return item.name == name; }),
+                         properties.end());
+        auto& required = schema.required;
+        required.erase(std::remove(required.begin(), required.end(), name),
+                       required.end());
+    }
+
+    template <typename T>
+    static void add(JsonSchema& schema, const std::string& name)
+    {
+        auto property = JsonSchemaFactory<T>::createSchema();
+        property.name = name;
+        schema.properties.push_back(std::move(property));
+        schema.required.push_back(name);
     }
 };
 
@@ -270,9 +279,9 @@ struct JsonSchemaFactory
  * @tparam ItemType Array item type.
  */
 template <typename ItemType>
-struct JsonArraySchema
+struct JsonArraySchemaFactory
 {
-    static JsonSchema create()
+    static JsonSchema createSchema()
     {
         JsonSchema schema;
         schema.type = JsonTypeName::ofArray();
@@ -288,9 +297,18 @@ struct JsonArraySchema
  * @tparam T Vector item type.
  */
 template <typename T>
-struct JsonSchemaFactory<std::vector<T>>
+struct JsonSchemaFactory<std::vector<T>> : public JsonArraySchemaFactory<T>
 {
-    static JsonSchema createSchema() { return JsonArraySchema<T>::create(); }
+};
+
+/**
+ * @brief Specialization to create JSON schema for deque.
+ *
+ * @tparam T Deque item type.
+ */
+template <typename T>
+struct JsonSchemaFactory<std::deque<T>> : public JsonArraySchemaFactory<T>
+{
 };
 
 /**
@@ -304,7 +322,7 @@ struct JsonSchemaFactory<glm::vec<S, T>>
 {
     static JsonSchema createSchema()
     {
-        auto schema = JsonArraySchema<T>::create();
+        auto schema = JsonArraySchemaFactory<T>::createSchema();
         schema.minItems = S;
         schema.maxItems = S;
         return schema;
@@ -321,9 +339,23 @@ struct JsonSchemaFactory<glm::qua<T>>
 {
     static JsonSchema createSchema()
     {
-        auto schema = JsonArraySchema<T>::create();
+        auto schema = JsonArraySchemaFactory<T>::createSchema();
         schema.minItems = 4;
         schema.maxItems = 4;
+        return schema;
+    }
+};
+
+template<typename T>
+struct JsonSchemaFactory<Box<T>>
+{
+    static JsonSchema createSchema()
+    {
+        JsonSchema schema;
+        schema.title = "Box";
+        schema.type = JsonTypeName::ofObject();
+        JsonProperty::add<typename Box<T>::vec>(schema, "min");
+        JsonProperty::add<typename Box<T>::vec>(schema, "max");
         return schema;
     }
 };

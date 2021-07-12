@@ -489,6 +489,61 @@ struct JsonSerializer<glm::qua<T>> : public GlmSerializer<glm::qua<T>>
 };
 
 /**
+ * @brief Partial specialization of JsonSerializer for Box<T>.
+ *
+ * @tparam T Real type (float or double).
+ */
+template<typename T>
+struct JsonSerializer<Box<T>>
+{
+    /**
+     * @brief Serialize value in json.
+     * 
+     * @param value Input value.
+     * @param json Output JSON.
+     * @return true Always.
+     * @return false Never.
+     */
+    static bool serialize(const Box<T>& value, JsonValue& json)
+    {
+        auto object = Poco::makeShared<JsonObject>();
+        object->set("min", Json::serialize(value.getMin()));
+        object->set("max", Json::serialize(value.getMax()));
+        json = object;
+        return true;
+    }
+
+    /**
+     * @brief Deserialize json in value.
+     * 
+     * @param json Input JSON.
+     * @param value Output box (unchanged if failure).
+     * @return true Success.
+     * @return false Failure (wrong types in json).
+     */
+    static bool deserialize(const JsonValue& json, Box<T>& value)
+    {
+        auto object = JsonExtractor::extractObject(json);
+        if (!object)
+        {
+            return false;
+        }
+        typename Box<T>::vec min;
+        if (!Json::deserialize(object->get("min"), min))
+        {
+            return false;
+        }
+        typename Box<T>::vec max;
+        if (!Json::deserialize(object->get("max"), max))
+        {
+            return false;
+        }
+        value = {min, max};
+        return true;
+    }
+};
+
+/**
  * @brief Partial specialization of JsonSerializer for optional.
  *
  * @tparam T Contained type.

@@ -33,6 +33,7 @@
 #include <brayns/network/entrypoints/TestEntrypoint.h>
 #include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
 #include <brayns/network/entrypoints/VersionEntrypoint.h>
+#include <brayns/network/entrypoints/VolumeParametersEntrypoint.h>
 
 namespace
 {
@@ -55,6 +56,8 @@ public:
         interface.add<VersionEntrypoint>();
         interface.add<GetApplicationParametersEntrypoint>();
         interface.add<SetApplicationParametersEntrypoint>();
+        interface.add<GetVolumeParametersEntrypoint>();
+        interface.add<SetVolumeParametersEntrypoint>();
         interface.add<SchemaEntrypoint>();
         interface.add<TestEntrypoint>();
     }

@@ -87,7 +87,7 @@ public:
     virtual JsonSchema getParamsSchema() const override
     {
         auto schema = RendererMessage::getSchema();
-        JsonSchemaHelper::remove(schema, "types");
+        JsonProperty::remove(schema, "types");
         return schema;
     }
 

@@ -80,12 +80,12 @@ public:
        Light source follow camera origin
     */
     bool getHeadLight() const { return _headLight; }
-    void setHeadLight(bool headLight) { _headLight = headLight; }
+    void setHeadLight(bool headLight) { _updateValue(_headLight, headLight); }
     /** If the rendering should be refined by accumulating multiple passes */
     bool getAccumulation() const { return _accumulation; }
     void setAccumulation(bool accumulation)
     {
-        _accumulation = accumulation;
+        _updateValue(_accumulation, accumulation);
     }
     /**
      * @return the threshold where accumulation stops if the variance error
