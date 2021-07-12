@@ -80,8 +80,13 @@ public:
        Light source follow camera origin
     */
     bool getHeadLight() const { return _headLight; }
+    void setHeadLight(bool headLight) { _headLight = headLight; }
     /** If the rendering should be refined by accumulating multiple passes */
     bool getAccumulation() const { return _accumulation; }
+    void setAccumulation(bool accumulation)
+    {
+        _accumulation = accumulation;
+    }
     /**
      * @return the threshold where accumulation stops if the variance error
      * reaches this value.
@@ -107,6 +112,7 @@ public:
         _updateValue(_maxAccumFrames, value);
     }
     size_t getMaxAccumFrames() const { return _maxAccumFrames; }
+
 protected:
     void parse(const po::variables_map& vm) final;
 
@@ -124,5 +130,5 @@ protected:
 
     SERIALIZATION_FRIEND(RenderingParameters)
 };
-}
+} // namespace brayns
 #endif // RENDERINGPARAMETERS_H

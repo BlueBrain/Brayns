@@ -154,6 +154,16 @@ public:
     virtual void onRequest(const Request& request) const = 0;
 
     /**
+     * @brief Shortcut to trigger the rendering of a new frame.
+     * 
+     */
+    void triggerRender() const
+    {
+        auto& engine = getApi().getEngine();
+        engine.triggerRender();
+    }
+
+    /**
      * @brief Broadcast a notification to all connected clients.
      *
      * @tparam MessageType Notification message type.

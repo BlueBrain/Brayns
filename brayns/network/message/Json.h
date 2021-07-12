@@ -26,6 +26,7 @@
 #include <string>
 #include <type_traits>
 #include <typeindex>
+#include <deque>
 #include <vector>
 
 #include <boost/optional.hpp>
@@ -323,12 +324,12 @@ struct JsonSerializer<JsonValue>
 };
 
 /**
- * @brief Specialization of JsonSerializer for vector<T>.
+ * @brief Helper for JsonSerializer of array containers.
  *
- * @tparam T The type of the vector items.
+ * @tparam T The type of the array container.
  */
-template <typename T>
-struct JsonSerializer<std::vector<T>>
+template<typename T>
+struct ArraySerializer
 {
     /**
      * @brief Use JsonSerializer<T>::serialize to serialize all items to a JSON
@@ -339,7 +340,7 @@ struct JsonSerializer<std::vector<T>>
      * @return true if success, false if failure, the output value is left
      * unchanged in this case.
      */
-    static bool serialize(const std::vector<T>& value, JsonValue& json)
+    static bool serialize(const T& value, JsonValue& json)
     {
         auto array = Poco::makeShared<JsonArray>();
         for (const auto& item : value)
@@ -365,14 +366,14 @@ struct JsonSerializer<std::vector<T>>
      * @return true if success, false if failure, the output value is left
      * unchanged in this case.
      */
-    static bool deserialize(const JsonValue& json, std::vector<T>& value)
+    static bool deserialize(const JsonValue& json, T& value)
     {
         auto array = JsonExtractor::extractArray(json);
         if (!array)
         {
             return false;
         }
-        std::vector<T> buffer(array->size());
+        T buffer(array->size());
         for (size_t i = 0; i < array->size(); ++i)
         {
             if (!Json::deserialize(array->get(i), buffer[i]))
@@ -386,12 +387,44 @@ struct JsonSerializer<std::vector<T>>
 };
 
 /**
+ * @brief Specialization of JsonSerializer for vector<T>.
+ *
+ * @tparam T The type of the vector items.
+ */
+template <typename T>
+struct JsonSerializer<std::vector<T>> : public ArraySerializer<std::vector<T>>
+{
+};
+
+/**
+ * @brief Specialization of JsonSerializer for deque<T>.
+ *
+ * @tparam T The type of the deque items.
+ */
+template <typename T>
+struct JsonSerializer<std::deque<T>> : public ArraySerializer<std::deque<T>>
+{
+};
+
+/**
  * @brief Helper class to serialize GLM types to a JSON array.
  *
+ * @tparam T GLM type.
  */
-struct GlmJsonSerializer
+template<typename T>
+struct GlmSerializer
 {
-    template <typename T>
+    /**
+     * @brief Create a JsonArray::Ptr.
+     *
+     * Derialize all elements of the vector using JsonSerializer<T>::serialize
+     * and put the array inside the provided JsonValue.
+     *
+     * @param value The vector to serialize.
+     * @param json The output JsonValue.
+     * @return true if success, false if failure, the output value is left
+     * unchanged in this case.
+     */
     static bool serialize(const T& value, JsonValue& json)
     {
         auto array = Poco::makeShared<JsonArray>();
@@ -405,7 +438,19 @@ struct GlmJsonSerializer
         return true;
     }
 
-    template <typename T>
+    /**
+     * @brief Extract a JsonArray::Ptr from the provided JsonValue.
+     *
+     * Deserialize all elements in the provided vector using
+     * JsonSerializer<T>::deserialize. If the json is not a JsonArray::Ptr, the
+     * value is left unchanged, if its size is not S, only the common indices
+     * will be updated (range = min(S, array.size())).
+     *
+     * @param json The JsonValue to deserialize.
+     * @param value The output vector.
+     * @return true if success, false if failure, the output value is left
+     * unchanged in this case.
+     */
     static bool deserialize(const JsonValue& json, T& value)
     {
         auto array = JsonExtractor::extractArray(json);
@@ -425,59 +470,22 @@ struct GlmJsonSerializer
 /**
  * @brief Partial specialization of JsonSerializer for glm::vec<S, T>.
  *
- * @tparam S The size of the vector.
- * @tparam T The type of the vector components.
+ * @tparam S Size of the vector.
+ * @tparam T Type of the vector components.
  */
 template <glm::length_t S, typename T>
-struct JsonSerializer<glm::vec<S, T>>
+struct JsonSerializer<glm::vec<S, T>> : public GlmSerializer<glm::vec<S, T>>
 {
-    /**
-     * @brief Create a JsonArray::Ptr.
-     *
-     * Derialize all elements of the vector using JsonSerializer<T>::serialize
-     * and put the array inside the provided JsonValue.
-     *
-     * @param value The vector to serialize.
-     * @param json The output JsonValue.
-     * @return true if success, false if failure, the output value is left
-     * unchanged in this case.
-     */
-    static bool serialize(const glm::vec<S, T>& value, JsonValue& json)
-    {
-        return GlmJsonSerializer::serialize(value, json);
-    }
-
-    /**
-     * @brief Extract a JsonArray::Ptr from the provided JsonValue.
-     *
-     * Deserialize all elements in the provided vector using
-     * JsonSerializer<T>::deserialize. If the json is not a JsonArray::Ptr, the
-     * value is left unchanged, if its size is not S, only the common indices
-     * will be updated (range = min(S, array.size())).
-     *
-     * @param json The JsonValue to deserialize.
-     * @param value The output vector.
-     * @return true if success, false if failure, the output value is left
-     * unchanged in this case.
-     */
-    static bool deserialize(const JsonValue& json, glm::vec<S, T>& value)
-    {
-        return GlmJsonSerializer::deserialize(json, value);
-    }
 };
 
+/**
+ * @brief Partial specialization of JsonSerializer for glm::qua<T>.
+ *
+ * @tparam T Type of the quaternion components.
+ */
 template <typename T>
-struct JsonSerializer<glm::qua<T>>
+struct JsonSerializer<glm::qua<T>> : public GlmSerializer<glm::qua<T>>
 {
-    static bool serialize(const glm::qua<T>& value, JsonValue& json)
-    {
-        return GlmJsonSerializer::serialize(value, json);
-    }
-
-    static bool deserialize(const JsonValue& json, glm::qua<T>& value)
-    {
-        return GlmJsonSerializer::deserialize(json, value);
-    }
 };
 
 /**

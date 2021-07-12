@@ -100,6 +100,7 @@ public:
         animationParameters.setDt(params.dt);
         animationParameters.setPlaying(params.playing);
         animationParameters.setUnit(params.unit);
+        triggerRender();
         request.reply(EmptyMessage());
     }
 };

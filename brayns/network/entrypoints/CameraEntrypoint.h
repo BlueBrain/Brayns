@@ -96,6 +96,7 @@ public:
         camera.setPosition(params.position);
         camera.setTarget(params.target);
         camera.setCurrentType(params.current);
+        triggerRender();
         request.reply(EmptyMessage());
     }
 };

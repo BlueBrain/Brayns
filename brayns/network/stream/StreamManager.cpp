@@ -39,6 +39,7 @@ class VideoStream
 public:
     static void broadcast(NetworkContext& context)
     {
+        BRAYNS_DEBUG << "Video broadcast\n";
         /*if (!_videoParams.enabled)
         {
             _encoder.reset();
@@ -89,13 +90,25 @@ public:
 class ImageStream
 {
 public:
-    static void broadcast(NetworkContext& context) {}
+    static void broadcast(NetworkContext& context)
+    {
+        BRAYNS_DEBUG << "Image broadcast\n";
+    }
 };
 
 class ControlledImageStream
 {
 public:
-    static void broadcast(NetworkContext& context) {}
+    static void broadcast(NetworkContext& context)
+    {
+        auto& stream = context.getStream();
+        auto& image = stream.getImageStreamInfo();
+        if (!image.triggered)
+        {
+            return;
+        }
+        BRAYNS_DEBUG << "Controlled image broadcast\n";
+    }
 };
 
 class StreamDispatcher
@@ -177,5 +190,6 @@ void StreamManager::setVideoEncoderKbps(int64_t kbps)
 void StreamManager::broadcast()
 {
     StreamDispatcher::broadcast(*_context);
+    _image.triggered = false;
 }
 } // namespace brayns

@@ -27,6 +27,7 @@
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
 #include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
 #include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
+#include <brayns/network/entrypoints/RendererEntrypoint.h>
 #include <brayns/network/entrypoints/SchemaEntrypoint.h>
 #include <brayns/network/entrypoints/TestEntrypoint.h>
 #include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
@@ -47,6 +48,8 @@ public:
         interface.add<ImageJpegEntrypoint>();
         interface.add<TriggerJpegStreamEntrypoint>();
         interface.add<ImageStreamingModeEntrypoint>();
+        interface.add<GetRendererEntrypoint>();
+        interface.add<SetRendererEntrypoint>();
         interface.add<SchemaEntrypoint>();
         interface.add<TestEntrypoint>();
     }
