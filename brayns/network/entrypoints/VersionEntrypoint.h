@@ -20,34 +20,36 @@
 
 #pragma once
 
+#include <sstream>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/entrypoint/EntrypointManager.h>
-#include <brayns/network/entrypoint/EntrypointSchema.h>
-#include <brayns/network/messages/SchemaMessage.h>
+#include <brayns/network/messages/VersionMessage.h>
+
+#include <brayns/version.h>
 
 namespace brayns
 {
-class SchemaEntrypoint : public Entrypoint<SchemaMessage, EntrypointSchema>
+class VersionEntrypoint : public Entrypoint<EmptyMessage, VersionMessage>
 {
 public:
-    virtual std::string getName() const override { return "schema"; }
+    virtual std::string getName() const override { return "get-version"; }
 
     virtual std::string getDescription() const override
     {
-        return "Get the JSON schema of the given entrypoint";
+        return "Get Brayns instance version";
     }
 
     virtual void onRequest(const Request& request) const override
     {
-        auto& params = request.getParams();
-        auto& endpoint = params.endpoint;
-        auto entrypoint = getEntrypoints().find(endpoint);
-        if (!entrypoint)
-        {
-            throw EntrypointException("Unknown entrypoint '" + endpoint + "'");
-        }
-        auto& schema = entrypoint->getSchema();
-        request.reply(schema);
+        VersionMessage result;
+        result.major = Version::getMajor();
+        result.minor = Version::getMinor();
+        result.patch = Version::getPatch();
+        result.abi = Version::getABI();
+        std::ostringstream stream;
+        stream << std::hex << Version::getRevision();
+        result.revision = stream.str();
+        request.reply(result);
     }
 };
 } // namespace brayns

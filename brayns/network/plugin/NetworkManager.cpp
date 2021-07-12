@@ -31,6 +31,7 @@
 #include <brayns/network/entrypoints/SchemaEntrypoint.h>
 #include <brayns/network/entrypoints/TestEntrypoint.h>
 #include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
+#include <brayns/network/entrypoints/VersionEntrypoint.h>
 
 namespace
 {
@@ -50,6 +51,7 @@ public:
         interface.add<ImageStreamingModeEntrypoint>();
         interface.add<GetRendererEntrypoint>();
         interface.add<SetRendererEntrypoint>();
+        interface.add<VersionEntrypoint>();
         interface.add<SchemaEntrypoint>();
         interface.add<TestEntrypoint>();
     }
