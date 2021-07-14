@@ -43,7 +43,8 @@ struct PtrReflector
      */
     static JsonSchema getSchema(const T& value)
     {
-        return value ? Json::getSchema(*value) : JsonSchema(T());
+        using ValueType = std::decay_t<decltype(*value)>;
+        return value ? Json::getSchema(*value) : Json::getSchema(ValueType());
     }
 
     /**

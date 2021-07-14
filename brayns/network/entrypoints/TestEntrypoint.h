@@ -27,12 +27,18 @@ namespace brayns
 BRAYNS_MESSAGE_BEGIN(TestParams)
 BRAYNS_MESSAGE_ENTRY(int, test, "Test int")
 BRAYNS_MESSAGE_ENTRY(Vector3d, vec, "Test vec3")
-BRAYNS_MESSAGE_ENTRY(std::vector<std::string>, strings, "Test strings")
+BRAYNS_MESSAGE_ENTRY(Quaterniond, qua, "Test qua")
+BRAYNS_MESSAGE_ENTRY(std::vector<std::string>, vector, "Test vector")
+BRAYNS_MESSAGE_ENTRY(std::list<std::string>, list, "Test list")
+BRAYNS_MESSAGE_OPTION(std::shared_ptr<std::string>, stringptr, "Test ptr")
 BRAYNS_MESSAGE_END()
 
 BRAYNS_MESSAGE_BEGIN(TestResult)
 BRAYNS_MESSAGE_ENTRY(std::string, test, "Test string")
 BRAYNS_MESSAGE_ENTRY(size_t, size, "Test size")
+BRAYNS_MESSAGE_ENTRY(StringMap<TestParams>, map, "Test map")
+BRAYNS_MESSAGE_ENTRY(StringHash<std::string>, hash, "Test hash")
+BRAYNS_MESSAGE_ENTRY(std::shared_ptr<int>, stringptr, "Test empty ptr")
 BRAYNS_MESSAGE_END()
 
 class TestEntrypoint : public Entrypoint<TestParams, TestResult>
@@ -49,11 +55,12 @@ public:
         TestResult result;
         result.test = "Success";
         notify(std::string("This is a notification"));
-        result.size = params.strings.size();
+        result.size = params.vector.size();
         if (result.size == 0)
         {
             throw EntrypointException("This is an error");
         }
+        result.stringptr = std::make_shared<int>(0);
         request.progress("This is a 100% progress", 1.0);
         request.reply(result);
     }

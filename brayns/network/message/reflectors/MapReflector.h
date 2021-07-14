@@ -39,7 +39,7 @@ namespace brayns
 template <typename T>
 struct MapReflector
 {
-    using ValueType = typename T::value_type;
+    using ValueType = typename T::mapped_type;
 
     /**
      * @brief Create a schema with object type and T::value_type
@@ -111,13 +111,29 @@ struct MapReflector
 };
 
 /**
+ * @brief Shorcut for map<string, T> convenient to avoid commas in macros.
+ * 
+ * @tparam T Map value type.
+ */
+template <typename T>
+using StringMap = std::map<std::string, T>;
+
+/**
+ * @brief Shorcut for unordered_map<string, T> convenient to avoid commas in
+ * macros.
+ *
+ * @tparam T Map value type.
+ */
+template <typename T>
+using StringHash = std::unordered_map<std::string, T>;
+
+/**
  * @brief Partial specialization of JsonReflector for std::map<std::string, T>.
  *
  * @tparam T Type of the map values.
  */
 template <typename T>
-struct JsonReflector<std::map<std::string, T>>
-    : MapReflector<std::map<std::string, T>>
+struct JsonReflector<StringMap<T>> : MapReflector<StringMap<T>>
 {
 };
 
@@ -128,8 +144,7 @@ struct JsonReflector<std::map<std::string, T>>
  * @tparam T Type of the map values.
  */
 template <typename T>
-struct JsonReflector<std::unordered_map<std::string, T>>
-    : MapReflector<std::unordered_map<std::string, T>>
+struct JsonReflector<StringHash<T>> : MapReflector<StringHash<T>>
 {
 };
 } // namespace brayns

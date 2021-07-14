@@ -41,7 +41,7 @@ struct MessageProperty
 {
     std::string name;
     JsonSchema schema;
-    bool required = true;
+    bool required = false;
     std::function<void(const void*, JsonValue&)> serialize;
     std::function<void(const JsonValue&, void*)> deserialize;
 };
@@ -171,7 +171,7 @@ private:
  * will be serialized using JsonReflector<TYPE>.
  *
  */
-#define BRAYNS_MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION)                     \
+#define BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, DESCRIPTION, REQUIRED)        \
     TYPE NAME = []                                                        \
     {                                                                     \
         static const int registerEntry = []                               \
@@ -180,6 +180,7 @@ private:
             property.name = #NAME;                                        \
             property.schema = Json::getSchema(TYPE());                    \
             property.schema.description = DESCRIPTION;                    \
+            property.required = REQUIRED;                                 \
             property.serialize = [](const void* value, JsonValue& json)   \
             {                                                             \
                 auto& message = *static_cast<const MessageType*>(value);  \
@@ -195,6 +196,12 @@ private:
         }();                                                              \
         return TYPE{};                                                    \
     }();
+
+#define BRAYNS_MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION) \
+    BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, DESCRIPTION, true)
+
+#define BRAYNS_MESSAGE_OPTION(TYPE, NAME, DESCRIPTION) \
+    BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, DESCRIPTION, false)
 
 /**
  * @brief Must be called after BRAYNS_MESSAGE_BEGIN and a set of
