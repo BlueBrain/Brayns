@@ -22,6 +22,8 @@
 
 #include <brayns/network/message/Message.h>
 
+#include "BoxMessage.h"
+
 namespace brayns
 {
 BRAYNS_MESSAGE_BEGIN(VolumeParametersMessage)
@@ -36,6 +38,6 @@ BRAYNS_MESSAGE_ENTRY(double, adaptive_max_sampling_rate,
 BRAYNS_MESSAGE_ENTRY(bool, adaptive_sampling, "Use adaptive sampling");
 BRAYNS_MESSAGE_ENTRY(double, sampling_rate, "Fixed sampling rate");
 BRAYNS_MESSAGE_ENTRY(Vector3d, specular, "Reflectivity amount XYZ");
-BRAYNS_MESSAGE_ENTRY(Boxd, clip_box, "Clip box");
+BRAYNS_MESSAGE_ENTRY(BoxMessage, clip_box, "Clip box");
 BRAYNS_MESSAGE_END()
 } // namespace brayns

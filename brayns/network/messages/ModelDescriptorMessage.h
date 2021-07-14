@@ -20,33 +20,23 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/entrypoint/EntrypointManager.h>
-#include <brayns/network/messages/SchemaMessage.h>
+#include <brayns/network/message/Message.h>
+
+#include "BoxMessage.h"
+#include "TransformationMessage.h"
 
 namespace brayns
 {
-class SchemaEntrypoint : public Entrypoint<SchemaParams, SchemaResult>
-{
-public:
-    virtual std::string getName() const override { return "schema"; }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the JSON schema of the given entrypoint";
-    }
-
-    virtual void onRequest(const Request& request) const override
-    {
-        auto& params = request.getParams();
-        auto& endpoint = params.endpoint;
-        auto entrypoint = getEntrypoints().find(endpoint);
-        if (!entrypoint)
-        {
-            throw EntrypointException("Unknown entrypoint '" + endpoint + "'");
-        }
-        auto& schema = entrypoint->getSchema();
-        request.reply(schema);
-    }
-};
+BRAYNS_MESSAGE_BEGIN(ModelDescriptorMessage)
+BRAYNS_MESSAGE_ENTRY(bool, bounding_box, "Has bounding box")
+BRAYNS_MESSAGE_ENTRY(BoxMessage, bounds, "Bounds")
+BRAYNS_MESSAGE_ENTRY(size_t, id, "ID")
+BRAYNS_MESSAGE_ENTRY(ModelMetadata, metadata, "Key-value metadata")
+BRAYNS_MESSAGE_ENTRY(std::string, name, "Name")
+BRAYNS_MESSAGE_ENTRY(std::string, path, "Source file path")
+BRAYNS_MESSAGE_ENTRY(TransformationMessage, transformation, "Transformation")
+BRAYNS_MESSAGE_ENTRY(bool, visible, "Is visible")
+BRAYNS_MESSAGE_ENTRY(std::string, loader_name, "Name of the loader")
+//BRAYNS_MESSAGE_ENTRY(PropertyMap, loader_properties, "Loader properties")
+BRAYNS_MESSAGE_END()
 } // namespace brayns

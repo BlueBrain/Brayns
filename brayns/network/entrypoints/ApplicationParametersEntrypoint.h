@@ -90,7 +90,7 @@ public:
 
     virtual JsonSchema getParamsSchema() const override
     {
-        auto schema = ApplicationParametersMessage::getSchema();
+        auto schema = Base::getParamsSchema();
         JsonProperty::remove(schema, "engine");
         JsonProperty::remove(schema, "plugins");
         return schema;

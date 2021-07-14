@@ -24,96 +24,22 @@
 #include <string>
 #include <vector>
 
-#include "Json.h"
-#include "JsonSchema.h"
+#include "reflectors/ArrayReflector.h"
+#include "reflectors/GlmReflector.h"
+#include "reflectors/JsonSchemaReflector.h"
+#include "reflectors/MapReflector.h"
+#include "reflectors/PrimitiveReflector.h"
+#include "reflectors/PtrReflector.h"
 
 namespace brayns
 {
-/**
- * @brief Template used to identify messages inside templates to provide
- * automatically a custom JsonSerializer for them. All messages are a
- * specialization of this template.
- *
- * @tparam TagType A tag type to specialize uniquely this template.
- */
-template <typename TagType>
-struct MessageHolder
-{
-};
-
-/**
- * @brief Custom JSON serializer for Message specializations. Use internally
- * getMessageInfo() method to perform the serialization.
- *
- * @tparam TagType The tag type provided to MessageHolder<TagType> to identify
- * the message at compile-time.
- */
-template <typename TagType>
-struct JsonSerializer<MessageHolder<TagType>>
-{
-    /**
-     * @brief Alias for the serialized message type.
-     *
-     */
-    using Message = MessageHolder<TagType>;
-
-    /**
-     * @brief Serialize message as an object using Message::serialize.
-     *
-     * @param value The message to serialize (declared with macros
-     * BRAYNS_MESSAGE_BEGIN, BRAYNS_MESSAGE_ENTRY and BRAYNS_MESSAGE_END).
-     * @param json The output JSON value.
-     * @return true if success, false if failure, the output value is left
-     * unchanged in this case.
-     */
-    static bool serialize(const Message& value, JsonValue& json)
-    {
-        return Message::serialize(value, json);
-    }
-
-    /**
-     * @brief Deserialize message as an object using Message::deserialize.
-     *
-     * @param json The source JSON value.
-     * @param value The message to deserialize (declared with macros
-     * BRAYNS_MESSAGE_BEGIN, BRAYNS_MESSAGE_ENTRY and BRAYNS_MESSAGE_END).
-     * @return true if success, false if failure, the output value is left
-     * unchanged in this case.
-     */
-    static bool deserialize(const JsonValue& json, Message& value)
-    {
-        return Message::deserialize(json, value);
-    }
-};
-
-/**
- * @brief Message JSON schemas are created using static method getSchema().
- *
- * @tparam TagType TagType identifying message type in MessageHolder<TagType>.
- */
-template <typename TagType>
-struct JsonSchemaFactory<MessageHolder<TagType>>
-{
-    /**
-     * @brief Alias for the serialized message type.
-     *
-     */
-    using Message = MessageHolder<TagType>;
-
-    /**
-     * @brief Create a JSON schema using Message::getSchema static method.
-     *
-     * @return JsonSchema JSON schema of the message.
-     */
-    static JsonSchema createSchema() { return Message::getSchema(); }
-};
-
 /**
  * @brief Message property info.
  *
  */
 struct MessageProperty
 {
+    std::string name;
     JsonSchema schema;
     bool required = true;
     std::function<void(const void*, JsonValue&)> serialize;
@@ -142,7 +68,7 @@ public:
         {
             JsonValue jsonProperty;
             property.serialize(message, jsonProperty);
-            object->set(property.schema.name, jsonProperty);
+            object->set(property.name, jsonProperty);
         }
         json = object;
         return true;
@@ -150,14 +76,14 @@ public:
 
     bool deserialize(const JsonValue& json, void* message) const
     {
-        auto object = JsonExtractor::extractObject(json);
+        auto object = JsonHelper::extractObject(json);
         if (!object)
         {
             return false;
         }
         for (const auto& property : _properties)
         {
-            auto jsonProperty = object->get(property.schema.name);
+            auto jsonProperty = object->get(property.name);
             property.deserialize(jsonProperty, message);
         }
         return true;
@@ -165,10 +91,10 @@ public:
 
     void addProperty(const MessageProperty& property)
     {
-        _schema.properties.push_back(property.schema);
+        _schema.properties[property.name] = property.schema;
         if (property.required)
         {
-            _schema.required.push_back(property.schema.name);
+            _schema.required.push_back(property.name);
         }
         _properties.push_back(property);
     }
@@ -200,49 +126,41 @@ private:
  * @endcode
  *
  */
-#define BRAYNS_MESSAGE_BEGIN(TYPE)                                  \
-    struct TYPE##Tag                                                \
-    {                                                               \
-    };                                                              \
-                                                                    \
-    using TYPE = MessageHolder<TYPE##Tag>;                          \
-                                                                    \
-    template <>                                                     \
-    struct MessageHolder<TYPE##Tag>                                 \
-    {                                                               \
-    private:                                                        \
-        using MessageType = TYPE;                                   \
-                                                                    \
-        static MessageInfo& _getInfo()                              \
-        {                                                           \
-            static MessageInfo info(#TYPE);                         \
-            return info;                                            \
-        }                                                           \
-                                                                    \
-        static const MessageInfo& _loadInfo()                       \
-        {                                                           \
-            static const int buildMessageInfo = []                  \
-            {                                                       \
-                TYPE();                                             \
-                return 0;                                           \
-            }();                                                    \
-            return _getInfo();                                      \
-        }                                                           \
-                                                                    \
-    public:                                                         \
-        static const JsonSchema& getSchema()                        \
-        {                                                           \
-            return _loadInfo().getSchema();                         \
-        }                                                           \
-                                                                    \
-        static bool serialize(const TYPE& value, JsonValue& json)   \
-        {                                                           \
-            return _loadInfo().serialize(&value, json);             \
-        }                                                           \
-                                                                    \
-        static bool deserialize(const JsonValue& json, TYPE& value) \
-        {                                                           \
-            return _loadInfo().deserialize(json, &value);           \
+#define BRAYNS_MESSAGE_BEGIN(TYPE)                                       \
+    struct TYPE                                                          \
+    {                                                                    \
+    private:                                                             \
+        using MessageType = TYPE;                                        \
+                                                                         \
+        static MessageInfo& _getInfo()                                   \
+        {                                                                \
+            static MessageInfo info(#TYPE);                              \
+            return info;                                                 \
+        }                                                                \
+                                                                         \
+        static const MessageInfo& _loadInfo()                            \
+        {                                                                \
+            static const int buildMessageInfo = []                       \
+            {                                                            \
+                TYPE();                                                  \
+                return 0;                                                \
+            }();                                                         \
+            return _getInfo();                                           \
+        }                                                                \
+                                                                         \
+    public:                                                              \
+        TYPE() = default;                                                \
+                                                                         \
+        JsonSchema getSchema() const { return _loadInfo().getSchema(); } \
+                                                                         \
+        bool serialize(JsonValue& json) const                            \
+        {                                                                \
+            return _loadInfo().serialize(this, json);                    \
+        }                                                                \
+                                                                         \
+        bool deserialize(const JsonValue& json)                          \
+        {                                                                \
+            return _loadInfo().deserialize(json, this);                  \
         }
 
 /**
@@ -250,7 +168,7 @@ private:
  *
  * Must be called only after BRAYNS_BEGIN_MESSAGE(...). The active message will
  * have a public attribute called NAME of type TYPE, the given description and
- * will be serialized using JsonSerializer<TYPE>.
+ * will be serialized using JsonReflector<TYPE>.
  *
  */
 #define BRAYNS_MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION)                     \
@@ -259,8 +177,8 @@ private:
         static const int registerEntry = []                               \
         {                                                                 \
             MessageProperty property;                                     \
-            property.schema = JsonSchemaFactory<TYPE>::createSchema();    \
-            property.schema.name = #NAME;                                 \
+            property.name = #NAME;                                        \
+            property.schema = Json::getSchema(TYPE());                    \
             property.schema.description = DESCRIPTION;                    \
             property.serialize = [](const void* value, JsonValue& json)   \
             {                                                             \

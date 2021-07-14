@@ -20,33 +20,15 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/entrypoint/EntrypointManager.h>
-#include <brayns/network/messages/SchemaMessage.h>
+#include <brayns/network/message/Message.h>
+
+#include "BoxMessage.h"
+#include "ModelDescriptorMessage.h"
 
 namespace brayns
 {
-class SchemaEntrypoint : public Entrypoint<SchemaParams, SchemaResult>
-{
-public:
-    virtual std::string getName() const override { return "schema"; }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the JSON schema of the given entrypoint";
-    }
-
-    virtual void onRequest(const Request& request) const override
-    {
-        auto& params = request.getParams();
-        auto& endpoint = params.endpoint;
-        auto entrypoint = getEntrypoints().find(endpoint);
-        if (!entrypoint)
-        {
-            throw EntrypointException("Unknown entrypoint '" + endpoint + "'");
-        }
-        auto& schema = entrypoint->getSchema();
-        request.reply(schema);
-    }
-};
+BRAYNS_MESSAGE_BEGIN(SceneMessage)
+BRAYNS_MESSAGE_ENTRY(BoxMessage, bounds, "Scene boundary");
+BRAYNS_MESSAGE_ENTRY(ModelDescriptorMessage, models, "List of models");
+BRAYNS_MESSAGE_END()
 } // namespace brayns

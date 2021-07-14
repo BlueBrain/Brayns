@@ -20,33 +20,32 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/entrypoint/EntrypointManager.h>
-#include <brayns/network/messages/SchemaMessage.h>
+#include "JsonSchema.h"
+#include "JsonType.h"
 
 namespace brayns
 {
-class SchemaEntrypoint : public Entrypoint<SchemaParams, SchemaResult>
+/**
+ * @brief Default JsonReflector intrusive implementation.
+ *
+ * Use methods getSchema(), serialize(JsonValue&) and deserialize(const
+ * JsonValue&) of the instance of T to reflect JSON info from it.
+ *
+ * @tparam T Type to reflect.
+ */
+template <typename T>
+struct JsonReflector
 {
-public:
-    virtual std::string getName() const override { return "schema"; }
+    static JsonSchema getSchema(const T& value) { return value.getSchema(); }
 
-    virtual std::string getDescription() const override
+    static bool serialize(const T& value, JsonValue& json)
     {
-        return "Get the JSON schema of the given entrypoint";
+        return value.serialize(json);
     }
 
-    virtual void onRequest(const Request& request) const override
+    static bool deserialize(const JsonValue& json, T& value)
     {
-        auto& params = request.getParams();
-        auto& endpoint = params.endpoint;
-        auto entrypoint = getEntrypoints().find(endpoint);
-        if (!entrypoint)
-        {
-            throw EntrypointException("Unknown entrypoint '" + endpoint + "'");
-        }
-        auto& schema = entrypoint->getSchema();
-        request.reply(schema);
+        return value.deserialize(json);
     }
 };
 } // namespace brayns

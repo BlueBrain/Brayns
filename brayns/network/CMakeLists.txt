@@ -19,7 +19,6 @@ set(BRAYNSNETWORK_SOURCES
   entrypoint/EntrypointManager.cpp
   interface/NetworkInterface.cpp
   interface/ServerInterface.cpp
-  message/JsonSchema.cpp
   message/JsonSchemaValidator.cpp
   plugin/NetworkManager.cpp
   socket/ConnectionManager.cpp

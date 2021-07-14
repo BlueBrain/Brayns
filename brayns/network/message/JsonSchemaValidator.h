@@ -26,7 +26,6 @@
 #include <brayns/common/utils/stringUtils.h>
 
 #include "Json.h"
-#include "JsonSchema.h"
 
 namespace brayns
 {

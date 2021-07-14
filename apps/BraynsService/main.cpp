@@ -88,7 +88,7 @@ private:
 
         // render or data load trigger from events
         _eventRendering->on<uvw::IdleEvent>([&](const auto&, auto&) {
-            _eventRendering->stop();
+            // HACK ADRIEN _eventRendering->stop();
             _accumRendering->stop();
             _timeSinceLastEvent.start();
 

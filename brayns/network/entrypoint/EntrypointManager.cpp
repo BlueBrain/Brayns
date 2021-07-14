@@ -35,8 +35,7 @@ using namespace brayns;
 class MessageValidator
 {
 public:
-    static void validate(const JsonValue& params,
-                         const EntrypointSchema& schema)
+    static void validate(const JsonValue& params, const SchemaResult& schema)
     {
         auto& schemaParams = schema.params;
         if (schemaParams.empty())

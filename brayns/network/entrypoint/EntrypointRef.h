@@ -24,7 +24,8 @@
 #include <memory>
 #include <type_traits>
 
-#include "EntrypointSchema.h"
+#include <brayns/network/messages/SchemaMessage.h>
+
 #include "IEntrypoint.h"
 
 namespace brayns
@@ -49,8 +50,7 @@ public:
     {
         _entrypoint->setContext(context);
         _entrypoint->onCreate();
-        _schema = EntrypointSchemaFactory::createSchema(*_entrypoint);
-        _async = _entrypoint->isAsync();
+        _schema = SchemaResult::fromEntrypoint(*_entrypoint);
     }
 
     void update() const { _entrypoint->onUpdate(); }
@@ -60,7 +60,7 @@ public:
         _entrypoint->onRequest(request);
     }
 
-    const EntrypointSchema& getSchema() const { return _schema; }
+    const SchemaResult& getSchema() const { return _schema; }
 
     const std::string& getName() const { return _schema.title; }
 
@@ -70,11 +70,10 @@ public:
 
     const JsonSchema& getResultSchema() const { return _schema.returns; }
 
-    bool isAsync() const { return _async; }
+    bool isAsync() const { return _schema.async; }
 
 private:
     std::unique_ptr<IEntrypoint> _entrypoint;
-    EntrypointSchema _schema;
-    bool _async = false;
+    SchemaResult _schema;
 };
 } // namespace brayns

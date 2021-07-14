@@ -20,33 +20,31 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/entrypoint/EntrypointManager.h>
-#include <brayns/network/messages/SchemaMessage.h>
+#include <brayns/common/Transformation.h>
+
+#include <brayns/network/message/Message.h>
 
 namespace brayns
 {
-class SchemaEntrypoint : public Entrypoint<SchemaParams, SchemaResult>
+BRAYNS_MESSAGE_BEGIN(TransformationMessage)
+BRAYNS_MESSAGE_ENTRY(Vector3d, translation, "Translation XYZ");
+BRAYNS_MESSAGE_ENTRY(Vector3d, scale, "Scale XYZ");
+BRAYNS_MESSAGE_ENTRY(Quaterniond, rotation, "Rotation XYZW");
+BRAYNS_MESSAGE_ENTRY(Vector3d, rotation_center, "Rotation center XYZ");
+
+BoxMessage& operator=(const Transformation& transformation)
 {
-public:
-    virtual std::string getName() const override { return "schema"; }
+    translation = transformation.getTranslation();
+    scale = transformation.getScale();
+    rotation = transformation.getRotation();
+    rotation_center = transformation.getRotationCenter();
+    return *this;
+}
 
-    virtual std::string getDescription() const override
-    {
-        return "Get the JSON schema of the given entrypoint";
-    }
+operator Transformation() const
+{
+    return {translation, scale, rotation, rotation_center};
+}
 
-    virtual void onRequest(const Request& request) const override
-    {
-        auto& params = request.getParams();
-        auto& endpoint = params.endpoint;
-        auto entrypoint = getEntrypoints().find(endpoint);
-        if (!entrypoint)
-        {
-            throw EntrypointException("Unknown entrypoint '" + endpoint + "'");
-        }
-        auto& schema = entrypoint->getSchema();
-        request.reply(schema);
-    }
-};
+BRAYNS_MESSAGE_END()
 } // namespace brayns

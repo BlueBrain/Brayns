@@ -82,7 +82,7 @@ public:
 
     virtual JsonSchema getParamsSchema() const override
     {
-        auto schema = CameraMessage::getSchema();
+        auto schema = Base::getParamsSchema();
         JsonProperty::remove(schema, "types");
         return schema;
     }

@@ -34,8 +34,8 @@ class EntrypointRequest
 public:
     EntrypointRequest(const NetworkRequest& request)
         : _request(&request)
-        , _params(Json::deserialize<ParamsType>(request.getParams()))
     {
+        Json::deserialize(request.getParams(), _params);
     }
 
     const ParamsType& getParams() const { return _params; }
@@ -67,6 +67,9 @@ template <typename ParamsType, typename ResultType>
 class Entrypoint : public IEntrypoint
 {
 public:
+    using Base = Entrypoint<ParamsType, ResultType>;
+    using Params = ParamsType;
+    using Result = ResultType;
     using Request = EntrypointRequest<ParamsType, ResultType>;
 
     /**
@@ -121,13 +124,13 @@ public:
     }
 
     /**
-     * @brief Build JsonSchema using JsonSchemaFactory<ParamsType>.
+     * @brief Build JsonSchema using ParamsType.
      *
      * @return JsonSchema Schema of the entrypoint request.
      */
     virtual JsonSchema getParamsSchema() const override
     {
-        return JsonSchemaFactory<ParamsType>::createSchema();
+        return Json::getSchema(Params());
     }
 
     /**
@@ -137,7 +140,7 @@ public:
      */
     virtual JsonSchema getResultSchema() const override
     {
-        return JsonSchemaFactory<ResultType>::createSchema();
+        return Json::getSchema(Result());
     }
 
     virtual void onRequest(const NetworkRequest& request) const override

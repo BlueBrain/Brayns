@@ -108,16 +108,16 @@ public:
     void addNotEnoughItems(size_t size, size_t minItems)
     {
         std::ostringstream stream;
-        stream << "Not enough items in '" << _path.toString()
-               << "': min '" << minItems << "' got '" << size << "'";
+        stream << "Not enough items in '" << _path.toString() << "': min '"
+               << minItems << "' got '" << size << "'";
         _errors.push_back(stream.str());
     }
 
     void addTooManyItems(size_t size, size_t maxItems)
     {
         std::ostringstream stream;
-        stream << "Too many items in '" << _path.toString()
-               << "': max '" << maxItems << "' got '" << size << "'";
+        stream << "Too many items in '" << _path.toString() << "': max '"
+               << maxItems << "' got '" << size << "'";
         _errors.push_back(stream.str());
     }
 
@@ -160,6 +160,7 @@ private:
         if (JsonSchemaInfo::isObject(schema))
         {
             _validateProperties(json, schema);
+            _validateAdditionalProperties(json, schema);
             return;
         }
         if (JsonSchemaInfo::isArray(schema))
@@ -170,7 +171,7 @@ private:
 
     bool _validateType(const JsonValue& json, const JsonSchema& schema)
     {
-        auto& type = JsonValueType::of(json);
+        auto& type = GetJsonTypeName::fromJson(json);
         if (!JsonSchemaInfo::hasType(schema, type))
         {
             _context.addInvalidType(type, schema.type);
@@ -195,28 +196,56 @@ private:
 
     void _validateProperties(const JsonValue& json, const JsonSchema& schema)
     {
-        auto& object = *json.extract<JsonObject::Ptr>();
-        for (const auto& property : schema.properties)
+        auto& object = json.extract<JsonObject::Ptr>();
+        for (const auto& pair : schema.properties)
         {
-            _context.push(property.name);
-            _validateProperty(property, object, schema);
+            _context.push(pair.first);
+            _validateProperty(pair.first, object, schema);
             _context.pop();
         }
     }
 
-    void _validateProperty(const JsonSchema& property,
-                           const JsonObject& object, const JsonSchema& schema)
+    void _validateProperty(const std::string& name,
+                           const JsonObject::Ptr& object,
+                           const JsonSchema& schema)
     {
-        auto json = object.get(property.name);
+        auto json = object->get(name);
         if (!json.isEmpty())
         {
-            _validate(json, property);
+            _validate(json, schema.properties.at(name));
             return;
         }
-        if (JsonSchemaInfo::isRequired(schema, property.name))
+        if (JsonSchemaInfo::isRequired(schema, name))
         {
             _context.addMissingProperty();
         }
+    }
+
+    void _validateAdditionalProperties(const JsonValue& json,
+                                       const JsonSchema& schema)
+    {
+        if (schema.additionalProperties.empty())
+        {
+            return;
+        }
+        auto& object = *json.extract<JsonObject::Ptr>();
+        for (const auto& pair : object)
+        {
+            _context.push(pair.first);
+            _validateAdditionalProperty(pair.first, pair.second, schema);
+            _context.pop();
+        }
+    }
+
+    void _validateAdditionalProperty(const std::string& name,
+                                     const JsonValue& json,
+                                     const JsonSchema& schema)
+    {
+        if (JsonSchemaInfo::hasProperty(schema, name))
+        {
+            return;
+        }
+        _validate(json, schema.additionalProperties[0]);
     }
 
     void _validateItems(const JsonValue& json, const JsonSchema& schema)
@@ -226,7 +255,12 @@ private:
             return;
         }
         auto& array = *json.extract<JsonArray::Ptr>();
+        _validateItems(array, schema);
         _validateItemLimits(array.size(), schema);
+    }
+
+    void _validateItems(const JsonArray& array, const JsonSchema& schema)
+    {
         for (size_t i = 0; i < array.size(); ++i)
         {
             _context.push(i);

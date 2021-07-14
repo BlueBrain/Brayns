@@ -110,8 +110,10 @@ BRAYNS_MESSAGE_END()
  *
  */
 template<>
-struct JsonSerializer<EmptyMessage>
+struct JsonReflector<EmptyMessage>
 {
+    static JsonSchema getSchema(const EmptyMessage&) { return {}; }
+
     static bool serialize(const EmptyMessage& value, JsonValue& json)
     {
         json = Poco::makeShared<JsonObject>();
@@ -122,16 +124,6 @@ struct JsonSerializer<EmptyMessage>
     {
         return true;
     }
-};
-
-/**
- * @brief Empty schema if no message.
- *  
- */
-template<>
-struct JsonSchemaFactory<EmptyMessage>
-{
-    static JsonSchema createSchema() { return {}; }
 };
 
 /**
