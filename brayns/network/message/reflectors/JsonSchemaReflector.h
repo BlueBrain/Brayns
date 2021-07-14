@@ -48,6 +48,7 @@ struct JsonReflector<JsonSchema>
         JsonHelper::setFirstIfNotEmpty(*object, "items", value.items);
         JsonHelper::setIfNotNull(*object, "minItems", value.minItems);
         JsonHelper::setIfNotNull(*object, "maxItems", value.maxItems);
+        json = object;
         return true;
     }
 
