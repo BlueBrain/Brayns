@@ -71,6 +71,13 @@ public:
 
     const std::vector<std::string>& getErrors() const { return _errors; }
 
+    void addInvalidType(JsonType type, JsonType schemaType)
+    {
+        auto& typeName = GetJsonTypeName::fromType(type);
+        auto& schemaTypeName = GetJsonTypeName::fromType(schemaType);
+        addInvalidType(typeName, schemaTypeName);
+    }
+
     void addInvalidType(const std::string& type, const std::string& schemaType)
     {
         std::ostringstream stream;
@@ -140,11 +147,11 @@ public:
 private:
     void _validate(const JsonValue& json, const JsonSchema& schema)
     {
-        if (JsonSchemaInfo::isEmpty(schema))
+        if (JsonSchemaHelper::isEmpty(schema))
         {
             return;
         }
-        if (JsonSchemaInfo::isOneOf(schema))
+        if (JsonSchemaHelper::isOneOf(schema))
         {
             return;
         }
@@ -152,18 +159,18 @@ private:
         {
             return;
         }
-        if (JsonSchemaInfo::isNumber(schema))
+        if (JsonSchemaHelper::isNumber(schema))
         {
             _validateLimits(json, schema);
             return;
         }
-        if (JsonSchemaInfo::isObject(schema))
+        if (JsonSchemaHelper::isObject(schema))
         {
             _validateProperties(json, schema);
             _validateAdditionalProperties(json, schema);
             return;
         }
-        if (JsonSchemaInfo::isArray(schema))
+        if (JsonSchemaHelper::isArray(schema))
         {
             _validateItems(json, schema);
         }
@@ -171,8 +178,8 @@ private:
 
     bool _validateType(const JsonValue& json, const JsonSchema& schema)
     {
-        auto& type = GetJsonTypeName::fromJson(json);
-        if (!JsonSchemaInfo::hasType(schema, type))
+        auto type = GetJsonType::fromJson(json);
+        if (!JsonSchemaHelper::hasType(schema, type))
         {
             _context.addInvalidType(type, schema.type);
             return false;
@@ -215,7 +222,7 @@ private:
             _validate(json, schema.properties.at(name));
             return;
         }
-        if (JsonSchemaInfo::isRequired(schema, name))
+        if (JsonSchemaHelper::isRequired(schema, name))
         {
             _context.addMissingProperty();
         }
@@ -241,7 +248,7 @@ private:
                                      const JsonValue& json,
                                      const JsonSchema& schema)
     {
-        if (JsonSchemaInfo::hasProperty(schema, name))
+        if (JsonSchemaHelper::hasProperty(schema, name))
         {
             return;
         }

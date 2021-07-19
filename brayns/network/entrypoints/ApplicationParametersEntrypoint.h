@@ -20,15 +20,13 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/entrypoint/ObjectEntrypoint.h>
 #include <brayns/network/messages/ApplicationParametersMessage.h>
-
-#include <brayns/parameters/ApplicationParameters.h>
 
 namespace brayns
 {
 class GetApplicationParametersEntrypoint
-    : public Entrypoint<EmptyMessage, ApplicationParametersMessage>
+    : public GetEntrypoint<ApplicationParametersMessage>
 {
 public:
     virtual std::string getName() const override
@@ -40,42 +38,10 @@ public:
     {
         return "Get the current state of the application parameters";
     }
-
-    virtual void onUpdate() const override
-    {
-        auto& manager = getApi().getParametersManager();
-        auto& applicationParameters = manager.getApplicationParameters();
-        if (!applicationParameters.isModified())
-        {
-            return;
-        }
-        auto params = _extractApplicationParameters();
-        notify(params);
-    }
-
-    virtual void onRequest(const Request& request) const override
-    {
-        auto result = _extractApplicationParameters();
-        request.reply(result);
-    }
-
-private:
-    ApplicationParametersMessage _extractApplicationParameters() const
-    {
-        auto& manager = getApi().getParametersManager();
-        auto& applicationParameters = manager.getApplicationParameters();
-        ApplicationParametersMessage result;
-        result.engine = applicationParameters.getEngine();
-        result.plugins = applicationParameters.getPlugins();
-        result.jpeg_compression = applicationParameters.getJpegCompression();
-        result.image_stream_fps = applicationParameters.getImageStreamFPS();
-        result.viewport = applicationParameters.getWindowSize();
-        return result;
-    }
 };
 
 class SetApplicationParametersEntrypoint
-    : public Entrypoint<ApplicationParametersMessage, EmptyMessage>
+    : public SetEntrypoint<ApplicationParametersMessage>
 {
 public:
     virtual std::string getName() const override
@@ -90,22 +56,10 @@ public:
 
     virtual JsonSchema getParamsSchema() const override
     {
-        auto schema = Base::getParamsSchema();
+        auto schema = Json::getSchema<ApplicationParametersMessage>();
         JsonProperty::remove(schema, "engine");
         JsonProperty::remove(schema, "plugins");
         return schema;
-    }
-
-    virtual void onRequest(const Request& request) const override
-    {
-        auto& params = request.getParams();
-        auto& manager = getApi().getParametersManager();
-        auto& applicationParameters = manager.getApplicationParameters();
-        applicationParameters.setJpegCompression(params.jpeg_compression);
-        applicationParameters.setImageStreamFPS(params.image_stream_fps);
-        applicationParameters.setWindowSize(params.viewport);
-        triggerRender();
-        request.reply(EmptyMessage());
     }
 };
 } // namespace brayns

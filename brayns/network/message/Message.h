@@ -24,12 +24,23 @@
 #include <string>
 #include <vector>
 
-#include "reflectors/ArrayReflector.h"
-#include "reflectors/GlmReflector.h"
-#include "reflectors/JsonSchemaReflector.h"
-#include "reflectors/MapReflector.h"
-#include "reflectors/PrimitiveReflector.h"
-#include "reflectors/PtrReflector.h"
+#include <brayns/engine/Engine.h>
+
+#include <brayns/pluginapi/PluginAPI.h>
+
+#include <brayns/parameters/ParametersManager.h>
+
+#include "adapters/ArrayAdapter.h"
+#include "adapters/EnumAdapter.h"
+#include "adapters/GlmAdapter.h"
+#include "adapters/JsonSchemaAdapter.h"
+#include "adapters/MapAdapter.h"
+#include "adapters/PrimitiveAdapter.h"
+#include "adapters/PropertyMapAdapter.h"
+#include "adapters/PtrAdapter.h"
+
+#include "JsonOptions.h"
+#include "JsonType.h"
 
 namespace brayns
 {
@@ -41,7 +52,7 @@ struct MessageProperty
 {
     std::string name;
     JsonSchema schema;
-    bool required = false;
+    JsonOptions options;
     std::function<void(const void*, JsonValue&)> serialize;
     std::function<void(const JsonValue&, void*)> deserialize;
 };
@@ -53,10 +64,10 @@ struct MessageProperty
 class MessageInfo
 {
 public:
-    MessageInfo(std::string title)
+    MessageInfo(const std::string& title)
     {
-        _schema.title = std::move(title);
-        _schema.type = JsonTypeName::ofObject();
+        _schema.title = title;
+        _schema.type = JsonType::Object;
     }
 
     const JsonSchema& getSchema() const { return _schema; }
@@ -91,10 +102,14 @@ public:
 
     void addProperty(const MessageProperty& property)
     {
-        _schema.properties[property.name] = property.schema;
-        if (property.required)
+        auto& name = property.name;
+        auto& schema = _schema.properties[name];
+        schema = property.schema;
+        auto& options = property.options;
+        JsonSchemaHelper::setOptions(schema, options);
+        if (options.required)
         {
-            _schema.required.push_back(property.name);
+            _schema.required.push_back(name);
         }
         _properties.push_back(property);
     }
@@ -116,8 +131,8 @@ private:
  * @code {.cpp}
  * // Declaration
  * BRAYNS_MESSAGE_BEGIN(MyMessage)
- * BRAYNS_MESSAGE_ENTRY(int, anEntry)
- * BRAYNS_MESSAGE_ENTRY(std::vector<std::string>, someEntries)
+ * BRAYNS_MESSAGE_ENTRY(int, anEntry, "This is an entry")
+ * BRAYNS_MESSAGE_ENTRY(std::vector<std::string>, someEntries, "Some entries")
  * BRAYNS_MESSAGE_END()
  *
  * // Usage
@@ -126,7 +141,7 @@ private:
  * @endcode
  *
  */
-#define BRAYNS_MESSAGE_BEGIN(TYPE)                                       \
+#define BRAYNS_NAMED_MESSAGE_BEGIN(TYPE, NAME)                           \
     struct TYPE                                                          \
     {                                                                    \
     private:                                                             \
@@ -134,7 +149,7 @@ private:
                                                                          \
         static MessageInfo& _getInfo()                                   \
         {                                                                \
-            static MessageInfo info(#TYPE);                              \
+            static MessageInfo info(NAME);                               \
             return info;                                                 \
         }                                                                \
                                                                          \
@@ -163,24 +178,25 @@ private:
             return _loadInfo().deserialize(json, this);                  \
         }
 
+#define BRAYNS_MESSAGE_BEGIN(TYPE) BRAYNS_NAMED_MESSAGE_BEGIN(TYPE, #TYPE)
+
 /**
  * @brief Add an entry to the current message.
  *
  * Must be called only after BRAYNS_BEGIN_MESSAGE(...). The active message will
  * have a public attribute called NAME of type TYPE, the given description and
- * will be serialized using JsonReflector<TYPE>.
+ * will be serialized using JsonAdapter<TYPE>.
  *
  */
-#define BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, DESCRIPTION, REQUIRED)        \
+#define BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, ...)                          \
     TYPE NAME = []                                                        \
     {                                                                     \
         static const int registerEntry = []                               \
         {                                                                 \
             MessageProperty property;                                     \
             property.name = #NAME;                                        \
-            property.schema = Json::getSchema(TYPE());                    \
-            property.schema.description = DESCRIPTION;                    \
-            property.required = REQUIRED;                                 \
+            property.schema = Json::getSchema<TYPE>();                    \
+            property.options = {__VA_ARGS__};                             \
             property.serialize = [](const void* value, JsonValue& json)   \
             {                                                             \
                 auto& message = *static_cast<const MessageType*>(value);  \
@@ -191,17 +207,17 @@ private:
                 auto& message = *static_cast<MessageType*>(value);        \
                 Json::deserialize(json, message.NAME);                    \
             };                                                            \
-            _getInfo().addProperty(property);                             \
+            _getInfo().addProperty(std::move(property));                  \
             return 0;                                                     \
         }();                                                              \
         return TYPE{};                                                    \
     }();
 
 #define BRAYNS_MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION) \
-    BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, DESCRIPTION, true)
+    BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, Description(DESCRIPTION), Required())
 
 #define BRAYNS_MESSAGE_OPTION(TYPE, NAME, DESCRIPTION) \
-    BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, DESCRIPTION, false)
+    BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, Description(DESCRIPTION))
 
 /**
  * @brief Must be called after BRAYNS_MESSAGE_BEGIN and a set of

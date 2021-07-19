@@ -20,48 +20,46 @@
 
 #pragma once
 
-#include <deque>
-#include <list>
-#include <vector>
+#include <brayns/common/mathTypes.h>
 
-#include "PrimitiveReflector.h"
+#include "PrimitiveAdapter.h"
 
 namespace brayns
 {
 /**
- * @brief Helper class to manipulate JSON for array-like types.
+ * @brief Helper class to serialize GLM types to a JSON array.
  *
- * Array like type can be constructed with a size_t and iterate using begin and
- * end.
- *
- * @tparam T The type of the array container.
+ * @tparam T GLM type.
  */
 template <typename T>
-struct ArrayReflector
+struct GlmAdapter
 {
     using ValueType = typename T::value_type;
 
     /**
-     * @brief Create a schema of array type and reflected item type.
+     * @brief Create a JSON schema with type array, item type of the reflected
+     * GLM type items and min and max size of the GLM type size.
      *
-     * @return JsonSchema Json schema of the container T.
+     * @return JsonSchema JSON schema of T.
      */
     static JsonSchema getSchema(const T&)
     {
         JsonSchema schema;
-        schema.type = JsonTypeName::ofArray();
-        schema.items = {Json::getSchema(ValueType())};
+        schema.type = JsonType::Array;
+        schema.items = {Json::getSchema<ValueType>()};
+        schema.minItems = size_t(T::length());
+        schema.maxItems = size_t(T::length());
         return schema;
     }
 
     /**
      * @brief Serialize value in json.
      *
-     * Iterate over value using begin(value) and end(value) to fill a JSON array
-     * with contained item (must be reflectable). In case of failure, json is
-     * left unchanged.
+     * Derialize all elements of the GLM type using
+     * JsonAdapter<T::value_type>::serialize and put the array inside the
+     * provided JsonValue. If it fails, json is left unchanged.
      *
-     * @param value Value to serialize.
+     * @param value Input value.
      * @param json Output JSON.
      * @return true Success.
      * @return false Failure.
@@ -69,13 +67,10 @@ struct ArrayReflector
     static bool serialize(const T& value, JsonValue& json)
     {
         auto array = Poco::makeShared<JsonArray>();
-        for (const auto& item : value)
+        for (glm::length_t i = 0; i < T::length(); ++i)
         {
             JsonValue jsonItem;
-            if (!Json::serialize(item, jsonItem))
-            {
-                return false;
-            }
+            Json::serialize(value[i], jsonItem);
             array->add(jsonItem);
         }
         json = array;
@@ -85,12 +80,12 @@ struct ArrayReflector
     /**
      * @brief Deserialize json in value.
      *
-     * Extract a json array from json and fill value with its items. Use
-     * constructor(size_t) to initialize the result using the JSON array size
-     * and begin(T) and end(T) to iterate over it to fill all values with the
-     * ones of the JSON array.
+     * Deserialize all elements in the provided GLM type using
+     * JsonAdapter<T::value_type>::deserialize. If the json is not a
+     * JsonArray::Ptr, the value is left unchanged, if its size is not S, only
+     * the common indices will be updated in min(T::length(), array.size()).
      *
-     * @param json JSON to deserialize.
+     * @param json Input JSON.
      * @param value Output value.
      * @return true Success.
      * @return false Failure.
@@ -102,47 +97,33 @@ struct ArrayReflector
         {
             return false;
         }
-        T buffer(array->size());
-        size_t i = 0;
-        for (auto& item : buffer)
+        auto size = std::min(T::length(), glm::length_t(array->size()));
+        for (glm::length_t i = 0; i < size; ++i)
         {
-            if (!Json::deserialize(array->get(i++), item))
-            {
-                return false;
-            }
+            Json::deserialize(array->get(i), value[i]);
         }
-        value = std::move(buffer);
         return true;
     }
 };
 
 /**
- * @brief Specialization of JsonSerializer for vector<T>.
+ * @brief Partial specialization of JsonAdapter for glm::vec<S, T>.
  *
- * @tparam T Item type.
+ * @tparam S Size of the vector.
+ * @tparam T Type of the vector components.
  */
-template <typename T>
-struct JsonReflector<std::vector<T>> : ArrayReflector<std::vector<T>>
+template <glm::length_t S, typename T>
+struct JsonAdapter<glm::vec<S, T>> : GlmAdapter<glm::vec<S, T>>
 {
 };
 
 /**
- * @brief Specialization of JsonSerializer for deque<T>.
+ * @brief Partial specialization of JsonAdapter for glm::qua<T>.
  *
- * @tparam T Item type.
+ * @tparam T Type of the quaternion components.
  */
 template <typename T>
-struct JsonReflector<std::deque<T>> : ArrayReflector<std::deque<T>>
-{
-};
-
-/**
- * @brief Specialization of JsonSerializer for list<T>.
- *
- * @tparam T Item type.
- */
-template <typename T>
-struct JsonReflector<std::list<T>> : ArrayReflector<std::list<T>>
+struct JsonAdapter<glm::qua<T>> : GlmAdapter<glm::qua<T>>
 {
 };
 } // namespace brayns

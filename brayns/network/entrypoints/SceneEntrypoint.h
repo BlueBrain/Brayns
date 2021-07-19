@@ -20,34 +20,30 @@
 
 #pragma once
 
-#include <brayns/network/message/Message.h>
-
-#include <brayns/engine/Scene.h>
-
-#include "BoxMessage.h"
-#include "ModelDescriptorMessage.h"
+#include <brayns/network/entrypoint/ObjectEntrypoint.h>
+#include <brayns/network/messages/SceneMessage.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(SceneMessage)
-BRAYNS_MESSAGE_ENTRY(BoxMessage, bounds, "Scene boundary")
-BRAYNS_MESSAGE_ENTRY(std::vector<ModelDescriptorMessage>, models, "All models")
-
-static Scene& extract(PluginAPI& api)
+class GetSceneEntrypoint : public GetEntrypoint<SceneMessage>
 {
-    auto& engine = api.getEngine();
-    return engine.getScene();
-}
+public:
+    virtual std::string getName() const override { return "get-scene"; }
 
-void dump(Scene& scene) const
+    virtual std::string getDescription() const override
+    {
+        return "Get the current state of the scene";
+    }
+};
+
+class SetSceneEntrypoint : public SetEntrypoint<SceneMessage>
 {
-    scene.setBounds(bounds);
-}
+public:
+    virtual std::string getName() const override { return "set-scene"; }
 
-void load(const Scene& scene)
-{
-    bounds = scene.getBounds();
-}
-
-BRAYNS_MESSAGE_END()
+    virtual std::string getDescription() const override
+    {
+        return "Set the current state of the scene";
+    }
+};
 } // namespace brayns

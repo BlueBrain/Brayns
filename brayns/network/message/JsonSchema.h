@@ -27,6 +27,7 @@
 
 #include <boost/optional.hpp>
 
+#include "JsonOptions.h"
 #include "JsonType.h"
 
 namespace brayns
@@ -37,12 +38,14 @@ namespace brayns
  */
 struct JsonSchema
 {
+    std::vector<JsonSchema> oneOf;
     std::string title;
     std::string description;
-    std::string type;
-    std::vector<JsonSchema> oneOf;
+    JsonType type = JsonType::Null;
+    JsonValue defaultValue;
     boost::optional<double> minimum;
     boost::optional<double> maximum;
+    std::vector<JsonValue> enums;
     std::map<std::string, JsonSchema> properties;
     std::vector<std::string> required;
     std::vector<JsonSchema> additionalProperties;
@@ -55,11 +58,11 @@ struct JsonSchema
  * @brief Helper class to get some basic info about a JSON schema.
  *
  */
-struct JsonSchemaInfo
+struct JsonSchemaHelper
 {
     static bool isEmpty(const JsonSchema& schema)
     {
-        return schema.type.empty() && schema.oneOf.empty();
+        return schema.type == JsonType::Null && schema.oneOf.empty();
     }
 
     static bool isOneOf(const JsonSchema& schema)
@@ -69,17 +72,17 @@ struct JsonSchemaInfo
 
     static bool isNumber(const JsonSchema& schema)
     {
-        return JsonTypeNameInfo::isNumber(schema.type);
+        return JsonTypeHelper::isNumber(schema.type);
     }
 
     static bool isObject(const JsonSchema& schema)
     {
-        return schema.type == JsonTypeName::ofObject();
+        return schema.type == JsonType::Object;
     }
 
     static bool isArray(const JsonSchema& schema)
     {
-        return schema.type == JsonTypeName::ofArray();
+        return schema.type == JsonType::Array;
     }
 
     static bool hasProperty(const JsonSchema& schema, const std::string& key)
@@ -94,10 +97,20 @@ struct JsonSchemaInfo
         return std::find(first, last, key) != last;
     }
 
-    static bool hasType(const JsonSchema& schema, const std::string& type)
+    static bool hasType(const JsonSchema& schema, JsonType type)
     {
-        return schema.type == type ||
-               isNumber(schema) && JsonTypeNameInfo::isNumber(type);
+        return JsonTypeHelper::isSame(schema.type, type);
+    }
+
+    static void setOptions(JsonSchema& schema, const JsonOptions& options)
+    {
+        schema.title = options.title;
+        schema.description = options.description;
+        schema.minimum = options.minimum;
+        schema.maximum = options.maximum;
+        schema.minItems = options.minItems;
+        schema.maxItems = options.maxItems;
+        schema.defaultValue = options.defaultValue;
     }
 };
 } // namespace brayns

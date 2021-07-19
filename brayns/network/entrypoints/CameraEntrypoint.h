@@ -20,14 +20,12 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/entrypoint/ObjectEntrypoint.h>
 #include <brayns/network/messages/CameraMessage.h>
-
-#include <brayns/engine/Camera.h>
 
 namespace brayns
 {
-class GetCameraEntrypoint : public Entrypoint<EmptyMessage, CameraMessage>
+class GetCameraEntrypoint : public GetEntrypoint<CameraMessage>
 {
 public:
     virtual std::string getName() const override { return "get-camera"; }
@@ -36,41 +34,9 @@ public:
     {
         return "Get the current state of the camera";
     }
-
-    virtual void onUpdate() const override
-    {
-        auto& engine = getApi().getEngine();
-        auto& camera = engine.getCamera();
-        if (!camera.isModified())
-        {
-            return;
-        }
-        auto params = _extractCamera();
-        notify(params);
-    }
-
-    virtual void onRequest(const Request& request) const override
-    {
-        auto result = _extractCamera();
-        request.reply(result);
-    }
-
-private:
-    CameraMessage _extractCamera() const
-    {
-        auto& engine = getApi().getEngine();
-        auto& camera = engine.getCamera();
-        CameraMessage result;
-        result.orientation = camera.getOrientation();
-        result.position = camera.getPosition();
-        result.target = camera.getTarget();
-        result.current = camera.getCurrentType();
-        result.types = camera.getTypes();
-        return result;
-    }
 };
 
-class SetCameraEntrypoint : public Entrypoint<CameraMessage, EmptyMessage>
+class SetCameraEntrypoint : public SetEntrypoint<CameraMessage>
 {
 public:
     virtual std::string getName() const override { return "set-camera"; }
@@ -82,22 +48,9 @@ public:
 
     virtual JsonSchema getParamsSchema() const override
     {
-        auto schema = Base::getParamsSchema();
+        auto schema = Json::getSchema<CameraMessage>();
         JsonProperty::remove(schema, "types");
         return schema;
-    }
-
-    virtual void onRequest(const Request& request) const override
-    {
-        auto& params = request.getParams();
-        auto& engine = getApi().getEngine();
-        auto& camera = engine.getCamera();
-        camera.setOrientation(params.orientation);
-        camera.setPosition(params.position);
-        camera.setTarget(params.target);
-        camera.setCurrentType(params.current);
-        triggerRender();
-        request.reply(EmptyMessage());
     }
 };
 } // namespace brayns

@@ -25,7 +25,6 @@
 namespace brayns
 {
 BRAYNS_MESSAGE_BEGIN(ImageStreamingModeMessage)
-BRAYNS_MESSAGE_ENTRY(std::string, type,
-                     "Streaming type, either 'stream' or 'quanta'");
+BRAYNS_MESSAGE_ENTRY(std::string, type, "Stream mode: 'stream' or 'quanta'")
 BRAYNS_MESSAGE_END()
 } // namespace brayns

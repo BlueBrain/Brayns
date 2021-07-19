@@ -38,7 +38,7 @@ BRAYNS_MESSAGE_ENTRY(std::string, test, "Test string")
 BRAYNS_MESSAGE_ENTRY(size_t, size, "Test size")
 BRAYNS_MESSAGE_ENTRY(StringMap<TestParams>, map, "Test map")
 BRAYNS_MESSAGE_ENTRY(StringHash<std::string>, hash, "Test hash")
-BRAYNS_MESSAGE_ENTRY(std::shared_ptr<int>, stringptr, "Test empty ptr")
+BRAYNS_MESSAGE_ENTRY(std::shared_ptr<int>, intptr, "Test empty ptr")
 BRAYNS_MESSAGE_END()
 
 class TestEntrypoint : public Entrypoint<TestParams, TestResult>
@@ -60,7 +60,7 @@ public:
         {
             throw EntrypointException("This is an error");
         }
-        result.stringptr = std::make_shared<int>(0);
+        result.intptr = std::make_shared<int>(0);
         request.progress("This is a 100% progress", 1.0);
         request.reply(result);
     }

@@ -24,17 +24,17 @@
 
 #include <boost/optional.hpp>
 
-#include "PrimitiveReflector.h"
+#include "PrimitiveAdapter.h"
 
 namespace brayns
 {
 /**
- * @brief Helper for JsonReflector for pointer-like values.
+ * @brief Helper for JsonAdapter for pointer-like values.
  *
  * @tparam T Contained type.
  */
 template <typename T>
-struct PtrReflector
+struct PtrAdapter
 {
     /**
      * @brief Create a JSON schema based on the value referenced by T.
@@ -43,8 +43,11 @@ struct PtrReflector
      */
     static JsonSchema getSchema(const T& value)
     {
-        using ValueType = std::decay_t<decltype(*value)>;
-        return value ? Json::getSchema(*value) : Json::getSchema(ValueType());
+        if (!value)
+        {
+            return Json::getSchema<std::decay_t<decltype(*value)>>();
+        }
+        return Json::getSchema(*value);
     }
 
     /**
@@ -83,12 +86,12 @@ struct PtrReflector
 };
 
 template <typename T>
-struct JsonReflector<T*> : PtrReflector<T*>
+struct JsonAdapter<T*> : PtrAdapter<T*>
 {
 };
 
 template <typename T>
-struct JsonReflector<std::unique_ptr<T>> : PtrReflector<std::unique_ptr<T>>
+struct JsonAdapter<std::unique_ptr<T>> : PtrAdapter<std::unique_ptr<T>>
 {
     static bool deserialize(const JsonValue& json, std::unique_ptr<T>& value)
     {
@@ -103,7 +106,7 @@ struct JsonReflector<std::unique_ptr<T>> : PtrReflector<std::unique_ptr<T>>
 };
 
 template <typename T>
-struct JsonReflector<std::shared_ptr<T>> : PtrReflector<std::shared_ptr<T>>
+struct JsonAdapter<std::shared_ptr<T>> : PtrAdapter<std::shared_ptr<T>>
 {
     static bool deserialize(const JsonValue& json, std::shared_ptr<T>& value)
     {
@@ -118,7 +121,7 @@ struct JsonReflector<std::shared_ptr<T>> : PtrReflector<std::shared_ptr<T>>
 };
 
 template <typename T>
-struct JsonReflector<boost::optional<T>> : PtrReflector<boost::optional<T>>
+struct JsonAdapter<boost::optional<T>> : PtrAdapter<boost::optional<T>>
 {
     static bool deserialize(const JsonValue& json, boost::optional<T>& value)
     {

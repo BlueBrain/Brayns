@@ -109,8 +109,8 @@ BRAYNS_MESSAGE_END()
  * @brief Serialize empty message as empty object.
  *
  */
-template<>
-struct JsonReflector<EmptyMessage>
+template <>
+struct JsonAdapter<EmptyMessage>
 {
     static JsonSchema getSchema(const EmptyMessage&) { return {}; }
 

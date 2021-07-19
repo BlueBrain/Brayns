@@ -24,7 +24,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "PrimitiveReflector.h"
+#include "PrimitiveAdapter.h"
 
 namespace brayns
 {
@@ -37,7 +37,7 @@ namespace brayns
  * @tparam T Map-like type.
  */
 template <typename T>
-struct MapReflector
+struct MapAdapter
 {
     using ValueType = typename T::mapped_type;
 
@@ -50,8 +50,8 @@ struct MapReflector
     static JsonSchema getSchema(const T&)
     {
         JsonSchema schema;
-        schema.type = JsonTypeName::ofObject();
-        schema.additionalProperties = {Json::getSchema(ValueType())};
+        schema.type = JsonType::Object;
+        schema.additionalProperties = {Json::getSchema<ValueType>()};
         return schema;
     }
 
@@ -111,40 +111,23 @@ struct MapReflector
 };
 
 /**
- * @brief Shorcut for map<string, T> convenient to avoid commas in macros.
- * 
- * @tparam T Map value type.
- */
-template <typename T>
-using StringMap = std::map<std::string, T>;
-
-/**
- * @brief Shorcut for unordered_map<string, T> convenient to avoid commas in
- * macros.
- *
- * @tparam T Map value type.
- */
-template <typename T>
-using StringHash = std::unordered_map<std::string, T>;
-
-/**
- * @brief Partial specialization of JsonReflector for std::map<std::string, T>.
+ * @brief Partial specialization of JsonAdapter for std::map<std::string, T>.
  *
  * @tparam T Type of the map values.
  */
 template <typename T>
-struct JsonReflector<StringMap<T>> : MapReflector<StringMap<T>>
+struct JsonAdapter<StringMap<T>> : MapAdapter<StringMap<T>>
 {
 };
 
 /**
- * @brief Partial specialization of JsonReflector for
+ * @brief Partial specialization of JsonAdapter for
  * std::unordered_map<std::string, T>.
  *
  * @tparam T Type of the map values.
  */
 template <typename T>
-struct JsonReflector<StringHash<T>> : MapReflector<StringHash<T>>
+struct JsonAdapter<StringHash<T>> : MapAdapter<StringHash<T>>
 {
 };
 } // namespace brayns

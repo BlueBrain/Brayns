@@ -41,8 +41,7 @@ public:
     virtual void onRequest(const Request& request) const override
     {
         getStream().triggerImageStream();
-        auto& engine = getApi().getEngine();
-        engine.triggerRender();
+        triggerRender();
         request.reply(EmptyMessage());
     }
 };

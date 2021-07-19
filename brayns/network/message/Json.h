@@ -25,14 +25,14 @@
 #include <Poco/JSON/Parser.h>
 #include <Poco/JSON/Stringifier.h>
 
+#include "JsonAdapter.h"
 #include "JsonType.h"
-#include "JsonReflector.h"
 
 namespace brayns
 {
 /**
  * @brief High level class to serialize / deserialize JSON for custom types.
- * A valid specialization of JsonReflector<T> is required.
+ * A valid specialization of JsonAdapter<T> is required.
  *
  */
 struct Json
@@ -66,21 +66,33 @@ struct Json
     }
 
     /**
-     * @brief Return the JSON schema of value using JsonReflector<T>.
-     * 
-     * @tparam T Type to reflect the schema from.
+     * @brief Return the JSON schema of value using JsonAdapter<T>.
+     *
+     * @tparam T Type to get the schema from.
      * @param value Value used to build the schema.
      * @return const JsonSchema& JSON schema of T.
      */
-    template<typename T>
+    template <typename T>
     static JsonSchema getSchema(const T& value)
     {
-        return JsonReflector<T>::getSchema(value);
+        return JsonAdapter<T>::getSchema(value);
+    }
+
+    /**
+     * @brief Shortcut to get the schema if no object instance is available.
+     *
+     * @tparam T Type to get the schema from.
+     * @return const JsonSchema& JSON schema of T.
+     */
+    template <typename T>
+    static JsonSchema getSchema()
+    {
+        return getSchema(T{});
     }
 
     /**
      * @brief Serialize a given type to a JsonValue using the
-     * JsonReflector<T>::serialize (must have a valid specialization).
+     * JsonAdapter<T>::serialize (must have a valid specialization).
      *
      * @tparam T Type of the object to serialize.
      * @param value Object to serialize.
@@ -90,7 +102,7 @@ struct Json
     static JsonValue serialize(const T& value)
     {
         JsonValue json;
-        JsonReflector<T>::serialize(value, json);
+        JsonAdapter<T>::serialize(value, json);
         return json;
     }
 
@@ -105,7 +117,7 @@ struct Json
     template <typename T>
     static bool serialize(const T& value, JsonValue& json)
     {
-        return JsonReflector<T>::serialize(value, json);
+        return JsonAdapter<T>::serialize(value, json);
     }
 
     /**
@@ -124,7 +136,7 @@ struct Json
 
     /**
      * @brief Convert a JsonValue to a given type using
-     * JsonReflector<T>::serialize (must have a valid specialization).
+     * JsonAdapter<T>::serialize (must have a valid specialization).
      *
      * @tparam T Type of the resulting object.
      * @param json JsonValue containing the object value.
@@ -134,7 +146,7 @@ struct Json
     static T deserialize(const JsonValue& json)
     {
         T value = {};
-        JsonReflector<T>::deserialize(json, value);
+        JsonAdapter<T>::deserialize(json, value);
         return value;
     }
 
@@ -149,7 +161,7 @@ struct Json
     template <typename T>
     static bool deserialize(const JsonValue& json, T& value)
     {
-        JsonReflector<T>::deserialize(json, value);
+        JsonAdapter<T>::deserialize(json, value);
     }
 
     /**
@@ -187,39 +199,6 @@ public:
         }
         return json.extract<JsonObject::Ptr>();
     }
-
-    template <typename T>
-    static void setIfNotEmpty(JsonObject& object, const std::string& key,
-                              const T& value)
-    {
-        if (value.empty())
-        {
-            return;
-        }
-        object.set(key, Json::serialize(value));
-    }
-
-    template <typename T>
-    static void setFirstIfNotEmpty(JsonObject& object, const std::string& key,
-                              const T& value)
-    {
-        if (value.empty())
-        {
-            return;
-        }
-        object.set(key, Json::serialize(value[0]));
-    }
-
-    template <typename T>
-    static void setIfNotNull(JsonObject& object, const std::string& key,
-                             const T& value)
-    {
-        if (!value)
-        {
-            return;
-        }
-        object.set(key, Json::serialize(*value));
-    }
 };
 
 struct JsonProperty
@@ -248,11 +227,11 @@ struct JsonProperty
  *
  */
 template <>
-struct JsonReflector<JsonValue>
+struct JsonAdapter<JsonValue>
 {
     /**
      * @brief Create an empty schema.
-     * 
+     *
      * @return JsonSchema Empty schema.
      */
     static JsonSchema getSchema(const JsonValue&) { return {}; }

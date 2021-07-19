@@ -20,11 +20,15 @@
 
 #pragma once
 
+#include <map>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 
 #include <Poco/JSON/Array.h>
 #include <Poco/JSON/Object.h>
+
+#include <brayns/common/utils/enumUtils.h>
 
 namespace brayns
 {
@@ -46,6 +50,26 @@ using JsonArray = Poco::JSON::Array;
  */
 using JsonObject = Poco::JSON::Object;
 
+/**
+ * @brief Shorcut for map<string, T> to avoid commas in macros.
+ *
+ * @tparam T Map value type.
+ */
+template <typename T>
+using StringMap = std::map<std::string, T>;
+
+/**
+ * @brief Shorcut for unordered_map<string, T> to avoid commas in macros.
+ *
+ * @tparam T Map value type.
+ */
+template <typename T>
+using StringHash = std::unordered_map<std::string, T>;
+
+/**
+ * @brief All available JSON types.
+ *
+ */
 enum class JsonType
 {
     Null,
@@ -57,7 +81,7 @@ enum class JsonType
     Object
 };
 
-struct JsonTypeInfo
+struct JsonTypeHelper
 {
     static bool isNumber(JsonType type)
     {
@@ -124,15 +148,6 @@ public:
     }
 };
 
-struct JsonTypeNameInfo
-{
-    static bool isNumber(const std::string& name)
-    {
-        return name == JsonTypeName::ofInteger() ||
-               name == JsonTypeName::ofNumber();
-    }
-};
-
 struct GetJsonType
 {
     static JsonType fromName(const std::string& name)
@@ -158,6 +173,35 @@ struct GetJsonType
             return JsonType::Array;
         }
         if (name == JsonTypeName::ofObject())
+        {
+            return JsonType::Object;
+        }
+        return JsonType::Null;
+    }
+
+    static JsonType fromJson(const JsonValue& json)
+    {
+        if (json.isBoolean())
+        {
+            return JsonType::Boolean;
+        }
+        if (json.isInteger())
+        {
+            return JsonType::Integer;
+        }
+        if (json.isNumeric())
+        {
+            return JsonType::Number;
+        }
+        if (json.isString())
+        {
+            return JsonType::String;
+        }
+        if (json.type() == typeid(JsonArray::Ptr))
+        {
+            return JsonType::Array;
+        }
+        if (json.type() == typeid(JsonObject::Ptr))
         {
             return JsonType::Object;
         }
@@ -208,40 +252,19 @@ struct GetJsonTypeName
         }
         return JsonTypeName::ofNull();
     }
-
-    static const std::string& fromJson(const JsonValue& json)
-    {
-        if (json.isBoolean())
-        {
-            return JsonTypeName::ofBoolean();
-        }
-        if (json.isInteger())
-        {
-            return JsonTypeName::ofInteger();
-        }
-        if (json.isNumeric())
-        {
-            return JsonTypeName::ofNumber();
-        }
-        if (json.isString())
-        {
-            return JsonTypeName::ofString();
-        }
-        if (json.type() == typeid(JsonArray::Ptr))
-        {
-            return JsonTypeName::ofArray();
-        }
-        if (json.type() == typeid(JsonObject::Ptr))
-        {
-            return JsonTypeName::ofObject();
-        }
-        return JsonTypeName::ofNull();
-    }
-
-    template<typename T>
-    static const std::string& fromPrimitive()
-    {
-        return fromType(GetJsonType::fromPrimitive<T>());
-    }
 };
+
+template <>
+inline std::vector<std::pair<std::string, JsonType>> enumMap<JsonType>()
+{
+    return {
+        {JsonTypeName::ofNull(), JsonType::Null},
+        {JsonTypeName::ofBoolean(), JsonType::Boolean},
+        {JsonTypeName::ofInteger(), JsonType::Integer},
+        {JsonTypeName::ofNumber(), JsonType::Number},
+        {JsonTypeName::ofString(), JsonType::String},
+        {JsonTypeName::ofArray(), JsonType::Array},
+        {JsonTypeName::ofObject(), JsonType::Object},
+    };
+}
 } // namespace brayns

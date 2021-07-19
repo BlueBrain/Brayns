@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 
 #include <brayns/network/message/Json.h>
 
@@ -33,11 +33,9 @@ namespace brayns
  * @tparam T Primitive type.
  */
 template <typename T>
-struct PrimitiveReflector
+struct PrimitiveAdapter
 {
-    static_assert(JsonTypeInfo::isPrimitive<T>(),
-                  "JSON reflection is not supported for this type, please "
-                  "provide a valid specialization of JsonReflector<T>");
+    static_assert(JsonTypeHelper::isPrimitive<T>(), "Not a primitive");
 
     /**
      * @brief Create a JSON schema with type and minimum if unsigned.
@@ -47,7 +45,7 @@ struct PrimitiveReflector
     static JsonSchema getSchema(const T&)
     {
         JsonSchema schema;
-        schema.type = GetJsonTypeName::fromPrimitive<T>();
+        schema.type = GetJsonType::fromPrimitive<T>();
         if (!std::is_same<T, bool>() && std::is_unsigned<T>())
         {
             schema.minimum = 0.0;
@@ -89,62 +87,62 @@ struct PrimitiveReflector
 };
 
 template <>
-struct JsonReflector<bool> : PrimitiveReflector<bool>
+struct JsonAdapter<bool> : PrimitiveAdapter<bool>
 {
 };
 
 template <>
-struct JsonReflector<int8_t> : PrimitiveReflector<int8_t>
+struct JsonAdapter<int8_t> : PrimitiveAdapter<int8_t>
 {
 };
 
 template <>
-struct JsonReflector<uint8_t> : PrimitiveReflector<uint8_t>
+struct JsonAdapter<uint8_t> : PrimitiveAdapter<uint8_t>
 {
 };
 
 template <>
-struct JsonReflector<int16_t> : PrimitiveReflector<int16_t>
+struct JsonAdapter<int16_t> : PrimitiveAdapter<int16_t>
 {
 };
 
 template <>
-struct JsonReflector<uint16_t> : PrimitiveReflector<uint16_t>
+struct JsonAdapter<uint16_t> : PrimitiveAdapter<uint16_t>
 {
 };
 
 template <>
-struct JsonReflector<int32_t> : PrimitiveReflector<int32_t>
+struct JsonAdapter<int32_t> : PrimitiveAdapter<int32_t>
 {
 };
 
 template <>
-struct JsonReflector<uint32_t> : PrimitiveReflector<uint32_t>
+struct JsonAdapter<uint32_t> : PrimitiveAdapter<uint32_t>
 {
 };
 
 template <>
-struct JsonReflector<int64_t> : PrimitiveReflector<int64_t>
+struct JsonAdapter<int64_t> : PrimitiveAdapter<int64_t>
 {
 };
 
 template <>
-struct JsonReflector<uint64_t> : PrimitiveReflector<uint64_t>
+struct JsonAdapter<uint64_t> : PrimitiveAdapter<uint64_t>
 {
 };
 
 template <>
-struct JsonReflector<float> : PrimitiveReflector<float>
+struct JsonAdapter<float> : PrimitiveAdapter<float>
 {
 };
 
 template <>
-struct JsonReflector<double> : PrimitiveReflector<double>
+struct JsonAdapter<double> : PrimitiveAdapter<double>
 {
 };
 
 template <>
-struct JsonReflector<std::string> : PrimitiveReflector<std::string>
+struct JsonAdapter<std::string> : PrimitiveAdapter<std::string>
 {
 };
 } // namespace brayns

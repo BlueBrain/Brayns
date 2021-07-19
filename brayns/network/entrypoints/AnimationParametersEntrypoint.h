@@ -20,15 +20,13 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/entrypoint/ObjectEntrypoint.h>
 #include <brayns/network/messages/AnimationParametersMessage.h>
-
-#include <brayns/parameters/AnimationParameters.h>
 
 namespace brayns
 {
 class GetAnimationParametersEntrypoint
-    : public Entrypoint<EmptyMessage, AnimationParametersMessage>
+    : public GetEntrypoint<AnimationParametersMessage>
 {
 public:
     virtual std::string getName() const override
@@ -40,43 +38,10 @@ public:
     {
         return "Get the current state of the animation parameters";
     }
-    
-    virtual void onUpdate() const override
-    {
-        auto& manager = getApi().getParametersManager();
-        auto& animationParameters = manager.getAnimationParameters();
-        if (!animationParameters.isModified())
-        {
-            return;
-        }
-        auto params = _extractAnimationParameters();
-        notify(params);
-    }
-
-    virtual void onRequest(const Request& request) const override
-    {
-        auto result = _extractAnimationParameters();
-        request.reply(result);
-    }
-
-private:
-    AnimationParametersMessage _extractAnimationParameters() const
-    {
-        auto& manager = getApi().getParametersManager();
-        auto& animationParameters = manager.getAnimationParameters();
-        AnimationParametersMessage result;
-        result.frame_count = animationParameters.getNumFrames();
-        result.current = animationParameters.getFrame();
-        result.delta = animationParameters.getDelta();
-        result.dt = animationParameters.getDt();
-        result.playing = animationParameters.isPlaying();
-        result.unit = animationParameters.getUnit();
-        return result;
-    }
 };
 
 class SetAnimationParametersEntrypoint
-    : public Entrypoint<AnimationParametersMessage, EmptyMessage>
+    : public SetEntrypoint<AnimationParametersMessage>
 {
 public:
     virtual std::string getName() const override
@@ -87,21 +52,6 @@ public:
     virtual std::string getDescription() const override
     {
         return "Set the current state of the animation parameters";
-    }
-
-    virtual void onRequest(const Request& request) const override
-    {
-        auto& params = request.getParams();
-        auto& manager = getApi().getParametersManager();
-        auto& animationParameters = manager.getAnimationParameters();
-        animationParameters.setNumFrames(params.frame_count);
-        animationParameters.setFrame(params.current);
-        animationParameters.setDelta(params.delta);
-        animationParameters.setDt(params.dt);
-        animationParameters.setPlaying(params.playing);
-        animationParameters.setUnit(params.unit);
-        triggerRender();
-        request.reply(EmptyMessage());
     }
 };
 } // namespace brayns

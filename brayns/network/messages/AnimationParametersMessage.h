@@ -22,14 +22,43 @@
 
 #include <brayns/network/message/Message.h>
 
+#include <brayns/parameters/AnimationParameters.h>
+
 namespace brayns
 {
 BRAYNS_MESSAGE_BEGIN(AnimationParametersMessage)
-BRAYNS_MESSAGE_ENTRY(uint32_t, frame_count, "Animation frame count");
-BRAYNS_MESSAGE_ENTRY(uint32_t, current, "Current frame index");
-BRAYNS_MESSAGE_ENTRY(int32_t, delta, "Frame delta");
-BRAYNS_MESSAGE_ENTRY(double, dt, "Frame time");
-BRAYNS_MESSAGE_ENTRY(bool, playing, "Animation is playing");
-BRAYNS_MESSAGE_ENTRY(std::string, unit, "Time unit");
+BRAYNS_MESSAGE_ENTRY(uint32_t, frame_count, "Animation frame count")
+BRAYNS_MESSAGE_ENTRY(uint32_t, current, "Current frame index")
+BRAYNS_MESSAGE_ENTRY(int32_t, delta, "Frame delta")
+BRAYNS_MESSAGE_ENTRY(double, dt, "Frame time")
+BRAYNS_MESSAGE_ENTRY(bool, playing, "Animation is playing")
+BRAYNS_MESSAGE_ENTRY(std::string, unit, "Time unit")
+
+static AnimationParameters& extract(PluginAPI& api)
+{
+    auto& parametersManager = api.getParametersManager();
+    return parametersManager.getAnimationParameters();
+}
+
+void dump(AnimationParameters& animationParameters) const
+{
+    animationParameters.setNumFrames(frame_count);
+    animationParameters.setFrame(current);
+    animationParameters.setDelta(delta);
+    animationParameters.setDt(dt);
+    animationParameters.setPlaying(playing);
+    animationParameters.setUnit(unit);
+}
+
+void load(const AnimationParameters& animationParameters)
+{
+    frame_count = animationParameters.getNumFrames();
+    current = animationParameters.getFrame();
+    delta = animationParameters.getDelta();
+    dt = animationParameters.getDt();
+    playing = animationParameters.isPlaying();
+    unit = animationParameters.getUnit();
+}
+
 BRAYNS_MESSAGE_END()
 } // namespace brayns

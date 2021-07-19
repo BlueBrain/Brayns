@@ -75,6 +75,9 @@ public:
         Returns the bounding box of the scene
     */
     const Boxd& getBounds() const { return _bounds; }
+
+    void setBounds(const Boxd& bounds) { _updateValue(_bounds, bounds); }
+
     /** Gets the light manager */
     LightManager& getLightManager() { return _lightManager; }
     /**

@@ -43,7 +43,7 @@ public:
             return;
         }
         auto& paramsSchema = schemaParams[0];
-        if (JsonSchemaInfo::isEmpty(paramsSchema))
+        if (JsonSchemaHelper::isEmpty(paramsSchema))
         {
             return;
         }

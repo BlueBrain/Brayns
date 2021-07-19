@@ -27,8 +27,8 @@
 namespace brayns
 {
 BRAYNS_MESSAGE_BEGIN(BoxMessage)
-BRAYNS_MESSAGE_ENTRY(Vector3d, min, "Bottom-left corner XYZ");
-BRAYNS_MESSAGE_ENTRY(Vector3d, max, "Top-right corner XYZ");
+BRAYNS_MESSAGE_ENTRY(Vector3d, min, "Bottom-left corner XYZ")
+BRAYNS_MESSAGE_ENTRY(Vector3d, max, "Top-right corner XYZ")
 
 BoxMessage& operator=(const Boxd& box)
 {

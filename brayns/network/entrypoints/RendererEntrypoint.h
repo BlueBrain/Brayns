@@ -20,14 +20,12 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/entrypoint/ObjectEntrypoint.h>
 #include <brayns/network/messages/RendererMessage.h>
-
-#include <brayns/parameters/RenderingParameters.h>
 
 namespace brayns
 {
-class GetRendererEntrypoint : public Entrypoint<EmptyMessage, RendererMessage>
+class GetRendererEntrypoint : public GetEntrypoint<RendererMessage>
 {
 public:
     virtual std::string getName() const override { return "get-renderer"; }
@@ -36,45 +34,9 @@ public:
     {
         return "Get the current state of the renderer";
     }
-
-    virtual void onUpdate() const override
-    {
-        auto& manager = getApi().getParametersManager();
-        auto& renderer = manager.getRenderingParameters();
-        if (!renderer.isModified())
-        {
-            return;
-        }
-        auto params = _extractRenderer();
-        notify(params);
-    }
-
-    virtual void onRequest(const Request& request) const override
-    {
-        auto result = _extractRenderer();
-        request.reply(result);
-    }
-
-private:
-    RendererMessage _extractRenderer() const
-    {
-        auto& manager = getApi().getParametersManager();
-        auto& renderer = manager.getRenderingParameters();
-        RendererMessage result;
-        result.accumulation = renderer.getAccumulation();
-        result.background_color = renderer.getBackgroundColor();
-        result.current = renderer.getCurrentRenderer();
-        result.head_light = renderer.getHeadLight();
-        result.max_accum_frames = renderer.getMaxAccumFrames();
-        result.samples_per_pixel = renderer.getSamplesPerPixel();
-        result.subsampling = renderer.getSubsampling();
-        result.types = renderer.getRenderers();
-        result.variance_threshold = renderer.getVarianceThreshold();
-        return result;
-    }
 };
 
-class SetRendererEntrypoint : public Entrypoint<RendererMessage, EmptyMessage>
+class SetRendererEntrypoint : public SetEntrypoint<RendererMessage>
 {
 public:
     virtual std::string getName() const override { return "set-renderer"; }
@@ -86,26 +48,9 @@ public:
 
     virtual JsonSchema getParamsSchema() const override
     {
-        auto schema = Base::getParamsSchema();
+        auto schema = Json::getSchema<RendererMessage>();
         JsonProperty::remove(schema, "types");
         return schema;
-    }
-
-    virtual void onRequest(const Request& request) const override
-    {
-        auto& params = request.getParams();
-        auto& manager = getApi().getParametersManager();
-        auto& renderer = manager.getRenderingParameters();
-        renderer.setAccumulation(params.accumulation);
-        renderer.setBackgroundColor(params.background_color);
-        renderer.setCurrentRenderer(params.current);
-        renderer.setHeadLight(params.head_light);
-        renderer.setMaxAccumFrames(params.max_accum_frames);
-        renderer.setSamplesPerPixel(params.samples_per_pixel);
-        renderer.setSubsampling(params.subsampling);
-        renderer.setVarianceThreshold(params.variance_threshold);
-        triggerRender();
-        request.reply(EmptyMessage());
     }
 };
 } // namespace brayns

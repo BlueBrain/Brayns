@@ -21,7 +21,6 @@
 #pragma once
 
 #include <brayns/network/entrypoint/IEntrypoint.h>
-#include <brayns/network/message/JsonSchema.h>
 #include <brayns/network/message/Message.h>
 
 namespace brayns
@@ -32,6 +31,13 @@ BRAYNS_MESSAGE_END()
 
 BRAYNS_MESSAGE_BEGIN(SchemaResult)
 
+BRAYNS_MESSAGE_ENTRY(std::string, title, "Name of the entrypoint")
+BRAYNS_MESSAGE_ENTRY(std::string, description, "Description of the entrypoint")
+BRAYNS_MESSAGE_ENTRY(std::string, type, "Type of entrypoint ('method')")
+BRAYNS_MESSAGE_ENTRY(bool, async, "Check if the entrypoint is asynchronous")
+BRAYNS_MESSAGE_ENTRY(std::vector<JsonSchema>, params, "Input schema")
+BRAYNS_MESSAGE_ENTRY(JsonSchema, returns, "Output schema")
+
 static SchemaResult fromEntrypoint(const IEntrypoint& entrypoint)
 {
     SchemaResult schema;
@@ -40,7 +46,7 @@ static SchemaResult fromEntrypoint(const IEntrypoint& entrypoint)
     schema.description = entrypoint.getDescription();
     schema.async = entrypoint.isAsync();
     auto params = entrypoint.getParamsSchema();
-    if (!JsonSchemaInfo::isEmpty(params))
+    if (!JsonSchemaHelper::isEmpty(params))
     {
         schema.params.push_back(std::move(params));
     }
@@ -48,11 +54,5 @@ static SchemaResult fromEntrypoint(const IEntrypoint& entrypoint)
     return schema;
 }
 
-BRAYNS_MESSAGE_ENTRY(std::string, title, "Name of the entrypoint");
-BRAYNS_MESSAGE_ENTRY(std::string, description, "Description of the entrypoint");
-BRAYNS_MESSAGE_ENTRY(std::string, type, "Type of entrypoint ('method')");
-BRAYNS_MESSAGE_ENTRY(bool, async, "Check if the entrypoint is asynchronous");
-BRAYNS_MESSAGE_ENTRY(std::vector<JsonSchema>, params, "Input schema");
-BRAYNS_MESSAGE_ENTRY(JsonSchema, returns, "Output schema");
 BRAYNS_MESSAGE_END()
 } // namespace brayns

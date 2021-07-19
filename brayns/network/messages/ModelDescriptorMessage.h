@@ -22,6 +22,8 @@
 
 #include <brayns/network/message/Message.h>
 
+#include <brayns/engine/Model.h>
+
 #include "BoxMessage.h"
 #include "TransformationMessage.h"
 
@@ -29,14 +31,14 @@ namespace brayns
 {
 BRAYNS_MESSAGE_BEGIN(ModelDescriptorMessage)
 BRAYNS_MESSAGE_ENTRY(bool, bounding_box, "Has bounding box")
-BRAYNS_MESSAGE_ENTRY(BoxMessage, bounds, "Bounds")
-BRAYNS_MESSAGE_ENTRY(size_t, id, "ID")
+BRAYNS_MESSAGE_ENTRY(BoxMessage, bounds, "Model bounds")
+BRAYNS_MESSAGE_ENTRY(size_t, id, "Model ID")
 BRAYNS_MESSAGE_ENTRY(ModelMetadata, metadata, "Key-value metadata")
-BRAYNS_MESSAGE_ENTRY(std::string, name, "Name")
-BRAYNS_MESSAGE_ENTRY(std::string, path, "Source file path")
+BRAYNS_MESSAGE_ENTRY(std::string, name, "Model name")
+BRAYNS_MESSAGE_ENTRY(std::string, path, "Model file path")
 BRAYNS_MESSAGE_ENTRY(TransformationMessage, transformation, "Transformation")
 BRAYNS_MESSAGE_ENTRY(bool, visible, "Is visible")
 BRAYNS_MESSAGE_ENTRY(std::string, loader_name, "Name of the loader")
-//BRAYNS_MESSAGE_ENTRY(PropertyMap, loader_properties, "Loader properties")
+BRAYNS_MESSAGE_ENTRY(PropertyMap, loader_properties, "Loader properties")
 BRAYNS_MESSAGE_END()
 } // namespace brayns

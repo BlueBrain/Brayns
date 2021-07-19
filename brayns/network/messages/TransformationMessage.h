@@ -27,12 +27,20 @@
 namespace brayns
 {
 BRAYNS_MESSAGE_BEGIN(TransformationMessage)
-BRAYNS_MESSAGE_ENTRY(Vector3d, translation, "Translation XYZ");
-BRAYNS_MESSAGE_ENTRY(Vector3d, scale, "Scale XYZ");
-BRAYNS_MESSAGE_ENTRY(Quaterniond, rotation, "Rotation XYZW");
-BRAYNS_MESSAGE_ENTRY(Vector3d, rotation_center, "Rotation center XYZ");
+BRAYNS_MESSAGE_ENTRY(Vector3d, translation, "Translation XYZ")
+BRAYNS_MESSAGE_ENTRY(Vector3d, scale, "Scale XYZ")
+BRAYNS_MESSAGE_ENTRY(Quaterniond, rotation, "Rotation XYZW")
+BRAYNS_MESSAGE_ENTRY(Vector3d, rotation_center, "Rotation center XYZ")
 
-BoxMessage& operator=(const Transformation& transformation)
+void dump(Transformation& transformation) const
+{
+    transformation.setTranslation(translation);
+    transformation.setScale(scale);
+    transformation.setRotation(rotation);
+    transformation.setRotationCenter(rotation_center);
+}
+
+TransformationMessage& operator=(const Transformation& transformation)
 {
     translation = transformation.getTranslation();
     scale = transformation.getScale();

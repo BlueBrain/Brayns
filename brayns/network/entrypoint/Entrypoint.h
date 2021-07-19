@@ -20,11 +20,7 @@
 
 #pragma once
 
-#include <brayns/network/context/NetworkContext.h>
-#include <brayns/network/message/MessageFactory.h>
-
-#include "EntrypointException.h"
-#include "IEntrypoint.h"
+#include "BaseEntrypoint.h"
 
 namespace brayns
 {
@@ -59,69 +55,11 @@ private:
     ParamsType _params;
 };
 
-/**
- * @brief Entrypoint common implementation used as base class.
- *
- */
 template <typename ParamsType, typename ResultType>
-class Entrypoint : public IEntrypoint
+class Entrypoint : public BaseEntrypoint
 {
 public:
-    using Base = Entrypoint<ParamsType, ResultType>;
-    using Params = ParamsType;
-    using Result = ResultType;
     using Request = EntrypointRequest<ParamsType, ResultType>;
-
-    /**
-     * @brief Get the Network context assigned to the entrypoint.
-     *
-     * @return NetworkContext& Network context.
-     */
-    NetworkContext& getContext() const { return *_context; }
-
-    /**
-     * @brief Shortcut to get a reference to Brayns API.
-     *
-     * @return PluginAPI& Brayns API access.
-     */
-    PluginAPI& getApi() const { return _context->getApi(); }
-
-    /**
-     * @brief Shortcut to get the Entrypoint list.
-     *
-     * @return EntrypointManager& Entrypoint manager.
-     */
-    EntrypointManager& getEntrypoints() const
-    {
-        return _context->getEntrypoints();
-    }
-
-    /**
-     * @brief Shortcut to get the connection list.
-     *
-     * @return ConnectionManager& Client connection manager.
-     */
-    ConnectionManager& getConnections() const
-    {
-        return _context->getConnections();
-    }
-
-    /**
-     * @brief Shortcut to get the stream manager.
-     *
-     * @return StreamManager& Stream manager.
-     */
-    StreamManager& getStream() const { return _context->getStream(); }
-
-    /**
-     * @brief Store the network context reference inside instance.
-     *
-     * @param context A reference to the network context.
-     */
-    virtual void setContext(NetworkContext& context) override
-    {
-        _context = &context;
-    }
 
     /**
      * @brief Build JsonSchema using ParamsType.
@@ -130,19 +68,25 @@ public:
      */
     virtual JsonSchema getParamsSchema() const override
     {
-        return Json::getSchema(Params());
+        return Json::getSchema<ParamsType>();
     }
 
     /**
-     * @brief Build JsonSchema using JsonSchemaFactory<ResultType>.
+     * @brief Build JsonSchema using ResultType.
      *
      * @return JsonSchema Schema of the entrypoint reply.
      */
     virtual JsonSchema getResultSchema() const override
     {
-        return Json::getSchema(Result());
+        return Json::getSchema<ResultType>();
     }
 
+    /**
+     * @brief Create a specialized request for Result and Params and forward it
+     * to onRequest(const Request&).
+     *
+     * @param request Generic request.
+     */
     virtual void onRequest(const NetworkRequest& request) const override
     {
         Request entrypointRequest(request);
@@ -155,49 +99,5 @@ public:
      * @param request Request with socket and parsed message.
      */
     virtual void onRequest(const Request& request) const = 0;
-
-    /**
-     * @brief Shortcut to trigger the rendering of a new frame.
-     * 
-     */
-    void triggerRender() const
-    {
-        auto& engine = getApi().getEngine();
-        engine.triggerRender();
-    }
-
-    /**
-     * @brief Broadcast a notification to all connected clients.
-     *
-     * @tparam MessageType Notification message type.
-     * @param params Message to send ("params" field).
-     */
-    template <typename T>
-    void notify(const T& params) const
-    {
-        try
-        {
-            _sendNotification(params);
-        }
-        catch (std::exception& e)
-        {
-            BRAYNS_ERROR << "Error during notification: " << e.what() << '\n';
-        }
-    }
-
-private:
-    template <typename T>
-    void _sendNotification(const T& params) const
-    {
-        NotificationMessage notification;
-        notification.jsonrpc = "2.0";
-        notification.method = getName();
-        notification.params = Json::serialize(params);
-        auto json = Json::stringify(notification);
-        auto& connections = _context->getConnections();
-        connections.broadcast(json);
-    }
-
-    NetworkContext* _context = nullptr;
 };
 } // namespace brayns

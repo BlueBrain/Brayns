@@ -21,7 +21,6 @@
 #pragma once
 
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/entrypoint/EntrypointManager.h>
 #include <brayns/network/messages/SchemaMessage.h>
 
 namespace brayns

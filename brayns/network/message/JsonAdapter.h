@@ -26,7 +26,7 @@
 namespace brayns
 {
 /**
- * @brief Default JsonReflector intrusive implementation.
+ * @brief Default JsonAdapter intrusive implementation.
  *
  * Use methods getSchema(), serialize(JsonValue&) and deserialize(const
  * JsonValue&) of the instance of T to reflect JSON info from it.
@@ -34,7 +34,7 @@ namespace brayns
  * @tparam T Type to reflect.
  */
 template <typename T>
-struct JsonReflector
+struct JsonAdapter
 {
     static JsonSchema getSchema(const T& value) { return value.getSchema(); }
 
