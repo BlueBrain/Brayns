@@ -144,6 +144,20 @@ struct ReadOnly
     bool value = true;
 };
 
+struct WriteOnly
+{
+    WriteOnly() = default;
+
+    WriteOnly(bool value)
+        : value(value)
+    {
+    }
+
+    void add(JsonOptions& options) const { options.writeOnly = value; }
+
+    bool value = true;
+};
+
 struct Minimum
 {
     Minimum(double value)

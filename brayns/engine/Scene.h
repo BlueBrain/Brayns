@@ -76,8 +76,6 @@ public:
     */
     const Boxd& getBounds() const { return _bounds; }
 
-    void setBounds(const Boxd& bounds) { _updateValue(_bounds, bounds); }
-
     /** Gets the light manager */
     LightManager& getLightManager() { return _lightManager; }
     /**
@@ -114,9 +112,12 @@ public:
      * @param modelDescriptor The model which will replace the current one
      * @return True if the model was found and replace, false otherwise
      */
-    BRAYNS_API bool replaceModel(const size_t id, ModelDescriptorPtr modelDescriptor);
+    BRAYNS_API bool replaceModel(const size_t id,
+                                 ModelDescriptorPtr modelDescriptor);
 
     BRAYNS_API ModelDescriptorPtr getModel(const size_t id) const;
+
+    const ModelDescriptors& getModels() const { return _modelDescriptors; }
 
     /**
         Builds a default scene made of a Cornell box, a reflective cube, and
@@ -198,7 +199,8 @@ public:
      * @param cb the callback for progress updates from the loader
      * @return the model that has been added to the scene
      */
-    std::vector<ModelDescriptorPtr> loadModels(Blob&& blob, const ModelParams& params,
+    std::vector<ModelDescriptorPtr> loadModels(Blob&& blob,
+                                               const ModelParams& params,
                                                LoaderProgress cb);
 
     /**
@@ -210,7 +212,8 @@ public:
      * @return the model that has been added to the scene
      */
     std::vector<ModelDescriptorPtr> loadModels(const std::string& path,
-                                               const ModelParams& params, LoaderProgress cb);
+                                               const ModelParams& params,
+                                               LoaderProgress cb);
 
     void visitModels(const std::function<void(Model&)>& functor);
 
@@ -225,7 +228,7 @@ public:
     /** @internal */
     BRAYNS_API void copyFrom(const Scene& rhs);
 
-    virtual void copyFromImpl(const Scene&) { }
+    virtual void copyFromImpl(const Scene&) {}
 
 protected:
     /** @return True if this scene supports scene updates from any thread. */

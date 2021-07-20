@@ -59,6 +59,8 @@ public:
         interface.add<SetApplicationParametersEntrypoint>();
         interface.add<GetVolumeParametersEntrypoint>();
         interface.add<SetVolumeParametersEntrypoint>();
+        interface.add<GetSceneEntrypoint>();
+        interface.add<SetSceneEntrypoint>();
         interface.add<SchemaEntrypoint>();
         interface.add<TestEntrypoint>();
     }
