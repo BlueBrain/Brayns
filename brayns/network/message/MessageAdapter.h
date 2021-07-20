@@ -67,50 +67,46 @@ namespace brayns
         property.getSchema = [](const void* data)                    \
         {                                                            \
             auto& object = *static_cast<const ObjectType*>(data);    \
-            return Json::getSchema(object.GET());                    \
+            return Json::getSchema(GET(object));                     \
         };                                                           \
         property.serialize = [](const void* data, JsonValue& json)   \
         {                                                            \
             auto& object = *static_cast<const ObjectType*>(data);    \
-            Json::serialize(object.GET(), json);                     \
+            Json::serialize(GET(object), json);                      \
         };                                                           \
         property.deserialize = [](const JsonValue& json, void* data) \
         {                                                            \
             auto& object = *static_cast<ObjectType*>(data);          \
-            auto buffer = object.GET();                              \
+            auto buffer = GET(object);                               \
             if (Json::deserialize(json, buffer))                     \
             {                                                        \
-                object.SET(std::move(buffer));                       \
+                SET(object, std::move(buffer));                      \
             }                                                        \
         };                                                           \
         info.addProperty(std::move(property));                       \
     };
 
-#define BRAYNS_ADAPTER_GETSET(NAME, GET, SET, DESCRIPTION) \
-    BRAYNS_ADAPTER_PROPERTY(NAME, GET, SET, Description(DESCRIPTION))
+#define BRAYNS_ADAPTER_GETSET(NAME, GET, SET, DESCRIPTION)                 \
+    BRAYNS_ADAPTER_PROPERTY(                                               \
+        NAME,                                                              \
+        [](const auto& object) -> decltype(auto) { return object.GET(); }, \
+        [](auto& object, auto&& value)                                     \
+        { object.SET(std::forward<decltype(value)>(value)); },             \
+        Description(DESCRIPTION))
 
-#define BRAYNS_ADAPTER_FIELD(NAME, FIELD, ...)                       \
-    {                                                                \
-        MessageProperty property;                                    \
-        property.name = NAME;                                        \
-        property.options = {__VA_ARGS__};                            \
-        property.getSchema = [](const void* data)                    \
-        {                                                            \
-            auto& object = *static_cast<const ObjectType*>(data);    \
-            return Json::getSchema(object.FIELD);                    \
-        };                                                           \
-        property.serialize = [](const void* data, JsonValue& json)   \
-        {                                                            \
-            auto& object = *static_cast<const ObjectType*>(data);    \
-            Json::serialize(object.FIELD, json);                     \
-        };                                                           \
-        property.deserialize = [](const JsonValue& json, void* data) \
-        {                                                            \
-            auto& object = *static_cast<ObjectType*>(data);          \
-            Json::deserialize(json, object.FIELD);                   \
-        };                                                           \
-        info.addProperty(std::move(property));                       \
-    };
+#define BRAYNS_ADAPTER_GET(NAME, GET, DESCRIPTION)                         \
+    BRAYNS_ADAPTER_PROPERTY(                                               \
+        NAME,                                                              \
+        [](const auto& object) -> decltype(auto) { return object.GET(); }, \
+        [](auto& object, auto&& value) {}, Description(DESCRIPTION))
+
+#define BRAYNS_ADAPTER_FIELD(NAME, FIELD, ...)                             \
+    BRAYNS_ADAPTER_PROPERTY(                                               \
+        NAME,                                                              \
+        [](const auto& object) -> decltype(auto) { return object.FIELD; }, \
+        [](auto& object, auto&& value)                                     \
+        { object.FIELD = std::forward<decltype(value)>(value); },          \
+        __VA_ARGS__)
 
 #define BRAYNS_ADAPTER_ENTRY(NAME, FIELD, DESCRIPTION) \
     BRAYNS_ADAPTER_FIELD(NAME, FIELD, Description(DESCRIPTION))

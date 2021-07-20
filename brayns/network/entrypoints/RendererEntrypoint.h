@@ -21,11 +21,11 @@
 #pragma once
 
 #include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/RendererMessage.h>
+#include <brayns/network/messages/RenderingParametersAdapter.h>
 
 namespace brayns
 {
-class GetRendererEntrypoint : public GetEntrypoint<RendererMessage>
+class GetRendererEntrypoint : public GetEntrypoint<RenderingParameters>
 {
 public:
     virtual std::string getName() const override { return "get-renderer"; }
@@ -36,7 +36,7 @@ public:
     }
 };
 
-class SetRendererEntrypoint : public SetEntrypoint<RendererMessage>
+class SetRendererEntrypoint : public SetEntrypoint<RenderingParameters>
 {
 public:
     virtual std::string getName() const override { return "set-renderer"; }
@@ -48,7 +48,7 @@ public:
 
     virtual JsonSchema getParamsSchema() const override
     {
-        auto schema = Json::getSchema<RendererMessage>();
+        auto schema = Json::getSchema<RenderingParameters>();
         JsonProperty::remove(schema, "types");
         return schema;
     }

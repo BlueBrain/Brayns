@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/IEntrypoint.h>
 #include <brayns/network/message/Message.h>
 
 namespace brayns
@@ -30,29 +29,11 @@ BRAYNS_MESSAGE_ENTRY(std::string, endpoint, "Name of the endpoint")
 BRAYNS_MESSAGE_END()
 
 BRAYNS_MESSAGE_BEGIN(SchemaResult)
-
 BRAYNS_MESSAGE_ENTRY(std::string, title, "Name of the entrypoint")
 BRAYNS_MESSAGE_ENTRY(std::string, description, "Description of the entrypoint")
 BRAYNS_MESSAGE_ENTRY(std::string, type, "Type of entrypoint ('method')")
 BRAYNS_MESSAGE_ENTRY(bool, async, "Check if the entrypoint is asynchronous")
 BRAYNS_MESSAGE_ENTRY(std::vector<JsonSchema>, params, "Input schema")
 BRAYNS_MESSAGE_ENTRY(JsonSchema, returns, "Output schema")
-
-static SchemaResult fromEntrypoint(const IEntrypoint& entrypoint)
-{
-    SchemaResult schema;
-    schema.title = entrypoint.getName();
-    schema.type = "method";
-    schema.description = entrypoint.getDescription();
-    schema.async = entrypoint.isAsync();
-    auto params = entrypoint.getParamsSchema();
-    if (!JsonSchemaHelper::isEmpty(params))
-    {
-        schema.params.push_back(std::move(params));
-    }
-    schema.returns = entrypoint.getResultSchema();
-    return schema;
-}
-
 BRAYNS_MESSAGE_END()
 } // namespace brayns

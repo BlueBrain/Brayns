@@ -20,38 +20,17 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/AnimationParametersAdapter.h>
+#include <brayns/network/message/MessageAdapter.h>
+
+#include <brayns/engine/Scene.h>
+
+#include "BoxAdapter.h"
+#include "ModelDescriptorAdapter.h"
 
 namespace brayns
 {
-class GetAnimationParametersEntrypoint
-    : public GetEntrypoint<AnimationParameters>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "get-animation-parameters";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the current state of the animation parameters";
-    }
-};
-
-class SetAnimationParametersEntrypoint
-    : public SetEntrypoint<AnimationParameters>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "set-animation-parameters";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Set the current state of the animation parameters";
-    }
-};
+BRAYNS_ADAPTER_BEGIN(Scene)
+BRAYNS_ADAPTER_GETSET("bounds", getBounds, setBounds, "Scene boundary")
+// BRAYNS_ADAPTER_GET("models", getModels, setModels, "All models")
+BRAYNS_ADAPTER_END()
 } // namespace brayns

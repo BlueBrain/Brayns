@@ -30,6 +30,26 @@
 
 namespace brayns
 {
+class EntrypointSchemaFactory
+{
+public:
+    static SchemaResult create(const IEntrypoint& entrypoint)
+    {
+        SchemaResult schema;
+        schema.title = entrypoint.getName();
+        schema.type = "method";
+        schema.description = entrypoint.getDescription();
+        schema.async = entrypoint.isAsync();
+        auto params = entrypoint.getParamsSchema();
+        if (!JsonSchemaHelper::isEmpty(params))
+        {
+            schema.params.push_back(std::move(params));
+        }
+        schema.returns = entrypoint.getResultSchema();
+        return schema;
+    }
+};
+
 class EntrypointRef
 {
 public:
@@ -50,7 +70,7 @@ public:
     {
         _entrypoint->setContext(context);
         _entrypoint->onCreate();
-        _schema = SchemaResult::fromEntrypoint(*_entrypoint);
+        _schema = EntrypointSchemaFactory::create(*_entrypoint);
     }
 
     void update() const { _entrypoint->onUpdate(); }

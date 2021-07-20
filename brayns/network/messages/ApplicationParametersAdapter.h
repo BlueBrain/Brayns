@@ -20,34 +20,19 @@
 
 #pragma once
 
-#include <brayns/network/message/Message.h>
+#include <brayns/network/message/MessageAdapter.h>
 
-#include <brayns/engine/Scene.h>
-
-#include "BoxAdapter.h"
-#include "ModelDescriptorMessage.h"
+#include <brayns/parameters/ApplicationParameters.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(SceneMessage)
-BRAYNS_MESSAGE_ENTRY(Boxd, bounds, "Scene boundary")
-BRAYNS_MESSAGE_ENTRY(std::vector<ModelDescriptorMessage>, models, "All models")
-
-static Scene& extract(PluginAPI& api)
-{
-    auto& engine = api.getEngine();
-    return engine.getScene();
-}
-
-void dump(Scene& scene) const
-{
-    scene.setBounds(bounds);
-}
-
-void load(const Scene& scene)
-{
-    bounds = scene.getBounds();
-}
-
-BRAYNS_MESSAGE_END()
+BRAYNS_ADAPTER_BEGIN(ApplicationParameters)
+BRAYNS_ADAPTER_GET("engine", getEngine, "Application engine")
+BRAYNS_ADAPTER_GET("plugins", getPlugins, "Loaded plugins")
+BRAYNS_ADAPTER_GETSET("jpeg_compression", getJpegCompression,
+                      setJpegCompression, "JPEG compression rate")
+BRAYNS_ADAPTER_GETSET("image_stream_fps", getImageStreamFPS, setImageStreamFPS,
+                      "Framerate of image stream")
+BRAYNS_ADAPTER_GETSET("viewport", getWindowSize, setWindowSize, "Window size")
+BRAYNS_ADAPTER_END()
 } // namespace brayns

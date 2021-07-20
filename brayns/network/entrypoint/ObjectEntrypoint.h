@@ -21,10 +21,11 @@
 #pragma once
 
 #include "BaseEntrypoint.h"
+#include "ObjectExtractor.h"
 
 namespace brayns
 {
-template <typename MessageType>
+template <typename ObjectType>
 class GetEntrypoint : public BaseEntrypoint
 {
 public:
@@ -35,37 +36,35 @@ public:
 
     virtual JsonSchema getResultSchema() const override
     {
-        return Json::getSchema<MessageType>();
+        auto& object = ObjectExtractor<ObjectType>::extract(getApi());
+        return Json::getSchema(object);
     }
 
     virtual void onUpdate() const override
     {
-        auto& object = MessageType::extract(getApi());
+        auto& object = ObjectExtractor<ObjectType>::extract(getApi());
         if (!object.isModified())
         {
             return;
         }
-        MessageType message;
-        message.load(object);
-        notify(message);
+        notify(object);
     }
 
     virtual void onRequest(const NetworkRequest& request) const override
     {
-        auto& object = MessageType::extract(getApi());
-        MessageType message;
-        message.load(object);
-        request.reply(message);
+        auto& object = ObjectExtractor<ObjectType>::extract(getApi());
+        request.reply(object);
     }
 };
 
-template <typename MessageType>
+template <typename ObjectType>
 class SetEntrypoint : public BaseEntrypoint
 {
 public:
     virtual JsonSchema getParamsSchema() const override
     {
-        return Json::getSchema<MessageType>();
+        auto& object = ObjectExtractor<ObjectType>::extract(getApi());
+        return Json::getSchema(object);
     }
 
     virtual JsonSchema getResultSchema() const override
@@ -76,9 +75,8 @@ public:
     virtual void onRequest(const NetworkRequest& request) const override
     {
         auto& params = request.getParams();
-        auto& object = MessageType::extract(getApi());
-        auto message = Json::deserialize<MessageType>(params);
-        message.dump(object);
+        auto& object = ObjectExtractor<ObjectType>::extract(getApi());
+        Json::deserialize(params, object);
         triggerRender();
         request.reply(EmptyMessage());
     }

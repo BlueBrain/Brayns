@@ -21,14 +21,13 @@
 #pragma once
 
 #include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/VolumeParametersMessage.h>
+#include <brayns/network/messages/VolumeParametersAdapter.h>
 
 #include <brayns/parameters/VolumeParameters.h>
 
 namespace brayns
 {
-class GetVolumeParametersEntrypoint
-    : public GetEntrypoint<VolumeParametersMessage>
+class GetVolumeParametersEntrypoint : public GetEntrypoint<VolumeParameters>
 {
 public:
     virtual std::string getName() const override
@@ -42,8 +41,7 @@ public:
     }
 };
 
-class SetVolumeParametersEntrypoint
-    : public SetEntrypoint<VolumeParametersMessage>
+class SetVolumeParametersEntrypoint : public SetEntrypoint<VolumeParameters>
 {
 public:
     virtual std::string getName() const override

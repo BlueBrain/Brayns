@@ -25,6 +25,8 @@
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/VersionMessage.h>
 
+#include <brayns/version.h>
+
 namespace brayns
 {
 class VersionEntrypoint : public Entrypoint<EmptyMessage, VersionMessage>
@@ -39,7 +41,15 @@ public:
 
     virtual void onRequest(const Request& request) const override
     {
-        request.reply(VersionMessage::create());
+        VersionMessage message;
+        message.major = Version::getMajor();
+        message.minor = Version::getMinor();
+        message.patch = Version::getPatch();
+        message.abi = Version::getABI();
+        std::ostringstream stream;
+        stream << std::hex << Version::getRevision();
+        message.revision = stream.str();
+        request.reply(message);
     }
 };
 } // namespace brayns

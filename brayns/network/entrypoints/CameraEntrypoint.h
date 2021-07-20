@@ -21,11 +21,11 @@
 #pragma once
 
 #include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/CameraMessage.h>
+#include <brayns/network/messages/CameraAdapter.h>
 
 namespace brayns
 {
-class GetCameraEntrypoint : public GetEntrypoint<CameraMessage>
+class GetCameraEntrypoint : public GetEntrypoint<Camera>
 {
 public:
     virtual std::string getName() const override { return "get-camera"; }
@@ -36,7 +36,7 @@ public:
     }
 };
 
-class SetCameraEntrypoint : public SetEntrypoint<CameraMessage>
+class SetCameraEntrypoint : public SetEntrypoint<Camera>
 {
 public:
     virtual std::string getName() const override { return "set-camera"; }
@@ -48,7 +48,7 @@ public:
 
     virtual JsonSchema getParamsSchema() const override
     {
-        auto schema = Json::getSchema<CameraMessage>();
+        auto schema = Json::getSchema<Camera>();
         JsonProperty::remove(schema, "types");
         return schema;
     }

@@ -20,38 +20,25 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/AnimationParametersAdapter.h>
+#include <brayns/network/message/MessageAdapter.h>
+
+#include <brayns/engine/Model.h>
+
+#include "BoxAdapter.h"
+#include "TransformationAdapter.h"
 
 namespace brayns
 {
-class GetAnimationParametersEntrypoint
-    : public GetEntrypoint<AnimationParameters>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "get-animation-parameters";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the current state of the animation parameters";
-    }
-};
-
-class SetAnimationParametersEntrypoint
-    : public SetEntrypoint<AnimationParameters>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "set-animation-parameters";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Set the current state of the animation parameters";
-    }
-};
+/*BRAYNS_ADAPTER_BEGIN(ModelDescriptor)
+BRAYNS_ADAPTER_GETSET("bounding_box", "Has bounding box")
+BRAYNS_ADAPTER_GETSET("bounds", "Model bounds")
+BRAYNS_ADAPTER_GETSET("id", "Model ID")
+BRAYNS_ADAPTER_GETSET("metadata", "Key-value metadata")
+BRAYNS_ADAPTER_GETSET("name", "Model name")
+BRAYNS_ADAPTER_GETSET("path", "Model file path")
+BRAYNS_ADAPTER_GETSET("transformation", "Transformation")
+BRAYNS_ADAPTER_GETSET("visible", "Is visible")
+BRAYNS_ADAPTER_GETSET("loader_name", "Name of the loader")
+BRAYNS_ADAPTER_GETSET("loader_properties", "Loader properties")
+BRAYNS_ADAPTER_END()*/
 } // namespace brayns

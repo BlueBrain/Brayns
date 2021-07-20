@@ -20,11 +20,7 @@
 
 #pragma once
 
-#include <sstream>
-
 #include <brayns/network/message/Message.h>
-
-#include <brayns/version.h>
 
 namespace brayns
 {
@@ -34,19 +30,5 @@ BRAYNS_MESSAGE_ENTRY(int, minor, "Minor version")
 BRAYNS_MESSAGE_ENTRY(int, patch, "Patch level")
 BRAYNS_MESSAGE_ENTRY(int, abi, "Binary interface version")
 BRAYNS_MESSAGE_ENTRY(std::string, revision, "SCM revision")
-
-static VersionMessage create()
-{
-    VersionMessage message;
-    message.major = Version::getMajor();
-    message.minor = Version::getMinor();
-    message.patch = Version::getPatch();
-    message.abi = Version::getABI();
-    std::ostringstream stream;
-    stream << std::hex << Version::getRevision();
-    message.revision = stream.str();
-    return message;
-}
-
 BRAYNS_MESSAGE_END()
 } // namespace brayns

@@ -21,12 +21,12 @@
 #pragma once
 
 #include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/ApplicationParametersMessage.h>
+#include <brayns/network/messages/ApplicationParametersAdapter.h>
 
 namespace brayns
 {
 class GetApplicationParametersEntrypoint
-    : public GetEntrypoint<ApplicationParametersMessage>
+    : public GetEntrypoint<ApplicationParameters>
 {
 public:
     virtual std::string getName() const override
@@ -41,7 +41,7 @@ public:
 };
 
 class SetApplicationParametersEntrypoint
-    : public SetEntrypoint<ApplicationParametersMessage>
+    : public SetEntrypoint<ApplicationParameters>
 {
 public:
     virtual std::string getName() const override
@@ -56,7 +56,7 @@ public:
 
     virtual JsonSchema getParamsSchema() const override
     {
-        auto schema = Json::getSchema<ApplicationParametersMessage>();
+        auto schema = Json::getSchema<ApplicationParameters>();
         JsonProperty::remove(schema, "engine");
         JsonProperty::remove(schema, "plugins");
         return schema;

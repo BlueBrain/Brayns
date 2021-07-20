@@ -20,25 +20,19 @@
 
 #pragma once
 
-#include <brayns/network/message/Message.h>
+#include <brayns/network/message/MessageAdapter.h>
 
-#include <brayns/engine/Model.h>
-
-#include "BoxAdapter.h"
-#include "TransformationMessage.h"
+#include <brayns/parameters/AnimationParameters.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(ModelDescriptorMessage)
-BRAYNS_MESSAGE_ENTRY(bool, bounding_box, "Has bounding box")
-BRAYNS_MESSAGE_ENTRY(Boxd, bounds, "Model bounds")
-BRAYNS_MESSAGE_ENTRY(size_t, id, "Model ID")
-BRAYNS_MESSAGE_ENTRY(ModelMetadata, metadata, "Key-value metadata")
-BRAYNS_MESSAGE_ENTRY(std::string, name, "Model name")
-BRAYNS_MESSAGE_ENTRY(std::string, path, "Model file path")
-BRAYNS_MESSAGE_ENTRY(TransformationMessage, transformation, "Transformation")
-BRAYNS_MESSAGE_ENTRY(bool, visible, "Is visible")
-BRAYNS_MESSAGE_ENTRY(std::string, loader_name, "Name of the loader")
-BRAYNS_MESSAGE_ENTRY(PropertyMap, loader_properties, "Loader properties")
-BRAYNS_MESSAGE_END()
+BRAYNS_ADAPTER_BEGIN(AnimationParameters)
+BRAYNS_ADAPTER_GETSET("frame_count", getNumFrames, setNumFrames,
+                      "Animation frame count")
+BRAYNS_ADAPTER_GETSET("current", getFrame, setFrame, "Current frame index")
+BRAYNS_ADAPTER_GETSET("delta", getDelta, setDelta, "Frame delta")
+BRAYNS_ADAPTER_GETSET("dt", getDt, setDt, "Frame time")
+BRAYNS_ADAPTER_GETSET("playing", isPlaying, setPlaying, "Animation is playing")
+BRAYNS_ADAPTER_GETSET("unit", getUnit, setUnit, "Time unit")
+BRAYNS_ADAPTER_END()
 } // namespace brayns

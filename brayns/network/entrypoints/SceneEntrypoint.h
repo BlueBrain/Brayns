@@ -21,11 +21,11 @@
 #pragma once
 
 #include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/SceneMessage.h>
+#include <brayns/network/messages/SceneAdapter.h>
 
 namespace brayns
 {
-class GetSceneEntrypoint : public GetEntrypoint<SceneMessage>
+class GetSceneEntrypoint : public GetEntrypoint<Scene>
 {
 public:
     virtual std::string getName() const override { return "get-scene"; }
@@ -36,7 +36,7 @@ public:
     }
 };
 
-class SetSceneEntrypoint : public SetEntrypoint<SceneMessage>
+class SetSceneEntrypoint : public SetEntrypoint<Scene>
 {
 public:
     virtual std::string getName() const override { return "set-scene"; }

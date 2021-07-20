@@ -20,38 +20,18 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/AnimationParametersAdapter.h>
+#include <brayns/common/Transformation.h>
+
+#include <brayns/network/message/MessageAdapter.h>
 
 namespace brayns
 {
-class GetAnimationParametersEntrypoint
-    : public GetEntrypoint<AnimationParameters>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "get-animation-parameters";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the current state of the animation parameters";
-    }
-};
-
-class SetAnimationParametersEntrypoint
-    : public SetEntrypoint<AnimationParameters>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "set-animation-parameters";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Set the current state of the animation parameters";
-    }
-};
+BRAYNS_ADAPTER_BEGIN(Transformation)
+BRAYNS_ADAPTER_GETSET("translation", getTranslation, setTranslation,
+                      "Translation XYZ")
+BRAYNS_ADAPTER_GETSET("scale", getScale, setScale, "Scale XYZ")
+BRAYNS_ADAPTER_GETSET("rotation", getRotation, setRotation, "Rotation XYZW")
+BRAYNS_ADAPTER_GETSET("rotation_center", getRotationCenter, setRotationCenter,
+                      "Rotation center XYZ")
+BRAYNS_ADAPTER_END()
 } // namespace brayns
