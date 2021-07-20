@@ -24,14 +24,14 @@
 
 #include <brayns/engine/Model.h>
 
-#include "BoxMessage.h"
+#include "BoxAdapter.h"
 #include "TransformationMessage.h"
 
 namespace brayns
 {
 BRAYNS_MESSAGE_BEGIN(ModelDescriptorMessage)
 BRAYNS_MESSAGE_ENTRY(bool, bounding_box, "Has bounding box")
-BRAYNS_MESSAGE_ENTRY(BoxMessage, bounds, "Model bounds")
+BRAYNS_MESSAGE_ENTRY(Boxd, bounds, "Model bounds")
 BRAYNS_MESSAGE_ENTRY(size_t, id, "Model ID")
 BRAYNS_MESSAGE_ENTRY(ModelMetadata, metadata, "Key-value metadata")
 BRAYNS_MESSAGE_ENTRY(std::string, name, "Model name")

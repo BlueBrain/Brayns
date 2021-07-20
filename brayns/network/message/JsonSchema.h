@@ -27,7 +27,6 @@
 
 #include <boost/optional.hpp>
 
-#include "JsonOptions.h"
 #include "JsonType.h"
 
 namespace brayns
@@ -100,17 +99,6 @@ struct JsonSchemaHelper
     static bool hasType(const JsonSchema& schema, JsonType type)
     {
         return JsonTypeHelper::isSame(schema.type, type);
-    }
-
-    static void setOptions(JsonSchema& schema, const JsonOptions& options)
-    {
-        schema.title = options.title;
-        schema.description = options.description;
-        schema.minimum = options.minimum;
-        schema.maximum = options.maximum;
-        schema.minItems = options.minItems;
-        schema.maxItems = options.maxItems;
-        schema.defaultValue = options.defaultValue;
     }
 };
 } // namespace brayns

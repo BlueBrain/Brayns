@@ -80,7 +80,7 @@ public:
         {
             auto child = property.getSchema(message);
             auto& options = property.options;
-            JsonSchemaHelper::setOptions(child, options);
+            JsonSchemaOptions::add(child, options);
             auto& name = property.name;
             if (options.required)
             {

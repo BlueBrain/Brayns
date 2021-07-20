@@ -96,6 +96,8 @@ public:
     inline vec getSize() const { return _max - _min; }
     inline const vec& getMin() const { return _min; }
     inline const vec& getMax() const { return _max; }
+    inline void setMin(const vec& min) { _min = min; }
+    inline void setMax(const vec& max) { _max = max; }
 
 #ifdef __INTEL_COMPILER // Workaround for ICC. Make members public
 public:

@@ -24,13 +24,13 @@
 
 #include <brayns/engine/Scene.h>
 
-#include "BoxMessage.h"
+#include "BoxAdapter.h"
 #include "ModelDescriptorMessage.h"
 
 namespace brayns
 {
 BRAYNS_MESSAGE_BEGIN(SceneMessage)
-BRAYNS_MESSAGE_ENTRY(BoxMessage, bounds, "Scene boundary")
+BRAYNS_MESSAGE_ENTRY(Boxd, bounds, "Scene boundary")
 BRAYNS_MESSAGE_ENTRY(std::vector<ModelDescriptorMessage>, models, "All models")
 
 static Scene& extract(PluginAPI& api)

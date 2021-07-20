@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "JsonSchema.h"
 #include "JsonType.h"
 
 #include <boost/optional.hpp>
@@ -58,6 +59,51 @@ struct JsonOptions
     JsonOptions(Args&&... args)
     {
         build(*this, std::forward<Args>(args)...);
+    }
+};
+
+class JsonSchemaOptions
+{
+public:
+    static void add(JsonSchema& schema, const JsonOptions& options)
+    {
+        updateIfNotEmpty(schema.title, options.title);
+        updateIfNotEmpty(schema.description, options.description);
+        updateIfNotNull(schema.minimum, options.minimum);
+        updateIfNotNull(schema.maximum, options.maximum);
+        updateIfNotNull(schema.minItems, options.minItems);
+        updateIfNotNull(schema.maxItems, options.maxItems);
+        updateIfNotEmpty(schema.defaultValue, options.defaultValue);
+    }
+
+private:
+    static void updateIfNotEmpty(JsonValue& value, const JsonValue& newValue)
+    {
+        if (newValue.isEmpty())
+        {
+            return;
+        }
+        value = newValue;
+    }
+
+    template <typename T>
+    static void updateIfNotEmpty(T& value, const T& newValue)
+    {
+        if (newValue.empty())
+        {
+            return;
+        }
+        value = newValue;
+    }
+
+    template <typename T>
+    static void updateIfNotNull(T& value, const T& newValue)
+    {
+        if (!newValue)
+        {
+            return;
+        }
+        value = newValue;
     }
 };
 

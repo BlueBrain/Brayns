@@ -22,25 +22,12 @@
 
 #include <brayns/common/mathTypes.h>
 
-#include <brayns/network/message/Message.h>
+#include <brayns/network/message/MessageAdapter.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(BoxMessage)
-BRAYNS_MESSAGE_ENTRY(Vector3d, min, "Bottom-left corner XYZ")
-BRAYNS_MESSAGE_ENTRY(Vector3d, max, "Top-right corner XYZ")
-
-BoxMessage& operator=(const Boxd& box)
-{
-    min = box.getMin();
-    max = box.getMax();
-    return *this;
-}
-
-operator Boxd() const
-{
-    return {min, max};
-}
-
-BRAYNS_MESSAGE_END()
+BRAYNS_ADAPTER_BEGIN(Boxd)
+BRAYNS_ADAPTER_GETSET("min", getMin, setMin, "Bottom-left corner XYZ")
+BRAYNS_ADAPTER_GETSET("max", getMax, setMax, "Top-right corner XYZ")
+BRAYNS_ADAPTER_END()
 } // namespace brayns
