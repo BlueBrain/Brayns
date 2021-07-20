@@ -45,12 +45,5 @@ public:
     {
         return "Set the current state of the camera";
     }
-
-    virtual JsonSchema getParamsSchema() const override
-    {
-        auto schema = Json::getSchema<Camera>();
-        JsonProperty::remove(schema, "types");
-        return schema;
-    }
 };
 } // namespace brayns

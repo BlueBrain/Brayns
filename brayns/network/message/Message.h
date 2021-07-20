@@ -82,7 +82,8 @@ public:
             auto& options = property.options;
             JsonSchemaOptions::add(child, options);
             auto& name = property.name;
-            if (options.required)
+            auto& optionRequired = options.required;
+            if (optionRequired.value_or(false))
             {
                 auto& required = schema.required;
                 required.push_back(name);
@@ -175,8 +176,6 @@ private:
         }                                                                    \
                                                                              \
     public:                                                                  \
-        TYPE() = default;                                                    \
-                                                                             \
         JsonSchema getSchema() const { return _loadInfo().getSchema(this); } \
                                                                              \
         bool serialize(JsonValue& json) const                                \
@@ -228,11 +227,12 @@ private:
         return TYPE{};                                                   \
     }();
 
-#define BRAYNS_MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION) \
-    BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, Description(DESCRIPTION), Required())
+#define BRAYNS_MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION, ...)                    \
+    BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, Description(DESCRIPTION), Required(), \
+                            __VA_ARGS__)
 
-#define BRAYNS_MESSAGE_OPTION(TYPE, NAME, DESCRIPTION) \
-    BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, Description(DESCRIPTION))
+#define BRAYNS_MESSAGE_OPTION(TYPE, NAME, DESCRIPTION, ...) \
+    BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, Description(DESCRIPTION), __VA_ARGS__)
 
 /**
  * @brief Must be called after BRAYNS_MESSAGE_BEGIN and a set of

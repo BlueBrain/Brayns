@@ -41,6 +41,8 @@ struct JsonSchema
     std::string title;
     std::string description;
     JsonType type = JsonType::Null;
+    bool readOnly = false;
+    bool writeOnly = false;
     JsonValue defaultValue;
     boost::optional<double> minimum;
     boost::optional<double> maximum;
@@ -86,13 +88,15 @@ struct JsonSchemaHelper
 
     static bool hasProperty(const JsonSchema& schema, const std::string& key)
     {
-        return schema.properties.find(key) != schema.properties.end();
+        auto& properties = schema.properties;
+        return properties.find(key) != properties.end();
     }
 
     static bool isRequired(const JsonSchema& schema, const std::string& key)
     {
-        auto first = schema.required.begin();
-        auto last = schema.required.end();
+        auto& required = schema.required;
+        auto first = required.begin();
+        auto last = required.end();
         return std::find(first, last, key) != last;
     }
 

@@ -37,6 +37,8 @@ public:
         setIfNotEmpty(object, "title", schema.title);
         setIfNotEmpty(object, "description", schema.description);
         setType(object, schema.type);
+        setIfNotNull(object, "readOnly", schema.readOnly);
+        setIfNotNull(object, "writeOnly", schema.writeOnly);
         setIfNotEmpty(object, "default", schema.defaultValue);
         setIfNotNull(object, "minimum", schema.minimum);
         setIfNotNull(object, "maximum", schema.maximum);
@@ -155,6 +157,8 @@ public:
         get(object, "oneOf", schema.oneOf);
         get(object, "title", schema.title);
         get(object, "description", schema.description);
+        get(object, "readOnly", schema.readOnly);
+        get(object, "writeOnly", schema.writeOnly);
         get(object, "default", schema.defaultValue);
         get(object, "type", schema.type);
         get(object, "minimum", schema.minimum);

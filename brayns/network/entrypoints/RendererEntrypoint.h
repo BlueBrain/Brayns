@@ -45,12 +45,5 @@ public:
     {
         return "Set the current state of the renderer";
     }
-
-    virtual JsonSchema getParamsSchema() const override
-    {
-        auto schema = Json::getSchema<RenderingParameters>();
-        JsonProperty::remove(schema, "types");
-        return schema;
-    }
 };
 } // namespace brayns

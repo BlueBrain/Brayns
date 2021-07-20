@@ -86,19 +86,20 @@ namespace brayns
         info.addProperty(std::move(property));                       \
     };
 
-#define BRAYNS_ADAPTER_GETSET(NAME, GET, SET, DESCRIPTION)                 \
+#define BRAYNS_ADAPTER_GETSET(NAME, GET, SET, DESCRIPTION, ...)            \
     BRAYNS_ADAPTER_PROPERTY(                                               \
         NAME,                                                              \
         [](const auto& object) -> decltype(auto) { return object.GET(); }, \
         [](auto& object, auto&& value)                                     \
         { object.SET(std::forward<decltype(value)>(value)); },             \
-        Description(DESCRIPTION))
+        Description(DESCRIPTION), __VA_ARGS__)
 
-#define BRAYNS_ADAPTER_GET(NAME, GET, DESCRIPTION)                         \
+#define BRAYNS_ADAPTER_GET(NAME, GET, DESCRIPTION, ...)                    \
     BRAYNS_ADAPTER_PROPERTY(                                               \
         NAME,                                                              \
         [](const auto& object) -> decltype(auto) { return object.GET(); }, \
-        [](auto& object, auto&& value) {}, Description(DESCRIPTION))
+        [](auto& object, auto&& value) {}, Description(DESCRIPTION),       \
+        ReadOnly(), __VA_ARGS__)
 
 #define BRAYNS_ADAPTER_FIELD(NAME, FIELD, ...)                             \
     BRAYNS_ADAPTER_PROPERTY(                                               \
@@ -108,8 +109,8 @@ namespace brayns
         { object.FIELD = std::forward<decltype(value)>(value); },          \
         __VA_ARGS__)
 
-#define BRAYNS_ADAPTER_ENTRY(NAME, FIELD, DESCRIPTION) \
-    BRAYNS_ADAPTER_FIELD(NAME, FIELD, Description(DESCRIPTION))
+#define BRAYNS_ADAPTER_ENTRY(NAME, FIELD, DESCRIPTION, ...) \
+    BRAYNS_ADAPTER_FIELD(NAME, FIELD, Description(DESCRIPTION), __VA_ARGS__)
 
 #define BRAYNS_ADAPTER_END() \
     return info;             \

@@ -53,13 +53,5 @@ public:
     {
         return "Set the current state of the application parameters";
     }
-
-    virtual JsonSchema getParamsSchema() const override
-    {
-        auto schema = Json::getSchema<ApplicationParameters>();
-        JsonProperty::remove(schema, "engine");
-        JsonProperty::remove(schema, "plugins");
-        return schema;
-    }
 };
 } // namespace brayns

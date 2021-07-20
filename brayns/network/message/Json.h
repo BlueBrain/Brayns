@@ -87,7 +87,8 @@ struct Json
     template <typename T>
     static JsonSchema getSchema()
     {
-        return getSchema(T{});
+        static const T value = {};
+        return getSchema(value);
     }
 
     /**
@@ -198,27 +199,6 @@ public:
             return nullptr;
         }
         return json.extract<JsonObject::Ptr>();
-    }
-};
-
-struct JsonProperty
-{
-    static void remove(JsonSchema& schema, const std::string& name)
-    {
-        auto& properties = schema.properties;
-        properties.erase(name);
-        auto& required = schema.required;
-        auto first = required.begin();
-        auto last = required.end();
-        auto from = std::remove(first, last, name);
-        required.erase(from, last);
-    }
-
-    template <typename T>
-    static void add(JsonSchema& schema, const std::string& name, const T& value)
-    {
-        schema.properties[name] = Json::getSchema(value);
-        schema.required.push_back(name);
     }
 };
 

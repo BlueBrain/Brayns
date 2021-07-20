@@ -44,14 +44,16 @@ struct JsonOptions
 
     static void build(JsonOptions&) {}
 
-    std::string title;
-    std::string description;
-    bool required = false;
+    boost::optional<std::string> title;
+    boost::optional<std::string> description;
+    boost::optional<bool> required = false;
+    boost::optional<bool> readOnly = false;
+    boost::optional<bool> writeOnly = false;
     boost::optional<double> minimum;
     boost::optional<double> maximum;
     boost::optional<size_t> minItems;
     boost::optional<size_t> maxItems;
-    JsonValue defaultValue;
+    boost::optional<JsonValue> defaultValue;
 
     JsonOptions() = default;
 
@@ -67,43 +69,26 @@ class JsonSchemaOptions
 public:
     static void add(JsonSchema& schema, const JsonOptions& options)
     {
-        updateIfNotEmpty(schema.title, options.title);
-        updateIfNotEmpty(schema.description, options.description);
-        updateIfNotNull(schema.minimum, options.minimum);
-        updateIfNotNull(schema.maximum, options.maximum);
-        updateIfNotNull(schema.minItems, options.minItems);
-        updateIfNotNull(schema.maxItems, options.maxItems);
-        updateIfNotEmpty(schema.defaultValue, options.defaultValue);
+        trySet(schema.title, options.title);
+        trySet(schema.description, options.description);
+        trySet(schema.readOnly, options.readOnly);
+        trySet(schema.writeOnly, options.writeOnly);
+        trySet(schema.minimum, options.minimum);
+        trySet(schema.maximum, options.maximum);
+        trySet(schema.minItems, options.minItems);
+        trySet(schema.maxItems, options.maxItems);
+        trySet(schema.defaultValue, options.defaultValue);
     }
 
 private:
-    static void updateIfNotEmpty(JsonValue& value, const JsonValue& newValue)
-    {
-        if (newValue.isEmpty())
-        {
-            return;
-        }
-        value = newValue;
-    }
-
-    template <typename T>
-    static void updateIfNotEmpty(T& value, const T& newValue)
-    {
-        if (newValue.empty())
-        {
-            return;
-        }
-        value = newValue;
-    }
-
-    template <typename T>
-    static void updateIfNotNull(T& value, const T& newValue)
+    template <typename T, typename U>
+    static void trySet(T& value, const U& newValue)
     {
         if (!newValue)
         {
             return;
         }
-        value = newValue;
+        value = *newValue;
     }
 };
 
@@ -141,6 +126,20 @@ struct Required
     }
 
     void add(JsonOptions& options) const { options.required = value; }
+
+    bool value = true;
+};
+
+struct ReadOnly
+{
+    ReadOnly() = default;
+
+    ReadOnly(bool value)
+        : value(value)
+    {
+    }
+
+    void add(JsonOptions& options) const { options.readOnly = value; }
 
     bool value = true;
 };
