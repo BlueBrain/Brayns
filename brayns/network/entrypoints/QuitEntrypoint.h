@@ -34,7 +34,7 @@ public:
         return "Quit the application";
     }
 
-    virtual void onRequest(const Request& request) const override
+    virtual void onRequest(const Request& request) override
     {
         auto& engine = getApi().getEngine();
         engine.setKeepRunning(false);

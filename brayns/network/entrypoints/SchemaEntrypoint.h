@@ -35,7 +35,7 @@ public:
         return "Get the JSON schema of the given entrypoint";
     }
 
-    virtual void onRequest(const Request& request) const override
+    virtual void onRequest(const Request& request) override
     {
         auto& params = request.getParams();
         auto& endpoint = params.endpoint;

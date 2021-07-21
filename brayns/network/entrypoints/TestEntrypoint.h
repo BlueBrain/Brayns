@@ -62,7 +62,7 @@ public:
 
     virtual std::string getDescription() const override { return "Test"; }
 
-    virtual void onRequest(const Request& request) const override
+    virtual void onRequest(const Request& request) override
     {
         auto& params = request.getParams();
         request.progress("This is a 0% progress", 0.0);

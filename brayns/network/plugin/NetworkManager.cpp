@@ -26,6 +26,7 @@
 #include <brayns/network/entrypoints/AnimationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/ApplicationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
+#include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
 #include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
 #include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
@@ -68,6 +69,7 @@ public:
         interface.add<SchemaEntrypoint>();
         interface.add<InspectEntrypoint>();
         interface.add<QuitEntrypoint>();
+        interface.add<ExitLaterEntrypoint>();
         interface.add<TestEntrypoint>();
     }
 };

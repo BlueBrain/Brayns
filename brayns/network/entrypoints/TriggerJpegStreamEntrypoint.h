@@ -38,7 +38,7 @@ public:
         return "Triggers the engine to stream a frame to the clients";
     }
 
-    virtual void onRequest(const Request& request) const override
+    virtual void onRequest(const Request& request) override
     {
         getStream().triggerImageStream();
         triggerRender();

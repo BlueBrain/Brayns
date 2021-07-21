@@ -39,7 +39,7 @@ public:
         return "Set the image streaming method between automatic or controlled";
     }
 
-    virtual void onRequest(const Request& request) const override
+    virtual void onRequest(const Request& request) override
     {
         bool controlled = _isControlled(request);
         getStream().setImageStreamControlled(controlled);

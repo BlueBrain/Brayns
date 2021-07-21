@@ -87,7 +87,7 @@ public:
      *
      * @param request Generic request.
      */
-    virtual void onRequest(const NetworkRequest& request) const override
+    virtual void onRequest(const NetworkRequest& request) override
     {
         Request entrypointRequest(request);
         onRequest(entrypointRequest);
@@ -98,6 +98,6 @@ public:
      *
      * @param request Request with socket and parsed message.
      */
-    virtual void onRequest(const Request& request) const = 0;
+    virtual void onRequest(const Request& request) = 0;
 };
 } // namespace brayns

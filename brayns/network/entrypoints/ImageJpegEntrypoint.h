@@ -37,7 +37,7 @@ public:
         return "Take a snapshot at JPEG format";
     }
 
-    virtual void onRequest(const Request& request) const override
+    virtual void onRequest(const Request& request) override
     {
         auto& api = getApi();
         auto& engine = api.getEngine();
@@ -45,11 +45,13 @@ public:
         auto& manager = api.getParametersManager();
         auto& parameters = manager.getApplicationParameters();
         auto compression = uint8_t(parameters.getJpegCompression());
-        ImageGenerator generator;
-        auto image = generator.createImage(framebuffer, "jpg", compression);
+        auto image = _generator.createImage(framebuffer, "jpg", compression);
         ImageBase64Message result;
         result.data = std::move(image.data);
         request.reply(result);
     }
+
+private:
+    ImageGenerator _generator;
 };
 } // namespace brayns

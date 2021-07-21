@@ -39,7 +39,7 @@ public:
         return "Get Brayns instance version";
     }
 
-    virtual void onRequest(const Request& request) const override
+    virtual void onRequest(const Request& request) override
     {
         VersionMessage message;
         message.major = Version::getMajor();

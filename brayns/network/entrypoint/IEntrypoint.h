@@ -93,13 +93,13 @@ public:
      * @brief Called each time a frame is rendered.
      * 
      */
-    virtual void onUpdate() const {}
+    virtual void onUpdate() {}
 
     /**
      * @brief Called each time the client sends a request to the entrypoint.
      *
      * @param request Client request.
      */
-    virtual void onRequest(const NetworkRequest& request) const = 0;
+    virtual void onRequest(const NetworkRequest& request) = 0;
 };
 } // namespace brayns

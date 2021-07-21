@@ -20,31 +20,12 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/StatisticsAdapter.h>
+#include <brayns/network/message/Message.h>
 
 namespace brayns
 {
-template <>
-struct ObjectExtractor<Statistics>
-{
-    static Statistics& extract(PluginAPI& api)
-    {
-        auto& engine = api.getEngine();
-        return engine.getStatistics();
-    }
-};
-
-class GetStatisticsEntrypoint : public GetEntrypoint<Statistics>
-{
-public:
-    virtual std::string getName() const override { return "get-statistics"; }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the current state of the statistics";
-    }
-
-    virtual void onUpdate() override {}
-};
+BRAYNS_MESSAGE_BEGIN(ExitLaterMessage)
+BRAYNS_MESSAGE_ENTRY(uint32_t, minutes,
+                     "Number of minutes after which Brayns will shut down")
+BRAYNS_MESSAGE_END()
 } // namespace brayns

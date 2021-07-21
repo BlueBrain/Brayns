@@ -44,7 +44,7 @@ public:
         return schema;
     }
 
-    virtual void onRequest(const Request& request) const override
+    virtual void onRequest(const Request& request) override
     {
         auto position = Vector2f(request.getParams());
         auto& engine = getApi().getEngine();

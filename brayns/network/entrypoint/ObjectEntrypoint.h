@@ -49,7 +49,7 @@ public:
         return Json::getSchema(object);
     }
 
-    virtual void onUpdate() const override
+    virtual void onUpdate() override
     {
         auto& object = getObject();
         if (!object.isModified())
@@ -59,7 +59,7 @@ public:
         notify(object);
     }
 
-    virtual void onRequest(const NetworkRequest& request) const override
+    virtual void onRequest(const NetworkRequest& request) override
     {
         auto& object = getObject();
         request.reply(object);
@@ -86,7 +86,7 @@ public:
         return Json::getSchema<EmptyMessage>();
     }
 
-    virtual void onRequest(const NetworkRequest& request) const override
+    virtual void onRequest(const NetworkRequest& request) override
     {
         auto& params = request.getParams();
         auto& object = getObject();
