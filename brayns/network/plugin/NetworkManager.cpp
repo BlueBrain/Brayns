@@ -29,6 +29,7 @@
 #include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
 #include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
+#include <brayns/network/entrypoints/QuitEntrypoint.h>
 #include <brayns/network/entrypoints/RendererEntrypoint.h>
 #include <brayns/network/entrypoints/SceneEntrypoint.h>
 #include <brayns/network/entrypoints/SchemaEntrypoint.h>
@@ -66,6 +67,7 @@ public:
         interface.add<GetStatisticsEntrypoint>();
         interface.add<SchemaEntrypoint>();
         interface.add<InspectEntrypoint>();
+        interface.add<QuitEntrypoint>();
         interface.add<TestEntrypoint>();
     }
 };
