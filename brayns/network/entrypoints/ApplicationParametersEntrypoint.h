@@ -25,6 +25,16 @@
 
 namespace brayns
 {
+template <>
+struct ObjectExtractor<ApplicationParameters>
+{
+    static ApplicationParameters& extract(PluginAPI& api)
+    {
+        auto& parametersManager = api.getParametersManager();
+        return parametersManager.getApplicationParameters();
+    }
+};
+
 class GetApplicationParametersEntrypoint
     : public GetEntrypoint<ApplicationParameters>
 {

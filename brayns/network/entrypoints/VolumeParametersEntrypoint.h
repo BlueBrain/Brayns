@@ -23,10 +23,18 @@
 #include <brayns/network/entrypoint/ObjectEntrypoint.h>
 #include <brayns/network/messages/VolumeParametersAdapter.h>
 
-#include <brayns/parameters/VolumeParameters.h>
-
 namespace brayns
 {
+template <>
+struct ObjectExtractor<VolumeParameters>
+{
+    static VolumeParameters& extract(PluginAPI& api)
+    {
+        auto& parametersManager = api.getParametersManager();
+        return parametersManager.getVolumeParameters();
+    }
+};
+
 class GetVolumeParametersEntrypoint : public GetEntrypoint<VolumeParameters>
 {
 public:

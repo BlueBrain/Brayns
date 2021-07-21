@@ -21,39 +21,28 @@
 #pragma once
 
 #include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/RenderingParametersAdapter.h>
+#include <brayns/network/messages/StatisticsAdapter.h>
 
 namespace brayns
 {
 template <>
-struct ObjectExtractor<RenderingParameters>
+struct ObjectExtractor<Statistics>
 {
-    static RenderingParameters& extract(PluginAPI& api)
+    static Statistics& extract(PluginAPI& api)
     {
-        auto& parametersManager = api.getParametersManager();
-        return parametersManager.getRenderingParameters();
+        auto& engine = api.getEngine();
+        return engine.getStatistics();
     }
 };
 
-class GetRendererEntrypoint : public GetEntrypoint<RenderingParameters>
+class GetStatisticsEntrypoint : public GetEntrypoint<Statistics>
 {
 public:
-    virtual std::string getName() const override { return "get-renderer"; }
+    virtual std::string getName() const override { return "get-statistics"; }
 
     virtual std::string getDescription() const override
     {
-        return "Get the current state of the renderer";
-    }
-};
-
-class SetRendererEntrypoint : public SetEntrypoint<RenderingParameters>
-{
-public:
-    virtual std::string getName() const override { return "set-renderer"; }
-
-    virtual std::string getDescription() const override
-    {
-        return "Set the current state of the renderer";
+        return "Get the current state of the statistics";
     }
 };
 } // namespace brayns

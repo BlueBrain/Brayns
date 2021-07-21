@@ -20,40 +20,14 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/CameraAdapter.h>
+#include <brayns/common/Statistics.h>
+
+#include <brayns/network/message/MessageAdapter.h>
 
 namespace brayns
 {
-template <>
-struct ObjectExtractor<Camera>
-{
-    static Camera& extract(PluginAPI& api)
-    {
-        auto& engine = api.getEngine();
-        return engine.getCamera();
-    }
-};
-
-class GetCameraEntrypoint : public GetEntrypoint<Camera>
-{
-public:
-    virtual std::string getName() const override { return "get-camera"; }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the current state of the camera";
-    }
-};
-
-class SetCameraEntrypoint : public SetEntrypoint<Camera>
-{
-public:
-    virtual std::string getName() const override { return "set-camera"; }
-
-    virtual std::string getDescription() const override
-    {
-        return "Set the current state of the camera";
-    }
-};
+BRAYNS_ADAPTER_BEGIN(Statistics)
+BRAYNS_ADAPTER_GET("fps", getFPS, "Framerate")
+BRAYNS_ADAPTER_GET("scene_size_in_bytes", getSceneSizeInBytes, "Scene size")
+BRAYNS_ADAPTER_END()
 } // namespace brayns

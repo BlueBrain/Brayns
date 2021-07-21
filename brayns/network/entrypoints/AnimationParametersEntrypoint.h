@@ -25,6 +25,16 @@
 
 namespace brayns
 {
+template <>
+struct ObjectExtractor<AnimationParameters>
+{
+    static AnimationParameters& extract(PluginAPI& api)
+    {
+        auto& parametersManager = api.getParametersManager();
+        return parametersManager.getAnimationParameters();
+    }
+};
+
 class GetAnimationParametersEntrypoint
     : public GetEntrypoint<AnimationParameters>
 {

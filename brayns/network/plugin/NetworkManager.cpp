@@ -29,8 +29,9 @@
 #include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
 #include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
 #include <brayns/network/entrypoints/RendererEntrypoint.h>
-#include <brayns/network/entrypoints/SchemaEntrypoint.h>
 #include <brayns/network/entrypoints/SceneEntrypoint.h>
+#include <brayns/network/entrypoints/SchemaEntrypoint.h>
+#include <brayns/network/entrypoints/StatisticsEntrypoint.h>
 #include <brayns/network/entrypoints/TestEntrypoint.h>
 #include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
 #include <brayns/network/entrypoints/VersionEntrypoint.h>
@@ -61,6 +62,7 @@ public:
         interface.add<SetVolumeParametersEntrypoint>();
         interface.add<GetSceneEntrypoint>();
         interface.add<SetSceneEntrypoint>();
+        interface.add<GetStatisticsEntrypoint>();
         interface.add<SchemaEntrypoint>();
         interface.add<TestEntrypoint>();
     }

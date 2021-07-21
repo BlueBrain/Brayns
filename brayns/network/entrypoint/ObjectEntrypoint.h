@@ -21,10 +21,14 @@
 #pragma once
 
 #include "BaseEntrypoint.h"
-#include "ObjectExtractor.h"
 
 namespace brayns
 {
+template <typename T>
+struct ObjectExtractor
+{
+};
+
 template <typename ObjectType>
 class GetEntrypoint : public BaseEntrypoint
 {

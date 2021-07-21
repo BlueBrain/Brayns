@@ -25,6 +25,16 @@
 
 namespace brayns
 {
+template <>
+struct ObjectExtractor<Scene>
+{
+    static Scene& extract(PluginAPI& api)
+    {
+        auto& engine = api.getEngine();
+        return engine.getScene();
+    }
+};
+
 class GetSceneEntrypoint : public GetEntrypoint<Scene>
 {
 public:
