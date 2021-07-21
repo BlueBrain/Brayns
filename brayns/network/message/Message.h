@@ -55,6 +55,15 @@ struct MessageProperty
     std::function<JsonSchema(const void*)> getSchema;
     std::function<void(const void*, JsonValue&)> serialize;
     std::function<void(const JsonValue&, void*)> deserialize;
+
+    JsonSchema getSchemaWithOptions(const void* message) const
+    {
+        auto schema = getSchema(message);
+        JsonSchemaOptions::add(schema, options);
+        return schema;
+    }
+
+    bool isRequired() const { return options.required.value_or(false); }
 };
 
 /**
@@ -78,12 +87,9 @@ public:
         schema.type = JsonType::Object;
         for (const auto& property : _properties)
         {
-            auto child = property.getSchema(message);
-            auto& options = property.options;
-            JsonSchemaOptions::add(child, options);
+            auto child = property.getSchemaWithOptions(message);
             auto& name = property.name;
-            auto& optionRequired = options.required;
-            if (optionRequired.value_or(false))
+            if (property.isRequired())
             {
                 auto& required = schema.required;
                 required.push_back(name);
@@ -127,6 +133,22 @@ public:
     }
 
 private:
+    void _addSchema(JsonSchema& schema, const MessageProperty& property,
+                    const void* message)
+    {
+        auto child = property.getSchema(message);
+        auto& options = property.options;
+        JsonSchemaOptions::add(child, options);
+        auto& name = property.name;
+        auto& optionRequired = options.required;
+        if (optionRequired.value_or(false))
+        {
+            auto& required = schema.required;
+            required.push_back(name);
+        }
+        schema.properties[name] = std::move(child);
+    }
+
     std::string _title;
     std::vector<MessageProperty> _properties;
 };

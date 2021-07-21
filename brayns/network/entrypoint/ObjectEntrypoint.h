@@ -33,6 +33,11 @@ template <typename ObjectType>
 class GetEntrypoint : public BaseEntrypoint
 {
 public:
+    const ObjectType& getObject() const
+    {
+        return ObjectExtractor<ObjectType>::extract(getApi());
+    }
+
     virtual JsonSchema getParamsSchema() const override
     {
         return Json::getSchema<EmptyMessage>();
@@ -40,13 +45,13 @@ public:
 
     virtual JsonSchema getResultSchema() const override
     {
-        auto& object = ObjectExtractor<ObjectType>::extract(getApi());
+        auto& object = getObject();
         return Json::getSchema(object);
     }
 
     virtual void onUpdate() const override
     {
-        auto& object = ObjectExtractor<ObjectType>::extract(getApi());
+        auto& object = getObject();
         if (!object.isModified())
         {
             return;
@@ -56,7 +61,7 @@ public:
 
     virtual void onRequest(const NetworkRequest& request) const override
     {
-        auto& object = ObjectExtractor<ObjectType>::extract(getApi());
+        auto& object = getObject();
         request.reply(object);
     }
 };
@@ -65,9 +70,14 @@ template <typename ObjectType>
 class SetEntrypoint : public BaseEntrypoint
 {
 public:
+    ObjectType& getObject() const
+    {
+        return ObjectExtractor<ObjectType>::extract(getApi());
+    }
+
     virtual JsonSchema getParamsSchema() const override
     {
-        auto& object = ObjectExtractor<ObjectType>::extract(getApi());
+        auto& object = getObject();
         return Json::getSchema(object);
     }
 
@@ -79,7 +89,7 @@ public:
     virtual void onRequest(const NetworkRequest& request) const override
     {
         auto& params = request.getParams();
-        auto& object = ObjectExtractor<ObjectType>::extract(getApi());
+        auto& object = getObject();
         Json::deserialize(params, object);
         triggerRender();
         request.reply(EmptyMessage());
