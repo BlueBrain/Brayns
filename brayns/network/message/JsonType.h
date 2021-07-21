@@ -253,18 +253,4 @@ struct GetJsonTypeName
         return JsonTypeName::ofNull();
     }
 };
-
-template <>
-inline std::vector<std::pair<std::string, JsonType>> enumMap<JsonType>()
-{
-    return {
-        {JsonTypeName::ofNull(), JsonType::Null},
-        {JsonTypeName::ofBoolean(), JsonType::Boolean},
-        {JsonTypeName::ofInteger(), JsonType::Integer},
-        {JsonTypeName::ofNumber(), JsonType::Number},
-        {JsonTypeName::ofString(), JsonType::String},
-        {JsonTypeName::ofArray(), JsonType::Array},
-        {JsonTypeName::ofObject(), JsonType::Object},
-    };
-}
 } // namespace brayns

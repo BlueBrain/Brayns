@@ -91,6 +91,23 @@ public:
         _errors.push_back(stream.str());
     }
 
+    void addInvalidEnum(const JsonValue& json,
+                        const std::vector<JsonValue>& enums)
+    {
+        std::ostringstream stream;
+        stream << "Invalid enum: '" << json.toString() << "' not in [";
+        if (!enums.empty())
+        {
+            stream << enums[0].toString();
+        }
+        for (size_t i = 1; i < enums.size(); ++i)
+        {
+            stream << ", " << enums[i].toString();
+        }
+        stream << "]";
+        _errors.push_back(stream.str());
+    }
+
     void addBelowMinimum(double value, double minimum)
     {
         std::ostringstream stream;
@@ -164,6 +181,11 @@ private:
             _validateLimits(json, schema);
             return;
         }
+        if (JsonSchemaHelper::isEnum(schema))
+        {
+            _validateEnum(json, schema);
+            return;
+        }
         if (JsonSchemaHelper::isObject(schema))
         {
             _validateProperties(json, schema);
@@ -201,6 +223,18 @@ private:
         }
     }
 
+    void _validateEnum(const JsonValue& json, const JsonSchema& schema)
+    {
+        for (const auto& value : schema.enums)
+        {
+            if (json == value)
+            {
+                return;
+            }
+        }
+        _context.addInvalidEnum(json, schema.enums);
+    }
+
     void _validateProperties(const JsonValue& json, const JsonSchema& schema)
     {
         auto& object = json.extract<JsonObject::Ptr>();
@@ -222,10 +256,11 @@ private:
             _validate(json, schema.properties.at(name));
             return;
         }
-        if (JsonSchemaHelper::isRequired(schema, name))
+        if (!JsonSchemaHelper::isRequired(schema, name))
         {
-            _context.addMissingProperty();
+            return;
         }
+        _context.addMissingProperty();
     }
 
     void _validateAdditionalProperties(const JsonValue& json,

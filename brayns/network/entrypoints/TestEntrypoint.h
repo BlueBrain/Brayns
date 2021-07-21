@@ -24,6 +24,18 @@
 
 namespace brayns
 {
+enum class TestEnum
+{
+    Test1,
+    Test2,
+    Test3
+};
+
+BRAYNS_ADAPTER_ENUM(TestEnum,
+        {"Test1", TestEnum::Test1},
+        {"Test2", TestEnum::Test2},
+        {"Test3", TestEnum::Test3})
+
 BRAYNS_MESSAGE_BEGIN(TestParams)
 BRAYNS_MESSAGE_ENTRY(int, test, "Test int")
 BRAYNS_MESSAGE_ENTRY(Vector3d, vec, "Test vec3")
@@ -31,6 +43,7 @@ BRAYNS_MESSAGE_ENTRY(Quaterniond, qua, "Test qua")
 BRAYNS_MESSAGE_ENTRY(std::vector<std::string>, vector, "Test vector")
 BRAYNS_MESSAGE_ENTRY(std::list<std::string>, list, "Test list")
 BRAYNS_MESSAGE_OPTION(std::shared_ptr<std::string>, stringptr, "Test ptr")
+BRAYNS_MESSAGE_OPTION(TestEnum, enumeration, "Test enum")
 BRAYNS_MESSAGE_END()
 
 BRAYNS_MESSAGE_BEGIN(TestResult)
@@ -38,7 +51,8 @@ BRAYNS_MESSAGE_ENTRY(std::string, test, "Test string")
 BRAYNS_MESSAGE_ENTRY(size_t, size, "Test size")
 BRAYNS_MESSAGE_ENTRY(StringMap<TestParams>, map, "Test map")
 BRAYNS_MESSAGE_ENTRY(StringHash<std::string>, hash, "Test hash")
-BRAYNS_MESSAGE_ENTRY(std::shared_ptr<int>, intptr, "Test empty ptr")
+BRAYNS_MESSAGE_ENTRY(std::shared_ptr<int>, intptr, "Test empty ptr",
+                     WriteOnly())
 BRAYNS_MESSAGE_END()
 
 class TestEntrypoint : public Entrypoint<TestParams, TestResult>

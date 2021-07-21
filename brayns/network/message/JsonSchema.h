@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -74,6 +75,11 @@ struct JsonSchemaHelper
     static bool isNumber(const JsonSchema& schema)
     {
         return JsonTypeHelper::isNumber(schema.type);
+    }
+
+    static bool isEnum(const JsonSchema& schema)
+    {
+        return !schema.enums.empty();
     }
 
     static bool isObject(const JsonSchema& schema)

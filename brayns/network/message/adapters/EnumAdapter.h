@@ -75,24 +75,26 @@ private:
     std::vector<std::pair<std::string, T>> _values;
 };
 
-struct GetEnumMap
+template <typename T>
+struct EnumReflector
 {
-    template <typename T>
-    static const EnumMap<T>& of()
-    {
-        static const EnumMap<T> values = enumMap<T>();
-        return values;
-    }
+    static EnumMap<T> reflect() { return enumMap<T>(); }
 };
 
 template <typename T>
 struct EnumAdapter
 {
+    static const EnumMap<T> getEnumMap()
+    {
+        static const EnumMap<T> values = EnumReflector<T>::reflect();
+        return values;
+    }
+
     static JsonSchema getSchema(const T&)
     {
         JsonSchema schema;
         schema.type = JsonType::String;
-        auto& enums = GetEnumMap::of<T>();
+        auto& enums = getEnumMap();
         schema.enums.reserve(enums.getSize());
         for (const auto& pair : enums)
         {
@@ -104,7 +106,7 @@ struct EnumAdapter
 
     static bool serialize(const T& value, JsonValue& json)
     {
-        auto& enums = GetEnumMap::of<T>();
+        auto& enums = getEnumMap();
         auto name = enums.getName(value);
         if (!name)
         {
@@ -120,7 +122,7 @@ struct EnumAdapter
         {
             return false;
         }
-        auto& enums = GetEnumMap::of<T>();
+        auto& enums = getEnumMap();
         auto newValue = enums.getValue(name);
         if (!newValue)
         {
@@ -130,8 +132,23 @@ struct EnumAdapter
     }
 };
 
-template<>
-struct JsonAdapter<JsonType> : EnumAdapter<JsonType>
-{
-};
+#define BRAYNS_ADAPTER_ENUM(TYPE, ...)                               \
+    template <>                                                      \
+    inline std::vector<std::pair<std::string, TYPE>> enumMap<TYPE>() \
+    {                                                                \
+        return {__VA_ARGS__};                                        \
+    }                                                                \
+                                                                     \
+    template <>                                                      \
+    struct JsonAdapter<TYPE> : EnumAdapter<TYPE>                     \
+    {                                                                \
+    };
+
+BRAYNS_ADAPTER_ENUM(JsonType, {JsonTypeName::ofNull(), JsonType::Null},
+                    {JsonTypeName::ofBoolean(), JsonType::Boolean},
+                    {JsonTypeName::ofInteger(), JsonType::Integer},
+                    {JsonTypeName::ofNumber(), JsonType::Number},
+                    {JsonTypeName::ofString(), JsonType::String},
+                    {JsonTypeName::ofArray(), JsonType::Array},
+                    {JsonTypeName::ofObject(), JsonType::Object})
 } // namespace brayns

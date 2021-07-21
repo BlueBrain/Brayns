@@ -36,7 +36,7 @@ public:
         setIfNotEmpty(object, "oneOf", schema.oneOf);
         setIfNotEmpty(object, "title", schema.title);
         setIfNotEmpty(object, "description", schema.description);
-        setType(object, schema.type);
+        setType(object, "type", schema.type);
         setIfNotNull(object, "readOnly", schema.readOnly);
         setIfNotNull(object, "writeOnly", schema.writeOnly);
         setIfNotEmpty(object, "default", schema.defaultValue);
@@ -52,13 +52,14 @@ public:
     }
 
 private:
-    static void setType(JsonObject& object, JsonType type)
+    static void setType(JsonObject& object, const std::string& key,
+                        JsonType type)
     {
         if (type == JsonType::Null)
         {
             return;
         }
-        object.set("type", GetJsonTypeName::fromType(type));
+        set(object, key, type);
     }
 
     static void setIfNotEmpty(JsonObject& object, const std::string& key,
