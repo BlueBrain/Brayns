@@ -20,11 +20,13 @@
 
 #pragma once
 
-#include <brayns/network/message/Message.h>
+#include <brayns/common/utils/ImageGenerator.h>
+
+#include <brayns/network/message/MessageAdapter.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(ImageBase64Message)
-BRAYNS_MESSAGE_ENTRY(std::string, data, "Image data")
-BRAYNS_MESSAGE_END()
+BRAYNS_NAMED_ADAPTER_BEGIN(ImageGenerator::ImageBase64, "ImageBase64")
+BRAYNS_ADAPTER_ENTRY(data, "Image data with base64 encoding")
+BRAYNS_ADAPTER_END()
 } // namespace brayns
