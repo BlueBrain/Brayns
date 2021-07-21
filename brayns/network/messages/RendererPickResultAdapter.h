@@ -20,31 +20,14 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/StatisticsAdapter.h>
+#include <brayns/network/message/MessageAdapter.h>
+
+#include <brayns/engine/Renderer.h>
 
 namespace brayns
 {
-template <>
-struct ObjectExtractor<Statistics>
-{
-    static Statistics& extract(PluginAPI& api)
-    {
-        auto& engine = api.getEngine();
-        return engine.getStatistics();
-    }
-};
-
-class GetStatisticsEntrypoint : public GetEntrypoint<Statistics>
-{
-public:
-    virtual std::string getName() const override { return "get-statistics"; }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the current state of the statistics";
-    }
-
-    virtual void onUpdate() const override {}
-};
+BRAYNS_ADAPTER_BEGIN(Renderer::PickResult)
+BRAYNS_ADAPTER_ENTRY(hit, "Check if the position is picked")
+BRAYNS_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
+BRAYNS_ADAPTER_END()
 } // namespace brayns

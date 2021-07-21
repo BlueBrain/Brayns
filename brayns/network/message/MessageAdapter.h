@@ -109,8 +109,11 @@ namespace brayns
         { object.FIELD = std::forward<decltype(value)>(value); },          \
         __VA_ARGS__)
 
-#define BRAYNS_ADAPTER_ENTRY(NAME, FIELD, DESCRIPTION, ...) \
+#define BRAYNS_ADAPTER_NAMED_ENTRY(NAME, FIELD, DESCRIPTION, ...) \
     BRAYNS_ADAPTER_FIELD(NAME, FIELD, Description(DESCRIPTION), __VA_ARGS__)
+
+#define BRAYNS_ADAPTER_ENTRY(FIELD, DESCRIPTION, ...) \
+    BRAYNS_ADAPTER_NAMED_ENTRY(#FIELD, FIELD, DESCRIPTION, __VA_ARGS__)
 
 #define BRAYNS_ADAPTER_END() \
     return info;             \

@@ -39,6 +39,7 @@ namespace brayns
 struct JsonSchema
 {
     std::vector<JsonSchema> oneOf;
+    std::string name;
     std::string title;
     std::string description;
     JsonType type = JsonType::Null;

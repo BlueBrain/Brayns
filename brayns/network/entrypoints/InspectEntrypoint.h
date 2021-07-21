@@ -20,31 +20,37 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/StatisticsAdapter.h>
+#include <brayns/network/entrypoint/Entrypoint.h>
+
+#include <brayns/network/messages/RendererPickResultAdapter.h>
 
 namespace brayns
 {
-template <>
-struct ObjectExtractor<Statistics>
-{
-    static Statistics& extract(PluginAPI& api)
-    {
-        auto& engine = api.getEngine();
-        return engine.getStatistics();
-    }
-};
-
-class GetStatisticsEntrypoint : public GetEntrypoint<Statistics>
+class InspectEntrypoint : public Entrypoint<Vector2d, Renderer::PickResult>
 {
 public:
-    virtual std::string getName() const override { return "get-statistics"; }
+    virtual std::string getName() const override { return "inspect"; }
 
     virtual std::string getDescription() const override
     {
-        return "Get the current state of the statistics";
+        return "Inspect the scene at x-y position";
     }
 
-    virtual void onUpdate() const override {}
+    virtual JsonSchema getParamsSchema() const override
+    {
+        auto schema = Json::getSchema<Vector2d>();
+        schema.name = "position";
+        schema.description = "x-y position in normalized coordinates";
+        return schema;
+    }
+
+    virtual void onRequest(const Request& request) const override
+    {
+        auto position = Vector2f(request.getParams());
+        auto& engine = getApi().getEngine();
+        auto& renderer = engine.getRenderer();
+        auto result = renderer.pick(position);
+        request.reply(result);
+    }
 };
 } // namespace brayns
