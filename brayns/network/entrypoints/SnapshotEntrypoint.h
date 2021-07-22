@@ -20,14 +20,32 @@
 
 #pragma once
 
-#include <brayns/network/message/MessageAdapter.h>
+#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/messages/SnapshotAdapter.h>
 
-#include <brayns/engine/Renderer.h>
+#include <brayns/common/utils/ImageGenerator.h>
+
+#include <brayns/tasks/SnapshotTask.h>
 
 namespace brayns
 {
-BRAYNS_NAMED_ADAPTER_BEGIN(Renderer::PickResult, "RendererPickResult")
-BRAYNS_ADAPTER_ENTRY(hit, "Check if the position is picked")
-BRAYNS_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
-BRAYNS_ADAPTER_END()
+class SnapshotEntrypoint
+    : public Entrypoint<SnapshotParams, ImageGenerator::ImageBase64>
+{
+public:
+    virtual std::string getName() const override { return "snapshot"; }
+
+    virtual std::string getDescription() const override
+    {
+        return "Take a snapshot with given parameters";
+    }
+
+    virtual void onRequest(const Request& request) override
+    {
+        request.reply({});
+    }
+
+private:
+    ImageGenerator _generator;
+};
 } // namespace brayns

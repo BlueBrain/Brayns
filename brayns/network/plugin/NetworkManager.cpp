@@ -35,6 +35,7 @@
 #include <brayns/network/entrypoints/ResetCameraEntrypoint.h>
 #include <brayns/network/entrypoints/SceneEntrypoint.h>
 #include <brayns/network/entrypoints/SchemaEntrypoint.h>
+#include <brayns/network/entrypoints/SnapshotEntrypoint.h>
 #include <brayns/network/entrypoints/StatisticsEntrypoint.h>
 #include <brayns/network/entrypoints/TestEntrypoint.h>
 #include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
@@ -72,6 +73,7 @@ public:
         interface.add<QuitEntrypoint>();
         interface.add<ExitLaterEntrypoint>();
         interface.add<ResetCameraEntrypoint>();
+        interface.add<SnapshotEntrypoint>();
         interface.add<TestEntrypoint>();
     }
 };

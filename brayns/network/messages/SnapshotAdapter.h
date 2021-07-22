@@ -22,12 +22,21 @@
 
 #include <brayns/network/message/MessageAdapter.h>
 
-#include <brayns/engine/Renderer.h>
+#include <brayns/tasks/SnapshotTask.h>
 
 namespace brayns
 {
-BRAYNS_NAMED_ADAPTER_BEGIN(Renderer::PickResult, "RendererPickResult")
-BRAYNS_ADAPTER_ENTRY(hit, "Check if the position is picked")
-BRAYNS_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
+BRAYNS_ADAPTER_BEGIN(SnapshotParams)
+BRAYNS_ADAPTER_NAMED_ENTRY("animation_parameters", animParams,
+                           "Animation parameters");
+BRAYNS_ADAPTER_NAMED_ENTRY("camera", camera, "Camera parameters");
+BRAYNS_ADAPTER_NAMED_ENTRY("format", format, "Image format from FreeImage");
+BRAYNS_ADAPTER_NAMED_ENTRY("name", name, "Name of the snapshot");
+BRAYNS_ADAPTER_NAMED_ENTRY("quality", quality, "Image quality from 0 to 100");
+BRAYNS_ADAPTER_NAMED_ENTRY("renderer", renderingParams, "Renderer parameters");
+BRAYNS_ADAPTER_NAMED_ENTRY("samples_per_pixel", samplesPerPixel,
+                           "Samples per pixel");
+BRAYNS_ADAPTER_NAMED_ENTRY("size", size, "Image dimensions");
+BRAYNS_ADAPTER_NAMED_ENTRY("file_path", filePath, "Path if saved on disk");
 BRAYNS_ADAPTER_END()
 } // namespace brayns

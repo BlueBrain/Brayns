@@ -40,10 +40,9 @@
 #include <brayns/parameters/RenderingParameters.h>
 #include <brayns/parameters/VolumeParameters.h>
 #include <brayns/tasks/AddModelFromBlobTask.h>
+#include <brayns/tasks/SnapshotTask.h>
 #include <brayns/tasks/errors.h>
 #include <brayns/version.h>
-
-#include "SnapshotTask.h"
 
 #include "jsonUtils.h"
 

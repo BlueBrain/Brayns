@@ -7,7 +7,6 @@
 set(BRAYNSROCKETS_HEADERS
   BinaryRequests.h
   RocketsPlugin.h
-  SnapshotTask.h
   Throttle.h
   Timeout.h
   jsonPropertyMap.h

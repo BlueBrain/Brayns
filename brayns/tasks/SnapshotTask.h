@@ -21,6 +21,7 @@
 #pragma once
 
 #include <brayns/common/tasks/Task.h>
+#include <brayns/common/utils/stringUtils.h>
 
 #include <brayns/common/utils/ImageGenerator.h>
 #include <brayns/engine/Camera.h>
