@@ -28,6 +28,7 @@
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
 #include <brayns/network/entrypoints/QuitEntrypoint.h>
 #include <brayns/network/entrypoints/RendererEntrypoint.h>
+#include <brayns/network/entrypoints/RequestModelUploadEntrypoint.h>
 #include <brayns/network/entrypoints/ResetCameraEntrypoint.h>
 #include <brayns/network/entrypoints/SceneEntrypoint.h>
 #include <brayns/network/entrypoints/SchemaEntrypoint.h>
@@ -68,6 +69,7 @@ public:
         interface.add<ExitLaterEntrypoint>();
         interface.add<ResetCameraEntrypoint>();
         interface.add<SnapshotEntrypoint>();
+        interface.add<RequestModelUploadEntrypoint>();
         interface.add<TestEntrypoint>();
     }
 };

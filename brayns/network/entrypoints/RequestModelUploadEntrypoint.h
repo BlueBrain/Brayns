@@ -22,44 +22,35 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/entrypoint/EntrypointTask.h>
-#include <brayns/network/messages/SnapshotAdapter.h>
+#include <brayns/network/messages/BinaryParamsAdapter.h>
+#include <brayns/network/messages/ModelDescriptorAdapter.h>
 #include <brayns/network/tasks/NetworkTaskManager.h>
 
 #include <brayns/tasks/SnapshotTask.h>
 
 namespace brayns
 {
-class SnapshotTask
-    : public EntrypointTask<SnapshotParams, ImageGenerator::ImageBase64>
+class RequestModelUploadEntrypoint
+    : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
 {
 public:
-    SnapshotTask(Engine& engine, SnapshotParams params,
-                 ImageGenerator& imageGenerator)
-        : _functor(engine, std::move(params), imageGenerator)
+    virtual std::string getName() const override
     {
-        _functor.setProgressFunc(
-            [this](std::string operation, float, float amount)
-            { progress(operation, amount); });
+        return "request-model-upload";
     }
-
-    virtual void onComplete() override { reply(_image); }
-
-    virtual void run() override { _image = _functor(); }
-
-private:
-    ImageGenerator::ImageBase64 _image;
-    SnapshotFunctor _functor;
-};
-
-class SnapshotEntrypoint
-    : public Entrypoint<SnapshotParams, ImageGenerator::ImageBase64>
-{
-public:
-    virtual std::string getName() const override { return "snapshot"; }
 
     virtual std::string getDescription() const override
     {
-        return "Take a snapshot with given parameters";
+        return "Request upload of blob to trigger adding of model after blob "
+               "has been received and return model descriptor on success";
+    }
+
+    virtual JsonSchema getParamsSchema() const override
+    {
+        auto schema = Json::getSchema<BinaryParam>();
+        schema.name = "param";
+        schema.description = "size, type, name, transformation, etc";
+        return schema;
     }
 
     virtual bool isAsync() const override { return true; }
@@ -68,16 +59,10 @@ public:
 
     virtual void onRequest(const Request& request) override
     {
-        auto params = request.getParams();
-        auto& engine = getApi().getEngine();
-        auto task = std::make_unique<SnapshotTask>(engine, std::move(params),
-                                                   _generator);
-        task->execute(request);
-        _tasks.add(std::move(task));
+        request.reply({});
     }
 
 private:
     NetworkTaskManager _tasks;
-    ImageGenerator _generator;
 };
 } // namespace brayns
