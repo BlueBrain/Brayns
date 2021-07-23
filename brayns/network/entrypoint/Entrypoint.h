@@ -21,40 +21,10 @@
 #pragma once
 
 #include "BaseEntrypoint.h"
+#include "EntrypointRequest.h"
 
 namespace brayns
 {
-template <typename ParamsType, typename ResultType>
-class EntrypointRequest
-{
-public:
-    EntrypointRequest(const NetworkRequest& request)
-        : _request(&request)
-    {
-        Json::deserialize(request.getParams(), _params);
-    }
-
-    const ParamsType& getParams() const { return _params; }
-
-    void error(int code, const std::string& message) const
-    {
-        _request->error(code, message);
-    }
-
-    void error(const std::string& message) const { _request->error(message); }
-
-    void progress(const std::string& operation, double amount) const
-    {
-        _request->progress(operation, amount);
-    }
-
-    void reply(const ResultType& result) const { _request->reply(result); }
-
-private:
-    const NetworkRequest* _request;
-    ParamsType _params;
-};
-
 template <typename ParamsType, typename ResultType>
 class Entrypoint : public BaseEntrypoint
 {
@@ -89,8 +59,7 @@ public:
      */
     virtual void onRequest(const NetworkRequest& request) override
     {
-        Request entrypointRequest(request);
-        onRequest(entrypointRequest);
+        onRequest(Request(request));
     }
 
     /**

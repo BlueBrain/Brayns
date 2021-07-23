@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <memory>
 #include <mutex>
 #include <unordered_map>
 #include <vector>
@@ -28,11 +29,52 @@
 
 namespace brayns
 {
-using ConnectionId = size_t;
+using SocketPtr = std::shared_ptr<NetworkSocket>;
 
+class ConnectionHandle
+{
+public:
+    ConnectionHandle() = default;
+
+    ConnectionHandle(SocketPtr socket)
+        : _socket(std::move(socket))
+    {
+    }
+
+    size_t getId() const { return size_t(_socket.get()); }
+
+    bool operator==(const ConnectionHandle& other) const
+    {
+        return _socket == other._socket;
+    }
+
+    bool operator!=(const ConnectionHandle& other) const
+    {
+        return !(*this == other);
+    }
+
+private:
+    SocketPtr _socket;
+};
+} // namespace brayns
+
+namespace std
+{
+template <>
+struct hash<brayns::ConnectionHandle>
+{
+    size_t operator()(const brayns::ConnectionHandle& handle) const
+    {
+        return handle.getId();
+    }
+};
+} // namespace std
+
+namespace brayns
+{
 struct RequestData
 {
-    ConnectionId id = 0;
+    ConnectionHandle handle;
     InputPacket packet;
 };
 
@@ -40,12 +82,14 @@ using RequestBuffer = std::vector<RequestData>;
 
 struct Connection
 {
-    Connection(const NetworkSocket& socket)
-        : socket(socket)
+    Connection() = default;
+
+    Connection(SocketPtr socket)
+        : socket(std::move(socket))
     {
     }
 
-    NetworkSocket socket;
+    SocketPtr socket;
     std::vector<InputPacket> buffer;
 };
 
@@ -53,18 +97,16 @@ class ConnectionManager
 {
 public:
     bool isEmpty();
-    size_t size();
-    ConnectionId add(const NetworkSocket& socket);
-    void remove(const NetworkSocket& socket);
-    void remove(ConnectionId id);
-    void bufferRequest(const NetworkSocket& socket, InputPacket packet);
-    void bufferRequest(ConnectionId id, InputPacket packet);
-    void send(ConnectionId id, const OutputPacket& packet);
+    size_t getConnectionCount();
+    void add(SocketPtr socket);
+    void remove(const ConnectionHandle& handle);
+    void bufferRequest(const ConnectionHandle& handle, InputPacket packet);
+    void send(const ConnectionHandle& handle, const OutputPacket& packet);
     void broadcast(const OutputPacket& packet);
     RequestBuffer extractRequestBuffer();
 
 private:
     std::mutex _mutex;
-    std::unordered_map<ConnectionId, Connection> _connections;
+    std::unordered_map<ConnectionHandle, Connection> _connections;
 };
 } // namespace brayns

@@ -22,6 +22,9 @@
 
 #include <string>
 
+#include <brayns/common/log.h>
+
+#include <brayns/network/entrypoint/EntrypointException.h>
 #include <brayns/network/message/MessageFactory.h>
 
 #include "ConnectionManager.h"
@@ -38,12 +41,20 @@ class NetworkRequest
 {
 public:
     /**
-     * @brief Construct a request from the socket opened with the client.
+     * @brief Construct an invalid request.
      *
-     * @param socket The socket opened by the client using HTTP.
      */
-    NetworkRequest(ConnectionId id, ConnectionManager& manager)
-        : _id(id)
+    NetworkRequest() = default;
+
+    /**
+     * @brief Construct a request from a connection handle and the connection
+     * manager used to send packets.
+     *
+     * @param handle Connection handle.
+     * @param manager Connection manager.
+     */
+    NetworkRequest(ConnectionHandle handle, ConnectionManager& manager)
+        : _handle(std::move(handle))
         , _manager(&manager)
     {
     }
@@ -122,6 +133,41 @@ public:
     void error(const std::string& message) const { error(0, message); }
 
     /**
+     * @brief Shortcut to process an arbitrary exception.
+     *
+     * @param e Opaque exception pointer.
+     */
+    void error(std::exception_ptr e) const
+    {
+        if (!e)
+        {
+            return;
+        }
+        try
+        {
+            std::rethrow_exception(e);
+        }
+        catch (const EntrypointException& e)
+        {
+            error(e.getCode(), e.what());
+        }
+        catch (const ConnectionClosedException& e)
+        {
+            BRAYNS_INFO << "Connection closed during request processing: "
+                        << e.what() << '\n';
+        }
+        catch (const std::exception& e)
+        {
+            error(e.what());
+        }
+        catch (...)
+        {
+            BRAYNS_ERROR << "Unknown error in request processing.\n";
+            error("Unknown error");
+        }
+    }
+
+    /**
      * @brief Send a progress message to all clients.
      *
      * Used to provide feedback during the request processing.
@@ -158,12 +204,23 @@ private:
     template <typename MessageType>
     void _send(const MessageType& message) const
     {
-        auto packet = Json::stringify(message);
-        _manager->send(_id, packet);
+        if (!_manager)
+        {
+            return;
+        }
+        try
+        {
+            auto packet = Json::stringify(message);
+            _manager->send(_handle, packet);
+        }
+        catch (...)
+        {
+            BRAYNS_ERROR << "Unexpected exception during reply.\n";
+        }
     }
 
-    ConnectionId _id;
-    ConnectionManager* _manager;
+    ConnectionHandle _handle;
+    ConnectionManager* _manager = nullptr;
     RequestMessage _message;
 };
 } // namespace brayns

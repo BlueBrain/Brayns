@@ -51,8 +51,8 @@ public:
     {
         try
         {
-            NetworkSocket socket(request, response);
-            _interface->run(socket);
+            auto socket = std::make_shared<NetworkSocket>(request, response);
+            _interface->run(std::move(socket));
         }
         catch (std::exception& e)
         {

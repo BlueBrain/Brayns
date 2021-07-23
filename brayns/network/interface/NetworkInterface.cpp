@@ -30,11 +30,11 @@ using namespace brayns;
 class MessageReceiver
 {
 public:
-    MessageReceiver(const NetworkSocket& socket, ConnectionManager& connections)
-        : _socket(socket)
+    MessageReceiver(SocketPtr socket, ConnectionManager& connections)
+        : _socket(std::move(socket))
         , _connections(&connections)
     {
-        _connections->add(socket);
+        _connections->add(_socket);
     }
 
     ~MessageReceiver() { _connections->remove(_socket); }
@@ -62,12 +62,12 @@ private:
     void _receive()
     {
         BRAYNS_DEBUG << "Waiting for client request\n";
-        auto packet = _socket.receive();
+        auto packet = _socket->receive();
         BRAYNS_DEBUG << "Message received: " << packet.getData() << '\n';
         _connections->bufferRequest(_socket, packet);
     }
 
-    NetworkSocket _socket;
+    SocketPtr _socket;
     ConnectionManager* _connections;
 };
 } // namespace
@@ -79,9 +79,9 @@ NetworkInterface::NetworkInterface(NetworkContext& context)
 {
 }
 
-void NetworkInterface::run(NetworkSocket& socket)
+void NetworkInterface::run(SocketPtr socket)
 {
-    MessageReceiver receiver(socket, _context->getConnections());
+    MessageReceiver receiver(std::move(socket), _context->getConnections());
     while (receiver.receive())
     {
     }

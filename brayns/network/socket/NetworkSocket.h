@@ -274,16 +274,6 @@ public:
         }
     }
 
-    /**
-     * @brief Return a unique ID for the undelying socket implementation.
-     *
-     * As sockets share their implementation, this ID will remain unique as long
-     * as a copy of the socket maintain the implementation alive.
-     *
-     * @return size_t Unique ID for the socket.
-     */
-    size_t getId() const { return size_t(_socket.impl()); }
-
 private:
     void _setupSocket()
     {

@@ -23,61 +23,11 @@
 #include <brayns/network/interface/ServerInterface.h>
 #include <brayns/network/stream/StreamManager.h>
 
-#include <brayns/network/entrypoints/AnimationParametersEntrypoint.h>
-#include <brayns/network/entrypoints/ApplicationParametersEntrypoint.h>
-#include <brayns/network/entrypoints/CameraEntrypoint.h>
-#include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
-#include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
-#include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
-#include <brayns/network/entrypoints/InspectEntrypoint.h>
-#include <brayns/network/entrypoints/QuitEntrypoint.h>
-#include <brayns/network/entrypoints/RendererEntrypoint.h>
-#include <brayns/network/entrypoints/ResetCameraEntrypoint.h>
-#include <brayns/network/entrypoints/SceneEntrypoint.h>
-#include <brayns/network/entrypoints/SchemaEntrypoint.h>
-#include <brayns/network/entrypoints/SnapshotEntrypoint.h>
-#include <brayns/network/entrypoints/StatisticsEntrypoint.h>
-#include <brayns/network/entrypoints/TestEntrypoint.h>
-#include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
-#include <brayns/network/entrypoints/VersionEntrypoint.h>
-#include <brayns/network/entrypoints/VolumeParametersEntrypoint.h>
+#include "EntrypointRegistry.h"
 
 namespace
 {
 using namespace brayns;
-
-class EntrypointRegistry
-{
-public:
-    static void registerEntrypoints(ActionInterface& interface)
-    {
-        interface.add<GetAnimationParametersEntrypoint>();
-        interface.add<SetAnimationParametersEntrypoint>();
-        interface.add<GetCameraEntrypoint>();
-        interface.add<SetCameraEntrypoint>();
-        interface.add<ImageJpegEntrypoint>();
-        interface.add<TriggerJpegStreamEntrypoint>();
-        interface.add<ImageStreamingModeEntrypoint>();
-        interface.add<GetRendererEntrypoint>();
-        interface.add<SetRendererEntrypoint>();
-        interface.add<VersionEntrypoint>();
-        interface.add<GetApplicationParametersEntrypoint>();
-        interface.add<SetApplicationParametersEntrypoint>();
-        interface.add<GetVolumeParametersEntrypoint>();
-        interface.add<SetVolumeParametersEntrypoint>();
-        interface.add<GetSceneEntrypoint>();
-        interface.add<SetSceneEntrypoint>();
-        interface.add<GetStatisticsEntrypoint>();
-        interface.add<SchemaEntrypoint>();
-        interface.add<InspectEntrypoint>();
-        interface.add<QuitEntrypoint>();
-        interface.add<ExitLaterEntrypoint>();
-        interface.add<ResetCameraEntrypoint>();
-        interface.add<SnapshotEntrypoint>();
-        interface.add<TestEntrypoint>();
-    }
-};
-
 class MessageBuilder
 {
 public:
@@ -146,17 +96,9 @@ public:
         {
             _processRequest(request, data);
         }
-        catch (const EntrypointException& e)
-        {
-            request.error(e.getCode(), e.what());
-        }
-        catch (const std::exception& e)
-        {
-            request.error(e.what());
-        }
         catch (...)
         {
-            BRAYNS_ERROR << "Unexpected failure during request processing\n";
+            request.error(std::current_exception());
         }
     }
 
@@ -164,7 +106,7 @@ private:
     NetworkRequest _createRequest(const RequestData& data)
     {
         auto& connections = _context->getConnections();
-        return {data.id, connections};
+        return {data.handle, connections};
     }
 
     void _processRequest(NetworkRequest& request, const RequestData& data)
@@ -180,7 +122,7 @@ private:
         return MessageBuilder::build(packet);
     }
 
-    void _dispatchToEntrypoints(const NetworkRequest& request)
+    void _dispatchToEntrypoints(const NetworkRequest request)
     {
         auto& entrypoints = _context->getEntrypoints();
         entrypoints.processRequest(request);

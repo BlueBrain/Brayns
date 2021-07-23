@@ -58,7 +58,7 @@ public:
      *
      * @param socket Socket used for communication.
      */
-    void run(NetworkSocket& socket);
+    void run(SocketPtr socket);
 
     /**
      * @brief Register an entrypoint.
@@ -70,10 +70,4 @@ public:
 private:
     NetworkContext* _context;
 };
-
-/**
- * @brief Shorcut for shared_ptr on the interface.
- * 
- */
-using NetworkInterfacePtr = std::shared_ptr<NetworkInterface>;
 } // namespace brayns

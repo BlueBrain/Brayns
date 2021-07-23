@@ -24,44 +24,33 @@ namespace brayns
 {
 bool ConnectionManager::isEmpty()
 {
-    return size() == 0;
+    return getConnectionCount() == 0;
 }
 
-size_t ConnectionManager::size()
+size_t ConnectionManager::getConnectionCount()
 {
     std::lock_guard<std::mutex> lock(_mutex);
     return _connections.size();
 }
 
-ConnectionId ConnectionManager::add(const NetworkSocket& socket)
+void ConnectionManager::add(SocketPtr socket)
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    auto id = socket.getId();
-    _connections.emplace(id, socket);
-    return id;
+    auto& connection = _connections[socket];
+    connection.socket = std::move(socket);
 }
 
-void ConnectionManager::remove(const NetworkSocket& socket)
-{
-    remove(socket.getId());
-}
-
-void ConnectionManager::remove(ConnectionId id)
+void ConnectionManager::remove(const ConnectionHandle& handle)
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    _connections.erase(id);
+    _connections.erase(handle);
 }
 
-void ConnectionManager::bufferRequest(const NetworkSocket& socket,
+void ConnectionManager::bufferRequest(const ConnectionHandle& handle,
                                       InputPacket packet)
 {
-    bufferRequest(socket.getId(), std::move(packet));
-}
-
-void ConnectionManager::bufferRequest(ConnectionId id, InputPacket packet)
-{
     std::lock_guard<std::mutex> lock(_mutex);
-    auto i = _connections.find(id);
+    auto i = _connections.find(handle);
     if (i == _connections.end())
     {
         return;
@@ -71,17 +60,18 @@ void ConnectionManager::bufferRequest(ConnectionId id, InputPacket packet)
     buffer.push_back(std::move(packet));
 }
 
-void ConnectionManager::send(ConnectionId id, const OutputPacket& packet)
+void ConnectionManager::send(const ConnectionHandle& handle,
+                             const OutputPacket& packet)
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    auto i = _connections.find(id);
+    auto i = _connections.find(handle);
     if (i == _connections.end())
     {
         return;
     }
     auto& connection = i->second;
     auto& socket = connection.socket;
-    socket.send(packet);
+    socket->send(packet);
 }
 
 void ConnectionManager::broadcast(const OutputPacket& packet)
@@ -91,7 +81,7 @@ void ConnectionManager::broadcast(const OutputPacket& packet)
     {
         auto& connection = pair.second;
         auto& socket = connection.socket;
-        socket.send(packet);
+        socket->send(packet);
     }
 }
 
@@ -101,15 +91,14 @@ RequestBuffer ConnectionManager::extractRequestBuffer()
     RequestBuffer requests;
     for (auto& pair : _connections)
     {
+        auto& handle = pair.first;
         auto& connection = pair.second;
-        auto& socket = connection.socket;
-        auto id = socket.getId();
         auto& buffer = connection.buffer;
         for (auto& packet : buffer)
         {
             requests.emplace_back();
             auto& request = requests.back();
-            request.id = id;
+            request.handle = handle;
             request.packet = std::move(packet);
         }
         buffer.clear();

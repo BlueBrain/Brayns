@@ -27,54 +27,41 @@
 #include <thread>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/entrypoint/EntrypointTask.h>
 #include <brayns/network/messages/ExitLaterMessage.h>
 
 namespace brayns
 {
-class ExitLaterTask
+class ExitLaterTask : public EntrypointTask<ExitLaterMessage, EmptyMessage>
 {
 public:
-    ~ExitLaterTask() { cancel(); }
-
-    void start(std::chrono::minutes duration)
+    ExitLaterTask(PluginAPI& api)
+        : _api(&api)
     {
-        cancel();
-        _complete = false;
-        _cancelled = false;
-        _duration = duration;
-        _thread = std::thread([this] { _run(); });
     }
 
-    void cancel()
+    virtual void onStart() override { reply(EmptyMessage()); }
+
+    virtual void onComplete() override
     {
-        if (!_thread.joinable())
-        {
-            return;
-        }
-        _cancelled = true;
-        _monitor.notify_all();
-        _thread.join();
+        auto& engine = _api->getEngine();
+        engine.setKeepRunning(false);
+        engine.triggerRender();
     }
 
-    bool isComplete() const { return _complete; }
+    virtual void onCancel() { _monitor.notify_all(); }
 
-private:
-    void _run()
+    virtual void run() override
     {
         std::unique_lock<std::mutex> lock(_mutex);
-        _monitor.wait_for(lock, _duration);
-        if (!_cancelled)
-        {
-            _complete = true;
-        }
+        auto duration = getParams().minutes;
+        _monitor.wait_for(lock, std::chrono::minutes(duration));
     }
 
-    std::chrono::minutes _duration;
-    std::thread _thread;
+private:
+    PluginAPI* _api;
     std::mutex _mutex;
     std::condition_variable _monitor;
-    std::atomic_bool _complete{false};
-    std::atomic_bool _cancelled{false};
 };
 
 class ExitLaterEntrypoint : public Entrypoint<ExitLaterMessage, EmptyMessage>
@@ -89,29 +76,24 @@ public:
 
     virtual bool isAsync() const override { return true; }
 
-    virtual void onUpdate() override
+    virtual void onCreate() override
     {
-        if (!_task.isComplete())
-        {
-            return;
-        }
-        auto& engine = getApi().getEngine();
-        engine.setKeepRunning(false);
-        engine.triggerRender();
+        _task = std::make_unique<ExitLaterTask>(getApi());
     }
+
+    virtual void onUpdate() override { _task->poll(); }
 
     virtual void onRequest(const Request& request) override
     {
-        auto& params = request.getParams();
-        auto duration = std::chrono::minutes(params.minutes);
-        if (duration.count())
+        auto params = request.getParams();
+        if (params.minutes == 0)
         {
-            _task.start(duration);
+            return;
         }
-        request.reply(EmptyMessage());
+        _task->execute(request);
     }
 
 private:
-    ExitLaterTask _task;
+    std::unique_ptr<ExitLaterTask> _task;
 };
 } // namespace brayns

@@ -30,7 +30,7 @@
 
 namespace brayns
 {
-class EntrypointSchemaFactory
+class EntrypointSchema
 {
 public:
     static SchemaResult create(const IEntrypoint& entrypoint)
@@ -70,7 +70,7 @@ public:
     {
         _entrypoint->setContext(context);
         _entrypoint->onCreate();
-        _schema = EntrypointSchemaFactory::create(*_entrypoint);
+        _schema = EntrypointSchema::create(*_entrypoint);
     }
 
     void update() const { _entrypoint->onUpdate(); }
