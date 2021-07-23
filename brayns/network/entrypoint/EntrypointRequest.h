@@ -33,10 +33,19 @@ public:
     EntrypointRequest(NetworkRequest request)
         : _request(std::move(request))
     {
-        Json::deserialize(request.getParams(), _params);
     }
 
-    const ParamsType& getParams() const { return _params; }
+    ParamsType getParams() const
+    {
+        auto& json = _request.getParams();
+        return Json::deserialize<ParamsType>(json);
+    }
+
+    void getParams(ParamsType& params) const
+    {
+        auto& json = _request.getParams();
+        Json::deserialize(json, params);
+    }
 
     void error(int code, const std::string& message) const
     {
@@ -56,6 +65,5 @@ public:
 
 private:
     NetworkRequest _request;
-    ParamsType _params;
 };
 } // namespace brayns

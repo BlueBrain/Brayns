@@ -21,14 +21,36 @@
 #pragma once
 
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/entrypoint/EntrypointTask.h>
 #include <brayns/network/messages/SnapshotAdapter.h>
-
-#include <brayns/common/utils/ImageGenerator.h>
+#include <brayns/network/tasks/NetworkTaskManager.h>
 
 #include <brayns/tasks/SnapshotTask.h>
 
 namespace brayns
 {
+class SnapshotTask
+    : public EntrypointTask<SnapshotParams, ImageGenerator::ImageBase64>
+{
+public:
+    SnapshotTask(Engine& engine, SnapshotParams params,
+                 ImageGenerator& imageGenerator)
+        : _functor(engine, std::move(params), imageGenerator)
+    {
+        _functor.setProgressFunc(
+            [this](std::string operation, float, float amount)
+            { progress(operation, amount); });
+    }
+
+    virtual void onComplete() override { reply(_image); }
+
+    virtual void run() override { _image = _functor(); }
+
+private:
+    ImageGenerator::ImageBase64 _image;
+    SnapshotFunctor _functor;
+};
+
 class SnapshotEntrypoint
     : public Entrypoint<SnapshotParams, ImageGenerator::ImageBase64>
 {
@@ -40,12 +62,20 @@ public:
         return "Take a snapshot with given parameters";
     }
 
+    virtual void onUpdate() override { _tasks.poll(); }
+
     virtual void onRequest(const Request& request) override
     {
-        request.reply({});
+        auto params = request.getParams();
+        auto& engine = getApi().getEngine();
+        auto task = std::make_unique<SnapshotTask>(engine, std::move(params),
+                                                   _generator);
+        task->execute(request);
+        _tasks.add(std::move(task));
     }
 
 private:
+    NetworkTaskManager _tasks;
     ImageGenerator _generator;
 };
 } // namespace brayns

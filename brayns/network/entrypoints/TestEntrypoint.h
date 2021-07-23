@@ -64,7 +64,7 @@ public:
 
     virtual void onRequest(const Request& request) override
     {
-        auto& params = request.getParams();
+        auto params = request.getParams();
         request.progress("This is a 0% progress", 0.0);
         TestResult result;
         result.test = "Success";
@@ -74,7 +74,7 @@ public:
         {
             throw EntrypointException("This is an error");
         }
-        result.intptr = std::make_shared<int>(0);
+        result.intptr = std::make_shared<int>(12);
         request.progress("This is a 100% progress", 1.0);
         request.reply(result);
     }

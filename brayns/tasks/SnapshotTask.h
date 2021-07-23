@@ -58,7 +58,7 @@ struct SnapshotParams
 class SnapshotFunctor : public TaskFunctor
 {
 public:
-    SnapshotFunctor(Engine& engine, SnapshotParams&& params,
+    SnapshotFunctor(Engine& engine, SnapshotParams params,
                     ImageGenerator& imageGenerator)
         : _params(std::move(params))
         , _camera(engine.createCamera())

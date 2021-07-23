@@ -46,7 +46,12 @@ public:
         start();
     }
 
-    const ParamsType& getParams() const { return _request.getParams(); }
+    ParamsType getParams() const { return _request.getParams(); }
+
+    void getParams(ParamsType& params) const
+    {
+        return _request.getParams(params);
+    }
 
     void reply(const ResultType& result) { _request.reply(result); }
 

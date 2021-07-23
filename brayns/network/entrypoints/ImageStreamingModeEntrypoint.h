@@ -53,7 +53,7 @@ public:
 private:
     bool _isControlled(const Request& request) const
     {
-        auto& params = request.getParams();
+        auto params = request.getParams();
         auto& type = params.type;
         if (type == "quanta")
         {

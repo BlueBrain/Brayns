@@ -60,7 +60,7 @@ public:
         {
             return;
         }
-        wait();
+        _fetchResult();
     }
 
     void wait()
@@ -69,16 +69,7 @@ public:
         {
             return;
         }
-        try
-        {
-            _result.get();
-            _throwIfCancelled();
-            onComplete();
-        }
-        catch (...)
-        {
-            onError(std::current_exception());
-        }
+        _fetchResult();
     }
 
     void cancel()
@@ -126,6 +117,20 @@ private:
             return;
         }
         throw std::runtime_error("Task cancelled");
+    }
+
+    void _fetchResult()
+    {
+        try
+        {
+            _result.get();
+            _throwIfCancelled();
+            onComplete();
+        }
+        catch (...)
+        {
+            onError(std::current_exception());
+        }
     }
 
     std::future<void> _result;

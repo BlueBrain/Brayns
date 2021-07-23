@@ -37,7 +37,7 @@ public:
 
     virtual void onRequest(const Request& request) override
     {
-        auto& params = request.getParams();
+        auto params = request.getParams();
         auto& endpoint = params.endpoint;
         auto entrypoint = getEntrypoints().find(endpoint);
         if (!entrypoint)

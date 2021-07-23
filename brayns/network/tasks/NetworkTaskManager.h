@@ -31,10 +31,9 @@ namespace brayns
 class NetworkTaskManager
 {
 public:
-    void run(NetworkTaskPtr task)
+    void add(NetworkTaskPtr task)
     {
         assert(task);
-        task->start();
         _tasks.push_back(std::move(task));
     }
 
@@ -49,12 +48,6 @@ public:
         };
         auto from = std::remove_if(first, last, predictor);
         _tasks.erase(from, last);
-    }
-
-    template <typename T, typename... Args>
-    void run(Args&&... args)
-    {
-        run(std::make_unique<T>(std::forward<Args>(args)...));
     }
 
 private:
