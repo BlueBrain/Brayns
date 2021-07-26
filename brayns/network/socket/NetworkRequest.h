@@ -53,9 +53,8 @@ public:
      * @param handle Connection handle.
      * @param manager Connection manager.
      */
-    NetworkRequest(ConnectionHandle handle, ConnectionManager& manager)
-        : _handle(std::move(handle))
-        , _manager(&manager)
+    NetworkRequest(ConnectionHandle handle, ConnectionManager& connections)
+        : _connection(std::move(handle), connections)
     {
     }
 
@@ -181,7 +180,7 @@ public:
         progress.params.operation = operation;
         progress.params.amount = amount;
         auto packet = Json::stringify(progress);
-        _manager->broadcast(std::move(packet));
+        _connection.broadcast(packet);
     }
 
     /**
@@ -204,23 +203,11 @@ private:
     template <typename MessageType>
     void _send(const MessageType& message) const
     {
-        if (!_manager)
-        {
-            return;
-        }
-        try
-        {
-            auto packet = Json::stringify(message);
-            _manager->send(_handle, packet);
-        }
-        catch (...)
-        {
-            BRAYNS_ERROR << "Unexpected exception during reply.\n";
-        }
+        auto packet = Json::stringify(message);
+        _connection.send(packet);
     }
 
-    ConnectionHandle _handle;
-    ConnectionManager* _manager = nullptr;
+    ConnectionRef _connection;
     RequestMessage _message;
 };
 } // namespace brayns

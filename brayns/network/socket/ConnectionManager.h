@@ -20,10 +20,13 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
 #include <vector>
+
+#include <brayns/common/log.h>
 
 #include "NetworkSocket.h"
 
@@ -72,13 +75,7 @@ struct hash<brayns::ConnectionHandle>
 
 namespace brayns
 {
-struct RequestData
-{
-    ConnectionHandle handle;
-    InputPacket packet;
-};
-
-using RequestBuffer = std::vector<RequestData>;
+using ConnectionBuffer = std::vector<InputPacket>;
 
 struct Connection
 {
@@ -90,7 +87,23 @@ struct Connection
     }
 
     SocketPtr socket;
-    std::vector<InputPacket> buffer;
+    bool added = true;
+    bool removed = false;
+    ConnectionBuffer buffer;
+};
+
+using ConnectionMap = std::unordered_map<ConnectionHandle, Connection>;
+
+using ConnectionCallback = std::function<void(const ConnectionHandle&)>;
+using DisconnectionCallback = std::function<void(const ConnectionHandle&)>;
+using RequestCallback =
+    std::function<void(const ConnectionHandle&, const InputPacket&)>;
+
+struct ConnectionListener
+{
+    ConnectionCallback onConnect;
+    DisconnectionCallback onDisconnect;
+    RequestCallback onRequest;
 };
 
 class ConnectionManager
@@ -98,15 +111,79 @@ class ConnectionManager
 public:
     bool isEmpty();
     size_t getConnectionCount();
-    void add(SocketPtr socket);
-    void remove(const ConnectionHandle& handle);
-    void bufferRequest(const ConnectionHandle& handle, InputPacket packet);
+    void connect(SocketPtr socket);
+    void disconnect(const ConnectionHandle& handle);
+    void receive(const ConnectionHandle& handle, InputPacket packet);
     void send(const ConnectionHandle& handle, const OutputPacket& packet);
     void broadcast(const OutputPacket& packet);
-    RequestBuffer extractRequestBuffer();
+    void update();
+
+    void onConnect(ConnectionCallback callback)
+    {
+        _listener.onConnect = std::move(callback);
+    }
+
+    void onDisconnect(DisconnectionCallback callback)
+    {
+        _listener.onDisconnect = std::move(callback);
+    }
+
+    void onRequest(RequestCallback callback)
+    {
+        _listener.onRequest = std::move(callback);
+    }
 
 private:
     std::mutex _mutex;
-    std::unordered_map<ConnectionHandle, Connection> _connections;
+    ConnectionMap _connections;
+    ConnectionListener _listener;
+};
+
+class ConnectionRef
+{
+public:
+    ConnectionRef() = default;
+
+    ConnectionRef(ConnectionHandle handle, ConnectionManager& connections)
+        : _handle(std::move(handle))
+        , _connections(&connections)
+    {
+    }
+
+    void send(const OutputPacket& packet) const
+    {
+        if (!_connections)
+        {
+            return;
+        }
+        try
+        {
+            _connections->send(_handle, packet);
+        }
+        catch (...)
+        {
+            BRAYNS_ERROR << "Unexpected error during sending request.\n";
+        }
+    }
+
+    void broadcast(const OutputPacket& packet) const
+    {
+        if (!_connections)
+        {
+            return;
+        }
+        try
+        {
+            _connections->broadcast(packet);
+        }
+        catch (...)
+        {
+            BRAYNS_ERROR << "Unexpected error during broadcast.\n";
+        }
+    }
+
+private:
+    ConnectionHandle _handle;
+    ConnectionManager* _connections = nullptr;
 };
 } // namespace brayns

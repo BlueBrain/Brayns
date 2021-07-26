@@ -56,12 +56,12 @@ public:
     }
 
     /**
-     * @brief Check if the packet data is empty.
+     * @brief Check if the packet data is empty (no flags, no data).
      *
      * @return true No data inside the packet.
      * @return false The packet is not empty.
      */
-    bool isEmpty() const { return _data.empty(); }
+    bool isEmpty() const { return _flags == 0 && _data.empty(); }
 
     /**
      * @brief Get the data of the packet.
@@ -270,7 +270,7 @@ public:
         }
         if (size < packet.getSize())
         {
-            throw ConnectionClosedException("Incomplete frame received");
+            throw ConnectionClosedException("Cannot send frame entirely");
         }
     }
 

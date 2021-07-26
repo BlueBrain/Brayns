@@ -55,14 +55,9 @@ public:
 
     virtual bool isAsync() const override { return true; }
 
-    virtual void onUpdate() override { _tasks.poll(); }
-
     virtual void onRequest(const Request& request) override
     {
         request.reply({});
     }
-
-private:
-    NetworkTaskManager _tasks;
 };
 } // namespace brayns

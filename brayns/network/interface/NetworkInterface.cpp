@@ -34,10 +34,10 @@ public:
         : _socket(std::move(socket))
         , _connections(&connections)
     {
-        _connections->add(_socket);
+        _connections->connect(_socket);
     }
 
-    ~MessageReceiver() { _connections->remove(_socket); }
+    ~MessageReceiver() { _connections->disconnect(_socket); }
 
     bool receive()
     {
@@ -64,7 +64,7 @@ private:
         BRAYNS_DEBUG << "Waiting for client request\n";
         auto packet = _socket->receive();
         BRAYNS_DEBUG << "Message received: " << packet.getData() << '\n';
-        _connections->bufferRequest(_socket, packet);
+        _connections->receive(_socket, packet);
     }
 
     SocketPtr _socket;

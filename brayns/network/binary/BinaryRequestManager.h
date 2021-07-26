@@ -19,46 +19,25 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/FrameBuffer.h>
-
-#include <brayns/network/binary/BinaryRequestManager.h>
-#include <brayns/network/entrypoint/EntrypointManager.h>
 #include <brayns/network/socket/ConnectionManager.h>
-#include <brayns/network/stream/StreamManager.h>
-
-#include <brayns/parameters/ParametersManager.h>
-
-#include <brayns/pluginapi/PluginAPI.h>
 
 namespace brayns
 {
-class NetworkContext
+class NetworkContext;
+
+class BinaryRequestManager
 {
 public:
-    NetworkContext(PluginAPI& api)
-        : _api(&api)
-        , _entrypoints(*this)
-        , _stream(*this)
-        , _binary(*this)
+    BinaryRequestManager(NetworkContext& context)
+        : _context(&context)
     {
     }
 
-    PluginAPI& getApi() { return *_api; }
+    void remove(const ConnectionHandle&) {}
 
-    EntrypointManager& getEntrypoints() { return _entrypoints; }
-
-    ConnectionManager& getConnections() { return _connections; }
-
-    StreamManager& getStream() { return _stream; }
-
-    BinaryRequestManager& getBinary() { return _binary; }
+    void processRequest(const ConnectionHandle&, const InputPacket&) {}
 
 private:
-    PluginAPI* _api;
-    EntrypointManager _entrypoints;
-    ConnectionManager _connections;
-    StreamManager _stream;
-    BinaryRequestManager _binary;
+    NetworkContext* _context;
 };
 } // namespace brayns

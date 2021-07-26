@@ -79,22 +79,37 @@ public:
     {
     }
 
-    void processRequests()
+    void processRequest(const ConnectionHandle& handle,
+                        const InputPacket& packet)
     {
-        auto& connections = _context->getConnections();
-        auto buffer = connections.extractRequestBuffer();
-        for (const auto& request : buffer)
+        if (packet.isBinary())
         {
-            processRequest(request);
+            _processBinaryRequest(handle, packet);
+            return;
         }
+        if (packet.isText())
+        {
+            _processTextRequest(handle, packet);
+            return;
+        }
+        BRAYNS_ERROR << "Invalid packet received.\n";
     }
 
-    void processRequest(const RequestData& data)
+private:
+    void _processBinaryRequest(const ConnectionHandle& handle,
+                               const InputPacket& packet)
     {
-        auto request = _createRequest(data);
+        auto& binary = _context->getBinary();
+        binary.processRequest(handle, packet);
+    }
+
+    void _processTextRequest(const ConnectionHandle& handle,
+                             const InputPacket& packet)
+    {
+        auto request = _createRequest(handle);
         try
         {
-            _processRequest(request, data);
+            _dispatch(request, packet);
         }
         catch (...)
         {
@@ -102,33 +117,47 @@ public:
         }
     }
 
-private:
-    NetworkRequest _createRequest(const RequestData& data)
+    NetworkRequest _createRequest(const ConnectionHandle& handle)
     {
         auto& connections = _context->getConnections();
-        return {data.handle, connections};
+        return {handle, connections};
     }
 
-    void _processRequest(NetworkRequest& request, const RequestData& data)
+    void _dispatch(NetworkRequest& request, const InputPacket& packet)
     {
-        auto message = _buildMessage(data);
+        auto message = MessageBuilder::build(packet);
         request.setMessage(std::move(message));
-        _dispatchToEntrypoints(request);
-    }
-
-    RequestMessage _buildMessage(const RequestData& data)
-    {
-        auto& packet = data.packet;
-        return MessageBuilder::build(packet);
-    }
-
-    void _dispatchToEntrypoints(const NetworkRequest request)
-    {
         auto& entrypoints = _context->getEntrypoints();
         entrypoints.processRequest(request);
     }
 
     NetworkContext* _context;
+};
+
+class ConnectionCallbackSystem
+{
+public:
+    static void setup(NetworkContext& context)
+    {
+        auto& connections = context.getConnections();
+        connections.onConnect(
+            [&](const auto& handle)
+            { BRAYNS_INFO << "New connection: " << handle.getId() << ".\n"; });
+        connections.onDisconnect(
+            [&](const auto& handle)
+            {
+                auto& binary = context.getBinary();
+                binary.remove(handle);
+                BRAYNS_INFO << "Connection removed: " << handle.getId()
+                            << ".\n";
+            });
+        connections.onRequest(
+            [&](const auto& handle, const auto& packet)
+            {
+                RequestManager manager(context);
+                manager.processRequest(handle, packet);
+            });
+    }
 };
 } // namespace
 
@@ -151,12 +180,13 @@ void NetworkManager::init()
     _interface = std::make_shared<ServerInterface>(*_context);
     _api->setActionInterface(_interface);
     EntrypointRegistry::registerEntrypoints(*_interface);
+    ConnectionCallbackSystem::setup(*_context);
 }
 
 void NetworkManager::preRender()
 {
-    RequestManager manager(*_context);
-    manager.processRequests();
+    auto& connections = _context->getConnections();
+    connections.update();
 }
 
 void NetworkManager::postRender()

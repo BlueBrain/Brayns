@@ -20,6 +20,101 @@
 
 #include "ConnectionManager.h"
 
+namespace
+{
+using namespace brayns;
+
+class RequestBuffer
+{
+public:
+    RequestBuffer() = default;
+
+    RequestBuffer(size_t connectionCount) { _buffer.reserve(connectionCount); }
+
+    void add(const ConnectionHandle& handle, ConnectionBuffer buffer)
+    {
+        _buffer.emplace_back(handle, std::move(buffer));
+    }
+
+    template <typename FunctorType>
+    void forEach(FunctorType functor) const
+    {
+        for (const auto& pair : _buffer)
+        {
+            auto& handle = pair.first;
+            auto& buffer = pair.second;
+            for (const auto& packet : buffer)
+            {
+                functor(handle, packet);
+            }
+        }
+    }
+
+private:
+    std::vector<std::pair<ConnectionHandle, ConnectionBuffer>> _buffer;
+};
+
+class ConnectionUpdater
+{
+public:
+    static RequestBuffer update(ConnectionMap& connections,
+                                const ConnectionListener& listener)
+    {
+        RequestBuffer requests(connections.size());
+        for (auto i = connections.begin(); i != connections.end();)
+        {
+            auto& handle = i->first;
+            auto& connection = i->second;
+            if (_tryDisconnect(handle, connection, listener))
+            {
+                i = connections.erase(i);
+                continue;
+            }
+            if (_tryConnect(handle, connection, listener))
+            {
+                connection.added = false;
+            }
+            auto& buffer = connection.buffer;
+            requests.add(handle, std::move(buffer));
+            buffer.clear();
+            ++i;
+        }
+        return requests;
+    }
+
+private:
+    static bool _tryDisconnect(const ConnectionHandle& handle,
+                               const Connection& connection,
+                               const ConnectionListener& listener)
+    {
+        if (!connection.removed)
+        {
+            return false;
+        }
+        if (listener.onDisconnect)
+        {
+            listener.onDisconnect(handle);
+        }
+        return true;
+    }
+
+    static bool _tryConnect(const ConnectionHandle& handle,
+                            const Connection& connection,
+                            const ConnectionListener& listener)
+    {
+        if (!connection.added)
+        {
+            return false;
+        }
+        if (listener.onConnect)
+        {
+            listener.onConnect(handle);
+        }
+        return true;
+    }
+};
+} // namespace
+
 namespace brayns
 {
 bool ConnectionManager::isEmpty()
@@ -33,21 +128,14 @@ size_t ConnectionManager::getConnectionCount()
     return _connections.size();
 }
 
-void ConnectionManager::add(SocketPtr socket)
+void ConnectionManager::connect(SocketPtr socket)
 {
     std::lock_guard<std::mutex> lock(_mutex);
     auto& connection = _connections[socket];
     connection.socket = std::move(socket);
 }
 
-void ConnectionManager::remove(const ConnectionHandle& handle)
-{
-    std::lock_guard<std::mutex> lock(_mutex);
-    _connections.erase(handle);
-}
-
-void ConnectionManager::bufferRequest(const ConnectionHandle& handle,
-                                      InputPacket packet)
+void ConnectionManager::disconnect(const ConnectionHandle& handle)
 {
     std::lock_guard<std::mutex> lock(_mutex);
     auto i = _connections.find(handle);
@@ -56,6 +144,23 @@ void ConnectionManager::bufferRequest(const ConnectionHandle& handle,
         return;
     }
     auto& connection = i->second;
+    connection.removed = true;
+}
+
+void ConnectionManager::receive(const ConnectionHandle& handle,
+                                InputPacket packet)
+{
+    std::lock_guard<std::mutex> lock(_mutex);
+    auto i = _connections.find(handle);
+    if (i == _connections.end())
+    {
+        return;
+    }
+    auto& connection = i->second;
+    if (connection.removed)
+    {
+        return;
+    }
     auto& buffer = connection.buffer;
     buffer.push_back(std::move(packet));
 }
@@ -70,6 +175,10 @@ void ConnectionManager::send(const ConnectionHandle& handle,
         return;
     }
     auto& connection = i->second;
+    if (connection.removed)
+    {
+        return;
+    }
     auto& socket = connection.socket;
     socket->send(packet);
 }
@@ -85,24 +194,18 @@ void ConnectionManager::broadcast(const OutputPacket& packet)
     }
 }
 
-RequestBuffer ConnectionManager::extractRequestBuffer()
+void ConnectionManager::update()
 {
-    std::lock_guard<std::mutex> lock(_mutex);
-    RequestBuffer requests;
-    for (auto& pair : _connections)
+    RequestBuffer buffer;
     {
-        auto& handle = pair.first;
-        auto& connection = pair.second;
-        auto& buffer = connection.buffer;
-        for (auto& packet : buffer)
-        {
-            requests.emplace_back();
-            auto& request = requests.back();
-            request.handle = handle;
-            request.packet = std::move(packet);
-        }
-        buffer.clear();
+        std::lock_guard<std::mutex> lock(_mutex);
+        buffer = ConnectionUpdater::update(_connections, _listener);
     }
-    return requests;
+    if (!_listener.onRequest)
+    {
+        return;
+    }
+    buffer.forEach([this](const auto& handle, const auto& packet)
+                   { _listener.onRequest(handle, packet); });
 }
 } // namespace brayns
