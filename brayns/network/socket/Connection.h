@@ -20,45 +20,26 @@
 
 #pragma once
 
-#include <mutex>
+#include <vector>
 
-#include "ConnectionListener.h"
-#include "ConnectionMap.h"
 #include "NetworkSocket.h"
 
 namespace brayns
 {
-class ConnectionManager
+using ConnectionBuffer = std::vector<InputPacket>;
+
+struct Connection
 {
-public:
-    size_t getConnectionCount();
-    void connect(NetworkSocketPtr socket);
-    void disconnect(const ConnectionHandle& handle);
-    void receive(const ConnectionHandle& handle, InputPacket packet);
-    void send(const ConnectionHandle& handle, const OutputPacket& packet);
-    void broadcast(const OutputPacket& packet);
-    void update();
+    Connection() = default;
 
-    bool isEmpty() { return getConnectionCount() == 0; }
-
-    void onConnect(ConnectionCallback callback)
+    Connection(NetworkSocketPtr socket)
+        : socket(std::move(socket))
     {
-        _listener.onConnect = std::move(callback);
     }
 
-    void onDisconnect(DisconnectionCallback callback)
-    {
-        _listener.onDisconnect = std::move(callback);
-    }
-
-    void onRequest(RequestCallback callback)
-    {
-        _listener.onRequest = std::move(callback);
-    }
-
-private:
-    std::mutex _mutex;
-    ConnectionMap _connections;
-    ConnectionListener _listener;
+    NetworkSocketPtr socket;
+    bool added = true;
+    bool removed = false;
+    ConnectionBuffer buffer;
 };
 } // namespace brayns

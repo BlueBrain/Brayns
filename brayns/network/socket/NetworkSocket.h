@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -284,4 +285,6 @@ private:
 
     Poco::Net::WebSocket _socket;
 };
+
+using NetworkSocketPtr = std::shared_ptr<NetworkSocket>;
 } // namespace brayns

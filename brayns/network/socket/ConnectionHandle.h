@@ -20,45 +20,49 @@
 
 #pragma once
 
-#include <mutex>
+#include <memory>
 
-#include "ConnectionListener.h"
-#include "ConnectionMap.h"
 #include "NetworkSocket.h"
 
 namespace brayns
 {
-class ConnectionManager
+class ConnectionHandle
 {
 public:
-    size_t getConnectionCount();
-    void connect(NetworkSocketPtr socket);
-    void disconnect(const ConnectionHandle& handle);
-    void receive(const ConnectionHandle& handle, InputPacket packet);
-    void send(const ConnectionHandle& handle, const OutputPacket& packet);
-    void broadcast(const OutputPacket& packet);
-    void update();
+    ConnectionHandle() = default;
 
-    bool isEmpty() { return getConnectionCount() == 0; }
-
-    void onConnect(ConnectionCallback callback)
+    ConnectionHandle(NetworkSocketPtr socket)
+        : _socket(std::move(socket))
     {
-        _listener.onConnect = std::move(callback);
     }
 
-    void onDisconnect(DisconnectionCallback callback)
+    bool isValid() const { return bool(_socket); }
+
+    size_t getId() const { return size_t(_socket.get()); }
+
+    bool operator==(const ConnectionHandle& other) const
     {
-        _listener.onDisconnect = std::move(callback);
+        return _socket == other._socket;
     }
 
-    void onRequest(RequestCallback callback)
+    bool operator!=(const ConnectionHandle& other) const
     {
-        _listener.onRequest = std::move(callback);
+        return !(*this == other);
     }
 
 private:
-    std::mutex _mutex;
-    ConnectionMap _connections;
-    ConnectionListener _listener;
+    NetworkSocketPtr _socket;
 };
 } // namespace brayns
+
+namespace std
+{
+template <>
+struct hash<brayns::ConnectionHandle>
+{
+    size_t operator()(const brayns::ConnectionHandle& handle) const
+    {
+        return handle.getId();
+    }
+};
+} // namespace std

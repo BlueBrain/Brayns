@@ -27,7 +27,7 @@
 #include <brayns/network/entrypoint/EntrypointException.h>
 #include <brayns/network/message/MessageFactory.h>
 
-#include "ConnectionManager.h"
+#include "ConnectionRef.h"
 
 namespace brayns
 {

@@ -31,9 +31,11 @@ public:
 
     RequestBuffer(size_t connectionCount) { _buffer.reserve(connectionCount); }
 
-    void add(const ConnectionHandle& handle, ConnectionBuffer buffer)
+    void extract(const ConnectionHandle& handle, Connection& connection)
     {
+        auto& buffer = connection.buffer;
         _buffer.emplace_back(handle, std::move(buffer));
+        buffer.clear();
     }
 
     template <typename FunctorType>
@@ -60,26 +62,21 @@ public:
     static RequestBuffer update(ConnectionMap& connections,
                                 const ConnectionListener& listener)
     {
-        RequestBuffer requests(connections.size());
-        for (auto i = connections.begin(); i != connections.end();)
-        {
-            auto& handle = i->first;
-            auto& connection = i->second;
-            if (_tryDisconnect(handle, connection, listener))
+        RequestBuffer buffer(connections.getConnectionCount());
+        connections.removeIf(
+            [&](const auto& handle, auto& connection)
             {
-                i = connections.erase(i);
-                continue;
-            }
-            if (_tryConnect(handle, connection, listener))
-            {
-                connection.added = false;
-            }
-            auto& buffer = connection.buffer;
-            requests.add(handle, std::move(buffer));
-            buffer.clear();
-            ++i;
-        }
-        return requests;
+                if (_tryDisconnect(handle, connection, listener))
+                {
+                    return true;
+                }
+                if (_tryConnect(handle, connection, listener))
+                {
+                    connection.added = false;
+                }
+                buffer.extract(handle, connection);
+            });
+        return buffer;
     }
 
 private:
@@ -117,51 +114,34 @@ private:
 
 namespace brayns
 {
-bool ConnectionManager::isEmpty()
-{
-    return getConnectionCount() == 0;
-}
-
 size_t ConnectionManager::getConnectionCount()
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    return _connections.size();
+    return _connections.getConnectionCount();
 }
 
-void ConnectionManager::connect(SocketPtr socket)
+void ConnectionManager::connect(NetworkSocketPtr socket)
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    auto& connection = _connections[socket];
-    connection.socket = std::move(socket);
+    _connections.add(std::move(socket));
 }
 
 void ConnectionManager::disconnect(const ConnectionHandle& handle)
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    auto i = _connections.find(handle);
-    if (i == _connections.end())
-    {
-        return;
-    }
-    auto& connection = i->second;
-    connection.removed = true;
+    _connections.markAsRemoved(handle);
 }
 
 void ConnectionManager::receive(const ConnectionHandle& handle,
                                 InputPacket packet)
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    auto i = _connections.find(handle);
-    if (i == _connections.end())
+    auto connection = _connections.find(handle);
+    if (!connection)
     {
         return;
     }
-    auto& connection = i->second;
-    if (connection.removed)
-    {
-        return;
-    }
-    auto& buffer = connection.buffer;
+    auto& buffer = connection->buffer;
     buffer.push_back(std::move(packet));
 }
 
@@ -169,29 +149,24 @@ void ConnectionManager::send(const ConnectionHandle& handle,
                              const OutputPacket& packet)
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    auto i = _connections.find(handle);
-    if (i == _connections.end())
+    auto connection = _connections.find(handle);
+    if (!connection)
     {
         return;
     }
-    auto& connection = i->second;
-    if (connection.removed)
-    {
-        return;
-    }
-    auto& socket = connection.socket;
+    auto& socket = connection->socket;
     socket->send(packet);
 }
 
 void ConnectionManager::broadcast(const OutputPacket& packet)
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    for (auto& pair : _connections)
-    {
-        auto& connection = pair.second;
-        auto& socket = connection.socket;
-        socket->send(packet);
-    }
+    _connections.forEach(
+        [&](const auto& handle, const auto& connection)
+        {
+            auto& socket = connection.socket;
+            socket->send(packet);
+        });
 }
 
 void ConnectionManager::update()

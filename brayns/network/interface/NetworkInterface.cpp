@@ -30,7 +30,7 @@ using namespace brayns;
 class MessageReceiver
 {
 public:
-    MessageReceiver(SocketPtr socket, ConnectionManager& connections)
+    MessageReceiver(NetworkSocketPtr socket, ConnectionManager& connections)
         : _socket(std::move(socket))
         , _connections(&connections)
     {
@@ -67,7 +67,7 @@ private:
         _connections->receive(_socket, packet);
     }
 
-    SocketPtr _socket;
+    NetworkSocketPtr _socket;
     ConnectionManager* _connections;
 };
 } // namespace
@@ -79,7 +79,7 @@ NetworkInterface::NetworkInterface(NetworkContext& context)
 {
 }
 
-void NetworkInterface::run(SocketPtr socket)
+void NetworkInterface::run(NetworkSocketPtr socket)
 {
     MessageReceiver receiver(std::move(socket), _context->getConnections());
     while (receiver.receive())

@@ -58,7 +58,7 @@ public:
      *
      * @param socket Socket used for communication.
      */
-    void run(SocketPtr socket);
+    void run(NetworkSocketPtr socket);
 
     /**
      * @brief Register an entrypoint.
