@@ -77,6 +77,14 @@ public:
     StreamManager& getStream() const { return _context->getStream(); }
 
     /**
+     * @brief Shortcut to get the task manager holding all asynchronous tasks
+     * currently running.
+     *
+     * @return NetworkTaskManager& Task manager.
+     */
+    NetworkTaskManager& getTasks() const { return _context->getTasks(); }
+
+    /**
      * @brief Store the network context reference inside instance.
      *
      * @param context A reference to the network context.

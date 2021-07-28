@@ -38,6 +38,8 @@ public:
     {
     }
 
+    const ConnectionHandle& getHandle() const { return _handle; }
+    
     void send(const OutputPacket& packet) const
     {
         if (!_connections)

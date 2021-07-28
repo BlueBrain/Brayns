@@ -22,6 +22,7 @@
 #include <brayns/network/entrypoints/AnimationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/ApplicationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
+#include <brayns/network/entrypoints/CancelEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
 #include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
 #include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
@@ -70,6 +71,7 @@ public:
         interface.add<ResetCameraEntrypoint>();
         interface.add<SnapshotEntrypoint>();
         interface.add<RequestModelUploadEntrypoint>();
+        interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }
 };

@@ -32,9 +32,17 @@ namespace brayns
  */
 BRAYNS_MESSAGE_BEGIN(RequestMessage)
 BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
-BRAYNS_MESSAGE_ENTRY(std::string, id, "Message ID")
+BRAYNS_MESSAGE_OPTION(std::string, id, "Message ID")
 BRAYNS_MESSAGE_ENTRY(std::string, method, "Entrypoint name")
 BRAYNS_MESSAGE_ENTRY(JsonValue, params, "Request content")
+BRAYNS_MESSAGE_END()
+
+/**
+ * @brief Cancel info received in cancel message params.
+ *
+ */
+BRAYNS_MESSAGE_BEGIN(CancelParams)
+BRAYNS_MESSAGE_ENTRY(std::string, id, "Request ID")
 BRAYNS_MESSAGE_END()
 
 /**
@@ -173,12 +181,11 @@ public:
     /**
      * @brief Create a ProgressMessage corresponding to a RequestMessage.
      *
-     * The resulting progress message will have the same attributes as the
-     * request (id, method, etc) and empty description and amount (to be filled
-     * with message content).
+     * The resulting progress message will have the same id as the request and
+     * empty description and amount (to be filled with message content).
      *
      * @param request Request message containing the transaction info.
-     * @return ReplyMessage The reply message corresponding to request.
+     * @return ProgressMessage The progress message corresponding to request.
      */
     static ProgressMessage createProgress(const RequestMessage& request)
     {

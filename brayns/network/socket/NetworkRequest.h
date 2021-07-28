@@ -59,6 +59,16 @@ public:
     }
 
     /**
+     * @brief Return the connection handle associated with the request.
+     *
+     * @return const ConnectionHandle& Connection handle with the client.
+     */
+    const ConnectionHandle& getConnectionHandle() const
+    {
+        return _connection.getHandle();
+    }
+
+    /**
      * @brief Get the message of the client request.
      *
      * @return const RequestMessage& The message sent by the client.
@@ -71,6 +81,14 @@ public:
      * @return const std::string& Request ID.
      */
     const std::string& getId() const { return _message.id; }
+
+    /**
+     * @brief Check if the request expects a reply.
+     *
+     * @return true A reply must be send (even with no result).
+     * @return false No reply can be sent.
+     */
+    bool shouldBeReplied() const { return !getId().empty(); }
 
     /**
      * @brief Get the method of the request (entrypoint name) from the message.
@@ -103,6 +121,10 @@ public:
      */
     void reply(const JsonValue& result) const
     {
+        if (!shouldBeReplied())
+        {
+            return;
+        }
         auto reply = MessageFactory::createReply(_message);
         reply.result = result;
         _send(reply);
@@ -118,6 +140,10 @@ public:
      */
     void error(int code, const std::string& message) const
     {
+        if (!shouldBeReplied())
+        {
+            return;
+        }
         auto error = MessageFactory::createError(_message);
         error.error.code = code;
         error.error.message = message;
@@ -138,7 +164,7 @@ public:
      */
     void error(std::exception_ptr e) const
     {
-        if (!e)
+        if (!shouldBeReplied() || !e)
         {
             return;
         }
@@ -196,6 +222,10 @@ public:
     template <typename MessageType>
     void reply(const MessageType& result) const
     {
+        if (!shouldBeReplied())
+        {
+            return;
+        }
         reply(Json::serialize(result));
     }
 

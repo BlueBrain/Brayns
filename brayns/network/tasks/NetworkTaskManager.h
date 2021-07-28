@@ -19,38 +19,66 @@
 
 #pragma once
 
-#include <algorithm>
-#include <cassert>
-#include <memory>
-#include <vector>
+#include <stdexcept>
 
-#include "NetworkTask.h"
+#include "NetworkTaskMap.h"
 
 namespace brayns
 {
 class NetworkTaskManager
 {
 public:
-    void add(NetworkTaskPtr task)
+    void addOrReplace(const ConnectionHandle& handle, const std::string& id,
+                      NetworkTaskPtr task)
     {
-        assert(task);
-        _tasks.push_back(std::move(task));
+        auto oldTask = _tasks.find(handle, id);
+        if (oldTask)
+        {
+            oldTask->cancelAndWait();
+        }
+        _tasks.add(handle, id, std::move(task));
     }
 
-    void poll()
+    bool addIfNotPresent(const ConnectionHandle& handle, const std::string& id,
+                         NetworkTaskPtr task)
     {
-        auto first = _tasks.begin();
-        auto last = _tasks.end();
-        auto predictor = [](auto& task)
+        auto oldTask = _tasks.find(handle, id);
+        if (oldTask)
         {
-            task->poll();
-            return !task->isRunning();
-        };
-        auto from = std::remove_if(first, last, predictor);
-        _tasks.erase(from, last);
+            return false;
+        }
+        _tasks.add(handle, id, std::move(task));
+        return true;
+    }
+
+    void cancel(const ConnectionHandle& handle) const
+    {
+        _tasks.forEach(handle, [&](auto&, auto& task) { task.onDisconnect(); });
+    }
+
+    bool cancel(const ConnectionHandle& handle, const std::string& id) const
+    {
+        auto task = _tasks.find(handle, id);
+        if (!task)
+        {
+            return false;
+        }
+        task->cancel();
+        return true;
+    }
+
+    void update()
+    {
+        _tasks.removeIf(
+            [](auto&, auto&, auto& task)
+            {
+                bool complete = !task.isRunning();
+                task.poll();
+                return complete;
+            });
     }
 
 private:
-    std::vector<NetworkTaskPtr> _tasks;
+    NetworkTaskMap _tasks;
 };
 } // namespace brayns

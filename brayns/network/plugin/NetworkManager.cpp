@@ -64,10 +64,6 @@ private:
             throw EntrypointException("Unsupported JSON-RPC version: '" +
                                       message.jsonrpc + "'");
         }
-        if (message.id.empty())
-        {
-            throw EntrypointException("Missing message ID");
-        }
     }
 };
 
@@ -140,23 +136,37 @@ public:
     static void setup(NetworkContext& context)
     {
         auto& connections = context.getConnections();
-        connections.onConnect(
-            [&](const auto& handle)
-            { BRAYNS_INFO << "New connection: " << handle.getId() << ".\n"; });
-        connections.onDisconnect(
-            [&](const auto& handle)
-            {
-                auto& binary = context.getBinary();
-                binary.remove(handle);
-                BRAYNS_INFO << "Connection removed: " << handle.getId()
-                            << ".\n";
-            });
-        connections.onRequest(
-            [&](const auto& handle, const auto& packet)
-            {
-                RequestManager manager(context);
-                manager.processRequest(handle, packet);
-            });
+        connections.onConnect([&](const auto& handle)
+                              { onConnect(context, handle); });
+        connections.onDisconnect([&](const auto& handle)
+                                 { onDisconnect(context, handle); });
+        connections.onRequest([&](const auto& handle, const auto& packet)
+                              { onRequest(context, handle, packet); });
+    }
+
+private:
+    static void onConnect(NetworkContext& context,
+                          const ConnectionHandle& handle)
+    {
+        BRAYNS_INFO << "New connection: " << handle.getId() << ".\n";
+    }
+
+    static void onDisconnect(NetworkContext& context,
+                             const ConnectionHandle& handle)
+    {
+        auto& binary = context.getBinary();
+        binary.remove(handle);
+        auto& tasks = context.getTasks();
+        tasks.cancel(handle);
+        BRAYNS_INFO << "Connection closed: " << handle.getId() << ".\n";
+    }
+
+    static void onRequest(NetworkContext& context,
+                          const ConnectionHandle& handle,
+                          const InputPacket& packet)
+    {
+        RequestManager manager(context);
+        manager.processRequest(handle, packet);
     }
 };
 } // namespace
@@ -187,6 +197,8 @@ void NetworkManager::preRender()
 {
     auto& connections = _context->getConnections();
     connections.update();
+    auto& tasks = _context->getTasks();
+    tasks.update();
 }
 
 void NetworkManager::postRender()

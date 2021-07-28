@@ -35,21 +35,10 @@ namespace brayns
 class ExitLaterTask : public EntrypointTask<ExitLaterMessage, EmptyMessage>
 {
 public:
-    ExitLaterTask(PluginAPI& api)
-        : _api(&api)
+    ExitLaterTask(Engine& engine)
+        : _engine(&engine)
     {
     }
-
-    virtual void onStart() override { reply(EmptyMessage()); }
-
-    virtual void onComplete() override
-    {
-        auto& engine = _api->getEngine();
-        engine.setKeepRunning(false);
-        engine.triggerRender();
-    }
-
-    virtual void onCancel() { _monitor.notify_all(); }
 
     virtual void run() override
     {
@@ -58,8 +47,20 @@ public:
         _monitor.wait_for(lock, std::chrono::minutes(duration));
     }
 
+    virtual void onStart() override { reply(EmptyMessage()); }
+
+    virtual void onComplete() override
+    {
+        _engine->setKeepRunning(false);
+        _engine->triggerRender();
+    }
+
+    virtual void onError(std::exception_ptr) override {}
+
+    virtual void onCancel() override { _monitor.notify_all(); }
+
 private:
-    PluginAPI* _api;
+    Engine* _engine;
     std::mutex _mutex;
     std::condition_variable _monitor;
 };
@@ -78,10 +79,9 @@ public:
 
     virtual void onCreate() override
     {
-        _task = std::make_unique<ExitLaterTask>(getApi());
+        auto& engine = getApi().getEngine();
+        _task = std::make_shared<ExitLaterTask>(engine);
     }
-
-    virtual void onUpdate() override { _task->poll(); }
 
     virtual void onRequest(const Request& request) override
     {
@@ -90,10 +90,10 @@ public:
         {
             return;
         }
-        _task->execute(request);
+        launchOrRestartTask(_task, request);
     }
 
 private:
-    std::unique_ptr<ExitLaterTask> _task;
+    std::shared_ptr<ExitLaterTask> _task;
 };
 } // namespace brayns

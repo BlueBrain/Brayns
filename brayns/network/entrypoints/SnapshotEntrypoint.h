@@ -42,9 +42,9 @@ public:
             { progress(operation, amount); });
     }
 
-    virtual void onComplete() override { reply(_image); }
-
     virtual void run() override { _image = _functor(); }
+
+    virtual void onComplete() override { reply(_image); }
 
 private:
     ImageGenerator::ImageBase64 _image;
@@ -64,20 +64,16 @@ public:
 
     virtual bool isAsync() const override { return true; }
 
-    virtual void onUpdate() override { _tasks.poll(); }
-
     virtual void onRequest(const Request& request) override
     {
         auto params = request.getParams();
         auto& engine = getApi().getEngine();
-        auto task = std::make_unique<SnapshotTask>(engine, std::move(params),
+        auto task = std::make_shared<SnapshotTask>(engine, std::move(params),
                                                    _generator);
-        task->execute(request);
-        _tasks.add(std::move(task));
+        launchTask(task, request);
     }
 
 private:
-    NetworkTaskManager _tasks;
     ImageGenerator _generator;
 };
 } // namespace brayns

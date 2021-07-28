@@ -35,6 +35,13 @@ public:
     {
     }
 
+    const ConnectionHandle& getConnectionHandle() const
+    {
+        return _request.getConnectionHandle();
+    }
+
+    const std::string& getId() const { return _request.getId(); }
+
     ParamsType getParams() const
     {
         auto& json = _request.getParams();

@@ -22,22 +22,15 @@
 #include <atomic>
 #include <chrono>
 #include <future>
+#include <memory>
 #include <stdexcept>
 
 namespace brayns
 {
-class NetworkTask;
-
-using NetworkTaskPtr = std::unique_ptr<NetworkTask>;
-
 class NetworkTask
 {
 public:
-    virtual ~NetworkTask()
-    {
-        cancel();
-        wait();
-    }
+    virtual ~NetworkTask() { cancelAndWait(); }
 
     bool isReady() const { return _hasStatus(std::future_status::ready); }
 
@@ -47,8 +40,7 @@ public:
 
     void start()
     {
-        cancel();
-        wait();
+        cancelAndWait();
         onStart();
         _cancelled = false;
         _result = std::async(std::launch::async, [this] { run(); });
@@ -82,6 +74,12 @@ public:
         _cancelled = true;
     }
 
+    void cancelAndWait()
+    {
+        cancel();
+        wait();
+    }
+
     void progress(const std::string& operation, double amount)
     {
         _throwIfCancelled();
@@ -99,6 +97,8 @@ public:
     virtual void onError(std::exception_ptr) {}
 
     virtual void onProgress(const std::string&, double) {}
+
+    virtual void onDisconnect() {}
 
 private:
     bool _hasStatus(std::future_status status) const
@@ -136,4 +136,6 @@ private:
     std::future<void> _result;
     std::atomic_bool _cancelled{false};
 };
+
+using NetworkTaskPtr = std::shared_ptr<NetworkTask>;
 } // namespace brayns
