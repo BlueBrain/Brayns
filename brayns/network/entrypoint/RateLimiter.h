@@ -20,35 +20,37 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/ImageStreamingModeMessage.h>
+#include <chrono>
 
 namespace brayns
 {
-class ImageStreamingModeEntrypoint
-    : public Entrypoint<ImageStreamingModeMessage, EmptyMessage>
+class RateLimiter
 {
 public:
-    virtual std::string getName() const override
+    using Clock = std::chrono::high_resolution_clock;
+    using TimePoint = Clock::time_point;
+    using Duration = Clock::duration;
+
+    RateLimiter(Duration period)
+        : _period(period)
     {
-        return "image-streaming-mode";
     }
 
-    virtual std::string getDescription() const override
+    template <typename FunctorType>
+    bool call(FunctorType functor)
     {
-        return "Set the image streaming method between automatic or controlled";
+        auto elapsed = Clock::now() - _lastCall;
+        if (elapsed < _period)
+        {
+            return false;
+        }
+        functor();
+        _lastCall = Clock::now();
+        return true;
     }
 
-    virtual void onRequest(const Request& request) override
-    {
-        auto params = request.getParams();
-        auto controlled = params.type == ImageStreamingMode::Quanta;
-        getStream().setImageStreamControlled(controlled);
-        auto& engine = getApi().getEngine();
-        auto& manager = engine.getParametersManager();
-        auto& parameters = manager.getApplicationParameters();
-        parameters.setUseQuantaRenderControl(controlled);
-        request.reply(EmptyMessage());
-    }
+private:
+    Duration _period;
+    TimePoint _lastCall;
 };
 } // namespace brayns

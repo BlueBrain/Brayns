@@ -39,7 +39,7 @@ public:
     }
 
     const ConnectionHandle& getHandle() const { return _handle; }
-    
+
     void send(const OutputPacket& packet) const
     {
         if (!_connections)
@@ -69,6 +69,22 @@ public:
         catch (...)
         {
             BRAYNS_ERROR << "Unexpected error during broadcast.\n";
+        }
+    }
+
+    void broadcastToOtherClients(const OutputPacket& packet) const
+    {
+        if (!_connections)
+        {
+            return;
+        }
+        try
+        {
+            _connections->broadcast(_handle, packet);
+        }
+        catch (...)
+        {
+            BRAYNS_ERROR << "Unexpected error during broadcast to others.\n";
         }
     }
 

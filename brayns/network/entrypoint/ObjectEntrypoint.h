@@ -21,6 +21,7 @@
 #pragma once
 
 #include "BaseEntrypoint.h"
+#include "RateLimiter.h"
 
 namespace brayns
 {
@@ -29,10 +30,23 @@ struct ObjectExtractor
 {
 };
 
+struct NotificationPeriod
+{
+    using Duration = RateLimiter::Duration;
+
+    static Duration interactive() { return std::chrono::milliseconds(1); }
+    static Duration defaultValue() { return std::chrono::milliseconds(50); }
+    static Duration slow() { return std::chrono::milliseconds(750); }
+};
+
 template <typename ObjectType>
 class GetEntrypoint : public BaseEntrypoint
 {
 public:
+    using Duration = RateLimiter::Duration;
+
+    void setNotificationPeriod(Duration duration) { _limiter = duration; }
+
     const ObjectType& getObject() const
     {
         return ObjectExtractor<ObjectType>::extract(getApi());
@@ -56,7 +70,7 @@ public:
         {
             return;
         }
-        notify(object);
+        _limiter.call([&] { notify(object); });
     }
 
     virtual void onRequest(const NetworkRequest& request) override
@@ -64,6 +78,9 @@ public:
         auto& object = getObject();
         request.reply(object);
     }
+
+private:
+    RateLimiter _limiter = NotificationPeriod::defaultValue();
 };
 
 template <typename ObjectType>

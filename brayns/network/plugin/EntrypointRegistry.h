@@ -23,13 +23,13 @@
 #include <brayns/network/entrypoints/ApplicationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
 #include <brayns/network/entrypoints/CancelEntrypoint.h>
+#include <brayns/network/entrypoints/EnvironmentMapEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
 #include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
 #include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
 #include <brayns/network/entrypoints/QuitEntrypoint.h>
 #include <brayns/network/entrypoints/RendererEntrypoint.h>
-#include <brayns/network/entrypoints/RequestModelUploadEntrypoint.h>
 #include <brayns/network/entrypoints/ResetCameraEntrypoint.h>
 #include <brayns/network/entrypoints/SceneEntrypoint.h>
 #include <brayns/network/entrypoints/SchemaEntrypoint.h>
@@ -70,7 +70,8 @@ public:
         interface.add<ExitLaterEntrypoint>();
         interface.add<ResetCameraEntrypoint>();
         interface.add<SnapshotEntrypoint>();
-        interface.add<RequestModelUploadEntrypoint>();
+        interface.add<GetEnvironmentMapEntrypoint>();
+        interface.add<SetEnvironmentMapEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }

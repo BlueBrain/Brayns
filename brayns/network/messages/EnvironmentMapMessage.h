@@ -20,34 +20,11 @@
 
 #pragma once
 
-#include <brayns/network/adapters/StatisticsAdapter.h>
-#include <brayns/network/entrypoint/ObjectEntrypoint.h>
+#include <brayns/network/json/Message.h>
 
 namespace brayns
 {
-template <>
-struct ObjectExtractor<Statistics>
-{
-    static Statistics& extract(PluginAPI& api)
-    {
-        auto& engine = api.getEngine();
-        return engine.getStatistics();
-    }
-};
-
-class GetStatisticsEntrypoint : public GetEntrypoint<Statistics>
-{
-public:
-    GetStatisticsEntrypoint()
-    {
-        setNotificationPeriod(NotificationPeriod::slow());
-    }
-
-    virtual std::string getName() const override { return "get-statistics"; }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the current state of the statistics";
-    }
-};
+BRAYNS_MESSAGE_BEGIN(EnvironmentMapMessage)
+BRAYNS_MESSAGE_ENTRY(std::string, filename, "Source of the background image")
+BRAYNS_MESSAGE_END()
 } // namespace brayns

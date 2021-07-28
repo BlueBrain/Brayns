@@ -117,9 +117,9 @@ public:
         {
             _sendNotification(params);
         }
-        catch (const std::exception& e)
+        catch (...)
         {
-            BRAYNS_ERROR << "Error during notification: " << e.what() << '\n';
+            BRAYNS_ERROR << "Error during notification.\n";
         }
     }
 

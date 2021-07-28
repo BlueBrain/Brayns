@@ -24,7 +24,16 @@
 
 namespace brayns
 {
+enum class ImageStreamingMode
+{
+    Stream,
+    Quanta
+};
+
+BRAYNS_ADAPTER_ENUM(ImageStreamingMode, {"stream", ImageStreamingMode::Stream},
+                    {"quanta", ImageStreamingMode::Quanta})
+
 BRAYNS_MESSAGE_BEGIN(ImageStreamingModeMessage)
-BRAYNS_MESSAGE_ENTRY(std::string, type, "Stream mode: 'stream' or 'quanta'")
+BRAYNS_MESSAGE_ENTRY(ImageStreamingMode, type, "Stream mode")
 BRAYNS_MESSAGE_END()
 } // namespace brayns

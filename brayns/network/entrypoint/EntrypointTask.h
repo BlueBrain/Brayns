@@ -19,9 +19,10 @@
 
 #pragma once
 
-#include "EntrypointRequest.h"
-
 #include <brayns/network/tasks/NetworkTask.h>
+
+#include "EntrypointRequest.h"
+#include "RateLimiter.h"
 
 namespace brayns
 {
@@ -58,10 +59,11 @@ public:
 
     virtual void onProgress(const std::string& operation, double amount)
     {
-        _request.progress(operation, amount);
+        _limiter.call([&] { _request.progress(operation, amount); });
     }
 
 private:
     Request _request;
+    RateLimiter _limiter{std::chrono::seconds(1)};
 };
 } // namespace brayns

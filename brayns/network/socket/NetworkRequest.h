@@ -229,6 +229,23 @@ public:
         reply(Json::serialize(result));
     }
 
+    /**
+     * @brief Send a notification to all other clients (not the request sender).
+     *
+     * @tparam MessageType Params object type.
+     * @param params Params content.
+     */
+    template <typename MessageType>
+    void notify(const MessageType& params) const
+    {
+        NotificationMessage notification;
+        notification.jsonrpc = "2.0";
+        notification.method = getMethod();
+        notification.params = Json::serialize(params);
+        auto json = Json::stringify(notification);
+        _connection.broadcastToOtherClients(json);
+    }
+
 private:
     template <typename MessageType>
     void _send(const MessageType& message) const

@@ -39,6 +39,11 @@ class GetAnimationParametersEntrypoint
     : public GetEntrypoint<AnimationParameters>
 {
 public:
+    GetAnimationParametersEntrypoint()
+    {
+        setNotificationPeriod(NotificationPeriod::interactive());
+    }
+
     virtual std::string getName() const override
     {
         return "get-animation-parameters";

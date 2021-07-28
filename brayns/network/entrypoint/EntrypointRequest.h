@@ -72,6 +72,12 @@ public:
 
     void reply(const ResultType& result) const { _request.reply(result); }
 
+    template <typename T>
+    void notify(const T& params) const
+    {
+        _request.notify(params);
+    }
+
 private:
     NetworkRequest _request;
 };

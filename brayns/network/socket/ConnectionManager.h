@@ -37,6 +37,7 @@ public:
     void receive(const ConnectionHandle& handle, InputPacket packet);
     void send(const ConnectionHandle& handle, const OutputPacket& packet);
     void broadcast(const OutputPacket& packet);
+    void broadcast(const ConnectionHandle& source, const OutputPacket& packet);
     void update();
 
     bool isEmpty() { return getConnectionCount() == 0; }

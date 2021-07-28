@@ -128,6 +128,7 @@ struct EnumAdapter
         {
             return false;
         }
+        value = *newValue;
         return true;
     }
 };

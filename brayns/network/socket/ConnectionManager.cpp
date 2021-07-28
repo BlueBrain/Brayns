@@ -169,6 +169,22 @@ void ConnectionManager::broadcast(const OutputPacket& packet)
         });
 }
 
+void ConnectionManager::broadcast(const ConnectionHandle& source,
+                                  const OutputPacket& packet)
+{
+    std::lock_guard<std::mutex> lock(_mutex);
+    _connections.forEach(
+        [&](const auto& handle, const auto& connection)
+        {
+            if (handle == source)
+            {
+                return;
+            }
+            auto& socket = connection.socket;
+            socket->send(packet);
+        });
+}
+
 void ConnectionManager::update()
 {
     RequestBuffer buffer;

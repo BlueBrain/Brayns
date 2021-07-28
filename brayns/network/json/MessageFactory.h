@@ -42,7 +42,7 @@ BRAYNS_MESSAGE_END()
  *
  */
 BRAYNS_MESSAGE_BEGIN(CancelParams)
-BRAYNS_MESSAGE_ENTRY(std::string, id, "Request ID")
+BRAYNS_MESSAGE_ENTRY(std::string, id, "ID of the request to cancel")
 BRAYNS_MESSAGE_END()
 
 /**

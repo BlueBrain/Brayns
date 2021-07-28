@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 
@@ -134,11 +135,21 @@ struct JsonAdapter<uint64_t> : PrimitiveAdapter<uint64_t>
 template <>
 struct JsonAdapter<float> : PrimitiveAdapter<float>
 {
+    static bool serialize(float value, JsonValue& json)
+    {
+        json = std::isfinite(value) ? value : 0.0f;
+        return true;
+    }
 };
 
 template <>
 struct JsonAdapter<double> : PrimitiveAdapter<double>
 {
+    static bool serialize(double value, JsonValue& json)
+    {
+        json = std::isfinite(value) ? value : 0.0;
+        return true;
+    }
 };
 
 template <>

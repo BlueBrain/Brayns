@@ -20,34 +20,62 @@
 
 #pragma once
 
+#include <brayns/engine/Scene.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/ImageStreamingModeMessage.h>
+#include <brayns/network/messages/EnvironmentMapMessage.h>
 
 namespace brayns
 {
-class ImageStreamingModeEntrypoint
-    : public Entrypoint<ImageStreamingModeMessage, EmptyMessage>
+class GetEnvironmentMapEntrypoint
+    : public Entrypoint<EmptyMessage, EnvironmentMapMessage>
 {
 public:
     virtual std::string getName() const override
     {
-        return "image-streaming-mode";
+        return "get-environment-map";
     }
 
     virtual std::string getDescription() const override
     {
-        return "Set the image streaming method between automatic or controlled";
+        return "Get the environment map from the scene";
+    }
+
+    virtual void onRequest(const Request& request) override
+    {
+        auto& engine = getApi().getEngine();
+        auto& scene = engine.getScene();
+        auto& environmentMap = scene.getEnvironmentMap();
+        request.reply({environmentMap});
+    }
+};
+
+class SetEnvironmentMapEntrypoint
+    : public Entrypoint<EnvironmentMapMessage, EmptyMessage>
+{
+public:
+    virtual std::string getName() const override
+    {
+        return "set-environment-map";
+    }
+
+    virtual std::string getDescription() const override
+    {
+        return "Set an environment map in the scene";
     }
 
     virtual void onRequest(const Request& request) override
     {
         auto params = request.getParams();
-        auto controlled = params.type == ImageStreamingMode::Quanta;
-        getStream().setImageStreamControlled(controlled);
+        auto& filename = params.filename;
         auto& engine = getApi().getEngine();
-        auto& manager = engine.getParametersManager();
-        auto& parameters = manager.getApplicationParameters();
-        parameters.setUseQuantaRenderControl(controlled);
+        auto& scene = engine.getScene();
+        if (!scene.setEnvironmentMap(filename))
+        {
+            throw EntrypointException("Failed to set environment map from: '" +
+                                      filename + "'");
+        }
+        request.notify(params);
         request.reply(EmptyMessage());
     }
 };
