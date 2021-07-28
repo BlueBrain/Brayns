@@ -22,7 +22,6 @@
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
 
-#include <brayns/network/binary/BinaryRequestManager.h>
 #include <brayns/network/entrypoint/EntrypointManager.h>
 #include <brayns/network/socket/ConnectionManager.h>
 #include <brayns/network/stream/StreamManager.h>
@@ -41,7 +40,6 @@ public:
         : _api(&api)
         , _entrypoints(*this)
         , _stream(*this)
-        , _binary(*this)
     {
     }
 
@@ -53,8 +51,6 @@ public:
 
     StreamManager& getStream() { return _stream; }
 
-    BinaryRequestManager& getBinary() { return _binary; }
-
     NetworkTaskManager& getTasks() { return _tasks; }
 
 private:
@@ -62,7 +58,6 @@ private:
     EntrypointManager _entrypoints;
     ConnectionManager _connections;
     StreamManager _stream;
-    BinaryRequestManager _binary;
     NetworkTaskManager _tasks;
 };
 } // namespace brayns

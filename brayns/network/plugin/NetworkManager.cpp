@@ -95,8 +95,7 @@ private:
     void _processBinaryRequest(const ConnectionHandle& handle,
                                const InputPacket& packet)
     {
-        auto& binary = _context->getBinary();
-        binary.processRequest(handle, packet);
+        throw std::runtime_error("Binary frames not supported");
     }
 
     void _processTextRequest(const ConnectionHandle& handle,
@@ -154,8 +153,6 @@ private:
     static void onDisconnect(NetworkContext& context,
                              const ConnectionHandle& handle)
     {
-        auto& binary = context.getBinary();
-        binary.remove(handle);
         auto& tasks = context.getTasks();
         tasks.disconnect(handle);
         BRAYNS_INFO << "Connection closed: " << handle.getId() << ".\n";
