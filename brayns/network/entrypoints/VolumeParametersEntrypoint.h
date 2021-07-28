@@ -20,8 +20,8 @@
 
 #pragma once
 
+#include <brayns/network/adapters/VolumeParametersAdapter.h>
 #include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/VolumeParametersAdapter.h>
 
 namespace brayns
 {

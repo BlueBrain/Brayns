@@ -20,9 +20,9 @@
 
 #pragma once
 
+#include <brayns/network/adapters/SnapshotAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/entrypoint/EntrypointTask.h>
-#include <brayns/network/messages/SnapshotAdapter.h>
 #include <brayns/network/tasks/NetworkTaskManager.h>
 
 #include <brayns/tasks/SnapshotTask.h>

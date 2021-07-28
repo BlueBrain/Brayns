@@ -30,14 +30,14 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
-#include "adapters/ArrayAdapter.h"
-#include "adapters/EnumAdapter.h"
-#include "adapters/GlmAdapter.h"
-#include "adapters/JsonSchemaAdapter.h"
-#include "adapters/MapAdapter.h"
-#include "adapters/PrimitiveAdapter.h"
-#include "adapters/PropertyMapAdapter.h"
-#include "adapters/PtrAdapter.h"
+#include <brayns/network/adapters/ArrayAdapter.h>
+#include <brayns/network/adapters/EnumAdapter.h>
+#include <brayns/network/adapters/GlmAdapter.h>
+#include <brayns/network/adapters/JsonSchemaAdapter.h>
+#include <brayns/network/adapters/MapAdapter.h>
+#include <brayns/network/adapters/PrimitiveAdapter.h>
+#include <brayns/network/adapters/PropertyMapAdapter.h>
+#include <brayns/network/adapters/PtrAdapter.h>
 
 #include "JsonOptions.h"
 #include "JsonType.h"

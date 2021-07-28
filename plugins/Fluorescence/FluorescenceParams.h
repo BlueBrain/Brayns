@@ -21,8 +21,8 @@
 #ifndef FLUORESCENCEPARAMS_H
 #define FLUORESCENCEPARAMS_H
 
-#include <brayns/network/message/ActionMessage.h>
 #include <brayns/common/types.h>
+#include <brayns/network/json/ActionMessage.h>
 
 #define COMMON_SENSOR_PROPS \
     MESSAGE_ENTRY(std::vector<float>, rotation, "Sensor 3D Rotation") \

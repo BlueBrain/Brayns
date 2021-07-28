@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/network/message/Json.h>
+#include <brayns/network/json/Json.h>
 
 #include "ArrayAdapter.h"
 #include "EnumAdapter.h"

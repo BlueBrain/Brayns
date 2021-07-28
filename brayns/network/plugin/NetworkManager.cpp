@@ -157,7 +157,7 @@ private:
         auto& binary = context.getBinary();
         binary.remove(handle);
         auto& tasks = context.getTasks();
-        tasks.cancel(handle);
+        tasks.disconnect(handle);
         BRAYNS_INFO << "Connection closed: " << handle.getId() << ".\n";
     }
 

@@ -20,18 +20,20 @@
 
 #pragma once
 
-#include <brayns/common/Transformation.h>
+#include <brayns/network/json/MessageAdapter.h>
 
-#include <brayns/network/message/MessageAdapter.h>
+#include <brayns/engine/Camera.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(Transformation)
-BRAYNS_ADAPTER_GETSET("translation", getTranslation, setTranslation,
-                      "Translation XYZ")
-BRAYNS_ADAPTER_GETSET("scale", getScale, setScale, "Scale XYZ")
-BRAYNS_ADAPTER_GETSET("rotation", getRotation, setRotation, "Rotation XYZW")
-BRAYNS_ADAPTER_GETSET("rotation_center", getRotationCenter, setRotationCenter,
-                      "Rotation center XYZ")
+BRAYNS_ADAPTER_BEGIN(Camera)
+BRAYNS_ADAPTER_GETSET("orientation", getOrientation, setOrientation,
+                      "Camera orientation XYZW")
+BRAYNS_ADAPTER_GETSET("position", getPosition, setPosition,
+                      "Camera position XYZ")
+BRAYNS_ADAPTER_GETSET("target", getTarget, setTarget, "Camera target XYZ")
+BRAYNS_ADAPTER_GETSET("current", getCurrentType, setCurrentType,
+                      "Camera current type")
+BRAYNS_ADAPTER_GET("types", getTypes, "Available camera types")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

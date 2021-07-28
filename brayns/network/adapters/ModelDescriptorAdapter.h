@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/network/message/MessageAdapter.h>
+#include <brayns/network/json/MessageAdapter.h>
 
 #include <brayns/engine/Model.h>
 

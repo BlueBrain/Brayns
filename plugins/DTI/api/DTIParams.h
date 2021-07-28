@@ -21,8 +21,8 @@
 
 #include "../io/DTITypes.h"
 
-#include <brayns/network/message/ActionMessage.h>
 #include <brayns/common/types.h>
+#include <brayns/network/json/ActionMessage.h>
 
 /**
  * @brief The Streamlines struct handles a set of streamlines. Indices are used

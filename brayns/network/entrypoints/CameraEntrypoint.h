@@ -20,8 +20,8 @@
 
 #pragma once
 
+#include <brayns/network/adapters/CameraAdapter.h>
 #include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/CameraAdapter.h>
 
 namespace brayns
 {

@@ -20,20 +20,13 @@
 
 #pragma once
 
-#include <brayns/network/message/MessageAdapter.h>
+#include <brayns/common/utils/ImageGenerator.h>
 
-#include <brayns/engine/Camera.h>
+#include <brayns/network/json/MessageAdapter.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(Camera)
-BRAYNS_ADAPTER_GETSET("orientation", getOrientation, setOrientation,
-                      "Camera orientation XYZW")
-BRAYNS_ADAPTER_GETSET("position", getPosition, setPosition,
-                      "Camera position XYZ")
-BRAYNS_ADAPTER_GETSET("target", getTarget, setTarget, "Camera target XYZ")
-BRAYNS_ADAPTER_GETSET("current", getCurrentType, setCurrentType,
-                      "Camera current type")
-BRAYNS_ADAPTER_GET("types", getTypes, "Available camera types")
+BRAYNS_NAMED_ADAPTER_BEGIN(ImageGenerator::ImageBase64, "ImageBase64")
+BRAYNS_ADAPTER_ENTRY(data, "Image data with base64 encoding")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

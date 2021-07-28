@@ -22,7 +22,7 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <brayns/network/messages/RendererPickResultAdapter.h>
+#include <brayns/network/adapters/RendererPickResultAdapter.h>
 
 namespace brayns
 {

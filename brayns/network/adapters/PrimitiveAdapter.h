@@ -23,7 +23,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include <brayns/network/message/Json.h>
+#include <brayns/network/json/Json.h>
 
 namespace brayns
 {

@@ -20,14 +20,19 @@
 
 #pragma once
 
-#include <brayns/common/Statistics.h>
+#include <brayns/network/json/MessageAdapter.h>
 
-#include <brayns/network/message/MessageAdapter.h>
+#include <brayns/parameters/ApplicationParameters.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(Statistics)
-BRAYNS_ADAPTER_GET("fps", getFPS, "Framerate")
-BRAYNS_ADAPTER_GET("scene_size_in_bytes", getSceneSizeInBytes, "Scene size")
+BRAYNS_ADAPTER_BEGIN(ApplicationParameters)
+BRAYNS_ADAPTER_GET("engine", getEngine, "Application engine")
+BRAYNS_ADAPTER_GET("plugins", getPlugins, "Loaded plugins")
+BRAYNS_ADAPTER_GETSET("jpeg_compression", getJpegCompression,
+                      setJpegCompression, "JPEG compression rate")
+BRAYNS_ADAPTER_GETSET("image_stream_fps", getImageStreamFPS, setImageStreamFPS,
+                      "Framerate of image stream")
+BRAYNS_ADAPTER_GETSET("viewport", getWindowSize, setWindowSize, "Window size")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

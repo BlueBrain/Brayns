@@ -22,7 +22,7 @@
 
 #include <string>
 
-#include <brayns/network/message/JsonSchema.h>
+#include <brayns/network/json/JsonSchema.h>
 #include <brayns/network/socket/NetworkRequest.h>
 
 namespace brayns

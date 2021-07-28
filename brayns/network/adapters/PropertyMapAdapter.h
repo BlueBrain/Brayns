@@ -23,7 +23,7 @@
 
 #include <brayns/common/propertymap/PropertyMap.h>
 
-#include <brayns/network/message/Json.h>
+#include <brayns/network/json/Json.h>
 
 namespace brayns
 {

@@ -27,7 +27,7 @@
 
 #include <brayns/network/entrypoint/EntrypointRef.h>
 
-#include <brayns/network/message/ActionMessage.h>
+#include <brayns/network/json/ActionMessage.h>
 
 #include <functional>
 #include <string>

@@ -20,17 +20,14 @@
 
 #pragma once
 
-#include <brayns/network/message/MessageAdapter.h>
+#include <brayns/network/json/MessageAdapter.h>
 
-#include <brayns/engine/Scene.h>
-
-#include "BoxAdapter.h"
-#include "ModelDescriptorAdapter.h"
+#include <brayns/engine/Renderer.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(Scene)
-BRAYNS_ADAPTER_GET("bounds", getBounds, "Scene boundary")
-BRAYNS_ADAPTER_GET("models", getModels, "All models")
+BRAYNS_NAMED_ADAPTER_BEGIN(Renderer::PickResult, "RendererPickResult")
+BRAYNS_ADAPTER_ENTRY(hit, "Check if the position is picked")
+BRAYNS_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

@@ -51,7 +51,7 @@ public:
         return true;
     }
 
-    void cancel(const ConnectionHandle& handle) const
+    void disconnect(const ConnectionHandle& handle) const
     {
         _tasks.forEach(handle, [&](auto&, auto& task) { task.onDisconnect(); });
     }

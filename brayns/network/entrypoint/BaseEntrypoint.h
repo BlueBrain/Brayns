@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/network/context/NetworkContext.h>
-#include <brayns/network/message/MessageFactory.h>
+#include <brayns/network/json/MessageFactory.h>
 
 #include "EntrypointException.h"
 #include "IEntrypoint.h"

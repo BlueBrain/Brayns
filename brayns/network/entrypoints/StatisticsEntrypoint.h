@@ -20,8 +20,8 @@
 
 #pragma once
 
+#include <brayns/network/adapters/StatisticsAdapter.h>
 #include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/StatisticsAdapter.h>
 
 namespace brayns
 {

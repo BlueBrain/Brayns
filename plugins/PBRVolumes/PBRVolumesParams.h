@@ -21,8 +21,8 @@
 #ifndef PBRVOLUMES_H
 #define PBRVOLUMES_H
 
-#include <brayns/network/message/ActionMessage.h>
 #include <brayns/common/types.h>
+#include <brayns/network/json/ActionMessage.h>
 
 // Commom parameters for all type of volumes
 #define COMMON_VOLUME_PROPS \

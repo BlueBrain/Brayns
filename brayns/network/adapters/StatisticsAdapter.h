@@ -20,19 +20,14 @@
 
 #pragma once
 
-#include <brayns/network/message/MessageAdapter.h>
+#include <brayns/common/Statistics.h>
 
-#include <brayns/parameters/AnimationParameters.h>
+#include <brayns/network/json/MessageAdapter.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(AnimationParameters)
-BRAYNS_ADAPTER_GETSET("frame_count", getNumFrames, setNumFrames,
-                      "Animation frame count")
-BRAYNS_ADAPTER_GETSET("current", getFrame, setFrame, "Current frame index")
-BRAYNS_ADAPTER_GETSET("delta", getDelta, setDelta, "Frame delta")
-BRAYNS_ADAPTER_GETSET("dt", getDt, setDt, "Frame time")
-BRAYNS_ADAPTER_GETSET("playing", isPlaying, setPlaying, "Animation is playing")
-BRAYNS_ADAPTER_GETSET("unit", getUnit, setUnit, "Time unit")
+BRAYNS_ADAPTER_BEGIN(Statistics)
+BRAYNS_ADAPTER_GET("fps", getFPS, "Framerate")
+BRAYNS_ADAPTER_GET("scene_size_in_bytes", getSceneSizeInBytes, "Scene size")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

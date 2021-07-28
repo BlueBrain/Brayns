@@ -20,10 +20,10 @@
 
 #pragma once
 
+#include <brayns/network/adapters/BinaryParamsAdapter.h>
+#include <brayns/network/adapters/ModelDescriptorAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/entrypoint/EntrypointTask.h>
-#include <brayns/network/messages/BinaryParamsAdapter.h>
-#include <brayns/network/messages/ModelDescriptorAdapter.h>
 #include <brayns/network/tasks/NetworkTaskManager.h>
 
 #include <brayns/tasks/SnapshotTask.h>

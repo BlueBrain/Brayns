@@ -26,7 +26,7 @@
 
 #include <brayns/network/context/NetworkContext.h>
 #include <brayns/network/entrypoint/EntrypointException.h>
-#include <brayns/network/message/JsonSchemaValidator.h>
+#include <brayns/network/json/JsonSchemaValidator.h>
 
 namespace
 {

@@ -21,8 +21,8 @@
 #ifndef CIRCUITINFOPARAMS_H
 #define CIRCUITINFOPARAMS_H
 
-#include <brayns/network/message/ActionMessage.h>
 #include <brayns/common/types.h>
+#include <brayns/network/json/ActionMessage.h>
 
 struct CircuitInfoRequest : public brayns::Message
 {

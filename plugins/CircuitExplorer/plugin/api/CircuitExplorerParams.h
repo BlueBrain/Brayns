@@ -25,8 +25,8 @@
 
 #include "../../common/types.h"
 
-#include <brayns/network/message/ActionMessage.h>
 #include <brayns/common/types.h>
+#include <brayns/network/json/ActionMessage.h>
 
 struct SaveModelToCache : public brayns::Message
 {

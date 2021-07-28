@@ -20,8 +20,8 @@
 
 #pragma once
 
+#include <brayns/network/adapters/ApplicationParametersAdapter.h>
 #include <brayns/network/entrypoint/ObjectEntrypoint.h>
-#include <brayns/network/messages/ApplicationParametersAdapter.h>
 
 namespace brayns
 {

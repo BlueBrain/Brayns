@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/network/message/Message.h>
+#include <brayns/network/json/Message.h>
 
 namespace brayns
 {

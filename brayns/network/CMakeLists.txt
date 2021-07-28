@@ -8,10 +8,10 @@ set(BRAYNSNETWORK_HEADERS
   entrypoint/IEntrypoint.h
   entrypoint/EntrypointException.h
   interface/ActionInterface.h
-  message/ActionMessage.h
-  message/Json.h
-  message/Message.h
-  message/MessageFactory.h
+  json/ActionMessage.h
+  json/Json.h
+  json/Message.h
+  json/MessageFactory.h
   plugin/NetworkManager.h
 )
 
@@ -19,7 +19,7 @@ set(BRAYNSNETWORK_SOURCES
   entrypoint/EntrypointManager.cpp
   interface/NetworkInterface.cpp
   interface/ServerInterface.cpp
-  message/JsonSchemaValidator.cpp
+  json/JsonSchemaValidator.cpp
   plugin/NetworkManager.cpp
   socket/ConnectionManager.cpp
   stream/StreamManager.cpp

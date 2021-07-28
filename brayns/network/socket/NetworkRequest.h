@@ -25,7 +25,7 @@
 #include <brayns/common/log.h>
 
 #include <brayns/network/entrypoint/EntrypointException.h>
-#include <brayns/network/message/MessageFactory.h>
+#include <brayns/network/json/MessageFactory.h>
 
 #include "ConnectionRef.h"
 

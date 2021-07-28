@@ -20,8 +20,8 @@
 
 #pragma once
 
+#include <brayns/network/adapters/ImageBase64Adapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/ImageBase64Adapter.h>
 
 #include <brayns/common/utils/ImageGenerator.h>
 
