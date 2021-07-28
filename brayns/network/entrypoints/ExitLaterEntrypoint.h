@@ -20,19 +20,17 @@
 
 #pragma once
 
-#include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
-#include <thread>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/entrypoint/EntrypointTask.h>
 #include <brayns/network/messages/ExitLaterMessage.h>
+#include <brayns/network/tasks/NetworkTask.h>
 
 namespace brayns
 {
-class ExitLaterTask : public EntrypointTask<ExitLaterMessage, EmptyMessage>
+class ExitLaterTask : public NetworkTask
 {
 public:
     ExitLaterTask(Engine& engine)
@@ -40,14 +38,18 @@ public:
     {
     }
 
+    void execute(uint32_t minutes)
+    {
+        cancelAndWait();
+        _duration = std::chrono::minutes(minutes);
+        start();
+    }
+
     virtual void run() override
     {
         std::unique_lock<std::mutex> lock(_mutex);
-        auto duration = getParams().minutes;
-        _monitor.wait_for(lock, std::chrono::minutes(duration));
+        _monitor.wait_for(lock, _duration);
     }
-
-    virtual void onStart() override { reply(EmptyMessage()); }
 
     virtual void onComplete() override
     {
@@ -55,11 +57,10 @@ public:
         _engine->triggerRender();
     }
 
-    virtual void onError(std::exception_ptr) override {}
-
     virtual void onCancel() override { _monitor.notify_all(); }
 
 private:
+    std::chrono::minutes _duration;
     Engine* _engine;
     std::mutex _mutex;
     std::condition_variable _monitor;
@@ -75,22 +76,24 @@ public:
         return "Schedules Brayns to shutdown after a given amount of minutes";
     }
 
-    virtual bool isAsync() const override { return true; }
-
     virtual void onCreate() override
     {
         auto& engine = getApi().getEngine();
         _task = std::make_shared<ExitLaterTask>(engine);
     }
 
+    virtual void onUpdate() override { _task->poll(); }
+
     virtual void onRequest(const Request& request) override
     {
         auto params = request.getParams();
-        if (params.minutes == 0)
+        auto& minutes = params.minutes;
+        if (minutes == 0)
         {
             return;
         }
-        launchOrRestartTask(_task, request);
+        _task->execute(minutes);
+        request.reply(EmptyMessage());
     }
 
 private:

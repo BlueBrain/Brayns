@@ -42,6 +42,8 @@ public:
 
     const std::string& getId() const { return _request.getId(); }
 
+    const std::string& getMethod() const { return _request.getMethod(); }
+
     ParamsType getParams() const
     {
         auto& json = _request.getParams();

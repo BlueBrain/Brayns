@@ -40,8 +40,7 @@ public:
 
     void execute(Request request)
     {
-        cancel();
-        wait();
+        cancelAndWait();
         _request = std::move(request);
         start();
     }
