@@ -36,8 +36,6 @@ namespace brayns
 template <typename T>
 struct PrimitiveAdapter
 {
-    static_assert(JsonTypeHelper::isPrimitive<T>(), "Not a primitive");
-
     /**
      * @brief Create a JSON schema with type and minimum if unsigned.
      *
@@ -83,6 +81,26 @@ struct PrimitiveAdapter
             return false;
         }
         value = json.convert<T>();
+        return true;
+    }
+};
+
+template <typename T>
+struct FloatAdapter : PrimitiveAdapter<T>
+{
+    static bool serialize(T value, JsonValue& json)
+    {
+        if (std::isinf(value))
+        {
+            json = std::numeric_limits<T>::max();
+            return true;
+        }
+        if (std::isnan(value))
+        {
+            json = T{};
+            return true;
+        }
+        json = value;
         return true;
     }
 };
@@ -133,23 +151,13 @@ struct JsonAdapter<uint64_t> : PrimitiveAdapter<uint64_t>
 };
 
 template <>
-struct JsonAdapter<float> : PrimitiveAdapter<float>
+struct JsonAdapter<float> : FloatAdapter<float>
 {
-    static bool serialize(float value, JsonValue& json)
-    {
-        json = std::isfinite(value) ? value : 0.0f;
-        return true;
-    }
 };
 
 template <>
-struct JsonAdapter<double> : PrimitiveAdapter<double>
+struct JsonAdapter<double> : FloatAdapter<double>
 {
-    static bool serialize(double value, JsonValue& json)
-    {
-        json = std::isfinite(value) ? value : 0.0;
-        return true;
-    }
 };
 
 template <>

@@ -129,7 +129,7 @@ private:
     NetworkContext* _context;
 };
 
-class ConnectionCallbackSystem
+class ConnectionCallbacks
 {
 public:
     static void setup(NetworkContext& context)
@@ -187,7 +187,7 @@ void NetworkManager::init()
     _interface = std::make_shared<ServerInterface>(*_context);
     _api->setActionInterface(_interface);
     EntrypointRegistry::registerEntrypoints(*_interface);
-    ConnectionCallbackSystem::setup(*_context);
+    ConnectionCallbacks::setup(*_context);
 }
 
 void NetworkManager::preRender()

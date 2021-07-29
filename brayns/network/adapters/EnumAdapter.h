@@ -113,6 +113,7 @@ struct EnumAdapter
             return false;
         }
         json = *name;
+        return true;
     }
 
     static bool deserialize(const JsonValue& json, T& value)

@@ -109,7 +109,19 @@ struct JsonSchemaHelper
 
     static bool hasType(const JsonSchema& schema, JsonType type)
     {
-        return JsonTypeHelper::isSame(schema.type, type);
+        return JsonTypeHelper::check(schema.type, type);
+    }
+
+    static void requireAll(JsonSchema& schema)
+    {
+        auto& properties = schema.properties;
+        auto& required = schema.required;
+        required.reserve(properties.size());
+        for (const auto& pair : properties)
+        {
+            auto& name = pair.first;
+            required.push_back(name);
+        }
     }
 };
 } // namespace brayns

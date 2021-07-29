@@ -83,6 +83,12 @@ enum class JsonType
 
 struct JsonTypeHelper
 {
+    static bool check(JsonType required, JsonType type)
+    {
+        return required == type ||
+               required == JsonType::Number && type == JsonType::Integer;
+    }
+
     static bool isNumber(JsonType type)
     {
         return type == JsonType::Integer || type == JsonType::Number;
@@ -90,9 +96,9 @@ struct JsonTypeHelper
 
     static bool isPrimitive(JsonType type) { return type <= JsonType::String; }
 
-    static bool isSame(JsonType left, JsonType right)
+    static bool isPrimitive(const JsonValue& json)
     {
-        return left == right || isNumber(left) && isNumber(right);
+        return json.isNumeric() || json.isString();
     }
 
     template <typename T>

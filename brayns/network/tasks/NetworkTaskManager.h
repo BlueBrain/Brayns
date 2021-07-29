@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <stdexcept>
-
 #include "NetworkTaskMap.h"
 
 namespace brayns

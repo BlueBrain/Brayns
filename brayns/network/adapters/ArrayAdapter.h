@@ -102,7 +102,7 @@ struct ArrayAdapter
         }
         T buffer(array->size());
         size_t i = 0;
-        for (auto& item : buffer)
+        for (decltype(auto) item : buffer)
         {
             if (!Json::deserialize(array->get(i++), item))
             {
@@ -110,6 +110,33 @@ struct ArrayAdapter
             }
         }
         value = std::move(buffer);
+        return true;
+    }
+};
+
+template <>
+struct JsonAdapter<std::vector<bool>::reference>
+{
+    using Ref = std::vector<bool>::reference;
+
+    static JsonSchema getSchema(Ref value)
+    {
+        return Json::getSchema(bool(value));
+    }
+
+    static bool serialize(Ref value, JsonValue& json)
+    {
+        json = bool(value);
+        return true;
+    }
+
+    static bool deserialize(const JsonValue& json, Ref value)
+    {
+        if (!json.isBoolean())
+        {
+            return false;
+        }
+        value = json.extract<bool>();
         return true;
     }
 };
