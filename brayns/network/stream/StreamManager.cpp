@@ -102,8 +102,8 @@ public:
     static void broadcast(NetworkContext& context)
     {
         auto& stream = context.getStream();
-        auto& image = stream.getImageStreamInfo();
-        if (!image.triggered)
+        auto& image = stream.getImageStream();
+        if (!image.isTriggered())
         {
             return;
         }
@@ -151,8 +151,8 @@ private:
     static bool _isImageStreamControlled(NetworkContext& context)
     {
         auto& stream = context.getStream();
-        auto& info = stream.getImageStreamInfo();
-        return info.controlled;
+        auto& info = stream.getImageStream();
+        return info.isControlled();
     }
 };
 } // namespace
@@ -166,30 +166,9 @@ StreamManager::StreamManager(NetworkContext& context)
 
 StreamManager::~StreamManager() {}
 
-void StreamManager::setImageStreamControlled(bool controlled)
-{
-    _image.controlled = controlled;
-    _image.triggered = false;
-}
-
-void StreamManager::triggerImageStream()
-{
-    _image.triggered = true;
-}
-
-void StreamManager::setVideoStreamEnabled(bool enabled)
-{
-    _video.enabled = enabled;
-}
-
-void StreamManager::setVideoEncoderKbps(int64_t kbps)
-{
-    _video.encoderKbps = kbps;
-}
-
-void StreamManager::broadcast()
+void StreamManager::update()
 {
     StreamDispatcher::broadcast(*_context);
-    _image.triggered = false;
+    _imageStream.resetTrigger();
 }
 } // namespace brayns

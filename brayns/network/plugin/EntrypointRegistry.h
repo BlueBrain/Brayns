@@ -38,6 +38,7 @@
 #include <brayns/network/entrypoints/TestEntrypoint.h>
 #include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
 #include <brayns/network/entrypoints/VersionEntrypoint.h>
+#include <brayns/network/entrypoints/VideoStreamEntrypoint.h>
 #include <brayns/network/entrypoints/VolumeParametersEntrypoint.h>
 
 namespace brayns
@@ -72,6 +73,8 @@ public:
         interface.add<SnapshotEntrypoint>();
         interface.add<GetEnvironmentMapEntrypoint>();
         interface.add<SetEnvironmentMapEntrypoint>();
+        interface.add<GetVideoStreamEntrypoint>();
+        interface.add<SetVideoStreamEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }

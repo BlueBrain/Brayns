@@ -20,30 +20,13 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/json/MessageAdapter.h>
+#include <brayns/network/stream/StreamManager.h>
 
 namespace brayns
 {
-class TriggerJpegStreamEntrypoint
-    : public Entrypoint<EmptyMessage, EmptyMessage>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "trigger-jpeg-stream";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Triggers the engine to stream a frame to the clients";
-    }
-
-    virtual void onRequest(const Request& request) override
-    {
-        auto& imageStream = getStream().getImageStream();
-        imageStream.trigger();
-        triggerRender();
-        request.reply(EmptyMessage());
-    }
-};
+BRAYNS_NAMED_ADAPTER_BEGIN(VideoStreamMonitor, "VideoStream")
+BRAYNS_ADAPTER_GETSET("enabled", isEnabled, setEnabled, "Video stream enabled")
+BRAYNS_ADAPTER_GETSET("kbps", getKbps, setKbps, "Encoding bit rate in kb/s")
+BRAYNS_ADAPTER_END()
 } // namespace brayns

@@ -203,6 +203,6 @@ void NetworkManager::postRender()
     auto& entrypoints = _context->getEntrypoints();
     entrypoints.update();
     auto& stream = _context->getStream();
-    stream.broadcast();
+    stream.update();
 }
 } // namespace brayns

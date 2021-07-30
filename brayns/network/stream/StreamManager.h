@@ -26,16 +26,52 @@ namespace brayns
 class NetworkContext;
 class Encoder;
 
-struct ImageStreamInfo
+class ImageStreamMonitor
 {
-    bool controlled = false;
-    bool triggered = false;
+public:
+    bool isControlled() const { return _controlled; }
+
+    void setControlled(bool controlled)
+    {
+        _controlled = controlled;
+        _triggered = false;
+    }
+
+    bool isTriggered() const { return _triggered; }
+
+    void trigger() { _triggered = true; }
+
+    void resetTrigger() { _triggered = false; }
+
+private:
+    bool _controlled = false;
+    bool _triggered = false;
 };
 
-struct VideoStreamInfo
+class VideoStreamMonitor
 {
-    bool enabled = false;
-    int64_t encoderKbps = 5000;
+public:
+    bool isEnabled() const { return _enabled; }
+
+    void setEnabled(bool enabled) { _enabled = enabled; }
+
+    uint32_t getKbps() const { return _kbps; }
+
+    void setKbps(uint32_t kbps) { _kbps = kbps; }
+
+    bool operator==(const VideoStreamMonitor& other) const
+    {
+        return _enabled == other._enabled && _kbps == other._kbps;
+    }
+
+    bool operator!=(const VideoStreamMonitor& other) const
+    {
+        return !(*this == other);
+    }
+
+private:
+    bool _enabled = false;
+    uint32_t _kbps = 5000;
 };
 
 class StreamManager
@@ -44,20 +80,16 @@ public:
     StreamManager(NetworkContext& context);
     ~StreamManager();
 
-    void setImageStreamControlled(bool controlled);
-    void triggerImageStream();
-    void setVideoStreamEnabled(bool enabled);
-    void setVideoEncoderKbps(int64_t kbps);
-    void broadcast();
+    void update();
 
-    const ImageStreamInfo& getImageStreamInfo() const { return _image; }
+    ImageStreamMonitor& getImageStream() { return _imageStream; }
 
-    const VideoStreamInfo& getVideoStreamInfo() const { return _video; }
+    VideoStreamMonitor& getVideoStream() { return _videoStream; }
 
 private:
     NetworkContext* _context;
-    ImageStreamInfo _image;
-    VideoStreamInfo _video;
+    ImageStreamMonitor _imageStream;
+    VideoStreamMonitor _videoStream;
     std::unique_ptr<Encoder> _encoder;
 };
-}
+} // namespace brayns
