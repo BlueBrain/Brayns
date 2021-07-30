@@ -112,6 +112,11 @@ struct JsonSchemaHelper
         return JsonTypeHelper::check(schema.type, type);
     }
 
+    static void allowAnyAdditionalProperty(JsonSchema& schema)
+    {
+        schema.additionalProperties = {{}};
+    }
+
     static void requireAll(JsonSchema& schema)
     {
         auto& properties = schema.properties;

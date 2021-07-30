@@ -87,12 +87,17 @@ private:
             set(object, key, false);
             return;
         }
-        if (additionalProperties.size() == 1)
+        if (additionalProperties.size() > 1)
         {
-            set(object, key, additionalProperties[0]);
+            set(object, key, additionalProperties);
             return;
         }
-        set(object, key, additionalProperties);
+        auto& schema = additionalProperties[0];
+        if (JsonSchemaHelper::isEmpty(schema))
+        {
+            return;
+        }
+        set(object, key, schema);
     }
 
     template <typename T>
@@ -121,17 +126,6 @@ private:
             return;
         }
         set(object, key, value);
-    }
-
-    template <typename T>
-    static void setFirstIfNotEmpty(JsonObject& object, const std::string& key,
-                                   const T& value)
-    {
-        if (value.empty())
-        {
-            return;
-        }
-        set(object, key, value[0]);
     }
 
     template <typename T>

@@ -71,6 +71,15 @@ public:
 
     const std::vector<std::string>& getErrors() const { return _errors; }
 
+    void addError(std::string error) { _errors.push_back(std::move(error)); }
+
+    void addErrors(const std::vector<std::string>& errors)
+    {
+        _errors.insert(_errors.end(), errors.begin(), errors.end());
+    }
+
+    void addInvalidOneOf() { addError("No schema in oneOf match the input"); }
+
     void addInvalidType(JsonType type, JsonType schemaType)
     {
         auto& typeName = GetJsonTypeName::fromType(type);
@@ -88,7 +97,7 @@ public:
             stream << " at '" << path << "'";
         }
         stream << ": expected '" << schemaType << "' got '" << type << "'";
-        _errors.push_back(stream.str());
+        addError(stream.str());
     }
 
     void addInvalidEnum(const JsonValue& json,
@@ -105,7 +114,7 @@ public:
             stream << ", " << enums[i].toString();
         }
         stream << "]";
-        _errors.push_back(stream.str());
+        addError(stream.str());
     }
 
     void addBelowMinimum(double value, double minimum)
@@ -113,7 +122,7 @@ public:
         std::ostringstream stream;
         stream << "'" << _path.toString() << "' is below minimum value '"
                << minimum << "'";
-        _errors.push_back(stream.str());
+        addError(stream.str());
     }
 
     void addAboveMaximum(double value, double maximum)
@@ -121,12 +130,17 @@ public:
         std::ostringstream stream;
         stream << "'" << _path.toString() << "' is above maximum value '"
                << maximum << "'";
-        _errors.push_back(stream.str());
+        addError(stream.str());
     }
 
     void addMissingProperty()
     {
-        _errors.push_back("Missing property: '" + _path.toString() + "'");
+        addError("Missing property: '" + _path.toString() + "'");
+    }
+
+    void addUnknownProperty()
+    {
+        addError("Unknown property: '" + _path.toString() + "'");
     }
 
     void addNotEnoughItems(size_t size, size_t minItems)
@@ -134,7 +148,7 @@ public:
         std::ostringstream stream;
         stream << "Not enough items in '" << _path.toString() << "': min '"
                << minItems << "' got '" << size << "'";
-        _errors.push_back(stream.str());
+        addError(stream.str());
     }
 
     void addTooManyItems(size_t size, size_t maxItems)
@@ -142,7 +156,7 @@ public:
         std::ostringstream stream;
         stream << "Too many items in '" << _path.toString() << "': max '"
                << maxItems << "' got '" << size << "'";
-        _errors.push_back(stream.str());
+        addError(stream.str());
     }
 
 private:
@@ -170,6 +184,7 @@ private:
         }
         if (JsonSchemaHelper::isOneOf(schema))
         {
+            _validateOneOf(json, schema);
             return;
         }
         if (!_validateType(json, schema))
@@ -196,6 +211,24 @@ private:
         {
             _validateItems(json, schema);
         }
+    }
+
+    void _validateOneOf(const JsonValue& json, const JsonSchema& schema)
+    {
+        auto backup = std::move(_context);
+        for (const auto& oneOf : schema.oneOf)
+        {
+            _context.clear();
+            _validate(json, oneOf);
+            auto& errors = _context.getErrors();
+            if (errors.empty())
+            {
+                _context = std::move(backup);
+                return;
+            }
+        }
+        _context = std::move(backup);
+        _context.addInvalidOneOf();
     }
 
     bool _validateType(const JsonValue& json, const JsonSchema& schema)
@@ -240,8 +273,9 @@ private:
         auto& object = json.extract<JsonObject::Ptr>();
         for (const auto& pair : schema.properties)
         {
-            _context.push(pair.first);
-            _validateProperty(pair.first, object, schema);
+            auto& name = pair.first;
+            _context.push(name);
+            _validateProperty(name, object, schema);
             _context.pop();
         }
     }
@@ -266,15 +300,13 @@ private:
     void _validateAdditionalProperties(const JsonValue& json,
                                        const JsonSchema& schema)
     {
-        if (schema.additionalProperties.empty())
-        {
-            return;
-        }
         auto& object = *json.extract<JsonObject::Ptr>();
         for (const auto& pair : object)
         {
-            _context.push(pair.first);
-            _validateAdditionalProperty(pair.first, pair.second, schema);
+            auto& name = pair.first;
+            auto& child = pair.second;
+            _context.push(name);
+            _validateAdditionalProperty(name, child, schema);
             _context.pop();
         }
     }
@@ -287,7 +319,13 @@ private:
         {
             return;
         }
-        _validate(json, schema.additionalProperties[0]);
+        auto& additionalProperties = schema.additionalProperties;
+        if (additionalProperties.empty())
+        {
+            _context.addUnknownProperty();
+            return;
+        }
+        _validate(json, additionalProperties[0]);
     }
 
     void _validateItems(const JsonValue& json, const JsonSchema& schema)

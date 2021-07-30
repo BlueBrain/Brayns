@@ -252,13 +252,13 @@ struct Converter<std::string, EnumProperty>
 };
 
 /**
- * @brief Converter to convert an enumeration to integer.
+ * @brief Converter to convert an enumeration to integer 32.
  *
  */
 template <>
-struct Converter<EnumProperty, int>
+struct Converter<EnumProperty, int32_t>
 {
-    static void convert(const EnumProperty& from, int& to)
+    static void convert(const EnumProperty& from, int32_t& to)
     {
         to = from.toInt();
     }
@@ -269,8 +269,31 @@ struct Converter<EnumProperty, int>
  *
  */
 template <>
-struct Converter<int, EnumProperty>
+struct Converter<int32_t, EnumProperty>
 {
-    static void convert(int from, EnumProperty& to) { to = from; }
+    static void convert(int32_t from, EnumProperty& to) { to = int(from); }
+};
+
+/**
+ * @brief Converter to convert an enumeration to integer 64.
+ *
+ */
+template <>
+struct Converter<EnumProperty, int64_t>
+{
+    static void convert(const EnumProperty& from, int64_t& to)
+    {
+        to = from.toInt();
+    }
+};
+
+/**
+ * @brief Converter to assign a new integer value to an enumeration.
+ *
+ */
+template <>
+struct Converter<int64_t, EnumProperty>
+{
+    static void convert(int64_t from, EnumProperty& to) { to = int(from); }
 };
 } // namespace brayns

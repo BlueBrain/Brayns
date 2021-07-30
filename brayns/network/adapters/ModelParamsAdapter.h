@@ -18,32 +18,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ConversionRegistry.h"
+#pragma once
 
-#include "AnyConverter.h"
-#include "Converter.h"
-#include "EnumProperty.h"
+#include <brayns/network/json/MessageAdapter.h>
 
-namespace
-{
-brayns::AnyConverterMap _registerConverters()
-{
-    brayns::AnyConverterMap converters;
-    converters.addexn2<int32_t, double>();
-    converters.addexn2<int64_t, double>();
-    converters.addex2<int32_t, brayns::EnumProperty>();
-    converters.addex2<int64_t, brayns::EnumProperty>();
-    converters.addex2<std::string, brayns::EnumProperty>();
-    return converters;
-}
+#include <brayns/engine/Model.h>
 
-brayns::AnyConverterMap _converters = _registerConverters();
-} // namespace
+#include "BoxAdapter.h"
+#include "TransformationAdapter.h"
 
 namespace brayns
 {
-bool ConversionRegistry::convert(const Any& from, Any& to)
-{
-    return _converters.convert(from, to);
-}
+BRAYNS_ADAPTER_BEGIN(ModelParams)
+BRAYNS_ADAPTER_GETSET("bounding_box", getBoundingBox, setBoundingBox,
+                      "Has bounding box")
+BRAYNS_ADAPTER_GETSET("name", getName, setName, "Model name")
+BRAYNS_ADAPTER_GETSET("path", getPath, setPath, "Model file path")
+BRAYNS_ADAPTER_GETSET("transformation", getTransformation, setTransformation,
+                      "Model transformation")
+BRAYNS_ADAPTER_GETSET("visible", getVisible, setVisible, "Is visible")
+BRAYNS_ADAPTER_GETSET("loader_name", getLoaderName, setLoaderName,
+                      "Name of the loader")
+BRAYNS_ADAPTER_GETSET("loader_properties", getLoaderProperties,
+                      setLoaderProperties, "Loader properties")
+BRAYNS_ADAPTER_END()
 } // namespace brayns

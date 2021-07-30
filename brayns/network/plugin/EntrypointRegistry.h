@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <brayns/network/entrypoints/AddModelEntrypoint.h>
 #include <brayns/network/entrypoints/AnimationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/ApplicationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
@@ -75,6 +76,7 @@ public:
         interface.add<SetEnvironmentMapEntrypoint>();
         interface.add<GetVideoStreamEntrypoint>();
         interface.add<SetVideoStreamEntrypoint>();
+        interface.add<AddModelEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }

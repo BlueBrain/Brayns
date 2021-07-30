@@ -83,9 +83,11 @@ public:
     static bool visit(const Property& property, FunctorType functor)
     {
         return property.visit<EnumProperty>(functor) ||
+               property.visit<float>(functor) ||
                property.visit<double>(functor) ||
                property.visit<int32_t>(functor) ||
                property.visit<uint32_t>(functor) ||
+               property.visit<int64_t>(functor) ||
                property.visit<uint64_t>(functor) ||
                property.visit<std::string>(functor) ||
                property.visit<bool>(functor) ||
@@ -98,6 +100,7 @@ public:
                property.visit<std::vector<float>>(functor) ||
                property.visit<std::vector<int32_t>>(functor) ||
                property.visit<std::vector<uint32_t>>(functor) ||
+               property.visit<std::vector<int64_t>>(functor) ||
                property.visit<std::vector<uint64_t>>(functor) ||
                property.visit<std::vector<std::string>>(functor) ||
                property.visit<std::vector<bool>>(functor);
@@ -107,9 +110,11 @@ public:
     static bool visit(Property& property, FunctorType functor)
     {
         return property.visit<EnumProperty>(functor) ||
+               property.visit<float>(functor) ||
                property.visit<double>(functor) ||
                property.visit<int32_t>(functor) ||
                property.visit<uint32_t>(functor) ||
+               property.visit<int64_t>(functor) ||
                property.visit<uint64_t>(functor) ||
                property.visit<std::string>(functor) ||
                property.visit<bool>(functor) ||
@@ -122,6 +127,7 @@ public:
                property.visit<std::vector<float>>(functor) ||
                property.visit<std::vector<int32_t>>(functor) ||
                property.visit<std::vector<uint32_t>>(functor) ||
+               property.visit<std::vector<int64_t>>(functor) ||
                property.visit<std::vector<uint64_t>>(functor) ||
                property.visit<std::vector<std::string>>(functor) ||
                property.visit<std::vector<bool>>(functor);
@@ -139,6 +145,11 @@ public:
         {
             add(property, schema);
         }
+        if (properties.empty())
+        {
+            JsonSchemaHelper::allowAnyAdditionalProperty(schema);
+        }
+        return schema;
     }
 
 private:
