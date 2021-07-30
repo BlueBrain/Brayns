@@ -20,32 +20,11 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/json/Message.h>
 
 namespace brayns
 {
-class CancelEntrypoint : public Entrypoint<CancelParams, EmptyMessage>
-{
-public:
-    virtual std::string getName() const override { return "cancel"; }
-
-    virtual std::string getDescription() const override
-    {
-        return "Cancel the task started by the request with the given ID";
-    }
-
-    virtual void onRequest(const Request& request) override
-    {
-        auto params = request.getParams();
-        auto& id = params.id;
-        auto& handle = request.getConnectionHandle();
-        auto& tasks = getTasks();
-        if (!tasks.cancel(handle, id))
-        {
-            throw EntrypointException("No task with ID '" + id +
-                                      "' is running for this client");
-        }
-        request.reply(EmptyMessage());
-    }
-};
+BRAYNS_MESSAGE_BEGIN(RemoveModelMessage)
+BRAYNS_MESSAGE_ENTRY(std::vector<size_t>, ids, "List of model ID to remove")
+BRAYNS_MESSAGE_END()
 } // namespace brayns

@@ -30,6 +30,7 @@
 #include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
 #include <brayns/network/entrypoints/QuitEntrypoint.h>
+#include <brayns/network/entrypoints/RemoveModelEntrypoint.h>
 #include <brayns/network/entrypoints/RendererEntrypoint.h>
 #include <brayns/network/entrypoints/ResetCameraEntrypoint.h>
 #include <brayns/network/entrypoints/SceneEntrypoint.h>
@@ -77,6 +78,7 @@ public:
         interface.add<GetVideoStreamEntrypoint>();
         interface.add<SetVideoStreamEntrypoint>();
         interface.add<AddModelEntrypoint>();
+        interface.add<RemoveModelEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }

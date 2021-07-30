@@ -20,31 +20,34 @@
 
 #pragma once
 
+#include <brayns/engine/Scene.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/messages/RemoveModelMessage.h>
 
 namespace brayns
 {
-class CancelEntrypoint : public Entrypoint<CancelParams, EmptyMessage>
+class RemoveModelEntrypoint
+    : public Entrypoint<RemoveModelMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override { return "cancel"; }
+    virtual std::string getName() const override { return "remove-model"; }
 
     virtual std::string getDescription() const override
     {
-        return "Cancel the task started by the request with the given ID";
+        return "Remove the model(s) from the ID list from the scene";
     }
 
     virtual void onRequest(const Request& request) override
     {
         auto params = request.getParams();
-        auto& id = params.id;
-        auto& handle = request.getConnectionHandle();
-        auto& tasks = getTasks();
-        if (!tasks.cancel(handle, id))
+        auto& engine = getApi().getEngine();
+        auto& scene = engine.getScene();
+        for (auto id : params.ids)
         {
-            throw EntrypointException("No task with ID '" + id +
-                                      "' is running for this client");
+            scene.removeModel(id);
         }
+        triggerRender();
         request.reply(EmptyMessage());
     }
 };
