@@ -27,14 +27,12 @@
 namespace brayns
 {
 BRAYNS_ADAPTER_BEGIN(AnimationParameters)
-BRAYNS_ADAPTER_GETSET(uint32_t, "frame_count", getNumFrames, setNumFrames,
+BRAYNS_ADAPTER_GETSET("frame_count", getNumFrames, setNumFrames,
                       "Animation frame count")
-BRAYNS_ADAPTER_GETSET(uint32_t, "current", getFrame, setFrame,
-                      "Current frame index")
-BRAYNS_ADAPTER_GETSET(uint32_t, "delta", getDelta, setDelta, "Frame delta")
-BRAYNS_ADAPTER_GETSET(double, "dt", getDt, setDt, "Frame time")
-BRAYNS_ADAPTER_GETSET(bool, "playing", isPlaying, setPlaying,
-                      "Animation is playing")
-BRAYNS_ADAPTER_GETSET(std::string, "unit", getUnit, setUnit, "Time unit")
+BRAYNS_ADAPTER_GETSET("current", getFrame, setFrame, "Current frame index")
+BRAYNS_ADAPTER_GETSET("delta", getDelta, setDelta, "Frame delta")
+BRAYNS_ADAPTER_GETSET("dt", getDt, setDt, "Frame time")
+BRAYNS_ADAPTER_GETSET("playing", isPlaying, setPlaying, "Animation is playing")
+BRAYNS_ADAPTER_GETSET("unit", getUnit, setUnit, "Time unit")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

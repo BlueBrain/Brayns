@@ -26,9 +26,7 @@
 namespace brayns
 {
 BRAYNS_NAMED_ADAPTER_BEGIN(VideoStreamMonitor, "VideoStream")
-BRAYNS_ADAPTER_GETSET(bool, "enabled", isEnabled, setEnabled,
-                      "Video stream enabled")
-BRAYNS_ADAPTER_GETSET(uint32_t, "kbps", getKbps, setKbps,
-                      "Encoding bit rate in kb/s")
+BRAYNS_ADAPTER_GETSET("enabled", isEnabled, setEnabled, "Video stream enabled")
+BRAYNS_ADAPTER_GETSET("kbps", getKbps, setKbps, "Encoding bit rate in kb/s")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

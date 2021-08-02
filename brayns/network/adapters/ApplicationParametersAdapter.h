@@ -27,14 +27,12 @@
 namespace brayns
 {
 BRAYNS_ADAPTER_BEGIN(ApplicationParameters)
-BRAYNS_ADAPTER_GET(std::string, "engine", getEngine, "Application engine")
-BRAYNS_ADAPTER_GET(std::vector<std::string>, "plugins", getPlugins,
-                   "Loaded plugins")
-BRAYNS_ADAPTER_GETSET(size_t, "jpeg_compression", getJpegCompression,
+BRAYNS_ADAPTER_GET("engine", getEngine, "Application engine")
+BRAYNS_ADAPTER_GET("plugins", getPlugins, "Loaded plugins")
+BRAYNS_ADAPTER_GETSET("jpeg_compression", getJpegCompression,
                       setJpegCompression, "JPEG compression rate")
-BRAYNS_ADAPTER_GETSET(size_t, "image_stream_fps", getImageStreamFPS,
-                      setImageStreamFPS, "Framerate of image stream")
-BRAYNS_ADAPTER_GETSET(Vector2ui, "viewport", getWindowSize, setWindowSize,
-                      "Window size")
+BRAYNS_ADAPTER_GETSET("image_stream_fps", getImageStreamFPS, setImageStreamFPS,
+                      "Framerate of image stream")
+BRAYNS_ADAPTER_GETSET("viewport", getWindowSize, setWindowSize, "Window size")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

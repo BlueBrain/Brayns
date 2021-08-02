@@ -27,23 +27,22 @@
 namespace brayns
 {
 BRAYNS_ADAPTER_BEGIN(RenderingParameters)
-BRAYNS_ADAPTER_GETSET(bool, "accumulation", getAccumulation, setAccumulation,
+BRAYNS_ADAPTER_GETSET("accumulation", getAccumulation, setAccumulation,
                       "Multiple render passes")
-BRAYNS_ADAPTER_GETSET(Vector3d, "background_color", getBackgroundColor,
+BRAYNS_ADAPTER_GETSET("background_color", getBackgroundColor,
                       setBackgroundColor, "Background color RGB")
-BRAYNS_ADAPTER_GETSET(std::string, "current", getCurrentRenderer,
-                      setCurrentRenderer, "Current renderer name")
-BRAYNS_ADAPTER_GETSET(bool, "head_light", getHeadLight, setHeadLight,
+BRAYNS_ADAPTER_GETSET("current", getCurrentRenderer, setCurrentRenderer,
+                      "Current renderer name")
+BRAYNS_ADAPTER_GETSET("head_light", getHeadLight, setHeadLight,
                       "Light source follows camera origin")
-BRAYNS_ADAPTER_GETSET(size_t, "max_accum_frames", getMaxAccumFrames,
-                      setMaxAccumFrames, "Max render passes")
-BRAYNS_ADAPTER_GETSET(uint32_t, "samples_per_pixel", getSamplesPerPixel,
+BRAYNS_ADAPTER_GETSET("max_accum_frames", getMaxAccumFrames, setMaxAccumFrames,
+                      "Max render passes")
+BRAYNS_ADAPTER_GETSET("samples_per_pixel", getSamplesPerPixel,
                       setSamplesPerPixel, "Samples per pixel")
-BRAYNS_ADAPTER_GETSET(uint32_t, "subsampling", getSubsampling, setSubsampling,
+BRAYNS_ADAPTER_GETSET("subsampling", getSubsampling, setSubsampling,
                       "Subsampling")
-BRAYNS_ADAPTER_GET(std::vector<std::string>, "types", getRenderers,
-                   "Available renderers")
-BRAYNS_ADAPTER_GETSET(double, "variance_threshold", getVarianceThreshold,
+BRAYNS_ADAPTER_GET("types", getRenderers, "Available renderers")
+BRAYNS_ADAPTER_GETSET("variance_threshold", getVarianceThreshold,
                       setVarianceThreshold, "Stop accumulation threshold")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

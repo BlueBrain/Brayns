@@ -30,20 +30,19 @@
 namespace brayns
 {
 BRAYNS_ADAPTER_BEGIN(ModelDescriptor)
-BRAYNS_ADAPTER_GETSET(bool, "bounding_box", getBoundingBox, setBoundingBox,
+BRAYNS_ADAPTER_GETSET("bounding_box", getBoundingBox, setBoundingBox,
                       "Display bounding box")
-BRAYNS_ADAPTER_GET(Boxd, "bounds", getBounds, "Model bounds")
-BRAYNS_ADAPTER_GETSET(size_t, "id", getModelID, setModelID, "Model ID")
-BRAYNS_ADAPTER_GETSET(ModelMetadata, "metadata", getMetadata, setMetadata,
-                      "Key-value data")
-BRAYNS_ADAPTER_GETSET(std::string, "name", getName, setName, "Model name")
-BRAYNS_ADAPTER_GETSET(std::string, "path", getPath, setPath, "Model file path")
-BRAYNS_ADAPTER_GETSET(Transformation, "transformation", getTransformation,
-                      setTransformation, "Model transformation")
-BRAYNS_ADAPTER_GETSET(bool, "visible", getVisible, setVisible, "Is visible")
-BRAYNS_ADAPTER_GETSET(std::string, "loader_name", getLoaderName, setLoaderName,
+BRAYNS_ADAPTER_GET("bounds", getBounds, "Model bounds")
+BRAYNS_ADAPTER_GETSET("id", getModelID, setModelID, "Model ID")
+BRAYNS_ADAPTER_GETSET("metadata", getMetadata, setMetadata, "Key-value data")
+BRAYNS_ADAPTER_GETSET("name", getName, setName, "Model name")
+BRAYNS_ADAPTER_GETSET("path", getPath, setPath, "Model file path")
+BRAYNS_ADAPTER_GETSET("transformation", getTransformation, setTransformation,
+                      "Model transformation")
+BRAYNS_ADAPTER_GETSET("visible", getVisible, setVisible, "Is visible")
+BRAYNS_ADAPTER_GETSET("loader_name", getLoaderName, setLoaderName,
                       "Name of the loader")
-BRAYNS_ADAPTER_GETSET(PropertyMap, "loader_properties", getLoaderProperties,
+BRAYNS_ADAPTER_GETSET("loader_properties", getLoaderProperties,
                       setLoaderProperties, "Loader properties")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

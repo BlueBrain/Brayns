@@ -27,7 +27,7 @@
 namespace brayns
 {
 BRAYNS_ADAPTER_BEGIN(Boxd)
-BRAYNS_ADAPTER_GETSET(Boxd::vec, "min", getMin, setMin, "Bottom-left XYZ")
-BRAYNS_ADAPTER_GETSET(Boxd::vec, "max", getMax, setMax, "Top-right XYZ")
+BRAYNS_ADAPTER_GETSET("min", getMin, setMin, "Bottom-left XYZ")
+BRAYNS_ADAPTER_GETSET("max", getMax, setMax, "Top-right XYZ")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

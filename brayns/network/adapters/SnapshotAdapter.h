@@ -27,22 +27,16 @@
 namespace brayns
 {
 BRAYNS_ADAPTER_BEGIN(SnapshotParams)
-BRAYNS_ADAPTER_NAMED_ENTRY(std::unique_ptr<AnimationParameters>,
-                           "animation_parameters", animParams,
+BRAYNS_ADAPTER_NAMED_ENTRY("animation_parameters", animParams,
                            "Animation parameters");
-BRAYNS_ADAPTER_NAMED_ENTRY(std::unique_ptr<Camera>, "camera", camera,
-                           "Camera parameters");
-BRAYNS_ADAPTER_NAMED_ENTRY(std::string, "format", format,
-                           "Image format from FreeImage");
-BRAYNS_ADAPTER_NAMED_ENTRY(std::string, "name", name, "Name of the snapshot");
-BRAYNS_ADAPTER_NAMED_ENTRY(size_t, "quality", quality,
-                           "Image quality from 0 to 100");
-BRAYNS_ADAPTER_NAMED_ENTRY(std::unique_ptr<RenderingParameters>, "renderer",
-                           renderingParams, "Renderer parameters");
-BRAYNS_ADAPTER_NAMED_ENTRY(int, "samples_per_pixel", samplesPerPixel,
+BRAYNS_ADAPTER_NAMED_ENTRY("camera", camera, "Camera parameters");
+BRAYNS_ADAPTER_NAMED_ENTRY("format", format, "Image format from FreeImage");
+BRAYNS_ADAPTER_NAMED_ENTRY("name", name, "Name of the snapshot");
+BRAYNS_ADAPTER_NAMED_ENTRY("quality", quality, "Image quality from 0 to 100");
+BRAYNS_ADAPTER_NAMED_ENTRY("renderer", renderingParams, "Renderer parameters");
+BRAYNS_ADAPTER_NAMED_ENTRY("samples_per_pixel", samplesPerPixel,
                            "Samples per pixel");
-BRAYNS_ADAPTER_NAMED_ENTRY(Vector2ui, "size", size, "Image dimensions");
-BRAYNS_ADAPTER_NAMED_ENTRY(std::string, "file_path", filePath,
-                           "Path if saved on disk");
+BRAYNS_ADAPTER_NAMED_ENTRY("size", size, "Image dimensions");
+BRAYNS_ADAPTER_NAMED_ENTRY("file_path", filePath, "Path if saved on disk");
 BRAYNS_ADAPTER_END()
 } // namespace brayns

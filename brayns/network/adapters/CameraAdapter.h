@@ -27,15 +27,13 @@
 namespace brayns
 {
 BRAYNS_ADAPTER_BEGIN(Camera)
-BRAYNS_ADAPTER_GETSET(Quaterniond, "orientation", getOrientation,
-                      setOrientation, "Camera orientation XYZW")
-BRAYNS_ADAPTER_GETSET(Vector3d, "position", getPosition, setPosition,
+BRAYNS_ADAPTER_GETSET("orientation", getOrientation, setOrientation,
+                      "Camera orientation XYZW")
+BRAYNS_ADAPTER_GETSET("position", getPosition, setPosition,
                       "Camera position XYZ")
-BRAYNS_ADAPTER_GETSET(Vector3d, "target", getTarget, setTarget,
-                      "Camera target XYZ")
-BRAYNS_ADAPTER_GETSET(std::string, "current", getCurrentType, setCurrentType,
+BRAYNS_ADAPTER_GETSET("target", getTarget, setTarget, "Camera target XYZ")
+BRAYNS_ADAPTER_GETSET("current", getCurrentType, setCurrentType,
                       "Camera current type")
-BRAYNS_ADAPTER_GET(std::vector<std::string>, "types", getTypes,
-                   "Available camera types")
+BRAYNS_ADAPTER_GET("types", getTypes, "Available camera types")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

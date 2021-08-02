@@ -20,16 +20,46 @@
 
 #pragma once
 
-#include <brayns/network/adapters/TransformationAdapter.h>
-#include <brayns/network/json/Message.h>
+#include <tuple>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(UpdateModelMessage)
-BRAYNS_MESSAGE_ENTRY(size_t, id, "Model ID")
-BRAYNS_MESSAGE_OPTION(bool, bounding_box, "Display model bounds")
-BRAYNS_MESSAGE_OPTION(std::string, name, "Model name")
-BRAYNS_MESSAGE_OPTION(Transformation, transformation, "Model transformation")
-BRAYNS_MESSAGE_OPTION(bool, visible, "Model visibility")
-BRAYNS_MESSAGE_END()
+template <typename R, typename O, typename... A>
+struct FunctorTrait
+{
+    using ReturnType = R;
+
+    using ObjectType = O;
+
+    template <size_t I>
+    using ArgType = std::tuple_element_t<I, std::tuple<A...>>;
+
+    static constexpr size_t ArgCount = sizeof...(A);
+};
+
+template <typename T>
+struct FunctorInfo : FunctorInfo<decltype(&T::operator())>
+{
+};
+
+template <typename R, typename... A>
+struct FunctorInfo<R (*)(A...)> : FunctorTrait<R, void, A...>
+{
+};
+
+template <typename R, typename O, typename... A>
+struct FunctorInfo<R (O::*)(A...) const> : FunctorTrait<R, O, A...>
+{
+};
+
+template <typename R, typename O, typename... A>
+struct FunctorInfo<R (O::*)(A...)> : FunctorTrait<R, O, A...>
+{
+};
+
+template <typename T, size_t I>
+using GetArgType = typename FunctorInfo<T>::template ArgType<I>;
+
+template <typename T, size_t I>
+using DecayArgType = std::decay_t<GetArgType<T, I>>;
 } // namespace brayns

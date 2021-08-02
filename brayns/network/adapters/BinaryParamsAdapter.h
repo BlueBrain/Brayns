@@ -30,20 +30,19 @@
 namespace brayns
 {
 BRAYNS_ADAPTER_BEGIN(BinaryParam)
-BRAYNS_ADAPTER_GETSET(Boxd, "bounding_box", getBoundingBox, setBoundingBox,
-                      "Bounding box");
-BRAYNS_ADAPTER_NAMED_ENTRY(std::string, "chunks_id", chunksID, "Chunk ID");
-BRAYNS_ADAPTER_GETSET(std::string, "name", getName, setName, "Model name");
-BRAYNS_ADAPTER_GETSET(std::string, "path", getPath, setPath,
-                      "Model source path");
-BRAYNS_ADAPTER_NAMED_ENTRY(size_t, "size", size, "File size in bytes");
-BRAYNS_ADAPTER_GETSET(Transformation, "transformation", getTransformation,
-                      setTransformation, "Model transformation");
-BRAYNS_ADAPTER_NAMED_ENTRY(std::string, "type", type, "File extension or type");
-BRAYNS_ADAPTER_GETSET(bool, "visible", getVisible, setVisible, "Visible");
-BRAYNS_ADAPTER_GETSET(std::string, "loader_name", getLoaderName, setLoaderName,
+BRAYNS_ADAPTER_GETSET("bounding_box", getBoundingBox, setBoundingBox,
+                      "Display bounds");
+BRAYNS_ADAPTER_NAMED_ENTRY("chunks_id", chunksID, "Chunk ID");
+BRAYNS_ADAPTER_GETSET("name", getName, setName, "Model name");
+BRAYNS_ADAPTER_GETSET("path", getPath, setPath, "Model source path");
+BRAYNS_ADAPTER_NAMED_ENTRY("size", size, "File size in bytes");
+BRAYNS_ADAPTER_GETSET("transformation", getTransformation, setTransformation,
+                      "Model transformation");
+BRAYNS_ADAPTER_NAMED_ENTRY("type", type, "File extension or type");
+BRAYNS_ADAPTER_GETSET("visible", getVisible, setVisible, "Visible");
+BRAYNS_ADAPTER_GETSET("loader_name", getLoaderName, setLoaderName,
                       "Loader name");
-BRAYNS_ADAPTER_GETSET(PropertyMap, "loader_properties", getLoaderProperties,
+BRAYNS_ADAPTER_GETSET("loader_properties", getLoaderProperties,
                       setLoaderProperties, "Loader properties");
 BRAYNS_ADAPTER_END()
 } // namespace brayns

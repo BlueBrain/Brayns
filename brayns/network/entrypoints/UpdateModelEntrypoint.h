@@ -23,13 +23,13 @@
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
+#include <brayns/network/adapters/UpdateModelAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/UpdateModelMessage.h>
 
 namespace brayns
 {
 class UpdateModelEntrypoint
-    : public Entrypoint<UpdateModelMessage, EmptyMessage>
+    : public Entrypoint<UpdateModelProxy, EmptyMessage>
 {
 public:
     virtual std::string getName() const override { return "update-model"; }
@@ -41,18 +41,12 @@ public:
 
     virtual void onRequest(const Request& request) override
     {
-        auto params = request.getParams();
+        auto& json = request.getJsonParams();
         auto& engine = getApi().getEngine();
         auto& scene = engine.getScene();
-        auto id = params.id;
-        auto model = scene.getModel(id);
-        if (!model)
-        {
-            throw EntrypointException("Unknown model ID: '" +
-                                      std::to_string(id) + "'");
-        }
-        // TODO
-        model->computeBounds();
+        UpdateModelProxy model(scene);
+        Json::deserialize(json, model);
+        model.computeBounds();
         scene.markModified();
         engine.triggerRender();
         request.reply(EmptyMessage());

@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <brayns/common/utils/FunctorInfo.h>
+
 #include "Message.h"
 
 namespace brayns
@@ -59,7 +61,7 @@ namespace brayns
 
 #define BRAYNS_ADAPTER_BEGIN(TYPE) BRAYNS_NAMED_ADAPTER_BEGIN(TYPE, #TYPE)
 
-#define BRAYNS_ADAPTER_PROPERTY(TYPE, NAME, GET, SET, ...)           \
+#define BRAYNS_ADAPTER_PROPERTY(NAME, SCHEMA, TOJSON, FROMJSON, ...) \
     {                                                                \
         MessageProperty property;                                    \
         property.name = NAME;                                        \
@@ -67,62 +69,82 @@ namespace brayns
         property.getSchema = [](const void* data)                    \
         {                                                            \
             auto& object = *static_cast<const ObjectType*>(data);    \
-            return Json::getSchema(GET(object));                     \
+            return SCHEMA(object);                                   \
         };                                                           \
         property.serialize = [](const void* data, JsonValue& json)   \
         {                                                            \
             auto& object = *static_cast<const ObjectType*>(data);    \
-            return Json::serialize(GET(object), json);               \
+            return TOJSON(object, json);                             \
         };                                                           \
         property.deserialize = [](const JsonValue& json, void* data) \
         {                                                            \
             auto& object = *static_cast<ObjectType*>(data);          \
-            TYPE buffer{};                                           \
-            if (!Json::deserialize(json, buffer))                    \
-            {                                                        \
-                return false;                                        \
-            }                                                        \
-            SET(object, std::move(buffer));                          \
-            return true;                                             \
+            return FROMJSON(json, object);                           \
         };                                                           \
         info.addProperty(std::move(property));                       \
     }
 
-#define BRAYNS_ADAPTER_GETSET(TYPE, NAME, GET, SET, DESCRIPTION, ...)      \
-    BRAYNS_ADAPTER_PROPERTY(                                               \
-        TYPE, NAME,                                                        \
-        [](const auto& object) -> decltype(auto) { return object.GET(); }, \
-        [](auto& object, auto&& value)                                     \
-        { object.SET(std::forward<decltype(value)>(value)); },             \
-        Description(DESCRIPTION), __VA_ARGS__)
+#define BRAYNS_ADAPTER_SCHEMA(GET) \
+    [](const auto& object) { return Json::getSchema(object.GET()); }
 
-#define BRAYNS_ADAPTER_GET(TYPE, NAME, GET, DESCRIPTION, ...)              \
+#define BRAYNS_ADAPTER_TOJSON(GET)     \
+    [](const auto& object, auto& json) \
+    { return Json::serialize(object.GET(), json); }
+
+#define BRAYNS_ADAPTER_ARGTYPE(OBJECT, METHOD) \
+    DecayArgType<decltype(&std::decay_t<decltype(OBJECT)>::METHOD), 0>
+
+#define BRAYNS_ADAPTER_FROMJSON(SET)                   \
+    [](const auto& json, auto& object)                 \
+    {                                                  \
+        using T = BRAYNS_ADAPTER_ARGTYPE(object, SET); \
+        T buffer{};                                    \
+        if (!Json::deserialize(json, buffer))          \
+        {                                              \
+            return false;                              \
+        }                                              \
+        object.SET(std::move(buffer));                 \
+        return true;                                   \
+    }
+
+#define BRAYNS_ADAPTER_GETSET(NAME, GET, SET, DESCRIPTION, ...) \
+    BRAYNS_ADAPTER_PROPERTY(NAME, BRAYNS_ADAPTER_SCHEMA(GET),   \
+                            BRAYNS_ADAPTER_TOJSON(GET),         \
+                            BRAYNS_ADAPTER_FROMJSON(SET),       \
+                            Description(DESCRIPTION), __VA_ARGS__)
+
+#define BRAYNS_ADAPTER_GET(NAME, GET, DESCRIPTION, ...)                    \
     BRAYNS_ADAPTER_PROPERTY(                                               \
-        TYPE, NAME,                                                        \
-        [](const auto& object) -> decltype(auto) { return object.GET(); }, \
-        [](auto& object, auto&& value) {}, Description(DESCRIPTION),       \
+        NAME, BRAYNS_ADAPTER_SCHEMA(GET), BRAYNS_ADAPTER_TOJSON(GET),      \
+        [](const auto&, auto&) { return true; }, Description(DESCRIPTION), \
         ReadOnly(), __VA_ARGS__)
 
-#define BRAYNS_ADAPTER_SET(TYPE, NAME, SET, DESCRIPTION, ...)  \
-    BRAYNS_ADAPTER_PROPERTY(                                   \
-        TYPE, NAME, [](const auto& object) { return TYPE{}; }, \
-        [](auto& object, auto&& value)                         \
-        { object.SET(std::forward<decltype(value)>(value)); }, \
+#define BRAYNS_ADAPTER_SET(NAME, SET, DESCRIPTION, ...)                        \
+    BRAYNS_ADAPTER_PROPERTY(                                                   \
+        NAME,                                                                  \
+        [](const auto& object)                                                 \
+        {                                                                      \
+            using T = BRAYNS_ADAPTER_ARGTYPE(object, SET);                     \
+            return Json::getSchema<T>();                                       \
+        },                                                                     \
+        [](const auto&, auto&) { return true; }, BRAYNS_ADAPTER_FROMJSON(SET), \
         Description(DESCRIPTION), WriteOnly(), __VA_ARGS__)
 
-#define BRAYNS_ADAPTER_FIELD(TYPE, NAME, FIELD, ...)                          \
-    BRAYNS_ADAPTER_PROPERTY(                                                  \
-        TYPE, NAME, [](const auto& object) -> auto& { return object.FIELD; }, \
-        [](auto& object, auto&& value)                                        \
-        { object.FIELD = std::forward<decltype(value)>(value); },             \
+#define BRAYNS_ADAPTER_FIELD(NAME, FIELD, ...)                            \
+    BRAYNS_ADAPTER_PROPERTY(                                              \
+        NAME,                                                             \
+        [](const auto& object) { return Json::getSchema(object.FIELD); }, \
+        [](const auto& object, auto& json)                                \
+        { return Json::serialize(object.FIELD, json); },                  \
+        [](const auto& json, auto& object)                                \
+        { return Json::deserialize(json, object.FIELD); },                \
         __VA_ARGS__)
 
-#define BRAYNS_ADAPTER_NAMED_ENTRY(TYPE, NAME, FIELD, DESCRIPTION, ...) \
-    BRAYNS_ADAPTER_FIELD(TYPE, NAME, FIELD, Description(DESCRIPTION),   \
-                         __VA_ARGS__)
+#define BRAYNS_ADAPTER_NAMED_ENTRY(NAME, FIELD, DESCRIPTION, ...) \
+    BRAYNS_ADAPTER_FIELD(NAME, FIELD, Description(DESCRIPTION), __VA_ARGS__)
 
-#define BRAYNS_ADAPTER_ENTRY(TYPE, FIELD, DESCRIPTION, ...) \
-    BRAYNS_ADAPTER_NAMED_ENTRY(TYPE, #FIELD, FIELD, DESCRIPTION, __VA_ARGS__)
+#define BRAYNS_ADAPTER_ENTRY(FIELD, DESCRIPTION, ...) \
+    BRAYNS_ADAPTER_NAMED_ENTRY(#FIELD, FIELD, DESCRIPTION, __VA_ARGS__)
 
 #define BRAYNS_ADAPTER_END() \
     return info;             \
