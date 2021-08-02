@@ -30,7 +30,7 @@
 namespace brayns
 {
 BRAYNS_ADAPTER_BEGIN(Scene)
-BRAYNS_ADAPTER_GET("bounds", getBounds, "Scene boundary")
-BRAYNS_ADAPTER_GET("models", getModels, "All models")
+BRAYNS_ADAPTER_GET(Boxd, "bounds", getBounds, "Scene boundary")
+BRAYNS_ADAPTER_GET(ModelDescriptors, "models", getModels, "All models")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

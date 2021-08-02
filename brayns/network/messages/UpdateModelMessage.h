@@ -20,22 +20,16 @@
 
 #pragma once
 
-#include <brayns/network/json/MessageAdapter.h>
-
-#include <brayns/engine/Camera.h>
+#include <brayns/network/adapters/TransformationAdapter.h>
+#include <brayns/network/json/Message.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(Camera)
-BRAYNS_ADAPTER_GETSET(Quaterniond, "orientation", getOrientation,
-                      setOrientation, "Camera orientation XYZW")
-BRAYNS_ADAPTER_GETSET(Vector3d, "position", getPosition, setPosition,
-                      "Camera position XYZ")
-BRAYNS_ADAPTER_GETSET(Vector3d, "target", getTarget, setTarget,
-                      "Camera target XYZ")
-BRAYNS_ADAPTER_GETSET(std::string, "current", getCurrentType, setCurrentType,
-                      "Camera current type")
-BRAYNS_ADAPTER_GET(std::vector<std::string>, "types", getTypes,
-                   "Available camera types")
-BRAYNS_ADAPTER_END()
+BRAYNS_MESSAGE_BEGIN(UpdateModelMessage)
+BRAYNS_MESSAGE_ENTRY(size_t, id, "Model ID")
+BRAYNS_MESSAGE_OPTION(bool, bounding_box, "Display model bounds")
+BRAYNS_MESSAGE_OPTION(std::string, name, "Model name")
+BRAYNS_MESSAGE_OPTION(Transformation, transformation, "Model transformation")
+BRAYNS_MESSAGE_OPTION(bool, visible, "Model visibility")
+BRAYNS_MESSAGE_END()
 } // namespace brayns

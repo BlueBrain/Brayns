@@ -27,7 +27,7 @@
 namespace brayns
 {
 BRAYNS_ADAPTER_BEGIN(Statistics)
-BRAYNS_ADAPTER_GET("fps", getFPS, "Framerate")
-BRAYNS_ADAPTER_GET("scene_size_in_bytes", getSceneSizeInBytes, "Scene size")
+BRAYNS_ADAPTER_GET(double, "fps", getFPS, "Framerate")
+BRAYNS_ADAPTER_GET(size_t, "scene_size_in_bytes", getSceneSizeInBytes, "Scene size")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

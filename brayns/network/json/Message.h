@@ -24,6 +24,8 @@
 #include <string>
 #include <vector>
 
+#include <boost/optional.hpp>
+
 #include <brayns/engine/Engine.h>
 
 #include <brayns/pluginapi/PluginAPI.h>
@@ -53,8 +55,8 @@ struct MessageProperty
     std::string name;
     JsonOptions options;
     std::function<JsonSchema(const void*)> getSchema;
-    std::function<void(const void*, JsonValue&)> serialize;
-    std::function<void(const JsonValue&, void*)> deserialize;
+    std::function<bool(const void*, JsonValue&)> serialize;
+    std::function<bool(const JsonValue&, void*)> deserialize;
 
     JsonSchema getSchemaWithOptions(const void* message) const
     {
@@ -63,7 +65,48 @@ struct MessageProperty
         return schema;
     }
 
-    bool isRequired() const { return options.required.value_or(false); }
+    void add(JsonSchema& schema, const void* message) const
+    {
+        if (isRequired())
+        {
+            auto& required = schema.required;
+            required.push_back(name);
+        }
+        schema.properties[name] = getSchemaWithOptions(message);
+    }
+
+    JsonValue extract(const JsonObject& object) const
+    {
+        auto json = object.get(name);
+        if (!json.isEmpty())
+        {
+            return json;
+        }
+        auto& defaultValue = options.defaultValue;
+        if (!defaultValue)
+        {
+            return json;
+        }
+        return *defaultValue;
+    }
+
+    bool isRequired() const
+    {
+        auto& required = options.required;
+        return required.value_or(false);
+    }
+
+    bool isReadOnly() const
+    {
+        auto& readOnly = options.readOnly;
+        return readOnly.value_or(false);
+    }
+
+    bool isWriteOnly() const
+    {
+        auto& writeOnly = options.writeOnly;
+        return writeOnly.value_or(false);
+    }
 };
 
 /**
@@ -87,14 +130,7 @@ public:
         schema.type = JsonType::Object;
         for (const auto& property : _properties)
         {
-            auto child = property.getSchemaWithOptions(message);
-            auto& name = property.name;
-            if (property.isRequired())
-            {
-                auto& required = schema.required;
-                required.push_back(name);
-            }
-            schema.properties[name] = std::move(child);
+            property.add(schema, message);
         }
         return schema;
     }
@@ -104,9 +140,15 @@ public:
         auto object = Poco::makeShared<JsonObject>();
         for (const auto& property : _properties)
         {
-            JsonValue jsonProperty;
-            property.serialize(message, jsonProperty);
-            object->set(property.name, jsonProperty);
+            if (property.isWriteOnly())
+            {
+                continue;
+            }
+            JsonValue child;
+            if (property.serialize(message, child))
+            {
+                object->set(property.name, child);
+            }
         }
         json = object;
         return true;
@@ -121,8 +163,12 @@ public:
         }
         for (const auto& property : _properties)
         {
-            auto jsonProperty = object->get(property.name);
-            property.deserialize(jsonProperty, message);
+            if (property.isReadOnly())
+            {
+                continue;
+            }
+            auto child = property.extract(*object);
+            property.deserialize(child, message);
         }
         return true;
     }
@@ -133,22 +179,6 @@ public:
     }
 
 private:
-    void _addSchema(JsonSchema& schema, const MessageProperty& property,
-                    const void* message)
-    {
-        auto child = property.getSchema(message);
-        auto& options = property.options;
-        JsonSchemaOptions::add(child, options);
-        auto& name = property.name;
-        auto& optionRequired = options.required;
-        if (optionRequired.value_or(false))
-        {
-            auto& required = schema.required;
-            required.push_back(name);
-        }
-        schema.properties[name] = std::move(child);
-    }
-
     std::string _title;
     std::vector<MessageProperty> _properties;
 };
@@ -236,12 +266,12 @@ private:
             property.serialize = [](const void* data, JsonValue& json)   \
             {                                                            \
                 auto& message = *static_cast<const MessageType*>(data);  \
-                Json::serialize(message.NAME, json);                     \
+                return Json::serialize(message.NAME, json);              \
             };                                                           \
             property.deserialize = [](const JsonValue& json, void* data) \
             {                                                            \
                 auto& message = *static_cast<MessageType*>(data);        \
-                Json::deserialize(json, message.NAME);                   \
+                return Json::deserialize(json, message.NAME);            \
             };                                                           \
             _getInfo().addProperty(std::move(property));                 \
             return 0;                                                    \
@@ -254,7 +284,8 @@ private:
                             __VA_ARGS__)
 
 #define BRAYNS_MESSAGE_OPTION(TYPE, NAME, DESCRIPTION, ...) \
-    BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, Description(DESCRIPTION), __VA_ARGS__)
+    BRAYNS_MESSAGE_PROPERTY(boost::optional<TYPE>, NAME,    \
+                            Description(DESCRIPTION), __VA_ARGS__)
 
 /**
  * @brief Must be called after BRAYNS_MESSAGE_BEGIN and a set of

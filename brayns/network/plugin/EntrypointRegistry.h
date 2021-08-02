@@ -39,6 +39,7 @@
 #include <brayns/network/entrypoints/StatisticsEntrypoint.h>
 #include <brayns/network/entrypoints/TestEntrypoint.h>
 #include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
+#include <brayns/network/entrypoints/UpdateModelEntrypoint.h>
 #include <brayns/network/entrypoints/VersionEntrypoint.h>
 #include <brayns/network/entrypoints/VideoStreamEntrypoint.h>
 #include <brayns/network/entrypoints/VolumeParametersEntrypoint.h>
@@ -79,6 +80,7 @@ public:
         interface.add<SetVideoStreamEntrypoint>();
         interface.add<AddModelEntrypoint>();
         interface.add<RemoveModelEntrypoint>();
+        interface.add<UpdateModelEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }

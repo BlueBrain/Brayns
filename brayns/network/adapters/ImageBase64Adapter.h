@@ -27,6 +27,6 @@
 namespace brayns
 {
 BRAYNS_NAMED_ADAPTER_BEGIN(ImageGenerator::ImageBase64, "ImageBase64")
-BRAYNS_ADAPTER_ENTRY(data, "Image data with base64 encoding")
+BRAYNS_ADAPTER_ENTRY(std::string, data, "Image data with base64 encoding")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

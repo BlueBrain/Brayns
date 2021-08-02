@@ -1,5 +1,4 @@
 /* Copyright (c) 2021 EPFL/Blue Brain Project
- *
  * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -27,11 +26,12 @@
 namespace brayns
 {
 BRAYNS_ADAPTER_BEGIN(Transformation)
-BRAYNS_ADAPTER_GETSET("translation", getTranslation, setTranslation,
+BRAYNS_ADAPTER_GETSET(Vector3d, "translation", getTranslation, setTranslation,
                       "Translation XYZ")
-BRAYNS_ADAPTER_GETSET("scale", getScale, setScale, "Scale XYZ")
-BRAYNS_ADAPTER_GETSET("rotation", getRotation, setRotation, "Rotation XYZW")
-BRAYNS_ADAPTER_GETSET("rotation_center", getRotationCenter, setRotationCenter,
-                      "Rotation center XYZ")
+BRAYNS_ADAPTER_GETSET(Vector3d, "scale", getScale, setScale, "Scale XYZ")
+BRAYNS_ADAPTER_GETSET(Quaterniond, "rotation", getRotation, setRotation,
+                      "Rotation XYZW")
+BRAYNS_ADAPTER_GETSET(Vector3d, "rotation_center", getRotationCenter,
+                      setRotationCenter, "Rotation center XYZ")
 BRAYNS_ADAPTER_END()
 } // namespace brayns
