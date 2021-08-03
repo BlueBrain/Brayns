@@ -86,6 +86,7 @@ public:
         interface.add<GetModelEntrypoint>();
         interface.add<GetModelPropertiesEntrypoint>();
         interface.add<SetModelPropertiesEntrypoint>();
+        interface.add<ModelPropertiesSchemaEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }

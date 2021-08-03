@@ -73,4 +73,28 @@ public:
         request.reply(EmptyMessage());
     }
 };
+
+class ModelPropertiesSchemaEntrypoint
+    : public Entrypoint<ModelMessage, JsonValue>
+{
+public:
+    virtual std::string getName() const override
+    {
+        return "model-properties-schema";
+    }
+
+    virtual std::string getDescription() const override
+    {
+        return "Get the property schema of the model";
+    }
+
+    virtual void onRequest(const Request& request) override
+    {
+        auto& model = ExtractModel::fromRequest(getApi(), request);
+        auto& properties = model.getProperties();
+        auto schema = Json::getSchema(properties);
+        auto result = Json::serialize(schema);
+        request.reply(result);
+    }
+};
 } // namespace brayns
