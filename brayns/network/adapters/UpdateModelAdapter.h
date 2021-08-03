@@ -20,8 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
-
+#include <brayns/network/entrypoint/ExtractModel.h>
 #include <brayns/network/json/MessageAdapter.h>
 
 #include "TransformationAdapter.h"
@@ -33,7 +32,7 @@ class UpdateModelProxy
 public:
     UpdateModelProxy() = default;
 
-    UpdateModelProxy(const Scene& scene)
+    UpdateModelProxy(Scene& scene)
         : _scene(&scene)
     {
     }
@@ -44,12 +43,7 @@ public:
         {
             throw std::runtime_error("Internal error with invalid setup");
         }
-        _model = _scene->getModel(id);
-        if (!_model)
-        {
-            throw EntrypointException("Unknown model ID: '" +
-                                      std::to_string(id) + "'");
-        }
+        _model = &ExtractModel::fromId(*_scene, id);
     }
 
     void setBoundingBox(bool enabled)
@@ -92,8 +86,8 @@ private:
         throw std::runtime_error("Internal error during model parsing");
     }
 
-    ModelDescriptorPtr _model;
-    const Scene* _scene = nullptr;
+    ModelDescriptor* _model = nullptr;
+    Scene* _scene = nullptr;
 };
 
 BRAYNS_NAMED_ADAPTER_BEGIN(UpdateModelProxy, "UpdateModelParams")

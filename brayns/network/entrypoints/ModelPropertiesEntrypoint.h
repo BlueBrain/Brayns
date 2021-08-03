@@ -23,23 +23,54 @@
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/entrypoint/ExtractModel.h>
 #include <brayns/network/messages/ModelMessage.h>
+#include <brayns/network/messages/ModelPropertiesMessage.h>
 
 namespace brayns
 {
-class GetModelEntrypoint : public Entrypoint<ModelMessage, ModelDescriptor>
+class GetModelPropertiesEntrypoint
+    : public Entrypoint<ModelMessage, PropertyMap>
 {
 public:
-    virtual std::string getName() const override { return "get-model"; }
+    virtual std::string getName() const override
+    {
+        return "get-model-properties";
+    }
 
     virtual std::string getDescription() const override
     {
-        return "Get all the information of the given model";
+        return "Get the properties of the given model";
     }
 
     virtual void onRequest(const Request& request) override
     {
         auto& model = ExtractModel::fromRequest(getApi(), request);
-        request.reply(model);
+        request.reply(model.getProperties());
+    }
+};
+
+class SetModelPropertiesEntrypoint
+    : public Entrypoint<ModelPropertiesMessage, EmptyMessage>
+{
+public:
+    virtual std::string getName() const override
+    {
+        return "set-model-properties";
+    }
+
+    virtual std::string getDescription() const override
+    {
+        return "Set the properties of the given model";
+    }
+
+    virtual void onRequest(const Request& request) override
+    {
+        auto params = request.getParams();
+        auto& newProperties = params.properties;
+        auto& model = ExtractModel::fromParams(getApi(), params);
+        auto oldProperties = model.getProperties();
+        oldProperties.merge(newProperties);
+        model.setProperties(oldProperties);
+        request.reply(EmptyMessage());
     }
 };
 } // namespace brayns

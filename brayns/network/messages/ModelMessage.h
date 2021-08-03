@@ -24,7 +24,7 @@
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(GetModelMessage)
-BRAYNS_MESSAGE_ENTRY(size_t, id, "Object ID")
+BRAYNS_MESSAGE_BEGIN(ModelMessage)
+BRAYNS_MESSAGE_ENTRY(size_t, id, "Model ID")
 BRAYNS_MESSAGE_END()
 } // namespace brayns

@@ -21,6 +21,7 @@
 
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Scene.h>
 
 #include <brayns/network/entrypoint/EntrypointManager.h>
 #include <brayns/network/socket/ConnectionManager.h>
