@@ -26,6 +26,7 @@
 #include <brayns/network/entrypoints/CancelEntrypoint.h>
 #include <brayns/network/entrypoints/EnvironmentMapEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
+#include <brayns/network/entrypoints/GetModelEntrypoint.h>
 #include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
 #include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
@@ -81,6 +82,7 @@ public:
         interface.add<AddModelEntrypoint>();
         interface.add<RemoveModelEntrypoint>();
         interface.add<UpdateModelEntrypoint>();
+        interface.add<GetModelEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }

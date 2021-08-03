@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/network/adapters/VideoStreamMonitorAdapter.h>
+#include <brayns/network/adapters/VideoStreamAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
