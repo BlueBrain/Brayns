@@ -80,9 +80,18 @@ public:
         wait();
     }
 
+    void checkCancelled() const
+    {
+        if (!_cancelled)
+        {
+            return;
+        }
+        throw std::runtime_error("Task cancelled");
+    }
+
     void progress(const std::string& operation, double amount)
     {
-        _throwIfCancelled();
+        checkCancelled();
         onProgress(operation, amount);
     }
 
@@ -110,21 +119,12 @@ private:
         return _result.wait_for(std::chrono::seconds(0)) == status;
     }
 
-    void _throwIfCancelled() const
-    {
-        if (!_cancelled)
-        {
-            return;
-        }
-        throw std::runtime_error("Task cancelled");
-    }
-
     void _fetchResult()
     {
         try
         {
             _result.get();
-            _throwIfCancelled();
+            checkCancelled();
             onComplete();
         }
         catch (...)

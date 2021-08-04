@@ -20,13 +20,10 @@
 
 #pragma once
 
-#include <chrono>
-#include <condition_variable>
-#include <mutex>
-
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/ExitLaterMessage.h>
 #include <brayns/network/tasks/NetworkTask.h>
+#include <brayns/network/tasks/NetworkTaskMonitor.h>
 
 namespace brayns
 {
@@ -45,11 +42,7 @@ public:
         start();
     }
 
-    virtual void run() override
-    {
-        std::unique_lock<std::mutex> lock(_mutex);
-        _monitor.wait_for(lock, _duration);
-    }
+    virtual void run() override { _monitor.waitFor(_duration); }
 
     virtual void onComplete() override
     {
@@ -57,13 +50,12 @@ public:
         _engine->triggerRender();
     }
 
-    virtual void onCancel() override { _monitor.notify_all(); }
+    virtual void onCancel() override { _monitor.notify(); }
 
 private:
     std::chrono::minutes _duration;
     Engine* _engine;
-    std::mutex _mutex;
-    std::condition_variable _monitor;
+    NetworkTaskMonitor _monitor;
 };
 
 class ExitLaterEntrypoint : public Entrypoint<ExitLaterMessage, EmptyMessage>

@@ -85,6 +85,13 @@ public:
     NetworkTaskManager& getTasks() const { return _context->getTasks(); }
 
     /**
+     * @brief Shortcut to get the binary request manager (raw model uploader).
+     *
+     * @return BinaryRequestManager& Binary request manager.
+     */
+    BinaryRequestManager& getBinary() const { return _context->getBinary(); }
+
+    /**
      * @brief Store the network context reference inside instance.
      *
      * @param context A reference to the network context.

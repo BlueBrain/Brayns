@@ -196,6 +196,8 @@ void NetworkManager::preRender()
     connections.update();
     auto& tasks = _context->getTasks();
     tasks.update();
+    auto& binary = _context->getBinary();
+    binary.update();
 }
 
 void NetworkManager::postRender()

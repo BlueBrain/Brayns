@@ -1,5 +1,6 @@
-/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
+/* Copyright (c) 2021 EPFL/Blue Brain Project
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -23,6 +24,7 @@
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/Scene.h>
 
+#include <brayns/network/binary/BinaryRequestManager.h>
 #include <brayns/network/entrypoint/EntrypointManager.h>
 #include <brayns/network/socket/ConnectionManager.h>
 #include <brayns/network/stream/StreamManager.h>
@@ -54,11 +56,14 @@ public:
 
     NetworkTaskManager& getTasks() { return _tasks; }
 
+    BinaryRequestManager& getBinary() { return _binary; }
+
 private:
     PluginAPI* _api;
     EntrypointManager _entrypoints;
     ConnectionManager _connections;
     StreamManager _stream;
     NetworkTaskManager _tasks;
+    BinaryRequestManager _binary;
 };
 } // namespace brayns

@@ -47,8 +47,8 @@ public:
         auto model = scene.getModel(id);
         if (!model)
         {
-            throw EntrypointException("No model found with ID '" +
-                                      std::to_string(id) + "'");
+            throw EntrypointException("No model found with ID " +
+                                      std::to_string(id));
         }
         return *model;
     }
