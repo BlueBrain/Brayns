@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <brayns/network/entrypoints/AddClipPlaneEntrypoint.h>
 #include <brayns/network/entrypoints/AddModelEntrypoint.h>
 #include <brayns/network/entrypoints/AnimationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/ApplicationParametersEntrypoint.h>
@@ -27,6 +28,7 @@
 #include <brayns/network/entrypoints/ChunkEntrypoint.h>
 #include <brayns/network/entrypoints/EnvironmentMapEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
+#include <brayns/network/entrypoints/GetClipPlanesEntrypoint.h>
 #include <brayns/network/entrypoints/GetModelEntrypoint.h>
 #include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
 #include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
@@ -94,6 +96,8 @@ public:
         interface.add<ModelPropertiesSchemaEntrypoint>();
         interface.add<GetModelTransferFunctionEntrypoint>();
         interface.add<SetModelTransferFunctionEntrypoint>();
+        interface.add<AddClipPlaneEntrypoint>();
+        interface.add<GetClipPlanesEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }
