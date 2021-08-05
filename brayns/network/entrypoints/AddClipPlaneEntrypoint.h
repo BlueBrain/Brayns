@@ -41,9 +41,10 @@ public:
         auto& engine = getApi().getEngine();
         auto& scene = engine.getScene();
         auto id = scene.addClipPlane(params);
-        auto plane = scene.getClipPlane(id);
-        request.notify(plane);
-        request.reply(plane);
+        auto clipPlane = scene.getClipPlane(id);
+        engine.triggerRender();
+        request.notify(clipPlane);
+        request.reply(clipPlane);
     }
 };
 } // namespace brayns

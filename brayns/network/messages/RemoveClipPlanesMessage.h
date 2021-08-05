@@ -20,27 +20,11 @@
 
 #pragma once
 
-#include <brayns/network/adapters/ClipPlaneAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/json/Message.h>
 
 namespace brayns
 {
-class GetClipPlanesEntrypoint : public Entrypoint<EmptyMessage, ClipPlanes>
-{
-public:
-    virtual std::string getName() const override { return "get-clip-planes"; }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get all clip planes";
-    }
-
-    virtual void onRequest(const Request& request) override
-    {
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
-        auto& clipPlanes = scene.getClipPlanes();
-        request.reply(clipPlanes);
-    }
-};
+BRAYNS_MESSAGE_BEGIN(RemoveClipPlanesMessage)
+BRAYNS_MESSAGE_ENTRY(std::vector<size_t>, ids, "Clip planes ID list")
+BRAYNS_MESSAGE_END()
 } // namespace brayns

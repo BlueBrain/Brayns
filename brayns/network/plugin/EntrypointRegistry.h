@@ -36,6 +36,7 @@
 #include <brayns/network/entrypoints/ModelPropertiesEntrypoint.h>
 #include <brayns/network/entrypoints/ModelTransferFunctionEntrypoint.h>
 #include <brayns/network/entrypoints/QuitEntrypoint.h>
+#include <brayns/network/entrypoints/RemoveClipPlanesEntrypoint.h>
 #include <brayns/network/entrypoints/RemoveModelEntrypoint.h>
 #include <brayns/network/entrypoints/RendererEntrypoint.h>
 #include <brayns/network/entrypoints/RequestModelUploadEntrypoint.h>
@@ -46,6 +47,7 @@
 #include <brayns/network/entrypoints/StatisticsEntrypoint.h>
 #include <brayns/network/entrypoints/TestEntrypoint.h>
 #include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
+#include <brayns/network/entrypoints/UpdateClipPlaneEntrypoint.h>
 #include <brayns/network/entrypoints/UpdateModelEntrypoint.h>
 #include <brayns/network/entrypoints/VersionEntrypoint.h>
 #include <brayns/network/entrypoints/VideoStreamEntrypoint.h>
@@ -98,6 +100,8 @@ public:
         interface.add<SetModelTransferFunctionEntrypoint>();
         interface.add<AddClipPlaneEntrypoint>();
         interface.add<GetClipPlanesEntrypoint>();
+        interface.add<UpdateClipPlaneEntrypoint>();
+        interface.add<RemoveClipPlanesEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }
