@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <sstream>
+
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/Scene.h>
 
@@ -40,14 +42,28 @@ public:
 
     const std::string& getChunksId() const { return _params.chunksID; }
 
+    size_t getModelSize() const { return _params.size; }
+
+    size_t getCurrentSize() const
+    {
+        auto& data = _blob.data;
+        return data.size();
+    }
+
+    double getUploadProgress() const
+    {
+        return double(getCurrentSize()) / double(getModelSize());
+    }
+
     void addBlob(const std::string& blob)
     {
-        _addBlob(blob);
-        _checkBlobSize();
-        _uploadProgress();
-        if (_isReady())
+        try
         {
-            _monitor.notify();
+            _addBlob(blob);
+        }
+        catch (...)
+        {
+            cancelWith(std::current_exception());
         }
     }
 
@@ -64,10 +80,12 @@ public:
 
     virtual void onStart() override
     {
+        _modelUploaded = false;
         _params = getParams();
         _validateParams();
         _blob.type = _params.type;
         _blob.name = _params.getName();
+        _blob.data.clear();
     }
 
     virtual void onComplete() override
@@ -102,48 +120,56 @@ private:
 
     void _addBlob(const std::string& blob)
     {
+        _throwIfModelAlreadyUploaded();
+        _throwIfBlobIsTooBig(blob);
+        _addBlobData(blob);
+        _uploadProgress();
+        _checkIfUploadIsFinished();
+    }
+
+    void _throwIfModelAlreadyUploaded()
+    {
+        if (_modelUploaded)
+        {
+            throw EntrypointException("Model already uploaded");
+        }
+    }
+
+    void _throwIfBlobIsTooBig(const std::string& blob)
+    {
+        auto modelSize = getModelSize();
+        auto currentSize = getCurrentSize();
+        auto newSize = currentSize + blob.size();
+        if (newSize <= modelSize)
+        {
+            return;
+        }
+        std::ostringstream stream;
+        stream << "Too many bytes uploaded: model size = " << modelSize
+               << " received = " << newSize;
+        throw EntrypointException(stream.str());
+    }
+
+    void _addBlobData(const std::string& blob)
+    {
         auto& data = _blob.data;
         data.insert(data.end(), blob.begin(), blob.end());
     }
 
-    void _checkBlobSize()
+    void _checkIfUploadIsFinished()
     {
-        auto modelSize = _params.size;
-        auto& data = _blob.data;
-        auto blobSize = data.size();
-        if (blobSize < modelSize)
+        if (getCurrentSize() != getModelSize())
         {
             return;
         }
-        _tooManyBytesReceived(blobSize, modelSize);
-    }
-
-    void _tooManyBytesReceived(size_t blobSize, size_t modelSize)
-    {
-        cancel();
-        std::ostringstream stream;
-        stream << "Too many bytes received: ";
-        stream << "model size = " << modelSize;
-        stream << " total received blob size = " << blobSize;
-        throw EntrypointException(stream.str());
-    }
-
-    bool _isReady()
-    {
-        auto modelSize = _params.size;
-        auto& data = _blob.data;
-        auto blobSize = data.size();
-        return blobSize == modelSize;
+        _modelUploaded = true;
+        _monitor.notify();
     }
 
     void _uploadProgress()
     {
-        auto message = "Model upload " + _params.getName() + "...";
-        auto modelSize = _params.size;
-        auto& data = _blob.data;
-        auto blobSize = data.size();
-        auto amount = double(blobSize) / double(modelSize);
-        progress(message, amount);
+        auto message = "Model upload of " + _params.getName() + "...";
+        progress(message, 0.5 * getUploadProgress());
     }
 
     void _loadingProgress(const std::string& operation, double amount)
@@ -156,6 +182,7 @@ private:
     Blob _blob;
     ModelDescriptors _descriptors;
     NetworkTaskMonitor _monitor;
+    bool _modelUploaded = false;
 };
 
 using ModelUploadTaskPtr = std::shared_ptr<ModelUploadTask>;

@@ -23,20 +23,55 @@
 #include <chrono>
 #include <future>
 #include <memory>
+#include <mutex>
 #include <stdexcept>
 
 namespace brayns
 {
+class NetworkTaskException
+{
+public:
+    void rethrow()
+    {
+        std::lock_guard<std::mutex> lock(_mutex);
+        if (!_e)
+        {
+            _e = std::make_exception_ptr(std::runtime_error("Task cancelled"));
+        }
+        std::rethrow_exception(_e);
+    }
+
+    NetworkTaskException& operator=(std::exception_ptr e)
+    {
+        std::lock_guard<std::mutex> lock(_mutex);
+        _e = std::move(e);
+        return *this;
+    }
+
+    template <typename T>
+    NetworkTaskException& operator=(T e)
+    {
+        *this = std::make_exception_ptr(std::move(e));
+        return *this;
+    }
+
+private:
+    std::mutex _mutex;
+    std::exception_ptr _e;
+};
+
 class NetworkTask
 {
 public:
-    virtual ~NetworkTask() { cancelAndWait(); }
+    virtual ~NetworkTask() = default;
 
     bool isReady() const { return _hasStatus(std::future_status::ready); }
 
     bool isRunning() const { return _hasStatus(std::future_status::timeout); }
 
     bool isCancelled() const { return _cancelled; }
+
+    bool isCancellable() const { return isRunning() && !isCancelled(); }
 
     void start()
     {
@@ -66,12 +101,20 @@ public:
 
     void cancel()
     {
-        if (_cancelled || !isRunning())
+        if (!isCancellable())
         {
             return;
         }
         onCancel();
         _cancelled = true;
+    }
+
+    void setException(std::exception_ptr e) { _e = e; }
+
+    void cancelWith(std::exception_ptr e)
+    {
+        _e = e;
+        cancel();
     }
 
     void cancelAndWait()
@@ -80,13 +123,13 @@ public:
         wait();
     }
 
-    void checkCancelled() const
+    void checkCancelled()
     {
         if (!_cancelled)
         {
             return;
         }
-        throw std::runtime_error("Task cancelled");
+        _e.rethrow();
     }
 
     void progress(const std::string& operation, double amount)
@@ -108,6 +151,19 @@ public:
     virtual void onProgress(const std::string&, double) {}
 
     virtual void onDisconnect() {}
+
+    template <typename T>
+    void setException(T e)
+    {
+        _e = std::move(e);
+    }
+
+    template <typename T>
+    void cancelWith(T e)
+    {
+        _e = std::move(e);
+        cancel();
+    }
 
 private:
     bool _hasStatus(std::future_status status) const
@@ -135,6 +191,7 @@ private:
 
     std::future<void> _result;
     std::atomic_bool _cancelled{false};
+    NetworkTaskException _e;
 };
 
 using NetworkTaskPtr = std::shared_ptr<NetworkTask>;

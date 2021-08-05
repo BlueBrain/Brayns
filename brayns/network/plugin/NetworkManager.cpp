@@ -95,7 +95,8 @@ private:
     void _processBinaryRequest(const ConnectionHandle& handle,
                                const InputPacket& packet)
     {
-        throw std::runtime_error("Binary frames not supported");
+        auto& binary = _context->getBinary();
+        binary.processBinaryRequest(handle, packet);
     }
 
     void _processTextRequest(const ConnectionHandle& handle,

@@ -24,6 +24,7 @@
 #include <brayns/network/entrypoints/ApplicationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
 #include <brayns/network/entrypoints/CancelEntrypoint.h>
+#include <brayns/network/entrypoints/ChunkEntrypoint.h>
 #include <brayns/network/entrypoints/EnvironmentMapEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
 #include <brayns/network/entrypoints/GetModelEntrypoint.h>
@@ -78,6 +79,7 @@ public:
         interface.add<ResetCameraEntrypoint>();
         interface.add<SnapshotEntrypoint>();
         interface.add<RequestModelUploadEntrypoint>();
+        interface.add<ChunkEntrypoint>();
         interface.add<GetEnvironmentMapEntrypoint>();
         interface.add<SetEnvironmentMapEntrypoint>();
         interface.add<GetVideoStreamEntrypoint>();

@@ -35,6 +35,8 @@ public:
     {
     }
 
+    virtual ~ExitLaterTask() { _monitor.notify(); }
+
     void execute(uint32_t minutes)
     {
         cancelAndWait();
@@ -80,10 +82,6 @@ public:
     {
         auto params = request.getParams();
         auto& minutes = params.minutes;
-        if (minutes == 0)
-        {
-            return;
-        }
         _task->execute(minutes);
         request.reply(EmptyMessage());
     }

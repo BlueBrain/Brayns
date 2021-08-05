@@ -63,7 +63,7 @@ private:
     {
         BRAYNS_DEBUG << "Waiting for client request\n";
         auto packet = _socket->receive();
-        BRAYNS_DEBUG << "Message received: " << packet.getData() << '\n';
+        BRAYNS_DEBUG << "Message received.\n";
         _connections->receive(_socket, packet);
     }
 

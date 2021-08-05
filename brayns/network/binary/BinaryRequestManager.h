@@ -43,8 +43,8 @@ public:
         auto& currentTask = _tasks[chunksId];
         if (currentTask)
         {
-            throw EntrypointException("A task with id '" + chunksId +
-                                      "' is already running");
+            throw EntrypointException("A model upload with chunks ID '" +
+                                      chunksId + "' is already running");
         }
         _nextChunkId = chunksId;
         currentTask = std::move(task);
@@ -57,8 +57,8 @@ public:
         auto i = _tasks.find(_nextChunkId);
         if (i == _tasks.end())
         {
-            BRAYNS_ERROR << "Task with ID '" << _nextChunkId
-                         << "' is not running.\n";
+            BRAYNS_ERROR << "No model upload with chunks ID '" << _nextChunkId
+                         << "'.\n";
             return;
         }
         auto& task = *i->second;
@@ -112,7 +112,7 @@ public:
         auto i = _uploaders.find(handle);
         if (i == _uploaders.end())
         {
-            throw EntrypointException("No task started for this client");
+            throw EntrypointException("No model uploads are running");
         }
         auto& uploader = i->second;
         uploader.setNextChunkId(id);
