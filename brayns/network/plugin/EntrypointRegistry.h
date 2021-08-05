@@ -32,6 +32,7 @@
 #include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
 #include <brayns/network/entrypoints/ModelPropertiesEntrypoint.h>
+#include <brayns/network/entrypoints/ModelTransferFunctionEntrypoint.h>
 #include <brayns/network/entrypoints/QuitEntrypoint.h>
 #include <brayns/network/entrypoints/RemoveModelEntrypoint.h>
 #include <brayns/network/entrypoints/RendererEntrypoint.h>
@@ -91,6 +92,8 @@ public:
         interface.add<GetModelPropertiesEntrypoint>();
         interface.add<SetModelPropertiesEntrypoint>();
         interface.add<ModelPropertiesSchemaEntrypoint>();
+        interface.add<GetModelTransferFunctionEntrypoint>();
+        interface.add<SetModelTransferFunctionEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }

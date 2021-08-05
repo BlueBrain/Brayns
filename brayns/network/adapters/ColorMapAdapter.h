@@ -20,26 +20,14 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/entrypoint/ExtractModel.h>
-#include <brayns/network/messages/GetModelMessage.h>
+#include <brayns/common/transferFunction/TransferFunction.h>
+
+#include <brayns/network/json/MessageAdapter.h>
 
 namespace brayns
 {
-class GetModelEntrypoint : public Entrypoint<GetModelMessage, ModelDescriptor>
-{
-public:
-    virtual std::string getName() const override { return "get-model"; }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get all the information of the given model";
-    }
-
-    virtual void onRequest(const Request& request) override
-    {
-        auto& model = ExtractModel::fromRequest(getApi(), request);
-        request.reply(model);
-    }
-};
+BRAYNS_ADAPTER_BEGIN(ColorMap)
+BRAYNS_ADAPTER_ENTRY(name, "Label of the color map", Required(false))
+BRAYNS_ADAPTER_ENTRY(colors, "Colors to map")
+BRAYNS_ADAPTER_END()
 } // namespace brayns

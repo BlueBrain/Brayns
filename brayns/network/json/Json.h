@@ -146,7 +146,7 @@ struct Json
     template <typename T>
     static T deserialize(const JsonValue& json)
     {
-        T value = {};
+        T value{};
         JsonAdapter<T>::deserialize(json, value);
         return value;
     }
@@ -199,6 +199,28 @@ public:
             return nullptr;
         }
         return json.extract<JsonObject::Ptr>();
+    }
+
+    template <typename T>
+    static T extract(const JsonValue& json, const std::string& key)
+    {
+        if (json.type() != typeid(JsonObject::Ptr))
+        {
+            return T{};
+        }
+        auto& object = *json.extract<JsonObject::Ptr>();
+        return Json::deserialize<T>(object.get(key));
+    }
+
+    template <typename T>
+    static bool extract(const JsonValue& json, const std::string& key, T& value)
+    {
+        if (json.type() != typeid(JsonObject::Ptr))
+        {
+            return value;
+        }
+        auto& object = *json.extract<JsonObject::Ptr>();
+        return Json::deserialize(object.get(key), value);
     }
 };
 

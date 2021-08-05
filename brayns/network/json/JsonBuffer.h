@@ -20,26 +20,33 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/entrypoint/ExtractModel.h>
-#include <brayns/network/messages/GetModelMessage.h>
+#include "Json.h"
 
 namespace brayns
 {
-class GetModelEntrypoint : public Entrypoint<GetModelMessage, ModelDescriptor>
+template <typename T>
+class JsonBuffer
 {
 public:
-    virtual std::string getName() const override { return "get-model"; }
+    JsonSchema getSchema() const { return Json::getSchema<T>(); }
 
-    virtual std::string getDescription() const override
+    bool serialize(JsonValue& json) const
     {
-        return "Get all the information of the given model";
+        json = _json;
+        return true;
     }
 
-    virtual void onRequest(const Request& request) override
+    bool deserialize(const JsonValue& json)
     {
-        auto& model = ExtractModel::fromRequest(getApi(), request);
-        request.reply(model);
+        _json = json;
+        return true;
     }
+
+    bool deserialize(T& value) const { Json::deserialize(_json, value); }
+
+    const JsonValue& getJson() const { return _json; }
+
+private:
+    JsonValue _json;
 };
 } // namespace brayns

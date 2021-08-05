@@ -20,11 +20,18 @@
 
 #pragma once
 
-#include <brayns/network/json/Message.h>
+#include <brayns/common/transferFunction/TransferFunction.h>
+
+#include <brayns/network/json/MessageAdapter.h>
+
+#include "ColorMapAdapter.h"
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(ModelMessage)
-BRAYNS_MESSAGE_ENTRY(size_t, id, "Model ID")
-BRAYNS_MESSAGE_END()
+BRAYNS_ADAPTER_BEGIN(TransferFunction)
+BRAYNS_ADAPTER_GETSET("range", getValuesRange, setValuesRange, "Values range")
+BRAYNS_ADAPTER_GETSET("opacity_curve", getControlPoints, setControlPoints,
+                      "Control points")
+BRAYNS_ADAPTER_GETSET("colormap", getColorMap, setColorMap, "Colors to map")
+BRAYNS_ADAPTER_END()
 } // namespace brayns

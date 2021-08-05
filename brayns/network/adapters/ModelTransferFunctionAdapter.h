@@ -21,47 +21,39 @@
 #pragma once
 
 #include <brayns/network/entrypoint/ExtractModel.h>
-#include <brayns/network/json/MessageAdapter.h>
+#include <brayns/network/json/JsonBuffer.h>
 
-#include "TransformationAdapter.h"
+#include "TransferFunctionAdapter.h"
 
 namespace brayns
 {
-class UpdateModelProxy
+class ModelTransferFunction
 {
 public:
-    UpdateModelProxy() = default;
+    using Buffer = JsonBuffer<TransferFunction>;
 
-    UpdateModelProxy(Scene& scene)
+    ModelTransferFunction() = default;
+
+    ModelTransferFunction(Scene& scene)
         : _scene(&scene)
     {
     }
 
-    void setId(size_t id) { _model = &ExtractModel::fromId(*_scene, id); }
+    void setId(size_t id) { ExtractModel::fromId(*_scene, id); }
 
-    void setBoundingBox(bool enabled) { _model->setBoundingBox(enabled); }
-
-    void setName(const std::string& name) { _model->setName(name); }
-
-    void setTransformation(const Transformation& transformation)
+    void setTransferFunction(const Buffer& buffer)
     {
-        _model->setTransformation(transformation);
+        auto& transferFunction = _scene->getTransferFunction();
+        buffer.deserialize(transferFunction);
     }
-
-    void setVisible(bool visible) { _model->setVisible(visible); }
-
-    void computeBounds() { _model->computeBounds(); }
 
 private:
     Scene* _scene = nullptr;
-    ModelDescriptor* _model = nullptr;
 };
 
-BRAYNS_NAMED_ADAPTER_BEGIN(UpdateModelProxy, "UpdateModelParams")
+BRAYNS_ADAPTER_BEGIN(ModelTransferFunction)
 BRAYNS_ADAPTER_SET("id", setId, "Model ID", Required())
-BRAYNS_ADAPTER_SET("bounding_box", setBoundingBox, "Display model bounds")
-BRAYNS_ADAPTER_SET("name", setName, "Model name")
-BRAYNS_ADAPTER_SET("transformation", setTransformation, "Model transformation")
-BRAYNS_ADAPTER_SET("visible", setVisible, "Model visibility")
+BRAYNS_ADAPTER_SET("transfer_function", setTransferFunction,
+                   "Transfer function", Required())
 BRAYNS_ADAPTER_END()
 } // namespace brayns

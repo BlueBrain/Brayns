@@ -22,13 +22,13 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/entrypoint/ExtractModel.h>
-#include <brayns/network/messages/ModelMessage.h>
+#include <brayns/network/messages/GetModelMessage.h>
 #include <brayns/network/messages/ModelPropertiesMessage.h>
 
 namespace brayns
 {
 class GetModelPropertiesEntrypoint
-    : public Entrypoint<ModelMessage, PropertyMap>
+    : public Entrypoint<GetModelMessage, PropertyMap>
 {
 public:
     virtual std::string getName() const override
@@ -75,7 +75,7 @@ public:
 };
 
 class ModelPropertiesSchemaEntrypoint
-    : public Entrypoint<ModelMessage, JsonValue>
+    : public Entrypoint<GetModelMessage, JsonValue>
 {
 public:
     virtual std::string getName() const override
