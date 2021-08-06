@@ -147,8 +147,10 @@ public:
         }
     }
 
+    const auto& getProperties() const { return _properties; }
+
 protected:
     std::string _currentType;
     std::map<std::string, PropertyMap> _properties;
 };
-}
+} // namespace brayns

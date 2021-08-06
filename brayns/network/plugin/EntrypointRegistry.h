@@ -24,6 +24,7 @@
 #include <brayns/network/entrypoints/AnimationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/ApplicationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
+#include <brayns/network/entrypoints/CameraParamsEntrypoint.h>
 #include <brayns/network/entrypoints/CancelEntrypoint.h>
 #include <brayns/network/entrypoints/ChunkEntrypoint.h>
 #include <brayns/network/entrypoints/EnvironmentMapEntrypoint.h>
@@ -110,6 +111,8 @@ public:
         interface.add<UpdateInstanceEntrypoint>();
         interface.add<GetLoadersEntrypoint>();
         interface.add<LoadersSchemaEntrypoint>();
+        interface.add<GetCameraParamsEntrypoint>();
+        interface.add<SetCameraParamsEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }
