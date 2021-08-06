@@ -29,6 +29,7 @@
 #include <brayns/network/entrypoints/EnvironmentMapEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
 #include <brayns/network/entrypoints/GetClipPlanesEntrypoint.h>
+#include <brayns/network/entrypoints/GetInstancesEntrypoint.h>
 #include <brayns/network/entrypoints/GetModelEntrypoint.h>
 #include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
 #include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
@@ -102,6 +103,7 @@ public:
         interface.add<GetClipPlanesEntrypoint>();
         interface.add<UpdateClipPlaneEntrypoint>();
         interface.add<RemoveClipPlanesEntrypoint>();
+        interface.add<GetInstancesEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }
