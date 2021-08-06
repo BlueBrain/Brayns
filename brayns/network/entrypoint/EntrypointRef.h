@@ -82,11 +82,14 @@ public:
 
     const SchemaResult& getSchema() const { return _schema; }
 
-    const std::string& getName() const { return _schema.title; }
+    std::string getName() const { return _entrypoint->getName(); }
 
     const std::string& getDescription() const { return _schema.description; }
 
-    const auto& getParamsSchema() const { return _schema.params; }
+    const std::vector<JsonSchema>& getParamsSchema() const
+    {
+        return _schema.params;
+    }
 
     const JsonSchema& getResultSchema() const { return _schema.returns; }
 

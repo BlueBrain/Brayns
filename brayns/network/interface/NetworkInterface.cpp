@@ -92,4 +92,10 @@ void NetworkInterface::addEntrypoint(EntrypointRef entrypoint)
     auto& entrypoints = _context->getEntrypoints();
     entrypoints.add(std::move(entrypoint));
 }
+
+void NetworkInterface::setupEntrypoints()
+{
+    auto& entrypoints = _context->getEntrypoints();
+    entrypoints.setup();
+}
 } // namespace brayns

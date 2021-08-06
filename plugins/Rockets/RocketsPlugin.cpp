@@ -24,9 +24,9 @@
 
 #include "RocketsPlugin.h"
 
-#include <brayns/common/utils/ImageGenerator.h>
 #include <brayns/common/Timer.h>
 #include <brayns/common/tasks/Task.h>
+#include <brayns/common/utils/ImageGenerator.h>
 #include <brayns/common/utils/stringUtils.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
@@ -327,8 +327,6 @@ public:
             _broadcastVideo();
 #endif
     }
-
-    virtual void addEntrypoint(EntrypointRef entrypoint) override {}
 
     void registerNotification(const RpcParameterDescription& desc,
                               const PropertyMap& input,

@@ -43,6 +43,7 @@
 #include <brayns/network/entrypoints/RemoveClipPlanesEntrypoint.h>
 #include <brayns/network/entrypoints/RemoveModelEntrypoint.h>
 #include <brayns/network/entrypoints/RendererEntrypoint.h>
+#include <brayns/network/entrypoints/RendererParamsEntrypoint.h>
 #include <brayns/network/entrypoints/RequestModelUploadEntrypoint.h>
 #include <brayns/network/entrypoints/ResetCameraEntrypoint.h>
 #include <brayns/network/entrypoints/SceneEntrypoint.h>
@@ -113,6 +114,8 @@ public:
         interface.add<LoadersSchemaEntrypoint>();
         interface.add<GetCameraParamsEntrypoint>();
         interface.add<SetCameraParamsEntrypoint>();
+        interface.add<GetRendererParamsEntrypoint>();
+        interface.add<SetRendererParamsEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }

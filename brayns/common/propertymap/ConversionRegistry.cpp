@@ -29,6 +29,7 @@ namespace
 brayns::AnyConverterMap _registerConverters()
 {
     brayns::AnyConverterMap converters;
+    converters.addexn2<int32_t, int64_t>();
     converters.addexn2<int32_t, double>();
     converters.addexn2<int64_t, double>();
     converters.addex2<int32_t, brayns::EnumProperty>();

@@ -85,6 +85,7 @@ void PluginManager::initPlugins(PluginAPI* api)
     const bool haveHttpServerURI = !appParameters.getHttpServerURI().empty();
 
     if (haveHttpServerURI)
+    {
 #ifdef BRAYNS_USE_NETWORKING
         // Since the Rockets plugin provides the ActionInterface, it must be
         // initialized before anything else
@@ -97,11 +98,17 @@ void PluginManager::initPlugins(PluginAPI* api)
             "BRAYNS_NETWORKING_ENABLED was not set, but HTTP server URI "
             "was specified");
 #endif
+    }
 
     for (const auto& extension : _extensions)
     {
         extension->_api = api;
         extension->init();
+    }
+
+    if (auto interface = api->getActionInterface())
+    {
+        interface->setupEntrypoints();
     }
 }
 

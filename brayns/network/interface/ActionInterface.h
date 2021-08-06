@@ -63,7 +63,16 @@ public:
      *
      * @param entrypoint Pointer to an IEntrypoint implementation.
      */
-    virtual void addEntrypoint(EntrypointRef entrypoint) = 0;
+    virtual void addEntrypoint(EntrypointRef entrypoint) {}
+
+    /**
+     * @brief Called once all plugins are initialized.
+     *
+     * Allow interface to run entrypoints setup once all plugins have been
+     * loaded.
+     *
+     */
+    virtual void setupEntrypoints() {}
 
     /**
      * @brief Shortcut to add an entrypoint from its type.

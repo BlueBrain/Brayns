@@ -36,7 +36,7 @@ class NetworkManager : public ExtensionPlugin
 public:
     /**
      * @brief Construct the object.
-     * 
+     *
      */
     NetworkManager();
 
@@ -54,13 +54,13 @@ public:
 
     /**
      * @brief Process request buffer.
-     * 
+     *
      */
     virtual void preRender() override;
 
     /**
      * @brief Broadcast images.
-     * 
+     *
      */
     virtual void postRender() override;
 

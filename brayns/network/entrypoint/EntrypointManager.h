@@ -38,6 +38,7 @@ public:
 
     const EntrypointRef* find(const std::string& name) const;
     void add(EntrypointRef entrypoint);
+    void setup();
     void update() const;
     void processRequest(const NetworkRequest& request) const;
 

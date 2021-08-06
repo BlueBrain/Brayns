@@ -110,8 +110,7 @@ const EntrypointRef* EntrypointManager::find(const std::string& name) const
 
 void EntrypointManager::add(EntrypointRef entrypoint)
 {
-    entrypoint.setup(*_context);
-    auto& name = entrypoint.getName();
+    auto name = entrypoint.getName();
     if (name.empty())
     {
         throw EntrypointException("Entrypoints must have a name");
@@ -120,7 +119,17 @@ void EntrypointManager::add(EntrypointRef entrypoint)
     {
         throw EntrypointException("Entrypoint '" + name + "' already exists");
     }
+    BRAYNS_INFO << "Add entrypoint " << name << ".\n";
     _entrypoints.emplace(name, std::move(entrypoint));
+}
+
+void EntrypointManager::setup()
+{
+    for (auto& pair : _entrypoints)
+    {
+        auto& entrypoint = pair.second;
+        entrypoint.setup(*_context);
+    }
 }
 
 void EntrypointManager::update() const

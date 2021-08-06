@@ -67,6 +67,12 @@ public:
      */
     virtual void addEntrypoint(EntrypointRef entrypoint) override;
 
+    /**
+     * @brief Run setup on all registered entrypoints.
+     *
+     */
+    virtual void setupEntrypoints() override;
+
 private:
     NetworkContext* _context;
 };
