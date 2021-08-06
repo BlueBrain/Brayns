@@ -49,6 +49,7 @@
 #include <brayns/network/entrypoints/TestEntrypoint.h>
 #include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
 #include <brayns/network/entrypoints/UpdateClipPlaneEntrypoint.h>
+#include <brayns/network/entrypoints/UpdateInstanceEntrypoint.h>
 #include <brayns/network/entrypoints/UpdateModelEntrypoint.h>
 #include <brayns/network/entrypoints/VersionEntrypoint.h>
 #include <brayns/network/entrypoints/VideoStreamEntrypoint.h>
@@ -104,6 +105,7 @@ public:
         interface.add<UpdateClipPlaneEntrypoint>();
         interface.add<RemoveClipPlanesEntrypoint>();
         interface.add<GetInstancesEntrypoint>();
+        interface.add<UpdateInstanceEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }
