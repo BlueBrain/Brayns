@@ -32,6 +32,14 @@ Light::Light(LightType type, const Vector3d& color, double intensity,
 {
 }
 
+Light::Light(LightType type)
+    : _type(type)
+    , _color(0.0)
+    , _intensity(0.0)
+    , _isVisible(false)
+{
+}
+
 DirectionalLight::DirectionalLight(const Vector3d& direction,
                                    double angularDiameter,
                                    const Vector3d& color, double intensity,
@@ -39,6 +47,13 @@ DirectionalLight::DirectionalLight(const Vector3d& direction,
     : Light(LightType::DIRECTIONAL, color, intensity, isVisible)
     , _direction(direction)
     , _angularDiameter(angularDiameter)
+{
+}
+
+DirectionalLight::DirectionalLight()
+    : Light(LightType::DIRECTIONAL)
+    , _direction(0.0)
+    , _angularDiameter(0.0)
 {
 }
 
@@ -51,6 +66,13 @@ SphereLight::SphereLight(const Vector3d& position, double radius,
 {
 }
 
+SphereLight::SphereLight()
+    : Light(LightType::SPHERE)
+    , _position(0.0)
+    , _radius(0.0)
+{
+}
+
 QuadLight::QuadLight(const Vector3d& position, const Vector3d& edge1,
                      const Vector3d& edge2, const Vector3d& color,
                      double intensity, bool isVisible)
@@ -58,6 +80,14 @@ QuadLight::QuadLight(const Vector3d& position, const Vector3d& edge1,
     , _position(position)
     , _edge1(edge1)
     , _edge2(edge2)
+{
+}
+
+QuadLight::QuadLight()
+    : Light(LightType::QUAD)
+    , _position(0.0)
+    , _edge1(0.0)
+    , _edge2(0.0)
 {
 }
 
@@ -74,10 +104,24 @@ SpotLight::SpotLight(const Vector3d& position, const Vector3d& direction,
 {
 }
 
+SpotLight::SpotLight()
+    : Light(LightType::SPOTLIGHT)
+    , _position(0.0)
+    , _direction(0.0)
+    , _openingAngle(0.0)
+    , _penumbraAngle(0.0)
+    , _radius(0.0)
+{
+}
+
 AmbientLight::AmbientLight(const Vector3d& color, double intensity,
                            bool isVisible)
     : Light(LightType::AMBIENT, color, intensity, isVisible)
 {
 }
 
+AmbientLight::AmbientLight()
+    : Light(LightType::AMBIENT)
+{
+}
 } // namespace brayns

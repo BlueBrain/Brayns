@@ -20,6 +20,7 @@
 #pragma once
 
 #include <brayns/network/entrypoints/AddClipPlaneEntrypoint.h>
+#include <brayns/network/entrypoints/AddLightEntrypoint.h>
 #include <brayns/network/entrypoints/AddModelEntrypoint.h>
 #include <brayns/network/entrypoints/AnimationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/ApplicationParametersEntrypoint.h>
@@ -118,6 +119,11 @@ public:
         interface.add<GetRendererParamsEntrypoint>();
         interface.add<SetRendererParamsEntrypoint>();
         interface.add<GetLightsEntrypoint>();
+        interface.add<AddLightDirectionalEntrypoint>();
+        interface.add<AddLightSphereEntrypoint>();
+        interface.add<AddLightQuadEntrypoint>();
+        interface.add<AddLightSpotEntrypoint>();
+        interface.add<AddLightAmbientEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }
