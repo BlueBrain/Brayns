@@ -28,6 +28,7 @@
 #include <brayns/network/entrypoints/CameraParamsEntrypoint.h>
 #include <brayns/network/entrypoints/CancelEntrypoint.h>
 #include <brayns/network/entrypoints/ChunkEntrypoint.h>
+#include <brayns/network/entrypoints/ClearLightsEntrypoint.h>
 #include <brayns/network/entrypoints/EnvironmentMapEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
 #include <brayns/network/entrypoints/GetClipPlanesEntrypoint.h>
@@ -126,6 +127,7 @@ public:
         interface.add<AddLightSpotEntrypoint>();
         interface.add<AddLightAmbientEntrypoint>();
         interface.add<RemoveLightsEntrypoint>();
+        interface.add<ClearLightsEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }
