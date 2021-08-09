@@ -43,6 +43,7 @@
 #include <brayns/network/entrypoints/ModelTransferFunctionEntrypoint.h>
 #include <brayns/network/entrypoints/QuitEntrypoint.h>
 #include <brayns/network/entrypoints/RemoveClipPlanesEntrypoint.h>
+#include <brayns/network/entrypoints/RemoveLightsEntrypoint.h>
 #include <brayns/network/entrypoints/RemoveModelEntrypoint.h>
 #include <brayns/network/entrypoints/RendererEntrypoint.h>
 #include <brayns/network/entrypoints/RendererParamsEntrypoint.h>
@@ -124,6 +125,7 @@ public:
         interface.add<AddLightQuadEntrypoint>();
         interface.add<AddLightSpotEntrypoint>();
         interface.add<AddLightAmbientEntrypoint>();
+        interface.add<RemoveLightsEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }
