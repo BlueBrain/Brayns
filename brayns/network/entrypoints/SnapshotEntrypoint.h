@@ -67,12 +67,10 @@ public:
     {
         auto params = request.getParams();
         auto& engine = getApi().getEngine();
+        auto& generator = getImageGenerator();
         auto task = std::make_shared<SnapshotTask>(engine, std::move(params),
-                                                   _generator);
+                                                   generator);
         launchTask(task, request);
     }
-
-private:
-    ImageGenerator _generator;
 };
 } // namespace brayns

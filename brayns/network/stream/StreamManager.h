@@ -19,16 +19,19 @@
 
 #pragma once
 
+#include <brayns/network/entrypoint/RateLimiter.h>
+
 #include <memory>
 
 namespace brayns
 {
 class NetworkContext;
-class Encoder;
 
 class ImageStreamMonitor
 {
 public:
+    void setFps(size_t fps) { _limiter = RateLimiter::fromFps(fps); }
+
     bool isControlled() const { return _controlled; }
 
     void setControlled(bool controlled)
@@ -43,7 +46,14 @@ public:
 
     void resetTrigger() { _triggered = false; }
 
+    template <typename FunctorType>
+    void call(FunctorType functor)
+    {
+        _limiter.call(std::move(functor));
+    }
+
 private:
+    RateLimiter _limiter;
     bool _controlled = false;
     bool _triggered = false;
 };
@@ -78,7 +88,6 @@ class StreamManager
 {
 public:
     StreamManager(NetworkContext& context);
-    ~StreamManager();
 
     void update();
 
@@ -90,6 +99,5 @@ private:
     NetworkContext* _context;
     ImageStreamMonitor _imageStream;
     VideoStreamMonitor _videoStream;
-    std::unique_ptr<Encoder> _encoder;
 };
 } // namespace brayns

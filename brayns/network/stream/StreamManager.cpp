@@ -19,15 +19,6 @@
 
 #include "StreamManager.h"
 
-//#include <brayns/common/utils/encoder.h>
-
-namespace brayns
-{
-class Encoder
-{
-};
-} // namespace brayns
-
 #include <brayns/network/context/NetworkContext.h>
 
 namespace
@@ -39,51 +30,7 @@ class VideoStream
 public:
     static void broadcast(NetworkContext& context)
     {
-        BRAYNS_DEBUG << "Video broadcast\n";
-        /*if (!_videoParams.enabled)
-        {
-            _encoder.reset();
-            if (_videoUpdatedResponse)
-                _videoUpdatedResponse();
-            _videoUpdatedResponse = nullptr;
-            return;
-        }
-
-        const auto& params = _parametersManager.getApplicationParameters();
-        const auto fps = params.getImageStreamFPS();
-        if (fps == 0)
-            return;
-
-        if (_encoder && _encoder->kbps != _videoParams.kbps)
-            _encoder.reset();
-
-        auto& frameBuffer = _engine.getFrameBuffer();
-        if (!_encoder)
-        {
-            int width = frameBuffer.getFrameSize().x;
-            if (width % 2 != 0)
-                width += 1;
-            int height = frameBuffer.getFrameSize().y;
-            if (height % 2 != 0)
-                height += 1;
-
-            _encoder =
-                std::make_unique<Encoder>(width, height, fps, _videoParams.kbps,
-                                          [&rs = _rocketsServer](auto a, auto b)
-                                          { rs->broadcastBinary(a, b); });
-        }
-
-        if (_videoUpdatedResponse)
-            _videoUpdatedResponse();
-        _videoUpdatedResponse = nullptr;
-
-        if (frameBuffer.getFrameBufferFormat() == FrameBufferFormat::none ||
-            !frameBuffer.isModified())
-        {
-            return;
-        }
-
-        _encoder->encode(frameBuffer);*/
+        throw std::runtime_error("Video stream not implemented");
     }
 };
 
@@ -92,7 +39,20 @@ class ImageStream
 public:
     static void broadcast(NetworkContext& context)
     {
-        BRAYNS_DEBUG << "Image broadcast\n";
+        auto& api = context.getApi();
+        auto& engine = api.getEngine();
+        auto& framebuffer = engine.getFrameBuffer();
+        auto& manager = api.getParametersManager();
+        auto& parameters = manager.getApplicationParameters();
+        auto compression = parameters.getJpegCompression();
+        auto& generator = context.getImageGenerator();
+        const auto image = generator.createJPEG(framebuffer, compression);
+        if (image.size == 0)
+        {
+            return;
+        }
+        auto& connections = context.getConnections();
+        connections.broadcast({image.data.get(), image.size});
     }
 };
 
@@ -102,12 +62,23 @@ public:
     static void broadcast(NetworkContext& context)
     {
         auto& stream = context.getStream();
-        auto& image = stream.getImageStream();
-        if (!image.isTriggered())
+        auto& imageStream = stream.getImageStream();
+        if (!imageStream.isTriggered())
         {
             return;
         }
-        BRAYNS_DEBUG << "Controlled image broadcast\n";
+        ImageStream::broadcast(context);
+    }
+};
+
+class AutoImageStream
+{
+public:
+    static void broadcast(NetworkContext& context)
+    {
+        auto& stream = context.getStream();
+        auto& imageStream = stream.getImageStream();
+        imageStream.call([&] { ImageStream::broadcast(context); });
     }
 };
 
@@ -130,29 +101,46 @@ public:
             ControlledImageStream::broadcast(context);
             return;
         }
-        ImageStream::broadcast(context);
+        AutoImageStream::broadcast(context);
     }
 
 private:
     static bool _needsBroadcast(NetworkContext& context)
     {
+        return _hasClients(context) && _hasNewImage(context);
+    }
+
+    static bool _hasClients(NetworkContext& context)
+    {
         auto& connections = context.getConnections();
         return !connections.isEmpty();
+    }
+
+    static bool _hasNewImage(NetworkContext& context)
+    {
+        auto& api = context.getApi();
+        auto& engine = api.getEngine();
+        auto& framebuffer = engine.getFrameBuffer();
+        if (framebuffer.getFrameBufferFormat() == FrameBufferFormat::none)
+        {
+            return false;
+        }
+        return framebuffer.isModified();
     }
 
     static bool _useVideoStream(NetworkContext& context)
     {
         auto& api = context.getApi();
-        auto& manager = api.getParametersManager();
-        auto& parameters = manager.getApplicationParameters();
+        auto& parametersManager = api.getParametersManager();
+        auto& parameters = parametersManager.getApplicationParameters();
         return parameters.useVideoStreaming();
     }
 
     static bool _isImageStreamControlled(NetworkContext& context)
     {
         auto& stream = context.getStream();
-        auto& info = stream.getImageStream();
-        return info.isControlled();
+        auto& imageStream = stream.getImageStream();
+        return imageStream.isControlled();
     }
 };
 } // namespace
@@ -162,13 +150,18 @@ namespace brayns
 StreamManager::StreamManager(NetworkContext& context)
     : _context(&context)
 {
+    auto& api = context.getApi();
+    auto& manager = api.getParametersManager();
+    auto& parameters = manager.getApplicationParameters();
+    auto fps = parameters.getImageStreamFPS();
+    _imageStream.setFps(fps);
 }
-
-StreamManager::~StreamManager() {}
 
 void StreamManager::update()
 {
     StreamDispatcher::broadcast(*_context);
-    _imageStream.resetTrigger();
+    auto& stream = _context->getStream();
+    auto& imageStream = stream.getImageStream();
+    imageStream.resetTrigger();
 }
 } // namespace brayns

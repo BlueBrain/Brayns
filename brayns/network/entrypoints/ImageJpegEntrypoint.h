@@ -23,8 +23,6 @@
 #include <brayns/network/adapters/ImageBase64Adapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <brayns/common/utils/ImageGenerator.h>
-
 namespace brayns
 {
 class ImageJpegEntrypoint
@@ -46,11 +44,9 @@ public:
         auto& manager = api.getParametersManager();
         auto& parameters = manager.getApplicationParameters();
         auto compression = uint8_t(parameters.getJpegCompression());
-        auto image = _generator.createImage(framebuffer, "jpg", compression);
+        auto& generator = getImageGenerator();
+        auto image = generator.createImage(framebuffer, "jpg", compression);
         request.reply(image);
     }
-
-private:
-    ImageGenerator _generator;
 };
 } // namespace brayns

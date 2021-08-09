@@ -31,7 +31,17 @@ public:
     using TimePoint = Clock::time_point;
     using Duration = Clock::duration;
 
-    RateLimiter(Duration period)
+    static RateLimiter fromFps(size_t fps)
+    {
+        if (fps == 0)
+        {
+            return {Duration::max()};
+        }
+        auto period = std::chrono::duration<double>(1.0 / fps);
+        return std::chrono::duration_cast<Duration>(period);
+    }
+
+    RateLimiter(Duration period = Duration(0))
         : _period(period)
     {
     }
@@ -39,13 +49,15 @@ public:
     template <typename FunctorType>
     bool call(FunctorType functor)
     {
-        auto elapsed = Clock::now() - _lastCall;
+        auto currentTime = Clock::now();
+        auto elapsed = currentTime - _lastCall;
         if (elapsed < _period)
         {
             return false;
         }
+        auto delay = (elapsed - _period) % _period;
+        _lastCall = currentTime - delay;
         functor();
-        _lastCall = Clock::now();
         return true;
     }
 
