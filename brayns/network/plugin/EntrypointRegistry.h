@@ -31,6 +31,7 @@
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
 #include <brayns/network/entrypoints/GetClipPlanesEntrypoint.h>
 #include <brayns/network/entrypoints/GetInstancesEntrypoint.h>
+#include <brayns/network/entrypoints/GetLightsEntrypoint.h>
 #include <brayns/network/entrypoints/GetLoadersEntrypoint.h>
 #include <brayns/network/entrypoints/GetModelEntrypoint.h>
 #include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
@@ -116,6 +117,7 @@ public:
         interface.add<SetCameraParamsEntrypoint>();
         interface.add<GetRendererParamsEntrypoint>();
         interface.add<SetRendererParamsEntrypoint>();
+        interface.add<GetLightsEntrypoint>();
         interface.add<CancelEntrypoint>();
         interface.add<TestEntrypoint>();
     }

@@ -84,7 +84,7 @@ struct EnumReflector
 template <typename T>
 struct EnumAdapter
 {
-    static const EnumMap<T> getEnumMap()
+    static const EnumMap<T>& getEnumMap()
     {
         static const EnumMap<T> values = EnumReflector<T>::reflect();
         return values;
@@ -131,6 +131,21 @@ struct EnumAdapter
         }
         value = *newValue;
         return true;
+    }
+};
+
+struct GetEnumName
+{
+    template <typename T>
+    static const std::string& of(const T& value)
+    {
+        auto& enumMap = EnumAdapter<T>::getEnumMap();
+        auto name = enumMap.getName(value);
+        if (!name)
+        {
+            throw std::runtime_error("Unknown enum value");
+        }
+        return *name;
     }
 };
 
