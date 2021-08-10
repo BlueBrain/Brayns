@@ -173,9 +173,9 @@ public:
         return true;
     }
 
-    void addProperty(const MessageProperty& property)
+    void addProperty(MessageProperty property)
     {
-        _properties.push_back(property);
+        _properties.push_back(std::move(property));
     }
 
 private:

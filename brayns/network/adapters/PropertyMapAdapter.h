@@ -79,58 +79,31 @@ struct JsonAdapter<EnumProperty>
 class PropertyVisitor
 {
 public:
-    template <typename FunctorType>
-    static bool visit(const Property& property, FunctorType functor)
+    template <typename T, typename FunctorType>
+    static bool visit(T& property, FunctorType functor)
     {
-        return property.visit<EnumProperty>(functor) ||
-               property.visit<float>(functor) ||
-               property.visit<double>(functor) ||
-               property.visit<int32_t>(functor) ||
-               property.visit<uint32_t>(functor) ||
-               property.visit<int64_t>(functor) ||
-               property.visit<uint64_t>(functor) ||
-               property.visit<std::string>(functor) ||
-               property.visit<bool>(functor) ||
-               property.visit<Vector2d>(functor) ||
-               property.visit<Vector2i>(functor) ||
-               property.visit<Vector3d>(functor) ||
-               property.visit<Vector3i>(functor) ||
-               property.visit<Vector4d>(functor) ||
-               property.visit<std::vector<double>>(functor) ||
-               property.visit<std::vector<float>>(functor) ||
-               property.visit<std::vector<int32_t>>(functor) ||
-               property.visit<std::vector<uint32_t>>(functor) ||
-               property.visit<std::vector<int64_t>>(functor) ||
-               property.visit<std::vector<uint64_t>>(functor) ||
-               property.visit<std::vector<std::string>>(functor) ||
-               property.visit<std::vector<bool>>(functor);
-    }
-
-    template <typename FunctorType>
-    static bool visit(Property& property, FunctorType functor)
-    {
-        return property.visit<EnumProperty>(functor) ||
-               property.visit<float>(functor) ||
-               property.visit<double>(functor) ||
-               property.visit<int32_t>(functor) ||
-               property.visit<uint32_t>(functor) ||
-               property.visit<int64_t>(functor) ||
-               property.visit<uint64_t>(functor) ||
-               property.visit<std::string>(functor) ||
-               property.visit<bool>(functor) ||
-               property.visit<Vector2d>(functor) ||
-               property.visit<Vector2i>(functor) ||
-               property.visit<Vector3d>(functor) ||
-               property.visit<Vector3i>(functor) ||
-               property.visit<Vector4d>(functor) ||
-               property.visit<std::vector<double>>(functor) ||
-               property.visit<std::vector<float>>(functor) ||
-               property.visit<std::vector<int32_t>>(functor) ||
-               property.visit<std::vector<uint32_t>>(functor) ||
-               property.visit<std::vector<int64_t>>(functor) ||
-               property.visit<std::vector<uint64_t>>(functor) ||
-               property.visit<std::vector<std::string>>(functor) ||
-               property.visit<std::vector<bool>>(functor);
+        return property.template visit<EnumProperty>(functor) ||
+               property.template visit<float>(functor) ||
+               property.template visit<double>(functor) ||
+               property.template visit<int32_t>(functor) ||
+               property.template visit<uint32_t>(functor) ||
+               property.template visit<int64_t>(functor) ||
+               property.template visit<uint64_t>(functor) ||
+               property.template visit<std::string>(functor) ||
+               property.template visit<bool>(functor) ||
+               property.template visit<Vector2d>(functor) ||
+               property.template visit<Vector2i>(functor) ||
+               property.template visit<Vector3d>(functor) ||
+               property.template visit<Vector3i>(functor) ||
+               property.template visit<Vector4d>(functor) ||
+               property.template visit<std::vector<double>>(functor) ||
+               property.template visit<std::vector<float>>(functor) ||
+               property.template visit<std::vector<int32_t>>(functor) ||
+               property.template visit<std::vector<uint32_t>>(functor) ||
+               property.template visit<std::vector<int64_t>>(functor) ||
+               property.template visit<std::vector<uint64_t>>(functor) ||
+               property.template visit<std::vector<std::string>>(functor) ||
+               property.template visit<std::vector<bool>>(functor);
     }
 };
 
