@@ -30,6 +30,8 @@ public:
     {
         interface.add<GetMaterialEntrypoint>();
         interface.add<SetMaterialEntrypoint>();
+        interface.add<SetMaterialsEntrypoint>();
+        interface.add<SetMaterialRangeEntrypoint>();
     }
 };
 } // namespace brayns

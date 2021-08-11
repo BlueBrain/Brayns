@@ -104,7 +104,13 @@ public:
                         const std::vector<JsonValue>& enums)
     {
         std::ostringstream stream;
-        stream << "Invalid enum: '" << json.toString() << "' not in [";
+        stream << "Invalid enum";
+        auto path = _path.toString();
+        if (!path.empty())
+        {
+            stream << " at '" << path << "'";
+        }
+        stream << ": '" << json.toString() << "' not in [";
         if (!enums.empty())
         {
             stream << enums[0].toString();

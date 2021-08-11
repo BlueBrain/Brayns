@@ -317,38 +317,44 @@ void CircuitExplorerPlugin::init()
     {
         brayns::CircuitExplorerEntrypoints::load(*actionInterface);
 
-        /*actionInterface->registerRequest<MaterialDescriptor, brayns::Message>(
-            {"set-material", "Modifies a specific material",
-             "MaterialDescriptor",
-             "The data to identify and modify the material"},
-            [&](const MaterialDescriptor& param)
-            { return _setMaterial(param); });
+        if (false)
+        {
+            actionInterface
+                ->registerRequest<MaterialDescriptor, brayns::Message>(
+                    {"set-material", "Modifies a specific material",
+                     "MaterialDescriptor",
+                     "The data to identify and modify the material"},
+                    [&](const MaterialDescriptor& param)
+                    { return _setMaterial(param); });
 
-        actionInterface->registerRequest<MaterialsDescriptor, brayns::Message>(
-            {"set-materials", "Set a set of materials from one or more models",
-             "MaterialsDescriptor",
-             "The data to identify and modify the materials of the given "
-             "models"},
-            [&](const MaterialsDescriptor& param)
-            { return _setMaterials(param); });
+            actionInterface->registerRequest<MaterialsDescriptor,
+                                             brayns::Message>(
+                {"set-materials",
+                 "Set a set of materials from one or more models",
+                 "MaterialsDescriptor",
+                 "The data to identify and modify the materials of the given "
+                 "models"},
+                [&](const MaterialsDescriptor& param)
+                { return _setMaterials(param); });
 
-        actionInterface
-            ->registerRequest<MaterialRangeDescriptor, brayns::Message>(
-                {"set-material-range",
-                 "Sets a set of materials of a single model with common "
-                 "material data",
-                 "MaterialRangeDescriptor",
-                 "The common data with which to update the material"},
-                [&](const MaterialRangeDescriptor& param)
-                { return _setMaterialRange(param); });
+            actionInterface
+                ->registerRequest<MaterialRangeDescriptor, brayns::Message>(
+                    {"set-material-range",
+                     "Sets a set of materials of a single model with common "
+                     "material data",
+                     "MaterialRangeDescriptor",
+                     "The common data with which to update the material"},
+                    [&](const MaterialRangeDescriptor& param)
+                    { return _setMaterialRange(param); });
 
-        actionInterface->registerRequest<MaterialProperties>(
-            {"get-material-properties",
-             "Returns the properties of the current camera"},
-            [&]() -> MaterialProperties { return _getMaterialProperties(); });
+            actionInterface->registerRequest<MaterialProperties>(
+                {"get-material-properties",
+                 "Returns the properties of the current camera"},
+                [&]() -> MaterialProperties
+                { return _getMaterialProperties(); });
 
-        actionInterface
-            ->registerRequest<UpdateMaterialProperties, brayns::Message>(
+            actionInterface->registerRequest<UpdateMaterialProperties,
+                                             brayns::Message>(
                 {"update-material-properties",
                  "Update selected properties of a set of materials of a single "
                  "model with "
@@ -358,23 +364,24 @@ void CircuitExplorerPlugin::init()
                 [&](const UpdateMaterialProperties& param)
                 { return _updateMaterialProperties(param); });
 
-        actionInterface->registerRequest<ModelId, MaterialIds>(
-            {"get-material-ids",
-             "Returns all the material IDs of a given model", "ModelId",
-             "The ID of the model to query"},
-            [&](const ModelId& modelId) -> MaterialIds
-            { return _getMaterialIds(modelId); });
+            actionInterface->registerRequest<ModelId, MaterialIds>(
+                {"get-material-ids",
+                 "Returns all the material IDs of a given model", "ModelId",
+                 "The ID of the model to query"},
+                [&](const ModelId& modelId) -> MaterialIds
+                { return _getMaterialIds(modelId); });
 
-        actionInterface->registerRequest<ModelMaterialId, MaterialDescriptor>(
-            {"get-material",
-             "Returns the properties from the given model and material",
-             "ModelMaterialId",
-             "The ID of the model and of the material to be queried"},
-            [&](const ModelMaterialId& modelId) -> MaterialDescriptor
-            { return _getMaterial(modelId); });
+            actionInterface
+                ->registerRequest<ModelMaterialId, MaterialDescriptor>(
+                    {"get-material",
+                     "Returns the properties from the given model and material",
+                     "ModelMaterialId",
+                     "The ID of the model and of the material to be queried"},
+                    [&](const ModelMaterialId& modelId) -> MaterialDescriptor
+                    { return _getMaterial(modelId); });
 
-        actionInterface
-            ->registerRequest<MaterialExtraAttributes, brayns::Message>(
+            actionInterface->registerRequest<MaterialExtraAttributes,
+                                             brayns::Message>(
                 {"set-material-extra-attributes",
                  "Sets the extra material attributes necessary for the Circuit "
                  "Explorer renderer",
@@ -384,34 +391,39 @@ void CircuitExplorerPlugin::init()
                 [&](const MaterialExtraAttributes& param)
                 { return _setMaterialExtraAttributes(param); });
 
-        actionInterface->registerRequest<SynapseAttributes, brayns::Message>(
-            {"set-synapses-attributes",
-             "Sets sypnapse specific attributes for a given model",
-             "SynapseAttributes", "The model and synapse attributes to modify"},
-            [&](const SynapseAttributes& param)
-            { return _setSynapseAttributes(param); });
+            actionInterface
+                ->registerRequest<SynapseAttributes, brayns::Message>(
+                    {"set-synapses-attributes",
+                     "Sets sypnapse specific attributes for a given model",
+                     "SynapseAttributes",
+                     "The model and synapse attributes to modify"},
+                    [&](const SynapseAttributes& param)
+                    { return _setSynapseAttributes(param); });
 
-        actionInterface->registerRequest<SaveModelToCache, brayns::Message>(
-            {"save-model-to-cache",
-             "Builds and saves a Brayns cache model from a given loaded model",
-             "SaveModelToCache",
-             "Model to be saved and parameters for the build of the cache "
-             "file"},
-            [&](const SaveModelToCache& param)
-            { return _saveModelToCache(param); });
+            actionInterface->registerRequest<SaveModelToCache, brayns::Message>(
+                {"save-model-to-cache",
+                 "Builds and saves a Brayns cache model from a given loaded "
+                 "model",
+                 "SaveModelToCache",
+                 "Model to be saved and parameters for the build of the cache "
+                 "file"},
+                [&](const SaveModelToCache& param)
+                { return _saveModelToCache(param); });
 
-        actionInterface->registerRequest<ConnectionsPerValue, brayns::Message>(
-            {"set-connections-per-value",
-             "Draws a point cloud representing the number of connections for a "
-             "given frame"
-             " and simulation value",
-             "ConnectionsPerValue",
-             "Model, frame, and value to build the point cloude"},
-            [&](const ConnectionsPerValue& param)
-            { return _setConnectionsPerValue(param); });
+            actionInterface
+                ->registerRequest<ConnectionsPerValue, brayns::Message>(
+                    {"set-connections-per-value",
+                     "Draws a point cloud representing the number of "
+                     "connections for a "
+                     "given frame"
+                     " and simulation value",
+                     "ConnectionsPerValue",
+                     "Model, frame, and value to build the point cloude"},
+                    [&](const ConnectionsPerValue& param)
+                    { return _setConnectionsPerValue(param); });
 
-        actionInterface
-            ->registerRequest<MetaballsFromSimulationValue, brayns::Message>(
+            actionInterface->registerRequest<MetaballsFromSimulationValue,
+                                             brayns::Message>(
                 {"set-metaballs-per-simulation-value",
                  "Adds a metaballs model representing the number of "
                  "connections for a given frame"
@@ -421,29 +433,34 @@ void CircuitExplorerPlugin::init()
                 [&](const MetaballsFromSimulationValue& param)
                 { return _setMetaballsPerSimulationValue(param); });
 
-        actionInterface->registerRequest<CameraDefinition, brayns::Message>(
-            {"set-odu-camera",
-             "Set the camera in a position and with an specific orientation "
-             "towards the scene",
-             "CameraDefinition", "Camera data to modify the current camera"},
-            [&](const CameraDefinition& s) { return _setCamera(s); });
+            actionInterface->registerRequest<CameraDefinition, brayns::Message>(
+                {"set-odu-camera",
+                 "Set the camera in a position and with an specific "
+                 "orientation "
+                 "towards the scene",
+                 "CameraDefinition",
+                 "Camera data to modify the current camera"},
+                [&](const CameraDefinition& s) { return _setCamera(s); });
 
-        actionInterface->registerRequest<CameraDefinition>(
-            {"get-odu-camera", "Returns the properties of the current camera"},
-            [&]() -> CameraDefinition { return _getCamera(); });
+            actionInterface->registerRequest<CameraDefinition>(
+                {"get-odu-camera",
+                 "Returns the properties of the current camera"},
+                [&]() -> CameraDefinition { return _getCamera(); });
 
-        actionInterface->registerRequest<AttachCellGrowthHandler,
-                                         brayns::Message>(
-            {"attach-cell-growth-handler",
-             "Attach a dynamic cell growing rendering system for a given model",
-             "AttachCellGrowthHandler",
-             "Model to which to attach the handler, and number of frames the "
-             "growth should span"},
-            [&](const AttachCellGrowthHandler& s)
-            { return _attachCellGrowthHandler(s); });
+            actionInterface
+                ->registerRequest<AttachCellGrowthHandler, brayns::Message>(
+                    {"attach-cell-growth-handler",
+                     "Attach a dynamic cell growing rendering system for a "
+                     "given model",
+                     "AttachCellGrowthHandler",
+                     "Model to which to attach the handler, and number of "
+                     "frames the "
+                     "growth should span"},
+                    [&](const AttachCellGrowthHandler& s)
+                    { return _attachCellGrowthHandler(s); });
 
-        actionInterface
-            ->registerRequest<AttachCircuitSimulationHandler, brayns::Message>(
+            actionInterface->registerRequest<AttachCircuitSimulationHandler,
+                                             brayns::Message>(
                 {"attach-circuit-simulation-handler",
                  "Dynamically loads and attach a simulation to a loaded model",
                  "AttachCircuitSimulationHandler",
@@ -451,25 +468,28 @@ void CircuitExplorerPlugin::init()
                 [&](const AttachCircuitSimulationHandler& s)
                 { return _attachCircuitSimulationHandler(s); });
 
-        actionInterface->registerRequest<ExportFramesToDisk, brayns::Message>(
-            {"export-frames-to-disk",
-             "Export a set of frames from a simulation as images written to "
-             "disk",
-             "ExportFramesToDisk",
-             "Configuration of the simulation to render and image store "
-             "specifications"},
-            [&](const ExportFramesToDisk& s)
-            { return _exportFramesToDisk(s); });
+            actionInterface->registerRequest<ExportFramesToDisk,
+                                             brayns::Message>(
+                {"export-frames-to-disk",
+                 "Export a set of frames from a simulation as images written "
+                 "to "
+                 "disk",
+                 "ExportFramesToDisk",
+                 "Configuration of the simulation to render and image store "
+                 "specifications"},
+                [&](const ExportFramesToDisk& s)
+                { return _exportFramesToDisk(s); });
 
-        actionInterface->registerRequest<FrameExportProgress>(
-            {"get-export-frames-progress",
-             "Returns the progress of the last issued export frames to disk "
-             "request"},
-            [&](void) -> FrameExportProgress
-            { return _getFrameExportProgress(); });
+            actionInterface->registerRequest<FrameExportProgress>(
+                {"get-export-frames-progress",
+                 "Returns the progress of the last issued export frames to "
+                 "disk "
+                 "request"},
+                [&](void) -> FrameExportProgress
+                { return _getFrameExportProgress(); });
 
-        actionInterface
-            ->registerRequest<ExportLayerToDisk, ExportLayerToDiskResult>(
+            actionInterface->registerRequest<ExportLayerToDisk,
+                                             ExportLayerToDiskResult>(
                 {"export-layer-to-disk",
                  "Export 1 or various layers to disk to be used in composition "
                  "when generating a"
@@ -480,83 +500,94 @@ void CircuitExplorerPlugin::init()
                 [&](const ExportLayerToDisk& s)
                 { return _exportLayerToDisk(s); });
 
-        actionInterface->registerRequest<MakeMovieParameters, brayns::Message>(
-            {"make-movie",
-             "Builds a movie file from a set of frames stored on disk",
-             "MakeMovieParameters",
-             "Information to find the frames, and how to compose them into a "
-             "media file"},
-            [&](const MakeMovieParameters& params)
-            { return _makeMovie(params); });
+            actionInterface
+                ->registerRequest<MakeMovieParameters, brayns::Message>(
+                    {"make-movie",
+                     "Builds a movie file from a set of frames stored on disk",
+                     "MakeMovieParameters",
+                     "Information to find the frames, and how to compose them "
+                     "into a "
+                     "media file"},
+                    [&](const MakeMovieParameters& params)
+                    { return _makeMovie(params); });
 
-        actionInterface->registerRequest<AnterogradeTracing, brayns::Message>(
-            {"trace-anterograde",
-             "Performs neuronal tracing; Showing efferent and afferent synapse "
-             "relationship "
-             " between cells (including projections)",
-             "AnterogradeTracing", "Data in which to base the cell highlight"},
-            [&](const AnterogradeTracing& payload)
-            { return _traceAnterogrades(payload); });
+            actionInterface
+                ->registerRequest<AnterogradeTracing, brayns::Message>(
+                    {"trace-anterograde",
+                     "Performs neuronal tracing; Showing efferent and afferent "
+                     "synapse "
+                     "relationship "
+                     " between cells (including projections)",
+                     "AnterogradeTracing",
+                     "Data in which to base the cell highlight"},
+                    [&](const AnterogradeTracing& payload)
+                    { return _traceAnterogrades(payload); });
 
-        actionInterface->registerRequest<AddGrid, brayns::Message>(
-            {"add-grid", "Adds a visual 3D grid to the scene", "AddGrid",
-             "Data necessary to build and render the grid"},
-            [&](const AddGrid& payload) { return _addGrid(payload); });
+            actionInterface->registerRequest<AddGrid, brayns::Message>(
+                {"add-grid", "Adds a visual 3D grid to the scene", "AddGrid",
+                 "Data necessary to build and render the grid"},
+                [&](const AddGrid& payload) { return _addGrid(payload); });
 
-        actionInterface->registerRequest<AddColumn, brayns::Message>(
-            {"add-column", "Adds a visual 3D column as a cylinder to the scene",
-             "AddColumn",
-             "Parameters to build and add the column to the scene"},
-            [&](const AddColumn& payload) { return _addColumn(payload); });
+            actionInterface->registerRequest<AddColumn, brayns::Message>(
+                {"add-column",
+                 "Adds a visual 3D column as a cylinder to the scene",
+                 "AddColumn",
+                 "Parameters to build and add the column to the scene"},
+                [&](const AddColumn& payload) { return _addColumn(payload); });
 
-        actionInterface->registerRequest<AddSphere, AddShapeResult>(
-            {"add-sphere", "Adds a visual 3D sphere to the scene", "AddSphere",
-             "Data to build, place and color the sphere"},
-            [&](const AddSphere& payload) { return _addSphere(payload); });
+            actionInterface->registerRequest<AddSphere, AddShapeResult>(
+                {"add-sphere", "Adds a visual 3D sphere to the scene",
+                 "AddSphere", "Data to build, place and color the sphere"},
+                [&](const AddSphere& payload) { return _addSphere(payload); });
 
-        actionInterface->registerRequest<AddPill, AddShapeResult>(
-            {"add-pill", "Adds a pill shape to the scene", "AddPill",
-             "The data to choose and build a type of pill"},
-            [&](const AddPill& payload) { return _addPill(payload); });
+            actionInterface->registerRequest<AddPill, AddShapeResult>(
+                {"add-pill", "Adds a pill shape to the scene", "AddPill",
+                 "The data to choose and build a type of pill"},
+                [&](const AddPill& payload) { return _addPill(payload); });
 
-        actionInterface->registerRequest<AddCylinder, AddShapeResult>(
-            {"add-cylinder", "Adds a cylinder to the scene", "AddCylinder",
-             "The data to build and color the cylinder"},
-            [&](const AddCylinder& payload) { return _addCylinder(payload); });
+            actionInterface->registerRequest<AddCylinder, AddShapeResult>(
+                {"add-cylinder", "Adds a cylinder to the scene", "AddCylinder",
+                 "The data to build and color the cylinder"},
+                [&](const AddCylinder& payload)
+                { return _addCylinder(payload); });
 
-        actionInterface->registerRequest<AddBox, AddShapeResult>(
-            {"add-box", "Adds an axis algined box to the scene", "AddBox",
-             "The data to build and color the box"},
-            [&](const AddBox& payload) { return _addBox(payload); });
+            actionInterface->registerRequest<AddBox, AddShapeResult>(
+                {"add-box", "Adds an axis algined box to the scene", "AddBox",
+                 "The data to build and color the box"},
+                [&](const AddBox& payload) { return _addBox(payload); });
 
-        actionInterface->registerRequest<RemapCircuit, RemapCircuitResult>(
-            {"remap-circuit-color",
-             "Remap the circuit colors to the specified scheme", "RemapCircuit",
-             "Scheme to which remap the circuits colors to"},
-            [&](const RemapCircuit& s) { return _remapCircuitToScheme(s); });
+            actionInterface->registerRequest<RemapCircuit, RemapCircuitResult>(
+                {"remap-circuit-color",
+                 "Remap the circuit colors to the specified scheme",
+                 "RemapCircuit",
+                 "Scheme to which remap the circuits colors to"},
+                [&](const RemapCircuit& s)
+                { return _remapCircuitToScheme(s); });
 
-        actionInterface->registerRequest<ColorCells, brayns::Message>(
-            {"color-cells",
-             "Color specific cells, given by GID, with specific "
-             "colors given in RGB",
-             "ColorCells",
-             "Information about the model, cells and color to "
-             "update"},
-            [&](const ColorCells& cc) { return _colorCells(cc); });
+            actionInterface->registerRequest<ColorCells, brayns::Message>(
+                {"color-cells",
+                 "Color specific cells, given by GID, with specific "
+                 "colors given in RGB",
+                 "ColorCells",
+                 "Information about the model, cells and color to "
+                 "update"},
+                [&](const ColorCells& cc) { return _colorCells(cc); });
 
-        actionInterface->registerRequest<MirrorModel, brayns::Message>(
-            {"mirror-model", "Mirrors a model along a given axis",
-             "MirrorModel",
-             "Model ID and axis along which to mirror the first."},
-            [&](const MirrorModel& mm) { return _mirrorModel(mm); });
+            actionInterface->registerRequest<MirrorModel, brayns::Message>(
+                {"mirror-model", "Mirrors a model along a given axis",
+                 "MirrorModel",
+                 "Model ID and axis along which to mirror the first."},
+                [&](const MirrorModel& mm) { return _mirrorModel(mm); });
 
-        actionInterface->registerRequest<CircuitThickness, brayns::Message>(
-            {"set-circuit-thickness",
-             "Modify the geometry radiuses (spheres, cones, cylinders and SDF "
-             "geometries)",
-             "CircuitThickness", "Model ID and radius multiplier to apply"},
-            [&](const CircuitThickness& cc)
-            { return _changeCircuitThickness(cc); });*/
+            actionInterface->registerRequest<CircuitThickness, brayns::Message>(
+                {"set-circuit-thickness",
+                 "Modify the geometry radiuses (spheres, cones, cylinders and "
+                 "SDF "
+                 "geometries)",
+                 "CircuitThickness", "Model ID and radius multiplier to apply"},
+                [&](const CircuitThickness& cc)
+                { return _changeCircuitThickness(cc); });
+        }
 
     } // if (actionInterface)
 

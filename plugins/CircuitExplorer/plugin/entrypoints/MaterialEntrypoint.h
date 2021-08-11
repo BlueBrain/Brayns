@@ -73,4 +73,57 @@ public:
         request.reply(EmptyMessage());
     }
 };
+
+class SetMaterialsEntrypoint
+    : public Entrypoint<std::vector<MaterialBuffer>, EmptyMessage>
+{
+public:
+    virtual std::string getName() const override { return "set-materials"; }
+
+    virtual std::string getDescription() const override
+    {
+        return "Update the corresponding materials with the given properties";
+    }
+
+    virtual void onRequest(const Request& request) override
+    {
+        auto params = request.getParams();
+        auto& engine = getApi().getEngine();
+        auto& scene = engine.getScene();
+        for (const auto& buffer : params)
+        {
+            MaterialProxy material(scene);
+            buffer.deserialize(material);
+            material.commit();
+        }
+        scene.markModified();
+        request.reply(EmptyMessage());
+    }
+};
+
+class SetMaterialRangeEntrypoint
+    : public Entrypoint<MaterialRangeProxy, EmptyMessage>
+{
+public:
+    virtual std::string getName() const override
+    {
+        return "set-material-range";
+    }
+
+    virtual std::string getDescription() const override
+    {
+        return "Update the corresponding materials with common properties";
+    }
+
+    virtual void onRequest(const Request& request) override
+    {
+        auto& engine = getApi().getEngine();
+        auto& scene = engine.getScene();
+        MaterialRangeProxy materialRange(scene);
+        request.getParams(materialRange);
+        materialRange.commit();
+        scene.markModified();
+        request.reply(EmptyMessage());
+    }
+};
 } // namespace brayns

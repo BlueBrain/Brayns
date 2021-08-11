@@ -26,6 +26,7 @@
 
 #include <brayns/network/common/ExtractMaterial.h>
 #include <brayns/network/common/ExtractModel.h>
+#include <brayns/network/json/JsonBuffer.h>
 #include <brayns/network/json/MessageAdapter.h>
 
 #include <common/commonTypes.h>
@@ -36,11 +37,26 @@ namespace brayns
 class MaterialRef
 {
 public:
+    MaterialRef() = default;
+
+    MaterialRef(Material& material)
+        : _material(&material)
+    {
+    }
+
     bool hasMaterial() const { return _material; }
 
     Material& getMaterial() const { return *_material; }
 
     void setMaterial(Material& material) { _material = &material; }
+
+    void commit()
+    {
+        if (_material)
+        {
+            _material->commit();
+        }
+    }
 
 private:
     Material* _material = nullptr;
@@ -49,6 +65,13 @@ private:
 class BaseMaterial : public MaterialRef
 {
 public:
+    BaseMaterial() = default;
+
+    BaseMaterial(Material& material)
+        : MaterialRef(material)
+    {
+    }
+
     const Vector3d& getDiffuseColor() const
     {
         return hasMaterial() ? getMaterial().getDiffuseColor()
@@ -166,6 +189,13 @@ private:
 class ExtendedMaterial : public BaseMaterial
 {
 public:
+    ExtendedMaterial() = default;
+
+    ExtendedMaterial(Material& material)
+        : BaseMaterial(material)
+    {
+    }
+
     bool getSimulationDataCast() const
     {
         return _valueOr(MATERIAL_PROPERTY_CAST_USER_DATA, false);
@@ -256,19 +286,61 @@ public:
         setMaterial(ExtractMaterial::fromId(*_model, id));
     }
 
+private:
+    Scene* _scene = nullptr;
+    ModelDescriptor* _model = nullptr;
+    size_t _materialId = 0;
+};
+
+class MaterialRangeProxy
+{
+public:
+    MaterialRangeProxy() = default;
+
+    MaterialRangeProxy(Scene& scene)
+        : _scene(&scene)
+    {
+    }
+
+    void setModelId(size_t id) { _model = &ExtractModel::fromId(*_scene, id); }
+
+    void setMaterialIds(const std::vector<size_t>& ids)
+    {
+        if (!_model)
+        {
+            return;
+        }
+        _materials.clear();
+        _materials.reserve(ids.size());
+        for (auto id : ids)
+        {
+            auto& material = ExtractMaterial::fromId(*_model, id);
+            _materials.push_back(material);
+        }
+    }
+
+    void setProperties(const JsonBuffer<ExtendedMaterial>& properties)
+    {
+        _properties = properties;
+    }
+
     void commit()
     {
-        if (hasMaterial())
+        for (auto material : _materials)
         {
-            getMaterial().commit();
+            _properties.deserialize(material);
+            material.commit();
         }
     }
 
 private:
     Scene* _scene = nullptr;
     ModelDescriptor* _model = nullptr;
-    size_t _materialId = 0;
+    std::vector<ExtendedMaterial> _materials;
+    JsonBuffer<ExtendedMaterial> _properties;
 };
+
+using MaterialBuffer = JsonBuffer<MaterialProxy>;
 
 BRAYNS_ADAPTER_ENUM(MaterialShadingMode, {"none", MaterialShadingMode::none},
                     {"diffuse", MaterialShadingMode::diffuse},
@@ -336,5 +408,14 @@ BRAYNS_ADAPTER_GETSET("material_id", getMaterialId, setMaterialId,
                       "The ID that identifies this material")
 BRAYNS_MATERIAL_PROPERTIES()
 BRAYNS_EXTENDED_MATERIAL_PROPERTIES()
+BRAYNS_ADAPTER_END()
+
+BRAYNS_NAMED_ADAPTER_BEGIN(MaterialRangeProxy, "MaterialRange")
+BRAYNS_ADAPTER_SET("model_id", setModelId,
+                   "The model which this material belongs to")
+BRAYNS_ADAPTER_SET("material_ids", setMaterialIds,
+                   "The list of ID that identifies the materials")
+BRAYNS_ADAPTER_SET("properties", setProperties,
+                   "Material properties to apply on all given materials")
 BRAYNS_ADAPTER_END()
 } // namespace brayns
