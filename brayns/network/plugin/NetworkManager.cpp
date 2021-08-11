@@ -23,7 +23,7 @@
 #include <brayns/network/interface/ServerInterface.h>
 #include <brayns/network/stream/StreamManager.h>
 
-#include "EntrypointRegistry.h"
+#include "NetworkManagerEntrypoints.h"
 
 namespace
 {
@@ -187,7 +187,7 @@ void NetworkManager::init()
     _context = std::make_unique<NetworkContext>(*_api);
     _interface = std::make_shared<ServerInterface>(*_context);
     _api->setActionInterface(_interface);
-    EntrypointRegistry::registerEntrypoints(*_interface);
+    NetworkManagerEntrypoints::load(*_interface);
     ConnectionCallbacks::setup(*_context);
 }
 

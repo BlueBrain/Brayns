@@ -20,8 +20,9 @@
 
 #pragma once
 
+#include <brayns/network/common/RateLimiter.h>
+
 #include "BaseEntrypoint.h"
-#include "RateLimiter.h"
 
 namespace brayns
 {

@@ -65,10 +65,10 @@
 
 namespace brayns
 {
-class EntrypointRegistry
+class NetworkManagerEntrypoints
 {
 public:
-    static void registerEntrypoints(ActionInterface& interface)
+    static void load(ActionInterface& interface)
     {
         interface.add<GetAnimationParametersEntrypoint>();
         interface.add<SetAnimationParametersEntrypoint>();

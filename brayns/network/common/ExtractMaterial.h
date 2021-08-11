@@ -20,40 +20,33 @@
 
 #pragma once
 
-#include <brayns/network/common/ExtractModel.h>
-#include <brayns/network/json/JsonBuffer.h>
+#include <brayns/engine/Material.h>
+#include <brayns/engine/Model.h>
 
-#include "TransferFunctionAdapter.h"
+#include <brayns/network/entrypoint/EntrypointException.h>
 
 namespace brayns
 {
-class ModelTransferFunction
+class ExtractMaterial
 {
 public:
-    using Buffer = JsonBuffer<TransferFunction>;
-
-    ModelTransferFunction() = default;
-
-    ModelTransferFunction(Scene& scene)
-        : _scene(&scene)
+    static Material& fromId(ModelDescriptor& descriptor, size_t id)
     {
+        auto& model = descriptor.getModel();
+        auto modelId = descriptor.getModelID();
+        return fromId(model, modelId, id);
     }
 
-    void setId(size_t id) { ExtractModel::fromId(*_scene, id); }
-
-    void setTransferFunction(const Buffer& buffer)
+    static Material& fromId(Model& model, size_t modelId, size_t id)
     {
-        auto& transferFunction = _scene->getTransferFunction();
-        buffer.deserialize(transferFunction);
+        auto material = model.getMaterial(id);
+        if (!material)
+        {
+            throw EntrypointException("No material with ID " +
+                                      std::to_string(id) + " in model " +
+                                      std::to_string(modelId));
+        }
+        return *material;
     }
-
-private:
-    Scene* _scene = nullptr;
 };
-
-BRAYNS_ADAPTER_BEGIN(ModelTransferFunction)
-BRAYNS_ADAPTER_SET("id", setId, "Model ID", Required())
-BRAYNS_ADAPTER_SET("transfer_function", setTransferFunction,
-                   "Transfer function", Required())
-BRAYNS_ADAPTER_END()
 } // namespace brayns

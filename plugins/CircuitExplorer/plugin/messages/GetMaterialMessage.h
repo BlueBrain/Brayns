@@ -20,40 +20,12 @@
 
 #pragma once
 
-#include <brayns/network/common/ExtractModel.h>
-#include <brayns/network/json/JsonBuffer.h>
-
-#include "TransferFunctionAdapter.h"
+#include <brayns/network/json/Message.h>
 
 namespace brayns
 {
-class ModelTransferFunction
-{
-public:
-    using Buffer = JsonBuffer<TransferFunction>;
-
-    ModelTransferFunction() = default;
-
-    ModelTransferFunction(Scene& scene)
-        : _scene(&scene)
-    {
-    }
-
-    void setId(size_t id) { ExtractModel::fromId(*_scene, id); }
-
-    void setTransferFunction(const Buffer& buffer)
-    {
-        auto& transferFunction = _scene->getTransferFunction();
-        buffer.deserialize(transferFunction);
-    }
-
-private:
-    Scene* _scene = nullptr;
-};
-
-BRAYNS_ADAPTER_BEGIN(ModelTransferFunction)
-BRAYNS_ADAPTER_SET("id", setId, "Model ID", Required())
-BRAYNS_ADAPTER_SET("transfer_function", setTransferFunction,
-                   "Transfer function", Required())
-BRAYNS_ADAPTER_END()
+BRAYNS_MESSAGE_BEGIN(GetMaterialMessage)
+BRAYNS_MESSAGE_ENTRY(size_t, model_id, "Model ID")
+BRAYNS_MESSAGE_ENTRY(size_t, material_id, "Material ID")
+BRAYNS_MESSAGE_END()
 } // namespace brayns

@@ -20,43 +20,56 @@
 
 #pragma once
 
-#include <brayns/network/adapters/ModelInstanceAdapter.h>
-#include <brayns/network/common/ExtractModel.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
+
+#include <plugin/adapters/MaterialAdapter.h>
+#include <plugin/messages/GetMaterialMessage.h>
 
 namespace brayns
 {
-class UpdateInstanceEntrypoint : public Entrypoint<ModelInstance, EmptyMessage>
+class GetMaterialEntrypoint
+    : public Entrypoint<GetMaterialMessage, MaterialProxy>
 {
 public:
-    virtual std::string getName() const override { return "update-instance"; }
+    virtual std::string getName() const override { return "get-material"; }
 
     virtual std::string getDescription() const override
     {
-        return "Update the model instance with the given values";
+        return "Retreive the material with given ID in given model";
     }
 
     virtual void onRequest(const Request& request) override
     {
         auto params = request.getParams();
-        auto modelId = params.getModelID();
-        auto instanceId = params.getInstanceID();
+        auto modelId = params.model_id;
+        auto materialId = params.material_id;
         auto& engine = getApi().getEngine();
         auto& scene = engine.getScene();
-        auto& model = ExtractModel::fromId(scene, modelId);
-        auto instance = model.getInstance(instanceId);
-        if (!instance)
-        {
-            throw EntrypointException(
-                "Model with ID " + std::to_string(modelId) +
-                " has no instance with ID " + std::to_string(instanceId));
-        }
-        auto& source = model.getModel();
-        source.markInstancesDirty();
-        scene.markModified(false);
-        engine.triggerRender();
-        request.getParams(*instance);
-        request.notify(*instance);
+        MaterialProxy material(scene);
+        material.setModelId(modelId);
+        material.setMaterialId(materialId);
+        request.reply(material);
+    }
+};
+
+class SetMaterialEntrypoint : public Entrypoint<MaterialProxy, EmptyMessage>
+{
+public:
+    virtual std::string getName() const override { return "set-material"; }
+
+    virtual std::string getDescription() const override
+    {
+        return "Update the corresponding material with the given properties";
+    }
+
+    virtual void onRequest(const Request& request) override
+    {
+        auto& engine = getApi().getEngine();
+        auto& scene = engine.getScene();
+        MaterialProxy material(scene);
+        request.getParams(material);
+        material.commit();
+        scene.markModified();
         request.reply(EmptyMessage());
     }
 };

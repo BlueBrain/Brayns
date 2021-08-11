@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/RateLimiter.h>
+#include <brayns/network/common/RateLimiter.h>
 
 #include <memory>
 

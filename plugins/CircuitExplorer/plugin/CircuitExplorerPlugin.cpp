@@ -38,7 +38,6 @@
 #include <plugin/meshing/PointCloudMesher.h>
 #include <plugin/movie/MovieMaker.h>
 
-#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/common/Progress.h>
 #include <brayns/common/Timer.h>
 #include <brayns/common/geometry/Streamline.h>
@@ -52,6 +51,7 @@
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
+#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
@@ -70,6 +70,8 @@
 #include <sys/wait.h>
 
 #include <boost/filesystem.hpp>
+
+#include "CircuitExplorerEntrypoints.h"
 
 #define REGISTER_LOADER(LOADER, FUNC) \
     registry.registerLoader({std::bind(&LOADER::getSupportedDataTypes), FUNC});
@@ -313,7 +315,9 @@ void CircuitExplorerPlugin::init()
     auto actionInterface = _api->getActionInterface();
     if (actionInterface)
     {
-        actionInterface->registerRequest<MaterialDescriptor, brayns::Message>(
+        brayns::CircuitExplorerEntrypoints::load(*actionInterface);
+
+        /*actionInterface->registerRequest<MaterialDescriptor, brayns::Message>(
             {"set-material", "Modifies a specific material",
              "MaterialDescriptor",
              "The data to identify and modify the material"},
@@ -552,7 +556,7 @@ void CircuitExplorerPlugin::init()
              "geometries)",
              "CircuitThickness", "Model ID and radius multiplier to apply"},
             [&](const CircuitThickness& cc)
-            { return _changeCircuitThickness(cc); });
+            { return _changeCircuitThickness(cc); });*/
 
     } // if (actionInterface)
 

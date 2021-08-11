@@ -20,8 +20,8 @@
 
 #pragma once
 
+#include <brayns/network/common/ExtractModel.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/entrypoint/ExtractModel.h>
 #include <brayns/network/messages/GetModelMessage.h>
 #include <brayns/network/messages/ModelPropertiesMessage.h>
 

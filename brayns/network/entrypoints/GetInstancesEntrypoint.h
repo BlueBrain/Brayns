@@ -23,8 +23,8 @@
 #include <algorithm>
 
 #include <brayns/network/adapters/ModelInstanceAdapter.h>
+#include <brayns/network/common/ExtractModel.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/entrypoint/ExtractModel.h>
 #include <brayns/network/messages/GetInstancesMessage.h>
 
 namespace brayns

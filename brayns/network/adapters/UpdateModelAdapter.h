@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/ExtractModel.h>
+#include <brayns/network/common/ExtractModel.h>
 #include <brayns/network/json/MessageAdapter.h>
 
 #include "TransformationAdapter.h"

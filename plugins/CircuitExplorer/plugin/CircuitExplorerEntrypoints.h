@@ -1,6 +1,5 @@
-/* Copyright (c) 2021 EPFL/Blue Brain Project
- *
- * Responsible Author: adrien.fleury@epfl.ch
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,26 +19,17 @@
 
 #pragma once
 
-#include <brayns/network/common/ExtractModel.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/GetModelMessage.h>
+#include <plugin/entrypoints/MaterialEntrypoint.h>
 
 namespace brayns
 {
-class GetModelEntrypoint : public Entrypoint<GetModelMessage, ModelDescriptor>
+class CircuitExplorerEntrypoints
 {
 public:
-    virtual std::string getName() const override { return "get-model"; }
-
-    virtual std::string getDescription() const override
+    static void load(ActionInterface& interface)
     {
-        return "Get all the information of the given model";
-    }
-
-    virtual void onRequest(const Request& request) override
-    {
-        auto& model = ExtractModel::fromRequest(getApi(), request);
-        request.reply(model);
+        interface.add<GetMaterialEntrypoint>();
+        interface.add<SetMaterialEntrypoint>();
     }
 };
 } // namespace brayns

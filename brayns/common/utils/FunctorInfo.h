@@ -34,7 +34,7 @@ struct FunctorTrait
     template <size_t I>
     using ArgType = std::tuple_element_t<I, std::tuple<A...>>;
 
-    static constexpr size_t ArgCount = sizeof...(A);
+    static constexpr size_t getArgCount() { return sizeof...(A); }
 };
 
 template <typename T>
@@ -44,6 +44,11 @@ struct FunctorInfo : FunctorInfo<decltype(&T::operator())>
 
 template <typename R, typename... A>
 struct FunctorInfo<R (*)(A...)> : FunctorTrait<R, void, A...>
+{
+};
+
+template <typename R, typename... A>
+struct FunctorInfo<R(A...)> : FunctorTrait<R, void, A...>
 {
 };
 

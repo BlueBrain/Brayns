@@ -19,10 +19,10 @@
 
 #pragma once
 
+#include <brayns/network/common/RateLimiter.h>
 #include <brayns/network/tasks/NetworkTask.h>
 
 #include "EntrypointRequest.h"
-#include "RateLimiter.h"
 
 namespace brayns
 {
