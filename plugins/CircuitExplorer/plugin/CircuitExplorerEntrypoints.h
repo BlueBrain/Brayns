@@ -28,6 +28,7 @@ class CircuitExplorerEntrypoints
 public:
     static void load(ActionInterface& interface)
     {
+        interface.add<GetMaterialIdsEntrypoint>();
         interface.add<GetMaterialEntrypoint>();
         interface.add<SetMaterialEntrypoint>();
         interface.add<SetMaterialsEntrypoint>();

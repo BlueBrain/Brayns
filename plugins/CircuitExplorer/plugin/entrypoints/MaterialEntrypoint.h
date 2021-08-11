@@ -27,6 +27,38 @@
 
 namespace brayns
 {
+class GetMaterialIdsEntrypoint
+    : public Entrypoint<GetMaterialIdsParams, GetMaterialIdsResult>
+{
+public:
+    virtual std::string getName() const override { return "get-material-ids"; }
+
+    virtual std::string getDescription() const override
+    {
+        return "Retreive the list of ID of the materials in given model";
+    }
+
+    virtual void onRequest(const Request& request) override
+    {
+        auto params = request.getParams();
+        auto modelId = params.model_id;
+        auto& engine = getApi().getEngine();
+        auto& scene = engine.getScene();
+        auto& descriptor = ExtractModel::fromId(scene, modelId);
+        auto& model = descriptor.getModel();
+        auto& materials = model.getMaterials();
+        GetMaterialIdsResult result;
+        auto& ids = result.ids;
+        ids.reserve(materials.size());
+        for (const auto& pair : materials)
+        {
+            auto id = pair.first;
+            ids.push_back(id);
+        }
+        request.reply(result);
+    }
+};
+
 class GetMaterialEntrypoint
     : public Entrypoint<GetMaterialMessage, MaterialProxy>
 {
