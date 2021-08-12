@@ -272,7 +272,14 @@ public:
 
     size_t getModelId() const { return _model ? _model->getModelID() : 0; }
 
-    void setModelId(size_t id) { _model = &ExtractModel::fromId(*_scene, id); }
+    void setModelId(size_t id)
+    {
+        if (!_scene)
+        {
+            return;
+        }
+        _model = &ExtractModel::fromId(*_scene, id);
+    }
 
     size_t getMaterialId() const { return _materialId; }
 

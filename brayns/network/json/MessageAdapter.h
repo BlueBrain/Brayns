@@ -26,9 +26,8 @@
 
 namespace brayns
 {
-#define BRAYNS_NAMED_ADAPTER_BEGIN(TYPE, NAME)                      \
-    template <>                                                     \
-    struct JsonAdapter<TYPE>                                        \
+#define BRAYNS_NAMED_JSON_BEGIN(CLASS, TYPE, NAME)                  \
+    CLASS                                                           \
     {                                                               \
     public:                                                         \
         static JsonSchema getSchema(const TYPE& value)              \
@@ -58,6 +57,12 @@ namespace brayns
         static MessageInfo _createInfo()                            \
         {                                                           \
             MessageInfo info(NAME);
+
+#define BRAYNS_JSON_BEGIN(CLASS, TYPE) \
+    BRAYNS_NAMED_JSON_BEGIN(CLASS, TYPE, #TYPE)
+
+#define BRAYNS_NAMED_ADAPTER_BEGIN(TYPE, NAME) \
+    BRAYNS_NAMED_JSON_BEGIN(template <> struct JsonAdapter<TYPE>, TYPE, NAME)
 
 #define BRAYNS_ADAPTER_BEGIN(TYPE) BRAYNS_NAMED_ADAPTER_BEGIN(TYPE, #TYPE)
 
@@ -140,9 +145,9 @@ namespace brayns
         { return Json::deserialize(json, object.FIELD); },                \
         __VA_ARGS__)
 
-#define BRAYNS_ADAPTER_NAMED_ENTRY(NAME, FIELD, DESCRIPTION, ...) \
-    BRAYNS_ADAPTER_FIELD(NAME, FIELD, Description(DESCRIPTION),   \
-                         Required(), __VA_ARGS__)
+#define BRAYNS_ADAPTER_NAMED_ENTRY(NAME, FIELD, DESCRIPTION, ...)           \
+    BRAYNS_ADAPTER_FIELD(NAME, FIELD, Description(DESCRIPTION), Required(), \
+                         __VA_ARGS__)
 
 #define BRAYNS_ADAPTER_ENTRY(FIELD, DESCRIPTION, ...) \
     BRAYNS_ADAPTER_NAMED_ENTRY(#FIELD, FIELD, DESCRIPTION, __VA_ARGS__)

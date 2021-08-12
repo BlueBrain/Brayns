@@ -23,7 +23,7 @@
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <plugin/adapters/MaterialAdapter.h>
-#include <plugin/messages/GetMaterialMessage.h>
+#include <plugin/messages/MaterialMessage.h>
 
 namespace brayns
 {

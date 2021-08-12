@@ -22,6 +22,13 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
+BRAYNS_MESSAGE_BEGIN(TestExternal)
+BRAYNS_MESSAGE_ENTRY(std::string, test, "Test string")
+BRAYNS_MESSAGE_ENTRY(size_t, size, "Test size")
+BRAYNS_MESSAGE_ENTRY(brayns::StringHash<std::string>, hash, "Test hash")
+BRAYNS_MESSAGE_ENTRY(std::vector<bool>, booleans, "Test booleans optimization")
+BRAYNS_MESSAGE_END()
+
 namespace brayns
 {
 enum class TestEnum

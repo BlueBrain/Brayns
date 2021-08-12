@@ -182,6 +182,7 @@ private:
     std::string _title;
     std::vector<MessageProperty> _properties;
 };
+} // namespace brayns
 
 /**
  * @brief Macro to declare a new message.
@@ -205,39 +206,42 @@ private:
  * @endcode
  *
  */
-#define BRAYNS_NAMED_MESSAGE_BEGIN(TYPE, NAME)                               \
-    struct TYPE                                                              \
-    {                                                                        \
-    private:                                                                 \
-        using MessageType = TYPE;                                            \
-                                                                             \
-        static MessageInfo& _getInfo()                                       \
-        {                                                                    \
-            static MessageInfo info(NAME);                                   \
-            return info;                                                     \
-        }                                                                    \
-                                                                             \
-        static const MessageInfo& _loadInfo()                                \
-        {                                                                    \
-            static const int buildMessageInfo = []                           \
-            {                                                                \
-                TYPE();                                                      \
-                return 0;                                                    \
-            }();                                                             \
-            return _getInfo();                                               \
-        }                                                                    \
-                                                                             \
-    public:                                                                  \
-        JsonSchema getSchema() const { return _loadInfo().getSchema(this); } \
-                                                                             \
-        bool serialize(JsonValue& json) const                                \
-        {                                                                    \
-            return _loadInfo().serialize(this, json);                        \
-        }                                                                    \
-                                                                             \
-        bool deserialize(const JsonValue& json)                              \
-        {                                                                    \
-            return _loadInfo().deserialize(json, this);                      \
+#define BRAYNS_NAMED_MESSAGE_BEGIN(TYPE, NAME)          \
+    struct TYPE                                         \
+    {                                                   \
+    private:                                            \
+        using MessageType = TYPE;                       \
+                                                        \
+        static brayns::MessageInfo& _getInfo()          \
+        {                                               \
+            static brayns::MessageInfo info(NAME);      \
+            return info;                                \
+        }                                               \
+                                                        \
+        static const brayns::MessageInfo& _loadInfo()   \
+        {                                               \
+            static const int buildMessageInfo = []      \
+            {                                           \
+                TYPE();                                 \
+                return 0;                               \
+            }();                                        \
+            return _getInfo();                          \
+        }                                               \
+                                                        \
+    public:                                             \
+        brayns::JsonSchema getSchema() const            \
+        {                                               \
+            return _loadInfo().getSchema(this);         \
+        }                                               \
+                                                        \
+        bool serialize(brayns::JsonValue& json) const   \
+        {                                               \
+            return _loadInfo().serialize(this, json);   \
+        }                                               \
+                                                        \
+        bool deserialize(const brayns::JsonValue& json) \
+        {                                               \
+            return _loadInfo().deserialize(json, this); \
         }
 
 #define BRAYNS_MESSAGE_BEGIN(TYPE) BRAYNS_NAMED_MESSAGE_BEGIN(TYPE, #TYPE)
@@ -253,6 +257,8 @@ private:
 #define BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, ...)                         \
     TYPE NAME = []                                                       \
     {                                                                    \
+        using namespace brayns;                                          \
+                                                                         \
         static const int registerEntry = []                              \
         {                                                                \
             MessageProperty property;                                    \
@@ -279,13 +285,13 @@ private:
         return TYPE{};                                                   \
     }();
 
-#define BRAYNS_MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION, ...)                    \
-    BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, Description(DESCRIPTION), Required(), \
-                            __VA_ARGS__)
+#define BRAYNS_MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION, ...)                \
+    BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, brayns::Description(DESCRIPTION), \
+                            brayns::Required(), __VA_ARGS__)
 
 #define BRAYNS_MESSAGE_OPTION(TYPE, NAME, DESCRIPTION, ...) \
     BRAYNS_MESSAGE_PROPERTY(boost::optional<TYPE>, NAME,    \
-                            Description(DESCRIPTION), __VA_ARGS__)
+                            brayns::Description(DESCRIPTION), __VA_ARGS__)
 
 /**
  * @brief Must be called after BRAYNS_MESSAGE_BEGIN and a set of
@@ -295,4 +301,3 @@ private:
 #define BRAYNS_MESSAGE_END() \
     }                        \
     ;
-} // namespace brayns
