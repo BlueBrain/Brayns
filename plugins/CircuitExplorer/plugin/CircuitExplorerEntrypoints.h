@@ -20,8 +20,9 @@
 #pragma once
 
 #include <plugin/entrypoints/MaterialEntrypoint.h>
-#include <plugin/entrypoints/SetSynapsesAttributesEntrypoint.h>
 #include <plugin/entrypoints/SaveModelToCacheEntrypoint.h>
+#include <plugin/entrypoints/SetConnectionsPerValueEntrypoint.h>
+#include <plugin/entrypoints/SetSynapsesAttributesEntrypoint.h>
 
 #include "CircuitExplorerContext.h"
 
@@ -39,5 +40,6 @@ public:
         interface.add<brayns::SetMaterialExtraAttributesEntrypoint>();
         interface.add<SetSynapsesAttributesEntrypoint>(context);
         interface.add<SaveModelToCacheEntrypoint>();
+        interface.add<SetConnectionsPerValueEntrypoint>();
     }
 };

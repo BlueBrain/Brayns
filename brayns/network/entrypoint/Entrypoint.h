@@ -30,6 +30,8 @@ template <typename ParamsType, typename ResultType>
 class Entrypoint : public BaseEntrypoint
 {
 public:
+    using Params = ParamsType;
+    using Result = ResultType;
     using Request = EntrypointRequest<ParamsType, ResultType>;
     using Task = EntrypointTask<ParamsType, ResultType>;
     using TaskPtr = std::shared_ptr<Task>;
