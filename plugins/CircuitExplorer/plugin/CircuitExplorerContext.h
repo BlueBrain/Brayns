@@ -19,23 +19,13 @@
 
 #pragma once
 
-#include <plugin/entrypoints/MaterialEntrypoint.h>
-#include <plugin/entrypoints/SetSynapsesAttributesEntrypoint.h>
+#include <plugin/api/CircuitExplorerParams.h>
 
-#include "CircuitExplorerContext.h"
-
-class CircuitExplorerEntrypoints
+class CircuitExplorerContext
 {
 public:
-    static void load(CircuitExplorerContext& context,
-                     brayns::ActionInterface& interface)
-    {
-        interface.add<brayns::GetMaterialIdsEntrypoint>();
-        interface.add<brayns::GetMaterialEntrypoint>();
-        interface.add<brayns::SetMaterialEntrypoint>();
-        interface.add<brayns::SetMaterialsEntrypoint>();
-        interface.add<brayns::SetMaterialRangeEntrypoint>();
-        interface.add<brayns::SetMaterialExtraAttributesEntrypoint>();
-        interface.add<SetSynapsesAttributesEntrypoint>(context);
-    }
+    SynapseAttributes& getSynapseAttributes() { return _synapseAttributes; }
+
+private:
+    SynapseAttributes _synapseAttributes;
 };

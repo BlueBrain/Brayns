@@ -267,6 +267,7 @@ void CircuitExplorerPlugin::init()
     auto& scene = _api->getScene();
     auto& registry = scene.getLoaderRegistry();
     auto& pm = _api->getParametersManager();
+    auto& synapseAttributes = _context.getSynapseAttributes();
 
     // Store the current accumulation settings
     _prevAccumulationSetting = _api->getParametersManager()
@@ -277,8 +278,7 @@ void CircuitExplorerPlugin::init()
         std::make_unique<BrickLoader>(scene, BrickLoader::getCLIProperties()));
 
     registry.registerLoader(
-        std::make_unique<SynapseJSONLoader>(scene,
-                                            std::move(_synapseAttributes)));
+        std::make_unique<SynapseJSONLoader>(scene, synapseAttributes));
 
     registry.registerLoader(std::make_unique<SynapseCircuitLoader>(
         scene, pm.getApplicationParameters(),
@@ -315,7 +315,7 @@ void CircuitExplorerPlugin::init()
     auto actionInterface = _api->getActionInterface();
     if (actionInterface)
     {
-        brayns::CircuitExplorerEntrypoints::load(*actionInterface);
+        CircuitExplorerEntrypoints::load(_context, *actionInterface);
 
         if (false)
         {
@@ -1412,12 +1412,14 @@ brayns::Message CircuitExplorerPlugin::_setSynapseAttributes(
 {
     brayns::Message result;
 
+    auto& synapseAttributes = _context.getSynapseAttributes();
+
     try
     {
-        _synapseAttributes = param;
-        SynapseJSONLoader loader(_api->getScene(), _synapseAttributes);
+        synapseAttributes = param;
+        SynapseJSONLoader loader(_api->getScene(), synapseAttributes);
         brayns::Vector3fs colors;
-        for (const auto& htmlColor : _synapseAttributes.htmlColors)
+        for (const auto& htmlColor : synapseAttributes.htmlColors)
         {
             auto hexCode = htmlColor;
             if (hexCode.at(0) == '#')
@@ -1433,12 +1435,12 @@ brayns::Message CircuitExplorerPlugin::_setSynapseAttributes(
             colors.push_back(color);
         }
         const auto modelDescriptor =
-            loader.importSynapsesFromGIDs(_synapseAttributes, colors);
+            loader.importSynapsesFromGIDs(synapseAttributes, colors);
 
         _api->getScene().addModel(modelDescriptor);
 
         PLUGIN_INFO << "Synapses successfully added for GID "
-                    << _synapseAttributes.gid << std::endl;
+                    << synapseAttributes.gid << std::endl;
         _dirty = true;
     }
     catch (const std::runtime_error& e)
