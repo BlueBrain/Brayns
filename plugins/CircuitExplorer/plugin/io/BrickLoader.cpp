@@ -677,6 +677,12 @@ std::vector<brayns::ModelDescriptorPtr> BrickLoader::importFromFile(
 void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
                                const std::string& filename)
 {
+    exportToFile(modelDescriptor, filename);
+}
+
+void BrickLoader::exportToFile(brayns::ModelDescriptor& modelDescriptor,
+                               const std::string& filename)
+{
     PLUGIN_INFO << "Saving model to cache file: " << filename << std::endl;
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     if (!file.good())
@@ -689,11 +695,11 @@ void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
     file.write((char*)&version, sizeof(size_t));
 
     // Save geometry
-    auto& model = modelDescriptor->getModel();
+    auto& model = modelDescriptor.getModel();
     uint64_t bufferSize{0};
 
     // Metadata
-    auto metadata = modelDescriptor->getMetadata();
+    auto metadata = modelDescriptor.getMetadata();
     size_t nbElements = metadata.size();
     file.write((char*)&nbElements, sizeof(size_t));
     for (const auto& data : metadata)
