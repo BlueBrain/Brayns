@@ -196,6 +196,18 @@ public:
     {
     }
 
+    void extendAttributes() const
+    {
+        PropertyMap properties;
+        properties.add({MATERIAL_PROPERTY_CAST_USER_DATA, false});
+        properties.add({MATERIAL_PROPERTY_SHADING_MODE,
+                        int(MaterialShadingMode::diffuse)});
+        properties.add({MATERIAL_PROPERTY_CLIPPING_MODE,
+                        int(MaterialClippingMode::no_clipping)});
+        properties.add({MATERIAL_PROPERTY_USER_PARAMETER, 1.0});
+        getMaterial().updateProperties(properties);
+    }
+
     bool getSimulationDataCast() const
     {
         return _valueOr(MATERIAL_PROPERTY_CAST_USER_DATA, false);

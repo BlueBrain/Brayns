@@ -158,4 +158,36 @@ public:
         request.reply(EmptyMessage());
     }
 };
+
+class SetMaterialExtraAttributesEntrypoint
+    : public Entrypoint<GetMaterialIdsParams, EmptyMessage>
+{
+public:
+    virtual std::string getName() const override
+    {
+        return "set-material-extra-attributes";
+    }
+
+    virtual std::string getDescription() const override
+    {
+        return "Add extra material attributes necessary for the Circuit "
+               "Explorer renderer";
+    }
+
+    virtual void onRequest(const Request& request) override
+    {
+        auto params = request.getParams();
+        auto modelId = params.model_id;
+        auto& engine = getApi().getEngine();
+        auto& scene = engine.getScene();
+        auto& descriptor = ExtractModel::fromId(scene, modelId);
+        auto& model = descriptor.getModel();
+        for (const auto& pair : model.getMaterials())
+        {
+            ExtendedMaterial material(*pair.second);
+            material.extendAttributes();
+        }
+        request.reply(EmptyMessage());
+    }
+};
 } // namespace brayns
