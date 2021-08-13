@@ -43,6 +43,7 @@ set(BRAYNSCIRCUITEXPLORER_SOURCES
     plugin/api/CellObjectMapper.cpp
     plugin/meshing/MetaballsGenerator.cpp
     plugin/meshing/PointCloudMesher.cpp
+    plugin/meshing/PointCloudLoader.cpp
     plugin/CircuitExplorerPlugin.cpp
     plugin/io/VoltageSimulationHandler.cpp
     plugin/io/CellGrowthHandler.cpp
@@ -67,6 +68,7 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     plugin/api/MorphologyMap.h
     plugin/meshing/MetaballsGenerator.h
     plugin/meshing/PointCloudMesher.h
+    plugin/meshing/PointCloudLoader.h
     plugin/CircuitExplorerPlugin.h
     plugin/io/CellGrowthHandler.h
     plugin/io/VoltageSimulationHandler.h

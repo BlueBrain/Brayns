@@ -23,22 +23,22 @@
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <plugin/meshing/PointCloudLoader.h>
-#include <plugin/messages/SetConnectionsPerValueMessage.h>
+#include <plugin/messages/SetMetaballsPerSimulationValueMessage.h>
 
-class SetConnectionsPerValueEntrypoint
-    : public brayns::Entrypoint<SetConnectionsPerValueMessage,
+class SetMetaballsPerSimulationValueEntrypoint
+    : public brayns::Entrypoint<SetMetaballsPerSimulationValueMessage,
                                 brayns::EmptyMessage>
 {
 public:
     virtual std::string getName() const override
     {
-        return "set-connections-per-value";
+        return "set-metaballs-per-simulation-value";
     }
 
     virtual std::string getDescription() const override
     {
-        return "Draw a point cloud representing the number of "
-               "connections for a given frame and simulation value";
+        return "Add a metaballs model representing the number of connections "
+               "for a given frame and simulation value";
     }
 
     virtual void onRequest(const Request& request) override
@@ -59,6 +59,8 @@ private:
         info.frame = params.frame;
         info.value = params.value;
         info.epsilon = params.epsilon;
-        PointCloudLoader::loadConvexHull(scene, info);
+        info.gridSize = params.grid_size;
+        info.threshold = params.threshold;
+        PointCloudLoader::loadMetaballs(scene, info);
     }
 };
