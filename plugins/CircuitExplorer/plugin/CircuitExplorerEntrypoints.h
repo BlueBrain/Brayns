@@ -20,6 +20,7 @@
 #pragma once
 
 #include <plugin/entrypoints/MaterialEntrypoint.h>
+#include <plugin/entrypoints/OduCameraEntrypoint.h>
 #include <plugin/entrypoints/SaveModelToCacheEntrypoint.h>
 #include <plugin/entrypoints/SetConnectionsPerValueEntrypoint.h>
 #include <plugin/entrypoints/SetMetaballsPerSimulationValueEntrypoint.h>
@@ -43,5 +44,7 @@ public:
         interface.add<SaveModelToCacheEntrypoint>();
         interface.add<SetConnectionsPerValueEntrypoint>();
         interface.add<SetMetaballsPerSimulationValueEntrypoint>();
+        interface.add<GetOduCameraEntrypoint>();
+        interface.add<SetOduCameraEntrypoint>();
     }
 };
