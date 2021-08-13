@@ -19,6 +19,8 @@
 
 #include "StreamManager.h"
 
+#include <brayns/common/log.h>
+
 #include <brayns/network/context/NetworkContext.h>
 
 namespace
@@ -51,8 +53,23 @@ public:
         {
             return;
         }
+        _trySendImage(context, image);
+    }
+
+private:
+    static void _trySendImage(NetworkContext& context,
+                              const ImageGenerator::ImageJPEG& image)
+    {
         auto& connections = context.getConnections();
-        connections.broadcast({image.data.get(), image.size});
+        try
+        {
+            connections.broadcast({image.data.get(), image.size});
+        }
+        catch (const ConnectionClosedException& e)
+        {
+            BRAYNS_DEBUG << "Connection closed during image broadcast: "
+                         << e.what() << ".\n";
+        }
     }
 };
 

@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <plugin/entrypoints/AttachCellGrowthHandlerEntrypoint.h>
 #include <plugin/entrypoints/MaterialEntrypoint.h>
 #include <plugin/entrypoints/OduCameraEntrypoint.h>
 #include <plugin/entrypoints/SaveModelToCacheEntrypoint.h>
@@ -46,5 +47,6 @@ public:
         interface.add<SetMetaballsPerSimulationValueEntrypoint>();
         interface.add<GetOduCameraEntrypoint>();
         interface.add<SetOduCameraEntrypoint>();
+        interface.add<AttachCellGrowthHandlerEntrypoint>();
     }
 };

@@ -39,7 +39,7 @@ public:
         auto data = _getFrameData(model, info.frame);
         for (const auto& pair : model.getSpheres())
         {
-            auto& points = cloud[pair.first];
+            brayns::Vector4fs points;
             for (const auto& sphere : pair.second)
             {
                 auto value = data[sphere.userData];
@@ -48,6 +48,10 @@ public:
                     continue;
                 }
                 points.push_back(_getPoint(sphere));
+            }
+            if (!points.empty())
+            {
+                cloud[pair.first] = std::move(points);
             }
         }
         return cloud;
