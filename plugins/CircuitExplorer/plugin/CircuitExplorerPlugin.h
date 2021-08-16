@@ -62,7 +62,6 @@ public:
     brayns::Message exportFramesToDisk(const ExportFramesToDisk& payload);
     FrameExportProgress getFrameExportProgress();
 
-private:
     CellObjectMapper* getMapperForCircuit(const size_t modelId) noexcept
     {
         for (auto& mapper : _mappers)
@@ -74,6 +73,7 @@ private:
         return nullptr;
     }
 
+private:
     // Rendering
     brayns::Message _setCamera(const CameraDefinition&);
     CameraDefinition _getCamera();

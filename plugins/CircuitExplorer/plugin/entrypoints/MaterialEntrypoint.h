@@ -23,42 +23,10 @@
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <plugin/adapters/MaterialAdapter.h>
-#include <plugin/messages/MaterialMessage.h>
+#include <plugin/messages/GetMaterialMessage.h>
 
 namespace brayns
 {
-class GetMaterialIdsEntrypoint
-    : public Entrypoint<GetMaterialIdsParams, GetMaterialIdsResult>
-{
-public:
-    virtual std::string getName() const override { return "get-material-ids"; }
-
-    virtual std::string getDescription() const override
-    {
-        return "Retreive the list of ID of the materials in given model";
-    }
-
-    virtual void onRequest(const Request& request) override
-    {
-        auto params = request.getParams();
-        auto modelId = params.model_id;
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
-        auto& descriptor = ExtractModel::fromId(scene, modelId);
-        auto& model = descriptor.getModel();
-        auto& materials = model.getMaterials();
-        GetMaterialIdsResult result;
-        auto& ids = result.ids;
-        ids.reserve(materials.size());
-        for (const auto& pair : materials)
-        {
-            auto id = pair.first;
-            ids.push_back(id);
-        }
-        request.reply(result);
-    }
-};
-
 class GetMaterialEntrypoint
     : public Entrypoint<GetMaterialMessage, MaterialProxy>
 {
@@ -107,7 +75,7 @@ public:
 };
 
 class SetMaterialsEntrypoint
-    : public Entrypoint<std::vector<MaterialBuffer>, EmptyMessage>
+    : public Entrypoint<std::vector<JsonBuffer<MaterialProxy>>, EmptyMessage>
 {
 public:
     virtual std::string getName() const override { return "set-materials"; }
@@ -120,8 +88,7 @@ public:
     virtual void onRequest(const Request& request) override
     {
         auto params = request.getParams();
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
+        auto& scene = getApi().getScene();
         for (const auto& buffer : params)
         {
             MaterialProxy material(scene);
@@ -129,64 +96,6 @@ public:
             material.commit();
         }
         scene.markModified();
-        request.reply(EmptyMessage());
-    }
-};
-
-class SetMaterialRangeEntrypoint
-    : public Entrypoint<MaterialRangeProxy, EmptyMessage>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "set-material-range";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Update the corresponding materials with common properties";
-    }
-
-    virtual void onRequest(const Request& request) override
-    {
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
-        MaterialRangeProxy materialRange(scene);
-        request.getParams(materialRange);
-        materialRange.commit();
-        scene.markModified();
-        request.reply(EmptyMessage());
-    }
-};
-
-class SetMaterialExtraAttributesEntrypoint
-    : public Entrypoint<GetMaterialIdsParams, EmptyMessage>
-{
-public:
-    virtual std::string getName() const override
-    {
-        return "set-material-extra-attributes";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Add extra material attributes necessary for the Circuit "
-               "Explorer renderer";
-    }
-
-    virtual void onRequest(const Request& request) override
-    {
-        auto params = request.getParams();
-        auto modelId = params.model_id;
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
-        auto& descriptor = ExtractModel::fromId(scene, modelId);
-        auto& model = descriptor.getModel();
-        for (const auto& pair : model.getMaterials())
-        {
-            ExtendedMaterial material(*pair.second);
-            material.extendAttributes();
-        }
         request.reply(EmptyMessage());
     }
 };

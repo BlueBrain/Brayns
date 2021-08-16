@@ -23,13 +23,17 @@
 #include <plugin/entrypoints/AttachCircuitSimulationHandlerEntrypoint.h>
 #include <plugin/entrypoints/ExportFramesToDiskEntrypoint.h>
 #include <plugin/entrypoints/GetExportFramesProgressEntrypoint.h>
+#include <plugin/entrypoints/GetMaterialIdsEntrypoint.h>
 #include <plugin/entrypoints/MakeMovieEntrypoint.h>
 #include <plugin/entrypoints/MaterialEntrypoint.h>
 #include <plugin/entrypoints/OduCameraEntrypoint.h>
 #include <plugin/entrypoints/SaveModelToCacheEntrypoint.h>
 #include <plugin/entrypoints/SetConnectionsPerValueEntrypoint.h>
+#include <plugin/entrypoints/SetMaterialExtraAttributesEntrypoint.h>
+#include <plugin/entrypoints/SetMaterialRangeEntrypoint.h>
 #include <plugin/entrypoints/SetMetaballsPerSimulationValueEntrypoint.h>
 #include <plugin/entrypoints/SetSynapsesAttributesEntrypoint.h>
+#include <plugin/entrypoints/TraceAnterogradeEntrypoint.h>
 
 #include "CircuitExplorerPlugin.h"
 
@@ -56,5 +60,6 @@ public:
         interface.add<ExportFramesToDiskEntrypoint>(plugin);
         interface.add<GetExportFramesProgressEntrypoint>(plugin);
         interface.add<MakeMovieEntrypoint>();
+        interface.add<TraceAnterogradeEntrypoint>(plugin);
     }
 };

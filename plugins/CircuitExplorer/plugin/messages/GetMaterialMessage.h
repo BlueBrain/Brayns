@@ -28,12 +28,4 @@ BRAYNS_MESSAGE_BEGIN(GetMaterialMessage)
 BRAYNS_MESSAGE_ENTRY(size_t, model_id, "Model ID")
 BRAYNS_MESSAGE_ENTRY(size_t, material_id, "Material ID")
 BRAYNS_MESSAGE_END()
-
-BRAYNS_MESSAGE_BEGIN(GetMaterialIdsParams)
-BRAYNS_MESSAGE_ENTRY(size_t, model_id, "Model ID")
-BRAYNS_MESSAGE_END()
-
-BRAYNS_MESSAGE_BEGIN(GetMaterialIdsResult)
-BRAYNS_MESSAGE_ENTRY(std::vector<size_t>, ids, "List of material ID")
-BRAYNS_MESSAGE_END()
 } // namespace brayns
