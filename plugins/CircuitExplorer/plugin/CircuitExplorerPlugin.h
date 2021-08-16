@@ -31,8 +31,6 @@
 #include <brayns/pluginapi/ExtensionPlugin.h>
 #include <vector>
 
-#include "CircuitExplorerContext.h"
-
 /**
  * @brief The CircuitExplorerPlugin class manages the loading and visualization
  * of the Blue Brain Project micro-circuits, and allows visualisation of voltage
@@ -58,6 +56,10 @@ public:
         _mappers.emplace_back(std::make_unique<T>(std::forward<T>(mapper)));
     }
     void releaseCircuitMapper(const size_t modelId);
+
+    // Shared with entrypoints
+    SynapseAttributes& getSynapseAttributes() { return _synapseAttributes; }
+    brayns::Message exportFramesToDisk(const ExportFramesToDisk& payload);
 
 private:
     CellObjectMapper* getMapperForCircuit(const size_t modelId) noexcept
@@ -95,7 +97,6 @@ private:
         const AttachCircuitSimulationHandler& payload);
 
     // Movie production
-    brayns::Message _exportFramesToDisk(const ExportFramesToDisk& payload);
     void _doExportFrameToDisk();
     FrameExportProgress _getFrameExportProgress();
     ExportLayerToDiskResult _exportLayerToDisk(
@@ -129,7 +130,7 @@ private:
     brayns::Message _mirrorModel(const MirrorModel& payload);
     brayns::Message _changeCircuitThickness(const CircuitThickness& payload);
 
-    CircuitExplorerContext _context;
+    SynapseAttributes _synapseAttributes;
 
     bool _dirty{false};
 

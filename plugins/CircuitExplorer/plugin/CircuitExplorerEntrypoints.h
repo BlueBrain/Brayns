@@ -27,13 +27,14 @@
 #include <plugin/entrypoints/SetConnectionsPerValueEntrypoint.h>
 #include <plugin/entrypoints/SetMetaballsPerSimulationValueEntrypoint.h>
 #include <plugin/entrypoints/SetSynapsesAttributesEntrypoint.h>
+#include <plugin/entrypoints/ExportFramesToDiskEntrypoint.h>
 
-#include "CircuitExplorerContext.h"
+#include "CircuitExplorerPlugin.h"
 
 class CircuitExplorerEntrypoints
 {
 public:
-    static void load(CircuitExplorerContext& context,
+    static void load(CircuitExplorerPlugin& plugin,
                      brayns::ActionInterface& interface)
     {
         interface.add<brayns::GetMaterialIdsEntrypoint>();
@@ -42,7 +43,7 @@ public:
         interface.add<brayns::SetMaterialsEntrypoint>();
         interface.add<brayns::SetMaterialRangeEntrypoint>();
         interface.add<brayns::SetMaterialExtraAttributesEntrypoint>();
-        interface.add<SetSynapsesAttributesEntrypoint>(context);
+        interface.add<SetSynapsesAttributesEntrypoint>(plugin);
         interface.add<SaveModelToCacheEntrypoint>();
         interface.add<SetConnectionsPerValueEntrypoint>();
         interface.add<SetMetaballsPerSimulationValueEntrypoint>();
@@ -50,5 +51,6 @@ public:
         interface.add<SetOduCameraEntrypoint>();
         interface.add<AttachCellGrowthHandlerEntrypoint>();
         interface.add<AttachCircuitSimulationHandlerEntrypoint>();
+        interface.add<ExportFramesToDiskEntrypoint>(plugin);
     }
 };

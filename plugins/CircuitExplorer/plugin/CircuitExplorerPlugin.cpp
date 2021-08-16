@@ -267,7 +267,6 @@ void CircuitExplorerPlugin::init()
     auto& scene = _api->getScene();
     auto& registry = scene.getLoaderRegistry();
     auto& pm = _api->getParametersManager();
-    auto& synapseAttributes = _context.getSynapseAttributes();
 
     // Store the current accumulation settings
     _prevAccumulationSetting = _api->getParametersManager()
@@ -278,7 +277,7 @@ void CircuitExplorerPlugin::init()
         std::make_unique<BrickLoader>(scene, BrickLoader::getCLIProperties()));
 
     registry.registerLoader(
-        std::make_unique<SynapseJSONLoader>(scene, synapseAttributes));
+        std::make_unique<SynapseJSONLoader>(scene, _synapseAttributes));
 
     registry.registerLoader(std::make_unique<SynapseCircuitLoader>(
         scene, pm.getApplicationParameters(),
@@ -315,7 +314,7 @@ void CircuitExplorerPlugin::init()
     auto actionInterface = _api->getActionInterface();
     if (actionInterface)
     {
-        CircuitExplorerEntrypoints::load(_context, *actionInterface);
+        CircuitExplorerEntrypoints::load(*this, *actionInterface);
 
         if (false)
         {
@@ -478,7 +477,7 @@ void CircuitExplorerPlugin::init()
                  "Configuration of the simulation to render and image store "
                  "specifications"},
                 [&](const ExportFramesToDisk& s)
-                { return _exportFramesToDisk(s); });
+                { return exportFramesToDisk(s); });
 
             actionInterface->registerRequest<FrameExportProgress>(
                 {"get-export-frames-progress",
@@ -1412,14 +1411,12 @@ brayns::Message CircuitExplorerPlugin::_setSynapseAttributes(
 {
     brayns::Message result;
 
-    auto& synapseAttributes = _context.getSynapseAttributes();
-
     try
     {
-        synapseAttributes = param;
-        SynapseJSONLoader loader(_api->getScene(), synapseAttributes);
+        _synapseAttributes = param;
+        SynapseJSONLoader loader(_api->getScene(), _synapseAttributes);
         brayns::Vector3fs colors;
-        for (const auto& htmlColor : synapseAttributes.htmlColors)
+        for (const auto& htmlColor : _synapseAttributes.htmlColors)
         {
             auto hexCode = htmlColor;
             if (hexCode.at(0) == '#')
@@ -1435,12 +1432,12 @@ brayns::Message CircuitExplorerPlugin::_setSynapseAttributes(
             colors.push_back(color);
         }
         const auto modelDescriptor =
-            loader.importSynapsesFromGIDs(synapseAttributes, colors);
+            loader.importSynapsesFromGIDs(_synapseAttributes, colors);
 
         _api->getScene().addModel(modelDescriptor);
 
         PLUGIN_INFO << "Synapses successfully added for GID "
-                    << synapseAttributes.gid << std::endl;
+                    << _synapseAttributes.gid << std::endl;
         _dirty = true;
     }
     catch (const std::runtime_error& e)
@@ -1736,7 +1733,7 @@ brayns::Message CircuitExplorerPlugin::_attachCircuitSimulationHandler(
     return result;
 }
 
-brayns::Message CircuitExplorerPlugin::_exportFramesToDisk(
+brayns::Message CircuitExplorerPlugin::exportFramesToDisk(
     const ExportFramesToDisk& payload)
 {
     brayns::Message result;

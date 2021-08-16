@@ -24,7 +24,7 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <plugin/CircuitExplorerContext.h>
+#include <plugin/CircuitExplorerPlugin.h>
 #include <plugin/adapters/SynapseAttributesAdapter.h>
 #include <plugin/io/SynapseJSONLoader.h>
 
@@ -75,8 +75,8 @@ class SetSynapsesAttributesEntrypoint
     : public brayns::Entrypoint<SynapseAttributes, brayns::EmptyMessage>
 {
 public:
-    SetSynapsesAttributesEntrypoint(CircuitExplorerContext& context)
-        : _attributes(&context.getSynapseAttributes())
+    SetSynapsesAttributesEntrypoint(CircuitExplorerPlugin& plugin)
+        : _attributes(&plugin.getSynapseAttributes())
     {
     }
 
