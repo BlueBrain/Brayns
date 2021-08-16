@@ -21,6 +21,7 @@
 
 #include <plugin/entrypoints/AddColumnEntrypoint.h>
 #include <plugin/entrypoints/AddGridEntrypoint.h>
+#include <plugin/entrypoints/AddPillEntrypoint.h>
 #include <plugin/entrypoints/AddSphereEntrypoint.h>
 #include <plugin/entrypoints/AttachCellGrowthHandlerEntrypoint.h>
 #include <plugin/entrypoints/AttachCircuitSimulationHandlerEntrypoint.h>
@@ -67,5 +68,6 @@ public:
         interface.add<AddGridEntrypoint>();
         interface.add<AddColumnEntrypoint>();
         interface.add<AddSphereEntrypoint>();
+        interface.add<AddPillEntrypoint>();
     }
 };

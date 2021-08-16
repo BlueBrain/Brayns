@@ -20,66 +20,84 @@
 
 #pragma once
 
+#include <brayns/common/geometry/SDFGeometry.h>
 #include <brayns/common/log.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <plugin/api/ShapeMaterial.h>
 
+#include <plugin/messages/AddPillMessage.h>
 #include <plugin/messages/AddShapeMessage.h>
-#include <plugin/messages/AddSphereMessage.h>
 
-class SphereModel
+class PillModel
 {
 public:
-    static size_t add(brayns::Scene& scene, const AddSphereMessage& params)
+    static size_t add(brayns::Scene& scene, const AddPillMessage& params)
     {
-        // Create sphere model
+        // Create pill model
         auto model = scene.createModel();
 
-        // Create sphere material
+        // Create pill material instance
         ShapeMaterialInfo info;
         info.id = 1;
         info.color = params.color;
         info.opacity = params.color.a;
         ShapeMaterial::create(*model, info);
 
-        // Add sphere to model
-        auto& center = params.center;
-        auto radius = params.radius;
-        model->addSphere(info.id, {center, radius});
+        // Extract pill info
+        auto type = params.type;
+        auto& p1 = params.p1;
+        auto& p2 = params.p2;
+        auto radius1 = params.radius1;
+        auto radius2 = params.radius2;
 
-        // Model name
+        // Build geometry
+        brayns::SDFGeometry sdf;
+        switch (type)
+        {
+        case PillType::Pill:
+            sdf = brayns::createSDFPill(p1, p2, radius1);
+        case PillType::ConePill:
+            sdf = brayns::createSDFConePill(p1, p2, radius1, radius2);
+        case PillType::SigmoidPill:
+            sdf = brayns::createSDFConePillSigmoid(p1, p2, radius1, radius2);
+        }
+
+        // Add geometry
+        model->addSDFGeometry(info.id, sdf, {});
+
+        // Pill model name
         size_t count = scene.getNumModels();
         auto name = params.name;
         if (name.empty())
         {
-            name = "sphere_" + std::to_string(count);
+            name = brayns::GetEnumName::of(type) + "_" + std::to_string(count);
         }
 
-        // Register model and return its ID
+        // Register pill model and return its ID
         return scene.addModel(
             std::make_shared<brayns::ModelDescriptor>(std::move(model), name));
     }
 };
 
-class AddSphereEntrypoint
-    : public brayns::Entrypoint<AddSphereMessage, AddShapeMessage>
+class AddPillEntrypoint
+    : public brayns::Entrypoint<AddPillMessage, AddShapeMessage>
 {
 public:
-    virtual std::string getName() const override { return "add-sphere"; }
+    virtual std::string getName() const override { return "add-pill"; }
 
     virtual std::string getDescription() const override
     {
-        return "Add a visual 3D sphere to the scene";
+        return "Add a visual 3D pill to the scene";
     }
 
     virtual void onRequest(const Request& request) override
     {
         auto params = request.getParams();
         auto& scene = getApi().getScene();
-        BRAYNS_INFO << "Building Sphere model.\n";
-        auto id = SphereModel::add(scene, params);
+        BRAYNS_INFO << "Building Pill model.\n";
+        auto id = PillModel::add(scene, params);
         scene.markModified();
         triggerRender();
         request.reply({id});
