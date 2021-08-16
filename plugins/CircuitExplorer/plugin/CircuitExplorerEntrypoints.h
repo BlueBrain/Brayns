@@ -21,6 +21,7 @@
 
 #include <plugin/entrypoints/AddColumnEntrypoint.h>
 #include <plugin/entrypoints/AddGridEntrypoint.h>
+#include <plugin/entrypoints/AddSphereEntrypoint.h>
 #include <plugin/entrypoints/AttachCellGrowthHandlerEntrypoint.h>
 #include <plugin/entrypoints/AttachCircuitSimulationHandlerEntrypoint.h>
 #include <plugin/entrypoints/ExportFramesToDiskEntrypoint.h>
@@ -65,5 +66,6 @@ public:
         interface.add<TraceAnterogradeEntrypoint>(plugin);
         interface.add<AddGridEntrypoint>();
         interface.add<AddColumnEntrypoint>();
+        interface.add<AddSphereEntrypoint>();
     }
 };
