@@ -23,6 +23,7 @@
 #include <plugin/entrypoints/AttachCircuitSimulationHandlerEntrypoint.h>
 #include <plugin/entrypoints/ExportFramesToDiskEntrypoint.h>
 #include <plugin/entrypoints/GetExportFramesProgressEntrypoint.h>
+#include <plugin/entrypoints/MakeMovieEntrypoint.h>
 #include <plugin/entrypoints/MaterialEntrypoint.h>
 #include <plugin/entrypoints/OduCameraEntrypoint.h>
 #include <plugin/entrypoints/SaveModelToCacheEntrypoint.h>
@@ -54,5 +55,6 @@ public:
         interface.add<AttachCircuitSimulationHandlerEntrypoint>();
         interface.add<ExportFramesToDiskEntrypoint>(plugin);
         interface.add<GetExportFramesProgressEntrypoint>(plugin);
+        interface.add<MakeMovieEntrypoint>();
     }
 };
