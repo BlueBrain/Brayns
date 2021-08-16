@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <plugin/entrypoints/AddColumnEntrypoint.h>
 #include <plugin/entrypoints/AddGridEntrypoint.h>
 #include <plugin/entrypoints/AttachCellGrowthHandlerEntrypoint.h>
 #include <plugin/entrypoints/AttachCircuitSimulationHandlerEntrypoint.h>
@@ -63,5 +64,6 @@ public:
         interface.add<MakeMovieEntrypoint>();
         interface.add<TraceAnterogradeEntrypoint>(plugin);
         interface.add<AddGridEntrypoint>();
+        interface.add<AddColumnEntrypoint>();
     }
 };
