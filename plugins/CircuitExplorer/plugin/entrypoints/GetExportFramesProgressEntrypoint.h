@@ -23,32 +23,32 @@
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <plugin/CircuitExplorerPlugin.h>
-#include <plugin/adapters/ExportFramesToDiskAdapter.h>
+#include <plugin/messages/GetExportFramesProgressMessage.h>
 
-class ExportFramesToDiskEntrypoint
-    : public brayns::Entrypoint<ExportFramesToDisk, brayns::EmptyMessage>
+class GetExportFramesProgressEntrypoint
+    : public brayns::Entrypoint<brayns::EmptyMessage,
+                                GetExportFramesProgressMessage>
 {
 public:
-    ExportFramesToDiskEntrypoint(CircuitExplorerPlugin& plugin)
+    GetExportFramesProgressEntrypoint(CircuitExplorerPlugin& plugin)
         : _plugin(&plugin)
     {
     }
 
     virtual std::string getName() const override
     {
-        return "export-frames-to-disk";
+        return "get-export-frames-progress";
     }
 
     virtual std::string getDescription() const override
     {
-        return "Export a set of frames from a simulation as image files";
+        return "Get the progress of the last issued frame export";
     }
 
     virtual void onRequest(const Request& request) override
     {
-        auto params = request.getParams();
-        _plugin->exportFramesToDisk(params);
-        request.reply(brayns::EmptyMessage());
+        auto message = _plugin->getFrameExportProgress();
+        request.reply({message.progress});
     }
 
 private:

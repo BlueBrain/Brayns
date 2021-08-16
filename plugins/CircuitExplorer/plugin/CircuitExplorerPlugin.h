@@ -57,9 +57,10 @@ public:
     }
     void releaseCircuitMapper(const size_t modelId);
 
-    // Shared with entrypoints
+    // Used by entrypoints
     SynapseAttributes& getSynapseAttributes() { return _synapseAttributes; }
     brayns::Message exportFramesToDisk(const ExportFramesToDisk& payload);
+    FrameExportProgress getFrameExportProgress();
 
 private:
     CellObjectMapper* getMapperForCircuit(const size_t modelId) noexcept
@@ -98,7 +99,6 @@ private:
 
     // Movie production
     void _doExportFrameToDisk();
-    FrameExportProgress _getFrameExportProgress();
     ExportLayerToDiskResult _exportLayerToDisk(
         const ExportLayerToDisk& payload);
     brayns::Message _makeMovie(const MakeMovieParameters& params);

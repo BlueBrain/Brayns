@@ -21,13 +21,14 @@
 
 #include <plugin/entrypoints/AttachCellGrowthHandlerEntrypoint.h>
 #include <plugin/entrypoints/AttachCircuitSimulationHandlerEntrypoint.h>
+#include <plugin/entrypoints/ExportFramesToDiskEntrypoint.h>
+#include <plugin/entrypoints/GetExportFramesProgressEntrypoint.h>
 #include <plugin/entrypoints/MaterialEntrypoint.h>
 #include <plugin/entrypoints/OduCameraEntrypoint.h>
 #include <plugin/entrypoints/SaveModelToCacheEntrypoint.h>
 #include <plugin/entrypoints/SetConnectionsPerValueEntrypoint.h>
 #include <plugin/entrypoints/SetMetaballsPerSimulationValueEntrypoint.h>
 #include <plugin/entrypoints/SetSynapsesAttributesEntrypoint.h>
-#include <plugin/entrypoints/ExportFramesToDiskEntrypoint.h>
 
 #include "CircuitExplorerPlugin.h"
 
@@ -52,5 +53,6 @@ public:
         interface.add<AttachCellGrowthHandlerEntrypoint>();
         interface.add<AttachCircuitSimulationHandlerEntrypoint>();
         interface.add<ExportFramesToDiskEntrypoint>(plugin);
+        interface.add<GetExportFramesProgressEntrypoint>(plugin);
     }
 };

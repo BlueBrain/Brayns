@@ -485,7 +485,7 @@ void CircuitExplorerPlugin::init()
                  "disk "
                  "request"},
                 [&](void) -> FrameExportProgress
-                { return _getFrameExportProgress(); });
+                { return getFrameExportProgress(); });
 
             actionInterface->registerRequest<ExportLayerToDisk,
                                              ExportLayerToDiskResult>(
@@ -1841,7 +1841,7 @@ void CircuitExplorerPlugin::_doExportFrameToDisk()
     PLUGIN_INFO << "Frame saved to " << filename << std::endl;
 }
 
-FrameExportProgress CircuitExplorerPlugin::_getFrameExportProgress()
+FrameExportProgress CircuitExplorerPlugin::getFrameExportProgress()
 {
     FrameExportProgress result;
 
