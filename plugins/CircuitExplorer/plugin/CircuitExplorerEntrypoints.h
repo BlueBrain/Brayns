@@ -20,6 +20,7 @@
 #pragma once
 
 #include <plugin/entrypoints/AddColumnEntrypoint.h>
+#include <plugin/entrypoints/AddCylinderEntrypoint.h>
 #include <plugin/entrypoints/AddGridEntrypoint.h>
 #include <plugin/entrypoints/AddPillEntrypoint.h>
 #include <plugin/entrypoints/AddSphereEntrypoint.h>
@@ -69,5 +70,6 @@ public:
         interface.add<AddColumnEntrypoint>();
         interface.add<AddSphereEntrypoint>();
         interface.add<AddPillEntrypoint>();
+        interface.add<AddCylinderEntrypoint>();
     }
 };
