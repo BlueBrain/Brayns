@@ -33,6 +33,7 @@
 #include <plugin/entrypoints/MakeMovieEntrypoint.h>
 #include <plugin/entrypoints/MaterialEntrypoint.h>
 #include <plugin/entrypoints/OduCameraEntrypoint.h>
+#include <plugin/entrypoints/RemapCircuitColorEntrypoint.h>
 #include <plugin/entrypoints/SaveModelToCacheEntrypoint.h>
 #include <plugin/entrypoints/SetConnectionsPerValueEntrypoint.h>
 #include <plugin/entrypoints/SetMaterialExtraAttributesEntrypoint.h>
@@ -73,5 +74,6 @@ public:
         interface.add<AddPillEntrypoint>();
         interface.add<AddCylinderEntrypoint>();
         interface.add<AddBoxEntrypoint>();
+        interface.add<RemapCircuitColorEntrypoint>(plugin);
     }
 };
