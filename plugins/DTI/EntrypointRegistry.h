@@ -21,6 +21,7 @@
 
 #include <entrypoints/AddStreamlinesEntrypoint.h>
 #include <entrypoints/SetSpikeSimulationEntrypoint.h>
+#include <entrypoints/SetSpikeSimulationFromFileEntrypoint.h>
 
 #include "DTIPlugin.h"
 
@@ -33,6 +34,7 @@ public:
     {
         interface.add<AddStreamlinesEntrypoint>();
         interface.add<SetSpikeSimulationEntrypoint>(plugin);
+        interface.add<SetSpikeSimulationFromFileEntrypoint>(plugin);
     }
 };
 } // namespace dti

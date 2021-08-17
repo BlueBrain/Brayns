@@ -20,41 +20,19 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/json/Message.h>
 
-#include <adapters/SetSpikeSimulationAdapter.h>
+#include <api/DTIParams.h>
 
-#include <DTIPlugin.h>
-
-namespace dti
+namespace brayns
 {
-class SetSpikeSimulationEntrypoint
-    : public brayns::Entrypoint<SpikeSimulationDescriptor, brayns::EmptyMessage>
-{
-public:
-    SetSpikeSimulationEntrypoint(DTIPlugin& plugin)
-        : _plugin(&plugin)
-    {
-    }
-
-    virtual std::string getName() const override
-    {
-        return "set-spike-simulation";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Add a spike simulation to a model";
-    }
-
-    virtual void onRequest(const Request& request) override
-    {
-        auto params = request.getParams();
-        _plugin->updateSpikeSimulation(params);
-        request.reply(brayns::EmptyMessage());
-    }
-
-private:
-    DTIPlugin* _plugin;
-};
-} // namespace dti
+BRAYNS_ADAPTER_BEGIN(SpikeSimulationFromFile)
+BRAYNS_ADAPTER_NAMED_ENTRY("model_id", modelId, "The ID of the loaded model")
+BRAYNS_ADAPTER_NAMED_ENTRY("dt", dt, "Simulation time step")
+BRAYNS_ADAPTER_NAMED_ENTRY("time_scale", timeScale, "Time scale")
+BRAYNS_ADAPTER_NAMED_ENTRY("decay_speed", decaySpeed, "Speed of spike decay")
+BRAYNS_ADAPTER_NAMED_ENTRY("rest_intensity", restIntensity, "Rest intensity")
+BRAYNS_ADAPTER_NAMED_ENTRY("spike_intensity", spikeIntensity, "Spike intensity")
+BRAYNS_ADAPTER_NAMED_ENTRY("path", path, "Path to BlueConfig file")
+BRAYNS_ADAPTER_END()
+} // namespace brayns

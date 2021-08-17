@@ -22,35 +22,35 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <adapters/SetSpikeSimulationAdapter.h>
+#include <adapters/SetSpikeSimulationFromFileAdapter.h>
 
 #include <DTIPlugin.h>
 
 namespace dti
 {
-class SetSpikeSimulationEntrypoint
-    : public brayns::Entrypoint<SpikeSimulationDescriptor, brayns::EmptyMessage>
+class SetSpikeSimulationFromFileEntrypoint
+    : public brayns::Entrypoint<SpikeSimulationFromFile, brayns::EmptyMessage>
 {
 public:
-    SetSpikeSimulationEntrypoint(DTIPlugin& plugin)
+    SetSpikeSimulationFromFileEntrypoint(DTIPlugin& plugin)
         : _plugin(&plugin)
     {
     }
 
     virtual std::string getName() const override
     {
-        return "set-spike-simulation";
+        return "set-spike-simulation-from-file";
     }
 
     virtual std::string getDescription() const override
     {
-        return "Add a spike simulation to a model";
+        return "Add a spike simulation loaded from a file to a model";
     }
 
     virtual void onRequest(const Request& request) override
     {
         auto params = request.getParams();
-        _plugin->updateSpikeSimulation(params);
+        _plugin->updateSpikeSimulationFromFile(params);
         request.reply(brayns::EmptyMessage());
     }
 
