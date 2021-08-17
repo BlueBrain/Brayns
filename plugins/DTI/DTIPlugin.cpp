@@ -85,7 +85,7 @@ void DTIPlugin::init()
                  "SpikeSimulationDescriptor",
                  "Description of the spike report"},
                 [&](const SpikeSimulationDescriptor &s)
-                { _updateSpikeSimulation(s); });
+                { updateSpikeSimulation(s); });
 
         _api->getActionInterface()
             ->registerNotification<SpikeSimulationFromFile>(
@@ -94,7 +94,7 @@ void DTIPlugin::init()
                  "SpikeSimulationFromFile",
                  "Path and extra parameters for the spike report"},
                 [&](const SpikeSimulationFromFile &s)
-                { _updateSpikeSimulationFromFile(s); });
+                { updateSpikeSimulationFromFile(s); });
     }
 }
 
@@ -265,7 +265,7 @@ void DTIPlugin::_updateSimulationFrame()
     }
 }
 
-void DTIPlugin::_updateSpikeSimulation(
+void DTIPlugin::updateSpikeSimulation(
     const SpikeSimulationDescriptor &spikeSimulation)
 
 {
@@ -280,7 +280,7 @@ void DTIPlugin::_updateSpikeSimulation(
     _simulationDirty = true;
 }
 
-void DTIPlugin::_updateSpikeSimulationFromFile(
+void DTIPlugin::updateSpikeSimulationFromFile(
     const SpikeSimulationFromFile &src)
 {
     auto modelDescriptor = _api->getScene().getModel(src.modelId);

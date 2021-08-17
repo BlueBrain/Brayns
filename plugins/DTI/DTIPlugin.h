@@ -47,10 +47,12 @@ public:
      */
     void preRender() final;
 
+    // Entrypoint access
+    void updateSpikeSimulation(const SpikeSimulationDescriptor &);
+    void updateSpikeSimulationFromFile(const SpikeSimulationFromFile &);
+
 private:
     void _updateStreamlines(const StreamlinesDescriptor &);
-    void _updateSpikeSimulation(const SpikeSimulationDescriptor &);
-    void _updateSpikeSimulationFromFile(const SpikeSimulationFromFile&);
     void _updateSpikeSimulation();
     void _updateSimulationFrame();
 

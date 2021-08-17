@@ -20,6 +20,7 @@
 #pragma once
 
 #include <entrypoints/AddStreamlinesEntrypoint.h>
+#include <entrypoints/SetSpikeSimulationEntrypoint.h>
 
 #include "DTIPlugin.h"
 
@@ -31,6 +32,7 @@ public:
     static void load(DTIPlugin& plugin, brayns::ActionInterface& interface)
     {
         interface.add<AddStreamlinesEntrypoint>();
+        interface.add<SetSpikeSimulationEntrypoint>(plugin);
     }
 };
 } // namespace dti

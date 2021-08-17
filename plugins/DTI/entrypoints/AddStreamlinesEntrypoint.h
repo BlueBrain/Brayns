@@ -76,7 +76,7 @@ public:
             // Create streamline geometry
             const auto endIndex = indices[index];
 
-            // Ignore params with less than 2 points
+            // Ignore streamlines with less than 2 points
             if (endIndex - startIndex < 2)
             {
                 continue;
@@ -111,7 +111,7 @@ public:
         // Check if some streamlines created
         if (nbStreamlines == 0)
         {
-            BRAYNS_INFO << "No params.\n";
+            BRAYNS_INFO << "No streamlines.\n";
             return;
         }
 
@@ -120,7 +120,7 @@ public:
             std::make_shared<brayns::ModelDescriptor>(std::move(model), name);
         scene.addModel(descriptor);
 
-        BRAYNS_INFO << nbStreamlines << " params loaded.\n";
+        BRAYNS_INFO << nbStreamlines << " streamlines loaded.\n";
     }
 
 private:
@@ -135,7 +135,7 @@ public:
 
     virtual std::string getDescription() const override
     {
-        return "Adds a streamline representation to the scene";
+        return "Add a streamline representation to the scene";
     }
 
     virtual void onRequest(const Request& request) override
