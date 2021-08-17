@@ -33,6 +33,7 @@
 #include <plugin/entrypoints/GetMaterialIdsEntrypoint.h>
 #include <plugin/entrypoints/MakeMovieEntrypoint.h>
 #include <plugin/entrypoints/MaterialEntrypoint.h>
+#include <plugin/entrypoints/MirrorModelEntrypoint.h>
 #include <plugin/entrypoints/OduCameraEntrypoint.h>
 #include <plugin/entrypoints/RemapCircuitColorEntrypoint.h>
 #include <plugin/entrypoints/SaveModelToCacheEntrypoint.h>
@@ -77,5 +78,6 @@ public:
         interface.add<AddBoxEntrypoint>();
         interface.add<RemapCircuitColorEntrypoint>(plugin);
         interface.add<ColorCellsEntrypoint>(plugin);
+        interface.add<MirrorModelEntrypoint>();
     }
 };
