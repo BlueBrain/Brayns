@@ -37,6 +37,7 @@
 #include <plugin/entrypoints/OduCameraEntrypoint.h>
 #include <plugin/entrypoints/RemapCircuitColorEntrypoint.h>
 #include <plugin/entrypoints/SaveModelToCacheEntrypoint.h>
+#include <plugin/entrypoints/SetCircuitThicknessEntrypoint.h>
 #include <plugin/entrypoints/SetConnectionsPerValueEntrypoint.h>
 #include <plugin/entrypoints/SetMaterialExtraAttributesEntrypoint.h>
 #include <plugin/entrypoints/SetMaterialRangeEntrypoint.h>
@@ -79,5 +80,6 @@ public:
         interface.add<RemapCircuitColorEntrypoint>(plugin);
         interface.add<ColorCellsEntrypoint>(plugin);
         interface.add<MirrorModelEntrypoint>();
+        interface.add<SetCircuitThicknessEntrypoint>();
     }
 };
