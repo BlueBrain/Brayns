@@ -27,6 +27,7 @@
 #include <plugin/entrypoints/AddSphereEntrypoint.h>
 #include <plugin/entrypoints/AttachCellGrowthHandlerEntrypoint.h>
 #include <plugin/entrypoints/AttachCircuitSimulationHandlerEntrypoint.h>
+#include <plugin/entrypoints/ColorCellsEntrypoint.h>
 #include <plugin/entrypoints/ExportFramesToDiskEntrypoint.h>
 #include <plugin/entrypoints/GetExportFramesProgressEntrypoint.h>
 #include <plugin/entrypoints/GetMaterialIdsEntrypoint.h>
@@ -75,5 +76,6 @@ public:
         interface.add<AddCylinderEntrypoint>();
         interface.add<AddBoxEntrypoint>();
         interface.add<RemapCircuitColorEntrypoint>(plugin);
+        interface.add<ColorCellsEntrypoint>(plugin);
     }
 };
