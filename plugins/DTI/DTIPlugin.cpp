@@ -26,7 +26,6 @@
 #include <io/DTITypes.h>
 #include <log.h>
 
-#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/common/Progress.h>
 #include <brayns/common/geometry/Streamline.h>
 #include <brayns/engine/Camera.h>
@@ -34,11 +33,14 @@
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
+#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <brain/brain.h>
 #include <brion/brion.h>
+
+#include "EntrypointRegistry.h"
 
 namespace
 {
@@ -61,26 +63,39 @@ void DTIPlugin::init()
     registry.registerLoader(
         std::make_unique<DTILoader>(scene, DTILoader::getCLIProperties()));
 
-     _api->getActionInterface()->registerNotification<StreamlinesDescriptor>(
-        {"add-streamlines",
-         "Adds a streamline representation to the scene",
-         "StreamlineDescriptor",
-         "Parameters to generate the streamline representation"},
-        [&](const StreamlinesDescriptor &s) { _updateStreamlines(s); });
+    auto interface = _api->getActionInterface();
+    if (!interface)
+    {
+        return;
+    }
 
-    _api->getActionInterface()->registerNotification<SpikeSimulationDescriptor>(
-        {"set-spike-simulation",
-         "Adds a spike simulation to a model",
-         "SpikeSimulationDescriptor",
-         "Description of the spike report"},
-        [&](const SpikeSimulationDescriptor &s) { _updateSpikeSimulation(s); });
+    EntrypointRegistry::load(*this, *interface);
 
-    _api->getActionInterface()->registerNotification<SpikeSimulationFromFile>(
-        {"set-spike-simulation-from-file",
-         "Adds a spike simulation loaded from a file to a model",
-         "SpikeSimulationFromFile",
-         "Path and extra parameters for the spike report"},
-        [&](const SpikeSimulationFromFile& s) { _updateSpikeSimulationFromFile(s); });
+    if (false)
+    {
+        _api->getActionInterface()->registerNotification<StreamlinesDescriptor>(
+            {"add-streamlines", "Adds a streamline representation to the scene",
+             "StreamlineDescriptor",
+             "Parameters to generate the streamline representation"},
+            [&](const StreamlinesDescriptor &s) { _updateStreamlines(s); });
+
+        _api->getActionInterface()
+            ->registerNotification<SpikeSimulationDescriptor>(
+                {"set-spike-simulation", "Adds a spike simulation to a model",
+                 "SpikeSimulationDescriptor",
+                 "Description of the spike report"},
+                [&](const SpikeSimulationDescriptor &s)
+                { _updateSpikeSimulation(s); });
+
+        _api->getActionInterface()
+            ->registerNotification<SpikeSimulationFromFile>(
+                {"set-spike-simulation-from-file",
+                 "Adds a spike simulation loaded from a file to a model",
+                 "SpikeSimulationFromFile",
+                 "Path and extra parameters for the spike report"},
+                [&](const SpikeSimulationFromFile &s)
+                { _updateSpikeSimulationFromFile(s); });
+    }
 }
 
 void DTIPlugin::preRender()
@@ -101,7 +116,7 @@ void DTIPlugin::preRender()
 
 void DTIPlugin::_updateStreamlines(const StreamlinesDescriptor &streamlines)
 {
-    const std::string& name = streamlines.name;
+    const std::string &name = streamlines.name;
     PLUGIN_INFO << "Loading streamlines <" << name << "> from Json"
                 << std::endl;
 
@@ -109,7 +124,7 @@ void DTIPlugin::_updateStreamlines(const StreamlinesDescriptor &streamlines)
     auto model = _api->getScene().createModel();
 
     const auto nbIndices = streamlines.indices.size();
-    //const auto nbVertices = streamlines.getvertices().size() / 3;
+    // const auto nbVertices = streamlines.getvertices().size() / 3;
 
     uint64_t startIndex = 0;
     for (size_t index = 0; index < nbIndices; ++index)
@@ -118,7 +133,7 @@ void DTIPlugin::_updateStreamlines(const StreamlinesDescriptor &streamlines)
         const auto materialId =
             streamlines.gids.empty() ? 0 : streamlines.gids[index];
         brayns::PropertyMap props;
-        props.setProperty({MATERIAL_PROPERTY_SHADING_MODE, 0});
+        props.add({MATERIAL_PROPERTY_SHADING_MODE, 0});
         auto material =
             model->createMaterial(materialId, std::to_string(materialId),
                                   props);
@@ -146,7 +161,8 @@ void DTIPlugin::_updateStreamlines(const StreamlinesDescriptor &streamlines)
         }
         const auto colors =
             DTILoader::getColorsFromPoints(points, streamlines.opacity,
-                                           static_cast<ColorScheme>(streamlines.colorScheme));
+                                           static_cast<ColorScheme>(
+                                               streamlines.colorScheme));
 
         brayns::Streamline streamline(points, colors, radii);
         model->addStreamline(materialId, streamline);
@@ -264,33 +280,36 @@ void DTIPlugin::_updateSpikeSimulation(
     _simulationDirty = true;
 }
 
-void DTIPlugin::_updateSpikeSimulationFromFile(const SpikeSimulationFromFile& src)
+void DTIPlugin::_updateSpikeSimulationFromFile(
+    const SpikeSimulationFromFile &src)
 {
     auto modelDescriptor = _api->getScene().getModel(src.modelId);
     if (!modelDescriptor)
     {
-        PLUGIN_ERROR << src.modelId << " is an invalid model ID"
-                     << std::endl;
+        PLUGIN_ERROR << src.modelId << " is an invalid model ID" << std::endl;
         return;
     }
 
-    std::unique_ptr<brion::BlueConfig> config {nullptr};
+    std::unique_ptr<brion::BlueConfig> config{nullptr};
     try
     {
-       config = std::make_unique<brion::BlueConfig>(src.path);
+        config = std::make_unique<brion::BlueConfig>(src.path);
     }
     catch (...)
     {
-        PLUGIN_ERROR << "Could not read BlueConfig file " << src.path << std::endl;
+        PLUGIN_ERROR << "Could not read BlueConfig file " << src.path
+                     << std::endl;
     }
-    std::unique_ptr<brain::SpikeReportReader> spikeReport {nullptr};
+    std::unique_ptr<brain::SpikeReportReader> spikeReport{nullptr};
     try
     {
-        spikeReport = std::make_unique<brain::SpikeReportReader>(config->getSpikeSource());
+        spikeReport = std::make_unique<brain::SpikeReportReader>(
+            config->getSpikeSource());
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
-        PLUGIN_ERROR << "Could not read Spike report: " << e.what() << std::endl;
+        PLUGIN_ERROR << "Could not read Spike report: " << e.what()
+                     << std::endl;
     }
 
     _spikeSimulation.dt = src.dt;
@@ -304,10 +323,10 @@ void DTIPlugin::_updateSpikeSimulationFromFile(const SpikeSimulationFromFile& sr
     auto spikes = spikeReport->getSpikes(0.f, spikeReport->getEndTime());
     _spikeSimulation.gids.resize(spikes.size());
     _spikeSimulation.timestamps.resize(spikes.size());
-    for(size_t i = 0; i < spikes.size(); ++i)
+    for (size_t i = 0; i < spikes.size(); ++i)
         _spikeSimulation.timestamps[i] = spikes[i].first;
 
-    for(size_t i = 0; i < spikes.size(); ++i)
+    for (size_t i = 0; i < spikes.size(); ++i)
         _spikeSimulation.gids[i] = spikes[i].second;
 
     _simulationDirty = true;
