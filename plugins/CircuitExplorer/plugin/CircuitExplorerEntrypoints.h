@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <plugin/entrypoints/AddBoxEntrypoint.h>
 #include <plugin/entrypoints/AddColumnEntrypoint.h>
 #include <plugin/entrypoints/AddCylinderEntrypoint.h>
 #include <plugin/entrypoints/AddGridEntrypoint.h>
@@ -71,5 +72,6 @@ public:
         interface.add<AddSphereEntrypoint>();
         interface.add<AddPillEntrypoint>();
         interface.add<AddCylinderEntrypoint>();
+        interface.add<AddBoxEntrypoint>();
     }
 };

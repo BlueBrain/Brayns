@@ -52,7 +52,7 @@ public:
         material->setDiffuseColor(white);
         material->setProperties(props);
 
-        // Top of the column
+        // Bottom of the column
         const brayns::Vector3fs verticesBottom = {
             {-0.25f, -1.0f, -0.5f}, {0.25f, -1.0f, -0.5f},
             {0.5f, -1.0f, -0.25f},  {0.5f, -1.0f, 0.25f},
@@ -60,7 +60,7 @@ public:
             {0.25f, -1.0f, 0.5f},   {-0.25f, -1.0f, 0.5f},
             {-0.5f, -1.0f, 0.25f},  {-0.5f, -1.0f, -0.25f}};
 
-        // Bottom of the column
+        // Top of the column
         const brayns::Vector3fs verticesTop = {
             {-0.25f, 1.f, -0.5f}, {0.25f, 1.f, -0.5f}, {0.5f, 1.f, -0.25f},
             {0.5f, 1.f, 0.25f},   {0.5f, 1.f, -0.25f}, {0.5f, 1.f, 0.25f},
