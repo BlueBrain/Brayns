@@ -26,6 +26,8 @@
 #include <entrypoints/CIGetCellIdsEntrypoint.h>
 #include <entrypoints/CIGetCellIdsFromModelEntrypoint.h>
 #include <entrypoints/CIGetEfferentCellIdsEntrypoint.h>
+#include <entrypoints/CIGetProjectionEfferentCellIdsEntrypoint.h>
+#include <entrypoints/CIGetProjectionsEntrypoint.h>
 #include <entrypoints/CIGetReportInfoEntrypoint.h>
 #include <entrypoints/CIGetReportsEntrypoint.h>
 #include <entrypoints/CIGetSpikeReportInfoEntrypoint.h>
@@ -47,5 +49,7 @@ public:
         interface.add<CIGetTargetsEntrypoint>();
         interface.add<CIGetAfferentCellIdsEntrypoint>();
         interface.add<CIGetEfferentCellIdsEntrypoint>();
+        interface.add<CIGetProjectionsEntrypoint>();
+        interface.add<CIGetProjectionEfferentCellIdsEntrypoint>();
     }
 };
