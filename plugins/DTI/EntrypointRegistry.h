@@ -20,8 +20,8 @@
 #pragma once
 
 #include <entrypoints/AddStreamlinesEntrypoint.h>
-#include <entrypoints/SetSpikeSimulationEntrypoint.h>
 #include <entrypoints/SetSpikeSimulationFromFileEntrypoint.h>
+#include <entrypoints/SetSpikeSimulationEntrypoint.h>
 
 #include "DTIPlugin.h"
 

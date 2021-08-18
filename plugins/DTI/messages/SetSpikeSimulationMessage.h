@@ -22,19 +22,17 @@
 
 #include <brayns/network/json/Message.h>
 
-#include <api/DTIParams.h>
-
-namespace brayns
+namespace dti
 {
-BRAYNS_ADAPTER_BEGIN(SpikeSimulationDescriptor)
-BRAYNS_ADAPTER_NAMED_ENTRY("model_id", modelId, "The ID of the loaded model")
-BRAYNS_ADAPTER_NAMED_ENTRY("gids", gids, "List of cel GIDs")
-BRAYNS_ADAPTER_NAMED_ENTRY("timestamps", timestamps, "List of spike timestamps")
-BRAYNS_ADAPTER_NAMED_ENTRY("dt", dt, "Simulation time step")
-BRAYNS_ADAPTER_NAMED_ENTRY("end_time", endTime, "Simulation end time")
-BRAYNS_ADAPTER_NAMED_ENTRY("time_scale", timeScale, "Time scale")
-BRAYNS_ADAPTER_NAMED_ENTRY("decay_speed", decaySpeed, "Speed of spike decay")
-BRAYNS_ADAPTER_NAMED_ENTRY("rest_intensity", restIntensity, "Rest intensity")
-BRAYNS_ADAPTER_NAMED_ENTRY("spike_intensity", spikeIntensity, "Spike intensity")
-BRAYNS_ADAPTER_END()
-} // namespace brayns
+BRAYNS_MESSAGE_BEGIN(SetSpikeSimulationMessage)
+BRAYNS_MESSAGE_ENTRY(size_t, model_id, "The ID of the loaded model")
+BRAYNS_MESSAGE_ENTRY(std::vector<uint64_t>, gids, "List of cel GIDs")
+BRAYNS_MESSAGE_ENTRY(std::vector<float>, timestamps, "List of spike timestamps")
+BRAYNS_MESSAGE_ENTRY(double, dt, "Simulation time step")
+BRAYNS_MESSAGE_ENTRY(double, end_time, "Simulation normalized end time")
+BRAYNS_MESSAGE_ENTRY(double, time_scale, "Time scale")
+BRAYNS_MESSAGE_ENTRY(double, decay_speed, "Speed of spike decay")
+BRAYNS_MESSAGE_ENTRY(double, rest_intensity, "Rest intensity")
+BRAYNS_MESSAGE_ENTRY(double, spike_intensity, "Spike intensity")
+BRAYNS_MESSAGE_END()
+} // namespace dti

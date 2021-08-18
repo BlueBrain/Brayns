@@ -24,7 +24,6 @@ set(${NAME}_SOURCES
 set(${NAME}_PUBLIC_HEADERS
   io/DTILoader.h
   io/DTISimulationHandler.h
-  api/DTIParams.h
   DTIPlugin.h
 )
 

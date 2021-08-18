@@ -22,14 +22,14 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <adapters/SetSpikeSimulationAdapter.h>
+#include <messages/SetSpikeSimulationMessage.h>
 
 #include <DTIPlugin.h>
 
 namespace dti
 {
 class SetSpikeSimulationEntrypoint
-    : public brayns::Entrypoint<SpikeSimulationDescriptor, brayns::EmptyMessage>
+    : public brayns::Entrypoint<SetSpikeSimulationMessage, brayns::EmptyMessage>
 {
 public:
     SetSpikeSimulationEntrypoint(DTIPlugin& plugin)

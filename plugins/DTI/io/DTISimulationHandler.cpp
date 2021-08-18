@@ -32,6 +32,7 @@
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/ParametersManager.h>
 
+#include <algorithm>
 #include <fstream>
 
 namespace
@@ -43,14 +44,14 @@ const float DEFAULT_TIME_INTERVAL = 1.f;
 namespace dti
 {
 DTISimulationHandler::DTISimulationHandler(
-    const Indices& indices, const SpikeSimulationDescriptor& spikeSimulation)
+    const Indices& indices, const SetSpikeSimulationMessage& spikeSimulation)
     : brayns::AbstractSimulationHandler()
     , _indices(indices)
     , _spikeSimulation(spikeSimulation)
 {
     _frameSize = indices[indices.size() - 1];
     _startTime = 0.0;
-    _endTime = _spikeSimulation.endTime;
+    _endTime = _spikeSimulation.end_time;
     _dt = _spikeSimulation.dt;
     _nbFrames = _endTime / _dt;
     _unit = "ms";
@@ -85,16 +86,19 @@ void* DTISimulationHandler::getFrameDataImpl(const uint32_t frame)
         {
             const float timestamp =
                 (j - begin) + (_spikes[_spikeSimulation.gids[i]] / _dt *
-                               _spikeSimulation.timeScale);
-            float value = _spikeSimulation.restIntensity;
+                               _spikeSimulation.time_scale);
+            float value = _spikeSimulation.rest_intensity;
             if (frame > timestamp)
             {
-                value = _spikeSimulation.restIntensity +
-                        _spikeSimulation.spikeIntensity -
-                        _spikeSimulation.spikeIntensity *
-                            std::min(1.f, std::max(static_cast<float>(_spikeSimulation.decaySpeed) *
-                                                       (frame - timestamp),
-                                                   0.f));
+                value =
+                    _spikeSimulation.rest_intensity +
+                    _spikeSimulation.spike_intensity -
+                    _spikeSimulation.spike_intensity *
+                        std::min(1.f,
+                                 std::max(static_cast<float>(
+                                              _spikeSimulation.decay_speed) *
+                                              (frame - timestamp),
+                                          0.f));
             }
             _data[j] = std::max(0.f, std::min(value, 1.f));
         }

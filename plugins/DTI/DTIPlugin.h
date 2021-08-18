@@ -19,27 +19,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef DTI_PLUGIN_H
-#define DTI_PLUGIN_H
-
-#include <api/DTIParams.h>
+#pragma once
 
 #include <array>
+#include <vector>
+
 #include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
-#include <vector>
+
+#include <messages/SetSpikeSimulationFromFileMessage.h>
+#include <messages/SetSpikeSimulationMessage.h>
 
 namespace dti
 {
 /**
- * @brief The AtomicVolumesPlugin class manages the loading of
+ * @brief The DTIPlugin class manages the loading of
  * RAW volumes as point clouds
  */
 class DTIPlugin : public brayns::ExtensionPlugin
 {
 public:
-    DTIPlugin();
-
     void init() final;
 
     /**
@@ -48,20 +47,18 @@ public:
     void preRender() final;
 
     // Entrypoint access
-    void updateSpikeSimulation(const SpikeSimulationDescriptor &);
-    void updateSpikeSimulationFromFile(const SpikeSimulationFromFile &);
+    void updateSpikeSimulation(const SetSpikeSimulationMessage &);
+    void updateSpikeSimulationFromFile(
+        const SetSpikeSimulationFromFileMessage &);
 
 private:
-    void _updateStreamlines(const StreamlinesDescriptor &);
     void _updateSpikeSimulation();
     void _updateSimulationFrame();
 
-    SpikeSimulationDescriptor _spikeSimulation;
+    SetSpikeSimulationMessage _spikeSimulation;
 
     bool _simulationDirty{false};
     uint64_t _currentFrame{std::numeric_limits<uint64_t>::max()};
     std::vector<size_t> _registeredModelsForSpikeSimulation;
 };
 } // namespace dti
-
-#endif
