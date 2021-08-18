@@ -26,6 +26,8 @@
 #include <entrypoints/CIGetCellIdsFromModelEntrypoint.h>
 #include <entrypoints/CIGetReportInfoEntrypoint.h>
 #include <entrypoints/CIGetReportsEntrypoint.h>
+#include <entrypoints/CIGetSpikeReportInfoEntrypoint.h>
+#include <entrypoints/CIGetTargetsEntrypoint.h>
 #include <entrypoints/CIInfoEntrypoint.h>
 
 class CircuitInfoEntrypoints
@@ -39,5 +41,7 @@ public:
         interface.add<CIGetCellIdsFromModelEntrypoint>();
         interface.add<CIGetReportsEntrypoint>();
         interface.add<CIGetReportInfoEntrypoint>();
+        interface.add<CIGetSpikeReportInfoEntrypoint>();
+        interface.add<CIGetTargetsEntrypoint>();
     }
 };
