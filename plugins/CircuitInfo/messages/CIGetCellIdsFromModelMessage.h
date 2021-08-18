@@ -1,5 +1,6 @@
-/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
+/* Copyright (c) 2021 EPFL/Blue Brain Project
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,21 +20,8 @@
 
 #pragma once
 
-#include <brayns/network/interface/ActionInterface.h>
+#include <brayns/network/json/Message.h>
 
-#include <entrypoints/CIGetCellDataEntrypoint.h>
-#include <entrypoints/CIGetCellIdsEntrypoint.h>
-#include <entrypoints/CIGetCellIdsFromModelEntrypoint.h>
-#include <entrypoints/CIInfoEntrypoint.h>
-
-class CircuitInfoEntrypoints
-{
-public:
-    static void load(brayns::ActionInterface& interface)
-    {
-        interface.add<CIInfoEntrypoint>();
-        interface.add<CIGetCellDataEntrypoint>();
-        interface.add<CIGetCellIdsEntrypoint>();
-        interface.add<CIGetCellIdsFromModelEntrypoint>();
-    }
-};
+BRAYNS_MESSAGE_BEGIN(CIGetCellIdsFromModelParams)
+BRAYNS_MESSAGE_ENTRY(size_t, model_id, "ID of the circuit model")
+BRAYNS_MESSAGE_END()

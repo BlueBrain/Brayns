@@ -61,6 +61,8 @@ public:
                 gids.insert(temp.begin(), temp.end());
             }
         }
+
+        // Fill result
         result.ids.insert(result.ids.end(), gids.begin(), gids.end());
 
         // Success
@@ -76,7 +78,7 @@ public:
 
     virtual std::string getDescription() const override
     {
-        return "Return the list of GIDs from a loaded circuit";
+        return "Return the list of GIDs from a circuit";
     }
 
     virtual void onRequest(const Request& request) override
