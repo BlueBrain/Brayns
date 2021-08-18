@@ -21,6 +21,7 @@
 
 #include <brayns/network/interface/ActionInterface.h>
 
+#include <entrypoints/CIGetAfferentCellIdsEntrypoint.h>
 #include <entrypoints/CIGetCellDataEntrypoint.h>
 #include <entrypoints/CIGetCellIdsEntrypoint.h>
 #include <entrypoints/CIGetCellIdsFromModelEntrypoint.h>
@@ -43,5 +44,6 @@ public:
         interface.add<CIGetReportInfoEntrypoint>();
         interface.add<CIGetSpikeReportInfoEntrypoint>();
         interface.add<CIGetTargetsEntrypoint>();
+        interface.add<CIGetAfferentCellIdsEntrypoint>();
     }
 };
