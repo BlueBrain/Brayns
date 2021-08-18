@@ -39,8 +39,12 @@ target_link_libraries(braynsNetwork PRIVATE
   braynsCommon
   braynsParameters
   braynsPluginAPI
+)
+
+target_link_libraries(braynsNetwork PUBLIC
   Poco::Foundation
-  Poco::Net Poco::JSON
+  Poco::Net
+  Poco::JSON
 )
 
 set_target_properties(braynsNetwork

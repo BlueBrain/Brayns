@@ -30,7 +30,14 @@ set(BRAYNSCIRCUITINFO_SOURCES
   CircuitInfoPlugin.cpp
 )
 
-set(BRAYNSCIRCUITINFO_LINK_LIBRARIES PRIVATE Brion Brain braynsCommon braynsParameters braynsPluginAPI)
+set(BRAYNSCIRCUITINFO_LINK_LIBRARIES PRIVATE
+  Brion
+  Brain
+  braynsCommon
+  braynsParameters
+  braynsPluginAPI
+  braynsNetwork
+)
 
 set(BRAYNSCIRCUITINFO_OMIT_LIBRARY_HEADER ON)
 set(BRAYNSCIRCUITINFO_OMIT_VERSION_HEADERS ON)

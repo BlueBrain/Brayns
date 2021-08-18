@@ -37,6 +37,12 @@ set(ENABLE_PAGECOMPILER_FILE2PAGE OFF CACHE BOOL "Enable File2Page")
 set(BUILD_SHARED_LIBS ON)
 add_subdirectory(poco)
 
+# Remove Poco postfix d in debug
+set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Set Debug library postfix" FORCE)
+set(CMAKE_RELEASE_POSTFIX "" CACHE STRING "Set Release library postfix" FORCE)
+set(CMAKE_MINSIZEREL_POSTFIX "" CACHE STRING "Set MinSizeRel library postfix" FORCE)
+set(CMAKE_RELWITHDEBINFO_POSTFIX "" CACHE STRING "Set RelWithDebInfo library postfix" FORCE)
+
 if(NOT TARGET glm)
     message(STATUS "Gathering GLM from submodules")
     option(GLM_QUIET "No CMake Message" ON)

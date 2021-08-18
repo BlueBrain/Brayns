@@ -29,7 +29,7 @@ set(${NAME}_PUBLIC_HEADERS
 )
 
 set(${NAME}_LINK_LIBRARIES
-  braynsPluginAPI glm)
+  braynsPluginAPI braynsNetwork glm)
 
 # Build type and options
 if(NOT CMAKE_BUILD_TYPE)

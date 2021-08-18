@@ -119,7 +119,7 @@ include_directories(
 set(BRAYNSCIRCUITEXPLORER_LINK_LIBRARIES
     PUBLIC ${OSPRAY_LIBRARIES}
     PRIVATE braynsCommon braynsParameters braynsIO braynsEngine braynsPluginAPI
-    braynsOSPRayEngine glm Brion Brain
+    braynsNetwork braynsOSPRayEngine glm Brion Brain
     ${FREEIMAGE_LIBRARIES} ${HDF5_LIBRARIES}
 )
 
