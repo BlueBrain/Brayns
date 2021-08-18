@@ -27,13 +27,13 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <messages/CIGetAfferentCellIdsMessage.h>
+#include <messages/CIGetEfferentCellIdsMessage.h>
 
-class AfferentCellRetreiver
+class EfferentCellRetreiver
 {
 public:
-    static std::vector<uint64_t> getAfferentCells(
-        const CIGetAfferentCellIdsParams& params)
+    static std::vector<uint64_t> getEfferentCells(
+        const CIGetEfferentCellIdsParams& params)
     {
         std::vector<uint64_t> result;
 
@@ -43,41 +43,41 @@ public:
 
         // Sources stream
         brion::GIDSet sources(params.sources.begin(), params.sources.end());
-        auto stream = circuit.getAfferentSynapses(sources);
+        auto stream = circuit.getEfferentSynapses(sources);
 
         // Retreive synapses immediately
         auto future = stream.read(stream.getRemaining());
         auto synapses = future.get();
 
         // Retreive GIDs and remove duplicates
-        auto preGids = synapses.preGIDs();
-        std::set<uint32_t> gids = {preGids, preGids + synapses.size()};
+        auto postGids = synapses.postGIDs();
+        std::set<uint32_t> gids = {postGids, postGids + synapses.size()};
 
         return {gids.begin(), gids.end()};
     }
 };
 
-class CIGetAfferentCellIdsEntrypoint
-    : public brayns::Entrypoint<CIGetAfferentCellIdsParams,
-                                CIGetAfferentCellIdsResult>
+class CIGetEfferentCellIdsEntrypoint
+    : public brayns::Entrypoint<CIGetEfferentCellIdsParams,
+                                CIGetEfferentCellIdsResult>
 {
 public:
     virtual std::string getName() const override
     {
-        return "ci-get-afferent-cell-ids";
+        return "ci-get-efferent-cell-ids";
     }
 
     virtual std::string getDescription() const override
     {
-        return "Return a list of afferent synapses cell GIDs from a circuit "
+        return "Return a list of efferent synapses cell GIDs from a circuit "
                "and a set of source cells";
     }
 
     virtual void onRequest(const Request& request) override
     {
         auto params = request.getParams();
-        CIGetAfferentCellIdsResult result;
-        result.ids = AfferentCellRetreiver::getAfferentCells(params);
+        CIGetEfferentCellIdsResult result;
+        result.ids = EfferentCellRetreiver::getEfferentCells(params);
         request.reply(result);
     }
 };
