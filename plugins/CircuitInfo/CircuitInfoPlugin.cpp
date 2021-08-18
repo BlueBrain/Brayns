@@ -63,7 +63,7 @@ void CircuitInfoPlugin::init()
         return;
     }
 
-    CircuitInfoEntrypoints::load(*this, *actionInterface);
+    CircuitInfoEntrypoints::load(*actionInterface);
 
     if (false)
     {

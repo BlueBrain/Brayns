@@ -19,16 +19,17 @@
 
 #pragma once
 
-#include <entrypoints/CIInfoEntrypoint.h>
+#include <brayns/network/interface/ActionInterface.h>
 
-#include "CircuitInfoPlugin.h"
+#include <entrypoints/CIGetCellDataEntrypoint.h>
+#include <entrypoints/CIInfoEntrypoint.h>
 
 class CircuitInfoEntrypoints
 {
 public:
-    static void load(CircuitInfoPlugin& plugin,
-                     brayns::ActionInterface& interface)
+    static void load(brayns::ActionInterface& interface)
     {
         interface.add<CIInfoEntrypoint>();
+        interface.add<CIGetCellDataEntrypoint>();
     }
 };
