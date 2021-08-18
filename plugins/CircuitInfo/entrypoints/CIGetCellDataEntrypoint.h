@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <boost/filesystem.hpp>
-
 #include <brain/brain.h>
 #include <brion/brion.h>
 
@@ -34,12 +32,6 @@ class CellDataRetreiver
 public:
     static CIGetCellDataResult getCellData(const CIGetCellDataParams& params)
     {
-        // Validate circuit path
-        if (!boost::filesystem::exists(params.path))
-        {
-            throw brayns::EntrypointException(9, "Circuit not found");
-        }
-
         // Result
         CIGetCellDataResult result;
 

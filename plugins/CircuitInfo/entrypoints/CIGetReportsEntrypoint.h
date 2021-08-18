@@ -25,58 +25,25 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <messages/CIGetCellIdsMessage.h>
+#include <messages/CIGetReportsMessage.h>
 
-class CellIdsRetreiver
+class CIGetReportsEntrypoint
+    : public brayns::Entrypoint<CIGetReportsParams, CIGetReportsResult>
 {
 public:
-    static CIGetCellIdsResult getCellIds(const CIGetCellIdsParams& params)
-    {
-        // Result
-        CIGetCellIdsResult result;
-
-        // Load data
-        const brion::BlueConfig config(params.path);
-        const brain::Circuit circuit(config);
-
-        // Extract GIDs
-        brion::GIDSet gids;
-        if (params.targets.empty())
-        {
-            gids = circuit.getGIDs();
-        }
-        else
-        {
-            for (const auto& target : params.targets)
-            {
-                auto temp = circuit.getGIDs(target);
-                gids.insert(temp.begin(), temp.end());
-            }
-        }
-
-        // Fill result
-        result.ids.insert(result.ids.end(), gids.begin(), gids.end());
-
-        // Success
-        return result;
-    }
-};
-
-class CIGetCellIdsEntrypoint
-    : public brayns::Entrypoint<CIGetCellIdsParams, CIGetCellIdsResult>
-{
-public:
-    virtual std::string getName() const override { return "ci-get-cell-ids"; }
+    virtual std::string getName() const override { return "ci-get-reports"; }
 
     virtual std::string getDescription() const override
     {
-        return "Return the list of GIDs from a circuit";
+        return "Return a list of reports from a circuit";
     }
 
     virtual void onRequest(const Request& request) override
     {
         auto params = request.getParams();
-        auto result = CellIdsRetreiver::getCellIds(params);
+        CIGetReportsResult result;
+        brion::BlueConfig config(params.path);
+        result.reports = config.getSectionNames(brion::CONFIGSECTION_REPORT);
         request.reply(result);
     }
 };

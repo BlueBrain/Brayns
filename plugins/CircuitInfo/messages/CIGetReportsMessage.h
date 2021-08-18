@@ -1,5 +1,6 @@
-/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
+/* Copyright (c) 2021 EPFL/Blue Brain Project
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,23 +20,12 @@
 
 #pragma once
 
-#include <brayns/network/interface/ActionInterface.h>
+#include <brayns/network/json/Message.h>
 
-#include <entrypoints/CIGetCellDataEntrypoint.h>
-#include <entrypoints/CIGetCellIdsEntrypoint.h>
-#include <entrypoints/CIGetCellIdsFromModelEntrypoint.h>
-#include <entrypoints/CIGetReportsEntrypoint.h>
-#include <entrypoints/CIInfoEntrypoint.h>
+BRAYNS_MESSAGE_BEGIN(CIGetReportsParams)
+BRAYNS_MESSAGE_ENTRY(std::string, path, "Path to the circuit config file")
+BRAYNS_MESSAGE_END()
 
-class CircuitInfoEntrypoints
-{
-public:
-    static void load(brayns::ActionInterface& interface)
-    {
-        interface.add<CIInfoEntrypoint>();
-        interface.add<CIGetCellDataEntrypoint>();
-        interface.add<CIGetCellIdsEntrypoint>();
-        interface.add<CIGetCellIdsFromModelEntrypoint>();
-        interface.add<CIGetReportsEntrypoint>();
-    }
-};
+BRAYNS_MESSAGE_BEGIN(CIGetReportsResult)
+BRAYNS_MESSAGE_ENTRY(std::vector<std::string>, reports, "Report names")
+BRAYNS_MESSAGE_END()
