@@ -24,6 +24,7 @@
 #include <entrypoints/CIGetCellDataEntrypoint.h>
 #include <entrypoints/CIGetCellIdsEntrypoint.h>
 #include <entrypoints/CIGetCellIdsFromModelEntrypoint.h>
+#include <entrypoints/CIGetReportInfoEntrypoint.h>
 #include <entrypoints/CIGetReportsEntrypoint.h>
 #include <entrypoints/CIInfoEntrypoint.h>
 
@@ -37,5 +38,6 @@ public:
         interface.add<CIGetCellIdsEntrypoint>();
         interface.add<CIGetCellIdsFromModelEntrypoint>();
         interface.add<CIGetReportsEntrypoint>();
+        interface.add<CIGetReportInfoEntrypoint>();
     }
 };
