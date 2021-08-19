@@ -20,15 +20,10 @@
 
 #pragma once
 
-#include <brayns/network/json/MessageAdapter.h>
+#include <brayns/network/json/Message.h>
 
-#include <plugin/api/CircuitExplorerParams.h>
-
-namespace brayns
-{
-BRAYNS_ADAPTER_BEGIN(ColorCells)
-BRAYNS_ADAPTER_NAMED_ENTRY("model_id", modelId, "Model to color")
-BRAYNS_ADAPTER_NAMED_ENTRY("gids", gids, "GIDs of the cells to color")
-BRAYNS_ADAPTER_NAMED_ENTRY("colors", colors, "Cell colors")
-BRAYNS_ADAPTER_END()
-} // namespace brayns
+BRAYNS_MESSAGE_BEGIN(ColorCellsMessage)
+BRAYNS_MESSAGE_ENTRY(size_t, model_id, "Model to color")
+BRAYNS_MESSAGE_ENTRY(std::vector<std::string>, gids, "Cells to color")
+BRAYNS_MESSAGE_ENTRY(std::vector<double>, colors, "Cell colors")
+BRAYNS_MESSAGE_END()

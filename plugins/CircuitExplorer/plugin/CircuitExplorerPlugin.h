@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MEMBRANELESS_ORGANELLES_PLUGIN_H
-#define MEMBRANELESS_ORGANELLES_PLUGIN_H
+#pragma once
 
 #include <plugin/api/CellObjectMapper.h>
 #include <plugin/api/CircuitExplorerParams.h>
@@ -39,8 +38,6 @@
 class CircuitExplorerPlugin : public brayns::ExtensionPlugin
 {
 public:
-    CircuitExplorerPlugin();
-
     void init() final;
 
     /**
@@ -48,19 +45,6 @@ public:
      */
     void preRender() final;
     void postRender() final;
-
-    template <class T, typename = std::enable_if_t<
-                           std::is_base_of<CellObjectMapper, T>::value>>
-    void addCircuitMapper(T&& mapper)
-    {
-        _mappers.emplace_back(std::make_unique<T>(std::forward<T>(mapper)));
-    }
-    void releaseCircuitMapper(const size_t modelId);
-
-    // Used by entrypoints
-    SynapseAttributes& getSynapseAttributes() { return _synapseAttributes; }
-    brayns::Message exportFramesToDisk(const ExportFramesToDisk& payload);
-    FrameExportProgress getFrameExportProgress();
 
     CellObjectMapper* getMapperForCircuit(const size_t modelId) noexcept
     {
@@ -73,62 +57,23 @@ public:
         return nullptr;
     }
 
+    template <class T, typename = std::enable_if_t<
+                           std::is_base_of<CellObjectMapper, T>::value>>
+    void addCircuitMapper(T&& mapper)
+    {
+        _mappers.emplace_back(std::make_unique<T>(std::forward<T>(mapper)));
+    }
+
+    void releaseCircuitMapper(const size_t modelId);
+
+    // Used by entrypoints
+    SynapseAttributes& getSynapseAttributes() { return _synapseAttributes; }
+    brayns::Message exportFramesToDisk(const ExportFramesToDisk& payload);
+    FrameExportProgress getFrameExportProgress();
+
 private:
-    // Rendering
     brayns::Message _setCamera(const CameraDefinition&);
-    CameraDefinition _getCamera();
-    brayns::Message _setMaterial(const MaterialDescriptor&);
-    brayns::Message _setMaterials(const MaterialsDescriptor&);
-    brayns::Message _setMaterialRange(const MaterialRangeDescriptor&);
-    brayns::Message _setMaterialExtraAttributes(const MaterialExtraAttributes&);
-    MaterialProperties _getMaterialProperties();
-    brayns::Message _updateMaterialProperties(const UpdateMaterialProperties&);
-
-    // Experimental
-    brayns::Message _setSynapseAttributes(const SynapseAttributes&);
-    brayns::Message _setConnectionsPerValue(const ConnectionsPerValue&);
-    brayns::Message _setMetaballsPerSimulationValue(
-        const MetaballsFromSimulationValue&);
-    brayns::Message _saveModelToCache(const SaveModelToCache&);
-
-    // Handlers
-    brayns::Message _attachCellGrowthHandler(
-        const AttachCellGrowthHandler& payload);
-    brayns::Message _attachCircuitSimulationHandler(
-        const AttachCircuitSimulationHandler& payload);
-
-    // Movie production
     void _doExportFrameToDisk();
-    ExportLayerToDiskResult _exportLayerToDisk(
-        const ExportLayerToDisk& payload);
-    brayns::Message _makeMovie(const MakeMovieParameters& params);
-
-    // Anterograde tracing
-    brayns::Message _traceAnterogrades(const AnterogradeTracing& payload);
-
-    // Add geometry
-    void _createShapeMaterial(brayns::ModelPtr& model, const size_t id,
-                              const brayns::Vector3d& color,
-                              const double& opacity);
-    AddShapeResult _addSphere(const AddSphere& payload);
-    AddShapeResult _addPill(const AddPill& payload);
-    AddShapeResult _addCylinder(const AddCylinder& payload);
-    AddShapeResult _addBox(const AddBox& payload);
-
-    // Predefined models
-    brayns::Message _addGrid(const AddGrid& payload);
-    brayns::Message _addColumn(const AddColumn& payload);
-
-    // Get material information
-    MaterialIds _getMaterialIds(const ModelId& modelId);
-    MaterialDescriptor _getMaterial(const ModelMaterialId& mmId);
-
-    // Remap circuit colors to a specific scheme
-    RemapCircuitResult _remapCircuitToScheme(const RemapCircuit& payload);
-    brayns::Message _colorCells(const ColorCells& payload);
-
-    brayns::Message _mirrorModel(const MirrorModel& payload);
-    brayns::Message _changeCircuitThickness(const CircuitThickness& payload);
 
     SynapseAttributes _synapseAttributes;
 
@@ -147,4 +92,3 @@ private:
 
     std::vector<std::unique_ptr<CellObjectMapper>> _mappers;
 };
-#endif

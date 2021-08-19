@@ -23,7 +23,7 @@
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <plugin/CircuitExplorerPlugin.h>
-#include <plugin/adapters/ColorCellsAdapter.h>
+#include <plugin/messages/ColorCellsMessage.h>
 
 class CellColorizer
 {
@@ -34,10 +34,10 @@ public:
     {
     }
 
-    void colorCells(const ColorCells& params)
+    void colorCells(const ColorCellsMessage& params)
     {
         // Extract message data
-        auto modelId = params.modelId;
+        auto modelId = params.model_id;
         auto& gids = params.gids;
         auto& colors = params.colors;
 
@@ -162,7 +162,7 @@ private:
 };
 
 class ColorCellsEntrypoint
-    : public brayns::Entrypoint<ColorCells, brayns::EmptyMessage>
+    : public brayns::Entrypoint<ColorCellsMessage, brayns::EmptyMessage>
 {
 public:
     ColorCellsEntrypoint(CircuitExplorerPlugin& plugin)
