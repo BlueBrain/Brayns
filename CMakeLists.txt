@@ -40,9 +40,6 @@ endif(BRAYNS_DEBUG_JSON_ENABLED)
 
 # Enable cloning of all optional subprojects for CI builds
 if($ENV{TRAVIS})
-  if(NOT DEFINED BRAYNS_NETWORKING_ENABLED)
-    option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ON)
-  endif()
   if(NOT DEFINED BRAYNS_DEFLECT_ENABLED)
     option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" ON)
   endif()
@@ -91,27 +88,8 @@ else()
 endif()
 
 # HTTP messaging
-common_find_package(LibJpegTurbo)
-common_find_package(Rockets)
+common_find_package(LibJpegTurbo REQUIRED)
 common_find_package(FFMPEG 3.4 SYSTEM)
-if(ROCKETS_FOUND AND ROCKETS_USE_LIBWEBSOCKETS)
-  option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ON)
-else()
-  option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" OFF)
-endif()
-
-if(BRAYNS_NETWORKING_ENABLED)
-  # We require turbojpeg for networking to get image streaming working
-  common_find_package(LibJpegTurbo REQUIRED)
-  common_find_package(Rockets REQUIRED)
-  if(NOT ROCKETS_USE_LIBWEBSOCKETS)
-    message(WARNING "Could not enable networking, missing Rockets with libwebsockets")
-  endif()
-  list(APPEND COMMON_FIND_PACKAGE_DEFINES BRAYNS_USE_NETWORKING)
-else()
-  common_find_package_disable(LibJpegTurbo)
-  common_find_package_disable(Rockets)
-endif()
 
 # OSPRay rendering engine
 common_find_package(ospray 1.8 SYSTEM)

@@ -19,15 +19,7 @@ configure_file(paths.h.in ${PROJECT_BINARY_DIR}/CircuitViewer/tests/paths.h)
 
 set(TEST_LIBRARIES BBPTestData brayns Brain braynsIO pdiff)
 
-if(BRAYNS_NETWORKING_ENABLED)
-  list(APPEND TEST_LIBRARIES Rockets braynsRockets)
-  include_directories(
-    ${PROJECT_SOURCE_DIR}/../Rockets
-    ${PROJECT_SOURCE_DIR}/../Rockets/rapidjson/include
-)
-else()
-  list(APPEND EXCLUDE_FROM_TESTS addCircuit.cpp)
-endif()
+list(APPEND EXCLUDE_FROM_TESTS addCircuit.cpp)
 
 if(NOT BRAYNS_OPTIX_TESTS_ENABLED)
     list(APPEND EXCLUDE_FROM_TESTS optixCircuit.cpp)

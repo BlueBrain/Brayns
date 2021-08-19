@@ -49,27 +49,24 @@ public:
 
         _brayns = std::make_unique<brayns::Brayns>(argc, argv);
 
-        // events from rockets, trigger rendering
-        _brayns->getEngine().triggerRender =
-            [& eventRendering = _eventRendering]
-        {
-            eventRendering->start();
-        };
+        // events, trigger rendering
+        _brayns->getEngine().triggerRender = [&eventRendering = _eventRendering]
+        { eventRendering->start(); };
 
         // launch first frame; after that, only events will trigger that
         _eventRendering->start();
 
         // stop the application on Ctrl+C
-        _sigintHandle->once<uvw::SignalEvent>(
-            [&](const auto&, auto&) { this->_stopMainLoop(); });
+        _sigintHandle->once<uvw::SignalEvent>([&](const auto&, auto&)
+                                              { this->_stopMainLoop(); });
         _sigintHandle->start(SIGINT);
     }
 
     void run()
     {
         // Start render & main loop
-        std::thread renderThread(
-            [& _renderLoop = _renderLoop] { _renderLoop->run(); });
+        std::thread renderThread([&_renderLoop = _renderLoop]
+                                 { _renderLoop->run(); });
         _mainLoop->run();
 
         // Finished
@@ -79,67 +76,72 @@ public:
 private:
     void _setupMainThread()
     {
-        // triggered after rendering, send events to rockets from the main
+        // triggered after rendering, send events from the main
         // thread
-        _renderingDone->on<uvw::AsyncEvent>([& brayns = _brayns](const auto&,
-                                                                 auto&) {
-            brayns->postRender();
-        });
+        _renderingDone->on<uvw::AsyncEvent>(
+            [&brayns = _brayns](const auto&, auto&) { brayns->postRender(); });
 
         // render or data load trigger from events
-        _eventRendering->on<uvw::IdleEvent>([&](const auto&, auto&) {
-            // HACK ADRIEN _eventRendering->stop();
-            _accumRendering->stop();
-            _timeSinceLastEvent.start();
-
-            // stop event loop(s) and exit application
-            if (!_brayns->getEngine().getKeepRunning())
+        _eventRendering->on<uvw::IdleEvent>(
+            [&](const auto&, auto&)
             {
-                this->_stopMainLoop();
-                return;
-            }
+                // HACK ADRIEN _eventRendering->stop();
+                _accumRendering->stop();
+                _timeSinceLastEvent.start();
 
-            // rendering
-            if (_brayns->commit())
-                _triggerRendering->send();
-        });
+                // stop event loop(s) and exit application
+                if (!_brayns->getEngine().getKeepRunning())
+                {
+                    this->_stopMainLoop();
+                    return;
+                }
+
+                // rendering
+                if (_brayns->commit())
+                    _triggerRendering->send();
+            });
 
         // start accum rendering when we have no more other events
-        _checkIdleRendering->on<uvw::CheckEvent>([& accumRendering =
-                                                      _accumRendering](
-            const auto&, auto&) { accumRendering->start(); });
+        _checkIdleRendering->on<uvw::CheckEvent>(
+            [&accumRendering = _accumRendering](const auto&, auto&)
+            { accumRendering->start(); });
 
         // accumulation rendering on idle; re-triggered by _checkIdleRendering
-        _accumRendering->on<uvw::IdleEvent>([&](const auto&, auto&) {
-            if (_timeSinceLastEvent.elapsed() < _idleRenderingDelay)
-                return;
+        _accumRendering->on<uvw::IdleEvent>(
+            [&](const auto&, auto&)
+            {
+                if (_timeSinceLastEvent.elapsed() < _idleRenderingDelay)
+                    return;
 
-            if (_brayns->getEngine().continueRendering() && _brayns->commit())
-                _triggerRendering->send();
+                if (_brayns->getEngine().continueRendering() &&
+                    _brayns->commit())
+                    _triggerRendering->send();
 
-            _accumRendering->stop();
-        });
+                _accumRendering->stop();
+            });
     }
 
     void _setupRenderThread()
     {
         // rendering, triggered from main thread
-        _triggerRendering->on<uvw::AsyncEvent>([&](const auto&, auto&) {
-            _brayns->render();
-            _renderingDone->send();
-
-            if (_brayns->getParametersManager()
-                    .getApplicationParameters()
-                    .isBenchmarking())
+        _triggerRendering->on<uvw::AsyncEvent>(
+            [&](const auto&, auto&)
             {
-                std::cout << _brayns->getEngine().getStatistics().getFPS()
-                          << " fps" << std::endl;
-            }
-        });
+                _brayns->render();
+                _renderingDone->send();
+
+                if (_brayns->getParametersManager()
+                        .getApplicationParameters()
+                        .isBenchmarking())
+                {
+                    std::cout << _brayns->getEngine().getStatistics().getFPS()
+                              << " fps" << std::endl;
+                }
+            });
 
         // stop render loop, triggered from main thread
-        _stopRenderThread->once<uvw::AsyncEvent>(
-            [&](const auto&, auto&) { this->_stopRenderLoop(); });
+        _stopRenderThread->once<uvw::AsyncEvent>([&](const auto&, auto&)
+                                                 { this->_stopRenderLoop(); });
     }
 
     void _stopMainLoop()

@@ -32,11 +32,9 @@
 
 #include <iostream>
 
-#ifdef BRAYNS_USE_NETWORKING
 #include <brayns/common/utils/ImageGenerator.h>
 #include <brayns/common/utils/base64/base64.h>
 #include <fstream>
-#endif
 
 inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(FIBITMAP* image)
 {
@@ -114,7 +112,6 @@ inline bool compareTestImage(const std::string& filename,
     return success;
 }
 
-#ifdef BRAYNS_USE_NETWORKING
 inline bool compareBase64TestImage(
     const brayns::ImageGenerator::ImageBase64& image,
     const std::string& filename)
@@ -143,4 +140,3 @@ inline bool compareBase64TestImage(
 
     return result;
 }
-#endif

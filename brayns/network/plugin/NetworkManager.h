@@ -21,6 +21,7 @@
 
 #include <memory>
 
+#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 namespace brayns

@@ -9,10 +9,6 @@ if(BRAYNS_DEFLECT_ENABLED)
   add_subdirectory(Deflect)
 endif()
 
-if(BRAYNS_NETWORKING_ENABLED)
-  add_subdirectory(Rockets)
-endif()
-
 option(BRAYNS_MULTIVIEW_ENABLED "Activate Multiview camera plugin" OFF)
 if(BRAYNS_MULTIVIEW_ENABLED)
   add_subdirectory(Multiview)

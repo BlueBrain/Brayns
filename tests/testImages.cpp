@@ -29,14 +29,11 @@
 #include <brayns/engine/Scene.h>
 
 #include <brayns/defines.h>
-#ifdef BRAYNS_USE_NETWORKING
-#include "ClientServer.h"
-#else
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
-#endif
 
 #include "PDiffHelpers.h"
+
 TEST_CASE("render_two_frames_and_compare_they_are_same")
 {
     const char* argv[] = {"testImages", "--disable-accumulation", "demo"};
@@ -77,30 +74,6 @@ TEST_CASE("render_xyz_and_compare")
     CHECK(compareTestImage("testdataMonkey_smaller.png",
                            brayns.getEngine().getFrameBuffer()));
 }
-
-#ifdef BRAYNS_USE_NETWORKING
-TEST_CASE("render_xyz_change_radius_from_rockets")
-{
-    const auto path = BRAYNS_TESTDATA_MODEL_MONKEY_PATH;
-    const std::vector<const char*> argv = {path, "--disable-accumulation"};
-
-    ClientServer clientServer(argv);
-
-    auto model = clientServer.getBrayns().getEngine().getScene().getModel(0);
-    brayns::PropertyMap props;
-    props.add({"radius", model->getProperties()["radius"].as<double>() / 2.});
-
-    CHECK((clientServer.makeRequest<brayns::ModelProperties, bool>(
-        "set-model-properties", {model->getModelID(), props})));
-
-    clientServer.getBrayns().getEngine().getScene().markModified();
-
-    clientServer.getBrayns().commitAndRender();
-    CHECK(compareTestImage(
-        "testdataMonkey_smaller.png",
-        clientServer.getBrayns().getEngine().getFrameBuffer()));
-}
-#endif
 
 TEST_CASE("render_protein_and_compare")
 {

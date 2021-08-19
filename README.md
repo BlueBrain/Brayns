@@ -154,8 +154,7 @@ cmake .. -DBRAYNS_DEFLECT_ENABLED=ON:OFF
 ```
 
 #### Enable/Disable HTTP/REST/Websockets interface.
- [LibJpegTurbo](http://libjpeg-turbo.virtualgl.org) and
- [Rockets](https://github.com/BlueBrain/Rockets).
+ [LibJpegTurbo](http://libjpeg-turbo.virtualgl.org).
  See documentation for REST API details.
 ```
 cmake .. -DBRAYNS_NETWORKING_ENABLED=ON:OFF

@@ -21,37 +21,18 @@
 
 #pragma once
 
-#include <brayns/common/log.h>
-#include <brayns/common/propertymap/PropertyMap.h>
-#include <brayns/common/types.h>
-
 #include <brayns/network/entrypoint/EntrypointRef.h>
-
-#include <brayns/network/json/ActionMessage.h>
-
-#include <functional>
-#include <string>
 
 namespace brayns
 {
 /**
- * Interface for registering actions, namely notifications which have no return
- * values with an optional parameter, and requests which return a value after
- * processing.
+ * Interface with the network engine.
  *
- * The encoding of the parameter and return value is restricted to JSON.
+ * Can be used to register entrypoints (recieve JSON RPC request with entrypoint
+ * name as method).
  *
- * The parameters object must be deserializable by a free function:
- * @code
- * bool from_json(Params& object, const std::string& json)
- * @endcode
+ * All entrypoints must implement IEntrypoint.
  *
- * The return type must be serializable by a free function:
- * @code
- * std::string to_json(const RetVal&)
- * @endcode
- *
- * The new way of registering entrypoint is using the IEntrypoint interface.
  */
 class ActionInterface
 {
@@ -86,129 +67,5 @@ public:
     {
         addEntrypoint(EntrypointRef::create<T>(std::forward<Args>(args)...));
     }
-
-    /**
-     * Register an action with no parameter and no return value.
-     *
-     * @param desc description of the action/RPC
-     * @param action the action to perform on an incoming notification
-     */
-    virtual void registerNotification(const RpcDescription& desc,
-                                      const std::function<void()>& action){};
-
-    /**
-     * Register an action with a property map as the parameter and no return
-     * value.
-     *
-     * @param desc description of the action/RPC
-     * @param input the acceptable property map as the parameter for the RPC
-     * @param action the action to perform on an incoming notification
-     */
-    virtual void registerNotification(
-        const RpcParameterDescription& desc, const PropertyMap& input,
-        const std::function<void(PropertyMap)>& action){};
-
-    /**
-     * Register an action with a property map as the parameter and a property
-     * map as the return value.
-     *
-     * @param desc description of the action/RPC
-     * @param input the acceptable property map as the parameter for the RPC
-     * @param output the property map layout that is returned on a successful
-     *               request
-     * @param action the action to perform on an incoming request
-     */
-    virtual void registerRequest(
-        const RpcParameterDescription& desc, const PropertyMap& input,
-        const PropertyMap& output,
-        const std::function<PropertyMap(PropertyMap)>& action){};
-
-    /**
-     * Register an action with no parameter and a property map as the return
-     * value.
-     *
-     * @param desc description of the action/RPC
-     * @param output the property map layout that is returned on a successful
-     *               request
-     * @param action the action to perform on an incoming request
-     */
-    virtual void registerRequest(const RpcDescription& desc,
-                                 const PropertyMap& output,
-                                 const std::function<PropertyMap()>& action){};
-
-    /** Register an action with no parameter and no return value. */
-    void registerNotification(const std::string& name,
-                              const std::function<void()>& action)
-    {
-        _registerNotification(name, [action] { action(); });
-    }
-
-    template <typename Params, typename = std::enable_if_t<
-                                   std::is_base_of<Message, Params>::value>>
-    void registerNotification(const RpcParameterDescription& desc,
-                              const std::function<void(Params)>& action)
-    {
-        Params p;
-        BRAYNS_INFO << "Registering notification " << desc.methodName
-                    << std::endl;
-        registerNotification(desc, p.getPropertyMap(),
-                             [action](PropertyMap map)
-                             {
-                                 Params par(map);
-                                 par.fromPropertyMap();
-                                 action(par);
-                             });
-    }
-
-    template <typename RetVal, typename = std::enable_if_t<
-                                   std::is_base_of<Message, RetVal>::value>>
-    void registerRequest(const RpcDescription& desc,
-                         const std::function<RetVal()>& action)
-    {
-        RetVal rv;
-        BRAYNS_INFO << "Registering request " << desc.methodName << std::endl;
-        registerRequest(desc, rv.getPropertyMap(),
-                        [action]()
-                        {
-                            RetVal retVal = action();
-                            retVal.toPropertyMap();
-                            return retVal.getPropertyMap();
-                        });
-    }
-
-    template <
-        typename Params, typename RetVal,
-        typename = std::enable_if_t<std::is_base_of<Message, Params>::value &&
-                                    std::is_base_of<Message, RetVal>::value>>
-    void registerRequest(const RpcParameterDescription& desc,
-                         const std::function<RetVal(Params)>& action)
-    {
-        Params p;
-        RetVal rv;
-        BRAYNS_INFO << "Registering request " << desc.methodName << std::endl;
-        registerRequest(desc, p.getPropertyMap(), rv.getPropertyMap(),
-                        [action](PropertyMap map)
-                        {
-                            Params par(map);
-                            par.fromPropertyMap();
-
-                            RetVal retVal = action(par);
-                            retVal.toPropertyMap();
-
-                            return retVal.getPropertyMap();
-                        });
-    }
-
-protected:
-    using RetParamFunc = std::function<std::string(std::string)>;
-    using RetFunc = std::function<std::string()>;
-    using ParamFunc = std::function<void(std::string)>;
-    using VoidFunc = std::function<void()>;
-
-private:
-    virtual void _registerRequest(const std::string&, const RetParamFunc&) {}
-    virtual void _registerRequest(const std::string&, const RetFunc&) {}
-    virtual void _registerNotification(const std::string&, const ParamFunc&) {}
-    virtual void _registerNotification(const std::string&, const VoidFunc&) {}
 };
 } // namespace brayns

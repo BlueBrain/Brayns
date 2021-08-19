@@ -7,9 +7,6 @@
 [submodule "perceptualdiff"]
 	path = deps/perceptualdiff
 	url = https://github.com/myint/perceptualdiff.git
-[submodule "plugins/Rockets/rapidjson"]
-	path = plugins/Rockets/rapidjson
-	url = https://github.com/Tencent/rapidjson.git
 [submodule "deps/glm"]
 	path = deps/glm
 	url = https://github.com/g-truc/glm.git
