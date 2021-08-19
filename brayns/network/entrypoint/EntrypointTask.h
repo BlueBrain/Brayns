@@ -26,6 +26,12 @@
 
 namespace brayns
 {
+/**
+ * @brief Helper class to run an entrypoint request in a separated thread.
+ *
+ * @tparam ParamsType Entrypoint request params.
+ * @tparam ResultType Entrypoint request result.
+ */
 template <typename ParamsType, typename ResultType>
 class EntrypointTask : public NetworkTask
 {

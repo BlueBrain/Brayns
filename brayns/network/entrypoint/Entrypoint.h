@@ -26,6 +26,12 @@
 
 namespace brayns
 {
+/**
+ * @brief Helper class to handle requests params and result with template.
+ *
+ * @tparam ParamsType
+ * @tparam ResultType
+ */
 template <typename ParamsType, typename ResultType>
 class Entrypoint : public BaseEntrypoint
 {
@@ -70,7 +76,7 @@ public:
     /**
      * @brief Shortcut to process the request with the message already parsed.
      *
-     * @param request Request with socket and parsed message.
+     * @param request Request specialized for Params and Result.
      */
     virtual void onRequest(const Request& request) = 0;
 

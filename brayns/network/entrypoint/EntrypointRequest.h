@@ -24,6 +24,12 @@
 
 namespace brayns
 {
+/**
+ * @brief Wrapper around a network request strongly typed.
+ *
+ * @tparam ParamsType Params of the request.
+ * @tparam ResultType Result of the request.
+ */
 template <typename ParamsType, typename ResultType>
 class EntrypointRequest
 {

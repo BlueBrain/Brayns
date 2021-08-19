@@ -29,7 +29,7 @@
 
 #include <messages/CIInfoMessage.h>
 
-class CircuitInfoRetreiver
+class CircuitInfoRetriever
 {
 public:
     static CIInfoResult getCircuitInfo(const std::string& path)
@@ -93,7 +93,7 @@ public:
     {
         auto params = request.getParams();
         auto& path = params.path;
-        auto result = CircuitInfoRetreiver::getCircuitInfo(path);
+        auto result = CircuitInfoRetriever::getCircuitInfo(path);
         request.reply(result);
     }
 };

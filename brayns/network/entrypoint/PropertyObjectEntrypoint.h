@@ -26,6 +26,12 @@
 
 namespace brayns
 {
+/**
+ * @brief Base class for entrypoints retieving property objects (objects with a
+ * many properties available but holding only one at a time).
+ *
+ * @tparam ObjectType Property object to retrieve.
+ */
 template <typename ObjectType>
 class GetPropertyObjectEntrypoint : public BaseEntrypoint
 {
@@ -54,6 +60,11 @@ public:
     }
 };
 
+/**
+ * @brief Base class for entrypoints updating property objects.
+ *
+ * @tparam ObjectType Property object to update.
+ */
 template <typename ObjectType>
 class SetPropertyObjectEntrypoint : public BaseEntrypoint
 {

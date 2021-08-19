@@ -30,9 +30,19 @@
 
 namespace brayns
 {
+/**
+ * @brief Helper class to build the JSON schema of an entrypoint.
+ *
+ */
 class EntrypointSchema
 {
 public:
+    /**
+     * @brief Create a JSON schema for the given entrypoint.
+     *
+     * @param entrypoint Entrypoint.
+     * @return SchemaResult Entrypoint schema.
+     */
     static SchemaResult create(const IEntrypoint& entrypoint)
     {
         SchemaResult schema;
@@ -50,6 +60,10 @@ public:
     }
 };
 
+/**
+ * @brief Entrypoint holder of an implementation of IEntrypoint.
+ *
+ */
 class EntrypointRef
 {
 public:

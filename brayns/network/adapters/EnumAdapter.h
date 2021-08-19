@@ -30,23 +30,54 @@
 
 namespace brayns
 {
+/**
+ * @brief Wrapper around a bimap from enum value to enum name.
+ *
+ * @tparam T Enum type
+ */
 template <typename T>
 class EnumMap
 {
 public:
     EnumMap() = default;
 
+    /**
+     * @brief Construct an EnumMap using names and values
+     *
+     * @param values
+     */
     EnumMap(std::vector<std::pair<std::string, T>> values)
         : _values(std::move(values))
     {
     }
 
+    /**
+     * @brief Get the number of enum values.
+     *
+     * @return size_t Number of available enums values
+     */
     size_t getSize() const { return _values.size(); }
 
+    /**
+     * @brief Pair value-name iterator.
+     *
+     * @return auto Iterator.
+     */
     auto begin() const { return _values.begin(); }
 
+    /**
+     * @brief Pair value-name iterator.
+     *
+     * @return auto Iterator.
+     */
     auto end() const { return _values.end(); }
 
+    /**
+     * @brief Get the value corresponding to enum name.
+     *
+     * @param name Enum name.
+     * @return const T* Enum value or null if invalid name.
+     */
     const T* getValue(const std::string& name) const
     {
         for (const auto& pair : _values)
@@ -59,6 +90,12 @@ public:
         return nullptr;
     }
 
+    /**
+     * @brief Get the name corresponding to the enum value.
+     *
+     * @param value Enum value.
+     * @return const std::string* Enum name or null if invalid value.
+     */
     const std::string* getName(const T& value) const
     {
         for (const auto& pair : _values)
@@ -75,21 +112,49 @@ private:
     std::vector<std::pair<std::string, T>> _values;
 };
 
+/**
+ * @brief Class used to get the EnumMap of an enum type.
+ *
+ * @tparam T Enum type to reflect.
+ */
 template <typename T>
 struct EnumReflector
 {
+    /**
+     * @brief Return a new EnumMap with values and names of T.
+     *
+     * @return EnumMap<T> Enum map of enum type.
+     */
     static EnumMap<T> reflect() { return enumMap<T>(); }
 };
 
+/**
+ * @brief Base JSON adapter for enumerations.
+ *
+ * @tparam T Enum type.
+ */
 template <typename T>
 struct EnumAdapter
 {
+    /**
+     * @brief Create and store a static instance of EnumMap<T>.
+     *
+     * @return const EnumMap<T>& Reference to the static EnumMap<T> instance.
+     */
     static const EnumMap<T>& getEnumMap()
     {
         static const EnumMap<T> values = EnumReflector<T>::reflect();
         return values;
     }
 
+    /**
+     * @brief Create an enum JSON schema.
+     *
+     * An enum schema is a string with all names in EnumMap<T> as available
+     * values.
+     *
+     * @return JsonSchema Schema of enum type.
+     */
     static JsonSchema getSchema(const T&)
     {
         JsonSchema schema;
@@ -104,6 +169,14 @@ struct EnumAdapter
         return schema;
     }
 
+    /**
+     * @brief Serialize an enum value using its name.
+     *
+     * @param value Value to serialize.
+     * @param json Output JSON.
+     * @return true Success.
+     * @return false Failure.
+     */
     static bool serialize(const T& value, JsonValue& json)
     {
         auto& enums = getEnumMap();
@@ -116,6 +189,14 @@ struct EnumAdapter
         return true;
     }
 
+    /**
+     * @brief Deserialize an enum value from its name.
+     *
+     * @param json Input JSON.
+     * @param value Output value.
+     * @return true Success.
+     * @return false Failure.
+     */
     static bool deserialize(const JsonValue& json, T& value)
     {
         std::string name;
@@ -134,8 +215,20 @@ struct EnumAdapter
     }
 };
 
+/**
+ * @brief Shortcut to get the name of an enum value using EnumAdapter<T>.
+ *
+ */
 struct GetEnumName
 {
+    /**
+     * @brief Return the name of an enum value.
+     *
+     * @tparam T Enum type.
+     * @param value Enum value.
+     * @return const std::string& Reference on the static name of value.
+     * @throw std::runtime_error No name found for value.
+     */
     template <typename T>
     static const std::string& of(const T& value)
     {
@@ -149,6 +242,18 @@ struct GetEnumName
     }
 };
 
+/**
+ * @brief Shortcut to reflect an enum with all its available name-value pairs.
+ *
+ * Reflected enum can be used in JSON (schema, serialization) and GetEnumName.
+ *
+ * @code {.cpp}
+ * BRAYNS_ADAPTER_ENUM(MyEnum,
+ *      {"Value1": MyEnum::Value1},
+ *      {"Value2", MyEnum::Value2})
+ * @endcode
+ *
+ */
 #define BRAYNS_ADAPTER_ENUM(TYPE, ...)                               \
     template <>                                                      \
     inline std::vector<std::pair<std::string, TYPE>> enumMap<TYPE>() \
@@ -161,6 +266,10 @@ struct GetEnumName
     {                                                                \
     };
 
+/**
+ * @brief Reflect JsonType enum.
+ *
+ */
 BRAYNS_ADAPTER_ENUM(JsonType, {JsonTypeName::ofNull(), JsonType::Null},
                     {JsonTypeName::ofBoolean(), JsonType::Boolean},
                     {JsonTypeName::ofInteger(), JsonType::Integer},

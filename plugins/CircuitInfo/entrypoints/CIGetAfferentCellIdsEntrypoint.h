@@ -29,7 +29,7 @@
 
 #include <messages/CIGetAfferentCellIdsMessage.h>
 
-class AfferentCellRetreiver
+class AfferentCellRetriever
 {
 public:
     static std::vector<uint64_t> getAfferentCells(
@@ -77,7 +77,7 @@ public:
     {
         auto params = request.getParams();
         CIGetAfferentCellIdsResult result;
-        result.ids = AfferentCellRetreiver::getAfferentCells(params);
+        result.ids = AfferentCellRetriever::getAfferentCells(params);
         request.reply(result);
     }
 };

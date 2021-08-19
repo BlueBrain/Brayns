@@ -84,9 +84,17 @@ private:
     std::unordered_map<std::string, ModelUploadTaskPtr> _tasks;
 };
 
+/**
+ * @brief Binary requests manager to handle model upload from client.
+ *
+ */
 class BinaryRequestManager
 {
 public:
+    /**
+     * @brief Called on each update to remove finished tasks.
+     *
+     */
     void update()
     {
         for (auto i = _uploaders.begin(); i != _uploaders.end();)
@@ -102,11 +110,24 @@ public:
         }
     }
 
+    /**
+     * @brief Register a new running model upload task.
+     *
+     * @param handle Client handle.
+     * @param task Task to manage.
+     */
     void addTask(const ConnectionHandle& handle, ModelUploadTaskPtr task)
     {
         _uploaders[handle].addTask(std::move(task));
     }
 
+    /**
+     * @brief Indicate that the next binary request from the given client will
+     * be a chunk of the given model.
+     *
+     * @param handle Client handle.
+     * @param id Model chunks ID given at model upload request.
+     */
     void setNextChunkId(const ConnectionHandle& handle, const std::string& id)
     {
         auto i = _uploaders.find(handle);
@@ -118,6 +139,12 @@ public:
         uploader.setNextChunkId(id);
     }
 
+    /**
+     * @brief Add the binary blob to the correct running mode upload task.
+     *
+     * @param handle Client handle.
+     * @param packet Client binary message.
+     */
     void processBinaryRequest(const ConnectionHandle& handle,
                               const InputPacket& packet)
     {

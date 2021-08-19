@@ -26,11 +26,22 @@
 
 namespace brayns
 {
+/**
+ * @brief Template class used to extract an object from PluginAPI.
+ *
+ * Must have a static method T& extract(PluginAPI& api).
+ *
+ * @tparam T Object type to extract.
+ */
 template <typename T>
 struct ObjectExtractor
 {
 };
 
+/**
+ * @brief Available notification periods.
+ *
+ */
 struct NotificationPeriod
 {
     using Duration = RateLimiter::Duration;
@@ -40,6 +51,12 @@ struct NotificationPeriod
     static Duration slow() { return std::chrono::milliseconds(750); }
 };
 
+/**
+ * @brief Base class for entrypoints retrieving a Brayns object (camera,
+ * renderer, ...).
+ *
+ * @tparam ObjectType Object type to retrieve.
+ */
 template <typename ObjectType>
 class GetEntrypoint : public BaseEntrypoint
 {
@@ -84,6 +101,11 @@ private:
     RateLimiter _limiter = NotificationPeriod::defaultValue();
 };
 
+/**
+ * @brief Base class for entrypoints updating Brayns objects.
+ *
+ * @tparam ObjectType Object type to update.
+ */
 template <typename ObjectType>
 class SetEntrypoint : public BaseEntrypoint
 {

@@ -27,9 +27,20 @@
 
 namespace brayns
 {
+/**
+ * @brief Helper class to extract a material from a model with error handling.
+ *
+ */
 class ExtractMaterial
 {
 public:
+    /**
+     * @brief Extract a material from a model and its ID.
+     *
+     * @param descriptor Source model.
+     * @param id Material ID
+     * @return Material& Material instance.
+     */
     static Material& fromId(ModelDescriptor& descriptor, size_t id)
     {
         auto& model = descriptor.getModel();
@@ -37,6 +48,13 @@ public:
         return fromId(model, modelId, id);
     }
 
+    /**
+     * @brief Extract a material from a model and its ID.
+     *
+     * @param model Source model.
+     * @param id Material ID
+     * @return Material& Material instance.
+     */
     static Material& fromId(Model& model, size_t modelId, size_t id)
     {
         auto material = model.getMaterial(id);

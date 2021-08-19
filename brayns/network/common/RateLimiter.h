@@ -24,6 +24,10 @@
 
 namespace brayns
 {
+/**
+ * @brief Helper class to call a functor with a max rate.
+ *
+ */
 class RateLimiter
 {
 public:

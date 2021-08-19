@@ -54,7 +54,6 @@
 #include <brayns/network/entrypoints/SchemaEntrypoint.h>
 #include <brayns/network/entrypoints/SnapshotEntrypoint.h>
 #include <brayns/network/entrypoints/StatisticsEntrypoint.h>
-#include <brayns/network/entrypoints/TestEntrypoint.h>
 #include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
 #include <brayns/network/entrypoints/UpdateClipPlaneEntrypoint.h>
 #include <brayns/network/entrypoints/UpdateInstanceEntrypoint.h>
@@ -129,7 +128,6 @@ public:
         interface.add<RemoveLightsEntrypoint>();
         interface.add<ClearLightsEntrypoint>();
         interface.add<CancelEntrypoint>();
-        interface.add<TestEntrypoint>();
     }
 };
 } // namespace brayns

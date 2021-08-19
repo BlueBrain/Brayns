@@ -29,7 +29,7 @@
 
 #include <messages/CIGetEfferentCellIdsMessage.h>
 
-class EfferentCellRetreiver
+class EfferentCellRetriever
 {
 public:
     static std::vector<uint64_t> getEfferentCells(
@@ -77,7 +77,7 @@ public:
     {
         auto params = request.getParams();
         CIGetEfferentCellIdsResult result;
-        result.ids = EfferentCellRetreiver::getEfferentCells(params);
+        result.ids = EfferentCellRetriever::getEfferentCells(params);
         request.reply(result);
     }
 };

@@ -189,8 +189,7 @@ private:
  *
  * The resulting message will have the symbol declared in MESSAGE_BEGIN and can
  * be used in JSON serialization with no additional code. A static instance of
- * MessageInfo will be stored inside the resulting message type and can be
- * retreived with the static method getMessageInfo().
+ * MessageInfo will be stored inside the resulting message type.
  *
  * Example:
  * @code {.cpp}
@@ -285,10 +284,18 @@ private:
         return TYPE{};                                                   \
     }();
 
+/**
+ * @brief Message required entry with mandatory description.
+ *
+ */
 #define BRAYNS_MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION, ...)                \
     BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, brayns::Description(DESCRIPTION), \
                             brayns::Required(), __VA_ARGS__)
 
+/**
+ * @brief Message optional entry typed as optional<TYPE>.
+ *
+ */
 #define BRAYNS_MESSAGE_OPTION(TYPE, NAME, DESCRIPTION, ...) \
     BRAYNS_MESSAGE_PROPERTY(boost::optional<TYPE>, NAME,    \
                             brayns::Description(DESCRIPTION), __VA_ARGS__)

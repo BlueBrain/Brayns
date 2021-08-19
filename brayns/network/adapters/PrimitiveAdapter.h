@@ -85,9 +85,22 @@ struct PrimitiveAdapter
     }
 };
 
+/**
+ * @brief JSON adapter for floating point numbers.
+ *
+ * @tparam T Type (usually float or double).
+ */
 template <typename T>
 struct FloatAdapter : PrimitiveAdapter<T>
 {
+    /**
+     * @brief Override serialization to handle inf and nan.
+     *
+     * @param value Input value.
+     * @param json Ouput JSON.
+     * @return true Success.
+     * @return false Failure.
+     */
     static bool serialize(T value, JsonValue& json)
     {
         if (std::isinf(value))
@@ -105,61 +118,109 @@ struct FloatAdapter : PrimitiveAdapter<T>
     }
 };
 
+/**
+ * @brief Allow boolean JSON handling.
+ *
+ */
 template <>
 struct JsonAdapter<bool> : PrimitiveAdapter<bool>
 {
 };
 
+/**
+ * @brief Allow int8 JSON handling.
+ *
+ */
 template <>
 struct JsonAdapter<int8_t> : PrimitiveAdapter<int8_t>
 {
 };
 
+/**
+ * @brief Allow uint8 JSON handling.
+ *
+ */
 template <>
 struct JsonAdapter<uint8_t> : PrimitiveAdapter<uint8_t>
 {
 };
 
+/**
+ * @brief Allow int16 JSON handling.
+ *
+ */
 template <>
 struct JsonAdapter<int16_t> : PrimitiveAdapter<int16_t>
 {
 };
 
+/**
+ * @brief Allow uint16 JSON handling.
+ *
+ */
 template <>
 struct JsonAdapter<uint16_t> : PrimitiveAdapter<uint16_t>
 {
 };
 
+/**
+ * @brief Allow int32 JSON handling.
+ *
+ */
 template <>
 struct JsonAdapter<int32_t> : PrimitiveAdapter<int32_t>
 {
 };
 
+/**
+ * @brief Allow uint64 JSON handling.
+ *
+ */
 template <>
 struct JsonAdapter<uint32_t> : PrimitiveAdapter<uint32_t>
 {
 };
 
+/**
+ * @brief Allow int64 JSON handling.
+ *
+ */
 template <>
 struct JsonAdapter<int64_t> : PrimitiveAdapter<int64_t>
 {
 };
 
+/**
+ * @brief Allow uint64 JSON handling.
+ *
+ */
 template <>
 struct JsonAdapter<uint64_t> : PrimitiveAdapter<uint64_t>
 {
 };
 
+/**
+ * @brief Allow float JSON handling
+ *
+ */
 template <>
 struct JsonAdapter<float> : FloatAdapter<float>
 {
 };
 
+/**
+ * @brief Allow double JSON handling.
+ *
+ */
 template <>
 struct JsonAdapter<double> : FloatAdapter<double>
 {
 };
 
+/**
+ * @brief Allow string JSON handling.
+ *
+ */
 template <>
 struct JsonAdapter<std::string> : PrimitiveAdapter<std::string>
 {

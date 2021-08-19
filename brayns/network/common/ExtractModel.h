@@ -29,6 +29,10 @@
 
 namespace brayns
 {
+/**
+ * @brief Helper class to extract a model from a given source.
+ *
+ */
 class ExtractModel
 {
 public:

@@ -27,7 +27,7 @@
 
 #include <messages/CIGetCellIdsMessage.h>
 
-class CellIdsRetreiver
+class CellIdsRetriever
 {
 public:
     static CIGetCellIdsResult getCellIds(const CIGetCellIdsParams& params)
@@ -76,7 +76,7 @@ public:
     virtual void onRequest(const Request& request) override
     {
         auto params = request.getParams();
-        auto result = CellIdsRetreiver::getCellIds(params);
+        auto result = CellIdsRetriever::getCellIds(params);
         request.reply(result);
     }
 };

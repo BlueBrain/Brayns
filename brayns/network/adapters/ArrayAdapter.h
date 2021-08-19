@@ -31,7 +31,7 @@ namespace brayns
 /**
  * @brief Helper class to manipulate JSON for array-like types.
  *
- * Array like type can be constructed with a size_t and iterate using begin and
+ * Array like type can be constructed with a size_t and iterated using begin and
  * end.
  *
  * @tparam T The type of the array container.
@@ -114,22 +114,48 @@ struct ArrayAdapter
     }
 };
 
+/**
+ * @brief Specialization for boolean ref of std::vector<bool>.
+ *
+ */
 template <>
 struct JsonAdapter<std::vector<bool>::reference>
 {
     using Ref = std::vector<bool>::reference;
 
+    /**
+     * @brief Get schema as boolean.
+     *
+     * @param value Value to get the schema from.
+     * @return JsonSchema Schema of value.
+     */
     static JsonSchema getSchema(Ref value)
     {
         return Json::getSchema(bool(value));
     }
 
+    /**
+     * @brief Serialize value as boolean
+     *
+     * @param value Value to serialize.
+     * @param json Output JSON.
+     * @return true Success.
+     * @return false Failure.
+     */
     static bool serialize(Ref value, JsonValue& json)
     {
         json = bool(value);
         return true;
     }
 
+    /**
+     * @brief Deserialize JSON into value.
+     *
+     * @param json Input JSON.
+     * @param value Ouput value.
+     * @return true Success.
+     * @return false Failure.
+     */
     static bool deserialize(const JsonValue& json, Ref value)
     {
         if (!json.isBoolean())

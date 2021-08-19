@@ -27,7 +27,7 @@
 
 #include <messages/CIGetTargetsMessage.h>
 
-class TargetRetreiver
+class TargetRetriever
 {
 public:
     static std::vector<std::string> getTargets(const std::string& path)
@@ -75,7 +75,7 @@ public:
         auto params = request.getParams();
         auto& path = params.path;
         CIGetTargetsResult result;
-        result.targets = TargetRetreiver::getTargets(path);
+        result.targets = TargetRetriever::getTargets(path);
         request.reply(result);
     }
 };

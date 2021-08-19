@@ -349,19 +349,45 @@ private:
     }
 };
 
+/**
+ * @brief JSON handling of PropertyMap.
+ *
+ */
 template <>
 struct JsonAdapter<PropertyMap>
 {
+    /**
+     * @brief Convert a PropertyMap to a JSON schema.
+     *
+     * @param value Input value.
+     * @return JsonSchema JSON schema.
+     */
     static JsonSchema getSchema(const PropertyMap& value)
     {
         return PropertyMapSchema::create(value);
     }
 
+    /**
+     * @brief Serialize a PropertyMap to JSON.
+     *
+     * @param value Input value.
+     * @param json Output JSON.
+     * @return true Success
+     * @return false Failure.
+     */
     static bool serialize(const PropertyMap& value, JsonValue& json)
     {
         return PropertyMapSerializer::serialize(value, json);
     }
 
+    /**
+     * @brief Deserialize a PropertyMap from JSON.
+     *
+     * @param json Input JSON.
+     * @param value Output value.
+     * @return true Success.
+     * @return false Failure.
+     */
     static bool deserialize(const JsonValue& json, PropertyMap& value)
     {
         return PropertyMapDeserializer::deserialize(json, value);

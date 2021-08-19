@@ -27,7 +27,7 @@
 
 #include <messages/CIGetProjectionEfferentCellIdsMessage.h>
 
-class ProjectionEfferentCellRetreiver
+class ProjectionEfferentCellRetriever
 {
 public:
     static std::vector<uint64_t> getEfferentCells(
@@ -77,7 +77,7 @@ public:
     {
         auto params = request.getParams();
         CIGetProjectionEfferentCellIdsResult result;
-        result.ids = ProjectionEfferentCellRetreiver::getEfferentCells(params);
+        result.ids = ProjectionEfferentCellRetriever::getEfferentCells(params);
         request.reply(result);
     }
 };

@@ -27,7 +27,7 @@
 
 #include <messages/CIGetReportInfoMessage.h>
 
-class ReportInfoRetreiver
+class ReportInfoRetriever
 {
 public:
     static auto getReportInfo(const CIGetReportInfoParams& params)
@@ -82,7 +82,7 @@ public:
     virtual void onRequest(const Request& request) override
     {
         auto params = request.getParams();
-        auto result = ReportInfoRetreiver::getReportInfo(params);
+        auto result = ReportInfoRetriever::getReportInfo(params);
         request.reply(result);
     }
 };

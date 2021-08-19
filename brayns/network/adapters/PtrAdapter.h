@@ -85,14 +85,32 @@ struct PtrAdapter
     }
 };
 
+/**
+ * @brief Allow JSON handling for pointer types.
+ *
+ * @tparam T Referenced type.
+ */
 template <typename T>
 struct JsonAdapter<T*> : PtrAdapter<T*>
 {
 };
 
+/**
+ * @brief Allow JSON handling for std::unique_ptr
+ *
+ * @tparam T Referenced type.
+ */
 template <typename T>
 struct JsonAdapter<std::unique_ptr<T>> : PtrAdapter<std::unique_ptr<T>>
 {
+    /**
+     * @brief Deserialize using std::make_unique<T> and JsonAdapter<T>.
+     *
+     * @param json Input JSON.
+     * @param value Ouput value.
+     * @return true Success.
+     * @return false Failure.
+     */
     static bool deserialize(const JsonValue& json, std::unique_ptr<T>& value)
     {
         T buffer = {};
@@ -105,9 +123,22 @@ struct JsonAdapter<std::unique_ptr<T>> : PtrAdapter<std::unique_ptr<T>>
     }
 };
 
+/**
+ * @brief Allow JSON handling for std::shared_ptr
+ *
+ * @tparam T Referenced type.
+ */
 template <typename T>
 struct JsonAdapter<std::shared_ptr<T>> : PtrAdapter<std::shared_ptr<T>>
 {
+    /**
+     * @brief Deserialize using std::make_shared<T> and JsonAdapter<T>.
+     *
+     * @param json Input JSON.
+     * @param value Ouput value.
+     * @return true Success.
+     * @return false Failure.
+     */
     static bool deserialize(const JsonValue& json, std::shared_ptr<T>& value)
     {
         T buffer = {};
@@ -120,9 +151,24 @@ struct JsonAdapter<std::shared_ptr<T>> : PtrAdapter<std::shared_ptr<T>>
     }
 };
 
+/**
+ * @brief Allow JSON handling for boost::optional
+ *
+ * @tparam T Referenced type.
+ */
 template <typename T>
 struct JsonAdapter<boost::optional<T>> : PtrAdapter<boost::optional<T>>
 {
+    /**
+     * @brief Deserialize and fill an optional value of T using JsonAdapter<T>.
+     *
+     * The output value will be left unchanged if fails.
+     *
+     * @param json Input JSON.
+     * @param value Ouput value.
+     * @return true Success.
+     * @return false Failure.
+     */
     static bool deserialize(const JsonValue& json, boost::optional<T>& value)
     {
         T buffer = {};

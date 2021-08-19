@@ -178,11 +178,29 @@ private:
     }
 };
 
+/**
+ * @brief Adapt JsonSchema to be used as JSON objects.
+ *
+ */
 template <>
 struct JsonAdapter<JsonSchema>
 {
+    /**
+     * @brief Return the schema itself.
+     *
+     * @param schema Input schema.
+     * @return JsonSchema Output schema.
+     */
     static JsonSchema getSchema(const JsonSchema& schema) { return schema; }
 
+    /**
+     * @brief Serialize a JSON schema as a JSON object
+     *
+     * @param value Input value.
+     * @param json Ouput JSON.
+     * @return true Success.
+     * @return false Failure.
+     */
     static bool serialize(const JsonSchema& value, JsonValue& json)
     {
         auto object = Poco::makeShared<JsonObject>();
@@ -191,6 +209,14 @@ struct JsonAdapter<JsonSchema>
         return true;
     }
 
+    /**
+     * @brief Deserialize a JSON schema from a JSON object.
+     *
+     * @param json Input JSON.
+     * @param value Ouput value.
+     * @return true Success.
+     * @return false Failure.
+     */
     static bool deserialize(const JsonValue& json, JsonSchema& value)
     {
         auto object = JsonHelper::extractObject(json);

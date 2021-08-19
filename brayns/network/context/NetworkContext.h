@@ -37,6 +37,10 @@
 
 namespace brayns
 {
+/**
+ * @brief Holds the data common to all entrypoints.
+ *
+ */
 class NetworkContext
 {
 public:

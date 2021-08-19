@@ -27,7 +27,7 @@
 
 #include <messages/CIGetCellDataMessage.h>
 
-class CellDataRetreiver
+class CellDataRetriever
 {
 public:
     static CIGetCellDataResult getCellData(const CIGetCellDataParams& params)
@@ -130,7 +130,7 @@ public:
     virtual void onRequest(const Request& request) override
     {
         auto params = request.getParams();
-        auto result = CellDataRetreiver::getCellData(params);
+        auto result = CellDataRetriever::getCellData(params);
         request.reply(result);
     }
 };

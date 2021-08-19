@@ -30,7 +30,7 @@
 
 #include "CIGetCellIdsEntrypoint.h"
 
-class ModelCellIdsRetreiver
+class ModelCellIdsRetriever
 {
 public:
     static CIGetCellIdsResult getCellIds(brayns::ModelDescriptor& model)
@@ -61,7 +61,7 @@ public:
         }
 
         // Get GIDs from circuit
-        return CellIdsRetreiver::getCellIds(params);
+        return CellIdsRetriever::getCellIds(params);
     }
 };
 
@@ -84,7 +84,7 @@ public:
         auto params = request.getParams();
         auto modelId = params.model_id;
         auto& model = brayns::ExtractModel::fromId(getApi(), modelId);
-        auto result = ModelCellIdsRetreiver::getCellIds(model);
+        auto result = ModelCellIdsRetriever::getCellIds(model);
         request.reply(result);
     }
 };
