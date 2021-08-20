@@ -44,18 +44,17 @@ public:
         try
         {
             _receive();
+            return true;
         }
         catch (const ConnectionClosedException& e)
         {
             BRAYNS_DEBUG << "Connection closed: " << e.what() << '\n';
-            return false;
         }
         catch (const std::exception& e)
         {
             BRAYNS_DEBUG << "Unknown receive error: " << e.what() << '\n';
-            return false;
         }
-        return true;
+        return false;
     }
 
 private:
@@ -81,7 +80,8 @@ NetworkInterface::NetworkInterface(NetworkContext& context)
 
 void NetworkInterface::run(NetworkSocketPtr socket)
 {
-    MessageReceiver receiver(std::move(socket), _context->getConnections());
+    auto& connections = _context->getConnections();
+    MessageReceiver receiver(std::move(socket), connections);
     while (receiver.receive())
     {
     }

@@ -75,11 +75,10 @@ PluginManager::PluginManager(int argc, const char** argv)
 void PluginManager::initPlugins(PluginAPI* api)
 {
     auto& parameters = api->getParametersManager();
-    auto& appParameters = parameters.getApplicationParameters();
+    auto& networkParameters = parameters.getNetworkParameters();
+    auto& uri = networkParameters.getUri();
 
-    const bool haveHttpServerURI = !appParameters.getHttpServerURI().empty();
-
-    if (haveHttpServerURI)
+    if (!uri.empty())
     {
         _extensions.insert(_extensions.begin(),
                            std::make_unique<NetworkManager>());

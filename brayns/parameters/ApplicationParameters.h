@@ -24,6 +24,7 @@
 #include "AbstractParameters.h"
 
 #include <brayns/common/types.h>
+
 #include <string>
 #include <vector>
 
@@ -83,12 +84,6 @@ public:
     size_t getMaxRenderFPS() const { return _maxRenderFPS; }
     bool isStereo() const { return _stereo; }
     bool getParallelRendering() const { return _parallelRendering; }
-    const std::string& getHttpServerURI() const { return _httpServerURI; }
-    void setHttpServerURI(const std::string& httpServerURI)
-    {
-        _updateValue(_httpServerURI, httpServerURI);
-    }
-
     const std::string& getEnvMap() const { return _envMap; }
     const std::string& getSandboxPath() const { return _sandBoxPath; }
     const strings& getInputPaths() const { return _inputPaths; }
@@ -99,6 +94,7 @@ public:
     {
         _updateValue(_useQuantaRenderControl, value);
     }
+
 protected:
     void parse(const po::variables_map& vm) final;
 
@@ -110,7 +106,6 @@ protected:
     bool _stereo{false};
     size_t _imageStreamFPS{60};
     size_t _maxRenderFPS{std::numeric_limits<size_t>::max()};
-    std::string _httpServerURI;
     bool _parallelRendering{false};
     bool _dynamicLoadBalancer{false};
     bool _useVideoStreaming{false};
@@ -125,6 +120,6 @@ protected:
 
     SERIALIZATION_FRIEND(ApplicationParameters)
 };
-}
+} // namespace brayns
 
 #endif // APPLICATIONPARAMETERS_H

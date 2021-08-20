@@ -44,6 +44,7 @@ target_link_libraries(braynsNetwork PRIVATE
 target_link_libraries(braynsNetwork PUBLIC
   Poco::Foundation
   Poco::Net
+  Poco::NetSSL
   Poco::JSON
 )
 

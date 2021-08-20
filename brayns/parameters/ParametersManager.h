@@ -26,6 +26,7 @@
 #include <brayns/parameters/AnimationParameters.h>
 #include <brayns/parameters/ApplicationParameters.h>
 #include <brayns/parameters/GeometryParameters.h>
+#include <brayns/parameters/NetworkParameters.h>
 #include <brayns/parameters/RenderingParameters.h>
 #include <brayns/parameters/VolumeParameters.h>
 
@@ -94,6 +95,13 @@ public:
     BRAYNS_API VolumeParameters& getVolumeParameters();
     BRAYNS_API const VolumeParameters& getVolumeParameters() const;
 
+    /**
+       Gets volume parameters
+       @return Parameters for the current volume
+    */
+    BRAYNS_API NetworkParameters& getNetworkParameters();
+    BRAYNS_API const NetworkParameters& getNetworkParameters() const;
+
     /** Call resetModified on all parameters. */
     void resetModified();
 
@@ -116,6 +124,7 @@ private:
     GeometryParameters _geometryParameters;
     RenderingParameters _renderingParameters;
     VolumeParameters _volumeParameters;
+    NetworkParameters _networkParameters;
 };
-}
+} // namespace brayns
 #endif // PARAMETERSMANAGER_H
