@@ -20,6 +20,7 @@
 #include "NetworkManager.h"
 
 #include <brayns/network/context/NetworkContext.h>
+#include <brayns/network/interface/ClientInterface.h>
 #include <brayns/network/interface/ServerInterface.h>
 #include <brayns/network/stream/StreamManager.h>
 
@@ -167,6 +168,22 @@ private:
         manager.processRequest(handle, packet);
     }
 };
+
+class InterfaceFactory
+{
+public:
+    static ActionInterfacePtr createInterface(NetworkContext& context)
+    {
+        auto& api = context.getApi();
+        auto& manager = api.getParametersManager();
+        auto& parameters = manager.getNetworkParameters();
+        if (parameters.isClient())
+        {
+            return std::make_shared<ClientInterface>(context);
+        }
+        return std::make_shared<ServerInterface>(context);
+    }
+};
 } // namespace
 
 namespace brayns
@@ -185,7 +202,7 @@ NetworkManager::~NetworkManager()
 void NetworkManager::init()
 {
     _context = std::make_unique<NetworkContext>(*_api);
-    _interface = std::make_shared<ServerInterface>(*_context);
+    _interface = InterfaceFactory::createInterface(*_context);
     _api->setActionInterface(_interface);
     NetworkManagerEntrypoints::load(*_interface);
     ConnectionCallbacks::setup(*_context);
