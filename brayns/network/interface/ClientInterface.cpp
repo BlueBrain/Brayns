@@ -17,21 +17,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ServerInterface.h"
+#include "ClientInterface.h"
 
+#include <atomic>
+#include <future>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <thread>
 
 #include <Poco/Net/Context.h>
+#include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPRequestHandler.h>
 #include <Poco/Net/HTTPRequestHandlerFactory.h>
-#include <Poco/Net/HTTPServerRequest.h>
-#include <Poco/Net/HTTPServerResponse.h>
+#include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/InvalidCertificateHandler.h>
 #include <Poco/Net/PrivateKeyPassphraseHandler.h>
 #include <Poco/Net/SSLManager.h>
-#include <Poco/Net/SecureServerSocket.h>
+#include <Poco/Net/SecureStreamSocket.h>
 
 #include <brayns/common/log.h>
 
@@ -43,65 +48,11 @@ namespace
 {
 using namespace brayns;
 
-class RequestHandler : public Poco::Net::HTTPRequestHandler
-{
-public:
-    RequestHandler(NetworkInterface& interface)
-        : _interface(&interface)
-    {
-    }
-
-    virtual void handleRequest(Poco::Net::HTTPServerRequest& request,
-                               Poco::Net::HTTPServerResponse& response) override
-    {
-        try
-        {
-            auto socket = std::make_shared<NetworkSocket>(request, response);
-            _interface->run(std::move(socket));
-        }
-        catch (const Poco::Exception& e)
-        {
-            _error(e.displayText().c_str());
-        }
-        catch (const std::exception& e)
-        {
-            _error(e.what());
-        }
-    }
-
-private:
-    void _error(const char* message)
-    {
-        BRAYNS_ERROR << "Error in websocket server: " << message << '\n';
-    }
-
-    NetworkInterface* _interface;
-};
-
-class RequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
-{
-public:
-    RequestHandlerFactory(NetworkInterface& interface)
-        : _interface(&interface)
-    {
-    }
-
-    virtual Poco::Net::HTTPRequestHandler* createRequestHandler(
-        const Poco::Net::HTTPServerRequest& request) override
-    {
-        BRAYNS_DEBUG << "New connection from '" << request.getHost() << "'\n";
-        return new RequestHandler(*_interface);
-    }
-
-private:
-    NetworkInterface* _interface;
-};
-
 class PassphraseHandler : public Poco::Net::PrivateKeyPassphraseHandler
 {
 public:
     PassphraseHandler(const NetworkParameters& parameters)
-        : Poco::Net::PrivateKeyPassphraseHandler(true)
+        : Poco::Net::PrivateKeyPassphraseHandler(false)
         , _parameters(&parameters)
     {
     }
@@ -119,7 +70,7 @@ class CertificateHandler : public Poco::Net::InvalidCertificateHandler
 {
 public:
     CertificateHandler(const NetworkParameters& parameters)
-        : Poco::Net::InvalidCertificateHandler(true)
+        : Poco::Net::InvalidCertificateHandler(false)
         , _parameters(&parameters)
     {
     }
@@ -134,12 +85,12 @@ private:
     const NetworkParameters* _parameters;
 };
 
-class ServerSslContext
+class ClientSslContext
 {
 public:
     static Poco::Net::Context::Ptr create(const NetworkParameters& parameters)
     {
-        auto usage = Poco::Net::Context::TLS_SERVER_USE;
+        auto usage = Poco::Net::Context::TLS_CLIENT_USE;
         Poco::Net::Context::Params params;
         params.privateKeyFile = parameters.getPrivateKeyFile();
         params.certificateFile = parameters.getCertificateFile();
@@ -148,67 +99,114 @@ public:
     }
 };
 
-class ServerSslManager
+class ClientSslManager
 {
 public:
-    ServerSslManager(const NetworkParameters& parameters)
+    ClientSslManager(const NetworkParameters& parameters)
     {
         auto& manager = Poco::Net::SSLManager::instance();
         auto passphrase = Poco::makeShared<PassphraseHandler>(parameters);
         auto certificate = Poco::makeShared<CertificateHandler>(parameters);
-        auto context = ServerSslContext::create(parameters);
-        manager.initializeServer(passphrase, certificate, context);
+        auto context = ClientSslContext::create(parameters);
+        manager.initializeClient(passphrase, certificate, context);
     }
 };
 
-class ServerSocket
+class ClientSession
 {
 public:
-    static Poco::Net::ServerSocket create(const NetworkParameters& parameters)
+    static std::unique_ptr<Poco::Net::HTTPClientSession> create(
+        const NetworkParameters& parameters)
     {
         auto& uri = parameters.getUri();
         auto secure = parameters.isSecure();
         auto address = Poco::Net::SocketAddress(uri);
         if (secure)
         {
-            static const ServerSslManager sslManager(parameters);
-            return Poco::Net::SecureServerSocket(address);
+            static const ClientSslManager sslManager(parameters);
+            Poco::Net::SecureStreamSocket socket(address);
+            return std::make_unique<Poco::Net::HTTPSClientSession>(socket);
         }
-        return Poco::Net::ServerSocket(address);
+        return std::make_unique<Poco::Net::HTTPClientSession>(address);
     }
 };
 
-class ServerParams
+class ClientManager
 {
 public:
-    static Poco::Net::HTTPServerParams::Ptr load(
-        const NetworkParameters& parameters)
+    static void run(const NetworkParameters& parameters,
+                    NetworkInterface& interface)
     {
-        auto maxClients = parameters.getMaxClients();
-        auto settings = Poco::makeAuto<Poco::Net::HTTPServerParams>();
-        settings->setMaxThreads(maxClients);
-        settings->setMaxQueued(maxClients);
-        return settings;
-    }
-};
-
-class ServerFactory
-{
-public:
-    static std::unique_ptr<Poco::Net::HTTPServer> createServer(
-        const NetworkParameters& parameters, NetworkInterface& interface)
-    {
-        auto factory = Poco::makeShared<RequestHandlerFactory>(interface);
-        auto socket = ServerSocket::create(parameters);
-        auto params = ServerParams::load(parameters);
-        return std::make_unique<Poco::Net::HTTPServer>(factory, socket, params);
+        auto session = ClientSession::create(parameters);
+        Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_1_1);
+        Poco::Net::HTTPResponse response;
+        auto socket =
+            std::make_shared<NetworkSocket>(*session, request, response);
+        interface.run(std::move(socket));
     }
 };
 } // namespace
 
 namespace brayns
 {
-ServerInterface::ServerInterface(NetworkContext& context)
+class ClientTask
+{
+public:
+    ClientTask(const NetworkParameters& parameters, NetworkInterface& interface)
+        : _parameters(&parameters)
+        , _interface(&interface)
+    {
+        _handle = std::async(std::launch::async, [this] { _run(); });
+    }
+
+    ~ClientTask()
+    {
+        _running = false;
+        try
+        {
+            _handle.get();
+        }
+        catch (const std::exception& e)
+        {
+            _error(e.what());
+        }
+    }
+
+private:
+    void _run()
+    {
+        _running = true;
+        while (_running)
+        {
+            try
+            {
+                ClientManager::run(*_parameters, *_interface);
+            }
+            catch (const Poco::Exception& e)
+            {
+                _error(e.displayText().c_str());
+            }
+            catch (const std::exception& e)
+            {
+                _error(e.what());
+            }
+            auto reconnectionPeriod = _parameters->getReconnectionPeriod();
+            std::this_thread::sleep_for(reconnectionPeriod);
+        }
+    }
+
+    void _error(const char* message)
+    {
+        BRAYNS_ERROR << "Error in websocket client: " << message << ".\n";
+    }
+
+    const NetworkParameters* _parameters;
+    NetworkInterface* _interface;
+    std::atomic_bool _running{false};
+    std::future<void> _handle;
+};
+
+ClientInterface::ClientInterface(NetworkContext& context)
     : NetworkInterface(context)
 {
     auto& api = context.getApi();
@@ -216,12 +214,13 @@ ServerInterface::ServerInterface(NetworkContext& context)
     auto& parameters = manager.getNetworkParameters();
     try
     {
-        _server = ServerFactory::createServer(parameters, *this);
-        _server->start();
+        _task = std::make_unique<ClientTask>(parameters, *this);
     }
     catch (const Poco::Exception& e)
     {
-        throw std::runtime_error("Cannot start server: " + e.displayText());
+        throw std::runtime_error("Cannot start client: " + e.displayText());
     }
 }
+
+ClientInterface::~ClientInterface() {}
 } // namespace brayns

@@ -208,6 +208,21 @@ class NetworkSocket
 {
 public:
     /**
+     * @brief Construct a client side websocket from client session.
+     *
+     * @param session Client session.
+     * @param request Client request.
+     * @param response Server response.
+     */
+    NetworkSocket(Poco::Net::HTTPClientSession& session,
+                  Poco::Net::HTTPRequest& request,
+                  Poco::Net::HTTPResponse& response)
+        : _socket(session, request, response)
+    {
+        _setupSocket();
+    }
+
+    /**
      * @brief Construct a server side websocket from client HTTP request.
      *
      * @param request Client request.
@@ -278,7 +293,7 @@ public:
 private:
     void _setupSocket()
     {
-        _socket.setMaxPayloadSize(int(1e7));
+        _socket.setMaxPayloadSize(int(1e9));
         _socket.setSendTimeout(Poco::Timespan());
         _socket.setReceiveTimeout(Poco::Timespan());
     }

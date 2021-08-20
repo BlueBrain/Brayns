@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <string>
 
 #include "AbstractParameters.h"
@@ -51,6 +52,16 @@ public:
     const std::string& getUri() const { return _uri; }
 
     void setUri(const std::string& uri) { _updateValue(_uri, uri); }
+
+    std::chrono::milliseconds getReconnectionPeriod() const
+    {
+        return std::chrono::milliseconds(_reconnectionPeriod);
+    }
+
+    void setReconnectionPeriod(std::chrono::milliseconds reconnectionPeriod)
+    {
+        _updateValue(_reconnectionPeriod, reconnectionPeriod.count());
+    }
 
     const std::string& getPrivateKeyFile() const { return _privateKeyFile; }
 
@@ -88,6 +99,7 @@ private:
     bool _secure = false;
     size_t _maxClients = 2;
     std::string _uri;
+    int64_t _reconnectionPeriod = 300;
     std::string _privateKeyFile;
     std::string _privateKeyPassphrase;
     std::string _certificateFile;
