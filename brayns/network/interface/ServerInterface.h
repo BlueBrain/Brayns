@@ -46,6 +46,12 @@ public:
      */
     ServerInterface(NetworkContext& context);
 
+    /**
+     * @brief Start the server to accept incoming request.
+     *
+     */
+    virtual void start() override;
+
 private:
     std::unique_ptr<Poco::Net::HTTPServer> _server;
 };

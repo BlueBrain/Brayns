@@ -78,7 +78,7 @@ public:
     virtual void onInvalidCertificate(
         const void*, Poco::Net::VerificationErrorArgs& args) override
     {
-        BRAYNS_ERROR << "Invalid certificate: " << args.errorMessage() << '.\n';
+        BRAYNS_ERROR << "Invalid certificate: " << args.errorMessage() << ".\n";
     }
 
 private:
@@ -156,11 +156,26 @@ public:
         : _parameters(&parameters)
         , _interface(&interface)
     {
-        _handle = std::async(std::launch::async, [this] { _run(); });
+    }
+
+    void start()
+    {
+        try
+        {
+            _handle = std::async(std::launch::async, [this] { _run(); });
+        }
+        catch (const Poco::Exception& e)
+        {
+            throw std::runtime_error("Cannot start client: " + e.displayText());
+        }
     }
 
     ~ClientTask()
     {
+        if (!_handle.valid() || !_running)
+        {
+            return;
+        }
         _running = false;
         try
         {
@@ -212,15 +227,13 @@ ClientInterface::ClientInterface(NetworkContext& context)
     auto& api = context.getApi();
     auto& manager = api.getParametersManager();
     auto& parameters = manager.getNetworkParameters();
-    try
-    {
-        _task = std::make_unique<ClientTask>(parameters, *this);
-    }
-    catch (const Poco::Exception& e)
-    {
-        throw std::runtime_error("Cannot start client: " + e.displayText());
-    }
+    _task = std::make_unique<ClientTask>(parameters, *this);
 }
 
 ClientInterface::~ClientInterface() {}
+
+void ClientInterface::start()
+{
+    _task->start();
+}
 } // namespace brayns

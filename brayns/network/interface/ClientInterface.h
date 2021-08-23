@@ -56,6 +56,12 @@ public:
      */
     virtual ~ClientInterface();
 
+    /**
+     * @brief Send the connection request to the settings server URI.
+     *
+     */
+    virtual void start() override;
+
 private:
     std::unique_ptr<ClientTask> _task;
 };

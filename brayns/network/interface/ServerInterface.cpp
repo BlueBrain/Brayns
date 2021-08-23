@@ -72,7 +72,7 @@ public:
 private:
     void _error(const char* message)
     {
-        BRAYNS_ERROR << "Error in websocket server: " << message << '\n';
+        BRAYNS_ERROR << "Error in websocket server: " << message << ".\n";
     }
 
     NetworkInterface* _interface;
@@ -89,7 +89,7 @@ public:
     virtual Poco::Net::HTTPRequestHandler* createRequestHandler(
         const Poco::Net::HTTPServerRequest& request) override
     {
-        BRAYNS_DEBUG << "New connection from '" << request.getHost() << "'\n";
+        BRAYNS_DEBUG << "New connection from '" << request.getHost() << "'.\n";
         return new RequestHandler(*_interface);
     }
 
@@ -127,7 +127,7 @@ public:
     virtual void onInvalidCertificate(
         const void*, Poco::Net::VerificationErrorArgs& args) override
     {
-        BRAYNS_ERROR << "Invalid certificate: " << args.errorMessage() << '.\n';
+        BRAYNS_ERROR << "Invalid certificate: " << args.errorMessage() << ".\n";
     }
 
 private:
@@ -217,6 +217,17 @@ ServerInterface::ServerInterface(NetworkContext& context)
     try
     {
         _server = ServerFactory::createServer(parameters, *this);
+    }
+    catch (const Poco::Exception& e)
+    {
+        throw std::runtime_error("Cannot create server: " + e.displayText());
+    }
+}
+
+void ServerInterface::start()
+{
+    try
+    {
         _server->start();
     }
     catch (const Poco::Exception& e)

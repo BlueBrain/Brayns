@@ -44,7 +44,7 @@ public:
      *
      * @param entrypoint Pointer to an IEntrypoint implementation.
      */
-    virtual void addEntrypoint(EntrypointRef entrypoint) {}
+    virtual void addEntrypoint(EntrypointRef entrypoint) = 0;
 
     /**
      * @brief Called once all plugins are initialized.
@@ -53,7 +53,15 @@ public:
      * loaded.
      *
      */
-    virtual void setupEntrypoints() {}
+    virtual void setupEntrypoints() = 0;
+
+    /**
+     * @brief Activate the network interface.
+     *
+     * Called once all entrypoints are setup.
+     *
+     */
+    virtual void start() = 0;
 
     /**
      * @brief Shortcut to add an entrypoint from its type.

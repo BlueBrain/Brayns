@@ -53,6 +53,8 @@
 #include <brayns/io/VolumeLoader.h>
 #include <brayns/io/XYZBLoader.h>
 
+#include <brayns/network/interface/ActionInterface.h>
+
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <thread>
@@ -114,6 +116,11 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->getScene().commit(); // Needed to obtain a bounding box
         _cameraManipulator->adjust(_engine->getScene().getBounds());
+
+        if (_actionInterface)
+        {
+            _actionInterface->start();
+        }
     }
 
     ~Impl()
@@ -294,9 +301,9 @@ private:
             engineName = "braynsOptixEngine";
         else if (string_utils::toLowercase(engineName) == "ospray")
             engineName = "braynsOSPRayEngine";
-        else if(string_utils::toLowercase(engineName) == "pbrt")
+        else if (string_utils::toLowercase(engineName) == "pbrt")
             engineName = "braynsPBRTEngine";
-        else if(string_utils::toLowercase(engineName) == "pbrtv2")
+        else if (string_utils::toLowercase(engineName) == "pbrtv2")
             engineName = "braynsPBRTV2Engine";
 
         _engine = _engineFactory.create(engineName);
@@ -389,7 +396,8 @@ private:
 
                 BRAYNS_INFO << "Loading '" << path << "'" << std::endl;
 
-                auto progress = [&](const std::string& msg, float t) {
+                auto progress = [&](const std::string& msg, float t)
+                {
                     constexpr auto MIN_SECS = 5;
                     constexpr auto MIN_PERCENTAGE = 10;
 
@@ -490,13 +498,13 @@ private:
             'e', "Enable eletron shading",
             std::bind(&Brayns::Impl::_electronShading, this));
         _keyboardHandler.registerKeyboardShortcut(
-            'f', "Enable fly mode", [this]() {
-                Brayns::Impl::_setupCameraManipulator(CameraMode::flying);
-            });
+            'f', "Enable fly mode",
+            [this]()
+            { Brayns::Impl::_setupCameraManipulator(CameraMode::flying); });
         _keyboardHandler.registerKeyboardShortcut(
-            'i', "Enable inspect mode", [this]() {
-                Brayns::Impl::_setupCameraManipulator(CameraMode::inspect);
-            });
+            'i', "Enable inspect mode",
+            [this]()
+            { Brayns::Impl::_setupCameraManipulator(CameraMode::inspect); });
         _keyboardHandler.registerKeyboardShortcut(
             'o', "Decrease ambient occlusion strength",
             std::bind(&Brayns::Impl::_decreaseAmbientOcclusionStrength, this));
@@ -555,7 +563,9 @@ private:
             'c', "Display current camera information",
             std::bind(&Brayns::Impl::_displayCameraInformation, this));
         _keyboardHandler.registerKeyboardShortcut(
-            'b', "Toggle benchmarking", [this]() {
+            'b', "Toggle benchmarking",
+            [this]()
+            {
                 auto& ap = _parametersManager.getApplicationParameters();
                 ap.setBenchmarking(!ap.isBenchmarking());
             });
