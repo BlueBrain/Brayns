@@ -43,6 +43,7 @@
 #include <brayns/network/entrypoints/ModelPropertiesEntrypoint.h>
 #include <brayns/network/entrypoints/ModelTransferFunctionEntrypoint.h>
 #include <brayns/network/entrypoints/QuitEntrypoint.h>
+#include <brayns/network/entrypoints/RegistryEntrypoint.h>
 #include <brayns/network/entrypoints/RemoveClipPlanesEntrypoint.h>
 #include <brayns/network/entrypoints/RemoveLightsEntrypoint.h>
 #include <brayns/network/entrypoints/RemoveModelEntrypoint.h>
@@ -128,6 +129,7 @@ public:
         interface.add<RemoveLightsEntrypoint>();
         interface.add<ClearLightsEntrypoint>();
         interface.add<CancelEntrypoint>();
+        interface.add<RegistryEntrypoint>();
     }
 };
 } // namespace brayns

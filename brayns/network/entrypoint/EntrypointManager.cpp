@@ -110,7 +110,7 @@ const EntrypointRef* EntrypointManager::find(const std::string& name) const
 
 void EntrypointManager::add(EntrypointRef entrypoint)
 {
-    auto name = entrypoint.getName();
+    auto name = entrypoint.loadName();
     if (name.empty())
     {
         throw EntrypointException("Entrypoints must have a name");

@@ -81,6 +81,29 @@ public:
      */
     void processRequest(const NetworkRequest& request) const;
 
+    /**
+     * @brief Return the number of registered entrypoints.
+     *
+     * @return size_t Number of existing entrypoints.
+     */
+    size_t size() const { return _entrypoints.size(); }
+
+    /**
+     * @brief Iterate over all registered entrypoints.
+     *
+     * @tparam FunctorType Functor type like void(const EntrypointRef&).
+     * @param functor Functor instance.
+     */
+    template <typename FunctorType>
+    void forEach(FunctorType functor) const
+    {
+        for (const auto& pair : _entrypoints)
+        {
+            auto& entrypoint = pair.second;
+            functor(entrypoint);
+        }
+    }
+
 private:
     NetworkContext* _context;
     EntrypointMap _entrypoints;
