@@ -124,8 +124,10 @@ public:
         if (secure)
         {
             static const ClientSslManager sslManager(parameters);
-            Poco::Net::SecureStreamSocket socket(address);
-            return std::make_unique<Poco::Net::HTTPSClientSession>(socket);
+            auto host = address.host();
+            auto ip = host.toString();
+            auto port = address.port();
+            return std::make_unique<Poco::Net::HTTPSClientSession>(ip, port);
         }
         return std::make_unique<Poco::Net::HTTPClientSession>(address);
     }
