@@ -139,13 +139,14 @@ public:
      * @param code Error code.
      * @param message Error description.
      */
-    void error(int code, const std::string& message) const
+    void error(int code, const std::string& message,
+               const JsonValue& data = {}) const
     {
         if (!shouldBeReplied())
         {
             return;
         }
-        _error(code, message);
+        _error(code, message, data);
     }
 
     /**
@@ -233,12 +234,15 @@ public:
 private:
     void _setupInvalidMessage() { _message.jsonrpc = "2.0"; }
 
-    void _error(int code, const std::string& message) const
+    void _error(int code, const std::string& message,
+                const JsonValue& data) const
     {
-        auto error = MessageFactory::createError(_message);
-        error.error.code = code;
-        error.error.message = message;
-        _send(error);
+        auto reply = MessageFactory::createError(_message);
+        auto& error = reply.error;
+        error.code = code;
+        error.message = message;
+        error.data = data;
+        _send(reply);
     }
 
     void _error(std::exception_ptr e) const
@@ -253,7 +257,7 @@ private:
         }
         catch (const EntrypointException& e)
         {
-            _error(e.getCode(), e.what());
+            _error(e.getCode(), e.what(), e.getData());
         }
         catch (const ConnectionClosedException& e)
         {
@@ -262,12 +266,12 @@ private:
         }
         catch (const std::exception& e)
         {
-            _error(0, e.what());
+            _error(0, e.what(), {});
         }
         catch (...)
         {
             BRAYNS_ERROR << "Unknown error in request processing.\n";
-            _error(0, "Unknown error");
+            _error(0, "Unknown error", {});
         }
     }
 

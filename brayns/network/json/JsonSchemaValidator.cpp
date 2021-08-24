@@ -81,13 +81,13 @@ public:
     void addInvalidOneOf()
     {
         std::ostringstream stream;
-        stream << "No schema in oneOf match the input";
+        stream << "Cannot find a schema in oneOf";
         auto path = _path.toString();
         if (!path.empty())
         {
             stream << " at '" << path << "'";
         }
-        stream << ".";
+        stream << " that match the given input.";
         addError(stream.str());
     }
 

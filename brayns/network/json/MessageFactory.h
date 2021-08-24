@@ -64,6 +64,7 @@ BRAYNS_MESSAGE_END()
 BRAYNS_MESSAGE_BEGIN(ErrorDescriptionMessage)
 BRAYNS_MESSAGE_ENTRY(int, code, "Error code")
 BRAYNS_MESSAGE_ENTRY(std::string, message, "Error description")
+BRAYNS_MESSAGE_ENTRY(JsonValue, data, "Additional error info")
 BRAYNS_MESSAGE_END()
 
 /**
@@ -74,7 +75,7 @@ BRAYNS_MESSAGE_BEGIN(ErrorMessage)
 BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
 BRAYNS_MESSAGE_ENTRY(RequestId, id, "Message ID")
 BRAYNS_MESSAGE_ENTRY(std::string, method, "Entrypoint name")
-BRAYNS_MESSAGE_ENTRY(ErrorDescriptionMessage, error, "Error description")
+BRAYNS_MESSAGE_ENTRY(ErrorDescriptionMessage, error, "Error object")
 BRAYNS_MESSAGE_END()
 
 /**

@@ -49,15 +49,7 @@ public:
 
     bool isEmpty() const { return _errors.empty(); }
 
-    std::string toString() const
-    {
-        return "JSON schema errors:\n\t" + join("\n\t");
-    }
-
-    std::string join(const std::string& separator) const
-    {
-        return string_utils::join(_errors, separator);
-    }
+    const std::vector<std::string>& asStringList() const { return _errors; }
 
 private:
     std::vector<std::string> _errors;

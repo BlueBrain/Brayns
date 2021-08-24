@@ -63,8 +63,8 @@ private:
         auto errors = JsonSchemaValidator::validate(json, schema);
         if (!errors.isEmpty())
         {
-            throw EntrypointException("Invalid JSON-RPC request: " +
-                                      errors.toString());
+            throw EntrypointException(0, "Invalid JSON-RPC request",
+                                      errors.asStringList());
         }
     }
 
