@@ -23,6 +23,7 @@
 #include <string>
 
 #include "Message.h"
+#include "RequestId.h"
 
 namespace brayns
 {
@@ -32,7 +33,7 @@ namespace brayns
  */
 BRAYNS_MESSAGE_BEGIN(RequestMessage)
 BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
-BRAYNS_MESSAGE_ENTRY(std::string, id, "Message ID", Required(false))
+BRAYNS_MESSAGE_ENTRY(RequestId, id, "Message ID", Required(false))
 BRAYNS_MESSAGE_ENTRY(std::string, method, "Entrypoint name")
 BRAYNS_MESSAGE_ENTRY(JsonValue, params, "Request content")
 BRAYNS_MESSAGE_END()
@@ -42,7 +43,7 @@ BRAYNS_MESSAGE_END()
  *
  */
 BRAYNS_MESSAGE_BEGIN(CancelParams)
-BRAYNS_MESSAGE_ENTRY(std::string, id, "ID of the request to cancel")
+BRAYNS_MESSAGE_ENTRY(RequestId, id, "ID of the request to cancel")
 BRAYNS_MESSAGE_END()
 
 /**
@@ -51,7 +52,7 @@ BRAYNS_MESSAGE_END()
  */
 BRAYNS_MESSAGE_BEGIN(ReplyMessage)
 BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
-BRAYNS_MESSAGE_ENTRY(std::string, id, "Message ID")
+BRAYNS_MESSAGE_ENTRY(RequestId, id, "Message ID")
 BRAYNS_MESSAGE_ENTRY(std::string, method, "Entrypoint name")
 BRAYNS_MESSAGE_ENTRY(JsonValue, result, "Reply content")
 BRAYNS_MESSAGE_END()
@@ -71,7 +72,7 @@ BRAYNS_MESSAGE_END()
  */
 BRAYNS_MESSAGE_BEGIN(ErrorMessage)
 BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
-BRAYNS_MESSAGE_ENTRY(std::string, id, "Message ID")
+BRAYNS_MESSAGE_ENTRY(RequestId, id, "Message ID")
 BRAYNS_MESSAGE_ENTRY(std::string, method, "Entrypoint name")
 BRAYNS_MESSAGE_ENTRY(ErrorDescriptionMessage, error, "Error description")
 BRAYNS_MESSAGE_END()
@@ -81,7 +82,7 @@ BRAYNS_MESSAGE_END()
  *
  */
 BRAYNS_MESSAGE_BEGIN(ProgressInfoMessage)
-BRAYNS_MESSAGE_ENTRY(std::string, id, "Request ID")
+BRAYNS_MESSAGE_ENTRY(RequestId, id, "Request ID")
 BRAYNS_MESSAGE_ENTRY(std::string, operation, "Operation description")
 BRAYNS_MESSAGE_ENTRY(double, amount, "Progress percentage [0-1]")
 BRAYNS_MESSAGE_END()

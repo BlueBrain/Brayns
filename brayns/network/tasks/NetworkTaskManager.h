@@ -26,7 +26,7 @@ namespace brayns
 class NetworkTaskManager
 {
 public:
-    void addOrReplace(const ConnectionHandle& handle, const std::string& id,
+    void addOrReplace(const ConnectionHandle& handle, const RequestId& id,
                       NetworkTaskPtr task)
     {
         auto oldTask = _tasks.find(handle, id);
@@ -37,7 +37,7 @@ public:
         _tasks.add(handle, id, std::move(task));
     }
 
-    bool addIfNotPresent(const ConnectionHandle& handle, const std::string& id,
+    bool addIfNotPresent(const ConnectionHandle& handle, const RequestId& id,
                          NetworkTaskPtr task)
     {
         auto oldTask = _tasks.find(handle, id);
@@ -54,7 +54,7 @@ public:
         _tasks.forEach(handle, [&](auto&, auto& task) { task.onDisconnect(); });
     }
 
-    bool cancel(const ConnectionHandle& handle, const std::string& id) const
+    bool cancel(const ConnectionHandle& handle, const RequestId& id) const
     {
         auto task = _tasks.find(handle, id);
         if (!task)

@@ -72,6 +72,7 @@ using StringHash = std::unordered_map<std::string, T>;
  */
 enum class JsonType
 {
+    Unknown,
     Null,
     Boolean,
     Integer,
@@ -94,7 +95,10 @@ struct JsonTypeHelper
         return type == JsonType::Integer || type == JsonType::Number;
     }
 
-    static bool isPrimitive(JsonType type) { return type <= JsonType::String; }
+    static bool isPrimitive(JsonType type)
+    {
+        return type != JsonType::Unknown && type <= JsonType::String;
+    }
 
     static bool isPrimitive(const JsonValue& json)
     {
@@ -158,6 +162,10 @@ struct GetJsonType
 {
     static JsonType fromName(const std::string& name)
     {
+        if (name == JsonTypeName::ofNull())
+        {
+            return JsonType::Null;
+        }
         if (name == JsonTypeName::ofBoolean())
         {
             return JsonType::Boolean;
@@ -182,11 +190,15 @@ struct GetJsonType
         {
             return JsonType::Object;
         }
-        return JsonType::Null;
+        return JsonType::Unknown;
     }
 
     static JsonType fromJson(const JsonValue& json)
     {
+        if (json.isEmpty())
+        {
+            return JsonType::Null;
+        }
         if (json.isBoolean())
         {
             return JsonType::Boolean;
@@ -211,12 +223,16 @@ struct GetJsonType
         {
             return JsonType::Object;
         }
-        return JsonType::Null;
+        return JsonType::Unknown;
     }
 
     template <typename T>
     static constexpr JsonType fromPrimitive()
     {
+        if (std::is_same<T, nullptr_t>())
+        {
+            return JsonType::Null;
+        }
         if (std::is_same<T, bool>())
         {
             return JsonType::Boolean;
@@ -233,7 +249,7 @@ struct GetJsonType
         {
             return JsonType::String;
         }
-        return JsonType::Null;
+        return JsonType::Unknown;
     }
 };
 
@@ -243,6 +259,8 @@ struct GetJsonTypeName
     {
         switch (type)
         {
+        case JsonType::Null:
+            return JsonTypeName::ofNull();
         case JsonType::Boolean:
             return JsonTypeName::ofBoolean();
         case JsonType::Integer:
@@ -256,7 +274,8 @@ struct GetJsonTypeName
         case JsonType::Object:
             return JsonTypeName::ofObject();
         }
-        return JsonTypeName::ofNull();
+        static const std::string empty;
+        return empty;
     }
 };
 } // namespace brayns

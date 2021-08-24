@@ -22,6 +22,7 @@
 #include <brayns/network/context/NetworkContext.h>
 #include <brayns/network/interface/ClientInterface.h>
 #include <brayns/network/interface/ServerInterface.h>
+#include <brayns/network/json/JsonSchemaValidator.h>
 #include <brayns/network/stream/StreamManager.h>
 
 #include "NetworkManagerEntrypoints.h"
@@ -29,32 +30,41 @@
 namespace
 {
 using namespace brayns;
+
 class MessageBuilder
 {
 public:
-    static RequestMessage build(const InputPacket& packet)
+    static RequestMessage build(const std::string& data)
     {
-        auto message = _parse(packet);
+        auto json = _parse(data);
+        _validateSchema(json);
+        auto message = Json::deserialize<RequestMessage>(json);
         _validateHeader(message);
         return message;
     }
 
 private:
-    static RequestMessage _parse(const InputPacket& packet)
+    static JsonValue _parse(const std::string& data)
     {
-        if (!packet.isText())
-        {
-            throw EntrypointException("Text frame expected");
-        }
-        auto& json = packet.getData();
         try
         {
-            return Json::parse<RequestMessage>(json);
+            return Json::parse(data);
         }
         catch (const Poco::JSON::JSONException& e)
         {
             throw EntrypointException("Failed to parse JSON request: " +
                                       e.displayText());
+        }
+    }
+
+    static void _validateSchema(const JsonValue& json)
+    {
+        static const JsonSchema schema = Json::getSchema<RequestMessage>();
+        auto errors = JsonSchemaValidator::validate(json, schema);
+        if (!errors.isEmpty())
+        {
+            throw EntrypointException("Invalid JSON-RPC request: " +
+                                      errors.toString());
         }
     }
 
@@ -64,6 +74,11 @@ private:
         {
             throw EntrypointException("Unsupported JSON-RPC version: '" +
                                       message.jsonrpc + "'");
+        }
+        auto& method = message.method;
+        if (method.empty())
+        {
+            throw EntrypointException("No method provided in request");
         }
     }
 };
@@ -110,7 +125,7 @@ private:
         }
         catch (...)
         {
-            request.error(std::current_exception());
+            request.invalidRequest(std::current_exception());
         }
     }
 
@@ -122,7 +137,8 @@ private:
 
     void _dispatch(NetworkRequest& request, const InputPacket& packet)
     {
-        auto message = MessageBuilder::build(packet);
+        auto& data = packet.getData();
+        auto message = MessageBuilder::build(data);
         request.setMessage(std::move(message));
         auto& entrypoints = _context->getEntrypoints();
         entrypoints.processRequest(request);

@@ -44,7 +44,7 @@ public:
      * @brief Construct an invalid request.
      *
      */
-    NetworkRequest() = default;
+    NetworkRequest() { _setupInvalidMessage(); }
 
     /**
      * @brief Construct a request from a connection handle and the connection
@@ -56,6 +56,7 @@ public:
     NetworkRequest(ConnectionHandle handle, ConnectionManager& connections)
         : _connection(std::move(handle), connections)
     {
+        _setupInvalidMessage();
     }
 
     /**
@@ -78,9 +79,9 @@ public:
     /**
      * @brief Get the ID of the request from the message.
      *
-     * @return const std::string& Request ID.
+     * @return const RequestId& Request ID.
      */
-    const std::string& getId() const { return _message.id; }
+    const RequestId& getId() const { return _message.id; }
 
     /**
      * @brief Check if the request expects a reply.
@@ -88,7 +89,7 @@ public:
      * @return true A reply must be send (even with no result).
      * @return false No reply can be sent.
      */
-    bool shouldBeReplied() const { return !getId().empty(); }
+    bool shouldBeReplied() const { return !getId().isEmpty(); }
 
     /**
      * @brief Get the method of the request (entrypoint name) from the message.
@@ -144,10 +145,7 @@ public:
         {
             return;
         }
-        auto error = MessageFactory::createError(_message);
-        error.error.code = code;
-        error.error.message = message;
-        _send(error);
+        _error(code, message);
     }
 
     /**
@@ -164,33 +162,19 @@ public:
      */
     void error(std::exception_ptr e) const
     {
-        if (!shouldBeReplied() || !e)
+        if (!shouldBeReplied())
         {
             return;
         }
-        try
-        {
-            std::rethrow_exception(e);
-        }
-        catch (const EntrypointException& e)
-        {
-            error(e.getCode(), e.what());
-        }
-        catch (const ConnectionClosedException& e)
-        {
-            BRAYNS_INFO << "Connection closed during request processing: "
-                        << e.what() << '\n';
-        }
-        catch (const std::exception& e)
-        {
-            error(e.what());
-        }
-        catch (...)
-        {
-            BRAYNS_ERROR << "Unknown error in request processing.\n";
-            error("Unknown error");
-        }
+        _error(e);
     }
+
+    /**
+     * @brief Report an error even if ID is null.
+     *
+     * @param e Opaque exception pointer.
+     */
+    void invalidRequest(std::exception_ptr e) const { _error(e); }
 
     /**
      * @brief Send a progress message to all clients.
@@ -247,6 +231,46 @@ public:
     }
 
 private:
+    void _setupInvalidMessage() { _message.jsonrpc = "2.0"; }
+
+    void _error(int code, const std::string& message) const
+    {
+        auto error = MessageFactory::createError(_message);
+        error.error.code = code;
+        error.error.message = message;
+        _send(error);
+    }
+
+    void _error(std::exception_ptr e) const
+    {
+        if (!e)
+        {
+            return;
+        }
+        try
+        {
+            std::rethrow_exception(e);
+        }
+        catch (const EntrypointException& e)
+        {
+            _error(e.getCode(), e.what());
+        }
+        catch (const ConnectionClosedException& e)
+        {
+            BRAYNS_INFO << "Connection closed during request processing: "
+                        << e.what() << ".\n";
+        }
+        catch (const std::exception& e)
+        {
+            _error(0, e.what());
+        }
+        catch (...)
+        {
+            BRAYNS_ERROR << "Unknown error in request processing.\n";
+            _error(0, "Unknown error");
+        }
+    }
+
     template <typename MessageType>
     void _send(const MessageType& message) const
     {

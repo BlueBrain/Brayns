@@ -42,8 +42,8 @@ public:
         auto& tasks = getTasks();
         if (!tasks.cancel(handle, id))
         {
-            throw EntrypointException("No task with ID '" + id +
-                                      "' is running for this client");
+            throw EntrypointException("No task with ID " + id.getDisplayText() +
+                                      " is running for this client");
         }
         request.reply(EmptyMessage());
     }

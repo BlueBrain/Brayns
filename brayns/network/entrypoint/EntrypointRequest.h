@@ -46,7 +46,7 @@ public:
         return _request.getConnectionHandle();
     }
 
-    const std::string& getId() const { return _request.getId(); }
+    const RequestId& getId() const { return _request.getId(); }
 
     const std::string& getMethod() const { return _request.getMethod(); }
 

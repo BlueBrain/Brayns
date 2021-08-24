@@ -34,7 +34,6 @@ public:
     static void serialize(const JsonSchema& schema, JsonObject& object)
     {
         setIfNotEmpty(object, "oneOf", schema.oneOf);
-        setIfNotEmpty(object, "name", schema.name);
         setIfNotEmpty(object, "title", schema.title);
         setIfNotEmpty(object, "description", schema.description);
         setType(object, "type", schema.type);
@@ -56,7 +55,7 @@ private:
     static void setType(JsonObject& object, const std::string& key,
                         JsonType type)
     {
-        if (type == JsonType::Null)
+        if (type == JsonType::Unknown)
         {
             return;
         }
@@ -151,7 +150,6 @@ public:
     static void deserialize(const JsonObject& object, JsonSchema& schema)
     {
         get(object, "oneOf", schema.oneOf);
-        get(object, "name", schema.name);
         get(object, "title", schema.title);
         get(object, "description", schema.description);
         get(object, "readOnly", schema.readOnly);

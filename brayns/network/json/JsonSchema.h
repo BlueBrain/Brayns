@@ -39,10 +39,9 @@ namespace brayns
 struct JsonSchema
 {
     std::vector<JsonSchema> oneOf;
-    std::string name;
     std::string title;
     std::string description;
-    JsonType type = JsonType::Null;
+    JsonType type = JsonType::Unknown;
     bool readOnly = false;
     bool writeOnly = false;
     JsonValue defaultValue;
@@ -65,7 +64,7 @@ struct JsonSchemaHelper
 {
     static bool isEmpty(const JsonSchema& schema)
     {
-        return schema.type == JsonType::Null && schema.oneOf.empty();
+        return schema.type == JsonType::Unknown && schema.oneOf.empty();
     }
 
     static bool isOneOf(const JsonSchema& schema)
@@ -127,6 +126,13 @@ struct JsonSchemaHelper
             auto& name = pair.first;
             required.push_back(name);
         }
+    }
+
+    static JsonSchema getNullSchema()
+    {
+        JsonSchema schema;
+        schema.type = JsonType::Null;
+        return schema;
     }
 };
 } // namespace brayns

@@ -23,13 +23,14 @@
 #include <string>
 #include <unordered_map>
 
+#include <brayns/network/json/RequestId.h>
 #include <brayns/network/socket/ConnectionHandle.h>
 
 #include "NetworkTask.h"
 
 namespace brayns
 {
-using NetworkTaskIdMap = std::unordered_map<std::string, NetworkTaskPtr>;
+using NetworkTaskIdMap = std::unordered_map<RequestId, NetworkTaskPtr>;
 
 using NetworkTaskConnectionMap =
     std::unordered_map<ConnectionHandle, NetworkTaskIdMap>;
@@ -37,15 +38,14 @@ using NetworkTaskConnectionMap =
 class NetworkTaskMap
 {
 public:
-    void add(const ConnectionHandle& handle, const std::string& id,
+    void add(const ConnectionHandle& handle, const RequestId& id,
              NetworkTaskPtr task)
     {
         assert(task);
         _tasks[handle][id] = std::move(task);
     }
 
-    NetworkTask* find(const ConnectionHandle& handle,
-                      const std::string& id) const
+    NetworkTask* find(const ConnectionHandle& handle, const RequestId& id) const
     {
         auto i = _tasks.find(handle);
         if (i == _tasks.end())

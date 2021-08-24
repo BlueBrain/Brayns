@@ -99,8 +99,8 @@ public:
         auto& id = request.getId();
         if (!tasks.addIfNotPresent(handle, id, task))
         {
-            throw EntrypointException("A task with ID '" + id +
-                                      "' is already running for this client");
+            throw EntrypointException("A task with ID " + id.getDisplayText() +
+                                      " is already running for this client");
         }
         task->execute(request);
     }

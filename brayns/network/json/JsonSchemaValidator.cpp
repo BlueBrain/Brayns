@@ -78,7 +78,18 @@ public:
         _errors.insert(_errors.end(), errors.begin(), errors.end());
     }
 
-    void addInvalidOneOf() { addError("No schema in oneOf match the input"); }
+    void addInvalidOneOf()
+    {
+        std::ostringstream stream;
+        stream << "No schema in oneOf match the input";
+        auto path = _path.toString();
+        if (!path.empty())
+        {
+            stream << " at '" << path << "'";
+        }
+        stream << ".";
+        addError(stream.str());
+    }
 
     void addInvalidType(JsonType type, JsonType schemaType)
     {

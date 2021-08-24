@@ -270,7 +270,8 @@ struct GetEnumName
  * @brief Reflect JsonType enum.
  *
  */
-BRAYNS_ADAPTER_ENUM(JsonType, {JsonTypeName::ofNull(), JsonType::Null},
+BRAYNS_ADAPTER_ENUM(JsonType, {"", JsonType::Unknown},
+                    {JsonTypeName::ofNull(), JsonType::Null},
                     {JsonTypeName::ofBoolean(), JsonType::Boolean},
                     {JsonTypeName::ofInteger(), JsonType::Integer},
                     {JsonTypeName::ofNumber(), JsonType::Number},
