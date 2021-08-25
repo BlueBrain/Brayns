@@ -35,7 +35,7 @@ BRAYNS_MESSAGE_BEGIN(RequestMessage)
 BRAYNS_MESSAGE_ENTRY(std::string, jsonrpc, "Protocol version")
 BRAYNS_MESSAGE_ENTRY(RequestId, id, "Message ID", Required(false))
 BRAYNS_MESSAGE_ENTRY(std::string, method, "Entrypoint name")
-BRAYNS_MESSAGE_ENTRY(JsonValue, params, "Request content")
+BRAYNS_MESSAGE_ENTRY(JsonValue, params, "Request content", Required(false))
 BRAYNS_MESSAGE_END()
 
 /**
