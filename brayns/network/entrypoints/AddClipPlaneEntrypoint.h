@@ -20,12 +20,13 @@
 
 #pragma once
 
-#include <brayns/network/adapters/ClipPlaneAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/messages/AddClipPlaneMessage.h>
 
 namespace brayns
 {
-class AddClipPlaneEntrypoint : public Entrypoint<Plane, ClipPlanePtr>
+class AddClipPlaneEntrypoint
+    : public Entrypoint<AddClipPlaneMessage, ClipPlanePtr>
 {
 public:
     virtual std::string getName() const override { return "add-clip-plane"; }
@@ -38,9 +39,10 @@ public:
     virtual void onRequest(const Request& request) override
     {
         auto params = request.getParams();
+        auto& plane = params.plane;
         auto& engine = getApi().getEngine();
         auto& scene = engine.getScene();
-        auto id = scene.addClipPlane(params);
+        auto id = scene.addClipPlane(plane);
         auto clipPlane = scene.getClipPlane(id);
         engine.triggerRender();
         request.notify(clipPlane);

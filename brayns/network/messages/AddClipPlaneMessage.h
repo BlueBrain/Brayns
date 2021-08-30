@@ -20,15 +20,13 @@
 
 #pragma once
 
-#include <brayns/common/scene/ClipPlane.h>
-
-#include <brayns/network/json/MessageAdapter.h>
+#include <brayns/network/adapters/ClipPlaneAdapter.h>
+#include <brayns/network/json/Message.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(ClipPlane)
-BRAYNS_ADAPTER_GET("id", getID, "Plane ID")
-BRAYNS_ADAPTER_GETSET("plane", getPlane, setPlane,
-                      "Plane normal vector XYZ and distance from origin")
-BRAYNS_ADAPTER_END()
+BRAYNS_MESSAGE_BEGIN(AddClipPlaneMessage)
+BRAYNS_MESSAGE_ENTRY(Plane, plane,
+                     "Plane normal vector XYZ and distance from origin")
+BRAYNS_MESSAGE_END()
 } // namespace brayns
