@@ -34,10 +34,10 @@ public:
         : _socket(std::move(socket))
         , _connections(&connections)
     {
-        _connections->connect(_socket);
+        _connections->add(_socket);
     }
 
-    ~MessageReceiver() { _connections->disconnect(_socket); }
+    ~MessageReceiver() { _connections->remove(_socket); }
 
     bool receive()
     {

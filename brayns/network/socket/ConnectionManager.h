@@ -31,14 +31,17 @@ namespace brayns
 class ConnectionManager
 {
 public:
+    ~ConnectionManager();
+
     size_t getConnectionCount();
-    void connect(NetworkSocketPtr socket);
-    void disconnect(const ConnectionHandle& handle);
+    void add(NetworkSocketPtr socket);
+    void remove(const ConnectionHandle& handle);
     void receive(const ConnectionHandle& handle, InputPacket packet);
     void send(const ConnectionHandle& handle, const OutputPacket& packet);
     void broadcast(const OutputPacket& packet);
     void broadcast(const ConnectionHandle& source, const OutputPacket& packet);
     void update();
+    void closeAllSockets();
 
     bool isEmpty() { return getConnectionCount() == 0; }
 

@@ -236,6 +236,12 @@ public:
     }
 
     /**
+     * @brief Close the socket.
+     *
+     */
+    void close() { _socket.close(); }
+
+    /**
      * @brief Receive an input packet from the connected client.
      *
      * Block until data is received.
@@ -291,12 +297,7 @@ public:
     }
 
 private:
-    void _setupSocket()
-    {
-        _socket.setMaxPayloadSize(int(1e9));
-        _socket.setSendTimeout(Poco::Timespan());
-        _socket.setReceiveTimeout(Poco::Timespan());
-    }
+    void _setupSocket() { _socket.setMaxPayloadSize(int(1e9)); }
 
     Poco::Net::WebSocket _socket;
 };

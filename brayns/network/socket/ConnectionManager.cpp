@@ -114,19 +114,24 @@ private:
 
 namespace brayns
 {
+ConnectionManager::~ConnectionManager()
+{
+    closeAllSockets();
+}
+
 size_t ConnectionManager::getConnectionCount()
 {
     std::lock_guard<std::mutex> lock(_mutex);
     return _connections.getConnectionCount();
 }
 
-void ConnectionManager::connect(NetworkSocketPtr socket)
+void ConnectionManager::add(NetworkSocketPtr socket)
 {
     std::lock_guard<std::mutex> lock(_mutex);
     _connections.add(std::move(socket));
 }
 
-void ConnectionManager::disconnect(const ConnectionHandle& handle)
+void ConnectionManager::remove(const ConnectionHandle& handle)
 {
     std::lock_guard<std::mutex> lock(_mutex);
     _connections.markAsRemoved(handle);
@@ -198,5 +203,16 @@ void ConnectionManager::update()
     }
     buffer.forEach([this](const auto& handle, const auto& packet)
                    { _listener.onRequest(handle, packet); });
+}
+
+void ConnectionManager::closeAllSockets()
+{
+    std::lock_guard<std::mutex> lock(_mutex);
+    _connections.forEach(
+        [](auto& handle, auto& connection)
+        {
+            auto& socket = connection.socket;
+            socket->close();
+        });
 }
 } // namespace brayns
