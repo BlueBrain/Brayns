@@ -41,6 +41,7 @@
 #include <plugin/entrypoints/SetConnectionsPerValueEntrypoint.h>
 #include <plugin/entrypoints/SetMaterialExtraAttributesEntrypoint.h>
 #include <plugin/entrypoints/SetMaterialRangeEntrypoint.h>
+#include <plugin/entrypoints/SetMaterialsEntrypoint.h>
 #include <plugin/entrypoints/SetMetaballsPerSimulationValueEntrypoint.h>
 #include <plugin/entrypoints/SetSynapsesAttributesEntrypoint.h>
 #include <plugin/entrypoints/TraceAnterogradeEntrypoint.h>

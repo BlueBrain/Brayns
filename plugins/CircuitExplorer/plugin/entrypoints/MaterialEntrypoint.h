@@ -73,30 +73,4 @@ public:
         request.reply(EmptyMessage());
     }
 };
-
-class SetMaterialsEntrypoint
-    : public Entrypoint<std::vector<JsonBuffer<MaterialProxy>>, EmptyMessage>
-{
-public:
-    virtual std::string getName() const override { return "set-materials"; }
-
-    virtual std::string getDescription() const override
-    {
-        return "Update the corresponding materials with the given properties";
-    }
-
-    virtual void onRequest(const Request& request) override
-    {
-        auto params = request.getParams();
-        auto& scene = getApi().getScene();
-        for (const auto& buffer : params)
-        {
-            MaterialProxy material(scene);
-            buffer.deserialize(material);
-            material.commit();
-        }
-        scene.markModified();
-        request.reply(EmptyMessage());
-    }
-};
 } // namespace brayns
