@@ -23,38 +23,10 @@
 #include <string>
 #include <vector>
 
-#include <brayns/common/utils/stringUtils.h>
-
 #include "Json.h"
 
 namespace brayns
 {
-/**
- * @brief Helper class to store JSON schema validation errors.
- *
- */
-class JsonSchemaErrorList
-{
-public:
-    JsonSchemaErrorList() = default;
-
-    JsonSchemaErrorList(std::vector<std::string> errors)
-        : _errors(std::move(errors))
-    {
-    }
-
-    auto begin() const { return _errors.begin(); }
-
-    auto end() const { return _errors.end(); }
-
-    bool isEmpty() const { return _errors.empty(); }
-
-    const std::vector<std::string>& asStringList() const { return _errors; }
-
-private:
-    std::vector<std::string> _errors;
-};
-
 /**
  * @brief Validate a JSON value using a JSON schema.
  *
@@ -62,7 +34,7 @@ private:
 class JsonSchemaValidator
 {
 public:
-    static JsonSchemaErrorList validate(const JsonValue& json,
-                                        const JsonSchema& schema);
+    static std::vector<std::string> validate(const JsonValue& json,
+                                             const JsonSchema& schema);
 };
 } // namespace brayns

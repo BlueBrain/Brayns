@@ -48,10 +48,9 @@ public:
             return;
         }
         auto errors = JsonSchemaValidator::validate(params, paramsSchema);
-        if (!errors.isEmpty())
+        if (!errors.empty())
         {
-            throw EntrypointException(0, "Invalid params Schema",
-                                      errors.asStringList());
+            throw EntrypointException(0, "Invalid params", errors);
         }
     }
 };

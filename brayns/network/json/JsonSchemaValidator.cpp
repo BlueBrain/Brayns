@@ -22,6 +22,8 @@
 
 #include <sstream>
 
+#include <brayns/common/utils/stringUtils.h>
+
 namespace
 {
 using namespace brayns;
@@ -184,8 +186,8 @@ private:
 class JsonValidator
 {
 public:
-    JsonSchemaErrorList validate(const JsonValue& json,
-                                 const JsonSchema& schema)
+    std::vector<std::string> validate(const JsonValue& json,
+                                      const JsonSchema& schema)
     {
         _context.clear();
         _validate(json, schema);
@@ -385,8 +387,8 @@ private:
 
 namespace brayns
 {
-JsonSchemaErrorList JsonSchemaValidator::validate(const JsonValue& json,
-                                                  const JsonSchema& schema)
+std::vector<std::string> JsonSchemaValidator::validate(const JsonValue& json,
+                                                       const JsonSchema& schema)
 {
     JsonValidator validator;
     return validator.validate(json, schema);

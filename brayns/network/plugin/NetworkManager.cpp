@@ -61,10 +61,9 @@ private:
     {
         static const JsonSchema schema = Json::getSchema<RequestMessage>();
         auto errors = JsonSchemaValidator::validate(json, schema);
-        if (!errors.isEmpty())
+        if (!errors.empty())
         {
-            throw EntrypointException(0, "Invalid JSON-RPC request",
-                                      errors.asStringList());
+            throw EntrypointException(0, "Invalid JSON-RPC request", errors);
         }
     }
 
