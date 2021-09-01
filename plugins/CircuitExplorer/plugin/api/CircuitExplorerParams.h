@@ -88,25 +88,3 @@ struct FrameExportProgress : public brayns::Message
                   "The normalized progress (0.0 to 1.0) of the last export "
                   "frames to disk request")
 };
-
-struct ExportLayerToDisk : public brayns::Message
-{
-    MESSAGE_BEGIN(ExportLayerToDisk)
-    MESSAGE_ENTRY(std::string, path, "Path where to store the frames")
-    MESSAGE_ENTRY(std::string, name, "Name to give to the layer frames")
-    MESSAGE_ENTRY(uint32_t, startFrame,
-                  "The frame number of the first frame to store "
-                  "(For instance: name00025.png")
-    MESSAGE_ENTRY(uint32_t, framesCount,
-                  "Number of frames to store, starting at startFrame")
-    MESSAGE_ENTRY(std::string, data,
-                  "Base64 layer image data to store on every frame")
-};
-
-struct ExportLayerToDiskResult : public brayns::Message
-{
-    MESSAGE_BEGIN(ExportLayerToDiskResult)
-    MESSAGE_ENTRY(std::vector<uint32_t>, frames,
-                  "List of frames that were successfully stored"
-                  " from the last export layer to disk request")
-};
