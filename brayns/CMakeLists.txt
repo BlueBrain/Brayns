@@ -22,8 +22,8 @@ set(BRAYNS_SOURCES
 )
 
 set(BRAYNS_LINK_LIBRARIES
-  PUBLIC braynsParameters braynsCommon braynsEngine
-  PRIVATE braynsIO braynsPluginAPI braynsManipulators braynsTasks braynsNetwork)
+  PUBLIC braynsParameters braynsCommon braynsEngine braynsNetwork
+  PRIVATE braynsIO braynsPluginAPI braynsManipulators braynsTasks)
 
 set(BRAYNS_OMIT_EXPORT ON)
 common_library(brayns)

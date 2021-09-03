@@ -65,7 +65,7 @@ public:
         return true;
     }
 
-    void update()
+    void poll()
     {
         _tasks.removeIf(
             [](auto&, auto&, auto& task)

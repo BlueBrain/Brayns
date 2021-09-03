@@ -73,6 +73,18 @@ public:
      */
     virtual void setupEntrypoints() override;
 
+    /**
+     * @brief Process incoming network requests.
+     *
+     */
+    virtual void processRequests() override;
+
+    /**
+     * @brief Update all entrypoints.
+     *
+     */
+    virtual void update() override;
+
 private:
     NetworkContext* _context;
 };

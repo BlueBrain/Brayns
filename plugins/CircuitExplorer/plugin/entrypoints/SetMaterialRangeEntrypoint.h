@@ -48,6 +48,7 @@ public:
         request.getParams(materialRange);
         materialRange.commit();
         scene.markModified();
+        engine.triggerRender();
         request.reply(EmptyMessage());
     }
 };

@@ -146,4 +146,22 @@ void EntrypointManager::processRequest(const NetworkRequest& request) const
     MessageDispatcher dispatcher(*this);
     dispatcher.dispatch(request);
 }
+
+void EntrypointManager::preRender() const
+{
+    for (const auto& pair : _entrypoints)
+    {
+        auto& entrypoint = pair.second;
+        entrypoint.preRender();
+    }
+}
+
+void EntrypointManager::postRender() const
+{
+    for (const auto& pair : _entrypoints)
+    {
+        auto& entrypoint = pair.second;
+        entrypoint.postRender();
+    }
+}
 } // namespace brayns

@@ -95,7 +95,7 @@ public:
      * @brief Called on each update to remove finished tasks.
      *
      */
-    void update()
+    void pollTasks()
     {
         for (auto i = _uploaders.begin(); i != _uploaders.end();)
         {

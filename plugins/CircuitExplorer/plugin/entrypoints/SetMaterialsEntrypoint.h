@@ -49,6 +49,7 @@ public:
             material.commit();
         }
         scene.markModified();
+        triggerRender();
         request.reply(EmptyMessage());
     }
 };

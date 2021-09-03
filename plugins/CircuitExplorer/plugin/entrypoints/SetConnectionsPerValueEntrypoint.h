@@ -47,6 +47,7 @@ public:
         auto& engine = getApi().getEngine();
         auto& scene = engine.getScene();
         _loadPoints(scene, params);
+        engine.triggerRender();
         request.reply(brayns::EmptyMessage());
     }
 

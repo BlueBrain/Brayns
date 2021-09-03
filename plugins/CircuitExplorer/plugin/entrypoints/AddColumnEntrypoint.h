@@ -117,6 +117,7 @@ public:
         auto& scene = getApi().getScene();
         BRAYNS_INFO << "Building Column model.\n";
         ColumnModel::add(scene, params);
+        triggerRender();
         request.reply(brayns::EmptyMessage());
     }
 };

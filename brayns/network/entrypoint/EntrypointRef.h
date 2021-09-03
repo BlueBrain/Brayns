@@ -125,6 +125,18 @@ public:
     }
 
     /**
+     * @brief Call implementation onPreRender.
+     *
+     */
+    void preRender() const { _entrypoint->onPreRender(); }
+
+    /**
+     * @brief Call implementation onPostRender.
+     *
+     */
+    void postRender() const { _entrypoint->onPostRender(); }
+
+    /**
      * @brief Retrieve entrypoint name from implementation.
      *
      * @return std::string Entrypoint name (ex: "get-camera").
@@ -173,16 +185,16 @@ public:
 
     /**
      * @brief Get the JSON schema of the entrypoint result.
-     * 
+     *
      * Must be called after setup.
-     * 
+     *
      * @return const JsonSchema& JSON schema.
      */
     const JsonSchema& getResultSchema() const { return _schema.returns; }
 
     /**
      * @brief Check if the entrypoint is asynchronous.
-     * 
+     *
      * @return true Async.
      * @return false Sync.
      */

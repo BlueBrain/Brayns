@@ -182,6 +182,7 @@ public:
         auto& scene = getApi().getScene();
         BRAYNS_INFO << "Building Grid scene.\n";
         GridModel::add(scene, params);
+        triggerRender();
         request.reply(brayns::EmptyMessage());
     }
 };

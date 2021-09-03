@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef BRAYNS_H
-#define BRAYNS_H
+#pragma once
 
 #include <brayns/api.h>
 #include <brayns/common/types.h>
@@ -94,7 +93,7 @@ public:
      *
      * @return true if rendering should continue or false if user inputs
      *         requested to stop.
-    */
+     */
     BRAYNS_API bool commitAndRender();
     //@}
 
@@ -145,9 +144,15 @@ public:
      */
     BRAYNS_API AbstractManipulator& getCameraManipulator();
 
+    /**
+     * @brief Get the registered network interface.
+     *
+     * @return ActionInterface* Network interface or null if not set.
+     */
+    BRAYNS_API ActionInterface* getActionInterface();
+
 private:
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-}
-#endif // BRAYNS
+} // namespace brayns

@@ -89,7 +89,7 @@ class StreamManager
 public:
     StreamManager(NetworkContext& context);
 
-    void update();
+    void broadcast();
 
     ImageStreamMonitor& getImageStream() { return _imageStream; }
 

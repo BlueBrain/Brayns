@@ -97,6 +97,7 @@ public:
         auto modelId = params.model_id;
         auto& scene = getApi().getScene();
         SetMaterialExtraAttributes::toModel(scene, modelId);
+        triggerRender();
         request.reply(EmptyMessage());
     }
 };

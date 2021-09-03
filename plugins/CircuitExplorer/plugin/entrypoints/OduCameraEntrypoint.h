@@ -79,6 +79,7 @@ public:
         camera.setOrientation(glm::inverse(orientation));
         camera.updateProperty("apertureRadius", apertureRadius);
         camera.updateProperty("focusDistance", focusDistance);
+        triggerRender();
         request.reply(brayns::EmptyMessage());
     }
 };

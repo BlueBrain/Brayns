@@ -51,6 +51,7 @@ public:
     {
         auto params = request.getParams();
         _plugin->updateSpikeSimulation(params);
+        triggerRender();
         request.reply(brayns::EmptyMessage());
     }
 

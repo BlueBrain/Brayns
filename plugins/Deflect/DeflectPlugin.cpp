@@ -22,21 +22,17 @@
 #include "DeflectParameters.h"
 #include "utils.h"
 
-#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/utils/utils.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/manipulators/AbstractManipulator.h>
+#include <brayns/network/interface/ActionInterface.h>
 
 #include <brayns/parameters/ParametersManager.h>
 
 #include <brayns/pluginapi/PluginAPI.h>
-
-#ifdef BRAYNS_USE_LIBUV
-#include <uvw.hpp>
-#endif
 
 namespace
 {
@@ -163,37 +159,10 @@ private:
 
         _waitOnFutures();
         _lastImages.clear();
-#ifdef BRAYNS_USE_LIBUV
-        if (_pollHandle)
-        {
-            _pollHandle->stop();
-            _pollHandle.reset();
-        }
-#endif
         _stream.reset();
     }
 
-    void _setupSocketListener()
-    {
-#ifdef BRAYNS_USE_LIBUV
-        assert(_stream->isConnected());
-
-        auto loop = uvw::Loop::getDefault();
-        _pollHandle = loop->resource<uvw::PollHandle>(_stream->getDescriptor());
-
-        _pollHandle->on<uvw::PollEvent>([&engine = _engine](const auto&, auto&)
-                                        { engine.triggerRender(); });
-
-        _pollHandle->start(uvw::PollHandle::Event::READABLE);
-
-        _stream->setDisconnectedCallback(
-            [&]
-            {
-                _pollHandle->stop();
-                _pollHandle.reset();
-            });
-#endif
-    }
+    void _setupSocketListener() {}
 
     void _handleDeflectEvents()
     {
@@ -419,10 +388,6 @@ private:
     std::unique_ptr<deflect::Observer> _stream;
     std::vector<Image> _lastImages;
     std::vector<deflect::Stream::Future> _futures;
-
-#ifdef BRAYNS_USE_LIBUV
-    std::shared_ptr<uvw::PollHandle> _pollHandle;
-#endif
 };
 
 DeflectPlugin::DeflectPlugin(DeflectParameters&& params)

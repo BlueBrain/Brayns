@@ -91,7 +91,7 @@ public:
 
     /**
      * @brief Called each time a frame is rendered.
-     * 
+     *
      */
     virtual void onUpdate() {}
 
@@ -101,5 +101,17 @@ public:
      * @param request Client request.
      */
     virtual void onRequest(const NetworkRequest& request) = 0;
+
+    /**
+     * @brief Called before each render.
+     *
+     */
+    virtual void onPreRender() {}
+
+    /**
+     * @brief Called after each render.
+     *
+     */
+    virtual void onPostRender() {}
 };
 } // namespace brayns

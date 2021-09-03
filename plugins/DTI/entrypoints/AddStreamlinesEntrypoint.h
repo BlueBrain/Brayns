@@ -143,6 +143,7 @@ public:
         auto params = request.getParams();
         StreamlineBuilder builder(getApi());
         builder.addStreamlines(params);
+        triggerRender();
         request.reply(brayns::EmptyMessage());
     }
 };

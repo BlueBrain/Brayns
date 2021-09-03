@@ -50,6 +50,7 @@ public:
         auto& model = descriptor.getModel();
         auto handler = std::make_shared<CellGrowthHandler>(frameCount);
         model.setSimulationHandler(std::move(handler));
+        triggerRender();
         request.reply(brayns::EmptyMessage());
     }
 };

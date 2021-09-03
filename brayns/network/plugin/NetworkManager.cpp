@@ -225,19 +225,15 @@ void NetworkManager::init()
 
 void NetworkManager::preRender()
 {
-    auto& connections = _context->getConnections();
-    connections.update();
-    auto& tasks = _context->getTasks();
-    tasks.update();
-    auto& binary = _context->getBinary();
-    binary.update();
+    auto& entrypoints = _context->getEntrypoints();
+    entrypoints.preRender();
 }
 
 void NetworkManager::postRender()
 {
     auto& entrypoints = _context->getEntrypoints();
-    entrypoints.update();
+    entrypoints.postRender();
     auto& stream = _context->getStream();
-    stream.update();
+    stream.broadcast();
 }
 } // namespace brayns

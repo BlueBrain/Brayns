@@ -54,6 +54,7 @@ public:
         model.setSimulationHandler(handler);
         auto& transferFunction = scene.getTransferFunction();
         AdvancedCircuitLoader::setSimulationTransferFunction(transferFunction);
+        triggerRender();
         request.reply(brayns::EmptyMessage());
     }
 

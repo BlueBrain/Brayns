@@ -224,9 +224,9 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->getStatistics().setFPS(_lastFPS);
 
-        _pluginManager.postRender();
-
         _engine->postRender();
+
+        _pluginManager.postRender();
 
         _engine->resetFrameBuffers();
         _engine->getStatistics().resetModified();
@@ -862,5 +862,10 @@ KeyboardHandler& Brayns::getKeyboardHandler()
 AbstractManipulator& Brayns::getCameraManipulator()
 {
     return _impl->getCameraManipulator();
+}
+
+ActionInterface* Brayns::getActionInterface()
+{
+    return _impl->getActionInterface();
 }
 } // namespace brayns

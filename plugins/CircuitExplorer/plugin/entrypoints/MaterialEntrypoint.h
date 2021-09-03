@@ -70,6 +70,7 @@ public:
         request.getParams(material);
         material.commit();
         scene.markModified();
+        triggerRender();
         request.reply(EmptyMessage());
     }
 };

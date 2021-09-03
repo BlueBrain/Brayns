@@ -40,8 +40,8 @@ public:
     void send(const ConnectionHandle& handle, const OutputPacket& packet);
     void broadcast(const OutputPacket& packet);
     void broadcast(const ConnectionHandle& source, const OutputPacket& packet);
-    void update();
-    void closeAllSockets();
+    void processRequests();
+    void closeAll();
 
     bool isEmpty() { return getConnectionCount() == 0; }
 

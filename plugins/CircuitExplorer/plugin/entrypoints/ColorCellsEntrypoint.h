@@ -182,6 +182,7 @@ public:
         auto params = request.getParams();
         CellColorizer colorizer(getApi(), *_plugin);
         colorizer.colorCells(params);
+        triggerRender();
         request.reply(brayns::EmptyMessage());
     }
 

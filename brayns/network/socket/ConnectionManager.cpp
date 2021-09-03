@@ -116,7 +116,7 @@ namespace brayns
 {
 ConnectionManager::~ConnectionManager()
 {
-    closeAllSockets();
+    closeAll();
 }
 
 size_t ConnectionManager::getConnectionCount()
@@ -190,7 +190,7 @@ void ConnectionManager::broadcast(const ConnectionHandle& source,
         });
 }
 
-void ConnectionManager::update()
+void ConnectionManager::processRequests()
 {
     RequestBuffer buffer;
     {
@@ -205,7 +205,7 @@ void ConnectionManager::update()
                    { _listener.onRequest(handle, packet); });
 }
 
-void ConnectionManager::closeAllSockets()
+void ConnectionManager::closeAll()
 {
     std::lock_guard<std::mutex> lock(_mutex);
     _connections.forEach(

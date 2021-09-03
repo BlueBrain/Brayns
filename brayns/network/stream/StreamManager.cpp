@@ -174,7 +174,7 @@ StreamManager::StreamManager(NetworkContext& context)
     _imageStream.setFps(fps);
 }
 
-void StreamManager::update()
+void StreamManager::broadcast()
 {
     StreamDispatcher::broadcast(*_context);
     auto& stream = _context->getStream();

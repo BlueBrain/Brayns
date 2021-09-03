@@ -100,6 +100,7 @@ public:
         auto model = loader.importSynapsesFromGIDs(*_attributes, colors);
         scene.addModel(model);
         scene.markModified();
+        triggerRender();
         request.reply(brayns::EmptyMessage());
     }
 

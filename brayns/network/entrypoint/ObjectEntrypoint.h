@@ -81,7 +81,13 @@ public:
         return Json::getSchema(object);
     }
 
-    virtual void onUpdate() override
+    virtual void onRequest(const NetworkRequest& request) override
+    {
+        auto& object = getObject();
+        request.reply(object);
+    }
+
+    virtual void onPostRender() override
     {
         auto& object = getObject();
         if (!object.isModified())
@@ -89,12 +95,6 @@ public:
             return;
         }
         _limiter.call([&] { notify(object); });
-    }
-
-    virtual void onRequest(const NetworkRequest& request) override
-    {
-        auto& object = getObject();
-        request.reply(object);
     }
 
 private:

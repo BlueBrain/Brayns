@@ -30,9 +30,9 @@ using namespace brayns;
 class MessageReceiver
 {
 public:
-    MessageReceiver(NetworkSocketPtr socket, ConnectionManager& connections)
+    MessageReceiver(NetworkSocketPtr socket, NetworkContext& context)
         : _socket(std::move(socket))
-        , _connections(&connections)
+        , _connections(&context.getConnections())
     {
         _connections->add(_socket);
     }
@@ -80,8 +80,7 @@ NetworkInterface::NetworkInterface(NetworkContext& context)
 
 void NetworkInterface::run(NetworkSocketPtr socket)
 {
-    auto& connections = _context->getConnections();
-    MessageReceiver receiver(std::move(socket), connections);
+    MessageReceiver receiver(std::move(socket), *_context);
     while (receiver.receive())
     {
     }
@@ -97,5 +96,21 @@ void NetworkInterface::setupEntrypoints()
 {
     auto& entrypoints = _context->getEntrypoints();
     entrypoints.setup();
+}
+
+void NetworkInterface::processRequests()
+{
+    auto& connections = _context->getConnections();
+    connections.processRequests();
+}
+
+void NetworkInterface::update()
+{
+    auto& entrypoints = _context->getEntrypoints();
+    entrypoints.update();
+    auto& tasks = _context->getTasks();
+    tasks.poll();
+    auto& binary = _context->getBinary();
+    binary.pollTasks();
 }
 } // namespace brayns

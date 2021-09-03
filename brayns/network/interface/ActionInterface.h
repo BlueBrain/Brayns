@@ -64,6 +64,18 @@ public:
     virtual void start() = 0;
 
     /**
+     * @brief Process incoming network requests.
+     *
+     */
+    virtual void processRequests() = 0;
+
+    /**
+     * @brief Update all entrypoints.
+     *
+     */
+    virtual void update() = 0;
+
+    /**
      * @brief Shortcut to add an entrypoint from its type.
      *
      * @tparam T Concrete type of the entrypoint (subclass of IEntrypoint).

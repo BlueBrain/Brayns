@@ -82,6 +82,18 @@ public:
     void processRequest(const NetworkRequest& request) const;
 
     /**
+     * @brief Notify all entrypoints before render.
+     *
+     */
+    void preRender() const;
+
+    /**
+     * @brief Notify all entrypoints after render.
+     *
+     */
+    void postRender() const;
+
+    /**
      * @brief Return the number of registered entrypoints.
      *
      * @return size_t Number of existing entrypoints.
