@@ -28,10 +28,6 @@
 #include <vrpn_Analog.h>
 #include <vrpn_Tracker.h>
 
-#ifdef BRAYNSVRPN_USE_LIBUV
-#include <uv.h>
-#endif
-
 namespace brayns
 {
 struct VrpnStates
@@ -51,30 +47,11 @@ public:
 
     void preRender() final;
 
-#ifdef BRAYNSVRPN_USE_LIBUV
-    void resumeRenderingIfTrackerIsActive();
-#endif
-
 private:
     std::unique_ptr<vrpn_Tracker_Remote> _vrpnTracker;
     std::unique_ptr<vrpn_Analog_Remote> _vrpnAnalog;
     const std::string _vrpnName;
     Timer _timer;
     VrpnStates _states;
-
-#ifdef BRAYNSVRPN_USE_LIBUV
-    struct LibuvDeleter
-    {
-        void operator()(uv_timer_t* timer)
-        {
-            uv_timer_stop(timer);
-            uv_close(reinterpret_cast<uv_handle_t*>(timer),
-                     [](uv_handle_t* handle) { delete handle; });
-        }
-    };
-    std::unique_ptr<uv_timer_t, LibuvDeleter> _idleTimer;
-
-    void _setupIdleTimer();
-#endif
 };
-}
+} // namespace brayns

@@ -31,10 +31,6 @@ constexpr vrpn_int32 HEAD_SENSOR_ID = 0;
 constexpr vrpn_int32 FLYSTICK_SENSOR_ID = 1;
 constexpr double MOVING_SPEED = 1.0f;
 const std::string DEFAULT_VRPN_NAME = "DTrack@cave1";
-#ifdef BRAYNSVRPN_USE_LIBUV
-constexpr int VRPN_IDLE_TIMEOUT_MS = 5000;
-constexpr int VRPN_REPEAT_TIMEOUT_MS = 16;
-#endif
 
 const std::string HEAD_POSITION_PROP = "headPosition";
 const std::string HEAD_ROTATION_PROP = "headRotation";
@@ -68,7 +64,7 @@ void joystickCallback(void* userData, const vrpn_ANALOGCB joystick)
     states->axisX = joystick.channel[0];
     states->axisZ = joystick.channel[1];
 }
-}
+} // namespace
 
 VRPNPlugin::VRPNPlugin(const std::string& vrpnName)
     : _vrpnName(vrpnName)
@@ -94,10 +90,6 @@ void VRPNPlugin::init()
                                  " analog");
 
     BRAYNS_INFO << "VRPN successfully connected to " << _vrpnName << std::endl;
-
-#ifdef BRAYNSVRPN_USE_LIBUV
-    _setupIdleTimer();
-#endif
 
     _vrpnTracker->register_change_handler(&(_api->getCamera()), trackerCallback,
                                           HEAD_SENSOR_ID);
@@ -125,33 +117,7 @@ void VRPNPlugin::preRender()
 
     _timer.start();
 }
-
-#ifdef BRAYNSVRPN_USE_LIBUV
-void VRPNPlugin::resumeRenderingIfTrackerIsActive()
-{
-    _vrpnTracker->mainloop();
-    if (_api->getCamera().isModified())
-        _api->triggerRender();
-}
-
-void VRPNPlugin::_setupIdleTimer()
-{
-    if (auto uvLoop = uv_default_loop())
-    {
-        _idleTimer.reset(new uv_timer_t);
-        uv_timer_init(uvLoop, _idleTimer.get());
-        _idleTimer->data = this;
-
-        uv_timer_start(_idleTimer.get(),
-                       [](uv_timer_t* timer) {
-                           auto plugin = static_cast<VRPNPlugin*>(timer->data);
-                           plugin->resumeRenderingIfTrackerIsActive();
-                       },
-                       VRPN_IDLE_TIMEOUT_MS, VRPN_REPEAT_TIMEOUT_MS);
-    }
-}
-#endif
-}
+} // namespace brayns
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
                                                          const char** argv)

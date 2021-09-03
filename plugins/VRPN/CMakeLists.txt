@@ -11,13 +11,12 @@ set(BraynsVRPN_VERSION_ABI 1)
 include(Common)
 
 common_find_package(VRPN REQUIRED)
-common_find_package(libuv)
 common_find_package_post()
 
 set(BRAYNSVRPN_HEADERS VRPNPlugin.h)
 set(BRAYNSVRPN_SOURCES VRPNPlugin.cpp)
 set(BRAYNSVRPN_LINK_LIBRARIES PRIVATE braynsCommon braynsPluginAPI braynsEngine
-  ${libuv_LIBRARIES} ${VRPN_LIBRARIES})
+  ${VRPN_LIBRARIES})
 
 set(BRAYNSVRPN_OMIT_LIBRARY_HEADER ON)
 set(BRAYNSVRPN_OMIT_VERSION_HEADERS ON)
