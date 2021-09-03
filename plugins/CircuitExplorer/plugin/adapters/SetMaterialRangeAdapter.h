@@ -51,13 +51,12 @@ public:
         {
             return;
         }
-        _materials.clear();
-        _materials.reserve(ids.size());
-        for (auto id : ids)
+        if (ids.empty())
         {
-            auto& material = ExtractMaterial::fromId(*_model, id);
-            _materials.push_back(material);
+            _loadAllMaterials();
+            return;
         }
+        _loadMaterialIds(ids);
     }
 
     void setProperties(const JsonBuffer<ExtendedMaterial>& properties)
@@ -75,6 +74,28 @@ public:
     }
 
 private:
+    void _loadAllMaterials()
+    {
+        auto& model = _model->getModel();
+        auto& materials = model.getMaterials();
+        for (const auto& pair : materials)
+        {
+            auto& material = *pair.second;
+            _materials.push_back(material);
+        }
+    }
+
+    void _loadMaterialIds(const std::vector<size_t>& ids)
+    {
+        _materials.clear();
+        _materials.reserve(ids.size());
+        for (auto id : ids)
+        {
+            auto& material = ExtractMaterial::fromId(*_model, id);
+            _materials.push_back(material);
+        }
+    }
+
     Scene* _scene = nullptr;
     ModelDescriptor* _model = nullptr;
     std::vector<ExtendedMaterial> _materials;

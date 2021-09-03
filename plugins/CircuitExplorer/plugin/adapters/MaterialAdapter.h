@@ -299,21 +299,21 @@ private:
     size_t _materialId = 0;
 };
 
-BRAYNS_ADAPTER_ENUM(MaterialShadingMode, {"none", MaterialShadingMode::none},
-                    {"diffuse", MaterialShadingMode::diffuse},
-                    {"electron", MaterialShadingMode::electron},
-                    {"cartoon", MaterialShadingMode::cartoon},
-                    {"electron_transparency",
+BRAYNS_ADAPTER_ENUM(MaterialShadingMode, {"None", MaterialShadingMode::none},
+                    {"Diffuse", MaterialShadingMode::diffuse},
+                    {"Electron", MaterialShadingMode::electron},
+                    {"Cartoon", MaterialShadingMode::cartoon},
+                    {"Electron transparency",
                      MaterialShadingMode::electron_transparency},
-                    {"perlin", MaterialShadingMode::perlin},
-                    {"diffuse_transparency",
+                    {"Perlin", MaterialShadingMode::perlin},
+                    {"Diffuse transparency",
                      MaterialShadingMode::diffuse_transparency},
-                    {"checker", MaterialShadingMode::checker})
+                    {"Checker", MaterialShadingMode::checker})
 
 BRAYNS_ADAPTER_ENUM(MaterialClippingMode,
-                    {"no_clipping", MaterialClippingMode::no_clipping},
-                    {"plane", MaterialClippingMode::plane},
-                    {"sphere", MaterialClippingMode::sphere})
+                    {"No clipping", MaterialClippingMode::no_clipping},
+                    {"Plane", MaterialClippingMode::plane},
+                    {"Sphere", MaterialClippingMode::sphere})
 
 #define BRAYNS_MATERIAL_PROPERTIES()                                           \
     BRAYNS_ADAPTER_GETSET("diffuse_color", getDiffuseColor, setDiffuseColor,   \

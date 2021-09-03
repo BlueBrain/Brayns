@@ -27,14 +27,14 @@
 
 namespace brayns
 {
-BRAYNS_ADAPTER_ENUM(CircuitColorScheme, {"none", CircuitColorScheme::none},
-                    {"by_id", CircuitColorScheme::by_id},
-                    {"by_type", CircuitColorScheme::by_type},
-                    {"by_layer", CircuitColorScheme::by_layer},
-                    {"by_mtype", CircuitColorScheme::by_mtype},
-                    {"by_etype", CircuitColorScheme::by_etype},
-                    {"by_target", CircuitColorScheme::by_target},
-                    {"single_material", CircuitColorScheme::single_material})
+BRAYNS_ADAPTER_ENUM(CircuitColorScheme, {"None", CircuitColorScheme::none},
+                    {"By id", CircuitColorScheme::by_id},
+                    {"By type", CircuitColorScheme::by_type},
+                    {"By layer", CircuitColorScheme::by_layer},
+                    {"By mtype", CircuitColorScheme::by_mtype},
+                    {"By etype", CircuitColorScheme::by_etype},
+                    {"By target", CircuitColorScheme::by_target},
+                    {"Single material", CircuitColorScheme::single_material})
 } // namespace brayns
 
 BRAYNS_MESSAGE_BEGIN(RemapCircuitColorParams)
