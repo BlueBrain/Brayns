@@ -153,13 +153,6 @@ cmake .. -DBRAYNS_CIRCUITVIEWER_ENABLED=ON:OFF
 cmake .. -DBRAYNS_DEFLECT_ENABLED=ON:OFF
 ```
 
-#### Enable/Disable HTTP/REST/Websockets interface.
- [LibJpegTurbo](http://libjpeg-turbo.virtualgl.org).
- See documentation for REST API details.
-```
-cmake .. -DBRAYNS_NETWORKING_ENABLED=ON:OFF
-```
-
 #### Enable/Disable [VRPN](https://github.com/vrpn/vrpn) tracking plugin.
 ```
 cmake .. -DBRAYNS_VRPN_ENABLED=ON:OFF
