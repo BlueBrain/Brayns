@@ -162,7 +162,7 @@ struct Json
     template <typename T>
     static bool deserialize(const JsonValue& json, T& value)
     {
-        JsonAdapter<T>::deserialize(json, value);
+        return JsonAdapter<T>::deserialize(json, value);
     }
 
     /**
