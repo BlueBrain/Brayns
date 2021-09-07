@@ -205,42 +205,42 @@ private:
  * @endcode
  *
  */
-#define BRAYNS_NAMED_MESSAGE_BEGIN(TYPE, NAME)          \
-    struct TYPE                                         \
-    {                                                   \
-    private:                                            \
-        using MessageType = TYPE;                       \
-                                                        \
-        static brayns::MessageInfo& _getInfo()          \
-        {                                               \
-            static brayns::MessageInfo info(NAME);      \
-            return info;                                \
-        }                                               \
-                                                        \
-        static const brayns::MessageInfo& _loadInfo()   \
-        {                                               \
-            static const int buildMessageInfo = []      \
-            {                                           \
-                TYPE();                                 \
-                return 0;                               \
-            }();                                        \
-            return _getInfo();                          \
-        }                                               \
-                                                        \
-    public:                                             \
-        brayns::JsonSchema getSchema() const            \
-        {                                               \
-            return _loadInfo().getSchema(this);         \
-        }                                               \
-                                                        \
-        bool serialize(brayns::JsonValue& json) const   \
-        {                                               \
-            return _loadInfo().serialize(this, json);   \
-        }                                               \
-                                                        \
-        bool deserialize(const brayns::JsonValue& json) \
-        {                                               \
-            return _loadInfo().deserialize(json, this); \
+#define BRAYNS_NAMED_MESSAGE_BEGIN(TYPE, NAME)                      \
+    struct TYPE                                                     \
+    {                                                               \
+    private:                                                        \
+        using MessageType = TYPE;                                   \
+                                                                    \
+        static brayns::MessageInfo& _getInfo()                      \
+        {                                                           \
+            static brayns::MessageInfo info(NAME);                  \
+            return info;                                            \
+        }                                                           \
+                                                                    \
+        static const brayns::MessageInfo& _loadInfo()               \
+        {                                                           \
+            [[maybe_unused]] static const int buildMessageInfo = [] \
+            {                                                       \
+                TYPE();                                             \
+                return 0;                                           \
+            }();                                                    \
+            return _getInfo();                                      \
+        }                                                           \
+                                                                    \
+    public:                                                         \
+        brayns::JsonSchema getSchema() const                        \
+        {                                                           \
+            return _loadInfo().getSchema(this);                     \
+        }                                                           \
+                                                                    \
+        bool serialize(brayns::JsonValue& json) const               \
+        {                                                           \
+            return _loadInfo().serialize(this, json);               \
+        }                                                           \
+                                                                    \
+        bool deserialize(const brayns::JsonValue& json)             \
+        {                                                           \
+            return _loadInfo().deserialize(json, this);             \
         }
 
 #define BRAYNS_MESSAGE_BEGIN(TYPE) BRAYNS_NAMED_MESSAGE_BEGIN(TYPE, #TYPE)
@@ -258,7 +258,7 @@ private:
     {                                                                    \
         using namespace brayns;                                          \
                                                                          \
-        static const int registerEntry = []                              \
+        [[maybe_unused]] static const int registerEntry = []             \
         {                                                                \
             MessageProperty property;                                    \
             property.name = #NAME;                                       \

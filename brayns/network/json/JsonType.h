@@ -87,7 +87,7 @@ struct JsonTypeHelper
     static bool check(JsonType required, JsonType type)
     {
         return required == type ||
-               required == JsonType::Number && type == JsonType::Integer;
+               (required == JsonType::Number && type == JsonType::Integer);
     }
 
     static bool isNumber(JsonType type)
@@ -257,6 +257,7 @@ struct GetJsonTypeName
 {
     static const std::string& fromType(JsonType type)
     {
+        static const std::string empty;
         switch (type)
         {
         case JsonType::Null:
@@ -273,9 +274,9 @@ struct GetJsonTypeName
             return JsonTypeName::ofArray();
         case JsonType::Object:
             return JsonTypeName::ofObject();
+        default:
+            return empty;
         }
-        static const std::string empty;
-        return empty;
     }
 };
 } // namespace brayns
