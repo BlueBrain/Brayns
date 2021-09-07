@@ -63,7 +63,7 @@ private:
         auto& connections = context.getConnections();
         try
         {
-            connections.broadcast({image.data.get(), image.size});
+            connections.broadcast({image.data.get(), int(image.size)});
         }
         catch (const ConnectionClosedException& e)
         {

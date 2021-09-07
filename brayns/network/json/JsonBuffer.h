@@ -42,7 +42,7 @@ public:
         return true;
     }
 
-    bool deserialize(T& value) const { Json::deserialize(_json, value); }
+    bool deserialize(T& value) const { return Json::deserialize(_json, value); }
 
     const JsonValue& getJson() const { return _json; }
 

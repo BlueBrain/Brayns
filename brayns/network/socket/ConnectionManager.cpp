@@ -75,6 +75,7 @@ public:
                     connection.added = false;
                 }
                 buffer.extract(handle, connection);
+                return false;
             });
         return buffer;
     }

@@ -94,8 +94,8 @@ private:
 
 struct Title
 {
-    Title(std::string value)
-        : value(std::move(value))
+    Title(std::string title)
+        : value(std::move(title))
     {
     }
 
@@ -106,8 +106,8 @@ struct Title
 
 struct Description
 {
-    Description(std::string value)
-        : value(std::move(value))
+    Description(std::string description)
+        : value(std::move(description))
     {
     }
 
@@ -120,8 +120,8 @@ struct Required
 {
     Required() = default;
 
-    Required(bool value)
-        : value(value)
+    Required(bool required)
+        : value(required)
     {
     }
 
@@ -134,8 +134,8 @@ struct ReadOnly
 {
     ReadOnly() = default;
 
-    ReadOnly(bool value)
-        : value(value)
+    ReadOnly(bool readOnly)
+        : value(readOnly)
     {
     }
 
@@ -148,8 +148,8 @@ struct WriteOnly
 {
     WriteOnly() = default;
 
-    WriteOnly(bool value)
-        : value(value)
+    WriteOnly(bool writeOnly)
+        : value(writeOnly)
     {
     }
 
@@ -160,8 +160,8 @@ struct WriteOnly
 
 struct Minimum
 {
-    Minimum(double value)
-        : value(value)
+    Minimum(double minimum)
+        : value(minimum)
     {
     }
 
@@ -172,8 +172,8 @@ struct Minimum
 
 struct Maximum
 {
-    Maximum(double value)
-        : value(value)
+    Maximum(double maximum)
+        : value(maximum)
     {
     }
 
@@ -184,8 +184,8 @@ struct Maximum
 
 struct MinItems
 {
-    MinItems(size_t value)
-        : value(value)
+    MinItems(size_t minItems)
+        : value(minItems)
     {
     }
 
@@ -196,8 +196,8 @@ struct MinItems
 
 struct MaxItems
 {
-    MaxItems(size_t value)
-        : value(value)
+    MaxItems(size_t maxItems)
+        : value(maxItems)
     {
     }
 
@@ -208,8 +208,8 @@ struct MaxItems
 
 struct Default
 {
-    Default(const JsonValue& value)
-        : value(value)
+    Default(const JsonValue& defaultValue)
+        : value(defaultValue)
     {
     }
 
