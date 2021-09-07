@@ -18,13 +18,6 @@ if(FreeImage_FOUND)
   list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/deps/perceptualdiff/*')
 endif()
 
-if(libuv_FOUND)
-  if(NOT EXISTS "${PROJECT_SOURCE_DIR}/deps/uvw")
-    message(FATAL_ERROR "uvw missing, run: git submodule update --init")
-  endif()
-  list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/deps/uvw/*')
-endif()
-
 # Both Poco and GLM create "uninstall" targets. But GLM check wether the
 # target exists before or not, whereas POCO doesnt give a damn.
 set(ENABLE_REDIS OFF CACHE BOOL "Enable Redis")
