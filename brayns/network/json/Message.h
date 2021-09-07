@@ -21,6 +21,7 @@
 #pragma once
 
 #include <functional>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -205,42 +206,39 @@ private:
  * @endcode
  *
  */
-#define BRAYNS_NAMED_MESSAGE_BEGIN(TYPE, NAME)                      \
-    struct TYPE                                                     \
-    {                                                               \
-    private:                                                        \
-        using MessageType = TYPE;                                   \
-                                                                    \
-        static brayns::MessageInfo& _getInfo()                      \
-        {                                                           \
-            static brayns::MessageInfo info(NAME);                  \
-            return info;                                            \
-        }                                                           \
-                                                                    \
-        static const brayns::MessageInfo& _loadInfo()               \
-        {                                                           \
-            [[maybe_unused]] static const int buildMessageInfo = [] \
-            {                                                       \
-                TYPE();                                             \
-                return 0;                                           \
-            }();                                                    \
-            return _getInfo();                                      \
-        }                                                           \
-                                                                    \
-    public:                                                         \
-        brayns::JsonSchema getSchema() const                        \
-        {                                                           \
-            return _loadInfo().getSchema(this);                     \
-        }                                                           \
-                                                                    \
-        bool serialize(brayns::JsonValue& json) const               \
-        {                                                           \
-            return _loadInfo().serialize(this, json);               \
-        }                                                           \
-                                                                    \
-        bool deserialize(const brayns::JsonValue& json)             \
-        {                                                           \
-            return _loadInfo().deserialize(json, this);             \
+#define BRAYNS_NAMED_MESSAGE_BEGIN(TYPE, NAME)           \
+    struct TYPE                                          \
+    {                                                    \
+    private:                                             \
+        using MessageType = TYPE;                        \
+                                                         \
+        static brayns::MessageInfo& _getInfo()           \
+        {                                                \
+            static brayns::MessageInfo _info(NAME);      \
+            return _info;                                \
+        }                                                \
+                                                         \
+        static const brayns::MessageInfo& _loadInfo()    \
+        {                                                \
+            static std::once_flag _flag;                 \
+            std::call_once(_flag, [] { TYPE(); });       \
+            return _getInfo();                           \
+        }                                                \
+                                                         \
+    public:                                              \
+        brayns::JsonSchema getSchema() const             \
+        {                                                \
+            return _loadInfo().getSchema(this);          \
+        }                                                \
+                                                         \
+        bool serialize(brayns::JsonValue& _json) const   \
+        {                                                \
+            return _loadInfo().serialize(this, _json);   \
+        }                                                \
+                                                         \
+        bool deserialize(const brayns::JsonValue& _json) \
+        {                                                \
+            return _loadInfo().deserialize(_json, this); \
         }
 
 #define BRAYNS_MESSAGE_BEGIN(TYPE) BRAYNS_NAMED_MESSAGE_BEGIN(TYPE, #TYPE)
@@ -253,35 +251,37 @@ private:
  * will be serialized using JsonAdapter<TYPE>.
  *
  */
-#define BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, ...)                         \
-    TYPE NAME = []                                                       \
-    {                                                                    \
-        using namespace brayns;                                          \
-                                                                         \
-        [[maybe_unused]] static const int registerEntry = []             \
-        {                                                                \
-            MessageProperty property;                                    \
-            property.name = #NAME;                                       \
-            property.options = {__VA_ARGS__};                            \
-            property.getSchema = [](const void* data)                    \
-            {                                                            \
-                auto& message = *static_cast<const MessageType*>(data);  \
-                return Json::getSchema(message.NAME);                    \
-            };                                                           \
-            property.serialize = [](const void* data, JsonValue& json)   \
-            {                                                            \
-                auto& message = *static_cast<const MessageType*>(data);  \
-                return Json::serialize(message.NAME, json);              \
-            };                                                           \
-            property.deserialize = [](const JsonValue& json, void* data) \
-            {                                                            \
-                auto& message = *static_cast<MessageType*>(data);        \
-                return Json::deserialize(json, message.NAME);            \
-            };                                                           \
-            _getInfo().addProperty(std::move(property));                 \
-            return 0;                                                    \
-        }();                                                             \
-        return TYPE{};                                                   \
+#define BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, ...)                              \
+    TYPE NAME = []                                                            \
+    {                                                                         \
+        using namespace brayns;                                               \
+        static std::once_flag _flag;                                          \
+        std::call_once(                                                       \
+            _flag,                                                            \
+            []                                                                \
+            {                                                                 \
+                MessageProperty _property;                                    \
+                _property.name = #NAME;                                       \
+                _property.options = {__VA_ARGS__};                            \
+                _property.getSchema = [](const void* _data)                   \
+                {                                                             \
+                    auto& _message = *static_cast<const MessageType*>(_data); \
+                    return Json::getSchema(_message.NAME);                    \
+                };                                                            \
+                _property.serialize = [](const void* _data, JsonValue& _json) \
+                {                                                             \
+                    auto& _message = *static_cast<const MessageType*>(_data); \
+                    return Json::serialize(_message.NAME, _json);             \
+                };                                                            \
+                _property.deserialize =                                       \
+                    [](const JsonValue& _json, void* _data)                   \
+                {                                                             \
+                    auto& _message = *static_cast<MessageType*>(_data);       \
+                    return Json::deserialize(_json, _message.NAME);           \
+                };                                                            \
+                _getInfo().addProperty(std::move(_property));                 \
+            });                                                               \
+        return TYPE{};                                                        \
     }();
 
 /**

@@ -30,9 +30,6 @@ set(BRAYNSNETWORK_INCLUDE_DIR ${PROJECT_SOURCE_DIR})
 
 add_library(braynsNetwork SHARED ${BRAYNSNETWORK_SOURCES} ${BRAYNSNETWORK_HEADERS})
 
-target_compile_options(braynsNetwork PRIVATE "-Werror")
-target_compile_options(braynsNetwork PUBLIC "-Wno-error=sign-promo")
-
 target_include_directories(braynsNetwork PUBLIC
   $<BUILD_INTERFACE:${BRAYNSNETWORK_INCLUDE_DIR}>
   $<INSTALL_INTERFACE:include>)
