@@ -35,7 +35,9 @@ set(BUILD_SHARED_LIBS ON)
 add_subdirectory(poco)
 
 # Remove Poco warnings
-target_compile_options(Foundation PUBLIC -w)
+if(NOT CMAKE_BUILD_TYPE MATCHES DEBUG)
+    target_compile_options(Foundation PUBLIC -w)
+endif()
 
 # Remove Poco postfix d in debug
 set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Set Debug library postfix" FORCE)
