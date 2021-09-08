@@ -124,16 +124,13 @@ struct JsonAdapter<EmptyMessage>
 {
     static JsonSchema getSchema(const EmptyMessage&) { return {}; }
 
-    static bool serialize(const EmptyMessage& value, JsonValue& json)
+    static bool serialize(const EmptyMessage&, JsonValue& json)
     {
         json = Poco::makeShared<JsonObject>();
         return true;
     }
 
-    static bool deserialize(const JsonValue& json, EmptyMessage& value)
-    {
-        return true;
-    }
+    static bool deserialize(const JsonValue&, EmptyMessage&) { return true; }
 };
 
 /**
