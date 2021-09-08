@@ -34,6 +34,9 @@ set(ENABLE_PAGECOMPILER_FILE2PAGE OFF CACHE BOOL "Enable File2Page")
 set(BUILD_SHARED_LIBS ON)
 add_subdirectory(poco)
 
+# Remove Poco warnings
+target_compile_options(Foundation PUBLIC -w)
+
 # Remove Poco postfix d in debug
 set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Set Debug library postfix" FORCE)
 set(CMAKE_RELEASE_POSTFIX "" CACHE STRING "Set Release library postfix" FORCE)
