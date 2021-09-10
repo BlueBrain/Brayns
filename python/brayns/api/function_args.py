@@ -19,7 +19,8 @@
 
 from typing import List
 
-from .params import Params, Property
+from .params import Params
+from .property import Property
 
 
 def get_declarations(params: Params) -> List[str]:

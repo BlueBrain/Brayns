@@ -18,7 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from .client.client import Client
-from .client.reply import Error as ReplyError
+from .client.reply_error import ReplyError
 from .utils.camera_path_handler import CameraPathHandler
 from .plugins.circuit_explorer import CircuitExplorer
 

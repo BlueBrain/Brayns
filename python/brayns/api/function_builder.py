@@ -17,24 +17,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
+from typing import Any, Callable
 
+from ..client.abstract_client import AbstractClient
 from . import function_args
-from . import client_interface
-
 from .entrypoint import Entrypoint
-from .client_interface import Client
 
 
-def build_function(client: Client, entrypoint: Entrypoint) -> Any:
+def build_function(
+    client: AbstractClient,
+    entrypoint: Entrypoint
+) -> Callable:
     method = entrypoint.name
     code = _get_function_code(entrypoint)
     context = {
-        '_get_result': lambda params: client_interface.get_result(
-            client,
-            method,
-            params
-        )
+        '_get_result': lambda params: _get_result(client, method, params)
     }
     exec(code, context)
     return context['_function']
@@ -71,3 +68,14 @@ def _format_args_description(entrypoint: Entrypoint) -> str:
         return ''
     separator = '\n    '
     return f'\n\n    Keyword arguments:\n    {separator.join(args)}\n    '
+
+
+def _get_result(client: AbstractClient, method: str, params: dict) -> Any:
+    args = {
+        key: value
+        for key, value in params.items()
+        if key != 'self' and value is not None
+    }
+    if not args:
+        return client.request(method, None)
+    return client.request(method, args)

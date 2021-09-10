@@ -21,13 +21,12 @@ from typing import Any, Tuple, Union
 
 from ..api import api_builder
 from ..utils import image
-
+from .abstract_client import AbstractClient
+from .request import Request
 from .json_rpc_client import JsonRpcClient
 
-from . import request
 
-
-class Client:
+class Client(AbstractClient):
 
     def __init__(
         self,
@@ -42,19 +41,19 @@ class Client:
     def __del__(self) -> None:
         self._client.disconnect()
 
-    def get(
+    def request(
         self,
         method: str,
         params: Any = None,
         request_id: Union[int, str] = 0,
         timeout: Union[None, float] = None,
     ) -> Any:
-        message = request.Message(method, params, request_id)
-        self._client.send(message)
-        if message.is_notification():
+        request = Request(method, params, request_id)
+        self._client.send(request)
+        if request.is_notification():
             return None
         return self._client.get_reply(
-            message,
+            request,
             timeout
         ).get_result()
 

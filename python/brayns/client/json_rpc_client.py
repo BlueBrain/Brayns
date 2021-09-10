@@ -19,16 +19,17 @@
 
 from typing import Union
 
+from .reply import Reply
+from .reply_error import ReplyError
+from .request import Request
+from .request_manager import RequestManager
 from .websocket_client import WebsocketClient
-
-from . import reply
-from . import request
 
 
 class JsonRpcClient:
 
     def __init__(self) -> None:
-        self._manager = request.Manager()
+        self._manager = RequestManager()
         self._client = WebsocketClient(
             callback=self._on_frame_received
         )
@@ -50,19 +51,19 @@ class JsonRpcClient:
         self._manager.clear()
         self._client.disconnect()
 
-    def send(self, message: request.Message) -> None:
-        self._manager.add_request(message)
-        self._client.send(request.to_json(message))
+    def send(self, request: Request) -> None:
+        self._manager.add_request(request)
+        self._client.send(request.to_json())
 
     def get_reply(
         self,
-        request: request.Message,
+        request: Request,
         timeout: Union[None, float] = None
-    ) -> reply.Message:
+    ) -> Reply:
         return self._manager.get_reply(request, timeout)
 
     def _on_frame_received(self, data):
         try:
-            self._manager.add_reply(reply.from_json(data))
-        except reply.ParsingError:
+            self._manager.add_reply(Reply.from_json(data))
+        except ReplyError:
             pass

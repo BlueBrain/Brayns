@@ -74,16 +74,21 @@ class CameraPathHandler:
                         float(self._nb_steps_per_sequence)
 
                     origin[k] = p0['origin'][k] + t_origin[k] * float(i)
-                    direction[k] = p0['direction'][k] + t_direction[k] * float(i)
+                    direction[k] = p0['direction'][k] + \
+                        t_direction[k] * float(i)
                     up[k] = p0['up'][k] + t_up[k] * float(i)
 
                 nbsteps = float(self._nb_steps_per_sequence)
-                t_aperture_radius = (p1['apertureRadius'] - p0['apertureRadius']) / nbsteps
+                t_aperture_radius = (
+                    p1['apertureRadius'] - p0['apertureRadius']) / nbsteps
 
-                aperture_radius = p0['apertureRadius'] + t_aperture_radius * float(i)
+                aperture_radius = p0['apertureRadius'] + \
+                    t_aperture_radius * float(i)
 
-                t_focus_distance = (p1['focusDistance'] - p0['focusDistance']) / nbsteps
-                focus_distance = p0['focusDistance'] + t_focus_distance * float(i)
+                t_focus_distance = (
+                    p1['focusDistance'] - p0['focusDistance']) / nbsteps
+                focus_distance = p0['focusDistance'] + \
+                    t_focus_distance * float(i)
 
                 origins.append(origin)
                 directions.append(direction)
@@ -99,7 +104,8 @@ class CameraPathHandler:
             aperture_radius = 0.0
             focus_distance = 0.0
             for j in range(int(self._smoothing_size)):
-                index = int(max(0, min(i + j - self._smoothing_size / 2, nb_frames - 1)))
+                index = int(
+                    max(0, min(i + j - self._smoothing_size / 2, nb_frames - 1)))
                 for k in range(3):
                     o[k] = o[k] + origins[index][k]
                     d[k] = d[k] + directions[index][k]

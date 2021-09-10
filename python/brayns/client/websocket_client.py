@@ -17,9 +17,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import asyncio
+import ssl
 from typing import Callable, Union
 
-import ssl
 import websockets
 
 from .event_loop import EventLoop
@@ -65,7 +66,7 @@ class WebsocketClient:
         self._polling_task.cancel()
         try:
             self._polling_task.result()
-        except:
+        except asyncio.CancelledError:
             pass
         self._loop.stop()
 

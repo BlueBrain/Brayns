@@ -19,22 +19,26 @@
 
 from typing import Any
 
-import abc
 
+class ReplyError(Exception):
 
-class Client(abc.ABC):
+    @staticmethod
+    def from_dict(error: dict):
+        return ReplyError(
+            code=error.get('code'),
+            message=error.get('message'),
+            data=error.get('data')
+        )
 
-    @abc.abstractmethod
-    def get(method: str, params: Any) -> Any:
-        pass
+    def __init__(
+        self,
+        code: int,
+        message: str,
+        data: Any = None
+    ) -> None:
+        self.code = code
+        self.message = message
+        self.data = data
 
-
-def get_result(client: Client, method: str, params: dict) -> Any:
-    args = {
-        key: value
-        for key, value in params.items()
-        if key != 'self' and value is not None
-    }
-    if not args:
-        return client.get(method, None)
-    return client.get(method, args)
+    def __str__(self) -> str:
+        return self.message

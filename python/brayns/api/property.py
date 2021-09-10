@@ -17,34 +17,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import asyncio
-import threading
-from typing import Coroutine
+from dataclasses import dataclass
+
+from . import typename
 
 
-class EventLoop:
+@dataclass
+class Property:
 
-    def __init__(self) -> None:
-        self._loop = asyncio.new_event_loop()
-        self._thread = None
+    typename: str
+    name: str
+    description: str
+    required: bool = False
+    read_only: bool = False
 
-    @property
-    def running(self) -> bool:
-        return self._loop.is_running()
-
-    def start(self) -> None:
-        if self.running:
-            return
-        self._thread = threading.Thread(
-            target=self._loop.run_forever,
-            daemon=True
+    @staticmethod
+    def from_schema(name: str, schema: dict, required: bool = False):
+        return Property(
+            typename=typename.from_schema(schema),
+            name=name,
+            description=schema.get('description', ''),
+            required=required,
+            read_only=schema.get('readOnly', False)
         )
-        self._thread.start()
-
-    def stop(self) -> None:
-        if not self.running:
-            return
-        self._loop.call_soon_threadsafe(self._loop.stop)
-
-    def run(self, coroutine: Coroutine) -> asyncio.Future:
-        return asyncio.run_coroutine_threadsafe(coroutine, self._loop)

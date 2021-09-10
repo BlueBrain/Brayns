@@ -256,7 +256,7 @@ class CircuitExplorer:
         params['path'] = path
         params['loader_properties'] = props
 
-        return self._get('add-model', params)
+        return self._request('add-model', params)
 
     # pylint: disable=R0913, R0914
     def set_material(self, model_id, material_id, diffuse_color=(1.0, 1.0, 1.0),
@@ -302,7 +302,7 @@ class CircuitExplorer:
         params['shading_mode'] = shading_mode
         params['clipping_mode'] = clipping_mode
         params['user_parameter'] = user_parameter
-        return self._get("set-material", params)
+        return self._request("set-material", params)
 
     # pylint: disable=W0102
     def set_materials(self, model_ids, material_ids, diffuse_colors, specular_colors,
@@ -351,7 +351,7 @@ class CircuitExplorer:
             material['shading_mode'] = shading_modes[i]
             material['clipping_mode'] = clipping_modes[i]
             material['user_parameter'] = user_parameters[i]
-        return self._get("set-materials", {'materials': materials})
+        return self._request("set-materials", {'materials': materials})
 
     # pylint: disable=R0913, R0914
     def set_material_range(self, model_id, material_ids, diffuse_color=(1.0, 1.0, 1.0),
@@ -399,7 +399,7 @@ class CircuitExplorer:
         properties['clipping_mode'] = clipping_mode
         properties['user_parameter'] = user_parameter
         params['properties'] = properties
-        return self._get("set-material-range", params)
+        return self._request("set-material-range", params)
 
     def save_model_to_cache(self, model_id, path):
         """
@@ -413,7 +413,7 @@ class CircuitExplorer:
         params = dict()
         params['model_id'] = model_id
         params['path'] = path
-        return self._get('save-model-to-cache', params)
+        return self._request('save-model-to-cache', params)
 
     def set_material_extra_attributes(self, model_id):
         """
@@ -425,7 +425,7 @@ class CircuitExplorer:
         """
         params = dict()
         params['model_id'] = model_id
-        return self._get('set-material-extra-attributes', params)
+        return self._request('set-material-extra-attributes', params)
 
     def set_camera(self, origin, direction, up):
         """
@@ -441,7 +441,7 @@ class CircuitExplorer:
         params['origin'] = origin
         params['direction'] = direction
         params['up'] = up
-        return self._get('set-odu-camera', params)
+        return self._request('set-odu-camera', params)
 
     def get_camera(self):
         """
@@ -450,7 +450,7 @@ class CircuitExplorer:
         :return: A JSon representation of the origin, direction and up vectors
         :rtype: str
         """
-        return self._get('get-odu-camera')
+        return self._request('get-odu-camera')
 
     def add_grid(self, min_value, max_value, interval, radius=1.0, opacity=0.5, show_axis=True,
                  colored=True):
@@ -475,7 +475,7 @@ class CircuitExplorer:
         params['plane_opacity'] = opacity
         params['show_axis'] = show_axis
         params['use_colors'] = colored
-        return self._get('add-grid', params)
+        return self._request('add-grid', params)
 
     def add_column(self, radius=0.01):
         """
@@ -487,7 +487,7 @@ class CircuitExplorer:
         """
         params = dict()
         params['radius'] = radius
-        return self._get('add-column', params)
+        return self._request('add-column', params)
 
     def export_frames_to_disk(self, path, animation_frames, camera_definitions, image_format='png',
                               quality=100, samples_per_pixel=1, start_frame=0, name_after_step=False):
@@ -530,7 +530,7 @@ class CircuitExplorer:
             # Focus distance
             values.append(camera_definition[4])
         params['camera_information'] = values
-        return self._get('export-frames-to-disk', params)
+        return self._request('export-frames-to-disk', params)
 
     def get_export_frames_progress(self):
         """
@@ -541,7 +541,7 @@ class CircuitExplorer:
             has finished.
         :rtype: dict
         """
-        return self._get('get-export-frames-progress')
+        return self._request('get-export-frames-progress')
 
     def make_movie(self, output_movie_path, fps_rate, frames_folder_path,
                    frame_file_extension="png", dimensions=[1920, 1080], erase_frames=True):
@@ -568,7 +568,7 @@ class CircuitExplorer:
         params['output_movie_path'] = output_movie_path
         params['erase_frames'] = erase_frames
 
-        return self._get('make-movie', params)
+        return self._request('make-movie', params)
 
     def cancel_frames_export(self):
         """
@@ -585,7 +585,7 @@ class CircuitExplorer:
         params['start_frame'] = 0
         params['animation_information'] = []
         params['camera_information'] = []
-        return self._get('export-frames-to-disk', params)
+        return self._request('export-frames-to-disk', params)
 
     def trace_anterograde(self, model_id, source_cells_gid, target_cells_gid,
                           source_cells_color=(5, 5, 0, 1), target_cells_color=(5, 0, 0, 1),
@@ -609,7 +609,7 @@ class CircuitExplorer:
         params['source_cell_color'] = source_cells_color
         params['connected_cells_color'] = target_cells_color
         params['non_connected_cells_color'] = non_connected_color
-        return self._get('trace-anterograde', params)
+        return self._request('trace-anterograde', params)
 
     def add_sphere(self, center, radius, color, name=""):
         """
@@ -627,7 +627,7 @@ class CircuitExplorer:
         params['radius'] = radius
         params['color'] = color
         params['name'] = name
-        return self._get('add-sphere', params)
+        return self._request('add-sphere', params)
 
     def add_pill(self, p1, p2, radius, color, name=""):
         """
@@ -649,7 +649,7 @@ class CircuitExplorer:
         params['radius2'] = radius
         params['color'] = color
         params['name'] = name
-        return self._get('add-pill', params)
+        return self._request('add-pill', params)
 
     def add_conepill(self, p1, p2, radius1, radius2, color, name=""):
         """
@@ -672,7 +672,7 @@ class CircuitExplorer:
         params['radius2'] = radius2
         params['color'] = color
         params['name'] = name
-        return self._get('add-pill', params)
+        return self._request('add-pill', params)
 
     def add_sigmoidpill(self, p1, p2, radius1, radius2, color, name=""):
         """
@@ -695,7 +695,7 @@ class CircuitExplorer:
         params['radius2'] = radius2
         params['color'] = color
         params['name'] = name
-        return self._get('add-pill', params)
+        return self._request('add-pill', params)
 
     def add_cylinder(self, center, up, radius, color, name=""):
         """
@@ -715,7 +715,7 @@ class CircuitExplorer:
         params['radius'] = radius
         params['color'] = color
         params['name'] = name
-        return self._get('add-cylinder', params)
+        return self._request('add-cylinder', params)
 
     def add_box(self, minCorner, maxCorner, color, name=""):
         """
@@ -733,7 +733,7 @@ class CircuitExplorer:
         params['max_corner'] = maxCorner
         params['color'] = color
         params['name'] = name
-        return self._get('add-box', params)
+        return self._request('add-box', params)
 
     def get_material_ids(self, model_id):
         """
@@ -745,10 +745,10 @@ class CircuitExplorer:
         """
         params = dict()
         params['model_id'] = model_id
-        return self._get('get-material-ids', params)
+        return self._request('get-material-ids', params)
 
-    def _get(self, method, params=None):
-        return self._client.get(
+    def _request(self, method, params=None):
+        return self._client.request(
             method=method,
             params=params,
             timeout=CircuitExplorer.DEFAULT_RESPONSE_TIMEOUT

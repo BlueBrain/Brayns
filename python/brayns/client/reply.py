@@ -17,40 +17,34 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any, Type, Union
-
 import json
+from typing import Any, Union
+
+from .reply_error import ReplyError
 
 
-class ParsingError(Exception):
-    pass
+class Reply:
 
+    @staticmethod
+    def from_json(data: str):
+        message = None
+        try:
+            message = json.loads(data)
+        except Exception as e:
+            raise ReplyError(0, f'JSON syntax error: {str(e)}')
+        if not isinstance(message, dict):
+            raise ReplyError(0, 'Not a JSON object')
+        return Reply.from_dict(message)
 
-class Error(Exception):
-
-    def __init__(
-        self,
-        code: int,
-        message: str,
-        data: Any = None
-    ) -> None:
-        self.code = code
-        self.message = message
-        self.data = data
-
-    def __str__(self) -> str:
-        return self.message
-
-
-def load_error(error: dict) -> Error:
-    return Error(
-        code=error.get('code'),
-        message=error.get('message'),
-        data=error.get('data')
-    )
-
-
-class Message:
+    @staticmethod
+    def from_dict(message: dict):
+        return Reply(
+            request_id=message.get('id'),
+            params=message.get('params'),
+            result=message.get('result'),
+            error=message.get('error'),
+            jsonrpc=message.get('jsonrpc')
+        )
 
     def __init__(
         self,
@@ -58,7 +52,7 @@ class Message:
         request_id: Union[None, int, str] = None,
         params: Any = None,
         result: Any = None,
-        error: Union[None, Error] = None,
+        error: Union[None, ReplyError] = None,
     ) -> None:
         self.jsonrpc = jsonrpc
         self.request_id = request_id
@@ -74,26 +68,5 @@ class Message:
 
     def get_result(self) -> Any:
         if self.is_error():
-            raise load_error(self.error)
+            raise ReplyError.from_dict(self.error)
         return self.result
-
-
-def load_message(message: dict) -> Message:
-    return Message(
-        request_id=message.get('id'),
-        params=message.get('params'),
-        result=message.get('result'),
-        error=message.get('error'),
-        jsonrpc=message.get('jsonrpc')
-    )
-
-
-def from_json(data: str) -> Message:
-    message = None
-    try:
-        message = json.loads(data)
-    except Exception as e:
-        raise ParsingError(f'JSON syntax error: {str(e)}')
-    if not isinstance(message, dict):
-        raise ParsingError('Not a JSON object')
-    return load_message(message)

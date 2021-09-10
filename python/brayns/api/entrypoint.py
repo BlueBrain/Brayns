@@ -17,27 +17,22 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from . import params
+from dataclasses import dataclass, field
 
 from .params import Params
 
 
+@dataclass
 class Entrypoint:
 
-    def __init__(
-        self,
-        name: str,
-        description: str,
-        params: Params
-    ) -> None:
-        self.name = name
-        self.description = description
-        self.params = params
+    name: str
+    description: str
+    params: Params = field(default_factory=Params)
 
-
-def from_schema(schema: dict) -> Entrypoint:
-    return Entrypoint(
-        name=schema['title'],
-        description=schema.get('description', ''),
-        params=params.from_schema(schema.get('params', []))
-    )
+    @staticmethod
+    def from_schema(schema: dict):
+        return Entrypoint(
+            name=schema['title'],
+            description=schema.get('description', ''),
+            params=Params.from_schemas(schema.get('params', []))
+        )
