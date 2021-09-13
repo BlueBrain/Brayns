@@ -26,12 +26,14 @@ from .request import Request
 
 class _Monitor:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._reply = None
         self._lock = threading.Condition()
 
     def get_reply(self, timeout: Union[None, float]) -> Reply:
         with self._lock:
+            if self._reply is not None:
+                return self._reply
             if not self._lock.wait(timeout):
                 raise TimeoutError('Reply timeout')
         return self._reply
@@ -62,15 +64,12 @@ class RequestManager:
         timeout: Union[None, float] = None
     ) -> Reply:
         request_id = request.request_id
-        monitor = self._requests.get(request_id)
-        if monitor is None:
-            raise KeyError('No pending request with id {request_id!r}')
         try:
-            return monitor.get_reply(timeout)
+            return self._requests[request_id].get_reply(timeout)
         finally:
             del self._requests[request_id]
 
-    def clear(self):
+    def clear(self) -> None:
         for request in self._requests.values():
             request.set_reply(
                 Reply(0, 'Connection closed')
