@@ -79,7 +79,9 @@ class WebsocketClient:
         self._websocket = await websockets.connect(
             uri=('wss://' if secure else 'ws://') + uri,
             ssl=ssl.create_default_context(cafile=cafile) if secure else None,
-            ping_interval=None
+            ping_interval=None,
+            timeout=None,
+            max_size=int(2e9)
         )
 
     async def _poll(self):
