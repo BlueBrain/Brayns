@@ -47,8 +47,18 @@ public:
 
     virtual void onRequest(const Request& request) override
     {
-        auto message = _plugin->getFrameExportProgress();
-        request.reply({message.progress});
+        auto result = _plugin->getFrameExportProgress();
+        auto& properties = result.getPropertyMap();
+        auto error = properties.find("error");
+        if (!error)
+        {
+            request.reply({result.progress});
+            return;
+        }
+        auto code = error->as<int32_t>();
+        auto message = properties.find("message");
+        auto description = message->as<std::string>();
+        throw brayns::EntrypointException(code, description);
     }
 
 private:

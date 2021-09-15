@@ -528,8 +528,7 @@ FrameExportProgress CircuitExplorerPlugin::getFrameExportProgress()
 
     if (_exportFrameError)
         result.setError(1, _exportFrameErrorMessage);
-    else
-        result.setError(0, "");
+
     return result;
 }
 
