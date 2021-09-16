@@ -46,13 +46,19 @@ class Reply:
             jsonrpc=message.get('jsonrpc')
         )
 
+    @staticmethod
+    def from_error_message(message: dict):
+        return Reply(
+            error=ReplyError(0, message)
+        )
+
     def __init__(
         self,
         jsonrpc: str = '2.0',
-        request_id: Union[None, int, str] = None,
+        request_id: Union[int, str, None] = None,
         params: Any = None,
         result: Any = None,
-        error: Union[None, ReplyError] = None,
+        error: Union[ReplyError, None] = None,
     ) -> None:
         self.jsonrpc = jsonrpc
         self.request_id = request_id

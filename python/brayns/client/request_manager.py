@@ -30,7 +30,7 @@ class _Monitor:
         self._reply = None
         self._lock = threading.Condition()
 
-    def get_reply(self, timeout: Union[None, float]) -> Reply:
+    def get_reply(self, timeout: Union[float, None]) -> Reply:
         with self._lock:
             if self._reply is not None:
                 return self._reply
@@ -61,7 +61,7 @@ class RequestManager:
     def get_reply(
         self,
         request: Request,
-        timeout: Union[None, float] = None
+        timeout: Union[float, None] = None
     ) -> Reply:
         request_id = request.request_id
         try:
@@ -72,6 +72,6 @@ class RequestManager:
     def clear(self) -> None:
         for request in self._requests.values():
             request.set_reply(
-                Reply(0, 'Connection closed')
+                Reply.from_error_message('Connection closed')
             )
         self._requests.clear()

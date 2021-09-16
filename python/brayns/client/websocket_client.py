@@ -17,7 +17,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import asyncio
+import concurrent.futures
 import ssl
 from typing import Callable, Union
 
@@ -60,14 +60,14 @@ class WebsocketClient:
     def disconnect(self) -> None:
         if not self.connected:
             return
-        self._loop.run(
-            self._websocket.close()
-        ).result()
         self._polling_task.cancel()
         try:
             self._polling_task.result()
-        except asyncio.CancelledError:
+        except concurrent.futures.CancelledError:
             pass
+        self._loop.run(
+            self._websocket.close()
+        ).result()
         self._loop.stop()
 
     def send(self, data: Union[bytes, str]) -> None:

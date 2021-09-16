@@ -20,11 +20,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # All rights reserved. Do not distribute without further notice.
 
-"""Provides a class that ease the definition of smoothed camera paths"""
+"""Provides a class that ease the definition of smoothed camera paths."""
 
 
 class CameraPathHandler:
-    """Camera path handler"""
+    """Camera path handler."""
 
     def __init__(self, control_points, nb_steps_per_sequence, smoothing_size):
         """

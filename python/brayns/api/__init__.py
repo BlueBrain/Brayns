@@ -17,27 +17,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .client.client import Client
-from .client.reply_error import ReplyError
-from .utils.camera_path_handler import CameraPathHandler
-from .plugins.circuit_explorer import CircuitExplorer
+"""Build a Python API exposing a Brayns renderer entrypoints."""
 
+from . import api_builder
 
-def connect(*args, **kwargs) -> Client:
-    """Connect to a Brayns renderer.
-
-    See brayns.Client for parameters details.
-
-    Returns:
-        Client: Brayns client instance connected to the renderer.
-    """
-    return Client(*args, **kwargs)
-
-
-__all__ = [
-    'connect',
-    'Client',
-    'CameraPathHandler',
-    'CircuitExplorer',
-    'ReplyError'
-]
+__all__ = ['api_builder']

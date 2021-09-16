@@ -19,7 +19,8 @@
 
 from typing import Any, Callable
 
-from ..client.abstract_client import AbstractClient
+from brayns.client.abstract_client import AbstractClient
+
 from . import function_args
 from .entrypoint import Entrypoint
 

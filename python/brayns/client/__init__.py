@@ -17,27 +17,14 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .client.client import Client
-from .client.reply_error import ReplyError
-from .utils.camera_path_handler import CameraPathHandler
-from .plugins.circuit_explorer import CircuitExplorer
+"""Brayns client API to connect to a Brayns renderer."""
 
-
-def connect(*args, **kwargs) -> Client:
-    """Connect to a Brayns renderer.
-
-    See brayns.Client for parameters details.
-
-    Returns:
-        Client: Brayns client instance connected to the renderer.
-    """
-    return Client(*args, **kwargs)
-
+from .abstract_client import AbstractClient
+from .client import Client
+from .reply_error import ReplyError
 
 __all__ = [
-    'connect',
+    'AbstractClient',
     'Client',
-    'CameraPathHandler',
-    'CircuitExplorer',
     'ReplyError'
 ]

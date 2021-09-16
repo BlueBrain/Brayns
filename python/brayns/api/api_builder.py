@@ -17,15 +17,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+"""Brayns API builder.
+
+Use Brayns JSON-RPC entrypoints schemas to add Python methods to the client.
+"""
+
 import types
 from typing import List
 
-from ..client.abstract_client import AbstractClient
+from brayns.client.abstract_client import AbstractClient
+
 from . import function_builder
 from .entrypoint import Entrypoint
 
 
 def build_api(client: AbstractClient) -> None:
+    """Add all Brayns entrypoints as methods to the provided client.
+
+    The client is used to get the entrypoints schemas to build the methods.
+
+    Args:
+        client (AbstractClient): Client connected to a Brayns renderer.
+    """
     for schema in _get_all_schemas(client):
         _add_method(client, Entrypoint.from_schema(schema))
 
