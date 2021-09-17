@@ -23,9 +23,23 @@
 
 namespace brayns
 {
+/**
+ * @brief Task manager to store all running tasks started by clients.
+ *
+ * A task is started by a JSON-RPC request and is hence bound to a client and a
+ * request ID. These two objects can be used to retreive and monitor a task.
+ *
+ */
 class NetworkTaskManager
 {
 public:
+    /**
+     * @brief Add a new task and cancel the old one.
+     *
+     * @param handle Client requesting the task.
+     * @param id Task request ID from JSON-RPC.
+     * @param task Task to register.
+     */
     void addOrReplace(const ConnectionHandle& handle, const RequestId& id,
                       NetworkTaskPtr task)
     {
@@ -37,6 +51,15 @@ public:
         _tasks.add(handle, id, std::move(task));
     }
 
+    /**
+     * @brief Add a task if not already running.
+     *
+     * @param handle Client requesting the task.
+     * @param id Task request ID from JSON-RPC.
+     * @param task Task to register.
+     * @return true No task with the same client / ID exists.
+     * @return false Cannot register the task because already running.
+     */
     bool addIfNotPresent(const ConnectionHandle& handle, const RequestId& id,
                          NetworkTaskPtr task)
     {
@@ -49,11 +72,24 @@ public:
         return true;
     }
 
+    /**
+     * @brief Notify all task bound to a client when this one disconnects.
+     *
+     * @param handle Client handle.
+     */
     void disconnect(const ConnectionHandle& handle) const
     {
         _tasks.forEach(handle, [&](auto&, auto& task) { task.onDisconnect(); });
     }
 
+    /**
+     * @brief Cancel a task from its client and ID.
+     *
+     * @param handle Client connection handle.
+     * @param id Task request ID.
+     * @return true Task found and cancelled.
+     * @return false Task not found.
+     */
     bool cancel(const ConnectionHandle& handle, const RequestId& id) const
     {
         auto task = _tasks.find(handle, id);
@@ -65,6 +101,13 @@ public:
         return true;
     }
 
+    /**
+     * @brief Poll all registered task.
+     *
+     * Polling a task checks if it is done, run cleanup if any and remove it
+     * from the list.
+     *
+     */
     void poll()
     {
         _tasks.removeIf(

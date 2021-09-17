@@ -26,17 +26,37 @@
 
 namespace brayns
 {
+/**
+ * @brief Wrapper around a condition variable to monitor a task.
+ *
+ */
 class NetworkTaskMonitor
 {
 public:
+    /**
+     * @brief Blocks until notified.
+     *
+     */
     void wait()
     {
         std::unique_lock<std::mutex> lock(_mutex);
         _monitor.wait(lock);
     }
 
+    /**
+     * @brief Notify the monitor and unlock all thread waiting on it.
+     *
+     */
     void notify() { _monitor.notify_all(); }
 
+    /**
+     * @brief Wait for notification or throw if timeout is reached.
+     *
+     * @tparam R Representation type.
+     * @tparam P Period ratio.
+     * @param timeout Timeout duration.
+     * @throw std::runtime_error Timeout is reached with no notifications.
+     */
     template <typename R, typename P>
     void wait(std::chrono::duration<R, P> timeout)
     {
@@ -48,6 +68,15 @@ public:
         }
     }
 
+    /**
+     * @brief Wait for notification with time limit.
+     *
+     * @tparam R Representation type.
+     * @tparam P Period type.
+     * @param duration Max duration to wait for notifications.
+     * @return true No notifications has been received, duration waited.
+     * @return false Waiting cancelled by a notification.
+     */
     template <typename R, typename P>
     bool waitFor(std::chrono::duration<R, P> duration)
     {
