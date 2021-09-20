@@ -30,14 +30,36 @@
 
 namespace brayns
 {
+/**
+ * @brief Task pool indexed by request ID.
+ *
+ */
 using NetworkTaskIdMap = std::unordered_map<RequestId, NetworkTaskPtr>;
 
+/**
+ * @brief Map of task pools indexed by client connection handle.
+ *
+ */
 using NetworkTaskConnectionMap =
     std::unordered_map<ConnectionHandle, NetworkTaskIdMap>;
 
+/**
+ * @brief Pool to store tasks.
+ *
+ * Allow to store and retreive tasks from the connection handle of the client
+ * requesting it and the ID of the associated request.
+ *
+ */
 class NetworkTaskMap
 {
 public:
+    /**
+     * @brief Add a task to the pool with the associated client and request ID.
+     *
+     * @param handle Connection handle of the client requesting the task.
+     * @param id ID of the request starting the task.
+     * @param task Abstract task (might be running or not).
+     */
     void add(const ConnectionHandle& handle, const RequestId& id,
              NetworkTaskPtr task)
     {
@@ -45,6 +67,13 @@ public:
         _tasks[handle][id] = std::move(task);
     }
 
+    /**
+     * @brief Retreive a task using its client and request ID.
+     *
+     * @param handle Connection handle of the client requesting the task.
+     * @param id ID of the request starting the task.
+     * @return NetworkTask* Task or null if not found.
+     */
     NetworkTask* find(const ConnectionHandle& handle, const RequestId& id) const
     {
         auto i = _tasks.find(handle);
@@ -62,6 +91,14 @@ public:
         return task.get();
     }
 
+    /**
+     * @brief Call the given functor on each client, request ID, task.
+     *
+     * Functor: void(const ConnectionHandle&, const RequestId&, NetworkTask&).
+     *
+     * @tparam FunctorType Functor type.
+     * @param functor Functor instance.
+     */
     template <typename FunctorType>
     void forEach(FunctorType functor) const
     {
@@ -78,6 +115,15 @@ public:
         }
     }
 
+    /**
+     * @brief Call for each request ID, task required by the given client.
+     *
+     * Functor: void(const RequestId&, NetworkTask&).
+     *
+     * @tparam FunctorType Functor type.
+     * @param handle Client connection handle.
+     * @param functor Functor instance.
+     */
     template <typename FunctorType>
     void forEach(const ConnectionHandle& handle, FunctorType functor) const
     {
@@ -95,6 +141,14 @@ public:
         }
     }
 
+    /**
+     * @brief Remove tasks if the given functor returns true.
+     *
+     * Functor: bool(const ConnectionHandle&, const RequestId&, NetworkTask&).
+     *
+     * @tparam FunctorType Functor type.
+     * @param functor Functor instance.
+     */
     template <typename FunctorType>
     void removeIf(FunctorType functor)
     {

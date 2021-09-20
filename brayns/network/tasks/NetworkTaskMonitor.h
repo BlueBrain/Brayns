@@ -75,7 +75,7 @@ public:
      * @tparam P Period type.
      * @param duration Max duration to wait for notifications.
      * @return true No notifications has been received, duration waited.
-     * @return false Waiting cancelled by a notification.
+     * @return false Cancelled by a notification.
      */
     template <typename R, typename P>
     bool waitFor(std::chrono::duration<R, P> duration)
