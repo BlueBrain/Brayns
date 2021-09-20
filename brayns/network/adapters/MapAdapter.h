@@ -92,7 +92,7 @@ struct MapAdapter
      */
     static bool deserialize(const JsonValue& json, T& value)
     {
-        auto object = JsonHelper::extractObject(json);
+        auto object = JsonExtractor::extractObject(json);
         if (!object)
         {
             return false;

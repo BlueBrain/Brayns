@@ -217,7 +217,7 @@ struct JsonAdapter<JsonSchema>
      */
     static bool deserialize(const JsonValue& json, JsonSchema& value)
     {
-        auto object = JsonHelper::extractObject(json);
+        auto object = JsonExtractor::extractObject(json);
         if (!object)
         {
             return false;

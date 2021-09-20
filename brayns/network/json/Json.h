@@ -180,50 +180,6 @@ struct Json
     }
 };
 
-class JsonHelper
-{
-public:
-    static JsonArray::Ptr extractArray(const JsonValue& json)
-    {
-        if (json.type() != typeid(JsonArray::Ptr))
-        {
-            return nullptr;
-        }
-        return json.extract<JsonArray::Ptr>();
-    }
-
-    static JsonObject::Ptr extractObject(const JsonValue& json)
-    {
-        if (json.type() != typeid(JsonObject::Ptr))
-        {
-            return nullptr;
-        }
-        return json.extract<JsonObject::Ptr>();
-    }
-
-    template <typename T>
-    static T extract(const JsonValue& json, const std::string& key)
-    {
-        if (json.type() != typeid(JsonObject::Ptr))
-        {
-            return T{};
-        }
-        auto& object = *json.extract<JsonObject::Ptr>();
-        return Json::deserialize<T>(object.get(key));
-    }
-
-    template <typename T>
-    static bool extract(const JsonValue& json, const std::string& key, T& value)
-    {
-        if (json.type() != typeid(JsonObject::Ptr))
-        {
-            return value;
-        }
-        auto& object = *json.extract<JsonObject::Ptr>();
-        return Json::deserialize(object.get(key), value);
-    }
-};
-
 /**
  * @brief Specialization to do nothing if value is already JSON.
  *

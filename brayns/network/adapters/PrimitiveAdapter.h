@@ -25,6 +25,7 @@
 #include <cstdint>
 
 #include <brayns/network/json/Json.h>
+#include <brayns/network/json/JsonExtractor.h>
 
 namespace brayns
 {

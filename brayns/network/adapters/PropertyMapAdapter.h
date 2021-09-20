@@ -224,7 +224,7 @@ private:
     static bool _createArray(const std::string& name, const JsonValue& json,
                              PropertyMap& properties)
     {
-        auto array = JsonHelper::extractArray(json);
+        auto array = JsonExtractor::extractArray(json);
         if (!array)
         {
             return false;
@@ -317,7 +317,7 @@ class PropertyMapDeserializer
 public:
     static bool deserialize(const JsonValue& json, PropertyMap& value)
     {
-        auto object = JsonHelper::extractObject(json);
+        auto object = JsonExtractor::extractObject(json);
         if (!object)
         {
             return false;

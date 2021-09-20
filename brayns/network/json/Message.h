@@ -157,7 +157,7 @@ public:
 
     bool deserialize(const JsonValue& json, void* message) const
     {
-        auto object = JsonHelper::extractObject(json);
+        auto object = JsonExtractor::extractObject(json);
         if (!object)
         {
             return false;

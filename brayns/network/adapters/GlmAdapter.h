@@ -92,7 +92,7 @@ struct GlmAdapter
      */
     static bool deserialize(const JsonValue& json, T& value)
     {
-        auto array = JsonHelper::extractArray(json);
+        auto array = JsonExtractor::extractArray(json);
         if (!array)
         {
             return false;
