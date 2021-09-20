@@ -32,11 +32,28 @@
 
 namespace brayns
 {
+/**
+ * @brief Model upload manager for one client.
+ *
+ */
 class ModelUploader
 {
 public:
+    /**
+     * @brief Check if the client has model uploads running.
+     *
+     * @return true At least one model upload task is running.
+     * @return false No model is uploaded.
+     */
     bool hasTasks() const { return !_tasks.empty(); }
 
+    /**
+     * @brief Add a new model upload task.
+     *
+     * Task model chunks ID must not be in use by another running model upload.
+     *
+     * @param task Running model upload task.
+     */
     void addTask(ModelUploadTaskPtr task)
     {
         auto& chunksId = task->getChunksId();
@@ -50,8 +67,20 @@ public:
         currentTask = std::move(task);
     }
 
+    /**
+     * @brief Associate the next binary packet with a model.
+     *
+     * @param id Chunks ID of the model.
+     */
     void setNextChunkId(const std::string& id) { _nextChunkId = id; }
 
+    /**
+     * @brief Add a new binary packet to the current model.
+     *
+     * Current model is set using its chunks ID with setNextChunkId.
+     *
+     * @param blob Model binary data chunk.
+     */
     void addBlob(const std::string& blob)
     {
         auto i = _tasks.find(_nextChunkId);
@@ -65,6 +94,10 @@ public:
         task.addBlob(blob);
     }
 
+    /**
+     * @brief Remove all finished tasks (cancelled or complete).
+     *
+     */
     void removeFinishedTasks()
     {
         for (auto i = _tasks.begin(); i != _tasks.end();)

@@ -32,29 +32,63 @@
 
 namespace brayns
 {
+/**
+ * @brief Task implementation to execute a binary model upload.
+ *
+ */
 class ModelUploadTask : public EntrypointTask<BinaryParam, ModelDescriptors>
 {
 public:
+    /**
+     * @brief Construct a new task with engine access.
+     *
+     * @param engine Engine used to create the model.
+     */
     ModelUploadTask(Engine& engine)
         : _engine(&engine)
     {
     }
 
+    /**
+     * @brief Get the ID of the model chunks.
+     *
+     * @return const std::string& Model chunks common ID.
+     */
     const std::string& getChunksId() const { return _params.chunksID; }
 
+    /**
+     * @brief Get the size in bytes of the model to upload.
+     *
+     * @return size_t Model size in bytes.
+     */
     size_t getModelSize() const { return _params.size; }
 
+    /**
+     * @brief Get the number of bytes of the model currently received.
+     *
+     * @return size_t Number of bytes received.
+     */
     size_t getCurrentSize() const
     {
         auto& data = _blob.data;
         return data.size();
     }
 
+    /**
+     * @brief Get the upload percentage progress (bytes received / model size).
+     *
+     * @return double Upload progress from 0 to 1.
+     */
     double getUploadProgress() const
     {
         return double(getCurrentSize()) / double(getModelSize());
     }
 
+    /**
+     * @brief Add a new binary blob to the model source.
+     *
+     * @param blob Blob binary data.
+     */
     void addBlob(const std::string& blob)
     {
         try
@@ -67,6 +101,10 @@ public:
         }
     }
 
+    /**
+     * @brief Wait for upload finished and perform the model loading.
+     *
+     */
     virtual void run() override
     {
         _monitor.wait();
@@ -78,6 +116,10 @@ public:
                               { _loadingProgress(operation, amount); }});
     }
 
+    /**
+     * @brief Prepare the model upload using request params.
+     *
+     */
     virtual void onStart() override
     {
         _modelUploaded = false;
@@ -88,14 +130,26 @@ public:
         _blob.data.clear();
     }
 
+    /**
+     * @brief Send reply with created models.
+     *
+     */
     virtual void onComplete() override
     {
         _engine->triggerRender();
         reply(_descriptors);
     }
 
+    /**
+     * @brief Cancel the task if the client disconnects.
+     *
+     */
     virtual void onDisconnect() override { cancel(); }
 
+    /**
+     * @brief Stop waiting for upload if cancelled.
+     *
+     */
     virtual void onCancel() override { _monitor.notify(); }
 
 private:
