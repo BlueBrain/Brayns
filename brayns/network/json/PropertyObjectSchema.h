@@ -26,9 +26,19 @@
 
 namespace brayns
 {
+/**
+ * @brief Helper class to create a JSON schema from a PropertyObjet.
+ *
+ */
 class PropertyObjectSchema
 {
 public:
+    /**
+     * @brief Create a oneOf schema from a property object.
+     *
+     * @param object Object to build the schema from.
+     * @return JsonSchema Schema of object.
+     */
     static JsonSchema create(const PropertyObject& object)
     {
         JsonSchema schema;

@@ -82,29 +82,69 @@ enum class JsonType
     Object
 };
 
+/**
+ * @brief Helper class to get info about JSON type.
+ *
+ */
 struct JsonTypeHelper
 {
+    /**
+     * @brief Check if the given type is accepted by required.
+     *
+     * @param required Required type.
+     * @param type Type to check.
+     * @return true Type is accepted by required.
+     * @return false Type is not accepted by required.
+     */
     static bool check(JsonType required, JsonType type)
     {
         return required == type ||
                (required == JsonType::Number && type == JsonType::Integer);
     }
 
+    /**
+     * @brief Check if the given type is numeric (number or integer).
+     *
+     * @param type Type to check.
+     * @return true Type is numeric.
+     * @return false Type is not numeric.
+     */
     static bool isNumeric(JsonType type)
     {
         return type == JsonType::Integer || type == JsonType::Number;
     }
 
+    /**
+     * @brief Check if the type is primitive (not object nor array).
+     *
+     * @param type Type to check.
+     * @return true Type is primitive.
+     * @return false Type is object or array.
+     */
     static bool isPrimitive(JsonType type)
     {
         return type != JsonType::Unknown && type <= JsonType::String;
     }
 
+    /**
+     * @brief Check if the given JSON is a primitive.
+     *
+     * @param json JSON to check.
+     * @return true JSON is primitive.
+     * @return false JSON is not primitive.
+     */
     static bool isPrimitive(const JsonValue& json)
     {
         return json.isNumeric() || json.isString();
     }
 
+    /**
+     * @brief Check if the type is primitive.
+     *
+     * @tparam T Type to check.
+     * @return true Type is primitive.
+     * @return false Type is object or array.
+     */
     template <typename T>
     static constexpr bool isPrimitive()
     {
@@ -112,45 +152,84 @@ struct JsonTypeHelper
     }
 };
 
+/**
+ * @brief JSON type name storage.
+ *
+ */
 class JsonTypeName
 {
 public:
+    /**
+     * @brief Null type name.
+     *
+     * @return const std::string& Type name.
+     */
     static const std::string& ofNull()
     {
         static const std::string name = "null";
         return name;
     }
 
+    /**
+     * @brief Boolean type name.
+     *
+     * @return const std::string& Type name.
+     */
     static const std::string& ofBoolean()
     {
         static const std::string name = "boolean";
         return name;
     }
 
+    /**
+     * @brief Integer type name.
+     *
+     * @return const std::string& Type name.
+     */
     static const std::string& ofInteger()
     {
         static const std::string name = "integer";
         return name;
     }
 
+    /**
+     * @brief Number type name.
+     *
+     * @return const std::string& Type name.
+     */
     static const std::string& ofNumber()
     {
         static const std::string name = "number";
         return name;
     }
 
+    /**
+     * @brief String type name.
+     *
+     * @return const std::string& Type name.
+     */
     static const std::string& ofString()
     {
         static const std::string name = "string";
         return name;
     }
 
+    /**
+     * @brief Array type name.
+     *
+     * @return const std::string& Type name.
+     */
     static const std::string& ofArray()
     {
         static const std::string name = "array";
         return name;
     }
 
+    /**
+     * @brief Object type name.
+     *
+     * @return const std::string& Type name.
+     */
     static const std::string& ofObject()
     {
         static const std::string name = "object";
@@ -158,8 +237,18 @@ public:
     }
 };
 
+/**
+ * @brief Helper type to get JSON type.
+ *
+ */
 struct GetJsonType
 {
+    /**
+     * @brief Return the JSON type from its name.
+     *
+     * @param name Type name.
+     * @return JsonType JSON type.
+     */
     static JsonType fromName(const std::string& name)
     {
         if (name == JsonTypeName::ofNull())
@@ -193,6 +282,12 @@ struct GetJsonType
         return JsonType::Unknown;
     }
 
+    /**
+     * @brief Return the JSON type from a JSON value.
+     *
+     * @param json JSON to evaluate.
+     * @return JsonType JSON type.
+     */
     static JsonType fromJson(const JsonValue& json)
     {
         if (json.isEmpty())
@@ -226,6 +321,12 @@ struct GetJsonType
         return JsonType::Unknown;
     }
 
+    /**
+     * @brief Return the JSON type from a primitive type.
+     *
+     * @tparam T Primitive type to check.
+     * @return JsonType JSON type.
+     */
     template <typename T>
     static constexpr JsonType fromPrimitive()
     {
@@ -253,8 +354,18 @@ struct GetJsonType
     }
 };
 
+/**
+ * @brief Helper to get the name of a JSON type.
+ *
+ */
 struct GetJsonTypeName
 {
+    /**
+     * @brief Return the name of the JSON type or empty if unknown.
+     *
+     * @param type Type to name.
+     * @return const std::string& Name of type.
+     */
     static const std::string& fromType(JsonType type)
     {
         static const std::string empty;
