@@ -31,10 +31,30 @@ namespace brayns
 class RateLimiter
 {
 public:
+    /**
+     * @brief Clock used to measure the rate.
+     *
+     */
     using Clock = std::chrono::high_resolution_clock;
+
+    /**
+     * @brief Clock timepoint used to measure the rate.
+     *
+     */
     using TimePoint = Clock::time_point;
+
+    /**
+     * @brief Duration unit used to measure the rate.
+     *
+     */
     using Duration = Clock::duration;
 
+    /**
+     * @brief Build a rate limiter using FPS specification.
+     *
+     * @param fps Frames (calls) per second expected.
+     * @return RateLimiter Matching rate limiter.
+     */
     static RateLimiter fromFps(size_t fps)
     {
         if (fps == 0)
@@ -45,11 +65,24 @@ public:
         return std::chrono::duration_cast<Duration>(period);
     }
 
+    /**
+     * @brief Construct a rate limiter with min period to call functor.
+     *
+     * @param period Min duration between two functor calls.
+     */
     RateLimiter(Duration period = Duration(0))
         : _period(period)
     {
     }
 
+    /**
+     * @brief Call the functor if the given period is ellapsed.
+     *
+     * @tparam FunctorType Functor type.
+     * @param functor Functor instance to call.
+     * @return true Functor has been called.
+     * @return false Too soon to call functor.
+     */
     template <typename FunctorType>
     bool call(FunctorType functor)
     {
