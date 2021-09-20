@@ -128,6 +128,16 @@ public:
     }
 
     /**
+     * @brief Setup object modification callback to notify it.
+     *
+     */
+    virtual void onCreate() override
+    {
+        auto& object = getObject();
+        object.onModified([this] { _limiter.call([&] { notify(object); }); });
+    }
+
+    /**
      * @brief Reply the serialized object.
      *
      * @param request Client get-object request.
@@ -136,20 +146,6 @@ public:
     {
         auto& object = getObject();
         request.reply(object);
-    }
-
-    /**
-     * @brief Broadcast object new value if modified.
-     *
-     */
-    virtual void onUpdate() override
-    {
-        auto& object = getObject();
-        if (!object.isModified())
-        {
-            return;
-        }
-        _limiter.call([&] { notify(object); });
     }
 
 private:
