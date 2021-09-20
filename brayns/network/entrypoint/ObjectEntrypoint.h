@@ -142,7 +142,7 @@ public:
      * @brief Broadcast object new value if modified.
      *
      */
-    virtual void onPostRender() override
+    virtual void onUpdate() override
     {
         auto& object = getObject();
         if (!object.isModified())
