@@ -27,25 +27,67 @@ namespace brayns
 {
 class NetworkContext;
 
+/**
+ * @brief Info to monitor the image stream.
+ *
+ */
 class ImageStreamMonitor
 {
 public:
+    /**
+     * @brief Set the max FPS of the stream.
+     *
+     * @param fps
+     */
     void setFps(size_t fps) { _limiter = RateLimiter::fromFps(fps); }
 
+    /**
+     * @brief Check if the stream is controlled.
+     *
+     * If true, the client trigger the stream of each image required.
+     *
+     * @return true Controlled.
+     * @return false Automatic.
+     */
     bool isControlled() const { return _controlled; }
 
+    /**
+     * @brief Set the stream control mode.
+     *
+     * @param controlled True if controlled.
+     */
     void setControlled(bool controlled)
     {
         _controlled = controlled;
         _triggered = false;
     }
 
+    /**
+     * @brief Check if the image stream has been triggered.
+     *
+     * @return true Client triggered the image stream.
+     * @return false Nothing triggered.
+     */
     bool isTriggered() const { return _triggered; }
 
+    /**
+     * @brief Trigger the image stream in controlled mode.
+     *
+     */
     void trigger() { _triggered = true; }
 
+    /**
+     * @brief Reset the trigger in control mode.
+     *
+     */
     void resetTrigger() { _triggered = false; }
 
+    /**
+     * @brief Call the given functor with maximum FPS rate limit.
+     *
+     * @tparam FunctorType Functor type.
+     * @param functor Functor like void().
+     */
     template <typename FunctorType>
     void call(FunctorType functor)
     {
@@ -58,6 +100,10 @@ private:
     bool _triggered = false;
 };
 
+/**
+ * @brief Video stream monitor.
+ *
+ */
 class VideoStreamMonitor
 {
 public:
@@ -84,15 +130,38 @@ private:
     uint32_t _kbps = 5000;
 };
 
+/**
+ * @brief Stream manager to monitor image streaming.
+ *
+ */
 class StreamManager
 {
 public:
+    /**
+     * @brief Construct a stream manager with NetworkContext access.
+     *
+     * @param context Context of the network manager.
+     */
     StreamManager(NetworkContext& context);
 
+    /**
+     * @brief Broadcast images according to current settings.
+     *
+     */
     void broadcast();
 
+    /**
+     * @brief Get the image stream monitor.
+     *
+     * @return ImageStreamMonitor& Image stream monitor.
+     */
     ImageStreamMonitor& getImageStream() { return _imageStream; }
 
+    /**
+     * @brief Get the video stream monitor.
+     *
+     * @return VideoStreamMonitor& Video stream monitor.
+     */
     VideoStreamMonitor& getVideoStream() { return _videoStream; }
 
 private:
