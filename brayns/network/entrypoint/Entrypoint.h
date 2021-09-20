@@ -31,6 +31,29 @@ namespace brayns
  *
  * @tparam ParamsType
  * @tparam ResultType
+ *
+ * Example:
+ * @code {.cpp}
+ * // MyEntrypoint.h
+ * class MyEntrypoint : public Entrypoint<MyParams, MyResult>
+ * {
+ * public:
+ *      virtual void onRequest(const Request& request) override
+ *      {
+ *          auto params = request.getParams();
+ *          // Do stuff
+ *          request.reply(MyResult());
+ *      }
+ * };
+ *
+ * MyPlugin.cpp
+ * auto interface = _api->getActionInterface();
+ * if (interface)
+ * {
+ *      interface->add<MyEntrypoint>();
+ * }
+ * @endcode
+ *
  */
 template <typename ParamsType, typename ResultType>
 class Entrypoint : public BaseEntrypoint

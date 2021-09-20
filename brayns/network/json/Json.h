@@ -32,7 +32,16 @@ namespace brayns
 {
 /**
  * @brief High level class to serialize / deserialize JSON for custom types.
- * A valid specialization of JsonAdapter<T> is required.
+ *
+ * Can also be used to build JSON schemas.
+ *
+ * A valid specialization of JsonAdapter<T> is required to allow this usage.
+ *
+ * Example:
+ * @code {.cpp}
+ * auto test = Json::parse<Test>(json);
+ * auto json = Json::stringify(test);
+ * @endcode
  *
  */
 struct Json
