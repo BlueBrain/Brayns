@@ -29,6 +29,10 @@ namespace brayns
 {
 class NetworkContext;
 
+/**
+ * @brief Map of entrypoints indexed by name.
+ *
+ */
 using EntrypointMap = std::unordered_map<std::string, EntrypointRef>;
 
 /**

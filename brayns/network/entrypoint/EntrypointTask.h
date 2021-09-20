@@ -36,15 +36,37 @@ template <typename ParamsType, typename ResultType>
 class EntrypointTask : public NetworkTask
 {
 public:
+    /**
+     * @brief Alias for corresponding EntrypointRequest.
+     *
+     */
     using Request = EntrypointRequest<ParamsType, ResultType>;
 
+    /**
+     * @brief Construct a task with no associated requests.
+     *
+     */
     EntrypointTask() = default;
 
+    /**
+     * @brief Construct a task with request.
+     *
+     * Store the request to allow subclasses to access it.
+     *
+     * @param request Request starting the task.
+     */
     EntrypointTask(Request request)
         : _request(std::move(request))
     {
     }
 
+    /**
+     * @brief Process the given request in separated thread.
+     *
+     * Store the request to allow subclasses to access it and start the task.
+     *
+     * @param request Request starting the task.
+     */
     void execute(Request request)
     {
         cancelAndWait();
@@ -52,17 +74,45 @@ public:
         start();
     }
 
+    /**
+     * @brief Parse and return the request params.
+     *
+     * @return ParamsType Request params.
+     */
     ParamsType getParams() const { return _request.getParams(); }
 
+    /**
+     * @brief Parse the request params to the given instance.
+     *
+     * @param params Request params.
+     */
     void getParams(ParamsType& params) const
     {
         return _request.getParams(params);
     }
 
+    /**
+     * @brief Send success reply using underlying request.
+     *
+     * @param result Reply result data.
+     */
     void reply(const ResultType& result) { _request.reply(result); }
 
+    /**
+     * @brief Send an error reply when an exception occurs in the thread.
+     *
+     * @param e Opaque exception ptr.
+     */
     virtual void onError(std::exception_ptr e) { _request.error(e); }
 
+    /**
+     * @brief Send progress notification when progress() is called.
+     *
+     * Notification are rate limited to 1 per second.
+     *
+     * @param operation Current operation.
+     * @param amount Progress amount 0-1.
+     */
     virtual void onProgress(const std::string& operation, double amount)
     {
         _limiter.call([&] { _request.progress(operation, amount); });
