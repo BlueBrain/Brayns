@@ -210,7 +210,7 @@ private:
         {
             return;
         }
-        if (JsonSchemaHelper::isNumber(schema))
+        if (JsonSchemaHelper::isNumeric(schema))
         {
             _validateLimits(json, schema);
             return;
@@ -253,7 +253,7 @@ private:
     bool _validateType(const JsonValue& json, const JsonSchema& schema)
     {
         auto type = GetJsonType::fromJson(json);
-        if (!JsonSchemaHelper::hasType(schema, type))
+        if (!JsonSchemaHelper::checkType(schema, type))
         {
             _context.addInvalidType(type, schema.type);
             return false;

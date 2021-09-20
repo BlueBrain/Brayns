@@ -90,7 +90,7 @@ struct JsonTypeHelper
                (required == JsonType::Number && type == JsonType::Integer);
     }
 
-    static bool isNumber(JsonType type)
+    static bool isNumeric(JsonType type)
     {
         return type == JsonType::Integer || type == JsonType::Number;
     }
