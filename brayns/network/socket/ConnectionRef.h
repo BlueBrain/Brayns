@@ -27,19 +27,45 @@
 
 namespace brayns
 {
+/**
+ * @brief Wrapper around the connection manager and handle.
+ *
+ * Use a pointer to the manager and a handle to synchronize operations.
+ *
+ */
 class ConnectionRef
 {
 public:
+    /**
+     * @brief Construct an invalid connection.
+     *
+     */
     ConnectionRef() = default;
 
+    /**
+     * @brief Construct a connection reference from the client and manager.
+     *
+     * @param handle Client handle.
+     * @param connections Connection manager.
+     */
     ConnectionRef(ConnectionHandle handle, ConnectionManager& connections)
         : _handle(std::move(handle))
         , _connections(&connections)
     {
     }
 
+    /**
+     * @brief Get the client handle.
+     *
+     * @return const ConnectionHandle& Client connection handle.
+     */
     const ConnectionHandle& getHandle() const { return _handle; }
 
+    /**
+     * @brief Send a packet to the client.
+     *
+     * @param packet Data packet.
+     */
     void send(const OutputPacket& packet) const
     {
         if (!_connections)
@@ -56,6 +82,11 @@ public:
         }
     }
 
+    /**
+     * @brief Send a packet to all clients.
+     *
+     * @param packet Data packet.
+     */
     void broadcast(const OutputPacket& packet) const
     {
         if (!_connections)
@@ -72,6 +103,11 @@ public:
         }
     }
 
+    /**
+     * @brief Send a packet to all client except this one.
+     *
+     * @param packet Data packet.
+     */
     void broadcastToOtherClients(const OutputPacket& packet) const
     {
         if (!_connections)

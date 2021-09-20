@@ -101,7 +101,7 @@ void NetworkInterface::setupEntrypoints()
 void NetworkInterface::processRequests()
 {
     auto& connections = _context->getConnections();
-    connections.processRequests();
+    connections.update();
 }
 
 void NetworkInterface::update()

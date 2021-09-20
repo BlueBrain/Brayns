@@ -191,7 +191,7 @@ void ConnectionManager::broadcast(const ConnectionHandle& source,
         });
 }
 
-void ConnectionManager::processRequests()
+void ConnectionManager::update()
 {
     RequestBuffer buffer;
     {

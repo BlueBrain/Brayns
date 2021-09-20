@@ -27,6 +27,10 @@
 
 namespace brayns
 {
+/**
+ * @brief Connection info indexed by client handle.
+ *
+ */
 class ConnectionMap
 {
 public:

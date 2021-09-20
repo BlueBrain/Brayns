@@ -27,13 +27,29 @@
 
 namespace brayns
 {
+/**
+ * @brief Callback when a client connects.
+ *
+ */
 using ConnectionCallback = std::function<void(const ConnectionHandle&)>;
 
+/**
+ * @brief Callback when a client disconnects.
+ *
+ */
 using DisconnectionCallback = std::function<void(const ConnectionHandle&)>;
 
+/**
+ * @brief Callback when a request is received.
+ *
+ */
 using RequestCallback =
     std::function<void(const ConnectionHandle&, const InputPacket&)>;
 
+/**
+ * @brief Pack all connection callbacks.
+ *
+ */
 struct ConnectionListener
 {
     ConnectionCallback onConnect;

@@ -65,9 +65,18 @@
 
 namespace brayns
 {
+/**
+ * @brief Helper class to register all core entrypoints.
+ *
+ */
 class NetworkManagerEntrypoints
 {
 public:
+    /**
+     * @brief Register an instance of all core entrypoints in interface.
+     *
+     * @param interface Interface to store entrypoints.
+     */
     static void load(ActionInterface& interface)
     {
         interface.add<GetAnimationParametersEntrypoint>();
