@@ -140,10 +140,13 @@ public:
                     NetworkInterface& interface)
     {
         auto session = ClientSession::create(parameters);
+        BRAYNS_INFO << "Establishing client session with '"
+                    << session->getHost() << ":" << session->getPort() << "'\n";
         Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_1_1);
         Poco::Net::HTTPResponse response;
         auto socket =
             std::make_shared<NetworkSocket>(*session, request, response);
+        BRAYNS_INFO << "Client session connected.\n";
         interface.run(std::move(socket));
     }
 };
@@ -162,14 +165,7 @@ public:
 
     void start()
     {
-        try
-        {
-            _handle = std::async(std::launch::async, [this] { _run(); });
-        }
-        catch (const Poco::Exception& e)
-        {
-            throw std::runtime_error("Cannot start client: " + e.displayText());
-        }
+        _handle = std::async(std::launch::async, [this] { _run(); });
     }
 
     ~ClientTask()

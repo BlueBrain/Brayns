@@ -101,7 +101,7 @@ public:
      *
      * @return const ObjectType& Entrypoint object.
      */
-    const ObjectType& getObject() const
+    ObjectType& getObject() const
     {
         return ObjectExtractor<ObjectType>::extract(getApi());
     }
@@ -134,7 +134,8 @@ public:
     virtual void onCreate() override
     {
         auto& object = getObject();
-        object.onModified([this] { _limiter.call([&] { notify(object); }); });
+        object.onModified([&](auto&)
+                          { _limiter.call([&] { notify(object); }); });
     }
 
     /**

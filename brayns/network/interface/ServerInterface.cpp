@@ -234,5 +234,8 @@ void ServerInterface::start()
     {
         throw std::runtime_error("Cannot start server: " + e.displayText());
     }
+    auto& socket = _server->socket();
+    auto address = socket.address();
+    BRAYNS_INFO << "Server started on '" << address.toString() << "'\n";
 }
 } // namespace brayns
