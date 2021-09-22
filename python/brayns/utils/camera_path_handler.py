@@ -152,12 +152,11 @@ class CameraPathHandler:
         raise KeyError
 
     @staticmethod
-    def get_orbit_around_target(brayns, model_index, nb_frames, radius=0):
+    def get_orbit_around_target(model, nb_frames, radius=0):
         """
         Returns a list of points the camera has to pass through
 
-        :param Brayns brayns: The brayns client object
-        :param int model_index: The model id to orbit around of
+        :param dict model: target model
         :param int nb_frames : Number of frames it should last
         :param float radius: Radius of the orbit
         :return: The smoothed camera information for the given frame
@@ -166,7 +165,6 @@ class CameraPathHandler:
         cameras = list()
 
         def get_target():
-            model = brayns.scene.models[model_index]
             min_bounds = model['bounds']['min']
             max_bounds = model['bounds']['max']
             center_bounds = [0, 0, 0]

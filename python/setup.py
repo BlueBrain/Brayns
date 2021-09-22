@@ -23,43 +23,38 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # All rights reserved. Do not distribute without further notice.
 
-"""setup.py"""
 import os
-import pathlib
 import pkg_resources
 import setuptools
-from setuptools import find_packages, setup
 
-BASEDIR = os.path.dirname(os.path.abspath(__file__))
+DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
 
-def parse_reqs(reqs_file):
-    ''' parse the requirements '''
-    install_reqs = list()
-    with pathlib.Path(reqs_file).open() as requirements_txt:
-        install_reqs = [str(requirement)
-                        for requirement
-                        in pkg_resources.parse_requirements(requirements_txt)]
+def get_requirements():
+    return [
+        str(requirement)
+        for requirement in pkg_resources.parse_requirements(
+            os.path.join(DIRECTORY, 'requirements.txt')
+        )
+    ]
 
-    return install_reqs
 
-REQS = parse_reqs(os.path.join(BASEDIR, "requirements.txt"))
+def get_readme():
+    return open(
+        os.path.join(DIRECTORY, 'README.md')
+    ).read()
 
-# read the contents of README.md
-this_directory = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(this_directory, 'README.md')) as f:
-    long_description = f.read()
 
-setup(
-    packages=find_packages(),
-    install_requires=REQS,
+setuptools.setup(
+    packages=setuptools.find_packages(),
+    install_requires=get_requirements(),
     description="The Brayns renderer python API",
-    long_description=long_description,
+    long_description=get_readme(),
     long_description_content_type='text/markdown',
     url='https://github.com/BlueBrain/Brayns',
     download_url='https://github.com/BlueBrain/Brayns',
     project_urls={
-            "Tracker": "https://bbpteam.epfl.ch/project/issues/projects/BRAYNS/issues",
-            "Source": "https://github.com/BlueBrain/Brayns",
+        'Tracker': 'https://bbpteam.epfl.ch/project/issues/projects/BRAYNS/issues',
+        'Source': 'https://github.com/BlueBrain/Brayns',
     }
 )

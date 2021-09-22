@@ -1,7 +1,6 @@
-# Copyright (c) 2016-2018, Blue Brain Project
-#                          Raphael Dumusc <raphael.dumusc@epfl.ch>
-#                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
-#                          Cyrille Favreau <cyrille.favreau@epfl.ch>
+# Copyright (c) 2021 EPFL/Blue Brain Project
+#
+# Responsible Author: adrien.fleury@epfl.ch
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -17,9 +16,18 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# All rights reserved. Do not distribute without further notice.
 
-python-jsonschema-objects~=0.3.3
-Sphinx~=2.0.0
-nbsphinx~=0.7.1
-sphinx-bluebrain-theme~=0.2.2
+from dataclasses import dataclass
+from typing import Any
+
+
+@dataclass
+class MockRequest:
+
+    schema: dict
+    params: Any = None
+    result: Any = None
+
+    @property
+    def method(self) -> str:
+        return self.schema['title']

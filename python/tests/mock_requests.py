@@ -1,8 +1,6 @@
-# Copyright (c) 2016-2018, Blue Brain Project
-#                          Raphael Dumusc <raphael.dumusc@epfl.ch>
-#                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
-#                          Cyrille Favreau <cyrille.favreau@epfl.ch>
-#                          Nadir Roman <nadir.romanguerrero@epfl.ch>
+# Copyright (c) 2021 EPFL/Blue Brain Project
+#
+# Responsible Author: adrien.fleury@epfl.ch
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -18,15 +16,30 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# All rights reserved. Do not distribute without further notice.
 
-pylint~=2.2.2
-pycodestyle~=2.4.0
-pydocstyle~=3.0.0
-nose~=1.3.7
-coverage~=4.5.2
-nosexcover~=1.0.11
-tox~=3.6.1
-mock~=2.0.0
-pandoc~=1.0.2
-websockets~=7.0
+import pathlib
+from typing import List
+
+from mock_request import MockRequest
+
+
+def load() -> List[MockRequest]:
+    return [
+        _load_request(path)
+        for path in _get_mock_files()
+    ]
+
+
+def _get_mock_files():
+    directory = pathlib.Path(__file__).parent / 'requests'
+    return directory.glob('mock_*.py')
+
+
+def _load_request(path: pathlib.Path):
+    context = {}
+    exec(path.open().read(), context)
+    return MockRequest(
+        schema=context.get('schema'),
+        params=context.get('params'),
+        result=context.get('result')
+    )

@@ -32,13 +32,8 @@ VENV_BIN:=$(VENV)/bin
 # simulate running in headless mode
 unexport DISPLAY
 
-# Test coverage pass threshold (percent)
-MIN_COV?=100
 VENV_INSTALLED=.installed
 PIP_INSTALL_OPTIONS=--ignore-installed
-
-FIND_LINT_PY=`find brayns -name "*.py" -not -path "*/*test*"`
-LINT_PYFILES := $(shell find $(FIND_LINT_PY))
 
 $(VENV):
 	virtualenv --system-site-packages -p `which python3` $(VENV)
@@ -49,25 +44,10 @@ $(VENV_INSTALLED): $(VENV)
 	$(VENV_BIN)/pip install -e .
 	touch $@
 
-run_pycodestyle: $(VENV_INSTALLED)
-	$(VENV_BIN)/pycodestyle $(LINT_PYFILES) > pycodestyle.txt
-
-run_pydocstyle: $(VENV_INSTALLED)
-	$(VENV_BIN)/pydocstyle $(LINT_PYFILES) > pydocstyle.txt
-
-run_pylint: $(VENV_INSTALLED)
-	$(VENV_BIN)/pylint --rcfile=pylintrc $(LINT_PYFILES) > pylint.txt
-
 run_tests: $(VENV_INSTALLED)
 	$(VENV_BIN)/nosetests -v --with-coverage --cover-min-percentage=$(MIN_COV) --cover-erase --cover-package brayns
 
-run_tests_xunit: $(VENV_INSTALLED)
-	@mkdir -p $(ROOT_DIR)/test-reports
-	$(VENV_BIN)/nosetests brayns --with-coverage --cover-min-percentage=$(MIN_COV) --cover-inclusive --cover-erase --cover-package=brayns --with-xunit --xunit-file=test-reports/nosetests_brayns.xml
-
-lint: run_pycodestyle run_pydocstyle run_pylint
-
-test: lint run_tests
+test: run_tests
 
 doc: $(VENV_INSTALLED)
 	$(VENV_BIN)/sphinx-build -b html -d $(ROOT_DIR)/sphinx/doctrees -T $(ROOT_DIR)/doc/source sphinx/html
@@ -93,4 +73,4 @@ clean: clean_doc clean_test_venv
 	@rm -rf dist
 	@rm -f $(VENV_INSTALLED)
 
-.PHONY: run_pycodestyle test clean_test_venv clean doc
+.PHONY: test clean_test_venv clean doc
