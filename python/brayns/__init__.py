@@ -26,8 +26,7 @@ Example:
     with brayns.connect(
         uri='localhost:5000',  # Renderer URI
         secure=True,  # Enable SSL, defaults to False
-        # Custom CA if server certificate is self-signed
-        cafile='/home/acfleury/Test/certificate.pem'
+        cafile='server.pem' # Custom CA if server certificate is self-signed
     ) as client:
 
         # Raw request with JSON-RPC method and params (defaults to None)
