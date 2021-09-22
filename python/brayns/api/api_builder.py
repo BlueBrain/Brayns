@@ -32,12 +32,14 @@ from .entrypoint import Entrypoint
 
 
 def build_api(client: AbstractClient) -> None:
-    """Add all Brayns entrypoints as methods to the provided client.
+    """Build Brayns Python API using the provided client instance.
 
-    The client is used to get the entrypoints schemas to build the methods.
+    Retreive all entrypoint schemas using the client (must be connected), use it
+    to build Python functions calling the corresponding JSON-RPC entrypoint and
+    bind these functions as client methods.
 
-    Args:
-        client (AbstractClient): Client connected to a Brayns renderer.
+    :param client: client instance connected to the renderer
+    :type client: AbstractClient
     """
     for schema in _get_all_schemas(client):
         _add_method(client, Entrypoint.from_schema(schema))

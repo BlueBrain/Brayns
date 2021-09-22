@@ -17,8 +17,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""Client implementation to connect to a Brayns renderer."""
-
 from typing import Any, Tuple, Union
 
 from brayns.api import api_builder
@@ -30,7 +28,7 @@ from .request import Request
 
 
 class Client(AbstractClient):
-    """Brayns client."""
+    """Brayns client implementation to connect to the renderer."""
 
     def __init__(
         self,
@@ -38,15 +36,14 @@ class Client(AbstractClient):
         secure: bool = False,
         cafile: Union[str, None] = None
     ) -> None:
-        """Connect to a Brayns renderer.
+        """Connect to the renderer using the given settings.
 
-        Raise an Exception from the underlying socket API in case of failure.
-
-        Args:
-            uri (str): Brayns renderer URI (host:port).
-            secure (bool, optional): enable SSL. Defaults to False.
-            cafile (Union[str, None], optional): provide a custom certification
-                authority to authenticate the server. Defaults to None.
+        :param uri: Renderer URI in format host:port
+        :type uri: str
+        :param secure: True if SSL is enabled, defaults to False
+        :type secure: bool, optional
+        :param cafile: CA used to authenticate the renderer, defaults to None
+        :type cafile: Union[str, None], optional
         """
         self._client = JsonRpcClient()
         self._client.connect(uri, secure, cafile)
@@ -54,15 +51,16 @@ class Client(AbstractClient):
 
     def __enter__(self) -> None:
         """Allow using Brayns client in context manager."""
+        return self
 
-    def __exit__(self, *args) -> None:
+    def __exit__(self, *_) -> None:
         """Disconnect from Brayns renderer when exiting context manager."""
         self.disconnect()
 
     def disconnect(self) -> None:
         """Disconnect the client from the renderer.
 
-        Should not be used after disconnection.
+        The client should not be used anymore after disconnection.
         """
         self._client.disconnect()
 
@@ -73,21 +71,21 @@ class Client(AbstractClient):
         request_id: Union[int, str] = 0,
         timeout: Union[float, None] = None,
     ) -> Any:
-        """Send a request to the connected Brayns renderer.
+        """Send a JSON-RPC request to the renderer.
 
-        Raise a ReplyError when a JSON-RPC error is received.
+        Raise a ReplyError if an error message is received.
+        Raise a Timeout error if a timeout is specified and reached.
 
-        Raise a TimeoutError if the timeout is not None and reached.
-
-        Args:
-            method (str): JSON-RPC method name.
-            params (Any, optional): JSON-RPC params. Defaults to None.
-            request_id (Union[int, str], optional): JSON-RPC ID. Defaults to 0.
-            timeout (Union[None, float], optional): max time to wait for the
-                reply. Defaults to None.
-
-        Returns:
-            Any: JSON-RPC result as parsed JSON (ie dict or list).
+        :param method: method name
+        :type method: str
+        :param params: request params, defaults to None
+        :type params: Any, optional
+        :param request_id: request ID, defaults to 0
+        :type request_id: Union[int, str], optional
+        :param timeout: request timeout in seconds, defaults to None
+        :type timeout: Union[float, None], optional
+        :return: reply result
+        :rtype: Any
         """
         request = Request(method, params, request_id)
         self._client.send(request)
@@ -108,26 +106,24 @@ class Client(AbstractClient):
         quality: Union[int, None] = None,
         samples_per_pixel: Union[int, None] = None
     ) -> image.Image:
-        """Request a snapshot and return a PIL image.
+        """Take a snapshot from the renderer.
 
-        See snapshot entrypoint / method for more details.
-
-        Args:
-            size (Tuple[int, int]): Viewport width and height.
-            format (str, optional): Image format. Defaults to 'jpg'.
-            animation_parameters (Union[dict, None], optional): Animation parameters.
-                Defaults to None if left as default.
-            camera (Union[dict, None], optional): Camera parameters.
-                Defaults to None if left as default.
-            renderer (Union[dict, None], optional): Renderer parameters.
-                Defaults to None if left as default.
-            quality (Union[int, None], optional): Image quality.
-                Defaults to None if left as default.
-            samples_per_pixel (Union[int, None], optional): Samples per pixel.
-                Defaults to None if left as default.
-
-        Returns:
-            image.Image: PIL image.
+        :param size: viewport width and height
+        :type size: Tuple[int, int]
+        :param format: image format, defaults to 'jpg'
+        :type format: str, optional
+        :param animation_parameters: animation parameters used, defaults to None
+        :type animation_parameters: Union[dict, None], optional
+        :param camera: camera parameters used, defaults to None
+        :type camera: Union[dict, None], optional
+        :param renderer: renderer parameters to use, defaults to None
+        :type renderer: Union[dict, None], optional
+        :param quality: image quality 0-100, defaults to None
+        :type quality: Union[int, None], optional
+        :param samples_per_pixel: SPP, defaults to None
+        :type samples_per_pixel: Union[int, None], optional
+        :return: PIL image object
+        :rtype: image.Image
         """
         return image.convert_snapshot_response_to_PIL(
             self.snapshot(**{

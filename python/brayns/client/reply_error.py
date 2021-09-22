@@ -17,23 +17,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""Exception thrown when a JSON-RPC error is received."""
-
 from typing import Any
 
 
 class ReplyError(Exception):
-    """JSON-RPC error message."""
+    """Exception thrown when an error reply is received."""
 
     @staticmethod
     def from_dict(error: dict):
-        """Build the error from the parsed JSON message.
+        """Create an exception using the "error" field of the error reply.
 
-        Args:
-            error (dict): JSON-RPC error message ("error")
-
-        Returns:
-            ReplyError: error object built from the JSON.
+        :param error: message error body
+        :type error: dict
+        :return: new exception object
+        :rtype: ReplyError
         """
         return ReplyError(
             code=error.get('code'),
@@ -47,21 +44,23 @@ class ReplyError(Exception):
         message: str,
         data: Any = None
     ) -> None:
-        """Create a JSON-RPC error reply.
+        """Init exception attributes.
 
-        Args:
-            code (int): error code.
-            message (str): error description.
-            data (Any, optional): additional error data. Defaults to None.
+        :param code: error code.
+        :type code: int
+        :param message: error description
+        :type message: str
+        :param data: additional error data, defaults to None
+        :type data: Any, optional
         """
         self.code = code
         self.message = message
         self.data = data
 
     def __str__(self) -> str:
-        """String representation of the error.
+        """Display it using the error message.
 
-        Returns:
-            str: error description.
+        :return: self.message
+        :rtype: str
         """
         return self.message

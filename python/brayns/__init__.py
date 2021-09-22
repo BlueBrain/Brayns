@@ -17,6 +17,27 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+"""Brayns Python module to connect to a renderer.
+
+Example:
+.. code-block: python
+    import brayns
+
+    with brayns.connect(
+        uri='localhost:5000',  # Renderer URI
+        secure=True,  # Enable SSL, defaults to False
+        # Custom CA if server certificate is self-signed
+        cafile='/home/acfleury/Test/certificate.pem'
+    ) as client:
+
+        # Raw request with JSON-RPC method and params (defaults to None)
+        registry = client.request('registry')
+        schema = client.request('schema', {'endpoint': 'get-camera'})
+
+        # Request using auto generated API (here entrypoint get-camera)
+        camera = client.get_camera()
+"""
+
 from .client.client import Client
 from .client.reply_error import ReplyError
 from .utils.camera_path_handler import CameraPathHandler
@@ -24,12 +45,12 @@ from .plugins.circuit_explorer import CircuitExplorer
 
 
 def connect(*args, **kwargs) -> Client:
-    """Connect to a Brayns renderer.
+    """Shortcut to connect to a Brayns renderer.
 
-    See brayns.Client for parameters details.
+    See brayns.Client for parameters and usage.
 
-    Returns:
-        Client: Brayns client instance connected to the renderer.
+    :return: client instance connected to the renderer
+    :rtype: Client
     """
     return Client(*args, **kwargs)
 

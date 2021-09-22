@@ -17,14 +17,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""Abstract class to define an interface for Brayns client."""
-
 from abc import ABC, abstractmethod
 from typing import Any, Union
 
 
 class AbstractClient(ABC):
-    """Interface representing a client to connect to a Brayns renderer."""
+    """Interface to implement to connect to the renderer."""
 
     @abstractmethod
     def request(
@@ -34,16 +32,16 @@ class AbstractClient(ABC):
         request_id: Union[int, str] = 0,
         timeout: Union[float, None] = None,
     ) -> Any:
-        """Send a request to the connected Brayns renderer.
+        """Send a JSON-RPC request to the renderer.
 
-        Args:
-            method (str): JSON-RPC method name.
-            params (Any, optional): JSON-RPC params. Defaults to None.
-            request_id (Union[int, str], optional): JSON-RPC request ID.
-                Defaults to 0 if a single request is run at a time.
-            timeout (Union[None, float], optional): max time in seconds to wait
-                for the reply or None if infinite. Defaults to None.
-
-        Returns:
-            Any: JSON-RPC reply result.
+        :param method: method name
+        :type method: str
+        :param params: request params, defaults to None
+        :type params: Any, optional
+        :param request_id: request ID, defaults to 0
+        :type request_id: Union[int, str], optional
+        :param timeout: optional timeout in seconds, defaults to None
+        :type timeout: Union[float, None], optional
+        :return: request result.
+        :rtype: Any
         """

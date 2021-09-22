@@ -45,11 +45,19 @@ def get_descriptions(params: Params) -> List[str]:
 
 
 def get_description(property: Property) -> str:
-    name = property.name
-    typename = property.typename
-    optional = '' if property.required else ' (optional)'
-    description = property.description
-    return f'{name}: {typename}{optional} -- {description}.'
+    return _PATTERN.format(
+        name=property.name,
+        typename=property.typename,
+        default='' if property.required else ', defaults to None',
+        optional='' if property.required else ', optional',
+        description=property.description
+    )
+
+
+_PATTERN = '''
+    :param {name}: {description}{default}
+    :type {name}: {typename}{optional}
+'''[1:-1]
 
 
 def _get_properties(params: Params) -> List[Property]:

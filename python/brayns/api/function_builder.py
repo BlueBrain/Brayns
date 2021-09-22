@@ -38,11 +38,20 @@ def build_function(
     return context['_function']
 
 
+def _get_result(client: AbstractClient, method: str, params: dict) -> Any:
+    args = {
+        key: value
+        for key, value in params.items()
+        if key != 'self' and value is not None
+    }
+    return client.request(method, args if args else None)
+
+
 _PATTERN = '''
 from typing import Any, Union
 
 def _function(self{args}) -> Any:
-    """{docstring}"""
+    """{docstring}."""
     return _get_result(locals())
 '''.strip()
 
@@ -60,23 +69,12 @@ def _format_args(entrypoint: Entrypoint) -> str:
 
 
 def _get_function_docstring(entrypoint: Entrypoint) -> str:
-    return f'{entrypoint.description}.{_format_args_description(entrypoint)}'
+    return f'{entrypoint.description}.{_format_params(entrypoint)}'
 
 
-def _format_args_description(entrypoint: Entrypoint) -> str:
+def _format_params(entrypoint: Entrypoint) -> str:
     args = function_args.get_descriptions(entrypoint.params)
     if not args:
         return ''
-    separator = '\n    '
-    return f'\n\n    Keyword arguments:\n    {separator.join(args)}\n    '
-
-
-def _get_result(client: AbstractClient, method: str, params: dict) -> Any:
-    args = {
-        key: value
-        for key, value in params.items()
-        if key != 'self' and value is not None
-    }
-    if not args:
-        return client.request(method, None)
-    return client.request(method, args)
+    separator = '\n'
+    return f'\n\n{separator.join(args)}\n    '
