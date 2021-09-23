@@ -37,7 +37,8 @@ def _get_mock_files():
 
 def _load_request(path: pathlib.Path):
     context = {}
-    exec(path.open().read(), context)
+    with path.open() as f:
+        exec(f.read(), context)
     return MockRequest(
         schema=context.get('schema'),
         params=context.get('params'),
