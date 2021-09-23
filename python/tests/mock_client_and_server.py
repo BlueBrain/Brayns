@@ -52,12 +52,10 @@ class MockClientAndServer:
             cafile=certfile
         )
 
+    @property
+    def client(self) -> Client:
+        return self._client
+
     def close(self) -> None:
         self._client.disconnect()
         self._server.stop()
-
-    def request(self, method: str, params: Any = None) -> Any:
-        return self._client.request(method, params)
-
-    def check_client_has_method(self, method: str) -> bool:
-        return hasattr(self._client, method.replace('-', '_'))

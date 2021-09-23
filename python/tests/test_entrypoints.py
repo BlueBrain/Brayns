@@ -17,6 +17,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from brayns.client.client import Client
 import pathlib
 import unittest
 
@@ -51,23 +52,40 @@ class TestEntrypoints(unittest.TestCase):
         self._client_and_server.close()
         self._secure_client_and_server.close()
 
-    def test_all(self) -> None:
+    def test_requests(self) -> None:
         for request in self._requests:
-            self._run(self._client_and_server, request)
-            self._run(self._secure_client_and_server, request)
+            self._check_request(self._client_and_server.client, request)
+            self._check_request(self._secure_client_and_server.client, request)
 
-    def _run(
+    def test_methods(self) -> None:
+        for request in self._requests:
+            self._check_method(self._client_and_server.client, request)
+            self._check_method(self._secure_client_and_server.client, request)
+
+    def _check_request(
         self,
-        client_and_server: MockClientAndServer,
+        client: Client,
         request: MockRequest
     ) -> None:
-        self.assertTrue(
-            client_and_server.check_client_has_method(request.method)
-        )
         self.assertEqual(
-            client_and_server.request(request.method, request.params),
+            client.request(request.method, request.params),
             request.result
         )
+
+    def _check_method(
+        self,
+        client: Client,
+        request: MockRequest
+    ) -> None:
+        method = getattr(
+            client,
+            request.method.replace('-', '_'),
+            None
+        )
+        self.assertIsNotNone(method)
+        params = request.params
+        result = method() if params is None else method(**params)
+        self.assertEqual(result, request.result)
 
 
 if __name__ == '__main__':
