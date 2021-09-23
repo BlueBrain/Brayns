@@ -43,8 +43,8 @@ class TestEntrypoints(unittest.TestCase):
             port=5001,
             request_handler=request_handler,
             secure=True,
-            certfile=(ssl / 'certificate.pem').absolute(),
-            keyfile=(ssl / 'key.pem').absolute(),
+            certfile=str(ssl / 'certificate.pem'),
+            keyfile=str(ssl / 'key.pem'),
             password='test'
         )
 

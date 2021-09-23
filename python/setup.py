@@ -23,26 +23,25 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # All rights reserved. Do not distribute without further notice.
 
-import os
+import pathlib
 import pkg_resources
 import setuptools
 
-DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+DIRECTORY = pathlib.Path(__file__).parent
 
 
 def get_requirements():
     return [
         str(requirement)
         for requirement in pkg_resources.parse_requirements(
-            os.path.join(DIRECTORY, 'requirements.txt')
+            str(DIRECTORY / 'requirements.txt')
         )
     ]
 
 
 def get_readme():
-    return open(
-        os.path.join(DIRECTORY, 'README.md')
-    ).read()
+    with (DIRECTORY / 'README.md').open() as readme:
+        return readme.read()
 
 
 setuptools.setup(

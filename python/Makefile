@@ -45,7 +45,7 @@ $(VENV_INSTALLED): $(VENV)
 	touch $@
 
 run_tests: $(VENV_INSTALLED)
-	$(VENV_BIN)/nosetests -v --with-coverage --cover-min-percentage=$(MIN_COV) --cover-erase --cover-package brayns
+	$(VENV_BIN)/unittest discover -s tests -p test_*.py
 
 test: run_tests
 

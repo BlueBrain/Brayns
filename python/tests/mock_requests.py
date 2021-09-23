@@ -31,8 +31,7 @@ def load() -> List[MockRequest]:
 
 
 def _get_mock_files():
-    directory = pathlib.Path(__file__).parent / 'requests'
-    return directory.glob('mock_*.py')
+    return (pathlib.Path(__file__).parent / 'requests').glob('mock_*.py')
 
 
 def _load_request(path: pathlib.Path):
