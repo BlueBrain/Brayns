@@ -25,7 +25,7 @@ Use Brayns JSON-RPC entrypoints schemas to add Python methods to the client.
 import types
 from typing import List
 
-from brayns.client.abstract_client import AbstractClient
+from ..client.abstract_client import AbstractClient
 
 from . import function_builder
 from .entrypoint import Entrypoint

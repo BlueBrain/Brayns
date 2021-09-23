@@ -19,8 +19,8 @@
 
 from typing import Any, Tuple, Union
 
-from brayns.api import api_builder
-from brayns.utils import image
+from ..api import api_builder
+from ..utils import image
 
 from .abstract_client import AbstractClient
 from .json_rpc_client import JsonRpcClient

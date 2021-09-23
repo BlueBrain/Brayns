@@ -31,12 +31,11 @@ DIRECTORY = pathlib.Path(__file__).parent
 
 
 def get_requirements():
-    return [
-        str(requirement)
-        for requirement in pkg_resources.parse_requirements(
-            str(DIRECTORY / 'requirements.txt')
-        )
-    ]
+    with (DIRECTORY / 'requirements.txt').open() as requirements:
+        return [
+            str(requirement)
+            for requirement in pkg_resources.parse_requirements(requirements)
+        ]
 
 
 def get_readme():
