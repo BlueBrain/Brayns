@@ -36,25 +36,25 @@ class TestEntrypoints(unittest.TestCase):
             port=5000,
             request_handler=request_handler
         )
-        '''ssl = pathlib.Path(__file__).parent / 'ssl'
+        ssl = pathlib.Path(__file__).parent / 'ssl'
         self._secure_client_and_server = MockClientAndServer(
-            host='locahost',
+            host='localhost',
             port=5001,
             request_handler=request_handler,
             secure=True,
             certfile=(ssl / 'certificate.pem').absolute(),
             keyfile=(ssl / 'key.pem').absolute(),
             password='test'
-        )'''
+        )
 
     def tearDown(self) -> None:
         self._client_and_server.close()
-        # self._secure_client_and_server.close()
+        self._secure_client_and_server.close()
 
     def test_all(self) -> None:
         for request in self._requests:
             self._run(self._client_and_server, request)
-            #self._run(self._secure_client_and_server, request)
+            self._run(self._secure_client_and_server, request)
 
     def _run(
         self,
