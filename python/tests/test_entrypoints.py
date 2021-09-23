@@ -28,8 +28,7 @@ from mock_request_handler import MockRequestHandler
 
 class TestEntrypoints(unittest.TestCase):
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def setUp(self) -> None:
         self._requests = mock_requests.load()
         request_handler = MockRequestHandler(self._requests)
         self._client_and_server = MockClientAndServer(
@@ -37,7 +36,7 @@ class TestEntrypoints(unittest.TestCase):
             port=5000,
             request_handler=request_handler
         )
-        ssl = pathlib.Path(__file__).parent / 'ssl'
+        '''ssl = pathlib.Path(__file__).parent / 'ssl'
         self._secure_client_and_server = MockClientAndServer(
             host='locahost',
             port=5001,
@@ -46,12 +45,16 @@ class TestEntrypoints(unittest.TestCase):
             certfile=(ssl / 'certificate.pem').absolute(),
             keyfile=(ssl / 'key.pem').absolute(),
             password='test'
-        )
+        )'''
+
+    def tearDown(self) -> None:
+        self._client_and_server.close()
+        # self._secure_client_and_server.close()
 
     def test_all(self) -> None:
         for request in self._requests:
             self._run(self._client_and_server, request)
-            self._run(self._secure_client_and_server, request)
+            #self._run(self._secure_client_and_server, request)
 
     def _run(
         self,

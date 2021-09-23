@@ -49,15 +49,16 @@ class MockServer:
         ) if secure else None
         self._websocket = None
         self._loop = EventLoop()
-        self._future = None
+        self._serve_task = None
 
     def start(self) -> None:
         self._loop.start()
-        self._future = self._loop.run(self._run())
+        self._loop.run(self._start()).result()
+        self._serve_task = self._loop.run(self._websocket.wait_closed())
 
     def stop(self) -> None:
-        self._loop.run(self._websocket.close())
-        self._future.result()
+        self._websocket.close()
+        self._serve_task.result()
         self._loop.stop()
 
     def _get_ssl(self, certfile, keyfile, password):
@@ -76,14 +77,12 @@ class MockServer:
             if reply is not None:
                 await websocket.send(reply)
 
-    async def _run(self):
-        async with websockets.serve(
+    async def _start(self):
+        self._websocket = await websockets.serve(
             self._handle_connection,
             self._host,
             self._port,
             ssl=self._ssl,
             ping_interval=None,
             timeout=0
-        ) as websocket:
-            self._websocket = websocket
-            await websocket.wait_closed()
+        )
