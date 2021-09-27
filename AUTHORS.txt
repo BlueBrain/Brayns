@@ -7,3 +7,4 @@ Stefan Eilemann
 Grigori Chevtchenko
 Raphael Dumusc
 Nadir Roman
+Adrien Fleury
