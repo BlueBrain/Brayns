@@ -18,7 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass, field
-from typing import Iterable, List
+from typing import Iterable, List, Union
 
 from .schema import Schema
 
@@ -40,7 +40,7 @@ class Entrypoint:
     name: str
     description: str
     params: List[Schema] = field(default_factory=list)
-    result: Schema = None
+    result: Union[Schema, None] = None
 
     @staticmethod
     def from_schema(schema: dict):

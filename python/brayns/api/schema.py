@@ -18,7 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Union
 
 from . import typename
 
@@ -57,8 +57,8 @@ class Schema:
     write_only: bool = False
     properties: List['Schema'] = field(default_factory=list)
     one_of: List['Schema'] = field(default_factory=list)
-    items: 'Schema' = None
-    additional_properties: 'Schema' = None
+    items: Union['Schema', None] = None
+    additional_properties: Union['Schema', None] = None
 
     @staticmethod
     def from_dict(schema: dict, name: str = '',  required: bool = False):
