@@ -124,9 +124,9 @@ def _get_oneof(schema: dict, required: bool = False):
 
 def _get_items(schema: dict):
     items = schema.get('items', {})
-    return Schema.from_dict(items) if items else None
+    return Schema.from_dict(items, name='items') if items else None
 
 
 def _get_additional_properties(schema: dict):
     items = schema.get('additionalProperties', False)
-    return Schema.from_dict(items) if items else None
+    return Schema.from_dict(items, 'items') if items else None
