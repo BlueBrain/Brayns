@@ -81,7 +81,7 @@ def _get_result(client: AbstractClient, method: str, params: dict) -> Any:
 def _get_function_code(entrypoint: Entrypoint) -> str:
     params = function_params.from_entrypoint(entrypoint)
     if params:
-        params += ', '
+        params = ', ' + params
     return _PATTERN.format(
         params=params,
         docstring=function_docstring.from_entrypoint(entrypoint)
