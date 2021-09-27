@@ -17,26 +17,33 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+"""Helper module to format function params of an entrypoint."""
 
-from . import typename
+from .entrypoint import Entrypoint
+from .schema import Schema
 
 
-@dataclass
-class Property:
+def from_entrypoint(entrypoint: Entrypoint):
+    """Create a string representing function params of an entrypoint.
 
-    typename: str
-    name: str
-    description: str
-    required: bool = False
-    read_only: bool = False
+    Example: {
+        params: {a: int, b: str}
+    }
+    gives 'a: int, b: str'
 
-    @staticmethod
-    def from_schema(name: str, schema: dict, required: bool = False):
-        return Property(
-            typename=typename.from_schema(schema),
-            name=name,
-            description=schema.get('description', ''),
-            required=required,
-            read_only=schema.get('readOnly', False)
-        )
+    :param entrypoint: Function source
+    :type entrypoint: Entrypoint
+    :return: Function params as string
+    :rtype: str
+    """
+    return ', '.join(
+        _format_param(param)
+        for param in entrypoint.params
+    )
+
+
+def _format_param(param: Schema):
+    name = param.name
+    typename = param.typename
+    default = '' if param.required else ' = None'
+    return f'{name}: {typename}{default}'

@@ -17,27 +17,44 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+"""Helper module to get the Python typename from a JSON schema."""
+
+from typing import List
+
+
 def from_schema(schema: dict) -> str:
+    """Get the Python typename from entrypoint JSON schema.
+
+    :param schema: Entrypoint schema.
+    :type schema: dict
+    :return: Python typename (integer -> 'int', string -> 'str', etc.)
+    :rtype: str
+    """
     typename = schema.get('type')
     if typename is not None:
-        return _TYPES[typename].__name__
-    return _from_oneof(schema)
+        return _TYPES[typename]
+    one_of = schema.get('oneOf', [])
+    if one_of:
+        return _from_one_of(one_of)
+    return 'Any'
 
 
 _TYPES = {
-    'boolean': bool,
-    'integer': int,
-    'number': float,
-    'string': str,
-    'array': list,
-    'object': dict
+    'null': 'None',
+    'boolean': 'bool',
+    'integer': 'int',
+    'number': 'float',
+    'string': 'str',
+    'array': 'list',
+    'object': 'dict'
 }
 
 
-def _from_oneof(schema: dict) -> str:
-    typenames = ', '.join(
-        from_schema(oneof)
-        for oneof in schema['oneOf']
-        if oneof.get('type') != 'null'
-    )
-    return f'Union[{typenames}]'
+def _from_one_of(one_of: List[dict]) -> str:
+    typenames = {
+        from_schema(schema)
+        for schema in one_of
+    }
+    if len(typenames) == 1:
+        return next(iter(typenames))
+    return f'Union[{", ".join(sorted(typenames))}]'

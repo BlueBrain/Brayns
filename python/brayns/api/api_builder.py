@@ -23,11 +23,11 @@ Use Brayns JSON-RPC entrypoints schemas to add Python methods to the client.
 """
 
 import types
-from typing import List
 
 from ..client.abstract_client import AbstractClient
 
 from . import function_builder
+from . import entrypoints
 from .entrypoint import Entrypoint
 
 
@@ -41,26 +41,19 @@ def build_api(client: AbstractClient) -> None:
     :param client: client instance connected to the renderer
     :type client: AbstractClient
     """
-    for schema in _get_all_schemas(client):
-        _add_method(client, Entrypoint.from_schema(schema))
-
-
-def _get_all_schemas(client: AbstractClient) -> List[str]:
-    return [
-        client.request('schema', {'endpoint': endpoint})
-        for endpoint in client.request('registry')
-    ]
+    for entrypoint in entrypoints.get_all(client):
+        _add_method(client, entrypoint)
 
 
 def _add_method(client: AbstractClient, entrypoint: Entrypoint) -> None:
     setattr(
         client,
         entrypoint.name.replace('-', '_'),
-        _get_method(client, entrypoint)
+        _create_method(client, entrypoint)
     )
 
 
-def _get_method(
+def _create_method(
     client: AbstractClient,
     entrypoint: Entrypoint
 ) -> types.MethodType:
