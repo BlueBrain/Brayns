@@ -2,7 +2,7 @@ Circuit Explorer API Methods
 ============================
 
 This is the API exposed by the Circuit Explorer plugin. To call this methods, you will need
-a ``Client`` object (You can learn how to create one in :ref:`usepythonclinet-label`), as well
+a ``Client`` object (You can learn how to create one in :ref:`usepythonclient-label`), as well
 as a backend Brayns service that has been launched with the argument:
 
 .. code-block:: console

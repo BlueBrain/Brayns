@@ -2,7 +2,7 @@ Core API Methods
 ----------------
 
 The Brayns python client API is automatically generated when connecting to a running
-backend service as shown in :ref:`usepythonclinet-label`. This allows the client to
+backend service as shown in :ref:`usepythonclient-label`. This allows the client to
 get only the available implementation that is exposed by the service we are connecting to.
 
 All the exposed API by the backend, including the API entries added by the plugins, are
