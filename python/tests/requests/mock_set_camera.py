@@ -68,6 +68,7 @@ schema = {
             'type': 'object'
         }
     ],
+    'plugin': 'Core',
     'returns': {},
     'title': 'set-camera',
     'type': 'method'
