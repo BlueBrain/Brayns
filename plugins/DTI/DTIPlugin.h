@@ -39,6 +39,8 @@ namespace dti
 class DTIPlugin : public brayns::ExtensionPlugin
 {
 public:
+    DTIPlugin();
+
     void init() final;
 
     /**

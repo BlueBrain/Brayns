@@ -30,5 +30,7 @@
 class CircuitInfoPlugin : public brayns::ExtensionPlugin
 {
 public:
+    CircuitInfoPlugin();
+
     void init() final;
 };

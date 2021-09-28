@@ -26,14 +26,14 @@
 
 #include "CircuitInfoEntrypoints.h"
 
+CircuitInfoPlugin::CircuitInfoPlugin()
+    : brayns::ExtensionPlugin("Circuit Info")
+{
+}
+
 void CircuitInfoPlugin::init()
 {
-    auto actionInterface = _api->getActionInterface();
-    if (!actionInterface)
-    {
-        return;
-    }
-    CircuitInfoEntrypoints::load(*actionInterface);
+    CircuitInfoEntrypoints::load(*this);
 }
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int /*argc*/,

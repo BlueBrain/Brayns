@@ -63,6 +63,8 @@
 #include <brayns/network/entrypoints/VideoStreamEntrypoint.h>
 #include <brayns/network/entrypoints/VolumeParametersEntrypoint.h>
 
+#include "NetworkManager.h"
+
 namespace brayns
 {
 /**
@@ -75,70 +77,70 @@ public:
     /**
      * @brief Register an instance of all core entrypoints in interface.
      *
-     * @param interface Interface to store entrypoints.
+     * @param plugin Plugin registering the entrypoint.
      */
-    static void load(ActionInterface& interface)
+    static void load(NetworkManager& plugin)
     {
-        interface.add<GetAnimationParametersEntrypoint>();
-        interface.add<SetAnimationParametersEntrypoint>();
-        interface.add<GetCameraEntrypoint>();
-        interface.add<SetCameraEntrypoint>();
-        interface.add<ImageJpegEntrypoint>();
-        interface.add<TriggerJpegStreamEntrypoint>();
-        interface.add<ImageStreamingModeEntrypoint>();
-        interface.add<GetRendererEntrypoint>();
-        interface.add<SetRendererEntrypoint>();
-        interface.add<VersionEntrypoint>();
-        interface.add<GetApplicationParametersEntrypoint>();
-        interface.add<SetApplicationParametersEntrypoint>();
-        interface.add<GetVolumeParametersEntrypoint>();
-        interface.add<SetVolumeParametersEntrypoint>();
-        interface.add<GetSceneEntrypoint>();
-        interface.add<SetSceneEntrypoint>();
-        interface.add<GetStatisticsEntrypoint>();
-        interface.add<SchemaEntrypoint>();
-        interface.add<InspectEntrypoint>();
-        interface.add<QuitEntrypoint>();
-        interface.add<ExitLaterEntrypoint>();
-        interface.add<ResetCameraEntrypoint>();
-        interface.add<SnapshotEntrypoint>();
-        interface.add<RequestModelUploadEntrypoint>();
-        interface.add<ChunkEntrypoint>();
-        interface.add<GetEnvironmentMapEntrypoint>();
-        interface.add<SetEnvironmentMapEntrypoint>();
-        interface.add<GetVideoStreamEntrypoint>();
-        interface.add<SetVideoStreamEntrypoint>();
-        interface.add<AddModelEntrypoint>();
-        interface.add<RemoveModelEntrypoint>();
-        interface.add<UpdateModelEntrypoint>();
-        interface.add<GetModelEntrypoint>();
-        interface.add<GetModelPropertiesEntrypoint>();
-        interface.add<SetModelPropertiesEntrypoint>();
-        interface.add<ModelPropertiesSchemaEntrypoint>();
-        interface.add<GetModelTransferFunctionEntrypoint>();
-        interface.add<SetModelTransferFunctionEntrypoint>();
-        interface.add<AddClipPlaneEntrypoint>();
-        interface.add<GetClipPlanesEntrypoint>();
-        interface.add<UpdateClipPlaneEntrypoint>();
-        interface.add<RemoveClipPlanesEntrypoint>();
-        interface.add<GetInstancesEntrypoint>();
-        interface.add<UpdateInstanceEntrypoint>();
-        interface.add<GetLoadersEntrypoint>();
-        interface.add<LoadersSchemaEntrypoint>();
-        interface.add<GetCameraParamsEntrypoint>();
-        interface.add<SetCameraParamsEntrypoint>();
-        interface.add<GetRendererParamsEntrypoint>();
-        interface.add<SetRendererParamsEntrypoint>();
-        interface.add<GetLightsEntrypoint>();
-        interface.add<AddLightDirectionalEntrypoint>();
-        interface.add<AddLightSphereEntrypoint>();
-        interface.add<AddLightQuadEntrypoint>();
-        interface.add<AddLightSpotEntrypoint>();
-        interface.add<AddLightAmbientEntrypoint>();
-        interface.add<RemoveLightsEntrypoint>();
-        interface.add<ClearLightsEntrypoint>();
-        interface.add<CancelEntrypoint>();
-        interface.add<RegistryEntrypoint>();
+        plugin.add<GetAnimationParametersEntrypoint>();
+        plugin.add<SetAnimationParametersEntrypoint>();
+        plugin.add<GetCameraEntrypoint>();
+        plugin.add<SetCameraEntrypoint>();
+        plugin.add<ImageJpegEntrypoint>();
+        plugin.add<TriggerJpegStreamEntrypoint>();
+        plugin.add<ImageStreamingModeEntrypoint>();
+        plugin.add<GetRendererEntrypoint>();
+        plugin.add<SetRendererEntrypoint>();
+        plugin.add<VersionEntrypoint>();
+        plugin.add<GetApplicationParametersEntrypoint>();
+        plugin.add<SetApplicationParametersEntrypoint>();
+        plugin.add<GetVolumeParametersEntrypoint>();
+        plugin.add<SetVolumeParametersEntrypoint>();
+        plugin.add<GetSceneEntrypoint>();
+        plugin.add<SetSceneEntrypoint>();
+        plugin.add<GetStatisticsEntrypoint>();
+        plugin.add<SchemaEntrypoint>();
+        plugin.add<InspectEntrypoint>();
+        plugin.add<QuitEntrypoint>();
+        plugin.add<ExitLaterEntrypoint>();
+        plugin.add<ResetCameraEntrypoint>();
+        plugin.add<SnapshotEntrypoint>();
+        plugin.add<RequestModelUploadEntrypoint>();
+        plugin.add<ChunkEntrypoint>();
+        plugin.add<GetEnvironmentMapEntrypoint>();
+        plugin.add<SetEnvironmentMapEntrypoint>();
+        plugin.add<GetVideoStreamEntrypoint>();
+        plugin.add<SetVideoStreamEntrypoint>();
+        plugin.add<AddModelEntrypoint>();
+        plugin.add<RemoveModelEntrypoint>();
+        plugin.add<UpdateModelEntrypoint>();
+        plugin.add<GetModelEntrypoint>();
+        plugin.add<GetModelPropertiesEntrypoint>();
+        plugin.add<SetModelPropertiesEntrypoint>();
+        plugin.add<ModelPropertiesSchemaEntrypoint>();
+        plugin.add<GetModelTransferFunctionEntrypoint>();
+        plugin.add<SetModelTransferFunctionEntrypoint>();
+        plugin.add<AddClipPlaneEntrypoint>();
+        plugin.add<GetClipPlanesEntrypoint>();
+        plugin.add<UpdateClipPlaneEntrypoint>();
+        plugin.add<RemoveClipPlanesEntrypoint>();
+        plugin.add<GetInstancesEntrypoint>();
+        plugin.add<UpdateInstanceEntrypoint>();
+        plugin.add<GetLoadersEntrypoint>();
+        plugin.add<LoadersSchemaEntrypoint>();
+        plugin.add<GetCameraParamsEntrypoint>();
+        plugin.add<SetCameraParamsEntrypoint>();
+        plugin.add<GetRendererParamsEntrypoint>();
+        plugin.add<SetRendererParamsEntrypoint>();
+        plugin.add<GetLightsEntrypoint>();
+        plugin.add<AddLightDirectionalEntrypoint>();
+        plugin.add<AddLightSphereEntrypoint>();
+        plugin.add<AddLightQuadEntrypoint>();
+        plugin.add<AddLightSpotEntrypoint>();
+        plugin.add<AddLightAmbientEntrypoint>();
+        plugin.add<RemoveLightsEntrypoint>();
+        plugin.add<ClearLightsEntrypoint>();
+        plugin.add<CancelEntrypoint>();
+        plugin.add<RegistryEntrypoint>();
     }
 };
 } // namespace brayns

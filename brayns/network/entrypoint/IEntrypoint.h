@@ -39,6 +39,20 @@ public:
     virtual ~IEntrypoint() = default;
 
     /**
+     * @brief Get the name of the plugin that loads this entrypoint.
+     *
+     * @return const std::string& Parent plugin name.
+     */
+    virtual const std::string& getPlugin() const = 0;
+
+    /**
+     * @brief Set the name of the plugin that loads this entrypoint.
+     *
+     * @param plugin Parent plugin name.
+     */
+    virtual void setPlugin(const std::string& plugin) = 0;
+
+    /**
      * @brief Used by the manager give context access.
      *
      * @param context A reference to the current network context.

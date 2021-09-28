@@ -29,7 +29,7 @@
 namespace brayns
 {
 /**
- * @brief Base entrypoint providing access to network context.
+ * @brief Base entrypoint providing basic functionalities.
  *
  */
 class BaseEntrypoint : public IEntrypoint
@@ -102,6 +102,20 @@ public:
     }
 
     /**
+     * @brief Get the stored plugin name.
+     *
+     * @return const std::string& Parent plugin name.
+     */
+    virtual const std::string& getPlugin() const override { return _plugin; }
+
+    /**
+     * @brief Store the plugin name.
+     *
+     * @param plugin Parent plugin name.
+     */
+    virtual void setPlugin(const std::string& plugin) { _plugin = plugin; }
+
+    /**
      * @brief Store the network context reference inside instance.
      *
      * @param context A reference to the network context.
@@ -153,6 +167,7 @@ private:
         connections.broadcast(json);
     }
 
+    std::string _plugin;
     NetworkContext* _context = nullptr;
 };
 } // namespace brayns

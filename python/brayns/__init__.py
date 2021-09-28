@@ -38,24 +38,16 @@ Example:
 """
 
 from .client.client import Client
+from .client.connect import connect
 from .client.reply_error import ReplyError
-from .utils.camera_path_handler import CameraPathHandler
+from .doc.doc_builder import build_rst_doc, save_rst_doc
 from .plugins.circuit_explorer import CircuitExplorer
-
-
-def connect(*args, **kwargs) -> Client:
-    """Shortcut to connect to a Brayns renderer.
-
-    See brayns.Client for parameters and usage.
-
-    :return: client instance connected to the renderer
-    :rtype: Client
-    """
-    return Client(*args, **kwargs)
-
+from .utils.camera_path_handler import CameraPathHandler
 
 __all__ = [
     'connect',
+    'build_rst_doc',
+    'save_rst_doc',
     'Client',
     'CameraPathHandler',
     'CircuitExplorer',

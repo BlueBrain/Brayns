@@ -18,10 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef EXTENSIONPLUGIN_H
-#define EXTENSIONPLUGIN_H
+#pragma once
+
+#include <cassert>
 
 #include <brayns/common/types.h>
+
+#include <brayns/network/entrypoint/EntrypointRef.h>
 
 namespace brayns
 {
@@ -48,23 +51,47 @@ class Engine;
 class ExtensionPlugin
 {
 public:
+    ExtensionPlugin(std::string name = {})
+        : _name(std::move(name))
+    {
+    }
+
     virtual ~ExtensionPlugin() = default;
 
     /**
      * Called from Brayns::Brayns right after the engine has been created
      */
     virtual void init() {}
+
     /**
      * Called from Brayns::preRender() to prepare the engine based on the
      * plugins' need for an upcoming render().
      */
     virtual void preRender() {}
+
     /** Called from Brayns::postRender() after render() has finished. */
     virtual void postRender() {}
-protected:
-    PluginAPI* _api{nullptr};
-    friend class PluginManager;
-};
-}
 
-#endif
+    template <typename T, typename... Args>
+    void add(Args&&... args)
+    {
+        assert(_api);
+        auto interface = _api->getActionInterface();
+        if (!interface)
+        {
+            return;
+        }
+        auto entrypoint = EntrypointRef::create<T>(std::forward<Args>(args)...);
+        entrypoint.setPlugin(_name);
+        interface->addEntrypoint(std::move(entrypoint));
+    }
+
+protected:
+    friend class PluginManager;
+
+    PluginAPI* _api = nullptr;
+
+private:
+    std::string _name;
+};
+} // namespace brayns

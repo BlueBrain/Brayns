@@ -51,36 +51,35 @@
 class CircuitExplorerEntrypoints
 {
 public:
-    static void load(CircuitExplorerPlugin& plugin,
-                     brayns::ActionInterface& interface)
+    static void load(CircuitExplorerPlugin& plugin)
     {
-        interface.add<brayns::GetMaterialIdsEntrypoint>();
-        interface.add<brayns::GetMaterialEntrypoint>();
-        interface.add<brayns::SetMaterialEntrypoint>();
-        interface.add<brayns::SetMaterialsEntrypoint>();
-        interface.add<brayns::SetMaterialRangeEntrypoint>();
-        interface.add<brayns::SetMaterialExtraAttributesEntrypoint>();
-        interface.add<SetSynapsesAttributesEntrypoint>(plugin);
-        interface.add<SaveModelToCacheEntrypoint>();
-        interface.add<SetConnectionsPerValueEntrypoint>();
-        interface.add<SetMetaballsPerSimulationValueEntrypoint>();
-        interface.add<GetOduCameraEntrypoint>();
-        interface.add<SetOduCameraEntrypoint>();
-        interface.add<AttachCellGrowthHandlerEntrypoint>();
-        interface.add<AttachCircuitSimulationHandlerEntrypoint>();
-        interface.add<ExportFramesToDiskEntrypoint>(plugin);
-        interface.add<GetExportFramesProgressEntrypoint>(plugin);
-        interface.add<MakeMovieEntrypoint>();
-        interface.add<TraceAnterogradeEntrypoint>(plugin);
-        interface.add<AddGridEntrypoint>();
-        interface.add<AddColumnEntrypoint>();
-        interface.add<AddSphereEntrypoint>();
-        interface.add<AddPillEntrypoint>();
-        interface.add<AddCylinderEntrypoint>();
-        interface.add<AddBoxEntrypoint>();
-        interface.add<RemapCircuitColorEntrypoint>(plugin);
-        interface.add<ColorCellsEntrypoint>(plugin);
-        interface.add<MirrorModelEntrypoint>();
-        interface.add<SetCircuitThicknessEntrypoint>();
+        plugin.add<brayns::GetMaterialIdsEntrypoint>();
+        plugin.add<brayns::GetMaterialEntrypoint>();
+        plugin.add<brayns::SetMaterialEntrypoint>();
+        plugin.add<brayns::SetMaterialsEntrypoint>();
+        plugin.add<brayns::SetMaterialRangeEntrypoint>();
+        plugin.add<brayns::SetMaterialExtraAttributesEntrypoint>();
+        plugin.add<SetSynapsesAttributesEntrypoint>(plugin);
+        plugin.add<SaveModelToCacheEntrypoint>();
+        plugin.add<SetConnectionsPerValueEntrypoint>();
+        plugin.add<SetMetaballsPerSimulationValueEntrypoint>();
+        plugin.add<GetOduCameraEntrypoint>();
+        plugin.add<SetOduCameraEntrypoint>();
+        plugin.add<AttachCellGrowthHandlerEntrypoint>();
+        plugin.add<AttachCircuitSimulationHandlerEntrypoint>();
+        plugin.add<ExportFramesToDiskEntrypoint>(plugin);
+        plugin.add<GetExportFramesProgressEntrypoint>(plugin);
+        plugin.add<MakeMovieEntrypoint>();
+        plugin.add<TraceAnterogradeEntrypoint>(plugin);
+        plugin.add<AddGridEntrypoint>();
+        plugin.add<AddColumnEntrypoint>();
+        plugin.add<AddSphereEntrypoint>();
+        plugin.add<AddPillEntrypoint>();
+        plugin.add<AddCylinderEntrypoint>();
+        plugin.add<AddBoxEntrypoint>();
+        plugin.add<RemapCircuitColorEntrypoint>(plugin);
+        plugin.add<ColorCellsEntrypoint>(plugin);
+        plugin.add<MirrorModelEntrypoint>();
+        plugin.add<SetCircuitThicknessEntrypoint>();
     }
 };

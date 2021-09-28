@@ -217,6 +217,11 @@ void _addSphereClippingPerspectiveCamera(brayns::Engine& engine)
     engine.addCameraType("circuit_explorer_sphere_clipping", properties);
 }
 
+CircuitExplorerPlugin::CircuitExplorerPlugin()
+    : brayns::ExtensionPlugin("Circuit Explorer")
+{
+}
+
 void CircuitExplorerPlugin::init()
 {
     auto& scene = _api->getScene();
@@ -266,11 +271,7 @@ void CircuitExplorerPlugin::init()
         std::make_unique<SonataLoader>(scene, pm.getApplicationParameters(),
                                        SonataLoader::getCLIProperties(), this));
 
-    auto actionInterface = _api->getActionInterface();
-    if (actionInterface)
-    {
-        CircuitExplorerEntrypoints::load(*this, *actionInterface);
-    }
+    CircuitExplorerEntrypoints::load(*this);
 
     auto& engine = _api->getEngine();
     _addAdvancedSimulationRenderer(engine);

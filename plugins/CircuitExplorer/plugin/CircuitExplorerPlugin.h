@@ -38,6 +38,8 @@
 class CircuitExplorerPlugin : public brayns::ExtensionPlugin
 {
 public:
+    CircuitExplorerPlugin();
+
     void init() final;
 
     /**

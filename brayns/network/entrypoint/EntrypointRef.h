@@ -46,6 +46,7 @@ public:
     static SchemaResult create(const IEntrypoint& entrypoint)
     {
         SchemaResult schema;
+        schema.plugin = entrypoint.getPlugin();
         schema.title = entrypoint.getName();
         schema.type = "method";
         schema.description = entrypoint.getDescription();
@@ -142,6 +143,23 @@ public:
      * @return std::string Entrypoint name (ex: "get-camera").
      */
     std::string loadName() const { return _entrypoint->getName(); }
+
+    /**
+     * @brief Get the name of the plugin the entrypoint belongs to.
+     *
+     * @return const std::string& Parent plugin name.
+     */
+    const std::string& getPlugin() const { return _entrypoint->getPlugin(); }
+
+    /**
+     * @brief Set the name of the plugin the entrypoint belongs to.
+     *
+     * @param plugin Parent plugin name.
+     */
+    void setPlugin(const std::string& plugin)
+    {
+        _entrypoint->setPlugin(plugin);
+    }
 
     /**
      * @brief Get the entrypoint schema.

@@ -29,6 +29,8 @@ BRAYNS_MESSAGE_ENTRY(std::string, endpoint, "Name of the endpoint")
 BRAYNS_MESSAGE_END()
 
 BRAYNS_MESSAGE_BEGIN(SchemaResult)
+BRAYNS_MESSAGE_ENTRY(std::string, plugin,
+                     "Name of the plugin that loads the entrypoint")
 BRAYNS_MESSAGE_ENTRY(std::string, title, "Name of the entrypoint")
 BRAYNS_MESSAGE_ENTRY(std::string, description, "Description of the entrypoint")
 BRAYNS_MESSAGE_ENTRY(std::string, type, "Type of entrypoint ('method')")

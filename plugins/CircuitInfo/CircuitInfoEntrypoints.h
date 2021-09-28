@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <brayns/network/interface/ActionInterface.h>
-
 #include <entrypoints/CIGetAfferentCellIdsEntrypoint.h>
 #include <entrypoints/CIGetCellDataEntrypoint.h>
 #include <entrypoints/CIGetCellIdsEntrypoint.h>
@@ -34,22 +32,24 @@
 #include <entrypoints/CIGetTargetsEntrypoint.h>
 #include <entrypoints/CIInfoEntrypoint.h>
 
+#include "CircuitInfoPlugin.h"
+
 class CircuitInfoEntrypoints
 {
 public:
-    static void load(brayns::ActionInterface& interface)
+    static void load(CircuitInfoPlugin& plugin)
     {
-        interface.add<CIInfoEntrypoint>();
-        interface.add<CIGetCellDataEntrypoint>();
-        interface.add<CIGetCellIdsEntrypoint>();
-        interface.add<CIGetCellIdsFromModelEntrypoint>();
-        interface.add<CIGetReportsEntrypoint>();
-        interface.add<CIGetReportInfoEntrypoint>();
-        interface.add<CIGetSpikeReportInfoEntrypoint>();
-        interface.add<CIGetTargetsEntrypoint>();
-        interface.add<CIGetAfferentCellIdsEntrypoint>();
-        interface.add<CIGetEfferentCellIdsEntrypoint>();
-        interface.add<CIGetProjectionsEntrypoint>();
-        interface.add<CIGetProjectionEfferentCellIdsEntrypoint>();
+        plugin.add<CIInfoEntrypoint>();
+        plugin.add<CIGetCellDataEntrypoint>();
+        plugin.add<CIGetCellIdsEntrypoint>();
+        plugin.add<CIGetCellIdsFromModelEntrypoint>();
+        plugin.add<CIGetReportsEntrypoint>();
+        plugin.add<CIGetReportInfoEntrypoint>();
+        plugin.add<CIGetSpikeReportInfoEntrypoint>();
+        plugin.add<CIGetTargetsEntrypoint>();
+        plugin.add<CIGetAfferentCellIdsEntrypoint>();
+        plugin.add<CIGetEfferentCellIdsEntrypoint>();
+        plugin.add<CIGetProjectionsEntrypoint>();
+        plugin.add<CIGetProjectionEfferentCellIdsEntrypoint>();
     }
 };

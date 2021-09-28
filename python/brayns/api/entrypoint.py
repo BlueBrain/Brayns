@@ -31,6 +31,8 @@ class Entrypoint:
     :type name: str
     :param description: Entrypoint description
     :type description: str
+    :param plugin: Name of the plugin loading the entrypoint
+    :type plugin: str
     :param params: Entrypoint params schemas formatted as in Python method
     :type params: List[Schema]
     :param result: Entrypoint result schema
@@ -39,6 +41,7 @@ class Entrypoint:
 
     name: str
     description: str
+    plugin: str = ''
     params: List[Schema] = field(default_factory=list)
     result: Union[Schema, None] = None
 
@@ -60,6 +63,7 @@ class Entrypoint:
         return Entrypoint(
             name=_get_name(schema),
             description=_get_description(schema),
+            plugin=_get_plugin(schema),
             params=_get_params(schema),
             result=_get_result(schema)
         )
@@ -71,6 +75,10 @@ def _get_name(schema: dict) -> str:
 
 def _get_description(schema: dict) -> str:
     return schema.get('description', '')
+
+
+def _get_plugin(schema: dict) -> str:
+    return schema['plugin']
 
 
 def _get_params(schema: dict):

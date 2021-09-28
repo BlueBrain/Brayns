@@ -20,21 +20,21 @@
 #pragma once
 
 #include <entrypoints/AddStreamlinesEntrypoint.h>
-#include <entrypoints/SetSpikeSimulationFromFileEntrypoint.h>
 #include <entrypoints/SetSpikeSimulationEntrypoint.h>
+#include <entrypoints/SetSpikeSimulationFromFileEntrypoint.h>
 
 #include "DTIPlugin.h"
 
 namespace dti
 {
-class EntrypointRegistry
+class DtiEntrypoints
 {
 public:
-    static void load(DTIPlugin& plugin, brayns::ActionInterface& interface)
+    static void load(DTIPlugin& plugin)
     {
-        interface.add<AddStreamlinesEntrypoint>();
-        interface.add<SetSpikeSimulationEntrypoint>(plugin);
-        interface.add<SetSpikeSimulationFromFileEntrypoint>(plugin);
+        plugin.add<AddStreamlinesEntrypoint>();
+        plugin.add<SetSpikeSimulationEntrypoint>(plugin);
+        plugin.add<SetSpikeSimulationFromFileEntrypoint>(plugin);
     }
 };
 } // namespace dti

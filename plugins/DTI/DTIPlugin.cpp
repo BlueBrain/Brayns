@@ -40,7 +40,7 @@
 #include <brain/brain.h>
 #include <brion/brion.h>
 
-#include "EntrypointRegistry.h"
+#include "DtiEntrypoints.h"
 
 namespace
 {
@@ -50,6 +50,11 @@ const std::string MATERIAL_PROPERTY_SHADING_MODE = "shading_mode";
 
 namespace dti
 {
+DTIPlugin::DTIPlugin()
+    : brayns::ExtensionPlugin("DTI")
+{
+}
+
 void DTIPlugin::init()
 {
     auto &scene = _api->getScene();
@@ -58,12 +63,7 @@ void DTIPlugin::init()
     registry.registerLoader(
         std::make_unique<DTILoader>(scene, DTILoader::getCLIProperties()));
 
-    auto interface = _api->getActionInterface();
-    if (!interface)
-    {
-        return;
-    }
-    EntrypointRegistry::load(*this, *interface);
+    DtiEntrypoints::load(*this);
 }
 
 void DTIPlugin::preRender()

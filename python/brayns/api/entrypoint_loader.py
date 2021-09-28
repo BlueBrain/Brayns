@@ -22,11 +22,10 @@
 from typing import List
 
 from ..client.abstract_client import AbstractClient
-
 from .entrypoint import Entrypoint
 
 
-def get_all(client: AbstractClient) -> List[Entrypoint]:
+def load_all_entrypoints(client: AbstractClient) -> List[Entrypoint]:
     """Fetch all entrypoints using the client and return the list.
 
     :param client: Brayns client connected to the renderer

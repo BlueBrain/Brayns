@@ -203,7 +203,10 @@ public:
 
 namespace brayns
 {
-NetworkManager::NetworkManager() {}
+NetworkManager::NetworkManager()
+    : ExtensionPlugin("Core")
+{
+}
 
 NetworkManager::~NetworkManager()
 {
@@ -219,7 +222,7 @@ void NetworkManager::init()
     _context = std::make_unique<NetworkContext>(*_api);
     _interface = InterfaceFactory::createInterface(*_context);
     _api->setActionInterface(_interface);
-    NetworkManagerEntrypoints::load(*_interface);
+    NetworkManagerEntrypoints::load(*this);
     ConnectionCallbacks::setup(*_context);
 }
 
