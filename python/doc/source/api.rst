@@ -4,9 +4,7 @@ Python API
 .. toctree::
    :hidden:
 
-   api_core
-   api_circuitexplorer
-   api_circuitinfo
-   api_dti
-   api_fluorescence
-   api_pbrvolumes
+   api_core_methods
+   api_circuitexplorer_methods
+   api_circuitinfo_methods
+   api_dti_methods
