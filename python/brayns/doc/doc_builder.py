@@ -84,8 +84,8 @@ def build_rst_doc(client: AbstractClient) -> Dict[str, str]:
     }
 
 
-_HEADER = '''{plugin} API Methods
-----------------
+_HEADER = '''{title}
+{underline}
 
 The Brayns python client API is automatically generated when connecting to a
 running backend service as shown in :ref:`usepythonclient-label`.
@@ -98,7 +98,21 @@ renderer to be available.
 
 The functions below are generated using the entrypoints of the {plugin} plugin.
 
-All arguments are keyword arguments.
+All arguments are keyword arguments extracted from the entrypoint params.
+
+Renderer errors will be raised with an instance of brayns.ReplyError. This one
+can be used to extract error code, description and some optional additional data
+(mainly used to store JSON errors).
+
+Example usage of some generated methods:
+
+.. code-block: python
+    import brayns
+
+    with brayns.connect(uri='localhost:5000') as client:
+        print(client.get_camera())
+        client.set_camera(current='orthographic')
+        print(client.get_camera())
 
 '''
 
@@ -244,7 +258,12 @@ def _build_rst_doc(plugin: str, entrypoints: List[Entrypoint]):
 
 
 def _build_raw_rst(plugin: str, entrypoints: List[Entrypoint]):
-    return _HEADER.format(plugin=plugin) + '----\n\n'.join(
+    title = f'{plugin} API methods'
+    return _HEADER.format(
+        title=title,
+        underline=len(title) * '-',
+        plugin=plugin
+    ) + '----\n\n'.join(
         _format_entrypoint(entrypoint)
         for entrypoint in entrypoints
     )
