@@ -56,6 +56,7 @@ public:
        @return OSPRay implementation of the camera object
     */
     OSPCamera impl() { return _camera; }
+
 private:
     OSPCamera _camera{nullptr};
     std::string _currentOSPCamera;
@@ -63,5 +64,5 @@ private:
 
     void _createOSPCamera();
 };
-}
+} // namespace brayns
 #endif // OSPRAYCAMERA_H

@@ -48,8 +48,7 @@ inline bool isKnownCamera(const std::string& type)
 {
     return type == PBRT_CAMTYPE_TELECENTRIC ||
            type == PBRT_CAMTYPE_ENVIRONMENT ||
-           type == PBRT_CAMTYPE_ORTOGRAPHIC ||
-           type == PBRT_CAMTYPE_PERSPECTIVE;
+           type == PBRT_CAMTYPE_ORTOGRAPHIC || type == PBRT_CAMTYPE_PERSPECTIVE;
 }
 
 void PBRTCamera::commit()
@@ -61,7 +60,7 @@ void PBRTCamera::commit()
 
 void PBRTCamera::manualCommit(const Vector2ui& resolution)
 {
-    if(!isModified() && _currentRes == resolution)
+    if (!isModified() && _currentRes == resolution)
         return;
 
     _needsRender = true;
@@ -74,14 +73,15 @@ void PBRTCamera::manualCommit(const Vector2ui& resolution)
     const auto srcLook = srcPos + srcDir * 100.0;
     const pbrt::Point look = glmToPbrt3<pbrt::Point>(srcLook);
 
-    const auto srcUp = glm::normalize(glm::rotate(getOrientation(), Vector3d(0., -1., 0.)));
+    const auto srcUp =
+        glm::normalize(glm::rotate(getOrientation(), Vector3d(0., -1., 0.)));
     const pbrt::Vector up = glmToPbrt3<pbrt::Vector>(srcUp);
 
     _camToWorldMatrix = pbrt::LookAt(pos, look, up);
     _worldToCamMatrix = pbrt::Transform(_camToWorldMatrix.GetInverseMatrix(),
                                         _camToWorldMatrix.GetMatrix());
 
-    if(!isKnownCamera(getCurrentType()))
+    if (!isKnownCamera(getCurrentType()))
     {
         BRAYNS_WARN << "PBRTCamera: Unknown camera type " << getCurrentType()
                     << ", falling back to Perspective" << std::endl;
@@ -92,7 +92,7 @@ void PBRTCamera::manualCommit(const Vector2ui& resolution)
 
     _currentRes = resolution;
     _createPBRTCamera();
-    _cameraChanged =  true;
+    _cameraChanged = true;
 }
 
 void PBRTCamera::_createPBRTCamera()
@@ -102,48 +102,49 @@ void PBRTCamera::_createPBRTCamera()
     // of the previous camera
     _pbrtCamera = nullptr;
 
-    pbrt::AnimatedTransform atr (&_worldToCamMatrix, 0.f, &_worldToCamMatrix, 1.f);
+    pbrt::AnimatedTransform atr(&_worldToCamMatrix, 0.f, &_worldToCamMatrix,
+                                1.f);
     pbrt::ParamSet params = _camParamstoPbrtParams();
     pbrt::Film* film = _createFilm();
 
-    if(getCurrentType() == PBRT_CAMTYPE_PERSPECTIVE)
+    if (getCurrentType() == PBRT_CAMTYPE_PERSPECTIVE)
         _pbrtCamera = pbrt::CreatePerspectiveCamera(params, atr, film);
-    else if(getCurrentType() == PBRT_CAMTYPE_ORTOGRAPHIC)
+    else if (getCurrentType() == PBRT_CAMTYPE_ORTOGRAPHIC)
         _pbrtCamera = pbrt::CreateOrthographicCamera(params, atr, film);
-    else if(getCurrentType() == PBRT_CAMTYPE_ENVIRONMENT)
+    else if (getCurrentType() == PBRT_CAMTYPE_ENVIRONMENT)
         _pbrtCamera = pbrt::CreateEnvironmentCamera(params, atr, film);
     else if (getCurrentType() == PBRT_CAMTYPE_TELECENTRIC)
         _pbrtCamera = pbrt::CreateTelecentricCamera(params, atr, film);
 
-    if(_pbrtCamera == nullptr)
-        throw std::runtime_error("PBRTCamera: Could not create PBRT Camera implementation");
+    if (_pbrtCamera == nullptr)
+        throw std::runtime_error(
+            "PBRTCamera: Could not create PBRT Camera implementation");
 }
 
 pbrt::Filter* PBRTCamera::_createFilter()
 {
     pbrt::Filter* filter = nullptr;
-    if(hasProperty("filter_type"))
+    if (hasProperty("filter_type"))
     {
         const auto params = _filterParamsToPbrtParams();
 
         const auto ft = getProperty<std::string>(PBRT_FILTERPROP_TYPE);
-        if(ft == PBRT_FILTERTYPE_BOX)
+        if (ft == PBRT_FILTERTYPE_BOX)
             filter = pbrt::CreateBoxFilter(params);
-        else if(ft == PBRT_FILTERTYPE_GAUSSIAN)
+        else if (ft == PBRT_FILTERTYPE_GAUSSIAN)
             filter = pbrt::CreateGaussianFilter(params);
-        else if(ft == PBRT_FILTERTYPE_MITCHELL)
+        else if (ft == PBRT_FILTERTYPE_MITCHELL)
             filter = pbrt::CreateMitchellFilter(params);
-        else if(ft == PBRT_FILTERTYPE_SINC)
+        else if (ft == PBRT_FILTERTYPE_SINC)
             filter = pbrt::CreateSincFilter(params);
-        else if(ft == PBRT_FILTERTYPE_TRIANGLE)
+        else if (ft == PBRT_FILTERTYPE_TRIANGLE)
             filter = pbrt::CreateTriangleFilter(params);
         else
-            BRAYNS_WARN << "PBRTCamera: Unknown filter type "
-                        << ft
+            BRAYNS_WARN << "PBRTCamera: Unknown filter type " << ft
                         << ", falling to Box filter" << std::endl;
     }
 
-    if(filter == nullptr)
+    if (filter == nullptr)
         filter = pbrt::CreateBoxFilter(pbrt::ParamSet());
 
     return filter;
@@ -154,19 +155,16 @@ pbrt::Film* PBRTCamera::_createFilm()
     return pbrt::CreateImageFilm(_filmParamsToPbrtParams(), _createFilter());
 }
 
-inline void addFloat(const brayns::PropertyObject& src,
-                     pbrt::ParamSet& dst,
-                     const std::string& propName,
-                     const double defaultValue)
+inline void addFloat(const brayns::PropertyObject& src, pbrt::ParamSet& dst,
+                     const std::string& propName, const double defaultValue)
 {
-    auto v = static_cast<float>(src.getPropertyOrValue<double>(propName, defaultValue));
+    auto v = static_cast<float>(
+        src.getPropertyOrValue<double>(propName, defaultValue));
     dst.AddFloat(propName, &v);
 }
 
-inline void addInt(const brayns::PropertyObject& src,
-                   pbrt::ParamSet& dst,
-                   const std::string& propName,
-                   const int defaultValue)
+inline void addInt(const brayns::PropertyObject& src, pbrt::ParamSet& dst,
+                   const std::string& propName, const int defaultValue)
 {
     auto val = src.getPropertyOrValue<int>(propName, defaultValue);
     dst.AddInt(propName, &val, 1);
@@ -186,7 +184,7 @@ pbrt::ParamSet PBRTCamera::_camParamstoPbrtParams()
                                   static_cast<double>(_currentRes.y));
     result.AddFloat(PBRT_CAMPROP_FRAMEASPECTRATIO, &far);
 
-    if(getCurrentType() == PBRT_CAMTYPE_PERSPECTIVE)
+    if (getCurrentType() == PBRT_CAMTYPE_PERSPECTIVE)
     {
         addFloat(*this, result, PBRT_CAMPROP_FOV, 90.);
         addFloat(*this, result, PBRT_CAMPROP_HALFFOV, -1.);
@@ -199,23 +197,23 @@ pbrt::ParamSet PBRTCamera::_filterParamsToPbrtParams()
 {
     pbrt::ParamSet result;
 
-    if(!hasProperty("filter_type"))
+    if (!hasProperty("filter_type"))
         return result;
 
     const auto filterType = getProperty<std::string>(PBRT_FILTERPROP_TYPE);
 
-    if(filterType == PBRT_FILTERTYPE_BOX)
+    if (filterType == PBRT_FILTERTYPE_BOX)
     {
         addFloat(*this, result, PBRT_FILTERPROP_XWIDTH, 0.5);
         addFloat(*this, result, PBRT_FILTERPROP_YWIDTH, 0.5);
     }
-    else if(filterType == PBRT_FILTERTYPE_GAUSSIAN)
+    else if (filterType == PBRT_FILTERTYPE_GAUSSIAN)
     {
         addFloat(*this, result, PBRT_FILTERPROP_XWIDTH, 2.);
         addFloat(*this, result, PBRT_FILTERPROP_YWIDTH, 2.);
         addFloat(*this, result, PBRT_FILTERPROP_ALPHA, 2.);
     }
-    else if(filterType == PBRT_FILTERTYPE_MITCHELL)
+    else if (filterType == PBRT_FILTERTYPE_MITCHELL)
     {
         addFloat(*this, result, PBRT_FILTERPROP_XWIDTH, 2.);
         addFloat(*this, result, PBRT_FILTERPROP_YWIDTH, 2.);
@@ -223,13 +221,13 @@ pbrt::ParamSet PBRTCamera::_filterParamsToPbrtParams()
         addFloat(*this, result, PBRT_FILTERPROP_B, val);
         addFloat(*this, result, PBRT_FILTERPROP_C, val);
     }
-    else if(filterType == PBRT_FILTERTYPE_SINC)
+    else if (filterType == PBRT_FILTERTYPE_SINC)
     {
         addFloat(*this, result, PBRT_FILTERPROP_XWIDTH, 4.);
         addFloat(*this, result, PBRT_FILTERPROP_YWIDTH, 4.);
         addFloat(*this, result, PBRT_FILTERPROP_TAU, 3.);
     }
-    else if(filterType == PBRT_FILTERTYPE_TRIANGLE)
+    else if (filterType == PBRT_FILTERTYPE_TRIANGLE)
     {
         addFloat(*this, result, PBRT_FILTERPROP_XWIDTH, 2.);
         addFloat(*this, result, PBRT_FILTERPROP_YWIDTH, 2.);
@@ -241,20 +239,24 @@ pbrt::ParamSet PBRTCamera::_filterParamsToPbrtParams()
 pbrt::ParamSet PBRTCamera::_filmParamsToPbrtParams()
 {
     pbrt::ParamSet result;
-    addInt(*this, result, PBRT_FILMPROP_XRESOLUTION, static_cast<int>(_currentRes.x));
-    addInt(*this, result, PBRT_FILMPROP_YRESOLUTION, static_cast<int>(_currentRes.y));
+    addInt(*this, result, PBRT_FILMPROP_XRESOLUTION,
+           static_cast<int>(_currentRes.x));
+    addInt(*this, result, PBRT_FILMPROP_YRESOLUTION,
+           static_cast<int>(_currentRes.y));
     addFloat(*this, result, PBRT_FILMPROP_PIXELWIDTH, 1.);
     addFloat(*this, result, PBRT_FILMPROP_PIXELHEIGHT, 1.);
-    
-    auto cropWindow = getPropertyOrValue<std::array<double, 4>>(PBRT_FILMPROP_CROPWINDOW, 
-                                                                {0., 1., 0., 1.});
-    float cropWindowFlt[4] = {static_cast<float>(cropWindow[0]), 
-                              static_cast<float>(cropWindow[1]), 
-                              static_cast<float>(cropWindow[2]), 
+
+    auto cropWindow =
+        getPropertyOrValue<std::array<double, 4>>(PBRT_FILMPROP_CROPWINDOW,
+                                                  {0., 1., 0., 1.});
+    float cropWindowFlt[4] = {static_cast<float>(cropWindow[0]),
+                              static_cast<float>(cropWindow[1]),
+                              static_cast<float>(cropWindow[2]),
                               static_cast<float>(cropWindow[3])};
     result.AddFloat(PBRT_FILMPROP_CROPWINDOW, &cropWindowFlt[0], 4);
 
-    auto filterSpectrum = getPropertyOrValue<bool>(PBRT_FILMPROP_FILTERSPECTRUM, false);
+    auto filterSpectrum =
+        getPropertyOrValue<bool>(PBRT_FILMPROP_FILTERSPECTRUM, false);
     result.AddBool(PBRT_FILMPROP_FILTERSPECTRUM, &filterSpectrum, 1);
 
     auto filterMin = getPropertyOrValue<int>(PBRT_FILMPROP_FILTERBANDMIN, 400);
@@ -265,4 +267,4 @@ pbrt::ParamSet PBRTCamera::_filmParamsToPbrtParams()
     return result;
 }
 
-}
+} // namespace brayns

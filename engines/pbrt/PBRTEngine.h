@@ -32,7 +32,7 @@ namespace brayns
 class PBRTEngine : public Engine
 {
 public:
-    PBRTEngine(ParametersManager& paramsManager);
+    PBRTEngine(ParametersManager &paramsManager);
 
     ~PBRTEngine();
 
@@ -40,9 +40,9 @@ public:
 
     Vector2ui getMinimumFrameSize() const final;
 
-    FrameBufferPtr createFrameBuffer(const std::string &name,
-                                     const Vector2ui &frameSize,
-                                     FrameBufferFormat frameBufferFormat) const final;
+    FrameBufferPtr createFrameBuffer(
+        const std::string &name, const Vector2ui &frameSize,
+        FrameBufferFormat frameBufferFormat) const final;
 
     ScenePtr createScene(AnimationParameters &animationParameters,
                          GeometryParameters &geometryParameters,
@@ -50,13 +50,11 @@ public:
 
     CameraPtr createCamera() const final;
 
-    RendererPtr createRenderer(const AnimationParameters &animationParameters,
-                               const RenderingParameters &renderingParameters) const final;
+    RendererPtr createRenderer(
+        const AnimationParameters &animationParameters,
+        const RenderingParameters &renderingParameters) const final;
 
-    const FrameBuffer& getFrameBuffer() const
-    {
-        return *_frameBuffers[0];
-    }
+    const FrameBuffer &getFrameBuffer() const { return *_frameBuffers[0]; }
 
     void markItemsRenderClean();
 
@@ -67,9 +65,7 @@ public:
 private:
     void _createCameras();
     void _createRenderers();
-
-
 };
-}
+} // namespace brayns
 
 #endif

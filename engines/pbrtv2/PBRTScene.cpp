@@ -46,14 +46,15 @@
 
 namespace brayns
 {
-
 pbrt::Shape* CreateSphere(const float radius, const Vector3f& center,
-                                          std::vector<std::unique_ptr<pbrt::Transform>>& pool)
+                          std::vector<std::unique_ptr<pbrt::Transform>>& pool)
 {
     pbrt::ParamSet params;
 
-    std::unique_ptr<pbrt::Transform> otwS (new pbrt::Transform(pbrtTranslation(center)));
-    std::unique_ptr<pbrt::Transform> wtoS (new pbrt::Transform(otwS->GetInverseMatrix(), otwS->GetMatrix()));
+    std::unique_ptr<pbrt::Transform> otwS(
+        new pbrt::Transform(pbrtTranslation(center)));
+    std::unique_ptr<pbrt::Transform> wtoS(
+        new pbrt::Transform(otwS->GetInverseMatrix(), otwS->GetMatrix()));
 
     auto otwFinalPtr = otwS.get();
     auto wtoFinalPtr = wtoS.get();
@@ -74,9 +75,7 @@ PBRTScene::PBRTScene(AnimationParameters& animationParameters,
     _backgroundMaterial = std::make_shared<PBRTMaterial>();
 }
 
-PBRTScene::~PBRTScene()
-{
-}
+PBRTScene::~PBRTScene() {}
 
 void PBRTScene::commit()
 {
@@ -90,7 +89,7 @@ void PBRTScene::commit()
     }
 
     const bool rebuildScene = isModified() || _lightManager.isModified();
-    if(!rebuildScene)
+    if (!rebuildScene)
     {
         bool doUpdate = false;
         for (auto& modelDescriptor : modelDescriptors)
@@ -143,16 +142,16 @@ void PBRTScene::commit()
     // Append light shapes to the primitive list so they are visible
     allPrims.insert(allPrims.end(), _lightShapes.begin(), _lightShapes.end());
 
-     auto bvh = pbrt::CreateBVHAccelerator(allPrims, pbrt::ParamSet());
+    auto bvh = pbrt::CreateBVHAccelerator(allPrims, pbrt::ParamSet());
 
     // Compute scene bounds with all the objects information
     _computeBounds();
 
     // Generate the volume region
     pbrt::VolumeRegion* vr = nullptr;
-    if(allVolumes.size() == 1)
+    if (allVolumes.size() == 1)
         vr = allVolumes[0];
-    else if(allVolumes.size() > 1)
+    else if (allVolumes.size() > 1)
         vr = new pbrt::AggregateVolume(allVolumes);
 
     // Create scene with primitives + lights
@@ -164,7 +163,7 @@ bool PBRTScene::commitLights()
     _lights.clear();
     _lightShapes.clear();
 
-    for(const auto& kv : _lightManager.getLights())
+    for (const auto& kv : _lightManager.getLights())
     {
         auto baseLight = kv.second;
 
@@ -172,16 +171,19 @@ bool PBRTScene::commitLights()
         float rgb[3] = {static_cast<float>(baseLight->_color.x),
                         static_cast<float>(baseLight->_color.y),
                         static_cast<float>(baseLight->_color.z)};
-        pbrt::Spectrum tempL = pbrt::Spectrum::FromRGB(rgb, pbrt::SpectrumType::SPECTRUM_ILLUMINANT);
+        pbrt::Spectrum tempL =
+            pbrt::Spectrum::FromRGB(rgb,
+                                    pbrt::SpectrumType::SPECTRUM_ILLUMINANT);
         float L[3];
         tempL.ToRGB(L);
 
-        switch(baseLight->_type)
+        switch (baseLight->_type)
         {
         case LightType::DIRECTIONAL:
         {
             pbrt::ParamSet params;
-            const auto dirLight = static_cast<DirectionalLight*>(baseLight.get());
+            const auto dirLight =
+                static_cast<DirectionalLight*>(baseLight.get());
             pbrt::Point from(static_cast<float>(-dirLight->_direction.x),
                              static_cast<float>(-dirLight->_direction.y),
                              static_cast<float>(-dirLight->_direction.z));
@@ -190,7 +192,8 @@ bool PBRTScene::commitLights()
             params.AddPoint("to", &to, 1);
 
             params.AddRGBSpectrum("L", L, 3);
-            auto pbrtDirLight = pbrt::CreateDistantLight(pbrt::Transform(), params);
+            auto pbrtDirLight =
+                pbrt::CreateDistantLight(pbrt::Transform(), params);
             _lights.push_back(pbrtDirLight);
             break;
         }
@@ -201,27 +204,32 @@ bool PBRTScene::commitLights()
             const auto radius = sphereLight->_radius;
             const auto& center = sphereLight->_position;
 
-            auto sphereShape = CreateSphere(static_cast<float>(radius), center, _transformPool);
+            auto sphereShape = CreateSphere(static_cast<float>(radius), center,
+                                            _transformPool);
             pbrt::Reference<pbrt::Shape> sphereShapeRef(sphereShape);
             const int nsamples = 16;
             params.AddInt("samples", &nsamples, 1);
 
             params.AddRGBSpectrum("L", L, 3);
-            auto pbrtSphereLight = pbrt::CreateDiffuseAreaLight(pbrt::Transform(), params, sphereShapeRef);
+            auto pbrtSphereLight =
+                pbrt::CreateDiffuseAreaLight(pbrt::Transform(), params,
+                                             sphereShapeRef);
             _lights.push_back(pbrtSphereLight);
 
             constexpr float WHITE_RGB[3] = {1.f, 1.f, 1.f};
-            pbrt::Reference<pbrt::Texture<pbrt::Spectrum>> Kd (
-                        new pbrt::ConstantTexture<pbrt::Spectrum>(pbrt::Spectrum::FromRGB(WHITE_RGB)));
-            pbrt::Reference<pbrt::Texture<float>> sigma (
-                        new pbrt::ConstantTexture<float>(0.f));
+            pbrt::Reference<pbrt::Texture<pbrt::Spectrum>> Kd(
+                new pbrt::ConstantTexture<pbrt::Spectrum>(
+                    pbrt::Spectrum::FromRGB(WHITE_RGB)));
+            pbrt::Reference<pbrt::Texture<float>> sigma(
+                new pbrt::ConstantTexture<float>(0.f));
             pbrt::Reference<pbrt::Texture<float>> bumpmap(nullptr);
 
-            pbrt::Reference<pbrt::Material> matte(new pbrt::MatteMaterial(Kd, sigma, bumpmap));
+            pbrt::Reference<pbrt::Material> matte(
+                new pbrt::MatteMaterial(Kd, sigma, bumpmap));
 
             _lightShapes.push_back(pbrt::Reference<pbrt::Primitive>(
-                                       new pbrt::GeometricPrimitive(
-                                           sphereShapeRef, matte, pbrtSphereLight)));
+                new pbrt::GeometricPrimitive(sphereShapeRef, matte,
+                                             pbrtSphereLight)));
             break;
         }
         case LightType::QUAD:
@@ -233,23 +241,14 @@ bool PBRTScene::commitLights()
             const Vector3f& p3 = quadLight->_edge2;
             const Vector3f p2 = p0 + ((p1 - p0) + (p3 - p0));
 
-            std::vector<pbrt::Point> pos =
-            {
-                pbrt::Point(p0.x, p0.y, p0.z),
-                pbrt::Point(p1.x, p1.y, p1.z),
-                pbrt::Point(p2.x, p2.y, p2.z),
-                pbrt::Point(p3.x, p3.y, p3.z)
-            };
+            std::vector<pbrt::Point> pos = {pbrt::Point(p0.x, p0.y, p0.z),
+                                            pbrt::Point(p1.x, p1.y, p1.z),
+                                            pbrt::Point(p2.x, p2.y, p2.z),
+                                            pbrt::Point(p3.x, p3.y, p3.z)};
 
             std::vector<int> indices = {0, 1, 2, 2, 3, 0};
 
-            std::vector<float> uvs =
-            {
-                0.f, 0.f,
-                1.f, 0.f,
-                1.f, 1.f,
-                0.f, 1.f
-            };
+            std::vector<float> uvs = {0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 0.f, 1.f};
 
             pbrt::ParamSet meshParams;
             meshParams.AddInt("indices", indices.data(), 6);
@@ -257,18 +256,21 @@ bool PBRTScene::commitLights()
             meshParams.AddFloat("uv", uvs.data(), 8);
 
             /*
-            // Adjust the orientation (normals) to face the center of the scene bounding box
-            auto tempNormal = glm::cross(glm::normalize(p1 - p0), glm::normalize(p3 - p0));
-            const auto& bbcenter = getBounds().getCenter();
-            auto dirVector = Vector3f(bbcenter.x, bbcenter.y, bbcenter.z) - p0;
-            const float dotResult = glm::dot(glm::normalize(tempNormal), glm::normalize(dirVector));
+            // Adjust the orientation (normals) to face the center of the scene
+            bounding box auto tempNormal = glm::cross(glm::normalize(p1 - p0),
+            glm::normalize(p3 - p0)); const auto& bbcenter =
+            getBounds().getCenter(); auto dirVector = Vector3f(bbcenter.x,
+            bbcenter.y, bbcenter.z) - p0; const float dotResult =
+            glm::dot(glm::normalize(tempNormal), glm::normalize(dirVector));
             const bool reverse = dotResult < 0.f;
             */
 
-            std::unique_ptr<pbrt::Transform> dummyTransform (new pbrt::Transform());
+            std::unique_ptr<pbrt::Transform> dummyTransform(
+                new pbrt::Transform());
             auto dtptr = dummyTransform.get();
             _transformPool.push_back(std::move(dummyTransform));
-            pbrt::Reference<pbrt::Shape> areaLight (pbrt::CreateTriangleMeshShape(dtptr, dtptr, true, meshParams));
+            pbrt::Reference<pbrt::Shape> areaLight(
+                pbrt::CreateTriangleMeshShape(dtptr, dtptr, true, meshParams));
 
             pbrt::ParamSet params;
 
@@ -281,21 +283,24 @@ bool PBRTScene::commitLights()
             params.AddRGBSpectrum("scale", intensityRGB, 1);
             params.AddRGBSpectrum("L", L, 3);
 
-            auto pbrtQuadLight = pbrt::CreateDiffuseAreaLight(pbrt::Transform(), params, areaLight);
+            auto pbrtQuadLight =
+                pbrt::CreateDiffuseAreaLight(pbrt::Transform(), params,
+                                             areaLight);
             _lights.push_back(pbrtQuadLight);
 
             constexpr float WHITE_RGB[3] = {1.f, 1.f, 1.f};
-            pbrt::Reference<pbrt::Texture<pbrt::Spectrum>> Kd (
-                        new pbrt::ConstantTexture<pbrt::Spectrum>(pbrt::Spectrum::FromRGB(WHITE_RGB)));
-            pbrt::Reference<pbrt::Texture<float>> sigma (
-                        new pbrt::ConstantTexture<float>(0.f));
+            pbrt::Reference<pbrt::Texture<pbrt::Spectrum>> Kd(
+                new pbrt::ConstantTexture<pbrt::Spectrum>(
+                    pbrt::Spectrum::FromRGB(WHITE_RGB)));
+            pbrt::Reference<pbrt::Texture<float>> sigma(
+                new pbrt::ConstantTexture<float>(0.f));
             pbrt::Reference<pbrt::Texture<float>> bumpmap(nullptr);
 
-            pbrt::Reference<pbrt::Material> matte(new pbrt::MatteMaterial(Kd, sigma, bumpmap));
+            pbrt::Reference<pbrt::Material> matte(
+                new pbrt::MatteMaterial(Kd, sigma, bumpmap));
 
             _lightShapes.push_back(pbrt::Reference<pbrt::Primitive>(
-                                       new pbrt::GeometricPrimitive(
-                                           areaLight, matte, pbrtQuadLight)));
+                new pbrt::GeometricPrimitive(areaLight, matte, pbrtQuadLight)));
 
             break;
         }
@@ -310,7 +315,8 @@ bool PBRTScene::commitLights()
             float coneAngle = static_cast<float>(spotLight->_openingAngle);
             params.AddFloat("coneangle", &coneAngle, 1);
 
-            float coneDeltaAngle = static_cast<float>(spotLight->_penumbraAngle);
+            float coneDeltaAngle =
+                static_cast<float>(spotLight->_penumbraAngle);
             params.AddFloat("conedeltaangle", &coneDeltaAngle, 1);
 
             pbrt::Point to(static_cast<float>(spotLight->_direction.x),
@@ -333,7 +339,8 @@ bool PBRTScene::commitLights()
 
             params.AddRGBSpectrum("L", L, 3);
 
-            auto pbrtAmbientLight = pbrt::CreateInfiniteLight(pbrt::Transform(), params);
+            auto pbrtAmbientLight =
+                pbrt::CreateInfiniteLight(pbrt::Transform(), params);
             _lights.push_back(pbrtAmbientLight);
             break;
         }
@@ -345,7 +352,7 @@ bool PBRTScene::commitLights()
 
 ModelPtr PBRTScene::createModel() const
 {
-    return std::unique_ptr<PBRTModel>(new PBRTModel(_animationParameters,
-                                                    _volumeParameters));
+    return std::unique_ptr<PBRTModel>(
+        new PBRTModel(_animationParameters, _volumeParameters));
 }
-}
+} // namespace brayns

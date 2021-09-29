@@ -55,6 +55,6 @@ private:
     uint8_ts _colorBuffer;
     std::mutex _mapMutex;
 };
-}
+} // namespace brayns
 
 #endif

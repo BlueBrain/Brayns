@@ -97,11 +97,10 @@ static __device__ void phongShade(float3 p_Kd, float3 p_Ka, float3 p_Ks,
 
     // Glossiness
     if (p_glossiness < 1.f)
-        p_normal =
-            optix::normalize(p_normal +
-                             (1.f - p_glossiness) *
-                                 make_float3(rnd(seed) - 0.5f, rnd(seed) - 0.5f,
-                                             rnd(seed) - 0.5f));
+        p_normal = optix::normalize(
+            p_normal + (1.f - p_glossiness) * make_float3(rnd(seed) - 0.5f,
+                                                          rnd(seed) - 0.5f,
+                                                          rnd(seed) - 0.5f));
 
     // Surface
     float3 hit_point = ray.origin + t_hit * ray.direction;

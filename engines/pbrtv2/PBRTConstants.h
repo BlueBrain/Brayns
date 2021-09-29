@@ -29,19 +29,19 @@ namespace brayns
 // Supported materials
 enum class PBRTMaterialClass : uint8_t
 {
-    MATERIAL_GLASS          = 0u,
-    MATERIAL_KDSUBSURFACE   = 1u,
-    MATERIAL_MATTE          = 2u,
-    MATERIAL_MEASURED       = 3u,
-    MATERIAL_METAL          = 4u,
-    MATERIAL_MIRROR         = 5u,
-    MATERIAL_MIXMAT         = 6u,
-    MATERIAL_PLASTIC        = 7u,
-    MATERIAL_SHINYMETAL     = 8u,
-    MATERIAL_SUBSTRATE      = 9u,
-    MATERIAL_SUBSURFACE     = 10u,
-    MATERIAL_TRANSLUCENT    = 11u,
-    MATERIAL_UBER           = 12u
+    MATERIAL_GLASS = 0u,
+    MATERIAL_KDSUBSURFACE = 1u,
+    MATERIAL_MATTE = 2u,
+    MATERIAL_MEASURED = 3u,
+    MATERIAL_METAL = 4u,
+    MATERIAL_MIRROR = 5u,
+    MATERIAL_MIXMAT = 6u,
+    MATERIAL_PLASTIC = 7u,
+    MATERIAL_SHINYMETAL = 8u,
+    MATERIAL_SUBSTRATE = 9u,
+    MATERIAL_SUBSURFACE = 10u,
+    MATERIAL_TRANSLUCENT = 11u,
+    MATERIAL_UBER = 12u
 };
 std::string materialClassToString(const PBRTMaterialClass matClass);
 
@@ -203,12 +203,12 @@ extern const std::string PBRT_SAMPLER_STRATIFIED;
 extern const std::string PBRT_SAMPLERPROP_TYPE;
 extern const std::string PBRT_SAMPLERPROP_MINSAMPLES;
 extern const std::string PBRT_SAMPLERPROP_MAXSAMPLES;
-extern const std::string PBRT_SAMPLERPROP_METHOD;       // "contrast", "shapeid"
+extern const std::string PBRT_SAMPLERPROP_METHOD; // "contrast", "shapeid"
 extern const std::string PBRT_SAMPLERPROP_PIXELSAMPLES;
 extern const std::string PBRT_SAMPLERPROP_JITTER;
 extern const std::string PBRT_SAMPLERPROP_XSAMPLES;
 extern const std::string PBRT_SAMPLERPROP_YSAMPLES;
 
-}
+} // namespace brayns
 
 #endif

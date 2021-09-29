@@ -28,7 +28,6 @@
 
 namespace brayns
 {
-
 class PBRTDebugSurfaceIntegrator : public pbrt::SurfaceIntegrator
 {
 public:
@@ -39,9 +38,11 @@ public:
     }
 
     pbrt::Spectrum Li(const pbrt::Scene *scene, const pbrt::Renderer *renderer,
-                      const pbrt::RayDifferential &ray, const pbrt::Intersection &isect,
-                      const pbrt::Sample *sample, pbrt::RNG &rng, pbrt::MemoryArena &arena)
-                      const final;
+                      const pbrt::RayDifferential &ray,
+                      const pbrt::Intersection &isect,
+                      const pbrt::Sample *sample, pbrt::RNG &rng,
+                      pbrt::MemoryArena &arena) const final;
+
 private:
     pbrt::Spectrum _green;
 };
@@ -62,19 +63,21 @@ public:
     }
 
     pbrt::Spectrum Li(const pbrt::Scene *scene, const pbrt::Renderer *renderer,
-                      const pbrt::RayDifferential &ray, const pbrt::Sample *sample,
-                      pbrt::RNG &rng, pbrt::Spectrum *transmittance, pbrt::MemoryArena &arena)
-                      const final;
-    pbrt::Spectrum Transmittance(const pbrt::Scene *scene, const pbrt::Renderer *renderer,
-                                 const pbrt::RayDifferential &ray, const pbrt::Sample *sample,
-                                 pbrt::RNG &rng, pbrt::MemoryArena &arena)
-                                 const final;
+                      const pbrt::RayDifferential &ray,
+                      const pbrt::Sample *sample, pbrt::RNG &rng,
+                      pbrt::Spectrum *transmittance,
+                      pbrt::MemoryArena &arena) const final;
+    pbrt::Spectrum Transmittance(const pbrt::Scene *scene,
+                                 const pbrt::Renderer *renderer,
+                                 const pbrt::RayDifferential &ray,
+                                 const pbrt::Sample *sample, pbrt::RNG &rng,
+                                 pbrt::MemoryArena &arena) const final;
 
 private:
     pbrt::Spectrum _white;
     pbrt::Spectrum _black;
     pbrt::Spectrum _red;
 };
-}
+} // namespace brayns
 
 #endif

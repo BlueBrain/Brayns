@@ -25,7 +25,7 @@ namespace brayns
 pbrt::Transform* TransformPool::findOrCreate(pbrt::Transform& t)
 {
     auto it = _hasTable.find(&t);
-    if(it != _hasTable.end())
+    if (it != _hasTable.end())
         return *it;
 
     auto* result = _pool.Alloc<pbrt::Transform>();
@@ -38,4 +38,4 @@ void TransformPool::clear()
     _pool.Reset();
     _hasTable.clear();
 }
-}
+} // namespace brayns

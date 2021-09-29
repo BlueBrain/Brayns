@@ -45,7 +45,7 @@ public:
 
     void setCurrentRenderer(const std::string& renderer)
     {
-        if(renderer != _currentRenderer)
+        if (renderer != _currentRenderer)
         {
             _currentRenderer = renderer;
             markModified();
@@ -62,7 +62,7 @@ public:
     }
 
 private:
-    std::unique_ptr<pbrt::Scene> _pbrtScene {nullptr};
+    std::unique_ptr<pbrt::Scene> _pbrtScene{nullptr};
     std::shared_ptr<pbrt::BVHAccel> _bvh;
     std::vector<std::shared_ptr<pbrt::Light>> _lights;
     std::vector<std::shared_ptr<pbrt::GeometricPrimitive>> _lightShapes;
@@ -71,6 +71,6 @@ private:
 
     std::string _currentRenderer;
 };
-}
+} // namespace brayns
 
 #endif

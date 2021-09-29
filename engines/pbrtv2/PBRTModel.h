@@ -42,24 +42,26 @@ public:
 
     void commitGeometry() final;
 
-    std::vector<pbrt::Reference<pbrt::Primitive>>
-    commitToPBRT(const Transformation& transform,
-                 std::vector<pbrt::Sensor*>& sensorBuffer,
-                 std::vector<pbrt::VolumeRegion*>& volumeBuffer);
+    std::vector<pbrt::Reference<pbrt::Primitive>> commitToPBRT(
+        const Transformation& transform,
+        std::vector<pbrt::Sensor*>& sensorBuffer,
+        std::vector<pbrt::VolumeRegion*>& volumeBuffer);
 
     void buildBoundingBox() final;
 
-    SharedDataVolumePtr createSharedDataVolume(const Vector3ui &dimensions,
-                                               const Vector3f &spacing,
+    SharedDataVolumePtr createSharedDataVolume(const Vector3ui& dimensions,
+                                               const Vector3f& spacing,
                                                const DataType type) const final;
 
-    BrickedVolumePtr createBrickedVolume(const Vector3ui &dimensions, const Vector3f &spacing,
+    BrickedVolumePtr createBrickedVolume(const Vector3ui& dimensions,
+                                         const Vector3f& spacing,
                                          const DataType type) const final
     {
         (void)dimensions;
         (void)spacing;
         (void)type;
-        throw std::runtime_error("PBRTModel: createBrickedVolume() not implemented");
+        throw std::runtime_error(
+            "PBRTModel: createBrickedVolume() not implemented");
     }
 
     bool materialsDirty() const;
@@ -67,14 +69,16 @@ public:
 protected:
     // Simulations will require a custom integrator
     // Disabled by now
-    void _commitSimulationDataImpl(const float *frameData, const size_t frameSize) final
+    void _commitSimulationDataImpl(const float* frameData,
+                                   const size_t frameSize) final
     {
         (void)frameData;
         (void)frameSize;
         BRAYNS_WARN << "PBRTModel commitSimulationDataImpl: "
                     << "Simulations not supported yet for PBRT" << std::endl;
     }
-    void _commitTransferFunctionImpl(const Vector3fs &colors, const floats &opacities,
+    void _commitTransferFunctionImpl(const Vector3fs& colors,
+                                     const floats& opacities,
                                      const Vector2d valueRange) final
     {
         (void)colors;
@@ -83,10 +87,11 @@ protected:
         BRAYNS_WARN << "PBRTModel commitSimulationDataImpl: "
                     << "Simulations not supported yet for PBRT" << std::endl;
     }
+
 private:
     // Instantiate all the scene materials
     void _commitMaterials();
-    MaterialPtr createMaterialImpl(const PropertyMap &properties = {}) final;
+    MaterialPtr createMaterialImpl(const PropertyMap& properties = {}) final;
 
     // Holds all the transforms of this model shapes
     std::vector<std::unique_ptr<pbrt::Transform>> _transformPool;
@@ -96,7 +101,9 @@ private:
     pbrt::Transform _worldToObject;
 
     // Functionality to instantiate volumes from metaobjects
-    using VolumeFactory = std::function<pbrt::VolumeRegion*(pbrt::Transform*, const PropertyMap&)>;
+    using VolumeFactory =
+        std::function<pbrt::VolumeRegion*(pbrt::Transform*,
+                                          const PropertyMap&)>;
     static std::unordered_map<std::string, VolumeFactory> _volumeFactories;
     std::vector<pbrt::VolumeRegion*> _createVolumes(pbrt::Transform* otw);
 
@@ -109,8 +116,9 @@ private:
     Primitives _createSDFGeometries(pbrt::Transform* otw, pbrt::Transform* wto);
 
     // Functionality to instantiate sensors from metaobjects
-    std::vector<pbrt::Sensor*> _createSensors(pbrt::Transform* otw, pbrt::Transform* wto);
+    std::vector<pbrt::Sensor*> _createSensors(pbrt::Transform* otw,
+                                              pbrt::Transform* wto);
 };
-}
+} // namespace brayns
 
 #endif

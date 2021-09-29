@@ -54,7 +54,10 @@ public:
 
     void buildBoundingBox() final;
 
-    void setSimulationOffset(const uint64_t offset) { _simulationOffset = offset; }
+    void setSimulationOffset(const uint64_t offset)
+    {
+        _simulationOffset = offset;
+    }
 
 private:
     using GeometryMap = std::map<size_t, OSPGeometry>;
@@ -81,7 +84,7 @@ private:
     size_t _boudingBoxMaterialId{0};
 
     // Simulation offset within the simulation buffer
-    uint64_t _simulationOffset {0};
+    uint64_t _simulationOffset{0};
 
     OSPTransferFunction _ospTransferFunction{nullptr};
 
@@ -100,4 +103,4 @@ private:
 
     MaterialPtr createMaterialImpl(const PropertyMap& properties = {}) final;
 };
-}
+} // namespace brayns

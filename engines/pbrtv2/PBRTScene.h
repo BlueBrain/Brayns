@@ -49,13 +49,13 @@ public:
 
 private:
     bool _needsRender{true};
-    std::unique_ptr<pbrt::Scene> _pbrtScene {nullptr};
+    std::unique_ptr<pbrt::Scene> _pbrtScene{nullptr};
     std::vector<pbrt::Light*> _lights;
     std::vector<pbrt::Reference<pbrt::Primitive>> _lightShapes;
 
-    //TransformPool _transformPool;
+    // TransformPool _transformPool;
     std::vector<std::unique_ptr<pbrt::Transform>> _transformPool;
 };
-}
+} // namespace brayns
 
 #endif

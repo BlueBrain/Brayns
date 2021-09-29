@@ -75,5 +75,5 @@ private:
     // protect map/unmap vs ospRenderFrame
     std::mutex _mapMutex;
 };
-}
+} // namespace brayns
 #endif // OSPRAYFRAMEBUFFER_H

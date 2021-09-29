@@ -35,7 +35,7 @@ public:
     void commit() final;
 
 public:
-    bool simEnabled {false};
-    ospray::uint64 simOffset {0};
+    bool simEnabled{false};
+    ospray::uint64 simOffset{0};
 };
-}
+} // namespace brayns

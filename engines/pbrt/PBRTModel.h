@@ -42,22 +42,24 @@ public:
 
     void commitGeometry() final;
 
-    std::vector<std::shared_ptr<pbrt::GeometricPrimitive>>
-    commitToPBRT(const Transformation& transform, const std::string& renderer);
+    std::vector<std::shared_ptr<pbrt::GeometricPrimitive>> commitToPBRT(
+        const Transformation& transform, const std::string& renderer);
 
     void buildBoundingBox() final;
 
-    SharedDataVolumePtr createSharedDataVolume(const Vector3ui &dimensions,
-                                               const Vector3f &spacing,
+    SharedDataVolumePtr createSharedDataVolume(const Vector3ui& dimensions,
+                                               const Vector3f& spacing,
                                                const DataType type) const final;
 
-    BrickedVolumePtr createBrickedVolume(const Vector3ui &dimensions, const Vector3f &spacing,
+    BrickedVolumePtr createBrickedVolume(const Vector3ui& dimensions,
+                                         const Vector3f& spacing,
                                          const DataType type) const final
     {
         (void)dimensions;
         (void)spacing;
         (void)type;
-        throw std::runtime_error("PBRTModel: createBrickedVolume() not implemented");
+        throw std::runtime_error(
+            "PBRTModel: createBrickedVolume() not implemented");
     }
 
     bool materialsDirty() const;
@@ -68,29 +70,33 @@ public:
     }
 
 protected:
-    void _commitSimulationDataImpl(const float *frameData, const size_t frameSize) final
+    void _commitSimulationDataImpl(const float* frameData,
+                                   const size_t frameSize) final
     {
         _simulationData = std::vector<float>(frameData, frameData + frameSize);
     }
 
-    void _commitTransferFunctionImpl(const Vector3fs&, const floats&, const Vector2d) final
+    void _commitTransferFunctionImpl(const Vector3fs&, const floats&,
+                                     const Vector2d) final
     {
         // Do nothing, we simply access the model transfer function
     }
+
 private:
     // Material commitment function.
     void _commitMaterials(const std::string& renderer);
-    MaterialPtr createMaterialImpl(const PropertyMap &properties = {}) final;
+    MaterialPtr createMaterialImpl(const PropertyMap& properties = {}) final;
 
     // Shapes transform pool
     std::vector<std::unique_ptr<pbrt::Transform>> _transformPool;
 
     // Call backs to handle different type of media
-    using MediaFactory = std::function<pbrt::Medium*(pbrt::Transform*,
-                                                     const brayns::PropertyMap&)>;
+    using MediaFactory =
+        std::function<pbrt::Medium*(pbrt::Transform*,
+                                    const brayns::PropertyMap&)>;
     static std::unordered_map<std::string, MediaFactory> _mediaFactories;
     // Media object
-    std::shared_ptr<pbrt::Medium> _modelMedium {nullptr};
+    std::shared_ptr<pbrt::Medium> _modelMedium{nullptr};
 
     // Model global transforms
     pbrt::Transform _objectToWorld;
@@ -109,6 +115,6 @@ private:
     std::vector<float> _simulationData;
     std::vector<std::shared_ptr<pbrt::Light>> _modelLights;
 };
-}
+} // namespace brayns
 
 #endif

@@ -31,33 +31,36 @@
 
 namespace brayns
 {
-class CustomCone : public pbrt::Shape {
+class CustomCone : public pbrt::Shape
+{
 public:
     // Cone Public Methods
-    CustomCone(const pbrt::Transform* o2w, const pbrt::Transform* w2o, bool reverseOrientation,
-               pbrt::Float height, pbrt::Float radius, pbrt::Float phiMax);
+    CustomCone(const pbrt::Transform* o2w, const pbrt::Transform* w2o,
+               bool reverseOrientation, pbrt::Float height, pbrt::Float radius,
+               pbrt::Float phiMax);
 
     pbrt::Bounds3f ObjectBound() const;
 
-    bool Intersect(const pbrt::Ray& ray, pbrt::Float* tHit, pbrt::SurfaceInteraction* isect,
+    bool Intersect(const pbrt::Ray& ray, pbrt::Float* tHit,
+                   pbrt::SurfaceInteraction* isect,
                    bool testAlphaTexture) const;
 
     bool IntersectP(const pbrt::Ray& ray, bool testAlphaTexture) const;
 
     pbrt::Float Area() const;
 
-    pbrt::Interaction Sample(const pbrt::Point2f &u, pbrt::Float *pdf) const;
+    pbrt::Interaction Sample(const pbrt::Point2f& u, pbrt::Float* pdf) const;
 
 protected:
     // Cone Private Data
     const pbrt::Float radius, height, phiMax;
 };
 
-std::shared_ptr<CustomCone> CreateCustomConeShape(const pbrt::Transform *o2w,
-                                                  const pbrt::Transform *w2o,
+std::shared_ptr<CustomCone> CreateCustomConeShape(const pbrt::Transform* o2w,
+                                                  const pbrt::Transform* w2o,
                                                   bool reverseOrientation,
-                                                  const pbrt::ParamSet &params);
+                                                  const pbrt::ParamSet& params);
 
-}
+} // namespace brayns
 
 #endif // PBRTCUSTOMCONE_H

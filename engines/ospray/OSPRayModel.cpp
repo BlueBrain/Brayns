@@ -53,7 +53,8 @@ OSPRayModel::OSPRayModel(AnimationParameters& animationParameters,
 
 OSPRayModel::~OSPRayModel()
 {
-    const auto releaseAndClearGeometry = [](auto& geometryMap) {
+    const auto releaseAndClearGeometry = [](auto& geometryMap)
+    {
         for (auto geom : geometryMap)
             ospRelease(geom.second);
         geometryMap.clear();
@@ -80,7 +81,7 @@ void OSPRayModel::buildBoundingBox()
 {
     if (_boundingBoxModel)
         return;
-    _boundingBoxModel = (OSPModel)new OSPRayISPCModel;//ospNewModel();
+    _boundingBoxModel = (OSPModel) new OSPRayISPCModel; // ospNewModel();
 
     auto material = createMaterial(BOUNDINGBOX_MATERIAL_ID, "bounding_box");
     material->setDiffuseColor({1, 1, 1});
@@ -130,7 +131,7 @@ void OSPRayModel::_addGeometryToModel(const OSPGeometry geometry,
     case SECONDARY_MODEL_MATERIAL_ID:
     {
         if (!_secondaryModel)
-            _secondaryModel = (OSPModel)new OSPRayISPCModel;//ospNewModel();
+            _secondaryModel = (OSPModel) new OSPRayISPCModel; // ospNewModel();
         ospAddGeometry(_secondaryModel, geometry);
         break;
     }
@@ -395,7 +396,7 @@ void OSPRayModel::commitGeometry()
         return;
 
     if (!_primaryModel)
-        _primaryModel = (OSPModel)new OSPRayISPCModel;
+        _primaryModel = (OSPModel) new OSPRayISPCModel;
 
     // Materials
     for (auto material : _materials)
@@ -498,18 +499,20 @@ void OSPRayModel::commitMaterials(const std::string& renderer)
 
 void OSPRayModel::commitSimulationParams()
 {
-    if(_simulationEnabled)
+    if (_simulationEnabled)
     {
         if (_secondaryModel)
         {
             osphelper::set(_secondaryModel, "simEnabled", _simulationEnabled);
-            osphelper::set(_secondaryModel, "simOffset", static_cast<int32_t>(_simulationOffset));
+            osphelper::set(_secondaryModel, "simOffset",
+                           static_cast<int32_t>(_simulationOffset));
             ospCommit(_secondaryModel);
         }
         else
         {
             osphelper::set(_primaryModel, "simEnabled", _simulationEnabled);
-            osphelper::set(_primaryModel, "simOffset", static_cast<int32_t>(_simulationOffset));
+            osphelper::set(_primaryModel, "simOffset",
+                           static_cast<int32_t>(_simulationOffset));
             ospCommit(_primaryModel);
         }
     }

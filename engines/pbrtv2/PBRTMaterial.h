@@ -45,13 +45,14 @@ public:
 private:
     bool _checkMaterialIntegrator(const PBRTMaterialClass matClass) const;
 
-    template<typename MaterialClass>
+    template <typename MaterialClass>
     pbrt::Material* _createPBRTMaterial() const;
 
-    pbrt::Material* _instantiateMaterial(const PBRTMaterialClass matClass) const;
+    pbrt::Material* _instantiateMaterial(
+        const PBRTMaterialClass matClass) const;
 
-    pbrt::Reference<pbrt::Material> _pbrtMat {nullptr};
+    pbrt::Reference<pbrt::Material> _pbrtMat{nullptr};
 };
-}
+} // namespace brayns
 
 #endif

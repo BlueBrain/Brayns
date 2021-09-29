@@ -39,4 +39,4 @@ public:
     void commit() final;
 };
 
-} // ::brayns
+} // namespace brayns

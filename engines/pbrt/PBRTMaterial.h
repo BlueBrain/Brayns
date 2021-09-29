@@ -26,7 +26,6 @@
 #include <brayns/engine/Material.h>
 
 #include <pbrt/core/material.h>
-#include <pbrt/core/material.h>
 
 #include <functional>
 #include <unordered_map>
@@ -48,14 +47,14 @@ public:
 private:
     bool _checkMaterialIntegrator(const PBRTMaterialClass matClass) const;
 
-    template<typename MaterialClass>
+    template <typename MaterialClass>
     pbrt::Material* _createPBRTMaterial() const;
-    pbrt::Material* _instantiateMaterial(const PBRTMaterialClass matClass) const;
+    pbrt::Material* _instantiateMaterial(
+        const PBRTMaterialClass matClass) const;
 
-    std::shared_ptr<pbrt::Material> _pbrtMat {nullptr};
+    std::shared_ptr<pbrt::Material> _pbrtMat{nullptr};
     std::string _renderer;
-
 };
-}
+} // namespace brayns
 
 #endif

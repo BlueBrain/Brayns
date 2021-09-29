@@ -64,8 +64,8 @@ private:
     uint8_ts _colorBuffer;
     std::mutex _mapMutex;
 
-    std::array<uint8_t, 4> _backgroundColor {0, 0, 0, 0};
+    std::array<uint8_t, 4> _backgroundColor{0, 0, 0, 0};
 };
-}
+} // namespace brayns
 
 #endif

@@ -53,6 +53,6 @@ protected:
     brayns::DefaultMaterial* _bgMaterial;
     float _timestamp;
 };
-}
+} // namespace brayns
 
 #endif // ABSTRACTRENDERER_H

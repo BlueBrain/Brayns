@@ -59,6 +59,6 @@ private:
 
     bool _useDynamicLoadBalancer{false};
 };
-}
+} // namespace brayns
 
 #endif // OSPRAYENGINE_H

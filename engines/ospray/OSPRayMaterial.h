@@ -46,12 +46,13 @@ public:
     void commit(const std::string& renderer);
 
     OSPMaterial getOSPMaterial() { return _ospMaterial; }
+
 private:
     OSPTexture _createOSPTexture2D(Texture2DPtr texture);
     OSPMaterial _ospMaterial{nullptr};
     bool _isBackGroundMaterial{false};
     std::string _renderer;
 };
-}
+} // namespace brayns
 
 #endif // OSPRAYMATERIAL_H
