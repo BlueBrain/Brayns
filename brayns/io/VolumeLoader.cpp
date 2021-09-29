@@ -60,7 +60,7 @@ std::string to_string(const glm::vec<M, T>& vec)
 
 template <typename T>
 glm::vec<3, T> parseVec3(const std::string& str,
-                             std::function<T(std::string)> conv)
+                         std::function<T(std::string)> conv)
 {
     const auto v = brayns::string_utils::split(str, ' ');
     if (v.size() != 3)
@@ -281,10 +281,10 @@ std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromFile(
 
     const auto dimensions =
         parseVec3<int32_t>(mhd.at("DimSize"),
-                             [](const auto& s) { return stoi(s); });
+                           [](const auto& s) { return stoi(s); });
     const auto spacing =
         parseVec3<double>(mhd.at("ElementSpacing"),
-                            [](const auto& s) { return stod(s); });
+                          [](const auto& s) { return stod(s); });
     const auto type = dataTypeFromMET(mhd.at("ElementType"));
 
     fs::path path = mhd.at("ElementDataFile");

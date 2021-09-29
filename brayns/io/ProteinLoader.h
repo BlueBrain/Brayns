@@ -45,8 +45,8 @@ public:
         const std::string& fileName, const LoaderProgress& callback,
         const PropertyMap& properties) const final;
 
-    std::vector<ModelDescriptorPtr> importFromBlob(Blob&&, const LoaderProgress&,
-                                      const PropertyMap&) const final
+    std::vector<ModelDescriptorPtr> importFromBlob(
+        Blob&&, const LoaderProgress&, const PropertyMap&) const final
     {
         throw std::runtime_error("Loading from blob not supported");
     }
@@ -54,6 +54,6 @@ public:
 private:
     PropertyMap _defaults;
 };
-}
+} // namespace brayns
 
 #endif // PROTEINLOADER_H

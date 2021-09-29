@@ -53,7 +53,7 @@ void _unbindMaterials(const AbstractSimulationHandlerPtr& simulationHandler,
     for (const auto& material : materials)
         simulationHandler->unbind(material.second);
 }
-}
+} // namespace
 ModelParams::ModelParams(const std::string& path)
     : _name(fs::path(path).stem())
     , _path(path)
@@ -135,9 +135,8 @@ void ModelDescriptor::addInstance(const ModelInstance& instance)
 void ModelDescriptor::removeInstance(const size_t id)
 {
     auto i = std::remove_if(_instances.begin(), _instances.end(),
-                            [id](const auto& instance) {
-                                return id == instance.getInstanceID();
-                            });
+                            [id](const auto& instance)
+                            { return id == instance.getInstanceID(); });
     if (i == _instances.end())
         return;
 
@@ -150,9 +149,8 @@ void ModelDescriptor::removeInstance(const size_t id)
 ModelInstance* ModelDescriptor::getInstance(const size_t id)
 {
     auto i = std::find_if(_instances.begin(), _instances.end(),
-                          [id](const auto& instance) {
-                              return id == instance.getInstanceID();
-                          });
+                          [id](const auto& instance)
+                          { return id == instance.getInstanceID(); });
     return i == _instances.end() ? nullptr : &(*i);
 }
 
@@ -196,9 +194,7 @@ Model::Model(AnimationParameters& animationParameters,
 {
 }
 
-Model::~Model()
-{
-}
+Model::~Model() {}
 
 bool Model::empty() const
 {
@@ -275,7 +271,8 @@ uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
     return geomIdx;
 }
 
-uint64_t Model::addMetaObject(const size_t materialId, const PropertyMap &metaObject)
+uint64_t Model::addMetaObject(const size_t materialId,
+                              const PropertyMap& metaObject)
 {
     _geometries->_metaObjects[materialId].push_back(metaObject);
     _metaObjectsDirty = true;
@@ -421,13 +418,11 @@ void Model::logInformation()
         nbSdfBeziers += sdfBeziers.second.size();
     for (const auto& sdfGeoms : _geometries->_sdf.geometryIndices)
         nbSdfGeoms += sdfGeoms.second.size();
-    for(const auto& metaObj : _geometries->_metaObjects)
+    for (const auto& metaObj : _geometries->_metaObjects)
         nbMetaObjects += metaObj.second.size();
 
-    BRAYNS_DEBUG << "Spheres: " << nbSpheres
-                 << ", Cylinders: " << nbCylinders
-                 << ", Cones: " << nbCones
-                 << ", SDFBeziers: " << nbSdfBeziers
+    BRAYNS_DEBUG << "Spheres: " << nbSpheres << ", Cylinders: " << nbCylinders
+                 << ", Cones: " << nbCones << ", SDFBeziers: " << nbSdfBeziers
                  << ", SDFGeometries: " << nbSdfGeoms
                  << ", Meshes: " << nbMeshes
                  << ", Meta Objects: " << nbMetaObjects
@@ -478,8 +473,8 @@ void Model::_updateSizeInBytes()
         _sizeInBytes += sdfIndices.second.size() * sizeof(uint64_t);
     for (const auto& sdfNeighbours : _geometries->_sdf.neighbours)
         _sizeInBytes += sdfNeighbours.size() * sizeof(size_t);
-    for(const auto& metaObjList : _geometries->_metaObjects)
-        for(const auto& metaObj : metaObjList.second)
+    for (const auto& metaObjList : _geometries->_metaObjects)
+        for (const auto& metaObj : metaObjList.second)
             _sizeInBytes += sizeof(metaObj);
 }
 
@@ -491,9 +486,10 @@ void Model::copyFrom(const Model& rhs)
     if (rhs._simulationHandler)
     {
         _simulationHandler = rhs._simulationHandler->clone();
-        // Reset simulation handler current frame so the simulation data gets commited
-        // (current frame != animation params current frame)
-        _simulationHandler->setCurrentFrame(std::numeric_limits<uint32_t>::max());
+        // Reset simulation handler current frame so the simulation data gets
+        // commited (current frame != animation params current frame)
+        _simulationHandler->setCurrentFrame(
+            std::numeric_limits<uint32_t>::max());
     }
 
     _materials.clear();
@@ -568,7 +564,8 @@ void Model::updateBounds()
         for (const auto& sdfBeziers : _geometries->_sdfBeziers)
             if (sdfBeziers.first != BOUNDINGBOX_MATERIAL_ID)
                 for (const auto& sdfBezier : sdfBeziers.second)
-                    _geometries->_sdfBeziersBounds.merge(bezierBounds(sdfBezier));
+                    _geometries->_sdfBeziersBounds.merge(
+                        bezierBounds(sdfBezier));
     }
 
     if (_triangleMeshesDirty)
@@ -665,4 +662,4 @@ AbstractSimulationHandlerPtr Model::getSimulationHandler() const
 {
     return _simulationHandler;
 }
-}
+} // namespace brayns

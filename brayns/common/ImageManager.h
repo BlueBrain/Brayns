@@ -43,5 +43,5 @@ public:
     static Texture2DPtr importTextureFromFile(const std::string& filename,
                                               const TextureType type);
 };
-}
+} // namespace brayns
 #endif // IMAGEMANAGER_H

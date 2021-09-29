@@ -127,4 +127,4 @@ public:
 protected:
     Scene& _scene;
 };
-}
+} // namespace brayns

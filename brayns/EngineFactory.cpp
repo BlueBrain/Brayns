@@ -78,4 +78,4 @@ Engine* EngineFactory::_loadEngine(const std::string& name, int argc,
     }
     return nullptr;
 }
-}
+} // namespace brayns

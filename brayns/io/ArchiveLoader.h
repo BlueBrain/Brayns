@@ -46,9 +46,9 @@ public:
         const PropertyMap& properties) const final;
 
 private:
-    std::vector<ModelDescriptorPtr> loadExtracted(const std::string& path,
-                                                  const LoaderProgress& callback,
-                                                  const PropertyMap& properties) const;
+    std::vector<ModelDescriptorPtr> loadExtracted(
+        const std::string& path, const LoaderProgress& callback,
+        const PropertyMap& properties) const;
     LoaderRegistry& _registry;
 };
-}
+} // namespace brayns

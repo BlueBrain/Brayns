@@ -224,6 +224,6 @@ inline unsigned int integer_pow(unsigned int base, unsigned int power)
 
     return res;
 }
-} // end of namespace
+} // namespace Assimp
 
 #endif // !  AI_STRINGCOMPARISON_H_INC

@@ -46,14 +46,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdarg.h>
 
 ///	@fn		ai_snprintf
-///	@brief	The portable version of the function snprintf ( C99 standard ), which
-///works on visual studio compilers 2013 and earlier.
+///	@brief	The portable version of the function snprintf ( C99 standard ),
+/// which works on visual studio compilers 2013 and earlier.
 ///	@param	outBuf		The buffer to write in
 ///	@param	size		The buffer size
 ///	@param	format		The format string
 ///	@param	ap			The additional arguments.
 ///	@return	The number of written characters if the buffer size was big enough.
-///If an encoding error occurs, a negative number is returned.
+/// If an encoding error occurs, a negative number is returned.
 #if defined(_MSC_VER) && _MSC_VER < 1900
 
 inline int c99_ai_vsnprintf(char *outBuf, size_t size, const char *format,

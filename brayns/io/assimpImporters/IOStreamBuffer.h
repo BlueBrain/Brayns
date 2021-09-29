@@ -378,4 +378,4 @@ inline bool IOStreamBuffer<T>::getNextBlock(std::vector<T> &buffer)
     return true;
 }
 
-} // !ns Assimp
+} // namespace Assimp

@@ -43,9 +43,9 @@ std::shared_ptr<T> _find(const std::vector<std::shared_ptr<T>>& list,
                          const size_t id,
                          size_t (U::*getID)() const = &T::getID)
 {
-    auto i = std::find_if(list.begin(), list.end(), [id, getID](auto x) {
-        return id == ((*x).*getID)();
-    });
+    auto i =
+        std::find_if(list.begin(), list.end(),
+                     [id, getID](auto x) { return id == ((*x).*getID)(); });
     return i == list.end() ? std::shared_ptr<T>{} : *i;
 }
 
@@ -54,9 +54,9 @@ std::shared_ptr<T> _remove(std::vector<std::shared_ptr<T>>& list,
                            const size_t id,
                            size_t (U::*getID)() const = &T::getID)
 {
-    auto i = std::find_if(list.begin(), list.end(), [id, getID](auto x) {
-        return id == ((*x).*getID)();
-    });
+    auto i =
+        std::find_if(list.begin(), list.end(),
+                     [id, getID](auto x) { return id == ((*x).*getID)(); });
     if (i == list.end())
         return std::shared_ptr<T>{};
     auto result = *i;
@@ -64,15 +64,14 @@ std::shared_ptr<T> _remove(std::vector<std::shared_ptr<T>>& list,
     return result;
 }
 
-template<typename T, typename U = T>
+template <typename T, typename U = T>
 std::shared_ptr<T> _replace(std::vector<std::shared_ptr<T>>& list,
-                            const size_t id,
-                            std::shared_ptr<T> newObj,
+                            const size_t id, std::shared_ptr<T> newObj,
                             size_t (U::*getID)() const = &T::getID)
 {
-    auto i = std::find_if(list.begin(), list.end(), [id, getID](auto x) {
-        return id == ((*x).*getID)();
-    });
+    auto i =
+        std::find_if(list.begin(), list.end(),
+                     [id, getID](auto x) { return id == ((*x).*getID)(); });
     if (i == list.end())
         return std::shared_ptr<T>{};
     auto result = *i;
@@ -105,7 +104,6 @@ void Scene::copyFrom(const Scene& rhs)
         _modelDescriptors.reserve(rhs._modelDescriptors.size());
         for (const auto& modelDesc : rhs._modelDescriptors)
             _modelDescriptors.push_back(modelDesc->clone(createModel()));
-
     }
     _computeBounds();
     _updateAnimationParameters();
@@ -123,9 +121,7 @@ void Scene::copyFrom(const Scene& rhs)
     markModified();
 }
 
-void Scene::commit()
-{
-}
+void Scene::commit() {}
 
 size_t Scene::getSizeInBytes() const
 {
@@ -192,7 +188,7 @@ void Scene::addModel(const size_t id, ModelDescriptorPtr modelDescriptor)
         model.commitGeometry();
 
     {
-        if(replaceModel(id, modelDescriptor))
+        if (replaceModel(id, modelDescriptor))
             modelDescriptor->setModelID(id);
 
         // add default instance of this model to render something
@@ -251,13 +247,12 @@ bool Scene::replaceModel(const size_t id, ModelDescriptorPtr modelDescriptor)
 {
     ModelDescriptorPtr model = nullptr;
 
-    if(supportsConcurrentSceneUpdates())
+    if (supportsConcurrentSceneUpdates())
     {
         {
             std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-            model =
-                _replace(_modelDescriptors, id,
-                         modelDescriptor, &ModelDescriptor::getModelID);
+            model = _replace(_modelDescriptors, id, modelDescriptor,
+                             &ModelDescriptor::getModelID);
         }
     }
     else
@@ -271,7 +266,7 @@ bool Scene::replaceModel(const size_t id, ModelDescriptorPtr modelDescriptor)
             _markedForReplacement[id] = modelDescriptor;
     }
 
-    if(model)
+    if (model)
     {
         markModified();
         return true;
@@ -315,7 +310,8 @@ void Scene::removeClipPlane(const size_t id)
         markModified();
 }
 
-std::vector<ModelDescriptorPtr> Scene::loadModels(Blob&& blob, const ModelParams& params,
+std::vector<ModelDescriptorPtr> Scene::loadModels(Blob&& blob,
+                                                  const ModelParams& params,
                                                   LoaderProgress cb)
 {
     const auto& loader =
@@ -327,20 +323,21 @@ std::vector<ModelDescriptorPtr> Scene::loadModels(Blob&& blob, const ModelParams
     propCopy.add({"loaderName", params.getLoaderName()});
 
     // Load the models
-    auto modelDescriptors = loader.importFromBlob(std::move(blob), cb, propCopy);
+    auto modelDescriptors =
+        loader.importFromBlob(std::move(blob), cb, propCopy);
 
     // Check for models correctness
     if (modelDescriptors.empty())
         throw std::runtime_error("No model returned by loader");
-    for(auto& md: modelDescriptors)
+    for (auto& md : modelDescriptors)
     {
-        if(!md)
+        if (!md)
             throw std::runtime_error("No model returned by loader");
     }
 
-    // Update loaded model with loader properties (so we can have the information
-    // with which it was loaded)
-    for(auto& md : modelDescriptors)
+    // Update loaded model with loader properties (so we can have the
+    // information with which it was loaded)
+    for (auto& md : modelDescriptors)
     {
         *md = params;
         addModel(md);
@@ -366,15 +363,15 @@ std::vector<ModelDescriptorPtr> Scene::loadModels(const std::string& path,
     if (modelDescriptors.empty())
         throw std::runtime_error("No model returned by loader");
 
-    for(auto& md: modelDescriptors)
+    for (auto& md : modelDescriptors)
     {
-        if(!md)
+        if (!md)
             throw std::runtime_error("No model returned by loader");
     }
 
-    // Update loaded model with loader properties (so we can have the information
-    // with which it was loaded)
-    for(auto& md : modelDescriptors)
+    // Update loaded model with loader properties (so we can have the
+    // information with which it was loaded)
+    for (auto& md : modelDescriptors)
     {
         *md = params;
         addModel(md);
@@ -596,16 +593,18 @@ void Scene::_updateAnimationParameters()
     uint32_t numFrames = 0;
     {
         std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-        for(auto& modelDesc : _modelDescriptors)
+        for (auto& modelDesc : _modelDescriptors)
         {
-            if(modelDesc->isMarkedForRemoval())
+            if (modelDesc->isMarkedForRemoval())
                 continue;
 
-            auto simHandler = modelDesc->getModel().getSimulationHandler().get();
-            if(simHandler)
+            auto simHandler =
+                modelDesc->getModel().getSimulationHandler().get();
+            if (simHandler)
             {
-                handlers.push_back(modelDesc->getModel().getSimulationHandler().get());
-                if(simHandler->getNbFrames() > numFrames)
+                handlers.push_back(
+                    modelDesc->getModel().getSimulationHandler().get());
+                if (simHandler->getNbFrames() > numFrames)
                     numFrames = simHandler->getNbFrames();
             }
         }
@@ -613,16 +612,16 @@ void Scene::_updateAnimationParameters()
 
     auto& ap = _animationParameters;
 
-    if(handlers.empty())
+    if (handlers.empty())
         ap.removeIsReadyCallback();
     else
     {
         ap.setIsReadyCallback(
             [handlersV = handlers]
             {
-                for(auto handler : handlersV)
+                for (auto handler : handlersV)
                 {
-                    if(!handler->isReady())
+                    if (!handler->isReady())
                         return false;
                 }
                 return true;

@@ -53,7 +53,7 @@ namespace ObjFile
 {
 struct Model;
 struct Material;
-}
+} // namespace ObjFile
 typedef float ai_real;
 
 /**

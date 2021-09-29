@@ -22,7 +22,6 @@
 
 #include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
-#include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/Transformation.h>
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/Cylinder.h>
@@ -31,6 +30,7 @@
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/geometry/Streamline.h>
 #include <brayns/common/geometry/TriangleMesh.h>
+#include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/types.h>
 
 #include <set>
@@ -499,7 +499,7 @@ protected:
     VolumeParameters& _volumeParameters;
 
     AbstractSimulationHandlerPtr _simulationHandler;
-    bool _simulationEnabled {false};
+    bool _simulationEnabled{false};
 
     MaterialMap _materials;
 
@@ -552,8 +552,8 @@ protected:
     bool _areGeometriesDirty() const
     {
         return _spheresDirty || _cylindersDirty || _conesDirty ||
-               _sdfBeziersDirty || _triangleMeshesDirty || _sdfGeometriesDirty ||
-               _metaObjectsDirty;
+               _sdfBeziersDirty || _triangleMeshesDirty ||
+               _sdfGeometriesDirty || _metaObjectsDirty;
     }
 
     Boxd _bounds;

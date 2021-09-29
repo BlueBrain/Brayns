@@ -100,6 +100,7 @@ public:
     void togglePlayback() { _playing = !_playing; }
     void setPlaying(bool playing) { _updateValue(_playing, playing); }
     bool isPlaying() const { return _playing; }
+
 private:
     uint32_t _adjustedCurrent(const uint32_t newCurrent) const
     {
@@ -119,5 +120,5 @@ private:
 
     SERIALIZATION_FRIEND(AnimationParameters)
 };
-}
+} // namespace brayns
 #endif

@@ -56,17 +56,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-static const aiImporterDesc desc = {
-    "Stanford Polygon Library (PLY) Importer",
-    "",
-    "",
-    "",
-    aiImporterFlags_SupportBinaryFlavour | aiImporterFlags_SupportTextFlavour,
-    0,
-    0,
-    0,
-    0,
-    "ply"};
+static const aiImporterDesc desc = {"Stanford Polygon Library (PLY) Importer",
+                                    "",
+                                    "",
+                                    "",
+                                    aiImporterFlags_SupportBinaryFlavour |
+                                        aiImporterFlags_SupportTextFlavour,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    "ply"};
 
 // ------------------------------------------------------------------------------------------------
 // Internal stuff
@@ -85,7 +85,7 @@ const T& GetProperty(const std::vector<T>& props, int idx)
 
     return props[idx];
 }
-}
+} // namespace
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -380,8 +380,8 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
             // add all faces
             iNum = 0;
             unsigned int iVertex = 0;
-            for (std::vector<unsigned int>::const_iterator
-                     i = aiSplit[p].begin();
+            for (std::vector<unsigned int>::const_iterator i =
+                     aiSplit[p].begin();
                  i != aiSplit[p].end(); ++i, ++iNum)
             {
                 p_pcOut->mFaces[iNum].mNumIndices =
@@ -485,8 +485,8 @@ void PLYImporter::LoadTextureCoordinates(std::vector<aiVector2D>* pvOut)
 
     // search in the DOM for a vertex entry
     unsigned int _i = 0;
-    for (std::vector<PLY::Element>::const_iterator
-             i = pcDOM->alElements.begin();
+    for (std::vector<PLY::Element>::const_iterator i =
+             pcDOM->alElements.begin();
          i != pcDOM->alElements.end(); ++i, ++_i)
     {
         if (PLY::EEST_Vertex == (*i).eSemantic)
@@ -495,8 +495,8 @@ void PLYImporter::LoadTextureCoordinates(std::vector<aiVector2D>* pvOut)
 
             // now check whether which normal components are available
             unsigned int _a = 0;
-            for (std::vector<PLY::Property>::const_iterator
-                     a = (*i).alProperties.begin();
+            for (std::vector<PLY::Property>::const_iterator a =
+                     (*i).alProperties.begin();
                  a != (*i).alProperties.end(); ++a, ++_a)
             {
                 if ((*a).bIsList)
@@ -561,8 +561,8 @@ void PLYImporter::LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals)
 
     // search in the DOM for a vertex entry
     unsigned int _i = 0;
-    for (std::vector<PLY::Element>::const_iterator
-             i = pcDOM->alElements.begin();
+    for (std::vector<PLY::Element>::const_iterator i =
+             pcDOM->alElements.begin();
          i != pcDOM->alElements.end(); ++i, ++_i)
     {
         if (PLY::EEST_Vertex == (*i).eSemantic)
@@ -574,8 +574,8 @@ void PLYImporter::LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals)
             {
                 // now check whether which normal components are available
                 unsigned int _a = 0;
-                for (std::vector<PLY::Property>::const_iterator
-                         a = (*i).alProperties.begin();
+                for (std::vector<PLY::Property>::const_iterator a =
+                         (*i).alProperties.begin();
                      a != (*i).alProperties.end(); ++a, ++_a)
                 {
                     if ((*a).bIsList)
@@ -605,8 +605,8 @@ void PLYImporter::LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals)
             {
                 // now check whether which coordinate sets are available
                 unsigned int _a = 0;
-                for (std::vector<PLY::Property>::const_iterator
-                         a = (*i).alProperties.begin();
+                for (std::vector<PLY::Property>::const_iterator a =
+                         (*i).alProperties.begin();
                      a != (*i).alProperties.end(); ++a, ++_a)
                 {
                     if ((*a).bIsList)
@@ -721,8 +721,8 @@ void PLYImporter::LoadVertexColor(std::vector<aiColor4D>* pvOut)
 
     // search in the DOM for a vertex entry
     unsigned int _i = 0;
-    for (std::vector<PLY::Element>::const_iterator
-             i = pcDOM->alElements.begin();
+    for (std::vector<PLY::Element>::const_iterator i =
+             pcDOM->alElements.begin();
          i != pcDOM->alElements.end(); ++i, ++_i)
     {
         if (PLY::EEST_Vertex == (*i).eSemantic)
@@ -731,8 +731,8 @@ void PLYImporter::LoadVertexColor(std::vector<aiColor4D>* pvOut)
 
             // now check whether which coordinate sets are available
             unsigned int _a = 0;
-            for (std::vector<PLY::Property>::const_iterator
-                     a = (*i).alProperties.begin();
+            for (std::vector<PLY::Property>::const_iterator a =
+                     (*i).alProperties.begin();
                  a != (*i).alProperties.end(); ++a, ++_a)
             {
                 if ((*a).bIsList)
@@ -839,8 +839,8 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 
     // search in the DOM for a face entry
     unsigned int _i = 0;
-    for (std::vector<PLY::Element>::const_iterator
-             i = pcDOM->alElements.begin();
+    for (std::vector<PLY::Element>::const_iterator i =
+             pcDOM->alElements.begin();
          i != pcDOM->alElements.end(); ++i, ++_i)
     {
         // face = unique number of vertex indices
@@ -848,8 +848,8 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
         {
             pcList = &pcDOM->alElementData[_i];
             unsigned int _a = 0;
-            for (std::vector<PLY::Property>::const_iterator
-                     a = (*i).alProperties.begin();
+            for (std::vector<PLY::Property>::const_iterator a =
+                     (*i).alProperties.begin();
                  a != (*i).alProperties.end(); ++a, ++_a)
             {
                 if (PLY::EST_VertexIndex == (*a).Semantic)
@@ -879,8 +879,8 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
             // find a list property in this ...
             pcList = &this->pcDOM->alElementData[_i];
             unsigned int _a = 0;
-            for (std::vector<PLY::Property>::const_iterator
-                     a = (*i).alProperties.begin();
+            for (std::vector<PLY::Property>::const_iterator a =
+                     (*i).alProperties.begin();
                  a != (*i).alProperties.end(); ++a, ++_a)
             {
                 // must be a dynamic list!
@@ -1069,8 +1069,8 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut)
 
     // search in the DOM for a vertex entry
     unsigned int _i = 0;
-    for (std::vector<PLY::Element>::const_iterator
-             i = this->pcDOM->alElements.begin();
+    for (std::vector<PLY::Element>::const_iterator i =
+             this->pcDOM->alElements.begin();
          i != this->pcDOM->alElements.end(); ++i, ++_i)
     {
         if (PLY::EEST_Material == (*i).eSemantic)
@@ -1079,8 +1079,8 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut)
 
             // now check whether which coordinate sets are available
             unsigned int _a = 0;
-            for (std::vector<PLY::Property>::const_iterator
-                     a = (*i).alProperties.begin();
+            for (std::vector<PLY::Property>::const_iterator a =
+                     (*i).alProperties.begin();
                  a != (*i).alProperties.end(); ++a, ++_a)
             {
                 if ((*a).bIsList)

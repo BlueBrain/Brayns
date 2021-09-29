@@ -50,6 +50,6 @@ private:
     void _turnUp();
     void _turnDown();
 };
-}
+} // namespace brayns
 
 #endif

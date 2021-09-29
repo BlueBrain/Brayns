@@ -29,4 +29,4 @@ Volume::Volume(const Vector3ui& dimensions, const Vector3f& spacing,
     , _dataType(type)
 {
 }
-}
+} // namespace brayns

@@ -86,4 +86,4 @@ private:
     async::cancellation_token* _cancelToken{nullptr};
     ProgressFunc _progressFunc;
 };
-}
+} // namespace brayns

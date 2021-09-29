@@ -43,6 +43,6 @@ public:
         const std::string& filename, const LoaderProgress& callback,
         const PropertyMap& properties) const final;
 };
-}
+} // namespace brayns
 
 #endif // XYZBLOADER_H

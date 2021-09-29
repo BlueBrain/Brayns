@@ -28,9 +28,9 @@ SERIALIZATION_ACCESS(Transformation)
 namespace brayns
 {
 /**
-* @brief Defines the translation, rotation and scale parameters to be applied
-* to a scene asset.
-*/
+ * @brief Defines the translation, rotation and scale parameters to be applied
+ * to a scene asset.
+ */
 class Transformation : public BaseObject
 {
 public:
@@ -72,10 +72,10 @@ public:
 
     Matrix4d toMatrix() const
     {
-        return glm::translate(Matrix4d(1.), _rotationCenter)
-                * (glm::toMat4(_rotation)
-                   * (glm::translate(Matrix4d(1.), _translation - _rotationCenter)
-                      * glm::scale(Matrix4d(1.), _scale)));
+        return glm::translate(Matrix4d(1.), _rotationCenter) *
+               (glm::toMat4(_rotation) *
+                (glm::translate(Matrix4d(1.), _translation - _rotationCenter) *
+                 glm::scale(Matrix4d(1.), _scale)));
     }
 
 private:
@@ -89,13 +89,15 @@ private:
 inline Transformation operator*(const Transformation& a,
                                 const Transformation& b)
 {
-    return {a.getTranslation() + b.getTranslation(), a.getScale() * b.getScale(),
-            a.getRotation() * b.getRotation(), a.getRotationCenter()};
+    return {a.getTranslation() + b.getTranslation(),
+            a.getScale() * b.getScale(), a.getRotation() * b.getRotation(),
+            a.getRotationCenter()};
 }
 
 inline Boxd transformBox(const Boxd& box, const Transformation& transformation)
 {
     const brayns::Matrix4d matrix = transformation.toMatrix();
-    return {matrix * Vector4d(box.getMin(), 1.), matrix * Vector4d(box.getMax(), 1.)};
+    return {matrix * Vector4d(box.getMin(), 1.),
+            matrix * Vector4d(box.getMax(), 1.)};
 }
-}
+} // namespace brayns

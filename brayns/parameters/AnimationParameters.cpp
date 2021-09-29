@@ -24,7 +24,7 @@ namespace
 {
 constexpr auto PARAM_ANIMATION_FRAME = "animation-frame";
 constexpr auto PARAM_PLAY_ANIMATION = "play-animation";
-}
+} // namespace
 
 namespace brayns
 {
@@ -80,4 +80,4 @@ bool AnimationParameters::_canUpdateFrame() const
 {
     return !hasIsReadyCallback() || _isReadyCallback();
 }
-}
+} // namespace brayns

@@ -116,6 +116,7 @@ public:
     }
     /** @internal @return the current rendererd frame buffer. */
     const std::string& getBufferTarget() const { return _bufferTarget; }
+
 private:
     Vector3d _target;
     Vector3d _position;
@@ -131,4 +132,4 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, Camera& camera);
-}
+} // namespace brayns

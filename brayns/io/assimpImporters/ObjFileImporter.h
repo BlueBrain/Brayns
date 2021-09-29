@@ -54,7 +54,7 @@ namespace ObjFile
 {
 struct Object;
 struct Model;
-}
+} // namespace ObjFile
 
 // ------------------------------------------------------------------------------------------------
 /// \class  ObjFileImporter

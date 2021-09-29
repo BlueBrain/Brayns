@@ -218,4 +218,4 @@ void Encoder::_toPicture(const uint8_t *const data, const int width_,
     sws_scale(sws_context, &data, stride, 0, height_, picture.frame->data,
               picture.frame->linesize);
 }
-}
+} // namespace brayns

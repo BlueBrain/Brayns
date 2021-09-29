@@ -19,7 +19,8 @@
 
 #pragma once
 
-extern "C" {
+extern "C"
+{
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/opt.h>
@@ -159,4 +160,4 @@ private:
     Timer _timer;
     float _leftover{0.f};
 };
-}
+} // namespace brayns

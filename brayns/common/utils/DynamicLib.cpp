@@ -106,4 +106,4 @@ void* DynamicLib::getSymbolAddress(const std::string& name) const
     return dlsym(_handler, name.c_str());
 #endif
 }
-}
+} // namespace brayns

@@ -73,6 +73,6 @@ protected:
 
     void translate(const Vector3d& v);
 };
-}
+} // namespace brayns
 
 #endif

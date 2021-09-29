@@ -58,7 +58,7 @@ struct Object;
 struct Material;
 struct Point3;
 struct Point2;
-}
+} // namespace ObjFile
 
 class ObjFileImporter;
 class IOSystem;

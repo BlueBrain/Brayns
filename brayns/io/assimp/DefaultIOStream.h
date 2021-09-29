@@ -129,6 +129,6 @@ inline DefaultIOStream::DefaultIOStream(FILE* pFile,
 }
 // ----------------------------------------------------------------------------------
 
-} // ns assimp
+} // namespace Assimp
 
 #endif //!!AI_DEFAULTIOSTREAM_H_INC

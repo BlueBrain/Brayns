@@ -45,6 +45,6 @@ private:
     void _flyForward();
     void _flyBackwards();
 };
-}
+} // namespace brayns
 
 #endif

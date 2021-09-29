@@ -87,4 +87,4 @@ protected:
     bool _accumulation{true};
     std::atomic_size_t _accumFrames{0};
 };
-}
+} // namespace brayns

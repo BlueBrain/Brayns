@@ -84,4 +84,4 @@ private:
                                     const uint8_t* rawData, int32_t pixelFormat,
                                     uint8_t quality, unsigned long& dataSize);
 };
-}
+} // namespace brayns

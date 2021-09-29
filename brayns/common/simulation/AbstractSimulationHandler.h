@@ -107,18 +107,19 @@ public:
     virtual bool isReady() const { return true; }
     /** Wait until current frame is ready */
     virtual void waitReady() const {}
+
 protected:
     uint32_t _getBoundedFrame(const uint32_t frame) const;
 
     uint32_t _currentFrame{std::numeric_limits<uint32_t>::max()};
     uint32_t _nbFrames{0};
     uint64_t _frameSize{0};
-    double _startTime {0};
+    double _startTime{0};
     double _endTime{0};
     double _dt{0};
     std::string _unit;
 
     floats _frameData;
 };
-}
+} // namespace brayns
 #endif // ABSTRACTSIMULATIONHANDLER_H

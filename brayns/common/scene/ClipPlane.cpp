@@ -24,4 +24,3 @@ namespace brayns
 {
 size_t ClipPlane::_nextID = 0;
 }
-

@@ -64,6 +64,7 @@ namespace Assimp
 class ByteSwap
 {
     ByteSwap() {}
+
 public:
     // ----------------------------------------------------------------------
     /** Swap two bytes of data
@@ -267,7 +268,7 @@ struct Getter<SwapEndianess, T, false>
         ByteSwapper<T, (SwapEndianess && sizeof(T) > 1)>()(inout);
     }
 };
-} // end Intern
-} // end Assimp
+} // namespace Intern
+} // namespace Assimp
 
 #endif //!! AI_BYTESWAPPER_H_INC

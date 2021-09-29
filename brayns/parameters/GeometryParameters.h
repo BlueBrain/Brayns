@@ -71,5 +71,5 @@ protected:
 
     SERIALIZATION_FRIEND(GeometryParameters)
 };
-}
+} // namespace brayns
 #endif // GEOMETRYPARAMETERS_H

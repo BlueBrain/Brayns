@@ -264,6 +264,6 @@ AI_FORCE_INLINE std::string GetNextToken(const char*& in)
 
 // ---------------------------------------------------------------------------------
 
-} // ! namespace Assimp
+} // namespace Assimp
 
 #endif // ! AI_PARSING_UTILS_H_INC

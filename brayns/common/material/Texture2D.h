@@ -82,4 +82,4 @@ private:
     // faces, mips, pixels
     std::vector<std::vector<std::vector<unsigned char>>> _rawData;
 };
-}
+} // namespace brayns

@@ -43,16 +43,18 @@ AddModelTask::AddModelTask(const ModelParams& modelParams, Engine& engine)
 
     LoadModelFunctor functor{engine, modelParams};
     functor.setCancelToken(_cancelToken);
-    functor.setProgressFunc([& progress = progress](const auto& msg, auto,
-                                                    auto amount) {
-        progress.update(msg, amount);
-    });
+    functor.setProgressFunc(
+        [&progress = progress](const auto& msg, auto, auto amount)
+        { progress.update(msg, amount); });
 
     // load data, return model descriptor
-    _task = async::spawn(std::move(functor))
-                .then([&engine](async::task<std::vector<ModelDescriptorPtr>> result) {
+    _task =
+        async::spawn(std::move(functor))
+            .then(
+                [&engine](async::task<std::vector<ModelDescriptorPtr>> result)
+                {
                     engine.triggerRender();
                     return result.get();
                 });
 }
-}
+} // namespace brayns

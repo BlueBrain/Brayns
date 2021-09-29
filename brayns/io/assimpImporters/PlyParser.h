@@ -89,7 +89,7 @@ enum EDataType
 /** \brief Specifies semantics for PLY element properties
  *
  * Semantics define the usage of a property, e.g. x coordinate
-*/
+ */
 enum ESemantic
 {
     //! vertex position x coordinate
@@ -173,7 +173,7 @@ enum ESemantic
 /** \brief Specifies semantics for PLY elements
  *
  * Semantics define the usage of an element, e.g. vertex or material
-*/
+ */
 enum EElementSemantic
 {
     //! The element is a vertex
@@ -295,7 +295,8 @@ class PropertyInstance
 public:
     //! Default constructor
     PropertyInstance() {}
-    union ValueUnion {
+    union ValueUnion
+    {
         //! uInt32 representation of the property. All
         // uint types are automatically converted to uint32
         uint32_t iUInt;
@@ -480,6 +481,6 @@ inline TYPE PLY::PropertyInstance::ConvertTo(
 }
 
 } // Namespace PLY
-} // Namespace AssImp
+} // namespace Assimp
 
 #endif // !! include guard

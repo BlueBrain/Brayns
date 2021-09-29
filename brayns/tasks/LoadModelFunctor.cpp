@@ -65,15 +65,15 @@ std::vector<ModelDescriptorPtr> LoadModelFunctor::_performLoad(
     }
 }
 
-std::vector<ModelDescriptorPtr> LoadModelFunctor::_loadData(Blob&& blob,
-                                                            const ModelParams& params)
+std::vector<ModelDescriptorPtr> LoadModelFunctor::_loadData(
+    Blob&& blob, const ModelParams& params)
 {
     return _engine.getScene().loadModels(std::move(blob), params,
                                          {_getProgressFunc()});
 }
 
-std::vector<ModelDescriptorPtr> LoadModelFunctor::_loadData(const std::string& path,
-                                                            const ModelParams& params)
+std::vector<ModelDescriptorPtr> LoadModelFunctor::_loadData(
+    const std::string& path, const ModelParams& params)
 {
     return _engine.getScene().loadModels(path, params, {_getProgressFunc()});
 }
@@ -88,7 +88,8 @@ void LoadModelFunctor::_updateProgress(const std::string& message,
 
 std::function<void(std::string, float)> LoadModelFunctor::_getProgressFunc()
 {
-    return [this](const std::string& msg, const float progress) {
+    return [this](const std::string& msg, const float progress)
+    {
         cancelCheck();
         const size_t newProgress = progress * TOTAL_PROGRESS;
         if (newProgress == 0 || newProgress % size_t(TOTAL_PROGRESS) > _nextTic)
@@ -98,4 +99,4 @@ std::function<void(std::string, float)> LoadModelFunctor::_getProgressFunc()
         }
     };
 }
-}
+} // namespace brayns

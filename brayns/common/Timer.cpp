@@ -89,4 +89,4 @@ double Timer::fps() const
 {
     return _fps;
 }
-}
+} // namespace brayns

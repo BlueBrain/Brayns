@@ -85,6 +85,7 @@ public:
     const Vector3d& getSpecular() const { return _specular; }
     void setClipBox(const Boxd& value) { _updateValue(_clipBox, value); }
     const Boxd& getClipBox() const { return _clipBox; }
+
 protected:
     void parse(const po::variables_map& vm) final;
 
@@ -103,5 +104,5 @@ protected:
 
     SERIALIZATION_FRIEND(VolumeParameters)
 };
-}
+} // namespace brayns
 #endif // VOLUMEPARAMETERS_H

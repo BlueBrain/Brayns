@@ -265,42 +265,38 @@ protected:
 public: // static utilities
 #ifdef ASSIMP_VERSION_5
         // -------------------------------------------------------------------
-        /** A utility for CanRead().
-         *
-         *  The function searches the header of a file for a specific token
-         *  and returns true if this token is found. This works for text
-         *  files only. There is a rudimentary handling of UNICODE files.
-         *  The comparison is case independent.
-         *
-         *  @param pIOSystem IO System to work with
-         *  @param file File name of the file
-         *  @param tokens List of tokens to search for
-         *  @param numTokens Size of the token array
-         *  @param searchBytes Number of bytes to be searched for the tokens.
-         */
-        static bool SearchFileHeaderForToken(
-                IOSystem *pIOSystem,
-                const std::string &file,
-                const char **tokens,
-                unsigned int numTokens,
-                unsigned int searchBytes = 200,
-                bool tokensSol = false,
-                bool noAlphaBeforeTokens = false);
+    /** A utility for CanRead().
+     *
+     *  The function searches the header of a file for a specific token
+     *  and returns true if this token is found. This works for text
+     *  files only. There is a rudimentary handling of UNICODE files.
+     *  The comparison is case independent.
+     *
+     *  @param pIOSystem IO System to work with
+     *  @param file File name of the file
+     *  @param tokens List of tokens to search for
+     *  @param numTokens Size of the token array
+     *  @param searchBytes Number of bytes to be searched for the tokens.
+     */
+    static bool SearchFileHeaderForToken(
+        IOSystem* pIOSystem, const std::string& file, const char** tokens,
+        unsigned int numTokens, unsigned int searchBytes = 200,
+        bool tokensSol = false, bool noAlphaBeforeTokens = false);
 #else
         // -------------------------------------------------------------------
-        /** A utility for CanRead().
-         *
-         *  The function searches the header of a file for a specific token
-         *  and returns true if this token is found. This works for text
-         *  files only. There is a rudimentary handling of UNICODE files.
-         *  The comparison is case independent.
-         *
-         *  @param pIOSystem IO System to work with
-         *  @param file File name of the file
-         *  @param tokens List of tokens to search for
-         *  @param numTokens Size of the token array
-         *  @param searchBytes Number of bytes to be searched for the tokens.
-         */
+    /** A utility for CanRead().
+     *
+     *  The function searches the header of a file for a specific token
+     *  and returns true if this token is found. This works for text
+     *  files only. There is a rudimentary handling of UNICODE files.
+     *  The comparison is case independent.
+     *
+     *  @param pIOSystem IO System to work with
+     *  @param file File name of the file
+     *  @param tokens List of tokens to search for
+     *  @param numTokens Size of the token array
+     *  @param searchBytes Number of bytes to be searched for the tokens.
+     */
     static bool SearchFileHeaderForToken(IOSystem* pIOSystem,
                                          const std::string& file,
                                          const char** tokens,
@@ -388,9 +384,9 @@ public: // static utilities
 
     // -------------------------------------------------------------------
     /** Utility function to move a std::vector into a aiScene array
-    *  @param vec The vector to be moved
-    *  @param out The output pointer to the allocated array.
-    *  @param numOut The output count of elements copied. */
+     *  @param vec The vector to be moved
+     *  @param out The output pointer to the allocated array.
+     *  @param numOut The output count of elements copied. */
     template <typename T>
     AI_FORCE_INLINE static void CopyVector(std::vector<T>& vec, T*& out,
                                            unsigned int& outLength)

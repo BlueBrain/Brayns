@@ -189,7 +189,7 @@ struct TmpFolder
     ~TmpFolder() { fs::remove_all(path); }
     std::string path{"/tmp/brayns_extracted_XXXXXX"};
 };
-}
+} // namespace
 
 namespace brayns
 {
@@ -209,8 +209,7 @@ std::vector<ModelDescriptorPtr> ArchiveLoader::loadExtracted(
     const std::string& path, const LoaderProgress& callback,
     const PropertyMap& properties) const
 {
-    const auto loaderName =
-        properties.valueOr("loaderName", std::string());
+    const auto loaderName = properties.valueOr("loaderName", std::string());
     const Loader* loader =
         loaderName.empty() ? nullptr
                            : &_registry.getSuitableLoader("", "", loaderName);
@@ -261,4 +260,4 @@ std::vector<std::string> ArchiveLoader::getSupportedExtensions() const
 {
     return {"zip", "gz", "tgz", "bz2", "rar"};
 }
-}
+} // namespace brayns
