@@ -96,4 +96,4 @@ brayns::Boxd File::getBoundingBox() const
                 {float(getWidth()), float(getHeight()), float(getDepth())}});
     return bbox;
 }
-}
+} // namespace bbic

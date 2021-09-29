@@ -24,7 +24,8 @@
 
 BRAYNS_MESSAGE_BEGIN(SetConnectionsPerValueMessage)
 BRAYNS_MESSAGE_ENTRY(size_t, model_id, "The ID of the model to save")
-BRAYNS_MESSAGE_ENTRY(uint32_t, frame, "The frame of the simulation in which to apply")
+BRAYNS_MESSAGE_ENTRY(uint32_t, frame,
+                     "The frame of the simulation in which to apply")
 BRAYNS_MESSAGE_ENTRY(double, value, "The value")
 BRAYNS_MESSAGE_ENTRY(double, epsilon, "The value epsilon")
 BRAYNS_MESSAGE_END()

@@ -58,8 +58,8 @@ void AdvancedSimulationRenderer::commit()
         _shadingEnabled, _randomNumber, _timestamp, spp,
         _electronShadingEnabled, _lightPtr, _lightArray.size(),
         _simulationData ? (float*)_simulationData->data : NULL,
-        _simulationDataSize, _samplingThreshold,
-        _volumeSpecularExponent, _volumeAlphaCorrection);
+        _simulationDataSize, _samplingThreshold, _volumeSpecularExponent,
+        _volumeAlphaCorrection);
 }
 
 AdvancedSimulationRenderer::AdvancedSimulationRenderer()
@@ -68,4 +68,4 @@ AdvancedSimulationRenderer::AdvancedSimulationRenderer()
 }
 
 OSP_REGISTER_RENDERER(AdvancedSimulationRenderer, advanced_simulation);
-} // ::brayns
+} // namespace brayns

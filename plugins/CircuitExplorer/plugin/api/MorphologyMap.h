@@ -51,7 +51,7 @@ struct MorphologyMap
 
     // material Id -> list of triangle meshes for this morphology
     size_t _triangleIndx;
-    bool _hasMesh {false};
+    bool _hasMesh{false};
 
     // material Id -> list of geometry sdfs for this morphology
     std::unordered_map<size_t, std::vector<size_t>> _sdfGeometryMap;

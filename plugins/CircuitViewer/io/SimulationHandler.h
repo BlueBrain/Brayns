@@ -71,6 +71,6 @@ private:
     bool _ready{false};
     std::vector<MaterialPtr> _materials;
 };
-}
+} // namespace brayns
 
 #endif // CIRCUITSIMULATIONHANDLER

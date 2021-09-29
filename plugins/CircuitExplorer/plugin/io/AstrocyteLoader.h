@@ -30,7 +30,7 @@ public:
     AstrocyteLoader(brayns::Scene &scene,
                     const brayns::ApplicationParameters &applicationParameters,
                     brayns::PropertyMap &&loaderParams,
-                    CircuitExplorerPlugin* plugin);
+                    CircuitExplorerPlugin *plugin);
 
     std::string getName() const final;
 
@@ -41,7 +41,7 @@ public:
 
     static brayns::PropertyMap getCLIProperties();
 
-   std::vector<brayns::ModelDescriptorPtr> importFromFile(
+    std::vector<brayns::ModelDescriptorPtr> importFromFile(
         const std::string &filename, const brayns::LoaderProgress &callback,
         const brayns::PropertyMap &properties) const final;
 

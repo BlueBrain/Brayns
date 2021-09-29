@@ -27,8 +27,7 @@ public:
     PairSynapsesLoader(
         brayns::Scene &scene,
         const brayns::ApplicationParameters &applicationParameters,
-        brayns::PropertyMap &&loaderParams,
-        CircuitExplorerPlugin* plugin);
+        brayns::PropertyMap &&loaderParams, CircuitExplorerPlugin *plugin);
 
     std::string getName() const final;
 

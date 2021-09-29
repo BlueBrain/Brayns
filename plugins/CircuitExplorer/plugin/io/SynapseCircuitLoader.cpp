@@ -28,13 +28,12 @@ const std::string LOADER_NAME = "Synapse loader use-case";
 SynapseCircuitLoader::SynapseCircuitLoader(
     brayns::Scene &scene,
     const brayns::ApplicationParameters &applicationParameters,
-    brayns::PropertyMap &&loaderParams, CircuitExplorerPlugin* plugin)
+    brayns::PropertyMap &&loaderParams, CircuitExplorerPlugin *plugin)
     : AbstractCircuitLoader(scene, applicationParameters,
                             std::move(loaderParams), plugin)
 {
     PLUGIN_INFO << "Registering " << LOADER_NAME << std::endl;
-    _fixedDefaults.add(
-        {PROP_DB_CONNECTION_STRING.getName(), std::string("")});
+    _fixedDefaults.add({PROP_DB_CONNECTION_STRING.getName(), std::string("")});
     _fixedDefaults.add({PROP_REPORT.getName(), std::string("")});
     _fixedDefaults.add(
         {PROP_PRESYNAPTIC_NEURON_GID.getName(), std::string("")});
@@ -52,10 +51,9 @@ SynapseCircuitLoader::SynapseCircuitLoader(
     _fixedDefaults.add(
         {PROP_USER_DATA_TYPE.getName(), enumToString(UserDataType::undefined)});
     _fixedDefaults.add({PROP_MORPHOLOGY_MAX_DISTANCE_TO_SOMA.getName(),
-                                std::numeric_limits<double>::max()});
+                        std::numeric_limits<double>::max()});
     _fixedDefaults.add({PROP_MESH_FOLDER.getName(), std::string("")});
-    _fixedDefaults.add(
-        {PROP_MESH_FILENAME_PATTERN.getName(), std::string("")});
+    _fixedDefaults.add({PROP_MESH_FILENAME_PATTERN.getName(), std::string("")});
     _fixedDefaults.add({PROP_MESH_TRANSFORMATION.getName(), false});
     _fixedDefaults.add({PROP_CELL_CLIPPING.getName(), false});
     _fixedDefaults.add({PROP_AREAS_OF_INTEREST.getName(), 0});

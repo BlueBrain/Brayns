@@ -40,8 +40,17 @@
 TEST_CASE("circuit_with_simulation_mapping_optix")
 {
     std::vector<const char*> argv = {
-        "brayns", BBP_TEST_BLUECONFIG3, "--animation-frame", "50", "--engine",
-        "optix", "--samples-per-pixel", "16", "--window-size", "200", "1000",
+        "brayns",
+        BBP_TEST_BLUECONFIG3,
+        "--animation-frame",
+        "50",
+        "--engine",
+        "optix",
+        "--samples-per-pixel",
+        "16",
+        "--window-size",
+        "200",
+        "1000",
         "--plugin",
         "braynsCircuitViewer --targets allmini50 --report "
         "voltages --display-mode soma --synchronous-mode"};

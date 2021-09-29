@@ -94,7 +94,7 @@ PropertyMap getCylindricStereoTrackedProperties(
     properties.setProperty(getCameraScalingProperty(params.getCameraScaling()));
     return properties;
 }
-}
+} // namespace
 
 OpenDeckPlugin::OpenDeckPlugin(OpenDeckParameters&& params)
     : _params(std::move(params))
@@ -155,4 +155,4 @@ extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
         return nullptr;
     }
 }
-}
+} // namespace brayns

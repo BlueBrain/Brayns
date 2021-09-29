@@ -28,13 +28,12 @@ const std::string LOADER_NAME = "Morphology collage use-case";
 MorphologyCollageLoader::MorphologyCollageLoader(
     brayns::Scene &scene,
     const brayns::ApplicationParameters &applicationParameters,
-    brayns::PropertyMap &&loaderParams, CircuitExplorerPlugin* plugin)
+    brayns::PropertyMap &&loaderParams, CircuitExplorerPlugin *plugin)
     : AbstractCircuitLoader(scene, applicationParameters,
                             std::move(loaderParams), plugin)
 {
     PLUGIN_INFO << "Registering " << LOADER_NAME << std::endl;
-    _fixedDefaults.add(
-        {PROP_DB_CONNECTION_STRING.getName(), std::string("")});
+    _fixedDefaults.add({PROP_DB_CONNECTION_STRING.getName(), std::string("")});
     _fixedDefaults.add(
         {PROP_PRESYNAPTIC_NEURON_GID.getName(), std::string("")});
     _fixedDefaults.add(
@@ -44,7 +43,7 @@ MorphologyCollageLoader::MorphologyCollageLoader(
     _fixedDefaults.add(
         {PROP_REPORT_TYPE.getName(), enumToString(ReportType::undefined)});
     _fixedDefaults.add({PROP_CIRCUIT_COLOR_SCHEME.getName(),
-                                enumToString(CircuitColorScheme::none)});
+                        enumToString(CircuitColorScheme::none)});
     _fixedDefaults.add({PROP_RADIUS_CORRECTION.getName(), 0.0});
     _fixedDefaults.add(
         {PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE.getName(), true});
@@ -55,10 +54,9 @@ MorphologyCollageLoader::MorphologyCollageLoader(
     _fixedDefaults.add(
         {PROP_USER_DATA_TYPE.getName(), enumToString(UserDataType::undefined)});
     _fixedDefaults.add({PROP_MORPHOLOGY_MAX_DISTANCE_TO_SOMA.getName(),
-                                std::numeric_limits<double>::max()});
+                        std::numeric_limits<double>::max()});
     _fixedDefaults.add({PROP_MESH_FOLDER.getName(), std::string("")});
-    _fixedDefaults.add(
-        {PROP_MESH_FILENAME_PATTERN.getName(), std::string("")});
+    _fixedDefaults.add({PROP_MESH_FILENAME_PATTERN.getName(), std::string("")});
     _fixedDefaults.add({PROP_MESH_TRANSFORMATION.getName(), false});
     _fixedDefaults.add({PROP_SYNAPSE_RADIUS.getName(), 1.0});
     _fixedDefaults.add({PROP_LOAD_AFFERENT_SYNAPSES.getName(), false});

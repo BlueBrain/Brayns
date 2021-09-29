@@ -45,4 +45,4 @@ private:
 
     DeflectParameters _params;
 };
-}
+} // namespace brayns

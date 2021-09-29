@@ -29,22 +29,21 @@ const double DEFAULT_RADIUS_MULTIPLIER = 2.0;
 MeshCircuitLoader::MeshCircuitLoader(
     brayns::Scene &scene,
     const brayns::ApplicationParameters &applicationParameters,
-    brayns::PropertyMap &&loaderParams, CircuitExplorerPlugin* plugin)
+    brayns::PropertyMap &&loaderParams, CircuitExplorerPlugin *plugin)
     : AbstractCircuitLoader(scene, applicationParameters,
                             std::move(loaderParams), plugin)
 {
     PLUGIN_INFO << "Registering " << LOADER_NAME << std::endl;
-    _fixedDefaults.add(
-        {PROP_DB_CONNECTION_STRING.getName(), std::string("")});
+    _fixedDefaults.add({PROP_DB_CONNECTION_STRING.getName(), std::string("")});
     _fixedDefaults.add({PROP_USE_SDF_GEOMETRY.getName(), false});
     _fixedDefaults.add(
         {PROP_PRESYNAPTIC_NEURON_GID.getName(), std::string("")});
     _fixedDefaults.add(
         {PROP_POSTSYNAPTIC_NEURON_GID.getName(), std::string("")});
-    _fixedDefaults.add(
-        {PROP_REPORT_TYPE.getName(), enumToString(ReportType::voltages_from_file)});
+    _fixedDefaults.add({PROP_REPORT_TYPE.getName(),
+                        enumToString(ReportType::voltages_from_file)});
     _fixedDefaults.add({PROP_CIRCUIT_COLOR_SCHEME.getName(),
-                                enumToString(CircuitColorScheme::by_id)});
+                        enumToString(CircuitColorScheme::by_id)});
     _fixedDefaults.add(
         {PROP_RADIUS_MULTIPLIER.getName(), DEFAULT_RADIUS_MULTIPLIER});
     _fixedDefaults.add({PROP_RADIUS_CORRECTION.getName(), 0.0});
@@ -56,13 +55,13 @@ MeshCircuitLoader::MeshCircuitLoader(
     _fixedDefaults.add({PROP_METABALLS_GRID_SIZE.getName(), 0});
     _fixedDefaults.add({PROP_METABALLS_THRESHOLD.getName(), 0.0});
     _fixedDefaults.add({PROP_USER_DATA_TYPE.getName(),
-                                enumToString(UserDataType::simulation_offset)});
+                        enumToString(UserDataType::simulation_offset)});
     _fixedDefaults.add({PROP_MORPHOLOGY_COLOR_SCHEME.getName(),
-                                enumToString(MorphologyColorScheme::none)});
-    _fixedDefaults.add(
-        {PROP_MORPHOLOGY_QUALITY.getName(), enumToString(MorphologyQuality::high)});
+                        enumToString(MorphologyColorScheme::none)});
+    _fixedDefaults.add({PROP_MORPHOLOGY_QUALITY.getName(),
+                        enumToString(MorphologyQuality::high)});
     _fixedDefaults.add({PROP_MORPHOLOGY_MAX_DISTANCE_TO_SOMA.getName(),
-                                std::numeric_limits<double>::max()});
+                        std::numeric_limits<double>::max()});
     _fixedDefaults.add({PROP_CELL_CLIPPING.getName(), false});
     _fixedDefaults.add({PROP_AREAS_OF_INTEREST.getName(), 0});
     _fixedDefaults.add({PROP_SYNAPSE_RADIUS.getName(), 1.0});

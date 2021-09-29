@@ -48,8 +48,7 @@ public:
     AbstractCircuitLoader(
         brayns::Scene &scene,
         const brayns::ApplicationParameters &applicationParameters,
-        brayns::PropertyMap &&loaderParams,
-        CircuitExplorerPlugin* pluginPtr);
+        brayns::PropertyMap &&loaderParams, CircuitExplorerPlugin *pluginPtr);
 
     brayns::PropertyMap getProperties() const final;
 
@@ -82,9 +81,9 @@ public:
      * sotred
      */
     void _populateLayerIds(const brion::BlueConfig &blueConfig,
-                           const brain::Circuit& circuit,
+                           const brain::Circuit &circuit,
                            const brain::GIDSet &gids,
-                           LayerSchemeItem& result) const;
+                           LayerSchemeItem &result) const;
 
     static void setSimulationTransferFunction(brayns::TransferFunction &tf,
                                               const float finalOpacity = 1.f);
@@ -95,11 +94,10 @@ protected:
     brayns::PropertyMap _fixedDefaults;
 
     brayns::ModelDescriptorPtr importCircuitFromBlueConfig(
-                const brion::BlueConfig& config, const brayns::PropertyMap& oproperties,
-                const brayns::LoaderProgress& callback) const;
+        const brion::BlueConfig &config, const brayns::PropertyMap &oproperties,
+        const brayns::LoaderProgress &callback) const;
 
 private:
-
     std::vector<std::string> _getTargetsAsStrings(
         const std::string &targets) const;
 
@@ -108,7 +106,7 @@ private:
     brain::GIDSet _getGids(const brayns::PropertyMap &properties,
                            const brion::BlueConfig &blueConfiguration,
                            const brain::Circuit &circuit,
-                           SchemeItem& targets) const;
+                           SchemeItem &targets) const;
 
     std::string _getMeshFilenameFromGID(const brayns::PropertyMap &props,
                                         const uint64_t gid) const;
@@ -116,7 +114,7 @@ private:
     float _importMorphologies(
         const brayns::PropertyMap &props, const brain::Circuit &circuit,
         brayns::Model &model, const brain::GIDSet &gids,
-        const Matrix4fs &transformations, CellObjectMapper& mapper,
+        const Matrix4fs &transformations, CellObjectMapper &mapper,
         CompartmentReportPtr compartmentReport,
         const brayns::LoaderProgress &callback,
         const size_t materialId = brayns::NO_MATERIAL) const;
@@ -134,13 +132,13 @@ private:
     size_t _getMaterialFromCircuitAttributes(
         const brayns::PropertyMap &props, const uint64_t index,
         const size_t material, const bool forSimulationModel,
-        CircuitSchemeData* data = nullptr) const;
+        CircuitSchemeData *data = nullptr) const;
 
     void _importMeshes(const brayns::PropertyMap &props, brayns::Model &model,
                        const brain::GIDSet &gids,
                        const Matrix4fs &transformations,
                        const brayns::LoaderProgress &callback,
-                       CellObjectMapper& mapper) const;
+                       CellObjectMapper &mapper) const;
 
     CompartmentReportPtr _attachSimulationHandler(
         const brayns::PropertyMap &properties,
@@ -161,10 +159,12 @@ private:
     // Synapses
     void _buildAfferentSynapses(const brain::Synapse &synapse,
                                 const size_t materialId, const float radius,
-                                brayns::Model &model, const uint64_t userData = 0) const;
+                                brayns::Model &model,
+                                const uint64_t userData = 0) const;
     void _buildEfferentSynapses(const brain::Synapse &synapse,
                                 const size_t materialId, const float radius,
-                                brayns::Model &model, const uint64_t userData = 0) const;
+                                brayns::Model &model,
+                                const uint64_t userData = 0) const;
     void _loadPairSynapses(const brayns::PropertyMap &properties,
                            const brain::Circuit &circuit,
                            const uint32_t &preGid, const uint32_t &postGid,
@@ -174,8 +174,8 @@ private:
                           const brain::Circuit &circuit,
                           const brain::GIDSet &gids, const float synapseRadius,
                           const bool loadAfferentSynapses,
-                          const bool loadEfferentSynapses,
-                          brayns::Model &model, CompartmentReportPtr compartmentReport) const;
+                          const bool loadEfferentSynapses, brayns::Model &model,
+                          CompartmentReportPtr compartmentReport) const;
 
-    CircuitExplorerPlugin* _pluginPtr{nullptr};
+    CircuitExplorerPlugin *_pluginPtr{nullptr};
 };

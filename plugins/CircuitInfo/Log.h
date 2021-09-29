@@ -29,7 +29,7 @@
 #define PLUGIN_ERROR std::cerr << "[ERROR] [CIRCUIT_INFO] "
 #define PLUGIN_WARN std::cerr << "[WARN ] [CIRCUIT_INFO] "
 #define PLUGIN_INFO std::cout << "[INFO ] [CIRCUIT_INFO] "
-#define PLUGIN_TIMER(__time, __msg)                                        \
+#define PLUGIN_TIMER(__time, __msg)                                    \
     std::cout << "[TIMER] [CIRCUIT_INFO] [" << __time << "] " << __msg \
               << std::endl;
 #ifdef NDEBUG

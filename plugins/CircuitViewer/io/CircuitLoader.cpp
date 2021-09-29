@@ -265,8 +265,9 @@ struct CircuitProperties
     CircuitProperties() = default;
     CircuitProperties(const PropertyMap& properties)
     {
-        const auto setVariable = [&](auto& variable, const std::string& name,
-                                     auto defaultVal) {
+        const auto setVariable =
+            [&](auto& variable, const std::string& name, auto defaultVal)
+        {
             using T = typename std::remove_reference<decltype(variable)>::type;
             variable = properties.getProperty<T>(name, defaultVal);
         };
@@ -480,7 +481,8 @@ public:
                                          ? strings{{""}}
                                          : _properties.targetList;
 
-        auto resolveTarget = [&](std::string key) {
+        auto resolveTarget = [&](std::string key)
+        {
             const auto fraction = _properties.density / 100.0f;
             const auto seed = _properties.randomSeed;
 
@@ -688,7 +690,8 @@ private:
                 if (cancelException)
                     continue;
                 const auto morphologyIndex = index + j;
-                auto materialFunc = [&](const brain::neuron::SectionType type) {
+                auto materialFunc = [&](const brain::neuron::SectionType type)
+                {
                     return _getMaterialId(_morphologyParams.colorScheme,
                                           morphologyIndex, type,
                                           perCellMaterialIds);
@@ -741,9 +744,9 @@ bool CircuitLoader::isSupported(const std::string& filename,
                                 const std::string& extension
                                     BRAYNS_UNUSED) const
 {
-
-    const auto ends_with = [](const std::string& value,
-                              const std::string& ending) {
+    const auto ends_with =
+        [](const std::string& value, const std::string& ending)
+    {
         if (ending.size() > value.size())
             return false;
         return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
@@ -753,20 +756,21 @@ bool CircuitLoader::isSupported(const std::string& filename,
         if (ends_with(filename, name))
             return true;
 
-    const auto contains = [](const std::string &value,
-                             const std::string &keyword) {
-        if(value.size() < keyword.size())
+    const auto contains =
+        [](const std::string& value, const std::string& keyword)
+    {
+        if (value.size() < keyword.size())
             return false;
 
         const auto lastSlash = value.find_last_of("/");
         std::string compareTo = value;
-        if(lastSlash != std::string::npos)
+        if (lastSlash != std::string::npos)
             compareTo = value.substr(lastSlash + 1);
         return compareTo.find(keyword) != std::string::npos;
     };
 
-    for(const auto& keyw : LOADER_KEYWORDS)
-        if(contains(filename, keyw))
+    for (const auto& keyw : LOADER_KEYWORDS)
+        if (contains(filename, keyw))
             return true;
 
     return false;

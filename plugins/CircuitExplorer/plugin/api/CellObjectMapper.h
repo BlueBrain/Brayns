@@ -76,7 +76,8 @@ public:
     void add(const size_t gid, const MorphologyMap& mm);
     void remove(const size_t gid);
 
-    RemapResult remapCircuitColors(const CircuitColorScheme scheme, brayns::Scene& scene);
+    RemapResult remapCircuitColors(const CircuitColorScheme scheme,
+                                   brayns::Scene& scene);
     void remapMorphologyColors(const MorphologyColorScheme scheme);
 
     void onCircuitColorFinish(const CircuitColorScheme& scheme,
@@ -88,10 +89,7 @@ public:
         return _cellToRenderableMap;
     }
 
-    size_t getSourceModelId() const
-    {
-        return _model->getModelID();
-    }
+    size_t getSourceModelId() const { return _model->getModelID(); }
 
 private:
     size_t _computeMaterialId(const CircuitColorScheme scheme,

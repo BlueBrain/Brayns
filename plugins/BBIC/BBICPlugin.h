@@ -40,4 +40,4 @@ public:
 private:
     std::list<VolumeModel> _volumeModels;
 };
-}
+} // namespace bbic

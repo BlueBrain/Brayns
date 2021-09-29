@@ -24,20 +24,19 @@
 #include <brayns/common/types.h>
 #include <brayns/network/json/ActionMessage.h>
 
-#define COMMON_SENSOR_PROPS \
-    MESSAGE_ENTRY(std::vector<float>, rotation, "Sensor 3D Rotation") \
+#define COMMON_SENSOR_PROPS                                                 \
+    MESSAGE_ENTRY(std::vector<float>, rotation, "Sensor 3D Rotation")       \
     MESSAGE_ENTRY(std::vector<float>, translation, "Sensor 3D Translation") \
-    MESSAGE_ENTRY(std::vector<float>, scale, "Sensor 3D Scale") \
-    MESSAGE_ENTRY(std::string, reference, "Sensor name") \
-    MESSAGE_ENTRY(int32_t, xpixels, "Sensor pixel capture width") \
-    MESSAGE_ENTRY(int32_t, ypixels, "Sensor pixel capture height") \
-    MESSAGE_ENTRY(double, fov, "Sensor capture field of view") \
+    MESSAGE_ENTRY(std::vector<float>, scale, "Sensor 3D Scale")             \
+    MESSAGE_ENTRY(std::string, reference, "Sensor name")                    \
+    MESSAGE_ENTRY(int32_t, xpixels, "Sensor pixel capture width")           \
+    MESSAGE_ENTRY(int32_t, ypixels, "Sensor pixel capture height")          \
+    MESSAGE_ENTRY(double, fov, "Sensor capture field of view")
 
-
-#define COMMON_VOLUME_PROPS \
+#define COMMON_VOLUME_PROPS                                                    \
     MESSAGE_ENTRY(std::vector<float>, p0, "Minimum axis-aligned volume bound") \
     MESSAGE_ENTRY(std::vector<float>, p1, "Maximum axis-aligned volume bound") \
-    MESSAGE_ENTRY(std::string, name, "Volume scene name") \
+    MESSAGE_ENTRY(std::string, name, "Volume scene name")
 
 /**
  * @brief The AddDiskSensorRequest struct
@@ -97,7 +96,8 @@ struct AddFluorescentAnnotatedVolume : public brayns::Message
     MESSAGE_ENTRY(int32_t, ntags, "Number of tags")
     MESSAGE_ENTRY(std::vector<float>, fexs, "Fluorescence exictatory spectrums")
     MESSAGE_ENTRY(std::vector<float>, fems, "Fluorescence emissive spectrums")
-    MESSAGE_ENTRY(std::vector<float>, epsilons, "Fluorescence epsilon tresholds")
+    MESSAGE_ENTRY(std::vector<float>, epsilons,
+                  "Fluorescence epsilon tresholds")
     MESSAGE_ENTRY(std::vector<float>, cs, "Fluorescence concentrations")
     MESSAGE_ENTRY(std::vector<float>, yields, "Fluorescence quantum yields")
     MESSAGE_ENTRY(std::vector<float>, gfs, "Fluorescence anisotropy parameters")

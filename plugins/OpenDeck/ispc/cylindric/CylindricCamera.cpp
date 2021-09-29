@@ -57,4 +57,4 @@ void CylindricCamera::commit()
 }
 
 OSP_REGISTER_CAMERA(CylindricCamera, cylindric);
-}
+} // namespace ospray

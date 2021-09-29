@@ -55,4 +55,4 @@ public:
 private:
     PropertyMap _defaults; // command line defaults
 };
-}
+} // namespace brayns

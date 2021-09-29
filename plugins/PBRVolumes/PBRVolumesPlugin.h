@@ -23,8 +23,8 @@
 
 #include "PBRVolumesParams.h"
 
-#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/common/types.h>
+#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 /**
@@ -52,7 +52,8 @@ private:
      *        inside the shapes of a given model
      * @return brayns::Message with information about request sucess
      */
-    brayns::Message _addHomogeneusVolumeToModel(const AddHomogeneusVolumeToModel&);
+    brayns::Message _addHomogeneusVolumeToModel(
+        const AddHomogeneusVolumeToModel&);
 
     /**
      * @brief Adds a new model with a heterogeneus (non constant) density

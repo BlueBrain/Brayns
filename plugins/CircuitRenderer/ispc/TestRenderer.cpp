@@ -14,17 +14,19 @@ void TestRenderer::commit()
     _lightData = (ospray::Data*)getParamData("lights");
     _lights.clear();
 
-    if(_lightData)
+    if (_lightData)
     {
-        for(size_t i = 0; i < _lightData->size(); ++i)
+        for (size_t i = 0; i < _lightData->size(); ++i)
             _lights.push_back(((ospray::Light**)_lightData->data)[i]->getIE());
 
-        _lightPtr = _lights.empty()? nullptr : &_lights[0];
-        _backgroundMaterial = (TestMaterial*)getParamObject("bgMaterial", nullptr);
+        _lightPtr = _lights.empty() ? nullptr : &_lights[0];
+        _backgroundMaterial =
+            (TestMaterial*)getParamObject("bgMaterial", nullptr);
     }
 
     ispc::TestRenderer_set(getIE(),
-                           (_backgroundMaterial? _backgroundMaterial->getIE() : nullptr),
+                           (_backgroundMaterial ? _backgroundMaterial->getIE()
+                                                : nullptr),
                            spp, _lightPtr, _lights.size());
 }
 
@@ -33,6 +35,6 @@ TestRenderer::TestRenderer()
     ispcEquivalent = ispc::TestRenderer_create(this);
 }
 
-//OSP_REGISTER_RENDERER(TestRenderer, TEST);
+// OSP_REGISTER_RENDERER(TestRenderer, TEST);
 OSP_REGISTER_RENDERER(TestRenderer, test);
-}
+} // namespace circuitRenderer

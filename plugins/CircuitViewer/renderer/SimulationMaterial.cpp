@@ -28,7 +28,6 @@
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/SDFGeometry.h>
 #include <brayns/common/geometry/Sphere.h>
-#include <brayns/common/geometry/Sphere.h>
 
 #include <ospray/SDK/geometry/Cylinders.h>
 #include <ospray/SDK/geometry/Geometry.h>
@@ -38,21 +37,22 @@
 #include <typeindex>
 #include <typeinfo>
 
-extern "C" {
-int SimulationMaterial_getBytesPerPrimitive(const void* geometry)
+extern "C"
 {
-    const ospray::Geometry* base =
-        static_cast<const ospray::Geometry*>(geometry);
-    if (dynamic_cast<const ospray::Spheres*>(base))
-        return sizeof(brayns::Sphere);
-    else if (dynamic_cast<const ospray::Cylinders*>(base))
-        return sizeof(brayns::Cylinder);
-    else if (dynamic_cast<const ospray::Cones*>(base))
-        return sizeof(brayns::Cone);
-    else if (dynamic_cast<const ospray::SDFGeometries*>(base))
-        return sizeof(brayns::SDFGeometry);
-    return 0;
-}
+    int SimulationMaterial_getBytesPerPrimitive(const void* geometry)
+    {
+        const ospray::Geometry* base =
+            static_cast<const ospray::Geometry*>(geometry);
+        if (dynamic_cast<const ospray::Spheres*>(base))
+            return sizeof(brayns::Sphere);
+        else if (dynamic_cast<const ospray::Cylinders*>(base))
+            return sizeof(brayns::Cylinder);
+        else if (dynamic_cast<const ospray::Cones*>(base))
+            return sizeof(brayns::Cone);
+        else if (dynamic_cast<const ospray::SDFGeometries*>(base))
+            return sizeof(brayns::SDFGeometry);
+        return 0;
+    }
 }
 
 namespace brayns
@@ -71,4 +71,4 @@ void SimulationMaterial::commit()
 
 OSP_REGISTER_MATERIAL(advanced_simulation, SimulationMaterial, default);
 OSP_REGISTER_MATERIAL(basic_simulation, SimulationMaterial, default);
-}
+} // namespace brayns

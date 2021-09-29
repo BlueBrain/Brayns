@@ -33,12 +33,11 @@ namespace
 {
 inline void _createBySegmentMaterials(Model& model)
 {
-    std::array<MaterialPtr, 5> materials{{
-        model.createMaterial(0, "unknown_section"),
-        model.createMaterial(1, "soma"),
-        model.createMaterial(2, "axon"),
-        model.createMaterial(3, "dendrite"),
-        model.createMaterial(4, "apical dendrite")}};
+    std::array<MaterialPtr, 5> materials{
+        {model.createMaterial(0, "unknown_section"),
+         model.createMaterial(1, "soma"), model.createMaterial(2, "axon"),
+         model.createMaterial(3, "dendrite"),
+         model.createMaterial(4, "apical dendrite")}};
     materials[0]->setDiffuseColor(Vector3f(0.9f, 0.9f, 0.9f));
     materials[1]->setDiffuseColor(Vector3f(0.9f, 0.9f, 0.9f));
     materials[2]->setDiffuseColor(Vector3f(0.2f, 0.4f, 0.8f));
@@ -103,8 +102,7 @@ inline brion::GIDSet _gidsFromRange(const uint32_t first, const uint32_t last,
 }
 
 inline brion::GIDSet _keyToGIDorRange(const std::string& key,
-                                      const double fraction,
-                                      const int32_t seed)
+                                      const double fraction, const int32_t seed)
 {
     std::regex regex(
         "([0-9]+)|"               // single GID
@@ -129,5 +127,5 @@ inline brion::GIDSet _keyToGIDorRange(const std::string& key,
 
     return {};
 }
-}
-}
+} // namespace
+} // namespace brayns

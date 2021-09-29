@@ -29,7 +29,7 @@
 #define PLUGIN_ERROR std::cerr << "[ERROR] [FLUORESCENCE] "
 #define PLUGIN_WARN std::cerr << "[WARN ] [FLUORESCENCE] "
 #define PLUGIN_INFO std::cout << "[INFO ] [FLUORESCENCE] "
-#define PLUGIN_TIMER(__time, __msg)                                        \
+#define PLUGIN_TIMER(__time, __msg)                                    \
     std::cout << "[TIMER] [FLUORESCENCE] [" << __time << "] " << __msg \
               << std::endl;
 #ifdef NDEBUG

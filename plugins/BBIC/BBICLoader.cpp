@@ -60,10 +60,9 @@ std::vector<brayns::ModelDescriptorPtr> Loader::importFromFile(
     auto modelDesc = volumeModel.getModel();
     _plugin->addModel(std::move(volumeModel));
 
-    modelDesc->onRemoved([plugin = _plugin](const auto& modelDesc_) {
-        plugin->removeModel(modelDesc_.getModelID());
-    });
+    modelDesc->onRemoved([plugin = _plugin](const auto& modelDesc_)
+                         { plugin->removeModel(modelDesc_.getModelID()); });
 
     return {modelDesc};
 }
-}
+} // namespace bbic

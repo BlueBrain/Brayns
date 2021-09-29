@@ -24,7 +24,7 @@ DerivePointerBinding: true
 ExperimentalAutoDetectBinPacking: false
 IndentCaseLabels: false
 IndentFunctionDeclarationAfterType: true
-IndentWidth:     4
+IndentWidth: 4
 KeepEmptyLinesAtTheStartOfBlocks: false
 Language: Cpp
 MaxEmptyLinesToKeep: 1
@@ -46,6 +46,5 @@ SpacesInAngles: false # '< ' style
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false # '(' style
 Standard: Cpp11
-TabWidth:        4
-UseTab:          Never
-...
+TabWidth: 4
+UseTab: Never
