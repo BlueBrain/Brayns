@@ -131,7 +131,6 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
    -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON \
    -DBRAYNS_CIRCUITINFO_ENABLED=ON \
    -DBRAYNS_DTI_ENABLED=OFF \
-   -DBRAYNS_CIRCUITVIEWER_ENABLED=ON \
    -DCLONE_SUBPROJECTS=ON \
    -DCMAKE_BUILD_TYPE=Release \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
@@ -183,4 +182,4 @@ EXPOSE 8200
 # See https://docs.docker.com/engine/reference/run/#entrypoint-default-command-to-execute-at-runtime
 # for more docs
 ENTRYPOINT ["braynsService"]
-CMD ["--http-server", ":8200", "--plugin", "braynsCircuitExplorer", "--plugin", "braynsCircuitInfo", "--sandbox-path", "/"]
+CMD ["--uri", "0.0.0.0:8200", "--plugin", "braynsCircuitExplorer", "--plugin", "braynsCircuitInfo", "--sandbox-path", "/"]
