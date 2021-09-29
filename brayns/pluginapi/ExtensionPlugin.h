@@ -25,6 +25,7 @@
 #include <brayns/common/types.h>
 
 #include <brayns/network/entrypoint/EntrypointRef.h>
+#include <brayns/network/interface/ActionInterface.h>
 
 namespace brayns
 {
