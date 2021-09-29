@@ -15,4 +15,9 @@ add_library(exampleBraynsPlugin SHARED
   Plugin.cpp
   Plugin.h)
 
-target_link_libraries(exampleBraynsPlugin braynsPluginAPI braynsCommon)
+target_link_libraries(
+  exampleBraynsPlugin
+  braynsPluginAPI
+  braynsNetwork
+  braynsCommon
+)
