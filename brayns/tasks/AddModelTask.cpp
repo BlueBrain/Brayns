@@ -44,7 +44,7 @@ AddModelTask::AddModelTask(const ModelParams& modelParams, Engine& engine)
     LoadModelFunctor functor{engine, modelParams};
     functor.setCancelToken(_cancelToken);
     functor.setProgressFunc(
-        [&progress = progress](const auto& msg, auto, auto amount) {
+        [& progress = progress](const auto& msg, auto, auto amount) {
             progress.update(msg, amount);
         });
 
