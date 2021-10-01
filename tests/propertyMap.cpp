@@ -142,11 +142,16 @@ TEST_CASE("fill_property_map")
     CHECK(doubles["vec3"].is<Vector3d>());
 
     CHECK(integers["number"].as<int32_t>() == doubles["number"].as<double>());
-    CHECK(integers["vec2"].as<Vector2i>()[0] == doubles["vec2"].as<Vector2d>()[0]);
-    CHECK(integers["vec2"].as<Vector2i>()[1] == doubles["vec2"].as<Vector2d>()[1]);
-    CHECK(integers["vec3"].as<Vector3i>()[0] == doubles["vec3"].as<Vector3d>()[0]);
-    CHECK(integers["vec3"].as<Vector3i>()[1] == doubles["vec3"].as<Vector3d>()[1]);
-    CHECK(integers["vec3"].as<Vector3i>()[2] == doubles["vec3"].as<Vector3d>()[2]);
+    CHECK(integers["vec2"].as<Vector2i>()[0] ==
+          doubles["vec2"].as<Vector2d>()[0]);
+    CHECK(integers["vec2"].as<Vector2i>()[1] ==
+          doubles["vec2"].as<Vector2d>()[1]);
+    CHECK(integers["vec3"].as<Vector3i>()[0] ==
+          doubles["vec3"].as<Vector3d>()[0]);
+    CHECK(integers["vec3"].as<Vector3i>()[1] ==
+          doubles["vec3"].as<Vector3d>()[1]);
+    CHECK(integers["vec3"].as<Vector3i>()[2] ==
+          doubles["vec3"].as<Vector3d>()[2]);
 
     integers.add({"foo", std::string("string")});
     doubles.add({"foo", 42});

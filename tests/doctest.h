@@ -422,8 +422,8 @@ DOCTEST_GCC_SUPPRESS_WARNING_POP
 #endif // DOCTEST_CONFIG_USE_IOSFWD
 
 #ifdef DOCTEST_CONFIG_USE_STD_HEADERS
-#include <iosfwd>
 #include <cstddef>
+#include <iosfwd>
 #if DOCTEST_MSVC >= DOCTEST_COMPILER(19, 20, 0)
 // see this issue on why this is needed:
 // https://github.com/onqtam/doctest/issues/183
@@ -525,7 +525,8 @@ class DOCTEST_INTERFACE String
         unsigned capacity;
     };
 
-    union {
+    union
+    {
         char buf[len];
         view data;
     };
@@ -1124,7 +1125,7 @@ DOCTEST_INTERFACE bool checkIfShouldThrow(assertType::Enum at);
 #ifndef DOCTEST_CONFIG_NO_EXCEPTIONS
 [[noreturn]]
 #endif // DOCTEST_CONFIG_NO_EXCEPTIONS
-    DOCTEST_INTERFACE void
+DOCTEST_INTERFACE void
     throwException();
 
 struct DOCTEST_INTERFACE Subcase
@@ -2216,16 +2217,14 @@ int registerReporter(const char* name, int priority)
                                              (__FILE__, __LINE__, 0));   \
     DOCTEST_GLOBAL_NO_WARNINGS_END()
 
-#define DOCTEST_TEST_CASE_TEMPLATE_INVOKE(id, ...)                           \
-    DOCTEST_TEST_CASE_TEMPLATE_INSTANTIATE_IMPL(id, DOCTEST_ANONYMOUS(       \
-                                                        _DOCTEST_ANON_TMP_), \
-                                                std::tuple<__VA_ARGS__>)     \
+#define DOCTEST_TEST_CASE_TEMPLATE_INVOKE(id, ...)                          \
+    DOCTEST_TEST_CASE_TEMPLATE_INSTANTIATE_IMPL(                            \
+        id, DOCTEST_ANONYMOUS(_DOCTEST_ANON_TMP_), std::tuple<__VA_ARGS__>) \
     typedef int DOCTEST_ANONYMOUS(_DOCTEST_ANON_FOR_SEMICOLON_)
 
-#define DOCTEST_TEST_CASE_TEMPLATE_APPLY(id, ...)                            \
-    DOCTEST_TEST_CASE_TEMPLATE_INSTANTIATE_IMPL(id, DOCTEST_ANONYMOUS(       \
-                                                        _DOCTEST_ANON_TMP_), \
-                                                __VA_ARGS__)                 \
+#define DOCTEST_TEST_CASE_TEMPLATE_APPLY(id, ...)               \
+    DOCTEST_TEST_CASE_TEMPLATE_INSTANTIATE_IMPL(                \
+        id, DOCTEST_ANONYMOUS(_DOCTEST_ANON_TMP_), __VA_ARGS__) \
     typedef int DOCTEST_ANONYMOUS(_DOCTEST_ANON_FOR_SEMICOLON_)
 
 #define DOCTEST_TEST_CASE_TEMPLATE_IMPL(dec, T, anon, ...)                     \
@@ -3011,8 +3010,8 @@ DOCTEST_TYPE_TO_STRING_IMPL(long int)
 DOCTEST_TYPE_TO_STRING_IMPL(unsigned long int)
 DOCTEST_TYPE_TO_STRING_IMPL(long long int)
 DOCTEST_TYPE_TO_STRING_IMPL(unsigned long long int)
-}
-} // namespace doctest::detail
+} // namespace detail
+} // namespace doctest
 
 #endif // DOCTEST_CONFIG_DISABLE
 
@@ -3126,43 +3125,43 @@ DOCTEST_MSVC_SUPPRESS_WARNING(26444) // Avoid unnamed objects with custom
 DOCTEST_MAKE_STD_HEADERS_CLEAN_FROM_WARNINGS_ON_WALL_BEGIN
 
 // required includes - will go only in one translation unit!
-#include <ctime>
-#include <cmath>
 #include <climits>
+#include <cmath>
+#include <ctime>
 // borland (Embarcadero) compiler requires math.h and not cmath -
 // https://github.com/onqtam/doctest/pull/37
 #ifdef __BORLANDC__
 #include <math.h>
 #endif // __BORLANDC__
-#include <new>
+#include <algorithm>
+#include <atomic>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <limits>
-#include <utility>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <algorithm>
-#include <iomanip>
-#include <vector>
-#include <atomic>
-#include <mutex>
-#include <set>
-#include <map>
 #include <exception>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <map>
+#include <mutex>
+#include <new>
+#include <set>
+#include <sstream>
 #include <stdexcept>
+#include <utility>
+#include <vector>
 #ifdef DOCTEST_CONFIG_POSIX_SIGNALS
 #include <csignal>
 #endif // DOCTEST_CONFIG_POSIX_SIGNALS
-#include <cfloat>
 #include <cctype>
+#include <cfloat>
 #include <cstdint>
 
 #ifdef DOCTEST_PLATFORM_MAC
+#include <sys/sysctl.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <sys/sysctl.h>
 #endif // DOCTEST_PLATFORM_MAC
 
 #ifdef DOCTEST_PLATFORM_WINDOWS
@@ -3982,35 +3981,19 @@ const ContextOptions* getContextOptions()
 #ifdef DOCTEST_CONFIG_DISABLE
 namespace doctest
 {
-Context::Context(int, const char* const*)
-{
-}
+Context::Context(int, const char* const*) {}
 Context::~Context() = default;
-void Context::applyCommandLine(int, const char* const*)
-{
-}
-void Context::addFilter(const char*, const char*)
-{
-}
-void Context::clearFilters()
-{
-}
-void Context::setOption(const char*, int)
-{
-}
-void Context::setOption(const char*, const char*)
-{
-}
+void Context::applyCommandLine(int, const char* const*) {}
+void Context::addFilter(const char*, const char*) {}
+void Context::clearFilters() {}
+void Context::setOption(const char*, int) {}
+void Context::setOption(const char*, const char*) {}
 bool Context::shouldExit()
 {
     return false;
 }
-void Context::setAsDefaultForAssertsOutOfTestCases()
-{
-}
-void Context::setAssertHandler(detail::assert_handler)
-{
-}
+void Context::setAsDefaultForAssertsOutOfTestCases() {}
+void Context::setAssertHandler(detail::assert_handler) {}
 int Context::run()
 {
     return 0;
@@ -4111,9 +4094,7 @@ bool checkIfShouldThrow(assertType::Enum at)
     throw TestFailureException();
 }
 #else  // DOCTEST_CONFIG_NO_EXCEPTIONS
-void throwException()
-{
-}
+void throwException() {}
 #endif // DOCTEST_CONFIG_NO_EXCEPTIONS
 } // namespace detail
 
@@ -4173,7 +4154,7 @@ int wildcmp(const char* str, const char* wild, bool caseSensitive)
 }
 
 //// C string hash function (djb2) - taken from
-///http://www.cse.yorku.ca/~oz/hash.html
+/// http://www.cse.yorku.ca/~oz/hash.html
 // unsigned hashStr(unsigned const char* str) {
 //    unsigned long hash = 5381;
 //    char          c;
@@ -4409,12 +4390,12 @@ int colors_init()
         g_attrsInitted = true;
         CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
         GetConsoleScreenBufferInfo(g_stdoutHandle, &csbiInfo);
-        g_origFgAttrs = csbiInfo.wAttributes &
-                        ~(BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_BLUE |
-                          BACKGROUND_INTENSITY);
-        g_origBgAttrs = csbiInfo.wAttributes &
-                        ~(FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE |
-                          FOREGROUND_INTENSITY);
+        g_origFgAttrs =
+            csbiInfo.wAttributes & ~(BACKGROUND_GREEN | BACKGROUND_RED |
+                                     BACKGROUND_BLUE | BACKGROUND_INTENSITY);
+        g_origBgAttrs =
+            csbiInfo.wAttributes & ~(FOREGROUND_GREEN | FOREGROUND_RED |
+                                     FOREGROUND_BLUE | FOREGROUND_INTENSITY);
     }
     return 0;
 }
@@ -4425,8 +4406,8 @@ int dumy_init_console_colors = colors_init();
 DOCTEST_CLANG_SUPPRESS_WARNING_WITH_PUSH("-Wdeprecated-declarations")
 void color_to_stream(std::ostream& s, Color::Enum code)
 {
-    ((void)s); // for DOCTEST_CONFIG_COLORS_NONE or
-               // DOCTEST_CONFIG_COLORS_WINDOWS
+    ((void)s);    // for DOCTEST_CONFIG_COLORS_NONE or
+                  // DOCTEST_CONFIG_COLORS_WINDOWS
     ((void)code); // for DOCTEST_CONFIG_COLORS_NONE
 #ifdef DOCTEST_CONFIG_COLORS_ANSI
     if (g_no_colors || (isatty(STDOUT_FILENO) == false &&
@@ -4833,6 +4814,7 @@ struct FatalConditionHandler
     }
 
     ~FatalConditionHandler() { reset(); }
+
 private:
     static bool isSet;
     static ULONG guaranteeSize;
@@ -4850,13 +4832,13 @@ struct SignalDefs
     int id;
     const char* name;
 };
-SignalDefs signalDefs[] = {
-    {SIGINT, "SIGINT - Terminal interrupt signal"},
-    {SIGILL, "SIGILL - Illegal instruction signal"},
-    {SIGFPE, "SIGFPE - Floating point error signal"},
-    {SIGSEGV, "SIGSEGV - Segmentation violation signal"},
-    {SIGTERM, "SIGTERM - Termination request signal"},
-    {SIGABRT, "SIGABRT - Abort (abnormal termination) signal"}};
+SignalDefs signalDefs[] = {{SIGINT, "SIGINT - Terminal interrupt signal"},
+                           {SIGILL, "SIGILL - Illegal instruction signal"},
+                           {SIGFPE, "SIGFPE - Floating point error signal"},
+                           {SIGSEGV, "SIGSEGV - Segmentation violation signal"},
+                           {SIGTERM, "SIGTERM - Termination request signal"},
+                           {SIGABRT,
+                            "SIGABRT - Abort (abnormal termination) signal"}};
 
 struct FatalConditionHandler
 {
@@ -5823,9 +5805,10 @@ struct ConsoleReporter : public IReporter
 
     void separator_to_stream()
     {
-        s << Color::Yellow << "================================================"
-                              "==============================="
-                              "\n";
+        s << Color::Yellow
+          << "================================================"
+             "==============================="
+             "\n";
     }
 
     const char* getSuccessOrFailString(bool success, assertType::Enum at,
@@ -5838,9 +5821,9 @@ struct ConsoleReporter : public IReporter
 
     Color::Enum getSuccessOrFailColor(bool success, assertType::Enum at)
     {
-        return success ? Color::BrightGreen : (at & assertType::is_warn)
-                                                  ? Color::Yellow
-                                                  : Color::Red;
+        return success
+                   ? Color::BrightGreen
+                   : (at & assertType::is_warn) ? Color::Yellow : Color::Red;
     }
 
     void successOrFailColoredStringToStream(bool success, assertType::Enum at,
@@ -6121,9 +6104,10 @@ struct ConsoleReporter : public IReporter
             p.numTestCasesFailed > 0 || p.numAssertsFailed > 0;
         s << Color::Cyan << "[doctest] " << Color::None
           << "test cases: " << std::setw(6) << p.numTestCasesPassingFilters
-          << " | " << ((p.numTestCasesPassingFilters == 0 || anythingFailed)
-                           ? Color::None
-                           : Color::Green)
+          << " | "
+          << ((p.numTestCasesPassingFilters == 0 || anythingFailed)
+                  ? Color::None
+                  : Color::Green)
           << std::setw(6) << p.numTestCasesPassingFilters - p.numTestCasesFailed
           << " passed" << Color::None << " | "
           << (p.numTestCasesFailed > 0 ? Color::Red : Color::None)
@@ -6218,8 +6202,9 @@ struct ConsoleReporter : public IReporter
         successOrFailColoredStringToStream(false, e.is_crash
                                                       ? assertType::is_require
                                                       : assertType::is_check);
-        s << Color::Red << (e.is_crash ? "test case CRASHED: "
-                                       : "test case THREW exception: ")
+        s << Color::Red
+          << (e.is_crash ? "test case CRASHED: "
+                         : "test case THREW exception: ")
           << Color::Cyan << e.error_string << "\n";
 
         int num_stringified_contexts = get_num_stringified_contexts();
@@ -7004,8 +6989,8 @@ int Context::run()
     // see these issues on the reasoning for this:
     // - https://github.com/onqtam/doctest/issues/143#issuecomment-414418903
     // - https://github.com/onqtam/doctest/issues/126
-    auto DOCTEST_FIX_FOR_MACOS_LIBCPP_IOSFWD_STRING_LINK_ERRORS = []()
-        DOCTEST_NOINLINE { std::cout << std::string(); };
+    auto DOCTEST_FIX_FOR_MACOS_LIBCPP_IOSFWD_STRING_LINK_ERRORS =
+        []() DOCTEST_NOINLINE { std::cout << std::string(); };
     DOCTEST_FIX_FOR_MACOS_LIBCPP_IOSFWD_STRING_LINK_ERRORS();
 
     return cleanup_and_return();
