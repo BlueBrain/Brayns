@@ -152,12 +152,13 @@ public:
     static void setup(NetworkContext& context)
     {
         auto& connections = context.getConnections();
-        connections.onConnect([&](const auto& handle)
-                              { onConnect(context, handle); });
-        connections.onDisconnect([&](const auto& handle)
-                                 { onDisconnect(context, handle); });
-        connections.onRequest([&](const auto& handle, const auto& packet)
-                              { onRequest(context, handle, packet); });
+        connections.onConnect(
+            [&](const auto& handle) { onConnect(context, handle); });
+        connections.onDisconnect(
+            [&](const auto& handle) { onDisconnect(context, handle); });
+        connections.onRequest([&](const auto& handle, const auto& packet) {
+            onRequest(context, handle, packet);
+        });
     }
 
 private:

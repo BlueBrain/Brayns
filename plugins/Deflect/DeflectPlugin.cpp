@@ -57,8 +57,7 @@ public:
                                                Execution::sync, "param",
                                                "Stream parameters"};
             ai->registerNotification(desc, _params.getPropertyMap(),
-                                     [&](const PropertyMap& prop)
-                                     {
+                                     [&](const PropertyMap& prop) {
                                          _params.getPropertyMap().merge(prop);
                                          _params.markModified();
                                          _engine.triggerRender();

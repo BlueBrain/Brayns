@@ -42,21 +42,21 @@ AddModelFromBlobTask::AddModelFromBlobTask(const BinaryParam& param,
     functor.setCancelToken(_cancelToken);
     functor.setProgressFunc(
         [&progress = progress, w = CHUNK_PROGRESS_WEIGHT](const auto& msg, auto,
-                                                          auto amount)
-        { progress.update(msg, w + (amount * (1.f - w))); });
+                                                          auto amount) {
+            progress.update(msg, w + (amount * (1.f - w)));
+        });
 
     // load data, return model descriptor or stop if blob receive was invalid
     _finishTasks.emplace_back(_errorEvent.get_task());
     _finishTasks.emplace_back(_chunkEvent.get_task().then(std::move(functor)));
-    _task = async::when_any(_finishTasks)
-                .then(
-                    [&engine](async::when_any_result<std::vector<
-                                  async::task<std::vector<ModelDescriptorPtr>>>>
-                                  results)
-                    {
-                        engine.triggerRender();
-                        return results.tasks[results.index].get();
-                    });
+    _task =
+        async::when_any(_finishTasks)
+            .then([&engine](async::when_any_result<std::vector<
+                                async::task<std::vector<ModelDescriptorPtr>>>>
+                                results) {
+                engine.triggerRender();
+                return results.tasks[results.index].get();
+            });
 }
 
 void AddModelFromBlobTask::appendBlob(const std::string& blob)

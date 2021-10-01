@@ -72,14 +72,12 @@ private:                                                               \
         NAME##Entry{_map, #NAME, DESCRIPTION};                         \
     brayns::MessageEntryRegisterer NAME##Registerer{                   \
         _toProp,                                                       \
-        [](void* ptr, brayns::PropertyMap& map)                        \
-        {                                                              \
+        [](void* ptr, brayns::PropertyMap& map) {                      \
             MsgType* msg = static_cast<MsgType*>(ptr);                 \
             map.update(#NAME, msg->NAME);                              \
         },                                                             \
         _fromProp,                                                     \
-        [](void* ptr, brayns::PropertyMap& map)                        \
-        {                                                              \
+        [](void* ptr, brayns::PropertyMap& map) {                      \
             MsgType* msg = static_cast<MsgType*>(ptr);                 \
             msg->NAME = map[#NAME].as<TYPE>();                         \
         }};

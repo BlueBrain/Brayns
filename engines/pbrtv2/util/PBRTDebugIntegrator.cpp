@@ -40,9 +40,9 @@ pbrt::Spectrum PBRTDebugVolumeIntegrator::Li(const pbrt::Scene *scene,
 {
     *T = _white;
     float t0, t1;
-    return scene->volumeRegion == nullptr                   ? _black
-           : scene->volumeRegion->IntersectP(ray, &t0, &t1) ? _red
-                                                            : _black;
+    return scene->volumeRegion == nullptr
+               ? _black
+               : scene->volumeRegion->IntersectP(ray, &t0, &t1) ? _red : _black;
 }
 
 pbrt::Spectrum PBRTDebugVolumeIntegrator::Transmittance(

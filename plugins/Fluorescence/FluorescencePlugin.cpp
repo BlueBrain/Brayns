@@ -122,22 +122,25 @@ void FluorescencePlugin::init()
                  "Adds a rectangle shaped sensor to the scene",
                  "AddRectangleSensorRequest",
                  "Parameters to define the rectangle sensor"},
-                [&](const AddRectangleSensorRequest& request)
-                { return _addRectangleSensor(request); });
+                [&](const AddRectangleSensorRequest& request) {
+                    return _addRectangleSensor(request);
+                });
 
         actionInterface->registerRequest<AddDiskSensorRequest, brayns::Message>(
             {"add-disk-sensor", "Adds a disk shaped sensor to the scene",
              "AddDiskSensorRequest", "Parameters to define the disk sensor"},
-            [&](const AddDiskSensorRequest& request)
-            { return _addDiskSensor(request); });
+            [&](const AddDiskSensorRequest& request) {
+                return _addDiskSensor(request);
+            });
 
         actionInterface->registerRequest<AddFluorescentVolume, brayns::Message>(
             {"add-fluorescent-volume",
              "Adds a constant density fluorescent volume to the scene",
              "AddFluorescentVolume",
              "Parameters to define the fluorescent volume"},
-            [&](const AddFluorescentVolume& request)
-            { return _addFluorescentVolume(request); });
+            [&](const AddFluorescentVolume& request) {
+                return _addFluorescentVolume(request);
+            });
 
         actionInterface
             ->registerRequest<AddFluorescentAnnotatedVolume, brayns::Message>(
@@ -145,8 +148,9 @@ void FluorescencePlugin::init()
                  "Adds an annotated fluorescent volume to the scene",
                  "AddFluorescentAnnotatedVolume",
                  "Parameters to define an annotated fluorescent volume"},
-                [&](const AddFluorescentAnnotatedVolume& request)
-                { return _addFluorescentAnnotatedVolume(request); });
+                [&](const AddFluorescentAnnotatedVolume& request) {
+                    return _addFluorescentAnnotatedVolume(request);
+                });
 
         actionInterface->registerRequest<AddFluorescentBinaryVolume,
                                          brayns::Message>(
@@ -154,8 +158,9 @@ void FluorescencePlugin::init()
              "Adds a constant density binary fluorescent volume to the scene",
              "AddFluorescentBinaryVolume",
              "Parameters to define a binary fluorescent volume"},
-            [&](const AddFluorescentBinaryVolume& request)
-            { return _addFluorescentBinaryVolume(request); });
+            [&](const AddFluorescentBinaryVolume& request) {
+                return _addFluorescentBinaryVolume(request);
+            });
 
         actionInterface->registerRequest<AddFluorescentGridFromFileVolume,
                                          brayns::Message>(
@@ -165,8 +170,9 @@ void FluorescencePlugin::init()
              "AddFluorescentGridFromFileVolume",
              "Parameters to define a fluorescent volume and the path to the "
              "density file"},
-            [&](const AddFluorescentGridFromFileVolume& request)
-            { return _addFluorescentGridVolumeFromFile(request); });
+            [&](const AddFluorescentGridFromFileVolume& request) {
+                return _addFluorescentGridVolumeFromFile(request);
+            });
 
         actionInterface
             ->registerRequest<AddFluorescentGridVolume, brayns::Message>(
@@ -177,8 +183,9 @@ void FluorescencePlugin::init()
                  "Parameters to define a fluorescent grid volume, and density "
                  "values and dimension of"
                  " the grid"},
-                [&](const AddFluorescentGridVolume& request)
-                { return _addFluorescentGridVolume(request); });
+                [&](const AddFluorescentGridVolume& request) {
+                    return _addFluorescentGridVolume(request);
+                });
 
         actionInterface
             ->registerRequest<AddFluorescentScatteringVolume, brayns::Message>(
@@ -187,8 +194,9 @@ void FluorescencePlugin::init()
                  "scene",
                  "AddFluorescentScatteringVolume",
                  "Parameters to define the fluorescent scattering volume"},
-                [&](const AddFluorescentScatteringVolume& request)
-                { return _addFluorescentScatteringVolume(request); });
+                [&](const AddFluorescentScatteringVolume& request) {
+                    return _addFluorescentScatteringVolume(request);
+                });
 
         actionInterface->registerRequest<AddFluorescentScatteringGridVolume,
                                          brayns::Message>(
@@ -198,8 +206,9 @@ void FluorescencePlugin::init()
              "Parameters to define a fluorescent scattering grid volume, and "
              "the density values"
              " and dimensions of the grid"},
-            [&](const AddFluorescentScatteringGridVolume& request)
-            { return _addFluorescentScatteringGridVolume(request); });
+            [&](const AddFluorescentScatteringGridVolume& request) {
+                return _addFluorescentScatteringGridVolume(request);
+            });
 
         actionInterface->registerRequest<
             AddFluorescentScatteringGridFromFileVolume, brayns::Message>(
@@ -211,8 +220,9 @@ void FluorescencePlugin::init()
              "Parameters to define the fluorescent scattering grid volume, and "
              "the path to the "
              "density file"},
-            [&](const AddFluorescentScatteringGridFromFileVolume& request)
-            { return _addFluorescentScatteringGridVolumeFromFile(request); });
+            [&](const AddFluorescentScatteringGridFromFileVolume& request) {
+                return _addFluorescentScatteringGridVolumeFromFile(request);
+            });
     }
 }
 

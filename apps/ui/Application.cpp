@@ -132,16 +132,14 @@ bool Application::init()
 
     auto& keyHandler = m_brayns.getKeyboardHandler();
     keyHandler.registerKeyboardShortcut(
-        'z', "Switch between depth and color buffers",
-        [&]()
-        {
+        'z', "Switch between depth and color buffers", [&]() {
             m_frameBufferMode = m_frameBufferMode == FrameBufferMode::DEPTH
                                     ? FrameBufferMode::COLOR
                                     : FrameBufferMode::DEPTH;
         });
-    keyHandler.registerKeyboardShortcut('h', "Toggle help window",
-                                        [&]()
-                                        { m_displayHelp = !m_displayHelp; });
+    keyHandler.registerKeyboardShortcut('h', "Toggle help window", [&]() {
+        m_displayHelp = !m_displayHelp;
+    });
 
     return true;
 }
@@ -353,39 +351,36 @@ void Application::render()
     // Launch a render if not running
     if (!m_renderFuture.valid())
     {
-        m_renderFuture =
-            std::async(std::launch::async,
-                       [&]
-                       {
-                           // Process mouse and keyboard events
-                           {
-                               std::unique_lock<std::mutex> lock(m_actionLock);
+        m_renderFuture = std::async(std::launch::async, [&] {
+            // Process mouse and keyboard events
+            {
+                std::unique_lock<std::mutex> lock(m_actionLock);
 
-                               for (const auto& action : m_actions)
-                               {
-                                   switch (action.type)
-                                   {
-                                   case EventType::Keyboard:
-                                       handleKey(action);
-                                       break;
-                                   case EventType::Cursor:
-                                       handleCursor(action);
-                                       break;
-                                   case EventType::MouseButton:
-                                       handleMouseButton(action);
-                                       break;
-                                   case EventType::Scroll:
-                                       handleScroll(action);
-                                       break;
-                                   }
-                               }
+                for (const auto& action : m_actions)
+                {
+                    switch (action.type)
+                    {
+                    case EventType::Keyboard:
+                        handleKey(action);
+                        break;
+                    case EventType::Cursor:
+                        handleCursor(action);
+                        break;
+                    case EventType::MouseButton:
+                        handleMouseButton(action);
+                        break;
+                    case EventType::Scroll:
+                        handleScroll(action);
+                        break;
+                    }
+                }
 
-                               m_actions.clear();
-                           }
+                m_actions.clear();
+            }
 
-                           m_brayns.commit();
-                           m_brayns.render();
-                       });
+            m_brayns.commit();
+            m_brayns.render();
+        });
     }
 
     const bool renderDone = m_renderFuture.wait_for(std::chrono::seconds(0)) ==
@@ -530,8 +525,7 @@ void Application::scrollCallback(double xoffset, double yoffset)
 
 void Application::handleKey(InputEvent action)
 {
-    const auto toKeyChar = [&](int key, bool shiftDown)
-    {
+    const auto toKeyChar = [&](int key, bool shiftDown) {
         constexpr auto KEY_A = 32;      // 'a'
         constexpr auto KEY_A_CAPS = 65; // 'A'
         constexpr auto KEY_Z_CAPS = 90; // 'Z'

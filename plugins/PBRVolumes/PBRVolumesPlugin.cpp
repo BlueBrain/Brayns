@@ -122,8 +122,9 @@ void PBRVolumesPlugin::init()
              "Adds a constant density volume to the scene",
              "AddHomogeneusVolume",
              "Parameters to define the homogeneus volume"},
-            [&](const AddHomogeneusVolume& request)
-            { return _addHomogeneusVolume(request); });
+            [&](const AddHomogeneusVolume& request) {
+                return _addHomogeneusVolume(request);
+            });
 
         actionInterface
             ->registerRequest<AddHomogeneusVolumeToModel, brayns::Message>(
@@ -133,8 +134,9 @@ void PBRVolumesPlugin::init()
                  "AddHomogeneusVolumeToModel",
                  "Parameters to define the homogeneus volume, and the model to "
                  "add it to"},
-                [&](const AddHomogeneusVolumeToModel& request)
-                { return _addHomogeneusVolumeToModel(request); });
+                [&](const AddHomogeneusVolumeToModel& request) {
+                    return _addHomogeneusVolumeToModel(request);
+                });
 
         actionInterface
             ->registerRequest<AddHeterogeneusVolume, brayns::Message>(
@@ -142,8 +144,9 @@ void PBRVolumesPlugin::init()
                  "Adds a non constant density volume to the scene",
                  "AddHeterogeneusVolume",
                  "Parameters to define the heterogeneus volume"},
-                [&](const AddHeterogeneusVolume& request)
-                { return _addHeterogeneusVolume(request); });
+                [&](const AddHeterogeneusVolume& request) {
+                    return _addHeterogeneusVolume(request);
+                });
 
         actionInterface->registerRequest<AddGridVolume, brayns::Message>(
             {"add-grid-volume",
@@ -151,8 +154,9 @@ void PBRVolumesPlugin::init()
              "its own density",
              "AddGridVolume",
              "Parameters to define the grid and the volume inside it"},
-            [&](const AddGridVolume& request)
-            { return _addGridVolume(request); });
+            [&](const AddGridVolume& request) {
+                return _addGridVolume(request);
+            });
     }
 }
 

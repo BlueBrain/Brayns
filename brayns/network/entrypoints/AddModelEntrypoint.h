@@ -44,8 +44,9 @@ public:
         auto& path = _params.getPath();
         _descriptors =
             scene.loadModels(path, _params,
-                             {[this](const auto& operation, auto amount)
-                              { progress(operation, amount); }});
+                             {[this](const auto& operation, auto amount) {
+                                 progress(operation, amount);
+                             }});
     }
 
     virtual void onStart() override

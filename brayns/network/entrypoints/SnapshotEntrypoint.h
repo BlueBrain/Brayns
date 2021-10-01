@@ -37,8 +37,9 @@ public:
         : _functor(engine, std::move(params), imageGenerator)
     {
         _functor.setProgressFunc(
-            [this](std::string operation, float, float amount)
-            { progress(operation, amount); });
+            [this](std::string operation, float, float amount) {
+                progress(operation, amount);
+            });
     }
 
     virtual void run() override { _image = _functor(); }

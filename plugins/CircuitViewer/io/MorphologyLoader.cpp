@@ -216,29 +216,29 @@ void _addSDFSample(SDFData& sdfData, const brain::neuron::Section section,
     }
 
     const auto connectGeometriesToBifurcation =
-        [&sdfData](const std::vector<size_t>& geometries, size_t bifurcationId)
-    {
-        const auto& bifGeom = sdfData.geometries[bifurcationId];
+        [&sdfData](const std::vector<size_t>& geometries,
+                   size_t bifurcationId) {
+            const auto& bifGeom = sdfData.geometries[bifurcationId];
 
-        for (size_t geomIdx : geometries)
-        {
-            // Do not blend yourself
-            if (geomIdx == bifurcationId)
-                continue;
-
-            const auto& geom = sdfData.geometries[geomIdx];
-            const float dist0 = glm::distance2(geom.p0, bifGeom.p0);
-            const float dist1 = glm::distance2(geom.p1, bifGeom.p0);
-            const float radiusSum = geom.r0 + bifGeom.r0;
-            const float radiusSumSq = radiusSum * radiusSum;
-
-            if (dist0 < radiusSumSq || dist1 < radiusSumSq)
+            for (size_t geomIdx : geometries)
             {
-                sdfData.neighbours[bifurcationId].insert(geomIdx);
-                sdfData.neighbours[geomIdx].insert(bifurcationId);
+                // Do not blend yourself
+                if (geomIdx == bifurcationId)
+                    continue;
+
+                const auto& geom = sdfData.geometries[geomIdx];
+                const float dist0 = glm::distance2(geom.p0, bifGeom.p0);
+                const float dist1 = glm::distance2(geom.p1, bifGeom.p0);
+                const float radiusSum = geom.r0 + bifGeom.r0;
+                const float radiusSumSq = radiusSum * radiusSum;
+
+                if (dist0 < radiusSumSq || dist1 < radiusSumSq)
+                {
+                    sdfData.neighbours[bifurcationId].insert(geomIdx);
+                    sdfData.neighbours[geomIdx].insert(bifurcationId);
+                }
             }
-        }
-    };
+        };
 
     if (isLast)
     {
@@ -337,13 +337,13 @@ void _createMaterials(Model& model, NeuronColorScheme scheme, size_t index)
 
 MorphologyLoaderParams::MorphologyLoaderParams(const PropertyMap& properties)
 {
-    const auto setVariable =
-        [&](auto& variable, const std::string& name, const auto defaultVal)
-    { variable = properties.valueOr(name, defaultVal); };
+    const auto setVariable = [&](auto& variable, const std::string& name,
+                                 const auto defaultVal) {
+        variable = properties.valueOr(name, defaultVal);
+    };
 
-    const auto setEnumVariable =
-        [&](auto& variable, const std::string& name, auto defaultVal)
-    {
+    const auto setEnumVariable = [&](auto& variable, const std::string& name,
+                                     auto defaultVal) {
         using T = decltype(defaultVal);
         const auto enumStr =
             properties.valueOr(name, enumToString<T>(defaultVal));
@@ -375,9 +375,8 @@ public:
     ModelData processMorphology(const brain::neuron::Morphology& morphology,
                                 const uint64_t index) const
     {
-        auto materialFunc =
-            [colorScheme = _params.colorScheme, index](auto sectionType)
-        {
+        auto materialFunc = [colorScheme = _params.colorScheme,
+                             index](auto sectionType) {
             size_t materialId = 0;
             switch (colorScheme)
             {

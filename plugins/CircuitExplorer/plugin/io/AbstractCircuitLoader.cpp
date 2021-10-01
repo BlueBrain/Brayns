@@ -72,9 +72,8 @@ std::vector<std::string> AbstractCircuitLoader::getSupportedExtensions() const
 bool AbstractCircuitLoader::isSupported(const std::string &filename,
                                         const std::string & /*extension*/) const
 {
-    const auto ends_with =
-        [](const std::string &value, const std::string &ending)
-    {
+    const auto ends_with = [](const std::string &value,
+                              const std::string &ending) {
         if (ending.size() > value.size())
             return false;
         return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
@@ -84,9 +83,8 @@ bool AbstractCircuitLoader::isSupported(const std::string &filename,
         if (ends_with(filename, name))
             return true;
 
-    const auto contains =
-        [](const std::string &value, const std::string &keyword)
-    {
+    const auto contains = [](const std::string &value,
+                             const std::string &keyword) {
         if (value.size() < keyword.size())
             return false;
 
@@ -530,8 +528,9 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuitFromBlueConfig(
 
     // Clean the circuit mapper associated with this model
     modelDescriptor->onRemoved(
-        [plptr = _pluginPtr](const brayns::ModelDescriptor &remMod)
-        { plptr->releaseCircuitMapper(remMod.getModelID()); });
+        [plptr = _pluginPtr](const brayns::ModelDescriptor &remMod) {
+            plptr->releaseCircuitMapper(remMod.getModelID());
+        });
 
     objMapper.setSourceModel(modelDescriptor);
     objMapper.onCircuitColorFinish(colorScheme, morphologyScheme);
@@ -920,15 +919,14 @@ float AbstractCircuitLoader::_importMorphologies(
     // the morphology map
     const auto func =
         [](std::unordered_map<size_t, std::vector<size_t>> &storage, size_t mid,
-           size_t start, size_t end)
-    {
-        if (end > start)
-        {
-            auto &storageVector = storage[mid];
-            for (size_t i = start; i < end; ++i)
-                storageVector.push_back(i);
-        }
-    };
+           size_t start, size_t end) {
+            if (end > start)
+            {
+                auto &storageVector = storage[mid];
+                for (size_t i = start; i < end; ++i)
+                    storageVector.push_back(i);
+            }
+        };
 
     size_t i = 0;
     for (auto gid : gids)

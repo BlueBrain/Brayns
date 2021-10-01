@@ -128,8 +128,7 @@ public:
 private:
     static void add(const Property& property, JsonSchema& schema)
     {
-        auto functor = [&](const auto& value)
-        {
+        auto functor = [&](const auto& value) {
             auto& name = property.getName();
             auto& properties = schema.properties;
             properties[name] = getSchema(property, value);
@@ -177,8 +176,9 @@ private:
     static bool _serialize(const Property& property, JsonValue& json)
     {
         bool success = false;
-        auto functor = [&](const auto& value)
-        { success = Json::serialize(value, json); };
+        auto functor = [&](const auto& value) {
+            success = Json::serialize(value, json);
+        };
         PropertyVisitor::visit(property, functor);
         return success;
     }
@@ -305,8 +305,9 @@ public:
     static bool update(Property& property, const JsonValue& json)
     {
         bool success = false;
-        auto functor = [&](auto& value)
-        { success = Json::deserialize(json, value); };
+        auto functor = [&](auto& value) {
+            success = Json::deserialize(json, value);
+        };
         PropertyVisitor::visit(property, functor);
         return success;
     }

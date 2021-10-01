@@ -53,8 +53,7 @@ OSPRayModel::OSPRayModel(AnimationParameters& animationParameters,
 
 OSPRayModel::~OSPRayModel()
 {
-    const auto releaseAndClearGeometry = [](auto& geometryMap)
-    {
+    const auto releaseAndClearGeometry = [](auto& geometryMap) {
         for (auto geom : geometryMap)
             ospRelease(geom.second);
         geometryMap.clear();

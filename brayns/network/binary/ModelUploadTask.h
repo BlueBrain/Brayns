@@ -112,8 +112,9 @@ public:
         auto& scene = _engine->getScene();
         _descriptors =
             scene.loadModels(std::move(_blob), _params,
-                             {[this](const auto& operation, auto amount)
-                              { _loadingProgress(operation, amount); }});
+                             {[this](const auto& operation, auto amount) {
+                                 _loadingProgress(operation, amount);
+                             }});
     }
 
     /**

@@ -63,20 +63,18 @@ public:
                                 const ConnectionListener& listener)
     {
         RequestBuffer buffer(connections.getConnectionCount());
-        connections.removeIf(
-            [&](const auto& handle, auto& connection)
+        connections.removeIf([&](const auto& handle, auto& connection) {
+            if (_tryDisconnect(handle, connection, listener))
             {
-                if (_tryDisconnect(handle, connection, listener))
-                {
-                    return true;
-                }
-                if (_tryConnect(handle, connection, listener))
-                {
-                    connection.added = false;
-                }
-                buffer.extract(handle, connection);
-                return false;
-            });
+                return true;
+            }
+            if (_tryConnect(handle, connection, listener))
+            {
+                connection.added = false;
+            }
+            buffer.extract(handle, connection);
+            return false;
+        });
         return buffer;
     }
 
@@ -167,28 +165,24 @@ void ConnectionManager::send(const ConnectionHandle& handle,
 void ConnectionManager::broadcast(const OutputPacket& packet)
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    _connections.forEach(
-        [&](const auto& handle, const auto& connection)
-        {
-            auto& socket = connection.socket;
-            socket->send(packet);
-        });
+    _connections.forEach([&](const auto& handle, const auto& connection) {
+        auto& socket = connection.socket;
+        socket->send(packet);
+    });
 }
 
 void ConnectionManager::broadcast(const ConnectionHandle& source,
                                   const OutputPacket& packet)
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    _connections.forEach(
-        [&](const auto& handle, const auto& connection)
+    _connections.forEach([&](const auto& handle, const auto& connection) {
+        if (handle == source)
         {
-            if (handle == source)
-            {
-                return;
-            }
-            auto& socket = connection.socket;
-            socket->send(packet);
-        });
+            return;
+        }
+        auto& socket = connection.socket;
+        socket->send(packet);
+    });
 }
 
 void ConnectionManager::update()
@@ -202,18 +196,17 @@ void ConnectionManager::update()
     {
         return;
     }
-    buffer.forEach([this](const auto& handle, const auto& packet)
-                   { _listener.onRequest(handle, packet); });
+    buffer.forEach([this](const auto& handle, const auto& packet) {
+        _listener.onRequest(handle, packet);
+    });
 }
 
 void ConnectionManager::closeAll()
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    _connections.forEach(
-        [](auto& handle, auto& connection)
-        {
-            auto& socket = connection.socket;
-            socket->close();
-        });
+    _connections.forEach([](auto& handle, auto& connection) {
+        auto& socket = connection.socket;
+        socket->close();
+    });
 }
 } // namespace brayns

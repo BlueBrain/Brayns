@@ -88,8 +88,7 @@ void LoadModelFunctor::_updateProgress(const std::string& message,
 
 std::function<void(std::string, float)> LoadModelFunctor::_getProgressFunc()
 {
-    return [this](const std::string& msg, const float progress)
-    {
+    return [this](const std::string& msg, const float progress) {
         cancelCheck();
         const size_t newProgress = progress * TOTAL_PROGRESS;
         if (newProgress == 0 || newProgress % size_t(TOTAL_PROGRESS) > _nextTic)

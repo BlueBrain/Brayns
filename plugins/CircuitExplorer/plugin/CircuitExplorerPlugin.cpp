@@ -356,8 +356,9 @@ void CircuitExplorerPlugin::releaseCircuitMapper(const size_t modelId)
     _mappers.erase(
         std::remove_if(_mappers.begin(), _mappers.end(),
                        [mid = modelId](
-                           const std::unique_ptr<CellObjectMapper>& mapper)
-                       { return mapper->getSourceModelId() == mid; }),
+                           const std::unique_ptr<CellObjectMapper>& mapper) {
+                           return mapper->getSourceModelId() == mid;
+                       }),
         _mappers.end());
 }
 

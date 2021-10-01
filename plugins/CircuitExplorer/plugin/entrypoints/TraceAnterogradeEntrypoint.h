@@ -65,30 +65,29 @@ public:
         // Cell GID -> Material ID
         auto getMaterialIds =
             [](const std::vector<uint32_t>& src,
-               const std::unordered_map<size_t, MorphologyMap>& m)
-        {
-            std::unordered_set<int32_t> buffer;
-            for (const auto& cellId : src)
-            {
-                auto morphologyMapIt = m.find(cellId);
-                if (morphologyMapIt != m.end())
+               const std::unordered_map<size_t, MorphologyMap>& m) {
+                std::unordered_set<int32_t> buffer;
+                for (const auto& cellId : src)
                 {
-                    const auto& morphologyMap = morphologyMapIt->second;
-                    if (morphologyMap._hasMesh)
-                        buffer.insert(
-                            static_cast<int32_t>(morphologyMap._triangleIndx));
-                    for (const auto& kvp : morphologyMap._coneMap)
-                        buffer.insert(static_cast<int32_t>(kvp.first));
-                    for (const auto& kvp : morphologyMap._sphereMap)
-                        buffer.insert(static_cast<int32_t>(kvp.first));
-                    for (const auto& kvp : morphologyMap._cylinderMap)
-                        buffer.insert(static_cast<int32_t>(kvp.first));
-                    for (const auto& kvp : morphologyMap._sdfGeometryMap)
-                        buffer.insert(static_cast<int32_t>(kvp.first));
+                    auto morphologyMapIt = m.find(cellId);
+                    if (morphologyMapIt != m.end())
+                    {
+                        const auto& morphologyMap = morphologyMapIt->second;
+                        if (morphologyMap._hasMesh)
+                            buffer.insert(static_cast<int32_t>(
+                                morphologyMap._triangleIndx));
+                        for (const auto& kvp : morphologyMap._coneMap)
+                            buffer.insert(static_cast<int32_t>(kvp.first));
+                        for (const auto& kvp : morphologyMap._sphereMap)
+                            buffer.insert(static_cast<int32_t>(kvp.first));
+                        for (const auto& kvp : morphologyMap._cylinderMap)
+                            buffer.insert(static_cast<int32_t>(kvp.first));
+                        for (const auto& kvp : morphologyMap._sdfGeometryMap)
+                            buffer.insert(static_cast<int32_t>(kvp.first));
+                    }
                 }
-            }
-            return buffer;
-        };
+                return buffer;
+            };
 
         // Gather material ids for the source and target cells
         auto sourceCellMaterialIds =

@@ -115,9 +115,10 @@ public:
     {
         AnyConverter converter;
         converter._conversion = {typeid(From), typeid(To)};
-        converter._functor =
-            [functor = std::move(functor)](const Any& from, Any& to)
-        { functor(from.as<From>(), to.as<To>()); };
+        converter._functor = [functor = std::move(functor)](const Any& from,
+                                                            Any& to) {
+            functor(from.as<From>(), to.as<To>());
+        };
         return converter;
     }
 
@@ -132,8 +133,9 @@ public:
     template <typename From, typename To>
     static AnyConverter create()
     {
-        return create<From, To>([](const auto& from, auto& to)
-                                { Converter<From, To>::convert(from, to); });
+        return create<From, To>([](const auto& from, auto& to) {
+            Converter<From, To>::convert(from, to);
+        });
     }
 
     /**

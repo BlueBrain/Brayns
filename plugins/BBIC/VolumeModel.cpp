@@ -152,9 +152,8 @@ void VolumeModel::_startUploadThread()
     if (toUpload_.empty())
         return;
 
-    _uploadThread = std::thread(
-        [this, volume = _activeVolume, lod = _lod, &toUpload_]
-        {
+    _uploadThread =
+        std::thread([this, volume = _activeVolume, lod = _lod, &toUpload_] {
             while (_keepUploading && !toUpload_.empty())
             {
                 const auto block = toUpload_.back();

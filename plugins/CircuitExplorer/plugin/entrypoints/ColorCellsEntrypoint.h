@@ -65,8 +65,7 @@ public:
         // Helper to apply color to material
         auto setMaterialColor = [](brayns::ModelDescriptor& model,
                                    size_t materialId,
-                                   const brayns::Vector3d& color)
-        {
+                                   const brayns::Vector3d& color) {
             auto material = model.getModel().getMaterial(materialId);
             if (!material)
             {

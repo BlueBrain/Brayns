@@ -63,8 +63,9 @@ bool SwapRedBlue32(FIBITMAP* freeImage)
 std::string getBase64Image(ImagePtr image, const std::string& format,
                            const int quality)
 {
-    FreeImage_SetOutputMessage([](FREE_IMAGE_FORMAT, const char* message)
-                               { throw std::runtime_error(message); });
+    FreeImage_SetOutputMessage([](FREE_IMAGE_FORMAT, const char* message) {
+        throw std::runtime_error(message);
+    });
 
     auto fif =
         format == "jpg" ? FIF_JPEG : FreeImage_GetFIFFromFormat(format.c_str());
@@ -98,8 +99,9 @@ ImagePtr mergeImages(const std::vector<ImagePtr>& images)
         bbp = FreeImage_GetBPP(image.get());
     }
 
-    FreeImage_SetOutputMessage([](FREE_IMAGE_FORMAT, const char* message)
-                               { throw std::runtime_error(message); });
+    FreeImage_SetOutputMessage([](FREE_IMAGE_FORMAT, const char* message) {
+        throw std::runtime_error(message);
+    });
 
     ImagePtr mergedImage{FreeImage_Allocate(width, height, bbp)};
     int offset = 0;

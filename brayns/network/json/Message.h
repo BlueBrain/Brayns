@@ -252,35 +252,27 @@ private:
  *
  */
 #define BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, ...)                              \
-    TYPE NAME = []                                                            \
-    {                                                                         \
+    TYPE NAME = [] {                                                          \
         using namespace brayns;                                               \
         static std::once_flag _flag;                                          \
-        std::call_once(                                                       \
-            _flag,                                                            \
-            []                                                                \
-            {                                                                 \
-                MessageProperty _property;                                    \
-                _property.name = #NAME;                                       \
-                _property.options = {__VA_ARGS__};                            \
-                _property.getSchema = [](const void* _data)                   \
-                {                                                             \
-                    auto& _message = *static_cast<const MessageType*>(_data); \
-                    return Json::getSchema(_message.NAME);                    \
-                };                                                            \
-                _property.serialize = [](const void* _data, JsonValue& _json) \
-                {                                                             \
-                    auto& _message = *static_cast<const MessageType*>(_data); \
-                    return Json::serialize(_message.NAME, _json);             \
-                };                                                            \
-                _property.deserialize =                                       \
-                    [](const JsonValue& _json, void* _data)                   \
-                {                                                             \
-                    auto& _message = *static_cast<MessageType*>(_data);       \
-                    return Json::deserialize(_json, _message.NAME);           \
-                };                                                            \
-                _getInfo().addProperty(std::move(_property));                 \
-            });                                                               \
+        std::call_once(_flag, [] {                                            \
+            MessageProperty _property;                                        \
+            _property.name = #NAME;                                           \
+            _property.options = {__VA_ARGS__};                                \
+            _property.getSchema = [](const void* _data) {                     \
+                auto& _message = *static_cast<const MessageType*>(_data);     \
+                return Json::getSchema(_message.NAME);                        \
+            };                                                                \
+            _property.serialize = [](const void* _data, JsonValue& _json) {   \
+                auto& _message = *static_cast<const MessageType*>(_data);     \
+                return Json::serialize(_message.NAME, _json);                 \
+            };                                                                \
+            _property.deserialize = [](const JsonValue& _json, void* _data) { \
+                auto& _message = *static_cast<MessageType*>(_data);           \
+                return Json::deserialize(_json, _message.NAME);               \
+            };                                                                \
+            _getInfo().addProperty(std::move(_property));                     \
+        });                                                                   \
         return TYPE{};                                                        \
     }();
 

@@ -83,8 +83,7 @@ void CircuitViewer::init()
     // This code should eventually go away. A more verbose alternative to
     // the harcoded label is to move the PropertyMap to struct parsing code
     // out of the circuit and morphology loader implementations.
-    const auto addGeometryQuality = [&params](PropertyMap& map)
-    {
+    const auto addGeometryQuality = [&params](PropertyMap& map) {
         map.add(
             {"geometryQuality",
              {enumToString(params.getGeometryParameters().getGeometryQuality()),

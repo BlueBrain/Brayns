@@ -399,8 +399,9 @@ public:
     int getIndex(const std::string& name) const
     {
         auto i = std::find_if(_properties.begin(), _properties.end(),
-                              [&](auto& property)
-                              { return property.getName() == name; });
+                              [&](auto& property) {
+                                  return property.getName() == name;
+                              });
         return i == _properties.end() ? -1 : int(i - _properties.begin());
     }
 

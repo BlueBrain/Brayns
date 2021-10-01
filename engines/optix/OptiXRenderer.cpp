@@ -159,22 +159,20 @@ void OptiXRenderer::commit()
         const auto renderProgram = OptiXContext::get().getRenderer(
             _renderingParameters.getCurrentRenderer());
 
-        _scene->visitModels(
-            [&](Model& model)
+        _scene->visitModels([&](Model& model) {
+            for (const auto& kv : model.getMaterials())
             {
-                for (const auto& kv : model.getMaterials())
-                {
-                    auto optixMaterial =
-                        dynamic_cast<OptiXMaterial*>(kv.second.get());
-                    const bool textured = optixMaterial->isTextured();
+                auto optixMaterial =
+                    dynamic_cast<OptiXMaterial*>(kv.second.get());
+                const bool textured = optixMaterial->isTextured();
 
-                    optixMaterial->getOptixMaterial()->setClosestHitProgram(
-                        0, textured ? renderProgram->closest_hit_textured
-                                    : renderProgram->closest_hit);
-                    optixMaterial->getOptixMaterial()->setAnyHitProgram(
-                        1, renderProgram->any_hit);
-                }
-            });
+                optixMaterial->getOptixMaterial()->setClosestHitProgram(
+                    0, textured ? renderProgram->closest_hit_textured
+                                : renderProgram->closest_hit);
+                optixMaterial->getOptixMaterial()->setAnyHitProgram(
+                    1, renderProgram->any_hit);
+            }
+        });
     }
 
     // Upload common properties
