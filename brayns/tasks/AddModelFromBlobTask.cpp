@@ -41,8 +41,8 @@ AddModelFromBlobTask::AddModelFromBlobTask(const BinaryParam& param,
     LoadModelFunctor functor{engine, param};
     functor.setCancelToken(_cancelToken);
     functor.setProgressFunc(
-        [&progress = progress, w = CHUNK_PROGRESS_WEIGHT](const auto& msg, auto,
-                                                          auto amount) {
+        [& progress = progress, w = CHUNK_PROGRESS_WEIGHT](const auto& msg,
+                                                           auto, auto amount) {
             progress.update(msg, w + (amount * (1.f - w)));
         });
 
