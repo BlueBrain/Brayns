@@ -295,8 +295,7 @@ class PropertyInstance
 public:
     //! Default constructor
     PropertyInstance() {}
-    union ValueUnion
-    {
+    union ValueUnion {
         //! uInt32 representation of the property. All
         // uint types are automatically converted to uint32
         uint32_t iUInt;
