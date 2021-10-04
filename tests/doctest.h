@@ -525,7 +525,8 @@ class DOCTEST_INTERFACE String
         unsigned capacity;
     };
 
-    union {
+    union
+    {
         char buf[len];
         view data;
     };
