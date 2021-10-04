@@ -177,41 +177,43 @@ namespace brayns
  * @brief Register a property that can only be get.
  *
  */
-#define BRAYNS_ADAPTER_GET(NAME, GET, DESCRIPTION, ...)                    \
-    BRAYNS_ADAPTER_PROPERTY(                                               \
-        NAME, BRAYNS_ADAPTER_SCHEMA(GET), BRAYNS_ADAPTER_TOJSON(GET),      \
-        [](const auto&, auto&) { return true; }, Description(DESCRIPTION), \
-        ReadOnly(), __VA_ARGS__)
+#define BRAYNS_ADAPTER_GET(NAME, GET, DESCRIPTION, ...)              \
+    BRAYNS_ADAPTER_PROPERTY(NAME, BRAYNS_ADAPTER_SCHEMA(GET),        \
+                            BRAYNS_ADAPTER_TOJSON(GET),              \
+                            [](const auto&, auto&) { return true; }, \
+                            Description(DESCRIPTION), ReadOnly(), __VA_ARGS__)
 
 /**
  * @brief Register a property that can only be set.
  *
  */
 #define BRAYNS_ADAPTER_SET(NAME, SET, DESCRIPTION, ...)                        \
-    BRAYNS_ADAPTER_PROPERTY(                                                   \
-        NAME,                                                                  \
-        [](const auto& object) {                                               \
-            using T = BRAYNS_ADAPTER_ARGTYPE(object, SET);                     \
-            return Json::getSchema<T>();                                       \
-        },                                                                     \
-        [](const auto&, auto&) { return true; }, BRAYNS_ADAPTER_FROMJSON(SET), \
-        Description(DESCRIPTION), WriteOnly(), __VA_ARGS__)
+    BRAYNS_ADAPTER_PROPERTY(NAME,                                              \
+                            [](const auto& object) {                           \
+                                using T = BRAYNS_ADAPTER_ARGTYPE(object, SET); \
+                                return Json::getSchema<T>();                   \
+                            },                                                 \
+                            [](const auto&, auto&) { return true; },           \
+                            BRAYNS_ADAPTER_FROMJSON(SET),                      \
+                            Description(DESCRIPTION), WriteOnly(),             \
+                            __VA_ARGS__)
 
 /**
  * @brief Register a public property.
  *
  */
-#define BRAYNS_ADAPTER_FIELD(NAME, FIELD, ...)                            \
-    BRAYNS_ADAPTER_PROPERTY(                                              \
-        NAME,                                                             \
-        [](const auto& object) { return Json::getSchema(object.FIELD); }, \
-        [](const auto& object, auto& json) {                              \
-            return Json::serialize(object.FIELD, json);                   \
-        },                                                                \
-        [](const auto& json, auto& object) {                              \
-            return Json::deserialize(json, object.FIELD);                 \
-        },                                                                \
-        __VA_ARGS__)
+#define BRAYNS_ADAPTER_FIELD(NAME, FIELD, ...)                                \
+    BRAYNS_ADAPTER_PROPERTY(NAME,                                             \
+                            [](const auto& object) {                          \
+                                return Json::getSchema(object.FIELD);         \
+                            },                                                \
+                            [](const auto& object, auto& json) {              \
+                                return Json::serialize(object.FIELD, json);   \
+                            },                                                \
+                            [](const auto& json, auto& object) {              \
+                                return Json::deserialize(json, object.FIELD); \
+                            },                                                \
+                            __VA_ARGS__)
 
 /**
  * @brief Register a public mandatory property with custom name and description.
