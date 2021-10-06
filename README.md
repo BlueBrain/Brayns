@@ -202,7 +202,7 @@ The development of this software was supported by funding to the Blue Brain Proj
 
 ## License
 
-Brayns is licensed under the LGPL, unless noted otherwise, e.g., for external dependencies. See file LGPL.txt for the full license.
+Brayns is licensed under the LGPL, unless noted otherwise, e.g., for external dependencies. See file LICENSE.txt for the full license.
 
 Copyright (c) 2008-2021 Blue Brain Project/EPFL
 
