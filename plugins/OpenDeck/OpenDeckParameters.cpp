@@ -19,7 +19,7 @@
 
 #include "OpenDeckParameters.h"
 
-#include <boost/program_options.hpp>
+#include <sstream>
 
 #include <brayns/common/log.h>
 
@@ -39,33 +39,33 @@ OpenDeckParameters::OpenDeckParameters()
 
 bool OpenDeckParameters::parse(int argc, const char** argv)
 {
-    namespace po = boost::program_options;
-
-    try
+    if (argc > 1)
     {
-        po::variables_map properties;
-
-        po::store(po::command_line_parser(argc, argv).run(), properties);
-        po::notify(properties);
-
-        auto i = properties.find(PARAM_RESOLUTION_SCALING);
-        if (i != properties.end())
+        auto token = argv[1];
+        std::istringstream stream(token);
+        double resolutionScaling;
+        stream >> resolutionScaling;
+        if (stream.fail())
         {
-            setResolutionScaling(i->second.as<double>());
+            BRAYNS_ERROR << 'Failed to parse resolution scaling: ' << token
+                         << '\n';
+            return false;
         }
-
-        i = properties.find(PARAM_CAMERA_SCALING);
-        if (i != properties.end())
-        {
-            setCameraScaling(i->second.as<double>());
-        }
+        setResolutionScaling(resolutionScaling);
     }
-    catch (const std::exception& e)
+
+    if (argc > 2)
     {
-        BRAYNS_ERROR << "Failed to parse commandline for "
-                     << std::quoted(_props.getName()) << ": " << e.what()
-                     << '\n';
-        return false;
+        auto token = argv[2];
+        std::istringstream stream(token);
+        double cameraScaling;
+        stream >> cameraScaling;
+        if (stream.fail())
+        {
+            BRAYNS_ERROR << 'Failed to parse camera scaling: ' << token << '\n';
+            return false;
+        }
+        setCameraScaling(cameraScaling);
     }
 
     return true;
