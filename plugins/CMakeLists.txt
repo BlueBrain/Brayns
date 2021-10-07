@@ -6,12 +6,12 @@
 
 option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" OFF)
 if(BRAYNS_DEFLECT_ENABLED)
-  add_subdirectory(Deflect)
+  #add_subdirectory(Deflect)
 endif()
 
 option(BRAYNS_MULTIVIEW_ENABLED "Activate Multiview camera plugin" OFF)
 if(BRAYNS_MULTIVIEW_ENABLED)
-  add_subdirectory(Multiview)
+  #add_subdirectory(Multiview)
 endif()
 
 option(BRAYNS_OPENDECK_ENABLED "Activate OpenDeck plugin" OFF)
@@ -26,7 +26,7 @@ endif()
 
 option(BRAYNS_CIRCUITVIEWER_ENABLED "Activate CircuitViewer plugin" OFF)
 if (BRAYNS_CIRCUITVIEWER_ENABLED)
-  add_subdirectory(CircuitViewer)
+  #add_subdirectory(CircuitViewer)
 endif()
 
 option(BRAYNS_CIRCUITEXPLORER_ENABLED "Activate CircuitExplorer plugin" OFF)
@@ -41,7 +41,7 @@ endif()
 
 option(BRAYNS_BBIC_ENABLED "Activate BBIC Volume plugin" OFF)
 if(BRAYNS_BBIC_ENABLED)
-  add_subdirectory(BBIC)
+  #add_subdirectory(BBIC)
 endif()
 
 option(BRAYNS_CIRCUITINFO_ENABLED "Activate CircuitInfo plugin" OFF)
@@ -51,15 +51,15 @@ endif()
 
 option(BRAYNS_CIRCUITRENDERER_ENABLED "Activate CircuitRenderer plugin" OFF)
 if(BRAYNS_CIRCUITRENDERER_ENABLED)
-    add_subdirectory(CircuitRenderer)
+    #add_subdirectory(CircuitRenderer)
 endif()
 
 if(BRAYNS_PBRTV2_ENABLED)
-    add_subdirectory(Fluorescence)
+    #add_subdirectory(Fluorescence)
 endif()
 
 if(BRAYNS_PBRT_ENABLED OR BRAYNS_PBRTV2_ENABLED)
-    add_subdirectory(PBRVolumes)
+    #add_subdirectory(PBRVolumes)
 endif()
 
 add_subdirectory(Example)
