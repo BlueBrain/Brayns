@@ -32,6 +32,8 @@ class OpenDeckParameters : public BaseObject
 public:
     OpenDeckParameters();
 
+    bool parse(int argc, const char** argv);
+
     double getResolutionScaling() const
     {
         return _props[PARAM_RESOLUTION_SCALING].as<double>();

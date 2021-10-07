@@ -35,11 +35,12 @@ const std::string DEFAULT_VRPN_NAME = "DTrack@cave1";
 const std::string HEAD_POSITION_PROP = "headPosition";
 const std::string HEAD_ROTATION_PROP = "headRotation";
 
-constexpr Vector3d to_array_3d(const vrpn_float64* pos)
+Vector3d to_array_3d(const vrpn_float64* pos)
 {
     return {pos[0], pos[1], pos[2]};
 }
-constexpr Vector4d to_array_4d(const vrpn_float64* quat)
+
+Vector4d to_array_4d(const vrpn_float64* quat)
 {
     return {quat[0], quat[1], quat[2], quat[3]};
 }

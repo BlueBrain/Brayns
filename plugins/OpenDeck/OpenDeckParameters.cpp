@@ -19,17 +19,55 @@
 
 #include "OpenDeckParameters.h"
 
+#include <boost/program_options.hpp>
+
+#include <brayns/common/log.h>
+
 namespace brayns
 {
 OpenDeckParameters::OpenDeckParameters()
     : _props("OpenDeck plugin parameters")
 {
-    _props.setProperty(
-        {PARAM_RESOLUTION_SCALING, 1.0,
-         Property::MetaData{"OpenDeck native resolution scale",
-                            "OpenDeck native resolution scale"}});
-    _props.setProperty({PARAM_CAMERA_SCALING, 1.0,
-                        Property::MetaData{"OpenDeck camera scaling",
-                                           "OpenDeck camera scaling"}});
+    _props.add({PARAM_RESOLUTION_SCALING,
+                1.0,
+                {"OpenDeck native resolution scale",
+                 "OpenDeck native resolution scale"}});
+    _props.add({PARAM_CAMERA_SCALING,
+                1.0,
+                {"OpenDeck camera scaling", "OpenDeck camera scaling"}});
+}
+
+bool OpenDeckParameters::parse(int argc, const char** argv)
+{
+    namespace po = boost::program_options;
+
+    try
+    {
+        po::variables_map properties;
+
+        po::store(po::command_line_parser(argc, argv).run(), properties);
+        po::notify(properties);
+
+        auto i = properties.find(PARAM_RESOLUTION_SCALING);
+        if (i != properties.end())
+        {
+            setResolutionScaling(i->second.as<double>());
+        }
+
+        i = properties.find(PARAM_CAMERA_SCALING);
+        if (i != properties.end())
+        {
+            setCameraScaling(i->second.as<double>());
+        }
+    }
+    catch (const std::exception& e)
+    {
+        BRAYNS_ERROR << "Failed to parse commandline for "
+                     << std::quoted(_props.getName()) << ": " << e.what()
+                     << '\n';
+        return false;
+    }
+
+    return true;
 }
 } // namespace brayns
