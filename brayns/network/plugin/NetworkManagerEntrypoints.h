@@ -60,7 +60,6 @@
 #include <brayns/network/entrypoints/UpdateInstanceEntrypoint.h>
 #include <brayns/network/entrypoints/UpdateModelEntrypoint.h>
 #include <brayns/network/entrypoints/VersionEntrypoint.h>
-#include <brayns/network/entrypoints/VideoStreamEntrypoint.h>
 #include <brayns/network/entrypoints/VolumeParametersEntrypoint.h>
 
 #include "NetworkManager.h"
@@ -108,8 +107,6 @@ public:
         plugin.add<ChunkEntrypoint>();
         plugin.add<GetEnvironmentMapEntrypoint>();
         plugin.add<SetEnvironmentMapEntrypoint>();
-        plugin.add<GetVideoStreamEntrypoint>();
-        plugin.add<SetVideoStreamEntrypoint>();
         plugin.add<AddModelEntrypoint>();
         plugin.add<RemoveModelEntrypoint>();
         plugin.add<UpdateModelEntrypoint>();

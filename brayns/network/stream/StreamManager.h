@@ -101,36 +101,6 @@ private:
 };
 
 /**
- * @brief Video stream monitor.
- *
- */
-class VideoStreamMonitor
-{
-public:
-    bool isEnabled() const { return _enabled; }
-
-    void setEnabled(bool enabled) { _enabled = enabled; }
-
-    uint32_t getKbps() const { return _kbps; }
-
-    void setKbps(uint32_t kbps) { _kbps = kbps; }
-
-    bool operator==(const VideoStreamMonitor& other) const
-    {
-        return _enabled == other._enabled && _kbps == other._kbps;
-    }
-
-    bool operator!=(const VideoStreamMonitor& other) const
-    {
-        return !(*this == other);
-    }
-
-private:
-    bool _enabled = false;
-    uint32_t _kbps = 5000;
-};
-
-/**
  * @brief Stream manager to monitor image streaming.
  *
  */
@@ -157,16 +127,8 @@ public:
      */
     ImageStreamMonitor& getImageStream() { return _imageStream; }
 
-    /**
-     * @brief Get the video stream monitor.
-     *
-     * @return VideoStreamMonitor& Video stream monitor.
-     */
-    VideoStreamMonitor& getVideoStream() { return _videoStream; }
-
 private:
     NetworkContext* _context;
     ImageStreamMonitor _imageStream;
-    VideoStreamMonitor _videoStream;
 };
 } // namespace brayns

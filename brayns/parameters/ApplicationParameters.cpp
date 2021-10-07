@@ -37,9 +37,6 @@ const std::string PARAM_STEREO = "stereo";
 const std::string PARAM_WINDOW_SIZE = "window-size";
 const std::string PARAM_ENV_MAP = "env-map";
 const std::string PARAM_SANDBOX_PATH = "sandbox-path";
-#ifdef BRAYNS_USE_FFMPEG
-const std::string PARAM_VIDEOSTREAMING = "videostreaming";
-#endif
 
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
@@ -86,13 +83,7 @@ ApplicationParameters::ApplicationParameters()
         (PARAM_ENV_MAP.c_str(), po::value<std::string>(&_envMap),
          "Path to environment map") //
         (PARAM_SANDBOX_PATH.c_str(), po::value<std::string>(&_sandBoxPath),
-         "Path to sandbox directory")
-#ifdef BRAYNS_USE_FFMPEG
-            (PARAM_VIDEOSTREAMING.c_str(),
-             po::bool_switch(&_useVideoStreaming)->default_value(false),
-             "Use videostreaming over websockets instead of JPEG")
-#endif
-        ;
+         "Path to sandbox directory");
 
     _positionalArgs.add(PARAM_INPUT_PATHS.c_str(), -1);
 }

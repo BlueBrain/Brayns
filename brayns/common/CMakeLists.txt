@@ -78,12 +78,6 @@ set(BRAYNSCOMMON_LINK_LIBRARIES
     ${FREEIMAGE_LIBRARIES}
 )
 
-if(FFMPEG_FOUND)
-  list(APPEND BRAYNSCOMMON_HEADERS utils/encoder.h)
-  list(APPEND BRAYNSCOMMON_SOURCES utils/encoder.cpp)
-  list(APPEND BRAYNSCOMMON_LINK_LIBRARIES PRIVATE ${FFMPEG_LIBRARIES})
-endif()
-
 common_library(braynsCommon)
 
 target_include_directories(braynsCommon SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS})

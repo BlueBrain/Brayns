@@ -79,7 +79,6 @@ public:
         _updateValue(_imageStreamFPS, fps);
     }
 
-    bool useVideoStreaming() const { return _useVideoStreaming; }
     /** Max render FPS to limit */
     size_t getMaxRenderFPS() const { return _maxRenderFPS; }
     bool isStereo() const { return _stereo; }
@@ -108,7 +107,6 @@ protected:
     size_t _maxRenderFPS{std::numeric_limits<size_t>::max()};
     bool _parallelRendering{false};
     bool _dynamicLoadBalancer{false};
-    bool _useVideoStreaming{false};
     std::string _envMap;
     std::string _sandBoxPath;
     bool _useQuantaRenderControl{false};

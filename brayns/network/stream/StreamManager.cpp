@@ -27,15 +27,6 @@ namespace
 {
 using namespace brayns;
 
-class VideoStream
-{
-public:
-    static void broadcast(NetworkContext& context)
-    {
-        throw std::runtime_error("Video stream not implemented");
-    }
-};
-
 class ImageStream
 {
 public:
@@ -108,11 +99,6 @@ public:
         {
             return;
         }
-        if (_useVideoStream(context))
-        {
-            VideoStream::broadcast(context);
-            return;
-        }
         if (_isImageStreamControlled(context))
         {
             ControlledImageStream::broadcast(context);
@@ -143,14 +129,6 @@ private:
             return false;
         }
         return framebuffer.isModified();
-    }
-
-    static bool _useVideoStream(NetworkContext& context)
-    {
-        auto& api = context.getApi();
-        auto& parametersManager = api.getParametersManager();
-        auto& parameters = parametersManager.getApplicationParameters();
-        return parameters.useVideoStreaming();
     }
 
     static bool _isImageStreamControlled(NetworkContext& context)

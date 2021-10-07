@@ -1020,24 +1020,6 @@ Return value:
 
 ----
 
-get_videostream
-~~~~~~~~~~~~~~~
-
-Get the current state of the video stream parameters.
-
-Parameters:
-
-This method takes no parameters.
-
-Return value:
-
-* ``dict``. The object has the following properties.
-
-  * ``enabled``: ``bool``. Video stream enabled.
-  * ``kbps``: ``int``. Encoding bit rate in kb/s.
-
-----
-
 get_volume_parameters
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -1703,22 +1685,6 @@ Set the current state of the scene.
 Parameters:
 
 This method takes no parameters.
-
-Return value:
-
-This method has no return values.
-
-----
-
-set_videostream
-~~~~~~~~~~~~~~~
-
-Set the current state of the video stream parameters.
-
-Parameters:
-
-* ``enabled``: ``bool``. Video stream enabled.
-* ``kbps``: ``int``. Encoding bit rate in kb/s.
 
 Return value:
 
