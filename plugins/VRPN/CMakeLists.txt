@@ -15,7 +15,7 @@ common_find_package_post()
 
 set(BRAYNSVRPN_HEADERS VRPNPlugin.h)
 set(BRAYNSVRPN_SOURCES VRPNPlugin.cpp)
-set(BRAYNSVRPN_LINK_LIBRARIES PRIVATE braynsCommon braynsPluginAPI braynsEngine
+set(BRAYNSVRPN_LINK_LIBRARIES PRIVATE braynsCommon braynsPluginAPI braynsEngine braynsNetwork
   ${VRPN_LIBRARIES})
 
 set(BRAYNSVRPN_OMIT_LIBRARY_HEADER ON)
