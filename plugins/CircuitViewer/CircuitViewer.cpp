@@ -41,23 +41,23 @@ void _addAdvancedSimulationRenderer(Engine& engine)
 {
     // clang-format off
     PropertyMap properties;
-    properties.setProperty(
+    properties.add(
         {"aoDistance", 10000., {"Ambient occlusion distance"}});
-    properties.setProperty(
-        {"aoWeight", 0., 0., 1., {"Ambient occlusion weight"}});
-    properties.setProperty(
+    properties.add(
+        {"aoWeight", 0.,{"Ambient occlusion weight"}});
+    properties.add(
         {"shading",
-         int32_t(AdvancedSimulationRenderer::Shading::none),
-         brayns::enumNames<AdvancedSimulationRenderer::Shading>(),
+         {int32_t(AdvancedSimulationRenderer::Shading::none),
+         brayns::enumNames<AdvancedSimulationRenderer::Shading>()},
          {"Shading"}});
-    properties.setProperty({"shadows", 0., 0., 1., {"Shadow intensity"}});
-    properties.setProperty({"softShadows", 0., 0., 1., {"Shadow softness"}});
-    properties.setProperty({"samplingThreshold", 0.001, 0.001, 1.,
+    properties.add({"shadows", 0., {"Shadow intensity"}});
+    properties.add({"softShadows", 0., {"Shadow softness"}});
+    properties.add({"samplingThreshold", 0.001,
                             {"Threshold under which sampling is ignored"}});
-    properties.setProperty({"volumeSpecularExponent", 20., 1., 100.,
+    properties.add({"volumeSpecularExponent", 20.,
                             {"Volume specular exponent"}});
-    properties.setProperty(
-        {"volumeAlphaCorrection", 0.5, 0.001, 1., {"Volume alpha correction"}});
+    properties.add(
+        {"volumeAlphaCorrection", 0.5, {"Volume alpha correction"}});
     // clang-format on
     engine.addRendererType("advanced_simulation", properties);
 }
@@ -66,7 +66,7 @@ void _addBasicSimulationRenderer(Engine& engine)
     PropertyMap properties;
     engine.addRendererType("basic_simulation", properties);
 }
-}
+} // namespace
 #endif
 
 CircuitViewer::CircuitViewer(PropertyMap&& circuitParams,
@@ -84,10 +84,10 @@ void CircuitViewer::init()
     // the harcoded label is to move the PropertyMap to struct parsing code
     // out of the circuit and morphology loader implementations.
     const auto addGeometryQuality = [&params](PropertyMap& map) {
-        map.setProperty(
+        map.add(
             {"geometryQuality",
-             enumToString(params.getGeometryParameters().getGeometryQuality()),
-             enumNames<GeometryQuality>(),
+             {enumToString(params.getGeometryParameters().getGeometryQuality()),
+              enumNames<GeometryQuality>()},
              {"Geometry Quality"}});
     };
 
@@ -112,7 +112,7 @@ void CircuitViewer::init()
     }
 #endif
 }
-}
+} // namespace brayns
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
                                                          const char** argv)
@@ -126,8 +126,8 @@ extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
     // loader as well.
     circuitParams.merge(morphologyParams);
 
-    if (!circuitParams.parse(argc, argv))
-        return nullptr;
+    /*if (!circuitParams.parse(argc, argv))
+        return nullptr;*/
 
     // Update morphology parameters with command line defaults
     morphologyParams.update(circuitParams);

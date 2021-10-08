@@ -1,15 +1,9 @@
-[submodule "uvw"]
-	path = deps/uvw
-	url = https://github.com/skypjack/uvw.git
 [submodule "async++"]
 	path = deps/async++
 	url = https://github.com/Amanieu/asyncplusplus.git
 [submodule "perceptualdiff"]
 	path = deps/perceptualdiff
 	url = https://github.com/myint/perceptualdiff.git
-[submodule "plugins/Rockets/rapidjson"]
-	path = plugins/Rockets/rapidjson
-	url = https://github.com/Tencent/rapidjson.git
 [submodule "deps/glm"]
 	path = deps/glm
 	url = https://github.com/g-truc/glm.git
@@ -33,3 +27,6 @@
 [submodule "deps/pbrt-v3"]
 	path = deps/pbrt-v3
 	url = https://github.com/BlueBrain/pbrt-v3
+[submodule "deps/poco"]
+	path = deps/poco
+	url = https://github.com/pocoproject/poco.git

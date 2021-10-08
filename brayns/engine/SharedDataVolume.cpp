@@ -89,4 +89,4 @@ void SharedDataVolume::mapData(uint8_ts&& buffer)
     _memoryBuffer = std::move(buffer);
     setVoxels(_memoryBuffer.data());
 }
-}
+} // namespace brayns

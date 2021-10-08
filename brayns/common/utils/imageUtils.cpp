@@ -31,7 +31,7 @@ inline void INPLACESWAP(T& a, T& b)
     b ^= a;
     a ^= b;
 }
-}
+} // namespace
 namespace brayns
 {
 namespace freeimage
@@ -113,7 +113,7 @@ ImagePtr mergeImages(const std::vector<ImagePtr>& images)
     }
     return mergedImage;
 }
-}
-}
+} // namespace freeimage
+} // namespace brayns
 
 #endif

@@ -85,4 +85,4 @@ private:
     std::mutex _mutex;
     DeflectParameters _params;
 };
-}
+} // namespace brayns

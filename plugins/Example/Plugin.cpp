@@ -45,7 +45,7 @@ void ExamplePlugin::postRender()
 {
     std::cout << "Plugin post render" << std::endl;
 }
-}
+} // namespace brayns
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int argc,
                                                          const char** argv)

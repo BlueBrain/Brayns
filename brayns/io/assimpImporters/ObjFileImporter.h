@@ -38,8 +38,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#ifndef OBJ_FILE_IMPORTER_H_INC
-#define OBJ_FILE_IMPORTER_H_INC
+
+#pragma once
 
 #include "BaseImporter.h"
 #include <assimp/material.h>
@@ -54,7 +54,7 @@ namespace ObjFile
 {
 struct Object;
 struct Model;
-}
+} // namespace ObjFile
 
 // ------------------------------------------------------------------------------------------------
 /// \class  ObjFileImporter
@@ -129,5 +129,3 @@ private:
 // ------------------------------------------------------------------------------------------------
 
 } // Namespace Assimp
-
-#endif

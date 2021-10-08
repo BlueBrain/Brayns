@@ -109,9 +109,8 @@ static __device__ inline float3 fresnelSchlickRoughness(float cosTheta,
                                                         float3 F0,
                                                         float roughness)
 {
-    return F0 +
-           (max(make_float3(1.0f - roughness), F0) - F0) *
-               pow(1.0f - cosTheta, 5.0f);
+    return F0 + (max(make_float3(1.0f - roughness), F0) - F0) *
+                    pow(1.0f - cosTheta, 5.0f);
 }
 
 static __device__ inline void shade()
@@ -169,8 +168,7 @@ static __device__ inline void shade()
         const float3 L = normalize(light.pos - WorldPos);
         const float3 H = normalize(V + L);
         const float attenuation = calculateAttenuation(WorldPos, light.pos);
-        const float3 radiance =
-            light.color * attenuation * 20.0f;
+        const float3 radiance = light.color * attenuation * 20.0f;
 
         // cook-torrance brdf
         const float NDF = distributionGGX(N, H, roughness);
@@ -195,8 +193,8 @@ static __device__ inline void shade()
             fresnelSchlickRoughness(max(NdotV, 0.0f), F0, roughness);
         const float3 kD = (make_float3(1.0f) - F) * (1.0f - albedoMetallic.w);
 
-        const float3 irradiance = make_float3(
-            rtTexCubemap<float4>(envmap_irradiance, N.x, N.y, N.z));
+        const float3 irradiance =
+            make_float3(rtTexCubemap<float4>(envmap_irradiance, N.x, N.y, N.z));
         const float3 diffuse = irradiance * albedo;
 
         // sample both the pre-filter map and the BRDF lut and combine them
@@ -204,8 +202,9 @@ static __device__ inline void shade()
         // part.
         const float3 reflectV = reflect(-V, N);
         const float3 prefilteredColor = make_float3(
-            rtTexCubemapLod<float4>(envmap_radiance, reflectV.x, reflectV.y, reflectV.z,
-                               roughness * float(radianceLODs)));
+            rtTexCubemapLod<float4>(envmap_radiance, reflectV.x, reflectV.y,
+                                    reflectV.z,
+                                    roughness * float(radianceLODs)));
         const float2 brdf = make_float2(
             rtTex2D<float4>(envmap_brdf_lut, max(NdotV, 0.0), roughness));
         const float3 specular = prefilteredColor * (F * brdf.x + brdf.y);

@@ -17,8 +17,8 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef PBRTDEBUGINTEGRATOR_H
-#define PBRTDEBUGINTEGRATOR_H
+
+#pragma once
 
 #include <pbrtv2/core/integrator.h>
 #include <pbrtv2/core/pbrt.h>
@@ -28,7 +28,6 @@
 
 namespace brayns
 {
-
 class PBRTDebugSurfaceIntegrator : public pbrt::SurfaceIntegrator
 {
 public:
@@ -39,9 +38,11 @@ public:
     }
 
     pbrt::Spectrum Li(const pbrt::Scene *scene, const pbrt::Renderer *renderer,
-                      const pbrt::RayDifferential &ray, const pbrt::Intersection &isect,
-                      const pbrt::Sample *sample, pbrt::RNG &rng, pbrt::MemoryArena &arena)
-                      const final;
+                      const pbrt::RayDifferential &ray,
+                      const pbrt::Intersection &isect,
+                      const pbrt::Sample *sample, pbrt::RNG &rng,
+                      pbrt::MemoryArena &arena) const final;
+
 private:
     pbrt::Spectrum _green;
 };
@@ -62,19 +63,19 @@ public:
     }
 
     pbrt::Spectrum Li(const pbrt::Scene *scene, const pbrt::Renderer *renderer,
-                      const pbrt::RayDifferential &ray, const pbrt::Sample *sample,
-                      pbrt::RNG &rng, pbrt::Spectrum *transmittance, pbrt::MemoryArena &arena)
-                      const final;
-    pbrt::Spectrum Transmittance(const pbrt::Scene *scene, const pbrt::Renderer *renderer,
-                                 const pbrt::RayDifferential &ray, const pbrt::Sample *sample,
-                                 pbrt::RNG &rng, pbrt::MemoryArena &arena)
-                                 const final;
+                      const pbrt::RayDifferential &ray,
+                      const pbrt::Sample *sample, pbrt::RNG &rng,
+                      pbrt::Spectrum *transmittance,
+                      pbrt::MemoryArena &arena) const final;
+    pbrt::Spectrum Transmittance(const pbrt::Scene *scene,
+                                 const pbrt::Renderer *renderer,
+                                 const pbrt::RayDifferential &ray,
+                                 const pbrt::Sample *sample, pbrt::RNG &rng,
+                                 pbrt::MemoryArena &arena) const final;
 
 private:
     pbrt::Spectrum _white;
     pbrt::Spectrum _black;
     pbrt::Spectrum _red;
 };
-}
-
-#endif
+} // namespace brayns

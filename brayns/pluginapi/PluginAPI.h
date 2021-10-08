@@ -60,4 +60,4 @@ public:
     /** Set the action interface to be used by Brayns main loop. */
     virtual void setActionInterface(const ActionInterfacePtr& interface) = 0;
 };
-}
+} // namespace brayns

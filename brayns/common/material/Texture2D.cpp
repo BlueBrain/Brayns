@@ -70,4 +70,4 @@ uint8_t Texture2D::getPossibleMipMapsLevels() const
     }
     return mipMapLevels;
 }
-}
+} // namespace brayns

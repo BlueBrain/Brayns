@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ANIMATIONPARAMETERS_H
-#define ANIMATIONPARAMETERS_H
+#pragma once
 
 #include "AbstractParameters.h"
 #include <list>
@@ -66,6 +65,8 @@ public:
     {
         _updateValue(_unit, unit, triggerCallback);
     }
+
+    const std::string& getUnit() const { return _unit; }
     using IsReadyCallback = std::function<bool()>;
 
     /**
@@ -96,7 +97,9 @@ public:
     void jumpFrames(int frames);
 
     void togglePlayback() { _playing = !_playing; }
+    void setPlaying(bool playing) { _updateValue(_playing, playing); }
     bool isPlaying() const { return _playing; }
+
 private:
     uint32_t _adjustedCurrent(const uint32_t newCurrent) const
     {
@@ -116,5 +119,4 @@ private:
 
     SERIALIZATION_FRIEND(AnimationParameters)
 };
-}
-#endif
+} // namespace brayns

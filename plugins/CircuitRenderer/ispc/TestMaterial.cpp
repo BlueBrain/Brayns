@@ -7,7 +7,7 @@ namespace circuitRenderer
 {
 void TestMaterial::commit()
 {
-    if(ispcEquivalent == nullptr)
+    if (ispcEquivalent == nullptr)
         ispcEquivalent = ispc::TestMaterial_create(this);
 
     // NAMES ARE WRONG!!! THEY ARE SET AT OSPRAYMATERIAL.CPP IN ENGINES/OSPRAY
@@ -19,11 +19,10 @@ void TestMaterial::commit()
     specularExponent = getParam1f("ns", 7.f);
     glossiness = getParam1f("glossiness", .5f);
 
-    ispc::TestMaterial_set(
-        getIE(), opacity, refraction,
-        reflection, (ispc::vec3f&)Kd,
-        (ispc::vec3f&)Ks, specularExponent, glossiness);
+    ispc::TestMaterial_set(getIE(), opacity, refraction, reflection,
+                           (ispc::vec3f&)Kd, (ispc::vec3f&)Ks, specularExponent,
+                           glossiness);
 }
 
 OSP_REGISTER_MATERIAL(test, TestMaterial, default);
-}
+} // namespace circuitRenderer

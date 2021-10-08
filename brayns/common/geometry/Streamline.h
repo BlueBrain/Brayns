@@ -66,4 +66,4 @@ struct StreamlinesData
     // indices [0,1,2,4,5].
     std::vector<int32_t> indices;
 };
-}
+} // namespace brayns

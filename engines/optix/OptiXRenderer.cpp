@@ -104,7 +104,7 @@ void toOptiXProperties(const brayns::PropertyMap& object)
                      << e.what() << std::endl;
     }
 }
-}
+} // namespace
 
 namespace brayns
 {
@@ -193,7 +193,5 @@ void OptiXRenderer::commit()
     _currentRenderer = _renderingParameters.getCurrentRenderer();
 }
 
-void OptiXRenderer::setCamera(CameraPtr /*camera*/)
-{
-}
+void OptiXRenderer::setCamera(CameraPtr /*camera*/) {}
 } // namespace brayns

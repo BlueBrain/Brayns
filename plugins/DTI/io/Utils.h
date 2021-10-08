@@ -1,6 +1,9 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <string>
+#include <vector>
+
 namespace
 {
 /* Returns a mapping from a name to an enum type. */

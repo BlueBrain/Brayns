@@ -41,4 +41,4 @@ protected:
     {
     }
 };
-}
+} // namespace brayns

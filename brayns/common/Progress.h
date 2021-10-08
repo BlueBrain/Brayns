@@ -76,4 +76,4 @@ private:
     float _amount{0.f};
     std::mutex _mutex;
 };
-}
+} // namespace brayns

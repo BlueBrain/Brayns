@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef TESTRENDERER_H
-#define TESTRENDERER_H
+#pragma once
 
 #include "TestMaterial.h"
 
@@ -48,6 +47,4 @@ protected:
 
     TestMaterial* _backgroundMaterial;
 };
-}
-
-#endif
+} // namespace circuitRenderer

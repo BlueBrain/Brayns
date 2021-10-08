@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CircuitExplorerAbstractRenderer_H
-#define CircuitExplorerAbstractRenderer_H
+#pragma once
 
 // obj
 #include "../CircuitExplorerMaterial.h"
@@ -57,5 +56,3 @@ protected:
     float _exposure{1.f};
 };
 } // namespace circuitExplorer
-
-#endif // CircuitExplorerAbstractRenderer_H

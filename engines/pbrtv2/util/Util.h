@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef UTIL_H
-#define UTIL_H
+#pragma once
 
 #include <brayns/common/mathTypes.h>
 #include <brayns/common/types.h>
@@ -28,16 +27,14 @@
 
 namespace brayns
 {
-template<class T>
+template <class T>
 T glmToPbrt3(const glm::vec3& p)
 {
-    return T(
-        static_cast<float>(p.x),
-        static_cast<float>(p.y),
-        static_cast<float>(p.z));
+    return T(static_cast<float>(p.x), static_cast<float>(p.y),
+             static_cast<float>(p.z));
 }
 
-template<class T>
+template <class T>
 glm::vec3 pbrtToGlm3(const T& p)
 {
     return glm::vec3(p.x, p.y, p.z);
@@ -47,6 +44,4 @@ pbrt::Transform pbrtTranslation(const Vector3f& v);
 
 pbrt::Transform pbrtTransform(const Transformation& t);
 
-}
-
-#endif
+} // namespace brayns

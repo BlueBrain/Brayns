@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef TRANSFORMPOOL_H
-#define TRANSFORMPOOL_H
+#pragma once
 
 #include <pbrtv2/core/memory.h>
 #include <pbrtv2/core/transform.h>
@@ -33,10 +32,11 @@ struct TransformHash
     bool operator()(const pbrt::Transform* const t) const
     {
         // From pbrt: src/core/api.cpp TransformCache::Hash
-        const char *ptr = reinterpret_cast<const char*>( (&t->GetMatrix()) );
+        const char* ptr = reinterpret_cast<const char*>((&t->GetMatrix()));
         size_t size = sizeof(pbrt::Matrix4x4);
         uint64_t hash = 14695981039346656037ull;
-        while (size > 0) {
+        while (size > 0)
+        {
             hash ^= static_cast<uint64_t>(*ptr);
             hash *= 1099511628211ull;
             ++ptr;
@@ -47,7 +47,8 @@ struct TransformHash
 };
 struct TransformEqual
 {
-    bool operator()(const pbrt::Transform* const a, const pbrt::Transform* const b) const
+    bool operator()(const pbrt::Transform* const a,
+                    const pbrt::Transform* const b) const
     {
         return *a == *b;
     }
@@ -60,9 +61,8 @@ public:
     void clear();
 
 private:
-    std::unordered_set<pbrt::Transform*, TransformHash, TransformEqual> _hasTable;
+    std::unordered_set<pbrt::Transform*, TransformHash, TransformEqual>
+        _hasTable;
     pbrt::MemoryArena _pool;
 };
-}
-
-#endif
+} // namespace brayns

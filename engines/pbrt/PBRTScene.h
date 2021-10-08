@@ -17,8 +17,8 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef PBRTSCENE_H
-#define PBRTSCENE_H
+
+#pragma once
 
 #include <brayns/engine/Scene.h>
 
@@ -45,7 +45,7 @@ public:
 
     void setCurrentRenderer(const std::string& renderer)
     {
-        if(renderer != _currentRenderer)
+        if (renderer != _currentRenderer)
         {
             _currentRenderer = renderer;
             markModified();
@@ -62,7 +62,7 @@ public:
     }
 
 private:
-    std::unique_ptr<pbrt::Scene> _pbrtScene {nullptr};
+    std::unique_ptr<pbrt::Scene> _pbrtScene{nullptr};
     std::shared_ptr<pbrt::BVHAccel> _bvh;
     std::vector<std::shared_ptr<pbrt::Light>> _lights;
     std::vector<std::shared_ptr<pbrt::GeometricPrimitive>> _lightShapes;
@@ -71,6 +71,4 @@ private:
 
     std::string _currentRenderer;
 };
-}
-
-#endif
+} // namespace brayns

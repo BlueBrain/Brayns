@@ -101,7 +101,7 @@ unsigned int lzf_compress(const void* const in_data, unsigned int in_len,
                           ,
                           LZF_STATE htab
 #endif
-                          )
+)
 {
 #if !LZF_STATE_ARG
     LZF_STATE htab;
@@ -162,7 +162,7 @@ unsigned int lzf_compress(const void* const in_data, unsigned int in_len,
 #else
             && *(u16*)ref == *(u16*)ip && ref[2] == ip[2]
 #endif
-            )
+        )
         {
             /* match found at *ref++ */
             unsigned int len = 2;

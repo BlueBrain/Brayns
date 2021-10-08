@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ClipPlane_H
-#define ClipPlane_H
+#pragma once
 
 #include <brayns/api.h>
 #include <brayns/common/types.h>
@@ -52,8 +51,7 @@ public:
 private:
     static size_t _nextID;
     size_t _id = 0;
-    Plane _plane = {{0}};
+    Plane _plane{0.0};
     SERIALIZATION_FRIEND(ClipPlane);
 };
 } // namespace brayns
-#endif // Model_H

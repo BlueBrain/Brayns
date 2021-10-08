@@ -55,4 +55,4 @@ protected:
 };
 
 using OptiXCameraProgramPtr = std::shared_ptr<OptiXCameraProgram>;
-}
+} // namespace brayns

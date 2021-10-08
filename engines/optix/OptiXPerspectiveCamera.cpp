@@ -91,4 +91,4 @@ void OptiXPerspectiveCamera::commit(const OptiXCamera& camera,
     context[CUDA_ATTR_CAMERA_BAD_COLOR]->setFloat(1.f, 0.f, 1.f);
     context[CUDA_ATTR_CAMERA_OFFSET]->setFloat(0, 0);
 }
-}
+} // namespace brayns

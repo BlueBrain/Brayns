@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PBRTCAMERA_H
-#define PBRTCAMERA_H
+#pragma once
 
 #include <brayns/engine/Camera.h>
 
@@ -37,7 +36,8 @@ PBRT Camera parameters by name (type):
     - "lensradius"      : float, default 0.f
     - "focaldistance"   : float, default 1e6
     - "frameaspectratio": float, default current fb widht / height
-    - "screenwindow"    : float[4] (minx, maxx, miny, maxy) // NOT NEEDED, PBRT COMPUTES IT FROM frameaspectratio
+    - "screenwindow"    : float[4] (minx, maxx, miny, maxy) // NOT NEEDED, PBRT
+COMPUTES IT FROM frameaspectratio
 
 
  - "perspective"
@@ -53,13 +53,11 @@ namespace brayns
 class PBRTCamera : public Camera
 {
 public:
-    PBRTCamera()
-    {
-    }
+    PBRTCamera() {}
 
     ~PBRTCamera()
     {
-        if(_pbrtCamera)
+        if (_pbrtCamera)
             delete _pbrtCamera;
     }
 
@@ -67,10 +65,7 @@ public:
 
     void manualCommit(const Vector2ui& resolution);
 
-    const pbrt::Transform& getLookAtMatrix() const
-    {
-        return _worldToCamMatrix;
-    }
+    const pbrt::Transform& getLookAtMatrix() const { return _worldToCamMatrix; }
     const pbrt::Transform& getInvLookAtMatrix() const
     {
         return _camToWorldMatrix;
@@ -98,16 +93,14 @@ private:
     // -> The renderer releases the camera
     //  -> The camera releases the film
     //   -> The film releases the filter
-    pbrt::Camera* _pbrtCamera {nullptr};
+    pbrt::Camera* _pbrtCamera{nullptr};
 
     pbrt::Transform _worldToCamMatrix;
     pbrt::Transform _camToWorldMatrix;
 
-    brayns::Vector2ui _currentRes {16,16};
+    brayns::Vector2ui _currentRes{16, 16};
 
     mutable bool _needsRender{true};
     mutable bool _cameraChanged{true};
 };
-}
-
-#endif
+} // namespace brayns

@@ -66,7 +66,7 @@ void setRawData(Texture2DPtr texture, const freeimage::ImagePtr& image,
         texture->setRawData(getRawData(faceImg, flipFace), face, mip);
     }
 }
-}
+} // namespace
 
 Texture2DPtr ImageManager::importTextureFromFile(
     const std::string& filename BRAYNS_UNUSED,
@@ -161,4 +161,4 @@ Texture2DPtr ImageManager::importTextureFromFile(
     return {};
 #endif
 }
-}
+} // namespace brayns

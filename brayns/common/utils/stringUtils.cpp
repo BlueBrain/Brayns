@@ -57,8 +57,7 @@ std::string replaceFirstOccurrence(std::string input,
 }
 
 std::string camelCaseToSeparated(const std::string& camelCase,
-                                 const char separator,
-                                 bool separateNumericals)
+                                 const char separator, bool separateNumericals)
 {
     if (camelCase.empty())
         return camelCase;
@@ -66,8 +65,8 @@ std::string camelCaseToSeparated(const std::string& camelCase,
     std::string str(1, ::tolower(camelCase[0]));
     for (auto it = camelCase.begin() + 1; it != camelCase.end(); ++it)
     {
-        if ((isupper(*it) && *(it - 1) != '-' && islower(*(it - 1)))
-             || (separateNumericals && isdigit(*(it - 1)) && isalpha(*it)))
+        if ((isupper(*it) && *(it - 1) != '-' && islower(*(it - 1))) ||
+            (separateNumericals && isdigit(*(it - 1)) && isalpha(*it)))
             str += separator;
         str += *it;
     }
@@ -146,5 +145,5 @@ std::vector<std::string> split(const std::string& s, char delim)
         elems.push_back(std::move(item));
     return elems;
 }
-}
-}
+} // namespace string_utils
+} // namespace brayns

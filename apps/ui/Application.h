@@ -122,8 +122,8 @@ private:
 
     brayns::Timer m_timer;
 
-    std::array<int, 2> m_windowPos{{0, 0}};
-    std::array<int, 2> m_windowSizePrev{{0, 0}};
+    brayns::Vector2i m_windowPos{0, 0};
+    brayns::Vector2i m_windowSizePrev{0, 0};
 
     std::future<void> m_renderFuture;
     std::mutex m_actionLock;

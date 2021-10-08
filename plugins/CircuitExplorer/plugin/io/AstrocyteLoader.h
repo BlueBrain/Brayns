@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef AstrocyteLoader_H
-#define AstrocyteLoader_H
+#pragma once
 
 #include "AbstractCircuitLoader.h"
 
@@ -30,7 +29,7 @@ public:
     AstrocyteLoader(brayns::Scene &scene,
                     const brayns::ApplicationParameters &applicationParameters,
                     brayns::PropertyMap &&loaderParams,
-                    CircuitExplorerPlugin* plugin);
+                    CircuitExplorerPlugin *plugin);
 
     std::string getName() const final;
 
@@ -41,7 +40,7 @@ public:
 
     static brayns::PropertyMap getCLIProperties();
 
-   std::vector<brayns::ModelDescriptorPtr> importFromFile(
+    std::vector<brayns::ModelDescriptorPtr> importFromFile(
         const std::string &filename, const brayns::LoaderProgress &callback,
         const brayns::PropertyMap &properties) const final;
 
@@ -51,5 +50,3 @@ private:
                                      const brayns::LoaderProgress &callback,
                                      brayns::Model &model) const;
 };
-
-#endif // AstrocyteLoader_H

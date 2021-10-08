@@ -1,4 +1,4 @@
-.. _usepythonclinet-label:
+.. _usepythonclient-label:
 
 Using Brayns python client
 ==========================

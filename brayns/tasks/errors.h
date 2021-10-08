@@ -45,4 +45,4 @@ inline TaskRuntimeError LOADING_BINARY_FAILED(const std::string& error)
 {
     return {error, ERROR_ID_LOADING_BINARY_FAILED};
 }
-}
+} // namespace brayns

@@ -46,4 +46,4 @@ void AbstractRenderer::commit()
     _bgMaterial =
         (brayns::DefaultMaterial*)getParamObject("bgMaterial", nullptr);
 }
-}
+} // namespace brayns

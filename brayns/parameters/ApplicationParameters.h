@@ -18,12 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef APPLICATIONPARAMETERS_H
-#define APPLICATIONPARAMETERS_H
+#pragma once
 
 #include "AbstractParameters.h"
 
 #include <brayns/common/types.h>
+
 #include <string>
 #include <vector>
 
@@ -78,17 +78,10 @@ public:
         _updateValue(_imageStreamFPS, fps);
     }
 
-    bool useVideoStreaming() const { return _useVideoStreaming; }
     /** Max render FPS to limit */
     size_t getMaxRenderFPS() const { return _maxRenderFPS; }
     bool isStereo() const { return _stereo; }
     bool getParallelRendering() const { return _parallelRendering; }
-    const std::string& getHttpServerURI() const { return _httpServerURI; }
-    void setHttpServerURI(const std::string& httpServerURI)
-    {
-        _updateValue(_httpServerURI, httpServerURI);
-    }
-
     const std::string& getEnvMap() const { return _envMap; }
     const std::string& getSandboxPath() const { return _sandBoxPath; }
     const strings& getInputPaths() const { return _inputPaths; }
@@ -99,6 +92,7 @@ public:
     {
         _updateValue(_useQuantaRenderControl, value);
     }
+
 protected:
     void parse(const po::variables_map& vm) final;
 
@@ -110,10 +104,8 @@ protected:
     bool _stereo{false};
     size_t _imageStreamFPS{60};
     size_t _maxRenderFPS{std::numeric_limits<size_t>::max()};
-    std::string _httpServerURI;
     bool _parallelRendering{false};
     bool _dynamicLoadBalancer{false};
-    bool _useVideoStreaming{false};
     std::string _envMap;
     std::string _sandBoxPath;
     bool _useQuantaRenderControl{false};
@@ -125,6 +117,4 @@ protected:
 
     SERIALIZATION_FRIEND(ApplicationParameters)
 };
-}
-
-#endif // APPLICATIONPARAMETERS_H
+} // namespace brayns

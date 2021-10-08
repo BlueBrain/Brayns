@@ -24,8 +24,9 @@ namespace brayns
 pbrt::Spectrum PBRTDebugIntegrator::Li(const pbrt::RayDifferential& r,
                                        const pbrt::Scene& s,
                                        pbrt::Sampler& /*sampler*/,
-                                       pbrt::MemoryArena& /*arena*/, int /*depth*/) const
+                                       pbrt::MemoryArena& /*arena*/,
+                                       int /*depth*/) const
 {
-    return s.IntersectP(r)? _green : _white;
+    return s.IntersectP(r) ? _green : _white;
 }
-}
+} // namespace brayns

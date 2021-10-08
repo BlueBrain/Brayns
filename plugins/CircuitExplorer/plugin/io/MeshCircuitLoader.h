@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MESHCIRCUITLOADER_H
-#define MESHCIRCUITLOADER_H
+#pragma once
 
 #include "AbstractCircuitLoader.h"
 
@@ -30,8 +29,7 @@ public:
     MeshCircuitLoader(
         brayns::Scene &scene,
         const brayns::ApplicationParameters &applicationParameters,
-        brayns::PropertyMap &&loaderParams,
-        CircuitExplorerPlugin* plugin);
+        brayns::PropertyMap &&loaderParams, CircuitExplorerPlugin *plugin);
 
     std::string getName() const final;
 
@@ -41,5 +39,3 @@ public:
         const std::string &filename, const brayns::LoaderProgress &callback,
         const brayns::PropertyMap &properties) const final;
 };
-
-#endif // MESHCIRCUITLOADER_H

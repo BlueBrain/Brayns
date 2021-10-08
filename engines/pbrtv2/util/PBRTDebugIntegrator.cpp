@@ -21,36 +21,34 @@
 
 namespace brayns
 {
-pbrt::Spectrum
-PBRTDebugSurfaceIntegrator::Li(const pbrt::Scene *scene, const pbrt::Renderer*,
-                               const pbrt::RayDifferential &ray, const pbrt::Intersection&,
-                               const pbrt::Sample*, pbrt::RNG&, pbrt::MemoryArena&)
-                               const
+pbrt::Spectrum PBRTDebugSurfaceIntegrator::Li(const pbrt::Scene *scene,
+                                              const pbrt::Renderer *,
+                                              const pbrt::RayDifferential &ray,
+                                              const pbrt::Intersection &,
+                                              const pbrt::Sample *, pbrt::RNG &,
+                                              pbrt::MemoryArena &) const
 {
     return _green;
 }
 
-pbrt::Spectrum
-PBRTDebugVolumeIntegrator::Li(const pbrt::Scene *scene, const pbrt::Renderer*,
-                              const pbrt::RayDifferential &ray, const pbrt::Sample*,
-                              pbrt::RNG&, pbrt::Spectrum* T, pbrt::MemoryArena&)
-                              const
+pbrt::Spectrum PBRTDebugVolumeIntegrator::Li(const pbrt::Scene *scene,
+                                             const pbrt::Renderer *,
+                                             const pbrt::RayDifferential &ray,
+                                             const pbrt::Sample *, pbrt::RNG &,
+                                             pbrt::Spectrum *T,
+                                             pbrt::MemoryArena &) const
 {
     *T = _white;
     float t0, t1;
-    return scene->volumeRegion == nullptr ?
-                _black :
-                scene->volumeRegion->IntersectP(ray, &t0, &t1) ?
-                    _red :
-                    _black;
+    return scene->volumeRegion == nullptr
+               ? _black
+               : scene->volumeRegion->IntersectP(ray, &t0, &t1) ? _red : _black;
 }
 
-pbrt::Spectrum
-PBRTDebugVolumeIntegrator::Transmittance(const pbrt::Scene*, const pbrt::Renderer*,
-                                         const pbrt::RayDifferential&, const pbrt::Sample*,
-                                         pbrt::RNG&, pbrt::MemoryArena&)
-                                         const
+pbrt::Spectrum PBRTDebugVolumeIntegrator::Transmittance(
+    const pbrt::Scene *, const pbrt::Renderer *, const pbrt::RayDifferential &,
+    const pbrt::Sample *, pbrt::RNG &, pbrt::MemoryArena &) const
 {
     return _white;
 }
-}
+} // namespace brayns

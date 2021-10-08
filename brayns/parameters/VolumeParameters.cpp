@@ -24,7 +24,7 @@ namespace
 const std::string PARAM_VOLUME_DIMENSIONS = "volume-dimensions";
 const std::string PARAM_VOLUME_ELEMENT_SPACING = "volume-element-spacing";
 const std::string PARAM_VOLUME_OFFSET = "volume-offset";
-}
+} // namespace
 
 namespace brayns
 {
@@ -39,9 +39,10 @@ VolumeParameters::VolumeParameters()
                               "Volume dimensions [uint uint uint]")(
         PARAM_VOLUME_ELEMENT_SPACING.c_str(),
         po::fixed_tokens_value<floats>(3, 3),
-        "Element spacing in the volume [float float float]")(
-        PARAM_VOLUME_OFFSET.c_str(), po::fixed_tokens_value<floats>(3, 3),
-        "Volume offset [float float float]");
+        "Element spacing in the volume [float float "
+        "float]")(PARAM_VOLUME_OFFSET.c_str(),
+                  po::fixed_tokens_value<floats>(3, 3),
+                  "Volume offset [float float float]");
 }
 
 void VolumeParameters::parse(const po::variables_map& vm)
@@ -71,4 +72,4 @@ void VolumeParameters::print()
     BRAYNS_INFO << "Element spacing : " << _elementSpacing << std::endl;
     BRAYNS_INFO << "Offset          : " << _offset << std::endl;
 }
-}
+} // namespace brayns

@@ -58,4 +58,4 @@ private:
 
     void _loadPlugin(const char* name, int argc, const char* argv[]);
 };
-}
+} // namespace brayns

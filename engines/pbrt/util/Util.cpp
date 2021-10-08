@@ -28,30 +28,27 @@ namespace brayns
 {
 pbrt::Transform pbrtTranslation(const Vector3f& v)
 {
-    pbrt::Matrix4x4 translation (1.f, 0.f, 0.f, v.x,
-                                 0.f, 1.f, 0.f, v.y,
-                                 0.f, 0.f, 1.f, v.z,
-                                 0.f, 0.f, 0.f, 1.f);
+    pbrt::Matrix4x4 translation(1.f, 0.f, 0.f, v.x, 0.f, 1.f, 0.f, v.y, 0.f,
+                                0.f, 1.f, v.z, 0.f, 0.f, 0.f, 1.f);
     return pbrt::Transform(translation);
 }
 
 pbrt::Transform pbrtTransform(const Transformation& t)
 {
-    //auto m = t.toMatrix();
+    // auto m = t.toMatrix();
 
-    const pbrt::Vector3f trans (t.getTranslation().x,
-                                t.getTranslation().y,
-                                t.getTranslation().z);
-    const pbrt::Vector3f rotCenter (t.getRotationCenter().x,
-                                    t.getRotationCenter().y,
-                                    t.getRotationCenter().z);
+    const pbrt::Vector3f trans(t.getTranslation().x, t.getTranslation().y,
+                               t.getTranslation().z);
+    const pbrt::Vector3f rotCenter(t.getRotationCenter().x,
+                                   t.getRotationCenter().y,
+                                   t.getRotationCenter().z);
     const auto& quatRot = t.getRotation();
     pbrt::Quaternion a;
     a.v.x = quatRot.x;
     a.v.y = quatRot.y;
     a.v.z = quatRot.z;
     a.w = quatRot.w;
-    const pbrt::Vector3f scale (t.getScale().x, t.getScale().y, t.getScale().z);
+    const pbrt::Vector3f scale(t.getScale().x, t.getScale().y, t.getScale().z);
 
     const auto trRot = a.ToTransform();
     const auto trTrans = pbrt::Translate(trans - rotCenter);
@@ -60,4 +57,4 @@ pbrt::Transform pbrtTransform(const Transformation& t)
 
     return trTransRotCent * trRot * trTrans * trScale;
 }
-}
+} // namespace brayns

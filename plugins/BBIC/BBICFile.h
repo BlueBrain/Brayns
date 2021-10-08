@@ -68,4 +68,4 @@ private:
     mutable std::mutex h5mutex_;
 #endif
 };
-}
+} // namespace bbic

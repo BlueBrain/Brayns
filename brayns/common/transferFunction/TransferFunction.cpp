@@ -48,7 +48,7 @@ double _interpolatedOpacity(const brayns::Vector2ds& controlPointsSorted,
     const auto& lastPoint = controlPointsSorted.back();
     return lastPoint.y;
 }
-}
+} // namespace
 
 namespace brayns
 {
@@ -95,14 +95,16 @@ floats TransferFunction::calculateInterpolatedOpacities() const
 
 Vector3f TransferFunction::getColorForValue(const double v) const
 {
-    if(v <= _valuesRange.x)
+    if (v <= _valuesRange.x)
         return *_colorMap.colors.begin();
 
-    if(v >= _valuesRange.y)
+    if (v >= _valuesRange.y)
         return _colorMap.colors.back();
 
-    const auto normValue = (v - _valuesRange.x) / (_valuesRange.y - _valuesRange.x);
-    const size_t index = static_cast<size_t>(floor(normValue * _colorMap.colors.size()));
+    const auto normValue =
+        (v - _valuesRange.x) / (_valuesRange.y - _valuesRange.x);
+    const size_t index =
+        static_cast<size_t>(floor(normValue * _colorMap.colors.size()));
     const size_t nextIndex = std::min(index + 1, _colorMap.colors.size() - 1);
 
     const double remainder = normValue - floor(normValue);
@@ -112,4 +114,4 @@ Vector3f TransferFunction::getColorForValue(const double v) const
 
     return (1.0 - remainder) * color1 + remainder * color2;
 }
-}
+} // namespace brayns

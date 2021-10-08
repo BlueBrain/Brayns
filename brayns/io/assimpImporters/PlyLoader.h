@@ -42,8 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  PLYLoader.h
  *  @brief Declaration of the .ply importer class.
  */
-#ifndef AI_PLYLOADER_H_INCLUDED
-#define AI_PLYLOADER_H_INCLUDED
+
+#pragma once
 
 #include "BaseImporter.h"
 #include "PlyParser.h"
@@ -60,7 +60,7 @@ using namespace PLY;
 
 // ---------------------------------------------------------------------------
 /** Importer class to load the stanford PLY file format
-*/
+ */
 class PLYImporter : public BaseImporter
 {
 public:
@@ -84,46 +84,46 @@ protected:
 
     // -------------------------------------------------------------------
     /** Imports the given file into the given scene structure.
-    * See BaseImporter::InternReadFile() for details
-    */
+     * See BaseImporter::InternReadFile() for details
+     */
     void InternReadFile(const std::string& pFile, aiScene* pScene,
                         IOSystem* pIOHandler);
 
 protected:
     // -------------------------------------------------------------------
     /** Extract vertices from the DOM
-    */
+     */
     void LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals = false);
 
     // -------------------------------------------------------------------
     /** Extract vertex color channels from the DOM
-    */
+     */
     void LoadVertexColor(std::vector<aiColor4D>* pvOut);
 
     // -------------------------------------------------------------------
     /** Extract texture coordinate channels from the DOM
-    */
+     */
     void LoadTextureCoordinates(std::vector<aiVector2D>* pvOut);
 
     // -------------------------------------------------------------------
     /** Extract a face list from the DOM
-    */
+     */
     void LoadFaces(std::vector<PLY::Face>* pvOut);
 
     // -------------------------------------------------------------------
     /** Extract a material list from the DOM
-    */
+     */
     void LoadMaterial(std::vector<aiMaterial*>* pvOut);
 
     // -------------------------------------------------------------------
     /** Validate material indices, replace default material identifiers
-    */
+     */
     void ReplaceDefaultMaterial(std::vector<PLY::Face>* avFaces,
                                 std::vector<aiMaterial*>* avMaterials);
 
     // -------------------------------------------------------------------
     /** Convert all meshes into our ourer representation
-    */
+     */
     void ConvertMeshes(std::vector<PLY::Face>* avFaces,
                        const std::vector<aiVector3D>* avPositions,
                        const std::vector<aiVector3D>* avNormals,
@@ -134,7 +134,7 @@ protected:
 
     // -------------------------------------------------------------------
     /** Static helper to parse a color from four single channels in
-    */
+     */
     static void GetMaterialColor(
         const std::vector<PLY::PropertyInstance>& avList,
         unsigned int aiPositions[4], PLY::EDataType aiTypes[4],
@@ -142,8 +142,8 @@ protected:
 
     // -------------------------------------------------------------------
     /** Static helper to parse a color channel value. The input value
-    *  is normalized to 0-1.
-    */
+     *  is normalized to 0-1.
+     */
     static ai_real NormalizeColorValue(PLY::PropertyInstance::ValueUnion val,
                                        PLY::EDataType eType);
 
@@ -155,5 +155,3 @@ protected:
 };
 
 } // end of namespace Assimp
-
-#endif // AI_3DSIMPORTER_H_INC

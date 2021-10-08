@@ -741,7 +741,6 @@ bool CircuitLoader::isSupported(const std::string& filename,
                                 const std::string& extension
                                     BRAYNS_UNUSED) const
 {
-
     const auto ends_with = [](const std::string& value,
                               const std::string& ending) {
         if (ending.size() > value.size())
@@ -753,20 +752,20 @@ bool CircuitLoader::isSupported(const std::string& filename,
         if (ends_with(filename, name))
             return true;
 
-    const auto contains = [](const std::string &value,
-                             const std::string &keyword) {
-        if(value.size() < keyword.size())
+    const auto contains = [](const std::string& value,
+                             const std::string& keyword) {
+        if (value.size() < keyword.size())
             return false;
 
         const auto lastSlash = value.find_last_of("/");
         std::string compareTo = value;
-        if(lastSlash != std::string::npos)
+        if (lastSlash != std::string::npos)
             compareTo = value.substr(lastSlash + 1);
         return compareTo.find(keyword) != std::string::npos;
     };
 
-    for(const auto& keyw : LOADER_KEYWORDS)
-        if(contains(filename, keyw))
+    for (const auto& keyw : LOADER_KEYWORDS)
+        if (contains(filename, keyw))
             return true;
 
     return false;

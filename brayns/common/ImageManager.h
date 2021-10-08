@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef IMAGEMANAGER_H
-#define IMAGEMANAGER_H
+#pragma once
 
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/types.h>
@@ -43,5 +42,4 @@ public:
     static Texture2DPtr importTextureFromFile(const std::string& filename,
                                               const TextureType type);
 };
-}
-#endif // IMAGEMANAGER_H
+} // namespace brayns

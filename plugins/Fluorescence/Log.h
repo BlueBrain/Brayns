@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FLOURESCENCE_LOG_H
-#define FLOURESCENCE_LOG_H
+#pragma once
 
 #include <ctime>
 #include <iostream>
@@ -29,7 +28,7 @@
 #define PLUGIN_ERROR std::cerr << "[ERROR] [FLUORESCENCE] "
 #define PLUGIN_WARN std::cerr << "[WARN ] [FLUORESCENCE] "
 #define PLUGIN_INFO std::cout << "[INFO ] [FLUORESCENCE] "
-#define PLUGIN_TIMER(__time, __msg)                                        \
+#define PLUGIN_TIMER(__time, __msg)                                    \
     std::cout << "[TIMER] [FLUORESCENCE] [" << __time << "] " << __msg \
               << std::endl;
 #ifdef NDEBUG
@@ -45,5 +44,3 @@
         PLUGIN_ERROR << __message << std::endl; \
         throw std::runtime_error(__message);    \
     }
-
-#endif // FLUORESCENCE_LOG_H

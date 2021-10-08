@@ -18,8 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ABSTRACTMANIPULATOR_H
-#define ABSTRACTMANIPULATOR_H
+#pragma once
 
 #include <brayns/common/types.h>
 
@@ -73,6 +72,4 @@ protected:
 
     void translate(const Vector3d& v);
 };
-}
-
-#endif
+} // namespace brayns

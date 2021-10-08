@@ -19,13 +19,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef DTISimulationHandler_H
-#define DTISimulationHandler_H
-
-#include "../api/DTIParams.h"
+#pragma once
 
 #include <brayns/api.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
+
+#include <messages/SetSpikeSimulationMessage.h>
 
 namespace dti
 {
@@ -43,33 +42,35 @@ public:
      * @brief Default constructor
      */
     DTISimulationHandler(const Indices& indices,
-                         const SpikeSimulationDescriptor& spikeSimulation);
+                         const SetSpikeSimulationMessage& spikeSimulation);
 
     void* getFrameDataImpl(const uint32_t frame) final;
 
     brayns::AbstractSimulationHandlerPtr clone() const final;
     std::map<uint64_t, float>& getSpikes() { return _spikes; }
-    void setTimeScale(const float scale) { _spikeSimulation.timeScale = scale; }
+    void setTimeScale(const float scale)
+    {
+        _spikeSimulation.time_scale = scale;
+    }
     void setDecaySpeed(const float value)
     {
-        _spikeSimulation.decaySpeed = value;
+        _spikeSimulation.decay_speed = value;
     }
     void setRestIntensity(const float value)
     {
-        _spikeSimulation.restIntensity = value;
+        _spikeSimulation.rest_intensity = value;
     }
     void setSpikeIntensity(const float value)
     {
-        _spikeSimulation.spikeIntensity = value;
+        _spikeSimulation.spike_intensity = value;
     }
 
 private:
     std::vector<float> _data;
     std::map<uint64_t, float> _spikes;
     Indices _indices;
-    SpikeSimulationDescriptor _spikeSimulation;
+    SetSpikeSimulationMessage _spikeSimulation;
 };
 
 typedef std::shared_ptr<DTISimulationHandler> DTISimulationHandlerPtr;
 } // namespace dti
-#endif // DTISimulationHandler_H

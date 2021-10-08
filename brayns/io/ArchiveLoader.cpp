@@ -1,4 +1,5 @@
-/* Copyright (c) 2018 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021 EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Jonas Karlsson <jonas.karlsson@epfl.ch>
  *
@@ -189,7 +190,7 @@ struct TmpFolder
     ~TmpFolder() { fs::remove_all(path); }
     std::string path{"/tmp/brayns_extracted_XXXXXX"};
 };
-}
+} // namespace
 
 namespace brayns
 {
@@ -209,8 +210,7 @@ std::vector<ModelDescriptorPtr> ArchiveLoader::loadExtracted(
     const std::string& path, const LoaderProgress& callback,
     const PropertyMap& properties) const
 {
-    const auto loaderName =
-        properties.getProperty<std::string>("loaderName", "");
+    const auto loaderName = properties.valueOr("loaderName", std::string());
     const Loader* loader =
         loaderName.empty() ? nullptr
                            : &_registry.getSuitableLoader("", "", loaderName);
@@ -261,4 +261,4 @@ std::vector<std::string> ArchiveLoader::getSupportedExtensions() const
 {
     return {"zip", "gz", "tgz", "bz2", "rar"};
 }
-}
+} // namespace brayns

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef TRIANGLEMESH_H
-#define TRIANGLEMESH_H
+#pragma once
 
 #include <brayns/common/types.h>
 
@@ -34,7 +33,8 @@ struct TriangleMesh
     std::vector<Vector2f> textureCoordinates;
 };
 
-inline TriangleMesh createBox(const Vector3f& minCorner, const Vector3f& maxCorner)
+inline TriangleMesh createBox(const Vector3f& minCorner,
+                              const Vector3f& maxCorner)
 {
     TriangleMesh result;
     const size_t numVertices = 24;
@@ -112,6 +112,4 @@ inline TriangleMesh createBox(const Vector3f& minCorner, const Vector3f& maxCorn
     return result;
 }
 
-}
-
-#endif // TRIANGLEMESH_H
+} // namespace brayns

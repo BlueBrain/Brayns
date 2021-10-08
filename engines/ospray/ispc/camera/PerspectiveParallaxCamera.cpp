@@ -70,4 +70,4 @@ void PerspectiveParallaxCamera::commit()
 
 OSP_REGISTER_CAMERA(PerspectiveParallaxCamera, perspectiveParallax);
 
-} // ::ospray
+} // namespace ospray

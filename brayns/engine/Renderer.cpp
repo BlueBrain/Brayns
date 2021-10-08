@@ -30,4 +30,4 @@ Renderer::Renderer(const AnimationParameters& animationParameters,
     , _renderingParameters(renderingParameters)
 {
 }
-}
+} // namespace brayns

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PBRTSDFGEOMETRYSHAPE_H
-#define PBRTSDFGEOMETRYSHAPE_H
+#pragma once
 
 #include <brayns/common/geometry/SDFGeometry.h>
 #include <brayns/common/log.h>
@@ -92,15 +91,17 @@ inline float sdSphere(const Vector3f& p, const Vector3f& c, float r)
     return glm::length(p - c) - r;
 }
 
-inline float sdCapsule(const Vector3f& p, const Vector3f& a, const Vector3f& b, float r)
+inline float sdCapsule(const Vector3f& p, const Vector3f& a, const Vector3f& b,
+                       float r)
 {
     const Vector3f pa = p - a, ba = b - a;
     const float h = glm::clamp(glm::dot(pa, ba) / glm::dot(ba, ba), 0.f, 1.f);
     return length(pa - ba * h) - r;
 }
 
-inline float sdConePill(const Vector3f& p, const Vector3f& p0, const Vector3f& p1,
-                        const float r0, const float r1, const bool useSigmoid)
+inline float sdConePill(const Vector3f& p, const Vector3f& p0,
+                        const Vector3f& p1, const float r0, const float r1,
+                        const bool useSigmoid)
 {
     const Vector3f v = (p1 - p0);
     const Vector3f w = (p - p0);
@@ -122,16 +123,15 @@ inline float sdConePill(const Vector3f& p, const Vector3f& p0, const Vector3f& p
     const float b = c1 / c2;
     const Vector3f Pb = p0 + b * v;
 
-    const float thickness = useSigmoid
-                        ? glm::lerp(r0, r1, smootherstep(b))
-                        : glm::lerp(r0, r1, b);
+    const float thickness =
+        useSigmoid ? glm::lerp(r0, r1, smootherstep(b)) : glm::lerp(r0, r1, b);
 
     return glm::length(p - Pb) - thickness;
 }
 
 inline float calcDistance(const SDFGeometry& primitive, const Vector3f& p)
 {
-    switch(primitive.type)
+    switch (primitive.type)
     {
     case SDFType::Sphere:
         return sdSphere(p, primitive.p0, primitive.r0);
@@ -148,80 +148,74 @@ inline float calcDistance(const SDFGeometry& primitive, const Vector3f& p)
     return -1.0;
 }
 
-
-template<SDFType T>
+template <SDFType T>
 class PBRTSDFGeometryShape : public pbrt::Shape
 {
 public:
-    PBRTSDFGeometryShape(const pbrt::Transform* objToWorld, const pbrt::Transform* worldToObj,
-                         bool revOrientation, const SDFGeometry* geom,
-                         const SDFGeometryData* data)
-      : pbrt::Shape(objToWorld, worldToObj, revOrientation)
-      , _srcGeom(geom)
-      , _srcData(data)
+    PBRTSDFGeometryShape(const pbrt::Transform* objToWorld,
+                         const pbrt::Transform* worldToObj, bool revOrientation,
+                         const SDFGeometry* geom, const SDFGeometryData* data)
+        : pbrt::Shape(objToWorld, worldToObj, revOrientation)
+        , _srcGeom(geom)
+        , _srcData(data)
     {
-      if(!_srcGeom || !_srcData)
-        throw std::runtime_error("PBRTSDFGeometryShape: Null sdf geometry given");
+        if (!_srcGeom || !_srcData)
+            throw std::runtime_error(
+                "PBRTSDFGeometryShape: Null sdf geometry given");
 
-      const auto bbounds = getSDFBoundingBox(*_srcGeom);
-      const auto& bmin = bbounds.getMin();
-      const auto& bmax = bbounds.getMax();
-      const pbrt::Point min (static_cast<float>(bmin.x),
-                             static_cast<float>(bmin.y),
-                             static_cast<float>(bmin.z));
-      const pbrt::Point max (static_cast<float>(bmax.x),
-                             static_cast<float>(bmax.y),
-                             static_cast<float>(bmax.z));
-      _bounds.pMin = min;
-      _bounds.pMax = max;
+        const auto bbounds = getSDFBoundingBox(*_srcGeom);
+        const auto& bmin = bbounds.getMin();
+        const auto& bmax = bbounds.getMax();
+        const pbrt::Point min(static_cast<float>(bmin.x),
+                              static_cast<float>(bmin.y),
+                              static_cast<float>(bmin.z));
+        const pbrt::Point max(static_cast<float>(bmax.x),
+                              static_cast<float>(bmax.y),
+                              static_cast<float>(bmax.z));
+        _bounds.pMin = min;
+        _bounds.pMax = max;
     }
 
-    ~PBRTSDFGeometryShape()
-    {
-    }
+    ~PBRTSDFGeometryShape() {}
 
-    pbrt::BBox ObjectBound() const final
-    {
-      return _bounds;
-    }
+    pbrt::BBox ObjectBound() const final { return _bounds; }
 
-    pbrt::BBox WorldBound() const final
-    {
-      return _bounds;
-    }
+    pbrt::BBox WorldBound() const final { return _bounds; }
 
     bool Intersect(const pbrt::Ray& ray, float* tHit, float* rayEpsilon,
                    pbrt::DifferentialGeometry* isect) const final
     {
-      *tHit = raymarch(ray);
-      if(*tHit > ray.mint && *tHit < ray.maxt)
-      {
-          
-          const auto bOrg = Vector3f(ray.o.x, ray.o.y, ray.o.z);
-          const auto bDir = glm::normalize(Vector3f(ray.d.x, ray.d.y, ray.d.z));
-          const auto bPos = bOrg + (*tHit * bDir);
-          const auto bNormal = computeNormal(bPos, calcEpsilon(bOrg, *tHit));
-          const pbrt::Point pHit = ray(static_cast<float>(*tHit));
-          *rayEpsilon = 1e-3f * *tHit;
+        *tHit = raymarch(ray);
+        if (*tHit > ray.mint && *tHit < ray.maxt)
+        {
+            const auto bOrg = Vector3f(ray.o.x, ray.o.y, ray.o.z);
+            const auto bDir =
+                glm::normalize(Vector3f(ray.d.x, ray.d.y, ray.d.z));
+            const auto bPos = bOrg + (*tHit * bDir);
+            const auto bNormal = computeNormal(bPos, calcEpsilon(bOrg, *tHit));
+            const pbrt::Point pHit = ray(static_cast<float>(*tHit));
+            *rayEpsilon = 1e-3f * *tHit;
 
-          const pbrt::Normal pNormal (bNormal.x, bNormal.y, bNormal.z);
+            const pbrt::Normal pNormal(bNormal.x, bNormal.y, bNormal.z);
 
-          pbrt::Vector dpdu, dpdv;
-          pbrt::Normal dndu, dndv;
-          float tu = 0.f, tv = 0.f;
+            pbrt::Vector dpdu, dpdv;
+            pbrt::Normal dndu, dndv;
+            float tu = 0.f, tv = 0.f;
 
-          dndu = dndv = pbrt::Normal(0.f, 0.f, 0.f);
-          pbrt::CoordinateSystem(pbrt::Vector(pNormal.x, pNormal.y, pNormal.z), &dpdu, &dpdv);
+            dndu = dndv = pbrt::Normal(0.f, 0.f, 0.f);
+            pbrt::CoordinateSystem(pbrt::Vector(pNormal.x, pNormal.y,
+                                                pNormal.z),
+                                   &dpdu, &dpdv);
 
-          *isect = pbrt::DifferentialGeometry(pHit, dpdu, dpdv,
-                                              dndu, dndv, tu, tv, this);
-        
-          isect->nn = pNormal;
+            *isect = pbrt::DifferentialGeometry(pHit, dpdu, dpdv, dndu, dndv,
+                                                tu, tv, this);
 
-          return true;
-      }
+            isect->nn = pNormal;
 
-      return false;
+            return true;
+        }
+
+        return false;
     }
 
     bool IntersectP(const pbrt::Ray& ray) const final
@@ -233,7 +227,8 @@ public:
     float Area() const final;
     pbrt::Point Sample(float u, float v, pbrt::Normal* pdf) const final;
 
-    bool Projects(const pbrt::Point &p, pbrt::Point &ps, pbrt::Normal &ns) const final
+    bool Projects(const pbrt::Point& p, pbrt::Point& ps,
+                  pbrt::Normal& ns) const final
     {
         (void)p;
         (void)ps;
@@ -256,21 +251,23 @@ private:
         const auto& neighbors = _srcData->neighbours[nindx];
         const auto numNeigh = neighbors.size();
 
-        if(numNeigh > 0)
+        if (numNeigh > 0)
         {
-          const float r0 = _srcGeom->r0;
+            const float r0 = _srcGeom->r0;
 
-          for (uint32_t i = 0; i < numNeigh; i++)
-          {
-              const SDFGeometry& neighbour = _srcData->geometries[neighbors[i]];
+            for (uint32_t i = 0; i < numNeigh; i++)
+            {
+                const SDFGeometry& neighbour =
+                    _srcData->geometries[neighbors[i]];
 
-              const float dOther = calcDistance(neighbour, p);
-              const float r1 = neighbour.r0;
-              const float blendFactor =
-                  glm::lerp(std::min(r0, r1), std::max(r0, r1), PBRT_SDF_BLEND_LERP_FACTOR);
+                const float dOther = calcDistance(neighbour, p);
+                const float r1 = neighbour.r0;
+                const float blendFactor =
+                    glm::lerp(std::min(r0, r1), std::max(r0, r1),
+                              PBRT_SDF_BLEND_LERP_FACTOR);
 
-              d = sminPoly(dOther, d, blendFactor * PBRT_SDF_BLEND_FACTOR);
-          }
+                d = sminPoly(dOther, d, blendFactor * PBRT_SDF_BLEND_FACTOR);
+            }
         }
 
         return d;
@@ -284,111 +281,121 @@ private:
     Vector3f computeNormal(const Vector3f& pos, const float e) const
     {
         // tetrahedron technique (4 evaluations)
-        static const Vector3f k0 = Vector3f(1, -1, -1), k1 = Vector3f(-1, -1, 1),
+        static const Vector3f k0 = Vector3f(1, -1, -1),
+                              k1 = Vector3f(-1, -1, 1),
                               k2 = Vector3f(-1, 1, -1), k3 = Vector3f(1, 1, 1);
 
-        auto temp = glm::normalize(k0 * sdfDistance(pos + e * k0) +
-                                   k1 * sdfDistance(pos + e * k1) +
-                                   k2 * sdfDistance(pos + e * k2) +
-                                   k3 * sdfDistance(pos + e * k3));
+        auto temp = glm::normalize(
+            k0 * sdfDistance(pos + e * k0) + k1 * sdfDistance(pos + e * k1) +
+            k2 * sdfDistance(pos + e * k2) + k3 * sdfDistance(pos + e * k3));
 
-        // Fix it due precission problems (TODO check when PBRT_FLOAT is double precission) 
+        // Fix it due precission problems (TODO check when PBRT_FLOAT is double
+        // precission)
         auto test = glm::dot(temp, temp);
         auto tempE = e;
         auto i = 0;
-        while(glm::isnan(test) && i < PBRT_MAX_NORMAL_FIX_ITERATIONS)
+        while (glm::isnan(test) && i < PBRT_MAX_NORMAL_FIX_ITERATIONS)
         {
-          tempE *= 10.f;
-          temp = glm::normalize(k0 * sdfDistance(pos + tempE * k0) +
-                                k1 * sdfDistance(pos + tempE * k1) +
-                                k2 * sdfDistance(pos + tempE * k2) +
-                                k3 * sdfDistance(pos + tempE * k3));
-          test = glm::dot(temp, temp);
-          ++i;
+            tempE *= 10.f;
+            temp = glm::normalize(k0 * sdfDistance(pos + tempE * k0) +
+                                  k1 * sdfDistance(pos + tempE * k1) +
+                                  k2 * sdfDistance(pos + tempE * k2) +
+                                  k3 * sdfDistance(pos + tempE * k3));
+            test = glm::dot(temp, temp);
+            ++i;
         }
 
-        if(glm::isnan(glm::abs(test)))
-          throw std::runtime_error("PBRTSDFGeometryShape: Tetrahedron evaluation for normal failed");
+        if (glm::isnan(glm::abs(test)))
+            throw std::runtime_error(
+                "PBRTSDFGeometryShape: Tetrahedron evaluation for normal "
+                "failed");
 
         return temp;
     }
 
     /**
      * Utility raymarch function used to fix rays that are born in the surface
-     * of the SDF. The standard raymarch approach generates an infinite loop for sub
-     * surface materials and create artifacts for reflections.
+     * of the SDF. The standard raymarch approach generates an infinite loop for
+     * sub surface materials and create artifacts for reflections.
      */
     float raymarchFixStep(const pbrt::Ray& ray, const float marchLength) const
     {
-      const Vector3f rayO (ray.o.x, ray.o.y, ray.o.z);
-      //const Vector3f rayD (ray.d.x, ray.d.y, ray.d.z);
-      const Vector3f rayD = glm::normalize(Vector3f(ray.d.x, ray.d.y, ray.d.z));
+        const Vector3f rayO(ray.o.x, ray.o.y, ray.o.z);
+        // const Vector3f rayD (ray.d.x, ray.d.y, ray.d.z);
+        const Vector3f rayD =
+            glm::normalize(Vector3f(ray.d.x, ray.d.y, ray.d.z));
 
-      const auto stepLength = marchLength / static_cast<float>(PBRT_MAX_MARCHING_ITERATIONS);
-      
-      float lastSign = sdfDistance(rayO) < 0.f? -1.f : 1.f;
-      float lastT = 0.f;
+        const auto stepLength =
+            marchLength / static_cast<float>(PBRT_MAX_MARCHING_ITERATIONS);
 
-      for(int i = 0; i < PBRT_MAX_MARCHING_ITERATIONS; ++i)
-      {
-        auto currentT = stepLength * static_cast<float>(i + 1);
-        auto d = sdfDistance(rayO + rayD * currentT);
-        auto sign = d < 0.f? -1.f : 1.f;
+        float lastSign = sdfDistance(rayO) < 0.f ? -1.f : 1.f;
+        float lastT = 0.f;
 
-        // We have cross the surface, refine hit and return distance
-        // i > 0 to allow surface rays penetrate the surface
-        if(sign != lastSign && i > 5)
+        for (int i = 0; i < PBRT_MAX_MARCHING_ITERATIONS; ++i)
         {
-          const auto fixLen = currentT - lastT;
-          const auto fixStep = fixLen / static_cast<float>(PBRT_MAX_MARCH_FIX_ITERATIONS);
-          for(int j = 0; j < PBRT_MAX_MARCH_FIX_ITERATIONS; j++)
-          {
-            currentT = lastT + (fixStep * static_cast<float>(i + 1));
-            d = sdfDistance(rayO + rayD * currentT);
-            sign = d < 0.f? -1.f : 1.f;
+            auto currentT = stepLength * static_cast<float>(i + 1);
+            auto d = sdfDistance(rayO + rayD * currentT);
+            auto sign = d < 0.f ? -1.f : 1.f;
 
-            if(sign != lastSign)
-              return currentT;
-            
-          }
+            // We have cross the surface, refine hit and return distance
+            // i > 0 to allow surface rays penetrate the surface
+            if (sign != lastSign && i > 5)
+            {
+                const auto fixLen = currentT - lastT;
+                const auto fixStep =
+                    fixLen / static_cast<float>(PBRT_MAX_MARCH_FIX_ITERATIONS);
+                for (int j = 0; j < PBRT_MAX_MARCH_FIX_ITERATIONS; j++)
+                {
+                    currentT = lastT + (fixStep * static_cast<float>(i + 1));
+                    d = sdfDistance(rayO + rayD * currentT);
+                    sign = d < 0.f ? -1.f : 1.f;
 
-          return currentT;
+                    if (sign != lastSign)
+                        return currentT;
+                }
+
+                return currentT;
+            }
+
+            lastSign = sign;
+            lastT = currentT;
         }
 
-        lastSign = sign;
-        lastT = currentT;
-      }
-      
-      return 0.f;
+        return 0.f;
     }
 
     float raymarch(const pbrt::Ray& ray) const
     {
         float bbHit0 = 0.f, bbHit1 = 0.f;
-        if(!_bounds.IntersectP(ray, &bbHit0, &bbHit1))
+        if (!_bounds.IntersectP(ray, &bbHit0, &bbHit1))
             return -1.f;
 
-        const Vector3f rayO (ray.o.x, ray.o.y, ray.o.z);
-        const Vector3f rayD = Vector3f(ray.d.x, ray.d.y, ray.d.z);//glm::normalize(Vector3f(ray.d.x, ray.d.y, ray.d.z));
+        const Vector3f rayO(ray.o.x, ray.o.y, ray.o.z);
+        const Vector3f rayD =
+            Vector3f(ray.d.x, ray.d.y,
+                     ray.d.z); // glm::normalize(Vector3f(ray.d.x,
+                               // ray.d.y, ray.d.z));
         const auto initialDistance = sdfDistance(rayO);
-        const float sdfSign = initialDistance < 0.f? -1.f : 1.f;
+        const float sdfSign = initialDistance < 0.f ? -1.f : 1.f;
 
         float t = bbHit0;
-        const float stepLength = (bbHit1 - bbHit0) /
-                                       static_cast<float>(PBRT_MAX_MARCHING_ITERATIONS);
+        const float stepLength =
+            (bbHit1 - bbHit0) /
+            static_cast<float>(PBRT_MAX_MARCHING_ITERATIONS);
 
         for (int i = 0; i < PBRT_MAX_MARCHING_ITERATIONS; ++i)
         {
             // Current position to evaluate
-            const auto currentT = bbHit0 + stepLength * static_cast<float>(i + 1);
+            const auto currentT =
+                bbHit0 + stepLength * static_cast<float>(i + 1);
             const Vector3f p = rayO + rayD * currentT;
 
             // Current distance to closest point of the shape
             float currentDist = sdfDistance(p);
-            float currentSign = currentDist < 0.f? -1.f : 1.f;
+            float currentSign = currentDist < 0.f ? -1.f : 1.f;
 
             // We cross the surface, refine hit and return
-            if(currentSign != sdfSign)
+            if (currentSign != sdfSign)
             {
                 auto start = t;
                 auto end = currentT;
@@ -398,16 +405,16 @@ private:
                     auto midPoint = (end + start) * 0.5f;
                     auto pFix = rayO + rayD * midPoint;
                     currentDist = sdfDistance(pFix);
-                    currentSign = currentDist < 0.f? -1.f : 1.f;
+                    currentSign = currentDist < 0.f ? -1.f : 1.f;
 
-                    if(currentSign != sdfSign)
+                    if (currentSign != sdfSign)
                         end = midPoint;
                     else
                         start = midPoint;
                 }
 
-                return start > bbHit1? -1.f : start;
-                    return -1.f;
+                return start > bbHit1 ? -1.f : start;
+                return -1.f;
             }
 
             t = currentT;
@@ -424,75 +431,82 @@ private:
     pbrt::BBox _bounds;
 };
 
-
-template<>
-float PBRTSDFGeometryShape<SDFType::Sphere>::shapeDistance(const Vector3f& p) const
+template <>
+float PBRTSDFGeometryShape<SDFType::Sphere>::shapeDistance(
+    const Vector3f& p) const
 {
     return sdSphere(p, _srcGeom->p0, _srcGeom->r0);
 }
 
-template<>
-float PBRTSDFGeometryShape<SDFType::Pill>::shapeDistance(const Vector3f& p) const
+template <>
+float PBRTSDFGeometryShape<SDFType::Pill>::shapeDistance(
+    const Vector3f& p) const
 {
     return sdCapsule(p, _srcGeom->p0, _srcGeom->p1, _srcGeom->r0);
 }
 
-template<>
-float PBRTSDFGeometryShape<SDFType::ConePill>::shapeDistance(const Vector3f& p) const
+template <>
+float PBRTSDFGeometryShape<SDFType::ConePill>::shapeDistance(
+    const Vector3f& p) const
 {
-    return sdConePill(p, _srcGeom->p0, _srcGeom->p1, _srcGeom->r0, _srcGeom->r1, false);
+    return sdConePill(p, _srcGeom->p0, _srcGeom->p1, _srcGeom->r0, _srcGeom->r1,
+                      false);
 }
 
-template<>
-float PBRTSDFGeometryShape<SDFType::ConePillSigmoid>::shapeDistance(const Vector3f& p) const
+template <>
+float PBRTSDFGeometryShape<SDFType::ConePillSigmoid>::shapeDistance(
+    const Vector3f& p) const
 {
-    return sdConePill(p, _srcGeom->p0, _srcGeom->p1, _srcGeom->r0, _srcGeom->r1, true);
+    return sdConePill(p, _srcGeom->p0, _srcGeom->p1, _srcGeom->r0, _srcGeom->r1,
+                      true);
 }
 
-template<>
+template <>
 float PBRTSDFGeometryShape<SDFType::Sphere>::Area() const
 {
     return PBRT_M_PI * 4.0f * _srcGeom->r0 * _srcGeom->r0;
 }
 
-template<>
+template <>
 float PBRTSDFGeometryShape<SDFType::Pill>::Area() const
 {
     const auto h = glm::length(_srcGeom->p1 - _srcGeom->p0);
 
-    //const auto sphere = pbrt::Pi * 4.0 * geom.r0 * geom.r0;
-    //const auto cylinder = pbrt::Pi * 2.0 * geom.r0 * h;
+    // const auto sphere = pbrt::Pi * 4.0 * geom.r0 * geom.r0;
+    // const auto cylinder = pbrt::Pi * 2.0 * geom.r0 * h;
 
     return PBRT_M_PI * 2.f * _srcGeom->r0 * (_srcGeom->r0 * 2.f + h);
 }
 
-template<>
+template <>
 float PBRTSDFGeometryShape<SDFType::ConePill>::Area() const
 {
     const auto h = glm::length(_srcGeom->p1 - _srcGeom->p0);
-    const auto s = sqrtf((_srcGeom->r1 - _srcGeom->r0)*(_srcGeom->r1 - _srcGeom->r0) + h*h);
-    //const auto cone = pbrt::Pi * (geom.r1 + geom.r0) * s;
-    //const auto sphereA = pbrt::Pi * 2.0 * geom.r0;
-    //const auto sphereB = pbrt::Pi * 2.0 * geom.r1;
+    const auto s = sqrtf(
+        (_srcGeom->r1 - _srcGeom->r0) * (_srcGeom->r1 - _srcGeom->r0) + h * h);
+    // const auto cone = pbrt::Pi * (geom.r1 + geom.r0) * s;
+    // const auto sphereA = pbrt::Pi * 2.0 * geom.r0;
+    // const auto sphereB = pbrt::Pi * 2.0 * geom.r1;
 
     return PBRT_M_PI * (_srcGeom->r0 + _srcGeom->r1) * (2.0f + s);
 }
 
-template<>
+template <>
 float PBRTSDFGeometryShape<SDFType::ConePillSigmoid>::Area() const
 {
     const auto h = glm::length(_srcGeom->p1 - _srcGeom->p0);
-    const auto s = sqrtf((_srcGeom->r1 - _srcGeom->r0)*(_srcGeom->r1 - _srcGeom->r0) + h*h);
+    const auto s = sqrtf(
+        (_srcGeom->r1 - _srcGeom->r0) * (_srcGeom->r1 - _srcGeom->r0) + h * h);
 
     return PBRT_M_PI * (_srcGeom->r0 + _srcGeom->r1) * (2.f + s);
 }
 
-template<>
-pbrt::Point
-PBRTSDFGeometryShape<SDFType::Sphere>::Sample(float u, float v,
-                                              pbrt::Normal* normal) const
+template <>
+pbrt::Point PBRTSDFGeometryShape<SDFType::Sphere>::Sample(
+    float u, float v, pbrt::Normal* normal) const
 {
-    const auto center = pbrt::Point(_srcGeom->p0.x, _srcGeom->p0.y, _srcGeom->p0.z);
+    const auto center =
+        pbrt::Point(_srcGeom->p0.x, _srcGeom->p0.y, _srcGeom->p0.z);
     const auto sample = _srcGeom->r0 * pbrt::UniformSampleSphere(u, v);
     pbrt::Point p = center + sample;
     p *= (_srcGeom->r0 / pbrt::Distance(p, center)); // Reproject
@@ -501,33 +515,37 @@ PBRTSDFGeometryShape<SDFType::Sphere>::Sample(float u, float v,
     return p;
 }
 
-template<>
-pbrt::Point
-PBRTSDFGeometryShape<SDFType::Pill>::Sample(float u, float v,
-                                            pbrt::Normal* normal) const
+template <>
+pbrt::Point PBRTSDFGeometryShape<SDFType::Pill>::Sample(
+    float u, float v, pbrt::Normal* normal) const
 {
-    // Determine were are we in the pill (top half sphere, cylinder, bottom half sphere)
+    // Determine were are we in the pill (top half sphere, cylinder, bottom half
+    // sphere)
     const auto h = glm::length(_srcGeom->p1 - _srcGeom->p0);
     const auto totalLen = _srcGeom->r0 * 2.f + h;
     const auto sampledLen = totalLen * u;
 
     pbrt::Point p;
 
-    if(sampledLen <= _srcGeom->r0) // We are in top sphere
+    if (sampledLen <= _srcGeom->r0) // We are in top sphere
     {
         const auto bDir = glm::normalize(_srcGeom->p0 - _srcGeom->p1);
-        const pbrt::Vector pDir = pbrt::Normalize(pbrt::Vector (bDir.x, bDir.y, bDir.z));
+        const pbrt::Vector pDir =
+            pbrt::Normalize(pbrt::Vector(bDir.x, bDir.y, bDir.z));
 
         const auto sample = pbrt::UniformSampleHemisphere(u, v);
-        auto sampleDir = pbrt::Vector(_srcGeom->p0.x, _srcGeom->p0.y, _srcGeom->p0.z) + _srcGeom->r0 * sample;
+        auto sampleDir =
+            pbrt::Vector(_srcGeom->p0.x, _srcGeom->p0.y, _srcGeom->p0.z) +
+            _srcGeom->r0 * sample;
 
-        if(pbrt::Dot(pDir, pbrt::Normalize(sampleDir)) < 0.f)
+        if (pbrt::Dot(pDir, pbrt::Normalize(sampleDir)) < 0.f)
             sampleDir = -sampleDir;
 
         p = pbrt::Point(sampleDir.x, sampleDir.y, sampleDir.z);
         *normal = pbrt::Normal(pbrt::Normalize(sampleDir));
     }
-    else if (sampledLen > _srcGeom->r0 && sampledLen <= _srcGeom->r0 + h) // In cylinder
+    else if (sampledLen > _srcGeom->r0 &&
+             sampledLen <= _srcGeom->r0 + h) // In cylinder
     {
         // Find a vector perpendicular to the pill main direction
         const auto bDir = glm::normalize(_srcGeom->p1 - _srcGeom->p0);
@@ -548,17 +566,21 @@ PBRTSDFGeometryShape<SDFType::Pill>::Sample(float u, float v,
         sample += (bDir * normaHeight);
 
         p = pbrt::Point(sample.x, sample.y, sample.z);
-        *normal = pbrt::Normalize(pbrt::Normal(rotated.x, rotated.y, rotated.z));
+        *normal =
+            pbrt::Normalize(pbrt::Normal(rotated.x, rotated.y, rotated.z));
     }
     else // In bottom sphere
     {
         const auto bDir = glm::normalize(_srcGeom->p1 - _srcGeom->p0);
-        const pbrt::Vector pDir = pbrt::Normalize(pbrt::Vector (bDir.x, bDir.y, bDir.z));
+        const pbrt::Vector pDir =
+            pbrt::Normalize(pbrt::Vector(bDir.x, bDir.y, bDir.z));
 
         const auto sample = pbrt::UniformSampleHemisphere(u, v);
-        auto sampleDir = pbrt::Vector(_srcGeom->p1.x, _srcGeom->p1.y, _srcGeom->p1.z) + _srcGeom->r0 * sample;
+        auto sampleDir =
+            pbrt::Vector(_srcGeom->p1.x, _srcGeom->p1.y, _srcGeom->p1.z) +
+            _srcGeom->r0 * sample;
 
-        if(pbrt::Dot(pDir, pbrt::Normalize(sampleDir)) < 0.f)
+        if (pbrt::Dot(pDir, pbrt::Normalize(sampleDir)) < 0.f)
             sampleDir = -sampleDir;
 
         p = pbrt::Point(sampleDir.x, sampleDir.y, sampleDir.z);
@@ -568,33 +590,37 @@ PBRTSDFGeometryShape<SDFType::Pill>::Sample(float u, float v,
     return p;
 }
 
-template<>
-pbrt::Point
-PBRTSDFGeometryShape<SDFType::ConePill>::Sample(float u, float v,
-                                                pbrt::Normal* normal) const
+template <>
+pbrt::Point PBRTSDFGeometryShape<SDFType::ConePill>::Sample(
+    float u, float v, pbrt::Normal* normal) const
 {
-    // Determine were are we in the pill (top half sphere, cylinder, bottom half sphere)
+    // Determine were are we in the pill (top half sphere, cylinder, bottom half
+    // sphere)
     const auto h = glm::length(_srcGeom->p1 - _srcGeom->p0);
     const auto totalLen = _srcGeom->r0 * 2.f + h;
     const auto sampledLen = totalLen * u;
 
     pbrt::Point p;
 
-    if(sampledLen <= _srcGeom->r0) // We are in top sphere
+    if (sampledLen <= _srcGeom->r0) // We are in top sphere
     {
         const auto bDir = glm::normalize(_srcGeom->p0 - _srcGeom->p1);
-        const pbrt::Vector pDir = pbrt::Normalize(pbrt::Vector(bDir.x, bDir.y, bDir.z));
+        const pbrt::Vector pDir =
+            pbrt::Normalize(pbrt::Vector(bDir.x, bDir.y, bDir.z));
 
         const auto sample = pbrt::UniformSampleHemisphere(u, v);
-        auto sampleDir = pbrt::Vector(_srcGeom->p0.x, _srcGeom->p0.y, _srcGeom->p0.z) + _srcGeom->r0 * sample;
+        auto sampleDir =
+            pbrt::Vector(_srcGeom->p0.x, _srcGeom->p0.y, _srcGeom->p0.z) +
+            _srcGeom->r0 * sample;
 
-        if(pbrt::Dot(pDir, pbrt::Normalize(sampleDir)) < 0.f)
+        if (pbrt::Dot(pDir, pbrt::Normalize(sampleDir)) < 0.f)
             sampleDir = -sampleDir;
 
         p = pbrt::Point(sampleDir.x, sampleDir.y, sampleDir.z);
         *normal = pbrt::Normal(pbrt::Normalize(sampleDir));
     }
-    else if (sampledLen > _srcGeom->r0 && sampledLen <= _srcGeom->r0 + h) // In frustrum cone
+    else if (sampledLen > _srcGeom->r0 &&
+             sampledLen <= _srcGeom->r0 + h) // In frustrum cone
     {
         // Find a vector perpendicular to the pill main direction
         const auto bDir = glm::normalize(_srcGeom->p1 - _srcGeom->p0);
@@ -615,17 +641,21 @@ PBRTSDFGeometryShape<SDFType::ConePill>::Sample(float u, float v,
         sample += (bDir * normaHeight);
 
         p = pbrt::Point(rotated.x, rotated.y, rotated.z);
-        *normal = pbrt::Normalize(pbrt::Normal(rotated.x, rotated.y, rotated.z));
+        *normal =
+            pbrt::Normalize(pbrt::Normal(rotated.x, rotated.y, rotated.z));
     }
     else // In bottom sphere
     {
         const auto bDir = glm::normalize(_srcGeom->p1 - _srcGeom->p0);
-        const pbrt::Vector pDir = pbrt::Normalize(pbrt::Vector(bDir.x, bDir.y, bDir.z));
+        const pbrt::Vector pDir =
+            pbrt::Normalize(pbrt::Vector(bDir.x, bDir.y, bDir.z));
 
         const auto sample = pbrt::UniformSampleHemisphere(u, v);
-        auto sampleDir = pbrt::Vector(_srcGeom->p1.x, _srcGeom->p1.y, _srcGeom->p1.z) + _srcGeom->r0 * sample;
+        auto sampleDir =
+            pbrt::Vector(_srcGeom->p1.x, _srcGeom->p1.y, _srcGeom->p1.z) +
+            _srcGeom->r0 * sample;
 
-        if(pbrt::Dot(pDir, pbrt::Normalize(sampleDir)) < 0.f)
+        if (pbrt::Dot(pDir, pbrt::Normalize(sampleDir)) < 0.f)
             sampleDir = -sampleDir;
 
         p = pbrt::Point(sampleDir.x, sampleDir.y, sampleDir.z);
@@ -635,33 +665,37 @@ PBRTSDFGeometryShape<SDFType::ConePill>::Sample(float u, float v,
     return p;
 }
 
-template<>
-pbrt::Point
-PBRTSDFGeometryShape<SDFType::ConePillSigmoid>::Sample(float u, float v,
-                                                       pbrt::Normal* normal) const
+template <>
+pbrt::Point PBRTSDFGeometryShape<SDFType::ConePillSigmoid>::Sample(
+    float u, float v, pbrt::Normal* normal) const
 {
     pbrt::Point p;
 
-    // Determine were are we in the pill (top half sphere, cylinder, bottom half sphere)
+    // Determine were are we in the pill (top half sphere, cylinder, bottom half
+    // sphere)
     const auto h = glm::length(_srcGeom->p1 - _srcGeom->p0);
     const auto totalLen = _srcGeom->r0 * 2.f + h;
     const auto sampledLen = totalLen * u;
 
-    if(sampledLen <= _srcGeom->r0) // We are in top sphere
+    if (sampledLen <= _srcGeom->r0) // We are in top sphere
     {
         const auto bDir = glm::normalize(_srcGeom->p0 - _srcGeom->p1);
-        const pbrt::Vector pDir = pbrt::Normalize(pbrt::Vector(bDir.x, bDir.y, bDir.z));
+        const pbrt::Vector pDir =
+            pbrt::Normalize(pbrt::Vector(bDir.x, bDir.y, bDir.z));
 
         const auto sample = pbrt::UniformSampleHemisphere(u, v);
-        auto sampleDir = pbrt::Vector(_srcGeom->p0.x, _srcGeom->p0.y, _srcGeom->p0.z) + _srcGeom->r0 * sample;
+        auto sampleDir =
+            pbrt::Vector(_srcGeom->p0.x, _srcGeom->p0.y, _srcGeom->p0.z) +
+            _srcGeom->r0 * sample;
 
-        if(pbrt::Dot(pDir, pbrt::Normalize(sampleDir)) < 0.f)
+        if (pbrt::Dot(pDir, pbrt::Normalize(sampleDir)) < 0.f)
             sampleDir = -sampleDir;
 
         p = pbrt::Point(sampleDir.x, sampleDir.y, sampleDir.z);
         *normal = pbrt::Normal(pbrt::Normalize(sampleDir));
     }
-    else if (sampledLen > _srcGeom->r0 && sampledLen <= _srcGeom->r0 + h) // In frustrum cone
+    else if (sampledLen > _srcGeom->r0 &&
+             sampledLen <= _srcGeom->r0 + h) // In frustrum cone
     {
         // Find a vector perpendicular to the pill main direction
         const auto bDir = glm::normalize(_srcGeom->p1 - _srcGeom->p0);
@@ -682,17 +716,21 @@ PBRTSDFGeometryShape<SDFType::ConePillSigmoid>::Sample(float u, float v,
         sample += (bDir * normaHeight);
 
         p = pbrt::Point(rotated.x, rotated.y, rotated.z);
-        *normal = pbrt::Normalize(pbrt::Normal(rotated.x, rotated.y, rotated.z));
+        *normal =
+            pbrt::Normalize(pbrt::Normal(rotated.x, rotated.y, rotated.z));
     }
     else // In bottom sphere
     {
         const auto bDir = glm::normalize(_srcGeom->p1 - _srcGeom->p0);
-        const pbrt::Vector pDir = pbrt::Normalize(pbrt::Vector(bDir.x, bDir.y, bDir.z));
+        const pbrt::Vector pDir =
+            pbrt::Normalize(pbrt::Vector(bDir.x, bDir.y, bDir.z));
 
         const auto sample = pbrt::UniformSampleHemisphere(u, v);
-        auto sampleDir = pbrt::Vector(_srcGeom->p1.x, _srcGeom->p1.y, _srcGeom->p1.z) + _srcGeom->r0 * sample;
+        auto sampleDir =
+            pbrt::Vector(_srcGeom->p1.x, _srcGeom->p1.y, _srcGeom->p1.z) +
+            _srcGeom->r0 * sample;
 
-        if(pbrt::Dot(pDir, pbrt::Normalize(sampleDir)) < 0.f)
+        if (pbrt::Dot(pDir, pbrt::Normalize(sampleDir)) < 0.f)
             sampleDir = -sampleDir;
 
         p = pbrt::Point(sampleDir.x, sampleDir.y, sampleDir.z);
@@ -701,6 +739,4 @@ PBRTSDFGeometryShape<SDFType::ConePillSigmoid>::Sample(float u, float v,
 
     return p;
 }
-}
-
-#endif
+} // namespace brayns

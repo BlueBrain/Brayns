@@ -25,20 +25,19 @@ void CellObjectMapper::add(const size_t gid, const MorphologyMap& mm)
 void CellObjectMapper::remove(const size_t gid)
 {
     auto it = _cellToRenderableMap.find(gid);
-    if(it != _cellToRenderableMap.end())
+    if (it != _cellToRenderableMap.end())
         _cellToRenderableMap.erase(it);
 }
 
-RemapResult
-CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
-                                     brayns::Scene& scene)
+RemapResult CellObjectMapper::remapCircuitColors(
+    const CircuitColorScheme scheme, brayns::Scene& scene)
 {
     RemapResult result;
     result.error = 0;
     result.message = "";
     result.updated = true;
 
-    if(scheme == _lastScheme)
+    if (scheme == _lastScheme)
     {
         result.updated = false;
         return result;
@@ -59,7 +58,8 @@ CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
     brayns::ConesMap remappedCones;
     brayns::SDFBeziersMap remappedBeziers;
     brayns::TriangleMeshMap remappedMeshes;
-    brayns::SDFGeometryData remappedSDFGeometries = _model->getModel().getSDFGeometryData();
+    brayns::SDFGeometryData remappedSDFGeometries =
+        _model->getModel().getSDFGeometryData();
     remappedSDFGeometries.geometryIndices.clear();
 
     // Create the new model which will replace the current one
@@ -75,50 +75,55 @@ CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
     {
         // Copy the simulation handler
         auto sh = _model->getModel().getSimulationHandler();
-        if(sh)
+        if (sh)
         {
             newModel->setSimulationHandler(sh->clone());
-            // Reset simulation handler current frame so the simulation data gets commited
-            // (current frame != animation params current frame)
+            // Reset simulation handler current frame so the simulation data
+            // gets commited (current frame != animation params current frame)
             sh->setCurrentFrame(std::numeric_limits<uint32_t>::max());
         }
 
         // Create the new materials given the new scheme
         brayns::PropertyMap materialProps;
-        materialProps.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, sh? true : false});
-        materialProps.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
-                                   static_cast<int>(MaterialShadingMode::diffuse)});
-        materialProps.setProperty(
+        materialProps.add(
+            {MATERIAL_PROPERTY_CAST_USER_DATA, sh ? true : false});
+        materialProps.add({MATERIAL_PROPERTY_SHADING_MODE,
+                           static_cast<int>(MaterialShadingMode::diffuse)});
+        materialProps.add(
             {MATERIAL_PROPERTY_CLIPPING_MODE,
              static_cast<int>(MaterialClippingMode::no_clipping)});
-        for(size_t i = 0; i < _cellToRenderableMap.size(); ++i)
+        for (size_t i = 0; i < _cellToRenderableMap.size(); ++i)
         {
             const auto matId = _computeMaterialId(scheme, i);
-            auto mptr = newModel->createMaterial(matId, std::to_string(matId), materialProps);
-            if(sh)
+            auto mptr = newModel->createMaterial(matId, std::to_string(matId),
+                                                 materialProps);
+            if (sh)
                 sh->bind(mptr);
         }
 
         // Remap item by item so we dont need to keep a whole second copy of
         // the circuit
         // Remap spheres
-        for(auto& pair : _cellToRenderableMap)
+        for (auto& pair : _cellToRenderableMap)
         {
             // If the model has spheres
             auto& msm = pair.second._sphereMap;
-            if(!msm.empty())
+            if (!msm.empty())
             {
                 // Recompute the material id for this morphology
-                const auto matId = _computeMaterialId(scheme, pair.second._linealIndex);
-                // Add all the spheres of this morphology to the temporal storage
+                const auto matId =
+                    _computeMaterialId(scheme, pair.second._linealIndex);
+                // Add all the spheres of this morphology to the temporal
+                // storage
                 auto& tempStorage = remappedSpheres[matId];
-                // At the same time, rebuild the new morphology material id -> part map
+                // At the same time, rebuild the new morphology material id ->
+                // part map
                 std::vector<size_t> newMapping;
-                for(auto& spheres : msm)
+                for (auto& spheres : msm)
                 {
                     auto& src = srcSpheres[spheres.first];
 
-                    for(auto sphereIndx : spheres.second)
+                    for (auto sphereIndx : spheres.second)
                     {
                         newMapping.push_back(tempStorage.size());
                         tempStorage.push_back(src[sphereIndx]);
@@ -130,21 +135,23 @@ CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
                 pair.second._sphereMap[matId] = newMapping;
             }
         }
-        newModel->getSpheres().insert(remappedSpheres.begin(), remappedSpheres.end());
+        newModel->getSpheres().insert(remappedSpheres.begin(),
+                                      remappedSpheres.end());
 
         // Remap cylinders
-        for(auto& pair : _cellToRenderableMap)
+        for (auto& pair : _cellToRenderableMap)
         {
             auto& msm = pair.second._cylinderMap;
-            if(!msm.empty())
+            if (!msm.empty())
             {
-                const auto matId = _computeMaterialId(scheme, pair.second._linealIndex);
+                const auto matId =
+                    _computeMaterialId(scheme, pair.second._linealIndex);
                 auto& tempStorage = remappedCylinder[matId];
                 std::vector<size_t> newMapping;
-                for(auto& cylinders : msm)
+                for (auto& cylinders : msm)
                 {
                     auto& src = srcCylinder[cylinders.first];
-                    for(auto cylinderIndx : cylinders.second)
+                    for (auto cylinderIndx : cylinders.second)
                     {
                         newMapping.push_back(tempStorage.size());
                         tempStorage.push_back(src[cylinderIndx]);
@@ -155,21 +162,23 @@ CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
                 pair.second._cylinderMap[matId] = newMapping;
             }
         }
-        newModel->getCylinders().insert(remappedCylinder.begin(), remappedCylinder.end());
+        newModel->getCylinders().insert(remappedCylinder.begin(),
+                                        remappedCylinder.end());
 
         // Remap cones
-        for(auto& pair : _cellToRenderableMap)
+        for (auto& pair : _cellToRenderableMap)
         {
             auto& msm = pair.second._coneMap;
-            if(!msm.empty())
+            if (!msm.empty())
             {
-                const auto matId = _computeMaterialId(scheme, pair.second._linealIndex);
+                const auto matId =
+                    _computeMaterialId(scheme, pair.second._linealIndex);
                 auto& tempStorage = remappedCones[matId];
                 std::vector<size_t> newMapping;
-                for(auto& cones : msm)
+                for (auto& cones : msm)
                 {
                     auto& src = srcCones[cones.first];
-                    for(auto coneIndx : cones.second)
+                    for (auto coneIndx : cones.second)
                     {
                         newMapping.push_back(tempStorage.size());
                         tempStorage.push_back(src[coneIndx]);
@@ -183,18 +192,19 @@ CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
         newModel->getCones().insert(remappedCones.begin(), remappedCones.end());
 
         // Remap Bezier SDFs
-        for(auto& pair : _cellToRenderableMap)
+        for (auto& pair : _cellToRenderableMap)
         {
             auto& msm = pair.second._sdfBezierMap;
-            if(!msm.empty())
+            if (!msm.empty())
             {
-                const auto matId = _computeMaterialId(scheme, pair.second._linealIndex);
+                const auto matId =
+                    _computeMaterialId(scheme, pair.second._linealIndex);
                 auto& tempStorage = remappedBeziers[matId];
                 std::vector<size_t> newMapping;
-                for(auto& beziers : msm)
+                for (auto& beziers : msm)
                 {
                     auto& src = srcBeziers[beziers.first];
-                    for(auto bezierIndx : beziers.second)
+                    for (auto bezierIndx : beziers.second)
                     {
                         newMapping.push_back(tempStorage.size());
                         tempStorage.push_back(src[bezierIndx]);
@@ -205,31 +215,36 @@ CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
                 pair.second._sdfBezierMap[matId] = newMapping;
             }
         }
-        newModel->getSDFBeziers().insert(remappedBeziers.begin(), remappedBeziers.end());
+        newModel->getSDFBeziers().insert(remappedBeziers.begin(),
+                                         remappedBeziers.end());
 
         // Remap meshes
-        for(auto& pair : _cellToRenderableMap)
+        for (auto& pair : _cellToRenderableMap)
         {
-            if(pair.second._hasMesh)
+            if (pair.second._hasMesh)
             {
-                const auto matId = _computeMaterialId(scheme, pair.second._linealIndex);
+                const auto matId =
+                    _computeMaterialId(scheme, pair.second._linealIndex);
                 remappedMeshes[matId] = srcMeshes[pair.second._triangleIndx];
                 pair.second._triangleIndx = matId;
             }
         }
-        newModel->getTriangleMeshes().insert(remappedMeshes.begin(), remappedMeshes.end());
+        newModel->getTriangleMeshes().insert(remappedMeshes.begin(),
+                                             remappedMeshes.end());
 
         // Remap Geometry SDFs
-        for(auto& pair : _cellToRenderableMap)
+        for (auto& pair : _cellToRenderableMap)
         {
             auto& msm = pair.second._sdfGeometryMap;
-            if(!msm.empty())
+            if (!msm.empty())
             {
-                const auto matId = _computeMaterialId(scheme, pair.second._linealIndex);
-                auto& tempStorage = remappedSDFGeometries.geometryIndices[matId];
-                for(auto& geometries : msm)
+                const auto matId =
+                    _computeMaterialId(scheme, pair.second._linealIndex);
+                auto& tempStorage =
+                    remappedSDFGeometries.geometryIndices[matId];
+                for (auto& geometries : msm)
                 {
-                    for(auto geometryIndx : geometries.second)
+                    for (auto geometryIndx : geometries.second)
                         tempStorage.push_back(geometryIndx);
                 }
             }
@@ -244,7 +259,8 @@ CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
 
         // Create model descriptor
         modelDescriptor =
-            std::make_shared<brayns::ModelDescriptor>(std::move(newModel), _model->getName(),
+            std::make_shared<brayns::ModelDescriptor>(std::move(newModel),
+                                                      _model->getName(),
                                                       _model->getPath(),
                                                       _model->getMetadata());
         modelDescriptor->setTransformation(transformation);
@@ -265,7 +281,7 @@ CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
         _lastScheme = scheme;
         _lastMorphologyScheme = MorphologyColorScheme::none;
     }
-    catch(std::exception& e)
+    catch (std::exception& e)
     {
         result.error = 3;
         result.message = "An exception occoured: " + std::string(e.what());
@@ -278,34 +294,38 @@ CellObjectMapper::remapCircuitColors(const CircuitColorScheme scheme,
 
 void CellObjectMapper::remapMorphologyColors(const MorphologyColorScheme scheme)
 {
-    if(scheme == _lastMorphologyScheme)
+    if (scheme == _lastMorphologyScheme)
         return;
 
     _lastMorphologyScheme = scheme;
     _lastScheme = CircuitColorScheme::none;
 }
 
-void CellObjectMapper::onCircuitColorFinish(const CircuitColorScheme& scheme,
-                                            const MorphologyColorScheme& mScheme)
+void CellObjectMapper::onCircuitColorFinish(
+    const CircuitColorScheme& scheme, const MorphologyColorScheme& mScheme)
 {
-    if(scheme != CircuitColorScheme::none)
+    if (scheme != CircuitColorScheme::none)
     {
-        if(scheme == CircuitColorScheme::by_layer)
+        if (scheme == CircuitColorScheme::by_layer)
         {
             std::string materialGroupsData = "[";
             const LayerSchemeItem& si = _data.layers;
             std::set<std::string> uniqueIds;
             uniqueIds.insert(si.ids.begin(), si.ids.end());
             size_t counter = 0;
-            for(const auto& id : uniqueIds)
+            for (const auto& id : uniqueIds)
             {
                 auto matIdIt = si.materialMap.find(id);
-                if(matIdIt != si.materialMap.end())
+                if (matIdIt != si.materialMap.end())
                 {
                     counter++;
-                    const std::string ending = counter == si.materialMap.size()? "" : ",";
-                    materialGroupsData += "{\"name\":\""+id+"\", "
-                                          "\"ids\":["+std::to_string(matIdIt->second)+"]}" + ending;
+                    const std::string ending =
+                        counter == si.materialMap.size() ? "" : ",";
+                    materialGroupsData += "{\"name\":\"" + id +
+                                          "\", "
+                                          "\"ids\":[" +
+                                          std::to_string(matIdIt->second) +
+                                          "]}" + ending;
                 }
             }
             materialGroupsData += "]";
@@ -320,7 +340,7 @@ void CellObjectMapper::onCircuitColorFinish(const CircuitColorScheme& scheme,
             // when remapping to a different scheme than by layer
             const brayns::ModelMetadata& oldMetadata = _model->getMetadata();
             auto it = oldMetadata.find("");
-            if(it != oldMetadata.end())
+            if (it != oldMetadata.end())
             {
                 auto newMetadata = oldMetadata;
                 newMetadata.erase("materialsGroup");
@@ -328,9 +348,8 @@ void CellObjectMapper::onCircuitColorFinish(const CircuitColorScheme& scheme,
             }
         }
     }
-    else if(mScheme != MorphologyColorScheme::none)
+    else if (mScheme != MorphologyColorScheme::none)
     {
-
     }
 }
 
@@ -352,10 +371,11 @@ size_t CellObjectMapper::_computeMaterialId(const CircuitColorScheme scheme,
         materialId = NB_MATERIALS_PER_INSTANCE * index;
         break;
     case CircuitColorScheme::by_target:
-        if(!_data.targets.ids.empty())
+        if (!_data.targets.ids.empty())
         {
             for (size_t i = 0; i < _data.targets.ids.size() - 1; ++i)
-                if (index >= _data.targets.ids[i] && index < _data.targets.ids[i + 1])
+                if (index >= _data.targets.ids[i] &&
+                    index < _data.targets.ids[i + 1])
                 {
                     materialId = NB_MATERIALS_PER_INSTANCE * i;
                     _data.targets.materialMap[i] = materialId;
@@ -367,8 +387,7 @@ size_t CellObjectMapper::_computeMaterialId(const CircuitColorScheme scheme,
         if (index < _data.etypes.ids.size())
         {
             const auto etypeId = _data.etypes.ids[index];
-            materialId =
-                NB_MATERIALS_PER_INSTANCE * etypeId;
+            materialId = NB_MATERIALS_PER_INSTANCE * etypeId;
             _data.etypes.materialMap[etypeId] = materialId;
         }
         else
@@ -389,7 +408,7 @@ size_t CellObjectMapper::_computeMaterialId(const CircuitColorScheme scheme,
         {
             const auto& layerId = _data.layers.ids[index];
             auto it = _data.layers.virtualIndex.find(layerId);
-            if(it != _data.layers.virtualIndex.end())
+            if (it != _data.layers.virtualIndex.end())
             {
                 materialId = NB_MATERIALS_PER_INSTANCE * it->second;
                 _data.layers.materialMap[layerId] = materialId;
@@ -432,13 +451,13 @@ void CellObjectMapper::_applyDefaultColorMap() const
         {0.21568627450980393, 0.49411764705882355, 0.7215686274509804}};
 
     uint64_t i = 0;
-    auto &materials = _model->getModel().getMaterials();
-    for (auto &material : materials)
+    auto& materials = _model->getModel().getMaterials();
+    for (auto& material : materials)
     {
-        if(material.first != brayns::SECONDARY_MODEL_MATERIAL_ID
-           && material.first != brayns::BOUNDINGBOX_MATERIAL_ID)
+        if (material.first != brayns::SECONDARY_MODEL_MATERIAL_ID &&
+            material.first != brayns::BOUNDINGBOX_MATERIAL_ID)
         {
-            const auto &color = colors[i % colors.size()];
+            const auto& color = colors[i % colors.size()];
             material.second->setDiffuseColor(color);
             ++i;
         }

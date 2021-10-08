@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MORPHOLOGY_LOADER_H
-#define MORPHOLOGY_LOADER_H
+#pragma once
 
 #include <plugin/api/CircuitExplorerParams.h>
 
@@ -281,5 +280,3 @@ private:
     size_t _defaultMaterialId{brayns::NO_MATERIAL};
     brayns::PropertyMap _defaults;
 };
-
-#endif // MORPHOLOGY_LOADER_H

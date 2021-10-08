@@ -32,4 +32,4 @@ public:
     void preRender() final;
     void postRender() final;
 };
-}
+} // namespace brayns

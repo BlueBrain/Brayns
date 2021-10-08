@@ -99,4 +99,4 @@ OSP_REGISTER_MATERIAL(basic, DefaultMaterial, default);
 OSP_REGISTER_MATERIAL(BASIC, DefaultMaterial, default);
 OSP_REGISTER_MATERIAL(proximity, DefaultMaterial, default);
 
-} // ::brayns
+} // namespace brayns

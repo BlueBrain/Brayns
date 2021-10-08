@@ -17,8 +17,8 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef PBRTRENDERER_H
-#define PBRTRENDERER_H
+
+#pragma once
 
 #include "PBRTCamera.h"
 
@@ -34,15 +34,16 @@ namespace brayns
 {
 class PBRTRenderer;
 
-using PBRTSurfaceIntegratorFactory = std::function<pbrt::SurfaceIntegrator*(PBRTRenderer&)>;
-using PBRTVolumeIntegratorFactory = std::function<pbrt::VolumeIntegrator*(PBRTRenderer&)>;
+using PBRTSurfaceIntegratorFactory =
+    std::function<pbrt::SurfaceIntegrator*(PBRTRenderer&)>;
+using PBRTVolumeIntegratorFactory =
+    std::function<pbrt::VolumeIntegrator*(PBRTRenderer&)>;
 using PBRTSamplerFactory = std::function<pbrt::Sampler*(PBRTRenderer&)>;
 
 class PBRTRenderer : public Renderer
 {
 public:
-    PBRTRenderer(const AnimationParameters&,
-                 const RenderingParameters&);
+    PBRTRenderer(const AnimationParameters&, const RenderingParameters&);
     ~PBRTRenderer();
 
     void render(FrameBufferPtr frameBuffer) final;
@@ -55,12 +56,14 @@ public:
     PBRTCamera* getPBRTCamera() noexcept { return _camera; }
 
 private:
-    std::unordered_map<std::string, PBRTSurfaceIntegratorFactory> _surfaceIntegratorFactory;
-    std::unordered_map<std::string, PBRTVolumeIntegratorFactory> _volumeIntegratorFactory;
+    std::unordered_map<std::string, PBRTSurfaceIntegratorFactory>
+        _surfaceIntegratorFactory;
+    std::unordered_map<std::string, PBRTVolumeIntegratorFactory>
+        _volumeIntegratorFactory;
     std::unordered_map<std::string, PBRTSamplerFactory> _samplerFactory;
 
     PBRTCamera* _camera;
-    Vector2i _currentRes {16,16};
+    Vector2i _currentRes{16, 16};
 
     std::string _currentSurfIntegrator;
     std::string _currentVolIntegrator;
@@ -68,6 +71,4 @@ private:
 
     mutable std::shared_ptr<pbrt::SamplerRenderer> _renderer{nullptr};
 };
-}
-
-#endif
+} // namespace brayns
