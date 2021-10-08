@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MORPHOLOGYMAP_H
-#define MORPHOLOGYMAP_H
+#pragma once
 
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/Cylinder.h>
@@ -57,4 +56,3 @@ struct MorphologyMap
     std::unordered_map<size_t, std::vector<size_t>> _sdfGeometryMap;
 };
 
-#endif

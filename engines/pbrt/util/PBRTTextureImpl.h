@@ -17,8 +17,8 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef PBRTTEXTUREIMPL_H
-#define PBRTTEXTUREIMPL_H
+
+#pragma once
 
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/types.h>
@@ -140,4 +140,3 @@ PBRTTextureImpl<pbrt::Float>::PBRTTextureImpl(
 
 } // namespace brayns
 
-#endif

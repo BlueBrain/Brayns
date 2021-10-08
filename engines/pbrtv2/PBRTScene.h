@@ -17,8 +17,8 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef PBRTSCENE_H
-#define PBRTSCENE_H
+
+#pragma once
 
 #include <brayns/engine/Scene.h>
 
@@ -58,4 +58,3 @@ private:
 };
 } // namespace brayns
 
-#endif

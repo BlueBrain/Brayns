@@ -38,8 +38,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#ifndef INCLUDED_AI_STRINGUTILS_H
-#define INCLUDED_AI_STRINGUTILS_H
+
+#pragma once
 
 #include <cstdlib>
 #include <sstream>
@@ -117,4 +117,3 @@ inline float ai_strtof(const char *begin, const char *end)
     return val;
 }
 
-#endif // INCLUDED_AI_STRINGUTILS_H

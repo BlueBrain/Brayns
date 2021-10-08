@@ -17,8 +17,8 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef PBRTDEBUGINTEGRATOR_H
-#define PBRTDEBUGINTEGRATOR_H
+
+#pragma once
 
 #include <pbrtv2/core/integrator.h>
 #include <pbrtv2/core/pbrt.h>
@@ -80,4 +80,3 @@ private:
 };
 } // namespace brayns
 
-#endif

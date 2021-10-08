@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PBRTCUSTOMCONE_H
-#define PBRTCUSTOMCONE_H
+#pragma once
 
 #include <pbrt/core/shape.h>
 
@@ -63,4 +62,3 @@ std::shared_ptr<CustomCone> CreateCustomConeShape(const pbrt::Transform* o2w,
 
 } // namespace brayns
 
-#endif // PBRTCUSTOMCONE_H

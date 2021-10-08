@@ -38,8 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#ifndef INCLUDED_EXCEPTIONAL_H
-#define INCLUDED_EXCEPTIONAL_H
+#pragma once
 
 #include <assimp/DefaultIOStream.h>
 #include <stdexcept>
@@ -122,4 +121,3 @@ struct ExceptionSwallower<void>
     catch (...) { return ExceptionSwallower<type>()(); } \
     }
 
-#endif // INCLUDED_EXCEPTIONAL_H

@@ -48,8 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    These functions are not consistently available on all platforms,
    or the provided implementations behave too differently.
 */
-#ifndef INCLUDED_AI_STRING_WORKERS_H
-#define INCLUDED_AI_STRING_WORKERS_H
+
+#pragma once
 
 #include "StringComparison.h"
 #include <assimp/ai_assert.h>
@@ -226,4 +226,3 @@ inline unsigned int integer_pow(unsigned int base, unsigned int power)
 }
 } // namespace Assimp
 
-#endif // !  AI_STRINGCOMPARISON_H_INC

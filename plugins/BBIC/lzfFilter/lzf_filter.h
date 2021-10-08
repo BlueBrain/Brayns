@@ -10,8 +10,7 @@
  *
  ****** End preamble block ****************************************************/
 
-#ifndef H5PY_LZF_H
-#define H5PY_LZF_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C"
@@ -34,4 +33,3 @@ extern "C"
 }
 #endif
 
-#endif

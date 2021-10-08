@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef BRAYNS_COMMON_ACTIONMESSAGE_H
-#define BRAYNS_COMMON_ACTIONMESSAGE_H
+#pragma once
 
 #include <brayns/common/propertymap/PropertyMap.h>
 
@@ -141,4 +140,3 @@ public:                                   \
 
 } // namespace brayns
 
-#endif // BRAYNS_COMMON_ACTIONMESSAGE_H

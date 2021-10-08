@@ -40,8 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Default file I/O using fXXX()-family of functions */
-#ifndef AI_DEFAULTIOSTREAM_H_INC
-#define AI_DEFAULTIOSTREAM_H_INC
+
+#pragma once
 
 #include <assimp/Defines.h>
 #include <assimp/IOStream.hpp>
@@ -131,4 +131,3 @@ inline DefaultIOStream::DefaultIOStream(FILE* pFile,
 
 } // namespace Assimp
 
-#endif //!!AI_DEFAULTIOSTREAM_H_INC

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _mathTypes_h_
-#define _mathTypes_h_
+#pragma once
 
 #define GLM_FORCE_CTOR_INIT
 #include <glm/glm.hpp>
@@ -157,4 +156,3 @@ typedef std::vector<Vector2d> Vector2ds;
 using Quaterniond = glm::tquat<double, glm::highp>; //!< Double quaternion.
 } // namespace brayns
 
-#endif // _mathTypes_h_

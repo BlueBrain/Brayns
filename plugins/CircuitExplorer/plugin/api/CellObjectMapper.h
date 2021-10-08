@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CELLOBJECTMAPPER_H
-#define CELLOBJECTMAPPER_H
+#pragma once
 
 #include <brayns/common/types.h>
 
@@ -109,4 +108,3 @@ private:
     std::unordered_map<size_t, MorphologyMap> _cellToRenderableMap;
 };
 
-#endif

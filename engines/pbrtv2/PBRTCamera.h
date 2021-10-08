@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PBRTCAMERA_H
-#define PBRTCAMERA_H
+#pragma once
 
 #include <brayns/engine/Camera.h>
 
@@ -106,4 +105,3 @@ private:
 };
 } // namespace brayns
 
-#endif

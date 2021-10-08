@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef UTIL_H
-#define UTIL_H
+#pragma once
 
 #include <brayns/common/mathTypes.h>
 #include <brayns/common/types.h>
@@ -38,4 +37,3 @@ pbrt::Transform pbrtTransform(const Transformation& t);
 
 } // namespace brayns
 
-#endif

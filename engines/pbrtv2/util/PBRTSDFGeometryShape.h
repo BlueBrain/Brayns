@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PBRTSDFGEOMETRYSHAPE_H
-#define PBRTSDFGEOMETRYSHAPE_H
+#pragma once
 
 #include <brayns/common/geometry/SDFGeometry.h>
 #include <brayns/common/log.h>
@@ -742,4 +741,3 @@ pbrt::Point PBRTSDFGeometryShape<SDFType::ConePillSigmoid>::Sample(
 }
 } // namespace brayns
 
-#endif

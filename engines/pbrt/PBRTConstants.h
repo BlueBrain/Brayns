@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PBRTCONSTANTS_H
-#define PBRTCONSTANTS_H
+#pragma once
 
 #include <cstdint>
 #include <string>
@@ -138,4 +137,3 @@ extern const std::string PBRT_SAMPLERPROP_YSAMPLES;
 
 } // namespace brayns
 
-#endif

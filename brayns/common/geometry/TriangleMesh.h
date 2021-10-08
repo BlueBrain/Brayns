@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef TRIANGLEMESH_H
-#define TRIANGLEMESH_H
+#pragma once
 
 #include <brayns/common/types.h>
 
@@ -115,4 +114,3 @@ inline TriangleMesh createBox(const Vector3f& minCorner,
 
 } // namespace brayns
 
-#endif // TRIANGLEMESH_H

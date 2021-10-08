@@ -42,8 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  PLYLoader.h
  *  @brief Declaration of the .ply importer class.
  */
-#ifndef AI_PLYLOADER_H_INCLUDED
-#define AI_PLYLOADER_H_INCLUDED
+
+#pragma once
 
 #include "BaseImporter.h"
 #include "PlyParser.h"
@@ -156,4 +156,3 @@ protected:
 
 } // end of namespace Assimp
 
-#endif // AI_3DSIMPORTER_H_INC

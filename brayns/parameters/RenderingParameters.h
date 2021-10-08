@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef RENDERINGPARAMETERS_H
-#define RENDERINGPARAMETERS_H
+#pragma once
 
 #include <brayns/common/types.h>
 
@@ -131,4 +130,3 @@ protected:
     SERIALIZATION_FRIEND(RenderingParameters)
 };
 } // namespace brayns
-#endif // RENDERINGPARAMETERS_H

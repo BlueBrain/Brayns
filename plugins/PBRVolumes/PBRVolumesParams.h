@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PBRVOLUMES_H
-#define PBRVOLUMES_H
+#pragma once
 
 #include <brayns/common/types.h>
 #include <brayns/network/json/ActionMessage.h>
@@ -104,4 +103,3 @@ struct AddGridVolume : public brayns::Message
     MESSAGE_ENTRY(int32_t, nz, "Grid Z dimension")
 };
 
-#endif

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PBRTFRAMEBUFFER_H
-#define PBRTFRAMEBUFFER_H
+#pragma once
 
 #include <brayns/engine/FrameBuffer.h>
 #include <pbrt/core/pbrt.h>
@@ -68,4 +67,3 @@ private:
 };
 } // namespace brayns
 
-#endif

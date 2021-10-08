@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CIRCUITSIMULATIONHANDLER_H
-#define CIRCUITSIMULATIONHANDLER_H
+#pragma once
 
 #include <brain/compartmentReportView.h>
 #include <brayns/api.h>
@@ -73,4 +72,3 @@ private:
 };
 } // namespace brayns
 
-#endif // CIRCUITSIMULATIONHANDLER

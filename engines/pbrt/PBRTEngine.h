@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PBRTENGINE_H
-#define PBRTENGINE_H
+#pragma once
 
 #include <brayns/engine/Engine.h>
 
@@ -68,4 +67,3 @@ private:
 };
 } // namespace brayns
 
-#endif

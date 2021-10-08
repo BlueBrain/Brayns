@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef VOLTAGESIMULATIONHANDLER_H
-#define VOLTAGESIMULATIONHANDLER_H
+#pragma once
 
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <plugin/api/CircuitExplorerParams.h>
@@ -75,4 +74,3 @@ private:
     bool _ready{false};
 };
 
-#endif // VOLTAGESIMULATIONHANDLER_H

@@ -41,8 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Helper class tp perform various byte oder swappings
    (e.g. little to big endian) */
-#ifndef AI_BYTESWAPPER_H_INC
-#define AI_BYTESWAPPER_H_INC
+
+#pragma once
 
 #include <assimp/ai_assert.h>
 #include <assimp/types.h>
@@ -271,4 +271,3 @@ struct Getter<SwapEndianess, T, false>
 } // namespace Intern
 } // namespace Assimp
 
-#endif //!! AI_BYTESWAPPER_H_INC

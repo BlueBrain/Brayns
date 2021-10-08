@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CIRCUITINFO_LOG_H
-#define CIRCUITINFO_LOG_H
+#pragma once
 
 #include <ctime>
 #include <iostream>
@@ -46,4 +45,3 @@
         throw std::runtime_error(__message);    \
     }
 
-#endif // CIRCUITINFO_LOG_H

@@ -42,8 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file ParsingUtils.h
  *  @brief Defines helper functions for text parsing
  */
-#ifndef AI_PARSING_UTILS_H_INC
-#define AI_PARSING_UTILS_H_INC
+
+#pragma once
 
 #include "StringComparison.h"
 #include "StringUtils.h"
@@ -266,4 +266,3 @@ AI_FORCE_INLINE std::string GetNextToken(const char*& in)
 
 } // namespace Assimp
 
-#endif // ! AI_PARSING_UTILS_H_INC

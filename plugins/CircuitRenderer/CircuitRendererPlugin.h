@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CIRCUITRENDERERPLUGIN_H
-#define CIRCUITRENDERERPLUGIN_H
+#pragma once
 
 #include <brayns/common/types.h>
 #include <brayns/network/interface/ActionInterface.h>
@@ -38,4 +37,3 @@ public:
     void init() final;
 };
 
-#endif

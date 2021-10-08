@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYMATERIAL_H
-#define OSPRAYMATERIAL_H
+#pragma once
 
 #include <brayns/engine/Material.h>
 #include <ospray.h>
@@ -55,4 +54,3 @@ private:
 };
 } // namespace brayns
 
-#endif // OSPRAYMATERIAL_H

@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef AstrocyteLoader_H
-#define AstrocyteLoader_H
+#pragma once
 
 #include "AbstractCircuitLoader.h"
 
@@ -52,4 +51,3 @@ private:
                                      brayns::Model &model) const;
 };
 
-#endif // AstrocyteLoader_H

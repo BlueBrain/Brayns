@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef DTISimulationHandler_H
-#define DTISimulationHandler_H
+#pragma once
 
 #include <brayns/api.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
@@ -75,4 +74,3 @@ private:
 
 typedef std::shared_ptr<DTISimulationHandler> DTISimulationHandlerPtr;
 } // namespace dti
-#endif // DTISimulationHandler_H

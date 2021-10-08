@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PROTEINLOADER_H
-#define PROTEINLOADER_H
+#pragma once
 
 #include <brayns/common/loader/Loader.h>
 #include <brayns/parameters/GeometryParameters.h>
@@ -56,4 +55,3 @@ private:
 };
 } // namespace brayns
 
-#endif // PROTEINLOADER_H

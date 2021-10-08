@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CIRCUIT_EXPLORER_UTILS_H
-#define CIRCUIT_EXPLORER_UTILS_H
+#pragma once
 
 #include <brain/brain.h>
 
@@ -29,4 +28,3 @@
 brayns::Vector3f get_translation(const brayns::Matrix4f& matrix);
 bool inBox(const brayns::Vector3f& point, const brayns::Boxf& box);
 
-#endif // CIRCUIT_EXPLORER_UTILS_H

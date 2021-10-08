@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYFRAMEBUFFER_H
-#define OSPRAYFRAMEBUFFER_H
+#pragma once
 
 #include <brayns/engine/FrameBuffer.h>
 #include <ospray.h>
@@ -76,4 +75,3 @@ private:
     std::mutex _mapMutex;
 };
 } // namespace brayns
-#endif // OSPRAYFRAMEBUFFER_H

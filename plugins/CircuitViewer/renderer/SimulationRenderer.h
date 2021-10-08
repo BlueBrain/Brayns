@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef SIMULATIONRENDERER_H
-#define SIMULATIONRENDERER_H
+#pragma once
 
 #include <engines/ospray/ispc/render/utils/AbstractRenderer.h>
 
@@ -49,4 +48,3 @@ protected:
 };
 } // namespace brayns
 
-#endif // SIMULATIONRENDERER_H

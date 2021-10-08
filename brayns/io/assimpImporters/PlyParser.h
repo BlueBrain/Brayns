@@ -40,8 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Defines the helper data structures for importing PLY files  */
-#ifndef AI_PLYFILEHELPER_H_INC
-#define AI_PLYFILEHELPER_H_INC
+
+#pragma once
 
 #include "ParsingUtils.h"
 #include <vector>
@@ -482,4 +482,3 @@ inline TYPE PLY::PropertyInstance::ConvertTo(
 } // Namespace PLY
 } // namespace Assimp
 
-#endif // !! include guard

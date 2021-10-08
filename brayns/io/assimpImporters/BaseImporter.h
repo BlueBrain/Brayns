@@ -40,8 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Definition of the base class for all importer worker classes. */
-#ifndef INCLUDED_AI_BASEIMPORTER_H
-#define INCLUDED_AI_BASEIMPORTER_H
+
+#pragma once
 
 #include "Exceptional.h"
 
@@ -407,5 +407,3 @@ protected:
 };
 
 } // end of namespace Assimp
-
-#endif // AI_BASEIMPORTER_H_INC

@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CIRCUIT_EXPLORER_LOG_H
-#define CIRCUIT_EXPLORER_LOG_H
+#pragma once
 
 #include <ctime>
 #include <iostream>
@@ -45,4 +44,3 @@
         throw std::runtime_error(__message);    \
     }
 
-#endif // CIRCUIT_EXPLORER_LOG_H

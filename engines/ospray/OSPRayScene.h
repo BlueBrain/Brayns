@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYSCENE_H
-#define OSPRAYSCENE_H
+#pragma once
 
 #include <brayns/common/types.h>
 #include <brayns/engine/Scene.h>
@@ -85,4 +84,3 @@ private:
     ModelDescriptors _activeModels;
 };
 } // namespace brayns
-#endif // OSPRAYSCENE_H

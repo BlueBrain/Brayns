@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PARAMETERSMANAGER_H
-#define PARAMETERSMANAGER_H
+#pragma once
 
 #include <brayns/api.h>
 #include <brayns/common/types.h>
@@ -127,4 +126,3 @@ private:
     NetworkParameters _networkParameters;
 };
 } // namespace brayns
-#endif // PARAMETERSMANAGER_H

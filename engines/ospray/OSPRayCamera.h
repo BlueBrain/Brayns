@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYCAMERA_H
-#define OSPRAYCAMERA_H
+#pragma once
 
 #include <brayns/engine/Camera.h>
 #include <ospray.h>
@@ -65,4 +64,3 @@ private:
     void _createOSPCamera();
 };
 } // namespace brayns
-#endif // OSPRAYCAMERA_H

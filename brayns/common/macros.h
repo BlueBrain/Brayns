@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MACROS_H
-#define MACROS_H
+#pragma once
 
 #define SERIALIZATION_ACCESS(type)            \
     namespace staticjson                      \
@@ -39,4 +38,3 @@
 
 #define BRAYNS_UNUSED_VAR(x) (void)x;
 
-#endif // MACROS_H

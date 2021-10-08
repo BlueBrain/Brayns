@@ -17,8 +17,8 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef PBRTRENDERER_H
-#define PBRTRENDERER_H
+
+#pragma once
 
 #include "PBRTCamera.h"
 
@@ -65,4 +65,3 @@ private:
 };
 } // namespace brayns
 
-#endif

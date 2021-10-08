@@ -38,8 +38,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#ifndef OBJ_FILEPARSER_H_INC
-#define OBJ_FILEPARSER_H_INC
+
+#pragma once
 
 #include "IOStreamBuffer.h"
 #include <assimp/mesh.h>
@@ -167,4 +167,3 @@ private:
 
 } // Namespace Assimp
 
-#endif

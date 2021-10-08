@@ -18,8 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FLYINGMODEMAINPULATOR_H
-#define FLYINGMODEMAINPULATOR_H
+#pragma once
 
 #include "AbstractManipulator.h"
 
@@ -47,4 +46,3 @@ private:
 };
 } // namespace brayns
 
-#endif

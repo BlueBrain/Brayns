@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef TYPES_H
-#define TYPES_H
+#pragma once
 
 #include <brayns/common/mathTypes.h>
 #include <brayns/common/utils/enumUtils.h>
@@ -385,4 +384,3 @@ inline std::vector<std::pair<std::string, DataType>> enumMap()
             {"int16", DataType::INT16},   {"int32", DataType::INT32}};
 }
 } // namespace brayns
-#endif // TYPES_H

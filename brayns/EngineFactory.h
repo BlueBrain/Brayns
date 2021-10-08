@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ENGINEFACTORY_H
-#define ENGINEFACTORY_H
+#pragma once
 
 #include <brayns/common/types.h>
 #include <brayns/common/utils/DynamicLib.h>
@@ -65,4 +64,3 @@ private:
 };
 } // namespace brayns
 
-#endif // ENGINEFACTORY_H

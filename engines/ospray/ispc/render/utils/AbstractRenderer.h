@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ABSTRACTRENDERER_H
-#define ABSTRACTRENDERER_H
+#pragma once
 
 // obj
 #include "../DefaultMaterial.h"
@@ -55,4 +54,3 @@ protected:
 };
 } // namespace brayns
 
-#endif // ABSTRACTRENDERER_H

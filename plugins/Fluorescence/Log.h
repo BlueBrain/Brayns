@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FLOURESCENCE_LOG_H
-#define FLOURESCENCE_LOG_H
+#pragma once
 
 #include <ctime>
 #include <iostream>
@@ -46,4 +45,3 @@
         throw std::runtime_error(__message);    \
     }
 
-#endif // FLUORESCENCE_LOG_H

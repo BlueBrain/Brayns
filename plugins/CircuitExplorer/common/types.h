@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CIRCUIT_EXPLORER_TYPES_H
-#define CIRCUIT_EXPLORER_TYPES_H
+#pragma once
 
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/Cylinder.h>
@@ -441,4 +440,3 @@ struct ParallelModelContainer
     std::vector<size_t> sdfMaterials;
 };
 
-#endif // CIRCUIT_EXPLORER_TYPES_H

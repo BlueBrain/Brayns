@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef COMMONTYPES_H
-#define COMMONTYPES_H
+#pragma once
 
 enum MaterialShadingMode
 {
@@ -41,4 +40,3 @@ enum MaterialClippingMode
     sphere = 2
 };
 
-#endif // COMMONTYPES_H

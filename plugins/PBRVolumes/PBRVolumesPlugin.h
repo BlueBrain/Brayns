@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FLUORESCENCEPLUGIN_H
-#define FLUORESCENCEPLUGIN_H
+#pragma once
 
 #include "PBRVolumesParams.h"
 
@@ -72,4 +71,3 @@ private:
     brayns::Message _addGridVolume(const AddGridVolume&);
 };
 
-#endif

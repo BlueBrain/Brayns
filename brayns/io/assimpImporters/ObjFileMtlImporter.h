@@ -37,8 +37,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------*/
-#ifndef OBJFILEMTLIMPORTER_H_INC
-#define OBJFILEMTLIMPORTER_H_INC
+
+#pragma once
 
 #include <assimp/defs.h>
 #include <string>
@@ -114,4 +114,3 @@ private:
 
 } // Namespace Assimp
 
-#endif // OBJFILEMTLIMPORTER_H_INC
