@@ -1,6 +1,8 @@
 /* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
+ * Responsible Author: adrien.fleury@epfl.ch
+ *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
  * This library is free software; you can redistribute it and/or modify it under
