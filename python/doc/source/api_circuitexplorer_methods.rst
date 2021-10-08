@@ -1,978 +1,706 @@
-Circuit Explorer API Methods
-============================
+Circuit Explorer API methods
+----------------------------
 
-This is the API exposed by the Circuit Explorer plugin. To call this methods, you will need
-a ``Client`` object (You can learn how to create one in :ref:`usepythonclinet-label`), as well
-as a backend Brayns service that has been launched with the argument:
+The Brayns python client API is automatically generated when connecting to a
+running backend service as shown in :ref:`usepythonclient-label`.
 
-.. code-block:: console
+The Core plugin is always loaded so the related entrypoints are always
+available.
 
-    --plugin braynsCircuitExplorer
+Other plugins might register additional entrypoints but must be loaded in the
+renderer to be available.
 
-----
+The functions below are generated using the entrypoints of the Circuit Explorer plugin.
+
+All arguments are keyword arguments extracted from the entrypoint params.
+
+Renderer errors will be raised with an instance of brayns.ReplyError. This one
+can be used to extract error code, description and some optional additional data
+(mainly used to store JSON errors).
+
+Example usage of some generated methods:
+
+.. code-block: python
+    import brayns
+
+    with brayns.connect(uri='localhost:5000') as client:
+        print(client.get_camera())
+        client.set_camera(current='orthographic')
+        print(client.get_camera())
 
 add_box
 ~~~~~~~
 
+Add a visual 3D box to the scene.
 
 Parameters:
 
-.. code-block:: python
+* ``color``: ``list``. Box color RGBA normalized.
 
-    add_box(max_corner, name, color, min_corner)
+  * ``items``: ``float``
 
-Adds an axis algined box to the scene
+* ``max_corner``: ``list``. Axis aligned maximum bound of the box.
 
-Parameters:
+  * ``items``: ``float``
 
-* ``color``: ``array``, A 4 component normalized color (RGBA) to apply to the box surface
-* ``max_corner``: ``array``, Axis aligned maximum bound of the box
-* ``min_corner``: ``array``, Axis aligned minimum bound of the box
-* ``name``: ``string``, Name to give to the added model
+* ``min_corner``: ``list``. Axis aligned minimum bound of the box.
+
+  * ``items``: ``float``
+
+* ``name``: ``str``. Name to give to the added model.
 
 Return value:
 
-* ``dictionary`` with the following entries:
+* ``dict``. The object has the following properties.
 
-  * ``id``: ``integer``, The id of the added model
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
+  * ``id``: ``int``. ID of the model of the shape added.
 
 ----
 
 add_column
 ~~~~~~~~~~
 
+Add a visual 3D column as a cylinder to the scene.
 
 Parameters:
 
-.. code-block:: python
+* ``radius``: ``float``. Radius of the cylinder.
 
-    add_column(radius)
+Return value:
 
-Adds a visual 3D column as a cylinder to the scene
-
-Parameters:
-
-* ``radius``: ``number``, Radium of the cylinder column to add
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
+This method has no return values.
 
 ----
 
 add_cylinder
 ~~~~~~~~~~~~
 
+Add a visual 3D cylinder to the scene.
 
 Parameters:
 
-.. code-block:: python
+* ``center``: ``list``. Center of the lower cylinder circumference.
 
-    add_cylinder(name, up, center, color, radius)
+  * ``items``: ``float``
 
-Adds a cylinder to the scene
+* ``color``: ``list``. Cylinder color RGBA normalized.
 
-Parameters:
+  * ``items``: ``float``
 
-* ``center``: ``array``, Center of the lower cylinder circunference
-* ``color``: ``array``, A 4 component normalized color (RGBA) to apply to the cylinder surface
-* ``name``: ``string``, Name to give to the added model
-* ``radius``: ``number``, Radius of the cylinder
-* ``up``: ``array``, Center of the upper cylinder circunference
+* ``radius``: ``float``. Radius of the cylinder.
+* ``up``: ``list``. Center of the upper cylinder circumference.
+
+  * ``items``: ``float``
+
+* ``name``: ``str``. Name to give to the added model.
 
 Return value:
 
-* ``dictionary`` with the following entries:
+* ``dict``. The object has the following properties.
 
-  * ``id``: ``integer``, The id of the added model
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
+  * ``id``: ``int``. ID of the model of the shape added.
 
 ----
 
 add_grid
 ~~~~~~~~
 
+Add a visual 3D grid to the scene.
 
 Parameters:
 
-.. code-block:: python
+* ``max_value``: ``float``. Positive square grid length from world origin.
+* ``min_value``: ``float``. Negative square grid length from world origin.
+* ``plane_opacity``: ``float``. Opacity of the grid mesh material.
+* ``radius``: ``float``. Radius of the cylinder that will be placed at each cell.
+* ``show_axis``: ``bool``. Wether to show a world aligned axis.
+* ``steps``: ``float``. Number of divisions.
+* ``use_colors``: ``bool``. Use colors on the grid axes.
 
-    add_grid(use_colors, plane_opacity, max_value, show_axis, steps, radius, min_value)
+Return value:
 
-Adds a visual 3D grid to the scene
-
-Parameters:
-
-* ``max_value``: ``number``, Negative square grid length from world origin.
-* ``min_value``: ``number``, Positive square grid length from world origin.
-* ``plane_opacity``: ``number``, Opacity of the grid mesh material.
-* ``radius``: ``number``, Radius of the cylinder that will be placed at each cell.
-* ``show_axis``: ``boolean``, Wether to show a world aligned axis.
-* ``steps``: ``number``, Number of divisions.
-* ``use_colors``: ``boolean``, Use colors on the grid axes.
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
-
+This method has no return values.
 
 ----
 
 add_pill
 ~~~~~~~~
 
+Add a visual 3D pill to the scene.
 
 Parameters:
 
-.. code-block:: python
+* ``color``: ``list``. Pill color RGBA normalized.
 
-    add_pill(name, radius1, radius2, p1, p2, color, type)
+  * ``items``: ``float``
 
-Adds a pill shape to the scene
+* ``p1``: ``list``. Center of the lower pill circumference.
 
-Parameters:
+  * ``items``: ``float``
 
-* ``color``: ``array``, A 4 component normalized color (RGBA) to apply to the pill surface
-* ``name``: ``string``, Name to give to the added model
-* ``p1``: ``array``, Center of the lower pill circunference
-* ``p2``: ``array``, Center of the upper pill circunference
-* ``radius1``: ``number``, Radius of the lower pill circunference
-* ``radius2``: ``number``, Radius of the upper pill circunference
-* ``type``: ``string``, Type of pill (pill, conepill or sigmoidpill)
+* ``p2``: ``list``. Center of the upper pill circumference.
+
+  * ``items``: ``float``
+
+* ``radius1``: ``float``. Radius of the lower pill circumference.
+* ``radius2``: ``float``. Radius of the upper pill circumference.
+* ``type``: ``str``. Type of pill.
+* ``name``: ``str``. Name to give to the added model.
 
 Return value:
 
-* ``dictionary`` with the following entries:
+* ``dict``. The object has the following properties.
 
-  * ``id``: ``integer``, The id of the added model
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
-
+  * ``id``: ``int``. ID of the model of the shape added.
 
 ----
 
 add_sphere
 ~~~~~~~~~~
 
+Add a visual 3D sphere to the scene.
 
 Parameters:
 
-.. code-block:: python
+* ``center``: ``list``. Sphere center XYZ.
 
-    add_sphere(name, color, radius, center)
+  * ``items``: ``float``
 
-Adds a visual 3D sphere to the scene
+* ``color``: ``list``. Sphere color RGBA normalized.
 
-Parameters:
+  * ``items``: ``float``
 
-* ``center``: ``array``, The coordinates of the sphere center (X,Y,Z)
-* ``color``: ``array``, A 4 component normalized color (RGBA) to apply to the sphere surface
-* ``name``: ``string``, Name to give to the added model
-* ``radius``: ``number``, Radius of the sphere
+* ``radius``: ``float``. Radius of the sphere.
+* ``name``: ``str``. Name of the sphere model.
 
 Return value:
 
-* ``dictionary`` with the following entries:
+* ``dict``. The object has the following properties.
 
-  * ``id``: ``integer``, The id of the added model
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
-
+  * ``id``: ``int``. ID of the model of the shape added.
 
 ----
 
 attach_cell_growth_handler
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Attach a dynamic cell growing rendering system for a given model.
 
 Parameters:
 
-.. code-block:: python
+* ``model_id``: ``int``. The model to which to attach the handler.
+* ``nb_frames``: ``int``. The number of frames to perform the growth.
 
-    attach_cell_growth_handler(nb_frames, model_id)
+Return value:
 
-Attach a dynamic cell growing rendering system for a given model
-
-Parameters:
-
-* ``model_id``: ``integer``, The model to which to attach the handler
-* ``nb_frames``: ``integer``, The number of frames to perform the growth
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
-
+This method has no return values.
 
 ----
 
 attach_circuit_simulation_handler
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Dynamically loads and attach a simulation to a loaded model.
 
 Parameters:
 
-.. code-block:: python
+* ``circuit_configuration``: ``str``. Simulation configuration file path.
+* ``model_id``: ``int``. The model to which to attach the handler.
+* ``report_name``: ``str``. The name of the report to attach.
 
-    attach_circuit_simulation_handler(synchronous_mode, model_id, report_name, circuit_configuration)
+Return value:
 
-Dynamically loads and attach a simulation to a loaded model
-
-Parameters:
-
-* ``circuit_configuration``: ``string``, The path to the Blue Brain config file which contains the simulation
-* ``model_id``: ``integer``, The model to which to attach the handler
-* ``report_name``: ``string``, The name of the report to attach
-* ``synchronous_mode``: ``boolean``, Wether to perform the load synchronously (blocking)
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
-
+This method has no return values.
 
 ----
 
 color_cells
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
 
-
-Parameters:
-
-.. code-block:: python
-
-    color_cells(model_id, gids, colors)
-
-Sets the color of the geometry of cells given by GID.
+Color cells with given colors using their GID.
 
 Parameters:
 
-* ``model_id``: ``integer``, The model to which apply the color
-* ``gid``: ``array``, List of GID ranges as string. Each string represents a batch of cells that will be mapped to the color in the same index. Examples of ranges: "80", "1-100,510".
-* ``colors``: ``array``, Contiguous list of RGB values to apply. This list must be 3 times the size of the gid list. Example of color list (red, blue): [1,0,0,0,0,1]
+* ``colors``: ``list``. Cell colors.
 
-Error:
+  * ``items``: ``float``
 
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
+* ``gids``: ``list``. Cells to color.
 
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
+  * ``items``: ``str``
 
+* ``model_id``: ``int``. Model to color.
+
+Return value:
+
+This method has no return values.
 
 ----
 
 export_frames_to_disk
 ~~~~~~~~~~~~~~~~~~~~~
 
+Export a set of frames from a simulation as image files.
 
 Parameters:
 
-.. code-block:: python
+* ``animation_information``: ``list``. A list of frame numbers to render.
 
-    export_frames_to_disk(spp, camera_information, quality, animation_information, format, path, start_frame)
+  * ``items``: ``int``
 
-Export a set of frames from a simulation as images written to disk
+* ``camera_information``: ``list``. A list of camera definitions. Each camera definition contains origin, direction, up, apperture and radius. (1 entry per animation information entry).
 
-Parameters:
+  * ``items``: ``float``
 
-* ``animation_information``: ``array``, A list of frame numbers to render
-* ``camera_information``: ``array``, A list of camera definitions. Each camera definition contains origin, direction, up, apperture and radius. (1 entry per animation information entry)
-* ``format``: ``string``, The image format (PNG or JPEG)
-* ``path``: ``string``, Path to the directory where the frames will be saved
-* ``quality``: ``integer``, The quality at which the images will be stored
-* ``spp``: ``integer``, Samples per pixels (The more, the better visual result and the slower the rendering)
-* ``start_frame``: ``integer``, The frame at which to start exporting frames
-* ``name_after_step``: ``bool``, Name the file on disk after the simulation step index.
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
-
-
-----
-
-export_layer_to_disk
-~~~~~~~~~~~~~~~~~~~~
-
-
-Parameters:
-
-.. code-block:: python
-
-    export_layer_to_disk(name, frames_count, path, data, start_frame)
-
-Export 1 or various layers to disk to be used in composition when generating a movie
-
-Parameters:
-
-* ``data``: ``string``, Base64 layer image data to store on every frame
-* ``frames_count``: ``integer``, Number of frames to store, starting at startFrame
-* ``name``: ``string``, Name to give to the layer frames
-* ``path``: ``string``, Path where to store the frames
-* ``start_frame``: ``integer``, The frame number of the first frame to store (For instance: name00025.png
+* ``format``: ``str``. The image format (PNG or JPEG).
+* ``name_after_step``: ``bool``. Name the file on disk after the simulation step index.
+* ``path``: ``str``. Directory to store the frames.
+* ``quality``: ``int``. The quality at which the images will be stored.
+* ``spp``: ``int``. Samples per pixels.
+* ``start_frame``: ``int``. The frame at which to start exporting frames.
 
 Return value:
 
-* ``dictionary`` with the following entries:
-
-  * ``frames``: ``array``, List of frames that were successfully stored from the last export layer to disk request
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
-
+This method has no return values.
 
 ----
 
 get_export_frames_progress
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: python
+Get the progress of the last issued frame export.
 
-    get_export_frames_progress()
+Parameters:
 
-Returns the progress of the last issued export frames to disk request
+This method takes no parameters.
 
 Return value:
 
-* ``dictionary`` with the following entries:
+* ``dict``. The object has the following properties.
 
-  * ``progress``: ``number``, The normalized progress (0.0 to 1.0) of the last export frames to disk request
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
-
+  * ``progress``: ``float``. Progress of the last export 0-1.
 
 ----
 
 get_material
 ~~~~~~~~~~~~
 
+Retreive the material with given ID in given model.
 
 Parameters:
 
-.. code-block:: python
-
-    get_material(model_id, material_id)
-
-Returns the properties from the given model and material
-
-Parameters:
-
-* ``material_id``: ``integer``, The id of the material
-* ``model_id``: ``integer``, The id of the model
+* ``material_id``: ``int``. Material ID.
+* ``model_id``: ``int``. Model ID.
 
 Return value:
 
-* ``dictionary`` with the following entries:
+* ``dict``. The object has the following properties.
 
-  * ``clipping_mode``: ``integer``, The choosen material clipping mode (0 = no clipping, 1 = clip by plane, 2 = clip by sphere)
-  * ``diffuse_color``: ``array``, A 3 component normalized color (RGB) describing the diffuse reflection
-  * ``emission``: ``number``, The emissive property of a material
-  * ``glossiness``: ``number``, The glossy component of a material
-  * ``material_id``: ``integer``, The ID that identifies this material
-  * ``model_id``: ``integer``, The model to which this material belongs to
-  * ``opacity``: ``number``, The transparency of the material (0 to 1)
-  * ``reflection_index``: ``number``, The index of reflection of the material surface
-  * ``refraction_index``: ``number``, The index of refraction of a transparent material
-  * ``shading_mode``: ``integer``, The choosen shading mode (0 = none, 1 = diffuse, 2 = electron, 3 = cartoon, 4 = electron transparency, 5 = perlin, 6 = diffuse transparency 7 = checker
-  * ``simulation_data_cast``: ``boolean``, Wether to cast the user parameter for simulation
-  * ``specular_color``: ``array``, A 3 component normalized color (RGB) describing the specular reflection
-  * ``specular_exponent``: ``number``, The specular exponent to sharpen the specular reflection
-  * ``user_parameter``: ``number``, A custom parameter passed to the simulation
+  * ``clipping_mode``: ``str``. The choosen material clipping mode.
+  * ``diffuse_color``: ``list``. Diffuse reflection color RGB normalized.
 
-Error:
+    * ``items``: ``float``
 
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
+  * ``emission``: ``float``. The emissive property of a material.
+  * ``glossiness``: ``float``. The glossy component of a material.
+  * ``material_id``: ``int``. The ID that identifies this material.
+  * ``model_id``: ``int``. The model which this material belongs to.
+  * ``opacity``: ``float``. The transparency of the material (0 to 1).
+  * ``reflection_index``: ``float``. The index of reflection of the material surface.
+  * ``refraction_index``: ``float``. The index of refraction of a transparent material.
+  * ``shading_mode``: ``str``. The chosen shading mode.
+  * ``simulation_data_cast``: ``bool``. Wether to cast the user parameter for simulation.
+  * ``specular_color``: ``list``. Specular reflection RGB normalized.
 
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
+    * ``items``: ``float``
 
+  * ``specular_exponent``: ``float``. The specular exponent to sharpen the specular reflection.
+  * ``user_parameter``: ``float``. A custom parameter passed to the simulation.
 
 ----
 
 get_material_ids
 ~~~~~~~~~~~~~~~~
 
+Retreive the list of ID of the materials in given model.
 
 Parameters:
 
-.. code-block:: python
-
-    get_material_ids(model_id)
-
-Returns all the material IDs of a given model
-
-Parameters:
-
-* ``model_id``: ``integer``, The id of the model
+* ``model_id``: ``int``. Model ID.
 
 Return value:
 
-* ``dictionary`` with the following entries:
+* ``dict``. The object has the following properties.
 
- * ``ids``: ``array``, The list of material ids
+  * ``ids``: ``list``. List of material ID.
 
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
-
-
-----
-
-get_material_properties
-~~~~~~~~~~~~~~~~
-
-
-Parameters:
-
-.. code-block:: python
-
-    get_material_ids()
-
-Returns all the editable material property names and their data types
-
-Return value:
-
-* ``dictionary`` with the following entries:
-
- * ``properties``: ``array``, The list of material property names
- * ``property_types``: ``array``, The list of material property data types names
-
+    * ``items``: ``int``
 
 ----
 
 get_odu_camera
 ~~~~~~~~~~~~~~
 
-.. code-block:: python
+Get the properties of the current camera.
 
-    get_odu_camera()
+Parameters:
 
-Returns the properties of the current camera
+This method takes no parameters.
 
 Return value:
 
-* ``dictionary`` with the following entries:
+* ``dict``. The object has the following properties.
 
-  * ``aperture_radius``: ``number``, The camera aperture
-  * ``direction``: ``array``, A normalized vector in the direction the camera is facing
-  * ``focus_distance``: ``number``, The distance from the origin, in the direction, at which the camera will focus
-  * ``origin``: ``array``, The position of the camera
-  * ``up``: ``array``, A normalized vector, perpendicular to the direction, that points to the camera upwards
+  * ``aperture_radius``: ``float``. The camera aperture.
+  * ``direction``: ``list``. Camera facing direction normalized.
 
-Error:
+    * ``items``: ``float``
 
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
+  * ``focus_distance``: ``float``. Focus distance from the origin.
+  * ``origin``: ``list``. Camera position.
 
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
+    * ``items``: ``float``
 
+  * ``up``: ``list``. Camera up direction normalized.
+
+    * ``items``: ``float``
 
 ----
 
 make_movie
 ~~~~~~~~~~
 
+Builds a movie file from a set of frames stored on disk.
 
 Parameters:
 
-.. code-block:: python
+* ``dimensions``: ``list``. Video dimensions (width,height).
 
-    make_movie(erase_frames, fps_rate, output_movie_path, frames_folder_path, dimensions, frames_file_extension, layers)
+  * ``items``: ``int``
 
-Builds a movie file from a set of frames stored on disk
+* ``erase_frames``: ``bool``. Wether to clean up the frame image files after generating the video file.
+* ``fps_rate``: ``int``. The frames per second rate at which to create the video.
+* ``frames_file_extension``: ``str``. The extension of the frame files to fetch (ex: png, jpg).
+* ``frames_folder_path``: ``str``. Path to where to fetch the frames to create the video.
+* ``output_movie_path``: ``str``. The path to where the movie will be created. Must include filename and extension.
 
-Parameters:
+Return value:
 
-* ``dimensions``: ``array``, Video dimensions (width,height)
-* ``erase_frames``: ``boolean``, Wether to clean up the frame image files after generating the video file
-* ``fps_rate``: ``integer``, The frames per second rate at which to create the video
-* ``frames_file_extension``: ``string``, The extension of the frame files to fetch (png, jpg)
-* ``frames_folder_path``: ``string``, Path to where to fetch the frames to create the video
-* ``layers``: ``array``, List of layer names to compose in the video. Layer name ``movie`` must be always present.
-* ``output_movie_path``: ``string``, The path to where the movie will be created. Must include filename and extension
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
+This method has no return values.
 
 ----
-
 
 mirror_model
-~~~~~~~~~~
+~~~~~~~~~~~~
 
-
-Parameters:
-
-.. code-block:: python
-
-    mirror_model(model_id, mirror_axis)
-
-Generates a copy the geometry inside a circuit, mirrored respect a center of a bounding box whose measures has been doubled in the non zero directions of the mirror axis.
+Mirrors a model along a given axis.
 
 Parameters:
 
-* ``model_id``: ``integer``, Model ID to which to copy and mirror its geometry.
-* ``mirror_axis``: ``array``, 3-components array of integers representing XYZ, indicating whether not to mirror in that axis (0) or to mirror it (1 or -1)
+* ``mirror_axis``: ``list``. The axis used to mirror.
 
-Error:
+  * ``items``: ``float``
 
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
+* ``model_id``: ``int``. Model to mirror.
 
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
+Return value:
+
+This method has no return values.
 
 ----
-
 
 remap_circuit_color
 ~~~~~~~~~~~~~~~~~~~
 
+Remap the circuit colors to the specified scheme.
 
 Parameters:
 
-.. code-block:: python
+* ``model_id``: ``int``. The model to remap.
+* ``scheme``: ``str``. New color scheme.
 
-    remap_circuit_color(model_id, scheme)
+Return value:
 
-Remap the circuit colors to the specified scheme
+* ``dict``. The object has the following properties.
 
-Parameters:
-
-* ``model_id``: ``integer``, The model to remap
-* ``scheme``: ``string``, Color scheme to remap a circuit to (Possible values: "By id", "By layer", "By mtype", "By etype", "By target", "Single color")
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
-
+  * ``updated``: ``bool``. Check if the colors of the model changed.
 
 ----
 
 save_model_to_cache
 ~~~~~~~~~~~~~~~~~~~
 
+Saves given model in a cache file.
 
 Parameters:
 
-.. code-block:: python
+* ``model_id``: ``int``. The ID of the model to save.
+* ``path``: ``str``. The path to save the cache file.
 
-    save_model_to_cache(model_id, parsed, path, parse_error)
+Return value:
 
-Builds and saves a Brayns cache model from a given loaded model
-
-Parameters:
-
-* ``model_id``: ``integer``, The model to save to a cache file
-* ``parse_error``: ``string``, A descriptive string in case the parse failed
-* ``parsed``: ``boolean``, A flag indicating wether the parsing was successful
-* ``path``: ``string``, The path to save the cache file
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
-
+This method has no return values.
 
 ----
 
 set_circuit_thickness
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
-
-Parameters:
-
-.. code-block:: python
-
-    set_circuit_thickness(model_id, radius_multiplier)
-
-Multiplies the radius of the geometric pieces that form the circuit by the given radius multiplier, effectively modifying the thickness of the cells. Subsequent calls will be based on the last computed radius value, not the original one.
+Modify the geometry radiuses (spheres, cones, cylinders and SDF geometries).
 
 Parameters:
 
-* ``model_id``: ``integer``, The model to which apply the thickness change.
-* ``radius_multiplier``: ``number``, The factor by which to multiply the radii of the geometry.
+* ``model_id``: ``int``. ID of the circuit model.
+* ``radius_multiplier``: ``float``. Scaling factor.
 
-Error:
+Return value:
 
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
-
+This method has no return values.
 
 ----
 
 set_connections_per_value
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Draw a point cloud representing the number of connections for a given frame and simulation value.
 
 Parameters:
 
-.. code-block:: python
+* ``epsilon``: ``float``. The value epsilon.
+* ``frame``: ``int``. The frame of the simulation in which to apply.
+* ``model_id``: ``int``. The ID of the model to save.
+* ``value``: ``float``. The value.
 
-    set_connections_per_value(value, epsilon, model_id, frame)
+Return value:
 
-Draws a point cloud representing the number of connections for a given frame and simulation value
-
-Parameters:
-
-* ``epsilon``: ``number``, The value epsilon
-* ``frame``: ``integer``, The frame of the simulation in which to apply
-* ``model_id``: ``integer``, The model to which apply the connections per value setting
-* ``value``: ``number``, The value
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
-
+This method has no return values.
 
 ----
 
 set_material
 ~~~~~~~~~~~~
 
+Update the corresponding material with the given properties.
 
 Parameters:
 
-.. code-block:: python
+* ``clipping_mode``: ``str``. The choosen material clipping mode.
+* ``diffuse_color``: ``list``. Diffuse reflection color RGB normalized.
 
-    set_material(specular_color, specular_exponent, opacity, reflection_index, glossiness, refraction_index, shading_mode, clipping_mode, model_id, material_id, user_parameter, emission, simulation_data_cast, diffuse_color)
+  * ``items``: ``float``
 
-Modifies a specific material
+* ``emission``: ``float``. The emissive property of a material.
+* ``glossiness``: ``float``. The glossy component of a material.
+* ``material_id``: ``int``. The ID that identifies this material.
+* ``model_id``: ``int``. The model which this material belongs to.
+* ``opacity``: ``float``. The transparency of the material (0 to 1).
+* ``reflection_index``: ``float``. The index of reflection of the material surface.
+* ``refraction_index``: ``float``. The index of refraction of a transparent material.
+* ``shading_mode``: ``str``. The chosen shading mode.
+* ``simulation_data_cast``: ``bool``. Wether to cast the user parameter for simulation.
+* ``specular_color``: ``list``. Specular reflection RGB normalized.
 
-Parameters:
+  * ``items``: ``float``
 
-* ``clipping_mode``: ``integer``, The choosen material clipping mode (0 = no clipping, 1 = clip by plane, 2 = clip by sphere)
-* ``diffuse_color``: ``array``, A 3 component normalized color (RGB) describing the diffuse reflection
-* ``emission``: ``number``, The emissive property of a material
-* ``glossiness``: ``number``, The glossy component of a material
-* ``material_id``: ``integer``, The ID that identifies this material
-* ``model_id``: ``integer``, The model to which this material belongs to
-* ``opacity``: ``number``, The transparency of the material (0 to 1)
-* ``reflection_index``: ``number``, The index of reflection of the material surface
-* ``refraction_index``: ``number``, The index of refraction of a transparent material
-* ``shading_mode``: ``integer``, The choosen shading mode (0 = none, 1 = diffuse, 2 = electron, 3 = cartoon, 4 = electron transparency, 5 = perlin, 6 = diffuse transparency 7 = checker
-* ``simulation_data_cast``: ``boolean``, Wether to cast the user parameter for simulation
-* ``specular_color``: ``array``, A 3 component normalized color (RGB) describing the specular reflection
-* ``specular_exponent``: ``number``, The specular exponent to sharpen the specular reflection
-* ``user_parameter``: ``number``, A custom parameter passed to the simulation
+* ``specular_exponent``: ``float``. The specular exponent to sharpen the specular reflection.
+* ``user_parameter``: ``float``. A custom parameter passed to the simulation.
 
-Error:
+Return value:
 
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
-
+This method has no return values.
 
 ----
 
 set_material_extra_attributes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Add extra material attributes necessary for the Circuit Explorer renderer.
 
 Parameters:
 
-.. code-block:: python
+* ``model_id``: ``int``. Model ID.
 
-    set_material_extra_attributes(model_id)
+Return value:
 
-Sets the extra material attributes necessary for the Circuit Explorer renderer
-
-Parameters:
-
-* ``model_id``: ``integer``, The model from which the materials will have the extra attributes setted
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
-
+This method has no return values.
 
 ----
 
 set_material_range
 ~~~~~~~~~~~~~~~~~~
 
+Update the corresponding materials with common properties.
 
 Parameters:
 
-.. code-block:: python
+* ``material_ids``: ``list``. The list of ID that identifies the materials.
 
-    set_material_range(specular_color, specular_exponent, material_ids, opacity, glossiness, reflection_index, refraction_index, shading_mode, clipping_mode, model_id, user_parameter, emission, simulation_data_cast, diffuse_color)
+  * ``items``: ``int``
 
-Sets a set of materials of a single model with common material data
+* ``model_id``: ``int``. The model which this material belongs to.
+* ``properties``: ``dict``. Material properties to apply on all given materials. The object has the following properties.
 
-Parameters:
+  * ``clipping_mode``: ``str``. The choosen material clipping mode.
+  * ``diffuse_color``: ``list``. Diffuse reflection color RGB normalized.
 
-* ``clipping_mode``: ``integer``, The choosen material clipping mode (0 = no clipping, 1 = clip by plane, 2 = clip by sphere)
-* ``diffuse_color``: ``array``, A 3 component normalized color (RGB) describing the diffuse reflection (minimum 1)
-* ``emission``: ``number``, The emissive property of a material
-* ``glossiness``: ``number``, The glossy component of a material
-* ``material_ids``: ``array``, The IDs that identifies the materials to modify of the given model (an empty list will modify all materials)
-* ``model_id``: ``integer``, The model to which these materials belongs to
-* ``opacity``: ``number``, The transparency of the material (0 to 1)
-* ``reflection_index``: ``number``, The index of reflection of the material surface
-* ``refraction_index``: ``number``, The index of refraction of a transparent material
-* ``shading_mode``: ``integer``, The choosen shading mode (0 = none, 1 = diffuse, 2 = electron, 3 = cartoon, 4 = electron transparency, 5 = perlin, 6 = diffuse transparency 7 = checker
-* ``simulation_data_cast``: ``boolean``, Wether to cast the user parameter for simulation
-* ``specular_color``: ``array``, A 3 component normalized color (RGB) describing the specular reflection (minimum 1)
-* ``specular_exponent``: ``number``, The specular exponent to sharpen the specular reflection
-* ``user_parameter``: ``number``, A custom parameter passed to the simulation
+    * ``items``: ``float``
 
-Error:
+  * ``emission``: ``float``. The emissive property of a material.
+  * ``glossiness``: ``float``. The glossy component of a material.
+  * ``opacity``: ``float``. The transparency of the material (0 to 1).
+  * ``reflection_index``: ``float``. The index of reflection of the material surface.
+  * ``refraction_index``: ``float``. The index of refraction of a transparent material.
+  * ``shading_mode``: ``str``. The chosen shading mode.
+  * ``simulation_data_cast``: ``bool``. Wether to cast the user parameter for simulation.
+  * ``specular_color``: ``list``. Specular reflection RGB normalized.
 
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
+    * ``items``: ``float``
 
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
+  * ``specular_exponent``: ``float``. The specular exponent to sharpen the specular reflection.
+  * ``user_parameter``: ``float``. A custom parameter passed to the simulation.
 
+Return value:
+
+This method has no return values.
 
 ----
 
 set_materials
 ~~~~~~~~~~~~~
 
-Parameters:
-
-.. code-block:: python
-
-    set_materials(opacities, material_ids, reflection_indices, specular_exponents, emissions, model_ids, shading_modes, simulation_data_casts, user_parameters, refraction_indices, glossinesses, clipping_modes, specular_colors, diffuse_colors)
-
-Set a set of materials from one or more models
+Update the corresponding materials with the given properties.
 
 Parameters:
 
-* ``clipping_modes``: ``array``, The choosen material clipping mode (0 = no clipping, 1 = clip by plane, 2 = clip by sphere) (1 per material)
-* ``diffuse_colors``: ``array``, A 3 component normalized color (RGB) describing the diffuse reflection (1 per material)
-* ``emissions``: ``array``, The emissive property of a material (1 per material)
-* ``glossinesses``: ``array``, The glossy component of a material (1 per material)
-* ``material_ids``: ``array``, The IDs that identifies these materials (1 per model id)
-* ``model_ids``: ``array``, The list of models to which the list of materials belongs to
-* ``opacities``: ``array``, The transparency of the material (0 to 1) (1 per material)
-* ``reflection_indices``: ``array``, The index of reflection of the material surface (1 per material)
-* ``refraction_indices``: ``array``, The index of refraction of a transparent material (1 per material)
-* ``shading_modes``: ``array``, The choosen shading mode (0 = none, 1 = diffuse, 2 = electron, 3 = cartoon, 4 = electron transparency, 5 = perlin, 6 = diffuse transparency 7 = checker) (1 per material)
-* ``simulation_data_casts``: ``array``, Wether to cast the user parameter for simulation (1 per material)
-* ``specular_colors``: ``array``, A 3 component normalized color (RGB) describing the specular reflection (1 per material)
-* ``specular_exponents``: ``array``, The specular exponent to sharpen the specular reflection (1 per material)
-* ``user_parameters``: ``array``, A custom parameter passed to the simulation (1 per material)
+* ``materials``: ``list``. List of materials to update.
 
-Error:
+  * ``items``: ``dict``. The object has the following properties.
 
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
+    * ``clipping_mode``: ``str``. The choosen material clipping mode.
+    * ``diffuse_color``: ``list``. Diffuse reflection color RGB normalized.
 
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
+      * ``items``: ``float``
 
+    * ``emission``: ``float``. The emissive property of a material.
+    * ``glossiness``: ``float``. The glossy component of a material.
+    * ``material_id``: ``int``. The ID that identifies this material.
+    * ``model_id``: ``int``. The model which this material belongs to.
+    * ``opacity``: ``float``. The transparency of the material (0 to 1).
+    * ``reflection_index``: ``float``. The index of reflection of the material surface.
+    * ``refraction_index``: ``float``. The index of refraction of a transparent material.
+    * ``shading_mode``: ``str``. The chosen shading mode.
+    * ``simulation_data_cast``: ``bool``. Wether to cast the user parameter for simulation.
+    * ``specular_color``: ``list``. Specular reflection RGB normalized.
+
+      * ``items``: ``float``
+
+    * ``specular_exponent``: ``float``. The specular exponent to sharpen the specular reflection.
+    * ``user_parameter``: ``float``. A custom parameter passed to the simulation.
+
+Return value:
+
+This method has no return values.
 
 ----
 
 set_metaballs_per_simulation_value
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Add a metaballs model representing the number of connections for a given frame and simulation value.
 
 Parameters:
 
-.. code-block:: python
+* ``epsilon``: ``float``. The value epsilon.
+* ``frame``: ``int``. The frame with metaballs.
+* ``grid_size``: ``int``. The size of a regular grid.
+* ``model_id``: ``int``. The model to set metaballs.
+* ``threshold``: ``float``. The threshold.
+* ``value``: ``float``. The value for the metaballs generation.
 
-    set_metaballs_per_simulation_value(threshold, model_id, grid_size, value, epsilon, frame)
+Return value:
 
-Adds a metaballs model representing the number of connections for a given frame and simulation value
-
-Parameters:
-
-* ``epsilon``: ``number``, The value epsilon
-* ``frame``: ``integer``, The frame in which the setting will be applied
-* ``grid_size``: ``integer``, The size of a regular grid
-* ``model_id``: ``integer``, The model to which apply the metaballs setting
-* ``threshold``: ``number``, The threshold
-* ``value``: ``number``, The value for the metaballs generation
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
+This method has no return values.
 
 ----
 
 set_odu_camera
 ~~~~~~~~~~~~~~
 
+Set the properties of the current camera.
 
 Parameters:
 
-.. code-block:: python
+* ``aperture_radius``: ``float``. The camera aperture.
+* ``direction``: ``list``. Camera facing direction normalized.
 
-    set_odu_camera(up, direction, focus_distance, origin, aperture_radius)
+  * ``items``: ``float``
 
-Set the camera in a position and with an specific orientation towards the scene
+* ``focus_distance``: ``float``. Focus distance from the origin.
+* ``origin``: ``list``. Camera position.
 
-Parameters:
+  * ``items``: ``float``
 
-* ``aperture_radius``: ``number``, The camera aperture
-* ``direction``: ``array``, A normalized vector in the direction the camera is facing
-* ``focus_distance``: ``number``, The distance from the origin, in the direction, at which the camera will focus
-* ``origin``: ``array``, The position of the camera
-* ``up``: ``array``, A normalized vector, perpendicular to the direction, that points to the camera upwards
+* ``up``: ``list``. Camera up direction normalized.
 
-Error:
+  * ``items``: ``float``
 
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
+Return value:
 
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
-
+This method has no return values.
 
 ----
 
 set_synapses_attributes
 ~~~~~~~~~~~~~~~~~~~~~~~
 
+Set synapses specific attributes for a given model.
 
 Parameters:
 
-.. code-block:: python
+* ``circuit_configuration``: ``str``. Path to the circuit configuration file.
+* ``gid``: ``int``. Target cell GID.
+* ``html_colors``: ``list``. List of rgb colors in hexadecimal.
 
-    set_synapses_attributes(gid, light_emission, circuit_configuration, html_colors, radius)
+  * ``items``: ``str``
 
-Sets sypnapse specific attributes for a given model
+* ``light_emission``: ``float``. Emission parameter for the synapse material.
+* ``radius``: ``float``. Synapse geometry radius.
 
-Parameters:
+Return value:
 
-* ``circuit_configuration``: ``string``, Path to the circuit configuration file
-* ``gid``: ``integer``, Target cell GID
-* ``html_colors``: ``array``, List of rgb colors in hexadecimal
-* ``light_emission``: ``number``, Emission parameter for the synapse material
-* ``radius``: ``number``, Synapse geometry radius
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
+This method has no return values.
 
 ----
 
 trace_anterograde
 ~~~~~~~~~~~~~~~~~
 
+Performs neuronal tracing showing efferent and afferent synapse relationship between cells (including projections).
 
 Parameters:
 
-.. code-block:: python
+* ``cell_gids``: ``list``. List of cell GIDs to use a source of the tracing.
 
-    trace_anterograde(model_id, source_cell_color, cell_gids, non_connected_cells_color, connected_cells_color, target_cell_gids)
+  * ``items``: ``int``
 
-Performs neuronal tracing; Showing efferent and afferent synapse relationship  between cells (including projections)
+* ``connected_cells_color``: ``list``. RGBA normalized color to apply to the target cells geometry.
 
-Parameters:
+  * ``items``: ``float``
 
-* ``cell_gids``: ``array``, List of cell GIDs to use a source of the tracing
-* ``connected_cells_color``: ``array``, A 4 component normalized color (RGBA) to apply to the target cells geometry
-* ``model_id``: ``integer``, Model where to perform the neuronal tracing
-* ``non_connected_cells_color``: ``array``, A 4 component normalized color (RGBA) to apply to the rest of cells
-* ``source_cell_color``: ``array``, A 4 component normalized color (RGBA) to apply to the source cell geometry
-* ``target_cell_gids``: ``array``, List of cells GIDs which are the result of the given tracing mode
+* ``model_id``: ``int``. Model where to perform the neuronal tracing.
+* ``non_connected_cells_color``: ``list``. RGBA normalized color to apply to the rest of cells.
 
-Error:
+  * ``items``: ``float``
 
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
+* ``source_cell_color``: ``list``. RGBA normalized color to apply to the source cell geometry.
 
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
+  * ``items``: ``float``
 
+* ``target_cell_gids``: ``list``. List of cells GIDs which are the result of the given tracing mode.
 
-----
+  * ``items``: ``int``
 
-update_material_properties
-~~~~~~~~~~~~~~~~~
+Return value:
 
-
-Parameters:
-
-.. code-block:: python
-
-    update_material_properties(model_id, material_ids, property_names, property_values)
-
-Update only the specified properties with the specified values for the given model and materials.
-
-Parameters:
-
-* ``model_id``: ``integer``, ID of the model to which apply the material modification
-* ``material_ids``: ``array``, List of material ids belonging to the given model. If empty, all materials of the given model will be modified.
-* ``property_names``: ``array``, List of property names to update. The names must match those returned by `get_material_properties()`
-* ``property_values``: ``array``, List of property values as string corresponding to the specified properties. Must be convertible to the types returned by `get_material_properties()`
-
-Error:
-
-In the event of an error, the return value will be a ``dictionary``, contain 2 entries:
-
-* ``error``: ``integer``, an error code that identifies the problem.
-* ``message``: ``str``, a description of the error.
+This method has no return values.
 

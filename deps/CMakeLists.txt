@@ -18,12 +18,32 @@ if(FreeImage_FOUND)
   list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/deps/perceptualdiff/*')
 endif()
 
-if(libuv_FOUND)
-  if(NOT EXISTS "${PROJECT_SOURCE_DIR}/deps/uvw")
-    message(FATAL_ERROR "uvw missing, run: git submodule update --init")
-  endif()
-  list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/deps/uvw/*')
+# Both Poco and GLM create "uninstall" targets. But GLM check wether the
+# target exists before or not, whereas POCO doesnt give a damn.
+set(ENABLE_REDIS OFF CACHE BOOL "Enable Redis")
+set(ENABLE_ENCODINGS OFF CACHE BOOL "Enable Encodings")
+set(ENABLE_APACHECONNECTOR OFF CACHE BOOL "Enable Apache")
+set(ENABLE_MONGODB OFF CACHE BOOL "Enable MongoDB")
+set(ENABLE_DATA_POSTGRESQL OFF CACHE BOOL "Enable PostgreSQL")
+set(ENABLE_DATA_MYSQL OFF CACHE BOOL "Enable MySQL")
+set(ENABLE_DATA_ODBC OFF CACHE BOOL "Enable Data ODBC")
+set(ENABLE_DATA_SQLITE OFF CACHE BOOL "Enable Data SQlite")
+set(ENABLE_ZIP OFF CACHE BOOL "Enable Zip")
+set(ENABLE_PAGECOMPILER OFF CACHE BOOL "Enable PageCompiler")
+set(ENABLE_PAGECOMPILER_FILE2PAGE OFF CACHE BOOL "Enable File2Page")
+set(BUILD_SHARED_LIBS ON)
+add_subdirectory(poco)
+
+# Remove Poco warnings
+if(NOT CMAKE_BUILD_TYPE MATCHES DEBUG)
+    target_compile_options(Foundation PUBLIC -w)
 endif()
+
+# Remove Poco postfix d in debug
+set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Set Debug library postfix" FORCE)
+set(CMAKE_RELEASE_POSTFIX "" CACHE STRING "Set Release library postfix" FORCE)
+set(CMAKE_MINSIZEREL_POSTFIX "" CACHE STRING "Set MinSizeRel library postfix" FORCE)
+set(CMAKE_RELWITHDEBINFO_POSTFIX "" CACHE STRING "Set RelWithDebInfo library postfix" FORCE)
 
 if(NOT TARGET glm)
     message(STATUS "Gathering GLM from submodules")

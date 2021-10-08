@@ -30,21 +30,4 @@ namespace brayns
 strings parseFolder(const std::string& folder, const strings& filters);
 
 std::string extractExtension(const std::string& filename);
-
-template <size_t M, typename T>
-inline glm::vec<M, T> toGlmVec(const std::array<T, M>& input)
-{
-    glm::vec<M, T> vec;
-    memcpy(glm::value_ptr(vec), input.data(), input.size() * sizeof(T));
-    return vec;
-}
-
-template <size_t M, typename T>
-inline std::array<T, M> toArray(const glm::vec<M, T>& input)
-{
-    std::array<T, M> output;
-    memcpy(output.data(), glm::value_ptr(input), M * sizeof(T));
-    return output;
-}
-
 } // namespace brayns

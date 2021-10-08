@@ -16,7 +16,7 @@ common_find_package_post()
 
 set(BRAYNSOPENDECK_HEADERS OpenDeckPlugin.h OpenDeckParameters.h)
 set(BRAYNSOPENDECK_SOURCES OpenDeckPlugin.cpp OpenDeckParameters.cpp)
-set(BRAYNSOPENDECK_LINK_LIBRARIES PRIVATE braynsCommon braynsEngine braynsPluginAPI)
+set(BRAYNSOPENDECK_LINK_LIBRARIES PRIVATE braynsCommon braynsEngine braynsPluginAPI braynsNetwork)
 
 if(OSPRAY_FOUND)
   list(APPEND BRAYNSOPENDECK_SOURCES

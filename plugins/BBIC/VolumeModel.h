@@ -61,4 +61,4 @@ private:
     std::thread _uploadThread;
     bool _keepUploading{true};
 };
-}
+} // namespace bbic

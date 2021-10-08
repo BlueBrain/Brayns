@@ -39,7 +39,7 @@ const std::map<std::string, brayns::BVHFlag> BVH_TYPES = {
     {"dynamic", brayns::BVHFlag::dynamic},
     {"compact", brayns::BVHFlag::compact},
     {"robust", brayns::BVHFlag::robust}};
-}
+} // namespace
 
 namespace brayns
 {
@@ -139,4 +139,4 @@ void GeometryParameters::print()
                 << (_memoryMode == MemoryMode::shared ? "Shared" : "Replicated")
                 << std::endl;
 }
-}
+} // namespace brayns

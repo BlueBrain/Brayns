@@ -58,5 +58,5 @@ ImagePtr mergeImages(const std::vector<ImagePtr>& images);
 #else
 using ImagePtr = std::unique_ptr<int>;
 #endif
-}
-}
+} // namespace freeimage
+} // namespace brayns

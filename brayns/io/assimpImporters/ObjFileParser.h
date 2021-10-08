@@ -38,8 +38,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#ifndef OBJ_FILEPARSER_H_INC
-#define OBJ_FILEPARSER_H_INC
+
+#pragma once
 
 #include "IOStreamBuffer.h"
 #include <assimp/mesh.h>
@@ -58,7 +58,7 @@ struct Object;
 struct Material;
 struct Point3;
 struct Point2;
-}
+} // namespace ObjFile
 
 class ObjFileImporter;
 class IOSystem;
@@ -166,5 +166,3 @@ private:
 };
 
 } // Namespace Assimp
-
-#endif

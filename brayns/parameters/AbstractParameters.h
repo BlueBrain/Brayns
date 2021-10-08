@@ -59,6 +59,7 @@ public:
     virtual void print();
 
     po::options_description& parameters() { return _parameters; }
+
 protected:
     std::string _name;
 
@@ -66,7 +67,7 @@ protected:
 
     static std::string asString(const bool flag) { return flag ? "on" : "off"; }
 };
-}
+} // namespace brayns
 
 namespace boost
 {
@@ -108,5 +109,5 @@ inline fixed_tokens_typed_value<T>* fixed_tokens_value(T* t, unsigned min,
 {
     return new fixed_tokens_typed_value<T>(t, min, max);
 }
-}
-}
+} // namespace program_options
+} // namespace boost

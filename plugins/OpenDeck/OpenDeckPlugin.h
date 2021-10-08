@@ -38,4 +38,4 @@ private:
     Vector2ui _floorRes;
     OpenDeckParameters _params;
 };
-}
+} // namespace brayns

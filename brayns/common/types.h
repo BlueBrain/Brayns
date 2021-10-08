@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef TYPES_H
-#define TYPES_H
+#pragma once
 
 #include <brayns/common/mathTypes.h>
 #include <brayns/common/utils/enumUtils.h>
@@ -257,7 +256,7 @@ enum class CameraMode
  * in absolute value of the coordinate system. Values are stored
  * in a Vector4, with the following order: nx, ny, nz and d
  */
-using Plane = std::array<double, 4>;
+using Plane = Vector4d;
 using Planes = std::vector<Plane>;
 
 struct RenderInput
@@ -385,4 +384,3 @@ inline std::vector<std::pair<std::string, DataType>> enumMap()
             {"int16", DataType::INT16},   {"int32", DataType::INT32}};
 }
 } // namespace brayns
-#endif // TYPES_H

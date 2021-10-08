@@ -54,9 +54,10 @@ public:
                         const RenderingParameters& renderingParameters);
 
     void setScene(ScenePtr scene) { _scene = scene; };
+
 protected:
     const AnimationParameters& _animationParameters;
     const RenderingParameters& _renderingParameters;
     ScenePtr _scene;
 };
-}
+} // namespace brayns

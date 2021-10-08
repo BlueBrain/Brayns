@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYMATERIAL_H
-#define OSPRAYMATERIAL_H
+#pragma once
 
 #include <brayns/engine/Material.h>
 #include <ospray.h>
@@ -46,12 +45,11 @@ public:
     void commit(const std::string& renderer);
 
     OSPMaterial getOSPMaterial() { return _ospMaterial; }
+
 private:
     OSPTexture _createOSPTexture2D(Texture2DPtr texture);
     OSPMaterial _ospMaterial{nullptr};
     bool _isBackGroundMaterial{false};
     std::string _renderer;
 };
-}
-
-#endif // OSPRAYMATERIAL_H
+} // namespace brayns

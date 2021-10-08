@@ -1,4 +1,5 @@
-/* Copyright (c) 2019 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021 EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -18,13 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CIRCUITINFOPLUGIN_H
-#define CIRCUITINFOPLUGIN_H
+#pragma once
 
-#include "CircuitInfoParams.h"
-
-#include <brayns/common/ActionInterface.h>
-#include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 /**
@@ -36,28 +32,6 @@ class CircuitInfoPlugin : public brayns::ExtensionPlugin
 {
 public:
     CircuitInfoPlugin();
-    ~CircuitInfoPlugin();
+
     void init() final;
-
-private:
-    CircuitInfo _getCircuitInfo(const CircuitInfoRequest& request);
-    CellData _getCellData(const CellDataRequest& request);
-
-    CellGIDList _getCellGIDs(const CellGIDListRequest& request);
-    CellGIDList _getCellGIDsFromModel(const ModelCellGIDListRequest& request);
-
-    ReportList _getReportList(const ReportListRequest& request);
-    ReportInfo _getReportInfo(const ReportInfoRequest& request);
-    SpikeReportInfo _getSpikeReportInfo(const SpikeReportRequest& request);
-
-    TargetList _getTargetList(const TargetListRequest& request);
-
-    AfferentGIDList _getAfferentGIDList(const AfferentGIDListRequest& request);
-    EfferentGIDList _getEfferentGIDList(const EfferentGIDListRequest& request);
-
-    ProjectionList _getProjectionList(const ProjectionListRequest& request);
-    ProjectionAfferentGIDList _getProjectionAfferentGIDList(const ProjectionAfferentGIDListRequest& request);
-    ProjectionEfferentGIDList _getProjectionEfferentGIDList(const ProjectionEfferentGIDListRequest& request);
 };
-
-#endif

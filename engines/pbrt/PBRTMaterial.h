@@ -18,14 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PBRTMATERIAL_H
-#define PBRTMATERIAL_H
+#pragma once
 
 #include "PBRTConstants.h"
 
 #include <brayns/engine/Material.h>
 
-#include <pbrt/core/material.h>
 #include <pbrt/core/material.h>
 
 #include <functional>
@@ -48,14 +46,12 @@ public:
 private:
     bool _checkMaterialIntegrator(const PBRTMaterialClass matClass) const;
 
-    template<typename MaterialClass>
+    template <typename MaterialClass>
     pbrt::Material* _createPBRTMaterial() const;
-    pbrt::Material* _instantiateMaterial(const PBRTMaterialClass matClass) const;
+    pbrt::Material* _instantiateMaterial(
+        const PBRTMaterialClass matClass) const;
 
-    std::shared_ptr<pbrt::Material> _pbrtMat {nullptr};
+    std::shared_ptr<pbrt::Material> _pbrtMat{nullptr};
     std::string _renderer;
-
 };
-}
-
-#endif
+} // namespace brayns

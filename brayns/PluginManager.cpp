@@ -24,10 +24,8 @@
 #include <brayns/common/utils/stringUtils.h>
 #include <brayns/parameters/ParametersManager.h>
 
+#include <brayns/network/plugin/NetworkManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
-#ifdef BRAYNS_USE_NETWORKING
-#include <plugins/Rockets/RocketsPlugin.h>
-#endif
 
 namespace
 {
@@ -37,7 +35,7 @@ bool containsString(const int length, const char** input, const char* toFind)
                return std::strcmp(arg, toFind) == 0;
            }) > 0;
 }
-}
+} // namespace
 
 namespace brayns
 {
@@ -76,29 +74,25 @@ PluginManager::PluginManager(int argc, const char** argv)
 
 void PluginManager::initPlugins(PluginAPI* api)
 {
-    // Rockets plugin cannot be initialized until we have the command line
-    // parameters
     auto& parameters = api->getParametersManager();
-    auto& appParameters = parameters.getApplicationParameters();
+    auto& networkParameters = parameters.getNetworkParameters();
+    auto& uri = networkParameters.getUri();
 
-    const bool haveHttpServerURI = !appParameters.getHttpServerURI().empty();
-
-    if (haveHttpServerURI)
-#ifdef BRAYNS_USE_NETWORKING
-        // Since the Rockets plugin provides the ActionInterface, it must be
-        // initialized before anything else
+    if (!uri.empty())
+    {
         _extensions.insert(_extensions.begin(),
-                           std::make_unique<RocketsPlugin>());
-#else
-        throw std::runtime_error(
-            "BRAYNS_NETWORKING_ENABLED was not set, but HTTP server URI "
-            "was specified");
-#endif
+                           std::make_unique<NetworkManager>());
+    }
 
     for (const auto& extension : _extensions)
     {
         extension->_api = api;
         extension->init();
+    }
+
+    if (auto interface = api->getActionInterface())
+    {
+        interface->setupEntrypoints();
     }
 }
 
@@ -147,4 +141,4 @@ void PluginManager::_loadPlugin(const char* name, int argc, const char* argv[])
         BRAYNS_ERROR << exc.what() << std::endl;
     }
 }
-}
+} // namespace brayns

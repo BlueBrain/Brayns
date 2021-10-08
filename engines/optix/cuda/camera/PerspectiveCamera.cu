@@ -97,9 +97,8 @@ __device__ float3 launch(unsigned int& seed, const float2 screen,
     // lens sampling
     float2 sample = optix::square_to_disk(make_float2(jitter4.z, jitter4.w));
 
-    ray_origin =
-        ray_origin +
-        aperture_radius * (sample.x * normalize(U) + sample.y * normalize(V));
+    ray_origin = ray_origin + aperture_radius * (sample.x * normalize(U) +
+                                                 sample.y * normalize(V));
 
     float near = scene_epsilon;
     float far = INFINITY;

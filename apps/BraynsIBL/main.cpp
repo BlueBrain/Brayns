@@ -297,7 +297,7 @@ auto val(T* in)
 {
     return po::value<T>(in)->default_value(*in);
 }
-}
+} // namespace
 
 int main(int argc, char** argv)
 {

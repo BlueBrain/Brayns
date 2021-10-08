@@ -11,6 +11,7 @@ add_subdirectory(manipulators)
 add_subdirectory(io)
 add_subdirectory(tasks)
 add_subdirectory(pluginapi)
+add_subdirectory(network)
 
 set(BRAYNS_PUBLIC_HEADERS Brayns.h)
 set(BRAYNS_HEADERS EngineFactory.h)
@@ -21,12 +22,8 @@ set(BRAYNS_SOURCES
 )
 
 set(BRAYNS_LINK_LIBRARIES
-  PUBLIC braynsParameters braynsCommon braynsEngine
+  PUBLIC braynsParameters braynsCommon braynsEngine braynsNetwork
   PRIVATE braynsIO braynsPluginAPI braynsManipulators braynsTasks)
-
-if(TARGET braynsRockets)
-  list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE braynsRockets)
-endif()
 
 set(BRAYNS_OMIT_EXPORT ON)
 common_library(brayns)

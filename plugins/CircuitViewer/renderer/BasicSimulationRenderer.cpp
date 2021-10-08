@@ -46,4 +46,4 @@ BasicSimulationRenderer::BasicSimulationRenderer()
 }
 
 OSP_REGISTER_RENDERER(BasicSimulationRenderer, basic_simulation);
-} // ::brayns
+} // namespace brayns

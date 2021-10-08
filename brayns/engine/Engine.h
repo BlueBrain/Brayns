@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/PropertyMap.h>
 #include <brayns/common/Statistics.h>
+#include <brayns/common/propertymap/PropertyMap.h>
 
 #include <functional>
 
@@ -93,7 +93,7 @@ public:
 
     /**
      * Callback when a new frame shall be triggered. Currently called by event
-     * plugins Deflect and Rockets.
+     * plugins Deflect.
      */
     std::function<void()> triggerRender{[] {}};
 
@@ -170,4 +170,4 @@ protected:
 
     bool _keepRunning{true};
 };
-}
+} // namespace brayns

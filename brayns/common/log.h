@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef BRAYNS_LOG_H
-#define BRAYNS_LOG_H
+#pragma once
 
 #include <iostream>
 
@@ -39,5 +38,3 @@
         BRAYNS_ERROR << exc.what() << std::endl; \
         throw exc;                               \
     }
-
-#endif

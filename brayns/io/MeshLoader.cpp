@@ -102,7 +102,8 @@ std::vector<std::string> getSupportedTypes()
 std::unique_ptr<Assimp::Importer> createImporter(const LoaderProgress& callback,
                                                  const std::string& filename)
 {
-    std::unique_ptr<Assimp::Importer> importer = std::make_unique<Assimp::Importer>();
+    std::unique_ptr<Assimp::Importer> importer =
+        std::make_unique<Assimp::Importer>();
     importer->SetProgressHandler(new ProgressWatcher(callback, filename));
 
 // WAR for https://github.com/assimp/assimp/issues/2337; use PLY importer
@@ -118,7 +119,7 @@ std::unique_ptr<Assimp::Importer> createImporter(const LoaderProgress& callback,
     importer->RegisterLoader(new Assimp::ObjFileImporter());
     return importer;
 }
-}
+} // namespace
 
 MeshLoader::MeshLoader(Scene& scene)
     : Loader(scene)
@@ -128,10 +129,10 @@ MeshLoader::MeshLoader(Scene& scene)
 MeshLoader::MeshLoader(Scene& scene, const GeometryParameters& params)
     : Loader(scene)
 {
-    _defaults.setProperty({PROP_GEOMETRY_QUALITY,
-                           enumToString(params.getGeometryQuality()),
-                           enumNames<brayns::GeometryQuality>(),
-                           {"Geometry quality"}});
+    _defaults.add({PROP_GEOMETRY_QUALITY,
+                   {enumToString(params.getGeometryQuality()),
+                    enumNames<brayns::GeometryQuality>()},
+                   {"Geometry quality"}});
 }
 
 bool MeshLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
@@ -149,9 +150,9 @@ std::vector<ModelDescriptorPtr> MeshLoader::importFromFile(
     PropertyMap properties = _defaults;
     properties.merge(inProperties);
 
-    const auto geometryQuality =
-        stringToEnum<GeometryQuality>(properties.getProperty<std::string>(
-            PROP_GEOMETRY_QUALITY, enumToString(GeometryQuality::high)));
+    const auto geometryQuality = stringToEnum<GeometryQuality>(
+        properties.valueOr(PROP_GEOMETRY_QUALITY,
+                           enumToString(GeometryQuality::high)));
 
     auto model = _scene.createModel();
     auto metadata = importMesh(fileName, callback, *model, {}, NO_MATERIAL,
@@ -174,9 +175,9 @@ std::vector<ModelDescriptorPtr> MeshLoader::importFromBlob(
     PropertyMap properties = getProperties();
     properties.merge(propertiesTmp);
 
-    const auto geometryQuality =
-        stringToEnum<GeometryQuality>(properties.getProperty<std::string>(
-            PROP_GEOMETRY_QUALITY, enumToString(GeometryQuality::high)));
+    const auto geometryQuality = stringToEnum<GeometryQuality>(
+        properties.valueOr(PROP_GEOMETRY_QUALITY,
+                           enumToString(GeometryQuality::high)));
 
     auto importer_ptr = createImporter(callback, blob.name);
     Assimp::Importer& importer = *(importer_ptr.get());
@@ -418,14 +419,15 @@ ModelMetadata MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
                         [](auto value, auto& i) { return value + i.second; });
 
     std::string materialInfo = "";
-    if(!matInfoList.empty())
+    if (!matInfoList.empty())
     {
         materialInfo += "[";
-        for(size_t i = 0; i < matInfoList.size(); i++)
+        for (size_t i = 0; i < matInfoList.size(); i++)
         {
             const auto& mi = matInfoList[i];
-            const std::string ending = (i + 1 < matInfoList.size())? "," : "";
-            materialInfo += "{\"name\":\""+mi.name+"\",\"ids\":["+std::to_string(mi.materialId)+"]}" + ending;
+            const std::string ending = (i + 1 < matInfoList.size()) ? "," : "";
+            materialInfo += "{\"name\":\"" + mi.name + "\",\"ids\":[" +
+                            std::to_string(mi.materialId) + "]}" + ending;
         }
         materialInfo += "]";
     }

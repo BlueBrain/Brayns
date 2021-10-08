@@ -53,6 +53,7 @@ Authors and Contributors
 * Adrien Devresse
 * Sebastien Speierer
 * Fabien Petitjean
+* Adrien Fleury
 
 
 Reporting issues

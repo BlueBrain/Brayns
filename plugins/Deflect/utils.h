@@ -75,5 +75,5 @@ inline bool needsReset(const deflect::Observer& stream,
 
     return changed || !stream.isConnected() || !params.getEnabled();
 }
-}
-}
+} // namespace utils
+} // namespace brayns

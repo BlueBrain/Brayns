@@ -1,4 +1,5 @@
-/* Copyright (c) 2020 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021 EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -18,13 +19,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FLUORESCENCEPLUGIN_H
-#define FLUORESCENCEPLUGIN_H
+#pragma once
 
 #include "FluorescenceParams.h"
 
-#include <brayns/common/ActionInterface.h>
 #include <brayns/common/types.h>
+#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 /**
@@ -66,14 +66,16 @@ private:
      *
      * @return RequestResponse with the sucess status of the request
      */
-    brayns::Message _addFluorescentAnnotatedVolume(const AddFluorescentAnnotatedVolume&);
+    brayns::Message _addFluorescentAnnotatedVolume(
+        const AddFluorescentAnnotatedVolume&);
 
     /**
      * @brief Adds a Fluorescent binary volume to the scene
      *
      * @return RequestResponse with the sucess status of the request
      */
-    brayns::Message _addFluorescentBinaryVolume(const AddFluorescentBinaryVolume&);
+    brayns::Message _addFluorescentBinaryVolume(
+        const AddFluorescentBinaryVolume&);
 
     /**
      * @brief Adds a Fluorescent grid volume to the scene, whose data is loaded
@@ -81,10 +83,12 @@ private:
      *
      * @return RequestResponse with the sucess status of the request
      */
-    brayns::Message _addFluorescentGridVolumeFromFile(const AddFluorescentGridFromFileVolume&);
+    brayns::Message _addFluorescentGridVolumeFromFile(
+        const AddFluorescentGridFromFileVolume&);
 
     /**
-     * @brief Adds a Fluorescent grid volume whose data is provided in the parameters
+     * @brief Adds a Fluorescent grid volume whose data is provided in the
+     * parameters
      *
      * @return RequestResponse with the sucess status of the request
      */
@@ -95,7 +99,8 @@ private:
      *
      * @return RequestResponse with the sucess status of the request
      */
-    brayns::Message _addFluorescentScatteringVolume(const AddFluorescentScatteringVolume&);
+    brayns::Message _addFluorescentScatteringVolume(
+        const AddFluorescentScatteringVolume&);
 
     /**
      * @brief Adds a Fluorescent scattering grid volume to the scene, whose data
@@ -103,7 +108,8 @@ private:
      *
      * @return RequestResponse with the sucess status of the request
      */
-    brayns::Message _addFluorescentScatteringGridVolume(const AddFluorescentScatteringGridVolume&);
+    brayns::Message _addFluorescentScatteringGridVolume(
+        const AddFluorescentScatteringGridVolume&);
 
     /**
      * @brief Adds a Fluorescent scattering grid volume to the scene, whose data
@@ -111,9 +117,6 @@ private:
      *
      * @return RequestResponse with the sucess status of the request
      */
-    brayns::Message
-    _addFluorescentScatteringGridVolumeFromFile(const AddFluorescentScatteringGridFromFileVolume&);
-
+    brayns::Message _addFluorescentScatteringGridVolumeFromFile(
+        const AddFluorescentScatteringGridFromFileVolume&);
 };
-
-#endif

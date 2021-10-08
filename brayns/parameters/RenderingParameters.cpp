@@ -31,7 +31,7 @@ const std::string PARAM_RENDERER = "renderer";
 const std::string PARAM_SPP = "samples-per-pixel";
 const std::string PARAM_SUBSAMPLING = "subsampling";
 const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
-}
+} // namespace
 
 namespace brayns
 {
@@ -105,4 +105,4 @@ void RenderingParameters::print()
     BRAYNS_INFO << "Max. accumulation frames          : " << _maxAccumFrames
                 << std::endl;
 }
-}
+} // namespace brayns

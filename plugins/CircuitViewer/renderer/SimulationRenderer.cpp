@@ -41,4 +41,4 @@ void SimulationRenderer::commit()
     _simulationDataSize = _simulationData ? _simulationData->size() : 0;
 }
 
-} // ::brayns
+} // namespace brayns

@@ -59,4 +59,4 @@ private:
     int _cacheFileDescriptor{-1};
     size_t _size{0};
 };
-}
+} // namespace brayns

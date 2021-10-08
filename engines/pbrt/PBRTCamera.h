@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PBRTCAMERA_H
-#define PBRTCAMERA_H
+#pragma once
 
 #include <brayns/engine/Camera.h>
 #include <pbrt/core/camera.h>
@@ -36,7 +35,8 @@ PBRT Camera parameters by name (type):
     - "lensradius"      : float, default 0.f
     - "focaldistance"   : float, default 1e6
     - "frameaspectratio": float, default current fb widht / height
-    - "screenwindow"    : float[4] (minx, maxx, miny, maxy) // NOT NEEDED, PBRT COMPUTES IT FROM frameaspectratio
+    - "screenwindow"    : float[4] (minx, maxx, miny, maxy) // NOT NEEDED, PBRT
+COMPUTES IT FROM frameaspectratio
     - "fov"             : float, default 90.f
     - "halffov"         : float, default -1.f
 
@@ -44,13 +44,15 @@ PBRT Camera parameters by name (type):
     - "lensradius"      : float, default 0.f
     - "focaldistance"   : float, default 1e6
     - "frameaspectratio": float, default current fb widht / height
-    - "screenwindow"    : float[4] (minx, maxx, miny, maxy) // NOT NEEDED, PBRT COMPUTES IT FROM frameaspectratio
+    - "screenwindow"    : float[4] (minx, maxx, miny, maxy) // NOT NEEDED, PBRT
+COMPUTES IT FROM frameaspectratio
 
  - "orthographic"
     - "lensradius"      : float, default 0.f
     - "focaldistance"   : float, default 1e6
     - "frameaspectratio": float, default current fb widht / height
-    - "screenwindow"    : float[4] (minx, maxx, miny, maxy) // NOT NEEDED, PBRT COMPUTES IT FROM frameaspectratio
+    - "screenwindow"    : float[4] (minx, maxx, miny, maxy) // NOT NEEDED, PBRT
+COMPUTES IT FROM frameaspectratio
 
  - "realistic"
     - "lensfile"        : string, path to lens file
@@ -64,28 +66,24 @@ namespace brayns
 class PBRTCamera : public Camera
 {
 public:
-    PBRTCamera()
-    {
-    }
+    PBRTCamera() {}
 
-    ~PBRTCamera()
-    {
-    }
+    ~PBRTCamera() {}
 
     void commit() final;
 
     void manualCommit(const Vector2ui& resolution);
 
-    const pbrt::Transform& getLookAtMatrix() const
-    {
-        return _worldToCamMatrix;
-    }
+    const pbrt::Transform& getLookAtMatrix() const { return _worldToCamMatrix; }
     const pbrt::Transform& getInvLookAtMatrix() const
     {
         return _camToWorldMatrix;
     }
 
-    const std::shared_ptr<const pbrt::Camera>& impl() const { return _pbrtCamera; }
+    const std::shared_ptr<const pbrt::Camera>& impl() const
+    {
+        return _pbrtCamera;
+    }
     pbrt::Film* getFilm() { return _film; }
     pbrt::Film* getFilm() const { return _film; }
     bool cameraChanged() const { return _cameraChanged || isModified(); }
@@ -100,16 +98,14 @@ private:
 
     std::unique_ptr<pbrt::Filter> _createFilter();
 
-    std::shared_ptr<const pbrt::Camera> _pbrtCamera {nullptr};
-    pbrt::Film* _film {nullptr};
+    std::shared_ptr<const pbrt::Camera> _pbrtCamera{nullptr};
+    pbrt::Film* _film{nullptr};
 
     pbrt::Transform _worldToCamMatrix;
     pbrt::Transform _camToWorldMatrix;
 
-    brayns::Vector2ui _currentRes {16,16};
+    brayns::Vector2ui _currentRes{16, 16};
 
     mutable bool _cameraChanged{true};
 };
-}
-
-#endif
+} // namespace brayns

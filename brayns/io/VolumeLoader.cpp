@@ -35,16 +35,16 @@ namespace
 {
 using Property = brayns::Property;
 const Property PROP_DIMENSIONS = {"dimensions",
-                                  std::array<int32_t, 3>({{0, 0, 0}}),
+                                  brayns::Vector3i{0, 0, 0},
                                   {"Dimensions"}};
 const Property PROP_SPACING = {"spacing",
-                               std::array<double, 3>({{1, 1, 1}}),
+                               brayns::Vector3d{1, 1, 1},
                                {"Spacing"}};
 const Property PROP_TYPE = {"type",
-                            brayns::enumToString(brayns::DataType::UINT8),
-                            brayns::enumNames<brayns::DataType>(),
+                            {brayns::enumToString(brayns::DataType::UINT8),
+                             brayns::enumNames<brayns::DataType>()},
                             {"Type"}};
-}
+} // namespace
 
 namespace brayns
 {
@@ -59,13 +59,13 @@ std::string to_string(const glm::vec<M, T>& vec)
 }
 
 template <typename T>
-std::array<T, 3> parseArray3(const std::string& str,
-                             std::function<T(std::string)> conv)
+glm::vec<3, T> parseVec3(const std::string& str,
+                         std::function<T(std::string)> conv)
 {
     const auto v = brayns::string_utils::split(str, ' ');
     if (v.size() != 3)
         throw std::runtime_error("Not exactly 3 values for mhd array");
-    return {{conv(v[0]), conv(v[1]), conv(v[2])}};
+    return {conv(v[0]), conv(v[1]), conv(v[2])};
 }
 
 std::map<std::string, std::string> parseMHD(const std::string& filename)
@@ -153,7 +153,7 @@ Vector2f dataRangeFromType(DataType type)
         return {0, 1};
     }
 }
-}
+} // namespace
 
 RawVolumeLoader::RawVolumeLoader(Scene& scene)
     : Loader(scene)
@@ -179,8 +179,9 @@ std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
     const PropertyMap& properties) const
 {
-    return {_loadVolume(filename, callback, properties,
-                       [filename](auto volume) { volume->mapData(filename); })};
+    return {
+        _loadVolume(filename, callback, properties,
+                    [filename](auto volume) { volume->mapData(filename); })};
 }
 
 ModelDescriptorPtr RawVolumeLoader::_loadVolume(
@@ -194,12 +195,11 @@ ModelDescriptorPtr RawVolumeLoader::_loadVolume(
 
     callback.updateProgress("Parsing volume file ...", 0.f);
 
-    const auto dimensions = toGlmVec(
-        properties.getProperty<std::array<int32_t, 3>>(PROP_DIMENSIONS.name));
-    const auto spacing = toGlmVec(
-        properties.getProperty<std::array<double, 3>>(PROP_SPACING.name));
+    const auto dimensions =
+        properties[PROP_DIMENSIONS.getName()].as<Vector3i>();
+    const auto spacing = properties[PROP_SPACING.getName()].as<Vector3d>();
     const auto type = stringToEnum<DataType>(
-        properties.getProperty<std::string>(PROP_TYPE.name));
+        properties[PROP_TYPE.getName()].to<std::string>());
 
     if (glm::compMul(dimensions) == 0)
         throw std::runtime_error("Volume dimensions are empty");
@@ -238,9 +238,9 @@ std::vector<std::string> RawVolumeLoader::getSupportedExtensions() const
 PropertyMap RawVolumeLoader::getProperties() const
 {
     PropertyMap pm;
-    pm.setProperty(PROP_DIMENSIONS);
-    pm.setProperty(PROP_SPACING);
-    pm.setProperty(PROP_TYPE);
+    pm.add(PROP_DIMENSIONS);
+    pm.add(PROP_SPACING);
+    pm.add(PROP_TYPE);
     return pm;
 }
 ////////////////////////////////////////////////////////////////////////////
@@ -280,11 +280,11 @@ std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromFile(
         throw std::runtime_error("Wrong object type for mhd file");
 
     const auto dimensions =
-        parseArray3<int32_t>(mhd.at("DimSize"),
-                             [](const auto& s) { return stoi(s); });
+        parseVec3<int32_t>(mhd.at("DimSize"),
+                           [](const auto& s) { return stoi(s); });
     const auto spacing =
-        parseArray3<double>(mhd.at("ElementSpacing"),
-                            [](const auto& s) { return stod(s); });
+        parseVec3<double>(mhd.at("ElementSpacing"),
+                          [](const auto& s) { return stod(s); });
     const auto type = dataTypeFromMET(mhd.at("ElementType"));
 
     fs::path path = mhd.at("ElementDataFile");
@@ -296,11 +296,17 @@ std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromFile(
     volumeFile = path.string();
 
     PropertyMap properties;
-    properties.setProperty(
-        {PROP_DIMENSIONS.name, dimensions, PROP_DIMENSIONS.metaData});
-    properties.setProperty({PROP_SPACING.name, spacing, PROP_SPACING.metaData});
-    properties.setProperty({PROP_TYPE.name, brayns::enumToString(type),
-                            PROP_TYPE.enums, PROP_TYPE.metaData});
+    properties.add(
+        {PROP_DIMENSIONS.getName(),
+         dimensions,
+         {PROP_DIMENSIONS.getLabel(), PROP_DIMENSIONS.getDescription()}});
+    properties.add({PROP_SPACING.getName(),
+                    spacing,
+                    {PROP_SPACING.getLabel(), PROP_SPACING.getDescription()}});
+    properties.add({PROP_TYPE.getName(),
+                    {brayns::enumToString(type),
+                     PROP_TYPE.as<brayns::EnumProperty>().getValues()},
+                    {PROP_TYPE.getLabel(), PROP_TYPE.getDescription()}});
 
     return RawVolumeLoader(_scene).importFromFile(volumeFile, callback,
                                                   properties);
@@ -315,4 +321,4 @@ std::vector<std::string> MHDVolumeLoader::getSupportedExtensions() const
 {
     return {"mhd"};
 }
-}
+} // namespace brayns

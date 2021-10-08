@@ -55,6 +55,7 @@ public:
 
     /** @copydoc Scene::supportsConcurrentSceneUpdates. */
     bool supportsConcurrentSceneUpdates() const final { return false; }
+
 private:
     optix::Buffer _lightBuffer{nullptr};
     std::vector<BasicLight> _optixLights;

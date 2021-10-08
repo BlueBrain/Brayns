@@ -43,7 +43,6 @@
 
 #include <unordered_set>
 
-
 namespace
 {
 const strings LOADER_KEYWORDS{"BlueConfig", "CircuitConfig"};
@@ -57,8 +56,7 @@ const size_t NB_MATERIALS_PER_INSTANCE = 3;
 AbstractCircuitLoader::AbstractCircuitLoader(
     brayns::Scene &scene,
     const brayns::ApplicationParameters &applicationParameters,
-    brayns::PropertyMap &&loaderParams,
-    CircuitExplorerPlugin* pluginPtr)
+    brayns::PropertyMap &&loaderParams, CircuitExplorerPlugin *pluginPtr)
     : Loader(scene)
     , _applicationParameters(applicationParameters)
     , _defaults(loaderParams)
@@ -87,18 +85,18 @@ bool AbstractCircuitLoader::isSupported(const std::string &filename,
 
     const auto contains = [](const std::string &value,
                              const std::string &keyword) {
-        if(value.size() < keyword.size())
+        if (value.size() < keyword.size())
             return false;
 
         const auto lastSlash = value.find_last_of("/");
         std::string compareTo = value;
-        if(lastSlash != std::string::npos)
+        if (lastSlash != std::string::npos)
             compareTo = value.substr(lastSlash + 1);
         return compareTo.find(keyword) != std::string::npos;
     };
 
-    for(const auto& keyw : LOADER_KEYWORDS)
-        if(contains(filename, keyw))
+    for (const auto &keyw : LOADER_KEYWORDS)
+        if (contains(filename, keyw))
             return true;
 
     return false;
@@ -129,20 +127,19 @@ std::vector<uint64_t> AbstractCircuitLoader::_getGIDsAsInts(
 brain::GIDSet AbstractCircuitLoader::_getGids(
     const brayns::PropertyMap &properties,
     const brion::BlueConfig &blueConfiguration, const brain::Circuit &circuit,
-    SchemeItem& targets) const
+    SchemeItem &targets) const
 {
     const auto circuitTargets = _getTargetsAsStrings(
-        properties.getProperty<std::string>(PROP_TARGETS.name));
+        properties[PROP_TARGETS.getName()].as<std::string>());
     const auto circuitGids =
-        _getGIDsAsInts(properties.getProperty<std::string>(PROP_GIDS.name));
-    const auto circuitDensity =
-        properties.getProperty<double>(PROP_DENSITY.name);
-    const auto randomSeed =
-        properties.getProperty<double>(PROP_RANDOM_SEED.name);
+        _getGIDsAsInts(properties[PROP_GIDS.getName()].as<std::string>());
+    const auto circuitDensity = properties[PROP_DENSITY.getName()].as<double>();
+    const auto randomSeed = properties[PROP_RANDOM_SEED.getName()].as<double>();
     const auto preSynapticNeuron =
-        properties.getProperty<std::string>(PROP_PRESYNAPTIC_NEURON_GID.name);
+        properties[PROP_PRESYNAPTIC_NEURON_GID.getName()].as<std::string>();
+    ;
     const auto postSynapticNeuron =
-        properties.getProperty<std::string>(PROP_POSTSYNAPTIC_NEURON_GID.name);
+        properties[PROP_POSTSYNAPTIC_NEURON_GID.getName()].as<std::string>();
 
     brain::GIDSet gids;
     targets.ids.push_back(0);
@@ -202,23 +199,24 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
     CompartmentReportPtr compartmentReport{nullptr};
 
     // Load simulation information from compartment report
-    const auto report = properties.getProperty<std::string>(PROP_REPORT.name);
+    const auto report = properties[PROP_REPORT.getName()].as<std::string>();
     const auto userDataType = stringToEnum<UserDataType>(
-        properties.getProperty<std::string>(PROP_USER_DATA_TYPE.name));
+        properties[PROP_USER_DATA_TYPE.getName()].to<std::string>());
 
     const auto dbConnectionString =
-        properties.getProperty<std::string>(PROP_DB_CONNECTION_STRING.name);
+        properties[PROP_DB_CONNECTION_STRING.getName()].as<std::string>();
 
     const auto synchronousMode =
-        properties.getProperty<bool>(PROP_SYNCHRONOUS_MODE.name);
-    
+        properties[PROP_SYNCHRONOUS_MODE.getName()].as<bool>();
+
     brayns::AbstractSimulationHandlerPtr simulationHandler{nullptr};
     switch (reportType)
     {
     case ReportType::voltages_from_file:
     {
-        if (report.empty() && (userDataType == UserDataType::simulation_offset ||
-                               userDataType == UserDataType::undefined))
+        if (report.empty() &&
+            (userDataType == UserDataType::simulation_offset ||
+             userDataType == UserDataType::undefined))
             return nullptr;
 
         PLUGIN_INFO << "Loading simulation data in "
@@ -245,13 +243,11 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
     case ReportType::spikes:
     {
         const auto &spikeReport = blueConfiguration.getSpikeSource();
-        const auto transitionTime = properties.getProperty<double>
-                (PROP_SPIKE_TRANSITION_TIME.name);
+        const auto transitionTime =
+            properties[PROP_SPIKE_TRANSITION_TIME.getName()].as<double>();
         PLUGIN_INFO << "Spike report: " << spikeReport << std::endl;
-        auto handler =
-            std::make_shared<SpikeSimulationHandler>(spikeReport.getPath(),
-                                                     gids,
-                                                     static_cast<float>(transitionTime));
+        auto handler = std::make_shared<SpikeSimulationHandler>(
+            spikeReport.getPath(), gids, static_cast<float>(transitionTime));
         model.setSimulationHandler(handler);
         simulationHandler = handler;
         setSimulationTransferFunction(_scene.getTransferFunction());
@@ -361,29 +357,34 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
 }
 
 brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuitFromBlueConfig(
-    const brion::BlueConfig& blueConfiguration,
+    const brion::BlueConfig &blueConfiguration,
     const brayns::PropertyMap &properties,
     const brayns::LoaderProgress &callback) const
 {
     const auto colorScheme = stringToEnum<CircuitColorScheme>(
-        properties.getProperty<std::string>(PROP_CIRCUIT_COLOR_SCHEME.name));
+        properties[PROP_CIRCUIT_COLOR_SCHEME.getName()].to<std::string>());
     const auto morphologyScheme = stringToEnum<MorphologyColorScheme>(
-        properties.getProperty<std::string>(PROP_MORPHOLOGY_COLOR_SCHEME.name));
+        properties[PROP_MORPHOLOGY_COLOR_SCHEME.getName()].to<std::string>());
     const auto morphologyQuality = stringToEnum<MorphologyQuality>(
-        properties.getProperty<std::string>(PROP_MORPHOLOGY_QUALITY.name));
-    const auto meshFolder = properties.getProperty<std::string>(PROP_MESH_FOLDER.name);
+        properties[PROP_MORPHOLOGY_QUALITY.getName()].to<std::string>());
+    const auto meshFolder =
+        properties[PROP_MESH_FOLDER.getName()].as<std::string>();
     const auto meshFilenamePattern =
-        properties.getProperty<std::string>(PROP_MESH_FILENAME_PATTERN.name);
+        properties[PROP_MESH_FILENAME_PATTERN.getName()].as<std::string>();
     const auto reportType = stringToEnum<ReportType>(
-        properties.getProperty<std::string>(PROP_REPORT_TYPE.name));
+        properties[PROP_REPORT_TYPE.getName()].to<std::string>());
     const auto userDataType = stringToEnum<UserDataType>(
-        properties.getProperty<std::string>(PROP_USER_DATA_TYPE.name));
-    const auto cellClipping = properties.getProperty<bool>(PROP_CELL_CLIPPING.name);
-    const auto areasOfInterest = properties.getProperty<int>(PROP_AREAS_OF_INTEREST.name);
-    const auto loadLayers = properties.getProperty<bool>(PROP_LOAD_LAYERS.name, true);
-    const auto loadEtypes = properties.getProperty<bool>(PROP_LOAD_ETYPES.name, true);
-    const auto loadMtypes = properties.getProperty<bool>(PROP_LOAD_MTYPES.name, true);
-
+        properties[PROP_USER_DATA_TYPE.getName()].to<std::string>());
+    const auto cellClipping =
+        properties[PROP_CELL_CLIPPING.getName()].as<bool>();
+    const auto areasOfInterest =
+        properties[PROP_AREAS_OF_INTEREST.getName()].as<int>();
+    const auto loadLayers =
+        properties.valueOr(PROP_LOAD_LAYERS.getName(), true);
+    const auto loadEtypes =
+        properties.valueOr(PROP_LOAD_ETYPES.getName(), true);
+    const auto loadMtypes =
+        properties.valueOr(PROP_LOAD_MTYPES.getName(), true);
 
     // Model (one for the whole circuit)
     auto model = _scene.createModel();
@@ -397,7 +398,7 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuitFromBlueConfig(
     // Circuit mapper. Morphology info will be gathered during loading
     CellObjectMapper objMapper;
     // Circuit schema data will be stored here
-    CircuitSchemeData& data = objMapper.getSchemeData();
+    CircuitSchemeData &data = objMapper.getSchemeData();
 
     callback.updateProgress("Getting GIDs...", 0);
     GIDOffsets targetGIDOffsets;
@@ -424,20 +425,20 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuitFromBlueConfig(
                                        allTransformations);
 
     // Import meshes and morphologies
-    if(loadLayers || colorScheme == CircuitColorScheme::by_layer)
+    if (loadLayers || colorScheme == CircuitColorScheme::by_layer)
     {
         callback.updateProgress("Identifying layer ids...", 0);
         _populateLayerIds(blueConfiguration, circuit, allGids, data.layers);
     }
 
-    if(loadEtypes || colorScheme == CircuitColorScheme::by_etype)
+    if (loadEtypes || colorScheme == CircuitColorScheme::by_etype)
     {
         callback.updateProgress("Identifying electro-physiology types...", 0);
         data.etypes.ids = circuit.getElectrophysiologyTypes(allGids);
-        //data.etypes.names = circuit.getElectrophysiologyTypeNames();
+        // data.etypes.names = circuit.getElectrophysiologyTypeNames();
     }
 
-    if(loadMtypes || colorScheme == CircuitColorScheme::by_mtype)
+    if (loadMtypes || colorScheme == CircuitColorScheme::by_mtype)
     {
         callback.updateProgress("Getting morphology types...", 0);
         data.mtypes.ids = circuit.getMorphologyTypes(allGids);
@@ -452,8 +453,8 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuitFromBlueConfig(
                                 compartmentReport, callback);
     else
     {
-        _importMeshes(properties, *model, allGids, allTransformations,
-                      callback, objMapper);
+        _importMeshes(properties, *model, allGids, allTransformations, callback,
+                      objMapper);
         if (compartmentReport != nullptr)
             // If meshes are loaded, and simulation is enabled, a secondary
             // model is created to store the simulation data in the 3D scene
@@ -475,17 +476,16 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuitFromBlueConfig(
 
     // Create custom materials
     brayns::PropertyMap materialProps;
-    materialProps.setProperty(
+    materialProps.add(
         {MATERIAL_PROPERTY_CAST_USER_DATA,
          (compartmentReport || userDataType == UserDataType::distance_to_soma ||
           reportType == ReportType::spikes)
              ? true
              : false});
-    materialProps.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
-                               static_cast<int>(MaterialShadingMode::diffuse)});
-    materialProps.setProperty(
-        {MATERIAL_PROPERTY_CLIPPING_MODE,
-         static_cast<int>(MaterialClippingMode::no_clipping)});
+    materialProps.add({MATERIAL_PROPERTY_SHADING_MODE,
+                       static_cast<int>(MaterialShadingMode::diffuse)});
+    materialProps.add({MATERIAL_PROPERTY_CLIPPING_MODE,
+                       static_cast<int>(MaterialClippingMode::no_clipping)});
     MorphologyLoader::createMissingMaterials(*model, materialProps);
 
     // Apply default colotmap
@@ -499,11 +499,11 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuitFromBlueConfig(
 
     // Create model
     brayns::ModelMetadata metadata = {
-        {"Report", properties.getProperty<std::string>(PROP_REPORT.name)},
+        {"Report", properties[PROP_REPORT.getName()].as<std::string>()},
         {"Report type",
-         properties.getProperty<std::string>(PROP_REPORT_TYPE.name)},
-        {"Targets", properties.getProperty<std::string>(PROP_TARGETS.name)},
-        {"GIDs", properties.getProperty<std::string>(PROP_GIDS.name)},
+         properties[PROP_REPORT_TYPE.getName()].to<std::string>()},
+        {"Targets", properties[PROP_TARGETS.getName()].as<std::string>()},
+        {"GIDs", properties[PROP_GIDS.getName()].as<std::string>()},
         {"Color scheme", enumToString<CircuitColorScheme>(colorScheme)},
         {"Use simulation model", enumToString<bool>(!meshFolder.empty())},
         {"Mesh filename pattern", meshFilenamePattern},
@@ -511,8 +511,10 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuitFromBlueConfig(
         {"Morphology quality",
          enumToString<MorphologyQuality>(morphologyQuality)},
         {"Number of neurons", std::to_string(allGids.size())},
-        {"Density", std::to_string(properties.getProperty<double>(PROP_DENSITY.name))},
-        {"RandomSeed", std::to_string(properties.getProperty<double>(PROP_RANDOM_SEED.name))},
+        {"Density",
+         std::to_string(properties[PROP_DENSITY.getName()].as<double>())},
+        {"RandomSeed",
+         std::to_string(properties[PROP_RANDOM_SEED.getName()].as<double>())},
         {"CircuitPath", blueConfiguration.getSource()}};
 
     brayns::ModelDescriptorPtr modelDescriptor;
@@ -525,10 +527,10 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuitFromBlueConfig(
     modelDescriptor->setTransformation(transformation);
 
     // Clean the circuit mapper associated with this model
-    modelDescriptor->onRemoved([plptr = _pluginPtr](const brayns::ModelDescriptor& remMod)
-    {
-        plptr->releaseCircuitMapper(remMod.getModelID());
-    });
+    modelDescriptor->onRemoved(
+        [plptr = _pluginPtr](const brayns::ModelDescriptor &remMod) {
+            plptr->releaseCircuitMapper(remMod.getModelID());
+        });
 
     objMapper.setSourceModel(modelDescriptor);
     objMapper.onCircuitColorFinish(colorScheme, morphologyScheme);
@@ -541,7 +543,7 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuitFromBlueConfig(
 size_t AbstractCircuitLoader::_getMaterialFromCircuitAttributes(
     const brayns::PropertyMap &properties, const uint64_t index,
     const size_t material, const bool forSimulationModel,
-    CircuitSchemeData* data) const
+    CircuitSchemeData *data) const
 {
     if (material != brayns::NO_MATERIAL)
         return material;
@@ -550,7 +552,7 @@ size_t AbstractCircuitLoader::_getMaterialFromCircuitAttributes(
         return 0;
 
     const auto colorScheme = stringToEnum<CircuitColorScheme>(
-        properties.getProperty<std::string>(PROP_CIRCUIT_COLOR_SCHEME.name));
+        properties[PROP_CIRCUIT_COLOR_SCHEME.getName()].to<std::string>());
 
     size_t materialId = 0;
     switch (colorScheme)
@@ -562,10 +564,11 @@ size_t AbstractCircuitLoader::_getMaterialFromCircuitAttributes(
         materialId = NB_MATERIALS_PER_INSTANCE * index;
         break;
     case CircuitColorScheme::by_target:
-        if(data && !data->targets.ids.empty())
+        if (data && !data->targets.ids.empty())
         {
             for (size_t i = 0; i < data->targets.ids.size() - 1; ++i)
-                if (index >= data->targets.ids[i] && index < data->targets.ids[i + 1])
+                if (index >= data->targets.ids[i] &&
+                    index < data->targets.ids[i + 1])
                 {
                     materialId = NB_MATERIALS_PER_INSTANCE * i;
                     data->targets.materialMap[i] = materialId;
@@ -577,8 +580,7 @@ size_t AbstractCircuitLoader::_getMaterialFromCircuitAttributes(
         if (data && index < data->etypes.ids.size())
         {
             const auto etypeId = data->etypes.ids[index];
-            materialId =
-                NB_MATERIALS_PER_INSTANCE * etypeId;
+            materialId = NB_MATERIALS_PER_INSTANCE * etypeId;
             data->etypes.materialMap[etypeId] = materialId;
         }
         else
@@ -597,7 +599,7 @@ size_t AbstractCircuitLoader::_getMaterialFromCircuitAttributes(
     case CircuitColorScheme::by_layer:
         if (data && index < data->layers.ids.size())
         {
-            const auto& layerId = data->layers.ids[index];
+            const auto &layerId = data->layers.ids[index];
             auto vi = data->layers.virtualIndex[layerId];
             materialId = NB_MATERIALS_PER_INSTANCE * vi;
             data->layers.materialMap[layerId] = materialId;
@@ -611,17 +613,18 @@ size_t AbstractCircuitLoader::_getMaterialFromCircuitAttributes(
     return materialId;
 }
 
-void AbstractCircuitLoader::_populateLayerIds(const brion::BlueConfig &blueConfig,
-                                              const brain::Circuit& circuit,
-                                              const brain::GIDSet &gids,
-                                              LayerSchemeItem& result) const
+void AbstractCircuitLoader::_populateLayerIds(
+    const brion::BlueConfig &blueConfig, const brain::Circuit &circuit,
+    const brain::GIDSet &gids, LayerSchemeItem &result) const
 {
-    const auto& tsvFile = blueConfig.get(brion::BlueConfigSection::CONFIGSECTION_RUN,
-                                         "Default", "MEComboInfoFile");
+    const auto &tsvFile =
+        blueConfig.get(brion::BlueConfigSection::CONFIGSECTION_RUN, "Default",
+                       "MEComboInfoFile");
     result.ids = circuit.getLayers(gids, tsvFile);
-    std::unordered_set<std::string> uniqueLayers(result.ids.begin(), result.ids.end());
+    std::unordered_set<std::string> uniqueLayers(result.ids.begin(),
+                                                 result.ids.end());
     size_t idx = 0;
-    for(const auto& uniqueLayer : uniqueLayers)
+    for (const auto &uniqueLayer : uniqueLayers)
         result.virtualIndex[uniqueLayer] = idx++;
 }
 
@@ -629,9 +632,9 @@ std::string AbstractCircuitLoader::_getMeshFilenameFromGID(
     const brayns::PropertyMap &properties, const uint64_t gid) const
 {
     const auto meshFolder =
-        properties.getProperty<std::string>(PROP_MESH_FOLDER.name);
+        properties[PROP_MESH_FOLDER.getName()].as<std::string>();
     const auto meshFilenamePattern =
-        properties.getProperty<std::string>(PROP_MESH_FILENAME_PATTERN.name);
+        properties[PROP_MESH_FILENAME_PATTERN.getName()].as<std::string>();
     const std::string gidAsString = std::to_string(gid);
     auto tmp = meshFilenamePattern;
     if (!tmp.empty())
@@ -645,19 +648,21 @@ std::string AbstractCircuitLoader::_getMeshFilenameFromGID(
 void AbstractCircuitLoader::_importMeshes(
     const brayns::PropertyMap &properties, brayns::Model &model,
     const brain::GIDSet &gids, const Matrix4fs &transformations,
-    const brayns::LoaderProgress &callback, CellObjectMapper& mapper) const
+    const brayns::LoaderProgress &callback, CellObjectMapper &mapper) const
 {
     brayns::MeshLoader meshLoader(_scene);
     const auto morphologyQuality = stringToEnum<MorphologyQuality>(
-        properties.getProperty<std::string>(PROP_MORPHOLOGY_QUALITY.name));
+        properties[PROP_MORPHOLOGY_QUALITY.getName()].to<std::string>());
     const auto meshTransformation =
-        properties.getProperty<bool>(PROP_MESH_TRANSFORMATION.name);
+        properties[PROP_MESH_TRANSFORMATION.getName()].as<bool>();
 
     size_t meshIndex = 0;
     for (const auto &gid : gids)
     {
-        const size_t materialId = _getMaterialFromCircuitAttributes(
-            properties, meshIndex, brayns::NO_MATERIAL, false, &mapper.getSchemeData());
+        const size_t materialId =
+            _getMaterialFromCircuitAttributes(properties, meshIndex,
+                                              brayns::NO_MATERIAL, false,
+                                              &mapper.getSchemeData());
 
         // Load mesh from file
         const auto transformation = meshTransformation
@@ -699,12 +704,11 @@ void AbstractCircuitLoader::_importMeshes(
     for (auto &material : model.getMaterials())
     {
         brayns::PropertyMap props;
-        props.setProperty({MATERIAL_PROPERTY_CAST_USER_DATA, true});
-        props.setProperty({MATERIAL_PROPERTY_SHADING_MODE,
-                           static_cast<int>(MaterialShadingMode::diffuse)});
-        props.setProperty(
-            {MATERIAL_PROPERTY_CLIPPING_MODE,
-             static_cast<int>(MaterialClippingMode::no_clipping)});
+        props.add({MATERIAL_PROPERTY_CAST_USER_DATA, true});
+        props.add({MATERIAL_PROPERTY_SHADING_MODE,
+                   static_cast<int>(MaterialShadingMode::diffuse)});
+        props.add({MATERIAL_PROPERTY_CLIPPING_MODE,
+                   static_cast<int>(MaterialClippingMode::no_clipping)});
         material.second->setProperties(props);
     }
 }
@@ -893,7 +897,7 @@ void AbstractCircuitLoader::setSimulationTransferFunction(
 float AbstractCircuitLoader::_importMorphologies(
     const brayns::PropertyMap &properties, const brain::Circuit &circuit,
     brayns::Model &model, const brain::GIDSet &gids,
-    const Matrix4fs &transformations, CellObjectMapper& mapper,
+    const Matrix4fs &transformations, CellObjectMapper &mapper,
     CompartmentReportPtr compartmentReport,
     const brayns::LoaderProgress &callback, const size_t materialId) const
 {
@@ -913,24 +917,24 @@ float AbstractCircuitLoader::_importMorphologies(
 
     // Function to compute shape indexes within the model and store them into
     // the morphology map
-    const auto func = [](std::unordered_map<size_t, std::vector<size_t>>& storage,
-                         size_t mid, size_t start, size_t end)
-    {
-        if(end > start)
-        {
-            auto& storageVector = storage[mid];
-            for(size_t i = start; i < end; ++i)
-                storageVector.push_back(i);
-        }
-    };
+    const auto func =
+        [](std::unordered_map<size_t, std::vector<size_t>> &storage, size_t mid,
+           size_t start, size_t end) {
+            if (end > start)
+            {
+                auto &storageVector = storage[mid];
+                for (size_t i = start; i < end; ++i)
+                    storageVector.push_back(i);
+            }
+        };
 
     size_t i = 0;
     for (auto gid : gids)
     {
         const auto uri = somasOnly ? brain::URI() : uris[i];
         const auto id =
-            _getMaterialFromCircuitAttributes(properties, i, materialId,
-                                              false, &mapper.getSchemeData());
+            _getMaterialFromCircuitAttributes(properties, i, materialId, false,
+                                              &mapper.getSchemeData());
 
         loader.setDefaultMaterialId(id);
 
@@ -938,7 +942,8 @@ float AbstractCircuitLoader::_importMorphologies(
         const size_t startSpheres = model.getSpheres()[id].size();
         const size_t startCones = model.getCones()[id].size();
         const size_t startCylinders = model.getCylinders()[id].size();
-        const size_t startSDFGeoms = model.getSDFGeometryData().geometries.size();
+        const size_t startSDFGeoms =
+            model.getSDFGeometryData().geometries.size();
         const size_t startSDFBeziers = model.getSDFBeziers()[id].size();
 
         MorphologyInfo morphologyInfo;
@@ -955,11 +960,11 @@ float AbstractCircuitLoader::_importMorphologies(
 
         // Map morphology
         MorphologyMap newMap;
-        func(newMap._sphereMap,      id,    startSpheres,    endSpheres);
-        func(newMap._coneMap,        id,    startCones,      endCones);
-        func(newMap._cylinderMap,    id,    startCylinders,  endCylinders);
-        func(newMap._sdfGeometryMap, id,    startSDFGeoms,   endSDFGeoms);
-        func(newMap._sdfBezierMap,   id,    startSDFBeziers, endSDFBeziers);
+        func(newMap._sphereMap, id, startSpheres, endSpheres);
+        func(newMap._coneMap, id, startCones, endCones);
+        func(newMap._cylinderMap, id, startCylinders, endCylinders);
+        func(newMap._sdfGeometryMap, id, startSDFGeoms, endSDFGeoms);
+        func(newMap._sdfBezierMap, id, startSDFBeziers, endSDFBeziers);
         newMap._linealIndex = i;
         mapper.add(gid, newMap);
 
@@ -967,29 +972,31 @@ float AbstractCircuitLoader::_importMorphologies(
             std::max(morphologyInfo.maxDistanceToSoma, maxDistanceToSoma);
 
         callback.updateProgress("Loading morphologies...",
-                 static_cast<float>(i) / static_cast<float>(uris.size()));
+                                static_cast<float>(i) /
+                                    static_cast<float>(uris.size()));
 
         ++i;
     }
 
-
     // Synapses
     const bool loadAfferentSynapses =
-        properties.getProperty<bool>(PROP_LOAD_AFFERENT_SYNAPSES.name);
+        properties[PROP_LOAD_AFFERENT_SYNAPSES.getName()].as<bool>();
     const bool loadEfferentSynapses =
-        properties.getProperty<bool>(PROP_LOAD_EFFERENT_SYNAPSES.name);
+        properties[PROP_LOAD_EFFERENT_SYNAPSES.getName()].as<bool>();
     const double synapseRadius =
-        properties.getProperty<double>(PROP_SYNAPSE_RADIUS.name);
+        properties[PROP_SYNAPSE_RADIUS.getName()].as<double>();
     const std::string preSynapticGID =
-        properties.getProperty<std::string>(PROP_PRESYNAPTIC_NEURON_GID.name);
+        properties[PROP_PRESYNAPTIC_NEURON_GID.getName()].as<std::string>();
     const std::string postSynapticGID =
-        properties.getProperty<std::string>(PROP_POSTSYNAPTIC_NEURON_GID.name);
+        properties[PROP_POSTSYNAPTIC_NEURON_GID.getName()].as<std::string>();
     if (!preSynapticGID.empty() && !postSynapticGID.empty())
         _loadPairSynapses(properties, circuit, stoi(preSynapticGID),
                           stoi(postSynapticGID), synapseRadius, model);
     else
-        _loadAllSynapses(properties, circuit, gids, static_cast<float>(synapseRadius),
-                         loadAfferentSynapses, loadEfferentSynapses, model, compartmentReport);
+        _loadAllSynapses(properties, circuit, gids,
+                         static_cast<float>(synapseRadius),
+                         loadAfferentSynapses, loadEfferentSynapses, model,
+                         compartmentReport);
 
     PLUGIN_TIMER(chrono.elapsed(), "Loading of " << gids.size() << " cells");
     return maxDistanceToSoma;
@@ -1025,7 +1032,7 @@ void AbstractCircuitLoader::_loadAllSynapses(
     uint64_t i = 0;
 
     auto uris = circuit.getMorphologyURIs(gids);
-    if(compartmentReport)
+    if (compartmentReport)
     {
         for (const auto &gid : gids)
         {
@@ -1033,13 +1040,10 @@ void AbstractCircuitLoader::_loadAllSynapses(
                 _getMaterialFromCircuitAttributes(properties, i,
                                                   brayns::NO_MATERIAL, false);
 
-            const auto& offsets =
-                compartmentReport->getOffsets()[i];
-            const auto& counts =
-                compartmentReport->getCompartmentCounts()[i];
+            const auto &offsets = compartmentReport->getOffsets()[i];
+            const auto &counts = compartmentReport->getCompartmentCounts()[i];
 
             brain::neuron::Morphology morphology(uris[i]);
-
 
             if (loadAfferentSynapses)
             {
@@ -1051,13 +1055,14 @@ void AbstractCircuitLoader::_loadAllSynapses(
                     auto sectionId = synapse.getPostsynapticSectionID();
                     if (sectionId < counts.size() && counts[sectionId] > 0)
                     {
-                        auto sections = morphology.getSections({brain::neuron::SectionType::apicalDendrite,
-                                                                brain::neuron::SectionType::dendrite,
-                                                                brain::neuron::SectionType::axon});
-                        brain::neuron::Section* section = nullptr;
-                        for(auto& s : sections)
+                        auto sections = morphology.getSections(
+                            {brain::neuron::SectionType::apicalDendrite,
+                             brain::neuron::SectionType::dendrite,
+                             brain::neuron::SectionType::axon});
+                        brain::neuron::Section *section = nullptr;
+                        for (auto &s : sections)
                         {
-                            if(s.getID() == sectionId)
+                            if (s.getID() == sectionId)
                             {
                                 section = &s;
                                 break;
@@ -1069,11 +1074,13 @@ void AbstractCircuitLoader::_loadAllSynapses(
                             auto samples = section->getSamples();
                             uint64_t j = 0, chosen = 0;
                             double closer = 99999999.9;
-                            for(const auto& sample : samples)
+                            for (const auto &sample : samples)
                             {
-                                glm::vec3 v3sample (sample);
-                                auto dist = glm::length(v3sample - synapse.getPostsynapticSurfacePosition());
-                                if(dist < closer)
+                                glm::vec3 v3sample(sample);
+                                auto dist = glm::length(
+                                    v3sample -
+                                    synapse.getPostsynapticSurfacePosition());
+                                if (dist < closer)
                                 {
                                     closer = dist;
                                     chosen = j;
@@ -1082,14 +1089,17 @@ void AbstractCircuitLoader::_loadAllSynapses(
                             }
 
                             const auto segCounts = counts[sectionId];
-                            const auto alpha = static_cast<double>(chosen) / static_cast<double>(segCounts);
-                            const auto extra = static_cast<uint64_t>(floor(segCounts * alpha));
+                            const auto alpha = static_cast<double>(chosen) /
+                                               static_cast<double>(segCounts);
+                            const auto extra =
+                                static_cast<uint64_t>(floor(segCounts * alpha));
 
                             userDataOffset = offsets[sectionId] + extra;
                         }
                     }
 
-                    _buildAfferentSynapses(synapse, id + 1, synapseRadius, model, userDataOffset);
+                    _buildAfferentSynapses(synapse, id + 1, synapseRadius,
+                                           model, userDataOffset);
                 }
             }
 
@@ -1103,13 +1113,14 @@ void AbstractCircuitLoader::_loadAllSynapses(
                     const auto sectionId = synapse.getPresynapticSectionID();
                     if (sectionId < counts.size() && counts[sectionId] > 0)
                     {
-                        auto sections = morphology.getSections({brain::neuron::SectionType::apicalDendrite,
-                                                                brain::neuron::SectionType::dendrite,
-                                                                brain::neuron::SectionType::axon});
-                        brain::neuron::Section* section = nullptr;
-                        for(auto& s : sections)
+                        auto sections = morphology.getSections(
+                            {brain::neuron::SectionType::apicalDendrite,
+                             brain::neuron::SectionType::dendrite,
+                             brain::neuron::SectionType::axon});
+                        brain::neuron::Section *section = nullptr;
+                        for (auto &s : sections)
                         {
-                            if(s.getID() == sectionId)
+                            if (s.getID() == sectionId)
                             {
                                 section = &s;
                                 break;
@@ -1121,11 +1132,13 @@ void AbstractCircuitLoader::_loadAllSynapses(
                             const auto samples = section->getSamples();
                             uint64_t j = 0, chosen = 0;
                             double closer = 99999999.9;
-                            for(const auto& sample : samples)
+                            for (const auto &sample : samples)
                             {
-                                glm::vec3 v3sample (sample);
-                                auto dist = glm::length(v3sample - synapse.getPresynapticSurfacePosition());
-                                if(dist < closer)
+                                glm::vec3 v3sample(sample);
+                                auto dist = glm::length(
+                                    v3sample -
+                                    synapse.getPresynapticSurfacePosition());
+                                if (dist < closer)
                                 {
                                     closer = dist;
                                     chosen = j;
@@ -1134,13 +1147,16 @@ void AbstractCircuitLoader::_loadAllSynapses(
                             }
 
                             const auto segCounts = counts[sectionId];
-                            const auto alpha = static_cast<double>(chosen) / static_cast<double>(segCounts);
-                            const auto extra = static_cast<uint64_t>(floor(segCounts * alpha));
+                            const auto alpha = static_cast<double>(chosen) /
+                                               static_cast<double>(segCounts);
+                            const auto extra =
+                                static_cast<uint64_t>(floor(segCounts * alpha));
 
                             userDataOffset = offsets[sectionId] + extra;
                         }
                     }
-                    _buildEfferentSynapses(synapse, id + 2, synapseRadius, model, userDataOffset);
+                    _buildEfferentSynapses(synapse, id + 2, synapseRadius,
+                                           model, userDataOffset);
                 }
             }
             ++i;
@@ -1159,7 +1175,8 @@ void AbstractCircuitLoader::_loadAllSynapses(
                 const brain::Synapses &afferentSynapses(
                     circuit.getAfferentSynapses({gid}));
                 for (const brain::Synapse &synapse : afferentSynapses)
-                    _buildAfferentSynapses(synapse, id + 1, synapseRadius, model);
+                    _buildAfferentSynapses(synapse, id + 1, synapseRadius,
+                                           model);
             }
 
             if (loadEfferentSynapses)
@@ -1167,7 +1184,8 @@ void AbstractCircuitLoader::_loadAllSynapses(
                 const brain::Synapses &efferentSynapses(
                     circuit.getEfferentSynapses({gid}));
                 for (const brain::Synapse &synapse : efferentSynapses)
-                    _buildEfferentSynapses(synapse, id + 2, synapseRadius, model);
+                    _buildEfferentSynapses(synapse, id + 2, synapseRadius,
+                                           model);
             }
             ++i;
         }
@@ -1178,14 +1196,16 @@ void AbstractCircuitLoader::_buildAfferentSynapses(
     const brain::Synapse &synapse, const size_t materialId, const float radius,
     brayns::Model &model, const uint64_t userData) const
 {
-    model.addSphere(materialId, {synapse.getPostsynapticSurfacePosition(), radius, userData});
+    model.addSphere(materialId, {synapse.getPostsynapticSurfacePosition(),
+                                 radius, userData});
 }
 
 void AbstractCircuitLoader::_buildEfferentSynapses(
     const brain::Synapse &synapse, const size_t materialId, const float radius,
     brayns::Model &model, const uint64_t userData) const
 {
-    model.addSphere(materialId, {synapse.getPresynapticSurfacePosition(), radius, userData});
+    model.addSphere(materialId, {synapse.getPresynapticSurfacePosition(),
+                                 radius, userData});
 }
 
 std::vector<brayns::ModelDescriptorPtr> AbstractCircuitLoader::importFromBlob(

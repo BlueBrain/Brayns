@@ -21,9 +21,6 @@
 
 #include "CircuitViewer/tests/paths.h"
 #include "tests/PDiffHelpers.h"
-#ifdef BRAYNS_USE_NETWORKING
-#include <jsonSerialization.h>
-#endif
 
 #include <brayns/Brayns.h>
 
@@ -40,11 +37,6 @@
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "tests/doctest.h"
-
-#ifdef BRAYNS_USE_NETWORKING
-#include "tests/ClientServer.h"
-#else
-#endif
 
 TEST_CASE("simple_circuit")
 {
@@ -86,65 +78,6 @@ TEST_CASE("circuit_with_color_by_mtype")
     CHECK(compareTestImage("testdataMiniColumn0_mtypes.png",
                            brayns.getEngine().getFrameBuffer()));
 }
-
-#ifdef BRAYNS_USE_NETWORKING
-TEST_CASE("circuit_with_simulation_mapping")
-{
-    const std::vector<const char*> argv = {
-        BBP_TEST_BLUECONFIG3,
-        "--samples-per-pixel",
-        "16",
-        "--animation-frame",
-        "50",
-        "--plugin",
-        "braynsCircuitViewer --targets allmini50 --report "
-        "voltages --synchronous-mode"};
-
-    ClientServer clientServer(argv);
-
-    auto modelDesc =
-        clientServer.getBrayns().getEngine().getScene().getModel(0);
-    const auto rotCenter = modelDesc->getTransformation().getRotationCenter();
-
-    auto& camera = clientServer.getBrayns().getEngine().getCamera();
-    const auto camPos = camera.getPosition();
-
-    std::cout << "Rot Center: " << rotCenter << std::endl;
-    std::cout << "Cam Pos: " << camPos << std::endl;
-
-    camera.setOrientation(brayns::Quaterniond(1, 0, 0, 0));
-    camera.setPosition(camPos + 0.9 * (rotCenter - camPos));
-
-    modelDesc->getModel().getTransferFunction().setValuesRange({-66, -62});
-
-    clientServer.getBrayns().commit();
-    modelDesc->getModel().getSimulationHandler()->waitReady();
-    clientServer.getBrayns().commitAndRender();
-    CHECK(compareTestImage(
-        "testdataallmini50basicsimulation.png",
-        clientServer.getBrayns().getEngine().getFrameBuffer()));
-
-    brayns::SnapshotParams params;
-    params.format = "png";
-    params.samplesPerPixel = 16;
-    params.size = clientServer.getBrayns()
-                      .getParametersManager()
-                      .getApplicationParameters()
-                      .getWindowSize();
-    params.animParams = std::make_unique<brayns::AnimationParameters>(
-        clientServer.getBrayns()
-            .getParametersManager()
-            .getAnimationParameters());
-    params.animParams->setFrame(42);
-
-    auto image = clientServer.makeRequest<
-        brayns::SnapshotParams, brayns::ImageGenerator::ImageBase64>("snapshot",
-                                                                     params);
-
-    CHECK(compareBase64TestImage(
-        image, "testdataallmini50basicsimulation_snapshot.png"));
-}
-#endif
 
 void testSdfGeometries(bool dampened, const char* app)
 {

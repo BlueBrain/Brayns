@@ -84,4 +84,4 @@ void MultiviewCamera::commit()
 }
 
 OSP_REGISTER_CAMERA(MultiviewCamera, multiview);
-}
+} // namespace ospray

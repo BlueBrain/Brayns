@@ -31,7 +31,7 @@ namespace
 {
 constexpr float DEFAULT_MOTION_SPEED = 0.03f;
 constexpr float DEFAULT_ROTATION_SPEED = 0.006f;
-}
+} // namespace
 
 AbstractManipulator::AbstractManipulator(Camera& camera,
                                          KeyboardHandler& keyboardHandler)
@@ -112,4 +112,4 @@ void AbstractManipulator::rotate(const Vector3d& pivot, const double du,
     _camera.setOrientation(final);
     _camera.setTarget(pivot);
 }
-}
+} // namespace brayns

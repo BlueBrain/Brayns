@@ -40,8 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Defines the helper data structures for importing PLY files  */
-#ifndef AI_PLYFILEHELPER_H_INC
-#define AI_PLYFILEHELPER_H_INC
+
+#pragma once
 
 #include "ParsingUtils.h"
 #include <vector>
@@ -89,7 +89,7 @@ enum EDataType
 /** \brief Specifies semantics for PLY element properties
  *
  * Semantics define the usage of a property, e.g. x coordinate
-*/
+ */
 enum ESemantic
 {
     //! vertex position x coordinate
@@ -173,7 +173,7 @@ enum ESemantic
 /** \brief Specifies semantics for PLY elements
  *
  * Semantics define the usage of an element, e.g. vertex or material
-*/
+ */
 enum EElementSemantic
 {
     //! The element is a vertex
@@ -480,6 +480,4 @@ inline TYPE PLY::PropertyInstance::ConvertTo(
 }
 
 } // Namespace PLY
-} // Namespace AssImp
-
-#endif // !! include guard
+} // namespace Assimp

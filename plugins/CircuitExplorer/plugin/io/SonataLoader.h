@@ -29,7 +29,7 @@ public:
     SonataLoader(brayns::Scene &scene,
                  const brayns::ApplicationParameters &applicationParameters,
                  brayns::PropertyMap &&loaderParams,
-                 CircuitExplorerPlugin* plugin);
+                 CircuitExplorerPlugin *plugin);
 
     std::string getName() const final;
 
@@ -40,7 +40,7 @@ public:
         const brayns::PropertyMap &properties) const final;
 
 private:
-    std::vector<brayns::ModelDescriptorPtr>
-    _loadFromBlueConfig(const std::string& file, const brayns::LoaderProgress& cb,
-                        const brayns::PropertyMap& props) const;
+    std::vector<brayns::ModelDescriptorPtr> _loadFromBlueConfig(
+        const std::string &file, const brayns::LoaderProgress &cb,
+        const brayns::PropertyMap &props) const;
 };

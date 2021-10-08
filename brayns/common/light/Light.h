@@ -43,7 +43,7 @@ class Light
 public:
     Light(LightType type, const Vector3d& color, double intensity,
           bool isVisible);
-    Light() = default;
+    Light(LightType type);
     virtual ~Light() = default;
 
     LightType _type;
@@ -67,7 +67,7 @@ public:
      */
     DirectionalLight(const Vector3d& direction, double angularDiameter,
                      const Vector3d& color, double intensity, bool isVisible);
-    DirectionalLight() = default;
+    DirectionalLight();
 
     Vector3d _direction;
     double _angularDiameter;
@@ -88,7 +88,7 @@ public:
      */
     SphereLight(const Vector3d& position, double radius, const Vector3d& color,
                 double intensity, bool isVisible);
-    SphereLight() = default;
+    SphereLight();
 
     Vector3d _position;
     double _radius;
@@ -112,7 +112,7 @@ public:
     QuadLight(const Vector3d& position, const Vector3d& edge1,
               const Vector3d& edge2, const Vector3d& color, double intensity,
               bool isVisible);
-    QuadLight() = default;
+    QuadLight();
 
     Vector3d _position;
     Vector3d _edge1;
@@ -142,7 +142,7 @@ public:
               const double openingAngle, const double penumbraAngle,
               const double radius, const Vector3d& color, double intensity,
               bool isVisible);
-    SpotLight() = default;
+    SpotLight();
 
     Vector3d _position;
     Vector3d _direction;
@@ -163,7 +163,7 @@ public:
      * @param isVisible Whether the light can be directly seen
      */
     AmbientLight(const Vector3d& color, double intensity, bool isVisible);
-    AmbientLight() = default;
+    AmbientLight();
 };
 
 } // namespace brayns

@@ -45,7 +45,7 @@ inline unsigned char clampCvt(float f)
 }
 
 const size_t ALIGNMENT = 64;
-}
+} // namespace
 
 namespace brayns
 {
@@ -246,7 +246,7 @@ void DeflectPixelOp::_finish()
         i.second.wait();
     _finishFutures.clear();
 }
-}
+} // namespace brayns
 
 namespace ospray
 {

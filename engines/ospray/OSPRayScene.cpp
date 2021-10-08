@@ -98,7 +98,8 @@ void OSPRayScene::commit()
         bool doUpdate = false;
         for (auto& modelDescriptor : modelDescriptors)
         {
-            auto& model = static_cast<OSPRayModel&>(modelDescriptor->getModel());
+            auto& model =
+                static_cast<OSPRayModel&>(modelDescriptor->getModel());
             model.commitSimulationParams();
             if (model.isDirty())
             {
@@ -116,7 +117,7 @@ void OSPRayScene::commit()
 
     if (_rootModel)
         ospRelease(_rootModel);
-    _rootModel = (OSPModel)new OSPRayISPCModel;
+    _rootModel = (OSPModel) new OSPRayISPCModel;
 
     for (auto modelDescriptor : modelDescriptors)
     {
@@ -130,7 +131,8 @@ void OSPRayScene::commit()
         auto& impl = static_cast<OSPRayModel&>(modelDescriptor->getModel());
         const auto& transformation = modelDescriptor->getTransformation();
 
-        BRAYNS_DEBUG << "Committing " << modelDescriptor->getName() << std::endl;
+        BRAYNS_DEBUG << "Committing " << modelDescriptor->getName()
+                     << std::endl;
 
         impl.commitGeometry();
         impl.commitSimulationParams();
@@ -143,7 +145,8 @@ void OSPRayScene::commit()
             modelDescriptor->getModel().commitGeometry();
             for (auto volume : modelDescriptor->getModel().getVolumes())
             {
-                auto ospVolume = std::dynamic_pointer_cast<OSPRayVolume>(volume);
+                auto ospVolume =
+                    std::dynamic_pointer_cast<OSPRayVolume>(volume);
                 ospAddVolume(_rootModel, ospVolume->impl());
             }
         }
@@ -161,9 +164,11 @@ void OSPRayScene::commit()
             {
                 // scale and move the unit-sized bounding box geometry to the
                 // model size/scale first, then apply the instance transform
-                const auto& modelBounds = modelDescriptor->getModel().getBounds();
+                const auto& modelBounds =
+                    modelDescriptor->getModel().getBounds();
                 Transformation modelTransform;
-                modelTransform.setTranslation(modelBounds.getCenter() - .5* modelBounds.getSize());
+                modelTransform.setTranslation(modelBounds.getCenter() -
+                                              .5 * modelBounds.getSize());
                 modelTransform.setScale(modelBounds.getSize());
 
                 addInstance(_rootModel, impl.getBoundingBoxModel(),
@@ -172,7 +177,8 @@ void OSPRayScene::commit()
             }
 
             if (modelDescriptor->getVisible() && instance.getVisible())
-                addInstance(_rootModel, impl.getPrimaryModel(), instanceTransform);
+                addInstance(_rootModel, impl.getPrimaryModel(),
+                            instanceTransform);
         }
 
         impl.markInstancesClean();
@@ -289,7 +295,8 @@ void OSPRayScene::_commitTransferFunction()
     ospRelease(colorsData);
 
     // Opacities
-    OSPData opacityData = ospNewData(opacities.size(), OSP_FLOAT, opacities.data());
+    OSPData opacityData =
+        ospNewData(opacities.size(), OSP_FLOAT, opacities.data());
     ospSetData(_ospTransferFunction, "opacities", opacityData);
     ospRelease(opacityData);
 
@@ -333,7 +340,7 @@ void OSPRayScene::_commitSimulationData(ModelDescriptors& modelDescriptors)
 {
     auto currentFrame = _animationParameters.getFrame();
 
-    //if(_lastFrame == currentFrame && !isModified())
+    // if(_lastFrame == currentFrame && !isModified())
     //    return;
 
     //_lastFrame = currentFrame;
@@ -343,17 +350,18 @@ void OSPRayScene::_commitSimulationData(ModelDescriptors& modelDescriptors)
     uint64_t offset = 0;
     for (auto& model : modelDescriptors)
     {
-        if(!model->getModel().isSimulationEnabled())
+        if (!model->getModel().isSimulationEnabled())
             continue;
 
         auto handler = model->getModel().getSimulationHandler();
-        if(!handler)
+        if (!handler)
             continue;
 
         auto& modelImpl = static_cast<OSPRayModel&>(model->getModel());
         modelImpl.setSimulationOffset(offset);
 
-        const float* data = static_cast<float*>(handler->getFrameData(currentFrame));
+        const float* data =
+            static_cast<float*>(handler->getFrameData(currentFrame));
         const uint64_t dataSize = handler->getFrameSize();
 
         _simData.insert(_simData.end(), data, data + dataSize);
@@ -362,11 +370,11 @@ void OSPRayScene::_commitSimulationData(ModelDescriptors& modelDescriptors)
 
     ospRelease(_ospSimulationData);
     _ospSimulationData = nullptr;
-    if(_simData.empty())
+    if (_simData.empty())
         return;
 
-    _ospSimulationData =
-        ospNewData(_simData.size(), OSP_FLOAT, _simData.data(), OSP_DATA_SHARED_BUFFER);
+    _ospSimulationData = ospNewData(_simData.size(), OSP_FLOAT, _simData.data(),
+                                    OSP_DATA_SHARED_BUFFER);
     ospCommit(_ospSimulationData);
 }
 

@@ -18,364 +18,218 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/common/PropertyMap.h>
+#include <brayns/common/propertymap/PropertyMap.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
+using namespace brayns;
+
 TEST_CASE("set_property")
 {
-    brayns::PropertyMap properties;
-    properties.setProperty({"foo", 1});
-    REQUIRE_EQ(properties.getProperties().size(), 1);
-    CHECK_EQ(properties.getProperties()[0]->get<int32_t>(), 1);
-    CHECK_EQ(properties.getProperties()[0]->metaData.label, "");
-    CHECK_EQ(properties.getProperties()[0]->metaData.description,
-             "no-description");
+    PropertyMap properties;
+    properties.add({"foo", 1});
+    CHECK(properties.size() == 1);
+    CHECK(properties[0].as<int32_t>() == 1);
+    CHECK(properties[0].getLabel() == "");
+    CHECK(properties[0].getDescription() == "no-description");
 }
 
 TEST_CASE("set_property_with_metadata")
 {
-    brayns::PropertyMap properties;
-
-    properties.setProperty({"foo", 1, {"Foo", "Foo description"}});
-    REQUIRE_EQ(properties.getProperties().size(), 1);
-    CHECK_EQ(properties.getProperties()[0]->get<int32_t>(), 1);
-    CHECK_EQ(properties.getProperties()[0]->metaData.label, "Foo");
-    CHECK_EQ(properties.getProperties()[0]->metaData.description,
-             "Foo description");
-}
-
-TEST_CASE("set_property_with_limits")
-{
-    brayns::PropertyMap properties;
-    properties.setProperty({"limit", 0.5, 0., 1.});
-    REQUIRE_EQ(properties.getProperties().size(), 1);
-    CHECK_EQ(properties.getProperties()[0]->get<double>(), 0.5);
-    CHECK_EQ(properties.getProperties()[0]->min<double>(), 0.);
-    CHECK_EQ(properties.getProperties()[0]->max<double>(), 1.);
-    CHECK_EQ(properties.getProperties()[0]->metaData.label, "");
-    CHECK_EQ(properties.getProperties()[0]->metaData.description,
-             "no-description");
-}
-
-TEST_CASE("set_property_with_limits_and_metadata")
-{
-    brayns::PropertyMap properties;
-    properties.setProperty(
-        {"limit", 0.5, 0., 1., {"With limits", "Limits description"}});
-    REQUIRE_EQ(properties.getProperties().size(), 1);
-    CHECK_EQ(properties.getProperties()[0]->get<double>(), 0.5);
-    CHECK_EQ(properties.getProperties()[0]->min<double>(), 0.);
-    CHECK_EQ(properties.getProperties()[0]->max<double>(), 1.);
-    CHECK_EQ(properties.getProperties()[0]->metaData.label, "With limits");
-    CHECK_EQ(properties.getProperties()[0]->metaData.description,
-             "Limits description");
+    PropertyMap properties;
+    properties.add({"foo", 1, {"Foo", "Foo description"}});
+    CHECK(properties.size() == 1);
+    CHECK(properties[0].as<int32_t>() == 1);
+    CHECK(properties[0].getLabel() == "Foo");
+    CHECK(properties[0].getDescription() == "Foo description");
 }
 
 TEST_CASE("set_property_from_other_property")
 {
-    brayns::PropertyMap properties;
-
-    brayns::PropertyMap otherProperties;
-    otherProperties.setProperty({"bar", 42.});
-    properties.setProperty(*otherProperties.getProperties()[0]);
-    CHECK_EQ(properties.getProperties()[0]->get<double>(), 42.);
-
-    CHECK_THROWS_AS(otherProperties.setProperty(
-                        {"bar", std::string("no double")}),
-                    std::runtime_error);
+    PropertyMap properties;
+    PropertyMap otherProperties;
+    otherProperties.add({"bar", 42.});
+    properties.add(otherProperties[0]);
+    CHECK(properties[0].as<double>() == 42.);
+    CHECK_THROWS(otherProperties.add({"bar", std::string("no double")}));
 }
 
 TEST_CASE("update_property")
 {
-    brayns::PropertyMap properties;
-    properties.setProperty({"foo", 1});
-    properties.updateProperty("foo", 42);
-    CHECK_EQ(properties.getProperties()[0]->get<int32_t>(), 42);
-
-    CHECK_THROWS_AS(properties.updateProperty("foo", false),
-                    std::runtime_error);
-
-    CHECK(properties.hasProperty("foo"));
-    properties.setProperty({"foo", 0});
-    CHECK_EQ(properties.getProperties()[0]->get<int32_t>(), 0);
-
-    CHECK(!properties.hasProperty("bar"));
-    CHECK_NOTHROW(properties.updateProperty("bar", 42));
+    PropertyMap properties;
+    properties.add({"foo", 1});
+    properties.update("foo", 42);
+    CHECK(properties[0].as<int32_t>() == 42);
+    CHECK_THROWS(properties.update("foo", false));
+    CHECK(properties.find("foo"));
+    properties.add({"foo", 0});
+    CHECK(properties[0].as<int32_t>() == 0);
+    CHECK(!properties.find("bar"));
+    CHECK_NOTHROW(properties.update("bar", 42));
 }
 
 TEST_CASE("get_property")
 {
-    brayns::PropertyMap properties;
-    properties.setProperty({"foo", 1});
-
-    CHECK_EQ(properties.getProperty("foo", 5), 1);
-    CHECK_EQ(properties.getProperty<int32_t>("foo"), 1);
-    CHECK_EQ(properties.getProperty("bla", 5), 5);
-    CHECK_THROWS_AS(properties.getProperty<bool>("bar"), std::runtime_error);
-    CHECK_THROWS_AS(properties.getPropertyType("bar"), std::runtime_error);
+    PropertyMap properties;
+    properties.add({"foo", 1});
+    CHECK(properties.valueOr("foo", 5) == 1);
+    CHECK(properties["foo"].as<int32_t>() == 1);
+    CHECK(properties.valueOr("bla", 5) == 5);
+    CHECK_THROWS(properties["bar"].as<bool>());
+    CHECK_THROWS(properties["bar"].getType());
 }
 
 TEST_CASE("set_and_get_all_supported_types")
 {
-    brayns::PropertyMap properties;
-    properties.setProperty({"int", 42});
-    properties.setProperty(
-        {"enum", std::string("Zero"), {"Zero", "One", "Two"}, {}});
-    properties.setProperty({"double", 1.2});
-    properties.setProperty({"string", std::string("foo")});
-    properties.setProperty({"bool", true});
-    properties.setProperty({"vec2i", std::array<int32_t, 2>{{1, 2}}});
-    properties.setProperty({"vec2d", std::array<double, 2>{{1, 2}}});
-    properties.setProperty({"vec3i", std::array<int32_t, 3>{{1, 2, 3}}});
-    properties.setProperty({"vec3d", std::array<double, 3>{{1, 2, 3}}});
-    properties.setProperty({"vec4d", std::array<double, 4>{{1, 2, 3, 4}}});
+    PropertyMap properties;
 
-    CHECK_EQ(properties.getProperty<int32_t>("int"), 42);
-    CHECK_EQ(properties.getProperty<std::string>("enum"), "Zero");
-    CHECK_EQ(properties.getEnums("enum").size(), 3);
-    CHECK_EQ(properties.getProperty<double>("double"), 1.2);
-    CHECK_EQ(properties.getProperty<std::string>("string"), "foo");
-    CHECK(properties.getProperty<bool>("bool"));
-    CHECK((properties.getProperty<std::array<int32_t, 2>>("vec2i") ==
-           std::array<int32_t, 2>{{1, 2}}));
-    CHECK((properties.getProperty<std::array<double, 2>>("vec2d") ==
-           std::array<double, 2>{{1, 2}}));
-    CHECK((properties.getProperty<std::array<int32_t, 3>>("vec3i") ==
-           std::array<int32_t, 3>{{1, 2, 3}}));
-    CHECK((properties.getProperty<std::array<double, 3>>("vec3d") ==
-           std::array<double, 3>{{1, 2, 3}}));
-    CHECK((properties.getProperty<std::array<double, 4>>("vec4d") ==
-           std::array<double, 4>{{1, 2, 3, 4}}));
+    properties.add({"int", 42});
+    properties.add({"enum", {"Zero", {"Zero", "One", "Two"}}});
+    properties.add({"double", 1.2});
+    properties.add({"string", std::string("foo")});
+    properties.add({"bool", true});
+    properties.add({"vec2i", Vector2i{1, 2}});
+    properties.add({"vec2d", Vector2d{1, 2}});
+    properties.add({"vec3i", Vector3i{1, 2, 3}});
+    properties.add({"vec3d", Vector3d{1, 2, 3}});
+    properties.add({"vec4d", Vector4d{1, 2, 3, 4}});
 
-    using Type = brayns::Property::Type;
-    CHECK(properties.getPropertyType("int") == Type::Int);
-    CHECK(properties.getPropertyType("double") == Type::Double);
-    CHECK(properties.getPropertyType("string") == Type::String);
-    CHECK(properties.getPropertyType("bool") == Type::Bool);
-    CHECK(properties.getPropertyType("vec2i") == Type::Vec2i);
-    CHECK(properties.getPropertyType("vec2d") == Type::Vec2d);
-    CHECK(properties.getPropertyType("vec3i") == Type::Vec3i);
-    CHECK(properties.getPropertyType("vec3d") == Type::Vec3d);
-    CHECK(properties.getPropertyType("vec4d") == Type::Vec4d);
+    CHECK(properties["int"].as<int32_t>() == 42);
+    CHECK(properties["enum"].as<EnumProperty>().toString() == "Zero");
+    CHECK(properties["enum"].as<EnumProperty>().getValues().size() == 3);
+    CHECK(properties["double"].as<double>() == 1.2);
+    CHECK(properties["string"].as<std::string>() == "foo");
+    CHECK(properties["bool"].as<bool>());
+    CHECK((properties["vec2i"].as<Vector2i>() == Vector2i{1, 2}));
+    CHECK((properties["vec2d"].as<Vector2d>() == Vector2d{1, 2}));
+    CHECK((properties["vec3i"].as<Vector3i>() == Vector3i{1, 2, 3}));
+    CHECK((properties["vec3d"].as<Vector3d>() == Vector3d{1, 2, 3}));
+    CHECK((properties["vec4d"].as<Vector4d>() == Vector4d{1, 2, 3, 4}));
+
+    CHECK(properties["int"].is<int32_t>());
+    CHECK(properties["double"].is<double>());
+    CHECK(properties["string"].is<std::string>());
+    CHECK(properties["bool"].is<bool>());
+    CHECK(properties["vec2i"].is<Vector2i>());
+    CHECK(properties["vec2d"].is<Vector2d>());
+    CHECK(properties["vec3i"].is<Vector3i>());
+    CHECK(properties["vec3d"].is<Vector3d>());
+    CHECK(properties["vec4d"].is<Vector4d>());
 }
 
 TEST_CASE("fill_property_map")
 {
-    using Type = brayns::Property::Type;
+    PropertyMap integers;
+    integers.add({"number", 42});
+    integers.add({"vec2", Vector2i{1, 2}});
+    integers.add({"vec3", Vector3i{1, 2, 3}});
 
-    brayns::PropertyMap propInts;
-    propInts.setProperty({"number", 42});
-    propInts.setProperty({"vec2", std::array<int32_t, 2>{{1, 2}}});
-    propInts.setProperty({"vec3", std::array<int32_t, 3>{{1, 2, 3}}});
+    PropertyMap doubles;
+    doubles.add({"number", -42.0});
+    doubles.add({"vec2", Vector2d{-1, -2}});
+    doubles.add({"vec3", Vector3d{-1, -2, -3}});
 
-    brayns::PropertyMap propDoubles;
-    propDoubles.setProperty({"number", -42.0});
-    propDoubles.setProperty({"vec2", std::array<double, 2>{{-1, -2}}});
-    propDoubles.setProperty({"vec3", std::array<double, 3>{{-1, -2, -3}}});
+    integers.merge(doubles);
+    doubles.merge(integers);
 
-    propInts.merge(propDoubles);
-    propDoubles.merge(propInts);
+    CHECK(integers["number"].is<int32_t>());
+    CHECK(integers["vec2"].is<Vector2i>());
+    CHECK(integers["vec3"].is<Vector3i>());
 
-    CHECK(propInts.getPropertyType("number") == Type::Int);
-    CHECK(propInts.getPropertyType("vec2") == Type::Vec2i);
-    CHECK(propInts.getPropertyType("vec3") == Type::Vec3i);
+    CHECK(doubles["number"].is<double>());
+    CHECK(doubles["vec2"].is<Vector2d>());
+    CHECK(doubles["vec3"].is<Vector3d>());
 
-    CHECK(propDoubles.getPropertyType("number") == Type::Double);
-    CHECK(propDoubles.getPropertyType("vec2") == Type::Vec2d);
-    CHECK(propDoubles.getPropertyType("vec3") == Type::Vec3d);
+    CHECK(integers["number"].as<int32_t>() == doubles["number"].as<double>());
+    CHECK(integers["vec2"].as<Vector2i>()[0] ==
+          doubles["vec2"].as<Vector2d>()[0]);
+    CHECK(integers["vec2"].as<Vector2i>()[1] ==
+          doubles["vec2"].as<Vector2d>()[1]);
+    CHECK(integers["vec3"].as<Vector3i>()[0] ==
+          doubles["vec3"].as<Vector3d>()[0]);
+    CHECK(integers["vec3"].as<Vector3i>()[1] ==
+          doubles["vec3"].as<Vector3d>()[1]);
+    CHECK(integers["vec3"].as<Vector3i>()[2] ==
+          doubles["vec3"].as<Vector3d>()[2]);
 
-    CHECK_EQ(propInts.getProperty<int32_t>("number"),
-             propDoubles.getProperty<double>("number"));
-    {
-        const auto aInts = propInts.getProperty<std::array<int, 2>>("vec2");
-        const auto aDoubles =
-            propDoubles.getProperty<std::array<double, 2>>("vec2");
-        CHECK_EQ(aInts[0], aDoubles[0]);
-        CHECK_EQ(aInts[1], aDoubles[1]);
-    }
-    {
-        const auto aInts = propInts.getProperty<std::array<int, 3>>("vec3");
-        const auto aDoubles =
-            propDoubles.getProperty<std::array<double, 3>>("vec3");
-        CHECK_EQ(aInts[0], aDoubles[0]);
-        CHECK_EQ(aInts[1], aDoubles[1]);
-        CHECK_EQ(aInts[2], aDoubles[2]);
-    }
-
-    propInts.setProperty({"foo", std::string("string")});
-    propDoubles.setProperty({"foo", 42});
-    CHECK_THROWS_AS(propInts.merge(propDoubles), std::runtime_error);
+    integers.add({"foo", std::string("string")});
+    doubles.add({"foo", 42});
+    CHECK_THROWS(integers.merge(doubles));
 }
 
 TEST_CASE("update_properties")
 {
-    brayns::PropertyMap source;
-    source.setProperty({"number", 42});
-    source.setProperty({"vec2", std::array<int32_t, 2>{{1, 2}}});
-    source.setProperty({"vec3", std::array<int32_t, 3>{{1, 2, 3}}});
+    PropertyMap from;
+    from.add({"number", 42});
+    from.add({"vec2", Vector2i{1, 2}});
+    from.add({"vec3", Vector3i{1, 2, 3}});
 
-    brayns::PropertyMap dest;
-    dest.setProperty({"number", 27});
-    dest.setProperty({"vec2", std::array<int32_t, 2>{{0, 1}}});
+    PropertyMap to;
+    to.add({"number", 27});
+    to.add({"vec2", Vector2i{0, 1}});
 
-    dest.update(source);
-    CHECK_EQ(dest.getProperty<int32_t>("number"), 42);
-    const auto array = dest.getProperty<std::array<int32_t, 2>>("vec2");
-    CHECK_EQ(1, array[0]);
-    CHECK_EQ(2, array[1]);
+    to.update(from);
+    CHECK(to["number"].as<int32_t>() == 42);
+    CHECK((to["vec2"].as<Vector2i>() == Vector2i{1, 2}));
 
-    dest.setProperty({"vec3", 10});
-    CHECK_THROWS_AS(dest.update(source), std::runtime_error);
+    to.add({"vec3", 10});
+    CHECK_THROWS(to.update(from));
 }
 
 TEST_CASE("merge_enums")
 {
-    using Type = brayns::Property::Type;
-
     const std::vector<std::string> enums = {"a", "b", "c"};
-    brayns::PropertyMap propInts;
-    propInts.setProperty({"abc", 1, enums, {}});
-    brayns::PropertyMap propStrings;
-    propStrings.setProperty({"abc", std::string("c"), enums, {}});
+
+    PropertyMap integers;
+    integers.add({"abc", {1, enums}});
+
+    PropertyMap labels;
+    labels.add({"abc", {"c", enums}});
 
     {
-        brayns::PropertyMap propIntsTmp;
+        PropertyMap tmp;
 
-        propIntsTmp.update(propInts);
-        CHECK(propIntsTmp.empty());
-        propIntsTmp.update(propStrings);
-        CHECK(propIntsTmp.empty());
+        tmp.update(integers);
+        CHECK(tmp.empty());
+        tmp.update(labels);
+        CHECK(tmp.empty());
 
-        propIntsTmp.merge(propInts);
-        propIntsTmp.merge(propStrings);
+        tmp.merge(integers);
+        tmp.merge(labels);
 
-        CHECK(propIntsTmp.getPropertyType("abc") == Type::Int);
-        CHECK_EQ(propIntsTmp.getProperty<int32_t>("abc"), 2);
+        CHECK(tmp["abc"].is<EnumProperty>());
+        CHECK(tmp["abc"].to<int32_t>() == 2);
+        CHECK(tmp["abc"].as<EnumProperty>().toInt() == 2);
 
-        propIntsTmp.update(propInts);
-        CHECK(propIntsTmp.getPropertyType("abc") == Type::Int);
-        CHECK_EQ(propIntsTmp.getProperty<int32_t>("abc"), 1);
+        tmp.update(integers);
+        CHECK(tmp["abc"].is<EnumProperty>());
+        CHECK(tmp["abc"].to<int32_t>() == 1);
+        CHECK(tmp["abc"].as<EnumProperty>().toInt() == 1);
 
-        propIntsTmp.update(propStrings);
-        CHECK(propIntsTmp.getPropertyType("abc") == Type::Int);
-        CHECK_EQ(propIntsTmp.getProperty<int32_t>("abc"), 2);
+        tmp.update(labels);
+        CHECK(tmp["abc"].is<EnumProperty>());
+        CHECK(tmp["abc"].to<int32_t>() == 2);
+        CHECK(tmp["abc"].as<EnumProperty>().toInt() == 2);
     }
 
     {
-        brayns::PropertyMap propStringsTmp;
-        propStringsTmp.merge(propStrings);
-        propStringsTmp.merge(propInts);
+        PropertyMap tmp;
+        tmp.merge(labels);
+        tmp.merge(integers);
 
-        CHECK(propStringsTmp.getPropertyType("abc") == Type::String);
-        CHECK_EQ(propStringsTmp.getProperty<std::string>("abc"), "b");
+        CHECK(tmp["abc"].is<EnumProperty>());
+        CHECK(tmp["abc"].to<std::string>() == "b");
+        CHECK(tmp["abc"].as<EnumProperty>().toString() == "b");
 
-        propStringsTmp.update(propStrings);
-        CHECK(propStringsTmp.getPropertyType("abc") == Type::String);
-        CHECK_EQ(propStringsTmp.getProperty<std::string>("abc"), "c");
+        tmp.update(labels);
+        CHECK(tmp["abc"].is<EnumProperty>());
+        CHECK(tmp["abc"].to<std::string>() == "c");
+        CHECK(tmp["abc"].as<EnumProperty>().toString() == "c");
 
-        propStringsTmp.update(propInts);
-        CHECK(propStringsTmp.getPropertyType("abc") == Type::String);
-        CHECK_EQ(propStringsTmp.getProperty<std::string>("abc"), "b");
+        tmp.update(integers);
+        CHECK(tmp["abc"].is<EnumProperty>());
+        CHECK(tmp["abc"].to<std::string>() == "b");
+        CHECK(tmp["abc"].as<EnumProperty>().toString() == "b");
     }
-}
-
-TEST_CASE("commandline")
-{
-    brayns::PropertyMap properties;
-    properties.setProperty({"int", 42});
-    properties.setProperty({"enum", std::string("Zero"), {"Zero", "One", "Two"}, {}});
-    properties.setProperty({"intEnum", 1, {"One", "Two", "Three"}, {}});
-    properties.setProperty({"double", 1.2});
-    properties.setProperty({"string", std::string("foo")});
-    properties.setProperty({"bool", true});
-    properties.setProperty({"boolSwitch", false});
-    properties.setProperty({"vec2i", std::array<int32_t, 2>{{1, 2}}});
-    properties.setProperty({"vec2d", std::array<double, 2>{{1, 2}}});
-    properties.setProperty({"vec3i", std::array<int32_t, 3>{{1, 2, 3}}});
-    properties.setProperty({"vec3d", std::array<double, 3>{{1, 2, 3}}});
-    properties.setProperty({"vec4d", std::array<double, 4>{{1, 2, 3, 4}}});
-
-    const char* argv[] = {"propertyMap",
-                          "--int",      "5",
-                          "--double",   "0.4",
-                          "--enum",     "One",
-                          "--int-enum", "Three",
-                          "--string",   "bar",
-                          "--bool",     "off",
-                          "--bool-switch",
-                          "--vec2i",     "3", "4",
-                          "--vec2d",     "1.2", "2.3",
-                          "--vec3i",     "3", "4", "5",
-                          "--vec3d",     "1.2", "2.3", "3.4",
-                          "--vec4d",     "1.2", "2.3", "3.4", "4.5"};
-    const int argc = sizeof(argv) / sizeof(char*);
-
-    REQUIRE(properties.parse(argc, argv));
-
-    CHECK_EQ(properties.getProperty<int32_t>("int"), 5);
-    CHECK_EQ(properties.getProperty<double>("double"), 0.4);
-    CHECK_EQ(properties.getProperty<std::string>("enum"), "One");
-    CHECK_EQ(properties.getProperty<int32_t>("intEnum"), 2);
-    CHECK_EQ(properties.getProperty<std::string>("string"), "bar");
-    CHECK(!properties.getProperty<bool>("bool"));
-    CHECK(properties.getProperty<bool>("boolSwitch"));
-    CHECK((properties.getProperty<std::array<int32_t, 2>>("vec2i") ==
-           std::array<int32_t, 2>{{3, 4}}));
-    CHECK((properties.getProperty<std::array<double, 2>>("vec2d") ==
-           std::array<double, 2>{{1.2, 2.3}}));
-    CHECK((properties.getProperty<std::array<int32_t, 3>>("vec3i") ==
-           std::array<int32_t, 3>{{3, 4, 5}}));
-    CHECK((properties.getProperty<std::array<double, 3>>("vec3d") ==
-           std::array<double, 3>{{1.2, 2.3, 3.4}}));
-    CHECK((properties.getProperty<std::array<double, 4>>("vec4d") ==
-           std::array<double, 4>{{1.2, 2.3, 3.4, 4.5}}));
-}
-
-TEST_CASE("commandline_no_option")
-{
-    brayns::PropertyMap properties;
-    properties.setProperty({"int", 42});
-
-    const char* argv[] = {"propertyMap"};
-    const int argc = sizeof(argv) / sizeof(char*);
-
-    REQUIRE(properties.parse(argc, argv));
-
-    CHECK_EQ(properties.getProperty<int32_t>("int"), 42);
-}
-
-TEST_CASE("commandline_unknown_option")
-{
-    brayns::PropertyMap properties;
-    properties.setProperty({"vec2i", std::array<int32_t, 2>{{1, 2}}});
-
-    const char* argv[] = {"propertyMap", "--vec3i", "3", "4", "5"};
-    const int argc = sizeof(argv) / sizeof(char*);
-
-    CHECK(!properties.parse(argc, argv));
-}
-
-TEST_CASE("commandline_too_many_vector_values")
-{
-    brayns::PropertyMap properties;
-    properties.setProperty({"vec2i", std::array<int32_t, 2>{{1, 2}}});
-
-    const char* argv[] = {"propertyMap", "--vec2i", "3", "4", "5"};
-    const int argc = sizeof(argv) / sizeof(char*);
-
-    CHECK(properties.parse(argc, argv));
-}
-
-TEST_CASE("commandline_wrong_enum_value")
-{
-    brayns::PropertyMap properties;
-    properties.setProperty(
-        {"enum", std::string("Zero"), {"Zero", "One", "Two"}, {}});
-
-    const char* argv[] = {"propertyMap", "--enum", "Four"};
-    const int argc = sizeof(argv) / sizeof(char*);
-
-    CHECK(!properties.parse(argc, argv));
 }

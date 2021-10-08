@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PROTEINLOADER_H
-#define PROTEINLOADER_H
+#pragma once
 
 #include <brayns/common/loader/Loader.h>
 #include <brayns/parameters/GeometryParameters.h>
@@ -45,8 +44,8 @@ public:
         const std::string& fileName, const LoaderProgress& callback,
         const PropertyMap& properties) const final;
 
-    std::vector<ModelDescriptorPtr> importFromBlob(Blob&&, const LoaderProgress&,
-                                      const PropertyMap&) const final
+    std::vector<ModelDescriptorPtr> importFromBlob(
+        Blob&&, const LoaderProgress&, const PropertyMap&) const final
     {
         throw std::runtime_error("Loading from blob not supported");
     }
@@ -54,6 +53,4 @@ public:
 private:
     PropertyMap _defaults;
 };
-}
-
-#endif // PROTEINLOADER_H
+} // namespace brayns

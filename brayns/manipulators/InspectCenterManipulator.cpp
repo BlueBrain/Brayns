@@ -148,4 +148,4 @@ void InspectCenterManipulator::_turnDown()
 {
     rotate(_camera.getTarget(), 0, -getRotationSpeed(), AxisMode::localY);
 }
-}
+} // namespace brayns

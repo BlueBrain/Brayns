@@ -69,4 +69,4 @@ std::ostream& operator<<(std::ostream& os, Camera& camera)
     const auto& orientation = camera.getOrientation();
     return os << position << ", " << orientation;
 }
-}
+} // namespace brayns

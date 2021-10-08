@@ -40,34 +40,34 @@ constexpr char rightFloorBufferName[] = "1R";
 const std::string HEAD_POSITION_PROP = "headPosition";
 const std::string HEAD_ROTATION_PROP = "headRotation";
 
-constexpr std::array<double, 3> HEAD_INIT_POS{{0.0, 2.0, 0.0}};
-constexpr std::array<double, 4> HEAD_INIT_ROT{{0.0, 0.0, 0.0, 1.0}};
+Vector3d HEAD_INIT_POS = {0.0, 2.0, 0.0};
+Vector4d HEAD_INIT_ROT = {0.0, 0.0, 0.0, 1.0};
 
 Property getHeadPositionProperty()
 {
     Property headPosition{HEAD_POSITION_PROP, HEAD_INIT_POS};
-    headPosition.markReadOnly();
+    headPosition.setReadOnly(true);
     return headPosition;
 }
 
 Property getHeadRotationProperty()
 {
     Property headRotation{HEAD_ROTATION_PROP, HEAD_INIT_ROT};
-    headRotation.markReadOnly();
+    headRotation.setReadOnly(true);
     return headRotation;
 }
 
 Property getStereoModeProperty()
 {
     return {"stereoMode",
-            3, // side-by-side
-            {"None", "Left eye", "Right eye", "Side by side"},
+            {3, // side-by-side
+             {"None", "Left eye", "Right eye", "Side by side"}},
             {"Stereo mode"}};
 }
 
 Property getInterpupillaryDistanceProperty()
 {
-    return {"interpupillaryDistance", 0.0635, 0.0, 10.0, {"Eye separation"}};
+    return {"interpupillaryDistance", 0.0635, {"Eye separation"}};
 }
 
 Property getCameraScalingProperty(const double scaling)
@@ -78,8 +78,8 @@ Property getCameraScalingProperty(const double scaling)
 PropertyMap getCylindricStereoProperties()
 {
     PropertyMap properties;
-    properties.setProperty(getStereoModeProperty());
-    properties.setProperty(getInterpupillaryDistanceProperty());
+    properties.add(getStereoModeProperty());
+    properties.add(getInterpupillaryDistanceProperty());
     return properties;
 }
 
@@ -87,14 +87,14 @@ PropertyMap getCylindricStereoTrackedProperties(
     const OpenDeckParameters& params)
 {
     PropertyMap properties;
-    properties.setProperty(getHeadPositionProperty());
-    properties.setProperty(getHeadRotationProperty());
-    properties.setProperty(getStereoModeProperty());
-    properties.setProperty(getInterpupillaryDistanceProperty());
-    properties.setProperty(getCameraScalingProperty(params.getCameraScaling()));
+    properties.add(getHeadPositionProperty());
+    properties.add(getHeadRotationProperty());
+    properties.add(getStereoModeProperty());
+    properties.add(getInterpupillaryDistanceProperty());
+    properties.add(getCameraScalingProperty(params.getCameraScaling()));
     return properties;
 }
-}
+} // namespace
 
 OpenDeckPlugin::OpenDeckPlugin(OpenDeckParameters&& params)
     : _params(std::move(params))
@@ -143,7 +143,7 @@ extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
                                                          const char** argv)
 {
     brayns::OpenDeckParameters params;
-    if (!params.getPropertyMap().parse(argc, argv))
+    if (!params.parse(argc, argv))
         return nullptr;
     try
     {
@@ -155,4 +155,4 @@ extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
         return nullptr;
     }
 }
-}
+} // namespace brayns

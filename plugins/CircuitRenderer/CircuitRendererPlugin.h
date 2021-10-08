@@ -1,4 +1,5 @@
-/* Copyright (c) 2019 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021 EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -18,11 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CIRCUITRENDERERPLUGIN_H
-#define CIRCUITRENDERERPLUGIN_H
+#pragma once
 
-#include <brayns/common/ActionInterface.h>
 #include <brayns/common/types.h>
+#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 /**
@@ -36,5 +36,3 @@ public:
     ~CircuitRendererPlugin();
     void init() final;
 };
-
-#endif

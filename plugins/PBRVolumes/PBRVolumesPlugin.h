@@ -1,4 +1,5 @@
-/* Copyright (c) 2020 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021 EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -18,13 +19,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FLUORESCENCEPLUGIN_H
-#define FLUORESCENCEPLUGIN_H
+#pragma once
 
 #include "PBRVolumesParams.h"
 
-#include <brayns/common/ActionInterface.h>
 #include <brayns/common/types.h>
+#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 /**
@@ -52,7 +52,8 @@ private:
      *        inside the shapes of a given model
      * @return brayns::Message with information about request sucess
      */
-    brayns::Message _addHomogeneusVolumeToModel(const AddHomogeneusVolumeToModel&);
+    brayns::Message _addHomogeneusVolumeToModel(
+        const AddHomogeneusVolumeToModel&);
 
     /**
      * @brief Adds a new model with a heterogeneus (non constant) density
@@ -69,5 +70,3 @@ private:
      */
     brayns::Message _addGridVolume(const AddGridVolume&);
 };
-
-#endif

@@ -16,7 +16,7 @@ circuits into Brayns.
 For further information on how to get started coding in Brayns, refer to:
 
 * :ref:`launchbraynsbackend-label` to get a running Brayns service.
-* :ref:`usepythonclinet-label` to learn the first steps for any Brayns python client script.
+* :ref:`usepythonclient-label` to learn the first steps for any Brayns python client script.
 
 Initialization
 ~~~~~~~~~~~~~~

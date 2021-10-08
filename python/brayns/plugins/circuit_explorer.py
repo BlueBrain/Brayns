@@ -55,19 +55,19 @@ class CircuitExplorer:
     GEOMETRY_QUALITY_HIGH = 2
 
     # Shading modes
-    SHADING_MODE_NONE = 0
-    SHADING_MODE_DIFFUSE = 1
-    SHADING_MODE_ELECTRON = 2
-    SHADING_MODE_CARTOON = 3
-    SHADING_MODE_ELECTRON_TRANSPARENCY = 4
-    SHADING_MODE_PERLIN = 5
-    SHADING_MODE_DIFFUSE_TRANSPARENCY = 6
-    SHADING_MODE_CHECKER = 7
+    SHADING_MODE_NONE = 'None'
+    SHADING_MODE_DIFFUSE = 'Diffuse'
+    SHADING_MODE_ELECTRON = 'Electron'
+    SHADING_MODE_CARTOON = 'Cartoon'
+    SHADING_MODE_ELECTRON_TRANSPARENCY = 'Electron transparency'
+    SHADING_MODE_PERLIN = 'Perlin'
+    SHADING_MODE_DIFFUSE_TRANSPARENCY = 'Diffuse transparency'
+    SHADING_MODE_CHECKER = 'Checker'
 
     # Clipping modes
-    CLIPPING_MODE_NONE = 0
-    CLIPPING_MODE_PLANE = 1
-    CLIPPING_MODE_SPHERE = 2
+    CLIPPING_MODE_NONE = 'No clipping'
+    CLIPPING_MODE_PLANE = 'Plane'
+    CLIPPING_MODE_SPHERE = 'Sphere'
 
     # Simulation report types
     REPORT_TYPE_NONE = 'Undefined'
@@ -81,7 +81,7 @@ class CircuitExplorer:
 
     def __init__(self, client):
         """Create a new Circuit Explorer instance"""
-        self._client = client.rockets_client
+        self._client = client
 
     # pylint: disable=W0102,R0913,R0914
     def load_circuit(self, path, name='Circuit', density=100.0, gids=list(),
@@ -249,14 +249,14 @@ class CircuitExplorer:
 
         props['120LoadLayers'] = load_layers
         props['121LoadEtypes'] = load_etypes
-        props['122LoadMtypes'] = load_mtypes;
+        props['122LoadMtypes'] = load_mtypes
 
         params = dict()
         params['name'] = name
         params['path'] = path
         params['loader_properties'] = props
 
-        return self._client.request(method='add-model', params=params)
+        return self._request('add-model', params)
 
     # pylint: disable=R0913, R0914
     def set_material(self, model_id, material_id, diffuse_color=(1.0, 1.0, 1.0),
@@ -288,22 +288,21 @@ class CircuitExplorer:
         :rtype: str
         """
         params = dict()
-        params['modelId'] = model_id
-        params['materialId'] = material_id
-        params['diffuseColor'] = diffuse_color
-        params['specularColor'] = specular_color
-        params['specularExponent'] = specular_exponent
-        params['reflectionIndex'] = reflection_index
+        params['model_id'] = model_id
+        params['material_id'] = material_id
+        params['diffuse_color'] = diffuse_color
+        params['specular_color'] = specular_color
+        params['specular_exponent'] = specular_exponent
+        params['reflection_index'] = reflection_index
         params['opacity'] = opacity
-        params['refractionIndex'] = refraction_index
+        params['refraction_index'] = refraction_index
         params['emission'] = emission
         params['glossiness'] = glossiness
-        params['simulationDataCast'] = simulation_data_cast
-        params['shadingMode'] = shading_mode
-        params['clippingMode'] = clipping_mode
-        params['userParameter'] = user_parameter
-        return self._client.request("set-material", params=params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        params['simulation_data_cast'] = simulation_data_cast
+        params['shading_mode'] = shading_mode
+        params['clipping_mode'] = clipping_mode
+        params['user_parameter'] = user_parameter
+        return self._request("set-material", params)
 
     # pylint: disable=W0102
     def set_materials(self, model_ids, material_ids, diffuse_colors, specular_colors,
@@ -334,34 +333,25 @@ class CircuitExplorer:
         :return: Result of the request submission
         :rtype: str
         """
-        params = dict()
-        params['modelIds'] = model_ids
-        params['materialIds'] = material_ids
-
-        dc = list()
-        for diffuse in diffuse_colors:
-            for k in range(3):
-                dc.append(diffuse[k])
-        params['diffuseColors'] = dc
-
-        sc = list()
-        for specular in specular_colors:
-            for k in range(3):
-                sc.append(specular[k])
-        params['specularColors'] = sc
-
-        params['specularExponents'] = specular_exponents
-        params['reflectionIndices'] = reflection_indices
-        params['opacities'] = opacities
-        params['refractionIndices'] = refraction_indices
-        params['emissions'] = emissions
-        params['glossinesses'] = glossinesses
-        params['simulationDataCasts'] = simulation_data_casts
-        params['shadingModes'] = shading_modes
-        params['clippingModes'] = clipping_modes
-        params['userParameters'] = user_parameters
-        return self._client.request("set-materials", params=params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        material_count = len(model_ids)
+        materials = material_count * [{}]
+        for i in range(len(model_ids)):
+            material = materials[i]
+            material['model_id'] = model_ids[i]
+            material['material_id'] = material_ids[i]
+            material['diffuse_color'] = diffuse_colors[i]
+            material['specular_color'] = specular_colors[i]
+            material['specular_exponent'] = specular_exponents[i]
+            material['reflection_index'] = reflection_indices[i]
+            material['opacity'] = opacities[i]
+            material['refraction_index'] = refraction_indices[i]
+            material['emission'] = emissions[i]
+            material['glossiness'] = glossinesses[i]
+            material['simulation_data_cast'] = simulation_data_casts[i]
+            material['shading_mode'] = shading_modes[i]
+            material['clipping_mode'] = clipping_modes[i]
+            material['user_parameter'] = user_parameters[i]
+        return self._request("set-materials", {'materials': materials})
 
     # pylint: disable=R0913, R0914
     def set_material_range(self, model_id, material_ids, diffuse_color=(1.0, 1.0, 1.0),
@@ -393,22 +383,23 @@ class CircuitExplorer:
         :rtype: str
         """
         params = dict()
-        params['modelId'] = model_id
-        params['materialIds'] = material_ids
-        params['diffuseColor'] = diffuse_color
-        params['specularColor'] = specular_color
-        params['specularExponent'] = specular_exponent
-        params['reflectionIndex'] = reflection_index
-        params['opacity'] = opacity
-        params['refractionIndex'] = refraction_index
-        params['emission'] = emission
-        params['glossiness'] = glossiness
-        params['simulationDataCast'] = simulation_data_cast
-        params['shadingMode'] = shading_mode
-        params['clippingMode'] = clipping_mode
-        params['userParameter'] = user_parameter
-        return self._client.request("set-material-range", params=params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        params['model_id'] = model_id
+        params['material_ids'] = material_ids
+        properties = dict()
+        properties['diffuse_color'] = diffuse_color
+        properties['specular_color'] = specular_color
+        properties['specular_exponent'] = specular_exponent
+        properties['reflection_index'] = reflection_index
+        properties['opacity'] = opacity
+        properties['refraction_index'] = refraction_index
+        properties['emission'] = emission
+        properties['glossiness'] = glossiness
+        properties['simulation_data_cast'] = simulation_data_cast
+        properties['shading_mode'] = shading_mode
+        properties['clipping_mode'] = clipping_mode
+        properties['user_parameter'] = user_parameter
+        params['properties'] = properties
+        return self._request("set-material-range", params)
 
     def save_model_to_cache(self, model_id, path):
         """
@@ -420,10 +411,9 @@ class CircuitExplorer:
         :rtype: str
         """
         params = dict()
-        params['modelId'] = model_id
+        params['model_id'] = model_id
         params['path'] = path
-        return self._client.request('save-model-to-cache', params=params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        return self._request('save-model-to-cache', params)
 
     def set_material_extra_attributes(self, model_id):
         """
@@ -434,9 +424,8 @@ class CircuitExplorer:
         :rtype: str
         """
         params = dict()
-        params['modelId'] = model_id
-        return self._client.request('set-material-extra-attributes', params=params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        params['model_id'] = model_id
+        return self._request('set-material-extra-attributes', params)
 
     def set_camera(self, origin, direction, up):
         """
@@ -452,8 +441,7 @@ class CircuitExplorer:
         params['origin'] = origin
         params['direction'] = direction
         params['up'] = up
-        return self._client.request('set-odu-camera', params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        return self._request('set-odu-camera', params)
 
     def get_camera(self):
         """
@@ -462,8 +450,7 @@ class CircuitExplorer:
         :return: A JSon representation of the origin, direction and up vectors
         :rtype: str
         """
-        return self._client.request('get-odu-camera',
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        return self._request('get-odu-camera')
 
     def add_grid(self, min_value, max_value, interval, radius=1.0, opacity=0.5, show_axis=True,
                  colored=True):
@@ -481,15 +468,14 @@ class CircuitExplorer:
         :rtype: str
         """
         params = dict()
-        params['minValue'] = min_value
-        params['maxValue'] = max_value
+        params['min_value'] = min_value
+        params['max_value'] = max_value
         params['steps'] = interval
         params['radius'] = radius
-        params['planeOpacity'] = opacity
-        params['showAxis'] = show_axis
-        params['useColors'] = colored
-        return self._client.request('add-grid', params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        params['plane_opacity'] = opacity
+        params['show_axis'] = show_axis
+        params['use_colors'] = colored
+        return self._request('add-grid', params)
 
     def add_column(self, radius=0.01):
         """
@@ -501,8 +487,7 @@ class CircuitExplorer:
         """
         params = dict()
         params['radius'] = radius
-        return self._client.request('add-column', params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        return self._request('add-column', params)
 
     def export_frames_to_disk(self, path, animation_frames, camera_definitions, image_format='png',
                               quality=100, samples_per_pixel=1, start_frame=0, name_after_step=False):
@@ -524,11 +509,11 @@ class CircuitExplorer:
         params = dict()
         params['path'] = path
         params['format'] = image_format
-        params['nameAfterStep'] = name_after_step
+        params['name_after_step'] = name_after_step
         params['quality'] = quality
         params['spp'] = samples_per_pixel
-        params['startFrame'] = start_frame
-        params['animationInformation'] = animation_frames
+        params['start_frame'] = start_frame
+        params['animation_information'] = animation_frames
         values = list()
         for camera_definition in camera_definitions:
             # Origin
@@ -544,9 +529,8 @@ class CircuitExplorer:
             values.append(camera_definition[3])
             # Focus distance
             values.append(camera_definition[4])
-        params['cameraInformation'] = values
-        return self._client.request('export-frames-to-disk', params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        params['camera_information'] = values
+        return self._request('export-frames-to-disk', params)
 
     def get_export_frames_progress(self):
         """
@@ -557,8 +541,7 @@ class CircuitExplorer:
             has finished.
         :rtype: dict
         """
-        return self._client.request('get-export-frames-progress',
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        return self._request('get-export-frames-progress')
 
     def make_movie(self, output_movie_path, fps_rate, frames_folder_path,
                    frame_file_extension="png", dimensions=[1920, 1080], erase_frames=True):
@@ -567,7 +550,7 @@ class CircuitExplorer:
 
         :param str output_movie_path: Full path to the media video to store the movie
         (it will be created if it does not exists). It must include extension, as it will be used
-        to determine the codec to be used (By default it should be .mp4)
+        to determine the codec to be used (by_default it should be .mp4)
         :param int fps_rate: Desired frame rate in the video
         :param str frames_folder_path: Path to the folder containing the frames to be used to
         create the video
@@ -579,15 +562,13 @@ class CircuitExplorer:
         """
         params = dict()
         params['dimensions'] = dimensions
-        params['framesFolderPath'] = frames_folder_path
-        params['framesFileExtension'] = frame_file_extension
-        params['fpsRate'] = fps_rate
-        params['outputMoviePath'] = output_movie_path
-        params['eraseFrames'] = erase_frames
-        params['layers'] = ["movie"]
+        params['frames_folder_path'] = frames_folder_path
+        params['frames_file_extension'] = frame_file_extension
+        params['fps_rate'] = fps_rate
+        params['output_movie_path'] = output_movie_path
+        params['erase_frames'] = erase_frames
 
-        return self._client.request('make-movie', params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        return self._request('make-movie', params)
 
     def cancel_frames_export(self):
         """
@@ -601,11 +582,10 @@ class CircuitExplorer:
         params['format'] = 'png'
         params['quality'] = 100
         params['spp'] = 1
-        params['startFrame'] = 0
-        params['animationInformation'] = []
-        params['cameraInformation'] = []
-        return self._client.request('export-frames-to-disk', params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        params['start_frame'] = 0
+        params['animation_information'] = []
+        params['camera_information'] = []
+        return self._request('export-frames-to-disk', params)
 
     def trace_anterograde(self, model_id, source_cells_gid, target_cells_gid,
                           source_cells_color=(5, 5, 0, 1), target_cells_color=(5, 0, 0, 1),
@@ -623,14 +603,13 @@ class CircuitExplorer:
         :rtype: dict
         """
         params = dict()
-        params['modelId'] = model_id
-        params['cellGIDs'] = source_cells_gid
-        params['targetCellGIDs'] = target_cells_gid
-        params['sourceCellColor'] = source_cells_color
-        params['connectedCellsColor'] = target_cells_color
-        params['nonConnectedCellsColor'] = non_connected_color
-        return self._client.request('trace-anterograde', params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        params['model_id'] = model_id
+        params['cell_gids'] = source_cells_gid
+        params['target_cell_gids'] = target_cells_gid
+        params['source_cell_color'] = source_cells_color
+        params['connected_cells_color'] = target_cells_color
+        params['non_connected_cells_color'] = non_connected_color
+        return self._request('trace-anterograde', params)
 
     def add_sphere(self, center, radius, color, name=""):
         """
@@ -648,8 +627,7 @@ class CircuitExplorer:
         params['radius'] = radius
         params['color'] = color
         params['name'] = name
-        return self._client.request('add-sphere', params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        return self._request('add-sphere', params)
 
     def add_pill(self, p1, p2, radius, color, name=""):
         """
@@ -671,8 +649,7 @@ class CircuitExplorer:
         params['radius2'] = radius
         params['color'] = color
         params['name'] = name
-        return self._client.request('add-pill', params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        return self._request('add-pill', params)
 
     def add_conepill(self, p1, p2, radius1, radius2, color, name=""):
         """
@@ -695,8 +672,7 @@ class CircuitExplorer:
         params['radius2'] = radius2
         params['color'] = color
         params['name'] = name
-        return self._client.request('add-pill', params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        return self._request('add-pill', params)
 
     def add_sigmoidpill(self, p1, p2, radius1, radius2, color, name=""):
         """
@@ -719,8 +695,7 @@ class CircuitExplorer:
         params['radius2'] = radius2
         params['color'] = color
         params['name'] = name
-        return self._client.request('add-pill', params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        return self._request('add-pill', params)
 
     def add_cylinder(self, center, up, radius, color, name=""):
         """
@@ -740,8 +715,7 @@ class CircuitExplorer:
         params['radius'] = radius
         params['color'] = color
         params['name'] = name
-        return self._client.request('add-cylinder', params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        return self._request('add-cylinder', params)
 
     def add_box(self, minCorner, maxCorner, color, name=""):
         """
@@ -755,12 +729,11 @@ class CircuitExplorer:
         :rtype: str
         """
         params = dict()
-        params['minCorner'] = minCorner
-        params['maxCorner'] = maxCorner
+        params['min_corner'] = minCorner
+        params['max_corner'] = maxCorner
         params['color'] = color
         params['name'] = name
-        return self._client.request('add-box', params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        return self._request('add-box', params)
 
     def get_material_ids(self, model_id):
         """
@@ -771,6 +744,12 @@ class CircuitExplorer:
         :rtype: str
         """
         params = dict()
-        params['modelId'] = model_id
-        return self._client.request('get-material-ids', params,
-                                    response_timeout=self.DEFAULT_RESPONSE_TIMEOUT)
+        params['model_id'] = model_id
+        return self._request('get-material-ids', params)
+
+    def _request(self, method, params=None):
+        return self._client.request(
+            method=method,
+            params=params,
+            timeout=CircuitExplorer.DEFAULT_RESPONSE_TIMEOUT
+        )

@@ -84,4 +84,4 @@ void Material::removeTexture(const TextureType type)
     _textureDescriptors.erase(i);
     markModified();
 }
-}
+} // namespace brayns

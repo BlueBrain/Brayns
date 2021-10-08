@@ -62,12 +62,10 @@ SpikeSimulationHandler::SpikeSimulationHandler(const std::string& reportPath,
     PLUGIN_INFO << "----------------------" << std::endl;
     PLUGIN_INFO << "Report path           : " << _reportPath << std::endl;
     PLUGIN_INFO << "Frame size (# of GIDs): " << _frameSize << std::endl;
-    PLUGIN_INFO << "End time              : " << _endTime
-                << std::endl;
+    PLUGIN_INFO << "End time              : " << _endTime << std::endl;
     PLUGIN_INFO << "Time interval         : " << DEFAULT_TIME_INTERVAL
                 << std::endl;
-    PLUGIN_INFO << "Transition time       : " << _transition
-                << std::endl;
+    PLUGIN_INFO << "Transition time       : " << _transition << std::endl;
     PLUGIN_INFO << "Number of frames      : " << _nbFrames << std::endl;
     PLUGIN_INFO << "-----------------------------------------------------------"
                 << std::endl;
@@ -99,9 +97,8 @@ void* SpikeSimulationHandler::getFrameDataImpl(const uint32_t frame)
             const auto gid = _gidMap[spike.second];
             const auto spikeTime = spike.first;
 
-
             // Spike in the future - start growth
-            if(spikeTime > currentFrameTime)
+            if (spikeTime > currentFrameTime)
             {
                 auto alpha = (spikeTime - currentFrameTime) / _transition;
                 alpha = std::min(std::max(0.f, alpha), 1.f);
@@ -109,7 +106,7 @@ void* SpikeSimulationHandler::getFrameDataImpl(const uint32_t frame)
                                   DEFAULT_SPIKING_VALUE * (1.f - alpha);
             }
             // Spike in the past - start fading
-            else if(spikeTime < currentFrameTime)
+            else if (spikeTime < currentFrameTime)
             {
                 auto alpha = (currentFrameTime - spikeTime) / _transition;
                 alpha = std::min(std::max(0.f, alpha), 1.f);

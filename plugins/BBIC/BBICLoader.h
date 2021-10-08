@@ -57,4 +57,4 @@ private:
 
     Plugin* _plugin;
 };
-}
+} // namespace bbic

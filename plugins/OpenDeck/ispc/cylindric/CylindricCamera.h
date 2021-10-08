@@ -37,4 +37,4 @@ struct CylindricCamera : public Camera
     std::string toString() const override;
     void commit() override;
 };
-}
+} // namespace ospray

@@ -35,4 +35,4 @@ public:
 
     void commit(const OptiXCamera& camera, ::optix::Context context) final;
 };
-}
+} // namespace brayns

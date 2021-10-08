@@ -43,7 +43,8 @@ struct PerspectiveParallaxCamera : public Camera
     }
     virtual void commit() override;
 
-    typedef enum {
+    typedef enum
+    {
         OSP_STEREO_NONE,
         OSP_STEREO_LEFT,
         OSP_STEREO_RIGHT,
@@ -51,4 +52,4 @@ struct PerspectiveParallaxCamera : public Camera
     } StereoMode;
 };
 
-} // ::ospray
+} // namespace ospray

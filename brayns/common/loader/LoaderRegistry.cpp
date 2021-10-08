@@ -112,4 +112,4 @@ bool LoaderRegistry::_archiveSupported(const std::string& filename,
 {
     return _archiveLoader && _archiveLoader->isSupported(filename, filetype);
 }
-}
+} // namespace brayns

@@ -74,4 +74,4 @@ private:
     clock::time_point _lastFPSTickTime;
     double _fps{0.0};
 };
-}
+} // namespace brayns

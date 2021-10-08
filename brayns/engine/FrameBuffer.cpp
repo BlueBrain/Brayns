@@ -68,4 +68,4 @@ freeimage::ImagePtr FrameBuffer::getImage()
     return nullptr;
 #endif
 }
-}
+} // namespace brayns

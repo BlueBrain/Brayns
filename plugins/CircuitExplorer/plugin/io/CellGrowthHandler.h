@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CELLGROWTHHANDLER_H
-#define CELLGROWTHHANDLER_H
+#pragma once
 
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 
@@ -47,5 +46,3 @@ public:
     brayns::AbstractSimulationHandlerPtr clone() const final;
 };
 typedef std::shared_ptr<CellGrowthHandler> CellGrowthHandlerPtr;
-
-#endif // CELLGROWTHHANDLER_H

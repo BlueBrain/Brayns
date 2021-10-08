@@ -109,7 +109,9 @@ public:
     }
 
     /** NOP for this task; tasks are running after construction. */
-    void schedule() override { /* task is already running after construction */}
+    void schedule() override
+    { /* task is already running after construction */
+    }
 
     /**
      * @return the result of tasks, or an exception in case of errors or
@@ -118,6 +120,7 @@ public:
     T result() { return _task.get(); }
     /** @return access to the async++ task for chaining, assignment, etc. */
     auto& get() { return _task; }
+
 protected:
     Type _task;
 
@@ -152,7 +155,8 @@ public:
     }
 
     void schedule() final { _e.set(); }
+
 private:
     async::event_task<void> _e;
 };
-}
+} // namespace brayns

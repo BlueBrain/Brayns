@@ -47,5 +47,5 @@ std::string toLowercase(const std::string input);
 void trim(std::string& s);
 
 std::vector<std::string> split(const std::string& s, char delim);
-}
-}
+} // namespace string_utils
+} // namespace brayns

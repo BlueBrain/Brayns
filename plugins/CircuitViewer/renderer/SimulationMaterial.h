@@ -29,4 +29,4 @@ struct SimulationMaterial : public brayns::DefaultMaterial
     std::string toString() const final { return "brayns::SimulationMaterial"; }
     void commit() final;
 };
-} // ::brayns
+} // namespace brayns

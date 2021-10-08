@@ -42,8 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file   ObjTools.h
  *  @brief  Some helpful templates for text parsing
  */
-#ifndef OBJ_TOOLS_H_INC
-#define OBJ_TOOLS_H_INC
+
+#pragma once
 
 #include "ParsingUtils.h"
 #include "fast_atof.h"
@@ -325,5 +325,3 @@ bool hasLineEnd(T it, T end)
 }
 
 } // Namespace Assimp
-
-#endif // OBJ_TOOLS_H_INC

@@ -40,9 +40,6 @@ endif(BRAYNS_DEBUG_JSON_ENABLED)
 
 # Enable cloning of all optional subprojects for CI builds
 if($ENV{TRAVIS})
-  if(NOT DEFINED BRAYNS_NETWORKING_ENABLED)
-    option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ON)
-  endif()
   if(NOT DEFINED BRAYNS_DEFLECT_ENABLED)
     option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" ON)
   endif()
@@ -69,7 +66,6 @@ include(Common)
 # Core dependencies
 common_find_package(Boost REQUIRED COMPONENTS program_options)
 common_find_package(OpenMP)
-common_find_package(libuv 1.8)
 common_find_package(FreeImage)
 
 if(BRAYNS_USE_SYSTEM_GLM)
@@ -91,27 +87,8 @@ else()
 endif()
 
 # HTTP messaging
-common_find_package(LibJpegTurbo)
-common_find_package(Rockets)
+common_find_package(LibJpegTurbo REQUIRED)
 common_find_package(FFMPEG 3.4 SYSTEM)
-if(ROCKETS_FOUND AND ROCKETS_USE_LIBWEBSOCKETS)
-  option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ON)
-else()
-  option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" OFF)
-endif()
-
-if(BRAYNS_NETWORKING_ENABLED)
-  # We require turbojpeg for networking to get image streaming working
-  common_find_package(LibJpegTurbo REQUIRED)
-  common_find_package(Rockets REQUIRED)
-  if(NOT ROCKETS_USE_LIBWEBSOCKETS)
-    message(WARNING "Could not enable networking, missing Rockets with libwebsockets")
-  endif()
-  list(APPEND COMMON_FIND_PACKAGE_DEFINES BRAYNS_USE_NETWORKING)
-else()
-  common_find_package_disable(LibJpegTurbo)
-  common_find_package_disable(Rockets)
-endif()
 
 # OSPRay rendering engine
 common_find_package(ospray 1.8 SYSTEM)
@@ -177,16 +154,6 @@ list(APPEND BRAYNS_DEPENDENT_LIBRARIES Async++ glm)
 
 add_subdirectory(deps)
 
-if(libuv_FOUND)
-  # The libuv version of Ubuntu 16.04 is too old to have this definition that is
-  # required by uvw (in fact, it uses an old enough version as well to make
-  # things work, but couldn't go further).
-  if(libuv_VERSION VERSION_LESS 1.9.0)
-    add_definitions(-DUV_DISCONNECT=4)
-  endif()
-  include_directories(SYSTEM deps/uvw/src)
-endif()
-
 # ------------------------------------------------------------------------------
 # BRAYNS applications and libraries
 # ------------------------------------------------------------------------------
@@ -200,13 +167,9 @@ if(BRAYNS_IBL_ENABLED)
   add_subdirectory(apps/BraynsIBL)
 endif()
 
-if(libuv_FOUND)
-  option(BRAYNS_SERVICE_ENABLED "Brayns Service" ON)
-  if(BRAYNS_SERVICE_ENABLED)
-    add_subdirectory(apps/BraynsService)
-  endif()
-else()
-  set(BRAYNS_SERVICE_ENABLED OFF)
+option(BRAYNS_SERVICE_ENABLED "Brayns Service" ON)
+if(BRAYNS_SERVICE_ENABLED)
+  add_subdirectory(apps/BraynsService)
 endif()
 
 option(BRAYNS_BENCHMARK_ENABLED "Brayns Benchmark" ON)

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef VOLUMEPARAMETERS_H
-#define VOLUMEPARAMETERS_H
+#pragma once
 
 #include "AbstractParameters.h"
 
@@ -46,6 +45,7 @@ public:
     }
     /** Volume offset */
     const Vector3d& getOffset() const { return _offset; }
+    void setOffset(const Vector3d& offset) { _updateValue(_offset, offset); }
     void setGradientShading(const bool enabled)
     {
         _updateValue(_gradientShading, enabled);
@@ -84,6 +84,7 @@ public:
     const Vector3d& getSpecular() const { return _specular; }
     void setClipBox(const Boxd& value) { _updateValue(_clipBox, value); }
     const Boxd& getClipBox() const { return _clipBox; }
+
 protected:
     void parse(const po::variables_map& vm) final;
 
@@ -102,5 +103,4 @@ protected:
 
     SERIALIZATION_FRIEND(VolumeParameters)
 };
-}
-#endif // VOLUMEPARAMETERS_H
+} // namespace brayns

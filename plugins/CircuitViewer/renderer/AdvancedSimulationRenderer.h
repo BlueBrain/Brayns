@@ -78,4 +78,4 @@ inline std::vector<std::pair<std::string, AdvancedSimulationRenderer::Shading>>
             {"diffuse", AdvancedSimulationRenderer::Shading::diffuse},
             {"electron", AdvancedSimulationRenderer::Shading::electron}};
 }
-} // ::brayns
+} // namespace brayns

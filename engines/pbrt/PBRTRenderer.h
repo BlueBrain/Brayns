@@ -17,8 +17,8 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef PBRTRENDERER_H
-#define PBRTRENDERER_H
+
+#pragma once
 
 #include "PBRTCamera.h"
 
@@ -32,14 +32,15 @@ namespace brayns
 {
 class PBRTRenderer;
 
-using PBRTRenderFactory = std::function<std::shared_ptr<pbrt::Integrator>(PBRTRenderer&)>;
-using PBRTSamplerFactory = std::function<std::shared_ptr<pbrt::Sampler>(PBRTRenderer&)>;
+using PBRTRenderFactory =
+    std::function<std::shared_ptr<pbrt::Integrator>(PBRTRenderer&)>;
+using PBRTSamplerFactory =
+    std::function<std::shared_ptr<pbrt::Sampler>(PBRTRenderer&)>;
 
 class PBRTRenderer : public Renderer
 {
 public:
-    PBRTRenderer(const AnimationParameters&,
-                 const RenderingParameters&);
+    PBRTRenderer(const AnimationParameters&, const RenderingParameters&);
     ~PBRTRenderer() = default;
 
     void render(FrameBufferPtr frameBuffer) final;
@@ -59,9 +60,7 @@ private:
     std::string _currentRenderer;
     std::string _currentSampler;
 
-    mutable std::shared_ptr<pbrt::Integrator> _pbrtRenderer {nullptr};
-    mutable std::shared_ptr<pbrt::Sampler> _pbrtSampler {nullptr};
+    mutable std::shared_ptr<pbrt::Integrator> _pbrtRenderer{nullptr};
+    mutable std::shared_ptr<pbrt::Sampler> _pbrtSampler{nullptr};
 };
-}
-
-#endif
+} // namespace brayns

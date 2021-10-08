@@ -37,7 +37,7 @@ brayns::PropertyMap createPropertyMap(const int32_t lods)
         {"lod", lods, 0, lods, {"Level of detail", "Level of detail"}});
     return props;
 }
-}
+} // namespace
 
 namespace bbic
 {
@@ -153,7 +153,7 @@ void VolumeModel::_startUploadThread()
         return;
 
     _uploadThread =
-        std::thread([ this, volume = _activeVolume, lod = _lod, &toUpload_ ] {
+        std::thread([this, volume = _activeVolume, lod = _lod, &toUpload_] {
             while (_keepUploading && !toUpload_.empty())
             {
                 const auto block = toUpload_.back();
@@ -173,4 +173,4 @@ void VolumeModel::_stopUploadThread()
     }
     _keepUploading = true;
 }
-}
+} // namespace bbic

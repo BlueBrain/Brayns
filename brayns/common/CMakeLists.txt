@@ -5,7 +5,7 @@
 
 set(BRAYNSCOMMON_SOURCES
   ImageManager.cpp
-  PropertyMap.cpp
+  propertymap/ConversionRegistry.cpp
   input/KeyboardHandler.cpp
   light/Light.cpp
   loader/LoaderRegistry.cpp
@@ -16,19 +16,21 @@ set(BRAYNSCOMMON_SOURCES
   utils/base64/base64.cpp
   utils/DynamicLib.cpp
   utils/imageUtils.cpp
+  utils/ImageGenerator.cpp
   utils/stringUtils.cpp
   utils/utils.cpp
   Timer.cpp
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
-  any.hpp
-  ActionInterface.h
-  ActionMessage.h
   BaseObject.h
   ImageManager.h
   Progress.h
-  PropertyMap.h
+  propertymap/Any.h
+  propertymap/Converter.h
+  propertymap/ConversionRegistry.h
+  propertymap/EnumProperty.h
+  propertymap/PropertyMap.h
   PropertyObject.h
   Statistics.h
   Timer.h
@@ -58,6 +60,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   types.h
   utils/enumUtils.h
   utils/imageUtils.h
+  utils/ImageGenerator.h
   utils/stringUtils.h
   utils/utils.h
 )
@@ -70,10 +73,15 @@ set(BRAYNSCOMMON_HEADERS
 
 set(BRAYNSCOMMON_INCLUDE_NAME brayns/common)
 set(BRAYNSCOMMON_LINK_LIBRARIES
-  PUBLIC glm Async++
+  PUBLIC glm Async++ ${LibJpegTurbo_LIBRARIES}
   PRIVATE braynsParameters ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FREEIMAGE_LIBRARIES}
 )
 
 common_library(braynsCommon)
+
 target_include_directories(braynsCommon SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS})
+
+if(FFMPEG_FOUND)
+  target_include_directories(braynsCommon SYSTEM PRIVATE ${FFMPEG_INCLUDE_DIR})
+endif()

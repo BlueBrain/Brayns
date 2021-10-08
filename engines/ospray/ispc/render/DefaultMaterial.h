@@ -65,11 +65,8 @@ struct DefaultMaterial : public ospray::Material
     /*! bump map */
     ospray::Texture2D* map_Bump;
 
-    std::string toString() const override
-    {
-        return "brayns::DefaultMaterial";
-    }
+    std::string toString() const override { return "brayns::DefaultMaterial"; }
 
     void commit() override;
 };
-} // ::brayns
+} // namespace brayns

@@ -69,4 +69,4 @@ inline std::string enumToString(const EnumT v)
     throw std::runtime_error("Could not match enum");
     return "Invalid";
 }
-}
+} // namespace brayns
