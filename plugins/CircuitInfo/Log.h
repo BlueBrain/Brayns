@@ -20,8 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CIRCUITINFO_LOG_H
-#define CIRCUITINFO_LOG_H
+#pragma once
 
 #include <ctime>
 #include <iostream>
@@ -29,7 +28,7 @@
 #define PLUGIN_ERROR std::cerr << "[ERROR] [CIRCUIT_INFO] "
 #define PLUGIN_WARN std::cerr << "[WARN ] [CIRCUIT_INFO] "
 #define PLUGIN_INFO std::cout << "[INFO ] [CIRCUIT_INFO] "
-#define PLUGIN_TIMER(__time, __msg)                                        \
+#define PLUGIN_TIMER(__time, __msg)                                    \
     std::cout << "[TIMER] [CIRCUIT_INFO] [" << __time << "] " << __msg \
               << std::endl;
 #ifdef NDEBUG
@@ -45,5 +44,3 @@
         PLUGIN_ERROR << __message << std::endl; \
         throw std::runtime_error(__message);    \
     }
-
-#endif // CIRCUITINFO_LOG_H

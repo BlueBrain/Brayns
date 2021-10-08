@@ -23,7 +23,6 @@
 #include "EngineFactory.h"
 #include "PluginManager.h"
 
-#include <brayns/common/PropertyMap.h>
 #include <brayns/common/Timer.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/light/Light.h>
@@ -53,6 +52,8 @@
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/VolumeLoader.h>
 #include <brayns/io/XYZBLoader.h>
+
+#include <brayns/network/interface/ActionInterface.h>
 
 #include <brayns/pluginapi/PluginAPI.h>
 
@@ -115,6 +116,11 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->getScene().commit(); // Needed to obtain a bounding box
         _cameraManipulator->adjust(_engine->getScene().getBounds());
+
+        if (_actionInterface)
+        {
+            _actionInterface->start();
+        }
     }
 
     ~Impl()
@@ -218,9 +224,9 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->getStatistics().setFPS(_lastFPS);
 
-        _pluginManager.postRender();
-
         _engine->postRender();
+
+        _pluginManager.postRender();
 
         _engine->resetFrameBuffers();
         _engine->getStatistics().resetModified();
@@ -295,9 +301,9 @@ private:
             engineName = "braynsOptixEngine";
         else if (string_utils::toLowercase(engineName) == "ospray")
             engineName = "braynsOSPRayEngine";
-        else if(string_utils::toLowercase(engineName) == "pbrt")
+        else if (string_utils::toLowercase(engineName) == "pbrt")
             engineName = "braynsPBRTEngine";
-        else if(string_utils::toLowercase(engineName) == "pbrtv2")
+        else if (string_utils::toLowercase(engineName) == "pbrtv2")
             engineName = "braynsPBRTV2Engine";
 
         _engine = _engineFactory.create(engineName);
@@ -853,5 +859,10 @@ KeyboardHandler& Brayns::getKeyboardHandler()
 AbstractManipulator& Brayns::getCameraManipulator()
 {
     return _impl->getCameraManipulator();
+}
+
+ActionInterface* Brayns::getActionInterface()
+{
+    return _impl->getActionInterface();
 }
 } // namespace brayns

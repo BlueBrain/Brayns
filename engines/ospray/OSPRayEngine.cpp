@@ -148,29 +148,21 @@ void OSPRayEngine::_createRenderers()
 
     {
         PropertyMap properties;
-        properties.setProperty({"rouletteDepth", 5, 0, 20, {"Roulette depth"}});
-        properties.setProperty(
-            {"maxContribution", 100000.0, 0.0, 100000.0, {"Max contribution"}});
+        properties.add({"rouletteDepth", 5, {"Roulette depth"}});
+        properties.add({"maxContribution", 100000.0, {"Max contribution"}});
 
         addRendererType("pathtracer", properties);
     }
     {
         PropertyMap properties;
-        properties.setProperty(
-            {"aoDistance", 10000., {"Ambient occlusion distance"}});
-        properties.setProperty({"aoSamples",
-                                int32_t(1),
-                                int32_t(0),
-                                int32_t(128),
-                                {"Ambient occlusion samples"}});
-        properties.setProperty({"aoTransparencyEnabled",
-                                true,
-                                {"Ambient occlusion transparency"}});
-        properties.setProperty(
-            {"aoWeight", 0., 0., 1., {"Ambient occlusion weight"}});
-        properties.setProperty(
-            {"oneSidedLighting", true, {"One-sided lighting"}});
-        properties.setProperty({"shadowsEnabled", false, {"Shadows"}});
+        properties.add({"aoDistance", 10000., {"Ambient occlusion distance"}});
+        properties.add({"aoSamples", 1, {"Ambient occlusion samples"}});
+        properties.add({"aoTransparencyEnabled",
+                        true,
+                        {"Ambient occlusion transparency"}});
+        properties.add({"aoWeight", 0., {"Ambient occlusion weight"}});
+        properties.add({"oneSidedLighting", true, {"One-sided lighting"}});
+        properties.add({"shadowsEnabled", false, {"Shadows"}});
 
         addRendererType("scivis", properties);
     }
@@ -214,10 +206,10 @@ void OSPRayEngine::_createCameras()
     const bool isStereo =
         _parametersManager.getApplicationParameters().isStereo();
     Property stereoProperty{"stereo", isStereo, {"Stereo"}};
-    stereoProperty.markReadOnly();
-    Property fovy{"fovy", 45., .1, 360., {"Field of view"}};
+    stereoProperty.setReadOnly(true);
+    Property fovy{"fovy", 45., {"Field of view"}};
     Property aspect{"aspect", 1., {"Aspect ratio"}};
-    aspect.markReadOnly();
+    aspect.setReadOnly(true);
     Property eyeSeparation{"interpupillaryDistance",
                            0.0635,
                            {"Eye separation"}};
@@ -225,57 +217,56 @@ void OSPRayEngine::_createCameras()
 
     {
         PropertyMap properties;
-        properties.setProperty(fovy);
-        properties.setProperty(aspect);
-        properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
-        properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
+        properties.add(fovy);
+        properties.add(aspect);
+        properties.add({"apertureRadius", 0., {"Aperture radius"}});
+        properties.add({"focusDistance", 1., {"Focus Distance"}});
         if (isStereo)
         {
-            properties.setProperty(stereoProperty);
-            properties.setProperty(eyeSeparation);
+            properties.add(stereoProperty);
+            properties.add(eyeSeparation);
         }
-        properties.setProperty(enableClippingPlanes);
+        properties.add(enableClippingPlanes);
         addCameraType("perspective", properties);
     }
     {
         PropertyMap properties;
-        properties.setProperty({"height", 1., {"Height"}});
-        properties.setProperty(aspect);
-        properties.setProperty(enableClippingPlanes);
+        properties.add({"height", 1., {"Height"}});
+        properties.add(aspect);
+        properties.add(enableClippingPlanes);
         addCameraType("orthographic", properties);
     }
     {
         PropertyMap properties;
-        properties.setProperty(fovy);
-        properties.setProperty(aspect);
-        properties.setProperty(enableClippingPlanes);
+        properties.add(fovy);
+        properties.add(aspect);
+        properties.add(enableClippingPlanes);
         if (isStereo)
         {
-            properties.setProperty(stereoProperty);
-            properties.setProperty(eyeSeparation);
-            properties.setProperty(
-                {"zeroParallaxPlane", 1., {"Zero parallax plane"}});
+            properties.add(stereoProperty);
+            properties.add(eyeSeparation);
+            properties.add({"zeroParallaxPlane", 1., {"Zero parallax plane"}});
         }
         addCameraType("perspectiveParallax", properties);
     }
     {
         PropertyMap properties;
-        properties.setProperty(enableClippingPlanes);
-        properties.setProperty({"half", true, {"Half sphere"}});
+        properties.add(enableClippingPlanes);
+        properties.add({"half", true, {"Half sphere"}});
         if (isStereo)
         {
-            properties.setProperty(stereoProperty);
-            properties.setProperty(eyeSeparation);
+            properties.add(stereoProperty);
+            properties.add(eyeSeparation);
         }
         addCameraType("panoramic", properties);
     }
     {
         PropertyMap properties;
-        properties.setProperty(fovy);
-        properties.setProperty(aspect);
-        properties.setProperty({"apertureRadius", 0., {"Aperture radius"}});
-        properties.setProperty({"focusDistance", 1., {"Focus Distance"}});
-        properties.setProperty(enableClippingPlanes);
+        properties.add(fovy);
+        properties.add(aspect);
+        properties.add({"apertureRadius", 0., {"Aperture radius"}});
+        properties.add({"focusDistance", 1., {"Focus Distance"}});
+        properties.add(enableClippingPlanes);
         addCameraType("fisheye", properties);
     }
 }

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PBRTCONSTANTS_H
-#define PBRTCONSTANTS_H
+#pragma once
 
 #include <cstdint>
 #include <string>
@@ -29,19 +28,19 @@ namespace brayns
 // Supported materials
 enum class PBRTMaterialClass : uint8_t
 {
-    MATERIAL_DISNEY         = 0u,
-    MATERIAL_FOURIER        = 1u,
-    MATERIAL_GLASS          = 2u,
-    MATERIAL_KDSUBSURFACE   = 3u,
-    MATERIAL_MATTE          = 4u,
-    MATERIAL_METAL          = 5u,
-    MATERIAL_MIRROR         = 6u,
-    MATERIAL_MIXMAT         = 7u,
-    MATERIAL_PLASTIC        = 8u,
-    MATERIAL_SUBSTRATE      = 9u,
-    MATERIAL_SUBSURFACE     = 10u,
-    MATERIAL_TRANSLUCENT    = 11u,
-    MATERIAL_UBER           = 12u
+    MATERIAL_DISNEY = 0u,
+    MATERIAL_FOURIER = 1u,
+    MATERIAL_GLASS = 2u,
+    MATERIAL_KDSUBSURFACE = 3u,
+    MATERIAL_MATTE = 4u,
+    MATERIAL_METAL = 5u,
+    MATERIAL_MIRROR = 6u,
+    MATERIAL_MIXMAT = 7u,
+    MATERIAL_PLASTIC = 8u,
+    MATERIAL_SUBSTRATE = 9u,
+    MATERIAL_SUBSURFACE = 10u,
+    MATERIAL_TRANSLUCENT = 11u,
+    MATERIAL_UBER = 12u
 };
 std::string materialClassToString(const PBRTMaterialClass matClass);
 
@@ -136,6 +135,4 @@ extern const std::string PBRT_SAMPLERPROP_JITTER;
 extern const std::string PBRT_SAMPLERPROP_XSAMPLES;
 extern const std::string PBRT_SAMPLERPROP_YSAMPLES;
 
-}
-
-#endif
+} // namespace brayns

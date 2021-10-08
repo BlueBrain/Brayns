@@ -19,7 +19,6 @@
 #include "BBICPlugin.h"
 #include "BBICLoader.h"
 
-#include <brayns/common/PropertyMap.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/pluginapi/PluginAPI.h>
@@ -55,7 +54,7 @@ void Plugin::removeModel(const size_t modelID)
     if (i != _volumeModels.end())
         _volumeModels.erase(i, _volumeModels.end());
 }
-}
+} // namespace bbic
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int, const char**)
 {

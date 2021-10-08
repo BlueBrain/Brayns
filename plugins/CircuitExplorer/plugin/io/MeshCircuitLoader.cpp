@@ -29,45 +29,44 @@ const double DEFAULT_RADIUS_MULTIPLIER = 2.0;
 MeshCircuitLoader::MeshCircuitLoader(
     brayns::Scene &scene,
     const brayns::ApplicationParameters &applicationParameters,
-    brayns::PropertyMap &&loaderParams, CircuitExplorerPlugin* plugin)
+    brayns::PropertyMap &&loaderParams, CircuitExplorerPlugin *plugin)
     : AbstractCircuitLoader(scene, applicationParameters,
                             std::move(loaderParams), plugin)
 {
     PLUGIN_INFO << "Registering " << LOADER_NAME << std::endl;
-    _fixedDefaults.setProperty(
-        {PROP_DB_CONNECTION_STRING.name, std::string("")});
-    _fixedDefaults.setProperty({PROP_USE_SDF_GEOMETRY.name, false});
-    _fixedDefaults.setProperty(
-        {PROP_PRESYNAPTIC_NEURON_GID.name, std::string("")});
-    _fixedDefaults.setProperty(
-        {PROP_POSTSYNAPTIC_NEURON_GID.name, std::string("")});
-    _fixedDefaults.setProperty(
-        {PROP_REPORT_TYPE.name, enumToString(ReportType::voltages_from_file)});
-    _fixedDefaults.setProperty({PROP_CIRCUIT_COLOR_SCHEME.name,
-                                enumToString(CircuitColorScheme::by_id)});
-    _fixedDefaults.setProperty(
-        {PROP_RADIUS_MULTIPLIER.name, DEFAULT_RADIUS_MULTIPLIER});
-    _fixedDefaults.setProperty({PROP_RADIUS_CORRECTION.name, 0.0});
-    _fixedDefaults.setProperty({PROP_USE_SDF_GEOMETRY.name, false});
-    _fixedDefaults.setProperty(
-        {PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE.name, false});
-    _fixedDefaults.setProperty({PROP_USE_REALISTIC_SOMA.name, false});
-    _fixedDefaults.setProperty({PROP_METABALLS_SAMPLES_FROM_SOMA.name, 0});
-    _fixedDefaults.setProperty({PROP_METABALLS_GRID_SIZE.name, 0});
-    _fixedDefaults.setProperty({PROP_METABALLS_THRESHOLD.name, 0.0});
-    _fixedDefaults.setProperty({PROP_USER_DATA_TYPE.name,
-                                enumToString(UserDataType::simulation_offset)});
-    _fixedDefaults.setProperty({PROP_MORPHOLOGY_COLOR_SCHEME.name,
-                                enumToString(MorphologyColorScheme::none)});
-    _fixedDefaults.setProperty(
-        {PROP_MORPHOLOGY_QUALITY.name, enumToString(MorphologyQuality::high)});
-    _fixedDefaults.setProperty({PROP_MORPHOLOGY_MAX_DISTANCE_TO_SOMA.name,
-                                std::numeric_limits<double>::max()});
-    _fixedDefaults.setProperty({PROP_CELL_CLIPPING.name, false});
-    _fixedDefaults.setProperty({PROP_AREAS_OF_INTEREST.name, 0});
-    _fixedDefaults.setProperty({PROP_SYNAPSE_RADIUS.name, 1.0});
-    _fixedDefaults.setProperty({PROP_LOAD_AFFERENT_SYNAPSES.name, false});
-    _fixedDefaults.setProperty({PROP_LOAD_EFFERENT_SYNAPSES.name, false});
+    _fixedDefaults.add({PROP_DB_CONNECTION_STRING.getName(), std::string("")});
+    _fixedDefaults.add({PROP_USE_SDF_GEOMETRY.getName(), false});
+    _fixedDefaults.add(
+        {PROP_PRESYNAPTIC_NEURON_GID.getName(), std::string("")});
+    _fixedDefaults.add(
+        {PROP_POSTSYNAPTIC_NEURON_GID.getName(), std::string("")});
+    _fixedDefaults.add({PROP_REPORT_TYPE.getName(),
+                        enumToString(ReportType::voltages_from_file)});
+    _fixedDefaults.add({PROP_CIRCUIT_COLOR_SCHEME.getName(),
+                        enumToString(CircuitColorScheme::by_id)});
+    _fixedDefaults.add(
+        {PROP_RADIUS_MULTIPLIER.getName(), DEFAULT_RADIUS_MULTIPLIER});
+    _fixedDefaults.add({PROP_RADIUS_CORRECTION.getName(), 0.0});
+    _fixedDefaults.add({PROP_USE_SDF_GEOMETRY.getName(), false});
+    _fixedDefaults.add(
+        {PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE.getName(), false});
+    _fixedDefaults.add({PROP_USE_REALISTIC_SOMA.getName(), false});
+    _fixedDefaults.add({PROP_METABALLS_SAMPLES_FROM_SOMA.getName(), 0});
+    _fixedDefaults.add({PROP_METABALLS_GRID_SIZE.getName(), 0});
+    _fixedDefaults.add({PROP_METABALLS_THRESHOLD.getName(), 0.0});
+    _fixedDefaults.add({PROP_USER_DATA_TYPE.getName(),
+                        enumToString(UserDataType::simulation_offset)});
+    _fixedDefaults.add({PROP_MORPHOLOGY_COLOR_SCHEME.getName(),
+                        enumToString(MorphologyColorScheme::none)});
+    _fixedDefaults.add({PROP_MORPHOLOGY_QUALITY.getName(),
+                        enumToString(MorphologyQuality::high)});
+    _fixedDefaults.add({PROP_MORPHOLOGY_MAX_DISTANCE_TO_SOMA.getName(),
+                        std::numeric_limits<double>::max()});
+    _fixedDefaults.add({PROP_CELL_CLIPPING.getName(), false});
+    _fixedDefaults.add({PROP_AREAS_OF_INTEREST.getName(), 0});
+    _fixedDefaults.add({PROP_SYNAPSE_RADIUS.getName(), 1.0});
+    _fixedDefaults.add({PROP_LOAD_AFFERENT_SYNAPSES.getName(), false});
+    _fixedDefaults.add({PROP_LOAD_EFFERENT_SYNAPSES.getName(), false});
 }
 
 std::vector<brayns::ModelDescriptorPtr> MeshCircuitLoader::importFromFile(
@@ -90,18 +89,18 @@ std::string MeshCircuitLoader::getName() const
 brayns::PropertyMap MeshCircuitLoader::getCLIProperties()
 {
     brayns::PropertyMap pm("MeshCircuitExplorer");
-    pm.setProperty(PROP_DENSITY);
-    pm.setProperty(PROP_REPORT);
-    pm.setProperty(PROP_SYNCHRONOUS_MODE);
-    pm.setProperty(PROP_TARGETS);
-    pm.setProperty(PROP_GIDS);
-    pm.setProperty(PROP_RANDOM_SEED);
-    pm.setProperty(PROP_MESH_FOLDER);
-    pm.setProperty(PROP_MESH_FILENAME_PATTERN);
-    pm.setProperty(PROP_MESH_TRANSFORMATION);
-    pm.setProperty(PROP_SECTION_TYPE_SOMA);
-    pm.setProperty(PROP_SECTION_TYPE_AXON);
-    pm.setProperty(PROP_SECTION_TYPE_DENDRITE);
-    pm.setProperty(PROP_SECTION_TYPE_APICAL_DENDRITE);
+    pm.add(PROP_DENSITY);
+    pm.add(PROP_REPORT);
+    pm.add(PROP_SYNCHRONOUS_MODE);
+    pm.add(PROP_TARGETS);
+    pm.add(PROP_GIDS);
+    pm.add(PROP_RANDOM_SEED);
+    pm.add(PROP_MESH_FOLDER);
+    pm.add(PROP_MESH_FILENAME_PATTERN);
+    pm.add(PROP_MESH_TRANSFORMATION);
+    pm.add(PROP_SECTION_TYPE_SOMA);
+    pm.add(PROP_SECTION_TYPE_AXON);
+    pm.add(PROP_SECTION_TYPE_DENDRITE);
+    pm.add(PROP_SECTION_TYPE_APICAL_DENDRITE);
     return pm;
 }

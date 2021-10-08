@@ -71,4 +71,4 @@ private:
         const PropertyMap& properties,
         const std::function<void(SharedDataVolumePtr)>& mapData) const;
 };
-}
+} // namespace brayns

@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYCAMERA_H
-#define OSPRAYCAMERA_H
+#pragma once
 
 #include <brayns/engine/Camera.h>
 #include <ospray.h>
@@ -56,6 +55,7 @@ public:
        @return OSPRay implementation of the camera object
     */
     OSPCamera impl() { return _camera; }
+
 private:
     OSPCamera _camera{nullptr};
     std::string _currentOSPCamera;
@@ -63,5 +63,4 @@ private:
 
     void _createOSPCamera();
 };
-}
-#endif // OSPRAYCAMERA_H
+} // namespace brayns

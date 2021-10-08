@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYSCENE_H
-#define OSPRAYSCENE_H
+#pragma once
 
 #include <brayns/common/types.h>
 #include <brayns/engine/Scene.h>
@@ -58,7 +57,10 @@ public:
     OSPModel getModel() { return _rootModel; }
     OSPData lightData() { return _ospLightData; }
     OSPData getSimulationData() { return _ospSimulationData; }
-    OSPTransferFunction getTransferFunctionImpl() { return _ospTransferFunction; }
+    OSPTransferFunction getTransferFunctionImpl()
+    {
+        return _ospTransferFunction;
+    }
 
 private:
     bool _commitVolumes(ModelDescriptors& modelDescriptors);
@@ -69,9 +71,9 @@ private:
     OSPModel _rootModel{nullptr};
 
     std::vector<float> _simData;
-    //uint32_t _lastFrame {std::numeric_limits<uint32_t>::max()};
+    // uint32_t _lastFrame {std::numeric_limits<uint32_t>::max()};
     OSPData _ospSimulationData{nullptr};
-    OSPTransferFunction _ospTransferFunction {nullptr};
+    OSPTransferFunction _ospTransferFunction{nullptr};
 
     std::vector<OSPLight> _ospLights;
 
@@ -82,4 +84,3 @@ private:
     ModelDescriptors _activeModels;
 };
 } // namespace brayns
-#endif // OSPRAYSCENE_H

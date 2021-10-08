@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef POINTCLOUDMESHER_H
-#define POINTCLOUDMESHER_H
+#pragma once
 
 #include <brayns/common/types.h>
 #include <map>
@@ -37,5 +36,3 @@ public:
     bool toMetaballs(brayns::Model& model, const PointCloud& pointCloud,
                      const size_t gridSize, const float threshold);
 };
-
-#endif // POINTCLOUDMESHER_H

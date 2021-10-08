@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef SPIKESIMULATIONHANDLER_H
-#define SPIKESIMULATIONHANDLER_H
+#pragma once
 
 #include <brain/brain.h>
 #include <brayns/api.h>
@@ -53,5 +52,3 @@ private:
 
     std::map<uint64_t, uint64_t> _gidMap;
 };
-
-#endif // SPIKESIMULATIONHANDLER_H

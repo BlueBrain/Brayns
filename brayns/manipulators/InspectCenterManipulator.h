@@ -18,8 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INSPECTCENTERMANIPULATOR_H
-#define INSPECTCENTERMANIPULATOR_H
+#pragma once
 
 #include "AbstractManipulator.h"
 
@@ -50,6 +49,4 @@ private:
     void _turnUp();
     void _turnDown();
 };
-}
-
-#endif
+} // namespace brayns

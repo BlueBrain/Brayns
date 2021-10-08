@@ -32,9 +32,7 @@ OSPRayISPCModel::OSPRayISPCModel()
     this->ispcEquivalent = ispc::OSPRayISPCModel_create(this);
 }
 
-OSPRayISPCModel::~OSPRayISPCModel()
-{
-}
+OSPRayISPCModel::~OSPRayISPCModel() {}
 
 void OSPRayISPCModel::commit()
 {
@@ -51,4 +49,4 @@ std::string OSPRayISPCModel::toString() const
     return std::string("brayns::OSPRayISPCModel");
 }
 
-}
+} // namespace brayns

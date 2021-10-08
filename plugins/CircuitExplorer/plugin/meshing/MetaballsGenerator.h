@@ -21,8 +21,7 @@
  *
  */
 
-#ifndef METABALLSGENERATOR_H
-#define METABALLSGENERATOR_H
+#pragma once
 
 #include <brayns/common/types.h>
 
@@ -99,4 +98,3 @@ private:
     Vertices _vertices;
     Cubes _cubes;
 };
-#endif // METABALLSGENERATOR_H

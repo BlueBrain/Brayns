@@ -76,11 +76,9 @@ void OptiXOpenDeckCamera::commit(const OptiXCamera& camera,
         normalize(glm::rotate(camera.getOrientation(), Vector3d(0, 0, 1)));
 
     const auto headPos =
-        camera.getPropertyOrValue<std::array<double, 3>>("headPosition",
-                                                         {{0., 0., 0.}});
+        camera.getPropertyOrValue<Vector3d>("headPosition", {{0., 0., 0.}});
     const auto headRotation =
-        camera.getPropertyOrValue<std::array<double, 4>>("headRotation",
-                                                         {{0., 0., 0., 1.}});
+        camera.getPropertyOrValue<Vector4d>("headRotation", {{0., 0., 0., 1.}});
     const auto headUVec =
         glm::rotate(Quaterniond(headRotation[3], headRotation[0],
                                 headRotation[1], headRotation[2]),
@@ -106,4 +104,4 @@ void OptiXOpenDeckCamera::commit(const OptiXCamera& camera,
     context[CUDA_ATTR_CAMERA_BAD_COLOR]->setFloat(1.f, 0.f, 1.f);
     // context[CUDA_ATTR_CAMERA_OFFSET]->setFloat(0, 0);
 }
-}
+} // namespace brayns

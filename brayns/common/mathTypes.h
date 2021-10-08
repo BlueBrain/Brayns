@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _mathTypes_h_
-#define _mathTypes_h_
+#pragma once
 
 #define GLM_FORCE_CTOR_INIT
 #include <glm/glm.hpp>
@@ -96,6 +95,8 @@ public:
     inline vec getSize() const { return _max - _min; }
     inline const vec& getMin() const { return _min; }
     inline const vec& getMax() const { return _max; }
+    inline void setMin(const vec& min) { _min = min; }
+    inline void setMax(const vec& max) { _max = max; }
 
 #ifdef __INTEL_COMPILER // Workaround for ICC. Make members public
 public:
@@ -154,5 +155,3 @@ typedef std::vector<Vector2d> Vector2ds;
  */
 using Quaterniond = glm::tquat<double, glm::highp>; //!< Double quaternion.
 } // namespace brayns
-
-#endif // _mathTypes_h_

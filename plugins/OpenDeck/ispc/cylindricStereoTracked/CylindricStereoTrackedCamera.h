@@ -40,4 +40,4 @@ private:
     vec3f _getHeadPosition();
     vec3f _getOpendeckCamDU();
 };
-}
+} // namespace ospray

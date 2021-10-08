@@ -65,15 +65,15 @@ std::vector<ModelDescriptorPtr> LoadModelFunctor::_performLoad(
     }
 }
 
-std::vector<ModelDescriptorPtr> LoadModelFunctor::_loadData(Blob&& blob,
-                                                            const ModelParams& params)
+std::vector<ModelDescriptorPtr> LoadModelFunctor::_loadData(
+    Blob&& blob, const ModelParams& params)
 {
     return _engine.getScene().loadModels(std::move(blob), params,
                                          {_getProgressFunc()});
 }
 
-std::vector<ModelDescriptorPtr> LoadModelFunctor::_loadData(const std::string& path,
-                                                            const ModelParams& params)
+std::vector<ModelDescriptorPtr> LoadModelFunctor::_loadData(
+    const std::string& path, const ModelParams& params)
 {
     return _engine.getScene().loadModels(path, params, {_getProgressFunc()});
 }
@@ -98,4 +98,4 @@ std::function<void(std::string, float)> LoadModelFunctor::_getProgressFunc()
         }
     };
 }
-}
+} // namespace brayns

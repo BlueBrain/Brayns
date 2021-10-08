@@ -339,16 +339,14 @@ MorphologyLoaderParams::MorphologyLoaderParams(const PropertyMap& properties)
 {
     const auto setVariable = [&](auto& variable, const std::string& name,
                                  const auto defaultVal) {
-        using T = typename std::remove_reference<decltype(variable)>::type;
-        variable = properties.getProperty<T>(name, defaultVal);
+        variable = properties.valueOr(name, defaultVal);
     };
 
     const auto setEnumVariable = [&](auto& variable, const std::string& name,
                                      auto defaultVal) {
         using T = decltype(defaultVal);
         const auto enumStr =
-            properties.getProperty<std::string>(name,
-                                                enumToString<T>(defaultVal));
+            properties.valueOr(name, enumToString<T>(defaultVal));
         variable = stringToEnum<T>(enumStr);
     };
 
@@ -466,7 +464,8 @@ public:
                     const auto& parent = section.getParent();
                     if (parent.getNumSamples() > 2)
                     {
-                        samples.emplace_back(parent.getSamples()[parent.getNumSamples() - 2]);
+                        samples.emplace_back(
+                            parent.getSamples()[parent.getNumSamples() - 2]);
                         useFirstSDFBezierCurves = false;
                     }
                 }
@@ -491,7 +490,8 @@ public:
                 if (i > 0 && i < samples_.size() - 1)
                 {
                     const Vector4f& prevSample = samples.back();
-                    const float dist = glm::distance(Vector3f(s), Vector3f(prevSample));
+                    const float dist =
+                        glm::distance(Vector3f(s), Vector3f(prevSample));
 
                     validSample = (dist >= (s.w + prevSample.w));
                 }

@@ -40,6 +40,7 @@ public:
     void commit() final;
 
     OSPVolume impl() const { return _volume; }
+
 protected:
     size_t _dataSize{0};
     const VolumeParameters& _parameters;
@@ -66,4 +67,4 @@ public:
 
     void setVoxels(const void* voxels) final;
 };
-}
+} // namespace brayns

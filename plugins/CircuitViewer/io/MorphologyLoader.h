@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MORPHOLOGY_LOADER_H
-#define MORPHOLOGY_LOADER_H
+#pragma once
 
 #include <brayns/common/loader/Loader.h>
 #include <brayns/common/types.h>
@@ -105,5 +104,3 @@ private:
     PropertyMap _defaults; // command line defaults
 };
 } // namespace brayns
-
-#endif // MORPHOLOGY_LOADER_H

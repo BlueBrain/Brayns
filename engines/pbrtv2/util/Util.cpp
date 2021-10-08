@@ -28,16 +28,14 @@ namespace brayns
 {
 pbrt::Transform pbrtTranslation(const Vector3f& v)
 {
-    pbrt::Matrix4x4 translation (1.f, 0.f, 0.f, v.x,
-                                 0.f, 1.f, 0.f, v.y,
-                                 0.f, 0.f, 1.f, v.z,
-                                 0.f, 0.f, 0.f, 1.f);
+    pbrt::Matrix4x4 translation(1.f, 0.f, 0.f, v.x, 0.f, 1.f, 0.f, v.y, 0.f,
+                                0.f, 1.f, v.z, 0.f, 0.f, 0.f, 1.f);
     return pbrt::Transform(translation);
 }
 
 pbrt::Transform pbrtTransform(const Transformation& t)
 {
-    //auto m = t.toMatrix();
+    // auto m = t.toMatrix();
 
     const auto& trans = t.getTranslation();
 
@@ -49,18 +47,22 @@ pbrt::Transform pbrtTransform(const Transformation& t)
     auto trRotX = pbrt::RotateX(static_cast<float>(euler.x));
     auto trRotY = pbrt::RotateX(static_cast<float>(euler.y));
     auto trRotZ = pbrt::RotateX(static_cast<float>(euler.z));
-    auto rotMatrix = pbrt::Matrix4x4::Mul(pbrt::Matrix4x4::Mul(trRotX.GetMatrix(), trRotY.GetMatrix()),
-                                          trRotZ.GetMatrix());
+    auto rotMatrix =
+        pbrt::Matrix4x4::Mul(pbrt::Matrix4x4::Mul(trRotX.GetMatrix(),
+                                                  trRotY.GetMatrix()),
+                             trRotZ.GetMatrix());
     auto trTrans = pbrt::Translate(pbrt::Vector(static_cast<float>(trans.x),
                                                 static_cast<float>(trans.y),
                                                 static_cast<float>(trans.z)));
-    auto trScale = pbrt::Scale(static_cast<float>(scale.x),
-                               static_cast<float>(scale.y),
-                               static_cast<float>(scale.z));
+    auto trScale =
+        pbrt::Scale(static_cast<float>(scale.x), static_cast<float>(scale.y),
+                    static_cast<float>(scale.z));
 
-    auto finalMatrix = pbrt::Matrix4x4::Mul(pbrt::Matrix4x4::Mul(rotMatrix, trTrans.GetMatrix()),
-                                            trScale.GetMatrix());
+    auto finalMatrix =
+        pbrt::Matrix4x4::Mul(pbrt::Matrix4x4::Mul(rotMatrix,
+                                                  trTrans.GetMatrix()),
+                             trScale.GetMatrix());
 
-    return pbrt::Transform (finalMatrix);
+    return pbrt::Transform(finalMatrix);
 }
-}
+} // namespace brayns

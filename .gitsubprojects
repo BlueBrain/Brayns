@@ -1,8 +1,3 @@
-# -*- mode: cmake -*-
-if(BRAYNS_NETWORKING_ENABLED)
-  git_subproject(Rockets https://github.com/BlueBrain/Rockets.git 52443933)
-endif()
-
 # Streaming to display walls
 if(BRAYNS_DEFLECT_ENABLED)
   git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 038e139)

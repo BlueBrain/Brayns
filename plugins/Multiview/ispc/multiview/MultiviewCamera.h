@@ -37,4 +37,4 @@ struct OSPRAY_SDK_INTERFACE MultiviewCamera : public Camera
     // Clip planes
     Ref<Data> clipPlanes;
 };
-}
+} // namespace ospray

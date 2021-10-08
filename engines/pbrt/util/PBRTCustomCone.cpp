@@ -7,12 +7,13 @@
 namespace brayns
 {
 // Cone Method Definitions
-CustomCone::CustomCone(const pbrt::Transform *o2w, const pbrt::Transform *w2o, bool ro,
-                       pbrt::Float height, pbrt::Float radius, pbrt::Float phiMax)
-    : Shape(o2w, w2o, ro),
-      radius(radius),
-      height(height),
-      phiMax(pbrt::Radians(pbrt::Clamp(phiMax, 0, 360)))
+CustomCone::CustomCone(const pbrt::Transform* o2w, const pbrt::Transform* w2o,
+                       bool ro, pbrt::Float height, pbrt::Float radius,
+                       pbrt::Float phiMax)
+    : Shape(o2w, w2o, ro)
+    , radius(radius)
+    , height(height)
+    , phiMax(pbrt::Radians(pbrt::Clamp(phiMax, 0, 360)))
 {
 }
 
@@ -23,10 +24,10 @@ pbrt::Bounds3f CustomCone::ObjectBound() const
     return pbrt::Bounds3f(p1, p2);
 }
 
-bool CustomCone::Intersect(const pbrt::Ray& r, pbrt::Float* tHit, pbrt::SurfaceInteraction* isect,
-                     bool) const
+bool CustomCone::Intersect(const pbrt::Ray& r, pbrt::Float* tHit,
+                           pbrt::SurfaceInteraction* isect, bool) const
 {
-    //ProfilePhase p(Prof::ShapeIntersect);
+    // ProfilePhase p(Prof::ShapeIntersect);
     pbrt::Float phi;
     pbrt::Point3f pHit;
     // Transform _Ray_ to object space
@@ -46,31 +47,41 @@ bool CustomCone::Intersect(const pbrt::Ray& r, pbrt::Float* tHit, pbrt::SurfaceI
 
     // Solve quadratic equation for _t_ values
     pbrt::EFloat t0, t1;
-    if (!Quadratic(a, b, c, &t0, &t1)) return false;
+    if (!Quadratic(a, b, c, &t0, &t1))
+        return false;
 
     // Check quadric shape _t0_ and _t1_ for nearest intersection
-    if (t0.UpperBound() > ray.tMax || t1.LowerBound() <= 0) return false;
+    if (t0.UpperBound() > ray.tMax || t1.LowerBound() <= 0)
+        return false;
     pbrt::EFloat tShapeHit = t0;
-    if (tShapeHit.LowerBound() <= 0) {
+    if (tShapeHit.LowerBound() <= 0)
+    {
         tShapeHit = t1;
-        if (tShapeHit.UpperBound() > ray.tMax) return false;
+        if (tShapeHit.UpperBound() > ray.tMax)
+            return false;
     }
 
     // Compute cone inverse mapping
     pHit = ray((pbrt::Float)tShapeHit);
     phi = std::atan2(pHit.y, pHit.x);
-    if (phi < 0.) phi += 2 * pbrt::Pi;
+    if (phi < 0.)
+        phi += 2 * pbrt::Pi;
 
     // Test cone intersection against clipping parameters
-    if (pHit.z < 0 || pHit.z > height || phi > phiMax) {
-        if (tShapeHit == t1) return false;
+    if (pHit.z < 0 || pHit.z > height || phi > phiMax)
+    {
+        if (tShapeHit == t1)
+            return false;
         tShapeHit = t1;
-        if (t1.UpperBound() > ray.tMax) return false;
+        if (t1.UpperBound() > ray.tMax)
+            return false;
         // Compute cone inverse mapping
         pHit = ray(static_cast<pbrt::Float>(tShapeHit));
         phi = std::atan2(pHit.y, pHit.x);
-        if (phi < 0.) phi += 2 * pbrt::Pi;
-        if (pHit.z < 0 || pHit.z > height || phi > phiMax) return false;
+        if (phi < 0.)
+            phi += 2 * pbrt::Pi;
+        if (pHit.z < 0 || pHit.z > height || phi > phiMax)
+            return false;
     }
 
     // Find parametric representation of cone hit
@@ -82,8 +93,10 @@ bool CustomCone::Intersect(const pbrt::Ray& r, pbrt::Float* tHit, pbrt::SurfaceI
     pbrt::Vector3f dpdv(-pHit.x / (1.f - v), -pHit.y / (1.f - v), height);
 
     // Compute cone $\dndu$ and $\dndv$
-    pbrt::Vector3f d2Pduu = -phiMax * phiMax * pbrt::Vector3f(pHit.x, pHit.y, 0.);
-    pbrt::Vector3f d2Pduv = phiMax / (1.f - v) * pbrt::Vector3f(pHit.y, -pHit.x, 0.);
+    pbrt::Vector3f d2Pduu =
+        -phiMax * phiMax * pbrt::Vector3f(pHit.x, pHit.y, 0.);
+    pbrt::Vector3f d2Pduv =
+        phiMax / (1.f - v) * pbrt::Vector3f(pHit.y, -pHit.x, 0.);
     pbrt::Vector3f d2Pdvv(0, 0, 0);
 
     // Compute coefficients for fundamental forms
@@ -98,9 +111,9 @@ bool CustomCone::Intersect(const pbrt::Ray& r, pbrt::Float* tHit, pbrt::SurfaceI
     // Compute $\dndu$ and $\dndv$ from fundamental form coefficients
     pbrt::Float invEGF2 = 1 / (E * G - F * F);
     pbrt::Normal3f dndu = pbrt::Normal3f((f * F - e * G) * invEGF2 * dpdu +
-                             (e * F - f * E) * invEGF2 * dpdv);
+                                         (e * F - f * E) * invEGF2 * dpdv);
     pbrt::Normal3f dndv = pbrt::Normal3f((g * F - f * G) * invEGF2 * dpdu +
-                             (f * F - g * E) * invEGF2 * dpdv);
+                                         (f * F - g * E) * invEGF2 * dpdv);
 
     // Compute error bounds for cone intersection
 
@@ -108,20 +121,21 @@ bool CustomCone::Intersect(const pbrt::Ray& r, pbrt::Float* tHit, pbrt::SurfaceI
     pbrt::EFloat px = ox + tShapeHit * dx;
     pbrt::EFloat py = oy + tShapeHit * dy;
     pbrt::EFloat pz = oz + tShapeHit * dz;
-    pbrt::Vector3f pError = pbrt::Vector3f(px.GetAbsoluteError(), py.GetAbsoluteError(),
-                               pz.GetAbsoluteError());
+    pbrt::Vector3f pError =
+        pbrt::Vector3f(px.GetAbsoluteError(), py.GetAbsoluteError(),
+                       pz.GetAbsoluteError());
 
     // Initialize _SurfaceInteraction_ from parametric information
-    *isect = (*ObjectToWorld)(pbrt::SurfaceInteraction(pHit, pError, pbrt::Point2f(u, v),
-                                                 -ray.d, dpdu, dpdv, dndu, dndv,
-                                                 ray.time, this));
+    *isect = (*ObjectToWorld)(
+        pbrt::SurfaceInteraction(pHit, pError, pbrt::Point2f(u, v), -ray.d,
+                                 dpdu, dpdv, dndu, dndv, ray.time, this));
     *tHit = static_cast<pbrt::Float>(tShapeHit);
     return true;
 }
 
 bool CustomCone::IntersectP(const pbrt::Ray& r, bool) const
 {
-    //ProfilePhase p(Prof::ShapeIntersectP);
+    // ProfilePhase p(Prof::ShapeIntersectP);
     pbrt::Float phi;
     pbrt::Point3f pHit;
     // Transform _Ray_ to object space
@@ -141,31 +155,41 @@ bool CustomCone::IntersectP(const pbrt::Ray& r, bool) const
 
     // Solve quadratic equation for _t_ values
     pbrt::EFloat t0, t1;
-    if (!Quadratic(a, b, c, &t0, &t1)) return false;
+    if (!Quadratic(a, b, c, &t0, &t1))
+        return false;
 
     // Check quadric shape _t0_ and _t1_ for nearest intersection
-    if (t0.UpperBound() > ray.tMax || t1.LowerBound() <= 0) return false;
+    if (t0.UpperBound() > ray.tMax || t1.LowerBound() <= 0)
+        return false;
     pbrt::EFloat tShapeHit = t0;
-    if (tShapeHit.LowerBound() <= 0) {
+    if (tShapeHit.LowerBound() <= 0)
+    {
         tShapeHit = t1;
-        if (tShapeHit.UpperBound() > ray.tMax) return false;
+        if (tShapeHit.UpperBound() > ray.tMax)
+            return false;
     }
 
     // Compute cone inverse mapping
     pHit = ray((pbrt::Float)tShapeHit);
     phi = std::atan2(pHit.y, pHit.x);
-    if (phi < 0.) phi += 2 * pbrt::Pi;
+    if (phi < 0.)
+        phi += 2 * pbrt::Pi;
 
     // Test cone intersection against clipping parameters
-    if (pHit.z < 0 || pHit.z > height || phi > phiMax) {
-        if (tShapeHit == t1) return false;
+    if (pHit.z < 0 || pHit.z > height || phi > phiMax)
+    {
+        if (tShapeHit == t1)
+            return false;
         tShapeHit = t1;
-        if (t1.UpperBound() > ray.tMax) return false;
+        if (t1.UpperBound() > ray.tMax)
+            return false;
         // Compute cone inverse mapping
         pHit = ray((pbrt::Float)tShapeHit);
         phi = std::atan2(pHit.y, pHit.x);
-        if (phi < 0.) phi += 2 * pbrt::Pi;
-        if (pHit.z < 0 || pHit.z > height || phi > phiMax) return false;
+        if (phi < 0.)
+            phi += 2 * pbrt::Pi;
+        if (pHit.z < 0 || pHit.z > height || phi > phiMax)
+            return false;
     }
     return true;
 }
@@ -179,12 +203,15 @@ pbrt::Float CustomCone::Area() const
 /**
  * CUSTOM IMPLEMENTATION. IS NOT SUPOSSED TO BE PHYSICALLY CORRECT
  */
-pbrt::Interaction CustomCone::Sample(const pbrt::Point2f& u, pbrt::Float* pdf) const
+pbrt::Interaction CustomCone::Sample(const pbrt::Point2f& u,
+                                     pbrt::Float* pdf) const
 {
-    pbrt::Point3f pObj = pbrt::Point3f(0, 0, 0) + radius * pbrt::UniformSampleCone(u, pbrt::Float(1));
+    pbrt::Point3f pObj = pbrt::Point3f(0, 0, 0) +
+                         radius * pbrt::UniformSampleCone(u, pbrt::Float(1));
     pbrt::Interaction it;
     it.n = Normalize((*ObjectToWorld)(pbrt::Normal3f(pObj.x, pObj.y, pObj.z)));
-    if (reverseOrientation) it.n *= -1;
+    if (reverseOrientation)
+        it.n *= -1;
     // Reproject _pObj_ to sphere surface and compute _pObjError_
     pObj *= radius / Distance(pObj, pbrt::Point3f(0, 0, 0));
     pbrt::Vector3f pObjError = gamma(5) * Abs((pbrt::Vector3f)pObj);
@@ -193,14 +220,15 @@ pbrt::Interaction CustomCone::Sample(const pbrt::Point2f& u, pbrt::Float* pdf) c
     return it;
 }
 
-std::shared_ptr<CustomCone> CreateCustomConeShape(const pbrt::Transform *o2w,
-                                                  const pbrt::Transform *w2o,
+std::shared_ptr<CustomCone> CreateCustomConeShape(const pbrt::Transform* o2w,
+                                                  const pbrt::Transform* w2o,
                                                   bool reverseOrientation,
-                                                  const pbrt::ParamSet &params) {
+                                                  const pbrt::ParamSet& params)
+{
     pbrt::Float radius = params.FindOneFloat("radius", 1);
     pbrt::Float height = params.FindOneFloat("height", 1);
     pbrt::Float phimax = params.FindOneFloat("phimax", 360);
-    return std::make_shared<CustomCone>(o2w, w2o, reverseOrientation, height, radius,
-                                  phimax);
+    return std::make_shared<CustomCone>(o2w, w2o, reverseOrientation, height,
+                                        radius, phimax);
 }
-}
+} // namespace brayns

@@ -108,7 +108,7 @@ void _printVersion()
     std::cout << "Brayns " << version.getString() << " (" << std::hex
               << version.getRevision() << ")" << std::dec << std::endl;
 }
-}
+} // namespace
 
 namespace brayns
 {
@@ -119,6 +119,7 @@ ParametersManager::ParametersManager(const int argc, const char** argv)
     registerParameters(&_geometryParameters);
     registerParameters(&_renderingParameters);
     registerParameters(&_volumeParameters);
+    registerParameters(&_networkParameters);
 
     for (auto parameters : _parameterSets)
         _allOptions.add(parameters->parameters());
@@ -262,6 +263,16 @@ const VolumeParameters& ParametersManager::getVolumeParameters() const
     return _volumeParameters;
 }
 
+NetworkParameters& ParametersManager::getNetworkParameters()
+{
+    return _networkParameters;
+}
+
+const NetworkParameters& ParametersManager::getNetworkParameters() const
+{
+    return _networkParameters;
+}
+
 void ParametersManager::_processUnrecognizedOptions(
     const std::vector<std::string>& unrecognizedOptions) const
 {
@@ -284,4 +295,4 @@ void ParametersManager::_processUnrecognizedOptions(
 
     throw po::error(errorMessage);
 }
-}
+} // namespace brayns

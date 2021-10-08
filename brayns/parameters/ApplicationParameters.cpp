@@ -37,15 +37,12 @@ const std::string PARAM_STEREO = "stereo";
 const std::string PARAM_WINDOW_SIZE = "window-size";
 const std::string PARAM_ENV_MAP = "env-map";
 const std::string PARAM_SANDBOX_PATH = "sandbox-path";
-#ifdef BRAYNS_USE_FFMPEG
-const std::string PARAM_VIDEOSTREAMING = "videostreaming";
-#endif
 
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
 const size_t DEFAULT_JPEG_COMPRESSION = 90;
 const std::string DEFAULT_SANDBOX_PATH = "/gpfs/bbp.cscs.ch/project";
-}
+} // namespace
 
 namespace brayns
 {
@@ -60,8 +57,6 @@ ApplicationParameters::ApplicationParameters()
          "Engine name [ospray|optix]") //
         (PARAM_MODULE.c_str(), po::value<strings>(&_modules)->composing(),
          "OSPRay module name [string]") //
-        (PARAM_HTTP_SERVER.c_str(), po::value<std::string>(&_httpServerURI),
-         "HTTP interface") //
         (PARAM_INPUT_PATHS.c_str(), po::value<strings>(&_inputPaths),
          "List of files/folders to load data from") //
         (PARAM_PLUGIN.c_str(), po::value<strings>(&_plugins)->composing(),
@@ -86,15 +81,9 @@ ApplicationParameters::ApplicationParameters()
         (PARAM_MAX_RENDER_FPS.c_str(), po::value<size_t>(&_maxRenderFPS),
          "Max. render FPS") //
         (PARAM_ENV_MAP.c_str(), po::value<std::string>(&_envMap),
-         "Path to environment map")
+         "Path to environment map") //
         (PARAM_SANDBOX_PATH.c_str(), po::value<std::string>(&_sandBoxPath),
-         "Path to sandbox directory")
-#ifdef BRAYNS_USE_FFMPEG
-            (PARAM_VIDEOSTREAMING.c_str(),
-             po::bool_switch(&_useVideoStreaming)->default_value(false),
-             "Use videostreaming over websockets instead of JPEG")
-#endif
-        ;
+         "Path to sandbox directory");
 
     _positionalArgs.add(PARAM_INPUT_PATHS.c_str(), -1);
 }
@@ -132,4 +121,4 @@ void ApplicationParameters::print()
     BRAYNS_INFO << "Sandbox directory           : " << _sandBoxPath
                 << std::endl;
 }
-}
+} // namespace brayns

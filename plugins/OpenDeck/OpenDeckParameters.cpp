@@ -19,17 +19,55 @@
 
 #include "OpenDeckParameters.h"
 
+#include <sstream>
+
+#include <brayns/common/log.h>
+
 namespace brayns
 {
 OpenDeckParameters::OpenDeckParameters()
     : _props("OpenDeck plugin parameters")
 {
-    _props.setProperty(
-        {PARAM_RESOLUTION_SCALING, 1.0,
-         Property::MetaData{"OpenDeck native resolution scale",
-                            "OpenDeck native resolution scale"}});
-    _props.setProperty({PARAM_CAMERA_SCALING, 1.0,
-                        Property::MetaData{"OpenDeck camera scaling",
-                                           "OpenDeck camera scaling"}});
+    _props.add({PARAM_RESOLUTION_SCALING,
+                1.0,
+                {"OpenDeck native resolution scale",
+                 "OpenDeck native resolution scale"}});
+    _props.add({PARAM_CAMERA_SCALING,
+                1.0,
+                {"OpenDeck camera scaling", "OpenDeck camera scaling"}});
 }
+
+bool OpenDeckParameters::parse(int argc, const char** argv)
+{
+    if (argc > 1)
+    {
+        auto token = argv[1];
+        std::istringstream stream(token);
+        double resolutionScaling;
+        stream >> resolutionScaling;
+        if (stream.fail())
+        {
+            BRAYNS_ERROR << 'Failed to parse resolution scaling: ' << token
+                         << '\n';
+            return false;
+        }
+        setResolutionScaling(resolutionScaling);
+    }
+
+    if (argc > 2)
+    {
+        auto token = argv[2];
+        std::istringstream stream(token);
+        double cameraScaling;
+        stream >> cameraScaling;
+        if (stream.fail())
+        {
+            BRAYNS_ERROR << 'Failed to parse camera scaling: ' << token << '\n';
+            return false;
+        }
+        setCameraScaling(cameraScaling);
+    }
+
+    return true;
 }
+} // namespace brayns

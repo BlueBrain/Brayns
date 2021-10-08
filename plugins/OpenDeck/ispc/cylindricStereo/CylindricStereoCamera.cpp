@@ -25,7 +25,7 @@ namespace
 {
 constexpr float OPENDECK_FOV_Y = 48.549f;
 constexpr float DEFAULT_INTERPUPILLARY_DISTANCE = 0.0635f;
-}
+} // namespace
 
 namespace ospray
 {
@@ -48,7 +48,7 @@ void CylindricStereoCamera::commit()
     const auto sideBySide = stereoMode == StereoMode::OSP_STEREO_SIDE_BY_SIDE;
 
     dir = normalize(dir);
-    // The tracking model of the 3d glasses is inversed 
+    // The tracking model of the 3d glasses is inversed
     // so we need to negate dir_du here.
     const auto dir_du = -normalize(cross(dir, up));
     const auto dir_dv = normalize(up);
@@ -90,4 +90,4 @@ float CylindricStereoCamera::getInterpupillaryDistance(
 }
 
 OSP_REGISTER_CAMERA(CylindricStereoCamera, cylindricStereo);
-}
+} // namespace ospray

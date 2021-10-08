@@ -45,4 +45,4 @@ private:
 
     SERIALIZATION_FRIEND(Statistics)
 };
-}
+} // namespace brayns

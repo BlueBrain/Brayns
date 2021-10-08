@@ -60,6 +60,9 @@ public:
     void exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
                       const std::string& filename);
 
+    void exportToFile(brayns::ModelDescriptor& modelDescriptor,
+                      const std::string& filename);
+
 private:
     std::string _readString(std::ifstream& f) const;
     brayns::PropertyMap _defaults;

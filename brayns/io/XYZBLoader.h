@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef XYZBLOADER_H
-#define XYZBLOADER_H
+#pragma once
 
 #include <brayns/common/loader/Loader.h>
 
@@ -43,6 +42,4 @@ public:
         const std::string& filename, const LoaderProgress& callback,
         const PropertyMap& properties) const final;
 };
-}
-
-#endif // XYZBLOADER_H
+} // namespace brayns

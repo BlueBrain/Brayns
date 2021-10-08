@@ -122,4 +122,4 @@ protected:
 
     SERIALIZATION_FRIEND(Material)
 };
-}
+} // namespace brayns

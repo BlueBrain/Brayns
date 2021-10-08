@@ -40,4 +40,4 @@ public:
 private:
     void* _handler{nullptr};
 };
-}
+} // namespace brayns

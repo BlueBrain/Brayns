@@ -36,7 +36,7 @@ namespace
 const auto PROP_RADIUS_MULTIPLIER = "radiusMultiplier";
 const auto PROP_COLOR_SCHEME = "colorScheme";
 const auto LOADER_NAME = "protein";
-}
+} // namespace
 
 namespace brayns
 {
@@ -324,13 +324,13 @@ ProteinLoader::ProteinLoader(Scene& scene, const PropertyMap& properties)
 ProteinLoader::ProteinLoader(Scene& scene, const GeometryParameters& params)
     : Loader(scene)
 {
-    _defaults.setProperty({PROP_COLOR_SCHEME,
-                           enumToString(params.getColorScheme()),
-                           brayns::enumNames<brayns::ColorScheme>(),
-                           {"Color scheme"}});
-    _defaults.setProperty({PROP_RADIUS_MULTIPLIER,
-                           static_cast<double>(params.getRadiusMultiplier()),
-                           {"Radius multiplier"}});
+    _defaults.add({PROP_COLOR_SCHEME,
+                   {enumToString(params.getColorScheme()),
+                    brayns::enumNames<brayns::ColorScheme>()},
+                   {"Color scheme"}});
+    _defaults.add({PROP_RADIUS_MULTIPLIER,
+                   static_cast<double>(params.getRadiusMultiplier()),
+                   {"Radius multiplier"}});
 }
 
 bool ProteinLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
@@ -349,10 +349,10 @@ std::vector<ModelDescriptorPtr> ProteinLoader::importFromFile(
     properties.merge(inProperties);
 
     const double radiusMultiplier =
-        properties.getProperty<double>(PROP_RADIUS_MULTIPLIER, 1.0);
+        properties.valueOr(PROP_RADIUS_MULTIPLIER, 1.0);
 
     const auto colorScheme = stringToEnum<ColorScheme>(
-        properties.getProperty<std::string>(PROP_COLOR_SCHEME));
+        properties[PROP_COLOR_SCHEME].to<std::string>());
 
     std::ifstream file(fileName.c_str());
     if (!file.is_open())
@@ -510,4 +510,4 @@ PropertyMap ProteinLoader::getProperties() const
 {
     return _defaults;
 }
-}
+} // namespace brayns

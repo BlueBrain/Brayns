@@ -23,17 +23,18 @@
 #include <pbrtv2/core/pbrt.h>
 
 // From PBRT src/core/film.cpp
-#define BRAYNS_PBRT_TO_BYTE(v) static_cast<uint8_t>(::Clamp(255.f * powf((v), 1.f/2.2f), 0.f, 255.f))
+#define BRAYNS_PBRT_TO_BYTE(v) \
+    static_cast<uint8_t>(::Clamp(255.f * powf((v), 1.f / 2.2f), 0.f, 255.f))
 
 namespace brayns
 {
-PBRTFrameBuffer::PBRTFrameBuffer(const std::string& name, const Vector2ui& frameSize,
+PBRTFrameBuffer::PBRTFrameBuffer(const std::string& name,
+                                 const Vector2ui& frameSize,
                                  const FrameBufferFormat frameBufferFormat)
- : FrameBuffer(name, frameSize, frameBufferFormat)
+    : FrameBuffer(name, frameSize, frameBufferFormat)
 {
     setAccumulation(false);
     _colorBuffer.resize(frameSize.x * frameSize.y * getColorDepth(), 0u);
-
 }
 
 PBRTFrameBuffer::~PBRTFrameBuffer()
@@ -51,7 +52,7 @@ void PBRTFrameBuffer::fillColorBuffer(const std::vector<float>& src)
             dst[0] = BRAYNS_PBRT_TO_BYTE(src[3 * (x * _frameSize.y + y) + 0]);
             dst[1] = BRAYNS_PBRT_TO_BYTE(src[3 * (x * _frameSize.y + y) + 1]);
             dst[2] = BRAYNS_PBRT_TO_BYTE(src[3 * (x * _frameSize.y + y) + 2]);
-            if(getColorDepth() == 4)
+            if (getColorDepth() == 4)
                 dst[3] = 255u;
             dst += getColorDepth();
         }
@@ -60,7 +61,7 @@ void PBRTFrameBuffer::fillColorBuffer(const std::vector<float>& src)
 
 void PBRTFrameBuffer::resize(const Vector2ui& frameSize)
 {
-    if(getSize() == frameSize)
+    if (getSize() == frameSize)
         return;
 
     _frameSize = frameSize;
@@ -76,4 +77,4 @@ void PBRTFrameBuffer::unmap()
 {
     _mapMutex.unlock();
 }
-}
+} // namespace brayns

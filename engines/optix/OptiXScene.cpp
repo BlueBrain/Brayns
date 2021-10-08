@@ -159,16 +159,15 @@ void OptiXScene::commit()
         _modelDescriptors.end());
 
     // Replace all models marked for replacement
-    for(auto& pair : _markedForReplacement)
+    for (auto& pair : _markedForReplacement)
     {
         auto it = std::find_if(std::begin(_modelDescriptors),
-                            std::end(_modelDescriptors),
-                            [checkId = pair.first](const auto& m)
-        {
-            return m->getModelID() == checkId;
-        });
+                               std::end(_modelDescriptors),
+                               [checkId = pair.first](const auto& m) {
+                                   return m->getModelID() == checkId;
+                               });
 
-        if(it != std::end(_modelDescriptors))
+        if (it != std::end(_modelDescriptors))
             *it = pair.second;
     }
 

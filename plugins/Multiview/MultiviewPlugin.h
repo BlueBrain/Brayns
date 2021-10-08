@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <brayns/common/PropertyMap.h>
+#include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
@@ -35,4 +35,4 @@ public:
 private:
     PropertyMap _properties;
 };
-}
+} // namespace brayns

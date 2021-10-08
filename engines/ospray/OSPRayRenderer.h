@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYRENDERER_H
-#define OSPRAYRENDERER_H
+#pragma once
 
 #include <brayns/common/types.h>
 #include <brayns/engine/Renderer.h>
@@ -60,5 +59,3 @@ private:
     void _destroyRenderer();
 };
 } // namespace brayns
-
-#endif // OSPRAYRENDERER_H

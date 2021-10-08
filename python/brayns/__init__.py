@@ -1,10 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2016-2018, Blue Brain Project
-#                          Raphael Dumusc <raphael.dumusc@epfl.ch>
-#                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
-#                          Cyrille Favreau <cyrille.favreau@epfl.ch>
+# Copyright (c) 2015-2021 EPFL/Blue Brain Project
+# All rights reserved. Do not distribute without permission.
+#
+# Responsible Author: adrien.fleury@epfl.ch
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -20,16 +17,40 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# All rights reserved. Do not distribute without further notice.
 
-"""The Brayns python client library provides access to remote control a running Brayns instance."""
+"""Brayns Python module to connect to a renderer.
 
-from .async_client import AsyncClient
-from .client import Client
+Example:
+.. code-block: python
+    import brayns
+
+    with brayns.connect(
+        uri='localhost:5000',  # Renderer URI
+        secure=True,  # Enable SSL, defaults to False
+        cafile='server.pem' # Custom CA if server certificate is self-signed
+    ) as client:
+
+        # Raw request with JSON-RPC method and params (defaults to None)
+        registry = client.request('registry')
+        schema = client.request('schema', {'endpoint': 'get-camera'})
+
+        # Request using auto generated API (here entrypoint get-camera)
+        camera = client.get_camera()
+"""
+
+from .client.client import Client
+from .client.connect import connect
+from .client.reply_error import ReplyError
+from .doc.doc_builder import build_rst_doc, save_rst_doc
 from .plugins.circuit_explorer import CircuitExplorer
-from .plugins.diffuse_tensor_imaging import DiffuseTensorImaging
-from .helpers.camera_path_handler import CameraPathHandler
-from .version import VERSION as __version__
+from .utils.camera_path_handler import CameraPathHandler
 
-__all__ = ['AsyncClient', 'Client', 'CircuitExplorer', 'DiffuseTensorImaging', 'CameraPathHandler',
-           'Fluorescence', 'PBRVolumes', '__version__']
+__all__ = [
+    'connect',
+    'build_rst_doc',
+    'save_rst_doc',
+    'Client',
+    'CameraPathHandler',
+    'CircuitExplorer',
+    'ReplyError'
+]

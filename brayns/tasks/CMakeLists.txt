@@ -13,6 +13,7 @@ set(BRAYNSTASKS_PUBLIC_HEADERS
   AddModelFromBlobTask.h
   AddModelTask.h
   LoadModelFunctor.h
+  SnapshotTask.h
   errors.h
 )
 

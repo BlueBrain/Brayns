@@ -57,13 +57,11 @@ std::istream& operator>>(std::istream& in, GidRow& gr)
 }
 
 /** Properties */
-const brayns::Property PROP_RADIUS = {
-    "radius", 1., 0.01, 100., {"Streamline radius"}};
-const brayns::Property PROP_OPACITY = {
-    "opacity", 1., 0., 1., {"Streamline opacity"}};
+const brayns::Property PROP_RADIUS = {"radius", 1., {"Streamline radius"}};
+const brayns::Property PROP_OPACITY = {"opacity", 1., {"Streamline opacity"}};
 const brayns::Property PROP_COLOR_SCHEME = {"colorscheme",
-                                            enumToString(ColorScheme::none),
-                                            enumerateNames<ColorScheme>(),
+                                            {enumToString(ColorScheme::none),
+                                             enumerateNames<ColorScheme>()},
                                             {"Color scheme"}};
 
 } // namespace
@@ -155,10 +153,10 @@ std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
     props.merge(properties);
 
     // Read loading properties
-    const auto radius = props.getProperty<double>(PROP_RADIUS.name);
-    const auto opacity = props.getProperty<double>(PROP_OPACITY.name);
+    const auto radius = props[PROP_RADIUS.getName()].as<double>();
+    const auto opacity = props[PROP_OPACITY.getName()].as<double>();
     const auto colorScheme = stringToEnum<ColorScheme>(
-        properties.getProperty<std::string>(PROP_COLOR_SCHEME.name));
+        properties[PROP_COLOR_SCHEME.getName()].to<std::string>());
 
     // Check files
     std::ifstream gidRowfile(config.gid_to_streamline, std::ios::in);
@@ -266,9 +264,9 @@ brayns::PropertyMap DTILoader::getProperties() const
 brayns::PropertyMap DTILoader::getCLIProperties()
 {
     brayns::PropertyMap pm("DTI");
-    pm.setProperty(PROP_RADIUS);
-    pm.setProperty(PROP_OPACITY);
-    pm.setProperty(PROP_COLOR_SCHEME);
+    pm.add(PROP_RADIUS);
+    pm.add(PROP_OPACITY);
+    pm.add(PROP_COLOR_SCHEME);
     return pm;
 }
 } // namespace dti

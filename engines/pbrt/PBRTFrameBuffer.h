@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PBRTFRAMEBUFFER_H
-#define PBRTFRAMEBUFFER_H
+#pragma once
 
 #include <brayns/engine/FrameBuffer.h>
 #include <pbrt/core/pbrt.h>
@@ -64,8 +63,6 @@ private:
     uint8_ts _colorBuffer;
     std::mutex _mapMutex;
 
-    std::array<uint8_t, 4> _backgroundColor {0, 0, 0, 0};
+    std::array<uint8_t, 4> _backgroundColor{0, 0, 0, 0};
 };
-}
-
-#endif
+} // namespace brayns

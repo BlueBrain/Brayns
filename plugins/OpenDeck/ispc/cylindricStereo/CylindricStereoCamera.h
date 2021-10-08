@@ -42,4 +42,4 @@ protected:
     StereoMode getStereoMode();
     float getInterpupillaryDistance(StereoMode stereoMode);
 };
-}
+} // namespace ospray

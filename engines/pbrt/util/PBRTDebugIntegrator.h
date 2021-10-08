@@ -17,8 +17,8 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef PBRTDEBUGINTEGRATOR_H
-#define PBRTDEBUGINTEGRATOR_H
+
+#pragma once
 
 #include <pbrt/core/integrator.h>
 #include <pbrt/core/pbrt.h>
@@ -34,21 +34,22 @@ public:
                         const pbrt::Bounds2i& pb)
         : pbrt::SamplerIntegrator(cam, sam, pb)
     {
-        constexpr pbrt::Float whiteRGB[3] = {pbrt::Float(1), pbrt::Float(1), pbrt::Float(1)};
+        constexpr pbrt::Float whiteRGB[3] = {pbrt::Float(1), pbrt::Float(1),
+                                             pbrt::Float(1)};
         _white = pbrt::Spectrum::FromRGB(whiteRGB);
 
-        constexpr pbrt::Float greenRGB[3] = {pbrt::Float(0), pbrt::Float(0.5), pbrt::Float(0)};
+        constexpr pbrt::Float greenRGB[3] = {pbrt::Float(0), pbrt::Float(0.5),
+                                             pbrt::Float(0)};
         _green = pbrt::Spectrum::FromRGB(greenRGB);
     }
 
     pbrt::Spectrum Li(const pbrt::RayDifferential& r, const pbrt::Scene& s,
-                      pbrt::Sampler&/* sampler*/, pbrt::MemoryArena&/* arena*/,
+                      pbrt::Sampler& /* sampler*/,
+                      pbrt::MemoryArena& /* arena*/,
                       int /*depth*/) const override;
 
 private:
     pbrt::Spectrum _white;
     pbrt::Spectrum _green;
 };
-}
-
-#endif
+} // namespace brayns

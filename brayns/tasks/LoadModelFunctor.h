@@ -43,7 +43,8 @@ private:
     std::vector<ModelDescriptorPtr> _performLoad(
         const std::function<std::vector<ModelDescriptorPtr>()>& loadData);
 
-    std::vector<ModelDescriptorPtr> _loadData(Blob&& blob, const ModelParams& params);
+    std::vector<ModelDescriptorPtr> _loadData(Blob&& blob,
+                                              const ModelParams& params);
     std::vector<ModelDescriptorPtr> _loadData(const std::string& path,
                                               const ModelParams& params);
 
@@ -56,4 +57,4 @@ private:
     size_t _currentProgress{0};
     size_t _nextTic{0};
 };
-}
+} // namespace brayns

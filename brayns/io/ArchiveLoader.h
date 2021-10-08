@@ -1,4 +1,5 @@
-/* Copyright (c) 2018 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021 EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Jonas Karlsson <jonas.karlsson@epfl.ch>
  *
@@ -46,9 +47,9 @@ public:
         const PropertyMap& properties) const final;
 
 private:
-    std::vector<ModelDescriptorPtr> loadExtracted(const std::string& path,
-                                                  const LoaderProgress& callback,
-                                                  const PropertyMap& properties) const;
+    std::vector<ModelDescriptorPtr> loadExtracted(
+        const std::string& path, const LoaderProgress& callback,
+        const PropertyMap& properties) const;
     LoaderRegistry& _registry;
 };
-}
+} // namespace brayns

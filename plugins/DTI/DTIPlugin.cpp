@@ -26,7 +26,6 @@
 #include <io/DTITypes.h>
 #include <log.h>
 
-#include <brayns/common/ActionInterface.h>
 #include <brayns/common/Progress.h>
 #include <brayns/common/geometry/Streamline.h>
 #include <brayns/engine/Camera.h>
@@ -34,11 +33,14 @@
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
+#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <brain/brain.h>
 #include <brion/brion.h>
+
+#include "DtiEntrypoints.h"
 
 namespace
 {
@@ -49,7 +51,7 @@ const std::string MATERIAL_PROPERTY_SHADING_MODE = "shading_mode";
 namespace dti
 {
 DTIPlugin::DTIPlugin()
-    : ExtensionPlugin()
+    : brayns::ExtensionPlugin("DTI")
 {
 }
 
@@ -61,26 +63,7 @@ void DTIPlugin::init()
     registry.registerLoader(
         std::make_unique<DTILoader>(scene, DTILoader::getCLIProperties()));
 
-     _api->getActionInterface()->registerNotification<StreamlinesDescriptor>(
-        {"add-streamlines",
-         "Adds a streamline representation to the scene",
-         "StreamlineDescriptor",
-         "Parameters to generate the streamline representation"},
-        [&](const StreamlinesDescriptor &s) { _updateStreamlines(s); });
-
-    _api->getActionInterface()->registerNotification<SpikeSimulationDescriptor>(
-        {"set-spike-simulation",
-         "Adds a spike simulation to a model",
-         "SpikeSimulationDescriptor",
-         "Description of the spike report"},
-        [&](const SpikeSimulationDescriptor &s) { _updateSpikeSimulation(s); });
-
-    _api->getActionInterface()->registerNotification<SpikeSimulationFromFile>(
-        {"set-spike-simulation-from-file",
-         "Adds a spike simulation loaded from a file to a model",
-         "SpikeSimulationFromFile",
-         "Path and extra parameters for the spike report"},
-        [&](const SpikeSimulationFromFile& s) { _updateSpikeSimulationFromFile(s); });
+    DtiEntrypoints::load(*this);
 }
 
 void DTIPlugin::preRender()
@@ -99,78 +82,76 @@ void DTIPlugin::preRender()
     }
 }
 
-void DTIPlugin::_updateStreamlines(const StreamlinesDescriptor &streamlines)
+void DTIPlugin::updateSpikeSimulation(
+    const SetSpikeSimulationMessage &spikeSimulation)
+
 {
-    const std::string& name = streamlines.name;
-    PLUGIN_INFO << "Loading streamlines <" << name << "> from Json"
-                << std::endl;
-
-    size_t nbStreamlines = 0;
-    auto model = _api->getScene().createModel();
-
-    const auto nbIndices = streamlines.indices.size();
-    //const auto nbVertices = streamlines.getvertices().size() / 3;
-
-    uint64_t startIndex = 0;
-    for (size_t index = 0; index < nbIndices; ++index)
+    auto modelDescriptor = _api->getScene().getModel(spikeSimulation.model_id);
+    if (!modelDescriptor)
     {
-        // Create material
-        const auto materialId =
-            streamlines.gids.empty() ? 0 : streamlines.gids[index];
-        brayns::PropertyMap props;
-        props.setProperty({MATERIAL_PROPERTY_SHADING_MODE, 0});
-        auto material =
-            model->createMaterial(materialId, std::to_string(materialId),
-                                  props);
-        material->setOpacity(streamlines.opacity);
-        material->setSpecularColor({0, 0, 0});
-
-        // Create streamline geometry
-        const auto endIndex = streamlines.indices[index];
-
-        if (endIndex - startIndex < 2)
-            // Ignore streamlines with less than 2 points
-            continue;
-
-        brayns::Vector3fs points;
-        std::vector<float> radii;
-        brayns::Vector3f normal;
-        for (uint64_t p = startIndex; p < endIndex; ++p)
-        {
-            const auto i = p * 3;
-            const brayns::Vector3f point = {streamlines.vertices[i],
-                                            streamlines.vertices[i + 1],
-                                            streamlines.vertices[i + 2]};
-            points.push_back(point);
-            radii.push_back(streamlines.radius);
-        }
-        const auto colors =
-            DTILoader::getColorsFromPoints(points, streamlines.opacity,
-                                           static_cast<ColorScheme>(streamlines.colorScheme));
-
-        brayns::Streamline streamline(points, colors, radii);
-        model->addStreamline(materialId, streamline);
-        startIndex = endIndex;
-
-        ++nbStreamlines;
+        PLUGIN_ERROR << spikeSimulation.model_id << " is an invalid model ID"
+                     << std::endl;
+        return;
     }
+    _spikeSimulation = spikeSimulation;
+    _simulationDirty = true;
+}
 
-    if (nbStreamlines == 0)
+void DTIPlugin::updateSpikeSimulationFromFile(
+    const SetSpikeSimulationFromFileMessage &src)
+{
+    auto modelDescriptor = _api->getScene().getModel(src.model_id);
+    if (!modelDescriptor)
     {
-        PLUGIN_INFO << "No streamlines" << std::endl;
+        PLUGIN_ERROR << src.model_id << " is an invalid model ID" << std::endl;
         return;
     }
 
-    auto modelDescriptor =
-        std::make_shared<brayns::ModelDescriptor>(std::move(model), name);
-    _api->getScene().addModel(modelDescriptor);
+    std::unique_ptr<brion::BlueConfig> config{nullptr};
+    try
+    {
+        config = std::make_unique<brion::BlueConfig>(src.path);
+    }
+    catch (...)
+    {
+        PLUGIN_ERROR << "Could not read BlueConfig file " << src.path
+                     << std::endl;
+    }
+    std::unique_ptr<brain::SpikeReportReader> spikeReport{nullptr};
+    try
+    {
+        spikeReport = std::make_unique<brain::SpikeReportReader>(
+            config->getSpikeSource());
+    }
+    catch (const std::exception &e)
+    {
+        PLUGIN_ERROR << "Could not read Spike report: " << e.what()
+                     << std::endl;
+    }
 
-    PLUGIN_INFO << nbStreamlines << " streamlines loaded" << std::endl;
+    _spikeSimulation.dt = src.dt;
+    _spikeSimulation.end_time = spikeReport->getEndTime();
+    _spikeSimulation.model_id = src.model_id;
+    _spikeSimulation.time_scale = src.time_scale;
+    _spikeSimulation.decay_speed = src.decay_speed;
+    _spikeSimulation.rest_intensity = src.rest_intensity;
+    _spikeSimulation.spike_intensity = src.spike_intensity;
+
+    auto spikes = spikeReport->getSpikes(0.f, spikeReport->getEndTime());
+    _spikeSimulation.gids.resize(spikes.size());
+    _spikeSimulation.timestamps.resize(spikes.size());
+    for (size_t i = 0; i < spikes.size(); ++i)
+        _spikeSimulation.timestamps[i] = spikes[i].first;
+
+    for (size_t i = 0; i < spikes.size(); ++i)
+        _spikeSimulation.gids[i] = spikes[i].second;
+
+    _simulationDirty = true;
 }
 
 void DTIPlugin::_updateSpikeSimulation()
 {
-    auto modelDescriptor = _api->getScene().getModel(_spikeSimulation.modelId);
+    auto modelDescriptor = _api->getScene().getModel(_spikeSimulation.model_id);
     auto &model = modelDescriptor->getModel();
     auto simulationHandler = model.getSimulationHandler();
     if (!simulationHandler)
@@ -184,23 +165,24 @@ void DTIPlugin::_updateSpikeSimulation()
         }
 
         PLUGIN_INFO << "Creating spike simulation handler for model "
-                    << _spikeSimulation.modelId << std::endl;
+                    << _spikeSimulation.model_id << std::endl;
         simulationHandler =
             std::make_shared<DTISimulationHandler>(indices, _spikeSimulation);
         model.setSimulationHandler(simulationHandler);
-        _registeredModelsForSpikeSimulation.push_back(_spikeSimulation.modelId);
+        _registeredModelsForSpikeSimulation.push_back(
+            _spikeSimulation.model_id);
     }
 
     const auto nbSpikes = _spikeSimulation.gids.size();
     PLUGIN_INFO << "Loading " << nbSpikes << " spikes from JSon to model "
-                << _spikeSimulation.modelId << std::endl;
+                << _spikeSimulation.model_id << std::endl;
 
     auto *spikesHandler =
         dynamic_cast<DTISimulationHandler *>(simulationHandler.get());
-    spikesHandler->setTimeScale(_spikeSimulation.timeScale);
-    spikesHandler->setDecaySpeed(_spikeSimulation.decaySpeed);
-    spikesHandler->setRestIntensity(_spikeSimulation.restIntensity);
-    spikesHandler->setSpikeIntensity(_spikeSimulation.spikeIntensity);
+    spikesHandler->setTimeScale(_spikeSimulation.time_scale);
+    spikesHandler->setDecaySpeed(_spikeSimulation.decay_speed);
+    spikesHandler->setRestIntensity(_spikeSimulation.rest_intensity);
+    spikesHandler->setSpikeIntensity(_spikeSimulation.spike_intensity);
 
     auto &spikes = spikesHandler->getSpikes();
     for (size_t i = 0; i < _spikeSimulation.gids.size(); ++i)
@@ -248,71 +230,6 @@ void DTIPlugin::_updateSimulationFrame()
         }
     }
 }
-
-void DTIPlugin::_updateSpikeSimulation(
-    const SpikeSimulationDescriptor &spikeSimulation)
-
-{
-    auto modelDescriptor = _api->getScene().getModel(spikeSimulation.modelId);
-    if (!modelDescriptor)
-    {
-        PLUGIN_ERROR << spikeSimulation.modelId << " is an invalid model ID"
-                     << std::endl;
-        return;
-    }
-    _spikeSimulation = spikeSimulation;
-    _simulationDirty = true;
-}
-
-void DTIPlugin::_updateSpikeSimulationFromFile(const SpikeSimulationFromFile& src)
-{
-    auto modelDescriptor = _api->getScene().getModel(src.modelId);
-    if (!modelDescriptor)
-    {
-        PLUGIN_ERROR << src.modelId << " is an invalid model ID"
-                     << std::endl;
-        return;
-    }
-
-    std::unique_ptr<brion::BlueConfig> config {nullptr};
-    try
-    {
-       config = std::make_unique<brion::BlueConfig>(src.path);
-    }
-    catch (...)
-    {
-        PLUGIN_ERROR << "Could not read BlueConfig file " << src.path << std::endl;
-    }
-    std::unique_ptr<brain::SpikeReportReader> spikeReport {nullptr};
-    try
-    {
-        spikeReport = std::make_unique<brain::SpikeReportReader>(config->getSpikeSource());
-    }
-    catch(const std::exception& e)
-    {
-        PLUGIN_ERROR << "Could not read Spike report: " << e.what() << std::endl;
-    }
-
-    _spikeSimulation.dt = src.dt;
-    _spikeSimulation.endTime = spikeReport->getEndTime();
-    _spikeSimulation.modelId = src.modelId;
-    _spikeSimulation.timeScale = src.timeScale;
-    _spikeSimulation.decaySpeed = src.decaySpeed;
-    _spikeSimulation.restIntensity = src.restIntensity;
-    _spikeSimulation.spikeIntensity = src.spikeIntensity;
-
-    auto spikes = spikeReport->getSpikes(0.f, spikeReport->getEndTime());
-    _spikeSimulation.gids.resize(spikes.size());
-    _spikeSimulation.timestamps.resize(spikes.size());
-    for(size_t i = 0; i < spikes.size(); ++i)
-        _spikeSimulation.timestamps[i] = spikes[i].first;
-
-    for(size_t i = 0; i < spikes.size(); ++i)
-        _spikeSimulation.gids[i] = spikes[i].second;
-
-    _simulationDirty = true;
-}
-
 } // namespace dti
 
 extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int /*argc*/,

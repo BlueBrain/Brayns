@@ -102,4 +102,4 @@ void FlyingModeManipulator::_flyBackwards()
 {
     translate(Vector3f(0, 0, 1) * getMotionSpeed());
 }
-}
+} // namespace brayns

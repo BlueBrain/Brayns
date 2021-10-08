@@ -34,4 +34,4 @@ class AddModelTask : public Task<std::vector<ModelDescriptorPtr>>
 public:
     AddModelTask(const ModelParams& model, Engine& engine);
 };
-}
+} // namespace brayns

@@ -40,7 +40,7 @@ vec3f _rotateVectorByQuat(const vec3f& v, const vec4f& q)
     return 2.0f * dot(u, v) * u + (s * s - dot(u, u)) * v +
            2.0f * s * cross(u, v);
 }
-}
+} // namespace
 
 CylindricStereoTrackedCamera::CylindricStereoTrackedCamera()
 {
@@ -105,4 +105,4 @@ vec3f CylindricStereoTrackedCamera::_getOpendeckCamDU()
 }
 
 OSP_REGISTER_CAMERA(CylindricStereoTrackedCamera, cylindricStereoTracked);
-}
+} // namespace ospray

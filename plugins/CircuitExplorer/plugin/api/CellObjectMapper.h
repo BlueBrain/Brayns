@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CELLOBJECTMAPPER_H
-#define CELLOBJECTMAPPER_H
+#pragma once
 
 #include <brayns/common/types.h>
 
@@ -76,7 +75,8 @@ public:
     void add(const size_t gid, const MorphologyMap& mm);
     void remove(const size_t gid);
 
-    RemapResult remapCircuitColors(const CircuitColorScheme scheme, brayns::Scene& scene);
+    RemapResult remapCircuitColors(const CircuitColorScheme scheme,
+                                   brayns::Scene& scene);
     void remapMorphologyColors(const MorphologyColorScheme scheme);
 
     void onCircuitColorFinish(const CircuitColorScheme& scheme,
@@ -88,10 +88,7 @@ public:
         return _cellToRenderableMap;
     }
 
-    size_t getSourceModelId() const
-    {
-        return _model->getModelID();
-    }
+    size_t getSourceModelId() const { return _model->getModelID(); }
 
 private:
     size_t _computeMaterialId(const CircuitColorScheme scheme,
@@ -110,5 +107,3 @@ private:
     // Maps GIDs to all the pieces that forms the morphology of the given cell
     std::unordered_map<size_t, MorphologyMap> _cellToRenderableMap;
 };
-
-#endif

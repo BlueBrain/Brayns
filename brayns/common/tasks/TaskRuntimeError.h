@@ -42,4 +42,4 @@ public:
     const int code;
     const std::string data;
 };
-}
+} // namespace brayns

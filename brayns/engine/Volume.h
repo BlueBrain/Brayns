@@ -53,4 +53,4 @@ protected:
     const Vector3f _spacing;
     const DataType _dataType;
 };
-}
+} // namespace brayns

@@ -21,7 +21,6 @@ common_find_package_post()
 
 
 set(BRAYNSCIRCUITINFO_HEADERS
-  CircuitInfoParams.h
   CircuitInfoPlugin.h
   Log.h
 )
@@ -30,7 +29,14 @@ set(BRAYNSCIRCUITINFO_SOURCES
   CircuitInfoPlugin.cpp
 )
 
-set(BRAYNSCIRCUITINFO_LINK_LIBRARIES PRIVATE Brion Brain braynsCommon braynsParameters braynsPluginAPI)
+set(BRAYNSCIRCUITINFO_LINK_LIBRARIES PRIVATE
+  Brion
+  Brain
+  braynsCommon
+  braynsParameters
+  braynsPluginAPI
+  braynsNetwork
+)
 
 set(BRAYNSCIRCUITINFO_OMIT_LIBRARY_HEADER ON)
 set(BRAYNSCIRCUITINFO_OMIT_VERSION_HEADERS ON)

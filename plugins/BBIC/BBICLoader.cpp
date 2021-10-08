@@ -66,4 +66,4 @@ std::vector<brayns::ModelDescriptorPtr> Loader::importFromFile(
 
     return {modelDesc};
 }
-}
+} // namespace bbic

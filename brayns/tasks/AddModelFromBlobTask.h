@@ -76,4 +76,4 @@ private:
     size_t _receivedBytes{0};
     const float CHUNK_PROGRESS_WEIGHT{0.5f};
 };
-}
+} // namespace brayns

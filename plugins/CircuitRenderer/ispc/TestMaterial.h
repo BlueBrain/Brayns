@@ -22,6 +22,6 @@ struct TestMaterial : public ospray::Material
 
     void commit() override;
 };
-}
+} // namespace circuitRenderer
 
 #endif

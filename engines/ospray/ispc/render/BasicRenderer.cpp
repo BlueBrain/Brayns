@@ -42,4 +42,4 @@ BasicRenderer::BasicRenderer()
 
 OSP_REGISTER_RENDERER(BasicRenderer, BASIC);
 OSP_REGISTER_RENDERER(BasicRenderer, basic);
-} // ::brayns
+} // namespace brayns

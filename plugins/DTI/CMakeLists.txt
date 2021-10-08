@@ -24,12 +24,11 @@ set(${NAME}_SOURCES
 set(${NAME}_PUBLIC_HEADERS
   io/DTILoader.h
   io/DTISimulationHandler.h
-  api/DTIParams.h
   DTIPlugin.h
 )
 
 set(${NAME}_LINK_LIBRARIES
-  braynsPluginAPI glm)
+  braynsPluginAPI braynsNetwork glm)
 
 # Build type and options
 if(NOT CMAKE_BUILD_TYPE)

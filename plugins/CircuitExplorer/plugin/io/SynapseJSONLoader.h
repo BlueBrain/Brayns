@@ -19,8 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef SynapseJSONLoader_H
-#define SynapseJSONLoader_H
+#pragma once
 
 #pragma once
 
@@ -73,5 +72,3 @@ public:
 private:
     const SynapseAttributes& _synapseAttributes;
 };
-
-#endif // SynapseJSONLoader_H

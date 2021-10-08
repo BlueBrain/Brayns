@@ -18,20 +18,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PBRVOLUMES_H
-#define PBRVOLUMES_H
+#pragma once
 
-#include <brayns/common/ActionMessage.h>
 #include <brayns/common/types.h>
+#include <brayns/network/json/ActionMessage.h>
 
 // Commom parameters for all type of volumes
-#define COMMON_VOLUME_PROPS \
-    MESSAGE_ENTRY(std::string, name, "Volume scene name") \
+#define COMMON_VOLUME_PROPS                                              \
+    MESSAGE_ENTRY(std::string, name, "Volume scene name")                \
     MESSAGE_ENTRY(std::vector<float>, absorption, "Absorption spectrum") \
     MESSAGE_ENTRY(std::vector<float>, scattering, "Scattering spectrum") \
-    MESSAGE_ENTRY(double, scale, "Spectrums scale") \
-    MESSAGE_ENTRY(double, g, "Anisotropy parameter") \
-    MESSAGE_ENTRY(std::vector<float>, le, "Radiance spectrum") \
+    MESSAGE_ENTRY(double, scale, "Spectrums scale")                      \
+    MESSAGE_ENTRY(double, g, "Anisotropy parameter")                     \
+    MESSAGE_ENTRY(std::vector<float>, le, "Radiance spectrum")
 
 /**
  * @brief The AddHomogeneusVolume struct
@@ -94,7 +93,8 @@ struct AddGridVolume : public brayns::Message
 {
     MESSAGE_BEGIN(AddGridVolume)
     COMMON_VOLUME_PROPS
-    MESSAGE_ENTRY(std::string, gridType, "Type of grid (PBRT-V2 only, values \"grid\" or \"vsd\"")
+    MESSAGE_ENTRY(std::string, gridType,
+                  "Type of grid (PBRT-V2 only, values \"grid\" or \"vsd\"")
     MESSAGE_ENTRY(std::vector<float>, p0, "Volume minimum bound")
     MESSAGE_ENTRY(std::vector<float>, p1, "Volume maximum bound")
     MESSAGE_ENTRY(std::vector<float>, density, "Volume grid density values")
@@ -102,5 +102,3 @@ struct AddGridVolume : public brayns::Message
     MESSAGE_ENTRY(int32_t, ny, "Grid Y dimension")
     MESSAGE_ENTRY(int32_t, nz, "Grid Z dimension")
 };
-
-#endif

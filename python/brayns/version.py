@@ -1,10 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2016-2019, Blue Brain Project
-#                          Raphael Dumusc <raphael.dumusc@epfl.ch>
-#                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
-#                          Cyrille Favreau <cyrille.favreau@epfl.ch>
+# Copyright (c) 2015-2021 EPFL/Blue Brain Project
+# All rights reserved. Do not distribute without permission.
+#
+# Responsible Author: adrien.fleury@epfl.ch
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -20,14 +17,14 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# All rights reserved. Do not distribute without further notice.
 
 """The version of the brayns package"""
+
 from pkg_resources import get_distribution, DistributionNotFound
 
 try:
-    VERSION = get_distribution('brayns').version  # pylint: disable=no-member
-except DistributionNotFound:  # pragma: no cover
+    VERSION = get_distribution('brayns').version
+except DistributionNotFound:
     VERSION = 'brayns-local'
 
 MINIMAL_VERSION = '1.1.0'

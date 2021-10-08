@@ -1,14 +1,14 @@
 /***** Preamble block *********************************************************
-*
-* This file is part of h5py, a low-level Python interface to the HDF5 library.
-*
-* Copyright (C) 2008 Andrew Collette
-* http://h5py.alfven.org
-* License: BSD  (See LICENSE.txt for full license)
-*
-* $Date$
-*
-****** End preamble block ****************************************************/
+ *
+ * This file is part of h5py, a low-level Python interface to the HDF5 library.
+ *
+ * Copyright (C) 2008 Andrew Collette
+ * http://h5py.alfven.org
+ * License: BSD  (See LICENSE.txt for full license)
+ *
+ * $Date$
+ *
+ ****** End preamble block ****************************************************/
 
 /*
     Implements an LZF filter module for HDF5, using the BSD-licensed library
@@ -22,9 +22,9 @@
     the result from H5Zregister.
 */
 
-#include "lzf/lzf.h"
-#include "hdf5.h"
 #include "lzf_filter.h"
+#include "hdf5.h"
+#include "lzf/lzf.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
