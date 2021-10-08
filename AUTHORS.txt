@@ -1,10 +1,24 @@
-Cyrille Favreau
-Ahmet Bilgili
-Daniel Nachbaur
-Jafet Villafranca
-Juan Hernando
-Stefan Eilemann
+
 Grigori Chevtchenko
 Raphael Dumusc
-Nadir Roman
+Stefan Eilemann
+Cyrille Favreau
 Adrien Fleury
+Andrei-Roland Groza
+Juan Bautista Hernando Vieites
+Jonas Karlsson
+Daniel Nachbaur
+Pawel Jozef Podhajski
+Nadir Roman Guerrero
+Jafet Villafranca Diaz
+
+Jefferson Amstutz (contributor)
+Ahmet Bilgili (contributor)
+Tristan Carel (contributor)
+Adrien Devresse (contributor)
+Timothee Ewart (contributor)
+luzpaz (contributor)
+Fabien Petitjean (contributor)
+Sebastien Speierer (contributor)
+Benoit Tassin (contributor)
+Matthias Wolf (contributor)
