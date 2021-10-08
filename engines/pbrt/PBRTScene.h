@@ -72,4 +72,3 @@ private:
     std::string _currentRenderer;
 };
 } // namespace brayns
-

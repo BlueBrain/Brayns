@@ -247,4 +247,3 @@ struct AddFluorescentScatteringGridVolume : public brayns::Message
     MESSAGE_ENTRY(int32_t, ny, "Grid y dimension")
     MESSAGE_ENTRY(int32_t, nz, "Grid z dimension")
 };
-

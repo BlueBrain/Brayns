@@ -70,4 +70,3 @@ private:
      */
     brayns::Message _addGridVolume(const AddGridVolume&);
 };
-

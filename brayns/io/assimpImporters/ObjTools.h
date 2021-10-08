@@ -325,4 +325,3 @@ bool hasLineEnd(T it, T end)
 }
 
 } // Namespace Assimp
-

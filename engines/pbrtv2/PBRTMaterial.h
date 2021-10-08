@@ -53,4 +53,3 @@ private:
     pbrt::Reference<pbrt::Material> _pbrtMat{nullptr};
 };
 } // namespace brayns
-

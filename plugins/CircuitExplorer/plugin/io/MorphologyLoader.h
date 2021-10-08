@@ -280,4 +280,3 @@ private:
     size_t _defaultMaterialId{brayns::NO_MATERIAL};
     brayns::PropertyMap _defaults;
 };
-

@@ -54,4 +54,3 @@ private:
     PropertyMap _defaults;
 };
 } // namespace brayns
-

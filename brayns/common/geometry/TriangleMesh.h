@@ -113,4 +113,3 @@ inline TriangleMesh createBox(const Vector3f& minCorner,
 }
 
 } // namespace brayns
-

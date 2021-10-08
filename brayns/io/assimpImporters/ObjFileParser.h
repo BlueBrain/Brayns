@@ -166,4 +166,3 @@ private:
 };
 
 } // Namespace Assimp
-

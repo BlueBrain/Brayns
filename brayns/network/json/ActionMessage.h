@@ -139,4 +139,3 @@ public:                                   \
     using MsgType = CLASS;
 
 } // namespace brayns
-

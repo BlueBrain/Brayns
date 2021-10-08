@@ -57,4 +57,3 @@ private:
     std::vector<std::unique_ptr<pbrt::Transform>> _transformPool;
 };
 } // namespace brayns
-

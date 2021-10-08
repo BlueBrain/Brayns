@@ -50,4 +50,3 @@ private:
                                      const brayns::LoaderProgress &callback,
                                      brayns::Model &model) const;
 };
-

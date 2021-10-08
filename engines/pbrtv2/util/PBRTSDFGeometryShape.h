@@ -740,4 +740,3 @@ pbrt::Point PBRTSDFGeometryShape<SDFType::ConePillSigmoid>::Sample(
     return p;
 }
 } // namespace brayns
-

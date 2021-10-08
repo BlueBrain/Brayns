@@ -270,4 +270,3 @@ struct Getter<SwapEndianess, T, false>
 };
 } // namespace Intern
 } // namespace Assimp
-

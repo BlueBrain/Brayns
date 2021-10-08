@@ -66,4 +66,3 @@ private:
     void _createRenderers();
 };
 } // namespace brayns
-

@@ -53,4 +53,3 @@ private:
     pbrt::Spectrum _green;
 };
 } // namespace brayns
-

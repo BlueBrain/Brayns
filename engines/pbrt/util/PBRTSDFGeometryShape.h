@@ -675,4 +675,3 @@ pbrt::Interaction PBRTSDFGeometryShape<SDFType::ConePillSigmoid>::Sample(
     return i;
 }
 } // namespace brayns
-

@@ -225,4 +225,3 @@ inline unsigned int integer_pow(unsigned int base, unsigned int power)
     return res;
 }
 } // namespace Assimp
-

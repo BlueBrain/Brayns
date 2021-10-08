@@ -50,4 +50,3 @@ private:
     void _turnDown();
 };
 } // namespace brayns
-

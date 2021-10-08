@@ -59,4 +59,3 @@ private:
     bool _useDynamicLoadBalancer{false};
 };
 } // namespace brayns
-

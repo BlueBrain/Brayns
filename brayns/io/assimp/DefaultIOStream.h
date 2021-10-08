@@ -130,4 +130,3 @@ inline DefaultIOStream::DefaultIOStream(FILE* pFile,
 // ----------------------------------------------------------------------------------
 
 } // namespace Assimp
-

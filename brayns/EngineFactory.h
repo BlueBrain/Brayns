@@ -63,4 +63,3 @@ private:
     Engine* _loadEngine(const std::string& name, int argc, const char* argv[]);
 };
 } // namespace brayns
-

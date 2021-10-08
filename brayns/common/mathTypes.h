@@ -155,4 +155,3 @@ typedef std::vector<Vector2d> Vector2ds;
  */
 using Quaterniond = glm::tquat<double, glm::highp>; //!< Double quaternion.
 } // namespace brayns
-

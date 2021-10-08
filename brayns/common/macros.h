@@ -37,4 +37,3 @@
 #endif
 
 #define BRAYNS_UNUSED_VAR(x) (void)x;
-

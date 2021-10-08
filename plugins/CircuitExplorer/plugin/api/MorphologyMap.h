@@ -55,4 +55,3 @@ struct MorphologyMap
     // material Id -> list of geometry sdfs for this morphology
     std::unordered_map<size_t, std::vector<size_t>> _sdfGeometryMap;
 };
-

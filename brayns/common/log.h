@@ -38,4 +38,3 @@
         BRAYNS_ERROR << exc.what() << std::endl; \
         throw exc;                               \
     }
-

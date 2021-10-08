@@ -39,4 +39,3 @@ enum MaterialClippingMode
     plane = 1,
     sphere = 2
 };
-

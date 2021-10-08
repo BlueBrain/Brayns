@@ -39,4 +39,3 @@ public:
         const std::string &filename, const brayns::LoaderProgress &callback,
         const brayns::PropertyMap &properties) const final;
 };
-

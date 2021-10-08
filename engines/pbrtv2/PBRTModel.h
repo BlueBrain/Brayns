@@ -119,4 +119,3 @@ private:
                                               pbrt::Transform* wto);
 };
 } // namespace brayns
-

@@ -481,4 +481,3 @@ inline TYPE PLY::PropertyInstance::ConvertTo(
 
 } // Namespace PLY
 } // namespace Assimp
-

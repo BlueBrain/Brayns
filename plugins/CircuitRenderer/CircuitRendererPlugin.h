@@ -36,4 +36,3 @@ public:
     ~CircuitRendererPlugin();
     void init() final;
 };
-

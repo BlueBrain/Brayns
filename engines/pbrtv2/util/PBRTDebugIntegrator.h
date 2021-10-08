@@ -79,4 +79,3 @@ private:
     pbrt::Spectrum _red;
 };
 } // namespace brayns
-

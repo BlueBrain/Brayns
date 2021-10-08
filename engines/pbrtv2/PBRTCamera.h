@@ -104,4 +104,3 @@ private:
     mutable bool _cameraChanged{true};
 };
 } // namespace brayns
-

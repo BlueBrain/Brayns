@@ -43,4 +43,3 @@ public:
         const PropertyMap& properties) const final;
 };
 } // namespace brayns
-

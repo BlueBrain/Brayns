@@ -116,4 +116,3 @@ inline float ai_strtof(const char *begin, const char *end)
 
     return val;
 }
-

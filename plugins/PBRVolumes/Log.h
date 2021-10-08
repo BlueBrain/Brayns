@@ -44,4 +44,3 @@
         PLUGIN_ERROR << __message << std::endl; \
         throw std::runtime_error(__message);    \
     }
-

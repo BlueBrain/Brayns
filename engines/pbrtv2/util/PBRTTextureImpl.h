@@ -191,4 +191,3 @@ PBRTTextureImpl<float>::PBRTTextureImpl(pbrt::TextureMapping2D* mapping,
 }
 
 } // namespace brayns
-

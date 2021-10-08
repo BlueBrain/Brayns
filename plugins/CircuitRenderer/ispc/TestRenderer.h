@@ -48,4 +48,3 @@ protected:
     TestMaterial* _backgroundMaterial;
 };
 } // namespace circuitRenderer
-

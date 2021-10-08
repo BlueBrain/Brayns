@@ -66,4 +66,3 @@ private:
     pbrt::MemoryArena _pool;
 };
 } // namespace brayns
-

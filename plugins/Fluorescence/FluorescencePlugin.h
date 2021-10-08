@@ -120,4 +120,3 @@ private:
     brayns::Message _addFluorescentScatteringGridVolumeFromFile(
         const AddFluorescentScatteringGridFromFileVolume&);
 };
-

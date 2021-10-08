@@ -64,4 +64,3 @@ private:
     mutable std::shared_ptr<pbrt::Sampler> _pbrtSampler{nullptr};
 };
 } // namespace brayns
-

@@ -55,4 +55,3 @@ private:
     std::string _renderer;
 };
 } // namespace brayns
-

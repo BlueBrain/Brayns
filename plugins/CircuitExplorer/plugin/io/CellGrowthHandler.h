@@ -46,4 +46,3 @@ public:
     brayns::AbstractSimulationHandlerPtr clone() const final;
 };
 typedef std::shared_ptr<CellGrowthHandler> CellGrowthHandlerPtr;
-

@@ -209,4 +209,3 @@ extern const std::string PBRT_SAMPLERPROP_XSAMPLES;
 extern const std::string PBRT_SAMPLERPROP_YSAMPLES;
 
 } // namespace brayns
-

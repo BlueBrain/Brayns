@@ -439,4 +439,3 @@ struct ParallelModelContainer
     std::vector<std::vector<size_t>> sdfNeighbours;
     std::vector<size_t> sdfMaterials;
 };
-

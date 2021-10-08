@@ -72,4 +72,3 @@ private:
     mutable std::shared_ptr<pbrt::SamplerRenderer> _renderer{nullptr};
 };
 } // namespace brayns
-

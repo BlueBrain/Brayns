@@ -66,4 +66,3 @@ private:
     std::array<uint8_t, 4> _backgroundColor{0, 0, 0, 0};
 };
 } // namespace brayns
-

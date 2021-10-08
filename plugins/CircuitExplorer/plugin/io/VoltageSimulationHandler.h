@@ -73,4 +73,3 @@ private:
     std::map<uint64_t, std::vector<float>> _frames;
     bool _ready{false};
 };
-

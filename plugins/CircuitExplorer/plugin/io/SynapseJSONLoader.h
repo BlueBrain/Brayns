@@ -72,4 +72,3 @@ public:
 private:
     const SynapseAttributes& _synapseAttributes;
 };
-

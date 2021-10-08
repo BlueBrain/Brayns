@@ -59,4 +59,3 @@ private:
     void _destroyRenderer();
 };
 } // namespace brayns
-

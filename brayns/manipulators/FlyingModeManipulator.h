@@ -45,4 +45,3 @@ private:
     void _flyBackwards();
 };
 } // namespace brayns
-

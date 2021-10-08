@@ -61,4 +61,3 @@ std::shared_ptr<CustomCone> CreateCustomConeShape(const pbrt::Transform* o2w,
                                                   const pbrt::ParamSet& params);
 
 } // namespace brayns
-

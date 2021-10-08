@@ -27,4 +27,3 @@
 
 brayns::Vector3f get_translation(const brayns::Matrix4f& matrix);
 bool inBox(const brayns::Vector3f& point, const brayns::Boxf& box);
-

@@ -115,4 +115,3 @@ private:
     std::vector<std::shared_ptr<pbrt::Light>> _modelLights;
 };
 } // namespace brayns
-

@@ -120,4 +120,3 @@ struct ExceptionSwallower<void>
     }                                                    \
     catch (...) { return ExceptionSwallower<type>()(); } \
     }
-

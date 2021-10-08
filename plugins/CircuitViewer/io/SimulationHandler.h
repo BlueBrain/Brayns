@@ -71,4 +71,3 @@ private:
     std::vector<MaterialPtr> _materials;
 };
 } // namespace brayns
-

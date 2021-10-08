@@ -52,4 +52,3 @@ private:
 
     std::map<uint64_t, uint64_t> _gidMap;
 };
-

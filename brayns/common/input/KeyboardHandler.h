@@ -69,4 +69,3 @@ private:
     std::vector<std::string> _helpStrings;
 };
 } // namespace brayns
-

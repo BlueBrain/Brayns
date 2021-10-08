@@ -118,4 +118,3 @@ protected:
     SERIALIZATION_FRIEND(ApplicationParameters)
 };
 } // namespace brayns
-

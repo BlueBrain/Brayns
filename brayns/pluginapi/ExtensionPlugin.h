@@ -75,12 +75,12 @@ public:
 
     /**
      * @brief Add an entrypoint of given type built using given args.
-     * 
+     *
      * Must be called in init() method.
-     * 
+     *
      * If an action interface is registered, it will be used to register the
      * entrypoint, otherwise nothing will be done.
-     * 
+     *
      * @tparam T Entrypoint type.
      * @tparam Args Entrypoint construction arguments types.
      * @param args Entrypoint construction arguments.

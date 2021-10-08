@@ -155,4 +155,3 @@ protected:
 };
 
 } // end of namespace Assimp
-

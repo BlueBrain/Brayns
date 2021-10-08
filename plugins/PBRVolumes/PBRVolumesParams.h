@@ -102,4 +102,3 @@ struct AddGridVolume : public brayns::Message
     MESSAGE_ENTRY(int32_t, ny, "Grid Y dimension")
     MESSAGE_ENTRY(int32_t, nz, "Grid Z dimension")
 };
-

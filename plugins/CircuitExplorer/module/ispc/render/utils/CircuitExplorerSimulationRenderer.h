@@ -56,4 +56,3 @@ protected:
     float _fogStart{0.f};
 };
 } // namespace circuitExplorer
-

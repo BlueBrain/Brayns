@@ -107,4 +107,3 @@ private:
     // Maps GIDs to all the pieces that forms the morphology of the given cell
     std::unordered_map<size_t, MorphologyMap> _cellToRenderableMap;
 };
-

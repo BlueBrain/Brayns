@@ -53,4 +53,3 @@ protected:
     float _timestamp;
 };
 } // namespace brayns
-

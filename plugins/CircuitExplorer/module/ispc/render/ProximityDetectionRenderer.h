@@ -69,4 +69,3 @@ private:
     float _alphaCorrection{0.5f};
 };
 } // namespace circuitExplorer
-

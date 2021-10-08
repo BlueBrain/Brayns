@@ -56,4 +56,3 @@ protected:
     float _exposure{1.f};
 };
 } // namespace circuitExplorer
-

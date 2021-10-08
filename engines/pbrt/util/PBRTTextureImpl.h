@@ -139,4 +139,3 @@ PBRTTextureImpl<pbrt::Float>::PBRTTextureImpl(
 }
 
 } // namespace brayns
-

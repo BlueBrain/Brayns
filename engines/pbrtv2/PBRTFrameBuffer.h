@@ -55,4 +55,3 @@ private:
     std::mutex _mapMutex;
 };
 } // namespace brayns
-

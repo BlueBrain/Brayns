@@ -45,4 +45,3 @@ pbrt::Transform pbrtTranslation(const Vector3f& v);
 pbrt::Transform pbrtTransform(const Transformation& t);
 
 } // namespace brayns
-

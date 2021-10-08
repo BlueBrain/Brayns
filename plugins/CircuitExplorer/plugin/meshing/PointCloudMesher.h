@@ -36,4 +36,3 @@ public:
     bool toMetaballs(brayns::Model& model, const PointCloud& pointCloud,
                      const size_t gridSize, const float threshold);
 };
-

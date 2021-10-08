@@ -265,4 +265,3 @@ AI_FORCE_INLINE std::string GetNextToken(const char*& in)
 // ---------------------------------------------------------------------------------
 
 } // namespace Assimp
-
