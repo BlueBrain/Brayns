@@ -20,8 +20,8 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # All rights reserved. Do not distribute without further notice.
 
-Pillow~=8.1.1
-websockets~=7.0
+Pillow~=8.3.2
+websockets~=9.1
 Sphinx~=2.0.0
 nbsphinx~=0.7.1
 sphinx-bluebrain-theme~=0.2.2
