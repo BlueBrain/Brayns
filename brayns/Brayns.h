@@ -35,7 +35,7 @@ namespace brayns
     Brayns uses plugins for extended function. There are a few built-in plugins
     and additional plugins can be dynamically loaded.
 
-    The underlying rendering engine (OSPRay, Optix, FireRays, etc) is specified
+    The underlying rendering engine (OSPRay) is specified
     in the rendering parameters and is invoked by the render method for
     generating the frames.
 

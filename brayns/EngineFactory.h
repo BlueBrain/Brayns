@@ -27,7 +27,7 @@ namespace brayns
 {
 /**
  * The engine factory is in charge of instantiating engines according to their
- * name (ospray, optix or firerays). If Brayns does not find the 3rd party
+ * name (ospray). If Brayns does not find the 3rd party
  * library at compilation time, the according lib is not generated and the
  * get method returns a null pointer.
  */
