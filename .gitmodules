@@ -17,16 +17,9 @@
 	path = CMake/common
 	url = https://github.com/BlueBrain/CMake.git
 	branch = brayns_recursive_submodules
-[submodule "deps/pbrt-v2"]
-	path = deps/pbrt-v2
-	url = https://github.com/BlueBrain/pbrt-v2
-	branch = brayns_integration
 [submodule "deps/Brion"]
 	path = deps/Brion
 	url = https://github.com/BlueBrain/Brion.git
-[submodule "deps/pbrt-v3"]
-	path = deps/pbrt-v3
-	url = https://github.com/BlueBrain/pbrt-v3
 [submodule "deps/poco"]
 	path = deps/poco
 	url = https://github.com/pocoproject/poco.git
