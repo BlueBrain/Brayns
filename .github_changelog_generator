@@ -1,8 +1,0 @@
-future-release=0.8.0
-user=BlueBrain
-project=Brayns
-output=Changelog.md
-compare-link=false
-date-format=%d-%m-%Y
-author=false
-enhancement-labels=enhancement,feature

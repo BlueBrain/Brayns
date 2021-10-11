@@ -3,10 +3,6 @@ Build/
 build/
 debug/
 release/
-Deflect/
-MVDTool/
-HighFive/
-plugins/extensions/usecases/
 CMakeFiles
 .DS_Store
 *~
