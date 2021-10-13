@@ -119,8 +119,7 @@ ADD . ${BRAYNS_SRC}
 # https://github.com/BlueBrain/Brayns
 
 # TODO: "|| exit 0"  hack to be removed as soon as MVDTool export issue is fixed.
-RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
-   && cd ${BRAYNS_SRC} \
+RUN cd ${BRAYNS_SRC} \
    && git submodule update --init --recursive \
    && mkdir -p build \
    && cd build \
@@ -131,7 +130,6 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
    -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON \
    -DBRAYNS_CIRCUITINFO_ENABLED=ON \
    -DBRAYNS_DTI_ENABLED=OFF \
-   -DCLONE_SUBPROJECTS=ON \
    -DCMAKE_BUILD_TYPE=Release \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
    -DBUILD_PYTHON_BINDINGS=OFF \
