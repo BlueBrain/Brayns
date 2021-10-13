@@ -47,9 +47,5 @@ if(BRAYNS_OSPRAY_ENABLED)
   ospray_ispc_compile(${PROJECT_SOURCE_DIR}/engines/ospray/ispc/render/BasicRenderer.ispc)
 endif()
 
-if(NOT BRAYNS_OPTIX_ENABLED OR NOT BRAYNS_OPTIX_TESTS_ENABLED)
-    list(APPEND EXCLUDE_FROM_TESTS demoOptiX.cpp)
-endif()
-
 list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/brayns/common/utils/base64/*')
 include(CommonCTest)

@@ -80,23 +80,8 @@ if(BRAYNS_VIEWER_ENABLED)
   target_include_directories(imgui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
 endif()
 
-# PBRT V3
-if(BRAYNS_PBRT_ENABLED)
-    SET(PBRT_FLOAT_AS_DOUBLE ON CACHE BOOL "Use 64-bit floats")
-    add_subdirectory(pbrt-v3)
-    # Disable compilation warnings
-    target_compile_options(pbrt PUBLIC -w)
-endif()
-
-# PBRT V2
-if(BRAYNS_PBRTV2_ENABLED)
-    add_subdirectory(pbrt-v2)
-    # Disable compilation warnings
-    target_compile_options(pbrtlibv2 PUBLIC -w)
-endif()
-
 # Brion if needed
-if(BRAYNS_CIRCUITVIEWER_ENABLED OR BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED)
+if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED)
     common_find_package(Brion)
     if((NOT Brion_FOUND AND NOT BRION_FOUND) AND NOT TARGET Brion)
         message(STATUS "Brion not found, gathering from submodules")

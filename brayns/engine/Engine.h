@@ -30,7 +30,7 @@ namespace brayns
 /**
  * Abstract implementation of the ray-tracing engine. What we call the
  * ray-tracing engine is a 3rd party acceleration library, typically OSPRay,
- * Optix or FireRays, that provides hardware acceleration.
+ * that provides hardware acceleration.
  * An engine holds a native implementation of a scene, a camera, a frame buffer
  * and of one or several renderers according to the capatilities of the
  * acceleration library.

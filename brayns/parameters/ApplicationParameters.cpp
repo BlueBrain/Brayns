@@ -54,7 +54,7 @@ ApplicationParameters::ApplicationParameters()
 {
     _parameters.add_options() //
         (PARAM_ENGINE.c_str(), po::value<std::string>(&_engine),
-         "Engine name [ospray|optix]") //
+         "Engine name [ospray]") //
         (PARAM_MODULE.c_str(), po::value<strings>(&_modules)->composing(),
          "OSPRay module name [string]") //
         (PARAM_INPUT_PATHS.c_str(), po::value<strings>(&_inputPaths),
