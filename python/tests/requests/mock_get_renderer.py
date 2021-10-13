@@ -20,61 +20,70 @@
 
 schema = {
     'async': False,
-    'description': 'Get the current state of the camera',
+    'description': 'Get the current state of the renderer',
     'params': [],
     'plugin': 'Core',
     'returns': {
         'additionalProperties': False,
         'properties': {
+            'accumulation': {
+                'description': 'Multiple render passes',
+                'type': 'boolean'
+            },
+            'background_color': {
+                'description': 'Background color RGB',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            },
             'current': {
-                'description': 'Camera current type',
+                'description': 'Current renderer name',
                 'type': 'string'
             },
-            'orientation': {
-                'description': 'Camera orientation XYZW',
-                'items': {
-                    'type': 'number'
-                },
-                'maxItems': 4,
-                'minItems': 4,
-                'type': 'array'
+            'head_light': {
+                'description': 'Light source follows camera origin',
+                'type': 'boolean'
             },
-            'position': {
-                'description': 'Camera position XYZ',
-                'items': {
-                    'type': 'number'
-                },
-                'maxItems': 3,
-                'minItems': 3,
-                'type': 'array'
+            'max_accum_frames': {
+                'description': 'Max render passes',
+                'minimum': 0,
+                'type': 'integer'
             },
-            'target': {
-                'description': 'Camera target XYZ',
-                'items': {
-                    'type': 'number'
-                },
-                'maxItems': 3,
-                'minItems': 3,
-                'type': 'array'
+            'samples_per_pixel': {
+                'description': 'Samples per pixel',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'subsampling': {
+                'description': 'Subsampling',
+                'minimum': 0,
+                'type': 'integer'
             },
             'types': {
-                'description': 'Available camera types',
+                'description': 'Available renderers',
                 'items': {
                     'type': 'string'
                 },
                 'readOnly': True,
                 'type': 'array'
+            },
+            'variance_threshold': {
+                'description': 'Stop accumulation threshold',
+                'type': 'number'
             }
         },
-        'title': 'Camera',
+        'title': 'RenderingParameters',
         'type': 'object'
     },
-    'title': 'get-camera',
+    'title': 'get-renderer',
     'type': 'method'
 }
 
 params = None
 
 result = {
-    'check': 0.038700254974591286
+    'check': 0.41771879195721207
 }

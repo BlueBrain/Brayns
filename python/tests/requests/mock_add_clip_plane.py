@@ -20,61 +20,60 @@
 
 schema = {
     'async': False,
-    'description': 'Get the current state of the camera',
-    'params': [],
+    'description': 'Add a clip plane and returns the clip plane descriptor',
+    'params': [
+        {
+            'additionalProperties': False,
+            'properties': {
+                'plane': {
+                    'description': 'Plane normal vector XYZ and distance from origin',
+                    'items': {
+                        'type': 'number'
+                    },
+                    'maxItems': 4,
+                    'minItems': 4,
+                    'type': 'array'
+                }
+            },
+            'title': 'ClipPlane',
+            'type': 'object'
+        }
+    ],
     'plugin': 'Core',
     'returns': {
         'additionalProperties': False,
         'properties': {
-            'current': {
-                'description': 'Camera current type',
-                'type': 'string'
+            'id': {
+                'description': 'Plane ID',
+                'minimum': 0,
+                'type': 'integer'
             },
-            'orientation': {
-                'description': 'Camera orientation XYZW',
+            'plane': {
+                'description': 'Plane normal vector XYZ and distance from origin',
                 'items': {
                     'type': 'number'
                 },
                 'maxItems': 4,
                 'minItems': 4,
                 'type': 'array'
-            },
-            'position': {
-                'description': 'Camera position XYZ',
-                'items': {
-                    'type': 'number'
-                },
-                'maxItems': 3,
-                'minItems': 3,
-                'type': 'array'
-            },
-            'target': {
-                'description': 'Camera target XYZ',
-                'items': {
-                    'type': 'number'
-                },
-                'maxItems': 3,
-                'minItems': 3,
-                'type': 'array'
-            },
-            'types': {
-                'description': 'Available camera types',
-                'items': {
-                    'type': 'string'
-                },
-                'readOnly': True,
-                'type': 'array'
             }
         },
-        'title': 'Camera',
+        'title': 'ClipPlane',
         'type': 'object'
     },
-    'title': 'get-camera',
+    'title': 'add-clip-plane',
     'type': 'method'
 }
 
-params = None
+params = {
+    'plane': [
+        1,
+        1,
+        1,
+        0
+    ]
+}
 
 result = {
-    'check': 0.038700254974591286
+    'check': 0.9901481881123096
 }
