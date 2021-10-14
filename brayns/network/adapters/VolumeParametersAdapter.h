@@ -41,8 +41,8 @@ BRAYNS_ADAPTER_GETSET("single_shade", getSingleShade, setSingleShade,
                       "Use a single shade for the whole volume")
 BRAYNS_ADAPTER_GETSET("pre_integration", getPreIntegration, setPreIntegration,
                       "Use pre-integration")
-BRAYNS_ADAPTER_GET("adaptive_max_sampling_rate", getAdaptiveMaxSamplingRate,
-                   "Max sampling rate")
+BRAYNS_ADAPTER_GETSET("adaptive_max_sampling_rate", getAdaptiveMaxSamplingRate,
+                      setAdaptiveMaxSamplingRate, "Max sampling rate")
 BRAYNS_ADAPTER_GETSET("adaptive_sampling", getAdaptiveSampling,
                       setAdaptiveSampling, "Use adaptive sampling")
 BRAYNS_ADAPTER_GETSET("sampling_rate", getSamplingRate, setSamplingRate,

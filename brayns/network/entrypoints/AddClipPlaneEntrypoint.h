@@ -37,6 +37,13 @@ public:
         return "Add a clip plane and returns the clip plane descriptor";
     }
 
+    virtual JsonSchema getParamsSchema() const override
+    {
+        auto schema = Json::getSchema<ClipPlane>();
+        schema.properties.erase("id");
+        return schema;
+    }
+
     virtual void onRequest(const Request& request) override
     {
         auto params = request.getParams();

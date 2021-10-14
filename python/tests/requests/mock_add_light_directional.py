@@ -20,26 +20,17 @@
 
 schema = {
     'async': False,
-    'description': 'Set the current state of the camera',
+    'description': 'Add a directional light and return its ID',
     'params': [
         {
             'additionalProperties': False,
             'properties': {
-                'current': {
-                    'description': 'Camera current type',
-                    'type': 'string'
+                'angular_diameter': {
+                    'description': 'Angular diameter in degrees',
+                    'type': 'number'
                 },
-                'orientation': {
-                    'description': 'Camera orientation XYZW',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 4,
-                    'minItems': 4,
-                    'type': 'array'
-                },
-                'position': {
-                    'description': 'Camera position XYZ',
+                'color': {
+                    'description': 'Light color RGB',
                     'items': {
                         'type': 'number'
                     },
@@ -47,8 +38,8 @@ schema = {
                     'minItems': 3,
                     'type': 'array'
                 },
-                'target': {
-                    'description': 'Camera target XYZ',
+                'direction': {
+                    'description': 'Light source direction',
                     'items': {
                         'type': 'number'
                     },
@@ -56,45 +47,51 @@ schema = {
                     'minItems': 3,
                     'type': 'array'
                 },
-                'types': {
-                    'description': 'Available camera types',
-                    'items': {
-                        'type': 'string'
-                    },
-                    'readOnly': True,
-                    'type': 'array'
+                'intensity': {
+                    'description': 'Light intensity 0-1',
+                    'type': 'number'
+                },
+                'is_visible': {
+                    'description': 'Light is visible',
+                    'type': 'boolean'
                 }
             },
-            'title': 'Camera',
+            'required': [
+                'color',
+                'intensity',
+                'is_visible',
+                'direction',
+                'angular_diameter'
+            ],
+            'title': 'DirectionalLight',
             'type': 'object'
         }
     ],
     'plugin': 'Core',
-    'returns': {},
-    'title': 'set-camera',
+    'returns': {
+        'minimum': 0,
+        'type': 'integer'
+    },
+    'title': 'add-light-directional',
     'type': 'method'
 }
 
 params = {
-    'orientation': [
-        0.5,
+    'color': [
+        1,
         0,
-        0,
-        0.866
+        0
     ],
-    'position': [
-        600,
-        1000,
-        1000
-    ],
-    'target': [
+    'intensity': 0.75,
+    'is_visible': True,
+    'direction': [
         0,
         0,
-        -1
+        1
     ],
-    'current': 'orthographic'
+    'angular_diameter': 1
 }
 
 result = {
-    'check': 0.5032883501097792
+    'check': 0.09474074260263221
 }

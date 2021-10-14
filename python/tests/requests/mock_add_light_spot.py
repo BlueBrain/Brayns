@@ -20,26 +20,47 @@
 
 schema = {
     'async': False,
-    'description': 'Set the current state of the camera',
+    'description': 'Add a spot light and return its ID',
     'params': [
         {
             'additionalProperties': False,
             'properties': {
-                'current': {
-                    'description': 'Camera current type',
-                    'type': 'string'
-                },
-                'orientation': {
-                    'description': 'Camera orientation XYZW',
+                'color': {
+                    'description': 'Light color RGB',
                     'items': {
                         'type': 'number'
                     },
-                    'maxItems': 4,
-                    'minItems': 4,
+                    'maxItems': 3,
+                    'minItems': 3,
                     'type': 'array'
+                },
+                'direction': {
+                    'description': 'Spot direction XYZ',
+                    'items': {
+                        'type': 'number'
+                    },
+                    'maxItems': 3,
+                    'minItems': 3,
+                    'type': 'array'
+                },
+                'intensity': {
+                    'description': 'Light intensity 0-1',
+                    'type': 'number'
+                },
+                'is_visible': {
+                    'description': 'Light is visible',
+                    'type': 'boolean'
+                },
+                'opening_angle': {
+                    'description': 'Opening angle in degrees',
+                    'type': 'number'
+                },
+                'penumbra_angle': {
+                    'description': 'Penumbra angle in degrees',
+                    'type': 'number'
                 },
                 'position': {
-                    'description': 'Camera position XYZ',
+                    'description': 'Light position XYZ',
                     'items': {
                         'type': 'number'
                     },
@@ -47,54 +68,57 @@ schema = {
                     'minItems': 3,
                     'type': 'array'
                 },
-                'target': {
-                    'description': 'Camera target XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'types': {
-                    'description': 'Available camera types',
-                    'items': {
-                        'type': 'string'
-                    },
-                    'readOnly': True,
-                    'type': 'array'
+                'radius': {
+                    'description': 'Spot radius',
+                    'type': 'number'
                 }
             },
-            'title': 'Camera',
+            'required': [
+                'color',
+                'intensity',
+                'is_visible',
+                'position',
+                'direction',
+                'opening_angle',
+                'penumbra_angle',
+                'radius'
+            ],
+            'title': 'SpotLight',
             'type': 'object'
         }
     ],
     'plugin': 'Core',
-    'returns': {},
-    'title': 'set-camera',
+    'returns': {
+        'minimum': 0,
+        'type': 'integer'
+    },
+    'title': 'add-light-spot',
     'type': 'method'
 }
 
 params = {
-    'orientation': [
-        0.5,
+    'color': [
+        1,
         0,
-        0,
-        0.866
+        0
     ],
+    'intensity': 0.75,
+    'is_visible': True,
     'position': [
-        600,
-        1000,
-        1000
-    ],
-    'target': [
         0,
         0,
-        -1
+        0
     ],
-    'current': 'orthographic'
+    'direction': [
+        0,
+        0,
+        1
+    ],
+    'opening_angle': 30,
+    'penumbra_angle': 10,
+    'radius': 1
 }
 
 result = {
-    'check': 0.5032883501097792
+    'check': 0.6215105068812427
 }

@@ -20,26 +20,17 @@
 
 schema = {
     'async': False,
-    'description': 'Set the current state of the camera',
+    'description': 'Set the properties of the current camera',
     'params': [
         {
             'additionalProperties': False,
             'properties': {
-                'current': {
-                    'description': 'Camera current type',
-                    'type': 'string'
+                'aperture_radius': {
+                    'description': 'The camera aperture',
+                    'type': 'number'
                 },
-                'orientation': {
-                    'description': 'Camera orientation XYZW',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 4,
-                    'minItems': 4,
-                    'type': 'array'
-                },
-                'position': {
-                    'description': 'Camera position XYZ',
+                'direction': {
+                    'description': 'Camera facing direction normalized',
                     'items': {
                         'type': 'number'
                     },
@@ -47,8 +38,12 @@ schema = {
                     'minItems': 3,
                     'type': 'array'
                 },
-                'target': {
-                    'description': 'Camera target XYZ',
+                'focus_distance': {
+                    'description': 'Focus distance from the origin',
+                    'type': 'number'
+                },
+                'origin': {
+                    'description': 'Camera position',
                     'items': {
                         'type': 'number'
                     },
@@ -56,45 +51,53 @@ schema = {
                     'minItems': 3,
                     'type': 'array'
                 },
-                'types': {
-                    'description': 'Available camera types',
+                'up': {
+                    'description': 'Camera up direction normalized',
                     'items': {
-                        'type': 'string'
+                        'type': 'number'
                     },
-                    'readOnly': True,
+                    'maxItems': 3,
+                    'minItems': 3,
                     'type': 'array'
                 }
             },
-            'title': 'Camera',
+            'required': [
+                'origin',
+                'direction',
+                'up',
+                'aperture_radius',
+                'focus_distance'
+            ],
+            'title': 'OduCameraMessage',
             'type': 'object'
         }
     ],
-    'plugin': 'Core',
+    'plugin': 'Circuit Explorer',
     'returns': {},
-    'title': 'set-camera',
+    'title': 'set-odu-camera',
     'type': 'method'
 }
 
 params = {
-    'orientation': [
-        0.5,
+    'origin': [
         0,
         0,
-        0.866
+        0
     ],
-    'position': [
-        600,
-        1000,
-        1000
+    'direction': [
+        0,
+        1,
+        0
     ],
-    'target': [
+    'up': [
         0,
         0,
-        -1
+        1
     ],
-    'current': 'orthographic'
+    'aperture_radius': 1,
+    'focus_distance': 2
 }
 
 result = {
-    'check': 0.5032883501097792
+    'check': 0.8470024212204907
 }

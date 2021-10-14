@@ -20,17 +20,22 @@
 
 schema = {
     'async': False,
-    'description': 'Set the current state of the camera',
+    'description': 'Add a visual 3D cylinder to the scene',
     'params': [
         {
             'additionalProperties': False,
             'properties': {
-                'current': {
-                    'description': 'Camera current type',
-                    'type': 'string'
+                'center': {
+                    'description': 'Center of the lower cylinder circumference',
+                    'items': {
+                        'type': 'number'
+                    },
+                    'maxItems': 3,
+                    'minItems': 3,
+                    'type': 'array'
                 },
-                'orientation': {
-                    'description': 'Camera orientation XYZW',
+                'color': {
+                    'description': 'Cylinder color RGBA normalized',
                     'items': {
                         'type': 'number'
                     },
@@ -38,63 +43,76 @@ schema = {
                     'minItems': 4,
                     'type': 'array'
                 },
-                'position': {
-                    'description': 'Camera position XYZ',
+                'name': {
+                    'description': 'Name to give to the added model',
+                    'type': 'string'
+                },
+                'radius': {
+                    'description': 'Radius of the cylinder',
+                    'minimum': 0,
+                    'type': 'number'
+                },
+                'up': {
+                    'description': 'Center of the upper cylinder circumference',
                     'items': {
                         'type': 'number'
                     },
                     'maxItems': 3,
                     'minItems': 3,
-                    'type': 'array'
-                },
-                'target': {
-                    'description': 'Camera target XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'types': {
-                    'description': 'Available camera types',
-                    'items': {
-                        'type': 'string'
-                    },
-                    'readOnly': True,
                     'type': 'array'
                 }
             },
-            'title': 'Camera',
+            'required': [
+                'center',
+                'up',
+                'radius',
+                'color'
+            ],
+            'title': 'AddCylinderMessage',
             'type': 'object'
         }
     ],
-    'plugin': 'Core',
-    'returns': {},
-    'title': 'set-camera',
+    'plugin': 'Circuit Explorer',
+    'returns': {
+        'additionalProperties': False,
+        'properties': {
+            'id': {
+                'description': 'ID of the model of the shape added',
+                'minimum': 0,
+                'type': 'integer'
+            }
+        },
+        'required': [
+            'id'
+        ],
+        'title': 'AddShapeMessage',
+        'type': 'object'
+    },
+    'title': 'add-cylinder',
     'type': 'method'
 }
 
 params = {
-    'orientation': [
-        0.5,
+    'center': [
         0,
         0,
-        0.866
+        0
     ],
-    'position': [
-        600,
-        1000,
-        1000
+    'up': [
+        0,
+        0.2,
+        0
     ],
-    'target': [
+    'radius': 0.1,
+    'color': [
+        1,
         0,
         0,
-        -1
+        1
     ],
-    'current': 'orthographic'
+    'name': 'test'
 }
 
 result = {
-    'check': 0.5032883501097792
+    'check': 0.4538203079872538
 }

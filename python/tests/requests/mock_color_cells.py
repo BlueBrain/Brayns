@@ -20,81 +20,62 @@
 
 schema = {
     'async': False,
-    'description': 'Set the current state of the camera',
+    'description': 'Color cells with given colors using their GID',
     'params': [
         {
             'additionalProperties': False,
             'properties': {
-                'current': {
-                    'description': 'Camera current type',
-                    'type': 'string'
-                },
-                'orientation': {
-                    'description': 'Camera orientation XYZW',
+                'colors': {
+                    'description': 'Cell colors',
                     'items': {
                         'type': 'number'
                     },
-                    'maxItems': 4,
-                    'minItems': 4,
                     'type': 'array'
                 },
-                'position': {
-                    'description': 'Camera position XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'target': {
-                    'description': 'Camera target XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'types': {
-                    'description': 'Available camera types',
+                'gids': {
+                    'description': 'Cells to color',
                     'items': {
                         'type': 'string'
                     },
-                    'readOnly': True,
                     'type': 'array'
+                },
+                'model_id': {
+                    'description': 'Model to color',
+                    'minimum': 0,
+                    'type': 'integer'
                 }
             },
-            'title': 'Camera',
+            'required': [
+                'model_id',
+                'gids',
+                'colors'
+            ],
+            'title': 'ColorCellsMessage',
             'type': 'object'
         }
     ],
-    'plugin': 'Core',
+    'plugin': 'Circuit Explorer',
     'returns': {},
-    'title': 'set-camera',
+    'title': 'color-cells',
     'type': 'method'
 }
 
 params = {
-    'orientation': [
-        0.5,
-        0,
-        0,
-        0.866
+    'model_id': 0,
+    'gids': [
+        '0,1-3',
+        '4-7'
     ],
-    'position': [
-        600,
-        1000,
-        1000
-    ],
-    'target': [
+    'colors': [
+        1,
         0,
         0,
-        -1
-    ],
-    'current': 'orthographic'
+        0,
+        1,
+        0
+    ]
 }
 
 result = {
-    'check': 0.5032883501097792
+    'check': 0.557867740522802
 }

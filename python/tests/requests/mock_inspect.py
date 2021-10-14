@@ -20,61 +20,64 @@
 
 schema = {
     'async': False,
-    'description': 'Get the current state of the camera',
-    'params': [],
+    'description': 'Inspect the scene at x-y position',
+    'params': [
+        {
+            'additionalProperties': False,
+            'properties': {
+                'position': {
+                    'description': 'Position XY (normalized)',
+                    'items': {
+                        'type': 'number'
+                    },
+                    'maxItems': 2,
+                    'minItems': 2,
+                    'type': 'array'
+                }
+            },
+            'required': [
+                'position'
+            ],
+            'title': 'InspectMessage',
+            'type': 'object'
+        }
+    ],
     'plugin': 'Core',
     'returns': {
         'additionalProperties': False,
         'properties': {
-            'current': {
-                'description': 'Camera current type',
-                'type': 'string'
-            },
-            'orientation': {
-                'description': 'Camera orientation XYZW',
-                'items': {
-                    'type': 'number'
-                },
-                'maxItems': 4,
-                'minItems': 4,
-                'type': 'array'
+            'hit': {
+                'description': 'Check if the position is picked',
+                'type': 'boolean'
             },
             'position': {
-                'description': 'Camera position XYZ',
+                'description': 'Picked position XYZ',
                 'items': {
                     'type': 'number'
                 },
                 'maxItems': 3,
                 'minItems': 3,
-                'type': 'array'
-            },
-            'target': {
-                'description': 'Camera target XYZ',
-                'items': {
-                    'type': 'number'
-                },
-                'maxItems': 3,
-                'minItems': 3,
-                'type': 'array'
-            },
-            'types': {
-                'description': 'Available camera types',
-                'items': {
-                    'type': 'string'
-                },
-                'readOnly': True,
                 'type': 'array'
             }
         },
-        'title': 'Camera',
+        'required': [
+            'hit',
+            'position'
+        ],
+        'title': 'RendererPickResult',
         'type': 'object'
     },
-    'title': 'get-camera',
+    'title': 'inspect',
     'type': 'method'
 }
 
-params = None
+params = {
+    'position': [
+        1,
+        1
+    ]
+}
 
 result = {
-    'check': 0.038700254974591286
+    'check': 0.4452817710188036
 }

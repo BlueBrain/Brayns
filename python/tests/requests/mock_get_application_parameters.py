@@ -20,61 +20,55 @@
 
 schema = {
     'async': False,
-    'description': 'Get the current state of the camera',
+    'description': 'Get the current state of the application parameters',
     'params': [],
     'plugin': 'Core',
     'returns': {
         'additionalProperties': False,
         'properties': {
-            'current': {
-                'description': 'Camera current type',
+            'engine': {
+                'description': 'Application engine',
+                'readOnly': True,
                 'type': 'string'
             },
-            'orientation': {
-                'description': 'Camera orientation XYZW',
-                'items': {
-                    'type': 'number'
-                },
-                'maxItems': 4,
-                'minItems': 4,
-                'type': 'array'
+            'image_stream_fps': {
+                'description': 'Framerate of image stream',
+                'minimum': 0,
+                'type': 'integer'
             },
-            'position': {
-                'description': 'Camera position XYZ',
-                'items': {
-                    'type': 'number'
-                },
-                'maxItems': 3,
-                'minItems': 3,
-                'type': 'array'
+            'jpeg_compression': {
+                'description': 'JPEG compression rate',
+                'minimum': 0,
+                'type': 'integer'
             },
-            'target': {
-                'description': 'Camera target XYZ',
-                'items': {
-                    'type': 'number'
-                },
-                'maxItems': 3,
-                'minItems': 3,
-                'type': 'array'
-            },
-            'types': {
-                'description': 'Available camera types',
+            'plugins': {
+                'description': 'Loaded plugins',
                 'items': {
                     'type': 'string'
                 },
                 'readOnly': True,
                 'type': 'array'
+            },
+            'viewport': {
+                'description': 'Window size',
+                'items': {
+                    'minimum': 0,
+                    'type': 'integer'
+                },
+                'maxItems': 2,
+                'minItems': 2,
+                'type': 'array'
             }
         },
-        'title': 'Camera',
+        'title': 'ApplicationParameters',
         'type': 'object'
     },
-    'title': 'get-camera',
+    'title': 'get-application-parameters',
     'type': 'method'
 }
 
 params = None
 
 result = {
-    'check': 0.038700254974591286
+    'check': 0.6681277775267211
 }
