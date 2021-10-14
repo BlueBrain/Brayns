@@ -28,7 +28,7 @@
 namespace brayns
 {
 BRAYNS_ADAPTER_BEGIN(ClipPlane)
-BRAYNS_ADAPTER_GET("id", getID, "Plane ID")
+BRAYNS_ADAPTER_GETSET("id", getID, setID, "Plane ID")
 BRAYNS_ADAPTER_GETSET("plane", getPlane, setPlane,
                       "Plane normal vector XYZ and distance from origin")
 BRAYNS_ADAPTER_END()

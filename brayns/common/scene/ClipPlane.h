@@ -37,6 +37,7 @@ public:
     }
 
     size_t getID() const { return _id; }
+    void setID(size_t id) { _updateValue(_id, id); }
     const Plane& getPlane() const { return _plane; };
     void setPlane(const Plane& plane) { _updateValue(_plane, plane); }
     /** @internal */

@@ -20,27 +20,18 @@
 
 schema = {
     'async': False,
-    'description': 'Get the current state of the camera',
+    'description': 'Get the properties of the current camera',
     'params': [],
-    'plugin': 'Core',
+    'plugin': 'Circuit Explorer',
     'returns': {
         'additionalProperties': False,
         'properties': {
-            'current': {
-                'description': 'Camera current type',
-                'type': 'string'
+            'aperture_radius': {
+                'description': 'The camera aperture',
+                'type': 'number'
             },
-            'orientation': {
-                'description': 'Camera orientation XYZW',
-                'items': {
-                    'type': 'number'
-                },
-                'maxItems': 4,
-                'minItems': 4,
-                'type': 'array'
-            },
-            'position': {
-                'description': 'Camera position XYZ',
+            'direction': {
+                'description': 'Camera facing direction normalized',
                 'items': {
                     'type': 'number'
                 },
@@ -48,8 +39,12 @@ schema = {
                 'minItems': 3,
                 'type': 'array'
             },
-            'target': {
-                'description': 'Camera target XYZ',
+            'focus_distance': {
+                'description': 'Focus distance from the origin',
+                'type': 'number'
+            },
+            'origin': {
+                'description': 'Camera position',
                 'items': {
                     'type': 'number'
                 },
@@ -57,24 +52,32 @@ schema = {
                 'minItems': 3,
                 'type': 'array'
             },
-            'types': {
-                'description': 'Available camera types',
+            'up': {
+                'description': 'Camera up direction normalized',
                 'items': {
-                    'type': 'string'
+                    'type': 'number'
                 },
-                'readOnly': True,
+                'maxItems': 3,
+                'minItems': 3,
                 'type': 'array'
             }
         },
-        'title': 'Camera',
+        'required': [
+            'origin',
+            'direction',
+            'up',
+            'aperture_radius',
+            'focus_distance'
+        ],
+        'title': 'OduCameraMessage',
         'type': 'object'
     },
-    'title': 'get-camera',
+    'title': 'get-odu-camera',
     'type': 'method'
 }
 
 params = None
 
 result = {
-    'check': 0.038700254974591286
+    'check': 0.7883105868668563
 }

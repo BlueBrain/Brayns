@@ -20,17 +20,22 @@
 
 schema = {
     'async': False,
-    'description': 'Set the current state of the camera',
+    'description': 'Add a visual 3D sphere to the scene',
     'params': [
         {
             'additionalProperties': False,
             'properties': {
-                'current': {
-                    'description': 'Camera current type',
-                    'type': 'string'
+                'center': {
+                    'description': 'Sphere center XYZ',
+                    'items': {
+                        'type': 'number'
+                    },
+                    'maxItems': 3,
+                    'minItems': 3,
+                    'type': 'array'
                 },
-                'orientation': {
-                    'description': 'Camera orientation XYZW',
+                'color': {
+                    'description': 'Sphere color RGBA normalized',
                     'items': {
                         'type': 'number'
                     },
@@ -38,63 +43,61 @@ schema = {
                     'minItems': 4,
                     'type': 'array'
                 },
-                'position': {
-                    'description': 'Camera position XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
+                'name': {
+                    'description': 'Name of the sphere model',
+                    'type': 'string'
                 },
-                'target': {
-                    'description': 'Camera target XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'types': {
-                    'description': 'Available camera types',
-                    'items': {
-                        'type': 'string'
-                    },
-                    'readOnly': True,
-                    'type': 'array'
+                'radius': {
+                    'description': 'Radius of the sphere',
+                    'minimum': 0,
+                    'type': 'number'
                 }
             },
-            'title': 'Camera',
+            'required': [
+                'center',
+                'radius',
+                'color'
+            ],
+            'title': 'AddSphereMessage',
             'type': 'object'
         }
     ],
-    'plugin': 'Core',
-    'returns': {},
-    'title': 'set-camera',
+    'plugin': 'Circuit Explorer',
+    'returns': {
+        'additionalProperties': False,
+        'properties': {
+            'id': {
+                'description': 'ID of the model of the shape added',
+                'minimum': 0,
+                'type': 'integer'
+            }
+        },
+        'required': [
+            'id'
+        ],
+        'title': 'AddShapeMessage',
+        'type': 'object'
+    },
+    'title': 'add-sphere',
     'type': 'method'
 }
 
 params = {
-    'orientation': [
-        0.5,
+    'center': [
         0,
         0,
-        0.866
+        0
     ],
-    'position': [
-        600,
-        1000,
-        1000
-    ],
-    'target': [
+    'radius': 0.1,
+    'color': [
+        1,
         0,
         0,
-        -1
+        1
     ],
-    'current': 'orthographic'
+    'name': 'test'
 }
 
 result = {
-    'check': 0.5032883501097792
+    'check': 0.35432092298554063
 }

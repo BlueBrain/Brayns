@@ -18,6 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from typing import Callable
 from brayns.client.client import Client
 import pathlib
 import unittest
@@ -84,9 +85,18 @@ class TestEntrypoints(unittest.TestCase):
             None
         )
         self.assertIsNotNone(method)
-        params = request.params
-        result = method() if params is None else method(**params)
+        result = self._call_method(method, request)
         self.assertEqual(result, request.result)
+    
+    def _call_method(self, method: Callable, request: MockRequest):
+        schemas = request.schema['params']
+        if not schemas:
+            return method()
+        params = request.params
+        schema = schemas[0]
+        if isinstance(schema, dict) and 'oneOf' in schema:
+            return method(params)
+        return method(**params)
 
 
 if __name__ == '__main__':

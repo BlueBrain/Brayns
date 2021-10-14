@@ -20,61 +20,48 @@
 
 schema = {
     'async': False,
-    'description': 'Get the current state of the camera',
+    'description': 'Get the current state of the animation parameters',
     'params': [],
     'plugin': 'Core',
     'returns': {
         'additionalProperties': False,
         'properties': {
             'current': {
-                'description': 'Camera current type',
+                'description': 'Current frame index',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'delta': {
+                'description': 'Frame delta',
+                'type': 'integer'
+            },
+            'dt': {
+                'description': 'Frame time',
+                'type': 'number'
+            },
+            'frame_count': {
+                'description': 'Animation frame count',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'playing': {
+                'description': 'Animation is playing',
+                'type': 'boolean'
+            },
+            'unit': {
+                'description': 'Time unit',
                 'type': 'string'
-            },
-            'orientation': {
-                'description': 'Camera orientation XYZW',
-                'items': {
-                    'type': 'number'
-                },
-                'maxItems': 4,
-                'minItems': 4,
-                'type': 'array'
-            },
-            'position': {
-                'description': 'Camera position XYZ',
-                'items': {
-                    'type': 'number'
-                },
-                'maxItems': 3,
-                'minItems': 3,
-                'type': 'array'
-            },
-            'target': {
-                'description': 'Camera target XYZ',
-                'items': {
-                    'type': 'number'
-                },
-                'maxItems': 3,
-                'minItems': 3,
-                'type': 'array'
-            },
-            'types': {
-                'description': 'Available camera types',
-                'items': {
-                    'type': 'string'
-                },
-                'readOnly': True,
-                'type': 'array'
             }
         },
-        'title': 'Camera',
+        'title': 'AnimationParameters',
         'type': 'object'
     },
-    'title': 'get-camera',
+    'title': 'get-animation-parameters',
     'type': 'method'
 }
 
 params = None
 
 result = {
-    'check': 0.038700254974591286
+    'check': 0.6139597045366021
 }

@@ -20,81 +20,102 @@
 
 schema = {
     'async': False,
-    'description': 'Set the current state of the camera',
+    'description': 'Add a quad light and return its ID',
     'params': [
         {
             'additionalProperties': False,
             'properties': {
-                'current': {
-                    'description': 'Camera current type',
-                    'type': 'string'
-                },
-                'orientation': {
-                    'description': 'Camera orientation XYZW',
+                'color': {
+                    'description': 'Light color RGB',
                     'items': {
                         'type': 'number'
                     },
-                    'maxItems': 4,
-                    'minItems': 4,
+                    'maxItems': 3,
+                    'minItems': 3,
                     'type': 'array'
+                },
+                'edge1': {
+                    'description': 'First edge XYZ',
+                    'items': {
+                        'type': 'number'
+                    },
+                    'maxItems': 3,
+                    'minItems': 3,
+                    'type': 'array'
+                },
+                'edge2': {
+                    'description': 'Second edge XYZ',
+                    'items': {
+                        'type': 'number'
+                    },
+                    'maxItems': 3,
+                    'minItems': 3,
+                    'type': 'array'
+                },
+                'intensity': {
+                    'description': 'Light intensity 0-1',
+                    'type': 'number'
+                },
+                'is_visible': {
+                    'description': 'Light is visible',
+                    'type': 'boolean'
                 },
                 'position': {
-                    'description': 'Camera position XYZ',
+                    'description': 'Light position XYZ',
                     'items': {
                         'type': 'number'
                     },
                     'maxItems': 3,
                     'minItems': 3,
-                    'type': 'array'
-                },
-                'target': {
-                    'description': 'Camera target XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'types': {
-                    'description': 'Available camera types',
-                    'items': {
-                        'type': 'string'
-                    },
-                    'readOnly': True,
                     'type': 'array'
                 }
             },
-            'title': 'Camera',
+            'required': [
+                'color',
+                'intensity',
+                'is_visible',
+                'position',
+                'edge1',
+                'edge2'
+            ],
+            'title': 'QuadLight',
             'type': 'object'
         }
     ],
     'plugin': 'Core',
-    'returns': {},
-    'title': 'set-camera',
+    'returns': {
+        'minimum': 0,
+        'type': 'integer'
+    },
+    'title': 'add-light-quad',
     'type': 'method'
 }
 
 params = {
-    'orientation': [
-        0.5,
+    'color': [
+        1,
         0,
-        0,
-        0.866
+        0
     ],
+    'intensity': 0.75,
+    'is_visible': True,
     'position': [
-        600,
-        1000,
-        1000
-    ],
-    'target': [
         0,
         0,
-        -1
+        0
     ],
-    'current': 'orthographic'
+    'edge1': [
+        0,
+        1,
+        0
+    ],
+    'edge2': [
+        0,
+        0,
+        1
+    ]
 }
 
 result = {
-    'check': 0.5032883501097792
+    'check': 0.670584967894954
 }

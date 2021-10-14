@@ -20,17 +20,13 @@
 
 schema = {
     'async': False,
-    'description': 'Set the current state of the camera',
+    'description': 'Add a visual 3D box to the scene',
     'params': [
         {
             'additionalProperties': False,
             'properties': {
-                'current': {
-                    'description': 'Camera current type',
-                    'type': 'string'
-                },
-                'orientation': {
-                    'description': 'Camera orientation XYZW',
+                'color': {
+                    'description': 'Box color RGBA normalized',
                     'items': {
                         'type': 'number'
                     },
@@ -38,8 +34,8 @@ schema = {
                     'minItems': 4,
                     'type': 'array'
                 },
-                'position': {
-                    'description': 'Camera position XYZ',
+                'max_corner': {
+                    'description': 'Axis aligned maximum bound of the box',
                     'items': {
                         'type': 'number'
                     },
@@ -47,8 +43,8 @@ schema = {
                     'minItems': 3,
                     'type': 'array'
                 },
-                'target': {
-                    'description': 'Camera target XYZ',
+                'min_corner': {
+                    'description': 'Axis aligned minimum bound of the box',
                     'items': {
                         'type': 'number'
                     },
@@ -56,45 +52,60 @@ schema = {
                     'minItems': 3,
                     'type': 'array'
                 },
-                'types': {
-                    'description': 'Available camera types',
-                    'items': {
-                        'type': 'string'
-                    },
-                    'readOnly': True,
-                    'type': 'array'
+                'name': {
+                    'description': 'Name to give to the added model',
+                    'type': 'string'
                 }
             },
-            'title': 'Camera',
+            'required': [
+                'min_corner',
+                'max_corner',
+                'color'
+            ],
+            'title': 'AddBoxMessage',
             'type': 'object'
         }
     ],
-    'plugin': 'Core',
-    'returns': {},
-    'title': 'set-camera',
+    'plugin': 'Circuit Explorer',
+    'returns': {
+        'additionalProperties': False,
+        'properties': {
+            'id': {
+                'description': 'ID of the model of the shape added',
+                'minimum': 0,
+                'type': 'integer'
+            }
+        },
+        'required': [
+            'id'
+        ],
+        'title': 'AddShapeMessage',
+        'type': 'object'
+    },
+    'title': 'add-box',
     'type': 'method'
 }
 
 params = {
-    'orientation': [
-        0.5,
-        0,
-        0,
-        0.866
+    'min_corner': [
+        -0.2,
+        -0.2,
+        -0.2
     ],
-    'position': [
-        600,
-        1000,
-        1000
+    'max_corner': [
+        0.2,
+        0.2,
+        0.2
     ],
-    'target': [
+    'color': [
+        1,
         0,
         0,
-        -1
+        1
     ],
-    'current': 'orthographic'
+    'name': 'test'
 }
 
 result = {
-    'check': 0.5032883501097792
+    'check': 0.10267644321697056
 }
