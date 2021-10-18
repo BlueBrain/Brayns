@@ -146,3 +146,6 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED)
         add_library(MorphIO::morphio_shared ALIAS morphiointer)
     endif()
 endif()
+
+# SPDLOG
+add_subdirectory(spdlog)

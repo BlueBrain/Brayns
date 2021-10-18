@@ -29,3 +29,6 @@
 [submodule "deps/MorphIO"]
 	path = deps/MorphIO
 	url = https://github.com/BlueBrain/MorphIO
+[submodule "deps/spdlog"]
+	path = deps/spdlog
+	url = https://github.com/gabime/spdlog.git
