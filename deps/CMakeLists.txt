@@ -90,3 +90,6 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED)
         message(STATUS "Found Brion")
     endif()
 endif()
+
+# SPDLOG
+add_subdirectory(spdlog)

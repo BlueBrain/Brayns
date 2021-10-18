@@ -23,3 +23,6 @@
 [submodule "deps/poco"]
 	path = deps/poco
 	url = https://github.com/pocoproject/poco.git
+[submodule "deps/spdlog"]
+	path = deps/spdlog
+	url = https://github.com/gabime/spdlog.git
