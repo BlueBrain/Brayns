@@ -53,7 +53,8 @@ OSPRayModel::OSPRayModel(AnimationParameters& animationParameters,
 
 OSPRayModel::~OSPRayModel()
 {
-    const auto releaseAndClearGeometry = [](auto& geometryMap) {
+    const auto releaseAndClearGeometry = [](auto& geometryMap)
+    {
         for (auto geom : geometryMap)
             ospRelease(geom.second);
         geometryMap.clear();
@@ -482,8 +483,7 @@ void OSPRayModel::commitMaterials(const std::string& renderer)
                     ++matIt;
                 if (matIt->first != geomIt->first)
                 {
-                    BRAYNS_ERROR << "Material for geometry missing"
-                                 << std::endl;
+                    Log::error("Material for geometry missing.");
                     ++geomIt;
                     continue;
                 }

@@ -23,7 +23,6 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <plugin/api/Log.h>
 #include <plugin/api/MaterialUtils.h>
 #include <plugin/network/messages/AddShapeMessage.h>
 #include <plugin/network/messages/AddSphereMessage.h>
@@ -76,7 +75,7 @@ public:
     {
         auto params = request.getParams();
         auto& scene = getApi().getScene();
-        PLUGIN_INFO << "Building Sphere model.\n";
+        brayns::Log::info("[CE] Building Sphere model.");
         auto id = SphereModel::add(scene, params);
         scene.markModified();
         triggerRender();

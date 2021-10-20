@@ -21,7 +21,7 @@
 
 #include "NetworkInterface.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <brayns/network/context/NetworkContext.h>
 
@@ -50,11 +50,11 @@ public:
         }
         catch (const ConnectionClosedException& e)
         {
-            BRAYNS_DEBUG << "Connection closed: " << e.what() << '\n';
+            Log::debug("Connection closed: {}.", e.what());
         }
         catch (const std::exception& e)
         {
-            BRAYNS_DEBUG << "Unknown receive error: " << e.what() << '\n';
+            Log::debug("Unknown receive error: {}.", e.what());
         }
         return false;
     }
@@ -62,9 +62,9 @@ public:
 private:
     void _receive()
     {
-        BRAYNS_DEBUG << "Waiting for client request\n";
+        Log::debug("Waiting for client request...");
         auto packet = _socket->receive();
-        BRAYNS_DEBUG << "Message received.\n";
+        Log::debug("Message received.");
         _connections->receive(_socket, packet);
     }
 

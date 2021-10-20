@@ -20,8 +20,8 @@
 
 #include "Model.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/common/Transformation.h>
-#include <brayns/common/log.h>
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Volume.h>
@@ -141,9 +141,8 @@ void ModelDescriptor::addInstance(const ModelInstance& instance)
 void ModelDescriptor::removeInstance(const size_t id)
 {
     auto i = std::remove_if(_instances.begin(), _instances.end(),
-                            [id](const auto& instance) {
-                                return id == instance.getInstanceID();
-                            });
+                            [id](const auto& instance)
+                            { return id == instance.getInstanceID(); });
     if (i == _instances.end())
         return;
 
@@ -156,9 +155,8 @@ void ModelDescriptor::removeInstance(const size_t id)
 ModelInstance* ModelDescriptor::getInstance(const size_t id)
 {
     auto i = std::find_if(_instances.begin(), _instances.end(),
-                          [id](const auto& instance) {
-                              return id == instance.getInstanceID();
-                          });
+                          [id](const auto& instance)
+                          { return id == instance.getInstanceID(); });
     return i == _instances.end() ? nullptr : &(*i);
 }
 
@@ -429,14 +427,12 @@ void Model::logInformation()
     for (const auto& metaObj : _geometries->_metaObjects)
         nbMetaObjects += metaObj.second.size();
 
-    BRAYNS_DEBUG << "Spheres: " << nbSpheres << ", Cylinders: " << nbCylinders
-                 << ", Cones: " << nbCones << ", SDFBeziers: " << nbSdfBeziers
-                 << ", SDFGeometries: " << nbSdfGeoms
-                 << ", Meshes: " << nbMeshes
-                 << ", Meta Objects: " << nbMetaObjects
-                 << ", Memory: " << _sizeInBytes << " bytes ("
-                 << _sizeInBytes / 1048576 << " MB), Bounds: " << _bounds
-                 << std::endl;
+    Log::debug(
+        "Spheres: {}, Cylinders: {}, Cones: {}, SDFBeziers: {}, SDFGeometries: "
+        "{}, Meshes: {}, Meta Objects: {}, Memory: {} bytes ({} MB), Bounds: "
+        "{}.",
+        nbSpheres, nbCylinders, nbCones, nbSdfBeziers, nbSdfGeoms, nbMeshes,
+        nbMetaObjects, _sizeInBytes, _sizeInBytes / 1048576, _bounds);
 }
 
 MaterialPtr Model::getMaterial(const size_t materialId) const

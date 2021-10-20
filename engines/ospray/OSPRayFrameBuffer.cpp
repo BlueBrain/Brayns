@@ -21,7 +21,7 @@
 #include "OSPRayFrameBuffer.h"
 #include "utils.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <ospray/SDK/common/OSPCommon.h>
 
 namespace brayns

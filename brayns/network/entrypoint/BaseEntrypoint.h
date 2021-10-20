@@ -151,7 +151,7 @@ public:
         }
         catch (...)
         {
-            BRAYNS_ERROR << "Error during notification.\n";
+            Log::error("Error during notification.");
         }
     }
 

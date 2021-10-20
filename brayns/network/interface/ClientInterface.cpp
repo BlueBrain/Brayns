@@ -40,7 +40,7 @@
 #include <Poco/Net/SSLManager.h>
 #include <Poco/Net/SecureStreamSocket.h>
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <brayns/parameters/ParametersManager.h>
 
@@ -80,7 +80,7 @@ public:
     virtual void onInvalidCertificate(
         const void*, Poco::Net::VerificationErrorArgs& args) override
     {
-        BRAYNS_ERROR << "Invalid certificate: " << args.errorMessage() << ".\n";
+        Log::error("Invalid certificate: {}.", args.errorMessage());
     }
 
 private:
@@ -142,13 +142,13 @@ public:
                     NetworkInterface& interface)
     {
         auto session = ClientSession::create(parameters);
-        BRAYNS_INFO << "Establishing client session with '"
-                    << session->getHost() << ":" << session->getPort() << "'\n";
+        Log::info("Establishing client session with '{}:{}'.",
+                  session->getHost(), session->getPort());
         Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_1_1);
         Poco::Net::HTTPResponse response;
         auto socket =
             std::make_shared<NetworkSocket>(*session, request, response);
-        BRAYNS_INFO << "Client session connected.\n";
+        Log::info("Client session connected.");
         interface.run(std::move(socket));
     }
 };
@@ -212,7 +212,7 @@ private:
 
     void _error(const char* message)
     {
-        BRAYNS_ERROR << "Error in websocket client: " << message << ".\n";
+        Log::error("Error in websocket client: {}.", message);
     }
 
     const NetworkParameters* _parameters;

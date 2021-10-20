@@ -20,7 +20,7 @@
 #pragma once
 
 #include <brayns/common/BaseObject.h>
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/common/types.h>
 
 #include <boost/program_options.hpp>

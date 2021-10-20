@@ -21,7 +21,7 @@
 
 #include "EntrypointManager.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <brayns/json/JsonSchemaValidator.h>
 #include <brayns/network/context/NetworkContext.h>
@@ -118,7 +118,7 @@ void EntrypointManager::add(EntrypointRef entrypoint)
     {
         throw EntrypointException("Entrypoint '" + name + "' already exists");
     }
-    BRAYNS_INFO << "Add entrypoint " << name << ".\n";
+    Log::info("Add entrypoint '{}'.", name);
     _entrypoints.emplace(name, std::move(entrypoint));
 }
 

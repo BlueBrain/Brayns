@@ -19,8 +19,8 @@
  */
 
 #include <brayns/Brayns.h>
+#include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
-#include <brayns/common/log.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/network/interface/ActionInterface.h>
 
@@ -83,12 +83,12 @@ int main(int argc, const char** argv)
         service.run();
 
         timer.stop();
-        BRAYNS_INFO << "Service was running for " << timer.seconds()
-                    << " seconds" << std::endl;
+        brayns::Log::info("Service was running for {} seconds.",
+                          timer.seconds());
     }
     catch (const std::runtime_error& e)
     {
-        BRAYNS_ERROR << e.what() << std::endl;
+        brayns::Log::error(e.what());
         return 1;
     }
     return 0;

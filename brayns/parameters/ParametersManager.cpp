@@ -181,7 +181,7 @@ void ParametersManager::_parse(int argc, const char** argv)
     }
     catch (const po::error& e)
     {
-        BRAYNS_ERROR << e.what() << std::endl;
+        Log::error(e.what());
         exit(EXIT_FAILURE);
     }
 }

@@ -105,7 +105,7 @@ public:
             _processTextRequest(handle, packet);
             return;
         }
-        BRAYNS_ERROR << "Invalid packet received.\n";
+        Log::error("Invalid packet received.");
     }
 
 private:
@@ -154,20 +154,19 @@ public:
     static void setup(NetworkContext& context)
     {
         auto& connections = context.getConnections();
-        connections.onConnect(
-            [&](const auto& handle) { onConnect(context, handle); });
-        connections.onDisconnect(
-            [&](const auto& handle) { onDisconnect(context, handle); });
-        connections.onRequest([&](const auto& handle, const auto& packet) {
-            onRequest(context, handle, packet);
-        });
+        connections.onConnect([&](const auto& handle)
+                              { onConnect(context, handle); });
+        connections.onDisconnect([&](const auto& handle)
+                                 { onDisconnect(context, handle); });
+        connections.onRequest([&](const auto& handle, const auto& packet)
+                              { onRequest(context, handle, packet); });
     }
 
 private:
     static void onConnect(NetworkContext& context,
                           const ConnectionHandle& handle)
     {
-        BRAYNS_INFO << "New connection: " << handle.getId() << ".\n";
+        Log::info("New connection: {}.", handle.getId());
     }
 
     static void onDisconnect(NetworkContext& context,
@@ -175,7 +174,7 @@ private:
     {
         auto& tasks = context.getTasks();
         tasks.disconnect(handle);
-        BRAYNS_INFO << "Connection closed: " << handle.getId() << ".\n";
+        Log::info("Connection closed: {}.", handle.getId());
     }
 
     static void onRequest(NetworkContext& context,

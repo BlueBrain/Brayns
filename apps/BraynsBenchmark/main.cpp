@@ -19,8 +19,8 @@
  */
 
 #include <brayns/Brayns.h>
+#include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
-#include <brayns/common/log.h>
 #include <brayns/common/types.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
@@ -38,8 +38,8 @@ int main(int argc, const char** argv)
         brayns::Brayns brayns(argc, argv);
         timer.stop();
 
-        BRAYNS_INFO << "[PERF] Scene initialization took "
-                    << timer.milliseconds() << " milliseconds" << std::endl;
+        brayns::Log::info("[PERF] Scene initialization took {} milliseconds",
+                          timer.milliseconds());
 
         auto& engine = brayns.getEngine();
         auto& scene = engine.getScene();
@@ -58,14 +58,14 @@ int main(int argc, const char** argv)
         }
         timer.stop();
 
-        BRAYNS_INFO << "[PERF] Rendering " << nbFrames << " frames took "
-                    << timer.milliseconds() << " milliseconds" << std::endl;
-        BRAYNS_INFO << "[PERF] Frames per second: "
-                    << nbFrames / timer.seconds() << std::endl;
+        brayns::Log::info("[PERF] Rendering {} frames took {} milliseconds.",
+                          nbFrames, timer.milliseconds());
+        brayns::Log::info("[PERF] Frames per second: {}.",
+                          nbFrames / timer.seconds());
     }
     catch (const std::runtime_error& e)
     {
-        BRAYNS_ERROR << e.what() << std::endl;
+        brayns::Log::error(e.what());
         return 1;
     }
     return 0;
