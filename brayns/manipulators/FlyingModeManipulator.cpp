@@ -22,8 +22,8 @@
 
 #include <brayns/engine/Camera.h>
 
+#include <brayns/common/Log.h>
 #include <brayns/common/input/KeyboardHandler.h>
-#include <brayns/common/log.h>
 
 namespace brayns
 {

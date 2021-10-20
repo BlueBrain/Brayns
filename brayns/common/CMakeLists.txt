@@ -85,3 +85,8 @@ target_include_directories(braynsCommon SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS}
 if(FFMPEG_FOUND)
   target_include_directories(braynsCommon SYSTEM PRIVATE ${FFMPEG_INCLUDE_DIR})
 endif()
+
+target_include_directories(braynsCommon PUBLIC  
+    "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/deps/spdlog/include>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>"
+)

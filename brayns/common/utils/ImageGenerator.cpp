@@ -41,8 +41,10 @@ ImageGenerator::ImageBase64 ImageGenerator::createImage(
 #ifdef BRAYNS_USE_FREEIMAGE
     return {freeimage::getBase64Image(frameBuffer.getImage(), format, quality)};
 #else
-    BRAYNS_WARN << "No FreeImage found, will take TurboJPEG snapshot; "
-                << "ignoring format '" << format << "'" << std::endl;
+    Log::error(
+        "No FreeImage found, will take TurboJPEG snapshot; ignoring format "
+        "'{}'.",
+        format);
     const auto& jpeg = createJPEG(frameBuffer, quality);
     return {base64_encode(jpeg.data.get(), jpeg.size)};
 #endif
@@ -117,7 +119,7 @@ ImageGenerator::ImageJPEG::JpegData ImageGenerator::_encodeJpeg(
 
     if (success != 0)
     {
-        BRAYNS_ERROR << "libjpeg-turbo image conversion failure" << std::endl;
+        Log::error("libjpeg-turbo image conversion failure.");
         return 0;
     }
     return ImageJPEG::JpegData{tjJpegBuf};

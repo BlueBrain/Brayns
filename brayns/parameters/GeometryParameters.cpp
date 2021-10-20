@@ -19,7 +19,7 @@
  */
 
 #include "GeometryParameters.h"
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/common/types.h>
 
 namespace
@@ -127,16 +127,12 @@ void GeometryParameters::parse(const po::variables_map& vm)
 void GeometryParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Color scheme               : "
-                << COLOR_SCHEMES[static_cast<size_t>(_colorScheme)]
-                << std::endl;
-    BRAYNS_INFO << "Geometry quality           : "
-                << GEOMETRY_QUALITIES[static_cast<size_t>(_geometryQuality)]
-                << std::endl;
-    BRAYNS_INFO << "Radius multiplier          : " << _radiusMultiplier
-                << std::endl;
-    BRAYNS_INFO << "Memory mode                : "
-                << (_memoryMode == MemoryMode::shared ? "Shared" : "Replicated")
-                << std::endl;
+    Log::info("Color scheme              : {}",
+              COLOR_SCHEMES[size_t(_colorScheme)]);
+    Log::info("Geometry quality           : {}",
+              GEOMETRY_QUALITIES[size_t(_geometryQuality)]);
+    Log::info("Radius multiplier          : {}", _radiusMultiplier);
+    Log::info("Memory mode                : {}",
+              _memoryMode == MemoryMode::shared ? "Shared" : "Replicated");
 }
 } // namespace brayns

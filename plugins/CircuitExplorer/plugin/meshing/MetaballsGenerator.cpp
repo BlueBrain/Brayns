@@ -23,9 +23,9 @@
 
 #include "MetaballsGenerator.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/geometry/TriangleMesh.h>
-#include <brayns/common/log.h>
 #include <brayns/engine/Material.h>
 
 const size_t NB_EDGES = 12;
@@ -415,12 +415,11 @@ void MetaballsGenerator::_buildVerticesAndCubes(
         }
     }
 
-    BRAYNS_DEBUG << "Nb metaballs   : " << metaballs.size() << std::endl;
-    BRAYNS_DEBUG << "Nb Vertices    : " << _vertices.size() << std::endl;
-    BRAYNS_DEBUG << "Nb Cubes       : " << _cubes.size() << std::endl;
-    BRAYNS_DEBUG << "Grid size      : " << gridSize << std::endl;
-    BRAYNS_DEBUG << "Grid dimensions: " << bounds << "/" << bounds.getSize()
-                 << std::endl;
+    brayns::Log::debug("Nb metaballs   : {}", metaballs.size());
+    brayns::Log::debug("Nb Vertices    : {}", _vertices.size());
+    brayns::Log::debug("Nb Cubes       : {}", _cubes.size());
+    brayns::Log::debug("Grid size      : {}", gridSize);
+    brayns::Log::debug("Grid dimensions: {} / {}", bounds, bounds.getSize());
 }
 
 void MetaballsGenerator::_buildTriangles(const brayns::Vector4fs& metaballs,

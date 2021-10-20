@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -79,7 +79,7 @@ public:
     {
         auto params = request.getParams();
         auto& scene = getApi().getScene();
-        BRAYNS_INFO << "Building Sphere model.\n";
+        brayns::Log::info("Building Sphere model.");
         auto id = SphereModel::add(scene, params);
         scene.markModified();
         triggerRender();

@@ -25,9 +25,9 @@
 #include "utils.h"
 
 #include <brayns/common/ImageManager.h>
+#include <brayns/common/Log.h>
 #include <brayns/common/Transformation.h>
 #include <brayns/common/light/Light.h>
-#include <brayns/common/log.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/engine/Model.h>
 #include <brayns/parameters/AnimationParameters.h>
@@ -131,8 +131,7 @@ void OSPRayScene::commit()
         auto& impl = static_cast<OSPRayModel&>(modelDescriptor->getModel());
         const auto& transformation = modelDescriptor->getTransformation();
 
-        BRAYNS_DEBUG << "Committing " << modelDescriptor->getName()
-                     << std::endl;
+        Log::debug("Committing {}.", modelDescriptor->getName());
 
         impl.commitGeometry();
         impl.commitSimulationParams();
@@ -183,7 +182,8 @@ void OSPRayScene::commit()
 
         impl.markInstancesClean();
     }
-    BRAYNS_DEBUG << "Committing root models" << std::endl;
+
+    Log::debug("Committing root models.");
 
     ospCommit(_rootModel);
 

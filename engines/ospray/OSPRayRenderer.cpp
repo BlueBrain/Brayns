@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/common/scene/ClipPlane.h>
 #include <brayns/engine/Model.h>
 
@@ -206,9 +206,9 @@ void OSPRayRenderer::_createOSPRenderer()
 
 void OSPRayRenderer::_commitRendererMaterials()
 {
-    _scene->visitModels([& renderer = _currentOSPRenderer](Model& model) {
-        static_cast<OSPRayModel&>(model).commitMaterials(renderer);
-    });
+    _scene->visitModels(
+        [&renderer = _currentOSPRenderer](Model& model)
+        { static_cast<OSPRayModel&>(model).commitMaterials(renderer); });
 }
 
 void OSPRayRenderer::setClipPlanes(const Planes& planes)

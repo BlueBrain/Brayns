@@ -21,7 +21,7 @@
 #include "OSPRayMaterial.h"
 #include "utils.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <ospray/SDK/common/OSPCommon.h>
 
@@ -134,9 +134,8 @@ OSPTexture OSPRayMaterial::_createOSPTexture2D(Texture2DPtr texture)
             type = OSP_TEXTURE_RGBA32F;
     }
 
-    BRAYNS_DEBUG << "Creating OSPRay texture from " << texture->filename << ": "
-                 << texture->width << "x" << texture->height << "x" << (int)type
-                 << std::endl;
+    Log::debug("Creating OSPRay texture from {}: {}x{}x{}.", texture->filename,
+               texture->width, texture->height, int(type));
 
     OSPTexture ospTexture = ospNewTexture("texture2d");
 

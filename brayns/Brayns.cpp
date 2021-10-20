@@ -23,10 +23,10 @@
 #include "EngineFactory.h"
 #include "PluginManager.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/light/Light.h>
-#include <brayns/common/log.h>
 #include <brayns/common/mathTypes.h>
 #include <brayns/common/utils/DynamicLib.h>
 #include <brayns/common/utils/stringUtils.h>
@@ -78,27 +78,21 @@ struct Brayns::Impl : public PluginAPI
         , _engineFactory{argc, argv, _parametersManager}
         , _pluginManager{argc, argv}
     {
-        BRAYNS_INFO << std::endl;
-        BRAYNS_INFO << " _|_|_|" << std::endl;
-        BRAYNS_INFO
-            << " _|    _|  _|  _|_|    _|_|_|  _|    _|  _|_|_|      _|_|_|  "
-            << std::endl;
-        BRAYNS_INFO
-            << " _|_|_|    _|_|      _|    _|  _|    _|  _|    _|  _|_|     "
-            << std::endl;
-        BRAYNS_INFO
-            << " _|    _|  _|        _|    _|  _|    _|  _|    _|      _|_| "
-            << std::endl;
-        BRAYNS_INFO
-            << " _|_|_|    _|          _|_|_|    _|_|_|  _|    _|  _|_|_|   "
-            << std::endl;
-        BRAYNS_INFO
-            << "                                    _|                     "
-            << std::endl;
-        BRAYNS_INFO
-            << "                                  _|_|                       "
-            << std::endl;
-        BRAYNS_INFO << std::endl;
+        Log::info("");
+        Log::info(" _|_|_|");
+        Log::info(
+            " _|    _|  _|  _|_|    _|_|_|  _|    _|  _|_|_|      _|_|_|  ");
+        Log::info(
+            " _|_|_|    _|_|      _|    _|  _|    _|  _|    _|  _|_|     ");
+        Log::info(
+            " _|    _|  _|        _|    _|  _|    _|  _|    _|      _|_| ");
+        Log::info(
+            " _|_|_|    _|          _|_|_|    _|_|_|  _|    _|  _|_|_|   ");
+        Log::info(
+            "                                    _|                     ");
+        Log::info(
+            "                                  _|_|                       ");
+        Log::info();
 
         // This initialization must happen before plugin intialization.
         _createEngine();
@@ -388,9 +382,10 @@ private:
                 std::string msgLast;
                 auto timeLast = std::chrono::steady_clock::now();
 
-                BRAYNS_INFO << "Loading '" << path << "'" << std::endl;
+                Log::info("Loading '{}'.", path);
 
-                auto progress = [&](const std::string& msg, float t) {
+                auto progress = [&](const std::string& msg, float t)
+                {
                     constexpr auto MIN_SECS = 5;
                     constexpr auto MIN_PERCENTAGE = 10;
 
@@ -409,7 +404,7 @@ private:
                         std::string p = std::to_string(percentage);
                         p.insert(p.begin(), 3 - p.size(), ' ');
 
-                        BRAYNS_INFO << "[" << p << "%] " << msg << std::endl;
+                        Log::info("[{}%] {}.", p, msg);
                         msgLast = msg;
                         percentageLast = percentage;
                         timeLast = time;
@@ -491,13 +486,13 @@ private:
             'e', "Enable eletron shading",
             std::bind(&Brayns::Impl::_electronShading, this));
         _keyboardHandler.registerKeyboardShortcut(
-            'f', "Enable fly mode", [this]() {
-                Brayns::Impl::_setupCameraManipulator(CameraMode::flying);
-            });
+            'f', "Enable fly mode",
+            [this]()
+            { Brayns::Impl::_setupCameraManipulator(CameraMode::flying); });
         _keyboardHandler.registerKeyboardShortcut(
-            'i', "Enable inspect mode", [this]() {
-                Brayns::Impl::_setupCameraManipulator(CameraMode::inspect);
-            });
+            'i', "Enable inspect mode",
+            [this]()
+            { Brayns::Impl::_setupCameraManipulator(CameraMode::inspect); });
         _keyboardHandler.registerKeyboardShortcut(
             'o', "Decrease ambient occlusion strength",
             std::bind(&Brayns::Impl::_decreaseAmbientOcclusionStrength, this));
@@ -556,7 +551,9 @@ private:
             'c', "Display current camera information",
             std::bind(&Brayns::Impl::_displayCameraInformation, this));
         _keyboardHandler.registerKeyboardShortcut(
-            'b', "Toggle benchmarking", [this]() {
+            'b', "Toggle benchmarking",
+            [this]()
+            {
                 auto& ap = _parametersManager.getApplicationParameters();
                 ap.setBenchmarking(!ap.isBenchmarking());
             });
@@ -726,7 +723,7 @@ private:
         auto fovy = camera.getProperty<double>("fovy");
         fovy += delta;
         camera.updateProperty("fovy", fovy);
-        BRAYNS_INFO << "Field of view: " << fovy << std::endl;
+        Log::info("Field of view: {}.", fovy);
     }
 
     void _changeEyeSeparation(const double delta)
@@ -738,7 +735,7 @@ private:
             camera.getProperty<double>("interpupillaryDistance");
         eyeSeparation += delta;
         camera.updateProperty("interpupillaryDistance", eyeSeparation);
-        BRAYNS_INFO << "Eye separation: " << eyeSeparation << std::endl;
+        Log::info("Eye separation: {}.", eyeSeparation);
     }
 
     void _gradientMaterials()
@@ -773,10 +770,7 @@ private:
                                               DEFAULT_MOTION_ACCELERATION);
     }
 
-    void _displayCameraInformation()
-    {
-        BRAYNS_INFO << _engine->getCamera() << std::endl;
-    }
+    void _displayCameraInformation() { Log::info("{}", _engine->getCamera()); }
 
     ParametersManager _parametersManager;
     EngineFactory _engineFactory;

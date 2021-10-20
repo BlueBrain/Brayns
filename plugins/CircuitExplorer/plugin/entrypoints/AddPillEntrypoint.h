@@ -21,8 +21,8 @@
 
 #pragma once
 
+#include <brayns/common/Log.h>
 #include <brayns/common/geometry/SDFGeometry.h>
-#include <brayns/common/log.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -97,7 +97,7 @@ public:
     {
         auto params = request.getParams();
         auto& scene = getApi().getScene();
-        BRAYNS_INFO << "Building Pill model.\n";
+        brayns::Log::info("Building Pill model.");
         auto id = PillModel::add(scene, params);
         scene.markModified();
         triggerRender();

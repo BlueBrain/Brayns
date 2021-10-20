@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <brayns/engine/Model.h>
 

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -116,7 +116,7 @@ public:
     {
         auto params = request.getParams();
         auto& scene = getApi().getScene();
-        BRAYNS_INFO << "Building Column model.\n";
+        brayns::Log::info("Building Column model.");
         ColumnModel::add(scene, params);
         triggerRender();
         request.reply(brayns::EmptyMessage());

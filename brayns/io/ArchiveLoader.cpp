@@ -21,7 +21,7 @@
 
 #include "ArchiveLoader.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/common/utils/filesystem.h>
 #include <brayns/common/utils/utils.h>
 #include <brayns/engine/Model.h>

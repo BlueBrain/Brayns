@@ -21,7 +21,7 @@
 
 #include "StreamManager.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <brayns/network/context/NetworkContext.h>
 
@@ -60,8 +60,8 @@ private:
         }
         catch (const ConnectionClosedException& e)
         {
-            BRAYNS_DEBUG << "Connection closed during image broadcast: "
-                         << e.what() << ".\n";
+            Log::debug("Connection closed during image broadcast: {}.",
+                       e.what());
         }
     }
 };

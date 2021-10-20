@@ -20,8 +20,8 @@
 
 #include "AbstractManipulator.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/common/input/KeyboardHandler.h>
-#include <brayns/common/log.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Scene.h>
 
@@ -55,11 +55,10 @@ void AbstractManipulator::adjust(const Boxd& boundingBox)
     _motionSpeed = DEFAULT_MOTION_SPEED * size;
 
     if (boundingBox.isEmpty())
-        BRAYNS_INFO << "World bounding box: empty" << std::endl;
+        Log::info("World bounding box: empty.");
     else
-        BRAYNS_INFO << "World bounding box: " << boundingBox << std::endl;
-    BRAYNS_INFO << "World center      : " << boundingBox.getCenter()
-                << std::endl;
+        Log::info("World bounding box: {}.", boundingBox);
+    Log::info("World center      : {}.", boundingBox.getCenter());
 }
 
 float AbstractManipulator::getRotationSpeed() const

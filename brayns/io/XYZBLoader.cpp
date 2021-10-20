@@ -20,7 +20,7 @@
 
 #include "XYZBLoader.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/common/utils/filesystem.h>
 #include <brayns/common/utils/stringUtils.h>
 #include <brayns/engine/Model.h>
@@ -59,7 +59,7 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback,
     const PropertyMap& properties BRAYNS_UNUSED) const
 {
-    BRAYNS_INFO << "Loading xyz " << blob.name << std::endl;
+    Log::info("Loading xyz {}.", blob.name);
 
     std::stringstream stream(std::string(blob.data.begin(), blob.data.end()));
     size_t numlines = 0;
@@ -134,15 +134,18 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
     modelDescriptor->setTransformation(transformation);
 
     Property radiusProperty("radius", meanRadius, {"Point size"});
-    radiusProperty.onModified([modelDesc = std::weak_ptr<ModelDescriptor>(
-                                   modelDescriptor)](const Property& property) {
-        if (auto modelDesc_ = modelDesc.lock())
+    radiusProperty.onModified(
+        [modelDesc = std::weak_ptr<ModelDescriptor>(modelDescriptor)](
+            const Property& property)
         {
-            const auto newRadius = property.as<double>();
-            for (auto& sphere : modelDesc_->getModel().getSpheres()[materialId])
-                sphere.radius = newRadius;
-        }
-    });
+            if (auto modelDesc_ = modelDesc.lock())
+            {
+                const auto newRadius = property.as<double>();
+                for (auto& sphere :
+                     modelDesc_->getModel().getSpheres()[materialId])
+                    sphere.radius = newRadius;
+            }
+        });
     PropertyMap modelProperties;
     modelProperties.add(radiusProperty);
     modelDescriptor->setProperties(modelProperties);

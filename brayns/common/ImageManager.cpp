@@ -19,7 +19,7 @@
  */
 
 #include "ImageManager.h"
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/common/utils/filesystem.h>
 #include <brayns/common/utils/imageUtils.h>
 
@@ -156,8 +156,7 @@ Texture2DPtr ImageManager::importTextureFromFile(
     }
     return texture;
 #else
-    BRAYNS_ERROR << "FreeImage is required to load images from file"
-                 << std::endl;
+    Log::error("FreeImage is required to load images from file");
     return {};
 #endif
 }

@@ -21,8 +21,8 @@
 
 #pragma once
 
+#include <brayns/common/Log.h>
 #include <brayns/common/geometry/TriangleMesh.h>
-#include <brayns/common/log.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -85,7 +85,7 @@ public:
     {
         auto params = request.getParams();
         auto& scene = getApi().getScene();
-        BRAYNS_INFO << "Building Box model.\n";
+        brayns::Log::info("Building Box model.");
         auto id = BoxModel::add(scene, params);
         scene.markModified();
         triggerRender();

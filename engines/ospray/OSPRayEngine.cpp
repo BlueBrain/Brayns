@@ -66,7 +66,7 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
     {
         // Note: This is necessary because OSPRay does not yet implement a
         // ospDestroy API.
-        BRAYNS_ERROR << "Error during ospInit(): " << e.what() << std::endl;
+        Log::error("Error during ospInit(): {}.", e.what());
     }
 
     for (const auto& module : ap.getOsprayModules())
@@ -80,8 +80,7 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
         }
         catch (const std::exception& e)
         {
-            BRAYNS_ERROR << "Error while loading module " << module << ": "
-                         << e.what() << std::endl;
+            Log::error("Error while loading module {}: {}", module, e.what());
         }
     }
 
@@ -125,9 +124,8 @@ void OSPRayEngine::commit()
             ospDeviceCommit(device);
             _useDynamicLoadBalancer = useDynamicLoadBalancer;
 
-            BRAYNS_INFO << "Using "
-                        << (useDynamicLoadBalancer ? "dynamic" : "static")
-                        << " load balancer" << std::endl;
+            Log::info("Using {} load balancer.",
+                      useDynamicLoadBalancer ? "dynamic" : "static");
         }
     }
 }

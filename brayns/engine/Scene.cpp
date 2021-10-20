@@ -20,8 +20,8 @@
 
 #include "Scene.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/common/Transformation.h>
-#include <brayns/common/log.h>
 #include <brayns/common/scene/ClipPlane.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/utils/utils.h>
@@ -43,9 +43,9 @@ std::shared_ptr<T> _find(const std::vector<std::shared_ptr<T>>& list,
                          const size_t id,
                          size_t (U::*getID)() const = &T::getID)
 {
-    auto i = std::find_if(list.begin(), list.end(), [id, getID](auto x) {
-        return id == ((*x).*getID)();
-    });
+    auto i =
+        std::find_if(list.begin(), list.end(),
+                     [id, getID](auto x) { return id == ((*x).*getID)(); });
     return i == list.end() ? std::shared_ptr<T>{} : *i;
 }
 
@@ -54,9 +54,9 @@ std::shared_ptr<T> _remove(std::vector<std::shared_ptr<T>>& list,
                            const size_t id,
                            size_t (U::*getID)() const = &T::getID)
 {
-    auto i = std::find_if(list.begin(), list.end(), [id, getID](auto x) {
-        return id == ((*x).*getID)();
-    });
+    auto i =
+        std::find_if(list.begin(), list.end(),
+                     [id, getID](auto x) { return id == ((*x).*getID)(); });
     if (i == list.end())
         return std::shared_ptr<T>{};
     auto result = *i;
@@ -69,9 +69,9 @@ std::shared_ptr<T> _replace(std::vector<std::shared_ptr<T>>& list,
                             const size_t id, std::shared_ptr<T> newObj,
                             size_t (U::*getID)() const = &T::getID)
 {
-    auto i = std::find_if(list.begin(), list.end(), [id, getID](auto x) {
-        return id == ((*x).*getID)();
-    });
+    auto i =
+        std::find_if(list.begin(), list.end(),
+                     [id, getID](auto x) { return id == ((*x).*getID)(); });
     if (i == list.end())
         return std::shared_ptr<T>{};
     auto result = *i;
@@ -389,7 +389,7 @@ void Scene::visitModels(const std::function<void(Model&)>& functor)
 
 void Scene::buildDefault()
 {
-    BRAYNS_INFO << "Building default Cornell Box scene" << std::endl;
+    Log::info("Building default Cornell Box scene.");
 
     auto model = createModel();
     const Vector3f WHITE = {1.f, 1.f, 1.f};
@@ -525,8 +525,7 @@ bool Scene::setEnvironmentMap(const std::string& envMap)
         }
         catch (const std::runtime_error& e)
         {
-            BRAYNS_DEBUG << "Cannot load environment map: " << e.what()
-                         << std::endl;
+            Log::debug("Cannot load environment map: {}.", e.what());
             _backgroundMaterial->clearTextures();
             success = false;
         }
@@ -616,14 +615,16 @@ void Scene::_updateAnimationParameters()
         ap.removeIsReadyCallback();
     else
     {
-        ap.setIsReadyCallback([handlersV = handlers] {
-            for (auto handler : handlersV)
+        ap.setIsReadyCallback(
+            [handlersV = handlers]
             {
-                if (!handler->isReady())
-                    return false;
-            }
-            return true;
-        });
+                for (auto handler : handlersV)
+                {
+                    if (!handler->isReady())
+                        return false;
+                }
+                return true;
+            });
 
         ap.setDt(handlers[0]->getDt(), false);
         ap.setUnit(handlers[0]->getUnit(), false);

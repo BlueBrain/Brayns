@@ -19,7 +19,7 @@
 
 #include "VRPNPlugin.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
@@ -90,7 +90,7 @@ void VRPNPlugin::init()
         throw std::runtime_error("VRPN couldn't connect to: " + _vrpnName +
                                  " analog");
 
-    BRAYNS_INFO << "VRPN successfully connected to " << _vrpnName << std::endl;
+    brayns::Log::info("VRPN successfully connected to {}.", _vrpnName);
 
     _vrpnTracker->register_change_handler(&(_api->getCamera()), trackerCallback,
                                           HEAD_SENSOR_ID);

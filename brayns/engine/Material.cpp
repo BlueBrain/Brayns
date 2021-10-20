@@ -21,7 +21,7 @@
 #include "Material.h"
 
 #include <brayns/common/ImageManager.h>
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 namespace brayns
 {
@@ -56,9 +56,9 @@ bool Material::_loadTexture(const std::string& fileName, const TextureType type)
         return false;
 
     _textures[fileName] = texture;
-    BRAYNS_DEBUG << fileName << ": " << texture->width << "x" << texture->height
-                 << "x" << (int)texture->channels << "x" << (int)texture->depth
-                 << " added to the texture cache" << std::endl;
+    Log::debug("{}: {}x{}x{}x{} added to the texture cache.", fileName,
+               texture->width, texture->height, int(texture->channels),
+               int(texture->depth));
     return true;
 }
 

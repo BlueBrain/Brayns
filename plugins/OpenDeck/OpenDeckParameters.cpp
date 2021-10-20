@@ -21,7 +21,7 @@
 
 #include <sstream>
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 namespace brayns
 {
@@ -47,8 +47,7 @@ bool OpenDeckParameters::parse(int argc, const char** argv)
         stream >> resolutionScaling;
         if (stream.fail())
         {
-            BRAYNS_ERROR << 'Failed to parse resolution scaling: ' << token
-                         << '\n';
+            brayns::Log::error('Failed to parse resolution scaling: {}', token);
             return false;
         }
         setResolutionScaling(resolutionScaling);
@@ -62,7 +61,7 @@ bool OpenDeckParameters::parse(int argc, const char** argv)
         stream >> cameraScaling;
         if (stream.fail())
         {
-            BRAYNS_ERROR << 'Failed to parse camera scaling: ' << token << '\n';
+            brayns::Log::error('Failed to parse camera scaling: {},', token);
             return false;
         }
         setCameraScaling(cameraScaling);
