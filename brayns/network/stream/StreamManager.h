@@ -91,7 +91,7 @@ public:
      * @param functor Functor like void().
      */
     template <typename FunctorType>
-    void call(FunctorType functor)
+    void callWithFpsLimit(FunctorType functor)
     {
         _limiter.call(std::move(functor));
     }
@@ -127,7 +127,7 @@ public:
      *
      * @return ImageStreamMonitor& Image stream monitor.
      */
-    ImageStreamMonitor& getImageStream() { return _imageStream; }
+    ImageStreamMonitor& getMonitor() { return _imageStream; }
 
 private:
     NetworkContext* _context;

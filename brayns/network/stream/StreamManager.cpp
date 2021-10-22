@@ -71,13 +71,27 @@ class ControlledImageStream
 public:
     static void broadcast(NetworkContext& context)
     {
-        auto& stream = context.getStream();
-        auto& imageStream = stream.getImageStream();
-        if (!imageStream.isTriggered())
+        if (!_isTriggered(context))
         {
             return;
         }
         ImageStream::broadcast(context);
+        _resetTrigger(context);
+    }
+
+private:
+    static bool _isTriggered(NetworkContext& context)
+    {
+        auto& stream = context.getStream();
+        auto& monitor = stream.getMonitor();
+        return monitor.isTriggered();
+    }
+
+    static void _resetTrigger(NetworkContext& context)
+    {
+        auto& stream = context.getStream();
+        auto& monitor = stream.getMonitor();
+        monitor.resetTrigger();
     }
 };
 
@@ -87,8 +101,8 @@ public:
     static void broadcast(NetworkContext& context)
     {
         auto& stream = context.getStream();
-        auto& imageStream = stream.getImageStream();
-        imageStream.call([&] { ImageStream::broadcast(context); });
+        auto& monitor = stream.getMonitor();
+        monitor.callWithFpsLimit([&] { ImageStream::broadcast(context); });
     }
 };
 
@@ -136,8 +150,8 @@ private:
     static bool _isImageStreamControlled(NetworkContext& context)
     {
         auto& stream = context.getStream();
-        auto& imageStream = stream.getImageStream();
-        return imageStream.isControlled();
+        auto& monitor = stream.getMonitor();
+        return monitor.isControlled();
     }
 };
 } // namespace
@@ -157,8 +171,5 @@ StreamManager::StreamManager(NetworkContext& context)
 void StreamManager::broadcast()
 {
     StreamDispatcher::broadcast(*_context);
-    auto& stream = _context->getStream();
-    auto& imageStream = stream.getImageStream();
-    imageStream.resetTrigger();
 }
 } // namespace brayns
