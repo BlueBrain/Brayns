@@ -41,8 +41,8 @@ public:
 
     virtual void onRequest(const Request& request) override
     {
-        auto& imageStream = getStream().getImageStream();
-        imageStream.trigger();
+        auto& monitor = getStream().getMonitor();
+        monitor.trigger();
         triggerRender();
         request.reply(EmptyMessage());
     }
