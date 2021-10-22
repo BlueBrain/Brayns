@@ -130,6 +130,4 @@ private:
 
     SERIALIZATION_FRIEND(Camera)
 };
-
-std::ostream& operator<<(std::ostream& os, Camera& camera);
 } // namespace brayns

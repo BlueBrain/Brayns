@@ -90,3 +90,20 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED)
         message(STATUS "Found Brion")
     endif()
 endif()
+
+# spdlog
+common_find_package(spdlog QUIET)
+if(NOT spdlog_FOUND)
+    message(STATUS "Gathering spdlog from submodules")
+    
+    find_package(Threads REQUIRED)
+    
+    add_library(spdlog_header_only IMPORTED GLOBAL INTERFACE)
+    add_library(spdlog::spdlog_header_only ALIAS spdlog_header_only)
+
+    target_include_directories(
+      spdlog_header_only SYSTEM INTERFACE
+      "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/spdlog/include>"
+      "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    )
+endif()

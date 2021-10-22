@@ -20,8 +20,8 @@
  */
 
 #include "DTISimulationHandler.h"
-#include "log.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/common/Transformation.h>
 #include <brayns/common/utils/utils.h>
 #include <brayns/engine/Engine.h>
@@ -61,14 +61,12 @@ DTISimulationHandler::DTISimulationHandler(
     // Load initial frame
     getFrameData(0);
 
-    PLUGIN_INFO << "-----------------------------------------------------------"
-                << std::endl;
-    PLUGIN_INFO << "Spike simulation information" << std::endl;
-    PLUGIN_INFO << "----------------------" << std::endl;
-    PLUGIN_INFO << "End time             : " << _endTime << std::endl;
-    PLUGIN_INFO << "Number of frames     : " << _nbFrames << std::endl;
-    PLUGIN_INFO << "-----------------------------------------------------------"
-                << std::endl;
+    brayns::Log::info("[DTI] -----------------------------------------------");
+    brayns::Log::info("[DTI] Spike simulation information");
+    brayns::Log::info("[DTI] ----------------------");
+    brayns::Log::info("[DTI] End time             : {}", _endTime);
+    brayns::Log::info("[DTI] Number of frames     : {}", _nbFrames);
+    brayns::Log::info("[DTI] -----------------------------------------------");
 }
 
 void* DTISimulationHandler::getFrameDataImpl(const uint32_t frame)

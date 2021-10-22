@@ -47,7 +47,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   light/Light.h
   loader/Loader.h
   loader/LoaderRegistry.h
-  log.h
+  Log.h
   material/Texture2D.h
   mathTypes.h
   macros.h
@@ -74,6 +74,7 @@ set(BRAYNSCOMMON_HEADERS
 set(BRAYNSCOMMON_INCLUDE_NAME brayns/common)
 set(BRAYNSCOMMON_LINK_LIBRARIES
   PUBLIC glm Async++ ${LibJpegTurbo_LIBRARIES}
+  PUBLIC spdlog::spdlog_header_only
   PRIVATE braynsParameters ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FREEIMAGE_LIBRARIES}
 )

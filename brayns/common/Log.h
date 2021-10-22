@@ -21,6 +21,8 @@
 
 #pragma once
 
+#define SPDLOG_HEADER_ONLY
+#include <spdlog/fmt/ostr.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
@@ -32,7 +34,7 @@ enum class LogLevel
     Debug = spdlog::level::debug,
     Info = spdlog::level::info,
     Warn = spdlog::level::warn,
-    Error = spdlog::level::error,
+    Error = spdlog::level::err,
     Critical = spdlog::level::critical,
     Off = spdlog::level::off,
     Count = spdlog::level::n_levels
@@ -98,7 +100,7 @@ private:
         return *logger;
     }
 
-    static spdlog::logger createLogger()
+    static std::shared_ptr<spdlog::logger> _createLogger()
     {
         auto logger = spdlog::stdout_color_mt("Brayns");
         logger->set_pattern("%^[%l][%T] %n: %v%$");

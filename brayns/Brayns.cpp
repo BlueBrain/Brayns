@@ -92,7 +92,7 @@ struct Brayns::Impl : public PluginAPI
             "                                    _|                     ");
         Log::info(
             "                                  _|_|                       ");
-        Log::info();
+        Log::info("");
 
         // This initialization must happen before plugin intialization.
         _createEngine();
@@ -770,7 +770,11 @@ private:
                                               DEFAULT_MOTION_ACCELERATION);
     }
 
-    void _displayCameraInformation() { Log::info("{}", _engine->getCamera()); }
+    void _displayCameraInformation()
+    {
+        auto& camera = _engine->getCamera();
+        Log::info("{}, {}", camera.getPosition(), camera.getOrientation());
+    }
 
     ParametersManager _parametersManager;
     EngineFactory _engineFactory;
