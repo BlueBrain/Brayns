@@ -20,9 +20,9 @@
  */
 
 #include "DTILoader.h"
-#include "../log.h"
 #include "Utils.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
@@ -121,13 +121,13 @@ std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
     // Check files
     std::ifstream gidRowfile(config.gid_to_streamline, std::ios::in);
     if (!gidRowfile.good())
-        PLUGIN_THROW(std::runtime_error("Could not open gid/row mapping file " +
-                                        config.gid_to_streamline));
+        throw std::runtime_error("Could not open gid/row mapping file " +
+                                 config.gid_to_streamline);
 
     std::ifstream streamlinesFile(config.streamlines, std::ios::in);
     if (!streamlinesFile.good())
-        PLUGIN_THROW(std::runtime_error("Could not open streamlines file " +
-                                        config.streamlines));
+        throw std::runtime_error("Could not open streamlines file " +
+                                 config.streamlines);
 
     // Load positions
     callback.updateProgress("Loading positions ...", 0.f);

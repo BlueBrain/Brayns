@@ -73,8 +73,7 @@ Engine* EngineFactory::_loadEngine(const std::string& name, int argc,
     }
     catch (const std::runtime_error& exc)
     {
-        Log::error("Failed to load engine {}: {}", std::quoted(name),
-                   exc.what());
+        Log::error("Failed to load engine '{}': {}", name, exc.what());
     }
     return nullptr;
 }

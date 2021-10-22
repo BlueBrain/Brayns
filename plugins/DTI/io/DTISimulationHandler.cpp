@@ -21,6 +21,7 @@
 
 #include "DTISimulationHandler.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/common/Transformation.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/Material.h>

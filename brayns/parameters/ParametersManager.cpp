@@ -20,6 +20,8 @@
 
 #include "ParametersManager.h"
 
+#include <iostream>
+
 #include <brayns/parameters/AbstractParameters.h>
 #include <brayns/version.h>
 

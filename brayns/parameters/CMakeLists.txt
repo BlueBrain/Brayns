@@ -27,6 +27,7 @@ set(BRAYNSPARAMETERS_PUBLIC_HEADERS
 )
 
 set(BRAYNSPARAMETERS_LINK_LIBRARIES
+    PUBLIC spdlog::spdlog_header_only
     PRIVATE glm ${Boost_PROGRAM_OPTIONS_LIBRARY} braynsUtils
 )
 

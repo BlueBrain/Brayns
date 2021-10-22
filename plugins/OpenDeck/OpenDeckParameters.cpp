@@ -47,7 +47,7 @@ bool OpenDeckParameters::parse(int argc, const char** argv)
         stream >> resolutionScaling;
         if (stream.fail())
         {
-            brayns::Log::error('Failed to parse resolution scaling: {}', token);
+            brayns::Log::error("Failed to parse resolution scaling: {}", token);
             return false;
         }
         setResolutionScaling(resolutionScaling);
@@ -61,7 +61,7 @@ bool OpenDeckParameters::parse(int argc, const char** argv)
         stream >> cameraScaling;
         if (stream.fail())
         {
-            brayns::Log::error('Failed to parse camera scaling: {},', token);
+            brayns::Log::error("Failed to parse camera scaling: {}", token);
             return false;
         }
         setCameraScaling(cameraScaling);

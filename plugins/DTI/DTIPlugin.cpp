@@ -24,8 +24,8 @@
 #include <io/DTILoader.h>
 #include <io/DTISimulationHandler.h>
 #include <io/DTITypes.h>
-#include <log.h>
 
+#include <brayns/common/Log.h>
 #include <brayns/common/Progress.h>
 #include <brayns/common/geometry/Streamline.h>
 #include <brayns/engine/Camera.h>
@@ -88,8 +88,8 @@ void DTIPlugin::updateSpikeSimulation(
     auto modelDescriptor = _api->getScene().getModel(spikeSimulation.model_id);
     if (!modelDescriptor)
     {
-        PLUGIN_ERROR << spikeSimulation.model_id << " is an invalid model ID"
-                     << std::endl;
+        brayns::Log::error("[DTI] {} is an invalid model ID.",
+                           spikeSimulation.model_id);
         return;
     }
     _spikeSimulation = spikeSimulation;
@@ -102,7 +102,7 @@ void DTIPlugin::updateSpikeSimulationFromFile(
     auto modelDescriptor = _api->getScene().getModel(src.model_id);
     if (!modelDescriptor)
     {
-        PLUGIN_ERROR << src.model_id << " is an invalid model ID" << std::endl;
+        brayns::Log::error("[DTI] {} is an invalid model ID.", src.model_id);
         return;
     }
 
@@ -113,8 +113,8 @@ void DTIPlugin::updateSpikeSimulationFromFile(
     }
     catch (...)
     {
-        PLUGIN_ERROR << "Could not read BlueConfig file " << src.path
-                     << std::endl;
+        brayns::Log::error("[DTI] Cannot read BlueConfig file: '{}'.",
+                           src.path);
     }
     std::unique_ptr<brain::SpikeReportReader> spikeReport{nullptr};
     try
@@ -124,8 +124,7 @@ void DTIPlugin::updateSpikeSimulationFromFile(
     }
     catch (const std::exception &e)
     {
-        PLUGIN_ERROR << "Could not read Spike report: " << e.what()
-                     << std::endl;
+        brayns::Log::error("[DTI] Could not read Spike report: {}.", e.what());
     }
 
     _spikeSimulation.dt = src.dt;
@@ -163,8 +162,9 @@ void DTIPlugin::_updateSpikeSimulation()
             indices.push_back(count);
         }
 
-        PLUGIN_INFO << "Creating spike simulation handler for model "
-                    << _spikeSimulation.model_id << std::endl;
+        brayns::Log::info(
+            "[DTI] Creating spike simulation handler for model {}.",
+            _spikeSimulation.model_id);
         simulationHandler =
             std::make_shared<DTISimulationHandler>(indices, _spikeSimulation);
         model.setSimulationHandler(simulationHandler);
@@ -173,8 +173,8 @@ void DTIPlugin::_updateSpikeSimulation()
     }
 
     const auto nbSpikes = _spikeSimulation.gids.size();
-    PLUGIN_INFO << "Loading " << nbSpikes << " spikes from JSon to model "
-                << _spikeSimulation.model_id << std::endl;
+    brayns::Log::info("[DTI] Loading {} spikes from JSON to model {}.",
+                      nbSpikes, _spikeSimulation.model_id);
 
     auto *spikesHandler =
         dynamic_cast<DTISimulationHandler *>(simulationHandler.get());
@@ -234,6 +234,6 @@ void DTIPlugin::_updateSimulationFrame()
 extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int /*argc*/,
                                                          char ** /*argv*/)
 {
-    PLUGIN_INFO << "Initializing DTI plugin" << std::endl;
+    brayns::Log::info("[DTI] Loading DTI plugin.");
     return new dti::DTIPlugin();
 }
