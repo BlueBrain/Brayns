@@ -22,7 +22,6 @@ common_find_package_post()
 
 set(BRAYNSCIRCUITINFO_HEADERS
   CircuitInfoPlugin.h
-  Log.h
 )
 
 set(BRAYNSCIRCUITINFO_SOURCES

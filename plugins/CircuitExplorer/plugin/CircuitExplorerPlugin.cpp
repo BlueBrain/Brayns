@@ -27,7 +27,6 @@
 
 #include <plugin/api/CircuitColorManager.h>
 #include <plugin/api/FrameExportManager.h>
-#include <plugin/api/Log.h>
 #include <plugin/api/VasculatureRadiiSimulation.h>
 
 #include <plugin/io/BBPLoader.h>
@@ -60,7 +59,7 @@ namespace
 {
 void _addAdvancedSimulationRenderer(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering advanced renderer" << std::endl;
+    brayns::Log::info("[CE] Registering advanced renderer.");
     brayns::PropertyMap properties;
     properties.add({"giDistance", 10000., {"Global illumination distance"}});
     properties.add({"giWeight", 0., {"Global illumination weight"}});
@@ -90,7 +89,7 @@ void _addAdvancedSimulationRenderer(brayns::Engine& engine)
 
 void _addBasicSimulationRenderer(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering basic renderer" << std::endl;
+    brayns::Log::info("[CE] Registering basic renderer.");
 
     brayns::PropertyMap properties;
     properties.add({"alphaCorrection", 0.5, {"Alpha correction"}});
@@ -108,7 +107,7 @@ void _addBasicSimulationRenderer(brayns::Engine& engine)
 
 void _addDOFPerspectiveCamera(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering DOF perspective camera" << std::endl;
+    brayns::Log::info("[CE] Registering DOF perspective camera.");
 
     brayns::PropertyMap properties;
     properties.add({"fovy", 45., {"Field of view"}});
@@ -121,8 +120,7 @@ void _addDOFPerspectiveCamera(brayns::Engine& engine)
 
 void _addSphereClippingPerspectiveCamera(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering sphere clipping perspective camera"
-                << std::endl;
+    brayns::Log::info("[CE] Registering sphere clipping perspective camera.");
 
     brayns::PropertyMap properties;
     properties.add({"fovy", 45., {"Field of view"}});
@@ -201,6 +199,6 @@ void CircuitExplorerPlugin::postRender()
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int, char**)
 {
-    PLUGIN_INFO << "Initializing Circuit Explorer plugin" << std::endl;
+    brayns::Log::info("[CE] Initializing circuit explorer plugin.");
     return new CircuitExplorerPlugin();
 }

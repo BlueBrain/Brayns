@@ -26,7 +26,6 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <plugin/api/Log.h>
 #include <plugin/api/MaterialUtils.h>
 #include <plugin/network/messages/AddBoxMessage.h>
 #include <plugin/network/messages/AddShapeMessage.h>

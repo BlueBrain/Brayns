@@ -18,12 +18,12 @@
 
 #include "SonataLoader.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/utils/StringUtils.h>
 
 #include <plugin/api/CircuitColorManager.h>
-#include <plugin/api/Log.h>
 #include <plugin/api/MaterialUtils.h>
 
 #include <plugin/io/sonataloader/ParameterCheck.h>
@@ -117,7 +117,7 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
     {
         const auto& nodeName = nodeSettings.node_population;
 
-        PLUGIN_INFO << "Loading " << nodeName << " node population\n";
+        brayns::Log::info("[CE] Loading {} node population.", nodeName);
 
         // Select nodes that are going to be loaded
         const auto nodeSelection = selectNodes(network.config, nodeSettings);
@@ -141,7 +141,7 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
         for (const auto& edge : nodeSettings.edge_populations)
         {
             const auto& edgeName = edge.edge_population;
-            PLUGIN_INFO << "\tLoading " << edgeName << " edge population\n";
+            brayns::Log::info("[CE] \tLoading {} edge population.", edgeName);
 
             informProgress(callback, "Loading " + edgeName, total, chunk);
             // Load edge data
@@ -186,7 +186,7 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
                                                  std::move(edgeColor), nodeIDs,
                                                  std::move(edgeMaterialMaps));
 
-            PLUGIN_INFO << "\tLoaded edge population " << edgeName << "\n";
+            brayns::Log::info("[CE] \tLoaded edge population {}.", edgeName);
         }
 
         informProgress(callback, nodeName + ": Generating node geometry", total,
@@ -221,7 +221,7 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
                                              std::move(nodeColor), nodeIDs,
                                              std::move(materialMaps));
 
-        PLUGIN_INFO << "Loaded node population " << nodeName << "\n";
+        brayns::Log::info("[CE] Loaded node population {}.", nodeName);
     }
 
     TransferFunctionUtils::set(scene.getTransferFunction());
