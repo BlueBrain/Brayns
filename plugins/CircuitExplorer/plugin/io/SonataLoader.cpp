@@ -2,10 +2,11 @@
 
 #include "AdvancedCircuitLoader.h"
 
-#include <common/log.h>
 #include <common/types.h>
 
 #include <brion/blueConfig.h>
+
+#include <brayns/common/Log.h>
 
 SonataLoader::SonataLoader(
     brayns::Scene& scene,
@@ -14,7 +15,7 @@ SonataLoader::SonataLoader(
     : AbstractCircuitLoader(scene, applicationParameters,
                             std::move(loaderParams), plugin)
 {
-    PLUGIN_INFO << "Registering " << getName() << std::endl;
+    brayns::Log::info("[CE] Registering {}.", getName());
     _fixedDefaults.add(
         {PROP_PRESYNAPTIC_NEURON_GID.getName(), std::string("")});
     _fixedDefaults.add(
@@ -66,8 +67,8 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::_loadFromBlueConfig(
 
     if (populationNames.size() != populationReports.size() ||
         populationNames.size() != populationReportTypes.size())
-        PLUGIN_THROW(
-            "Population name count must match report name, report type count")
+        throw std::runtime_error(
+            "Population name count must match report name, report type count");
 
     for (size_t i = 0; i < populationNames.size(); ++i)
     {
@@ -93,7 +94,7 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::_loadFromBlueConfig(
         const auto& populationReport = populationReports[i];
         const auto& populationReportType = populationReportTypes[i];
 
-        PLUGIN_INFO << "Loading population " << populationName << std::endl;
+        brayns::Log::info("[CE] Loading population {}.", populationName);
 
         // Use the default parameters and update the variable ones for each
         // population

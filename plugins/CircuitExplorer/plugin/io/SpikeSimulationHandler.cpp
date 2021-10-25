@@ -19,9 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <common/log.h>
-
 #include "SpikeSimulationHandler.h"
+
+#include <brayns/common/Log.h>
 #include <brayns/parameters/AnimationParameters.h>
 
 namespace
@@ -56,19 +56,18 @@ SpikeSimulationHandler::SpikeSimulationHandler(const std::string& reportPath,
     _frameSize = _gids.size();
     _frameData.resize(_frameSize, DEFAULT_REST_VALUE);
 
-    PLUGIN_INFO << "-----------------------------------------------------------"
-                << std::endl;
-    PLUGIN_INFO << "Spike simulation information" << std::endl;
-    PLUGIN_INFO << "----------------------" << std::endl;
-    PLUGIN_INFO << "Report path           : " << _reportPath << std::endl;
-    PLUGIN_INFO << "Frame size (# of GIDs): " << _frameSize << std::endl;
-    PLUGIN_INFO << "End time              : " << _endTime << std::endl;
-    PLUGIN_INFO << "Time interval         : " << DEFAULT_TIME_INTERVAL
-                << std::endl;
-    PLUGIN_INFO << "Transition time       : " << _transition << std::endl;
-    PLUGIN_INFO << "Number of frames      : " << _nbFrames << std::endl;
-    PLUGIN_INFO << "-----------------------------------------------------------"
-                << std::endl;
+    brayns::Log::info(
+        "[CE] -----------------------------------------------------------");
+    brayns::Log::info("[CE] Spike simulation information");
+    brayns::Log::info("[CE] ----------------------");
+    brayns::Log::info("[CE] Report path           : {}", _reportPath);
+    brayns::Log::info("[CE] Frame size (# of GIDs): {}", _frameSize);
+    brayns::Log::info("[CE] End time              : {}", _endTime);
+    brayns::Log::info("[CE] Time interval         : {}", DEFAULT_TIME_INTERVAL);
+    brayns::Log::info("[CE] Transition time       : {}", _transition);
+    brayns::Log::info("[CE] Number of frames      : {}", _nbFrames);
+    brayns::Log::info(
+        "[CE] -----------------------------------------------------------");
 }
 
 SpikeSimulationHandler::SpikeSimulationHandler(

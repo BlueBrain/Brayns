@@ -21,7 +21,7 @@
 
 #include "PairSynapsesLoader.h"
 
-#include <common/log.h>
+#include <brayns/common/Log.h>
 
 const std::string LOADER_NAME = "Pair synapses use-case";
 
@@ -32,7 +32,7 @@ PairSynapsesLoader::PairSynapsesLoader(
     : AbstractCircuitLoader(scene, applicationParameters,
                             std::move(loaderParams), plugin)
 {
-    PLUGIN_INFO << "Registering " << LOADER_NAME << std::endl;
+    brayns::Log::info("[CE] Registering {}.", LOADER_NAME);
     _fixedDefaults.add({PROP_DB_CONNECTION_STRING.getName(), std::string("")});
     _fixedDefaults.add({PROP_DENSITY.getName(), 1.0});
     _fixedDefaults.add({PROP_RANDOM_SEED.getName(), 0.0});
@@ -67,7 +67,7 @@ std::vector<brayns::ModelDescriptorPtr> PairSynapsesLoader::importFromFile(
     const std::string &filename, const brayns::LoaderProgress &callback,
     const brayns::PropertyMap &properties) const
 {
-    PLUGIN_INFO << "Loading circuit from " << filename << std::endl;
+    brayns::Log::info("[CE] Loading circuit from {}.", filename);
     callback.updateProgress("Loading circuit ...", 0);
     brayns::PropertyMap props = _defaults;
     props.merge(_fixedDefaults);

@@ -21,10 +21,11 @@
 
 #include "AstrocyteLoader.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
+
 #include <common/commonTypes.h>
-#include <common/log.h>
 
 #include <fstream>
 
@@ -38,7 +39,7 @@ AstrocyteLoader::AstrocyteLoader(
     : AbstractCircuitLoader(scene, applicationParameters,
                             std::move(loaderParams), plugin)
 {
-    PLUGIN_INFO << "Registering " << LOADER_NAME << std::endl;
+    brayns::Log::info("[CE] Registering {}.", LOADER_NAME);
     _fixedDefaults.add({PROP_DB_CONNECTION_STRING.getName(), std::string("")});
     _fixedDefaults.add({PROP_DENSITY.getName(), 1.0});
     _fixedDefaults.add({PROP_RANDOM_SEED.getName(), 0.0});
@@ -91,7 +92,7 @@ std::vector<brayns::ModelDescriptorPtr> AstrocyteLoader::importFromFile(
     const std::string &filename, const brayns::LoaderProgress &callback,
     const brayns::PropertyMap &properties) const
 {
-    PLUGIN_INFO << "Loading morphologies from " << filename << std::endl;
+    brayns::Log::info("[CE] Loading morphologies from {}.", filename);
     callback.updateProgress("Loading morphologies ...", 0);
     brayns::PropertyMap props = _defaults;
     props.merge(_fixedDefaults);

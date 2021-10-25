@@ -20,12 +20,12 @@
  */
 
 #include <common/commonTypes.h>
-#include <common/log.h>
 
 #include "SynapseJSONLoader.h"
 
 #include <brion/brion.h>
 
+#include <brayns/common/Log.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
@@ -42,14 +42,13 @@ SynapseJSONLoader::SynapseJSONLoader(brayns::Scene& scene,
     : Loader(scene)
     , _synapseAttributes(synapseAttributes)
 {
-    PLUGIN_INFO << "Registering " << LOADER_NAME << std::endl;
+    brayns::Log::info("[CE] Registering {}.", LOADER_NAME);
 }
 
 std::string SynapseJSONLoader::getName() const
 {
     return LOADER_NAME;
 }
-
 std::vector<std::string> SynapseJSONLoader::getSupportedExtensions() const
 {
     return {SUPPORTED_EXTENTION_JSON};
@@ -91,7 +90,7 @@ brayns::ModelDescriptorPtr SynapseJSONLoader::importSynapsesFromGIDs(
             "No synapse could be found for the give GID set");
 
     // Load synapses
-    PLUGIN_DEBUG << "Loading " << synapses.size() << " synapses" << std::endl;
+    brayns::Log::debug("[CE] Loading {} synapses.", synapses.size());
     auto model = _scene.createModel();
     size_t i = 0;
     for (auto synapse : synapses)

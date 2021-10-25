@@ -24,9 +24,9 @@
 #include "SpikeSimulationHandler.h"
 #include "VoltageSimulationHandler.h"
 #include <common/commonTypes.h>
-#include <common/log.h>
 #include <common/types.h>
 
+#include <brayns/common/Log.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
@@ -67,7 +67,7 @@ BrickLoader::BrickLoader(brayns::Scene& scene,
     : Loader(scene)
     , _defaults(loaderParams)
 {
-    PLUGIN_INFO << "Registering " << LOADER_NAME << std::endl;
+    brayns::Log::info("[CE] Registering {}.", LOADER_NAME);
 }
 
 std::string BrickLoader::getName() const
@@ -115,19 +115,19 @@ std::vector<brayns::ModelDescriptorPtr> BrickLoader::importFromFile(
     props.merge(properties);
 
     callback.updateProgress("Loading cache...", 0);
-    PLUGIN_INFO << "Loading model from cache file: " << filename << std::endl;
+    brayns::Log::info("[CE] Loading model from cache file: {}.", filename);
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (!file.good())
     {
         const std::string msg = "Could not open cache file " + filename;
-        PLUGIN_THROW(msg);
+        throw std::runtime_error(msg);
     }
 
     // File version
     size_t version;
     file.read((char*)&version, sizeof(size_t));
 
-    PLUGIN_INFO << "Version: " << version << std::endl;
+    brayns::Log::info("[CE] Version: {}.", version);
 
     auto model = _scene.createModel();
 
@@ -683,12 +683,12 @@ void BrickLoader::exportToFile(const brayns::ModelDescriptorPtr modelDescriptor,
 void BrickLoader::exportToFile(brayns::ModelDescriptor& modelDescriptor,
                                const std::string& filename)
 {
-    PLUGIN_INFO << "Saving model to cache file: " << filename << std::endl;
+    brayns::Log::info("[CE] Saving model to cache file: {}.", filename);
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     if (!file.good())
     {
         const std::string msg = "Could not open cache file " + filename;
-        PLUGIN_THROW(msg);
+        throw std::runtime_error(msg);
     }
 
     const size_t version = CACHE_VERSION_3;

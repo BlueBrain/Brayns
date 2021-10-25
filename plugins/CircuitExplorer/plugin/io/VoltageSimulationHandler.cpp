@@ -21,8 +21,7 @@
 
 #include "VoltageSimulationHandler.h"
 
-#include <common/log.h>
-
+#include <brayns/common/Log.h>
 #include <brayns/parameters/AnimationParameters.h>
 
 #include <brion/types.h>
@@ -44,20 +43,19 @@ VoltageSimulationHandler::VoltageSimulationHandler(
     _unit = _compartmentReport->getTimeUnit();
     _frameSize = _compartmentReport->getFrameSize();
 
-    PLUGIN_INFO << "-----------------------------------------------------------"
-                << std::endl;
-    PLUGIN_INFO << "Voltage simulation information" << std::endl;
-    PLUGIN_INFO << "----------------------" << std::endl;
-    PLUGIN_INFO << "Start time           : " << _startTime << std::endl;
-    PLUGIN_INFO << "End time             : " << _endTime << std::endl;
-    PLUGIN_INFO << "Steps between frames : " << _dt << std::endl;
-    PLUGIN_INFO << "Number of frames     : " << _nbFrames << std::endl;
-    PLUGIN_INFO << "Frame size           : " << _frameSize << std::endl;
-    PLUGIN_INFO << "Mode                 : "
-                << (_synchronousMode ? "Synchronous" : "Asynchronous")
-                << std::endl;
-    PLUGIN_INFO << "-----------------------------------------------------------"
-                << std::endl;
+    brayns::Log::info(
+        "[CE] -----------------------------------------------------------");
+    brayns::Log::info("[CE] Voltage simulation information");
+    brayns::Log::info("[CE] ----------------------");
+    brayns::Log::info("[CE] Start time           : {}", _startTime);
+    brayns::Log::info("[CE] End time             : {}", _endTime);
+    brayns::Log::info("[CE] Steps between frames : {}", _dt);
+    brayns::Log::info("[CE] Number of frames     : {}", _nbFrames);
+    brayns::Log::info("[CE] Frame size           : {}", _frameSize);
+    brayns::Log::info("[CE] Mode                 : {}",
+                      (_synchronousMode ? "Synchronous" : "Asynchronous"));
+    brayns::Log::info(
+        "[CE] -----------------------------------------------------------");
 }
 
 VoltageSimulationHandler::VoltageSimulationHandler(
@@ -130,8 +128,8 @@ bool VoltageSimulationHandler::_makeFrameReady(const uint32_t frame)
         }
         catch (const std::exception& e)
         {
-            PLUGIN_ERROR << "Error loading simulation frame " << frame << ": "
-                         << e.what() << std::endl;
+            brayns::Log::error("[CE] Error loading simulation frame {}: {}.",
+                               frame, e.what());
             return false;
         }
         _currentFrame = frame;

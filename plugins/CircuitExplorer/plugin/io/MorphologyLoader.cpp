@@ -21,10 +21,10 @@
 
 #include "MorphologyLoader.h"
 #include "Utils.h"
-#include <common/log.h>
 #include <common/types.h>
 #include <plugin/meshing/MetaballsGenerator.h>
 
+#include <brayns/common/Log.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/types.h>
 #include <brayns/engine/Material.h>
@@ -307,31 +307,29 @@ void MorphologyLoader::_connectSDFBifurcations(
         // Function for connecting overlapping geometries with current
         // bifurcation
         const auto connectGeometriesToBifurcation =
-            [&](const std::vector<size_t>& geometries) {
-                const auto& bifGeom =
-                    sdfMorphologyData.geometries[bifurcationId];
+            [&](const std::vector<size_t>& geometries)
+        {
+            const auto& bifGeom = sdfMorphologyData.geometries[bifurcationId];
 
-                for (size_t geomIdx : geometries)
+            for (size_t geomIdx : geometries)
+            {
+                // Do not blend yourself
+                if (geomIdx == bifurcationId)
+                    continue;
+
+                const auto& geom = sdfMorphologyData.geometries[geomIdx];
+                const double dist0 = glm::distance2(geom.p0, bifGeom.p0);
+                const double dist1 = glm::distance2(geom.p1, bifGeom.p0);
+                const double radiusSum = geom.r0 + bifGeom.r0;
+                const double radiusSumSq = radiusSum * radiusSum;
+
+                if (dist0 < radiusSumSq || dist1 < radiusSumSq)
                 {
-                    // Do not blend yourself
-                    if (geomIdx == bifurcationId)
-                        continue;
-
-                    const auto& geom = sdfMorphologyData.geometries[geomIdx];
-                    const double dist0 = glm::distance2(geom.p0, bifGeom.p0);
-                    const double dist1 = glm::distance2(geom.p1, bifGeom.p0);
-                    const double radiusSum = geom.r0 + bifGeom.r0;
-                    const double radiusSumSq = radiusSum * radiusSum;
-
-                    if (dist0 < radiusSumSq || dist1 < radiusSumSq)
-                    {
-                        sdfMorphologyData.neighbours[bifurcationId].insert(
-                            geomIdx);
-                        sdfMorphologyData.neighbours[geomIdx].insert(
-                            bifurcationId);
-                    }
+                    sdfMorphologyData.neighbours[bifurcationId].insert(geomIdx);
+                    sdfMorphologyData.neighbours[geomIdx].insert(bifurcationId);
                 }
-            };
+            }
+        };
 
         // Connect all child sections
         for (const size_t sectionChild : mts.sectionChildren[section])
@@ -462,7 +460,8 @@ MorphologyTreeStructure MorphologyLoader::_calculateMorphologyTreeStructure(
     }
 
     const auto overlaps = [](const std::pair<double, brayns::Vector3f>& p0,
-                             const std::pair<double, brayns::Vector3f>& p1) {
+                             const std::pair<double, brayns::Vector3f>& p1)
+    {
         const double d = (p0.second - p1.second).length();
         const double r = p0.first + p1.first;
 

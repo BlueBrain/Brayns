@@ -22,7 +22,8 @@
  */
 
 #include "CircuitExplorerAdvancedRenderer.h"
-#include <common/log.h>
+
+#include <brayns/common/Log.h>
 
 // ospray
 #include <ospray/SDK/common/Data.h>

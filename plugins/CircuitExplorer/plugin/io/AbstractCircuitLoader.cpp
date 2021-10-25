@@ -26,11 +26,11 @@
 #include "VoltageSimulationHandler.h"
 
 #include <common/commonTypes.h>
-#include <common/log.h>
 #include <common/types.h>
 #include <plugin/CircuitExplorerPlugin.h>
 #include <plugin/io/CellGrowthHandler.h>
 
+#include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
 #include <brayns/common/scene/ClipPlane.h>
 #include <brayns/engine/Material.h>
@@ -72,8 +72,9 @@ std::vector<std::string> AbstractCircuitLoader::getSupportedExtensions() const
 bool AbstractCircuitLoader::isSupported(const std::string &filename,
                                         const std::string & /*extension*/) const
 {
-    const auto ends_with = [](const std::string &value,
-                              const std::string &ending) {
+    const auto ends_with =
+        [](const std::string &value, const std::string &ending)
+    {
         if (ending.size() > value.size())
             return false;
         return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
@@ -83,8 +84,9 @@ bool AbstractCircuitLoader::isSupported(const std::string &filename,
         if (ends_with(filename, name))
             return true;
 
-    const auto contains = [](const std::string &value,
-                             const std::string &keyword) {
+    const auto contains =
+        [](const std::string &value, const std::string &keyword)
+    {
         if (value.size() < keyword.size())
             return false;
 
@@ -165,8 +167,8 @@ brain::GIDSet AbstractCircuitLoader::_getGids(
     {
         const auto defaultTarget = blueConfiguration.getCircuitTarget();
         localTargets.push_back(defaultTarget);
-        PLUGIN_INFO << "No target specified. Loading default one: "
-                    << defaultTarget << std::endl;
+        brayns::Log::info("[CE] No target specified. Loading default one: {}.",
+                          defaultTarget);
     }
     else
         localTargets = circuitTargets;
@@ -179,15 +181,17 @@ brain::GIDSet AbstractCircuitLoader::_getGids(
                  ? (target.empty() ? circuit.getGIDs()
                                    : circuit.getGIDs(target))
                  : circuit.getRandomGIDs(circuitDensity, target, randomSeed));
-        PLUGIN_INFO << "Target " << target << ": " << targetGids.size()
-                    << " cells" << std::endl;
+        brayns::Log::info("[CE] Target {}: {} cells.", target,
+                          targetGids.size());
         gids.insert(targetGids.begin(), targetGids.end());
         targets.ids.push_back(gids.size());
         targets.nameMap[counter++] = target;
     }
 
     if (gids.empty())
-        PLUGIN_THROW("Selection is empty");
+    {
+        throw std::runtime_error("Selection is empty");
+    }
     return gids;
 }
 
@@ -219,11 +223,10 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
              userDataType == UserDataType::undefined))
             return nullptr;
 
-        PLUGIN_INFO << "Loading simulation data in "
-                    << (synchronousMode ? "a" : "") << "synchronous mode"
-                    << std::endl;
+        brayns::Log::info("[CE] Loading simulation data in {} mode.",
+                          synchronousMode ? "synchronous" : "asynchronous");
         const auto &voltageReport = blueConfiguration.getReportSource(report);
-        PLUGIN_INFO << "Voltage report: " << voltageReport << std::endl;
+        brayns::Log::info("[CE] Voltage report: {}.", voltageReport);
         auto handler =
             std::make_shared<VoltageSimulationHandler>(voltageReport.getPath(),
                                                        gids, synchronousMode);
@@ -231,7 +234,7 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
 
         // Only keep simulated GIDs
         if (!compartmentReport)
-            PLUGIN_THROW("No voltage report was found");
+            throw std::runtime_error("No voltage report was found");
         gids = compartmentReport->getGIDs();
 
         model.setSimulationHandler(handler);
@@ -245,7 +248,7 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
         const auto &spikeReport = blueConfiguration.getSpikeSource();
         const auto transitionTime =
             properties[PROP_SPIKE_TRANSITION_TIME.getName()].as<double>();
-        PLUGIN_INFO << "Spike report: " << spikeReport << std::endl;
+        brayns::Log::info("[CE] Spike report: {}.", spikeReport);
         auto handler = std::make_shared<SpikeSimulationHandler>(
             spikeReport.getPath(), gids, static_cast<float>(transitionTime));
         model.setSimulationHandler(handler);
@@ -265,7 +268,7 @@ CompartmentReportPtr AbstractCircuitLoader::_attachSimulationHandler(
             setSimulationTransferFunction(_scene.getTransferFunction(), 0.f);
         }
         else
-            PLUGIN_THROW("Unknown report type. Simulation ignored");
+            throw std::runtime_error("Unknown report type. Simulation ignored");
     }
     return compartmentReport;
 }
@@ -307,7 +310,7 @@ void AbstractCircuitLoader::_filterGIDsWithClippingPlanes(
     }
     gids = clippedGids;
     transformations = clippedTransformations;
-    PLUGIN_INFO << "Clipped circuit: " << gids.size() << " cells" << std::endl;
+    brayns::Log::info("[CE] Clipped circuit: {} cells.", gids.size());
 }
 
 void AbstractCircuitLoader::_filterGIDsWithAreasOfInterest(
@@ -343,8 +346,7 @@ void AbstractCircuitLoader::_filterGIDsWithAreasOfInterest(
     }
     gids = rearrangedGids;
     transformations = rearrangedTransformations;
-    PLUGIN_INFO << "Areas of interest: " << gids.size() << " cells"
-                << std::endl;
+    brayns::Log::info("[CE] Areas of interest: {} cells.", gids.size());
 }
 
 brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuit(
@@ -389,7 +391,7 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuitFromBlueConfig(
     // Model (one for the whole circuit)
     auto model = _scene.createModel();
     if (!model)
-        PLUGIN_THROW("Failed to create model");
+        throw std::runtime_error("Failed to create model");
 
     // Open Circuit and select GIDs according to specified target
     callback.updateProgress("Open Brain circuit ...", 0);
@@ -528,9 +530,8 @@ brayns::ModelDescriptorPtr AbstractCircuitLoader::importCircuitFromBlueConfig(
 
     // Clean the circuit mapper associated with this model
     modelDescriptor->onRemoved(
-        [plptr = _pluginPtr](const brayns::ModelDescriptor &remMod) {
-            plptr->releaseCircuitMapper(remMod.getModelID());
-        });
+        [plptr = _pluginPtr](const brayns::ModelDescriptor &remMod)
+        { plptr->releaseCircuitMapper(remMod.getModelID()); });
 
     objMapper.setSourceModel(modelDescriptor);
     objMapper.onCircuitColorFinish(colorScheme, morphologyScheme);
@@ -584,7 +585,7 @@ size_t AbstractCircuitLoader::_getMaterialFromCircuitAttributes(
             data->etypes.materialMap[etypeId] = materialId;
         }
         else
-            PLUGIN_DEBUG << "Failed to get neuron E-type" << std::endl;
+            brayns::Log::debug("[CE] Failed to get neuron E-type.");
         break;
     case CircuitColorScheme::by_mtype:
         if (data && index < data->mtypes.ids.size())
@@ -594,7 +595,7 @@ size_t AbstractCircuitLoader::_getMaterialFromCircuitAttributes(
             data->mtypes.materialMap[mtypeId] = materialId;
         }
         else
-            PLUGIN_DEBUG << "Failed to get neuron M-type" << std::endl;
+            brayns::Log::debug("[CE] Failed to get neuron M-type.");
         break;
     case CircuitColorScheme::by_layer:
         if (data && index < data->layers.ids.size())
@@ -605,7 +606,7 @@ size_t AbstractCircuitLoader::_getMaterialFromCircuitAttributes(
             data->layers.materialMap[layerId] = materialId;
         }
         else
-            PLUGIN_DEBUG << "Failed to get neuron layer" << std::endl;
+            brayns::Log::debug("[CE] Failed to get neuron layer.");
         break;
     default:
         materialId = brayns::NO_MATERIAL;
@@ -694,7 +695,7 @@ void AbstractCircuitLoader::_importMeshes(
         }
         catch (const std::runtime_error &e)
         {
-            PLUGIN_WARN << e.what() << std::endl;
+            brayns::Log::warn(e.what());
         }
         ++meshIndex;
         callback.updateProgress("Loading morphologies as meshes...",
@@ -919,14 +920,15 @@ float AbstractCircuitLoader::_importMorphologies(
     // the morphology map
     const auto func =
         [](std::unordered_map<size_t, std::vector<size_t>> &storage, size_t mid,
-           size_t start, size_t end) {
-            if (end > start)
-            {
-                auto &storageVector = storage[mid];
-                for (size_t i = start; i < end; ++i)
-                    storageVector.push_back(i);
-            }
-        };
+           size_t start, size_t end)
+    {
+        if (end > start)
+        {
+            auto &storageVector = storage[mid];
+            for (size_t i = start; i < end; ++i)
+                storageVector.push_back(i);
+        }
+    };
 
     size_t i = 0;
     for (auto gid : gids)
@@ -998,7 +1000,8 @@ float AbstractCircuitLoader::_importMorphologies(
                          loadAfferentSynapses, loadEfferentSynapses, model,
                          compartmentReport);
 
-    PLUGIN_TIMER(chrono.elapsed(), "Loading of " << gids.size() << " cells");
+    brayns::Log::info("[TIMER][CE][{}] Loading of {} cells.", chrono.elapsed(),
+                      gids.size());
     return maxDistanceToSoma;
 }
 
@@ -1007,8 +1010,8 @@ void AbstractCircuitLoader::_loadPairSynapses(
     const uint32_t &preGid, const uint32_t &postGid, const float synapseRadius,
     brayns::Model &model) const
 {
-    PLUGIN_INFO << "Loading pair Synapses (" << preGid << " -> " << postGid
-                << ")" << std::endl;
+    brayns::Log::info("[CE] Loading pair Synapses ({} -> {}).", preGid,
+                      postGid);
     const brain::Synapses &postAfferentSynapses(
         circuit.getAfferentSynapses({postGid}));
 
@@ -1212,7 +1215,7 @@ std::vector<brayns::ModelDescriptorPtr> AbstractCircuitLoader::importFromBlob(
     brayns::Blob && /*blob*/, const brayns::LoaderProgress & /*callback*/,
     const brayns::PropertyMap & /*properties*/) const
 {
-    PLUGIN_THROW("Load circuit from memory not supported");
+    throw std::runtime_error("Load circuit from memory not supported.");
 }
 
 brayns::PropertyMap AbstractCircuitLoader::getProperties() const

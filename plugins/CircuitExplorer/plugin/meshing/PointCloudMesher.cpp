@@ -20,10 +20,11 @@
  */
 
 #include "PointCloudMesher.h"
-#include "../../common/log.h"
+
+#include <brayns/common/Log.h>
+#include <brayns/engine/Model.h>
 
 #include "MetaballsGenerator.h"
-#include <brayns/engine/Model.h>
 
 #if (CIRCUITEXPLORER_USE_CGAL)
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -58,8 +59,8 @@ bool PointCloudMesher::toConvexHull(brayns::Model& model,
         CGAL::convex_hull_3(points.begin(), points.end(), obj);
         if (const Polyhedron_3* poly = CGAL::object_cast<Polyhedron_3>(&obj))
         {
-            PLUGIN_INFO << "The convex hull contains "
-                        << poly->size_of_vertices() << " vertices" << std::endl;
+            brayns::Log::info("[CE] The convex hull contains {} vertices.",
+                              poly->size_of_vertices());
 
             for (auto eit = poly->edges_begin(); eit != poly->edges_end();
                  ++eit)
@@ -73,7 +74,7 @@ bool PointCloudMesher::toConvexHull(brayns::Model& model,
             }
         }
         else
-            PLUGIN_ERROR << "something else" << std::endl;
+            brayns::Log::error("something else");
     }
     return addModel;
 }
@@ -95,9 +96,8 @@ bool PointCloudMesher::toMetaballs(brayns::Model& model,
         if (point.second.empty())
             continue;
 
-        PLUGIN_INFO << "Material " << point.first
-                    << ", number of balls: " << point.second.size()
-                    << std::endl;
+        brayns::Log::info("[CE] Material {}, number of balls: {}.", point.first,
+                          point.second.size());
 
         model.createMaterial(point.first, std::to_string(point.first));
 

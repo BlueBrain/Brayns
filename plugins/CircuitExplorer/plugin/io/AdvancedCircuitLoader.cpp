@@ -21,7 +21,7 @@
 
 #include "AdvancedCircuitLoader.h"
 
-#include <common/log.h>
+#include <brayns/common/Log.h>
 
 const std::string LOADER_NAME = "Advanced circuit loader (Experimental)";
 
@@ -32,7 +32,7 @@ AdvancedCircuitLoader::AdvancedCircuitLoader(
     : AbstractCircuitLoader(scene, applicationParameters,
                             std::move(loaderParams), plugin)
 {
-    PLUGIN_INFO << "Registering " << LOADER_NAME << std::endl;
+    brayns::Log::info("[CE] Registering {}.", LOADER_NAME);
     _fixedDefaults.add(
         {PROP_PRESYNAPTIC_NEURON_GID.getName(), std::string("")});
     _fixedDefaults.add(
@@ -43,7 +43,7 @@ std::vector<brayns::ModelDescriptorPtr> AdvancedCircuitLoader::importFromFile(
     const std::string &filename, const brayns::LoaderProgress &callback,
     const brayns::PropertyMap &properties) const
 {
-    PLUGIN_INFO << "Loading circuit from " << filename << std::endl;
+    brayns::Log::info("[CE] Loading circuit from {}.}", filename);
     callback.updateProgress("Loading circuit ...", 0);
     brayns::PropertyMap props = _defaults;
     props.merge(_fixedDefaults);

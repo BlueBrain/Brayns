@@ -21,7 +21,7 @@
 
 #include "MeshCircuitLoader.h"
 
-#include <common/log.h>
+#include <brayns/common/Log.h>
 
 const std::string LOADER_NAME = "Circuit viewer with meshes use-case";
 const double DEFAULT_RADIUS_MULTIPLIER = 2.0;
@@ -33,7 +33,7 @@ MeshCircuitLoader::MeshCircuitLoader(
     : AbstractCircuitLoader(scene, applicationParameters,
                             std::move(loaderParams), plugin)
 {
-    PLUGIN_INFO << "Registering " << LOADER_NAME << std::endl;
+    brayns::Log::info("[CE] Registering {}.", LOADER_NAME);
     _fixedDefaults.add({PROP_DB_CONNECTION_STRING.getName(), std::string("")});
     _fixedDefaults.add({PROP_USE_SDF_GEOMETRY.getName(), false});
     _fixedDefaults.add(
@@ -73,7 +73,7 @@ std::vector<brayns::ModelDescriptorPtr> MeshCircuitLoader::importFromFile(
     const std::string &filename, const brayns::LoaderProgress &callback,
     const brayns::PropertyMap &properties) const
 {
-    PLUGIN_INFO << "Loading circuit from " << filename << std::endl;
+    brayns::Log::info("[CE] Loading circuit from {}.", filename);
     callback.updateProgress("Loading circuit ...", 0);
     brayns::PropertyMap props = _defaults;
     props.merge(_fixedDefaults);

@@ -3,8 +3,8 @@
 #include <brayns/common/types.h>
 
 #include <common/commonTypes.h>
-#include <common/log.h>
 
+#include <brayns/common/Log.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/engine/Material.h>
 
@@ -43,7 +43,7 @@ RemapResult CellObjectMapper::remapCircuitColors(
         return result;
     }
 
-    PLUGIN_INFO << "Remapping circuit..." << std::endl;
+    brayns::Log::info("[CE] Remapping circuit...");
 
     // Gather current geometry mapping (material -> geometry list)
     brayns::SpheresMap& srcSpheres = _model->getModel().getSpheres();
@@ -287,7 +287,7 @@ RemapResult CellObjectMapper::remapCircuitColors(
         result.message = "An exception occoured: " + std::string(e.what());
     }
 
-    PLUGIN_INFO << "Remapping done!" << std::endl;
+    brayns::Log::info("[CE] Remapping done!");
 
     return result;
 }
@@ -391,7 +391,7 @@ size_t CellObjectMapper::_computeMaterialId(const CircuitColorScheme scheme,
             _data.etypes.materialMap[etypeId] = materialId;
         }
         else
-            PLUGIN_WARN << "Failed to get neuron E-type" << std::endl;
+            brayns::Log::warn("[CE] Failed to get neuron E-type.");
         break;
     case CircuitColorScheme::by_mtype:
         if (index < _data.mtypes.ids.size())
@@ -401,7 +401,7 @@ size_t CellObjectMapper::_computeMaterialId(const CircuitColorScheme scheme,
             _data.mtypes.materialMap[mtypeId] = materialId;
         }
         else
-            PLUGIN_WARN << "Failed to get neuron M-type" << std::endl;
+            brayns::Log::warn("[CE] Failed to get neuron M-type.");
         break;
     case CircuitColorScheme::by_layer:
         if (index < _data.layers.ids.size())
@@ -414,10 +414,10 @@ size_t CellObjectMapper::_computeMaterialId(const CircuitColorScheme scheme,
                 _data.layers.materialMap[layerId] = materialId;
             }
             else
-                PLUGIN_WARN << "Failed to get layer virtual index" << std::endl;
+                brayns::Log::warn("[CE] Failed to get layer virtual index.");
         }
         else
-            PLUGIN_WARN << "Failed to get neuron layer" << std::endl;
+            brayns::Log::warn("[CE] Failed to get neuron layer.");
         break;
     default:
         materialId = brayns::NO_MATERIAL;

@@ -21,7 +21,6 @@
 
 #include "CircuitExplorerPlugin.h"
 #include <common/commonTypes.h>
-#include <common/log.h>
 
 #include <plugin/io/AdvancedCircuitLoader.h>
 #include <plugin/io/AstrocyteLoader.h>
@@ -38,6 +37,7 @@
 #include <plugin/meshing/PointCloudMesher.h>
 #include <plugin/movie/MovieMaker.h>
 
+#include <brayns/common/Log.h>
 #include <brayns/common/Progress.h>
 #include <brayns/common/Timer.h>
 #include <brayns/common/geometry/Streamline.h>
@@ -82,7 +82,7 @@ const std::string ANTEROGRADE_TYPE_EFFERENT = "efferent";
 
 void _addAdvancedSimulationRenderer(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering advanced renderer" << std::endl;
+    brayns::Log::info("[CE] Registering advanced renderer.");
     brayns::PropertyMap properties;
     properties.add({"giDistance", 10000., {"Global illumination distance"}});
     properties.add({"giWeight", 0., {"Global illumination weight"}});
@@ -112,7 +112,7 @@ void _addAdvancedSimulationRenderer(brayns::Engine& engine)
 
 void _addBasicSimulationRenderer(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering basic renderer" << std::endl;
+    brayns::Log::info("[CE] Registering basic renderer.");
 
     brayns::PropertyMap properties;
     properties.add({"alphaCorrection", 0.5, {"Alpha correction"}});
@@ -130,7 +130,7 @@ void _addBasicSimulationRenderer(brayns::Engine& engine)
 
 void _addVoxelizedSimulationRenderer(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering voxelized Simulation renderer" << std::endl;
+    brayns::Log::info("[CE] Registering voxelized Simulation renderer.");
 
     brayns::PropertyMap properties;
     properties.add({"alphaCorrection", 0.5, {"Alpha correction"}});
@@ -147,7 +147,7 @@ void _addVoxelizedSimulationRenderer(brayns::Engine& engine)
 
 void _addGrowthRenderer(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering cell growth renderer" << std::endl;
+    brayns::Log::info("[CE] Registering cell growth renderer.");
 
     brayns::PropertyMap properties;
     properties.add({"alphaCorrection", 0.5, {"Alpha correction"}});
@@ -167,7 +167,7 @@ void _addGrowthRenderer(brayns::Engine& engine)
 
 void _addProximityRenderer(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering proximity detection renderer" << std::endl;
+    brayns::Log::info("[CE] Registering proximity detection renderer.");
 
     brayns::PropertyMap properties;
     properties.add({"alphaCorrection", 0.5, {"Alpha correction"}});
@@ -192,7 +192,7 @@ void _addProximityRenderer(brayns::Engine& engine)
 
 void _addDOFPerspectiveCamera(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering DOF perspective camera" << std::endl;
+    brayns::Log::info("[CE] Registering DOF perspective camera.");
 
     brayns::PropertyMap properties;
     properties.add({"fovy", 45., {"Field of view"}});
@@ -205,8 +205,7 @@ void _addDOFPerspectiveCamera(brayns::Engine& engine)
 
 void _addSphereClippingPerspectiveCamera(brayns::Engine& engine)
 {
-    PLUGIN_INFO << "Registering sphere clipping perspective camera"
-                << std::endl;
+    brayns::Log::info("[CE] Registering sphere clipping perspective camera.");
 
     brayns::PropertyMap properties;
     properties.add({"fovy", 45., {"Field of view"}});
@@ -356,9 +355,8 @@ void CircuitExplorerPlugin::releaseCircuitMapper(const size_t modelId)
     _mappers.erase(
         std::remove_if(_mappers.begin(), _mappers.end(),
                        [mid = modelId](
-                           const std::unique_ptr<CellObjectMapper>& mapper) {
-                           return mapper->getSourceModelId() == mid;
-                       }),
+                           const std::unique_ptr<CellObjectMapper>& mapper)
+                       { return mapper->getSourceModelId() == mid; }),
         _mappers.end());
 }
 
@@ -387,21 +385,19 @@ brayns::Message CircuitExplorerPlugin::exportFramesToDisk(
     _api->getParametersManager().getRenderingParameters().setMaxAccumFrames(
         static_cast<size_t>(payload.spp) + 1);
 
-    PLUGIN_INFO << "-----------------------------------------------------------"
-                   "---------------------"
-                << std::endl;
-    PLUGIN_INFO << "Movie settings     :" << std::endl;
-    PLUGIN_INFO << "- Number of frames : "
-                << payload.animationInformation.size() - payload.startFrame
-                << std::endl;
-    PLUGIN_INFO << "- Samples per pixel: " << payload.spp << std::endl;
-    PLUGIN_INFO << "- Frame size       : " << frameBuffer.getSize()
-                << std::endl;
-    PLUGIN_INFO << "- Export folder    : " << payload.path << std::endl;
-    PLUGIN_INFO << "- Start frame      : " << payload.startFrame << std::endl;
-    PLUGIN_INFO << "-----------------------------------------------------------"
-                   "---------------------"
-                << std::endl;
+    brayns::Log::info(
+        "-----------------------------------------------------------"
+        "---------------------");
+    brayns::Log::info("[CE] Movie settings     :");
+    brayns::Log::info("[CE] - Number of frames : {}",
+                      payload.animationInformation.size() - payload.startFrame);
+    brayns::Log::info("[CE] - Samples per pixel: {}", payload.spp);
+    brayns::Log::info("[CE] - Frame size       : {}", frameBuffer.getSize());
+    brayns::Log::info("[CE] - Export folder    : {}", payload.path);
+    brayns::Log::info("[CE] - Start frame      : {}", payload.startFrame);
+    brayns::Log::info(
+        "[CE] -----------------------------------------------------------"
+        "---------------------");
 
     return result;
 }
@@ -441,9 +437,9 @@ brayns::Message CircuitExplorerPlugin::_setCamera(
 
     _api->getCamera().markModified();
 
-    PLUGIN_DEBUG << "SET: " << origin << ", " << direction << ", " << up << ", "
-                 << glm::inverse(q) << "," << payload.apertureRadius << ","
-                 << payload.focusDistance << std::endl;
+    brayns::Log::debug("[CE] SET: {}, {}, {}, {}, {}, {}.", origin, direction,
+                       up, glm::inverse(q), payload.apertureRadius,
+                       payload.focusDistance);
 
     return result;
 }
@@ -509,7 +505,7 @@ void CircuitExplorerPlugin::_doExportFrameToDisk()
 
     frameBuffer.clear();
 
-    PLUGIN_INFO << "Frame saved to " << filename << std::endl;
+    brayns::Log::info("[CE] Frame saved to '{}'.", filename);
 }
 
 FrameExportProgress CircuitExplorerPlugin::getFrameExportProgress()
@@ -537,6 +533,6 @@ FrameExportProgress CircuitExplorerPlugin::getFrameExportProgress()
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int /*argc*/,
                                                          char** /*argv*/)
 {
-    PLUGIN_INFO << "Initializing circuit explorer plugin" << std::endl;
+    brayns::Log::info("[CE] Initializing circuit explorer plugin.");
     return new CircuitExplorerPlugin();
 }
