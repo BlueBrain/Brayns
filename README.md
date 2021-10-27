@@ -190,7 +190,17 @@ and outputs.
 
 ## Funding & Acknowledgment
 
-The development of this software was supported by funding to the Blue Brain Project, a research center of the École polytechnique fédérale de Lausanne (EPFL), from the Swiss government’s ETH Board of the Swiss Federal Institutes of Technology
+The development of this software was supported by funding to the Blue Brain Project,
+a research center of the École polytechnique fédérale de Lausanne (EPFL), from the
+Swiss government’s ETH Board of the Swiss Federal Institutes of Technology.
+
+This project has received funding from the European Union’s FP7-ICT programme
+under Grant Agreement No. 604102 (Human Brain Project RUP).
+
+This project has received funding from the European Union's Horizon 2020 Framework
+Programme for Research and Innovation under the Specific Grant Agreement No. 720270
+(Human Brain Project SGA1).
+
 
 ## License
 
