@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2019, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -21,8 +21,6 @@
 
 namespace brayns
 {
-AbstractSimulationHandler::~AbstractSimulationHandler() = default;
-
 AbstractSimulationHandler& AbstractSimulationHandler::operator=(
     const AbstractSimulationHandler& rhs)
 {
@@ -32,28 +30,27 @@ AbstractSimulationHandler& AbstractSimulationHandler::operator=(
     _currentFrame = rhs._currentFrame;
     _nbFrames = rhs._nbFrames;
     _frameSize = rhs._frameSize;
+    _startTime = rhs._startTime;
+    _endTime = rhs._endTime;
     _dt = rhs._dt;
+    _frameAdjuster = rhs._frameAdjuster;
     _unit = rhs._unit;
     _frameData = rhs._frameData;
 
     return *this;
 }
 
-uint32_t AbstractSimulationHandler::_getBoundedFrame(const uint32_t frame) const
+uint32_t AbstractSimulationHandler::_getBoundedFrame(
+    const uint32_t inputFrame) const
 {
+    const auto frame = static_cast<uint32_t>(inputFrame * _frameAdjuster);
     const double frameTimestamp = static_cast<double>(frame) * _dt;
-    uint32_t boundedFrame = 0;
 
     if (frameTimestamp <= _startTime)
-        boundedFrame = 0;
+        return 0u;
     else if (frameTimestamp >= _endTime)
-        boundedFrame = std::max(_nbFrames - 1, 0u);
+        return _nbFrames > 0u ? _nbFrames - 1 : 0u;
     else
-    {
-        const double realTimestamp = frameTimestamp - _startTime;
-        boundedFrame = static_cast<uint32_t>(realTimestamp / _dt);
-    }
-
-    return boundedFrame;
+        return static_cast<uint32_t>(frameTimestamp / _dt);
 }
 } // namespace brayns

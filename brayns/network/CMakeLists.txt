@@ -8,9 +8,6 @@ set(BRAYNSNETWORK_HEADERS
   entrypoint/IEntrypoint.h
   entrypoint/EntrypointException.h
   interface/ActionInterface.h
-  json/ActionMessage.h
-  json/Json.h
-  json/Message.h
   json/MessageFactory.h
   plugin/NetworkManager.h
 )
@@ -20,7 +17,6 @@ set(BRAYNSNETWORK_SOURCES
   interface/NetworkInterface.cpp
   interface/ClientInterface.cpp
   interface/ServerInterface.cpp
-  json/JsonSchemaValidator.cpp
   plugin/NetworkManager.cpp
   socket/ConnectionManager.cpp
   stream/StreamManager.cpp
@@ -38,13 +34,14 @@ target_link_libraries(braynsNetwork PRIVATE
   braynsCommon
   braynsParameters
   braynsPluginAPI
+  braynsUtils
 )
 
 target_link_libraries(braynsNetwork PUBLIC
+  braynsJson
   Poco::Foundation
   Poco::Net
   Poco::NetSSL
-  Poco::JSON
 )
 
 set_target_properties(braynsNetwork

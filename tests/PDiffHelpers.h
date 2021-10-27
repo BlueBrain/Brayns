@@ -1,6 +1,4 @@
-#pragma once
-
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Jonas Karlsson <jonas.karlsson@epfl.ch>
  *
@@ -20,21 +18,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#pragma once
+
 #include <brayns/Brayns.h>
 
-#include <brayns/common/utils/imageUtils.h>
+#include <brayns/common/utils/ImageGenerator.h>
 #include <brayns/engine/FrameBuffer.h>
+#include <brayns/utils/ImageUtils.h>
+#include <brayns/utils/base64/base64.h>
 
 #include <deps/perceptualdiff/metric.h>
 #include <deps/perceptualdiff/rgba_image.h>
 
 #include <tests/paths.h>
 
-#include <iostream>
-
-#include <brayns/common/utils/ImageGenerator.h>
-#include <brayns/common/utils/base64/base64.h>
 #include <fstream>
+#include <iostream>
 
 inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(FIBITMAP* image)
 {

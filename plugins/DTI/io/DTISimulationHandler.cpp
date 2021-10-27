@@ -23,7 +23,6 @@
 #include "log.h"
 
 #include <brayns/common/Transformation.h>
-#include <brayns/common/utils/utils.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -19,32 +19,16 @@
 
 #include "VolumeLoader.h"
 
-#include <brayns/common/utils/filesystem.h>
-#include <brayns/common/utils/stringUtils.h>
-#include <brayns/common/utils/utils.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/engine/SharedDataVolume.h>
+#include <brayns/utils/Filesystem.h>
+#include <brayns/utils/StringUtils.h>
 
 #include <fstream>
 #include <map>
 #include <sstream>
 #include <string>
-
-namespace
-{
-using Property = brayns::Property;
-const Property PROP_DIMENSIONS = {"dimensions",
-                                  brayns::Vector3i{0, 0, 0},
-                                  {"Dimensions"}};
-const Property PROP_SPACING = {"spacing",
-                               brayns::Vector3d{1, 1, 1},
-                               {"Spacing"}};
-const Property PROP_TYPE = {"type",
-                            {brayns::enumToString(brayns::DataType::UINT8),
-                             brayns::enumNames<brayns::DataType>()},
-                            {"Type"}};
-} // namespace
 
 namespace brayns
 {
@@ -160,7 +144,7 @@ RawVolumeLoader::RawVolumeLoader(Scene& scene)
 {
 }
 
-bool RawVolumeLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
+bool RawVolumeLoader::isSupported(const std::string&,
                                   const std::string& extension) const
 {
     return extension == "raw";
@@ -168,7 +152,7 @@ bool RawVolumeLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
 
 std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback,
-    const PropertyMap& properties) const
+    const RawVolumeLoaderParameters& properties) const
 {
     return {_loadVolume(blob.name, callback, properties, [&blob](auto volume) {
         volume->mapData(std::move(blob.data));
@@ -177,7 +161,7 @@ std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromBlob(
 
 std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
-    const PropertyMap& properties) const
+    const RawVolumeLoaderParameters& properties) const
 {
     return {
         _loadVolume(filename, callback, properties,
@@ -186,27 +170,18 @@ std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromFile(
 
 ModelDescriptorPtr RawVolumeLoader::_loadVolume(
     const std::string& filename, const LoaderProgress& callback,
-    const PropertyMap& propertiesTmp,
+    const RawVolumeLoaderParameters& params,
     const std::function<void(SharedDataVolumePtr)>& mapData) const
 {
-    // Fill property map since the actual property types are known now.
-    PropertyMap properties = getProperties();
-    properties.merge(propertiesTmp);
-
     callback.updateProgress("Parsing volume file ...", 0.f);
 
-    const auto dimensions =
-        properties[PROP_DIMENSIONS.getName()].as<Vector3i>();
-    const auto spacing = properties[PROP_SPACING.getName()].as<Vector3d>();
-    const auto type = stringToEnum<DataType>(
-        properties[PROP_TYPE.getName()].to<std::string>());
-
-    if (glm::compMul(dimensions) == 0)
+    if (glm::compMul(params.dimensions) == 0)
         throw std::runtime_error("Volume dimensions are empty");
 
-    const auto dataRange = dataRangeFromType(type);
+    const auto dataRange = dataRangeFromType(params.type);
     auto model = _scene.createModel();
-    auto volume = model->createSharedDataVolume(dimensions, spacing, type);
+    auto volume = model->createSharedDataVolume(params.dimensions,
+                                                params.spacing, params.type);
     volume->setDataRange(dataRange);
 
     callback.updateProgress("Loading voxels ...", 0.5f);
@@ -219,8 +194,8 @@ ModelDescriptorPtr RawVolumeLoader::_loadVolume(
     transformation.setRotationCenter(model->getBounds().getCenter());
     auto modelDescriptor = std::make_shared<ModelDescriptor>(
         std::move(model), filename,
-        ModelMetadata{{"dimensions", to_string(dimensions)},
-                      {"element-spacing", to_string(spacing)}});
+        ModelMetadata{{"dimensions", to_string(params.dimensions)},
+                      {"element-spacing", to_string(params.spacing)}});
     modelDescriptor->setTransformation(transformation);
     return modelDescriptor;
 }
@@ -235,37 +210,27 @@ std::vector<std::string> RawVolumeLoader::getSupportedExtensions() const
     return {"raw"};
 }
 
-PropertyMap RawVolumeLoader::getProperties() const
-{
-    PropertyMap pm;
-    pm.add(PROP_DIMENSIONS);
-    pm.add(PROP_SPACING);
-    pm.add(PROP_TYPE);
-    return pm;
-}
 ////////////////////////////////////////////////////////////////////////////
 
 MHDVolumeLoader::MHDVolumeLoader(Scene& scene)
-    : Loader(scene)
+    : NoInputLoader(scene)
 {
 }
 
-bool MHDVolumeLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
+bool MHDVolumeLoader::isSupported(const std::string&,
                                   const std::string& extension) const
 {
     return extension == "mhd";
 }
 
 std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromBlob(
-    Blob&& blob BRAYNS_UNUSED, const LoaderProgress&,
-    const PropertyMap& properties BRAYNS_UNUSED) const
+    Blob&&, const LoaderProgress&) const
 {
     throw std::runtime_error("Volume loading from blob is not supported");
 }
 
 std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromFile(
-    const std::string& filename, const LoaderProgress& callback,
-    const PropertyMap&) const
+    const std::string& filename, const LoaderProgress& callback) const
 {
     std::string volumeFile = filename;
     const auto mhd = parseMHD(filename);
@@ -295,21 +260,12 @@ std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromFile(
     }
     volumeFile = path.string();
 
-    PropertyMap properties;
-    properties.add(
-        {PROP_DIMENSIONS.getName(),
-         dimensions,
-         {PROP_DIMENSIONS.getLabel(), PROP_DIMENSIONS.getDescription()}});
-    properties.add({PROP_SPACING.getName(),
-                    spacing,
-                    {PROP_SPACING.getLabel(), PROP_SPACING.getDescription()}});
-    properties.add({PROP_TYPE.getName(),
-                    {brayns::enumToString(type),
-                     PROP_TYPE.as<brayns::EnumProperty>().getValues()},
-                    {PROP_TYPE.getLabel(), PROP_TYPE.getDescription()}});
+    RawVolumeLoaderParameters params;
+    params.dimensions = dimensions;
+    params.spacing = spacing;
+    params.type = type;
 
-    return RawVolumeLoader(_scene).importFromFile(volumeFile, callback,
-                                                  properties);
+    return RawVolumeLoader(_scene).importFromFile(volumeFile, callback, params);
 }
 
 std::string MHDVolumeLoader::getName() const

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -24,14 +24,13 @@
 #include <brayns/common/log.h>
 #include <brayns/common/scene/ClipPlane.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
-#include <brayns/common/utils/utils.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
 
 #include <brayns/parameters/AnimationParameters.h>
 #include <brayns/parameters/GeometryParameters.h>
 
-#include <brayns/common/utils/filesystem.h>
+#include <brayns/utils/Filesystem.h>
 
 #include <fstream>
 
@@ -318,31 +317,11 @@ std::vector<ModelDescriptorPtr> Scene::loadModels(Blob&& blob,
         _loaderRegistry.getSuitableLoader("", blob.type,
                                           params.getLoaderName());
 
-    // HACK: Add loader name in properties for archive loader
-    auto propCopy = params.getLoaderProperties();
-    propCopy.add({"loaderName", params.getLoaderName()});
-
     // Load the models
     auto modelDescriptors =
-        loader.importFromBlob(std::move(blob), cb, propCopy);
+        loader.loadFromBlob(std::move(blob), cb, params.getLoadParameters());
 
-    // Check for models correctness
-    if (modelDescriptors.empty())
-        throw std::runtime_error("No model returned by loader");
-    for (auto& md : modelDescriptors)
-    {
-        if (!md)
-            throw std::runtime_error("No model returned by loader");
-    }
-
-    // Update loaded model with loader properties (so we can have the
-    // information with which it was loaded)
-    for (auto& md : modelDescriptors)
-    {
-        *md = params;
-        addModel(md);
-    }
-
+    _processNewModels(params, modelDescriptors);
     return modelDescriptors;
 }
 
@@ -352,31 +331,12 @@ std::vector<ModelDescriptorPtr> Scene::loadModels(const std::string& path,
 {
     const auto& loader =
         _loaderRegistry.getSuitableLoader(path, "", params.getLoaderName());
-    // HACK: Add loader name in properties for archive loader
-    auto propCopy = params.getLoaderProperties();
-    propCopy.add({"loaderName", params.getLoaderName()});
 
     // Load the models
-    auto modelDescriptors = loader.importFromFile(path, cb, propCopy);
+    auto modelDescriptors =
+        loader.loadFromFile(path, cb, params.getLoadParameters());
 
-    // Check for models correctness
-    if (modelDescriptors.empty())
-        throw std::runtime_error("No model returned by loader");
-
-    for (auto& md : modelDescriptors)
-    {
-        if (!md)
-            throw std::runtime_error("No model returned by loader");
-    }
-
-    // Update loaded model with loader properties (so we can have the
-    // information with which it was loaded)
-    for (auto& md : modelDescriptors)
-    {
-        *md = params;
-        addModel(md);
-    }
-
+    _processNewModels(params, modelDescriptors);
     return modelDescriptors;
 }
 
@@ -545,6 +505,29 @@ bool Scene::hasEnvironmentMap() const
     return !_environmentMap.empty();
 }
 
+void Scene::_processNewModels(
+    const ModelParams& params, std::vector<ModelDescriptorPtr>& models)
+{
+    // Check for models correctness
+    if (models.empty())
+        throw std::runtime_error("No model returned by loader");
+
+    for (auto& md : models)
+    {
+        if (!md)
+            throw std::runtime_error("No model returned by loader");
+    }
+
+    // Update loaded model with loader properties (so we can have the
+    // information with which it was loaded)
+
+    for (auto& md : models)
+    {
+        *md = params;
+        addModel(md);
+    }
+}
+
 void Scene::_computeBounds()
 {
     std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
@@ -590,7 +573,10 @@ void Scene::_loadIBLMaps(const std::string& envMap)
 void Scene::_updateAnimationParameters()
 {
     std::vector<AbstractSimulationHandler*> handlers;
-    uint32_t numFrames = 0;
+
+    double earlierStart = std::numeric_limits<double>::max();
+    double latestEnd = std::numeric_limits<double>::lowest();
+    double smallestDt = std::numeric_limits<double>::max();
     {
         std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
         for (auto& modelDesc : _modelDescriptors)
@@ -602,10 +588,11 @@ void Scene::_updateAnimationParameters()
                 modelDesc->getModel().getSimulationHandler().get();
             if (simHandler)
             {
-                handlers.push_back(
-                    modelDesc->getModel().getSimulationHandler().get());
-                if (simHandler->getNbFrames() > numFrames)
-                    numFrames = simHandler->getNbFrames();
+                handlers.push_back(simHandler);
+                earlierStart =
+                    std::min(earlierStart, simHandler->getStartTime());
+                latestEnd = std::max(latestEnd, simHandler->getEndTime());
+                smallestDt = std::min(smallestDt, simHandler->getDt());
             }
         }
     }
@@ -616,6 +603,13 @@ void Scene::_updateAnimationParameters()
         ap.removeIsReadyCallback();
     else
     {
+        // Set the frame adjuster
+        for (auto& handler : handlers)
+        {
+            if (handler->getDt() != smallestDt)
+                handler->setFrameAdjuster(smallestDt / handler->getDt());
+        }
+
         ap.setIsReadyCallback([handlersV = handlers] {
             for (auto handler : handlersV)
             {
@@ -625,9 +619,10 @@ void Scene::_updateAnimationParameters()
             return true;
         });
 
-        ap.setDt(handlers[0]->getDt(), false);
+        ap.setDt(smallestDt, false);
+        ap.setStartFrame(static_cast<uint32_t>(earlierStart / smallestDt));
+        ap.setEndFrame(static_cast<uint32_t>(latestEnd / smallestDt));
         ap.setUnit(handlers[0]->getUnit(), false);
-        ap.setNumFrames(numFrames, false);
         ap.markModified();
     }
 }

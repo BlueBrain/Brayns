@@ -23,7 +23,7 @@
 
 #include <brayns/common/light/Light.h>
 
-#include <brayns/network/json/MessageAdapter.h>
+#include <brayns/json/MessageAdapter.h>
 
 namespace brayns
 {

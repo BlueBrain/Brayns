@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -28,8 +28,6 @@
 #include <brayns/engine/LightManager.h>
 
 #include <shared_mutex>
-
-SERIALIZATION_ACCESS(Scene)
 
 namespace brayns
 {
@@ -230,6 +228,14 @@ public:
 
     virtual void copyFromImpl(const Scene&) {}
 
+private:
+    /**
+     * @brief _processNewModels Check and add (if checks pass) the models from
+     * the input list to the scene.
+     */
+    void _processNewModels(
+        const ModelParams& params, std::vector<ModelDescriptorPtr>& models);
+
 protected:
     /** @return True if this scene supports scene updates from any thread. */
     virtual bool supportsConcurrentSceneUpdates() const { return false; }
@@ -258,8 +264,5 @@ protected:
 
     LoaderRegistry _loaderRegistry;
     Boxd _bounds;
-
-private:
-    SERIALIZATION_FRIEND(Scene)
 };
 } // namespace brayns

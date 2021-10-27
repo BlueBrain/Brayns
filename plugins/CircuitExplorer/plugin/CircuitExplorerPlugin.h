@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2019, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -21,14 +21,8 @@
 
 #pragma once
 
-#include <plugin/api/CellObjectMapper.h>
-#include <plugin/api/CircuitExplorerParams.h>
-#include <plugin/io/AbstractCircuitLoader.h>
-
-#include <array>
 #include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
-#include <vector>
 
 /**
  * @brief The CircuitExplorerPlugin class manages the loading and visualization
@@ -41,56 +35,6 @@ public:
     CircuitExplorerPlugin();
 
     void init() final;
-
-    /**
-     * @brief preRender Updates the scene according to latest data load
-     */
     void preRender() final;
     void postRender() final;
-
-    CellObjectMapper* getMapperForCircuit(const size_t modelId) noexcept
-    {
-        for (auto& mapper : _mappers)
-        {
-            if (mapper->getSourceModelId() == modelId)
-                return mapper.get();
-        }
-
-        return nullptr;
-    }
-
-    template <class T, typename = std::enable_if_t<
-                           std::is_base_of<CellObjectMapper, T>::value>>
-    void addCircuitMapper(T&& mapper)
-    {
-        _mappers.emplace_back(std::make_unique<T>(std::forward<T>(mapper)));
-    }
-
-    void releaseCircuitMapper(const size_t modelId);
-
-    // Used by entrypoints
-    SynapseAttributes& getSynapseAttributes() { return _synapseAttributes; }
-    brayns::Message exportFramesToDisk(const ExportFramesToDisk& payload);
-    FrameExportProgress getFrameExportProgress();
-
-private:
-    brayns::Message _setCamera(const CameraDefinition&);
-    void _doExportFrameToDisk();
-
-    SynapseAttributes _synapseAttributes;
-
-    bool _dirty{false};
-
-    ExportFramesToDisk _exportFramesToDiskPayload;
-    bool _exportFramesToDiskDirty{false};
-    // Flag used to avoid the first frame to be rendered with the wrong camera
-    // parameters
-    bool _exportFramesToDiskStartFlag{false};
-    uint16_t _frameNumber{0};
-    uint32_t _accumulationFrameNumber{0};
-    size_t _prevAccumulationSetting;
-    bool _exportFrameError{false};
-    std::string _exportFrameErrorMessage;
-
-    std::vector<std::unique_ptr<CellObjectMapper>> _mappers;
 };

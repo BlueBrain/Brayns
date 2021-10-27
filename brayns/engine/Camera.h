@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
@@ -24,8 +24,6 @@
 #include <brayns/api.h>
 #include <brayns/common/PropertyObject.h>
 #include <brayns/common/types.h>
-
-SERIALIZATION_ACCESS(Camera)
 
 namespace brayns
 {
@@ -127,8 +125,6 @@ private:
     Quaterniond _initialOrientation;
 
     std::string _bufferTarget;
-
-    SERIALIZATION_FRIEND(Camera)
 };
 
 std::ostream& operator<<(std::ostream& os, Camera& camera);

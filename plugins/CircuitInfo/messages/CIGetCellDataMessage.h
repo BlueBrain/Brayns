@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/network/json/Message.h>
+#include <brayns/json/Message.h>
 
 BRAYNS_MESSAGE_BEGIN(CIGetCellDataParams)
 BRAYNS_MESSAGE_ENTRY(std::string, path, "Path to circuit config file")

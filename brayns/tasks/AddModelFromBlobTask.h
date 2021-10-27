@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
@@ -28,7 +28,6 @@ namespace brayns
 {
 struct BinaryParam;
 }
-SERIALIZATION_ACCESS(BinaryParam)
 
 namespace brayns
 {
@@ -42,7 +41,6 @@ struct BinaryParam : ModelParams
     size_t size{0};   //!< size in bytes of file
     std::string type; //!< file extension or type (MESH, POINTS, CIRCUIT)
     std::string chunksID;
-    SERIALIZATION_FRIEND(BinaryParam)
 };
 
 /**

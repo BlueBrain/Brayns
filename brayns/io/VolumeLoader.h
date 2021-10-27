@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -20,55 +20,56 @@
 #pragma once
 
 #include <brayns/common/loader/Loader.h>
+#include <brayns/io/RawVolumeLoaderParameters.h>
 
 namespace brayns
 {
 /** A volume loader for mhd volumes.
  */
-class MHDVolumeLoader : public Loader
+class MHDVolumeLoader : public NoInputLoader
 {
 public:
     MHDVolumeLoader(Scene& scene);
 
     std::vector<std::string> getSupportedExtensions() const final;
+
     std::string getName() const final;
 
     bool isSupported(const std::string& filename,
                      const std::string& extension) const final;
     std::vector<ModelDescriptorPtr> importFromBlob(
-        Blob&& blob, const LoaderProgress& callback,
-        const PropertyMap& properties) const final;
+        Blob&& blob, const LoaderProgress& callback) const final;
 
     std::vector<ModelDescriptorPtr> importFromFile(
-        const std::string& filename, const LoaderProgress& callback,
-        const PropertyMap& properties) const final;
+        const std::string& filename,
+        const LoaderProgress& callback) const final;
 };
 
 /** A volume loader for raw volumes with params for dimensions.
  */
-class RawVolumeLoader : public Loader
+class RawVolumeLoader : public Loader<RawVolumeLoaderParameters>
 {
 public:
     RawVolumeLoader(Scene& scene);
 
     std::vector<std::string> getSupportedExtensions() const final;
+
     std::string getName() const final;
-    PropertyMap getProperties() const final;
 
     bool isSupported(const std::string& filename,
                      const std::string& extension) const final;
     std::vector<ModelDescriptorPtr> importFromBlob(
         Blob&& blob, const LoaderProgress& callback,
-        const PropertyMap& properties) const final;
+        const RawVolumeLoaderParameters& properties) const final;
 
     std::vector<ModelDescriptorPtr> importFromFile(
         const std::string& filename, const LoaderProgress& callback,
-        const PropertyMap& properties) const final;
+        const RawVolumeLoaderParameters& properties) const final;
 
 private:
     ModelDescriptorPtr _loadVolume(
         const std::string& filename, const LoaderProgress& callback,
-        const PropertyMap& properties,
+        const RawVolumeLoaderParameters& properties,
         const std::function<void(SharedDataVolumePtr)>& mapData) const;
 };
 } // namespace brayns

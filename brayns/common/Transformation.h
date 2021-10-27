@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -22,8 +22,6 @@
 
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/types.h>
-
-SERIALIZATION_ACCESS(Transformation)
 
 namespace brayns
 {
@@ -83,8 +81,6 @@ private:
     Vector3d _scale{1, 1, 1};
     Quaterniond _rotation{1, 0, 0, 0};
     Vector3d _rotationCenter{0, 0, 0};
-
-    SERIALIZATION_FRIEND(Transformation)
 };
 inline Transformation operator*(const Transformation& a,
                                 const Transformation& b)

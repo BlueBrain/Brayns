@@ -23,3 +23,9 @@
 [submodule "deps/poco"]
 	path = deps/poco
 	url = https://github.com/pocoproject/poco.git
+[submodule "deps/libsonata"]
+	path = deps/libsonata
+	url = https://github.com/BlueBrain/libsonata
+[submodule "deps/MorphIO"]
+	path = deps/MorphIO
+	url = https://github.com/BlueBrain/MorphIO

@@ -1,124 +1,204 @@
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 #include "SonataLoader.h"
 
-#include "AdvancedCircuitLoader.h"
+#include <brayns/common/Timer.h>
+#include <brayns/engine/Scene.h>
+#include <brayns/utils/StringUtils.h>
 
-#include <common/log.h>
-#include <common/types.h>
+#include <plugin/api/CircuitColorManager.h>
+#include <plugin/api/Log.h>
+#include <plugin/api/MaterialUtils.h>
 
-#include <brion/blueConfig.h>
+#include <plugin/io/sonataloader/ParameterCheck.h>
+#include <plugin/io/sonataloader/colorhandlers/PopulationColorManager.h>
+#include <plugin/io/sonataloader/data/SonataSelection.h>
+#include <plugin/io/sonataloader/populations/PopulationLoadManager.h>
+#include <plugin/io/sonataloader/reports/PopulationReportManager.h>
 
-SonataLoader::SonataLoader(
-    brayns::Scene& scene,
-    const brayns::ApplicationParameters& applicationParameters,
-    brayns::PropertyMap&& loaderParams, CircuitExplorerPlugin* plugin)
-    : AbstractCircuitLoader(scene, applicationParameters,
-                            std::move(loaderParams), plugin)
+#include <plugin/io/util/TransferFunctionUtils.h>
+
+using namespace sonataloader;
+
+namespace
 {
-    PLUGIN_INFO << "Registering " << getName() << std::endl;
-    _fixedDefaults.add(
-        {PROP_PRESYNAPTIC_NEURON_GID.getName(), std::string("")});
-    _fixedDefaults.add(
-        {PROP_POSTSYNAPTIC_NEURON_GID.getName(), std::string("")});
-    _fixedDefaults.add(PROP_SYNCHRONOUS_MODE);
+inline auto selectNodes(const bbp::sonata::CircuitConfig& config,
+                        const SonataNodePopulationParameters& lc)
+{
+    NodeSelection selection;
+    selection.select(config, lc.node_population, lc.node_sets);
+    selection.select(lc.node_ids);
+    selection.select(lc.report_type, lc.report_path, lc.node_population);
+    const auto selected = selection.intersection(lc.node_percentage);
+    if(selected.empty())
+        throw std::runtime_error("SonataLoader: Empty node selection for " + lc.node_population);
+    return selected;
+}
+
+inline brayns::ModelDescriptorPtr createModelDescriptor(
+    const std::string& name, const std::string& path, brayns::ModelPtr& model)
+{
+    model->updateBounds();
+    brayns::Transformation transform;
+    transform.setRotationCenter(model->getBounds().getCenter());
+    auto modelDescriptor =
+        std::make_shared<brayns::ModelDescriptor>(std::move(model), name, path,
+                                                  brayns::ModelMetadata());
+    modelDescriptor->setName(name);
+    modelDescriptor->setTransformation(transform);
+    return modelDescriptor;
+}
+
+inline void __informProgress(const brayns::LoaderProgress& cb, const std::string& msg, float& total, const float chunk)
+{
+    cb.updateProgress(msg, total);
+    total += chunk;
+    total = std::max(total, 1.f);
+}
+} // namespace
+
+std::vector<std::string> SonataLoader::getSupportedExtensions() const
+{
+    return std::vector<std::string>{".json"};
 }
 
 std::string SonataLoader::getName() const
 {
-    return std::string("Sonata circuit loader");
+    return std::string("SONATA loader");
 }
 
-brayns::PropertyMap SonataLoader::getCLIProperties()
+std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromBlob(
+    brayns::Blob&&, const brayns::LoaderProgress&,
+    const SonataLoaderParameters&) const
 {
-    brayns::PropertyMap properties;
-    properties.add(
-        {"populations", std::vector<std::string>(), {"Populations to load"}});
-    properties.add(
-        {"reports", std::vector<std::string>(), {"Reports to load"}});
-    properties.add(
-        {"reportTypes", std::vector<std::string>(), {"Report types to load"}});
-    auto pm = AdvancedCircuitLoader::getCLIProperties();
-    properties.merge(pm);
-    return properties;
+    throw std::runtime_error("Sonata loader: import from blob not supported");
 }
 
 std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
-    const std::string& filename, const brayns::LoaderProgress& callback,
-    const brayns::PropertyMap& properties) const
+    const std::string& path, const brayns::LoaderProgress& callback,
+    const SonataLoaderParameters& input) const
 {
-    if (filename.find("BlueConfig") != std::string::npos ||
-        filename.find("CircuitConfig") != std::string::npos)
-        return _loadFromBlueConfig(filename, callback, properties);
+    const brayns::Timer timer;
+    PLUGIN_INFO << getName() << ": Loading " << path << "\n";
 
-    return std::vector<brayns::ModelDescriptorPtr>();
-}
+    // Parse and check config and load parameters
+    const SonataConfig::Data network = SonataConfig::readNetwork(path);
+    ParameterCheck::checkInput(network.config, input);
 
-std::vector<brayns::ModelDescriptorPtr> SonataLoader::_loadFromBlueConfig(
-    const std::string& file, const brayns::LoaderProgress& cb,
-    const brayns::PropertyMap& props) const
-{
+    // Compute how much progress percentage each population load will consume
+    const auto numNodes = input.node_population_settings.size();
+    size_t numEdges = 0u;
+    for (const auto& popLoadConfig : input.node_population_settings)
+        numEdges += popLoadConfig.edge_populations.size();
+    float total = 0.f;
+    const float chunk = (1.f / static_cast<float>(numNodes * 3 + numEdges * 3));
+
     std::vector<brayns::ModelDescriptorPtr> result;
-
-    auto& populationNames = props["populations"].as<std::vector<std::string>>();
-    auto& populationReports = props["reports"].as<std::vector<std::string>>();
-    auto& populationReportTypes =
-        props["reportTypes"].as<std::vector<std::string>>();
-    const double density = props[PROP_DENSITY.getName()].as<double>();
-
-    if (populationNames.size() != populationReports.size() ||
-        populationNames.size() != populationReportTypes.size())
-        PLUGIN_THROW(
-            "Population name count must match report name, report type count")
-
-    for (size_t i = 0; i < populationNames.size(); ++i)
+    for (const auto& nodeSettings : input.node_population_settings)
     {
-        // Default properties used for each loaded population
-        brayns::PropertyMap defaultProperties =
-            AdvancedCircuitLoader::getCLIProperties();
-        defaultProperties.update(PROP_SECTION_TYPE_APICAL_DENDRITE.getName(),
-                                 true);
-        defaultProperties.update(PROP_SECTION_TYPE_AXON.getName(), false);
-        defaultProperties.update(PROP_SECTION_TYPE_DENDRITE.getName(), true);
-        defaultProperties.update(PROP_SECTION_TYPE_SOMA.getName(), true);
-        defaultProperties.update(PROP_USER_DATA_TYPE.getName(),
-                                 std::string("Simulation offset"));
-        defaultProperties.update(PROP_LOAD_LAYERS.getName(), false);
-        defaultProperties.update(PROP_LOAD_ETYPES.getName(), false);
-        defaultProperties.update(PROP_LOAD_MTYPES.getName(), false);
-        defaultProperties.update(PROP_USE_SDF_GEOMETRY.getName(), true);
-        defaultProperties.add(PROP_PRESYNAPTIC_NEURON_GID);
-        defaultProperties.add(PROP_POSTSYNAPTIC_NEURON_GID);
+        const auto& nodeName = nodeSettings.node_population;
 
-        // Population variables
-        const auto& populationName = populationNames[i];
-        const auto& populationReport = populationReports[i];
-        const auto& populationReportType = populationReportTypes[i];
+        PLUGIN_INFO << "Loading " << nodeName << " node population\n";
 
-        PLUGIN_INFO << "Loading population " << populationName << std::endl;
+        // Select nodes that are going to be loaded
+        const auto nodeSelection = selectNodes(network.config, nodeSettings);
 
-        // Use the default parameters and update the variable ones for each
-        // population
-        defaultProperties.update(PROP_DENSITY.getName(), density);
-        defaultProperties.update(PROP_REPORT.getName(), populationReport);
-        defaultProperties.update(PROP_REPORT_TYPE.getName(),
-                                 populationReportType);
+        // Load node data
+        const auto nodeIDs = nodeSelection.flatten();
+        __informProgress(callback, "Loading " + nodeName, total, chunk);
+        auto nodes = PopulationLoaderManager::loadNodes(network, nodeSettings, nodeSelection);
+        if (nodes.empty())
+            continue;
 
-        // Load the BlueConfig/CircuitConfig
-        std::unique_ptr<brion::BlueConfig> config;
-        // Section Run Default
-        if (populationName == "Default")
-            config = std::make_unique<brion::BlueConfig>(file);
-        // Section Circuit <population name>
-        else
-            config = std::make_unique<brion::BlueConfig>(
-                file, brion::BlueConfigSection::CONFIGSECTION_CIRCUIT,
-                populationName);
+        // Load node report mapping, if any
+        __informProgress(callback, nodeName + ": Loading simulation", total, chunk);
+        PopulationReportManager::loadNodeMapping(nodeSettings, nodeSelection, nodes);
 
-        // Import the model
-        auto model =
-            importCircuitFromBlueConfig(*config, defaultProperties, cb);
-        if (model)
-            result.push_back(model);
+        // Load edges for this node population
+        for (const auto& edge : nodeSettings.edge_populations)
+        {
+            const auto& edgeName = edge.edge_population;
+
+            __informProgress(callback, "Loading " + edgeName, total, chunk);
+            // Load edge data
+            auto edges = PopulationLoaderManager::loadEdges(network, edge, nodeSelection);
+            if (edges.empty())
+                continue;
+
+            // Map edge geometry to node geometry
+            PopulationLoaderManager::mapEdgesToNodes(nodes, edges);
+
+            // Load edge report mapping, if any
+             __informProgress(callback, edgeName + ": Loading simulation", total, chunk);
+            PopulationReportManager::loadEdgeMapping(edge, nodeSelection, edges);
+
+            // Add geometry to the edge model
+            __informProgress(callback, edgeName + ": Generating edge geometry", total, chunk);
+            brayns::ModelPtr edgeModel = _scene.createModel();
+            std::vector<ElementMaterialMap::Ptr> edgeMaterialMaps(nodes.size());
+            for (size_t j = 0; j < nodes.size(); ++j)
+            {
+                edgeMaterialMaps[j] = edges[j]->addToModel(*edgeModel);
+                edges[j].reset(nullptr);
+            }
+
+            result.push_back(createModelDescriptor(edgeName, path, edgeModel));
+
+            // Create simulation handler, if any
+            PopulationReportManager::addEdgeReportHandler(edge, nodeSelection, result.back());
+
+            // Create the color handler
+            auto edgeColor = PopulationColorManager::createEdgeColorHandler(network, edge);
+            CircuitColorManager::registerHandler(result.back(), std::move(edgeColor), nodeIDs, std::move(edgeMaterialMaps));
+
+            PLUGIN_INFO << "Loaded edge population " << edgeName << "\n";
+        }
+
+        __informProgress(callback, nodeName + ": Generating node geometry", total, chunk);
+
+        // Add geometry to the node model
+        brayns::ModelPtr nodeModel = _scene.createModel();
+        std::vector<ElementMaterialMap::Ptr> materialMaps(nodes.size());
+        for (size_t i = 0; i < nodes.size(); ++i)
+        {
+            materialMaps[i] = nodes[i]->addToModel(*nodeModel);
+            nodes[i].reset(nullptr);
+        }
+
+        // Create the model descriptor
+        result.push_back(createModelDescriptor(nodeName, path, nodeModel));
+
+        // Create simulation handler
+        PopulationReportManager::addNodeReportHandler(nodeSettings, nodeSelection, result.back());
+
+        // Create the color handler
+        auto nodeColor = PopulationColorManager::createNodeColorHandler(network, nodeSettings);
+        CircuitColorManager::registerHandler(result.back(), std::move(nodeColor), nodeIDs, std::move(materialMaps));
+
+        PLUGIN_INFO << "Loaded node population " << nodeName << "\n";
     }
+
+    TransferFunctionUtils::set(_scene.getTransferFunction());
+
+    const auto time = timer.elapsed();
+    PLUGIN_INFO << getName() << ": Done in " << time << " second(s)";
+    PLUGIN_INFO << std::endl;
 
     return result;
 }

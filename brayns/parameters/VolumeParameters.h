@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -21,8 +21,6 @@
 #pragma once
 
 #include "AbstractParameters.h"
-
-SERIALIZATION_ACCESS(VolumeParameters)
 
 namespace brayns
 {
@@ -100,7 +98,5 @@ protected:
     double _samplingRate{0.125};
     Vector3d _specular{0.3, 0.3, 0.3};
     Boxd _clipBox;
-
-    SERIALIZATION_FRIEND(VolumeParameters)
 };
 } // namespace brayns

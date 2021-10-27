@@ -338,44 +338,45 @@ bool OSPRayScene::_commitVolumes(ModelDescriptors& modelDescriptors)
 
 void OSPRayScene::_commitSimulationData(ModelDescriptors& modelDescriptors)
 {
-    auto currentFrame = _animationParameters.getFrame();
-
-    // if(_lastFrame == currentFrame && !isModified())
-    //    return;
-
-    //_lastFrame = currentFrame;
-
-    _simData.clear();
-
-    uint64_t offset = 0;
-    for (auto& model : modelDescriptors)
+    const auto currentFrame = _animationParameters.getAbsoluteFrame();
+    if (_lastFrame != currentFrame || isModified() ||
+        _ospSimulationData == nullptr)
     {
-        if (!model->getModel().isSimulationEnabled())
-            continue;
+        _lastFrame = currentFrame;
+        _simData.clear();
 
-        auto handler = model->getModel().getSimulationHandler();
-        if (!handler)
-            continue;
+        uint64_t offset = 0;
+        for (auto& model : modelDescriptors)
+        {
+            if (!model->getModel().isSimulationEnabled())
+                continue;
 
-        auto& modelImpl = static_cast<OSPRayModel&>(model->getModel());
-        modelImpl.setSimulationOffset(offset);
+            auto handler = model->getModel().getSimulationHandler();
+            if (!handler)
+                continue;
 
-        const float* data =
-            static_cast<float*>(handler->getFrameData(currentFrame));
-        const uint64_t dataSize = handler->getFrameSize();
+            auto& modelImpl = static_cast<OSPRayModel&>(model->getModel());
+            modelImpl.setSimulationOffset(offset);
 
-        _simData.insert(_simData.end(), data, data + dataSize);
-        offset += dataSize;
+            const float* data =
+                static_cast<float*>(handler->getFrameData(currentFrame));
+            const uint64_t dataSize = handler->getFrameSize();
+
+            _simData.insert(_simData.end(), data, data + dataSize);
+            offset += dataSize;
+        }
+
+        ospRelease(_ospSimulationData);
+        _ospSimulationData = nullptr;
+        if (_simData.empty())
+            return;
+
+        _ospSimulationData =
+            ospNewData(_simData.size(), OSP_FLOAT, _simData.data(),
+                       OSP_DATA_SHARED_BUFFER);
+
+        ospCommit(_ospSimulationData);
     }
-
-    ospRelease(_ospSimulationData);
-    _ospSimulationData = nullptr;
-    if (_simData.empty())
-        return;
-
-    _ospSimulationData = ospNewData(_simData.size(), OSP_FLOAT, _simData.data(),
-                                    OSP_DATA_SHARED_BUFFER);
-    ospCommit(_ospSimulationData);
 }
 
 } // namespace brayns

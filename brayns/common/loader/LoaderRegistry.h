@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  *
  * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
@@ -31,7 +31,7 @@ struct LoaderInfo
 {
     std::string name;
     std::vector<std::string> extensions;
-    PropertyMap properties;
+    JsonSchema inputParametersSchema;
 };
 
 /**
@@ -42,7 +42,7 @@ class LoaderRegistry
 {
 public:
     /** Register the given loader. */
-    void registerLoader(std::unique_ptr<Loader> loader);
+    void registerLoader(std::unique_ptr<AbstractLoader> loader);
 
     /**
      * Get a list of loaders and their supported file extensions and properties
@@ -63,9 +63,9 @@ public:
      * Get a loader that matches the provided name, filetype or loader name.
      * @throw std::runtime_error if no loader found.
      */
-    const Loader& getSuitableLoader(const std::string& filename,
-                                    const std::string& filetype,
-                                    const std::string& loaderName) const;
+    const AbstractLoader& getSuitableLoader(
+        const std::string& filename, const std::string& filetype,
+        const std::string& loaderName) const;
 
     /**
      * Load the given file or folder into the given scene by choosing the first
@@ -84,15 +84,8 @@ public:
     /** @internal */
     void clear();
 
-    /** @internal */
-    void registerArchiveLoader(std::unique_ptr<Loader> loader);
-
 private:
-    bool _archiveSupported(const std::string& filename,
-                           const std::string& filetype) const;
-
-    std::vector<std::unique_ptr<Loader>> _loaders;
-    std::unique_ptr<Loader> _archiveLoader;
+    std::vector<std::unique_ptr<AbstractLoader>> _loaders;
     std::vector<LoaderInfo> _loaderInfos;
 };
 } // namespace brayns

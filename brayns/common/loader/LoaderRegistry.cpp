@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Daniel.Nachbaur <daniel.nachbaur@epfl.ch>
  *
@@ -20,15 +20,18 @@
 
 #include "LoaderRegistry.h"
 
-#include <brayns/common/utils/filesystem.h>
-#include <brayns/common/utils/utils.h>
+#include <brayns/common/log.h>
+#include <brayns/utils/Filesystem.h>
 
 namespace brayns
 {
-void LoaderRegistry::registerLoader(std::unique_ptr<Loader> loader)
+void LoaderRegistry::registerLoader(std::unique_ptr<AbstractLoader> loader)
 {
     _loaderInfos.push_back({loader->getName(), loader->getSupportedExtensions(),
-                            loader->getProperties()});
+                            loader->getInputParametersSchema()});
+
+    BRAYNS_INFO << "Registering loader " << loader->getName() << "\n";
+
     _loaders.push_back(std::move(loader));
 }
 
@@ -42,9 +45,7 @@ bool LoaderRegistry::isSupportedFile(const std::string& filename) const
     if (fs::is_directory(filename))
         return false;
 
-    const auto extension = extractExtension(filename);
-    if (_archiveSupported(filename, extension))
-        return true;
+    const auto extension = fs::path(filename).extension().lexically_normal().string();
     for (const auto& loader : _loaders)
         if (loader->isSupported(filename, extension))
             return true;
@@ -53,15 +54,13 @@ bool LoaderRegistry::isSupportedFile(const std::string& filename) const
 
 bool LoaderRegistry::isSupportedType(const std::string& type) const
 {
-    if (_archiveSupported("", type))
-        return true;
     for (const auto& loader : _loaders)
         if (loader->isSupported("", type))
             return true;
     return false;
 }
 
-const Loader& LoaderRegistry::getSuitableLoader(
+const AbstractLoader& LoaderRegistry::getSuitableLoader(
     const std::string& filename, const std::string& filetype,
     const std::string& loaderName) const
 {
@@ -69,12 +68,7 @@ const Loader& LoaderRegistry::getSuitableLoader(
         throw std::runtime_error("'" + filename + "' is a directory");
 
     const auto extension =
-        filetype.empty() ? extractExtension(filename) : filetype;
-
-    // If we have an archive we always use the archive loader even if a specific
-    // loader is specified
-    if (_archiveSupported(filename, extension))
-        return *_archiveLoader;
+        filetype.empty() ? fs::path(filename).extension().lexically_normal().string() : filetype;
 
     // Find specific loader
     if (!loaderName.empty())
@@ -98,18 +92,6 @@ const Loader& LoaderRegistry::getSuitableLoader(
 void LoaderRegistry::clear()
 {
     _loaders.clear();
-    _archiveLoader.reset();
     _loaderInfos.clear();
-}
-
-void LoaderRegistry::registerArchiveLoader(std::unique_ptr<Loader> loader)
-{
-    _archiveLoader = std::move(loader);
-}
-
-bool LoaderRegistry::_archiveSupported(const std::string& filename,
-                                       const std::string& filetype) const
-{
-    return _archiveLoader && _archiveLoader->isSupported(filename, filetype);
 }
 } // namespace brayns

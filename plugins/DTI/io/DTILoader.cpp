@@ -37,14 +37,6 @@ const std::string LOADER_NAME = "DTI loader";
 /** Supported extensions */
 const std::string SUPPORTED_EXTENTION_DTI = "dti";
 
-template <>
-inline std::vector<std::pair<std::string, ColorScheme>> enumerateMap()
-{
-    return {{"None", ColorScheme::none},
-            {"By id", ColorScheme::by_id},
-            {"By normal", ColorScheme::by_normal}};
-}
-
 struct GidRow
 {
     uint64_t gid;
@@ -55,26 +47,10 @@ std::istream& operator>>(std::istream& in, GidRow& gr)
 {
     return in >> gr.gid >> gr.row;
 }
-
-/** Properties */
-const brayns::Property PROP_RADIUS = {"radius", 1., {"Streamline radius"}};
-const brayns::Property PROP_OPACITY = {"opacity", 1., {"Streamline opacity"}};
-const brayns::Property PROP_COLOR_SCHEME = {"colorscheme",
-                                            {enumToString(ColorScheme::none),
-                                             enumerateNames<ColorScheme>()},
-                                            {"Color scheme"}};
-
 } // namespace
 
 namespace dti
 {
-DTILoader::DTILoader(brayns::Scene& scene, brayns::PropertyMap&& loaderParams)
-    : Loader(scene)
-    , _defaults(loaderParams)
-{
-    PLUGIN_INFO << "Registering " << LOADER_NAME << std::endl;
-}
-
 std::string DTILoader::getName() const
 {
     return LOADER_NAME;
@@ -83,13 +59,6 @@ std::string DTILoader::getName() const
 std::vector<std::string> DTILoader::getSupportedExtensions() const
 {
     return {SUPPORTED_EXTENTION_DTI};
-}
-
-bool DTILoader::isSupported(const std::string& /*filename*/,
-                            const std::string& extension) const
-{
-    const std::set<std::string> types = {SUPPORTED_EXTENTION_DTI};
-    return types.find(extension) != types.end();
 }
 
 DTIConfiguration DTILoader::_readConfiguration(
@@ -104,7 +73,7 @@ DTIConfiguration DTILoader::_readConfiguration(
 
 std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromBlob(
     brayns::Blob&& /*blob*/, const brayns::LoaderProgress& /*callback*/,
-    const brayns::PropertyMap& /*properties*/) const
+    const DTILoaderParameters& /*properties*/) const
 {
     throw std::runtime_error("Loading DTI from blob is not supported");
 }
@@ -143,20 +112,11 @@ Colors DTILoader::getColorsFromPoints(const brayns::Vector3fs& points,
 
 std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
     const std::string& filename, const brayns::LoaderProgress& callback,
-    const brayns::PropertyMap& properties) const
+    const DTILoaderParameters& input) const
 {
     boost::property_tree::ptree pt;
     boost::property_tree::ini_parser::read_ini(filename, pt);
     const auto config = _readConfiguration(pt);
-
-    brayns::PropertyMap props = _defaults;
-    props.merge(properties);
-
-    // Read loading properties
-    const auto radius = props[PROP_RADIUS.getName()].as<double>();
-    const auto opacity = props[PROP_OPACITY.getName()].as<double>();
-    const auto colorScheme = stringToEnum<ColorScheme>(
-        properties[PROP_COLOR_SCHEME.getName()].to<std::string>());
 
     // Check files
     std::ifstream gidRowfile(config.gid_to_streamline, std::ios::in);
@@ -231,10 +191,10 @@ std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
             const auto& points = (*it).second;
             const auto nbPoints = points.size();
             const auto colors =
-                getColorsFromPoints(points, opacity, colorScheme);
+                getColorsFromPoints(points, input.opacity, input.color_scheme);
 
             std::vector<float> radii;
-            radii.resize(nbPoints, radius);
+            radii.resize(nbPoints, input.radius);
 
             brayns::Streamline streamline(points, colors, radii);
             model->createMaterial(gidRow.gid, std::to_string(gidRow.gid));
@@ -254,19 +214,5 @@ std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
                                                   metadata);
     callback.updateProgress("Done", 1.f);
     return {modelDescriptor};
-}
-
-brayns::PropertyMap DTILoader::getProperties() const
-{
-    return _defaults;
-}
-
-brayns::PropertyMap DTILoader::getCLIProperties()
-{
-    brayns::PropertyMap pm("DTI");
-    pm.add(PROP_RADIUS);
-    pm.add(PROP_OPACITY);
-    pm.add(PROP_COLOR_SCHEME);
-    return pm;
 }
 } // namespace dti

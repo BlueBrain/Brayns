@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -32,6 +32,14 @@ struct TriangleMesh
     std::vector<Vector3ui> indices;
     std::vector<Vector2f> textureCoordinates;
 };
+
+inline Boxf createMeshBounds(const TriangleMesh& mesh)
+{
+    Boxf result;
+    for (const auto& vertex : mesh.vertices)
+        result.merge(vertex);
+    return result;
+}
 
 inline TriangleMesh createBox(const Vector3f& minCorner,
                               const Vector3f& maxCorner)

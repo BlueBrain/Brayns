@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -21,36 +21,34 @@
 #pragma once
 
 #include <brayns/common/loader/Loader.h>
-#include <brayns/parameters/GeometryParameters.h>
+#include <brayns/io/ProteinLoaderParameters.h>
 
 namespace brayns
 {
 /** Loads protein from PDB files
  * http://www.rcsb.org
  */
-class ProteinLoader : public Loader
+class ProteinLoader : public Loader<ProteinLoaderParameters>
 {
 public:
-    ProteinLoader(Scene& scene, const PropertyMap& properties);
-    ProteinLoader(Scene& scene, const GeometryParameters& params);
+    ProteinLoader(Scene& scene);
 
     std::vector<std::string> getSupportedExtensions() const final;
+
     std::string getName() const final;
-    PropertyMap getProperties() const final;
 
     bool isSupported(const std::string& filename,
                      const std::string& extension) const final;
+
     std::vector<ModelDescriptorPtr> importFromFile(
         const std::string& fileName, const LoaderProgress& callback,
-        const PropertyMap& properties) const final;
+        const ProteinLoaderParameters& properties) const final;
 
     std::vector<ModelDescriptorPtr> importFromBlob(
-        Blob&&, const LoaderProgress&, const PropertyMap&) const final
+        Blob&&, const LoaderProgress&,
+        const ProteinLoaderParameters&) const final
     {
         throw std::runtime_error("Loading from blob not supported");
     }
-
-private:
-    PropertyMap _defaults;
 };
 } // namespace brayns

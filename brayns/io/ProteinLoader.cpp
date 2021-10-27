@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -22,7 +22,6 @@
 
 #include <brayns/common/log.h>
 #include <brayns/common/types.h>
-#include <brayns/common/utils/utils.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
@@ -31,15 +30,13 @@
 #include <assert.h>
 #include <fstream>
 
-namespace
-{
-const auto PROP_RADIUS_MULTIPLIER = "radiusMultiplier";
-const auto PROP_COLOR_SCHEME = "colorScheme";
-const auto LOADER_NAME = "protein";
-} // namespace
-
 namespace brayns
 {
+namespace
+{
+constexpr char LOADER_NAME[] = "protein";
+} // namespace
+
 /** Structure containing the positions of the proteins in space
  */
 struct PDBCellPositions
@@ -315,25 +312,12 @@ static AtomicRadius atomic_radii[colorMapSize] = // atomic radii in microns
      {"OXT", 25.f, 112},
      {"P", 25.f, 113}};
 
-ProteinLoader::ProteinLoader(Scene& scene, const PropertyMap& properties)
+ProteinLoader::ProteinLoader(Scene& scene)
     : Loader(scene)
-    , _defaults(properties)
 {
 }
 
-ProteinLoader::ProteinLoader(Scene& scene, const GeometryParameters& params)
-    : Loader(scene)
-{
-    _defaults.add({PROP_COLOR_SCHEME,
-                   {enumToString(params.getColorScheme()),
-                    brayns::enumNames<brayns::ColorScheme>()},
-                   {"Color scheme"}});
-    _defaults.add({PROP_RADIUS_MULTIPLIER,
-                   static_cast<double>(params.getRadiusMultiplier()),
-                   {"Radius multiplier"}});
-}
-
-bool ProteinLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
+bool ProteinLoader::isSupported(const std::string&,
                                 const std::string& extension) const
 {
     const std::set<std::string> types = {"pdb", "pdb1"};
@@ -342,18 +326,8 @@ bool ProteinLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
 
 std::vector<ModelDescriptorPtr> ProteinLoader::importFromFile(
     const std::string& fileName, const LoaderProgress&,
-    const PropertyMap& inProperties) const
+    const ProteinLoaderParameters& properties) const
 {
-    // Fill property map since the actual property types are known now.
-    PropertyMap properties = _defaults;
-    properties.merge(inProperties);
-
-    const double radiusMultiplier =
-        properties.valueOr(PROP_RADIUS_MULTIPLIER, 1.0);
-
-    const auto colorScheme = stringToEnum<ColorScheme>(
-        properties[PROP_COLOR_SCHEME].to<std::string>());
-
     std::ifstream file(fileName.c_str());
     if (!file.is_open())
         throw std::runtime_error("Could not open " + fileName);
@@ -432,12 +406,12 @@ std::vector<ModelDescriptorPtr> ProteinLoader::importFromFile(
                 if (atomName == colorMap[i].symbol)
                 {
                     found = true;
-                    switch (colorScheme)
+                    switch (properties.color_scheme)
                     {
-                    case ColorScheme::protein_chains:
+                    case ProteinLoaderColorScheme::protein_chains:
                         atom.materialId = abs(atom.chainId);
                         break;
-                    case ColorScheme::protein_residues:
+                    case ProteinLoaderColorScheme::protein_residues:
                         atom.materialId = atom.residue;
                         break;
                     default:
@@ -466,7 +440,8 @@ std::vector<ModelDescriptorPtr> ProteinLoader::importFromFile(
             const auto center = 0.01f * atom.position;
 
             // Convert radius from angstrom
-            const float radius = 0.0001f * atom.radius * radiusMultiplier;
+            const float radius =
+                0.0001f * atom.radius * properties.radius_multiplier;
 
             spheres[atom.materialId].push_back({center, radius});
         }
@@ -504,10 +479,5 @@ std::string ProteinLoader::getName() const
 std::vector<std::string> ProteinLoader::getSupportedExtensions() const
 {
     return {"pdb", "pdb1"};
-}
-
-PropertyMap ProteinLoader::getProperties() const
-{
-    return _defaults;
 }
 } // namespace brayns

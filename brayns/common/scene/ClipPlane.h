@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Juan Hernando <juan.hernando@epfl.ch>
  *
@@ -22,8 +22,6 @@
 
 #include <brayns/api.h>
 #include <brayns/common/types.h>
-
-SERIALIZATION_ACCESS(ClipPlane)
 
 namespace brayns
 {
@@ -52,6 +50,5 @@ private:
     static size_t _nextID;
     size_t _id = 0;
     Plane _plane{0.0};
-    SERIALIZATION_FRIEND(ClipPlane);
 };
 } // namespace brayns

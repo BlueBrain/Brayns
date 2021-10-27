@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -27,8 +27,8 @@
 #include <brayns/engine/Volume.h>
 
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
-#include <brayns/common/utils/filesystem.h>
 #include <brayns/parameters/AnimationParameters.h>
+#include <brayns/utils/Filesystem.h>
 
 #include <set>
 
@@ -55,7 +55,7 @@ void _unbindMaterials(const AbstractSimulationHandlerPtr& simulationHandler,
 }
 } // namespace
 ModelParams::ModelParams(const std::string& path)
-    : _name(fs::path(path).stem())
+    : _name(fs::path(path).stem().string())
     , _path(path)
 {
 }
@@ -67,10 +67,10 @@ ModelParams::ModelParams(const std::string& name, const std::string& path)
 }
 
 ModelParams::ModelParams(const std::string& name, const std::string& path,
-                         const PropertyMap& loaderProperties)
+                         const JsonValue& loadParameters)
     : _name(name)
     , _path(path)
-    , _loaderProperties(loaderProperties)
+    , _loadParameters(loadParameters)
 {
 }
 
@@ -101,11 +101,17 @@ ModelDescriptor& ModelDescriptor::operator=(const ModelParams& rhs)
 {
     if (this == &rhs)
         return *this;
+
     _updateValue(_boundingBox, rhs.getBoundingBox());
     if (rhs.getName().empty())
         _updateValue(_name, fs::path(rhs.getPath()).stem().string());
     else
-        _updateValue(_name, rhs.getName());
+    {
+        // TEMP HACK FFS: Append whatever is on name to the model params name
+        const auto extraName = _name.empty() ? "" : " - " + _name;
+        _updateValue(_name, rhs.getName() + extraName);
+    }
+
     _updateValue(_path, rhs.getPath());
     _updateValue(_visible, rhs.getVisible());
 
@@ -118,7 +124,7 @@ ModelDescriptor& ModelDescriptor::operator=(const ModelParams& rhs)
         // by the model loader is used
         _transformation.setRotationCenter(oldRotationCenter);
 
-    _loaderProperties = rhs.getLoaderProperties();
+    _loadParameters = rhs.getLoadParameters();
     _loaderName = rhs.getLoaderName();
 
     return *this;
@@ -185,7 +191,7 @@ ModelDescriptorPtr ModelDescriptor::clone(ModelPtr model) const
     newModelDesc->_instances = _instances;
     newModelDesc->_properties = _properties;
     newModelDesc->_model->buildBoundingBox();
-    newModelDesc->_loaderProperties = _loaderProperties;
+    newModelDesc->_loadParameters = _loadParameters;
     return newModelDesc;
 }
 
@@ -313,7 +319,7 @@ bool Model::isDirty() const
 void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)
 {
     size_t index = 0;
-    for (auto material : _materials)
+    for (auto& material : _materials)
     {
         material.second->setSpecularColor(Vector3f(0.f));
         material.second->setOpacity(1.f);
@@ -488,6 +494,7 @@ void Model::copyFrom(const Model& rhs)
     if (rhs._simulationHandler)
     {
         _simulationHandler = rhs._simulationHandler->clone();
+        setSimulationEnabled(true);
         // Reset simulation handler current frame so the simulation data gets
         // commited (current frame != animation params current frame)
         _simulationHandler->setCurrentFrame(
@@ -645,7 +652,7 @@ MaterialPtr Model::createMaterial(const size_t materialId,
 
 void Model::setSimulationHandler(AbstractSimulationHandlerPtr handler)
 {
-    _simulationEnabled = handler != nullptr;
+    setSimulationEnabled(handler != nullptr);
     if (_simulationHandler != handler)
         _unbindMaterials(_simulationHandler, _materials);
     _simulationHandler = handler;

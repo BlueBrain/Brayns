@@ -80,6 +80,34 @@ if(BRAYNS_VIEWER_ENABLED)
   target_include_directories(imgui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
 endif()
 
+# --------------------------------------------------------------------------------
+# sonata (which also brings HighFive)
+# --------------------------------------------------------------------------------
+if(BRAYNS_CIRCUITEXPLORER_ENABLED)
+    common_find_package(sonata)
+    common_find_package(HighFive)
+    common_find_package(nlohmann_json)
+    if(NOT sonata_FOUND AND NOT TARGET sonata::sonata_shared)
+        message(STATUS "Gathering sonata from submodules")
+        # Sonata links against gcov, but on Apple this library is not included
+        # on the library path
+        if(APPLE)
+            add_library(gcov INTERFACE)
+            # Export target
+            install(TARGETS gcov EXPORT gcov-targets)
+            install(EXPORT gcov-targets DESTINATION share/gcov/CMake)
+            set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-instr-generate -fcoverage-mapping")
+            set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fprofile-instr-generate -fcoverage-mapping")
+        endif()
+        set(SONATA_VERSION "0.1.9")
+        add_subdirectory(libsonata)
+        add_library(sonatainter INTERFACE)
+        target_include_directories(sonatainter INTERFACE ${CMAKE_CURRENT_LIST_DIR}/libsonata/include)
+        target_link_libraries(sonatainter INTERFACE sonata_shared)
+        add_library(sonata::sonata_shared ALIAS sonatainter)
+    endif()
+endif()
+
 # Brion if needed
 if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED)
     common_find_package(Brion)
@@ -88,5 +116,33 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED)
         add_subdirectory(Brion)
     else()
         message(STATUS "Found Brion")
+    endif()
+endif()
+
+# --------------------------------------------------------------------------------
+# MorphIO
+# --------------------------------------------------------------------------------
+if(BRAYNS_CIRCUITEXPLORER_ENABLED)
+    common_find_package(MorphIO)
+    if(NOT MorphIO_FOUND AND NOT TARGET MorphIO::morphio_shared)
+        set(MORPHIO_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/MorphIO/include/)
+
+        # Deps
+        add_subdirectory(MorphIO/3rdparty/GSL_LITE)
+        target_include_directories(gsl-lite SYSTEM INTERFACE)
+        add_library(lexertl INTERFACE)
+        target_include_directories(lexertl SYSTEM INTERFACE MorphIO/3rdparty/lexertl14/include)
+
+        # Retrieve version
+        set(MORPHIO_VERSION_STRING "3.3.0")
+        set(MorphIO_VERSION_MAJOR 3)
+        set(MorphIO_VERSION_MINOR 3)
+        set(MorphIO_VERSION_PATCH 0)
+        # Morphio
+        add_subdirectory(MorphIO/src)
+        add_library(morphiointer INTERFACE)
+        target_include_directories(morphiointer INTERFACE ${CMAKE_CURRENT_LIST_DIR}/MorphIO/include)
+        target_link_libraries(morphiointer INTERFACE morphio_shared)
+        add_library(MorphIO::morphio_shared ALIAS morphiointer)
     endif()
 endif()

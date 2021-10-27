@@ -24,7 +24,7 @@
 #include <stdexcept>
 #include <string>
 
-#include <brayns/network/json/Json.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {

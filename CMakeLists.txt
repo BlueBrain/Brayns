@@ -66,7 +66,7 @@ include(Common)
 # Core dependencies
 common_find_package(Boost REQUIRED COMPONENTS program_options)
 common_find_package(OpenMP)
-common_find_package(FreeImage)
+common_find_package(FreeImage REQUIRED)
 
 if(BRAYNS_USE_SYSTEM_GLM)
   find_package(glm REQUIRED)
@@ -75,15 +75,6 @@ endif()
 # Compiler options
 if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-class-memaccess -Wno-deprecated-copy -Wno-ignored-qualifiers")
-endif()
-
-# Archive loading
-common_find_package(LibArchive)
-option(BRAYNS_LIBARCHIVE_ENABLED "Activate libarchive for archive loading" ${LibArchive_FOUND})
-if(BRAYNS_LIBARCHIVE_ENABLED)
-  common_find_package(LibArchive REQUIRED)
-else()
-  common_find_package_disable(LibArchive)
 endif()
 
 # HTTP messaging
@@ -118,7 +109,7 @@ else()
   option(BRAYNS_VIEWER_ENABLED "Activate Brayns Viewer" OFF)
 endif()
 
-if(GLEW_FOUND AND OPENGL_FOUND AND FreeImage_FOUND)
+if(GLEW_FOUND AND OPENGL_FOUND)
   option(BRAYNS_IBL_ENABLED "Activate Brayns IBL tool" ON)
 else()
   option(BRAYNS_IBL_ENABLED "Activate Brayns IBL tool" OFF)
@@ -127,9 +118,6 @@ endif()
 if(BRAYNS_VIEWER_ENABLED OR BRAYNS_IBL_ENABLED)
   common_find_package(GLEW SYSTEM REQUIRED)
   common_find_package(OpenGL REQUIRED)
-  if(BRAYNS_IBL_ENABLED)
-    common_find_package(FreeImage REQUIRED)
-  endif()
 else()
   common_find_package_disable(GLEW)
   common_find_package_disable(OpenGL)

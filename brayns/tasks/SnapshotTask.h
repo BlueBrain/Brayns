@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
@@ -21,16 +21,14 @@
 #pragma once
 
 #include <brayns/common/tasks/Task.h>
-#include <brayns/common/utils/stringUtils.h>
-
 #include <brayns/common/utils/ImageGenerator.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
-
 #include <brayns/parameters/ParametersManager.h>
+#include <brayns/utils/StringUtils.h>
 
 #include <fstream>
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,10 +20,10 @@
 
 #include "ImageGenerator.h"
 
-#include <brayns/common/utils/base64/base64.h>
-#include <brayns/common/utils/imageUtils.h>
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/parameters/ApplicationParameters.h>
+#include <brayns/utils/ImageUtils.h>
+#include <brayns/utils/base64/base64.h>
 
 namespace brayns
 {
@@ -34,41 +34,27 @@ ImageGenerator::~ImageGenerator()
 }
 
 ImageGenerator::ImageBase64 ImageGenerator::createImage(
-    FrameBuffer& frameBuffer BRAYNS_UNUSED,
-    const std::string& format BRAYNS_UNUSED,
-    const uint8_t quality BRAYNS_UNUSED)
+    FrameBuffer& frameBuffer, const std::string& format, const uint8_t quality)
 {
-#ifdef BRAYNS_USE_FREEIMAGE
     return {freeimage::getBase64Image(frameBuffer.getImage(), format, quality)};
-#else
-    BRAYNS_WARN << "No FreeImage found, will take TurboJPEG snapshot; "
-                << "ignoring format '" << format << "'" << std::endl;
-    const auto& jpeg = createJPEG(frameBuffer, quality);
-    return {base64_encode(jpeg.data.get(), jpeg.size)};
-#endif
 }
 
 ImageGenerator::ImageBase64 ImageGenerator::createImage(
-    const std::vector<FrameBufferPtr>& frameBuffers BRAYNS_UNUSED,
-    const std::string& format BRAYNS_UNUSED,
-    const uint8_t quality BRAYNS_UNUSED)
+    const std::vector<FrameBufferPtr>& frameBuffers, const std::string& format,
+    const uint8_t quality)
 {
     if (frameBuffers.size() == 1)
         return createImage(*frameBuffers[0], format, quality);
 
-#ifdef BRAYNS_USE_FREEIMAGE
     std::vector<freeimage::ImagePtr> images;
     for (auto frameBuffer : frameBuffers)
         images.push_back(frameBuffer->getImage());
     return {freeimage::getBase64Image(freeimage::mergeImages(images), format,
                                       quality)};
-#else
-    throw std::runtime_error("Need FreeImage; cannot create any image");
-#endif
 }
 
-ImageGenerator::ImageJPEG ImageGenerator::createJPEG(
-    FrameBuffer& frameBuffer BRAYNS_UNUSED, const uint8_t quality BRAYNS_UNUSED)
+ImageGenerator::ImageJPEG ImageGenerator::createJPEG(FrameBuffer& frameBuffer,
+                                                     const uint8_t quality)
 {
     frameBuffer.map();
     const auto colorBuffer = frameBuffer.getColorBuffer();

@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2018, EPFL/Blue Brain Project
+# Copyright (c) 2015-2021, EPFL/Blue Brain Project
 # Responsible Author: Daniel Nachbaur <daniel.nachbaur@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -14,7 +14,7 @@ set(BRAYNSTASKS_PUBLIC_HEADERS
   AddModelTask.h
   LoadModelFunctor.h
   SnapshotTask.h
-  errors.h
+  Errors.h
 )
 
 set(BRAYNSTASKS_INCLUDE_NAME brayns/tasks)

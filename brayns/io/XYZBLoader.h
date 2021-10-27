@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -24,22 +24,23 @@
 
 namespace brayns
 {
-class XYZBLoader : public Loader
+class XYZBLoader : public NoInputLoader
 {
 public:
     XYZBLoader(Scene& scene);
 
     std::vector<std::string> getSupportedExtensions() const final;
+
     std::string getName() const final;
 
     bool isSupported(const std::string& filename,
                      const std::string& extension) const final;
+
     std::vector<ModelDescriptorPtr> importFromBlob(
-        Blob&& blob, const LoaderProgress& callback,
-        const PropertyMap& properties) const final;
+        Blob&& blob, const LoaderProgress& callback) const final;
 
     std::vector<ModelDescriptorPtr> importFromFile(
-        const std::string& filename, const LoaderProgress& callback,
-        const PropertyMap& properties) const final;
+        const std::string& filename,
+        const LoaderProgress& callback) const final;
 };
 } // namespace brayns

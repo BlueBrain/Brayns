@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2019, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -31,10 +31,13 @@ namespace brayns
 class AbstractSimulationHandler
 {
 public:
+    AbstractSimulationHandler() = default;
+    AbstractSimulationHandler(const AbstractSimulationHandler& o) { *this = o; }
+
     /** @return a clone of the concrete simulation handler implementation. */
     virtual AbstractSimulationHandlerPtr clone() const = 0;
 
-    virtual ~AbstractSimulationHandler();
+    virtual ~AbstractSimulationHandler() = default;
 
     AbstractSimulationHandler& operator=(const AbstractSimulationHandler& rhs);
 
@@ -52,6 +55,20 @@ public:
     void setCurrentFrame(const uint32_t newFrame) { _currentFrame = newFrame; }
 
     /**
+     * @brief setFrameAdjuster sets the frame adjusting parameter
+     *
+     * The frame adjuster Multiplies the current frame by this parameter to get
+     * the real report frame. Because Brayns now support multiple simulations
+     * simultaneously, its possible to have 2 simulations with same start and
+     * end time, but different time step (dt). This yields a different number of
+     * frames for each report, and without the adjuster, one of them would not
+     * be played at the appropiate rate
+     *
+     * @param adjuster
+     */
+    void setFrameAdjuster(const double adjuster) { _frameAdjuster = adjuster; }
+
+    /**
      * @brief returns a void pointer to the simulation data for the given frame
      * or nullptr if the frame is not loaded yet.
      */
@@ -60,10 +77,7 @@ public:
         return getFrameDataImpl(_getBoundedFrame(frame));
     }
 
-    virtual void* getFrameDataImpl(uint32_t frame BRAYNS_UNUSED)
-    {
-        return _frameData.data();
-    }
+    virtual void* getFrameDataImpl(uint32_t) { return _frameData.data(); }
 
     /**
      * @brief getFrameSize return the size of the current simulation frame
@@ -116,6 +130,14 @@ protected:
     double _startTime{0};
     double _endTime{0};
     double _dt{0};
+    // Multiplies the current frame by this parameter to get the real report
+    // frame. Because Brayns now support multiple simulations simultaneously,
+    // its possible to have 2 simulations with same start and end time, but
+    // different time step (dt) This yields a different number of frames for
+    // each report, and without the adjuster, One of them would not be played at
+    // the appropiate rate frameToLoad = static_cast<uint32_t>(frame *
+    // _frameAdjuster)
+    double _frameAdjuster{1.0};
     std::string _unit;
 
     floats _frameData;

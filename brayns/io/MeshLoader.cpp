@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -31,11 +31,11 @@
 #include <numeric>
 #include <unordered_map>
 
-#include <brayns/common/utils/filesystem.h>
-#include <brayns/common/utils/stringUtils.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
+#include <brayns/utils/Filesystem.h>
+#include <brayns/utils/StringUtils.h>
 
 #ifdef USE_CUSTOM_PLY_IMPORTER
 #include "assimpImporters/PlyLoader.h"
@@ -46,10 +46,7 @@ namespace brayns
 {
 namespace
 {
-const auto PROP_GEOMETRY_QUALITY = "geometryQuality";
-
-const auto LOADER_NAME = "mesh";
-
+constexpr char LOADER_NAME[] = "mesh";
 constexpr float TOTAL_PROGRESS = 100.f;
 constexpr float LOADING_FRACTION = 50.f;
 constexpr float POST_LOADING_FRACTION = 50.f;
@@ -126,16 +123,7 @@ MeshLoader::MeshLoader(Scene& scene)
 {
 }
 
-MeshLoader::MeshLoader(Scene& scene, const GeometryParameters& params)
-    : Loader(scene)
-{
-    _defaults.add({PROP_GEOMETRY_QUALITY,
-                   {enumToString(params.getGeometryQuality()),
-                    enumNames<brayns::GeometryQuality>()},
-                   {"Geometry quality"}});
-}
-
-bool MeshLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
+bool MeshLoader::isSupported(const std::string&,
                              const std::string& extension) const
 {
     const auto types = getSupportedTypes();
@@ -144,19 +132,11 @@ bool MeshLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
 
 std::vector<ModelDescriptorPtr> MeshLoader::importFromFile(
     const std::string& fileName, const LoaderProgress& callback,
-    const PropertyMap& inProperties) const
+    const MeshLoaderParameters& params) const
 {
-    // Fill property map since the actual property types are known now.
-    PropertyMap properties = _defaults;
-    properties.merge(inProperties);
-
-    const auto geometryQuality = stringToEnum<GeometryQuality>(
-        properties.valueOr(PROP_GEOMETRY_QUALITY,
-                           enumToString(GeometryQuality::high)));
-
     auto model = _scene.createModel();
     auto metadata = importMesh(fileName, callback, *model, {}, NO_MATERIAL,
-                               geometryQuality);
+                               params.geometry_quality);
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
@@ -169,21 +149,13 @@ std::vector<ModelDescriptorPtr> MeshLoader::importFromFile(
 
 std::vector<ModelDescriptorPtr> MeshLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback,
-    const PropertyMap& propertiesTmp) const
+    const MeshLoaderParameters& params) const
 {
-    // Fill property map since the actual property types are known now.
-    PropertyMap properties = getProperties();
-    properties.merge(propertiesTmp);
-
-    const auto geometryQuality = stringToEnum<GeometryQuality>(
-        properties.valueOr(PROP_GEOMETRY_QUALITY,
-                           enumToString(GeometryQuality::high)));
-
     auto importer_ptr = createImporter(callback, blob.name);
     Assimp::Importer& importer = *(importer_ptr.get());
     const aiScene* aiScene =
         importer.ReadFileFromMemory(blob.data.data(), blob.data.size(),
-                                    _getQuality(geometryQuality),
+                                    _getQuality(params.geometry_quality),
                                     blob.type.c_str());
 
     if (!aiScene)
@@ -442,15 +414,16 @@ ModelMetadata MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
     return metadata;
 }
 
-size_t MeshLoader::_getQuality(const GeometryQuality geometryQuality) const
+size_t MeshLoader::_getQuality(
+    const MeshLoaderGeometryQuality geometryQuality) const
 {
     switch (geometryQuality)
     {
-    case GeometryQuality::low:
+    case MeshLoaderGeometryQuality::low:
         return aiProcess_Triangulate;
-    case GeometryQuality::medium:
+    case MeshLoaderGeometryQuality::medium:
         return aiProcessPreset_TargetRealtime_Fast;
-    case GeometryQuality::high:
+    case MeshLoaderGeometryQuality::high:
     default:
         return aiProcess_GenSmoothNormals | aiProcess_Triangulate;
     }
@@ -459,7 +432,7 @@ size_t MeshLoader::_getQuality(const GeometryQuality geometryQuality) const
 ModelMetadata MeshLoader::importMesh(
     const std::string& fileName, const LoaderProgress& callback, Model& model,
     const Matrix4f& transformation, const size_t defaultMaterialId,
-    const GeometryQuality geometryQuality) const
+    const MeshLoaderGeometryQuality geometryQuality) const
 {
     const fs::path file = fileName;
 
@@ -508,10 +481,5 @@ std::string MeshLoader::getName() const
 std::vector<std::string> MeshLoader::getSupportedExtensions() const
 {
     return getSupportedTypes();
-}
-
-PropertyMap MeshLoader::getProperties() const
-{
-    return _defaults;
 }
 } // namespace brayns

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/common/mathTypes.h>
-#include <brayns/common/utils/enumUtils.h>
+#include <brayns/utils/EnumUtils.h>
 
 #include <array>
 #include <cstdint>
@@ -29,16 +29,6 @@
 #include <map>
 #include <memory>
 #include <vector>
-
-typedef ::int64_t int64;
-typedef ::uint64_t uint64;
-typedef ::int32_t int32;
-typedef ::uint32_t uint32;
-typedef ::int16_t int16;
-typedef ::uint16_t uint16;
-typedef ::int8_t int8;
-typedef ::uint8_t uint8;
-typedef ::int64_t index_t;
 
 typedef std::vector<std::string> strings;
 typedef std::vector<float> floats;
@@ -183,24 +173,6 @@ enum class FrameBufferFormat
     none
 };
 
-/** Define the color scheme to be applied to the geometry */
-enum class ColorScheme
-{
-    none = 0,
-    by_id = 1,
-    protein_atoms = 2,
-    protein_chains = 3,
-    protein_residues = 4
-};
-
-/** Geometry quality */
-enum class GeometryQuality
-{
-    low,
-    medium,
-    high
-};
-
 /** Some 'special' materials are used by Brayns to accomplish specific features
  *  such as bounding boxes.
  */
@@ -288,8 +260,10 @@ struct Blob
     uint8_ts data;
 };
 
+template <typename T>
 class Loader;
-using LoaderPtr = std::unique_ptr<Loader>;
+template <typename T>
+using LoaderPtr = std::unique_ptr<Loader<T>>;
 
 enum class DataType
 {
@@ -354,26 +328,6 @@ enum class BVHFlag
     compact,
     robust
 };
-
-///////////////////////////////////////////////////////////////////////////
-
-template <>
-inline std::vector<std::pair<std::string, ColorScheme>> enumMap()
-{
-    return {{"none", ColorScheme::none},
-            {"by_id", ColorScheme::by_id},
-            {"protein_atoms", ColorScheme::protein_atoms},
-            {"protein_chains", ColorScheme::protein_chains},
-            {"protein_residues", ColorScheme::protein_residues}};
-}
-
-template <>
-inline std::vector<std::pair<std::string, GeometryQuality>> enumMap()
-{
-    return {{"low", GeometryQuality::low},
-            {"medium", GeometryQuality::medium},
-            {"high", GeometryQuality::high}};
-}
 
 template <>
 inline std::vector<std::pair<std::string, DataType>> enumMap()
