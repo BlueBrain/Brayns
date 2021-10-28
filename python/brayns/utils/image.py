@@ -33,6 +33,10 @@ def base64decode(data: str) -> bytes:
     return base64.b64decode(data)
 
 
-def convert_snapshot_response_to_PIL(data: str) -> Image:
+def convert_snapshot_response_to_PIL(response: dict) -> Image:
     """Convert the snapshot base64 data received from Brayns to a PIL image."""
-    return Image.open(io.BytesIO(base64decode(data)))
+    return Image.open(
+        io.BytesIO(
+            base64decode(response['data'])
+        )
+    )
