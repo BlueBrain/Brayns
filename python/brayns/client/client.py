@@ -18,10 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any, Tuple, Union
+from typing import Any, Union
 
 from ..api import api_builder
-from ..utils import image
 
 from .abstract_client import AbstractClient
 from .json_rpc_client import JsonRpcClient
@@ -96,40 +95,3 @@ class Client(AbstractClient):
             request,
             timeout
         ).get_result()
-
-    def image(
-        self,
-        size: Tuple[int, int],
-        format: str = 'jpg',
-        animation_parameters: Union[dict, None] = None,
-        camera: Union[dict, None] = None,
-        renderer: Union[dict, None] = None,
-        quality: Union[int, None] = None,
-        samples_per_pixel: Union[int, None] = None
-    ) -> image.Image:
-        """Take a snapshot from the renderer.
-
-        :param size: viewport width and height
-        :type size: Tuple[int, int]
-        :param format: image format, defaults to 'jpg'
-        :type format: str, optional
-        :param animation_parameters: animation parameters used, defaults to None
-        :type animation_parameters: Union[dict, None], optional
-        :param camera: camera parameters used, defaults to None
-        :type camera: Union[dict, None], optional
-        :param renderer: renderer parameters to use, defaults to None
-        :type renderer: Union[dict, None], optional
-        :param quality: image quality 0-100, defaults to None
-        :type quality: Union[int, None], optional
-        :param samples_per_pixel: SPP, defaults to None
-        :type samples_per_pixel: Union[int, None], optional
-        :return: PIL image object
-        :rtype: image.Image
-        """
-        return image.convert_snapshot_response_to_PIL(
-            self.snapshot(**{
-                key: value
-                for key, value in locals().items()
-                if key != 'self'
-            })
-        )
