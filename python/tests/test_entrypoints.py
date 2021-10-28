@@ -18,51 +18,38 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Callable
-from brayns.client.client import Client
 import pathlib
 import unittest
+from typing import Callable
 
-import mock_requests
-from mock_client_and_server import MockClientAndServer
+from brayns.client.client import Client
+
+from brayns_tester import BraynsTester
 from mock_request import MockRequest
-from mock_request_handler import MockRequestHandler
 
 
 class TestEntrypoints(unittest.TestCase):
 
+    REQUESTS = pathlib.Path(__file__).parent / 'requests'
+
     def setUp(self) -> None:
-        self._requests = mock_requests.load()
-        request_handler = MockRequestHandler(self._requests)
-        self._client_and_server = MockClientAndServer(
-            host='localhost',
-            port=5000,
-            request_handler=request_handler
-        )
-        ssl = pathlib.Path(__file__).parent / 'ssl'
-        self._secure_client_and_server = MockClientAndServer(
-            host='localhost',
-            port=5001,
-            request_handler=request_handler,
-            secure=True,
-            certfile=str(ssl / 'certificate.pem'),
-            keyfile=str(ssl / 'key.pem'),
-            password='test'
+        self._tester = BraynsTester(
+            requests_folder=pathlib.Path(__file__).parent / 'requests',
+            ssl_folder=pathlib.Path(__file__).parent / 'ssl'
         )
 
     def tearDown(self) -> None:
-        self._client_and_server.close()
-        self._secure_client_and_server.close()
+        self._tester.close_connections()
 
     def test_requests(self) -> None:
-        for request in self._requests:
-            self._check_request(self._client_and_server.client, request)
-            self._check_request(self._secure_client_and_server.client, request)
+        for request in self._tester.requests:
+            self._check_request(self._tester.client, request)
+            self._check_request(self._tester.secure_client, request)
 
     def test_methods(self) -> None:
-        for request in self._requests:
-            self._check_method(self._client_and_server.client, request)
-            self._check_method(self._secure_client_and_server.client, request)
+        for request in self._tester.requests:
+            self._check_method(self._tester.client, request)
+            self._check_method(self._tester.secure_client, request)
 
     def _check_request(
         self,
@@ -87,7 +74,7 @@ class TestEntrypoints(unittest.TestCase):
         self.assertIsNotNone(method)
         result = self._call_method(method, request)
         self.assertEqual(result, request.result)
-    
+
     def _call_method(self, method: Callable, request: MockRequest):
         schemas = request.schema['params']
         if not schemas:

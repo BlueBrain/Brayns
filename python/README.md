@@ -47,11 +47,24 @@ client.set_camera(current='orthographic')
 Methods throw a brayns.ReplyError on error.
 
 #### Snapshot
-Make a snapshot and return a PIL image:
+Make a snapshot and return a base64 encoded image:
 ```py
 import brayns
+import base64
 
 client = brayns.Client('myhost:5000')
 
-image = client.image(format='png', size=(1920, 1080), samples_per_pixel=64)
+result = client.snapshot(
+    format='png',
+    size=(1920, 1080),
+    samples_per_pixel=64
+)
+
+base64_data = result['data']
+
+data = base64.b64decode(base64_data)
+
+with open('myImage.png', 'wb') as image:
+    image.write(data)
+
 ```

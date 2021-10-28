@@ -226,7 +226,8 @@ params = {
         1920,
         1080
     ],
-    'format': 'jpg'
+    'format': 'jpg',
+    'samples_per_pixel': 128
 }
 
 result = {
