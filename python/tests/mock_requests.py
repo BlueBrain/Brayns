@@ -24,15 +24,15 @@ from typing import List
 from mock_request import MockRequest
 
 
-def load() -> List[MockRequest]:
+def load(path: pathlib.Path) -> List[MockRequest]:
     return [
         _load_request(path)
-        for path in _get_mock_files()
+        for path in _get_mock_files(path)
     ]
 
 
-def _get_mock_files():
-    return (pathlib.Path(__file__).parent / 'requests').glob('mock_*.py')
+def _get_mock_files(path: pathlib.Path):
+    return path.glob('mock_*.py')
 
 
 def _load_request(path: pathlib.Path):
