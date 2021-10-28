@@ -26,8 +26,8 @@ void clipRay(const uniform vec4f* clipPlanes, const unsigned int numClipPlanes,
 {
     for (int i = 0; i < numClipPlanes; ++i)
     {
-        const vec3f normal = {
-            clipPlanes[i].x, clipPlanes[i].y, clipPlanes[i].z};
+        const vec3f normal = {clipPlanes[i].x, clipPlanes[i].y,
+                              clipPlanes[i].z};
         const float d = clipPlanes[i].w;
 
         const float distance = dot(normal, position) + d;

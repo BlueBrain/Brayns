@@ -1134,8 +1134,9 @@ inline vec3f getRandomVector(const unsigned int frameBufferWidth,
 {
     RandomTEA rng_state;
     varying RandomTEA* const uniform rng = &rng_state;
-    RandomTEA__Constructor(rng, (frameBufferWidth * sample.sampleID.y) +
-                                    sample.sampleID.x,
+    RandomTEA__Constructor(rng,
+                           (frameBufferWidth * sample.sampleID.y) +
+                               sample.sampleID.x,
                            sample.sampleID.z);
 
     vec3f tangent, biTangent;

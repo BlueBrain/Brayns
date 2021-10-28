@@ -107,7 +107,8 @@ inline vec3f CircuitExplorerBasicRenderer_shadeRay(
             vec4f simulationContribution = make_vec4f(0.f);
             bool ignoreIntersection = false;
             const uniform Geometry* geometry = dg.geometry;
-            const uniform OSPRayISPCModel* model = (const uniform OSPRayISPCModel*)geometry->model;
+            const uniform OSPRayISPCModel* model =
+                (const uniform OSPRayISPCModel*)geometry->model;
             if (model->simEnabled == 1 && objMaterial->castSimulationData == 1)
             {
                 // Get simulation value from geometry

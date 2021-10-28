@@ -46,7 +46,7 @@ export void DefaultMaterial_set(
     const uniform affine2f& xform_Bump, const uniform linear2f& rot_Bump)
 {
     uniform DefaultMaterial* uniform self =
-        (uniform DefaultMaterial * uniform)_mat;
+        (uniform DefaultMaterial * uniform) _mat;
 
     self->map_d = make_TextureParam((Texture2D*)map_d, xform_d);
     self->d = d;

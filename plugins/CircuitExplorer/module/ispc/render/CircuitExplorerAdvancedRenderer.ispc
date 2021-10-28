@@ -724,9 +724,10 @@ inline void processSimulationContribution(varying ScreenSample& sample,
                                           const varying uint32 primID)
 {
     const uniform Geometry* geometry = attributes.dg->geometry;
-    const uniform OSPRayISPCModel* model = (const uniform OSPRayISPCModel*)geometry->model;
+    const uniform OSPRayISPCModel* model =
+        (const uniform OSPRayISPCModel*)geometry->model;
 
-    if(model->simEnabled != 1)
+    if (model->simEnabled != 1)
         return;
 
     if (!attributes.castSimulationData)
