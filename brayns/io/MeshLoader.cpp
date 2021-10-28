@@ -123,13 +123,6 @@ MeshLoader::MeshLoader(Scene& scene)
 {
 }
 
-bool MeshLoader::isSupported(const std::string&,
-                             const std::string& extension) const
-{
-    const auto types = getSupportedTypes();
-    return std::find(types.begin(), types.end(), extension) != types.end();
-}
-
 std::vector<ModelDescriptorPtr> MeshLoader::importFromFile(
     const std::string& fileName, const LoaderProgress& callback,
     const MeshLoaderParameters& params) const

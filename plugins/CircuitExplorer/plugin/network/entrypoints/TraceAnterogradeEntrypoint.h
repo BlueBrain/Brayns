@@ -62,7 +62,8 @@ public:
                 "circuit model");
         }
 
-        CircuitColorManager::updateSingleColor(model, params.non_connected_cells_color);
+        CircuitColorManager::updateSingleColor(
+            model, params.non_connected_cells_color);
 
         std::map<uint64_t, brayns::Vector4f> colorMap;
         for (const auto gid : params.cell_gids)

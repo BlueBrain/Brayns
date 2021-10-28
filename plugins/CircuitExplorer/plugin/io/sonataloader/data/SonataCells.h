@@ -35,7 +35,8 @@ public:
     using Selection = bbp::sonata::Selection;
 
     /**
-     * @brief returns a string representing the node population type (biophysical, astrocyte, vasculature, ...)
+     * @brief returns a string representing the node population type
+     * (biophysical, astrocyte, vasculature, ...)
      */
     static std::string getPopulationType(const Nodes& nodes);
 

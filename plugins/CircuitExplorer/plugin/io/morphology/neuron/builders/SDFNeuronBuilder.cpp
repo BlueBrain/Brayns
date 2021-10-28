@@ -38,7 +38,8 @@ typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
 class SDFInstantiableGeometry : public NeuronInstantiableGeometry
 {
 public:
-    MorphologyInstance::Ptr instantiate(const brayns::Vector3f& tr, const brayns::Quaternion& rot) const final
+    MorphologyInstance::Ptr instantiate(
+        const brayns::Vector3f& tr, const brayns::Quaternion& rot) const final
     {
         auto transformedSDF = sdfGeometries;
         for (auto& geometry : transformedSDF)
@@ -200,7 +201,8 @@ private:
     }
 };
 
-NeuronInstantiableGeometry::Ptr SDFNeuronBuilder::_buildImpl(const NeuronMorphology& m) const
+NeuronInstantiableGeometry::Ptr SDFNeuronBuilder::_buildImpl(
+    const NeuronMorphology& m) const
 {
     auto instantiablePtr = std::make_unique<SDFInstantiableGeometry>();
     auto& instantiable = *instantiablePtr.get();
@@ -215,11 +217,13 @@ NeuronInstantiableGeometry::Ptr SDFNeuronBuilder::_buildImpl(const NeuronMorphol
     {
         // Copy set neighbours into final vector neighbour
         const auto& tn = builder._neighbours[i];
-        instantiable.sdfData->neighbours[i] = std::vector<size_t>(tn.begin(), tn.end());
+        instantiable.sdfData->neighbours[i] =
+            std::vector<size_t>(tn.begin(), tn.end());
     }
     // Group geometries by section type
     for (size_t i = 0; i < builder._sectionTypeMap.size(); ++i)
-        instantiable.sdfData->sectionTypeMap[builder._sectionTypeMap[i]].push_back(i);
+        instantiable.sdfData->sectionTypeMap[builder._sectionTypeMap[i]]
+            .push_back(i);
 
     instantiable.sdfData->sectionGeometries = std::move(builder._sectionMap);
 

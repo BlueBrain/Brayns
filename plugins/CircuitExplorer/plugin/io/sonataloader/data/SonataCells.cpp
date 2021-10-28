@@ -22,6 +22,8 @@
 
 #include <glm/gtx/matrix_decompose.hpp>
 
+#include <plugin/api/Log.h>
+
 namespace sonataloader
 {
 namespace
@@ -77,9 +79,9 @@ inline void __checkEnums(const bbp::sonata::NodePopulation& nodes,
                          const std::vector<const char*>& enums)
 {
     const auto& enumerations = nodes.enumerationNames();
-    for(const auto enumName : enums)
+    for (const auto enumName : enums)
     {
-        if(enumerations.find(enumName) == enumerations.end())
+        if (enumerations.find(enumName) == enumerations.end())
         {
             throw std::runtime_error("Node population '" + nodes.name() +
                                      "' is missing "
@@ -93,8 +95,23 @@ inline void __checkEnums(const bbp::sonata::NodePopulation& nodes,
 
 std::string SonataCells::getPopulationType(const Nodes& nodes)
 {
-    __checkEnums(nodes, {enumModelType});
-    return nodes.enumerationValues(enumModelType)[0];
+    // Standard still not stable on this point. Not sure if it will
+    // be an enum on the library group. or a dataset of the population
+    // itself.
+    // Test data has it as dataset of the population
+
+    PLUGIN_WARN << "SonataCells::getPopulationType(): Extracted from "
+                   "pouplation dataset\n";
+
+    // Library enum
+    //__checkEnums(nodes, {enumModelType});
+    // return nodes.enumerationValues(enumModelType)[0];
+
+    // Population dataset
+    __checkAttributes(nodes, {enumModelType});
+    // Select the first node only
+    const auto selection = bbp::sonata::Selection::fromValues({0});
+    return nodes.getAttribute<std::string>(enumModelType, selection)[0];
 }
 
 std::vector<std::string> SonataCells::getMorphologies(

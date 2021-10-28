@@ -30,7 +30,7 @@ class ChemicalSynapsePopulationLoader : public CommonEdgeLoader
 {
 public:
     ChemicalSynapsePopulationLoader()
-     : CommonEdgeLoader("chemical")
+        : CommonEdgeLoader("chemical")
     {
     }
 };

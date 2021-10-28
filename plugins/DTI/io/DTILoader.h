@@ -38,7 +38,7 @@ class DTILoader : public brayns::Loader<DTILoaderParameters>
 {
 public:
     DTILoader(brayns::Scene& scene)
-     : brayns::Loader<DTILoaderParameters>(scene)
+        : brayns::Loader<DTILoaderParameters>(scene)
     {
     }
 

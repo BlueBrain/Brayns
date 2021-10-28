@@ -317,13 +317,6 @@ ProteinLoader::ProteinLoader(Scene& scene)
 {
 }
 
-bool ProteinLoader::isSupported(const std::string&,
-                                const std::string& extension) const
-{
-    const std::set<std::string> types = {"pdb", "pdb1"};
-    return types.find(extension) != types.end();
-}
-
 std::vector<ModelDescriptorPtr> ProteinLoader::importFromFile(
     const std::string& fileName, const LoaderProgress&,
     const ProteinLoaderParameters& properties) const

@@ -59,14 +59,14 @@ brayns::AbstractSimulationHandlerPtr SonataReportHandler::clone() const
                                                  _selection);
 }
 
-void* SonataReportHandler::getFrameDataImpl(const uint32_t frame)
+std::vector<float> SonataReportHandler::getFrameDataImpl(const uint32_t frame)
 {
     _ready = false;
     const auto realFrame = frame > _nbFrames ? _nbFrames : frame;
     const auto timestamp = __frameIndexToTimestamp(realFrame, _dt);
-    _frameData = _reportPopulation.get(_selection, timestamp).data;
+    const auto data = _reportPopulation.get(_selection, timestamp).data;
     _ready = true;
 
-    return _frameData.data();
+    return data;
 }
 } // namespace sonataloader

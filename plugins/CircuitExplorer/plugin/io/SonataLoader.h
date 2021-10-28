@@ -32,7 +32,7 @@ public:
      * @brief Constructor
      */
     SonataLoader(brayns::Scene& scene)
-     : brayns::Loader<SonataLoaderParameters>(scene)
+        : brayns::Loader<SonataLoaderParameters>(scene)
     {
     }
 

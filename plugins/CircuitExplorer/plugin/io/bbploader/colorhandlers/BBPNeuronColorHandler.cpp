@@ -270,8 +270,8 @@ inline std::vector<std::string> __getAvailableMethods(
 
 BBPNeuronColorHandler::BBPNeuronColorHandler(const std::string& circuitPath,
                                              const std::string& circuitPop)
- : _circuitPath(circuitPath)
- , _circuitPop(circuitPop)
+    : _circuitPath(circuitPath)
+    , _circuitPop(circuitPop)
 {
 }
 

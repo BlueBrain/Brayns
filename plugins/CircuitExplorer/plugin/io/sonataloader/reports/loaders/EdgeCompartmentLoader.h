@@ -32,8 +32,7 @@ class EdgeCompartmentLoader : public EdgeReportLoader
 {
 public:
     std::vector<EdgeReportMapping> loadMapping(
-            const std::string& reportPath,
-            const std::string& population,
+        const std::string& reportPath, const std::string& population,
         const bbp::sonata::Selection&) const final;
 };
 } // namespace sonataloader

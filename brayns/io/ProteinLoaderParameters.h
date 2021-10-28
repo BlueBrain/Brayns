@@ -42,9 +42,11 @@ BRAYNS_ADAPTER_ENUM(
     {"protein_residues", ProteinLoaderColorScheme::protein_residues});
 
 BRAYNS_MESSAGE_BEGIN(ProteinLoaderParameters)
-BRAYNS_MESSAGE_ENTRY(ProteinLoaderColorScheme, color_scheme,
-                     "Defines how to color the loaded proteins")
-BRAYNS_MESSAGE_ENTRY(double, radius_multiplier,
-                     "A multiplier to apply to the protein sample radii")
+BRAYNS_MESSAGE_ENTRY_DEFAULT(ProteinLoaderColorScheme, color_scheme,
+                             ProteinLoaderColorScheme::none,
+                             "Defines how to color the loaded proteins")
+BRAYNS_MESSAGE_ENTRY_DEFAULT(
+    double, radius_multiplier, 1.0,
+    "A multiplier to apply to the protein sample radii")
 BRAYNS_MESSAGE_END()
 } // namespace brayns

@@ -41,17 +41,20 @@ class NodeReportLoaderTable
 public:
     NodeReportLoaderTable()
     {
-        registerReportLoader<ReportType::BLOODFLOW_PRESSURE, NodeVasculatureReportLoader>();
-        registerReportLoader<ReportType::BLOODFLOW_RADII, NodeVasculatureReportLoader>();
-        registerReportLoader<ReportType::BLOODFLOW_SPEED, NodeVasculatureReportLoader>();
+        registerReportLoader<ReportType::BLOODFLOW_PRESSURE,
+                             NodeVasculatureReportLoader>();
+        registerReportLoader<ReportType::BLOODFLOW_RADII,
+                             NodeVasculatureReportLoader>();
+        registerReportLoader<ReportType::BLOODFLOW_SPEED,
+                             NodeVasculatureReportLoader>();
         registerReportLoader<ReportType::COMPARTMENT, NodeCompartmentLoader>();
         registerReportLoader<ReportType::SPIKES, NodeSpikeLoader>();
         registerReportLoader<ReportType::SUMMATION, NodeCompartmentLoader>();
     }
 
-    template<ReportType type,
-             typename T,
-             typename = std::enable_if_t<std::is_base_of<NodeReportLoader, T>::value>>
+    template <ReportType type, typename T,
+              typename =
+                  std::enable_if_t<std::is_base_of<NodeReportLoader, T>::value>>
     void registerReportLoader()
     {
         _table[type] = std::make_unique<T>();
@@ -60,10 +63,11 @@ public:
     const NodeReportLoader& getLoader(const ReportType& type) const
     {
         auto it = _table.find(type);
-        if(it == _table.end())
+        if (it == _table.end())
         {
             const auto typeStr = brayns::enumToString<ReportType>(type);
-            throw std::runtime_error("SonataLoader: Cannot find report loader for " + typeStr);
+            throw std::runtime_error(
+                "SonataLoader: Cannot find report loader for " + typeStr);
         }
 
         return *(it->second);
@@ -72,85 +76,113 @@ public:
 private:
     std::unordered_map<ReportType, NodeReportLoader::Ptr> _table;
 };
-}
+} // namespace
 
-void PopulationReportManager::loadNodeMapping(const SonataNodePopulationParameters& input,
-                                              const bbp::sonata::Selection& selection,
-                                              std::vector<MorphologyInstance::Ptr>& nodes)
+void PopulationReportManager::loadNodeMapping(
+    const SonataNodePopulationParameters& input,
+    const bbp::sonata::Selection& selection,
+    std::vector<MorphologyInstance::Ptr>& nodes)
 {
     static const NodeReportLoaderTable NODEREPORT_TABLE;
 
     const auto type = input.report_type;
-    if(type == ReportType::NONE)
+    if (type == ReportType::NONE)
         return;
 
     const auto& reportLoader = NODEREPORT_TABLE.getLoader(type);
-    const auto mapping = reportLoader.loadMapping(input.report_path, input.node_population, selection);
+    const auto mapping =
+        reportLoader.loadMapping(input.report_path, input.node_population,
+                                 selection);
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (size_t i = 0; i < nodes.size(); ++i)
     {
         const auto& cm = mapping[i];
-        nodes[i]->mapSimulation(cm.globalOffset, cm.offsets,
-                                cm.compartments);
+        nodes[i]->mapSimulation(cm.globalOffset, cm.offsets, cm.compartments);
     }
 }
 
-void PopulationReportManager::loadEdgeMapping(const SonataEdgePopulationParameters& input,
-                                              const bbp::sonata::Selection& selection,
-                                              std::vector<SynapseGroup::Ptr>& edges)
-{   
-    if(input.edge_report.empty())
+void PopulationReportManager::loadEdgeMapping(
+    const SonataEdgePopulationParameters& input,
+    const bbp::sonata::Selection& selection,
+    std::vector<SynapseGroup::Ptr>& edges)
+{
+    if (input.edge_report.empty())
         return;
 
     // Currently there is only one type of synapse report...
-    const auto mapping = EdgeCompartmentLoader().loadMapping(input.edge_report, input.edge_population, selection);
+    const auto mapping =
+        EdgeCompartmentLoader().loadMapping(input.edge_report,
+                                            input.edge_population, selection);
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (size_t j = 0; j < edges.size(); ++j)
         edges[j]->mapSimulation(mapping[j].offsets);
 }
 
-void PopulationReportManager::addNodeReportHandler(const SonataNodePopulationParameters& input,
-                                                   const bbp::sonata::Selection& selection,
-                                                   brayns::ModelDescriptorPtr& model)
+void PopulationReportManager::addNodeReportHandler(
+    const SonataNodePopulationParameters& input,
+    const bbp::sonata::Selection& selection, brayns::ModelDescriptorPtr& model)
 {
-    if(input.report_type == ReportType::NONE)
+    if (input.report_type == ReportType::NONE)
         return;
 
     const auto& path = input.report_path;
     const auto& population = input.node_population;
 
-    brayns::AbstractSimulationHandlerPtr handler {nullptr};
-    if(input.report_type == ReportType::SPIKES)
-        handler = std::make_shared<SonataSpikeHandler>(path, population, selection);
-    else if(input.report_type == ReportType::BLOODFLOW_RADII)
-        handler = std::make_shared<VasculatureRadiiHandler>(path, population, selection);
+    brayns::AbstractSimulationHandlerPtr handler{nullptr};
+    if (input.report_type == ReportType::SPIKES)
+        handler =
+            std::make_shared<SonataSpikeHandler>(path, population, selection);
+    else if (input.report_type == ReportType::BLOODFLOW_RADII)
+        handler = std::make_shared<VasculatureRadiiHandler>(path, population,
+                                                            selection);
     else
-        handler = std::make_shared<SonataReportHandler>(path, population, selection);
+        handler =
+            std::make_shared<SonataReportHandler>(path, population, selection);
 
+    model->getModel().setSimulationHandler(handler);
     CircuitExplorerMaterial::setSimulationColorEnabled(model->getModel(), true);
 
-    if(input.report_type == ReportType::BLOODFLOW_RADII)
+    if (input.report_type == ReportType::BLOODFLOW_RADII)
     {
         VasculatureRadiiSimulation::registerModel(model);
-        model->addOnRemoved([](const brayns::ModelDescriptor& model)
-        {
+        model->addOnRemoved([](const brayns::ModelDescriptor& model) {
             VasculatureRadiiSimulation::unregisterModel(model.getModelID());
         });
     }
 }
 
-void PopulationReportManager::addEdgeReportHandler(const SonataEdgePopulationParameters& input,
-                                                   const bbp::sonata::Selection& selection,
-                                                   brayns::ModelDescriptorPtr& model)
+void PopulationReportManager::addEdgeReportHandler(
+    const SonataEdgePopulationParameters& input,
+    const bbp::sonata::Selection& selection, brayns::ModelDescriptorPtr& model)
 {
-    if(input.edge_report.empty())
+    if (input.edge_report.empty())
         return;
 
-    auto handler = std::make_shared<SonataReportHandler>(input.edge_report, input.edge_population, selection);
+    auto handler =
+        std::make_shared<SonataReportHandler>(input.edge_report,
+                                              input.edge_population, selection);
     model->getModel().setSimulationHandler(handler);
-
     CircuitExplorerMaterial::setSimulationColorEnabled(model->getModel(), true);
 }
+
+void PopulationReportManager::addNodeHandlerToEdges(
+    const brayns::ModelDescriptorPtr& nodeModel,
+    const std::vector<brayns::ModelDescriptor*>& edgeModels)
+{
+    const auto& model = nodeModel->getModel();
+    if (!model.getSimulationHandler())
+        return;
+
+    for (auto edgeModelDescr : edgeModels)
+    {
+        auto& edgeModel = edgeModelDescr->getModel();
+        if (!edgeModel.getSimulationHandler())
+        {
+            edgeModel.setSimulationHandler(model.getSimulationHandler());
+            CircuitExplorerMaterial::setSimulationColorEnabled(edgeModel, true);
+        }
+    }
 }
+} // namespace sonataloader

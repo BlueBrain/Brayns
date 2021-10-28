@@ -40,6 +40,17 @@ AbstractSimulationHandler& AbstractSimulationHandler::operator=(
     return *this;
 }
 
+void* AbstractSimulationHandler::getFrameData(const uint32_t frame)
+{
+    if (frame != _currentFrame)
+    {
+        _frameData = getFrameDataImpl(_getBoundedFrame(frame));
+        _currentFrame = frame;
+    }
+
+    return _frameData.data();
+}
+
 uint32_t AbstractSimulationHandler::_getBoundedFrame(
     const uint32_t inputFrame) const
 {

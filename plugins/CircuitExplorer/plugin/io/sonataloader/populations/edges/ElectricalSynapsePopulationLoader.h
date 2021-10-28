@@ -30,7 +30,7 @@ class ElectricalSynapsePopulationLoader : public CommonEdgeLoader
 {
 public:
     ElectricalSynapsePopulationLoader()
-     : CommonEdgeLoader("electrical_synapse")
+        : CommonEdgeLoader("electrical_synapse")
     {
     }
 };

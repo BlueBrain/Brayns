@@ -24,11 +24,10 @@
 
 namespace sonataloader
 {
-std::vector<SynapseGroup::Ptr>
-    SynapseAstrocytePopulationLoader::load(
-        const SonataConfig::Data& networkData,
-        const SonataEdgePopulationParameters& lc,
-        const bbp::sonata::Selection& nodeSelection) const
+std::vector<SynapseGroup::Ptr> SynapseAstrocytePopulationLoader::load(
+    const SonataConfig::Data& networkData,
+    const SonataEdgePopulationParameters& lc,
+    const bbp::sonata::Selection& nodeSelection) const
 {
     if (lc.load_afferent)
         throw std::runtime_error(
@@ -38,7 +37,8 @@ std::vector<SynapseGroup::Ptr>
 
     const auto baseNodeList = nodeSelection.flatten();
 
-    const auto population = networkData.config.getEdgePopulation(lc.edge_population);
+    const auto population =
+        networkData.config.getEdgePopulation(lc.edge_population);
     // Fill it by mapping node ID to synapse list in case there is a node Id
     // without synapses, so we can still place an empty vector at the end
     std::map<uint64_t, std::unique_ptr<SynapseGroup>> mapping;

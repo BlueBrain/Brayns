@@ -48,13 +48,6 @@ XYZBLoader::XYZBLoader(Scene& scene)
 {
 }
 
-bool XYZBLoader::isSupported(const std::string&,
-                             const std::string& extension) const
-{
-    const std::set<std::string> types = {"xyz"};
-    return types.find(extension) != types.end();
-}
-
 std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback) const
 {

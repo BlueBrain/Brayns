@@ -26,9 +26,9 @@
 #include <plugin/io/morphology/neuron/NeuronMorphologyImporter.h>
 
 BRAYNS_MESSAGE_BEGIN(NeuronMorphologyLoaderParameters)
-BRAYNS_MESSAGE_ENTRY(
-    std::string, geometry_mode,
-    "Type of geometry to use to display the cells. Possible values are: 'vanilla', 'samples', 'smooth'")
+BRAYNS_MESSAGE_ENTRY(std::string, geometry_mode,
+                     "Type of geometry to use to display the cells. Possible "
+                     "values are: 'vanilla', 'samples', 'smooth'")
 BRAYNS_MESSAGE_ENTRY(float, radius_multiplier,
                      "Parameter to multiply all morphology sample radii by. "
                      "Must be > 0.0. Ignored if 'radius_override' > 0.0")

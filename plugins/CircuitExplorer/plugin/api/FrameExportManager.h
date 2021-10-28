@@ -102,7 +102,8 @@ public:
 private:
     static void _start(brayns::PluginAPI& api) noexcept;
     static void _stop(brayns::PluginAPI& api) noexcept;
-    static void _writeImageToDisk(brayns::PluginAPI& api, const uint32_t frameNumberName);
+    static void _writeImageToDisk(brayns::PluginAPI& api,
+                                  const uint32_t frameNumberName);
 
 private:
     static bool _exportRunning;

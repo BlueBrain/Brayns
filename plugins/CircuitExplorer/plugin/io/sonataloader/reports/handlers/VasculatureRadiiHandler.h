@@ -38,7 +38,7 @@ public:
 
     brayns::AbstractSimulationHandlerPtr clone() const final;
 
-    void* getFrameDataImpl(const uint32_t frame) final;
+    std::vector<float> getFrameDataImpl(const uint32_t frame) final;
 
     const std::vector<float>& getCurrentRadiiFrame() const noexcept;
 
@@ -54,7 +54,9 @@ private:
     const bbp::sonata::Selection _selection;
     const bbp::sonata::ElementReportReader _reader;
     const bbp::sonata::ElementReportReader::Population& _reportPopulation;
+
     bool _ready{true};
+
     size_t _radiiFrameSize;
     std::vector<float> _radii;
     uint32_t _lastRadiiFrame{std::numeric_limits<uint32_t>::max()};

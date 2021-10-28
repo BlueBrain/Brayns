@@ -41,7 +41,8 @@ struct NodeReportMapping
 
 /**
  * @brief The NodeReportLoader class is the base class to manage SONATA report
- * for node populations. Is in charge of computing the mapping for a set of nodes
+ * for node populations. Is in charge of computing the mapping for a set of
+ * nodes
  */
 class NodeReportLoader
 {
@@ -57,8 +58,7 @@ public:
      *        cells
      */
     virtual std::vector<NodeReportMapping> loadMapping(
-        const std::string& reportPath,
-        const std::string& population,
+        const std::string& reportPath, const std::string& population,
         const bbp::sonata::Selection&) const = 0;
 };
 } // namespace sonataloader

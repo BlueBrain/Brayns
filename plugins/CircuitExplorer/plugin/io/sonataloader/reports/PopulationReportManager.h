@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <brayns/common/simulation/AbstractSimulationHandler.h>
+#include <brayns/engine/Model.h>
 
 #include <plugin/io/SonataLoaderParameters.h>
 #include <plugin/io/morphology/MorphologyInstance.h>
@@ -31,18 +31,50 @@ namespace sonataloader
 class PopulationReportManager
 {
 public:
+    /**
+     * @brief if the given population was requested to be loaded with a report,
+     * it loads and sets the geometry simulation mapping for the given nodes of
+     * the node population
+     */
     static void loadNodeMapping(const SonataNodePopulationParameters& input,
                                 const bbp::sonata::Selection& selection,
                                 std::vector<MorphologyInstance::Ptr>& nodes);
+
+    /**
+     * @brief if the given population was requested to be loaded with a report,
+     * it loads and sets the geometry simulation mapping for the given edges of
+     * the edge population
+     */
     static void loadEdgeMapping(const SonataEdgePopulationParameters& input,
                                 const bbp::sonata::Selection& selection,
                                 std::vector<SynapseGroup::Ptr>& edges);
 
-    static void addNodeReportHandler(const SonataNodePopulationParameters& input,
-                                     const bbp::sonata::Selection& selection,
-                                     brayns::ModelDescriptorPtr& model);
-    static void addEdgeReportHandler(const SonataEdgePopulationParameters& input,
-                                     const bbp::sonata::Selection& selection,
-                                     brayns::ModelDescriptorPtr& model);
+    /**
+     * @brief if the given population was requested to be loaded with a report,
+     * it instantiates the appropriate simulation handler, enabled simulation
+     * coloring and handles any special case (such as vasculature radii reports)
+     */
+    static void addNodeReportHandler(
+        const SonataNodePopulationParameters& input,
+        const bbp::sonata::Selection& selection,
+        brayns::ModelDescriptorPtr& model);
+
+    /**
+     * @brief if the given population was requested to be loaded with a report,
+     * it instantiates the appropriate simulation handler and enabled simulation
+     */
+    static void addEdgeReportHandler(
+        const SonataEdgePopulationParameters& input,
+        const bbp::sonata::Selection& selection,
+        brayns::ModelDescriptorPtr& model);
+
+    /**
+     * @brief Checks each edge population. If they dont have a simulation of
+     * their own, and the node model has, it sets that simulation to the edges
+     * as well
+     */
+    static void addNodeHandlerToEdges(
+        const brayns::ModelDescriptorPtr& nodeModel,
+        const std::vector<brayns::ModelDescriptor*>& edgeModels);
 };
-}
+} // namespace sonataloader

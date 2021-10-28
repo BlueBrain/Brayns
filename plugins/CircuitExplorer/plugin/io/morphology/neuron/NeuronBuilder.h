@@ -28,7 +28,8 @@ class NeuronInstantiableGeometry
 public:
     using Ptr = std::unique_ptr<NeuronInstantiableGeometry>;
 
-    virtual MorphologyInstance::Ptr instantiate(const brayns::Vector3f& tr, const brayns::Quaternion& rot) const = 0;
+    virtual MorphologyInstance::Ptr instantiate(
+        const brayns::Vector3f& tr, const brayns::Quaternion& rot) const = 0;
 };
 
 /**
@@ -42,10 +43,10 @@ class NeuronBuilder
 public:
     using Ptr = std::unique_ptr<NeuronBuilder>;
 
-    template<typename T,
-             typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
+    template <typename T, typename = std::enable_if_t<
+                              std::is_constructible<std::string, T>::value>>
     NeuronBuilder(T&& name)
-     : _name (std::forward<T>(name))
+        : _name(std::forward<T>(name))
     {
     }
 
@@ -55,10 +56,7 @@ public:
      * @brief returns this neuron geoemtry builder name, used to identify it
      * @return std::string with the builders name
      */
-    const std::string& getName()
-    {
-        return _name;
-    }
+    const std::string& getName() { return _name; }
 
     /**
      * @brief builds the geometry from the given morphology representation. If
@@ -71,7 +69,8 @@ public:
     }
 
 protected:
-    virtual NeuronInstantiableGeometry::Ptr _buildImpl(const NeuronMorphology&) const = 0;
+    virtual NeuronInstantiableGeometry::Ptr _buildImpl(
+        const NeuronMorphology&) const = 0;
 
 private:
     const std::string _name;

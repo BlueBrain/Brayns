@@ -30,7 +30,7 @@ class EndFootPopulationLoader : public EdgePopulationLoader
 {
 public:
     EndFootPopulationLoader()
-     : EdgePopulationLoader("endfoot")
+        : EdgePopulationLoader("endfoot")
     {
     }
 

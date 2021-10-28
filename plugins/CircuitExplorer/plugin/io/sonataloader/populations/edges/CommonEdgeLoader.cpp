@@ -25,9 +25,9 @@
 namespace sonataloader
 {
 std::vector<std::unique_ptr<SynapseGroup>> CommonEdgeLoader::load(
-        const SonataConfig::Data& networkConfig,
-        const SonataEdgePopulationParameters& lc,
-        const bbp::sonata::Selection& nodeSelection) const
+    const SonataConfig::Data& networkConfig,
+    const SonataEdgePopulationParameters& lc,
+    const bbp::sonata::Selection& nodeSelection) const
 {
     const auto baseNodeList = nodeSelection.flatten();
 
@@ -43,7 +43,8 @@ std::vector<std::unique_ptr<SynapseGroup>> CommonEdgeLoader::load(
     std::vector<brayns::Vector3f> surfacePos;
     std::vector<uint64_t> edgeIds;
 
-    const auto population = networkConfig.config.getEdgePopulation(lc.edge_population);
+    const auto population =
+        networkConfig.config.getEdgePopulation(lc.edge_population);
 
     if (lc.load_afferent)
     {

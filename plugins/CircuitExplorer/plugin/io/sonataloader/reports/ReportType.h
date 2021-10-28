@@ -36,4 +36,4 @@ enum class ReportType : uint8_t
     BLOODFLOW_PRESSURE,
     BLOODFLOW_RADII
 };
-}
+} // namespace sonataloader

@@ -184,7 +184,7 @@ public:
     void callOnRemoved()
     {
         if (!_onRemovedCallback.empty())
-            for(const auto& callback : _onRemovedCallback)
+            for (const auto& callback : _onRemovedCallback)
                 callback(*this);
     }
     /** @internal */

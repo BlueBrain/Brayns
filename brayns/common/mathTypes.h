@@ -87,7 +87,7 @@ public:
 
     inline bool isEmpty() const
     {
-        return _min.x >= _max.x || _min.y >= _max.y || _min.z >= _max.x;
+        return _min.x >= _max.x || _min.y >= _max.y || _min.z >= _max.z;
     }
 
     inline vec getCenter() const { return (_min + _max) * .5; }

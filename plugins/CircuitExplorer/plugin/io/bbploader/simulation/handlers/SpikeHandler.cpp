@@ -59,7 +59,6 @@ SpikeHandler::SpikeHandler(
     _nbFrames = _endTime / DEFAULT_TIME_INTERVAL;
     _dt = DEFAULT_TIME_INTERVAL;
     _frameSize = gids.size();
-    _frameData.resize(_frameSize, DEFAULT_REST_VALUE);
 }
 
 SpikeHandler::SpikeHandler(const SpikeHandler& other)
@@ -77,10 +76,11 @@ brayns::AbstractSimulationHandlerPtr SpikeHandler::clone() const
     return std::make_shared<SpikeHandler>(*this);
 }
 
-void* SpikeHandler::getFrameDataImpl(const uint32_t frame)
+std::vector<float> SpikeHandler::getFrameDataImpl(const uint32_t frame)
 {
     _ready = false;
-    std::fill(_frameData.begin(), _frameData.end(), DEFAULT_REST_VALUE);
+    std::vector<float> data(_frameSize, DEFAULT_REST_VALUE);
+
     const auto timestamp = __frameIndexToTimestamp(frame, _dt);
 
     const auto trStart = timestamp - _transition;
@@ -96,23 +96,23 @@ void* SpikeHandler::getFrameDataImpl(const uint32_t frame)
         {
             auto alpha = (spikeTime - timestamp) / _transition;
             alpha = std::min(std::max(0.0, alpha), 1.0);
-            _frameData[index] = DEFAULT_REST_VALUE * alpha +
-                                DEFAULT_SPIKING_VALUE * (1.0 - alpha);
+            data[index] = DEFAULT_REST_VALUE * alpha +
+                          DEFAULT_SPIKING_VALUE * (1.0 - alpha);
         }
         // Spike in the past - start fading
         else if (spikeTime < timestamp)
         {
             auto alpha = (timestamp - spikeTime) / _transition;
             alpha = std::min(std::max(0.0, alpha), 1.0);
-            _frameData[index] = DEFAULT_REST_VALUE * alpha +
-                                DEFAULT_SPIKING_VALUE * (1.0 - alpha);
+            data[index] = DEFAULT_REST_VALUE * alpha +
+                          DEFAULT_SPIKING_VALUE * (1.0 - alpha);
         }
         // Spiking neuron
         else
-            _frameData[index] = DEFAULT_SPIKING_VALUE;
+            data[index] = DEFAULT_SPIKING_VALUE;
     }
     _ready = true;
-    return _frameData.data();
+    return data;
 }
 
 bool SpikeHandler::isReady() const

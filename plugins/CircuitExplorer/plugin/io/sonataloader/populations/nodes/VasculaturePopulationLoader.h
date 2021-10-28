@@ -30,7 +30,7 @@ class VasculaturePopulationLoader : public NodePopulationLoader
 {
 public:
     VasculaturePopulationLoader()
-     : NodePopulationLoader("vasculature")
+        : NodePopulationLoader("vasculature")
     {
     }
 

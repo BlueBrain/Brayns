@@ -30,21 +30,24 @@ namespace sonataloader
 class CommonNodeLoader : public NodePopulationLoader
 {
 public:
-    template<typename T,
-             typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
+    template <typename T, typename = std::enable_if_t<
+                              std::is_constructible<std::string, T>::value>>
     CommonNodeLoader(T&& name)
-     : NodePopulationLoader(std::forward<T>(name))
+        : NodePopulationLoader(std::forward<T>(name))
     {
     }
 
     /**
      * @brief loads a node population as morphologiy geometry
      * @param loadSettings Settings that configures the load process
-     * @param nodeSelection Selection of nodes to laod from within the population
-     * @param morphologyNames vector with the morphology name for each selected node
+     * @param nodeSelection Selection of nodes to laod from within the
+     * population
+     * @param morphologyNames vector with the morphology name for each selected
+     * node
      * @param positions vector with the translation for each selected node
      * @param rotations vector with the rotation for each selected node
-     * @param cb progress report callback to inform the client of the load process
+     * @param cb progress report callback to inform the client of the load
+     * process
      * @return a vector of morphology instances holding the geometries
      */
     std::vector<MorphologyInstance::Ptr> loadNodes(
@@ -55,4 +58,4 @@ public:
         const std::vector<brayns::Vector3f>& positions,
         const std::vector<brayns::Quaternion>& rotations) const;
 };
-}
+} // namespace sonataloader

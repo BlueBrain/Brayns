@@ -63,7 +63,8 @@ public:
     };
 
 public:
-    NeuronMorphology(const std::string& path, const bool soma, const bool axon, const bool dendrites);
+    NeuronMorphology(const std::string& path, const bool soma, const bool axon,
+                     const bool dendrites);
 
     /**
      * @brief returns true if this morphology was loaded with soma

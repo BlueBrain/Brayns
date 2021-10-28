@@ -41,9 +41,9 @@ public:
      */
     struct ImportSettings
     {
-        bool loadSoma {false};
-        bool loadAxon {false};
-        bool loadDendrites {false};
+        bool loadSoma{false};
+        bool loadAxon{false};
+        bool loadDendrites{false};
         std::string builderName;
         float radiusMultiplier{1.f};
         float radiusOverride{0.f};
@@ -52,7 +52,8 @@ public:
     /**
      * @brief constructs an importer with the given configuration
      * @throws std::runtime_error if the choosen builder does not exist,
-     * or if the settings do not request any morphology section (soma, axon or dendrite)
+     * or if the settings do not request any morphology section (soma, axon or
+     * dendrite)
      */
     NeuronMorphologyImporter(const ImportSettings& settings);
 
@@ -60,14 +61,15 @@ public:
      * @brief loads a morphology, processes it through the pipeline and then
      * builds the geometry. Returns an NeuronInstantiableGeometry object.
      */
-    NeuronInstantiableGeometry::Ptr import(const std::string& morphologyPath) const;
+    NeuronInstantiableGeometry::Ptr import(
+        const std::string& morphologyPath) const;
 
 private:
     const NeuronBuilder& _getNeuronBuilder(const std::string& name) const;
 
-    const bool soma {false};
-    const bool axon {false};
-    const bool dendrites {false};
+    const bool soma{false};
+    const bool axon{false};
+    const bool dendrites{false};
     const NeuronBuilder& _builder;
     NeuronMorphologyPipeline _pipeline;
 };

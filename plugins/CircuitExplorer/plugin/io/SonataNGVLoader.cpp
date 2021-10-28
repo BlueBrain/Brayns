@@ -82,7 +82,7 @@ std::vector<brayns::ModelDescriptorPtr> SonataNGVLoader::importFromFile(
         // Import the model
         auto models =
             _internal->importFromBlueConfig(path, cb, population.circuit_config,
-                                           *config);
+                                            *config);
         for (auto& model : models)
             model->setName(name + " - " + model->getName());
         result.insert(result.end(), models.begin(), models.end());

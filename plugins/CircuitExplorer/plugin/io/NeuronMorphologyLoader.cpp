@@ -82,7 +82,9 @@ std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromFile(
     importSettings.radiusMultiplier = input.radius_multiplier;
     importSettings.radiusOverride = input.radius_override;
 
-    const auto geometry = NeuronMorphologyImporter(importSettings).import(path)
+    const auto geometry =
+        NeuronMorphologyImporter(importSettings)
+            .import(path)
             ->instantiate(brayns::Vector3f(), brayns::Quaternion());
 
     auto modelPtr = _scene.createModel();

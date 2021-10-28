@@ -51,8 +51,10 @@ public:
         try
         {
             auto& scene = getApi().getScene();
-            const auto& descriptor = brayns::ExtractModel::fromId(scene, params.model_id);
-            CircuitColorManager::updateColorsById(descriptor, params.color_info);
+            const auto& descriptor =
+                brayns::ExtractModel::fromId(scene, params.model_id);
+            CircuitColorManager::updateColorsById(descriptor,
+                                                  params.color_info);
             scene.markModified();
             getApi().triggerRender();
         }
@@ -91,7 +93,8 @@ public:
         try
         {
             auto& scene = getApi().getScene();
-            const auto& descriptor = brayns::ExtractModel::fromId(scene, params.model_id);
+            const auto& descriptor =
+                brayns::ExtractModel::fromId(scene, params.model_id);
             CircuitColorManager::updateSingleColor(descriptor, params.color);
             scene.markModified();
             getApi().triggerRender();
@@ -128,7 +131,8 @@ public:
         const auto& descriptor = brayns::ExtractModel::fromId(scene, params.id);
         try
         {
-            request.reply({CircuitColorManager::getAvailableMethods(descriptor)});
+            request.reply(
+                {CircuitColorManager::getAvailableMethods(descriptor)});
         }
         catch (const CircuitModelNotFoundException&)
         {
@@ -159,11 +163,13 @@ public:
     {
         auto params = request.getParams();
         auto& scene = getApi().getScene();
-        const auto& descriptor = brayns::ExtractModel::fromId(scene, params.model_id);
+        const auto& descriptor =
+            brayns::ExtractModel::fromId(scene, params.model_id);
         try
         {
             request.reply(
-                {CircuitColorManager::getMethodVariables(descriptor, params.method)});
+                {CircuitColorManager::getMethodVariables(descriptor,
+                                                         params.method)});
         }
         catch (const CircuitModelNotFoundException&)
         {
@@ -203,11 +209,12 @@ public:
     {
         auto params = request.getParams();
         auto& scene = getApi().getScene();
-        const auto& descriptor = brayns::ExtractModel::fromId(scene, params.model_id);
+        const auto& descriptor =
+            brayns::ExtractModel::fromId(scene, params.model_id);
         try
         {
             CircuitColorManager::updateColors(descriptor, params.method,
-                                  params.color_info);
+                                              params.color_info);
             scene.markModified();
             getApi().triggerRender();
         }

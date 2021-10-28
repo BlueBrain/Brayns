@@ -102,8 +102,8 @@ inline std::vector<std::string> __getMethodsValues(
 } // namespace
 
 CommonEdgeColorHandler::CommonEdgeColorHandler(
-    const std::string& configPath,
-    const std::string& edgePopulation, const bool afferent)
+    const std::string& configPath, const std::string& edgePopulation,
+    const bool afferent)
     : _config(bbp::sonata::CircuitConfig::fromFile(configPath))
     , _edgePopulation(edgePopulation)
     , _nodePopulation(__getNodePopulation(_config, _edgePopulation, afferent))

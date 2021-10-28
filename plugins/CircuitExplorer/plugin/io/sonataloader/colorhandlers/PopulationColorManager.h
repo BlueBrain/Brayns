@@ -26,8 +26,8 @@
 namespace sonataloader
 {
 /**
- * @brief The PopulationColorManager class is in charge of creating the appropiate
- * circuit color handlers for each node and edge population types
+ * @brief The PopulationColorManager class is in charge of creating the
+ * appropiate circuit color handlers for each node and edge population types
  */
 class PopulationColorManager
 {
@@ -35,13 +35,15 @@ public:
     /**
      * @brief creates a CircuitColorHandler based on the node population type
      */
-    static CircuitColorHandler::Ptr createNodeColorHandler(const SonataConfig::Data& network,
-                                                           const SonataNodePopulationParameters& lc);
+    static CircuitColorHandler::Ptr createNodeColorHandler(
+        const SonataConfig::Data& network,
+        const SonataNodePopulationParameters& lc);
 
     /**
      * @brief creates a CircuitColorHandler based on the edge population type
      */
-    static CircuitColorHandler::Ptr createEdgeColorHandler(const SonataConfig::Data& network,
-                                                           const SonataEdgePopulationParameters& lc);
+    static CircuitColorHandler::Ptr createEdgeColorHandler(
+        const SonataConfig::Data& network,
+        const SonataEdgePopulationParameters& lc);
 };
-}
+} // namespace sonataloader

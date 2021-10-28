@@ -63,15 +63,13 @@ SonataSpikeHandler::SonataSpikeHandler(const std::string& h5FilePath,
         greatestTime = 1.0;
 
     _startTime = 0.0;
-    _endTime = greatestTime;
+    _endTime = greatestTime + SPIKE_HANDLER_DT;
     _dt = SPIKE_HANDLER_DT;
     _unit = "";
 
     _frameSize = selection.flatSize();
-    _frameData.resize(_frameSize);
-    _nbFrames = static_cast<uint32_t>((std::nextafter(_endTime, INFINITY) -
-                                       std::nextafter(_startTime, INFINITY)) /
-                                      _dt);
+    _nbFrames = static_cast<uint32_t>(
+        std::round(std::nextafter(_endTime, INFINITY) / _dt));
 
     const auto flatSelection = _selection.flatten();
     for (size_t i = 0; i < flatSelection.size(); ++i)
@@ -84,13 +82,12 @@ brayns::AbstractSimulationHandlerPtr SonataSpikeHandler::clone() const
                                                 _selection);
 }
 
-void* SonataSpikeHandler::getFrameDataImpl(const uint32_t frame)
+std::vector<float> SonataSpikeHandler::getFrameDataImpl(const uint32_t frame)
 {
     _ready = false;
     // const auto realFrame = frame > _nbFrames? _nbFrames : frame;
     const auto timestamp = __frameIndexToTimestamp(frame, _dt);
-
-    std::fill(_frameData.begin(), _frameData.end(), SPIKE_DEFAULT_REST_VALUE);
+    std::vector<float> data(_frameSize, SPIKE_DEFAULT_REST_VALUE);
 
     const auto trStart =
         std::max(timestamp - SPIKE_TRANSITION_TIME_SECONDS, 0.0);
@@ -108,8 +105,8 @@ void* SonataSpikeHandler::getFrameDataImpl(const uint32_t frame)
             auto alpha =
                 (spikeTime - timestamp) / SPIKE_TRANSITION_TIME_SECONDS;
             alpha = std::min(std::max(0.0, alpha), 1.0);
-            _frameData[index] = SPIKE_DEFAULT_REST_VALUE * alpha +
-                                SPIKE_DEFAULT_SPIKING_VALUE * (1.0 - alpha);
+            data[index] = SPIKE_DEFAULT_REST_VALUE * alpha +
+                          SPIKE_DEFAULT_SPIKING_VALUE * (1.0 - alpha);
         }
         // Spike in the past - start fading
         else if (spikeTime < timestamp)
@@ -117,16 +114,16 @@ void* SonataSpikeHandler::getFrameDataImpl(const uint32_t frame)
             auto alpha =
                 (timestamp - spikeTime) / SPIKE_TRANSITION_TIME_SECONDS;
             alpha = std::min(std::max(0.0, alpha), 1.0);
-            _frameData[index] = SPIKE_DEFAULT_REST_VALUE * alpha +
-                                SPIKE_DEFAULT_SPIKING_VALUE * (1.0 - alpha);
+            data[index] = SPIKE_DEFAULT_REST_VALUE * alpha +
+                          SPIKE_DEFAULT_SPIKING_VALUE * (1.0 - alpha);
         }
         // Spiking neuron
         else
-            _frameData[index] = SPIKE_DEFAULT_SPIKING_VALUE;
+            data[index] = SPIKE_DEFAULT_SPIKING_VALUE;
     }
 
     _ready = true;
 
-    return _frameData.data();
+    return data;
 }
 } // namespace sonataloader

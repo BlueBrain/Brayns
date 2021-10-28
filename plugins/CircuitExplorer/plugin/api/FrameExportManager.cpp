@@ -73,7 +73,8 @@ std::string FrameExportManager::_currentExportErrorMessage = {};
 bool FrameExportManager::_originalAccumulationSetting = false;
 uint32_t FrameExportManager::_originalAccumulationSize = 0u;
 
-void FrameExportManager::startNewExport(brayns::PluginAPI& api, ExportInfo&& input)
+void FrameExportManager::startNewExport(brayns::PluginAPI& api,
+                                        ExportInfo&& input)
 {
     if (_exportRunning)
         throw FrameExportInProgressException();
@@ -88,8 +89,8 @@ void FrameExportManager::startNewExport(brayns::PluginAPI& api, ExportInfo&& inp
         << "Movie settings     :\n"
         << "- Number of frames : " << _currentExport.keyFrames.size() << "\n"
         << "- Samples per pixel: " << _currentExport.numSamples << "\n"
-        << "- Frame size       : "
-        << api.getEngine().getFrameBuffer().getSize() << "\n"
+        << "- Frame size       : " << api.getEngine().getFrameBuffer().getSize()
+        << "\n"
         << "- Export folder    : " << _currentExport.storePath << "\n"
         << "-----------------------------------------------------------"
         << std::endl;
@@ -212,7 +213,8 @@ void FrameExportManager::_stop(brayns::PluginAPI& api) noexcept
     api.getRenderer().commit();
 }
 
-void FrameExportManager::_writeImageToDisk(brayns::PluginAPI& api, const uint32_t frameNumberName)
+void FrameExportManager::_writeImageToDisk(brayns::PluginAPI& api,
+                                           const uint32_t frameNumberName)
 {
     auto& frameBuffer = api.getEngine().getFrameBuffer();
     auto image = frameBuffer.getImage();

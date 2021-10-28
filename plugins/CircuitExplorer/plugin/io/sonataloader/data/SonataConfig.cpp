@@ -30,7 +30,8 @@ constexpr char ASCII_FORMAT[] = "neurolucida-asc";
 
 SonataConfig::Data SonataConfig::readNetwork(const std::string& configPath)
 {
-    return SonataConfig::Data {configPath, bbp::sonata::CircuitConfig::fromFile(configPath)};
+    return SonataConfig::Data{configPath,
+                              bbp::sonata::CircuitConfig::fromFile(configPath)};
 }
 
 SonataConfig::MorphologyPath::MorphologyPath(const std::string& path,

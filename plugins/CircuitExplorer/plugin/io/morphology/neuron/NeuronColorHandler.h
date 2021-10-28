@@ -155,7 +155,8 @@ private:
                             &NeuronMaterialMap::axon);
             updateSectionCB(brayns::enumToString(NeuronSection::DENDRITE),
                             &NeuronMaterialMap::dendrite);
-            updateSectionCB(brayns::enumToString(NeuronSection::APICAL_DENDRITE),
+            updateSectionCB(brayns::enumToString(
+                                NeuronSection::APICAL_DENDRITE),
                             &NeuronMaterialMap::apicalDendrite);
         }
         else

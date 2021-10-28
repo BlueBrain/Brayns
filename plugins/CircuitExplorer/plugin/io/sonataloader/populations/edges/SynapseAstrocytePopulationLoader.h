@@ -30,7 +30,7 @@ class SynapseAstrocytePopulationLoader : public EdgePopulationLoader
 {
 public:
     SynapseAstrocytePopulationLoader()
-     : EdgePopulationLoader("synapse_astrocyte")
+        : EdgePopulationLoader("synapse_astrocyte")
     {
     }
 

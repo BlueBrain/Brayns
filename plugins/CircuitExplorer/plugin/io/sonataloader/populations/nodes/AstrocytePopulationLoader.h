@@ -30,7 +30,7 @@ class AstrocytePopulationLoader : public CommonNodeLoader
 {
 public:
     AstrocytePopulationLoader()
-     : CommonNodeLoader("astrocyte")
+        : CommonNodeLoader("astrocyte")
     {
     }
 

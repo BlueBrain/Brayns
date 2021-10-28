@@ -25,21 +25,24 @@ namespace
 class SampleNeuronInstantiableGeometry : public NeuronInstantiableGeometry
 {
 public:
-    MorphologyInstance::Ptr instantiate(const brayns::Vector3f& t, const brayns::Quaternion& r) const final
+    MorphologyInstance::Ptr instantiate(const brayns::Vector3f& t,
+                                        const brayns::Quaternion& r) const final
     {
         auto transformed = samples;
         for (auto& sphere : transformed)
             sphere.center = t + r * sphere.center;
 
-        return std::make_unique<SampleNeuronInstance>(std::move(transformed), data);
+        return std::make_unique<SampleNeuronInstance>(std::move(transformed),
+                                                      data);
     }
 
     std::vector<brayns::Sphere> samples;
     std::shared_ptr<SampleSharedData> data;
 };
-}
+} // namespace
 
-NeuronInstantiableGeometry::Ptr SampleNeuronBuilder::_buildImpl(const NeuronMorphology& m) const
+NeuronInstantiableGeometry::Ptr SampleNeuronBuilder::_buildImpl(
+    const NeuronMorphology& m) const
 {
     auto instantiablePtr = std::make_unique<SampleNeuronInstantiableGeometry>();
     auto& instantiable = *instantiablePtr.get();
@@ -50,7 +53,8 @@ NeuronInstantiableGeometry::Ptr SampleNeuronBuilder::_buildImpl(const NeuronMorp
     if (m.hasSoma())
     {
         const auto& soma = m.soma();
-        instantiable.samples.push_back(brayns::Sphere(soma.center, soma.radius));
+        instantiable.samples.push_back(
+            brayns::Sphere(soma.center, soma.radius));
         instantiable.data->sectionTypeMap[NeuronSection::SOMA].push_back(0);
         instantiable.data->sectionMap[-1].push_back(0);
     }

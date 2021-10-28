@@ -45,7 +45,7 @@ std::vector<MorphologyInstance::Ptr> CellLoader::load(
     config.loadAxon = lc.neuron_morphology_parameters.load_axon;
     config.loadDendrites = lc.neuron_morphology_parameters.load_dendrites;
     config.loadSoma = lc.neuron_morphology_parameters.load_soma;
-    const NeuronMorphologyImporter importer (config);
+    const NeuronMorphologyImporter importer(config);
 
     std::vector<MorphologyInstance::Ptr> cells(gids.size());
 
@@ -53,7 +53,8 @@ std::vector<MorphologyInstance::Ptr> CellLoader::load(
                             const std::vector<size_t>& indices) {
         const auto instantiable = importer.import(path);
         for (const auto idx : indices)
-            cells[idx] = instantiable->instantiate(positions[idx], rotations[idx]);
+            cells[idx] =
+                instantiable->instantiate(positions[idx], rotations[idx]);
     };
 
     std::vector<std::future<void>> loadTasks;

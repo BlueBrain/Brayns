@@ -27,13 +27,15 @@ std::vector<MorphologyInstance::Ptr> AstrocytePopulationLoader::load(
     const SonataNodePopulationParameters& lc,
     const bbp::sonata::Selection& nodeSelection) const
 {
-    const auto population = networkData.config.getNodePopulation(lc.node_population);
+    const auto population =
+        networkData.config.getNodePopulation(lc.node_population);
     const auto morphologies =
         SonataCells::getMorphologies(population, nodeSelection);
-    const auto positions =
-        SonataCells::getPositions(population, nodeSelection);
-    const std::vector<brayns::Quaternion> dummy (positions.size(), brayns::Quaternion());
+    const auto positions = SonataCells::getPositions(population, nodeSelection);
+    const std::vector<brayns::Quaternion> dummy(positions.size(),
+                                                brayns::Quaternion());
 
-    return loadNodes(networkData, lc, nodeSelection, morphologies, positions, dummy);
+    return loadNodes(networkData, lc, nodeSelection, morphologies, positions,
+                     dummy);
 }
 } // namespace sonataloader

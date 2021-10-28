@@ -40,7 +40,7 @@ public:
 
     bool isReady() const final;
 
-    void* getFrameDataImpl(const uint32_t frame) final;
+    std::vector<float> getFrameDataImpl(const uint32_t frame) final;
 
 private:
     const std::string _path;

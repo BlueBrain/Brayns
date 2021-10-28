@@ -30,7 +30,7 @@ class PointNeuronPopulationLoader : public NodePopulationLoader
 {
 public:
     PointNeuronPopulationLoader()
-     : NodePopulationLoader("point_neuron")
+        : NodePopulationLoader("point_neuron")
     {
     }
 

@@ -18,42 +18,18 @@
 
 #include "VasculaturePopulationLoader.h"
 
-#include <plugin/api/Log.h>
 #include <plugin/io/morphology/vasculature/VasculatureInstance.h>
 #include <plugin/io/sonataloader/data/SonataVasculature.h>
 
 namespace sonataloader
 {
-namespace
-{
-VasculatureSection __computeVasculatureSection(const VasculatureGeometrySettings& vgs)
-{
-    VasculatureSection section = VasculatureSection::NONE;
-    if(vgs.load_arterial_capillary)
-        section |= VasculatureSection::ARTERIAL_CAPILLARY;
-    if(vgs.load_arteriole)
-        section |= VasculatureSection::ARTERIOLE;
-    if(vgs.load_artery)
-        section |= VasculatureSection::ARTERY;
-    if(vgs.load_transitional)
-        section |= VasculatureSection::TRANSITIONAL;
-    if(vgs.load_vein)
-        section |= VasculatureSection::VEIN;
-    if(vgs.load_venous_capillary)
-        section |= VasculatureSection::VENOUS_CAPILLARY;
-    if(vgs.load_venule)
-        section |= VasculatureSection::VENULE;
-
-    return section;
-}
-}
-
 std::vector<MorphologyInstance::Ptr> VasculaturePopulationLoader::load(
     const SonataConfig::Data& networkData,
     const SonataNodePopulationParameters& lc,
     const bbp::sonata::Selection& selection) const
 {
-    const auto population = networkData.config.getNodePopulation(lc.node_population);
+    const auto population =
+        networkData.config.getNodePopulation(lc.node_population);
 
     const auto startPoints =
         SonataVasculature::getSegmentStartPoints(population, selection);
@@ -62,9 +38,15 @@ std::vector<MorphologyInstance::Ptr> VasculaturePopulationLoader::load(
     const auto sectionTypes =
         SonataVasculature::getSegmentSectionTypes(population, selection);
 
+    std::cout << "Rad mult: "
+              << lc.vasculature_geometry_parameters.radius_multiplier << "\n";
+    std::cout << "Rad override: "
+              << lc.vasculature_geometry_parameters.radius_override << "\n";
+
     std::vector<float> startRadii, endRadii;
     const auto radOverride = lc.vasculature_geometry_parameters.radius_override;
-    const auto radMultiplier = lc.vasculature_geometry_parameters.radius_multiplier;
+    const auto radMultiplier =
+        lc.vasculature_geometry_parameters.radius_multiplier;
     if (radOverride > 0.f)
     {
         startRadii.resize(startPoints.size(), radOverride);
@@ -74,39 +56,30 @@ std::vector<MorphologyInstance::Ptr> VasculaturePopulationLoader::load(
     {
         startRadii =
             SonataVasculature::getSegmentStartRadii(population, selection);
-        endRadii =
-            SonataVasculature::getSegmentEndRadii(population, selection);
+        endRadii = SonataVasculature::getSegmentEndRadii(population, selection);
         if (radMultiplier != 1.f)
         {
+            std::cout << "Modding" << std::endl;
             std::transform(startRadii.begin(), startRadii.end(),
                            startRadii.begin(),
-                           [mult = radMultiplier](
-                               const float r) { return r * mult; });
+                           [mult = radMultiplier](const float r) {
+                               return r * mult;
+                           });
             std::transform(endRadii.begin(), endRadii.end(), endRadii.begin(),
-                           [mult = radMultiplier](
-                               const float r) { return r * mult; });
+                           [mult = radMultiplier](const float r) {
+                               return r * mult;
+                           });
         }
     }
 
     std::vector<MorphologyInstance::Ptr> result(startPoints.size());
-    const auto requestedSections = __computeVasculatureSection(lc.vasculature_geometry_parameters);
 
-    PLUGIN_WARN << "Vasculature section check disabled. Test data has wrong "
-                   "'type' dataset"
-                << std::endl;
-
-    #pragma omp parallel for
+#pragma omp parallel for
     for (size_t i = 0; i < startPoints.size(); ++i)
-    {
-        if (sectionTypes[i] != VasculatureSection::NONE &&
-            !static_cast<uint8_t>(sectionTypes[i] & requestedSections))
-            continue;
-
         result[i] =
             std::make_unique<VasculatureInstance>(startPoints[i], startRadii[i],
                                                   endPoints[i], endRadii[i],
                                                   sectionTypes[i]);
-    }
 
     return result;
 }

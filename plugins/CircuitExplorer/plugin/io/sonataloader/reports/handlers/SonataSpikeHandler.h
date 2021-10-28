@@ -39,7 +39,7 @@ public:
 
     brayns::AbstractSimulationHandlerPtr clone() const final;
 
-    void* getFrameDataImpl(const uint32_t frame) final;
+    std::vector<float> getFrameDataImpl(const uint32_t frame) final;
 
     bool isReady() const final { return _ready; }
 

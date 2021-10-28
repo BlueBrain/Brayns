@@ -44,4 +44,4 @@ inline std::vector<std::pair<std::string, NeuronSection>> enumMap()
             {"dendrite", NeuronSection::DENDRITE},
             {"apical_dendrite", NeuronSection::APICAL_DENDRITE}};
 }
-}
+} // namespace brayns

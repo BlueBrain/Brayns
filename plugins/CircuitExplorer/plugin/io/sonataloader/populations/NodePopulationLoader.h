@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <plugin/io/morphology/MorphologyInstance.h>
 #include <plugin/io/SonataLoaderParameters.h>
+#include <plugin/io/morphology/MorphologyInstance.h>
 #include <plugin/io/sonataloader/data/SonataConfig.h>
 
 namespace sonataloader
@@ -35,10 +35,10 @@ class NodePopulationLoader
 public:
     using Ptr = std::unique_ptr<NodePopulationLoader>;
 
-    template<typename T,
-             typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
+    template <typename T, typename = std::enable_if_t<
+                              std::is_constructible<std::string, T>::value>>
     NodePopulationLoader(T&& typeName)
-     : _typeName(std::forward<T>(typeName))
+        : _typeName(std::forward<T>(typeName))
     {
     }
 
@@ -48,10 +48,7 @@ public:
      * @brief returns a std::string that represents the population type of this
      * loader
      */
-    const std::string& getType() const noexcept
-    {
-        return _typeName;
-    }
+    const std::string& getType() const noexcept { return _typeName; }
 
     /**
      * @brief load the node population data. The given parameters may be used to
@@ -65,6 +62,5 @@ public:
 
 private:
     const std::string _typeName;
-
 };
 } // namespace sonataloader

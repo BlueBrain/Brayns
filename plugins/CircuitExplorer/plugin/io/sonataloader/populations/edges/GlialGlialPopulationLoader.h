@@ -26,11 +26,11 @@ namespace sonataloader
  * @brief The GlialGlialPopulationLoader class implements the edge load
  * functionality to read 'glialglial' edge population types
  */
-class GlialGlialPopulationLoader: public CommonEdgeLoader
+class GlialGlialPopulationLoader : public CommonEdgeLoader
 {
 public:
     GlialGlialPopulationLoader()
-     : CommonEdgeLoader("glialglial")
+        : CommonEdgeLoader("glialglial")
     {
     }
 };

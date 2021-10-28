@@ -25,8 +25,7 @@
 namespace sonataloader
 {
 std::vector<EdgeReportMapping> EdgeCompartmentLoader::loadMapping(
-        const std::string& reportPath,
-        const std::string& population,
+    const std::string& reportPath, const std::string& population,
     const bbp::sonata::Selection& s) const
 {
     const auto nodeIds = s.flatten();

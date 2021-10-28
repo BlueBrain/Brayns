@@ -28,8 +28,8 @@
 namespace brayns
 {
 BRAYNS_ADAPTER_ENUM(ColorScheme, {{"None", ColorScheme::none},
-                                         {"By id", ColorScheme::by_id},
-                                         {"By normal", ColorScheme::by_normal}})
+                                  {"By id", ColorScheme::by_id},
+                                  {"By normal", ColorScheme::by_normal}})
 }
 
 BRAYNS_MESSAGE_BEGIN(DTILoaderParameters)

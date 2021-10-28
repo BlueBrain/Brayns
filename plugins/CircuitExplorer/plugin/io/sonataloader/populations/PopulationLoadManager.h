@@ -24,34 +24,37 @@
 namespace sonataloader
 {
 /**
- * @brief The PopulationLoaderManager class gives access to all the edge and node
- * population loaders organized by the population type
+ * @brief The PopulationLoaderManager class gives access to all the edge and
+ * node population loaders organized by the population type
  */
 class PopulationLoaderManager
 {
 public:
     /**
-     * @brief returns a reference to the edge loader object that can handle the type
-     * of edge population denoted by edgeType
+     * @brief returns a reference to the edge loader object that can handle the
+     * type of edge population denoted by edgeType
      */
-    static std::vector<SynapseGroup::Ptr> loadEdges(const SonataConfig::Data& networkConfig,
-                                                    const SonataEdgePopulationParameters& lc,
-                                                    const bbp::sonata::Selection& nodeSelection);
+    static std::vector<SynapseGroup::Ptr> loadEdges(
+        const SonataConfig::Data& networkConfig,
+        const SonataEdgePopulationParameters& lc,
+        const bbp::sonata::Selection& nodeSelection);
 
     /**
-     * @brief returns a reference to the node loader object that can handle the type
-     * of node population denoted by nodeType
+     * @brief returns a reference to the node loader object that can handle the
+     * type of node population denoted by nodeType
      */
-    static std::vector<MorphologyInstance::Ptr> loadNodes(const SonataConfig::Data& networkData,
-                                                          const SonataNodePopulationParameters& loadSettings,
-                                                          const bbp::sonata::Selection& nodeSelection);
+    static std::vector<MorphologyInstance::Ptr> loadNodes(
+        const SonataConfig::Data& networkData,
+        const SonataNodePopulationParameters& loadSettings,
+        const bbp::sonata::Selection& nodeSelection);
 
     /**
      * @brief Adjusts the geometry of the edges to the geometry of the nodes
-     * they belong to. It also sets the simulation mapping of the edge to that of
-     * the nodes.
+     * they belong to. It also sets the simulation mapping of the edge to that
+     * of the nodes.
      */
-    static void mapEdgesToNodes(const std::vector<MorphologyInstance::Ptr>& nodes,
-                                std::vector<SynapseGroup::Ptr>& edges);
+    static void mapEdgesToNodes(
+        const std::vector<MorphologyInstance::Ptr>& nodes,
+        std::vector<SynapseGroup::Ptr>& edges);
 };
-}
+} // namespace sonataloader

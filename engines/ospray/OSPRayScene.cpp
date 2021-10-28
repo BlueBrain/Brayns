@@ -355,6 +355,9 @@ void OSPRayScene::_commitSimulationData(ModelDescriptors& modelDescriptors)
             if (!handler)
                 continue;
 
+            if (handler->getFrameSize() == 0)
+                continue;
+
             auto& modelImpl = static_cast<OSPRayModel&>(model->getModel());
             modelImpl.setSimulationOffset(offset);
 

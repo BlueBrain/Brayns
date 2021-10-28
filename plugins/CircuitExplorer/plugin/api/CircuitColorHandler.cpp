@@ -18,8 +18,8 @@
 
 #include "CircuitColorHandler.h"
 
-#include <brayns/utils/StringUtils.h>
 #include <brayns/engine/Material.h>
+#include <brayns/utils/StringUtils.h>
 
 #include <plugin/api/ColorUtils.h>
 

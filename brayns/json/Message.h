@@ -245,7 +245,7 @@ private:
  * will be serialized using JsonAdapter<TYPE>.
  *
  */
-#define BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, ...)                              \
+#define BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, DEFAULT, ...)                     \
     TYPE NAME = [] {                                                          \
         using namespace brayns;                                               \
         static std::once_flag _flag;                                          \
@@ -267,23 +267,33 @@ private:
             };                                                                \
             _getInfo().addProperty(std::move(_property));                     \
         });                                                                   \
-        return TYPE{};                                                        \
+        return DEFAULT;                                                       \
     }();
 
 /**
  * @brief Message required entry with mandatory description.
  *
  */
-#define BRAYNS_MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION, ...)                \
-    BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, brayns::Description(DESCRIPTION), \
+#define BRAYNS_MESSAGE_ENTRY(TYPE, NAME, DESCRIPTION, ...)    \
+    BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, TYPE{},               \
+                            brayns::Description(DESCRIPTION), \
+                            brayns::Required(), __VA_ARGS__)
+
+/**
+ * @brief Message required entry with mandatory description and default value.
+ *
+ */
+#define BRAYNS_MESSAGE_ENTRY_DEFAULT(TYPE, NAME, DEFAULT, DESCRIPTION, ...) \
+    BRAYNS_MESSAGE_PROPERTY(TYPE, NAME, DEFAULT,                            \
+                            brayns::Description(DESCRIPTION),               \
                             brayns::Required(), __VA_ARGS__)
 
 /**
  * @brief Message optional entry typed as optional<TYPE>.
  *
  */
-#define BRAYNS_MESSAGE_OPTION(TYPE, NAME, DESCRIPTION, ...) \
-    BRAYNS_MESSAGE_PROPERTY(boost::optional<TYPE>, NAME,    \
+#define BRAYNS_MESSAGE_OPTION(TYPE, NAME, DESCRIPTION, ...)      \
+    BRAYNS_MESSAGE_PROPERTY(boost::optional<TYPE>, NAME, TYPE{}, \
                             brayns::Description(DESCRIPTION), __VA_ARGS__)
 
 /**

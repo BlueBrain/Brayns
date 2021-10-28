@@ -43,10 +43,11 @@ public:
      * @brief registerHandler registers a CircuitColorHandler to make it
      * available to access
      */
-    static void registerHandler(brayns::ModelDescriptorPtr& model,
-                                std::unique_ptr<CircuitColorHandler>&& handler,
-                                const std::vector<uint64_t>& ids,
-                                std::vector<ElementMaterialMap::Ptr>&& elements);
+    static void registerHandler(
+        brayns::ModelDescriptorPtr& model,
+        std::unique_ptr<CircuitColorHandler>&& handler,
+        const std::vector<uint64_t>& ids,
+        std::vector<ElementMaterialMap::Ptr>&& elements);
 
     /**
      * @brief unregisterHandler destroys the handler associated with the given
@@ -87,7 +88,7 @@ public:
      * associated, or if the id/id ranges specified (if any) cannot be parsed
      */
     static void updateColorsById(const brayns::ModelDescriptor& model,
-                          const std::vector<ColoringInformation>& vars);
+                                 const std::vector<ColoringInformation>& vars);
 
     /**
      * @brief updateColorsById calls the handler associated with the modelId to
@@ -95,8 +96,9 @@ public:
      * @throws std::runtime_error if the given model ID does not have a handler
      * associated
      */
-    static void updateColorsById(const brayns::ModelDescriptor& model,
-                          const std::map<uint64_t, brayns::Vector4f>& colorMap);
+    static void updateColorsById(
+        const brayns::ModelDescriptor& model,
+        const std::map<uint64_t, brayns::Vector4f>& colorMap);
 
     /**
      * @brief updateSingleColor calls the handler associated with the modelId to
@@ -105,7 +107,7 @@ public:
      * associated
      */
     static void updateSingleColor(const brayns::ModelDescriptor& model,
-                           const brayns::Vector4f& color);
+                                  const brayns::Vector4f& color);
 
     /**
      * @brief updateColors calls the handler associated with the modelId to
@@ -114,8 +116,9 @@ public:
      * @throws std::runtime_error if the given model ID does not have a handler
      * associated, or if the associated handler does not have the given method
      */
-    static void updateColors(const brayns::ModelDescriptor& model, const std::string& method,
-                        const std::vector<ColoringInformation>& vars);
+    static void updateColors(const brayns::ModelDescriptor& model,
+                             const std::string& method,
+                             const std::vector<ColoringInformation>& vars);
 
 private:
     static std::vector<std::unique_ptr<CircuitColorHandler>> _handlers;

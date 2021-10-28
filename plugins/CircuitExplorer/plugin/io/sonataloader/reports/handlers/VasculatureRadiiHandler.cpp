@@ -50,9 +50,10 @@ VasculatureRadiiHandler::VasculatureRadiiHandler(
     _frameSize = 0;
     _radiiFrameSize = firstFrame.ids.size();
     _radii.resize(_radiiFrameSize);
-    _nbFrames = static_cast<uint32_t>((std::nextafter(_endTime, INFINITY) -
-                                       std::nextafter(_startTime, INFINITY)) /
-                                      _dt);
+    _nbFrames = static_cast<uint32_t>(
+        std::round((std::nextafter(_endTime, INFINITY) -
+                    std::nextafter(_startTime, INFINITY)) /
+                   _dt));
 }
 
 brayns::AbstractSimulationHandlerPtr VasculatureRadiiHandler::clone() const
@@ -62,7 +63,8 @@ brayns::AbstractSimulationHandlerPtr VasculatureRadiiHandler::clone() const
                                                      _selection);
 }
 
-void* VasculatureRadiiHandler::getFrameDataImpl(const uint32_t frame)
+std::vector<float> VasculatureRadiiHandler::getFrameDataImpl(
+    const uint32_t frame)
 {
     _ready = false;
     const auto realFrame = frame > _nbFrames ? _nbFrames : frame;
@@ -71,7 +73,7 @@ void* VasculatureRadiiHandler::getFrameDataImpl(const uint32_t frame)
     _lastRadiiFrame = realFrame;
     _ready = true;
 
-    return _frameData.data();
+    return {};
 }
 
 const std::vector<float>& VasculatureRadiiHandler::getCurrentRadiiFrame() const

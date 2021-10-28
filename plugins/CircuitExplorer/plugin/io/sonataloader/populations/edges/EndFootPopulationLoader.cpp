@@ -38,19 +38,19 @@ std::string __getEndFeetAreasPath(const bbp::sonata::CircuitConfig& config,
                                   const std::string& basePath)
 {
     auto parsedJson = brayns::Json::parse(config.getExpandedJSON());
-    const auto json = parsedJson.extract<brayns::JsonObject>();
+    const auto json = parsedJson.extract<brayns::JsonObject::Ptr>();
 
     std::string resultPath = "";
 
     // First fetch default one, if any
-    if (const auto components = json.getObject("components"))
+    if (const auto components = json->getObject("components"))
     {
         if (components->has("end_feet_area"))
             resultPath =
                 components->get("end_feet_area").extract<std::string>();
     }
 
-    const auto edgeNetworkList = json.getObject("networks")->getArray("edges");
+    const auto edgeNetworkList = json->getObject("networks")->getArray("edges");
     bool found = false;
     for (const auto entry : *edgeNetworkList)
     {
@@ -58,8 +58,8 @@ std::string __getEndFeetAreasPath(const bbp::sonata::CircuitConfig& config,
             break;
 
         const auto& entryObject = entry.extract<Poco::JSON::Object::Ptr>();
-
         auto edgeFile = entryObject->get("edges_file").extract<std::string>();
+
         if (!fs::path(edgeFile).is_absolute())
             edgeFile =
                 fs::absolute(fs::path(basePath) / fs::path(edgeFile)).string();
@@ -108,12 +108,13 @@ std::vector<std::unique_ptr<SynapseGroup>> EndFootPopulationLoader::load(
         throw std::runtime_error(
             "Afferent edges not supported on endfoot connectivity");
 
-    const auto basePath =
-        fs::path(networkData.path).parent_path().string();
-    auto path = __getEndFeetAreasPath(networkData.config, lc.edge_population, basePath);
+    const auto basePath = fs::path(networkData.path).parent_path().string();
+    auto path =
+        __getEndFeetAreasPath(networkData.config, lc.edge_population, basePath);
 
     const auto nodes = nodeSelection.flatten();
-    const auto population = networkData.config.getEdgePopulation(lc.edge_population);
+    const auto population =
+        networkData.config.getEdgePopulation(lc.edge_population);
 
     const auto edgeSelection = EdgeSelection(population.efferentEdges(nodes))
                                    .intersection(lc.edge_percentage);

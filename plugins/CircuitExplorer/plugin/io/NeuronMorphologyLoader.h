@@ -33,7 +33,7 @@ public:
      * @brief Constructor
      */
     NeuronMorphologyLoader(brayns::Scene& scene)
-     : brayns::Loader<NeuronMorphologyLoaderParameters>(scene)
+        : brayns::Loader<NeuronMorphologyLoaderParameters>(scene)
     {
     }
 

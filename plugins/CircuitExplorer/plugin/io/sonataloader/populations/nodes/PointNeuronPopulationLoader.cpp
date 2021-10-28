@@ -28,10 +28,10 @@ std::vector<MorphologyInstance::Ptr> PointNeuronPopulationLoader::load(
     const SonataNodePopulationParameters& lc,
     const bbp::sonata::Selection& nodeSelection) const
 {
-    const auto population = networkData.config.getNodePopulation(lc.node_population);
+    const auto population =
+        networkData.config.getNodePopulation(lc.node_population);
     const auto nodesSize = nodeSelection.flatSize();
-    const auto positions =
-        SonataCells::getPositions(population, nodeSelection);
+    const auto positions = SonataCells::getPositions(population, nodeSelection);
     const auto radMult = lc.neuron_morphology_parameters.radius_multiplier;
     const auto radOverride = lc.neuron_morphology_parameters.radius_override;
     const float radius =

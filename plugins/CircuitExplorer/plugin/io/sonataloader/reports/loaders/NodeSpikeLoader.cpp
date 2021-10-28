@@ -23,8 +23,7 @@
 namespace sonataloader
 {
 std::vector<NodeReportMapping> NodeSpikeLoader::loadMapping(
-        const std::string& reportPath,
-        const std::string& population,
+    const std::string& reportPath, const std::string& population,
     const bbp::sonata::Selection& s) const
 {
     std::vector<NodeReportMapping> mapping(s.flatSize());

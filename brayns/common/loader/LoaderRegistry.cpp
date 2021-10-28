@@ -45,7 +45,8 @@ bool LoaderRegistry::isSupportedFile(const std::string& filename) const
     if (fs::is_directory(filename))
         return false;
 
-    const auto extension = fs::path(filename).extension().lexically_normal().string();
+    const auto extension =
+        fs::path(filename).extension().lexically_normal().string();
     for (const auto& loader : _loaders)
         if (loader->isSupported(filename, extension))
             return true;
@@ -68,7 +69,9 @@ const AbstractLoader& LoaderRegistry::getSuitableLoader(
         throw std::runtime_error("'" + filename + "' is a directory");
 
     const auto extension =
-        filetype.empty() ? fs::path(filename).extension().lexically_normal().string() : filetype;
+        filetype.empty()
+            ? fs::path(filename).extension().lexically_normal().string()
+            : filetype;
 
     // Find specific loader
     if (!loaderName.empty())

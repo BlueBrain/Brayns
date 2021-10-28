@@ -84,19 +84,23 @@ public:
     virtual std::vector<std::string> getSupportedExtensions() const = 0;
 
     /**
-     * @brief Query the loader if it can load the given file. Compares the file extension
-     * to the supported extensions (removing the dot, if any, and making them lowercase).
-     * Can be overriden to perform mor explicit checks
+     * @brief Query the loader if it can load the given file. Compares the file
+     * extension to the supported extensions (removing the dot, if any, and
+     * making them lowercase). Can be overriden to perform mor explicit checks
      */
     virtual bool isSupported(const std::string& filename,
                              const std::string& extension) const
     {
         const auto extensions = getSupportedExtensions();
-        const auto lcExtension = string_utils::toLowercase(extension[0] == '.'? extension.substr(1) : extension);
-        auto it = std::find_if(extensions.begin(), extensions.end(), [&](const std::string& ext)
-        {
-            return string_utils::toLowercase(ext[0] == '.'? ext.substr(1) : ext) == lcExtension;
-        });
+        const auto lcExtension = string_utils::toLowercase(
+            extension[0] == '.' ? extension.substr(1) : extension);
+        auto it =
+            std::find_if(extensions.begin(), extensions.end(),
+                         [&](const std::string& ext) {
+                             return string_utils::toLowercase(
+                                        ext[0] == '.' ? ext.substr(1) : ext) ==
+                                    lcExtension;
+                         });
         return it != extensions.end();
     };
 
@@ -177,7 +181,7 @@ public:
         const JsonValue& params) const override
     {
         T inputParams;
-        if (!Json::deserialize<T>(params, inputParams))
+        if (!params.isEmpty() && !Json::deserialize<T>(params, inputParams))
             throw std::invalid_argument("Could not parse " + getName() +
                                         " loader parameters");
 

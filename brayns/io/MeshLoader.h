@@ -38,9 +38,6 @@ public:
     std::vector<std::string> getSupportedExtensions() const final;
     std::string getName() const final;
 
-    bool isSupported(const std::string& filename,
-                     const std::string& extension) const final;
-
     std::vector<ModelDescriptorPtr> importFromFile(
         const std::string& fileName, const LoaderProgress& callback,
         const MeshLoaderParameters& properties) const final;

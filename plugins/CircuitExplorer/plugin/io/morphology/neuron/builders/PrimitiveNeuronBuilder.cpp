@@ -38,7 +38,8 @@ typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
 class PrimitiveInstantiableGeometry : public NeuronInstantiableGeometry
 {
 public:
-    MorphologyInstance::Ptr instantiate(const brayns::Vector3f& tr, const brayns::Quaternion& rot) const final
+    MorphologyInstance::Ptr instantiate(
+        const brayns::Vector3f& tr, const brayns::Quaternion& rot) const final
     {
         auto sphereCopy = spheres;
         for (auto& sphere : sphereCopy)
@@ -58,10 +59,9 @@ public:
             cylinder.up = tr + rot * cylinder.up;
         }
 
-        return std::make_unique<PrimitiveNeuronInstance>(std::move(sphereCopy),
-                                                         std::move(cylinderCopy),
-                                                         std::move(coneCopy),
-                                                         data);
+        return std::make_unique<PrimitiveNeuronInstance>(
+            std::move(sphereCopy), std::move(cylinderCopy), std::move(coneCopy),
+            data);
     }
 
     void addSphere(const brayns::Vector3f& c, const float r,
@@ -109,7 +109,8 @@ public:
 
 } // namespace
 
-NeuronInstantiableGeometry::Ptr PrimitiveNeuronBuilder::_buildImpl(const NeuronMorphology& m) const
+NeuronInstantiableGeometry::Ptr PrimitiveNeuronBuilder::_buildImpl(
+    const NeuronMorphology& m) const
 {
     auto instantiableResult = std::make_unique<PrimitiveInstantiableGeometry>();
     auto& instantiable = *instantiableResult.get();
@@ -120,13 +121,15 @@ NeuronInstantiableGeometry::Ptr PrimitiveNeuronBuilder::_buildImpl(const NeuronM
     if (m.hasSoma())
     {
         const auto& soma = m.soma();
-        instantiable.addSphere(soma.center, soma.radius, NeuronSection::SOMA, -1);
+        instantiable.addSphere(soma.center, soma.radius, NeuronSection::SOMA,
+                               -1);
         for (const auto child : soma.children)
         {
             if (!child->samples.empty())
                 instantiable.addCone(soma.center, soma.radius,
-                        brayns::Vector3f(*child->samples.begin()),
-                        (*child->samples.begin()).w, NeuronSection::SOMA, -1);
+                                     brayns::Vector3f(*child->samples.begin()),
+                                     (*child->samples.begin()).w,
+                                     NeuronSection::SOMA, -1);
         }
     }
 
@@ -148,9 +151,11 @@ NeuronInstantiableGeometry::Ptr PrimitiveNeuronBuilder::_buildImpl(const NeuronM
                 if (s1 != s2)
                 {
                     if (almostEqual(r1, r2, 100000))
-                        instantiable.addCylinder(p1, p2, r1, section.type, section.id);
+                        instantiable.addCylinder(p1, p2, r1, section.type,
+                                                 section.id);
                     else
-                        instantiable.addCone(p1, r1, p2, r2, section.type, section.id);
+                        instantiable.addCone(p1, r1, p2, r2, section.type,
+                                             section.id);
                 }
             }
         }

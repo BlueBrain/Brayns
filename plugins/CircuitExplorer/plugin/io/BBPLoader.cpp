@@ -112,24 +112,22 @@ inline brain::GIDSet __computeInitialGIDs(const brion::BlueConfig& config,
 inline brayns::ModelDescriptorPtr __loadSynapse(
     const std::string& path, const brain::Circuit& circuit,
     const brain::GIDSet& gids, const bool afferent,
-    const std::vector<MorphologyInstance::Ptr>& cells,
-    brayns::ModelPtr&& model)
+    const std::vector<MorphologyInstance::Ptr>& cells, brayns::ModelPtr&& model)
 {
     auto synapses = SynapseLoader::load(circuit, gids, afferent);
-    if(synapses.empty())
+    if (synapses.empty())
     {
         PLUGIN_WARN << "synapses empty" << std::endl;
         return {nullptr};
     }
 
-
     std::vector<ElementMaterialMap::Ptr> synapseMatMap(gids.size());
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (size_t i = 0; i < cells.size(); ++i)
         synapses[i]->mapToCell(*cells[i]);
 
-    for(size_t i = 0; i < synapses.size(); ++i)
+    for (size_t i = 0; i < synapses.size(); ++i)
     {
         synapseMatMap[i] = synapses[i]->addToModel(*model);
         synapses[i].reset(nullptr);
@@ -144,13 +142,15 @@ inline brayns::ModelDescriptorPtr __loadSynapse(
     transformation.setRotationCenter(model->getBounds().getCenter());
     auto modelDesc =
         std::make_shared<brayns::ModelDescriptor>(std::move(model), "Synapses",
-                                                  path, brayns::ModelMetadata());
+                                                  path,
+                                                  brayns::ModelMetadata());
     modelDesc->setTransformation(transformation);
     modelDesc->setName(afferent ? "Afferent synapses" : "Efferent synapses");
 
     auto synapseColor = std::make_unique<BBPSynapseColorHandler>();
     const auto ids = std::vector<uint64_t>(gids.begin(), gids.end());
-    CircuitColorManager::registerHandler(modelDesc, std::move(synapseColor), ids, std::move(synapseMatMap));
+    CircuitColorManager::registerHandler(modelDesc, std::move(synapseColor),
+                                         ids, std::move(synapseMatMap));
 
     return modelDesc;
 }
@@ -249,7 +249,7 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
         throw std::runtime_error(
             "BBPLoader: No GIDs selected. Empty circuits not supported");
 
-    const std::vector<uint64_t> gidList (gids.begin(), gids.end());
+    const std::vector<uint64_t> gidList(gids.begin(), gids.end());
 
     auto cells = CellLoader::load(params, gids, circuit);
 
@@ -258,7 +258,7 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
     if (simulation)
     {
         const auto mapping = simulation->getMapping(gids);
-        #pragma omp parallel for
+#pragma omp parallel for
         for (size_t i = 0; i < mapping.size(); ++i)
         {
             const auto& cm = mapping[i];
@@ -277,7 +277,12 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
         auto model = __loadSynapse(path, circuit, gids, true, cells,
                                    _scene.createModel());
         if (model)
+        {
+            // Enable simulation for synapses as well
+            model->getModel().setSimulationHandler(
+                cellModel->getSimulationHandler());
             result.push_back(model);
+        }
     }
 
     if (params.load_efferent_synapses)
@@ -287,7 +292,11 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
         auto model = __loadSynapse(path, circuit, gids, false, cells,
                                    _scene.createModel());
         if (model)
+        {
+            model->getModel().setSimulationHandler(
+                cellModel->getSimulationHandler());
             result.push_back(model);
+        }
     }
 
     callback.updateProgress("Generating geometry", total);
@@ -299,21 +308,27 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
     }
 
     cellModel->updateBounds();
-    if (simulation)
-        CircuitExplorerMaterial::setSimulationColorEnabled(*cellModel, true);
 
     brayns::Transformation transformation;
     transformation.setRotationCenter(cellModel->getBounds().getCenter());
     auto modelDescriptor =
         std::make_shared<brayns::ModelDescriptor>(std::move(cellModel),
-                                                  "Circuit", path, brayns::ModelMetadata());
+                                                  "Circuit", path,
+                                                  brayns::ModelMetadata());
     modelDescriptor->setTransformation(transformation);
     result.push_back(modelDescriptor);
+
+    // Enable simulation coloring for all models if there is a simulation loaded
+    if (simulation)
+        for (auto& model : result)
+            CircuitExplorerMaterial::setSimulationColorEnabled(
+                model->getModel(), true);
 
     auto cellColor =
         std::make_unique<BBPNeuronColorHandler>(__getCircuitFilePath(config),
                                                 config.getCircuitPopulation());
-    CircuitColorManager::registerHandler(modelDescriptor, std::move(cellColor), gidList, std::move(cellMatMap));
+    CircuitColorManager::registerHandler(modelDescriptor, std::move(cellColor),
+                                         gidList, std::move(cellMatMap));
 
     PLUGIN_INFO << getName() << ": Loaded " << result.size() << " models\n";
 

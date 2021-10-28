@@ -34,7 +34,7 @@ public:
      * @brief Constructor
      */
     BBPLoader(brayns::Scene& scene)
-     : brayns::Loader<BBPLoaderParameters>(scene)
+        : brayns::Loader<BBPLoaderParameters>(scene)
     {
     }
 

@@ -58,4 +58,5 @@ private:
     };
 
     static std::vector<SimulationTracker> _vasculatureModels;
+    static uint32_t _lastFrame;
 };

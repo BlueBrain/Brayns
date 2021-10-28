@@ -35,8 +35,7 @@ constexpr char methodByHemisphere[] = "hemisphere";
 } // namespace
 
 SonataNeuronColorHandler::SonataNeuronColorHandler(
-    const std::string& configPath,
-    const std::string& population)
+    const std::string& configPath, const std::string& population)
     : _config(bbp::sonata::CircuitConfig::fromFile(configPath))
     , _population(population)
 {

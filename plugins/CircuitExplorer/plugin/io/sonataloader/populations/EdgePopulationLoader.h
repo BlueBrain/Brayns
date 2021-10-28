@@ -34,10 +34,10 @@ class EdgePopulationLoader
 public:
     using Ptr = std::unique_ptr<EdgePopulationLoader>;
 
-    template<typename T,
-             typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
+    template <typename T, typename = std::enable_if_t<
+                              std::is_constructible<std::string, T>::value>>
     EdgePopulationLoader(T&& name)
-     : _typeName(std::forward<T>(name))
+        : _typeName(std::forward<T>(name))
     {
     }
 
@@ -47,10 +47,7 @@ public:
      * @brief returns a std::string representing the type of edge population
      * of this loader
      */
-    const std::string& getType() const noexcept
-    {
-        return _typeName;
-    }
+    const std::string& getType() const noexcept { return _typeName; }
 
     /**
      * @brief load the edge population data. The given parameters may be used to

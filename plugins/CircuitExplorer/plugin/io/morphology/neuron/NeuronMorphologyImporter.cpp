@@ -31,7 +31,8 @@
 namespace
 {
 /**
- * @brief The NeuronBuilderTable class is a table to access the available neuron geometry builders
+ * @brief The NeuronBuilderTable class is a table to access the available neuron
+ * geometry builders
  */
 class NeuronBuilderTable
 {
@@ -49,8 +50,8 @@ public:
     /**
      * @brief instantiate a builder by its type and registers it on the table
      */
-    template<typename T,
-             typename = std::enable_if_t<std::is_base_of<NeuronBuilder, T>::value>>
+    template <typename T, typename = std::enable_if_t<
+                              std::is_base_of<NeuronBuilder, T>::value>>
     void registerBuilder()
     {
         auto builder = std::make_unique<T>();
@@ -68,8 +69,9 @@ public:
     const NeuronBuilder& getBuilder(const std::string& name)
     {
         auto it = _builders.find(name);
-        if(it == _builders.end())
-            throw std::runtime_error("NeuronBuilderTable: Unknown builder "+name);
+        if (it == _builders.end())
+            throw std::runtime_error("NeuronBuilderTable: Unknown builder " +
+                                     name);
 
         return *(it->second.get());
     }
@@ -78,45 +80,51 @@ public:
     {
         std::vector<std::string> result;
         result.reserve(_builders.size());
-        for(const auto& entry : _builders)
+        for (const auto& entry : _builders)
             result.push_back(entry.first);
     }
+
 private:
     std::unordered_map<std::string, std::unique_ptr<NeuronBuilder>> _builders;
 };
-}
+} // namespace
 
-std::vector<std::string> NeuronMorphologyImporter::getAvailableGeometryTypes() noexcept
+std::vector<std::string>
+    NeuronMorphologyImporter::getAvailableGeometryTypes() noexcept
 {
     return NeuronBuilderTable().getAvailableBuilderNames();
 }
 
-NeuronMorphologyImporter::NeuronMorphologyImporter(const ImportSettings& settings)
- : soma(settings.loadSoma)
- , axon(settings.loadAxon)
- , dendrites(settings.loadDendrites)
- , _builder(_getNeuronBuilder(settings.builderName))
+NeuronMorphologyImporter::NeuronMorphologyImporter(
+    const ImportSettings& settings)
+    : soma(settings.loadSoma)
+    , axon(settings.loadAxon)
+    , dendrites(settings.loadDendrites)
+    , _builder(_getNeuronBuilder(settings.builderName))
 {
-    if(!soma && !axon && !dendrites)
-        throw std::runtime_error("NeuronMorphologyImporter: No section enabled for loading");
+    if (!soma && !axon && !dendrites)
+        throw std::runtime_error(
+            "NeuronMorphologyImporter: No section enabled for loading");
 
-    if(settings.radiusOverride > 0.f)
+    if (settings.radiusOverride > 0.f)
         _pipeline.registerStage<RadiusOverride>(settings.radiusOverride);
-    else if(settings.radiusMultiplier != 1.f)
+    else if (settings.radiusMultiplier != 1.f)
         _pipeline.registerStage<RadiusMultiplier>(settings.radiusMultiplier);
 
-    if(settings.builderName == "smooth" && (axon || dendrites))
+    if (settings.builderName == "smooth" && (axon || dendrites))
         _pipeline.registerStage<RadiusSmoother>();
 }
 
-NeuronInstantiableGeometry::Ptr NeuronMorphologyImporter::import(const std::string& morphologyPath) const
+NeuronInstantiableGeometry::Ptr NeuronMorphologyImporter::import(
+    const std::string& morphologyPath) const
 {
-    NeuronMorphology morphology (morphologyPath, soma, axon, dendrites);
+    NeuronMorphology morphology(morphologyPath, soma, axon, dendrites);
     _pipeline.process(morphology);
     return _builder.build(morphology);
 }
 
-const NeuronBuilder& NeuronMorphologyImporter::_getNeuronBuilder(const std::string& name) const
+const NeuronBuilder& NeuronMorphologyImporter::_getNeuronBuilder(
+    const std::string& name) const
 {
     static NeuronBuilderTable NEURON_BUILDER_TABLE;
     return NEURON_BUILDER_TABLE.getBuilder(name);

@@ -29,34 +29,19 @@
 namespace brayns
 {
 BRAYNS_ADAPTER_ENUM(
-    sonataloader::ReportType,
-        {"none", sonataloader::ReportType::NONE},
-        {"spikes", sonataloader::ReportType::SPIKES},
-        {"compartment", sonataloader::ReportType::COMPARTMENT},
-        {"summation", sonataloader::ReportType::SUMMATION},
-        {"synapse", sonataloader::ReportType::SYNAPSE},
-        {"bloodflow_pressure", sonataloader::ReportType::BLOODFLOW_PRESSURE},
-        {"bloodflow_speed", sonataloader::ReportType::BLOODFLOW_SPEED},
-        {"bloodflow_radii", sonataloader::ReportType::BLOODFLOW_RADII})
+    sonataloader::ReportType, {"none", sonataloader::ReportType::NONE},
+    {"spikes", sonataloader::ReportType::SPIKES},
+    {"compartment", sonataloader::ReportType::COMPARTMENT},
+    {"summation", sonataloader::ReportType::SUMMATION},
+    {"synapse", sonataloader::ReportType::SYNAPSE},
+    {"bloodflow_pressure", sonataloader::ReportType::BLOODFLOW_PRESSURE},
+    {"bloodflow_speed", sonataloader::ReportType::BLOODFLOW_SPEED},
+    {"bloodflow_radii", sonataloader::ReportType::BLOODFLOW_RADII})
 }
-
-BRAYNS_MESSAGE_BEGIN(HOTFIX)
-BRAYNS_MESSAGE_END()
 
 // ---------------------------------------------------------------------------
 
 BRAYNS_MESSAGE_BEGIN(VasculatureGeometrySettings)
-BRAYNS_MESSAGE_ENTRY(bool, load_vein, "Wether to load or not vein sections")
-BRAYNS_MESSAGE_ENTRY(bool, load_artery, "Wether to load or not artery sections")
-BRAYNS_MESSAGE_ENTRY(bool, load_venule, "Wether to load or not venule sections")
-BRAYNS_MESSAGE_ENTRY(bool, load_arteriole,
-                     "Wether to load or not arteriole sections")
-BRAYNS_MESSAGE_ENTRY(bool, load_venous_capillary,
-                     "Wether to load or not venous capillary sections")
-BRAYNS_MESSAGE_ENTRY(bool, load_arterial_capillary,
-                     "Wether to load or not arterial capillary sections")
-BRAYNS_MESSAGE_ENTRY(bool, load_transitional,
-                     "Wether to load or not transitional sections")
 BRAYNS_MESSAGE_ENTRY(float, radius_multiplier,
                      "Factor by which to multiply all vasculature sample "
                      "radii. Ignored if radius_override is greater than 0")
@@ -98,8 +83,7 @@ BRAYNS_MESSAGE_ENTRY(
     sonataloader::ReportType, report_type,
     "Type of report to load for the given node population. Possible values "
     "are: " +
-        string_utils::join(brayns::enumNames<sonataloader::ReportType>(),
-                           ", "))
+        string_utils::join(brayns::enumNames<sonataloader::ReportType>(), ", "))
 BRAYNS_MESSAGE_ENTRY(std::string, report_path,
                      "Path of the report file to load (Ignored if report_type "
                      "is 'none' or 'spikes')")

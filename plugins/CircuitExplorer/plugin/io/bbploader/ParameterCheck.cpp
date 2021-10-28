@@ -75,8 +75,10 @@ void __checkReport(const brion::BlueConfig& config,
     }
     case SimulationType::COMPARTMENT:
     {
-        if(input.report_name.empty())
-            throw std::invalid_argument("BBPLoader: A compartment report type was requested, but no report_name was provided");
+        if (input.report_name.empty())
+            throw std::invalid_argument(
+                "BBPLoader: A compartment report type was requested, but no "
+                "report_name was provided");
         const auto uri = config.getReportSource(input.report_name);
         if (uri.getPath().empty() || !fs::exists(uri.getPath()))
             throw std::invalid_argument(

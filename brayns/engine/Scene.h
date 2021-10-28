@@ -233,8 +233,8 @@ private:
      * @brief _processNewModels Check and add (if checks pass) the models from
      * the input list to the scene.
      */
-    void _processNewModels(
-        const ModelParams& params, std::vector<ModelDescriptorPtr>& models);
+    void _processNewModels(const ModelParams& params,
+                           std::vector<ModelDescriptorPtr>& models);
 
 protected:
     /** @return True if this scene supports scene updates from any thread. */

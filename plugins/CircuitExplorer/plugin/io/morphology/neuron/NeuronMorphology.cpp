@@ -134,8 +134,8 @@ std::vector<NeuronMorphology::Section> readNeurites(
 
 // ------------------------------------------------------------------------------------------------
 
-NeuronMorphology::NeuronMorphology(
-    const std::string& path, const bool soma, const bool axon, const bool dendrites)
+NeuronMorphology::NeuronMorphology(const std::string& path, const bool soma,
+                                   const bool axon, const bool dendrites)
     : _morphologyPath(path)
     , _soma(nullptr)
 {

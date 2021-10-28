@@ -505,8 +505,8 @@ bool Scene::hasEnvironmentMap() const
     return !_environmentMap.empty();
 }
 
-void Scene::_processNewModels(
-    const ModelParams& params, std::vector<ModelDescriptorPtr>& models)
+void Scene::_processNewModels(const ModelParams& params,
+                              std::vector<ModelDescriptorPtr>& models)
 {
     // Check for models correctness
     if (models.empty())
@@ -620,8 +620,10 @@ void Scene::_updateAnimationParameters()
         });
 
         ap.setDt(smallestDt, false);
-        ap.setStartFrame(static_cast<uint32_t>(earlierStart / smallestDt));
-        ap.setEndFrame(static_cast<uint32_t>(latestEnd / smallestDt));
+        ap.setStartFrame(static_cast<uint32_t>(
+            std::round(std::nextafter(earlierStart, INFINITY) / smallestDt)));
+        ap.setEndFrame(static_cast<uint32_t>(
+            std::round(std::nextafter(latestEnd, INFINITY) / smallestDt)));
         ap.setUnit(handlers[0]->getUnit(), false);
         ap.markModified();
     }

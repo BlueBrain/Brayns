@@ -48,16 +48,17 @@ std::vector<MorphologyInstance::Ptr> CommonNodeLoader::loadNodes(
     config.loadAxon = lc.neuron_morphology_parameters.load_axon;
     config.loadDendrites = lc.neuron_morphology_parameters.load_dendrites;
     config.loadSoma = lc.neuron_morphology_parameters.load_soma;
-    const NeuronMorphologyImporter importer (config);
+    const NeuronMorphologyImporter importer(config);
 
-    const auto morphPath =
-        SonataConfig::resolveMorphologyPath(networkData.config.getNodePopulationProperties(lc.node_population));
+    const auto morphPath = SonataConfig::resolveMorphologyPath(
+        networkData.config.getNodePopulationProperties(lc.node_population));
 
     const auto loadFn = [&](const std::string& name,
                             const std::vector<size_t>& indices) {
         const auto instantiable = importer.import(morphPath.buildPath(name));
         for (const auto idx : indices)
-            result[idx] = instantiable->instantiate(positions[idx], rotations[idx]);
+            result[idx] =
+                instantiable->instantiate(positions[idx], rotations[idx]);
     };
 
     // Use system threadpools
@@ -74,4 +75,4 @@ std::vector<MorphologyInstance::Ptr> CommonNodeLoader::loadNodes(
 
     return result;
 }
-}
+} // namespace sonataloader

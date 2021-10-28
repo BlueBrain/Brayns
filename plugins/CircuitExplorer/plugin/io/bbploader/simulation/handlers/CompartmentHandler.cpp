@@ -45,7 +45,6 @@ CompartmentHandler::CompartmentHandler(
     _nbFrames = (_endTime - _startTime) / _dt;
     _unit = _report->getTimeUnit();
     _frameSize = _report->getFrameSize();
-    _frameData.resize(_frameSize, -100.f);
 }
 
 CompartmentHandler::CompartmentHandler(const CompartmentHandler& o)
@@ -66,8 +65,9 @@ bool CompartmentHandler::isReady() const
     return _ready;
 }
 
-void* CompartmentHandler::getFrameDataImpl(const uint32_t frame)
+std::vector<float> CompartmentHandler::getFrameDataImpl(const uint32_t frame)
 {
+    std::vector<float> data;
     _ready = false;
     auto loadFuture =
         _report->loadFrame(__frameIndexToTimestamp(frame, _dt) + _startTime);
@@ -77,12 +77,12 @@ void* CompartmentHandler::getFrameDataImpl(const uint32_t frame)
         auto frameData = loadFuture.get();
         if (frameData.data.get() != nullptr)
         {
-            _frameData = std::move(*frameData.data);
+            data = std::move(*frameData.data);
             _ready = true;
         }
         else
             PLUGIN_WARN << "Attempt to get frame from " << _path << " failed"
                         << std::endl;
     }
-    return _frameData.data();
+    return data;
 }

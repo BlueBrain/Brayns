@@ -20,9 +20,11 @@
 
 #include <plugin/io/sonataloader/reports/handlers/VasculatureRadiiHandler.h>
 
-std::vector<VasculatureRadiiSimulation::SimulationTracker> VasculatureRadiiSimulation::_vasculatureModels;
+std::vector<VasculatureRadiiSimulation::SimulationTracker>
+    VasculatureRadiiSimulation::_vasculatureModels;
 
-void VasculatureRadiiSimulation::registerModel(brayns::ModelDescriptorPtr& model)
+void VasculatureRadiiSimulation::registerModel(
+    brayns::ModelDescriptorPtr& model)
 {
     // Must have simulation
     auto handler = model->getModel().getSimulationHandler();
@@ -44,7 +46,8 @@ void VasculatureRadiiSimulation::registerModel(brayns::ModelDescriptorPtr& model
                 "mapped beyond frame size");
     }
 
-    _vasculatureModels.push_back({model.get(), std::numeric_limits<uint32_t>::max()});
+    _vasculatureModels.push_back(
+        {model.get(), std::numeric_limits<uint32_t>::max()});
 }
 
 void VasculatureRadiiSimulation::unregisterModel(size_t modelId)
