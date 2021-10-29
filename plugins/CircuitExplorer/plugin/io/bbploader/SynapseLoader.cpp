@@ -6,10 +6,10 @@ namespace bbploader
 {
 namespace
 {
-inline auto __load(const brain::Synapses& src, const brain::GIDSet& gids,
-                   glm::vec3 (brain::Synapse::*posMethod)() const,
-                   uint32_t (brain::Synapse::*gidMethod)() const,
-                   uint32_t (brain::Synapse::*sectionMethod)() const)
+auto doLoad(const brain::Synapses& src, const brain::GIDSet& gids,
+            glm::vec3 (brain::Synapse::*posMethod)() const,
+            uint32_t (brain::Synapse::*gidMethod)() const,
+            uint32_t (brain::Synapse::*sectionMethod)() const)
 {
     std::vector<std::unique_ptr<SynapseGroup>> result;
     if (!src.empty())
@@ -41,14 +41,14 @@ std::vector<std::unique_ptr<SynapseGroup>> SynapseLoader::load(
 {
     if (afferent)
     {
-        return __load(circuit.getAfferentSynapses(gids), gids,
+        return doLoad(circuit.getAfferentSynapses(gids), gids,
                       &brain::Synapse::getPostsynapticSurfacePosition,
                       &brain::Synapse::getPostsynapticGID,
                       &brain::Synapse::getPostsynapticSectionID);
     }
     else
     {
-        return __load(circuit.getEfferentSynapses(gids), gids,
+        return doLoad(circuit.getEfferentSynapses(gids), gids,
                       &brain::Synapse::getPresynapticSurfacePosition,
                       &brain::Synapse::getPresynapticGID,
                       &brain::Synapse::getPresynapticSectionID);

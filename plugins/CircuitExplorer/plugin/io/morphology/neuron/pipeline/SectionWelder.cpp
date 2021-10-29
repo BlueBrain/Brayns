@@ -26,7 +26,7 @@ struct SectionOffsets
 };
 } // namespace
 
-void SectionWelder::proccess(NeuronMorphology& morphology) const
+void SectionWelder::process(NeuronMorphology& morphology) const
 {
     for (auto& section : morphology.sections())
     {

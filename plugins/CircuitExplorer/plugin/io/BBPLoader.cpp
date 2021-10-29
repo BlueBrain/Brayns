@@ -48,7 +48,7 @@ using namespace bbploader;
 
 namespace
 {
-inline std::unique_ptr<Simulation> __intantiateSimulation(
+std::unique_ptr<Simulation> intantiateSimulation(
     const brion::BlueConfig& config, const BBPLoaderParameters& input,
     const brain::GIDSet& inputGids) noexcept
 {
@@ -66,9 +66,9 @@ inline std::unique_ptr<Simulation> __intantiateSimulation(
     }
 }
 
-inline brain::GIDSet __computeInitialGIDs(const brion::BlueConfig& config,
-                                          const brain::Circuit& circuit,
-                                          const BBPLoaderParameters& input)
+brain::GIDSet computeInitialGIDs(const brion::BlueConfig& config,
+                                 const brain::Circuit& circuit,
+                                 const BBPLoaderParameters& input)
 {
     if (!input.gids.empty())
         return brain::GIDSet(input.gids.begin(), input.gids.end());
@@ -109,7 +109,7 @@ inline brain::GIDSet __computeInitialGIDs(const brion::BlueConfig& config,
     return finalList;
 }
 
-inline brayns::ModelDescriptorPtr __loadSynapse(
+brayns::ModelDescriptorPtr loadSynapse(
     const std::string& path, const brain::Circuit& circuit,
     const brain::GIDSet& gids, const bool afferent,
     const std::vector<MorphologyInstance::Ptr>& cells, brayns::ModelPtr&& model)
@@ -155,7 +155,7 @@ inline brayns::ModelDescriptorPtr __loadSynapse(
     return modelDesc;
 }
 
-inline std::string __getCircuitFilePath(const brion::BlueConfig& config)
+std::string getCircuitFilePath(const brion::BlueConfig& config)
 {
     const auto csrc = config.getCircuitSource().getPath();
     if (fs::exists(csrc))
@@ -238,10 +238,10 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
 
     callback.updateProgress("Loading cells", total);
     total += chunk;
-    auto gids = __computeInitialGIDs(config, circuit, params);
+    auto gids = computeInitialGIDs(config, circuit, params);
 
     // Load simulation, intersect initial gids with simulation gids
-    const auto simulation = __intantiateSimulation(config, params, gids);
+    const auto simulation = intantiateSimulation(config, params, gids);
     if (simulation)
         gids = simulation->getReportGids();
 
@@ -274,8 +274,8 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
         PLUGIN_INFO << getName() << ": Loading afferent synapses\n";
         callback.updateProgress("Loading afferent synapses", total);
         total += chunk;
-        auto model = __loadSynapse(path, circuit, gids, true, cells,
-                                   _scene.createModel());
+        auto model =
+            loadSynapse(path, circuit, gids, true, cells, _scene.createModel());
         if (model)
         {
             // Enable simulation for synapses as well
@@ -289,8 +289,8 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
     {
         PLUGIN_INFO << getName() << ": Loading efferent synapses\n";
         callback.updateProgress("Loading efferent synapses", total);
-        auto model = __loadSynapse(path, circuit, gids, false, cells,
-                                   _scene.createModel());
+        auto model = loadSynapse(path, circuit, gids, false, cells,
+                                 _scene.createModel());
         if (model)
         {
             model->getModel().setSimulationHandler(
@@ -325,7 +325,7 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
                 model->getModel(), true);
 
     auto cellColor =
-        std::make_unique<BBPNeuronColorHandler>(__getCircuitFilePath(config),
+        std::make_unique<BBPNeuronColorHandler>(getCircuitFilePath(config),
                                                 config.getCircuitPopulation());
     CircuitColorManager::registerHandler(modelDescriptor, std::move(cellColor),
                                          gidList, std::move(cellMatMap));

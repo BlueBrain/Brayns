@@ -26,7 +26,7 @@ namespace bbploader
 {
 namespace
 {
-void __checkPercentage(const BBPLoaderParameters& input)
+void checkPercentage(const BBPLoaderParameters& input)
 {
     if (input.percentage <= 0.f)
         throw std::invalid_argument(
@@ -36,8 +36,8 @@ void __checkPercentage(const BBPLoaderParameters& input)
             "BBPLoader: Cell percentage must be cannot be greater than 1.0");
 }
 
-void __checkTargets(const brion::BlueConfig& config,
-                    const BBPLoaderParameters& input)
+void checkTargets(const brion::BlueConfig& config,
+                  const BBPLoaderParameters& input)
 {
     if (input.targets.empty())
         return;
@@ -60,8 +60,8 @@ void __checkTargets(const brion::BlueConfig& config,
     }
 }
 
-void __checkReport(const brion::BlueConfig& config,
-                   const BBPLoaderParameters& input)
+void checkReport(const brion::BlueConfig& config,
+                 const BBPLoaderParameters& input)
 {
     switch (input.report_type)
     {
@@ -91,14 +91,14 @@ void __checkReport(const brion::BlueConfig& config,
     }
 }
 
-void __checkSpikeTransitionTime(const BBPLoaderParameters& input)
+void checkSpikeTransitionTime(const BBPLoaderParameters& input)
 {
     if (input.spike_transition_time < 0.f)
         throw std::invalid_argument(
             "BBPLoader: spike_transition_time must be greater or equal to 0.0");
 }
 
-void __checkRadiusModifications(const BBPLoaderParameters& input)
+void checkRadiusModifications(const BBPLoaderParameters& input)
 {
     if (input.neuron_morphology_parameters.radius_override < 0.f)
         throw std::invalid_argument(
@@ -110,7 +110,7 @@ void __checkRadiusModifications(const BBPLoaderParameters& input)
             "0.0");
 }
 
-void __checkNeuronSections(const BBPLoaderParameters& input)
+void checkNeuronSections(const BBPLoaderParameters& input)
 {
     if (!input.neuron_morphology_parameters.load_soma &&
         !input.neuron_morphology_parameters.load_axon &&
@@ -124,11 +124,11 @@ void __checkNeuronSections(const BBPLoaderParameters& input)
 void ParameterCheck::checkInput(const brion::BlueConfig& config,
                                 const BBPLoaderParameters& input)
 {
-    __checkPercentage(input);
-    __checkTargets(config, input);
-    __checkReport(config, input);
-    __checkSpikeTransitionTime(input);
-    __checkRadiusModifications(input);
-    __checkNeuronSections(input);
+    checkPercentage(input);
+    checkTargets(config, input);
+    checkReport(config, input);
+    checkSpikeTransitionTime(input);
+    checkRadiusModifications(input);
+    checkNeuronSections(input);
 }
 } // namespace bbploader

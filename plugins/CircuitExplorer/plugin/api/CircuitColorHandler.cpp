@@ -27,7 +27,7 @@
 
 namespace
 {
-inline std::vector<uint64_t> __parseIDRanges(const std::string& input)
+std::vector<uint64_t> parseIDRanges(const std::string& input)
 {
     if (input.empty())
         throw IDRangeParseException("Empty ID or ID range");
@@ -72,8 +72,8 @@ inline std::vector<uint64_t> __parseIDRanges(const std::string& input)
     return result;
 }
 
-inline void __updateMaterialImpl(brayns::ModelDescriptor* model,
-                                 const size_t id, const brayns::Vector4f& color)
+void updateMaterialImpl(brayns::ModelDescriptor* model, const size_t id,
+                        const brayns::Vector4f& color)
 {
     if (id == std::numeric_limits<size_t>::max())
         return;
@@ -91,7 +91,7 @@ void ElementMaterialMap::_updateMaterial(brayns::ModelDescriptor* model,
                                          const size_t id,
                                          const brayns::Vector4f& color) const
 {
-    __updateMaterialImpl(model, id, color);
+    updateMaterialImpl(model, id, color);
 }
 
 void CircuitColorHandler::initialize()
@@ -145,7 +145,7 @@ void CircuitColorHandler::updateColorById(
             const auto& rawIds = entry.variable;
             const auto& color = entry.color;
 
-            const auto ids = __parseIDRanges(rawIds);
+            const auto ids = parseIDRanges(rawIds);
             for (const auto id : ids)
                 colorMap[id] = color;
         }
@@ -201,7 +201,7 @@ size_t CircuitColorHandler::getModelID() const noexcept
 void CircuitColorHandler::_updateMaterial(const size_t id,
                                           const brayns::Vector4f& color)
 {
-    __updateMaterialImpl(_model, id, color);
+    updateMaterialImpl(_model, id, color);
 }
 
 void CircuitColorHandler::setModel(brayns::ModelDescriptor* model)

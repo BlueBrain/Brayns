@@ -23,7 +23,7 @@ RadiusMultiplier::RadiusMultiplier(const float multiplier)
 {
 }
 
-void RadiusMultiplier::proccess(NeuronMorphology& morphology) const
+void RadiusMultiplier::process(NeuronMorphology& morphology) const
 {
     if (morphology.hasSoma())
         morphology.soma().radius *= _multiplier;

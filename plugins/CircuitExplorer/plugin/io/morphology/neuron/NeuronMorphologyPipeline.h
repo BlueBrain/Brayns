@@ -36,7 +36,7 @@ public:
      * @brief applies a process to the soma and/or sections of the given
      * morphology, effectively altering it in the process
      */
-    virtual void proccess(NeuronMorphology& morphology) const = 0;
+    virtual void process(NeuronMorphology& morphology) const = 0;
 };
 
 /**
@@ -71,7 +71,7 @@ public:
     void process(NeuronMorphology& morphology) const
     {
         for (const auto& stage : _stages)
-            stage->proccess(morphology);
+            stage->process(morphology);
     }
 
 private:

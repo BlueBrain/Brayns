@@ -33,9 +33,9 @@ namespace
 {
 // The endfeet mesh file is not retruned by bbp::sonata::CircuitConfig (by now).
 // Get it manually from the expanded json
-std::string __getEndFeetAreasPath(const bbp::sonata::CircuitConfig& config,
-                                  const std::string& edgePopulation,
-                                  const std::string& basePath)
+std::string getEndFeetAreasPath(const bbp::sonata::CircuitConfig& config,
+                                const std::string& edgePopulation,
+                                const std::string& basePath)
 {
     auto parsedJson = brayns::Json::parse(config.getExpandedJSON());
     const auto json = parsedJson.extract<brayns::JsonObject::Ptr>();
@@ -110,7 +110,7 @@ std::vector<std::unique_ptr<SynapseGroup>> EndFootPopulationLoader::load(
 
     const auto basePath = fs::path(networkData.path).parent_path().string();
     auto path =
-        __getEndFeetAreasPath(networkData.config, lc.edge_population, basePath);
+        getEndFeetAreasPath(networkData.config, lc.edge_population, basePath);
 
     const auto nodes = nodeSelection.flatten();
     const auto population =

@@ -27,8 +27,8 @@ namespace sonataloader
 {
 namespace
 {
-bbp::sonata::Selection __applyPercentage(const std::vector<uint64_t>& src,
-                                         const float percentage) noexcept
+bbp::sonata::Selection applyPercentage(const std::vector<uint64_t>& src,
+                                       const float percentage) noexcept
 {
     const auto expectedSize = static_cast<size_t>(src.size() * percentage);
     const auto skipFactor = static_cast<size_t>(
@@ -108,7 +108,7 @@ bbp::sonata::Selection NodeSelection::intersection(const float percent)
             common = _nodeSetsSelection;
 
         if (percent < 1.0)
-            common = __applyPercentage(common.flatten(), percent);
+            common = applyPercentage(common.flatten(), percent);
 
         return common;
     }
@@ -122,7 +122,7 @@ EdgeSelection::EdgeSelection(bbp::sonata::Selection&& intialEdgeSelection)
 bbp::sonata::Selection EdgeSelection::intersection(const float percentage)
 {
     if (percentage < 1.f)
-        return __applyPercentage(_edgeListSelection.flatten(), percentage);
+        return applyPercentage(_edgeListSelection.flatten(), percentage);
 
     return _edgeListSelection;
 }

@@ -12,7 +12,7 @@ namespace
 {
 using Range = std::pair<uint64_t, uint64_t>;
 
-inline auto __computeMapping(
+auto computeMapping(
     const HighFive::Group& reportPop,
     const std::unordered_map<bbp::sonata::NodeID, Range>& nodePointers,
     const std::vector<bbp::sonata::NodeID>& nodeIds)
@@ -81,8 +81,8 @@ std::vector<std::pair<bbp::sonata::NodeID, bbp::sonata::ElementID>>
 
     // Compute final list of
     if (!nodeIds.empty())
-        return __computeMapping(reportPop, nodePointers, nodeIds);
+        return computeMapping(reportPop, nodePointers, nodeIds);
     else
-        return __computeMapping(reportPop, nodePointers, reportNodeIds);
+        return computeMapping(reportPop, nodePointers, reportNodeIds);
 }
 } // namespace sonataloader

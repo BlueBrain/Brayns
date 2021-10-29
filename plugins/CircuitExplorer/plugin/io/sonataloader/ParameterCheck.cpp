@@ -30,9 +30,9 @@ namespace sonataloader
 {
 namespace
 {
-void __checkNodePopulation(const bbp::sonata::CircuitConfig& config,
-                           const SonataNodePopulationParameters& population,
-                           const std::string& populationType)
+void checkNodePopulation(const bbp::sonata::CircuitConfig& config,
+                         const SonataNodePopulationParameters& population,
+                         const std::string& populationType)
 {
     const auto percentage = population.node_percentage;
     if (percentage <= 0.f || percentage > 1.f)
@@ -92,9 +92,9 @@ void __checkNodePopulation(const bbp::sonata::CircuitConfig& config,
     }
 }
 
-void __checkEdges(const bbp::sonata::CircuitConfig& config,
-                  const SonataNodePopulationParameters& population,
-                  const std::string& populationType)
+void checkEdges(const bbp::sonata::CircuitConfig& config,
+                const SonataNodePopulationParameters& population,
+                const std::string& populationType)
 {
     const auto allEdges = config.listEdgePopulations();
     for (const auto& edge : population.edge_populations)
@@ -136,8 +136,8 @@ void __checkEdges(const bbp::sonata::CircuitConfig& config,
     }
 }
 
-void __checkNeuronMorphology(const SonataNodePopulationParameters& population,
-                             const std::string& populationType)
+void checkNeuronMorphology(const SonataNodePopulationParameters& population,
+                           const std::string& populationType)
 {
     if (populationType == "vasculature")
         return;
@@ -161,8 +161,8 @@ void __checkNeuronMorphology(const SonataNodePopulationParameters& population,
             "SonataLoader: 'radius_multiplier' must be > 0.0");
 }
 
-void __checkVasculature(const SonataNodePopulationParameters& population,
-                        const std::string& populationType)
+void checkVasculature(const SonataNodePopulationParameters& population,
+                      const std::string& populationType)
 {
     if (populationType != "vasculature")
         return;
@@ -195,10 +195,10 @@ void ParameterCheck::checkInput(const bbp::sonata::CircuitConfig& config,
 
         const auto type = config.getNodePopulationProperties(name).type;
 
-        __checkNodePopulation(config, population, type);
-        __checkEdges(config, population, type);
-        __checkNeuronMorphology(population, type);
-        __checkVasculature(population, type);
+        checkNodePopulation(config, population, type);
+        checkEdges(config, population, type);
+        checkNeuronMorphology(population, type);
+        checkVasculature(population, type);
     }
 }
 } // namespace sonataloader

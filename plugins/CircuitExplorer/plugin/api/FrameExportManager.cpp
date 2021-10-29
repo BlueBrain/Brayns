@@ -31,13 +31,13 @@
 
 namespace
 {
-inline auto __getFIImageFormat(const std::string& format) noexcept
+auto getFIImageFormat(const std::string& format) noexcept
 {
     return format == "jpg" ? FIF_JPEG
                            : FreeImage_GetFIFFromFormat(format.c_str());
 }
 
-inline void __checkExportParameters(const FrameExportManager::ExportInfo& input)
+void checkExportParameters(const FrameExportManager::ExportInfo& input)
 {
     if (input.keyFrames.empty())
         throw FrameExportParameterException("No keyframe information");
@@ -56,7 +56,7 @@ inline void __checkExportParameters(const FrameExportManager::ExportInfo& input)
     if (!(status.permissions() & boost::filesystem::perms::others_write))
         throw FrameExportParameterException("No write permissions on " + path);
 
-    const auto imageFormat = __getFIImageFormat(input.imageFormat);
+    const auto imageFormat = getFIImageFormat(input.imageFormat);
     if (imageFormat == FIF_UNKNOWN)
         throw FrameExportParameterException("Unknown image file format " +
                                             input.imageFormat);
@@ -79,7 +79,7 @@ void FrameExportManager::startNewExport(brayns::PluginAPI& api,
     if (_exportRunning)
         throw FrameExportInProgressException();
 
-    __checkExportParameters(input);
+    checkExportParameters(input);
 
     _currentExport = std::move(input);
     _start(api);
@@ -219,7 +219,7 @@ void FrameExportManager::_writeImageToDisk(brayns::PluginAPI& api,
     auto& frameBuffer = api.getEngine().getFrameBuffer();
     auto image = frameBuffer.getImage();
 
-    const auto fif = __getFIImageFormat(_currentExport.imageFormat);
+    const auto fif = getFIImageFormat(_currentExport.imageFormat);
 
     if (fif == FIF_JPEG)
         image.reset(FreeImage_ConvertTo24Bits(image.get()));

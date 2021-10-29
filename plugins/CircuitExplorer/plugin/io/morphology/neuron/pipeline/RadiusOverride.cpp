@@ -23,7 +23,7 @@ RadiusOverride::RadiusOverride(const float value)
 {
 }
 
-void RadiusOverride::proccess(NeuronMorphology& morphology) const
+void RadiusOverride::process(NeuronMorphology& morphology) const
 {
     if (morphology.hasSoma())
         morphology.soma().radius = _value;

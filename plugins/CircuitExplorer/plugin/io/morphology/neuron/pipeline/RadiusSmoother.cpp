@@ -24,7 +24,7 @@ namespace
 {
 #define MAX_RADIUS_PERCENT_CHANGE 0.07f
 
-inline auto getSmoothRadius(float current, const float parentRadius)
+auto getSmoothRadius(float current, const float parentRadius)
 {
     const auto maxChange = parentRadius * MAX_RADIUS_PERCENT_CHANGE;
     if (std::abs(current - parentRadius) > maxChange)
@@ -38,7 +38,7 @@ inline auto getSmoothRadius(float current, const float parentRadius)
 }
 } // namespace
 
-void RadiusSmoother::proccess(NeuronMorphology& morphology) const
+void RadiusSmoother::process(NeuronMorphology& morphology) const
 {
     std::queue<NeuronMorphology::Section*> smoothQueue;
 

@@ -28,7 +28,7 @@
 
 namespace
 {
-inline void __checkInput(const NeuronMorphologyLoaderParameters& input)
+void checkInput(const NeuronMorphologyLoaderParameters& input)
 {
     if (!input.load_soma && !input.load_axon && !input.load_dendrites)
         throw std::invalid_argument(
@@ -72,7 +72,7 @@ std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromFile(
     PLUGIN_INFO << getName() << ": Loading " << path << std::endl;
     callback.updateProgress("Loading " + path, 0.f);
 
-    __checkInput(input);
+    checkInput(input);
 
     NeuronMorphologyImporter::ImportSettings importSettings;
     importSettings.builderName = input.geometry_mode;

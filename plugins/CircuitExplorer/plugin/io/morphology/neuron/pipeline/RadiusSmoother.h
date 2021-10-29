@@ -21,12 +21,12 @@
 #include <plugin/io/morphology/neuron/NeuronMorphologyPipeline.h>
 
 /**
- * @brief The RadiusSmoother class proccess a morphology by re-calculating each
+ * @brief The RadiusSmoother class process a morphology by re-calculating each
  * sample radius based on the previous sample radius, starting at the soma and
  * traversing the morphology hirarchily
  */
 class RadiusSmoother : public NeuronMorphologyPipelineStage
 {
 public:
-    void proccess(NeuronMorphology& morphology) const final;
+    void process(NeuronMorphology& morphology) const final;
 };

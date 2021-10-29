@@ -30,8 +30,7 @@ constexpr float DEFAULT_REST_VALUE = -80.f;
 constexpr float DEFAULT_SPIKING_VALUE = -1.f;
 constexpr float DEFAULT_TIME_INTERVAL = 0.01f;
 
-inline auto __frameIndexToTimestamp(const uint32_t frame,
-                                    const double dt) noexcept
+auto frameIndexToTimestamp(const uint32_t frame, const double dt) noexcept
 {
     return static_cast<double>(std::nextafter(dt, INFINITY) * frame);
 }
@@ -81,7 +80,7 @@ std::vector<float> SpikeHandler::getFrameDataImpl(const uint32_t frame)
     _ready = false;
     std::vector<float> data(_frameSize, DEFAULT_REST_VALUE);
 
-    const auto timestamp = __frameIndexToTimestamp(frame, _dt);
+    const auto timestamp = frameIndexToTimestamp(frame, _dt);
 
     const auto trStart = timestamp - _transition;
     const auto trEnd = timestamp + _transition;

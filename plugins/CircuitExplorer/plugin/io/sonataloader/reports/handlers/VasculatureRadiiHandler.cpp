@@ -22,8 +22,7 @@ namespace sonataloader
 {
 namespace
 {
-inline auto __frameIndexToTimestamp(const uint32_t frame,
-                                    const double dt) noexcept
+auto frameIndexToTimestamp(const uint32_t frame, const double dt) noexcept
 {
     return static_cast<double>(std::nextafter(dt, INFINITY) * frame);
 }
@@ -68,7 +67,7 @@ std::vector<float> VasculatureRadiiHandler::getFrameDataImpl(
 {
     _ready = false;
     const auto realFrame = frame > _nbFrames ? _nbFrames : frame;
-    const auto timestamp = __frameIndexToTimestamp(realFrame, _dt);
+    const auto timestamp = frameIndexToTimestamp(realFrame, _dt);
     _radii = _reportPopulation.get(_selection, timestamp).data;
     _lastRadiiFrame = realFrame;
     _ready = true;

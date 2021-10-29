@@ -21,7 +21,7 @@
 #include <plugin/io/morphology/neuron/NeuronMorphologyPipeline.h>
 
 /**
- * @brief The RadiusMultiplier class proccess a morphology by multiplying all
+ * @brief The RadiusMultiplier class process a morphology by multiplying all
  * the sample radii by a constant multiplier
  */
 class RadiusMultiplier : public NeuronMorphologyPipelineStage
@@ -29,7 +29,7 @@ class RadiusMultiplier : public NeuronMorphologyPipelineStage
 public:
     RadiusMultiplier(const float multiplier);
 
-    void proccess(NeuronMorphology& morphology) const final;
+    void process(NeuronMorphology& morphology) const final;
 
 private:
     const float _multiplier;

@@ -227,8 +227,8 @@ private:
 
 // ------------------------------------------------------------------------------------------------
 
-inline std::unique_ptr<CircuitAccessor> __instantiateCircuit(
-    const std::string& path, const std::string& pop)
+std::unique_ptr<CircuitAccessor> instantiateCircuit(const std::string& path,
+                                                    const std::string& pop)
 {
     const auto lowerCasePath = brayns::string_utils::toLowercase(path);
     if (lowerCasePath.find(".mvd2") != std::string::npos)
@@ -243,8 +243,7 @@ inline std::unique_ptr<CircuitAccessor> __instantiateCircuit(
     return {nullptr};
 }
 
-inline std::vector<std::string> __getAvailableMethods(
-    const CircuitAccessor& circuit)
+std::vector<std::string> getAvailableMethods(const CircuitAccessor& circuit)
 {
     std::vector<std::string> result;
 
@@ -277,14 +276,14 @@ BBPNeuronColorHandler::BBPNeuronColorHandler(const std::string& circuitPath,
 
 std::vector<std::string> BBPNeuronColorHandler::_getExtraMethods() const
 {
-    const auto circuit = __instantiateCircuit(_circuitPath, _circuitPop);
-    return __getAvailableMethods(*circuit);
+    const auto circuit = instantiateCircuit(_circuitPath, _circuitPop);
+    return getAvailableMethods(*circuit);
 }
 
 std::vector<std::string> BBPNeuronColorHandler::_getValuesForMethod(
     const std::string& method) const
 {
-    const auto circuit = __instantiateCircuit(_circuitPath, _circuitPop);
+    const auto circuit = instantiateCircuit(_circuitPath, _circuitPop);
     std::vector<std::string> data;
     if (method == methodByLayer)
         data = circuit->getLayers(_ids);

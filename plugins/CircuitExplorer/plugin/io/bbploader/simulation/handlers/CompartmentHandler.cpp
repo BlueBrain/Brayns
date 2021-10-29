@@ -25,8 +25,7 @@
 
 namespace
 {
-inline auto __frameIndexToTimestamp(const uint32_t frame,
-                                    const double dt) noexcept
+auto frameIndexToTimestamp(const uint32_t frame, const double dt) noexcept
 {
     return static_cast<double>(std::nextafter(dt, INFINITY) * frame);
 }
@@ -70,7 +69,7 @@ std::vector<float> CompartmentHandler::getFrameDataImpl(const uint32_t frame)
     std::vector<float> data;
     _ready = false;
     auto loadFuture =
-        _report->loadFrame(__frameIndexToTimestamp(frame, _dt) + _startTime);
+        _report->loadFrame(frameIndexToTimestamp(frame, _dt) + _startTime);
     if (loadFuture.valid())
     {
         loadFuture.wait();

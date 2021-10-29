@@ -24,6 +24,7 @@
 #include <brayns/common/types.h>
 #include <brayns/json/Json.h>
 #include <brayns/json/JsonSchema.h>
+#include <brayns/json/JsonSchemaValidator.h>
 #include <brayns/utils/StringUtils.h>
 
 #include <functional>
@@ -113,7 +114,7 @@ public:
      * @brief returns the loader input parameter schema to be used on loader
      *        discovery
      */
-    virtual JsonSchema getInputParametersSchema() = 0;
+    virtual const JsonSchema& getInputParametersSchema() const = 0;
 
     /**
      * @brief Loads a model/list of models from a blob of memory
@@ -154,25 +155,22 @@ class Loader : public AbstractLoader
 public:
     Loader(Scene& scene)
         : _scene(scene)
+        , _parameterSchema(Json::getSchema<T>())
     {
     }
 
     virtual ~Loader() = default;
 
-    virtual JsonSchema getInputParametersSchema() override
+    virtual const JsonSchema& getInputParametersSchema() const override
     {
-        return Json::getSchema<T>();
+        return _parameterSchema;
     }
 
     virtual std::vector<ModelDescriptorPtr> loadFromBlob(
         Blob&& blob, const LoaderProgress& callback,
         const JsonValue& params) const override
     {
-        T inputParams;
-        if (!Json::deserialize<T>(params, inputParams))
-            throw std::invalid_argument("Could not parse " + getName() +
-                                        " loader parameters");
-
+        const T inputParams = _parseParameters(params);
         return importFromBlob(std::move(blob), callback, inputParams);
     }
 
@@ -180,11 +178,7 @@ public:
         const std::string& path, const LoaderProgress& callback,
         const JsonValue& params) const override
     {
-        T inputParams;
-        if (!params.isEmpty() && !Json::deserialize<T>(params, inputParams))
-            throw std::invalid_argument("Could not parse " + getName() +
-                                        " loader parameters");
-
+        const T inputParams = _parseParameters(params);
         return importFromFile(path, callback, inputParams);
     }
 
@@ -214,6 +208,29 @@ public:
 
 protected:
     Scene& _scene;
+
+private:
+    const JsonSchema _parameterSchema;
+
+    T _parseParameters(const JsonValue& input) const
+    {
+        T inputParams;
+        if (input.isEmpty())
+            Json::deserialize<T>(Json::parse("{}"), inputParams);
+        else
+        {
+            const auto errors =
+                JsonSchemaValidator::validate(input, _parameterSchema);
+            if (!errors.empty())
+                throw std::invalid_argument(
+                    "Could not parse " + getName() +
+                    " parameters: " + string_utils::join(errors, ", "));
+
+            Json::deserialize<T>(input, inputParams);
+        }
+
+        return inputParams;
+    }
 };
 
 /**

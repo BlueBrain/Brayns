@@ -38,8 +38,8 @@ using namespace sonataloader;
 
 namespace
 {
-inline auto selectNodes(const bbp::sonata::CircuitConfig& config,
-                        const SonataNodePopulationParameters& lc)
+auto selectNodes(const bbp::sonata::CircuitConfig& config,
+                 const SonataNodePopulationParameters& lc)
 {
     NodeSelection selection;
     selection.select(config, lc.node_population, lc.node_sets);
@@ -52,9 +52,9 @@ inline auto selectNodes(const bbp::sonata::CircuitConfig& config,
     return selected;
 }
 
-inline brayns::ModelDescriptorPtr createModelDescriptor(const std::string& name,
-                                                        const std::string& path,
-                                                        brayns::ModelPtr& model)
+brayns::ModelDescriptorPtr createModelDescriptor(const std::string& name,
+                                                 const std::string& path,
+                                                 brayns::ModelPtr& model)
 {
     model->updateBounds();
     brayns::Transformation transform;
@@ -67,9 +67,8 @@ inline brayns::ModelDescriptorPtr createModelDescriptor(const std::string& name,
     return modelDescriptor;
 }
 
-inline void __informProgress(const brayns::LoaderProgress& cb,
-                             const std::string& msg, float& total,
-                             const float chunk)
+void informProgress(const brayns::LoaderProgress& cb, const std::string& msg,
+                    float& total, const float chunk)
 {
     cb.updateProgress(msg, total);
     total += chunk;
@@ -125,15 +124,15 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
 
         // Load node data
         const auto nodeIDs = nodeSelection.flatten();
-        __informProgress(callback, "Loading " + nodeName, total, chunk);
+        informProgress(callback, "Loading " + nodeName, total, chunk);
         auto nodes = PopulationLoaderManager::loadNodes(network, nodeSettings,
                                                         nodeSelection);
         if (nodes.empty())
             continue;
 
         // Load node report mapping, if any
-        __informProgress(callback, nodeName + ": Loading simulation", total,
-                         chunk);
+        informProgress(callback, nodeName + ": Loading simulation", total,
+                       chunk);
         PopulationReportManager::loadNodeMapping(nodeSettings, nodeSelection,
                                                  nodes);
 
@@ -144,7 +143,7 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
             const auto& edgeName = edge.edge_population;
             PLUGIN_INFO << "\tLoading " << edgeName << " edge population\n";
 
-            __informProgress(callback, "Loading " + edgeName, total, chunk);
+            informProgress(callback, "Loading " + edgeName, total, chunk);
             // Load edge data
             auto edges = PopulationLoaderManager::loadEdges(network, edge,
                                                             nodeSelection);
@@ -155,14 +154,14 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
             PopulationLoaderManager::mapEdgesToNodes(nodes, edges);
 
             // Load edge report mapping, if any
-            __informProgress(callback, edgeName + ": Loading simulation", total,
-                             chunk);
+            informProgress(callback, edgeName + ": Loading simulation", total,
+                           chunk);
             PopulationReportManager::loadEdgeMapping(edge, nodeSelection,
                                                      edges);
 
             // Add geometry to the edge model
-            __informProgress(callback, edgeName + ": Generating edge geometry",
-                             total, chunk);
+            informProgress(callback, edgeName + ": Generating edge geometry",
+                           total, chunk);
             brayns::ModelPtr edgeModel = _scene.createModel();
             std::vector<ElementMaterialMap::Ptr> edgeMaterialMaps(nodes.size());
             for (size_t j = 0; j < nodes.size(); ++j)
@@ -190,8 +189,8 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
             PLUGIN_INFO << "\tLoaded edge population " << edgeName << "\n";
         }
 
-        __informProgress(callback, nodeName + ": Generating node geometry",
-                         total, chunk);
+        informProgress(callback, nodeName + ": Generating node geometry", total,
+                       chunk);
 
         // Add geometry to the node model
         brayns::ModelPtr nodeModel = _scene.createModel();

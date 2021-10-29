@@ -27,8 +27,7 @@ constexpr float SPIKE_DEFAULT_REST_VALUE = -80.f;
 constexpr float SPIKE_DEFAULT_SPIKING_VALUE = -1.f;
 constexpr float SPIKE_TRANSITION_TIME_SECONDS = 0.05f;
 
-inline auto __frameIndexToTimestamp(const uint32_t frame,
-                                    const double dt) noexcept
+auto frameIndexToTimestamp(const uint32_t frame, const double dt) noexcept
 {
     return static_cast<double>(std::nextafter(dt, INFINITY) * frame);
 }
@@ -86,7 +85,7 @@ std::vector<float> SonataSpikeHandler::getFrameDataImpl(const uint32_t frame)
 {
     _ready = false;
     // const auto realFrame = frame > _nbFrames? _nbFrames : frame;
-    const auto timestamp = __frameIndexToTimestamp(frame, _dt);
+    const auto timestamp = frameIndexToTimestamp(frame, _dt);
     std::vector<float> data(_frameSize, SPIKE_DEFAULT_REST_VALUE);
 
     const auto trStart =

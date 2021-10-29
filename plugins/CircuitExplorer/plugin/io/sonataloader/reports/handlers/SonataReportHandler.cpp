@@ -22,8 +22,7 @@ namespace sonataloader
 {
 namespace
 {
-inline auto __frameIndexToTimestamp(const uint32_t frame,
-                                    const double dt) noexcept
+auto frameIndexToTimestamp(const uint32_t frame, const double dt) noexcept
 {
     return static_cast<double>(std::nextafter(dt, INFINITY) * frame);
 }
@@ -63,7 +62,7 @@ std::vector<float> SonataReportHandler::getFrameDataImpl(const uint32_t frame)
 {
     _ready = false;
     const auto realFrame = frame > _nbFrames ? _nbFrames : frame;
-    const auto timestamp = __frameIndexToTimestamp(realFrame, _dt);
+    const auto timestamp = frameIndexToTimestamp(realFrame, _dt);
     const auto data = _reportPopulation.get(_selection, timestamp).data;
     _ready = true;
 

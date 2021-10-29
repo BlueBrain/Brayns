@@ -51,16 +51,16 @@ constexpr char attribSynapseClass[] = "synapse_class";
 constexpr char attribRegion[] = "region";
 constexpr char attribHemisphere[] = "hemisphere";
 
-inline std::string __getNodePopulation(const bbp::sonata::CircuitConfig& config,
-                                       const std::string& edgePopulation,
-                                       const bool afferent)
+std::string getNodePopulation(const bbp::sonata::CircuitConfig& config,
+                              const std::string& edgePopulation,
+                              const bool afferent)
 {
     const auto edges = config.getEdgePopulation(edgePopulation);
     return afferent ? edges.target() : edges.source();
 }
 
-inline const std::vector<std::pair<const char*, const char*>>&
-    __methodAttribMapping() noexcept
+const std::vector<std::pair<const char*, const char*>>&
+    methodAttribMapping() noexcept
 {
     static const std::vector<std::pair<const char*, const char*>>
         possibleMethods = {{methodByMorphology, attribMorphology},
@@ -74,9 +74,9 @@ inline const std::vector<std::pair<const char*, const char*>>&
     return possibleMethods;
 }
 
-inline const char* __getAttribForMethod(const std::string& method)
+const char* getAttribForMethod(const std::string& method)
 {
-    const auto& mapping = __methodAttribMapping();
+    const auto& mapping = methodAttribMapping();
     for (const auto& entry : mapping)
     {
         if (method == entry.first)
@@ -87,13 +87,13 @@ inline const char* __getAttribForMethod(const std::string& method)
                                 method + "'");
 }
 
-inline std::vector<std::string> __getMethodsValues(
+std::vector<std::string> getMethodsValues(
     const bbp::sonata::CircuitConfig& config, const std::string& nodePopulation,
     const std::string& method, const std::vector<uint64_t>& nodeIds)
 {
     const std::set<uint64_t> uniqueNodes(nodeIds.begin(), nodeIds.end());
     const auto nodes = config.getNodePopulation(nodePopulation);
-    const auto attrib = __getAttribForMethod(method);
+    const auto attrib = getAttribForMethod(method);
     const auto nodeSelection =
         bbp::sonata::Selection::fromValues(uniqueNodes.begin(),
                                            uniqueNodes.end());
@@ -106,7 +106,7 @@ CommonEdgeColorHandler::CommonEdgeColorHandler(
     const bool afferent)
     : _config(bbp::sonata::CircuitConfig::fromFile(configPath))
     , _edgePopulation(edgePopulation)
-    , _nodePopulation(__getNodePopulation(_config, _edgePopulation, afferent))
+    , _nodePopulation(getNodePopulation(_config, _edgePopulation, afferent))
     , _afferent(afferent)
 {
 }
@@ -171,7 +171,7 @@ std::vector<std::string> CommonEdgeColorHandler::_getMethodsImpl() const
 {
     const auto nodes = _config.getNodePopulation(_nodePopulation);
     const auto& attributes = nodes.attributeNames();
-    const auto& possibleMethods = __methodAttribMapping();
+    const auto& possibleMethods = methodAttribMapping();
 
     std::vector<std::string> result;
     result.reserve(possibleMethods.size());
@@ -189,7 +189,7 @@ std::vector<std::string> CommonEdgeColorHandler::_getMethodVariablesImpl(
     const std::string& method) const
 {
     const auto values =
-        __getMethodsValues(_config, _nodePopulation, method, _nodeIds);
+        getMethodsValues(_config, _nodePopulation, method, _nodeIds);
     const std::set<std::string> unique(values.begin(), values.end());
     return std::vector<std::string>(unique.begin(), unique.end());
 }
@@ -220,7 +220,7 @@ void CommonEdgeColorHandler::_updateColorImpl(
     const std::vector<ColoringInformation>& variables)
 {
     const auto values =
-        __getMethodsValues(_config, _nodePopulation, method, _nodeIds);
+        getMethodsValues(_config, _nodePopulation, method, _nodeIds);
 
     if (!variables.empty())
     {

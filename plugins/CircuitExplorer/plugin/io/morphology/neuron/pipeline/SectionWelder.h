@@ -21,7 +21,7 @@
 #include <plugin/io/morphology/neuron/NeuronMorphologyPipeline.h>
 
 /**
- * @brief The SectionWelder class proccess a morphology by traversing it
+ * @brief The SectionWelder class process a morphology by traversing it
  * hierarchily, and checking the distance between a section's first sample
  * and its parent last sample. If the distance is higher than both samples
  * combined radii, an extra sample is added to weld both sections
@@ -29,5 +29,5 @@
 class SectionWelder : public NeuronMorphologyPipelineStage
 {
 public:
-    void proccess(NeuronMorphology& morphology) const final;
+    void process(NeuronMorphology& morphology) const final;
 };

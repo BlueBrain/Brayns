@@ -21,7 +21,7 @@
 #include <plugin/io/morphology/neuron/NeuronMorphologyPipeline.h>
 
 /**
- * @brief The RadiusOverride class proccess a morphology by setting all samples
+ * @brief The RadiusOverride class process a morphology by setting all samples
  *        radii to a fixed value
  */
 class RadiusOverride : public NeuronMorphologyPipelineStage
@@ -29,7 +29,7 @@ class RadiusOverride : public NeuronMorphologyPipelineStage
 public:
     RadiusOverride(const float value);
 
-    void proccess(NeuronMorphology& morphology) const final;
+    void process(NeuronMorphology& morphology) const final;
 
 private:
     const float _value;
