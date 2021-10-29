@@ -64,7 +64,7 @@ public:
         _properties = properties;
     }
 
-    void commit()
+    void commit() const
     {
         for (auto material : _materials)
         {
