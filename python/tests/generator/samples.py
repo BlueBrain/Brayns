@@ -469,10 +469,21 @@ set_renderer_params = {
     'id': 1,
     'method': 'set-renderer-params',
     'params': {
-        'volumeSpecularExponent': 22,
-        'volumeAlphaCorrection': 0.6,
-        'useHardwareRandomizer': True,
-        'softShadowsSamples': 2
+        'epsilonFactor': 1,
+        'exposure': 1,
+        'fogStart': 0,
+        'fogThickness': 100000000,
+        'giDistance': 10000,
+        'giSamples': 0,
+        'giWeight': 0,
+        'maxBounces': 5,
+        'maxDistanceToSecondaryModel': 30,
+        'samplingThreshold': 0.001,
+        'shadows': 1,
+        'softShadows': 0,
+        'softShadowsSamples': 1,
+        'volumeAlphaCorrection': 0.5,
+        'volumeSpecularExponent': 20
     }
 }
 

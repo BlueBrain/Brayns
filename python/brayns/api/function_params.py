@@ -38,13 +38,13 @@ def from_entrypoint(entrypoint: Entrypoint):
     :rtype: str
     """
     return ', '.join(
-        _format_param(param)
-        for param in entrypoint.params
+        _format_param(schema)
+        for schema in entrypoint.params.schemas
     )
 
 
-def _format_param(param: Schema):
-    name = param.name
-    typename = param.typename
-    default = '' if param.required else ' = None'
+def _format_param(schema: Schema):
+    name = schema.name
+    typename = schema.typename
+    default = '' if schema.required else ' = None'
     return f'{name}: {typename}{default}'

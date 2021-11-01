@@ -19,7 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass, field
-from typing import List, Union
+from typing import Iterable, List, Union
 
 from . import typename
 
@@ -40,7 +40,7 @@ class Schema:
     :type read_only: bool
     :param write_only: Cannot be used as result if True
     :type write_only: bool
-    :param properties: Schema properties if dict
+    :param properties: Schema properties if dict (sorted by required and name)
     :type properties: List[Schema]
     :param one_of: Schema is a Union of these schemas if not empty
     :type one_of: List[Schema]
@@ -50,7 +50,7 @@ class Schema:
     :type additional_properties: Schema
     """
 
-    typename: str
+    typename: str = 'None'
     name: str = ''
     description: str = ''
     required: bool = False
@@ -102,14 +102,21 @@ def _get_write_only(schema: dict):
 
 def _get_properties(schema: dict):
     required = set(schema.get('required', []))
-    return [
+    return _get_sorted_properties(
         Schema.from_dict(
             schema=child,
             name=name,
             required=name in required
         )
         for name, child in schema.get('properties', {}).items()
-    ]
+    )
+
+
+def _get_sorted_properties(schemas: Iterable[Schema]):
+    return sorted(
+        schemas,
+        key=lambda schema: (not schema.required, schema.name)
+    )
 
 
 def _get_oneof(schema: dict, required: bool = False):
