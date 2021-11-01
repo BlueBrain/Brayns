@@ -103,7 +103,7 @@ private:
     static std::shared_ptr<spdlog::logger> _createLogger()
     {
         auto logger = spdlog::stdout_color_mt("Brayns");
-        logger->set_pattern("%^[%l][%T]: %v%$");
+        logger->set_pattern("%^[%l][%T] %v%$");
 #ifdef NDEBUG
         logger->set_level(spdlog::level::info);
 #else
