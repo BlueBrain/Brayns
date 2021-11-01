@@ -31,14 +31,6 @@ class BBPLoader : public brayns::Loader<BBPLoaderParameters>
 {
 public:
     /**
-     * @brief Constructor
-     */
-    BBPLoader(brayns::Scene& scene)
-        : brayns::Loader<BBPLoaderParameters>(scene)
-    {
-    }
-
-    /**
      * @brief getSupportedExtensions returns a list with supported file
      * extensions
      */
@@ -62,14 +54,14 @@ public:
      */
     std::vector<brayns::ModelDescriptorPtr> importFromBlob(
         brayns::Blob&&, const brayns::LoaderProgress&,
-        const BBPLoaderParameters&) const final;
+        const BBPLoaderParameters&, brayns::Scene&) const final;
 
     /**
      * @brief importFromFile imports models from a file given by a path
      */
     std::vector<brayns::ModelDescriptorPtr> importFromFile(
         const std::string& path, const brayns::LoaderProgress& callback,
-        const BBPLoaderParameters& params) const final;
+        const BBPLoaderParameters& params, brayns::Scene& scene) const final;
 
     /**
      * @brief importFromBlueConfig imports a neuronal circuit from a BlueConfig
@@ -79,6 +71,6 @@ public:
      */
     std::vector<brayns::ModelDescriptorPtr> importFromBlueConfig(
         const std::string& path, const brayns::LoaderProgress& callback,
-        const BBPLoaderParameters& params,
-        const brion::BlueConfig& config) const;
+        const BBPLoaderParameters& params, const brion::BlueConfig& config,
+        brayns::Scene& scene) const;
 };

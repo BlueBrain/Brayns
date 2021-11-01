@@ -26,8 +26,6 @@
 class SonataNGVLoader : public brayns::Loader<SonataNGVLoaderParameters>
 {
 public:
-    SonataNGVLoader(brayns::Scene& scene);
-
     /**
      * @brief getSupportedExtensions returns a list with supported file
      * extensions
@@ -52,15 +50,16 @@ public:
      */
     std::vector<brayns::ModelDescriptorPtr> importFromBlob(
         brayns::Blob&&, const brayns::LoaderProgress&,
-        const SonataNGVLoaderParameters&) const final;
+        const SonataNGVLoaderParameters&, brayns::Scene&) const final;
 
     /**
      * @brief importFromFile imports models from a file given by a path
      */
     std::vector<brayns::ModelDescriptorPtr> importFromFile(
         const std::string& path, const brayns::LoaderProgress& callback,
-        const SonataNGVLoaderParameters& input) const final;
+        const SonataNGVLoaderParameters& input,
+        brayns::Scene& scene) const final;
 
 private:
-    std::unique_ptr<BBPLoader> _internal;
+    BBPLoader _internal;
 };

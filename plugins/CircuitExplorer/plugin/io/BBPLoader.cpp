@@ -198,21 +198,22 @@ std::string BBPLoader::getName() const
 }
 
 std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlob(
-    brayns::Blob&&, const brayns::LoaderProgress&,
-    const BBPLoaderParameters&) const
+    brayns::Blob&&, const brayns::LoaderProgress&, const BBPLoaderParameters&,
+    brayns::Scene&) const
 {
     throw std::runtime_error("BBP loader: import from blob not supported");
 }
 
 std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromFile(
     const std::string& path, const brayns::LoaderProgress& callback,
-    const BBPLoaderParameters& params) const
+    const BBPLoaderParameters& params, brayns::Scene& scene) const
 {
     brayns::Timer timer;
     PLUGIN_INFO << getName() << ": Loading " << path << std::endl;
 
     const brion::BlueConfig config(path);
-    const auto result = importFromBlueConfig(path, callback, params, config);
+    const auto result =
+        importFromBlueConfig(path, callback, params, config, scene);
 
     PLUGIN_INFO << getName() << ": Done in " << timer.elapsed() << " second(s)"
                 << std::endl;
@@ -221,7 +222,8 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromFile(
 
 std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
     const std::string& path, const brayns::LoaderProgress& callback,
-    const BBPLoaderParameters& params, const brion::BlueConfig& config) const
+    const BBPLoaderParameters& params, const brion::BlueConfig& config,
+    brayns::Scene& scene) const
 {
     std::vector<brayns::ModelDescriptorPtr> result;
 
@@ -230,7 +232,7 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
     const brain::Circuit circuit(config);
     ParameterCheck::checkInput(config, params);
 
-    brayns::ModelPtr cellModel = _scene.createModel();
+    brayns::ModelPtr cellModel = scene.createModel();
 
     // Configure progress reporter
     const float chunk = 0.2f;
@@ -266,7 +268,7 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
                                     cm.compartments);
         }
         cellModel->setSimulationHandler(simulation->createHandler());
-        TransferFunctionUtils::set(_scene.getTransferFunction());
+        TransferFunctionUtils::set(scene.getTransferFunction());
     }
 
     if (params.load_afferent_synapses)
@@ -275,7 +277,7 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
         callback.updateProgress("Loading afferent synapses", total);
         total += chunk;
         auto model =
-            loadSynapse(path, circuit, gids, true, cells, _scene.createModel());
+            loadSynapse(path, circuit, gids, true, cells, scene.createModel());
         if (model)
         {
             // Enable simulation for synapses as well
@@ -289,8 +291,8 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
     {
         PLUGIN_INFO << getName() << ": Loading efferent synapses\n";
         callback.updateProgress("Loading efferent synapses", total);
-        auto model = loadSynapse(path, circuit, gids, false, cells,
-                                 _scene.createModel());
+        auto model =
+            loadSynapse(path, circuit, gids, false, cells, scene.createModel());
         if (model)
         {
             model->getModel().setSimulationHandler(

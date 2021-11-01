@@ -33,18 +33,16 @@ namespace brayns
 class MeshLoader : public Loader<MeshLoaderParameters>
 {
 public:
-    MeshLoader(Scene& scene);
-
     std::vector<std::string> getSupportedExtensions() const final;
     std::string getName() const final;
 
     std::vector<ModelDescriptorPtr> importFromFile(
         const std::string& fileName, const LoaderProgress& callback,
-        const MeshLoaderParameters& properties) const final;
+        const MeshLoaderParameters& properties, Scene& scene) const final;
 
     std::vector<ModelDescriptorPtr> importFromBlob(
         Blob&& blob, const LoaderProgress& callback,
-        const MeshLoaderParameters& properties) const final;
+        const MeshLoaderParameters& properties, Scene& scene) const final;
 
     ModelMetadata importMesh(
         const std::string& fileName, const LoaderProgress& callback,

@@ -139,11 +139,6 @@ Vector2f dataRangeFromType(DataType type)
 }
 } // namespace
 
-RawVolumeLoader::RawVolumeLoader(Scene& scene)
-    : Loader(scene)
-{
-}
-
 bool RawVolumeLoader::isSupported(const std::string&,
                                   const std::string& extension) const
 {
@@ -152,26 +147,28 @@ bool RawVolumeLoader::isSupported(const std::string&,
 
 std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback,
-    const RawVolumeLoaderParameters& properties) const
+    const RawVolumeLoaderParameters& properties, Scene& scene) const
 {
-    return {_loadVolume(blob.name, callback, properties, [&blob](auto volume) {
-        volume->mapData(std::move(blob.data));
-    })};
+    return {_loadVolume(blob.name, callback, properties,
+                        [&blob](auto volume) {
+                            volume->mapData(std::move(blob.data));
+                        },
+                        scene)};
 }
 
 std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
-    const RawVolumeLoaderParameters& properties) const
+    const RawVolumeLoaderParameters& properties, Scene& scene) const
 {
-    return {
-        _loadVolume(filename, callback, properties,
-                    [filename](auto volume) { volume->mapData(filename); })};
+    return {_loadVolume(filename, callback, properties,
+                        [filename](auto volume) { volume->mapData(filename); },
+                        scene)};
 }
 
 ModelDescriptorPtr RawVolumeLoader::_loadVolume(
     const std::string& filename, const LoaderProgress& callback,
     const RawVolumeLoaderParameters& params,
-    const std::function<void(SharedDataVolumePtr)>& mapData) const
+    const std::function<void(SharedDataVolumePtr)>& mapData, Scene& scene) const
 {
     callback.updateProgress("Parsing volume file ...", 0.f);
 
@@ -179,7 +176,7 @@ ModelDescriptorPtr RawVolumeLoader::_loadVolume(
         throw std::runtime_error("Volume dimensions are empty");
 
     const auto dataRange = dataRangeFromType(params.type);
-    auto model = _scene.createModel();
+    auto model = scene.createModel();
     auto volume = model->createSharedDataVolume(params.dimensions,
                                                 params.spacing, params.type);
     volume->setDataRange(dataRange);
@@ -212,11 +209,6 @@ std::vector<std::string> RawVolumeLoader::getSupportedExtensions() const
 
 ////////////////////////////////////////////////////////////////////////////
 
-MHDVolumeLoader::MHDVolumeLoader(Scene& scene)
-    : NoInputLoader(scene)
-{
-}
-
 bool MHDVolumeLoader::isSupported(const std::string&,
                                   const std::string& extension) const
 {
@@ -224,13 +216,14 @@ bool MHDVolumeLoader::isSupported(const std::string&,
 }
 
 std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromBlob(
-    Blob&&, const LoaderProgress&) const
+    Blob&&, const LoaderProgress&, Scene&) const
 {
     throw std::runtime_error("Volume loading from blob is not supported");
 }
 
 std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromFile(
-    const std::string& filename, const LoaderProgress& callback) const
+    const std::string& filename, const LoaderProgress& callback,
+    Scene& scene) const
 {
     std::string volumeFile = filename;
     const auto mhd = parseMHD(filename);
@@ -265,7 +258,8 @@ std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromFile(
     params.spacing = spacing;
     params.type = type;
 
-    return RawVolumeLoader(_scene).importFromFile(volumeFile, callback, params);
+    return RawVolumeLoader().importFromFile(volumeFile, callback, params,
+                                            scene);
 }
 
 std::string MHDVolumeLoader::getName() const

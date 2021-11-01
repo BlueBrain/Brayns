@@ -38,11 +38,6 @@ std::vector<MorphologyInstance::Ptr> VasculaturePopulationLoader::load(
     const auto sectionTypes =
         SonataVasculature::getSegmentSectionTypes(population, selection);
 
-    std::cout << "Rad mult: "
-              << lc.vasculature_geometry_parameters.radius_multiplier << "\n";
-    std::cout << "Rad override: "
-              << lc.vasculature_geometry_parameters.radius_override << "\n";
-
     std::vector<float> startRadii, endRadii;
     const auto radOverride = lc.vasculature_geometry_parameters.radius_override;
     const auto radMultiplier =

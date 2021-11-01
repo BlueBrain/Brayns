@@ -30,14 +30,6 @@ class NeuronMorphologyLoader
 {
 public:
     /**
-     * @brief Constructor
-     */
-    NeuronMorphologyLoader(brayns::Scene& scene)
-        : brayns::Loader<NeuronMorphologyLoaderParameters>(scene)
-    {
-    }
-
-    /**
      * @brief getSupportedExtensions returns a list with supported file
      * extensions
      */
@@ -54,12 +46,13 @@ public:
      */
     std::vector<brayns::ModelDescriptorPtr> importFromBlob(
         brayns::Blob&&, const brayns::LoaderProgress&,
-        const NeuronMorphologyLoaderParameters&) const final;
+        const NeuronMorphologyLoaderParameters&, brayns::Scene&) const final;
 
     /**
      * @brief importFromFile imports models from a file given by a path
      */
     std::vector<brayns::ModelDescriptorPtr> importFromFile(
         const std::string& path, const brayns::LoaderProgress& callback,
-        const NeuronMorphologyLoaderParameters& properties) const final;
+        const NeuronMorphologyLoaderParameters& properties,
+        brayns::Scene& scene) const final;
 };

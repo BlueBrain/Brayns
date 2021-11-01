@@ -312,14 +312,9 @@ static AtomicRadius atomic_radii[colorMapSize] = // atomic radii in microns
      {"OXT", 25.f, 112},
      {"P", 25.f, 113}};
 
-ProteinLoader::ProteinLoader(Scene& scene)
-    : Loader(scene)
-{
-}
-
 std::vector<ModelDescriptorPtr> ProteinLoader::importFromFile(
     const std::string& fileName, const LoaderProgress&,
-    const ProteinLoaderParameters& properties) const
+    const ProteinLoaderParameters& properties, Scene& scene) const
 {
     std::ifstream file(fileName.c_str());
     if (!file.is_open())
@@ -441,7 +436,7 @@ std::vector<ModelDescriptorPtr> ProteinLoader::importFromFile(
     }
     file.close();
 
-    auto model = _scene.createModel();
+    auto model = scene.createModel();
 
     // Add materials and spheres
     for (const auto& spheresPerMaterial : spheres)

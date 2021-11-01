@@ -127,8 +127,8 @@ public:
      * the blob
      */
     virtual std::vector<ModelDescriptorPtr> loadFromBlob(
-        Blob&& blob, const LoaderProgress& callback,
-        const JsonValue& params) const = 0;
+        Blob&& blob, const LoaderProgress& callback, const JsonValue& params,
+        Scene& scene) const = 0;
 
     /**
      * @brief Loads a model/list of models from a path to a file
@@ -142,7 +142,7 @@ public:
      */
     virtual std::vector<ModelDescriptorPtr> loadFromFile(
         const std::string& path, const LoaderProgress& callback,
-        const JsonValue& params) const = 0;
+        const JsonValue& params, Scene& scene) const = 0;
 };
 
 /**
@@ -153,9 +153,8 @@ template <typename T>
 class Loader : public AbstractLoader
 {
 public:
-    Loader(Scene& scene)
-        : _scene(scene)
-        , _parameterSchema(Json::getSchema<T>())
+    Loader()
+        : _parameterSchema(Json::getSchema<T>())
     {
     }
 
@@ -167,19 +166,19 @@ public:
     }
 
     virtual std::vector<ModelDescriptorPtr> loadFromBlob(
-        Blob&& blob, const LoaderProgress& callback,
-        const JsonValue& params) const override
+        Blob&& blob, const LoaderProgress& callback, const JsonValue& params,
+        Scene& scene) const override
     {
         const T inputParams = _parseParameters(params);
-        return importFromBlob(std::move(blob), callback, inputParams);
+        return importFromBlob(std::move(blob), callback, inputParams, scene);
     }
 
     virtual std::vector<ModelDescriptorPtr> loadFromFile(
         const std::string& path, const LoaderProgress& callback,
-        const JsonValue& params) const override
+        const JsonValue& params, Scene& scene) const override
     {
         const T inputParams = _parseParameters(params);
-        return importFromFile(path, callback, inputParams);
+        return importFromFile(path, callback, inputParams, scene);
     }
 
     /**
@@ -191,8 +190,8 @@ public:
      * @return the model that has been created by the loader
      */
     virtual std::vector<ModelDescriptorPtr> importFromBlob(
-        Blob&& blob, const LoaderProgress& callback,
-        const T& properties) const = 0;
+        Blob&& blob, const LoaderProgress& callback, const T& properties,
+        Scene& scene) const = 0;
 
     /**
      * Import the data from the given file and return the created model.
@@ -204,10 +203,7 @@ public:
      */
     virtual std::vector<ModelDescriptorPtr> importFromFile(
         const std::string& filename, const LoaderProgress& callback,
-        const T& properties) const = 0;
-
-protected:
-    Scene& _scene;
+        const T& properties, Scene& scene) const = 0;
 
 private:
     const JsonSchema _parameterSchema;
@@ -266,11 +262,6 @@ struct JsonAdapter<EmptyLoaderParameters>
 class NoInputLoader : public Loader<EmptyLoaderParameters>
 {
 public:
-    NoInputLoader(Scene& scene)
-        : Loader(scene)
-    {
-    }
-
     /**
      * @brief importFromBlob imports a model from a blob of memory
      * @param blob the memory blob containing the model data
@@ -278,7 +269,7 @@ public:
      * @return a std::vector with the loaded ModelDescriptorPtr objects
      */
     virtual std::vector<ModelDescriptorPtr> importFromBlob(
-        Blob&& blob, const LoaderProgress& callback) const = 0;
+        Blob&& blob, const LoaderProgress& callback, Scene& scene) const = 0;
 
     /**
      * @brief importFromFile imports a model from a file from disk
@@ -287,20 +278,21 @@ public:
      * @return a std::vector with the loaded ModelDescriptorPtr objects
      */
     virtual std::vector<ModelDescriptorPtr> importFromFile(
-        const std::string& path, const LoaderProgress& callback) const = 0;
+        const std::string& path, const LoaderProgress& callback,
+        Scene& scene) const = 0;
 
     std::vector<ModelDescriptorPtr> importFromBlob(
         Blob&& blob, const LoaderProgress& callback,
-        const EmptyLoaderParameters&) const final
+        const EmptyLoaderParameters&, Scene& scene) const final
     {
-        return importFromBlob(std::move(blob), callback);
+        return importFromBlob(std::move(blob), callback, scene);
     }
 
     std::vector<ModelDescriptorPtr> importFromFile(
         const std::string& path, const LoaderProgress& callback,
-        const EmptyLoaderParameters&) const final
+        const EmptyLoaderParameters&, Scene& scene) const final
     {
-        return importFromFile(path, callback);
+        return importFromFile(path, callback, scene);
     }
 };
 } // namespace brayns

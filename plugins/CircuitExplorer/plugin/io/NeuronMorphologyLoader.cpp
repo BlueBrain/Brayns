@@ -58,7 +58,7 @@ std::string NeuronMorphologyLoader::getName() const
 
 std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromBlob(
     brayns::Blob&&, const brayns::LoaderProgress&,
-    const NeuronMorphologyLoaderParameters&) const
+    const NeuronMorphologyLoaderParameters&, brayns::Scene&) const
 {
     throw std::runtime_error(
         "MorphologyLoader: Import from blob not supported");
@@ -66,7 +66,7 @@ std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromBlob(
 
 std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromFile(
     const std::string& path, const brayns::LoaderProgress& callback,
-    const NeuronMorphologyLoaderParameters& input) const
+    const NeuronMorphologyLoaderParameters& input, brayns::Scene& scene) const
 {
     brayns::Timer timer;
     PLUGIN_INFO << getName() << ": Loading " << path << std::endl;
@@ -87,7 +87,7 @@ std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromFile(
             .import(path)
             ->instantiate(brayns::Vector3f(), brayns::Quaternion());
 
-    auto modelPtr = _scene.createModel();
+    auto modelPtr = scene.createModel();
     geometry->addToModel(*modelPtr);
 
     modelPtr->updateBounds();

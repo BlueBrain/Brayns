@@ -67,20 +67,6 @@ public:
         const std::string& filename, const std::string& filetype,
         const std::string& loaderName) const;
 
-    /**
-     * Load the given file or folder into the given scene by choosing the first
-     * matching loader based on the filename or filetype.
-     *
-     * @param path the file or folder containing the data to import
-     * @param scene the scene where to add the loaded model to
-     * @param transformation the transformation to apply for the added model
-     * @param materialID the default material ot use
-     * @param cb the callback for progress updates from the loader
-     */
-    void load(const std::string& path, Scene& scene,
-              const Matrix4f& transformation, const size_t materialID,
-              LoaderProgress cb);
-
     /** @internal */
     void clear();
 

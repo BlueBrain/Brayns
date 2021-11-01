@@ -144,10 +144,10 @@ void CircuitExplorerPlugin::init()
     // LOADERS ADDED BY THIS PLUGIN
     auto& scene = _api->getScene();
     auto& registry = scene.getLoaderRegistry();
-    registry.registerLoader(std::make_unique<BBPLoader>(scene));
-    registry.registerLoader(std::make_unique<NeuronMorphologyLoader>(scene));
-    registry.registerLoader(std::make_unique<SonataLoader>(scene));
-    registry.registerLoader(std::make_unique<SonataNGVLoader>(scene));
+    registry.registerLoader(std::make_unique<BBPLoader>());
+    registry.registerLoader(std::make_unique<NeuronMorphologyLoader>());
+    registry.registerLoader(std::make_unique<SonataLoader>());
+    registry.registerLoader(std::make_unique<SonataNGVLoader>());
 
     // ENTRY POINTS ADDED BY THIS PLUGIN
     add<brayns::GetMaterialIdsEntrypoint>();

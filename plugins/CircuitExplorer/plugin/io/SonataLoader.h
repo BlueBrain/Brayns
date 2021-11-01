@@ -29,14 +29,6 @@ class SonataLoader : public brayns::Loader<SonataLoaderParameters>
 {
 public:
     /**
-     * @brief Constructor
-     */
-    SonataLoader(brayns::Scene& scene)
-        : brayns::Loader<SonataLoaderParameters>(scene)
-    {
-    }
-
-    /**
      * @brief getSupportedExtensions returns a list with supported file
      * extensions
      */
@@ -59,12 +51,12 @@ public:
      */
     std::vector<brayns::ModelDescriptorPtr> importFromBlob(
         brayns::Blob&&, const brayns::LoaderProgress&,
-        const SonataLoaderParameters&) const final;
+        const SonataLoaderParameters&, brayns::Scene&) const final;
 
     /**
      * @brief importFromFile imports models from a file given by a path
      */
     std::vector<brayns::ModelDescriptorPtr> importFromFile(
         const std::string& path, const brayns::LoaderProgress& callback,
-        const SonataLoaderParameters& input) const final;
+        const SonataLoaderParameters& input, brayns::Scene& scene) const final;
 };

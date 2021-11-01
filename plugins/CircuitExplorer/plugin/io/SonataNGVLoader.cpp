@@ -27,21 +27,15 @@
 
 #include <brion/blueConfig.h>
 
-SonataNGVLoader::SonataNGVLoader(brayns::Scene& scene)
-    : brayns::Loader<SonataNGVLoaderParameters>(scene)
-    , _internal(std::make_unique<BBPLoader>(scene))
-{
-}
-
 std::vector<std::string> SonataNGVLoader::getSupportedExtensions() const
 {
-    return _internal->getSupportedExtensions();
+    return _internal.getSupportedExtensions();
 }
 
 bool SonataNGVLoader::isSupported(const std::string& filename,
                                   const std::string& extension) const
 {
-    return _internal->isSupported(filename, extension);
+    return _internal.isSupported(filename, extension);
 }
 
 std::string SonataNGVLoader::getName() const
@@ -51,14 +45,14 @@ std::string SonataNGVLoader::getName() const
 
 std::vector<brayns::ModelDescriptorPtr> SonataNGVLoader::importFromBlob(
     brayns::Blob&&, const brayns::LoaderProgress&,
-    const SonataNGVLoaderParameters&) const
+    const SonataNGVLoaderParameters&, brayns::Scene&) const
 {
     throw std::runtime_error("SonataNGVLoader: Import from blob not supported");
 }
 
 std::vector<brayns::ModelDescriptorPtr> SonataNGVLoader::importFromFile(
     const std::string& path, const brayns::LoaderProgress& cb,
-    const SonataNGVLoaderParameters& props) const
+    const SonataNGVLoaderParameters& props, brayns::Scene& scene) const
 {
     brayns::Timer timer;
     PLUGIN_INFO << getName() << ": Loading " << path << std::endl;
@@ -81,8 +75,8 @@ std::vector<brayns::ModelDescriptorPtr> SonataNGVLoader::importFromFile(
 
         // Import the model
         auto models =
-            _internal->importFromBlueConfig(path, cb, population.circuit_config,
-                                            *config);
+            _internal.importFromBlueConfig(path, cb, population.circuit_config,
+                                           *config, scene);
         for (auto& model : models)
             model->setName(name + " - " + model->getName());
         result.insert(result.end(), models.begin(), models.end());

@@ -344,12 +344,12 @@ private:
         auto& registry = _engine->getScene().getLoaderRegistry();
         auto& scene = _engine->getScene();
 
-        registry.registerLoader(std::make_unique<ProteinLoader>(scene));
-        registry.registerLoader(std::make_unique<RawVolumeLoader>(scene));
-        registry.registerLoader(std::make_unique<MHDVolumeLoader>(scene));
-        registry.registerLoader(std::make_unique<XYZBLoader>(scene));
+        registry.registerLoader(std::make_unique<ProteinLoader>());
+        registry.registerLoader(std::make_unique<RawVolumeLoader>());
+        registry.registerLoader(std::make_unique<MHDVolumeLoader>());
+        registry.registerLoader(std::make_unique<XYZBLoader>());
 #if BRAYNS_USE_ASSIMP
-        registry.registerLoader(std::make_unique<MeshLoader>(scene));
+        registry.registerLoader(std::make_unique<MeshLoader>());
 #endif
     }
 

@@ -118,16 +118,11 @@ std::unique_ptr<Assimp::Importer> createImporter(const LoaderProgress& callback,
 }
 } // namespace
 
-MeshLoader::MeshLoader(Scene& scene)
-    : Loader(scene)
-{
-}
-
 std::vector<ModelDescriptorPtr> MeshLoader::importFromFile(
     const std::string& fileName, const LoaderProgress& callback,
-    const MeshLoaderParameters& params) const
+    const MeshLoaderParameters& params, Scene& scene) const
 {
-    auto model = _scene.createModel();
+    auto model = scene.createModel();
     auto metadata = importMesh(fileName, callback, *model, {}, NO_MATERIAL,
                                params.geometry_quality);
 
@@ -142,7 +137,7 @@ std::vector<ModelDescriptorPtr> MeshLoader::importFromFile(
 
 std::vector<ModelDescriptorPtr> MeshLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback,
-    const MeshLoaderParameters& params) const
+    const MeshLoaderParameters& params, Scene& scene) const
 {
     auto importer_ptr = createImporter(callback, blob.name);
     Assimp::Importer& importer = *(importer_ptr.get());
@@ -160,7 +155,7 @@ std::vector<ModelDescriptorPtr> MeshLoader::importFromBlob(
     callback.updateProgress("Post-processing...",
                             (LOADING_FRACTION) / TOTAL_PROGRESS);
 
-    auto model = _scene.createModel();
+    auto model = scene.createModel();
 
     auto metadata =
         _postLoad(aiScene, *model, Matrix4f(1), NO_MATERIAL, "", callback);

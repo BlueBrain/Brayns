@@ -43,13 +43,8 @@ float _computeHalfArea(const Boxf& bbox)
 }
 } // namespace
 
-XYZBLoader::XYZBLoader(Scene& scene)
-    : NoInputLoader(scene)
-{
-}
-
 std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
-    Blob&& blob, const LoaderProgress& callback) const
+    Blob&& blob, const LoaderProgress& callback, Scene& scene) const
 {
     BRAYNS_INFO << "Loading xyz " << blob.name << std::endl;
 
@@ -61,7 +56,7 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
     }
     stream.seekg(0);
 
-    auto model = _scene.createModel();
+    auto model = scene.createModel();
 
     const auto name = fs::path({blob.name}).stem().string();
     const auto materialId = 0;
@@ -142,7 +137,8 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
 }
 
 std::vector<ModelDescriptorPtr> XYZBLoader::importFromFile(
-    const std::string& filename, const LoaderProgress& callback) const
+    const std::string& filename, const LoaderProgress& callback,
+    Scene& scene) const
 {
     std::ifstream file(filename);
     if (!file.good())
@@ -151,7 +147,7 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromFile(
                            filename,
                            {std::istreambuf_iterator<char>(file),
                             std::istreambuf_iterator<char>()}},
-                          callback);
+                          callback, scene);
 }
 
 std::string XYZBLoader::getName() const

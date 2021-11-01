@@ -319,7 +319,8 @@ std::vector<ModelDescriptorPtr> Scene::loadModels(Blob&& blob,
 
     // Load the models
     auto modelDescriptors =
-        loader.loadFromBlob(std::move(blob), cb, params.getLoadParameters());
+        loader.loadFromBlob(std::move(blob), cb, params.getLoadParameters(),
+                            *this);
 
     _processNewModels(params, modelDescriptors);
     return modelDescriptors;
@@ -334,7 +335,7 @@ std::vector<ModelDescriptorPtr> Scene::loadModels(const std::string& path,
 
     // Load the models
     auto modelDescriptors =
-        loader.loadFromFile(path, cb, params.getLoadParameters());
+        loader.loadFromFile(path, cb, params.getLoadParameters(), *this);
 
     _processNewModels(params, modelDescriptors);
     return modelDescriptors;

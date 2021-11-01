@@ -88,14 +88,14 @@ std::string SonataLoader::getName() const
 
 std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromBlob(
     brayns::Blob&&, const brayns::LoaderProgress&,
-    const SonataLoaderParameters&) const
+    const SonataLoaderParameters&, brayns::Scene&) const
 {
     throw std::runtime_error("Sonata loader: import from blob not supported");
 }
 
 std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
     const std::string& path, const brayns::LoaderProgress& callback,
-    const SonataLoaderParameters& input) const
+    const SonataLoaderParameters& input, brayns::Scene& scene) const
 {
     const brayns::Timer timer;
     PLUGIN_INFO << getName() << ": Loading " << path << "\n";
@@ -162,7 +162,7 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
             // Add geometry to the edge model
             informProgress(callback, edgeName + ": Generating edge geometry",
                            total, chunk);
-            brayns::ModelPtr edgeModel = _scene.createModel();
+            brayns::ModelPtr edgeModel = scene.createModel();
             std::vector<ElementMaterialMap::Ptr> edgeMaterialMaps(nodes.size());
             for (size_t j = 0; j < nodes.size(); ++j)
             {
@@ -193,7 +193,7 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
                        chunk);
 
         // Add geometry to the node model
-        brayns::ModelPtr nodeModel = _scene.createModel();
+        brayns::ModelPtr nodeModel = scene.createModel();
         std::vector<ElementMaterialMap::Ptr> materialMaps(nodes.size());
         for (size_t i = 0; i < nodes.size(); ++i)
         {
@@ -224,7 +224,7 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
         PLUGIN_INFO << "Loaded node population " << nodeName << "\n";
     }
 
-    TransferFunctionUtils::set(_scene.getTransferFunction());
+    TransferFunctionUtils::set(scene.getTransferFunction());
 
     const auto time = timer.elapsed();
     PLUGIN_INFO << getName() << ": Done in " << time << " second(s)";

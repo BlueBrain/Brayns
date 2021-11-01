@@ -72,8 +72,8 @@ DTIConfiguration DTILoader::_readConfiguration(
 }
 
 std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromBlob(
-    brayns::Blob&& /*blob*/, const brayns::LoaderProgress& /*callback*/,
-    const DTILoaderParameters& /*properties*/) const
+    brayns::Blob&&, const brayns::LoaderProgress&, const DTILoaderParameters&,
+    brayns::Scene&) const
 {
     throw std::runtime_error("Loading DTI from blob is not supported");
 }
@@ -112,7 +112,7 @@ Colors DTILoader::getColorsFromPoints(const brayns::Vector3fs& points,
 
 std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
     const std::string& filename, const brayns::LoaderProgress& callback,
-    const DTILoaderParameters& input) const
+    const DTILoaderParameters& input, brayns::Scene& scene) const
 {
     boost::property_tree::ptree pt;
     boost::property_tree::ini_parser::read_ini(filename, pt);
@@ -171,7 +171,7 @@ std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
     streamlinesFile.close();
 
     // Create model
-    auto model = _scene.createModel();
+    auto model = scene.createModel();
     const auto nbStreamlines = gidRows.size();
     count = 0;
     uint64_t i = 0;
