@@ -20,9 +20,9 @@
 
 """Helper module to build an entrypoint function docstring."""
 
-from typing import List, Union
-
 from .entrypoint import Entrypoint
+from .params import Params
+from .result import Result
 from .schema import Schema
 
 
@@ -60,7 +60,7 @@ _RETURN = '''
 
 
 def _get_params_and_result_docstring(entrypoint: Entrypoint):
-    if not entrypoint.params and entrypoint.result is None:
+    if not entrypoint.params and not entrypoint.result:
         return ''
     return _PARAMS_AND_RESULT.format(
         params=_get_params_docstring(entrypoint.params),
@@ -68,10 +68,10 @@ def _get_params_and_result_docstring(entrypoint: Entrypoint):
     )
 
 
-def _get_params_docstring(schemas: List[Schema]):
+def _get_params_docstring(params: Params):
     return ''.join(
         _get_param_docstring(schema)
-        for schema in schemas
+        for schema in params.schemas
     )
 
 
@@ -85,18 +85,18 @@ def _get_param_docstring(schema: Schema):
     )
 
 
-def _get_result_docstring(schema: Union[Schema, None]):
+def _get_result_docstring(result: Result):
     return _RETURN.format(
-        description=_get_description(schema),
-        typename=_get_typename(schema)
+        description=_get_description(result),
+        typename=_get_typename(result)
     )
 
 
-def _get_description(schema: Union[Schema, None]):
-    if schema is None:
+def _get_description(result: Result):
+    if not result:
         return 'This method has no return value'
-    return schema.description or 'No descriptions available'
+    return result.schema.description or 'No descriptions available'
 
 
-def _get_typename(schema: Union[Schema, None]):
-    return schema.typename if schema is not None else 'None'
+def _get_typename(result: Result):
+    return result.schema.typename if result else 'None'

@@ -51,8 +51,8 @@ class MockRequestHandler:
 
     def _reply_mock(self, method: str, request: dict) -> dict:
         mock = self._requests[method]
-        params = request['params']
-        mock_params = mock.params
+        params = request.get('params') or {}
+        mock_params = mock.params or {}
         if params != mock_params:
             raise ValueError(f'Expected param {mock_params} got {params}')
         return mock.result
