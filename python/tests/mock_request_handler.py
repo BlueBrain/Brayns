@@ -33,30 +33,50 @@ class MockRequestHandler:
         }
 
     def __call__(self, data: Union[bytes, str]) -> Union[bytes, str, None]:
-        if not isinstance(data, str):
-            return None
         request = json.loads(data)
-        reply = self._get_reply(request)
-        if reply is None:
-            return None
-        return json.dumps(reply)
+        try:
+            reply = self._get_reply(request, self._get_result(request))
+        except Exception as e:
+            reply = self._get_error(request, str(e))
+        return None if reply is None else json.dumps(reply)
 
-    def _get_reply(self, request: dict) -> dict:
+    def _get_result(self, request: dict) -> Any:
+        method = request['method']
+        if method == 'registry':
+            return sorted(self._requests)
+        if method == 'schema':
+            endpoint = request['params']['endpoint']
+            return self._requests[endpoint].schema
+        return self._reply_mock(method, request)
+
+    def _reply_mock(self, method: str, request: dict) -> dict:
+        mock = self._requests[method]
+        params = request['params']
+        mock_params = mock.params
+        if params != mock_params:
+            raise ValueError(f'Expected param {mock_params} got {params}')
+        return mock.result
+
+    def _get_message(self, request: dict, key: str, value: Any):
         request_id = request.get('id')
         if request_id is None:
             return None
         return {
             'jsonrpc': '2.0',
             'id': request_id,
-            'result': self._get_result(request)
+            key: value
         }
 
-    def _get_result(self, request: dict) -> Any:
-        method = request['method']
-        if method == 'registry':
-            return list(self._requests)
-        if method == 'schema':
-            return self._requests[
-                request['params']['endpoint']
-            ].schema
-        return self._requests[method].result
+    def _get_reply(self, request: dict, result: Any):
+        return self._get_message(
+            request,
+            key='result',
+            value=result
+        )
+
+    def _get_error(self, request: dict, message: str):
+        return self._get_message(
+            request,
+            key='error',
+            value={'message': message}
+        )
