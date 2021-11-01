@@ -19,9 +19,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass, field
-from typing import Iterable, List, Union
 
-from .schema import Schema
+from .params import Params
+from .result import Result
 
 
 @dataclass
@@ -38,13 +38,15 @@ class Entrypoint:
     :type params: List[Schema]
     :param result: Entrypoint result schema
     :type result: Schema, can be None
+    :param unpack_params: True if the params are unpacked in Python method
+    :type unpack_params: bool, defaults to True
     """
 
     name: str
     description: str
     plugin: str = ''
-    params: List[Schema] = field(default_factory=list)
-    result: Union[Schema, None] = None
+    params: Params = field(default_factory=Params)
+    result: Result = field(default_factory=Result)
 
     @staticmethod
     def from_schema(schema: dict):
@@ -83,56 +85,8 @@ def _get_plugin(schema: dict) -> str:
 
 
 def _get_params(schema: dict):
-    params = schema.get('params', [])
-    if not params:
-        return []
-    param = Schema.from_dict(params[0])
-    if param.read_only:
-        return []
-    if not param.properties:
-        return [_format_single_param(param)]
-    return [
-        child
-        for child in _format_params(param).properties
-    ]
-
-
-def _format_single_param(param: Schema):
-    if not param.name:
-        param.name = 'params'
-    return param
-
-
-def _format_params(params: Schema):
-    params.properties = _sort_properties(
-        _format_params(schema)
-        for schema in params.properties
-        if not schema.read_only
-    )
-    return params
-
-
-def _sort_properties(properties: Iterable[Schema]):
-    return sorted(
-        properties,
-        key=lambda param: (not param.required, param.name)
-    )
+    return Params.from_dicts(schema.get('params', []))
 
 
 def _get_result(schema: dict):
-    returns = schema.get('returns', {})
-    if not returns:
-        return None
-    result = Schema.from_dict(returns)
-    if result.write_only:
-        return None
-    return _format_result(result)
-
-
-def _format_result(result: Schema):
-    result.properties = _sort_properties(
-        _format_result(schema)
-        for schema in result.properties
-        if not schema.write_only
-    )
-    return result
+    return Result.from_dict(schema.get('returns', {}))

@@ -283,7 +283,7 @@ def _get_entrypoints_by_plugin(client: AbstractClient):
 
 def _format_params(entrypoint: Entrypoint):
     return (
-        SchemaFormatter().format_schemas(entrypoint.params)
+        SchemaFormatter().format_schemas(entrypoint.params.schemas)
         if entrypoint.params
         else 'This method takes no parameters.'
     )
@@ -291,8 +291,8 @@ def _format_params(entrypoint: Entrypoint):
 
 def _format_result(entrypoint: Entrypoint):
     return (
-        SchemaFormatter().format_schema(entrypoint.result)
-        if entrypoint.result is not None
+        SchemaFormatter().format_schema(entrypoint.result.schema)
+        if entrypoint.result
         else 'This method has no return values.'
     )
 
