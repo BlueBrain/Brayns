@@ -332,7 +332,6 @@ struct MinItems
  * @brief Add a max item count to an option set.
  *
  */
-
 struct MaxItems
 {
     MaxItems(size_t maxItems)
@@ -349,7 +348,6 @@ struct MaxItems
  * @brief Add a default value to an option set.
  *
  */
-
 struct Default
 {
     Default(const JsonValue& defaultValue)
