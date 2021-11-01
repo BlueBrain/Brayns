@@ -1,16 +1,10 @@
-# Copyright (c) 2015-2019, EPFL/Blue Brain Project
+# Copyright (c) 2015-2021, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-
 project(braynsCircuitExplorer VERSION 1.0.0)
 set(braynsCircuitExplorer_VERSION_ABI 1)
-
-if(NOT EXISTS ${CMAKE_SOURCE_DIR}/CMake/common/Common.cmake)
-  message(FATAL_ERROR "CMake/common missing, run: git submodule update --init --recursive")
-endif()
 
 include(Common)
 common_find_package(sonata)
@@ -293,7 +287,6 @@ set(BRAYNSCIRCUITEXPLORER_LINK_LIBRARIES
     braynsOSPRayEngine glm sonata::sonata_shared MorphIO::morphio_shared Brion Brain
     ${FREEIMAGE_LIBRARIES} ${HDF5_LIBRARIES}
     HighFive
-    nlohmann_json::nlohmann_json
     MVDTool
 )
 
