@@ -11,8 +11,8 @@ As a Brayns client, to run any script that uses the Brayns python client API you
 running Brayns server backend. You have two ways to start a Brayns backend: Thought
 WebBrayns web interface or manually on BB5
 
-Automatic allocation throught WebBrayns
----------------------------------------
+Automatic allocation through WebBrayns
+--------------------------------------
 
 The easiest way to launch a Brayns backend service is throught WebBrayns. It offers an easy to follow interface
 which will allocate a node on BB5 and launch a Brayns backend instance for you.
