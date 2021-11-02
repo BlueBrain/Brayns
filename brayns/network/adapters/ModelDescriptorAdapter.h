@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/network/json/MessageAdapter.h>
+#include <brayns/json/MessageAdapter.h>
 
 #include <brayns/engine/Model.h>
 
@@ -43,7 +43,7 @@ BRAYNS_ADAPTER_GETSET("transformation", getTransformation, setTransformation,
 BRAYNS_ADAPTER_GETSET("visible", getVisible, setVisible, "Is visible")
 BRAYNS_ADAPTER_GETSET("loader_name", getLoaderName, setLoaderName,
                       "Name of the loader")
-BRAYNS_ADAPTER_GETSET("loader_properties", getLoaderProperties,
-                      setLoaderProperties, "Loader properties")
+BRAYNS_ADAPTER_GETSET("loader_properties", getLoadParameters, setLoadParameters,
+                      "Loader properties")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

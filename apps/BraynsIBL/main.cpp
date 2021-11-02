@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -30,7 +30,7 @@ namespace po = boost::program_options;
 #include <vector>
 
 #include <brayns/common/types.h>
-#include <brayns/common/utils/filesystem.h>
+#include <brayns/utils/Filesystem.h>
 
 #include <apps/BraynsIBL/brdf.fs.h>
 #include <apps/BraynsIBL/brdf.vs.h>

@@ -1,5 +1,4 @@
-
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: jonas.karlsson@epfl.ch
  *

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/network/json/MessageAdapter.h>
+#include <brayns/json/MessageAdapter.h>
 
 #include <brayns/engine/Scene.h>
 

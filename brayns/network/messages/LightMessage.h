@@ -22,9 +22,8 @@
 #pragma once
 
 #include <brayns/common/light/Light.h>
-
+#include <brayns/json/Message.h>
 #include <brayns/network/adapters/LightAdapter.h>
-#include <brayns/network/json/Message.h>
 
 namespace brayns
 {

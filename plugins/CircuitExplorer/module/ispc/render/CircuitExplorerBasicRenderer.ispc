@@ -1,9 +1,6 @@
-/* Copyright (c) 2018-2019, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
- *
- * This file is part of the circuit explorer for Brayns
- * <https://github.com/favreau/Brayns-UC-CircuitExplorer>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -110,7 +107,8 @@ inline vec3f CircuitExplorerBasicRenderer_shadeRay(
             vec4f simulationContribution = make_vec4f(0.f);
             bool ignoreIntersection = false;
             const uniform Geometry* geometry = dg.geometry;
-            const uniform OSPRayISPCModel* model = (const uniform OSPRayISPCModel*)geometry->model;
+            const uniform OSPRayISPCModel* model =
+                (const uniform OSPRayISPCModel*)geometry->model;
             if (model->simEnabled == 1 && objMaterial->castSimulationData == 1)
             {
                 // Get simulation value from geometry

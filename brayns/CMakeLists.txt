@@ -1,10 +1,12 @@
-# Copyright (c) 2015-2017, EPFL/Blue Brain Project
+# Copyright (c) 2015-2021, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
+add_subdirectory(utils)
 add_subdirectory(parameters)
+add_subdirectory(json)
 add_subdirectory(common)
 add_subdirectory(engine)
 add_subdirectory(manipulators)

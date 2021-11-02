@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -24,8 +24,6 @@
 
 #include <brayns/common/types.h>
 
-SERIALIZATION_ACCESS(GeometryParameters)
-
 namespace brayns
 {
 /** Manages geometry parameters
@@ -41,9 +39,6 @@ public:
     /** @copydoc AbstractParameters::print */
     void print() final;
 
-    ColorScheme getColorScheme() const { return _colorScheme; }
-    GeometryQuality getGeometryQuality() const { return _geometryQuality; }
-    float getRadiusMultiplier() const { return _radiusMultiplier; }
     /**
      * Defines what memory mode should be used between Brayns and the
      * underlying renderer
@@ -60,14 +55,7 @@ protected:
     // Scene
     std::set<BVHFlag> _defaultBVHFlags;
 
-    // Geometry
-    ColorScheme _colorScheme{ColorScheme::none};
-    GeometryQuality _geometryQuality{GeometryQuality::high};
-    float _radiusMultiplier{1};
-
     // System parameters
     MemoryMode _memoryMode{MemoryMode::shared};
-
-    SERIALIZATION_FRIEND(GeometryParameters)
 };
 } // namespace brayns

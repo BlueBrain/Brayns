@@ -44,7 +44,7 @@ public:
     DTISimulationHandler(const Indices& indices,
                          const SetSpikeSimulationMessage& spikeSimulation);
 
-    void* getFrameDataImpl(const uint32_t frame) final;
+    std::vector<float> getFrameDataImpl(const uint32_t frame) final;
 
     brayns::AbstractSimulationHandlerPtr clone() const final;
     std::map<uint64_t, float>& getSpikes() { return _spikes; }
@@ -66,7 +66,6 @@ public:
     }
 
 private:
-    std::vector<float> _data;
     std::map<uint64_t, float> _spikes;
     Indices _indices;
     SetSpikeSimulationMessage _spikeSimulation;

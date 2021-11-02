@@ -21,8 +21,8 @@
 
 #pragma once
 
+#include <brayns/json/JsonBuffer.h>
 #include <brayns/network/common/ExtractModel.h>
-#include <brayns/network/json/JsonBuffer.h>
 
 #include "TransferFunctionAdapter.h"
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,8 +20,8 @@
 
 #include "ImageManager.h"
 #include <brayns/common/log.h>
-#include <brayns/common/utils/filesystem.h>
-#include <brayns/common/utils/imageUtils.h>
+#include <brayns/utils/Filesystem.h>
+#include <brayns/utils/ImageUtils.h>
 
 namespace brayns
 {
@@ -68,9 +68,8 @@ void setRawData(Texture2DPtr texture, const freeimage::ImagePtr& image,
 }
 } // namespace
 
-Texture2DPtr ImageManager::importTextureFromFile(
-    const std::string& filename BRAYNS_UNUSED,
-    const TextureType type BRAYNS_UNUSED)
+Texture2DPtr ImageManager::importTextureFromFile(const std::string& filename,
+                                                 const TextureType type)
 {
 #ifdef BRAYNS_USE_FREEIMAGE
     auto format = FreeImage_GetFileType(filename.c_str());

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/network/json/Message.h>
+#include <brayns/json/Message.h>
 
 BRAYNS_MESSAGE_BEGIN(CIGetCellIdsFromModelParams)
 BRAYNS_MESSAGE_ENTRY(size_t, model_id, "ID of the circuit model")

@@ -60,8 +60,7 @@ void DTIPlugin::init()
     auto &scene = _api->getScene();
     auto &registry = scene.getLoaderRegistry();
 
-    registry.registerLoader(
-        std::make_unique<DTILoader>(scene, DTILoader::getCLIProperties()));
+    registry.registerLoader(std::make_unique<DTILoader>());
 
     DtiEntrypoints::load(*this);
 }

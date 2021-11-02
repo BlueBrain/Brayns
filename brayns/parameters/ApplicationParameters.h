@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -26,8 +26,6 @@
 
 #include <string>
 #include <vector>
-
-SERIALIZATION_ACCESS(ApplicationParameters)
 
 namespace brayns
 {
@@ -114,7 +112,5 @@ protected:
     strings _plugins;
 
     po::positional_options_description _positionalArgs;
-
-    SERIALIZATION_FRIEND(ApplicationParameters)
 };
 } // namespace brayns

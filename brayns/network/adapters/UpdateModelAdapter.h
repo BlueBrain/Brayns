@@ -21,8 +21,8 @@
 
 #pragma once
 
+#include <brayns/json/MessageAdapter.h>
 #include <brayns/network/common/ExtractModel.h>
-#include <brayns/network/json/MessageAdapter.h>
 
 #include "TransformationAdapter.h"
 

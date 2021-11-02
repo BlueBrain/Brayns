@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/network/json/Message.h>
+#include <brayns/json/Message.h>
 
 BRAYNS_MESSAGE_BEGIN(CIGetReportInfoParams)
 BRAYNS_MESSAGE_ENTRY(

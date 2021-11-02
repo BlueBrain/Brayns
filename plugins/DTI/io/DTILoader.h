@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "DTILoaderParameters.h"
 #include "DTITypes.h"
 
 #include <brayns/common/loader/Loader.h>
@@ -33,29 +34,22 @@
  */
 namespace dti
 {
-class DTILoader : public brayns::Loader
+class DTILoader : public brayns::Loader<DTILoaderParameters>
 {
 public:
-    DTILoader(brayns::Scene& scene, brayns::PropertyMap&& loaderParams = {});
-
     std::string getName() const final;
 
     std::vector<std::string> getSupportedExtensions() const final;
 
-    bool isSupported(const std::string& filename,
-                     const std::string& extension) const final;
-
-    static brayns::PropertyMap getCLIProperties();
-
-    brayns::PropertyMap getProperties() const final;
-
     std::vector<brayns::ModelDescriptorPtr> importFromBlob(
         brayns::Blob&& blob, const brayns::LoaderProgress& callback,
-        const brayns::PropertyMap& properties) const final;
+        const DTILoaderParameters& properties,
+        brayns::Scene& scene) const final;
 
     std::vector<brayns::ModelDescriptorPtr> importFromFile(
         const std::string& filename, const brayns::LoaderProgress& callback,
-        const brayns::PropertyMap& properties) const final;
+        const DTILoaderParameters& properties,
+        brayns::Scene& scene) const final;
 
     static Colors getColorsFromPoints(const Points& points, const float opacity,
                                       const ColorScheme colorScheme);

@@ -23,7 +23,7 @@
 
 #include <brayns/common/transferFunction/TransferFunction.h>
 
-#include <brayns/network/json/MessageAdapter.h>
+#include <brayns/json/MessageAdapter.h>
 
 #include "ColorMapAdapter.h"
 

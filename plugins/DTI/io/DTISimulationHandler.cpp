@@ -20,10 +20,8 @@
  */
 
 #include "DTISimulationHandler.h"
-#include "log.h"
 
 #include <brayns/common/Transformation.h>
-#include <brayns/common/utils/utils.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
@@ -55,29 +53,12 @@ DTISimulationHandler::DTISimulationHandler(
     _dt = _spikeSimulation.dt;
     _nbFrames = _endTime / _dt;
     _unit = "ms";
-
-    _data.resize(_frameSize, 0.f);
-
-    // Load initial frame
-    getFrameData(0);
-
-    PLUGIN_INFO << "-----------------------------------------------------------"
-                << std::endl;
-    PLUGIN_INFO << "Spike simulation information" << std::endl;
-    PLUGIN_INFO << "----------------------" << std::endl;
-    PLUGIN_INFO << "End time             : " << _endTime << std::endl;
-    PLUGIN_INFO << "Number of frames     : " << _nbFrames << std::endl;
-    PLUGIN_INFO << "-----------------------------------------------------------"
-                << std::endl;
 }
 
-void* DTISimulationHandler::getFrameDataImpl(const uint32_t frame)
+std::vector<float> DTISimulationHandler::getFrameDataImpl(const uint32_t frame)
 {
-    if (_currentFrame == frame)
-        return (void*)_data.data();
-
-    _currentFrame = frame;
     uint64_t begin = 0;
+    std::vector<float> data(_frameSize, 0.f);
     for (uint64_t i = 0; i < _indices.size(); ++i)
     {
         const auto end = _indices[i];
@@ -100,11 +81,11 @@ void* DTISimulationHandler::getFrameDataImpl(const uint32_t frame)
                                               (frame - timestamp),
                                           0.f));
             }
-            _data[j] = std::max(0.f, std::min(value, 1.f));
+            data[j] = std::max(0.f, std::min(value, 1.f));
         }
         begin = end + 1;
     }
-    return (void*)_data.data();
+    return data;
 }
 
 brayns::AbstractSimulationHandlerPtr DTISimulationHandler::clone() const

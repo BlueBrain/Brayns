@@ -21,8 +21,8 @@
 
 #pragma once
 
+#include <brayns/json/Message.h>
 #include <brayns/network/adapters/ClipPlaneAdapter.h>
-#include <brayns/network/json/Message.h>
 
 namespace brayns
 {

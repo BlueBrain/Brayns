@@ -21,7 +21,8 @@
 
 #pragma once
 
-#include <brayns/network/json/Message.h>
+#include <brayns/common/adapters/PropertyMapAdapter.h>
+#include <brayns/json/Message.h>
 
 namespace brayns
 {

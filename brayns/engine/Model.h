@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -32,13 +32,9 @@
 #include <brayns/common/geometry/TriangleMesh.h>
 #include <brayns/common/propertymap/PropertyMap.h>
 #include <brayns/common/types.h>
+#include <brayns/json/JsonType.h>
 
 #include <set>
-
-SERIALIZATION_ACCESS(Model)
-SERIALIZATION_ACCESS(ModelParams)
-SERIALIZATION_ACCESS(ModelDescriptor)
-SERIALIZATION_ACCESS(ModelInstance)
 
 namespace brayns
 {
@@ -88,8 +84,6 @@ protected:
     bool _visible{true};
     bool _boundingBox{false};
     Transformation _transformation;
-
-    SERIALIZATION_FRIEND(ModelInstance)
 };
 
 class ModelParams : public ModelInstance
@@ -100,7 +94,7 @@ public:
     ModelParams(const std::string& path);
     ModelParams(const std::string& name, const std::string& path);
     ModelParams(const std::string& name, const std::string& path,
-                const PropertyMap& loaderProperties);
+                const JsonValue& loaderProperties);
 
     ModelParams(ModelParams&& rhs) = default;
     ModelParams& operator=(ModelParams&& rhs) = default;
@@ -117,16 +111,14 @@ public:
         _updateValue(_loaderName, loaderName);
     }
     const std::string& getLoaderName() const { return _loaderName; }
-    const PropertyMap& getLoaderProperties() const { return _loaderProperties; }
-    void setLoaderProperties(const PropertyMap& pm) { _loaderProperties = pm; }
+    const JsonValue& getLoadParameters() const { return _loadParameters; }
+    void setLoadParameters(const JsonValue& pm) { _loadParameters = pm; }
 
 protected:
     std::string _name;
     std::string _path;
     std::string _loaderName;
-    PropertyMap _loaderProperties;
-
-    SERIALIZATION_FRIEND(ModelParams)
+    JsonValue _loadParameters;
 };
 
 /**
@@ -183,16 +175,17 @@ public:
     /**
      * Set a function that is called when this model is about to be removed.
      */
-    void onRemoved(const RemovedCallback& callback)
+    void addOnRemoved(const RemovedCallback& callback)
     {
-        _onRemovedCallback = callback;
+        _onRemovedCallback.push_back(callback);
     }
 
     /** @internal */
     void callOnRemoved()
     {
-        if (_onRemovedCallback)
-            _onRemovedCallback(*this);
+        if (!_onRemovedCallback.empty())
+            for (const auto& callback : _onRemovedCallback)
+                callback(*this);
     }
     /** @internal */
     void markForRemoval() { _markedForRemoval = true; }
@@ -208,10 +201,8 @@ private:
     ModelPtr _model;
     ModelInstances _instances;
     PropertyMap _properties;
-    RemovedCallback _onRemovedCallback;
+    std::vector<RemovedCallback> _onRemovedCallback;
     bool _markedForRemoval = false;
-
-    SERIALIZATION_FRIEND(ModelDescriptor)
 };
 
 /**
@@ -478,7 +469,11 @@ public:
     }
     const std::set<BVHFlag>& getBVHFlags() const { return _bvhFlags; }
 
-    void setSimulationEnabled(const bool v) { _simulationEnabled = v; }
+    void setSimulationEnabled(const bool v)
+    {
+        _simulationEnabled = v;
+        _simulationEnabledDirty = true;
+    }
     bool isSimulationEnabled() const { return _simulationEnabled; }
 
     void updateBounds();
@@ -499,6 +494,7 @@ protected:
     VolumeParameters& _volumeParameters;
 
     AbstractSimulationHandlerPtr _simulationHandler;
+    bool _simulationEnabledDirty{true};
     bool _simulationEnabled{false};
 
     MaterialMap _materials;
@@ -563,7 +559,5 @@ protected:
 
     // Whether this model has set the AnimationParameters "is ready" callback
     bool _isReadyCallbackSet{false};
-
-    SERIALIZATION_FRIEND(Model)
 };
 } // namespace brayns

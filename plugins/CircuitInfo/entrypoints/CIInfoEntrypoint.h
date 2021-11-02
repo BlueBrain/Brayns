@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <boost/filesystem.hpp>
+#include <brayns/utils/Filesystem.h>
 
 #include <brain/brain.h>
 #include <brion/brion.h>
@@ -36,7 +36,7 @@ public:
     static CIInfoResult getCircuitInfo(const std::string& path)
     {
         // Validate path
-        if (!boost::filesystem::exists(path))
+        if (!fs::exists(path))
         {
             throw brayns::EntrypointException(9, "Circuit not found");
         }
