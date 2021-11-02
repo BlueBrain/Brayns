@@ -68,9 +68,9 @@ on port 5000, and enabling the Circuit Explorer, Circuit Info and DTI plugins
 
 .. hint::
 
-   Brayns, by default, does not understand about science-specific models. The specific functionality is loaded using
-   plugins. ``CircuitExplorer`` plugin is the main plugin for neuroscientific visualization that you will want to load.
+   Brayns, by default, does not understand science-specific models. The specific functionality is loaded using plugins.
+   The ``CircuitExplorer`` plugin is the main plugin for neuroscientific visualization that you will want to load.
    For further information on plugins, check :ref:`plugins-label`.
 
 Now we know the host (node ID) and port (5000 in this case) where our Brayns backend is running. We will need both to
-connect through the Python client.
+connect to it through the Python client.
