@@ -14,7 +14,7 @@ WebBrayns web interface or manually on BB5
 Automatic allocation through WebBrayns
 --------------------------------------
 
-The easiest way to launch a Brayns backend service is throught WebBrayns. It offers an easy to follow interface
+The easiest way to launch a Brayns backend service is through WebBrayns. It offers an easy to follow interface
 which will allocate a node on BB5 and launch a Brayns backend instance for you.
 
 From the URL you will be able to extract the node ID and the port on which Brayns is running.
@@ -27,7 +27,7 @@ To do so, go to |location_link|. You will see something like this:
 
 Enter your project account and type of partition to use and then click on
 ``+ ALLOCATE NEW RESOURCE``.
-There is a contextual help to guide you throught out the process if you need it.
+There is a contextual help to guide you through out the process if you need it.
 
 .. warning::
 
@@ -73,4 +73,4 @@ on port 5000, and enabling the Circuit Explorer, Circuit Info and DTI plugins
    For further information on plugins, check :ref:`plugins-label`.
 
 Now we know the host (node ID) and port (5000 in this case) where our Brayns backend is running. We will need both to
-connect throught the python client.
+connect through the Python client.
