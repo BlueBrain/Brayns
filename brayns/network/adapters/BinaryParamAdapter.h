@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/network/json/MessageAdapter.h>
+#include <brayns/json/MessageAdapter.h>
 
 #include <brayns/tasks/AddModelFromBlobTask.h>
 
@@ -45,7 +45,7 @@ BRAYNS_ADAPTER_NAMED_ENTRY("type", type,
 BRAYNS_ADAPTER_GETSET("visible", getVisible, setVisible, "Visible");
 BRAYNS_ADAPTER_GETSET("loader_name", getLoaderName, setLoaderName,
                       "Loader name");
-BRAYNS_ADAPTER_GETSET("loader_properties", getLoaderProperties,
-                      setLoaderProperties, "Loader properties");
+BRAYNS_ADAPTER_GETSET("loader_properties", getLoadParameters, setLoadParameters,
+                      "Loader properties");
 BRAYNS_ADAPTER_END()
 } // namespace brayns

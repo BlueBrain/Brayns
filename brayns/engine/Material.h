@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -25,8 +25,6 @@
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/mathTypes.h>
 #include <brayns/common/types.h>
-
-SERIALIZATION_ACCESS(Material)
 
 namespace brayns
 {
@@ -119,7 +117,5 @@ protected:
     double _glossiness{1.};
     TexturesMap _textures;
     TextureDescriptors _textureDescriptors;
-
-    SERIALIZATION_FRIEND(Material)
 };
 } // namespace brayns

@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2019, EPFL/Blue Brain Project
+# Copyright (c) 2015-2021, EPFL/Blue Brain Project
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 

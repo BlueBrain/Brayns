@@ -71,7 +71,7 @@ private:
     OSPModel _rootModel{nullptr};
 
     std::vector<float> _simData;
-    // uint32_t _lastFrame {std::numeric_limits<uint32_t>::max()};
+    uint32_t _lastFrame{std::numeric_limits<uint32_t>::max()};
     OSPData _ospSimulationData{nullptr};
     OSPTransferFunction _ospTransferFunction{nullptr};
 

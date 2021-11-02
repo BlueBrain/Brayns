@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -498,7 +498,7 @@ void OSPRayModel::commitMaterials(const std::string& renderer)
 
 void OSPRayModel::commitSimulationParams()
 {
-    if (_simulationEnabled)
+    if (_simulationEnabledDirty)
     {
         if (_secondaryModel)
         {
@@ -514,6 +514,7 @@ void OSPRayModel::commitSimulationParams()
                            static_cast<int32_t>(_simulationOffset));
             ospCommit(_primaryModel);
         }
+        _simulationEnabledDirty = false;
     }
 }
 

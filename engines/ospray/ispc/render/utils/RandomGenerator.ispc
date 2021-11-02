@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -1134,8 +1134,9 @@ inline vec3f getRandomVector(const unsigned int frameBufferWidth,
 {
     RandomTEA rng_state;
     varying RandomTEA* const uniform rng = &rng_state;
-    RandomTEA__Constructor(rng, (frameBufferWidth * sample.sampleID.y) +
-                                    sample.sampleID.x,
+    RandomTEA__Constructor(rng,
+                           (frameBufferWidth * sample.sampleID.y) +
+                               sample.sampleID.x,
                            sample.sampleID.z);
 
     vec3f tangent, biTangent;

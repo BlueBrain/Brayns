@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  *
  * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
@@ -23,8 +23,6 @@
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/types.h>
 
-SERIALIZATION_ACCESS(Statistics)
-
 namespace brayns
 {
 /** Captures various statistics about rendering, scenes, etc. */
@@ -42,7 +40,5 @@ public:
 private:
     double _fps{0.0};
     size_t _sceneSizeInBytes{0};
-
-    SERIALIZATION_FRIEND(Statistics)
 };
 } // namespace brayns

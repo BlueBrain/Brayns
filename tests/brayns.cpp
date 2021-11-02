@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
@@ -75,8 +75,7 @@ TEST_CASE("defaults")
     CHECK_EQ(renderParams.getBackgroundColor(), brayns::Vector3d(0, 0, 0));
 
     const auto& geomParams = pm.getGeometryParameters();
-    CHECK(geomParams.getColorScheme() == brayns::ColorScheme::none);
-    CHECK(geomParams.getGeometryQuality() == brayns::GeometryQuality::high);
+    CHECK(geomParams.getMemoryMode() == brayns::MemoryMode::shared);
 
     const auto& animParams = pm.getAnimationParameters();
     CHECK_EQ(animParams.getFrame(), 0);
@@ -91,7 +90,6 @@ TEST_CASE("defaults")
     defaultBoundingBox.merge(brayns::Vector3d(0, 0, 0));
     defaultBoundingBox.merge(brayns::Vector3d(1, 1, 1));
     CHECK_EQ(scene.getBounds(), defaultBoundingBox);
-    CHECK(geomParams.getMemoryMode() == brayns::MemoryMode::shared);
 }
 
 TEST_CASE("bvh_type")

@@ -21,10 +21,10 @@
 
 #include "NetworkManager.h"
 
+#include <brayns/json/JsonSchemaValidator.h>
 #include <brayns/network/context/NetworkContext.h>
 #include <brayns/network/interface/ClientInterface.h>
 #include <brayns/network/interface/ServerInterface.h>
-#include <brayns/network/json/JsonSchemaValidator.h>
 #include <brayns/network/stream/StreamManager.h>
 
 #include "NetworkManagerEntrypoints.h"

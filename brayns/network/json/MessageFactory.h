@@ -23,7 +23,8 @@
 
 #include <string>
 
-#include "Message.h"
+#include <brayns/json/Message.h>
+
 #include "RequestId.h"
 
 namespace brayns

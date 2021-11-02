@@ -62,8 +62,7 @@ private:
 
     JsonSchema _getSchema(const LoaderInfo& loader)
     {
-        auto& properties = loader.properties;
-        auto schema = Json::getSchema(properties);
+        auto schema = loader.inputParametersSchema;
         auto& name = loader.name;
         schema.title = name;
         return schema;

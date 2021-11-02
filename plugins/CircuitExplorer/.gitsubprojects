@@ -1,4 +1,0 @@
-# -*- mode: cmake -*-
-if(NOT TARGET HighFive)
-    git_subproject(HighFive https://github.com/BlueBrain/HighFive.git 67f5b3a6)
-endif()

@@ -135,7 +135,7 @@ RUN cd ${BRAYNS_SRC} \
    -DBUILD_PYTHON_BINDINGS=OFF \
    -DEXTLIB_FROM_SUBMODULES=ON
 
-RUN cd ${BRAYNS_SRC}/build && make -j install \
+RUN cd ${BRAYNS_SRC}/build && make -j1 install \
    && rm -rf ${DIST_PATH}/include ${DIST_PATH}/cmake ${DIST_PATH}/share
 
 # Final image, containing only Brayns and libraries required to run it

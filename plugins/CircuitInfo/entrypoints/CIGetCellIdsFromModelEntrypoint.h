@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/common/utils/stringUtils.h>
+#include <brayns/utils/StringUtils.h>
 
 #include <brayns/network/common/ExtractModel.h>
 #include <brayns/network/entrypoint/Entrypoint.h>

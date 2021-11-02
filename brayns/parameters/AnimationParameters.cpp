@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -48,6 +48,8 @@ void AnimationParameters::reset()
 {
     _updateValue(_current, 0u, false);
     _updateValue(_dt, 0., false);
+    _updateValue(_startFrame, 0u, false);
+    _updateValue(_endFrame, 0u, false);
     _updateValue(_numFrames, 0u, false);
     _updateValue(_playing, false, false);
     _updateValue(_unit, std::string(), false);

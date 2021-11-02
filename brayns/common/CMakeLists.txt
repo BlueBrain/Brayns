@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2017, EPFL/Blue Brain Project
+# Copyright (c) 2015-2021, EPFL/Blue Brain Project
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -13,16 +13,12 @@ set(BRAYNSCOMMON_SOURCES
   scene/ClipPlane.cpp
   simulation/AbstractSimulationHandler.cpp
   transferFunction/TransferFunction.cpp
-  utils/base64/base64.cpp
-  utils/DynamicLib.cpp
-  utils/imageUtils.cpp
   utils/ImageGenerator.cpp
-  utils/stringUtils.cpp
-  utils/utils.cpp
   Timer.cpp
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
+  adapters/PropertyMapAdapter.h
   BaseObject.h
   ImageManager.h
   Progress.h
@@ -50,7 +46,6 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   log.h
   material/Texture2D.h
   mathTypes.h
-  macros.h
   scene/ClipPlane.h
   simulation/AbstractSimulationHandler.h
   tasks/Task.h
@@ -58,22 +53,12 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   tasks/TaskRuntimeError.h
   transferFunction/TransferFunction.h
   types.h
-  utils/enumUtils.h
-  utils/imageUtils.h
   utils/ImageGenerator.h
-  utils/stringUtils.h
-  utils/utils.h
-)
-
-set(BRAYNSCOMMON_HEADERS
-  utils/DynamicLib.h
-  utils/filesystem.h
-  utils/base64/base64.h
 )
 
 set(BRAYNSCOMMON_INCLUDE_NAME brayns/common)
 set(BRAYNSCOMMON_LINK_LIBRARIES
-  PUBLIC glm Async++ ${LibJpegTurbo_LIBRARIES}
+  PUBLIC glm Async++ ${LibJpegTurbo_LIBRARIES} braynsUtils braynsJson
   PRIVATE braynsParameters ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FREEIMAGE_LIBRARIES}
 )

@@ -1,11 +1,6 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
- *
- * This file is part of the circuit explorer for Brayns
- * <https://github.com/favreau/Brayns-UC-CircuitExplorer>
- *
- * Based on OSPRay implementation
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -22,7 +17,8 @@
  */
 
 #include "CircuitExplorerAdvancedRenderer.h"
-#include <common/log.h>
+
+#include <plugin/api/Log.h>
 
 // ospray
 #include <ospray/SDK/common/Data.h>

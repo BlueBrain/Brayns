@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
@@ -28,8 +28,8 @@
 #include <brayns/common/light/Light.h>
 #include <brayns/common/log.h>
 #include <brayns/common/mathTypes.h>
-#include <brayns/common/utils/DynamicLib.h>
-#include <brayns/common/utils/stringUtils.h>
+#include <brayns/utils/DynamicLib.h>
+#include <brayns/utils/StringUtils.h>
 
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
@@ -43,9 +43,6 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
-#if BRAYNS_USE_LIBARCHIVE
-#include <brayns/io/ArchiveLoader.h>
-#endif
 #if BRAYNS_USE_ASSIMP
 #include <brayns/io/MeshLoader.h>
 #endif
@@ -348,18 +345,12 @@ private:
         auto& registry = _engine->getScene().getLoaderRegistry();
         auto& scene = _engine->getScene();
 
-        auto params = _parametersManager.getGeometryParameters();
-
-        registry.registerLoader(std::make_unique<ProteinLoader>(scene, params));
-        registry.registerLoader(std::make_unique<RawVolumeLoader>(scene));
-        registry.registerLoader(std::make_unique<MHDVolumeLoader>(scene));
-        registry.registerLoader(std::make_unique<XYZBLoader>(scene));
+        registry.registerLoader(std::make_unique<ProteinLoader>());
+        registry.registerLoader(std::make_unique<RawVolumeLoader>());
+        registry.registerLoader(std::make_unique<MHDVolumeLoader>());
+        registry.registerLoader(std::make_unique<XYZBLoader>());
 #if BRAYNS_USE_ASSIMP
-        registry.registerLoader(std::make_unique<MeshLoader>(scene, params));
-#endif
-#if BRAYNS_USE_LIBARCHIVE
-        registry.registerArchiveLoader(
-            std::make_unique<ArchiveLoader>(scene, registry));
+        registry.registerLoader(std::make_unique<MeshLoader>());
 #endif
     }
 

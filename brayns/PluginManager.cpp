@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Juan Hernando <juan.hernando@epfl.ch>
  *
@@ -21,8 +21,8 @@
 #include "PluginManager.h"
 
 #include <brayns/common/log.h>
-#include <brayns/common/utils/stringUtils.h>
 #include <brayns/parameters/ParametersManager.h>
+#include <brayns/utils/StringUtils.h>
 
 #include <brayns/network/plugin/NetworkManager.h>
 #include <brayns/pluginapi/PluginAPI.h>

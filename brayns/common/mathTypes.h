@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -28,7 +28,6 @@
 #include <vector>
 
 #include <brayns/common/BaseObject.h>
-#include <brayns/common/macros.h>
 
 namespace brayns
 {
@@ -88,7 +87,7 @@ public:
 
     inline bool isEmpty() const
     {
-        return _min.x >= _max.x || _min.y >= _max.y || _min.z >= _max.x;
+        return _min.x >= _max.x || _min.y >= _max.y || _min.z >= _max.z;
     }
 
     inline vec getCenter() const { return (_min + _max) * .5; }
@@ -106,9 +105,6 @@ public:
 private:
     vec _min{std::numeric_limits<T>::max()};
     vec _max{-std::numeric_limits<T>::max()};
-
-    SERIALIZATION_FRIEND(Box<double>)
-    SERIALIZATION_FRIEND(Box<float>)
 #endif
 };
 
@@ -127,6 +123,8 @@ using Boxd = Box<double>;
 /**
  * Matrix definitions
  */
+using Matrix3d = glm::mat<3, 3, double>;
+using Matrix3f = glm::mat3;
 using Matrix4d = glm::mat<4, 4, double>;
 using Matrix4f = glm::mat4;
 
@@ -153,5 +151,6 @@ typedef std::vector<Vector2d> Vector2ds;
 /**
  * Quaternion definitions
  */
+using Quaternion = glm::quat;
 using Quaterniond = glm::tquat<double, glm::highp>; //!< Double quaternion.
 } // namespace brayns

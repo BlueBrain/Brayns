@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -21,10 +21,10 @@
 #include "XYZBLoader.h"
 
 #include <brayns/common/log.h>
-#include <brayns/common/utils/filesystem.h>
-#include <brayns/common/utils/stringUtils.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
+#include <brayns/utils/Filesystem.h>
+#include <brayns/utils/StringUtils.h>
 
 #include <fstream>
 #include <sstream>
@@ -43,21 +43,8 @@ float _computeHalfArea(const Boxf& bbox)
 }
 } // namespace
 
-XYZBLoader::XYZBLoader(Scene& scene)
-    : Loader(scene)
-{
-}
-
-bool XYZBLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
-                             const std::string& extension) const
-{
-    const std::set<std::string> types = {"xyz"};
-    return types.find(extension) != types.end();
-}
-
 std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
-    Blob&& blob, const LoaderProgress& callback,
-    const PropertyMap& properties BRAYNS_UNUSED) const
+    Blob&& blob, const LoaderProgress& callback, Scene& scene) const
 {
     BRAYNS_INFO << "Loading xyz " << blob.name << std::endl;
 
@@ -69,9 +56,9 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
     }
     stream.seekg(0);
 
-    auto model = _scene.createModel();
+    auto model = scene.createModel();
 
-    const auto name = fs::path({blob.name}).stem();
+    const auto name = fs::path({blob.name}).stem().string();
     const auto materialId = 0;
     model->createMaterial(materialId, name);
     auto& spheres = model->getSpheres()[materialId];
@@ -151,7 +138,7 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
 
 std::vector<ModelDescriptorPtr> XYZBLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
-    const PropertyMap& properties) const
+    Scene& scene) const
 {
     std::ifstream file(filename);
     if (!file.good())
@@ -160,7 +147,7 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromFile(
                            filename,
                            {std::istreambuf_iterator<char>(file),
                             std::istreambuf_iterator<char>()}},
-                          callback, properties);
+                          callback, scene);
 }
 
 std::string XYZBLoader::getName() const

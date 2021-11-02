@@ -23,7 +23,7 @@
 
 #include <typeindex>
 
-#include <brayns/network/adapters/PrimitiveAdapter.h>
+#include <brayns/json/adapters/PrimitiveAdapter.h>
 
 namespace brayns
 {

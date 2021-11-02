@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -24,16 +24,9 @@
 
 namespace
 {
-const std::string PARAM_COLOR_SCHEME = "color-scheme";
-const std::string PARAM_GEOMETRY_QUALITY = "geometry-quality";
-const std::string PARAM_RADIUS_MULTIPLIER = "radius-multiplier";
 const std::string PARAM_MEMORY_MODE = "memory-mode";
 const std::string PARAM_DEFAULT_BVH_FLAG = "default-bvh-flag";
 
-const std::array<std::string, 5> COLOR_SCHEMES = {
-    {"none", "by-id", "protein-atoms", "protein-chains", "protein-residues"}};
-
-const std::string GEOMETRY_QUALITIES[3] = {"low", "medium", "high"};
 const std::string GEOMETRY_MEMORY_MODES[2] = {"shared", "replicated"};
 const std::map<std::string, brayns::BVHFlag> BVH_TYPES = {
     {"dynamic", brayns::BVHFlag::dynamic},
@@ -48,16 +41,6 @@ GeometryParameters::GeometryParameters()
 {
     _parameters.add_options()
         //
-        (PARAM_COLOR_SCHEME.c_str(), po::value<std::string>(),
-         "Color scheme to be applied to the geometry "
-         "[none|by-id|protein-atoms|protein-chains|protein-residues]")
-        //
-        (PARAM_GEOMETRY_QUALITY.c_str(), po::value<std::string>(),
-         "Geometry rendering quality [low|medium|high]")
-        //
-        (PARAM_RADIUS_MULTIPLIER.c_str(), po::value<float>(),
-         "Radius multiplier for spheres, cones and cylinders [float]")
-        //
         (PARAM_MEMORY_MODE.c_str(), po::value<std::string>(),
          "Defines what memory mode should be used between Brayns and "
          "the underlying renderer [shared|replicated]")
@@ -70,34 +53,6 @@ GeometryParameters::GeometryParameters()
 
 void GeometryParameters::parse(const po::variables_map& vm)
 {
-    if (vm.count(PARAM_COLOR_SCHEME))
-    {
-        _colorScheme = ColorScheme::none;
-        const auto& colorScheme = vm[PARAM_COLOR_SCHEME].as<std::string>();
-        if (!colorScheme.empty())
-        {
-            auto it = std::find(COLOR_SCHEMES.begin(), COLOR_SCHEMES.end(),
-                                colorScheme);
-            if (it == COLOR_SCHEMES.end())
-                throw po::error("No match for color scheme '" + colorScheme);
-
-            const auto index = std::distance(COLOR_SCHEMES.begin(), it);
-            _colorScheme = static_cast<ColorScheme>(index);
-        }
-    }
-    if (vm.count(PARAM_GEOMETRY_QUALITY))
-    {
-        _geometryQuality = GeometryQuality::low;
-        const auto& geometryQuality =
-            vm[PARAM_GEOMETRY_QUALITY].as<std::string>();
-        for (size_t i = 0;
-             i < sizeof(GEOMETRY_QUALITIES) / sizeof(GEOMETRY_QUALITIES[0]);
-             ++i)
-            if (geometryQuality == GEOMETRY_QUALITIES[i])
-                _geometryQuality = static_cast<GeometryQuality>(i);
-    }
-    if (vm.count(PARAM_RADIUS_MULTIPLIER))
-        _radiusMultiplier = vm[PARAM_RADIUS_MULTIPLIER].as<float>();
     if (vm.count(PARAM_MEMORY_MODE))
     {
         const auto& memoryMode = vm[PARAM_MEMORY_MODE].as<std::string>();
@@ -127,14 +82,6 @@ void GeometryParameters::parse(const po::variables_map& vm)
 void GeometryParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Color scheme               : "
-                << COLOR_SCHEMES[static_cast<size_t>(_colorScheme)]
-                << std::endl;
-    BRAYNS_INFO << "Geometry quality           : "
-                << GEOMETRY_QUALITIES[static_cast<size_t>(_geometryQuality)]
-                << std::endl;
-    BRAYNS_INFO << "Radius multiplier          : " << _radiusMultiplier
-                << std::endl;
     BRAYNS_INFO << "Memory mode                : "
                 << (_memoryMode == MemoryMode::shared ? "Shared" : "Replicated")
                 << std::endl;

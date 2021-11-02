@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/network/json/Message.h>
+#include <brayns/json/Message.h>
 
 namespace dti
 {

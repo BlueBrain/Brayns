@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Juan Hernando <cyrille.favreau@epfl.ch>
  *
@@ -21,8 +21,8 @@
 #pragma once
 
 #include <brayns/common/types.h>
-#include <brayns/common/utils/DynamicLib.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
+#include <brayns/utils/DynamicLib.h>
 
 #include <vector>
 

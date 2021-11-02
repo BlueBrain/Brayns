@@ -23,13 +23,13 @@
 
 #include <brayns/common/loader/LoaderRegistry.h>
 
-#include <brayns/network/json/MessageAdapter.h>
+#include <brayns/json/MessageAdapter.h>
 
 namespace brayns
 {
 BRAYNS_ADAPTER_BEGIN(LoaderInfo)
 BRAYNS_ADAPTER_ENTRY(name, "Loader name")
 BRAYNS_ADAPTER_ENTRY(extensions, "Supported file extensions")
-BRAYNS_ADAPTER_ENTRY(properties, "Loader properties")
+BRAYNS_ADAPTER_ENTRY(inputParametersSchema, "Loader properties")
 BRAYNS_ADAPTER_END()
 } // namespace brayns

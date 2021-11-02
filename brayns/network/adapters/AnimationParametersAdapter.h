@@ -21,13 +21,17 @@
 
 #pragma once
 
-#include <brayns/network/json/MessageAdapter.h>
+#include <brayns/json/MessageAdapter.h>
 
 #include <brayns/parameters/AnimationParameters.h>
 
 namespace brayns
 {
 BRAYNS_ADAPTER_BEGIN(AnimationParameters)
+BRAYNS_ADAPTER_GETSET("start_frame", getStartFrame, setStartFrame,
+                      "Global initial simulation frame index")
+BRAYNS_ADAPTER_GETSET("end_frame", getEndFrame, setEndFrame,
+                      "Global final simulation frame index")
 BRAYNS_ADAPTER_GETSET("frame_count", getNumFrames, setNumFrames,
                       "Animation frame count")
 BRAYNS_ADAPTER_GETSET("current", getFrame, setFrame, "Current frame index")

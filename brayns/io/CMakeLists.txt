@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2017, EPFL/Blue Brain Project
+# Copyright (c) 2015-2021, EPFL/Blue Brain Project
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -18,13 +18,6 @@ set(BRAYNSIO_PUBLIC_HEADERS
 set(BRAYNSIO_LINK_LIBRARIES
   PRIVATE braynsParameters braynsCommon braynsEngine
 )
-
-if(BRAYNS_LIBARCHIVE_ENABLED)
-  list(APPEND BRAYNSIO_SOURCES ArchiveLoader.cpp)
-  list(APPEND BRAYNSIO_HEADERS ArchiveLoader.h)
-  list(APPEND BRAYNSIO_LINK_LIBRARIES
-    PRIVATE ${LibArchive_LIBRARIES})
-endif()
 
 if(BRAYNS_ASSIMP_ENABLED)
   list(APPEND BRAYNSIO_SOURCES MeshLoader.cpp assimpImporters/ObjFileImporter.cpp assimpImporters/ObjFileParser.cpp assimpImporters/ObjFileMtlImporter.cpp)

@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2016, EPFL/Blue Brain Project
+# Copyright (c) 2015-2021, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
@@ -27,7 +27,7 @@ set(BRAYNSPARAMETERS_PUBLIC_HEADERS
 )
 
 set(BRAYNSPARAMETERS_LINK_LIBRARIES
-    PRIVATE glm ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    PRIVATE glm ${Boost_PROGRAM_OPTIONS_LIBRARY} braynsUtils
 )
 
 set(BRAYNSPARAMETERS_INCLUDE_NAME brayns/parameters)

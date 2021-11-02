@@ -23,7 +23,7 @@
 
 #include <brayns/common/mathTypes.h>
 
-#include <brayns/network/json/MessageAdapter.h>
+#include <brayns/json/MessageAdapter.h>
 
 namespace brayns
 {
