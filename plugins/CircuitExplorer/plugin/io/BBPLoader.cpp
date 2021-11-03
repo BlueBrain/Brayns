@@ -21,12 +21,12 @@
 
 #include "BBPLoader.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/utils/Filesystem.h>
 
 #include <plugin/api/CircuitColorManager.h>
-#include <plugin/api/Log.h>
 #include <plugin/api/MaterialUtils.h>
 #include <plugin/io/bbploader/CellLoader.h>
 #include <plugin/io/bbploader/ParameterCheck.h>
@@ -117,7 +117,7 @@ brayns::ModelDescriptorPtr loadSynapse(
     auto synapses = SynapseLoader::load(circuit, gids, afferent);
     if (synapses.empty())
     {
-        PLUGIN_WARN << "synapses empty" << std::endl;
+        brayns::Log::warn("[CE] synapses empty.");
         return {nullptr};
     }
 
@@ -179,7 +179,8 @@ std::vector<std::string> BBPLoader::getSupportedExtensions() const
 bool BBPLoader::isSupported(const std::string& filename,
                             const std::string& extension) const
 {
-    const auto containsKeyword = [](const std::string& matcher) {
+    const auto containsKeyword = [](const std::string& matcher)
+    {
         const auto lcm = brayns::string_utils::toLowercase(matcher);
         if (lcm.find("blueconfig") != std::string::npos ||
             lcm.find("circuitconfig") != std::string::npos)
@@ -209,14 +210,14 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromFile(
     const BBPLoaderParameters& params, brayns::Scene& scene) const
 {
     brayns::Timer timer;
-    PLUGIN_INFO << getName() << ": Loading " << path << std::endl;
+    brayns::Log::info("[CE] {}: loading {}.", getName(), path);
 
     const brion::BlueConfig config(path);
     const auto result =
         importFromBlueConfig(path, callback, params, config, scene);
 
-    PLUGIN_INFO << getName() << ": Done in " << timer.elapsed() << " second(s)"
-                << std::endl;
+    brayns::Log::info("[CE] {}: done in {} second(s).", getName(),
+                      timer.elapsed());
     return result;
 }
 
@@ -273,7 +274,7 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
 
     if (params.load_afferent_synapses)
     {
-        PLUGIN_INFO << getName() << ": Loading afferent synapses\n";
+        brayns::Log::info("[CE] {}: loading afferent synapses.", getName());
         callback.updateProgress("Loading afferent synapses", total);
         total += chunk;
         auto model =
@@ -289,7 +290,7 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
 
     if (params.load_efferent_synapses)
     {
-        PLUGIN_INFO << getName() << ": Loading efferent synapses\n";
+        brayns::Log::info("[CE] {}: loading efferent synapses.", getName());
         callback.updateProgress("Loading efferent synapses", total);
         auto model =
             loadSynapse(path, circuit, gids, false, cells, scene.createModel());
@@ -332,7 +333,7 @@ std::vector<brayns::ModelDescriptorPtr> BBPLoader::importFromBlueConfig(
     CircuitColorManager::registerHandler(modelDescriptor, std::move(cellColor),
                                          gidList, std::move(cellMatMap));
 
-    PLUGIN_INFO << getName() << ": Loaded " << result.size() << " models\n";
+    brayns::Log::info("[CE] {}: loaded {} model(s).", getName(), result.size());
 
     return result;
 }

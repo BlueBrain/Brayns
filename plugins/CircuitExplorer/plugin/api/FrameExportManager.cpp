@@ -18,14 +18,14 @@
 
 #include "FrameExportManager.h"
 
+#include <brayns/common/Log.h>
+
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/Renderer.h>
 
 #include <brayns/parameters/ParametersManager.h>
-
-#include <plugin/api/Log.h>
 
 #include <boost/filesystem.hpp>
 
@@ -84,16 +84,18 @@ void FrameExportManager::startNewExport(brayns::PluginAPI& api,
     _currentExport = std::move(input);
     _start(api);
 
-    PLUGIN_INFO
-        << "-----------------------------------------------------------\n"
-        << "Movie settings     :\n"
-        << "- Number of frames : " << _currentExport.keyFrames.size() << "\n"
-        << "- Samples per pixel: " << _currentExport.numSamples << "\n"
-        << "- Frame size       : " << api.getEngine().getFrameBuffer().getSize()
-        << "\n"
-        << "- Export folder    : " << _currentExport.storePath << "\n"
-        << "-----------------------------------------------------------"
-        << std::endl;
+    brayns::Log::info(
+        "[CE] -----------------------------------------------------------");
+    brayns::Log::info("[CE] Movie settings     :");
+    brayns::Log::info("[CE] - Number of frames : {}",
+                      _currentExport.keyFrames.size());
+    brayns::Log::info("[CE] - Samples per pixel: {}",
+                      _currentExport.numSamples);
+    brayns::Log::info("[CE] - Frame size       : {}",
+                      api.getEngine().getFrameBuffer().getSize());
+    brayns::Log::info("[CE] - Export folder    : {}", _currentExport.storePath);
+    brayns::Log::info(
+        "[CE] -----------------------------------------------------------");
 }
 
 void FrameExportManager::preRender(brayns::PluginAPI& api)
@@ -248,7 +250,7 @@ void FrameExportManager::_writeImageToDisk(brayns::PluginAPI& api,
         _currentExportError = true;
         _currentExportErrorMessage =
             "Unable to create or open image file " + fileName;
-        PLUGIN_INFO << _currentExportErrorMessage << std::endl;
+        brayns::Log::info("[CE] {}.", _currentExportErrorMessage);
         return;
     }
 
@@ -257,5 +259,5 @@ void FrameExportManager::_writeImageToDisk(brayns::PluginAPI& api,
 
     frameBuffer.clear();
 
-    PLUGIN_INFO << "Frame saved to " << fileName << std::endl;
+    brayns::Log::info("[CE] Frame saved to {}.", fileName);
 }
