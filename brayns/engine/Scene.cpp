@@ -42,9 +42,9 @@ std::shared_ptr<T> _find(const std::vector<std::shared_ptr<T>>& list,
                          const size_t id,
                          size_t (U::*getID)() const = &T::getID)
 {
-    auto i =
-        std::find_if(list.begin(), list.end(),
-                     [id, getID](auto x) { return id == ((*x).*getID)(); });
+    auto i = std::find_if(list.begin(), list.end(), [id, getID](auto x) {
+        return id == ((*x).*getID)();
+    });
     return i == list.end() ? std::shared_ptr<T>{} : *i;
 }
 
@@ -53,9 +53,9 @@ std::shared_ptr<T> _remove(std::vector<std::shared_ptr<T>>& list,
                            const size_t id,
                            size_t (U::*getID)() const = &T::getID)
 {
-    auto i =
-        std::find_if(list.begin(), list.end(),
-                     [id, getID](auto x) { return id == ((*x).*getID)(); });
+    auto i = std::find_if(list.begin(), list.end(), [id, getID](auto x) {
+        return id == ((*x).*getID)();
+    });
     if (i == list.end())
         return std::shared_ptr<T>{};
     auto result = *i;
@@ -68,9 +68,9 @@ std::shared_ptr<T> _replace(std::vector<std::shared_ptr<T>>& list,
                             const size_t id, std::shared_ptr<T> newObj,
                             size_t (U::*getID)() const = &T::getID)
 {
-    auto i =
-        std::find_if(list.begin(), list.end(),
-                     [id, getID](auto x) { return id == ((*x).*getID)(); });
+    auto i = std::find_if(list.begin(), list.end(), [id, getID](auto x) {
+        return id == ((*x).*getID)();
+    });
     if (i == list.end())
         return std::shared_ptr<T>{};
     auto result = *i;
@@ -603,16 +603,14 @@ void Scene::_updateAnimationParameters()
         ap.removeIsReadyCallback();
     else
     {
-        ap.setIsReadyCallback(
-            [handlersV = handlers]
+        ap.setIsReadyCallback([handlersV = handlers] {
+            for (auto handler : handlersV)
             {
-                for (auto handler : handlersV)
-                {
-                    if (!handler->isReady())
-                        return false;
-                }
-                return true;
-            });
+                if (!handler->isReady())
+                    return false;
+            }
+            return true;
+        });
 
         ap.setDt(smallestDt, false);
         ap.setStartFrame(static_cast<uint32_t>(

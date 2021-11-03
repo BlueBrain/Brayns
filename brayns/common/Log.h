@@ -51,44 +51,44 @@ public:
     }
 
     template <typename... Args>
-    static void log(LogLevel level, Args &&...args)
+    static void log(LogLevel level, Args &&... args)
     {
         getLogger().log(spdlog::level::level_enum(level),
                         std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    static void trace(Args &&...args)
+    static void trace(Args &&... args)
     {
         log(LogLevel::Trace, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    static void debug(Args &&...args)
+    static void debug(Args &&... args)
     {
         log(LogLevel::Debug, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    static void info(Args &&...args)
+    static void info(Args &&... args)
     {
         log(LogLevel::Info, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    static void warn(Args &&...args)
+    static void warn(Args &&... args)
     {
         log(LogLevel::Warn, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    static void error(Args &&...args)
+    static void error(Args &&... args)
     {
         log(LogLevel::Error, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    static void critical(Args &&...args)
+    static void critical(Args &&... args)
     {
         log(LogLevel::Critical, std::forward<Args>(args)...);
     }

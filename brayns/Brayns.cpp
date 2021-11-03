@@ -375,8 +375,7 @@ private:
 
                 Log::info("Loading '{}'.", path);
 
-                auto progress = [&](const std::string& msg, float t)
-                {
+                auto progress = [&](const std::string& msg, float t) {
                     constexpr auto MIN_SECS = 5;
                     constexpr auto MIN_PERCENTAGE = 10;
 
@@ -477,13 +476,13 @@ private:
             'e', "Enable eletron shading",
             std::bind(&Brayns::Impl::_electronShading, this));
         _keyboardHandler.registerKeyboardShortcut(
-            'f', "Enable fly mode",
-            [this]()
-            { Brayns::Impl::_setupCameraManipulator(CameraMode::flying); });
+            'f', "Enable fly mode", [this]() {
+                Brayns::Impl::_setupCameraManipulator(CameraMode::flying);
+            });
         _keyboardHandler.registerKeyboardShortcut(
-            'i', "Enable inspect mode",
-            [this]()
-            { Brayns::Impl::_setupCameraManipulator(CameraMode::inspect); });
+            'i', "Enable inspect mode", [this]() {
+                Brayns::Impl::_setupCameraManipulator(CameraMode::inspect);
+            });
         _keyboardHandler.registerKeyboardShortcut(
             'o', "Decrease ambient occlusion strength",
             std::bind(&Brayns::Impl::_decreaseAmbientOcclusionStrength, this));
@@ -542,9 +541,7 @@ private:
             'c', "Display current camera information",
             std::bind(&Brayns::Impl::_displayCameraInformation, this));
         _keyboardHandler.registerKeyboardShortcut(
-            'b', "Toggle benchmarking",
-            [this]()
-            {
+            'b', "Toggle benchmarking", [this]() {
                 auto& ap = _parametersManager.getApplicationParameters();
                 ap.setBenchmarking(!ap.isBenchmarking());
             });
