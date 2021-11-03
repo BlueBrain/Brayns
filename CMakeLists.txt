@@ -125,7 +125,7 @@ endif()
 
 common_find_package_post()
 
-list(APPEND BRAYNS_DEPENDENT_LIBRARIES Async++ glm)
+list(APPEND BRAYNS_DEPENDENT_LIBRARIES Async++ glm spdlog::spdlog_header_only)
 
 add_subdirectory(deps)
 
