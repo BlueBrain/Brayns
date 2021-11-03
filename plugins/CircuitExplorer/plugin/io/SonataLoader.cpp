@@ -98,7 +98,7 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
     const SonataLoaderParameters& input, brayns::Scene& scene) const
 {
     const brayns::Timer timer;
-    PLUGIN_INFO << getName() << ": Loading " << path << "\n";
+    brayns::Log::info("[CE] {}: loading {}.", getName(), path);
 
     // Parse and check config and load parameters
     const SonataConfig::Data network = SonataConfig::readNetwork(path);
@@ -227,8 +227,7 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
     TransferFunctionUtils::set(scene.getTransferFunction());
 
     const auto time = timer.elapsed();
-    PLUGIN_INFO << getName() << ": Done in " << time << " second(s)";
-    PLUGIN_INFO << std::endl;
+    brayns::Log::info("[CE] {}: done in {} second(s).", getName(), time);
 
     return result;
 }

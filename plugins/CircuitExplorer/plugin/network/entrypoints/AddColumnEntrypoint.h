@@ -22,6 +22,7 @@
 #pragma once
 
 #include <brayns/common/Log.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <plugin/api/MaterialUtils.h>
