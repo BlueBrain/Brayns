@@ -162,4 +162,6 @@ if(NOT spdlog_FOUND)
       "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/spdlog/include>"
       "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
     )
+
+    common_find_package(spdlog QUIET)
 endif()
