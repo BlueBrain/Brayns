@@ -133,6 +133,12 @@ add_subdirectory(deps)
 # BRAYNS applications and libraries
 # ------------------------------------------------------------------------------
 
+add_subdirectory(plugins)
+add_subdirectory(brayns)
+if(BRAYNS_UNIT_TESTING_ENABLED)
+  add_subdirectory(tests)
+endif()
+
 if(BRAYNS_VIEWER_ENABLED)
   add_subdirectory(apps/ui)
   add_subdirectory(apps/BraynsViewer)
@@ -156,12 +162,6 @@ if(BRAYNS_OSPRAY_ENABLED)
   add_subdirectory(engines/ospray)
 else()
   message(WARNING "OSPRay not found or enabled. Brayns cannot work without an engine" )
-endif()
-
-add_subdirectory(plugins)
-add_subdirectory(brayns)
-if(BRAYNS_UNIT_TESTING_ENABLED)
-  add_subdirectory(tests)
 endif()
 
 include(CommonCPack)
