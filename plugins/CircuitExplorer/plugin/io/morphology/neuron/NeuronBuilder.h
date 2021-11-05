@@ -75,3 +75,42 @@ protected:
 private:
     const std::string _name;
 };
+
+/**
+ * @brief The NeuronBuilderTable class register and gives access to all
+ * available neuron builders, identifying them by their name
+ */
+class NeuronBuilderTable
+{
+public:
+    /**
+     * @brief NeuronBuilderTable constructor registers all available builders
+     */
+    NeuronBuilderTable();
+
+    /**
+     * @brief instantiate a builder by its type and registers it on the table
+     */
+    template <typename T, typename = std::enable_if_t<
+                              std::is_base_of<NeuronBuilder, T>::value>>
+    void registerBuilder()
+    {
+        auto builder = std::make_unique<T>();
+        const auto name = builder->getName();
+        _builders[name] = std::move(builder);
+    }
+
+    /**
+     * @brief Search and returns a neuron builder by its name
+     *
+     * @throws std::runtime_error if the given name does not correspond to an
+     * existing builder
+     * @returns a reference to a neuron builder
+     */
+    const NeuronBuilder& getBuilder(const std::string& name) const;
+
+    std::vector<std::string> getAvailableBuilderNames() const noexcept;
+
+private:
+    std::unordered_map<std::string, std::unique_ptr<NeuronBuilder>> _builders;
+};

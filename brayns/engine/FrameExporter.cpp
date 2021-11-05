@@ -16,19 +16,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "FrameExportManager.h"
+#include "FrameExporter.h"
 
 #include <brayns/common/Log.h>
-
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/Renderer.h>
-
 #include <brayns/parameters/ParametersManager.h>
+#include <brayns/utils/Filesystem.h>
 
-#include <boost/filesystem.hpp>
-
+namespace brayns
+{
 namespace
 {
 auto getFIImageFormat(const std::string& format) noexcept
@@ -37,7 +36,7 @@ auto getFIImageFormat(const std::string& format) noexcept
                            : FreeImage_GetFIFFromFormat(format.c_str());
 }
 
-void checkExportParameters(const FrameExportManager::ExportInfo& input)
+void checkExportParameters(const FrameExporter::ExportInfo& input)
 {
     if (input.keyFrames.empty())
         throw FrameExportParameterException("No keyframe information");
@@ -47,14 +46,33 @@ void checkExportParameters(const FrameExportManager::ExportInfo& input)
             "Number of samples must be greater than 0");
 
     const auto& path = input.storePath;
-    const auto bPath = boost::filesystem::path(path);
-    if (!boost::filesystem::exists(bPath))
+    const auto bPath = fs::path(path);
+    if (!fs::exists(bPath))
         throw FrameExportParameterException("Frame result path " + path +
                                             " not found");
 
-    const auto status = boost::filesystem::status(bPath);
-    if (!(status.permissions() & boost::filesystem::perms::others_write))
-        throw FrameExportParameterException("No write permissions on " + path);
+    // Filesystem allow to query permissions, but no information about
+    // current user permissions. To check wether we can write on the target
+    // path without using system API, we attempt to create a directory and
+    // capture any exception that may be thrown
+    std::string testDirBaseName = "test_directory_";
+    uint32_t indexTest{0u};
+    while (fs::exists(fs::path(testDirBaseName + std::to_string(indexTest))))
+        ++indexTest;
+
+    const auto testDirName = testDirBaseName + std::to_string(indexTest);
+    const fs::path testDirFilename(testDirName);
+    try
+    {
+        fs::create_directory(bPath / testDirFilename);
+    }
+    catch (const fs::filesystem_error& fse)
+    {
+        throw FrameExportParameterException("Cannot write on " + path + ": " +
+                                            std::string(fse.what()));
+    }
+    // Remove test directory on success
+    fs::remove(bPath / testDirFilename);
 
     const auto imageFormat = getFIImageFormat(input.imageFormat);
     if (imageFormat == FIF_UNKNOWN)
@@ -63,57 +81,50 @@ void checkExportParameters(const FrameExportManager::ExportInfo& input)
 }
 } // namespace
 
-bool FrameExportManager::_exportRunning = false;
-FrameExportManager::ExportInfo FrameExportManager::_currentExport = {};
-uint64_t FrameExportManager::_currentExportKeyFrameIndex = 0u;
-uint32_t FrameExportManager::_currentExportFrameAccumulation = 0u;
-bool FrameExportManager::_currentExportError = false;
-std::string FrameExportManager::_currentExportErrorMessage = {};
-
-bool FrameExportManager::_originalAccumulationSetting = false;
-uint32_t FrameExportManager::_originalAccumulationSize = 0u;
-
-void FrameExportManager::startNewExport(brayns::PluginAPI& api,
-                                        ExportInfo&& input)
+void FrameExporter::startNewExport(ExportInfo&& input)
 {
-    if (_exportRunning)
+    if (_exportRunning || _exportRequested)
         throw FrameExportInProgressException();
 
     checkExportParameters(input);
 
     _currentExport = std::move(input);
-    _start(api);
+    _exportRequested = true;
 
     brayns::Log::info(
-        "[CE] -----------------------------------------------------------");
-    brayns::Log::info("[CE] Movie settings     :");
-    brayns::Log::info("[CE] - Number of frames : {}",
-                      _currentExport.keyFrames.size());
-    brayns::Log::info("[CE] - Samples per pixel: {}",
-                      _currentExport.numSamples);
-    brayns::Log::info("[CE] - Frame size       : {}",
-                      api.getEngine().getFrameBuffer().getSize());
-    brayns::Log::info("[CE] - Export folder    : {}", _currentExport.storePath);
-    brayns::Log::info(
-        "[CE] -----------------------------------------------------------");
+        "Export frame request\n"
+        "- Number of frames:\t{}\n"
+        "- Samples per pixel:\t{}\n"
+        "- Export folder:\t{}",
+        _currentExport.keyFrames.size(), _currentExport.numSamples,
+        _currentExport.storePath);
 }
 
-void FrameExportManager::preRender(brayns::PluginAPI& api)
+void FrameExporter::preRender(Camera& camera, Renderer& renderer,
+                              FrameBuffer& frameBuffer,
+                              ParametersManager& parameters)
 {
+    if (_exportRequested)
+    {
+        _exportRunning = true;
+        _exportRequested = false;
+        _start(camera, renderer, frameBuffer, parameters);
+    }
+
     if (!_exportRunning)
         return;
 
     // Finish on error
     if (_currentExportError)
     {
-        _stop(api);
+        _stop(camera, renderer, parameters);
         return;
     }
 
     // Export completed
     if (_currentExportKeyFrameIndex >= _currentExport.keyFrames.size())
     {
-        _stop(api);
+        _stop(camera, renderer, parameters);
         return;
     }
 
@@ -122,13 +133,14 @@ void FrameExportManager::preRender(brayns::PluginAPI& api)
     {
         const auto& keyFrame =
             _currentExport.keyFrames[_currentExportKeyFrameIndex];
-        CameraUtils::updateCamera(api.getCamera(), keyFrame.camera);
-        api.getParametersManager().getAnimationParameters().setFrame(
-            keyFrame.frameIndex);
+
+        camera = keyFrame.camera;
+        camera.setProperties(keyFrame.cameraParameters);
+        parameters.getAnimationParameters().setFrame(keyFrame.frameIndex);
     }
 }
 
-void FrameExportManager::postRender(brayns::PluginAPI& api)
+void FrameExporter::postRender(FrameBuffer& frameBuffer)
 {
     if (!_exportRunning)
         return;
@@ -142,14 +154,14 @@ void FrameExportManager::postRender(brayns::PluginAPI& api)
             frameNumberName =
                 _currentExport.keyFrames[_currentExportKeyFrameIndex]
                     .frameIndex;
-        _writeImageToDisk(api, frameNumberName);
+        _writeImageToDisk(frameBuffer, frameNumberName);
 
         _currentExportFrameAccumulation = 0;
         ++_currentExportKeyFrameIndex;
     }
 }
 
-double FrameExportManager::getExportProgress()
+double FrameExporter::getExportProgress()
 {
     if (!_exportRunning)
         throw FrameExportNotRunningException();
@@ -167,7 +179,34 @@ double FrameExportManager::getExportProgress()
     return static_cast<double>(progress) / static_cast<double>(totalFrameCount);
 }
 
-void FrameExportManager::_start(brayns::PluginAPI& api) noexcept
+void FrameExporter::_saveState(Camera& camera, ParametersManager& parameters)
+{
+    _originalState = {};
+
+    const auto& renderParams = parameters.getRenderingParameters();
+    _originalState.hasAccumulation = renderParams.getAccumulation();
+    _originalState.accumulationSize = renderParams.getMaxAccumFrames();
+
+    _originalState.camera = camera;
+    _originalState.cameraProperties = camera.getPropertyMap();
+}
+
+void FrameExporter::_restoreState(Camera& camera, ParametersManager& parameters)
+{
+    auto& renderParams = parameters.getRenderingParameters();
+    renderParams.setAccumulation(_originalState.hasAccumulation);
+    renderParams.setMaxAccumFrames(_originalState.accumulationSize);
+
+    camera = _originalState.camera;
+    camera.setProperties(_originalState.cameraProperties);
+
+    camera.markModified();
+    camera.commit();
+}
+
+void FrameExporter::_start(Camera& camera, Renderer& renderer,
+                           FrameBuffer& frameBuffer,
+                           ParametersManager& parameters) noexcept
 {
     // Initialize export status
     _exportRunning = true;
@@ -176,49 +215,33 @@ void FrameExportManager::_start(brayns::PluginAPI& api) noexcept
     _currentExportError = 0;
     _currentExportErrorMessage = "";
 
-    // Modify rendering engine
-    _originalAccumulationSetting =
-        api.getParametersManager().getRenderingParameters().getAccumulation();
-    if (_originalAccumulationSetting)
-        _originalAccumulationSize = api.getParametersManager()
-                                        .getRenderingParameters()
-                                        .getMaxAccumFrames();
+    _saveState(camera, parameters);
 
-    api.getRenderer().markModified();
-    api.getRenderer().commit();
+    auto& renderParams = parameters.getRenderingParameters();
+    renderParams.setMaxAccumFrames(_currentExport.numSamples + 1);
 
-    auto& frameBuffer = api.getEngine().getFrameBuffer();
+    renderer.markModified();
+    renderer.commit();
+
     frameBuffer.clear();
-
-    api.getParametersManager().getRenderingParameters().setMaxAccumFrames(
-        static_cast<size_t>(_currentExport.numSamples) + 1);
-
-    // Update camera for first frame
-    CameraUtils::updateCamera(api.getCamera(),
-                              _currentExport.keyFrames[0].camera);
 }
 
-void FrameExportManager::_stop(brayns::PluginAPI& api) noexcept
+void FrameExporter::_stop(Camera& camera, Renderer& renderer,
+                          ParametersManager& parameters) noexcept
 {
     _exportRunning = false;
     _currentExportKeyFrameIndex = 0u;
     _currentExportFrameAccumulation = 0u;
 
-    if (!_originalAccumulationSetting)
-        api.getParametersManager().getRenderingParameters().setAccumulation(
-            false);
-    else if (_currentExport.numSamples != _originalAccumulationSize)
-        api.getParametersManager().getRenderingParameters().setMaxAccumFrames(
-            _originalAccumulationSize);
+    _restoreState(camera, parameters);
 
-    api.getRenderer().markModified();
-    api.getRenderer().commit();
+    renderer.markModified();
+    renderer.commit();
 }
 
-void FrameExportManager::_writeImageToDisk(brayns::PluginAPI& api,
-                                           const uint32_t frameNumberName)
+void FrameExporter::_writeImageToDisk(FrameBuffer& frameBuffer,
+                                      const uint32_t frameNumberName)
 {
-    auto& frameBuffer = api.getEngine().getFrameBuffer();
     auto image = frameBuffer.getImage();
 
     const auto fif = getFIImageFormat(_currentExport.imageFormat);
@@ -230,7 +253,7 @@ void FrameExportManager::_writeImageToDisk(brayns::PluginAPI& api,
     if (fif == FIF_TIFF)
         flags = TIFF_NONE;
 
-    brayns::freeimage::MemoryPtr memory(FreeImage_OpenMemory());
+    freeimage::MemoryPtr memory(FreeImage_OpenMemory());
 
     FreeImage_SaveToMemory(fif, image.get(), memory.get(), flags);
 
@@ -250,7 +273,7 @@ void FrameExportManager::_writeImageToDisk(brayns::PluginAPI& api,
         _currentExportError = true;
         _currentExportErrorMessage =
             "Unable to create or open image file " + fileName;
-        brayns::Log::info("[CE] {}.", _currentExportErrorMessage);
+        brayns::Log::error("{}", _currentExportErrorMessage);
         return;
     }
 
@@ -259,5 +282,6 @@ void FrameExportManager::_writeImageToDisk(brayns::PluginAPI& api,
 
     frameBuffer.clear();
 
-    brayns::Log::info("[CE] Frame saved to {}.", fileName);
+    brayns::Log::info("Frame saved to {}", fileName);
 }
+} // namespace brayns

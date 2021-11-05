@@ -2,6 +2,7 @@
  * All rights reserved. Do not distribute without permission.
  *
  * Responsible Author: adrien.fleury@epfl.ch
+ *                     nadir.romanguerrero@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,42 +22,45 @@
 
 #pragma once
 
+#include <brayns/engine/FrameExporter.h>
+#include <brayns/network/adapters/FrameExportdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <plugin/api/FrameExportManager.h>
-#include <plugin/network/messages/GetExportFramesProgressMessage.h>
 
-class GetExportFramesProgressEntrypoint
-    : public brayns::Entrypoint<brayns::EmptyMessage,
-                                GetExportFramesProgressMessage>
+namespace brayns
+{
+class ExportFramesToDiskEntrypoint
+    : public Entrypoint<FrameExporter::ExportInfo, EmptyMessage>
 {
 public:
     virtual std::string getName() const override
     {
-        return "get-export-frames-progress";
+        return "export-frames-to-disk";
     }
 
     virtual std::string getDescription() const override
     {
-        return "Get the progress of the last issued frame export";
+        return "Export a set of frames from a simulation as image files";
     }
 
     virtual void onRequest(const Request& request) override
     {
-        double progress{};
+        auto params = request.getParams();
+        auto& engine = getApi().getEngine();
+        auto& exporter = engine.getFrameExporter();
         try
         {
-            progress = FrameExportManager::getExportProgress();
+            exporter.startNewExport(std::move(params));
         }
-        catch (const FrameExportNotRunningException&)
+        catch (const FrameExportParameterException& fpe)
         {
-            throw brayns::EntrypointException(
-                1, "There is no frame export in progress");
+            throw EntrypointException(1, fpe.what());
         }
-        catch (const std::runtime_error& e)
+        catch (const FrameExportInProgressException&)
         {
-            throw brayns::EntrypointException(2, e.what());
+            throw EntrypointException(2, "Frame export already in progress");
         }
-
-        request.reply({progress});
+        engine.triggerRender();
+        request.reply(EmptyMessage());
     }
 };
+} // namespace brayns

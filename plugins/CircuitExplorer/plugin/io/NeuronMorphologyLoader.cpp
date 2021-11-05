@@ -24,7 +24,8 @@
 #include <brayns/engine/Scene.h>
 
 #include <plugin/io/NeuronMorphologyLoaderParameters.h>
-#include <plugin/io/morphology/neuron/NeuronMorphologyImporter.h>
+#include <plugin/io/morphology/neuron/NeuronBuilder.h>
+#include <plugin/io/morphology/neuron/NeuronMorphologyPipeline.h>
 
 namespace
 {
@@ -74,18 +75,26 @@ std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromFile(
 
     checkInput(input);
 
-    NeuronMorphologyImporter::ImportSettings importSettings;
-    importSettings.builderName = input.geometry_mode;
-    importSettings.loadAxon = input.load_axon;
-    importSettings.loadDendrites = input.load_dendrites;
-    importSettings.loadSoma = input.load_soma;
-    importSettings.radiusMultiplier = input.radius_multiplier;
-    importSettings.radiusOverride = input.radius_override;
+    const auto& geometryMode = input.geometry_mode;
+    const auto radMultiplier = input.radius_multiplier;
+    const auto radOverride = input.radius_override;
+    const auto loadSoma = input.load_soma;
+    const auto loadAxon = input.load_axon;
+    const auto loadDend = input.load_dendrites;
+
+    const NeuronBuilder& builder =
+        NeuronBuilderTable().getBuilder(geometryMode);
+    const NeuronMorphologyPipeline pipeline =
+        NeuronMorphologyPipeline::create(radMultiplier, radOverride,
+                                         geometryMode == "smooth" &&
+                                             (loadAxon || loadDend));
+
+    NeuronMorphology morphology(path, loadSoma, loadAxon, loadDend);
+    pipeline.process(morphology);
+    const auto instantiable = builder.build(morphology);
 
     const auto geometry =
-        NeuronMorphologyImporter(importSettings)
-            .import(path)
-            ->instantiate(brayns::Vector3f(), brayns::Quaternion());
+        instantiable->instantiate(brayns::Vector3f(), brayns::Quaternion());
 
     auto modelPtr = scene.createModel();
     geometry->addToModel(*modelPtr);

@@ -26,6 +26,11 @@
 class SonataNGVLoader : public brayns::Loader<SonataNGVLoaderParameters>
 {
 public:
+    SonataNGVLoader(CircuitColorManager& colorManager)
+        : _internal(std::make_unique<BBPLoader>(colorManager))
+    {
+    }
+
     /**
      * @brief getSupportedExtensions returns a list with supported file
      * extensions
@@ -61,5 +66,5 @@ public:
         brayns::Scene& scene) const final;
 
 private:
-    BBPLoader _internal;
+    std::unique_ptr<BBPLoader> _internal{nullptr};
 };

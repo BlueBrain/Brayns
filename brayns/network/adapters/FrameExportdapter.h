@@ -22,18 +22,20 @@
 
 #include <brayns/json/MessageAdapter.h>
 
-#include <plugin/api/FrameExportManager.h>
-#include <plugin/network/adapters/ODUCameraAdapter.h>
+#include <brayns/engine/FrameExporter.h>
+#include <brayns/network/adapters/CameraAdapter.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(FrameExportManager::KeyFrame)
+BRAYNS_ADAPTER_BEGIN(FrameExporter::KeyFrame)
 BRAYNS_ADAPTER_NAMED_ENTRY("frame_index", frameIndex,
                            "Integer index of the simulation frame")
-BRAYNS_ADAPTER_NAMED_ENTRY("camera", camera, "Camera parameters")
+BRAYNS_ADAPTER_NAMED_ENTRY("camera", camera, "Camera definition")
+BRAYNS_ADAPTER_NAMED_ENTRY("camera_params", cameraParameters,
+                           "Camera parameters")
 BRAYNS_ADAPTER_END()
 
-BRAYNS_ADAPTER_BEGIN(FrameExportManager::ExportInfo)
+BRAYNS_ADAPTER_BEGIN(FrameExporter::ExportInfo)
 BRAYNS_ADAPTER_NAMED_ENTRY("path", storePath,
                            "Path where to store the rendered frames")
 BRAYNS_ADAPTER_NAMED_ENTRY("format", imageFormat,

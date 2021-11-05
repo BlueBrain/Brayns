@@ -26,7 +26,6 @@
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <plugin/api/CircuitColorManager.h>
-#include <plugin/api/FrameExportManager.h>
 #include <plugin/api/VasculatureRadiiSimulation.h>
 
 #include <plugin/io/BBPLoader.h>
@@ -41,13 +40,10 @@
 #include <plugin/network/entrypoints/AddPillEntrypoint.h>
 #include <plugin/network/entrypoints/AddSphereEntrypoint.h>
 #include <plugin/network/entrypoints/ColorCircuitEntryPoint.h>
-#include <plugin/network/entrypoints/ExportFramesToDiskEntrypoint.h>
-#include <plugin/network/entrypoints/GetExportFramesProgressEntrypoint.h>
 #include <plugin/network/entrypoints/GetMaterialIdsEntrypoint.h>
 #include <plugin/network/entrypoints/MakeMovieEntrypoint.h>
 #include <plugin/network/entrypoints/MaterialEntrypoint.h>
 #include <plugin/network/entrypoints/MirrorModelEntrypoint.h>
-#include <plugin/network/entrypoints/OduCameraEntrypoint.h>
 #include <plugin/network/entrypoints/SetCircuitThicknessEntrypoint.h>
 #include <plugin/network/entrypoints/SetMaterialExtraAttributesEntrypoint.h>
 #include <plugin/network/entrypoints/SetMaterialRangeEntrypoint.h>
@@ -142,10 +138,10 @@ void CircuitExplorerPlugin::init()
     // LOADERS ADDED BY THIS PLUGIN
     auto& scene = _api->getScene();
     auto& registry = scene.getLoaderRegistry();
-    registry.registerLoader(std::make_unique<BBPLoader>());
+    registry.registerLoader(std::make_unique<BBPLoader>(_colorManager));
     registry.registerLoader(std::make_unique<NeuronMorphologyLoader>());
-    registry.registerLoader(std::make_unique<SonataLoader>());
-    registry.registerLoader(std::make_unique<SonataNGVLoader>());
+    registry.registerLoader(std::make_unique<SonataLoader>(_colorManager));
+    registry.registerLoader(std::make_unique<SonataNGVLoader>(_colorManager));
 
     // ENTRY POINTS ADDED BY THIS PLUGIN
     add<brayns::GetMaterialIdsEntrypoint>();
@@ -154,12 +150,8 @@ void CircuitExplorerPlugin::init()
     add<brayns::SetMaterialsEntrypoint>();
     add<brayns::SetMaterialRangeEntrypoint>();
     add<brayns::SetMaterialExtraAttributesEntrypoint>();
-    add<GetOduCameraEntrypoint>();
-    add<SetOduCameraEntrypoint>();
-    add<ExportFramesToDiskEntrypoint>();
-    add<GetExportFramesProgressEntrypoint>();
     add<MakeMovieEntrypoint>();
-    add<TraceAnterogradeEntrypoint>();
+    add<TraceAnterogradeEntrypoint>(_colorManager);
     add<AddGridEntrypoint>();
     add<AddColumnEntrypoint>();
     add<AddSphereEntrypoint>();
@@ -168,11 +160,11 @@ void CircuitExplorerPlugin::init()
     add<AddBoxEntrypoint>();
     add<MirrorModelEntrypoint>();
     add<SetCircuitThicknessEntrypoint>();
-    add<ColorCircuitByIdEntrypoint>();
-    add<ColorCircuitBySingleColorEntrypoint>();
-    add<AvailableColorMethodsEntrypoint>();
-    add<AvailableColorMethodVariablesEntrypoint>();
-    add<ColorCircuitByMethodEntrypoint>();
+    add<ColorCircuitByIdEntrypoint>(_colorManager);
+    add<ColorCircuitBySingleColorEntrypoint>(_colorManager);
+    add<AvailableColorMethodsEntrypoint>(_colorManager);
+    add<AvailableColorMethodVariablesEntrypoint>(_colorManager);
+    add<ColorCircuitByMethodEntrypoint>(_colorManager);
     add<SimulationColorEntryPoint>();
 
     // RENDERERS ADDED BY THIS PLUGIN
@@ -188,14 +180,13 @@ void CircuitExplorerPlugin::init()
 
 void CircuitExplorerPlugin::preRender()
 {
-    FrameExportManager::preRender(*_api);
-    VasculatureRadiiSimulation::update();
+    auto& scene = _api->getScene();
+    const auto frame =
+        _api->getParametersManager().getAnimationParameters().getFrame();
+    VasculatureRadiiSimulation::update(frame, scene);
 }
 
-void CircuitExplorerPlugin::postRender()
-{
-    FrameExportManager::postRender(*_api);
-}
+void CircuitExplorerPlugin::postRender() {}
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int, char**)
 {

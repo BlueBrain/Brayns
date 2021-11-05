@@ -122,12 +122,10 @@ std::vector<SynapseGroup::Ptr> PopulationLoaderManager::loadEdges(
     const SonataEdgePopulationParameters& lc,
     const bbp::sonata::Selection& nodeSelection)
 {
-    static EdgePopulationLoaders edgeLoaders;
-
     const auto edgeType =
         networkConfig.config.getEdgePopulationProperties(lc.edge_population)
             .type;
-    const auto& loader = edgeLoaders.getEdgeLoader(edgeType);
+    const auto& loader = EdgePopulationLoaders().getEdgeLoader(edgeType);
 
     return loader.load(networkConfig, lc, nodeSelection);
 }
@@ -137,7 +135,6 @@ std::vector<MorphologyInstance::Ptr> PopulationLoaderManager::loadNodes(
     const SonataNodePopulationParameters& lc,
     const bbp::sonata::Selection& nodeSelection)
 {
-    static NodePopulationLoaders nodeLoaders;
     std::string nodeType;
     {
         try
@@ -158,7 +155,7 @@ std::vector<MorphologyInstance::Ptr> PopulationLoaderManager::loadNodes(
             nodeType = std::move(nodeProperties.type);
         }
     }
-    const auto& loader = nodeLoaders.getNodeLoader(nodeType);
+    const auto& loader = NodePopulationLoaders().getNodeLoader(nodeType);
 
     return loader.load(networkData, lc, nodeSelection);
 }

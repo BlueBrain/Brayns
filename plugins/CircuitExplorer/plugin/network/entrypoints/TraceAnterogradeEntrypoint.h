@@ -31,6 +31,11 @@ class TraceAnterogradeEntrypoint
     : public brayns::Entrypoint<TraceAnterogradeMessage, brayns::EmptyMessage>
 {
 public:
+    TraceAnterogradeEntrypoint(CircuitColorManager& manager)
+        : _manager(manager)
+    {
+    }
+
     virtual std::string getName() const override { return "trace-anterograde"; }
 
     virtual std::string getDescription() const override
@@ -55,15 +60,14 @@ public:
         auto& model = brayns::ExtractModel::fromId(scene, modelId);
 
         // Retreive cell mapping
-        if (!CircuitColorManager::handlerExists(model))
+        if (!_manager.handlerExists(model))
         {
             throw brayns::EntrypointException(
                 "There given model ID does not correspond to any existing "
                 "circuit model");
         }
 
-        CircuitColorManager::updateSingleColor(
-            model, params.non_connected_cells_color);
+        _manager.updateSingleColor(model, params.non_connected_cells_color);
 
         std::map<uint64_t, brayns::Vector4f> colorMap;
         for (const auto gid : params.cell_gids)
@@ -72,11 +76,14 @@ public:
         for (const auto gid : params.target_cell_gids)
             colorMap[gid] = params.connected_cells_color;
 
-        CircuitColorManager::updateColorsById(model, colorMap);
+        _manager.updateColorsById(model, colorMap);
 
         scene.markModified();
         getApi().triggerRender();
 
         request.reply(brayns::EmptyMessage());
     }
+
+private:
+    CircuitColorManager& _manager;
 };

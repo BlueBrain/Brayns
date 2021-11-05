@@ -24,6 +24,8 @@
 #include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
+#include <plugin/api/CircuitColorManager.h>
+
 /**
  * @brief The CircuitExplorerPlugin class manages the loading and visualization
  * of the Blue Brain Project micro-circuits, and allows visualisation of voltage
@@ -37,4 +39,7 @@ public:
     void init() final;
     void preRender() final;
     void postRender() final;
+
+private:
+    CircuitColorManager _colorManager;
 };

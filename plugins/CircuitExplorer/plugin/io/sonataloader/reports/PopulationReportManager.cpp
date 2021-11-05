@@ -19,7 +19,6 @@
 #include "PopulationReportManager.h"
 
 #include <plugin/api/MaterialUtils.h>
-#include <plugin/api/VasculatureRadiiSimulation.h>
 
 #include <plugin/io/sonataloader/reports/handlers/SonataReportHandler.h>
 #include <plugin/io/sonataloader/reports/handlers/SonataSpikeHandler.h>
@@ -36,46 +35,48 @@ namespace sonataloader
 {
 namespace
 {
-class NodeReportLoaderTable
+NodeReportLoader::Ptr getLoaderForType(const ReportType type)
 {
-public:
-    NodeReportLoaderTable()
+    switch (type)
     {
-        registerReportLoader<ReportType::BLOODFLOW_PRESSURE,
-                             NodeVasculatureReportLoader>();
-        registerReportLoader<ReportType::BLOODFLOW_RADII,
-                             NodeVasculatureReportLoader>();
-        registerReportLoader<ReportType::BLOODFLOW_SPEED,
-                             NodeVasculatureReportLoader>();
-        registerReportLoader<ReportType::COMPARTMENT, NodeCompartmentLoader>();
-        registerReportLoader<ReportType::SPIKES, NodeSpikeLoader>();
-        registerReportLoader<ReportType::SUMMATION, NodeCompartmentLoader>();
+    case ReportType::BLOODFLOW_PRESSURE:
+    case ReportType::BLOODFLOW_RADII:
+    case ReportType::BLOODFLOW_SPEED:
+        return std::make_unique<NodeVasculatureReportLoader>();
+    case ReportType::COMPARTMENT:
+    case ReportType::SUMMATION:
+        return std::make_unique<NodeCompartmentLoader>();
+    case ReportType::SPIKES:
+        return std::make_unique<NodeSpikeLoader>();
+    default:
+        return {nullptr};
     }
+}
 
-    template <ReportType type, typename T,
-              typename =
-                  std::enable_if_t<std::is_base_of<NodeReportLoader, T>::value>>
-    void registerReportLoader()
+brayns::AbstractSimulationHandlerPtr getHandlerForType(
+    const ReportType type, const std::string& reportPath,
+    const std::string& population, const bbp::sonata::Selection& selection)
+{
+    switch (type)
     {
-        _table[type] = std::make_unique<T>();
+    case ReportType::BLOODFLOW_PRESSURE:
+    case ReportType::BLOODFLOW_SPEED:
+    case ReportType::COMPARTMENT:
+    case ReportType::SUMMATION:
+    case ReportType::SYNAPSE:
+        return std::make_shared<SonataReportHandler>(reportPath, population,
+                                                     selection);
+    case ReportType::BLOODFLOW_RADII:
+        return std::make_shared<VasculatureRadiiHandler>(reportPath, population,
+                                                         selection);
+    case ReportType::SPIKES:
+        return std::make_shared<SonataSpikeHandler>(reportPath, population,
+                                                    selection);
+    default:
+        return {nullptr};
     }
+}
 
-    const NodeReportLoader& getLoader(const ReportType& type) const
-    {
-        auto it = _table.find(type);
-        if (it == _table.end())
-        {
-            const auto typeStr = brayns::enumToString<ReportType>(type);
-            throw std::runtime_error(
-                "SonataLoader: Cannot find report loader for " + typeStr);
-        }
-
-        return *(it->second);
-    }
-
-private:
-    std::unordered_map<ReportType, NodeReportLoader::Ptr> _table;
-};
 } // namespace
 
 void PopulationReportManager::loadNodeMapping(
@@ -83,16 +84,14 @@ void PopulationReportManager::loadNodeMapping(
     const bbp::sonata::Selection& selection,
     std::vector<MorphologyInstance::Ptr>& nodes)
 {
-    static const NodeReportLoaderTable NODEREPORT_TABLE;
-
     const auto type = input.report_type;
     if (type == ReportType::NONE)
         return;
 
-    const auto& reportLoader = NODEREPORT_TABLE.getLoader(type);
+    const auto reportLoader = getLoaderForType(type);
     const auto mapping =
-        reportLoader.loadMapping(input.report_path, input.node_population,
-                                 selection);
+        reportLoader->loadMapping(input.report_path, input.node_population,
+                                  selection);
 
 #pragma omp parallel for
     for (size_t i = 0; i < nodes.size(); ++i)
@@ -124,33 +123,19 @@ void PopulationReportManager::addNodeReportHandler(
     const SonataNodePopulationParameters& input,
     const bbp::sonata::Selection& selection, brayns::ModelDescriptorPtr& model)
 {
-    if (input.report_type == ReportType::NONE)
+    const auto type = input.report_type;
+    if (type == ReportType::NONE)
         return;
 
     const auto& path = input.report_path;
     const auto& population = input.node_population;
 
-    brayns::AbstractSimulationHandlerPtr handler{nullptr};
-    if (input.report_type == ReportType::SPIKES)
-        handler =
-            std::make_shared<SonataSpikeHandler>(path, population, selection);
-    else if (input.report_type == ReportType::BLOODFLOW_RADII)
-        handler = std::make_shared<VasculatureRadiiHandler>(path, population,
-                                                            selection);
-    else
-        handler =
-            std::make_shared<SonataReportHandler>(path, population, selection);
+    auto handler = getHandlerForType(type, path, population, selection);
+    if (!handler)
+        return;
 
     model->getModel().setSimulationHandler(handler);
     CircuitExplorerMaterial::setSimulationColorEnabled(model->getModel(), true);
-
-    if (input.report_type == ReportType::BLOODFLOW_RADII)
-    {
-        VasculatureRadiiSimulation::registerModel(model);
-        model->addOnRemoved([](const brayns::ModelDescriptor& model) {
-            VasculatureRadiiSimulation::unregisterModel(model.getModelID());
-        });
-    }
 }
 
 void PopulationReportManager::addEdgeReportHandler(
@@ -160,9 +145,12 @@ void PopulationReportManager::addEdgeReportHandler(
     if (input.edge_report.empty())
         return;
 
+    const auto& path = input.edge_report;
+    const auto& population = input.edge_population;
+
     auto handler =
-        std::make_shared<SonataReportHandler>(input.edge_report,
-                                              input.edge_population, selection);
+        getHandlerForType(ReportType::SYNAPSE, path, population, selection);
+
     model->getModel().setSimulationHandler(handler);
     CircuitExplorerMaterial::setSimulationColorEnabled(model->getModel(), true);
 }
