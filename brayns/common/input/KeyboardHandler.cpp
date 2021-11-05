@@ -34,9 +34,7 @@ void KeyboardHandler::registerKeyboardShortcut(const unsigned char key,
 {
     if (_registeredShortcuts.find(key) != _registeredShortcuts.end())
     {
-        std::stringstream message;
-        message << key << " is already registered";
-        BRAYNS_ERROR << message.str() << std::endl;
+        Log::error("{} is already registered.", key);
     }
     else
     {
@@ -59,7 +57,7 @@ void KeyboardHandler::handleKeyboardShortcut(const unsigned char key)
     auto it = _registeredShortcuts.find(key);
     if (it != _registeredShortcuts.end())
     {
-        BRAYNS_DEBUG << "Processing " << (*it).second.description << std::endl;
+        Log::debug("Processing {}.", (*it).second.description);
         (*it).second.functor();
     }
 }
@@ -70,9 +68,7 @@ void KeyboardHandler::registerSpecialKey(const SpecialKey key,
 {
     if (_registeredSpecialKeys.find(key) != _registeredSpecialKeys.end())
     {
-        std::stringstream message;
-        message << int(key) << " is already registered";
-        BRAYNS_ERROR << message.str() << std::endl;
+        Log::error("{} is already registered.", key);
     }
     else
     {
@@ -95,7 +91,7 @@ void KeyboardHandler::handle(const SpecialKey key)
     auto it = _registeredSpecialKeys.find(key);
     if (it != _registeredSpecialKeys.end())
     {
-        BRAYNS_INFO << "Processing " << (*it).second.description << std::endl;
+        Log::debug("Processing {}.", (*it).second.description);
         (*it).second.functor();
     }
 }

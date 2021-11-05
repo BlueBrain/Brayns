@@ -103,7 +103,7 @@ ImageGenerator::ImageJPEG::JpegData ImageGenerator::_encodeJpeg(
 
     if (success != 0)
     {
-        BRAYNS_ERROR << "libjpeg-turbo image conversion failure" << std::endl;
+        Log::error("libjpeg-turbo image conversion failure.");
         return 0;
     }
     return ImageJPEG::JpegData{tjJpegBuf};

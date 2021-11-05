@@ -115,7 +115,6 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     plugin/api/CircuitColorManager.h
     plugin/api/ColorUtils.h
     plugin/api/FrameExportManager.h
-    plugin/api/Log.h
     plugin/api/MaterialEnums.h
     plugin/api/MaterialUtils.h
     plugin/api/VasculatureRadiiSimulation.h

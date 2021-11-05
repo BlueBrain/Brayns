@@ -19,8 +19,8 @@
  */
 
 #include "CircuitInfoPlugin.h"
-#include "Log.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/network/interface/ActionInterface.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
@@ -39,6 +39,6 @@ void CircuitInfoPlugin::init()
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int /*argc*/,
                                                          char** /*argv*/)
 {
-    PLUGIN_INFO << "Initializing circuit info plugin" << std::endl;
+    brayns::Log::info("[CI] Loading circuit info plugin");
     return new CircuitInfoPlugin();
 }

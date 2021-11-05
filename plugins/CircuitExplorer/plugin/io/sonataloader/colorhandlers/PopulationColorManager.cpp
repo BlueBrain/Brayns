@@ -18,7 +18,7 @@
 
 #include "PopulationColorManager.h"
 
-#include <plugin/api/Log.h>
+#include <brayns/common/Log.h>
 
 #include <plugin/io/sonataloader/colorhandlers/edge/CommonEdgeColorHandler.h>
 #include <plugin/io/sonataloader/colorhandlers/edge/EndFootColorHandler.h>
@@ -42,9 +42,10 @@ CircuitColorHandler::Ptr PopulationColorManager::createNodeColorHandler(
     }
     catch (...)
     {
-        PLUGIN_WARN << "PopulationLoaderManager: Extracting population type "
-                       "from population properties for "
-                    << lc.node_population << "\n";
+        brayns::Log::warn(
+            "[CE] PopulationLoaderManager: Extracting population type "
+            "from population properties for {}.",
+            lc.node_population);
         type =
             network.config.getNodePopulationProperties(lc.node_population).type;
     }

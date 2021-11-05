@@ -41,7 +41,7 @@ AnimationParameters::AnimationParameters()
 void AnimationParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Animation frame          : " << _current << std::endl;
+    Log::info("Animation frame          : {}.", _current);
 }
 
 void AnimationParameters::reset()

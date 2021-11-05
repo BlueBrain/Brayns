@@ -19,7 +19,7 @@
 
 #include "OpenDeckPlugin.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/pluginapi/PluginAPI.h>

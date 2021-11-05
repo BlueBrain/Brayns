@@ -18,7 +18,7 @@
  */
 
 #include "RenderingParameters.h"
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 namespace
 {
@@ -90,19 +90,15 @@ void RenderingParameters::parse(const po::variables_map& vm)
 void RenderingParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Supported renderers               : " << std::endl;
+    Log::info("Supported renderers               :");
     for (const auto& renderer : _renderers)
-        BRAYNS_INFO << "- " << renderer << std::endl;
-    BRAYNS_INFO << "Renderer                          : " << _renderer
-                << std::endl;
-    BRAYNS_INFO << "Samples per pixel                 : " << _spp << std::endl;
-    BRAYNS_INFO << "Background color                  : " << _backgroundColor
-                << std::endl;
-    BRAYNS_INFO << "Camera                            : " << _camera
-                << std::endl;
-    BRAYNS_INFO << "Accumulation                      : "
-                << asString(_accumulation) << std::endl;
-    BRAYNS_INFO << "Max. accumulation frames          : " << _maxAccumFrames
-                << std::endl;
+        Log::info("- {}", renderer);
+    Log::info("Renderer                          : {}", _renderer);
+    Log::info("Samples per pixel                 : {}", _spp);
+    Log::info("Background color                  : {}", _backgroundColor);
+    Log::info("Camera                            : {}", _camera);
+    Log::info("Accumulation                      : {}",
+              asString(_accumulation));
+    Log::info("Max. accumulation frames          : {}", _maxAccumFrames);
 }
 } // namespace brayns

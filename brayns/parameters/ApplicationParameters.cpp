@@ -18,7 +18,7 @@
  */
 
 #include "ApplicationParameters.h"
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/parameters/ParametersManager.h>
 
 namespace
@@ -102,23 +102,18 @@ void ApplicationParameters::parse(const po::variables_map& vm)
 void ApplicationParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Engine                      : " << _engine << std::endl;
-    BRAYNS_INFO << "Ospray modules              : " << std::endl;
+    Log::info("Engine                      : {}", _engine);
+    Log::info("Ospray modules              :");
     for (const auto& module : _modules)
-        BRAYNS_INFO << "- " << module << std::endl;
-    BRAYNS_INFO << "Plugins                     : " << std::endl;
+        Log::info("- {}", module);
+    Log::info("Plugins                     :");
     for (const auto& plugin : _plugins)
-        BRAYNS_INFO << "- " << plugin << std::endl;
-    BRAYNS_INFO << "Window size                 : " << _windowSize << std::endl;
-    BRAYNS_INFO << "Benchmarking                : " << asString(_benchmarking)
-                << std::endl;
-    BRAYNS_INFO << "JPEG Compression            : " << _jpegCompression
-                << std::endl;
-    BRAYNS_INFO << "Image stream FPS            : " << _imageStreamFPS
-                << std::endl;
-    BRAYNS_INFO << "Max. render  FPS            : " << _maxRenderFPS
-                << std::endl;
-    BRAYNS_INFO << "Sandbox directory           : " << _sandBoxPath
-                << std::endl;
+        Log::info("- {}", plugin);
+    Log::info("Window size                 : {}", _windowSize);
+    Log::info("Benchmarking                : {}", asString(_benchmarking));
+    Log::info("JPEG Compression            : {}", _jpegCompression);
+    Log::info("Image stream FPS            : {}", _imageStreamFPS);
+    Log::info("Max. render  FPS            : {}", _maxRenderFPS);
+    Log::info("Sandbox directory           : {}", _sandBoxPath);
 }
 } // namespace brayns

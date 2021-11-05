@@ -21,10 +21,11 @@
 
 #pragma once
 
+#include <brayns/common/Log.h>
 #include <brayns/common/geometry/TriangleMesh.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <plugin/api/Log.h>
 #include <plugin/api/MaterialUtils.h>
 #include <plugin/network/messages/AddBoxMessage.h>
 #include <plugin/network/messages/AddShapeMessage.h>
@@ -82,7 +83,7 @@ public:
     {
         auto params = request.getParams();
         auto& scene = getApi().getScene();
-        PLUGIN_INFO << "Building Box model.\n";
+        brayns::Log::info("[CE] Building Box model.");
         auto id = BoxModel::add(scene, params);
         scene.markModified();
         triggerRender();

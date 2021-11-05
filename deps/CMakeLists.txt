@@ -146,3 +146,17 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED)
         add_library(MorphIO::morphio_shared ALIAS morphiointer)
     endif()
 endif()
+
+# spdlog
+message(STATUS "Gathering spdlog from submodules")
+
+find_package(Threads REQUIRED)
+
+add_library(spdlog_header_only IMPORTED GLOBAL INTERFACE)
+add_library(spdlog::spdlog_header_only ALIAS spdlog_header_only)
+
+target_include_directories(
+  spdlog_header_only SYSTEM INTERFACE
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/spdlog/include>"
+  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)

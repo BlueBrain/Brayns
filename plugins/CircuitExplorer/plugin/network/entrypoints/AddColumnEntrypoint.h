@@ -21,9 +21,10 @@
 
 #pragma once
 
+#include <brayns/common/Log.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <plugin/api/Log.h>
 #include <plugin/api/MaterialUtils.h>
 #include <plugin/network/messages/AddColumnMessage.h>
 
@@ -102,7 +103,7 @@ public:
     {
         auto params = request.getParams();
         auto& scene = getApi().getScene();
-        PLUGIN_INFO << "Building Column model.\n";
+        brayns::Log::info("[CE] Building Column model.");
         ColumnModel::add(scene, params);
         triggerRender();
         request.reply(brayns::EmptyMessage());

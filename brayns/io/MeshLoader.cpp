@@ -25,7 +25,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/version.h>
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <fstream>
 #include <numeric>
@@ -174,8 +174,7 @@ void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
                                   const std::string& folder,
                                   MaterialInfoList& list) const
 {
-    BRAYNS_DEBUG << "Loading " << aiScene->mNumMaterials << " materials"
-                 << std::endl;
+    Log::debug("Loading {} materials.", aiScene->mNumMaterials);
 
     list.resize(aiScene->mNumMaterials);
     for (size_t m = 0; m < aiScene->mNumMaterials; ++m)
@@ -218,8 +217,7 @@ void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
                         nullptr) == AI_SUCCESS)
                 {
                     const std::string fileName = folder + "/" + path.data;
-                    BRAYNS_DEBUG << "Loading texture: " << fileName
-                                 << std::endl;
+                    Log::debug("Loading texture: {}.", fileName);
                     material->setTexture(fileName,
                                          textureTypeMapping[textureType].type);
                 }
@@ -360,9 +358,8 @@ ModelMetadata MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
                 nonTriangulatedFaces = true;
         }
         if (nonTriangulatedFaces)
-            BRAYNS_DEBUG
-                << "Some faces are not triangulated and have been removed"
-                << std::endl;
+            Log::debug(
+                "Some faces are not triangulated and have been removed.");
         indexOffsets[id] += mesh->mNumVertices;
 
         callback.updateProgress("Post-processing...",
