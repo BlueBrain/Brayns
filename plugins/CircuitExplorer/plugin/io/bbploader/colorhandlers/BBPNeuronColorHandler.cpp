@@ -293,7 +293,6 @@ std::vector<std::string> BBPNeuronColorHandler::_getValuesForMethod(
     else if (method == methodByMorph)
         data = circuit->getMorphologyNames(_ids);
 
-    const std::unordered_set<std::string> uniques(data.begin(), data.end());
-    return std::vector<std::string>(uniques.begin(), uniques.end());
+    return data;
 }
 } // namespace bbploader

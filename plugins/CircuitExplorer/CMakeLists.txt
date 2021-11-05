@@ -41,7 +41,6 @@ set(BRAYNSCIRCUITEXPLORER_SOURCES
     plugin/api/CircuitColorHandler.cpp
     plugin/api/CircuitColorManager.cpp
     plugin/api/ColorUtils.cpp
-    plugin/api/FrameExportManager.cpp
     plugin/api/MaterialUtils.cpp
     plugin/api/VasculatureRadiiSimulation.cpp
     plugin/io/BBPLoader.cpp
@@ -57,8 +56,9 @@ set(BRAYNSCIRCUITEXPLORER_SOURCES
     plugin/io/bbploader/simulation/SpikeSimulation.cpp
     plugin/io/bbploader/simulation/handlers/CompartmentHandler.cpp
     plugin/io/bbploader/simulation/handlers/SpikeHandler.cpp
+    plugin/io/morphology/neuron/NeuronBuilder.cpp
     plugin/io/morphology/neuron/NeuronMorphology.cpp
-    plugin/io/morphology/neuron/NeuronMorphologyImporter.cpp
+    plugin/io/morphology/neuron/NeuronMorphologyPipeline.cpp
     plugin/io/morphology/neuron/builders/PrimitiveNeuronBuilder.cpp
     plugin/io/morphology/neuron/builders/SDFNeuronBuilder.cpp
     plugin/io/morphology/neuron/builders/SampleNeuronBuilder.cpp
@@ -114,7 +114,6 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     plugin/api/CircuitColorHandler.h
     plugin/api/CircuitColorManager.h
     plugin/api/ColorUtils.h
-    plugin/api/FrameExportManager.h
     plugin/api/MaterialEnums.h
     plugin/api/MaterialUtils.h
     plugin/api/VasculatureRadiiSimulation.h
@@ -143,7 +142,6 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     plugin/io/morphology/neuron/NeuronGeometryType.h
     plugin/io/morphology/neuron/NeuronMaterialMap.h
     plugin/io/morphology/neuron/NeuronMorphology.h
-    plugin/io/morphology/neuron/NeuronMorphologyImporter.h
     plugin/io/morphology/neuron/NeuronMorphologyPipeline.h
     plugin/io/morphology/neuron/NeuronSection.h
     plugin/io/morphology/neuron/builders/PrimitiveNeuronBuilder.h
@@ -206,9 +204,7 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     plugin/io/util/TransferFunctionUtils.h
     plugin/movie/MovieMaker.h
     plugin/network/adapters/ColoringInfoAdapter.h
-    plugin/network/adapters/FrameExportdapter.h
     plugin/network/adapters/MaterialAdapter.h
-    plugin/network/adapters/ODUCameraAdapter.h
     plugin/network/adapters/SetMaterialRangeAdapter.h
     plugin/network/entrypoints/AddBoxEntrypoint.h
     plugin/network/entrypoints/AddColumnEntrypoint.h
@@ -217,13 +213,10 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     plugin/network/entrypoints/AddPillEntrypoint.h
     plugin/network/entrypoints/AddSphereEntrypoint.h
     plugin/network/entrypoints/ColorCircuitEntryPoint.h
-    plugin/network/entrypoints/ExportFramesToDiskEntrypoint.h
-    plugin/network/entrypoints/GetExportFramesProgressEntrypoint.h
     plugin/network/entrypoints/GetMaterialIdsEntrypoint.h
     plugin/network/entrypoints/MakeMovieEntrypoint.h
     plugin/network/entrypoints/MaterialEntrypoint.h
     plugin/network/entrypoints/MirrorModelEntrypoint.h
-    plugin/network/entrypoints/OduCameraEntrypoint.h
     plugin/network/entrypoints/SetCircuitThicknessEntrypoint.h
     plugin/network/entrypoints/SetMaterialExtraAttributesEntrypoint.h
     plugin/network/entrypoints/SetMaterialRangeEntrypoint.h
@@ -239,8 +232,6 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     plugin/network/messages/AddSphereMessage.h
     plugin/network/messages/AvailableColoringInfoMessage.h
     plugin/network/messages/ColorCircuitMessage.h
-    plugin/network/messages/ExportFramesToDiskMessage.h
-    plugin/network/messages/GetExportFramesProgressMessage.h
     plugin/network/messages/GetMaterialIdsMessage.h
     plugin/network/messages/GetMaterialMessage.h
     plugin/network/messages/MakeMovieMessage.h

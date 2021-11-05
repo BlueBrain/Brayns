@@ -66,9 +66,7 @@ std::vector<std::string> SonataNeuronColorHandler::_getValuesForMethod(
     const std::string& method) const
 {
     const auto selection = bbp::sonata::Selection::fromValues(_ids);
-    const auto values = _config.getNodePopulation(_population)
-                            .getAttribute<std::string>(method, selection);
-    const auto unique = std::set<std::string>(values.begin(), values.end());
-    return std::vector<std::string>(unique.begin(), unique.end());
+    return _config.getNodePopulation(_population)
+        .getAttribute<std::string>(method, selection);
 }
 } // namespace sonataloader

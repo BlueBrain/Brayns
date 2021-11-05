@@ -48,6 +48,19 @@ class NeuronMorphologyPipeline
 {
 public:
     /**
+     * @brief create is a utility function to create a morphology processing
+     * pipeline with the needed stages to satisfy the given parameters
+     * @param radiusMultiplier A multiplier to apply to all morphology sample
+     * radii
+     * @param radiusOverride A value to override all morphology sample radii
+     * @param smooth a flag indicating wether the morphology should be processed
+     * to have a smooth appearance, getting rid of original sampling artifacts
+     */
+    static NeuronMorphologyPipeline create(const float radiusMultiplier,
+                                           const float radiusOverride,
+                                           const bool smooth) noexcept;
+
+    /**
      * @brief registers a processing stage into this pipeline. Pipeline stages
      * are stored and applied over a morphology in the same order that they were
      * added
@@ -68,11 +81,7 @@ public:
      * Pipeline stages are applied over a morphology in the same order that they
      * were added
      */
-    void process(NeuronMorphology& morphology) const
-    {
-        for (const auto& stage : _stages)
-            stage->process(morphology);
-    }
+    void process(NeuronMorphology& morphology) const;
 
 private:
     std::vector<std::unique_ptr<NeuronMorphologyPipelineStage>> _stages;

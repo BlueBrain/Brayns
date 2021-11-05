@@ -20,6 +20,7 @@
 
 #include <brayns/common/loader/Loader.h>
 
+#include <plugin/api/CircuitColorManager.h>
 #include <plugin/io/BBPLoaderParameters.h>
 
 #include <brion/blueConfig.h>
@@ -30,6 +31,11 @@
 class BBPLoader : public brayns::Loader<BBPLoaderParameters>
 {
 public:
+    BBPLoader(CircuitColorManager& colorManager)
+        : _colorManager(colorManager)
+    {
+    }
+
     /**
      * @brief getSupportedExtensions returns a list with supported file
      * extensions
@@ -73,4 +79,7 @@ public:
         const std::string& path, const brayns::LoaderProgress& callback,
         const BBPLoaderParameters& params, const brion::BlueConfig& config,
         brayns::Scene& scene) const;
+
+private:
+    CircuitColorManager& _colorManager;
 };

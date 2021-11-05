@@ -122,13 +122,18 @@ public:
     /** Wait until current frame is ready */
     virtual void waitReady() const {}
 
+    /**
+     * @brief return the frame index within this handler bounds that
+     * correspond to the given global frame index
+     * @param frame the global frame to be bounded
+     */
+    uint32_t getBoundedFrame(const uint32_t frame) const;
+
 private:
     uint32_t _currentFrame{std::numeric_limits<uint32_t>::max()};
     std::vector<float> _frameData;
 
 protected:
-    uint32_t _getBoundedFrame(const uint32_t frame) const;
-
     uint32_t _nbFrames{0};
     uint64_t _frameSize{0};
     double _startTime{0};

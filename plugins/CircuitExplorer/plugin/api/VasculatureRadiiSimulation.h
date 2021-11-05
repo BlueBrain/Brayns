@@ -18,9 +18,7 @@
 
 #pragma once
 
-#include <brayns/common/simulation/AbstractSimulationHandler.h>
-#include <brayns/engine/Model.h>
-#include <brayns/pluginapi/PluginAPI.h>
+#include <brayns/engine/Scene.h>
 
 /**
  * @brief The VasculatureRadiiSimulation controls the update of SONATA
@@ -33,30 +31,8 @@ class VasculatureRadiiSimulation
 {
 public:
     /**
-     * @brief attempts to register a model into the list. If must have a
-     * VasculatureRadiiHandler associated with it to succeed.
-     */
-    static void registerModel(brayns::ModelDescriptorPtr& model);
-
-    /**
-     * @brief unregister the model given its ID from this class (if the given
-     * model id corresponds to an existing model).
-     */
-    static void unregisterModel(size_t modelId);
-
-    /**
      * @brief iterates over all the registered vasculature datasets, gathering
      * the current simulation frame and updating the geometry radii with it.
      */
-    static void update();
-
-private:
-    struct SimulationTracker
-    {
-        brayns::ModelDescriptor* model{nullptr};
-        uint32_t lastFrame{std::numeric_limits<uint32_t>::max()};
-    };
-
-    static std::vector<SimulationTracker> _vasculatureModels;
-    static uint32_t _lastFrame;
+    static void update(const uint32_t frame, brayns::Scene& scene);
 };

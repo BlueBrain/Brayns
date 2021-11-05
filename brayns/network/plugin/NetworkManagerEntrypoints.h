@@ -33,7 +33,9 @@
 #include <brayns/network/entrypoints/ClearLightsEntrypoint.h>
 #include <brayns/network/entrypoints/EnvironmentMapEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
+#include <brayns/network/entrypoints/ExportFramesToDiskEntryPoint.h>
 #include <brayns/network/entrypoints/GetClipPlanesEntrypoint.h>
+#include <brayns/network/entrypoints/GetExportFramesProgressEntrypoint.h>
 #include <brayns/network/entrypoints/GetInstancesEntrypoint.h>
 #include <brayns/network/entrypoints/GetLightsEntrypoint.h>
 #include <brayns/network/entrypoints/GetLoadersEntrypoint.h>
@@ -140,6 +142,8 @@ public:
         plugin.add<ClearLightsEntrypoint>();
         plugin.add<CancelEntrypoint>();
         plugin.add<RegistryEntrypoint>();
+        plugin.add<ExportFramesToDiskEntrypoint>();
+        plugin.add<GetExportFramesProgressEntrypoint>();
     }
 };
 } // namespace brayns

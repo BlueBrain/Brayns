@@ -24,6 +24,18 @@ CircuitColorHandler* getHandler(
     const brayns::ModelDescriptor& model,
     const std::vector<std::unique_ptr<CircuitColorHandler>>& handlers)
 {
+    const auto it =
+        std::find_if(handlers.begin(), handlers.end(),
+                     [&](const CircuitColorHandler::Ptr& cch) {
+                         return cch->getModelID() == model.getModelID();
+                     });
+
+    if (it == handlers.end())
+        throw CircuitModelNotFoundException();
+
+    return it->get();
+
+    /*
     for (auto& handler : handlers)
     {
         if (handler->getModelID() == model.getModelID())
@@ -31,11 +43,9 @@ CircuitColorHandler* getHandler(
     }
 
     throw CircuitModelNotFoundException();
+    */
 }
 } // namespace
-
-std::vector<std::unique_ptr<CircuitColorHandler>>
-    CircuitColorManager::_handlers;
 
 void CircuitColorManager::registerHandler(
     brayns::ModelDescriptorPtr& model,
@@ -46,8 +56,8 @@ void CircuitColorManager::registerHandler(
     handler->setModel(model.get());
     handler->setElements(ids, std::move(elements));
 
-    model->addOnRemoved([](const brayns::ModelDescriptor& model) {
-        CircuitColorManager::unregisterHandler(model);
+    model->addOnRemoved([ccmPtr = this](const brayns::ModelDescriptor& model) {
+        ccmPtr->unregisterHandler(model);
     });
 
     handler->initialize();

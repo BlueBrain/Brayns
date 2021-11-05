@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2021 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: nadir.romanguerrero@epfl.ch
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,24 +21,11 @@
 
 #pragma once
 
-#include <brayns/json/MessageAdapter.h>
-
-#include <plugin/api/CameraUtils.h>
+#include <brayns/json/Message.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(ODUCameraInformation)
-BRAYNS_ADAPTER_NAMED_ENTRY("origin", origin,
-                           "3D Global position at which to position the camera")
-BRAYNS_ADAPTER_NAMED_ENTRY(
-    "direction", direction,
-    "3D vector indicating the direction the camera is facing")
-BRAYNS_ADAPTER_NAMED_ENTRY("up", up,
-                           "3D vector indicating the camera up direction to "
-                           "build the orthornormal basis")
-BRAYNS_ADAPTER_NAMED_ENTRY("aperture_radius", apertureRadius,
-                           "Camera lens aperture radius (in mm)")
-BRAYNS_ADAPTER_NAMED_ENTRY("focus_distance", focusDistance,
-                           "Camera focus distance (in world units)")
-BRAYNS_ADAPTER_END()
+BRAYNS_MESSAGE_BEGIN(GetExportFramesProgressMessage)
+BRAYNS_MESSAGE_ENTRY(double, progress, "Progress of the last export 0-1")
+BRAYNS_MESSAGE_END()
 } // namespace brayns

@@ -32,6 +32,11 @@ class ColorCircuitByIdEntrypoint
     : public brayns::Entrypoint<ColorCircuitByIdMessage, brayns::EmptyMessage>
 {
 public:
+    ColorCircuitByIdEntrypoint(CircuitColorManager& manager)
+        : _manager(manager)
+    {
+    }
+
     virtual std::string getName() const override
     {
         return "color-circuit-by-id";
@@ -53,8 +58,7 @@ public:
             auto& scene = getApi().getScene();
             const auto& descriptor =
                 brayns::ExtractModel::fromId(scene, params.model_id);
-            CircuitColorManager::updateColorsById(descriptor,
-                                                  params.color_info);
+            _manager.updateColorsById(descriptor, params.color_info);
             scene.markModified();
             getApi().triggerRender();
         }
@@ -70,6 +74,9 @@ public:
 
         request.reply(brayns::EmptyMessage());
     }
+
+private:
+    CircuitColorManager& _manager;
 };
 
 class ColorCircuitBySingleColorEntrypoint
@@ -77,6 +84,11 @@ class ColorCircuitBySingleColorEntrypoint
                                 brayns::EmptyMessage>
 {
 public:
+    ColorCircuitBySingleColorEntrypoint(CircuitColorManager& manager)
+        : _manager(manager)
+    {
+    }
+
     virtual std::string getName() const override
     {
         return "color-circuit-by-single-color";
@@ -95,7 +107,7 @@ public:
             auto& scene = getApi().getScene();
             const auto& descriptor =
                 brayns::ExtractModel::fromId(scene, params.model_id);
-            CircuitColorManager::updateSingleColor(descriptor, params.color);
+            _manager.updateSingleColor(descriptor, params.color);
             scene.markModified();
             getApi().triggerRender();
         }
@@ -106,6 +118,9 @@ public:
         }
         request.reply(brayns::EmptyMessage());
     }
+
+private:
+    CircuitColorManager& _manager;
 };
 
 class AvailableColorMethodsEntrypoint
@@ -113,6 +128,11 @@ class AvailableColorMethodsEntrypoint
                                 AvailableColorMethodsMessage>
 {
 public:
+    AvailableColorMethodsEntrypoint(CircuitColorManager& manager)
+        : _manager(manager)
+    {
+    }
+
     virtual std::string getName() const override
     {
         return "get-circuit-color-methods";
@@ -131,8 +151,7 @@ public:
         const auto& descriptor = brayns::ExtractModel::fromId(scene, params.id);
         try
         {
-            request.reply(
-                {CircuitColorManager::getAvailableMethods(descriptor)});
+            request.reply({_manager.getAvailableMethods(descriptor)});
         }
         catch (const CircuitModelNotFoundException&)
         {
@@ -140,6 +159,9 @@ public:
                 1, "The given ID does not correspond to any circuit model");
         }
     }
+
+private:
+    CircuitColorManager& _manager;
 };
 
 class AvailableColorMethodVariablesEntrypoint
@@ -147,6 +169,11 @@ class AvailableColorMethodVariablesEntrypoint
                                 AvailableColorMethodVariablesMessage>
 {
 public:
+    AvailableColorMethodVariablesEntrypoint(CircuitColorManager& manager)
+        : _manager(manager)
+    {
+    }
+
     virtual std::string getName() const override
     {
         return "get-circuit-color-method-variables";
@@ -168,8 +195,7 @@ public:
         try
         {
             request.reply(
-                {CircuitColorManager::getMethodVariables(descriptor,
-                                                         params.method)});
+                {_manager.getMethodVariables(descriptor, params.method)});
         }
         catch (const CircuitModelNotFoundException&)
         {
@@ -184,6 +210,9 @@ public:
                 "exists for the given model");
         }
     }
+
+private:
+    CircuitColorManager& _manager;
 };
 
 class ColorCircuitByMethodEntrypoint
@@ -191,6 +220,11 @@ class ColorCircuitByMethodEntrypoint
                                 brayns::EmptyMessage>
 {
 public:
+    ColorCircuitByMethodEntrypoint(CircuitColorManager& manager)
+        : _manager(manager)
+    {
+    }
+
     virtual std::string getName() const override
     {
         return "color-circuit-by-method";
@@ -213,8 +247,7 @@ public:
             brayns::ExtractModel::fromId(scene, params.model_id);
         try
         {
-            CircuitColorManager::updateColors(descriptor, params.method,
-                                              params.color_info);
+            _manager.updateColors(descriptor, params.method, params.color_info);
             scene.markModified();
             getApi().triggerRender();
         }
@@ -239,4 +272,7 @@ public:
 
         request.reply(brayns::EmptyMessage());
     }
+
+private:
+    CircuitColorManager& _manager;
 };
