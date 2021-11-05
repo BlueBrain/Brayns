@@ -182,9 +182,8 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
             // Create the color handler
             auto edgeColor =
                 PopulationColorManager::createEdgeColorHandler(network, edge);
-            CircuitColorManager::registerHandler(result.back(),
-                                                 std::move(edgeColor), nodeIDs,
-                                                 std::move(edgeMaterialMaps));
+            _colorManager.registerHandler(result.back(), std::move(edgeColor),
+                                          nodeIDs, std::move(edgeMaterialMaps));
 
             brayns::Log::info("[CE] \tLoaded edge population {}.", edgeName);
         }
@@ -217,9 +216,8 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
         auto nodeColor =
             PopulationColorManager::createNodeColorHandler(network,
                                                            nodeSettings);
-        CircuitColorManager::registerHandler(result.back(),
-                                             std::move(nodeColor), nodeIDs,
-                                             std::move(materialMaps));
+        _colorManager.registerHandler(result.back(), std::move(nodeColor),
+                                      nodeIDs, std::move(materialMaps));
 
         brayns::Log::info("[CE] Loaded node population {}.", nodeName);
     }

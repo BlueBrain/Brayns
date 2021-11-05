@@ -23,8 +23,6 @@
 #include <brayns/json/MessageAdapter.h>
 #include <brayns/utils/StringUtils.h>
 
-#include <plugin/io/morphology/neuron/NeuronMorphologyImporter.h>
-
 BRAYNS_MESSAGE_BEGIN(NeuronMorphologyLoaderParameters)
 BRAYNS_MESSAGE_ENTRY(std::string, geometry_mode,
                      "Type of geometry to use to display the cells. Possible "

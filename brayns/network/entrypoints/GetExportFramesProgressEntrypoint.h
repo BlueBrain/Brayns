@@ -21,47 +21,46 @@
 
 #pragma once
 
-#include <brayns/engine/Camera.h>
+#include <brayns/engine/FrameExporter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/messages/GetExportFramesProgressMessage.h>
 
-#include <plugin/api/CameraUtils.h>
-#include <plugin/network/adapters/ODUCameraAdapter.h>
-
-class GetOduCameraEntrypoint
-    : public brayns::Entrypoint<brayns::EmptyMessage, ODUCameraInformation>
+namespace brayns
+{
+class GetExportFramesProgressEntrypoint
+    : public Entrypoint<EmptyMessage, GetExportFramesProgressMessage>
 {
 public:
-    virtual std::string getName() const override { return "get-odu-camera"; }
+    virtual std::string getName() const override
+    {
+        return "get-export-frames-progress";
+    }
 
     virtual std::string getDescription() const override
     {
-        return "Get the properties of the current camera";
+        return "Get the progress of the last issued frame export";
     }
 
     virtual void onRequest(const Request& request) override
     {
-        auto& camera = getApi().getCamera();
-        request.reply(CameraUtils::getCameraAsODU(camera));
+        double progress{};
+        try
+        {
+            auto& engine = getApi().getEngine();
+            auto& frameExporter = engine.getFrameExporter();
+            progress = frameExporter.getExportProgress();
+        }
+        catch (const FrameExportNotRunningException&)
+        {
+            throw EntrypointException(1,
+                                      "There is no frame export in progress");
+        }
+        catch (const std::runtime_error& e)
+        {
+            throw EntrypointException(2, e.what());
+        }
+
+        request.reply({progress});
     }
 };
-
-class SetOduCameraEntrypoint
-    : public brayns::Entrypoint<ODUCameraInformation, brayns::EmptyMessage>
-{
-public:
-    virtual std::string getName() const override { return "set-odu-camera"; }
-
-    virtual std::string getDescription() const override
-    {
-        return "Set the properties of the current camera";
-    }
-
-    virtual void onRequest(const Request& request) override
-    {
-        auto params = request.getParams();
-        auto& camera = getApi().getCamera();
-        CameraUtils::updateCamera(camera, params);
-        triggerRender();
-        request.reply(brayns::EmptyMessage());
-    }
-};
+} // namespace brayns

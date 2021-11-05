@@ -18,70 +18,40 @@
 
 #include "VasculatureRadiiSimulation.h"
 
+#include <brayns/engine/Model.h>
+
 #include <plugin/io/sonataloader/reports/handlers/VasculatureRadiiHandler.h>
 
-std::vector<VasculatureRadiiSimulation::SimulationTracker>
-    VasculatureRadiiSimulation::_vasculatureModels;
-
-void VasculatureRadiiSimulation::registerModel(
-    brayns::ModelDescriptorPtr& model)
+namespace
 {
-    // Must have simulation
-    auto handler = model->getModel().getSimulationHandler();
-    if (!handler)
-        return;
-
-    // And must be a vasculature radii handler
-    auto radiiHandler =
-        dynamic_cast<sonataloader::VasculatureRadiiHandler*>(handler.get());
-    if (radiiHandler == nullptr)
-        return;
-
-    const auto maxIndex = radiiHandler->getRadiiFrameSize() - 1;
-    for (auto& sdfGeometry : model->getModel().getSDFGeometryData().geometries)
-    {
-        if (sdfGeometry.userData > maxIndex)
-            throw std::runtime_error(
-                "VasculatureRadiiSimulation: Vasculature geometry is "
-                "mapped beyond frame size");
-    }
-
-    _vasculatureModels.push_back(
-        {model.get(), std::numeric_limits<uint32_t>::max()});
+sonataloader::VasculatureRadiiHandler* toRadiiHandler(
+    brayns::AbstractSimulationHandlerPtr& handler)
+{
+    return dynamic_cast<sonataloader::VasculatureRadiiHandler*>(handler.get());
 }
+} // namespace
 
-void VasculatureRadiiSimulation::unregisterModel(size_t modelId)
+void VasculatureRadiiSimulation::update(const uint32_t frame,
+                                        brayns::Scene& scene)
 {
-    auto it = std::find_if(_vasculatureModels.begin(), _vasculatureModels.end(),
-                           [modId = modelId](const SimulationTracker& st) {
-                               return st.model->getModelID() == modId;
-                           });
+    const auto& models = scene.getModels();
 
-    if (it != _vasculatureModels.end())
-        _vasculatureModels.erase(it);
-}
-
-void VasculatureRadiiSimulation::update()
-{
-    for (size_t i = 0; i < _vasculatureModels.size(); ++i)
+#pragma omp parallel for
+    for (size_t i = 0; i < models.size(); ++i)
     {
-        auto& model = _vasculatureModels[i].model->getModel();
-        auto handler = static_cast<sonataloader::VasculatureRadiiHandler*>(
-            model.getSimulationHandler().get());
+        const auto& model = models[i];
+        auto& modelObj = model->getModel();
+        auto handler = modelObj.getSimulationHandler();
 
-        const auto boundedFrame = handler->getLastBoundedFrame();
-        if (boundedFrame != _vasculatureModels[i].lastFrame)
+        if (auto radiiHandler = toRadiiHandler(handler))
         {
-            const auto radii = handler->getCurrentRadiiFrame();
-
-            for (auto& sdfGeometry : model.getSDFGeometryData().geometries)
+            const auto& frameData = radiiHandler->getCurrentRadiiFrame();
+            for (auto& sdfGeometry : modelObj.getSDFGeometryData().geometries)
             {
-                sdfGeometry.r0 = radii[sdfGeometry.userData];
-                sdfGeometry.r1 = radii[sdfGeometry.userData];
+                sdfGeometry.r0 = frameData[sdfGeometry.userData];
+                sdfGeometry.r1 = frameData[sdfGeometry.userData];
             }
-
-            model.commitGeometry();
-            _vasculatureModels[i].lastFrame = boundedFrame;
+            modelObj.commitGeometry();
         }
     }
 }

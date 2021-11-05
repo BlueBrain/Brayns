@@ -20,6 +20,7 @@
 
 #include <brayns/common/loader/Loader.h>
 
+#include <plugin/api/CircuitColorManager.h>
 #include <plugin/io/SonataLoaderParameters.h>
 
 /**
@@ -28,6 +29,11 @@
 class SonataLoader : public brayns::Loader<SonataLoaderParameters>
 {
 public:
+    SonataLoader(CircuitColorManager& colorManager)
+        : _colorManager(colorManager)
+    {
+    }
+
     /**
      * @brief getSupportedExtensions returns a list with supported file
      * extensions
@@ -59,4 +65,7 @@ public:
     std::vector<brayns::ModelDescriptorPtr> importFromFile(
         const std::string& path, const brayns::LoaderProgress& callback,
         const SonataLoaderParameters& input, brayns::Scene& scene) const final;
+
+private:
+    CircuitColorManager& _colorManager;
 };

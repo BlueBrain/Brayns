@@ -29,13 +29,13 @@
 
 std::vector<std::string> SonataNGVLoader::getSupportedExtensions() const
 {
-    return _internal.getSupportedExtensions();
+    return _internal->getSupportedExtensions();
 }
 
 bool SonataNGVLoader::isSupported(const std::string& filename,
                                   const std::string& extension) const
 {
-    return _internal.isSupported(filename, extension);
+    return _internal->isSupported(filename, extension);
 }
 
 std::string SonataNGVLoader::getName() const
@@ -74,8 +74,8 @@ std::vector<brayns::ModelDescriptorPtr> SonataNGVLoader::importFromFile(
 
         // Import the model
         auto models =
-            _internal.importFromBlueConfig(path, cb, population.circuit_config,
-                                           *config, scene);
+            _internal->importFromBlueConfig(path, cb, population.circuit_config,
+                                            *config, scene);
         for (auto& model : models)
             model->setName(name + " - " + model->getName());
         result.insert(result.end(), models.begin(), models.end());

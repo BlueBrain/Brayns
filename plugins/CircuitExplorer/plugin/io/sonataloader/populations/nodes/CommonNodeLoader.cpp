@@ -18,6 +18,8 @@
 
 #include "CommonNodeLoader.h"
 
+#include <plugin/io/morphology/neuron/NeuronBuilder.h>
+#include <plugin/io/morphology/neuron/NeuronMorphologyPipeline.h>
 #include <plugin/io/sonataloader/data/SonataConfig.h>
 
 #include <future>
@@ -41,21 +43,31 @@ std::vector<MorphologyInstance::Ptr> CommonNodeLoader::loadNodes(
     for (size_t i = 0; i < nodesSize; ++i)
         morphologyMap[morphologyNames[i]].push_back(i);
 
-    NeuronMorphologyImporter::ImportSettings config;
-    config.radiusMultiplier = lc.neuron_morphology_parameters.radius_multiplier;
-    config.radiusOverride = lc.neuron_morphology_parameters.radius_override;
-    config.builderName = lc.neuron_morphology_parameters.geometry_mode;
-    config.loadAxon = lc.neuron_morphology_parameters.load_axon;
-    config.loadDendrites = lc.neuron_morphology_parameters.load_dendrites;
-    config.loadSoma = lc.neuron_morphology_parameters.load_soma;
-    const NeuronMorphologyImporter importer(config);
+    const auto& morphSettings = lc.neuron_morphology_parameters;
+    const auto& geometryMode = morphSettings.geometry_mode;
+    const auto radMultiplier = morphSettings.radius_multiplier;
+    const auto radOverride = morphSettings.radius_override;
+    const auto loadSoma = morphSettings.load_soma;
+    const auto loadAxon = morphSettings.load_axon;
+    const auto loadDend = morphSettings.load_dendrites;
+
+    const NeuronBuilderTable builderTable;
+    const auto& builder = builderTable.getBuilder(geometryMode);
+    const NeuronMorphologyPipeline pipeline =
+        NeuronMorphologyPipeline::create(radMultiplier, radOverride,
+                                         geometryMode == "smooth" &&
+                                             (loadAxon || loadDend));
 
     const auto morphPath = SonataConfig::resolveMorphologyPath(
         networkData.config.getNodePopulationProperties(lc.node_population));
 
     const auto loadFn = [&](const std::string& name,
                             const std::vector<size_t>& indices) {
-        const auto instantiable = importer.import(morphPath.buildPath(name));
+        const auto path = morphPath.buildPath(name);
+        NeuronMorphology morphology(path, loadSoma, loadAxon, loadDend);
+        pipeline.process(morphology);
+        const auto instantiable = builder.build(morphology);
+
         for (const auto idx : indices)
             result[idx] =
                 instantiable->instantiate(positions[idx], rotations[idx]);

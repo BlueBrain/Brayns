@@ -59,18 +59,17 @@ std::string getNodePopulation(const bbp::sonata::CircuitConfig& config,
     return afferent ? edges.target() : edges.source();
 }
 
-const std::vector<std::pair<const char*, const char*>>&
-    methodAttribMapping() noexcept
+std::vector<std::pair<const char*, const char*>> methodAttribMapping() noexcept
 {
-    static const std::vector<std::pair<const char*, const char*>>
-        possibleMethods = {{methodByMorphology, attribMorphology},
-                           {methodByLayer, attribLayer},
-                           {methodByMorphClass, attribMorphClass},
-                           {methodByEType, attribEType},
-                           {methodByMType, attribMType},
-                           {methodBySynapseClass, attribSynapseClass},
-                           {methodByRegion, attribRegion},
-                           {methodByHemisphere, attribHemisphere}};
+    const std::vector<std::pair<const char*, const char*>> possibleMethods = {
+        {methodByMorphology, attribMorphology},
+        {methodByLayer, attribLayer},
+        {methodByMorphClass, attribMorphClass},
+        {methodByEType, attribEType},
+        {methodByMType, attribMType},
+        {methodBySynapseClass, attribSynapseClass},
+        {methodByRegion, attribRegion},
+        {methodByHemisphere, attribHemisphere}};
     return possibleMethods;
 }
 

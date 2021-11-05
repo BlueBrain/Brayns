@@ -20,15 +20,13 @@
 
 #include <stdexcept>
 
-#include <brayns/pluginapi/PluginAPI.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Renderer.h>
+#include <brayns/parameters/ParametersManager.h>
 
-#include <plugin/api/CameraUtils.h>
-#include <plugin/network/messages/ExportFramesToDiskMessage.h>
-
-// TODO: Frame export should be a core feature, not a plugin add-on. MOVE TO
-// CORE
-// ==============================================================================
-
+namespace brayns
+{
 /**
  * @brief Exception thrown when a frame export request does not have any
  * keyframe information
@@ -72,13 +70,14 @@ public:
  * @brief The FrameExportManager class manages frame export to disk requests
  * made through the CircutiExplorer plugin
  */
-class FrameExportManager
+class FrameExporter
 {
 public:
     struct KeyFrame
     {
         uint64_t frameIndex;
-        ODUCameraInformation camera;
+        Camera camera;
+        PropertyMap cameraParameters;
     };
 
     struct ExportInfo
@@ -92,27 +91,43 @@ public:
     };
 
 public:
-    static void startNewExport(brayns::PluginAPI& api, ExportInfo&& input);
+    void startNewExport(ExportInfo&& input);
 
-    static void preRender(brayns::PluginAPI& api);
-    static void postRender(brayns::PluginAPI& api);
+    void preRender(Camera& camera, Renderer& renderer, FrameBuffer& frameBuffer,
+                   ParametersManager& parameters);
+    void postRender(FrameBuffer& frameBuffer);
 
-    static double getExportProgress();
-
-private:
-    static void _start(brayns::PluginAPI& api) noexcept;
-    static void _stop(brayns::PluginAPI& api) noexcept;
-    static void _writeImageToDisk(brayns::PluginAPI& api,
-                                  const uint32_t frameNumberName);
+    double getExportProgress();
 
 private:
-    static bool _exportRunning;
-    static ExportInfo _currentExport;
-    static uint64_t _currentExportKeyFrameIndex;
-    static uint32_t _currentExportFrameAccumulation;
-    static bool _currentExportError;
-    static std::string _currentExportErrorMessage;
+    void _saveState(Camera& camera, ParametersManager& parameters);
+    void _restoreState(Camera& camera, ParametersManager& parameters);
 
-    static bool _originalAccumulationSetting;
-    static uint32_t _originalAccumulationSize;
+    void _start(Camera& camera, Renderer& renderer, FrameBuffer& framebuffer,
+                ParametersManager& parameters) noexcept;
+    void _stop(Camera& camera, Renderer& renderer,
+               ParametersManager& parameters) noexcept;
+    void _writeImageToDisk(FrameBuffer& frameBuffer,
+                           const uint32_t frameNumberName);
+
+private:
+    struct OriginalState
+    {
+        bool hasAccumulation{false};
+        uint32_t accumulationSize{0u};
+        Camera camera;
+        PropertyMap cameraProperties;
+    };
+
+    OriginalState _originalState;
+
+    // Flags when an export is requested after the previous preRender()
+    bool _exportRequested{false};
+    bool _exportRunning{false};
+    ExportInfo _currentExport{};
+    uint64_t _currentExportKeyFrameIndex{0u};
+    uint32_t _currentExportFrameAccumulation{0u};
+    bool _currentExportError{false};
+    std::string _currentExportErrorMessage{};
 };
+} // namespace brayns

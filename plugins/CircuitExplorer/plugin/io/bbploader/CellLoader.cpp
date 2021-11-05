@@ -18,7 +18,8 @@
 
 #include "CellLoader.h"
 
-#include <plugin/io/morphology/neuron/NeuronMorphologyImporter.h>
+#include <plugin/io/morphology/neuron/NeuronBuilder.h>
+#include <plugin/io/morphology/neuron/NeuronMorphologyPipeline.h>
 
 #include <future>
 
@@ -38,20 +39,28 @@ std::vector<MorphologyInstance::Ptr> CellLoader::load(
     const auto positions = circuit.getPositions(gids);
     const auto rotations = circuit.getRotations(gids);
 
-    NeuronMorphologyImporter::ImportSettings config;
-    config.radiusMultiplier = lc.neuron_morphology_parameters.radius_multiplier;
-    config.radiusOverride = lc.neuron_morphology_parameters.radius_override;
-    config.builderName = lc.neuron_morphology_parameters.geometry_mode;
-    config.loadAxon = lc.neuron_morphology_parameters.load_axon;
-    config.loadDendrites = lc.neuron_morphology_parameters.load_dendrites;
-    config.loadSoma = lc.neuron_morphology_parameters.load_soma;
-    const NeuronMorphologyImporter importer(config);
+    const auto& morphSettings = lc.neuron_morphology_parameters;
+    const auto& geometryMode = morphSettings.geometry_mode;
+    const auto radMultiplier = morphSettings.radius_multiplier;
+    const auto radOverride = morphSettings.radius_override;
+    const auto loadSoma = morphSettings.load_soma;
+    const auto loadAxon = morphSettings.load_axon;
+    const auto loadDend = morphSettings.load_dendrites;
+
+    const NeuronBuilderTable builderTable;
+    const auto& builder = builderTable.getBuilder(geometryMode);
+    const NeuronMorphologyPipeline pipeline =
+        NeuronMorphologyPipeline::create(radMultiplier, radOverride,
+                                         geometryMode == "smooth" &&
+                                             (loadAxon || loadDend));
 
     std::vector<MorphologyInstance::Ptr> cells(gids.size());
 
     const auto loadFn = [&](const std::string& path,
                             const std::vector<size_t>& indices) {
-        const auto instantiable = importer.import(path);
+        NeuronMorphology morphology(path, loadSoma, loadAxon, loadDend);
+        pipeline.process(morphology);
+        const auto instantiable = builder.build(morphology);
         for (const auto idx : indices)
             cells[idx] =
                 instantiable->instantiate(positions[idx], rotations[idx]);

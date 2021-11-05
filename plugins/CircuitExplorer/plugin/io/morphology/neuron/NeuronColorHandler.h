@@ -202,6 +202,7 @@ private:
         }
         else
         {
+            std::cout << "HERE" << std::endl;
             const auto values = _getValuesForMethod(method);
 
             ColorDeck deck;
