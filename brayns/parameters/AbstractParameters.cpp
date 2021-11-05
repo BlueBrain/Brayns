@@ -24,6 +24,6 @@ namespace brayns
 {
 void AbstractParameters::print()
 {
-    BRAYNS_INFO << "-= " << _name << " parameters =-" << std::endl;
+    Log::info("-= {} parameters =-", _name);
 }
 } // namespace brayns

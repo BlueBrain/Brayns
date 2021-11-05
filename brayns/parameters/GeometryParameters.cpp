@@ -19,7 +19,7 @@
  */
 
 #include "GeometryParameters.h"
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/common/types.h>
 
 namespace
@@ -82,8 +82,7 @@ void GeometryParameters::parse(const po::variables_map& vm)
 void GeometryParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Memory mode                : "
-                << (_memoryMode == MemoryMode::shared ? "Shared" : "Replicated")
-                << std::endl;
+    Log::info("Memory mode                : {}",
+              _memoryMode == MemoryMode::shared ? "Shared" : "Replicated");
 }
 } // namespace brayns

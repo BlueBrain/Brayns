@@ -18,11 +18,11 @@
 
 #include "NeuronMorphologyLoader.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
-#include <plugin/api/Log.h>
 #include <plugin/io/NeuronMorphologyLoaderParameters.h>
 #include <plugin/io/morphology/neuron/NeuronMorphologyImporter.h>
 
@@ -69,7 +69,7 @@ std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromFile(
     const NeuronMorphologyLoaderParameters& input, brayns::Scene& scene) const
 {
     brayns::Timer timer;
-    PLUGIN_INFO << getName() << ": Loading " << path << std::endl;
+    brayns::Log::info("[CE] {}: loading {}.", getName(), path);
     callback.updateProgress("Loading " + path, 0.f);
 
     checkInput(input);
@@ -100,7 +100,7 @@ std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromFile(
                                                   brayns::ModelMetadata());
     modelDescriptor->setTransformation(transformation);
 
-    PLUGIN_INFO << getName() << ": Done in " << timer.elapsed() << " second(s)"
-                << std::endl;
+    brayns::Log::info("[CE] {}: done in {} second(s).", timer.elapsed());
+
     return {modelDescriptor};
 }

@@ -23,7 +23,7 @@
 
 #include <string>
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <brayns/network/entrypoint/EntrypointException.h>
 #include <brayns/network/json/MessageFactory.h>
@@ -262,8 +262,8 @@ private:
         }
         catch (const ConnectionClosedException& e)
         {
-            BRAYNS_INFO << "Connection closed during request processing: "
-                        << e.what() << ".\n";
+            Log::info("Connection closed during request processing: {}.",
+                      e.what());
         }
         catch (const std::exception& e)
         {
@@ -271,7 +271,7 @@ private:
         }
         catch (...)
         {
-            BRAYNS_ERROR << "Unknown error in request processing.\n";
+            Log::error("Unknown error in request processing.");
             _error(0, "Unknown error", {});
         }
     }

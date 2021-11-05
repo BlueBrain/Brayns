@@ -16,11 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <plugin/api/Log.h>
-
 #include "CircuitExplorerSimulationRenderer.h"
 #include "CircuitExplorerSimulationRenderer_ispc.h"
 
+#include <brayns/common/Log.h>
 #include <engines/ospray/ispc/geometry/Cones.h>
 #include <engines/ospray/ispc/geometry/SDFGeometries.h>
 

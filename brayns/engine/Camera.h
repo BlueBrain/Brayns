@@ -126,6 +126,4 @@ private:
 
     std::string _bufferTarget;
 };
-
-std::ostream& operator<<(std::ostream& os, Camera& camera);
 } // namespace brayns

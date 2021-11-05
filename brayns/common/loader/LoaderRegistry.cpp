@@ -20,7 +20,7 @@
 
 #include "LoaderRegistry.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/utils/Filesystem.h>
 
 namespace brayns
@@ -30,7 +30,7 @@ void LoaderRegistry::registerLoader(std::unique_ptr<AbstractLoader> loader)
     _loaderInfos.push_back({loader->getName(), loader->getSupportedExtensions(),
                             loader->getInputParametersSchema()});
 
-    BRAYNS_INFO << "Registering loader " << loader->getName() << "\n";
+    brayns::Log::info("Registering loader {}.", loader->getName());
 
     _loaders.push_back(std::move(loader));
 }

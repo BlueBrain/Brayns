@@ -20,6 +20,8 @@
 
 #include "ParametersManager.h"
 
+#include <iostream>
+
 #include <brayns/parameters/AbstractParameters.h>
 #include <brayns/version.h>
 
@@ -181,7 +183,7 @@ void ParametersManager::_parse(int argc, const char** argv)
     }
     catch (const po::error& e)
     {
-        BRAYNS_ERROR << e.what() << std::endl;
+        Log::error(e.what());
         exit(EXIT_FAILURE);
     }
 }

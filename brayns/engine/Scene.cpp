@@ -20,8 +20,8 @@
 
 #include "Scene.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/common/Transformation.h>
-#include <brayns/common/log.h>
 #include <brayns/common/scene/ClipPlane.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/engine/Material.h>
@@ -350,7 +350,7 @@ void Scene::visitModels(const std::function<void(Model&)>& functor)
 
 void Scene::buildDefault()
 {
-    BRAYNS_INFO << "Building default Cornell Box scene" << std::endl;
+    Log::info("Building default Cornell Box scene.");
 
     auto model = createModel();
     const Vector3f WHITE = {1.f, 1.f, 1.f};
@@ -486,8 +486,7 @@ bool Scene::setEnvironmentMap(const std::string& envMap)
         }
         catch (const std::runtime_error& e)
         {
-            BRAYNS_DEBUG << "Cannot load environment map: " << e.what()
-                         << std::endl;
+            Log::debug("Cannot load environment map: {}.", e.what());
             _backgroundMaterial->clearTextures();
             success = false;
         }
@@ -604,13 +603,6 @@ void Scene::_updateAnimationParameters()
         ap.removeIsReadyCallback();
     else
     {
-        // Set the frame adjuster
-        for (auto& handler : handlers)
-        {
-            if (handler->getDt() != smallestDt)
-                handler->setFrameAdjuster(smallestDt / handler->getDt());
-        }
-
         ap.setIsReadyCallback([handlersV = handlers] {
             for (auto handler : handlersV)
             {

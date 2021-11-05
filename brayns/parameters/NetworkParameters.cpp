@@ -21,7 +21,7 @@
 
 #include "NetworkParameters.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 namespace brayns
 {
@@ -56,14 +56,13 @@ NetworkParameters::NetworkParameters()
 void NetworkParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << std::boolalpha;
-    BRAYNS_INFO << "Client mode               :" << _client;
-    BRAYNS_INFO << "\nSecure                    :" << _secure;
-    BRAYNS_INFO << "\nMax simultaneous clients  :" << _maxClients;
-    BRAYNS_INFO << "\nURI                       :" << _uri;
-    BRAYNS_INFO << "\nPrivate key file          :" << _privateKeyFile;
-    BRAYNS_INFO << "\nPrivate key passphrase    :" << _privateKeyPassphrase;
-    BRAYNS_INFO << "\nCertificate file          :" << _certificateFile;
-    BRAYNS_INFO << "\nCA location               :" << _caLocation;
+    Log::info("Client mode               : {}", _client);
+    Log::info("\nSecure                    : {}", _secure);
+    Log::info("\nMax simultaneous clients  : {}", _maxClients);
+    Log::info("\nURI                       : {}", _uri);
+    Log::info("\nPrivate key file          : {}", _privateKeyFile);
+    Log::info("\nPrivate key passphrase    : {}", _privateKeyPassphrase);
+    Log::info("\nCertificate file          : {}", _certificateFile);
+    Log::info("\nCA location               : {}", _caLocation);
 }
 } // namespace brayns

@@ -22,7 +22,7 @@
 
 #include <glm/gtx/matrix_decompose.hpp>
 
-#include <plugin/api/Log.h>
+#include <brayns/common/Log.h>
 
 namespace sonataloader
 {
@@ -100,8 +100,9 @@ std::string SonataCells::getPopulationType(const Nodes& nodes)
     // itself.
     // Test data has it as dataset of the population
 
-    PLUGIN_WARN << "SonataCells::getPopulationType(): Extracted from "
-                   "pouplation dataset\n";
+    brayns::Log::warn(
+        "[CE] SonataCells::getPopulationType(): Extracted from population "
+        "dataset.");
 
     // Library enum
     // checkEnums(nodes, {enumModelType});

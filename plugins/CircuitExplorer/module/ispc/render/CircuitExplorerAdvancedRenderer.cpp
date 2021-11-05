@@ -18,7 +18,7 @@
 
 #include "CircuitExplorerAdvancedRenderer.h"
 
-#include <plugin/api/Log.h>
+#include <brayns/common/Log.h>
 
 // ospray
 #include <ospray/SDK/common/Data.h>

@@ -16,12 +16,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <plugin/api/Log.h>
+#include <brayns/common/Log.h>
 
 namespace ospray
 {
 extern "C" void ospray_init_module_braynsCircuitExplorer()
 {
-    PLUGIN_INFO << "Initializing circuit explorer module" << std::endl;
+    brayns::Log::info("Initializing circuit explorer module.");
 }
 } // namespace ospray

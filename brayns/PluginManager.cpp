@@ -20,7 +20,7 @@
 
 #include "PluginManager.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/utils/StringUtils.h>
 
@@ -133,12 +133,12 @@ void PluginManager::_loadPlugin(const char* name, int argc, const char* argv[])
         {
             _extensions.emplace_back(plugin);
             _libs.push_back(std::move(library));
-            BRAYNS_INFO << "Loaded plugin '" << name << "'" << std::endl;
+            Log::info("Loaded plugin '{}'.", name);
         }
     }
     catch (const std::runtime_error& exc)
     {
-        BRAYNS_ERROR << exc.what() << std::endl;
+        Log::error(exc.what());
     }
 }
 } // namespace brayns

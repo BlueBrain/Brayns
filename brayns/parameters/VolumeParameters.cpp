@@ -68,8 +68,8 @@ void VolumeParameters::parse(const po::variables_map& vm)
 void VolumeParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Dimensions      : " << _dimensions << std::endl;
-    BRAYNS_INFO << "Element spacing : " << _elementSpacing << std::endl;
-    BRAYNS_INFO << "Offset          : " << _offset << std::endl;
+    Log::info("Dimensions      : {}", _dimensions);
+    Log::info("Element spacing : {}", _elementSpacing);
+    Log::info("Offset          : {}", _offset);
 }
 } // namespace brayns

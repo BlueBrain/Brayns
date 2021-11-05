@@ -18,9 +18,9 @@
 
 #include "SonataNGVLoader.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
 
-#include <plugin/api/Log.h>
 #include <plugin/io/BBPLoader.h>
 #include <plugin/io/bbploader/ParameterCheck.h>
 #include <plugin/io/bbploader/simulation/SimulationType.h>
@@ -55,15 +55,14 @@ std::vector<brayns::ModelDescriptorPtr> SonataNGVLoader::importFromFile(
     const SonataNGVLoaderParameters& props, brayns::Scene& scene) const
 {
     brayns::Timer timer;
-    PLUGIN_INFO << getName() << ": Loading " << path << std::endl;
+    brayns::Log::info("[CE] {}: loading {}.", getName(), path);
 
     std::vector<brayns::ModelDescriptorPtr> result;
 
     for (const auto& population : props.populations)
     {
         const auto& name = population.population_name;
-        PLUGIN_INFO << "\t" << getName() << ": Loading population " << name
-                    << std::endl;
+        brayns::Log::info("[CE] \t{}: loading population {}.", getName(), name);
 
         // Load the BlueConfig/CircuitConfig
         std::unique_ptr<brion::BlueConfig> config;
@@ -82,7 +81,8 @@ std::vector<brayns::ModelDescriptorPtr> SonataNGVLoader::importFromFile(
         result.insert(result.end(), models.begin(), models.end());
     }
 
-    PLUGIN_INFO << getName() << ": Done in " << timer.elapsed() << " second(s)"
-                << std::endl;
+    brayns::Log::info("[CE] {}: done in {} second()s.", getName(),
+                      timer.elapsed());
+
     return result;
 }

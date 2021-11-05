@@ -62,11 +62,4 @@ void Camera::reset()
 {
     set(_initialPosition, _initialOrientation, _initialTarget);
 }
-
-std::ostream& operator<<(std::ostream& os, Camera& camera)
-{
-    const auto& position = camera.getPosition();
-    const auto& orientation = camera.getOrientation();
-    return os << position << ", " << orientation;
-}
 } // namespace brayns

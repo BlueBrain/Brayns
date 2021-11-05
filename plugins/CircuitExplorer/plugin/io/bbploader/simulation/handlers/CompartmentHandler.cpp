@@ -21,7 +21,7 @@
 
 #include "CompartmentHandler.h"
 
-#include <plugin/api/Log.h>
+#include <brayns/common/Log.h>
 
 namespace
 {
@@ -80,8 +80,8 @@ std::vector<float> CompartmentHandler::getFrameDataImpl(const uint32_t frame)
             _ready = true;
         }
         else
-            PLUGIN_WARN << "Attempt to get frame from " << _path << " failed"
-                        << std::endl;
+            brayns::Log::warn("[CE] Attempt to get frame from {} failed.",
+                              _path);
     }
     return data;
 }

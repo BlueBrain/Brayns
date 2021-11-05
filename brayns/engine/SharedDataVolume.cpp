@@ -20,7 +20,7 @@
 
 #include "SharedDataVolume.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <fcntl.h>
 #include <fstream>

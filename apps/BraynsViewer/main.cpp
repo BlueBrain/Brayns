@@ -21,7 +21,7 @@
 
 #include <apps/ui/Application.h>
 #include <brayns/Brayns.h>
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <brayns/parameters/ApplicationParameters.h>
 #include <brayns/parameters/ParametersManager.h>
@@ -45,7 +45,7 @@ int main(int argc, const char** argv)
     }
     catch (const std::runtime_error& e)
     {
-        BRAYNS_ERROR << e.what() << std::endl;
+        brayns::Log::error(e.what());
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;

@@ -20,9 +20,9 @@
 
 #include "utils.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/common/PropertyObject.h>
 #include <brayns/common/Transformation.h>
-#include <brayns/common/log.h>
 
 namespace brayns
 {
@@ -49,7 +49,7 @@ void toOSPRayProperties(const PropertyMap& object, OSPObject ospObject)
     }
     catch (const std::exception& e)
     {
-        BRAYNS_ERROR << "Failed to apply properties for ospObject" << std::endl;
+        Log::error("Failed to apply properties for ospObject.");
     }
 }
 

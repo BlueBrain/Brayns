@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/common/scene/ClipPlane.h>
 #include <brayns/engine/Model.h>
 

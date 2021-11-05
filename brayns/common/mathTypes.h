@@ -108,12 +108,6 @@ private:
 #endif
 };
 
-template <typename T>
-inline std::ostream& operator<<(std::ostream& os, const Box<T>& aabb)
-{
-    return os << aabb.getMin() << " - " << aabb.getMax();
-}
-
 /**
  * AABB definitions
  */
@@ -154,3 +148,12 @@ typedef std::vector<Vector2d> Vector2ds;
 using Quaternion = glm::quat;
 using Quaterniond = glm::tquat<double, glm::highp>; //!< Double quaternion.
 } // namespace brayns
+
+namespace std
+{
+template <typename T>
+inline std::ostream& operator<<(std::ostream& os, const brayns::Box<T>& box)
+{
+    return os << box.getMin() << " - " << box.getMax();
+}
+} // namespace std

@@ -482,8 +482,7 @@ void OSPRayModel::commitMaterials(const std::string& renderer)
                     ++matIt;
                 if (matIt->first != geomIt->first)
                 {
-                    BRAYNS_ERROR << "Material for geometry missing"
-                                 << std::endl;
+                    Log::error("Material for geometry missing.");
                     ++geomIt;
                     continue;
                 }

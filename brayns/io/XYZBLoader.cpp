@@ -20,7 +20,7 @@
 
 #include "XYZBLoader.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/utils/Filesystem.h>
@@ -46,7 +46,7 @@ float _computeHalfArea(const Boxf& bbox)
 std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback, Scene& scene) const
 {
-    BRAYNS_INFO << "Loading xyz " << blob.name << std::endl;
+    Log::info("Loading xyz {}.", blob.name);
 
     std::stringstream stream(std::string(blob.data.begin(), blob.data.end()));
     size_t numlines = 0;

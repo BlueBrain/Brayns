@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -54,7 +54,7 @@ public:
         auto& scene = _api->getScene();
 
         // Start loading model
-        BRAYNS_INFO << "Loading params <" << name << "> from Json.\n";
+        brayns::Log::info("Loading params <{}> from Json.", name);
 
         // Create model
         auto model = scene.createModel();
@@ -112,7 +112,7 @@ public:
         // Check if some streamlines created
         if (nbStreamlines == 0)
         {
-            BRAYNS_INFO << "No streamlines.\n";
+            brayns::Log::info("No streamlines.");
             return;
         }
 
@@ -121,7 +121,7 @@ public:
             std::make_shared<brayns::ModelDescriptor>(std::move(model), name);
         scene.addModel(descriptor);
 
-        BRAYNS_INFO << nbStreamlines << " streamlines loaded.\n";
+        brayns::Log::info("{} streamlines loaded.", nbStreamlines);
     }
 
 private:

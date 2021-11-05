@@ -21,9 +21,10 @@
 
 #pragma once
 
+#include <brayns/common/Log.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <plugin/api/Log.h>
 #include <plugin/api/MaterialUtils.h>
 #include <plugin/network/messages/AddGridMessage.h>
 
@@ -163,7 +164,7 @@ public:
     {
         auto params = request.getParams();
         auto& scene = getApi().getScene();
-        PLUGIN_INFO << "Building Grid scene.\n";
+        brayns::Log::info("[CE] Building Grid scene.");
         GridModel::add(scene, params);
         triggerRender();
         request.reply(brayns::EmptyMessage());

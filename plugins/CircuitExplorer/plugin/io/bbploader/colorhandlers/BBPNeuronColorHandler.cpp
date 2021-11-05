@@ -24,9 +24,8 @@
 #include <mvdtool/mvd3.hpp>
 #include <mvdtool/sonata.hpp>
 
+#include <brayns/common/Log.h>
 #include <brayns/utils/StringUtils.h>
-
-#include <plugin/api/Log.h>
 
 namespace bbploader
 {
@@ -80,7 +79,7 @@ public:
         const auto result =
             _getAttrib(gids, brion::NeuronAttributes::NEURON_LAYER);
         if (result.empty())
-            PLUGIN_WARN << "MVD2Circuit: No layer data found" << std::endl;
+            brayns::Log::warn("[CE] MVD2Circuit: No layer data found");
         return result;
     }
 
@@ -90,7 +89,7 @@ public:
             _getAttrib(gids, brion::NeuronAttributes::NEURON_ETYPE);
         if (indices.empty())
         {
-            PLUGIN_WARN << "MVD2Circuit: No e-type data found" << std::endl;
+            brayns::Log::warn("[CE] MVD2Circuit: No e-type data found");
             return {};
         }
         const auto allETypes =
@@ -107,7 +106,7 @@ public:
             _getAttrib(gids, brion::NeuronAttributes::NEURON_MTYPE);
         if (indices.empty())
         {
-            PLUGIN_WARN << "MVD2Circuit: No m-type data found" << std::endl;
+            brayns::Log::warn("[CE] MVD2Circuit: No m-type data found");
             return {};
         }
         const auto allMTypes =
@@ -124,8 +123,8 @@ public:
         const auto result =
             _getAttrib(gids, brion::NeuronAttributes::NEURON_MORPHOLOGY_NAME);
         if (result.empty())
-            PLUGIN_WARN << "MVD2Circuit: No morphology name data found"
-                        << std::endl;
+            brayns::Log::warn(
+                "[CE] MVD2Circuit: No morphology name data found");
         return result;
     }
 
@@ -160,7 +159,7 @@ public:
         const auto range = _getRange(gids);
         const auto result = _arrange(_circuit->getLayers(range), gids);
         if (result.empty())
-            PLUGIN_WARN << "GenericCircuit: No layer data found" << std::endl;
+            brayns::Log::warn("[CE] GenericCircuit: No layer data found");
         return result;
     }
 
@@ -169,7 +168,7 @@ public:
         const auto range = _getRange(gids);
         const auto result = _arrange(_circuit->getEtypes(range), gids);
         if (result.empty())
-            PLUGIN_WARN << "GenericCircuit: No e-type data found" << std::endl;
+            brayns::Log::warn("[CE] GenericCircuit: No e-type data found");
         return result;
     }
 
@@ -178,7 +177,7 @@ public:
         const auto range = _getRange(gids);
         const auto result = _arrange(_circuit->getMtypes(range), gids);
         if (result.empty())
-            PLUGIN_WARN << "GenericCircuit: No m-type data found" << std::endl;
+            brayns::Log::warn("[CE] GenericCircuit: No m-type data found");
         return result;
     }
 
@@ -188,8 +187,8 @@ public:
         const auto range = _getRange(gids);
         const auto result = _arrange(_circuit->getMorphologies(range), gids);
         if (result.empty())
-            PLUGIN_WARN << "GenericCircuit: No morphology name data found"
-                        << std::endl;
+            brayns::Log::warn(
+                "[CE] GenericCircuit: No morphology name data found");
         return result;
     }
 
