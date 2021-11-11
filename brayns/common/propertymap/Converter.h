@@ -23,7 +23,7 @@
 
 #include <vector>
 
-#include <brayns/common/types.h>
+#include <brayns/common/mathTypes.h>
 
 namespace brayns
 {

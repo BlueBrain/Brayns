@@ -2,30 +2,28 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(BRAYNSUI_SOURCES
-  Application.cpp
-)
+add_library(braynsUI STATIC Application.cpp Application.h)
 
-set(BRAYNSUI_PUBLIC_HEADERS
-  Application.h
-)
+target_link_libraries(braynsUI PUBLIC
+    brayns
+    glm)
 
-set(BRAYNSUI_LINK_LIBRARIES
-    PUBLIC brayns braynsParameters glm
-    PRIVATE braynsManipulators
+target_link_libraries(braynsUI PRIVATE
+    braynsManipulators
     ${OPENGL_gl_LIBRARY}
     glfw
-    GLEW#${GLEW_LIBRARIES}
-    imgui
+    GLEW #${GLEW_LIBRARIES}
+    imgui)
+
+#target_include_directories(braynsUI PRIVATE ${PROJECT_SOURCE_DIR}/deps/glfw/include)
+#target_include_directories(braynsUI PRIVATE ${PROJECT_SOURCE_DIR}/deps)
+
+install(TARGETS braynsUI
+    EXPORT braynsUI-targets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
 )
 
-set(BRAYNSUI_OMIT_EXPORT ON)
-common_library(braynsUI)
-
-if(APPLE)
-  target_compile_options(braynsUI PRIVATE -Wno-deprecated-declarations)
-  target_link_libraries(braynsUI PRIVATE "-framework OpenGL")
-endif()
-
-target_include_directories(braynsUI PRIVATE ${PROJECT_SOURCE_DIR}/deps/glfw/include)
-target_include_directories(braynsUI PRIVATE ${PROJECT_SOURCE_DIR}/deps)
+install(EXPORT braynsUI-targets
+    DESTINATION share/CMake
+)

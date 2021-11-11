@@ -13,10 +13,6 @@
 [submodule "deps/imgui"]
 	path = deps/imgui
 	url = https://github.com/ocornut/imgui.git
-[submodule "CMake/common"]
-	path = CMake/common
-	url = https://github.com/BlueBrain/CMake.git
-	branch = brayns_recursive_submodules
 [submodule "deps/Brion"]
 	path = deps/Brion
 	url = https://github.com/BlueBrain/Brion.git

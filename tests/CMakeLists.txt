@@ -1,51 +1,75 @@
 # Copyright (c) 2015-2021, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-# Responsible Author: Daniel.Nachbaur@epfl.ch
+# Responsible Authors: Daniel.Nachbaur@epfl.ch
+#                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(TEST_LIBRARIES brayns braynsIO braynsManipulators)
+include(CTest)
+enable_testing()
 
 configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
 
-list(APPEND EXCLUDE_FROM_TESTS myPlugin.cpp)
+#list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
+#include(osprayUse)
+#include_directories_ispc(${PROJECT_SOURCE_DIR})
+#ospray_ispc_compile(${PROJECT_SOURCE_DIR}/engines/ospray/ispc/render/BasicRenderer.ispc)
 
-if(TARGET pdiff)
-  list(APPEND TEST_LIBRARIES pdiff ${FREEIMAGE_LIBRARIES})
-else()
-  list(APPEND EXCLUDE_FROM_TESTS
-    clipPlaneRendering.cpp
-    snapshot.cpp
-    streamlines.cpp
-  )
-endif()
-
-if(NOT BRAYNS_OSPRAY_ENABLED)
-  list(APPEND EXCLUDE_FROM_TESTS
+set(TEST_LIST
     brayns.cpp
     clipPlaneRendering.cpp
-    shadows.cpp
+    lights.cpp
+    propertyMap.cpp
+    sdfGeometries.cpp
     streamlines.cpp
     subsampling.cpp
     testImages.cpp
-    lights.cpp
-  )
-else()
-  list(APPEND TEST_LIBRARIES braynsOSPRayEngine)
+    perf/renderingSettings.cpp
+)
+
+set(TEST_TARGET_LIST)
+
+foreach(TEST ${TEST_LIST})
+    get_filename_component(TEST_NAME ${TEST} NAME_WLE)
+    set(TEST_NAME "braynstest_${TEST_NAME}")
+
+    add_executable(${TEST_NAME} ${TEST})
+
+    set(TEST_TARGET_LIST ${TEST_TARGET_LIST} ${TEST_NAME})
+
+    set_target_properties(${TEST_NAME} PROPERTIES FOLDER tests OUTPUT_NAME ${TEST_NAME})
+
+    target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${PROJECT_BINARY_DIR})
+    target_link_libraries(${TEST_NAME} PRIVATE
+        brayns braynsIO braynsManipulators pdiff ${FREEIMAGE_LIBRARIES} braynsOSPRayEngine
+    )
+
+    add_test(NAME ${TEST_NAME}
+        COMMAND $<TARGET_FILE:${TEST_NAME}>  -l test_suite
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    set_tests_properties(${TEST_NAME} PROPERTIES LABELS "Brayns-unit")
+
+endforeach()
+
+add_custom_target(Brayns-cpptests USES_TERMINAL
+    COMMAND ${CMAKE_CTEST_COMMAND} -T test --no-compress-output
+    --output-on-failure -L Brayns-unit -C $<CONFIGURATION> \${ARGS}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/tests
+    COMMENT "Running Brayns unit tests")
+set_target_properties(Brayns-cpptests PROPERTIES
+  EXCLUDE_FROM_DEFAULT_BUILD ON FOLDER "tests")
+
+if(NOT TARGET tests)
+    add_custom_target(tests)
+    set_target_properties(tests PROPERTIES
+        EXCLUDE_FROM_DEFAULT_BUILD ON FOLDER ${PROJECT_BINARY_DIR}/tests)
 endif()
 
-if(TARGET braynsCircuitViewer)
-  list(APPEND TEST_LIBRARIES braynsCircuitViewer)
-else()
-  list(APPEND EXCLUDE_FROM_TESTS shadows.cpp)
-endif()
+add_custom_target(Brayns-tests)
+set_target_properties(Brayns-tests PROPERTIES
+  EXCLUDE_FROM_DEFAULT_BUILD ON FOLDER ${PROJECT_BINARY_DIR}/tests)
 
-if(BRAYNS_OSPRAY_ENABLED)
-  list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
-  include(osprayUse)
-  include_directories_ispc(${PROJECT_SOURCE_DIR})
-  ospray_ispc_compile(${PROJECT_SOURCE_DIR}/engines/ospray/ispc/render/BasicRenderer.ispc)
-endif()
+add_dependencies(tests Brayns-tests)
+add_dependencies(Brayns-tests Brayns-cpptests)
 
-list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/brayns/common/utils/base64/*')
-include(CommonCTest)
+add_dependencies(Brayns-cpptests ${TEST_TARGET_LIST})

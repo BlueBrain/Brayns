@@ -23,7 +23,7 @@
 namespace
 {
 template <class T>
-inline void INPLACESWAP(T& a, T& b)
+void INPLACESWAP(T& a, T& b) noexcept
 {
     a ^= b;
     b ^= a;

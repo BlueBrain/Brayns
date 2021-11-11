@@ -29,9 +29,7 @@
 
 #include <functional>
 
-#ifdef BRAYNS_USE_OPENMP
 #include <omp.h>
-#endif
 
 namespace brayns
 {
@@ -60,9 +58,7 @@ public:
      */
     void updateProgress(const std::string& message, const float fraction) const
     {
-#ifdef BRAYNS_USE_OPENMP
         if (omp_get_thread_num() == 0)
-#endif
             if (_callback)
                 _callback(message, fraction);
     }

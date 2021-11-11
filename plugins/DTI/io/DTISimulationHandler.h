@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <brayns/api.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 
 #include <messages/SetSpikeSimulationMessage.h>

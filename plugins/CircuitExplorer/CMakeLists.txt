@@ -1,21 +1,8 @@
 # Copyright (c) 2015-2021, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
+# Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
-
-project(braynsCircuitExplorer VERSION 1.0.0)
-set(braynsCircuitExplorer_VERSION_ABI 1)
-
-include(Common)
-common_find_package(sonata)
-common_find_package(Brion)
-common_find_package(HighFive)
-common_find_package(MVDTool)
-common_find_package(nlohmann_json)
-common_find_package(ospray 1.8 SYSTEM)
-common_find_package(CGAL)
-common_find_package(OpenMP)
-common_find_package_post()
 
 # reuse ispc setup and macros from ospray
 list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
@@ -257,32 +244,10 @@ set(BRAYNSCIRCUITEXPLORER_ISPC_SOURCES
 )
 
 # Compile ispc code
-set(BRAYNS_SOURCE_DIR ${PROJECT_SOURCE_DIR}/../..)
-list(APPEND ALL_ISPC_INCLUDES ${OSPRAY_INCLUDE_DIRS} ${BRAYNS_SOURCE_DIR})
-include_directories_ispc(${ALL_ISPC_INCLUDES} )
+list(APPEND ALL_ISPC_INCLUDES ${OSPRAY_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR})
+include_directories_ispc(${ALL_ISPC_INCLUDES})
 ospray_ispc_compile(${BRAYNSCIRCUITEXPLORER_ISPC_SOURCES})
 list(APPEND BRAYNSCIRCUITEXPLORER_SOURCES ${ISPC_OBJECTS})
-
-# Compile C++ code
-include_directories(
-    SYSTEM
-    ${CMAKE_CURRENT_SOURCE_DIR}/.
-    ${CMAKE_CURRENT_SOURCE_DIR}/..
-    ${CMAKE_CURRENT_SOURCE_DIR}/../..
-)
-
-set(BRAYNSCIRCUITEXPLORER_LINK_LIBRARIES
-    PUBLIC ${OSPRAY_LIBRARIES}
-    PRIVATE braynsCommon braynsParameters braynsIO braynsEngine braynsPluginAPI braynsNetwork
-    braynsOSPRayEngine glm sonata::sonata_shared MorphIO::morphio_shared Brion Brain
-    ${FREEIMAGE_LIBRARIES} ${HDF5_LIBRARIES}
-    HighFive
-    MVDTool
-)
-
-set(BRAYNSCIRCUITEXPLORER_OMIT_LIBRARY_HEADER ON)
-set(BRAYNSCIRCUITEXPLORER_OMIT_VERSION_HEADERS ON)
-set(BRAYNSCIRCUITEXPLORER_OMIT_EXPORT ON)
 
 # Movie generation with FFmpeg
 find_library(AVFORMAT_LIBRARY avformat)
@@ -312,22 +277,46 @@ if(NOT SWSCALE_LIBRARY)
     set(FFMPEG_FOUND OFF)
 endif()
 
+add_library(braynsCircuitExplorer SHARED ${BRAYNSCIRCUITEXPLORER_SOURCES} ${BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS})
+
+set(CIRCUITEXPLORER_INCLUDEDIR_LIST ${CMAKE_CURRENT_LIST_DIR} ${OSPRAY_INCLUDE_DIRS})
+
+target_include_directories(braynsCircuitExplorer PUBLIC
+  "$<BUILD_INTERFACE:${CIRCUITEXPLORER_INCLUDEDIR_LIST}>"
+  "$<INSTALL_INTERFACE:include>")
+
+target_link_libraries(braynsCircuitExplorer PUBLIC ${OSPRAY_LIBRARIES})
+target_link_libraries(braynsCircuitExplorer PRIVATE
+    braynsCommon braynsParameters braynsIO braynsEngine braynsPluginAPI braynsNetwork
+    sonata::sonata_shared MorphIO::morphio_shared Brion Brain ${HDF5_LIBRARIES}
+    HighFive MVDTool braynsOSPRayEngine
+)
 if(FFMPEG_FOUND)
-    message(STATUS "FFmpeg dev libraries found, enable movie generation")
-    list(APPEND BRAYNSCIRCUITEXPLORER_LINK_LIBRARIES
+    target_compile_definitions(braynsCircuitExplorer PRIVATE BRAYNS_USE_FFMPEG)
+    target_link_libraries(braynsCircuitExplorer PRIVATE
         ${AVFORMAT_LIBRARY}
         ${AVCODEC_LIBRARY}
         ${AVUTIL_LIBRARY}
-        ${SWSCALE_LIBRARY}
-    )
-else()
-    message(STATUS "One or more FFmpeg dev libraries not found, disable movie generation")
+        ${SWSCALE_LIBRARY})
 endif()
 
-list(APPEND BRAYNSCIRCUITEXPLORER_SOURCES plugin/movie/MovieMaker.cpp)
+set_target_properties(braynsCircuitExplorer
+    PROPERTIES
+        VERSION ${BRAYNS_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+)
 
-common_library(braynsCircuitExplorer)
+install(TARGETS braynsCircuitExplorer
+    EXPORT braynsCircuitExplorer-targets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
 
-if(FFMPEG_FOUND)
-    target_compile_definitions(braynsCircuitExplorer PRIVATE BRAYNS_USE_FFMPEG)
-endif()
+install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING PATTERN "*.h")
+
+install(EXPORT braynsCircuitExplorer-targets
+    DESTINATION share/braynsCircuitExplorer/CMake
+)
+

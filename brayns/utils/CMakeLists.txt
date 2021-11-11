@@ -1,4 +1,5 @@
 # Copyright (c) 2015-2021, EPFL/Blue Brain Project
+# Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
@@ -19,15 +20,28 @@ set(BRAYNSUTILS_SOURCES
   StringUtils.cpp
 )
 
-set(BRAYNSUTILS_INCLUDE_NAME brayns/utils)
-set(BRAYNSUTILS_LINK_LIBRARIES
-  PUBLIC ${LibJpegTurbo_LIBRARIES}
-  PRIVATE  ${FREEIMAGE_LIBRARIES}
-)
+add_library(braynsUtils SHARED ${BRAYNSUTILS_SOURCES} ${BRAYNSUTILS_HEADERS})
 
-common_library(braynsUtils)
+target_include_directories(braynsUtils PUBLIC
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+  $<INSTALL_INTERFACE:include>)
+
+target_include_directories(braynsUtils SYSTEM PUBLIC ${FREEIMAGE_INCLUDE_DIRS})
+
+target_link_libraries(braynsUtils PUBLIC ${LibJpegTurbo_LIBRARIES})
+target_link_libraries(braynsUtils PRIVATE ${FREEIMAGE_LIBRARIES})
 
 # Needed to allow DynamicLib class to find the engine and plugins libraries
 set_target_properties(braynsUtils PROPERTIES BUILD_RPATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
-target_include_directories(braynsUtils SYSTEM PUBLIC ${FREEIMAGE_INCLUDE_DIRS})
+set_target_properties(braynsUtils
+    PROPERTIES
+        VERSION ${BRAYNS_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+)
+
+install(TARGETS braynsUtils
+    EXPORT brayns-targets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)

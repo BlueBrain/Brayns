@@ -20,9 +20,7 @@
 
 #include "ImageGenerator.h"
 
-#include <brayns/engine/FrameBuffer.h>
 #include <brayns/parameters/ApplicationParameters.h>
-#include <brayns/utils/ImageUtils.h>
 #include <brayns/utils/base64/base64.h>
 
 namespace brayns
@@ -34,38 +32,39 @@ ImageGenerator::~ImageGenerator()
 }
 
 ImageGenerator::ImageBase64 ImageGenerator::createImage(
-    FrameBuffer& frameBuffer, const std::string& format, const uint8_t quality)
+    freeimage::ImagePtr&& image, const std::string& format, const uint8_t quality)
 {
-    return {freeimage::getBase64Image(frameBuffer.getImage(), format, quality)};
+    return {freeimage::getBase64Image(std::move(image), format, quality)};
 }
 
 ImageGenerator::ImageBase64 ImageGenerator::createImage(
-    const std::vector<FrameBufferPtr>& frameBuffers, const std::string& format,
+    std::vector<freeimage::ImagePtr>& images, const std::string& format,
     const uint8_t quality)
 {
-    if (frameBuffers.size() == 1)
-        return createImage(*frameBuffers[0], format, quality);
+    if (images.size() == 1)
+        return createImage(std::move(images[0]), format, quality);
 
-    std::vector<freeimage::ImagePtr> images;
-    for (auto frameBuffer : frameBuffers)
-        images.push_back(frameBuffer->getImage());
     return {freeimage::getBase64Image(freeimage::mergeImages(images), format,
                                       quality)};
 }
 
-ImageGenerator::ImageJPEG ImageGenerator::createJPEG(FrameBuffer& frameBuffer,
-                                                     const uint8_t quality)
+ImageGenerator::ImageJPEG ImageGenerator::createJPEG(const uint8_t* colorBuffer,
+                                                     const FrameBufferFormat format,
+                                                     const Vector2ui& size, uint8_t quality)
 {
-    frameBuffer.map();
-    const auto colorBuffer = frameBuffer.getColorBuffer();
-    if (!colorBuffer)
-    {
-        frameBuffer.unmap();
+    //frameBuffer.map();
+    //const auto colorBuffer = frameBuffer.getColorBuffer();
+    //if (!colorBuffer)
+    //{
+    //    frameBuffer.unmap();
+    //    return ImageJPEG();
+    //}
+
+    if(!colorBuffer)
         return ImageJPEG();
-    }
 
     int32_t pixelFormat = TJPF_RGBX;
-    switch (frameBuffer.getFrameBufferFormat())
+    switch (format)
     {
     case FrameBufferFormat::bgra_i8:
         pixelFormat = TJPF_BGRX;
@@ -75,11 +74,9 @@ ImageGenerator::ImageJPEG ImageGenerator::createJPEG(FrameBuffer& frameBuffer,
         pixelFormat = TJPF_RGBX;
     }
 
-    const auto& frameSize = frameBuffer.getSize();
     ImageJPEG image;
-    image.data = _encodeJpeg(frameSize.x, frameSize.y, colorBuffer, pixelFormat,
+    image.data = _encodeJpeg(size.x, size.y, colorBuffer, pixelFormat,
                              quality, image.size);
-    frameBuffer.unmap();
     return image;
 }
 

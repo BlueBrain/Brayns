@@ -21,6 +21,7 @@
 #pragma once
 
 #include <brayns/common/types.h>
+#include <brayns/utils/ImageUtils.h>
 
 #include <turbojpeg.h>
 
@@ -52,9 +53,9 @@ public:
      * @throw std::runtime_error if image conversion failed or neither FreeImage
      *                           nor TurboJPEG is available
      */
-    ImageBase64 createImage(FrameBuffer& frameBuffer, const std::string& format,
+    ImageBase64 createImage(freeimage::ImagePtr&& image, const std::string& format,
                             uint8_t quality);
-    ImageBase64 createImage(const std::vector<FrameBufferPtr>& frameBuffers,
+    ImageBase64 createImage(std::vector<freeimage::ImagePtr>& frameBuffers,
                             const std::string& format, uint8_t quality);
 
     struct ImageJPEG
@@ -75,7 +76,9 @@ public:
      * @param quality 1..100 JPEG quality
      * @return JPEG image with a size > 0 if valid, size == 0 on error.
      */
-    ImageJPEG createJPEG(FrameBuffer& frameBuffer, uint8_t quality);
+    ImageJPEG createJPEG(const uint8_t* colorBuffer,
+                         const FrameBufferFormat format,
+                         const Vector2ui& size, uint8_t quality);
 
 private:
     tjhandle _compressor{tjInitCompress()};

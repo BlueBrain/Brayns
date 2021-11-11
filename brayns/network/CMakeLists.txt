@@ -1,6 +1,7 @@
-cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
-
-project(braynsNetwork VERSION 0.1.0)
+# Copyright (c) 2015-2021, EPFL/Blue Brain Project
+# All rights reserved. Do not distribute without permission.
+#
+# This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSNETWORK_HEADERS
   entrypoint/Entrypoint.h
@@ -46,16 +47,12 @@ target_link_libraries(braynsNetwork PUBLIC
 
 set_target_properties(braynsNetwork
     PROPERTIES
-        VERSION ${Brayns_VERSION}
-        SOVERSION ${Brayns_VERSION_MAJOR}.${Brayns_VERSION_MINOR}
+        VERSION ${BRAYNS_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 )
 
 install(TARGETS braynsNetwork
-    EXPORT braynsNetwork-targets
+    EXPORT brayns-targets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
-)
-
-install(EXPORT braynsNetwork-targets
-    DESTINATION share/CMake
 )

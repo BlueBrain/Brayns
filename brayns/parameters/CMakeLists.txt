@@ -26,10 +26,27 @@ set(BRAYNSPARAMETERS_PUBLIC_HEADERS
   NetworkParameters.h
 )
 
-set(BRAYNSPARAMETERS_LINK_LIBRARIES
-    PUBLIC spdlog::spdlog_header_only
-    PRIVATE glm ${Boost_PROGRAM_OPTIONS_LIBRARY} braynsUtils
+add_library(braynsParameters SHARED ${BRAYNSPARAMETERS_SOURCES} ${BRAYNSPARAMETERS_PUBLIC_HEADERS})
+
+set(BRAYNSPARAMETER_INCLUDE_DIRS_LIST
+    ${PROJECT_SOURCE_DIR}
+    ${CMAKE_BINARY_DIR}/include
+)
+target_include_directories(braynsParameters PUBLIC
+  "$<BUILD_INTERFACE:${BRAYNSPARAMETER_INCLUDE_DIRS_LIST}>"
+  "$<INSTALL_INTERFACE:include>")
+
+target_link_libraries(braynsParameters PUBLIC spdlog::spdlog)
+target_link_libraries(braynsParameters PRIVATE glm ${Boost_PROGRAM_OPTIONS_LIBRARY} braynsUtils)
+
+set_target_properties(braynsParameters
+    PROPERTIES
+        VERSION ${BRAYNS_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 )
 
-set(BRAYNSPARAMETERS_INCLUDE_NAME brayns/parameters)
-common_library(braynsParameters)
+install(TARGETS braynsParameters
+    EXPORT brayns-targets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)

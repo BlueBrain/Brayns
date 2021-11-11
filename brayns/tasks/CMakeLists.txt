@@ -1,5 +1,6 @@
 # Copyright (c) 2015-2021, EPFL/Blue Brain Project
-# Responsible Author: Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+# Responsible Authors: Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+#                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
@@ -17,7 +18,22 @@ set(BRAYNSTASKS_PUBLIC_HEADERS
   Errors.h
 )
 
-set(BRAYNSTASKS_INCLUDE_NAME brayns/tasks)
-set(BRAYNSTASKS_LINK_LIBRARIES PUBLIC braynsCommon braynsEngine)
+add_library(braynsTasks SHARED ${BRAYNSTASKS_SOURCES} ${BRAYNSTASKS_PUBLIC_HEADERS})
 
-common_library(braynsTasks)
+target_include_directories(braynsTasks PUBLIC
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+  $<INSTALL_INTERFACE:include>)
+
+target_link_libraries(braynsTasks PUBLIC braynsCommon braynsEngine)
+
+set_target_properties(braynsTasks
+    PROPERTIES
+        VERSION ${BRAYNS_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+)
+
+install(TARGETS braynsTasks
+    EXPORT brayns-targets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)

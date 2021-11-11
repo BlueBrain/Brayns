@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include <brayns/api.h>
 #include <brayns/common/types.h>
 #include <vector>
 
@@ -44,7 +43,7 @@ public:
         aoe
     };
 
-    BRAYNS_API Texture2D(const Type type, const std::string& filename,
+    Texture2D(const Type type, const std::string& filename,
                          const uint8_t channels, const uint8_t depth,
                          const uint32_t width, const uint32_t height);
 

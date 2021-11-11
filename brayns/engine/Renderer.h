@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <brayns/api.h>
 #include <brayns/common/PropertyObject.h>
 #include <brayns/parameters/AnimationParameters.h>
 #include <brayns/parameters/RenderingParameters.h>
@@ -50,7 +49,7 @@ public:
     }
     //@}
 
-    BRAYNS_API Renderer(const AnimationParameters& animationParameters,
+    Renderer(const AnimationParameters& animationParameters,
                         const RenderingParameters& renderingParameters);
 
     void setScene(ScenePtr scene) { _scene = scene; };

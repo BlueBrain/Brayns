@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/types.h>
 #include <brayns/utils/ImageUtils.h>
@@ -65,7 +64,7 @@ public:
     virtual void updatePixelOp(const PropertyMap& /*properties*/){};
     //@}
 
-    BRAYNS_API FrameBuffer(const std::string& name, const Vector2ui& frameSize,
+    FrameBuffer(const std::string& name, const Vector2ui& frameSize,
                            FrameBufferFormat frameBufferFormat);
 
     size_t getColorDepth() const;
@@ -78,6 +77,7 @@ public:
     const std::string& getName() const { return _name; }
     void incrementAccumFrames() { ++_accumFrames; }
     size_t numAccumFrames() const { return _accumFrames; }
+
     freeimage::ImagePtr getImage();
 
 protected:

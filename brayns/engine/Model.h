@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/Transformation.h>
 #include <brayns/common/geometry/Cone.h>
@@ -218,14 +217,14 @@ public:
     Model(AnimationParameters& animationParameters,
           VolumeParameters& volumeParameters);
 
-    BRAYNS_API virtual ~Model();
+    virtual ~Model();
 
     /** @name API for engine-specific code */
     //@{
     virtual void commitGeometry() = 0;
 
     /** Factory method to create an engine-specific material. */
-    BRAYNS_API MaterialPtr createMaterial(const size_t materialId,
+    MaterialPtr createMaterial(const size_t materialId,
                                           const std::string& name,
                                           const PropertyMap& properties = {});
 
@@ -233,7 +232,7 @@ public:
      * Create a volume with the given dimensions, voxel spacing and data type
      * where the voxels are set via setVoxels() from any memory location.
      */
-    BRAYNS_API virtual SharedDataVolumePtr createSharedDataVolume(
+    virtual SharedDataVolumePtr createSharedDataVolume(
         const Vector3ui& dimensions, const Vector3f& spacing,
         const DataType type) const = 0;
 
@@ -242,21 +241,21 @@ public:
      * where the voxels are copied via setBrick() into an optimized internal
      * storage.
      */
-    BRAYNS_API virtual BrickedVolumePtr createBrickedVolume(
+    virtual BrickedVolumePtr createBrickedVolume(
         const Vector3ui& dimensions, const Vector3f& spacing,
         const DataType type) const = 0;
 
-    BRAYNS_API virtual void buildBoundingBox() = 0;
+    virtual void buildBoundingBox() = 0;
     //@}
 
     /**
      * @return true if the geometry Model does not contain any geometry, false
      *         otherwise
      */
-    BRAYNS_API bool empty() const;
+    bool empty() const;
 
     /** @return true if the geometry Model is dirty, false otherwise */
-    BRAYNS_API bool isDirty() const;
+    bool isDirty() const;
 
     /**
         Returns the bounds for the Model
@@ -277,7 +276,7 @@ public:
       @param sphere Sphere to add
       @return Index of the sphere for the specified material
       */
-    BRAYNS_API uint64_t addSphere(const size_t materialId,
+    uint64_t addSphere(const size_t materialId,
                                   const Sphere& sphere);
 
     /**
@@ -295,7 +294,7 @@ public:
       @param cylinder Cylinder to add
       @return Index of the sphere for the specified material
       */
-    BRAYNS_API uint64_t addCylinder(const size_t materialId,
+    uint64_t addCylinder(const size_t materialId,
                                     const Cylinder& cylinder);
     /**
         Returns cones handled by the model
@@ -312,7 +311,7 @@ public:
       @param cone Cone to add
       @return Index of the sphere for the specified material
       */
-    BRAYNS_API uint64_t addCone(const size_t materialId, const Cone& cone);
+    uint64_t addCone(const size_t materialId, const Cone& cone);
 
     /**
         Returns SDFBezier handled by the model
@@ -333,7 +332,7 @@ public:
       @param sdfBezier SDFBezier to add
       @return Index of the bezier for the specified material
       */
-    BRAYNS_API uint64_t addSDFBezier(const size_t materialId,
+    uint64_t addSDFBezier(const size_t materialId,
                                      const SDFBezier& sdfBezier);
 
     /**
@@ -341,7 +340,7 @@ public:
       @param materialId Id of the material for the streamline
       @param streamline Streamline to add
       */
-    BRAYNS_API void addStreamline(const size_t materialId,
+    void addStreamline(const size_t materialId,
                                   const Streamline& streamline);
 
     /**
@@ -378,7 +377,7 @@ public:
      * @param metaObject object descriptor in the form of a property map
      * @return The meta object index for the given material
      */
-    BRAYNS_API uint64_t addMetaObject(const size_t materialId,
+    uint64_t addMetaObject(const size_t materialId,
                                       const PropertyMap& metaObject);
 
     /**
@@ -413,16 +412,16 @@ public:
     }
 
     /** Add a volume to the model*/
-    BRAYNS_API void addVolume(VolumePtr);
+    void addVolume(VolumePtr);
 
     /** Remove a volume from the model */
-    BRAYNS_API void removeVolume(VolumePtr);
+    void removeVolume(VolumePtr);
 
     /**
      * @brief logInformation Logs information about the model, like the number
      * of primitives, and the associated memory footprint.
      */
-    BRAYNS_API void logInformation();
+    void logInformation();
 
     /**
         Sets the materials handled by the model, and available to the geometry
@@ -430,31 +429,31 @@ public:
        materials. For instance MT_RANDOM creates materials with random colors,
        transparency, reflection, and light emission
     */
-    void BRAYNS_API setMaterialsColorMap(const MaterialsColorMap colorMap);
+    void setMaterialsColorMap(const MaterialsColorMap colorMap);
 
     /**
      * @brief getMaterials Returns a reference to the map of materials handled
      * by the model
      * @return The map of materials handled by the model
      */
-    BRAYNS_API const MaterialMap& getMaterials() const { return _materials; }
+    const MaterialMap& getMaterials() const { return _materials; }
     /**
      * @brief getMaterial Returns a pointer to a specific material
      * @param materialId Id of the material
      * @return A pointer to the material or an exception if the material is not
      * registered in the model
      */
-    BRAYNS_API MaterialPtr getMaterial(const size_t materialId) const;
+    MaterialPtr getMaterial(const size_t materialId) const;
 
     /**
         Returns the simulutation handler
     */
-    BRAYNS_API AbstractSimulationHandlerPtr getSimulationHandler() const;
+    AbstractSimulationHandlerPtr getSimulationHandler() const;
 
     /**
         Sets the simulation handler
     */
-    BRAYNS_API void setSimulationHandler(AbstractSimulationHandlerPtr handler);
+    void setSimulationHandler(AbstractSimulationHandlerPtr handler);
 
     /** @return the size in bytes of all geometries. */
     size_t getSizeInBytes() const;
@@ -484,7 +483,7 @@ protected:
     void _updateSizeInBytes();
 
     /** Factory method to create an engine-specific material. */
-    BRAYNS_API virtual MaterialPtr createMaterialImpl(
+    virtual MaterialPtr createMaterialImpl(
         const PropertyMap& properties = {}) = 0;
 
     /** Mark all geometries as clean. */
