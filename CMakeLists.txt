@@ -15,8 +15,15 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
+include(GitUtils)
 
 project(Brayns VERSION 1.1.0)
+
+# Set up version
+set(BRAYNS_GIT_HASH "Not found")
+get_commit_hash(BRAYNS_GIT_HASH)
+set(BRAYNS_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
 # Options
 option(BRAYNS_TESTS_ENABLED "Activate unit testing" OFF)
@@ -33,12 +40,8 @@ option(BRAYNS_VRPN_ENABLED "Activate vrpn plugin" OFF)
 option(BRAYNS_MULTIVIEW_ENABLED "Activate Multiview camera plugin" OFF)
 option(BRAYNS_HARDWARE_RANDOMIZER_ENABLED "Enables hardware randomizer if supported by target CPU" OFF)
 
-# Custom cmake module configs
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
-include(GetGitCommitHash)
-set(BRAYNS_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
-
 # Core dependencies
+find_package(Git REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(OpenMP REQUIRED)
 find_package(FreeImage REQUIRED)
