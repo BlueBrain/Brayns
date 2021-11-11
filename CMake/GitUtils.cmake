@@ -6,6 +6,8 @@
 
 # FROM https://jonathanhamberg.com/post/cmake-embedding-git-hash/
 # Get the latest abbreviated commit hash of the working branch
+
+
 function (get_commit_hash OUTPUT_VAR)
     execute_process(
         COMMAND ${GIT_EXECUTABLE} log -1 --format=%h
@@ -17,10 +19,22 @@ function (get_commit_hash OUTPUT_VAR)
 endfunction()
 
 
-function (initialize_submodule SUBMODULE_PATH)
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive --depth 1 ${SUBMODULE_PATH}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        OUTPUT_QUIET
-    )
+function (initialize_submodule SUBMODULE_PATH SHALLOW_CLONE)
+    if(${SHALLOW_CLONE})
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive --depth 1 ${SUBMODULE_PATH}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            OUTPUT_QUIET
+            COMMAND_ECHO NONE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    else()
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive ${SUBMODULE_PATH}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            OUTPUT_QUIET
+            COMMAND_ECHO NONE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    endif()
 endfunction()

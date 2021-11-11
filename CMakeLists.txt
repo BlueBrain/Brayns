@@ -15,15 +15,11 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
-include(GitUtils)
 
 project(Brayns VERSION 1.1.0)
 
-# Set up version
-set(BRAYNS_GIT_HASH "Not found")
-get_commit_hash(BRAYNS_GIT_HASH)
-set(BRAYNS_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+# Extra CMake scripts
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
 
 # Options
 option(BRAYNS_TESTS_ENABLED "Activate unit testing" OFF)
@@ -48,14 +44,20 @@ find_package(FreeImage REQUIRED)
 find_package(LibJpegTurbo REQUIRED)
 find_package(ospray 1.8 REQUIRED)
 find_package(assimp REQUIRED)
-find_package(Poco COMPONENTS Foundation JSON Net NetSSL)
-find_package(glm)
+find_package(Poco QUIET COMPONENTS Foundation JSON Net NetSSL)
+find_package(glm QUIET)
 
 if(BRAYNS_VIEWER_ENABLED OR BRAYNS_IBL_ENABLED)
     find_package(GLEW REQUIRED)
     find_package(OpenGL REQUIRED)
-    find_package(glfw3)
+    find_package(glfw3 QUIET)
 endif()
+
+# Set up version
+include(GitUtils)
+set(BRAYNS_GIT_HASH "Not found")
+get_commit_hash(BRAYNS_GIT_HASH)
+set(BRAYNS_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
 # Downloadable dependencies
 add_subdirectory(deps)

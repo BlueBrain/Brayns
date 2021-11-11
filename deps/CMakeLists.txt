@@ -5,18 +5,19 @@
 
 # Async++
 message(STATUS "Downloading Async++ from submodules")
-initialize_submodule("async++")
+initialize_submodule("async++" ON)
 set(BUILD_SHARED_LIBS ON CACHE BOOL "Build Async++ as a shared library" FORCE)
 add_subdirectory(async++)
 
 # Perceptual Diff
 message(STATUS "Downloading PerceptualDiff from submodules")
-initialize_submodule("perceptualdiff")
+initialize_submodule("perceptualdiff" ON)
 add_subdirectory(perceptualdiff)
 
+# Poco
 if(NOT Poco_Found)
     message(STATUS "Downloading Poco from submodules")
-    initialize_submodule("poco")
+    initialize_submodule("poco" ON)
     # Both Poco and GLM create "uninstall" targets. But GLM check wether the
     # target exists before or not, whereas POCO doesnt give a damn.
     set(ENABLE_REDIS OFF CACHE BOOL "Enable Redis")
@@ -45,9 +46,10 @@ if(NOT Poco_Found)
     set(CMAKE_RELWITHDEBINFO_POSTFIX "" CACHE STRING "Set RelWithDebInfo library postfix" FORCE)
 endif()
 
+# GLM
 if(NOT glm_FOUND AND NOT TARGET glm)
     message(STATUS "Downloading GLM from submodules")
-    initialize_submodule("glm")
+    initialize_submodule("glm" ON)
     option(GLM_QUIET "No CMake Message" ON)
     option(GLM_TEST_ENABLE "Build unit tests" OFF)
     option(GLM_TEST_ENABLE_CXX_14 "Enable C++ 14" ON)
@@ -63,25 +65,25 @@ endif()
 
 # spdlog
 message(STATUS "Downloading spdlog from submodules")
-initialize_submodule("spdlog")
+initialize_submodule("spdlog" ON)
 set(SPDLOG_BUILD_SHARED ON CACHE BOOL "" FORCE)
 set(SPDLOG_MASTER_PROJECT ON)
 add_subdirectory(spdlog)
 
+# GLFW
 if(BRAYNS_VIEWER_ENABLED AND NOT glfw3_FOUND)
-  # GLFW
   message(STATUS "Downloading GLFW3 from submodules")
-  initialize_submodule("glfw")
+  initialize_submodule("glfw" ON)
   set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
   set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
   set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
   add_subdirectory(glfw)
 endif()
 
+# ImGui
 if(BRAYNS_VIEWER_ENABLED)
-  # IMGUI
   message(STATUS "Downloading ImGui from submodules")
-  initialize_submodule("imgui")
+  initialize_submodule("imgui" ON)
   add_library(imgui STATIC
       ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_draw.cpp
@@ -111,14 +113,12 @@ if(BRAYNS_VIEWER_ENABLED)
 
 endif()
 
-# --------------------------------------------------------------------------------
 # sonata (which also brings HighFive)
-# --------------------------------------------------------------------------------
 if(BRAYNS_CIRCUITEXPLORER_ENABLED)
     find_package(sonata QUIET)
     if(NOT sonata_FOUND AND NOT TARGET sonata::sonata_shared)
         message(STATUS "Downloading libsonata from submodules")
-        initialize_submodule("libsonata")
+        initialize_submodule("libsonata" OFF)
         set(EXTLIB_FROM_SUBMODULES ON CACHE BOOL "" FORCE)
         set(SONATA_TESTS OFF CACHE BOOL "" FORCE)
         add_subdirectory(libsonata)
@@ -126,14 +126,12 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED)
     endif()
 endif()
 
-# --------------------------------------------------------------------------------
 # MorphIO
-# --------------------------------------------------------------------------------
 if(BRAYNS_CIRCUITEXPLORER_ENABLED)
     find_package(MorphIO QUIET)
     if(NOT MorphIO_FOUND AND NOT TARGET MorphIO::morphio_shared)
         message(STATUS "Downloading MorphIO from submodules")
-        initialize_submodule("MorphIO")
+        initialize_submodule("MorphIO" ON)
         set(BUILD_BINDINGS OFF CACHE BOOL "" FORCE)
         set(MORPHIO_TESTS OFF CACHE BOOL "" FORCE)
 
@@ -159,12 +157,12 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED)
     endif()
 endif()
 
-# Brion if needed
+# Brion
 if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED)
     find_package(Brion QUIET)
     if(NOT Brion_FOUND AND NOT TARGET Brion)
         message(STATUS "Downloading Brion from submodules")
-        initialize_submodule("Brion")
+        initialize_submodule("Brion" ON)
         add_subdirectory(Brion)
     endif()
 endif()
