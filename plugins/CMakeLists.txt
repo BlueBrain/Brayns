@@ -5,6 +5,8 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
+add_subdirectory(deps)
+
 if(BRAYNS_MULTIVIEW_ENABLED)
     message(FATAL_ERROR "Multiview plugin needs to be updated before compilation")
     add_subdirectory(Multiview)

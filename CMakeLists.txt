@@ -6,7 +6,7 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
 # CMake configuration
 set(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
@@ -46,12 +46,6 @@ find_package(ospray 1.8 REQUIRED)
 find_package(assimp REQUIRED)
 find_package(Poco QUIET COMPONENTS Foundation JSON Net NetSSL)
 find_package(glm QUIET)
-
-if(BRAYNS_VIEWER_ENABLED OR BRAYNS_IBL_ENABLED)
-    find_package(GLEW REQUIRED)
-    find_package(OpenGL REQUIRED)
-    find_package(glfw3 QUIET)
-endif()
 
 # Set up version
 include(GitUtils)

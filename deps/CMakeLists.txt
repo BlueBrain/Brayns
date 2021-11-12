@@ -1,23 +1,68 @@
 # Copyright (c) 2015-2019, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
+# Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
+include(FetchContent)
+
+set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY ON)
+set(CMAKE_INSTALL_LIBDIR lib)
+
+# =============================================================================
 # Async++
-message(STATUS "Downloading Async++ from submodules")
-initialize_submodule("async++" ON)
+# =============================================================================
 set(BUILD_SHARED_LIBS ON CACHE BOOL "Build Async++ as a shared library" FORCE)
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/async++")
+    message(STATUS "Downloading Async++ from submodules")
+    FetchContent_Declare(
+        async++
+        GIT_REPOSITORY https://github.com/Amanieu/asyncplusplus.git
+        GIT_TAG        2c852e5c8751350afaa6cbd67a3d921a7469bc71
+        GIT_SHALLOW ON
+        GIT_SUBMODULES_RECURSE OFF
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/async++
+    )
+    FetchContent_Populate(async++)
+endif()
 add_subdirectory(async++)
 
+# =============================================================================
 # Perceptual Diff
-message(STATUS "Downloading PerceptualDiff from submodules")
-initialize_submodule("perceptualdiff" ON)
-add_subdirectory(perceptualdiff)
+# =============================================================================
+if(BRAYNS_TESTS_ENABLED)
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/perceptualdiff")
+        message(STATUS "Downloading PerceptualDiff from submodules")
+        FetchContent_Declare(
+            perceptualdiff
+            GIT_REPOSITORY https://github.com/myint/perceptualdiff.git
+            GIT_TAG        7ae45fbbe2364c02b9dd54cc83c8f530ba96641b
+            GIT_SHALLOW ON
+            GIT_SUBMODULES_RECURSE ON
+            SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/perceptualdiff
+        )
+        FetchContent_Populate(perceptualdiff)
+    endif()
+    add_subdirectory(perceptualdiff)
+endif()
 
+# =============================================================================
 # Poco
+# =============================================================================
 if(NOT Poco_Found)
-    message(STATUS "Downloading Poco from submodules")
-    initialize_submodule("poco" ON)
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/poco")
+        message(STATUS "Downloading Poco from submodules")
+        FetchContent_Declare(
+            poco
+            GIT_REPOSITORY https://github.com/pocoproject/poco.git
+            GIT_TAG        poco-1.11.1-release
+            GIT_SHALLOW ON
+            GIT_SUBMODULES_RECURSE ON
+            SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/poco
+        )
+        FetchContent_Populate(poco)
+    endif()
+
     # Both Poco and GLM create "uninstall" targets. But GLM check wether the
     # target exists before or not, whereas POCO doesnt give a damn.
     set(ENABLE_REDIS OFF CACHE BOOL "Enable Redis")
@@ -46,10 +91,22 @@ if(NOT Poco_Found)
     set(CMAKE_RELWITHDEBINFO_POSTFIX "" CACHE STRING "Set RelWithDebInfo library postfix" FORCE)
 endif()
 
+# =============================================================================
 # GLM
+# =============================================================================
 if(NOT glm_FOUND AND NOT TARGET glm)
-    message(STATUS "Downloading GLM from submodules")
-    initialize_submodule("glm" ON)
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/glm")
+        message(STATUS "Downloading GLM from submodules")
+        FetchContent_Declare(
+            glm
+            GIT_REPOSITORY https://github.com/g-truc/glm.git
+            GIT_TAG        9749727c2db4742369219e1d452f43e918734b4e
+            GIT_SHALLOW ON
+            GIT_SUBMODULES_RECURSE OFF
+            SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/glm
+        )
+        FetchContent_Populate(glm)
+    endif()
     option(GLM_QUIET "No CMake Message" ON)
     option(GLM_TEST_ENABLE "Build unit tests" OFF)
     option(GLM_TEST_ENABLE_CXX_14 "Enable C++ 14" ON)
@@ -63,106 +120,21 @@ if(NOT glm_FOUND AND NOT TARGET glm)
     endif()
 endif()
 
+# =============================================================================
 # spdlog
-message(STATUS "Downloading spdlog from submodules")
-initialize_submodule("spdlog" ON)
+# =============================================================================
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/spdlog")
+    message(STATUS "Downloading spdlog from submodules")
+    FetchContent_Declare(
+        spdlog
+        GIT_REPOSITORY https://github.com/gabime/spdlog.git
+        GIT_TAG        v1.9.2
+        GIT_SHALLOW ON
+        GIT_SUBMODULES_RECURSE ON
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/spdlog
+    )
+    FetchContent_Populate(spdlog)
+endif()
 set(SPDLOG_BUILD_SHARED ON CACHE BOOL "" FORCE)
 set(SPDLOG_MASTER_PROJECT ON)
 add_subdirectory(spdlog)
-
-# GLFW
-if(BRAYNS_VIEWER_ENABLED AND NOT glfw3_FOUND)
-  message(STATUS "Downloading GLFW3 from submodules")
-  initialize_submodule("glfw" ON)
-  set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-  set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-  set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-  add_subdirectory(glfw)
-endif()
-
-# ImGui
-if(BRAYNS_VIEWER_ENABLED)
-  message(STATUS "Downloading ImGui from submodules")
-  initialize_submodule("imgui" ON)
-  add_library(imgui STATIC
-      ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_draw.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_widgets.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/imgui/examples/imgui_impl_glfw.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/imgui/examples/imgui_impl_opengl2.cpp
-    )
-  target_compile_definitions(imgui PRIVATE -DIMGUI_IMPL_OPENGL_LOADER_GLEW)
-  target_link_libraries(imgui glfw ${OPENGL_gl_LIBRARY} ${OPENGL_opengl_LIBRARY})
-  target_include_directories(imgui PUBLIC
-      "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/imgui>"
-      "$<INSTALL_INTERFACE:include>")
-
-  install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/imgui
-      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-      FILES_MATCHING PATTERN "*.h")
-
-  install(TARGETS imgui
-      EXPORT imgui-targets
-      LIBRARY DESTINATION lib
-      ARCHIVE DESTINATION lib
-  )
-
-  install(EXPORT imgui-targets
-      DESTINATION share/CMake
-  )
-
-endif()
-
-# sonata (which also brings HighFive)
-if(BRAYNS_CIRCUITEXPLORER_ENABLED)
-    find_package(sonata QUIET)
-    if(NOT sonata_FOUND AND NOT TARGET sonata::sonata_shared)
-        message(STATUS "Downloading libsonata from submodules")
-        initialize_submodule("libsonata" OFF)
-        set(EXTLIB_FROM_SUBMODULES ON CACHE BOOL "" FORCE)
-        set(SONATA_TESTS OFF CACHE BOOL "" FORCE)
-        add_subdirectory(libsonata)
-        add_library(sonata::sonata_shared ALIAS sonata_shared)
-    endif()
-endif()
-
-# MorphIO
-if(BRAYNS_CIRCUITEXPLORER_ENABLED)
-    find_package(MorphIO QUIET)
-    if(NOT MorphIO_FOUND AND NOT TARGET MorphIO::morphio_shared)
-        message(STATUS "Downloading MorphIO from submodules")
-        initialize_submodule("MorphIO" ON)
-        set(BUILD_BINDINGS OFF CACHE BOOL "" FORCE)
-        set(MORPHIO_TESTS OFF CACHE BOOL "" FORCE)
-
-        set(MORPHIO_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/MorphIO/include/)
-
-        # Deps
-        add_subdirectory(MorphIO/3rdparty/GSL_LITE)
-        target_include_directories(gsl-lite SYSTEM INTERFACE)
-        add_library(lexertl INTERFACE)
-        target_include_directories(lexertl SYSTEM INTERFACE MorphIO/3rdparty/lexertl14/include)
-
-        # Retrieve version
-        set(MORPHIO_VERSION_STRING "3.3.0")
-        set(MorphIO_VERSION_MAJOR 3)
-        set(MorphIO_VERSION_MINOR 3)
-        set(MorphIO_VERSION_PATCH 0)
-        # Morphio
-        add_subdirectory(MorphIO/src)
-        add_library(morphiointer INTERFACE)
-        target_include_directories(morphiointer INTERFACE ${CMAKE_CURRENT_LIST_DIR}/MorphIO/include)
-        target_link_libraries(morphiointer INTERFACE morphio_shared)
-        add_library(MorphIO::morphio_shared ALIAS morphiointer)
-    endif()
-endif()
-
-# Brion
-if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED)
-    find_package(Brion QUIET)
-    if(NOT Brion_FOUND AND NOT TARGET Brion)
-        message(STATUS "Downloading Brion from submodules")
-        initialize_submodule("Brion" ON)
-        add_subdirectory(Brion)
-    endif()
-endif()

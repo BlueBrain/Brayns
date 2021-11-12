@@ -1,4 +1,7 @@
 # BRAYNS applications
+
+add_subdirectory(deps)
+
 if(BRAYNS_VIEWER_ENABLED)
   add_subdirectory(ui)
   add_subdirectory(BraynsViewer)
