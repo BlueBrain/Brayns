@@ -4,22 +4,6 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-# Brion is needed for 3 plugin
-if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED OR BRAYNS_DTI_ENABLED)
-    find_package(HDF5 REQUIRED)
-    find_package(Brion QUIET)
-endif()
-
-# CircutiExplorer
-if(BRAYNS_CIRCUITEXPLORER_ENABLED)
-    find_package(Boost QUIET REQUIRED COMPONENTS system)
-    find_package(HDF5 REQUIRED)
-    find_package(HighFive QUIET)
-    find_package(sonata QUIET)
-    find_package(MVDTool QUIET)
-    find_package(MorphIO QUIET)
-endif()
-
 include(FetchContent)
 set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY ON)
 set(CMAKE_INSTALL_LIBDIR lib)
@@ -119,7 +103,7 @@ endif()
 # =============================================================================
 # Brion
 # =============================================================================
-if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED OR BRAYNS_DTI_ENABLED AND NOT Brion_FOUND)
+if((BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED OR BRAYNS_DTI_ENABLED) AND NOT Brion_FOUND)
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/Brion")
         message(STATUS "Downloading Brion from submodules")
         FetchContent_Declare(

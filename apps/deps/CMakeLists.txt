@@ -9,12 +9,6 @@ include(FetchContent)
 set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY ON)
 set(CMAKE_INSTALL_LIBDIR lib)
 
-if(BRAYNS_VIEWER_ENABLED OR BRAYNS_IBL_ENABLED)
-    find_package(GLEW REQUIRED)
-    find_package(OpenGL REQUIRED)
-    find_package(glfw3 QUIET)
-endif()
-
 if((BRAYNS_VIEWER_ENABLED OR BRAYNS_IBL_ENABLED) AND NOT glfw3_FOUND)
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/glfw")
         message(STATUS "Downloading GLFW3 from submodules")

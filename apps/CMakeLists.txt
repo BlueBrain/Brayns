@@ -1,5 +1,11 @@
 # BRAYNS applications
 
+if(BRAYNS_VIEWER_ENABLED OR BRAYNS_IBL_ENABLED)
+    find_package(GLEW REQUIRED)
+    find_package(OpenGL REQUIRED)
+    find_package(glfw3 QUIET)
+endif()
+
 add_subdirectory(deps)
 
 if(BRAYNS_VIEWER_ENABLED)
