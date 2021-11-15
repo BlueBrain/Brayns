@@ -37,8 +37,6 @@ if(BRAYNS_TESTS_ENABLED)
             perceptualdiff
             GIT_REPOSITORY https://github.com/myint/perceptualdiff.git
             GIT_TAG        7ae45fbbe2364c02b9dd54cc83c8f530ba96641b
-            GIT_SHALLOW ON
-            GIT_SUBMODULES_RECURSE ON
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/perceptualdiff
         )
         FetchContent_Populate(perceptualdiff)
