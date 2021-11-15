@@ -34,7 +34,7 @@ endif()
 # =============================================================================
 # MorphIO
 # =============================================================================
-if(BRAYNS_CIRCUITEXPLORER_ENABLED AND NOT MorphIO_FOUND AND NOT TARGET MorphIO::morphio_shared)
+if(BRAYNS_CIRCUITEXPLORER_ENABLED AND NOT MorphIO_FOUND AND NOT TARGET MorphIO::morphio)
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/MorphIO")
         message(STATUS "Downloading MorphIO from submodules")
         FetchContent_Declare(
@@ -69,7 +69,7 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED AND NOT MorphIO_FOUND AND NOT TARGET MorphIO::
     add_library(morphiointer INTERFACE)
     target_include_directories(morphiointer INTERFACE ${CMAKE_CURRENT_LIST_DIR}/MorphIO/include)
     target_link_libraries(morphiointer INTERFACE morphio_shared)
-    add_library(MorphIO::morphio_shared ALIAS morphiointer)
+    add_library(MorphIO::morphio ALIAS morphiointer)
 endif()
 
 # =============================================================================
@@ -109,7 +109,7 @@ if((BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED OR BRAYNS_DTI_E
         FetchContent_Declare(
             Brion
             GIT_REPOSITORY https://github.com/BlueBrain/Brion.git
-            GIT_TAG        459f2f66ff6eb6507d5d9f01430f2fda9a77be70
+            GIT_TAG        6e8eabbcb8336494dcc8c986b5e77b0b512118d0
             GIT_SHALLOW ON
             GIT_SUBMODULES_RECURSE OFF
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Brion

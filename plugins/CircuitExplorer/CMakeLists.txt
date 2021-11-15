@@ -288,7 +288,7 @@ target_include_directories(braynsCircuitExplorer PUBLIC
 target_link_libraries(braynsCircuitExplorer PUBLIC ${OSPRAY_LIBRARIES})
 target_link_libraries(braynsCircuitExplorer PRIVATE
     braynsCommon braynsParameters braynsIO braynsEngine braynsPluginAPI braynsNetwork
-    sonata::sonata_shared MorphIO::morphio_shared Brion Brain ${HDF5_LIBRARIES}
+    sonata::sonata_shared MorphIO::morphio Brion Brain ${HDF5_LIBRARIES}
     HighFive MVDTool braynsOSPRayEngine
 )
 if(FFMPEG_FOUND)
