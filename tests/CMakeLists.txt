@@ -65,10 +65,17 @@ if(NOT TARGET tests)
         EXCLUDE_FROM_DEFAULT_BUILD ON FOLDER ${PROJECT_BINARY_DIR}/tests)
 endif()
 
+if(NOT TARGET test)
+    add_custom_target(test)
+    set_target_properties(test PROPERTIES
+        EXCLUDE_FROM_DEFAULT_BUILD ON FOLDER ${PROJECT_BINARY_DIR}/tests)
+endif()
+
 add_custom_target(Brayns-tests)
 set_target_properties(Brayns-tests PROPERTIES
   EXCLUDE_FROM_DEFAULT_BUILD ON FOLDER ${PROJECT_BINARY_DIR}/tests)
 
+add_dependencies(test tests)
 add_dependencies(tests Brayns-tests)
 add_dependencies(Brayns-tests Brayns-cpptests)
 

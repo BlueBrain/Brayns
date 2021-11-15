@@ -29,8 +29,6 @@
 
 #include <functional>
 
-#include <omp.h>
-
 namespace brayns
 {
 /**
@@ -58,9 +56,8 @@ public:
      */
     void updateProgress(const std::string& message, const float fraction) const
     {
-        if (omp_get_thread_num() == 0)
-            if (_callback)
-                _callback(message, fraction);
+        if (_callback)
+            _callback(message, fraction);
     }
 
     CallbackFn _callback;
