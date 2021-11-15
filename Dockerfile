@@ -130,7 +130,7 @@ RUN cd ${BRAYNS_SRC} \
    -DCMAKE_BUILD_TYPE=Release \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
 
-RUN cd ${BRAYNS_SRC}/build && make -j1 install \
+RUN cd ${BRAYNS_SRC}/build && make -j4 install \
    && rm -rf ${DIST_PATH}/include ${DIST_PATH}/cmake ${DIST_PATH}/share
 
 # Final image, containing only Brayns and libraries required to run it
