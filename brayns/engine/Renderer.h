@@ -50,7 +50,7 @@ public:
     //@}
 
     Renderer(const AnimationParameters& animationParameters,
-                        const RenderingParameters& renderingParameters);
+             const RenderingParameters& renderingParameters);
 
     void setScene(ScenePtr scene) { _scene = scene; };
 

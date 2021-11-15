@@ -224,9 +224,8 @@ public:
     virtual void commitGeometry() = 0;
 
     /** Factory method to create an engine-specific material. */
-    MaterialPtr createMaterial(const size_t materialId,
-                                          const std::string& name,
-                                          const PropertyMap& properties = {});
+    MaterialPtr createMaterial(const size_t materialId, const std::string& name,
+                               const PropertyMap& properties = {});
 
     /**
      * Create a volume with the given dimensions, voxel spacing and data type
@@ -241,9 +240,9 @@ public:
      * where the voxels are copied via setBrick() into an optimized internal
      * storage.
      */
-    virtual BrickedVolumePtr createBrickedVolume(
-        const Vector3ui& dimensions, const Vector3f& spacing,
-        const DataType type) const = 0;
+    virtual BrickedVolumePtr createBrickedVolume(const Vector3ui& dimensions,
+                                                 const Vector3f& spacing,
+                                                 const DataType type) const = 0;
 
     virtual void buildBoundingBox() = 0;
     //@}
@@ -276,8 +275,7 @@ public:
       @param sphere Sphere to add
       @return Index of the sphere for the specified material
       */
-    uint64_t addSphere(const size_t materialId,
-                                  const Sphere& sphere);
+    uint64_t addSphere(const size_t materialId, const Sphere& sphere);
 
     /**
         Returns cylinders handled by the model
@@ -294,8 +292,7 @@ public:
       @param cylinder Cylinder to add
       @return Index of the sphere for the specified material
       */
-    uint64_t addCylinder(const size_t materialId,
-                                    const Cylinder& cylinder);
+    uint64_t addCylinder(const size_t materialId, const Cylinder& cylinder);
     /**
         Returns cones handled by the model
     */
@@ -332,16 +329,14 @@ public:
       @param sdfBezier SDFBezier to add
       @return Index of the bezier for the specified material
       */
-    uint64_t addSDFBezier(const size_t materialId,
-                                     const SDFBezier& sdfBezier);
+    uint64_t addSDFBezier(const size_t materialId, const SDFBezier& sdfBezier);
 
     /**
       Adds a streamline to the model
       @param materialId Id of the material for the streamline
       @param streamline Streamline to add
       */
-    void addStreamline(const size_t materialId,
-                                  const Streamline& streamline);
+    void addStreamline(const size_t materialId, const Streamline& streamline);
 
     /**
         Returns streamlines handled by the model
@@ -378,7 +373,7 @@ public:
      * @return The meta object index for the given material
      */
     uint64_t addMetaObject(const size_t materialId,
-                                      const PropertyMap& metaObject);
+                           const PropertyMap& metaObject);
 
     /**
      * @brief Return the list of metaobjects that this model contains

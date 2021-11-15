@@ -57,14 +57,12 @@ public:
               the camera orientation
        @param target The x, y, z coordinates of the camera target
     */
-    void set(const Vector3d& position,
-                        const Quaterniond& orientation,
-                        const Vector3d& target = Vector3d(0.0, 0.0, 0.0));
+    void set(const Vector3d& position, const Quaterniond& orientation,
+             const Vector3d& target = Vector3d(0.0, 0.0, 0.0));
 
     void setInitialState(const Vector3d& position,
-                                    const Quaterniond& orientation,
-                                    const Vector3d& target = Vector3d(0.0, 0.0,
-                                                                      0.0));
+                         const Quaterniond& orientation,
+                         const Vector3d& target = Vector3d(0.0, 0.0, 0.0));
 
     /**
        Sets camera position

@@ -22,8 +22,8 @@
 
 #include <iostream>
 
-#include <brayns/parameters/AbstractParameters.h>
 #include <brayns/Version.h>
+#include <brayns/parameters/AbstractParameters.h>
 
 namespace
 {
@@ -106,12 +106,11 @@ std::vector<std::string> findSimilarOptions(
 
 void _printVersion()
 {
-    std::cout << "Brayns "
-              << brayns::Version::getMajor() << "."
+    std::cout << "Brayns " << brayns::Version::getMajor() << "."
               << brayns::Version::getMinor() << "."
-              << brayns::Version::getPatch()
-              << " (" << brayns::Version::getCommitHash()
-              << ")" << std::dec << std::endl;
+              << brayns::Version::getPatch() << " ("
+              << brayns::Version::getCommitHash() << ")" << std::dec
+              << std::endl;
 }
 } // namespace
 

@@ -114,7 +114,7 @@ if(NOT glm_FOUND AND NOT TARGET glm)
 
     # WAR for https://github.com/g-truc/glm/issues/854
     if(CMAKE_COMPILER_IS_GNUCXX AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
-      target_compile_options(glm INTERFACE -Wno-class-memaccess -Wno-error=class-memaccess)
+      target_compile_options(glm INTERFACE -Wno-pedantic -Wno-error=pedantic -Wno-class-memaccess -Wno-error=class-memaccess)
     endif()
 endif()
 

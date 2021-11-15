@@ -24,6 +24,8 @@ target_include_directories(braynsJson PUBLIC
 target_link_libraries(braynsJson PUBLIC Poco::JSON glm)
 target_link_libraries(braynsJson PRIVATE braynsUtils)
 
+target_compile_options(braynsJson PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+
 set_target_properties(braynsJson
     PROPERTIES
         VERSION ${BRAYNS_VERSION}

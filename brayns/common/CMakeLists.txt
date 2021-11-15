@@ -71,6 +71,8 @@ target_link_libraries(braynsCommon PRIVATE
     braynsParameters ${Boost_PROGRAM_OPTIONS_LIBRARY} ${FREEIMAGE_LIBRARIES}
 )
 
+target_compile_options(braynsCommon PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+
 set_target_properties(braynsCommon
     PROPERTIES
         VERSION ${BRAYNS_VERSION}

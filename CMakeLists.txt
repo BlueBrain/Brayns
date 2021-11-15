@@ -53,6 +53,9 @@ set(BRAYNS_GIT_HASH "Not found")
 get_commit_hash(BRAYNS_GIT_HASH)
 set(BRAYNS_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
+# Brayns targets compile options
+set(BRAYNS_COMPILE_OPTIONS -Wall -Wextra -pedantic -Werror)
+
 # Downloadable dependencies
 add_subdirectory(deps)
 

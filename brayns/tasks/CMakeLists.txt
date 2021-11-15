@@ -26,6 +26,8 @@ target_include_directories(braynsTasks PUBLIC
 
 target_link_libraries(braynsTasks PUBLIC braynsCommon braynsEngine)
 
+target_compile_options(braynsTasks PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+
 set_target_properties(braynsTasks
     PROPERTIES
         VERSION ${BRAYNS_VERSION}

@@ -39,6 +39,8 @@ target_link_libraries(brayns PRIVATE
     braynsIO braynsPluginAPI braynsManipulators braynsTasks
 )
 
+target_compile_options(brayns PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+
 set_target_properties(brayns
     PROPERTIES
         VERSION ${BRAYNS_VERSION}

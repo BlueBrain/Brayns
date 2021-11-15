@@ -39,6 +39,8 @@ target_include_directories(braynsParameters PUBLIC
 target_link_libraries(braynsParameters PUBLIC spdlog::spdlog)
 target_link_libraries(braynsParameters PRIVATE glm ${Boost_PROGRAM_OPTIONS_LIBRARY} braynsUtils)
 
+target_compile_options(braynsParameters PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+
 set_target_properties(braynsParameters
     PROPERTIES
         VERSION ${BRAYNS_VERSION}

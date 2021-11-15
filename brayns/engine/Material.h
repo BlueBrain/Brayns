@@ -43,10 +43,7 @@ public:
     Material(const PropertyMap& properties = {});
 
     const std::string& getName() const { return _name; }
-    void setName(const std::string& value)
-    {
-        _updateValue(_name, value);
-    }
+    void setName(const std::string& value) { _updateValue(_name, value); }
     void setDiffuseColor(const Vector3d& value)
     {
         _updateValue(_diffuseColor, value);
@@ -56,10 +53,7 @@ public:
     {
         _updateValue(_specularColor, value);
     }
-    const Vector3d& getSpecularColor() const
-    {
-        return _specularColor;
-    }
+    const Vector3d& getSpecularColor() const { return _specularColor; }
     void setSpecularExponent(double value)
     {
         _updateValue(_specularExponent, value);
@@ -77,22 +71,15 @@ public:
         _updateValue(_refractionIndex, value);
     }
     double getRefractionIndex() const { return _refractionIndex; }
-    void setEmission(double value)
-    {
-        _updateValue(_emission, value);
-    }
+    void setEmission(double value) { _updateValue(_emission, value); }
     double getEmission() const { return _emission; }
-    void setGlossiness(double value)
-    {
-        _updateValue(_glossiness, value);
-    }
+    void setGlossiness(double value) { _updateValue(_glossiness, value); }
     double getGlossiness() const { return _glossiness; }
     const TextureDescriptors& getTextureDescriptors() const
     {
         return _textureDescriptors;
     }
-    void setTexture(const std::string& fileName,
-                               const TextureType type);
+    void setTexture(const std::string& fileName, const TextureType type);
     void removeTexture(const TextureType type);
 
     Texture2DPtr getTexture(const TextureType type) const;

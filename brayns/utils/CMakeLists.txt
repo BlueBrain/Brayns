@@ -34,6 +34,8 @@ target_link_libraries(braynsUtils PRIVATE ${FREEIMAGE_LIBRARIES})
 # Needed to allow DynamicLib class to find the engine and plugins libraries
 set_target_properties(braynsUtils PROPERTIES BUILD_RPATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
+target_compile_options(braynsUtils PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+
 set_target_properties(braynsUtils
     PROPERTIES
         VERSION ${BRAYNS_VERSION}

@@ -171,7 +171,7 @@ public:
         {
             std::vector<freeimage::ImagePtr> images;
             images.reserve(frameBuffers.size());
-            for(const auto& frameBuffer : frameBuffers)
+            for (const auto& frameBuffer : frameBuffers)
                 images.push_back(frameBuffer->getImage());
             return _imageGenerator.createImage(images, _params.format,
                                                _params.quality);

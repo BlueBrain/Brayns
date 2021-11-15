@@ -32,7 +32,8 @@ ImageGenerator::~ImageGenerator()
 }
 
 ImageGenerator::ImageBase64 ImageGenerator::createImage(
-    freeimage::ImagePtr&& image, const std::string& format, const uint8_t quality)
+    freeimage::ImagePtr&& image, const std::string& format,
+    const uint8_t quality)
 {
     return {freeimage::getBase64Image(std::move(image), format, quality)};
 }
@@ -48,19 +49,11 @@ ImageGenerator::ImageBase64 ImageGenerator::createImage(
                                       quality)};
 }
 
-ImageGenerator::ImageJPEG ImageGenerator::createJPEG(const uint8_t* colorBuffer,
-                                                     const FrameBufferFormat format,
-                                                     const Vector2ui& size, uint8_t quality)
+ImageGenerator::ImageJPEG ImageGenerator::createJPEG(
+    const uint8_t* colorBuffer, const FrameBufferFormat format,
+    const Vector2ui& size, uint8_t quality)
 {
-    //frameBuffer.map();
-    //const auto colorBuffer = frameBuffer.getColorBuffer();
-    //if (!colorBuffer)
-    //{
-    //    frameBuffer.unmap();
-    //    return ImageJPEG();
-    //}
-
-    if(!colorBuffer)
+    if (!colorBuffer)
         return ImageJPEG();
 
     int32_t pixelFormat = TJPF_RGBX;
@@ -75,8 +68,8 @@ ImageGenerator::ImageJPEG ImageGenerator::createJPEG(const uint8_t* colorBuffer,
     }
 
     ImageJPEG image;
-    image.data = _encodeJpeg(size.x, size.y, colorBuffer, pixelFormat,
-                             quality, image.size);
+    image.data = _encodeJpeg(size.x, size.y, colorBuffer, pixelFormat, quality,
+                             image.size);
     return image;
 }
 

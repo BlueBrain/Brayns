@@ -65,7 +65,7 @@ public:
     //@}
 
     FrameBuffer(const std::string& name, const Vector2ui& frameSize,
-                           FrameBufferFormat frameBufferFormat);
+                FrameBufferFormat frameBufferFormat);
 
     size_t getColorDepth() const;
     const Vector2ui& getFrameSize() const { return _frameSize; }

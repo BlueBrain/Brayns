@@ -55,6 +55,8 @@ elseif(assimp_VERSION VERSION_GREATER_EQUAL 5.0.0)
     target_compile_definitions(braynsIO PRIVATE ASSIMP_VERSION_5)
 endif()
 
+target_compile_options(braynsIO PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+
 set_target_properties(braynsIO
     PROPERTIES
         VERSION ${BRAYNS_VERSION}

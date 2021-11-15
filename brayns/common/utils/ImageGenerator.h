@@ -53,8 +53,8 @@ public:
      * @throw std::runtime_error if image conversion failed or neither FreeImage
      *                           nor TurboJPEG is available
      */
-    ImageBase64 createImage(freeimage::ImagePtr&& image, const std::string& format,
-                            uint8_t quality);
+    ImageBase64 createImage(freeimage::ImagePtr&& image,
+                            const std::string& format, uint8_t quality);
     ImageBase64 createImage(std::vector<freeimage::ImagePtr>& frameBuffers,
                             const std::string& format, uint8_t quality);
 
@@ -77,8 +77,8 @@ public:
      * @return JPEG image with a size > 0 if valid, size == 0 on error.
      */
     ImageJPEG createJPEG(const uint8_t* colorBuffer,
-                         const FrameBufferFormat format,
-                         const Vector2ui& size, uint8_t quality);
+                         const FrameBufferFormat format, const Vector2ui& size,
+                         uint8_t quality);
 
 private:
     tjhandle _compressor{tjInitCompress()};

@@ -45,6 +45,8 @@ target_link_libraries(braynsNetwork PUBLIC
   Poco::NetSSL
 )
 
+target_compile_options(braynsNetwork PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+
 set_target_properties(braynsNetwork
     PROPERTIES
         VERSION ${BRAYNS_VERSION}

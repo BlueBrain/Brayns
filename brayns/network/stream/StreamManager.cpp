@@ -41,10 +41,10 @@ public:
         auto& parameters = manager.getApplicationParameters();
         auto compression = parameters.getJpegCompression();
         auto& generator = context.getImageGenerator();
-        const auto image = generator.createJPEG(framebuffer.getColorBuffer(),
-                                                framebuffer.getFrameBufferFormat(),
-                                                framebuffer.getSize(),
-                                                compression);
+        const auto image =
+            generator.createJPEG(framebuffer.getColorBuffer(),
+                                 framebuffer.getFrameBufferFormat(),
+                                 framebuffer.getSize(), compression);
         if (image.size == 0)
         {
             return;

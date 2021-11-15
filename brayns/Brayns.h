@@ -76,7 +76,7 @@ public:
      * @param renderOutput Color and depth buffers
      */
     void commitAndRender(const RenderInput& renderInput,
-                                    RenderOutput& renderOutput);
+                         RenderOutput& renderOutput);
 
     /**
      * Renders color and depth buffers of the current scene, according to

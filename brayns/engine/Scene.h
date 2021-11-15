@@ -65,8 +65,8 @@ public:
      * light sources.
      */
     Scene(AnimationParameters& animationParameters,
-                     GeometryParameters& geometryParameters,
-                     VolumeParameters& volumeParameters);
+          GeometryParameters& geometryParameters,
+          VolumeParameters& volumeParameters);
 
     /**
         Returns the bounding box of the scene
@@ -109,8 +109,7 @@ public:
      * @param modelDescriptor The model which will replace the current one
      * @return True if the model was found and replace, false otherwise
      */
-    bool replaceModel(const size_t id,
-                                 ModelDescriptorPtr modelDescriptor);
+    bool replaceModel(const size_t id, ModelDescriptorPtr modelDescriptor);
 
     ModelDescriptorPtr getModel(const size_t id) const;
 

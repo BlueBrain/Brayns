@@ -25,6 +25,8 @@ target_include_directories(braynsManipulators PUBLIC
 target_link_libraries(braynsManipulators PUBLIC braynsCommon)
 target_link_libraries(braynsManipulators PRIVATE braynsEngine)
 
+target_compile_options(braynsManipulators PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+
 set_target_properties(braynsManipulators
     PROPERTIES
         VERSION ${BRAYNS_VERSION}
