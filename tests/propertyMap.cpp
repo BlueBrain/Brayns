@@ -95,15 +95,21 @@ TEST_CASE("set_and_get_all_supported_types")
 
     CHECK(properties["int"].as<int32_t>() == 42);
     CHECK(properties["enum"].as<brayns::EnumProperty>().toString() == "Zero");
-    CHECK(properties["enum"].as<brayns::EnumProperty>().getValues().size() == 3);
+    CHECK(properties["enum"].as<brayns::EnumProperty>().getValues().size() ==
+          3);
     CHECK(properties["double"].as<double>() == 1.2);
     CHECK(properties["string"].as<std::string>() == "foo");
     CHECK(properties["bool"].as<bool>());
-    CHECK((properties["vec2i"].as<brayns::Vector2i>() == brayns::Vector2i{1, 2}));
-    CHECK((properties["vec2d"].as<brayns::Vector2d>() == brayns::Vector2d{1, 2}));
-    CHECK((properties["vec3i"].as<brayns::Vector3i>() == brayns::Vector3i{1, 2, 3}));
-    CHECK((properties["vec3d"].as<brayns::Vector3d>() == brayns::Vector3d{1, 2, 3}));
-    CHECK((properties["vec4d"].as<brayns::Vector4d>() == brayns::Vector4d{1, 2, 3, 4}));
+    CHECK(
+        (properties["vec2i"].as<brayns::Vector2i>() == brayns::Vector2i{1, 2}));
+    CHECK(
+        (properties["vec2d"].as<brayns::Vector2d>() == brayns::Vector2d{1, 2}));
+    CHECK((properties["vec3i"].as<brayns::Vector3i>() ==
+           brayns::Vector3i{1, 2, 3}));
+    CHECK((properties["vec3d"].as<brayns::Vector3d>() ==
+           brayns::Vector3d{1, 2, 3}));
+    CHECK((properties["vec4d"].as<brayns::Vector4d>() ==
+           brayns::Vector4d{1, 2, 3, 4}));
 
     CHECK(properties["int"].is<int32_t>());
     CHECK(properties["double"].is<double>());
