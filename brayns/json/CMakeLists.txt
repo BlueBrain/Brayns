@@ -33,7 +33,7 @@ set_target_properties(braynsJson
 )
 
 install(TARGETS braynsJson
-    EXPORT brayns-targets
+    EXPORT Brayns-targets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
 )

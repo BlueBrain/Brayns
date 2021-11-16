@@ -80,7 +80,7 @@ set_target_properties(braynsCommon
 )
 
 install(TARGETS braynsCommon
-    EXPORT brayns-targets
+    EXPORT Brayns-targets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
 )

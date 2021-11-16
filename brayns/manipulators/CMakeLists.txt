@@ -34,7 +34,7 @@ set_target_properties(braynsManipulators
 )
 
 install(TARGETS braynsManipulators
-    EXPORT brayns-targets
+    EXPORT Brayns-targets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
 )

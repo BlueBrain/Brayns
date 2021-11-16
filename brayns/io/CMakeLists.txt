@@ -64,7 +64,7 @@ set_target_properties(braynsIO
 )
 
 install(TARGETS braynsIO
-    EXPORT brayns-targets
+    EXPORT Brayns-targets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
 )

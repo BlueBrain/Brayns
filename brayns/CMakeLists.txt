@@ -48,7 +48,7 @@ set_target_properties(brayns
 )
 
 install(TARGETS brayns
-    EXPORT brayns-targets
+    EXPORT Brayns-targets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
 )
@@ -59,10 +59,10 @@ install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 install(FILES ${CMAKE_BINARY_DIR}/include/brayns/Version.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brayns)
 
-install(FILES brayns-config.cmake
+install(FILES Brayns-config.cmake
     DESTINATION share/brayns/CMake
 )
 
-install(EXPORT brayns-targets
+install(EXPORT Brayns-targets
     DESTINATION share/brayns/CMake
 )

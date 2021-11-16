@@ -51,7 +51,7 @@ set_target_properties(braynsEngine
 )
 
 install(TARGETS braynsEngine
-    EXPORT brayns-targets
+    EXPORT Brayns-targets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
 )
