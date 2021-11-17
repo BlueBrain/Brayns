@@ -120,7 +120,6 @@ ADD . ${BRAYNS_SRC}
 
 # TODO: "|| exit 0"  hack to be removed as soon as MVDTool export issue is fixed.
 RUN cd ${BRAYNS_SRC} \
-   && git submodule update --init --recursive \
    && mkdir -p build \
    && cd build \
    && CMAKE_PREFIX_PATH=${DIST_PATH}:${DIST_PATH}/lib/cmake/libwebsockets \
