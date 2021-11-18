@@ -35,23 +35,31 @@ void VasculatureRadiiSimulation::update(const uint32_t frame,
                                         brayns::Scene& scene)
 {
     const auto& models = scene.getModels();
-
-#pragma omp parallel for
     for (size_t i = 0; i < models.size(); ++i)
     {
         const auto& model = models[i];
+        //auto model = scene.getModel(constModel->getModelID());
         auto& modelObj = model->getModel();
         auto handler = modelObj.getSimulationHandler();
-
         if (auto radiiHandler = toRadiiHandler(handler))
         {
+            auto currentFrame = radiiHandler->getBoundedFrame(frame);
+            auto lastUsed = radiiHandler->getLastUsedFrame();
+            if(lastUsed == frame)
+                continue;
+
             const auto& frameData = radiiHandler->getCurrentRadiiFrame();
-            for (auto& sdfGeometry : modelObj.getSDFGeometryData().geometries)
+            auto& geometries = modelObj.getSDFGeometryData().geometries;
+
+            #pragma omp parallel for
+            for(size_t geomIdx = 0; geomIdx < geometries.size(); ++geomIdx)
             {
-                sdfGeometry.r0 = frameData[sdfGeometry.userData];
-                sdfGeometry.r1 = frameData[sdfGeometry.userData];
+                auto& geometry = geometries[geomIdx];
+                geometry.r0 = std::max(frameData[geometry.userData], 0.01f);
+                geometry.r1 = std::max(frameData[geometry.userData], 0.01f);
             }
-            modelObj.commitGeometry();
+
+            radiiHandler->setLastUsedFrame(currentFrame);
         }
     }
 }

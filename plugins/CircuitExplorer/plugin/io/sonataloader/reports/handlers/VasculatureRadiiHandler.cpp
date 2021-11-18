@@ -69,7 +69,6 @@ std::vector<float> VasculatureRadiiHandler::getFrameDataImpl(
     const auto realFrame = frame > _nbFrames ? _nbFrames : frame;
     const auto timestamp = frameIndexToTimestamp(realFrame, _dt);
     _radii = _reportPopulation.get(_selection, timestamp).data;
-    _lastRadiiFrame = realFrame;
     _ready = true;
 
     return {};
