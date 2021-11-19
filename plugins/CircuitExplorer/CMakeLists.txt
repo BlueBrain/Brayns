@@ -306,6 +306,8 @@ set_target_properties(braynsCircuitExplorer
         SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 )
 
+target_compile_options(braynsCircuitExplorer PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+
 install(TARGETS braynsCircuitExplorer
     EXPORT braynsCircuitExplorer-targets
     LIBRARY DESTINATION lib
