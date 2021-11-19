@@ -144,12 +144,12 @@ OSPGeometry& OSPRayModel::_createGeometry(GeometryMap& map,
                                           const char* name)
 {
     auto& geometry = map[materialId];
-    //if (geometry)
+    // if (geometry)
     //{
     //    ospRemoveGeometry(_primaryModel, geometry);
     //    ospRelease(geometry);
     //}
-    if(!geometry)
+    if (!geometry)
         geometry = ospNewGeometry(name);
 
     auto matIt = _materials.find(materialId);

@@ -38,21 +38,21 @@ void VasculatureRadiiSimulation::update(const uint32_t frame,
     for (size_t i = 0; i < models.size(); ++i)
     {
         const auto& model = models[i];
-        //auto model = scene.getModel(constModel->getModelID());
+        // auto model = scene.getModel(constModel->getModelID());
         auto& modelObj = model->getModel();
         auto handler = modelObj.getSimulationHandler();
         if (auto radiiHandler = toRadiiHandler(handler))
         {
             auto currentFrame = radiiHandler->getBoundedFrame(frame);
             auto lastUsed = radiiHandler->getLastUsedFrame();
-            if(lastUsed == frame)
+            if (lastUsed == frame)
                 continue;
 
             const auto& frameData = radiiHandler->getCurrentRadiiFrame();
             auto& geometries = modelObj.getSDFGeometryData().geometries;
 
-            #pragma omp parallel for
-            for(size_t geomIdx = 0; geomIdx < geometries.size(); ++geomIdx)
+#pragma omp parallel for
+            for (size_t geomIdx = 0; geomIdx < geometries.size(); ++geomIdx)
             {
                 auto& geometry = geometries[geomIdx];
                 geometry.r0 = std::max(frameData[geometry.userData], 0.01f);
