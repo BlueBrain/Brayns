@@ -23,7 +23,7 @@ project(Brayns VERSION 1.1.0)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
 
 # Options
-option(BRAYNS_TESTS_ENABLED "Activate unit testing" OFF)
+option(BRAYNS_TESTS_ENABLED "Activate unit testing" ON)
 option(BRAYNS_VIEWER_ENABLED "Activate Brayns Viewer" OFF)
 option(BRAYNS_SERVICE_ENABLED "Activate Brayns Service" ON)
 option(BRAYNS_BENCHMARK_ENABLED "Activate Brayns Benchmark" OFF)
