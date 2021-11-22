@@ -10,11 +10,6 @@ enable_testing()
 
 configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
 
-#list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
-#include(osprayUse)
-#include_directories_ispc(${PROJECT_SOURCE_DIR})
-#ospray_ispc_compile(${PROJECT_SOURCE_DIR}/engines/ospray/ispc/render/BasicRenderer.ispc)
-
 set(TEST_LIST
     brayns.cpp
     clipPlaneRendering.cpp
