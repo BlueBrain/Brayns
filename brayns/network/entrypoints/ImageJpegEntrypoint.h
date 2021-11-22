@@ -46,7 +46,8 @@ public:
         auto& parameters = manager.getApplicationParameters();
         auto compression = uint8_t(parameters.getJpegCompression());
         auto& generator = getImageGenerator();
-        auto image = generator.createImage(framebuffer, "jpg", compression);
+        auto image =
+            generator.createImage(framebuffer.getImage(), "jpg", compression);
         request.reply(image);
     }
 };

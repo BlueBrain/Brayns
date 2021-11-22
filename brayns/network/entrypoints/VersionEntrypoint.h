@@ -21,12 +21,10 @@
 
 #pragma once
 
-#include <sstream>
-
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/VersionMessage.h>
 
-#include <brayns/version.h>
+#include <brayns/Version.h>
 
 namespace brayns
 {
@@ -46,10 +44,7 @@ public:
         message.major = Version::getMajor();
         message.minor = Version::getMinor();
         message.patch = Version::getPatch();
-        message.abi = Version::getABI();
-        std::ostringstream stream;
-        stream << std::hex << Version::getRevision();
-        message.revision = stream.str();
+        message.revision = Version::getCommitHash();
         request.reply(message);
     }
 };

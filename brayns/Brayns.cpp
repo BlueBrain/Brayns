@@ -43,9 +43,7 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
-#if BRAYNS_USE_ASSIMP
 #include <brayns/io/MeshLoader.h>
-#endif
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/VolumeLoader.h>
 #include <brayns/io/XYZBLoader.h>
@@ -343,9 +341,7 @@ private:
         registry.registerLoader(std::make_unique<RawVolumeLoader>());
         registry.registerLoader(std::make_unique<MHDVolumeLoader>());
         registry.registerLoader(std::make_unique<XYZBLoader>());
-#if BRAYNS_USE_ASSIMP
         registry.registerLoader(std::make_unique<MeshLoader>());
-#endif
     }
 
     void _loadData()

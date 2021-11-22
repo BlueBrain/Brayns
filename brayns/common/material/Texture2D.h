@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include <brayns/api.h>
 #include <brayns/common/types.h>
 #include <vector>
 
@@ -44,9 +43,9 @@ public:
         aoe
     };
 
-    BRAYNS_API Texture2D(const Type type, const std::string& filename,
-                         const uint8_t channels, const uint8_t depth,
-                         const uint32_t width, const uint32_t height);
+    Texture2D(const Type type, const std::string& filename,
+              const uint8_t channels, const uint8_t depth, const uint32_t width,
+              const uint32_t height);
 
     size_t getSizeInBytes() const { return height * width * depth * channels; }
     void setMipLevels(const uint8_t mips);

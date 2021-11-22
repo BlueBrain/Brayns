@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/types.h>
 

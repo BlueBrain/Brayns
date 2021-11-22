@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <brayns/api.h>
 #include <brayns/common/types.h>
 
 namespace brayns
@@ -61,8 +60,8 @@ public:
      * the geometry and the renderer. Brayns creates the scene using built-in
      * and plug-in provided loaders.
      */
-    BRAYNS_API Brayns(int argc, const char** argv);
-    BRAYNS_API ~Brayns();
+    Brayns(int argc, const char** argv);
+    ~Brayns();
 
     /** @name Simple execution API  */
     //@{
@@ -76,8 +75,8 @@ public:
      *        camera and according model and projection matrices
      * @param renderOutput Color and depth buffers
      */
-    BRAYNS_API void commitAndRender(const RenderInput& renderInput,
-                                    RenderOutput& renderOutput);
+    void commitAndRender(const RenderInput& renderInput,
+                         RenderOutput& renderOutput);
 
     /**
      * Renders color and depth buffers of the current scene, according to
@@ -94,7 +93,7 @@ public:
      * @return true if rendering should continue or false if user inputs
      *         requested to stop.
      */
-    BRAYNS_API bool commitAndRender();
+    bool commitAndRender();
     //@}
 
     /** @name Low-level execution API */
@@ -108,48 +107,48 @@ public:
      *         evaluated (accum rendering, data loading, etc.)
      * @note threadsafe with render()
      */
-    BRAYNS_API bool commit();
+    bool commit();
 
     /**
      * Render a frame into the current framebuffer.
      * @note threadsafe with commit()
      */
-    BRAYNS_API void render();
+    void render();
 
     /**
      * Call postRender() on engine and plugins to signal finish of render().
      * Shall only be called after render() has finished. This is only needed if
      * commit() and render() are called individually.
      */
-    BRAYNS_API void postRender();
+    void postRender();
     //@}
 
     /**
        @return the current engine
     */
-    BRAYNS_API Engine& getEngine();
+    Engine& getEngine();
 
     /**
      * @return The parameter manager
      */
-    BRAYNS_API ParametersManager& getParametersManager();
+    ParametersManager& getParametersManager();
 
     /**
      * Gets the keyboard handler
      */
-    BRAYNS_API KeyboardHandler& getKeyboardHandler();
+    KeyboardHandler& getKeyboardHandler();
 
     /**
      * Gets the camera manipulator
      */
-    BRAYNS_API AbstractManipulator& getCameraManipulator();
+    AbstractManipulator& getCameraManipulator();
 
     /**
      * @brief Get the registered network interface.
      *
      * @return ActionInterface* Network interface or null if not set.
      */
-    BRAYNS_API ActionInterface* getActionInterface();
+    ActionInterface* getActionInterface();
 
 private:
     struct Impl;

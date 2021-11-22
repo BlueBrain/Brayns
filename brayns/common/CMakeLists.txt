@@ -1,5 +1,6 @@
 # Copyright (c) 2015-2021, EPFL/Blue Brain Project
-# Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+# Responsible Authors: Cyrille Favreau <cyrille.favreau@epfl.ch>
+#                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
@@ -56,23 +57,30 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   utils/ImageGenerator.h
 )
 
-set(BRAYNSCOMMON_INCLUDE_NAME brayns/common)
-set(BRAYNSCOMMON_LINK_LIBRARIES
-  PUBLIC glm Async++ ${LibJpegTurbo_LIBRARIES} braynsUtils braynsJson
-  PUBLIC spdlog::spdlog_header_only
-  PRIVATE braynsParameters ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${FREEIMAGE_LIBRARIES}
-)
-
-common_library(braynsCommon)
+add_library(braynsCommon SHARED ${BRAYNSCOMMON_PUBLIC_HEADERS} ${BRAYNSCOMMON_SOURCES})
 
 target_include_directories(braynsCommon SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS})
+target_include_directories(braynsCommon PUBLIC
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
+    "$<INSTALL_INTERFACE:include>")
 
-if(FFMPEG_FOUND)
-  target_include_directories(braynsCommon SYSTEM PRIVATE ${FFMPEG_INCLUDE_DIR})
-endif()
+target_link_libraries(braynsCommon PUBLIC
+  glm Async++ ${LibJpegTurbo_LIBRARIES} braynsUtils braynsJson spdlog::spdlog
+)
+target_link_libraries(braynsCommon PRIVATE
+    braynsParameters ${Boost_PROGRAM_OPTIONS_LIBRARY} ${FREEIMAGE_LIBRARIES}
+)
 
-target_include_directories(braynsCommon PUBLIC  
-    "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/deps/spdlog/include>"
-    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>"
+target_compile_options(braynsCommon PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+
+set_target_properties(braynsCommon
+    PROPERTIES
+        VERSION ${BRAYNS_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+)
+
+install(TARGETS braynsCommon
+    EXPORT Brayns-targets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
 )

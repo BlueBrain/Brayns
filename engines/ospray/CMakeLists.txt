@@ -1,6 +1,7 @@
 # Copyright (c) 2015-2021, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-# Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+# Responsible Authors: Cyrille Favreau <cyrille.favreau@epfl.ch>
+#                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
@@ -11,14 +12,8 @@
 # directories (names 'intel64' and 'mic', respectively)
 
 # compiler selection for the non-MIC part
-if(APPLE)
-  set(OSPRAY_COMPILER "CLANG" CACHE STRING "compiler to use (ICC,GCC, or CLANG)")
-  set_property(CACHE OSPRAY_COMPILER PROPERTY STRINGS ICC GCC CLANG)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-variable-sized-type-not-at-end")
-else()
-  set(OSPRAY_COMPILER "GCC" CACHE STRING "compiler to use (ICC or GCC)")
-  set_property(CACHE OSPRAY_COMPILER PROPERTY STRINGS ICC GCC)
-endif()
+set(OSPRAY_COMPILER "GCC" CACHE STRING "compiler to use (ICC or GCC)")
+set_property(CACHE OSPRAY_COMPILER PROPERTY STRINGS ICC GCC)
 
 
 set(BRAYNSOSPRAYENGINE_ISPC_SOURCES
@@ -83,9 +78,6 @@ set(BRAYNSOSPRAYENGINE_HEADERS
   ispc/render/BasicRenderer.h
   ispc/render/DefaultMaterial.h
   ispc/render/utils/AbstractRenderer.h
-)
-
-set(BRAYNSOSPRAYENGINE_PUBLIC_HEADERS
   ispc/geometry/Cones.h
   ispc/geometry/SDFBeziers.h
   ispc/geometry/SDFGeometries.h
@@ -96,11 +88,6 @@ set_source_files_properties(
     OSPRayMaterial.cpp
     PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations)
 
-set(BRAYNSOSPRAYENGINE_LINK_LIBRARIES
-    PRIVATE braynsEngine braynsParameters braynsCommon ospray::ospray_common ospray::ospray
-    # Public linkage needed for transfer function test
-    PUBLIC ospray::ospray_module_ispc
-)
 
 # reuse ispc setup and macros from ospray
 list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
@@ -110,7 +97,6 @@ endif()
 include(osprayUse)
 
 # Enable/disable use of hardware randomizer
-option(BRAYNS_HARDWARE_RANDOMIZER_ENABLED "Enables hardware randomizer if supported by target CPU" OFF)
 if(BRAYNS_HARDWARE_RANDOMIZER_ENABLED)
   set(ISPC_EXTRA_ARGS -DBRAYNS_ISPC_USE_HARDWARE_RANDOMIZER=ON)
 endif()
@@ -120,9 +106,34 @@ include_directories_ispc(${PROJECT_SOURCE_DIR})
 ospray_ispc_compile(${BRAYNSOSPRAYENGINE_ISPC_SOURCES})
 list(APPEND BRAYNSOSPRAYENGINE_SOURCES ${ISPC_OBJECTS})
 
-# Compile C++ code
-set(BRAYNSOSPRAYENGINE_OMIT_LIBRARY_HEADER ON)
-set(BRAYNSOSPRAYENGINE_OMIT_VERSION_HEADERS ON)
-set(BRAYNSOSPRAYENGINE_EXPORT ON)
+add_library(braynsOSPRayEngine SHARED ${BRAYNSOSPRAYENGINE_SOURCES} ${BRAYNSOSPRAYENGINE_HEADERS})
 
-common_library(braynsOSPRayEngine)
+set(BRAYNS_PARAMETER_INCLUDE_DIR_LIST
+    ${PROJECT_SOURCE_DIR}
+    ${CMAKE_BINARY_DIR}/)
+target_include_directories(brayns PUBLIC
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+  $<INSTALL_INTERFACE:include>)
+
+target_link_libraries(braynsOSPRayEngine PUBLIC
+  ospray::ospray_module_ispc
+)
+target_link_libraries(braynsOSPRayEngine PRIVATE
+    braynsEngine braynsParameters braynsCommon ospray::ospray_common ospray::ospray
+)
+
+set_target_properties(braynsOSPRayEngine
+    PROPERTIES
+        VERSION ${BRAYNS_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+)
+
+install(TARGETS braynsOSPRayEngine
+    EXPORT braynsOSPRayEngine-targets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
+
+install(EXPORT braynsOSPRayEngine-targets
+    DESTINATION share/CMake
+)

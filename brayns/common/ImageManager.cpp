@@ -72,7 +72,6 @@ void setRawData(Texture2DPtr texture, const freeimage::ImagePtr& image,
 Texture2DPtr ImageManager::importTextureFromFile(const std::string& filename,
                                                  const TextureType type)
 {
-#ifdef BRAYNS_USE_FREEIMAGE
     auto format = FreeImage_GetFileType(filename.c_str());
     if (format == FIF_UNKNOWN)
         format = FreeImage_GetFIFFromFilename(filename.c_str());
@@ -155,9 +154,5 @@ Texture2DPtr ImageManager::importTextureFromFile(const std::string& filename,
         setRawData(texture, mipImage, mip);
     }
     return texture;
-#else
-    Log::error("FreeImage is required to load images from file");
-    return {};
-#endif
 }
 } // namespace brayns

@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/loader/LoaderRegistry.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
@@ -48,16 +47,16 @@ public:
      * Called after scene-related changes have been made before rendering the
      * scene.
      */
-    BRAYNS_API virtual void commit();
+    virtual void commit();
 
     /**
      * Commits lights to renderers.
      * @return True if lights were committed, false otherwise
      */
-    BRAYNS_API virtual bool commitLights() = 0;
+    virtual bool commitLights() = 0;
 
     /** Factory method to create an engine-specific model. */
-    BRAYNS_API virtual ModelPtr createModel() const = 0;
+    virtual ModelPtr createModel() const = 0;
 
     //@}
 
@@ -65,9 +64,9 @@ public:
      * Creates a scene object responsible for handling models, simulations and
      * light sources.
      */
-    BRAYNS_API Scene(AnimationParameters& animationParameters,
-                     GeometryParameters& geometryParameters,
-                     VolumeParameters& volumeParameters);
+    Scene(AnimationParameters& animationParameters,
+          GeometryParameters& geometryParameters,
+          VolumeParameters& volumeParameters);
 
     /**
         Returns the bounding box of the scene
@@ -80,21 +79,21 @@ public:
         Adds a model to the scene
         @throw std::runtime_error if model is empty
       */
-    BRAYNS_API size_t addModel(ModelDescriptorPtr model);
+    size_t addModel(ModelDescriptorPtr model);
 
     /**
      * @brief Adds a model to the scene with the specific model id
      * @param id to be used as model identifier
      * @param model the model itself
      */
-    BRAYNS_API void addModel(const size_t id, ModelDescriptorPtr model);
+    void addModel(const size_t id, ModelDescriptorPtr model);
 
     /**
         Removes a model from the scene
         @param id id of the model (descriptor)
         @return True if model was found and removed, false otherwise
       */
-    BRAYNS_API bool removeModel(const size_t id);
+    bool removeModel(const size_t id);
 
     /**
      * @brief Check wether a model has been marked for replacement
@@ -102,7 +101,7 @@ public:
      * @param id the ID of the model to replace the current one
      * @return true if the model is on the list to be replaced
      */
-    BRAYNS_API bool isMarkedForReplacement(const size_t id);
+    bool isMarkedForReplacement(const size_t id);
 
     /**
      * @brief Replaces an existing model (given its ID) for a new one
@@ -110,10 +109,9 @@ public:
      * @param modelDescriptor The model which will replace the current one
      * @return True if the model was found and replace, false otherwise
      */
-    BRAYNS_API bool replaceModel(const size_t id,
-                                 ModelDescriptorPtr modelDescriptor);
+    bool replaceModel(const size_t id, ModelDescriptorPtr modelDescriptor);
 
-    BRAYNS_API ModelDescriptorPtr getModel(const size_t id) const;
+    ModelDescriptorPtr getModel(const size_t id) const;
 
     const ModelDescriptors& getModels() const { return _modelDescriptors; }
 
@@ -121,27 +119,27 @@ public:
         Builds a default scene made of a Cornell box, a reflective cube, and
         a transparent sphere
     */
-    BRAYNS_API void buildDefault();
+    void buildDefault();
 
     /**
      * @return true if the scene does not contain any geometry, false otherwise
      */
-    BRAYNS_API bool empty() const;
+    bool empty() const;
 
     /** Add a clip plane to the scene.
      * @param plane The coefficients of the clip plane equation.
      * @return The clip plane ID.
      */
-    BRAYNS_API size_t addClipPlane(const Plane& plane);
+    size_t addClipPlane(const Plane& plane);
 
     /** Get a clip plane by its ID.
         @param id the plane ID.
         @return A pointer to the clip plane or null if not found.
      */
-    BRAYNS_API ClipPlanePtr getClipPlane(const size_t id) const;
+    ClipPlanePtr getClipPlane(const size_t id) const;
 
     /** Remove a clip plane by its ID, or nop if not found. */
-    BRAYNS_API void removeClipPlane(const size_t id);
+    void removeClipPlane(const size_t id);
 
     /**
        @return the clip planes
@@ -224,7 +222,7 @@ public:
     }
 
     /** @internal */
-    BRAYNS_API void copyFrom(const Scene& rhs);
+    void copyFrom(const Scene& rhs);
 
     virtual void copyFromImpl(const Scene&) {}
 

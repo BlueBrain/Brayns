@@ -24,10 +24,6 @@
 #include <brayns/engine/Engine.h>
 #include <brayns/parameters/ParametersManager.h>
 
-#if (BRAYNS_USE_OSPRAY)
-#include <engines/ospray/OSPRayEngine.h>
-#endif
-
 namespace brayns
 {
 typedef Engine* (*CreateFuncType)(int, const char**, ParametersManager&);

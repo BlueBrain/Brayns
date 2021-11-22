@@ -33,11 +33,11 @@
 
 #include <GLFW/glfw3.h>
 
-#include <imgui/imconfig.h>
-#include <imgui/imgui.h>
+#include <imconfig.h>
+#include <imgui.h>
 // NOTE: include samples after imconfig.h and imgui.h
-#include <imgui/examples/imgui_impl_glfw.h>
-#include <imgui/examples/imgui_impl_opengl2.h>
+#include <examples/imgui_impl_glfw.h>
+#include <examples/imgui_impl_opengl2.h>
 
 #include <algorithm>
 #include <cassert>

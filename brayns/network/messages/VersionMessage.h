@@ -29,7 +29,6 @@ BRAYNS_MESSAGE_BEGIN(VersionMessage)
 BRAYNS_MESSAGE_ENTRY(int, major, "Major version")
 BRAYNS_MESSAGE_ENTRY(int, minor, "Minor version")
 BRAYNS_MESSAGE_ENTRY(int, patch, "Patch level")
-BRAYNS_MESSAGE_ENTRY(int, abi, "Binary interface version")
 BRAYNS_MESSAGE_ENTRY(std::string, revision, "SCM revision")
 BRAYNS_MESSAGE_END()
 } // namespace brayns

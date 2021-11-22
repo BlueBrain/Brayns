@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <brayns/api.h>
 #include <brayns/common/PropertyObject.h>
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/mathTypes.h>
@@ -41,62 +40,49 @@ public:
     virtual void commit() = 0;
     //@}
 
-    BRAYNS_API Material(const PropertyMap& properties = {});
+    Material(const PropertyMap& properties = {});
 
-    BRAYNS_API const std::string& getName() const { return _name; }
-    BRAYNS_API void setName(const std::string& value)
-    {
-        _updateValue(_name, value);
-    }
-    BRAYNS_API void setDiffuseColor(const Vector3d& value)
+    const std::string& getName() const { return _name; }
+    void setName(const std::string& value) { _updateValue(_name, value); }
+    void setDiffuseColor(const Vector3d& value)
     {
         _updateValue(_diffuseColor, value);
     }
-    BRAYNS_API const Vector3d& getDiffuseColor() const { return _diffuseColor; }
-    BRAYNS_API void setSpecularColor(const Vector3d& value)
+    const Vector3d& getDiffuseColor() const { return _diffuseColor; }
+    void setSpecularColor(const Vector3d& value)
     {
         _updateValue(_specularColor, value);
     }
-    BRAYNS_API const Vector3d& getSpecularColor() const
-    {
-        return _specularColor;
-    }
-    BRAYNS_API void setSpecularExponent(double value)
+    const Vector3d& getSpecularColor() const { return _specularColor; }
+    void setSpecularExponent(double value)
     {
         _updateValue(_specularExponent, value);
     }
-    BRAYNS_API double getSpecularExponent() const { return _specularExponent; }
-    BRAYNS_API void setReflectionIndex(double value)
+    double getSpecularExponent() const { return _specularExponent; }
+    void setReflectionIndex(double value)
     {
         _updateValue(_reflectionIndex, value);
     }
-    BRAYNS_API double getReflectionIndex() const { return _reflectionIndex; }
-    BRAYNS_API void setOpacity(double value) { _updateValue(_opacity, value); }
-    BRAYNS_API double getOpacity() const { return _opacity; }
-    BRAYNS_API void setRefractionIndex(double value)
+    double getReflectionIndex() const { return _reflectionIndex; }
+    void setOpacity(double value) { _updateValue(_opacity, value); }
+    double getOpacity() const { return _opacity; }
+    void setRefractionIndex(double value)
     {
         _updateValue(_refractionIndex, value);
     }
-    BRAYNS_API double getRefractionIndex() const { return _refractionIndex; }
-    BRAYNS_API void setEmission(double value)
-    {
-        _updateValue(_emission, value);
-    }
-    BRAYNS_API double getEmission() const { return _emission; }
-    BRAYNS_API void setGlossiness(double value)
-    {
-        _updateValue(_glossiness, value);
-    }
-    BRAYNS_API double getGlossiness() const { return _glossiness; }
-    BRAYNS_API const TextureDescriptors& getTextureDescriptors() const
+    double getRefractionIndex() const { return _refractionIndex; }
+    void setEmission(double value) { _updateValue(_emission, value); }
+    double getEmission() const { return _emission; }
+    void setGlossiness(double value) { _updateValue(_glossiness, value); }
+    double getGlossiness() const { return _glossiness; }
+    const TextureDescriptors& getTextureDescriptors() const
     {
         return _textureDescriptors;
     }
-    BRAYNS_API void setTexture(const std::string& fileName,
-                               const TextureType type);
-    BRAYNS_API void removeTexture(const TextureType type);
+    void setTexture(const std::string& fileName, const TextureType type);
+    void removeTexture(const TextureType type);
 
-    BRAYNS_API Texture2DPtr getTexture(const TextureType type) const;
+    Texture2DPtr getTexture(const TextureType type) const;
     bool hasTexture(const TextureType type) const
     {
         return _textureDescriptors.count(type) > 0;
