@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <brayns/api.h>
 #include <brayns/common/types.h>
 #include <brayns/parameters/AnimationParameters.h>
 #include <brayns/parameters/ApplicationParameters.h>
@@ -47,59 +46,59 @@ public:
        Registers specific parameters to the manager
        @param parameters to be registered
      */
-    BRAYNS_API void registerParameters(AbstractParameters* parameters);
+    void registerParameters(AbstractParameters* parameters);
 
     /**
        Displays usage of registered parameters
      */
-    BRAYNS_API void usage();
+    void usage();
 
     /**
        Displays values registered parameters
      */
-    BRAYNS_API void print();
+    void print();
 
     /**
        Gets animation parameters
        @return Animation parameters for the current scene
     */
-    BRAYNS_API AnimationParameters& getAnimationParameters();
-    BRAYNS_API const AnimationParameters& getAnimationParameters() const;
+    AnimationParameters& getAnimationParameters();
+    const AnimationParameters& getAnimationParameters() const;
 
     /**
        Gets rendering parameters
        @return Rendering parameters for the current scene
     */
-    BRAYNS_API RenderingParameters& getRenderingParameters();
-    BRAYNS_API const RenderingParameters& getRenderingParameters() const;
+    RenderingParameters& getRenderingParameters();
+    const RenderingParameters& getRenderingParameters() const;
 
     /**
        Gets geometry parameters
        @return Geometry parameters for the current scene
     */
-    BRAYNS_API GeometryParameters& getGeometryParameters();
-    BRAYNS_API const GeometryParameters& getGeometryParameters() const;
+    GeometryParameters& getGeometryParameters();
+    const GeometryParameters& getGeometryParameters() const;
 
     /**
        Gets application parameters
        @return Application parameters for the current scene
     */
-    BRAYNS_API ApplicationParameters& getApplicationParameters();
-    BRAYNS_API const ApplicationParameters& getApplicationParameters() const;
+    ApplicationParameters& getApplicationParameters();
+    const ApplicationParameters& getApplicationParameters() const;
 
     /**
        Gets volume parameters
        @return Parameters for the current volume
     */
-    BRAYNS_API VolumeParameters& getVolumeParameters();
-    BRAYNS_API const VolumeParameters& getVolumeParameters() const;
+    VolumeParameters& getVolumeParameters();
+    const VolumeParameters& getVolumeParameters() const;
 
     /**
        Gets volume parameters
        @return Parameters for the current volume
     */
-    BRAYNS_API NetworkParameters& getNetworkParameters();
-    BRAYNS_API const NetworkParameters& getNetworkParameters() const;
+    NetworkParameters& getNetworkParameters();
+    const NetworkParameters& getNetworkParameters() const;
 
     /** Call resetModified on all parameters. */
     void resetModified();

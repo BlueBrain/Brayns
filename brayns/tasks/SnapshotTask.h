@@ -168,8 +168,14 @@ public:
             return ImageGenerator::ImageBase64();
         }
         else
-            return _imageGenerator.createImage(frameBuffers, _params.format,
+        {
+            std::vector<freeimage::ImagePtr> images;
+            images.reserve(frameBuffers.size());
+            for (const auto& frameBuffer : frameBuffers)
+                images.push_back(frameBuffer->getImage());
+            return _imageGenerator.createImage(images, _params.format,
                                                _params.quality);
+        }
     }
 
 private:

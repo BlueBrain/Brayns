@@ -125,7 +125,8 @@ std::vector<SynapseGroup::Ptr> PopulationLoaderManager::loadEdges(
     const auto edgeType =
         networkConfig.config.getEdgePopulationProperties(lc.edge_population)
             .type;
-    const auto& loader = EdgePopulationLoaders().getEdgeLoader(edgeType);
+    EdgePopulationLoaders epl;
+    const auto& loader = epl.getEdgeLoader(edgeType);
 
     return loader.load(networkConfig, lc, nodeSelection);
 }
@@ -155,7 +156,8 @@ std::vector<MorphologyInstance::Ptr> PopulationLoaderManager::loadNodes(
             nodeType = std::move(nodeProperties.type);
         }
     }
-    const auto& loader = NodePopulationLoaders().getNodeLoader(nodeType);
+    NodePopulationLoaders npl;
+    const auto& loader = npl.getNodeLoader(nodeType);
 
     return loader.load(networkData, lc, nodeSelection);
 }

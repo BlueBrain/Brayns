@@ -1,13 +1,19 @@
 # Copyright (c) 2015-2021, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-# Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+# Responsible Authors: Cyrille Favreau <cyrille.favreau@epfl.ch>
+#                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(BRAYNSBENCHMARK_SOURCES main.cpp)
+add_executable(braynsBenchmark main.cpp)
 
-set(BRAYNSBENCHMARK_LINK_LIBRARIES
-  PUBLIC brayns braynsCommon braynsIO braynsParameters
+target_link_libraries(braynsBenchmark PUBLIC brayns braynsIO)
+
+install(TARGETS braynsBenchmark
+    EXPORT braynsBenchmark-targets
+    RUNTIME DESTINATION bin
 )
 
-common_application(braynsBenchmark)
+install(EXPORT braynsBenchmark-targets
+    DESTINATION share/CMake
+)

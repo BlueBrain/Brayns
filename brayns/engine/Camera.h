@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <brayns/api.h>
 #include <brayns/common/PropertyObject.h>
 #include <brayns/common/types.h>
 
@@ -45,11 +44,11 @@ public:
     virtual void commit(){};
     //@}
 
-    BRAYNS_API Camera() = default;
+    Camera() = default;
 
-    BRAYNS_API virtual ~Camera() = default;
+    virtual ~Camera() = default;
 
-    BRAYNS_API Camera& operator=(const Camera& rhs);
+    Camera& operator=(const Camera& rhs);
 
     /**
        Sets position, and quaternion
@@ -58,14 +57,12 @@ public:
               the camera orientation
        @param target The x, y, z coordinates of the camera target
     */
-    BRAYNS_API void set(const Vector3d& position,
-                        const Quaterniond& orientation,
-                        const Vector3d& target = Vector3d(0.0, 0.0, 0.0));
+    void set(const Vector3d& position, const Quaterniond& orientation,
+             const Vector3d& target = Vector3d(0.0, 0.0, 0.0));
 
-    BRAYNS_API void setInitialState(const Vector3d& position,
-                                    const Quaterniond& orientation,
-                                    const Vector3d& target = Vector3d(0.0, 0.0,
-                                                                      0.0));
+    void setInitialState(const Vector3d& position,
+                         const Quaterniond& orientation,
+                         const Vector3d& target = Vector3d(0.0, 0.0, 0.0));
 
     /**
        Sets camera position
@@ -105,7 +102,7 @@ public:
     */
     const Quaterniond& getOrientation() const { return _orientation; }
     /** Resets the camera to its initial values */
-    BRAYNS_API void reset();
+    void reset();
 
     /** @internal Sets the name of current rendered frame buffer. */
     void setBufferTarget(const std::string& target)

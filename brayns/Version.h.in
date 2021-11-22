@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: sebastien.speierer@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,25 +18,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/common/geometry/SDFBezier.h>
-
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "tests/doctest.h"
-
-TEST_CASE("bezier_bounding_box")
+namespace brayns
 {
-    const brayns::SDFBezier bezier = {
-        0,                   // userdata
-        {-2.0f, 0.0f, 0.0f}, // p0
-        {-2.0f, 0.0f, 0.0f}, // c0
-        1.f,                 // r0
-        {1.0f, 0.0f, 0.0f},  // p1
-        {1.0f, 0.0f, 0.0f},  // c1
-        1.0f                 // r1
-    };
 
-    const auto bbox = bezierBounds(bezier);
+#define BRAYNS_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define BRAYNS_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define BRAYNS_VERSION_PATCH @PROJECT_VERSION_PATCH@
+#define BRAYNS_GIT_HASH "@BRAYNS_GIT_HASH@"
 
-    CHECK_EQ(bbox.getMin(), brayns::Vector3d(-3.0, -1.0, -1.0));
-    CHECK_EQ(bbox.getMax(), brayns::Vector3d(2.0, 1.0, 1.0));
+class Version
+{
+public:
+    static int getMajor() noexcept
+    {
+        return BRAYNS_VERSION_MAJOR;
+    }
+
+    static int getMinor() noexcept
+    {
+        return BRAYNS_VERSION_MINOR;
+    }
+
+    static int getPatch() noexcept
+    {
+        return BRAYNS_VERSION_PATCH;
+    }
+
+    static const char* getCommitHash() noexcept
+    {
+        return BRAYNS_GIT_HASH;
+    }
+};
 }

@@ -20,6 +20,8 @@
 
 #include "FrameBuffer.h"
 
+#include <FreeImage.h>
+
 namespace brayns
 {
 FrameBuffer::FrameBuffer(const std::string& name, const Vector2ui& frameSize,
@@ -47,7 +49,6 @@ size_t FrameBuffer::getColorDepth() const
 
 freeimage::ImagePtr FrameBuffer::getImage()
 {
-#ifdef BRAYNS_USE_FREEIMAGE
     map();
     const auto colorBuffer = getColorBuffer();
     const auto& size = getSize();
@@ -64,8 +65,5 @@ freeimage::ImagePtr FrameBuffer::getImage()
     freeimage::SwapRedBlue32(image.get());
 #endif
     return image;
-#else
-    return nullptr;
-#endif
 }
 } // namespace brayns

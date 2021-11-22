@@ -118,12 +118,12 @@ OpenDeckPlugin::OpenDeckPlugin(OpenDeckParameters&& params)
 void OpenDeckPlugin::init()
 {
     auto& engine = _api->getEngine();
-#ifdef BRAYNS_USE_OSPRAY
+
     engine.addCameraType("cylindric");
     engine.addCameraType("cylindricStereo", getCylindricStereoProperties());
     engine.addCameraType("cylindricStereoTracked",
                          getCylindricStereoTrackedProperties(_params));
-#endif
+
     FrameBufferPtr frameBuffer =
         engine.createFrameBuffer(leftWallBufferName, _wallRes,
                                  FrameBufferFormat::rgba_i8);

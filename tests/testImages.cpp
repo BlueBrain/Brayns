@@ -27,7 +27,6 @@
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
-#include <brayns/defines.h>
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
@@ -100,7 +99,6 @@ TEST_CASE("render_protein_in_stereo_and_compare")
                            *brayns.getEngine().getFrameBuffers()[1]));
 }
 
-#if BRAYNS_USE_ASSIMP
 TEST_CASE("render_ply_and_compare")
 {
     const auto path = BRAYNS_TESTDATA_MODEL_LUCY_PATH;
@@ -112,18 +110,3 @@ TEST_CASE("render_ply_and_compare")
     CHECK(compareTestImage("testdataLucy.png",
                            brayns.getEngine().getFrameBuffer()));
 }
-#endif
-
-#if BRAYNS_USE_LIBARCHIVE
-TEST_CASE("render_capsule_and_compare")
-{
-    const char* argv[] = {"testImages", BRAYNS_TESTDATA_MODEL_CAPSULE_PATH,
-                          "--samples-per-pixel", "128"};
-    const int argc = sizeof(argv) / sizeof(char*);
-
-    brayns::Brayns brayns(argc, argv);
-    brayns.commitAndRender();
-    CHECK(compareTestImage("testCapsule.png",
-                           brayns.getEngine().getFrameBuffer()));
-}
-#endif

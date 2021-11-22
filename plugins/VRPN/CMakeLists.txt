@@ -1,29 +1,28 @@
-# Copyright (c) 2015-2018, EPFL/Blue Brain Project
+# Copyright (c) 2015-2021, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+find_package(VRPN REQUIRED)
 
-project(BraynsVRPN VERSION 1.0.0)
-set(BraynsVRPN_VERSION_ABI 1)
+add_library(braynsVRPN SHARED VRPNPlugin.cpp VRPNPlugin.h)
 
-include(Common)
+target_link_libraries(braynsVRPN PRIVATE
+    braynsCommon braynsPluginAPI braynsEngine braynsNetwork ${VRPN_LIBRARIES}
+)
 
-common_find_package(VRPN REQUIRED)
-common_find_package_post()
+set_target_properties(braynsVRPN
+    PROPERTIES
+        VERSION ${BRAYNS_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+)
 
-set(BRAYNSVRPN_HEADERS VRPNPlugin.h)
-set(BRAYNSVRPN_SOURCES VRPNPlugin.cpp)
-set(BRAYNSVRPN_LINK_LIBRARIES PRIVATE braynsCommon braynsPluginAPI braynsEngine braynsNetwork
-  ${VRPN_LIBRARIES})
+install(TARGETS braynsVRPN
+    EXPORT braynsVRPN-targets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
 
-set(BRAYNSVRPN_OMIT_LIBRARY_HEADER ON)
-set(BRAYNSVRPN_OMIT_VERSION_HEADERS ON)
-set(BRAYNSVRPN_OMIT_EXPORT ON)
-set(BRAYNSVRPN_INCLUDE_NAME brayns_vrpn)
-common_library(braynsVRPN)
-
-if (TARGET Brayns-all)
-  add_dependencies(Brayns-all braynsVRPN)
-endif()
+install(EXPORT braynsVRPN-targets
+    DESTINATION share/braynsVRPN/CMake
+)

@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include <brayns/api.h>
 #include <brayns/common/types.h>
 
 namespace brayns
@@ -41,9 +40,9 @@ public:
 
     AbstractSimulationHandler& operator=(const AbstractSimulationHandler& rhs);
 
-    BRAYNS_API virtual void bind(const MaterialPtr& /* material */){};
+    virtual void bind(const MaterialPtr& /* material */){};
 
-    BRAYNS_API virtual void unbind(const MaterialPtr& /* material */){};
+    virtual void unbind(const MaterialPtr& /* material */){};
 
     /** @return the current loaded frame for the simulation. */
     uint32_t getCurrentFrame() const { return _currentFrame; }

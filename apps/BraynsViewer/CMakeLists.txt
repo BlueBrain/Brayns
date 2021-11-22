@@ -4,14 +4,18 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(BRAYNSVIEWER_SOURCES main.cpp)
+add_executable(braynsViewer main.cpp)
 
-set(BRAYNSVIEWER_LINK_LIBRARIES
-  PUBLIC brayns
-  braynsCommon
-  braynsIO
-  braynsParameters
-  braynsUI
+target_link_libraries(braynsViewer PRIVATE
+    brayns
+    braynsIO
+    braynsUI)
+
+install(TARGETS braynsViewer
+    EXPORT braynsViewer-targets
+    RUNTIME DESTINATION bin
 )
 
-common_application(braynsViewer)
+install(EXPORT braynsViewer-targets
+    DESTINATION share/CMake
+)

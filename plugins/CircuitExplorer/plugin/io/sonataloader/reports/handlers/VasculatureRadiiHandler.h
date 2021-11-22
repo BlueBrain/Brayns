@@ -44,7 +44,9 @@ public:
 
     size_t getRadiiFrameSize() const noexcept { return _radiiFrameSize; }
 
-    uint32_t getLastBoundedFrame() const noexcept { return _lastRadiiFrame; }
+    void setLastUsedFrame(const uint32_t frame) { _lastRadiiFrame = frame; }
+
+    uint32_t getLastUsedFrame() const noexcept { return _lastRadiiFrame; }
 
     bool isReady() const final { return _ready; }
 

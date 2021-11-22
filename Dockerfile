@@ -120,22 +120,16 @@ ADD . ${BRAYNS_SRC}
 
 # TODO: "|| exit 0"  hack to be removed as soon as MVDTool export issue is fixed.
 RUN cd ${BRAYNS_SRC} \
-   && git submodule update --init --recursive \
    && mkdir -p build \
    && cd build \
    && CMAKE_PREFIX_PATH=${DIST_PATH}:${DIST_PATH}/lib/cmake/libwebsockets \
    cmake ..  \
-   -DBRAYNS_ASSIMP_ENABLED=ON \
-   -DBRAYNS_OSPRAY_ENABLED=ON \
    -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON \
    -DBRAYNS_CIRCUITINFO_ENABLED=ON \
-   -DBRAYNS_DTI_ENABLED=OFF \
    -DCMAKE_BUILD_TYPE=Release \
-   -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
-   -DBUILD_PYTHON_BINDINGS=OFF \
-   -DEXTLIB_FROM_SUBMODULES=ON
+   -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
 
-RUN cd ${BRAYNS_SRC}/build && make -j1 install \
+RUN cd ${BRAYNS_SRC}/build && make -j4 install \
    && rm -rf ${DIST_PATH}/include ${DIST_PATH}/cmake ${DIST_PATH}/share
 
 # Final image, containing only Brayns and libraries required to run it

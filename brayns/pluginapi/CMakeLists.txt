@@ -1,12 +1,11 @@
 # Copyright (c) 2015-2021, EPFL/Blue Brain Project
-# Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+# Responsible Authors: Cyrille Favreau <cyrille.favreau@epfl.ch>
+#                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(BRAYNSPLUGINAPI_PUBLIC_HEADERS
-  ExtensionPlugin.h
-  PluginAPI.h
-)
+add_library(braynsPluginAPI INTERFACE)
 
-set(BRAYNSPLUGINAPI_INCLUDE_NAME brayns/pluginapi)
-common_library(braynsPluginAPI)
+target_include_directories(braynsPluginAPI INTERFACE
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+  $<INSTALL_INTERFACE:include>)

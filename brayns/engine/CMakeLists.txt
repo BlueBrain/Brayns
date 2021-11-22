@@ -1,5 +1,6 @@
 # Copyright (c) 2015-2021, EPFL/Blue Brain Project
-# Responsible Author: Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+# Responsible Authors: Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+#                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
@@ -32,10 +33,25 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
   Volume.h
 )
 
-set(BRAYNSENGINE_INCLUDE_NAME brayns/engine)
-set(BRAYNSENGINE_LINK_LIBRARIES
-  PUBLIC braynsCommon
-  PRIVATE braynsParameters ${FREEIMAGE_LIBRARIES}
+add_library(braynsEngine SHARED ${BRAYNSENGINE_SOURCES} ${BRAYNSENGINE_PUBLIC_HEADERS})
+
+target_include_directories(braynsEngine PUBLIC
+  "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
+  "$<INSTALL_INTERFACE:include>")
+
+target_link_libraries(braynsEngine PUBLIC braynsCommon)
+target_link_libraries(braynsEngine PRIVATE braynsParameters ${FREEIMAGE_LIBRARIES})
+
+target_compile_options(braynsEngine PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+
+set_target_properties(braynsEngine
+    PROPERTIES
+        VERSION ${BRAYNS_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 )
 
-common_library(braynsEngine)
+install(TARGETS braynsEngine
+    EXPORT Brayns-targets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
