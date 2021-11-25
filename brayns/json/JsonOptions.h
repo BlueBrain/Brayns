@@ -355,7 +355,11 @@ struct Default
     {
     }
 
-    void add(JsonOptions& options) const { options.defaultValue = value; }
+    void add(JsonOptions& options) const
+    {
+        options.defaultValue = value;
+        options.required = false;
+    }
 
     JsonValue value;
 };

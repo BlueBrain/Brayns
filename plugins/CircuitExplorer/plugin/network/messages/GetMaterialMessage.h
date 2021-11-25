@@ -21,12 +21,12 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(GetMaterialMessage)
-BRAYNS_MESSAGE_ENTRY(size_t, model_id, "Model ID")
-BRAYNS_MESSAGE_ENTRY(size_t, material_id, "Material ID")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(GetMaterialMessage)
+BRAYNS_JSON_OBJECT_ENTRY(size_t, model_id, "Model ID")
+BRAYNS_JSON_OBJECT_ENTRY(size_t, material_id, "Material ID")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

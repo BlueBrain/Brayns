@@ -20,30 +20,30 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 #include <plugin/network/adapters/ColoringInfoAdapter.h>
 
-BRAYNS_MESSAGE_BEGIN(ColorCircuitByIdMessage)
-BRAYNS_MESSAGE_ENTRY(size_t, model_id, "ID of the model to color")
-BRAYNS_MESSAGE_ENTRY(
+BRAYNS_JSON_OBJECT_BEGIN(ColorCircuitByIdMessage)
+BRAYNS_JSON_OBJECT_ENTRY(size_t, model_id, "ID of the model to color")
+BRAYNS_JSON_OBJECT_ENTRY(
     std::vector<ColoringInformation>, color_info,
     "List of IDs with their corresponding color. If empty, all the "
     "model will be colored with random colors per ID")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_END()
 
-BRAYNS_MESSAGE_BEGIN(ColorCircuitBySingleColorMessage)
-BRAYNS_MESSAGE_ENTRY(size_t, model_id, "ID of the model to color")
-BRAYNS_MESSAGE_ENTRY(brayns::Vector4f, color,
-                     "Color to use for the whole circuit "
-                     "(Normalized RGBA)")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(ColorCircuitBySingleColorMessage)
+BRAYNS_JSON_OBJECT_ENTRY(size_t, model_id, "ID of the model to color")
+BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector4f, color,
+                         "Color to use for the whole circuit "
+                         "(Normalized RGBA)")
+BRAYNS_JSON_OBJECT_END()
 
-BRAYNS_MESSAGE_BEGIN(ColorCircuitByMethodMessage)
-BRAYNS_MESSAGE_ENTRY(size_t, model_id, "ID of the model to color")
-BRAYNS_MESSAGE_ENTRY(std::string, method, "Method to use for coloring")
-BRAYNS_MESSAGE_ENTRY(
+BRAYNS_JSON_OBJECT_BEGIN(ColorCircuitByMethodMessage)
+BRAYNS_JSON_OBJECT_ENTRY(size_t, model_id, "ID of the model to color")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, method, "Method to use for coloring")
+BRAYNS_JSON_OBJECT_ENTRY(
     std::vector<ColoringInformation>, color_info,
     "List of IDs with their corresponding color. If empty, all the "
     "model will be colored with random colors per ID")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_END()

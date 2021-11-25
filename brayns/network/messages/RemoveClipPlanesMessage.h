@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(RemoveClipPlanesMessage)
-BRAYNS_MESSAGE_ENTRY(std::vector<size_t>, ids, "Clip planes ID list")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(RemoveClipPlanesMessage)
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<size_t>, ids, "Clip planes ID list")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

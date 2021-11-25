@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
-BRAYNS_MESSAGE_BEGIN(AddShapeMessage)
-BRAYNS_MESSAGE_ENTRY(size_t, id, "ID of the model of the shape added")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(AddShapeMessage)
+BRAYNS_JSON_OBJECT_ENTRY(size_t, id, "ID of the model of the shape added")
+BRAYNS_JSON_OBJECT_END()

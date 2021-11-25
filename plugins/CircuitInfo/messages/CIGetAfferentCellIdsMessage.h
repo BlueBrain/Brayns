@@ -21,13 +21,14 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
-BRAYNS_MESSAGE_BEGIN(CIGetAfferentCellIdsParams)
-BRAYNS_MESSAGE_ENTRY(std::string, path, "Path to the circuit config file")
-BRAYNS_MESSAGE_ENTRY(std::vector<uint64_t>, sources, "Source cells GIDs")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(CIGetAfferentCellIdsParams)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path to the circuit config file")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint64_t>, sources, "Source cells GIDs")
+BRAYNS_JSON_OBJECT_END()
 
-BRAYNS_MESSAGE_BEGIN(CIGetAfferentCellIdsResult)
-BRAYNS_MESSAGE_ENTRY(std::vector<uint64_t>, ids, "Afferent cells unique GIDs")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(CIGetAfferentCellIdsResult)
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint64_t>, ids,
+                         "Afferent cells unique GIDs")
+BRAYNS_JSON_OBJECT_END()

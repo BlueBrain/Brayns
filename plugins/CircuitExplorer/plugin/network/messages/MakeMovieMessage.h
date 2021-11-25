@@ -21,21 +21,25 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
-BRAYNS_MESSAGE_BEGIN(MakeMovieMessage)
-BRAYNS_MESSAGE_ENTRY(brayns::Vector2ui, dimensions,
-                     "Video dimensions (width,height)")
-BRAYNS_MESSAGE_ENTRY(std::string, frames_folder_path,
-                     "Path to where to fetch the frames to create the video")
-BRAYNS_MESSAGE_ENTRY(std::string, frames_file_extension,
-                     "The extension of the frame files to fetch (ex: png, jpg)")
-BRAYNS_MESSAGE_ENTRY(uint32_t, fps_rate,
-                     "The frames per second rate at which to create the video")
-BRAYNS_MESSAGE_ENTRY(std::string, output_movie_path,
-                     "The path to where the movie will be created."
-                     " Must include filename and extension")
-BRAYNS_MESSAGE_ENTRY(bool, erase_frames,
-                     "Wether to clean up the frame image files after generating"
-                     " the video file")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(MakeMovieMessage)
+BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector2ui, dimensions,
+                         "Video dimensions (width,height)")
+BRAYNS_JSON_OBJECT_ENTRY(
+    std::string, frames_folder_path,
+    "Path to where to fetch the frames to create the video")
+BRAYNS_JSON_OBJECT_ENTRY(
+    std::string, frames_file_extension,
+    "The extension of the frame files to fetch (ex: png, jpg)")
+BRAYNS_JSON_OBJECT_ENTRY(
+    uint32_t, fps_rate,
+    "The frames per second rate at which to create the video")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, output_movie_path,
+                         "The path to where the movie will be created."
+                         " Must include filename and extension")
+BRAYNS_JSON_OBJECT_ENTRY(
+    bool, erase_frames,
+    "Wether to clean up the frame image files after generating"
+    " the video file")
+BRAYNS_JSON_OBJECT_END()

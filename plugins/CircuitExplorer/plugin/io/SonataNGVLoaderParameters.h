@@ -20,18 +20,18 @@
 
 #pragma once
 
-#include <brayns/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 #include <plugin/io/BBPLoaderParameters.h>
 
-BRAYNS_MESSAGE_BEGIN(SonataNGVPopulationSettings)
-BRAYNS_MESSAGE_ENTRY(std::string, population_name,
-                     "Name of the population to load")
-BRAYNS_MESSAGE_ENTRY(BBPLoaderParameters, circuit_config,
-                     "Settings to configure the load")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(SonataNGVPopulationSettings)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, population_name,
+                         "Name of the population to load")
+BRAYNS_JSON_OBJECT_ENTRY(BBPLoaderParameters, circuit_config,
+                         "Settings to configure the load")
+BRAYNS_JSON_OBJECT_END()
 
-BRAYNS_MESSAGE_BEGIN(SonataNGVLoaderParameters)
-BRAYNS_MESSAGE_ENTRY(std::vector<SonataNGVPopulationSettings>, populations,
-                     "Name of the populations to load")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(SonataNGVLoaderParameters)
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<SonataNGVPopulationSettings>, populations,
+                         "Name of the populations to load")
+BRAYNS_JSON_OBJECT_END()

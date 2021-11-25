@@ -52,9 +52,9 @@ private:
     Scene* _scene = nullptr;
 };
 
-BRAYNS_ADAPTER_BEGIN(ModelTransferFunction)
-BRAYNS_ADAPTER_SET("id", setId, "Model ID", Required())
-BRAYNS_ADAPTER_SET("transfer_function", setTransferFunction,
-                   "Transfer function", Required())
-BRAYNS_ADAPTER_END()
+BRAYNS_JSON_ADAPTER_BEGIN(ModelTransferFunction)
+BRAYNS_JSON_ADAPTER_SET("id", setId, "Model ID", Required())
+BRAYNS_JSON_ADAPTER_SET("transfer_function", setTransferFunction,
+                        "Transfer function", Required())
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

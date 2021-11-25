@@ -21,28 +21,29 @@
 
 #pragma once
 
-#include <brayns/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 #include <brayns/tasks/SnapshotTask.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(SnapshotParams)
-BRAYNS_ADAPTER_NAMED_ENTRY("animation_parameters", animParams,
-                           "Animation parameters", Required(false));
-BRAYNS_ADAPTER_NAMED_ENTRY("camera", camera, "Camera parameters",
-                           Required(false));
-BRAYNS_ADAPTER_NAMED_ENTRY("format", format, "Image format from FreeImage");
-BRAYNS_ADAPTER_NAMED_ENTRY("name", name, "Name of the snapshot",
-                           Required(false));
-BRAYNS_ADAPTER_NAMED_ENTRY("quality", quality, "Image quality from 0 to 100",
-                           Required(false));
-BRAYNS_ADAPTER_NAMED_ENTRY("renderer", renderingParams, "Renderer parameters",
-                           Required(false));
-BRAYNS_ADAPTER_NAMED_ENTRY("samples_per_pixel", samplesPerPixel,
-                           "Samples per pixel", Required(false));
-BRAYNS_ADAPTER_NAMED_ENTRY("size", size, "Image dimensions");
-BRAYNS_ADAPTER_NAMED_ENTRY("file_path", filePath, "Path if saved on disk",
-                           Required(false));
-BRAYNS_ADAPTER_END()
+BRAYNS_JSON_ADAPTER_BEGIN(SnapshotParams)
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("animation_parameters", animParams,
+                                "Animation parameters", Required(false));
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("camera", camera, "Camera parameters",
+                                Required(false));
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("format", format,
+                                "Image format from FreeImage");
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("name", name, "Name of the snapshot",
+                                Required(false));
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("quality", quality,
+                                "Image quality from 0 to 100", Required(false));
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("renderer", renderingParams,
+                                "Renderer parameters", Required(false));
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("samples_per_pixel", samplesPerPixel,
+                                "Samples per pixel", Required(false));
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("size", size, "Image dimensions");
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("file_path", filePath, "Path if saved on disk",
+                                Required(false));
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns
