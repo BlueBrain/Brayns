@@ -33,6 +33,9 @@
  * Declaring a JsonAdapter allow the Json class to build schema, serialize and
  * deserialize the given type using JSON.
  *
+ * All JSON adapters (defined with macro or not) must be in brayns namespace to
+ * be used by brayns JSON functionalities (Json class).
+ *
  * Usage:
  * @code {.cpp}
  * BRAYNS_JSON_ADAPTER_BEGIN(MyType)

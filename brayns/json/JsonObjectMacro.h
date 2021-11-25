@@ -5,22 +5,21 @@
 /**
  * @brief Macro to declare a type that can be treated as a JSON object.
  *
- * The resulting message will have the symbol declared in
- * BRAYNS_JSON_OBJECT_BEGIN and can be used in JSON serialization with no
- * additional code. A static instance of JsonObjectInfo will be stored inside
- * the resulting message type.
+ * The resulting type will have the symbol declared in BRAYNS_JSON_OBJECT_BEGIN
+ * and can be used in JSON serialization with no additional code. A static
+ * instance of JsonObjectInfo will be stored inside the resulting type.
  *
  * Example:
  * @code {.cpp}
  * // Declaration
- * BRAYNS_JSON_OBJECT_BEGIN(MyMessage)
+ * BRAYNS_JSON_OBJECT_BEGIN(Type)
  * BRAYNS_JSON_OBJECT_ENTRY(int, anEntry, "This is an entry")
- * BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, someEntries, "Descript")
+ * BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, someEntries, "Describe")
  * BRAYNS_JSON_OBJECT_END()
  *
  * // Usage
- * std::string json = Json::stringify(MyMessage());
- * MyMessage message = Json::parse<MyMessage>(json);
+ * std::string json = Json::stringify(Type());
+ * Type instance = Json::parse<Type>(json);
  * @endcode
  *
  */
@@ -65,9 +64,9 @@
 /**
  * @brief Add an entry to the current message.
  *
- * Must be called only after BRAYNS_BEGIN_MESSAGE(...). The active message will
- * have a public attribute called NAME of type TYPE, the given description and
- * will be serialized using JsonAdapter<TYPE>.
+ * Must be called only after BRAYNS_JSON_OBJECT_BEGIN(...). The active message
+ * will have a public attribute called NAME of type TYPE, the given description
+ * and will be serialized using JsonAdapter<TYPE>.
  *
  */
 #define BRAYNS_JSON_OBJECT_PROPERTY(TYPE, NAME, ...)                          \
