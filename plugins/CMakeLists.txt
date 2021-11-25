@@ -32,10 +32,6 @@ if(BRAYNS_OPENDECK_ENABLED)
     add_subdirectory(OpenDeck)
 endif()
 
-if(BRAYNS_VRPN_ENABLED)
-    add_subdirectory(VRPN)
-endif()
-
 if (BRAYNS_CIRCUITEXPLORER_ENABLED)
     add_subdirectory(CircuitExplorer)
 endif()
