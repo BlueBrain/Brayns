@@ -21,6 +21,7 @@
 #pragma once
 
 #include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {

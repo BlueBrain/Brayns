@@ -22,6 +22,7 @@
 
 #include <brayns/common/types.h>
 #include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {

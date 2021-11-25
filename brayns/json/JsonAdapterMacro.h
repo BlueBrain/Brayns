@@ -23,10 +23,8 @@
 
 #include <brayns/utils/FunctorInfo.h>
 
-#include "JsonObjectMacro.h"
+#include "JsonObjectInfo.h"
 
-namespace brayns
-{
 /**
  * @brief Create a JsonAdapter for the given type and name.
  *
@@ -243,4 +241,3 @@ namespace brayns
     }                             \
     }                             \
     ;
-} // namespace brayns

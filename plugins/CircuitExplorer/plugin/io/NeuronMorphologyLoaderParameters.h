@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/JsonObjectMacro.h>
 #include <brayns/utils/StringUtils.h>
 
 BRAYNS_JSON_OBJECT_BEGIN(NeuronMorphologyLoaderParameters)
