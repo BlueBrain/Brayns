@@ -28,25 +28,25 @@ BRAYNS_JSON_OBJECT_ENTRY(
     std::string, geometry_mode,
     "Type of geometry to use to display the cells. Possible "
     "values are: 'vanilla', 'samples', 'smooth'",
-    brayns::Default("smooth"), brayns::Required(false))
+    brayns::Default("smooth"))
 BRAYNS_JSON_OBJECT_ENTRY(
     float, radius_multiplier,
     "Parameter to multiply all morphology sample radii by. "
     "Must be > 0.0. Ignored if 'radius_override' > 0.0",
-    brayns::Default(1.f), brayns::Required(false))
+    brayns::Default(1.f))
 BRAYNS_JSON_OBJECT_ENTRY(
     float, radius_override,
     "Parameter to use as radius for all morphology sample radii. 0.0 disables "
     "this parameter. If > 0.0, invalidates 'radius_multiplier'",
-    brayns::Default(0.f), brayns::Required(false))
+    brayns::Default(0.f))
 BRAYNS_JSON_OBJECT_ENTRY(bool, load_soma,
                          "Wether to load or not the soma section of the neuron",
-                         brayns::Default(true), brayns::Required(false))
+                         brayns::Default(true))
 BRAYNS_JSON_OBJECT_ENTRY(bool, load_axon,
                          "Wether to load or not the axon section of the neuron",
-                         brayns::Default(false), brayns::Required(false))
+                         brayns::Default(false))
 BRAYNS_JSON_OBJECT_ENTRY(
     bool, load_dendrites,
     "Wether to load or not the dendrite secitons of the neuron",
-    brayns::Default(true), brayns::Required(false))
+    brayns::Default(true))
 BRAYNS_JSON_OBJECT_END()

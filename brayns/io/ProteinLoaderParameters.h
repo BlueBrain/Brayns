@@ -45,9 +45,9 @@ BRAYNS_JSON_ADAPTER_ENUM(
 BRAYNS_JSON_OBJECT_BEGIN(ProteinLoaderParameters)
 BRAYNS_JSON_OBJECT_ENTRY(ProteinLoaderColorScheme, color_scheme,
                          "Defines how to color the loaded proteins",
-                         Default("none"), Required(false))
+                         Default("none"))
 BRAYNS_JSON_OBJECT_ENTRY(double, radius_multiplier,
                          "A multiplier to apply to the protein sample radii",
-                         Default(1.0), Required(false))
+                         Default(1.0))
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

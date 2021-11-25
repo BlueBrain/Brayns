@@ -46,12 +46,12 @@ BRAYNS_JSON_OBJECT_BEGIN(VasculatureGeometrySettings)
 BRAYNS_JSON_OBJECT_ENTRY(float, radius_multiplier,
                          "Factor by which to multiply all vasculature sample "
                          "radii. Ignored if radius_override is greater than 0",
-                         brayns::Default(1.f), brayns::Required(false))
+                         brayns::Default(1.f))
 BRAYNS_JSON_OBJECT_ENTRY(
     float, radius_override,
     "Factor to replace all vasculature sample radii. Disabled by setting to "
     "0.0. Invalidates radius_multiplier if greater than 0",
-    brayns::Default(0.f), brayns::Required(false))
+    brayns::Default(0.f))
 BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(SonataEdgePopulationParameters)

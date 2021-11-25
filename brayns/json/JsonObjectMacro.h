@@ -104,14 +104,6 @@
                                 brayns::Required(), __VA_ARGS__)
 
 /**
- * @brief Message optional entry typed as optional<TYPE>.
- *
- */
-#define BRAYNS_JSON_OBJECT_OPTION(TYPE, NAME, DESCRIPTION, ...) \
-    BRAYNS_JSON_OBJECT_PROPERTY(boost::optional<TYPE>, NAME,    \
-                                brayns::Description(DESCRIPTION), __VA_ARGS__)
-
-/**
  * @brief Must be called after BRAYNS_JSON_OBJECT_BEGIN and a set of
  * BRAYNS_JSON_OBJECT_ENTRY to generate valid code.
  *

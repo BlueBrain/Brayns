@@ -61,14 +61,14 @@ BRAYNS_JSON_OBJECT_ENTRY(
     float, spike_transition_time,
     "When loading a spike report, fade-in and fade-out time, in seconds, from "
     "resting state to spike state. Must be greater than or equal to 0.0",
-    brayns::Default(1.f), brayns::Required(false))
+    brayns::Default(1.f))
 BRAYNS_JSON_OBJECT_ENTRY(NeuronMorphologyLoaderParameters,
                          neuron_morphology_parameters,
                          "Settings to configure neuron morphology load")
 BRAYNS_JSON_OBJECT_ENTRY(bool, load_afferent_synapses,
                          "Wether to add geometry for afferent synapses or not",
-                         brayns::Default(false), brayns::Required(false))
+                         brayns::Default(false))
 BRAYNS_JSON_OBJECT_ENTRY(bool, load_efferent_synapses,
                          "Wether to add geometry for efferent synapses or not",
-                         brayns::Default(false), brayns::Required(false))
+                         brayns::Default(false))
 BRAYNS_JSON_OBJECT_END()
