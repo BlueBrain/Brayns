@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 #include <brayns/engine/Model.h>
 
@@ -30,20 +30,21 @@
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(ModelDescriptor)
-BRAYNS_ADAPTER_GETSET("bounding_box", getBoundingBox, setBoundingBox,
-                      "Display bounding box")
-BRAYNS_ADAPTER_GET("bounds", getBounds, "Model bounds")
-BRAYNS_ADAPTER_GETSET("id", getModelID, setModelID, "Model ID")
-BRAYNS_ADAPTER_GETSET("metadata", getMetadata, setMetadata, "Key-value data")
-BRAYNS_ADAPTER_GETSET("name", getName, setName, "Model name")
-BRAYNS_ADAPTER_GETSET("path", getPath, setPath, "Model file path")
-BRAYNS_ADAPTER_GETSET("transformation", getTransformation, setTransformation,
-                      "Model transformation")
-BRAYNS_ADAPTER_GETSET("visible", getVisible, setVisible, "Is visible")
-BRAYNS_ADAPTER_GETSET("loader_name", getLoaderName, setLoaderName,
-                      "Name of the loader")
-BRAYNS_ADAPTER_GETSET("loader_properties", getLoadParameters, setLoadParameters,
-                      "Loader properties")
-BRAYNS_ADAPTER_END()
+BRAYNS_JSON_ADAPTER_BEGIN(ModelDescriptor)
+BRAYNS_JSON_ADAPTER_GETSET("bounding_box", getBoundingBox, setBoundingBox,
+                           "Display bounding box")
+BRAYNS_JSON_ADAPTER_GET("bounds", getBounds, "Model bounds")
+BRAYNS_JSON_ADAPTER_GETSET("id", getModelID, setModelID, "Model ID")
+BRAYNS_JSON_ADAPTER_GETSET("metadata", getMetadata, setMetadata,
+                           "Key-value data")
+BRAYNS_JSON_ADAPTER_GETSET("name", getName, setName, "Model name")
+BRAYNS_JSON_ADAPTER_GETSET("path", getPath, setPath, "Model file path")
+BRAYNS_JSON_ADAPTER_GETSET("transformation", getTransformation,
+                           setTransformation, "Model transformation")
+BRAYNS_JSON_ADAPTER_GETSET("visible", getVisible, setVisible, "Is visible")
+BRAYNS_JSON_ADAPTER_GETSET("loader_name", getLoaderName, setLoaderName,
+                           "Name of the loader")
+BRAYNS_JSON_ADAPTER_GETSET("loader_properties", getLoadParameters,
+                           setLoadParameters, "Loader properties")
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

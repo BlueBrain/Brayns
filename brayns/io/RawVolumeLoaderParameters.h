@@ -22,13 +22,13 @@
 
 #include <brayns/common/adapters/DataTypeAdapter.h>
 #include <brayns/common/types.h>
-#include <brayns/json/MessageAdapter.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(RawVolumeLoaderParameters)
-BRAYNS_MESSAGE_ENTRY(Vector3i, dimensions, "Volume grid size (x,y,z)")
-BRAYNS_MESSAGE_ENTRY(Vector3d, spacing, "Volume grid cell spacing")
-BRAYNS_MESSAGE_ENTRY(DataType, type, "Volume byte data type")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(RawVolumeLoaderParameters)
+BRAYNS_JSON_OBJECT_ENTRY(Vector3i, dimensions, "Volume grid size (x,y,z)")
+BRAYNS_JSON_OBJECT_ENTRY(Vector3d, spacing, "Volume grid cell spacing")
+BRAYNS_JSON_OBJECT_ENTRY(DataType, type, "Volume byte data type")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

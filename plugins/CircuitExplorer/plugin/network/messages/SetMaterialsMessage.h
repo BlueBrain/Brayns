@@ -21,14 +21,14 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 #include <plugin/network/adapters/MaterialAdapter.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(SetMaterialsMessage)
-BRAYNS_MESSAGE_ENTRY(std::vector<brayns::JsonBuffer<MaterialProxy>>, materials,
-                     "List of materials to update")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(SetMaterialsMessage)
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<brayns::JsonBuffer<MaterialProxy>>,
+                         materials, "List of materials to update")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

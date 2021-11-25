@@ -24,8 +24,8 @@
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
+#include <brayns/json/JsonAdapterMacro.h>
 #include <brayns/json/JsonBuffer.h>
-#include <brayns/json/MessageAdapter.h>
 #include <brayns/network/common/ExtractMaterial.h>
 #include <brayns/network/common/ExtractModel.h>
 
@@ -103,11 +103,11 @@ private:
 };
 
 BRAYNS_NAMED_ADAPTER_BEGIN(MaterialRangeProxy, "MaterialRange")
-BRAYNS_ADAPTER_SET("model_id", setModelId,
-                   "The model which this material belongs to")
-BRAYNS_ADAPTER_SET("material_ids", setMaterialIds,
-                   "The list of ID that identifies the materials")
-BRAYNS_ADAPTER_SET("properties", setProperties,
-                   "Material properties to apply on all given materials")
-BRAYNS_ADAPTER_END()
+BRAYNS_JSON_ADAPTER_SET("model_id", setModelId,
+                        "The model which this material belongs to")
+BRAYNS_JSON_ADAPTER_SET("material_ids", setMaterialIds,
+                        "The list of ID that identifies the materials")
+BRAYNS_JSON_ADAPTER_SET("properties", setProperties,
+                        "Material properties to apply on all given materials")
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

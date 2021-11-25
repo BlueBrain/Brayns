@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
-BRAYNS_MESSAGE_BEGIN(SetCircuitThicknessMessage)
-BRAYNS_MESSAGE_ENTRY(size_t, model_id, "ID of the circuit model")
-BRAYNS_MESSAGE_ENTRY(double, radius_multiplier, "Scaling factor")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(SetCircuitThicknessMessage)
+BRAYNS_JSON_OBJECT_ENTRY(size_t, model_id, "ID of the circuit model")
+BRAYNS_JSON_OBJECT_ENTRY(double, radius_multiplier, "Scaling factor")
+BRAYNS_JSON_OBJECT_END()

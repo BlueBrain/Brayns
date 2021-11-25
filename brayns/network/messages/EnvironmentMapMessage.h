@@ -21,11 +21,12 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(EnvironmentMapMessage)
-BRAYNS_MESSAGE_ENTRY(std::string, filename, "Source of the background image")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(EnvironmentMapMessage)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, filename,
+                         "Source of the background image")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

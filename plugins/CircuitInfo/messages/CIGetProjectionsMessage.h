@@ -21,12 +21,13 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
-BRAYNS_MESSAGE_BEGIN(CIGetProjectionsParams)
-BRAYNS_MESSAGE_ENTRY(std::string, path, "Path to the circuit config file")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(CIGetProjectionsParams)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path to the circuit config file")
+BRAYNS_JSON_OBJECT_END()
 
-BRAYNS_MESSAGE_BEGIN(CIGetProjectionsResult)
-BRAYNS_MESSAGE_ENTRY(std::vector<std::string>, projections, "Projections names")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(CIGetProjectionsResult)
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, projections,
+                         "Projections names")
+BRAYNS_JSON_OBJECT_END()

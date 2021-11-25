@@ -23,16 +23,17 @@
 
 #include <brayns/common/Transformation.h>
 
-#include <brayns/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(Transformation)
-BRAYNS_ADAPTER_GETSET("translation", getTranslation, setTranslation,
-                      "Translation XYZ")
-BRAYNS_ADAPTER_GETSET("scale", getScale, setScale, "Scale XYZ")
-BRAYNS_ADAPTER_GETSET("rotation", getRotation, setRotation, "Rotation XYZW")
-BRAYNS_ADAPTER_GETSET("rotation_center", getRotationCenter, setRotationCenter,
-                      "Rotation center XYZ")
-BRAYNS_ADAPTER_END()
+BRAYNS_JSON_ADAPTER_BEGIN(Transformation)
+BRAYNS_JSON_ADAPTER_GETSET("translation", getTranslation, setTranslation,
+                           "Translation XYZ")
+BRAYNS_JSON_ADAPTER_GETSET("scale", getScale, setScale, "Scale XYZ")
+BRAYNS_JSON_ADAPTER_GETSET("rotation", getRotation, setRotation,
+                           "Rotation XYZW")
+BRAYNS_JSON_ADAPTER_GETSET("rotation_center", getRotationCenter,
+                           setRotationCenter, "Rotation center XYZ")
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

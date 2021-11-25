@@ -21,13 +21,14 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
-BRAYNS_MESSAGE_BEGIN(AddSphereMessage)
-BRAYNS_MESSAGE_ENTRY(std::string, name, "Name of the sphere model",
-                     brayns::Required(false))
-BRAYNS_MESSAGE_ENTRY(brayns::Vector3d, center, "Sphere center XYZ")
-BRAYNS_MESSAGE_ENTRY(double, radius, "Radius of the sphere",
-                     brayns::Minimum(0.0))
-BRAYNS_MESSAGE_ENTRY(brayns::Vector4d, color, "Sphere color RGBA normalized")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(AddSphereMessage)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, name, "Name of the sphere model",
+                         brayns::Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector3d, center, "Sphere center XYZ")
+BRAYNS_JSON_OBJECT_ENTRY(double, radius, "Radius of the sphere",
+                         brayns::Minimum(0.0))
+BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector4d, color,
+                         "Sphere color RGBA normalized")
+BRAYNS_JSON_OBJECT_END()

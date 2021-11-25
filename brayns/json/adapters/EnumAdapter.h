@@ -249,13 +249,13 @@ struct GetEnumName
  * Reflected enum can be used in JSON (schema, serialization) and GetEnumName.
  *
  * @code {.cpp}
- * BRAYNS_ADAPTER_ENUM(MyEnum,
+ * BRAYNS_JSON_ADAPTER_ENUM(MyEnum,
  *      {"Value1": MyEnum::Value1},
  *      {"Value2", MyEnum::Value2})
  * @endcode
  *
  */
-#define BRAYNS_ADAPTER_ENUM(TYPE, ...)                               \
+#define BRAYNS_JSON_ADAPTER_ENUM(TYPE, ...)                          \
     template <>                                                      \
     inline std::vector<std::pair<std::string, TYPE>> enumMap<TYPE>() \
     {                                                                \
@@ -271,12 +271,12 @@ struct GetEnumName
  * @brief Reflect JsonType enum.
  *
  */
-BRAYNS_ADAPTER_ENUM(JsonType, {"", JsonType::Unknown},
-                    {JsonTypeName::ofNull(), JsonType::Null},
-                    {JsonTypeName::ofBoolean(), JsonType::Boolean},
-                    {JsonTypeName::ofInteger(), JsonType::Integer},
-                    {JsonTypeName::ofNumber(), JsonType::Number},
-                    {JsonTypeName::ofString(), JsonType::String},
-                    {JsonTypeName::ofArray(), JsonType::Array},
-                    {JsonTypeName::ofObject(), JsonType::Object})
+BRAYNS_JSON_ADAPTER_ENUM(JsonType, {"", JsonType::Unknown},
+                         {JsonTypeName::ofNull(), JsonType::Null},
+                         {JsonTypeName::ofBoolean(), JsonType::Boolean},
+                         {JsonTypeName::ofInteger(), JsonType::Integer},
+                         {JsonTypeName::ofNumber(), JsonType::Number},
+                         {JsonTypeName::ofString(), JsonType::String},
+                         {JsonTypeName::ofArray(), JsonType::Array},
+                         {JsonTypeName::ofObject(), JsonType::Object})
 } // namespace brayns

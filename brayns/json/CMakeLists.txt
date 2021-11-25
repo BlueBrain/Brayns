@@ -1,14 +1,15 @@
 set(BRAYNSJSON_HEADERS
   Json.h
   JsonAdapter.h
+  JsonAdapterMacro.h
   JsonBuffer.h
   JsonExtractor.h
   JsonOptions.h
   JsonSchema.h
   JsonSchemaValidator.h
   JsonType.h
-  Message.h
-  MessageAdapter.h
+  JsonObjectInfo.h
+  JsonObjectMacro.h
 )
 
 set(BRAYNSJSON_SOURCES
