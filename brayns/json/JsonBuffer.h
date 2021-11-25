@@ -36,10 +36,10 @@ namespace brayns
  *
  * Example:
  * @code {.cpp}
- * BRAYNS_MESSAGE_BEGIN(Test)
- * BRAYNS_MESSAGE_ENTRY(int, now, "Processed immediately")
- * BRAYNS_MESSAGE_ENTRY(JsonBuffer<int>, later, "Delay JSON processing")
- * BRAYNS_MESSAGE_END()
+ * BRAYNS_JSON_OBJECT_BEGIN(Test)
+ * BRAYNS_JSON_OBJECT_ENTRY(int, now, "Processed immediately")
+ * BRAYNS_JSON_OBJECT_ENTRY(JsonBuffer<int>, later, "Delay JSON processing")
+ * BRAYNS_JSON_OBJECT_END()
  * @endcode
  *
  * In the example when we call Json::deserialize(json, test), the JSON at key

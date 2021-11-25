@@ -21,22 +21,23 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(SchemaParams)
-BRAYNS_MESSAGE_ENTRY(std::string, endpoint, "Name of the endpoint")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(SchemaParams)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, endpoint, "Name of the endpoint")
+BRAYNS_JSON_OBJECT_END()
 
-BRAYNS_MESSAGE_BEGIN(SchemaResult)
-BRAYNS_MESSAGE_ENTRY(std::string, plugin,
-                     "Name of the plugin that loads the entrypoint")
-BRAYNS_MESSAGE_ENTRY(std::string, title, "Name of the entrypoint")
-BRAYNS_MESSAGE_ENTRY(std::string, description, "Description of the entrypoint")
-BRAYNS_MESSAGE_ENTRY(std::string, type, "Type of entrypoint ('method')")
-BRAYNS_MESSAGE_ENTRY(bool, async, "Check if the entrypoint is asynchronous")
-BRAYNS_MESSAGE_ENTRY(std::vector<JsonSchema>, params, "Input schema")
-BRAYNS_MESSAGE_ENTRY(JsonSchema, returns, "Output schema")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(SchemaResult)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, plugin,
+                         "Name of the plugin that loads the entrypoint")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, title, "Name of the entrypoint")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, description,
+                         "Description of the entrypoint")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, type, "Type of entrypoint ('method')")
+BRAYNS_JSON_OBJECT_ENTRY(bool, async, "Check if the entrypoint is asynchronous")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<JsonSchema>, params, "Input schema")
+BRAYNS_JSON_OBJECT_ENTRY(JsonSchema, returns, "Output schema")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

@@ -21,14 +21,14 @@
 
 #pragma once
 
-#include <brayns/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 #include <brayns/engine/Renderer.h>
 
 namespace brayns
 {
 BRAYNS_NAMED_ADAPTER_BEGIN(Renderer::PickResult, "RendererPickResult")
-BRAYNS_ADAPTER_NAMED_ENTRY("hit", hit, "Check if the position is picked")
-BRAYNS_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
-BRAYNS_ADAPTER_END()
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("hit", hit, "Check if the position is picked")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

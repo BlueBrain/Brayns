@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
@@ -31,13 +31,13 @@ enum class MeshLoaderGeometryQuality
     high
 };
 
-BRAYNS_ADAPTER_ENUM(MeshLoaderGeometryQuality,
-                    {"low", MeshLoaderGeometryQuality::low},
-                    {"medium", MeshLoaderGeometryQuality::medium},
-                    {"high", MeshLoaderGeometryQuality::high})
+BRAYNS_JSON_ADAPTER_ENUM(MeshLoaderGeometryQuality,
+                         {"low", MeshLoaderGeometryQuality::low},
+                         {"medium", MeshLoaderGeometryQuality::medium},
+                         {"high", MeshLoaderGeometryQuality::high})
 
-BRAYNS_MESSAGE_BEGIN(MeshLoaderParameters)
-BRAYNS_MESSAGE_ENTRY(MeshLoaderGeometryQuality, geometry_quality,
-                     "Mesh geometry quality")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(MeshLoaderParameters)
+BRAYNS_JSON_OBJECT_ENTRY(MeshLoaderGeometryQuality, geometry_quality,
+                         "Mesh geometry quality")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

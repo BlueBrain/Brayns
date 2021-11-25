@@ -23,12 +23,12 @@
 
 #include <brayns/common/mathTypes.h>
 
-#include <brayns/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(Boxd)
-BRAYNS_ADAPTER_GETSET("min", getMin, setMin, "Bottom-left XYZ")
-BRAYNS_ADAPTER_GETSET("max", getMax, setMax, "Top-right XYZ")
-BRAYNS_ADAPTER_END()
+BRAYNS_JSON_ADAPTER_BEGIN(Boxd)
+BRAYNS_JSON_ADAPTER_GETSET("min", getMin, setMin, "Bottom-left XYZ")
+BRAYNS_JSON_ADAPTER_GETSET("max", getMax, setMax, "Top-right XYZ")
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

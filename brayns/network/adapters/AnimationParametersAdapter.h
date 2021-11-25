@@ -21,23 +21,24 @@
 
 #pragma once
 
-#include <brayns/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 #include <brayns/parameters/AnimationParameters.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(AnimationParameters)
-BRAYNS_ADAPTER_GETSET("start_frame", getStartFrame, setStartFrame,
-                      "Global initial simulation frame index")
-BRAYNS_ADAPTER_GETSET("end_frame", getEndFrame, setEndFrame,
-                      "Global final simulation frame index")
-BRAYNS_ADAPTER_GETSET("frame_count", getNumFrames, setNumFrames,
-                      "Animation frame count")
-BRAYNS_ADAPTER_GETSET("current", getFrame, setFrame, "Current frame index")
-BRAYNS_ADAPTER_GETSET("delta", getDelta, setDelta, "Frame delta")
-BRAYNS_ADAPTER_GETSET("dt", getDt, setDt, "Frame time")
-BRAYNS_ADAPTER_GETSET("playing", isPlaying, setPlaying, "Animation is playing")
-BRAYNS_ADAPTER_GETSET("unit", getUnit, setUnit, "Time unit")
-BRAYNS_ADAPTER_END()
+BRAYNS_JSON_ADAPTER_BEGIN(AnimationParameters)
+BRAYNS_JSON_ADAPTER_GETSET("start_frame", getStartFrame, setStartFrame,
+                           "Global initial simulation frame index")
+BRAYNS_JSON_ADAPTER_GETSET("end_frame", getEndFrame, setEndFrame,
+                           "Global final simulation frame index")
+BRAYNS_JSON_ADAPTER_GETSET("frame_count", getNumFrames, setNumFrames,
+                           "Animation frame count")
+BRAYNS_JSON_ADAPTER_GETSET("current", getFrame, setFrame, "Current frame index")
+BRAYNS_JSON_ADAPTER_GETSET("delta", getDelta, setDelta, "Frame delta")
+BRAYNS_JSON_ADAPTER_GETSET("dt", getDt, setDt, "Frame time")
+BRAYNS_JSON_ADAPTER_GETSET("playing", isPlaying, setPlaying,
+                           "Animation is playing")
+BRAYNS_JSON_ADAPTER_GETSET("unit", getUnit, setUnit, "Time unit")
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

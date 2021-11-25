@@ -21,22 +21,22 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
-BRAYNS_MESSAGE_BEGIN(TraceAnterogradeMessage)
-BRAYNS_MESSAGE_ENTRY(size_t, model_id,
-                     "Model where to perform the neuronal tracing")
-BRAYNS_MESSAGE_ENTRY(std::vector<uint32_t>, cell_gids,
-                     "List of cell GIDs to use a source of the tracing")
-BRAYNS_MESSAGE_ENTRY(
+BRAYNS_JSON_OBJECT_BEGIN(TraceAnterogradeMessage)
+BRAYNS_JSON_OBJECT_ENTRY(size_t, model_id,
+                         "Model where to perform the neuronal tracing")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint32_t>, cell_gids,
+                         "List of cell GIDs to use a source of the tracing")
+BRAYNS_JSON_OBJECT_ENTRY(
     std::vector<uint32_t>, target_cell_gids,
     "List of cells GIDs which are the result of the given tracing mode")
-BRAYNS_MESSAGE_ENTRY(
+BRAYNS_JSON_OBJECT_ENTRY(
     brayns::Vector4d, source_cell_color,
     "RGBA normalized color to apply to the source cell geometry")
-BRAYNS_MESSAGE_ENTRY(
+BRAYNS_JSON_OBJECT_ENTRY(
     brayns::Vector4d, connected_cells_color,
     "RGBA normalized color to apply to the target cells geometry")
-BRAYNS_MESSAGE_ENTRY(brayns::Vector4d, non_connected_cells_color,
-                     "RGBA normalized color to apply to the rest of cells")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector4d, non_connected_cells_color,
+                         "RGBA normalized color to apply to the rest of cells")
+BRAYNS_JSON_OBJECT_END()

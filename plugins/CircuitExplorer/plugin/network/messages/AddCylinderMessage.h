@@ -21,16 +21,17 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
-BRAYNS_MESSAGE_BEGIN(AddCylinderMessage)
-BRAYNS_MESSAGE_ENTRY(std::string, name, "Name to give to the added model",
-                     brayns::Required(false))
-BRAYNS_MESSAGE_ENTRY(brayns::Vector3d, center,
-                     "Center of the lower cylinder circumference")
-BRAYNS_MESSAGE_ENTRY(brayns::Vector3d, up,
-                     "Center of the upper cylinder circumference")
-BRAYNS_MESSAGE_ENTRY(double, radius, "Radius of the cylinder",
-                     brayns::Minimum(0.0))
-BRAYNS_MESSAGE_ENTRY(brayns::Vector4d, color, "Cylinder color RGBA normalized")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(AddCylinderMessage)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, name, "Name to give to the added model",
+                         brayns::Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector3d, center,
+                         "Center of the lower cylinder circumference")
+BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector3d, up,
+                         "Center of the upper cylinder circumference")
+BRAYNS_JSON_OBJECT_ENTRY(double, radius, "Radius of the cylinder",
+                         brayns::Minimum(0.0))
+BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector4d, color,
+                         "Cylinder color RGBA normalized")
+BRAYNS_JSON_OBJECT_END()

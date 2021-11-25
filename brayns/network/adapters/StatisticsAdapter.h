@@ -23,12 +23,13 @@
 
 #include <brayns/common/Statistics.h>
 
-#include <brayns/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(Statistics)
-BRAYNS_ADAPTER_GET("fps", getFPS, "Framerate")
-BRAYNS_ADAPTER_GET("scene_size_in_bytes", getSceneSizeInBytes, "Scene size")
-BRAYNS_ADAPTER_END()
+BRAYNS_JSON_ADAPTER_BEGIN(Statistics)
+BRAYNS_JSON_ADAPTER_GET("fps", getFPS, "Framerate")
+BRAYNS_JSON_ADAPTER_GET("scene_size_in_bytes", getSceneSizeInBytes,
+                        "Scene size")
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

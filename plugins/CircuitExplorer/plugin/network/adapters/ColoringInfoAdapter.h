@@ -20,16 +20,16 @@
 
 #pragma once
 
-#include <brayns/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 #include <plugin/api/CircuitColorHandler.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(ColoringInformation)
-BRAYNS_ADAPTER_NAMED_ENTRY("variable", variable,
-                           "Variable of the coloring method being used")
-BRAYNS_ADAPTER_NAMED_ENTRY(
+BRAYNS_JSON_ADAPTER_BEGIN(ColoringInformation)
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("variable", variable,
+                                "Variable of the coloring method being used")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
     "color", color, "Color applied to the given variable (Normalized RGBA)")
-BRAYNS_ADAPTER_END()
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 enum class PillType
 {
@@ -32,22 +32,24 @@ enum class PillType
 
 namespace brayns
 {
-BRAYNS_ADAPTER_ENUM(PillType, {"pill", PillType::Pill},
-                    {"conepill", PillType::ConePill},
-                    {"sigmoidpill", PillType::SigmoidPill})
+BRAYNS_JSON_ADAPTER_ENUM(PillType, {"pill", PillType::Pill},
+                         {"conepill", PillType::ConePill},
+                         {"sigmoidpill", PillType::SigmoidPill})
 } // namespace brayns
 
-BRAYNS_MESSAGE_BEGIN(AddPillMessage)
-BRAYNS_MESSAGE_ENTRY(std::string, name, "Name to give to the added model",
-                     brayns::Required(false))
-BRAYNS_MESSAGE_ENTRY(PillType, type, "Type of pill")
-BRAYNS_MESSAGE_ENTRY(brayns::Vector3d, p1,
-                     "Center of the lower pill circumference")
-BRAYNS_MESSAGE_ENTRY(brayns::Vector3d, p2,
-                     "Center of the upper pill circumference")
-BRAYNS_MESSAGE_ENTRY(double, radius1, "Radius of the lower pill circumference",
-                     brayns::Minimum(0.0))
-BRAYNS_MESSAGE_ENTRY(double, radius2, "Radius of the upper pill circumference",
-                     brayns::Minimum(0.0))
-BRAYNS_MESSAGE_ENTRY(brayns::Vector4d, color, "Pill color RGBA normalized")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(AddPillMessage)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, name, "Name to give to the added model",
+                         brayns::Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(PillType, type, "Type of pill")
+BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector3d, p1,
+                         "Center of the lower pill circumference")
+BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector3d, p2,
+                         "Center of the upper pill circumference")
+BRAYNS_JSON_OBJECT_ENTRY(double, radius1,
+                         "Radius of the lower pill circumference",
+                         brayns::Minimum(0.0))
+BRAYNS_JSON_OBJECT_ENTRY(double, radius2,
+                         "Radius of the upper pill circumference",
+                         brayns::Minimum(0.0))
+BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector4d, color, "Pill color RGBA normalized")
+BRAYNS_JSON_OBJECT_END()

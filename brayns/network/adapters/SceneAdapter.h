@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 #include <brayns/engine/Scene.h>
 
@@ -30,8 +30,8 @@
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(Scene)
-BRAYNS_ADAPTER_GET("bounds", getBounds, "Scene boundary")
-BRAYNS_ADAPTER_GET("models", getModels, "All models")
-BRAYNS_ADAPTER_END()
+BRAYNS_JSON_ADAPTER_BEGIN(Scene)
+BRAYNS_JSON_ADAPTER_GET("bounds", getBounds, "Scene boundary")
+BRAYNS_JSON_ADAPTER_GET("models", getModels, "All models")
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

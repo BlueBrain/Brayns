@@ -21,17 +21,18 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
-BRAYNS_MESSAGE_BEGIN(AddGridMessage)
-BRAYNS_MESSAGE_ENTRY(double, min_value,
-                     "Negative square grid length from world origin")
-BRAYNS_MESSAGE_ENTRY(double, max_value,
-                     "Positive square grid length from world origin")
-BRAYNS_MESSAGE_ENTRY(double, steps, "Number of divisions")
-BRAYNS_MESSAGE_ENTRY(double, radius,
-                     "Radius of the cylinder that will be placed at each cell")
-BRAYNS_MESSAGE_ENTRY(double, plane_opacity, "Opacity of the grid mesh material")
-BRAYNS_MESSAGE_ENTRY(bool, show_axis, "Wether to show a world aligned axis")
-BRAYNS_MESSAGE_ENTRY(bool, use_colors, "Use colors on the grid axes")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(AddGridMessage)
+BRAYNS_JSON_OBJECT_ENTRY(double, min_value,
+                         "Negative square grid length from world origin")
+BRAYNS_JSON_OBJECT_ENTRY(double, max_value,
+                         "Positive square grid length from world origin")
+BRAYNS_JSON_OBJECT_ENTRY(double, steps, "Number of divisions")
+BRAYNS_JSON_OBJECT_ENTRY(
+    double, radius, "Radius of the cylinder that will be placed at each cell")
+BRAYNS_JSON_OBJECT_ENTRY(double, plane_opacity,
+                         "Opacity of the grid mesh material")
+BRAYNS_JSON_OBJECT_ENTRY(bool, show_axis, "Wether to show a world aligned axis")
+BRAYNS_JSON_OBJECT_ENTRY(bool, use_colors, "Use colors on the grid axes")
+BRAYNS_JSON_OBJECT_END()

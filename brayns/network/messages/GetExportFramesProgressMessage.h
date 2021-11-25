@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(GetExportFramesProgressMessage)
-BRAYNS_MESSAGE_ENTRY(double, progress, "Progress of the last export 0-1")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(GetExportFramesProgressMessage)
+BRAYNS_JSON_OBJECT_ENTRY(double, progress, "Progress of the last export 0-1")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

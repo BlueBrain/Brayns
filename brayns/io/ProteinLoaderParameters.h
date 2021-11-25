@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/common/types.h>
-#include <brayns/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
@@ -34,19 +34,19 @@ enum class ProteinLoaderColorScheme
     protein_residues = 4
 };
 
-BRAYNS_ADAPTER_ENUM(
+BRAYNS_JSON_ADAPTER_ENUM(
     ProteinLoaderColorScheme, {"none", ProteinLoaderColorScheme::none},
     {"by_id", ProteinLoaderColorScheme::by_id},
     {"protein_atoms", ProteinLoaderColorScheme::protein_atoms},
     {"protein_chains", ProteinLoaderColorScheme::protein_chains},
     {"protein_residues", ProteinLoaderColorScheme::protein_residues});
 
-BRAYNS_MESSAGE_BEGIN(ProteinLoaderParameters)
-BRAYNS_MESSAGE_ENTRY(ProteinLoaderColorScheme, color_scheme,
-                     "Defines how to color the loaded proteins",
-                     Default("none"), Required(false))
-BRAYNS_MESSAGE_ENTRY(double, radius_multiplier,
-                     "A multiplier to apply to the protein sample radii",
-                     Default(1.0), Required(false))
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(ProteinLoaderParameters)
+BRAYNS_JSON_OBJECT_ENTRY(ProteinLoaderColorScheme, color_scheme,
+                         "Defines how to color the loaded proteins",
+                         Default("none"), Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(double, radius_multiplier,
+                         "A multiplier to apply to the protein sample radii",
+                         Default(1.0), Required(false))
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

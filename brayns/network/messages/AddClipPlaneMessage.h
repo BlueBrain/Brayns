@@ -21,13 +21,13 @@
 
 #pragma once
 
-#include <brayns/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 #include <brayns/network/adapters/ClipPlaneAdapter.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(AddClipPlaneMessage)
-BRAYNS_MESSAGE_ENTRY(Plane, plane,
-                     "Plane normal vector XYZ and distance from origin")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(AddClipPlaneMessage)
+BRAYNS_JSON_OBJECT_ENTRY(Plane, plane,
+                         "Plane normal vector XYZ and distance from origin")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns
