@@ -96,6 +96,7 @@ struct Brayns::Impl : public PluginAPI
         _loadData();
 
         _engine->getScene().commit(); // Needed to obtain a bounding box
+        _adjustCamera();
 
         if (_actionInterface)
         {
@@ -398,6 +399,36 @@ private:
         scene.setEnvironmentMap(
             _parametersManager.getApplicationParameters().getEnvMap());
         scene.markModified();
+    }
+
+    void _adjustCamera()
+    {
+        // Extract data
+        auto& camera = _engine->getCamera();
+        auto& scene = _engine->getScene();
+        auto& bounds = scene.getBounds();
+
+        // Camera position
+        auto position = bounds.getCenter();
+        auto size = bounds.isEmpty() ? 1 : glm::compMax(bounds.getSize());
+        position.z += size;
+
+        // Camera target
+        auto target = position;
+
+        // Set Camera state
+        camera.setInitialState(position, glm::identity<Quaterniond>(), target);
+
+        // Log camera status
+        if (bounds.isEmpty())
+        {
+            Log::info("World bounding box: empty.");
+        }
+        else
+        {
+            Log::info("World bounding box: {}.", bounds);
+        }
+        Log::info("World center      : {}.", bounds.getCenter());
     }
 
     ParametersManager _parametersManager;
