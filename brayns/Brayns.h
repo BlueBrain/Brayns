@@ -49,8 +49,7 @@ public:
     /** Brayns instance initialization.
      *
      * Initialization involves command line parsing, engine creation, plugin
-     * loading and initialization, data loading, scene creation and setup of
-     * keyboard mouse interactions.
+     * loading and initialization, data loading and scene creation.
      *
      * In a setup using event loops, the event loop must be set up correctly
      * before calling this constructor to ensure that plugins can install their
