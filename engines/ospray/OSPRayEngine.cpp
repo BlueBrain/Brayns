@@ -20,8 +20,6 @@
 
 #include "OSPRayEngine.h"
 
-#include <brayns/common/input/KeyboardHandler.h>
-
 #include <brayns/parameters/ParametersManager.h>
 
 #include "OSPRayCamera.h"

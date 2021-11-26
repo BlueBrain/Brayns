@@ -26,6 +26,8 @@ constexpr float DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER = 0.25f;
 
 namespace brayns
 {
+class KeyboardHandler;
+
 /**
  * Base class for camera manipulators.
  */

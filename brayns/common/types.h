@@ -58,8 +58,6 @@ class Engine;
 class Scene;
 using ScenePtr = std::shared_ptr<Scene>;
 
-class AbstractManipulator;
-
 class Camera;
 using CameraPtr = std::shared_ptr<Camera>;
 
@@ -156,8 +154,6 @@ class VolumeParameters;
 
 class PluginAPI;
 class ExtensionPlugin;
-
-class KeyboardHandler;
 
 class MeshLoader;
 

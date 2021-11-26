@@ -7,7 +7,6 @@
 set(BRAYNSCOMMON_SOURCES
   ImageManager.cpp
   propertymap/ConversionRegistry.cpp
-  input/KeyboardHandler.cpp
   light/Light.cpp
   loader/LoaderRegistry.cpp
   material/Texture2D.cpp
@@ -40,7 +39,6 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   geometry/Sphere.h
   geometry/Streamline.h
   geometry/TriangleMesh.h
-  input/KeyboardHandler.h
   light/Light.h
   loader/Loader.h
   loader/LoaderRegistry.h

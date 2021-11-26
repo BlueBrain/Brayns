@@ -20,7 +20,7 @@
 
 #include "InspectCenterManipulator.h"
 
-#include <brayns/common/input/KeyboardHandler.h>
+#include "../input/KeyboardHandler.h"
 #include <brayns/engine/Camera.h>
 
 namespace brayns

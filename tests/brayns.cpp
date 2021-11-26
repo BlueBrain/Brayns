@@ -25,7 +25,6 @@
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
-#include <brayns/manipulators/InspectCenterManipulator.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
@@ -47,9 +46,6 @@ TEST_CASE("defaults")
     CHECK_EQ(camera.getCurrentType(), "perspective");
     CHECK_EQ(camera.getPosition(), brayns::Vector3d(0.5, 0.5, 1.5));
     CHECK_EQ(camera.getOrientation(), brayns::Quaterniond(1, 0, 0, 0));
-
-    auto& manipulator = brayns.getCameraManipulator();
-    CHECK(dynamic_cast<brayns::InspectCenterManipulator*>(&manipulator));
 
     auto& fb = brayns.getEngine().getFrameBuffer();
     CHECK(!fb.getColorBuffer());

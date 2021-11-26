@@ -23,7 +23,12 @@
 #include <brayns/common/Timer.h>
 
 #include <future>
+#include <memory>
 #include <mutex>
+
+#include "../input/KeyboardHandler.h"
+
+#include "../manipulators/AbstractManipulator.h"
 
 struct GLFWwindow;
 
@@ -77,6 +82,9 @@ private:
         DEPTH
     };
 
+    void registerKeyboardShortcuts();
+    void setupCameraManipulator(brayns::CameraMode mode, bool adjust = true);
+
     bool initGLFW();
     void initOpenGL();
     void initImGUI();
@@ -96,6 +104,8 @@ private:
     void handleScroll(InputEvent action);
 
     brayns::Brayns& m_brayns;
+    brayns::KeyboardHandler m_keyboardHandler;
+    std::unique_ptr<brayns::AbstractManipulator> m_cameraManipulator;
     GLFWwindow* m_window{nullptr};
     int m_width{0};
     int m_height{0};

@@ -19,12 +19,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <apps/ui/Application.h>
 #include <brayns/Brayns.h>
 #include <brayns/common/Log.h>
 
 #include <brayns/parameters/ApplicationParameters.h>
 #include <brayns/parameters/ParametersManager.h>
+
+#include "ui/Application.h"
 
 #include <cstdlib>
 
