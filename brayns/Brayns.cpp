@@ -57,7 +57,7 @@
 
 #include <brayns/pluginapi/PluginAPI.h>
 
-#include <mutex>  // std::unique_lock
+#include <mutex> // std::unique_lock
 #include <thread>
 
 namespace
