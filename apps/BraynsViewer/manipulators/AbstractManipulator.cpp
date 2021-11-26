@@ -20,8 +20,8 @@
 
 #include "AbstractManipulator.h"
 
+#include "../input/KeyboardHandler.h"
 #include <brayns/common/Log.h>
-#include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Scene.h>
 
