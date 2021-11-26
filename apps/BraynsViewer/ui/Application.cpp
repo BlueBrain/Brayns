@@ -79,8 +79,6 @@ void glfwErrorCallback(int error, const char* description)
 }
 } // namespace
 
-using namespace brayns;
-
 Application* Application::createInstance(brayns::Brayns& brayns)
 {
     delete appInstance;
@@ -164,20 +162,21 @@ void Application::registerKeyboardShortcuts()
     auto& camera = engine.getCamera();
 
     m_keyboardHandler.registerKeyboardShortcut('0', "Black background", [&] {
-        renderParams.setBackgroundColor(Vector3f(0.f, 0.f, 0.f));
+        renderParams.setBackgroundColor({0.f, 0.f, 0.f});
     });
     m_keyboardHandler.registerKeyboardShortcut('1', "Gray background", [&] {
-        renderParams.setBackgroundColor(Vector3f(0.5f, 0.5f, 0.5f));
+        renderParams.setBackgroundColor({0.5f, 0.5f, 0.5f});
     });
     m_keyboardHandler.registerKeyboardShortcut('2', "White background", [&] {
-        renderParams.setBackgroundColor(Vector3f(1.f, 1.f, 1.f));
+        renderParams.setBackgroundColor({1.f, 1.f, 1.f});
     });
     m_keyboardHandler.registerKeyboardShortcut(
-        '3', "Set gradient materials",
-        [&] { scene.setMaterialsColorMap(MaterialsColorMap::gradient); });
+        '3', "Set gradient materials", [&] {
+            scene.setMaterialsColorMap(brayns::MaterialsColorMap::gradient);
+        });
     m_keyboardHandler.registerKeyboardShortcut(
         '4', "Set random materials",
-        [&] { scene.setMaterialsColorMap(MaterialsColorMap::random); });
+        [&] { scene.setMaterialsColorMap(brayns::MaterialsColorMap::random); });
     m_keyboardHandler.registerKeyboardShortcut(
         '5', "Scientific visualization renderer",
         [&] { renderParams.setCurrentRenderer("scivis"); });
