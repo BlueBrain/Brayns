@@ -20,13 +20,11 @@
 #include "Application.h"
 
 #include <brayns/Brayns.h>
-#include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
-#include <brayns/manipulators/AbstractManipulator.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #include <GL/glew.h>
@@ -43,8 +41,12 @@
 #include <cassert>
 #include <iostream>
 
+#include "../manipulators/FlyingModeManipulator.h"
+#include "../manipulators/InspectCenterManipulator.h"
+
 namespace
 {
+constexpr auto DEFAULT_MOTION_ACCELERATION = 1.5f;
 constexpr auto MAX_FRAMEBUFFERS = 2;
 
 Application* appInstance = nullptr;
@@ -77,6 +79,8 @@ void glfwErrorCallback(int error, const char* description)
 }
 } // namespace
 
+using namespace brayns;
+
 Application* Application::createInstance(brayns::Brayns& brayns)
 {
     delete appInstance;
@@ -93,6 +97,9 @@ void Application::destroyInstance()
 Application::Application(brayns::Brayns& brayns)
     : m_brayns(brayns)
 {
+    registerKeyboardShortcuts();
+    setupCameraManipulator(brayns::CameraMode::inspect, false);
+    m_cameraManipulator->adjust(m_brayns.getEngine().getScene().getBounds());
 }
 
 void Application::reshape()
@@ -131,18 +138,230 @@ bool Application::init()
     initOpenGL();
     initImGUI();
 
-    auto& keyHandler = m_brayns.getKeyboardHandler();
-    keyHandler.registerKeyboardShortcut(
-        'z', "Switch between depth and color buffers", [&]() {
+    m_keyboardHandler.registerKeyboardShortcut(
+        'z', "Switch between depth and color buffers", [&] {
             m_frameBufferMode = m_frameBufferMode == FrameBufferMode::DEPTH
                                     ? FrameBufferMode::COLOR
                                     : FrameBufferMode::DEPTH;
         });
-    keyHandler.registerKeyboardShortcut('h', "Toggle help window", [&]() {
+    m_keyboardHandler.registerKeyboardShortcut('h', "Toggle help window", [&] {
         m_displayHelp = !m_displayHelp;
     });
 
     return true;
+}
+
+void Application::registerKeyboardShortcuts()
+{
+    auto& manager = m_brayns.getParametersManager();
+    auto& renderParams = manager.getRenderingParameters();
+    auto& animationParams = manager.getAnimationParameters();
+    auto& applicationParams = manager.getApplicationParameters();
+    auto& volumeParams = manager.getVolumeParameters();
+    auto& engine = m_brayns.getEngine();
+    auto& scene = engine.getScene();
+    auto& renderer = engine.getRenderer();
+    auto& camera = engine.getCamera();
+
+    m_keyboardHandler.registerKeyboardShortcut('0', "Black background", [&] {
+        renderParams.setBackgroundColor(Vector3f(0.f, 0.f, 0.f));
+    });
+    m_keyboardHandler.registerKeyboardShortcut('1', "Gray background", [&] {
+        renderParams.setBackgroundColor(Vector3f(0.5f, 0.5f, 0.5f));
+    });
+    m_keyboardHandler.registerKeyboardShortcut('2', "White background", [&] {
+        renderParams.setBackgroundColor(Vector3f(1.f, 1.f, 1.f));
+    });
+    m_keyboardHandler.registerKeyboardShortcut(
+        '3', "Set gradient materials",
+        [&] { scene.setMaterialsColorMap(MaterialsColorMap::gradient); });
+    m_keyboardHandler.registerKeyboardShortcut(
+        '4', "Set random materials",
+        [&] { scene.setMaterialsColorMap(MaterialsColorMap::random); });
+    m_keyboardHandler.registerKeyboardShortcut(
+        '5', "Scientific visualization renderer",
+        [&] { renderParams.setCurrentRenderer("scivis"); });
+    m_keyboardHandler.registerKeyboardShortcut('6', "Default renderer", [&] {
+        renderParams.setCurrentRenderer("basic");
+    });
+    m_keyboardHandler.registerKeyboardShortcut(
+        '7', "Basic simulation renderer",
+        [&] { renderParams.setCurrentRenderer("basic_simulation"); });
+    m_keyboardHandler.registerKeyboardShortcut(
+        '8', "Advanced Simulation renderer",
+        [&] { renderParams.setCurrentRenderer("advanced_simulation"); });
+    m_keyboardHandler.registerKeyboardShortcut('9', "Proximity renderer", [&] {
+        renderParams.setCurrentRenderer("proximity");
+    });
+    m_keyboardHandler.registerKeyboardShortcut(
+        '[', "Decrease animation frame by 1",
+        [&] { animationParams.jumpFrames(1); });
+    m_keyboardHandler.registerKeyboardShortcut(
+        ']', "Increase animation frame by 1",
+        [&] { animationParams.jumpFrames(-1); });
+    m_keyboardHandler.registerKeyboardShortcut(
+        'e', "Enable eletron shading", [&] {
+            renderer.updateProperty("shadingEnabled", false);
+            renderer.updateProperty("electronShadingEnabled", true);
+        });
+    m_keyboardHandler.registerKeyboardShortcut(
+        'f', "Enable fly mode",
+        [this]() { setupCameraManipulator(brayns::CameraMode::flying); });
+    m_keyboardHandler.registerKeyboardShortcut(
+        'i', "Enable inspect mode",
+        [this]() { setupCameraManipulator(brayns::CameraMode::inspect); });
+    m_keyboardHandler.registerKeyboardShortcut(
+        'o', "Decrease ambient occlusion strength", [&] {
+            if (!renderer.hasProperty("aoWeight"))
+                return;
+
+            auto aoStrength = renderer.getProperty<double>("aoWeight");
+            aoStrength -= 0.1;
+            if (aoStrength < 0.)
+                aoStrength = 0.;
+            renderer.updateProperty("aoWeight", aoStrength);
+        });
+    m_keyboardHandler.registerKeyboardShortcut(
+        'O', "Increase ambient occlusion strength", [&] {
+            if (!renderer.hasProperty("aoWeight"))
+                return;
+
+            auto aoStrength = renderer.getProperty<double>("aoWeight");
+            aoStrength += 0.1;
+            if (aoStrength > 1.)
+                aoStrength = 1.;
+            renderer.updateProperty("aoWeight", aoStrength);
+        });
+    m_keyboardHandler.registerKeyboardShortcut(
+        'p', "Enable diffuse shading", [&] {
+            renderer.updateProperty("shadingEnabled", true);
+            renderer.updateProperty("electronShadingEnabled", false);
+        });
+    m_keyboardHandler.registerKeyboardShortcut('P', "Disable shading", [&] {
+        renderer.updateProperty("shadingEnabled", false);
+        renderer.updateProperty("electronShadingEnabled", false);
+    });
+    m_keyboardHandler.registerKeyboardShortcut('r', "Set animation frame to 0",
+                                               [&] {
+                                                   animationParams.setFrame(0);
+                                               });
+    m_keyboardHandler.registerKeyboardShortcut(
+        'u', "Enable/Disable shadows", [&] {
+            if (!renderer.hasProperty("shadows"))
+                return;
+            renderer.updateProperty("shadows", renderer.getProperty<double>(
+                                                   "shadows") == 0.
+                                                   ? 1.
+                                                   : 0.);
+        });
+    m_keyboardHandler.registerKeyboardShortcut(
+        'U', "Enable/Disable soft shadows", [&] {
+            if (!renderer.hasProperty("softShadows"))
+                return;
+
+            renderer.updateProperty("softShadows", renderer.getProperty<double>(
+                                                       "softShadows") == 0.
+                                                       ? 1.
+                                                       : 0.);
+        });
+    m_keyboardHandler.registerKeyboardShortcut(
+        't', "Multiply samples per ray by 2", [&] {
+            volumeParams.setSamplingRate(volumeParams.getSamplingRate() * 2);
+        });
+    m_keyboardHandler.registerKeyboardShortcut(
+        'T', "Divide samples per ray by 2", [&] {
+            volumeParams.setSamplingRate(volumeParams.getSamplingRate() / 2);
+        });
+    m_keyboardHandler.registerKeyboardShortcut(
+        'l', "Toggle load dynamic/static load balancer", [&] {
+            applicationParams.setDynamicLoadBalancer(
+                !applicationParams.getDynamicLoadBalancer());
+        });
+    m_keyboardHandler.registerKeyboardShortcut(
+        'g', "Enable/Disable animation playback",
+        [&] { animationParams.togglePlayback(); });
+    m_keyboardHandler.registerKeyboardShortcut(
+        '{', "Decrease eye separation", [&] {
+            if (!camera.hasProperty("interpupillaryDistance"))
+                return;
+            auto eyeSeparation =
+                camera.getProperty<double>("interpupillaryDistance");
+            eyeSeparation -= 0.01;
+            camera.updateProperty("interpupillaryDistance", eyeSeparation);
+            brayns::Log::info("Eye separation: {}.", eyeSeparation);
+        });
+    m_keyboardHandler.registerKeyboardShortcut(
+        '}', "Increase eye separation", [&] {
+            if (!camera.hasProperty("interpupillaryDistance"))
+                return;
+            auto eyeSeparation =
+                camera.getProperty<double>("interpupillaryDistance");
+            eyeSeparation += 0.01;
+            camera.updateProperty("interpupillaryDistance", eyeSeparation);
+            brayns::Log::info("Eye separation: {}.", eyeSeparation);
+        });
+    m_keyboardHandler.registerKeyboardShortcut(
+        '<', "Decrease field of view", [&] {
+            if (!camera.hasProperty("fovy"))
+                return;
+            auto fovy = camera.getProperty<double>("fovy");
+            fovy -= 1.0;
+            camera.updateProperty("fovy", fovy);
+            brayns::Log::info("Field of view: {}.", fovy);
+        });
+    m_keyboardHandler.registerKeyboardShortcut(
+        '>', "Increase field of view", [&] {
+            if (!camera.hasProperty("fovy"))
+                return;
+            auto fovy = camera.getProperty<double>("fovy");
+            fovy += 1.0;
+            camera.updateProperty("fovy", fovy);
+            brayns::Log::info("Field of view: {}.", fovy);
+        });
+    m_keyboardHandler.registerKeyboardShortcut(' ',
+                                               "Camera reset to initial state",
+                                               [&] { camera.reset(); });
+    m_keyboardHandler.registerKeyboardShortcut(
+        '+', "Increase motion speed", [&] {
+            m_cameraManipulator->updateMotionSpeed(DEFAULT_MOTION_ACCELERATION);
+        });
+    m_keyboardHandler.registerKeyboardShortcut(
+        '-', "Decrease motion speed", [&] {
+            m_cameraManipulator->updateMotionSpeed(1.f /
+                                                   DEFAULT_MOTION_ACCELERATION);
+        });
+    m_keyboardHandler.registerKeyboardShortcut(
+        'c', "Display current camera information", [&] {
+            brayns::Log::info("{}, {}", camera.getPosition(),
+                              camera.getOrientation());
+        });
+    m_keyboardHandler.registerKeyboardShortcut('b', "Toggle benchmarking", [&] {
+        applicationParams.setBenchmarking(!applicationParams.isBenchmarking());
+    });
+}
+
+void Application::setupCameraManipulator(brayns::CameraMode mode, bool adjust)
+{
+    m_cameraManipulator.reset();
+
+    auto& engine = m_brayns.getEngine();
+    auto& camera = engine.getCamera();
+    auto& scene = engine.getScene();
+
+    switch (mode)
+    {
+    case brayns::CameraMode::flying:
+        m_cameraManipulator.reset(
+            new brayns::FlyingModeManipulator(camera, m_keyboardHandler));
+        break;
+    case brayns::CameraMode::inspect:
+        m_cameraManipulator.reset(
+            new brayns::InspectCenterManipulator(camera, m_keyboardHandler));
+        break;
+    };
+
+    if (adjust)
+        m_cameraManipulator->adjust(scene.getBounds());
 }
 
 bool Application::initGLFW()
@@ -312,7 +531,7 @@ void Application::guiNewFrame()
     if (m_displayHelp)
     {
         ImGui::Begin("Keyboard shortcuts");
-        for (const auto& line : m_brayns.getKeyboardHandler().help())
+        for (const auto& line : m_keyboardHandler.help())
             ImGui::Text("%s", line.c_str());
         ImGui::End();
     }
@@ -543,16 +762,16 @@ void Application::handleKey(InputEvent action)
         switch (action.button)
         {
         case GLFW_KEY_LEFT:
-            m_brayns.getKeyboardHandler().handle(brayns::SpecialKey::LEFT);
+            m_keyboardHandler.handle(brayns::SpecialKey::LEFT);
             break;
         case GLFW_KEY_RIGHT:
-            m_brayns.getKeyboardHandler().handle(brayns::SpecialKey::RIGHT);
+            m_keyboardHandler.handle(brayns::SpecialKey::RIGHT);
             break;
         case GLFW_KEY_UP:
-            m_brayns.getKeyboardHandler().handle(brayns::SpecialKey::UP);
+            m_keyboardHandler.handle(brayns::SpecialKey::UP);
             break;
         case GLFW_KEY_DOWN:
-            m_brayns.getKeyboardHandler().handle(brayns::SpecialKey::DOWN);
+            m_keyboardHandler.handle(brayns::SpecialKey::DOWN);
             break;
         case GLFW_KEY_F11:
             m_toggleFullScreen = true;
@@ -573,7 +792,7 @@ void Application::handleKey(InputEvent action)
             const char keyChar =
                 toKeyChar(action.button,
                           m_leftShiftKeyDown || m_rightShiftKeyDown);
-            m_brayns.getKeyboardHandler().handleKeyboardShortcut(keyChar);
+            m_keyboardHandler.handleKeyboardShortcut(keyChar);
         }
     }
 
@@ -603,20 +822,18 @@ void Application::handleCursor(InputEvent action)
 {
     const brayns::Vector2d pos{action.xpos, action.ypos};
 
-    auto& manipulator = m_brayns.getCameraManipulator();
-
     if (m_rightMouseButtonDown || (m_leftMouseButtonDown && m_altKeyDown))
     {
-        manipulator.dragRight(pos, m_lastMousePos);
+        m_cameraManipulator->dragRight(pos, m_lastMousePos);
     }
     else if (m_middleMouseButtonDown ||
              (m_leftMouseButtonDown && m_ctrlKeyDown))
     {
-        manipulator.dragMiddle(pos, m_lastMousePos);
+        m_cameraManipulator->dragMiddle(pos, m_lastMousePos);
     }
     else if (m_leftMouseButtonDown)
     {
-        manipulator.dragLeft(pos, m_lastMousePos);
+        m_cameraManipulator->dragLeft(pos, m_lastMousePos);
     }
 
     m_lastMousePos = pos;
@@ -646,7 +863,7 @@ void Application::handleMouseButton(InputEvent action)
         if (result.hit)
         {
             // updates position based on new target and current rotation
-            m_brayns.getCameraManipulator().rotate(
+            m_cameraManipulator->rotate(
                 result.pos, 0, 0,
                 brayns::AbstractManipulator::AxisMode::localY);
         }
@@ -656,5 +873,5 @@ void Application::handleMouseButton(InputEvent action)
 void Application::handleScroll(InputEvent action)
 {
     const auto delta = action.yoffset > 0.0 ? 1 : -1;
-    m_brayns.getCameraManipulator().wheel(m_lastMousePos, delta);
+    m_cameraManipulator->wheel(m_lastMousePos, delta);
 }

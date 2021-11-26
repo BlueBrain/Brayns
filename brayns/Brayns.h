@@ -134,16 +134,6 @@ public:
     ParametersManager& getParametersManager();
 
     /**
-     * Gets the keyboard handler
-     */
-    KeyboardHandler& getKeyboardHandler();
-
-    /**
-     * Gets the camera manipulator
-     */
-    AbstractManipulator& getCameraManipulator();
-
-    /**
      * @brief Get the registered network interface.
      *
      * @return ActionInterface* Network interface or null if not set.

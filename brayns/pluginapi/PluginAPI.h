@@ -42,12 +42,6 @@ public:
     /** @return access to the action interface of Brayns. */
     virtual ActionInterface* getActionInterface() = 0;
 
-    /** @return access to the keyboard handler of Brayns. */
-    virtual KeyboardHandler& getKeyboardHandler() = 0;
-
-    /** @return access to the camera manipulator of Brayns. */
-    virtual AbstractManipulator& getCameraManipulator() = 0;
-
     /** @return access to the camera of Brayns. */
     virtual Camera& getCamera() = 0;
 
