@@ -34,6 +34,7 @@
 #include <brayns/common/utils/filesystem.h>
 
 #include <fstream>
+#include <mutex> // std::unique_lock
 
 namespace
 {

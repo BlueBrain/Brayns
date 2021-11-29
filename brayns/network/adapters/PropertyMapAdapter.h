@@ -153,6 +153,10 @@ private:
     }
 };
 
+#ifdef _serialize
+#undef _serialize
+#endif
+
 class PropertyMapSerializer
 {
 public:
