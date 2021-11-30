@@ -137,13 +137,14 @@ public:
 class ImageCopy
 {
 public:
-    static void *of(const ImageInfo &info, const void *data)
+    static void *of(const Image &image)
     {
+        auto data = image.getData();
         if (!data)
         {
             return nullptr;
         }
-        auto size = info.getSize();
+        auto size = image.getSize();
         auto copy = ImageAllocator::allocate(size);
         std::memcpy(copy, data, size);
         return copy;
@@ -156,10 +157,9 @@ public:
     static void save(const Image &image, const std::string &filename)
     {
         auto path = filename.c_str();
-        auto &info = image.getInfo();
-        auto width = int(info.width);
-        auto height = int(info.height);
-        auto channelCount = int(info.channelCount);
+        auto width = int(image.getWidth());
+        auto height = int(image.getHeight());
+        auto channelCount = int(image.getChannelCount());
         auto data = image.getData();
         if (!stbi_write_jpg(path, width, height, channelCount, data, 100))
         {
@@ -174,10 +174,9 @@ public:
     static void save(const Image &image, const std::string &filename)
     {
         auto path = filename.c_str();
-        auto &info = image.getInfo();
-        auto width = int(info.width);
-        auto height = int(info.height);
-        auto channelCount = int(info.channelCount);
+        auto width = int(image.getWidth());
+        auto height = int(image.getHeight());
+        auto channelCount = int(image.getChannelCount());
         auto data = image.getData();
         if (!stbi_write_png(path, width, height, channelCount, data, 0))
         {
@@ -192,10 +191,9 @@ public:
     static void save(const Image &image, const std::string &filename)
     {
         auto path = filename.c_str();
-        auto &info = image.getInfo();
-        auto width = int(info.width);
-        auto height = int(info.height);
-        auto channelCount = int(info.channelCount);
+        auto width = int(image.getWidth());
+        auto height = int(image.getHeight());
+        auto channelCount = int(image.getChannelCount());
         auto data = image.getFloats();
         if (!stbi_write_hdr(path, width, height, channelCount, data))
         {
@@ -235,9 +233,8 @@ class ImageFlipper
 public:
     static void flipVertically(const Image &image)
     {
-        auto &info = image.getInfo();
-        auto height = info.height;
-        auto rowSize = info.getRowSize();
+        auto height = image.getHeight();
+        auto rowSize = image.getRowSize();
         auto data = static_cast<uint8_t *>(image.getData());
         uint8_t buffer[2048];
         for (size_t i = 0; i < height / 2; ++i)
@@ -286,7 +283,7 @@ Image::~Image()
 
 Image::Image(const Image &other)
     : _info(other._info)
-    , _data(ImageCopy::of(other._info, other._data))
+    , _data(ImageCopy::of(other))
 {
 }
 
@@ -300,7 +297,7 @@ Image &Image::operator=(const Image &other)
 {
     _info = other._info;
     stbi_image_free(_data);
-    _data = ImageCopy::of(other._info, _data);
+    _data = ImageCopy::of(other);
     return *this;
 }
 

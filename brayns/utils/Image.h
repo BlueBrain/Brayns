@@ -71,6 +71,22 @@ public:
 
     const ImageInfo &getInfo() const { return _info; }
 
+    size_t getWidth() const { return _info.width; }
+
+    size_t getHeight() const { return _info.height; }
+
+    size_t getChannelCount() const { return _info.channelCount; }
+
+    size_t getChannelSize() const { return _info.channelSize; }
+
+    size_t getSize() const { return _info.getSize(); }
+
+    size_t getRowSize() const { return _info.getRowSize(); }
+
+    size_t getPixelCount() const { return _info.getPixelCount(); }
+
+    size_t getPixelSize() const { return _info.getPixelSize(); }
+
     bool isEmpty() const { return _data == nullptr; }
 
     void *getData() const { return _data; }
