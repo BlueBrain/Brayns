@@ -9,6 +9,7 @@ set(BRAYNSUTILS_HEADERS
   EnumUtils.h
   Filesystem.h
   FunctorInfo.h
+  Image.h
   ImageUtils.h
   StringUtils.h
 )
@@ -16,6 +17,7 @@ set(BRAYNSUTILS_HEADERS
 set(BRAYNSUTILS_SOURCES
   base64/base64.cpp
   DynamicLib.cpp
+  Image.cpp
   ImageUtils.cpp
   StringUtils.cpp
 )

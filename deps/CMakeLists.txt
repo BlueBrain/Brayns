@@ -136,3 +136,16 @@ endif()
 set(SPDLOG_BUILD_SHARED ON CACHE BOOL "" FORCE)
 set(SPDLOG_MASTER_PROJECT ON)
 add_subdirectory(spdlog)
+
+# =============================================================================
+# stb
+# =============================================================================
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/stb")
+    message(STATUS "Downloading stb from submodules")
+    FetchContent_Declare(
+        stb
+        GIT_REPOSITORY https://github.com/nothings/stb
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/stb
+    )
+    FetchContent_Populate(stb)
+endif()
