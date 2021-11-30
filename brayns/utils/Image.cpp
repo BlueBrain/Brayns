@@ -59,7 +59,7 @@ public:
         info.width = size_t(image.width);
         info.height = size_t(image.height);
         info.channelCount = size_t(image.channelCount);
-        info.channelType = image.channelType;
+        info.channelSize = image.channelSize;
         return {info, data};
     }
 
@@ -69,25 +69,25 @@ private:
         int width = 0;
         int height = 0;
         int channelCount = 0;
-        ChannelType channelType = ChannelType::Unknown;
+        size_t channelSize = 0;
         void *data = nullptr;
 
         void load(const char *path)
         {
             data = stbi_load(path, &width, &height, &channelCount, 0);
-            channelType = ChannelType::Uint8;
+            channelSize = 1;
         }
 
         void load16(const char *path)
         {
             data = stbi_load_16(path, &width, &height, &channelCount, 0);
-            channelType = ChannelType::Uint16;
+            channelSize = 2;
         }
 
         void loadf(const char *path)
         {
             data = stbi_loadf(path, &width, &height, &channelCount, 0);
-            channelType = ChannelType::Float;
+            channelSize = 4;
         }
     };
 
@@ -248,9 +248,9 @@ public:
             while (remainder)
             {
                 auto size = std::min(remainder, sizeof(buffer));
-                memcpy(buffer, row0, size);
-                memcpy(row0, row1, size);
-                memcpy(row1, buffer, size);
+                std::memcpy(buffer, row0, size);
+                std::memcpy(row0, row1, size);
+                std::memcpy(row1, buffer, size);
                 row0 += size;
                 row1 += size;
                 remainder -= size;

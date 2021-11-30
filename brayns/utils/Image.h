@@ -26,22 +26,12 @@
 
 namespace brayns
 {
-enum class ChannelType
-{
-    Unknown,
-    Uint8 = sizeof(uint8_t),
-    Uint16 = sizeof(uint16_t),
-    Float = sizeof(float)
-};
-
 struct ImageInfo
 {
     size_t width = 0;
     size_t height = 0;
     size_t channelCount = 0;
-    ChannelType channelType = ChannelType::Unknown;
-
-    size_t getChannelSize() const { return size_t(channelType); }
+    size_t channelSize = 0;
 
     size_t getSize() const { return getPixelCount() * getPixelSize(); }
 
@@ -51,7 +41,7 @@ struct ImageInfo
 
     size_t getPixelCount() const { return width * height; }
 
-    size_t getPixelSize() const { return channelCount * getChannelSize(); }
+    size_t getPixelSize() const { return channelCount * channelSize; }
 
     bool isGrey() const { return channelCount == 1; }
 
@@ -94,7 +84,7 @@ public:
     template <typename T>
     T *getDataAs() const
     {
-        assert(_info.getChannelSize() == sizeof(T));
+        assert(_info.channelSize == sizeof(T));
         return static_cast<T *>(_data);
     }
 
