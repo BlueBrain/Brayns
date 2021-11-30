@@ -43,6 +43,13 @@ struct ImageInfo
 
     size_t getPixelSize() const { return channelCount * channelSize; }
 
+    size_t getPixelIndex(size_t x, size_t y) const { return x + y * width; }
+
+    size_t getPixelOffset(size_t x, size_t y) const
+    {
+        return getPixelIndex(x, y) * getPixelSize();
+    }
+
     bool isGrey() const { return channelCount == 1; }
 
     bool isGreyAlpha() const { return channelCount == 2; }
@@ -55,10 +62,10 @@ struct ImageInfo
 class Image
 {
 public:
+    static Image allocate(const ImageInfo &info);
     static Image load(const std::string &filename);
 
     Image() = default;
-    Image(const ImageInfo &info);
     Image(const ImageInfo &info, void *data);
     ~Image();
     Image(const Image &other);
@@ -68,8 +75,8 @@ public:
 
     void save(const std::string &filename) const;
     void flipVertically();
-
-    const ImageInfo &getInfo() const { return _info; }
+    void paste(const Image &image, size_t x = 0, size_t y = 0);
+    void assign(const void *data, size_t size, size_t offset = 0);
 
     size_t getWidth() const { return _info.width; }
 
@@ -81,11 +88,23 @@ public:
 
     size_t getSize() const { return _info.getSize(); }
 
+    size_t getRowCount() const { return _info.getRowCount(); }
+
     size_t getRowSize() const { return _info.getRowSize(); }
 
     size_t getPixelCount() const { return _info.getPixelCount(); }
 
     size_t getPixelSize() const { return _info.getPixelSize(); }
+
+    size_t getPixelIndex(size_t x, size_t y) const
+    {
+        return _info.getPixelIndex(x, y);
+    }
+
+    size_t getPixelOffset(size_t x, size_t y) const
+    {
+        return _info.getPixelOffset(x, y);
+    }
 
     bool isEmpty() const { return _data == nullptr; }
 
@@ -97,11 +116,25 @@ public:
 
     float *getFloats() const { return getDataAs<float>(); }
 
-    template <typename T>
-    T *getDataAs() const
+    template <typename ChannelType>
+    ChannelType *getDataAs() const
     {
-        assert(_info.channelSize == sizeof(T));
-        return static_cast<T *>(_data);
+        assert(_info.channelSize == sizeof(ChannelType));
+        return static_cast<ChannelType *>(_data);
+    }
+
+    template <typename ChannelType>
+    ChannelType *getRow(size_t index) const
+    {
+        return getDataAs<ChannelType>() +
+               index * getWidth() * getChannelCount();
+    }
+
+    template <typename ChannelType>
+    ChannelType *getPixel(size_t x, size_t y) const
+    {
+        return getDataAs<ChannelType>() +
+               getPixelIndex(x, y) * getChannelCount();
     }
 
 private:

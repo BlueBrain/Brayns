@@ -31,6 +31,7 @@ namespace po = boost::program_options;
 
 #include <brayns/common/types.h>
 #include <brayns/utils/Filesystem.h>
+#include <brayns/utils/Image.h>
 
 #include <apps/BraynsIBL/brdf.fs.h>
 #include <apps/BraynsIBL/brdf.vs.h>
@@ -167,60 +168,57 @@ struct Image
 
 Image loadImage(const std::string& envMap)
 {
-    auto image = FreeImage_Load(FIF_HDR, envMap.c_str());
-    if (!image)
+    try
+    {
+        auto image = brayns::Image::load(envMap);
+        auto size = image.getSize();
+        auto data = image.getFloats();
+        std::vector<float> rawData(data, data + size);
+        return {image.getWidth(), image.getHeight(), rawData};
+    }
+    catch (const std::runtime_error& e)
+    {
         return {};
-
-    FreeImage_FlipVertical(image);
-    const auto width = FreeImage_GetWidth(image);
-    const auto height = FreeImage_GetHeight(image);
-    const auto bpp = FreeImage_GetBPP(image);
-    const auto pitch = width * bpp / 8;
-    std::vector<float> rawData(height * pitch / sizeof(float));
-    FreeImage_ConvertToRawBits((BYTE*)rawData.data(), image, pitch, bpp,
-                               FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK,
-                               FI_RGBA_BLUE_MASK, TRUE);
-    FreeImage_Unload(image);
-    return {width, height, rawData};
+    }
 }
 
-FIBITMAP* toImage(const float* texture, const size_t width, const size_t height,
-                  const bool toByte = false)
+brayns::Image toImage(const float* texture, size_t width, size_t height,
+                      bool toByte = false)
 {
+    brayns::ImageInfo info;
+    info.width = width;
+    info.height = height;
+    info.channelCount = 3;
     if (toByte)
     {
-        auto img = FreeImage_Allocate(width, height, 8 * 3);
-        RGBQUAD color;
-        for (size_t y = 0; y < height; y++)
+        info.channelSize = 1;
+        auto image = brayns::Image::allocate(info);
+        auto data = image.getData();
+        for (size_t y = 0; y < height; ++y)
         {
-            for (size_t x = 0; x < width; x++)
+            for (size_t x = 0; x < width; ++x)
             {
-                const auto val = &texture[(x * 3) + y * width * 3];
-                color.rgbRed = std::pow(std::min(*val, 1.f), 1.f / 2.2f) * 255;
-                color.rgbGreen =
-                    std::pow(std::min(*(val + 1), 1.f), 1.f / 2.2f) * 255;
-                color.rgbBlue =
-                    std::pow(std::min(*(val + 2), 1.f), 1.f / 2.2f) * 255;
-                FreeImage_SetPixelColor(img, x, y, &color);
+                auto from = &texture[(x * 3) + y * width * 3];
+                auto to = image.getPixel<uint8_t>(x, y);
+                to[0] = std::pow(std::min(from[0], 1.f), 1.f / 2.2f) * 255;
+                to[1] = std::pow(std::min(from[1], 1.f), 1.f / 2.2f) * 255;
+                to[2] = std::pow(std::min(from[2], 1.f), 1.f / 2.2f) * 255;
             }
         }
-        return img;
+        return image;
     }
 
-    auto img = FreeImage_AllocateT(FIT_RGBF, width, height, 32 * 3);
-    for (unsigned y = 0; y < height; y++)
-    {
-        float* dst_bits = (float*)FreeImage_GetScanLine(img, y);
-        memcpy(dst_bits, texture, width * 3 * sizeof(float));
-        texture += (width * 3);
-    }
-    return img;
+    info.channelSize = sizeof(float);
+    auto image = brayns::Image::allocate(info);
+    image.assign(texture, image.getSize());
+    return image;
 }
 
-void saveImage(FIBITMAP* img, std::string filename, const bool asPNG = false)
+void saveImage(const brayns::Image& image, std::string filename,
+               bool asPNG = false)
 {
     filename += asPNG ? ".png" : ".hdr";
-    FreeImage_Save(asPNG ? FIF_PNG : FIF_HDR, img, filename.c_str());
+    image.save(filename.c_str());
 }
 
 void saveTex2d(const unsigned int texture, const unsigned int width,
@@ -235,13 +233,11 @@ void saveTex2d(const unsigned int texture, const unsigned int width,
 
     auto img = toImage(buffer.data(), width, height);
     saveImage(img, filename);
-    FreeImage_Unload(img);
 
     if (asPNG)
     {
         auto imgByte = toImage(buffer.data(), width, height, true);
         saveImage(imgByte, filename, asPNG);
-        FreeImage_Unload(imgByte);
     }
 }
 
@@ -249,11 +245,23 @@ void saveCubemap(const unsigned int cubemap, const unsigned int size,
                  const std::string& filename, const bool asPNG = false,
                  const unsigned int level = 0)
 {
-    FIBITMAP* img =
-        FreeImage_AllocateT(FIT_RGBF, size * 6, size, 24 * sizeof(float));
-    FIBITMAP* pngImg{nullptr};
+    brayns::ImageInfo imageInfo;
+    imageInfo.width = 6 * size;
+    imageInfo.height = size;
+    imageInfo.channelCount = 3;
+    imageInfo.channelSize = sizeof(float);
+    auto image = brayns::Image::allocate(imageInfo);
+
+    brayns::Image png;
     if (asPNG)
-        pngImg = FreeImage_Allocate(size * 4, size * 3, 24);
+    {
+        brayns::ImageInfo pngInfo;
+        pngInfo.width = 4 * size;
+        pngInfo.height = 3 * size;
+        pngInfo.channelCount = 3;
+        pngInfo.channelSize = 1;
+        png = brayns::Image::allocate(pngInfo);
+    }
 
     unsigned int offsetX[] = {size * 2,  // right
                               0,         // left
@@ -264,31 +272,29 @@ void saveCubemap(const unsigned int cubemap, const unsigned int size,
     unsigned int offsetY[] = {size, size, 0, size * 2, size, size};
 
     std::vector<float> buffer(size * size * 3);
+
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap);
+
     for (uint8_t i = 0; i < 6; ++i)
     {
         glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, level, GL_RGB,
                       GL_FLOAT, buffer.data());
         auto face = toImage(buffer.data(), size, size);
-        FreeImage_FlipVertical(face);
-        FreeImage_Paste(img, face, i * size, 0, 255);
-        FreeImage_Unload(face);
-        if (pngImg)
+        face.flipVertically();
+        image.paste(face, i * size, 0);
+        if (!png.isEmpty())
         {
             auto faceByte = toImage(buffer.data(), size, size, true);
-            FreeImage_FlipVertical(faceByte);
-            FreeImage_Paste(pngImg, faceByte, offsetX[i], offsetY[i], 255);
-            FreeImage_Unload(faceByte);
+            faceByte.flipVertically();
+            png.paste(faceByte, offsetX[i], offsetY[i]);
         }
     }
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-    saveImage(img, filename);
-    FreeImage_Unload(img);
+    saveImage(image, filename);
 
-    if (pngImg)
+    if (!png.isEmpty())
     {
-        saveImage(pngImg, filename, asPNG);
-        FreeImage_Unload(pngImg);
+        saveImage(png, filename, asPNG);
     }
 }
 

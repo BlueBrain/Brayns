@@ -44,6 +44,30 @@ namespace
 {
 using namespace brayns;
 
+class ImageAllocator
+{
+public:
+    static void *allocate(const ImageInfo &info)
+    {
+        auto size = info.getSize();
+        if (size == 0)
+        {
+            return nullptr;
+        }
+        return allocate(size);
+    }
+
+    static void *allocate(size_t size)
+    {
+        auto data = malloc(size);
+        if (!data)
+        {
+            throw std::runtime_error("Failed to allocate image memory");
+        }
+        return data;
+    }
+};
+
 class ImageLoader
 {
 public:
@@ -87,7 +111,7 @@ private:
         void loadf(const char *path)
         {
             data = stbi_loadf(path, &width, &height, &channelCount, 0);
-            channelSize = 4;
+            channelSize = sizeof(float);
         }
     };
 
@@ -110,41 +134,20 @@ private:
     }
 };
 
-class ImageAllocator
-{
-public:
-    static void *allocate(const ImageInfo &info)
-    {
-        auto size = info.getSize();
-        if (size == 0)
-        {
-            return nullptr;
-        }
-        return allocate(size);
-    }
-
-    static void *allocate(size_t size)
-    {
-        auto data = malloc(size);
-        if (!data)
-        {
-            throw std::runtime_error("Failed to allocate image memory");
-        }
-        return data;
-    }
-};
-
 class ImageCopy
 {
 public:
     static void *of(const Image &image)
     {
-        auto data = image.getData();
+        return of(image.getData(), image.getSize());
+    }
+
+    static void *of(const void *data, size_t size)
+    {
         if (!data)
         {
             return nullptr;
         }
-        auto size = image.getSize();
         auto copy = ImageAllocator::allocate(size);
         std::memcpy(copy, data, size);
         return copy;
@@ -259,15 +262,14 @@ public:
 
 namespace brayns
 {
+Image Image::allocate(const ImageInfo &info)
+{
+    return {info, ImageAllocator::allocate(info)};
+}
+
 Image Image::load(const std::string &filename)
 {
     return ImageLoader::load(filename);
-}
-
-Image::Image(const ImageInfo &info)
-    : _info(info)
-    , _data(ImageAllocator::allocate(info))
-{
 }
 
 Image::Image(const ImageInfo &info, void *data)
@@ -316,5 +318,22 @@ void Image::save(const std::string &filename) const
 void Image::flipVertically()
 {
     return ImageFlipper::flipVertically(*this);
+}
+
+void Image::paste(const Image &image, size_t x, size_t y)
+{
+    auto source = image.getData();
+    auto size = image.getSize();
+    auto bytes = getBytes();
+    auto destination = bytes + getPixelOffset(x, y);
+    assert(destination + size <= bytes + getSize());
+    std::memcpy(destination, source, size);
+}
+
+void Image::assign(const void *data, size_t size, size_t offset)
+{
+    assert(offset + size < getSize());
+    auto destination = getBytes() + offset;
+    std::memcpy(destination, data, size);
 }
 } // namespace brayns
