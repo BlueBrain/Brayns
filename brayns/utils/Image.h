@@ -23,6 +23,7 @@
 
 #include <cassert>
 #include <string>
+#include <vector>
 
 namespace brayns
 {
@@ -64,6 +65,8 @@ class Image
 public:
     static Image allocate(const ImageInfo &info);
     static Image load(const std::string &filename);
+    static Image merge(const std::vector<Image> &images);
+    static bool canBeSavedAs(const std::string &extension);
 
     Image() = default;
     Image(const ImageInfo &info, void *data);
@@ -73,10 +76,13 @@ public:
     Image &operator=(const Image &other);
     Image &operator=(Image &&other);
 
-    void save(const std::string &filename) const;
+    void save(const std::string &filename, int quality = 100) const;
+    std::string toBase64() const;
     void flipVertically();
     void paste(const Image &image, size_t x = 0, size_t y = 0);
     void assign(const void *data, size_t size, size_t offset = 0);
+
+    const ImageInfo &getInfo() const { return _info; }
 
     size_t getWidth() const { return _info.width; }
 

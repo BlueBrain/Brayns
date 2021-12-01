@@ -39,6 +39,7 @@
 #pragma GCC diagnostic pop
 
 #include "Filesystem.h"
+#include "base64/base64.h"
 
 namespace
 {
@@ -154,23 +155,6 @@ public:
     }
 };
 
-class JpegWriter
-{
-public:
-    static void save(const Image &image, const std::string &filename)
-    {
-        auto path = filename.c_str();
-        auto width = int(image.getWidth());
-        auto height = int(image.getHeight());
-        auto channelCount = int(image.getChannelCount());
-        auto data = image.getData();
-        if (!stbi_write_jpg(path, width, height, channelCount, data, 100))
-        {
-            throw std::runtime_error("Cannot save JPEG as '" + filename + "'");
-        }
-    }
-};
-
 class PngWriter
 {
 public:
@@ -184,6 +168,41 @@ public:
         if (!stbi_write_png(path, width, height, channelCount, data, 0))
         {
             throw std::runtime_error("Cannot save PNG as '" + filename + "'");
+        }
+    }
+};
+
+class BitmapWriter
+{
+public:
+    static void save(const Image &image, const std::string &filename)
+    {
+        auto path = filename.c_str();
+        auto width = int(image.getWidth());
+        auto height = int(image.getHeight());
+        auto channelCount = int(image.getChannelCount());
+        auto data = image.getData();
+        if (!stbi_write_bmp(path, width, height, channelCount, data))
+        {
+            throw std::runtime_error("Cannot save BMP as '" + filename + "'");
+        }
+    }
+};
+
+class JpegWriter
+{
+public:
+    static void save(const Image &image, const std::string &filename,
+                     int quality)
+    {
+        auto path = filename.c_str();
+        auto width = int(image.getWidth());
+        auto height = int(image.getHeight());
+        auto channelCount = int(image.getChannelCount());
+        auto data = image.getData();
+        if (!stbi_write_jpg(path, width, height, channelCount, data, quality))
+        {
+            throw std::runtime_error("Cannot save JPEG as '" + filename + "'");
         }
     }
 };
@@ -208,18 +227,33 @@ public:
 class ImageWriter
 {
 public:
-    static void save(const Image &image, const std::string &filename)
+    static bool canSaveImageAs(const std::string &extension)
+    {
+        static const std::vector<std::string> extensions = {"png", "bmp", "jpg",
+                                                            "hdr"};
+        auto first = extensions.begin();
+        auto last = extensions.end();
+        return std::find(first, last, extension) != last;
+    }
+
+    static void save(const Image &image, const std::string &filename,
+                     int quality)
     {
         fs::path path(filename);
         auto extension = path.extension().string();
-        if (extension == ".jpg")
-        {
-            JpegWriter::save(image, filename);
-            return;
-        }
         if (extension == ".png")
         {
             PngWriter::save(image, filename);
+            return;
+        }
+        if (extension == ".bmp")
+        {
+            BitmapWriter::save(image, filename);
+            return;
+        }
+        if (extension == ".jpg")
+        {
+            JpegWriter::save(image, filename, quality);
             return;
         }
         if (extension == ".hdr")
@@ -258,6 +292,57 @@ public:
         }
     }
 };
+
+class ImageMerger
+{
+public:
+    static Image merge(const std::vector<Image> &images)
+    {
+        auto info = _getInfo(images);
+        auto result = Image::allocate(info);
+        size_t offset = 0;
+        for (const auto &image : images)
+        {
+            result.paste(image, offset);
+            offset += image.getWidth();
+        }
+        return result;
+    }
+
+private:
+    static ImageInfo _getInfo(const std::vector<Image> &images)
+    {
+        if (images.empty())
+        {
+            return {};
+        }
+        auto info = images[0].getInfo();
+        for (size_t i = 1; i < images.size(); ++i)
+        {
+            _add(images[i], info);
+        }
+        return info;
+    }
+
+    static void _add(const Image &image, ImageInfo &info)
+    {
+        info.width += image.getWidth();
+        if (image.getHeight() != info.height)
+        {
+            throw std::runtime_error("All images must have the same height");
+        }
+        if (image.getChannelCount() != info.channelCount)
+        {
+            throw std::runtime_error(
+                "All images must have the same channel count");
+        }
+        if (image.getChannelSize() != info.channelSize)
+        {
+            throw std::runtime_error(
+                "All images must have the same channel size");
+        }
+    }
+};
 } // namespace
 
 namespace brayns
@@ -270,6 +355,16 @@ Image Image::allocate(const ImageInfo &info)
 Image Image::load(const std::string &filename)
 {
     return ImageLoader::load(filename);
+}
+
+Image Image::merge(const std::vector<Image> &images)
+{
+    return ImageMerger::merge(images);
+}
+
+bool Image::canBeSavedAs(const std::string &extension)
+{
+    return ImageWriter::canSaveImageAs(extension);
 }
 
 Image::Image(const ImageInfo &info, void *data)
@@ -310,9 +405,16 @@ Image &Image::operator=(Image &&other)
     return *this;
 }
 
-void Image::save(const std::string &filename) const
+void Image::save(const std::string &filename, int quality) const
 {
-    ImageWriter::save(*this, filename);
+    ImageWriter::save(*this, filename, quality);
+}
+
+std::string Image::toBase64() const
+{
+    auto data = static_cast<const unsigned char *>(_data);
+    auto size = getSize();
+    return base64_encode(data, size);
 }
 
 void Image::flipVertically()
