@@ -5,7 +5,6 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSCOMMON_SOURCES
-  ImageManager.cpp
   propertymap/ConversionRegistry.cpp
   light/Light.cpp
   loader/LoaderRegistry.cpp
@@ -20,7 +19,6 @@ set(BRAYNSCOMMON_SOURCES
 set(BRAYNSCOMMON_PUBLIC_HEADERS
   adapters/PropertyMapAdapter.h
   BaseObject.h
-  ImageManager.h
   Progress.h
   propertymap/Any.h
   propertymap/Converter.h

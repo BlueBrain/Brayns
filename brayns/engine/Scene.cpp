@@ -473,38 +473,6 @@ void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)
     markModified();
 }
 
-bool Scene::setEnvironmentMap(const std::string& envMap)
-{
-    bool success = true;
-    if (envMap.empty())
-        _backgroundMaterial->clearTextures();
-    else
-    {
-        try
-        {
-            _backgroundMaterial->setTexture(envMap, TextureType::diffuse);
-        }
-        catch (const std::runtime_error& e)
-        {
-            Log::debug("Cannot load environment map: {}.", e.what());
-            _backgroundMaterial->clearTextures();
-            success = false;
-        }
-
-        _loadIBLMaps(envMap);
-    }
-
-    _updateValue(_environmentMap, success ? envMap : "");
-    if (_backgroundMaterial->isModified())
-        markModified();
-    return success;
-}
-
-bool Scene::hasEnvironmentMap() const
-{
-    return !_environmentMap.empty();
-}
-
 void Scene::_processNewModels(const ModelParams& params,
                               std::vector<ModelDescriptorPtr>& models)
 {
@@ -541,33 +509,6 @@ void Scene::_computeBounds()
     if (_bounds.isEmpty())
         // If no model is enabled. return empty bounding box
         _bounds.merge({0, 0, 0});
-}
-
-void Scene::_loadIBLMaps(const std::string& envMap)
-{
-    try
-    {
-        auto tex = _backgroundMaterial->getTexture(TextureType::diffuse);
-
-        const auto path = fs::path(envMap).parent_path();
-        const auto basename = (path / fs::path(envMap).stem()).string();
-
-        const std::string irradianceMap = basename + IRRADIANCE_MAP + ".hdr";
-        const std::string radianceMap = basename + RADIANCE_MAP + ".hdr";
-        const std::string brdfLUT = basename + BRDF_LUT + ".hdr";
-
-        if (fs::exists(irradianceMap) && fs::exists(radianceMap) &&
-            fs::exists(brdfLUT))
-        {
-            _backgroundMaterial->setTexture(irradianceMap,
-                                            TextureType::irradiance);
-            _backgroundMaterial->setTexture(radianceMap, TextureType::radiance);
-            _backgroundMaterial->setTexture(brdfLUT, TextureType::brdf_lut);
-        }
-    }
-    catch (...)
-    {
-    }
 }
 
 void Scene::_updateAnimationParameters()

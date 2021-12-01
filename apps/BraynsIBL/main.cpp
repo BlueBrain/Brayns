@@ -176,7 +176,7 @@ Image loadImage(const std::string& envMap)
         std::vector<float> rawData(data, data + size);
         return {image.getWidth(), image.getHeight(), rawData};
     }
-    catch (const std::runtime_error& e)
+    catch (const std::runtime_error&)
     {
         return {};
     }

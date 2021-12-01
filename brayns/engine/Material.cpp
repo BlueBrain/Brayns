@@ -20,68 +20,11 @@
 
 #include "Material.h"
 
-#include <brayns/common/ImageManager.h>
-#include <brayns/common/Log.h>
-
 namespace brayns
 {
 Material::Material(const PropertyMap& properties)
 {
     setCurrentType("default");
     _properties.at(_currentType).merge(properties);
-}
-
-Texture2DPtr Material::getTexture(const TextureType type) const
-{
-    const auto it = _textureDescriptors.find(type);
-    if (it == _textureDescriptors.end())
-        throw std::runtime_error("Failed to get texture with type " +
-                                 std::to_string(static_cast<int>(type)));
-    return it->second;
-}
-
-void Material::clearTextures()
-{
-    _textureDescriptors.clear();
-    markModified();
-}
-
-bool Material::_loadTexture(const std::string& fileName, const TextureType type)
-{
-    if (_textures.find(fileName) != _textures.end())
-        return true;
-
-    auto texture = ImageManager::importTextureFromFile(fileName, type);
-    if (!texture)
-        return false;
-
-    _textures[fileName] = texture;
-    Log::debug("{}: {}x{}x{}x{} added to the texture cache.", fileName,
-               texture->width, texture->height, int(texture->channels),
-               int(texture->depth));
-    return true;
-}
-
-void Material::setTexture(const std::string& fileName, const TextureType type)
-{
-    auto i = _textureDescriptors.find(type);
-    if (i != _textureDescriptors.end() && i->second->filename == fileName)
-        return;
-
-    if (_textures.find(fileName) == _textures.end())
-        if (!_loadTexture(fileName, type))
-            throw std::runtime_error("Failed to load texture from " + fileName);
-    _textureDescriptors[type] = _textures[fileName];
-    markModified();
-}
-
-void Material::removeTexture(const TextureType type)
-{
-    auto i = _textureDescriptors.find(type);
-    if (i == _textureDescriptors.end())
-        return;
-
-    _textureDescriptors.erase(i);
-    markModified();
 }
 } // namespace brayns
