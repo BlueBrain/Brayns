@@ -78,20 +78,19 @@ void CircuitExplorerMaterial::commit()
     glossiness = getParam1f("glossiness", 1.f);
 
     // Cast simulation data
-    castSimulationData =
-        getParam(MATERIAL_PROPERTY_CAST_USER_DATA.c_str(), false);
+    castSimulationData = getParam(MATERIAL_PROPERTY_CAST_USER_DATA, false);
 
     // Shading mode
     shadingMode = static_cast<MaterialShadingMode>(
-        getParam1i(MATERIAL_PROPERTY_SHADING_MODE.c_str(),
+        getParam1i(MATERIAL_PROPERTY_SHADING_MODE,
                    static_cast<int>(MaterialShadingMode::none)));
     // Clipping mode
     clippingMode = static_cast<MaterialClippingMode>(
-        getParam1i(MATERIAL_PROPERTY_CLIPPING_MODE.c_str(),
+        getParam1i(MATERIAL_PROPERTY_CLIPPING_MODE,
                    static_cast<int>(MaterialClippingMode::no_clipping)));
 
     // User parameter
-    userParameter = getParam1f(MATERIAL_PROPERTY_USER_PARAMETER.c_str(), 1.f);
+    userParameter = getParam1f(MATERIAL_PROPERTY_USER_PARAMETER, 1.f);
 
     ispc::CircuitExplorerMaterial_set(
         getIE(), map_d ? map_d->getIE() : nullptr,
