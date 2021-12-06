@@ -39,12 +39,14 @@ public:
         auto& framebuffer = engine.getFrameBuffer();
         auto& manager = api.getParametersManager();
         auto& parameters = manager.getApplicationParameters();
-        auto compression = parameters.getJpegCompression();
+        auto quality = parameters.getJpegCompression();
         auto& generator = context.getImageGenerator();
-        const auto image =
-            generator.createJPEG(framebuffer.getColorBuffer(),
-                                 framebuffer.getFrameBufferFormat(),
-                                 framebuffer.getSize(), compression);
+        framebuffer.map();
+        auto colorBuffer = framebuffer.getColorBuffer();
+        auto format = framebuffer.getFrameBufferFormat();
+        auto size = framebuffer.getSize();
+        auto image = generator.createJPEG(colorBuffer, format, size, quality);
+        framebuffer.unmap();
         if (image.size == 0)
         {
             return;
