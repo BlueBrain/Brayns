@@ -22,7 +22,6 @@
 
 #include <brayns/network/common/ExtractModel.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/GetModelMessage.h>
 
 #include <plugin/api/CircuitColorManager.h>
 #include <plugin/network/messages/AvailableColoringInfoMessage.h>
@@ -124,7 +123,7 @@ private:
 };
 
 class AvailableColorMethodsEntrypoint
-    : public brayns::Entrypoint<brayns::GetModelMessage,
+    : public brayns::Entrypoint<ColoredCircuitID,
                                 AvailableColorMethodsMessage>
 {
 public:
@@ -148,7 +147,8 @@ public:
     {
         auto params = request.getParams();
         auto& scene = getApi().getScene();
-        const auto& descriptor = brayns::ExtractModel::fromId(scene, params.id);
+        const auto& descriptor = brayns::ExtractModel::fromId(scene,
+                                                              params.model_id);
         try
         {
             request.reply({_manager.getAvailableMethods(descriptor)});
