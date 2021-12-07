@@ -21,14 +21,28 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
-
-#include <brayns/engine/Renderer.h>
+#include <fstream>
+#include <stdexcept>
+#include <string>
 
 namespace brayns
 {
-BRAYNS_NAMED_JSON_ADAPTER_BEGIN(Renderer::PickResult, "RendererPickResult")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("hit", hit, "Check if the position is picked")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
-BRAYNS_JSON_ADAPTER_END()
+class FileReader
+{
+public:
+    static std::string read(const std::string &filename)
+    {
+        std::ifstream stream(filename, std::ios::ate);
+        if (!stream.is_open())
+        {
+            throw std::runtime_error("Cannot read '" + filename + "'");
+        }
+        auto size = stream.tellg();
+        std::string data;
+        data.resize(size);
+        stream.seekg(0);
+        stream.read(data.data(), size);
+        return data;
+    }
+};
 } // namespace brayns

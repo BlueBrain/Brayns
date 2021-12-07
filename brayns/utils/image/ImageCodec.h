@@ -21,13 +21,20 @@
 
 #pragma once
 
-#include <brayns/common/utils/ImageGenerator.h>
+#include <string>
+#include <vector>
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include "Image.h"
 
 namespace brayns
 {
-BRAYNS_NAMED_ADAPTER_BEGIN(ImageGenerator::ImageBase64, "ImageBase64")
-BRAYNS_JSON_ADAPTER_ENTRY(data, "Image data with base64 encoding")
-BRAYNS_JSON_ADAPTER_END()
+class ImageCodec
+{
+public:
+    virtual ~ImageCodec() = default;
+
+    virtual std::string getFormat() const = 0;
+    virtual std::string encode(const Image &image, int quality) const = 0;
+    virtual Image decode(const void *data, size_t size) const = 0;
+};
 } // namespace brayns

@@ -21,14 +21,26 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/utils/image/ImageCodec.h>
 
-#include <brayns/engine/Renderer.h>
+#include "StbiHelper.h"
 
 namespace brayns
 {
-BRAYNS_NAMED_JSON_ADAPTER_BEGIN(Renderer::PickResult, "RendererPickResult")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("hit", hit, "Check if the position is picked")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
-BRAYNS_JSON_ADAPTER_END()
+class PngCodec : public ImageCodec
+{
+public:
+    virtual std::string getFormat() const override { return "png"; }
+
+    virtual std::string encode(const Image &image, int quality) const override
+    {
+        (void)quality;
+        return StbiHelper::encodePng(image);
+    }
+
+    virtual Image decode(const void *data, size_t size) const override
+    {
+        return StbiHelper::decode(data, size);
+    };
+};
 } // namespace brayns

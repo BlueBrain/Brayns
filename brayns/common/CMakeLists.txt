@@ -12,7 +12,6 @@ set(BRAYNSCOMMON_SOURCES
   scene/ClipPlane.cpp
   simulation/AbstractSimulationHandler.cpp
   transferFunction/TransferFunction.cpp
-  utils/ImageGenerator.cpp
   Timer.cpp
 )
 
@@ -50,21 +49,19 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   tasks/TaskRuntimeError.h
   transferFunction/TransferFunction.h
   types.h
-  utils/ImageGenerator.h
 )
 
 add_library(braynsCommon SHARED ${BRAYNSCOMMON_PUBLIC_HEADERS} ${BRAYNSCOMMON_SOURCES})
 
-target_include_directories(braynsCommon SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS})
 target_include_directories(braynsCommon PUBLIC
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
     "$<INSTALL_INTERFACE:include>")
 
 target_link_libraries(braynsCommon PUBLIC
-  glm Async++ ${LibJpegTurbo_LIBRARIES} braynsUtils braynsJson spdlog::spdlog
+  glm Async++ braynsUtils braynsJson spdlog::spdlog
 )
 target_link_libraries(braynsCommon PRIVATE
-    braynsParameters ${Boost_PROGRAM_OPTIONS_LIBRARY} ${FREEIMAGE_LIBRARIES}
+    braynsParameters ${Boost_PROGRAM_OPTIONS_LIBRARY}
 )
 
 target_compile_options(braynsCommon PRIVATE ${BRAYNS_COMPILE_OPTIONS})

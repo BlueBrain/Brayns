@@ -21,14 +21,23 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
-
-#include <brayns/engine/Renderer.h>
+#include <fstream>
+#include <stdexcept>
+#include <string>
 
 namespace brayns
 {
-BRAYNS_NAMED_JSON_ADAPTER_BEGIN(Renderer::PickResult, "RendererPickResult")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("hit", hit, "Check if the position is picked")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
-BRAYNS_JSON_ADAPTER_END()
+class FileWriter
+{
+public:
+    static void write(const std::string &data, const std::string &filename)
+    {
+        std::ofstream stream(filename);
+        if (!stream.is_open())
+        {
+            throw std::runtime_error("Cannot write '" + filename + "'");
+        }
+        stream.write(data.data(), data.size());
+    }
+};
 } // namespace brayns

@@ -24,18 +24,17 @@
 #include <brayns/network/adapters/SnapshotAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/entrypoint/EntrypointTask.h>
+#include <brayns/network/messages/ImageBase64Message.h>
 
 #include <brayns/tasks/SnapshotTask.h>
 
 namespace brayns
 {
-class SnapshotTask
-    : public EntrypointTask<SnapshotParams, ImageGenerator::ImageBase64>
+class SnapshotTask : public EntrypointTask<SnapshotParams, ImageBase64Message>
 {
 public:
-    SnapshotTask(Engine& engine, SnapshotParams params,
-                 ImageGenerator& imageGenerator)
-        : _functor(engine, std::move(params), imageGenerator)
+    SnapshotTask(Engine& engine, SnapshotParams params)
+        : _functor(engine, std::move(params))
     {
         _functor.setProgressFunc(
             [this](std::string operation, float, float amount) {
@@ -43,17 +42,16 @@ public:
             });
     }
 
-    virtual void run() override { _image = _functor(); }
+    virtual void run() override { _image.data = _functor(); }
 
     virtual void onComplete() override { reply(_image); }
 
 private:
-    ImageGenerator::ImageBase64 _image;
+    ImageBase64Message _image;
     SnapshotFunctor _functor;
 };
 
-class SnapshotEntrypoint
-    : public Entrypoint<SnapshotParams, ImageGenerator::ImageBase64>
+class SnapshotEntrypoint : public Entrypoint<SnapshotParams, ImageBase64Message>
 {
 public:
     virtual std::string getName() const override { return "snapshot"; }
@@ -69,9 +67,7 @@ public:
     {
         auto params = request.getParams();
         auto& engine = getApi().getEngine();
-        auto& generator = getImageGenerator();
-        auto task = std::make_shared<SnapshotTask>(engine, std::move(params),
-                                                   generator);
+        auto task = std::make_shared<SnapshotTask>(engine, std::move(params));
         launchTask(task, request);
     }
 };

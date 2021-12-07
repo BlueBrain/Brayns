@@ -21,14 +21,38 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <cstring>
+#include <utility>
 
-#include <brayns/engine/Renderer.h>
+#include "Image.h"
 
 namespace brayns
 {
-BRAYNS_NAMED_JSON_ADAPTER_BEGIN(Renderer::PickResult, "RendererPickResult")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("hit", hit, "Check if the position is picked")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
-BRAYNS_JSON_ADAPTER_END()
+class ImageFlipper
+{
+public:
+    static void flipVertically(Image &image)
+    {
+        auto height = image.getHeight();
+        auto rowSize = image.getRowSize();
+        auto data = static_cast<uint8_t *>(image.getData());
+        uint8_t buffer[2048];
+        for (size_t i = 0; i < height / 2; ++i)
+        {
+            auto row0 = data + i * rowSize;
+            auto row1 = data + (height - i - 1) * rowSize;
+            auto remainder = rowSize;
+            while (remainder)
+            {
+                auto size = std::min(remainder, sizeof(buffer));
+                std::memcpy(buffer, row0, size);
+                std::memcpy(row0, row1, size);
+                std::memcpy(row1, buffer, size);
+                row0 += size;
+                row1 += size;
+                remainder -= size;
+            }
+        }
+    }
+};
 } // namespace brayns

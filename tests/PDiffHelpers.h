@@ -22,10 +22,10 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/common/utils/ImageGenerator.h>
 #include <brayns/engine/FrameBuffer.h>
-#include <brayns/utils/ImageUtils.h>
 #include <brayns/utils/base64/base64.h>
+#include <brayns/utils/image/Image.h>
+#include <brayns/utils/image/ImageConverter.h>
 
 #include <deps/perceptualdiff/metric.h>
 #include <deps/perceptualdiff/rgba_image.h>
@@ -35,29 +35,29 @@
 #include <fstream>
 #include <iostream>
 
-inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(FIBITMAP* image)
+inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
+    const brayns::Image& image)
 {
-    const auto w = FreeImage_GetWidth(image);
-    const auto h = FreeImage_GetHeight(image);
+    auto width = image.getWidth();
+    auto height = image.getHeight();
 
-    auto result = std::make_unique<pdiff::RGBAImage>(w, h, "");
-    // Copy the image over to our internal format, FreeImage has the scanlines
-    // bottom to top though.
-    auto dest = result->get_data();
-    for (unsigned int y = 0; y < h; y++, dest += w)
-    {
-        const auto scanline = reinterpret_cast<const unsigned int*>(
-            FreeImage_GetScanLine(image, h - y - 1));
-        memcpy(dest, scanline, sizeof(dest[0]) * w);
-    }
+    auto result = std::make_unique<pdiff::RGBAImage>(width, height, "");
+
+    auto destination = result->get_data();
+    auto source = image.getData();
+    auto size = image.getSize();
+
+    std::memcpy(destination, source, image.getSize());
 
     return result;
 }
 
 inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
-    brayns::FrameBuffer& fb)
+    brayns::FrameBuffer& framebuffer)
 {
-    return createPDiffRGBAImage(FreeImage_ConvertTo32Bits(fb.getImage().get()));
+    auto image = framebuffer.getImage();
+    auto rgba = brayns::ImageConverter::convertToRgba(image);
+    return createPDiffRGBAImage(rgba);
 }
 
 inline std::unique_ptr<pdiff::RGBAImage> clonePDiffRGBAImage(
@@ -109,33 +109,4 @@ inline bool compareTestImage(const std::string& filename,
     }
 
     return success;
-}
-
-inline bool compareBase64TestImage(
-    const brayns::ImageGenerator::ImageBase64& image,
-    const std::string& filename)
-{
-    auto decodedImage = base64_decode(image.data);
-
-    static bool saveImages = getenv("BRAYNS_SAVE_TEST_IMAGES");
-    if (saveImages)
-    {
-        std::fstream file(filename, std::ios::out);
-        file << decodedImage;
-    }
-
-    auto freeImageMem =
-        FreeImage_OpenMemory((BYTE*)decodedImage.data(), decodedImage.length());
-    const auto fif = FreeImage_GetFileTypeFromMemory(freeImageMem, 0);
-    auto decodedFreeImage = FreeImage_LoadFromMemory(fif, freeImageMem, 0);
-
-    const auto testImage{createPDiffRGBAImage(decodedFreeImage)};
-    auto imageDiff = clonePDiffRGBAImage(*testImage);
-
-    auto result = _compareImage(*testImage, filename, *imageDiff);
-
-    FreeImage_Unload(decodedFreeImage);
-    FreeImage_CloseMemory(freeImageMem);
-
-    return result;
 }

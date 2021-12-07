@@ -25,17 +25,13 @@
 #include <brayns/engine/Renderer.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/utils/Filesystem.h>
+#include <brayns/utils/image/ImageCodecRegistry.h>
+#include <brayns/utils/image/ImageEncoder.h>
 
 namespace brayns
 {
 namespace
 {
-auto getFIImageFormat(const std::string& format) noexcept
-{
-    return format == "jpg" ? FIF_JPEG
-                           : FreeImage_GetFIFFromFormat(format.c_str());
-}
-
 void checkExportParameters(const FrameExporter::ExportInfo& input)
 {
     if (input.keyFrames.empty())
@@ -74,10 +70,12 @@ void checkExportParameters(const FrameExporter::ExportInfo& input)
     // Remove test directory on success
     fs::remove(bPath / testDirFilename);
 
-    const auto imageFormat = getFIImageFormat(input.imageFormat);
-    if (imageFormat == FIF_UNKNOWN)
+    auto& format = input.imageFormat;
+    if (!ImageCodecRegistry::isSupported(format))
+    {
         throw FrameExportParameterException("Unknown image file format " +
-                                            input.imageFormat);
+                                            format);
+    }
 }
 } // namespace
 
@@ -244,44 +242,27 @@ void FrameExporter::_writeImageToDisk(FrameBuffer& frameBuffer,
 {
     auto image = frameBuffer.getImage();
 
-    const auto fif = getFIImageFormat(_currentExport.imageFormat);
-
-    if (fif == FIF_JPEG)
-        image.reset(FreeImage_ConvertTo24Bits(image.get()));
-
-    int flags = _currentExport.imageQuality;
-    if (fif == FIF_TIFF)
-        flags = TIFF_NONE;
-
-    freeimage::MemoryPtr memory(FreeImage_OpenMemory());
-
-    FreeImage_SaveToMemory(fif, image.get(), memory.get(), flags);
-
-    BYTE* pixels = nullptr;
-    DWORD numPixels = 0;
-    FreeImage_AcquireMemory(memory.get(), &pixels, &numPixels);
-
     char frame[7];
     sprintf(frame, "%05d", static_cast<int32_t>(frameNumberName));
+    auto& basePath = _currentExport.storePath;
+    auto& extension = _currentExport.imageFormat;
+    auto filename = basePath + '/' + frame + "." + extension;
+    auto quality = _currentExport.imageQuality;
 
-    const auto& basePath = _currentExport.storePath;
-    const auto& extension = _currentExport.imageFormat;
-    const auto fileName = basePath + '/' + frame + "." + extension;
-    std::ofstream file(fileName, std::ios_base::binary);
-    if (!file.is_open())
+    try
+    {
+        ImageEncoder::save(image, filename, quality);
+    }
+    catch (const std::runtime_error& e)
     {
         _currentExportError = true;
-        _currentExportErrorMessage =
-            "Unable to create or open image file " + fileName;
+        _currentExportErrorMessage = e.what();
         brayns::Log::error("{}", _currentExportErrorMessage);
         return;
     }
 
-    file.write((char*)pixels, numPixels);
-    file.close();
-
     frameBuffer.clear();
 
-    brayns::Log::info("Frame saved to {}", fileName);
+    brayns::Log::info("Frame saved to {}", filename);
 }
 } // namespace brayns

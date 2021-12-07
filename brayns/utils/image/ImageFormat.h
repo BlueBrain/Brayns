@@ -21,14 +21,28 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/utils/Filesystem.h>
 
-#include <brayns/engine/Renderer.h>
+#include <string>
 
 namespace brayns
 {
-BRAYNS_NAMED_JSON_ADAPTER_BEGIN(Renderer::PickResult, "RendererPickResult")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("hit", hit, "Check if the position is picked")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
-BRAYNS_JSON_ADAPTER_END()
+class ImageFormat
+{
+public:
+    static std::string fromFilename(const std::string &filename)
+    {
+        auto extension = fs::path(filename).extension();
+        return fromExtension(extension.string());
+    }
+
+    static std::string fromExtension(const std::string &extension)
+    {
+        if (extension.empty() || extension[0] != '.')
+        {
+            return extension;
+        }
+        return extension.substr(1);
+    }
+};
 } // namespace brayns

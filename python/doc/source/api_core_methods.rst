@@ -1743,7 +1743,7 @@ Take a snapshot with given parameters.
 
 Parameters:
 
-* ``format``: ``str``. Image format from FreeImage.
+* ``format``: ``str``. Image format (extension without dot).
 * ``size``: ``list``. Image dimensions.
 
   * ``items``: ``int``

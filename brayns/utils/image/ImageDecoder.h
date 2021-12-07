@@ -21,14 +21,36 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <stdexcept>
+#include <string>
 
-#include <brayns/engine/Renderer.h>
+#include <brayns/utils/FileReader.h>
+
+#include "Image.h"
+#include "ImageCodecRegistry.h"
+#include "ImageFormat.h"
 
 namespace brayns
 {
-BRAYNS_NAMED_JSON_ADAPTER_BEGIN(Renderer::PickResult, "RendererPickResult")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("hit", hit, "Check if the position is picked")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
-BRAYNS_JSON_ADAPTER_END()
+class ImageDecoder
+{
+public:
+    static Image load(const std::string &filename)
+    {
+        auto format = ImageFormat::fromFilename(filename);
+        auto data = FileReader::read(filename);
+        return decode(data);
+    }
+
+    static Image decode(const std::string &data, const std::string &format)
+    {
+        auto &codec = ImageCodecRegistry::getCodec(format);
+        auto image = codec.decode(data.data(), data.size());
+        if (image.isEmpty())
+        {
+            throw std::runtime_error("Failed to decode '" + format + "'");
+        }
+        return image;
+    }
+};
 } // namespace brayns

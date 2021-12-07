@@ -18,10 +18,8 @@ RUN apt-get update \
    ninja-build \
    libarchive-dev \
    libassimp-dev \
-   libfreeimage-dev \
    libhdf5-serial-dev \
    libtbb-dev \
-   libturbojpeg0-dev \
    pkg-config \
    wget \
    ca-certificates \
@@ -140,10 +138,8 @@ RUN apt-get update \
    && apt-get -y --no-install-recommends install \
    libarchive13 \
    libassimp4 \
-   libfreeimage3 \
    libgomp1 \
    libhdf5-103 \
-   libturbojpeg0 \
    && apt-get clean \
    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

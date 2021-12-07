@@ -21,14 +21,42 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
-
-#include <brayns/engine/Renderer.h>
+#include <cstddef>
 
 namespace brayns
 {
-BRAYNS_NAMED_JSON_ADAPTER_BEGIN(Renderer::PickResult, "RendererPickResult")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("hit", hit, "Check if the position is picked")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
-BRAYNS_JSON_ADAPTER_END()
+struct ImageInfo
+{
+    size_t width = 0;
+    size_t height = 0;
+    size_t channelCount = 0;
+    size_t channelSize = 0;
+
+    size_t getSize() const { return getPixelCount() * getPixelSize(); }
+
+    size_t getRowCount() const { return height; }
+
+    size_t getRowSize() const { return width * getPixelSize(); }
+
+    size_t getRowOffset(size_t index) const { return index * getRowSize(); }
+
+    size_t getPixelCount() const { return width * height; }
+
+    size_t getPixelSize() const { return channelCount * channelSize; }
+
+    size_t getPixelIndex(size_t x, size_t y) const { return x + y * width; }
+
+    size_t getPixelOffset(size_t x, size_t y) const
+    {
+        return getPixelIndex(x, y) * getPixelSize();
+    }
+
+    bool isGrey() const { return channelCount == 1; }
+
+    bool isGreyAlpha() const { return channelCount == 2; }
+
+    bool isRgb() const { return channelCount == 3; }
+
+    bool isRgba() const { return channelCount == 4; }
+};
 } // namespace brayns

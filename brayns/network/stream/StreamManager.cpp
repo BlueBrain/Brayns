@@ -25,6 +25,8 @@
 
 #include <brayns/network/context/NetworkContext.h>
 
+#include <brayns/utils/image/ImageEncoder.h>
+
 namespace
 {
 using namespace brayns;
@@ -40,26 +42,18 @@ public:
         auto& manager = api.getParametersManager();
         auto& parameters = manager.getApplicationParameters();
         auto compression = parameters.getJpegCompression();
-        auto& generator = context.getImageGenerator();
-        const auto image =
-            generator.createJPEG(framebuffer.getColorBuffer(),
-                                 framebuffer.getFrameBufferFormat(),
-                                 framebuffer.getSize(), compression);
-        if (image.size == 0)
-        {
-            return;
-        }
-        _trySendImage(context, image);
+        auto image = framebuffer.getImage();
+        auto data = ImageEncoder::encode(image, "jpg", compression);
+        _trySendImage(context, data);
     }
 
 private:
-    static void _trySendImage(NetworkContext& context,
-                              const ImageGenerator::ImageJPEG& image)
+    static void _trySendImage(NetworkContext& context, const std::string& data)
     {
         auto& connections = context.getConnections();
         try
         {
-            connections.broadcast({image.data.get(), int(image.size)});
+            connections.broadcast({data.data(), int(data.size())});
         }
         catch (const ConnectionClosedException& e)
         {

@@ -25,7 +25,6 @@
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/Scene.h>
 
-#include <brayns/common/utils/ImageGenerator.h>
 #include <brayns/network/binary/BinaryRequestManager.h>
 #include <brayns/network/entrypoint/EntrypointManager.h>
 #include <brayns/network/socket/ConnectionManager.h>
@@ -99,13 +98,6 @@ public:
      */
     BinaryRequestManager& getBinary() { return _binary; }
 
-    /**
-     * @brief Image generator used by all entrypoints to create images.
-     *
-     * @return ImageGenerator& Common image generator.
-     */
-    ImageGenerator& getImageGenerator() { return _imageGenerator; }
-
 private:
     PluginAPI* _api;
     EntrypointManager _entrypoints;
@@ -113,6 +105,5 @@ private:
     StreamManager _stream;
     NetworkTaskManager _tasks;
     BinaryRequestManager _binary;
-    ImageGenerator _imageGenerator;
 };
 } // namespace brayns

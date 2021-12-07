@@ -20,7 +20,9 @@
 
 #include "FrameBuffer.h"
 
-#include <FreeImage.h>
+#include <brayns/common/Log.h>
+
+#include <brayns/utils/image/ImageFlipper.h>
 
 namespace brayns
 {
@@ -37,7 +39,6 @@ size_t FrameBuffer::getColorDepth() const
     switch (_frameBufferFormat)
     {
     case FrameBufferFormat::rgba_i8:
-    case FrameBufferFormat::bgra_i8:
     case FrameBufferFormat::rgb_f32:
         return 4;
     case FrameBufferFormat::rgb_i8:
@@ -47,23 +48,48 @@ size_t FrameBuffer::getColorDepth() const
     }
 }
 
-freeimage::ImagePtr FrameBuffer::getImage()
+Image FrameBuffer::getImage()
 {
     map();
+
     const auto colorBuffer = getColorBuffer();
     const auto& size = getSize();
 
-    freeimage::ImagePtr image(
-        FreeImage_ConvertFromRawBits(const_cast<uint8_t*>(colorBuffer), size.x,
-                                     size.y, getColorDepth() * size.x,
-                                     8 * getColorDepth(), 0xFF0000, 0x00FF00,
-                                     0x0000FF, false));
+    ImageInfo info;
+
+    info.width = size.x;
+    info.height = size.y;
+
+    switch (_frameBufferFormat)
+    {
+    case FrameBufferFormat::rgb_i8:
+    case FrameBufferFormat::rgb_f32:
+        info.channelCount = 3;
+    case FrameBufferFormat::rgba_i8:
+        info.channelCount = 4;
+    default:
+        Log::warn("Invalid framebuffer format: {}.", int(_frameBufferFormat));
+        return {};
+    }
+
+    switch (_frameBufferFormat)
+    {
+    case FrameBufferFormat::rgb_i8:
+    case FrameBufferFormat::rgb_f32:
+    case FrameBufferFormat::rgba_i8:
+        info.channelSize = 1;
+    default:
+        Log::warn("Invalid framebuffer format: {}.", int(_frameBufferFormat));
+        return {};
+    }
+
+    auto data = reinterpret_cast<const char*>(colorBuffer);
+    auto length = info.getSize();
+    Image image(info, {data, length});
+    ImageFlipper::flipVertically(image);
 
     unmap();
 
-#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_BGR
-    freeimage::SwapRedBlue32(image.get());
-#endif
     return image;
 }
 } // namespace brayns

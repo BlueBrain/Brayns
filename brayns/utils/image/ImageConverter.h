@@ -21,14 +21,38 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <cassert>
+#include <cstring>
 
-#include <brayns/engine/Renderer.h>
+#include "Image.h"
 
 namespace brayns
 {
-BRAYNS_NAMED_JSON_ADAPTER_BEGIN(Renderer::PickResult, "RendererPickResult")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("hit", hit, "Check if the position is picked")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
-BRAYNS_JSON_ADAPTER_END()
+class ImageConverter
+{
+public:
+    static Image convertToRgba(const Image &source)
+    {
+        auto channelCount = source.getChannelCount();
+        if (channelCount == 4)
+        {
+            return source;
+        }
+        assert(channelCount == 3);
+        auto info = source.getInfo();
+        info.channelCount = 4;
+        Image destination(info, char(-1));
+        auto pixelSize = source.getPixelSize();
+        for (size_t y = 0; y < info.height; ++y)
+        {
+            for (size_t x = 0; x < info.width; ++x)
+            {
+                auto from = source.getData(x, y);
+                auto to = destination.getData(x, y);
+                std::memcpy(to, from, pixelSize);
+            }
+        }
+        return destination;
+    }
+};
 } // namespace brayns

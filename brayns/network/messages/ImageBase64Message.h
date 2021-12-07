@@ -1,5 +1,7 @@
-/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,40 +21,11 @@
 
 #pragma once
 
-#include <memory>
-#include <vector>
-
-#include <FreeImage.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-namespace freeimage
-{
-struct ImageDeleter
-{
-    inline void operator()(FIBITMAP* image)
-    {
-        if (image)
-            FreeImage_Unload(image);
-    }
-};
-
-struct MemoryDeleter
-{
-    inline void operator()(FIMEMORY* memory)
-    {
-        if (memory)
-            FreeImage_CloseMemory(memory);
-    }
-};
-
-using ImagePtr = std::unique_ptr<FIBITMAP, ImageDeleter>;
-using MemoryPtr = std::unique_ptr<FIMEMORY, MemoryDeleter>;
-
-bool SwapRedBlue32(FIBITMAP* freeImage);
-std::string getBase64Image(ImagePtr image, const std::string& format,
-                           const int quality);
-ImagePtr mergeImages(const std::vector<ImagePtr>& images);
-
-} // namespace freeimage
+BRAYNS_JSON_OBJECT_BEGIN(ImageBase64Message)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, data, "Image data with base64 encoding")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

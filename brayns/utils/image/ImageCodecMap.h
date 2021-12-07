@@ -21,14 +21,39 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <cassert>
+#include <memory>
+#include <stdexcept>
+#include <unordered_map>
 
-#include <brayns/engine/Renderer.h>
+#include "ImageCodec.h"
 
 namespace brayns
 {
-BRAYNS_NAMED_JSON_ADAPTER_BEGIN(Renderer::PickResult, "RendererPickResult")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("hit", hit, "Check if the position is picked")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
-BRAYNS_JSON_ADAPTER_END()
+class ImageCodecMap
+{
+public:
+    ImageCodec *find(const std::string &format) const
+    {
+        auto i = _codecs.find(format);
+        return i == _codecs.end() ? nullptr : i->second.get();
+    }
+
+    void add(std::unique_ptr<ImageCodec> codec)
+    {
+        assert(codec);
+        auto format = codec->getFormat();
+        auto pair = _codecs.emplace(std::move(format), std::move(codec));
+        assert(pair.second);
+    }
+
+    template <typename T, typename... Args>
+    void add(Args &&... args)
+    {
+        add(std::make_unique<T>(std::forward<Args>(args)...));
+    }
+
+private:
+    std::unordered_map<std::string, std::unique_ptr<ImageCodec>> _codecs;
+};
 } // namespace brayns

@@ -21,14 +21,45 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include "codecs/JpegCodec.h"
+#include "codecs/PngCodec.h"
 
-#include <brayns/engine/Renderer.h>
+#include "ImageCodecMap.h"
 
 namespace brayns
 {
-BRAYNS_NAMED_JSON_ADAPTER_BEGIN(Renderer::PickResult, "RendererPickResult")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("hit", hit, "Check if the position is picked")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
-BRAYNS_JSON_ADAPTER_END()
+class ImageCodecRegistry
+{
+public:
+    static bool isSupported(const std::string &format)
+    {
+        auto &codecs = _getCodecs();
+        return codecs.find(format);
+    }
+
+    static const ImageCodec &getCodec(const std::string &format)
+    {
+        auto &codecs = _getCodecs();
+        auto codec = codecs.find(format);
+        if (!codec)
+        {
+            throw std::runtime_error("Format not supported: '" + format + "'");
+        }
+    }
+
+private:
+    static const ImageCodecMap &_getCodecs()
+    {
+        static const auto codecs = _createCodecs();
+        return codecs;
+    }
+
+    static ImageCodecMap _createCodecs()
+    {
+        ImageCodecMap codecs;
+        codecs.add<PngCodec>();
+        codecs.add<JpegCodec>();
+        return codecs;
+    }
+};
 } // namespace brayns

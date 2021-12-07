@@ -21,14 +21,15 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
-
-#include <brayns/engine/Renderer.h>
+#include <brayns/utils/image/Image.h>
 
 namespace brayns
 {
-BRAYNS_NAMED_JSON_ADAPTER_BEGIN(Renderer::PickResult, "RendererPickResult")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("hit", hit, "Check if the position is picked")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
-BRAYNS_JSON_ADAPTER_END()
+class StbiHelper
+{
+public:
+    static Image decode(const void *data, size_t size);
+    static std::string encodePng(const Image &image);
+    static std::string encodeJpeg(const Image &image, int quality);
+};
 } // namespace brayns
