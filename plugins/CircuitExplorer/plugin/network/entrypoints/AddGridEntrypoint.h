@@ -110,8 +110,9 @@ public:
 
             // Axis material properties
             brayns::PropertyMap diffuseProps;
-            diffuseProps.add({MATERIAL_PROPERTY_CAST_USER_DATA, false});
-            diffuseProps.add({MATERIAL_PROPERTY_SHADING_MODE,
+            diffuseProps.add(
+                {std::string(MATERIAL_PROPERTY_CAST_USER_DATA), false});
+            diffuseProps.add({std::string(MATERIAL_PROPERTY_SHADING_MODE),
                               static_cast<int>(MaterialShadingMode::diffuse)});
 
             // X

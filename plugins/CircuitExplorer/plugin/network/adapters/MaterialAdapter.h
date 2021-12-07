@@ -197,44 +197,44 @@ public:
 
     bool getSimulationDataCast() const
     {
-        return _valueOr(MATERIAL_PROPERTY_CAST_USER_DATA, false);
+        return _valueOr(std::string(MATERIAL_PROPERTY_CAST_USER_DATA), false);
     }
 
     void setSimulationDataCast(bool value) const
     {
-        _setValue(MATERIAL_PROPERTY_CAST_USER_DATA, value);
+        _setValue(std::string(MATERIAL_PROPERTY_CAST_USER_DATA), value);
     }
 
     MaterialShadingMode getShadingMode() const
     {
-        auto code = _valueOr(MATERIAL_PROPERTY_SHADING_MODE, 0);
+        auto code = _valueOr(std::string(MATERIAL_PROPERTY_SHADING_MODE), 0);
         return MaterialShadingMode(code);
     }
 
     void setShadingMode(MaterialShadingMode value) const
     {
-        _setValue(MATERIAL_PROPERTY_SHADING_MODE, int(value));
+        _setValue(std::string(MATERIAL_PROPERTY_SHADING_MODE), int(value));
     }
 
     MaterialClippingMode getClippingMode() const
     {
-        auto code = _valueOr(MATERIAL_PROPERTY_CLIPPING_MODE, 0);
+        auto code = _valueOr(std::string(MATERIAL_PROPERTY_CLIPPING_MODE), 0);
         return MaterialClippingMode(code);
     }
 
     void setClippingMode(MaterialClippingMode value) const
     {
-        _setValue(MATERIAL_PROPERTY_CLIPPING_MODE, int(value));
+        _setValue(std::string(MATERIAL_PROPERTY_CLIPPING_MODE), int(value));
     }
 
     double getUserParameter() const
     {
-        return _valueOr(MATERIAL_PROPERTY_USER_PARAMETER, 0.0);
+        return _valueOr(std::string(MATERIAL_PROPERTY_USER_PARAMETER), 0.0);
     }
 
     void setUserParameter(double value) const
     {
-        _setValue(MATERIAL_PROPERTY_USER_PARAMETER, value);
+        _setValue(std::string(MATERIAL_PROPERTY_USER_PARAMETER), value);
     }
 
 private:

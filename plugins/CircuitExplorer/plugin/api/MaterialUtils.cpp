@@ -39,7 +39,7 @@ size_t CircuitExplorerMaterial::createUnlit(brayns::Model& model,
     auto matPtr = model.createMaterial(matId, "", _getExtraAttributes());
     matPtr->setDiffuseColor(color);
     matPtr->setOpacity(opacity);
-    matPtr->updateProperty(MATERIAL_PROPERTY_SHADING_MODE,
+    matPtr->updateProperty(std::string(MATERIAL_PROPERTY_SHADING_MODE),
                            static_cast<int32_t>(MaterialShadingMode::none));
     return matId;
 }
@@ -59,9 +59,11 @@ void CircuitExplorerMaterial::setSimulationColorEnabled(brayns::Model& model,
 {
     for (auto& matEntry : model.getMaterials())
     {
-        if (!matEntry.second->hasProperty(MATERIAL_PROPERTY_CAST_USER_DATA))
+        if (!matEntry.second->hasProperty(
+                std::string(MATERIAL_PROPERTY_CAST_USER_DATA)))
             continue;
-        matEntry.second->updateProperty(MATERIAL_PROPERTY_CAST_USER_DATA,
+        matEntry.second->updateProperty(std::string(
+                                            MATERIAL_PROPERTY_CAST_USER_DATA),
                                         value);
         matEntry.second->markModified();
         matEntry.second->commit();
@@ -74,12 +76,12 @@ const brayns::PropertyMap&
     static brayns::PropertyMap extra;
     if (extra.empty())
     {
-        extra.add({MATERIAL_PROPERTY_CAST_USER_DATA, false});
-        extra.add({MATERIAL_PROPERTY_SHADING_MODE,
+        extra.add({std::string(MATERIAL_PROPERTY_CAST_USER_DATA), false});
+        extra.add({std::string(MATERIAL_PROPERTY_SHADING_MODE),
                    static_cast<int32_t>(MaterialShadingMode::diffuse)});
-        extra.add({MATERIAL_PROPERTY_CLIPPING_MODE,
+        extra.add({std::string(MATERIAL_PROPERTY_CLIPPING_MODE),
                    static_cast<int>(MaterialClippingMode::no_clipping)});
-        extra.add({MATERIAL_PROPERTY_USER_PARAMETER, 1.0});
+        extra.add({std::string(MATERIAL_PROPERTY_USER_PARAMETER), 1.0});
     }
     return extra;
 }
