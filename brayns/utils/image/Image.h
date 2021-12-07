@@ -72,20 +72,20 @@ public:
 
     void write(const void *data, size_t size, size_t x = 0, size_t y = 0)
     {
-        auto offset = _info.getPixelOffset(x, y);
-        assert(offset + size <= getSize());
         auto destination = getData(x, y);
         std::memcpy(destination, data, size);
     }
 
     const void *getData(size_t x = 0, size_t y = 0) const
     {
-        return _data.data() + _info.getPixelOffset(x, y);
+        auto offset = _info.getPixelOffset(x, y);
+        return &_data[offset];
     }
 
     void *getData(size_t x = 0, size_t y = 0)
     {
-        return &_data[0] + _info.getPixelOffset(x, y);
+        auto offset = _info.getPixelOffset(x, y);
+        return &_data[offset];
     }
 
 private:
