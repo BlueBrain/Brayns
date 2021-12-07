@@ -95,7 +95,7 @@ public:
         auto width = int(image.getWidth());
         auto height = int(image.getHeight());
         auto channelCount = int(image.getChannelCount());
-        assert(channelCount == 1);
+        assert(image.getChannelSize() == 1);
         auto data = image.getData();
         auto success =
             stbi_write_png_to_func(&StringBuilder::append, &context, width,
@@ -117,7 +117,7 @@ public:
         auto width = int(image.getWidth());
         auto height = int(image.getHeight());
         auto channelCount = int(image.getChannelCount());
-        assert(channelCount == 1);
+        assert(image.getChannelSize() == 1);
         auto data = image.getData();
         auto success =
             stbi_write_jpg_to_func(&StringBuilder::append, &context, width,

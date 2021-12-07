@@ -65,8 +65,10 @@ Image FrameBuffer::getImage()
     case FrameBufferFormat::rgb_i8:
     case FrameBufferFormat::rgb_f32:
         info.channelCount = 3;
+        break;
     case FrameBufferFormat::rgba_i8:
         info.channelCount = 4;
+        break;
     default:
         Log::warn("Invalid framebuffer format: {}.", int(_frameBufferFormat));
         return {};
@@ -78,6 +80,7 @@ Image FrameBuffer::getImage()
     case FrameBufferFormat::rgb_f32:
     case FrameBufferFormat::rgba_i8:
         info.channelSize = 1;
+        break;
     default:
         Log::warn("Invalid framebuffer format: {}.", int(_frameBufferFormat));
         return {};

@@ -38,7 +38,7 @@ public:
         : _info(info)
         , _data(std::move(data))
     {
-        assert(_info.getSize() == data.size());
+        assert(_info.getSize() == _data.size());
     }
 
     Image(const ImageInfo &info, char fillWith = '\0')
