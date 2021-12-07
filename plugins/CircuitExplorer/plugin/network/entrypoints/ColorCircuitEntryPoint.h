@@ -123,8 +123,7 @@ private:
 };
 
 class AvailableColorMethodsEntrypoint
-    : public brayns::Entrypoint<ColoredCircuitID,
-                                AvailableColorMethodsMessage>
+    : public brayns::Entrypoint<ColoredCircuitID, AvailableColorMethodsMessage>
 {
 public:
     AvailableColorMethodsEntrypoint(CircuitColorManager& manager)
@@ -147,8 +146,8 @@ public:
     {
         auto params = request.getParams();
         auto& scene = getApi().getScene();
-        const auto& descriptor = brayns::ExtractModel::fromId(scene,
-                                                              params.model_id);
+        const auto& descriptor =
+            brayns::ExtractModel::fromId(scene, params.model_id);
         try
         {
             request.reply({_manager.getAvailableMethods(descriptor)});
