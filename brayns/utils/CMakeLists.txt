@@ -12,7 +12,6 @@ set(BRAYNSUTILS_HEADERS
   image/Image.h
   image/ImageCodecRegistry.h
   image/ImageCodec.h
-  image/ImageConverter.h
   image/ImageDecoder.h
   image/ImageEncoder.h
   image/ImageFlipper.h

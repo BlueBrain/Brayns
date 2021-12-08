@@ -41,7 +41,7 @@ public:
         std::string data;
         data.resize(size);
         stream.seekg(0);
-        stream.read(data.data(), size);
+        stream.read(&data[0], size);
         return data;
     }
 };

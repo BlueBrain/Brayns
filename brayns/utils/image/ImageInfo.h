@@ -58,5 +58,14 @@ struct ImageInfo
     bool isRgb() const { return channelCount == 3; }
 
     bool isRgba() const { return channelCount == 4; }
+
+    bool operator==(const ImageInfo &other) const
+    {
+        return width == other.width && height == other.height &&
+               channelCount == other.channelCount &&
+               channelSize == other.channelSize;
+    }
+
+    bool operator!=(const ImageInfo &other) const { return !(*this == other); }
 };
 } // namespace brayns

@@ -18,8 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PDiffHelpers.h"
-
 #include <brayns/Brayns.h>
 #include <brayns/common/scene/ClipPlane.h>
 #include <brayns/engine/Camera.h>
@@ -28,6 +26,8 @@
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
+
+#include "ImageValidator.h"
 
 class Demo
 {
@@ -70,23 +70,23 @@ void testClipping(brayns::Brayns& brayns, bool orthographic = false)
     else
         camera.setCurrentType("perspective");
     brayns.commitAndRender();
-    CHECK(compareTestImage(original, engine.getFrameBuffer()));
+    CHECK(ImageValidator::validate(engine, original));
 
     auto id1 = scene.addClipPlane({1.0, 0.0, 0.0, -0.5});
     auto id2 = scene.addClipPlane({0.0, -1.0, 0.0, 0.5});
     brayns.commitAndRender();
-    CHECK(compareTestImage(clipped, engine.getFrameBuffer()));
+    CHECK(ImageValidator::validate(engine, clipped));
 
     scene.removeClipPlane(id1);
     scene.removeClipPlane(id2);
     brayns.commitAndRender();
-    CHECK(compareTestImage(original, engine.getFrameBuffer()));
+    CHECK(ImageValidator::validate(engine, original));
 
     id1 = scene.addClipPlane({1.0, 0.0, 0.0, -0.5});
     id2 = scene.addClipPlane({0.0, 1.0, 0.0, 0.5});
     scene.getClipPlane(id2)->setPlane({0.0, -1.0, 0.0, 0.5});
     brayns.commitAndRender();
-    CHECK(compareTestImage(clipped, engine.getFrameBuffer()));
+    CHECK(ImageValidator::validate(engine, clipped));
 
     scene.removeClipPlane(id1);
     scene.removeClipPlane(id2);

@@ -30,24 +30,26 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
-#include "PDiffHelpers.h"
+#include "ImageValidator.h"
 
 TEST_CASE("render_two_frames_and_compare_they_are_same")
 {
     const char* argv[] = {"testImages", "--disable-accumulation", "demo"};
     const int argc = sizeof(argv) / sizeof(char*);
+
     brayns::Brayns brayns(argc, argv);
+    auto& engine = brayns.getEngine();
+    auto& framebuffer = engine.getFrameBuffer();
 
     brayns.commitAndRender();
-    const auto oldImage =
-        createPDiffRGBAImage(brayns.getEngine().getFrameBuffer());
+    auto oldImage = framebuffer.getImage();
 
-    brayns.getEngine().getFrameBuffer().clear();
+    framebuffer.clear();
+
     brayns.commitAndRender();
-    const auto newImage =
-        createPDiffRGBAImage(brayns.getEngine().getFrameBuffer());
+    auto newImage = framebuffer.getImage();
 
-    CHECK(pdiff::yee_compare(*oldImage, *newImage));
+    CHECK(ImageValidator::validate(oldImage, newImage));
 }
 
 TEST_CASE("render_xyz_and_compare")
@@ -57,20 +59,20 @@ TEST_CASE("render_xyz_and_compare")
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
-    brayns.commitAndRender();
-    CHECK(compareTestImage("testdataMonkey.png",
-                           brayns.getEngine().getFrameBuffer()));
+    auto& engine = brayns.getEngine();
 
-    auto model = brayns.getEngine().getScene().getModel(0);
+    brayns.commitAndRender();
+    CHECK(ImageValidator::validate(engine, "testdataMonkey.png"));
+
+    auto model = engine.getScene().getModel(0);
     auto props = model->getProperties();
     props.update("radius", props["radius"].as<double>() / 2.);
     model->setProperties(props);
 
-    brayns.getEngine().getScene().markModified();
+    engine.getScene().markModified();
 
     brayns.commitAndRender();
-    CHECK(compareTestImage("testdataMonkey_smaller.png",
-                           brayns.getEngine().getFrameBuffer()));
+    CHECK(ImageValidator::validate(engine, "testdataMonkey_smaller.png"));
 }
 
 TEST_CASE("render_protein_and_compare")
@@ -80,9 +82,10 @@ TEST_CASE("render_protein_and_compare")
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
+    auto& engine = brayns.getEngine();
+
     brayns.commitAndRender();
-    CHECK(compareTestImage("testdataProtein.png",
-                           brayns.getEngine().getFrameBuffer()));
+    CHECK(ImageValidator::validate(engine, "testdataProtein.png"));
 }
 
 TEST_CASE("render_protein_in_stereo_and_compare")
@@ -92,11 +95,14 @@ TEST_CASE("render_protein_in_stereo_and_compare")
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
+    auto& engine = brayns.getEngine();
+    auto& framebuffers = engine.getFrameBuffers();
+
     brayns.commitAndRender();
-    CHECK(compareTestImage("testdataProtein_left_eye.png",
-                           *brayns.getEngine().getFrameBuffers()[0]));
-    CHECK(compareTestImage("testdataProtein_right_eye.png",
-                           *brayns.getEngine().getFrameBuffers()[1]));
+    CHECK(ImageValidator::validate(*framebuffers[0],
+                                   "testdataProtein_left_eye.png"));
+    CHECK(ImageValidator::validate(*framebuffers[1],
+                                   "testdataProtein_right_eye.png"));
 }
 
 TEST_CASE("render_ply_and_compare")
@@ -106,7 +112,8 @@ TEST_CASE("render_ply_and_compare")
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
+    auto& engine = brayns.getEngine();
+
     brayns.commitAndRender();
-    CHECK(compareTestImage("testdataLucy.png",
-                           brayns.getEngine().getFrameBuffer()));
+    CHECK(ImageValidator::validate(engine, "testdataLucy.png"));
 }

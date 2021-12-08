@@ -39,7 +39,7 @@ public:
     {
         auto format = ImageFormat::fromFilename(filename);
         auto data = FileReader::read(filename);
-        return decode(data);
+        return decode(data, format);
     }
 
     static Image decode(const std::string &data, const std::string &format)

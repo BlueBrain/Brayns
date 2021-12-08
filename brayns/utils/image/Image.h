@@ -88,6 +88,13 @@ public:
         return &_data[offset];
     }
 
+    bool operator==(const Image &other) const
+    {
+        return _info == other._info && _data == other._data;
+    }
+
+    bool operator!=(const Image &other) const { return !(*this == other); }
+
 private:
     ImageInfo _info;
     std::string _data;
