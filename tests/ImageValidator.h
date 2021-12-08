@@ -59,6 +59,7 @@ public:
         {
             std::cout << "Image does not match '" << filename << "'\n";
         }
+        return same;
     }
 
     static bool validate(const brayns::Image &image,
