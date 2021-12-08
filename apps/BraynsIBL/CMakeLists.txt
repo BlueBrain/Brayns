@@ -30,12 +30,12 @@ target_include_directories(braynsIBL PRIVATE
 
 target_link_libraries(braynsIBL PRIVATE
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${FREEIMAGE_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
     ${OPENGL_opengl_LIBRARY}
-    GLEW
+    GLEW #${GLEW_LIBRARIES}
     glfw
     glm
-    braynsUtils
 )
 
 install(TARGETS braynsIBL
