@@ -29,6 +29,8 @@ foreach(TEST ${TEST_LIST})
     set(TEST_NAME "braynstest_${TEST_NAME}")
 
     add_executable(${TEST_NAME} ${TEST})
+    
+    target_compile_options(${TEST_NAME} PRIVATE ${BRAYNS_COMPILE_OPTIONS})
 
     set(TEST_TARGET_LIST ${TEST_TARGET_LIST} ${TEST_NAME})
 
