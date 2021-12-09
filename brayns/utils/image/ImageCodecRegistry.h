@@ -63,6 +63,7 @@ public:
         {
             throw std::runtime_error("Format not supported: '" + format + "'");
         }
+        return *codec;
     }
 
 private:
