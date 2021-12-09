@@ -30,15 +30,30 @@
 
 namespace brayns
 {
+/**
+ * @brief Helper class to store codecs.
+ *
+ */
 class ImageCodecMap
 {
 public:
+    /**
+     * @brief Find a codec for the given format.
+     *
+     * @param format Image format.
+     * @return ImageCodec* Corresponding codec or null if not supported.
+     */
     ImageCodec *find(const std::string &format) const
     {
         auto i = _codecs.find(format);
         return i == _codecs.end() ? nullptr : i->second.get();
     }
 
+    /**
+     * @brief Add a codec.
+     *
+     * @param codec Image codec.
+     */
     void add(std::unique_ptr<ImageCodec> codec)
     {
         assert(codec);
@@ -47,6 +62,13 @@ public:
         assert(pair.second);
     }
 
+    /**
+     * @brief Shortcut to add a codec.
+     *
+     * @tparam T Codec type.
+     * @tparam Args Codec constructor arguments types.
+     * @param args Codec constructor arguments.
+     */
     template <typename T, typename... Args>
     void add(Args &&... args)
     {

@@ -27,17 +27,40 @@
 
 namespace brayns
 {
+/**
+ * @brief Encode and decode PNG images.
+ *
+ */
 class PngCodec : public ImageCodec
 {
 public:
+    /**
+     * @brief Return the format ID of PNG ("png").
+     *
+     * @return std::string PNG format ID.
+     */
     virtual std::string getFormat() const override { return "png"; }
 
+    /**
+     * @brief Encode an image as PNG.
+     *
+     * @param image Image to encode.
+     * @param quality Not used as PNG is lossless.
+     * @return std::string PNG data that can be saved directly.
+     */
     virtual std::string encode(const Image &image, int quality) const override
     {
         (void)quality;
         return StbiHelper::encodePng(image);
     }
 
+    /**
+     * @brief Decode raw PNG data.
+     *
+     * @param data PNG data (ex: file content).
+     * @param size Size of data in bytes.
+     * @return Image Decoded image.
+     */
     virtual Image decode(const void *data, size_t size) const override
     {
         return StbiHelper::decode(data, size);

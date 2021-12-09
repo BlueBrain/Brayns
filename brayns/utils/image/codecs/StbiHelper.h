@@ -25,11 +25,47 @@
 
 namespace brayns
 {
+/**
+ * @brief Helper class to build and use STB image.
+ *
+ * Only supports 8bit channels images.
+ */
 class StbiHelper
 {
 public:
+    /**
+     * @brief Decode byte array of encoded image and return the image.
+     *
+     * The byte array is the raw encoded image (ex: PNG file content).
+     *
+     * The format is deduced from the data directly.
+     *
+     * @param data Raw encoded image data.
+     * @param size Size of data in bytes.
+     * @return Image Decoded image.
+     */
     static Image decode(const void *data, size_t size);
+
+    /**
+     * @brief Encode an image as PNG.
+     *
+     * The resulting PNG data can be written directly to the file.
+     *
+     * @param image Image to encode.
+     * @return std::string Image PNG data.
+     */
     static std::string encodePng(const Image &image);
+
+    /**
+     * @brief Encode an image as JPEG.
+     *
+     * The resulting JPEG data can be written directly to the file.
+     *
+     * Alpha channel is discared.
+     *
+     * @param image Image to encode.
+     * @return std::string Image JPEG data.
+     */
     static std::string encodeJpeg(const Image &image, int quality);
 };
 } // namespace brayns

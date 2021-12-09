@@ -32,9 +32,20 @@
 
 namespace brayns
 {
+/**
+ * @brief Used to decode images from files or memory.
+ *
+ */
 class ImageDecoder
 {
 public:
+    /**
+     * @brief Load an image from given file.
+     *
+     * @param filename Image file path.
+     * @return Image Decoded image.
+     * @throw std::runtime_error Format not supported or corrupted.
+     */
     static Image load(const std::string &filename)
     {
         auto format = ImageFormat::fromFilename(filename);
@@ -42,6 +53,14 @@ public:
         return decode(data, format);
     }
 
+    /**
+     * @brief Decode the raw file data encoded with given format.
+     *
+     * @param data Image encoded data.
+     * @param format Image encoding format.
+     * @return Image Decoded image.
+     * @throw std::runtime_error Format not supported or corrupted.
+     */
     static Image decode(const std::string &data, const std::string &format)
     {
         auto &codec = ImageCodecRegistry::getCodec(format);

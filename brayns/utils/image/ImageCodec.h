@@ -28,13 +28,42 @@
 
 namespace brayns
 {
+/**
+ * @brief Abstract encoder / decoder to encode and decode image files.
+ *
+ */
 class ImageCodec
 {
 public:
     virtual ~ImageCodec() = default;
 
+    /**
+     * @brief Get the code of the image format (extension without dot).
+     *
+     * @return std::string Code of the supported format.
+     */
     virtual std::string getFormat() const = 0;
+
+    /**
+     * @brief Encode the given image.
+     *
+     * Return an empty string if errors.
+     *
+     * @param image Image to encode.
+     * @param quality Quality of the encoding if required (JPEG).
+     * @return std::string Encoded image data.
+     */
     virtual std::string encode(const Image &image, int quality) const = 0;
+
+    /**
+     * @brief Decode the given bytes.
+     *
+     * Return an empty image if errors.
+     *
+     * @param data Bytes to decode.
+     * @param size Size of data.
+     * @return Image Decoded image.
+     */
     virtual Image decode(const void *data, size_t size) const = 0;
 };
 } // namespace brayns

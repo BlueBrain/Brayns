@@ -28,9 +28,18 @@
 
 namespace brayns
 {
+/**
+ * @brief Helper class to flip an image.
+ *
+ */
 class ImageFlipper
 {
 public:
+    /**
+     * @brief Flip the given image vertically (first row become last row).
+     *
+     * @param image Image to flip.
+     */
     static void flipVertically(Image &image)
     {
         auto height = image.getHeight();

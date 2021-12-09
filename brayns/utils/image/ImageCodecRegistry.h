@@ -28,15 +28,33 @@
 
 namespace brayns
 {
+/**
+ * @brief Static class to store image codecs of supported formats.
+ *
+ */
 class ImageCodecRegistry
 {
 public:
+    /**
+     * @brief Check if a format is supported.
+     *
+     * @param format Image format.
+     * @return true Supported.
+     * @return false Not supported.
+     */
     static bool isSupported(const std::string &format)
     {
         auto &codecs = _getCodecs();
         return codecs.find(format);
     }
 
+    /**
+     * @brief Get codec to handle the given format.
+     *
+     * @param format Image format.
+     * @return const ImageCodec& Image codec supporting format.
+     * @throw std::runtime_error Format not supported.
+     */
     static const ImageCodec &getCodec(const std::string &format)
     {
         auto &codecs = _getCodecs();

@@ -30,9 +30,22 @@
 
 namespace brayns
 {
+/**
+ * @brief Class to merge a list of images.
+ *
+ */
 class ImageMerger
 {
 public:
+    /**
+     * @brief Merge images horizontally.
+     *
+     * Images should have the same height, channel count and channel size.
+     *
+     * @param images Images to merge.
+     * @return Image Image containing all images side-by-side.
+     * @throw std::runtime_error Incompatible images.
+     */
     static Image merge(const std::vector<Image> &images)
     {
         auto info = _combineInfo(images);

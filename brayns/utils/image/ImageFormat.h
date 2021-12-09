@@ -27,15 +27,37 @@
 
 namespace brayns
 {
+/**
+ * @brief Helper class to get the ID of an image encoding.
+ *
+ * The image format ID is the file extension without the dot.
+ *
+ */
 class ImageFormat
 {
 public:
+    /**
+     * @brief Extract the image format from the given file path.
+     *
+     * Basically take the extension without the dot.
+     *
+     * @param filename Path containing info about image format.
+     * @return std::string Image format ID.
+     */
     static std::string fromFilename(const std::string &filename)
     {
         auto extension = fs::path(filename).extension();
         return fromExtension(extension.string());
     }
 
+    /**
+     * @brief Extract the image format from the given file extension.
+     *
+     * Basically remove the dot if present.
+     *
+     * @param filename Extension with or without the dot.
+     * @return std::string Image format ID.
+     */
     static std::string fromExtension(const std::string &extension)
     {
         if (extension.empty() || extension[0] != '.')
