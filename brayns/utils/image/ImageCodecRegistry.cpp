@@ -21,14 +21,45 @@
 
 #include "ImageCodecRegistry.h"
 
+#include <memory>
+#include <unordered_map>
+
 #include "codecs/JpegCodec.h"
 #include "codecs/PngCodec.h"
-
-#include "ImageCodecMap.h"
 
 namespace
 {
 using namespace brayns;
+
+class ImageCodecMap
+{
+public:
+    ImageCodec *find(const std::string &format) const
+    {
+        auto i = _codecs.find(format);
+        return i == _codecs.end() ? nullptr : i->second.get();
+    }
+
+    void add(std::unique_ptr<ImageCodec> codec)
+    {
+        assert(codec);
+        auto format = codec->getFormat();
+        auto pair = _codecs.emplace(std::move(format), std::move(codec));
+        if (!pair.second)
+        {
+            throw std::runtime_error("Too many codecs for '" + format + "'");
+        }
+    }
+
+    template <typename T, typename... Args>
+    void add(Args &&... args)
+    {
+        add(std::make_unique<T>(std::forward<Args>(args)...));
+    }
+
+private:
+    std::unordered_map<std::string, std::unique_ptr<ImageCodec>> _codecs;
+};
 
 class ImageCodecStorage
 {
