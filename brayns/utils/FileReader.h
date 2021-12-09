@@ -35,7 +35,7 @@ public:
         std::ifstream stream(filename, std::ios::ate);
         if (!stream.is_open())
         {
-            throw std::runtime_error("Cannot read '" + filename + "'");
+            throw std::runtime_error("Cannot read file '" + filename + "'");
         }
         auto size = stream.tellg();
         std::string data;

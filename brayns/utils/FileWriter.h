@@ -35,7 +35,7 @@ public:
         std::ofstream stream(filename);
         if (!stream.is_open())
         {
-            throw std::runtime_error("Cannot write '" + filename + "'");
+            throw std::runtime_error("Cannot write file '" + filename + "'");
         }
         stream.write(data.data(), data.size());
     }

@@ -25,6 +25,8 @@
 #include <iostream>
 #include <string>
 
+#include <tests/paths.h>
+
 #include <brayns/engine/Engine.h>
 #include <brayns/utils/image/Image.h>
 #include <brayns/utils/image/ImageDecoder.h>
@@ -49,11 +51,12 @@ public:
     static bool validate(const brayns::Image &image,
                          const std::string &filename)
     {
+        auto path = BRAYNS_TESTDATA_IMAGES_PATH + filename;
         if (_shouldSaveTestImages())
         {
-            brayns::ImageEncoder::save(image, filename);
+            brayns::ImageEncoder::save(image, path);
         }
-        auto reference = brayns::ImageDecoder::load(filename);
+        auto reference = brayns::ImageDecoder::load(path);
         auto same = validate(image, reference);
         if (!same)
         {
@@ -71,6 +74,6 @@ public:
 private:
     static bool _shouldSaveTestImages()
     {
-        return std::getenv("BRAYNS_SAVE_TEST_IMAGES");
+        return std::getenv("BRAYNS_GENERATE_TEST_IMAGES");
     }
 };
