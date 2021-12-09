@@ -19,39 +19,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ImageFlipper.h"
 
-#include <stdexcept>
-#include <string>
-
-#include "Image.h"
+#include <cstring>
+#include <utility>
 
 namespace brayns
 {
-/**
- * @brief Used to decode images from files or memory.
- *
- */
-class ImageDecoder
+void ImageFlipper::flipVertically(Image &image)
 {
-public:
-    /**
-     * @brief Load an image from given file.
-     *
-     * @param filename Image file path.
-     * @return Image Decoded image.
-     * @throw std::runtime_error Format not supported or corrupted.
-     */
-    static Image load(const std::string &filename);
-
-    /**
-     * @brief Decode the raw file data encoded with given format.
-     *
-     * @param data Image encoded data.
-     * @param format Image encoding format.
-     * @return Image Decoded image.
-     * @throw std::runtime_error Format not supported or corrupted.
-     */
-    static Image decode(const std::string &data, const std::string &format);
-};
+    auto height = image.getHeight();
+    auto rowSize = image.getRowSize();
+    auto data = static_cast<uint8_t *>(image.getData());
+    uint8_t buffer[2048];
+    for (size_t i = 0; i < height / 2; ++i)
+    {
+        auto row0 = data + i * rowSize;
+        auto row1 = data + (height - i - 1) * rowSize;
+        auto remainder = rowSize;
+        while (remainder)
+        {
+            auto size = std::min(remainder, sizeof(buffer));
+            std::memcpy(buffer, row0, size);
+            std::memcpy(row0, row1, size);
+            std::memcpy(row1, buffer, size);
+            row0 += size;
+            row1 += size;
+            remainder -= size;
+        }
+    }
+}
 } // namespace brayns

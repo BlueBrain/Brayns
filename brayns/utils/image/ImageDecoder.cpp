@@ -19,39 +19,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ImageDecoder.h"
 
-#include <stdexcept>
-#include <string>
+#include <brayns/utils/FileReader.h>
 
-#include "Image.h"
+#include "ImageCodecRegistry.h"
+#include "ImageFormat.h"
 
 namespace brayns
 {
-/**
- * @brief Used to decode images from files or memory.
- *
- */
-class ImageDecoder
+Image ImageDecoder::load(const std::string &filename)
 {
-public:
-    /**
-     * @brief Load an image from given file.
-     *
-     * @param filename Image file path.
-     * @return Image Decoded image.
-     * @throw std::runtime_error Format not supported or corrupted.
-     */
-    static Image load(const std::string &filename);
+    auto format = ImageFormat::fromFilename(filename);
+    auto data = FileReader::read(filename);
+    return decode(data, format);
+}
 
-    /**
-     * @brief Decode the raw file data encoded with given format.
-     *
-     * @param data Image encoded data.
-     * @param format Image encoding format.
-     * @return Image Decoded image.
-     * @throw std::runtime_error Format not supported or corrupted.
-     */
-    static Image decode(const std::string &data, const std::string &format);
-};
+Image ImageDecoder::decode(const std::string &data, const std::string &format)
+{
+    auto &codec = ImageCodecRegistry::getCodec(format);
+    auto image = codec.decode(data.data(), data.size());
+    if (image.isEmpty())
+    {
+        throw std::runtime_error("Failed to decode '" + format + "'");
+    }
+    return image;
+}
 } // namespace brayns

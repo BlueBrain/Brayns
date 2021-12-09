@@ -21,10 +21,15 @@ set(BRAYNSUTILS_HEADERS
   StringUtils.h
 )
   
-  set(BRAYNSUTILS_SOURCES
+set(BRAYNSUTILS_SOURCES
   base64/base64.cpp
   DynamicLib.cpp
   image/codecs/StbiHelper.cpp
+  image/ImageCodecRegistry.cpp
+  image/ImageDecoder.cpp
+  image/ImageEncoder.cpp
+  image/ImageFlipper.cpp
+  image/ImageMerger.cpp
   StringUtils.cpp
 )
 

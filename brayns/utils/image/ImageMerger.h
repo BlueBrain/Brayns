@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <cassert>
-#include <cstring>
 #include <stdexcept>
 #include <vector>
 
@@ -46,51 +44,6 @@ public:
      * @return Image Image containing all images side-by-side.
      * @throw std::runtime_error Incompatible images.
      */
-    static Image merge(const std::vector<Image> &images)
-    {
-        auto info = _combineInfo(images);
-        Image result(info);
-        size_t x = 0;
-        for (const auto &image : images)
-        {
-            result.write(image, x);
-            x += image.getWidth();
-        }
-        return result;
-    }
-
-private:
-    static ImageInfo _combineInfo(const std::vector<Image> &images)
-    {
-        if (images.empty())
-        {
-            return {};
-        }
-        auto info = images[0].getInfo();
-        for (size_t i = 1; i < images.size(); ++i)
-        {
-            _add(images[i], info);
-        }
-        return info;
-    }
-
-    static void _add(const Image &image, ImageInfo &info)
-    {
-        info.width += image.getWidth();
-        if (image.getHeight() != info.height)
-        {
-            throw std::runtime_error("All images must have the same height");
-        }
-        if (image.getChannelCount() != info.channelCount)
-        {
-            throw std::runtime_error(
-                "All images must have the same channel count");
-        }
-        if (image.getChannelSize() != info.channelSize)
-        {
-            throw std::runtime_error(
-                "All images must have the same channel size");
-        }
-    }
+    static Image merge(const std::vector<Image> &images);
 };
 } // namespace brayns

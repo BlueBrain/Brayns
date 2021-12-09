@@ -21,9 +21,6 @@
 
 #pragma once
 
-#include <cstring>
-#include <utility>
-
 #include "Image.h"
 
 namespace brayns
@@ -36,32 +33,10 @@ class ImageFlipper
 {
 public:
     /**
-     * @brief Flip the given image vertically (first row become last row).
+     * @brief Flip the given image vertically (first row becomes last row).
      *
      * @param image Image to flip.
      */
-    static void flipVertically(Image &image)
-    {
-        auto height = image.getHeight();
-        auto rowSize = image.getRowSize();
-        auto data = static_cast<uint8_t *>(image.getData());
-        uint8_t buffer[2048];
-        for (size_t i = 0; i < height / 2; ++i)
-        {
-            auto row0 = data + i * rowSize;
-            auto row1 = data + (height - i - 1) * rowSize;
-            auto remainder = rowSize;
-            while (remainder)
-            {
-                auto size = std::min(remainder, sizeof(buffer));
-                std::memcpy(buffer, row0, size);
-                std::memcpy(row0, row1, size);
-                std::memcpy(row1, buffer, size);
-                row0 += size;
-                row1 += size;
-                remainder -= size;
-            }
-        }
-    }
+    static void flipVertically(Image &image);
 };
 } // namespace brayns

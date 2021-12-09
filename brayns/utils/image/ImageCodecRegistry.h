@@ -21,10 +21,9 @@
 
 #pragma once
 
-#include "codecs/JpegCodec.h"
-#include "codecs/PngCodec.h"
+#include <string>
 
-#include "ImageCodecMap.h"
+#include "ImageCodec.h"
 
 namespace brayns
 {
@@ -42,11 +41,7 @@ public:
      * @return true Supported.
      * @return false Not supported.
      */
-    static bool isSupported(const std::string &format)
-    {
-        auto &codecs = _getCodecs();
-        return codecs.find(format);
-    }
+    static bool isSupported(const std::string &format);
 
     /**
      * @brief Get codec to handle the given format.
@@ -55,30 +50,6 @@ public:
      * @return const ImageCodec& Image codec supporting format.
      * @throw std::runtime_error Format not supported.
      */
-    static const ImageCodec &getCodec(const std::string &format)
-    {
-        auto &codecs = _getCodecs();
-        auto codec = codecs.find(format);
-        if (!codec)
-        {
-            throw std::runtime_error("Format not supported: '" + format + "'");
-        }
-        return *codec;
-    }
-
-private:
-    static const ImageCodecMap &_getCodecs()
-    {
-        static const auto codecs = _createCodecs();
-        return codecs;
-    }
-
-    static ImageCodecMap _createCodecs()
-    {
-        ImageCodecMap codecs;
-        codecs.add<PngCodec>();
-        codecs.add<JpegCodec>();
-        return codecs;
-    }
+    static const ImageCodec &getCodec(const std::string &format);
 };
 } // namespace brayns

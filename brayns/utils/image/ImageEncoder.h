@@ -24,12 +24,7 @@
 #include <stdexcept>
 #include <string>
 
-#include <brayns/utils/FileWriter.h>
-#include <brayns/utils/base64/base64.h>
-
 #include "Image.h"
-#include "ImageCodecRegistry.h"
-#include "ImageFormat.h"
 
 namespace brayns
 {
@@ -49,12 +44,7 @@ public:
      * @throw std::runtime_error Invalid format, path or image.
      */
     static void save(const Image &image, const std::string &filename,
-                     int quality = 0)
-    {
-        auto format = ImageFormat::fromFilename(filename);
-        auto data = encode(image, format, quality);
-        FileWriter::write(data, filename);
-    }
+                     int quality = 0);
 
     /**
      * @brief Encode the image with given format.
@@ -66,16 +56,7 @@ public:
      * @throw std::runtime_error Invalid format or image.
      */
     static std::string encode(const Image &image, const std::string &format,
-                              int quality = 0)
-    {
-        auto &codec = ImageCodecRegistry::getCodec(format);
-        auto data = codec.encode(image, quality);
-        if (data.empty())
-        {
-            throw std::runtime_error("Failed to encode to '" + format + "'");
-        }
-        return data;
-    }
+                              int quality = 0);
 
     /**
      * @brief Encode the image with given format and then to base64.
@@ -88,12 +69,6 @@ public:
      */
     static std::string encodeToBase64(const Image &image,
                                       const std::string &format,
-                                      int quality = 0)
-    {
-        auto data = encode(image, format, quality);
-        auto bytes = reinterpret_cast<const unsigned char *>(data.data());
-        auto size = data.size();
-        return base64_encode(bytes, size);
-    }
+                                      int quality = 0);
 };
 } // namespace brayns
