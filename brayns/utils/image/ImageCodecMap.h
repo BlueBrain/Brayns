@@ -53,13 +53,17 @@ public:
      * @brief Add a codec.
      *
      * @param codec Image codec.
+     * @throw std::runtime_error Another codec is registered for this format.
      */
     void add(std::unique_ptr<ImageCodec> codec)
     {
         assert(codec);
         auto format = codec->getFormat();
         auto pair = _codecs.emplace(std::move(format), std::move(codec));
-        assert(pair.second);
+        if (!pair.second)
+        {
+            throw std::runtime_error("Too many codecs for '" + format + "'");
+        }
     }
 
     /**
