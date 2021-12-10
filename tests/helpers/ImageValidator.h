@@ -53,24 +53,25 @@ public:
     static bool validate(const brayns::Image &image,
                          const std::string &filename)
     {
+        std::cout << "Validation of image '" << filename << "'.\n";
         auto path = BRAYNS_TESTDATA_IMAGES_PATH + filename;
         _saveIfNeeded(image, path);
         auto reference = brayns::ImageDecoder::load(path);
-        auto same = validate(image, reference);
-        if (!same)
-        {
-            std::cout << "Image does not match '" << filename << "'\n";
-        }
-        return same;
+        return validate(image, reference);
     }
 
     static bool validate(const brayns::Image &image,
                          const brayns::Image &reference)
     {
-        return image == reference;
+        auto evaluation = _evaluate(image, reference);
+        std::cout << "Evaluation result: " << evaluation << ".\n";
+        std::cout << "Evaluation threshold: " << _threshold << ".\n";
+        return evaluation < _threshold;
     }
 
 private:
+    static constexpr double _threshold = 1.0;
+
     static void _saveIfNeeded(const brayns::Image &image,
                               const std::string &path)
     {
@@ -102,5 +103,24 @@ private:
         auto data = static_cast<const char *>(image.getData());
         auto size = image.getSize();
         stream.write(data, size);
+    }
+
+    static double _evaluate(const brayns::Image &image,
+                            const brayns::Image &reference)
+    {
+        auto imageSize = image.getSize();
+        auto referenceSize = reference.getSize();
+        if (imageSize != referenceSize)
+        {
+            return false;
+        }
+        auto imageData = static_cast<const uint8_t *>(image.getData());
+        auto referenceData = static_cast<const uint8_t *>(reference.getData());
+        size_t diff = 0;
+        for (size_t i = 0; i < imageSize; ++i)
+        {
+            diff += std::abs(int(imageData[i]) - int(referenceData[i]));
+        }
+        return double(diff) / double(imageSize);
     }
 };

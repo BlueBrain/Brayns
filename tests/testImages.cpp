@@ -30,7 +30,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
-#include "ImageValidator.h"
+#include "helpers/ImageValidator.h"
 
 TEST_CASE("render_two_frames_and_compare_they_are_same")
 {
