@@ -22,12 +22,14 @@
 #pragma once
 
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <string>
 
 #include <tests/paths.h>
 
 #include <brayns/engine/Engine.h>
+#include <brayns/utils/Filesystem.h>
 #include <brayns/utils/image/Image.h>
 #include <brayns/utils/image/ImageDecoder.h>
 #include <brayns/utils/image/ImageEncoder.h>
@@ -52,10 +54,7 @@ public:
                          const std::string &filename)
     {
         auto path = BRAYNS_TESTDATA_IMAGES_PATH + filename;
-        if (_shouldSaveTestImages())
-        {
-            brayns::ImageEncoder::save(image, path);
-        }
+        _saveIfNeeded(image, path);
         auto reference = brayns::ImageDecoder::load(path);
         auto same = validate(image, reference);
         if (!same)
@@ -72,8 +71,36 @@ public:
     }
 
 private:
-    static bool _shouldSaveTestImages()
+    static void _saveIfNeeded(const brayns::Image &image,
+                              const std::string &path)
     {
-        return std::getenv("BRAYNS_GENERATE_TEST_IMAGES");
+        if (_isSavePngEnabled())
+        {
+            brayns::ImageEncoder::save(image, path);
+        }
+        if (_isSaveRawEnabled())
+        {
+            _saveRaw(image, path);
+        }
+    }
+
+    static bool _isSavePngEnabled()
+    {
+        return std::getenv("BRAYNS_TEST_SAVE_PNG");
+    }
+
+    static bool _isSaveRawEnabled()
+    {
+        return std::getenv("BRAYNS_TEST_SAVE_RAW");
+    }
+
+    static void _saveRaw(const brayns::Image &image, const std::string &path)
+    {
+        fs::path modifiedPath(path);
+        modifiedPath.replace_extension(".txt");
+        std::ofstream stream(modifiedPath);
+        auto data = static_cast<const char *>(image.getData());
+        auto size = image.getSize();
+        stream.write(data, size);
     }
 };
