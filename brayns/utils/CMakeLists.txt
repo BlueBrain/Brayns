@@ -39,6 +39,8 @@ target_include_directories(braynsUtils PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
   $<INSTALL_INTERFACE:include>)
 
+target_link_libraries(braynsUtils PRIVATE stb)
+
 # Needed to allow DynamicLib class to find the engine and plugins libraries
 set_target_properties(braynsUtils PROPERTIES BUILD_RPATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 

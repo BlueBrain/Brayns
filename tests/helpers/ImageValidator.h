@@ -116,11 +116,11 @@ private:
         }
         auto imageData = static_cast<const uint8_t *>(image.getData());
         auto referenceData = static_cast<const uint8_t *>(reference.getData());
-        size_t diff = 0;
+        size_t errorSum = 0;
         for (size_t i = 0; i < imageSize; ++i)
         {
-            diff += std::abs(int(imageData[i]) - int(referenceData[i]));
+            errorSum += std::abs(int(imageData[i]) - int(referenceData[i]));
         }
-        return double(diff) / double(imageSize);
+        return double(errorSum) / double(imageSize);
     }
 };

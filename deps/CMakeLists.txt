@@ -132,3 +132,9 @@ if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/stb")
     )
     FetchContent_Populate(stb)
 endif()
+
+add_library(stb INTERFACE)
+
+target_include_directories(stb INTERFACE
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/stb>"
+    "$<INSTALL_INTERFACE:include>")
