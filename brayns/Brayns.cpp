@@ -38,11 +38,6 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
-#include <brayns/io/loaders/MeshLoader.h>
-#include <brayns/io/loaders/ProteinLoader.h>
-#include <brayns/io/loaders/VolumeLoader.h>
-#include <brayns/io/loaders/XYZBLoader.h>
-
 #include <brayns/network/interface/ActionInterface.h>
 
 #include <brayns/pluginapi/PluginAPI.h>
