@@ -22,18 +22,14 @@
 
 #include "Errors.h"
 
-#include <brayns/engine/Camera.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/FrameBuffer.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
-
 namespace brayns
 {
 const float TOTAL_PROGRESS = 100.f;
 
-LoadModelFunctor::LoadModelFunctor(Engine& engine, const ModelParams& params)
+LoadModelFunctor::LoadModelFunctor(Engine& engine, LoaderRegistry& registry,
+                                   const ModelParams& params)
     : _engine(engine)
+    , _registry(registry)
     , _params(params)
 {
 }
@@ -67,14 +63,30 @@ std::vector<ModelDescriptorPtr> LoadModelFunctor::_performLoad(
 std::vector<ModelDescriptorPtr> LoadModelFunctor::_loadData(
     Blob&& blob, const ModelParams& params)
 {
-    return _engine.getScene().loadModels(std::move(blob), params,
-                                         {_getProgressFunc()});
+    const auto& loader =
+        _registry.getSuitableLoader("", blob.type, params.getLoaderName());
+    auto models =
+        loader.loadFromBlob(std::move(blob), {_getProgressFunc()},
+                            params.getLoadParameters(), _engine.getScene());
+
+    _engine.getScene().addModels(models, params);
+
+    return models;
 }
 
 std::vector<ModelDescriptorPtr> LoadModelFunctor::_loadData(
     const std::string& path, const ModelParams& params)
 {
-    return _engine.getScene().loadModels(path, params, {_getProgressFunc()});
+    const auto& loader =
+        _registry.getSuitableLoader(path, "", params.getLoaderName());
+
+    auto models =
+        loader.loadFromFile(path, {_getProgressFunc()},
+                            params.getLoadParameters(), _engine.getScene());
+
+    _engine.getScene().addModels(models, params);
+
+    return models;
 }
 
 void LoadModelFunctor::_updateProgress(const std::string& message,

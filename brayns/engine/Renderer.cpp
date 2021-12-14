@@ -18,8 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/common/types.h>
-
 #include "Renderer.h"
 
 namespace brayns

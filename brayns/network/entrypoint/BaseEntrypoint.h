@@ -104,7 +104,10 @@ public:
      *
      * @param plugin Parent plugin name.
      */
-    virtual void setPlugin(const std::string& plugin) { _plugin = plugin; }
+    virtual void setPlugin(const std::string& plugin) override
+    {
+        _plugin = plugin;
+    }
 
     /**
      * @brief Store the network context reference inside instance.

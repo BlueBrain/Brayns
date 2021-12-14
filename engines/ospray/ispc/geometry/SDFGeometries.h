@@ -21,7 +21,6 @@
 #pragma once
 
 #include "ospray/SDK/geometry/Geometry.h"
-#include <brayns/common/types.h>
 
 namespace ospray
 {

@@ -19,7 +19,8 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
+#include <cstdint>
+#include <string>
 #include <vector>
 
 namespace brayns

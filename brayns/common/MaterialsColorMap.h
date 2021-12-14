@@ -20,15 +20,14 @@
 
 #pragma once
 
-#include <brayns/common/adapters/DataTypeAdapter.h>
-#include <brayns/common/types.h>
-#include <brayns/json/JsonObjectMacro.h>
-
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(RawVolumeLoaderParameters)
-BRAYNS_JSON_OBJECT_ENTRY(Vector3i, dimensions, "Volume grid size (x,y,z)")
-BRAYNS_JSON_OBJECT_ENTRY(Vector3d, spacing, "Volume grid cell spacing")
-BRAYNS_JSON_OBJECT_ENTRY(DataType, type, "Volume byte data type")
-BRAYNS_JSON_OBJECT_END()
-} // namespace brayns
+enum class MaterialsColorMap
+{
+    random,         // Random materials including transparency, reflection,
+                    // and light emission
+    shades_of_grey, // 255 shades of grey
+    gradient,       // Gradient from blue to yellow through green
+    pastel          // Random pastel colors
+};
+}

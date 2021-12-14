@@ -20,42 +20,30 @@
 
 #pragma once
 
-#include "AbstractParameters.h"
-
-#include <brayns/common/types.h>
+#include <brayns/io/Loader.h>
+#include <brayns/io/loaders/ProteinLoaderParameters.h>
 
 namespace brayns
 {
-/** Manages geometry parameters
+/** Loads protein from PDB files
+ * http://www.rcsb.org
  */
-class GeometryParameters : public AbstractParameters
+class ProteinLoader : public Loader<ProteinLoaderParameters>
 {
 public:
-    /**
-       Parse the command line parameters and populates according class members
-     */
-    GeometryParameters();
+    std::vector<std::string> getSupportedExtensions() const final;
 
-    /** @copydoc AbstractParameters::print */
-    void print() final;
+    std::string getName() const final;
 
-    /**
-     * Defines what memory mode should be used between Brayns and the
-     * underlying renderer
-     */
-    MemoryMode getMemoryMode() const { return _memoryMode; };
-    const std::set<BVHFlag>& getDefaultBVHFlags() const
+    std::vector<ModelDescriptorPtr> importFromFile(
+        const std::string& fileName, const LoaderProgress& callback,
+        const ProteinLoaderParameters& properties, Scene& scene) const final;
+
+    std::vector<ModelDescriptorPtr> importFromBlob(
+        Blob&&, const LoaderProgress&, const ProteinLoaderParameters&,
+        Scene&) const final
     {
-        return _defaultBVHFlags;
+        throw std::runtime_error("Loading from blob not supported");
     }
-
-protected:
-    void parse(const po::variables_map& vm) final;
-
-    // Scene
-    std::set<BVHFlag> _defaultBVHFlags;
-
-    // System parameters
-    MemoryMode _memoryMode{MemoryMode::shared};
 };
 } // namespace brayns

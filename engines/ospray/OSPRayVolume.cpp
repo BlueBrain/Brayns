@@ -20,13 +20,13 @@
 
 #include "OSPRayVolume.h"
 
-#include <brayns/parameters/VolumeParameters.h>
 #include <engines/ospray/utils.h>
 
 namespace brayns
 {
 OSPRayVolume::OSPRayVolume(const Vector3ui& dimensions, const Vector3f& spacing,
-                           const DataType type, const VolumeParameters& params,
+                           const VolumeDataType type,
+                           const VolumeParameters& params,
                            OSPTransferFunction transferFunction,
                            const std::string& volumeType)
     : Volume(dimensions, spacing, type)
@@ -38,34 +38,34 @@ OSPRayVolume::OSPRayVolume(const Vector3ui& dimensions, const Vector3f& spacing,
 
     switch (type)
     {
-    case DataType::FLOAT:
+    case VolumeDataType::FLOAT:
         osphelper::set(_volume, "voxelType", "float");
         _ospType = OSP_FLOAT;
         _dataSize = 4;
         break;
-    case DataType::DOUBLE:
+    case VolumeDataType::DOUBLE:
         osphelper::set(_volume, "voxelType", "double");
         _ospType = OSP_DOUBLE;
         _dataSize = 8;
         break;
-    case DataType::UINT8:
+    case VolumeDataType::UINT8:
         osphelper::set(_volume, "voxelType", "uchar");
         _ospType = OSP_UINT;
         _dataSize = 1;
         break;
-    case DataType::UINT16:
+    case VolumeDataType::UINT16:
         osphelper::set(_volume, "voxelType", "ushort");
         _ospType = OSP_UINT2;
         _dataSize = 2;
         break;
-    case DataType::INT16:
+    case VolumeDataType::INT16:
         osphelper::set(_volume, "voxelType", "short");
         _ospType = OSP_INT2;
         _dataSize = 2;
         break;
-    case DataType::UINT32:
-    case DataType::INT8:
-    case DataType::INT32:
+    case VolumeDataType::UINT32:
+    case VolumeDataType::INT8:
+    case VolumeDataType::INT32:
         throw std::runtime_error("Unsupported voxel type " +
                                  std::to_string(int(type)));
     }
@@ -80,7 +80,7 @@ OSPRayVolume::~OSPRayVolume()
 
 OSPRayBrickedVolume::OSPRayBrickedVolume(const Vector3ui& dimensions,
                                          const Vector3f& spacing,
-                                         const DataType type,
+                                         const VolumeDataType type,
                                          const VolumeParameters& params,
                                          OSPTransferFunction transferFunction)
     : Volume(dimensions, spacing, type)
@@ -91,8 +91,9 @@ OSPRayBrickedVolume::OSPRayBrickedVolume(const Vector3ui& dimensions,
 }
 
 OSPRaySharedDataVolume::OSPRaySharedDataVolume(
-    const Vector3ui& dimensions, const Vector3f& spacing, const DataType type,
-    const VolumeParameters& params, OSPTransferFunction transferFunction)
+    const Vector3ui& dimensions, const Vector3f& spacing,
+    const VolumeDataType type, const VolumeParameters& params,
+    OSPTransferFunction transferFunction)
     : Volume(dimensions, spacing, type)
     , SharedDataVolume(dimensions, spacing, type)
     , OSPRayVolume(dimensions, spacing, type, params, transferFunction,

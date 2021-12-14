@@ -88,23 +88,6 @@ TEST_CASE("render_protein_and_compare")
     CHECK(ImageValidator::validate(engine, "testdataProtein.png"));
 }
 
-TEST_CASE("render_protein_in_stereo_and_compare")
-{
-    const char* argv[] = {"testImages", BRAYNS_TESTDATA_MODEL_PDB_PATH,
-                          "--disable-accumulation", "--stereo"};
-    const int argc = sizeof(argv) / sizeof(char*);
-
-    brayns::Brayns brayns(argc, argv);
-    auto& engine = brayns.getEngine();
-    auto& framebuffers = engine.getFrameBuffers();
-
-    brayns.commitAndRender();
-    CHECK(ImageValidator::validate(*framebuffers[0],
-                                   "testdataProtein_left_eye.png"));
-    CHECK(ImageValidator::validate(*framebuffers[1],
-                                   "testdataProtein_right_eye.png"));
-}
-
 TEST_CASE("render_ply_and_compare")
 {
     const auto path = BRAYNS_TESTDATA_MODEL_LUCY_PATH;

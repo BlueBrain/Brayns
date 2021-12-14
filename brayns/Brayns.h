@@ -21,7 +21,10 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/io/LoaderRegistry.h>
+#include <brayns/network/interface/ActionInterface.h>
+#include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
 {
@@ -61,21 +64,6 @@ public:
      */
     Brayns(int argc, const char** argv);
     ~Brayns();
-
-    /** @name Simple execution API  */
-    //@{
-    /**
-     * Renders color and depth buffers of the current scene, according to
-     * specified parameters.
-     *
-     * Combines commit() and render() together in a synchronized fashion.
-     *
-     * @param renderInput Rendering parameters such as the position of the
-     *        camera and according model and projection matrices
-     * @param renderOutput Color and depth buffers
-     */
-    void commitAndRender(const RenderInput& renderInput,
-                         RenderOutput& renderOutput);
 
     /**
      * Renders color and depth buffers of the current scene, according to
@@ -131,6 +119,12 @@ public:
      * @return The parameter manager
      */
     ParametersManager& getParametersManager();
+
+    /**
+     * @brief getLoaderRegistry gives access to the loaders registry
+     * @return LoaderRegistry&
+     */
+    LoaderRegistry& getLoaderRegistry();
 
     /**
      * @brief Get the registered network interface.

@@ -137,7 +137,7 @@ private:
         auto& api = context.getApi();
         auto& engine = api.getEngine();
         auto& framebuffer = engine.getFrameBuffer();
-        if (framebuffer.getFrameBufferFormat() == FrameBufferFormat::none)
+        if (framebuffer.getFrameBufferFormat() == PixelFormat::NONE)
         {
             return false;
         }

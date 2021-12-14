@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/common/light/Light.h>
+#include <brayns/engine/Light.h>
 #include <brayns/json/JsonObjectMacro.h>
 #include <brayns/network/adapters/LightAdapter.h>
 

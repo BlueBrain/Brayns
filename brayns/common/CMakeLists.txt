@@ -5,50 +5,50 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSCOMMON_SOURCES
-  propertymap/ConversionRegistry.cpp
-  light/Light.cpp
-  loader/LoaderRegistry.cpp
-  material/Texture2D.cpp
-  scene/ClipPlane.cpp
-  simulation/AbstractSimulationHandler.cpp
-  transferFunction/TransferFunction.cpp
-  Timer.cpp
+    Timer.cpp
+    material/Texture2D.cpp
+    propertymap/ConversionRegistry.cpp
+    scene/ClipPlane.cpp
+    simulation/AbstractSimulationHandler.cpp
+    transferFunction/TransferFunction.cpp
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
-  adapters/PropertyMapAdapter.h
-  BaseObject.h
-  Progress.h
-  propertymap/Any.h
-  propertymap/Converter.h
-  propertymap/ConversionRegistry.h
-  propertymap/EnumProperty.h
-  propertymap/PropertyMap.h
-  PropertyObject.h
-  Statistics.h
-  Timer.h
-  Transformation.h
-  geometry/CommonDefines.h
-  geometry/Cone.h
-  geometry/Cylinder.h
-  geometry/SDFGeometry.h
-  geometry/SDFBezier.h
-  geometry/Sphere.h
-  geometry/Streamline.h
-  geometry/TriangleMesh.h
-  light/Light.h
-  loader/Loader.h
-  loader/LoaderRegistry.h
-  Log.h
-  material/Texture2D.h
-  mathTypes.h
-  scene/ClipPlane.h
-  simulation/AbstractSimulationHandler.h
-  tasks/Task.h
-  tasks/TaskFunctor.h
-  tasks/TaskRuntimeError.h
-  transferFunction/TransferFunction.h
-  types.h
+    BaseObject.h
+    Blob.h
+    DefaultMaterialIds.h
+    Log.h
+    MaterialsColorMap.h
+    MathTypes.h
+    PixelFormat.h
+    Progress.h
+    PropertyObject.h
+    Statistics.h
+    TextureType.h
+    Timer.h
+    Transformation.h
+    VolumeDataType.h
+    adapters/PropertyMapAdapter.h
+    adapters/VolumeDataTypeAdapter.h
+    geometry/CommonDefines.h
+    geometry/Cone.h
+    geometry/Cylinder.h
+    geometry/SDFGeometry.h
+    geometry/Sphere.h
+    geometry/Streamline.h
+    geometry/TriangleMesh.h
+    material/Texture2D.h
+    propertymap/Any.h
+    propertymap/Converter.h
+    propertymap/ConversionRegistry.h
+    propertymap/EnumProperty.h
+    propertymap/PropertyMap.h
+    scene/ClipPlane.h
+    simulation/AbstractSimulationHandler.h
+    tasks/Task.h
+    tasks/TaskFunctor.h
+    tasks/TaskRuntimeError.h
+    transferFunction/TransferFunction.h
 )
 
 add_library(braynsCommon SHARED ${BRAYNSCOMMON_PUBLIC_HEADERS} ${BRAYNSCOMMON_SOURCES})

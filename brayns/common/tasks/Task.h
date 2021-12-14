@@ -22,7 +22,6 @@
 
 #include <brayns/common/Progress.h>
 #include <brayns/common/tasks/TaskFunctor.h>
-#include <brayns/common/types.h>
 
 namespace brayns
 {

@@ -20,7 +20,6 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/common/types.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
@@ -58,8 +57,8 @@ TEST_CASE("streamlines")
         {
             for (size_t row = 0; row < 3; ++row)
             {
-                brayns::Vector3fs vertices;
-                brayns::Vector4fs vertexColors;
+                std::vector<brayns::Vector3f> vertices;
+                std::vector<brayns::Vector4f> vertexColors;
                 std::vector<float> radii;
 
                 const auto offset =

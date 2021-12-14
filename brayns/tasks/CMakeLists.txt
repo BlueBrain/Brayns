@@ -24,7 +24,7 @@ target_include_directories(braynsTasks PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
   $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(braynsTasks PUBLIC braynsCommon braynsEngine)
+target_link_libraries(braynsTasks PUBLIC braynsCommon braynsEngine braynsIO)
 
 target_compile_options(braynsTasks PRIVATE ${BRAYNS_COMPILE_OPTIONS})
 

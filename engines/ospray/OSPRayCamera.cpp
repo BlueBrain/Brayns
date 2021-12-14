@@ -69,7 +69,7 @@ void OSPRayCamera::commit()
     ospCommit(_camera);
 }
 
-void OSPRayCamera::setClipPlanes(const Planes& planes)
+void OSPRayCamera::setClipPlanes(const std::vector<Plane>& planes)
 {
     if (_clipPlanes == planes)
         return;

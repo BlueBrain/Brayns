@@ -19,7 +19,7 @@
  */
 
 #if __cplusplus
-#include <brayns/common/types.h>
+#include <brayns/common/MathTypes.h>
 #define VEC3_TYPE brayns::Vector3f
 #define UINT64_T uint64_t
 #endif

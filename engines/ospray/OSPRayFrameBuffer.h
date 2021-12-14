@@ -31,7 +31,7 @@ class OSPRayFrameBuffer : public FrameBuffer
 {
 public:
     OSPRayFrameBuffer(const std::string& name, const Vector2ui& frameSize,
-                      const FrameBufferFormat frameBufferFormat);
+                      const PixelFormat frameBufferFormat);
     ~OSPRayFrameBuffer();
 
     void clear() final;
@@ -39,7 +39,7 @@ public:
     void map() final;
     void unmap() final;
     void setAccumulation(const bool accumulation) final;
-    void setFormat(FrameBufferFormat frameBufferFormat) final;
+    void setFormat(PixelFormat frameBufferFormat) final;
     void setSubsampling(const size_t) final;
     Vector2ui getSize() const final
     {

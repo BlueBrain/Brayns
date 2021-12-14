@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/loader/Loader.h>
 #include <brayns/common/propertymap/PropertyMap.h>
+#include <brayns/io/Loader.h>
 
 #include <set>
 
@@ -41,6 +41,8 @@ struct LoaderInfo
 class LoaderRegistry
 {
 public:
+    LoaderRegistry();
+
     /** Register the given loader. */
     void registerLoader(std::unique_ptr<AbstractLoader> loader);
 

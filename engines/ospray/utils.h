@@ -20,7 +20,9 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
+#include <brayns/common/PropertyObject.h>
+#include <brayns/common/Transformation.h>
+
 #include <ospray/SDK/common/Managed.h>
 #include <ospray/SDK/common/OSPCommon.h>
 

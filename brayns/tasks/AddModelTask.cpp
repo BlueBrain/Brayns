@@ -23,16 +23,11 @@
 #include "Errors.h"
 #include "LoadModelFunctor.h"
 
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
-
 namespace brayns
 {
-AddModelTask::AddModelTask(const ModelParams& modelParams, Engine& engine)
+AddModelTask::AddModelTask(const ModelParams& modelParams, Engine& engine,
+                           LoaderRegistry& registry)
 {
-    const auto& registry = engine.getScene().getLoaderRegistry();
-
     // pre-check for validity of given paths
     const auto& path = modelParams.getPath();
     if (path.empty())
@@ -41,7 +36,7 @@ AddModelTask::AddModelTask(const ModelParams& modelParams, Engine& engine)
     if (!registry.isSupportedFile(path))
         throw UNSUPPORTED_TYPE;
 
-    LoadModelFunctor functor{engine, modelParams};
+    LoadModelFunctor functor{engine, registry, modelParams};
     functor.setCancelToken(_cancelToken);
     functor.setProgressFunc(
         [& progress = progress](const auto& msg, auto, auto amount) {

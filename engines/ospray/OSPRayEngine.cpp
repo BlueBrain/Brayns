@@ -20,6 +20,7 @@
 
 #include "OSPRayEngine.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #include "OSPRayCamera.h"
@@ -67,26 +68,10 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
         Log::error("Error during ospInit(): {}.", e.what());
     }
 
-    for (const auto& module : ap.getOsprayModules())
-    {
-        try
-        {
-            const auto error = ospLoadModule(module.c_str());
-            if (error != OSP_NO_ERROR)
-                throw std::runtime_error(
-                    ospDeviceGetLastErrorMsg(ospGetCurrentDevice()));
-        }
-        catch (const std::exception& e)
-        {
-            Log::error("Error while loading module {}: {}", module, e.what());
-        }
-    }
-
     _createRenderers();
 
     _scene = std::make_shared<OSPRayScene>(
         _parametersManager.getAnimationParameters(),
-        _parametersManager.getGeometryParameters(),
         _parametersManager.getVolumeParameters());
 
     _createCameras();
@@ -168,18 +153,16 @@ void OSPRayEngine::_createRenderers()
 
 FrameBufferPtr OSPRayEngine::createFrameBuffer(
     const std::string& name, const Vector2ui& frameSize,
-    const FrameBufferFormat frameBufferFormat) const
+    const PixelFormat frameBufferFormat) const
 {
     return std::make_shared<OSPRayFrameBuffer>(name, frameSize,
                                                frameBufferFormat);
 }
 
 ScenePtr OSPRayEngine::createScene(AnimationParameters& animationParameters,
-                                   GeometryParameters& geometryParameters,
                                    VolumeParameters& volumeParameters) const
 {
-    return std::make_shared<OSPRayScene>(animationParameters,
-                                         geometryParameters, volumeParameters);
+    return std::make_shared<OSPRayScene>(animationParameters, volumeParameters);
 }
 
 CameraPtr OSPRayEngine::createCamera() const
@@ -199,10 +182,6 @@ void OSPRayEngine::_createCameras()
 {
     _camera = std::make_shared<OSPRayCamera>();
 
-    const bool isStereo =
-        _parametersManager.getApplicationParameters().isStereo();
-    Property stereoProperty{"stereo", isStereo, {"Stereo"}};
-    stereoProperty.setReadOnly(true);
     Property fovy{"fovy", 45., {"Field of view"}};
     Property aspect{"aspect", 1., {"Aspect ratio"}};
     aspect.setReadOnly(true);
@@ -217,11 +196,6 @@ void OSPRayEngine::_createCameras()
         properties.add(aspect);
         properties.add({"apertureRadius", 0., {"Aperture radius"}});
         properties.add({"focusDistance", 1., {"Focus Distance"}});
-        if (isStereo)
-        {
-            properties.add(stereoProperty);
-            properties.add(eyeSeparation);
-        }
         properties.add(enableClippingPlanes);
         addCameraType("perspective", properties);
     }
@@ -237,23 +211,12 @@ void OSPRayEngine::_createCameras()
         properties.add(fovy);
         properties.add(aspect);
         properties.add(enableClippingPlanes);
-        if (isStereo)
-        {
-            properties.add(stereoProperty);
-            properties.add(eyeSeparation);
-            properties.add({"zeroParallaxPlane", 1., {"Zero parallax plane"}});
-        }
         addCameraType("perspectiveParallax", properties);
     }
     {
         PropertyMap properties;
         properties.add(enableClippingPlanes);
         properties.add({"half", true, {"Half sphere"}});
-        if (isStereo)
-        {
-            properties.add(stereoProperty);
-            properties.add(eyeSeparation);
-        }
         addCameraType("panoramic", properties);
     }
     {

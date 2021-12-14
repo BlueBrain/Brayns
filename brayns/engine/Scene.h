@@ -21,10 +21,13 @@
 #pragma once
 
 #include <brayns/common/BaseObject.h>
-#include <brayns/common/loader/LoaderRegistry.h>
+#include <brayns/common/MaterialsColorMap.h>
+#include <brayns/common/scene/ClipPlane.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
-#include <brayns/common/types.h>
 #include <brayns/engine/LightManager.h>
+#include <brayns/engine/Model.h>
+#include <brayns/parameters/AnimationParameters.h>
+#include <brayns/parameters/VolumeParameters.h>
 
 #include <shared_mutex>
 
@@ -65,7 +68,6 @@ public:
      * light sources.
      */
     Scene(AnimationParameters& animationParameters,
-          GeometryParameters& geometryParameters,
           VolumeParameters& volumeParameters);
 
     /**
@@ -113,7 +115,10 @@ public:
 
     ModelDescriptorPtr getModel(const size_t id) const;
 
-    const ModelDescriptors& getModels() const { return _modelDescriptors; }
+    const std::vector<ModelDescriptorPtr>& getModels() const
+    {
+        return _modelDescriptors;
+    }
 
     /**
         Builds a default scene made of a Cornell box, a reflective cube, and
@@ -144,7 +149,10 @@ public:
     /**
        @return the clip planes
     */
-    const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
+    const std::vector<ClipPlanePtr>& getClipPlanes() const
+    {
+        return _clipPlanes;
+    }
     /** @return the current size in bytes of the loaded geometry. */
     size_t getSizeInBytes() const;
 
@@ -169,33 +177,18 @@ public:
     }
 
     /**
-     * Load the model from the given blob.
+     * Adds the list of models to the scene
      *
-     * @param blob the blob containing the data to import
+     * @param input list of models to add to the scene
      * @param params Parameters for the model to be loaded
-     * @param cb the callback for progress updates from the loader
-     * @return the model that has been added to the scene
+     * @throws std::runtime_error if any of the models being added is not
+     * correct
      */
-    std::vector<ModelDescriptorPtr> loadModels(Blob&& blob,
-                                               const ModelParams& params,
-                                               LoaderProgress cb);
-
-    /**
-     * Load the model from the given file.
-     *
-     * @param path the file or folder containing the data to import
-     * @param params Parameters for the model to be loaded
-     * @param cb the callback for progress updates from the loader
-     * @return the model that has been added to the scene
-     */
-    std::vector<ModelDescriptorPtr> loadModels(const std::string& path,
-                                               const ModelParams& params,
-                                               LoaderProgress cb);
+    void addModels(std::vector<ModelDescriptorPtr>& input,
+                   const ModelParams& params);
 
     void visitModels(const std::function<void(Model&)>& functor);
 
-    /** @return the registry for all supported loaders of this scene. */
-    LoaderRegistry& getLoaderRegistry() { return _loaderRegistry; }
     /** @internal */
     auto acquireReadAccess() const
     {
@@ -207,14 +200,6 @@ public:
 
     virtual void copyFromImpl(const Scene&) {}
 
-private:
-    /**
-     * @brief _processNewModels Check and add (if checks pass) the models from
-     * the input list to the scene.
-     */
-    void _processNewModels(const ModelParams& params,
-                           std::vector<ModelDescriptorPtr>& models);
-
 protected:
     /** @return True if this scene supports scene updates from any thread. */
     virtual bool supportsConcurrentSceneUpdates() const { return false; }
@@ -222,7 +207,6 @@ protected:
     void _updateAnimationParameters();
 
     AnimationParameters& _animationParameters;
-    GeometryParameters& _geometryParameters;
     VolumeParameters& _volumeParameters;
     MaterialPtr _backgroundMaterial;
 
@@ -230,15 +214,17 @@ protected:
 
     // Model
     size_t _modelID{0};
-    ModelDescriptors _modelDescriptors;
+    std::vector<ModelDescriptorPtr> _modelDescriptors;
     mutable std::shared_timed_mutex _modelMutex;
 
     std::unordered_map<size_t, ModelDescriptorPtr> _markedForReplacement;
 
     LightManager _lightManager;
-    ClipPlanes _clipPlanes;
+    std::vector<ClipPlanePtr> _clipPlanes;
 
-    LoaderRegistry _loaderRegistry;
     Boxd _bounds;
 };
+
+using ScenePtr = std::shared_ptr<Scene>;
+
 } // namespace brayns

@@ -1,9 +1,10 @@
 #ifndef DTI_TYPES_H
 #define DTI_TYPES_H
 
+#include <brayns/common/MathTypes.h>
 #include <brayns/common/Transformation.h>
-#include <brayns/common/mathTypes.h>
-#include <brayns/common/types.h>
+
+#include <map>
 #include <string>
 
 using Matrix3f = glm::mat<3, 3, float>;
@@ -25,7 +26,7 @@ struct DTIConfiguration
 
 using Point = brayns::Vector3f;
 using Points = std::vector<Point>;
-using Colors = brayns::Vector4fs;
+using Colors = std::vector<brayns::Vector4f>;
 using Streamlines = std::map<uint64_t, Points>;
 using Indices = std::vector<size_t>;
 using Vertices = std::vector<float>;

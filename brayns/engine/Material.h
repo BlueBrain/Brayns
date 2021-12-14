@@ -20,9 +20,10 @@
 
 #pragma once
 
+#include <brayns/common/MathTypes.h>
 #include <brayns/common/PropertyObject.h>
-#include <brayns/common/mathTypes.h>
-#include <brayns/common/types.h>
+
+#include <memory>
 
 namespace brayns
 {
@@ -84,4 +85,7 @@ protected:
     double _emission{0.};
     double _glossiness{1.};
 };
+
+using MaterialPtr = std::shared_ptr<Material>;
+
 } // namespace brayns

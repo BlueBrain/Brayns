@@ -22,13 +22,13 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
+#include <brayns/common/VolumeDataType.h>
 #include <brayns/json/adapters/EnumAdapter.h>
 
 namespace brayns
 {
 template <>
-struct JsonAdapter<DataType> : EnumAdapter<DataType>
+struct JsonAdapter<VolumeDataType> : EnumAdapter<VolumeDataType>
 {
 };
 } // namespace brayns

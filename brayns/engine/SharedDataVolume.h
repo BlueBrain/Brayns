@@ -20,7 +20,10 @@
 
 #pragma once
 
+#include <brayns/common/VolumeDataType.h>
 #include <brayns/engine/Volume.h>
+
+#include <memory>
 
 namespace brayns
 {
@@ -41,12 +44,12 @@ public:
      * setVoxels().
      */
     void mapData(const std::string& filename);
-    void mapData(const uint8_ts& buffer);
-    void mapData(uint8_ts&& buffer);
+    void mapData(const std::vector<uint8_t>& buffer);
+    void mapData(std::vector<uint8_t>&& buffer);
 
 protected:
     SharedDataVolume(const Vector3ui& dimensions, const Vector3f& spacing,
-                     const DataType type)
+                     const VolumeDataType type)
         : Volume(dimensions, spacing, type)
     {
     }
@@ -54,9 +57,11 @@ protected:
     ~SharedDataVolume();
 
 private:
-    uint8_ts _memoryBuffer;
+    std::vector<uint8_t> _memoryBuffer;
     void* _memoryMapPtr{nullptr};
     int _cacheFileDescriptor{-1};
     size_t _size{0};
 };
+
+using SharedDataVolumePtr = std::shared_ptr<SharedDataVolume>;
 } // namespace brayns

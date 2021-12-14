@@ -20,30 +20,22 @@
 
 #pragma once
 
-#include <brayns/common/loader/Loader.h>
-#include <brayns/io/ProteinLoaderParameters.h>
+#include <brayns/io/Loader.h>
 
 namespace brayns
 {
-/** Loads protein from PDB files
- * http://www.rcsb.org
- */
-class ProteinLoader : public Loader<ProteinLoaderParameters>
+class XYZBLoader : public NoInputLoader
 {
 public:
     std::vector<std::string> getSupportedExtensions() const final;
 
     std::string getName() const final;
 
-    std::vector<ModelDescriptorPtr> importFromFile(
-        const std::string& fileName, const LoaderProgress& callback,
-        const ProteinLoaderParameters& properties, Scene& scene) const final;
-
     std::vector<ModelDescriptorPtr> importFromBlob(
-        Blob&&, const LoaderProgress&, const ProteinLoaderParameters&,
-        Scene&) const final
-    {
-        throw std::runtime_error("Loading from blob not supported");
-    }
+        Blob&& blob, const LoaderProgress& callback, Scene& scene) const final;
+
+    std::vector<ModelDescriptorPtr> importFromFile(
+        const std::string& filename, const LoaderProgress& callback,
+        Scene& scene) const final;
 };
 } // namespace brayns

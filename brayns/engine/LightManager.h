@@ -20,7 +20,7 @@
 #pragma once
 
 #include <brayns/common/BaseObject.h>
-#include <brayns/common/types.h>
+#include <brayns/engine/Light.h>
 
 #include <map>
 #include <unordered_map>

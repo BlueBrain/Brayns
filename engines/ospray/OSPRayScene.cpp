@@ -26,24 +26,19 @@
 
 #include <brayns/common/Log.h>
 #include <brayns/common/Transformation.h>
-#include <brayns/common/light/Light.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
+#include <brayns/engine/Light.h>
 #include <brayns/engine/Model.h>
 #include <brayns/parameters/AnimationParameters.h>
 
-#include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/VolumeParameters.h>
 
 namespace brayns
 {
 OSPRayScene::OSPRayScene(AnimationParameters& animationParameters,
-                         GeometryParameters& geometryParameters,
                          VolumeParameters& volumeParameters)
-    : Scene(animationParameters, geometryParameters, volumeParameters)
-    , _memoryManagementFlags(geometryParameters.getMemoryMode() ==
-                                     MemoryMode::shared
-                                 ? uint32_t(OSP_DATA_SHARED_BUFFER)
-                                 : 0)
+    : Scene(animationParameters, volumeParameters)
+    , _memoryManagementFlags(uint32_t(OSP_DATA_SHARED_BUFFER))
 {
     _backgroundMaterial = std::make_shared<OSPRayMaterial>(PropertyMap(), true);
 
@@ -77,7 +72,7 @@ void OSPRayScene::commit()
     commitLights();
 
     // copy the list to avoid locking the mutex
-    ModelDescriptors modelDescriptors;
+    std::vector<ModelDescriptorPtr> modelDescriptors;
     {
         auto lock = acquireReadAccess();
         modelDescriptors = _modelDescriptors;
@@ -309,7 +304,8 @@ void OSPRayScene::_commitTransferFunction()
     _transferFunction.resetModified();
 }
 
-bool OSPRayScene::_commitVolumes(ModelDescriptors& modelDescriptors)
+bool OSPRayScene::_commitVolumes(
+    std::vector<ModelDescriptorPtr>& modelDescriptors)
 {
     bool rebuildScene = false;
     for (auto& modelDescriptor : modelDescriptors)
@@ -335,7 +331,8 @@ bool OSPRayScene::_commitVolumes(ModelDescriptors& modelDescriptors)
     return rebuildScene;
 }
 
-void OSPRayScene::_commitSimulationData(ModelDescriptors& modelDescriptors)
+void OSPRayScene::_commitSimulationData(
+    std::vector<ModelDescriptorPtr>& modelDescriptors)
 {
     const auto currentFrame = _animationParameters.getAbsoluteFrame();
     if (_lastFrame != currentFrame || isModified() ||

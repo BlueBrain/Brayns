@@ -31,7 +31,7 @@
 namespace brayns
 {
 class GetInstancesEntrypoint
-    : public Entrypoint<GetInstanceMessage, ModelInstances>
+    : public Entrypoint<GetInstanceMessage, std::vector<ModelInstance>>
 {
 public:
     virtual std::string getName() const override { return "get-instances"; }

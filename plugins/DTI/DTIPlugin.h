@@ -24,7 +24,6 @@
 #include <array>
 #include <vector>
 
-#include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 #include <messages/SetSpikeSimulationFromFileMessage.h>

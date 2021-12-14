@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <brayns/common/loader/Loader.h>
+#include <brayns/io/Loader.h>
 
 #include <plugin/api/CircuitColorManager.h>
 #include <plugin/io/SonataLoaderParameters.h>

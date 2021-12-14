@@ -68,7 +68,7 @@ public:
         brayns::Vector3f center = (max + min) * 0.5;
 
         // Spheres
-        brayns::SpheresMap& sphereMap = model.getSpheres();
+        auto& sphereMap = model.getSpheres();
         for (auto& entry : sphereMap)
         {
             std::vector<brayns::Sphere> tempBuf;
@@ -86,7 +86,7 @@ public:
         }
 
         // Cones
-        brayns::ConesMap& conesMap = model.getCones();
+        auto& conesMap = model.getCones();
         for (auto& entry : conesMap)
         {
             std::vector<brayns::Cone> tempBuf;
@@ -109,7 +109,7 @@ public:
         }
 
         // Cylinders
-        brayns::CylindersMap& cylindersMap = model.getCylinders();
+        auto& cylindersMap = model.getCylinders();
         for (auto& entry : cylindersMap)
         {
             std::vector<brayns::Cylinder> tempBuf;

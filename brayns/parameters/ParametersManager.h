@@ -20,10 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
 #include <brayns/parameters/AnimationParameters.h>
 #include <brayns/parameters/ApplicationParameters.h>
-#include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/NetworkParameters.h>
 #include <brayns/parameters/RenderingParameters.h>
 #include <brayns/parameters/VolumeParameters.h>
@@ -73,13 +71,6 @@ public:
     const RenderingParameters& getRenderingParameters() const;
 
     /**
-       Gets geometry parameters
-       @return Geometry parameters for the current scene
-    */
-    GeometryParameters& getGeometryParameters();
-    const GeometryParameters& getGeometryParameters() const;
-
-    /**
        Gets application parameters
        @return Application parameters for the current scene
     */
@@ -119,7 +110,6 @@ private:
     std::vector<AbstractParameters*> _parameterSets;
     AnimationParameters _animationParameters;
     ApplicationParameters _applicationParameters;
-    GeometryParameters _geometryParameters;
     RenderingParameters _renderingParameters;
     VolumeParameters _volumeParameters;
     NetworkParameters _networkParameters;

@@ -23,7 +23,7 @@
 namespace brayns
 {
 Volume::Volume(const Vector3ui& dimensions, const Vector3f& spacing,
-               const DataType type)
+               const VolumeDataType type)
     : _dimensions(dimensions)
     , _spacing(spacing)
     , _dataType(type)

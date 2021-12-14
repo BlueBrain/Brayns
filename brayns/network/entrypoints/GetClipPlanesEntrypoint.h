@@ -26,7 +26,8 @@
 
 namespace brayns
 {
-class GetClipPlanesEntrypoint : public Entrypoint<EmptyMessage, ClipPlanes>
+class GetClipPlanesEntrypoint
+    : public Entrypoint<EmptyMessage, std::vector<ClipPlanePtr>>
 {
 public:
     virtual std::string getName() const override { return "get-clip-planes"; }

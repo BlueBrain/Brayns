@@ -21,6 +21,9 @@
 #pragma once
 
 #include <brayns/common/PropertyObject.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Scene.h>
 #include <brayns/parameters/AnimationParameters.h>
 #include <brayns/parameters/RenderingParameters.h>
 
@@ -59,4 +62,6 @@ protected:
     const RenderingParameters& _renderingParameters;
     ScenePtr _scene;
 };
+
+using RendererPtr = std::shared_ptr<Renderer>;
 } // namespace brayns

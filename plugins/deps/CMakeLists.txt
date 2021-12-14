@@ -109,7 +109,7 @@ if((BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED OR BRAYNS_DTI_E
         FetchContent_Declare(
             Brion
             GIT_REPOSITORY https://github.com/BlueBrain/Brion.git
-            GIT_TAG        c102f417aac60bb7166292d9cf68588f5e7eea41
+            GIT_TAG        bbac4134556ba42bb3b1e76ca26c8caa82bece02
             GIT_SHALLOW ON
             GIT_SUBMODULES_RECURSE OFF
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Brion

@@ -69,6 +69,6 @@ public:
 
 private:
     std::unique_ptr<NetworkContext> _context;
-    ActionInterfacePtr _interface;
+    std::shared_ptr<ActionInterface> _interface;
 };
 } // namespace brayns

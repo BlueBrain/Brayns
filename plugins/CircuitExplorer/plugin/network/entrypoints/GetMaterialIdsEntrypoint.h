@@ -53,7 +53,7 @@ public:
     }
 
 private:
-    std::vector<size_t> _getIds(const MaterialMap& materials)
+    std::vector<size_t> _getIds(const std::map<size_t, MaterialPtr>& materials)
     {
         std::vector<size_t> ids;
         ids.reserve(materials.size());
