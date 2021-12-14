@@ -19,15 +19,12 @@ Circuit Explorer plugin
 The Circuit Explorer plugin is the main Brayns plugin for neuroscientific visualization. It
 provides Brayns with extra features, such as, but not limited to:
 
-* Loading neuronal circuits based on CircuitConfig / BlueConfig
+* Loading neuronal circuits and simulations based on CircuitConfig / BlueConfig
+* Loading SONATA multi-population networks and simulations
 * Load morphology files (Ascii, SWC or H5)
-* Loading simulations in the form of compartment or spike reports
-* Load circuit-specific features, such as synapses
-* Provides multiple renderers for different kind of visualizations that highlight circuit specific features
+* Load BlueConfig/SONATA multi-population hybrid circuits
 
-The Circuit Explorer plugin also provides a python class within the Brayns python client that
-encapsulates its functionality and eases the usage of the API exposed by this plugin. For further information
-on the Circuit Explorer's python API, refer to :ref:`circuitexplorerapi-label`
+For further information on the Circuit Explorer's python API, refer to :ref:`circuitexplorerapi-label`
 
 To load the Circuit Explorer plugin when launching the Brayns backend service, use the following argument
 in the command line:
@@ -98,41 +95,3 @@ in the command line:
 
     --plugin braynsDTI
 
-
-Fluorescence plugin
--------------------
-
-The Fluorescence plugin allows for fluorescent staining visualization. It works by sending the Brayns
-backend service a specific generated volume that will use to render fluorescent scattering and decaying.
-
-.. attention::
-
-    This plugin requires a specific rendering engine to allow for its usage, the pbrt-v2 engine.
-
-For information on the Fluorescence python API, refer to :ref:`fluorescencepluginapi-label`
-
-To load the Fluorescence plugin when launching the Brayns backend service, use the following arguments in
-the command line, which will load the appropiate render engine along the plugin:
-
-.. code-block:: console
-
-    --engine pbrtv2 --plugin braynsFluorescence
-
-
-Physically based volumes plugin
--------------------------------
-
-The PBR Volumes plugin allows to load volumes into Brayns with physically based properties.
-
-.. attention::
-
-    This plugin requires a specific rendering engine to allow for its usage, the pbrt-v3 engine.
-
-For information on the PBR Volumes python API, refer to :ref:`pbrvolumespluginapi-label`
-
-To load the PBR Volumes plugin when launching the Brayns backend service, use the following arguments in
-the command line, which will load the appropiate render engine along the plugin:
-
-.. code-block:: console
-
-    --engine pbrt --plugin braynsPBRVolumes
