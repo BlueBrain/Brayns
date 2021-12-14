@@ -26,10 +26,6 @@ schema = {
     'returns': {
         'additionalProperties': False,
         'properties': {
-            'abi': {
-                'description': 'Binary interface version',
-                'type': 'integer'
-            },
             'major': {
                 'description': 'Major version',
                 'type': 'integer'
@@ -51,7 +47,6 @@ schema = {
             'major',
             'minor',
             'patch',
-            'abi',
             'revision'
         ],
         'title': 'VersionMessage',

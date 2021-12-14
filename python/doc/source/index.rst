@@ -34,7 +34,6 @@ The Brayns python client allows to:
    usage
    plugins
    api
-   examples
 
 
 Acknowledgments

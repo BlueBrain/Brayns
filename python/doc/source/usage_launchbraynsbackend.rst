@@ -8,43 +8,7 @@ Running a Brayns backend service
 ================================
 
 As a Brayns client, to run any script that uses the Brayns python client API you must have access to a
-running Brayns server backend. You have two ways to start a Brayns backend: Thought
-WebBrayns web interface or manually on BB5
-
-Automatic allocation through WebBrayns
---------------------------------------
-
-The easiest way to launch a Brayns backend service is through WebBrayns. It offers an easy to follow interface
-which will allocate a node on BB5 and launch a Brayns backend instance for you.
-
-From the URL you will be able to extract the node ID and the port on which Brayns is running.
-
-To do so, go to |location_link|. You will see something like this:
-
-.. image:: _static/webbrayns_main.png
-   :width: 100%
-   :align: center
-
-Enter your project account and type of partition to use and then click on
-``+ ALLOCATE NEW RESOURCE``.
-There is a contextual help to guide you through out the process if you need it.
-
-.. warning::
-
-   At the momment, is not possible to choose which plugins will be loaded when launching
-   the Brayns backend service from WebBrayns. Currently, only the ``CircuitExplorer``
-   and ``CircuitInfo`` plugins are loaded.
-
-Manual launch on BB5
---------------------
-
-To launch a Brayns backend manually, the first step is to know the path to a ``braynsService`` executable
-
-For instance, the master branch of the respository is downloaded and compiled in BB5, and can be found in:
-
-``/gpfs/bbp.cscs.ch/home/nroman/software/install/linux-rhel7-x86_64/gcc-8.3.0/brayns-latest-s44b7v/bin``
-
-Once we know the location of the ``braynsService`` binary, we proceed:
+running Brayns server backend. To launch a Brayns backend:
 
 * 1 - Get an allocation on BB5:
 
@@ -60,10 +24,11 @@ characters, for example: ``r2i2n11``. You will need it to connect to the ``brayn
 
 .. code-block:: console
 
-    $ cd /gpfs/bbp.cscs.ch/home/nroman/software/install/linux-rhel7-x86_64/gcc-8.3.0/brayns-latest-s44b7v/bin
-    $ ./braynsService --http-server :5000 --plugin braynsCircuitExplorer --plugin braynsCircuitInfo --plugin braynsDTI
+    $ module load unstable
+    $ module load brayns/latest
+    $ ./braynsService --uri 0.0.0.0:5000 --plugin braynsCircuitExplorer --plugin braynsCircuitInfo --plugin braynsDTI
 
-The last command will launch a Brayns backend service with remote access needed for the python client (``--http-server``)
+The last command will launch a Brayns backend service with remote access needed for the python client (``--uri``)
 on port 5000, and enabling the Circuit Explorer, Circuit Info and DTI plugins
 
 .. hint::

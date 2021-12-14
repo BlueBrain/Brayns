@@ -1,7 +1,7 @@
 {
     "name": "brayns",
     "description": "Brayns python API",
-    "version": "1.1.0",
+    "version": "2.0.0",
     "repository": {
       "type": "git",
       "url": "https://github.com/BlueBrain/Brayns.git"
@@ -13,5 +13,5 @@
       "url": "https://github.com/BlueBrain/Brayns/issues"
     },
     "homepage": "https://github.com/BlueBrain/Brayns",
-    "contributors":["Daniel Nachbaur", "Cyrille Favreau", "Jonas Karlsson", "Roland Groza", "Nadir Roman", "Grigori Chevtchenko", "Pawel Podhajski", "Adrien Devresse", "Sebastien Speierer", "Fabien Petitjean"]
+    "contributors":["Daniel Nachbaur", "Cyrille Favreau", "Jonas Karlsson", "Roland Groza", "Nadir Roman", "Grigori Chevtchenko", "Pawel Podhajski", "Adrien Devresse", "Sebastien Speierer", "Fabien Petitjean", "Adrien Fleury"]
   }

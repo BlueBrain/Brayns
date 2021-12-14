@@ -157,5 +157,4 @@ as a base64 encoded string. We only need to store the result on disk.
 Further information
 -------------------
 
-For further information about the API, refer to the different API pages. You can also
-find more complete and complex examples using the Brayns python client in the :ref:`examples-label`
+For further information about the API, refer to the different API pages.

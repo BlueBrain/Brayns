@@ -27,4 +27,4 @@ try:
 except DistributionNotFound:
     VERSION = 'brayns-local'
 
-MINIMAL_VERSION = '1.1.0'
+MINIMAL_VERSION = '2.0.0'

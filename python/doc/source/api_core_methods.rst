@@ -191,7 +191,7 @@ Parameters:
 
 * ``bounding_box``: ``bool``. Display bounding box.
 * ``loader_name``: ``str``. Name of the loader.
-* ``loader_properties``: ``dict``. Loader properties.
+* ``loader_properties``: ``Any``. Loader properties.
 * ``name``: ``str``. Model name.
 * ``path``: ``str``. Model file path.
 * ``transformation``: ``dict``. Model transformation. The object has the following properties.
@@ -233,7 +233,7 @@ Return value:
 
     * ``id``: ``int``. Model ID.
     * ``loader_name``: ``str``. Name of the loader.
-    * ``loader_properties``: ``dict``. Loader properties.
+    * ``loader_properties``: ``Any``. Loader properties.
     * ``metadata``: ``dict``. Key-value data.
 
       * ``items``: ``str``
@@ -271,9 +271,9 @@ Parameters:
 
 * ``id``: ``Union[None, int, str]``. ID of the request to cancel. Can be one of the following objects depending on the renderer configuration.
 
-  * ``None``
-  * ``int``
-  * ``str``
+  * ``params``: ``None``
+  * ``params``: ``int``
+  * ``params``: ``str``
 
 Return value:
 
@@ -326,6 +326,47 @@ This method has no return values.
 
 ----
 
+export_frames_to_disk
+~~~~~~~~~~~~~~~~~~~~~
+
+Export a set of frames from a simulation as image files.
+
+Parameters:
+
+* ``format``: ``str``. Image store format ('png', 'jpg', ...).
+* ``key_frames``: ``list``. List of key frames to render.
+
+  * ``items``: ``dict``. The object has the following properties.
+
+    * ``camera``: ``dict``. Camera definition. The object has the following properties.
+
+      * ``current``: ``str``. Camera current type.
+      * ``orientation``: ``list``. Camera orientation XYZW.
+
+        * ``items``: ``float``
+
+      * ``position``: ``list``. Camera position XYZ.
+
+        * ``items``: ``float``
+
+      * ``target``: ``list``. Camera target XYZ.
+
+        * ``items``: ``float``
+
+    * ``camera_params``: ``dict``. Camera parameters.
+    * ``frame_index``: ``int``. Integer index of the simulation frame.
+
+* ``name_image_after_simulation_index``: ``bool``. Wether to name the rendered images after the simulation frame index or not.
+* ``path``: ``str``. Path where to store the rendered frames.
+* ``quality``: ``int``. Image quality (compression rate = 100 - quality, 100 = highest quality, 0 = lowest quality.
+* ``spp``: ``int``. Number of samples per pixel.
+
+Return value:
+
+This method has no return values.
+
+----
+
 get_animation_parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -340,10 +381,9 @@ Return value:
 * ``dict``. The object has the following properties.
 
   * ``current``: ``int``. Current frame index.
-  * ``delta``: ``int``. Frame delta.
   * ``dt``: ``float``. Frame time.
-  * ``frame_count``: ``int``. Animation frame count.
-  * ``playing``: ``bool``. Animation is playing.
+  * ``end_frame``: ``int``. Global final simulation frame index.
+  * ``start_frame``: ``int``. Global initial simulation frame index.
   * ``unit``: ``str``. Time unit.
 
 ----
@@ -361,7 +401,6 @@ Return value:
 
 * ``dict``. The object has the following properties.
 
-  * ``engine``: ``str``. Application engine.
   * ``image_stream_fps``: ``int``. Framerate of image stream.
   * ``jpeg_compression``: ``int``. JPEG compression rate.
   * ``plugins``: ``list``. Loaded plugins.
@@ -492,10 +531,10 @@ Return value:
 
 ----
 
-get_environment_map
-~~~~~~~~~~~~~~~~~~~
+get_export_frames_progress
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Get the environment map from the scene.
+Get the progress of the last issued frame export.
 
 Parameters:
 
@@ -505,7 +544,7 @@ Return value:
 
 * ``dict``. The object has the following properties.
 
-  * ``filename``: ``str``. Source of the background image.
+  * ``progress``: ``float``. Progress of the last export 0-1.
 
 ----
 
@@ -670,8 +709,8 @@ Return value:
 
       * ``items``: ``str``
 
+    * ``inputParametersSchema``: ``Any``. Loader properties.
     * ``name``: ``str``. Loader name.
-    * ``properties``: ``dict``. Loader properties.
 
 ----
 
@@ -701,7 +740,7 @@ Return value:
 
   * ``id``: ``int``. Model ID.
   * ``loader_name``: ``str``. Name of the loader.
-  * ``loader_properties``: ``dict``. Loader properties.
+  * ``loader_properties``: ``Any``. Loader properties.
   * ``metadata``: ``dict``. Key-value data.
 
     * ``items``: ``str``
@@ -853,47 +892,6 @@ Return value:
     * ``simulationThreshold``: ``float``
     * ``useHardwareRandomizer``: ``bool``
 
-  * ``circuit_explorer_cell_growth``: ``dict``. The object has the following properties.
-
-    * ``alphaCorrection``: ``float``
-    * ``exposure``: ``float``
-    * ``fogStart``: ``float``
-    * ``fogThickness``: ``float``
-    * ``shadowDistance``: ``float``
-    * ``shadows``: ``float``
-    * ``simulationThreshold``: ``float``
-    * ``softShadows``: ``float``
-    * ``tfColor``: ``bool``
-    * ``useHardwareRandomizer``: ``bool``
-
-  * ``circuit_explorer_proximity_detection``: ``dict``. The object has the following properties.
-
-    * ``alphaCorrection``: ``float``
-    * ``detectionDistance``: ``float``
-    * ``detectionFarColor``: ``list``
-
-      * ``items``: ``float``
-
-    * ``detectionNearColor``: ``list``
-
-      * ``items``: ``float``
-
-    * ``detectionOnDifferentMaterial``: ``bool``
-    * ``exposure``: ``float``
-    * ``maxBounces``: ``int``
-    * ``surfaceShadingEnabled``: ``bool``
-    * ``useHardwareRandomizer``: ``bool``
-
-  * ``circuit_explorer_voxelized_simulation``: ``dict``. The object has the following properties.
-
-    * ``alphaCorrection``: ``float``
-    * ``exposure``: ``float``
-    * ``fogStart``: ``float``
-    * ``fogThickness``: ``float``
-    * ``maxBounces``: ``int``
-    * ``simulationThreshold``: ``float``
-    * ``useHardwareRandomizer``: ``bool``
-
   * ``pathtracer``: ``dict``. The object has the following properties.
 
     * ``maxContribution``: ``float``
@@ -952,7 +950,7 @@ Return value:
 
       * ``id``: ``int``. Model ID.
       * ``loader_name``: ``str``. Name of the loader.
-      * ``loader_properties``: ``dict``. Loader properties.
+      * ``loader_properties``: ``Any``. Loader properties.
       * ``metadata``: ``dict``. Key-value data.
 
         * ``items``: ``str``
@@ -1012,7 +1010,6 @@ Return value:
 
 * ``dict``. The object has the following properties.
 
-  * ``abi``: ``int``. Binary interface version.
   * ``major``: ``int``. Major version.
   * ``minor``: ``int``. Minor version.
   * ``patch``: ``int``. Patch level.
@@ -1246,7 +1243,7 @@ Parameters:
 * ``type``: ``str``. File extension or type (MESH, POINTS, CIRCUIT).
 * ``bounding_box``: ``bool``. Display bounds.
 * ``loader_name``: ``str``. Loader name.
-* ``loader_properties``: ``dict``. Loader properties.
+* ``loader_properties``: ``Any``. Loader properties.
 * ``name``: ``str``. Model name.
 * ``path``: ``str``. Model source path.
 * ``transformation``: ``dict``. Model transformation. The object has the following properties.
@@ -1288,7 +1285,7 @@ Return value:
 
     * ``id``: ``int``. Model ID.
     * ``loader_name``: ``str``. Name of the loader.
-    * ``loader_properties``: ``dict``. Loader properties.
+    * ``loader_properties``: ``Any``. Loader properties.
     * ``metadata``: ``dict``. Key-value data.
 
       * ``items``: ``str``
@@ -1363,11 +1360,6 @@ Set the current state of the animation parameters.
 Parameters:
 
 * ``current``: ``int``. Current frame index.
-* ``delta``: ``int``. Frame delta.
-* ``dt``: ``float``. Frame time.
-* ``frame_count``: ``int``. Animation frame count.
-* ``playing``: ``bool``. Animation is playing.
-* ``unit``: ``str``. Time unit.
 
 Return value:
 
@@ -1448,14 +1440,12 @@ Parameters:
   * ``fisheye``: ``dict``. The object has the following properties.
 
     * ``apertureRadius``: ``float``
-    * ``aspect``: ``float``
     * ``enableClippingPlanes``: ``bool``
     * ``focusDistance``: ``float``
     * ``fovy``: ``float``
 
   * ``orthographic``: ``dict``. The object has the following properties.
 
-    * ``aspect``: ``float``
     * ``enableClippingPlanes``: ``bool``
     * ``height``: ``float``
 
@@ -1467,31 +1457,14 @@ Parameters:
   * ``perspective``: ``dict``. The object has the following properties.
 
     * ``apertureRadius``: ``float``
-    * ``aspect``: ``float``
     * ``enableClippingPlanes``: ``bool``
     * ``focusDistance``: ``float``
     * ``fovy``: ``float``
 
   * ``perspectiveParallax``: ``dict``. The object has the following properties.
 
-    * ``aspect``: ``float``
     * ``enableClippingPlanes``: ``bool``
     * ``fovy``: ``float``
-
-Return value:
-
-This method has no return values.
-
-----
-
-set_environment_map
-~~~~~~~~~~~~~~~~~~~
-
-Set an environment map in the scene.
-
-Parameters:
-
-* ``filename``: ``str``. Source of the background image.
 
 Return value:
 
@@ -1614,47 +1587,6 @@ Parameters:
     * ``simulationThreshold``: ``float``
     * ``useHardwareRandomizer``: ``bool``
 
-  * ``circuit_explorer_cell_growth``: ``dict``. The object has the following properties.
-
-    * ``alphaCorrection``: ``float``
-    * ``exposure``: ``float``
-    * ``fogStart``: ``float``
-    * ``fogThickness``: ``float``
-    * ``shadowDistance``: ``float``
-    * ``shadows``: ``float``
-    * ``simulationThreshold``: ``float``
-    * ``softShadows``: ``float``
-    * ``tfColor``: ``bool``
-    * ``useHardwareRandomizer``: ``bool``
-
-  * ``circuit_explorer_proximity_detection``: ``dict``. The object has the following properties.
-
-    * ``alphaCorrection``: ``float``
-    * ``detectionDistance``: ``float``
-    * ``detectionFarColor``: ``list``
-
-      * ``items``: ``float``
-
-    * ``detectionNearColor``: ``list``
-
-      * ``items``: ``float``
-
-    * ``detectionOnDifferentMaterial``: ``bool``
-    * ``exposure``: ``float``
-    * ``maxBounces``: ``int``
-    * ``surfaceShadingEnabled``: ``bool``
-    * ``useHardwareRandomizer``: ``bool``
-
-  * ``circuit_explorer_voxelized_simulation``: ``dict``. The object has the following properties.
-
-    * ``alphaCorrection``: ``float``
-    * ``exposure``: ``float``
-    * ``fogStart``: ``float``
-    * ``fogThickness``: ``float``
-    * ``maxBounces``: ``int``
-    * ``simulationThreshold``: ``float``
-    * ``useHardwareRandomizer``: ``bool``
-
   * ``pathtracer``: ``dict``. The object has the following properties.
 
     * ``maxContribution``: ``float``
@@ -1699,6 +1631,7 @@ Set the current state of the volume parameters.
 
 Parameters:
 
+* ``adaptive_max_sampling_rate``: ``float``. Max sampling rate.
 * ``adaptive_sampling``: ``bool``. Use adaptive sampling.
 * ``clip_box``: ``dict``. Clip box. The object has the following properties.
 
@@ -1743,7 +1676,7 @@ Take a snapshot with given parameters.
 
 Parameters:
 
-* ``format``: ``str``. Image format (extension without dot).
+* ``format``: ``str``. Image format (extension without the dot).
 * ``size``: ``list``. Image dimensions.
 
   * ``items``: ``int``
@@ -1751,11 +1684,6 @@ Parameters:
 * ``animation_parameters``: ``dict``. Animation parameters. The object has the following properties.
 
   * ``current``: ``int``. Current frame index.
-  * ``delta``: ``int``. Frame delta.
-  * ``dt``: ``float``. Frame time.
-  * ``frame_count``: ``int``. Animation frame count.
-  * ``playing``: ``bool``. Animation is playing.
-  * ``unit``: ``str``. Time unit.
 
 * ``camera``: ``dict``. Camera parameters. The object has the following properties.
 
@@ -1821,6 +1749,7 @@ Update a clip plane with the given coefficients.
 
 Parameters:
 
+* ``id``: ``int``. Plane ID.
 * ``plane``: ``list``. Plane normal vector XYZ and distance from origin.
 
   * ``items``: ``float``
