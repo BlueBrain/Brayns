@@ -20,8 +20,12 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/parameters/ParametersManager.h>
 #include <brayns/utils/DynamicLib.h>
+
+#include <map>
+#include <vector>
 
 namespace brayns
 {

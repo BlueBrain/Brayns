@@ -45,12 +45,12 @@ public:
     OSPModel getPrimaryModel() const { return _primaryModel; }
     OSPModel getSecondaryModel() const { return _secondaryModel; }
     OSPModel getBoundingBoxModel() const { return _boundingBoxModel; }
-    SharedDataVolumePtr createSharedDataVolume(const Vector3ui& dimensions,
-                                               const Vector3f& spacing,
-                                               const DataType type) const final;
+    SharedDataVolumePtr createSharedDataVolume(
+        const Vector3ui& dimensions, const Vector3f& spacing,
+        const VolumeDataType type) const final;
     BrickedVolumePtr createBrickedVolume(const Vector3ui& dimensions,
                                          const Vector3f& spacing,
-                                         const DataType type) const final;
+                                         const VolumeDataType type) const final;
 
     void buildBoundingBox() final;
 
@@ -73,7 +73,6 @@ private:
     void _commitSDFGeometries();
     void _addGeometryToModel(const OSPGeometry geometry,
                              const size_t materialId);
-    void _setBVHFlags();
 
     // Models
     OSPModel _primaryModel{nullptr};

@@ -40,6 +40,15 @@ enum class EventType
     Scroll
 };
 
+/**
+ * The different modes for moving the camera.
+ */
+enum class CameraMode
+{
+    flying,
+    inspect
+};
+
 struct InputEvent
 {
     EventType type;
@@ -83,7 +92,7 @@ private:
     };
 
     void registerKeyboardShortcuts();
-    void setupCameraManipulator(brayns::CameraMode mode, bool adjust = true);
+    void setupCameraManipulator(CameraMode mode, bool adjust = true);
 
     bool initGLFW();
     void initOpenGL();

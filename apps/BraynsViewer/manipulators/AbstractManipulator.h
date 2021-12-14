@@ -20,7 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
+#include <brayns/common/MathTypes.h>
+#include <brayns/engine/Camera.h>
 
 constexpr float DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER = 0.25f;
 

@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/propertymap/PropertyMap.h>
-#include <brayns/common/types.h>
+#include <brayns/common/Blob.h>
+#include <brayns/engine/Model.h>
 #include <brayns/json/Json.h>
 #include <brayns/json/JsonSchema.h>
 #include <brayns/json/JsonSchemaValidator.h>

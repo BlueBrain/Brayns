@@ -23,6 +23,7 @@
 #include <iostream>
 
 #include <brayns/Version.h>
+#include <brayns/common/Log.h>
 #include <brayns/parameters/AbstractParameters.h>
 
 namespace
@@ -106,11 +107,9 @@ std::vector<std::string> findSimilarOptions(
 
 void _printVersion()
 {
-    std::cout << "Brayns " << brayns::Version::getMajor() << "."
-              << brayns::Version::getMinor() << "."
-              << brayns::Version::getPatch() << " ("
-              << brayns::Version::getCommitHash() << ")" << std::dec
-              << std::endl;
+    brayns::Log::info("Brayns {}.{}.{} ({})", brayns::Version::getMajor(),
+                      brayns::Version::getMinor(), brayns::Version::getPatch(),
+                      brayns::Version::getCommitHash());
 }
 } // namespace
 
@@ -120,7 +119,6 @@ ParametersManager::ParametersManager(const int argc, const char** argv)
 {
     registerParameters(&_animationParameters);
     registerParameters(&_applicationParameters);
-    registerParameters(&_geometryParameters);
     registerParameters(&_renderingParameters);
     registerParameters(&_volumeParameters);
     registerParameters(&_networkParameters);
@@ -245,16 +243,6 @@ RenderingParameters& ParametersManager::getRenderingParameters()
 const RenderingParameters& ParametersManager::getRenderingParameters() const
 {
     return _renderingParameters;
-}
-
-GeometryParameters& ParametersManager::getGeometryParameters()
-{
-    return _geometryParameters;
-}
-
-const GeometryParameters& ParametersManager::getGeometryParameters() const
-{
-    return _geometryParameters;
 }
 
 VolumeParameters& ParametersManager::getVolumeParameters()

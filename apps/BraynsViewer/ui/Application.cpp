@@ -96,7 +96,7 @@ Application::Application(brayns::Brayns& brayns)
     : m_brayns(brayns)
 {
     registerKeyboardShortcuts();
-    setupCameraManipulator(brayns::CameraMode::inspect, false);
+    setupCameraManipulator(CameraMode::inspect, false);
     m_cameraManipulator->adjust(m_brayns.getEngine().getScene().getBounds());
 }
 
@@ -112,15 +112,6 @@ void Application::reshape()
 
     auto& applicationParameters =
         m_brayns.getParametersManager().getApplicationParameters();
-
-    // In case of 3D stereo vision, make sure the width is even
-    if (applicationParameters.isStereo())
-    {
-        if (width % 2 != 0)
-            width = (width - 1) / 2;
-        else
-            width /= 2;
-    }
 
     m_width = width;
     m_height = height;
@@ -193,22 +184,20 @@ void Application::registerKeyboardShortcuts()
         renderParams.setCurrentRenderer("proximity");
     });
     m_keyboardHandler.registerKeyboardShortcut(
-        '[', "Decrease animation frame by 1",
-        [&] { animationParams.jumpFrames(1); });
-    m_keyboardHandler.registerKeyboardShortcut(
-        ']', "Increase animation frame by 1",
-        [&] { animationParams.jumpFrames(-1); });
-    m_keyboardHandler.registerKeyboardShortcut(
         'e', "Enable eletron shading", [&] {
             renderer.updateProperty("shadingEnabled", false);
             renderer.updateProperty("electronShadingEnabled", true);
         });
-    m_keyboardHandler.registerKeyboardShortcut(
-        'f', "Enable fly mode",
-        [this]() { setupCameraManipulator(brayns::CameraMode::flying); });
-    m_keyboardHandler.registerKeyboardShortcut(
-        'i', "Enable inspect mode",
-        [this]() { setupCameraManipulator(brayns::CameraMode::inspect); });
+    m_keyboardHandler.registerKeyboardShortcut('f', "Enable fly mode",
+                                               [this]() {
+                                                   setupCameraManipulator(
+                                                       CameraMode::flying);
+                                               });
+    m_keyboardHandler.registerKeyboardShortcut('i', "Enable inspect mode",
+                                               [this]() {
+                                                   setupCameraManipulator(
+                                                       CameraMode::inspect);
+                                               });
     m_keyboardHandler.registerKeyboardShortcut(
         'o', "Decrease ambient occlusion strength", [&] {
             if (!renderer.hasProperty("aoWeight"))
@@ -277,9 +266,6 @@ void Application::registerKeyboardShortcuts()
                 !applicationParams.getDynamicLoadBalancer());
         });
     m_keyboardHandler.registerKeyboardShortcut(
-        'g', "Enable/Disable animation playback",
-        [&] { animationParams.togglePlayback(); });
-    m_keyboardHandler.registerKeyboardShortcut(
         '{', "Decrease eye separation", [&] {
             if (!camera.hasProperty("interpupillaryDistance"))
                 return;
@@ -339,7 +325,7 @@ void Application::registerKeyboardShortcuts()
     });
 }
 
-void Application::setupCameraManipulator(brayns::CameraMode mode, bool adjust)
+void Application::setupCameraManipulator(CameraMode mode, bool adjust)
 {
     m_cameraManipulator.reset();
 
@@ -349,11 +335,11 @@ void Application::setupCameraManipulator(brayns::CameraMode mode, bool adjust)
 
     switch (mode)
     {
-    case brayns::CameraMode::flying:
+    case CameraMode::flying:
         m_cameraManipulator.reset(
             new brayns::FlyingModeManipulator(camera, m_keyboardHandler));
         break;
-    case brayns::CameraMode::inspect:
+    case CameraMode::inspect:
         m_cameraManipulator.reset(
             new brayns::InspectCenterManipulator(camera, m_keyboardHandler));
         break;
@@ -378,9 +364,7 @@ bool Application::initGLFW()
         return false;
     }
 
-    const auto engineName =
-        m_brayns.getParametersManager().getApplicationParameters().getEngine();
-    const std::string windowTitle = "Brayns Viewer [" + engineName + "] ";
+    const std::string windowTitle = "Brayns Viewer";
 
     m_window = glfwCreateWindow(windowWidth, windowHeight, windowTitle.c_str(),
                                 NULL, NULL);
@@ -447,6 +431,7 @@ void Application::run()
         toggleFullscreen();
         reshape();
 
+        m_brayns.getActionInterface()->processRequests();
         render();
         guiNewFrame();
         guiRender();
@@ -620,7 +605,7 @@ void Application::render()
         GLenum format = GL_RGBA;
         switch (frameBuffer->getFrameBufferFormat())
         {
-        case brayns::FrameBufferFormat::rgb_i8:
+        case brayns::PixelFormat::RGB_I8:
             format = GL_RGB;
             break;
         default:

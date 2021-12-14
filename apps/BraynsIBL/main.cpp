@@ -41,6 +41,10 @@ namespace po = boost::program_options;
 
 namespace
 {
+const std::string IRRADIANCE_MAP = "-irradiance";
+const std::string RADIANCE_MAP = "-radiance";
+const std::string BRDF_LUT = "-brdfLUT";
+
 void glfwErrorCallback(int error, const char* description)
 {
     std::cerr << "GLFW Error: " << error << ": " << description << std::endl;

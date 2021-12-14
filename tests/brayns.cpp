@@ -55,8 +55,6 @@ TEST_CASE("defaults")
 
     auto& pm = brayns.getParametersManager();
     const auto& appParams = pm.getApplicationParameters();
-    CHECK(appParams.getEngine() == "ospray");
-    CHECK(appParams.getOsprayModules().empty());
     CHECK_EQ(appParams.getWindowSize(), brayns::Vector2ui(800, 600));
     CHECK(!appParams.isBenchmarking());
     CHECK_EQ(appParams.getJpegCompression(), 90);
@@ -68,10 +66,7 @@ TEST_CASE("defaults")
     CHECK_EQ(renderParams.getCameras().size(), 5);
     CHECK_EQ(renderParams.getRenderers().size(), 5);
     CHECK_EQ(renderParams.getSamplesPerPixel(), 1);
-    CHECK_EQ(renderParams.getBackgroundColor(), brayns::Vector3d(0, 0, 0));
-
-    const auto& geomParams = pm.getGeometryParameters();
-    CHECK(geomParams.getMemoryMode() == brayns::MemoryMode::shared);
+    CHECK_EQ(renderParams.getBackgroundColor(), brayns::Vector3f(0, 0, 0));
 
     const auto& animParams = pm.getAnimationParameters();
     CHECK_EQ(animParams.getFrame(), 0);
@@ -86,20 +81,4 @@ TEST_CASE("defaults")
     defaultBoundingBox.merge(brayns::Vector3d(0, 0, 0));
     defaultBoundingBox.merge(brayns::Vector3d(1, 1, 1));
     CHECK_EQ(scene.getBounds(), defaultBoundingBox);
-}
-
-TEST_CASE("bvh_type")
-{
-    const char* argv[] = {
-        "brayns",  "demo", "--default-bvh-flag", "robust", "--default-bvh-flag",
-        "compact",
-    };
-    const int argc = sizeof(argv) / sizeof(char*);
-    brayns::Brayns brayns(argc, argv);
-
-    auto model = brayns.getEngine().getScene().getModel(0);
-    const auto& bvhFlags = model->getModel().getBVHFlags();
-
-    CHECK(bvhFlags.count(brayns::BVHFlag::robust) > 0);
-    CHECK(bvhFlags.count(brayns::BVHFlag::compact) > 0);
 }

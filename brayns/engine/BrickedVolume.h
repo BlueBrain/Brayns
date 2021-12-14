@@ -22,6 +22,8 @@
 
 #include <brayns/engine/Volume.h>
 
+#include <memory>
+
 namespace brayns
 {
 /** A volume type where the voxels are copied for each added brick. */
@@ -36,9 +38,11 @@ public:
 
 protected:
     BrickedVolume(const Vector3ui& dimensions, const Vector3f& spacing,
-                  const DataType type)
+                  const VolumeDataType type)
         : Volume(dimensions, spacing, type)
     {
     }
 };
+
+using BrickedVolumePtr = std::shared_ptr<BrickedVolume>;
 } // namespace brayns

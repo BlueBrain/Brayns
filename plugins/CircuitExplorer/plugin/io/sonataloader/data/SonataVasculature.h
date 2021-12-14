@@ -20,7 +20,7 @@
 
 #include <bbp/sonata/nodes.h>
 
-#include <brayns/common/mathTypes.h>
+#include <brayns/common/MathTypes.h>
 
 #include <plugin/io/morphology/vasculature/VasculatureSection.h>
 

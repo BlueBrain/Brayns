@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,19 +18,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AbstractParameters.h"
+#pragma once
 
-#include <brayns/common/Log.h>
+#include <cstdlib>
+#include <limits>
 
 namespace brayns
 {
-void AbstractParameters::print()
-{
-    Log::info("-= {} parameters =-", _name);
-}
-
-po::options_description& AbstractParameters::parameters()
-{
-    return _parameters;
-}
+constexpr size_t NO_MATERIAL = std::numeric_limits<size_t>::max();
+constexpr size_t BOUNDINGBOX_MATERIAL_ID = NO_MATERIAL - 1;
+constexpr size_t SECONDARY_MODEL_MATERIAL_ID = NO_MATERIAL - 2;
 } // namespace brayns

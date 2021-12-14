@@ -84,7 +84,7 @@ public:
             }
 
             // Load points
-            brayns::Vector3fs points;
+            std::vector<brayns::Vector3f> points;
             std::vector<float> radii;
             brayns::Vector3f normal;
             for (uint64_t p = startIndex; p < endIndex; ++p)

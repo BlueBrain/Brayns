@@ -20,10 +20,14 @@
 
 #pragma once
 
+#include <brayns/common/PixelFormat.h>
 #include <brayns/common/Statistics.h>
 #include <brayns/common/propertymap/PropertyMap.h>
 
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/FrameExporter.h>
+#include <brayns/engine/Scene.h>
 
 #include <functional>
 
@@ -56,11 +60,10 @@ public:
     /** Factory method to create an engine-specific framebuffer. */
     virtual FrameBufferPtr createFrameBuffer(
         const std::string& name, const Vector2ui& frameSize,
-        FrameBufferFormat frameBufferFormat) const = 0;
+        PixelFormat frameBufferFormat) const = 0;
 
     /** Factory method to create an engine-specific scene. */
     virtual ScenePtr createScene(AnimationParameters& animationParameters,
-                                 GeometryParameters& geometryParameters,
                                  VolumeParameters& volumeParameters) const = 0;
 
     /** Factory method to create an engine-specific camera. */

@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/loader/Loader.h>
-#include <brayns/io/MeshLoaderParameters.h>
+#include <brayns/io/Loader.h>
+#include <brayns/io/loaders/MeshLoaderParameters.h>
 
 struct aiScene;
 

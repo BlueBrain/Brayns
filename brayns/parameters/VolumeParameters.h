@@ -22,6 +22,8 @@
 
 #include "AbstractParameters.h"
 
+#include <brayns/common/MathTypes.h>
+
 namespace brayns
 {
 class VolumeParameters final : public AbstractParameters
@@ -29,7 +31,9 @@ class VolumeParameters final : public AbstractParameters
 public:
     VolumeParameters();
 
-    /** @copydoc AbstractParameters::print */
+    /**
+     * @brief print prints these parametes to the Log
+     */
     void print() final;
 
     /** Volume dimensions  */

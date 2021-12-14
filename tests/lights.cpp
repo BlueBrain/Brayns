@@ -19,10 +19,10 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/common/light/Light.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Light.h>
 #include <brayns/engine/LightManager.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
@@ -51,7 +51,7 @@ const brayns::Vector3f lampPositions[4] = {
 
 TEST_CASE("render_scivis_quadlight")
 {
-    const char* argv[] = {"lights",     "demo",   "--engine",       "ospray",
+    const char* argv[] = {"lights",     "demo",
                           "--renderer", "scivis", "--no-head-light"};
     const int argc = sizeof(argv) / sizeof(char*);
 
@@ -70,7 +70,7 @@ TEST_CASE("render_scivis_quadlight")
 
 TEST_CASE("render_scivis_spotlight")
 {
-    const char* argv[] = {"lights",     "demo",   "--engine",       "ospray",
+    const char* argv[] = {"lights",     "demo",
                           "--renderer", "scivis", "--no-head-light"};
     const int argc = sizeof(argv) / sizeof(char*);
 

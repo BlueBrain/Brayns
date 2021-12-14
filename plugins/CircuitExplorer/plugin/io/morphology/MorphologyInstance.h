@@ -18,8 +18,7 @@
 
 #pragma once
 
-#include <brayns/common/mathTypes.h>
-#include <brayns/common/types.h>
+#include <brayns/common/MathTypes.h>
 
 #include <plugin/api/CircuitColorHandler.h>
 

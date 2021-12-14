@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
 #include <brayns/engine/Model.h>
 
 #include <map>

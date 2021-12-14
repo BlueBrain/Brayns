@@ -136,8 +136,7 @@ CircuitExplorerPlugin::CircuitExplorerPlugin()
 void CircuitExplorerPlugin::init()
 {
     // LOADERS ADDED BY THIS PLUGIN
-    auto& scene = _api->getScene();
-    auto& registry = scene.getLoaderRegistry();
+    auto& registry = _api->getLoaderRegistry();
     registry.registerLoader(std::make_unique<BBPLoader>(_colorManager));
     registry.registerLoader(std::make_unique<NeuronMorphologyLoader>());
     registry.registerLoader(std::make_unique<SonataLoader>(_colorManager));

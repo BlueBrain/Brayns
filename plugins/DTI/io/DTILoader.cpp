@@ -78,9 +78,9 @@ std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromBlob(
     throw std::runtime_error("Loading DTI from blob is not supported");
 }
 
-Colors DTILoader::getColorsFromPoints(const brayns::Vector3fs& points,
-                                      const float opacity,
-                                      const ColorScheme colorScheme)
+Colors DTILoader::getColorsFromPoints(
+    const std::vector<brayns::Vector3f>& points, const float opacity,
+    const ColorScheme colorScheme)
 {
     Colors colors;
     switch (colorScheme)

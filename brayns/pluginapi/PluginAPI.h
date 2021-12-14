@@ -21,10 +21,17 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/Renderer.h>
+#include <brayns/engine/Scene.h>
+#include <brayns/io/LoaderRegistry.h>
+#include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
 {
+class ActionInterface;
+
 /** The API that plugins can use to interact with Brayns. */
 class PluginAPI
 {
@@ -48,10 +55,16 @@ public:
     /** @return access to the renderer of Brayns. */
     virtual Renderer& getRenderer() = 0;
 
+    /**
+     * @brief getLoaderRegistry gives access to the loader registry
+     */
+    virtual LoaderRegistry& getLoaderRegistry() = 0;
+
     /** Triggers a new preRender() and potentially render() and postRender(). */
     virtual void triggerRender() = 0;
 
     /** Set the action interface to be used by Brayns main loop. */
-    virtual void setActionInterface(const ActionInterfacePtr& interface) = 0;
+    virtual void setActionInterface(
+        const std::shared_ptr<ActionInterface>& interface) = 0;
 };
 } // namespace brayns

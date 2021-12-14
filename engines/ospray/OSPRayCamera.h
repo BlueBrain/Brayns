@@ -46,7 +46,7 @@ public:
        Set the clipping planes to use in this camera.
        Only implemented in the perspective and orthographic cameras.
     */
-    void setClipPlanes(const Planes& planes);
+    void setClipPlanes(const std::vector<Plane>& planes);
 
     /**
        Gets the OSPRay implementation of the camera object
@@ -57,7 +57,7 @@ public:
 private:
     OSPCamera _camera{nullptr};
     std::string _currentOSPCamera;
-    Planes _clipPlanes;
+    std::vector<Plane> _clipPlanes;
 
     void _createOSPCamera();
 };

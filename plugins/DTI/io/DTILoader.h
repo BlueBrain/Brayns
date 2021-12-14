@@ -24,8 +24,7 @@
 #include "DTILoaderParameters.h"
 #include "DTITypes.h"
 
-#include <brayns/common/loader/Loader.h>
-#include <brayns/common/types.h>
+#include <brayns/io/Loader.h>
 
 #include <boost/property_tree/ini_parser.hpp>
 

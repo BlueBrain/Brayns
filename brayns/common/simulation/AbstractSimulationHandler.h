@@ -19,7 +19,9 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
+#include <limits>
+#include <memory>
+#include <vector>
 
 namespace brayns
 {
@@ -34,15 +36,11 @@ public:
     AbstractSimulationHandler(const AbstractSimulationHandler& o) { *this = o; }
 
     /** @return a clone of the concrete simulation handler implementation. */
-    virtual AbstractSimulationHandlerPtr clone() const = 0;
+    virtual std::shared_ptr<AbstractSimulationHandler> clone() const = 0;
 
     virtual ~AbstractSimulationHandler() = default;
 
     AbstractSimulationHandler& operator=(const AbstractSimulationHandler& rhs);
-
-    virtual void bind(const MaterialPtr& /* material */){};
-
-    virtual void unbind(const MaterialPtr& /* material */){};
 
     /** @return the current loaded frame for the simulation. */
     uint32_t getCurrentFrame() const { return _currentFrame; }
@@ -148,4 +146,6 @@ protected:
     double _frameAdjuster{1.0};
     std::string _unit;
 };
+
+using AbstractSimulationHandlerPtr = std::shared_ptr<AbstractSimulationHandler>;
 } // namespace brayns

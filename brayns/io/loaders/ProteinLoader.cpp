@@ -21,7 +21,6 @@
 #include "ProteinLoader.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/common/types.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
@@ -321,7 +320,7 @@ std::vector<ModelDescriptorPtr> ProteinLoader::importFromFile(
         throw std::runtime_error("Could not open " + fileName);
 
     size_t lineIndex{0};
-    std::map<size_t, Spheres> spheres;
+    std::map<size_t, std::vector<Sphere>> spheres;
 
     while (file.good())
     {

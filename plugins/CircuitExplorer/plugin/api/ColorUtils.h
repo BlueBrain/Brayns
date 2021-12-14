@@ -18,9 +18,10 @@
 
 #pragma once
 
-#include <brayns/common/mathTypes.h>
+#include <brayns/common/MathTypes.h>
 
 #include <unordered_map>
+#include <vector>
 
 /**
  * @brief The ColorTable struct holds static read-only list of colors to

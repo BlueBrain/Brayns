@@ -4,29 +4,34 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSIO_SOURCES
-    MeshLoader.cpp
-    ProteinLoader.cpp
-    VolumeLoader.cpp
-    XYZBLoader.cpp
-    assimpImporters/ObjFileImporter.cpp
-    assimpImporters/ObjFileParser.cpp
-    assimpImporters/ObjFileMtlImporter.cpp
+    LoaderRegistry.cpp
+    loaders/MeshLoader.cpp
+    loaders/ProteinLoader.cpp
+    loaders/VolumeLoader.cpp
+    loaders/XYZBLoader.cpp
+    loaders/assimpImporters/ObjFileImporter.cpp
+    loaders/assimpImporters/ObjFileParser.cpp
+    loaders/assimpImporters/ObjFileMtlImporter.cpp
 )
 
 set(BRAYNSIO_PUBLIC_HEADERS
-    MeshLoader.h
-    ProteinLoader.h
-    VolumeLoader.h
-    XYZBLoader.h
+    Loader.h
+    LoaderRegistry.h
+    loaders/MeshLoader.h
+    loaders/ProteinLoader.h
+    loaders/VolumeLoader.h
+    loaders/XYZBLoader.h
 )
 
 if(assimp_VERSION VERSION_GREATER_EQUAL 4.1.0)
-    list(APPEND BRAYNSIO_SOURCES assimpImporters/PlyLoader.cpp assimpImporters/PlyParser.cpp)
-    set_source_files_properties(assimpImporters/PlyLoader.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+    list(APPEND BRAYNSIO_SOURCES
+        loaders/assimpImporters/PlyLoader.cpp
+        loaders/assimpImporters/PlyParser.cpp)
+    set_source_files_properties(loaders/assimpImporters/PlyLoader.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
 endif()
 
 if(assimp_VERSION VERSION_LESS 4)
-    list(APPEND BRAYNSIO_SOURCES assimp/DefaultIOStream.cpp)
+    list(APPEND BRAYNSIO_SOURCES loaders/assimp/DefaultIOStream.cpp)
 endif()
 
 

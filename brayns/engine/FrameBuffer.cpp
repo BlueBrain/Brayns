@@ -27,7 +27,7 @@
 namespace brayns
 {
 FrameBuffer::FrameBuffer(const std::string& name, const Vector2ui& frameSize,
-                         const FrameBufferFormat frameBufferFormat)
+                         const PixelFormat frameBufferFormat)
     : _name(name)
     , _frameSize(frameSize)
     , _frameBufferFormat(frameBufferFormat)
@@ -38,10 +38,10 @@ size_t FrameBuffer::getColorDepth() const
 {
     switch (_frameBufferFormat)
     {
-    case FrameBufferFormat::rgba_i8:
-    case FrameBufferFormat::rgb_f32:
+    case PixelFormat::RGBA_I8:
+    case PixelFormat::RGB_F32:
         return 4;
-    case FrameBufferFormat::rgb_i8:
+    case PixelFormat::RGB_I8:
         return 3;
     default:
         return 0;
@@ -62,11 +62,11 @@ Image FrameBuffer::getImage()
 
     switch (_frameBufferFormat)
     {
-    case FrameBufferFormat::rgb_i8:
-    case FrameBufferFormat::rgb_f32:
+    case PixelFormat::RGB_I8:
+    case PixelFormat::RGB_F32:
         info.channelCount = 3;
         break;
-    case FrameBufferFormat::rgba_i8:
+    case PixelFormat::RGBA_I8:
         info.channelCount = 4;
         break;
     default:
@@ -76,9 +76,9 @@ Image FrameBuffer::getImage()
 
     switch (_frameBufferFormat)
     {
-    case FrameBufferFormat::rgb_i8:
-    case FrameBufferFormat::rgb_f32:
-    case FrameBufferFormat::rgba_i8:
+    case PixelFormat::RGB_I8:
+    case PixelFormat::RGB_F32:
+    case PixelFormat::RGBA_I8:
         info.channelSize = 1;
         break;
     default:

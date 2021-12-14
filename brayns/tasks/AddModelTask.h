@@ -20,8 +20,10 @@
 
 #pragma once
 
-#include <brayns/common/loader/Loader.h>
 #include <brayns/common/tasks/Task.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/engine/Model.h>
+#include <brayns/io/LoaderRegistry.h>
 
 namespace brayns
 {
@@ -32,6 +34,7 @@ namespace brayns
 class AddModelTask : public Task<std::vector<ModelDescriptorPtr>>
 {
 public:
-    AddModelTask(const ModelParams& model, Engine& engine);
+    AddModelTask(const ModelParams& model, Engine& engine,
+                 LoaderRegistry& registry);
 };
 } // namespace brayns

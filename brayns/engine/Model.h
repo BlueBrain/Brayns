@@ -21,17 +21,26 @@
 #pragma once
 
 #include <brayns/common/BaseObject.h>
+#include <brayns/common/MaterialsColorMap.h>
 #include <brayns/common/Transformation.h>
+#include <brayns/common/VolumeDataType.h>
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/Cylinder.h>
-#include <brayns/common/geometry/SDFBezier.h>
 #include <brayns/common/geometry/SDFGeometry.h>
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/geometry/Streamline.h>
 #include <brayns/common/geometry/TriangleMesh.h>
 #include <brayns/common/propertymap/PropertyMap.h>
-#include <brayns/common/types.h>
+#include <brayns/common/simulation/AbstractSimulationHandler.h>
+
+#include <brayns/engine/BrickedVolume.h>
+#include <brayns/engine/Material.h>
+#include <brayns/engine/SharedDataVolume.h>
+
 #include <brayns/json/JsonType.h>
+
+#include <brayns/parameters/AnimationParameters.h>
+#include <brayns/parameters/VolumeParameters.h>
 
 #include <set>
 
@@ -130,6 +139,11 @@ protected:
  * - If set to true, the bounding box attribute displays a bounding box for the
  * current model
  */
+
+class Model;
+using ModelPtr = std::unique_ptr<Model>;
+using ModelMetadata = std::map<std::string, std::string>;
+
 class ModelDescriptor : public ModelParams
 {
 public:
@@ -158,7 +172,10 @@ public:
     void addInstance(const ModelInstance& instance);
     void removeInstance(const size_t id);
     ModelInstance* getInstance(const size_t id);
-    const ModelInstances& getInstances() const { return _instances; }
+    const std::vector<ModelInstance>& getInstances() const
+    {
+        return _instances;
+    }
     Boxd getBounds() const { return _bounds; }
     void computeBounds();
 
@@ -191,18 +208,20 @@ public:
     /** @internal */
     bool isMarkedForRemoval() const { return _markedForRemoval; }
     /** @internal */
-    ModelDescriptorPtr clone(ModelPtr model) const;
+    std::shared_ptr<ModelDescriptor> clone(ModelPtr model) const;
 
 private:
     size_t _nextInstanceID{0};
     Boxd _bounds;
     ModelMetadata _metadata;
     ModelPtr _model;
-    ModelInstances _instances;
+    std::vector<ModelInstance> _instances;
     PropertyMap _properties;
     std::vector<RemovedCallback> _onRemovedCallback;
     bool _markedForRemoval = false;
 };
+
+using ModelDescriptorPtr = std::shared_ptr<ModelDescriptor>;
 
 /**
  * The abstract Model class holds the geometry attached to an asset of
@@ -233,16 +252,16 @@ public:
      */
     virtual SharedDataVolumePtr createSharedDataVolume(
         const Vector3ui& dimensions, const Vector3f& spacing,
-        const DataType type) const = 0;
+        const VolumeDataType type) const = 0;
 
     /**
      * Create a volume with the given dimensions, voxel spacing and data type
      * where the voxels are copied via setBrick() into an optimized internal
      * storage.
      */
-    virtual BrickedVolumePtr createBrickedVolume(const Vector3ui& dimensions,
-                                                 const Vector3f& spacing,
-                                                 const DataType type) const = 0;
+    virtual BrickedVolumePtr createBrickedVolume(
+        const Vector3ui& dimensions, const Vector3f& spacing,
+        const VolumeDataType type) const = 0;
 
     virtual void buildBoundingBox() = 0;
     //@}
@@ -263,8 +282,11 @@ public:
     /**
         Returns spheres handled by the Model
     */
-    const SpheresMap& getSpheres() const { return _geometries->_spheres; }
-    SpheresMap& getSpheres()
+    const std::map<size_t, std::vector<Sphere>>& getSpheres() const
+    {
+        return _geometries->_spheres;
+    }
+    std::map<size_t, std::vector<Sphere>>& getSpheres()
     {
         _spheresDirty = true;
         return _geometries->_spheres;
@@ -280,8 +302,11 @@ public:
     /**
         Returns cylinders handled by the model
       */
-    const CylindersMap& getCylinders() const { return _geometries->_cylinders; }
-    CylindersMap& getCylinders()
+    const std::map<size_t, std::vector<Cylinder>>& getCylinders() const
+    {
+        return _geometries->_cylinders;
+    }
+    std::map<size_t, std::vector<Cylinder>>& getCylinders()
     {
         _cylindersDirty = true;
         return _geometries->_cylinders;
@@ -296,8 +321,11 @@ public:
     /**
         Returns cones handled by the model
     */
-    const ConesMap& getCones() const { return _geometries->_cones; }
-    ConesMap& getCones()
+    const std::map<size_t, std::vector<Cone>>& getCones() const
+    {
+        return _geometries->_cones;
+    }
+    std::map<size_t, std::vector<Cone>>& getCones()
     {
         _conesDirty = true;
         return _geometries->_cones;
@@ -311,27 +339,6 @@ public:
     uint64_t addCone(const size_t materialId, const Cone& cone);
 
     /**
-        Returns SDFBezier handled by the model
-    */
-    const SDFBeziersMap& getSDFBeziers() const
-    {
-        return _geometries->_sdfBeziers;
-    }
-
-    SDFBeziersMap& getSDFBeziers()
-    {
-        _sdfBeziersDirty = true;
-        return _geometries->_sdfBeziers;
-    }
-    /**
-      Adds a SDFBezier to the model
-      @param materialId Id of the material for the sdfBezier
-      @param sdfBezier SDFBezier to add
-      @return Index of the bezier for the specified material
-      */
-    uint64_t addSDFBezier(const size_t materialId, const SDFBezier& sdfBezier);
-
-    /**
       Adds a streamline to the model
       @param materialId Id of the material for the streamline
       @param streamline Streamline to add
@@ -341,7 +348,7 @@ public:
     /**
         Returns streamlines handled by the model
     */
-    StreamlinesDataMap& getStreamlines()
+    std::map<size_t, StreamlinesData>& getStreamlines()
     {
         _streamlinesDirty = true;
         return _geometries->_streamlines;
@@ -366,25 +373,6 @@ public:
         return _geometries->_sdf;
     }
 
-    /**
-     * @brief Add a metaobject to the scene
-     * @param materialId Id of the material that this metaobject will use
-     * @param metaObject object descriptor in the form of a property map
-     * @return The meta object index for the given material
-     */
-    uint64_t addMetaObject(const size_t materialId,
-                           const PropertyMap& metaObject);
-
-    /**
-     * @brief Return the list of metaobjects that this model contains
-     * @return List of metaobjects in the form of PropertyMap
-     */
-    MetaObjects& getMetaObjects()
-    {
-        _metaObjectsDirty = true;
-        return _geometries->_metaObjects;
-    }
-
     /** Update the list of neighbours for a SDF geometry
       @param geometryIdx Index of the geometry
       @param neighbourIndices Global indices of the geometries to smoothly blend
@@ -396,11 +384,11 @@ public:
     /**
         Returns triangle meshes handled by the model
     */
-    const TriangleMeshMap& getTriangleMeshes() const
+    const std::map<size_t, TriangleMesh>& getTriangleMeshes() const
     {
         return _geometries->_triangleMeshes;
     }
-    TriangleMeshMap& getTriangleMeshes()
+    std::map<size_t, TriangleMesh>& getTriangleMeshes()
     {
         _triangleMeshesDirty = true;
         return _geometries->_triangleMeshes;
@@ -431,7 +419,10 @@ public:
      * by the model
      * @return The map of materials handled by the model
      */
-    const MaterialMap& getMaterials() const { return _materials; }
+    const std::map<size_t, MaterialPtr>& getMaterials() const
+    {
+        return _materials;
+    }
     /**
      * @brief getMaterial Returns a pointer to a specific material
      * @param materialId Id of the material
@@ -454,14 +445,12 @@ public:
     size_t getSizeInBytes() const;
     void markInstancesDirty() { _instancesDirty = true; }
     void markInstancesClean() { _instancesDirty = false; }
-    const Volumes& getVolumes() const { return _geometries->_volumes; }
+    const std::vector<VolumePtr>& getVolumes() const
+    {
+        return _geometries->_volumes;
+    }
     bool isVolumesDirty() const { return _volumesDirty; }
     void resetVolumesDirty() { _volumesDirty = false; }
-    void setBVHFlags(std::set<BVHFlag> bvhFlags)
-    {
-        _bvhFlags = std::move(bvhFlags);
-    }
-    const std::set<BVHFlag>& getBVHFlags() const { return _bvhFlags; }
 
     void setSimulationEnabled(const bool v)
     {
@@ -491,36 +480,31 @@ protected:
     bool _simulationEnabledDirty{true};
     bool _simulationEnabled{false};
 
-    MaterialMap _materials;
+    std::map<size_t, MaterialPtr> _materials;
 
     struct Geometries
     {
-        SpheresMap _spheres;
-        CylindersMap _cylinders;
-        ConesMap _cones;
-        SDFBeziersMap _sdfBeziers;
-        TriangleMeshMap _triangleMeshes;
-        StreamlinesDataMap _streamlines;
+        std::map<size_t, std::vector<Sphere>> _spheres;
+        std::map<size_t, std::vector<Cylinder>> _cylinders;
+        std::map<size_t, std::vector<Cone>> _cones;
+        std::map<size_t, TriangleMesh> _triangleMeshes;
+        std::map<size_t, StreamlinesData> _streamlines;
         SDFGeometryData _sdf;
-        Volumes _volumes;
-        MetaObjects _metaObjects;
+        std::vector<VolumePtr> _volumes;
 
         Boxd _sphereBounds;
         Boxd _cylindersBounds;
         Boxd _conesBounds;
-        Boxd _sdfBeziersBounds;
         Boxd _triangleMeshesBounds;
         Boxd _streamlinesBounds;
         Boxd _sdfGeometriesBounds;
         Boxd _volumesBounds;
-        Boxd _metaObjectBounds;
 
         bool isEmpty() const
         {
             return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
-                   _sdfBeziers.empty() && _triangleMeshes.empty() &&
-                   _sdf.geometries.empty() && _streamlines.empty() &&
-                   _volumes.empty() && _metaObjects.empty();
+                   _triangleMeshes.empty() && _sdf.geometries.empty() &&
+                   _streamlines.empty() && _volumes.empty();
         }
     };
 
@@ -532,23 +516,19 @@ protected:
     bool _spheresDirty{false};
     bool _cylindersDirty{false};
     bool _conesDirty{false};
-    bool _sdfBeziersDirty{false};
     bool _triangleMeshesDirty{false};
     bool _streamlinesDirty{false};
     bool _sdfGeometriesDirty{false};
     bool _volumesDirty{false};
-    bool _metaObjectsDirty{false};
 
     bool _areGeometriesDirty() const
     {
         return _spheresDirty || _cylindersDirty || _conesDirty ||
-               _sdfBeziersDirty || _triangleMeshesDirty ||
-               _sdfGeometriesDirty || _metaObjectsDirty;
+               _triangleMeshesDirty || _sdfGeometriesDirty;
     }
 
     Boxd _bounds;
     bool _instancesDirty{true};
-    std::set<BVHFlag> _bvhFlags;
     size_t _sizeInBytes{0};
 
     // Whether this model has set the AnimationParameters "is ready" callback

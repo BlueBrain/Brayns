@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
 #include <brayns/engine/Camera.h>
 
 // TODO: Setting up the camera in this manner is kind of common in 3D

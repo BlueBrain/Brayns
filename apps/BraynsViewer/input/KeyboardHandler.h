@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
-
 #include <functional>
+#include <map>
+#include <vector>
 
 namespace brayns
 {

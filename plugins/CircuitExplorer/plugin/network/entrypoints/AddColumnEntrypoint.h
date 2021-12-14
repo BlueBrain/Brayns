@@ -39,7 +39,7 @@ public:
         const auto matId = CircuitExplorerMaterial::create(*model);
 
         // Bottom of the column
-        const brayns::Vector3fs verticesBottom = {
+        const std::vector<brayns::Vector3f> verticesBottom = {
             {-0.25f, -1.0f, -0.5f}, {0.25f, -1.0f, -0.5f},
             {0.5f, -1.0f, -0.25f},  {0.5f, -1.0f, 0.25f},
             {0.5f, -1.0f, -0.25f},  {0.5f, -1.0f, 0.25f},
@@ -47,7 +47,7 @@ public:
             {-0.5f, -1.0f, 0.25f},  {-0.5f, -1.0f, -0.25f}};
 
         // Top of the column
-        const brayns::Vector3fs verticesTop = {
+        const std::vector<brayns::Vector3f> verticesTop = {
             {-0.25f, 1.f, -0.5f}, {0.25f, 1.f, -0.5f}, {0.5f, 1.f, -0.25f},
             {0.5f, 1.f, 0.25f},   {0.5f, 1.f, -0.25f}, {0.5f, 1.f, 0.25f},
             {0.25f, 1.f, 0.5f},   {-0.25f, 1.f, 0.5f}, {-0.5f, 1.f, 0.25f},

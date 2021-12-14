@@ -41,7 +41,6 @@ namespace brayns
 struct SnapshotParams
 {
     std::unique_ptr<AnimationParameters> animParams;
-    std::unique_ptr<GeometryParameters> geometryParams;
     std::unique_ptr<VolumeParameters> volumeParams;
     std::unique_ptr<RenderingParameters> renderingParams;
     std::unique_ptr<Camera> camera;
@@ -71,12 +70,6 @@ public:
                 engine.getParametersManager().getAnimationParameters());
         }
 
-        if (_params.geometryParams == nullptr)
-        {
-            _params.geometryParams = std::make_unique<GeometryParameters>(
-                engine.getParametersManager().getGeometryParameters());
-        }
-
         if (_params.renderingParams == nullptr)
         {
             _params.renderingParams = std::make_unique<RenderingParameters>(
@@ -89,9 +82,7 @@ public:
                 engine.getParametersManager().getVolumeParameters());
         }
 
-        _scene =
-            engine.createScene(*_params.animParams, *_params.geometryParams,
-                               *_params.volumeParams);
+        _scene = engine.createScene(*_params.animParams, *_params.volumeParams);
 
         _renderer = engine.createRenderer(*_params.animParams,
                                           *_params.renderingParams);
@@ -137,12 +128,13 @@ public:
 
         const auto isStereo = _camera->hasProperty("stereo") &&
                               _camera->getProperty<bool>("stereo");
-        const auto names = isStereo ? strings{"0L", "0R"} : strings{"default"};
+        const auto names = isStereo ? std::vector<std::string>{"0L", "0R"}
+                                    : std::vector<std::string>{"default"};
         std::vector<FrameBufferPtr> frameBuffers;
         for (const auto& name : names)
             frameBuffers.push_back(
                 _engine.createFrameBuffer(name, _params.size,
-                                          FrameBufferFormat::rgba_i8));
+                                          PixelFormat::RGBA_I8));
 
         while (frameBuffers[0]->numAccumFrames() !=
                size_t(_params.samplesPerPixel))

@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,19 +18,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AbstractParameters.h"
+#pragma once
 
-#include <brayns/common/Log.h>
+#include <brayns/common/adapters/VolumeDataTypeAdapter.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-void AbstractParameters::print()
-{
-    Log::info("-= {} parameters =-", _name);
-}
-
-po::options_description& AbstractParameters::parameters()
-{
-    return _parameters;
-}
+BRAYNS_JSON_OBJECT_BEGIN(RawVolumeLoaderParameters)
+BRAYNS_JSON_OBJECT_ENTRY(Vector3i, dimensions, "Volume grid size (x,y,z)")
+BRAYNS_JSON_OBJECT_ENTRY(Vector3d, spacing, "Volume grid cell spacing")
+BRAYNS_JSON_OBJECT_ENTRY(VolumeDataType, type, "Volume byte data type")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

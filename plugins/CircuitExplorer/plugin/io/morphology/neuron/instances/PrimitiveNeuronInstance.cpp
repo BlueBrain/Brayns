@@ -24,8 +24,10 @@
 #include <plugin/io/morphology/neuron/NeuronMaterialMap.h>
 
 PrimitiveNeuronInstance::PrimitiveNeuronInstance(
-    brayns::Spheres&& spheres, brayns::Cylinders&& cylinders,
-    brayns::Cones&& cones, const std::shared_ptr<PrimitiveSharedData>& data)
+    std::vector<brayns::Sphere>&& spheres,
+    std::vector<brayns::Cylinder>&& cylinders,
+    std::vector<brayns::Cone>&& cones,
+    const std::shared_ptr<PrimitiveSharedData>& data)
     : _spheres(std::move(spheres))
     , _cylinders(std::move(cylinders))
     , _cones(std::move(cones))

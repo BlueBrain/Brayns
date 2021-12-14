@@ -57,8 +57,7 @@ DTIPlugin::DTIPlugin()
 
 void DTIPlugin::init()
 {
-    auto &scene = _api->getScene();
-    auto &registry = scene.getLoaderRegistry();
+    auto &registry = _api->getLoaderRegistry();
 
     registry.registerLoader(std::make_unique<DTILoader>());
 

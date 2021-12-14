@@ -108,7 +108,7 @@ void OSPRayRenderer::commit()
         }
 
         // Setting the clip planes in the renderer and the camera
-        Planes planes;
+        std::vector<Plane> planes;
         for (const auto& clipPlane : _scene->getClipPlanes())
             planes.push_back(clipPlane->getPlane());
 
@@ -211,7 +211,7 @@ void OSPRayRenderer::_commitRendererMaterials()
     });
 }
 
-void OSPRayRenderer::setClipPlanes(const Planes& planes)
+void OSPRayRenderer::setClipPlanes(const std::vector<Plane>& planes)
 {
     if (_clipPlanes == planes)
         return;

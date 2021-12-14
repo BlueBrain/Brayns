@@ -21,7 +21,7 @@
 #include "OSPRayMaterial.h"
 #include "utils.h"
 
-#include <brayns/common/Log.h>
+#include <brayns/common/TextureType.h>
 
 #include <ospray/SDK/common/OSPCommon.h>
 

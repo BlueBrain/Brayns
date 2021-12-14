@@ -55,9 +55,9 @@ struct PrimitiveSharedData
 class PrimitiveNeuronInstance : public MorphologyInstance
 {
 public:
-    PrimitiveNeuronInstance(brayns::Spheres&& spheres,
-                            brayns::Cylinders&& cylinders,
-                            brayns::Cones&& cones,
+    PrimitiveNeuronInstance(std::vector<brayns::Sphere>&& spheres,
+                            std::vector<brayns::Cylinder>&& cylinders,
+                            std::vector<brayns::Cone>&& cones,
                             const std::shared_ptr<PrimitiveSharedData>& data);
 
     void mapSimulation(const size_t globalOffset,

@@ -22,13 +22,8 @@
 
 #include <brayns/common/Log.h>
 #include <brayns/common/Transformation.h>
-#include <brayns/common/scene/ClipPlane.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
-
-#include <brayns/parameters/AnimationParameters.h>
-#include <brayns/parameters/GeometryParameters.h>
 
 #include <brayns/utils/Filesystem.h>
 
@@ -82,10 +77,8 @@ std::shared_ptr<T> _replace(std::vector<std::shared_ptr<T>>& list,
 namespace brayns
 {
 Scene::Scene(AnimationParameters& animationParameters,
-             GeometryParameters& geometryParameters,
              VolumeParameters& volumeParameters)
     : _animationParameters(animationParameters)
-    , _geometryParameters(geometryParameters)
     , _volumeParameters(volumeParameters)
 {
 }
@@ -143,9 +136,6 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
     if (model.empty())
         throw std::runtime_error("Empty models not supported.");
 
-    const auto defaultBVHFlags = _geometryParameters.getDefaultBVHFlags();
-
-    model.setBVHFlags(defaultBVHFlags);
     model.buildBoundingBox();
 
     // Since models can be added concurrently we check if that is supported
@@ -177,9 +167,6 @@ void Scene::addModel(const size_t id, ModelDescriptorPtr modelDescriptor)
     if (model.empty())
         throw std::runtime_error("Empty models not supported.");
 
-    const auto defaultBVHFlags = _geometryParameters.getDefaultBVHFlags();
-
-    model.setBVHFlags(defaultBVHFlags);
     model.buildBoundingBox();
 
     // Since models can be added concurrently we check if that is supported
@@ -309,36 +296,27 @@ void Scene::removeClipPlane(const size_t id)
         markModified();
 }
 
-std::vector<ModelDescriptorPtr> Scene::loadModels(Blob&& blob,
-                                                  const ModelParams& params,
-                                                  LoaderProgress cb)
+void Scene::addModels(std::vector<ModelDescriptorPtr>& input,
+                      const ModelParams& params)
 {
-    const auto& loader =
-        _loaderRegistry.getSuitableLoader("", blob.type,
-                                          params.getLoaderName());
+    // Check for models correctness
+    if (input.empty())
+        throw std::runtime_error("No model returned by loader");
 
-    // Load the models
-    auto modelDescriptors =
-        loader.loadFromBlob(std::move(blob), cb, params.getLoadParameters(),
-                            *this);
+    for (auto& md : input)
+    {
+        if (!md)
+            throw std::runtime_error("No model returned by loader");
+    }
 
-    _processNewModels(params, modelDescriptors);
-    return modelDescriptors;
-}
+    // Update loaded model with loader properties (so we can have the
+    // information with which it was loaded)
 
-std::vector<ModelDescriptorPtr> Scene::loadModels(const std::string& path,
-                                                  const ModelParams& params,
-                                                  LoaderProgress cb)
-{
-    const auto& loader =
-        _loaderRegistry.getSuitableLoader(path, "", params.getLoaderName());
-
-    // Load the models
-    auto modelDescriptors =
-        loader.loadFromFile(path, cb, params.getLoadParameters(), *this);
-
-    _processNewModels(params, modelDescriptors);
-    return modelDescriptors;
+    for (auto& md : input)
+    {
+        *md = params;
+        addModel(md);
+    }
 }
 
 void Scene::visitModels(const std::function<void(Model&)>& functor)
@@ -473,29 +451,6 @@ void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)
     markModified();
 }
 
-void Scene::_processNewModels(const ModelParams& params,
-                              std::vector<ModelDescriptorPtr>& models)
-{
-    // Check for models correctness
-    if (models.empty())
-        throw std::runtime_error("No model returned by loader");
-
-    for (auto& md : models)
-    {
-        if (!md)
-            throw std::runtime_error("No model returned by loader");
-    }
-
-    // Update loaded model with loader properties (so we can have the
-    // information with which it was loaded)
-
-    for (auto& md : models)
-    {
-        *md = params;
-        addModel(md);
-    }
-}
-
 void Scene::_computeBounds()
 {
     std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
@@ -540,25 +495,14 @@ void Scene::_updateAnimationParameters()
 
     auto& ap = _animationParameters;
 
-    if (handlers.empty())
-        ap.removeIsReadyCallback();
-    else
+    if (!handlers.empty())
     {
-        ap.setIsReadyCallback([handlersV = handlers] {
-            for (auto handler : handlersV)
-            {
-                if (!handler->isReady())
-                    return false;
-            }
-            return true;
-        });
-
-        ap.setDt(smallestDt, false);
-        ap.setStartFrame(static_cast<uint32_t>(
-            std::round(std::nextafter(earlierStart, INFINITY) / smallestDt)));
-        ap.setEndFrame(static_cast<uint32_t>(
-            std::round(std::nextafter(latestEnd, INFINITY) / smallestDt)));
-        ap.setUnit(handlers[0]->getUnit(), false);
+        ap.setDt(smallestDt);
+        ap.setStartAndEndFrame(
+            static_cast<uint32_t>(std::round(
+                std::nextafter(earlierStart, INFINITY) / smallestDt)),
+            static_cast<uint32_t>(
+                std::round(std::nextafter(latestEnd, INFINITY) / smallestDt)));
         ap.markModified();
     }
 }

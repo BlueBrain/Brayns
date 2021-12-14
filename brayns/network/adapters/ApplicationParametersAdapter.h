@@ -28,7 +28,6 @@
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(ApplicationParameters)
-BRAYNS_JSON_ADAPTER_GET("engine", getEngine, "Application engine")
 BRAYNS_JSON_ADAPTER_GET("plugins", getPlugins, "Loaded plugins")
 BRAYNS_JSON_ADAPTER_GETSET("jpeg_compression", getJpegCompression,
                            setJpegCompression, "JPEG compression rate")

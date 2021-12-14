@@ -22,7 +22,6 @@
 
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/propertymap/PropertyMap.h>
-#include <brayns/common/types.h>
 
 #include <map>
 
@@ -121,9 +120,9 @@ public:
     }
 
     /** @return the list of all registered types. */
-    strings getTypes() const
+    std::vector<std::string> getTypes() const
     {
-        strings types;
+        std::vector<std::string> types;
         for (const auto& i : _properties)
             types.push_back(i.first);
         return types;

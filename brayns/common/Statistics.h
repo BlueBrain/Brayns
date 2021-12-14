@@ -21,7 +21,6 @@
 #pragma once
 
 #include <brayns/common/BaseObject.h>
-#include <brayns/common/types.h>
 
 namespace brayns
 {

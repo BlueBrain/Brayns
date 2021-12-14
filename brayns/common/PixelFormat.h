@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,19 +18,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AbstractParameters.h"
-
-#include <brayns/common/Log.h>
+#pragma once
 
 namespace brayns
 {
-void AbstractParameters::print()
+enum class PixelFormat
 {
-    Log::info("-= {} parameters =-", _name);
+    RGBA_I8,
+    RGB_I8,
+    RGB_F32,
+    NONE
+};
 }
-
-po::options_description& AbstractParameters::parameters()
-{
-    return _parameters;
-}
-} // namespace brayns
