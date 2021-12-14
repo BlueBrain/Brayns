@@ -20,6 +20,7 @@
 
 #include "KeyboardHandler.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/parameters/RenderingParameters.h>
 #include <brayns/parameters/VolumeParameters.h>

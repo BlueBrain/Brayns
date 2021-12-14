@@ -25,21 +25,6 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/ext.hpp>
 #include <glm/gtx/io.hpp>
-#include <vector>
-
-#include <brayns/common/BaseObject.h>
-
-namespace brayns
-{
-template <typename T>
-class Box;
-}
-namespace staticjson
-{
-class ObjectHandler;
-template <typename U>
-void init(brayns::Box<U>*, ObjectHandler*);
-} // namespace staticjson
 
 namespace brayns
 {
@@ -134,13 +119,16 @@ using Vector3ui = glm::vec<3, uint32_t>;
 using Vector2f = glm::vec2;
 using Vector3f = glm::vec3;
 using Vector4f = glm::vec4;
-typedef std::vector<Vector3f> Vector3fs;
-typedef std::vector<Vector4f> Vector4fs;
 
 using Vector2d = glm::vec<2, double>;
 using Vector3d = glm::vec<3, double>;
 using Vector4d = glm::vec<4, double>;
-typedef std::vector<Vector2d> Vector2ds;
+
+/** A clip plane is defined by a normal and a distance expressed
+ * in absolute value of the coordinate system. Values are stored
+ * in a Vector4, with the following order: nx, ny, nz and d
+ */
+using Plane = Vector4d;
 
 /**
  * Quaternion definitions

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/common/loader/Loader.h>
+#include <brayns/io/Loader.h>
 
 #include <brayns/engine/Scene.h>
 
@@ -31,11 +31,13 @@
 
 namespace brayns
 {
-class LoadModelTask : public EntrypointTask<ModelParams, ModelDescriptors>
+class LoadModelTask
+    : public EntrypointTask<ModelParams, std::vector<ModelDescriptorPtr>>
 {
 public:
-    LoadModelTask(Engine& engine)
+    LoadModelTask(Engine& engine, LoaderRegistry& registry)
         : _engine(&engine)
+        , _loaderRegistry(&registry)
     {
     }
 
@@ -43,24 +45,30 @@ public:
     {
         auto& scene = _engine->getScene();
         auto& path = _params.getPath();
-        _descriptors =
-            scene.loadModels(path, _params,
-                             {[this](const auto& operation, auto amount) {
-                                 progress(operation, amount);
-                             }});
+        auto& loaderName = _params.getLoaderName();
+
+        const auto& loader =
+            _loaderRegistry->getSuitableLoader(path, "", loaderName);
+
+        auto models =
+            loader.loadFromFile(path,
+                                {[this](const auto& operation, auto amount) {
+                                    progress(operation, amount);
+                                }},
+                                _params.getLoadParameters(), scene);
+
+        scene.addModels(models, _params);
     }
 
     virtual void onStart() override
     {
         _params = getParams();
-        auto& scene = _engine->getScene();
-        auto& registry = scene.getLoaderRegistry();
         auto& path = _params.getPath();
         if (path.empty())
         {
             throw EntrypointException("Missing model path");
         }
-        if (!registry.isSupportedFile(path))
+        if (!_loaderRegistry->isSupportedFile(path))
         {
             throw EntrypointException("Unsupported file type: '" + path + "'");
         }
@@ -74,11 +82,13 @@ public:
 
 private:
     Engine* _engine;
+    LoaderRegistry* _loaderRegistry;
     ModelParams _params;
-    ModelDescriptors _descriptors;
+    std::vector<ModelDescriptorPtr> _descriptors;
 };
 
-class AddModelEntrypoint : public Entrypoint<ModelParams, ModelDescriptors>
+class AddModelEntrypoint
+    : public Entrypoint<ModelParams, std::vector<ModelDescriptorPtr>>
 {
 public:
     virtual std::string getName() const override { return "add-model"; }
@@ -93,7 +103,8 @@ public:
     virtual void onRequest(const Request& request) override
     {
         auto& engine = getApi().getEngine();
-        auto task = std::make_shared<LoadModelTask>(engine);
+        auto& registry = getApi().getLoaderRegistry();
+        auto task = std::make_shared<LoadModelTask>(engine, registry);
         launchTask(task, request);
     }
 };

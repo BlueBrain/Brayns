@@ -21,7 +21,7 @@
 #include <plugin/io/morphology/MorphologyInstance.h>
 #include <plugin/io/morphology/neuron/NeuronMorphology.h>
 
-#include <brayns/common/mathTypes.h>
+#include <brayns/common/MathTypes.h>
 
 class NeuronInstantiableGeometry
 {

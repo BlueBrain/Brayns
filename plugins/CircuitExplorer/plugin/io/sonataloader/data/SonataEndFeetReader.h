@@ -20,6 +20,8 @@
 
 #include <brayns/common/geometry/TriangleMesh.h>
 
+#include <vector>
+
 namespace sonataloader
 {
 /**

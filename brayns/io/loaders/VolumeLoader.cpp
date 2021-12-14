@@ -87,52 +87,52 @@ std::map<std::string, std::string> parseMHD(const std::string& filename)
     return result;
 }
 
-DataType dataTypeFromMET(const std::string& type)
+VolumeDataType dataTypeFromMET(const std::string& type)
 {
     if (type == "MET_FLOAT")
-        return DataType::FLOAT;
+        return VolumeDataType::FLOAT;
     else if (type == "MET_DOUBLE")
-        return DataType::DOUBLE;
+        return VolumeDataType::DOUBLE;
     else if (type == "MET_UCHAR")
-        return DataType::UINT8;
+        return VolumeDataType::UINT8;
     else if (type == "MET_USHORT")
-        return DataType::UINT16;
+        return VolumeDataType::UINT16;
     else if (type == "MET_UINT")
-        return DataType::UINT32;
+        return VolumeDataType::UINT32;
     else if (type == "MET_CHAR")
-        return DataType::INT8;
+        return VolumeDataType::INT8;
     else if (type == "MET_SHORT")
-        return DataType::INT16;
+        return VolumeDataType::INT16;
     else if (type == "MET_INT")
-        return DataType::INT32;
+        return VolumeDataType::INT32;
     else
         throw std::runtime_error("Unknown data type " + type);
 }
 
-Vector2f dataRangeFromType(DataType type)
+Vector2f dataRangeFromType(VolumeDataType type)
 {
     switch (type)
     {
-    case DataType::UINT8:
+    case VolumeDataType::UINT8:
         return {std::numeric_limits<uint8_t>::min(),
                 std::numeric_limits<uint8_t>::max()};
-    case DataType::UINT16:
+    case VolumeDataType::UINT16:
         return {std::numeric_limits<uint16_t>::min(),
                 std::numeric_limits<uint16_t>::max()};
-    case DataType::UINT32:
+    case VolumeDataType::UINT32:
         return {std::numeric_limits<uint32_t>::min() / 100,
                 std::numeric_limits<uint32_t>::max() / 100};
-    case DataType::INT8:
+    case VolumeDataType::INT8:
         return {std::numeric_limits<int8_t>::min(),
                 std::numeric_limits<int8_t>::max()};
-    case DataType::INT16:
+    case VolumeDataType::INT16:
         return {std::numeric_limits<int16_t>::min(),
                 std::numeric_limits<int16_t>::max()};
-    case DataType::INT32:
+    case VolumeDataType::INT32:
         return {std::numeric_limits<int32_t>::min() / 100,
                 std::numeric_limits<int32_t>::max() / 100};
-    case DataType::FLOAT:
-    case DataType::DOUBLE:
+    case VolumeDataType::FLOAT:
+    case VolumeDataType::DOUBLE:
     default:
         return {0, 1};
     }

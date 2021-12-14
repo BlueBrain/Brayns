@@ -22,7 +22,8 @@
 #pragma once
 
 #include <brayns/common/PropertyObject.h>
-#include <brayns/common/types.h>
+
+#include <memory>
 
 namespace brayns
 {
@@ -123,4 +124,6 @@ private:
 
     std::string _bufferTarget;
 };
+
+using CameraPtr = std::shared_ptr<Camera>;
 } // namespace brayns

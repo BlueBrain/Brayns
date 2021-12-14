@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 #include <brayns/utils/DynamicLib.h>
 

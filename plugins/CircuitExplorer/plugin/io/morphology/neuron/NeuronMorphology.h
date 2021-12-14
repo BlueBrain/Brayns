@@ -20,7 +20,7 @@
 
 #include <plugin/io/morphology/neuron/NeuronSection.h>
 
-#include <brayns/common/mathTypes.h>
+#include <brayns/common/MathTypes.h>
 
 #include <set>
 #include <string>

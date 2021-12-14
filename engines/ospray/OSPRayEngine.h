@@ -40,12 +40,11 @@ public:
     /** @copydoc Engine::getMinimumFrameSize */
     Vector2ui getMinimumFrameSize() const final;
 
-    FrameBufferPtr createFrameBuffer(
-        const std::string& name, const Vector2ui& frameSize,
-        FrameBufferFormat frameBufferFormat) const final;
+    FrameBufferPtr createFrameBuffer(const std::string& name,
+                                     const Vector2ui& frameSize,
+                                     PixelFormat frameBufferFormat) const final;
 
     ScenePtr createScene(AnimationParameters& animationParameters,
-                         GeometryParameters& geometryParameters,
                          VolumeParameters& volumeParameters) const final;
     CameraPtr createCamera() const final;
     RendererPtr createRenderer(

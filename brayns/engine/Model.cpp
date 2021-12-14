@@ -20,6 +20,7 @@
 
 #include "Model.h"
 
+#include <brayns/common/DefaultMaterialIds.h>
 #include <brayns/common/Log.h>
 #include <brayns/common/Transformation.h>
 #include <brayns/common/material/Texture2D.h>
@@ -36,23 +37,6 @@ namespace brayns
 {
 namespace
 {
-void _bindMaterials(const AbstractSimulationHandlerPtr& simulationHandler,
-                    MaterialMap& materials)
-{
-    if (!simulationHandler)
-        return;
-    for (const auto& material : materials)
-        simulationHandler->bind(material.second);
-}
-
-void _unbindMaterials(const AbstractSimulationHandlerPtr& simulationHandler,
-                      MaterialMap& materials)
-{
-    if (!simulationHandler)
-        return;
-    for (const auto& material : materials)
-        simulationHandler->unbind(material.second);
-}
 } // namespace
 ModelParams::ModelParams(const std::string& path)
     : _name(fs::path(path).stem().string())
@@ -230,13 +214,6 @@ uint64_t Model::addCone(const size_t materialId, const Cone& cone)
     return _geometries->_cones[materialId].size() - 1;
 }
 
-uint64_t Model::addSDFBezier(const size_t materialId, const SDFBezier& bezier)
-{
-    _sdfBeziersDirty = true;
-    _geometries->_sdfBeziers[materialId].push_back(bezier);
-    return _geometries->_sdfBeziers[materialId].size() - 1;
-}
-
 void Model::addStreamline(const size_t materialId, const Streamline& streamline)
 {
     if (streamline.position.size() < 2)
@@ -277,14 +254,6 @@ uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
     _geometries->_sdf.geometries.push_back(geom);
     _sdfGeometriesDirty = true;
     return geomIdx;
-}
-
-uint64_t Model::addMetaObject(const size_t materialId,
-                              const PropertyMap& metaObject)
-{
-    _geometries->_metaObjects[materialId].push_back(metaObject);
-    _metaObjectsDirty = true;
-    return _geometries->_metaObjects.size() - 1;
 }
 
 void Model::updateSDFGeometryNeighbours(
@@ -422,12 +391,8 @@ void Model::logInformation()
         nbCylinders += cylinders.second.size();
     for (const auto& cones : _geometries->_cones)
         nbCones += cones.second.size();
-    for (const auto& sdfBeziers : _geometries->_sdfBeziers)
-        nbSdfBeziers += sdfBeziers.second.size();
     for (const auto& sdfGeoms : _geometries->_sdf.geometryIndices)
         nbSdfGeoms += sdfGeoms.second.size();
-    for (const auto& metaObj : _geometries->_metaObjects)
-        nbMetaObjects += metaObj.second.size();
 
     Log::debug(
         "Spheres: {}, Cylinders: {}, Cones: {}, SDFBeziers: {}, SDFGeometries: "
@@ -454,9 +419,7 @@ void Model::_updateSizeInBytes()
     for (const auto& cylinders : _geometries->_cylinders)
         _sizeInBytes += cylinders.second.size() * sizeof(Cylinder);
     for (const auto& cones : _geometries->_cones)
-        _sizeInBytes += cones.second.size() * sizeof(Cones);
-    for (const auto& sdfBeziers : _geometries->_sdfBeziers)
-        _sizeInBytes += sdfBeziers.second.size() * sizeof(SDFBeziers);
+        _sizeInBytes += cones.second.size() * sizeof(Cone);
     for (const auto& triangleMesh : _geometries->_triangleMeshes)
     {
         const auto& mesh = triangleMesh.second;
@@ -479,9 +442,6 @@ void Model::_updateSizeInBytes()
         _sizeInBytes += sdfIndices.second.size() * sizeof(uint64_t);
     for (const auto& sdfNeighbours : _geometries->_sdf.neighbours)
         _sizeInBytes += sdfNeighbours.size() * sizeof(size_t);
-    for (const auto& metaObjList : _geometries->_metaObjects)
-        for (const auto& metaObj : metaObjList.second)
-            _sizeInBytes += sizeof(metaObj);
 }
 
 void Model::copyFrom(const Model& rhs)
@@ -508,7 +468,6 @@ void Model::copyFrom(const Model& rhs)
         _materials[material.first] = newMaterial;
     }
     _bounds = rhs._bounds;
-    _bvhFlags = rhs._bvhFlags;
     _sizeInBytes = rhs._sizeInBytes;
 
     // reference only to save memory
@@ -517,12 +476,10 @@ void Model::copyFrom(const Model& rhs)
     _spheresDirty = !_geometries->_spheres.empty();
     _cylindersDirty = !_geometries->_cylinders.empty();
     _conesDirty = !_geometries->_cones.empty();
-    _sdfBeziersDirty = !_geometries->_sdfBeziers.empty();
     _triangleMeshesDirty = !_geometries->_triangleMeshes.empty();
     _streamlinesDirty = !_geometries->_streamlines.empty();
     _sdfGeometriesDirty = !_geometries->_sdf.geometries.empty();
     _volumesDirty = !_geometries->_volumes.empty();
-    _metaObjectsDirty = !_geometries->_metaObjects.empty();
 }
 
 void Model::updateBounds()
@@ -563,16 +520,6 @@ void Model::updateBounds()
                     _geometries->_conesBounds.merge(cone.center);
                     _geometries->_conesBounds.merge(cone.up);
                 }
-    }
-
-    if (_sdfBeziersDirty)
-    {
-        _geometries->_sdfBeziersBounds.reset();
-        for (const auto& sdfBeziers : _geometries->_sdfBeziers)
-            if (sdfBeziers.first != BOUNDINGBOX_MATERIAL_ID)
-                for (const auto& sdfBezier : sdfBeziers.second)
-                    _geometries->_sdfBeziersBounds.merge(
-                        bezierBounds(sdfBezier));
     }
 
     if (_triangleMeshesDirty)
@@ -617,7 +564,6 @@ void Model::updateBounds()
     _bounds.merge(_geometries->_sphereBounds);
     _bounds.merge(_geometries->_cylindersBounds);
     _bounds.merge(_geometries->_conesBounds);
-    _bounds.merge(_geometries->_sdfBeziersBounds);
     _bounds.merge(_geometries->_triangleMeshesBounds);
     _bounds.merge(_geometries->_streamlinesBounds);
     _bounds.merge(_geometries->_sdfGeometriesBounds);
@@ -629,12 +575,10 @@ void Model::_markGeometriesClean()
     _spheresDirty = false;
     _cylindersDirty = false;
     _conesDirty = false;
-    _sdfBeziersDirty = false;
     _triangleMeshesDirty = false;
     _streamlinesDirty = false;
     _sdfGeometriesDirty = false;
     _volumesDirty = false;
-    _metaObjectsDirty = false;
 }
 
 MaterialPtr Model::createMaterial(const size_t materialId,
@@ -643,18 +587,13 @@ MaterialPtr Model::createMaterial(const size_t materialId,
 {
     auto material = _materials[materialId] = createMaterialImpl(properties);
     material->setName(name);
-    if (_simulationHandler && materialId != BOUNDINGBOX_MATERIAL_ID)
-        _simulationHandler->bind(material);
     return material;
 }
 
 void Model::setSimulationHandler(AbstractSimulationHandlerPtr handler)
 {
     setSimulationEnabled(handler != nullptr);
-    if (_simulationHandler != handler)
-        _unbindMaterials(_simulationHandler, _materials);
     _simulationHandler = handler;
-    _bindMaterials(_simulationHandler, _materials);
 }
 
 size_t Model::getSizeInBytes() const

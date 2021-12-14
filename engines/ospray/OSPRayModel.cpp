@@ -23,6 +23,8 @@
 #include "OSPRayVolume.h"
 #include "utils.h"
 
+#include <brayns/common/DefaultMaterialIds.h>
+#include <brayns/common/Log.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Scene.h>
@@ -215,20 +217,6 @@ void OSPRayModel::_commitCones(const size_t materialId)
     _addGeometryToModel(geometry, materialId);
 }
 
-void OSPRayModel::_commitSDFBeziers(const size_t materialId)
-{
-    auto& geometry = _createGeometry(_ospSDFBeziers, materialId, "sdfbeziers");
-    auto data = allocateVectorData(_geometries->_sdfBeziers.at(materialId),
-                                   OSP_FLOAT, _memoryManagementFlags);
-
-    ospSetObject(geometry, "sdfbeziers", data);
-    ospRelease(data);
-
-    ospCommit(geometry);
-
-    _addGeometryToModel(geometry, materialId);
-}
-
 void OSPRayModel::_commitMeshes(const size_t materialId)
 {
     auto& geometry = _createGeometry(_ospMeshes, materialId, "trianglemesh");
@@ -369,16 +357,6 @@ void OSPRayModel::_commitSDFGeometries()
     ospRelease(neighbourData);
 }
 
-void OSPRayModel::_setBVHFlags()
-{
-    osphelper::set(_primaryModel, "dynamicScene",
-                   static_cast<int>(_bvhFlags.count(BVHFlag::dynamic)));
-    osphelper::set(_primaryModel, "compactMode",
-                   static_cast<int>(_bvhFlags.count(BVHFlag::compact)));
-    osphelper::set(_primaryModel, "robustMode",
-                   static_cast<int>(_bvhFlags.count(BVHFlag::robust)));
-}
-
 void OSPRayModel::commitGeometry()
 {
     for (auto volume : _geometries->_volumes)
@@ -416,12 +394,6 @@ void OSPRayModel::commitGeometry()
             _commitCones(cones.first);
     }
 
-    if (_sdfBeziersDirty)
-    {
-        for (const auto& sdfBeziers : _geometries->_sdfBeziers)
-            _commitSDFBeziers(sdfBeziers.first);
-    }
-
     if (_triangleMeshesDirty)
     {
         for (const auto& meshes : _geometries->_triangleMeshes)
@@ -439,7 +411,6 @@ void OSPRayModel::commitGeometry()
 
     updateBounds();
     _markGeometriesClean();
-    _setBVHFlags();
 
     // handled by the scene
     _instancesDirty = false;
@@ -520,16 +491,16 @@ MaterialPtr OSPRayModel::createMaterialImpl(const PropertyMap& properties)
 
 SharedDataVolumePtr OSPRayModel::createSharedDataVolume(
     const Vector3ui& dimensions, const Vector3f& spacing,
-    const DataType type) const
+    const VolumeDataType type) const
 {
     return std::make_shared<OSPRaySharedDataVolume>(dimensions, spacing, type,
                                                     _volumeParameters,
                                                     _ospTransferFunction);
 }
 
-BrickedVolumePtr OSPRayModel::createBrickedVolume(const Vector3ui& dimensions,
-                                                  const Vector3f& spacing,
-                                                  const DataType type) const
+BrickedVolumePtr OSPRayModel::createBrickedVolume(
+    const Vector3ui& dimensions, const Vector3f& spacing,
+    const VolumeDataType type) const
 {
     return std::make_shared<OSPRayBrickedVolume>(dimensions, spacing, type,
                                                  _volumeParameters,

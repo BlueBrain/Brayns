@@ -28,7 +28,6 @@
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/parameters/AnimationParameters.h>
-#include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #include <algorithm>

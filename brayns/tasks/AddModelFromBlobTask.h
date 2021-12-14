@@ -20,9 +20,10 @@
 
 #pragma once
 
-#include <brayns/common/loader/Loader.h>
 #include <brayns/common/tasks/Task.h>
+#include <brayns/engine/Engine.h>
 #include <brayns/engine/Model.h>
+#include <brayns/io/LoaderRegistry.h>
 
 namespace brayns
 {
@@ -50,12 +51,13 @@ struct BinaryParam : ModelParams
 class AddModelFromBlobTask : public Task<std::vector<ModelDescriptorPtr>>
 {
 public:
-    AddModelFromBlobTask(const BinaryParam& param, Engine& engine);
+    AddModelFromBlobTask(const BinaryParam& param, Engine& engine,
+                         LoaderRegistry& registry);
 
     void appendBlob(const std::string& blob);
 
 private:
-    void _checkValidity(Engine& engine);
+    void _checkValidity(LoaderRegistry& registry);
     void _cancel() final
     {
         _chunkEvent.set_exception(
@@ -69,7 +71,7 @@ private:
     async::event_task<Blob> _chunkEvent;
     async::event_task<std::vector<ModelDescriptorPtr>> _errorEvent;
     std::vector<async::task<std::vector<ModelDescriptorPtr>>> _finishTasks;
-    uint8_ts _blob;
+    std::vector<uint8_t> _blob;
     BinaryParam _param;
     size_t _receivedBytes{0};
     const float CHUNK_PROGRESS_WEIGHT{0.5f};

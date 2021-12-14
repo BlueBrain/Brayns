@@ -21,14 +21,17 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
+#include <brayns/common/BaseObject.h>
+#include <brayns/common/MathTypes.h>
+
+#include <vector>
 
 namespace brayns
 {
 struct ColorMap
 {
     std::string name;
-    Vector3fs colors;
+    std::vector<Vector3f> colors;
 
     bool operator==(const ColorMap& rhs) const;
 
@@ -43,8 +46,11 @@ public:
     /** Reset to gray-scale with opacity [0..1] and value range [0,255]. */
     void clear();
 
-    const Vector2ds& getControlPoints() const { return _controlPoints; }
-    void setControlPoints(const Vector2ds& controlPoints)
+    const std::vector<Vector2d>& getControlPoints() const
+    {
+        return _controlPoints;
+    }
+    void setControlPoints(const std::vector<Vector2d>& controlPoints)
     {
         _updateValue(_controlPoints, controlPoints);
     }
@@ -62,13 +68,13 @@ public:
         _updateValue(_valuesRange, valuesRange);
     }
 
-    floats calculateInterpolatedOpacities() const;
+    std::vector<float> calculateInterpolatedOpacities() const;
 
     Vector3f getColorForValue(const double v) const;
 
 private:
     ColorMap _colorMap;
-    Vector2ds _controlPoints;
+    std::vector<Vector2d> _controlPoints;
     Vector2d _valuesRange;
 };
 } // namespace brayns

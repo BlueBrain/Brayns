@@ -190,7 +190,8 @@ private:
 class InterfaceFactory
 {
 public:
-    static ActionInterfacePtr createInterface(NetworkContext& context)
+    static std::shared_ptr<ActionInterface> createInterface(
+        NetworkContext& context)
     {
         auto& api = context.getApi();
         auto& manager = api.getParametersManager();

@@ -20,8 +20,6 @@
 #pragma once
 
 #include <brayns/common/BaseObject.h>
-#include <brayns/common/Log.h>
-#include <brayns/common/types.h>
 
 #include <boost/program_options.hpp>
 #include <boost/program_options/value_semantic.hpp>
@@ -58,7 +56,7 @@ public:
      */
     virtual void print();
 
-    po::options_description& parameters() { return _parameters; }
+    po::options_description& parameters();
 
 protected:
     std::string _name;

@@ -9,6 +9,7 @@ set(BRAYNSENGINE_SOURCES
   Engine.cpp
   FrameBuffer.cpp
   FrameExporter.cpp
+  Light.cpp
   LightManager.cpp
   Material.cpp
   Model.cpp
@@ -24,6 +25,7 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
   Engine.h
   FrameBuffer.h
   FrameExporter.h
+  Light.h
   LightManager.h
   Material.h
   Model.h

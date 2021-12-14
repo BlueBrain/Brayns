@@ -1,6 +1,6 @@
-/* Copyright (c) 2019, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Author: Sebastien Speierer <sebastien.speierer@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,19 +20,23 @@
 
 #pragma once
 
-#include "ospray/SDK/geometry/Geometry.h"
-#include <brayns/common/types.h>
+#include <cstdint>
 
-namespace ospray
+namespace brayns
 {
-struct SDFBeziers : public ospray::Geometry
+enum class TextureType : uint8_t
 {
-    std::string toString() const final { return "brayns::SDFBeziers"; }
-    void finalize(ospray::Model* model) final;
-
-    ospray::Ref<ospray::Data> data;
-
-    SDFBeziers();
+    diffuse = 0,
+    normals,
+    bump,
+    specular,
+    emissive,
+    opacity,
+    reflection,
+    refraction,
+    occlusion,
+    radiance,
+    irradiance,
+    brdf_lut
 };
-
-} // namespace ospray
+}

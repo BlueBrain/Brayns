@@ -20,15 +20,17 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
+#include <brayns/common/MathTypes.h>
+
+#include <vector>
 
 namespace brayns
 {
 struct TriangleMesh
 {
-    Vector3fs vertices;
-    Vector3fs normals;
-    Vector4fs colors;
+    std::vector<Vector3f> vertices;
+    std::vector<Vector3f> normals;
+    std::vector<Vector4f> colors;
     std::vector<Vector3ui> indices;
     std::vector<Vector2f> textureCoordinates;
 };

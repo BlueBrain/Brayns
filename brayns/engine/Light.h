@@ -19,7 +19,9 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
+#include <brayns/common/MathTypes.h>
+
+#include <memory>
 
 namespace brayns
 {
@@ -51,6 +53,8 @@ public:
     double _intensity;
     bool _isVisible;
 };
+
+using LightPtr = std::shared_ptr<Light>;
 
 class DirectionalLight : public Light
 {

@@ -22,6 +22,7 @@
 
 #include <brayns/engine/BrickedVolume.h>
 #include <brayns/engine/SharedDataVolume.h>
+#include <brayns/parameters/VolumeParameters.h>
 
 #include <ospray/SDK/volume/Volume.h>
 
@@ -31,12 +32,14 @@ class OSPRayVolume : public virtual Volume
 {
 public:
     OSPRayVolume(const Vector3ui& dimensions, const Vector3f& spacing,
-                 const DataType type, const VolumeParameters& params,
+                 const VolumeDataType type, const VolumeParameters& params,
                  OSPTransferFunction transferFunction,
                  const std::string& volumeType);
+
     ~OSPRayVolume();
 
     void setDataRange(const Vector2f& range) final;
+
     void commit() final;
 
     OSPVolume impl() const { return _volume; }
@@ -52,8 +55,10 @@ class OSPRayBrickedVolume : public BrickedVolume, public OSPRayVolume
 {
 public:
     OSPRayBrickedVolume(const Vector3ui& dimensions, const Vector3f& spacing,
-                        const DataType type, const VolumeParameters& params,
+                        const VolumeDataType type,
+                        const VolumeParameters& params,
                         OSPTransferFunction transferFunction);
+
     void setBrick(const void* data, const Vector3ui& position,
                   const Vector3ui& size) final;
 };
@@ -62,7 +67,8 @@ class OSPRaySharedDataVolume : public SharedDataVolume, public OSPRayVolume
 {
 public:
     OSPRaySharedDataVolume(const Vector3ui& dimensions, const Vector3f& spacing,
-                           const DataType type, const VolumeParameters& params,
+                           const VolumeDataType type,
+                           const VolumeParameters& params,
                            OSPTransferFunction transferFunction);
 
     void setVoxels(const void* voxels) final;

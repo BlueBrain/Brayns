@@ -25,11 +25,14 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/version.h>
-#include <brayns/common/Log.h>
 
 #include <fstream>
 #include <numeric>
 #include <unordered_map>
+
+#include <brayns/common/DefaultMaterialIds.h>
+#include <brayns/common/Log.h>
+#include <brayns/common/TextureType.h>
 
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>

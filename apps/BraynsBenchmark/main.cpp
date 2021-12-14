@@ -21,7 +21,6 @@
 #include <brayns/Brayns.h>
 #include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
-#include <brayns/common/types.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/Scene.h>

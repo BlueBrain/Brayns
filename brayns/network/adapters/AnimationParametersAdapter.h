@@ -28,17 +28,12 @@
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(AnimationParameters)
-BRAYNS_JSON_ADAPTER_GETSET("start_frame", getStartFrame, setStartFrame,
-                           "Global initial simulation frame index")
-BRAYNS_JSON_ADAPTER_GETSET("end_frame", getEndFrame, setEndFrame,
-                           "Global final simulation frame index")
-BRAYNS_JSON_ADAPTER_GETSET("frame_count", getNumFrames, setNumFrames,
-                           "Animation frame count")
+BRAYNS_JSON_ADAPTER_GET("start_frame", getStartFrame,
+                        "Global initial simulation frame index")
+BRAYNS_JSON_ADAPTER_GET("end_frame", getEndFrame,
+                        "Global final simulation frame index")
 BRAYNS_JSON_ADAPTER_GETSET("current", getFrame, setFrame, "Current frame index")
-BRAYNS_JSON_ADAPTER_GETSET("delta", getDelta, setDelta, "Frame delta")
-BRAYNS_JSON_ADAPTER_GETSET("dt", getDt, setDt, "Frame time")
-BRAYNS_JSON_ADAPTER_GETSET("playing", isPlaying, setPlaying,
-                           "Animation is playing")
-BRAYNS_JSON_ADAPTER_GETSET("unit", getUnit, setUnit, "Time unit")
+BRAYNS_JSON_ADAPTER_GET("dt", getDt, "Frame time")
+BRAYNS_JSON_ADAPTER_GET("unit", getTimeUnit, "Time unit")
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

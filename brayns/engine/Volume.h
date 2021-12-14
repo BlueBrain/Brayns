@@ -21,7 +21,10 @@
 #pragma once
 
 #include <brayns/common/BaseObject.h>
-#include <brayns/common/types.h>
+#include <brayns/common/MathTypes.h>
+#include <brayns/common/VolumeDataType.h>
+
+#include <memory>
 
 namespace brayns
 {
@@ -37,7 +40,7 @@ public:
     //@}
 
     Volume(const Vector3ui& dimensions, const Vector3f& spacing,
-           const DataType type);
+           const VolumeDataType type);
 
     size_t getSizeInBytes() const { return _sizeInBytes; }
     Boxd getBounds() const
@@ -51,6 +54,8 @@ protected:
     std::atomic_size_t _sizeInBytes{0};
     const Vector3ui _dimensions;
     const Vector3f _spacing;
-    const DataType _dataType;
+    const VolumeDataType _dataType;
 };
+
+using VolumePtr = std::shared_ptr<Volume>;
 } // namespace brayns

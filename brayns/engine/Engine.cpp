@@ -95,8 +95,7 @@ FrameExporter& Engine::getFrameExporter() noexcept
 bool Engine::continueRendering() const
 {
     auto frameBuffer = _frameBuffers[0];
-    return _parametersManager.getAnimationParameters().isPlaying() ||
-           (frameBuffer->getAccumulation() &&
+    return (frameBuffer->getAccumulation() &&
             (frameBuffer->numAccumFrames() <
              _parametersManager.getRenderingParameters().getMaxAccumFrames()));
 }

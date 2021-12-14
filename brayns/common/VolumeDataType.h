@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2021 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,12 +20,29 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/utils/EnumUtils.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(EnvironmentMapMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, filename,
-                         "Source of the background image")
-BRAYNS_JSON_OBJECT_END()
+enum class VolumeDataType
+{
+    FLOAT,
+    DOUBLE,
+    UINT8,
+    UINT16,
+    UINT32,
+    INT8,
+    INT16,
+    INT32
+};
+
+template <>
+inline std::vector<std::pair<std::string, VolumeDataType>> enumMap()
+{
+    return {
+        {"float", VolumeDataType::FLOAT},   {"double", VolumeDataType::DOUBLE},
+        {"uint8", VolumeDataType::UINT8},   {"uint16", VolumeDataType::UINT16},
+        {"uint32", VolumeDataType::UINT32}, {"int8", VolumeDataType::INT8},
+        {"int16", VolumeDataType::INT16},   {"int32", VolumeDataType::INT32}};
+}
 } // namespace brayns

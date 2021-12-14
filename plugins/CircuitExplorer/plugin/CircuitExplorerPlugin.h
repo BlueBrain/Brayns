@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 #include <plugin/api/CircuitColorManager.h>

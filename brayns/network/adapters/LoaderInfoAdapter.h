@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/common/loader/LoaderRegistry.h>
+#include <brayns/io/LoaderRegistry.h>
 
 #include <brayns/json/JsonAdapterMacro.h>
 

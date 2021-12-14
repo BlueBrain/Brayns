@@ -20,6 +20,7 @@
 #include "OpenDeckPlugin.h"
 
 #include <brayns/common/Log.h>
+#include <brayns/common/PixelFormat.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/pluginapi/PluginAPI.h>
@@ -126,16 +127,16 @@ void OpenDeckPlugin::init()
 
     FrameBufferPtr frameBuffer =
         engine.createFrameBuffer(leftWallBufferName, _wallRes,
-                                 FrameBufferFormat::rgba_i8);
+                                 PixelFormat::RGBA_I8);
     engine.addFrameBuffer(frameBuffer);
     frameBuffer = engine.createFrameBuffer(rightWallBufferName, _wallRes,
-                                           FrameBufferFormat::rgba_i8);
+                                           PixelFormat::RGBA_I8);
     engine.addFrameBuffer(frameBuffer);
     frameBuffer = engine.createFrameBuffer(leftFloorBufferName, _floorRes,
-                                           FrameBufferFormat::rgba_i8);
+                                           PixelFormat::RGBA_I8);
     engine.addFrameBuffer(frameBuffer);
     frameBuffer = engine.createFrameBuffer(rightFloorBufferName, _floorRes,
-                                           FrameBufferFormat::rgba_i8);
+                                           PixelFormat::RGBA_I8);
     engine.addFrameBuffer(frameBuffer);
 }
 

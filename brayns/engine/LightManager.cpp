@@ -19,8 +19,6 @@
 
 #include "LightManager.h"
 
-#include <brayns/common/light/Light.h>
-
 #include <algorithm>
 
 namespace brayns

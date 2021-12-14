@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
 #include <brayns/engine/Renderer.h>
 
 #include <ospray.h>
@@ -43,7 +42,7 @@ public:
 
     PickResult pick(const Vector2f& pickPos) final;
 
-    void setClipPlanes(const Planes& planes);
+    void setClipPlanes(const std::vector<Plane>& planes);
 
 private:
     OSPRayCamera* _camera{nullptr};
@@ -52,7 +51,7 @@ private:
     std::string _currentOSPRenderer;
     OSPData _currLightsData{nullptr};
 
-    Planes _clipPlanes;
+    std::vector<Plane> _clipPlanes;
 
     void _createOSPRenderer();
     void _commitRendererMaterials();

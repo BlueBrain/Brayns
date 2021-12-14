@@ -20,7 +20,6 @@
 #pragma once
 
 #include <brayns/common/propertymap/PropertyMap.h>
-#include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 namespace brayns

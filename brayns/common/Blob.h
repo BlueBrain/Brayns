@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,22 +20,15 @@
 
 #pragma once
 
-#include <brayns/common/loader/Loader.h>
+#include <string>
+#include <vector>
 
 namespace brayns
 {
-class XYZBLoader : public NoInputLoader
+struct Blob
 {
-public:
-    std::vector<std::string> getSupportedExtensions() const final;
-
-    std::string getName() const final;
-
-    std::vector<ModelDescriptorPtr> importFromBlob(
-        Blob&& blob, const LoaderProgress& callback, Scene& scene) const final;
-
-    std::vector<ModelDescriptorPtr> importFromFile(
-        const std::string& filename, const LoaderProgress& callback,
-        Scene& scene) const final;
+    std::string type;
+    std::string name;
+    std::vector<uint8_t> data;
 };
 } // namespace brayns

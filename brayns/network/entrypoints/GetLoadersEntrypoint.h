@@ -39,9 +39,7 @@ public:
 
     virtual void onRequest(const Request& request) override
     {
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
-        auto& registry = scene.getLoaderRegistry();
+        auto& registry = getApi().getLoaderRegistry();
         auto& loaders = registry.getLoaderInfos();
         request.reply(loaders);
     }

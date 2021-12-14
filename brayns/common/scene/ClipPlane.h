@@ -20,7 +20,10 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
+#include <brayns/common/BaseObject.h>
+#include <brayns/common/MathTypes.h>
+
+#include <memory>
 
 namespace brayns
 {
@@ -51,4 +54,6 @@ private:
     size_t _id = 0;
     Plane _plane{0.0};
 };
+
+using ClipPlanePtr = std::shared_ptr<ClipPlane>;
 } // namespace brayns

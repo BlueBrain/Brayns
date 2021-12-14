@@ -20,7 +20,7 @@
 
 #include <bbp/sonata/edges.h>
 
-#include <brayns/common/mathTypes.h>
+#include <brayns/common/MathTypes.h>
 
 namespace sonataloader
 {

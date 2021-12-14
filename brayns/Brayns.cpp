@@ -24,31 +24,27 @@
 #include "PluginManager.h"
 
 #include <brayns/common/Log.h>
+#include <brayns/common/MathTypes.h>
+#include <brayns/common/PixelFormat.h>
 #include <brayns/common/Timer.h>
-#include <brayns/common/light/Light.h>
-#include <brayns/common/mathTypes.h>
-#include <brayns/utils/DynamicLib.h>
-#include <brayns/utils/StringUtils.h>
 
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Light.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
 
 #include <brayns/parameters/ParametersManager.h>
 
-#include <brayns/io/MeshLoader.h>
-#include <brayns/io/ProteinLoader.h>
-#include <brayns/io/VolumeLoader.h>
-#include <brayns/io/XYZBLoader.h>
-
 #include <brayns/network/interface/ActionInterface.h>
 
 #include <brayns/pluginapi/PluginAPI.h>
 
-#include <mutex> // std::unique_lock
+#include <brayns/utils/DynamicLib.h>
+#include <brayns/utils/StringUtils.h>
+
 #include <thread>
 
 namespace
@@ -87,9 +83,6 @@ struct Brayns::Impl : public PluginAPI
         // This initialization must happen before plugin intialization.
         _createEngine();
 
-        // Loaders before plugin init since 'Brain Atlas' uses the mesh loader
-        _registerLoaders();
-
         // Plugin init before frame buffer creation needed by OpenDeck plugin
         _pluginManager.initPlugins(this);
         _createFrameBuffer();
@@ -110,7 +103,7 @@ struct Brayns::Impl : public PluginAPI
         // make sure that plugin objects are removed first, as plugins are
         // destroyed before the engine, but plugin destruction still should have
         // a valid engine and _api (aka this object).
-        _engine->getScene().getLoaderRegistry().clear();
+        _loaderRegistry.clear();
         _pluginManager.destroyPlugins();
     }
 
@@ -139,8 +132,6 @@ struct Brayns::Impl : public PluginAPI
         scene.commit();
 
         _engine->getStatistics().setSceneSizeInBytes(scene.getSizeInBytes());
-
-        _parametersManager.getAnimationParameters().update();
 
         auto& renderer = _engine->getRenderer();
         renderer.setCurrentType(rp.getCurrentRenderer());
@@ -199,11 +190,8 @@ struct Brayns::Impl : public PluginAPI
         }
     }
 
-    void postRender(RenderOutput* output)
+    void postRender()
     {
-        if (output)
-            _updateRenderOutput(*output);
-
         _engine->getStatistics().setFPS(_lastFPS);
 
         _engine->postRender();
@@ -212,42 +200,6 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->resetFrameBuffers();
         _engine->getStatistics().resetModified();
-    }
-
-    bool commit(const RenderInput& renderInput)
-    {
-        _engine->getCamera().set(renderInput.position, renderInput.orientation,
-                                 renderInput.target);
-        _parametersManager.getApplicationParameters().setWindowSize(
-            renderInput.windowSize);
-
-        return commit();
-    }
-
-    void _updateRenderOutput(RenderOutput& renderOutput)
-    {
-        FrameBuffer& frameBuffer = _engine->getFrameBuffer();
-        frameBuffer.map();
-        const Vector2i& frameSize = frameBuffer.getSize();
-        const auto colorBuffer = frameBuffer.getColorBuffer();
-        if (colorBuffer)
-        {
-            const size_t size =
-                frameSize.x * frameSize.y * frameBuffer.getColorDepth();
-            renderOutput.colorBuffer.assign(colorBuffer, colorBuffer + size);
-            renderOutput.colorBufferFormat = frameBuffer.getFrameBufferFormat();
-        }
-
-        const auto depthBuffer = frameBuffer.getDepthBuffer();
-        if (depthBuffer)
-        {
-            const size_t size = frameSize.x * frameSize.y;
-            renderOutput.depthBuffer.assign(depthBuffer, depthBuffer + size);
-        }
-
-        renderOutput.frameSize = frameSize;
-
-        frameBuffer.unmap();
     }
 
     Engine& getEngine() final { return *_engine; }
@@ -261,6 +213,8 @@ struct Brayns::Impl : public PluginAPI
 
     Renderer& getRenderer() final { return _engine->getRenderer(); }
 
+    LoaderRegistry& getLoaderRegistry() final { return _loaderRegistry; }
+
     void triggerRender() final { _engine->triggerRender(); }
 
     ActionInterface* getActionInterface() final
@@ -268,7 +222,8 @@ struct Brayns::Impl : public PluginAPI
         return _actionInterface.get();
     }
 
-    void setActionInterface(const ActionInterfacePtr& interface) final
+    void setActionInterface(
+        const std::shared_ptr<ActionInterface>& interface) final
     {
         _actionInterface = interface;
     }
@@ -278,15 +233,9 @@ struct Brayns::Impl : public PluginAPI
 private:
     void _createEngine()
     {
-        auto engineName =
-            _parametersManager.getApplicationParameters().getEngine();
-
-        if (string_utils::toLowercase(engineName) == "ospray")
-            engineName = "braynsOSPRayEngine";
-
-        _engine = _engineFactory.create(engineName);
+        _engine = _engineFactory.create("braynsOSPRayEngine");
         if (!_engine)
-            throw std::runtime_error("Unsupported engine: " + engineName);
+            throw std::runtime_error("Could not allocate ospray engine");
 
         // Default sun light
         _sunLight =
@@ -307,11 +256,7 @@ private:
         if (!_engine->getFrameBuffers().empty())
             return;
 
-        const auto& ap = _parametersManager.getApplicationParameters();
-        const auto names =
-            ap.isStereo() ? strings{"0L", "0R"} : strings{"default"};
-        for (const auto& name : names)
-            _addFrameBuffer(name);
+        _addFrameBuffer("default");
     }
 
     void _addFrameBuffer(const std::string& name)
@@ -320,28 +265,14 @@ private:
         const auto frameSize = ap.getWindowSize();
 
         auto frameBuffer =
-            _engine->createFrameBuffer(name, frameSize,
-                                       FrameBufferFormat::rgba_i8);
+            _engine->createFrameBuffer(name, frameSize, PixelFormat::RGBA_I8);
         _engine->addFrameBuffer(frameBuffer);
         _frameBuffers.push_back(frameBuffer);
-    }
-
-    void _registerLoaders()
-    {
-        auto& registry = _engine->getScene().getLoaderRegistry();
-        auto& scene = _engine->getScene();
-
-        registry.registerLoader(std::make_unique<ProteinLoader>());
-        registry.registerLoader(std::make_unique<RawVolumeLoader>());
-        registry.registerLoader(std::make_unique<MHDVolumeLoader>());
-        registry.registerLoader(std::make_unique<XYZBLoader>());
-        registry.registerLoader(std::make_unique<MeshLoader>());
     }
 
     void _loadData()
     {
         auto& scene = _engine->getScene();
-        const auto& registry = scene.getLoaderRegistry();
 
         const auto& paths =
             _parametersManager.getApplicationParameters().getInputPaths();
@@ -354,7 +285,7 @@ private:
             }
 
             for (const auto& path : paths)
-                if (!registry.isSupportedFile(path))
+                if (!_loaderRegistry.isSupportedFile(path))
                     throw std::runtime_error("No loader found for '" + path +
                                              "'");
 
@@ -392,9 +323,14 @@ private:
                     }
                 };
 
+                const auto& loader =
+                    _loaderRegistry.getSuitableLoader(path, "", "");
+
+                auto models = loader.loadFromFile(path, {progress}, {}, scene);
+
                 // No properties passed, use command line defaults.
                 ModelParams params(path, path, {});
-                scene.loadModels(path, params, {progress});
+                scene.addModels(models, params);
             }
         }
         scene.markModified();
@@ -434,6 +370,7 @@ private:
     EngineFactory _engineFactory;
     PluginManager _pluginManager;
     Engine* _engine{nullptr};
+    LoaderRegistry _loaderRegistry;
     std::vector<FrameBufferPtr> _frameBuffers;
 
     // protect render() vs commit() when doing all the commits
@@ -455,22 +392,12 @@ Brayns::Brayns(int argc, const char** argv)
 
 Brayns::~Brayns() = default;
 
-void Brayns::commitAndRender(const RenderInput& renderInput,
-                             RenderOutput& renderOutput)
-{
-    if (_impl->commit(renderInput))
-    {
-        _impl->render();
-        _impl->postRender(&renderOutput);
-    }
-}
-
 bool Brayns::commitAndRender()
 {
     if (_impl->commit())
     {
         _impl->render();
-        _impl->postRender(nullptr);
+        _impl->postRender();
     }
     return _impl->getEngine().getKeepRunning();
 }
@@ -487,12 +414,17 @@ void Brayns::render()
 
 void Brayns::postRender()
 {
-    _impl->postRender(nullptr);
+    _impl->postRender();
 }
 
 Engine& Brayns::getEngine()
 {
     return _impl->getEngine();
+}
+
+LoaderRegistry& Brayns::getLoaderRegistry()
+{
+    return _impl->getLoaderRegistry();
 }
 
 ParametersManager& Brayns::getParametersManager()

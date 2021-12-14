@@ -9,7 +9,6 @@ set(BRAYNSPARAMETERS_SOURCES
   AbstractParameters.cpp
   AnimationParameters.cpp
   RenderingParameters.cpp
-  GeometryParameters.cpp
   ApplicationParameters.cpp
   VolumeParameters.cpp
   NetworkParameters.cpp
@@ -20,7 +19,6 @@ set(BRAYNSPARAMETERS_PUBLIC_HEADERS
   AbstractParameters.h
   AnimationParameters.h
   RenderingParameters.h
-  GeometryParameters.h
   ApplicationParameters.h
   VolumeParameters.h
   NetworkParameters.h

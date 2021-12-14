@@ -19,6 +19,8 @@
 
 #include "VolumeParameters.h"
 
+#include <brayns/common/Log.h>
+
 namespace
 {
 const std::string PARAM_VOLUME_DIMENSIONS = "volume-dimensions";
@@ -35,13 +37,14 @@ VolumeParameters::VolumeParameters()
     , _offset(0.f, 0.f, 0.f)
 {
     _parameters.add_options()(PARAM_VOLUME_DIMENSIONS.c_str(),
-                              po::fixed_tokens_value<uints>(3, 3),
+                              po::fixed_tokens_value<std::vector<uint32_t>>(3,
+                                                                            3),
                               "Volume dimensions [uint uint uint]")(
         PARAM_VOLUME_ELEMENT_SPACING.c_str(),
-        po::fixed_tokens_value<floats>(3, 3),
+        po::fixed_tokens_value<std::vector<float>>(3, 3),
         "Element spacing in the volume [float float "
         "float]")(PARAM_VOLUME_OFFSET.c_str(),
-                  po::fixed_tokens_value<floats>(3, 3),
+                  po::fixed_tokens_value<std::vector<float>>(3, 3),
                   "Volume offset [float float float]");
 }
 
@@ -49,17 +52,17 @@ void VolumeParameters::parse(const po::variables_map& vm)
 {
     if (vm.count(PARAM_VOLUME_DIMENSIONS))
     {
-        auto values = vm[PARAM_VOLUME_DIMENSIONS].as<uints>();
+        auto values = vm[PARAM_VOLUME_DIMENSIONS].as<std::vector<uint32_t>>();
         _dimensions = Vector3ui(values[0], values[1], values[2]);
     }
     if (vm.count(PARAM_VOLUME_ELEMENT_SPACING))
     {
-        auto values = vm[PARAM_VOLUME_ELEMENT_SPACING].as<floats>();
+        auto values = vm[PARAM_VOLUME_ELEMENT_SPACING].as<std::vector<float>>();
         _elementSpacing = Vector3f(values[0], values[1], values[2]);
     }
     if (vm.count(PARAM_VOLUME_OFFSET))
     {
-        auto values = vm[PARAM_VOLUME_OFFSET].as<floats>();
+        auto values = vm[PARAM_VOLUME_OFFSET].as<std::vector<float>>();
         _offset = Vector3f(values[0], values[1], values[2]);
     }
     markModified();

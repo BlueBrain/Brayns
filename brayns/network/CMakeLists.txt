@@ -40,6 +40,8 @@ target_link_libraries(braynsNetwork PRIVATE
 
 target_link_libraries(braynsNetwork PUBLIC
   braynsJson
+  braynsTasks
+  braynsIO
   Poco::Foundation
   Poco::Net
   Poco::NetSSL
