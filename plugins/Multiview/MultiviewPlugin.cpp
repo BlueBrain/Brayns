@@ -43,14 +43,6 @@ MultiviewPlugin::MultiviewPlugin(PropertyMap&& properties)
 
 void MultiviewPlugin::init()
 {
-    auto& engine = _api->getEngine();
-
-    auto& params = engine.getParametersManager();
-    if (params.getApplicationParameters().getEngine() == "ospray")
-        engine.addCameraType("multiview", _properties);
-    else
-        throw std::runtime_error(
-            "The multiview camera is only available for ospray engine");
 }
 } // namespace brayns
 

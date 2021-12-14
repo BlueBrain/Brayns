@@ -21,7 +21,6 @@
 
 #include "OpenDeckParameters.h"
 
-#include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 namespace brayns
