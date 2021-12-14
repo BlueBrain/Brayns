@@ -51,8 +51,8 @@ const brayns::Vector3f lampPositions[4] = {
 
 TEST_CASE("render_scivis_quadlight")
 {
-    const char* argv[] = {"lights",     "demo",
-                          "--renderer", "scivis", "--no-head-light"};
+    const char* argv[] = {"lights", "demo", "--renderer", "scivis",
+                          "--no-head-light"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
@@ -70,8 +70,8 @@ TEST_CASE("render_scivis_quadlight")
 
 TEST_CASE("render_scivis_spotlight")
 {
-    const char* argv[] = {"lights",     "demo",
-                          "--renderer", "scivis", "--no-head-light"};
+    const char* argv[] = {"lights", "demo", "--renderer", "scivis",
+                          "--no-head-light"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
