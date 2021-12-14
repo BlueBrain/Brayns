@@ -9,14 +9,27 @@ set(BRAYNSUTILS_HEADERS
   EnumUtils.h
   Filesystem.h
   FunctorInfo.h
-  ImageUtils.h
+  image/Image.h
+  image/ImageCodecRegistry.h
+  image/ImageCodec.h
+  image/ImageDecoder.h
+  image/ImageEncoder.h
+  image/ImageFlipper.h
+  image/ImageFormat.h
+  image/ImageInfo.h
+  image/ImageMerger.h
   StringUtils.h
 )
-
+  
 set(BRAYNSUTILS_SOURCES
   base64/base64.cpp
   DynamicLib.cpp
-  ImageUtils.cpp
+  image/codecs/StbiHelper.cpp
+  image/ImageCodecRegistry.cpp
+  image/ImageDecoder.cpp
+  image/ImageEncoder.cpp
+  image/ImageFlipper.cpp
+  image/ImageMerger.cpp
   StringUtils.cpp
 )
 
@@ -26,10 +39,7 @@ target_include_directories(braynsUtils PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
   $<INSTALL_INTERFACE:include>)
 
-target_include_directories(braynsUtils SYSTEM PUBLIC ${FREEIMAGE_INCLUDE_DIRS})
-
-target_link_libraries(braynsUtils PUBLIC ${LibJpegTurbo_LIBRARIES})
-target_link_libraries(braynsUtils PRIVATE ${FREEIMAGE_LIBRARIES})
+target_link_libraries(braynsUtils PRIVATE stb)
 
 # Needed to allow DynamicLib class to find the engine and plugins libraries
 set_target_properties(braynsUtils PROPERTIES BUILD_RPATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})

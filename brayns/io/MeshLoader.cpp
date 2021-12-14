@@ -204,26 +204,6 @@ void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
             {aiTextureType_OPACITY, TextureType::opacity},
             {aiTextureType_REFLECTION, TextureType::reflection}};
 
-        for (size_t textureType = 0; textureType < NB_TEXTURE_TYPES;
-             ++textureType)
-        {
-            if (aimaterial->GetTextureCount(
-                    textureTypeMapping[textureType].aiType) > 0)
-            {
-                aiString path;
-                if (aimaterial->GetTexture(
-                        textureTypeMapping[textureType].aiType, 0, &path,
-                        nullptr, nullptr, nullptr, nullptr,
-                        nullptr) == AI_SUCCESS)
-                {
-                    const std::string fileName = folder + "/" + path.data;
-                    Log::debug("Loading texture: {}.", fileName);
-                    material->setTexture(fileName,
-                                         textureTypeMapping[textureType].type);
-                }
-            }
-        }
-
         aiColor4D value4f(0.f);
         float value1f;
         if (aimaterial->Get(AI_MATKEY_COLOR_DIFFUSE, value4f) == AI_SUCCESS)

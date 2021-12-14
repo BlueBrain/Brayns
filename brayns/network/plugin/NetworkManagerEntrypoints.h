@@ -31,7 +31,6 @@
 #include <brayns/network/entrypoints/CancelEntrypoint.h>
 #include <brayns/network/entrypoints/ChunkEntrypoint.h>
 #include <brayns/network/entrypoints/ClearLightsEntrypoint.h>
-#include <brayns/network/entrypoints/EnvironmentMapEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
 #include <brayns/network/entrypoints/ExportFramesToDiskEntryPoint.h>
 #include <brayns/network/entrypoints/GetClipPlanesEntrypoint.h>
@@ -109,8 +108,6 @@ public:
         plugin.add<SnapshotEntrypoint>();
         plugin.add<RequestModelUploadEntrypoint>();
         plugin.add<ChunkEntrypoint>();
-        plugin.add<GetEnvironmentMapEntrypoint>();
-        plugin.add<SetEnvironmentMapEntrypoint>();
         plugin.add<AddModelEntrypoint>();
         plugin.add<RemoveModelEntrypoint>();
         plugin.add<UpdateModelEntrypoint>();

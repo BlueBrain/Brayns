@@ -1,5 +1,7 @@
-/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,40 +21,37 @@
 
 #pragma once
 
-#include <memory>
-#include <vector>
+#include <stdexcept>
+#include <string>
 
-#include <FreeImage.h>
+#include "Image.h"
 
 namespace brayns
 {
-namespace freeimage
+/**
+ * @brief Used to decode images from files or memory.
+ *
+ */
+class ImageDecoder
 {
-struct ImageDeleter
-{
-    inline void operator()(FIBITMAP* image)
-    {
-        if (image)
-            FreeImage_Unload(image);
-    }
+public:
+    /**
+     * @brief Load an image from given file.
+     *
+     * @param filename Image file path.
+     * @return Image Decoded image.
+     * @throw std::runtime_error Format not supported or corrupted.
+     */
+    static Image load(const std::string &filename);
+
+    /**
+     * @brief Decode the raw file data encoded with given format.
+     *
+     * @param data Image encoded data.
+     * @param format Image encoding format.
+     * @return Image Decoded image.
+     * @throw std::runtime_error Format not supported or corrupted.
+     */
+    static Image decode(const std::string &data, const std::string &format);
 };
-
-struct MemoryDeleter
-{
-    inline void operator()(FIMEMORY* memory)
-    {
-        if (memory)
-            FreeImage_CloseMemory(memory);
-    }
-};
-
-using ImagePtr = std::unique_ptr<FIBITMAP, ImageDeleter>;
-using MemoryPtr = std::unique_ptr<FIMEMORY, MemoryDeleter>;
-
-bool SwapRedBlue32(FIBITMAP* freeImage);
-std::string getBase64Image(ImagePtr image, const std::string& format,
-                           const int quality);
-ImagePtr mergeImages(const std::vector<ImagePtr>& images);
-
-} // namespace freeimage
 } // namespace brayns

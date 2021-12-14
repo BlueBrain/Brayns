@@ -93,16 +93,6 @@ public:
     BinaryRequestManager& getBinary() const { return _context->getBinary(); }
 
     /**
-     * @brief Shortcut to get the global instance of the image generator.
-     *
-     * @return ImageGenerator& Image generator.
-     */
-    ImageGenerator& getImageGenerator() const
-    {
-        return _context->getImageGenerator();
-    }
-
-    /**
      * @brief Get the stored plugin name.
      *
      * @return const std::string& Parent plugin name.

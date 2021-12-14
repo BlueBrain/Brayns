@@ -40,7 +40,6 @@ target_include_directories(braynsEngine PUBLIC
   "$<INSTALL_INTERFACE:include>")
 
 target_link_libraries(braynsEngine PUBLIC braynsCommon)
-target_link_libraries(braynsEngine PRIVATE braynsParameters ${FREEIMAGE_LIBRARIES})
 
 target_compile_options(braynsEngine PRIVATE ${BRAYNS_COMPILE_OPTIONS})
 

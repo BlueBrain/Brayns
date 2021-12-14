@@ -102,7 +102,7 @@ private:
     JsonBuffer<ExtendedMaterial> _properties;
 };
 
-BRAYNS_NAMED_ADAPTER_BEGIN(MaterialRangeProxy, "MaterialRange")
+BRAYNS_NAMED_JSON_ADAPTER_BEGIN(MaterialRangeProxy, "MaterialRange")
 BRAYNS_JSON_ADAPTER_SET("model_id", setModelId,
                         "The model which this material belongs to")
 BRAYNS_JSON_ADAPTER_SET("material_ids", setMaterialIds,

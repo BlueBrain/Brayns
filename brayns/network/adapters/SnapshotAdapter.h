@@ -33,7 +33,7 @@ BRAYNS_JSON_ADAPTER_NAMED_ENTRY("animation_parameters", animParams,
 BRAYNS_JSON_ADAPTER_NAMED_ENTRY("camera", camera, "Camera parameters",
                                 Required(false));
 BRAYNS_JSON_ADAPTER_NAMED_ENTRY("format", format,
-                                "Image format from FreeImage");
+                                "Image format (extension without the dot)");
 BRAYNS_JSON_ADAPTER_NAMED_ENTRY("name", name, "Name of the snapshot",
                                 Required(false));
 BRAYNS_JSON_ADAPTER_NAMED_ENTRY("quality", quality,

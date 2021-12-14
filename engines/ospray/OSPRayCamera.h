@@ -48,8 +48,6 @@ public:
     */
     void setClipPlanes(const Planes& planes);
 
-    void setEnvironmentMap(const bool environmentMap);
-
     /**
        Gets the OSPRay implementation of the camera object
        @return OSPRay implementation of the camera object

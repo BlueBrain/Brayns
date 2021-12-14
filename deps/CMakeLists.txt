@@ -28,23 +28,6 @@ endif()
 add_subdirectory(async++)
 
 # =============================================================================
-# Perceptual Diff
-# =============================================================================
-if(BRAYNS_TESTS_ENABLED)
-    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/perceptualdiff")
-        message(STATUS "Downloading PerceptualDiff from submodules")
-        FetchContent_Declare(
-            perceptualdiff
-            GIT_REPOSITORY https://github.com/myint/perceptualdiff.git
-            GIT_TAG        7ae45fbbe2364c02b9dd54cc83c8f530ba96641b
-            SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/perceptualdiff
-        )
-        FetchContent_Populate(perceptualdiff)
-    endif()
-    add_subdirectory(perceptualdiff)
-endif()
-
-# =============================================================================
 # Poco
 # =============================================================================
 if(NOT Poco_Found)
@@ -136,3 +119,22 @@ endif()
 set(SPDLOG_BUILD_SHARED ON CACHE BOOL "" FORCE)
 set(SPDLOG_MASTER_PROJECT ON)
 add_subdirectory(spdlog)
+
+# =============================================================================
+# stb
+# =============================================================================
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/stb")
+    message(STATUS "Downloading stb from submodules")
+    FetchContent_Declare(
+        stb
+        GIT_REPOSITORY https://github.com/nothings/stb
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/stb
+    )
+    FetchContent_Populate(stb)
+endif()
+
+add_library(stb INTERFACE)
+
+target_include_directories(stb INTERFACE
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/stb>"
+    "$<INSTALL_INTERFACE:include>")

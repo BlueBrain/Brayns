@@ -48,7 +48,7 @@
  * @endcode
  *
  */
-#define BRAYNS_NAMED_ADAPTER_BEGIN(TYPE, NAME)                      \
+#define BRAYNS_NAMED_JSON_ADAPTER_BEGIN(TYPE, NAME)                 \
     template <>                                                     \
     struct JsonAdapter<TYPE>                                        \
     {                                                               \
@@ -85,7 +85,8 @@
  * @brief Shortcut to have the same type symbol and name.
  *
  */
-#define BRAYNS_JSON_ADAPTER_BEGIN(TYPE) BRAYNS_NAMED_ADAPTER_BEGIN(TYPE, #TYPE)
+#define BRAYNS_JSON_ADAPTER_BEGIN(TYPE) \
+    BRAYNS_NAMED_JSON_ADAPTER_BEGIN(TYPE, #TYPE)
 
 /**
  * @brief Register a property in the current adapter.

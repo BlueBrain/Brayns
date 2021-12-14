@@ -158,25 +158,6 @@ public:
      */
     void setMaterialsColorMap(MaterialsColorMap colorMap);
 
-    /**
-     * Set a new environment map to the scene as the background image. If envMap
-     * is empty, it removes the previous map and the background color is used
-     * instead.
-     *
-     * @param envMap a filepath to an image that shall be used as the
-     *               environment map texture
-     * @return false if the new map could not be set, true otherwise
-     */
-    bool setEnvironmentMap(const std::string& envMap);
-
-    /**
-     *  @return the current set environment map texture file, or empty if no
-     *          environment is set
-     */
-    const std::string& getEnvironmentMap() const { return _environmentMap; }
-    /** @return true if an environment map is currently set in the scene. */
-    bool hasEnvironmentMap() const;
-
     MaterialPtr getBackgroundMaterial() const { return _backgroundMaterial; }
 
     /** @return the transfer function used for volumes and simulations. */
@@ -238,15 +219,12 @@ protected:
     /** @return True if this scene supports scene updates from any thread. */
     virtual bool supportsConcurrentSceneUpdates() const { return false; }
     void _computeBounds();
-    void _loadIBLMaps(const std::string& envMap);
-
     void _updateAnimationParameters();
 
     AnimationParameters& _animationParameters;
     GeometryParameters& _geometryParameters;
     VolumeParameters& _volumeParameters;
     MaterialPtr _backgroundMaterial;
-    std::string _environmentMap;
 
     TransferFunction _transferFunction;
 

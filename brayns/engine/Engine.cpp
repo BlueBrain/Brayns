@@ -25,8 +25,6 @@
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
 
-#include <brayns/common/ImageManager.h>
-
 #include <brayns/parameters/ParametersManager.h>
 
 namespace brayns

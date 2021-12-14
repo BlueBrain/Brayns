@@ -111,7 +111,7 @@ schema = {
                     'type': 'string'
                 },
                 'format': {
-                    'description': 'Image format from FreeImage',
+                    'description': 'Image format (extension without dot)',
                     'type': 'string'
                 },
                 'name': {

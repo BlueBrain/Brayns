@@ -21,14 +21,11 @@
 #pragma once
 
 #include <brayns/common/PropertyObject.h>
-#include <brayns/common/material/Texture2D.h>
 #include <brayns/common/mathTypes.h>
 #include <brayns/common/types.h>
 
 namespace brayns
 {
-typedef std::map<TextureType, Texture2DPtr> TextureDescriptors;
-
 class Material : public PropertyObject
 {
 public:
@@ -75,23 +72,8 @@ public:
     double getEmission() const { return _emission; }
     void setGlossiness(double value) { _updateValue(_glossiness, value); }
     double getGlossiness() const { return _glossiness; }
-    const TextureDescriptors& getTextureDescriptors() const
-    {
-        return _textureDescriptors;
-    }
-    void setTexture(const std::string& fileName, const TextureType type);
-    void removeTexture(const TextureType type);
-
-    Texture2DPtr getTexture(const TextureType type) const;
-    bool hasTexture(const TextureType type) const
-    {
-        return _textureDescriptors.count(type) > 0;
-    }
-    void clearTextures();
 
 protected:
-    bool _loadTexture(const std::string& fileName, const TextureType type);
-
     std::string _name{"undefined"};
     Vector3d _diffuseColor{1., 1., 1.};
     Vector3d _specularColor{1., 1., 1.};
@@ -101,7 +83,5 @@ protected:
     double _refractionIndex{1.};
     double _emission{0.};
     double _glossiness{1.};
-    TexturesMap _textures;
-    TextureDescriptors _textureDescriptors;
 };
 } // namespace brayns
