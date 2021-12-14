@@ -358,7 +358,7 @@ BRAYNS_MATERIAL_PROPERTIES()
 BRAYNS_EXTENDED_MATERIAL_PROPERTIES()
 BRAYNS_JSON_ADAPTER_END()
 
-BRAYNS_NAMED_ADAPTER_BEGIN(MaterialProxy, "Material")
+BRAYNS_NAMED_JSON_ADAPTER_BEGIN(MaterialProxy, "Material")
 BRAYNS_JSON_ADAPTER_GETSET("model_id", getModelId, setModelId,
                            "The model which this material belongs to")
 BRAYNS_JSON_ADAPTER_GETSET("material_id", getMaterialId, setMaterialId,

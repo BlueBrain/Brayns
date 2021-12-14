@@ -21,13 +21,36 @@
 
 #pragma once
 
-#include <brayns/common/utils/ImageGenerator.h>
+#include <stdexcept>
+#include <string>
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include "ImageCodec.h"
 
 namespace brayns
 {
-BRAYNS_NAMED_ADAPTER_BEGIN(ImageGenerator::ImageBase64, "ImageBase64")
-BRAYNS_JSON_ADAPTER_ENTRY(data, "Image data with base64 encoding")
-BRAYNS_JSON_ADAPTER_END()
+/**
+ * @brief Static class to store image codecs of supported formats.
+ *
+ */
+class ImageCodecRegistry
+{
+public:
+    /**
+     * @brief Check if a format is supported.
+     *
+     * @param format Image format.
+     * @return true Supported.
+     * @return false Not supported.
+     */
+    static bool isSupported(const std::string &format);
+
+    /**
+     * @brief Get codec to handle the given format.
+     *
+     * @param format Image format.
+     * @return const ImageCodec& Image codec supporting format.
+     * @throw std::runtime_error Format not supported.
+     */
+    static const ImageCodec &getCodec(const std::string &format);
+};
 } // namespace brayns

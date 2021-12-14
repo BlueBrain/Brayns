@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,26 +21,11 @@
 
 #pragma once
 
-#include <brayns/common/material/Texture2D.h>
-#include <brayns/common/types.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-/**
- * @brief The ImageManager class uses the FreeImage libray to manipulate
- * images. This class provide an API for encoding into a specific format (PNG,
- * JPEG, etc), and exporting frame buffers to the file system
- */
-class ImageManager
-{
-public:
-    /**
-     * @brief Import a Texture from file
-     * @param filename Full name of the texture file
-     * @return Pointer to Texture2D object is import was successful, nullptr
-     * otherwise
-     */
-    static Texture2DPtr importTextureFromFile(const std::string& filename,
-                                              const TextureType type);
-};
+BRAYNS_JSON_OBJECT_BEGIN(ImageBase64Message)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, data, "Image data with base64 encoding")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

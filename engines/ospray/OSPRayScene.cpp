@@ -24,7 +24,6 @@
 #include "OSPRayVolume.h"
 #include "utils.h"
 
-#include <brayns/common/ImageManager.h>
 #include <brayns/common/Log.h>
 #include <brayns/common/Transformation.h>
 #include <brayns/common/light/Light.h>

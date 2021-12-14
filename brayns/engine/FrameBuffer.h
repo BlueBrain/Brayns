@@ -22,7 +22,7 @@
 
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/types.h>
-#include <brayns/utils/ImageUtils.h>
+#include <brayns/utils/image/Image.h>
 
 namespace brayns
 {
@@ -78,7 +78,7 @@ public:
     void incrementAccumFrames() { ++_accumFrames; }
     size_t numAccumFrames() const { return _accumFrames; }
 
-    freeimage::ImagePtr getImage();
+    Image getImage();
 
 protected:
     const std::string _name;

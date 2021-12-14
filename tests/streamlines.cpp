@@ -19,7 +19,6 @@
  */
 
 #include <brayns/Brayns.h>
-#include <tests/paths.h>
 
 #include <brayns/common/types.h>
 #include <brayns/engine/Camera.h>
@@ -32,7 +31,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
-#include "PDiffHelpers.h"
+#include "helpers/ImageValidator.h"
 
 TEST_CASE("streamlines")
 {
@@ -41,7 +40,8 @@ TEST_CASE("streamlines")
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
-    auto& scene = brayns.getEngine().getScene();
+    auto& engine = brayns.getEngine();
+    auto& scene = engine.getScene();
 
     {
         constexpr size_t materialId = 0;
@@ -96,11 +96,10 @@ TEST_CASE("streamlines")
         auto position = modelDesc->getModel().getBounds().getCenter();
         position.z += glm::compMax(modelDesc->getModel().getBounds().getSize());
 
-        brayns.getEngine().getCamera().setInitialState(
+        engine.getCamera().setInitialState(
             position, glm::identity<brayns::Quaterniond>());
     }
 
     brayns.commitAndRender();
-    CHECK(compareTestImage("streamlines.png",
-                           brayns.getEngine().getFrameBuffer()));
+    CHECK(ImageValidator::validate(engine, "streamlines.png"));
 }

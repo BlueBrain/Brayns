@@ -29,6 +29,8 @@ foreach(TEST ${TEST_LIST})
     set(TEST_NAME "braynstest_${TEST_NAME}")
 
     add_executable(${TEST_NAME} ${TEST})
+    
+    target_compile_options(${TEST_NAME} PRIVATE ${BRAYNS_COMPILE_OPTIONS})
 
     set(TEST_TARGET_LIST ${TEST_TARGET_LIST} ${TEST_NAME})
 
@@ -36,7 +38,7 @@ foreach(TEST ${TEST_LIST})
 
     target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${PROJECT_BINARY_DIR})
     target_link_libraries(${TEST_NAME} PRIVATE
-        brayns braynsIO ${OpenMP_CXX_LIBRARRIES} pdiff ${FREEIMAGE_LIBRARIES} braynsOSPRayEngine
+        brayns braynsIO ${OpenMP_CXX_LIBRARRIES} braynsOSPRayEngine
     )
 
     add_test(NAME ${TEST_NAME}

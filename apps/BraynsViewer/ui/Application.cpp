@@ -620,9 +620,6 @@ void Application::render()
         GLenum format = GL_RGBA;
         switch (frameBuffer->getFrameBufferFormat())
         {
-        case brayns::FrameBufferFormat::bgra_i8:
-            format = GL_BGRA;
-            break;
         case brayns::FrameBufferFormat::rgb_i8:
             format = GL_RGB;
             break;

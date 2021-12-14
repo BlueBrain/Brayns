@@ -12,9 +12,9 @@ if(BRAYNS_VIEWER_ENABLED)
   add_subdirectory(BraynsViewer)
 endif()
 
-if(BRAYNS_IBL_ENABLED)
-  add_subdirectory(BraynsIBL)
-endif()
+#if(BRAYNS_IBL_ENABLED)
+#  add_subdirectory(BraynsIBL)
+#endif()
 
 if(BRAYNS_SERVICE_ENABLED)
   add_subdirectory(BraynsService)

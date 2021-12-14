@@ -30,7 +30,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
-#include "PDiffHelpers.h"
+#include "helpers/ImageValidator.h"
 
 namespace
 {
@@ -56,16 +56,16 @@ TEST_CASE("render_scivis_quadlight")
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
+    auto& engine = brayns.getEngine();
 
-    brayns.getEngine().getScene().getLightManager().addLight(
+    engine.getScene().getLightManager().addLight(
         std::make_shared<brayns::QuadLight>(
             lampPositions[0], (lampPositions[1] - lampPositions[0]),
             (lampPositions[3] - lampPositions[0]), YELLOW, 1.0f, true));
 
     brayns.commitAndRender();
 
-    CHECK(compareTestImage("testLightScivisQuadLight.png",
-                           brayns.getEngine().getFrameBuffer()));
+    CHECK(ImageValidator::validate(engine, "testLightScivisQuadLight.png"));
 }
 
 TEST_CASE("render_scivis_spotlight")
@@ -75,13 +75,13 @@ TEST_CASE("render_scivis_spotlight")
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
+    auto& engine = brayns.getEngine();
 
-    brayns.getEngine().getScene().getLightManager().addLight(
+    engine.getScene().getLightManager().addLight(
         std::make_shared<brayns::SpotLight>(lampCentre,
                                             brayns::Vector3f(0, -1, 0), 90.f,
                                             10.f, lampWidth, BLUE, 1.0f, true));
     brayns.commitAndRender();
 
-    CHECK(compareTestImage("testLightScivisSpotLight.png",
-                           brayns.getEngine().getFrameBuffer()));
+    CHECK(ImageValidator::validate(engine, "testLightScivisSpotLight.png"));
 }

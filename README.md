@@ -73,8 +73,8 @@ To install all dependencies needed by Brayns on Ubuntu 18.04 run:
 
 ```
 sudo apt install git cmake g++ libtbb-dev libgl1-mesa-dev libxrandr-dev \
-libxinerama-dev libxcursor-dev libboost-all-dev libfreeimage-dev libglew-dev \
-libwebsockets-dev libturbojpeg libturbojpeg0-dev libassimp-dev libhdf5-dev
+libxinerama-dev libxcursor-dev libboost-all-dev libglew-dev \
+libwebsockets-dev libassimp-dev libhdf5-dev
 ```
 
 ### Prerequisites

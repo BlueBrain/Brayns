@@ -163,7 +163,6 @@ class Statistics;
 enum class FrameBufferFormat
 {
     rgba_i8,
-    bgra_i8,
     rgb_i8,
     rgb_f32,
     none
