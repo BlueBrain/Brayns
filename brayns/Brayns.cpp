@@ -45,6 +45,7 @@
 #include <brayns/utils/DynamicLib.h>
 #include <brayns/utils/StringUtils.h>
 
+#include <mutex>
 #include <thread>
 
 namespace
