@@ -41,9 +41,7 @@ MultiviewPlugin::MultiviewPlugin(PropertyMap&& properties)
     }
 }
 
-void MultiviewPlugin::init()
-{
-}
+void MultiviewPlugin::init() {}
 } // namespace brayns
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
