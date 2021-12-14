@@ -65,9 +65,9 @@ TEST_CASE("render_xyz_and_compare")
     CHECK(ImageValidator::validate(engine, "testdataMonkey.png"));
 
     auto model = engine.getScene().getModel(0);
-    auto props = model->getProperties();
-    props.update("radius", props["radius"].as<double>() / 2.);
-    model->setProperties(props);
+    auto properties = model->getProperties();
+    properties.update("radius", properties["radius"].as<double>() / 2.);
+    model->setProperties(properties);
 
     engine.getScene().markModified();
 
