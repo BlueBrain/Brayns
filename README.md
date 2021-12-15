@@ -1,5 +1,7 @@
 # Brayns
 
+[![DOI](https://zenodo.org/badge/61363694.svg)](https://zenodo.org/badge/latestdoi/61363694)
+
 [![C++ Build Status](https://bbpcode.epfl.ch/ci/buildStatus/icon?job=oss.Brayns)](https://bbpcode.epfl.ch/ci/job/oss.Brayns/)
 [![Docker Build Status](https://bbpcode.epfl.ch/ci/buildStatus/icon?job=oss.Brayns.docker)](https://bbpcode.epfl.ch/ci/job/oss.Brayns.docker/)
 [![Python Build Status](https://travis-ci.org/BlueBrain/Brayns.svg)](https://travis-ci.org/BlueBrain/Brayns)
