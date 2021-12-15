@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -25,8 +25,6 @@
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
 
-#include <brayns/common/ImageManager.h>
-
 #include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
@@ -43,6 +41,9 @@ void Engine::commit()
 
 void Engine::preRender()
 {
+    _frameExporter.preRender(getCamera(), getRenderer(), getFrameBuffer(),
+                             getParametersManager());
+
     if (!mustRender())
         return;
 
@@ -72,6 +73,8 @@ void Engine::render()
 
 void Engine::postRender()
 {
+    _frameExporter.postRender(getFrameBuffer());
+
     if (!mustRender())
         return;
 
@@ -84,11 +87,15 @@ Renderer& Engine::getRenderer()
     return *_renderer;
 }
 
+FrameExporter& Engine::getFrameExporter() noexcept
+{
+    return _frameExporter;
+}
+
 bool Engine::continueRendering() const
 {
     auto frameBuffer = _frameBuffers[0];
-    return _parametersManager.getAnimationParameters().isPlaying() ||
-           (frameBuffer->getAccumulation() &&
+    return (frameBuffer->getAccumulation() &&
             (frameBuffer->numAccumFrames() <
              _parametersManager.getRenderingParameters().getMaxAccumFrames()));
 }

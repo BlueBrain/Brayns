@@ -44,8 +44,8 @@ public:
     {
         auto params = request.getParams();
         auto controlled = params.type == ImageStreamingMode::Quanta;
-        auto& imageStream = getStream().getImageStream();
-        imageStream.setControlled(controlled);
+        auto& monitor = getStream().getMonitor();
+        monitor.setControlled(controlled);
         auto& engine = getApi().getEngine();
         auto& manager = engine.getParametersManager();
         auto& parameters = manager.getApplicationParameters();

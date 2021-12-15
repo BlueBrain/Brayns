@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,18 +20,28 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
+#include <brayns/common/MathTypes.h>
+
+#include <vector>
 
 namespace brayns
 {
 struct TriangleMesh
 {
-    Vector3fs vertices;
-    Vector3fs normals;
-    Vector4fs colors;
+    std::vector<Vector3f> vertices;
+    std::vector<Vector3f> normals;
+    std::vector<Vector4f> colors;
     std::vector<Vector3ui> indices;
     std::vector<Vector2f> textureCoordinates;
 };
+
+inline Boxf createMeshBounds(const TriangleMesh& mesh)
+{
+    Boxf result;
+    for (const auto& vertex : mesh.vertices)
+        result.merge(vertex);
+    return result;
+}
 
 inline TriangleMesh createBox(const Vector3f& minCorner,
                               const Vector3f& maxCorner)

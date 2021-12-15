@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,64 +21,83 @@
 
 #include "AnimationParameters.h"
 
-namespace
-{
-constexpr auto PARAM_ANIMATION_FRAME = "animation-frame";
-constexpr auto PARAM_PLAY_ANIMATION = "play-animation";
-} // namespace
+#include <brayns/common/Log.h>
 
 namespace brayns
 {
 AnimationParameters::AnimationParameters()
     : AbstractParameters("Animation")
 {
-    _parameters.add_options()(PARAM_ANIMATION_FRAME,
-                              po::value<uint32_t>(&_current),
-                              "Scene animation frame [uint]")(
-        PARAM_PLAY_ANIMATION, po::bool_switch(&_playing)->default_value(false),
-        "Start animation playback");
 }
 
 void AnimationParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Animation frame          : " << _current << std::endl;
+    Log::info("Animation frame          : {}.", _current);
 }
 
 void AnimationParameters::reset()
 {
     _updateValue(_current, 0u, false);
     _updateValue(_dt, 0., false);
-    _updateValue(_numFrames, 0u, false);
-    _updateValue(_playing, false, false);
-    _updateValue(_unit, std::string(), false);
+    _updateValue(_startFrame, 0u, false);
+    _updateValue(_endFrame, 0u, false);
 
     // trigger the modified callback only once
     if (isModified())
         markModified();
 }
 
-void AnimationParameters::setDelta(const int32_t delta)
+void AnimationParameters::setStartAndEndFrame(const uint32_t startFrame,
+                                              const uint32_t endFrame) noexcept
 {
-    if (delta == 0)
-        throw std::logic_error("Animation delta cannot be set to 0");
-    _updateValue(_delta, delta);
+    _updateValue(_startFrame, startFrame);
+    _updateValue(_endFrame, endFrame);
+    // Recompute current with the new start and end fraems
+    setFrame(_current);
 }
 
-void AnimationParameters::update()
+uint32_t AnimationParameters::getStartFrame() const noexcept
 {
-    if (_playing && _canUpdateFrame())
-        setFrame(getFrame() + getDelta());
+    return _startFrame;
 }
 
-void AnimationParameters::jumpFrames(int frames)
+uint32_t AnimationParameters::getEndFrame() const noexcept
 {
-    if (_canUpdateFrame())
-        setFrame(getFrame() + frames);
+    return _endFrame;
 }
 
-bool AnimationParameters::_canUpdateFrame() const
+void AnimationParameters::setFrame(const uint32_t value) noexcept
 {
-    return !hasIsReadyCallback() || _isReadyCallback();
+    const auto numFrames = _endFrame - _startFrame;
+    auto newValue =
+        numFrames == 0 ? 0 : (value >= numFrames ? numFrames - 1 : value);
+    _updateValue(_current, newValue);
 }
+
+uint32_t AnimationParameters::getFrame() const noexcept
+{
+    return _current;
+}
+
+uint32_t AnimationParameters::getAbsoluteFrame() const noexcept
+{
+    return _startFrame + _current;
+}
+
+void AnimationParameters::setDt(const double dt) noexcept
+{
+    _updateValue(_dt, dt);
+}
+
+double AnimationParameters::getDt() const noexcept
+{
+    return _dt;
+}
+
+const std::string& AnimationParameters::getTimeUnit() const noexcept
+{
+    return _unit;
+}
+
 } // namespace brayns

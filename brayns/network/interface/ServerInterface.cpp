@@ -35,7 +35,7 @@
 #include <Poco/Net/SSLManager.h>
 #include <Poco/Net/SecureServerSocket.h>
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <brayns/parameters/ParametersManager.h>
 
@@ -74,7 +74,7 @@ public:
 private:
     void _error(const char* message)
     {
-        BRAYNS_ERROR << "Error in websocket server: " << message << ".\n";
+        Log::error("Error in websocket server: {}.", message);
     }
 
     NetworkInterface* _interface;
@@ -91,7 +91,7 @@ public:
     virtual Poco::Net::HTTPRequestHandler* createRequestHandler(
         const Poco::Net::HTTPServerRequest& request) override
     {
-        BRAYNS_DEBUG << "New connection from '" << request.getHost() << "'.\n";
+        Log::debug("New connection from '{}'.", request.getHost());
         return new RequestHandler(*_interface);
     }
 
@@ -129,7 +129,7 @@ public:
     virtual void onInvalidCertificate(
         const void*, Poco::Net::VerificationErrorArgs& args) override
     {
-        BRAYNS_ERROR << "Invalid certificate: " << args.errorMessage() << ".\n";
+        Log::error("Invalid certificate: {}.", args.errorMessage());
     }
 
 private:
@@ -238,6 +238,6 @@ void ServerInterface::start()
     }
     auto& socket = _server->socket();
     auto address = socket.address();
-    BRAYNS_INFO << "Server started on '" << address.toString() << "'\n";
+    Log::info("Server started on '{}'.", address.toString());
 }
 } // namespace brayns

@@ -21,20 +21,20 @@
 
 #pragma once
 
-#include <brayns/network/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 #include <brayns/engine/Camera.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(Camera)
-BRAYNS_ADAPTER_GETSET("orientation", getOrientation, setOrientation,
-                      "Camera orientation XYZW")
-BRAYNS_ADAPTER_GETSET("position", getPosition, setPosition,
-                      "Camera position XYZ")
-BRAYNS_ADAPTER_GETSET("target", getTarget, setTarget, "Camera target XYZ")
-BRAYNS_ADAPTER_GETSET("current", getCurrentType, setCurrentType,
-                      "Camera current type")
-BRAYNS_ADAPTER_GET("types", getTypes, "Available camera types")
-BRAYNS_ADAPTER_END()
+BRAYNS_JSON_ADAPTER_BEGIN(Camera)
+BRAYNS_JSON_ADAPTER_GETSET("orientation", getOrientation, setOrientation,
+                           "Camera orientation XYZW")
+BRAYNS_JSON_ADAPTER_GETSET("position", getPosition, setPosition,
+                           "Camera position XYZ")
+BRAYNS_JSON_ADAPTER_GETSET("target", getTarget, setTarget, "Camera target XYZ")
+BRAYNS_JSON_ADAPTER_GETSET("current", getCurrentType, setCurrentType,
+                           "Camera current type")
+BRAYNS_JSON_ADAPTER_GET("types", getTypes, "Available camera types")
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

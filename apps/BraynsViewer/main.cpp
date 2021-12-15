@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
@@ -19,12 +19,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <apps/ui/Application.h>
 #include <brayns/Brayns.h>
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <brayns/parameters/ApplicationParameters.h>
 #include <brayns/parameters/ParametersManager.h>
+
+#include "ui/Application.h"
 
 #include <cstdlib>
 
@@ -45,7 +46,7 @@ int main(int argc, const char** argv)
     }
     catch (const std::runtime_error& e)
     {
-        BRAYNS_ERROR << e.what() << std::endl;
+        brayns::Log::error(e.what());
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;

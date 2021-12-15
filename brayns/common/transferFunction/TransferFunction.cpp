@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Authors: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
@@ -21,14 +21,14 @@
 
 #include "TransferFunction.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <algorithm>
 
 namespace
 {
-double _interpolatedOpacity(const brayns::Vector2ds& controlPointsSorted,
-                            const double x)
+double _interpolatedOpacity(
+    const std::vector<brayns::Vector2d>& controlPointsSorted, const double x)
 {
     const auto& firstPoint = controlPointsSorted.front();
     if (x <= firstPoint.x)
@@ -77,7 +77,7 @@ void TransferFunction::clear()
     markModified();
 }
 
-floats TransferFunction::calculateInterpolatedOpacities() const
+std::vector<float> TransferFunction::calculateInterpolatedOpacities() const
 {
     constexpr size_t numSamples = 256;
     constexpr double dx = 1. / (numSamples - 1);
@@ -86,7 +86,7 @@ floats TransferFunction::calculateInterpolatedOpacities() const
     std::sort(tfPoints.begin(), tfPoints.end(),
               [](auto a, auto b) { return a.x < b.x; });
 
-    floats opacities;
+    std::vector<float> opacities;
     opacities.reserve(numSamples);
     for (size_t i = 0; i < numSamples; ++i)
         opacities.push_back(_interpolatedOpacity(tfPoints, i * dx));

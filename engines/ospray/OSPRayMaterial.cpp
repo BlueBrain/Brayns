@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -21,7 +21,7 @@
 #include "OSPRayMaterial.h"
 #include "utils.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/TextureType.h>
 
 #include <ospray/SDK/common/OSPCommon.h>
 
@@ -76,24 +76,6 @@ void OSPRayMaterial::commit()
     // Properties
     toOSPRayProperties(*this, _ospMaterial);
 
-    // Textures
-    for (const auto& textureType : textureTypeMaterialAttribute)
-        ospSetObject(_ospMaterial, textureType.attribute.c_str(), nullptr);
-
-    for (const auto& textureDescriptor : _textureDescriptors)
-    {
-        const auto texType = textureDescriptor.first;
-        auto texture = getTexture(texType);
-        if (texture)
-        {
-            auto ospTexture = _createOSPTexture2D(texture);
-            const auto str =
-                textureTypeMaterialAttribute[int(texType)].attribute.c_str();
-            ospSetObject(_ospMaterial, str, ospTexture);
-            ospRelease(ospTexture);
-        }
-    }
-
     ospCommit(_ospMaterial);
     resetModified();
 }
@@ -110,47 +92,5 @@ void OSPRayMaterial::commit(const std::string& renderer)
     _renderer = renderer;
     markModified(false); // Ensure commit recreates the ISPC object
     commit();
-}
-
-OSPTexture OSPRayMaterial::_createOSPTexture2D(Texture2DPtr texture)
-{
-    OSPTextureFormat type = OSP_TEXTURE_R8; // smallest valid type as default
-    if (texture->depth == 1)
-    {
-        if (texture->channels == 1)
-            type = OSP_TEXTURE_R8;
-        if (texture->channels == 3)
-            type = OSP_TEXTURE_RGB8;
-        if (texture->channels == 4)
-            type = OSP_TEXTURE_RGBA8;
-    }
-    else if (texture->depth == 4)
-    {
-        if (texture->channels == 1)
-            type = OSP_TEXTURE_R32F;
-        if (texture->channels == 3)
-            type = OSP_TEXTURE_RGB32F;
-        if (texture->channels == 4)
-            type = OSP_TEXTURE_RGBA32F;
-    }
-
-    BRAYNS_DEBUG << "Creating OSPRay texture from " << texture->filename << ": "
-                 << texture->width << "x" << texture->height << "x" << (int)type
-                 << std::endl;
-
-    OSPTexture ospTexture = ospNewTexture("texture2d");
-
-    const Vector2i size{int(texture->width), int(texture->height)};
-
-    osphelper::set(ospTexture, "type", static_cast<int>(type));
-    osphelper::set(ospTexture, "size", size);
-    auto textureData = ospNewData(texture->getSizeInBytes(), OSP_RAW,
-                                  texture->getRawData<unsigned char>(),
-                                  OSP_DATA_SHARED_BUFFER);
-    ospSetObject(ospTexture, "data", textureData);
-    ospRelease(textureData);
-    ospCommit(ospTexture);
-
-    return ospTexture;
 }
 } // namespace brayns

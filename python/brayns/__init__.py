@@ -42,7 +42,6 @@ from .client.client import Client
 from .client.connect import connect
 from .client.reply_error import ReplyError
 from .doc.doc_builder import build_rst_doc, save_rst_doc
-from .plugins.circuit_explorer import CircuitExplorer
 from .utils.camera_path_handler import CameraPathHandler
 
 __all__ = [
@@ -51,6 +50,5 @@ __all__ = [
     'save_rst_doc',
     'Client',
     'CameraPathHandler',
-    'CircuitExplorer',
     'ReplyError'
 ]

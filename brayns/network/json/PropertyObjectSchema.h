@@ -23,7 +23,7 @@
 
 #include <brayns/common/PropertyObject.h>
 
-#include "Message.h"
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,10 +20,9 @@
 
 #include "utils.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/common/PropertyObject.h>
 #include <brayns/common/Transformation.h>
-#include <brayns/common/log.h>
-#include <brayns/common/utils/utils.h>
 
 namespace brayns
 {
@@ -50,7 +49,7 @@ void toOSPRayProperties(const PropertyMap& object, OSPObject ospObject)
     }
     catch (const std::exception& e)
     {
-        BRAYNS_ERROR << "Failed to apply properties for ospObject" << std::endl;
+        Log::error("Failed to apply properties for ospObject.");
     }
 }
 

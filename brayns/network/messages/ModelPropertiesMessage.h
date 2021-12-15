@@ -21,12 +21,13 @@
 
 #pragma once
 
-#include <brayns/network/json/Message.h>
+#include <brayns/common/adapters/PropertyMapAdapter.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(ModelPropertiesMessage)
-BRAYNS_MESSAGE_ENTRY(size_t, id, "Model ID")
-BRAYNS_MESSAGE_ENTRY(PropertyMap, properties, "Model properties")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(ModelPropertiesMessage)
+BRAYNS_JSON_OBJECT_ENTRY(size_t, id, "Model ID")
+BRAYNS_JSON_OBJECT_ENTRY(PropertyMap, properties, "Model properties")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

@@ -1,5 +1,18 @@
 # Change Log
 
+## [2.0.0](https://github.com/BlueBrain/Brayns/tree/2.0.0)
+
+**Implemented enhancements:**
+
+- BlueConfig/Sonata multipopulation hybrid support [\#906](https://github.com/BlueBrain/Brayns/pull/906)
+- Support Assimp 5.0.1 [\#912](https://github.com/BlueBrain/Brayns/pull/912)
+- Make movie depends now on system libraries [\#915](https://github.com/BlueBrain/Brayns/pull/915)
+- New network system implemented with Poco [\#919](https://github.com/BlueBrain/Brayns/pull/919)
+- CircuitExplorer refactoring. Full SONATA support [\#927](https://github.com/BlueBrain/Brayns/pull/927)
+- Implementation of a proper logging system [\#932](https://github.com/BlueBrain/Brayns/pull/932)
+- Removal of CMake/common. Build system rewritten from scratch [\#934](https://github.com/BlueBrain/Brayns/pull/934)
+- Replaced FreeImage with STB [\#942](https://github.com/BlueBrain/Brayns/pull/942)
+
 ## [1.1.0](https://github.com/BlueBrain/Brayns/tree/1.1.0)
 
 **Implemented enhancements:**

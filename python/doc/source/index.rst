@@ -18,7 +18,7 @@ that encapsulate commonly used fuctions for an easy usage.
 The Brayns python client allows to:
 
 - Load models into brayns (circuits, DTIs, meshes, volumes, ...)
-- Load and/or attach simulations (comparment and spike reports)
+- Load and/or attach simulations (compartment and spike reports)
 - Modify their visual appearance (color, simulation transfer function, ...)
 - Tune the renderers to achieve different visual results
 - Render images and simulation videos to disk
@@ -34,7 +34,6 @@ The Brayns python client allows to:
    usage
    plugins
    api
-   examples
 
 
 Acknowledgments

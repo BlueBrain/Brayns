@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Juan Hernando <juan.hernando@epfl.ch>
  *
@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include <brayns/api.h>
-#include <brayns/common/types.h>
+#include <brayns/common/BaseObject.h>
+#include <brayns/common/MathTypes.h>
 
-SERIALIZATION_ACCESS(ClipPlane)
+#include <memory>
 
 namespace brayns
 {
@@ -37,6 +37,7 @@ public:
     }
 
     size_t getID() const { return _id; }
+    void setID(size_t id) { _updateValue(_id, id); }
     const Plane& getPlane() const { return _plane; };
     void setPlane(const Plane& plane) { _updateValue(_plane, plane); }
     /** @internal */
@@ -52,6 +53,7 @@ private:
     static size_t _nextID;
     size_t _id = 0;
     Plane _plane{0.0};
-    SERIALIZATION_FRIEND(ClipPlane);
 };
+
+using ClipPlanePtr = std::shared_ptr<ClipPlane>;
 } // namespace brayns

@@ -24,27 +24,21 @@
 #include "OSPRayVolume.h"
 #include "utils.h"
 
-#include <brayns/common/ImageManager.h>
+#include <brayns/common/Log.h>
 #include <brayns/common/Transformation.h>
-#include <brayns/common/light/Light.h>
-#include <brayns/common/log.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
+#include <brayns/engine/Light.h>
 #include <brayns/engine/Model.h>
 #include <brayns/parameters/AnimationParameters.h>
 
-#include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/VolumeParameters.h>
 
 namespace brayns
 {
 OSPRayScene::OSPRayScene(AnimationParameters& animationParameters,
-                         GeometryParameters& geometryParameters,
                          VolumeParameters& volumeParameters)
-    : Scene(animationParameters, geometryParameters, volumeParameters)
-    , _memoryManagementFlags(geometryParameters.getMemoryMode() ==
-                                     MemoryMode::shared
-                                 ? uint32_t(OSP_DATA_SHARED_BUFFER)
-                                 : 0)
+    : Scene(animationParameters, volumeParameters)
+    , _memoryManagementFlags(uint32_t(OSP_DATA_SHARED_BUFFER))
 {
     _backgroundMaterial = std::make_shared<OSPRayMaterial>(PropertyMap(), true);
 
@@ -78,7 +72,7 @@ void OSPRayScene::commit()
     commitLights();
 
     // copy the list to avoid locking the mutex
-    ModelDescriptors modelDescriptors;
+    std::vector<ModelDescriptorPtr> modelDescriptors;
     {
         auto lock = acquireReadAccess();
         modelDescriptors = _modelDescriptors;
@@ -131,8 +125,7 @@ void OSPRayScene::commit()
         auto& impl = static_cast<OSPRayModel&>(modelDescriptor->getModel());
         const auto& transformation = modelDescriptor->getTransformation();
 
-        BRAYNS_DEBUG << "Committing " << modelDescriptor->getName()
-                     << std::endl;
+        Log::debug("Committing {}.", modelDescriptor->getName());
 
         impl.commitGeometry();
         impl.commitSimulationParams();
@@ -183,7 +176,8 @@ void OSPRayScene::commit()
 
         impl.markInstancesClean();
     }
-    BRAYNS_DEBUG << "Committing root models" << std::endl;
+
+    Log::debug("Committing root models.");
 
     ospCommit(_rootModel);
 
@@ -310,7 +304,8 @@ void OSPRayScene::_commitTransferFunction()
     _transferFunction.resetModified();
 }
 
-bool OSPRayScene::_commitVolumes(ModelDescriptors& modelDescriptors)
+bool OSPRayScene::_commitVolumes(
+    std::vector<ModelDescriptorPtr>& modelDescriptors)
 {
     bool rebuildScene = false;
     for (auto& modelDescriptor : modelDescriptors)
@@ -336,46 +331,51 @@ bool OSPRayScene::_commitVolumes(ModelDescriptors& modelDescriptors)
     return rebuildScene;
 }
 
-void OSPRayScene::_commitSimulationData(ModelDescriptors& modelDescriptors)
+void OSPRayScene::_commitSimulationData(
+    std::vector<ModelDescriptorPtr>& modelDescriptors)
 {
-    auto currentFrame = _animationParameters.getFrame();
-
-    // if(_lastFrame == currentFrame && !isModified())
-    //    return;
-
-    //_lastFrame = currentFrame;
-
-    _simData.clear();
-
-    uint64_t offset = 0;
-    for (auto& model : modelDescriptors)
+    const auto currentFrame = _animationParameters.getAbsoluteFrame();
+    if (_lastFrame != currentFrame || isModified() ||
+        _ospSimulationData == nullptr)
     {
-        if (!model->getModel().isSimulationEnabled())
-            continue;
+        _lastFrame = currentFrame;
+        _simData.clear();
 
-        auto handler = model->getModel().getSimulationHandler();
-        if (!handler)
-            continue;
+        uint64_t offset = 0;
+        for (auto& model : modelDescriptors)
+        {
+            if (!model->getModel().isSimulationEnabled())
+                continue;
 
-        auto& modelImpl = static_cast<OSPRayModel&>(model->getModel());
-        modelImpl.setSimulationOffset(offset);
+            auto handler = model->getModel().getSimulationHandler();
+            if (!handler)
+                continue;
 
-        const float* data =
-            static_cast<float*>(handler->getFrameData(currentFrame));
-        const uint64_t dataSize = handler->getFrameSize();
+            if (handler->getFrameSize() == 0)
+                continue;
 
-        _simData.insert(_simData.end(), data, data + dataSize);
-        offset += dataSize;
+            auto& modelImpl = static_cast<OSPRayModel&>(model->getModel());
+            modelImpl.setSimulationOffset(offset);
+
+            const float* data =
+                static_cast<float*>(handler->getFrameData(currentFrame));
+            const uint64_t dataSize = handler->getFrameSize();
+
+            _simData.insert(_simData.end(), data, data + dataSize);
+            offset += dataSize;
+        }
+
+        ospRelease(_ospSimulationData);
+        _ospSimulationData = nullptr;
+        if (_simData.empty())
+            return;
+
+        _ospSimulationData =
+            ospNewData(_simData.size(), OSP_FLOAT, _simData.data(),
+                       OSP_DATA_SHARED_BUFFER);
+
+        ospCommit(_ospSimulationData);
     }
-
-    ospRelease(_ospSimulationData);
-    _ospSimulationData = nullptr;
-    if (_simData.empty())
-        return;
-
-    _ospSimulationData = ospNewData(_simData.size(), OSP_FLOAT, _simData.data(),
-                                    OSP_DATA_SHARED_BUFFER);
-    ospCommit(_ospSimulationData);
 }
 
 } // namespace brayns

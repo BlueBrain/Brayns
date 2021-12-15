@@ -21,10 +21,9 @@
 
 #pragma once
 
-#include <brayns/common/light/Light.h>
-
+#include <brayns/engine/Light.h>
+#include <brayns/json/JsonObjectMacro.h>
 #include <brayns/network/adapters/LightAdapter.h>
-#include <brayns/network/json/Message.h>
 
 namespace brayns
 {
@@ -100,9 +99,9 @@ private:
     JsonValue _json;
 };
 
-BRAYNS_MESSAGE_BEGIN(LightMessage)
-BRAYNS_MESSAGE_ENTRY(LightType, type, "Light type")
-BRAYNS_MESSAGE_ENTRY(size_t, id, "Light ID")
-BRAYNS_MESSAGE_ENTRY(LightProperties, properties, "Light properties")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(LightMessage)
+BRAYNS_JSON_OBJECT_ENTRY(LightType, type, "Light type")
+BRAYNS_JSON_OBJECT_ENTRY(size_t, id, "Light ID")
+BRAYNS_JSON_OBJECT_ENTRY(LightProperties, properties, "Light properties")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

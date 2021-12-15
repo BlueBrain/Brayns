@@ -1,9 +1,6 @@
-/* Copyright (c) 2018-2019, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
- *
- * This file is part of the circuit explorer for Brayns
- * <https://github.com/favreau/Brayns-UC-CircuitExplorer>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -22,7 +19,8 @@
 #include "CircuitExplorerMaterial.h"
 #include "CircuitExplorerMaterial_ispc.h"
 
-#include <common/types.h>
+#include <plugin/api/MaterialUtils.h>
+
 #include <ospray/SDK/common/Data.h>
 
 namespace brayns
@@ -80,20 +78,19 @@ void CircuitExplorerMaterial::commit()
     glossiness = getParam1f("glossiness", 1.f);
 
     // Cast simulation data
-    castSimulationData =
-        getParam(MATERIAL_PROPERTY_CAST_USER_DATA.c_str(), false);
+    castSimulationData = getParam(MATERIAL_PROPERTY_CAST_USER_DATA, false);
 
     // Shading mode
     shadingMode = static_cast<MaterialShadingMode>(
-        getParam1i(MATERIAL_PROPERTY_SHADING_MODE.c_str(),
+        getParam1i(MATERIAL_PROPERTY_SHADING_MODE,
                    static_cast<int>(MaterialShadingMode::none)));
     // Clipping mode
     clippingMode = static_cast<MaterialClippingMode>(
-        getParam1i(MATERIAL_PROPERTY_CLIPPING_MODE.c_str(),
+        getParam1i(MATERIAL_PROPERTY_CLIPPING_MODE,
                    static_cast<int>(MaterialClippingMode::no_clipping)));
 
     // User parameter
-    userParameter = getParam1f(MATERIAL_PROPERTY_USER_PARAMETER.c_str(), 1.f);
+    userParameter = getParam1f(MATERIAL_PROPERTY_USER_PARAMETER, 1.f);
 
     ispc::CircuitExplorerMaterial_set(
         getIE(), map_d ? map_d->getIE() : nullptr,

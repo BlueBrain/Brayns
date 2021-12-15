@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,18 +20,12 @@
 
 #include "Scene.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/common/Transformation.h>
-#include <brayns/common/log.h>
-#include <brayns/common/scene/ClipPlane.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
-#include <brayns/common/utils/utils.h>
 #include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
 
-#include <brayns/parameters/AnimationParameters.h>
-#include <brayns/parameters/GeometryParameters.h>
-
-#include <brayns/common/utils/filesystem.h>
+#include <brayns/utils/Filesystem.h>
 
 #include <fstream>
 #include <mutex> // std::unique_lock
@@ -84,10 +78,8 @@ std::shared_ptr<T> _replace(std::vector<std::shared_ptr<T>>& list,
 namespace brayns
 {
 Scene::Scene(AnimationParameters& animationParameters,
-             GeometryParameters& geometryParameters,
              VolumeParameters& volumeParameters)
     : _animationParameters(animationParameters)
-    , _geometryParameters(geometryParameters)
     , _volumeParameters(volumeParameters)
 {
 }
@@ -145,9 +137,6 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
     if (model.empty())
         throw std::runtime_error("Empty models not supported.");
 
-    const auto defaultBVHFlags = _geometryParameters.getDefaultBVHFlags();
-
-    model.setBVHFlags(defaultBVHFlags);
     model.buildBoundingBox();
 
     // Since models can be added concurrently we check if that is supported
@@ -179,9 +168,6 @@ void Scene::addModel(const size_t id, ModelDescriptorPtr modelDescriptor)
     if (model.empty())
         throw std::runtime_error("Empty models not supported.");
 
-    const auto defaultBVHFlags = _geometryParameters.getDefaultBVHFlags();
-
-    model.setBVHFlags(defaultBVHFlags);
     model.buildBoundingBox();
 
     // Since models can be added concurrently we check if that is supported
@@ -311,26 +297,14 @@ void Scene::removeClipPlane(const size_t id)
         markModified();
 }
 
-std::vector<ModelDescriptorPtr> Scene::loadModels(Blob&& blob,
-                                                  const ModelParams& params,
-                                                  LoaderProgress cb)
+void Scene::addModels(std::vector<ModelDescriptorPtr>& input,
+                      const ModelParams& params)
 {
-    const auto& loader =
-        _loaderRegistry.getSuitableLoader("", blob.type,
-                                          params.getLoaderName());
-
-    // HACK: Add loader name in properties for archive loader
-    auto propCopy = params.getLoaderProperties();
-    propCopy.add({"loaderName", params.getLoaderName()});
-
-    // Load the models
-    auto modelDescriptors =
-        loader.importFromBlob(std::move(blob), cb, propCopy);
-
     // Check for models correctness
-    if (modelDescriptors.empty())
+    if (input.empty())
         throw std::runtime_error("No model returned by loader");
-    for (auto& md : modelDescriptors)
+
+    for (auto& md : input)
     {
         if (!md)
             throw std::runtime_error("No model returned by loader");
@@ -338,47 +312,12 @@ std::vector<ModelDescriptorPtr> Scene::loadModels(Blob&& blob,
 
     // Update loaded model with loader properties (so we can have the
     // information with which it was loaded)
-    for (auto& md : modelDescriptors)
+
+    for (auto& md : input)
     {
         *md = params;
         addModel(md);
     }
-
-    return modelDescriptors;
-}
-
-std::vector<ModelDescriptorPtr> Scene::loadModels(const std::string& path,
-                                                  const ModelParams& params,
-                                                  LoaderProgress cb)
-{
-    const auto& loader =
-        _loaderRegistry.getSuitableLoader(path, "", params.getLoaderName());
-    // HACK: Add loader name in properties for archive loader
-    auto propCopy = params.getLoaderProperties();
-    propCopy.add({"loaderName", params.getLoaderName()});
-
-    // Load the models
-    auto modelDescriptors = loader.importFromFile(path, cb, propCopy);
-
-    // Check for models correctness
-    if (modelDescriptors.empty())
-        throw std::runtime_error("No model returned by loader");
-
-    for (auto& md : modelDescriptors)
-    {
-        if (!md)
-            throw std::runtime_error("No model returned by loader");
-    }
-
-    // Update loaded model with loader properties (so we can have the
-    // information with which it was loaded)
-    for (auto& md : modelDescriptors)
-    {
-        *md = params;
-        addModel(md);
-    }
-
-    return modelDescriptors;
 }
 
 void Scene::visitModels(const std::function<void(Model&)>& functor)
@@ -390,7 +329,7 @@ void Scene::visitModels(const std::function<void(Model&)>& functor)
 
 void Scene::buildDefault()
 {
-    BRAYNS_INFO << "Building default Cornell Box scene" << std::endl;
+    Log::info("Building default Cornell Box scene.");
 
     auto model = createModel();
     const Vector3f WHITE = {1.f, 1.f, 1.f};
@@ -513,39 +452,6 @@ void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)
     markModified();
 }
 
-bool Scene::setEnvironmentMap(const std::string& envMap)
-{
-    bool success = true;
-    if (envMap.empty())
-        _backgroundMaterial->clearTextures();
-    else
-    {
-        try
-        {
-            _backgroundMaterial->setTexture(envMap, TextureType::diffuse);
-        }
-        catch (const std::runtime_error& e)
-        {
-            BRAYNS_DEBUG << "Cannot load environment map: " << e.what()
-                         << std::endl;
-            _backgroundMaterial->clearTextures();
-            success = false;
-        }
-
-        _loadIBLMaps(envMap);
-    }
-
-    _updateValue(_environmentMap, success ? envMap : "");
-    if (_backgroundMaterial->isModified())
-        markModified();
-    return success;
-}
-
-bool Scene::hasEnvironmentMap() const
-{
-    return !_environmentMap.empty();
-}
-
 void Scene::_computeBounds()
 {
     std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
@@ -561,37 +467,13 @@ void Scene::_computeBounds()
         _bounds.merge({0, 0, 0});
 }
 
-void Scene::_loadIBLMaps(const std::string& envMap)
-{
-    try
-    {
-        auto tex = _backgroundMaterial->getTexture(TextureType::diffuse);
-
-        const auto path = fs::path(envMap).parent_path();
-        const auto basename = (path / fs::path(envMap).stem()).string();
-
-        const std::string irradianceMap = basename + IRRADIANCE_MAP + ".hdr";
-        const std::string radianceMap = basename + RADIANCE_MAP + ".hdr";
-        const std::string brdfLUT = basename + BRDF_LUT + ".hdr";
-
-        if (fs::exists(irradianceMap) && fs::exists(radianceMap) &&
-            fs::exists(brdfLUT))
-        {
-            _backgroundMaterial->setTexture(irradianceMap,
-                                            TextureType::irradiance);
-            _backgroundMaterial->setTexture(radianceMap, TextureType::radiance);
-            _backgroundMaterial->setTexture(brdfLUT, TextureType::brdf_lut);
-        }
-    }
-    catch (...)
-    {
-    }
-}
-
 void Scene::_updateAnimationParameters()
 {
     std::vector<AbstractSimulationHandler*> handlers;
-    uint32_t numFrames = 0;
+
+    double earlierStart = std::numeric_limits<double>::max();
+    double latestEnd = std::numeric_limits<double>::lowest();
+    double smallestDt = std::numeric_limits<double>::max();
     {
         std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
         for (auto& modelDesc : _modelDescriptors)
@@ -603,32 +485,25 @@ void Scene::_updateAnimationParameters()
                 modelDesc->getModel().getSimulationHandler().get();
             if (simHandler)
             {
-                handlers.push_back(
-                    modelDesc->getModel().getSimulationHandler().get());
-                if (simHandler->getNbFrames() > numFrames)
-                    numFrames = simHandler->getNbFrames();
+                handlers.push_back(simHandler);
+                earlierStart =
+                    std::min(earlierStart, simHandler->getStartTime());
+                latestEnd = std::max(latestEnd, simHandler->getEndTime());
+                smallestDt = std::min(smallestDt, simHandler->getDt());
             }
         }
     }
 
     auto& ap = _animationParameters;
 
-    if (handlers.empty())
-        ap.removeIsReadyCallback();
-    else
+    if (!handlers.empty())
     {
-        ap.setIsReadyCallback([handlersV = handlers] {
-            for (auto handler : handlersV)
-            {
-                if (!handler->isReady())
-                    return false;
-            }
-            return true;
-        });
-
-        ap.setDt(handlers[0]->getDt(), false);
-        ap.setUnit(handlers[0]->getUnit(), false);
-        ap.setNumFrames(numFrames, false);
+        ap.setDt(smallestDt);
+        ap.setStartAndEndFrame(
+            static_cast<uint32_t>(std::round(
+                std::nextafter(earlierStart, INFINITY) / smallestDt)),
+            static_cast<uint32_t>(
+                std::round(std::nextafter(latestEnd, INFINITY) / smallestDt)));
         ap.markModified();
     }
 }

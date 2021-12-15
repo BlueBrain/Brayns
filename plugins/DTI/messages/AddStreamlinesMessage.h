@@ -21,19 +21,19 @@
 
 #pragma once
 
-#include <brayns/network/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace dti
 {
-BRAYNS_MESSAGE_BEGIN(AddStreamlinesMessage)
-BRAYNS_MESSAGE_ENTRY(std::string, name, "Model name")
-BRAYNS_MESSAGE_ENTRY(std::vector<uint64_t>, gids, "List of cell GIDs")
-BRAYNS_MESSAGE_ENTRY(std::vector<uint64_t>, indices, "List of indices")
-BRAYNS_MESSAGE_ENTRY(std::vector<float>, vertices,
-                     "List of vertices (3 components per vertex)")
-BRAYNS_MESSAGE_ENTRY(double, radius, "Streamline tube radius")
-BRAYNS_MESSAGE_ENTRY(double, opacity, "Color opacity")
-BRAYNS_MESSAGE_ENTRY(uint32_t, color_scheme,
-                     "Color scheme to draw the streamlines")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(AddStreamlinesMessage)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, name, "Model name")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint64_t>, gids, "List of cell GIDs")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint64_t>, indices, "List of indices")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<float>, vertices,
+                         "List of vertices (3 components per vertex)")
+BRAYNS_JSON_OBJECT_ENTRY(double, radius, "Streamline tube radius")
+BRAYNS_JSON_OBJECT_ENTRY(double, opacity, "Color opacity")
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, color_scheme,
+                         "Color scheme to draw the streamlines")
+BRAYNS_JSON_OBJECT_END()
 } // namespace dti

@@ -45,7 +45,7 @@ Command line arguments are documented in the [User Guide](doc/UserGuide.md).
 
 The following platforms and build environments are tested:
 
-* Linux: Ubuntu 16.04, Debian 9, RHEL 7 (Makefile, x64)
+* Linux: Ubuntu 16.04, Ubuntu 18.04, Ubuntu 20.04, Debian 9, RHEL 7 (Makefile, x64)
 
 ## Using Docker images
 
@@ -73,8 +73,8 @@ To install all dependencies needed by Brayns on Ubuntu 18.04 run:
 
 ```
 sudo apt install git cmake g++ libtbb-dev libgl1-mesa-dev libxrandr-dev \
-libxinerama-dev libxcursor-dev libboost-all-dev libfreeimage-dev libglew-dev \
-libwebsockets-dev libturbojpeg libturbojpeg0-dev libassimp-dev libhdf5-dev
+libxinerama-dev libxcursor-dev libboost-all-dev libglew-dev \
+libwebsockets-dev libassimp-dev libhdf5-dev
 ```
 
 ### Prerequisites
@@ -133,10 +133,6 @@ Clone OSPRay in the same folder level as ISPC compiler
 A number of dependencies are optional, and are related to some specific Brayns
 features:
 
-#### Enable/Disable [OptiX](https://developer.nvidia.com/optix)
-```
-cmake .. -DOptiX_INSTALL_DIR=<OptiX_installation_folder> -DBRAYNS_OPTIX_ENABLED=On
-```
 
 #### Enable/Disable [assimp](https://github.com/assimp/assimp) supported mesh file loader (.obj, .ply, etc.)
 ```
@@ -145,23 +141,7 @@ cmake .. -DBRAYNS_ASSIMP_ENABLED=ON:OFF
 
 #### Enable/Disable [Brion](https://github.com/BlueBrain/Brion) supported morphology file loader (.h5, .swc, BlueConfig, CircuitConfig)
 ```
-cmake .. -DBRAYNS_CIRCUITVIEWER_ENABLED=ON:OFF
-```
-
-#### Enable/Disable [Deflect](https://github.com/BlueBrain/Deflect) for streaming to [Tide](https://github.com/BlueBrain/Tide), the Tiled Interactive DisplayWall environment.
-```
-cmake .. -DBRAYNS_DEFLECT_ENABLED=ON:OFF
-```
-
-#### Enable/Disable [VRPN](https://github.com/vrpn/vrpn) tracking plugin.
-```
-cmake .. -DBRAYNS_VRPN_ENABLED=ON:OFF
-```
-
-#### Enable/Disable optional OSPRay modules.
-```
-cmake .. -DBRAYNS_OPTIX_ENABLED=ON:OFF
-cmake .. -DBRAYNS_OPENDECK_ENABLED=ON:OFF
+cmake .. -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON:OFF
 ```
 
 ## Running Brayns viewer

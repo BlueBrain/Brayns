@@ -23,12 +23,12 @@
 
 #include <brayns/common/transferFunction/TransferFunction.h>
 
-#include <brayns/network/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(ColorMap)
-BRAYNS_ADAPTER_ENTRY(name, "Label of the color map", Required(false))
-BRAYNS_ADAPTER_ENTRY(colors, "Colors to map")
-BRAYNS_ADAPTER_END()
+BRAYNS_JSON_ADAPTER_BEGIN(ColorMap)
+BRAYNS_JSON_ADAPTER_ENTRY(name, "Label of the color map", Required(false))
+BRAYNS_JSON_ADAPTER_ENTRY(colors, "Colors to map")
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

@@ -181,15 +181,24 @@ Return value:
 
 ----
 
-attach_cell_growth_handler
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+color_circuit_by_id
+~~~~~~~~~~~~~~~~~~~
 
-Attach a dynamic cell growing rendering system for a given model.
+Colors a circuit model by element ID. Specific IDs can be targetted as single IDs or ID Ranges (being-end),otherwise, random colors per ID will be applied.
 
 Parameters:
 
-* ``model_id``: ``int``. The model to which to attach the handler.
-* ``nb_frames``: ``int``. The number of frames to perform the growth.
+* ``color_info``: ``list``. List of IDs with their corresponding color. If empty, all the model will be colored with random colors per ID.
+
+  * ``items``: ``dict``. The object has the following properties.
+
+    * ``color``: ``list``. Color applied to the given variable (Normalized RGBA).
+
+      * ``items``: ``float``
+
+    * ``variable``: ``str``. Variable of the coloring method being used.
+
+* ``model_id``: ``int``. ID of the model to color.
 
 Return value:
 
@@ -197,16 +206,25 @@ This method has no return values.
 
 ----
 
-attach_circuit_simulation_handler
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+color_circuit_by_method
+~~~~~~~~~~~~~~~~~~~~~~~
 
-Dynamically loads and attach a simulation to a loaded model.
+Colors a circuit model by grouping its elements using the given method. Specific variables can be targetted, otherwise, random colors per variable group will be applied.
 
 Parameters:
 
-* ``circuit_configuration``: ``str``. Simulation configuration file path.
-* ``model_id``: ``int``. The model to which to attach the handler.
-* ``report_name``: ``str``. The name of the report to attach.
+* ``color_info``: ``list``. List of IDs with their corresponding color. If empty, all the model will be colored with random colors per ID.
+
+  * ``items``: ``dict``. The object has the following properties.
+
+    * ``color``: ``list``. Color applied to the given variable (Normalized RGBA).
+
+      * ``items``: ``float``
+
+    * ``variable``: ``str``. Variable of the coloring method being used.
+
+* ``method``: ``str``. Method to use for coloring.
+* ``model_id``: ``int``. ID of the model to color.
 
 Return value:
 
@@ -214,22 +232,18 @@ This method has no return values.
 
 ----
 
-color_cells
-~~~~~~~~~~~
+color_circuit_by_single_color
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Color cells with given colors using their GID.
+Colors a whole circuit model with a single color.
 
 Parameters:
 
-* ``colors``: ``list``. Cell colors.
+* ``color``: ``list``. Color to use for the whole circuit (Normalized RGBA).
 
   * ``items``: ``float``
 
-* ``gids``: ``list``. Cells to color.
-
-  * ``items``: ``str``
-
-* ``model_id``: ``int``. Model to color.
+* ``model_id``: ``int``. ID of the model to color.
 
 Return value:
 
@@ -237,48 +251,42 @@ This method has no return values.
 
 ----
 
-export_frames_to_disk
-~~~~~~~~~~~~~~~~~~~~~
+get_circuit_color_method_variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Export a set of frames from a simulation as image files.
-
-Parameters:
-
-* ``animation_information``: ``list``. A list of frame numbers to render.
-
-  * ``items``: ``int``
-
-* ``camera_information``: ``list``. A list of camera definitions. Each camera definition contains origin, direction, up, apperture and radius. (1 entry per animation information entry).
-
-  * ``items``: ``float``
-
-* ``format``: ``str``. The image format (PNG or JPEG).
-* ``name_after_step``: ``bool``. Name the file on disk after the simulation step index.
-* ``path``: ``str``. Directory to store the frames.
-* ``quality``: ``int``. The quality at which the images will be stored.
-* ``spp``: ``int``. Samples per pixels.
-* ``start_frame``: ``int``. The frame at which to start exporting frames.
-
-Return value:
-
-This method has no return values.
-
-----
-
-get_export_frames_progress
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Get the progress of the last issued frame export.
+Return the available variables which can be specified when coloring a circuit model by the given method.
 
 Parameters:
 
-This method takes no parameters.
+* ``method``: ``str``. Name of the method to query.
+* ``model_id``: ``int``. ID of the model to query.
 
 Return value:
 
 * ``dict``. The object has the following properties.
 
-  * ``progress``: ``float``. Progress of the last export 0-1.
+  * ``variables``: ``list``. Available variables for the given circuit model and method.
+
+    * ``items``: ``str``
+
+----
+
+get_circuit_color_methods
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Return the available extra coloring methods for a circuit model.
+
+Parameters:
+
+* ``model_id``: ``int``. ID of the model to query.
+
+Return value:
+
+* ``dict``. The object has the following properties.
+
+  * ``methods``: ``list``. Available coloring methods.
+
+    * ``items``: ``str``
 
 ----
 
@@ -326,7 +334,7 @@ Retreive the list of ID of the materials in given model.
 
 Parameters:
 
-* ``model_id``: ``int``. Model ID.
+* ``id``: ``int``. Model ID.
 
 Return value:
 
@@ -335,35 +343,6 @@ Return value:
   * ``ids``: ``list``. List of material ID.
 
     * ``items``: ``int``
-
-----
-
-get_odu_camera
-~~~~~~~~~~~~~~
-
-Get the properties of the current camera.
-
-Parameters:
-
-This method takes no parameters.
-
-Return value:
-
-* ``dict``. The object has the following properties.
-
-  * ``aperture_radius``: ``float``. The camera aperture.
-  * ``direction``: ``list``. Camera facing direction normalized.
-
-    * ``items``: ``float``
-
-  * ``focus_distance``: ``float``. Focus distance from the origin.
-  * ``origin``: ``list``. Camera position.
-
-    * ``items``: ``float``
-
-  * ``up``: ``list``. Camera up direction normalized.
-
-    * ``items``: ``float``
 
 ----
 
@@ -409,40 +388,6 @@ This method has no return values.
 
 ----
 
-remap_circuit_color
-~~~~~~~~~~~~~~~~~~~
-
-Remap the circuit colors to the specified scheme.
-
-Parameters:
-
-* ``model_id``: ``int``. The model to remap.
-* ``scheme``: ``str``. New color scheme.
-
-Return value:
-
-* ``dict``. The object has the following properties.
-
-  * ``updated``: ``bool``. Check if the colors of the model changed.
-
-----
-
-save_model_to_cache
-~~~~~~~~~~~~~~~~~~~
-
-Saves given model in a cache file.
-
-Parameters:
-
-* ``model_id``: ``int``. The ID of the model to save.
-* ``path``: ``str``. The path to save the cache file.
-
-Return value:
-
-This method has no return values.
-
-----
-
 set_circuit_thickness
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -452,24 +397,6 @@ Parameters:
 
 * ``model_id``: ``int``. ID of the circuit model.
 * ``radius_multiplier``: ``float``. Scaling factor.
-
-Return value:
-
-This method has no return values.
-
-----
-
-set_connections_per_value
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Draw a point cloud representing the number of connections for a given frame and simulation value.
-
-Parameters:
-
-* ``epsilon``: ``float``. The value epsilon.
-* ``frame``: ``int``. The frame of the simulation in which to apply.
-* ``model_id``: ``int``. The ID of the model to save.
-* ``value``: ``float``. The value.
 
 Return value:
 
@@ -518,7 +445,7 @@ Add extra material attributes necessary for the Circuit Explorer renderer.
 
 Parameters:
 
-* ``model_id``: ``int``. Model ID.
+* ``id``: ``int``. Model ID.
 
 Return value:
 
@@ -603,68 +530,15 @@ This method has no return values.
 
 ----
 
-set_metaballs_per_simulation_value
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+set_simulation_color
+~~~~~~~~~~~~~~~~~~~~
 
-Add a metaballs model representing the number of connections for a given frame and simulation value.
-
-Parameters:
-
-* ``epsilon``: ``float``. The value epsilon.
-* ``frame``: ``int``. The frame with metaballs.
-* ``grid_size``: ``int``. The size of a regular grid.
-* ``model_id``: ``int``. The model to set metaballs.
-* ``threshold``: ``float``. The threshold.
-* ``value``: ``float``. The value for the metaballs generation.
-
-Return value:
-
-This method has no return values.
-
-----
-
-set_odu_camera
-~~~~~~~~~~~~~~
-
-Set the properties of the current camera.
+Enables or disables the color of a given Circuit Model by its simulation values.
 
 Parameters:
 
-* ``aperture_radius``: ``float``. The camera aperture.
-* ``direction``: ``list``. Camera facing direction normalized.
-
-  * ``items``: ``float``
-
-* ``focus_distance``: ``float``. Focus distance from the origin.
-* ``origin``: ``list``. Camera position.
-
-  * ``items``: ``float``
-
-* ``up``: ``list``. Camera up direction normalized.
-
-  * ``items``: ``float``
-
-Return value:
-
-This method has no return values.
-
-----
-
-set_synapses_attributes
-~~~~~~~~~~~~~~~~~~~~~~~
-
-Set synapses specific attributes for a given model.
-
-Parameters:
-
-* ``circuit_configuration``: ``str``. Path to the circuit configuration file.
-* ``gid``: ``int``. Target cell GID.
-* ``html_colors``: ``list``. List of rgb colors in hexadecimal.
-
-  * ``items``: ``str``
-
-* ``light_emission``: ``float``. Emission parameter for the synapse material.
-* ``radius``: ``float``. Synapse geometry radius.
+* ``enabled``: ``bool``. If true, coloring by simulation value will be enabled for the given model.
+* ``model_id``: ``int``. ID of the model to enable or disable simulation color.
 
 Return value:
 

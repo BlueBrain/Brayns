@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
@@ -20,7 +20,7 @@
 
 #include "SharedDataVolume.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <fcntl.h>
 #include <fstream>
@@ -78,13 +78,13 @@ void SharedDataVolume::mapData(const std::string& filename)
     setVoxels(_memoryMapPtr);
 }
 
-void SharedDataVolume::mapData(const uint8_ts& buffer)
+void SharedDataVolume::mapData(const std::vector<uint8_t>& buffer)
 {
     _memoryBuffer.insert(_memoryBuffer.begin(), buffer.begin(), buffer.end());
     setVoxels(_memoryBuffer.data());
 }
 
-void SharedDataVolume::mapData(uint8_ts&& buffer)
+void SharedDataVolume::mapData(std::vector<uint8_t>&& buffer)
 {
     _memoryBuffer = std::move(buffer);
     setVoxels(_memoryBuffer.data());

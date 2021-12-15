@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,14 +20,18 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
-#include <brayns/common/utils/DynamicLib.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/parameters/ParametersManager.h>
+#include <brayns/utils/DynamicLib.h>
+
+#include <map>
+#include <vector>
 
 namespace brayns
 {
 /**
  * The engine factory is in charge of instantiating engines according to their
- * name (ospray, optix or firerays). If Brayns does not find the 3rd party
+ * name (ospray). If Brayns does not find the 3rd party
  * library at compilation time, the according lib is not generated and the
  * get method returns a null pointer.
  */

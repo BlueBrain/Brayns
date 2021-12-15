@@ -21,13 +21,13 @@
 
 #pragma once
 
-#include <brayns/network/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(GetInstanceMessage)
-BRAYNS_MESSAGE_ENTRY(size_t, id, "Model ID")
-BRAYNS_MESSAGE_ENTRY(Vector2ui, result_range, "Result list from/to indices",
-                     Required(false))
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(GetInstanceMessage)
+BRAYNS_JSON_OBJECT_ENTRY(size_t, id, "Model ID")
+BRAYNS_JSON_OBJECT_ENTRY(Vector2ui, result_range, "Result list from/to indices",
+                         Required(false))
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

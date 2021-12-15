@@ -19,7 +19,7 @@
 
 #include "MultiviewPlugin.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/parameters/ParametersManager.h>
@@ -41,17 +41,7 @@ MultiviewPlugin::MultiviewPlugin(PropertyMap&& properties)
     }
 }
 
-void MultiviewPlugin::init()
-{
-    auto& engine = _api->getEngine();
-
-    auto& params = engine.getParametersManager();
-    if (params.getApplicationParameters().getEngine() == "ospray")
-        engine.addCameraType("multiview", _properties);
-    else
-        throw std::runtime_error(
-            "The multiview camera is only available for ospray engine");
-}
+void MultiviewPlugin::init() {}
 } // namespace brayns
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,

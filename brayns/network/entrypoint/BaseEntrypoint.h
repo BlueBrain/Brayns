@@ -93,16 +93,6 @@ public:
     BinaryRequestManager& getBinary() const { return _context->getBinary(); }
 
     /**
-     * @brief Shortcut to get the global instance of the image generator.
-     *
-     * @return ImageGenerator& Image generator.
-     */
-    ImageGenerator& getImageGenerator() const
-    {
-        return _context->getImageGenerator();
-    }
-
-    /**
      * @brief Get the stored plugin name.
      *
      * @return const std::string& Parent plugin name.
@@ -114,7 +104,10 @@ public:
      *
      * @param plugin Parent plugin name.
      */
-    virtual void setPlugin(const std::string& plugin) { _plugin = plugin; }
+    virtual void setPlugin(const std::string& plugin) override
+    {
+        _plugin = plugin;
+    }
 
     /**
      * @brief Store the network context reference inside instance.
@@ -151,7 +144,7 @@ public:
         }
         catch (...)
         {
-            BRAYNS_ERROR << "Error during notification.\n";
+            Log::error("Error during notification.");
         }
     }
 

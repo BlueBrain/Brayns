@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
@@ -20,25 +20,23 @@
 
 #include "AddModelFromBlobTask.h"
 
+#include "Errors.h"
 #include "LoadModelFunctor.h"
-#include "errors.h"
-
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/Scene.h>
 
 #include <sstream>
 
 namespace brayns
 {
 AddModelFromBlobTask::AddModelFromBlobTask(const BinaryParam& param,
-                                           Engine& engine)
+                                           Engine& engine,
+                                           LoaderRegistry& registry)
     : _param(param)
 {
-    _checkValidity(engine);
+    _checkValidity(registry);
 
     _blob.reserve(param.size);
 
-    LoadModelFunctor functor{engine, param};
+    LoadModelFunctor functor{engine, registry, param};
     functor.setCancelToken(_cancelToken);
     functor.setProgressFunc(
         [& progress = progress, w = CHUNK_PROGRESS_WEIGHT](const auto& msg,
@@ -81,12 +79,11 @@ void AddModelFromBlobTask::appendBlob(const std::string& blob)
         _chunkEvent.set({_param.type, _param.getName(), std::move(_blob)});
 }
 
-void AddModelFromBlobTask::_checkValidity(Engine& engine)
+void AddModelFromBlobTask::_checkValidity(LoaderRegistry& registry)
 {
     if (_param.type.empty() || _param.size == 0)
         throw MISSING_PARAMS;
 
-    const auto& registry = engine.getScene().getLoaderRegistry();
     if (!registry.isSupportedType(_param.type))
         throw UNSUPPORTED_TYPE;
 }

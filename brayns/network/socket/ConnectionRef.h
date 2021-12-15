@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include "ConnectionHandle.h"
 #include "ConnectionManager.h"
@@ -79,7 +79,7 @@ public:
         }
         catch (...)
         {
-            BRAYNS_ERROR << "Unexpected error during sending request.\n";
+            Log::error("Unexpected error during sending request.");
         }
     }
 
@@ -100,7 +100,7 @@ public:
         }
         catch (...)
         {
-            BRAYNS_ERROR << "Unexpected error during broadcast.\n";
+            Log::error("Unexpected error during broadcast.");
         }
     }
 
@@ -121,7 +121,7 @@ public:
         }
         catch (...)
         {
-            BRAYNS_ERROR << "Unexpected error during broadcast to others.\n";
+            Log::error("Unexpected error during broadcast to others.");
         }
     }
 

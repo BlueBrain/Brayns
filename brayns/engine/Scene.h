@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,16 +20,16 @@
 
 #pragma once
 
-#include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
-#include <brayns/common/loader/LoaderRegistry.h>
+#include <brayns/common/MaterialsColorMap.h>
+#include <brayns/common/scene/ClipPlane.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
-#include <brayns/common/types.h>
 #include <brayns/engine/LightManager.h>
+#include <brayns/engine/Model.h>
+#include <brayns/parameters/AnimationParameters.h>
+#include <brayns/parameters/VolumeParameters.h>
 
 #include <shared_mutex>
-
-SERIALIZATION_ACCESS(Scene)
 
 namespace brayns
 {
@@ -50,16 +50,16 @@ public:
      * Called after scene-related changes have been made before rendering the
      * scene.
      */
-    BRAYNS_API virtual void commit();
+    virtual void commit();
 
     /**
      * Commits lights to renderers.
      * @return True if lights were committed, false otherwise
      */
-    BRAYNS_API virtual bool commitLights() = 0;
+    virtual bool commitLights() = 0;
 
     /** Factory method to create an engine-specific model. */
-    BRAYNS_API virtual ModelPtr createModel() const = 0;
+    virtual ModelPtr createModel() const = 0;
 
     //@}
 
@@ -67,9 +67,8 @@ public:
      * Creates a scene object responsible for handling models, simulations and
      * light sources.
      */
-    BRAYNS_API Scene(AnimationParameters& animationParameters,
-                     GeometryParameters& geometryParameters,
-                     VolumeParameters& volumeParameters);
+    Scene(AnimationParameters& animationParameters,
+          VolumeParameters& volumeParameters);
 
     /**
         Returns the bounding box of the scene
@@ -82,21 +81,21 @@ public:
         Adds a model to the scene
         @throw std::runtime_error if model is empty
       */
-    BRAYNS_API size_t addModel(ModelDescriptorPtr model);
+    size_t addModel(ModelDescriptorPtr model);
 
     /**
      * @brief Adds a model to the scene with the specific model id
      * @param id to be used as model identifier
      * @param model the model itself
      */
-    BRAYNS_API void addModel(const size_t id, ModelDescriptorPtr model);
+    void addModel(const size_t id, ModelDescriptorPtr model);
 
     /**
         Removes a model from the scene
         @param id id of the model (descriptor)
         @return True if model was found and removed, false otherwise
       */
-    BRAYNS_API bool removeModel(const size_t id);
+    bool removeModel(const size_t id);
 
     /**
      * @brief Check wether a model has been marked for replacement
@@ -104,7 +103,7 @@ public:
      * @param id the ID of the model to replace the current one
      * @return true if the model is on the list to be replaced
      */
-    BRAYNS_API bool isMarkedForReplacement(const size_t id);
+    bool isMarkedForReplacement(const size_t id);
 
     /**
      * @brief Replaces an existing model (given its ID) for a new one
@@ -112,43 +111,48 @@ public:
      * @param modelDescriptor The model which will replace the current one
      * @return True if the model was found and replace, false otherwise
      */
-    BRAYNS_API bool replaceModel(const size_t id,
-                                 ModelDescriptorPtr modelDescriptor);
+    bool replaceModel(const size_t id, ModelDescriptorPtr modelDescriptor);
 
-    BRAYNS_API ModelDescriptorPtr getModel(const size_t id) const;
+    ModelDescriptorPtr getModel(const size_t id) const;
 
-    const ModelDescriptors& getModels() const { return _modelDescriptors; }
+    const std::vector<ModelDescriptorPtr>& getModels() const
+    {
+        return _modelDescriptors;
+    }
 
     /**
         Builds a default scene made of a Cornell box, a reflective cube, and
         a transparent sphere
     */
-    BRAYNS_API void buildDefault();
+    void buildDefault();
 
     /**
      * @return true if the scene does not contain any geometry, false otherwise
      */
-    BRAYNS_API bool empty() const;
+    bool empty() const;
 
     /** Add a clip plane to the scene.
      * @param plane The coefficients of the clip plane equation.
      * @return The clip plane ID.
      */
-    BRAYNS_API size_t addClipPlane(const Plane& plane);
+    size_t addClipPlane(const Plane& plane);
 
     /** Get a clip plane by its ID.
         @param id the plane ID.
         @return A pointer to the clip plane or null if not found.
      */
-    BRAYNS_API ClipPlanePtr getClipPlane(const size_t id) const;
+    ClipPlanePtr getClipPlane(const size_t id) const;
 
     /** Remove a clip plane by its ID, or nop if not found. */
-    BRAYNS_API void removeClipPlane(const size_t id);
+    void removeClipPlane(const size_t id);
 
     /**
        @return the clip planes
     */
-    const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
+    const std::vector<ClipPlanePtr>& getClipPlanes() const
+    {
+        return _clipPlanes;
+    }
     /** @return the current size in bytes of the loaded geometry. */
     size_t getSizeInBytes() const;
 
@@ -162,25 +166,6 @@ public:
      */
     void setMaterialsColorMap(MaterialsColorMap colorMap);
 
-    /**
-     * Set a new environment map to the scene as the background image. If envMap
-     * is empty, it removes the previous map and the background color is used
-     * instead.
-     *
-     * @param envMap a filepath to an image that shall be used as the
-     *               environment map texture
-     * @return false if the new map could not be set, true otherwise
-     */
-    bool setEnvironmentMap(const std::string& envMap);
-
-    /**
-     *  @return the current set environment map texture file, or empty if no
-     *          environment is set
-     */
-    const std::string& getEnvironmentMap() const { return _environmentMap; }
-    /** @return true if an environment map is currently set in the scene. */
-    bool hasEnvironmentMap() const;
-
     MaterialPtr getBackgroundMaterial() const { return _backgroundMaterial; }
 
     /** @return the transfer function used for volumes and simulations. */
@@ -192,33 +177,18 @@ public:
     }
 
     /**
-     * Load the model from the given blob.
+     * Adds the list of models to the scene
      *
-     * @param blob the blob containing the data to import
+     * @param input list of models to add to the scene
      * @param params Parameters for the model to be loaded
-     * @param cb the callback for progress updates from the loader
-     * @return the model that has been added to the scene
+     * @throws std::runtime_error if any of the models being added is not
+     * correct
      */
-    std::vector<ModelDescriptorPtr> loadModels(Blob&& blob,
-                                               const ModelParams& params,
-                                               LoaderProgress cb);
-
-    /**
-     * Load the model from the given file.
-     *
-     * @param path the file or folder containing the data to import
-     * @param params Parameters for the model to be loaded
-     * @param cb the callback for progress updates from the loader
-     * @return the model that has been added to the scene
-     */
-    std::vector<ModelDescriptorPtr> loadModels(const std::string& path,
-                                               const ModelParams& params,
-                                               LoaderProgress cb);
+    void addModels(std::vector<ModelDescriptorPtr>& input,
+                   const ModelParams& params);
 
     void visitModels(const std::function<void(Model&)>& functor);
 
-    /** @return the registry for all supported loaders of this scene. */
-    LoaderRegistry& getLoaderRegistry() { return _loaderRegistry; }
     /** @internal */
     auto acquireReadAccess() const
     {
@@ -226,7 +196,7 @@ public:
     }
 
     /** @internal */
-    BRAYNS_API void copyFrom(const Scene& rhs);
+    void copyFrom(const Scene& rhs);
 
     virtual void copyFromImpl(const Scene&) {}
 
@@ -234,32 +204,27 @@ protected:
     /** @return True if this scene supports scene updates from any thread. */
     virtual bool supportsConcurrentSceneUpdates() const { return false; }
     void _computeBounds();
-    void _loadIBLMaps(const std::string& envMap);
-
     void _updateAnimationParameters();
 
     AnimationParameters& _animationParameters;
-    GeometryParameters& _geometryParameters;
     VolumeParameters& _volumeParameters;
     MaterialPtr _backgroundMaterial;
-    std::string _environmentMap;
 
     TransferFunction _transferFunction;
 
     // Model
     size_t _modelID{0};
-    ModelDescriptors _modelDescriptors;
+    std::vector<ModelDescriptorPtr> _modelDescriptors;
     mutable std::shared_timed_mutex _modelMutex;
 
     std::unordered_map<size_t, ModelDescriptorPtr> _markedForReplacement;
 
     LightManager _lightManager;
-    ClipPlanes _clipPlanes;
+    std::vector<ClipPlanePtr> _clipPlanes;
 
-    LoaderRegistry _loaderRegistry;
     Boxd _bounds;
-
-private:
-    SERIALIZATION_FRIEND(Scene)
 };
+
+using ScenePtr = std::shared_ptr<Scene>;
+
 } // namespace brayns

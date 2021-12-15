@@ -18,10 +18,8 @@ RUN apt-get update \
    ninja-build \
    libarchive-dev \
    libassimp-dev \
-   libfreeimage-dev \
    libhdf5-serial-dev \
    libtbb-dev \
-   libturbojpeg0-dev \
    pkg-config \
    wget \
    ca-certificates \
@@ -119,25 +117,17 @@ ADD . ${BRAYNS_SRC}
 # https://github.com/BlueBrain/Brayns
 
 # TODO: "|| exit 0"  hack to be removed as soon as MVDTool export issue is fixed.
-RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
-   && cd ${BRAYNS_SRC} \
-   && git submodule update --init --recursive \
+RUN cd ${BRAYNS_SRC} \
    && mkdir -p build \
    && cd build \
    && CMAKE_PREFIX_PATH=${DIST_PATH}:${DIST_PATH}/lib/cmake/libwebsockets \
    cmake ..  \
-   -DBRAYNS_ASSIMP_ENABLED=ON \
-   -DBRAYNS_OSPRAY_ENABLED=ON \
    -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON \
    -DBRAYNS_CIRCUITINFO_ENABLED=ON \
-   -DBRAYNS_DTI_ENABLED=OFF \
-   -DCLONE_SUBPROJECTS=ON \
    -DCMAKE_BUILD_TYPE=Release \
-   -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
-   -DBUILD_PYTHON_BINDINGS=OFF \
-   -DEXTLIB_FROM_SUBMODULES=ON
+   -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
 
-RUN cd ${BRAYNS_SRC}/build && make -j install \
+RUN cd ${BRAYNS_SRC}/build && make -j4 install \
    && rm -rf ${DIST_PATH}/include ${DIST_PATH}/cmake ${DIST_PATH}/share
 
 # Final image, containing only Brayns and libraries required to run it
@@ -148,10 +138,8 @@ RUN apt-get update \
    && apt-get -y --no-install-recommends install \
    libarchive13 \
    libassimp4 \
-   libfreeimage3 \
    libgomp1 \
    libhdf5-103 \
-   libturbojpeg0 \
    && apt-get clean \
    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

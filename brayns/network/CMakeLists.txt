@@ -1,6 +1,7 @@
-cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
-
-project(braynsNetwork VERSION 0.1.0)
+# Copyright (c) 2015-2021, EPFL/Blue Brain Project
+# All rights reserved. Do not distribute without permission.
+#
+# This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSNETWORK_HEADERS
   entrypoint/Entrypoint.h
@@ -8,9 +9,6 @@ set(BRAYNSNETWORK_HEADERS
   entrypoint/IEntrypoint.h
   entrypoint/EntrypointException.h
   interface/ActionInterface.h
-  json/ActionMessage.h
-  json/Json.h
-  json/Message.h
   json/MessageFactory.h
   plugin/NetworkManager.h
 )
@@ -20,7 +18,6 @@ set(BRAYNSNETWORK_SOURCES
   interface/NetworkInterface.cpp
   interface/ClientInterface.cpp
   interface/ServerInterface.cpp
-  json/JsonSchemaValidator.cpp
   plugin/NetworkManager.cpp
   socket/ConnectionManager.cpp
   stream/StreamManager.cpp
@@ -38,27 +35,28 @@ target_link_libraries(braynsNetwork PRIVATE
   braynsCommon
   braynsParameters
   braynsPluginAPI
+  braynsUtils
 )
 
 target_link_libraries(braynsNetwork PUBLIC
+  braynsJson
+  braynsTasks
+  braynsIO
   Poco::Foundation
   Poco::Net
   Poco::NetSSL
-  Poco::JSON
 )
+
+target_compile_options(braynsNetwork PRIVATE ${BRAYNS_COMPILE_OPTIONS})
 
 set_target_properties(braynsNetwork
     PROPERTIES
-        VERSION ${Brayns_VERSION}
-        SOVERSION ${Brayns_VERSION_MAJOR}.${Brayns_VERSION_MINOR}
+        VERSION ${BRAYNS_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 )
 
 install(TARGETS braynsNetwork
-    EXPORT braynsNetwork-targets
+    EXPORT Brayns-targets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
-)
-
-install(EXPORT braynsNetwork-targets
-    DESTINATION share/CMake
 )

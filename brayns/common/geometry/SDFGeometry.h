@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Jonas Karlsson <jonas.karlsson@epfl.ch>
  *
@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
+#include <brayns/common/MathTypes.h>
 
 namespace brayns
 {
@@ -34,7 +34,7 @@ enum class SDFType : uint8_t
 
 struct SDFGeometry
 {
-    uint64_t userData;
+    uint64_t userData{};
     Vector3f center; // TO BE REMOVED, for v3 cache compatibility only
     Vector3f p0;
     Vector3f p1;
@@ -48,10 +48,10 @@ struct SDFGeometry
 inline SDFGeometry createSDFSphere(const Vector3f& center, const float radius,
                                    const uint64_t data = 0)
 {
-    SDFGeometry geom;
+    SDFGeometry geom{};
     geom.userData = data;
-    geom.p0 = center;
-    geom.r0 = radius;
+    geom.p0 = geom.p1 = center;
+    geom.r0 = geom.r1 = radius;
     geom.type = SDFType::Sphere;
     return geom;
 }
@@ -59,11 +59,11 @@ inline SDFGeometry createSDFSphere(const Vector3f& center, const float radius,
 inline SDFGeometry createSDFPill(const Vector3f& p0, const Vector3f& p1,
                                  const float radius, const uint64_t data = 0)
 {
-    SDFGeometry geom;
+    SDFGeometry geom{};
     geom.userData = data;
     geom.p0 = p0;
     geom.p1 = p1;
-    geom.r0 = radius;
+    geom.r0 = geom.r1 = radius;
     geom.type = SDFType::Pill;
     return geom;
 }
@@ -72,7 +72,7 @@ inline SDFGeometry createSDFConePill(const Vector3f& p0, const Vector3f& p1,
                                      const float r0, const float r1,
                                      const uint64_t data = 0)
 {
-    SDFGeometry geom;
+    SDFGeometry geom{};
     geom.userData = data;
     geom.p0 = p0;
     geom.p1 = p1;

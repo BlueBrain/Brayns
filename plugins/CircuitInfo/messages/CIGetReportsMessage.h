@@ -21,12 +21,12 @@
 
 #pragma once
 
-#include <brayns/network/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
-BRAYNS_MESSAGE_BEGIN(CIGetReportsParams)
-BRAYNS_MESSAGE_ENTRY(std::string, path, "Path to the circuit config file")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(CIGetReportsParams)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path to the circuit config file")
+BRAYNS_JSON_OBJECT_END()
 
-BRAYNS_MESSAGE_BEGIN(CIGetReportsResult)
-BRAYNS_MESSAGE_ENTRY(std::vector<std::string>, reports, "Report names")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(CIGetReportsResult)
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, reports, "Report names")
+BRAYNS_JSON_OBJECT_END()

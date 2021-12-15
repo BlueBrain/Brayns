@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/network/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
@@ -31,10 +31,11 @@ enum class ImageStreamingMode
     Quanta
 };
 
-BRAYNS_ADAPTER_ENUM(ImageStreamingMode, {"stream", ImageStreamingMode::Stream},
-                    {"quanta", ImageStreamingMode::Quanta})
+BRAYNS_JSON_ADAPTER_ENUM(ImageStreamingMode,
+                         {"stream", ImageStreamingMode::Stream},
+                         {"quanta", ImageStreamingMode::Quanta})
 
-BRAYNS_MESSAGE_BEGIN(ImageStreamingModeMessage)
-BRAYNS_MESSAGE_ENTRY(ImageStreamingMode, type, "Stream mode")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(ImageStreamingModeMessage)
+BRAYNS_JSON_OBJECT_ENTRY(ImageStreamingMode, type, "Stream mode")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

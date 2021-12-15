@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -21,21 +21,20 @@
 #include "OSPRayFrameBuffer.h"
 #include "utils.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <ospray/SDK/common/OSPCommon.h>
 
 namespace brayns
 {
 namespace
 {
-OSPFrameBufferFormat toOSPFrameBufferFormat(
-    const FrameBufferFormat frameBufferFormat)
+OSPFrameBufferFormat toOSPFrameBufferFormat(const PixelFormat frameBufferFormat)
 {
     switch (frameBufferFormat)
     {
-    case FrameBufferFormat::rgba_i8:
+    case PixelFormat::RGBA_I8:
         return OSP_FB_RGBA8;
-    case FrameBufferFormat::rgb_f32:
+    case PixelFormat::RGB_F32:
         return OSP_FB_RGBA32F;
     default:
         return OSP_FB_NONE;
@@ -44,7 +43,7 @@ OSPFrameBufferFormat toOSPFrameBufferFormat(
 } // namespace
 OSPRayFrameBuffer::OSPRayFrameBuffer(const std::string& name,
                                      const Vector2ui& frameSize,
-                                     const FrameBufferFormat frameBufferFormat)
+                                     const PixelFormat frameBufferFormat)
     : FrameBuffer(name, frameSize, frameBufferFormat)
 {
     resize(frameSize);
@@ -135,7 +134,7 @@ void OSPRayFrameBuffer::map()
 
 void OSPRayFrameBuffer::_mapUnsafe()
 {
-    if (_frameBufferFormat == FrameBufferFormat::none)
+    if (_frameBufferFormat == PixelFormat::NONE)
         return;
 
     _colorBuffer = (uint8_t*)ospMapFrameBuffer(_currentFB(), OSP_FB_COLOR);
@@ -150,7 +149,7 @@ void OSPRayFrameBuffer::unmap()
 
 void OSPRayFrameBuffer::_unmapUnsafe()
 {
-    if (_frameBufferFormat == FrameBufferFormat::none)
+    if (_frameBufferFormat == PixelFormat::NONE)
         return;
 
     if (_colorBuffer)
@@ -190,7 +189,7 @@ void OSPRayFrameBuffer::setAccumulation(const bool accumulation)
     }
 }
 
-void OSPRayFrameBuffer::setFormat(FrameBufferFormat frameBufferFormat)
+void OSPRayFrameBuffer::setFormat(PixelFormat frameBufferFormat)
 {
     if (_frameBufferFormat != frameBufferFormat)
     {

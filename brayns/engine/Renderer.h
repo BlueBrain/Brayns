@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,8 +20,10 @@
 
 #pragma once
 
-#include <brayns/api.h>
 #include <brayns/common/PropertyObject.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Scene.h>
 #include <brayns/parameters/AnimationParameters.h>
 #include <brayns/parameters/RenderingParameters.h>
 
@@ -50,8 +52,8 @@ public:
     }
     //@}
 
-    BRAYNS_API Renderer(const AnimationParameters& animationParameters,
-                        const RenderingParameters& renderingParameters);
+    Renderer(const AnimationParameters& animationParameters,
+             const RenderingParameters& renderingParameters);
 
     void setScene(ScenePtr scene) { _scene = scene; };
 
@@ -60,4 +62,6 @@ protected:
     const RenderingParameters& _renderingParameters;
     ScenePtr _scene;
 };
+
+using RendererPtr = std::shared_ptr<Renderer>;
 } // namespace brayns

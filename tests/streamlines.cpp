@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Jonas karlsson <jonas.karlsson@epfl.ch>
  *
@@ -19,9 +19,7 @@
  */
 
 #include <brayns/Brayns.h>
-#include <tests/paths.h>
 
-#include <brayns/common/types.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
@@ -32,7 +30,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
-#include "PDiffHelpers.h"
+#include "helpers/ImageValidator.h"
 
 TEST_CASE("streamlines")
 {
@@ -41,7 +39,8 @@ TEST_CASE("streamlines")
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
-    auto& scene = brayns.getEngine().getScene();
+    auto& engine = brayns.getEngine();
+    auto& scene = engine.getScene();
 
     {
         constexpr size_t materialId = 0;
@@ -58,8 +57,8 @@ TEST_CASE("streamlines")
         {
             for (size_t row = 0; row < 3; ++row)
             {
-                brayns::Vector3fs vertices;
-                brayns::Vector4fs vertexColors;
+                std::vector<brayns::Vector3f> vertices;
+                std::vector<brayns::Vector4f> vertexColors;
                 std::vector<float> radii;
 
                 const auto offset =
@@ -96,11 +95,10 @@ TEST_CASE("streamlines")
         auto position = modelDesc->getModel().getBounds().getCenter();
         position.z += glm::compMax(modelDesc->getModel().getBounds().getSize());
 
-        brayns.getEngine().getCamera().setInitialState(
+        engine.getCamera().setInitialState(
             position, glm::identity<brayns::Quaterniond>());
     }
 
     brayns.commitAndRender();
-    CHECK(compareTestImage("streamlines.png",
-                           brayns.getEngine().getFrameBuffer()));
+    CHECK(ImageValidator::validate(engine, "streamlines.png"));
 }

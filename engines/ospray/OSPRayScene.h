@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
 #include <brayns/engine/Scene.h>
 
 #include "ispc/model/OSPRayISPCModel.h"
@@ -40,7 +39,6 @@ class OSPRayScene : public Scene
 {
 public:
     OSPRayScene(AnimationParameters& animationParameters,
-                GeometryParameters& geometryParameters,
                 VolumeParameters& volumeParameters);
     ~OSPRayScene();
 
@@ -63,15 +61,16 @@ public:
     }
 
 private:
-    bool _commitVolumes(ModelDescriptors& modelDescriptors);
+    bool _commitVolumes(std::vector<ModelDescriptorPtr>& modelDescriptors);
     void _commitTransferFunction();
-    void _commitSimulationData(ModelDescriptors& modelDescriptors);
+    void _commitSimulationData(
+        std::vector<ModelDescriptorPtr>& modelDescriptors);
     void _destroyLights();
 
     OSPModel _rootModel{nullptr};
 
     std::vector<float> _simData;
-    // uint32_t _lastFrame {std::numeric_limits<uint32_t>::max()};
+    uint32_t _lastFrame{std::numeric_limits<uint32_t>::max()};
     OSPData _ospSimulationData{nullptr};
     OSPTransferFunction _ospTransferFunction{nullptr};
 
@@ -81,6 +80,6 @@ private:
 
     size_t _memoryManagementFlags{0};
 
-    ModelDescriptors _activeModels;
+    std::vector<ModelDescriptorPtr> _activeModels;
 };
 } // namespace brayns

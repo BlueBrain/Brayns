@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include <brayns/network/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(RemoveLightsMessage)
-BRAYNS_MESSAGE_ENTRY(std::vector<size_t>, ids, "List of light ID to remove")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(RemoveLightsMessage)
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<size_t>, ids, "List of light ID to remove")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

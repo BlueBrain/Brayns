@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Jonas Karlsson <jonas.karlsson@epfl.ch>
  *
@@ -21,7 +21,6 @@
 #pragma once
 
 #include "ospray/SDK/geometry/Geometry.h"
-#include <brayns/common/types.h>
 
 namespace ospray
 {

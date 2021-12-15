@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/common/scene/ClipPlane.h>
 #include <brayns/engine/Model.h>
 
@@ -108,7 +108,7 @@ void OSPRayRenderer::commit()
         }
 
         // Setting the clip planes in the renderer and the camera
-        Planes planes;
+        std::vector<Plane> planes;
         for (const auto& clipPlane : _scene->getClipPlanes())
             planes.push_back(clipPlane->getPlane());
 
@@ -211,7 +211,7 @@ void OSPRayRenderer::_commitRendererMaterials()
     });
 }
 
-void OSPRayRenderer::setClipPlanes(const Planes& planes)
+void OSPRayRenderer::setClipPlanes(const std::vector<Plane>& planes)
 {
     if (_clipPlanes == planes)
         return;

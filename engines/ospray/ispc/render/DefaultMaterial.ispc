@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -46,7 +46,7 @@ export void DefaultMaterial_set(
     const uniform affine2f& xform_Bump, const uniform linear2f& rot_Bump)
 {
     uniform DefaultMaterial* uniform self =
-        (uniform DefaultMaterial * uniform)_mat;
+        (uniform DefaultMaterial * uniform) _mat;
 
     self->map_d = make_TextureParam((Texture2D*)map_d, xform_d);
     self->d = d;

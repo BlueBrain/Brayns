@@ -1,17 +1,31 @@
-# Copyright (c) 2015-2016, EPFL/Blue Brain Project
+# Copyright (c) 2015-2021, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(BRAYNSVIEWER_SOURCES main.cpp)
-
-set(BRAYNSVIEWER_LINK_LIBRARIES
-  PUBLIC brayns
-  braynsCommon
-  braynsIO
-  braynsParameters
-  braynsUI
+add_executable(braynsViewer
+    main.cpp
+    input/KeyboardHandler.cpp
+    manipulators/AbstractManipulator.cpp
+    manipulators/FlyingModeManipulator.cpp
+    manipulators/InspectCenterManipulator.cpp
+    ui/Application.cpp
 )
 
-common_application(braynsViewer)
+target_link_libraries(braynsViewer PRIVATE
+    brayns
+    braynsIO
+    glfw
+    GLEW
+    imgui
+)
+
+install(TARGETS braynsViewer
+    EXPORT braynsViewer-targets
+    RUNTIME DESTINATION bin
+)
+
+install(EXPORT braynsViewer-targets
+    DESTINATION share/CMake
+)

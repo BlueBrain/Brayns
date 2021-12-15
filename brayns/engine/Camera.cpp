@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
@@ -61,12 +61,5 @@ void Camera::setInitialState(const Vector3d& position,
 void Camera::reset()
 {
     set(_initialPosition, _initialOrientation, _initialTarget);
-}
-
-std::ostream& operator<<(std::ostream& os, Camera& camera)
-{
-    const auto& position = camera.getPosition();
-    const auto& orientation = camera.getOrientation();
-    return os << position << ", " << orientation;
 }
 } // namespace brayns

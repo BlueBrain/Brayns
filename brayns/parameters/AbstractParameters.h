@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2019, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -20,8 +20,6 @@
 #pragma once
 
 #include <brayns/common/BaseObject.h>
-#include <brayns/common/log.h>
-#include <brayns/common/types.h>
 
 #include <boost/program_options.hpp>
 #include <boost/program_options/value_semantic.hpp>
@@ -58,7 +56,7 @@ public:
      */
     virtual void print();
 
-    po::options_description& parameters() { return _parameters; }
+    po::options_description& parameters();
 
 protected:
     std::string _name;

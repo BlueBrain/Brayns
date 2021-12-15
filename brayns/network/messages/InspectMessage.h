@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include <brayns/network/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(InspectMessage)
-BRAYNS_MESSAGE_ENTRY(Vector2d, position, "Position XY (normalized)")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(InspectMessage)
+BRAYNS_JSON_OBJECT_ENTRY(Vector2d, position, "Position XY (normalized)")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

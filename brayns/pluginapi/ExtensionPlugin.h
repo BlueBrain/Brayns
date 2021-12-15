@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -22,15 +22,12 @@
 
 #include <cassert>
 
-#include <brayns/common/types.h>
-
 #include <brayns/network/entrypoint/EntrypointRef.h>
 #include <brayns/network/interface/ActionInterface.h>
+#include <brayns/pluginapi/PluginAPI.h>
 
 namespace brayns
 {
-class Engine;
-
 /**
  * Defines the abstract representation of an extension plug-in. What we mean by
  * extension is a set a functionalities that are not provided by the core of the

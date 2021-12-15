@@ -1,87 +1,79 @@
-# Copyright (c) 2015-2017, EPFL/Blue Brain Project
-# Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+# Copyright (c) 2015-2021, EPFL/Blue Brain Project
+# Responsible Authors: Cyrille Favreau <cyrille.favreau@epfl.ch>
+#                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSCOMMON_SOURCES
-  ImageManager.cpp
-  propertymap/ConversionRegistry.cpp
-  input/KeyboardHandler.cpp
-  light/Light.cpp
-  loader/LoaderRegistry.cpp
-  material/Texture2D.cpp
-  scene/ClipPlane.cpp
-  simulation/AbstractSimulationHandler.cpp
-  transferFunction/TransferFunction.cpp
-  utils/base64/base64.cpp
-  utils/DynamicLib.cpp
-  utils/imageUtils.cpp
-  utils/ImageGenerator.cpp
-  utils/stringUtils.cpp
-  utils/utils.cpp
-  Timer.cpp
+    Timer.cpp
+    material/Texture2D.cpp
+    propertymap/ConversionRegistry.cpp
+    scene/ClipPlane.cpp
+    simulation/AbstractSimulationHandler.cpp
+    transferFunction/TransferFunction.cpp
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
-  BaseObject.h
-  ImageManager.h
-  Progress.h
-  propertymap/Any.h
-  propertymap/Converter.h
-  propertymap/ConversionRegistry.h
-  propertymap/EnumProperty.h
-  propertymap/PropertyMap.h
-  PropertyObject.h
-  Statistics.h
-  Timer.h
-  Transformation.h
-  geometry/CommonDefines.h
-  geometry/Cone.h
-  geometry/Cylinder.h
-  geometry/SDFGeometry.h
-  geometry/SDFBezier.h
-  geometry/Sphere.h
-  geometry/Streamline.h
-  geometry/TriangleMesh.h
-  input/KeyboardHandler.h
-  light/Light.h
-  loader/Loader.h
-  loader/LoaderRegistry.h
-  log.h
-  material/Texture2D.h
-  mathTypes.h
-  macros.h
-  scene/ClipPlane.h
-  simulation/AbstractSimulationHandler.h
-  tasks/Task.h
-  tasks/TaskFunctor.h
-  tasks/TaskRuntimeError.h
-  transferFunction/TransferFunction.h
-  types.h
-  utils/enumUtils.h
-  utils/imageUtils.h
-  utils/ImageGenerator.h
-  utils/stringUtils.h
-  utils/utils.h
+    BaseObject.h
+    Blob.h
+    DefaultMaterialIds.h
+    Log.h
+    MaterialsColorMap.h
+    MathTypes.h
+    PixelFormat.h
+    Progress.h
+    PropertyObject.h
+    Statistics.h
+    TextureType.h
+    Timer.h
+    Transformation.h
+    VolumeDataType.h
+    adapters/PropertyMapAdapter.h
+    adapters/VolumeDataTypeAdapter.h
+    geometry/CommonDefines.h
+    geometry/Cone.h
+    geometry/Cylinder.h
+    geometry/SDFGeometry.h
+    geometry/Sphere.h
+    geometry/Streamline.h
+    geometry/TriangleMesh.h
+    material/Texture2D.h
+    propertymap/Any.h
+    propertymap/Converter.h
+    propertymap/ConversionRegistry.h
+    propertymap/EnumProperty.h
+    propertymap/PropertyMap.h
+    scene/ClipPlane.h
+    simulation/AbstractSimulationHandler.h
+    tasks/Task.h
+    tasks/TaskFunctor.h
+    tasks/TaskRuntimeError.h
+    transferFunction/TransferFunction.h
 )
 
-set(BRAYNSCOMMON_HEADERS
-  utils/DynamicLib.h
-  utils/filesystem.h
-  utils/base64/base64.h
+add_library(braynsCommon SHARED ${BRAYNSCOMMON_PUBLIC_HEADERS} ${BRAYNSCOMMON_SOURCES})
+
+target_include_directories(braynsCommon PUBLIC
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
+    "$<INSTALL_INTERFACE:include>")
+
+target_link_libraries(braynsCommon PUBLIC
+  glm Async++ braynsUtils braynsJson spdlog::spdlog
+)
+target_link_libraries(braynsCommon PRIVATE
+    braynsParameters ${Boost_PROGRAM_OPTIONS_LIBRARY}
 )
 
-set(BRAYNSCOMMON_INCLUDE_NAME brayns/common)
-set(BRAYNSCOMMON_LINK_LIBRARIES
-  PUBLIC glm Async++ ${LibJpegTurbo_LIBRARIES}
-  PRIVATE braynsParameters ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${FREEIMAGE_LIBRARIES}
+target_compile_options(braynsCommon PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+
+set_target_properties(braynsCommon
+    PROPERTIES
+        VERSION ${BRAYNS_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 )
 
-common_library(braynsCommon)
-
-target_include_directories(braynsCommon SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS})
-
-if(FFMPEG_FOUND)
-  target_include_directories(braynsCommon SYSTEM PRIVATE ${FFMPEG_INCLUDE_DIR})
-endif()
+install(TARGETS braynsCommon
+    EXPORT Brayns-targets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)

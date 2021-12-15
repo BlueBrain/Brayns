@@ -21,12 +21,12 @@
 
 #pragma once
 
-#include <brayns/network/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-BRAYNS_MESSAGE_BEGIN(ExitLaterMessage)
-BRAYNS_MESSAGE_ENTRY(uint32_t, minutes,
-                     "Number of minutes after which Brayns will shut down")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(ExitLaterMessage)
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, minutes,
+                         "Number of minutes after which Brayns will shut down")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

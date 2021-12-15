@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Jonas Karlsson <jonas.karlsson@epfl.ch>
  *
@@ -20,25 +20,26 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
+#include <brayns/common/MathTypes.h>
 
 namespace brayns
 {
 struct Streamline
 {
-    Streamline(const Vector3fs& position_in, const Vector4fs& color_in,
-               const std::vector<float>& radius_in)
-        : position(position_in)
-        , color(color_in)
-        , radius(radius_in)
+    Streamline(const std::vector<Vector3f>& positions,
+               const std::vector<Vector4f>& colors,
+               const std::vector<float>& radii)
+        : position(positions)
+        , color(colors)
+        , radius(radii)
     {
     }
 
     // Array of vertex positions
-    Vector3fs position;
+    std::vector<Vector3f> position;
 
     // Array of corresponding vertex colors (RGBA)
-    Vector4fs color;
+    std::vector<Vector4f> color;
 
     // Array of vertex radii
     std::vector<float> radius;
@@ -48,10 +49,10 @@ struct StreamlinesData
 {
     // Data array of all vertex position (and optional radius) for all
     // streamlines
-    Vector4fs vertex;
+    std::vector<Vector4f> vertex;
 
     // Data array of corresponding vertex colors (RGBA)
-    Vector4fs vertexColor;
+    std::vector<Vector4f> vertexColor;
 
     // Data array of indices to the first vertex of a link.
     //

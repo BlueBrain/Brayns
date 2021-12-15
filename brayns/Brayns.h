@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
@@ -21,8 +21,10 @@
 
 #pragma once
 
-#include <brayns/api.h>
-#include <brayns/common/types.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/io/LoaderRegistry.h>
+#include <brayns/network/interface/ActionInterface.h>
+#include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
 {
@@ -35,7 +37,7 @@ namespace brayns
     Brayns uses plugins for extended function. There are a few built-in plugins
     and additional plugins can be dynamically loaded.
 
-    The underlying rendering engine (OSPRay, Optix, FireRays, etc) is specified
+    The underlying rendering engine (OSPRay) is specified
     in the rendering parameters and is invoked by the render method for
     generating the frames.
 
@@ -50,8 +52,7 @@ public:
     /** Brayns instance initialization.
      *
      * Initialization involves command line parsing, engine creation, plugin
-     * loading and initialization, data loading, scene creation and setup of
-     * keyboard mouse interactions.
+     * loading and initialization, data loading and scene creation.
      *
      * In a setup using event loops, the event loop must be set up correctly
      * before calling this constructor to ensure that plugins can install their
@@ -61,23 +62,8 @@ public:
      * the geometry and the renderer. Brayns creates the scene using built-in
      * and plug-in provided loaders.
      */
-    BRAYNS_API Brayns(int argc, const char** argv);
-    BRAYNS_API ~Brayns();
-
-    /** @name Simple execution API  */
-    //@{
-    /**
-     * Renders color and depth buffers of the current scene, according to
-     * specified parameters.
-     *
-     * Combines commit() and render() together in a synchronized fashion.
-     *
-     * @param renderInput Rendering parameters such as the position of the
-     *        camera and according model and projection matrices
-     * @param renderOutput Color and depth buffers
-     */
-    BRAYNS_API void commitAndRender(const RenderInput& renderInput,
-                                    RenderOutput& renderOutput);
+    Brayns(int argc, const char** argv);
+    ~Brayns();
 
     /**
      * Renders color and depth buffers of the current scene, according to
@@ -94,7 +80,7 @@ public:
      * @return true if rendering should continue or false if user inputs
      *         requested to stop.
      */
-    BRAYNS_API bool commitAndRender();
+    bool commitAndRender();
     //@}
 
     /** @name Low-level execution API */
@@ -108,48 +94,44 @@ public:
      *         evaluated (accum rendering, data loading, etc.)
      * @note threadsafe with render()
      */
-    BRAYNS_API bool commit();
+    bool commit();
 
     /**
      * Render a frame into the current framebuffer.
      * @note threadsafe with commit()
      */
-    BRAYNS_API void render();
+    void render();
 
     /**
      * Call postRender() on engine and plugins to signal finish of render().
      * Shall only be called after render() has finished. This is only needed if
      * commit() and render() are called individually.
      */
-    BRAYNS_API void postRender();
+    void postRender();
     //@}
 
     /**
        @return the current engine
     */
-    BRAYNS_API Engine& getEngine();
+    Engine& getEngine();
 
     /**
      * @return The parameter manager
      */
-    BRAYNS_API ParametersManager& getParametersManager();
+    ParametersManager& getParametersManager();
 
     /**
-     * Gets the keyboard handler
+     * @brief getLoaderRegistry gives access to the loaders registry
+     * @return LoaderRegistry&
      */
-    BRAYNS_API KeyboardHandler& getKeyboardHandler();
-
-    /**
-     * Gets the camera manipulator
-     */
-    BRAYNS_API AbstractManipulator& getCameraManipulator();
+    LoaderRegistry& getLoaderRegistry();
 
     /**
      * @brief Get the registered network interface.
      *
      * @return ActionInterface* Network interface or null if not set.
      */
-    BRAYNS_API ActionInterface* getActionInterface();
+    ActionInterface* getActionInterface();
 
 private:
     struct Impl;

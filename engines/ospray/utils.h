@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,7 +20,9 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
+#include <brayns/common/PropertyObject.h>
+#include <brayns/common/Transformation.h>
+
 #include <ospray/SDK/common/Managed.h>
 #include <ospray/SDK/common/OSPCommon.h>
 

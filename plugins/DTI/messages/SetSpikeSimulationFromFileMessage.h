@@ -21,17 +21,17 @@
 
 #pragma once
 
-#include <brayns/network/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace dti
 {
-BRAYNS_MESSAGE_BEGIN(SetSpikeSimulationFromFileMessage)
-BRAYNS_MESSAGE_ENTRY(size_t, model_id, "The ID of the loaded model")
-BRAYNS_MESSAGE_ENTRY(double, dt, "Simulation time step")
-BRAYNS_MESSAGE_ENTRY(double, time_scale, "Simulation time scale")
-BRAYNS_MESSAGE_ENTRY(double, decay_speed, "Speed of spike decay")
-BRAYNS_MESSAGE_ENTRY(double, rest_intensity, "Rest intensity")
-BRAYNS_MESSAGE_ENTRY(double, spike_intensity, "Spike intensity")
-BRAYNS_MESSAGE_ENTRY(std::string, path, "Path to BlueConfig file")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(SetSpikeSimulationFromFileMessage)
+BRAYNS_JSON_OBJECT_ENTRY(size_t, model_id, "The ID of the loaded model")
+BRAYNS_JSON_OBJECT_ENTRY(double, dt, "Simulation time step")
+BRAYNS_JSON_OBJECT_ENTRY(double, time_scale, "Simulation time scale")
+BRAYNS_JSON_OBJECT_ENTRY(double, decay_speed, "Speed of spike decay")
+BRAYNS_JSON_OBJECT_ENTRY(double, rest_intensity, "Rest intensity")
+BRAYNS_JSON_OBJECT_ENTRY(double, spike_intensity, "Spike intensity")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path to BlueConfig file")
+BRAYNS_JSON_OBJECT_END()
 } // namespace dti

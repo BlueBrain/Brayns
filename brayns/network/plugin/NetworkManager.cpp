@@ -21,10 +21,10 @@
 
 #include "NetworkManager.h"
 
+#include <brayns/json/JsonSchemaValidator.h>
 #include <brayns/network/context/NetworkContext.h>
 #include <brayns/network/interface/ClientInterface.h>
 #include <brayns/network/interface/ServerInterface.h>
-#include <brayns/network/json/JsonSchemaValidator.h>
 #include <brayns/network/stream/StreamManager.h>
 
 #include "NetworkManagerEntrypoints.h"
@@ -105,7 +105,7 @@ public:
             _processTextRequest(handle, packet);
             return;
         }
-        BRAYNS_ERROR << "Invalid packet received.\n";
+        Log::error("Invalid packet received.");
     }
 
 private:
@@ -167,7 +167,7 @@ private:
     static void onConnect(NetworkContext& context,
                           const ConnectionHandle& handle)
     {
-        BRAYNS_INFO << "New connection: " << handle.getId() << ".\n";
+        Log::info("New connection: {}.", handle.getId());
     }
 
     static void onDisconnect(NetworkContext& context,
@@ -175,7 +175,7 @@ private:
     {
         auto& tasks = context.getTasks();
         tasks.disconnect(handle);
-        BRAYNS_INFO << "Connection closed: " << handle.getId() << ".\n";
+        Log::info("Connection closed: {}.", handle.getId());
     }
 
     static void onRequest(NetworkContext& context,
@@ -190,7 +190,8 @@ private:
 class InterfaceFactory
 {
 public:
-    static ActionInterfacePtr createInterface(NetworkContext& context)
+    static std::shared_ptr<ActionInterface> createInterface(
+        NetworkContext& context)
     {
         auto& api = context.getApi();
         auto& manager = api.getParametersManager();

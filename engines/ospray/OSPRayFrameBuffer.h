@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -31,7 +31,7 @@ class OSPRayFrameBuffer : public FrameBuffer
 {
 public:
     OSPRayFrameBuffer(const std::string& name, const Vector2ui& frameSize,
-                      const FrameBufferFormat frameBufferFormat);
+                      const PixelFormat frameBufferFormat);
     ~OSPRayFrameBuffer();
 
     void clear() final;
@@ -39,7 +39,7 @@ public:
     void map() final;
     void unmap() final;
     void setAccumulation(const bool accumulation) final;
-    void setFormat(FrameBufferFormat frameBufferFormat) final;
+    void setFormat(PixelFormat frameBufferFormat) final;
     void setSubsampling(const size_t) final;
     Vector2ui getSize() const final
     {

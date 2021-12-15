@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -69,13 +69,7 @@ void OSPRayCamera::commit()
     ospCommit(_camera);
 }
 
-void OSPRayCamera::setEnvironmentMap(const bool environmentMap)
-{
-    osphelper::set(_camera, "environmentMap", environmentMap);
-    ospCommit(_camera);
-}
-
-void OSPRayCamera::setClipPlanes(const Planes& planes)
+void OSPRayCamera::setClipPlanes(const std::vector<Plane>& planes)
 {
     if (_clipPlanes == planes)
         return;

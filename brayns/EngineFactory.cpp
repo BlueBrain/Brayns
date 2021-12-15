@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,13 +20,9 @@
 
 #include "EngineFactory.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/parameters/ParametersManager.h>
-
-#if (BRAYNS_USE_OSPRAY)
-#include <engines/ospray/OSPRayEngine.h>
-#endif
 
 namespace brayns
 {
@@ -67,14 +63,13 @@ Engine* EngineFactory::_loadEngine(const std::string& name, int argc,
         {
             _engines.emplace(name, std::unique_ptr<Engine>(plugin));
             _libs.push_back(std::move(library));
-            BRAYNS_INFO << "Loaded engine '" << name << "'" << std::endl;
+            Log::info("Loaded engine '{}'.", name);
             return plugin;
         }
     }
     catch (const std::runtime_error& exc)
     {
-        BRAYNS_ERROR << "Failed to load engine " << std::quoted(name) << ": "
-                     << exc.what() << std::endl;
+        Log::error("Failed to load engine '{}': {}", name, exc.what());
     }
     return nullptr;
 }

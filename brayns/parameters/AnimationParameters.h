@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,9 +22,6 @@
 #pragma once
 
 #include "AbstractParameters.h"
-#include <list>
-
-SERIALIZATION_ACCESS(AnimationParameters)
 
 namespace brayns
 {
@@ -32,91 +30,89 @@ class AnimationParameters : public AbstractParameters
 public:
     AnimationParameters();
 
-    /** @copydoc AbstractParameters::print */
+    /**
+     * @brief print implementation to print this parameters
+     */
     void print() final;
 
-    /** Reset to a 'no animation' state: 0 for dt, start and end. */
+    /**
+     * @brief reset resets the parameters to no animation state:
+     * - dt = 0.0
+     * - start frame = 0
+     * - end frame = 0
+     */
     void reset();
 
-    /** The current frame number of the animation. */
-    void setFrame(uint32_t value)
-    {
-        _updateValue(_current, _adjustedCurrent(value));
-    }
-    uint32_t getFrame() const { return _current; }
-    /** The (frame) delta to apply for animations to select the next frame. */
-    void setDelta(const int32_t delta);
-    int32_t getDelta() const { return _delta; }
-    void setNumFrames(const uint32_t numFrames,
-                      const bool triggerCallback = true)
-    {
-        _updateValue(_numFrames, numFrames, triggerCallback);
-        _updateValue(_current, std::min(_current, _numFrames), triggerCallback);
-    }
-    uint32_t getNumFrames() const { return _numFrames; }
-    /** The dt of a simulation. */
-    void setDt(const double dt, const bool triggerCallback = true)
-    {
-        _updateValue(_dt, dt, triggerCallback);
-    }
-    double getDt() const { return _dt; }
-    /** The time unit of a simulation. */
-    void setUnit(const std::string& unit, const bool triggerCallback = true)
-    {
-        _updateValue(_unit, unit, triggerCallback);
-    }
-
-    const std::string& getUnit() const { return _unit; }
-    using IsReadyCallback = std::function<bool()>;
+    /**
+     * @brief setStartAndEndFrame sets the first and last absolute frame
+     * numbers of the loaded simulations. These frame numbers are computed
+     * from the loaded simulations, using the simulation with the earliest
+     * starting time and the simulation with the latest end time
+     * @param startFrame uint32_t first absolute frame
+     * @param endFrame uint32_t last absolute frame
+     */
+    void setStartAndEndFrame(const uint32_t startFrame,
+                             const uint32_t endFrame) noexcept;
 
     /**
-     * Set a callback to report if the current animation frame is ready
-     * (e.g. simulation has been loaded) and the animation can advance to the
-     * next frame.
+     * @brief getStartFrame returns the first absolute frame number
+     * @return uint32_t
      */
-    void setIsReadyCallback(const IsReadyCallback& callback)
-    {
-        _isReadyCallback = callback;
-    }
+    uint32_t getStartFrame() const noexcept;
 
-    /** Remove the given callback from the list of IsReadyCallbacks. */
-    void removeIsReadyCallback()
-    {
-        if (_isReadyCallback)
-        {
-            reset();
-            _isReadyCallback = nullptr;
-        }
-    }
+    /**
+     * @brief getEndFrame returns the last absolute frame number
+     * @return uint32_t
+     */
+    uint32_t getEndFrame() const noexcept;
 
-    bool hasIsReadyCallback() const { return !!_isReadyCallback; }
-    /** Update the current frame if delta is set and all listeners are ready. */
-    void update();
+    /**
+     * @brief setFrame sets the current normalized frame. A normalized frame
+     * number is in the interval [ 0, getEndFrame() - getStartFrame() ). If
+     * the provided value is outside the interval, it will be clampped
+     * @param value uint32_t normalized frame to set
+     */
+    void setFrame(const uint32_t value) noexcept;
 
-    /** Jump 'frames' from current frame if all listeners are ready. */
-    void jumpFrames(int frames);
+    /**
+     * @brief getFrame returns the current normalized frame. A normalized frame
+     * number is in the interval [ 0, getEndFrame() - getStartFrame() )
+     * @return uint32_t
+     */
+    uint32_t getFrame() const noexcept;
 
-    void togglePlayback() { _playing = !_playing; }
-    void setPlaying(bool playing) { _updateValue(_playing, playing); }
-    bool isPlaying() const { return _playing; }
+    /**
+     * @brief getAbsoluteFrame returns the current absolute frame. An absolute
+     * frame is calculated as getStartFrame() + getFrame(). It is in the
+     * interval [ getStartFrame(), getEndFrame() )
+     * @return uint32_t
+     */
+    uint32_t getAbsoluteFrame() const noexcept;
+
+    /**
+     * @brief setDt sets the simulation timestep (in milliseconds)
+     * @param dt double timestep in milliseconds
+     */
+    void setDt(const double dt) noexcept;
+
+    /**
+     * @brief getDt returns the simulation timestep (in milliseconds)
+     * @return double
+     */
+    double getDt() const noexcept;
+
+    /**
+     * @brief getTimeUnit returns a string representing the time unit in which
+     * the simulation runs. It is always millisecconds ("ms")
+     * @return const std::string&
+     */
+    const std::string& getTimeUnit() const noexcept;
 
 private:
-    uint32_t _adjustedCurrent(const uint32_t newCurrent) const
-    {
-        return _numFrames == 0 ? 0 : newCurrent % _numFrames;
-    }
-
-    bool _canUpdateFrame() const;
-
-    uint32_t _numFrames{0};
+    uint32_t _startFrame{0};
+    uint32_t _endFrame{0};
     uint32_t _current{0};
-    int32_t _delta{1};
-    bool _playing{false};
     double _dt{0};
-    std::string _unit;
-
-    IsReadyCallback _isReadyCallback;
-
-    SERIALIZATION_FRIEND(AnimationParameters)
+    const std::string _unit = "ms";
 };
 } // namespace brayns

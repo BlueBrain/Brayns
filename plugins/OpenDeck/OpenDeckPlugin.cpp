@@ -19,7 +19,8 @@
 
 #include "OpenDeckPlugin.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
+#include <brayns/common/PixelFormat.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/pluginapi/PluginAPI.h>
@@ -118,24 +119,24 @@ OpenDeckPlugin::OpenDeckPlugin(OpenDeckParameters&& params)
 void OpenDeckPlugin::init()
 {
     auto& engine = _api->getEngine();
-#ifdef BRAYNS_USE_OSPRAY
+
     engine.addCameraType("cylindric");
     engine.addCameraType("cylindricStereo", getCylindricStereoProperties());
     engine.addCameraType("cylindricStereoTracked",
                          getCylindricStereoTrackedProperties(_params));
-#endif
+
     FrameBufferPtr frameBuffer =
         engine.createFrameBuffer(leftWallBufferName, _wallRes,
-                                 FrameBufferFormat::rgba_i8);
+                                 PixelFormat::RGBA_I8);
     engine.addFrameBuffer(frameBuffer);
     frameBuffer = engine.createFrameBuffer(rightWallBufferName, _wallRes,
-                                           FrameBufferFormat::rgba_i8);
+                                           PixelFormat::RGBA_I8);
     engine.addFrameBuffer(frameBuffer);
     frameBuffer = engine.createFrameBuffer(leftFloorBufferName, _floorRes,
-                                           FrameBufferFormat::rgba_i8);
+                                           PixelFormat::RGBA_I8);
     engine.addFrameBuffer(frameBuffer);
     frameBuffer = engine.createFrameBuffer(rightFloorBufferName, _floorRes,
-                                           FrameBufferFormat::rgba_i8);
+                                           PixelFormat::RGBA_I8);
     engine.addFrameBuffer(frameBuffer);
 }
 

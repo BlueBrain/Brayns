@@ -1,68 +1,45 @@
 # Copyright (c) 2015-2018, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-# Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+# Responsible Authors: Cyrille Favreau <cyrille.favreau@epfl.ch>
+#                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" OFF)
-if(BRAYNS_DEFLECT_ENABLED)
-  #add_subdirectory(Deflect)
+# Brion is needed for 3 plugin
+if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED OR BRAYNS_DTI_ENABLED)
+    find_package(HDF5 REQUIRED)
+    find_package(Brion QUIET)
 endif()
 
-option(BRAYNS_MULTIVIEW_ENABLED "Activate Multiview camera plugin" OFF)
+# CircutiExplorer
+if(BRAYNS_CIRCUITEXPLORER_ENABLED)
+    find_package(Boost QUIET REQUIRED COMPONENTS system)
+    find_package(HDF5 REQUIRED)
+    find_package(HighFive QUIET)
+    find_package(sonata QUIET)
+    find_package(MVDTool QUIET)
+    find_package(MorphIO QUIET)
+endif()
+
+add_subdirectory(deps)
+
 if(BRAYNS_MULTIVIEW_ENABLED)
-  #add_subdirectory(Multiview)
+    message(FATAL_ERROR "Multiview plugin needs to be updated before compilation")
+    add_subdirectory(Multiview)
 endif()
 
-option(BRAYNS_OPENDECK_ENABLED "Activate OpenDeck plugin" OFF)
 if(BRAYNS_OPENDECK_ENABLED)
-  add_subdirectory(OpenDeck)
+    add_subdirectory(OpenDeck)
 endif()
 
-option(BRAYNS_VRPN_ENABLED "Activate vrpn plugin" OFF)
-if(BRAYNS_VRPN_ENABLED)
-  add_subdirectory(VRPN)
-endif()
-
-option(BRAYNS_CIRCUITVIEWER_ENABLED "Activate CircuitViewer plugin" OFF)
-if (BRAYNS_CIRCUITVIEWER_ENABLED)
-  #add_subdirectory(CircuitViewer)
-endif()
-
-option(BRAYNS_CIRCUITEXPLORER_ENABLED "Activate CircuitExplorer plugin" OFF)
 if (BRAYNS_CIRCUITEXPLORER_ENABLED)
-  add_subdirectory(CircuitExplorer)
+    add_subdirectory(CircuitExplorer)
 endif()
 
-option(BRAYNS_DTI_ENABLED "Activate DTI plugin" OFF)
 if (BRAYNS_DTI_ENABLED)
-  add_subdirectory(DTI)
+    add_subdirectory(DTI)
 endif()
 
-option(BRAYNS_BBIC_ENABLED "Activate BBIC Volume plugin" OFF)
-if(BRAYNS_BBIC_ENABLED)
-  #add_subdirectory(BBIC)
-endif()
-
-option(BRAYNS_CIRCUITINFO_ENABLED "Activate CircuitInfo plugin" OFF)
 if(BRAYNS_CIRCUITINFO_ENABLED)
     add_subdirectory(CircuitInfo)
-endif()
-
-option(BRAYNS_CIRCUITRENDERER_ENABLED "Activate CircuitRenderer plugin" OFF)
-if(BRAYNS_CIRCUITRENDERER_ENABLED)
-    #add_subdirectory(CircuitRenderer)
-endif()
-
-if(BRAYNS_PBRTV2_ENABLED)
-    #add_subdirectory(Fluorescence)
-endif()
-
-if(BRAYNS_PBRT_ENABLED OR BRAYNS_PBRTV2_ENABLED)
-    #add_subdirectory(PBRVolumes)
-endif()
-
-add_subdirectory(Example)
-if (TARGET Brayns-all)
-  add_dependencies(Brayns-all exampleBraynsPlugin)
 endif()

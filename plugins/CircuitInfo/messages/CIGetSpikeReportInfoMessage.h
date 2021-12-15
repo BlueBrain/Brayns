@@ -21,13 +21,13 @@
 
 #pragma once
 
-#include <brayns/network/json/Message.h>
+#include <brayns/json/JsonObjectMacro.h>
 
-BRAYNS_MESSAGE_BEGIN(CIGetSpikeReportInfoParams)
-BRAYNS_MESSAGE_ENTRY(std::string, path, "Path of the circuit to test")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(CIGetSpikeReportInfoParams)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path of the circuit to test")
+BRAYNS_JSON_OBJECT_END()
 
-BRAYNS_MESSAGE_BEGIN(CIGetSpikeReportInfoResult)
-BRAYNS_MESSAGE_ENTRY(std::string, path, "Path to the spike report")
-BRAYNS_MESSAGE_ENTRY(bool, exists, "Check if the report exists")
-BRAYNS_MESSAGE_END()
+BRAYNS_JSON_OBJECT_BEGIN(CIGetSpikeReportInfoResult)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path to the spike report")
+BRAYNS_JSON_OBJECT_ENTRY(bool, exists, "Check if the report exists")
+BRAYNS_JSON_OBJECT_END()

@@ -76,8 +76,25 @@ schema = {
 }
 
 params = {
-    'orientation': [0.5, 0, 0, 0.866],
-    'position': [600, 1000, 1000],
-    'target': [0, 0, -1],
+    'orientation': [
+        0.5,
+        0,
+        0,
+        0.866
+    ],
+    'position': [
+        600,
+        1000,
+        1000
+    ],
+    'target': [
+        0,
+        0,
+        -1
+    ],
     'current': 'orthographic'
+}
+
+result = {
+    'check': 0.5032883501097792
 }

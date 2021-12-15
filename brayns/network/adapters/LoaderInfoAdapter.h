@@ -21,15 +21,15 @@
 
 #pragma once
 
-#include <brayns/common/loader/LoaderRegistry.h>
+#include <brayns/io/LoaderRegistry.h>
 
-#include <brayns/network/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(LoaderInfo)
-BRAYNS_ADAPTER_ENTRY(name, "Loader name")
-BRAYNS_ADAPTER_ENTRY(extensions, "Supported file extensions")
-BRAYNS_ADAPTER_ENTRY(properties, "Loader properties")
-BRAYNS_ADAPTER_END()
+BRAYNS_JSON_ADAPTER_BEGIN(LoaderInfo)
+BRAYNS_JSON_ADAPTER_ENTRY(name, "Loader name")
+BRAYNS_JSON_ADAPTER_ENTRY(extensions, "Supported file extensions")
+BRAYNS_JSON_ADAPTER_ENTRY(inputParametersSchema, "Loader properties")
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

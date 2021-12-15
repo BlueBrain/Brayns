@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2019, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include <brayns/api.h>
-#include <brayns/common/types.h>
+#include <cstdint>
+#include <string>
 #include <vector>
 
 namespace brayns
@@ -44,9 +44,9 @@ public:
         aoe
     };
 
-    BRAYNS_API Texture2D(const Type type, const std::string& filename,
-                         const uint8_t channels, const uint8_t depth,
-                         const uint32_t width, const uint32_t height);
+    Texture2D(const Type type, const std::string& filename,
+              const uint8_t channels, const uint8_t depth, const uint32_t width,
+              const uint32_t height);
 
     size_t getSizeInBytes() const { return height * width * depth * channels; }
     void setMipLevels(const uint8_t mips);

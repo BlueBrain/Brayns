@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,8 +20,14 @@
 
 #pragma once
 
+#include <brayns/common/PixelFormat.h>
 #include <brayns/common/Statistics.h>
 #include <brayns/common/propertymap/PropertyMap.h>
+
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/FrameExporter.h>
+#include <brayns/engine/Scene.h>
 
 #include <functional>
 
@@ -30,7 +36,7 @@ namespace brayns
 /**
  * Abstract implementation of the ray-tracing engine. What we call the
  * ray-tracing engine is a 3rd party acceleration library, typically OSPRay,
- * Optix or FireRays, that provides hardware acceleration.
+ * that provides hardware acceleration.
  * An engine holds a native implementation of a scene, a camera, a frame buffer
  * and of one or several renderers according to the capatilities of the
  * acceleration library.
@@ -54,11 +60,10 @@ public:
     /** Factory method to create an engine-specific framebuffer. */
     virtual FrameBufferPtr createFrameBuffer(
         const std::string& name, const Vector2ui& frameSize,
-        FrameBufferFormat frameBufferFormat) const = 0;
+        PixelFormat frameBufferFormat) const = 0;
 
     /** Factory method to create an engine-specific scene. */
     virtual ScenePtr createScene(AnimationParameters& animationParameters,
-                                 GeometryParameters& geometryParameters,
                                  VolumeParameters& volumeParameters) const = 0;
 
     /** Factory method to create an engine-specific camera. */
@@ -90,6 +95,12 @@ public:
     Camera& getCamera() { return *_camera; }
     /** Gets the renderer */
     Renderer& getRenderer();
+
+    /**
+     * @brief returns the frame exporter object
+     * @return FrameExporter
+     */
+    FrameExporter& getFrameExporter() noexcept;
 
     /**
      * Callback when a new frame shall be triggered. Currently called by event
@@ -167,6 +178,12 @@ protected:
     RendererPtr _renderer;
     std::vector<FrameBufferPtr> _frameBuffers;
     Statistics _statistics;
+
+    // TODO after engine refactor: FrameExporter can have its own
+    // renderer, camera and framebuffer. We can pass it the scene
+    // to render it. We can have a list of them rendering at the
+    // same time
+    FrameExporter _frameExporter;
 
     bool _keepRunning{true};
 };

@@ -21,8 +21,8 @@
 
 #pragma once
 
+#include <brayns/json/JsonAdapterMacro.h>
 #include <brayns/network/common/ExtractModel.h>
-#include <brayns/network/json/MessageAdapter.h>
 
 #include "TransformationAdapter.h"
 
@@ -58,11 +58,12 @@ private:
     ModelDescriptor* _model = nullptr;
 };
 
-BRAYNS_NAMED_ADAPTER_BEGIN(UpdateModelProxy, "UpdateModelParams")
-BRAYNS_ADAPTER_SET("id", setId, "Model ID", Required())
-BRAYNS_ADAPTER_SET("bounding_box", setBoundingBox, "Display model bounds")
-BRAYNS_ADAPTER_SET("name", setName, "Model name")
-BRAYNS_ADAPTER_SET("transformation", setTransformation, "Model transformation")
-BRAYNS_ADAPTER_SET("visible", setVisible, "Model visibility")
-BRAYNS_ADAPTER_END()
+BRAYNS_NAMED_JSON_ADAPTER_BEGIN(UpdateModelProxy, "UpdateModelParams")
+BRAYNS_JSON_ADAPTER_SET("id", setId, "Model ID", Required())
+BRAYNS_JSON_ADAPTER_SET("bounding_box", setBoundingBox, "Display model bounds")
+BRAYNS_JSON_ADAPTER_SET("name", setName, "Model name")
+BRAYNS_JSON_ADAPTER_SET("transformation", setTransformation,
+                        "Model transformation")
+BRAYNS_JSON_ADAPTER_SET("visible", setVisible, "Model visibility")
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

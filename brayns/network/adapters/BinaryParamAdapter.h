@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/network/json/MessageAdapter.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 #include <brayns/tasks/AddModelFromBlobTask.h>
 
@@ -30,22 +30,21 @@
 
 namespace brayns
 {
-BRAYNS_ADAPTER_BEGIN(BinaryParam)
-BRAYNS_ADAPTER_GETSET("bounding_box", getBoundingBox, setBoundingBox,
-                      "Display bounds");
-BRAYNS_ADAPTER_NAMED_ENTRY("chunks_id", chunksID, "Chunk ID", Required());
-BRAYNS_ADAPTER_GETSET("name", getName, setName, "Model name");
-BRAYNS_ADAPTER_GETSET("path", getPath, setPath, "Model source path");
-BRAYNS_ADAPTER_NAMED_ENTRY("size", size, "File size in bytes", Required());
-BRAYNS_ADAPTER_GETSET("transformation", getTransformation, setTransformation,
-                      "Model transformation");
-BRAYNS_ADAPTER_NAMED_ENTRY("type", type,
-                           "File extension or type (MESH, POINTS, CIRCUIT)",
-                           Required());
-BRAYNS_ADAPTER_GETSET("visible", getVisible, setVisible, "Visible");
-BRAYNS_ADAPTER_GETSET("loader_name", getLoaderName, setLoaderName,
-                      "Loader name");
-BRAYNS_ADAPTER_GETSET("loader_properties", getLoaderProperties,
-                      setLoaderProperties, "Loader properties");
-BRAYNS_ADAPTER_END()
+BRAYNS_JSON_ADAPTER_BEGIN(BinaryParam)
+BRAYNS_JSON_ADAPTER_GETSET("bounding_box", getBoundingBox, setBoundingBox,
+                           "Display bounds");
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("chunks_id", chunksID, "Chunk ID", Required());
+BRAYNS_JSON_ADAPTER_GETSET("name", getName, setName, "Model name");
+BRAYNS_JSON_ADAPTER_GETSET("path", getPath, setPath, "Model source path");
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("size", size, "File size in bytes", Required());
+BRAYNS_JSON_ADAPTER_GETSET("transformation", getTransformation,
+                           setTransformation, "Model transformation");
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
+    "type", type, "File extension or type (MESH, POINTS, CIRCUIT)", Required());
+BRAYNS_JSON_ADAPTER_GETSET("visible", getVisible, setVisible, "Visible");
+BRAYNS_JSON_ADAPTER_GETSET("loader_name", getLoaderName, setLoaderName,
+                           "Loader name");
+BRAYNS_JSON_ADAPTER_GETSET("loader_properties", getLoadParameters,
+                           setLoadParameters, "Loader properties");
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

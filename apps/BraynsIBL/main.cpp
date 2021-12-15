@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -30,7 +30,7 @@ namespace po = boost::program_options;
 #include <vector>
 
 #include <brayns/common/types.h>
-#include <brayns/common/utils/filesystem.h>
+#include <brayns/utils/Filesystem.h>
 
 #include <apps/BraynsIBL/brdf.fs.h>
 #include <apps/BraynsIBL/brdf.vs.h>
@@ -41,6 +41,10 @@ namespace po = boost::program_options;
 
 namespace
 {
+const std::string IRRADIANCE_MAP = "-irradiance";
+const std::string RADIANCE_MAP = "-radiance";
+const std::string BRDF_LUT = "-brdfLUT";
+
 void glfwErrorCallback(int error, const char* description)
 {
     std::cerr << "GLFW Error: " << error << ": " << description << std::endl;

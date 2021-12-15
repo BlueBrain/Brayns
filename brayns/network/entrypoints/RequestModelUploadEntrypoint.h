@@ -29,7 +29,7 @@
 namespace brayns
 {
 class RequestModelUploadEntrypoint
-    : public Entrypoint<BinaryParam, ModelDescriptors>
+    : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
 {
 public:
     virtual std::string getName() const override
@@ -48,7 +48,8 @@ public:
     virtual void onRequest(const Request& request) override
     {
         auto& engine = getApi().getEngine();
-        auto task = std::make_shared<ModelUploadTask>(engine);
+        auto& registry = getApi().getLoaderRegistry();
+        auto task = std::make_shared<ModelUploadTask>(engine, registry);
         launchTask(task, request);
         auto& binary = getBinary();
         auto& handle = request.getConnectionHandle();

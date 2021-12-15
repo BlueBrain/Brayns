@@ -24,7 +24,7 @@
 #include <string>
 #include <unordered_map>
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <brayns/network/entrypoint/EntrypointException.h>
 #include <brayns/network/socket/ConnectionHandle.h>
@@ -87,8 +87,7 @@ public:
         auto i = _tasks.find(_nextChunkId);
         if (i == _tasks.end())
         {
-            BRAYNS_ERROR << "No model upload with chunks ID '" << _nextChunkId
-                         << "'.\n";
+            Log::error("No model upload with chunks ID '{}'.", _nextChunkId);
             return;
         }
         auto& task = *i->second;
@@ -185,7 +184,7 @@ public:
         auto i = _uploaders.find(handle);
         if (i == _uploaders.end())
         {
-            BRAYNS_ERROR << "Processing binary from unknown client.\n";
+            Log::error("Processing binary from unknown client.");
             return;
         }
         auto& uploader = i->second;

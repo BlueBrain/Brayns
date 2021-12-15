@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  *
  * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
@@ -22,7 +22,6 @@
 
 #include <brayns/common/Progress.h>
 #include <brayns/common/tasks/TaskFunctor.h>
-#include <brayns/common/types.h>
 
 namespace brayns
 {

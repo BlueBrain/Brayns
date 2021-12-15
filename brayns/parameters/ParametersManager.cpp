@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,8 +20,11 @@
 
 #include "ParametersManager.h"
 
+#include <iostream>
+
+#include <brayns/Version.h>
+#include <brayns/common/Log.h>
 #include <brayns/parameters/AbstractParameters.h>
-#include <brayns/version.h>
 
 namespace
 {
@@ -104,9 +107,9 @@ std::vector<std::string> findSimilarOptions(
 
 void _printVersion()
 {
-    brayns::Version version;
-    std::cout << "Brayns " << version.getString() << " (" << std::hex
-              << version.getRevision() << ")" << std::dec << std::endl;
+    brayns::Log::info("Brayns {}.{}.{} ({})", brayns::Version::getMajor(),
+                      brayns::Version::getMinor(), brayns::Version::getPatch(),
+                      brayns::Version::getCommitHash());
 }
 } // namespace
 
@@ -116,7 +119,6 @@ ParametersManager::ParametersManager(const int argc, const char** argv)
 {
     registerParameters(&_animationParameters);
     registerParameters(&_applicationParameters);
-    registerParameters(&_geometryParameters);
     registerParameters(&_renderingParameters);
     registerParameters(&_volumeParameters);
     registerParameters(&_networkParameters);
@@ -181,7 +183,7 @@ void ParametersManager::_parse(int argc, const char** argv)
     }
     catch (const po::error& e)
     {
-        BRAYNS_ERROR << e.what() << std::endl;
+        Log::error(e.what());
         exit(EXIT_FAILURE);
     }
 }
@@ -241,16 +243,6 @@ RenderingParameters& ParametersManager::getRenderingParameters()
 const RenderingParameters& ParametersManager::getRenderingParameters() const
 {
     return _renderingParameters;
-}
-
-GeometryParameters& ParametersManager::getGeometryParameters()
-{
-    return _geometryParameters;
-}
-
-const GeometryParameters& ParametersManager::getGeometryParameters() const
-{
-    return _geometryParameters;
 }
 
 VolumeParameters& ParametersManager::getVolumeParameters()

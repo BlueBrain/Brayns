@@ -23,8 +23,12 @@
 
 #include <sstream>
 
+#include <brayns/common/Blob.h>
+
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/Scene.h>
+
+#include <brayns/io/LoaderRegistry.h>
 
 #include <brayns/network/adapters/BinaryParamAdapter.h>
 #include <brayns/network/adapters/ModelDescriptorAdapter.h>
@@ -37,7 +41,8 @@ namespace brayns
  * @brief Task implementation to execute a binary model upload.
  *
  */
-class ModelUploadTask : public EntrypointTask<BinaryParam, ModelDescriptors>
+class ModelUploadTask
+    : public EntrypointTask<BinaryParam, std::vector<ModelDescriptorPtr>>
 {
 public:
     /**
@@ -45,8 +50,9 @@ public:
      *
      * @param engine Engine used to create the model.
      */
-    ModelUploadTask(Engine& engine)
+    ModelUploadTask(Engine& engine, LoaderRegistry& registry)
         : _engine(&engine)
+        , _registry(&registry)
     {
     }
 
@@ -111,11 +117,19 @@ public:
         _monitor.wait();
         checkCancelled();
         auto& scene = _engine->getScene();
+
+        const auto& blobType = _blob.type;
+        const auto& loaderName = _params.getLoaderName();
+        auto& loader = _registry->getSuitableLoader("", blobType, loaderName);
+
         _descriptors =
-            scene.loadModels(std::move(_blob), _params,
-                             {[this](const auto& operation, auto amount) {
-                                 _loadingProgress(operation, amount);
-                             }});
+            loader.loadFromBlob(std::move(_blob),
+                                {[this](const auto& operation, auto amount) {
+                                    _loadingProgress(operation, amount);
+                                }},
+                                _params.getLoadParameters(), scene);
+
+        scene.addModels(_descriptors, _params);
     }
 
     /**
@@ -166,9 +180,7 @@ private:
         {
             throw EntrypointException("Missing model type");
         }
-        auto& scene = _engine->getScene();
-        auto& registry = scene.getLoaderRegistry();
-        if (!registry.isSupportedType(type))
+        if (!_registry->isSupportedType(type))
         {
             throw EntrypointException("Unsupported model type '" + type + "'");
         }
@@ -234,9 +246,10 @@ private:
     }
 
     Engine* _engine;
+    LoaderRegistry* _registry{nullptr};
     BinaryParam _params;
     Blob _blob;
-    ModelDescriptors _descriptors;
+    std::vector<ModelDescriptorPtr> _descriptors;
     NetworkTaskMonitor _monitor;
     bool _modelUploaded = false;
 };

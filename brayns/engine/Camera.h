@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
@@ -21,11 +21,9 @@
 
 #pragma once
 
-#include <brayns/api.h>
 #include <brayns/common/PropertyObject.h>
-#include <brayns/common/types.h>
 
-SERIALIZATION_ACCESS(Camera)
+#include <memory>
 
 namespace brayns
 {
@@ -47,11 +45,11 @@ public:
     virtual void commit(){};
     //@}
 
-    BRAYNS_API Camera() = default;
+    Camera() = default;
 
-    BRAYNS_API virtual ~Camera() = default;
+    virtual ~Camera() = default;
 
-    BRAYNS_API Camera& operator=(const Camera& rhs);
+    Camera& operator=(const Camera& rhs);
 
     /**
        Sets position, and quaternion
@@ -60,14 +58,12 @@ public:
               the camera orientation
        @param target The x, y, z coordinates of the camera target
     */
-    BRAYNS_API void set(const Vector3d& position,
-                        const Quaterniond& orientation,
-                        const Vector3d& target = Vector3d(0.0, 0.0, 0.0));
+    void set(const Vector3d& position, const Quaterniond& orientation,
+             const Vector3d& target = Vector3d(0.0, 0.0, 0.0));
 
-    BRAYNS_API void setInitialState(const Vector3d& position,
-                                    const Quaterniond& orientation,
-                                    const Vector3d& target = Vector3d(0.0, 0.0,
-                                                                      0.0));
+    void setInitialState(const Vector3d& position,
+                         const Quaterniond& orientation,
+                         const Vector3d& target = Vector3d(0.0, 0.0, 0.0));
 
     /**
        Sets camera position
@@ -107,7 +103,7 @@ public:
     */
     const Quaterniond& getOrientation() const { return _orientation; }
     /** Resets the camera to its initial values */
-    BRAYNS_API void reset();
+    void reset();
 
     /** @internal Sets the name of current rendered frame buffer. */
     void setBufferTarget(const std::string& target)
@@ -127,9 +123,7 @@ private:
     Quaterniond _initialOrientation;
 
     std::string _bufferTarget;
-
-    SERIALIZATION_FRIEND(Camera)
 };
 
-std::ostream& operator<<(std::ostream& os, Camera& camera);
+using CameraPtr = std::shared_ptr<Camera>;
 } // namespace brayns

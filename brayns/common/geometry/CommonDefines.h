@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Jonas Karlsson <jonas.karlsson@epfl.ch>
  *
@@ -19,7 +19,7 @@
  */
 
 #if __cplusplus
-#include <brayns/common/types.h>
+#include <brayns/common/MathTypes.h>
 #define VEC3_TYPE brayns::Vector3f
 #define UINT64_T uint64_t
 #endif

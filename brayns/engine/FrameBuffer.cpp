@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,10 +20,14 @@
 
 #include "FrameBuffer.h"
 
+#include <brayns/common/Log.h>
+
+#include <brayns/utils/image/ImageFlipper.h>
+
 namespace brayns
 {
 FrameBuffer::FrameBuffer(const std::string& name, const Vector2ui& frameSize,
-                         const FrameBufferFormat frameBufferFormat)
+                         const PixelFormat frameBufferFormat)
     : _name(name)
     , _frameSize(frameSize)
     , _frameBufferFormat(frameBufferFormat)
@@ -34,38 +38,61 @@ size_t FrameBuffer::getColorDepth() const
 {
     switch (_frameBufferFormat)
     {
-    case FrameBufferFormat::rgba_i8:
-    case FrameBufferFormat::bgra_i8:
-    case FrameBufferFormat::rgb_f32:
+    case PixelFormat::RGBA_I8:
+    case PixelFormat::RGB_F32:
         return 4;
-    case FrameBufferFormat::rgb_i8:
+    case PixelFormat::RGB_I8:
         return 3;
     default:
         return 0;
     }
 }
 
-freeimage::ImagePtr FrameBuffer::getImage()
+Image FrameBuffer::getImage()
 {
-#ifdef BRAYNS_USE_FREEIMAGE
     map();
+
     const auto colorBuffer = getColorBuffer();
     const auto& size = getSize();
 
-    freeimage::ImagePtr image(
-        FreeImage_ConvertFromRawBits(const_cast<uint8_t*>(colorBuffer), size.x,
-                                     size.y, getColorDepth() * size.x,
-                                     8 * getColorDepth(), 0xFF0000, 0x00FF00,
-                                     0x0000FF, false));
+    ImageInfo info;
+
+    info.width = size.x;
+    info.height = size.y;
+
+    switch (_frameBufferFormat)
+    {
+    case PixelFormat::RGB_I8:
+    case PixelFormat::RGB_F32:
+        info.channelCount = 3;
+        break;
+    case PixelFormat::RGBA_I8:
+        info.channelCount = 4;
+        break;
+    default:
+        Log::warn("Invalid framebuffer format: {}.", int(_frameBufferFormat));
+        return {};
+    }
+
+    switch (_frameBufferFormat)
+    {
+    case PixelFormat::RGB_I8:
+    case PixelFormat::RGB_F32:
+    case PixelFormat::RGBA_I8:
+        info.channelSize = 1;
+        break;
+    default:
+        Log::warn("Invalid framebuffer format: {}.", int(_frameBufferFormat));
+        return {};
+    }
+
+    auto data = reinterpret_cast<const char*>(colorBuffer);
+    auto length = info.getSize();
+    Image image(info, {data, length});
+    ImageFlipper::flipVertically(image);
 
     unmap();
 
-#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_BGR
-    freeimage::SwapRedBlue32(image.get());
-#endif
     return image;
-#else
-    return nullptr;
-#endif
 }
 } // namespace brayns

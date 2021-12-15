@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2016, EPFL/Blue Brain Project
+# Copyright (c) 2015-2021, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
@@ -9,7 +9,6 @@ set(BRAYNSPARAMETERS_SOURCES
   AbstractParameters.cpp
   AnimationParameters.cpp
   RenderingParameters.cpp
-  GeometryParameters.cpp
   ApplicationParameters.cpp
   VolumeParameters.cpp
   NetworkParameters.cpp
@@ -20,15 +19,34 @@ set(BRAYNSPARAMETERS_PUBLIC_HEADERS
   AbstractParameters.h
   AnimationParameters.h
   RenderingParameters.h
-  GeometryParameters.h
   ApplicationParameters.h
   VolumeParameters.h
   NetworkParameters.h
 )
 
-set(BRAYNSPARAMETERS_LINK_LIBRARIES
-    PRIVATE glm ${Boost_PROGRAM_OPTIONS_LIBRARY}
+add_library(braynsParameters SHARED ${BRAYNSPARAMETERS_SOURCES} ${BRAYNSPARAMETERS_PUBLIC_HEADERS})
+
+set(BRAYNSPARAMETER_INCLUDE_DIRS_LIST
+    ${PROJECT_SOURCE_DIR}
+    ${CMAKE_BINARY_DIR}/include
+)
+target_include_directories(braynsParameters PUBLIC
+  "$<BUILD_INTERFACE:${BRAYNSPARAMETER_INCLUDE_DIRS_LIST}>"
+  "$<INSTALL_INTERFACE:include>")
+
+target_link_libraries(braynsParameters PUBLIC spdlog::spdlog)
+target_link_libraries(braynsParameters PRIVATE glm ${Boost_PROGRAM_OPTIONS_LIBRARY} braynsUtils)
+
+target_compile_options(braynsParameters PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+
+set_target_properties(braynsParameters
+    PROPERTIES
+        VERSION ${BRAYNS_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 )
 
-set(BRAYNSPARAMETERS_INCLUDE_NAME brayns/parameters)
-common_library(braynsParameters)
+install(TARGETS braynsParameters
+    EXPORT Brayns-targets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)

@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -19,10 +19,10 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/common/light/Light.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Light.h>
 #include <brayns/engine/LightManager.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
@@ -30,7 +30,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
-#include "PDiffHelpers.h"
+#include "helpers/ImageValidator.h"
 
 namespace
 {
@@ -51,37 +51,37 @@ const brayns::Vector3f lampPositions[4] = {
 
 TEST_CASE("render_scivis_quadlight")
 {
-    const char* argv[] = {"lights",     "demo",   "--engine",       "ospray",
-                          "--renderer", "scivis", "--no-head-light"};
+    const char* argv[] = {"lights", "demo", "--renderer", "scivis",
+                          "--no-head-light"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
+    auto& engine = brayns.getEngine();
 
-    brayns.getEngine().getScene().getLightManager().addLight(
+    engine.getScene().getLightManager().addLight(
         std::make_shared<brayns::QuadLight>(
             lampPositions[0], (lampPositions[1] - lampPositions[0]),
             (lampPositions[3] - lampPositions[0]), YELLOW, 1.0f, true));
 
     brayns.commitAndRender();
 
-    CHECK(compareTestImage("testLightScivisQuadLight.png",
-                           brayns.getEngine().getFrameBuffer()));
+    CHECK(ImageValidator::validate(engine, "testLightScivisQuadLight.png"));
 }
 
 TEST_CASE("render_scivis_spotlight")
 {
-    const char* argv[] = {"lights",     "demo",   "--engine",       "ospray",
-                          "--renderer", "scivis", "--no-head-light"};
+    const char* argv[] = {"lights", "demo", "--renderer", "scivis",
+                          "--no-head-light"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
+    auto& engine = brayns.getEngine();
 
-    brayns.getEngine().getScene().getLightManager().addLight(
+    engine.getScene().getLightManager().addLight(
         std::make_shared<brayns::SpotLight>(lampCentre,
                                             brayns::Vector3f(0, -1, 0), 90.f,
                                             10.f, lampWidth, BLUE, 1.0f, true));
     brayns.commitAndRender();
 
-    CHECK(compareTestImage("testLightScivisSpotLight.png",
-                           brayns.getEngine().getFrameBuffer()));
+    CHECK(ImageValidator::validate(engine, "testLightScivisSpotLight.png"));
 }

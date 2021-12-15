@@ -1,9 +1,6 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
- *
- * This file is part of the circuit explorer for Brayns
- * <https://github.com/favreau/Brayns-UC-CircuitExplorer>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -19,11 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <common/log.h>
-
 #include "CircuitExplorerSimulationRenderer.h"
 #include "CircuitExplorerSimulationRenderer_ispc.h"
 
+#include <brayns/common/Log.h>
 #include <engines/ospray/ispc/geometry/Cones.h>
 #include <engines/ospray/ispc/geometry/SDFGeometries.h>
 

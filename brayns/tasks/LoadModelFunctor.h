@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include <brayns/common/loader/Loader.h>
 #include <brayns/common/tasks/TaskFunctor.h>
-#include <brayns/common/types.h>
+#include <brayns/engine/Engine.h>
 #include <brayns/engine/Model.h>
+#include <brayns/io/LoaderRegistry.h>
 
 namespace brayns
 {
@@ -34,7 +34,8 @@ namespace brayns
 class LoadModelFunctor : public TaskFunctor
 {
 public:
-    LoadModelFunctor(Engine& engine, const ModelParams& params);
+    LoadModelFunctor(Engine& engine, LoaderRegistry& registry,
+                     const ModelParams& params);
     LoadModelFunctor(LoadModelFunctor&&) = default;
     std::vector<ModelDescriptorPtr> operator()(Blob&& blob);
     std::vector<ModelDescriptorPtr> operator()();
@@ -53,6 +54,7 @@ private:
     std::function<void(std::string, float)> _getProgressFunc();
 
     Engine& _engine;
+    LoaderRegistry& _registry;
     ModelParams _params;
     size_t _currentProgress{0};
     size_t _nextTic{0};

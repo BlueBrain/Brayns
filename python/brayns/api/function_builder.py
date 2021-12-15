@@ -20,12 +20,10 @@
 
 """Helper module to create a function calling an entrypoint."""
 
-from typing import Any, Callable
+from typing import Callable
 
 from ..client.abstract_client import AbstractClient
-
-from . import function_params
-from . import function_docstring
+from . import function_docstring, function_params
 from .entrypoint import Entrypoint
 
 
@@ -38,12 +36,15 @@ def build_function(
     If the entrypoint params are not a oneOf and have properties, the function
     will have these properties as keyword arguments.
 
-    Example: {
-        title: do-stuff,
+    The function return type is defined by the content of the field 'result' of
+    the reply that is returned without any processing.
+
+    Example: Entrypoint(
+        title='do-stuff',
         params: [{a: int, b: str}],
         returns: {c: float}
-    }
-    gives def function(a: int, b: str) -> float
+    )
+    gives def function(a: int, b: str) -> Any
 
     Optional arguments will be defaulted to None.
 
@@ -54,10 +55,9 @@ def build_function(
     :return: Raw entrypoint return value
     :rtype: Callable
     """
-    method = entrypoint.name
     code = _get_function_code(entrypoint)
     context = {
-        '_get_result': lambda params: _get_result(client, method, params)
+        '_get_result': lambda params: _get_result(client, entrypoint, params)
     }
     exec(code, context)
     return context['_function']
@@ -70,16 +70,39 @@ def _function(self{params}) -> Any:
     return _get_result(locals())'''
 
 
-def _get_result(client: AbstractClient, method: str, params: dict) -> Any:
-    args = {
+def _get_result(client: AbstractClient, entrypoint: Entrypoint, params: dict):
+    return client.request(
+        method=entrypoint.name,
+        params=_get_params(entrypoint, params)
+    )
+
+
+def _get_params(entrypoint: Entrypoint, params: dict):
+    return _unpack_params(
+        entrypoint=entrypoint,
+        params=_filter_params(params)
+    )
+
+
+def _unpack_params(entrypoint: Entrypoint, params: dict):
+    if not params:
+        return None
+    if entrypoint.params.unpacked:
+        return params
+    if len(params) != 1 or 'params' not in params:
+        raise ValueError(f'Invalid packed params: {params}')
+    return params['params']
+
+
+def _filter_params(params: dict):
+    return {
         key: value
         for key, value in params.items()
         if key != 'self' and value is not None
     }
-    return client.request(method, args if args else None)
 
 
-def _get_function_code(entrypoint: Entrypoint) -> str:
+def _get_function_code(entrypoint: Entrypoint):
     params = function_params.from_entrypoint(entrypoint)
     if params:
         params = ', ' + params

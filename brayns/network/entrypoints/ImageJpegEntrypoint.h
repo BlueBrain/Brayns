@@ -21,13 +21,13 @@
 
 #pragma once
 
-#include <brayns/network/adapters/ImageBase64Adapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/messages/ImageBase64Message.h>
+#include <brayns/utils/image/ImageEncoder.h>
 
 namespace brayns
 {
-class ImageJpegEntrypoint
-    : public Entrypoint<EmptyMessage, ImageGenerator::ImageBase64>
+class ImageJpegEntrypoint : public Entrypoint<EmptyMessage, ImageBase64Message>
 {
 public:
     virtual std::string getName() const override { return "image-jpeg"; }
@@ -44,10 +44,10 @@ public:
         auto& framebuffer = engine.getFrameBuffer();
         auto& manager = api.getParametersManager();
         auto& parameters = manager.getApplicationParameters();
-        auto compression = uint8_t(parameters.getJpegCompression());
-        auto& generator = getImageGenerator();
-        auto image = generator.createImage(framebuffer, "jpg", compression);
-        request.reply(image);
+        auto quality = int(parameters.getJpegCompression());
+        auto image = framebuffer.getImage();
+        auto data = ImageEncoder::encodeToBase64(image, "jpg", quality);
+        request.reply({data});
     }
 };
 } // namespace brayns

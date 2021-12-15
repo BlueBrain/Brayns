@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,10 +20,17 @@
 
 #include "AbstractParameters.h"
 
+#include <brayns/common/Log.h>
+
 namespace brayns
 {
 void AbstractParameters::print()
 {
-    BRAYNS_INFO << "-= " << _name << " parameters =-" << std::endl;
+    Log::info("-= {} parameters =-", _name);
+}
+
+po::options_description& AbstractParameters::parameters()
+{
+    return _parameters;
 }
 } // namespace brayns

@@ -1,5 +1,0 @@
-[gerrit]
-host=bbpcode.epfl.ch
-project=viz/Brayns-UC-CircuitExplorer
-defaultbranch=master
-port=22

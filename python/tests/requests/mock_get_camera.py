@@ -73,18 +73,8 @@ schema = {
     'type': 'method'
 }
 
+params = None
+
 result = {
-    'current': 'perspective',
-    'orientation': [0, 0, 0, 1],
-    'position': [0, 0, 1],
-    'target': [0, 0, 0],
-    'types': [
-        'circuit_explorer_dof_perspective',
-        'circuit_explorer_sphere_clipping',
-        'fisheye',
-        'orthographic',
-        'panoramic',
-        'perspective',
-        'perspectiveParallax'
-    ]
+    'check': 0.038700254974591286
 }

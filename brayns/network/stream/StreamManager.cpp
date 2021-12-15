@@ -21,9 +21,11 @@
 
 #include "StreamManager.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/Log.h>
 
 #include <brayns/network/context/NetworkContext.h>
+
+#include <brayns/utils/image/ImageEncoder.h>
 
 namespace
 {
@@ -40,28 +42,23 @@ public:
         auto& manager = api.getParametersManager();
         auto& parameters = manager.getApplicationParameters();
         auto compression = parameters.getJpegCompression();
-        auto& generator = context.getImageGenerator();
-        const auto image = generator.createJPEG(framebuffer, compression);
-        if (image.size == 0)
-        {
-            return;
-        }
-        _trySendImage(context, image);
+        auto image = framebuffer.getImage();
+        auto data = ImageEncoder::encode(image, "jpg", compression);
+        _trySendImage(context, data);
     }
 
 private:
-    static void _trySendImage(NetworkContext& context,
-                              const ImageGenerator::ImageJPEG& image)
+    static void _trySendImage(NetworkContext& context, const std::string& data)
     {
         auto& connections = context.getConnections();
         try
         {
-            connections.broadcast({image.data.get(), int(image.size)});
+            connections.broadcast({data.data(), int(data.size())});
         }
         catch (const ConnectionClosedException& e)
         {
-            BRAYNS_DEBUG << "Connection closed during image broadcast: "
-                         << e.what() << ".\n";
+            Log::debug("Connection closed during image broadcast: {}.",
+                       e.what());
         }
     }
 };
@@ -71,13 +68,27 @@ class ControlledImageStream
 public:
     static void broadcast(NetworkContext& context)
     {
-        auto& stream = context.getStream();
-        auto& imageStream = stream.getImageStream();
-        if (!imageStream.isTriggered())
+        if (!_isTriggered(context))
         {
             return;
         }
         ImageStream::broadcast(context);
+        _resetTrigger(context);
+    }
+
+private:
+    static bool _isTriggered(NetworkContext& context)
+    {
+        auto& stream = context.getStream();
+        auto& monitor = stream.getMonitor();
+        return monitor.isTriggered();
+    }
+
+    static void _resetTrigger(NetworkContext& context)
+    {
+        auto& stream = context.getStream();
+        auto& monitor = stream.getMonitor();
+        monitor.resetTrigger();
     }
 };
 
@@ -87,8 +98,8 @@ public:
     static void broadcast(NetworkContext& context)
     {
         auto& stream = context.getStream();
-        auto& imageStream = stream.getImageStream();
-        imageStream.call([&] { ImageStream::broadcast(context); });
+        auto& monitor = stream.getMonitor();
+        monitor.callWithFpsLimit([&] { ImageStream::broadcast(context); });
     }
 };
 
@@ -126,7 +137,7 @@ private:
         auto& api = context.getApi();
         auto& engine = api.getEngine();
         auto& framebuffer = engine.getFrameBuffer();
-        if (framebuffer.getFrameBufferFormat() == FrameBufferFormat::none)
+        if (framebuffer.getFrameBufferFormat() == PixelFormat::NONE)
         {
             return false;
         }
@@ -136,8 +147,8 @@ private:
     static bool _isImageStreamControlled(NetworkContext& context)
     {
         auto& stream = context.getStream();
-        auto& imageStream = stream.getImageStream();
-        return imageStream.isControlled();
+        auto& monitor = stream.getMonitor();
+        return monitor.isControlled();
     }
 };
 } // namespace
@@ -157,8 +168,5 @@ StreamManager::StreamManager(NetworkContext& context)
 void StreamManager::broadcast()
 {
     StreamDispatcher::broadcast(*_context);
-    auto& stream = _context->getStream();
-    auto& imageStream = stream.getImageStream();
-    imageStream.resetTrigger();
 }
 } // namespace brayns

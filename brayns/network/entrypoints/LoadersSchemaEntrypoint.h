@@ -37,9 +37,7 @@ public:
 
     virtual void onRequest(const Request& request) override
     {
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
-        auto& registry = scene.getLoaderRegistry();
+        auto& registry = getApi().getLoaderRegistry();
         auto& loaders = registry.getLoaderInfos();
         auto schema = _getSchema(loaders);
         auto json = Json::serialize(schema);
@@ -62,8 +60,7 @@ private:
 
     JsonSchema _getSchema(const LoaderInfo& loader)
     {
-        auto& properties = loader.properties;
-        auto schema = Json::getSchema(properties);
+        auto schema = loader.inputParametersSchema;
         auto& name = loader.name;
         schema.title = name;
         return schema;

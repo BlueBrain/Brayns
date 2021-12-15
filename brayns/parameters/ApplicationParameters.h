@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -22,12 +22,10 @@
 
 #include "AbstractParameters.h"
 
-#include <brayns/common/types.h>
+#include <brayns/common/MathTypes.h>
 
 #include <string>
 #include <vector>
-
-SERIALIZATION_ACCESS(ApplicationParameters)
 
 namespace brayns
 {
@@ -38,83 +36,158 @@ class ApplicationParameters : public AbstractParameters
 public:
     ApplicationParameters();
 
-    /** @copydoc AbstractParameters::print */
+    /**
+     * @brief print prints these parameters on the log
+     */
     void print() final;
 
-    /** Engine*/
-    const std::string& getEngine() const { return _engine; }
-    /** OSPRay modules */
-    const std::vector<std::string>& getOsprayModules() const
-    {
-        return _modules;
-    }
+    /**
+     * @brief getDynamicLoadBalancer returns whether dynamic load balance
+     * on the rendering backend is enabled or not
+     * @return bool
+     */
+    bool getDynamicLoadBalancer() const noexcept;
 
-    bool getDynamicLoadBalancer() const { return _dynamicLoadBalancer; }
-    void setDynamicLoadBalancer(const bool value)
-    {
-        _updateValue(_dynamicLoadBalancer, value);
-    }
+    /**
+     * @brief setDynamicLoadBalancer sets whether dynamic load balance
+     * should be used on the rendering backend
+     * @param value bool
+     */
+    void setDynamicLoadBalancer(const bool value) noexcept;
 
-    /** window size */
-    const Vector2ui getWindowSize() const { return Vector2ui(_windowSize); }
-    void setWindowSize(const Vector2ui& size)
-    {
-        Vector2d value(size);
-        _updateValue(_windowSize, value);
-    }
-    /** Benchmarking */
-    bool isBenchmarking() const { return _benchmarking; }
-    void setBenchmarking(bool enabled) { _benchmarking = enabled; }
-    /** JPEG compression quality */
-    void setJpegCompression(const size_t compression)
-    {
-        _updateValue(_jpegCompression, compression);
-    }
-    size_t getJpegCompression() const { return _jpegCompression; }
-    /** Image stream FPS */
-    size_t getImageStreamFPS() const { return _imageStreamFPS; }
-    void setImageStreamFPS(const size_t fps)
-    {
-        _updateValue(_imageStreamFPS, fps);
-    }
+    /**
+     * @brief getWindowSize returns the viewport size (width, height)
+     * @return const Vector2ui&
+     */
+    const Vector2ui& getWindowSize() const noexcept;
 
-    /** Max render FPS to limit */
-    size_t getMaxRenderFPS() const { return _maxRenderFPS; }
-    bool isStereo() const { return _stereo; }
-    bool getParallelRendering() const { return _parallelRendering; }
-    const std::string& getEnvMap() const { return _envMap; }
-    const std::string& getSandboxPath() const { return _sandBoxPath; }
-    const strings& getInputPaths() const { return _inputPaths; }
-    const strings& getPlugins() const { return _plugins; }
-    po::positional_options_description& posArgs() { return _positionalArgs; }
-    bool getUseQuantaRenderControl() const { return _useQuantaRenderControl; }
-    void setUseQuantaRenderControl(bool value)
-    {
-        _updateValue(_useQuantaRenderControl, value);
-    }
+    /**
+     * @brief setWindowSize sets the viewport size (width, height)
+     * @param size const Vector2ui&
+     */
+    void setWindowSize(const Vector2ui& size) noexcept;
+
+    /**
+     * @brief isBenchmarking returns whether the system has been initialized
+     * on benchmarking mode
+     * @return bool
+     */
+    bool isBenchmarking() const noexcept;
+
+    /**
+     * @brief setBenchmarking sets wether the system is on benchmarking
+     * mode or not
+     * @param enabled bool
+     */
+    void setBenchmarking(const bool enabled) noexcept;
+
+    /**
+     * @brief setJpegCompression sets the JPEG image streamming compression
+     * parameter
+     * @param compression size_t
+     */
+    void setJpegCompression(const size_t compression) noexcept;
+
+    /**
+     * @brief getJpegCompression returns the JPEG image streamming compression
+     * parameter
+     * @return size_t
+     */
+    size_t getJpegCompression() const noexcept;
+
+    /**
+     * @brief getImageStreamFPS sets the max FPS at which the system should
+     * stream frames to the connected clients
+     * @return size_t
+     */
+    size_t getImageStreamFPS() const noexcept;
+
+    /**
+     * @brief setImageStreamFPS sets the max FPS at which the system should
+     * stream frames to the connected clients
+     * @param fps size_t
+     */
+    void setImageStreamFPS(const size_t fps) noexcept;
+
+    /**
+     * @brief getUseQuantaRenderControl returns whether quanta stream control
+     * is enabled or not. Quanta stream control is the mode in which images are
+     * only streamed to the clients upon explicit request
+     * @return bool
+     */
+    bool getUseQuantaRenderControl() const noexcept;
+
+    /**
+     * @brief setUseQuantaRenderControl sets whether quanta stream control
+     * is enabled or not. Quanta stream control is the mode in which images are
+     * only streamed to the clients upon explicit request
+     * @param value bool
+     */
+    void setUseQuantaRenderControl(const bool value) noexcept;
+
+    /**
+     * @brief getMaxRenderFPS returns the max FPS at which the renderer should
+     * produce frames
+     * @return size_T
+     */
+    size_t getMaxRenderFPS() const noexcept;
+
+    /**
+     * @brief getParallelRendering returns whether parallel rendering is
+     * enabled on the rendering backend
+     * @return bool
+     */
+    bool getParallelRendering() const noexcept;
+
+    /**
+     * @brief getSandboxPath returns the sandbox path with which the sytem has
+     * been initialized. THe sandbox path limits the files which can be
+     * accessed by the loaders
+     * @return const std::string&
+     */
+    const std::string& getSandboxPath() const noexcept;
+
+    /**
+     * @brief getInputPaths returns the list of paths with which the system was
+     * initialized. These paths are used to laod models at system start up.
+     * @return const std::vector<std::string>&
+     */
+    const std::vector<std::string>& getInputPaths() const noexcept;
+
+    /**
+     * @brief getPlugins return the list of plugis with which brayns was
+     * initialized
+     * @return const std::vector<std::string>&
+     */
+    const std::vector<std::string>& getPlugins() const noexcept;
+
+    /**
+     * @brief posArgs return the positional arguments object used to initialize
+     * this object
+     * @return po::positional_options_description&
+     */
+    po::positional_options_description& posArgs() noexcept;
 
 protected:
+    /**
+     * @brief parse parses the input parameters to initialize this object
+     * @param vm const po::variables_map&
+     */
     void parse(const po::variables_map& vm) final;
 
-    std::string _engine{"ospray"};
-    std::vector<std::string> _modules;
-    Vector2d _windowSize;
+    Vector2ui _windowSize;
     bool _benchmarking{false};
     size_t _jpegCompression;
-    bool _stereo{false};
     size_t _imageStreamFPS{60};
     size_t _maxRenderFPS{std::numeric_limits<size_t>::max()};
     bool _parallelRendering{false};
     bool _dynamicLoadBalancer{false};
-    std::string _envMap;
     std::string _sandBoxPath;
     bool _useQuantaRenderControl{false};
 
-    strings _inputPaths;
-    strings _plugins;
+    std::vector<std::string> _inputPaths;
+    std::vector<std::string> _plugins;
 
     po::positional_options_description _positionalArgs;
-
-    SERIALIZATION_FRIEND(ApplicationParameters)
 };
 } // namespace brayns
