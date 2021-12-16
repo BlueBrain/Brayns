@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <stddef.h> // size_t
 #include <tuple>
 
 namespace brayns

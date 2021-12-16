@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <stdexcept> // std::runtime_error
 #include <string>
 #include <tuple>
 #include <vector>
