@@ -20,20 +20,23 @@
 
 #pragma once
 
+#include <memory>
+#include <unordered_map>
+
 #include <brayns/io/Loader.h>
 #include <brayns/io/loaders/MeshLoaderParameters.h>
 
-struct aiScene;
+#include "mesh/MeshParser.h"
 
 namespace brayns
 {
-/** Loads meshes from files using the assimp library
- * http://assimp.sourceforge.net
- */
 class MeshLoader : public Loader<MeshLoaderParameters>
 {
 public:
+    MeshLoader();
+
     std::vector<std::string> getSupportedExtensions() const final;
+
     std::string getName() const final;
 
     std::vector<ModelDescriptorPtr> importFromFile(
@@ -44,29 +47,15 @@ public:
         Blob&& blob, const LoaderProgress& callback,
         const MeshLoaderParameters& properties, Scene& scene) const final;
 
-    ModelMetadata importMesh(
-        const std::string& fileName, const LoaderProgress& callback,
-        Model& model, const Matrix4f& transformation,
-        const size_t defaultMaterialId,
-        const MeshLoaderGeometryQuality geometryQuality) const;
+    template <typename T, typename... Args>
+    void add(Args&&... args)
+    {
+        auto parser = std::make_unique<T>(std::forward<Args>(args)...);
+        auto format = parser->getFormat();
+        _parsers.emplace(std::move(format), std::move(parser));
+    }
 
 private:
-    struct MaterialInfo
-    {
-        std::string name;
-        size_t materialId;
-    };
-    typedef std::vector<MaterialInfo> MaterialInfoList;
-
-    void _createMaterials(Model& model, const aiScene* aiScene,
-                          const std::string& folder,
-                          MaterialInfoList& list) const;
-
-    ModelMetadata _postLoad(const aiScene* aiScene, Model& model,
-                            const Matrix4f& transformation,
-                            const size_t defaultMaterial,
-                            const std::string& folder,
-                            const LoaderProgress& callback) const;
-    size_t _getQuality(const MeshLoaderGeometryQuality geometryQuality) const;
+    std::unordered_map<std::string, std::unique_ptr<MeshParser>> _parsers;
 };
 } // namespace brayns

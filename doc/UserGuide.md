@@ -20,7 +20,7 @@ braynsViewer 4IMY.pdb
 
 ## Meshes
 
-Brayns can load file formats supported by the [assimp](https://github.com/assimp/assimp) library.
+Brayns can load mesh files.
 
 ```
 braynsViewer mesh.obj|ply
