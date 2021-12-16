@@ -45,9 +45,6 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
     propertymap/PropertyMap.h
     scene/ClipPlane.h
     simulation/AbstractSimulationHandler.h
-    tasks/Task.h
-    tasks/TaskFunctor.h
-    tasks/TaskRuntimeError.h
     transferFunction/TransferFunction.h
 )
 
