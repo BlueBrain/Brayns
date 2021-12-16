@@ -11,6 +11,7 @@ set(BRAYNSNETWORK_HEADERS
   interface/ActionInterface.h
   json/MessageFactory.h
   plugin/NetworkManager.h
+  tasks/functors/SnapshotTask.h
 )
 
 set(BRAYNSNETWORK_SOURCES
@@ -21,6 +22,7 @@ set(BRAYNSNETWORK_SOURCES
   plugin/NetworkManager.cpp
   socket/ConnectionManager.cpp
   stream/StreamManager.cpp
+  tasks/functors/SnapshotTask.cpp
 )
 
 set(BRAYNSNETWORK_INCLUDE_DIR ${PROJECT_SOURCE_DIR})
@@ -40,7 +42,6 @@ target_link_libraries(braynsNetwork PRIVATE
 
 target_link_libraries(braynsNetwork PUBLIC
   braynsJson
-  braynsTasks
   braynsIO
   Poco::Foundation
   Poco::Net

@@ -48,13 +48,14 @@ void AnimationParameters::reset()
         markModified();
 }
 
-void AnimationParameters::setStartAndEndFrame(const uint32_t startFrame,
-                                              const uint32_t endFrame) noexcept
+void AnimationParameters::setStartFrame(const uint32_t startFrame) noexcept
 {
     _updateValue(_startFrame, startFrame);
+}
+
+void AnimationParameters::setEndFrame(const uint32_t endFrame) noexcept
+{
     _updateValue(_endFrame, endFrame);
-    // Recompute current with the new start and end fraems
-    setFrame(_current);
 }
 
 uint32_t AnimationParameters::getStartFrame() const noexcept
@@ -69,10 +70,7 @@ uint32_t AnimationParameters::getEndFrame() const noexcept
 
 void AnimationParameters::setFrame(const uint32_t value) noexcept
 {
-    const auto numFrames = _endFrame - _startFrame;
-    auto newValue =
-        numFrames == 0 ? 0 : (value >= numFrames ? numFrames - 1 : value);
-    _updateValue(_current, newValue);
+    _updateValue(_current, value);
 }
 
 uint32_t AnimationParameters::getFrame() const noexcept
@@ -82,7 +80,11 @@ uint32_t AnimationParameters::getFrame() const noexcept
 
 uint32_t AnimationParameters::getAbsoluteFrame() const noexcept
 {
-    return _startFrame + _current;
+    const auto numFrames =
+        _endFrame >= _startFrame ? _endFrame - _startFrame : 0;
+    auto current =
+        numFrames == 0 ? 0 : (_current >= numFrames ? numFrames - 1 : _current);
+    return _startFrame + current;
 }
 
 void AnimationParameters::setDt(const double dt) noexcept

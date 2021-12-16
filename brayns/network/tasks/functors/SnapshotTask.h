@@ -21,28 +21,45 @@
 #pragma once
 
 #include <brayns/common/tasks/Task.h>
-#include <brayns/common/tasks/TaskRuntimeError.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/parameters/AnimationParameters.h>
+#include <brayns/parameters/RenderingParameters.h>
+#include <brayns/parameters/VolumeParameters.h>
 
 namespace brayns
 {
-const auto ERROR_ID_MISSING_PARAMS = -1731;
-const auto ERROR_ID_UNSUPPORTED_TYPE = -1732;
-const auto ERROR_ID_INVALID_BINARY_RECEIVE = -1733;
-const auto ERROR_ID_LOADING_BINARY_FAILED = -1734;
-
-const TaskRuntimeError MISSING_PARAMS{"Missing params",
-                                      ERROR_ID_MISSING_PARAMS};
-
-const TaskRuntimeError UNSUPPORTED_TYPE{"Unsupported type",
-                                        ERROR_ID_UNSUPPORTED_TYPE};
-
-const TaskRuntimeError INVALID_BINARY_RECEIVE{
-    "Invalid binary received; no more files expected or "
-    "current file is complete",
-    ERROR_ID_INVALID_BINARY_RECEIVE};
-
-inline TaskRuntimeError LOADING_BINARY_FAILED(const std::string& error)
+/**
+ * @brief The SnapshotParams struct holds the setting to configure the
+ * snapshot rendering
+ */
+struct SnapshotParams
 {
-    return {error, ERROR_ID_LOADING_BINARY_FAILED};
-}
+    std::unique_ptr<AnimationParameters> animParams;
+    std::unique_ptr<VolumeParameters> volumeParams;
+    std::unique_ptr<RenderingParameters> renderingParams;
+    std::unique_ptr<Camera> camera;
+    int samplesPerPixel{1};
+    Vector2ui size;
+    size_t quality{100};
+    std::string format;
+    std::string name;
+    std::string filePath;
+};
+
+/**
+ * A functor for snapshot rendering and conversion to a base64-encoded image for
+ * the web client.
+ */
+class SnapshotFunctor : public TaskFunctor
+{
+public:
+    SnapshotFunctor(Engine& engine, SnapshotParams&& params);
+
+    std::string operator()();
+
+private:
+    Engine& _engine;
+    SnapshotParams _params;
+};
 } // namespace brayns

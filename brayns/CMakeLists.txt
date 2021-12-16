@@ -13,7 +13,6 @@ add_subdirectory(json)
 add_subdirectory(common)
 add_subdirectory(engine)
 add_subdirectory(io)
-add_subdirectory(tasks)
 add_subdirectory(pluginapi)
 add_subdirectory(network)
 
@@ -35,7 +34,7 @@ target_link_libraries(brayns PUBLIC
   braynsParameters braynsCommon braynsEngine braynsNetwork
 )
 target_link_libraries(brayns PRIVATE
-    braynsIO braynsPluginAPI braynsTasks
+    braynsIO braynsPluginAPI
 )
 
 target_compile_options(brayns PRIVATE ${BRAYNS_COMPILE_OPTIONS})

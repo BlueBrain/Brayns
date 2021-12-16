@@ -25,8 +25,7 @@
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/entrypoint/EntrypointTask.h>
 #include <brayns/network/messages/ImageBase64Message.h>
-
-#include <brayns/tasks/SnapshotTask.h>
+#include <brayns/network/tasks/functors/SnapshotTask.h>
 
 namespace brayns
 {

@@ -23,7 +23,7 @@
 
 #include <brayns/json/JsonAdapterMacro.h>
 
-#include <brayns/tasks/SnapshotTask.h>
+#include <brayns/network/tasks/functors/SnapshotTask.h>
 
 namespace brayns
 {
