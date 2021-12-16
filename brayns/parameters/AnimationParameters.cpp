@@ -80,11 +80,10 @@ uint32_t AnimationParameters::getFrame() const noexcept
 
 uint32_t AnimationParameters::getAbsoluteFrame() const noexcept
 {
-    const auto numFrames = _endFrame >= _startFrame? _endFrame - _startFrame
-                                                   : 0;
+    const auto numFrames =
+        _endFrame >= _startFrame ? _endFrame - _startFrame : 0;
     auto current =
-        numFrames == 0 ? 0 : (_current >= numFrames ? numFrames - 1
-                                                    : _current);
+        numFrames == 0 ? 0 : (_current >= numFrames ? numFrames - 1 : _current);
     return _startFrame + current;
 }
 

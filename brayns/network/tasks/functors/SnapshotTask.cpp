@@ -116,8 +116,8 @@ std::string encodeSnapshotToBase64(SnapshotParams& params, FrameBuffer& fb)
 } // namespace
 
 SnapshotFunctor::SnapshotFunctor(Engine& engine, SnapshotParams&& params)
- : _engine(engine)
- , _params(std::move(params))
+    : _engine(engine)
+    , _params(std::move(params))
 {
 }
 
@@ -153,7 +153,7 @@ std::string SnapshotFunctor::operator()()
 
     // Initialize framebuffer
     auto frameBuffer =
-            _engine.createFrameBuffer("default", size, PixelFormat::RGBA_I8);
+        _engine.createFrameBuffer("default", size, PixelFormat::RGBA_I8);
     frameBuffer->setAccumulation(true);
 
     // Prepare notifications message
@@ -164,8 +164,8 @@ std::string SnapshotFunctor::operator()()
     // TODO WITH ENGINE REFACTORING
     // OSPRay supports a progress callback for the rendering process
     // https://github.com/ospray/ospray/tree/v1.8.5#progress-and-cancel-progress-and-cancel-unnumbered
-    // Can be used to get progress information while using samples per pixel instead of accumulation
-    // to speed up rendering
+    // Can be used to get progress information while using samples per pixel
+    // instead of accumulation to speed up rendering
     size_t numAccumFrames = frameBuffer->numAccumFrames();
     const auto spp = _params.samplesPerPixel;
     while (numAccumFrames != spp)
@@ -186,4 +186,4 @@ std::string SnapshotFunctor::operator()()
     else
         return encodeSnapshotToBase64(_params, *frameBuffer);
 }
-}
+} // namespace brayns

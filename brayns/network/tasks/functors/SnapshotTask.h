@@ -20,7 +20,6 @@
 
 #pragma once
 
-
 #include <brayns/common/tasks/Task.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
