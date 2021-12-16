@@ -8,21 +8,21 @@ set(BRAYNSNETWORK_HEADERS
   entrypoint/EntrypointManager.h
   entrypoint/IEntrypoint.h
   entrypoint/EntrypointException.h
+  entrypoints/SnapshotEntrypoint.h
   interface/ActionInterface.h
   json/MessageFactory.h
   plugin/NetworkManager.h
-  tasks/functors/SnapshotTask.h
 )
 
 set(BRAYNSNETWORK_SOURCES
   entrypoint/EntrypointManager.cpp
+  entrypoints/SnapshotEntrypoint.cpp
   interface/NetworkInterface.cpp
   interface/ClientInterface.cpp
   interface/ServerInterface.cpp
   plugin/NetworkManager.cpp
   socket/ConnectionManager.cpp
   stream/StreamManager.cpp
-  tasks/functors/SnapshotTask.cpp
 )
 
 set(BRAYNSNETWORK_INCLUDE_DIR ${PROJECT_SOURCE_DIR})

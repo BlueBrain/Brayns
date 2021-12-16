@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Daniel.Nachbaur@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,18 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SnapshotTask.h"
+#include "SnapshotEntrypoint.h"
 
-#include <brayns/common/Log.h>
-#include <brayns/engine/FrameBuffer.h>
-#include <brayns/engine/Renderer.h>
-#include <brayns/engine/Scene.h>
-#include <brayns/parameters/ParametersManager.h>
-#include <brayns/utils/StringUtils.h>
-#include <brayns/utils/image/Image.h>
 #include <brayns/utils/image/ImageEncoder.h>
 #include <brayns/utils/image/ImageFormat.h>
-#include <brayns/utils/image/ImageMerger.h>
 
 namespace brayns
 {
@@ -42,9 +34,9 @@ void initializeParameters(Engine& engine, SnapshotParams& params)
     const auto& sysRenderParams = paramsManager.getRenderingParameters();
     const auto& sysVolumeParams = paramsManager.getVolumeParameters();
 
-    auto& animParams = params.animParams;
-    auto& renderParams = params.renderingParams;
-    auto& volumeParams = params.volumeParams;
+    auto& animParams = params.animation_parameters;
+    auto& renderParams = params.renderer;
+    auto& volumeParams = params.volume_parameters;
 
     if (!animParams)
         animParams = std::make_unique<AnimationParameters>(sysAnimParams);
@@ -55,7 +47,7 @@ void initializeParameters(Engine& engine, SnapshotParams& params)
     renderParams->setSamplesPerPixel(1);
     renderParams->setSubsampling(1);
     renderParams->setAccumulation(true);
-    renderParams->setMaxAccumFrames(params.samplesPerPixel);
+    renderParams->setMaxAccumFrames(params.samples_per_pixel);
 
     if (!volumeParams)
         volumeParams = std::make_unique<VolumeParameters>(sysVolumeParams);
@@ -80,7 +72,7 @@ std::shared_ptr<Camera> initializeCamera(Engine& engine, SnapshotParams& params)
 
 std::string writeSnapshotToDisk(SnapshotParams& params, FrameBuffer& fb)
 {
-    const auto& path = params.filePath;
+    const auto& path = params.file_path;
     const auto& format = params.format;
     auto image = fb.getImage();
     auto filename = path + "." + format;
@@ -115,19 +107,19 @@ std::string encodeSnapshotToBase64(SnapshotParams& params, FrameBuffer& fb)
 }
 } // namespace
 
-SnapshotFunctor::SnapshotFunctor(Engine& engine, SnapshotParams&& params)
+SnapshotTask::SnapshotTask(Engine& engine, SnapshotParams&& params)
     : _engine(engine)
     , _params(std::move(params))
 {
 }
 
-std::string SnapshotFunctor::operator()()
+void SnapshotTask::run()
 {
     // Initialize parameters
     initializeParameters(_engine, _params);
-    auto& animParams = _params.animParams;
-    auto& renderParams = _params.renderingParams;
-    auto& volumeParams = _params.volumeParams;
+    auto& animParams = _params.animation_parameters;
+    auto& renderParams = _params.renderer;
+    auto& volumeParams = _params.volume_parameters;
 
     // Initialize (Clone) scene
     auto scene = _engine.createScene(*animParams, *volumeParams);
@@ -167,23 +159,50 @@ std::string SnapshotFunctor::operator()()
     // Can be used to get progress information while using samples per pixel
     // instead of accumulation to speed up rendering
     size_t numAccumFrames = frameBuffer->numAccumFrames();
-    const auto spp = _params.samplesPerPixel;
+    const auto spp = _params.samples_per_pixel;
     while (numAccumFrames != spp)
     {
         renderer->render(frameBuffer);
         frameBuffer->incrementAccumFrames();
         numAccumFrames = frameBuffer->numAccumFrames();
 
-        const auto numAccumFramesF = static_cast<float>(numAccumFrames);
-        const auto localProgess = 1.f / numAccumFramesF;
-        const auto totalProgress = numAccumFramesF / static_cast<float>(spp);
-        progress(msg, localProgess, totalProgress);
+        const auto totalProgress =
+            static_cast<float>(numAccumFrames) / static_cast<float>(spp);
+        progress(msg, totalProgress);
     }
 
     // Handle result
-    if (!_params.filePath.empty())
-        return writeSnapshotToDisk(_params, *frameBuffer);
+    if (!_params.file_path.empty())
+        _image.data = writeSnapshotToDisk(_params, *frameBuffer);
     else
-        return encodeSnapshotToBase64(_params, *frameBuffer);
+        _image.data = encodeSnapshotToBase64(_params, *frameBuffer);
+}
+
+void SnapshotTask::onComplete()
+{
+    reply(_image);
+}
+
+std::string SnapshotEntrypoint::getName() const
+{
+    return "snapshot";
+}
+
+std::string SnapshotEntrypoint::getDescription() const
+{
+    return "Take a snapshot with given parameters";
+}
+
+bool SnapshotEntrypoint::isAsync() const
+{
+    return true;
+}
+
+void SnapshotEntrypoint::onRequest(const Request& request)
+{
+    auto params = request.getParams();
+    auto& engine = getApi().getEngine();
+    auto task = std::make_shared<SnapshotTask>(engine, std::move(params));
+    launchTask(task, request);
 }
 } // namespace brayns
