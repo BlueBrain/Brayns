@@ -76,7 +76,7 @@ To install all dependencies needed by Brayns on Ubuntu 18.04 run:
 ```
 sudo apt install git cmake g++ libtbb-dev libgl1-mesa-dev libxrandr-dev \
 libxinerama-dev libxcursor-dev libboost-all-dev libglew-dev \
-libwebsockets-dev libassimp-dev libhdf5-dev
+libwebsockets-dev libhdf5-dev
 ```
 
 ### Prerequisites
@@ -134,12 +134,6 @@ Clone OSPRay in the same folder level as ISPC compiler
 
 A number of dependencies are optional, and are related to some specific Brayns
 features:
-
-
-#### Enable/Disable [assimp](https://github.com/assimp/assimp) supported mesh file loader (.obj, .ply, etc.)
-```
-cmake .. -DBRAYNS_ASSIMP_ENABLED=ON:OFF
-```
 
 #### Enable/Disable [Brion](https://github.com/BlueBrain/Brion) supported morphology file loader (.h5, .swc, BlueConfig, CircuitConfig)
 ```
