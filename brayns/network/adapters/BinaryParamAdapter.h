@@ -23,7 +23,7 @@
 
 #include <brayns/json/JsonAdapterMacro.h>
 
-#include <brayns/tasks/AddModelFromBlobTask.h>
+#include <brayns/engine/Model.h>
 
 #include "BoxAdapter.h"
 #include "TransformationAdapter.h"

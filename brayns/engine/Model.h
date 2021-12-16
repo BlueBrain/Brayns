@@ -130,6 +130,17 @@ protected:
 };
 
 /**
+ * @brief The BinaryParam struct extends the ModelParams to allow adding models
+ * from blobs of memory
+ */
+struct BinaryParam : ModelParams
+{
+    size_t size{0};   //!< size in bytes of file
+    std::string type; //!< file extension or type (MESH, POINTS, CIRCUIT)
+    std::string chunksID;
+};
+
+/**
  * @brief The ModelDescriptor struct defines the metadata attached to a model.
  * Model descriptor are exposed via the HTTP/WS interface.
  * - Enabling a model means that the model is part of scene. If disabled, the

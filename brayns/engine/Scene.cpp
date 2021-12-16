@@ -499,9 +499,10 @@ void Scene::_updateAnimationParameters()
     if (!handlers.empty())
     {
         ap.setDt(smallestDt);
-        ap.setStartAndEndFrame(
+        ap.setStartFrame(
             static_cast<uint32_t>(std::round(
-                std::nextafter(earlierStart, INFINITY) / smallestDt)),
+                std::nextafter(earlierStart, INFINITY) / smallestDt)));
+        ap.setEndFrame(
             static_cast<uint32_t>(
                 std::round(std::nextafter(latestEnd, INFINITY) / smallestDt)));
         ap.markModified();

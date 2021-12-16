@@ -44,15 +44,22 @@ public:
     void reset();
 
     /**
-     * @brief setStartAndEndFrame sets the first and last absolute frame
-     * numbers of the loaded simulations. These frame numbers are computed
+     * @brief setStartFrame sets the first absolute frame
+     * numbers of the loaded simulations. It is computed
      * from the loaded simulations, using the simulation with the earliest
-     * starting time and the simulation with the latest end time
+     * start time.
      * @param startFrame uint32_t first absolute frame
-     * @param endFrame uint32_t last absolute frame
      */
-    void setStartAndEndFrame(const uint32_t startFrame,
-                             const uint32_t endFrame) noexcept;
+    void setStartFrame(const uint32_t startFrame) noexcept;
+
+    /**
+     * @brief setEndFrame sets the last absolute frame
+     * numbers of the loaded simulations. It is computed
+     * from the loaded simulations, using the simulation with the latest
+     * end time.
+     * @param startFrame uint32_t first absolute frame
+     */
+    void setEndFrame(const uint32_t endFrame) noexcept;
 
     /**
      * @brief getStartFrame returns the first absolute frame number
