@@ -50,14 +50,14 @@ public:
         const auto& loader =
             _loaderRegistry->getSuitableLoader(path, "", loaderName);
 
-        auto models =
+        _descriptors =
             loader.loadFromFile(path,
                                 {[this](const auto& operation, auto amount) {
                                     progress(operation, amount);
                                 }},
                                 _params.getLoadParameters(), scene);
 
-        scene.addModels(models, _params);
+        scene.addModels(_descriptors, _params);
     }
 
     virtual void onStart() override
