@@ -64,6 +64,11 @@ struct FunctorInfo<R (O::*)(A...)> : FunctorTrait<R, O, A...>
 {
 };
 
+template <typename R, typename O, typename... A>
+struct FunctorInfo<R (O::*)(A...) noexcept> : FunctorTrait<R, O, A...>
+{
+};
+
 template <typename T, size_t I>
 using GetArgType = typename FunctorInfo<T>::template ArgType<I>;
 
