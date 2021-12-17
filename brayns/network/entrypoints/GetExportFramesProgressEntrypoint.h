@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/FrameExporter.h>
+#include <brayns/network/common/FrameExporter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/GetExportFramesProgressMessage.h>
 
@@ -31,36 +31,15 @@ class GetExportFramesProgressEntrypoint
     : public Entrypoint<EmptyMessage, GetExportFramesProgressMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "get-export-frames-progress";
-    }
+    GetExportFramesProgressEntrypoint(std::shared_ptr<FrameExporter>& expt);
 
-    virtual std::string getDescription() const override
-    {
-        return "Get the progress of the last issued frame export";
-    }
+    std::string getName() const final;
 
-    virtual void onRequest(const Request& request) override
-    {
-        double progress{};
-        try
-        {
-            auto& engine = getApi().getEngine();
-            auto& frameExporter = engine.getFrameExporter();
-            progress = frameExporter.getExportProgress();
-        }
-        catch (const FrameExportNotRunningException&)
-        {
-            throw EntrypointException(1,
-                                      "There is no frame export in progress");
-        }
-        catch (const std::runtime_error& e)
-        {
-            throw EntrypointException(2, e.what());
-        }
+    std::string getDescription() const final;
 
-        request.reply({progress});
-    }
+    void onRequest(const Request& request) final;
+
+private:
+    std::shared_ptr<FrameExporter> _exporter {nullptr};
 };
 } // namespace brayns

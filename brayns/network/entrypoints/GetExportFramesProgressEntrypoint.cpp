@@ -2,7 +2,6 @@
  * All rights reserved. Do not distribute without permission.
  *
  * Responsible Author: adrien.fleury@epfl.ch
- *                     nadir.romanguerrero@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,30 +19,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/adapters/FrameExportAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "GetExportFramesProgressEntrypoint.h"
 
 namespace brayns
 {
-class ExportFramesToDiskEntrypoint
-    : public Entrypoint<FrameExporter::ExportInfo, EmptyMessage>
+GetExportFramesProgressEntrypoint::GetExportFramesProgressEntrypoint(
+        std::shared_ptr<FrameExporter>& expt)
+ : _exporter(expt)
 {
-public:
-    ExportFramesToDiskEntrypoint(std::shared_ptr<FrameExporter>& exporter);
+}
 
-    std::string getName() const final;
+std::string GetExportFramesProgressEntrypoint::getName() const
+{
+    return "get-export-frames-progress";
+}
 
-    std::string getDescription() const final;
+std::string GetExportFramesProgressEntrypoint::getDescription() const
+{
+    return "Get the progress of the last issued frame export";
+}
 
-    void onRequest(const Request& request) final;
+void GetExportFramesProgressEntrypoint::onRequest(const Request& request)
+{
+    double progress{};
+    try
+    {
+        progress = _exporter->getExportProgress();
+    }
+    catch (const FrameExportNotRunningException&)
+    {
+        throw EntrypointException(1,
+                                  "There is no frame export in progress");
+    }
+    catch (const std::runtime_error& e)
+    {
+        throw EntrypointException(2, e.what());
+    }
 
-    void onPreRender() final;
-
-    void onPostRender() final;
-
-private:
-    std::shared_ptr<FrameExporter> _exporter {nullptr};
-};
-} // namespace brayns
+    request.reply({progress});
+}
+}

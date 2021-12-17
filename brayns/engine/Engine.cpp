@@ -20,13 +20,6 @@
 
 #include "Engine.h"
 
-#include <brayns/engine/Camera.h>
-#include <brayns/engine/FrameBuffer.h>
-#include <brayns/engine/Renderer.h>
-#include <brayns/engine/Scene.h>
-
-#include <brayns/parameters/ParametersManager.h>
-
 namespace brayns
 {
 Engine::Engine(ParametersManager& parametersManager)
@@ -41,9 +34,6 @@ void Engine::commit()
 
 void Engine::preRender()
 {
-    _frameExporter.preRender(getCamera(), getRenderer(), getFrameBuffer(),
-                             getParametersManager());
-
     if (!mustRender())
         return;
 
@@ -73,8 +63,6 @@ void Engine::render()
 
 void Engine::postRender()
 {
-    _frameExporter.postRender(getFrameBuffer());
-
     if (!mustRender())
         return;
 
@@ -85,11 +73,6 @@ void Engine::postRender()
 Renderer& Engine::getRenderer()
 {
     return *_renderer;
-}
-
-FrameExporter& Engine::getFrameExporter() noexcept
-{
-    return _frameExporter;
 }
 
 bool Engine::continueRendering() const

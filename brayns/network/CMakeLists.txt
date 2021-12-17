@@ -4,10 +4,14 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSNETWORK_HEADERS
+  common/FrameExporter.h
   entrypoint/Entrypoint.h
   entrypoint/EntrypointManager.h
   entrypoint/IEntrypoint.h
   entrypoint/EntrypointException.h
+  entrypoints/ExportFramesEntrypoint.h
+  entrypoints/ExportFramesToDiskEntryPoint.h
+  entrypoints/GetExportFramesProgressEntrypoint.h
   entrypoints/SnapshotEntrypoint.h
   interface/ActionInterface.h
   json/MessageFactory.h
@@ -15,7 +19,11 @@ set(BRAYNSNETWORK_HEADERS
 )
 
 set(BRAYNSNETWORK_SOURCES
+  common/FrameExporter.cpp
   entrypoint/EntrypointManager.cpp
+  entrypoints/ExportFramesEntrypoint.cpp
+  entrypoints/ExportFramesToDiskEntryPoint.cpp
+  entrypoints/GetExportFramesProgressEntrypoint.cpp
   entrypoints/SnapshotEntrypoint.cpp
   interface/NetworkInterface.cpp
   interface/ClientInterface.cpp
