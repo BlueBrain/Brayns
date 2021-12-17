@@ -5,7 +5,7 @@
 # See: https://docs.docker.com/engine/userguide/eng-image/multistage-build/#use-multi-stage-builds
 
 # Image where Brayns is built
-FROM debian:buster-slim as builder
+FROM debian as builder
 LABEL maintainer="bbp-svc-viz@groupes.epfl.ch"
 ARG DIST_PATH=/app/dist
 
