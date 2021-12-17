@@ -26,8 +26,8 @@
 
 namespace brayns
 {
-class ExportFramesTask :
-        public EntrypointTask<ExportFramesParams, ExportFramesResult>
+class ExportFramesTask
+    : public EntrypointTask<ExportFramesParams, ExportFramesResult>
 {
 public:
     ExportFramesTask(Engine& engine, ExportFramesParams&& params);
@@ -39,11 +39,11 @@ public:
 private:
     Engine& _engine;
     ExportFramesParams _params;
-    ExportFramesResult _result {0, ""};
+    ExportFramesResult _result{0, ""};
 };
 
-class ExportFramesEntrypoint :
-        public Entrypoint<ExportFramesParams, ExportFramesResult>
+class ExportFramesEntrypoint
+    : public Entrypoint<ExportFramesParams, ExportFramesResult>
 {
 public:
     std::string getName() const final;

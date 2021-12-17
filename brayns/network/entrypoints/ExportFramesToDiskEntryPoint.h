@@ -44,6 +44,6 @@ public:
     void onPostRender() final;
 
 private:
-    std::shared_ptr<FrameExporter> _exporter {nullptr};
+    std::shared_ptr<FrameExporter> _exporter{nullptr};
 };
 } // namespace brayns

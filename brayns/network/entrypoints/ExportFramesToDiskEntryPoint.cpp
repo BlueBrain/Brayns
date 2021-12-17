@@ -25,7 +25,7 @@
 namespace brayns
 {
 ExportFramesToDiskEntrypoint::ExportFramesToDiskEntrypoint(
-        std::shared_ptr<FrameExporter>& exporter)
+    std::shared_ptr<FrameExporter>& exporter)
     : _exporter(exporter)
 {
 }
@@ -75,4 +75,4 @@ void ExportFramesToDiskEntrypoint::onPostRender()
     auto& frameBuffer = getApi().getEngine().getFrameBuffer();
     _exporter->postRender(frameBuffer);
 }
-}
+} // namespace brayns

@@ -62,7 +62,7 @@ void initializeParameters(Engine& engine, ExportFramesParams& params)
     if (rendererName.empty())
         rendererName = sysRenderer.getCurrentType();
 
-    if(renderSpecificParams.empty())
+    if (renderSpecificParams.empty())
         renderSpecificParams = sysRenderer.getPropertyMap(rendererName);
 
     if (!volumeParams)
@@ -70,8 +70,7 @@ void initializeParameters(Engine& engine, ExportFramesParams& params)
 }
 
 std::string writeFrameToDisk(const ExportFramesParams& params,
-                             const uint32_t frameName,
-                             FrameBuffer& fb)
+                             const uint32_t frameName, FrameBuffer& fb)
 {
     const auto& path = params.path;
     const auto& format = params.format;
@@ -127,8 +126,8 @@ void ExportFramesTask::run()
     auto camera = _engine.createCamera();
     const auto& systemCamera = _engine.getCamera();
     camera->clonePropertiesFrom(systemCamera);
-    const auto aspectRatio = static_cast<double>(imageSize.x) /
-            static_cast<double>(imageSize.y);
+    const auto aspectRatio =
+        static_cast<double>(imageSize.x) / static_cast<double>(imageSize.y);
     camera->setBufferTarget("default");
     camera->markModified(false);
     camera->commit();
@@ -145,9 +144,8 @@ void ExportFramesTask::run()
     renderer->setScene(scene);
 
     // Create the framebuffer
-    auto frameBuffer = _engine.createFrameBuffer("default",
-                                                 imageSize,
-                                                 PixelFormat::RGBA_I8);
+    auto frameBuffer =
+        _engine.createFrameBuffer("default", imageSize, PixelFormat::RGBA_I8);
     frameBuffer->setAccumulation(false);
     frameBuffer->markModified();
 
@@ -156,7 +154,7 @@ void ExportFramesTask::run()
 
     logExportInfo(_params);
 
-    for(size_t i = 0; i < keyFrames.size(); ++i)
+    for (size_t i = 0; i < keyFrames.size(); ++i)
     {
         const auto& keyFrame = keyFrames[i];
 
@@ -175,7 +173,7 @@ void ExportFramesTask::run()
         frameBuffer->clear();
         renderer->render(frameBuffer);
 
-        auto name = nameAfterStep? keyFrame.frame_index : i;
+        auto name = nameAfterStep ? keyFrame.frame_index : i;
         char frame[7];
         sprintf(frame, "%05d", static_cast<int32_t>(name));
         try

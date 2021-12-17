@@ -83,7 +83,7 @@ public:
      * @param plugin Plugin registering the entrypoint.
      */
     static void load(NetworkManager& plugin)
-    {   
+    {
         plugin.add<GetAnimationParametersEntrypoint>();
         plugin.add<SetAnimationParametersEntrypoint>();
         plugin.add<GetCameraEntrypoint>();
