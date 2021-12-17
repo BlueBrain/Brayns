@@ -20,10 +20,12 @@
 
 #pragma once
 
+#include <brayns/common/adapters/PropertyMapAdapter.h>
+
 #include <brayns/json/JsonAdapterMacro.h>
 
-#include <brayns/engine/FrameExporter.h>
 #include <brayns/network/adapters/CameraAdapter.h>
+#include <brayns/network/common/FrameExporter.h>
 
 namespace brayns
 {

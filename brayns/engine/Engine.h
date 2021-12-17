@@ -26,8 +26,10 @@
 
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/FrameBuffer.h>
-#include <brayns/engine/FrameExporter.h>
+#include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
+
+#include <brayns/parameters/ParametersManager.h>
 
 #include <functional>
 
@@ -95,12 +97,6 @@ public:
     Camera& getCamera() { return *_camera; }
     /** Gets the renderer */
     Renderer& getRenderer();
-
-    /**
-     * @brief returns the frame exporter object
-     * @return FrameExporter
-     */
-    FrameExporter& getFrameExporter() noexcept;
 
     /**
      * Callback when a new frame shall be triggered. Currently called by event
@@ -178,12 +174,6 @@ protected:
     RendererPtr _renderer;
     std::vector<FrameBufferPtr> _frameBuffers;
     Statistics _statistics;
-
-    // TODO after engine refactor: FrameExporter can have its own
-    // renderer, camera and framebuffer. We can pass it the scene
-    // to render it. We can have a list of them rendering at the
-    // same time
-    FrameExporter _frameExporter;
 
     bool _keepRunning{true};
 };

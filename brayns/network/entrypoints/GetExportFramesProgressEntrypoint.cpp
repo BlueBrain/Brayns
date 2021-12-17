@@ -19,27 +19,42 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/common/FrameExporter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/GetExportFramesProgressMessage.h>
+#include "GetExportFramesProgressEntrypoint.h"
 
 namespace brayns
 {
-class GetExportFramesProgressEntrypoint
-    : public Entrypoint<EmptyMessage, GetExportFramesProgressMessage>
+GetExportFramesProgressEntrypoint::GetExportFramesProgressEntrypoint(
+    std::shared_ptr<FrameExporter>& expt)
+    : _exporter(expt)
 {
-public:
-    GetExportFramesProgressEntrypoint(std::shared_ptr<FrameExporter>& expt);
+}
 
-    std::string getName() const final;
+std::string GetExportFramesProgressEntrypoint::getName() const
+{
+    return "get-export-frames-progress";
+}
 
-    std::string getDescription() const final;
+std::string GetExportFramesProgressEntrypoint::getDescription() const
+{
+    return "Get the progress of the last issued frame export";
+}
 
-    void onRequest(const Request& request) final;
+void GetExportFramesProgressEntrypoint::onRequest(const Request& request)
+{
+    double progress{};
+    try
+    {
+        progress = _exporter->getExportProgress();
+    }
+    catch (const FrameExportNotRunningException&)
+    {
+        throw EntrypointException(1, "There is no frame export in progress");
+    }
+    catch (const std::runtime_error& e)
+    {
+        throw EntrypointException(2, e.what());
+    }
 
-private:
-    std::shared_ptr<FrameExporter> _exporter{nullptr};
-};
+    request.reply({progress});
+}
 } // namespace brayns

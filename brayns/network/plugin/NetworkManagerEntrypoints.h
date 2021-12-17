@@ -32,6 +32,7 @@
 #include <brayns/network/entrypoints/ChunkEntrypoint.h>
 #include <brayns/network/entrypoints/ClearLightsEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
+#include <brayns/network/entrypoints/ExportFramesEntrypoint.h>
 #include <brayns/network/entrypoints/ExportFramesToDiskEntryPoint.h>
 #include <brayns/network/entrypoints/GetClipPlanesEntrypoint.h>
 #include <brayns/network/entrypoints/GetExportFramesProgressEntrypoint.h>
@@ -139,8 +140,11 @@ public:
         plugin.add<ClearLightsEntrypoint>();
         plugin.add<CancelEntrypoint>();
         plugin.add<RegistryEntrypoint>();
-        plugin.add<ExportFramesToDiskEntrypoint>();
-        plugin.add<GetExportFramesProgressEntrypoint>();
+        plugin.add<ExportFramesEntrypoint>();
+
+        auto frameExporter = std::make_shared<FrameExporter>();
+        plugin.add<ExportFramesToDiskEntrypoint>(frameExporter);
+        plugin.add<GetExportFramesProgressEntrypoint>(frameExporter);
     }
 };
 } // namespace brayns

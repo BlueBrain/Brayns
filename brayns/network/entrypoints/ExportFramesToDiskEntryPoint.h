@@ -22,8 +22,7 @@
 
 #pragma once
 
-#include <brayns/engine/FrameExporter.h>
-#include <brayns/network/adapters/FrameExportdapter.h>
+#include <brayns/network/adapters/FrameExportAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
@@ -32,35 +31,19 @@ class ExportFramesToDiskEntrypoint
     : public Entrypoint<FrameExporter::ExportInfo, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "export-frames-to-disk";
-    }
+    ExportFramesToDiskEntrypoint(std::shared_ptr<FrameExporter>& exporter);
 
-    virtual std::string getDescription() const override
-    {
-        return "Export a set of frames from a simulation as image files";
-    }
+    std::string getName() const final;
 
-    virtual void onRequest(const Request& request) override
-    {
-        auto params = request.getParams();
-        auto& engine = getApi().getEngine();
-        auto& exporter = engine.getFrameExporter();
-        try
-        {
-            exporter.startNewExport(std::move(params));
-        }
-        catch (const FrameExportParameterException& fpe)
-        {
-            throw EntrypointException(1, fpe.what());
-        }
-        catch (const FrameExportInProgressException&)
-        {
-            throw EntrypointException(2, "Frame export already in progress");
-        }
-        engine.triggerRender();
-        request.reply(EmptyMessage());
-    }
+    std::string getDescription() const final;
+
+    void onRequest(const Request& request) final;
+
+    void onPreRender() final;
+
+    void onPostRender() final;
+
+private:
+    std::shared_ptr<FrameExporter> _exporter{nullptr};
 };
 } // namespace brayns
