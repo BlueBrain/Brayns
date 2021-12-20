@@ -11,7 +11,7 @@ spack_setup:
    bb5_account: proj3
    SPACK_PACKAGE_NAME: brayns
    SPACK_PACKAGE_COMPILER: gcc
-   SPACK_PACKAGE_SPEC: ^ospray@1.8.5%intel +brion
+   SPACK_PACKAGE_SPEC: +brion ^ospray@1.8.5%intel
    DATADIR: /tmp 
 
 
@@ -27,7 +27,7 @@ brayns-spack-build:
    SPACK_PACKAGE: brayns
    SPACK_PACKAGE_COMPILER: gcc
    SPACK_PACKAGE_REF: ''
-   SPACK_PACKAGE_SPEC: ^ospray@1.8.5%intel +brion
+   SPACK_PACKAGE_SPEC: +brion ^ospray@1.8.5%intel
    DATADIR: /tmp 
   
 
