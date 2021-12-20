@@ -19,7 +19,8 @@ ubuntu-clangformat-check:
     - apt update && apt install -y git clang-format-12
     - CLANG_FORMAT_EXTENSIONS="\.[cmh]$|\.[chi]pp$|\.frag$|\.vert$|\.glsl$|\.ispc$|\.ih$"
     - if [ -f .clang-format ]; then
-    - if [ git diff --name-only --diff-filter=ACMR origin/master | grep -E "$CLANG_FORMAT_EXTENSIONS" | xargs -n1 clang-format-12 -style=file -fallback-style=none -output-replacements-xml | grep "<replacement " >/dev/null ]; then
+    - if git diff --name-only --diff-filter=ACMR origin/master | grep -E "$CLANG_FORMAT_EXTENSIONS" | xargs -n1 clang-format-12 -style=file -fallback-style=none -output-replacements-xml | grep "<replacement " >/dev/null
+    - then
     - echo "clang-format check failed - commit does not match coding style"
     - git diff --name-only --diff-filter=ACMR origin/master | grep -E "$CLANG_FORMAT_EXTENSIONS" | xargs -n1 clang-format-12 -i -style=file -fallback-style=none
     - git diff
@@ -82,7 +83,7 @@ ubuntu-cpp-build:
     - tar -xzf boost_1_70_0.tar.gz
     - cd ./boost_1_70_0
     - ./bootstrap.sh
-    - ./b2 install -j 10
+    - ./b2 install -j 4
     
     - cd $CI_PROJECT_DIR
 
