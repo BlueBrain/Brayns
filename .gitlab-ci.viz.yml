@@ -3,7 +3,6 @@ stages:
   
 include:
   - project: viz/ci/gitlabpipelines
-    ref: disable_noproxy_limit_compile_jobs
     file: index.yml
 
 default:
