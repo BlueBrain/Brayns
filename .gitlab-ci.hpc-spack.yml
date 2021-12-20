@@ -19,11 +19,11 @@ brayns-spack-build:
   extends: .spack_build
   stage: test
   variables:
+   SLURM_CPUS_PER_TASK: 72
    SALLOC_ACCOUNT: proj3
    SBATCH_ACCOUNT: proj3
    SLURM_ACCOUNT: proj3
    bb5_account: proj3
-   SPACK_PACKAGE_NAME: brayns
    SPACK_PACKAGE: brayns
    SPACK_PACKAGE_COMPILER: gcc
    SPACK_PACKAGE_REF: ''
