@@ -2,7 +2,7 @@ include:
   - project: hpc/gitlab-pipelines
     file: spack-build-components.gitlab-ci.yml
 
-spack-setup:
+spack_setup:
   extends: .spack_setup_ccache
   variables:
     SALLOC_ACCOUNT: proj3
