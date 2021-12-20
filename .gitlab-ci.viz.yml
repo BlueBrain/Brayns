@@ -14,6 +14,8 @@ ubuntu-clangformat-check:
     name: ubuntu:20.04
     entrypoint: [""]
   script:
+    - pwd
+    - ls -l
     - apt update && apt install -y git clang-format-12
     - CLANG_FORMAT_EXTENSIONS="\.[cmh]$|\.[chi]pp$|\.frag$|\.vert$|\.glsl$|\.ispc$|\.ih$"
     - if [ -f .clang-format ]; then
@@ -34,6 +36,7 @@ ubuntu-cpp-build:
   extends: .cmake-ubuntu
   stage: test
   before_script:
+    - env
     # From the Dockerfile
     - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y $APT_BASE_PACKAGES $APT_PACKAGES
    
