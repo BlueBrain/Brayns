@@ -87,6 +87,7 @@ docker-build:
     - if: $CI_COMMIT_BRANCH == "BRAYNS_306_Migrate_CI_to_Gitlab"
   
 spack-build:
+  tags: [bb5_map]
   extends: .spack_setup_ccache
   stage: test
   variables:
