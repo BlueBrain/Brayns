@@ -81,11 +81,13 @@ ubuntu-cpp-build:
     - ./bootstrap.sh
     - ./b2 install -j 4
     
+    - export BRAYNS_DEPENDENCIES_PATH=$DIST_PATH
+    
     - cd $CI_PROJECT_DIR
 
   variables:
     APT_PACKAGES: git libassimp-dev libhdf5-serial-dev libtbb-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev
-    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=$DIST_PATH -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_CIRCUITINFO_ENABLED=ON -DBRAYNS_DTI_ENABLED=ON -DBRAYNS_VIEWER_ENABLED=ON -DBRAYNS_BENCHMARK_ENABLED=ON
+    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=$BRAYNS_DEPENDENCIES_PATH -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_CIRCUITINFO_ENABLED=ON -DBRAYNS_DTI_ENABLED=ON -DBRAYNS_VIEWER_ENABLED=ON -DBRAYNS_BENCHMARK_ENABLED=ON
     KUBERNETES_CPU_LIMIT: 4       
     KUBERNETES_CPU_REQUEST: 4                             
     KUBERNETES_MEMORY_LIMIT: 8Gi
@@ -101,6 +103,4 @@ docker-build:
   stage: test
   
   rules:
-  #  - if: $CI_MERGE_REQUEST_IID
-    # run on default branch in order to upload coverage report
-    - if: $CI_COMMIT_BRANCH == "BRAYNS_306_Migrate_CI_to_Gitlab"
+    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
