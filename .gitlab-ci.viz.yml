@@ -76,7 +76,7 @@ ubuntu-cpp-build:
 
   variables:
     APT_PACKAGES: git libassimp-dev libhdf5-serial-dev libtbb-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev libboost-all-dev libgl1-mesa-dev libglew-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
-    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=/app/dist -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_CIRCUITINFO_ENABLED=ON -DBRAYNS_DTI_ENABLED=ON -DBRAYNS_VIEWER_ENABLED=ON -DBRAYNS_BENCHMARK_ENABLED=ON
+    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=/app/dist -DISPC_EXECUTABLE=/app/ispc-v1.10.0-linux/bin/ispc -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_CIRCUITINFO_ENABLED=ON -DBRAYNS_DTI_ENABLED=ON -DBRAYNS_VIEWER_ENABLED=ON -DBRAYNS_BENCHMARK_ENABLED=ON
     KUBERNETES_CPU_LIMIT: 4       
     KUBERNETES_CPU_REQUEST: 4                             
     KUBERNETES_MEMORY_LIMIT: 8Gi
