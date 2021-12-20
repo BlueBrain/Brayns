@@ -72,22 +72,11 @@ ubuntu-cpp-build:
     - CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja -DOSPRAY_ENABLE_TUTORIALS=OFF -DOSPRAY_ENABLE_APPS=OFF -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
     - ninja -j4 install
     
-    - BOOST_SRC=/app/boost
-    - mkdir ${BOOST_SRC}
-    - cd ${BOOST_SRC}
-    - wget https://boostorg.jfrog.io/artifactory/main/release/1.70.0/source/boost_1_70_0.tar.gz
-    - tar -xzf boost_1_70_0.tar.gz
-    - cd ./boost_1_70_0
-    - ./bootstrap.sh
-    - ./b2 install -j 4
-    
-    - export BRAYNS_DEPENDENCIES_PATH=$DIST_PATH
-    
     - cd $CI_PROJECT_DIR
 
   variables:
-    APT_PACKAGES: git libassimp-dev libhdf5-serial-dev libtbb-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev
-    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=$BRAYNS_DEPENDENCIES_PATH -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_CIRCUITINFO_ENABLED=ON -DBRAYNS_DTI_ENABLED=ON -DBRAYNS_VIEWER_ENABLED=ON -DBRAYNS_BENCHMARK_ENABLED=ON
+    APT_PACKAGES: git libassimp-dev libhdf5-serial-dev libtbb-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev libboost-all-dev
+    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=/app/dist -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_CIRCUITINFO_ENABLED=ON -DBRAYNS_DTI_ENABLED=ON -DBRAYNS_VIEWER_ENABLED=ON -DBRAYNS_BENCHMARK_ENABLED=ON
     KUBERNETES_CPU_LIMIT: 4       
     KUBERNETES_CPU_REQUEST: 4                             
     KUBERNETES_MEMORY_LIMIT: 8Gi

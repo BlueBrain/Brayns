@@ -5,11 +5,8 @@ viz_stack:
       - local: .gitlab-ci.viz.yml
     strategy: depend
     
-  # TEST: TO BE REMOVED BEFORE MERGE!!!
   rules:
-  #  - if: $CI_MERGE_REQUEST_IID
-    # run on default branch in order to upload coverage report
-    - if: $CI_COMMIT_BRANCH == "BRAYNS_306_Migrate_CI_to_Gitlab"
+    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 hpc_stack:
   stage: test
@@ -18,9 +15,6 @@ hpc_stack:
       - local: .gitlab-ci.hpc-spack.yml
     strategy: depend
     
-  # TEST: TO BE REMOVED BEFORE MERGE!!!
   rules:
-  #  - if: $CI_MERGE_REQUEST_IID
-    # run on default branch in order to upload coverage report
-    - if: $CI_COMMIT_BRANCH == "BRAYNS_306_Migrate_CI_to_Gitlab"
+    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
