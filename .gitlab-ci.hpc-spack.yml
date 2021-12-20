@@ -24,7 +24,9 @@ brayns-spack-build:
    SLURM_ACCOUNT: proj3
    bb5_account: proj3
    SPACK_PACKAGE_NAME: brayns
+   SPACK_PACKAGE: brayns
    SPACK_PACKAGE_COMPILER: gcc
+   SPACK_PACKAGE_REF: ''
    SPACK_PACKAGE_SPEC: ^ospray@1.8.5%intel +brion
    DATADIR: /tmp 
   
