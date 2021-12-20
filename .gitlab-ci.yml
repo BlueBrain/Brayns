@@ -86,6 +86,8 @@ docker-build:
     # run on default branch in order to upload coverage report
     - if: $CI_COMMIT_BRANCH == "BRAYNS_306_Migrate_CI_to_Gitlab"
   
+spack-setup:
+  tags: [bb5_map]
 spack-build:
   tags: [bb5_map]
   extends: .spack_setup_ccache
