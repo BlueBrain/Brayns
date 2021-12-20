@@ -3,7 +3,9 @@ include:
     file: spack-build-components.gitlab-ci.yml
 
 spack-build:
-  extends: .spack_setup_ccache
+  extends: 
+    - .spack_setup_ccache
+    - .spack_build
   stage: test
   variables:
     SALLOC_ACCOUNT: proj3
