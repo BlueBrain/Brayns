@@ -2,22 +2,30 @@ include:
   - project: hpc/gitlab-pipelines
     file: spack-build-components.gitlab-ci.yml
 
-variables:
-  SALLOC_ACCOUNT: proj3
-  SBATCH_ACCOUNT: proj3
-  SLURM_ACCOUNT: proj3
-  bb5_account: proj3
-  SPACK_PACKAGE_NAME: brayns
-  SPACK_PACKAGE_COMPILER: gcc
-  SPACK_PACKAGE_SPEC: ^ospray@1.8.5%intel +brion
-  DATADIR: /tmp 
-
 spack_setup:
   extends: .spack_setup_ccache
+  variables:
+   SALLOC_ACCOUNT: proj3
+   SBATCH_ACCOUNT: proj3
+   SLURM_ACCOUNT: proj3
+   bb5_account: proj3
+   SPACK_PACKAGE_NAME: brayns
+   SPACK_PACKAGE_COMPILER: gcc
+   SPACK_PACKAGE_SPEC: ^ospray@1.8.5%intel +brion
+   DATADIR: /tmp 
 
 
 brayns-spack-build:
   extends: .spack_build
   stage: test
+  variables:
+   SALLOC_ACCOUNT: proj3
+   SBATCH_ACCOUNT: proj3
+   SLURM_ACCOUNT: proj3
+   bb5_account: proj3
+   SPACK_PACKAGE_NAME: brayns
+   SPACK_PACKAGE_COMPILER: gcc
+   SPACK_PACKAGE_SPEC: ^ospray@1.8.5%intel +brion
+   DATADIR: /tmp 
   
 
