@@ -19,7 +19,7 @@ ubuntu-clangformat-check:
     - apt update && apt install -y git clang-format-12
     - CLANG_FORMAT_EXTENSIONS="\.[cmh]$|\.[chi]pp$|\.frag$|\.vert$|\.glsl$|\.ispc$|\.ih$"
     - if [ -f .clang-format ]; then
-    - git pull
+    - git pull origin master
     - git checkout origin/master
     - if git diff --name-only --diff-filter=ACMR origin/master | grep -E "$CLANG_FORMAT_EXTENSIONS" | xargs -n1 clang-format-12 -style=file -fallback-style=none -output-replacements-xml | grep "<replacement " >/dev/null
     - then
@@ -97,3 +97,8 @@ ubuntu-cpp-build:
 docker-build:
   extends: .build-image-using-kaniko
   stage: test
+  
+  rules:
+  #  - if: $CI_MERGE_REQUEST_IID
+    # run on default branch in order to upload coverage report
+    - if: $CI_COMMIT_BRANCH == "BRAYNS_306_Migrate_CI_to_Gitlab"
