@@ -2,9 +2,7 @@ include:
   - project: hpc/gitlab-pipelines
     file: spack-build-components.gitlab-ci.yml
 
-spack_setup:
-  extends: .spack_setup_ccache
-  variables:
+variables:
     SALLOC_ACCOUNT: proj3
     SBATCH_ACCOUNT: proj3
     SLURM_ACCOUNT: proj3
@@ -13,6 +11,9 @@ spack_setup:
     SPACK_PACKAGE_COMPILER: gcc
     SPACK_PACKAGE_SPEC: ^ospray@1.8.5%intel +brion
     DATADIR: /tmp 
+
+spack_setup:
+  extends: .spack_setup_ccache
     
 
 brayns-spack-build:
