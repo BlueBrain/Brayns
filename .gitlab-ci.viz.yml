@@ -35,6 +35,10 @@ ubuntu-cpp-build:
   stage: test
   before_script:
     - env
+    - echo "MEMORY"
+    - grep MemTotal /proc/meminfo | awk '{print $2}'
+    - echo "DISK"
+    - df -Pk . | sed 1d | grep -v used | awk '{ print $4 "\t" }'
     # From the Dockerfile
     - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y $APT_BASE_PACKAGES $APT_PACKAGES
    
