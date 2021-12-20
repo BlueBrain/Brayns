@@ -21,9 +21,7 @@ ubuntu-clangformat-check:
     - if [ -f .clang-format ]; then
     - if [ git diff --name-only --diff-filter=ACMR origin/master | grep -E "$CLANG_FORMAT_EXTENSIONS" | xargs -n1 clang-format-12 -style=file -fallback-style=none -output-replacements-xml | grep "<replacement " >/dev/null ]; then
     - echo "clang-format check failed - commit does not match coding style"
-    - git diff --name-only --diff-filter=ACMR origin/master |\
-    - grep -E "$CLANG_FORMAT_EXTENSIONS" |\
-    - xargs -n1 clang-format -i -style=file -fallback-style=none
+    - git diff --name-only --diff-filter=ACMR origin/master | grep -E "$CLANG_FORMAT_EXTENSIONS" | xargs -n1 clang-format-12 -i -style=file -fallback-style=none
     - git diff
     - exit 1
     - else
@@ -36,6 +34,7 @@ ubuntu-cpp-build:
   extends: .cmake-ubuntu
   stage: test
   before_script:
+    - export http_proxy=$HTTP_PROXY
     - env
     # From the Dockerfile
     - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y $APT_BASE_PACKAGES $APT_PACKAGES
