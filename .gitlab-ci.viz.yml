@@ -73,7 +73,7 @@ ubuntu-cpp-build:
     - git checkout ${OSPRAY_TAG}
     - mkdir -p build && cd build
     - CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja -DOSPRAY_ENABLE_TUTORIALS=OFF -DOSPRAY_ENABLE_APPS=OFF -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
-    - ninja install
+    - ninja -j4 install
     
     - BOOST_SRC=/app/boost
     - mkdir ${BOOST_SRC}
