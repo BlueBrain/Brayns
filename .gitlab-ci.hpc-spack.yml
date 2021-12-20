@@ -2,13 +2,7 @@ include:
   - project: hpc/gitlab-pipelines
     file: spack-build-components.gitlab-ci.yml
 
-default:
-  tags: []
-
-spack-setup:
-  tags: [bb5_map]
 spack-build:
-  tags: [bb5_map]
   extends: .spack_setup_ccache
   stage: test
   variables:
