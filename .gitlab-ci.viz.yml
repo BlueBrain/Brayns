@@ -75,7 +75,7 @@ ubuntu-cpp-build:
     - cd $CI_PROJECT_DIR
 
   variables:
-    APT_PACKAGES: git libassimp-dev libhdf5-serial-dev libtbb-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev libboost-all-dev libgl1-mesa-dev libglew-dev
+    APT_PACKAGES: git libassimp-dev libhdf5-serial-dev libtbb-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev libboost-all-dev libgl1-mesa-dev libglew-dev libxrandr-dev
     CMAKE_ARGS: -DCMAKE_PREFIX_PATH=/app/dist -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_CIRCUITINFO_ENABLED=ON -DBRAYNS_DTI_ENABLED=ON -DBRAYNS_VIEWER_ENABLED=ON -DBRAYNS_BENCHMARK_ENABLED=ON
     KUBERNETES_CPU_LIMIT: 4       
     KUBERNETES_CPU_REQUEST: 4                             
