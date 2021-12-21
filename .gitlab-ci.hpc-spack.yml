@@ -34,6 +34,7 @@ brayns-spack-build:
 brayns-spack-test:
   extends: .ctest
   stage: test
+  needs: ["brayns-spack-build"]
   variables:
    SALLOC_ACCOUNT: proj3
    SBATCH_ACCOUNT: proj3
