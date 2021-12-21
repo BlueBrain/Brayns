@@ -88,7 +88,7 @@ ubuntu-cpp-build:
 
 ubuntu_cpp_tests:
   stage: test
-  needs: ["ubuntu_cpp_build"]
+  needs: ["ubuntu-cpp-build"]
   script:
     - apt install python3 python3-venv
   
