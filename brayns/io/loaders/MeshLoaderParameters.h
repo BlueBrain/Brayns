@@ -39,6 +39,6 @@ BRAYNS_JSON_ADAPTER_ENUM(MeshLoaderGeometryQuality,
 
 BRAYNS_JSON_OBJECT_BEGIN(MeshLoaderParameters)
 BRAYNS_JSON_OBJECT_ENTRY(MeshLoaderGeometryQuality, geometry_quality,
-                         "Mesh geometry quality")
+                         "Mesh geometry quality", Default("high"))
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

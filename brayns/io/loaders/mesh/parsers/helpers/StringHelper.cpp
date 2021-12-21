@@ -56,13 +56,19 @@ std::string_view StringHelper::trimLeft(std::string_view str)
 
 size_t StringHelper::count(std::string_view str, std::string_view item)
 {
+    if (item.empty())
+    {
+        return 0;
+    }
     size_t result = 0;
     for (size_t i = 0; i < str.size(); ++i)
     {
-        auto extracted = str.substr(i, item.size());
+        auto size = item.size();
+        auto extracted = str.substr(i, size);
         if (extracted == item)
         {
             ++result;
+            i += size - 1;
         }
     }
     return result;
@@ -78,7 +84,8 @@ std::string_view StringHelper::extract(std::string_view &str,
         ++i;
     }
     auto extracted = str.substr(0, i);
-    str = str.substr(i + size);
+    auto newStart = std::min(i + size, str.size());
+    str = str.substr(newStart);
     return extracted;
 }
 
@@ -86,18 +93,19 @@ std::string_view StringHelper::extractToken(std::string_view &str)
 {
     str = trimLeft(str);
     size_t i = 0;
-    while (i < str.size() && isSpace(str[i]))
+    while (i < str.size() && !isSpace(str[i]))
     {
         ++i;
     }
     auto token = str.substr(0, i);
-    str = trimLeft(str.substr(i));
+    str = str.substr(i);
+    str = trimLeft(str);
     return token;
 }
 
 size_t StringHelper::countTokens(std::string_view str)
 {
-    size_t result;
+    size_t result = 0;
     while (!extractToken(str).empty())
     {
         ++result;
