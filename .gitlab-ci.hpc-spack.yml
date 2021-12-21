@@ -29,5 +29,20 @@ brayns-spack-build:
    SPACK_PACKAGE_REF: ''
    SPACK_PACKAGE_SPEC: +brion ^ospray@1.8.5%intel
    DATADIR: /tmp 
+   
+
+brayns-spack-test:
+  extends: .ctest
+  stage: test
+  variables:
+   SALLOC_ACCOUNT: proj3
+   SBATCH_ACCOUNT: proj3
+   SLURM_ACCOUNT: proj3
+   bb5_account: proj3
+   SPACK_PACKAGE: brayns
+   SPACK_PACKAGE_COMPILER: gcc
+   SPACK_PACKAGE_REF: ''
+   SPACK_PACKAGE_SPEC: +brion ^ospray@1.8.5%intel
+   DATADIR: /tmp 
   
 
