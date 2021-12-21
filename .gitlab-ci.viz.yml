@@ -45,7 +45,7 @@ ubuntu-cpp-build:
     KUBERNETES_MEMORY_REQUEST: 8Gi
     NUM_COMPILE_JOBS: 4
   before_script:
-    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y $APT_BASE_PACKAGES $APT_PACKAGES $BRAYNS_VIEWER_PACKAGES
+    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y $APT_BASE_PACKAGES $APT_PACKAGES
    
     - DIST_PATH=/app/dist
   
