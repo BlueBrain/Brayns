@@ -21,16 +21,28 @@
 
 #pragma once
 
-#include <brayns/io/loaders/mesh/MeshParser.h>
+#include <string_view>
 
 namespace brayns
 {
-class ObjMeshParser : public MeshParser
+class StringHelper
 {
 public:
-    virtual std::string getFormat() const override;
+    static bool isSpace(char c);
 
-    virtual std::vector<TriangleMesh> parse(
-        std::istream &stream) const override;
+    static bool isSpace(std::string_view str);
+
+    static bool startsWith(std::string_view str, std::string_view item);
+
+    static std::string_view trimLeft(std::string_view str);
+
+    static size_t count(std::string_view str, std::string_view item);
+
+    static std::string_view extract(std::string_view &str,
+                                    std::string_view separator);
+
+    static std::string_view extractToken(std::string_view &str);
+
+    static size_t countTokens(std::string_view str);
 };
 } // namespace brayns
