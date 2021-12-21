@@ -30,6 +30,28 @@
 
 namespace brayns
 {
+class MeshParserRegistry
+{
+public:
+    std::vector<std::string> getAllFormats() const;
+
+    const MeshParser& getParser(const std::string& format) const;
+
+    const MeshParser* findParser(const std::string& format) const;
+
+    void addParser(std::unique_ptr<MeshParser> parser);
+
+    template <typename T, typename... Args>
+    void add(Args&&... args)
+    {
+        auto parser = std::make_unique<T>(std::forward<Args>(args)...);
+        addParser(std::move(parser));
+    }
+
+private:
+    std::unordered_map<std::string, std::unique_ptr<MeshParser>> _parsers;
+};
+
 class MeshLoader : public Loader<MeshLoaderParameters>
 {
 public:
@@ -47,15 +69,7 @@ public:
         Blob&& blob, const LoaderProgress& callback,
         const MeshLoaderParameters& properties, Scene& scene) const final;
 
-    template <typename T, typename... Args>
-    void add(Args&&... args)
-    {
-        auto parser = std::make_unique<T>(std::forward<Args>(args)...);
-        auto format = parser->getFormat();
-        _parsers.emplace(std::move(format), std::move(parser));
-    }
-
 private:
-    std::unordered_map<std::string, std::unique_ptr<MeshParser>> _parsers;
+    MeshParserRegistry _parsers;
 };
 } // namespace brayns
