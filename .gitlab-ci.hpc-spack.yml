@@ -1,49 +1,35 @@
 include:
   - project: hpc/gitlab-pipelines
     file: spack-build-components.gitlab-ci.yml
+    
 
-spack_setup:
-  extends: .spack_setup_ccache
-  variables:
+variables:
+   bb5_account: proj3
+   DATADIR: /tmp
    SALLOC_ACCOUNT: proj3
    SBATCH_ACCOUNT: proj3
    SLURM_ACCOUNT: proj3
-   bb5_account: proj3
+   SLURM_CPUS_PER_TASK: 72
+   SPACK_PACKAGE: brayns
    SPACK_PACKAGE_NAME: brayns
    SPACK_PACKAGE_COMPILER: gcc
+   SPACK_PACKAGE_REF: ''
    SPACK_PACKAGE_SPEC: +brion ^ospray@1.8.5%intel
-   DATADIR: /tmp 
+    
+
+spack_setup:
+  extends: .spack_setup_ccache
 
 
 brayns-spack-build:
   extends: .spack_build
   stage: test
-  variables:
-   SLURM_CPUS_PER_TASK: 72
-   SALLOC_ACCOUNT: proj3
-   SBATCH_ACCOUNT: proj3
-   SLURM_ACCOUNT: proj3
-   bb5_account: proj3
-   SPACK_PACKAGE: brayns
-   SPACK_PACKAGE_COMPILER: gcc
-   SPACK_PACKAGE_REF: ''
-   SPACK_PACKAGE_SPEC: +brion ^ospray@1.8.5%intel
-   DATADIR: /tmp 
    
 
 brayns-spack-test:
   extends: .ctest
   stage: test
   needs: ["brayns-spack-build"]
-  variables:
-   SALLOC_ACCOUNT: proj3
-   SBATCH_ACCOUNT: proj3
-   SLURM_ACCOUNT: proj3
-   bb5_account: proj3
-   SPACK_PACKAGE: brayns
-   SPACK_PACKAGE_COMPILER: gcc
-   SPACK_PACKAGE_REF: ''
-   SPACK_PACKAGE_SPEC: +brion ^ospray@1.8.5%intel
-   DATADIR: /tmp 
+
   
 
