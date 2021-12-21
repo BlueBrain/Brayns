@@ -141,7 +141,7 @@ private:
     static bool _isEmptyLineOrComment(std::string_view line)
     {
         line = StringHelper::trimLeft(line);
-        return StringHelper::startsWith(line, "#");
+        return line.empty() || line[0] == '#';
     }
 
     static void _extractHeaderAndValue(Context &context, std::string_view line)
@@ -204,6 +204,7 @@ public:
         }
         auto &name = context.value;
         CurrentMesh::next(context, name);
+        return true;
     }
 };
 
@@ -220,6 +221,7 @@ public:
         auto vertex = ValueParser::parseVector3(value);
         auto &mesh = CurrentMesh::get(context);
         mesh.vertices.push_back(vertex);
+        return true;
     }
 };
 
@@ -236,6 +238,7 @@ public:
         auto texture = ValueParser::parseVector2(value);
         auto &mesh = CurrentMesh::get(context);
         mesh.textures.push_back(texture);
+        return true;
     }
 };
 
@@ -252,6 +255,35 @@ public:
         auto normal = ValueParser::parseVector3(value);
         auto &mesh = CurrentMesh::get(context);
         mesh.normals.push_back(normal);
+        return true;
+    }
+};
+
+class FaceValidator
+{
+public:
+    static void validate(const MeshBuffer &mesh)
+    {
+        if (!_checkAttributeCount(mesh))
+        {
+            throw std::runtime_error("Face attribute count mismatch");
+        }
+    }
+
+private:
+    static bool _checkAttributeCount(const MeshBuffer &mesh)
+    {
+        auto vertexCount = mesh.vertexIndices.size();
+        auto textureCount = mesh.textureIndices.size();
+        auto normalCount = mesh.normalIndices.size();
+        return _checkAttributeCount(vertexCount, textureCount) &&
+               _checkAttributeCount(vertexCount, normalCount) &&
+               _checkAttributeCount(textureCount, normalCount);
+    }
+
+    static bool _checkAttributeCount(size_t left, size_t right)
+    {
+        return left == 0 || right == 0 || left == right;
     }
 };
 
@@ -266,23 +298,37 @@ public:
         }
         auto &value = context.value;
         auto &mesh = CurrentMesh::get(context);
-        _extractIndices(value, mesh);
+        _extractVertices(value, mesh);
         return true;
     }
 
 private:
-    static void _extractIndices(std::string_view value, MeshBuffer &mesh)
+    static void _extractVertices(std::string_view value, MeshBuffer &mesh)
     {
-        auto count = StringHelper::count(value, "/");
-        if (count < 1 || count > 3)
+        auto count = StringHelper::countTokens(value);
+        if (count != 3)
         {
-            throw std::runtime_error("Invalid index count " +
-                                     std::to_string(count));
+            throw std::runtime_error("Non-triangular face with " +
+                                     std::to_string(count) + " vertices");
         }
-        _extractIndex(value, mesh.vertexIndices);
-        _extractIndex(value, mesh.textureIndices);
-        _extractIndex(value, mesh.normalIndices);
-        _checkFaces(mesh);
+        _extractIndices(value, mesh);
+        _extractIndices(value, mesh);
+        _extractIndices(value, mesh);
+        FaceValidator::validate(mesh);
+    }
+
+    static void _extractIndices(std::string_view &value, MeshBuffer &mesh)
+    {
+        auto indices = StringHelper::extractToken(value);
+        auto count = StringHelper::count(indices, "/");
+        if (count > 2)
+        {
+            throw std::runtime_error("Invalid index count of " +
+                                     std::to_string(count) + " in a vertex");
+        }
+        _extractIndex(indices, mesh.vertexIndices);
+        _extractIndex(indices, mesh.textureIndices);
+        _extractIndex(indices, mesh.normalIndices);
     }
 
     static void _extractIndex(std::string_view &tokens,
@@ -295,29 +341,6 @@ private:
         }
         auto index = ValueParser::parseIndex(token);
         vertices.push_back(index);
-    }
-
-    static bool _checkFaces(MeshBuffer &mesh)
-    {
-        if (!_checkAttributeCount(mesh))
-        {
-            throw std::runtime_error("Face attribute count mismatch");
-        }
-    }
-
-    static bool _checkAttributeCount(const MeshBuffer &mesh)
-    {
-        auto vertexCount = mesh.vertexIndices.size();
-        auto textureCount = mesh.textureIndices.size();
-        auto normalCount = mesh.normalIndices.size();
-        return _checkAttributeCount(vertexCount, textureCount) &&
-               _checkAttributeCount(vertexCount, normalCount) &&
-               _checkAttributeCount(textureCount, normalCount);
-    }
-
-    static bool _checkAttributeCount(size_t left, size_t right)
-    {
-        return left == 0 || right == 0 || left == right;
     }
 };
 
@@ -343,7 +366,7 @@ public:
         stream << context.lineNumber;
         stream << ": '";
         stream << message;
-        stream << "' line content: '";
+        stream << "'. Line content: '";
         stream << context.line;
         stream << "'";
         return stream.str();
@@ -369,7 +392,7 @@ private:
         {
             return _parseNewLine(stream, context);
         }
-        catch (const std::runtime_error &e)
+        catch (const std::exception &e)
         {
             auto message = ErrorMessage::format(context, e.what());
             throw std::runtime_error(message);

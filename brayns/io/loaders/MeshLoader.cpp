@@ -42,7 +42,7 @@ public:
         std::filesystem::path path(filename);
         auto extension = path.extension();
         auto format = extension.string();
-        format.erase(0);
+        format.erase(0, 1);
         std::ifstream stream(filename);
         if (!stream)
         {
@@ -68,7 +68,12 @@ public:
                                            std::istream& stream)
     {
         auto& parser = parsers.getParser(format);
-        return parser.parse(stream);
+        auto meshes = parser.parse(stream);
+        if (meshes.empty())
+        {
+            throw std::runtime_error("No meshes found");
+        }
+        return meshes;
     }
 };
 
