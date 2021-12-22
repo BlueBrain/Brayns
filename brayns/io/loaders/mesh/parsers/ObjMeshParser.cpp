@@ -26,8 +26,6 @@
 #include <string_view>
 #include <utility>
 
-#include <brayns/common/Log.h>
-
 #include "helpers/StringHelper.h"
 
 namespace
@@ -196,66 +194,54 @@ public:
 class NewObjectParser
 {
 public:
-    static bool parse(Context &context)
+    static bool canParse(Context &context) { return context.header == "o"; }
+
+    static void parse(Context &context)
     {
-        if (context.header != "o")
-        {
-            return false;
-        }
         auto &name = context.value;
         CurrentMesh::next(context, name);
-        return true;
     }
 };
 
 class VertexParser
 {
 public:
-    static bool parse(Context &context)
+    static bool canParse(Context &context) { return context.header == "v"; }
+
+    static void parse(Context &context)
     {
-        if (context.header != "v")
-        {
-            return false;
-        }
         auto &value = context.value;
         auto vertex = ValueParser::parseVector3(value);
         auto &mesh = CurrentMesh::get(context);
         mesh.vertices.push_back(vertex);
-        return true;
     }
 };
 
 class TextureParser
 {
 public:
-    static bool parse(Context &context)
+    static bool canParse(Context &context) { return context.header == "vt"; }
+
+    static void parse(Context &context)
     {
-        if (context.header != "vt")
-        {
-            return false;
-        }
         auto &value = context.value;
         auto texture = ValueParser::parseVector2(value);
         auto &mesh = CurrentMesh::get(context);
         mesh.textures.push_back(texture);
-        return true;
     }
 };
 
 class NormalParser
 {
 public:
-    static bool parse(Context &context)
+    static bool canParse(Context &context) { return context.header == "vn"; }
+
+    static void parse(Context &context)
     {
-        if (context.header != "vn")
-        {
-            return false;
-        }
         auto &value = context.value;
         auto normal = ValueParser::parseVector3(value);
         auto &mesh = CurrentMesh::get(context);
         mesh.normals.push_back(normal);
-        return true;
     }
 };
 
@@ -290,16 +276,13 @@ private:
 class FaceParser
 {
 public:
-    static bool parse(Context &context)
+    static bool canParse(Context &context) { return context.header == "f"; }
+
+    static void parse(Context &context)
     {
-        if (context.header != "f")
-        {
-            return false;
-        }
         auto &value = context.value;
         auto &mesh = CurrentMesh::get(context);
         _extractVertices(value, mesh);
-        return true;
     }
 
 private:
@@ -349,9 +332,23 @@ class MeshExtractor
 public:
     static bool tryExtractMeshData(Context &context)
     {
-        return NewObjectParser::parse(context) ||
-               VertexParser::parse(context) || TextureParser::parse(context) ||
-               NormalParser::parse(context) || FaceParser::parse(context);
+        return _tryParseWith<NewObjectParser>(context) ||
+               _tryParseWith<VertexParser>(context) ||
+               _tryParseWith<TextureParser>(context) ||
+               _tryParseWith<NormalParser>(context) ||
+               _tryParseWith<FaceParser>(context);
+    }
+
+private:
+    template <typename T>
+    static bool _tryParseWith(Context &context)
+    {
+        if (!T::canParse(context))
+        {
+            return false;
+        }
+        T::parse(context);
+        return true;
     }
 };
 
@@ -409,10 +406,7 @@ private:
         {
             return true;
         }
-        if (!MeshExtractor::tryExtractMeshData(context))
-        {
-            Log::debug("Skip line {}: {}.", context.lineNumber, context.line);
-        }
+        MeshExtractor::tryExtractMeshData(context);
         return true;
     }
 };
