@@ -85,9 +85,9 @@ public:
         auto model = scene.createModel();
         model->createMaterial(NO_MATERIAL, "default");
         auto& modelMeshes = model->getTriangleMeshes();
-        for (size_t i = 0; i < meshes.size(); ++i)
+        for (const auto& mesh : meshes)
         {
-            modelMeshes[i] = meshes[i];
+            modelMeshes[NO_MATERIAL] = mesh;
         }
         return model;
     }
