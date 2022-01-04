@@ -21,16 +21,43 @@
 
 #pragma once
 
-#include <brayns/io/loaders/mesh/MeshParser.h>
+#include <cstdint>
 
 namespace brayns
 {
-class ObjMeshParser : public MeshParser
+class EndianHelper
 {
 public:
-    virtual std::string getFormat() const override;
+    static bool isBigEndian()
+    {
+        int32_t test = 1;
+        return *reinterpret_cast<char *>(&test) == 0;
+    }
 
-    virtual std::vector<TriangleMesh> parse(
-        std::string_view data) const override;
+    template <typename T>
+    static T convertLittleEndianToLocalEndian(T value)
+    {
+        return isBigEndian() ? swapBytes(value) : value;
+    }
+
+    template <typename T>
+    static T convertBigEndianToLocalEndian(T value)
+    {
+        return isBigEndian() ? value : swapBytes(value);
+    }
+
+    template <typename T>
+    static T swapBytes(T value)
+    {
+        T copy;
+        auto from = reinterpret_cast<const char *>(&value);
+        auto to = reinterpret_cast<char *>(&copy);
+        auto stride = sizeof(T);
+        for (size_t i = 0; i < stride; ++i)
+        {
+            to[i] = from[stride - i - 1];
+        }
+        return copy;
+    }
 };
 } // namespace brayns
