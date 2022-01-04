@@ -21,8 +21,7 @@
 
 #pragma once
 
-#include <istream>
-#include <string>
+#include <string_view>
 #include <vector>
 
 #include <brayns/common/geometry/TriangleMesh.h>
@@ -35,6 +34,6 @@ public:
     virtual ~MeshParser() = default;
 
     virtual std::string getFormat() const = 0;
-    virtual std::vector<TriangleMesh> parse(std::istream &stream) const = 0;
+    virtual std::vector<TriangleMesh> parse(std::string_view data) const = 0;
 };
 } // namespace brayns

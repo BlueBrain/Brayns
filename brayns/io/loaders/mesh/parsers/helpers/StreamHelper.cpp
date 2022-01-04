@@ -19,18 +19,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "StreamHelper.h"
 
-#include <brayns/io/loaders/mesh/MeshParser.h>
+#include <stdexcept>
 
 namespace brayns
 {
-class ObjMeshParser : public MeshParser
+bool StreamHelper::getLine(std::string_view &data, std::string_view &line)
 {
-public:
-    virtual std::string getFormat() const override;
-
-    virtual std::vector<TriangleMesh> parse(
-        std::string_view data) const override;
-};
+    line = {};
+    if (data.empty())
+    {
+        return false;
+    }
+    for (size_t i = 0; i < data.size(); ++i)
+    {
+        auto c = data[i];
+        if (c == '\n')
+        {
+            line = data.substr(0, i);
+            data = data.substr(i + 1);
+            return true;
+        }
+    }
+    line = data;
+    data = {};
+    return true;
+}
 } // namespace brayns

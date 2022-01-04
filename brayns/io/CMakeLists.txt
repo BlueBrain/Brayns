@@ -10,7 +10,9 @@ set(BRAYNSIO_SOURCES
     loaders/VolumeLoader.cpp
     loaders/XYZBLoader.cpp
     loaders/mesh/parsers/ObjMeshParser.cpp
+    loaders/mesh/parsers/PlyMeshParser.cpp
     loaders/mesh/parsers/helpers/StringHelper.cpp
+    loaders/mesh/parsers/helpers/StreamHelper.cpp
 )
 
 set(BRAYNSIO_PUBLIC_HEADERS

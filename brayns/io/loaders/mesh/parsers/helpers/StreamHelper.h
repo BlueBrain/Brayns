@@ -21,16 +21,13 @@
 
 #pragma once
 
-#include <brayns/io/loaders/mesh/MeshParser.h>
+#include <istream>
 
 namespace brayns
 {
-class ObjMeshParser : public MeshParser
+class StreamHelper
 {
 public:
-    virtual std::string getFormat() const override;
-
-    virtual std::vector<TriangleMesh> parse(
-        std::string_view data) const override;
+    static bool getLine(std::string_view &data, std::string_view &line);
 };
 } // namespace brayns

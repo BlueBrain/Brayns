@@ -26,8 +26,10 @@
 
 #include <brayns/common/DefaultMaterialIds.h>
 #include <brayns/engine/Scene.h>
+#include <brayns/utils/FileReader.h>
 
 #include "mesh/parsers/ObjMeshParser.h"
+#include "mesh/parsers/PlyMeshParser.h"
 
 namespace
 {
@@ -43,32 +45,27 @@ public:
         auto extension = path.extension();
         auto format = extension.string();
         format.erase(0, 1);
-        std::ifstream stream(filename);
-        if (!stream)
-        {
-            throw std::runtime_error("Cannot open '" + filename + "'");
-        }
-        return parse(parsers, format, stream);
+        auto data = FileReader::read(filename);
+        return parse(parsers, format, data);
     }
 
     static std::vector<TriangleMesh> parse(const MeshParserRegistry& parsers,
                                            const Blob& blob)
     {
         auto& format = blob.type;
-        auto& data = blob.data;
-        auto ptr = reinterpret_cast<const char*>(data.data());
-        auto size = data.size();
-        std::string buffer = {ptr, size};
-        std::istringstream stream(buffer);
-        return parse(parsers, format, stream);
+        auto& blobData = blob.data;
+        auto ptr = reinterpret_cast<const char*>(blobData.data());
+        auto size = blobData.size();
+        std::string_view data = {ptr, size};
+        return parse(parsers, format, data);
     }
 
     static std::vector<TriangleMesh> parse(const MeshParserRegistry& parsers,
                                            const std::string& format,
-                                           std::istream& stream)
+                                           std::string_view data)
     {
         auto& parser = parsers.getParser(format);
-        auto meshes = parser.parse(stream);
+        auto meshes = parser.parse(data);
         if (meshes.empty())
         {
             throw std::runtime_error("No meshes found");
@@ -156,6 +153,7 @@ void MeshParserRegistry::addParser(std::unique_ptr<MeshParser> parser)
 MeshLoader::MeshLoader()
 {
     _parsers.add<ObjMeshParser>();
+    _parsers.add<PlyMeshParser>();
 }
 
 std::vector<std::string> MeshLoader::getSupportedExtensions() const

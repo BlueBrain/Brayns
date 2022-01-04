@@ -21,16 +21,42 @@
 
 #pragma once
 
-#include <brayns/io/loaders/mesh/MeshParser.h>
+#include <stdexcept>
+#include <string_view>
+
+#include "EndianHelper.h"
 
 namespace brayns
 {
-class ObjMeshParser : public MeshParser
+class BinaryHelper
 {
 public:
-    virtual std::string getFormat() const override;
+    template <typename T>
+    static T extractBigEndian(std::string_view &line)
+    {
+        auto value = extract<T>(line);
+        return EndianHelper::convertBigEndianToLocalEndian(value);
+    }
 
-    virtual std::vector<TriangleMesh> parse(
-        std::string_view data) const override;
+    template <typename T>
+    static T extractLittleEndian(std::string_view &line)
+    {
+        auto value = extract<T>(line);
+        return EndianHelper::convertLittleEndianToLocalEndian(value);
+    }
+
+    template <typename T>
+    static T extract(std::string_view &line)
+    {
+        auto stride = sizeof(T);
+        if (line.size() < stride)
+        {
+            throw std::runtime_error("Line too short");
+        }
+        T value;
+        std::memcpy(&value, line.data(), stride);
+        line = line.substr(stride);
+        return value;
+    }
 };
 } // namespace brayns

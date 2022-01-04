@@ -25,7 +25,7 @@
 
 namespace brayns
 {
-class ObjMeshParser : public MeshParser
+class PlyMeshParser : public MeshParser
 {
 public:
     virtual std::string getFormat() const override;
