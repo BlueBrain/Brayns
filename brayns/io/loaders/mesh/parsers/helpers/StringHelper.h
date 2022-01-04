@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <sstream>
+#include <stdexcept>
 #include <string_view>
 
 namespace brayns
@@ -44,5 +46,20 @@ public:
     static std::string_view extractToken(std::string_view &str);
 
     static size_t countTokens(std::string_view str);
+
+    template <typename T>
+    static T extract(std::string_view &data)
+    {
+        auto token = extractToken(data);
+        std::string buffer = {token.data(), token.size()};
+        std::istringstream stream(buffer);
+        T value;
+        stream >> value;
+        if (stream.fail())
+        {
+            throw std::runtime_error("Failed to parse value");
+        }
+        return value;
+    }
 };
 } // namespace brayns

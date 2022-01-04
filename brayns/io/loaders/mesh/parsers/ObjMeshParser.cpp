@@ -21,11 +21,12 @@
 
 #include "ObjMeshParser.h"
 
-#include <cassert>
 #include <sstream>
-#include <string_view>
 #include <utility>
 
+#include <brayns/common/Log.h>
+
+#include "helpers/StreamHelper.h"
 #include "helpers/StringHelper.h"
 
 namespace
@@ -45,11 +46,17 @@ struct MeshBuffer
 
 struct Context
 {
+    std::string_view data;
     size_t lineNumber = 0;
-    std::string line;
+    std::string_view line;
     std::string_view header;
     std::string_view value;
     std::vector<MeshBuffer> meshes;
+
+    Context(std::string_view source)
+        : data(source)
+    {
+    }
 };
 
 class CurrentMesh
@@ -70,48 +77,8 @@ public:
         auto &meshes = context.meshes;
         auto &mesh = meshes.emplace_back();
         mesh.name = {name.data(), name.size()};
+        Log::debug("New mesh found: {}.", mesh.name);
         return mesh;
-    }
-};
-
-class LineExtractor
-{
-public:
-    static bool nextLine(std::istream &stream, Context &context)
-    {
-        if (!nextLine(stream, context.line))
-        {
-            return false;
-        }
-        ++context.lineNumber;
-        return true;
-    }
-
-    static bool nextLine(std::istream &stream, std::string &line)
-    {
-        line.clear();
-        if (!stream.good())
-        {
-            return false;
-        }
-        while (true)
-        {
-            char c;
-            stream.get(c);
-            if (stream.eof())
-            {
-                return true;
-            }
-            if (stream.fail())
-            {
-                throw std::runtime_error("Line extraction failed");
-            }
-            if (c == '\n')
-            {
-                return true;
-            }
-            line.push_back(c);
-        }
     }
 };
 
@@ -120,7 +87,7 @@ class LineParser
 public:
     static bool parseHeaderAndValue(Context &context)
     {
-        auto line = _getLine(context);
+        std::string_view line = context.line;
         if (_isEmptyLineOrComment(line))
         {
             return false;
@@ -130,12 +97,6 @@ public:
     }
 
 private:
-    static std::string_view _getLine(Context &context)
-    {
-        auto &line = context.line;
-        return {line.data(), line.size()};
-    }
-
     static bool _isEmptyLineOrComment(std::string_view line)
     {
         line = StringHelper::trimLeft(line);
@@ -152,31 +113,14 @@ private:
 class ValueParser
 {
 public:
-    static uint32_t parseIndex(std::string_view str)
-    {
-        std::string buffer = {str.data(), str.size()};
-        auto index = std::stoul(buffer);
-        if (index > std::numeric_limits<uint32_t>::max())
-        {
-            throw std::runtime_error("Indices must fit on 32 bits");
-        }
-        return uint32_t(index);
-    }
-
-    static float parseFloat(std::string_view str)
-    {
-        std::string buffer = {str.data(), str.size()};
-        return std::stof(buffer);
-    }
-
     static Vector2f parseVector2(std::string_view str)
     {
         if (StringHelper::countTokens(str) != 2)
         {
             throw std::runtime_error("Expected 2 numbers for a vector2");
         }
-        return {parseFloat(StringHelper::extractToken(str)),
-                parseFloat(StringHelper::extractToken(str))};
+        return {StringHelper::extract<float>(str),
+                StringHelper::extract<float>(str)};
     }
 
     static Vector3f parseVector3(std::string_view str)
@@ -185,16 +129,19 @@ public:
         {
             throw std::runtime_error("Expected 3 numbers for a vector3");
         }
-        return {parseFloat(StringHelper::extractToken(str)),
-                parseFloat(StringHelper::extractToken(str)),
-                parseFloat(StringHelper::extractToken(str))};
+        return {StringHelper::extract<float>(str),
+                StringHelper::extract<float>(str),
+                StringHelper::extract<float>(str)};
     }
 };
 
 class NewObjectParser
 {
 public:
-    static bool canParse(Context &context) { return context.header == "o"; }
+    static bool canParse(const Context &context)
+    {
+        return context.header == "o";
+    }
 
     static void parse(Context &context)
     {
@@ -206,7 +153,10 @@ public:
 class VertexParser
 {
 public:
-    static bool canParse(Context &context) { return context.header == "v"; }
+    static bool canParse(const Context &context)
+    {
+        return context.header == "v";
+    }
 
     static void parse(Context &context)
     {
@@ -220,7 +170,10 @@ public:
 class TextureParser
 {
 public:
-    static bool canParse(Context &context) { return context.header == "vt"; }
+    static bool canParse(const Context &context)
+    {
+        return context.header == "vt";
+    }
 
     static void parse(Context &context)
     {
@@ -234,7 +187,10 @@ public:
 class NormalParser
 {
 public:
-    static bool canParse(Context &context) { return context.header == "vn"; }
+    static bool canParse(const Context &context)
+    {
+        return context.header == "vn";
+    }
 
     static void parse(Context &context)
     {
@@ -276,7 +232,10 @@ private:
 class FaceParser
 {
 public:
-    static bool canParse(Context &context) { return context.header == "f"; }
+    static bool canParse(const Context &context)
+    {
+        return context.header == "f";
+    }
 
     static void parse(Context &context)
     {
@@ -322,7 +281,7 @@ private:
         {
             return;
         }
-        auto index = ValueParser::parseIndex(token);
+        auto index = StringHelper::extract<uint32_t>(token);
         vertices.push_back(index);
     }
 };
@@ -373,21 +332,19 @@ public:
 class ObjParser
 {
 public:
-    static std::vector<MeshBuffer> parse(std::istream &stream)
+    static std::vector<MeshBuffer> parse(std::string_view data)
     {
-        Context context;
-        while (_parseLine(stream, context))
-        {
-        }
+        Context context(data);
+        _tryParse(context);
         return context.meshes;
     }
 
 private:
-    static bool _parseLine(std::istream &stream, Context &context)
+    static void _tryParse(Context &context)
     {
         try
         {
-            return _parseNewLine(stream, context);
+            _parse(context);
         }
         catch (const std::exception &e)
         {
@@ -396,18 +353,34 @@ private:
         }
     }
 
-    static bool _parseNewLine(std::istream &stream, Context &context)
+    static void _parse(Context &context)
     {
-        if (!LineExtractor::nextLine(stream, context))
+        while (_extractLine(context))
+        {
+            _parseLine(context);
+        }
+    }
+
+    static bool _extractLine(Context &context)
+    {
+        if (!StreamHelper::getLine(context.data, context.line))
         {
             return false;
         }
+        ++context.lineNumber;
+        return true;
+    }
+
+    static void _parseLine(Context &context)
+    {
         if (!LineParser::parseHeaderAndValue(context))
         {
-            return true;
+            return;
         }
-        MeshExtractor::tryExtractMeshData(context);
-        return true;
+        if (!MeshExtractor::tryExtractMeshData(context))
+        {
+            Log::debug("Skip line {} '{}'.", context.lineNumber, context.line);
+        }
     }
 };
 
@@ -478,9 +451,9 @@ std::string ObjMeshParser::getFormat() const
     return "obj";
 }
 
-std::vector<TriangleMesh> ObjMeshParser::parse(std::istream &stream) const
+std::vector<TriangleMesh> ObjMeshParser::parse(std::string_view data) const
 {
-    auto buffers = ObjParser::parse(stream);
+    auto buffers = ObjParser::parse(data);
     return MeshConverter::convert(buffers);
 }
 } // namespace brayns
