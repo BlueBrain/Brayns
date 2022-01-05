@@ -525,7 +525,7 @@ public:
         {
             _parseLine(context);
         }
-        HeaderValidator::validate(context.header);
+        _checkHeader(context);
     }
 
 private:
@@ -565,6 +565,13 @@ private:
         return _tryParseWith<FormatParser>(context) ||
                _tryParseWith<ElementParser>(context) ||
                _tryParseWith<PropertyParser>(context);
+    }
+
+    static void _checkHeader(Context &context)
+    {
+        context.key = {};
+        context.value = {};
+        HeaderValidator::validate(context.header);
     }
 
     template <typename T>
@@ -970,9 +977,9 @@ public:
         for (const auto &element : header.elements)
         {
             context.element = &element;
-            BodyLine::next(context);
             for (size_t i = 0; i < element.count; ++i)
             {
+                BodyLine::next(context);
                 for (const auto &property : element.properties)
                 {
                     context.property = &property;
