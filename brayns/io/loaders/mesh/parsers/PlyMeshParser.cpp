@@ -748,7 +748,7 @@ private:
         switch (header.format)
         {
         case Format::Ascii:
-            return StringHelper::extract<T>(context.line);
+            return StringHelper::extract<T>(context.value);
         case Format::BinaryLittleEndian:
             return BinaryHelper::extractLittleEndian<T>(context.data);
         case Format::BinaryBigEndian:
@@ -797,8 +797,10 @@ public:
             throw std::runtime_error("Non triangular face with " +
                                      std::to_string(size) + " indices");
         }
-        return {extractIndex(context), extractIndex(context),
-                extractIndex(context)};
+        auto first = extractIndex(context);
+        auto second = extractIndex(context);
+        auto third = extractIndex(context);
+        return {first, second, third};
     }
 
     static void extractTristrips(Context &context,
@@ -814,8 +816,10 @@ public:
         indices.reserve(indices.size() + size);
         for (size_t i = 0; i < size; i += 3)
         {
-            indices.emplace_back(extractIndex(context), extractIndex(context),
-                                 extractIndex(context));
+            auto first = extractIndex(context);
+            auto second = extractIndex(context);
+            auto third = extractIndex(context);
+            indices.emplace_back(first, second, third);
         }
     }
 
@@ -964,6 +968,7 @@ public:
         {
             throw std::runtime_error("Incomplete data");
         }
+        context.value = context.line;
         ++context.lineNumber;
     }
 };
