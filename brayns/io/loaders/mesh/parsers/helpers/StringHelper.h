@@ -62,4 +62,10 @@ public:
         return value;
     }
 };
+
+template <>
+uint8_t StringHelper::extract<uint8_t>(std::string_view &data);
+
+template <>
+int8_t StringHelper::extract<int8_t>(std::string_view &data);
 } // namespace brayns
