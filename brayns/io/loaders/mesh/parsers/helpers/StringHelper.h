@@ -57,7 +57,7 @@ public:
         stream >> value;
         if (stream.fail())
         {
-            throw std::runtime_error("Failed to parse value");
+            throw std::runtime_error("Failed to parse value '" + buffer + "'");
         }
         return value;
     }
