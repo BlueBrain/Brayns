@@ -30,6 +30,7 @@
 
 #include "mesh/parsers/ObjMeshParser.h"
 #include "mesh/parsers/PlyMeshParser.h"
+#include "mesh/parsers/StlMeshParser.h"
 
 namespace
 {
@@ -154,6 +155,7 @@ MeshLoader::MeshLoader()
 {
     _parsers.add<ObjMeshParser>();
     _parsers.add<PlyMeshParser>();
+    _parsers.add<StlMeshParser>();
 }
 
 std::vector<std::string> MeshLoader::getSupportedExtensions() const

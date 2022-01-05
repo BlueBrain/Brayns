@@ -527,7 +527,7 @@ public:
         {
             _parseLine(context);
         }
-        _checkHeader(context);
+        _prepareBodyExtraction(context);
     }
 
 private:
@@ -555,6 +555,10 @@ private:
 
     static void _parseLine(Context &context)
     {
+        if (StringHelper::isSpace(context.line))
+        {
+            return;
+        }
         if (!_tryParseLine(context))
         {
             Log::debug("Skip header line {}: '{}'.", context.lineNumber,
@@ -569,16 +573,17 @@ private:
                _tryParseWith<PropertyParser>(context);
     }
 
-    static void _checkHeader(Context &context)
+    static void _prepareBodyExtraction(Context &context)
     {
         auto &header = context.header;
         HeaderValidator::validate(header);
+        context.key = {};
+        context.value = {};
         if (header.isBinary())
         {
             context.line = "<binary>";
+            context.value = context.data;
         }
-        context.key = {};
-        context.value = {};
     }
 
     template <typename T>
@@ -770,14 +775,15 @@ private:
     static T _extract(Context &context)
     {
         auto &header = context.header;
+        auto &value = context.value;
         switch (header.format)
         {
         case Format::Ascii:
-            return StringHelper::extract<T>(context.value);
+            return StringHelper::extract<T>(value);
         case Format::BinaryLittleEndian:
-            return BinaryHelper::extractLittleEndian<T>(context.data);
+            return BinaryHelper::extractLittleEndian<T>(value);
         case Format::BinaryBigEndian:
-            return BinaryHelper::extractBigEndian<T>(context.data);
+            return BinaryHelper::extractBigEndian<T>(value);
         default:
             throw std::runtime_error("Invalid format");
         }
@@ -989,11 +995,28 @@ class BodyLine
 public:
     static void next(Context &context)
     {
-        auto &header = context.header;
-        if (header.isBinary())
+        if (context.header.isBinary())
         {
             return;
         }
+        _nextNonEmptyLine(context);
+    }
+
+private:
+    static void _nextNonEmptyLine(Context &context)
+    {
+        while (true)
+        {
+            _nextLine(context);
+            if (!StringHelper::isSpace(context.value))
+            {
+                return;
+            }
+        }
+    }
+
+    static void _nextLine(Context &context)
+    {
         if (!StreamHelper::getLine(context.data, context.line))
         {
             throw std::runtime_error("Incomplete data");
