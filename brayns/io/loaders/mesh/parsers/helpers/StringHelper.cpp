@@ -114,17 +114,6 @@ size_t StringHelper::countTokens(std::string_view str)
 }
 
 template <>
-uint8_t StringHelper::extract<uint8_t>(std::string_view &data)
-{
-    auto value = StringHelper::extract<uint32_t>(data);
-    if (value > std::numeric_limits<uint8_t>::max())
-    {
-        throw std::out_of_range(std::to_string(value));
-    }
-    return uint8_t(value);
-}
-
-template <>
 int8_t StringHelper::extract<int8_t>(std::string_view &data)
 {
     auto value = StringHelper::extract<int32_t>(data);
@@ -134,5 +123,16 @@ int8_t StringHelper::extract<int8_t>(std::string_view &data)
         throw std::out_of_range(std::to_string(value));
     }
     return int8_t(value);
+}
+
+template <>
+uint8_t StringHelper::extract<uint8_t>(std::string_view &data)
+{
+    auto value = StringHelper::extract<uint32_t>(data);
+    if (value > std::numeric_limits<uint8_t>::max())
+    {
+        throw std::out_of_range(std::to_string(value));
+    }
+    return uint8_t(value);
 }
 } // namespace brayns

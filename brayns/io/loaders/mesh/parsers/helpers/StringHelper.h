@@ -51,7 +51,7 @@ public:
     static T extract(std::string_view &data)
     {
         auto token = extractToken(data);
-        std::string buffer = {token.data(), token.size()};
+        auto buffer = std::string(token);
         std::istringstream stream(buffer);
         T value;
         stream >> value;
@@ -64,8 +64,8 @@ public:
 };
 
 template <>
-uint8_t StringHelper::extract<uint8_t>(std::string_view &data);
+int8_t StringHelper::extract<int8_t>(std::string_view &data);
 
 template <>
-int8_t StringHelper::extract<int8_t>(std::string_view &data);
+uint8_t StringHelper::extract<uint8_t>(std::string_view &data);
 } // namespace brayns

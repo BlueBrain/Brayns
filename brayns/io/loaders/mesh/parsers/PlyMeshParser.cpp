@@ -64,8 +64,7 @@ public:
         {
             return Format::BinaryBigEndian;
         }
-        std::string format = {name.data(), name.size()};
-        throw std::runtime_error("Invalid format '" + format + "'");
+        throw std::runtime_error("Invalid format '" + std::string(name) + "'");
     }
 };
 
@@ -119,8 +118,7 @@ public:
         {
             return Type::Float64;
         }
-        std::string key = {name.data(), name.size()};
-        throw std::runtime_error("Invalid type '" + key + "'");
+        throw std::runtime_error("Invalid type '" + std::string(name) + "'");
     }
 };
 
@@ -343,7 +341,7 @@ private:
         {
             throw std::runtime_error("Unsupported version");
         }
-        header.version = {version.data(), version.size()};
+        header.version = version;
     }
 };
 
@@ -371,7 +369,7 @@ private:
         auto &header = context.header;
         auto &element = header.elements.emplace_back();
         auto name = StringHelper::extractToken(value);
-        element.name = {name.data(), name.size()};
+        element.name = name;
         element.count = StringHelper::extract<size_t>(value);
         element.semantic = GetElementSemantic::fromName(name);
     }
@@ -448,7 +446,7 @@ private:
         auto type = StringHelper::extractToken(data);
         property.type = GetType::fromName(type);
         auto name = StringHelper::extractToken(data);
-        property.name = {name.data(), name.size()};
+        property.name = name;
         property.semantic = GetSemantic::fromName(name);
     }
 };
