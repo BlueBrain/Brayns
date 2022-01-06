@@ -12,6 +12,7 @@ set(BRAYNSIO_SOURCES
     loaders/mesh/parsers/ObjMeshParser.cpp
     loaders/mesh/parsers/PlyMeshParser.cpp
     loaders/mesh/parsers/StlMeshParser.cpp
+    loaders/mesh/parsers/OffMeshParser.cpp
     loaders/mesh/parsers/helpers/StringHelper.cpp
     loaders/mesh/parsers/helpers/StreamHelper.cpp
 )
