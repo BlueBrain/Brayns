@@ -52,6 +52,7 @@ struct Context
     std::string_view value;
     bool facet = false;
     bool loop = false;
+    bool end = false;
     size_t vertex = 0;
     Solid solid;
 
@@ -106,6 +107,50 @@ public:
         auto &solid = context.solid;
         auto &facets = solid.facets;
         return facets.emplace_back();
+    }
+};
+
+class BeginSolid
+{
+public:
+    static bool canParse(const Context &context)
+    {
+        return context.key == "solid";
+    }
+
+    static void parse(Context &context)
+    {
+        if (context.facet)
+        {
+            throw std::runtime_error("Opening facet before solid");
+        }
+        if (context.loop)
+        {
+            throw std::runtime_error("Opening loop before solid");
+        }
+        context.solid.name = context.value;
+    }
+};
+
+class EndSolid
+{
+public:
+    static bool canParse(const Context &context)
+    {
+        return context.key == "endsolid";
+    }
+
+    static void parse(Context &context)
+    {
+        if (context.facet)
+        {
+            throw std::runtime_error("Closing solid before facet");
+        }
+        if (context.loop)
+        {
+            throw std::runtime_error("Closing loop before solid");
+        }
+        context.end = true;
     }
 };
 
@@ -216,7 +261,7 @@ public:
         {
             throw std::runtime_error("End loop outside facet");
         }
-        if (context.vertex != 2)
+        if (context.vertex != 3)
         {
             throw std::runtime_error("Expected 3 vertices per facet");
         }
@@ -239,12 +284,12 @@ public:
         {
             throw std::runtime_error("Vertex definition outside facet");
         }
-        if (context.vertex >= 2)
+        if (context.vertex >= 3)
         {
             throw std::runtime_error("More that 3 vertices in facet");
         }
-        ++context.vertex;
         _extract(context);
+        ++context.vertex;
     }
 
 private:
@@ -270,7 +315,7 @@ public:
             return;
         }
         context.key = StringHelper::extractToken(line);
-        context.value = StringHelper::extractToken(line);
+        context.value = line;
         if (!_tryParse(context))
         {
             throw std::runtime_error("Invalid line");
@@ -280,7 +325,9 @@ public:
 private:
     static bool _tryParse(Context &context)
     {
-        return _tryParseWith<BeginFacet>(context) ||
+        return _tryParseWith<BeginSolid>(context) ||
+               _tryParseWith<EndSolid>(context) ||
+               _tryParseWith<BeginFacet>(context) ||
                _tryParseWith<EndFacet>(context) ||
                _tryParseWith<BeginLoop>(context) ||
                _tryParseWith<EndLoop>(context) ||
@@ -337,7 +384,12 @@ private:
         {
             ++context.lineNumber;
             AsciiLineParser::parse(context);
+            if (context.end)
+            {
+                return;
+            }
         }
+        throw std::runtime_error("Unterminated solid");
     }
 };
 
@@ -426,6 +478,7 @@ public:
         _reserve(solid, mesh);
         _addVertices(solid, mesh);
         _addIndices(mesh);
+        return mesh;
     }
 
 private:
