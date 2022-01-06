@@ -685,6 +685,7 @@ public:
             }
             return float(asDouble);
         }
+        throw std::runtime_error("Internal error");
     }
 
     static int32_t toSignedInteger(Value value)
@@ -879,6 +880,56 @@ public:
     }
 };
 
+class ColorExtractor
+{
+public:
+    static float extractAndNormalize(Context &context)
+    {
+        auto value = PropertyExtractor::extractFloat(context);
+        auto &property = *context.property;
+        auto type = property.type;
+        return _normalize(value, type);
+    }
+
+private:
+    static float _normalize(float value, Type type)
+    {
+        auto baseValue = _getBaseValue(type);
+        auto range = _getRange(type);
+        return baseValue + value / range;
+    }
+
+    static float _getBaseValue(Type type)
+    {
+        switch (type)
+        {
+        case Type::Int8:
+        case Type::Int16:
+        case Type::Int32:
+            return 0.5f;
+        default:
+            return 0.0f;
+        }
+    }
+
+    static float _getRange(Type type)
+    {
+        switch (type)
+        {
+        case Type::Int8:
+        case Type::UInt8:
+        case Type::Int32:
+            return float(std::numeric_limits<uint8_t>::max());
+        case Type::Int16:
+        case Type::UInt16:
+        case Type::UInt32:
+            return float(std::numeric_limits<uint16_t>::max());
+        default:
+            return 1.0f;
+        }
+    }
+};
+
 class MeshExtractor
 {
 public:
@@ -922,13 +973,13 @@ private:
         case Semantic::TextureY:
             return _extractFloat(context, mesh.tys);
         case Semantic::Red:
-            return _extractFloat(context, mesh.rs);
+            return _extractColor(context, mesh.rs);
         case Semantic::Green:
-            return _extractFloat(context, mesh.gs);
+            return _extractColor(context, mesh.gs);
         case Semantic::Blue:
-            return _extractFloat(context, mesh.bs);
+            return _extractColor(context, mesh.bs);
         case Semantic::Alpha:
-            return _extractFloat(context, mesh.as);
+            return _extractColor(context, mesh.as);
         default:
             return PropertyExtractor::extractAndDiscard(context);
         }
@@ -963,6 +1014,12 @@ private:
     static void _extractFloat(Context &context, std::vector<float> &to)
     {
         auto value = PropertyExtractor::extractFloat(context);
+        to.push_back(value);
+    }
+
+    static void _extractColor(Context &context, std::vector<float> &to)
+    {
+        auto value = ColorExtractor::extractAndNormalize(context);
         to.push_back(value);
     }
 
