@@ -29,6 +29,7 @@
 #include <brayns/utils/FileReader.h>
 
 #include "mesh/parsers/ObjMeshParser.h"
+#include "mesh/parsers/OffMeshParser.h"
 #include "mesh/parsers/PlyMeshParser.h"
 #include "mesh/parsers/StlMeshParser.h"
 
@@ -156,6 +157,7 @@ MeshLoader::MeshLoader()
     _parsers.add<ObjMeshParser>();
     _parsers.add<PlyMeshParser>();
     _parsers.add<StlMeshParser>();
+    _parsers.add<OffMeshParser>();
 }
 
 std::vector<std::string> MeshLoader::getSupportedExtensions() const
