@@ -76,7 +76,7 @@ public:
     {
         auto &meshes = context.meshes;
         auto &mesh = meshes.emplace_back();
-        mesh.name = {name.data(), name.size()};
+        mesh.name = name;
         Log::debug("New mesh found: {}.", mesh.name);
         return mesh;
     }
