@@ -70,7 +70,10 @@ std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromFile(
     const NeuronMorphologyLoaderParameters& input, brayns::Scene& scene) const
 {
     brayns::Timer timer;
-    brayns::Log::info("[CE] {}: loading {}.", getName(), path);
+
+    auto name = getName();
+
+    brayns::Log::info("[CE] {}: loading {}.", name, path);
     callback.updateProgress("Loading " + path, 0.f);
 
     checkInput(input);
@@ -82,8 +85,8 @@ std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromFile(
     const auto loadAxon = input.load_axon;
     const auto loadDend = input.load_dendrites;
 
-    const NeuronBuilder& builder =
-        NeuronBuilderTable().getBuilder(geometryMode);
+    NeuronBuilderTable builders;
+    const NeuronBuilder& builder = builders.getBuilder(geometryMode);
     const NeuronMorphologyPipeline pipeline =
         NeuronMorphologyPipeline::create(radMultiplier, radOverride,
                                          geometryMode == "smooth" &&
@@ -109,7 +112,7 @@ std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromFile(
                                                   brayns::ModelMetadata());
     modelDescriptor->setTransformation(transformation);
 
-    brayns::Log::info("[CE] {}: done in {} second(s).", timer.elapsed());
+    brayns::Log::info("[CE] {}: done in {} second(s).", name, timer.elapsed());
 
     return {modelDescriptor};
 }
