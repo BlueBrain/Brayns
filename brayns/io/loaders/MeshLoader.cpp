@@ -40,8 +40,8 @@ using namespace brayns;
 class MeshParsingHelper
 {
 public:
-    static std::vector<TriangleMesh> parse(const MeshParserRegistry& parsers,
-                                           const std::string& filename)
+    static TriangleMesh parse(const MeshParserRegistry& parsers,
+                              const std::string& filename)
     {
         std::filesystem::path path(filename);
         auto extension = path.extension();
@@ -51,8 +51,8 @@ public:
         return parse(parsers, format, data);
     }
 
-    static std::vector<TriangleMesh> parse(const MeshParserRegistry& parsers,
-                                           const Blob& blob)
+    static TriangleMesh parse(const MeshParserRegistry& parsers,
+                              const Blob& blob)
     {
         auto& format = blob.type;
         auto& blobData = blob.data;
@@ -62,32 +62,29 @@ public:
         return parse(parsers, format, data);
     }
 
-    static std::vector<TriangleMesh> parse(const MeshParserRegistry& parsers,
-                                           const std::string& format,
-                                           std::string_view data)
+    static TriangleMesh parse(const MeshParserRegistry& parsers,
+                              const std::string& format, std::string_view data)
     {
         auto& parser = parsers.getParser(format);
-        auto meshes = parser.parse(data);
-        if (meshes.empty())
+        auto mesh = parser.parse(data);
+        if (mesh.indices.empty())
         {
             throw std::runtime_error("No meshes found");
         }
-        return meshes;
+        return mesh;
     }
 };
 
 class MeshLoadingHelper
 {
 public:
-    static ModelPtr load(const std::vector<TriangleMesh>& meshes, Scene& scene)
+    static ModelPtr load(const TriangleMesh& mesh, Scene& scene)
     {
         auto model = scene.createModel();
-        model->createMaterial(NO_MATERIAL, "default");
-        auto& modelMeshes = model->getTriangleMeshes();
-        for (const auto& mesh : meshes)
-        {
-            modelMeshes[NO_MATERIAL] = mesh;
-        }
+        size_t defaultMaterialId = 0;
+        model->createMaterial(defaultMaterialId, "default");
+        auto& meshes = model->getTriangleMeshes();
+        meshes[defaultMaterialId] = mesh;
         return model;
     }
 };
@@ -95,60 +92,77 @@ public:
 class MeshMetadata
 {
 public:
-    static ModelMetadata build(const std::vector<TriangleMesh>& meshes)
+    static ModelMetadata build(const TriangleMesh& mesh)
     {
-        auto meshCount = meshes.size();
-        size_t vertexCount = 0;
-        size_t triangleCount = 0;
-        for (const auto& mesh : meshes)
-        {
-            vertexCount += mesh.vertices.size();
-            triangleCount += mesh.indices.size();
-        }
-        return {{"meshes", std::to_string(meshCount)},
+        auto vertexCount = mesh.vertices.size();
+        auto triangleCount = mesh.indices.size();
+        return {{"meshes", "1"},
                 {"vertices", std::to_string(vertexCount)},
                 {"faces", std::to_string(triangleCount)}};
+    }
+};
+
+class MeshImporter
+{
+public:
+    static std::vector<ModelDescriptorPtr> import(Scene& scene,
+                                                  const TriangleMesh& mesh,
+                                                  const std::string& name)
+    {
+        auto model = MeshLoadingHelper::load(mesh, scene);
+        auto metadata = MeshMetadata::build(mesh);
+        auto descriptor =
+            std::make_shared<ModelDescriptor>(std::move(model), name, metadata);
+        return {descriptor};
     }
 };
 } // namespace
 
 namespace brayns
 {
-std::vector<std::string> MeshParserRegistry::getAllFormats() const
+std::vector<std::string> MeshParserRegistry::getAllSupportedExtensions() const
 {
-    std::vector<std::string> formats;
-    formats.reserve(_parsers.size());
-    for (const auto& [format, parser] : _parsers)
+    std::vector<std::string> extensions;
+    extensions.reserve(_parsers.size());
+    for (const auto& [extension, parser] : _parsers)
     {
-        formats.push_back(format);
+        extensions.push_back(extension);
     }
-    return formats;
+    return extensions;
 }
 
-const MeshParser& MeshParserRegistry::getParser(const std::string& format) const
+const MeshParser& MeshParserRegistry::getParser(
+    const std::string& extension) const
 {
-    auto parser = findParser(format);
+    auto parser = findParser(extension);
     if (!parser)
     {
-        throw std::runtime_error("Mesh format not supported: '" + format + "'");
+        throw std::runtime_error("Mesh format extension not supported: '" +
+                                 extension + "'");
     }
     return *parser;
 }
 
 const MeshParser* MeshParserRegistry::findParser(
-    const std::string& format) const
+    const std::string& extension) const
 {
-    auto i = _parsers.find(format);
+    auto i = _parsers.find(extension);
     return i == _parsers.end() ? nullptr : i->second.get();
 }
 
-void MeshParserRegistry::addParser(std::unique_ptr<MeshParser> parser)
+void MeshParserRegistry::addParser(std::shared_ptr<MeshParser> parser)
 {
-    auto format = parser->getFormat();
-    auto [i, ok] = _parsers.emplace(std::move(format), std::move(parser));
-    if (!ok)
+    auto extensions = parser->getSupportedExtensions();
+    for (auto& extension : extensions)
     {
-        throw std::runtime_error("Mesh format duplication: '" + format + "'");
+        auto [i, ok] =
+            _parsers.emplace(std::move(extension), std::move(parser));
+        if (!ok)
+        {
+            throw std::runtime_error(
+                "Mesh format extension supported by multiple parsers: '" +
+                extension + "'");
+        }
     }
 }
 
@@ -162,7 +176,7 @@ MeshLoader::MeshLoader()
 
 std::vector<std::string> MeshLoader::getSupportedExtensions() const
 {
-    return _parsers.getAllFormats();
+    return _parsers.getAllSupportedExtensions();
 }
 
 std::string MeshLoader::getName() const
@@ -176,13 +190,9 @@ std::vector<ModelDescriptorPtr> MeshLoader::importFromFile(
 {
     (void)callback;
     (void)params;
-    auto meshes = MeshParsingHelper::parse(_parsers, fileName);
-    auto model = MeshLoadingHelper::load(meshes, scene);
-    auto metadata = MeshMetadata::build(meshes);
+    auto mesh = MeshParsingHelper::parse(_parsers, fileName);
     auto& name = fileName;
-    auto descriptor =
-        std::make_shared<ModelDescriptor>(std::move(model), name, metadata);
-    return {descriptor};
+    return MeshImporter::import(scene, mesh, name);
 }
 
 std::vector<ModelDescriptorPtr> MeshLoader::importFromBlob(
@@ -191,12 +201,8 @@ std::vector<ModelDescriptorPtr> MeshLoader::importFromBlob(
 {
     (void)callback;
     (void)params;
-    auto meshes = MeshParsingHelper::parse(_parsers, blob);
-    auto model = MeshLoadingHelper::load(meshes, scene);
-    auto metadata = MeshMetadata::build(meshes);
+    auto mesh = MeshParsingHelper::parse(_parsers, blob);
     auto& name = blob.name;
-    auto descriptor =
-        std::make_shared<ModelDescriptor>(std::move(model), name, metadata);
-    return {descriptor};
+    return MeshImporter::import(scene, mesh, name);
 }
 } // namespace brayns
