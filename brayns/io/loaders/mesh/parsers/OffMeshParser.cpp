@@ -274,17 +274,14 @@ private:
 
 namespace brayns
 {
-std::string OffMeshParser::getFormat() const
+std::vector<std::string> OffMeshParser::getSupportedExtensions() const
 {
-    return "off";
+    return {"off"};
 }
 
-std::vector<TriangleMesh> OffMeshParser::parse(std::string_view data) const
+TriangleMesh OffMeshParser::parse(std::string_view data) const
 {
     auto buffer = OffParser::parse(data);
-    auto mesh = MeshConverter::convert(buffer);
-    std::vector<TriangleMesh> meshes;
-    meshes.push_back(std::move(mesh));
-    return meshes;
+    return MeshConverter::convert(buffer);
 }
 } // namespace brayns
