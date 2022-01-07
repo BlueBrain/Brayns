@@ -33,23 +33,23 @@ namespace brayns
 class MeshParserRegistry
 {
 public:
-    std::vector<std::string> getAllFormats() const;
+    std::vector<std::string> getAllSupportedExtensions() const;
 
-    const MeshParser& getParser(const std::string& format) const;
+    const MeshParser& getParser(const std::string& extension) const;
 
-    const MeshParser* findParser(const std::string& format) const;
+    const MeshParser* findParser(const std::string& extension) const;
 
-    void addParser(std::unique_ptr<MeshParser> parser);
+    void addParser(std::shared_ptr<MeshParser> parser);
 
     template <typename T, typename... Args>
     void add(Args&&... args)
     {
-        auto parser = std::make_unique<T>(std::forward<Args>(args)...);
+        auto parser = std::make_shared<T>(std::forward<Args>(args)...);
         addParser(std::move(parser));
     }
 
 private:
-    std::unordered_map<std::string, std::unique_ptr<MeshParser>> _parsers;
+    std::unordered_map<std::string, std::shared_ptr<MeshParser>> _parsers;
 };
 
 class MeshLoader : public Loader<MeshLoaderParameters>

@@ -28,9 +28,7 @@ namespace brayns
 class PlyMeshParser : public MeshParser
 {
 public:
-    virtual std::string getFormat() const override;
-
-    virtual std::vector<TriangleMesh> parse(
-        std::string_view data) const override;
+    virtual std::vector<std::string> getSupportedExtensions() const override;
+    virtual TriangleMesh parse(std::string_view data) const override;
 };
 } // namespace brayns

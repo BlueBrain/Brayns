@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -33,7 +34,7 @@ class MeshParser
 public:
     virtual ~MeshParser() = default;
 
-    virtual std::string getFormat() const = 0;
-    virtual std::vector<TriangleMesh> parse(std::string_view data) const = 0;
+    virtual std::vector<std::string> getSupportedExtensions() const = 0;
+    virtual TriangleMesh parse(std::string_view data) const = 0;
 };
 } // namespace brayns

@@ -1352,17 +1352,14 @@ private:
 
 namespace brayns
 {
-std::string PlyMeshParser::getFormat() const
+std::vector<std::string> PlyMeshParser::getSupportedExtensions() const
 {
-    return "ply";
+    return {"ply"};
 }
 
-std::vector<TriangleMesh> PlyMeshParser::parse(std::string_view data) const
+TriangleMesh PlyMeshParser::parse(std::string_view data) const
 {
     auto buffer = PlyParser::parse(data);
-    auto mesh = MeshConverter::convert(buffer);
-    std::vector<TriangleMesh> meshes;
-    meshes.push_back(std::move(mesh));
-    return meshes;
+    return MeshConverter::convert(buffer);
 }
 } // namespace brayns
