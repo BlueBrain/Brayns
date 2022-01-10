@@ -1215,9 +1215,10 @@ private:
         for (size_t i = 0; i < size - 2; i++)
         {
             auto &triangle = indices.emplace_back();
-            triangle[0] = tristrips[offset + i];
-            triangle[1] = tristrips[offset + i + 1];
-            triangle[2] = tristrips[offset + i + 2];
+            auto index = offset + i;
+            triangle[0] = tristrips[index];
+            triangle[1] = tristrips[index + 1];
+            triangle[2] = tristrips[index + 2];
             if (i & 1)
             {
                 std::swap(triangle[0], triangle[1]);
@@ -1237,6 +1238,7 @@ public:
         _getNormals(buffer, mesh);
         _getColors(buffer, mesh);
         _getTextures(buffer, mesh);
+        _recomputeIndices(mesh);
         return mesh;
     }
 
@@ -1247,11 +1249,20 @@ private:
         ConvertTristrips::toTriangles(buffer.tristrips, mesh.indices);
     }
 
+    static void _recomputeIndices(TriangleMesh &mesh)
+    {
+        mesh.indices.clear();
+        for (size_t i = 0; i < mesh.vertices.size(); i += 3)
+        {
+            mesh.indices.emplace_back(i, i + 1, i + 3);
+        }
+    }
+
     static void _getPositions(const MeshBuffer &buffer, TriangleMesh &mesh)
     {
         if (buffer.xs.empty() && buffer.ys.empty() && buffer.zs.empty())
         {
-            return;
+            throw std::runtime_error("No positions in vertices");
         }
         mesh.vertices.reserve(3 * mesh.indices.size());
         for (const auto &triangle : mesh.indices)
