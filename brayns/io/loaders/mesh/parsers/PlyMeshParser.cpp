@@ -1254,7 +1254,7 @@ private:
         mesh.indices.clear();
         for (size_t i = 0; i < mesh.vertices.size(); i += 3)
         {
-            mesh.indices.emplace_back(i, i + 1, i + 3);
+            mesh.indices.emplace_back(i, i + 1, i + 2);
         }
     }
 
