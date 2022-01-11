@@ -486,7 +486,7 @@ private:
                 semantics[index] = true;
                 continue;
             }
-            std::string name = {element.name.data(), element.name.size()};
+            auto name = std::string(element.name);
             throw std::runtime_error("Semantic duplication '" + name + "'");
             _checkDuplication(element);
         }
@@ -509,7 +509,7 @@ private:
                 semantics[index] = true;
                 continue;
             }
-            std::string name = {property.name.data(), property.name.size()};
+            auto name = std::string(property.name);
             throw std::runtime_error("Semantic duplication '" + name + "'");
         }
     }
