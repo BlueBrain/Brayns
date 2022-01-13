@@ -29,12 +29,28 @@
 
 namespace brayns
 {
+/**
+ * @brief Generic interface to define a mesh parser.
+ *
+ */
 class MeshParser
 {
 public:
     virtual ~MeshParser() = default;
 
+    /**
+     * @brief Get a list of the file extensions supported by the parser.
+     *
+     * @return std::vector<std::string> List of supported file extensions.
+     */
     virtual std::vector<std::string> getSupportedExtensions() const = 0;
+
+    /**
+     * @brief Parse the raw file data and return the mesh.
+     *
+     * @param data File data in text or binary format.
+     * @return TriangleMesh Extracted mesh.
+     */
     virtual TriangleMesh parse(std::string_view data) const = 0;
 };
 } // namespace brayns
