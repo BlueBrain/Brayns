@@ -27,9 +27,19 @@ brayns-spack-build:
    
 
 brayns-spack-test:
-  extends: .ctest
+  extends: .spack_build
   stage: test
-  needs: ["brayns-spack-build"]
+  script:
+   - module load unstable git
+   - git clone -c feature.manyFiles=true https://github.com/BlueBrain/spack.git
+   - . spack/share/spack/setup-env.sh
+   - mkdir fake_home
+   - export HOME=${PWD}/fake_home
+   - mkdir -p ~/.spack
+   - ln -s /gpfs/bbp.cscs.ch/apps/hpc/jenkins/config/*.yaml ~/.spack
+   - export SPACK_INSTALL_PREFIX=${HOME}/software
+   - SPACK_FULL_SPEC="${SPACK_PACKAGE}@develop${SPACK_PACKAGE_COMPILER:+%}${SPACK_PACKAGE_COMPILER}${SPACK_PACKAGE_SPEC}${SPACK_PACKAGE_DEPENDENCIES:+ }${SPACK_PACKAGE_DEPENDENCIES}"
+   - spack build-dev --test=root ${SPACK_FULL_SPEC}
 
   
 
