@@ -39,7 +39,7 @@ brayns-spack-test:
    - ln -s /gpfs/bbp.cscs.ch/apps/hpc/jenkins/config/*.yaml ~/.spack
    - export SPACK_INSTALL_PREFIX=${HOME}/software
    - SPACK_FULL_SPEC="${SPACK_PACKAGE}@develop${SPACK_PACKAGE_COMPILER:+%}${SPACK_PACKAGE_COMPILER}${SPACK_PACKAGE_SPEC}${SPACK_PACKAGE_DEPENDENCIES:+ }${SPACK_PACKAGE_DEPENDENCIES}"
-   - spack build-dev --test=root ${SPACK_FULL_SPEC}
+   - spack dev-build --test=root ${SPACK_FULL_SPEC}
 
   
 
