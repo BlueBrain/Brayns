@@ -34,6 +34,7 @@ brayns-spack-test:
   stage: test
   timeout: 2h
   script:
+   - cd ${CI_PROJECT_DIR}
    - module load unstable spack git
    - SPACK_FULL_SPEC="${SPACK_PACKAGE}@develop${SPACK_PACKAGE_COMPILER:+%}${SPACK_PACKAGE_COMPILER}${SPACK_PACKAGE_SPEC}${SPACK_PACKAGE_DEPENDENCIES:+ }${SPACK_PACKAGE_DEPENDENCIES}"
    - spack dev-build --test=root ${SPACK_FULL_SPEC}
