@@ -36,6 +36,8 @@ brayns-spack-test:
   script:
    - cd ${CI_PROJECT_DIR}
    - module load unstable spack git
+   - git clone --depth 1 --single-branch --branch develop ${CI_REPOSITORY_URL} BraynsClone # ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME} ${CI_REPOSITORY_URL} BraynsClone
+   - cd BraynsClone
    - SPACK_FULL_SPEC="${SPACK_PACKAGE}@develop${SPACK_PACKAGE_COMPILER:+%}${SPACK_PACKAGE_COMPILER}${SPACK_PACKAGE_SPEC}${SPACK_PACKAGE_DEPENDENCIES:+ }${SPACK_PACKAGE_DEPENDENCIES}"
    - spack dev-build --test=root ${SPACK_FULL_SPEC}
 
