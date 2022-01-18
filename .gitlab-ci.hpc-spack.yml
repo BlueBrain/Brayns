@@ -5,7 +5,7 @@ include:
 
 variables:
    bb5_account: proj3
-   bb5_duration: 2:00:00
+   bb5_duration: "2:00:00"
    DATADIR: /tmp
    SALLOC_ACCOUNT: proj3
    SBATCH_ACCOUNT: proj3
