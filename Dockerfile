@@ -66,7 +66,7 @@ RUN mkdir -p ${OSPRAY_SRC} \
    -DOSPRAY_ENABLE_TUTORIALS=OFF \
    -DOSPRAY_ENABLE_APPS=OFF \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
-   && ninja install
+   && ninja -j4 install
 
 # Install libwebsockets (2.0 from Debian is not reliable)
 # https://github.com/warmcat/libwebsockets/releases
@@ -89,7 +89,7 @@ RUN mkdir -p ${LWS_SRC} \
    -DLWS_WITHOUT_EXTENSIONS=ON \
    -DLWS_WITHOUT_TESTAPPS=ON \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
-   && ninja install
+   && ninja -j4 install
 
 ARG BOOST_SRC=/app/boost
 
