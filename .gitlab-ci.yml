@@ -6,7 +6,7 @@ viz_stack:
     strategy: depend
     
   rules:
-    - if: $CI_PIPELINE_SOURCE == "external_pull_request_event" || $CI_PIPELINE_SOURCE == "trigger"
+    - if: '$CI_PIPELINE_SOURCE == "external_pull_request_event" || $CI_PIPELINE_SOURCE == "trigger"'
 
 hpc_stack:
   stage: test
@@ -16,5 +16,5 @@ hpc_stack:
     strategy: depend
     
   rules:
-    - if: $CI_PIPELINE_SOURCE == "external_pull_request_event" || $CI_PIPELINE_SOURCE == "trigger"
+    - if: '$CI_PIPELINE_SOURCE == "external_pull_request_event" || $CI_PIPELINE_SOURCE == "trigger"'
 
