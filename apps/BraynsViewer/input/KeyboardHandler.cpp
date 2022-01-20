@@ -101,7 +101,8 @@ void KeyboardHandler::_buildHelp()
 {
     _helpStrings.clear();
 
-    const auto specialKeyToString = [](const SpecialKey key) {
+    const auto specialKeyToString = [](const SpecialKey key)
+    {
         switch (key)
         {
         case SpecialKey::RIGHT:

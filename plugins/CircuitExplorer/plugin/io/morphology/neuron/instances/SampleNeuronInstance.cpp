@@ -79,8 +79,9 @@ ElementMaterialMap::Ptr SampleNeuronInstance::addToModel(
             model.addSphere(materialId, _samples[geomIdx]);
     }
 
-    const auto updateMaterialMap = [&](const NeuronSection section,
-                                       size_t& buffer) {
+    const auto updateMaterialMap =
+        [&](const NeuronSection section, size_t& buffer)
+    {
         auto it = sectionToMat.find(section);
         if (it != sectionToMat.end())
             buffer = it->second;

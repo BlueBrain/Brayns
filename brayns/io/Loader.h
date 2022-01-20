@@ -90,7 +90,8 @@ public:
             extension[0] == '.' ? extension.substr(1) : extension);
         auto it =
             std::find_if(extensions.begin(), extensions.end(),
-                         [&](const std::string& ext) {
+                         [&](const std::string& ext)
+                         {
                              return string_utils::toLowercase(
                                         ext[0] == '.' ? ext.substr(1) : ext) ==
                                     lcExtension;

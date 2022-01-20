@@ -71,8 +71,8 @@ void RenderingParameters::setCurrentRenderer(
     _updateValue(_renderer, renderer);
 }
 
-const std::vector<std::string>& RenderingParameters::getRenderers() const
-    noexcept
+const std::vector<std::string>& RenderingParameters::getRenderers()
+    const noexcept
 {
     return _renderers;
 }

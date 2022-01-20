@@ -112,11 +112,13 @@ public:
      */
     void poll()
     {
-        _tasks.removeIf([](auto&, auto&, auto& task) {
-            bool complete = !task.isRunning();
-            task.poll();
-            return complete;
-        });
+        _tasks.removeIf(
+            [](auto&, auto&, auto& task)
+            {
+                bool complete = !task.isRunning();
+                task.poll();
+                return complete;
+            });
     }
 
 private:

@@ -93,8 +93,8 @@ void NetworkParameters::setUri(const std::string& uri) noexcept
     _updateValue(_uri, uri);
 }
 
-std::chrono::milliseconds NetworkParameters::getReconnectionPeriod() const
-    noexcept
+std::chrono::milliseconds NetworkParameters::getReconnectionPeriod()
+    const noexcept
 {
     return std::chrono::milliseconds(_reconnectionPeriod);
 }

@@ -190,8 +190,8 @@ std::vector<NeuronMorphology::Section>& NeuronMorphology::sections() noexcept
     return _sections;
 }
 
-const std::vector<NeuronMorphology::Section>& NeuronMorphology::sections() const
-    noexcept
+const std::vector<NeuronMorphology::Section>& NeuronMorphology::sections()
+    const noexcept
 {
     return _sections;
 }

@@ -130,9 +130,8 @@ void CommonEdgeColorHandler::_setElementsImpl(
     }
 
     std::sort(tempBuf.begin(), tempBuf.end(),
-              [](const SynapseMaterialInfo& a, const SynapseMaterialInfo& b) {
-                  return a.id < b.id;
-              });
+              [](const SynapseMaterialInfo& a, const SynapseMaterialInfo& b)
+              { return a.id < b.id; });
 
     // Get edge ids to query the node ids of each
     std::vector<uint64_t> edgeIds;

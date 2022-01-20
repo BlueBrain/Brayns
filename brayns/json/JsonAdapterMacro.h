@@ -100,15 +100,18 @@
         JsonObjectProperty property;                                      \
         property.name = NAME;                                             \
         property.options = {__VA_ARGS__};                                 \
-        property.getSchema = [](const void* data) {                       \
+        property.getSchema = [](const void* data)                         \
+        {                                                                 \
             auto& object = *static_cast<const ObjectType*>(data);         \
             return SCHEMA(object);                                        \
         };                                                                \
-        property.serialize = [](const void* data, JsonValue& json) {      \
+        property.serialize = [](const void* data, JsonValue& json)        \
+        {                                                                 \
             auto& object = *static_cast<const ObjectType*>(data);         \
             return TOJSON(object, json);                                  \
         };                                                                \
-        property.deserialize = [](const JsonValue& json, void* data) {    \
+        property.deserialize = [](const JsonValue& json, void* data)      \
+        {                                                                 \
             auto& object = *static_cast<ObjectType*>(data);               \
             return FROMJSON(json, object);                                \
         };                                                                \
@@ -131,10 +134,9 @@
  * The argument is a functor returning the property from a TYPE instance.
  *
  */
-#define BRAYNS_JSON_ADAPTER_TOJSON(GET)             \
-    [](const auto& object, auto& json) {            \
-        return Json::serialize(object.GET(), json); \
-    }
+#define BRAYNS_JSON_ADAPTER_TOJSON(GET) \
+    [](const auto& object, auto& json)  \
+    { return Json::serialize(object.GET(), json); }
 
 /**
  * @brief Shortcut to get the decay argument type of an object method.
@@ -153,7 +155,8 @@
  *
  */
 #define BRAYNS_JSON_ADAPTER_FROMJSON(SET)                   \
-    [](const auto& json, auto& object) {                    \
+    [](const auto& json, auto& object)                      \
+    {                                                       \
         using T = BRAYNS_JSON_ADAPTER_ARGTYPE(object, SET); \
         T buffer{};                                         \
         if (!Json::deserialize(json, buffer))               \
@@ -180,29 +183,28 @@
  * @brief Register a property that can only be get.
  *
  */
-#define BRAYNS_JSON_ADAPTER_GET(NAME, GET, DESCRIPTION, ...)              \
-    BRAYNS_JSON_ADAPTER_PROPERTY(NAME, BRAYNS_JSON_ADAPTER_SCHEMA(GET),   \
-                                 BRAYNS_JSON_ADAPTER_TOJSON(GET),         \
-                                 [](const auto&, auto&) { return true; }, \
-                                 Description(DESCRIPTION), ReadOnly(),    \
-                                 __VA_ARGS__)
+#define BRAYNS_JSON_ADAPTER_GET(NAME, GET, DESCRIPTION, ...)               \
+    BRAYNS_JSON_ADAPTER_PROPERTY(                                          \
+        NAME, BRAYNS_JSON_ADAPTER_SCHEMA(GET),                             \
+        BRAYNS_JSON_ADAPTER_TOJSON(GET),                                   \
+        [](const auto&, auto&) { return true; }, Description(DESCRIPTION), \
+        ReadOnly(), __VA_ARGS__)
 
 /**
  * @brief Register a property that can only be set.
  *
  */
-#define BRAYNS_JSON_ADAPTER_SET(NAME, SET, DESCRIPTION, ...)                 \
-    BRAYNS_JSON_ADAPTER_PROPERTY(NAME,                                       \
-                                 [](const auto& object) {                    \
-                                     using T =                               \
-                                         BRAYNS_JSON_ADAPTER_ARGTYPE(object, \
-                                                                     SET);   \
-                                     return Json::getSchema<T>();            \
-                                 },                                          \
-                                 [](const auto&, auto&) { return true; },    \
-                                 BRAYNS_JSON_ADAPTER_FROMJSON(SET),          \
-                                 Description(DESCRIPTION), WriteOnly(),      \
-                                 __VA_ARGS__)
+#define BRAYNS_JSON_ADAPTER_SET(NAME, SET, DESCRIPTION, ...)         \
+    BRAYNS_JSON_ADAPTER_PROPERTY(                                    \
+        NAME,                                                        \
+        [](const auto& object)                                       \
+        {                                                            \
+            using T = BRAYNS_JSON_ADAPTER_ARGTYPE(object, SET);      \
+            return Json::getSchema<T>();                             \
+        },                                                           \
+        [](const auto&, auto&) { return true; },                     \
+        BRAYNS_JSON_ADAPTER_FROMJSON(SET), Description(DESCRIPTION), \
+        WriteOnly(), __VA_ARGS__)
 
 /**
  * @brief Register a public property.
@@ -212,12 +214,10 @@
     BRAYNS_JSON_ADAPTER_PROPERTY(                                         \
         NAME,                                                             \
         [](const auto& object) { return Json::getSchema(object.FIELD); }, \
-        [](const auto& object, auto& json) {                              \
-            return Json::serialize(object.FIELD, json);                   \
-        },                                                                \
-        [](const auto& json, auto& object) {                              \
-            return Json::deserialize(json, object.FIELD);                 \
-        },                                                                \
+        [](const auto& object, auto& json)                                \
+        { return Json::serialize(object.FIELD, json); },                  \
+        [](const auto& json, auto& object)                                \
+        { return Json::deserialize(json, object.FIELD); },                \
         __VA_ARGS__)
 
 /**

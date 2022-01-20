@@ -130,13 +130,13 @@ private:
     {
         if (method == METHOD_BY_SECTION)
         {
-            const auto updateSectionCB = [&](const std::string& section,
-                                             size_t NeuronMaterialMap::*ptr) {
+            const auto updateSectionCB =
+                [&](const std::string& section, size_t NeuronMaterialMap::*ptr)
+            {
                 const auto varIt =
                     std::find_if(input.begin(), input.end(),
-                                 [&](const ColoringInformation& ci) {
-                                     return ci.variable == section;
-                                 });
+                                 [&](const ColoringInformation& ci)
+                                 { return ci.variable == section; });
 
                 if (varIt == input.end())
                     return;
@@ -184,8 +184,9 @@ private:
     {
         if (method == METHOD_BY_SECTION)
         {
-            const auto updateSectionCB = [&](const brayns::Vector4f& c,
-                                             size_t NeuronMaterialMap::*ptr) {
+            const auto updateSectionCB =
+                [&](const brayns::Vector4f& c, size_t NeuronMaterialMap::*ptr)
+            {
                 for (auto& element : _elements)
                 {
                     auto& nmm = static_cast<NeuronMaterialMap&>(*element.get());
