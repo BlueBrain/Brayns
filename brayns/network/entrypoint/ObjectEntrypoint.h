@@ -135,8 +135,8 @@ public:
     virtual void onCreate() override
     {
         auto& object = getObject();
-        object.onModified(
-            [&](auto&) { _limiter.call([&] { notify(object); }); });
+        object.onModified([&](auto&)
+                          { _limiter.call([&] { notify(object); }); });
     }
 
     /**

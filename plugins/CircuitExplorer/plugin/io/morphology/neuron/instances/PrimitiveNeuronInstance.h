@@ -75,10 +75,10 @@ public:
                                         const uint32_t segment) const final;
 
 private:
-    const brayns::Vector3f& _getGeometryP0(const PrimitiveGeometry& g) const
-        noexcept;
-    const brayns::Vector3f& _getGeometryP1(const PrimitiveGeometry& g) const
-        noexcept;
+    const brayns::Vector3f& _getGeometryP0(
+        const PrimitiveGeometry& g) const noexcept;
+    const brayns::Vector3f& _getGeometryP1(
+        const PrimitiveGeometry& g) const noexcept;
 
     void _setSimulationOffset(const PrimitiveGeometry& geom,
                               const uint64_t offset) noexcept;

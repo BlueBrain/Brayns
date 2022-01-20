@@ -56,8 +56,9 @@ std::vector<MorphologyInstance::Ptr> CellLoader::load(
 
     std::vector<MorphologyInstance::Ptr> cells(gids.size());
 
-    const auto loadFn = [&](const std::string& path,
-                            const std::vector<size_t>& indices) {
+    const auto loadFn =
+        [&](const std::string& path, const std::vector<size_t>& indices)
+    {
         NeuronMorphology morphology(path, loadSoma, loadAxon, loadDend);
         pipeline.process(morphology);
         const auto instantiable = builder.build(morphology);

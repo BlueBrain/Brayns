@@ -61,8 +61,9 @@ std::vector<MorphologyInstance::Ptr> CommonNodeLoader::loadNodes(
     const auto morphPath = SonataConfig::resolveMorphologyPath(
         networkData.config.getNodePopulationProperties(lc.node_population));
 
-    const auto loadFn = [&](const std::string& name,
-                            const std::vector<size_t>& indices) {
+    const auto loadFn =
+        [&](const std::string& name, const std::vector<size_t>& indices)
+    {
         const auto path = morphPath.buildPath(name);
         NeuronMorphology morphology(path, loadSoma, loadAxon, loadDend);
         pipeline.process(morphology);

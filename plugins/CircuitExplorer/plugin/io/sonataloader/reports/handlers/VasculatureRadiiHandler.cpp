@@ -74,8 +74,8 @@ std::vector<float> VasculatureRadiiHandler::getFrameDataImpl(
     return {};
 }
 
-const std::vector<float>& VasculatureRadiiHandler::getCurrentRadiiFrame() const
-    noexcept
+const std::vector<float>& VasculatureRadiiHandler::getCurrentRadiiFrame()
+    const noexcept
 {
     return _radii;
 }

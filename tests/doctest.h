@@ -525,7 +525,8 @@ class DOCTEST_INTERFACE String
         unsigned capacity;
     };
 
-    union {
+    union
+    {
         char buf[len];
         view data;
     };
@@ -1124,7 +1125,7 @@ DOCTEST_INTERFACE bool checkIfShouldThrow(assertType::Enum at);
 #ifndef DOCTEST_CONFIG_NO_EXCEPTIONS
 [[noreturn]]
 #endif // DOCTEST_CONFIG_NO_EXCEPTIONS
-    DOCTEST_INTERFACE void
+DOCTEST_INTERFACE void
     throwException();
 
 struct DOCTEST_INTERFACE Subcase
@@ -4088,7 +4089,10 @@ bool checkIfShouldThrow(assertType::Enum at)
 }
 
 #ifndef DOCTEST_CONFIG_NO_EXCEPTIONS
-[[noreturn]] void throwException() { throw TestFailureException(); }
+[[noreturn]] void throwException()
+{
+    throw TestFailureException();
+}
 #else  // DOCTEST_CONFIG_NO_EXCEPTIONS
 void throwException() {}
 #endif // DOCTEST_CONFIG_NO_EXCEPTIONS
@@ -5096,7 +5100,8 @@ namespace
 using namespace detail;
 
 template <typename Ex>
-[[noreturn]] void throw_exception(Ex const& e) {
+[[noreturn]] void throw_exception(Ex const& e)
+{
 #ifndef DOCTEST_CONFIG_NO_EXCEPTIONS
     throw e;
 #else  // DOCTEST_CONFIG_NO_EXCEPTIONS
@@ -5816,9 +5821,9 @@ struct ConsoleReporter : public IReporter
 
     Color::Enum getSuccessOrFailColor(bool success, assertType::Enum at)
     {
-        return success
-                   ? Color::BrightGreen
-                   : (at & assertType::is_warn) ? Color::Yellow : Color::Red;
+        return success                      ? Color::BrightGreen
+               : (at & assertType::is_warn) ? Color::Yellow
+                                            : Color::Red;
     }
 
     void successOrFailColoredStringToStream(bool success, assertType::Enum at,
@@ -6734,7 +6739,8 @@ int Context::run()
         p->cout = &fstr;
     }
 
-    auto cleanup_and_return = [&]() {
+    auto cleanup_and_return = [&]()
+    {
         if (fstr.is_open())
             fstr.close();
 

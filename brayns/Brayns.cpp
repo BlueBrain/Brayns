@@ -298,7 +298,8 @@ private:
 
                 Log::info("Loading '{}'.", path);
 
-                auto progress = [&](const std::string& msg, float t) {
+                auto progress = [&](const std::string& msg, float t)
+                {
                     constexpr auto MIN_SECS = 5;
                     constexpr auto MIN_PERCENTAGE = 10;
 

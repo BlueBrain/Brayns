@@ -149,20 +149,19 @@ std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback,
     const RawVolumeLoaderParameters& properties, Scene& scene) const
 {
-    return {_loadVolume(blob.name, callback, properties,
-                        [&blob](auto volume) {
-                            volume->mapData(std::move(blob.data));
-                        },
-                        scene)};
+    return {_loadVolume(
+        blob.name, callback, properties,
+        [&blob](auto volume) { volume->mapData(std::move(blob.data)); },
+        scene)};
 }
 
 std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
     const RawVolumeLoaderParameters& properties, Scene& scene) const
 {
-    return {_loadVolume(filename, callback, properties,
-                        [filename](auto volume) { volume->mapData(filename); },
-                        scene)};
+    return {_loadVolume(
+        filename, callback, properties,
+        [filename](auto volume) { volume->mapData(filename); }, scene)};
 }
 
 ModelDescriptorPtr RawVolumeLoader::_loadVolume(

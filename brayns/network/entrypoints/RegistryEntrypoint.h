@@ -41,9 +41,8 @@ public:
         auto& entrypoints = getEntrypoints();
         std::vector<std::string> result;
         result.reserve(entrypoints.size());
-        entrypoints.forEach([&](const auto& entrypoint) {
-            result.push_back(entrypoint.getName());
-        });
+        entrypoints.forEach([&](const auto& entrypoint)
+                            { result.push_back(entrypoint.getName()); });
         request.reply(result);
     }
 };

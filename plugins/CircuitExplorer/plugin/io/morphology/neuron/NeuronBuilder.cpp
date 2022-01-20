@@ -39,8 +39,8 @@ const NeuronBuilder& NeuronBuilderTable::getBuilder(
     return *(it->second.get());
 }
 
-std::vector<std::string> NeuronBuilderTable::getAvailableBuilderNames() const
-    noexcept
+std::vector<std::string> NeuronBuilderTable::getAvailableBuilderNames()
+    const noexcept
 {
     std::vector<std::string> result;
     result.reserve(_builders.size());

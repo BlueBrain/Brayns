@@ -124,9 +124,8 @@ public:
 
         _descriptors =
             loader.loadFromBlob(std::move(_blob),
-                                {[this](const auto& operation, auto amount) {
-                                    _loadingProgress(operation, amount);
-                                }},
+                                {[this](const auto& operation, auto amount)
+                                 { _loadingProgress(operation, amount); }},
                                 _params.getLoadParameters(), scene);
 
         scene.addModels(_descriptors, _params);

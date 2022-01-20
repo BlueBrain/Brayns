@@ -57,13 +57,11 @@ std::vector<MorphologyInstance::Ptr> VasculaturePopulationLoader::load(
             std::cout << "Modding" << std::endl;
             std::transform(startRadii.begin(), startRadii.end(),
                            startRadii.begin(),
-                           [mult = radMultiplier](const float r) {
-                               return r * mult;
-                           });
+                           [mult = radMultiplier](const float r)
+                           { return r * mult; });
             std::transform(endRadii.begin(), endRadii.end(), endRadii.begin(),
-                           [mult = radMultiplier](const float r) {
-                               return r * mult;
-                           });
+                           [mult = radMultiplier](const float r)
+                           { return r * mult; });
         }
     }
 

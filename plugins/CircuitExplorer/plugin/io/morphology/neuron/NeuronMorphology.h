@@ -90,8 +90,8 @@ public:
      * children of the given section
      */
     std::vector<Section*> sectionChildren(const Section& section) noexcept;
-    std::vector<const Section*> sectionChildren(const Section& section) const
-        noexcept;
+    std::vector<const Section*> sectionChildren(
+        const Section& section) const noexcept;
 
     /**
      * @brief Returns the parent section of the passed section. If the passed

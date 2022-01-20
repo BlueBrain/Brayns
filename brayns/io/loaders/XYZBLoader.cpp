@@ -121,15 +121,18 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
     modelDescriptor->setTransformation(transformation);
 
     Property radiusProperty("radius", meanRadius, {"Point size"});
-    radiusProperty.onModified([modelDesc = std::weak_ptr<ModelDescriptor>(
-                                   modelDescriptor)](const Property& property) {
-        if (auto modelDesc_ = modelDesc.lock())
+    radiusProperty.onModified(
+        [modelDesc = std::weak_ptr<ModelDescriptor>(modelDescriptor)](
+            const Property& property)
         {
-            const auto newRadius = property.as<double>();
-            for (auto& sphere : modelDesc_->getModel().getSpheres()[materialId])
-                sphere.radius = newRadius;
-        }
-    });
+            if (auto modelDesc_ = modelDesc.lock())
+            {
+                const auto newRadius = property.as<double>();
+                for (auto& sphere :
+                     modelDesc_->getModel().getSpheres()[materialId])
+                    sphere.radius = newRadius;
+            }
+        });
     PropertyMap modelProperties;
     modelProperties.add(radiusProperty);
     modelDescriptor->setProperties(modelProperties);

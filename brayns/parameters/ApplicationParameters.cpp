@@ -166,14 +166,14 @@ const std::string& ApplicationParameters::getSandboxPath() const noexcept
     return _sandBoxPath;
 }
 
-const std::vector<std::string>& ApplicationParameters::getInputPaths() const
-    noexcept
+const std::vector<std::string>& ApplicationParameters::getInputPaths()
+    const noexcept
 {
     return _inputPaths;
 }
 
-const std::vector<std::string>& ApplicationParameters::getPlugins() const
-    noexcept
+const std::vector<std::string>& ApplicationParameters::getPlugins()
+    const noexcept
 {
     return _plugins;
 }

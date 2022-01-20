@@ -177,7 +177,8 @@ std::vector<std::string> BBPLoader::getSupportedExtensions() const
 bool BBPLoader::isSupported(const std::string& filename,
                             const std::string& extension) const
 {
-    const auto containsKeyword = [](const std::string& matcher) {
+    const auto containsKeyword = [](const std::string& matcher)
+    {
         const auto lcm = brayns::string_utils::toLowercase(matcher);
         if (lcm.find("blueconfig") != std::string::npos ||
             lcm.find("circuitconfig") != std::string::npos)

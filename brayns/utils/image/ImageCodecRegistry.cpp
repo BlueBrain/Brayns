@@ -52,7 +52,7 @@ public:
     }
 
     template <typename T, typename... Args>
-    void add(Args &&... args)
+    void add(Args &&...args)
     {
         add(std::make_unique<T>(std::forward<Args>(args)...));
     }

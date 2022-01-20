@@ -52,9 +52,8 @@ public:
 
         _descriptors =
             loader.loadFromFile(path,
-                                {[this](const auto& operation, auto amount) {
-                                    progress(operation, amount);
-                                }},
+                                {[this](const auto& operation, auto amount)
+                                 { progress(operation, amount); }},
                                 _params.getLoadParameters(), scene);
 
         scene.addModels(_descriptors, _params);
