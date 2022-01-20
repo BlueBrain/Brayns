@@ -24,7 +24,7 @@ ubuntu-clangformat-check:
     - if git diff --name-only --diff-filter=ACMR origin/develop | grep -E "$CLANG_FORMAT_EXTENSIONS" | xargs -n1 clang-format-12 -style=file -fallback-style=none -output-replacements-xml | grep "<replacement " >/dev/null
     - then
     - echo "clang-format check failed - commit does not match coding style"
-    - git diff --name-only --diff-filter=ACMR origin/develop | grep -E "$CLANG_FORMAT_EXTENSIONS" | xargs -n1 clang-format-12 -i -style=file -fallback-style=none
+    - git diff --name-only --diff-filter=ACMR origin/develop | grep -E "$CLANG_FORMAT_EXTENSIONS" | xargs -n1 clang-format-12 -style=file -fallback-style=none
     - git diff
     - exit 1
     - else
