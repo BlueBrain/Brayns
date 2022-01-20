@@ -5,8 +5,14 @@ viz_stack:
       - local: .gitlab-ci.viz.yml
     strategy: depend
     
-  #rules:
-  #  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "develop"
+  rules:
+    # Run on changes that are pushed to the default branch
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    # Don't run on MR events because we also get "external_pull_request_event" from GitHub.
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - when: always
+
 
 hpc_stack:
   stage: test
@@ -15,6 +21,11 @@ hpc_stack:
       - local: .gitlab-ci.hpc-spack.yml
     strategy: depend
     
-  #rules:
-  #  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "develop"
+  rules:
+    # Run on changes that are pushed to the default branch
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    # Don't run on MR events because we also get "external_pull_request_event" from GitHub.
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - when: always
 
