@@ -22,6 +22,7 @@
 #include "StringHelper.h"
 
 #include <algorithm>
+#include <limits>
 
 namespace brayns
 {

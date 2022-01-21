@@ -22,6 +22,7 @@
 #include "StlMeshParser.h"
 
 #include <array>
+#include <limits>
 
 #include "helpers/BinaryHelper.h"
 #include "helpers/StreamHelper.h"

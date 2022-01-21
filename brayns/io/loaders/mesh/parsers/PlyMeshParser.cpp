@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <array>
 #include <bitset>
+#include <limits>
 #include <optional>
 #include <stdexcept>
 #include <variant>
