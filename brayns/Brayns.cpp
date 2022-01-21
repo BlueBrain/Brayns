@@ -116,9 +116,7 @@ struct Brayns::Impl : public PluginAPI
 
         _pluginManager.preRender();
 
-        auto& scene = _engine->getScene();
-        auto& lightManager = scene.getLightManager();
-        const auto& rp = _parametersManager.getRenderingParameters();
+        auto& scene = _engine->getScene(); auto& lightManager = scene.getLightManager(); const auto& rp = _parametersManager.getRenderingParameters();
         auto& camera = _engine->getCamera();
 
         // Need to update head light before scene is committed
