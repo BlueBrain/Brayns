@@ -33,6 +33,7 @@ ubuntu-clangformat-check:
     - echo "clang-format check successful"
     - fi
     - fi
+  allow_failure: true
 
 
 ubuntu-cpp-build:
