@@ -20,53 +20,141 @@
 
 #pragma once
 
+#include <memory>
+#include <unordered_map>
+
 #include <brayns/io/Loader.h>
 #include <brayns/io/loaders/MeshLoaderParameters.h>
 
-struct aiScene;
+#include "mesh/MeshParser.h"
 
 namespace brayns
 {
-/** Loads meshes from files using the assimp library
- * http://assimp.sourceforge.net
+/**
+ * @brief Helper class to store mesh parsers per format.
+ *
+ */
+class MeshParserRegistry
+{
+public:
+    /**
+     * @brief Use the registered parsers to get all supported formats.
+     *
+     * @return std::vector<std::string> List of file extensions.
+     */
+    std::vector<std::string> getAllSupportedExtensions() const;
+
+    /**
+     * @brief Get the parser supporting the given format.
+     *
+     * @param extension File extension.
+     * @return const MeshParser& Parser that can handle the file.
+     * @throw std::runtime_error Format not supported.
+     */
+    const MeshParser& getParser(const std::string& extension) const;
+
+    /**
+     * @brief Find if a parser can support the extension and return it.
+     *
+     * @param extension File extension.
+     * @return const MeshParser* Parser or null if not supported.
+     */
+    const MeshParser* findParser(const std::string& extension) const;
+
+    /**
+     * @brief Register a new mesh parser.
+     *
+     * Throw if one of the parser formats is already registered.
+     *
+     * @param parser Parser to register.
+     * @throw std::runtime_error Another parser can support one of the formats.
+     */
+    void addParser(std::shared_ptr<MeshParser> parser);
+
+    /**
+     * @brief Shortcut to add a parser of the given type.
+     *
+     * @tparam T Parser type.
+     * @tparam Args Parser constructor arguments types.
+     * @param args Parser constructor arguments.
+     */
+    template <typename T, typename... Args>
+    void add(Args&&... args)
+    {
+        auto parser = std::make_shared<T>(std::forward<Args>(args)...);
+        addParser(std::move(parser));
+    }
+
+private:
+    std::unordered_map<std::string, std::shared_ptr<MeshParser>> _parsers;
+};
+
+/**
+ * @brief Loader to support mesh files.
+ *
+ * Multiple objects are merged in a single mesh.
+ *
+ * Vertices are duplicated (vertex count = 3 * index count).
+ *
+ * Only triangular faces are supported.
+ *
+ * Materials are not extracted.
+ *
+ * A default white material is used for the mesh model.
+ *
  */
 class MeshLoader : public Loader<MeshLoaderParameters>
 {
 public:
+    /**
+     * @brief Register all parsers.
+     *
+     */
+    MeshLoader();
+
+    /**
+     * @brief Extract all supported formats using the registered parsers.
+     *
+     * @return std::vector<std::string> Supported file extensions.
+     */
     std::vector<std::string> getSupportedExtensions() const final;
+
+    /**
+     * @brief Get the loader name.
+     *
+     * @return std::string Loader name.
+     */
     std::string getName() const final;
 
+    /**
+     * @brief Import the mesh in the given scene from the given file.
+     *
+     * @param fileName File to import.
+     * @param callback Deprecated.
+     * @param properties Deprecated.
+     * @param scene Scene receiving the new mesh.
+     * @return std::vector<ModelDescriptorPtr> Models containing the mesh.
+     * @throw std::runtime_error An error occurs.
+     */
     std::vector<ModelDescriptorPtr> importFromFile(
         const std::string& fileName, const LoaderProgress& callback,
         const MeshLoaderParameters& properties, Scene& scene) const final;
 
+    /**
+     * @brief Import the mesh in the given scene from the given blob of data.
+     *
+     * @param blob Mesh data.
+     * @param callback Deprecated.
+     * @param properties  Deprecated.
+     * @param scene Scene receiving the new mesh.
+     * @return std::vector<ModelDescriptorPtr> Models containing the mesh.
+     * @throw std::runtime_error An error occurs.
+     */
     std::vector<ModelDescriptorPtr> importFromBlob(
         Blob&& blob, const LoaderProgress& callback,
         const MeshLoaderParameters& properties, Scene& scene) const final;
 
-    ModelMetadata importMesh(
-        const std::string& fileName, const LoaderProgress& callback,
-        Model& model, const Matrix4f& transformation,
-        const size_t defaultMaterialId,
-        const MeshLoaderGeometryQuality geometryQuality) const;
-
 private:
-    struct MaterialInfo
-    {
-        std::string name;
-        size_t materialId;
-    };
-    typedef std::vector<MaterialInfo> MaterialInfoList;
-
-    void _createMaterials(Model& model, const aiScene* aiScene,
-                          const std::string& folder,
-                          MaterialInfoList& list) const;
-
-    ModelMetadata _postLoad(const aiScene* aiScene, Model& model,
-                            const Matrix4f& transformation,
-                            const size_t defaultMaterial,
-                            const std::string& folder,
-                            const LoaderProgress& callback) const;
-    size_t _getQuality(const MeshLoaderGeometryQuality geometryQuality) const;
+    MeshParserRegistry _parsers;
 };
 } // namespace brayns

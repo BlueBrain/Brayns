@@ -1,15 +1,12 @@
 stages:
   - test
 
-
 include:
   - project: viz/ci/gitlabpipelines
     file: index.yml
 
-
 default:
   tags: []
-
 
 ubuntu-clangformat-check:
   stage: test
@@ -32,34 +29,32 @@ ubuntu-clangformat-check:
     - fi
     - fi
 
-
 ubuntu-cpp-build:
   extends: .cmake-ubuntu
   stage: test
   variables:
-    APT_PACKAGES: git libassimp-dev libhdf5-serial-dev libtbb-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev libboost-all-dev 
+    APT_PACKAGES: git libhdf5-serial-dev libtbb-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev libboost-all-dev
     CMAKE_ARGS: -DCMAKE_PREFIX_PATH=/app/dist -DISPC_EXECUTABLE=/app/ispc-v1.10.0-linux/bin/ispc -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_CIRCUITINFO_ENABLED=ON -DBRAYNS_DTI_ENABLED=ON
-    KUBERNETES_CPU_LIMIT: 4       
-    KUBERNETES_CPU_REQUEST: 4                             
+    KUBERNETES_CPU_LIMIT: 4
+    KUBERNETES_CPU_REQUEST: 4
     KUBERNETES_MEMORY_LIMIT: 8Gi
     KUBERNETES_MEMORY_REQUEST: 8Gi
     NUM_COMPILE_JOBS: 4
   before_script:
     - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y $APT_BASE_PACKAGES $APT_PACKAGES
-   
+
     - DIST_PATH=/app/dist
-  
+
     # Install ISPC
     - ISPC_VERSION=1.10.0b
     - ISPC_DIR=ispc-v${ISPC_VERSION}-linux
     - ISPC_PATH=/app/ispc-v1.10.0-linux
     - export PATH=$PATH:${ISPC_PATH}
-    
+
     - mkdir -p ${ISPC_PATH}
     - wget https://github.com/ispc/ispc/releases/download/v1.10.0/${ISPC_DIR}.tar.gz
     - tar zxvf ${ISPC_DIR}.tar.gz -C ${ISPC_PATH} --strip-components=1
     - rm -rf ${ISPC_PATH}/${ISPC_DIR}/examples
-
 
     # Install embree
     # https://github.com/embree/embree/releases
@@ -82,14 +77,13 @@ ubuntu-cpp-build:
     - mkdir -p build && cd build
     - CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja -DOSPRAY_ENABLE_TUTORIALS=OFF -DOSPRAY_ENABLE_APPS=OFF -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
     - ninja -j$NUM_COMPILE_JOBS install
-    
-    - cd $CI_PROJECT_DIR
 
+    - cd $CI_PROJECT_DIR
 
 docker-build:
   variables:
-    KUBERNETES_CPU_LIMIT: 4       
-    KUBERNETES_CPU_REQUEST: 4                             
+    KUBERNETES_CPU_LIMIT: 4
+    KUBERNETES_CPU_REQUEST: 4
     KUBERNETES_MEMORY_LIMIT: 8Gi
     KUBERNETES_MEMORY_REQUEST: 8Gi
   extends: .build-image-using-kaniko

@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,25 +21,14 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/io/loaders/mesh/MeshParser.h>
 
 namespace brayns
 {
-enum class MeshLoaderGeometryQuality
+class ObjMeshParser : public MeshParser
 {
-    low,
-    medium,
-    high
+public:
+    virtual std::vector<std::string> getSupportedExtensions() const override;
+    virtual TriangleMesh parse(std::string_view data) const override;
 };
-
-BRAYNS_JSON_ADAPTER_ENUM(MeshLoaderGeometryQuality,
-                         {"low", MeshLoaderGeometryQuality::low},
-                         {"medium", MeshLoaderGeometryQuality::medium},
-                         {"high", MeshLoaderGeometryQuality::high})
-
-BRAYNS_JSON_OBJECT_BEGIN(MeshLoaderParameters)
-BRAYNS_JSON_OBJECT_ENTRY(MeshLoaderGeometryQuality, geometry_quality,
-                         "Mesh geometry quality", Default("high"))
-BRAYNS_JSON_OBJECT_END()
 } // namespace brayns
