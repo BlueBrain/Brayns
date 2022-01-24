@@ -9,9 +9,12 @@ set(BRAYNSIO_SOURCES
     loaders/ProteinLoader.cpp
     loaders/VolumeLoader.cpp
     loaders/XYZBLoader.cpp
-    loaders/assimpImporters/ObjFileImporter.cpp
-    loaders/assimpImporters/ObjFileParser.cpp
-    loaders/assimpImporters/ObjFileMtlImporter.cpp
+    loaders/mesh/parsers/ObjMeshParser.cpp
+    loaders/mesh/parsers/PlyMeshParser.cpp
+    loaders/mesh/parsers/StlMeshParser.cpp
+    loaders/mesh/parsers/OffMeshParser.cpp
+    loaders/mesh/parsers/helpers/StringHelper.cpp
+    loaders/mesh/parsers/helpers/StreamHelper.cpp
 )
 
 set(BRAYNSIO_PUBLIC_HEADERS
@@ -23,18 +26,6 @@ set(BRAYNSIO_PUBLIC_HEADERS
     loaders/XYZBLoader.h
 )
 
-if(assimp_VERSION VERSION_GREATER_EQUAL 4.1.0)
-    list(APPEND BRAYNSIO_SOURCES
-        loaders/assimpImporters/PlyLoader.cpp
-        loaders/assimpImporters/PlyParser.cpp)
-    set_source_files_properties(loaders/assimpImporters/PlyLoader.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
-endif()
-
-if(assimp_VERSION VERSION_LESS 4)
-    list(APPEND BRAYNSIO_SOURCES loaders/assimp/DefaultIOStream.cpp)
-endif()
-
-
 add_library(braynsIO SHARED ${BRAYNSIO_SOURCES} ${BRAYNSIO_PUBLIC_HEADERS})
 
 target_include_directories(braynsIO PUBLIC
@@ -42,23 +33,10 @@ target_include_directories(braynsIO PUBLIC
    "$<INSTALL_INTERFACE:include>")
 
 target_link_libraries(braynsIO PRIVATE
-    braynsParameters braynsCommon braynsEngine ${ASSIMP_LIBRARIES} ${assimp_LIBRARIES}
+    braynsParameters
+    braynsCommon
+    braynsEngine
 )
-
-if(assimp_VERSION VERSION_GREATER_EQUAL 4.1.0)
-    target_compile_definitions(braynsIO PRIVATE USE_CUSTOM_PLY_IMPORTER)
-endif()
-
-if(assimp_VERSION VERSION_GREATER_EQUAL 5.0.0)
-    target_compile_definitions(braynsIO PRIVATE ASSIMP_VERSION_5_0_1)
-endif()
-
-if(assimp_VERSION VERSION_LESS 4)
-    target_include_directories(braynsIO PRIVATE .)
-    target_compile_definitions(braynsIO PRIVATE ASSIMP_VERSION_3)
-elseif(assimp_VERSION VERSION_GREATER_EQUAL 5.0.0)
-    target_compile_definitions(braynsIO PRIVATE ASSIMP_VERSION_5)
-endif()
 
 target_compile_options(braynsIO PRIVATE ${BRAYNS_COMPILE_OPTIONS})
 

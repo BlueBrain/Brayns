@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,27 +19,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "StreamHelper.h"
 
-#include <brayns/json/JsonAdapterMacro.h>
-#include <brayns/json/JsonObjectMacro.h>
+#include <stdexcept>
 
 namespace brayns
 {
-enum class MeshLoaderGeometryQuality
+bool StreamHelper::getLine(std::string_view &data, std::string_view &line)
 {
-    low,
-    medium,
-    high
-};
-
-BRAYNS_JSON_ADAPTER_ENUM(MeshLoaderGeometryQuality,
-                         {"low", MeshLoaderGeometryQuality::low},
-                         {"medium", MeshLoaderGeometryQuality::medium},
-                         {"high", MeshLoaderGeometryQuality::high})
-
-BRAYNS_JSON_OBJECT_BEGIN(MeshLoaderParameters)
-BRAYNS_JSON_OBJECT_ENTRY(MeshLoaderGeometryQuality, geometry_quality,
-                         "Mesh geometry quality")
-BRAYNS_JSON_OBJECT_END()
+    line = {};
+    if (data.empty())
+    {
+        return false;
+    }
+    for (size_t i = 0; i < data.size(); ++i)
+    {
+        auto c = data[i];
+        if (c == '\n')
+        {
+            line = data.substr(0, i);
+            data = data.substr(i + 1);
+            return true;
+        }
+    }
+    line = data;
+    data = {};
+    return true;
+}
 } // namespace brayns
