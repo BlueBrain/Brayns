@@ -354,7 +354,7 @@ public:
         return context.key == "element";
     }
 
-    static bool parse(Context &context)
+    static void parse(Context &context)
     {
         if (StringHelper::countTokens(context.value) != 2)
         {
@@ -368,7 +368,8 @@ private:
     {
         auto value = context.value;
         auto &header = context.header;
-        auto &element = header.elements.emplace_back();
+        auto &elements = header.elements;
+        auto &element = elements.emplace_back();
         auto name = StringHelper::extractToken(value);
         element.name = name;
         element.count = StringHelper::extract<size_t>(value);
@@ -546,7 +547,7 @@ private:
             throw std::runtime_error("Incomplete header");
         }
         ++context.lineNumber;
-        std::string_view line = context.line;
+        auto line = context.line;
         context.key = StringHelper::extractToken(line);
         context.value = line;
         return context.key != "end_header";
