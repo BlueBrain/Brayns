@@ -24,7 +24,6 @@
 #include <unordered_map>
 
 #include <brayns/io/Loader.h>
-#include <brayns/io/loaders/MeshLoaderParameters.h>
 
 #include "mesh/MeshParser.h"
 
@@ -103,7 +102,7 @@ private:
  * A default white material is used for the mesh model.
  *
  */
-class MeshLoader : public Loader<MeshLoaderParameters>
+class MeshLoader : public NoInputLoader
 {
 public:
     /**
@@ -138,7 +137,7 @@ public:
      */
     std::vector<ModelDescriptorPtr> importFromFile(
         const std::string& fileName, const LoaderProgress& callback,
-        const MeshLoaderParameters& properties, Scene& scene) const final;
+        Scene& scene) const final;
 
     /**
      * @brief Import the mesh in the given scene from the given blob of data.
@@ -151,8 +150,7 @@ public:
      * @throw std::runtime_error An error occurs.
      */
     std::vector<ModelDescriptorPtr> importFromBlob(
-        Blob&& blob, const LoaderProgress& callback,
-        const MeshLoaderParameters& properties, Scene& scene) const final;
+        Blob&& blob, const LoaderProgress& callback, Scene& scene) const final;
 
 private:
     MeshParserRegistry _parsers;

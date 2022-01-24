@@ -1,12 +1,15 @@
 stages:
   - test
 
+
 include:
   - project: viz/ci/gitlabpipelines
     file: index.yml
 
+
 default:
   tags: []
+
 
 ubuntu-clangformat-check:
   stage: test
@@ -28,6 +31,7 @@ ubuntu-clangformat-check:
     - echo "clang-format check successful"
     - fi
     - fi
+
 
 ubuntu-cpp-build:
   extends: .cmake-ubuntu
@@ -56,6 +60,7 @@ ubuntu-cpp-build:
     - tar zxvf ${ISPC_DIR}.tar.gz -C ${ISPC_PATH} --strip-components=1
     - rm -rf ${ISPC_PATH}/${ISPC_DIR}/examples
 
+
     # Install embree
     # https://github.com/embree/embree/releases
     - EMBREE_VERSION=3.5.2
@@ -79,6 +84,7 @@ ubuntu-cpp-build:
     - ninja -j$NUM_COMPILE_JOBS install
 
     - cd $CI_PROJECT_DIR
+
 
 docker-build:
   variables:
