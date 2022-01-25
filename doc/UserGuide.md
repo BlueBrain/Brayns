@@ -20,10 +20,14 @@ braynsViewer 4IMY.pdb
 
 ## Meshes
 
-Brayns can load mesh files.
+Brayns can load mesh files with the following formats:
+- OBJ
+- PLY
+- STL
+- OFF
 
 ```
-braynsViewer mesh.obj|ply
+braynsViewer mesh.obj
 ```
 
 ![Mesh](images/Mesh.png)
