@@ -46,7 +46,10 @@ public:
      * @return true At least one model upload task is running.
      * @return false No model is uploaded.
      */
-    bool hasTasks() const { return !_tasks.empty(); }
+    bool hasTasks() const
+    {
+        return !_tasks.empty();
+    }
 
     /**
      * @brief Add a new model upload task.
@@ -57,12 +60,11 @@ public:
      */
     void addTask(ModelUploadTaskPtr task)
     {
-        auto& chunksId = task->getChunksId();
-        auto& currentTask = _tasks[chunksId];
+        auto &chunksId = task->getChunksId();
+        auto &currentTask = _tasks[chunksId];
         if (currentTask)
         {
-            throw EntrypointException("A model upload with chunks ID '" +
-                                      chunksId + "' is already running");
+            throw EntrypointException("A model upload with chunks ID '" + chunksId + "' is already running");
         }
         _nextChunkId = chunksId;
         currentTask = std::move(task);
@@ -73,7 +75,10 @@ public:
      *
      * @param id Chunks ID of the model.
      */
-    void setNextChunkId(const std::string& id) { _nextChunkId = id; }
+    void setNextChunkId(const std::string &id)
+    {
+        _nextChunkId = id;
+    }
 
     /**
      * @brief Add a new binary packet to the current model.
@@ -82,7 +87,7 @@ public:
      *
      * @param blob Model binary data chunk.
      */
-    void addBlob(const std::string& blob)
+    void addBlob(const std::string &blob)
     {
         auto i = _tasks.find(_nextChunkId);
         if (i == _tasks.end())
@@ -90,7 +95,7 @@ public:
             Log::error("No model upload with chunks ID '{}'.", _nextChunkId);
             return;
         }
-        auto& task = *i->second;
+        auto &task = *i->second;
         task.addBlob(blob);
     }
 
@@ -102,7 +107,7 @@ public:
     {
         for (auto i = _tasks.begin(); i != _tasks.end();)
         {
-            auto& task = *i->second;
+            auto &task = *i->second;
             if (task.isRunning())
             {
                 ++i;
@@ -132,7 +137,7 @@ public:
     {
         for (auto i = _uploaders.begin(); i != _uploaders.end();)
         {
-            auto& uploader = i->second;
+            auto &uploader = i->second;
             uploader.removeFinishedTasks();
             if (!uploader.hasTasks())
             {
@@ -149,7 +154,7 @@ public:
      * @param handle Client handle.
      * @param task Task to manage.
      */
-    void addTask(const ConnectionHandle& handle, ModelUploadTaskPtr task)
+    void addTask(const ConnectionHandle &handle, ModelUploadTaskPtr task)
     {
         _uploaders[handle].addTask(std::move(task));
     }
@@ -161,14 +166,14 @@ public:
      * @param handle Client handle.
      * @param id Model chunks ID given at model upload request.
      */
-    void setNextChunkId(const ConnectionHandle& handle, const std::string& id)
+    void setNextChunkId(const ConnectionHandle &handle, const std::string &id)
     {
         auto i = _uploaders.find(handle);
         if (i == _uploaders.end())
         {
             throw EntrypointException("No model uploads are running");
         }
-        auto& uploader = i->second;
+        auto &uploader = i->second;
         uploader.setNextChunkId(id);
     }
 
@@ -178,8 +183,7 @@ public:
      * @param handle Client handle.
      * @param packet Client binary message.
      */
-    void processBinaryRequest(const ConnectionHandle& handle,
-                              const InputPacket& packet)
+    void processBinaryRequest(const ConnectionHandle &handle, const InputPacket &packet)
     {
         auto i = _uploaders.find(handle);
         if (i == _uploaders.end())
@@ -187,8 +191,8 @@ public:
             Log::error("Processing binary from unknown client.");
             return;
         }
-        auto& uploader = i->second;
-        auto& data = packet.getData();
+        auto &uploader = i->second;
+        auto &data = packet.getData();
         uploader.addBlob(data);
     }
 

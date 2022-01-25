@@ -29,8 +29,7 @@ NeuronBuilderTable::NeuronBuilderTable()
     registerBuilder<SampleNeuronBuilder>();
 }
 
-const NeuronBuilder& NeuronBuilderTable::getBuilder(
-    const std::string& name) const
+const NeuronBuilder &NeuronBuilderTable::getBuilder(const std::string &name) const
 {
     auto it = _builders.find(name);
     if (it == _builders.end())
@@ -39,11 +38,10 @@ const NeuronBuilder& NeuronBuilderTable::getBuilder(
     return *(it->second.get());
 }
 
-std::vector<std::string> NeuronBuilderTable::getAvailableBuilderNames()
-    const noexcept
+std::vector<std::string> NeuronBuilderTable::getAvailableBuilderNames() const noexcept
 {
     std::vector<std::string> result;
     result.reserve(_builders.size());
-    for (const auto& entry : _builders)
+    for (const auto &entry : _builders)
         result.push_back(entry.first);
 }

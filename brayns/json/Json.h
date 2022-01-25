@@ -55,7 +55,7 @@ struct Json
      * @throw Poco::JSON::Exception The JsonValue doesn't contain JSON
      * values.
      */
-    static std::string stringify(const JsonValue& json)
+    static std::string stringify(const JsonValue &json)
     {
         std::ostringstream stream;
         Poco::JSON::Stringifier::condense(json, stream);
@@ -69,7 +69,7 @@ struct Json
      * @return JsonValue The resulting JsonValue
      * @throw Poco::JSON::Exception The JSON format is incorrect.
      */
-    static JsonValue parse(const std::string& json)
+    static JsonValue parse(const std::string &json)
     {
         Poco::JSON::Parser parser;
         return parser.parse(json);
@@ -82,8 +82,8 @@ struct Json
      * @param value Value used to build the schema.
      * @return const JsonSchema& JSON schema of T.
      */
-    template <typename T>
-    static JsonSchema getSchema(const T& value)
+    template<typename T>
+    static JsonSchema getSchema(const T &value)
     {
         return JsonAdapter<T>::getSchema(value);
     }
@@ -94,7 +94,7 @@ struct Json
      * @tparam T Type to get the schema from.
      * @return const JsonSchema& JSON schema of T.
      */
-    template <typename T>
+    template<typename T>
     static JsonSchema getSchema()
     {
         static const T value = {};
@@ -109,8 +109,8 @@ struct Json
      * @param value Object to serialize.
      * @return JsonValue JSON source.
      */
-    template <typename T>
-    static JsonValue serialize(const T& value)
+    template<typename T>
+    static JsonValue serialize(const T &value)
     {
         JsonValue json;
         JsonAdapter<T>::serialize(value, json);
@@ -125,8 +125,8 @@ struct Json
      * @return true if success, false if failure, the output value is left
      * unchanged in this case.
      */
-    template <typename T>
-    static bool serialize(const T& value, JsonValue& json)
+    template<typename T>
+    static bool serialize(const T &value, JsonValue &json)
     {
         return JsonAdapter<T>::serialize(value, json);
     }
@@ -139,8 +139,8 @@ struct Json
      * @param value The object to serialize.
      * @return std::string JSON string representing the object.
      */
-    template <typename T>
-    static std::string stringify(const T& value)
+    template<typename T>
+    static std::string stringify(const T &value)
     {
         return stringify(serialize(value));
     }
@@ -153,8 +153,8 @@ struct Json
      * @param json JsonValue containing the object value.
      * @return T Deserialized object.
      */
-    template <typename T>
-    static T deserialize(const JsonValue& json)
+    template<typename T>
+    static T deserialize(const JsonValue &json)
     {
         T value{};
         JsonAdapter<T>::deserialize(json, value);
@@ -169,8 +169,8 @@ struct Json
      * @return true if success, false if failure, the output value is left
      * unchanged in this case.
      */
-    template <typename T>
-    static bool deserialize(const JsonValue& json, T& value)
+    template<typename T>
+    static bool deserialize(const JsonValue &json, T &value)
     {
         return JsonAdapter<T>::deserialize(json, value);
     }
@@ -183,8 +183,8 @@ struct Json
      * @param json The JSON string to parse representing the object.
      * @return T The parsed object.
      */
-    template <typename T>
-    static T parse(const std::string& json)
+    template<typename T>
+    static T parse(const std::string &json)
     {
         return deserialize<T>(parse(json));
     }
@@ -194,7 +194,7 @@ struct Json
  * @brief Specialization to do nothing if value is already JSON.
  *
  */
-template <>
+template<>
 struct JsonAdapter<JsonValue>
 {
     /**
@@ -202,7 +202,10 @@ struct JsonAdapter<JsonValue>
      *
      * @return JsonSchema Empty schema.
      */
-    static JsonSchema getSchema(const JsonValue&) { return {}; }
+    static JsonSchema getSchema(const JsonValue &)
+    {
+        return {};
+    }
 
     /**
      * @brief Copy value into json.
@@ -212,7 +215,7 @@ struct JsonAdapter<JsonValue>
      * @return true if success, false if failure, the output value is left
      * unchanged in this case.
      */
-    static bool serialize(const JsonValue& value, JsonValue& json)
+    static bool serialize(const JsonValue &value, JsonValue &json)
     {
         json = value;
         return true;
@@ -226,7 +229,7 @@ struct JsonAdapter<JsonValue>
      * @return true if success, false if failure, the output value is left
      * unchanged in this case.
      */
-    static bool deserialize(const JsonValue& json, JsonValue& value)
+    static bool deserialize(const JsonValue &json, JsonValue &value)
     {
         value = json;
         return true;

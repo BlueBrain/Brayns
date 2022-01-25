@@ -33,37 +33,51 @@ class UpdateModelProxy
 public:
     UpdateModelProxy() = default;
 
-    UpdateModelProxy(Scene& scene)
+    UpdateModelProxy(Scene &scene)
         : _scene(&scene)
     {
     }
 
-    void setId(size_t id) { _model = &ExtractModel::fromId(*_scene, id); }
+    void setId(size_t id)
+    {
+        _model = &ExtractModel::fromId(*_scene, id);
+    }
 
-    void setBoundingBox(bool enabled) { _model->setBoundingBox(enabled); }
+    void setBoundingBox(bool enabled)
+    {
+        _model->setBoundingBox(enabled);
+    }
 
-    void setName(const std::string& name) { _model->setName(name); }
+    void setName(const std::string &name)
+    {
+        _model->setName(name);
+    }
 
-    void setTransformation(const Transformation& transformation)
+    void setTransformation(const Transformation &transformation)
     {
         _model->setTransformation(transformation);
     }
 
-    void setVisible(bool visible) { _model->setVisible(visible); }
+    void setVisible(bool visible)
+    {
+        _model->setVisible(visible);
+    }
 
-    void computeBounds() { _model->computeBounds(); }
+    void computeBounds()
+    {
+        _model->computeBounds();
+    }
 
 private:
-    Scene* _scene = nullptr;
-    ModelDescriptor* _model = nullptr;
+    Scene *_scene = nullptr;
+    ModelDescriptor *_model = nullptr;
 };
 
 BRAYNS_NAMED_JSON_ADAPTER_BEGIN(UpdateModelProxy, "UpdateModelParams")
 BRAYNS_JSON_ADAPTER_SET("id", setId, "Model ID", Required())
 BRAYNS_JSON_ADAPTER_SET("bounding_box", setBoundingBox, "Display model bounds")
 BRAYNS_JSON_ADAPTER_SET("name", setName, "Model name")
-BRAYNS_JSON_ADAPTER_SET("transformation", setTransformation,
-                        "Model transformation")
+BRAYNS_JSON_ADAPTER_SET("transformation", setTransformation, "Model transformation")
 BRAYNS_JSON_ADAPTER_SET("visible", setVisible, "Model visibility")
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

@@ -13,24 +13,20 @@ namespace
 using Range = std::pair<uint64_t, uint64_t>;
 
 auto computeMapping(
-    const HighFive::Group& reportPop,
-    const std::unordered_map<bbp::sonata::NodeID, Range>& nodePointers,
-    const std::vector<bbp::sonata::NodeID>& nodeIds)
+    const HighFive::Group &reportPop,
+    const std::unordered_map<bbp::sonata::NodeID, Range> &nodePointers,
+    const std::vector<bbp::sonata::NodeID> &nodeIds)
 {
     std::vector<std::pair<bbp::sonata::NodeID, bbp::sonata::ElementID>> result;
-    auto elementIdsData =
-        reportPop.getGroup("mapping").getDataSet("element_ids");
+    auto elementIdsData = reportPop.getGroup("mapping").getDataSet("element_ids");
     for (const auto nodeId : nodeIds)
     {
         const auto it = nodePointers.find(nodeId);
         if (it == nodePointers.end())
             continue;
 
-        std::vector<bbp::sonata::ElementID> elementIds(it->second.second -
-                                                       it->second.first);
-        elementIdsData
-            .select({it->second.first}, {it->second.second - it->second.first})
-            .read(elementIds.data());
+        std::vector<bbp::sonata::ElementID> elementIds(it->second.second - it->second.first);
+        elementIdsData.select({it->second.first}, {it->second.second - it->second.first}).read(elementIds.data());
 
         for (const auto elem : elementIds)
             result.push_back(std::make_pair(nodeId, elem));
@@ -40,7 +36,8 @@ auto computeMapping(
 } // namespace
 
 std::vector<bbp::sonata::NodeID> SonataSimulationMapping::getCompartmentNodes(
-    const std::string& reportPath, const std::string& population)
+    const std::string &reportPath,
+    const std::string &population)
 {
     const HighFive::File file(reportPath, HighFive::File::ReadOnly);
     const auto reportPop = file.getGroup("/report/" + population);
@@ -53,10 +50,10 @@ std::vector<bbp::sonata::NodeID> SonataSimulationMapping::getCompartmentNodes(
 
 // Extracted and optimized code
 // from https://github.com/BlueBrain/libsonata/blob/master/src/report_reader.cpp
-std::vector<std::pair<bbp::sonata::NodeID, bbp::sonata::ElementID>>
-    SonataSimulationMapping::getCompartmentMapping(
-        const std::string& reportPath, const std::string& population,
-        const std::vector<bbp::sonata::NodeID>& nodeIds)
+std::vector<std::pair<bbp::sonata::NodeID, bbp::sonata::ElementID>> SonataSimulationMapping::getCompartmentMapping(
+    const std::string &reportPath,
+    const std::string &population,
+    const std::vector<bbp::sonata::NodeID> &nodeIds)
 {
     // Get report population
     const HighFive::File file(reportPath, HighFive::File::ReadOnly);
@@ -75,9 +72,7 @@ std::vector<std::pair<bbp::sonata::NodeID, bbp::sonata::ElementID>>
 
     std::unordered_map<bbp::sonata::NodeID, Range> nodePointers;
     for (size_t i = 0; i < reportNodeIds.size(); ++i)
-        nodePointers.emplace(reportNodeIds[i],
-                             std::make_pair(indexPointers[i],
-                                            indexPointers[i + 1]));
+        nodePointers.emplace(reportNodeIds[i], std::make_pair(indexPointers[i], indexPointers[i + 1]));
 
     // Compute final list of
     if (!nodeIds.empty())

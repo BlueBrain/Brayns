@@ -56,7 +56,7 @@ namespace brayns
  * @endcode
  *
  */
-template <typename ParamsType, typename ResultType>
+template<typename ParamsType, typename ResultType>
 class Entrypoint : public BaseEntrypoint
 {
 public:
@@ -92,7 +92,7 @@ public:
      *
      * @param request Generic request.
      */
-    virtual void onRequest(const NetworkRequest& request) override
+    virtual void onRequest(const NetworkRequest &request) override
     {
         onRequest(Request(request));
     }
@@ -102,7 +102,7 @@ public:
      *
      * @param request Request specialized for Params and Result.
      */
-    virtual void onRequest(const Request& request) = 0;
+    virtual void onRequest(const Request &request) = 0;
 
     /**
      * @brief Launch a task to process the given request.
@@ -116,15 +116,14 @@ public:
      * @throw EntrypointException A request with the same client and ID is
      * already running.
      */
-    void launchTask(const TaskPtr& task, const Request& request) const
+    void launchTask(const TaskPtr &task, const Request &request) const
     {
-        auto& tasks = getTasks();
-        auto& handle = request.getConnectionHandle();
-        auto& id = request.getId();
+        auto &tasks = getTasks();
+        auto &handle = request.getConnectionHandle();
+        auto &id = request.getId();
         if (!tasks.addIfNotPresent(handle, id, task))
         {
-            throw EntrypointException("A task with ID " + id.getDisplayText() +
-                                      " is already running for this client");
+            throw EntrypointException("A task with ID " + id.getDisplayText() + " is already running for this client");
         }
         task->execute(request);
     }
@@ -139,11 +138,11 @@ public:
      * be called.
      * @param request Client request to process.
      */
-    void launchOrRestartTask(const TaskPtr& task, const Request& request) const
+    void launchOrRestartTask(const TaskPtr &task, const Request &request) const
     {
-        auto& tasks = getTasks();
-        auto& handle = request.getConnectionHandle();
-        auto& id = request.getId();
+        auto &tasks = getTasks();
+        auto &handle = request.getConnectionHandle();
+        auto &id = request.getId();
         tasks.addIfNotPresent(handle, id, task);
         task->execute(request);
     }

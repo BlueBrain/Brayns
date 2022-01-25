@@ -35,18 +35,19 @@ enum class ProteinLoaderColorScheme
 };
 
 BRAYNS_JSON_ADAPTER_ENUM(
-    ProteinLoaderColorScheme, {"none", ProteinLoaderColorScheme::none},
+    ProteinLoaderColorScheme,
+    {"none", ProteinLoaderColorScheme::none},
     {"by_id", ProteinLoaderColorScheme::by_id},
     {"protein_atoms", ProteinLoaderColorScheme::protein_atoms},
     {"protein_chains", ProteinLoaderColorScheme::protein_chains},
     {"protein_residues", ProteinLoaderColorScheme::protein_residues});
 
 BRAYNS_JSON_OBJECT_BEGIN(ProteinLoaderParameters)
-BRAYNS_JSON_OBJECT_ENTRY(ProteinLoaderColorScheme, color_scheme,
-                         "Defines how to color the loaded proteins",
-                         Default("none"))
-BRAYNS_JSON_OBJECT_ENTRY(double, radius_multiplier,
-                         "A multiplier to apply to the protein sample radii",
-                         Default(1.0))
+BRAYNS_JSON_OBJECT_ENTRY(
+    ProteinLoaderColorScheme,
+    color_scheme,
+    "Defines how to color the loaded proteins",
+    Default("none"))
+BRAYNS_JSON_OBJECT_ENTRY(double, radius_multiplier, "A multiplier to apply to the protein sample radii", Default(1.0))
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

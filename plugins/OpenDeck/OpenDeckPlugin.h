@@ -28,7 +28,7 @@ namespace brayns
 class OpenDeckPlugin : public ExtensionPlugin
 {
 public:
-    OpenDeckPlugin(OpenDeckParameters&& params);
+    OpenDeckPlugin(OpenDeckParameters &&params);
 
     void init() final;
 

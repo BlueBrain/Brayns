@@ -37,7 +37,7 @@ namespace brayns
  *
  * @tparam T Map-like type.
  */
-template <typename T>
+template<typename T>
 struct MapAdapter
 {
     using ValueType = typename T::mapped_type;
@@ -48,7 +48,7 @@ struct MapAdapter
      *
      * @return JsonSchema T schema.
      */
-    static JsonSchema getSchema(const T&)
+    static JsonSchema getSchema(const T &)
     {
         JsonSchema schema;
         schema.type = JsonType::Object;
@@ -64,10 +64,10 @@ struct MapAdapter
      * @return true Success.
      * @return false Failure.
      */
-    static bool serialize(const T& value, JsonValue& json)
+    static bool serialize(const T &value, JsonValue &json)
     {
         auto object = Poco::makeShared<JsonObject>();
-        for (const auto& pair : value)
+        for (const auto &pair : value)
         {
             JsonValue jsonItem;
             if (!Json::serialize(pair.second, jsonItem))
@@ -91,7 +91,7 @@ struct MapAdapter
      * @return true Success.
      * @return false Failure.
      */
-    static bool deserialize(const JsonValue& json, T& value)
+    static bool deserialize(const JsonValue &json, T &value)
     {
         auto object = JsonExtractor::extractObject(json);
         if (!object)
@@ -99,7 +99,7 @@ struct MapAdapter
             return false;
         }
         T buffer;
-        for (const auto& pair : *object)
+        for (const auto &pair : *object)
         {
             if (!Json::deserialize(pair.second, buffer[pair.first]))
             {
@@ -116,7 +116,7 @@ struct MapAdapter
  *
  * @tparam T Type of the map values.
  */
-template <typename T>
+template<typename T>
 struct JsonAdapter<StringMap<T>> : MapAdapter<StringMap<T>>
 {
 };
@@ -127,7 +127,7 @@ struct JsonAdapter<StringMap<T>> : MapAdapter<StringMap<T>>
  *
  * @tparam T Type of the map values.
  */
-template <typename T>
+template<typename T>
 struct JsonAdapter<StringHash<T>> : MapAdapter<StringHash<T>>
 {
 };

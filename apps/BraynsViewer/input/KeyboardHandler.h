@@ -43,23 +43,22 @@ enum class SpecialKey
 class KeyboardHandler
 {
 public:
-    void registerKeyboardShortcut(const unsigned char key,
-                                  const std::string& description,
-                                  std::function<void()> functor);
+    void registerKeyboardShortcut(
+        const unsigned char key,
+        const std::string &description,
+        std::function<void()> functor);
 
     void unregisterKeyboardShortcut(const unsigned char key);
 
     void handleKeyboardShortcut(const unsigned char key);
 
-    void registerSpecialKey(const SpecialKey key,
-                            const std::string& description,
-                            std::function<void()> functor);
+    void registerSpecialKey(const SpecialKey key, const std::string &description, std::function<void()> functor);
 
     void unregisterSpecialKey(const SpecialKey key);
 
     void handle(const SpecialKey key);
 
-    const std::vector<std::string>& help() const;
+    const std::vector<std::string> &help() const;
 
 private:
     void _buildHelp();

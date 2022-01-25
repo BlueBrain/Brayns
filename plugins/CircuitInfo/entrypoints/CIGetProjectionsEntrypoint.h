@@ -28,8 +28,7 @@
 
 #include <messages/CIGetProjectionsMessage.h>
 
-class CIGetProjectionsEntrypoint
-    : public brayns::Entrypoint<CIGetProjectionsParams, CIGetProjectionsResult>
+class CIGetProjectionsEntrypoint : public brayns::Entrypoint<CIGetProjectionsParams, CIGetProjectionsResult>
 {
 public:
     virtual std::string getName() const override
@@ -42,7 +41,7 @@ public:
         return "Return a list of projection names available on a circuit";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         CIGetProjectionsResult result;

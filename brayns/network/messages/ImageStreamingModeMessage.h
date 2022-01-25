@@ -31,9 +31,10 @@ enum class ImageStreamingMode
     Quanta
 };
 
-BRAYNS_JSON_ADAPTER_ENUM(ImageStreamingMode,
-                         {"stream", ImageStreamingMode::Stream},
-                         {"quanta", ImageStreamingMode::Quanta})
+BRAYNS_JSON_ADAPTER_ENUM(
+    ImageStreamingMode,
+    {"stream", ImageStreamingMode::Stream},
+    {"quanta", ImageStreamingMode::Quanta})
 
 BRAYNS_JSON_OBJECT_BEGIN(ImageStreamingModeMessage)
 BRAYNS_JSON_OBJECT_ENTRY(ImageStreamingMode, type, "Stream mode")

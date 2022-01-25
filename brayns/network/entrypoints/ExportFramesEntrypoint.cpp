@@ -29,12 +29,12 @@ namespace brayns
 {
 namespace
 {
-void logExportInfo(const ExportFramesParams& info)
+void logExportInfo(const ExportFramesParams &info)
 {
     const auto numKeyFrames = info.key_frames.size();
     const auto spp = info.spp;
-    const auto& path = info.path;
-    const auto& renderer = info.renderer_name;
+    const auto &path = info.path;
+    const auto &renderer = info.renderer_name;
     const auto w = info.image_size.x;
     const auto h = info.image_size.y;
 
@@ -45,19 +45,24 @@ void logExportInfo(const ExportFramesParams& info)
         "- Samples per pixel:\t{}\n"
         "- Export folder:\t{}\n"
         "- Renderer:\t{}\n",
-        w, h, numKeyFrames, spp, path, renderer);
+        w,
+        h,
+        numKeyFrames,
+        spp,
+        path,
+        renderer);
 }
 
-void initializeParameters(Engine& engine, ExportFramesParams& params)
+void initializeParameters(Engine &engine, ExportFramesParams &params)
 {
-    const auto& paramsManager = engine.getParametersManager();
-    const auto& sysRenderParams = paramsManager.getRenderingParameters();
-    const auto& sysVolumeParams = paramsManager.getVolumeParameters();
-    const auto& sysRenderer = engine.getRenderer();
+    const auto &paramsManager = engine.getParametersManager();
+    const auto &sysRenderParams = paramsManager.getRenderingParameters();
+    const auto &sysVolumeParams = paramsManager.getVolumeParameters();
+    const auto &sysRenderer = engine.getRenderer();
 
-    auto& rendererName = params.renderer_name;
-    auto& renderSpecificParams = params.renderer_parameters;
-    auto& volumeParams = params.volume_parameters;
+    auto &rendererName = params.renderer_name;
+    auto &renderSpecificParams = params.renderer_parameters;
+    auto &volumeParams = params.volume_parameters;
 
     if (rendererName.empty())
         rendererName = sysRenderer.getCurrentType();
@@ -69,11 +74,10 @@ void initializeParameters(Engine& engine, ExportFramesParams& params)
         volumeParams = std::make_unique<VolumeParameters>(sysVolumeParams);
 }
 
-std::string writeFrameToDisk(const ExportFramesParams& params,
-                             const uint32_t frameName, FrameBuffer& fb)
+std::string writeFrameToDisk(const ExportFramesParams &params, const uint32_t frameName, FrameBuffer &fb)
 {
-    const auto& path = params.path;
-    const auto& format = params.format;
+    const auto &path = params.path;
+    const auto &format = params.format;
     auto quality = params.quality;
     auto image = fb.getImage();
 
@@ -86,7 +90,7 @@ std::string writeFrameToDisk(const ExportFramesParams& params,
         ImageEncoder::save(image, filename, quality);
         Log::info("Frame saved to {}", filename);
     }
-    catch (const std::runtime_error& e)
+    catch (const std::runtime_error &e)
     {
         Log::error("{}", e.what());
     }
@@ -95,7 +99,7 @@ std::string writeFrameToDisk(const ExportFramesParams& params,
 }
 } // namespace
 
-ExportFramesTask::ExportFramesTask(Engine& engine, ExportFramesParams&& params)
+ExportFramesTask::ExportFramesTask(Engine &engine, ExportFramesParams &&params)
     : _engine(engine)
     , _params(std::move(params))
 {
@@ -107,27 +111,26 @@ void ExportFramesTask::run()
     initializeParameters(_engine, _params);
 
     // Create parameter managers
-    auto& paramManager = _engine.getParametersManager();
+    auto &paramManager = _engine.getParametersManager();
     auto animParams = paramManager.getAnimationParameters();
     auto renderParams = paramManager.getRenderingParameters();
     renderParams.setSamplesPerPixel(_params.spp);
     renderParams.setSubsampling(1);
     renderParams.setAccumulation(false);
-    auto& volumeParams = *_params.volume_parameters;
+    auto &volumeParams = *_params.volume_parameters;
 
-    const auto& rendererName = _params.renderer_name;
-    const auto& rendererSettings = _params.renderer_parameters;
-    const auto& imageSize = _params.image_size;
+    const auto &rendererName = _params.renderer_name;
+    const auto &rendererSettings = _params.renderer_parameters;
+    const auto &imageSize = _params.image_size;
     const auto nameAfterStep = _params.name_after_simulation_index;
-    const auto& rendererSpecificParams = _params.renderer_parameters;
-    const auto& keyFrames = _params.key_frames;
+    const auto &rendererSpecificParams = _params.renderer_parameters;
+    const auto &keyFrames = _params.key_frames;
 
     // Create the camera
     auto camera = _engine.createCamera();
-    const auto& systemCamera = _engine.getCamera();
+    const auto &systemCamera = _engine.getCamera();
     camera->clonePropertiesFrom(systemCamera);
-    const auto aspectRatio =
-        static_cast<double>(imageSize.x) / static_cast<double>(imageSize.y);
+    const auto aspectRatio = static_cast<double>(imageSize.x) / static_cast<double>(imageSize.y);
     camera->setBufferTarget("default");
     camera->markModified(false);
     camera->commit();
@@ -144,8 +147,7 @@ void ExportFramesTask::run()
     renderer->setScene(scene);
 
     // Create the framebuffer
-    auto frameBuffer =
-        _engine.createFrameBuffer("default", imageSize, PixelFormat::RGBA_I8);
+    auto frameBuffer = _engine.createFrameBuffer("default", imageSize, PixelFormat::RGBA_I8);
     frameBuffer->setAccumulation(false);
     frameBuffer->markModified();
 
@@ -156,7 +158,7 @@ void ExportFramesTask::run()
 
     for (size_t i = 0; i < keyFrames.size(); ++i)
     {
-        const auto& keyFrame = keyFrames[i];
+        const auto &keyFrame = keyFrames[i];
 
         animParams.setFrame(keyFrame.frame_index);
         scene->markModified(false);
@@ -180,7 +182,7 @@ void ExportFramesTask::run()
         {
             writeFrameToDisk(_params, name, *frameBuffer);
         }
-        catch (const std::exception& e)
+        catch (const std::exception &e)
         {
             _result = {1, e.what()};
             return;
@@ -188,8 +190,7 @@ void ExportFramesTask::run()
 
         totalProgress += progressChunk;
 
-        progress(fmt::format("Frame {} out of {} done", i, keyFrames.size()),
-                 totalProgress);
+        progress(fmt::format("Frame {} out of {} done", i, keyFrames.size()), totalProgress);
     }
 }
 
@@ -213,10 +214,10 @@ bool ExportFramesEntrypoint::isAsync() const
     return true;
 }
 
-void ExportFramesEntrypoint::onRequest(const Request& request)
+void ExportFramesEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto& engine = getApi().getEngine();
+    auto &engine = getApi().getEngine();
     auto task = std::make_shared<ExportFramesTask>(engine, std::move(params));
     launchTask(task, request);
 }

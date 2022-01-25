@@ -25,8 +25,7 @@
 
 BRAYNS_JSON_OBJECT_BEGIN(CIGetCellIdsParams)
 BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path to the circuit config file")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, targets, "Targets to query",
-                         brayns::Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, targets, "Targets to query", brayns::Required(false))
 BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(CIGetCellIdsResult)

@@ -36,23 +36,22 @@ namespace
 constexpr auto ALMOST_ZERO = 1e-7f;
 constexpr auto LOADER_NAME = "xyzb";
 
-float _computeHalfArea(const Boxf& bbox)
+float _computeHalfArea(const Boxf &bbox)
 {
     const auto size = bbox.getSize();
     return size[0] * size[1] + size[0] * size[2] + size[1] * size[2];
 }
 } // namespace
 
-std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
-    Blob&& blob, const LoaderProgress& callback, Scene& scene) const
+std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(Blob &&blob, const LoaderProgress &callback, Scene &scene)
+    const
 {
     Log::info("Loading xyz {}.", blob.name);
 
     std::stringstream stream(std::string(blob.data.begin(), blob.data.end()));
     size_t numlines = 0;
     {
-        numlines = std::count(std::istreambuf_iterator<char>(stream),
-                              std::istreambuf_iterator<char>(), '\n');
+        numlines = std::count(std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>(), '\n');
     }
     stream.seekg(0);
 
@@ -61,7 +60,7 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
     const auto name = fs::path({blob.name}).stem().string();
     const auto materialId = 0;
     model->createMaterial(materialId, name);
-    auto& spheres = model->getSpheres()[materialId];
+    auto &spheres = model->getSpheres()[materialId];
 
     const size_t startOffset = spheres.size();
     spheres.reserve(spheres.size() + numlines);
@@ -92,8 +91,7 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
             break;
         }
         default:
-            throw std::runtime_error("Invalid content in line " +
-                                     std::to_string(i + 1) + ": " + line);
+            throw std::runtime_error("Invalid content in line " + std::to_string(i + 1) + ": " + line);
         }
         callback.updateProgress(msg.str(), i++ / static_cast<float>(numlines));
     }
@@ -102,13 +100,9 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
     // https://en.wikipedia.org/wiki/Wigner%E2%80%93Seitz_radius
 
     const auto volume = glm::compMul(bbox.getSize());
-    const auto density4PI =
-        4 * M_PI * numlines /
-        (volume > ALMOST_ZERO ? volume : _computeHalfArea(bbox));
+    const auto density4PI = 4 * M_PI * numlines / (volume > ALMOST_ZERO ? volume : _computeHalfArea(bbox));
 
-    const double meanRadius = volume > ALMOST_ZERO
-                                  ? std::pow((3. / density4PI), 1. / 3.)
-                                  : std::sqrt(1 / density4PI);
+    const double meanRadius = volume > ALMOST_ZERO ? std::pow((3. / density4PI), 1. / 3.) : std::sqrt(1 / density4PI);
 
     // resize the spheres to the new mean radius
     for (i = 0; i < numlines; ++i)
@@ -116,20 +110,17 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
-    auto modelDescriptor =
-        std::make_shared<ModelDescriptor>(std::move(model), blob.name);
+    auto modelDescriptor = std::make_shared<ModelDescriptor>(std::move(model), blob.name);
     modelDescriptor->setTransformation(transformation);
 
     Property radiusProperty("radius", meanRadius, {"Point size"});
     radiusProperty.onModified(
-        [modelDesc = std::weak_ptr<ModelDescriptor>(modelDescriptor)](
-            const Property& property)
+        [modelDesc = std::weak_ptr<ModelDescriptor>(modelDescriptor)](const Property &property)
         {
             if (auto modelDesc_ = modelDesc.lock())
             {
                 const auto newRadius = property.as<double>();
-                for (auto& sphere :
-                     modelDesc_->getModel().getSpheres()[materialId])
+                for (auto &sphere : modelDesc_->getModel().getSpheres()[materialId])
                     sphere.radius = newRadius;
             }
         });
@@ -139,18 +130,16 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(
     return {modelDescriptor};
 }
 
-std::vector<ModelDescriptorPtr> XYZBLoader::importFromFile(
-    const std::string& filename, const LoaderProgress& callback,
-    Scene& scene) const
+std::vector<ModelDescriptorPtr>
+    XYZBLoader::importFromFile(const std::string &filename, const LoaderProgress &callback, Scene &scene) const
 {
     std::ifstream file(filename);
     if (!file.good())
         throw std::runtime_error("Could not open file " + filename);
-    return importFromBlob({"xyz",
-                           filename,
-                           {std::istreambuf_iterator<char>(file),
-                            std::istreambuf_iterator<char>()}},
-                          callback, scene);
+    return importFromBlob(
+        {"xyz", filename, {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()}},
+        callback,
+        scene);
 }
 
 std::string XYZBLoader::getName() const

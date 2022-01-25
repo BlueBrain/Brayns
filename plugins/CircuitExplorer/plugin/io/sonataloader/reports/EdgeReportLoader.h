@@ -54,7 +54,8 @@ public:
      *        cells
      */
     virtual std::vector<EdgeReportMapping> loadMapping(
-        const std::string& reportPath, const std::string& population,
-        const bbp::sonata::Selection&) const = 0;
+        const std::string &reportPath,
+        const std::string &population,
+        const bbp::sonata::Selection &) const = 0;
 };
 } // namespace sonataloader

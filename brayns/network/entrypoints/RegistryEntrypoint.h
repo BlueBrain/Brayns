@@ -25,24 +25,25 @@
 
 namespace brayns
 {
-class RegistryEntrypoint
-    : public Entrypoint<EmptyMessage, std::vector<std::string>>
+class RegistryEntrypoint : public Entrypoint<EmptyMessage, std::vector<std::string>>
 {
 public:
-    virtual std::string getName() const override { return "registry"; }
+    virtual std::string getName() const override
+    {
+        return "registry";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Retreive the names of all registered entrypoints";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
-        auto& entrypoints = getEntrypoints();
+        auto &entrypoints = getEntrypoints();
         std::vector<std::string> result;
         result.reserve(entrypoints.size());
-        entrypoints.forEach([&](const auto& entrypoint)
-                            { result.push_back(entrypoint.getName()); });
+        entrypoints.forEach([&](const auto &entrypoint) { result.push_back(entrypoint.getName()); });
         request.reply(result);
     }
 };

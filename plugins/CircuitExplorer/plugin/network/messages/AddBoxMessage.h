@@ -24,11 +24,8 @@
 #include <brayns/json/JsonObjectMacro.h>
 
 BRAYNS_JSON_OBJECT_BEGIN(AddBoxMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, name, "Name to give to the added model",
-                         brayns::Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector3d, min_corner,
-                         "Axis aligned minimum bound of the box")
-BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector3d, max_corner,
-                         "Axis aligned maximum bound of the box")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, name, "Name to give to the added model", brayns::Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector3d, min_corner, "Axis aligned minimum bound of the box")
+BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector3d, max_corner, "Axis aligned maximum bound of the box")
 BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector4d, color, "Box color RGBA normalized")
 BRAYNS_JSON_OBJECT_END()

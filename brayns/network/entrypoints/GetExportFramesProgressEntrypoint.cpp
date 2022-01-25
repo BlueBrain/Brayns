@@ -23,8 +23,7 @@
 
 namespace brayns
 {
-GetExportFramesProgressEntrypoint::GetExportFramesProgressEntrypoint(
-    std::shared_ptr<FrameExporter>& expt)
+GetExportFramesProgressEntrypoint::GetExportFramesProgressEntrypoint(std::shared_ptr<FrameExporter> &expt)
     : _exporter(expt)
 {
 }
@@ -39,18 +38,18 @@ std::string GetExportFramesProgressEntrypoint::getDescription() const
     return "Get the progress of the last issued frame export";
 }
 
-void GetExportFramesProgressEntrypoint::onRequest(const Request& request)
+void GetExportFramesProgressEntrypoint::onRequest(const Request &request)
 {
     double progress{};
     try
     {
         progress = _exporter->getExportProgress();
     }
-    catch (const FrameExportNotRunningException&)
+    catch (const FrameExportNotRunningException &)
     {
         throw EntrypointException(1, "There is no frame export in progress");
     }
-    catch (const std::runtime_error& e)
+    catch (const std::runtime_error &e)
     {
         throw EntrypointException(2, e.what());
     }

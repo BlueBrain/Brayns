@@ -44,21 +44,21 @@ public:
      *
      * @return const std::string& Parent plugin name.
      */
-    virtual const std::string& getPlugin() const = 0;
+    virtual const std::string &getPlugin() const = 0;
 
     /**
      * @brief Set the name of the plugin that loads this entrypoint.
      *
      * @param plugin Parent plugin name.
      */
-    virtual void setPlugin(const std::string& plugin) = 0;
+    virtual void setPlugin(const std::string &plugin) = 0;
 
     /**
      * @brief Used by the manager give context access.
      *
      * @param context A reference to the current network context.
      */
-    virtual void setContext(NetworkContext& context) = 0;
+    virtual void setContext(NetworkContext &context) = 0;
 
     /**
      * @brief Return the name of the entrypoint (unique ID).
@@ -96,37 +96,48 @@ public:
      * thread.
      * @return false The entrypoint will be executed in the main loop.
      */
-    virtual bool isAsync() const { return false; }
+    virtual bool isAsync() const
+    {
+        return false;
+    }
 
     /**
      * @brief Called once the entrypoint is ready to be used.
      *
      */
-    virtual void onCreate() {}
+    virtual void onCreate()
+    {
+    }
 
     /**
      * @brief Called each time a frame is rendered.
      *
      */
-    virtual void onUpdate() {}
+    virtual void onUpdate()
+    {
+    }
 
     /**
      * @brief Called each time the client sends a request to the entrypoint.
      *
      * @param request Client request.
      */
-    virtual void onRequest(const NetworkRequest& request) = 0;
+    virtual void onRequest(const NetworkRequest &request) = 0;
 
     /**
      * @brief Called before each render.
      *
      */
-    virtual void onPreRender() {}
+    virtual void onPreRender()
+    {
+    }
 
     /**
      * @brief Called after each render.
      *
      */
-    virtual void onPostRender() {}
+    virtual void onPostRender()
+    {
+    }
 };
 } // namespace brayns

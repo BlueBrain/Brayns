@@ -26,21 +26,14 @@
 BRAYNS_JSON_OBJECT_BEGIN(CIGetCellDataParams)
 BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path to circuit config file")
 BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint64_t>, ids, "List of cell IDs")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, properties,
-                         "Desired properties")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, properties, "Desired properties")
 BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(CIGetCellDataResult)
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, etypes,
-                         "Requested cell e-types")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, mtypes,
-                         "Requested cell m-types")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, morphology_classes,
-                         "Requested cell morphology classes")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, layers,
-                         "Requested cell layers")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<double>, positions,
-                         "Requested cell positions")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<double>, orientations,
-                         "Requested cell orientations")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, etypes, "Requested cell e-types")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, mtypes, "Requested cell m-types")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, morphology_classes, "Requested cell morphology classes")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, layers, "Requested cell layers")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<double>, positions, "Requested cell positions")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<double>, orientations, "Requested cell orientations")
 BRAYNS_JSON_OBJECT_END()

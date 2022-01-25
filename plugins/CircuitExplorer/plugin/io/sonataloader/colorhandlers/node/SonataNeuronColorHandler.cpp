@@ -34,8 +34,7 @@ constexpr char methodByRegion[] = "region";
 constexpr char methodByHemisphere[] = "hemisphere";
 } // namespace
 
-SonataNeuronColorHandler::SonataNeuronColorHandler(
-    const std::string& configPath, const std::string& population)
+SonataNeuronColorHandler::SonataNeuronColorHandler(const std::string &configPath, const std::string &population)
     : _config(bbp::sonata::CircuitConfig::fromFile(configPath))
     , _population(population)
 {
@@ -44,15 +43,20 @@ SonataNeuronColorHandler::SonataNeuronColorHandler(
 std::vector<std::string> SonataNeuronColorHandler::_getExtraMethods() const
 {
     const auto population = _config.getNodePopulation(_population);
-    const auto& attributes = population.attributeNames();
+    const auto &attributes = population.attributeNames();
     const std::vector<std::string> possibleMethods = {
-        methodByMorphology, methodByLayer,     methodByMorphClass,
-        methodByEType,      methodByMType,     methodBySynapseClass,
-        methodByRegion,     methodByHemisphere};
+        methodByMorphology,
+        methodByLayer,
+        methodByMorphClass,
+        methodByEType,
+        methodByMType,
+        methodBySynapseClass,
+        methodByRegion,
+        methodByHemisphere};
     std::vector<std::string> result;
     result.reserve(possibleMethods.size());
 
-    for (const auto& possible : possibleMethods)
+    for (const auto &possible : possibleMethods)
     {
         if (attributes.find(possible) != attributes.end())
             result.push_back(possible);
@@ -62,11 +66,9 @@ std::vector<std::string> SonataNeuronColorHandler::_getExtraMethods() const
     return result;
 }
 
-std::vector<std::string> SonataNeuronColorHandler::_getValuesForMethod(
-    const std::string& method) const
+std::vector<std::string> SonataNeuronColorHandler::_getValuesForMethod(const std::string &method) const
 {
     const auto selection = bbp::sonata::Selection::fromValues(_ids);
-    return _config.getNodePopulation(_population)
-        .getAttribute<std::string>(method, selection);
+    return _config.getNodePopulation(_population).getAttribute<std::string>(method, selection);
 }
 } // namespace sonataloader

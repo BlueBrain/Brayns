@@ -90,7 +90,7 @@ public:
     /**
      * @brief Construct an exception from the error message.
      */
-    MovieCreationException(const std::string& message)
+    MovieCreationException(const std::string &message)
         : std::runtime_error(message)
     {
     }
@@ -108,5 +108,5 @@ public:
      * @param info Information provided by the user to create the movie.
      * @throw MovieCreationException if the movie cannot be created.
      */
-    static void createMovie(const MovieInfo& info);
+    static void createMovie(const MovieInfo &info);
 };

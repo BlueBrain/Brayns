@@ -48,8 +48,7 @@ public:
 
     std::vector<SynapseMaterialInfo> materials;
 
-    void setColor(brayns::ModelDescriptor*,
-                  const brayns::Vector4f&) noexcept final
+    void setColor(brayns::ModelDescriptor *, const brayns::Vector4f &) noexcept final
     {
     }
 };

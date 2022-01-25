@@ -27,17 +27,17 @@ namespace brayns
 class DynamicLib
 {
 public:
-    DynamicLib(const std::string& name);
+    DynamicLib(const std::string &name);
     ~DynamicLib();
 
-    DynamicLib(DynamicLib&& other);
-    DynamicLib& operator=(DynamicLib&& other);
-    DynamicLib(const DynamicLib&) = delete;
-    DynamicLib& operator=(const DynamicLib&) = delete;
+    DynamicLib(DynamicLib &&other);
+    DynamicLib &operator=(DynamicLib &&other);
+    DynamicLib(const DynamicLib &) = delete;
+    DynamicLib &operator=(const DynamicLib &) = delete;
 
-    void* getSymbolAddress(const std::string& name) const;
+    void *getSymbolAddress(const std::string &name) const;
 
 private:
-    void* _handler{nullptr};
+    void *_handler{nullptr};
 };
 } // namespace brayns

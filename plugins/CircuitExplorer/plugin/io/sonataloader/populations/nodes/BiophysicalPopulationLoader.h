@@ -35,8 +35,8 @@ public:
     }
 
     std::vector<MorphologyInstance::Ptr> load(
-        const SonataConfig::Data& networkData,
-        const SonataNodePopulationParameters& loadSettings,
-        const bbp::sonata::Selection& nodeSelection) const final;
+        const SonataConfig::Data &networkData,
+        const SonataNodePopulationParameters &loadSettings,
+        const bbp::sonata::Selection &nodeSelection) const final;
 };
 } // namespace sonataloader

@@ -116,8 +116,7 @@ public:
         {
             throw std::runtime_error("Expected 2 numbers for a vector2");
         }
-        return {StringHelper::extract<float>(str),
-                StringHelper::extract<float>(str)};
+        return {StringHelper::extract<float>(str), StringHelper::extract<float>(str)};
     }
 
     static Vector3f parseVector3(std::string_view str)
@@ -126,16 +125,20 @@ public:
         {
             throw std::runtime_error("Expected 3 numbers for a vector3");
         }
-        return {StringHelper::extract<float>(str),
-                StringHelper::extract<float>(str),
-                StringHelper::extract<float>(str)};
+        return {
+            StringHelper::extract<float>(str),
+            StringHelper::extract<float>(str),
+            StringHelper::extract<float>(str)};
     }
 };
 
 class NewObjectParser
 {
 public:
-    static bool canParse(const Context &context) { return context.key == "o"; }
+    static bool canParse(const Context &context)
+    {
+        return context.key == "o";
+    }
 
     static void parse(Context &context)
     {
@@ -147,7 +150,10 @@ public:
 class VertexParser
 {
 public:
-    static bool canParse(const Context &context) { return context.key == "v"; }
+    static bool canParse(const Context &context)
+    {
+        return context.key == "v";
+    }
 
     static void parse(Context &context)
     {
@@ -161,7 +167,10 @@ public:
 class TextureParser
 {
 public:
-    static bool canParse(const Context &context) { return context.key == "vt"; }
+    static bool canParse(const Context &context)
+    {
+        return context.key == "vt";
+    }
 
     static void parse(Context &context)
     {
@@ -175,7 +184,10 @@ public:
 class NormalParser
 {
 public:
-    static bool canParse(const Context &context) { return context.key == "vn"; }
+    static bool canParse(const Context &context)
+    {
+        return context.key == "vn";
+    }
 
     static void parse(Context &context)
     {
@@ -207,9 +219,8 @@ private:
         }
         auto textureCount = mesh.textureIndices.size();
         auto normalCount = mesh.normalIndices.size();
-        return _checkSameOrEmpty(vertexCount, textureCount) &&
-               _checkSameOrEmpty(vertexCount, normalCount) &&
-               _checkSameOrEmpty(textureCount, normalCount);
+        return _checkSameOrEmpty(vertexCount, textureCount) && _checkSameOrEmpty(vertexCount, normalCount)
+            && _checkSameOrEmpty(textureCount, normalCount);
     }
 
     static bool _checkSameOrEmpty(size_t left, size_t right)
@@ -221,7 +232,10 @@ private:
 class FaceParser
 {
 public:
-    static bool canParse(const Context &context) { return context.key == "f"; }
+    static bool canParse(const Context &context)
+    {
+        return context.key == "f";
+    }
 
     static void parse(Context &context)
     {
@@ -236,8 +250,7 @@ private:
         auto count = StringHelper::countTokens(value);
         if (count != 3)
         {
-            throw std::runtime_error("Non-triangular face with " +
-                                     std::to_string(count) + " vertices");
+            throw std::runtime_error("Non-triangular face with " + std::to_string(count) + " vertices");
         }
         _extractIndices(value, mesh);
         _extractIndices(value, mesh);
@@ -251,16 +264,14 @@ private:
         auto count = StringHelper::count(indices, "/");
         if (count > 2)
         {
-            throw std::runtime_error("Invalid index count of " +
-                                     std::to_string(count) + " in a vertex");
+            throw std::runtime_error("Invalid index count of " + std::to_string(count) + " in a vertex");
         }
         _extractIndex(indices, mesh.vertexIndices, mesh.vertices.size());
         _extractIndex(indices, mesh.textureIndices, mesh.textures.size());
         _extractIndex(indices, mesh.normalIndices, mesh.normals.size());
     }
 
-    static void _extractIndex(std::string_view &tokens,
-                              std::vector<uint32_t> &indices, size_t size)
+    static void _extractIndex(std::string_view &tokens, std::vector<uint32_t> &indices, size_t size)
     {
         auto token = StringHelper::extract(tokens, "/");
         if (token.empty())
@@ -281,15 +292,13 @@ class MeshExtractor
 public:
     static bool tryExtractMeshData(Context &context)
     {
-        return _tryParseWith<NewObjectParser>(context) ||
-               _tryParseWith<VertexParser>(context) ||
-               _tryParseWith<TextureParser>(context) ||
-               _tryParseWith<NormalParser>(context) ||
-               _tryParseWith<FaceParser>(context);
+        return _tryParseWith<NewObjectParser>(context) || _tryParseWith<VertexParser>(context)
+            || _tryParseWith<TextureParser>(context) || _tryParseWith<NormalParser>(context)
+            || _tryParseWith<FaceParser>(context);
     }
 
 private:
-    template <typename T>
+    template<typename T>
     static bool _tryParseWith(Context &context)
     {
         if (!T::canParse(context))
@@ -304,8 +313,7 @@ private:
 class ErrorMessage
 {
 public:
-    static std::string format(const Context &context,
-                              const std::string &message)
+    static std::string format(const Context &context, const std::string &message)
     {
         std::ostringstream stream;
         stream << "Parsing error at line ";
@@ -333,23 +341,20 @@ public:
         {
             if (!_checkCompatibility(first, meshes[i]))
             {
-                throw std::runtime_error(
-                    "Mesh number" + std::to_string(i) +
-                    " is not compatible with the first one");
+                throw std::runtime_error("Mesh number" + std::to_string(i) + " is not compatible with the first one");
             }
         }
     }
 
 private:
-    static bool _checkCompatibility(const MeshBuffer &left,
-                                    const MeshBuffer &right)
+    static bool _checkCompatibility(const MeshBuffer &left, const MeshBuffer &right)
     {
         auto leftTextureCount = left.textureIndices.size();
         auto rightTextureCount = right.textureIndices.size();
         auto leftNormalCount = left.normalIndices.size();
         auto rightNormalCount = right.normalIndices.size();
-        return _bothOrNoneAreEmpty(leftTextureCount, rightTextureCount) &&
-               _bothOrNoneAreEmpty(leftNormalCount, rightNormalCount);
+        return _bothOrNoneAreEmpty(leftTextureCount, rightTextureCount)
+            && _bothOrNoneAreEmpty(leftNormalCount, rightNormalCount);
     }
 
     static bool _bothOrNoneAreEmpty(size_t left, size_t right)
@@ -426,8 +431,7 @@ public:
     }
 
 private:
-    static void _reserve(const std::vector<MeshBuffer> &buffers,
-                         TriangleMesh &mesh)
+    static void _reserve(const std::vector<MeshBuffer> &buffers, TriangleMesh &mesh)
     {
         size_t vertexCount = 0;
         size_t normalCount = 0;
@@ -446,8 +450,7 @@ private:
         mesh.indices.reserve(indexCount);
     }
 
-    static void _fill(const std::vector<MeshBuffer> &buffers,
-                      TriangleMesh &mesh)
+    static void _fill(const std::vector<MeshBuffer> &buffers, TriangleMesh &mesh)
     {
         size_t offset = 0;
         for (const auto &buffer : buffers)
@@ -464,8 +467,7 @@ private:
         }
     }
 
-    static void _addVertex(const MeshBuffer &buffer, TriangleMesh &mesh,
-                           size_t index)
+    static void _addVertex(const MeshBuffer &buffer, TriangleMesh &mesh, size_t index)
     {
         auto vertexIndex = buffer.vertexIndices[index] - 1;
         auto &vertex = buffer.vertices[vertexIndex];

@@ -26,7 +26,7 @@
 class SonataNGVLoader : public brayns::Loader<SonataNGVLoaderParameters>
 {
 public:
-    SonataNGVLoader(CircuitColorManager& colorManager)
+    SonataNGVLoader(CircuitColorManager &colorManager)
         : _internal(std::make_unique<BBPLoader>(colorManager))
     {
     }
@@ -41,8 +41,7 @@ public:
      * @brief isSupported returns wether the given filename or file extension
      * are supported by this loader
      */
-    bool isSupported(const std::string& filename,
-                     const std::string& extension) const final;
+    bool isSupported(const std::string &filename, const std::string &extension) const final;
 
     /**
      * @brief getName returns the name of the loader, used when invoking this
@@ -54,16 +53,19 @@ public:
      * @brief importFromBlob imports models from a byte blob. NOT SUPPORTED
      */
     std::vector<brayns::ModelDescriptorPtr> importFromBlob(
-        brayns::Blob&&, const brayns::LoaderProgress&,
-        const SonataNGVLoaderParameters&, brayns::Scene&) const final;
+        brayns::Blob &&,
+        const brayns::LoaderProgress &,
+        const SonataNGVLoaderParameters &,
+        brayns::Scene &) const final;
 
     /**
      * @brief importFromFile imports models from a file given by a path
      */
     std::vector<brayns::ModelDescriptorPtr> importFromFile(
-        const std::string& path, const brayns::LoaderProgress& callback,
-        const SonataNGVLoaderParameters& input,
-        brayns::Scene& scene) const final;
+        const std::string &path,
+        const brayns::LoaderProgress &callback,
+        const SonataNGVLoaderParameters &input,
+        brayns::Scene &scene) const final;
 
 private:
     std::unique_ptr<BBPLoader> _internal{nullptr};

@@ -24,10 +24,10 @@
 #include <plugin/io/morphology/neuron/NeuronMaterialMap.h>
 
 PrimitiveNeuronInstance::PrimitiveNeuronInstance(
-    std::vector<brayns::Sphere>&& spheres,
-    std::vector<brayns::Cylinder>&& cylinders,
-    std::vector<brayns::Cone>&& cones,
-    const std::shared_ptr<PrimitiveSharedData>& data)
+    std::vector<brayns::Sphere> &&spheres,
+    std::vector<brayns::Cylinder> &&cylinders,
+    std::vector<brayns::Cone> &&cones,
+    const std::shared_ptr<PrimitiveSharedData> &data)
     : _spheres(std::move(spheres))
     , _cylinders(std::move(cylinders))
     , _cones(std::move(cones))
@@ -36,51 +36,47 @@ PrimitiveNeuronInstance::PrimitiveNeuronInstance(
 }
 
 void PrimitiveNeuronInstance::mapSimulation(
-    const size_t globalOffset, const std::vector<uint16_t>& sectionOffsets,
-    const std::vector<uint16_t>& sectionCompartments)
+    const size_t globalOffset,
+    const std::vector<uint16_t> &sectionOffsets,
+    const std::vector<uint16_t> &sectionCompartments)
 {
-    for (auto& geomSection : _data->sectionMap)
+    for (auto &geomSection : _data->sectionMap)
     {
-        const auto& segments = geomSection.second;
+        const auto &segments = geomSection.second;
         // No section level information (soma report, spike simulation, etc.)
         // or dealing with soma
-        if (geomSection.first <= -1 || sectionOffsets.empty() ||
-            static_cast<size_t>(geomSection.first) > sectionOffsets.size() - 1)
+        if (geomSection.first <= -1 || sectionOffsets.empty()
+            || static_cast<size_t>(geomSection.first) > sectionOffsets.size() - 1)
         {
-            for (const auto& segment : segments)
+            for (const auto &segment : segments)
                 _setSimulationOffset(_data->geometries[segment], globalOffset);
         }
         else
         {
             const double step =
-                static_cast<double>(sectionCompartments[geomSection.first]) /
-                static_cast<double>(segments.size());
+                static_cast<double>(sectionCompartments[geomSection.first]) / static_cast<double>(segments.size());
 
             const size_t sectionOffset = sectionOffsets[geomSection.first];
             for (size_t i = 0; i < segments.size(); ++i)
             {
-                const auto compartment =
-                    static_cast<size_t>(std::floor(step * i));
-                const auto finalOffset =
-                    globalOffset + (sectionOffset + compartment);
-                _setSimulationOffset(_data->geometries[segments[i]],
-                                     finalOffset);
+                const auto compartment = static_cast<size_t>(std::floor(step * i));
+                const auto finalOffset = globalOffset + (sectionOffset + compartment);
+                _setSimulationOffset(_data->geometries[segments[i]], finalOffset);
             }
         }
     }
 }
 
-ElementMaterialMap::Ptr PrimitiveNeuronInstance::addToModel(
-    brayns::Model& model) const
+ElementMaterialMap::Ptr PrimitiveNeuronInstance::addToModel(brayns::Model &model) const
 {
     std::unordered_map<NeuronSection, size_t> sectionToMat;
-    for (const auto& sectionTypeGeom : _data->sectionTypeMap)
+    for (const auto &sectionTypeGeom : _data->sectionTypeMap)
     {
         const auto materialId = CircuitExplorerMaterial::create(model);
         sectionToMat[sectionTypeGeom.first] = materialId;
         for (const auto geometryIdx : sectionTypeGeom.second)
         {
-            const auto& primitive = _data->geometries[geometryIdx];
+            const auto &primitive = _data->geometries[geometryIdx];
             switch (primitive.type)
             {
             case PrimitiveType::SPHERE:
@@ -96,8 +92,7 @@ ElementMaterialMap::Ptr PrimitiveNeuronInstance::addToModel(
         }
     }
 
-    const auto updateMaterialMap =
-        [&](const NeuronSection section, size_t& buffer)
+    const auto updateMaterialMap = [&](const NeuronSection section, size_t &buffer)
     {
         auto it = sectionToMat.find(section);
         if (it != sectionToMat.end())
@@ -107,29 +102,25 @@ ElementMaterialMap::Ptr PrimitiveNeuronInstance::addToModel(
     updateMaterialMap(NeuronSection::SOMA, materialMap->soma);
     updateMaterialMap(NeuronSection::AXON, materialMap->axon);
     updateMaterialMap(NeuronSection::DENDRITE, materialMap->dendrite);
-    updateMaterialMap(NeuronSection::APICAL_DENDRITE,
-                      materialMap->apicalDendrite);
+    updateMaterialMap(NeuronSection::APICAL_DENDRITE, materialMap->apicalDendrite);
     return materialMap;
 }
 
-size_t PrimitiveNeuronInstance::getSectionSegmentCount(
-    const int32_t section) const
+size_t PrimitiveNeuronInstance::getSectionSegmentCount(const int32_t section) const
 {
     auto it = _data->sectionMap.find(section);
     if (it == _data->sectionMap.end())
-        throw std::invalid_argument("Section " + std::to_string(section) +
-                                    "not found");
+        throw std::invalid_argument("Section " + std::to_string(section) + "not found");
 
     return it->second.size();
 }
 
-MorphologyInstance::SegmentPoints PrimitiveNeuronInstance::getSegment(
-    const int32_t section, const uint32_t segment) const
+MorphologyInstance::SegmentPoints PrimitiveNeuronInstance::getSegment(const int32_t section, const uint32_t segment)
+    const
 {
     auto it = _data->sectionMap.find(section);
     if (it == _data->sectionMap.end())
-        throw std::invalid_argument("Section " + std::to_string(section) +
-                                    " not found");
+        throw std::invalid_argument("Section " + std::to_string(section) + " not found");
 
     if (it->second.size() <= segment)
         throw std::invalid_argument("Section " + std::to_string(section) +
@@ -137,19 +128,17 @@ MorphologyInstance::SegmentPoints PrimitiveNeuronInstance::getSegment(
                                     "Segment " +
                                     std::to_string(segment) + " not found");
 
-    const auto& geom = _data->geometries[it->second[segment]];
-    const auto& start = _getGeometryP0(geom);
-    const auto& end = _getGeometryP1(geom);
+    const auto &geom = _data->geometries[it->second[segment]];
+    const auto &start = _getGeometryP0(geom);
+    const auto &end = _getGeometryP1(geom);
     return std::make_pair(&start, &end);
 }
 
-uint64_t PrimitiveNeuronInstance::getSegmentSimulationOffset(
-    const int32_t section, const uint32_t segment) const
+uint64_t PrimitiveNeuronInstance::getSegmentSimulationOffset(const int32_t section, const uint32_t segment) const
 {
     auto it = _data->sectionMap.find(section);
     if (it == _data->sectionMap.end())
-        throw std::invalid_argument("Section " + std::to_string(section) +
-                                    " not found");
+        throw std::invalid_argument("Section " + std::to_string(section) + " not found");
 
     if (it->second.size() <= segment)
         throw std::invalid_argument("Section " + std::to_string(section) +
@@ -157,7 +146,7 @@ uint64_t PrimitiveNeuronInstance::getSegmentSimulationOffset(
                                     "Segment " +
                                     std::to_string(segment) + " not found");
 
-    const auto& geom = _data->geometries[it->second[segment]];
+    const auto &geom = _data->geometries[it->second[segment]];
     switch (geom.type)
     {
     case PrimitiveType::SPHERE:
@@ -169,8 +158,7 @@ uint64_t PrimitiveNeuronInstance::getSegmentSimulationOffset(
     }
 }
 
-const brayns::Vector3f& PrimitiveNeuronInstance::_getGeometryP0(
-    const PrimitiveGeometry& g) const noexcept
+const brayns::Vector3f &PrimitiveNeuronInstance::_getGeometryP0(const PrimitiveGeometry &g) const noexcept
 {
     switch (g.type)
     {
@@ -185,8 +173,7 @@ const brayns::Vector3f& PrimitiveNeuronInstance::_getGeometryP0(
 
 //#pragma GCC diagnostic push
 //#pragma GCC diagnostic ignored "-Wterminate"
-const brayns::Vector3f& PrimitiveNeuronInstance::_getGeometryP1(
-    const PrimitiveGeometry& g) const noexcept
+const brayns::Vector3f &PrimitiveNeuronInstance::_getGeometryP1(const PrimitiveGeometry &g) const noexcept
 {
     switch (g.type)
     {
@@ -200,8 +187,7 @@ const brayns::Vector3f& PrimitiveNeuronInstance::_getGeometryP1(
 }
 //#pragma GCC diagnostic pop
 
-void PrimitiveNeuronInstance::_setSimulationOffset(
-    const PrimitiveGeometry& geom, const uint64_t offset) noexcept
+void PrimitiveNeuronInstance::_setSimulationOffset(const PrimitiveGeometry &geom, const uint64_t offset) noexcept
 {
     switch (geom.type)
     {

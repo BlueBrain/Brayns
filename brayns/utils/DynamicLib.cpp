@@ -21,20 +21,20 @@
 #include <stdexcept>
 
 #ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
+    #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+    #endif
+    #include <windows.h>
 #else
-#include <dlfcn.h>
-#include <sys/times.h>
+    #include <dlfcn.h>
+    #include <sys/times.h>
 #endif
 
 #include "DynamicLib.h"
 
 namespace brayns
 {
-DynamicLib::DynamicLib(const std::string& name)
+DynamicLib::DynamicLib(const std::string &name)
 {
     std::string file = name;
     std::string errorMessage;
@@ -45,28 +45,30 @@ DynamicLib::DynamicLib(const std::string& name)
     {
         DWORD err = GetLastError();
         LPTSTR buffer;
-        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                          FORMAT_MESSAGE_FROM_SYSTEM |
-                          FORMAT_MESSAGE_IGNORE_INSERTS,
-                      NULL, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                      (LPTSTR)&buffer, 0, NULL);
+        FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            err,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR)&buffer,
+            0,
+            NULL);
         errorMessage = buffer;
         LocalFree(buffer);
     }
 
 #else
-#if defined(__MACOSX__) || defined(__APPLE__)
+    #if defined(__MACOSX__) || defined(__APPLE__)
     std::string filename = "lib" + file + ".dylib";
-#else
+    #else
     std::string filename = "lib" + file + ".so";
-#endif
+    #endif
     _handler = dlopen(filename.c_str(), RTLD_LAZY | RTLD_GLOBAL);
     if (!_handler)
         errorMessage = dlerror();
 #endif
     if (!_handler)
-        throw std::runtime_error("Error opening dynamic library: " + filename +
-                                 ": " + errorMessage);
+        throw std::runtime_error("Error opening dynamic library: " + filename + ": " + errorMessage);
 }
 
 DynamicLib::~DynamicLib()
@@ -84,20 +86,20 @@ DynamicLib::~DynamicLib()
     _handler = 0;
 }
 
-DynamicLib::DynamicLib(DynamicLib&& other)
+DynamicLib::DynamicLib(DynamicLib &&other)
 {
     _handler = other._handler;
     other._handler = nullptr;
 }
 
-DynamicLib& DynamicLib::operator=(DynamicLib&& other)
+DynamicLib &DynamicLib::operator=(DynamicLib &&other)
 {
     _handler = other._handler;
     other._handler = nullptr;
     return *this;
 }
 
-void* DynamicLib::getSymbolAddress(const std::string& name) const
+void *DynamicLib::getSymbolAddress(const std::string &name) const
 {
     if (!_handler)
         return nullptr;

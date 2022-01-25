@@ -46,7 +46,7 @@ public:
      *
      * @param context Network context reference.
      */
-    ServerInterface(NetworkContext& context);
+    ServerInterface(NetworkContext &context);
 
     /**
      * @brief Start the server to accept incoming request.

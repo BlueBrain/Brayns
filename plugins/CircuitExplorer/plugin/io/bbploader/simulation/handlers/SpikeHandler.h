@@ -36,10 +36,12 @@ namespace bbploader
 class SpikeHandler : public brayns::AbstractSimulationHandler
 {
 public:
-    SpikeHandler(const std::string& path, const float transitionTime,
-                 const brain::GIDSet& gids,
-                 const std::shared_ptr<brain::SpikeReportReader>& report);
-    SpikeHandler(const SpikeHandler&);
+    SpikeHandler(
+        const std::string &path,
+        const float transitionTime,
+        const brain::GIDSet &gids,
+        const std::shared_ptr<brain::SpikeReportReader> &report);
+    SpikeHandler(const SpikeHandler &);
 
     brayns::AbstractSimulationHandlerPtr clone() const final;
 

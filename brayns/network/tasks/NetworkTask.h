@@ -62,7 +62,7 @@ public:
      * @param e Opaque exception pointer.
      * @return NetworkTaskException& *this.
      */
-    NetworkTaskException& operator=(std::exception_ptr e)
+    NetworkTaskException &operator=(std::exception_ptr e)
     {
         std::lock_guard<std::mutex> lock(_mutex);
         _e = std::move(e);
@@ -76,8 +76,8 @@ public:
      * @param e Exception instance.
      * @return NetworkTaskException& *this
      */
-    template <typename T>
-    NetworkTaskException& operator=(T e)
+    template<typename T>
+    NetworkTaskException &operator=(T e)
     {
         *this = std::make_exception_ptr(std::move(e));
         return *this;
@@ -110,7 +110,10 @@ public:
      * @return true Task is done and a the result has not been retreived yet.
      * @return false Task is running or the result has already been retreived.
      */
-    bool isReady() const { return _hasStatus(std::future_status::ready); }
+    bool isReady() const
+    {
+        return _hasStatus(std::future_status::ready);
+    }
 
     /**
      * @brief Check if the task is running.
@@ -118,7 +121,10 @@ public:
      * @return true Task is running.
      * @return false Task is done or not started.
      */
-    bool isRunning() const { return _hasStatus(std::future_status::timeout); }
+    bool isRunning() const
+    {
+        return _hasStatus(std::future_status::timeout);
+    }
 
     /**
      * @brief Check if the task has been cancelled.
@@ -126,7 +132,10 @@ public:
      * @return true Cancel was called between start() and onComplete().
      * @return false Task was not cancelled or has been restarted.
      */
-    bool isCancelled() const { return _cancelled; }
+    bool isCancelled() const
+    {
+        return _cancelled;
+    }
 
     /**
      * @brief Check if the task can be cancelled.
@@ -137,7 +146,10 @@ public:
      * @return true Task cancellation is meaningful.
      * @return false Task cannot be cancelled.
      */
-    bool isCancellable() const { return isRunning() && !isCancelled(); }
+    bool isCancellable() const
+    {
+        return isRunning() && !isCancelled();
+    }
 
     /**
      * @brief Start the task by calling run() in a separated thread.
@@ -199,7 +211,10 @@ public:
      *
      * @param e Opaque exception pointer.
      */
-    void setException(std::exception_ptr e) { _e = e; }
+    void setException(std::exception_ptr e)
+    {
+        _e = e;
+    }
 
     /**
      * @brief Shortcut to assign an exception with cancellation.
@@ -241,7 +256,7 @@ public:
      * @param operation Current operation description.
      * @param amount Percentage progress 0-1.
      */
-    void progress(const std::string& operation, double amount)
+    void progress(const std::string &operation, double amount)
     {
         checkCancelled();
         onProgress(operation, amount);
@@ -257,25 +272,33 @@ public:
      * @brief Custom logic to run in the main thread when a task is started.
      *
      */
-    virtual void onStart() {}
+    virtual void onStart()
+    {
+    }
 
     /**
      * @brief Custom logic to run in the main thread when a task succeed.
      *
      */
-    virtual void onComplete() {}
+    virtual void onComplete()
+    {
+    }
 
     /**
      * @brief Custom logic to run in the main thread just before cancellation.
      *
      */
-    virtual void onCancel() {}
+    virtual void onCancel()
+    {
+    }
 
     /**
      * @brief Custom logic to run in the main thread when an exception is set.
      *
      */
-    virtual void onError(std::exception_ptr) {}
+    virtual void onError(std::exception_ptr)
+    {
+    }
 
     /**
      * @brief Custom logic to run when progress() is called.
@@ -283,13 +306,17 @@ public:
      * @param operation Current operation description.
      * @param amount Percentage progress 0-1.
      */
-    virtual void onProgress(const std::string&, double) {}
+    virtual void onProgress(const std::string &, double)
+    {
+    }
 
     /**
      * @brief Called when the task client is disconnected.
      *
      */
-    virtual void onDisconnect() {}
+    virtual void onDisconnect()
+    {
+    }
 
     /**
      * @brief Assign an exception to the task.
@@ -297,7 +324,7 @@ public:
      * @tparam T Exception type.
      * @param e Exception instance.
      */
-    template <typename T>
+    template<typename T>
     void setException(T e)
     {
         _e = std::move(e);
@@ -309,7 +336,7 @@ public:
      * @tparam T Exception type.
      * @param e Exception instance.
      */
-    template <typename T>
+    template<typename T>
     void cancelWith(T e)
     {
         _e = std::move(e);

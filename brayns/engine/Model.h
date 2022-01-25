@@ -61,30 +61,53 @@ class ModelInstance : public BaseObject
 {
 public:
     ModelInstance() = default;
-    ModelInstance(const bool visible, const bool boundingBox,
-                  const Transformation& transformation)
+    ModelInstance(const bool visible, const bool boundingBox, const Transformation &transformation)
         : _visible(visible)
         , _boundingBox(boundingBox)
         , _transformation(transformation)
     {
     }
-    bool getVisible() const { return _visible; }
-    void setVisible(const bool visible) { _updateValue(_visible, visible); }
-    bool getBoundingBox() const { return _boundingBox; }
+    bool getVisible() const
+    {
+        return _visible;
+    }
+    void setVisible(const bool visible)
+    {
+        _updateValue(_visible, visible);
+    }
+    bool getBoundingBox() const
+    {
+        return _boundingBox;
+    }
     void setBoundingBox(const bool enabled)
     {
         _updateValue(_boundingBox, enabled);
     }
-    const Transformation& getTransformation() const { return _transformation; }
-    void setTransformation(const Transformation& transformation)
+    const Transformation &getTransformation() const
+    {
+        return _transformation;
+    }
+    void setTransformation(const Transformation &transformation)
     {
         _updateValue(_transformation, transformation);
     }
 
-    void setModelID(const size_t id) { _updateValue(_modelID, id); }
-    size_t getModelID() const { return _modelID; }
-    void setInstanceID(const size_t id) { _updateValue(_instanceID, id); }
-    size_t getInstanceID() const { return _instanceID; }
+    void setModelID(const size_t id)
+    {
+        _updateValue(_modelID, id);
+    }
+    size_t getModelID() const
+    {
+        return _modelID;
+    }
+    void setInstanceID(const size_t id)
+    {
+        _updateValue(_instanceID, id);
+    }
+    size_t getInstanceID() const
+    {
+        return _instanceID;
+    }
 
 protected:
     size_t _modelID{0};
@@ -99,28 +122,48 @@ class ModelParams : public ModelInstance
 public:
     ModelParams() = default;
 
-    ModelParams(const std::string& path);
-    ModelParams(const std::string& name, const std::string& path);
-    ModelParams(const std::string& name, const std::string& path,
-                const JsonValue& loaderProperties);
+    ModelParams(const std::string &path);
+    ModelParams(const std::string &name, const std::string &path);
+    ModelParams(const std::string &name, const std::string &path, const JsonValue &loaderProperties);
 
-    ModelParams(ModelParams&& rhs) = default;
-    ModelParams& operator=(ModelParams&& rhs) = default;
+    ModelParams(ModelParams &&rhs) = default;
+    ModelParams &operator=(ModelParams &&rhs) = default;
 
-    ModelParams(const ModelParams& rhs) = default;
-    ModelParams& operator=(const ModelParams& rhs) = default;
+    ModelParams(const ModelParams &rhs) = default;
+    ModelParams &operator=(const ModelParams &rhs) = default;
 
-    void setName(const std::string& name) { _updateValue(_name, name); }
-    const std::string& getName() const { return _name; }
-    void setPath(const std::string& path) { _updateValue(_path, path); }
-    const std::string& getPath() const { return _path; }
-    void setLoaderName(const std::string& loaderName)
+    void setName(const std::string &name)
+    {
+        _updateValue(_name, name);
+    }
+    const std::string &getName() const
+    {
+        return _name;
+    }
+    void setPath(const std::string &path)
+    {
+        _updateValue(_path, path);
+    }
+    const std::string &getPath() const
+    {
+        return _path;
+    }
+    void setLoaderName(const std::string &loaderName)
     {
         _updateValue(_loaderName, loaderName);
     }
-    const std::string& getLoaderName() const { return _loaderName; }
-    const JsonValue& getLoadParameters() const { return _loadParameters; }
-    void setLoadParameters(const JsonValue& pm) { _loadParameters = pm; }
+    const std::string &getLoaderName() const
+    {
+        return _loaderName;
+    }
+    const JsonValue &getLoadParameters() const
+    {
+        return _loadParameters;
+    }
+    void setLoadParameters(const JsonValue &pm)
+    {
+        _loadParameters = pm;
+    }
 
 protected:
     std::string _name;
@@ -135,7 +178,7 @@ protected:
  */
 struct BinaryParam : ModelParams
 {
-    size_t size{0};   //!< size in bytes of file
+    size_t size{0}; //!< size in bytes of file
     std::string type; //!< file extension or type (MESH, POINTS, CIRCUIT)
     std::string chunksID;
 };
@@ -160,49 +203,65 @@ class ModelDescriptor : public ModelParams
 public:
     ModelDescriptor() = default;
 
-    ModelDescriptor(ModelDescriptor&& rhs) = default;
-    ModelDescriptor& operator=(ModelDescriptor&& rhs) = default;
+    ModelDescriptor(ModelDescriptor &&rhs) = default;
+    ModelDescriptor &operator=(ModelDescriptor &&rhs) = default;
 
-    ModelDescriptor(ModelPtr model, const std::string& path);
-    ModelDescriptor(ModelPtr model, const std::string& path,
-                    const ModelMetadata& metadata);
-    ModelDescriptor(ModelPtr model, const std::string& name,
-                    const std::string& path, const ModelMetadata& metadata);
+    ModelDescriptor(ModelPtr model, const std::string &path);
+    ModelDescriptor(ModelPtr model, const std::string &path, const ModelMetadata &metadata);
+    ModelDescriptor(ModelPtr model, const std::string &name, const std::string &path, const ModelMetadata &metadata);
 
-    ModelDescriptor& operator=(const ModelParams& rhs);
+    ModelDescriptor &operator=(const ModelParams &rhs);
 
-    bool getEnabled() const { return _visible || _boundingBox; }
-    void setMetadata(const ModelMetadata& metadata)
+    bool getEnabled() const
+    {
+        return _visible || _boundingBox;
+    }
+    void setMetadata(const ModelMetadata &metadata)
     {
         _metadata = metadata;
         markModified();
     }
-    const ModelMetadata& getMetadata() const { return _metadata; }
-    const Model& getModel() const { return *_model; }
-    Model& getModel() { return *_model; }
-    void addInstance(const ModelInstance& instance);
+    const ModelMetadata &getMetadata() const
+    {
+        return _metadata;
+    }
+    const Model &getModel() const
+    {
+        return *_model;
+    }
+    Model &getModel()
+    {
+        return *_model;
+    }
+    void addInstance(const ModelInstance &instance);
     void removeInstance(const size_t id);
-    ModelInstance* getInstance(const size_t id);
-    const std::vector<ModelInstance>& getInstances() const
+    ModelInstance *getInstance(const size_t id);
+    const std::vector<ModelInstance> &getInstances() const
     {
         return _instances;
     }
-    Boxd getBounds() const { return _bounds; }
+    Boxd getBounds() const
+    {
+        return _bounds;
+    }
     void computeBounds();
 
-    void setProperties(const PropertyMap& properties)
+    void setProperties(const PropertyMap &properties)
     {
         _properties = properties;
         markModified();
     }
 
-    const PropertyMap& getProperties() const { return _properties; }
-    using RemovedCallback = std::function<void(const ModelDescriptor&)>;
+    const PropertyMap &getProperties() const
+    {
+        return _properties;
+    }
+    using RemovedCallback = std::function<void(const ModelDescriptor &)>;
 
     /**
      * Set a function that is called when this model is about to be removed.
      */
-    void addOnRemoved(const RemovedCallback& callback)
+    void addOnRemoved(const RemovedCallback &callback)
     {
         _onRemovedCallback.push_back(callback);
     }
@@ -211,13 +270,19 @@ public:
     void callOnRemoved()
     {
         if (!_onRemovedCallback.empty())
-            for (const auto& callback : _onRemovedCallback)
+            for (const auto &callback : _onRemovedCallback)
                 callback(*this);
     }
     /** @internal */
-    void markForRemoval() { _markedForRemoval = true; }
+    void markForRemoval()
+    {
+        _markedForRemoval = true;
+    }
     /** @internal */
-    bool isMarkedForRemoval() const { return _markedForRemoval; }
+    bool isMarkedForRemoval() const
+    {
+        return _markedForRemoval;
+    }
     /** @internal */
     std::shared_ptr<ModelDescriptor> clone(ModelPtr model) const;
 
@@ -244,8 +309,7 @@ using ModelDescriptorPtr = std::shared_ptr<ModelDescriptor>;
 class Model
 {
 public:
-    Model(AnimationParameters& animationParameters,
-          VolumeParameters& volumeParameters);
+    Model(AnimationParameters &animationParameters, VolumeParameters &volumeParameters);
 
     virtual ~Model();
 
@@ -254,15 +318,15 @@ public:
     virtual void commitGeometry() = 0;
 
     /** Factory method to create an engine-specific material. */
-    MaterialPtr createMaterial(const size_t materialId, const std::string& name,
-                               const PropertyMap& properties = {});
+    MaterialPtr createMaterial(const size_t materialId, const std::string &name, const PropertyMap &properties = {});
 
     /**
      * Create a volume with the given dimensions, voxel spacing and data type
      * where the voxels are set via setVoxels() from any memory location.
      */
     virtual SharedDataVolumePtr createSharedDataVolume(
-        const Vector3ui& dimensions, const Vector3f& spacing,
+        const Vector3ui &dimensions,
+        const Vector3f &spacing,
         const VolumeDataType type) const = 0;
 
     /**
@@ -270,9 +334,8 @@ public:
      * where the voxels are copied via setBrick() into an optimized internal
      * storage.
      */
-    virtual BrickedVolumePtr createBrickedVolume(
-        const Vector3ui& dimensions, const Vector3f& spacing,
-        const VolumeDataType type) const = 0;
+    virtual BrickedVolumePtr
+        createBrickedVolume(const Vector3ui &dimensions, const Vector3f &spacing, const VolumeDataType type) const = 0;
 
     virtual void buildBoundingBox() = 0;
     //@}
@@ -289,15 +352,18 @@ public:
     /**
         Returns the bounds for the Model
     */
-    const Boxd& getBounds() const { return _bounds; }
+    const Boxd &getBounds() const
+    {
+        return _bounds;
+    }
     /**
         Returns spheres handled by the Model
     */
-    const std::map<size_t, std::vector<Sphere>>& getSpheres() const
+    const std::map<size_t, std::vector<Sphere>> &getSpheres() const
     {
         return _geometries->_spheres;
     }
-    std::map<size_t, std::vector<Sphere>>& getSpheres()
+    std::map<size_t, std::vector<Sphere>> &getSpheres()
     {
         _spheresDirty = true;
         return _geometries->_spheres;
@@ -308,16 +374,16 @@ public:
       @param sphere Sphere to add
       @return Index of the sphere for the specified material
       */
-    uint64_t addSphere(const size_t materialId, const Sphere& sphere);
+    uint64_t addSphere(const size_t materialId, const Sphere &sphere);
 
     /**
         Returns cylinders handled by the model
       */
-    const std::map<size_t, std::vector<Cylinder>>& getCylinders() const
+    const std::map<size_t, std::vector<Cylinder>> &getCylinders() const
     {
         return _geometries->_cylinders;
     }
-    std::map<size_t, std::vector<Cylinder>>& getCylinders()
+    std::map<size_t, std::vector<Cylinder>> &getCylinders()
     {
         _cylindersDirty = true;
         return _geometries->_cylinders;
@@ -328,15 +394,15 @@ public:
       @param cylinder Cylinder to add
       @return Index of the sphere for the specified material
       */
-    uint64_t addCylinder(const size_t materialId, const Cylinder& cylinder);
+    uint64_t addCylinder(const size_t materialId, const Cylinder &cylinder);
     /**
         Returns cones handled by the model
     */
-    const std::map<size_t, std::vector<Cone>>& getCones() const
+    const std::map<size_t, std::vector<Cone>> &getCones() const
     {
         return _geometries->_cones;
     }
-    std::map<size_t, std::vector<Cone>>& getCones()
+    std::map<size_t, std::vector<Cone>> &getCones()
     {
         _conesDirty = true;
         return _geometries->_cones;
@@ -347,19 +413,19 @@ public:
       @param cone Cone to add
       @return Index of the sphere for the specified material
       */
-    uint64_t addCone(const size_t materialId, const Cone& cone);
+    uint64_t addCone(const size_t materialId, const Cone &cone);
 
     /**
       Adds a streamline to the model
       @param materialId Id of the material for the streamline
       @param streamline Streamline to add
       */
-    void addStreamline(const size_t materialId, const Streamline& streamline);
+    void addStreamline(const size_t materialId, const Streamline &streamline);
 
     /**
         Returns streamlines handled by the model
     */
-    std::map<size_t, StreamlinesData>& getStreamlines()
+    std::map<size_t, StreamlinesData> &getStreamlines()
     {
         _streamlinesDirty = true;
         return _geometries->_streamlines;
@@ -372,13 +438,13 @@ public:
       together with
       @return Global index of the geometry
       */
-    uint64_t addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
-                            const std::vector<size_t>& neighbourIndices);
+    uint64_t
+        addSDFGeometry(const size_t materialId, const SDFGeometry &geom, const std::vector<size_t> &neighbourIndices);
 
     /**
      * Returns SDF geometry data handled by the model
      */
-    SDFGeometryData& getSDFGeometryData()
+    SDFGeometryData &getSDFGeometryData()
     {
         _sdfGeometriesDirty = true;
         return _geometries->_sdf;
@@ -389,17 +455,16 @@ public:
       @param neighbourIndices Global indices of the geometries to smoothly blend
       together with
       */
-    void updateSDFGeometryNeighbours(
-        size_t geometryIdx, const std::vector<size_t>& neighbourIndices);
+    void updateSDFGeometryNeighbours(size_t geometryIdx, const std::vector<size_t> &neighbourIndices);
 
     /**
         Returns triangle meshes handled by the model
     */
-    const std::map<size_t, TriangleMesh>& getTriangleMeshes() const
+    const std::map<size_t, TriangleMesh> &getTriangleMeshes() const
     {
         return _geometries->_triangleMeshes;
     }
-    std::map<size_t, TriangleMesh>& getTriangleMeshes()
+    std::map<size_t, TriangleMesh> &getTriangleMeshes()
     {
         _triangleMeshesDirty = true;
         return _geometries->_triangleMeshes;
@@ -430,7 +495,7 @@ public:
      * by the model
      * @return The map of materials handled by the model
      */
-    const std::map<size_t, MaterialPtr>& getMaterials() const
+    const std::map<size_t, MaterialPtr> &getMaterials() const
     {
         return _materials;
     }
@@ -454,38 +519,52 @@ public:
 
     /** @return the size in bytes of all geometries. */
     size_t getSizeInBytes() const;
-    void markInstancesDirty() { _instancesDirty = true; }
-    void markInstancesClean() { _instancesDirty = false; }
-    const std::vector<VolumePtr>& getVolumes() const
+    void markInstancesDirty()
+    {
+        _instancesDirty = true;
+    }
+    void markInstancesClean()
+    {
+        _instancesDirty = false;
+    }
+    const std::vector<VolumePtr> &getVolumes() const
     {
         return _geometries->_volumes;
     }
-    bool isVolumesDirty() const { return _volumesDirty; }
-    void resetVolumesDirty() { _volumesDirty = false; }
+    bool isVolumesDirty() const
+    {
+        return _volumesDirty;
+    }
+    void resetVolumesDirty()
+    {
+        _volumesDirty = false;
+    }
 
     void setSimulationEnabled(const bool v)
     {
         _simulationEnabled = v;
         _simulationEnabledDirty = true;
     }
-    bool isSimulationEnabled() const { return _simulationEnabled; }
+    bool isSimulationEnabled() const
+    {
+        return _simulationEnabled;
+    }
 
     void updateBounds();
     /** @internal */
-    void copyFrom(const Model& rhs);
+    void copyFrom(const Model &rhs);
 
 protected:
     void _updateSizeInBytes();
 
     /** Factory method to create an engine-specific material. */
-    virtual MaterialPtr createMaterialImpl(
-        const PropertyMap& properties = {}) = 0;
+    virtual MaterialPtr createMaterialImpl(const PropertyMap &properties = {}) = 0;
 
     /** Mark all geometries as clean. */
     void _markGeometriesClean();
 
-    AnimationParameters& _animationParameters;
-    VolumeParameters& _volumeParameters;
+    AnimationParameters &_animationParameters;
+    VolumeParameters &_volumeParameters;
 
     AbstractSimulationHandlerPtr _simulationHandler;
     bool _simulationEnabledDirty{true};
@@ -513,9 +592,8 @@ protected:
 
         bool isEmpty() const
         {
-            return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
-                   _triangleMeshes.empty() && _sdf.geometries.empty() &&
-                   _streamlines.empty() && _volumes.empty();
+            return _spheres.empty() && _cylinders.empty() && _cones.empty() && _triangleMeshes.empty()
+                && _sdf.geometries.empty() && _streamlines.empty() && _volumes.empty();
         }
     };
 
@@ -534,8 +612,7 @@ protected:
 
     bool _areGeometriesDirty() const
     {
-        return _spheresDirty || _cylindersDirty || _conesDirty ||
-               _triangleMeshesDirty || _sdfGeometriesDirty;
+        return _spheresDirty || _cylindersDirty || _conesDirty || _triangleMeshesDirty || _sdfGeometriesDirty;
     }
 
     Boxd _bounds;

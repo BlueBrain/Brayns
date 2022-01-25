@@ -27,9 +27,7 @@
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(ColoringInformation)
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("variable", variable,
-                                "Variable of the coloring method being used")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
-    "color", color, "Color applied to the given variable (Normalized RGBA)")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("variable", variable, "Variable of the coloring method being used")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("color", color, "Color applied to the given variable (Normalized RGBA)")
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

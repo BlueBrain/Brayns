@@ -32,9 +32,12 @@ using namespace brayns;
 class JsonPath
 {
 public:
-    void clear() { _path.clear(); }
+    void clear()
+    {
+        _path.clear();
+    }
 
-    void push(const std::string& key)
+    void push(const std::string &key)
     {
         if (_path.empty())
         {
@@ -49,9 +52,15 @@ public:
         _path.push_back("[" + std::to_string(index) + "]");
     }
 
-    void pop() { _path.pop_back(); }
+    void pop()
+    {
+        _path.pop_back();
+    }
 
-    std::string toString() const { return string_utils::join(_path, {}); }
+    std::string toString() const
+    {
+        return string_utils::join(_path, {});
+    }
 
 private:
     std::vector<std::string> _path;
@@ -66,17 +75,32 @@ public:
         _errors.clear();
     }
 
-    void push(const std::string& key) { _path.push(key); }
+    void push(const std::string &key)
+    {
+        _path.push(key);
+    }
 
-    void push(size_t index) { _path.push(index); }
+    void push(size_t index)
+    {
+        _path.push(index);
+    }
 
-    void pop() { _path.pop(); }
+    void pop()
+    {
+        _path.pop();
+    }
 
-    const std::vector<std::string>& getErrors() const { return _errors; }
+    const std::vector<std::string> &getErrors() const
+    {
+        return _errors;
+    }
 
-    void addError(std::string error) { _errors.push_back(std::move(error)); }
+    void addError(std::string error)
+    {
+        _errors.push_back(std::move(error));
+    }
 
-    void addErrors(const std::vector<std::string>& errors)
+    void addErrors(const std::vector<std::string> &errors)
     {
         _errors.insert(_errors.end(), errors.begin(), errors.end());
     }
@@ -96,12 +120,12 @@ public:
 
     void addInvalidType(JsonType type, JsonType schemaType)
     {
-        auto& typeName = GetJsonTypeName::fromType(type);
-        auto& schemaTypeName = GetJsonTypeName::fromType(schemaType);
+        auto &typeName = GetJsonTypeName::fromType(type);
+        auto &schemaTypeName = GetJsonTypeName::fromType(schemaType);
         addInvalidType(typeName, schemaTypeName);
     }
 
-    void addInvalidType(const std::string& type, const std::string& schemaType)
+    void addInvalidType(const std::string &type, const std::string &schemaType)
     {
         std::ostringstream stream;
         stream << "Invalid type";
@@ -114,8 +138,7 @@ public:
         addError(stream.str());
     }
 
-    void addInvalidEnum(const JsonValue& json,
-                        const std::vector<JsonValue>& enums)
+    void addInvalidEnum(const JsonValue &json, const std::vector<JsonValue> &enums)
     {
         std::ostringstream stream;
         stream << "Invalid enum";
@@ -140,16 +163,14 @@ public:
     void addBelowMinimum(double value, double minimum)
     {
         std::ostringstream stream;
-        stream << "'" << _path.toString() << "' is below minimum value '"
-               << minimum << "'";
+        stream << "'" << _path.toString() << "' is below minimum value '" << minimum << "'";
         addError(stream.str());
     }
 
     void addAboveMaximum(double value, double maximum)
     {
         std::ostringstream stream;
-        stream << "'" << _path.toString() << "' is above maximum value '"
-               << maximum << "'";
+        stream << "'" << _path.toString() << "' is above maximum value '" << maximum << "'";
         addError(stream.str());
     }
 
@@ -166,16 +187,14 @@ public:
     void addNotEnoughItems(size_t size, size_t minItems)
     {
         std::ostringstream stream;
-        stream << "Not enough items in '" << _path.toString() << "': min '"
-               << minItems << "' got '" << size << "'";
+        stream << "Not enough items in '" << _path.toString() << "': min '" << minItems << "' got '" << size << "'";
         addError(stream.str());
     }
 
     void addTooManyItems(size_t size, size_t maxItems)
     {
         std::ostringstream stream;
-        stream << "Too many items in '" << _path.toString() << "': max '"
-               << maxItems << "' got '" << size << "'";
+        stream << "Too many items in '" << _path.toString() << "': max '" << maxItems << "' got '" << size << "'";
         addError(stream.str());
     }
 
@@ -187,8 +206,7 @@ private:
 class JsonValidator
 {
 public:
-    std::vector<std::string> validate(const JsonValue& json,
-                                      const JsonSchema& schema)
+    std::vector<std::string> validate(const JsonValue &json, const JsonSchema &schema)
     {
         _context.clear();
         _validate(json, schema);
@@ -196,7 +214,7 @@ public:
     }
 
 private:
-    void _validate(const JsonValue& json, const JsonSchema& schema)
+    void _validate(const JsonValue &json, const JsonSchema &schema)
     {
         if (JsonSchemaHelper::isEmpty(schema))
         {
@@ -233,14 +251,14 @@ private:
         }
     }
 
-    void _validateOneOf(const JsonValue& json, const JsonSchema& schema)
+    void _validateOneOf(const JsonValue &json, const JsonSchema &schema)
     {
         auto backup = std::move(_context);
-        for (const auto& oneOf : schema.oneOf)
+        for (const auto &oneOf : schema.oneOf)
         {
             _context.clear();
             _validate(json, oneOf);
-            auto& errors = _context.getErrors();
+            auto &errors = _context.getErrors();
             if (errors.empty())
             {
                 _context = std::move(backup);
@@ -251,7 +269,7 @@ private:
         _context.addInvalidOneOf();
     }
 
-    bool _validateType(const JsonValue& json, const JsonSchema& schema)
+    bool _validateType(const JsonValue &json, const JsonSchema &schema)
     {
         auto type = GetJsonType::fromJson(json);
         if (!JsonSchemaHelper::checkType(schema, type))
@@ -262,7 +280,7 @@ private:
         return true;
     }
 
-    void _validateLimits(const JsonValue& json, const JsonSchema& schema)
+    void _validateLimits(const JsonValue &json, const JsonSchema &schema)
     {
         auto value = json.convert<double>();
         if (schema.minimum && value < *schema.minimum)
@@ -276,9 +294,9 @@ private:
         }
     }
 
-    void _validateEnum(const JsonValue& json, const JsonSchema& schema)
+    void _validateEnum(const JsonValue &json, const JsonSchema &schema)
     {
-        for (const auto& value : schema.enums)
+        for (const auto &value : schema.enums)
         {
             if (json == value)
             {
@@ -288,21 +306,19 @@ private:
         _context.addInvalidEnum(json, schema.enums);
     }
 
-    void _validateProperties(const JsonValue& json, const JsonSchema& schema)
+    void _validateProperties(const JsonValue &json, const JsonSchema &schema)
     {
-        auto& object = json.extract<JsonObject::Ptr>();
-        for (const auto& pair : schema.properties)
+        auto &object = json.extract<JsonObject::Ptr>();
+        for (const auto &pair : schema.properties)
         {
-            auto& name = pair.first;
+            auto &name = pair.first;
             _context.push(name);
             _validateProperty(name, object, schema);
             _context.pop();
         }
     }
 
-    void _validateProperty(const std::string& name,
-                           const JsonObject::Ptr& object,
-                           const JsonSchema& schema)
+    void _validateProperty(const std::string &name, const JsonObject::Ptr &object, const JsonSchema &schema)
     {
         auto json = object->get(name);
         if (!json.isEmpty())
@@ -317,29 +333,26 @@ private:
         _context.addMissingProperty();
     }
 
-    void _validateAdditionalProperties(const JsonValue& json,
-                                       const JsonSchema& schema)
+    void _validateAdditionalProperties(const JsonValue &json, const JsonSchema &schema)
     {
-        auto& object = *json.extract<JsonObject::Ptr>();
-        for (const auto& pair : object)
+        auto &object = *json.extract<JsonObject::Ptr>();
+        for (const auto &pair : object)
         {
-            auto& name = pair.first;
-            auto& child = pair.second;
+            auto &name = pair.first;
+            auto &child = pair.second;
             _context.push(name);
             _validateAdditionalProperty(name, child, schema);
             _context.pop();
         }
     }
 
-    void _validateAdditionalProperty(const std::string& name,
-                                     const JsonValue& json,
-                                     const JsonSchema& schema)
+    void _validateAdditionalProperty(const std::string &name, const JsonValue &json, const JsonSchema &schema)
     {
         if (JsonSchemaHelper::hasProperty(schema, name))
         {
             return;
         }
-        auto& additionalProperties = schema.additionalProperties;
+        auto &additionalProperties = schema.additionalProperties;
         if (additionalProperties.empty())
         {
             _context.addUnknownProperty();
@@ -348,18 +361,18 @@ private:
         _validate(json, additionalProperties[0]);
     }
 
-    void _validateItems(const JsonValue& json, const JsonSchema& schema)
+    void _validateItems(const JsonValue &json, const JsonSchema &schema)
     {
         if (schema.items.empty())
         {
             return;
         }
-        auto& array = *json.extract<JsonArray::Ptr>();
+        auto &array = *json.extract<JsonArray::Ptr>();
         _validateItems(array, schema);
         _validateItemLimits(array.size(), schema);
     }
 
-    void _validateItems(const JsonArray& array, const JsonSchema& schema)
+    void _validateItems(const JsonArray &array, const JsonSchema &schema)
     {
         for (size_t i = 0; i < array.size(); ++i)
         {
@@ -369,7 +382,7 @@ private:
         }
     }
 
-    void _validateItemLimits(size_t size, const JsonSchema& schema)
+    void _validateItemLimits(size_t size, const JsonSchema &schema)
     {
         if (schema.minItems && size < *schema.minItems)
         {
@@ -388,8 +401,7 @@ private:
 
 namespace brayns
 {
-std::vector<std::string> JsonSchemaValidator::validate(const JsonValue& json,
-                                                       const JsonSchema& schema)
+std::vector<std::string> JsonSchemaValidator::validate(const JsonValue &json, const JsonSchema &schema)
 {
     JsonValidator validator;
     return validator.validate(json, schema);

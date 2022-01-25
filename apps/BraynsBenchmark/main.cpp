@@ -25,7 +25,7 @@
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/Scene.h>
 
-int main(int argc, const char** argv)
+int main(int argc, const char **argv)
 {
     try
     {
@@ -37,32 +37,27 @@ int main(int argc, const char** argv)
         brayns::Brayns brayns(argc, argv);
         timer.stop();
 
-        brayns::Log::info("[PERF] Scene initialization took {} milliseconds",
-                          timer.milliseconds());
+        brayns::Log::info("[PERF] Scene initialization took {} milliseconds", timer.milliseconds());
 
-        auto& engine = brayns.getEngine();
-        auto& scene = engine.getScene();
+        auto &engine = brayns.getEngine();
+        auto &scene = engine.getScene();
         const auto bounds = scene.getBounds();
         const double radius = glm::compMax(bounds.getSize());
         timer.start();
         for (size_t frame = 0; frame < nbFrames; ++frame)
         {
-            const brayns::Vector3d& center = bounds.getCenter();
-            const auto quat = glm::angleAxis(frame * M_PI / 180.0,
-                                             brayns::Vector3d(0.0, 1.0, 0.0));
-            const brayns::Vector3d dir =
-                glm::rotate(quat, brayns::Vector3d(0, 0, -1));
+            const brayns::Vector3d &center = bounds.getCenter();
+            const auto quat = glm::angleAxis(frame * M_PI / 180.0, brayns::Vector3d(0.0, 1.0, 0.0));
+            const brayns::Vector3d dir = glm::rotate(quat, brayns::Vector3d(0, 0, -1));
             engine.getCamera().set(center + radius * -dir, quat);
             brayns.commitAndRender();
         }
         timer.stop();
 
-        brayns::Log::info("[PERF] Rendering {} frames took {} milliseconds.",
-                          nbFrames, timer.milliseconds());
-        brayns::Log::info("[PERF] Frames per second: {}.",
-                          nbFrames / timer.seconds());
+        brayns::Log::info("[PERF] Rendering {} frames took {} milliseconds.", nbFrames, timer.milliseconds());
+        brayns::Log::info("[PERF] Frames per second: {}.", nbFrames / timer.seconds());
     }
-    catch (const std::runtime_error& e)
+    catch (const std::runtime_error &e)
     {
         brayns::Log::error(e.what());
         return 1;

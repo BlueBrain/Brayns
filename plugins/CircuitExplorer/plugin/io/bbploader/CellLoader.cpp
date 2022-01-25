@@ -25,9 +25,8 @@
 
 namespace bbploader
 {
-std::vector<MorphologyInstance::Ptr> CellLoader::load(
-    const BBPLoaderParameters& lc, const brain::GIDSet& gids,
-    const brain::Circuit& circuit)
+std::vector<MorphologyInstance::Ptr>
+    CellLoader::load(const BBPLoaderParameters &lc, const brain::GIDSet &gids, const brain::Circuit &circuit)
 {
     const auto morphPaths = circuit.getMorphologyURIs(gids);
     // Group indices by the morphology name, so we will load the morphology
@@ -39,8 +38,8 @@ std::vector<MorphologyInstance::Ptr> CellLoader::load(
     const auto positions = circuit.getPositions(gids);
     const auto rotations = circuit.getRotations(gids);
 
-    const auto& morphSettings = lc.neuron_morphology_parameters;
-    const auto& geometryMode = morphSettings.geometry_mode;
+    const auto &morphSettings = lc.neuron_morphology_parameters;
+    const auto &geometryMode = morphSettings.geometry_mode;
     const auto radMultiplier = morphSettings.radius_multiplier;
     const auto radOverride = morphSettings.radius_override;
     const auto loadSoma = morphSettings.load_soma;
@@ -48,31 +47,29 @@ std::vector<MorphologyInstance::Ptr> CellLoader::load(
     const auto loadDend = morphSettings.load_dendrites;
 
     const NeuronBuilderTable builderTable;
-    const auto& builder = builderTable.getBuilder(geometryMode);
-    const NeuronMorphologyPipeline pipeline =
-        NeuronMorphologyPipeline::create(radMultiplier, radOverride,
-                                         geometryMode == "smooth" &&
-                                             (loadAxon || loadDend));
+    const auto &builder = builderTable.getBuilder(geometryMode);
+    const NeuronMorphologyPipeline pipeline = NeuronMorphologyPipeline::create(
+        radMultiplier,
+        radOverride,
+        geometryMode == "smooth" && (loadAxon || loadDend));
 
     std::vector<MorphologyInstance::Ptr> cells(gids.size());
 
-    const auto loadFn =
-        [&](const std::string& path, const std::vector<size_t>& indices)
+    const auto loadFn = [&](const std::string &path, const std::vector<size_t> &indices)
     {
         NeuronMorphology morphology(path, loadSoma, loadAxon, loadDend);
         pipeline.process(morphology);
         const auto instantiable = builder.build(morphology);
         for (const auto idx : indices)
-            cells[idx] =
-                instantiable->instantiate(positions[idx], rotations[idx]);
+            cells[idx] = instantiable->instantiate(positions[idx], rotations[idx]);
     };
 
     std::vector<std::future<void>> loadTasks;
     loadTasks.reserve(morphPathMap.size());
-    for (const auto& entry : morphPathMap)
+    for (const auto &entry : morphPathMap)
         loadTasks.push_back(std::async(loadFn, entry.first, entry.second));
 
-    for (const auto& task : loadTasks)
+    for (const auto &task : loadTasks)
     {
         if (task.valid())
             task.wait();

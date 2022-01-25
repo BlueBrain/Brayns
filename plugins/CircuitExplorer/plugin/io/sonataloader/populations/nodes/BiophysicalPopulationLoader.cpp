@@ -23,19 +23,16 @@
 namespace sonataloader
 {
 std::vector<MorphologyInstance::Ptr> BiophysicalPopulationLoader::load(
-    const SonataConfig::Data& networkData,
-    const SonataNodePopulationParameters& lc,
-    const bbp::sonata::Selection& nodeSelection) const
+    const SonataConfig::Data &networkData,
+    const SonataNodePopulationParameters &lc,
+    const bbp::sonata::Selection &nodeSelection) const
 {
-    const auto population =
-        networkData.config.getNodePopulation(lc.node_population);
+    const auto population = networkData.config.getNodePopulation(lc.node_population);
 
-    const auto morphologies =
-        SonataCells::getMorphologies(population, nodeSelection);
+    const auto morphologies = SonataCells::getMorphologies(population, nodeSelection);
     const auto positions = SonataCells::getPositions(population, nodeSelection);
     const auto rotations = SonataCells::getRotations(population, nodeSelection);
 
-    return loadNodes(networkData, lc, nodeSelection, morphologies, positions,
-                     rotations);
+    return loadNodes(networkData, lc, nodeSelection, morphologies, positions, rotations);
 }
 } // namespace sonataloader

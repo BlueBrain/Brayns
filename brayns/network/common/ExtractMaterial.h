@@ -43,9 +43,9 @@ public:
      * @return Material& Material instance.
      * @throw EntrypointException Material or model not found.
      */
-    static Material& fromId(ModelDescriptor& descriptor, size_t id)
+    static Material &fromId(ModelDescriptor &descriptor, size_t id)
     {
-        auto& model = descriptor.getModel();
+        auto &model = descriptor.getModel();
         auto modelId = descriptor.getModelID();
         return fromId(model, modelId, id);
     }
@@ -58,14 +58,13 @@ public:
      * @return Material& Material instance.
      * @throw EntrypointException Material or model not found.
      */
-    static Material& fromId(Model& model, size_t modelId, size_t id)
+    static Material &fromId(Model &model, size_t modelId, size_t id)
     {
         auto material = model.getMaterial(id);
         if (!material)
         {
-            throw EntrypointException("No material with ID " +
-                                      std::to_string(id) + " in model " +
-                                      std::to_string(modelId));
+            throw EntrypointException(
+                "No material with ID " + std::to_string(id) + " in model " + std::to_string(modelId));
         }
         return *material;
     }

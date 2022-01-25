@@ -23,7 +23,8 @@
 #include <plugin/io/morphology/neuron/pipeline/RadiusSmoother.h>
 
 NeuronMorphologyPipeline NeuronMorphologyPipeline::create(
-    const float radiusMultiplier, const float radiusOverride,
+    const float radiusMultiplier,
+    const float radiusOverride,
     const bool smooth) noexcept
 {
     NeuronMorphologyPipeline pipeline;
@@ -39,8 +40,8 @@ NeuronMorphologyPipeline NeuronMorphologyPipeline::create(
     return pipeline;
 }
 
-void NeuronMorphologyPipeline::process(NeuronMorphology& morphology) const
+void NeuronMorphologyPipeline::process(NeuronMorphology &morphology) const
 {
-    for (const auto& stage : _stages)
+    for (const auto &stage : _stages)
         stage->process(morphology);
 }

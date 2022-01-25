@@ -26,12 +26,12 @@
 
 namespace brayns
 {
-template <>
+template<>
 struct ObjectExtractor<RenderingParameters>
 {
-    static RenderingParameters& extract(PluginAPI& api)
+    static RenderingParameters &extract(PluginAPI &api)
     {
-        auto& parametersManager = api.getParametersManager();
+        auto &parametersManager = api.getParametersManager();
         return parametersManager.getRenderingParameters();
     }
 };
@@ -39,7 +39,10 @@ struct ObjectExtractor<RenderingParameters>
 class GetRendererEntrypoint : public GetEntrypoint<RenderingParameters>
 {
 public:
-    virtual std::string getName() const override { return "get-renderer"; }
+    virtual std::string getName() const override
+    {
+        return "get-renderer";
+    }
 
     virtual std::string getDescription() const override
     {
@@ -50,7 +53,10 @@ public:
 class SetRendererEntrypoint : public SetEntrypoint<RenderingParameters>
 {
 public:
-    virtual std::string getName() const override { return "set-renderer"; }
+    virtual std::string getName() const override
+    {
+        return "set-renderer";
+    }
 
     virtual std::string getDescription() const override
     {

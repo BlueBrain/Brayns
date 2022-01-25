@@ -44,7 +44,7 @@ public:
      *
      * @param message Error description.
      */
-    EntrypointException(const std::string& message)
+    EntrypointException(const std::string &message)
         : std::runtime_error(message)
     {
     }
@@ -55,8 +55,7 @@ public:
      * @param code Error code.
      * @param message Error description.
      */
-    EntrypointException(int code, const std::string& message,
-                        const JsonValue& data = {})
+    EntrypointException(int code, const std::string &message, const JsonValue &data = {})
         : std::runtime_error(message)
         , _code(code)
         , _data(data)
@@ -71,8 +70,8 @@ public:
      * @param message Error description.
      * @param data Error data.
      */
-    template <typename T>
-    EntrypointException(int code, const std::string& message, const T& data)
+    template<typename T>
+    EntrypointException(int code, const std::string &message, const T &data)
         : std::runtime_error(message)
         , _code(code)
         , _data(Json::serialize(data))
@@ -84,14 +83,20 @@ public:
      *
      * @return int Error code.
      */
-    int getCode() const { return _code; }
+    int getCode() const
+    {
+        return _code;
+    }
 
     /**
      * @brief Get additional info about the error.
      *
      * @return const JsonValue& Error data.
      */
-    const JsonValue& getData() const { return _data; }
+    const JsonValue &getData() const
+    {
+        return _data;
+    }
 
 private:
     int _code = 0;

@@ -37,13 +37,13 @@ public:
      * Custom copy constructor to not copy changedCallback and solve
      * non-copyable atomic modified state.
      */
-    BaseObject(const BaseObject&)
+    BaseObject(const BaseObject &)
         : _modified(true)
     {
     }
 
     /** Custom assignment operator that does not copy the changedCallback. */
-    BaseObject& operator=(const BaseObject& rhs)
+    BaseObject &operator=(const BaseObject &rhs)
     {
         if (this == &rhs)
             return *this;
@@ -56,11 +56,17 @@ public:
      * @return true if any parameter has been modified since the last
      *         resetModified().
      */
-    bool isModified() const { return _modified; }
+    bool isModified() const
+    {
+        return _modified;
+    }
     /**
      * Reset the modified state, typically done after changes have been applied.
      */
-    void resetModified() { _modified = false; }
+    void resetModified()
+    {
+        _modified = false;
+    }
     void markModified(const bool triggerCallback = true)
     {
         _modified = true;
@@ -68,26 +74,28 @@ public:
             _modifiedCallback(*this);
     }
 
-    using ModifiedCallback = std::function<void(const BaseObject&)>;
+    using ModifiedCallback = std::function<void(const BaseObject &)>;
 
     /**
      * Set a function that is called after this object has been modified.
      */
-    void onModified(const ModifiedCallback& callback)
+    void onModified(const ModifiedCallback &callback)
     {
         _modifiedCallback = callback;
     }
 
-    void clearModifiedCallback() { _modifiedCallback = ModifiedCallback(); }
+    void clearModifiedCallback()
+    {
+        _modifiedCallback = ModifiedCallback();
+    }
 
 protected:
     /**
      * Helper function for derived classes to update a parameter and mark it
      * modified if it has changed.
      */
-    template <typename T>
-    void _updateValue(T& member, const T& newValue,
-                      const bool triggerCallback = true)
+    template<typename T>
+    void _updateValue(T &member, const T &newValue, const bool triggerCallback = true)
     {
         if (!_isEqual(member, newValue))
         {
@@ -96,18 +104,14 @@ protected:
         }
     }
 
-    template <class T>
-    bool _isEqual(
-        const T& a, const T& b,
-        typename std::enable_if<std::is_floating_point<T>::value>::type* = 0)
+    template<class T>
+    bool _isEqual(const T &a, const T &b, typename std::enable_if<std::is_floating_point<T>::value>::type * = 0)
     {
         return std::fabs(a - b) < 0.000001;
     }
 
-    template <class T>
-    bool _isEqual(
-        const T& a, const T& b,
-        typename std::enable_if<!std::is_floating_point<T>::value>::type* = 0)
+    template<class T>
+    bool _isEqual(const T &a, const T &b, typename std::enable_if<!std::is_floating_point<T>::value>::type * = 0)
     {
         return a == b;
     }

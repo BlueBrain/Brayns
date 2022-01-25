@@ -28,18 +28,20 @@
 
 #include <messages/CIGetReportsMessage.h>
 
-class CIGetReportsEntrypoint
-    : public brayns::Entrypoint<CIGetReportsParams, CIGetReportsResult>
+class CIGetReportsEntrypoint : public brayns::Entrypoint<CIGetReportsParams, CIGetReportsResult>
 {
 public:
-    virtual std::string getName() const override { return "ci-get-reports"; }
+    virtual std::string getName() const override
+    {
+        return "ci-get-reports";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Return a list of reports from a circuit";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         CIGetReportsResult result;

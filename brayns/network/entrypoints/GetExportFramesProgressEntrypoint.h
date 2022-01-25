@@ -27,17 +27,16 @@
 
 namespace brayns
 {
-class GetExportFramesProgressEntrypoint
-    : public Entrypoint<EmptyMessage, GetExportFramesProgressMessage>
+class GetExportFramesProgressEntrypoint : public Entrypoint<EmptyMessage, GetExportFramesProgressMessage>
 {
 public:
-    GetExportFramesProgressEntrypoint(std::shared_ptr<FrameExporter>& expt);
+    GetExportFramesProgressEntrypoint(std::shared_ptr<FrameExporter> &expt);
 
     std::string getName() const final;
 
     std::string getDescription() const final;
 
-    void onRequest(const Request& request) final;
+    void onRequest(const Request &request) final;
 
 private:
     std::shared_ptr<FrameExporter> _exporter{nullptr};

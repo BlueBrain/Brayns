@@ -37,10 +37,10 @@ public:
      * @param argc Number of command line arguments
      * @param argv Command line arguments
      */
-    PluginManager(int argc, const char** argv);
+    PluginManager(int argc, const char **argv);
 
     /** Calls ExtensionPlugin::init in all loaded plugins */
-    void initPlugins(PluginAPI* api);
+    void initPlugins(PluginAPI *api);
 
     /** Destroys all plugins. */
     void destroyPlugins();
@@ -55,6 +55,6 @@ private:
     std::vector<DynamicLib> _libs;
     std::vector<std::unique_ptr<ExtensionPlugin>> _extensions;
 
-    void _loadPlugin(const char* name, int argc, const char* argv[]);
+    void _loadPlugin(const char *name, int argc, const char *argv[]);
 };
 } // namespace brayns

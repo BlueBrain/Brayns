@@ -32,12 +32,10 @@ namespace bbploader
 class BBPNeuronColorHandler : public NeuronColorHandler<brion::GIDSet>
 {
 public:
-    BBPNeuronColorHandler(const std::string& circuitPath,
-                          const std::string& circuitPop);
+    BBPNeuronColorHandler(const std::string &circuitPath, const std::string &circuitPop);
 
     std::vector<std::string> _getExtraMethods() const final;
-    std::vector<std::string> _getValuesForMethod(
-        const std::string& method) const final;
+    std::vector<std::string> _getValuesForMethod(const std::string &method) const final;
 
 private:
     const std::string _circuitPath;

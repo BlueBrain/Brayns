@@ -24,18 +24,16 @@
 namespace sonataloader
 {
 std::vector<MorphologyInstance::Ptr> PointNeuronPopulationLoader::load(
-    const SonataConfig::Data& networkData,
-    const SonataNodePopulationParameters& lc,
-    const bbp::sonata::Selection& nodeSelection) const
+    const SonataConfig::Data &networkData,
+    const SonataNodePopulationParameters &lc,
+    const bbp::sonata::Selection &nodeSelection) const
 {
-    const auto population =
-        networkData.config.getNodePopulation(lc.node_population);
+    const auto population = networkData.config.getNodePopulation(lc.node_population);
     const auto nodesSize = nodeSelection.flatSize();
     const auto positions = SonataCells::getPositions(population, nodeSelection);
     const auto radMult = lc.neuron_morphology_parameters.radius_multiplier;
     const auto radOverride = lc.neuron_morphology_parameters.radius_override;
-    const float radius =
-        radOverride > 0.f ? radOverride : (radMult > 0.f ? radMult : 1.f);
+    const float radius = radOverride > 0.f ? radOverride : (radMult > 0.f ? radMult : 1.f);
     std::vector<MorphologyInstance::Ptr> result(nodesSize);
 
     auto sharedData = std::make_shared<SampleSharedData>();

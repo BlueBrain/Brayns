@@ -39,62 +39,65 @@ RenderingParameters::RenderingParameters()
     : AbstractParameters("Rendering")
 {
     _parameters.add_options() //
-        (PARAM_RENDERER, po::value<std::string>(),
+        (PARAM_RENDERER,
+         po::value<std::string>(),
          "The renderer to use") //
-        (PARAM_SPP, po::value<uint32_t>(&_spp),
+        (PARAM_SPP,
+         po::value<uint32_t>(&_spp),
          "Number of samples per pixel [uint]") //
-        (PARAM_SUBSAMPLING, po::value<uint32_t>(&_subsampling),
+        (PARAM_SUBSAMPLING,
+         po::value<uint32_t>(&_subsampling),
          "Subsampling factor [uint]") //
-        (PARAM_ACCUMULATION, po::bool_switch()->default_value(false),
+        (PARAM_ACCUMULATION,
+         po::bool_switch()->default_value(false),
          "Disable accumulation") //
         (PARAM_BACKGROUND_COLOR,
          po::fixed_tokens_value<std::vector<float>>(3, 3),
          "Background color [float float float]") //
-        (PARAM_CAMERA, po::value<std::string>(),
+        (PARAM_CAMERA,
+         po::value<std::string>(),
          "The camera to use") //
-        (PARAM_HEAD_LIGHT, po::bool_switch()->default_value(false),
+        (PARAM_HEAD_LIGHT,
+         po::bool_switch()->default_value(false),
          "Disable light source attached to camera origin.") //
-        (PARAM_VARIANCE_THRESHOLD, po::value<double>(&_varianceThreshold),
+        (PARAM_VARIANCE_THRESHOLD,
+         po::value<double>(&_varianceThreshold),
          "Threshold for adaptive accumulation [float]") //
-        (PARAM_MAX_ACCUMULATION_FRAMES, po::value<size_t>(&_maxAccumFrames),
-         "Maximum number of accumulation frames");
+        (PARAM_MAX_ACCUMULATION_FRAMES, po::value<size_t>(&_maxAccumFrames), "Maximum number of accumulation frames");
 }
 
-const std::string& RenderingParameters::getCurrentRenderer() const noexcept
+const std::string &RenderingParameters::getCurrentRenderer() const noexcept
 {
     return _renderer;
 }
 
-void RenderingParameters::setCurrentRenderer(
-    const std::string& renderer) noexcept
+void RenderingParameters::setCurrentRenderer(const std::string &renderer) noexcept
 {
     _updateValue(_renderer, renderer);
 }
 
-const std::vector<std::string>& RenderingParameters::getRenderers()
-    const noexcept
+const std::vector<std::string> &RenderingParameters::getRenderers() const noexcept
 {
     return _renderers;
 }
 
-void RenderingParameters::addRenderer(const std::string& renderer) noexcept
+void RenderingParameters::addRenderer(const std::string &renderer) noexcept
 {
-    if (std::find(_renderers.begin(), _renderers.end(), renderer) ==
-        _renderers.end())
+    if (std::find(_renderers.begin(), _renderers.end(), renderer) == _renderers.end())
         _renderers.push_back(renderer);
 }
 
-const std::string& RenderingParameters::getCurrentCamera() const noexcept
+const std::string &RenderingParameters::getCurrentCamera() const noexcept
 {
     return _camera;
 }
 
-const std::vector<std::string>& RenderingParameters::getCameras() const noexcept
+const std::vector<std::string> &RenderingParameters::getCameras() const noexcept
 {
     return _cameras;
 }
 
-void RenderingParameters::addCamera(const std::string& camera) noexcept
+void RenderingParameters::addCamera(const std::string &camera) noexcept
 {
     auto it = std::find(_cameras.begin(), _cameras.end(), camera);
     if (it == _cameras.end())
@@ -121,12 +124,12 @@ void RenderingParameters::setSubsampling(const uint32_t subsampling) noexcept
     _updateValue(_subsampling, std::max(1u, subsampling));
 }
 
-const Vector3f& RenderingParameters::getBackgroundColor() const noexcept
+const Vector3f &RenderingParameters::getBackgroundColor() const noexcept
 {
     return _backgroundColor;
 }
 
-void RenderingParameters::setBackgroundColor(const Vector3f& value) noexcept
+void RenderingParameters::setBackgroundColor(const Vector3f &value) noexcept
 {
     _updateValue(_backgroundColor, value);
 }
@@ -171,11 +174,11 @@ size_t RenderingParameters::getMaxAccumFrames() const noexcept
     return _maxAccumFrames;
 }
 
-void RenderingParameters::parse(const po::variables_map& vm)
+void RenderingParameters::parse(const po::variables_map &vm)
 {
     if (vm.count(PARAM_RENDERER))
     {
-        const std::string& rendererName = vm[PARAM_RENDERER].as<std::string>();
+        const std::string &rendererName = vm[PARAM_RENDERER].as<std::string>();
         addRenderer(rendererName);
         _renderer = rendererName;
     }
@@ -187,10 +190,9 @@ void RenderingParameters::parse(const po::variables_map& vm)
     }
     if (vm.count(PARAM_CAMERA))
     {
-        const std::string& cameraName = vm[PARAM_CAMERA].as<std::string>();
+        const std::string &cameraName = vm[PARAM_CAMERA].as<std::string>();
         _camera = cameraName;
-        if (std::find(_cameras.begin(), _cameras.end(), cameraName) ==
-            _cameras.end())
+        if (std::find(_cameras.begin(), _cameras.end(), cameraName) == _cameras.end())
             _cameras.push_back(cameraName);
     }
     _headLight = !vm[PARAM_HEAD_LIGHT].as<bool>();
@@ -201,14 +203,13 @@ void RenderingParameters::print()
 {
     AbstractParameters::print();
     Log::info("Supported renderers               :");
-    for (const auto& renderer : _renderers)
+    for (const auto &renderer : _renderers)
         Log::info("- {}", renderer);
     Log::info("Renderer                          : {}", _renderer);
     Log::info("Samples per pixel                 : {}", _spp);
     Log::info("Background color                  : {}", _backgroundColor);
     Log::info("Camera                            : {}", _camera);
-    Log::info("Accumulation                      : {}",
-              asString(_accumulation));
+    Log::info("Accumulation                      : {}", asString(_accumulation));
     Log::info("Max. accumulation frames          : {}", _maxAccumFrames);
 }
 } // namespace brayns

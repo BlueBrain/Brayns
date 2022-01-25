@@ -47,10 +47,10 @@ public:
      *        key. If no color is associated with the key, a new one is cached
      *        and returned
      */
-    const brayns::Vector4f& getColorForKey(const std::string& k) noexcept;
+    const brayns::Vector4f &getColorForKey(const std::string &k) noexcept;
 
 private:
-    const brayns::Vector4f& _emplaceColor(const std::string& k) noexcept;
+    const brayns::Vector4f &_emplaceColor(const std::string &k) noexcept;
 
     static ColorTable _TABLE;
 
@@ -71,7 +71,7 @@ public:
      * @brief getNextColor returns the next color in the list. When the list
      *        has been exhausted, it starts from the beginning.
      */
-    const brayns::Vector4f& getNextColor() noexcept;
+    const brayns::Vector4f &getNextColor() noexcept;
 
 private:
     static ColorTable _TABLE;

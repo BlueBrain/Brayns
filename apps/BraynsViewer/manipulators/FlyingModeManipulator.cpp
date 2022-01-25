@@ -22,26 +22,23 @@
 
 #include <brayns/engine/Camera.h>
 
-#include "../input/KeyboardHandler.h"
 #include <brayns/common/Log.h>
+#include "../input/KeyboardHandler.h"
 
 namespace brayns
 {
-FlyingModeManipulator::FlyingModeManipulator(Camera& camera,
-                                             KeyboardHandler& keyboardHandler)
+FlyingModeManipulator::FlyingModeManipulator(Camera &camera, KeyboardHandler &keyboardHandler)
     : AbstractManipulator(camera, keyboardHandler)
 {
+    _keyboardHandler.registerKeyboardShortcut('a', "Strafe left", std::bind(&FlyingModeManipulator::_strafeLeft, this));
     _keyboardHandler.registerKeyboardShortcut(
-        'a', "Strafe left",
-        std::bind(&FlyingModeManipulator::_strafeLeft, this));
-    _keyboardHandler.registerKeyboardShortcut(
-        'd', "Strafe right",
+        'd',
+        "Strafe right",
         std::bind(&FlyingModeManipulator::_strafeRight, this));
+    _keyboardHandler.registerKeyboardShortcut('w', "Fly forward", std::bind(&FlyingModeManipulator::_flyForward, this));
     _keyboardHandler.registerKeyboardShortcut(
-        'w', "Fly forward",
-        std::bind(&FlyingModeManipulator::_flyForward, this));
-    _keyboardHandler.registerKeyboardShortcut(
-        's', "Fly backwards",
+        's',
+        "Fly backwards",
         std::bind(&FlyingModeManipulator::_flyBackwards, this));
 }
 
@@ -53,32 +50,27 @@ FlyingModeManipulator::~FlyingModeManipulator()
     _keyboardHandler.unregisterKeyboardShortcut('s');
 }
 
-void FlyingModeManipulator::dragLeft(const Vector2i& to, const Vector2i& from)
+void FlyingModeManipulator::dragLeft(const Vector2i &to, const Vector2i &from)
 {
     const float du = (to.x - from.x) * getRotationSpeed();
     const float dv = (to.y - from.y) * getRotationSpeed();
     rotate(_camera.getPosition(), du, dv, AxisMode::globalY);
 }
 
-void FlyingModeManipulator::dragRight(const Vector2i& to, const Vector2i& from)
+void FlyingModeManipulator::dragRight(const Vector2i &to, const Vector2i &from)
 {
-    const float distance = -(to.y - from.y) *
-                           DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER *
-                           getMotionSpeed();
+    const float distance = -(to.y - from.y) * DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER * getMotionSpeed();
     translate(Vector3f(0, 0, -1) * distance);
 }
 
-void FlyingModeManipulator::dragMiddle(const Vector2i& to, const Vector2i& from)
+void FlyingModeManipulator::dragMiddle(const Vector2i &to, const Vector2i &from)
 {
-    const float x = (to.x - from.x) * DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER *
-                    getMotionSpeed();
-    const float y = (to.y - from.y) * DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER *
-                    getMotionSpeed();
+    const float x = (to.x - from.x) * DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER * getMotionSpeed();
+    const float y = (to.y - from.y) * DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER * getMotionSpeed();
     translate({-x, y, 0.f});
 }
 
-void FlyingModeManipulator::wheel(const Vector2i& /*position*/,
-                                  const float delta)
+void FlyingModeManipulator::wheel(const Vector2i & /*position*/, const float delta)
 {
     translate(Vector3f(0, 0, -1) * delta * getWheelSpeed());
 }

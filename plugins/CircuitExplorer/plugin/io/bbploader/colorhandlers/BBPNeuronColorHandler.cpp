@@ -42,17 +42,12 @@ class CircuitAccessor
 {
 public:
     virtual ~CircuitAccessor() = default;
-    virtual std::vector<std::string> getLayers(
-        const brain::GIDSet& gids) const = 0;
-    virtual std::vector<std::string> getETypes(
-        const brain::GIDSet& gids) const = 0;
-    virtual std::vector<std::string> getMTypes(
-        const brain::GIDSet& gids) const = 0;
-    virtual std::vector<std::string> getMorphologyNames(
-        const brain::GIDSet& gids) const = 0;
+    virtual std::vector<std::string> getLayers(const brain::GIDSet &gids) const = 0;
+    virtual std::vector<std::string> getETypes(const brain::GIDSet &gids) const = 0;
+    virtual std::vector<std::string> getMTypes(const brain::GIDSet &gids) const = 0;
+    virtual std::vector<std::string> getMorphologyNames(const brain::GIDSet &gids) const = 0;
 
-    std::vector<std::string> getData(const brain::GIDSet& gids,
-                                     const std::string& method) const
+    std::vector<std::string> getData(const brain::GIDSet &gids, const std::string &method) const
     {
         if (method == methodByLayer)
             return getLayers(gids);
@@ -69,68 +64,59 @@ public:
 class MVD2Circuit : public CircuitAccessor
 {
 public:
-    MVD2Circuit(const std::string& path)
+    MVD2Circuit(const std::string &path)
         : _circuit(path)
     {
     }
 
-    std::vector<std::string> getLayers(const brain::GIDSet& gids) const final
+    std::vector<std::string> getLayers(const brain::GIDSet &gids) const final
     {
-        const auto result =
-            _getAttrib(gids, brion::NeuronAttributes::NEURON_LAYER);
+        const auto result = _getAttrib(gids, brion::NeuronAttributes::NEURON_LAYER);
         if (result.empty())
             brayns::Log::warn("[CE] MVD2Circuit: No layer data found");
         return result;
     }
 
-    std::vector<std::string> getETypes(const brain::GIDSet& gids) const final
+    std::vector<std::string> getETypes(const brain::GIDSet &gids) const final
     {
-        const auto indices =
-            _getAttrib(gids, brion::NeuronAttributes::NEURON_ETYPE);
+        const auto indices = _getAttrib(gids, brion::NeuronAttributes::NEURON_ETYPE);
         if (indices.empty())
         {
             brayns::Log::warn("[CE] MVD2Circuit: No e-type data found");
             return {};
         }
-        const auto allETypes =
-            _circuit.getTypes(brion::NeuronClass::NEURONCLASS_ETYPE);
+        const auto allETypes = _circuit.getTypes(brion::NeuronClass::NEURONCLASS_ETYPE);
         std::vector<std::string> result(gids.size());
         for (size_t i = 0; i < gids.size(); ++i)
             result[i] = allETypes[std::stoull(indices[i])];
         return result;
     }
 
-    std::vector<std::string> getMTypes(const brain::GIDSet& gids) const final
+    std::vector<std::string> getMTypes(const brain::GIDSet &gids) const final
     {
-        const auto indices =
-            _getAttrib(gids, brion::NeuronAttributes::NEURON_MTYPE);
+        const auto indices = _getAttrib(gids, brion::NeuronAttributes::NEURON_MTYPE);
         if (indices.empty())
         {
             brayns::Log::warn("[CE] MVD2Circuit: No m-type data found");
             return {};
         }
-        const auto allMTypes =
-            _circuit.getTypes(brion::NeuronClass::NEURONCLASS_MTYPE);
+        const auto allMTypes = _circuit.getTypes(brion::NeuronClass::NEURONCLASS_MTYPE);
         std::vector<std::string> result(gids.size());
         for (size_t i = 0; i < gids.size(); ++i)
             result[i] = allMTypes[std::stoull(indices[i])];
         return result;
     }
 
-    std::vector<std::string> getMorphologyNames(
-        const brain::GIDSet& gids) const final
+    std::vector<std::string> getMorphologyNames(const brain::GIDSet &gids) const final
     {
-        const auto result =
-            _getAttrib(gids, brion::NeuronAttributes::NEURON_MORPHOLOGY_NAME);
+        const auto result = _getAttrib(gids, brion::NeuronAttributes::NEURON_MORPHOLOGY_NAME);
         if (result.empty())
-            brayns::Log::warn(
-                "[CE] MVD2Circuit: No morphology name data found");
+            brayns::Log::warn("[CE] MVD2Circuit: No morphology name data found");
         return result;
     }
 
 private:
-    std::vector<std::string> _getAttrib(const brain::GIDSet& gids,
-                                        const uint32_t attrib) const
+    std::vector<std::string> _getAttrib(const brain::GIDSet &gids, const uint32_t attrib) const
     {
         const auto matrix = _circuit.get(gids, attrib);
         if (matrix.shape()[0] == 0)
@@ -145,16 +131,16 @@ private:
     brion::Circuit _circuit;
 };
 
-template <class CircuitType>
+template<class CircuitType>
 class GenericCircuit : public CircuitAccessor
 {
 public:
-    GenericCircuit(std::unique_ptr<CircuitType>&& circuit)
+    GenericCircuit(std::unique_ptr<CircuitType> &&circuit)
         : _circuit(std::move(circuit))
     {
     }
 
-    std::vector<std::string> getLayers(const brain::GIDSet& gids) const final
+    std::vector<std::string> getLayers(const brain::GIDSet &gids) const final
     {
         const auto range = _getRange(gids);
         const auto result = _arrange(_circuit->getLayers(range), gids);
@@ -163,7 +149,7 @@ public:
         return result;
     }
 
-    std::vector<std::string> getETypes(const brain::GIDSet& gids) const final
+    std::vector<std::string> getETypes(const brain::GIDSet &gids) const final
     {
         const auto range = _getRange(gids);
         const auto result = _arrange(_circuit->getEtypes(range), gids);
@@ -172,7 +158,7 @@ public:
         return result;
     }
 
-    std::vector<std::string> getMTypes(const brain::GIDSet& gids) const final
+    std::vector<std::string> getMTypes(const brain::GIDSet &gids) const final
     {
         const auto range = _getRange(gids);
         const auto result = _arrange(_circuit->getMtypes(range), gids);
@@ -181,19 +167,17 @@ public:
         return result;
     }
 
-    std::vector<std::string> getMorphologyNames(
-        const brain::GIDSet& gids) const final
+    std::vector<std::string> getMorphologyNames(const brain::GIDSet &gids) const final
     {
         const auto range = _getRange(gids);
         const auto result = _arrange(_circuit->getMorphologies(range), gids);
         if (result.empty())
-            brayns::Log::warn(
-                "[CE] GenericCircuit: No morphology name data found");
+            brayns::Log::warn("[CE] GenericCircuit: No morphology name data found");
         return result;
     }
 
 private:
-    MVD::Range _getRange(const brain::GIDSet& gids) const noexcept
+    MVD::Range _getRange(const brain::GIDSet &gids) const noexcept
     {
         MVD::Range range;
         range.offset = *gids.begin() - 1; // GIDs start at 1
@@ -201,8 +185,7 @@ private:
         return range;
     }
 
-    std::vector<std::string> _arrange(const std::vector<std::string>& src,
-                                      const brain::GIDSet& gids) const
+    std::vector<std::string> _arrange(const std::vector<std::string> &src, const brain::GIDSet &gids) const
     {
         if (src.empty())
             return {};
@@ -226,23 +209,20 @@ private:
 
 // ------------------------------------------------------------------------------------------------
 
-std::unique_ptr<CircuitAccessor> instantiateCircuit(const std::string& path,
-                                                    const std::string& pop)
+std::unique_ptr<CircuitAccessor> instantiateCircuit(const std::string &path, const std::string &pop)
 {
     const auto lowerCasePath = brayns::string_utils::toLowercase(path);
     if (lowerCasePath.find(".mvd2") != std::string::npos)
         return std::make_unique<MVD2Circuit>(path);
     else if (lowerCasePath.find(".mvd3") != std::string::npos)
-        return std::make_unique<GenericCircuit<MVD3::MVD3File>>(
-            std::make_unique<MVD3::MVD3File>(path));
+        return std::make_unique<GenericCircuit<MVD3::MVD3File>>(std::make_unique<MVD3::MVD3File>(path));
     else if (lowerCasePath.find(".h5") || lowerCasePath.find(".hdf5"))
-        return std::make_unique<GenericCircuit<MVD::SonataFile>>(
-            std::make_unique<MVD::SonataFile>(path, pop));
+        return std::make_unique<GenericCircuit<MVD::SonataFile>>(std::make_unique<MVD::SonataFile>(path, pop));
 
     return {nullptr};
 }
 
-std::vector<std::string> getAvailableMethods(const CircuitAccessor& circuit)
+std::vector<std::string> getAvailableMethods(const CircuitAccessor &circuit)
 {
     std::vector<std::string> result;
 
@@ -266,8 +246,7 @@ std::vector<std::string> getAvailableMethods(const CircuitAccessor& circuit)
 }
 } // namespace
 
-BBPNeuronColorHandler::BBPNeuronColorHandler(const std::string& circuitPath,
-                                             const std::string& circuitPop)
+BBPNeuronColorHandler::BBPNeuronColorHandler(const std::string &circuitPath, const std::string &circuitPop)
     : _circuitPath(circuitPath)
     , _circuitPop(circuitPop)
 {
@@ -279,8 +258,7 @@ std::vector<std::string> BBPNeuronColorHandler::_getExtraMethods() const
     return getAvailableMethods(*circuit);
 }
 
-std::vector<std::string> BBPNeuronColorHandler::_getValuesForMethod(
-    const std::string& method) const
+std::vector<std::string> BBPNeuronColorHandler::_getValuesForMethod(const std::string &method) const
 {
     const auto circuit = instantiateCircuit(_circuitPath, _circuitPop);
     std::vector<std::string> data;

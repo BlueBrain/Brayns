@@ -28,34 +28,26 @@
 
 TEST_CASE("subsampling_buffer_size")
 {
-    const char* argv[] = {"subsampling", "--window-size", "400",
-                          "200",         "--subsampling", "4",
-                          "demo"};
-    const int argc = sizeof(argv) / sizeof(char*);
+    const char *argv[] = {"subsampling", "--window-size", "400", "200", "--subsampling", "4", "demo"};
+    const int argc = sizeof(argv) / sizeof(char *);
     brayns::Brayns brayns(argc, argv);
 
     brayns.commitAndRender();
-    CHECK_EQ(brayns.getEngine().getFrameBuffer().getSize(),
-             brayns::Vector2ui(100, 50));
+    CHECK_EQ(brayns.getEngine().getFrameBuffer().getSize(), brayns::Vector2ui(100, 50));
 
     brayns.commitAndRender();
-    CHECK_EQ(brayns.getEngine().getFrameBuffer().getSize(),
-             brayns::Vector2ui(400, 200));
+    CHECK_EQ(brayns.getEngine().getFrameBuffer().getSize(), brayns::Vector2ui(400, 200));
 }
 
 TEST_CASE("no_subsampling_needed")
 {
-    const char* argv[] = {"subsampling", "--window-size",       "400",
-                          "200",         "--samples-per-pixel", "2",
-                          "demo"};
-    const int argc = sizeof(argv) / sizeof(char*);
+    const char *argv[] = {"subsampling", "--window-size", "400", "200", "--samples-per-pixel", "2", "demo"};
+    const int argc = sizeof(argv) / sizeof(char *);
     brayns::Brayns brayns(argc, argv);
 
     brayns.commitAndRender();
-    CHECK_EQ(brayns.getEngine().getFrameBuffer().getSize(),
-             brayns::Vector2ui(400, 200));
+    CHECK_EQ(brayns.getEngine().getFrameBuffer().getSize(), brayns::Vector2ui(400, 200));
 
     brayns.commitAndRender();
-    CHECK_EQ(brayns.getEngine().getFrameBuffer().getSize(),
-             brayns::Vector2ui(400, 200));
+    CHECK_EQ(brayns.getEngine().getFrameBuffer().getSize(), brayns::Vector2ui(400, 200));
 }

@@ -31,11 +31,10 @@ public:
 
     std::string getName() const final;
 
-    std::vector<ModelDescriptorPtr> importFromBlob(
-        Blob&& blob, const LoaderProgress& callback, Scene& scene) const final;
+    std::vector<ModelDescriptorPtr> importFromBlob(Blob &&blob, const LoaderProgress &callback, Scene &scene)
+        const final;
 
-    std::vector<ModelDescriptorPtr> importFromFile(
-        const std::string& filename, const LoaderProgress& callback,
-        Scene& scene) const final;
+    std::vector<ModelDescriptorPtr>
+        importFromFile(const std::string &filename, const LoaderProgress &callback, Scene &scene) const final;
 };
 } // namespace brayns

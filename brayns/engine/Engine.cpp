@@ -22,7 +22,7 @@
 
 namespace brayns
 {
-Engine::Engine(ParametersManager& parametersManager)
+Engine::Engine(ParametersManager &parametersManager)
     : _parametersManager(parametersManager)
 {
 }
@@ -37,7 +37,7 @@ void Engine::preRender()
     if (!mustRender())
         return;
 
-    const auto& renderParams = _parametersManager.getRenderingParameters();
+    const auto &renderParams = _parametersManager.getRenderingParameters();
     if (!renderParams.isModified())
         return;
     for (auto frameBuffer : _frameBuffers)
@@ -70,7 +70,7 @@ void Engine::postRender()
         frameBuffer->incrementAccumFrames();
 }
 
-Renderer& Engine::getRenderer()
+Renderer &Engine::getRenderer()
 {
     return *_renderer;
 }
@@ -78,9 +78,9 @@ Renderer& Engine::getRenderer()
 bool Engine::continueRendering() const
 {
     auto frameBuffer = _frameBuffers[0];
-    return (frameBuffer->getAccumulation() &&
-            (frameBuffer->numAccumFrames() <
-             _parametersManager.getRenderingParameters().getMaxAccumFrames()));
+    return (
+        frameBuffer->getAccumulation()
+        && (frameBuffer->numAccumFrames() < _parametersManager.getRenderingParameters().getMaxAccumFrames()));
 }
 
 void Engine::addFrameBuffer(FrameBufferPtr frameBuffer)
@@ -90,9 +90,7 @@ void Engine::addFrameBuffer(FrameBufferPtr frameBuffer)
 
 void Engine::removeFrameBuffer(FrameBufferPtr frameBuffer)
 {
-    _frameBuffers.erase(std::remove(_frameBuffers.begin(), _frameBuffers.end(),
-                                    frameBuffer),
-                        _frameBuffers.end());
+    _frameBuffers.erase(std::remove(_frameBuffers.begin(), _frameBuffers.end(), frameBuffer), _frameBuffers.end());
 }
 
 void Engine::clearFrameBuffers()
@@ -107,15 +105,13 @@ void Engine::resetFrameBuffers()
         frameBuffer->resetModified();
 }
 
-void Engine::addRendererType(const std::string& name,
-                             const PropertyMap& properties)
+void Engine::addRendererType(const std::string &name, const PropertyMap &properties)
 {
     _parametersManager.getRenderingParameters().addRenderer(name);
     getRenderer().setProperties(name, properties);
 }
 
-void Engine::addCameraType(const std::string& name,
-                           const PropertyMap& properties)
+void Engine::addCameraType(const std::string &name, const PropertyMap &properties)
 {
     _parametersManager.getRenderingParameters().addCamera(name);
     getCamera().setProperties(name, properties);
@@ -123,8 +119,7 @@ void Engine::addCameraType(const std::string& name,
 
 bool Engine::mustRender()
 {
-    if (_parametersManager.getApplicationParameters()
-            .getUseQuantaRenderControl())
+    if (_parametersManager.getApplicationParameters().getUseQuantaRenderControl())
     {
         // When playing an animation:
         //  - A frame data from the animation gets loaded
@@ -138,12 +133,11 @@ bool Engine::mustRender()
         // Do not render if camera hasnt been modified and either there is no
         // accumulation frames or they are completed for the current pass
         auto frameBuffer = _frameBuffers[0];
-        if (!_camera->isModified() &&
-            (!frameBuffer->getAccumulation() ||
-             (frameBuffer->getAccumulation() &&
-              frameBuffer->numAccumFrames() >=
-                  _parametersManager.getRenderingParameters()
-                      .getMaxAccumFrames())))
+        if (!_camera->isModified()
+            && (!frameBuffer->getAccumulation()
+                || (frameBuffer->getAccumulation()
+                    && frameBuffer->numAccumFrames()
+                        >= _parametersManager.getRenderingParameters().getMaxAccumFrames())))
             return false;
     }
 

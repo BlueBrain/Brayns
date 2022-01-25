@@ -34,7 +34,7 @@ namespace brayns
 class FrameExportParameterException : public std::runtime_error
 {
 public:
-    FrameExportParameterException(const std::string& msg)
+    FrameExportParameterException(const std::string &msg)
         : std::runtime_error(msg)
     {
     }
@@ -91,24 +91,20 @@ public:
     };
 
 public:
-    void startNewExport(ExportInfo&& input);
+    void startNewExport(ExportInfo &&input);
 
-    void preRender(Camera& camera, Renderer& renderer, FrameBuffer& frameBuffer,
-                   ParametersManager& parameters);
-    void postRender(FrameBuffer& frameBuffer);
+    void preRender(Camera &camera, Renderer &renderer, FrameBuffer &frameBuffer, ParametersManager &parameters);
+    void postRender(FrameBuffer &frameBuffer);
 
     double getExportProgress();
 
 private:
-    void _saveState(Camera& camera, ParametersManager& parameters);
-    void _restoreState(Camera& camera, ParametersManager& parameters);
+    void _saveState(Camera &camera, ParametersManager &parameters);
+    void _restoreState(Camera &camera, ParametersManager &parameters);
 
-    void _start(Camera& camera, Renderer& renderer, FrameBuffer& framebuffer,
-                ParametersManager& parameters) noexcept;
-    void _stop(Camera& camera, Renderer& renderer,
-               ParametersManager& parameters) noexcept;
-    void _writeImageToDisk(FrameBuffer& frameBuffer,
-                           const uint32_t frameNumberName);
+    void _start(Camera &camera, Renderer &renderer, FrameBuffer &framebuffer, ParametersManager &parameters) noexcept;
+    void _stop(Camera &camera, Renderer &renderer, ParametersManager &parameters) noexcept;
+    void _writeImageToDisk(FrameBuffer &frameBuffer, const uint32_t frameNumberName);
 
 private:
     struct OriginalState

@@ -35,7 +35,7 @@ namespace brayns
  *
  * @tparam ObjectType Property object to retrieve.
  */
-template <typename ObjectType>
+template<typename ObjectType>
 class GetPropertyObjectEntrypoint : public BaseEntrypoint
 {
 public:
@@ -44,7 +44,7 @@ public:
      *
      * @return const ObjectType& Underlying object.
      */
-    const ObjectType& getObject() const
+    const ObjectType &getObject() const
     {
         return ObjectExtractor<ObjectType>::extract(getApi());
     }
@@ -66,7 +66,7 @@ public:
      */
     virtual JsonSchema getResultSchema() const override
     {
-        auto& object = getObject();
+        auto &object = getObject();
         return PropertyObjectSchema::create(object);
     }
 
@@ -75,10 +75,10 @@ public:
      *
      * @param request Client get-...-properties request.
      */
-    virtual void onRequest(const NetworkRequest& request) override
+    virtual void onRequest(const NetworkRequest &request) override
     {
-        auto& object = getObject();
-        auto& properties = object.getPropertyMap();
+        auto &object = getObject();
+        auto &properties = object.getPropertyMap();
         request.reply(properties);
     }
 };
@@ -88,7 +88,7 @@ public:
  *
  * @tparam ObjectType Property object to update.
  */
-template <typename ObjectType>
+template<typename ObjectType>
 class SetPropertyObjectEntrypoint : public BaseEntrypoint
 {
 public:
@@ -97,7 +97,7 @@ public:
      *
      * @return const ObjectType& Underlying object.
      */
-    ObjectType& getObject() const
+    ObjectType &getObject() const
     {
         return ObjectExtractor<ObjectType>::extract(getApi());
     }
@@ -109,7 +109,7 @@ public:
      */
     virtual JsonSchema getParamsSchema() const override
     {
-        auto& object = getObject();
+        auto &object = getObject();
         return PropertyObjectSchema::create(object);
     }
 
@@ -128,11 +128,11 @@ public:
      *
      * @param request Client set-...-properties request.
      */
-    virtual void onRequest(const NetworkRequest& request) override
+    virtual void onRequest(const NetworkRequest &request) override
     {
-        auto& params = request.getParams();
+        auto &params = request.getParams();
         auto properties = Json::deserialize<PropertyMap>(params);
-        auto& object = getObject();
+        auto &object = getObject();
         object.updateProperties(properties);
         triggerRender();
         request.notify(properties);

@@ -50,7 +50,7 @@ public:
      *
      * @param context Network context reference.
      */
-    ClientInterface(NetworkContext& context);
+    ClientInterface(NetworkContext &context);
 
     /**
      * @brief Shutdown the client thread.

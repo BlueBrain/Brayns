@@ -27,12 +27,10 @@ namespace sonataloader
 {
 namespace
 {
-bbp::sonata::Selection applyPercentage(const std::vector<uint64_t>& src,
-                                       const float percentage) noexcept
+bbp::sonata::Selection applyPercentage(const std::vector<uint64_t> &src, const float percentage) noexcept
 {
     const auto expectedSize = static_cast<size_t>(src.size() * percentage);
-    const auto skipFactor = static_cast<size_t>(
-        static_cast<float>(src.size()) / static_cast<float>(expectedSize));
+    const auto skipFactor = static_cast<size_t>(static_cast<float>(src.size()) / static_cast<float>(expectedSize));
     std::vector<uint64_t> finalList;
     finalList.reserve(expectedSize);
     for (size_t i = 0; i < src.size(); i = i + skipFactor)
@@ -49,20 +47,19 @@ NodeSelection::NodeSelection()
 {
 }
 
-void NodeSelection::select(const bbp::sonata::CircuitConfig& config,
-                           const std::string& population,
-                           const std::vector<std::string>& nodeSets)
+void NodeSelection::select(
+    const bbp::sonata::CircuitConfig &config,
+    const std::string &population,
+    const std::vector<std::string> &nodeSets)
 {
     const auto nodePopulation = config.getNodePopulation(population);
 
     if (!nodeSets.empty())
     {
-        const auto nodeSetFile =
-            bbp::sonata::NodeSets::fromFile(config.getNodeSetsPath());
-        for (const auto& nodeSetName : nodeSets)
+        const auto nodeSetFile = bbp::sonata::NodeSets::fromFile(config.getNodeSetsPath());
+        for (const auto &nodeSetName : nodeSets)
         {
-            const auto newSelection =
-                nodeSetFile.materialize(nodeSetName, nodePopulation);
+            const auto newSelection = nodeSetFile.materialize(nodeSetName, nodePopulation);
             _nodeSetsSelection = _nodeListSelection & newSelection;
         }
     }
@@ -70,20 +67,17 @@ void NodeSelection::select(const bbp::sonata::CircuitConfig& config,
         _nodeSetsSelection = nodePopulation.selectAll();
 }
 
-void NodeSelection::select(const std::vector<uint64_t>& nodeList)
+void NodeSelection::select(const std::vector<uint64_t> &nodeList)
 {
     _nodeListSelection = bbp::sonata::Selection::fromValues(nodeList);
 }
 
-void NodeSelection::select(const ReportType simType,
-                           const std::string& reportPath,
-                           const std::string& population)
+void NodeSelection::select(const ReportType simType, const std::string &reportPath, const std::string &population)
 {
     if (simType == ReportType::SPIKES || simType == ReportType::NONE)
         return;
 
-    auto nodeIds =
-        SonataSimulationMapping::getCompartmentNodes(reportPath, population);
+    auto nodeIds = SonataSimulationMapping::getCompartmentNodes(reportPath, population);
     std::sort(nodeIds.begin(), nodeIds.end());
     _simulationSelection = bbp::sonata::Selection::fromValues(nodeIds);
 }
@@ -114,7 +108,7 @@ bbp::sonata::Selection NodeSelection::intersection(const float percent)
     }
 }
 
-EdgeSelection::EdgeSelection(bbp::sonata::Selection&& intialEdgeSelection)
+EdgeSelection::EdgeSelection(bbp::sonata::Selection &&intialEdgeSelection)
     : _edgeListSelection(std::move(intialEdgeSelection))
 {
 }

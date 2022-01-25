@@ -54,8 +54,10 @@ NodeReportLoader::Ptr getLoaderForType(const ReportType type)
 }
 
 brayns::AbstractSimulationHandlerPtr getHandlerForType(
-    const ReportType type, const std::string& reportPath,
-    const std::string& population, const bbp::sonata::Selection& selection)
+    const ReportType type,
+    const std::string &reportPath,
+    const std::string &population,
+    const bbp::sonata::Selection &selection)
 {
     switch (type)
     {
@@ -64,14 +66,11 @@ brayns::AbstractSimulationHandlerPtr getHandlerForType(
     case ReportType::COMPARTMENT:
     case ReportType::SUMMATION:
     case ReportType::SYNAPSE:
-        return std::make_shared<SonataReportHandler>(reportPath, population,
-                                                     selection);
+        return std::make_shared<SonataReportHandler>(reportPath, population, selection);
     case ReportType::BLOODFLOW_RADII:
-        return std::make_shared<VasculatureRadiiHandler>(reportPath, population,
-                                                         selection);
+        return std::make_shared<VasculatureRadiiHandler>(reportPath, population, selection);
     case ReportType::SPIKES:
-        return std::make_shared<SonataSpikeHandler>(reportPath, population,
-                                                    selection);
+        return std::make_shared<SonataSpikeHandler>(reportPath, population, selection);
     default:
         return {nullptr};
     }
@@ -80,39 +79,35 @@ brayns::AbstractSimulationHandlerPtr getHandlerForType(
 } // namespace
 
 void PopulationReportManager::loadNodeMapping(
-    const SonataNodePopulationParameters& input,
-    const bbp::sonata::Selection& selection,
-    std::vector<MorphologyInstance::Ptr>& nodes)
+    const SonataNodePopulationParameters &input,
+    const bbp::sonata::Selection &selection,
+    std::vector<MorphologyInstance::Ptr> &nodes)
 {
     const auto type = input.report_type;
     if (type == ReportType::NONE)
         return;
 
     const auto reportLoader = getLoaderForType(type);
-    const auto mapping =
-        reportLoader->loadMapping(input.report_path, input.node_population,
-                                  selection);
+    const auto mapping = reportLoader->loadMapping(input.report_path, input.node_population, selection);
 
 #pragma omp parallel for
     for (size_t i = 0; i < nodes.size(); ++i)
     {
-        const auto& cm = mapping[i];
+        const auto &cm = mapping[i];
         nodes[i]->mapSimulation(cm.globalOffset, cm.offsets, cm.compartments);
     }
 }
 
 void PopulationReportManager::loadEdgeMapping(
-    const SonataEdgePopulationParameters& input,
-    const bbp::sonata::Selection& selection,
-    std::vector<SynapseGroup::Ptr>& edges)
+    const SonataEdgePopulationParameters &input,
+    const bbp::sonata::Selection &selection,
+    std::vector<SynapseGroup::Ptr> &edges)
 {
     if (input.edge_report.empty())
         return;
 
     // Currently there is only one type of synapse report...
-    const auto mapping =
-        EdgeCompartmentLoader().loadMapping(input.edge_report,
-                                            input.edge_population, selection);
+    const auto mapping = EdgeCompartmentLoader().loadMapping(input.edge_report, input.edge_population, selection);
 
 #pragma omp parallel for
     for (size_t j = 0; j < edges.size(); ++j)
@@ -120,15 +115,16 @@ void PopulationReportManager::loadEdgeMapping(
 }
 
 void PopulationReportManager::addNodeReportHandler(
-    const SonataNodePopulationParameters& input,
-    const bbp::sonata::Selection& selection, brayns::ModelDescriptorPtr& model)
+    const SonataNodePopulationParameters &input,
+    const bbp::sonata::Selection &selection,
+    brayns::ModelDescriptorPtr &model)
 {
     const auto type = input.report_type;
     if (type == ReportType::NONE)
         return;
 
-    const auto& path = input.report_path;
-    const auto& population = input.node_population;
+    const auto &path = input.report_path;
+    const auto &population = input.node_population;
 
     auto handler = getHandlerForType(type, path, population, selection);
     if (!handler)
@@ -139,33 +135,33 @@ void PopulationReportManager::addNodeReportHandler(
 }
 
 void PopulationReportManager::addEdgeReportHandler(
-    const SonataEdgePopulationParameters& input,
-    const bbp::sonata::Selection& selection, brayns::ModelDescriptorPtr& model)
+    const SonataEdgePopulationParameters &input,
+    const bbp::sonata::Selection &selection,
+    brayns::ModelDescriptorPtr &model)
 {
     if (input.edge_report.empty())
         return;
 
-    const auto& path = input.edge_report;
-    const auto& population = input.edge_population;
+    const auto &path = input.edge_report;
+    const auto &population = input.edge_population;
 
-    auto handler =
-        getHandlerForType(ReportType::SYNAPSE, path, population, selection);
+    auto handler = getHandlerForType(ReportType::SYNAPSE, path, population, selection);
 
     model->getModel().setSimulationHandler(handler);
     CircuitExplorerMaterial::setSimulationColorEnabled(model->getModel(), true);
 }
 
 void PopulationReportManager::addNodeHandlerToEdges(
-    const brayns::ModelDescriptorPtr& nodeModel,
-    const std::vector<brayns::ModelDescriptor*>& edgeModels)
+    const brayns::ModelDescriptorPtr &nodeModel,
+    const std::vector<brayns::ModelDescriptor *> &edgeModels)
 {
-    const auto& model = nodeModel->getModel();
+    const auto &model = nodeModel->getModel();
     if (!model.getSimulationHandler())
         return;
 
     for (auto edgeModelDescr : edgeModels)
     {
-        auto& edgeModel = edgeModelDescr->getModel();
+        auto &edgeModel = edgeModelDescr->getModel();
         if (!edgeModel.getSimulationHandler())
         {
             edgeModel.setSimulationHandler(model.getSimulationHandler());

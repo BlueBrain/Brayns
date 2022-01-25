@@ -29,7 +29,7 @@ void AbstractParameters::print()
     Log::info("-= {} parameters =-", _name);
 }
 
-po::options_description& AbstractParameters::parameters()
+po::options_description &AbstractParameters::parameters()
 {
     return _parameters;
 }

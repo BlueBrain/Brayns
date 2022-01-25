@@ -75,12 +75,18 @@ void MultiviewCamera::commit()
     const auto clipPlaneData = clipPlanes ? clipPlanes->data : nullptr;
     const size_t numClipPlanes = clipPlanes ? clipPlanes->numItems : 0;
 
-    ispc::MultiviewCamera_set(getIE(), (const ispc::vec3f&)org,
-                              (const ispc::vec3f&)dir_00,
-                              (const ispc::vec3f&)dir_du,
-                              (const ispc::vec3f&)dir_dv, scaledAperture,
-                              height, aspect, armLength,
-                              (const ispc::vec4f*)clipPlaneData, numClipPlanes);
+    ispc::MultiviewCamera_set(
+        getIE(),
+        (const ispc::vec3f &)org,
+        (const ispc::vec3f &)dir_00,
+        (const ispc::vec3f &)dir_du,
+        (const ispc::vec3f &)dir_dv,
+        scaledAperture,
+        height,
+        aspect,
+        armLength,
+        (const ispc::vec4f *)clipPlaneData,
+        numClipPlanes);
 }
 
 OSP_REGISTER_CAMERA(MultiviewCamera, multiview);

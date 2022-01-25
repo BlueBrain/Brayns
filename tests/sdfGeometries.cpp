@@ -26,11 +26,8 @@
 TEST_CASE("bounding_box")
 {
     const auto sphere = brayns::createSDFSphere({1.0f, 1.0f, 1.0f}, 1.0f);
-    const auto conePill =
-        brayns::createSDFConePill({0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, 2.0f,
-                                  1.0f);
-    const auto pill =
-        brayns::createSDFPill({0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, 2.0f);
+    const auto conePill = brayns::createSDFConePill({0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, 2.0f, 1.0f);
+    const auto pill = brayns::createSDFPill({0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, 2.0f);
 
     const auto boxSphere = getSDFBoundingBox(sphere);
     const auto boxConePill = getSDFBoundingBox(conePill);

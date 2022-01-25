@@ -24,25 +24,16 @@
 #include <brayns/json/JsonObjectMacro.h>
 
 BRAYNS_JSON_OBJECT_BEGIN(CIGetReportInfoParams)
-BRAYNS_JSON_OBJECT_ENTRY(
-    std::string, path,
-    "Path to the circuit BlueConfig from which to get the report")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, report,
-                         "Name of the report from where to get the information")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path to the circuit BlueConfig from which to get the report")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, report, "Name of the report from where to get the information")
 BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(CIGetReportInfoResult)
-BRAYNS_JSON_OBJECT_ENTRY(double, start_time,
-                         "Time at which the simulation starts")
+BRAYNS_JSON_OBJECT_ENTRY(double, start_time, "Time at which the simulation starts")
 BRAYNS_JSON_OBJECT_ENTRY(double, end_time, "Time at which the simulation ends")
-BRAYNS_JSON_OBJECT_ENTRY(double, time_step,
-                         "Time between two consecutive simulation frames")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, data_unit,
-                         "Unit of the report values. Can be (mV, mA, ...)")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, time_unit,
-                         "Unit of the report time values")
-BRAYNS_JSON_OBJECT_ENTRY(uint64_t, frame_count,
-                         "Number of simulation frames in the report")
-BRAYNS_JSON_OBJECT_ENTRY(uint64_t, frame_size,
-                         "Number of values per frame in the report")
+BRAYNS_JSON_OBJECT_ENTRY(double, time_step, "Time between two consecutive simulation frames")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, data_unit, "Unit of the report values. Can be (mV, mA, ...)")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, time_unit, "Unit of the report time values")
+BRAYNS_JSON_OBJECT_ENTRY(uint64_t, frame_count, "Number of simulation frames in the report")
+BRAYNS_JSON_OBJECT_ENTRY(uint64_t, frame_size, "Number of values per frame in the report")
 BRAYNS_JSON_OBJECT_END()

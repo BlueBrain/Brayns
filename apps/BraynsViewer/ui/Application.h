@@ -69,7 +69,7 @@ struct InputEvent
 class Application
 {
 public:
-    static Application* createInstance(brayns::Brayns& brayns);
+    static Application *createInstance(brayns::Brayns &brayns);
     static void destroyInstance();
 
     bool init();
@@ -81,7 +81,7 @@ public:
     void scrollCallback(double xoffset, double yoffset);
 
 private:
-    Application(brayns::Brayns& brayns);
+    Application(brayns::Brayns &brayns);
     ~Application() = default;
 
     /* The different types of frame buffer targets for rendering. */
@@ -112,10 +112,10 @@ private:
     void handleMouseButton(InputEvent action);
     void handleScroll(InputEvent action);
 
-    brayns::Brayns& m_brayns;
+    brayns::Brayns &m_brayns;
     brayns::KeyboardHandler m_keyboardHandler;
     std::unique_ptr<brayns::AbstractManipulator> m_cameraManipulator;
-    GLFWwindow* m_window{nullptr};
+    GLFWwindow *m_window{nullptr};
     int m_width{0};
     int m_height{0};
     bool m_exit{false};

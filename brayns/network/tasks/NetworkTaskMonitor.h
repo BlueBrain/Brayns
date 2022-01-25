@@ -48,7 +48,10 @@ public:
      * @brief Notify the monitor and unlock all thread waiting on it.
      *
      */
-    void notify() { _monitor.notify_all(); }
+    void notify()
+    {
+        _monitor.notify_all();
+    }
 
     /**
      * @brief Wait for notification or throw if timeout is reached.
@@ -58,7 +61,7 @@ public:
      * @param timeout Timeout duration.
      * @throw std::runtime_error Timeout is reached with no notifications.
      */
-    template <typename R, typename P>
+    template<typename R, typename P>
     void wait(std::chrono::duration<R, P> timeout)
     {
         std::unique_lock<std::mutex> lock(_mutex);
@@ -78,7 +81,7 @@ public:
      * @return true No notifications has been received, duration waited.
      * @return false Cancelled by a notification.
      */
-    template <typename R, typename P>
+    template<typename R, typename P>
     bool waitFor(std::chrono::duration<R, P> duration)
     {
         std::unique_lock<std::mutex> lock(_mutex);

@@ -27,16 +27,16 @@ namespace brayns
 {
 namespace
 {
-void initializeParameters(Engine& engine, SnapshotParams& params)
+void initializeParameters(Engine &engine, SnapshotParams &params)
 {
-    const auto& paramsManager = engine.getParametersManager();
-    const auto& sysAnimParams = paramsManager.getAnimationParameters();
-    const auto& sysRenderParams = paramsManager.getRenderingParameters();
-    const auto& sysVolumeParams = paramsManager.getVolumeParameters();
+    const auto &paramsManager = engine.getParametersManager();
+    const auto &sysAnimParams = paramsManager.getAnimationParameters();
+    const auto &sysRenderParams = paramsManager.getRenderingParameters();
+    const auto &sysVolumeParams = paramsManager.getVolumeParameters();
 
-    auto& animParams = params.animation_parameters;
-    auto& renderParams = params.renderer;
-    auto& volumeParams = params.volume_parameters;
+    auto &animParams = params.animation_parameters;
+    auto &renderParams = params.renderer;
+    auto &volumeParams = params.volume_parameters;
 
     if (!animParams)
         animParams = std::make_unique<AnimationParameters>(sysAnimParams);
@@ -53,10 +53,10 @@ void initializeParameters(Engine& engine, SnapshotParams& params)
         volumeParams = std::make_unique<VolumeParameters>(sysVolumeParams);
 }
 
-std::shared_ptr<Camera> initializeCamera(Engine& engine, SnapshotParams& params)
+std::shared_ptr<Camera> initializeCamera(Engine &engine, SnapshotParams &params)
 {
     auto camera = engine.createCamera();
-    const auto& sysCamera = engine.getCamera();
+    const auto &sysCamera = engine.getCamera();
 
     if (params.camera)
     {
@@ -70,10 +70,10 @@ std::shared_ptr<Camera> initializeCamera(Engine& engine, SnapshotParams& params)
     return camera;
 }
 
-std::string writeSnapshotToDisk(SnapshotParams& params, FrameBuffer& fb)
+std::string writeSnapshotToDisk(SnapshotParams &params, FrameBuffer &fb)
 {
-    const auto& path = params.file_path;
-    const auto& format = params.format;
+    const auto &path = params.file_path;
+    const auto &format = params.format;
     auto image = fb.getImage();
     auto filename = path + "." + format;
     auto quality = params.quality;
@@ -81,7 +81,7 @@ std::string writeSnapshotToDisk(SnapshotParams& params, FrameBuffer& fb)
     {
         ImageEncoder::save(image, filename, quality);
     }
-    catch (const std::runtime_error& e)
+    catch (const std::runtime_error &e)
     {
         Log::error("{}", e.what());
     }
@@ -89,7 +89,7 @@ std::string writeSnapshotToDisk(SnapshotParams& params, FrameBuffer& fb)
     return {};
 }
 
-std::string encodeSnapshotToBase64(SnapshotParams& params, FrameBuffer& fb)
+std::string encodeSnapshotToBase64(SnapshotParams &params, FrameBuffer &fb)
 {
     try
     {
@@ -98,7 +98,7 @@ std::string encodeSnapshotToBase64(SnapshotParams& params, FrameBuffer& fb)
         auto quality = params.quality;
         return {ImageEncoder::encodeToBase64(image, format, quality)};
     }
-    catch (const std::runtime_error& e)
+    catch (const std::runtime_error &e)
     {
         Log::error("{}", e.what());
     }
@@ -107,7 +107,7 @@ std::string encodeSnapshotToBase64(SnapshotParams& params, FrameBuffer& fb)
 }
 } // namespace
 
-SnapshotTask::SnapshotTask(Engine& engine, SnapshotParams&& params)
+SnapshotTask::SnapshotTask(Engine &engine, SnapshotParams &&params)
     : _engine(engine)
     , _params(std::move(params))
 {
@@ -117,9 +117,9 @@ void SnapshotTask::run()
 {
     // Initialize parameters
     initializeParameters(_engine, _params);
-    auto& animParams = _params.animation_parameters;
-    auto& renderParams = _params.renderer;
-    auto& volumeParams = _params.volume_parameters;
+    auto &animParams = _params.animation_parameters;
+    auto &renderParams = _params.renderer;
+    auto &volumeParams = _params.volume_parameters;
 
     // Initialize (Clone) scene
     auto scene = _engine.createScene(*animParams, *volumeParams);
@@ -128,7 +128,7 @@ void SnapshotTask::run()
 
     // Initialize camera
     auto camera = initializeCamera(_engine, _params);
-    const auto& size = _params.size;
+    const auto &size = _params.size;
     const auto ar = static_cast<double>(size.x) / static_cast<double>(size.y);
     camera->updateProperty("aspect", ar);
     camera->setBufferTarget("default");
@@ -136,7 +136,7 @@ void SnapshotTask::run()
 
     // Initialize renderer
     auto renderer = _engine.createRenderer(*animParams, *renderParams);
-    const auto& sysRenderer = _engine.getRenderer();
+    const auto &sysRenderer = _engine.getRenderer();
     renderer->setCurrentType(sysRenderer.getCurrentType());
     renderer->clonePropertiesFrom(sysRenderer);
     renderer->setCamera(camera);
@@ -144,8 +144,7 @@ void SnapshotTask::run()
     renderer->commit();
 
     // Initialize framebuffer
-    auto frameBuffer =
-        _engine.createFrameBuffer("default", size, PixelFormat::RGBA_I8);
+    auto frameBuffer = _engine.createFrameBuffer("default", size, PixelFormat::RGBA_I8);
     frameBuffer->setAccumulation(true);
 
     // Prepare notifications message
@@ -166,8 +165,7 @@ void SnapshotTask::run()
         frameBuffer->incrementAccumFrames();
         numAccumFrames = frameBuffer->numAccumFrames();
 
-        const auto totalProgress =
-            static_cast<float>(numAccumFrames) / static_cast<float>(spp);
+        const auto totalProgress = static_cast<float>(numAccumFrames) / static_cast<float>(spp);
         progress(msg, totalProgress);
     }
 
@@ -198,10 +196,10 @@ bool SnapshotEntrypoint::isAsync() const
     return true;
 }
 
-void SnapshotEntrypoint::onRequest(const Request& request)
+void SnapshotEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto& engine = getApi().getEngine();
+    auto &engine = getApi().getEngine();
     auto task = std::make_shared<SnapshotTask>(engine, std::move(params));
     launchTask(task, request);
 }

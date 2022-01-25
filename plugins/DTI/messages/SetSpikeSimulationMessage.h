@@ -28,8 +28,7 @@ namespace dti
 BRAYNS_JSON_OBJECT_BEGIN(SetSpikeSimulationMessage)
 BRAYNS_JSON_OBJECT_ENTRY(size_t, model_id, "The ID of the loaded model")
 BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint64_t>, gids, "List of cel GIDs")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<float>, timestamps,
-                         "List of spike timestamps")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<float>, timestamps, "List of spike timestamps")
 BRAYNS_JSON_OBJECT_ENTRY(double, dt, "Simulation time step")
 BRAYNS_JSON_OBJECT_ENTRY(double, end_time, "Simulation normalized end time")
 BRAYNS_JSON_OBJECT_ENTRY(double, time_scale, "Time scale")

@@ -37,29 +37,23 @@ enum class VasculatureSection : uint8_t
     ALL = VEIN | ARTERY | VENULE | ARTERIOLE | VENOUS_CAPILLARY | TRANSITIONAL
 };
 
-inline VasculatureSection operator&(const VasculatureSection a,
-                                    const VasculatureSection b) noexcept
+inline VasculatureSection operator&(const VasculatureSection a, const VasculatureSection b) noexcept
 {
-    return static_cast<VasculatureSection>(static_cast<uint8_t>(a) &
-                                           static_cast<uint8_t>(b));
+    return static_cast<VasculatureSection>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
 }
 
-inline VasculatureSection operator&=(VasculatureSection& a,
-                                     const VasculatureSection& b) noexcept
+inline VasculatureSection operator&=(VasculatureSection &a, const VasculatureSection &b) noexcept
 {
     a = a & b;
     return a;
 }
 
-inline VasculatureSection operator|(const VasculatureSection a,
-                                    const VasculatureSection b) noexcept
+inline VasculatureSection operator|(const VasculatureSection a, const VasculatureSection b) noexcept
 {
-    return static_cast<VasculatureSection>(static_cast<uint8_t>(a) |
-                                           static_cast<uint8_t>(b));
+    return static_cast<VasculatureSection>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
 }
 
-inline VasculatureSection operator|=(VasculatureSection& a,
-                                     const VasculatureSection& b) noexcept
+inline VasculatureSection operator|=(VasculatureSection &a, const VasculatureSection &b) noexcept
 {
     a = a | b;
     return a;

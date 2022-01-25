@@ -26,7 +26,6 @@
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(ExitLaterMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, minutes,
-                         "Number of minutes after which Brayns will shut down")
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, minutes, "Number of minutes after which Brayns will shut down")
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

@@ -59,13 +59,13 @@ public:
      * @brief getWindowSize returns the viewport size (width, height)
      * @return const Vector2ui&
      */
-    const Vector2ui& getWindowSize() const noexcept;
+    const Vector2ui &getWindowSize() const noexcept;
 
     /**
      * @brief setWindowSize sets the viewport size (width, height)
      * @param size const Vector2ui&
      */
-    void setWindowSize(const Vector2ui& size) noexcept;
+    void setWindowSize(const Vector2ui &size) noexcept;
 
     /**
      * @brief isBenchmarking returns whether the system has been initialized
@@ -145,35 +145,35 @@ public:
      * accessed by the loaders
      * @return const std::string&
      */
-    const std::string& getSandboxPath() const noexcept;
+    const std::string &getSandboxPath() const noexcept;
 
     /**
      * @brief getInputPaths returns the list of paths with which the system was
      * initialized. These paths are used to laod models at system start up.
      * @return const std::vector<std::string>&
      */
-    const std::vector<std::string>& getInputPaths() const noexcept;
+    const std::vector<std::string> &getInputPaths() const noexcept;
 
     /**
      * @brief getPlugins return the list of plugis with which brayns was
      * initialized
      * @return const std::vector<std::string>&
      */
-    const std::vector<std::string>& getPlugins() const noexcept;
+    const std::vector<std::string> &getPlugins() const noexcept;
 
     /**
      * @brief posArgs return the positional arguments object used to initialize
      * this object
      * @return po::positional_options_description&
      */
-    po::positional_options_description& posArgs() noexcept;
+    po::positional_options_description &posArgs() noexcept;
 
 protected:
     /**
      * @brief parse parses the input parameters to initialize this object
      * @param vm const po::variables_map&
      */
-    void parse(const po::variables_map& vm) final;
+    void parse(const po::variables_map &vm) final;
 
     Vector2ui _windowSize;
     bool _benchmarking{false};

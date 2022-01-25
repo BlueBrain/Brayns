@@ -26,9 +26,10 @@ namespace brayns
 {
 struct Streamline
 {
-    Streamline(const std::vector<Vector3f>& positions,
-               const std::vector<Vector4f>& colors,
-               const std::vector<float>& radii)
+    Streamline(
+        const std::vector<Vector3f> &positions,
+        const std::vector<Vector4f> &colors,
+        const std::vector<float> &radii)
         : position(positions)
         , color(colors)
         , radius(radii)

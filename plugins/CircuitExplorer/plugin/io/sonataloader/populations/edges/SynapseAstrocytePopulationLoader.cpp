@@ -25,9 +25,9 @@
 namespace sonataloader
 {
 std::vector<SynapseGroup::Ptr> SynapseAstrocytePopulationLoader::load(
-    const SonataConfig::Data& networkData,
-    const SonataEdgePopulationParameters& lc,
-    const bbp::sonata::Selection& nodeSelection) const
+    const SonataConfig::Data &networkData,
+    const SonataEdgePopulationParameters &lc,
+    const bbp::sonata::Selection &nodeSelection) const
 {
     if (lc.load_afferent)
         throw std::runtime_error(
@@ -37,32 +37,23 @@ std::vector<SynapseGroup::Ptr> SynapseAstrocytePopulationLoader::load(
 
     const auto baseNodeList = nodeSelection.flatten();
 
-    const auto population =
-        networkData.config.getEdgePopulation(lc.edge_population);
+    const auto population = networkData.config.getEdgePopulation(lc.edge_population);
     // Fill it by mapping node ID to synapse list in case there is a node Id
     // without synapses, so we can still place an empty vector at the end
     std::map<uint64_t, std::unique_ptr<SynapseGroup>> mapping;
     for (const auto nodeId : baseNodeList)
         mapping[nodeId] = std::make_unique<SynapseAstrocyteGroup>();
 
-    const auto edgeSelection =
-        EdgeSelection(population.efferentEdges(baseNodeList))
-            .intersection(lc.edge_percentage);
+    const auto edgeSelection = EdgeSelection(population.efferentEdges(baseNodeList)).intersection(lc.edge_percentage);
     const auto edgeIds = edgeSelection.flatten();
-    const auto srcNodes =
-        SonataSynapses::getSourceNodes(population, edgeSelection);
-    const auto sectionIds =
-        SonataSynapses::getEfferentAstrocyteSectionIds(population,
-                                                       edgeSelection);
-    const auto distances =
-        SonataSynapses::getEfferentAstrocyteSectionDistances(population,
-                                                             edgeSelection);
+    const auto srcNodes = SonataSynapses::getSourceNodes(population, edgeSelection);
+    const auto sectionIds = SonataSynapses::getEfferentAstrocyteSectionIds(population, edgeSelection);
+    const auto distances = SonataSynapses::getEfferentAstrocyteSectionDistances(population, edgeSelection);
 
     // Group data by node id
     for (size_t i = 0; i < srcNodes.size(); ++i)
     {
-        auto& buffer =
-            static_cast<SynapseAstrocyteGroup&>(*mapping[srcNodes[i]].get());
+        auto &buffer = static_cast<SynapseAstrocyteGroup &>(*mapping[srcNodes[i]].get());
         buffer.addSynapse(edgeIds[i], sectionIds[i], distances[i]);
     }
 

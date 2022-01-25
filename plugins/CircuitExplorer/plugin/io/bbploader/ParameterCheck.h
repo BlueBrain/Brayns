@@ -31,7 +31,6 @@ public:
      * @brief checks the user input parameters that configures the circuit load
      * @throws std::invalid_argument if any parameter is wrong
      */
-    static void checkInput(const brion::BlueConfig& config,
-                           const BBPLoaderParameters& input);
+    static void checkInput(const brion::BlueConfig &config, const BBPLoaderParameters &input);
 };
 } // namespace bbploader

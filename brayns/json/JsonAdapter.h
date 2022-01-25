@@ -34,7 +34,7 @@ namespace brayns
  *
  * @tparam T Type to reflect.
  */
-template <typename T>
+template<typename T>
 struct JsonAdapter
 {
     /**
@@ -43,7 +43,10 @@ struct JsonAdapter
      * @param value Value to get the schema from.
      * @return JsonSchema JSON schema of value.
      */
-    static JsonSchema getSchema(const T& value) { return value.getSchema(); }
+    static JsonSchema getSchema(const T &value)
+    {
+        return value.getSchema();
+    }
 
     /**
      * @brief Serialize value into json.
@@ -53,7 +56,7 @@ struct JsonAdapter
      * @return true Success.
      * @return false Failure.
      */
-    static bool serialize(const T& value, JsonValue& json)
+    static bool serialize(const T &value, JsonValue &json)
     {
         return value.serialize(json);
     }
@@ -66,7 +69,7 @@ struct JsonAdapter
      * @return true Success.
      * @return false Failure.
      */
-    static bool deserialize(const JsonValue& json, T& value)
+    static bool deserialize(const JsonValue &json, T &value)
     {
         return value.deserialize(json);
     }

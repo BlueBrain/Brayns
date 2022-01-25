@@ -23,11 +23,11 @@
 #include <brayns/common/Log.h>
 
 #include <fcntl.h>
-#include <fstream>
-#include <future>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fstream>
+#include <future>
 
 namespace
 {
@@ -40,7 +40,7 @@ SharedDataVolume::~SharedDataVolume()
 {
     if (_memoryMapPtr)
     {
-        ::munmap((void*)_memoryMapPtr, _size);
+        ::munmap((void *)_memoryMapPtr, _size);
         _memoryMapPtr = nullptr;
     }
     if (_cacheFileDescriptor != NO_DESCRIPTOR)
@@ -50,7 +50,7 @@ SharedDataVolume::~SharedDataVolume()
     }
 }
 
-void SharedDataVolume::mapData(const std::string& filename)
+void SharedDataVolume::mapData(const std::string &filename)
 {
     _cacheFileDescriptor = open(filename.c_str(), O_RDONLY);
     if (_cacheFileDescriptor == NO_DESCRIPTOR)
@@ -65,8 +65,7 @@ void SharedDataVolume::mapData(const std::string& filename)
     }
 
     _size = sb.st_size;
-    _memoryMapPtr =
-        ::mmap(0, _size, PROT_READ, MAP_PRIVATE, _cacheFileDescriptor, 0);
+    _memoryMapPtr = ::mmap(0, _size, PROT_READ, MAP_PRIVATE, _cacheFileDescriptor, 0);
     if (_memoryMapPtr == MAP_FAILED)
     {
         _memoryMapPtr = nullptr;
@@ -78,13 +77,13 @@ void SharedDataVolume::mapData(const std::string& filename)
     setVoxels(_memoryMapPtr);
 }
 
-void SharedDataVolume::mapData(const std::vector<uint8_t>& buffer)
+void SharedDataVolume::mapData(const std::vector<uint8_t> &buffer)
 {
     _memoryBuffer.insert(_memoryBuffer.begin(), buffer.begin(), buffer.end());
     setVoxels(_memoryBuffer.data());
 }
 
-void SharedDataVolume::mapData(std::vector<uint8_t>&& buffer)
+void SharedDataVolume::mapData(std::vector<uint8_t> &&buffer)
 {
     _memoryBuffer = std::move(buffer);
     setVoxels(_memoryBuffer.data());

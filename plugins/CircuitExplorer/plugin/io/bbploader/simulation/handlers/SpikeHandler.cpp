@@ -37,9 +37,10 @@ auto frameIndexToTimestamp(const uint32_t frame, const double dt) noexcept
 } // namespace
 
 SpikeHandler::SpikeHandler(
-    const std::string& path, const float transitionTime,
-    const brain::GIDSet& gids,
-    const std::shared_ptr<brain::SpikeReportReader>& report)
+    const std::string &path,
+    const float transitionTime,
+    const brain::GIDSet &gids,
+    const std::shared_ptr<brain::SpikeReportReader> &report)
     : brayns::AbstractSimulationHandler()
     , _path(path)
     , _transition(transitionTime)
@@ -60,7 +61,7 @@ SpikeHandler::SpikeHandler(
     _frameSize = gids.size();
 }
 
-SpikeHandler::SpikeHandler(const SpikeHandler& other)
+SpikeHandler::SpikeHandler(const SpikeHandler &other)
     : brayns::AbstractSimulationHandler(other)
     , _path(other._path)
     , _transition(other._transition)
@@ -85,7 +86,7 @@ std::vector<float> SpikeHandler::getFrameDataImpl(const uint32_t frame)
     const auto trStart = timestamp - _transition;
     const auto trEnd = timestamp + _transition;
     const auto spikes = _report->getSpikes(trStart, trEnd);
-    for (const auto& spike : spikes)
+    for (const auto &spike : spikes)
     {
         const auto index = _gidMap[spike.second];
         const auto spikeTime = spike.first;
@@ -95,16 +96,14 @@ std::vector<float> SpikeHandler::getFrameDataImpl(const uint32_t frame)
         {
             auto alpha = (spikeTime - timestamp) / _transition;
             alpha = std::min(std::max(0.0, alpha), 1.0);
-            data[index] = DEFAULT_REST_VALUE * alpha +
-                          DEFAULT_SPIKING_VALUE * (1.0 - alpha);
+            data[index] = DEFAULT_REST_VALUE * alpha + DEFAULT_SPIKING_VALUE * (1.0 - alpha);
         }
         // Spike in the past - start fading
         else if (spikeTime < timestamp)
         {
             auto alpha = (timestamp - spikeTime) / _transition;
             alpha = std::min(std::max(0.0, alpha), 1.0);
-            data[index] = DEFAULT_REST_VALUE * alpha +
-                          DEFAULT_SPIKING_VALUE * (1.0 - alpha);
+            data[index] = DEFAULT_REST_VALUE * alpha + DEFAULT_SPIKING_VALUE * (1.0 - alpha);
         }
         // Spiking neuron
         else

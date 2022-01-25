@@ -49,25 +49,26 @@ public:
     /**
      * Get a list of loaders and their supported file extensions and properties
      */
-    const std::vector<LoaderInfo>& getLoaderInfos() const;
+    const std::vector<LoaderInfo> &getLoaderInfos() const;
 
     /**
      * @return true if any of the registered loaders can handle the given file
      */
-    bool isSupportedFile(const std::string& filename) const;
+    bool isSupportedFile(const std::string &filename) const;
 
     /**
      * @return true if any of the registered loaders can handle the given type
      */
-    bool isSupportedType(const std::string& type) const;
+    bool isSupportedType(const std::string &type) const;
 
     /**
      * Get a loader that matches the provided name, filetype or loader name.
      * @throw std::runtime_error if no loader found.
      */
-    const AbstractLoader& getSuitableLoader(
-        const std::string& filename, const std::string& filetype,
-        const std::string& loaderName) const;
+    const AbstractLoader &getSuitableLoader(
+        const std::string &filename,
+        const std::string &filetype,
+        const std::string &loaderName) const;
 
     /** @internal */
     void clear();

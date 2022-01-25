@@ -23,8 +23,8 @@
 
 #include <brayns/common/MathTypes.h>
 
-#include "AbstractParameters.h"
 #include <deque>
+#include "AbstractParameters.h"
 
 namespace brayns
 {
@@ -47,49 +47,49 @@ public:
      * current renderer
      * @return const std::string&
      */
-    const std::string& getCurrentRenderer() const noexcept;
+    const std::string &getCurrentRenderer() const noexcept;
 
     /**
      * @brief setCurrentRenderer sets the current renderer used by the
      * system
      * @param renderer const std::string&
      */
-    void setCurrentRenderer(const std::string& renderer) noexcept;
+    void setCurrentRenderer(const std::string &renderer) noexcept;
 
     /**
      * @brief getRenderers returns a list with the names of all available
      * renderers
      * @return const std::vector<std::string>&
      */
-    const std::vector<std::string>& getRenderers() const noexcept;
+    const std::vector<std::string> &getRenderers() const noexcept;
 
     /**
      * @brief addRenderer adds a new renderer name to the list of available
      * renderers. If the name is already present, this function has no effect
      * @param renderer const std::string&
      */
-    void addRenderer(const std::string& renderer) noexcept;
+    void addRenderer(const std::string &renderer) noexcept;
 
     /**
      * @brief getCurrentCamera returns the name of the current camera used by
      * the system
      * @return const std::string&
      */
-    const std::string& getCurrentCamera() const noexcept;
+    const std::string &getCurrentCamera() const noexcept;
 
     /**
      * @brief getCameras returns a list with the names of all available
      * cameras
      * @return const std::vector<std::string>&
      */
-    const std::vector<std::string>& getCameras() const noexcept;
+    const std::vector<std::string> &getCameras() const noexcept;
 
     /**
      * @brief addCamera adds a new camera name to the list of available
      * cameras. If the name is already present, this function has no effect
      * @param camera const std::string&
      */
-    void addCamera(const std::string& camera) noexcept;
+    void addCamera(const std::string &camera) noexcept;
 
     /**
      * @brief getSamplesPerPixel returns the number of samples per pixel
@@ -128,14 +128,14 @@ public:
      * systems renderer as normalized RGB values.
      * @return const Vector3f&
      */
-    const Vector3f& getBackgroundColor() const noexcept;
+    const Vector3f &getBackgroundColor() const noexcept;
 
     /**
      * @brief setBackgroundColor sets the background color used by the
      * systems renderer as normalized RGB values
      * @param value const Vector3f&
      */
-    void setBackgroundColor(const Vector3f& value) noexcept;
+    void setBackgroundColor(const Vector3f &value) noexcept;
 
     /**
      * @brief getHeadLight returns wether headlight is enabled on the systems
@@ -207,7 +207,7 @@ public:
     void setVarianceThreshold(const double value) noexcept;
 
 protected:
-    void parse(const po::variables_map& vm) final;
+    void parse(const po::variables_map &vm) final;
 
     std::string _renderer{"basic"};
     std::vector<std::string> _renderers;

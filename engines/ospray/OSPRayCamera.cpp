@@ -54,8 +54,7 @@ void OSPRayCamera::commit()
     if (!_clipPlanes.empty())
     {
         const auto clipPlanes = convertVectorToFloat(_clipPlanes);
-        auto clipPlaneData =
-            ospNewData(clipPlanes.size(), OSP_FLOAT4, clipPlanes.data());
+        auto clipPlaneData = ospNewData(clipPlanes.size(), OSP_FLOAT4, clipPlanes.data());
         ospSetData(_camera, "clipPlanes", clipPlaneData);
         ospRelease(clipPlaneData);
     }
@@ -69,7 +68,7 @@ void OSPRayCamera::commit()
     ospCommit(_camera);
 }
 
-void OSPRayCamera::setClipPlanes(const std::vector<Plane>& planes)
+void OSPRayCamera::setClipPlanes(const std::vector<Plane> &planes)
 {
     if (_clipPlanes == planes)
         return;
@@ -81,8 +80,7 @@ void OSPRayCamera::_createOSPCamera()
 {
     auto newCamera = ospNewCamera(getCurrentType().c_str());
     if (!newCamera)
-        throw std::runtime_error(getCurrentType() +
-                                 " is not a registered camera");
+        throw std::runtime_error(getCurrentType() + " is not a registered camera");
     if (_camera)
         ospRelease(_camera);
     _camera = newCamera;

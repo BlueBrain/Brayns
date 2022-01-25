@@ -35,26 +35,28 @@ public:
 
     ModelTransferFunction() = default;
 
-    ModelTransferFunction(Scene& scene)
+    ModelTransferFunction(Scene &scene)
         : _scene(&scene)
     {
     }
 
-    void setId(size_t id) { ExtractModel::fromId(*_scene, id); }
-
-    void setTransferFunction(const Buffer& buffer)
+    void setId(size_t id)
     {
-        auto& transferFunction = _scene->getTransferFunction();
+        ExtractModel::fromId(*_scene, id);
+    }
+
+    void setTransferFunction(const Buffer &buffer)
+    {
+        auto &transferFunction = _scene->getTransferFunction();
         buffer.deserialize(transferFunction);
     }
 
 private:
-    Scene* _scene = nullptr;
+    Scene *_scene = nullptr;
 };
 
 BRAYNS_JSON_ADAPTER_BEGIN(ModelTransferFunction)
 BRAYNS_JSON_ADAPTER_SET("id", setId, "Model ID", Required())
-BRAYNS_JSON_ADAPTER_SET("transfer_function", setTransferFunction,
-                        "Transfer function", Required())
+BRAYNS_JSON_ADAPTER_SET("transfer_function", setTransferFunction, "Transfer function", Required())
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

@@ -38,7 +38,7 @@ public:
        Constructor
        @param name Display name for the set of parameters
      */
-    AbstractParameters(const std::string& name)
+    AbstractParameters(const std::string &name)
         : _name(name)
         , _parameters(name)
     {
@@ -49,21 +49,24 @@ public:
        Parses parameters managed by the class
        @param vm the variables map of all arguments passed by the user
      */
-    virtual void parse(const po::variables_map&){};
+    virtual void parse(const po::variables_map &){};
 
     /**
        Displays values of registered parameters
      */
     virtual void print();
 
-    po::options_description& parameters();
+    po::options_description &parameters();
 
 protected:
     std::string _name;
 
     po::options_description _parameters;
 
-    static std::string asString(const bool flag) { return flag ? "on" : "off"; }
+    static std::string asString(const bool flag)
+    {
+        return flag ? "on" : "off";
+    }
 };
 } // namespace brayns
 
@@ -74,7 +77,7 @@ namespace program_options
 /**
  * Wrapper for supporting fixed size multitoken values
  */
-template <typename T, typename charT = char>
+template<typename T, typename charT = char>
 class fixed_tokens_typed_value : public typed_value<T, charT>
 {
     const unsigned _min;
@@ -83,27 +86,31 @@ class fixed_tokens_typed_value : public typed_value<T, charT>
     typedef typed_value<T, charT> base;
 
 public:
-    fixed_tokens_typed_value(T* t, unsigned min, unsigned max)
+    fixed_tokens_typed_value(T *t, unsigned min, unsigned max)
         : base(t)
         , _min(min)
         , _max(max)
     {
         base::multitoken();
     }
-    unsigned min_tokens() const { return _min; }
-    unsigned max_tokens() const { return _max; }
+    unsigned min_tokens() const
+    {
+        return _min;
+    }
+    unsigned max_tokens() const
+    {
+        return _max;
+    }
 };
 
-template <typename T>
-inline fixed_tokens_typed_value<T>* fixed_tokens_value(unsigned min,
-                                                       unsigned max)
+template<typename T>
+inline fixed_tokens_typed_value<T> *fixed_tokens_value(unsigned min, unsigned max)
 {
     return new fixed_tokens_typed_value<T>(nullptr, min, max);
 }
 
-template <typename T>
-inline fixed_tokens_typed_value<T>* fixed_tokens_value(T* t, unsigned min,
-                                                       unsigned max)
+template<typename T>
+inline fixed_tokens_typed_value<T> *fixed_tokens_value(T *t, unsigned min, unsigned max)
 {
     return new fixed_tokens_typed_value<T>(t, min, max);
 }

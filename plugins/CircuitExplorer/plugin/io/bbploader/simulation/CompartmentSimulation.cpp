@@ -22,38 +22,33 @@
 
 namespace bbploader
 {
-CompartmentSimulation::CompartmentSimulation(const std::string& path,
-                                             const brain::GIDSet& inputGids)
+CompartmentSimulation::CompartmentSimulation(const std::string &path, const brain::GIDSet &inputGids)
     : _path(path)
-    , _report(std::make_shared<brion::CompartmentReport>(brion::URI(path),
-                                                         brion::MODE_READ,
-                                                         inputGids))
+    , _report(std::make_shared<brion::CompartmentReport>(brion::URI(path), brion::MODE_READ, inputGids))
 {
 }
 
-const brain::GIDSet& CompartmentSimulation::getReportGids() const
+const brain::GIDSet &CompartmentSimulation::getReportGids() const
 {
     return _report->getGIDs();
 }
 
-std::vector<Simulation::CellMapping> CompartmentSimulation::getMapping(
-    const brain::GIDSet& inputGids) const
+std::vector<Simulation::CellMapping> CompartmentSimulation::getMapping(const brain::GIDSet &inputGids) const
 {
-    const auto& ccounts = _report->getCompartmentCounts();
-    const auto& offsets = _report->getOffsets();
+    const auto &ccounts = _report->getCompartmentCounts();
+    const auto &offsets = _report->getOffsets();
 
     std::vector<Simulation::CellMapping> mapping(inputGids.size());
 
 #pragma omp parallel for
     for (size_t i = 0; i < inputGids.size(); ++i)
     {
-        const auto& count = ccounts[i];
-        const auto& offset = offsets[i];
+        const auto &count = ccounts[i];
+        const auto &offset = offsets[i];
 
         mapping[i].globalOffset = offset[0];
 
-        mapping[i].compartments =
-            std::vector<uint16_t>(count.begin(), count.end());
+        mapping[i].compartments = std::vector<uint16_t>(count.begin(), count.end());
 
         mapping[i].offsets.resize(offset.size());
         for (size_t j = 0; j < offset.size(); ++j)
@@ -63,8 +58,7 @@ std::vector<Simulation::CellMapping> CompartmentSimulation::getMapping(
     return mapping;
 }
 
-brayns::AbstractSimulationHandlerPtr CompartmentSimulation::createHandler()
-    const
+brayns::AbstractSimulationHandlerPtr CompartmentSimulation::createHandler() const
 {
     return std::make_shared<CompartmentHandler>(_path, _report);
 }

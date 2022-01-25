@@ -30,9 +30,13 @@ namespace brayns
 void BasicRenderer::commit()
 {
     AbstractRenderer::commit();
-    ispc::BasicRenderer_set(getIE(),
-                            (_bgMaterial ? _bgMaterial->getIE() : nullptr),
-                            _timestamp, spp, _lightPtr, _lightArray.size());
+    ispc::BasicRenderer_set(
+        getIE(),
+        (_bgMaterial ? _bgMaterial->getIE() : nullptr),
+        _timestamp,
+        spp,
+        _lightPtr,
+        _lightArray.size());
 }
 
 BasicRenderer::BasicRenderer()

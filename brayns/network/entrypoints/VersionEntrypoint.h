@@ -31,14 +31,17 @@ namespace brayns
 class VersionEntrypoint : public Entrypoint<EmptyMessage, VersionMessage>
 {
 public:
-    virtual std::string getName() const override { return "get-version"; }
+    virtual std::string getName() const override
+    {
+        return "get-version";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Get Brayns instance version";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         VersionMessage message;
         message.major = Version::getMajor();

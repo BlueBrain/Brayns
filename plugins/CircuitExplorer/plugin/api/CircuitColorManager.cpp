@@ -20,14 +20,14 @@
 
 namespace
 {
-CircuitColorHandler* getHandler(
-    const brayns::ModelDescriptor& model,
-    const std::vector<std::unique_ptr<CircuitColorHandler>>& handlers)
+CircuitColorHandler *getHandler(
+    const brayns::ModelDescriptor &model,
+    const std::vector<std::unique_ptr<CircuitColorHandler>> &handlers)
 {
-    const auto it =
-        std::find_if(handlers.begin(), handlers.end(),
-                     [&](const CircuitColorHandler::Ptr& cch)
-                     { return cch->getModelID() == model.getModelID(); });
+    const auto it = std::find_if(
+        handlers.begin(),
+        handlers.end(),
+        [&](const CircuitColorHandler::Ptr &cch) { return cch->getModelID() == model.getModelID(); });
 
     if (it == handlers.end())
         throw CircuitModelNotFoundException();
@@ -47,23 +47,21 @@ CircuitColorHandler* getHandler(
 } // namespace
 
 void CircuitColorManager::registerHandler(
-    brayns::ModelDescriptorPtr& model,
-    std::unique_ptr<CircuitColorHandler>&& handler,
-    const std::vector<uint64_t>& ids,
-    std::vector<ElementMaterialMap::Ptr>&& elements)
+    brayns::ModelDescriptorPtr &model,
+    std::unique_ptr<CircuitColorHandler> &&handler,
+    const std::vector<uint64_t> &ids,
+    std::vector<ElementMaterialMap::Ptr> &&elements)
 {
     handler->setModel(model.get());
     handler->setElements(ids, std::move(elements));
 
-    model->addOnRemoved([ccmPtr = this](const brayns::ModelDescriptor& model)
-                        { ccmPtr->unregisterHandler(model); });
+    model->addOnRemoved([ccmPtr = this](const brayns::ModelDescriptor &model) { ccmPtr->unregisterHandler(model); });
 
     handler->initialize();
     _handlers.push_back(std::move(handler));
 }
 
-void CircuitColorManager::unregisterHandler(
-    const brayns::ModelDescriptor& model)
+void CircuitColorManager::unregisterHandler(const brayns::ModelDescriptor &model)
 {
     auto it = _handlers.begin();
     while (it != _handlers.end())
@@ -78,10 +76,9 @@ void CircuitColorManager::unregisterHandler(
     }
 }
 
-bool CircuitColorManager::handlerExists(
-    const brayns::ModelDescriptor& model) noexcept
+bool CircuitColorManager::handlerExists(const brayns::ModelDescriptor &model) noexcept
 {
-    for (const auto& handler : _handlers)
+    for (const auto &handler : _handlers)
     {
         if (handler->getModelID() == model.getModelID())
             return true;
@@ -90,41 +87,41 @@ bool CircuitColorManager::handlerExists(
     return false;
 }
 
-const std::vector<std::string>& CircuitColorManager::getAvailableMethods(
-    const brayns::ModelDescriptor& model)
+const std::vector<std::string> &CircuitColorManager::getAvailableMethods(const brayns::ModelDescriptor &model)
 {
     return getHandler(model, _handlers)->getMethods();
 }
 
-const std::vector<std::string>& CircuitColorManager::getMethodVariables(
-    const brayns::ModelDescriptor& model, const std::string& method)
+const std::vector<std::string> &CircuitColorManager::getMethodVariables(
+    const brayns::ModelDescriptor &model,
+    const std::string &method)
 {
     return getHandler(model, _handlers)->getMethodVariables(method);
 }
 
 void CircuitColorManager::updateColorsById(
-    const brayns::ModelDescriptor& model,
-    const std::vector<ColoringInformation>& vars)
+    const brayns::ModelDescriptor &model,
+    const std::vector<ColoringInformation> &vars)
 {
     getHandler(model, _handlers)->updateColorById(vars);
 }
 
 void CircuitColorManager::updateColorsById(
-    const brayns::ModelDescriptor& model,
-    const std::map<uint64_t, brayns::Vector4f>& colorMap)
+    const brayns::ModelDescriptor &model,
+    const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
     getHandler(model, _handlers)->updateColorById(colorMap);
 }
 
-void CircuitColorManager::updateSingleColor(
-    const brayns::ModelDescriptor& model, const brayns::Vector4f& color)
+void CircuitColorManager::updateSingleColor(const brayns::ModelDescriptor &model, const brayns::Vector4f &color)
 {
     getHandler(model, _handlers)->updateSingleColor(color);
 }
 
 void CircuitColorManager::updateColors(
-    const brayns::ModelDescriptor& model, const std::string& method,
-    const std::vector<ColoringInformation>& vars)
+    const brayns::ModelDescriptor &model,
+    const std::string &method,
+    const std::vector<ColoringInformation> &vars)
 {
     getHandler(model, _handlers)->updateColor(method, vars);
 }

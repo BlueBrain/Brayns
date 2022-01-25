@@ -29,7 +29,7 @@
 
 #include <cstdlib>
 
-int main(int argc, const char** argv)
+int main(int argc, const char **argv)
 {
     try
     {
@@ -44,7 +44,7 @@ int main(int argc, const char** argv)
         appInstance->run();
         Application::destroyInstance();
     }
-    catch (const std::runtime_error& e)
+    catch (const std::runtime_error &e)
     {
         brayns::Log::error(e.what());
         return EXIT_FAILURE;

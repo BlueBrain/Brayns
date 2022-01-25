@@ -49,35 +49,35 @@ struct JsonObjectProperty
 {
     std::string name;
     JsonOptions options;
-    std::function<JsonSchema(const void*)> getSchema;
-    std::function<bool(const void*, JsonValue&)> serialize;
-    std::function<bool(const JsonValue&, void*)> deserialize;
+    std::function<JsonSchema(const void *)> getSchema;
+    std::function<bool(const void *, JsonValue &)> serialize;
+    std::function<bool(const JsonValue &, void *)> deserialize;
 
-    JsonSchema getSchemaWithOptions(const void* message) const
+    JsonSchema getSchemaWithOptions(const void *message) const
     {
         auto schema = getSchema(message);
         JsonSchemaOptions::add(schema, options);
         return schema;
     }
 
-    void add(JsonSchema& schema, const void* message) const
+    void add(JsonSchema &schema, const void *message) const
     {
         if (isRequired())
         {
-            auto& required = schema.required;
+            auto &required = schema.required;
             required.push_back(name);
         }
         schema.properties[name] = getSchemaWithOptions(message);
     }
 
-    JsonValue extract(const JsonObject& object) const
+    JsonValue extract(const JsonObject &object) const
     {
         auto json = object.get(name);
         if (!json.isEmpty())
         {
             return json;
         }
-        auto& defaultValue = options.defaultValue;
+        auto &defaultValue = options.defaultValue;
         if (!defaultValue)
         {
             return json;
@@ -87,19 +87,19 @@ struct JsonObjectProperty
 
     bool isRequired() const
     {
-        auto& required = options.required;
+        auto &required = options.required;
         return required.value_or(false);
     }
 
     bool isReadOnly() const
     {
-        auto& readOnly = options.readOnly;
+        auto &readOnly = options.readOnly;
         return readOnly.value_or(false);
     }
 
     bool isWriteOnly() const
     {
-        auto& writeOnly = options.writeOnly;
+        auto &writeOnly = options.writeOnly;
         return writeOnly.value_or(false);
     }
 };
@@ -118,22 +118,22 @@ public:
     {
     }
 
-    JsonSchema getSchema(const void* message) const
+    JsonSchema getSchema(const void *message) const
     {
         JsonSchema schema;
         schema.title = _title;
         schema.type = JsonType::Object;
-        for (const auto& property : _properties)
+        for (const auto &property : _properties)
         {
             property.add(schema, message);
         }
         return schema;
     }
 
-    bool serialize(const void* message, JsonValue& json) const
+    bool serialize(const void *message, JsonValue &json) const
     {
         auto object = Poco::makeShared<JsonObject>();
-        for (const auto& property : _properties)
+        for (const auto &property : _properties)
         {
             if (property.isWriteOnly())
             {
@@ -149,14 +149,14 @@ public:
         return true;
     }
 
-    bool deserialize(const JsonValue& json, void* message) const
+    bool deserialize(const JsonValue &json, void *message) const
     {
         auto object = JsonExtractor::extractObject(json);
         if (!object)
         {
             return false;
         }
-        for (const auto& property : _properties)
+        for (const auto &property : _properties)
         {
             if (property.isReadOnly())
             {

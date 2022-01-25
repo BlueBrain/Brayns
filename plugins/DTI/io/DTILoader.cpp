@@ -43,7 +43,7 @@ struct GidRow
     uint64_t row;
 };
 
-std::istream& operator>>(std::istream& in, GidRow& gr)
+std::istream &operator>>(std::istream &in, GidRow &gr)
 {
     return in >> gr.gid >> gr.row;
 }
@@ -61,25 +61,26 @@ std::vector<std::string> DTILoader::getSupportedExtensions() const
     return {SUPPORTED_EXTENTION_DTI};
 }
 
-DTIConfiguration DTILoader::_readConfiguration(
-    const boost::property_tree::ptree& pt) const
+DTIConfiguration DTILoader::_readConfiguration(const boost::property_tree::ptree &pt) const
 {
     DTIConfiguration configuration;
     configuration.streamlines = pt.get<std::string>("streamlines");
-    configuration.gid_to_streamline =
-        pt.get<std::string>("gids_to_streamline_row");
+    configuration.gid_to_streamline = pt.get<std::string>("gids_to_streamline_row");
     return configuration;
 }
 
 std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromBlob(
-    brayns::Blob&&, const brayns::LoaderProgress&, const DTILoaderParameters&,
-    brayns::Scene&) const
+    brayns::Blob &&,
+    const brayns::LoaderProgress &,
+    const DTILoaderParameters &,
+    brayns::Scene &) const
 {
     throw std::runtime_error("Loading DTI from blob is not supported");
 }
 
 Colors DTILoader::getColorsFromPoints(
-    const std::vector<brayns::Vector3f>& points, const float opacity,
+    const std::vector<brayns::Vector3f> &points,
+    const float opacity,
     const ColorScheme colorScheme)
 {
     Colors colors;
@@ -89,19 +90,15 @@ Colors DTILoader::getColorsFromPoints(
         colors.push_back({0.f, 0.f, 0.f, opacity});
         for (uint64_t i = 0; i < points.size() - 1; ++i)
         {
-            const auto& p1 = points[i];
-            const auto& p2 = points[i + 1];
+            const auto &p1 = points[i];
+            const auto &p2 = points[i + 1];
             const auto dir = normalize(p2 - p1);
-            const brayns::Vector3f n = {0.5f + dir.x * 0.5f,
-                                        0.5f + dir.y * 0.5f,
-                                        0.5f + dir.z * 0.5f};
+            const brayns::Vector3f n = {0.5f + dir.x * 0.5f, 0.5f + dir.y * 0.5f, 0.5f + dir.z * 0.5f};
             colors.push_back({n.x, n.y, n.z, opacity});
         }
         break;
     case ColorScheme::by_id:
-        colors.resize(points.size(),
-                      {rand() % 100 / 100.f, rand() % 100 / 100.f,
-                       rand() % 100 / 100.f, opacity});
+        colors.resize(points.size(), {rand() % 100 / 100.f, rand() % 100 / 100.f, rand() % 100 / 100.f, opacity});
         break;
     default:
         colors.resize(points.size(), {1.f, 1.f, 1.f, opacity});
@@ -111,8 +108,10 @@ Colors DTILoader::getColorsFromPoints(
 }
 
 std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
-    const std::string& filename, const brayns::LoaderProgress& callback,
-    const DTILoaderParameters& input, brayns::Scene& scene) const
+    const std::string &filename,
+    const brayns::LoaderProgress &callback,
+    const DTILoaderParameters &input,
+    brayns::Scene &scene) const
 {
     boost::property_tree::ptree pt;
     boost::property_tree::ini_parser::read_ini(filename, pt);
@@ -121,13 +120,11 @@ std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
     // Check files
     std::ifstream gidRowfile(config.gid_to_streamline, std::ios::in);
     if (!gidRowfile.good())
-        throw std::runtime_error("Could not open gid/row mapping file " +
-                                 config.gid_to_streamline);
+        throw std::runtime_error("Could not open gid/row mapping file " + config.gid_to_streamline);
 
     std::ifstream streamlinesFile(config.streamlines, std::ios::in);
     if (!streamlinesFile.good())
-        throw std::runtime_error("Could not open streamlines file " +
-                                 config.streamlines);
+        throw std::runtime_error("Could not open streamlines file " + config.streamlines);
 
     // Load positions
     callback.updateProgress("Loading positions ...", 0.f);
@@ -139,7 +136,7 @@ std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
 
     // Rows to load
     std::set<u_int64_t> rowsToLoad;
-    for (const auto& gidRow : gidRows)
+    for (const auto &gidRow : gidRows)
         rowsToLoad.insert(gidRow.row);
 
     // Load points
@@ -176,22 +173,19 @@ std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
     count = 0;
     uint64_t i = 0;
     std::set<u_int16_t> streamlineAdded;
-    for (const auto& gidRow : gidRows)
+    for (const auto &gidRow : gidRows)
     {
         const auto it = streamlines.find(gidRow.row);
-        if (it != streamlines.end() &&
-            streamlineAdded.find(gidRow.row) == streamlineAdded.end())
+        if (it != streamlines.end() && streamlineAdded.find(gidRow.row) == streamlineAdded.end())
         {
             streamlineAdded.insert(gidRow.row);
-            callback.updateProgress("Creating " + std::to_string(count) +
-                                        " streamlines ...",
-                                    0.6f +
-                                        0.2f * float(i) / float(nbStreamlines));
+            callback.updateProgress(
+                "Creating " + std::to_string(count) + " streamlines ...",
+                0.6f + 0.2f * float(i) / float(nbStreamlines));
 
-            const auto& points = (*it).second;
+            const auto &points = (*it).second;
             const auto nbPoints = points.size();
-            const auto colors =
-                getColorsFromPoints(points, input.opacity, input.color_scheme);
+            const auto colors = getColorsFromPoints(points, input.opacity, input.color_scheme);
 
             std::vector<float> radii;
             radii.resize(nbPoints, input.radius);
@@ -204,14 +198,9 @@ std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
         ++i;
     }
 
-    callback.updateProgress("Committing " + std::to_string(count) +
-                                " streamlines ...",
-                            0.8f);
-    brayns::ModelMetadata metadata = {
-        {"Number of streamlines", std::to_string(count)}};
-    auto modelDescriptor =
-        std::make_shared<brayns::ModelDescriptor>(std::move(model), "DTI",
-                                                  metadata);
+    callback.updateProgress("Committing " + std::to_string(count) + " streamlines ...", 0.8f);
+    brayns::ModelMetadata metadata = {{"Number of streamlines", std::to_string(count)}};
+    auto modelDescriptor = std::make_shared<brayns::ModelDescriptor>(std::move(model), "DTI", metadata);
     callback.updateProgress("Done", 1.f);
     return {modelDescriptor};
 }

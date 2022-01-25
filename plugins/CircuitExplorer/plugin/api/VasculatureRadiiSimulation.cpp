@@ -24,22 +24,20 @@
 
 namespace
 {
-sonataloader::VasculatureRadiiHandler* toRadiiHandler(
-    brayns::AbstractSimulationHandlerPtr& handler)
+sonataloader::VasculatureRadiiHandler *toRadiiHandler(brayns::AbstractSimulationHandlerPtr &handler)
 {
-    return dynamic_cast<sonataloader::VasculatureRadiiHandler*>(handler.get());
+    return dynamic_cast<sonataloader::VasculatureRadiiHandler *>(handler.get());
 }
 } // namespace
 
-void VasculatureRadiiSimulation::update(const uint32_t frame,
-                                        brayns::Scene& scene)
+void VasculatureRadiiSimulation::update(const uint32_t frame, brayns::Scene &scene)
 {
-    const auto& models = scene.getModels();
+    const auto &models = scene.getModels();
     for (size_t i = 0; i < models.size(); ++i)
     {
-        const auto& model = models[i];
+        const auto &model = models[i];
         // auto model = scene.getModel(constModel->getModelID());
-        auto& modelObj = model->getModel();
+        auto &modelObj = model->getModel();
         auto handler = modelObj.getSimulationHandler();
         if (auto radiiHandler = toRadiiHandler(handler))
         {
@@ -48,13 +46,13 @@ void VasculatureRadiiSimulation::update(const uint32_t frame,
             if (lastUsed == frame)
                 continue;
 
-            const auto& frameData = radiiHandler->getCurrentRadiiFrame();
-            auto& geometries = modelObj.getSDFGeometryData().geometries;
+            const auto &frameData = radiiHandler->getCurrentRadiiFrame();
+            auto &geometries = modelObj.getSDFGeometryData().geometries;
 
 #pragma omp parallel for
             for (size_t geomIdx = 0; geomIdx < geometries.size(); ++geomIdx)
             {
-                auto& geometry = geometries[geomIdx];
+                auto &geometry = geometries[geomIdx];
                 geometry.r0 = std::max(frameData[geometry.userData], 0.01f);
                 geometry.r1 = std::max(frameData[geometry.userData], 0.01f);
             }

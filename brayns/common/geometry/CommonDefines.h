@@ -19,12 +19,12 @@
  */
 
 #if __cplusplus
-#include <brayns/common/MathTypes.h>
-#define VEC3_TYPE brayns::Vector3f
-#define UINT64_T uint64_t
+    #include <brayns/common/MathTypes.h>
+    #define VEC3_TYPE brayns::Vector3f
+    #define UINT64_T uint64_t
 #endif
 
 #if ISPC
-#define VEC3_TYPE vec3f
-#define UINT64_T unsigned int64
+    #define VEC3_TYPE vec3f
+    #define UINT64_T unsigned int64
 #endif

@@ -218,13 +218,11 @@ public:
         {
             return Semantic::Alpha;
         }
-        if (property == "u" || property == "s" || property == "tx" ||
-            property == "texture_u")
+        if (property == "u" || property == "s" || property == "tx" || property == "texture_u")
         {
             return Semantic::TextureX;
         }
-        if (property == "v" || property == "t" || property == "ty" ||
-            property == "texture_v")
+        if (property == "v" || property == "t" || property == "ty" || property == "texture_v")
         {
             return Semantic::TextureY;
         }
@@ -247,7 +245,10 @@ struct Property
     Type countType = Type::Unknown;
     Semantic semantic = Semantic::Unknown;
 
-    bool isList() const { return countType != Type::Unknown; }
+    bool isList() const
+    {
+        return countType != Type::Unknown;
+    }
 };
 
 struct Element
@@ -266,8 +267,7 @@ struct Header
 
     bool isBinary() const
     {
-        return format == Format::BinaryLittleEndian ||
-               format == Format::BinaryBigEndian;
+        return format == Format::BinaryLittleEndian || format == Format::BinaryBigEndian;
     }
 };
 
@@ -398,8 +398,7 @@ public:
             _parseList(context);
             return;
         }
-        throw std::runtime_error("Invalid token count for property " +
-                                 std::to_string(count));
+        throw std::runtime_error("Invalid token count for property " + std::to_string(count));
     }
 
 private:
@@ -417,8 +416,7 @@ private:
         auto key = StringHelper::extractToken(data);
         if (key != "list")
         {
-            throw std::runtime_error(
-                "Expected 'list' key before property with 4 tokens");
+            throw std::runtime_error("Expected 'list' key before property with 4 tokens");
         }
         auto countType = StringHelper::extractToken(data);
         property.countType = GetType::fromName(countType);
@@ -561,16 +559,14 @@ private:
         }
         if (!_tryParseLine(context))
         {
-            Log::debug("Skip header line {}: '{}'.", context.lineNumber,
-                       context.line);
+            Log::debug("Skip header line {}: '{}'.", context.lineNumber, context.line);
         }
     }
 
     static bool _tryParseLine(Context &context)
     {
-        return _tryParseWith<FormatParser>(context) ||
-               _tryParseWith<ElementParser>(context) ||
-               _tryParseWith<PropertyParser>(context);
+        return _tryParseWith<FormatParser>(context) || _tryParseWith<ElementParser>(context)
+            || _tryParseWith<PropertyParser>(context);
     }
 
     static void _prepareBodyExtraction(Context &context)
@@ -586,7 +582,7 @@ private:
         }
     }
 
-    template <typename T>
+    template<typename T>
     static bool _tryParseWith(Context &context)
     {
         if (!T::canParse(context))
@@ -643,13 +639,13 @@ public:
     {
     }
 
-    template <typename T>
+    template<typename T>
     bool is() const
     {
         return std::holds_alternative<T>(_value);
     }
 
-    template <typename T>
+    template<typename T>
     T as() const
     {
         return std::get<T>(_value);
@@ -772,7 +768,7 @@ private:
         }
     }
 
-    template <typename T>
+    template<typename T>
     static T _extract(Context &context)
     {
         auto &header = context.header;
@@ -832,8 +828,7 @@ public:
         auto size = ValueExtractor::extractSize(context);
         if (size != 3)
         {
-            throw std::runtime_error("Non triangular face with " +
-                                     std::to_string(size) + " indices");
+            throw std::runtime_error("Non triangular face with " + std::to_string(size) + " indices");
         }
         auto first = extractIndex(context);
         auto second = extractIndex(context);
@@ -841,8 +836,7 @@ public:
         return {first, second, third};
     }
 
-    static void extractTristrips(Context &context,
-                                 std::vector<int32_t> &tristrips)
+    static void extractTristrips(Context &context, std::vector<int32_t> &tristrips)
     {
         auto size = ValueExtractor::extractSize(context);
         if (size == 0)
@@ -867,9 +861,7 @@ public:
         auto size = ValueExtractor::extractSize(context);
         if (size != 6)
         {
-            throw std::runtime_error(
-                "Expected 6 coordinates for face texture, got " +
-                std::to_string(size));
+            throw std::runtime_error("Expected 6 coordinates for face texture, got " + std::to_string(size));
         }
         for (size_t i = 0; i < 3; ++i)
         {
@@ -1108,8 +1100,7 @@ public:
 class ErrorMessage
 {
 public:
-    static std::string format(const Context &context,
-                              const std::string &message)
+    static std::string format(const Context &context, const std::string &message)
     {
         std::ostringstream stream;
         stream << "Parsing error at line " << context.lineNumber;
@@ -1161,8 +1152,7 @@ private:
 class VectorHelper
 {
 public:
-    static float get(const std::vector<float> &from, size_t index,
-                     float defaultValue = 0.0f)
+    static float get(const std::vector<float> &from, size_t index, float defaultValue = 0.0f)
     {
         if (from.empty())
         {
@@ -1179,16 +1169,14 @@ public:
 class ConvertTristrips
 {
 public:
-    static void toTriangles(const std::vector<int32_t> &tristrips,
-                            std::vector<Vector3ui> &indices)
+    static void toTriangles(const std::vector<int32_t> &tristrips, std::vector<Vector3ui> &indices)
     {
         for (size_t i = 0; i < tristrips.size(); ++i)
         {
             auto size = _getStripSize(tristrips, i);
             if (size < 3)
             {
-                throw std::runtime_error("Invalid triangle strip size: " +
-                                         std::to_string(size));
+                throw std::runtime_error("Invalid triangle strip size: " + std::to_string(size));
             }
             _loadTriangles(tristrips, i, size, indices);
             i += size;
@@ -1196,8 +1184,7 @@ public:
     }
 
 private:
-    static size_t _getStripSize(const std::vector<int32_t> &tristrips,
-                                size_t offset)
+    static size_t _getStripSize(const std::vector<int32_t> &tristrips, size_t offset)
     {
         for (size_t i = offset; i < tristrips.size(); ++i)
         {
@@ -1210,9 +1197,11 @@ private:
         return tristrips.size() - offset;
     }
 
-    static void _loadTriangles(const std::vector<int32_t> &tristrips,
-                               size_t offset, size_t size,
-                               std::vector<Vector3ui> &indices)
+    static void _loadTriangles(
+        const std::vector<int32_t> &tristrips,
+        size_t offset,
+        size_t size,
+        std::vector<Vector3ui> &indices)
     {
         for (size_t i = 0; i < size - 2; i++)
         {
@@ -1271,9 +1260,10 @@ private:
         {
             for (auto index : triangle)
             {
-                mesh.vertices.emplace_back(VectorHelper::get(buffer.xs, index),
-                                           VectorHelper::get(buffer.ys, index),
-                                           VectorHelper::get(buffer.zs, index));
+                mesh.vertices.emplace_back(
+                    VectorHelper::get(buffer.xs, index),
+                    VectorHelper::get(buffer.ys, index),
+                    VectorHelper::get(buffer.zs, index));
             }
         }
     }
@@ -1289,17 +1279,17 @@ private:
         {
             for (auto index : triangle)
             {
-                mesh.normals.emplace_back(VectorHelper::get(buffer.nxs, index),
-                                          VectorHelper::get(buffer.nys, index),
-                                          VectorHelper::get(buffer.nzs, index));
+                mesh.normals.emplace_back(
+                    VectorHelper::get(buffer.nxs, index),
+                    VectorHelper::get(buffer.nys, index),
+                    VectorHelper::get(buffer.nzs, index));
             }
         }
     }
 
     static void _getColors(const MeshBuffer &buffer, TriangleMesh &mesh)
     {
-        if (buffer.rs.empty() && buffer.gs.empty() && buffer.bs.empty() &&
-            buffer.as.empty())
+        if (buffer.rs.empty() && buffer.gs.empty() && buffer.bs.empty() && buffer.as.empty())
         {
             return;
         }
@@ -1308,11 +1298,11 @@ private:
         {
             for (auto index : triangle)
             {
-                mesh.colors.emplace_back(VectorHelper::get(buffer.rs, index),
-                                         VectorHelper::get(buffer.gs, index),
-                                         VectorHelper::get(buffer.bs, index),
-                                         VectorHelper::get(buffer.as, index,
-                                                           1.0f));
+                mesh.colors.emplace_back(
+                    VectorHelper::get(buffer.rs, index),
+                    VectorHelper::get(buffer.gs, index),
+                    VectorHelper::get(buffer.bs, index),
+                    VectorHelper::get(buffer.as, index, 1.0f));
             }
         }
     }
@@ -1325,8 +1315,7 @@ private:
         }
         if (!buffer.textures.empty())
         {
-            throw std::runtime_error(
-                "Texture coordinates defined in both face and vertices");
+            throw std::runtime_error("Texture coordinates defined in both face and vertices");
         }
         mesh.textureCoordinates.reserve(3 * mesh.indices.size());
         for (const auto &triangle : mesh.indices)
@@ -1340,8 +1329,7 @@ private:
         }
     }
 
-    static void _getTexturesFromFaces(const MeshBuffer &buffer,
-                                      TriangleMesh &mesh)
+    static void _getTexturesFromFaces(const MeshBuffer &buffer, TriangleMesh &mesh)
     {
         if (buffer.textures.empty())
         {
@@ -1349,8 +1337,7 @@ private:
         }
         if (buffer.textures.size() != mesh.indices.size())
         {
-            throw std::runtime_error(
-                "Indices and texture coordinates mismatch");
+            throw std::runtime_error("Indices and texture coordinates mismatch");
         }
         mesh.textureCoordinates.reserve(3 * buffer.textures.size());
         for (const auto &texture : buffer.textures)

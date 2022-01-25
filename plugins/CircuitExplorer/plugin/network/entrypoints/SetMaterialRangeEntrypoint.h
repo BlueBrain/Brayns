@@ -27,8 +27,7 @@
 
 namespace brayns
 {
-class SetMaterialRangeEntrypoint
-    : public Entrypoint<MaterialRangeProxy, EmptyMessage>
+class SetMaterialRangeEntrypoint : public Entrypoint<MaterialRangeProxy, EmptyMessage>
 {
 public:
     virtual std::string getName() const override
@@ -41,10 +40,10 @@ public:
         return "Update the corresponding materials with common properties";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
+        auto &engine = getApi().getEngine();
+        auto &scene = engine.getScene();
         MaterialRangeProxy materialRange(scene);
         request.getParams(materialRange);
         materialRange.commit();

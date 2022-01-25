@@ -36,13 +36,13 @@ class Progress : public BaseObject
 {
 public:
     Progress() = default;
-    explicit Progress(const std::string& operation)
+    explicit Progress(const std::string &operation)
         : _operation(operation)
     {
     }
 
     /** Update the progress with a new absolute amount. */
-    void update(const std::string& operation, const float amount)
+    void update(const std::string &operation, const float amount)
     {
         std::lock_guard<std::mutex> lock_(_mutex);
         _updateValue(_operation, operation);
@@ -50,7 +50,7 @@ public:
     }
 
     /** Update the progress with the given increment. */
-    void increment(const std::string& operation, const float increment)
+    void increment(const std::string &operation, const float increment)
     {
         std::lock_guard<std::mutex> lock_(_mutex);
         _updateValue(_operation, operation);

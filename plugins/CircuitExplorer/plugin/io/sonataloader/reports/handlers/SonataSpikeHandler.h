@@ -33,22 +33,26 @@ namespace sonataloader
 class SonataSpikeHandler : public brayns::AbstractSimulationHandler
 {
 public:
-    SonataSpikeHandler(const std::string& h5FilePath,
-                       const std::string& populationName,
-                       const bbp::sonata::Selection& selection);
+    SonataSpikeHandler(
+        const std::string &h5FilePath,
+        const std::string &populationName,
+        const bbp::sonata::Selection &selection);
 
     brayns::AbstractSimulationHandlerPtr clone() const final;
 
     std::vector<float> getFrameDataImpl(const uint32_t frame) final;
 
-    bool isReady() const final { return _ready; }
+    bool isReady() const final
+    {
+        return _ready;
+    }
 
 private:
     const std::string _h5FilePath;
     const std::string _populationName;
     const bbp::sonata::Selection _selection;
     const bbp::sonata::SpikeReader _reader;
-    const bbp::sonata::SpikeReader::Population& _spikePopulation;
+    const bbp::sonata::SpikeReader::Population &_spikePopulation;
     std::unordered_map<uint64_t, size_t> _gidsToIndex;
     bool _ready{true};
 };

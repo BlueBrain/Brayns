@@ -42,8 +42,7 @@ public:
      * @param id Task request ID from JSON-RPC.
      * @param task Task to register.
      */
-    void addOrReplace(const ConnectionHandle& handle, const RequestId& id,
-                      NetworkTaskPtr task)
+    void addOrReplace(const ConnectionHandle &handle, const RequestId &id, NetworkTaskPtr task)
     {
         auto oldTask = _tasks.find(handle, id);
         if (oldTask)
@@ -62,8 +61,7 @@ public:
      * @return true No task with the same client / ID exists.
      * @return false Cannot register the task because already running.
      */
-    bool addIfNotPresent(const ConnectionHandle& handle, const RequestId& id,
-                         NetworkTaskPtr task)
+    bool addIfNotPresent(const ConnectionHandle &handle, const RequestId &id, NetworkTaskPtr task)
     {
         auto oldTask = _tasks.find(handle, id);
         if (oldTask)
@@ -79,9 +77,9 @@ public:
      *
      * @param handle Client handle.
      */
-    void disconnect(const ConnectionHandle& handle) const
+    void disconnect(const ConnectionHandle &handle) const
     {
-        _tasks.forEach(handle, [&](auto&, auto& task) { task.onDisconnect(); });
+        _tasks.forEach(handle, [&](auto &, auto &task) { task.onDisconnect(); });
     }
 
     /**
@@ -92,7 +90,7 @@ public:
      * @return true Task found and cancelled.
      * @return false Task not found.
      */
-    bool cancel(const ConnectionHandle& handle, const RequestId& id) const
+    bool cancel(const ConnectionHandle &handle, const RequestId &id) const
     {
         auto task = _tasks.find(handle, id);
         if (!task)
@@ -113,7 +111,7 @@ public:
     void poll()
     {
         _tasks.removeIf(
-            [](auto&, auto&, auto& task)
+            [](auto &, auto &, auto &task)
             {
                 bool complete = !task.isRunning();
                 task.poll();

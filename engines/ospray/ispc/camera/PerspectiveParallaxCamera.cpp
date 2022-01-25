@@ -36,8 +36,7 @@ void PerspectiveParallaxCamera::commit()
     const float fovy = getParamf("fovy", 60.f);
     float aspectRatio = getParamf("aspect", 1.5f);
 
-    const float interpupillaryDistance =
-        getParamf("interpupillaryDistance", 0.0635f);
+    const float interpupillaryDistance = getParamf("interpupillaryDistance", 0.0635f);
     const float zeroParallaxPlane = getParamf("zeroParallaxPlane", 1.f);
 
     float idpOffset = 0.0f;
@@ -56,16 +55,19 @@ void PerspectiveParallaxCamera::commit()
     const vec3f dir_dv = normalize(up);
     dir = -dir;
 
-    const float imgPlane_size_y =
-        2.f * zeroParallaxPlane * tanf(deg2rad(0.5f * fovy));
+    const float imgPlane_size_y = 2.f * zeroParallaxPlane * tanf(deg2rad(0.5f * fovy));
     const float imgPlane_size_x = imgPlane_size_y * aspectRatio;
 
-    ispc::PerspectiveParallaxCamera_set(getIE(), (const ispc::vec3f&)org,
-                                        (const ispc::vec3f&)dir,
-                                        (const ispc::vec3f&)dir_du,
-                                        (const ispc::vec3f&)dir_dv,
-                                        zeroParallaxPlane, imgPlane_size_y,
-                                        imgPlane_size_x, idpOffset);
+    ispc::PerspectiveParallaxCamera_set(
+        getIE(),
+        (const ispc::vec3f &)org,
+        (const ispc::vec3f &)dir,
+        (const ispc::vec3f &)dir_du,
+        (const ispc::vec3f &)dir_dv,
+        zeroParallaxPlane,
+        imgPlane_size_y,
+        imgPlane_size_x,
+        idpOffset);
 }
 
 OSP_REGISTER_CAMERA(PerspectiveParallaxCamera, perspectiveParallax);

@@ -39,7 +39,10 @@ public:
      *
      * @return std::string PNG format ID.
      */
-    virtual std::string getFormat() const override { return "png"; }
+    virtual std::string getFormat() const override
+    {
+        return "png";
+    }
 
     /**
      * @brief Encode an image as PNG.

@@ -43,51 +43,53 @@ enum class LogLevel
 class Log
 {
 public:
-    static void disable() { setLevel(LogLevel::Off); }
+    static void disable()
+    {
+        setLevel(LogLevel::Off);
+    }
 
     static void setLevel(LogLevel level)
     {
         getLogger().set_level(spdlog::level::level_enum(level));
     }
 
-    template <typename... Args>
+    template<typename... Args>
     static void log(LogLevel level, Args &&...args)
     {
-        getLogger().log(spdlog::level::level_enum(level),
-                        std::forward<Args>(args)...);
+        getLogger().log(spdlog::level::level_enum(level), std::forward<Args>(args)...);
     }
 
-    template <typename... Args>
+    template<typename... Args>
     static void trace(Args &&...args)
     {
         log(LogLevel::Trace, std::forward<Args>(args)...);
     }
 
-    template <typename... Args>
+    template<typename... Args>
     static void debug(Args &&...args)
     {
         log(LogLevel::Debug, std::forward<Args>(args)...);
     }
 
-    template <typename... Args>
+    template<typename... Args>
     static void info(Args &&...args)
     {
         log(LogLevel::Info, std::forward<Args>(args)...);
     }
 
-    template <typename... Args>
+    template<typename... Args>
     static void warn(Args &&...args)
     {
         log(LogLevel::Warn, std::forward<Args>(args)...);
     }
 
-    template <typename... Args>
+    template<typename... Args>
     static void error(Args &&...args)
     {
         log(LogLevel::Error, std::forward<Args>(args)...);
     }
 
-    template <typename... Args>
+    template<typename... Args>
     static void critical(Args &&...args)
     {
         log(LogLevel::Critical, std::forward<Args>(args)...);

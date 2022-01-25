@@ -33,8 +33,7 @@
 class EfferentCellRetriever
 {
 public:
-    static std::vector<uint64_t> getEfferentCells(
-        const CIGetEfferentCellIdsParams& params)
+    static std::vector<uint64_t> getEfferentCells(const CIGetEfferentCellIdsParams &params)
     {
         std::vector<uint64_t> result;
 
@@ -58,9 +57,7 @@ public:
     }
 };
 
-class CIGetEfferentCellIdsEntrypoint
-    : public brayns::Entrypoint<CIGetEfferentCellIdsParams,
-                                CIGetEfferentCellIdsResult>
+class CIGetEfferentCellIdsEntrypoint : public brayns::Entrypoint<CIGetEfferentCellIdsParams, CIGetEfferentCellIdsResult>
 {
 public:
     virtual std::string getName() const override
@@ -74,7 +71,7 @@ public:
                "and a set of source cells";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         CIGetEfferentCellIdsResult result;

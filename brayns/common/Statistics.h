@@ -28,9 +28,18 @@ namespace brayns
 class Statistics : public BaseObject
 {
 public:
-    double getFPS() const { return _fps; }
-    void setFPS(const double fps) { _updateValue(_fps, fps); }
-    size_t getSceneSizeInBytes() const { return _sceneSizeInBytes; }
+    double getFPS() const
+    {
+        return _fps;
+    }
+    void setFPS(const double fps)
+    {
+        _updateValue(_fps, fps);
+    }
+    size_t getSceneSizeInBytes() const
+    {
+        return _sceneSizeInBytes;
+    }
     void setSceneSizeInBytes(const size_t sceneSizeInBytes)
     {
         _updateValue(_sceneSizeInBytes, sceneSizeInBytes);

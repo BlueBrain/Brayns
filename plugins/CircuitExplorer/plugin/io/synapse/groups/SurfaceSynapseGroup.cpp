@@ -21,9 +21,11 @@
 #include <plugin/api/MaterialUtils.h>
 #include <plugin/io/synapse/SynapseMaterialMap.h>
 
-void SurfaceSynapseGroup::addSynapse(const uint64_t id, const int32_t section,
-                                     const float distance,
-                                     const brayns::Vector3f& position)
+void SurfaceSynapseGroup::addSynapse(
+    const uint64_t id,
+    const int32_t section,
+    const float distance,
+    const brayns::Vector3f &position)
 {
     _ids.push_back(id);
     _sections.push_back(section);
@@ -31,7 +33,7 @@ void SurfaceSynapseGroup::addSynapse(const uint64_t id, const int32_t section,
     _positions.push_back(position);
 }
 
-void SurfaceSynapseGroup::mapToCell(const MorphologyInstance& cell)
+void SurfaceSynapseGroup::mapToCell(const MorphologyInstance &cell)
 {
     for (size_t j = 0; j < _ids.size(); ++j)
     {
@@ -42,7 +44,7 @@ void SurfaceSynapseGroup::mapToCell(const MorphologyInstance& cell)
             if (segmentCount == 0)
                 continue;
 
-            const auto& surfPos = _positions[j];
+            const auto &surfPos = _positions[j];
             const auto distance = _distances[j];
 
             float totalDistance = 0.f;
@@ -64,11 +66,9 @@ void SurfaceSynapseGroup::mapToCell(const MorphologyInstance& cell)
                 if (localNorm >= distance)
                 {
                     const auto points = cell.getSegment(section, i);
-                    const auto point = glm::lerp(*points.first, *points.second,
-                                                 distance / localNorm);
+                    const auto point = glm::lerp(*points.first, *points.second, distance / localNorm);
                     const auto dirVector = glm::normalize(surfPos - point);
-                    _geometry.push_back(brayns::createSDFConePillSigmoid(
-                        point, point + dirVector * 3.5f, 0.35f, 0.5f));
+                    _geometry.push_back(brayns::createSDFConePillSigmoid(point, point + dirVector * 3.5f, 0.35f, 0.5f));
                     _addedSynapses.push_back(j);
                     break;
                 }
@@ -81,8 +81,7 @@ void SurfaceSynapseGroup::mapToCell(const MorphologyInstance& cell)
     }
 }
 
-void SurfaceSynapseGroup::mapSimulation(
-    const std::unordered_map<uint64_t, uint64_t>& mapping)
+void SurfaceSynapseGroup::mapSimulation(const std::unordered_map<uint64_t, uint64_t> &mapping)
 {
     for (size_t i = 0; i < _addedSynapses.size(); ++i)
     {
@@ -92,8 +91,7 @@ void SurfaceSynapseGroup::mapSimulation(
     }
 }
 
-SynapseMaterialMap::Ptr SurfaceSynapseGroup::addToModel(
-    brayns::Model& model) const
+SynapseMaterialMap::Ptr SurfaceSynapseGroup::addToModel(brayns::Model &model) const
 {
     auto result = std::make_unique<SynapseMaterialMap>();
     result->materials.reserve(_addedSynapses.size());

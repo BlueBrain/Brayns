@@ -38,14 +38,17 @@ class MaterialRangeProxy
 public:
     MaterialRangeProxy() = default;
 
-    MaterialRangeProxy(Scene& scene)
+    MaterialRangeProxy(Scene &scene)
         : _scene(&scene)
     {
     }
 
-    void setModelId(size_t id) { _model = &ExtractModel::fromId(*_scene, id); }
+    void setModelId(size_t id)
+    {
+        _model = &ExtractModel::fromId(*_scene, id);
+    }
 
-    void setMaterialIds(const std::vector<size_t>& ids)
+    void setMaterialIds(const std::vector<size_t> &ids)
     {
         if (!_model)
         {
@@ -59,7 +62,7 @@ public:
         _loadMaterialIds(ids);
     }
 
-    void setProperties(const JsonBuffer<ExtendedMaterial>& properties)
+    void setProperties(const JsonBuffer<ExtendedMaterial> &properties)
     {
         _properties = properties;
     }
@@ -76,38 +79,35 @@ public:
 private:
     void _loadAllMaterials()
     {
-        auto& model = _model->getModel();
-        auto& materials = model.getMaterials();
-        for (const auto& pair : materials)
+        auto &model = _model->getModel();
+        auto &materials = model.getMaterials();
+        for (const auto &pair : materials)
         {
-            auto& material = *pair.second;
+            auto &material = *pair.second;
             _materials.push_back(material);
         }
     }
 
-    void _loadMaterialIds(const std::vector<size_t>& ids)
+    void _loadMaterialIds(const std::vector<size_t> &ids)
     {
         _materials.clear();
         _materials.reserve(ids.size());
         for (auto id : ids)
         {
-            auto& material = ExtractMaterial::fromId(*_model, id);
+            auto &material = ExtractMaterial::fromId(*_model, id);
             _materials.push_back(material);
         }
     }
 
-    Scene* _scene = nullptr;
-    ModelDescriptor* _model = nullptr;
+    Scene *_scene = nullptr;
+    ModelDescriptor *_model = nullptr;
     std::vector<ExtendedMaterial> _materials;
     JsonBuffer<ExtendedMaterial> _properties;
 };
 
 BRAYNS_NAMED_JSON_ADAPTER_BEGIN(MaterialRangeProxy, "MaterialRange")
-BRAYNS_JSON_ADAPTER_SET("model_id", setModelId,
-                        "The model which this material belongs to")
-BRAYNS_JSON_ADAPTER_SET("material_ids", setMaterialIds,
-                        "The list of ID that identifies the materials")
-BRAYNS_JSON_ADAPTER_SET("properties", setProperties,
-                        "Material properties to apply on all given materials")
+BRAYNS_JSON_ADAPTER_SET("model_id", setModelId, "The model which this material belongs to")
+BRAYNS_JSON_ADAPTER_SET("material_ids", setMaterialIds, "The list of ID that identifies the materials")
+BRAYNS_JSON_ADAPTER_SET("properties", setProperties, "Material properties to apply on all given materials")
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

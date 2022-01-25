@@ -29,7 +29,7 @@
 class SonataLoader : public brayns::Loader<SonataLoaderParameters>
 {
 public:
-    SonataLoader(CircuitColorManager& colorManager)
+    SonataLoader(CircuitColorManager &colorManager)
         : _colorManager(colorManager)
     {
     }
@@ -56,16 +56,20 @@ public:
      * @brief importFromBlob imports models from a byte blob. NOT SUPPORTED
      */
     std::vector<brayns::ModelDescriptorPtr> importFromBlob(
-        brayns::Blob&&, const brayns::LoaderProgress&,
-        const SonataLoaderParameters&, brayns::Scene&) const final;
+        brayns::Blob &&,
+        const brayns::LoaderProgress &,
+        const SonataLoaderParameters &,
+        brayns::Scene &) const final;
 
     /**
      * @brief importFromFile imports models from a file given by a path
      */
     std::vector<brayns::ModelDescriptorPtr> importFromFile(
-        const std::string& path, const brayns::LoaderProgress& callback,
-        const SonataLoaderParameters& input, brayns::Scene& scene) const final;
+        const std::string &path,
+        const brayns::LoaderProgress &callback,
+        const SonataLoaderParameters &input,
+        brayns::Scene &scene) const final;
 
 private:
-    CircuitColorManager& _colorManager;
+    CircuitColorManager &_colorManager;
 };

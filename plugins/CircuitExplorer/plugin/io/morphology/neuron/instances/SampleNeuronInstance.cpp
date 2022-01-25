@@ -25,53 +25,50 @@
 #include <plugin/io/morphology/neuron/NeuronMaterialMap.h>
 
 SampleNeuronInstance::SampleNeuronInstance(
-    std::vector<brayns::Sphere>&& geometry,
-    const std::shared_ptr<SampleSharedData>& data)
+    std::vector<brayns::Sphere> &&geometry,
+    const std::shared_ptr<SampleSharedData> &data)
     : _samples(std::move(geometry))
     , _data(data)
 {
 }
 
 void SampleNeuronInstance::mapSimulation(
-    const size_t globalOffset, const std::vector<uint16_t>& sectionOffsets,
-    const std::vector<uint16_t>& sectionCompartments)
+    const size_t globalOffset,
+    const std::vector<uint16_t> &sectionOffsets,
+    const std::vector<uint16_t> &sectionCompartments)
 {
-    for (auto& geomSection : _data->sectionMap)
+    for (auto &geomSection : _data->sectionMap)
     {
-        const auto& segments = geomSection.second;
+        const auto &segments = geomSection.second;
         // No section level information (soma report, spike simulation, etc.)
         // or dealing with soma
-        if (geomSection.first <= -1 || sectionOffsets.empty() ||
-            static_cast<size_t>(geomSection.first) > sectionOffsets.size() - 1)
+        if (geomSection.first <= -1 || sectionOffsets.empty()
+            || static_cast<size_t>(geomSection.first) > sectionOffsets.size() - 1)
         {
-            for (const auto& segment : segments)
+            for (const auto &segment : segments)
                 _samples[segment].userData = globalOffset;
         }
         else
         {
             const double step =
-                static_cast<double>(sectionCompartments[geomSection.first]) /
-                static_cast<double>(segments.size());
+                static_cast<double>(sectionCompartments[geomSection.first]) / static_cast<double>(segments.size());
 
             const size_t sectionOffset = sectionOffsets[geomSection.first];
             for (size_t i = 0; i < segments.size(); ++i)
             {
-                const auto compartment =
-                    static_cast<size_t>(std::floor(step * i));
-                const auto finalOffset =
-                    globalOffset + (sectionOffset + compartment);
+                const auto compartment = static_cast<size_t>(std::floor(step * i));
+                const auto finalOffset = globalOffset + (sectionOffset + compartment);
                 _samples[segments[i]].userData = finalOffset;
             }
         }
     }
 }
 
-ElementMaterialMap::Ptr SampleNeuronInstance::addToModel(
-    brayns::Model& model) const
+ElementMaterialMap::Ptr SampleNeuronInstance::addToModel(brayns::Model &model) const
 {
     // Add geometries to the model
     std::unordered_map<NeuronSection, size_t> sectionToMat;
-    for (const auto& entry : _data->sectionTypeMap)
+    for (const auto &entry : _data->sectionTypeMap)
     {
         const auto materialId = CircuitExplorerMaterial::create(model);
         sectionToMat[entry.first] = materialId;
@@ -79,8 +76,7 @@ ElementMaterialMap::Ptr SampleNeuronInstance::addToModel(
             model.addSphere(materialId, _samples[geomIdx]);
     }
 
-    const auto updateMaterialMap =
-        [&](const NeuronSection section, size_t& buffer)
+    const auto updateMaterialMap = [&](const NeuronSection section, size_t &buffer)
     {
         auto it = sectionToMat.find(section);
         if (it != sectionToMat.end())
@@ -90,8 +86,7 @@ ElementMaterialMap::Ptr SampleNeuronInstance::addToModel(
     updateMaterialMap(NeuronSection::SOMA, materialMap->soma);
     updateMaterialMap(NeuronSection::AXON, materialMap->axon);
     updateMaterialMap(NeuronSection::DENDRITE, materialMap->dendrite);
-    updateMaterialMap(NeuronSection::APICAL_DENDRITE,
-                      materialMap->apicalDendrite);
+    updateMaterialMap(NeuronSection::APICAL_DENDRITE, materialMap->apicalDendrite);
     return materialMap;
 }
 
@@ -99,19 +94,16 @@ size_t SampleNeuronInstance::getSectionSegmentCount(const int32_t section) const
 {
     auto it = _data->sectionMap.find(section);
     if (it == _data->sectionMap.end())
-        throw std::invalid_argument("Section " + std::to_string(section) +
-                                    "not found");
+        throw std::invalid_argument("Section " + std::to_string(section) + "not found");
 
     return std::max(it->second.size(), 1ul) - 1;
 }
 
-MorphologyInstance::SegmentPoints SampleNeuronInstance::getSegment(
-    const int32_t section, const uint32_t segment) const
+MorphologyInstance::SegmentPoints SampleNeuronInstance::getSegment(const int32_t section, const uint32_t segment) const
 {
     auto it = _data->sectionMap.find(section);
     if (it == _data->sectionMap.end())
-        throw std::invalid_argument("Section " + std::to_string(section) +
-                                    " not found");
+        throw std::invalid_argument("Section " + std::to_string(section) + " not found");
 
     if (std::max(it->second.size(), 1ul) - 1 <= segment)
         throw std::invalid_argument("Section " + std::to_string(section) +
@@ -119,18 +111,16 @@ MorphologyInstance::SegmentPoints SampleNeuronInstance::getSegment(
                                     "Segment " +
                                     std::to_string(segment) + " not found");
 
-    const auto& start = _samples[it->second[segment]];
-    const auto& end = _samples[it->second[segment + 1]];
+    const auto &start = _samples[it->second[segment]];
+    const auto &end = _samples[it->second[segment + 1]];
     return std::make_pair(&start.center, &end.center);
 }
 
-uint64_t SampleNeuronInstance::getSegmentSimulationOffset(
-    const int32_t section, const uint32_t segment) const
+uint64_t SampleNeuronInstance::getSegmentSimulationOffset(const int32_t section, const uint32_t segment) const
 {
     auto it = _data->sectionMap.find(section);
     if (it == _data->sectionMap.end())
-        throw std::invalid_argument("Section " + std::to_string(section) +
-                                    " not found");
+        throw std::invalid_argument("Section " + std::to_string(section) + " not found");
 
     if (it->second.size() <= segment)
         throw std::invalid_argument("Section " + std::to_string(section) +

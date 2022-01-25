@@ -35,8 +35,8 @@ public:
     }
 
     std::vector<SynapseGroup::Ptr> load(
-        const SonataConfig::Data& networkData,
-        const SonataEdgePopulationParameters& lc,
-        const bbp::sonata::Selection& nodeSelection) const final;
+        const SonataConfig::Data &networkData,
+        const SonataEdgePopulationParameters &lc,
+        const bbp::sonata::Selection &nodeSelection) const final;
 };
 } // namespace sonataloader

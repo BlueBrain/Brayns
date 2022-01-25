@@ -30,7 +30,7 @@ namespace dti
 class DtiEntrypoints
 {
 public:
-    static void load(DTIPlugin& plugin)
+    static void load(DTIPlugin &plugin)
     {
         plugin.add<AddStreamlinesEntrypoint>();
         plugin.add<SetSpikeSimulationEntrypoint>(plugin);

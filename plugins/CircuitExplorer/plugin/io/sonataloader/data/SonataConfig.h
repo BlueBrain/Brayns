@@ -31,21 +31,20 @@ public:
         bbp::sonata::CircuitConfig config;
     };
 
-    static Data readNetwork(const std::string& configPath);
+    static Data readNetwork(const std::string &configPath);
 
     class MorphologyPath
     {
     public:
-        MorphologyPath(const std::string& path, const char* extension);
+        MorphologyPath(const std::string &path, const char *extension);
 
-        std::string buildPath(const std::string& morphologyName) const noexcept;
+        std::string buildPath(const std::string &morphologyName) const noexcept;
 
     private:
         const std::string _path;
         const std::string _extension;
     };
 
-    static MorphologyPath resolveMorphologyPath(
-        const bbp::sonata::PopulationProperties&);
+    static MorphologyPath resolveMorphologyPath(const bbp::sonata::PopulationProperties &);
 };
 } // namespace sonataloader

@@ -34,7 +34,7 @@ namespace brayns
  * @tparam ParamsType Entrypoint request params.
  * @tparam ResultType Entrypoint request result.
  */
-template <typename ParamsType, typename ResultType>
+template<typename ParamsType, typename ResultType>
 class EntrypointTask : public NetworkTask
 {
 public:
@@ -81,14 +81,17 @@ public:
      *
      * @return ParamsType Request params.
      */
-    ParamsType getParams() const { return _request.getParams(); }
+    ParamsType getParams() const
+    {
+        return _request.getParams();
+    }
 
     /**
      * @brief Parse the request params to the given instance.
      *
      * @param params Request params.
      */
-    void getParams(ParamsType& params) const
+    void getParams(ParamsType &params) const
     {
         return _request.getParams(params);
     }
@@ -98,14 +101,20 @@ public:
      *
      * @param result Reply result data.
      */
-    void reply(const ResultType& result) { _request.reply(result); }
+    void reply(const ResultType &result)
+    {
+        _request.reply(result);
+    }
 
     /**
      * @brief Send an error reply when an exception occurs in the thread.
      *
      * @param e Opaque exception ptr.
      */
-    virtual void onError(std::exception_ptr e) { _request.error(e); }
+    virtual void onError(std::exception_ptr e)
+    {
+        _request.error(e);
+    }
 
     /**
      * @brief Send progress notification when progress() is called.
@@ -115,7 +124,7 @@ public:
      * @param operation Current operation.
      * @param amount Progress amount 0-1.
      */
-    virtual void onProgress(const std::string& operation, double amount)
+    virtual void onProgress(const std::string &operation, double amount)
     {
         _limiter.call([&] { _request.progress(operation, amount); });
     }

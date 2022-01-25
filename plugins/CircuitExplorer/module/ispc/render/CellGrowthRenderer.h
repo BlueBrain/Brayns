@@ -35,7 +35,10 @@ public:
        Returns the class name as a string
        @return string containing the full name of the class
     */
-    std::string toString() const final { return "CellGrowthRenderer"; }
+    std::string toString() const final
+    {
+        return "CellGrowthRenderer";
+    }
     void commit() final;
 
 private:

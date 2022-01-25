@@ -48,7 +48,7 @@ namespace brayns
  *
  * @tparam T Type to serialize.
  */
-template <typename T>
+template<typename T>
 class JsonBuffer
 {
 public:
@@ -57,7 +57,10 @@ public:
      *
      * @return JsonSchema JSON schema of T.
      */
-    JsonSchema getSchema() const { return Json::getSchema<T>(); }
+    JsonSchema getSchema() const
+    {
+        return Json::getSchema<T>();
+    }
 
     /**
      * @brief Copy the internally stored JSON into parameter.
@@ -66,7 +69,7 @@ public:
      * @return true Always.
      * @return false Never.
      */
-    bool serialize(JsonValue& json) const
+    bool serialize(JsonValue &json) const
     {
         json = _json;
         return true;
@@ -79,7 +82,7 @@ public:
      * @return true Always.
      * @return false Never.
      */
-    bool deserialize(const JsonValue& json)
+    bool deserialize(const JsonValue &json)
     {
         _json = json;
         return true;
@@ -94,14 +97,20 @@ public:
      * @return true Success.
      * @return false Failure.
      */
-    bool deserialize(T& value) const { return Json::deserialize(_json, value); }
+    bool deserialize(T &value) const
+    {
+        return Json::deserialize(_json, value);
+    }
 
     /**
      * @brief Get the internal JSON value.
      *
      * @return const JsonValue& Internal JSON.
      */
-    const JsonValue& getJson() const { return _json; }
+    const JsonValue &getJson() const
+    {
+        return _json;
+    }
 
 private:
     JsonValue _json;

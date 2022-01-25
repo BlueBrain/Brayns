@@ -33,21 +33,18 @@
 class PillModel
 {
 public:
-    static size_t add(brayns::Scene& scene, const AddPillMessage& params)
+    static size_t add(brayns::Scene &scene, const AddPillMessage &params)
     {
         // Create pill model
         auto model = scene.createModel();
 
         // Create pill material instance
-        const auto matId =
-            CircuitExplorerMaterial::create(*model,
-                                            brayns::Vector3f(params.color),
-                                            params.color.a);
+        const auto matId = CircuitExplorerMaterial::create(*model, brayns::Vector3f(params.color), params.color.a);
 
         // Extract pill info
         auto type = params.type;
-        auto& p1 = params.p1;
-        auto& p2 = params.p2;
+        auto &p1 = params.p1;
+        auto &p2 = params.p2;
         auto radius1 = params.radius1;
         auto radius2 = params.radius2;
 
@@ -75,26 +72,27 @@ public:
         }
 
         // Register pill model and return its ID
-        return scene.addModel(
-            std::make_shared<brayns::ModelDescriptor>(std::move(model), name));
+        return scene.addModel(std::make_shared<brayns::ModelDescriptor>(std::move(model), name));
     }
 };
 
-class AddPillEntrypoint
-    : public brayns::Entrypoint<AddPillMessage, AddShapeMessage>
+class AddPillEntrypoint : public brayns::Entrypoint<AddPillMessage, AddShapeMessage>
 {
 public:
-    virtual std::string getName() const override { return "add-pill"; }
+    virtual std::string getName() const override
+    {
+        return "add-pill";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Add a visual 3D pill to the scene";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& scene = getApi().getScene();
+        auto &scene = getApi().getScene();
         brayns::Log::info("[CE] Building Pill model.");
         auto id = PillModel::add(scene, params);
         scene.markModified();

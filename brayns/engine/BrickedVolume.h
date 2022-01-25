@@ -32,13 +32,11 @@ class BrickedVolume : public virtual Volume
 public:
     /** @name API for engine-specific code */
     //@{
-    virtual void setBrick(const void* data, const Vector3ui& position,
-                          const Vector3ui& size) = 0;
+    virtual void setBrick(const void *data, const Vector3ui &position, const Vector3ui &size) = 0;
     //@}
 
 protected:
-    BrickedVolume(const Vector3ui& dimensions, const Vector3f& spacing,
-                  const VolumeDataType type)
+    BrickedVolume(const Vector3ui &dimensions, const Vector3f &spacing, const VolumeDataType type)
         : Volume(dimensions, spacing, type)
     {
     }

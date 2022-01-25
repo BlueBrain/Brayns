@@ -28,8 +28,7 @@
 
 namespace brayns
 {
-class GetModelPropertiesEntrypoint
-    : public Entrypoint<GetModelMessage, PropertyMap>
+class GetModelPropertiesEntrypoint : public Entrypoint<GetModelMessage, PropertyMap>
 {
 public:
     virtual std::string getName() const override
@@ -42,15 +41,14 @@ public:
         return "Get the properties of the given model";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
-        auto& model = ExtractModel::fromRequest(getApi(), request);
+        auto &model = ExtractModel::fromRequest(getApi(), request);
         request.reply(model.getProperties());
     }
 };
 
-class SetModelPropertiesEntrypoint
-    : public Entrypoint<ModelPropertiesMessage, EmptyMessage>
+class SetModelPropertiesEntrypoint : public Entrypoint<ModelPropertiesMessage, EmptyMessage>
 {
 public:
     virtual std::string getName() const override
@@ -63,11 +61,11 @@ public:
         return "Set the properties of the given model";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& newProperties = params.properties;
-        auto& model = ExtractModel::fromParams(getApi(), params);
+        auto &newProperties = params.properties;
+        auto &model = ExtractModel::fromParams(getApi(), params);
         auto oldProperties = model.getProperties();
         oldProperties.merge(newProperties);
         model.setProperties(oldProperties);
@@ -75,8 +73,7 @@ public:
     }
 };
 
-class ModelPropertiesSchemaEntrypoint
-    : public Entrypoint<GetModelMessage, JsonValue>
+class ModelPropertiesSchemaEntrypoint : public Entrypoint<GetModelMessage, JsonValue>
 {
 public:
     virtual std::string getName() const override
@@ -89,10 +86,10 @@ public:
         return "Get the property schema of the model";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
-        auto& model = ExtractModel::fromRequest(getApi(), request);
-        auto& properties = model.getProperties();
+        auto &model = ExtractModel::fromRequest(getApi(), request);
+        auto &properties = model.getProperties();
         auto schema = Json::getSchema(properties);
         auto result = Json::serialize(schema);
         request.reply(result);

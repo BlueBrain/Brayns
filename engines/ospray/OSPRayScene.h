@@ -38,8 +38,7 @@ namespace brayns
 class OSPRayScene : public Scene
 {
 public:
-    OSPRayScene(AnimationParameters& animationParameters,
-                VolumeParameters& volumeParameters);
+    OSPRayScene(AnimationParameters &animationParameters, VolumeParameters &volumeParameters);
     ~OSPRayScene();
 
     /** @copydoc Scene::commit */
@@ -49,22 +48,33 @@ public:
     bool commitLights() final;
 
     /** @copydoc Scene::supportsConcurrentSceneUpdates. */
-    bool supportsConcurrentSceneUpdates() const final { return true; }
+    bool supportsConcurrentSceneUpdates() const final
+    {
+        return true;
+    }
     ModelPtr createModel() const final;
 
-    OSPModel getModel() { return _rootModel; }
-    OSPData lightData() { return _ospLightData; }
-    OSPData getSimulationData() { return _ospSimulationData; }
+    OSPModel getModel()
+    {
+        return _rootModel;
+    }
+    OSPData lightData()
+    {
+        return _ospLightData;
+    }
+    OSPData getSimulationData()
+    {
+        return _ospSimulationData;
+    }
     OSPTransferFunction getTransferFunctionImpl()
     {
         return _ospTransferFunction;
     }
 
 private:
-    bool _commitVolumes(std::vector<ModelDescriptorPtr>& modelDescriptors);
+    bool _commitVolumes(std::vector<ModelDescriptorPtr> &modelDescriptors);
     void _commitTransferFunction();
-    void _commitSimulationData(
-        std::vector<ModelDescriptorPtr>& modelDescriptors);
+    void _commitSimulationData(std::vector<ModelDescriptorPtr> &modelDescriptors);
     void _destroyLights();
 
     OSPModel _rootModel{nullptr};

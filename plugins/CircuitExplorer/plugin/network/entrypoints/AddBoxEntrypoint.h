@@ -33,24 +33,21 @@
 class BoxModel
 {
 public:
-    static size_t add(brayns::Scene& scene, const AddBoxMessage& params)
+    static size_t add(brayns::Scene &scene, const AddBoxMessage &params)
     {
         // Create box model
         auto model = scene.createModel();
 
         // Create box material instance
-        const auto matId =
-            CircuitExplorerMaterial::create(*model,
-                                            brayns::Vector3f(params.color),
-                                            params.color.a);
+        const auto matId = CircuitExplorerMaterial::create(*model, brayns::Vector3f(params.color), params.color.a);
 
         // Extract box info
-        auto& minCorner = params.min_corner;
-        auto& maxCorner = params.max_corner;
+        auto &minCorner = params.min_corner;
+        auto &maxCorner = params.max_corner;
 
         // Create box mesh
         auto mesh = brayns::createBox(minCorner, maxCorner);
-        auto& meshes = model->getTriangleMeshes();
+        auto &meshes = model->getTriangleMeshes();
         meshes[matId] = mesh;
         model->markInstancesDirty();
 
@@ -63,26 +60,27 @@ public:
         }
 
         // Register box model and return its ID
-        return scene.addModel(
-            std::make_shared<brayns::ModelDescriptor>(std::move(model), name));
+        return scene.addModel(std::make_shared<brayns::ModelDescriptor>(std::move(model), name));
     }
 };
 
-class AddBoxEntrypoint
-    : public brayns::Entrypoint<AddBoxMessage, AddShapeMessage>
+class AddBoxEntrypoint : public brayns::Entrypoint<AddBoxMessage, AddShapeMessage>
 {
 public:
-    virtual std::string getName() const override { return "add-box"; }
+    virtual std::string getName() const override
+    {
+        return "add-box";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Add a visual 3D box to the scene";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& scene = getApi().getScene();
+        auto &scene = getApi().getScene();
         brayns::Log::info("[CE] Building Box model.");
         auto id = BoxModel::add(scene, params);
         scene.markModified();

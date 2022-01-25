@@ -39,12 +39,11 @@ namespace sonataloader
 {
 namespace
 {
-template <typename Super>
+template<typename Super>
 class PopulationLoaderTable
 {
 public:
-    template <typename T,
-              typename = std::enable_if_t<std::is_base_of<Super, T>::value>>
+    template<typename T, typename = std::enable_if_t<std::is_base_of<Super, T>::value>>
     void registerLoader()
     {
         auto loader = std::make_unique<T>();
@@ -52,7 +51,7 @@ public:
         _nodes[name] = std::move(loader);
     }
 
-    Super* getLoader(const std::string& name)
+    Super *getLoader(const std::string &name)
     {
         auto it = _nodes.find(name);
         if (it != _nodes.end())
@@ -76,12 +75,11 @@ public:
         _table.registerLoader<VasculaturePopulationLoader>();
     }
 
-    const NodePopulationLoader& getNodeLoader(const std::string& name)
+    const NodePopulationLoader &getNodeLoader(const std::string &name)
     {
         auto nlptr = _table.getLoader(name);
         if (!nlptr)
-            throw std::invalid_argument("No node population loader for type " +
-                                        name);
+            throw std::invalid_argument("No node population loader for type " + name);
 
         return *nlptr;
     }
@@ -102,12 +100,11 @@ public:
         _table.registerLoader<SynapseAstrocytePopulationLoader>();
     }
 
-    const EdgePopulationLoader& getEdgeLoader(const std::string& name)
+    const EdgePopulationLoader &getEdgeLoader(const std::string &name)
     {
         auto elptr = _table.getLoader(name);
         if (!elptr)
-            throw std::invalid_argument("No edge population loader for type " +
-                                        name);
+            throw std::invalid_argument("No edge population loader for type " + name);
 
         return *elptr;
     }
@@ -118,30 +115,27 @@ private:
 } // namespace
 
 std::vector<SynapseGroup::Ptr> PopulationLoaderManager::loadEdges(
-    const SonataConfig::Data& networkConfig,
-    const SonataEdgePopulationParameters& lc,
-    const bbp::sonata::Selection& nodeSelection)
+    const SonataConfig::Data &networkConfig,
+    const SonataEdgePopulationParameters &lc,
+    const bbp::sonata::Selection &nodeSelection)
 {
-    const auto edgeType =
-        networkConfig.config.getEdgePopulationProperties(lc.edge_population)
-            .type;
+    const auto edgeType = networkConfig.config.getEdgePopulationProperties(lc.edge_population).type;
     EdgePopulationLoaders epl;
-    const auto& loader = epl.getEdgeLoader(edgeType);
+    const auto &loader = epl.getEdgeLoader(edgeType);
 
     return loader.load(networkConfig, lc, nodeSelection);
 }
 
 std::vector<MorphologyInstance::Ptr> PopulationLoaderManager::loadNodes(
-    const SonataConfig::Data& networkData,
-    const SonataNodePopulationParameters& lc,
-    const bbp::sonata::Selection& nodeSelection)
+    const SonataConfig::Data &networkData,
+    const SonataNodePopulationParameters &lc,
+    const bbp::sonata::Selection &nodeSelection)
 {
     std::string nodeType;
     {
         try
         {
-            const auto nodes =
-                networkData.config.getNodePopulation(lc.node_population);
+            const auto nodes = networkData.config.getNodePopulation(lc.node_population);
             nodeType = SonataCells::getPopulationType(nodes);
         }
         catch (...)
@@ -150,21 +144,19 @@ std::vector<MorphologyInstance::Ptr> PopulationLoaderManager::loadNodes(
                 "[CE] PopulationLoaderManager: Extracting population "
                 "type from population properties for {}.",
                 lc.node_population);
-            auto nodeProperties =
-                networkData.config.getNodePopulationProperties(
-                    lc.node_population);
+            auto nodeProperties = networkData.config.getNodePopulationProperties(lc.node_population);
             nodeType = std::move(nodeProperties.type);
         }
     }
     NodePopulationLoaders npl;
-    const auto& loader = npl.getNodeLoader(nodeType);
+    const auto &loader = npl.getNodeLoader(nodeType);
 
     return loader.load(networkData, lc, nodeSelection);
 }
 
 void PopulationLoaderManager::mapEdgesToNodes(
-    const std::vector<MorphologyInstance::Ptr>& nodes,
-    std::vector<SynapseGroup::Ptr>& edges)
+    const std::vector<MorphologyInstance::Ptr> &nodes,
+    std::vector<SynapseGroup::Ptr> &edges)
 {
 #pragma omp parallel for
     for (size_t j = 0; j < nodes.size(); ++j)

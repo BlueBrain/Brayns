@@ -30,12 +30,11 @@ namespace brayns
 class OSPRayFrameBuffer : public FrameBuffer
 {
 public:
-    OSPRayFrameBuffer(const std::string& name, const Vector2ui& frameSize,
-                      const PixelFormat frameBufferFormat);
+    OSPRayFrameBuffer(const std::string &name, const Vector2ui &frameSize, const PixelFormat frameBufferFormat);
     ~OSPRayFrameBuffer();
 
     void clear() final;
-    void resize(const Vector2ui& frameSize) final;
+    void resize(const Vector2ui &frameSize) final;
     void map() final;
     void unmap() final;
     void setAccumulation(const bool accumulation) final;
@@ -49,11 +48,20 @@ public:
     {
         return std::unique_lock<std::mutex>(_mapMutex);
     }
-    const uint8_t* getColorBuffer() const final { return _colorBuffer; }
-    const float* getDepthBuffer() const final { return _depthBuffer; }
-    OSPFrameBuffer impl() { return _currentFB(); }
-    void createPixelOp(const std::string& name) final;
-    void updatePixelOp(const PropertyMap& properties) final;
+    const uint8_t *getColorBuffer() const final
+    {
+        return _colorBuffer;
+    }
+    const float *getDepthBuffer() const final
+    {
+        return _depthBuffer;
+    }
+    OSPFrameBuffer impl()
+    {
+        return _currentFB();
+    }
+    void createPixelOp(const std::string &name) final;
+    void updatePixelOp(const PropertyMap &properties) final;
 
 private:
     void _recreate();
@@ -66,8 +74,8 @@ private:
 
     OSPFrameBuffer _frameBuffer{nullptr};
     OSPFrameBuffer _subsamplingFrameBuffer{nullptr};
-    uint8_t* _colorBuffer{nullptr};
-    float* _depthBuffer{nullptr};
+    uint8_t *_colorBuffer{nullptr};
+    float *_depthBuffer{nullptr};
     OSPPixelOp _pixelOp{nullptr};
     size_t _subsamplingFactor{1};
 

@@ -26,14 +26,13 @@
 
 namespace brayns
 {
-void toOSPRayProperties(const PropertyMap& object, OSPObject ospObject)
+void toOSPRayProperties(const PropertyMap &object, OSPObject ospObject)
 {
     try
     {
-        for (const auto& prop : object)
+        for (const auto &prop : object)
         {
-            auto setProperty = [&](const auto& value)
-            { osphelper::set(ospObject, prop.getName().c_str(), value); };
+            auto setProperty = [&](const auto &value) { osphelper::set(ospObject, prop.getName().c_str(), value); };
 
             prop.visit<double>(setProperty);
             prop.visit<int>(setProperty);
@@ -46,19 +45,19 @@ void toOSPRayProperties(const PropertyMap& object, OSPObject ospObject)
             prop.visit<Vector4d>(setProperty);
         }
     }
-    catch (const std::exception& e)
+    catch (const std::exception &e)
     {
         Log::error("Failed to apply properties for ospObject.");
     }
 }
 
-void toOSPRayProperties(const PropertyObject& object, OSPObject ospObject)
+void toOSPRayProperties(const PropertyObject &object, OSPObject ospObject)
 {
     toOSPRayProperties(object.getPropertyMap(), ospObject);
 }
 
-template <typename T, typename U, int S>
-auto _toGlm(const ospcommon::vec_t<U, S>& input)
+template<typename T, typename U, int S>
+auto _toGlm(const ospcommon::vec_t<U, S> &input)
 {
     glm::vec<S, T> glm;
     for (int i = 0; i < S; ++i)
@@ -68,61 +67,61 @@ auto _toGlm(const ospcommon::vec_t<U, S>& input)
     return glm;
 }
 
-void fromOSPRayProperties(PropertyMap& object, ospray::ManagedObject& ospObject)
+void fromOSPRayProperties(PropertyMap &object, ospray::ManagedObject &ospObject)
 {
-    for (auto& prop : object)
+    for (auto &prop : object)
     {
         auto name = prop.getName().c_str();
         prop.visit<double>(
-            [&](const auto& value)
+            [&](const auto &value)
             {
                 double newValue = ospObject.getParam1f(name, float(value));
                 prop.setValue(newValue);
             });
         prop.visit<int>(
-            [&](const auto& value)
+            [&](const auto &value)
             {
                 int newValue = ospObject.getParam1i(name, value);
                 prop.setValue(newValue);
             });
         prop.visit<bool>(
-            [&](const auto& value)
+            [&](const auto &value)
             {
                 bool newValue = ospObject.getParam(name, int(value));
                 prop.setValue(newValue);
             });
         prop.visit<std::string>(
-            [&](const auto& value)
+            [&](const auto &value)
             {
                 auto newValue = ospObject.getParam(name, value);
                 prop.setValue(newValue);
             });
         prop.visit<Vector2d>(
-            [&](const auto&)
+            [&](const auto &)
             {
                 auto newValue = ospObject.getParam(name, ospcommon::vec2f());
                 prop.setValue(_toGlm<double>(newValue));
             });
         prop.visit<Vector2i>(
-            [&](const auto&)
+            [&](const auto &)
             {
                 auto newValue = ospObject.getParam(name, ospcommon::vec2i());
                 prop.setValue(_toGlm<int>(newValue));
             });
         prop.visit<Vector3d>(
-            [&](const auto&)
+            [&](const auto &)
             {
                 auto newValue = ospObject.getParam(name, ospcommon::vec3f());
                 prop.setValue(_toGlm<double>(newValue));
             });
         prop.visit<Vector3i>(
-            [&](const auto&)
+            [&](const auto &)
             {
                 auto newValue = ospObject.getParam(name, ospcommon::vec3i());
                 prop.setValue(_toGlm<int>(newValue));
             });
         prop.visit<Vector4d>(
-            [&](const auto&)
+            [&](const auto &)
             {
                 auto newValue = ospObject.getParam(name, ospcommon::vec4f());
                 prop.setValue(_toGlm<double>(newValue));
@@ -130,25 +129,22 @@ void fromOSPRayProperties(PropertyMap& object, ospray::ManagedObject& ospObject)
     }
 }
 
-ospcommon::affine3f transformationToAffine3f(
-    const Transformation& transformation)
+ospcommon::affine3f transformationToAffine3f(const Transformation &transformation)
 {
     // https://stackoverflow.com/a/18436193
-    const auto& quat = transformation.getRotation();
-    const float x = atan2(2 * (quat.w * quat.x + quat.y * quat.z),
-                          1 - 2 * (quat.x * quat.x + quat.y * quat.y));
+    const auto &quat = transformation.getRotation();
+    const float x = atan2(2 * (quat.w * quat.x + quat.y * quat.z), 1 - 2 * (quat.x * quat.x + quat.y * quat.y));
     const float y = asin(2 * (quat.w * quat.y - quat.z * quat.x));
-    const float z = atan2(2 * (quat.w * quat.z + quat.x * quat.y),
-                          1 - 2 * (quat.y * quat.y + quat.z * quat.z));
+    const float z = atan2(2 * (quat.w * quat.z + quat.x * quat.y), 1 - 2 * (quat.y * quat.y + quat.z * quat.z));
 
     ospcommon::affine3f rot{ospcommon::one};
     rot = ospcommon::affine3f::rotate({1, 0, 0}, x) * rot;
     rot = ospcommon::affine3f::rotate({0, 1, 0}, y) * rot;
     rot = ospcommon::affine3f::rotate({0, 0, 1}, z) * rot;
 
-    const auto& rotationCenter = transformation.getRotationCenter();
-    const auto& translation = transformation.getTranslation();
-    const auto& scale = transformation.getScale();
+    const auto &rotationCenter = transformation.getRotationCenter();
+    const auto &translation = transformation.getTranslation();
+    const auto &scale = transformation.getScale();
 
     // We start scaling the object,
     // then we move it at `translation` location,
@@ -156,32 +152,27 @@ ospcommon::affine3f transformationToAffine3f(
     //
     // To make the object rotate around its own center,
     // juste set `rotationCenter` to be equal to `translation`.
-    return ospcommon::affine3f::translate({float(rotationCenter.x),
-                                           float(rotationCenter.y),
-                                           float(rotationCenter.z)}) *
-           rot *
-           ospcommon::affine3f::translate(
+    return ospcommon::affine3f::translate({float(rotationCenter.x), float(rotationCenter.y), float(rotationCenter.z)})
+        * rot
+        * ospcommon::affine3f::translate(
                {float(translation.x - rotationCenter.x),
                 float(translation.y - rotationCenter.y),
-                float(translation.z - rotationCenter.z)}) *
-           ospcommon::affine3f::scale(
-               {float(scale.x), float(scale.y), float(scale.z)});
+                float(translation.z - rotationCenter.z)})
+        * ospcommon::affine3f::scale({float(scale.x), float(scale.y), float(scale.z)});
 }
 
-void addInstance(OSPModel rootModel, OSPModel modelToAdd,
-                 const Transformation& transform)
+void addInstance(OSPModel rootModel, OSPModel modelToAdd, const Transformation &transform)
 {
     auto affine = transformationToAffine3f(transform);
-    OSPGeometry instance = ospNewInstance(modelToAdd, (osp::affine3f&)affine);
+    OSPGeometry instance = ospNewInstance(modelToAdd, (osp::affine3f &)affine);
     ospCommit(instance);
     ospAddGeometry(rootModel, instance);
     ospRelease(instance);
 }
 
-void addInstance(OSPModel rootModel, OSPModel modelToAdd,
-                 const ospcommon::affine3f& affine)
+void addInstance(OSPModel rootModel, OSPModel modelToAdd, const ospcommon::affine3f &affine)
 {
-    OSPGeometry instance = ospNewInstance(modelToAdd, (osp::affine3f&)affine);
+    OSPGeometry instance = ospNewInstance(modelToAdd, (osp::affine3f &)affine);
     ospCommit(instance);
     ospAddGeometry(rootModel, instance);
     ospRelease(instance);
@@ -189,61 +180,61 @@ void addInstance(OSPModel rootModel, OSPModel modelToAdd,
 
 namespace osphelper
 {
-void set(OSPObject obj, const char* id, const char* s)
+void set(OSPObject obj, const char *id, const char *s)
 {
     ospSetString(obj, id, s);
 }
-void set(OSPObject obj, const char* id, const std::string& s)
+void set(OSPObject obj, const char *id, const std::string &s)
 {
     ospSetString(obj, id, s.c_str());
 }
-void set(OSPObject obj, const char* id, double v)
+void set(OSPObject obj, const char *id, double v)
 {
     ospSet1f(obj, id, float(v));
 }
-void set(OSPObject obj, const char* id, float v)
+void set(OSPObject obj, const char *id, float v)
 {
     ospSet1f(obj, id, v);
 }
-void set(OSPObject obj, const char* id, bool v)
+void set(OSPObject obj, const char *id, bool v)
 {
     ospSet1b(obj, id, v);
 }
-void set(OSPObject obj, const char* id, int32_t v)
+void set(OSPObject obj, const char *id, int32_t v)
 {
     ospSet1i(obj, id, v);
 }
-void set(OSPObject obj, const char* id, const Vector2f& v)
+void set(OSPObject obj, const char *id, const Vector2f &v)
 {
     ospSet2fv(obj, id, glm::value_ptr(v));
 }
-void set(OSPObject obj, const char* id, const Vector2d& v)
+void set(OSPObject obj, const char *id, const Vector2d &v)
 {
     Vector2f tmp = v;
     ospSet2fv(obj, id, glm::value_ptr(tmp));
 }
-void set(OSPObject obj, const char* id, const Vector2i& v)
+void set(OSPObject obj, const char *id, const Vector2i &v)
 {
     ospSet2iv(obj, id, glm::value_ptr(v));
 }
-void set(OSPObject obj, const char* id, const Vector3f& v)
+void set(OSPObject obj, const char *id, const Vector3f &v)
 {
     ospSet3fv(obj, id, glm::value_ptr(v));
 }
-void set(OSPObject obj, const char* id, const Vector3d& v)
+void set(OSPObject obj, const char *id, const Vector3d &v)
 {
     Vector3f tmp = v;
     ospSet3fv(obj, id, glm::value_ptr(tmp));
 }
-void set(OSPObject obj, const char* id, const Vector3i& v)
+void set(OSPObject obj, const char *id, const Vector3i &v)
 {
     ospSet3iv(obj, id, glm::value_ptr(v));
 }
-void set(OSPObject obj, const char* id, const Vector4f& v)
+void set(OSPObject obj, const char *id, const Vector4f &v)
 {
     ospSet4fv(obj, id, glm::value_ptr(v));
 }
-void set(OSPObject obj, const char* id, const Vector4d& v)
+void set(OSPObject obj, const char *id, const Vector4d &v)
 {
     Vector4f tmp = v;
     ospSet4fv(obj, id, glm::value_ptr(tmp));

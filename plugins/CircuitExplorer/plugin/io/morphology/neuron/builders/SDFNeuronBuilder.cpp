@@ -23,33 +23,29 @@
 namespace
 {
 // From http://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
-template <class T>
-typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
-    almostEqual(T x, T y, int ulp)
+template<class T>
+typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type almostEqual(T x, T y, int ulp)
 {
     // the machine epsilon has to be scaled to the magnitude of the values used
     // and multiplied by the desired precision in ULPs (units in the last place)
-    return std::abs(x - y) <=
-               std::numeric_limits<T>::epsilon() * std::abs(x + y) * ulp
-           // unless the result is subnormal
-           || std::abs(x - y) < std::numeric_limits<T>::min();
+    return std::abs(x - y) <= std::numeric_limits<T>::epsilon() * std::abs(x + y) * ulp
+        // unless the result is subnormal
+        || std::abs(x - y) < std::numeric_limits<T>::min();
 }
 
 class SDFInstantiableGeometry : public NeuronInstantiableGeometry
 {
 public:
-    MorphologyInstance::Ptr instantiate(
-        const brayns::Vector3f& tr, const brayns::Quaternion& rot) const final
+    MorphologyInstance::Ptr instantiate(const brayns::Vector3f &tr, const brayns::Quaternion &rot) const final
     {
         auto transformedSDF = sdfGeometries;
-        for (auto& geometry : transformedSDF)
+        for (auto &geometry : transformedSDF)
         {
             geometry.p0 = tr + (rot * geometry.p0);
             geometry.p1 = tr + (rot * geometry.p1);
         }
 
-        return std::make_unique<SDFNeuronInstance>(std::move(transformedSDF),
-                                                   sdfData);
+        return std::make_unique<SDFNeuronInstance>(std::move(transformedSDF), sdfData);
     }
 
     std::vector<brayns::SDFGeometry> sdfGeometries;
@@ -61,7 +57,7 @@ public:
 class InternalBuilder
 {
 public:
-    InternalBuilder(const NeuronMorphology& morph)
+    InternalBuilder(const NeuronMorphology &morph)
         : m(morph)
     {
         // Soma
@@ -69,7 +65,7 @@ public:
             _addSomaGeometry();
 
         // Dendrites and axon
-        for (const auto& section : m.sections())
+        for (const auto &section : m.sections())
         {
             std::vector<size_t> sectionGeoms;
             sectionGeoms.reserve(section.samples.size());
@@ -78,32 +74,28 @@ public:
             {
                 for (size_t i = 1; i < section.samples.size(); ++i)
                 {
-                    const auto& s1 = section.samples[i - 1];
+                    const auto &s1 = section.samples[i - 1];
                     const brayns::Vector3f p1(s1);
                     const float r1 = s1.w;
 
-                    const auto& s2 = section.samples[i];
+                    const auto &s2 = section.samples[i];
                     const brayns::Vector3f p2(s2);
                     const float r2 = s2.w;
 
                     if (s1 != s2)
-                        sectionGeoms.push_back(_addSegment(p2, r2, p1, r1,
-                                                           section.id,
-                                                           section.type));
+                        sectionGeoms.push_back(_addSegment(p2, r2, p1, r1, section.id, section.type));
                 }
             }
             else
             {
-                const auto& s1 = section.samples.front();
+                const auto &s1 = section.samples.front();
                 const brayns::Vector3f p1(s1);
                 const float r1 = s1.w;
-                sectionGeoms.push_back(
-                    _addSegment(p1, r1, p1, r1, section.id, section.type));
+                sectionGeoms.push_back(_addSegment(p1, r1, p1, r1, section.id, section.type));
             }
 
             // Update geometry hierarchy use to merge bifurcations at the end
-            const auto parentId =
-                section.parentId == -1 ? section.id : section.parentId;
+            const auto parentId = section.parentId == -1 ? section.id : section.parentId;
             _sectionHierarchy[parentId].push_back(sectionGeoms.front());
             _sectionHierarchy[section.id].push_back(sectionGeoms.back());
         }
@@ -121,14 +113,13 @@ public:
     std::vector<NeuronSection> _sectionTypeMap;
 
 private:
-    const NeuronMorphology& m;
+    const NeuronMorphology &m;
     // Maps bifurcation section parent to the geometry indices taking
     // part in surch bifurcation, so they can be linked together
     std::unordered_map<int32_t, std::vector<size_t>> _sectionHierarchy;
 
 private:
-    size_t _addSDFGeometry(brayns::SDFGeometry&& geometry,
-                           const int32_t section, const NeuronSection type)
+    size_t _addSDFGeometry(brayns::SDFGeometry &&geometry, const int32_t section, const NeuronSection type)
     {
         const size_t idx = _geometry.size();
         _geometry.push_back(geometry);
@@ -140,21 +131,18 @@ private:
 
     void _addSomaGeometry()
     {
-        const auto& soma = m.soma();
+        const auto &soma = m.soma();
 
         if (!soma.children.empty())
         {
             std::set<size_t> childGeomIndices;
             for (const auto child : soma.children)
             {
-                const auto& startSample = child->samples.front();
+                const auto &startSample = child->samples.front();
                 const brayns::Vector3f samplePos(startSample);
                 const float sampleRadius = startSample.w;
-                auto geometry =
-                    brayns::createSDFConePillSigmoid(soma.center, samplePos,
-                                                     soma.radius, sampleRadius);
-                const size_t geomIdx = _addSDFGeometry(std::move(geometry), -1,
-                                                       NeuronSection::SOMA);
+                auto geometry = brayns::createSDFConePillSigmoid(soma.center, samplePos, soma.radius, sampleRadius);
+                const size_t geomIdx = _addSDFGeometry(std::move(geometry), -1, NeuronSection::SOMA);
                 childGeomIndices.insert(geomIdx);
 
                 // Add geometry to hierarchy to blend later
@@ -169,30 +157,32 @@ private:
         }
         else
         {
-            _addSDFGeometry(brayns::createSDFSphere(soma.center, soma.radius),
-                            -1, NeuronSection::SOMA);
+            _addSDFGeometry(brayns::createSDFSphere(soma.center, soma.radius), -1, NeuronSection::SOMA);
         }
     }
 
-    size_t _addSegment(const brayns::Vector3f& pos, const float radius,
-                       const brayns::Vector3f& target, const float targetRadius,
-                       const int32_t section, const NeuronSection type)
+    size_t _addSegment(
+        const brayns::Vector3f &pos,
+        const float radius,
+        const brayns::Vector3f &target,
+        const float targetRadius,
+        const int32_t section,
+        const NeuronSection type)
     {
-        brayns::SDFGeometry geom =
-            (almostEqual(radius, targetRadius, 100000))
-                ? brayns::createSDFPill(pos, target, radius)
-                : brayns::createSDFConePill(pos, target, radius, targetRadius);
+        brayns::SDFGeometry geom = (almostEqual(radius, targetRadius, 100000))
+            ? brayns::createSDFPill(pos, target, radius)
+            : brayns::createSDFConePill(pos, target, radius, targetRadius);
 
         return _addSDFGeometry(std::move(geom), section, type);
     }
 
     void connectSDFBifurcations()
     {
-        for (const auto& entry : _sectionHierarchy)
+        for (const auto &entry : _sectionHierarchy)
         {
             for (const auto geomIdx : entry.second)
             {
-                auto& geomNeighbours = _neighbours[geomIdx];
+                auto &geomNeighbours = _neighbours[geomIdx];
                 for (const auto neighIdx : entry.second)
                     geomNeighbours.insert(neighIdx);
                 geomNeighbours.erase(geomIdx);
@@ -201,11 +191,10 @@ private:
     }
 };
 
-NeuronInstantiableGeometry::Ptr SDFNeuronBuilder::_buildImpl(
-    const NeuronMorphology& m) const
+NeuronInstantiableGeometry::Ptr SDFNeuronBuilder::_buildImpl(const NeuronMorphology &m) const
 {
     auto instantiablePtr = std::make_unique<SDFInstantiableGeometry>();
-    auto& instantiable = *instantiablePtr.get();
+    auto &instantiable = *instantiablePtr.get();
 
     InternalBuilder builder(m);
 
@@ -216,14 +205,12 @@ NeuronInstantiableGeometry::Ptr SDFNeuronBuilder::_buildImpl(
     for (size_t i = 0; i < instantiable.sdfGeometries.size(); ++i)
     {
         // Copy set neighbours into final vector neighbour
-        const auto& tn = builder._neighbours[i];
-        instantiable.sdfData->neighbours[i] =
-            std::vector<size_t>(tn.begin(), tn.end());
+        const auto &tn = builder._neighbours[i];
+        instantiable.sdfData->neighbours[i] = std::vector<size_t>(tn.begin(), tn.end());
     }
     // Group geometries by section type
     for (size_t i = 0; i < builder._sectionTypeMap.size(); ++i)
-        instantiable.sdfData->sectionTypeMap[builder._sectionTypeMap[i]]
-            .push_back(i);
+        instantiable.sdfData->sectionTypeMap[builder._sectionTypeMap[i]].push_back(i);
 
     instantiable.sdfData->sectionGeometries = std::move(builder._sectionMap);
 

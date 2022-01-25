@@ -31,12 +31,15 @@ namespace brayns
 class ExitLaterTask : public NetworkTask
 {
 public:
-    ExitLaterTask(Engine& engine)
+    ExitLaterTask(Engine &engine)
         : _engine(&engine)
     {
     }
 
-    virtual ~ExitLaterTask() { _monitor.notify(); }
+    virtual ~ExitLaterTask()
+    {
+        _monitor.notify();
+    }
 
     void execute(uint32_t minutes)
     {
@@ -45,7 +48,10 @@ public:
         start();
     }
 
-    virtual void run() override { _monitor.waitFor(_duration); }
+    virtual void run() override
+    {
+        _monitor.waitFor(_duration);
+    }
 
     virtual void onComplete() override
     {
@@ -53,18 +59,24 @@ public:
         _engine->triggerRender();
     }
 
-    virtual void onCancel() override { _monitor.notify(); }
+    virtual void onCancel() override
+    {
+        _monitor.notify();
+    }
 
 private:
     std::chrono::minutes _duration;
-    Engine* _engine;
+    Engine *_engine;
     NetworkTaskMonitor _monitor;
 };
 
 class ExitLaterEntrypoint : public Entrypoint<ExitLaterMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override { return "exit-later"; }
+    virtual std::string getName() const override
+    {
+        return "exit-later";
+    }
 
     virtual std::string getDescription() const override
     {
@@ -73,16 +85,19 @@ public:
 
     virtual void onCreate() override
     {
-        auto& engine = getApi().getEngine();
+        auto &engine = getApi().getEngine();
         _task = std::make_shared<ExitLaterTask>(engine);
     }
 
-    virtual void onUpdate() override { _task->poll(); }
+    virtual void onUpdate() override
+    {
+        _task->poll();
+    }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& minutes = params.minutes;
+        auto &minutes = params.minutes;
         _task->execute(minutes);
         request.reply(EmptyMessage());
     }

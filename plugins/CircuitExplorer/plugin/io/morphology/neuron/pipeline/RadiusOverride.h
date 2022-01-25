@@ -29,7 +29,7 @@ class RadiusOverride : public NeuronMorphologyPipelineStage
 public:
     RadiusOverride(const float value);
 
-    void process(NeuronMorphology& morphology) const final;
+    void process(NeuronMorphology &morphology) const final;
 
 private:
     const float _value;

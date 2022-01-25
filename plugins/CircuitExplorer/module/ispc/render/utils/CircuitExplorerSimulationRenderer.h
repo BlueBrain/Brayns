@@ -41,7 +41,7 @@ public:
     void commit() override;
 
 protected:
-    ospray::Model* _secondaryModel;
+    ospray::Model *_secondaryModel;
     float _maxDistanceToSecondaryModel{30.f};
 
     ospray::Ref<ospray::Data> _simulationData;

@@ -31,7 +31,7 @@ namespace brayns
  * @tparam ParamsType Type of request params.
  * @tparam ResultType Type of request result.
  */
-template <typename ParamsType, typename ResultType>
+template<typename ParamsType, typename ResultType>
 class EntrypointRequest
 {
 public:
@@ -56,7 +56,7 @@ public:
      *
      * @return const ConnectionHandle& Client connection handle.
      */
-    const ConnectionHandle& getConnectionHandle() const
+    const ConnectionHandle &getConnectionHandle() const
     {
         return _request.getConnectionHandle();
     }
@@ -66,21 +66,30 @@ public:
      *
      * @return const RequestId& Request ID.
      */
-    const RequestId& getId() const { return _request.getId(); }
+    const RequestId &getId() const
+    {
+        return _request.getId();
+    }
 
     /**
      * @brief Get the JSON-RPC method of the request.
      *
      * @return const std::string& Method name.
      */
-    const std::string& getMethod() const { return _request.getMethod(); }
+    const std::string &getMethod() const
+    {
+        return _request.getMethod();
+    }
 
     /**
      * @brief Get the JSON-RPC params of the request at JSON format.
      *
      * @return const JsonValue& JSON request params.
      */
-    const JsonValue& getJsonParams() const { return _request.getParams(); }
+    const JsonValue &getJsonParams() const
+    {
+        return _request.getParams();
+    }
 
     /**
      * @brief Parse the JSON-RPC params of the request parsed as ParamsType.
@@ -89,7 +98,7 @@ public:
      */
     ParamsType getParams() const
     {
-        auto& json = _request.getParams();
+        auto &json = _request.getParams();
         return Json::deserialize<ParamsType>(json);
     }
 
@@ -98,9 +107,9 @@ public:
      *
      * @param params Parsing destination.
      */
-    void getParams(ParamsType& params) const
+    void getParams(ParamsType &params) const
     {
-        auto& json = _request.getParams();
+        auto &json = _request.getParams();
         Json::deserialize(json, params);
     }
 
@@ -110,7 +119,7 @@ public:
      * @param code Error code.
      * @param message Error description.
      */
-    void error(int code, const std::string& message) const
+    void error(int code, const std::string &message) const
     {
         _request.error(code, message);
     }
@@ -120,14 +129,20 @@ public:
      *
      * @param message Error description.
      */
-    void error(const std::string& message) const { _request.error(message); }
+    void error(const std::string &message) const
+    {
+        _request.error(message);
+    }
 
     /**
      * @brief Shortcut to send an error reply from an arbitrary exception.
      *
      * @param e Opaque exception pointer.
      */
-    void error(std::exception_ptr e) const { _request.error(e); }
+    void error(std::exception_ptr e) const
+    {
+        _request.error(e);
+    }
 
     /**
      * @brief Send a progress message of the request to the client.
@@ -135,7 +150,7 @@ public:
      * @param operation Operation description.
      * @param amount Operation progress amount 0-1.
      */
-    void progress(const std::string& operation, double amount) const
+    void progress(const std::string &operation, double amount) const
     {
         _request.progress(operation, amount);
     }
@@ -145,7 +160,10 @@ public:
      *
      * @param result Result data of the reply.
      */
-    void reply(const ResultType& result) const { _request.reply(result); }
+    void reply(const ResultType &result) const
+    {
+        _request.reply(result);
+    }
 
     /**
      * @brief Send a notification to all other clients (not the request sender).
@@ -153,8 +171,8 @@ public:
      * @tparam T Notification params type.
      * @param params Params of the notification.
      */
-    template <typename T>
-    void notify(const T& params) const
+    template<typename T>
+    void notify(const T &params) const
     {
         _request.notify(params);
     }

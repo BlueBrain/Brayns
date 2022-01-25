@@ -23,9 +23,6 @@
 #include <brayns/json/JsonObjectMacro.h>
 
 BRAYNS_JSON_OBJECT_BEGIN(SimulationColorMessage)
-BRAYNS_JSON_OBJECT_ENTRY(
-    size_t, model_id, "ID of the model to enable or disable simulation color")
-BRAYNS_JSON_OBJECT_ENTRY(
-    bool, enabled,
-    "If true, coloring by simulation value will be enabled for the given model")
+BRAYNS_JSON_OBJECT_ENTRY(size_t, model_id, "ID of the model to enable or disable simulation color")
+BRAYNS_JSON_OBJECT_ENTRY(bool, enabled, "If true, coloring by simulation value will be enabled for the given model")
 BRAYNS_JSON_OBJECT_END()

@@ -36,12 +36,13 @@ public:
     std::string getName() const final;
 
     std::vector<ModelDescriptorPtr> importFromFile(
-        const std::string& fileName, const LoaderProgress& callback,
-        const ProteinLoaderParameters& properties, Scene& scene) const final;
+        const std::string &fileName,
+        const LoaderProgress &callback,
+        const ProteinLoaderParameters &properties,
+        Scene &scene) const final;
 
-    std::vector<ModelDescriptorPtr> importFromBlob(
-        Blob&&, const LoaderProgress&, const ProteinLoaderParameters&,
-        Scene&) const final
+    std::vector<ModelDescriptorPtr>
+        importFromBlob(Blob &&, const LoaderProgress &, const ProteinLoaderParameters &, Scene &) const final
     {
         throw std::runtime_error("Loading from blob not supported");
     }

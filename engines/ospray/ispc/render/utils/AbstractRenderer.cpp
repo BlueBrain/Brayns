@@ -32,18 +32,16 @@ void AbstractRenderer::commit()
 {
     Renderer::commit();
 
-    _lightData = (ospray::Data*)getParamData("lights");
+    _lightData = (ospray::Data *)getParamData("lights");
     _lightArray.clear();
 
     if (_lightData)
         for (size_t i = 0; i < _lightData->size(); ++i)
-            _lightArray.push_back(
-                ((ospray::Light**)_lightData->data)[i]->getIE());
+            _lightArray.push_back(((ospray::Light **)_lightData->data)[i]->getIE());
 
     _lightPtr = _lightArray.empty() ? nullptr : &_lightArray[0];
 
     _timestamp = getParam1f("timestamp", 0.f);
-    _bgMaterial =
-        (brayns::DefaultMaterial*)getParamObject("bgMaterial", nullptr);
+    _bgMaterial = (brayns::DefaultMaterial *)getParamObject("bgMaterial", nullptr);
 }
 } // namespace brayns

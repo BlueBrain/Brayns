@@ -26,22 +26,24 @@
 
 namespace brayns
 {
-class GetClipPlanesEntrypoint
-    : public Entrypoint<EmptyMessage, std::vector<ClipPlanePtr>>
+class GetClipPlanesEntrypoint : public Entrypoint<EmptyMessage, std::vector<ClipPlanePtr>>
 {
 public:
-    virtual std::string getName() const override { return "get-clip-planes"; }
+    virtual std::string getName() const override
+    {
+        return "get-clip-planes";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Get all clip planes";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
-        auto& clipPlanes = scene.getClipPlanes();
+        auto &engine = getApi().getEngine();
+        auto &scene = engine.getScene();
+        auto &clipPlanes = scene.getClipPlanes();
         request.reply(clipPlanes);
     }
 };

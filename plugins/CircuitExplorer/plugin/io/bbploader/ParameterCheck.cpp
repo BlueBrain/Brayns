@@ -26,27 +26,24 @@ namespace bbploader
 {
 namespace
 {
-void checkPercentage(const BBPLoaderParameters& input)
+void checkPercentage(const BBPLoaderParameters &input)
 {
     if (input.percentage <= 0.f)
-        throw std::invalid_argument(
-            "BBPLoader: Cell percentage must be greater than 0.0");
+        throw std::invalid_argument("BBPLoader: Cell percentage must be greater than 0.0");
     else if (input.percentage > 1.f)
-        throw std::invalid_argument(
-            "BBPLoader: Cell percentage must be cannot be greater than 1.0");
+        throw std::invalid_argument("BBPLoader: Cell percentage must be cannot be greater than 1.0");
 }
 
-void checkTargets(const brion::BlueConfig& config,
-                  const BBPLoaderParameters& input)
+void checkTargets(const brion::BlueConfig &config, const BBPLoaderParameters &input)
 {
     if (input.targets.empty())
         return;
 
     const auto targetParsers = config.getTargets();
-    for (const auto& trg : input.targets)
+    for (const auto &trg : input.targets)
     {
         bool exists = false;
-        for (const auto& parser : targetParsers)
+        for (const auto &parser : targetParsers)
         {
             if (parser.contains(trg))
             {
@@ -55,13 +52,11 @@ void checkTargets(const brion::BlueConfig& config,
             }
         }
         if (!exists)
-            throw std::invalid_argument(
-                "BBPLoader: Invalid or empty target: '" + trg + "'");
+            throw std::invalid_argument("BBPLoader: Invalid or empty target: '" + trg + "'");
     }
 }
 
-void checkReport(const brion::BlueConfig& config,
-                 const BBPLoaderParameters& input)
+void checkReport(const brion::BlueConfig &config, const BBPLoaderParameters &input)
 {
     switch (input.report_type)
     {
@@ -69,8 +64,7 @@ void checkReport(const brion::BlueConfig& config,
     {
         const auto uri = config.getSpikeSource();
         if (uri.getPath().empty() || !fs::exists(uri.getPath()))
-            throw std::invalid_argument(
-                "BBPLoader: Unable to find Spike report file");
+            throw std::invalid_argument("BBPLoader: Unable to find Spike report file");
         break;
     }
     case SimulationType::COMPARTMENT:
@@ -82,8 +76,7 @@ void checkReport(const brion::BlueConfig& config,
         const auto uri = config.getReportSource(input.report_name);
         if (uri.getPath().empty() || !fs::exists(uri.getPath()))
             throw std::invalid_argument(
-                "BBPLoader: Unable to find Voltage report file for '" +
-                input.report_name + "'");
+                "BBPLoader: Unable to find Voltage report file for '" + input.report_name + "'");
         break;
     }
     case SimulationType::NONE:
@@ -91,38 +84,35 @@ void checkReport(const brion::BlueConfig& config,
     }
 }
 
-void checkSpikeTransitionTime(const BBPLoaderParameters& input)
+void checkSpikeTransitionTime(const BBPLoaderParameters &input)
 {
     if (input.spike_transition_time < 0.f)
-        throw std::invalid_argument(
-            "BBPLoader: spike_transition_time must be greater or equal to 0.0");
+        throw std::invalid_argument("BBPLoader: spike_transition_time must be greater or equal to 0.0");
 }
 
-void checkRadiusModifications(const BBPLoaderParameters& input)
+void checkRadiusModifications(const BBPLoaderParameters &input)
 {
     if (input.neuron_morphology_parameters.radius_override < 0.f)
-        throw std::invalid_argument(
-            "BBPLoader: 'radius_override' cannot be negative");
-    else if (input.neuron_morphology_parameters.radius_override == 0.f &&
-             input.neuron_morphology_parameters.radius_multiplier <= 0.f)
+        throw std::invalid_argument("BBPLoader: 'radius_override' cannot be negative");
+    else if (
+        input.neuron_morphology_parameters.radius_override == 0.f
+        && input.neuron_morphology_parameters.radius_multiplier <= 0.f)
         throw std::invalid_argument(
             "BBPLoader: 'radius_multiplier' cannot be less than or equal to "
             "0.0");
 }
 
-void checkNeuronSections(const BBPLoaderParameters& input)
+void checkNeuronSections(const BBPLoaderParameters &input)
 {
-    if (!input.neuron_morphology_parameters.load_soma &&
-        !input.neuron_morphology_parameters.load_axon &&
-        !input.neuron_morphology_parameters.load_dendrites)
+    if (!input.neuron_morphology_parameters.load_soma && !input.neuron_morphology_parameters.load_axon
+        && !input.neuron_morphology_parameters.load_dendrites)
         throw std::invalid_argument(
             "BBPLoader: All neuron sections cannot be disabled. Empty circuits "
             "are not allowed");
 }
 } // namespace
 
-void ParameterCheck::checkInput(const brion::BlueConfig& config,
-                                const BBPLoaderParameters& input)
+void ParameterCheck::checkInput(const brion::BlueConfig &config, const BBPLoaderParameters &input)
 {
     checkPercentage(input);
     checkTargets(config, input);

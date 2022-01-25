@@ -32,13 +32,12 @@ constexpr uint8_t rightFloor = 3u;
 
 const vec3f OPENDECK_RIGHT_DIRECTION{1.0f, 0.0f, 0.0f};
 
-vec3f _rotateVectorByQuat(const vec3f& v, const vec4f& q)
+vec3f _rotateVectorByQuat(const vec3f &v, const vec4f &q)
 {
     const auto u = vec3f{q[0], q[1], q[2]}; // vector part of the quaternion
-    const auto s = q[3];                    // scalar part of the quaternion
+    const auto s = q[3]; // scalar part of the quaternion
 
-    return 2.0f * dot(u, v) * u + (s * s - dot(u, u)) * v +
-           2.0f * s * cross(u, v);
+    return 2.0f * dot(u, v) * u + (s * s - dot(u, u)) * v + 2.0f * s * cross(u, v);
 }
 } // namespace
 
@@ -56,7 +55,7 @@ void CylindricStereoTrackedCamera::commit()
 {
     Camera::commit();
 
-    const std::string& bufferTarget = getParamString("buffer_target");
+    const std::string &bufferTarget = getParamString("buffer_target");
     const float cameraScaling = getParamf("cameraScaling", 1.0);
 
     uint8_t bufferId = 255u;
@@ -83,13 +82,17 @@ void CylindricStereoTrackedCamera::commit()
     const auto dir_du = vec3f(1, 0, 0);
     const auto dir_dv = vec3f(0, 1, 0);
 
-    ispc::CylindricStereoTrackedCamera_set(getIE(), (const ispc::vec3f&)org,
-                                           (const ispc::vec3f&)headPosition,
-                                           (const ispc::vec3f&)dir,
-                                           (const ispc::vec3f&)dir_du,
-                                           (const ispc::vec3f&)dir_dv,
-                                           (const ispc::vec3f&)openDeckCamDU,
-                                           ipd, bufferId, cameraScaling);
+    ispc::CylindricStereoTrackedCamera_set(
+        getIE(),
+        (const ispc::vec3f &)org,
+        (const ispc::vec3f &)headPosition,
+        (const ispc::vec3f &)dir,
+        (const ispc::vec3f &)dir_du,
+        (const ispc::vec3f &)dir_dv,
+        (const ispc::vec3f &)openDeckCamDU,
+        ipd,
+        bufferId,
+        cameraScaling);
 }
 
 vec3f CylindricStereoTrackedCamera::_getHeadPosition()

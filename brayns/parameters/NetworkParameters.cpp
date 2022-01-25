@@ -83,67 +83,62 @@ void NetworkParameters::setMaxClients(size_t maxClients) noexcept
     _updateValue(_maxClients, maxClients);
 }
 
-const std::string& NetworkParameters::getUri() const noexcept
+const std::string &NetworkParameters::getUri() const noexcept
 {
     return _uri;
 }
 
-void NetworkParameters::setUri(const std::string& uri) noexcept
+void NetworkParameters::setUri(const std::string &uri) noexcept
 {
     _updateValue(_uri, uri);
 }
 
-std::chrono::milliseconds NetworkParameters::getReconnectionPeriod()
-    const noexcept
+std::chrono::milliseconds NetworkParameters::getReconnectionPeriod() const noexcept
 {
     return std::chrono::milliseconds(_reconnectionPeriod);
 }
 
-void NetworkParameters::setReconnectionPeriod(
-    std::chrono::milliseconds reconnectionPeriod) noexcept
+void NetworkParameters::setReconnectionPeriod(std::chrono::milliseconds reconnectionPeriod) noexcept
 {
     _updateValue(_reconnectionPeriod, reconnectionPeriod.count());
 }
 
-const std::string& NetworkParameters::getPrivateKeyFile() const noexcept
+const std::string &NetworkParameters::getPrivateKeyFile() const noexcept
 {
     return _privateKeyFile;
 }
 
-void NetworkParameters::setPrivateKeyFile(
-    const std::string& privateKeyFile) noexcept
+void NetworkParameters::setPrivateKeyFile(const std::string &privateKeyFile) noexcept
 {
     _updateValue(_privateKeyFile, privateKeyFile);
 }
 
-const std::string& NetworkParameters::getPrivateKeyPassphrase() const noexcept
+const std::string &NetworkParameters::getPrivateKeyPassphrase() const noexcept
 {
     return _privateKeyPassphrase;
 }
 
-void NetworkParameters::setPrivateKeyPassphrase(
-    const std::string& privateKeyPassphrase) noexcept
+void NetworkParameters::setPrivateKeyPassphrase(const std::string &privateKeyPassphrase) noexcept
 {
     _updateValue(_privateKeyPassphrase, privateKeyPassphrase);
 }
 
-const std::string& NetworkParameters::getCertificateFile() const noexcept
+const std::string &NetworkParameters::getCertificateFile() const noexcept
 {
     return _certificateFile;
 }
 
-void NetworkParameters::setCertificateFile(
-    const std::string& certificateFile) noexcept
+void NetworkParameters::setCertificateFile(const std::string &certificateFile) noexcept
 {
     _updateValue(_certificateFile, certificateFile);
 }
 
-const std::string& NetworkParameters::getCALocation() const noexcept
+const std::string &NetworkParameters::getCALocation() const noexcept
 {
     return _caLocation;
 }
 
-void NetworkParameters::setCALocation(const std::string& caLocation) noexcept
+void NetworkParameters::setCALocation(const std::string &caLocation) noexcept
 {
     _updateValue(_caLocation, caLocation);
 }

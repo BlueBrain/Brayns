@@ -28,23 +28,25 @@
 
 namespace brayns
 {
-class InspectEntrypoint
-    : public Entrypoint<InspectMessage, Renderer::PickResult>
+class InspectEntrypoint : public Entrypoint<InspectMessage, Renderer::PickResult>
 {
 public:
-    virtual std::string getName() const override { return "inspect"; }
+    virtual std::string getName() const override
+    {
+        return "inspect";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Inspect the scene at x-y position";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         auto position = Vector2f(params.position);
-        auto& engine = getApi().getEngine();
-        auto& renderer = engine.getRenderer();
+        auto &engine = getApi().getEngine();
+        auto &renderer = engine.getRenderer();
         auto result = renderer.pick(position);
         request.reply(result);
     }

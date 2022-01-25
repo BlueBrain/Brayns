@@ -60,10 +60,11 @@ Property getHeadRotationProperty()
 
 Property getStereoModeProperty()
 {
-    return {"stereoMode",
-            {3, // side-by-side
-             {"None", "Left eye", "Right eye", "Side by side"}},
-            {"Stereo mode"}};
+    return {
+        "stereoMode",
+        {3, // side-by-side
+         {"None", "Left eye", "Right eye", "Side by side"}},
+        {"Stereo mode"}};
 }
 
 Property getInterpupillaryDistanceProperty()
@@ -84,8 +85,7 @@ PropertyMap getCylindricStereoProperties()
     return properties;
 }
 
-PropertyMap getCylindricStereoTrackedProperties(
-    const OpenDeckParameters& params)
+PropertyMap getCylindricStereoTrackedProperties(const OpenDeckParameters &params)
 {
     PropertyMap properties;
     properties.add(getHeadPositionProperty());
@@ -97,11 +97,10 @@ PropertyMap getCylindricStereoTrackedProperties(
 }
 } // namespace
 
-OpenDeckPlugin::OpenDeckPlugin(OpenDeckParameters&& params)
+OpenDeckPlugin::OpenDeckPlugin(OpenDeckParameters &&params)
     : _params(std::move(params))
 {
-    if (_params.getResolutionScaling() > 1.0f ||
-        _params.getResolutionScaling() <= 0.0f)
+    if (_params.getResolutionScaling() > 1.0f || _params.getResolutionScaling() <= 0.0f)
     {
         throw std::runtime_error(
             "The scale of the native OpenDeck resolution cannot be bigger "
@@ -110,38 +109,32 @@ OpenDeckPlugin::OpenDeckPlugin(OpenDeckParameters&& params)
     if (_params.getCameraScaling() <= 0.0)
         throw std::runtime_error("The camera scale cannot be zero or negative");
 
-    _wallRes = Vector2ui(openDeckWallResX * _params.getResolutionScaling(),
-                         openDeckWallResY * _params.getResolutionScaling());
-    _floorRes = Vector2ui(openDeckFloorResX * _params.getResolutionScaling(),
-                          openDeckFloorResY * _params.getResolutionScaling());
+    _wallRes =
+        Vector2ui(openDeckWallResX * _params.getResolutionScaling(), openDeckWallResY * _params.getResolutionScaling());
+    _floorRes = Vector2ui(
+        openDeckFloorResX * _params.getResolutionScaling(),
+        openDeckFloorResY * _params.getResolutionScaling());
 }
 
 void OpenDeckPlugin::init()
 {
-    auto& engine = _api->getEngine();
+    auto &engine = _api->getEngine();
 
     engine.addCameraType("cylindric");
     engine.addCameraType("cylindricStereo", getCylindricStereoProperties());
-    engine.addCameraType("cylindricStereoTracked",
-                         getCylindricStereoTrackedProperties(_params));
+    engine.addCameraType("cylindricStereoTracked", getCylindricStereoTrackedProperties(_params));
 
-    FrameBufferPtr frameBuffer =
-        engine.createFrameBuffer(leftWallBufferName, _wallRes,
-                                 PixelFormat::RGBA_I8);
+    FrameBufferPtr frameBuffer = engine.createFrameBuffer(leftWallBufferName, _wallRes, PixelFormat::RGBA_I8);
     engine.addFrameBuffer(frameBuffer);
-    frameBuffer = engine.createFrameBuffer(rightWallBufferName, _wallRes,
-                                           PixelFormat::RGBA_I8);
+    frameBuffer = engine.createFrameBuffer(rightWallBufferName, _wallRes, PixelFormat::RGBA_I8);
     engine.addFrameBuffer(frameBuffer);
-    frameBuffer = engine.createFrameBuffer(leftFloorBufferName, _floorRes,
-                                           PixelFormat::RGBA_I8);
+    frameBuffer = engine.createFrameBuffer(leftFloorBufferName, _floorRes, PixelFormat::RGBA_I8);
     engine.addFrameBuffer(frameBuffer);
-    frameBuffer = engine.createFrameBuffer(rightFloorBufferName, _floorRes,
-                                           PixelFormat::RGBA_I8);
+    frameBuffer = engine.createFrameBuffer(rightFloorBufferName, _floorRes, PixelFormat::RGBA_I8);
     engine.addFrameBuffer(frameBuffer);
 }
 
-extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
-                                                         const char** argv)
+extern "C" brayns::ExtensionPlugin *brayns_plugin_create(const int argc, const char **argv)
 {
     brayns::OpenDeckParameters params;
     if (!params.parse(argc, argv))
@@ -150,7 +143,7 @@ extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
     {
         return new brayns::OpenDeckPlugin(std::move(params));
     }
-    catch (const std::runtime_error& exc)
+    catch (const std::runtime_error &exc)
     {
         std::cerr << exc.what() << std::endl;
         return nullptr;

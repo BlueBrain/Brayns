@@ -34,8 +34,7 @@ namespace bbploader
 class SynapseLoader
 {
 public:
-    static std::vector<std::unique_ptr<SynapseGroup>> load(
-        const brain::Circuit& circuit, const brain::GIDSet& gids,
-        const bool afferent);
+    static std::vector<std::unique_ptr<SynapseGroup>>
+        load(const brain::Circuit &circuit, const brain::GIDSet &gids, const bool afferent);
 };
 } // namespace bbploader

@@ -29,12 +29,10 @@ namespace bbploader
 class CompartmentSimulation : public Simulation
 {
 public:
-    CompartmentSimulation(const std::string& path,
-                          const brain::GIDSet& inputGids);
+    CompartmentSimulation(const std::string &path, const brain::GIDSet &inputGids);
 
-    const brain::GIDSet& getReportGids() const final;
-    std::vector<CellMapping> getMapping(
-        const brain::GIDSet& inputGids) const final;
+    const brain::GIDSet &getReportGids() const final;
+    std::vector<CellMapping> getMapping(const brain::GIDSet &inputGids) const final;
     brayns::AbstractSimulationHandlerPtr createHandler() const final;
 
 private:

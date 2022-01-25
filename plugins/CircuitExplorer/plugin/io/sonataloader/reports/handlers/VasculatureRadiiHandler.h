@@ -32,30 +32,43 @@ namespace sonataloader
 class VasculatureRadiiHandler : public brayns::AbstractSimulationHandler
 {
 public:
-    VasculatureRadiiHandler(const std::string& h5FilePath,
-                            const std::string& populationName,
-                            const bbp::sonata::Selection& selection);
+    VasculatureRadiiHandler(
+        const std::string &h5FilePath,
+        const std::string &populationName,
+        const bbp::sonata::Selection &selection);
 
     brayns::AbstractSimulationHandlerPtr clone() const final;
 
     std::vector<float> getFrameDataImpl(const uint32_t frame) final;
 
-    const std::vector<float>& getCurrentRadiiFrame() const noexcept;
+    const std::vector<float> &getCurrentRadiiFrame() const noexcept;
 
-    size_t getRadiiFrameSize() const noexcept { return _radiiFrameSize; }
+    size_t getRadiiFrameSize() const noexcept
+    {
+        return _radiiFrameSize;
+    }
 
-    void setLastUsedFrame(const uint32_t frame) { _lastRadiiFrame = frame; }
+    void setLastUsedFrame(const uint32_t frame)
+    {
+        _lastRadiiFrame = frame;
+    }
 
-    uint32_t getLastUsedFrame() const noexcept { return _lastRadiiFrame; }
+    uint32_t getLastUsedFrame() const noexcept
+    {
+        return _lastRadiiFrame;
+    }
 
-    bool isReady() const final { return _ready; }
+    bool isReady() const final
+    {
+        return _ready;
+    }
 
 private:
     const std::string _h5FilePath;
     const std::string _populationName;
     const bbp::sonata::Selection _selection;
     const bbp::sonata::ElementReportReader _reader;
-    const bbp::sonata::ElementReportReader::Population& _reportPopulation;
+    const bbp::sonata::ElementReportReader::Population &_reportPopulation;
 
     bool _ready{true};
 

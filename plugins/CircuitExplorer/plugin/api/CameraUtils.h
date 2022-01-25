@@ -55,11 +55,10 @@ public:
     /**
      * @brief updates the renderer camera with the given ODU definition.
      */
-    static void updateCamera(brayns::Camera& camera,
-                             const ODUCameraInformation& cinfo);
+    static void updateCamera(brayns::Camera &camera, const ODUCameraInformation &cinfo);
 
     /**
      * @brief returns an ODU definition of the current camera state.
      */
-    static ODUCameraInformation getCameraAsODU(const brayns::Camera& camera);
+    static ODUCameraInformation getCameraAsODU(const brayns::Camera &camera);
 };

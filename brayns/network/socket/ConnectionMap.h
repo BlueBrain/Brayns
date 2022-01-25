@@ -35,9 +35,12 @@ namespace brayns
 class ConnectionMap
 {
 public:
-    size_t getConnectionCount() const { return _connections.size(); }
+    size_t getConnectionCount() const
+    {
+        return _connections.size();
+    }
 
-    Connection* find(const ConnectionHandle& handle)
+    Connection *find(const ConnectionHandle &handle)
     {
         auto connection = _find(handle);
         if (!connection || connection->removed)
@@ -49,11 +52,11 @@ public:
 
     void add(NetworkSocketPtr socket)
     {
-        auto& connection = _connections[socket];
+        auto &connection = _connections[socket];
         connection.socket = std::move(socket);
     }
 
-    void markAsRemoved(const ConnectionHandle& handle)
+    void markAsRemoved(const ConnectionHandle &handle)
     {
         auto connection = _find(handle);
         if (!connection)
@@ -63,24 +66,24 @@ public:
         connection->removed = true;
     }
 
-    template <typename FunctorType>
+    template<typename FunctorType>
     void forEach(FunctorType functor) const
     {
-        for (const auto& pair : _connections)
+        for (const auto &pair : _connections)
         {
-            auto& handle = pair.first;
-            auto& connection = pair.second;
+            auto &handle = pair.first;
+            auto &connection = pair.second;
             functor(handle, connection);
         }
     }
 
-    template <typename FunctorType>
+    template<typename FunctorType>
     void removeIf(FunctorType functor)
     {
         for (auto i = _connections.begin(); i != _connections.end();)
         {
-            auto& handle = i->first;
-            auto& connection = i->second;
+            auto &handle = i->first;
+            auto &connection = i->second;
             if (functor(handle, connection))
             {
                 i = _connections.erase(i);
@@ -91,7 +94,7 @@ public:
     }
 
 private:
-    Connection* _find(const ConnectionHandle& handle)
+    Connection *_find(const ConnectionHandle &handle)
     {
         auto i = _connections.find(handle);
         return i == _connections.end() ? nullptr : &i->second;

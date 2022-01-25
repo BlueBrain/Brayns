@@ -32,26 +32,20 @@
 
 namespace
 {
-template <typename T, typename U = T> // U seems to be needed when getID is a
-                                      // member function of a base of T.
-std::shared_ptr<T> _find(const std::vector<std::shared_ptr<T>>& list,
-                         const size_t id,
-                         size_t (U::*getID)() const = &T::getID)
+template<typename T, typename U = T> // U seems to be needed when getID is a
+                                     // member function of a base of T.
+std::shared_ptr<T>
+    _find(const std::vector<std::shared_ptr<T>> &list, const size_t id, size_t (U::*getID)() const = &T::getID)
 {
-    auto i =
-        std::find_if(list.begin(), list.end(),
-                     [id, getID](auto x) { return id == ((*x).*getID)(); });
+    auto i = std::find_if(list.begin(), list.end(), [id, getID](auto x) { return id == ((*x).*getID)(); });
     return i == list.end() ? std::shared_ptr<T>{} : *i;
 }
 
-template <typename T, typename U = T>
-std::shared_ptr<T> _remove(std::vector<std::shared_ptr<T>>& list,
-                           const size_t id,
-                           size_t (U::*getID)() const = &T::getID)
+template<typename T, typename U = T>
+std::shared_ptr<T>
+    _remove(std::vector<std::shared_ptr<T>> &list, const size_t id, size_t (U::*getID)() const = &T::getID)
 {
-    auto i =
-        std::find_if(list.begin(), list.end(),
-                     [id, getID](auto x) { return id == ((*x).*getID)(); });
+    auto i = std::find_if(list.begin(), list.end(), [id, getID](auto x) { return id == ((*x).*getID)(); });
     if (i == list.end())
         return std::shared_ptr<T>{};
     auto result = *i;
@@ -59,14 +53,14 @@ std::shared_ptr<T> _remove(std::vector<std::shared_ptr<T>>& list,
     return result;
 }
 
-template <typename T, typename U = T>
-std::shared_ptr<T> _replace(std::vector<std::shared_ptr<T>>& list,
-                            const size_t id, std::shared_ptr<T> newObj,
-                            size_t (U::*getID)() const = &T::getID)
+template<typename T, typename U = T>
+std::shared_ptr<T> _replace(
+    std::vector<std::shared_ptr<T>> &list,
+    const size_t id,
+    std::shared_ptr<T> newObj,
+    size_t (U::*getID)() const = &T::getID)
 {
-    auto i =
-        std::find_if(list.begin(), list.end(),
-                     [id, getID](auto x) { return id == ((*x).*getID)(); });
+    auto i = std::find_if(list.begin(), list.end(), [id, getID](auto x) { return id == ((*x).*getID)(); });
     if (i == list.end())
         return std::shared_ptr<T>{};
     auto result = *i;
@@ -77,14 +71,13 @@ std::shared_ptr<T> _replace(std::vector<std::shared_ptr<T>>& list,
 
 namespace brayns
 {
-Scene::Scene(AnimationParameters& animationParameters,
-             VolumeParameters& volumeParameters)
+Scene::Scene(AnimationParameters &animationParameters, VolumeParameters &volumeParameters)
     : _animationParameters(animationParameters)
     , _volumeParameters(volumeParameters)
 {
 }
 
-void Scene::copyFrom(const Scene& rhs)
+void Scene::copyFrom(const Scene &rhs)
 {
     if (this == &rhs)
         return;
@@ -95,7 +88,7 @@ void Scene::copyFrom(const Scene& rhs)
 
         _modelDescriptors.clear();
         _modelDescriptors.reserve(rhs._modelDescriptors.size());
-        for (const auto& modelDesc : rhs._modelDescriptors)
+        for (const auto &modelDesc : rhs._modelDescriptors)
             _modelDescriptors.push_back(modelDesc->clone(createModel()));
     }
     _computeBounds();
@@ -114,7 +107,9 @@ void Scene::copyFrom(const Scene& rhs)
     markModified();
 }
 
-void Scene::commit() {}
+void Scene::commit()
+{
+}
 
 size_t Scene::getSizeInBytes() const
 {
@@ -133,7 +128,7 @@ size_t Scene::getNumModels() const
 
 size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
 {
-    auto& model = modelDescriptor->getModel();
+    auto &model = modelDescriptor->getModel();
     if (model.empty())
         throw std::runtime_error("Empty models not supported.");
 
@@ -150,8 +145,7 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
 
         // add default instance of this model to render something
         if (modelDescriptor->getInstances().empty())
-            modelDescriptor->addInstance(
-                {true, true, modelDescriptor->getTransformation()});
+            modelDescriptor->addInstance({true, true, modelDescriptor->getTransformation()});
     }
 
     _updateAnimationParameters();
@@ -164,7 +158,7 @@ size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
 
 void Scene::addModel(const size_t id, ModelDescriptorPtr modelDescriptor)
 {
-    auto& model = modelDescriptor->getModel();
+    auto &model = modelDescriptor->getModel();
     if (model.empty())
         throw std::runtime_error("Empty models not supported.");
 
@@ -180,8 +174,7 @@ void Scene::addModel(const size_t id, ModelDescriptorPtr modelDescriptor)
 
         // add default instance of this model to render something
         if (modelDescriptor->getInstances().empty())
-            modelDescriptor->addInstance(
-                {true, true, modelDescriptor->getTransformation()});
+            modelDescriptor->addInstance({true, true, modelDescriptor->getTransformation()});
     }
 
     _updateAnimationParameters();
@@ -198,8 +191,7 @@ bool Scene::removeModel(const size_t id)
     {
         {
             std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-            model =
-                _remove(_modelDescriptors, id, &ModelDescriptor::getModelID);
+            model = _remove(_modelDescriptors, id, &ModelDescriptor::getModelID);
         }
         if (model)
             model->callOnRemoved();
@@ -238,8 +230,7 @@ bool Scene::replaceModel(const size_t id, ModelDescriptorPtr modelDescriptor)
     {
         {
             std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-            model = _replace(_modelDescriptors, id, modelDescriptor,
-                             &ModelDescriptor::getModelID);
+            model = _replace(_modelDescriptors, id, modelDescriptor, &ModelDescriptor::getModelID);
         }
     }
     else
@@ -277,10 +268,10 @@ bool Scene::empty() const
     return true;
 }
 
-size_t Scene::addClipPlane(const Plane& plane)
+size_t Scene::addClipPlane(const Plane &plane)
 {
     auto clipPlane = std::make_shared<ClipPlane>(plane);
-    clipPlane->onModified([&](const BaseObject&) { markModified(false); });
+    clipPlane->onModified([&](const BaseObject &) { markModified(false); });
     _clipPlanes.emplace_back(std::move(clipPlane));
     markModified();
     return _clipPlanes.back()->getID();
@@ -297,14 +288,13 @@ void Scene::removeClipPlane(const size_t id)
         markModified();
 }
 
-void Scene::addModels(std::vector<ModelDescriptorPtr>& input,
-                      const ModelParams& params)
+void Scene::addModels(std::vector<ModelDescriptorPtr> &input, const ModelParams &params)
 {
     // Check for models correctness
     if (input.empty())
         throw std::runtime_error("No model returned by loader");
 
-    for (auto& md : input)
+    for (auto &md : input)
     {
         if (!md)
             throw std::runtime_error("No model returned by loader");
@@ -313,17 +303,17 @@ void Scene::addModels(std::vector<ModelDescriptorPtr>& input,
     // Update loaded model with loader properties (so we can have the
     // information with which it was loaded)
 
-    for (auto& md : input)
+    for (auto &md : input)
     {
         *md = params;
         addModel(md);
     }
 }
 
-void Scene::visitModels(const std::function<void(Model&)>& functor)
+void Scene::visitModels(const std::function<void(Model &)> &functor)
 {
     std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-    for (const auto& modelDescriptor : _modelDescriptors)
+    for (const auto &modelDescriptor : _modelDescriptors)
         functor(modelDescriptor->getModel());
 }
 
@@ -335,13 +325,14 @@ void Scene::buildDefault()
     const Vector3f WHITE = {1.f, 1.f, 1.f};
 
     const Vector3f positions[8] = {
-        {0.f, 0.f, 0.f}, {1.f, 0.f, 0.f}, //    6--------7
-        {0.f, 1.f, 0.f},                  //   /|       /|
-        {1.f, 1.f, 0.f},                  //  2--------3 |
-        {0.f, 0.f, 1.f},                  //  | |      | |
-        {1.f, 0.f, 1.f},                  //  | 4------|-5
-        {0.f, 1.f, 1.f},                  //  |/       |/
-        {1.f, 1.f, 1.f}                   //  0--------1
+        {0.f, 0.f, 0.f},
+        {1.f, 0.f, 0.f}, //    6--------7
+        {0.f, 1.f, 0.f}, //   /|       /|
+        {1.f, 1.f, 0.f}, //  2--------3 |
+        {0.f, 0.f, 1.f}, //  | |      | |
+        {1.f, 0.f, 1.f}, //  | 4------|-5
+        {0.f, 1.f, 1.f}, //  |/       |/
+        {1.f, 1.f, 1.f} //  0--------1
     };
 
     const uint16_t indices[6][6] = {
@@ -350,20 +341,22 @@ void Scene::buildDefault()
         {3, 1, 0, 0, 2, 3}, // Back
         {2, 0, 4, 4, 6, 2}, // Left
         {0, 1, 5, 5, 4, 0}, // Bottom
-        {7, 3, 2, 2, 6, 7}  // Top
+        {7, 3, 2, 2, 6, 7} // Top
     };
 
-    const Vector3f colors[6] = {{0.8f, 0.8f, 0.8f}, {1.f, 0.f, 0.f},
-                                {0.8f, 0.8f, 0.8f}, {0.f, 1.f, 0.f},
-                                {0.8f, 0.8f, 0.8f}, {0.8f, 0.8f, 0.8f}};
+    const Vector3f colors[6] = {
+        {0.8f, 0.8f, 0.8f},
+        {1.f, 0.f, 0.f},
+        {0.8f, 0.8f, 0.8f},
+        {0.f, 1.f, 0.f},
+        {0.8f, 0.8f, 0.8f},
+        {0.8f, 0.8f, 0.8f}};
 
     size_t materialId = 0;
     for (size_t i = 1; i < 6; ++i)
     {
         // Cornell box
-        auto material =
-            model->createMaterial(materialId,
-                                  "wall_" + std::to_string(materialId));
+        auto material = model->createMaterial(materialId, "wall_" + std::to_string(materialId));
         material->setDiffuseColor(colors[i]);
         material->setSpecularColor(WHITE);
         material->setSpecularExponent(10.f);
@@ -371,7 +364,7 @@ void Scene::buildDefault()
         material->setGlossiness(i == 4 ? 0.9f : 1.f);
         material->setOpacity(1.f);
 
-        auto& triangleMesh = model->getTriangleMeshes()[materialId];
+        auto &triangleMesh = model->getTriangleMeshes()[materialId];
         for (size_t j = 0; j < 6; ++j)
         {
             const auto position = positions[indices[i][j]];
@@ -401,9 +394,7 @@ void Scene::buildDefault()
         material->setDiffuseColor({0.1f, 0.1f, 0.8f});
         material->setSpecularColor(WHITE);
         material->setSpecularExponent(10.f);
-        model->addCylinder(materialId, {{0.25f, 0.126f, 0.75f},
-                                        {0.75f, 0.126f, 0.75f},
-                                        0.125f});
+        model->addCylinder(materialId, {{0.25f, 0.126f, 0.75f}, {0.75f, 0.126f, 0.75f}, 0.125f});
         ++materialId;
     }
 
@@ -413,10 +404,7 @@ void Scene::buildDefault()
         material->setReflectionIndex(0.8f);
         material->setSpecularColor(WHITE);
         material->setSpecularExponent(10.f);
-        model->addCone(materialId, {{0.75f, 0.01f, 0.25f},
-                                    {0.75f, 0.5f, 0.25f},
-                                    0.15f,
-                                    0.f});
+        model->addCone(materialId, {{0.75f, 0.01f, 0.25f}, {0.75f, 0.5f, 0.25f}, 0.15f, 0.f});
         ++materialId;
     }
 
@@ -431,15 +419,14 @@ void Scene::buildDefault()
             {0.5f + lampInfo.x, lampInfo.y, 0.5f - lampInfo.z},
             {0.5f + lampInfo.x, lampInfo.y, 0.5f + lampInfo.z},
             {0.5f - lampInfo.x, lampInfo.y, 0.5f + lampInfo.z}};
-        auto& triangleMesh = model->getTriangleMeshes()[materialId];
+        auto &triangleMesh = model->getTriangleMeshes()[materialId];
         for (size_t i = 0; i < 4; ++i)
             triangleMesh.vertices.push_back(lampPositions[i]);
         triangleMesh.indices.push_back(Vector3i(2, 1, 0));
         triangleMesh.indices.push_back(Vector3i(0, 3, 2));
     }
 
-    addModel(
-        std::make_shared<ModelDescriptor>(std::move(model), "DefaultScene"));
+    addModel(std::make_shared<ModelDescriptor>(std::move(model), "DefaultScene"));
 }
 
 void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)
@@ -469,40 +456,36 @@ void Scene::_computeBounds()
 
 void Scene::_updateAnimationParameters()
 {
-    std::vector<AbstractSimulationHandler*> handlers;
+    std::vector<AbstractSimulationHandler *> handlers;
 
     double earlierStart = std::numeric_limits<double>::max();
     double latestEnd = std::numeric_limits<double>::lowest();
     double smallestDt = std::numeric_limits<double>::max();
     {
         std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-        for (auto& modelDesc : _modelDescriptors)
+        for (auto &modelDesc : _modelDescriptors)
         {
             if (modelDesc->isMarkedForRemoval())
                 continue;
 
-            auto simHandler =
-                modelDesc->getModel().getSimulationHandler().get();
+            auto simHandler = modelDesc->getModel().getSimulationHandler().get();
             if (simHandler)
             {
                 handlers.push_back(simHandler);
-                earlierStart =
-                    std::min(earlierStart, simHandler->getStartTime());
+                earlierStart = std::min(earlierStart, simHandler->getStartTime());
                 latestEnd = std::max(latestEnd, simHandler->getEndTime());
                 smallestDt = std::min(smallestDt, simHandler->getDt());
             }
         }
     }
 
-    auto& ap = _animationParameters;
+    auto &ap = _animationParameters;
 
     if (!handlers.empty())
     {
         ap.setDt(smallestDt);
-        ap.setStartFrame(static_cast<uint32_t>(
-            std::round(std::nextafter(earlierStart, INFINITY) / smallestDt)));
-        ap.setEndFrame(static_cast<uint32_t>(
-            std::round(std::nextafter(latestEnd, INFINITY) / smallestDt)));
+        ap.setStartFrame(static_cast<uint32_t>(std::round(std::nextafter(earlierStart, INFINITY) / smallestDt)));
+        ap.setEndFrame(static_cast<uint32_t>(std::round(std::nextafter(latestEnd, INFINITY) / smallestDt)));
         ap.markModified();
     }
 }

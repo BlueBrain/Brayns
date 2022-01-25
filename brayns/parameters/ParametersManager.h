@@ -38,13 +38,13 @@ namespace brayns
 class ParametersManager
 {
 public:
-    ParametersManager(int argc, const char** argv);
+    ParametersManager(int argc, const char **argv);
 
     /**
        Registers specific parameters to the manager
        @param parameters to be registered
      */
-    void registerParameters(AbstractParameters* parameters);
+    void registerParameters(AbstractParameters *parameters);
 
     /**
        Displays usage of registered parameters
@@ -60,36 +60,36 @@ public:
        Gets animation parameters
        @return Animation parameters for the current scene
     */
-    AnimationParameters& getAnimationParameters();
-    const AnimationParameters& getAnimationParameters() const;
+    AnimationParameters &getAnimationParameters();
+    const AnimationParameters &getAnimationParameters() const;
 
     /**
        Gets rendering parameters
        @return Rendering parameters for the current scene
     */
-    RenderingParameters& getRenderingParameters();
-    const RenderingParameters& getRenderingParameters() const;
+    RenderingParameters &getRenderingParameters();
+    const RenderingParameters &getRenderingParameters() const;
 
     /**
        Gets application parameters
        @return Application parameters for the current scene
     */
-    ApplicationParameters& getApplicationParameters();
-    const ApplicationParameters& getApplicationParameters() const;
+    ApplicationParameters &getApplicationParameters();
+    const ApplicationParameters &getApplicationParameters() const;
 
     /**
        Gets volume parameters
        @return Parameters for the current volume
     */
-    VolumeParameters& getVolumeParameters();
-    const VolumeParameters& getVolumeParameters() const;
+    VolumeParameters &getVolumeParameters();
+    const VolumeParameters &getVolumeParameters() const;
 
     /**
        Gets volume parameters
        @return Parameters for the current volume
     */
-    NetworkParameters& getNetworkParameters();
-    const NetworkParameters& getNetworkParameters() const;
+    NetworkParameters &getNetworkParameters();
+    const NetworkParameters &getNetworkParameters() const;
 
     /** Call resetModified on all parameters. */
     void resetModified();
@@ -101,13 +101,12 @@ public:
     bool isAnyModified() const;
 
 private:
-    void _parse(int argc, const char** argv);
-    void _processUnrecognizedOptions(
-        const std::vector<std::string>& unrecognizedOptions) const;
+    void _parse(int argc, const char **argv);
+    void _processUnrecognizedOptions(const std::vector<std::string> &unrecognizedOptions) const;
 
     po::options_description _allOptions;
 
-    std::vector<AbstractParameters*> _parameterSets;
+    std::vector<AbstractParameters *> _parameterSets;
     AnimationParameters _animationParameters;
     ApplicationParameters _applicationParameters;
     RenderingParameters _renderingParameters;

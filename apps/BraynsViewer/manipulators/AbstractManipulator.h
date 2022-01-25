@@ -41,29 +41,29 @@ public:
         localY
     };
 
-    AbstractManipulator(Camera& camera, KeyboardHandler& keyboardHandler);
+    AbstractManipulator(Camera &camera, KeyboardHandler &keyboardHandler);
     virtual ~AbstractManipulator() = default;
 
     /** Adjust manipulator behaviour to the given scene */
-    virtual void adjust(const Boxd& boundingBox);
-    virtual void dragLeft(const Vector2i& to, const Vector2i& from) = 0;
-    virtual void dragRight(const Vector2i& to, const Vector2i& from) = 0;
-    virtual void dragMiddle(const Vector2i& to, const Vector2i& from) = 0;
-    virtual void wheel(const Vector2i& position, float delta) = 0;
+    virtual void adjust(const Boxd &boundingBox);
+    virtual void dragLeft(const Vector2i &to, const Vector2i &from) = 0;
+    virtual void dragRight(const Vector2i &to, const Vector2i &from) = 0;
+    virtual void dragMiddle(const Vector2i &to, const Vector2i &from) = 0;
+    virtual void wheel(const Vector2i &position, float delta) = 0;
 
     float getMotionSpeed() const;
     void updateMotionSpeed(float speed);
 
     float getRotationSpeed() const;
     float getWheelSpeed() const;
-    void rotate(const Vector3d& pivot, double du, double dv, AxisMode axisMode);
+    void rotate(const Vector3d &pivot, double du, double dv, AxisMode axisMode);
 
 protected:
     /*! target camera */
-    Camera& _camera;
+    Camera &_camera;
 
     /*! keyboard handler to register/deregister keyboard events */
-    KeyboardHandler& _keyboardHandler;
+    KeyboardHandler &_keyboardHandler;
 
     /*! camera speed modifier - affects how many units the camera _moves_ with
      * each unit on the screen */
@@ -73,6 +73,6 @@ protected:
      * _rotates_ with each unit on the screen */
     double _rotationSpeed;
 
-    void translate(const Vector3d& v);
+    void translate(const Vector3d &v);
 };
 } // namespace brayns

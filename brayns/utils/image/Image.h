@@ -82,28 +82,40 @@ public:
      * @return true Empty image.
      * @return false Valid image.
      */
-    bool isEmpty() const { return getData() == nullptr; }
+    bool isEmpty() const
+    {
+        return getData() == nullptr;
+    }
 
     /**
      * @brief Get the image info.
      *
      * @return const ImageInfo& Image info.
      */
-    const ImageInfo &getInfo() const { return _info; }
+    const ImageInfo &getInfo() const
+    {
+        return _info;
+    }
 
     /**
      * @brief Get the image width in pixels.
      *
      * @return size_t Image width.
      */
-    size_t getWidth() const { return _info.width; }
+    size_t getWidth() const
+    {
+        return _info.width;
+    }
 
     /**
      * @brief Get the image height in pixels.
      *
      * @return size_t Image height.
      */
-    size_t getHeight() const { return _info.height; }
+    size_t getHeight() const
+    {
+        return _info.height;
+    }
 
     /**
      * @brief Get the number of channels per pixel.
@@ -115,35 +127,50 @@ public:
      *
      * @return size_t Channels per pixel.
      */
-    size_t getChannelCount() const { return _info.channelCount; }
+    size_t getChannelCount() const
+    {
+        return _info.channelCount;
+    }
 
     /**
      * @brief Get the size of a channel in bytes.
      *
      * @return size_t Channel size.
      */
-    size_t getChannelSize() const { return _info.channelSize; }
+    size_t getChannelSize() const
+    {
+        return _info.channelSize;
+    }
 
     /**
      * @brief Get the size of the image in bytes.
      *
      * @return size_t Image size.
      */
-    size_t getSize() const { return _data.size(); }
+    size_t getSize() const
+    {
+        return _data.size();
+    }
 
     /**
      * @brief Get the size of a pixel row in bytes.
      *
      * @return size_t Row size.
      */
-    size_t getRowSize() const { return _info.getRowSize(); }
+    size_t getRowSize() const
+    {
+        return _info.getRowSize();
+    }
 
     /**
      * @brief Get the size of a single pixel in bytes.
      *
      * @return size_t Pixel size.
      */
-    size_t getPixelSize() const { return _info.getPixelSize(); }
+    size_t getPixelSize() const
+    {
+        return _info.getPixelSize();
+    }
 
     /**
      * @brief Write the given image inside the current one with given offset.
@@ -220,7 +247,10 @@ public:
      * @return true Different info or data.
      * @return false Same info and data.
      */
-    bool operator!=(const Image &other) const { return !(*this == other); }
+    bool operator!=(const Image &other) const
+    {
+        return !(*this == other);
+    }
 
 private:
     ImageInfo _info;

@@ -29,11 +29,9 @@ BRAYNS_JSON_OBJECT_BEGIN(AddStreamlinesMessage)
 BRAYNS_JSON_OBJECT_ENTRY(std::string, name, "Model name")
 BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint64_t>, gids, "List of cell GIDs")
 BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint64_t>, indices, "List of indices")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<float>, vertices,
-                         "List of vertices (3 components per vertex)")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<float>, vertices, "List of vertices (3 components per vertex)")
 BRAYNS_JSON_OBJECT_ENTRY(double, radius, "Streamline tube radius")
 BRAYNS_JSON_OBJECT_ENTRY(double, opacity, "Color opacity")
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, color_scheme,
-                         "Color scheme to draw the streamlines")
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, color_scheme, "Color scheme to draw the streamlines")
 BRAYNS_JSON_OBJECT_END()
 } // namespace dti

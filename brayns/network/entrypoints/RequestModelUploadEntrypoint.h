@@ -28,8 +28,7 @@
 
 namespace brayns
 {
-class RequestModelUploadEntrypoint
-    : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
+class RequestModelUploadEntrypoint : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
 {
 public:
     virtual std::string getName() const override
@@ -43,16 +42,19 @@ public:
                "model descriptor on success";
     }
 
-    virtual bool isAsync() const override { return true; }
-
-    virtual void onRequest(const Request& request) override
+    virtual bool isAsync() const override
     {
-        auto& engine = getApi().getEngine();
-        auto& registry = getApi().getLoaderRegistry();
+        return true;
+    }
+
+    virtual void onRequest(const Request &request) override
+    {
+        auto &engine = getApi().getEngine();
+        auto &registry = getApi().getLoaderRegistry();
         auto task = std::make_shared<ModelUploadTask>(engine, registry);
         launchTask(task, request);
-        auto& binary = getBinary();
-        auto& handle = request.getConnectionHandle();
+        auto &binary = getBinary();
+        auto &handle = request.getConnectionHandle();
         binary.addTask(handle, task);
     }
 };

@@ -113,7 +113,7 @@ public:
      * the simulation runs. It is always millisecconds ("ms")
      * @return const std::string&
      */
-    const std::string& getTimeUnit() const noexcept;
+    const std::string &getTimeUnit() const noexcept;
 
 private:
     uint32_t _startFrame{0};

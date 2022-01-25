@@ -32,28 +32,21 @@ namespace sonataloader
 class VasculatureColorHandler : public CircuitColorHandler
 {
 public:
-    void _setElementsImpl(
-        const std::vector<uint64_t>& ids,
-        std::vector<ElementMaterialMap::Ptr>&& elements) final;
+    void _setElementsImpl(const std::vector<uint64_t> &ids, std::vector<ElementMaterialMap::Ptr> &&elements) final;
 
     std::vector<std::string> _getMethodsImpl() const final;
 
-    std::vector<std::string> _getMethodVariablesImpl(
-        const std::string&) const final;
+    std::vector<std::string> _getMethodVariablesImpl(const std::string &) const final;
 
-    void _updateColorByIdImpl(
-        const std::map<uint64_t, brayns::Vector4f>& colorMap) final;
+    void _updateColorByIdImpl(const std::map<uint64_t, brayns::Vector4f> &colorMap) final;
 
-    void _updateSingleColorImpl(const brayns::Vector4f& color) final;
+    void _updateSingleColorImpl(const brayns::Vector4f &color) final;
 
-    void _updateColorImpl(
-        const std::string&,
-        const std::vector<ColoringInformation>& variables) final;
+    void _updateColorImpl(const std::string &, const std::vector<ColoringInformation> &variables) final;
 
 private:
     std::vector<uint64_t> _ids;
     std::vector<ElementMaterialMap::Ptr> _elements;
-    std::unordered_map<VasculatureSection, std::vector<size_t>>
-        _sectionMaterials;
+    std::unordered_map<VasculatureSection, std::vector<size_t>> _sectionMaterials;
 };
 } // namespace sonataloader

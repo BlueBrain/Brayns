@@ -30,8 +30,7 @@ namespace brayns
 struct Sphere
 {
 #if __cplusplus
-    Sphere(const Vector3f& c = {0.f, 0.f, 0.f}, const float r = 0.f,
-           const uint64_t data = 0)
+    Sphere(const Vector3f &c = {0.f, 0.f, 0.f}, const float r = 0.f, const uint64_t data = 0)
         : userData(data)
         , center(c)
         , radius(r)

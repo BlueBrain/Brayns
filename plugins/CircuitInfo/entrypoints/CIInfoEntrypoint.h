@@ -33,7 +33,7 @@
 class CircuitInfoRetriever
 {
 public:
-    static CIInfoResult getCircuitInfo(const std::string& path)
+    static CIInfoResult getCircuitInfo(const std::string &path)
     {
         // Validate path
         if (!fs::exists(path))
@@ -45,8 +45,7 @@ public:
         CIInfoResult result;
 
         // Hard-coded properties
-        result.cells_properties = {"etype", "mtype",    "morphology_class",
-                                   "layer", "position", "orientation"};
+        result.cells_properties = {"etype", "mtype", "morphology_class", "layer", "position", "orientation"};
 
         // Open circuit
         const brion::BlueConfig config(path);
@@ -60,18 +59,18 @@ public:
         result.spike_report = config.getSpikeSource().getPath();
 
         // All target types
-        auto types = {brion::TargetType::TARGET_CELL,
-                      brion::TargetType::TARGET_COMPARTMENT,
-                      brion::TargetType::TARGET_ALL};
+        auto types = {
+            brion::TargetType::TARGET_CELL,
+            brion::TargetType::TARGET_COMPARTMENT,
+            brion::TargetType::TARGET_ALL};
 
         // Extract targets
-        for (const auto& target : config.getTargets())
+        for (const auto &target : config.getTargets())
         {
-            for (const auto& type : types)
+            for (const auto &type : types)
             {
-                auto& names = target.getTargetNames(type);
-                result.targets.insert(result.targets.end(), names.begin(),
-                                      names.end());
+                auto &names = target.getTargetNames(type);
+                result.targets.insert(result.targets.end(), names.begin(), names.end());
             }
         }
 
@@ -83,17 +82,20 @@ public:
 class CIInfoEntrypoint : public brayns::Entrypoint<CIInfoParams, CIInfoResult>
 {
 public:
-    virtual std::string getName() const override { return "ci-info"; }
+    virtual std::string getName() const override
+    {
+        return "ci-info";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Return general info about a circuit";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& path = params.path;
+        auto &path = params.path;
         auto result = CircuitInfoRetriever::getCircuitInfo(path);
         request.reply(result);
     }

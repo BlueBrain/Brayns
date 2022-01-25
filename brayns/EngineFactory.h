@@ -45,8 +45,7 @@ public:
      * @param parametersManager Container for all parameters (application,
      *        rendering, geometry, scene)
      */
-    EngineFactory(int argc, const char** argv,
-                  ParametersManager& parametersManager);
+    EngineFactory(int argc, const char **argv, ParametersManager &parametersManager);
 
     /**
      * @brief Create an instance of the engine corresponding the given name. If
@@ -55,15 +54,15 @@ public:
      * @return A pointer to the engine, null if the engine could not be
      *         instantiated
      */
-    Engine* create(const std::string& name);
+    Engine *create(const std::string &name);
 
 private:
     int _argc;
-    const char** _argv;
-    ParametersManager& _parametersManager;
+    const char **_argv;
+    ParametersManager &_parametersManager;
     std::vector<DynamicLib> _libs;
     std::map<std::string, std::unique_ptr<Engine>> _engines;
 
-    Engine* _loadEngine(const std::string& name, int argc, const char* argv[]);
+    Engine *_loadEngine(const std::string &name, int argc, const char *argv[]);
 };
 } // namespace brayns

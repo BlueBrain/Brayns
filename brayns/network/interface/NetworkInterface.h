@@ -49,7 +49,7 @@ public:
      *
      * @param context Network context reference.
      */
-    NetworkInterface(NetworkContext& context);
+    NetworkInterface(NetworkContext &context);
 
     /**
      * @brief Receive requests and send replies to the client until the
@@ -88,6 +88,6 @@ public:
     virtual void update() override;
 
 private:
-    NetworkContext* _context;
+    NetworkContext *_context;
 };
 } // namespace brayns

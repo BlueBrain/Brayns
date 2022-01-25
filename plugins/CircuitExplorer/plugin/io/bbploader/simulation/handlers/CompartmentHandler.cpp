@@ -31,9 +31,7 @@ auto frameIndexToTimestamp(const uint32_t frame, const double dt) noexcept
 }
 } // namespace
 
-CompartmentHandler::CompartmentHandler(
-    const std::string& path,
-    const std::shared_ptr<brion::CompartmentReport>& report)
+CompartmentHandler::CompartmentHandler(const std::string &path, const std::shared_ptr<brion::CompartmentReport> &report)
     : brayns::AbstractSimulationHandler()
     , _path(path)
     , _report(report)
@@ -46,7 +44,7 @@ CompartmentHandler::CompartmentHandler(
     _frameSize = _report->getFrameSize();
 }
 
-CompartmentHandler::CompartmentHandler(const CompartmentHandler& o)
+CompartmentHandler::CompartmentHandler(const CompartmentHandler &o)
     : brayns::AbstractSimulationHandler(o)
     , _path(o._path)
     , _report(o._report)
@@ -68,8 +66,7 @@ std::vector<float> CompartmentHandler::getFrameDataImpl(const uint32_t frame)
 {
     std::vector<float> data;
     _ready = false;
-    auto loadFuture =
-        _report->loadFrame(frameIndexToTimestamp(frame, _dt) + _startTime);
+    auto loadFuture = _report->loadFrame(frameIndexToTimestamp(frame, _dt) + _startTime);
     if (loadFuture.valid())
     {
         loadFuture.wait();
@@ -80,8 +77,7 @@ std::vector<float> CompartmentHandler::getFrameDataImpl(const uint32_t frame)
             _ready = true;
         }
         else
-            brayns::Log::warn("[CE] Attempt to get frame from {} failed.",
-                              _path);
+            brayns::Log::warn("[CE] Attempt to get frame from {} failed.", _path);
     }
     return data;
 }

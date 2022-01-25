@@ -27,17 +27,16 @@
 
 namespace
 {
-double _interpolatedOpacity(
-    const std::vector<brayns::Vector2d>& controlPointsSorted, const double x)
+double _interpolatedOpacity(const std::vector<brayns::Vector2d> &controlPointsSorted, const double x)
 {
-    const auto& firstPoint = controlPointsSorted.front();
+    const auto &firstPoint = controlPointsSorted.front();
     if (x <= firstPoint.x)
         return firstPoint.y;
 
     for (size_t i = 1; i < controlPointsSorted.size(); ++i)
     {
-        const auto& current = controlPointsSorted[i];
-        const auto& previous = controlPointsSorted[i - 1];
+        const auto &current = controlPointsSorted[i];
+        const auto &previous = controlPointsSorted[i - 1];
         if (x <= current.x)
         {
             const auto t = (x - previous.x) / (current.x - previous.x);
@@ -45,14 +44,14 @@ double _interpolatedOpacity(
         }
     }
 
-    const auto& lastPoint = controlPointsSorted.back();
+    const auto &lastPoint = controlPointsSorted.back();
     return lastPoint.y;
 }
 } // namespace
 
 namespace brayns
 {
-bool ColorMap::operator==(const ColorMap& rhs) const
+bool ColorMap::operator==(const ColorMap &rhs) const
 {
     if (this == &rhs)
         return true;
@@ -83,8 +82,7 @@ std::vector<float> TransferFunction::calculateInterpolatedOpacities() const
     constexpr double dx = 1. / (numSamples - 1);
 
     auto tfPoints = getControlPoints();
-    std::sort(tfPoints.begin(), tfPoints.end(),
-              [](auto a, auto b) { return a.x < b.x; });
+    std::sort(tfPoints.begin(), tfPoints.end(), [](auto a, auto b) { return a.x < b.x; });
 
     std::vector<float> opacities;
     opacities.reserve(numSamples);
@@ -101,16 +99,14 @@ Vector3f TransferFunction::getColorForValue(const double v) const
     if (v >= _valuesRange.y)
         return _colorMap.colors.back();
 
-    const auto normValue =
-        (v - _valuesRange.x) / (_valuesRange.y - _valuesRange.x);
-    const size_t index =
-        static_cast<size_t>(floor(normValue * _colorMap.colors.size()));
+    const auto normValue = (v - _valuesRange.x) / (_valuesRange.y - _valuesRange.x);
+    const size_t index = static_cast<size_t>(floor(normValue * _colorMap.colors.size()));
     const size_t nextIndex = std::min(index + 1, _colorMap.colors.size() - 1);
 
     const double remainder = normValue - floor(normValue);
 
-    const auto& color1 = _colorMap.colors[index];
-    const auto& color2 = _colorMap.colors[nextIndex];
+    const auto &color1 = _colorMap.colors[index];
+    const auto &color2 = _colorMap.colors[nextIndex];
 
     return (1.0 - remainder) * color1 + remainder * color2;
 }

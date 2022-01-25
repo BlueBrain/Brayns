@@ -55,13 +55,11 @@ private:
         }
         if (image.getChannelCount() != info.channelCount)
         {
-            throw std::runtime_error(
-                "All images must have the same channel count");
+            throw std::runtime_error("All images must have the same channel count");
         }
         if (image.getChannelSize() != info.channelSize)
         {
-            throw std::runtime_error(
-                "All images must have the same channel size");
+            throw std::runtime_error("All images must have the same channel size");
         }
     }
 };

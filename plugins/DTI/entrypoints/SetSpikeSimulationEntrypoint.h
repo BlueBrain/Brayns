@@ -29,11 +29,10 @@
 
 namespace dti
 {
-class SetSpikeSimulationEntrypoint
-    : public brayns::Entrypoint<SetSpikeSimulationMessage, brayns::EmptyMessage>
+class SetSpikeSimulationEntrypoint : public brayns::Entrypoint<SetSpikeSimulationMessage, brayns::EmptyMessage>
 {
 public:
-    SetSpikeSimulationEntrypoint(DTIPlugin& plugin)
+    SetSpikeSimulationEntrypoint(DTIPlugin &plugin)
         : _plugin(&plugin)
     {
     }
@@ -48,7 +47,7 @@ public:
         return "Add a spike simulation to a model";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         _plugin->updateSpikeSimulation(params);
@@ -57,6 +56,6 @@ public:
     }
 
 private:
-    DTIPlugin* _plugin;
+    DTIPlugin *_plugin;
 };
 } // namespace dti

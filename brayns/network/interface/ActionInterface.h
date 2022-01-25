@@ -82,8 +82,8 @@ public:
      * @tparam Args Types of the arguments to pass to the constructor of T.
      * @param args Arguments to pass to the constructor of T.
      */
-    template <typename T, typename... Args>
-    void add(Args&&... args)
+    template<typename T, typename... Args>
+    void add(Args &&...args)
     {
         addEntrypoint(EntrypointRef::create<T>(std::forward<Args>(args)...));
     }

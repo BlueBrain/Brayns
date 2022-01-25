@@ -21,16 +21,14 @@
 #include <plugin/api/MaterialUtils.h>
 #include <plugin/io/synapse/SynapseMaterialMap.h>
 
-void OldSurfaceSynapseGroup::addSynapse(const uint64_t id,
-                                        const int32_t section,
-                                        const brayns::Vector3f& position)
+void OldSurfaceSynapseGroup::addSynapse(const uint64_t id, const int32_t section, const brayns::Vector3f &position)
 {
     _ids.push_back(id);
     _sections.push_back(section);
     _positions.push_back(position);
 }
 
-void OldSurfaceSynapseGroup::mapToCell(const MorphologyInstance& cell)
+void OldSurfaceSynapseGroup::mapToCell(const MorphologyInstance &cell)
 {
     for (size_t j = 0; j < _ids.size(); ++j)
     {
@@ -41,30 +39,21 @@ void OldSurfaceSynapseGroup::mapToCell(const MorphologyInstance& cell)
             if (segmentCount == 0)
                 continue;
 
-            const auto& surfPos = _positions[j];
+            const auto &surfPos = _positions[j];
             for (size_t i = 0; i < segmentCount; ++i)
             {
                 const auto segment = cell.getSegment(section, i);
-                const auto d = glm::dot(surfPos - *segment.first,
-                                        surfPos - *segment.second);
+                const auto d = glm::dot(surfPos - *segment.first, surfPos - *segment.second);
                 if (d < 0.f)
                 {
-                    const auto dirVector =
-                        glm::normalize(*segment.second - *segment.first);
-                    const auto point =
-                        *segment.first +
-                        dirVector *
-                            glm::dot(dirVector, surfPos - *segment.first);
-                    const auto endPoint =
-                        point + glm::normalize(surfPos - point) * 3.5f;
-                    _geometry.push_back(
-                        brayns::createSDFConePillSigmoid(point, endPoint, 0.35f,
-                                                         0.5f));
+                    const auto dirVector = glm::normalize(*segment.second - *segment.first);
+                    const auto point = *segment.first + dirVector * glm::dot(dirVector, surfPos - *segment.first);
+                    const auto endPoint = point + glm::normalize(surfPos - point) * 3.5f;
+                    _geometry.push_back(brayns::createSDFConePillSigmoid(point, endPoint, 0.35f, 0.5f));
                     // By default we copy the cell simulation mapping to show
                     // the node simulation report. If there is a synapse report,
                     // it will overwrite this value
-                    _geometry.back().userData =
-                        cell.getSegmentSimulationOffset(section, i);
+                    _geometry.back().userData = cell.getSegmentSimulationOffset(section, i);
                     _addedSynapses.push_back(j);
                     break;
                 }
@@ -77,8 +66,7 @@ void OldSurfaceSynapseGroup::mapToCell(const MorphologyInstance& cell)
     }
 }
 
-void OldSurfaceSynapseGroup::mapSimulation(
-    const std::unordered_map<uint64_t, uint64_t>& mapping)
+void OldSurfaceSynapseGroup::mapSimulation(const std::unordered_map<uint64_t, uint64_t> &mapping)
 {
     for (size_t i = 0; i < _addedSynapses.size(); ++i)
     {
@@ -88,8 +76,7 @@ void OldSurfaceSynapseGroup::mapSimulation(
     }
 }
 
-SynapseMaterialMap::Ptr OldSurfaceSynapseGroup::addToModel(
-    brayns::Model& model) const
+SynapseMaterialMap::Ptr OldSurfaceSynapseGroup::addToModel(brayns::Model &model) const
 {
     auto result = std::make_unique<SynapseMaterialMap>();
     result->materials.reserve(_addedSynapses.size());

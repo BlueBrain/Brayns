@@ -62,7 +62,7 @@ public:
      * @brief getLights Gets the lights
      * @return Immutable list of all light sources and their id
      */
-    const std::map<size_t, LightPtr>& getLights() const;
+    const std::map<size_t, LightPtr> &getLights() const;
 
     /**
      * @brief clearLights Removes all light sources

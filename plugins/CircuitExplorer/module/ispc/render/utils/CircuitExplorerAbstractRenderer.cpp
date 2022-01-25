@@ -28,20 +28,17 @@ void CircuitExplorerAbstractRenderer::commit()
 {
     Renderer::commit();
 
-    _lightData = (ospray::Data*)getParamData("lights");
+    _lightData = (ospray::Data *)getParamData("lights");
     _lightArray.clear();
 
     if (_lightData)
         for (size_t i = 0; i < _lightData->size(); ++i)
-            _lightArray.push_back(
-                ((ospray::Light**)_lightData->data)[i]->getIE());
+            _lightArray.push_back(((ospray::Light **)_lightData->data)[i]->getIE());
 
     _lightPtr = _lightArray.empty() ? nullptr : &_lightArray[0];
 
     _timestamp = getParam1f("timestamp", 0.f);
-    _bgMaterial =
-        (brayns::obj::CircuitExplorerMaterial*)getParamObject("bgMaterial",
-                                                              nullptr);
+    _bgMaterial = (brayns::obj::CircuitExplorerMaterial *)getParamObject("bgMaterial", nullptr);
     _maxBounces = getParam1i("maxBounces", 10);
     _exposure = getParam1f("exposure", 1.f);
 

@@ -30,23 +30,26 @@ class RequestBuffer
 public:
     RequestBuffer() = default;
 
-    RequestBuffer(size_t connectionCount) { _buffer.reserve(connectionCount); }
-
-    void extract(const ConnectionHandle& handle, Connection& connection)
+    RequestBuffer(size_t connectionCount)
     {
-        auto& buffer = connection.buffer;
+        _buffer.reserve(connectionCount);
+    }
+
+    void extract(const ConnectionHandle &handle, Connection &connection)
+    {
+        auto &buffer = connection.buffer;
         _buffer.emplace_back(handle, std::move(buffer));
         buffer.clear();
     }
 
-    template <typename FunctorType>
+    template<typename FunctorType>
     void forEach(FunctorType functor) const
     {
-        for (const auto& pair : _buffer)
+        for (const auto &pair : _buffer)
         {
-            auto& handle = pair.first;
-            auto& buffer = pair.second;
-            for (const auto& packet : buffer)
+            auto &handle = pair.first;
+            auto &buffer = pair.second;
+            for (const auto &packet : buffer)
             {
                 functor(handle, packet);
             }
@@ -60,12 +63,11 @@ private:
 class ConnectionUpdater
 {
 public:
-    static RequestBuffer update(ConnectionMap& connections,
-                                const ConnectionListener& listener)
+    static RequestBuffer update(ConnectionMap &connections, const ConnectionListener &listener)
     {
         RequestBuffer buffer(connections.getConnectionCount());
         connections.removeIf(
-            [&](const auto& handle, auto& connection)
+            [&](const auto &handle, auto &connection)
             {
                 if (_tryDisconnect(handle, connection, listener))
                 {
@@ -82,9 +84,8 @@ public:
     }
 
 private:
-    static bool _tryDisconnect(const ConnectionHandle& handle,
-                               const Connection& connection,
-                               const ConnectionListener& listener)
+    static bool
+        _tryDisconnect(const ConnectionHandle &handle, const Connection &connection, const ConnectionListener &listener)
     {
         if (!connection.removed)
         {
@@ -97,9 +98,8 @@ private:
         return true;
     }
 
-    static bool _tryConnect(const ConnectionHandle& handle,
-                            const Connection& connection,
-                            const ConnectionListener& listener)
+    static bool
+        _tryConnect(const ConnectionHandle &handle, const Connection &connection, const ConnectionListener &listener)
     {
         if (!connection.added)
         {
@@ -133,14 +133,13 @@ void ConnectionManager::add(NetworkSocketPtr socket)
     _connections.add(std::move(socket));
 }
 
-void ConnectionManager::remove(const ConnectionHandle& handle)
+void ConnectionManager::remove(const ConnectionHandle &handle)
 {
     std::lock_guard<std::mutex> lock(_mutex);
     _connections.markAsRemoved(handle);
 }
 
-void ConnectionManager::receive(const ConnectionHandle& handle,
-                                InputPacket packet)
+void ConnectionManager::receive(const ConnectionHandle &handle, InputPacket packet)
 {
     std::lock_guard<std::mutex> lock(_mutex);
     auto connection = _connections.find(handle);
@@ -148,12 +147,11 @@ void ConnectionManager::receive(const ConnectionHandle& handle,
     {
         return;
     }
-    auto& buffer = connection->buffer;
+    auto &buffer = connection->buffer;
     buffer.push_back(std::move(packet));
 }
 
-void ConnectionManager::send(const ConnectionHandle& handle,
-                             const OutputPacket& packet)
+void ConnectionManager::send(const ConnectionHandle &handle, const OutputPacket &packet)
 {
     std::lock_guard<std::mutex> lock(_mutex);
     auto connection = _connections.find(handle);
@@ -161,33 +159,32 @@ void ConnectionManager::send(const ConnectionHandle& handle,
     {
         return;
     }
-    auto& socket = connection->socket;
+    auto &socket = connection->socket;
     socket->send(packet);
 }
 
-void ConnectionManager::broadcast(const OutputPacket& packet)
+void ConnectionManager::broadcast(const OutputPacket &packet)
 {
     std::lock_guard<std::mutex> lock(_mutex);
     _connections.forEach(
-        [&](const auto& handle, const auto& connection)
+        [&](const auto &handle, const auto &connection)
         {
-            auto& socket = connection.socket;
+            auto &socket = connection.socket;
             socket->send(packet);
         });
 }
 
-void ConnectionManager::broadcast(const ConnectionHandle& source,
-                                  const OutputPacket& packet)
+void ConnectionManager::broadcast(const ConnectionHandle &source, const OutputPacket &packet)
 {
     std::lock_guard<std::mutex> lock(_mutex);
     _connections.forEach(
-        [&](const auto& handle, const auto& connection)
+        [&](const auto &handle, const auto &connection)
         {
             if (handle == source)
             {
                 return;
             }
-            auto& socket = connection.socket;
+            auto &socket = connection.socket;
             socket->send(packet);
         });
 }
@@ -203,17 +200,16 @@ void ConnectionManager::update()
     {
         return;
     }
-    buffer.forEach([this](const auto& handle, const auto& packet)
-                   { _listener.onRequest(handle, packet); });
+    buffer.forEach([this](const auto &handle, const auto &packet) { _listener.onRequest(handle, packet); });
 }
 
 void ConnectionManager::closeAll()
 {
     std::lock_guard<std::mutex> lock(_mutex);
     _connections.forEach(
-        [](auto& handle, auto& connection)
+        [](auto &handle, auto &connection)
         {
-            auto& socket = connection.socket;
+            auto &socket = connection.socket;
             socket->close();
         });
 }

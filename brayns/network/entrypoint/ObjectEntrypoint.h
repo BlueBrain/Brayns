@@ -34,7 +34,7 @@ namespace brayns
  *
  * @tparam T Object type to extract.
  */
-template <typename T>
+template<typename T>
 struct ObjectExtractor
 {
 };
@@ -56,21 +56,30 @@ struct NotificationPeriod
      *
      * @return Duration Equivalent duration.
      */
-    static Duration interactive() { return std::chrono::milliseconds(1); }
+    static Duration interactive()
+    {
+        return std::chrono::milliseconds(1);
+    }
 
     /**
      * @brief Default notification period.
      *
      * @return Duration Equivalent duration.
      */
-    static Duration defaultValue() { return std::chrono::milliseconds(50); }
+    static Duration defaultValue()
+    {
+        return std::chrono::milliseconds(50);
+    }
 
     /**
      * @brief Slow notification period.
      *
      * @return Duration Equivalent duration.
      */
-    static Duration slow() { return std::chrono::milliseconds(750); }
+    static Duration slow()
+    {
+        return std::chrono::milliseconds(750);
+    }
 };
 
 /**
@@ -80,7 +89,7 @@ struct NotificationPeriod
  *
  * @tparam ObjectType Object type to retrieve.
  */
-template <typename ObjectType>
+template<typename ObjectType>
 class GetEntrypoint : public BaseEntrypoint
 {
 public:
@@ -95,14 +104,17 @@ public:
      *
      * @param duration Notification period.
      */
-    void setNotificationPeriod(Duration duration) { _limiter = duration; }
+    void setNotificationPeriod(Duration duration)
+    {
+        _limiter = duration;
+    }
 
     /**
      * @brief Get the object using ObjectExtractor<ObjectType>::extract(api).
      *
      * @return const ObjectType& Entrypoint object.
      */
-    ObjectType& getObject() const
+    ObjectType &getObject() const
     {
         return ObjectExtractor<ObjectType>::extract(getApi());
     }
@@ -124,7 +136,7 @@ public:
      */
     virtual JsonSchema getResultSchema() const override
     {
-        auto& object = getObject();
+        auto &object = getObject();
         return Json::getSchema(object);
     }
 
@@ -134,9 +146,8 @@ public:
      */
     virtual void onCreate() override
     {
-        auto& object = getObject();
-        object.onModified([&](auto&)
-                          { _limiter.call([&] { notify(object); }); });
+        auto &object = getObject();
+        object.onModified([&](auto &) { _limiter.call([&] { notify(object); }); });
     }
 
     /**
@@ -144,9 +155,9 @@ public:
      *
      * @param request Client get-object request.
      */
-    virtual void onRequest(const NetworkRequest& request) override
+    virtual void onRequest(const NetworkRequest &request) override
     {
-        auto& object = getObject();
+        auto &object = getObject();
         request.reply(object);
     }
 
@@ -159,7 +170,7 @@ private:
  *
  * @tparam ObjectType Object type to update.
  */
-template <typename ObjectType>
+template<typename ObjectType>
 class SetEntrypoint : public BaseEntrypoint
 {
 public:
@@ -168,7 +179,7 @@ public:
      *
      * @return ObjectType& Object to update.
      */
-    ObjectType& getObject() const
+    ObjectType &getObject() const
     {
         return ObjectExtractor<ObjectType>::extract(getApi());
     }
@@ -180,7 +191,7 @@ public:
      */
     virtual JsonSchema getParamsSchema() const override
     {
-        auto& object = getObject();
+        auto &object = getObject();
         return Json::getSchema(object);
     }
 
@@ -199,10 +210,10 @@ public:
      *
      * @param request Client set-object request.
      */
-    virtual void onRequest(const NetworkRequest& request) override
+    virtual void onRequest(const NetworkRequest &request) override
     {
-        auto& params = request.getParams();
-        auto& object = getObject();
+        auto &params = request.getParams();
+        auto &object = getObject();
         Json::deserialize(params, object);
         triggerRender();
         request.reply(EmptyMessage());

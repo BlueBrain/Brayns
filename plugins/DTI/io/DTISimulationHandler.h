@@ -40,13 +40,15 @@ public:
     /**
      * @brief Default constructor
      */
-    DTISimulationHandler(const Indices& indices,
-                         const SetSpikeSimulationMessage& spikeSimulation);
+    DTISimulationHandler(const Indices &indices, const SetSpikeSimulationMessage &spikeSimulation);
 
     std::vector<float> getFrameDataImpl(const uint32_t frame) final;
 
     brayns::AbstractSimulationHandlerPtr clone() const final;
-    std::map<uint64_t, float>& getSpikes() { return _spikes; }
+    std::map<uint64_t, float> &getSpikes()
+    {
+        return _spikes;
+    }
     void setTimeScale(const float scale)
     {
         _spikeSimulation.time_scale = scale;

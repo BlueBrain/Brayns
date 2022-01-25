@@ -26,11 +26,13 @@
 
 namespace brayns
 {
-class AddClipPlaneEntrypoint
-    : public Entrypoint<AddClipPlaneMessage, ClipPlanePtr>
+class AddClipPlaneEntrypoint : public Entrypoint<AddClipPlaneMessage, ClipPlanePtr>
 {
 public:
-    virtual std::string getName() const override { return "add-clip-plane"; }
+    virtual std::string getName() const override
+    {
+        return "add-clip-plane";
+    }
 
     virtual std::string getDescription() const override
     {
@@ -44,12 +46,12 @@ public:
         return schema;
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& plane = params.plane;
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
+        auto &plane = params.plane;
+        auto &engine = getApi().getEngine();
+        auto &scene = engine.getScene();
         auto id = scene.addClipPlane(plane);
         auto clipPlane = scene.getClipPlane(id);
         engine.triggerRender();

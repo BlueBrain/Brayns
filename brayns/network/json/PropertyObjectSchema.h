@@ -40,13 +40,13 @@ public:
      * @param object Object to build the schema from.
      * @return JsonSchema Schema of object.
      */
-    static JsonSchema create(const PropertyObject& object)
+    static JsonSchema create(const PropertyObject &object)
     {
         JsonSchema schema;
-        auto& oneOf = schema.oneOf;
-        auto& properties = object.getProperties();
+        auto &oneOf = schema.oneOf;
+        auto &properties = object.getProperties();
         oneOf.reserve(properties.size());
-        for (const auto& pair : properties)
+        for (const auto &pair : properties)
         {
             oneOf.push_back(_getSchema(pair));
         }
@@ -54,12 +54,11 @@ public:
     }
 
 private:
-    static JsonSchema _getSchema(
-        const std::pair<std::string, PropertyMap>& pair)
+    static JsonSchema _getSchema(const std::pair<std::string, PropertyMap> &pair)
     {
-        auto& properties = pair.second;
+        auto &properties = pair.second;
         auto schema = Json::getSchema(properties);
-        auto& type = pair.first;
+        auto &type = pair.first;
         schema.title = type;
         return schema;
     }

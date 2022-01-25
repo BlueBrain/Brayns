@@ -32,37 +32,37 @@ typedef ospray::vec3f Color;
 struct CircuitExplorerMaterial : public ospray::Material
 {
     /*! opacity: 0 (transparent), 1 (opaque) */
-    ospray::Texture2D* map_d;
+    ospray::Texture2D *map_d;
     ospray::affine2f xform_d;
     float d;
 
     /*! refraction index */
-    ospray::Texture2D* map_Refraction;
+    ospray::Texture2D *map_Refraction;
     ospray::affine2f xform_Refraction;
     float refraction;
 
     /*! reflection index */
-    ospray::Texture2D* map_Reflection;
+    ospray::Texture2D *map_Reflection;
     ospray::affine2f xform_Reflection;
     float reflection;
 
     /*! radiance: 0 (none), 1 (full) */
-    ospray::Texture2D* map_a;
+    ospray::Texture2D *map_a;
     ospray::affine2f xform_a;
     float a;
 
     /*! diffuse  reflectance: 0 (none), 1 (full) */
-    ospray::Texture2D* map_Kd;
+    ospray::Texture2D *map_Kd;
     ospray::affine2f xform_Kd;
     Color Kd;
 
     /*! specular reflectance: 0 (none), 1 (full) */
-    ospray::Texture2D* map_Ks;
+    ospray::Texture2D *map_Ks;
     ospray::affine2f xform_Ks;
     Color Ks;
 
     /*! specular exponent: 0 (diffuse), infinity (specular) */
-    ospray::Texture2D* map_Ns;
+    ospray::Texture2D *map_Ns;
     ospray::affine2f xform_Ns;
     float Ns;
 
@@ -70,7 +70,7 @@ struct CircuitExplorerMaterial : public ospray::Material
     float glossiness;
 
     /*! bump map */
-    ospray::Texture2D* map_Bump;
+    ospray::Texture2D *map_Bump;
     ospray::affine2f xform_Bump;
     ospray::linear2f rot_Bump;
 
@@ -87,7 +87,10 @@ struct CircuitExplorerMaterial : public ospray::Material
     /*! User parameter */
     float userParameter;
 
-    std::string toString() const final { return "default_material"; }
+    std::string toString() const final
+    {
+        return "default_material";
+    }
     void commit() final;
 };
 } // namespace obj

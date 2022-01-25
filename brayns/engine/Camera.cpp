@@ -23,7 +23,7 @@
 
 namespace brayns
 {
-Camera& Camera::operator=(const Camera& rhs)
+Camera &Camera::operator=(const Camera &rhs)
 {
     if (this == &rhs)
         return *this;
@@ -39,17 +39,14 @@ Camera& Camera::operator=(const Camera& rhs)
     return *this;
 }
 
-void Camera::set(const Vector3d& position, const Quaterniond& orientation,
-                 const Vector3d& target)
+void Camera::set(const Vector3d &position, const Quaterniond &orientation, const Vector3d &target)
 {
     setPosition(position);
     setOrientation(orientation);
     setTarget(target);
 }
 
-void Camera::setInitialState(const Vector3d& position,
-                             const Quaterniond& orientation,
-                             const Vector3d& target)
+void Camera::setInitialState(const Vector3d &position, const Quaterniond &orientation, const Vector3d &target)
 {
     _initialPosition = position;
     _initialTarget = target;

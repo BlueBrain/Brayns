@@ -30,9 +30,8 @@ namespace sonataloader
 class CommonNodeLoader : public NodePopulationLoader
 {
 public:
-    template <typename T, typename = std::enable_if_t<
-                              std::is_constructible<std::string, T>::value>>
-    CommonNodeLoader(T&& name)
+    template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
+    CommonNodeLoader(T &&name)
         : NodePopulationLoader(std::forward<T>(name))
     {
     }
@@ -51,11 +50,11 @@ public:
      * @return a vector of morphology instances holding the geometries
      */
     std::vector<MorphologyInstance::Ptr> loadNodes(
-        const SonataConfig::Data& networkData,
-        const SonataNodePopulationParameters& loadSettings,
-        const bbp::sonata::Selection& nodeSelection,
-        const std::vector<std::string>& morphologyNames,
-        const std::vector<brayns::Vector3f>& positions,
-        const std::vector<brayns::Quaternion>& rotations) const;
+        const SonataConfig::Data &networkData,
+        const SonataNodePopulationParameters &loadSettings,
+        const bbp::sonata::Selection &nodeSelection,
+        const std::vector<std::string> &morphologyNames,
+        const std::vector<brayns::Vector3f> &positions,
+        const std::vector<brayns::Quaternion> &rotations) const;
 };
 } // namespace sonataloader

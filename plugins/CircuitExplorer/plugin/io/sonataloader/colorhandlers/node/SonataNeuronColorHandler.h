@@ -29,16 +29,13 @@ namespace sonataloader
  * @brief The NeuronColorHandler class provides functionality
  *        to set a biophysical and astrocyte node population circuit color
  */
-class SonataNeuronColorHandler
-    : public NeuronColorHandler<std::vector<bbp::sonata::NodeID>>
+class SonataNeuronColorHandler : public NeuronColorHandler<std::vector<bbp::sonata::NodeID>>
 {
 public:
-    SonataNeuronColorHandler(const std::string& configPath,
-                             const std::string& population);
+    SonataNeuronColorHandler(const std::string &configPath, const std::string &population);
 
     std::vector<std::string> _getExtraMethods() const final;
-    std::vector<std::string> _getValuesForMethod(
-        const std::string& method) const final;
+    std::vector<std::string> _getValuesForMethod(const std::string &method) const final;
 
 private:
     const bbp::sonata::CircuitConfig _config;

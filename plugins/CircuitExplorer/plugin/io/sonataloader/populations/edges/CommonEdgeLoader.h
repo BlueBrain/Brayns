@@ -34,16 +34,15 @@ namespace sonataloader
 class CommonEdgeLoader : public EdgePopulationLoader
 {
 public:
-    template <typename T, typename = std::enable_if_t<
-                              std::is_constructible<std::string, T>::value>>
-    CommonEdgeLoader(T&& name)
+    template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
+    CommonEdgeLoader(T &&name)
         : EdgePopulationLoader(std::forward<T>(name))
     {
     }
 
     std::vector<SynapseGroup::Ptr> load(
-        const SonataConfig::Data& networkConfig,
-        const SonataEdgePopulationParameters& lc,
-        const bbp::sonata::Selection& nodeSelection) const final;
+        const SonataConfig::Data &networkConfig,
+        const SonataEdgePopulationParameters &lc,
+        const bbp::sonata::Selection &nodeSelection) const final;
 };
 } // namespace sonataloader

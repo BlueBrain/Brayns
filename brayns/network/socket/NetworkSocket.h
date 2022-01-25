@@ -51,7 +51,7 @@ public:
      * @param buffer Raw data of the packet.
      * @param flags Packet info (binary, close, etc).
      */
-    InputPacket(const Poco::Buffer<char>& buffer, int flags)
+    InputPacket(const Poco::Buffer<char> &buffer, int flags)
         : _data(buffer.begin(), buffer.size())
         , _flags(flags)
     {
@@ -63,14 +63,20 @@ public:
      * @return true No data inside the packet.
      * @return false The packet is not empty.
      */
-    bool isEmpty() const { return _flags == 0 && _data.empty(); }
+    bool isEmpty() const
+    {
+        return _flags == 0 && _data.empty();
+    }
 
     /**
      * @brief Get the data of the packet.
      *
      * @return const std::string& Raw data of the packet.
      */
-    const std::string& getData() const { return _data; }
+    const std::string &getData() const
+    {
+        return _data;
+    }
 
     /**
      * @brief Check if the packet content is in binary format.
@@ -89,7 +95,10 @@ public:
      * @return true The packet is a text packet.
      * @return false The packet is not a text packet.
      */
-    bool isText() const { return _flags & Poco::Net::WebSocket::FRAME_OP_TEXT; }
+    bool isText() const
+    {
+        return _flags & Poco::Net::WebSocket::FRAME_OP_TEXT;
+    }
 
     /**
      * @brief Check if the packet is a close packet.
@@ -127,7 +136,7 @@ public:
      *
      * @param data The text content of the packet.
      */
-    OutputPacket(const std::string& data)
+    OutputPacket(const std::string &data)
         : _data(data.data())
         , _size(int(data.size()))
         , _flags(Poco::Net::WebSocket::FRAME_TEXT)
@@ -140,7 +149,7 @@ public:
      * @param data The binary content of the packet.
      * @param size The size of the packet content.
      */
-    OutputPacket(const void* data, int size)
+    OutputPacket(const void *data, int size)
         : _data(data)
         , _size(size)
         , _flags(Poco::Net::WebSocket::FRAME_BINARY)
@@ -153,31 +162,43 @@ public:
      * @return true The packet is empty.
      * @return false The packet is not empty.
      */
-    bool isEmpty() const { return _size <= 0; }
+    bool isEmpty() const
+    {
+        return _size <= 0;
+    }
 
     /**
      * @brief Get the data to send.
      *
      * @return const void* Data to send.
      */
-    const void* getData() const { return _data; }
+    const void *getData() const
+    {
+        return _data;
+    }
 
     /**
      * @brief Get the size of the packet content.
      *
      * @return int The size of the packet content.
      */
-    int getSize() const { return _size; }
+    int getSize() const
+    {
+        return _size;
+    }
 
     /**
      * @brief Get the raw flags of the packet.
      *
      * @return int Raw flags containing packet info.
      */
-    int getFlags() const { return _flags; }
+    int getFlags() const
+    {
+        return _flags;
+    }
 
 private:
-    const void* _data;
+    const void *_data;
     int _size = 0;
     int _flags = 0;
 };
@@ -195,7 +216,7 @@ public:
      *
      * @param message Description of the reason why the connection was closed.
      */
-    ConnectionClosedException(const std::string& message)
+    ConnectionClosedException(const std::string &message)
         : std::runtime_error(message)
     {
     }
@@ -215,9 +236,10 @@ public:
      * @param request Client request.
      * @param response Server response.
      */
-    NetworkSocket(Poco::Net::HTTPClientSession& session,
-                  Poco::Net::HTTPRequest& request,
-                  Poco::Net::HTTPResponse& response)
+    NetworkSocket(
+        Poco::Net::HTTPClientSession &session,
+        Poco::Net::HTTPRequest &request,
+        Poco::Net::HTTPResponse &response)
         : _socket(session, request, response)
     {
         _setupSocket();
@@ -229,8 +251,7 @@ public:
      * @param request Client request.
      * @param response Server response.
      */
-    NetworkSocket(Poco::Net::HTTPServerRequest& request,
-                  Poco::Net::HTTPServerResponse& response)
+    NetworkSocket(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response)
         : _socket(request, response)
     {
         _setupSocket();
@@ -240,7 +261,10 @@ public:
      * @brief Close the socket.
      *
      */
-    void close() { _socket.close(); }
+    void close()
+    {
+        _socket.close();
+    }
 
     /**
      * @brief Receive an input packet from the connected client.
@@ -258,7 +282,7 @@ public:
         {
             _socket.receiveFrame(buffer, flags);
         }
-        catch (Poco::Exception& e)
+        catch (Poco::Exception &e)
         {
             throw ConnectionClosedException(e.displayText());
         }
@@ -279,15 +303,14 @@ public:
      *
      * @param packet Packet containing the data to send to the client.
      */
-    void send(const OutputPacket& packet)
+    void send(const OutputPacket &packet)
     {
         int size = 0;
         try
         {
-            size = _socket.sendFrame(packet.getData(), packet.getSize(),
-                                     packet.getFlags());
+            size = _socket.sendFrame(packet.getData(), packet.getSize(), packet.getFlags());
         }
-        catch (Poco::Exception& e)
+        catch (Poco::Exception &e)
         {
             throw ConnectionClosedException(e.displayText());
         }

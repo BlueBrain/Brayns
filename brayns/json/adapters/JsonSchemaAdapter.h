@@ -32,7 +32,7 @@ namespace brayns
 class JsonSchemaSerializer
 {
 public:
-    static void serialize(const JsonSchema& schema, JsonObject& object)
+    static void serialize(const JsonSchema &schema, JsonObject &object)
     {
         setIfNotEmpty(object, "oneOf", schema.oneOf);
         setIfNotEmpty(object, "title", schema.title);
@@ -53,8 +53,7 @@ public:
     }
 
 private:
-    static void setType(JsonObject& object, const std::string& key,
-                        JsonType type)
+    static void setType(JsonObject &object, const std::string &key, JsonType type)
     {
         if (type == JsonType::Unknown)
         {
@@ -63,8 +62,7 @@ private:
         set(object, key, type);
     }
 
-    static void setIfNotEmpty(JsonObject& object, const std::string& key,
-                              const JsonValue& value)
+    static void setIfNotEmpty(JsonObject &object, const std::string &key, const JsonValue &value)
     {
         if (value.isEmpty())
         {
@@ -73,15 +71,13 @@ private:
         set(object, key, value);
     }
 
-    static void setAdditionalProperties(JsonObject& object,
-                                        const std::string& key,
-                                        const JsonSchema& value)
+    static void setAdditionalProperties(JsonObject &object, const std::string &key, const JsonSchema &value)
     {
         if (value.type != JsonType::Object)
         {
             return;
         }
-        auto& additionalProperties = value.additionalProperties;
+        auto &additionalProperties = value.additionalProperties;
         if (additionalProperties.empty())
         {
             set(object, key, false);
@@ -92,7 +88,7 @@ private:
             set(object, key, additionalProperties);
             return;
         }
-        auto& schema = additionalProperties[0];
+        auto &schema = additionalProperties[0];
         if (JsonSchemaHelper::isEmpty(schema))
         {
             return;
@@ -100,15 +96,14 @@ private:
         set(object, key, schema);
     }
 
-    template <typename T>
-    static void set(JsonObject& object, const std::string& key, const T& value)
+    template<typename T>
+    static void set(JsonObject &object, const std::string &key, const T &value)
     {
         object.set(key, Json::serialize(value));
     }
 
-    template <typename T>
-    static void setIfNotNull(JsonObject& object, const std::string& key,
-                             const T& value)
+    template<typename T>
+    static void setIfNotNull(JsonObject &object, const std::string &key, const T &value)
     {
         if (!value)
         {
@@ -117,9 +112,8 @@ private:
         set(object, key, value);
     }
 
-    template <typename T>
-    static void setIfNotEmpty(JsonObject& object, const std::string& key,
-                              const T& value)
+    template<typename T>
+    static void setIfNotEmpty(JsonObject &object, const std::string &key, const T &value)
     {
         if (value.empty())
         {
@@ -128,9 +122,8 @@ private:
         set(object, key, value);
     }
 
-    template <typename T>
-    static void setAsTuple(JsonObject& object, const std::string& key,
-                           const T& value)
+    template<typename T>
+    static void setAsTuple(JsonObject &object, const std::string &key, const T &value)
     {
         if (value.empty())
         {
@@ -148,7 +141,7 @@ private:
 class JsonSchemaDeserializer
 {
 public:
-    static void deserialize(const JsonObject& object, JsonSchema& schema)
+    static void deserialize(const JsonObject &object, JsonSchema &schema)
     {
         get(object, "oneOf", schema.oneOf);
         get(object, "title", schema.title);
@@ -169,8 +162,8 @@ public:
     }
 
 private:
-    template <typename T>
-    static void get(const JsonObject& object, const std::string& key, T& value)
+    template<typename T>
+    static void get(const JsonObject &object, const std::string &key, T &value)
     {
         auto json = object.get(key);
         Json::deserialize(json, value);
@@ -181,7 +174,7 @@ private:
  * @brief Adapt JsonSchema to be used as JSON objects.
  *
  */
-template <>
+template<>
 struct JsonAdapter<JsonSchema>
 {
     /**
@@ -190,7 +183,10 @@ struct JsonAdapter<JsonSchema>
      * @param schema Input schema.
      * @return JsonSchema Output schema.
      */
-    static JsonSchema getSchema(const JsonSchema& schema) { return schema; }
+    static JsonSchema getSchema(const JsonSchema &schema)
+    {
+        return schema;
+    }
 
     /**
      * @brief Serialize a JSON schema as a JSON object
@@ -200,7 +196,7 @@ struct JsonAdapter<JsonSchema>
      * @return true Success.
      * @return false Failure.
      */
-    static bool serialize(const JsonSchema& value, JsonValue& json)
+    static bool serialize(const JsonSchema &value, JsonValue &json)
     {
         auto object = Poco::makeShared<JsonObject>();
         JsonSchemaSerializer::serialize(value, *object);
@@ -216,7 +212,7 @@ struct JsonAdapter<JsonSchema>
      * @return true Success.
      * @return false Failure.
      */
-    static bool deserialize(const JsonValue& json, JsonSchema& value)
+    static bool deserialize(const JsonValue &json, JsonSchema &value)
     {
         auto object = JsonExtractor::extractObject(json);
         if (!object)

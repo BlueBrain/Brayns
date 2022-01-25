@@ -26,7 +26,7 @@
 
 namespace brayns
 {
-template <typename T>
+template<typename T>
 class AddLightEntrypoint : public BaseEntrypoint
 {
 public:
@@ -42,7 +42,7 @@ public:
         return Json::getSchema<size_t>();
     }
 
-    virtual void onRequest(const NetworkRequest& request) override
+    virtual void onRequest(const NetworkRequest &request) override
     {
         auto params = request.getParams();
         auto light = Json::deserialize<Ptr>(params);
@@ -50,17 +50,16 @@ public:
         {
             throw EntrypointException("Failed to extract light properties");
         }
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
-        auto& lightManager = scene.getLightManager();
+        auto &engine = getApi().getEngine();
+        auto &scene = engine.getScene();
+        auto &lightManager = scene.getLightManager();
         auto id = lightManager.addLight(std::move(light));
         engine.triggerRender();
         request.reply(Json::serialize(id));
     }
 };
 
-class AddLightDirectionalEntrypoint
-    : public AddLightEntrypoint<DirectionalLight>
+class AddLightDirectionalEntrypoint : public AddLightEntrypoint<DirectionalLight>
 {
 public:
     virtual std::string getName() const override
@@ -77,7 +76,10 @@ public:
 class AddLightSphereEntrypoint : public AddLightEntrypoint<SphereLight>
 {
 public:
-    virtual std::string getName() const override { return "add-light-sphere"; }
+    virtual std::string getName() const override
+    {
+        return "add-light-sphere";
+    }
 
     virtual std::string getDescription() const override
     {
@@ -88,7 +90,10 @@ public:
 class AddLightQuadEntrypoint : public AddLightEntrypoint<QuadLight>
 {
 public:
-    virtual std::string getName() const override { return "add-light-quad"; }
+    virtual std::string getName() const override
+    {
+        return "add-light-quad";
+    }
 
     virtual std::string getDescription() const override
     {
@@ -99,7 +104,10 @@ public:
 class AddLightSpotEntrypoint : public AddLightEntrypoint<SpotLight>
 {
 public:
-    virtual std::string getName() const override { return "add-light-spot"; }
+    virtual std::string getName() const override
+    {
+        return "add-light-spot";
+    }
 
     virtual std::string getDescription() const override
     {
@@ -110,7 +118,10 @@ public:
 class AddLightAmbientEntrypoint : public AddLightEntrypoint<AmbientLight>
 {
 public:
-    virtual std::string getName() const override { return "add-light-ambient"; }
+    virtual std::string getName() const override
+    {
+        return "add-light-ambient";
+    }
 
     virtual std::string getDescription() const override
     {

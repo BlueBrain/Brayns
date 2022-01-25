@@ -38,33 +38,32 @@ class PluginAPI
 public:
     virtual ~PluginAPI() = default;
 
-    virtual Engine& getEngine() = 0;
+    virtual Engine &getEngine() = 0;
 
     /** @return access to the scene of Brayns. */
-    virtual Scene& getScene() = 0;
+    virtual Scene &getScene() = 0;
 
     /** @return access to the parameters of Brayns. */
-    virtual ParametersManager& getParametersManager() = 0;
+    virtual ParametersManager &getParametersManager() = 0;
 
     /** @return access to the action interface of Brayns. */
-    virtual ActionInterface* getActionInterface() = 0;
+    virtual ActionInterface *getActionInterface() = 0;
 
     /** @return access to the camera of Brayns. */
-    virtual Camera& getCamera() = 0;
+    virtual Camera &getCamera() = 0;
 
     /** @return access to the renderer of Brayns. */
-    virtual Renderer& getRenderer() = 0;
+    virtual Renderer &getRenderer() = 0;
 
     /**
      * @brief getLoaderRegistry gives access to the loader registry
      */
-    virtual LoaderRegistry& getLoaderRegistry() = 0;
+    virtual LoaderRegistry &getLoaderRegistry() = 0;
 
     /** Triggers a new preRender() and potentially render() and postRender(). */
     virtual void triggerRender() = 0;
 
     /** Set the action interface to be used by Brayns main loop. */
-    virtual void setActionInterface(
-        const std::shared_ptr<ActionInterface>& interface) = 0;
+    virtual void setActionInterface(const std::shared_ptr<ActionInterface> &interface) = 0;
 };
 } // namespace brayns

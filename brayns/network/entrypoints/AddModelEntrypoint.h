@@ -31,11 +31,10 @@
 
 namespace brayns
 {
-class LoadModelTask
-    : public EntrypointTask<ModelParams, std::vector<ModelDescriptorPtr>>
+class LoadModelTask : public EntrypointTask<ModelParams, std::vector<ModelDescriptorPtr>>
 {
 public:
-    LoadModelTask(Engine& engine, LoaderRegistry& registry)
+    LoadModelTask(Engine &engine, LoaderRegistry &registry)
         : _engine(&engine)
         , _loaderRegistry(&registry)
     {
@@ -43,18 +42,17 @@ public:
 
     virtual void run() override
     {
-        auto& scene = _engine->getScene();
-        auto& path = _params.getPath();
-        auto& loaderName = _params.getLoaderName();
+        auto &scene = _engine->getScene();
+        auto &path = _params.getPath();
+        auto &loaderName = _params.getLoaderName();
 
-        const auto& loader =
-            _loaderRegistry->getSuitableLoader(path, "", loaderName);
+        const auto &loader = _loaderRegistry->getSuitableLoader(path, "", loaderName);
 
-        _descriptors =
-            loader.loadFromFile(path,
-                                {[this](const auto& operation, auto amount)
-                                 { progress(operation, amount); }},
-                                _params.getLoadParameters(), scene);
+        _descriptors = loader.loadFromFile(
+            path,
+            {[this](const auto &operation, auto amount) { progress(operation, amount); }},
+            _params.getLoadParameters(),
+            scene);
 
         scene.addModels(_descriptors, _params);
     }
@@ -62,7 +60,7 @@ public:
     virtual void onStart() override
     {
         _params = getParams();
-        auto& path = _params.getPath();
+        auto &path = _params.getPath();
         if (path.empty())
         {
             throw EntrypointException("Missing model path");
@@ -80,29 +78,34 @@ public:
     }
 
 private:
-    Engine* _engine;
-    LoaderRegistry* _loaderRegistry;
+    Engine *_engine;
+    LoaderRegistry *_loaderRegistry;
     ModelParams _params;
     std::vector<ModelDescriptorPtr> _descriptors;
 };
 
-class AddModelEntrypoint
-    : public Entrypoint<ModelParams, std::vector<ModelDescriptorPtr>>
+class AddModelEntrypoint : public Entrypoint<ModelParams, std::vector<ModelDescriptorPtr>>
 {
 public:
-    virtual std::string getName() const override { return "add-model"; }
+    virtual std::string getName() const override
+    {
+        return "add-model";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Add model from path and return model descriptor on success";
     }
 
-    virtual bool isAsync() const override { return true; }
-
-    virtual void onRequest(const Request& request) override
+    virtual bool isAsync() const override
     {
-        auto& engine = getApi().getEngine();
-        auto& registry = getApi().getLoaderRegistry();
+        return true;
+    }
+
+    virtual void onRequest(const Request &request) override
+    {
+        auto &engine = getApi().getEngine();
+        auto &registry = getApi().getLoaderRegistry();
         auto task = std::make_shared<LoadModelTask>(engine, registry);
         launchTask(task, request);
     }

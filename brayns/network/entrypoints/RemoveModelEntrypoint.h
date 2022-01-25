@@ -28,22 +28,24 @@
 
 namespace brayns
 {
-class RemoveModelEntrypoint
-    : public Entrypoint<RemoveModelMessage, EmptyMessage>
+class RemoveModelEntrypoint : public Entrypoint<RemoveModelMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override { return "remove-model"; }
+    virtual std::string getName() const override
+    {
+        return "remove-model";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Remove the model(s) from the ID list from the scene";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
+        auto &engine = getApi().getEngine();
+        auto &scene = engine.getScene();
         for (auto id : params.ids)
         {
             scene.removeModel(id);

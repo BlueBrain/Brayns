@@ -57,7 +57,7 @@ struct Conversion
      * @return true If from == other.from and to == other.to.
      * @return false Otherwise.
      */
-    bool operator==(const Conversion& other) const
+    bool operator==(const Conversion &other) const
     {
         return from == other.from && to == other.to;
     }
@@ -74,10 +74,10 @@ namespace std
  *
  * @tparam  Conversion to hash.
  */
-template <>
+template<>
 struct hash<brayns::Conversion>
 {
-    size_t operator()(const brayns::Conversion& conversion) const
+    size_t operator()(const brayns::Conversion &conversion) const
     {
         constexpr size_t randomValue = 0x9e3779b9;
         auto from = conversion.from.hash_code();
@@ -111,13 +111,12 @@ public:
      * @return AnyConverter The converter that will perform the conversion from
      * From to To in runtime.
      */
-    template <typename From, typename To, typename FunctorType>
+    template<typename From, typename To, typename FunctorType>
     static AnyConverter create(FunctorType functor)
     {
         AnyConverter converter;
         converter._conversion = {typeid(From), typeid(To)};
-        converter._functor =
-            [functor = std::move(functor)](const Any& from, Any& to)
+        converter._functor = [functor = std::move(functor)](const Any &from, Any &to)
         { functor(from.as<From>(), to.as<To>()); };
         return converter;
     }
@@ -130,11 +129,10 @@ public:
      * @return AnyConverter The converter that will perform the conversion from
      * From to To in runtime.
      */
-    template <typename From, typename To>
+    template<typename From, typename To>
     static AnyConverter create()
     {
-        return create<From, To>([](const auto& from, auto& to)
-                                { Converter<From, To>::convert(from, to); });
+        return create<From, To>([](const auto &from, auto &to) { Converter<From, To>::convert(from, to); });
     }
 
     /**
@@ -143,7 +141,10 @@ public:
      *
      * @return const Conversion& The conversion runtime conversion.
      */
-    const Conversion& getConversion() const { return _conversion; }
+    const Conversion &getConversion() const
+    {
+        return _conversion;
+    }
 
     /**
      * @brief Perform the conversion between two Any instances having the same
@@ -153,7 +154,7 @@ public:
      * @param from
      * @param to
      */
-    void convert(const Any& from, Any& to) const
+    void convert(const Any &from, Any &to) const
     {
         assert(from.getType() == _conversion.from);
         assert(to.getType() == _conversion.to);
@@ -162,7 +163,7 @@ public:
 
 private:
     Conversion _conversion;
-    std::function<void(const Any&, Any&)> _functor;
+    std::function<void(const Any &, Any &)> _functor;
 };
 
 /**
@@ -182,7 +183,7 @@ public:
      * @return true The converter was found so the conversion is performed.
      * @return false The converter was not found so nothing happened.
      */
-    bool convert(const Any& from, Any& to)
+    bool convert(const Any &from, Any &to)
     {
         Conversion conversion = {from.getType(), to.getType()};
         if (conversion.from == conversion.to)
@@ -215,7 +216,7 @@ public:
      * @tparam From The source type.
      * @tparam To The destination type.
      */
-    template <typename From, typename To>
+    template<typename From, typename To>
     void add()
     {
         add(AnyConverter::create<From, To>());
@@ -228,7 +229,7 @@ public:
      * @tparam From The source type.
      * @tparam To The destination type.
      */
-    template <typename From, typename To>
+    template<typename From, typename To>
     void add2()
     {
         add<From, To>();
@@ -242,7 +243,7 @@ public:
      * @tparam From The source type.
      * @tparam To The destination type.
      */
-    template <typename From, typename To>
+    template<typename From, typename To>
     void addex()
     {
         add<From, To>();
@@ -256,7 +257,7 @@ public:
      * @tparam From The source type.
      * @tparam To The destination type.
      */
-    template <typename From, typename To>
+    template<typename From, typename To>
     void addex2()
     {
         addex<From, To>();
@@ -271,7 +272,7 @@ public:
      * @tparam From The source type.
      * @tparam To The destination type.
      */
-    template <typename From, typename To>
+    template<typename From, typename To>
     void addexn()
     {
         addex<From, To>();
@@ -287,7 +288,7 @@ public:
      * @tparam From The source type.
      * @tparam To The destination type.
      */
-    template <typename From, typename To>
+    template<typename From, typename To>
     void addexn2()
     {
         addexn<From, To>();

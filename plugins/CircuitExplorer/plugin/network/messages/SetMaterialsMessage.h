@@ -28,7 +28,6 @@
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(SetMaterialsMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<brayns::JsonBuffer<MaterialProxy>>,
-                         materials, "List of materials to update")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<brayns::JsonBuffer<MaterialProxy>>, materials, "List of materials to update")
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

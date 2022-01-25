@@ -32,16 +32,15 @@
 class MovieHelper
 {
 public:
-    static void makeMovie(const MakeMovieMessage& params)
+    static void makeMovie(const MakeMovieMessage &params)
     {
         // The folder the frames image files are stored in
-        auto& frameFolder = params.frames_folder_path;
+        auto &frameFolder = params.frames_folder_path;
 
         // Return an error if the directory provided doesn't exist
         if (!fs::is_directory(frameFolder))
         {
-            throw brayns::EntrypointException("Invalid frame folder: '" +
-                                              frameFolder + "'");
+            throw brayns::EntrypointException("Invalid frame folder: '" + frameFolder + "'");
         }
 
         // Make sure the extension has a dot as in boost::filesystem
@@ -53,13 +52,13 @@ public:
 
         // Extract video frames from folder and extension
         std::vector<std::string> frames;
-        for (const auto& entry : fs::directory_iterator(frameFolder))
+        for (const auto &entry : fs::directory_iterator(frameFolder))
         {
             if (!fs::is_regular_file(entry))
             {
                 continue;
             }
-            auto& path = entry.path();
+            auto &path = entry.path();
             if (path.extension() != extension)
             {
                 continue;
@@ -84,7 +83,7 @@ public:
         {
             MovieMaker::createMovie(movie);
         }
-        catch (const MovieCreationException& e)
+        catch (const MovieCreationException &e)
         {
             throw brayns::EntrypointException(e.what());
         }
@@ -92,7 +91,7 @@ public:
         // Remove frames image files from disk if asked to save space
         if (params.erase_frames)
         {
-            for (const auto& frame : movie.inputFiles)
+            for (const auto &frame : movie.inputFiles)
             {
                 fs::remove(frame);
             }
@@ -100,18 +99,20 @@ public:
     }
 };
 
-class MakeMovieEntrypoint
-    : public brayns::Entrypoint<MakeMovieMessage, brayns::EmptyMessage>
+class MakeMovieEntrypoint : public brayns::Entrypoint<MakeMovieMessage, brayns::EmptyMessage>
 {
 public:
-    virtual std::string getName() const override { return "make-movie"; }
+    virtual std::string getName() const override
+    {
+        return "make-movie";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Builds a movie file from a set of frames stored on disk";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         MovieHelper::makeMovie(params);

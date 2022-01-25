@@ -24,36 +24,33 @@
 namespace sonataloader
 {
 void EndFootColorHandler::_setElementsImpl(
-    const std::vector<uint64_t>&,
-    std::vector<ElementMaterialMap::Ptr>&& elements)
+    const std::vector<uint64_t> &,
+    std::vector<ElementMaterialMap::Ptr> &&elements)
 {
     size_t totalMaterials = 0;
-    for (const auto& element : elements)
+    for (const auto &element : elements)
     {
-        const auto& emm =
-            static_cast<const SynapseMaterialMap&>(*element.get());
+        const auto &emm = static_cast<const SynapseMaterialMap &>(*element.get());
         totalMaterials += emm.materials.size();
     }
 
     _materials.reserve(totalMaterials);
-    for (const auto& element : elements)
+    for (const auto &element : elements)
     {
-        const auto& emm =
-            static_cast<const SynapseMaterialMap&>(*element.get());
-        for (const auto& material : emm.materials)
+        const auto &emm = static_cast<const SynapseMaterialMap &>(*element.get());
+        for (const auto &material : emm.materials)
             _materials.push_back(material.material);
     }
 }
 
-void EndFootColorHandler::_updateColorByIdImpl(
-    const std::map<uint64_t, brayns::Vector4f>&)
+void EndFootColorHandler::_updateColorByIdImpl(const std::map<uint64_t, brayns::Vector4f> &)
 {
     ColorRoulette r;
     for (const auto matId : _materials)
         _updateMaterial(matId, r.getNextColor());
 }
 
-void EndFootColorHandler::_updateSingleColorImpl(const brayns::Vector4f& color)
+void EndFootColorHandler::_updateSingleColorImpl(const brayns::Vector4f &color)
 {
     for (const auto matId : _materials)
         _updateMaterial(matId, color);

@@ -32,32 +32,27 @@ namespace brayns
  * Set all the properties from the current property map of the given object to
  * the given ospray object.
  */
-void toOSPRayProperties(const PropertyObject& object, OSPObject ospObject);
-void toOSPRayProperties(const PropertyMap& object, OSPObject ospObject);
+void toOSPRayProperties(const PropertyObject &object, OSPObject ospObject);
+void toOSPRayProperties(const PropertyMap &object, OSPObject ospObject);
 
 /** Update all the properties in the property map from the given ospray object.
  */
-void fromOSPRayProperties(PropertyMap& object,
-                          ospray::ManagedObject& ospObject);
+void fromOSPRayProperties(PropertyMap &object, ospray::ManagedObject &ospObject);
 
 /** Convert a brayns::Transformation to an ospcommon::affine3f. */
-ospcommon::affine3f transformationToAffine3f(
-    const Transformation& transformation);
+ospcommon::affine3f transformationToAffine3f(const Transformation &transformation);
 
 /** Helper to add the given model as an instance to the given root model. */
-void addInstance(OSPModel rootModel, OSPModel modelToAdd,
-                 const Transformation& transform);
-void addInstance(OSPModel rootModel, OSPModel modelToAdd,
-                 const ospcommon::affine3f& affine);
+void addInstance(OSPModel rootModel, OSPModel modelToAdd, const Transformation &transform);
+void addInstance(OSPModel rootModel, OSPModel modelToAdd, const ospcommon::affine3f &affine);
 
 /** Helper to convert a vector of double tuples to a vector of float tuples. */
-template <int S>
-std::vector<glm::vec<S, float>> convertVectorToFloat(
-    const std::vector<glm::vec<S, double>>& input)
+template<int S>
+std::vector<glm::vec<S, float>> convertVectorToFloat(const std::vector<glm::vec<S, double>> &input)
 {
     std::vector<glm::vec<S, float>> output;
     output.reserve(input.size());
-    for (const auto& value : input)
+    for (const auto &value : input)
     {
         glm::vec<S, float> converted;
         for (int i = 0; i < S; ++i)
@@ -72,19 +67,19 @@ std::vector<glm::vec<S, float>> convertVectorToFloat(
 namespace osphelper
 {
 /** Helper methods for setting properties on OSPRay object */
-void set(OSPObject obj, const char* id, const char* s);
-void set(OSPObject obj, const char* id, const std::string& s);
-void set(OSPObject obj, const char* id, double v);
-void set(OSPObject obj, const char* id, float v);
-void set(OSPObject obj, const char* id, bool v);
-void set(OSPObject obj, const char* id, int32_t v);
-void set(OSPObject obj, const char* id, const Vector2f& v);
-void set(OSPObject obj, const char* id, const Vector2d& v);
-void set(OSPObject obj, const char* id, const Vector2i& v);
-void set(OSPObject obj, const char* id, const Vector3f& v);
-void set(OSPObject obj, const char* id, const Vector3d& v);
-void set(OSPObject obj, const char* id, const Vector3i& v);
-void set(OSPObject obj, const char* id, const Vector4f& v);
-void set(OSPObject obj, const char* id, const Vector4d& v);
+void set(OSPObject obj, const char *id, const char *s);
+void set(OSPObject obj, const char *id, const std::string &s);
+void set(OSPObject obj, const char *id, double v);
+void set(OSPObject obj, const char *id, float v);
+void set(OSPObject obj, const char *id, bool v);
+void set(OSPObject obj, const char *id, int32_t v);
+void set(OSPObject obj, const char *id, const Vector2f &v);
+void set(OSPObject obj, const char *id, const Vector2d &v);
+void set(OSPObject obj, const char *id, const Vector2i &v);
+void set(OSPObject obj, const char *id, const Vector3f &v);
+void set(OSPObject obj, const char *id, const Vector3d &v);
+void set(OSPObject obj, const char *id, const Vector3i &v);
+void set(OSPObject obj, const char *id, const Vector4f &v);
+void set(OSPObject obj, const char *id, const Vector4d &v);
 } // namespace osphelper
 } // namespace brayns

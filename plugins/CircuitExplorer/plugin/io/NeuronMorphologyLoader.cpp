@@ -29,7 +29,7 @@
 
 namespace
 {
-void checkInput(const NeuronMorphologyLoaderParameters& input)
+void checkInput(const NeuronMorphologyLoaderParameters &input)
 {
     if (!input.load_soma && !input.load_axon && !input.load_dendrites)
         throw std::invalid_argument(
@@ -58,16 +58,19 @@ std::string NeuronMorphologyLoader::getName() const
 }
 
 std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromBlob(
-    brayns::Blob&&, const brayns::LoaderProgress&,
-    const NeuronMorphologyLoaderParameters&, brayns::Scene&) const
+    brayns::Blob &&,
+    const brayns::LoaderProgress &,
+    const NeuronMorphologyLoaderParameters &,
+    brayns::Scene &) const
 {
-    throw std::runtime_error(
-        "MorphologyLoader: Import from blob not supported");
+    throw std::runtime_error("MorphologyLoader: Import from blob not supported");
 }
 
 std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromFile(
-    const std::string& path, const brayns::LoaderProgress& callback,
-    const NeuronMorphologyLoaderParameters& input, brayns::Scene& scene) const
+    const std::string &path,
+    const brayns::LoaderProgress &callback,
+    const NeuronMorphologyLoaderParameters &input,
+    brayns::Scene &scene) const
 {
     brayns::Timer timer;
 
@@ -78,7 +81,7 @@ std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromFile(
 
     checkInput(input);
 
-    const auto& geometryMode = input.geometry_mode;
+    const auto &geometryMode = input.geometry_mode;
     const auto radMultiplier = input.radius_multiplier;
     const auto radOverride = input.radius_override;
     const auto loadSoma = input.load_soma;
@@ -86,18 +89,17 @@ std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromFile(
     const auto loadDend = input.load_dendrites;
 
     NeuronBuilderTable builders;
-    const NeuronBuilder& builder = builders.getBuilder(geometryMode);
-    const NeuronMorphologyPipeline pipeline =
-        NeuronMorphologyPipeline::create(radMultiplier, radOverride,
-                                         geometryMode == "smooth" &&
-                                             (loadAxon || loadDend));
+    const NeuronBuilder &builder = builders.getBuilder(geometryMode);
+    const NeuronMorphologyPipeline pipeline = NeuronMorphologyPipeline::create(
+        radMultiplier,
+        radOverride,
+        geometryMode == "smooth" && (loadAxon || loadDend));
 
     NeuronMorphology morphology(path, loadSoma, loadAxon, loadDend);
     pipeline.process(morphology);
     const auto instantiable = builder.build(morphology);
 
-    const auto geometry =
-        instantiable->instantiate(brayns::Vector3f(), brayns::Quaternion());
+    const auto geometry = instantiable->instantiate(brayns::Vector3f(), brayns::Quaternion());
 
     auto modelPtr = scene.createModel();
     geometry->addToModel(*modelPtr);
@@ -107,9 +109,7 @@ std::vector<brayns::ModelDescriptorPtr> NeuronMorphologyLoader::importFromFile(
     transformation.setRotationCenter(modelPtr->getBounds().getCenter());
 
     auto modelDescriptor =
-        std::make_shared<brayns::ModelDescriptor>(std::move(modelPtr),
-                                                  "Morphology", path,
-                                                  brayns::ModelMetadata());
+        std::make_shared<brayns::ModelDescriptor>(std::move(modelPtr), "Morphology", path, brayns::ModelMetadata());
     modelDescriptor->setTransformation(transformation);
 
     brayns::Log::info("[CE] {}: done in {} second(s).", name, timer.elapsed());

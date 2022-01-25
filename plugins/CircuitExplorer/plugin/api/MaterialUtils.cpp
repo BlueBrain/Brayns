@@ -20,9 +20,7 @@
 
 #include <brayns/engine/Material.h>
 
-size_t CircuitExplorerMaterial::create(brayns::Model& model,
-                                       const brayns::Vector3f& color,
-                                       const float opacity)
+size_t CircuitExplorerMaterial::create(brayns::Model &model, const brayns::Vector3f &color, const float opacity)
 {
     const auto matId = model.getMaterials().size();
     auto matPtr = model.createMaterial(matId, "", _getExtraAttributes());
@@ -31,22 +29,21 @@ size_t CircuitExplorerMaterial::create(brayns::Model& model,
     return matId;
 }
 
-size_t CircuitExplorerMaterial::createUnlit(brayns::Model& model,
-                                            const brayns::Vector3f& color,
-                                            const float opacity)
+size_t CircuitExplorerMaterial::createUnlit(brayns::Model &model, const brayns::Vector3f &color, const float opacity)
 {
     const auto matId = model.getMaterials().size();
     auto matPtr = model.createMaterial(matId, "", _getExtraAttributes());
     matPtr->setDiffuseColor(color);
     matPtr->setOpacity(opacity);
-    matPtr->updateProperty(std::string(MATERIAL_PROPERTY_SHADING_MODE),
-                           static_cast<int32_t>(MaterialShadingMode::none));
+    matPtr->updateProperty(
+        std::string(MATERIAL_PROPERTY_SHADING_MODE),
+        static_cast<int32_t>(MaterialShadingMode::none));
     return matId;
 }
 
-void CircuitExplorerMaterial::addExtraAttributes(brayns::Model& model)
+void CircuitExplorerMaterial::addExtraAttributes(brayns::Model &model)
 {
-    for (auto& matEntry : model.getMaterials())
+    for (auto &matEntry : model.getMaterials())
     {
         matEntry.second->updateProperties(_getExtraAttributes());
         matEntry.second->markModified();
@@ -54,33 +51,26 @@ void CircuitExplorerMaterial::addExtraAttributes(brayns::Model& model)
     }
 }
 
-void CircuitExplorerMaterial::setSimulationColorEnabled(brayns::Model& model,
-                                                        const bool value)
+void CircuitExplorerMaterial::setSimulationColorEnabled(brayns::Model &model, const bool value)
 {
-    for (auto& matEntry : model.getMaterials())
+    for (auto &matEntry : model.getMaterials())
     {
-        if (!matEntry.second->hasProperty(
-                std::string(MATERIAL_PROPERTY_CAST_USER_DATA)))
+        if (!matEntry.second->hasProperty(std::string(MATERIAL_PROPERTY_CAST_USER_DATA)))
             continue;
-        matEntry.second->updateProperty(std::string(
-                                            MATERIAL_PROPERTY_CAST_USER_DATA),
-                                        value);
+        matEntry.second->updateProperty(std::string(MATERIAL_PROPERTY_CAST_USER_DATA), value);
         matEntry.second->markModified();
         matEntry.second->commit();
     }
 }
 
-const brayns::PropertyMap&
-    CircuitExplorerMaterial::_getExtraAttributes() noexcept
+const brayns::PropertyMap &CircuitExplorerMaterial::_getExtraAttributes() noexcept
 {
     static brayns::PropertyMap extra;
     if (extra.empty())
     {
         extra.add({std::string(MATERIAL_PROPERTY_CAST_USER_DATA), false});
-        extra.add({std::string(MATERIAL_PROPERTY_SHADING_MODE),
-                   static_cast<int32_t>(MaterialShadingMode::diffuse)});
-        extra.add({std::string(MATERIAL_PROPERTY_CLIPPING_MODE),
-                   static_cast<int>(MaterialClippingMode::no_clipping)});
+        extra.add({std::string(MATERIAL_PROPERTY_SHADING_MODE), static_cast<int32_t>(MaterialShadingMode::diffuse)});
+        extra.add({std::string(MATERIAL_PROPERTY_CLIPPING_MODE), static_cast<int>(MaterialClippingMode::no_clipping)});
         extra.add({std::string(MATERIAL_PROPERTY_USER_PARAMETER), 1.0});
     }
     return extra;

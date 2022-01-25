@@ -30,14 +30,14 @@ namespace brayns
 class FlyingModeManipulator : public AbstractManipulator
 {
 public:
-    FlyingModeManipulator(Camera& camera, KeyboardHandler& keyboardHandler);
+    FlyingModeManipulator(Camera &camera, KeyboardHandler &keyboardHandler);
     ~FlyingModeManipulator();
 
 private:
-    void dragLeft(const Vector2i& to, const Vector2i& from) final;
-    void dragRight(const Vector2i& to, const Vector2i& from) final;
-    void dragMiddle(const Vector2i& to, const Vector2i& from) final;
-    void wheel(const Vector2i& position, float delta) final;
+    void dragLeft(const Vector2i &to, const Vector2i &from) final;
+    void dragRight(const Vector2i &to, const Vector2i &from) final;
+    void dragMiddle(const Vector2i &to, const Vector2i &from) final;
+    void wheel(const Vector2i &position, float delta) final;
 
     void _strafeLeft();
     void _strafeRight();

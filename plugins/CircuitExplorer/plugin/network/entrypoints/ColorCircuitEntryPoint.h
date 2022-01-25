@@ -27,11 +27,10 @@
 #include <plugin/network/messages/AvailableColoringInfoMessage.h>
 #include <plugin/network/messages/ColorCircuitMessage.h>
 
-class ColorCircuitByIdEntrypoint
-    : public brayns::Entrypoint<ColorCircuitByIdMessage, brayns::EmptyMessage>
+class ColorCircuitByIdEntrypoint : public brayns::Entrypoint<ColorCircuitByIdMessage, brayns::EmptyMessage>
 {
 public:
-    ColorCircuitByIdEntrypoint(CircuitColorManager& manager)
+    ColorCircuitByIdEntrypoint(CircuitColorManager &manager)
         : _manager(manager)
     {
     }
@@ -49,24 +48,22 @@ public:
                "otherwise, random colors per ID will be applied";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         try
         {
-            auto& scene = getApi().getScene();
-            const auto& descriptor =
-                brayns::ExtractModel::fromId(scene, params.model_id);
+            auto &scene = getApi().getScene();
+            const auto &descriptor = brayns::ExtractModel::fromId(scene, params.model_id);
             _manager.updateColorsById(descriptor, params.color_info);
             scene.markModified();
             getApi().triggerRender();
         }
-        catch (const CircuitModelNotFoundException&)
+        catch (const CircuitModelNotFoundException &)
         {
-            throw brayns::EntrypointException(
-                1, "The given ID does not correspond to any circuit model");
+            throw brayns::EntrypointException(1, "The given ID does not correspond to any circuit model");
         }
-        catch (const IDRangeParseException& irpe)
+        catch (const IDRangeParseException &irpe)
         {
             throw brayns::EntrypointException(2, irpe.what());
         }
@@ -75,15 +72,14 @@ public:
     }
 
 private:
-    CircuitColorManager& _manager;
+    CircuitColorManager &_manager;
 };
 
 class ColorCircuitBySingleColorEntrypoint
-    : public brayns::Entrypoint<ColorCircuitBySingleColorMessage,
-                                brayns::EmptyMessage>
+    : public brayns::Entrypoint<ColorCircuitBySingleColorMessage, brayns::EmptyMessage>
 {
 public:
-    ColorCircuitBySingleColorEntrypoint(CircuitColorManager& manager)
+    ColorCircuitBySingleColorEntrypoint(CircuitColorManager &manager)
         : _manager(manager)
     {
     }
@@ -98,35 +94,32 @@ public:
         return "Colors a whole circuit model with a single color";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         try
         {
-            auto& scene = getApi().getScene();
-            const auto& descriptor =
-                brayns::ExtractModel::fromId(scene, params.model_id);
+            auto &scene = getApi().getScene();
+            const auto &descriptor = brayns::ExtractModel::fromId(scene, params.model_id);
             _manager.updateSingleColor(descriptor, params.color);
             scene.markModified();
             getApi().triggerRender();
         }
-        catch (const CircuitModelNotFoundException&)
+        catch (const CircuitModelNotFoundException &)
         {
-            throw brayns::EntrypointException(
-                1, "The given ID does not correspond to any circuit model");
+            throw brayns::EntrypointException(1, "The given ID does not correspond to any circuit model");
         }
         request.reply(brayns::EmptyMessage());
     }
 
 private:
-    CircuitColorManager& _manager;
+    CircuitColorManager &_manager;
 };
 
-class AvailableColorMethodsEntrypoint
-    : public brayns::Entrypoint<ColoredCircuitID, AvailableColorMethodsMessage>
+class AvailableColorMethodsEntrypoint : public brayns::Entrypoint<ColoredCircuitID, AvailableColorMethodsMessage>
 {
 public:
-    AvailableColorMethodsEntrypoint(CircuitColorManager& manager)
+    AvailableColorMethodsEntrypoint(CircuitColorManager &manager)
         : _manager(manager)
     {
     }
@@ -142,33 +135,30 @@ public:
                "model";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& scene = getApi().getScene();
-        const auto& descriptor =
-            brayns::ExtractModel::fromId(scene, params.model_id);
+        auto &scene = getApi().getScene();
+        const auto &descriptor = brayns::ExtractModel::fromId(scene, params.model_id);
         try
         {
             request.reply({_manager.getAvailableMethods(descriptor)});
         }
-        catch (const CircuitModelNotFoundException&)
+        catch (const CircuitModelNotFoundException &)
         {
-            throw brayns::EntrypointException(
-                1, "The given ID does not correspond to any circuit model");
+            throw brayns::EntrypointException(1, "The given ID does not correspond to any circuit model");
         }
     }
 
 private:
-    CircuitColorManager& _manager;
+    CircuitColorManager &_manager;
 };
 
 class AvailableColorMethodVariablesEntrypoint
-    : public brayns::Entrypoint<RequestCircuitColorMethodVariables,
-                                AvailableColorMethodVariablesMessage>
+    : public brayns::Entrypoint<RequestCircuitColorMethodVariables, AvailableColorMethodVariablesMessage>
 {
 public:
-    AvailableColorMethodVariablesEntrypoint(CircuitColorManager& manager)
+    AvailableColorMethodVariablesEntrypoint(CircuitColorManager &manager)
         : _manager(manager)
     {
     }
@@ -185,21 +175,18 @@ public:
                " model by the given method";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& scene = getApi().getScene();
-        const auto& descriptor =
-            brayns::ExtractModel::fromId(scene, params.model_id);
+        auto &scene = getApi().getScene();
+        const auto &descriptor = brayns::ExtractModel::fromId(scene, params.model_id);
         try
         {
-            request.reply(
-                {_manager.getMethodVariables(descriptor, params.method)});
+            request.reply({_manager.getMethodVariables(descriptor, params.method)});
         }
-        catch (const CircuitModelNotFoundException&)
+        catch (const CircuitModelNotFoundException &)
         {
-            throw brayns::EntrypointException(
-                1, "The given ID does not correspond to any circuit model");
+            throw brayns::EntrypointException(1, "The given ID does not correspond to any circuit model");
         }
         catch (const ColorMethodNotFoundException)
         {
@@ -211,15 +198,13 @@ public:
     }
 
 private:
-    CircuitColorManager& _manager;
+    CircuitColorManager &_manager;
 };
 
-class ColorCircuitByMethodEntrypoint
-    : public brayns::Entrypoint<ColorCircuitByMethodMessage,
-                                brayns::EmptyMessage>
+class ColorCircuitByMethodEntrypoint : public brayns::Entrypoint<ColorCircuitByMethodMessage, brayns::EmptyMessage>
 {
 public:
-    ColorCircuitByMethodEntrypoint(CircuitColorManager& manager)
+    ColorCircuitByMethodEntrypoint(CircuitColorManager &manager)
         : _manager(manager)
     {
     }
@@ -238,22 +223,20 @@ public:
                " will be applied";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& scene = getApi().getScene();
-        const auto& descriptor =
-            brayns::ExtractModel::fromId(scene, params.model_id);
+        auto &scene = getApi().getScene();
+        const auto &descriptor = brayns::ExtractModel::fromId(scene, params.model_id);
         try
         {
             _manager.updateColors(descriptor, params.method, params.color_info);
             scene.markModified();
             getApi().triggerRender();
         }
-        catch (const CircuitModelNotFoundException&)
+        catch (const CircuitModelNotFoundException &)
         {
-            throw brayns::EntrypointException(
-                1, "The given ID does not correspond to any circuit model");
+            throw brayns::EntrypointException(1, "The given ID does not correspond to any circuit model");
         }
         catch (const ColorMethodNotFoundException)
         {
@@ -264,14 +247,15 @@ public:
         }
         catch (const ColorMethodVariableNotFoundException)
         {
-            throw brayns::EntrypointException(3,
-                                              "One or more method variables "
-                                              "specified does not exist");
+            throw brayns::EntrypointException(
+                3,
+                "One or more method variables "
+                "specified does not exist");
         }
 
         request.reply(brayns::EmptyMessage());
     }
 
 private:
-    CircuitColorManager& _manager;
+    CircuitColorManager &_manager;
 };

@@ -30,29 +30,25 @@
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(FrameExporter::KeyFrame)
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("frame_index", frameIndex,
-                                "Integer index of the simulation frame")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("frame_index", frameIndex, "Integer index of the simulation frame")
 BRAYNS_JSON_ADAPTER_NAMED_ENTRY("camera", camera, "Camera definition")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("camera_params", cameraParameters,
-                                "Camera parameters")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("camera_params", cameraParameters, "Camera parameters")
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(FrameExporter::ExportInfo)
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("path", storePath,
-                                "Path where to store the rendered frames")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("format", imageFormat,
-                                "Image store format ('png', 'jpg', ...)")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("path", storePath, "Path where to store the rendered frames")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("format", imageFormat, "Image store format ('png', 'jpg', ...)")
 BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
-    "quality", imageQuality,
+    "quality",
+    imageQuality,
     "Image quality (compression rate = 100 - quality, "
     "100 = highest quality, 0 = lowest quality")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("spp", numSamples,
-                                "Number of samples per pixel")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("name_image_after_simulation_index",
-                                nameImageAfterSimulationFrameIndex,
-                                "Wether to name the rendered images after the "
-                                "simulation frame index or not")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("key_frames", keyFrames,
-                                "List of key frames to render")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("spp", numSamples, "Number of samples per pixel")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
+    "name_image_after_simulation_index",
+    nameImageAfterSimulationFrameIndex,
+    "Wether to name the rendered images after the "
+    "simulation frame index or not")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("key_frames", keyFrames, "List of key frames to render")
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

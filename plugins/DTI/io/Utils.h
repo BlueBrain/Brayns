@@ -7,14 +7,14 @@
 namespace
 {
 /* Returns a mapping from a name to an enum type. */
-template <typename EnumT>
+template<typename EnumT>
 std::vector<std::pair<std::string, EnumT>> enumerateMap();
 
 /* Convert a string to an enum. */
-template <typename EnumT>
-inline EnumT stringToEnum(const std::string& v)
+template<typename EnumT>
+inline EnumT stringToEnum(const std::string &v)
 {
-    for (const auto& p : enumerateMap<EnumT>())
+    for (const auto &p : enumerateMap<EnumT>())
         if (p.first == v)
             return p.second;
 
@@ -23,20 +23,20 @@ inline EnumT stringToEnum(const std::string& v)
 }
 
 /* Returns all names for given enum type 'EnumT' */
-template <typename EnumT>
+template<typename EnumT>
 inline std::vector<std::string> enumerateNames()
 {
     std::vector<std::string> v;
-    for (const auto& p : enumerateMap<EnumT>())
+    for (const auto &p : enumerateMap<EnumT>())
         v.push_back(p.first);
     return v;
 }
 
 /* Convert an enum to a string. */
-template <typename EnumT>
+template<typename EnumT>
 inline std::string enumToString(const EnumT v)
 {
-    for (const auto& p : enumerateMap<EnumT>())
+    for (const auto &p : enumerateMap<EnumT>())
         if (p.second == v)
             return p.first;
 

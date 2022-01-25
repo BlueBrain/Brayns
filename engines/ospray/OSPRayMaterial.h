@@ -28,8 +28,7 @@ namespace brayns
 class OSPRayMaterial : public Material
 {
 public:
-    OSPRayMaterial(const PropertyMap& properties = {},
-                   const bool backgroundMaterial = false)
+    OSPRayMaterial(const PropertyMap &properties = {}, const bool backgroundMaterial = false)
         : Material(properties)
         , _isBackGroundMaterial(backgroundMaterial)
     {
@@ -42,9 +41,12 @@ public:
     /** Instance the actual renderer specific object for this material.
         This operation always creates a new ISPC side material.
      */
-    void commit(const std::string& renderer);
+    void commit(const std::string &renderer);
 
-    OSPMaterial getOSPMaterial() { return _ospMaterial; }
+    OSPMaterial getOSPMaterial()
+    {
+        return _ospMaterial;
+    }
 
 private:
     OSPMaterial _ospMaterial{nullptr};

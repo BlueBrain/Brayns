@@ -38,55 +38,48 @@ public:
      * @brief returns a string representing the node population type
      * (biophysical, astrocyte, vasculature, ...)
      */
-    static std::string getPopulationType(const Nodes& nodes);
+    static std::string getPopulationType(const Nodes &nodes);
 
     /**
      * @brief returns the list of morphology names from the given node
      * population and for the given node selection
      */
-    static std::vector<std::string> getMorphologies(const Nodes& nodes,
-                                                    const Selection& selection);
+    static std::vector<std::string> getMorphologies(const Nodes &nodes, const Selection &selection);
 
     /**
      * @brief returns the list of 3D position from the given node population
      *        and for the given node selection
      */
-    static std::vector<brayns::Vector3f> getPositions(
-        const Nodes& nodes, const Selection& selection);
+    static std::vector<brayns::Vector3f> getPositions(const Nodes &nodes, const Selection &selection);
 
     /**
      * @brief returns the list of Quaternion rotations from the given node
      * population and for the given node selection
      */
-    static std::vector<brayns::Quaternion> getRotations(
-        const Nodes& nodes, const Selection& selection);
+    static std::vector<brayns::Quaternion> getRotations(const Nodes &nodes, const Selection &selection);
 
     /**
      * @brief returns the list of neuronal layers from the given node population
      *        and for the given node selection
      */
-    static std::vector<std::string> getLayers(const Nodes& population,
-                                              const Selection& selection);
+    static std::vector<std::string> getLayers(const Nodes &population, const Selection &selection);
 
     /**
      * @brief returns the list of neuronal regions from the given node
      * population and for the given node selection
      */
-    static std::vector<std::string> getRegions(const Nodes& population,
-                                               const Selection& selection);
+    static std::vector<std::string> getRegions(const Nodes &population, const Selection &selection);
 
     /**
      * @brief returns the list of morphological types from the given node
      * population and for the given node selection
      */
-    static std::vector<std::string> getMTypes(const Nodes& population,
-                                              const Selection& selection);
+    static std::vector<std::string> getMTypes(const Nodes &population, const Selection &selection);
 
     /**
      * @brief returns the list of electro-physiological types from the given
      * node population and for the given node selection
      */
-    static std::vector<std::string> getETypes(const Nodes& population,
-                                              const Selection& selection);
+    static std::vector<std::string> getETypes(const Nodes &population, const Selection &selection);
 };
 } // namespace sonataloader

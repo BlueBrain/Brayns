@@ -42,18 +42,17 @@ public:
      * @brief mapToCell adjust this SynapseGroup geometry to the correct
      * position based on the morphology geometry given as parameter
      */
-    virtual void mapToCell(const MorphologyInstance&) = 0;
+    virtual void mapToCell(const MorphologyInstance &) = 0;
 
     /**
      * @brief mapSimulation sets the edge geometries simulation offset, which is
      *        given as a map of edge id -> simulation array index
      */
-    virtual void mapSimulation(
-        const std::unordered_map<uint64_t, uint64_t>&) = 0;
+    virtual void mapSimulation(const std::unordered_map<uint64_t, uint64_t> &) = 0;
 
     /**
      * @brief addToModel adds all the edge geometries on this SynapseGroup to
      * the model given as parameter
      */
-    virtual SynapseMaterialMap::Ptr addToModel(brayns::Model& model) const = 0;
+    virtual SynapseMaterialMap::Ptr addToModel(brayns::Model &model) const = 0;
 };

@@ -45,7 +45,10 @@ public:
      * @brief Construct an invalid request.
      *
      */
-    NetworkRequest() { _setupInvalidMessage(); }
+    NetworkRequest()
+    {
+        _setupInvalidMessage();
+    }
 
     /**
      * @brief Construct a request from a connection handle and the connection
@@ -54,7 +57,7 @@ public:
      * @param handle Connection handle.
      * @param manager Connection manager.
      */
-    NetworkRequest(ConnectionHandle handle, ConnectionManager& connections)
+    NetworkRequest(ConnectionHandle handle, ConnectionManager &connections)
         : _connection(std::move(handle), connections)
     {
         _setupInvalidMessage();
@@ -65,7 +68,7 @@ public:
      *
      * @return const ConnectionHandle& Connection handle with the client.
      */
-    const ConnectionHandle& getConnectionHandle() const
+    const ConnectionHandle &getConnectionHandle() const
     {
         return _connection.getHandle();
     }
@@ -75,14 +78,20 @@ public:
      *
      * @return const RequestMessage& The message sent by the client.
      */
-    const RequestMessage& getMessage() const { return _message; }
+    const RequestMessage &getMessage() const
+    {
+        return _message;
+    }
 
     /**
      * @brief Get the ID of the request from the message.
      *
      * @return const RequestId& Request ID.
      */
-    const RequestId& getId() const { return _message.id; }
+    const RequestId &getId() const
+    {
+        return _message.id;
+    }
 
     /**
      * @brief Check if the request expects a reply.
@@ -90,28 +99,40 @@ public:
      * @return true A reply must be send (even with no result).
      * @return false No reply can be sent.
      */
-    bool shouldBeReplied() const { return !getId().isEmpty(); }
+    bool shouldBeReplied() const
+    {
+        return !getId().isEmpty();
+    }
 
     /**
      * @brief Get the method of the request (entrypoint name) from the message.
      *
      * @return const std::string& The name of the requested method.
      */
-    const std::string& getMethod() const { return _message.method; }
+    const std::string &getMethod() const
+    {
+        return _message.method;
+    }
 
     /**
      * @brief Get the content of the message (parameters).
      *
      * @return const JsonValue& Message content in JSON format.
      */
-    const JsonValue& getParams() const { return _message.params; }
+    const JsonValue &getParams() const
+    {
+        return _message.params;
+    }
 
     /**
      * @brief Setup the client message.
      *
      * @param message Client message.
      */
-    void setMessage(RequestMessage message) { _message = std::move(message); }
+    void setMessage(RequestMessage message)
+    {
+        _message = std::move(message);
+    }
 
     /**
      * @brief Send a reply message in case of success.
@@ -121,7 +142,7 @@ public:
      *
      * @param result Message content stored under "result" in the reply.
      */
-    void reply(const JsonValue& result) const
+    void reply(const JsonValue &result) const
     {
         if (!shouldBeReplied())
         {
@@ -140,8 +161,7 @@ public:
      * @param code Error code.
      * @param message Error description.
      */
-    void error(int code, const std::string& message,
-               const JsonValue& data = {}) const
+    void error(int code, const std::string &message, const JsonValue &data = {}) const
     {
         if (!shouldBeReplied())
         {
@@ -155,7 +175,10 @@ public:
      *
      * @param message Error message.
      */
-    void error(const std::string& message) const { error(0, message); }
+    void error(const std::string &message) const
+    {
+        error(0, message);
+    }
 
     /**
      * @brief Shortcut to process an arbitrary exception.
@@ -176,7 +199,10 @@ public:
      *
      * @param e Opaque exception pointer.
      */
-    void invalidRequest(std::exception_ptr e) const { _error(e); }
+    void invalidRequest(std::exception_ptr e) const
+    {
+        _error(e);
+    }
 
     /**
      * @brief Send a progress message to all clients.
@@ -186,7 +212,7 @@ public:
      * @param operation Current step description.
      * @param amount Completion percentage.
      */
-    void progress(const std::string& operation, double amount) const
+    void progress(const std::string &operation, double amount) const
     {
         auto progress = MessageFactory::createProgress(_message);
         progress.params.operation = operation;
@@ -205,8 +231,8 @@ public:
      * the reply.
      * @param result Message content stored under "result" in the reply.
      */
-    template <typename MessageType>
-    void reply(const MessageType& result) const
+    template<typename MessageType>
+    void reply(const MessageType &result) const
     {
         if (!shouldBeReplied())
         {
@@ -221,8 +247,8 @@ public:
      * @tparam MessageType Params object type.
      * @param params Params content.
      */
-    template <typename MessageType>
-    void notify(const MessageType& params) const
+    template<typename MessageType>
+    void notify(const MessageType &params) const
     {
         NotificationMessage notification;
         notification.jsonrpc = "2.0";
@@ -233,13 +259,15 @@ public:
     }
 
 private:
-    void _setupInvalidMessage() { _message.jsonrpc = "2.0"; }
+    void _setupInvalidMessage()
+    {
+        _message.jsonrpc = "2.0";
+    }
 
-    void _error(int code, const std::string& message,
-                const JsonValue& data) const
+    void _error(int code, const std::string &message, const JsonValue &data) const
     {
         auto reply = MessageFactory::createError(_message);
-        auto& error = reply.error;
+        auto &error = reply.error;
         error.code = code;
         error.message = message;
         error.data = data;
@@ -256,16 +284,15 @@ private:
         {
             std::rethrow_exception(e);
         }
-        catch (const EntrypointException& e)
+        catch (const EntrypointException &e)
         {
             _error(e.getCode(), e.what(), e.getData());
         }
-        catch (const ConnectionClosedException& e)
+        catch (const ConnectionClosedException &e)
         {
-            Log::info("Connection closed during request processing: {}.",
-                      e.what());
+            Log::info("Connection closed during request processing: {}.", e.what());
         }
-        catch (const std::exception& e)
+        catch (const std::exception &e)
         {
             _error(0, e.what(), {});
         }
@@ -276,8 +303,8 @@ private:
         }
     }
 
-    template <typename MessageType>
-    void _send(const MessageType& message) const
+    template<typename MessageType>
+    void _send(const MessageType &message) const
     {
         auto packet = Json::stringify(message);
         _connection.send(packet);

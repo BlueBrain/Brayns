@@ -27,7 +27,7 @@
 
 namespace brayns
 {
-template <>
+template<>
 struct JsonAdapter<VolumeDataType> : EnumAdapter<VolumeDataType>
 {
 };

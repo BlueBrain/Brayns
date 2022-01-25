@@ -326,16 +326,12 @@ public:
 private:
     static bool _tryParse(Context &context)
     {
-        return _tryParseWith<BeginSolid>(context) ||
-               _tryParseWith<EndSolid>(context) ||
-               _tryParseWith<BeginFacet>(context) ||
-               _tryParseWith<EndFacet>(context) ||
-               _tryParseWith<BeginLoop>(context) ||
-               _tryParseWith<EndLoop>(context) ||
-               _tryParseWith<Vertex>(context);
+        return _tryParseWith<BeginSolid>(context) || _tryParseWith<EndSolid>(context)
+            || _tryParseWith<BeginFacet>(context) || _tryParseWith<EndFacet>(context)
+            || _tryParseWith<BeginLoop>(context) || _tryParseWith<EndLoop>(context) || _tryParseWith<Vertex>(context);
     }
 
-    template <typename T>
+    template<typename T>
     static bool _tryParseWith(Context &context)
     {
         if (!T::canParse(context))
@@ -425,8 +421,7 @@ private:
         auto size = 50 * count;
         if (data.size() < size)
         {
-            throw std::runtime_error("Expected " + std::to_string(size) +
-                                     " bytes of data after header");
+            throw std::runtime_error("Expected " + std::to_string(size) + " bytes of data after header");
         }
     }
 
@@ -437,8 +432,7 @@ private:
         return solid;
     }
 
-    static std::vector<Facet> _extractFacets(std::string_view &data,
-                                             size_t count)
+    static std::vector<Facet> _extractFacets(std::string_view &data, size_t count)
     {
         std::vector<Facet> facets;
         facets.reserve(count);
@@ -529,8 +523,7 @@ std::vector<std::string> StlMeshParser::getSupportedExtensions() const
 
 TriangleMesh StlMeshParser::parse(std::string_view data) const
 {
-    auto solid = Format::isAscii(data) ? AsciiParser::parse(data)
-                                       : BinaryParser::parse(data);
+    auto solid = Format::isAscii(data) ? AsciiParser::parse(data) : BinaryParser::parse(data);
     return MeshConverter::convert(solid);
 }
 } // namespace brayns

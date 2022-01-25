@@ -30,26 +30,20 @@
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(VolumeParameters)
-BRAYNS_JSON_ADAPTER_GETSET("volume_dimensions", getDimensions, setDimensions,
-                           "Dimensions XYZ")
-BRAYNS_JSON_ADAPTER_GETSET("volume_element_spacing", getElementSpacing,
-                           setElementSpacing, "Element spacing XYZ")
+BRAYNS_JSON_ADAPTER_GETSET("volume_dimensions", getDimensions, setDimensions, "Dimensions XYZ")
+BRAYNS_JSON_ADAPTER_GETSET("volume_element_spacing", getElementSpacing, setElementSpacing, "Element spacing XYZ")
 BRAYNS_JSON_ADAPTER_GETSET("volume_offset", getOffset, setOffset, "Offset XYZ")
-BRAYNS_JSON_ADAPTER_GETSET("gradient_shading", getGradientShading,
-                           setGradientShading, "Use gradient shading")
-BRAYNS_JSON_ADAPTER_GETSET("single_shade", getSingleShade, setSingleShade,
-                           "Use a single shade for the whole volume")
-BRAYNS_JSON_ADAPTER_GETSET("pre_integration", getPreIntegration,
-                           setPreIntegration, "Use pre-integration")
-BRAYNS_JSON_ADAPTER_GETSET("adaptive_max_sampling_rate",
-                           getAdaptiveMaxSamplingRate,
-                           setAdaptiveMaxSamplingRate, "Max sampling rate")
-BRAYNS_JSON_ADAPTER_GETSET("adaptive_sampling", getAdaptiveSampling,
-                           setAdaptiveSampling, "Use adaptive sampling")
-BRAYNS_JSON_ADAPTER_GETSET("sampling_rate", getSamplingRate, setSamplingRate,
-                           "Fixed sampling rate")
-BRAYNS_JSON_ADAPTER_GETSET("specular", getSpecular, setSpecular,
-                           "Reflectivity amount XYZ")
+BRAYNS_JSON_ADAPTER_GETSET("gradient_shading", getGradientShading, setGradientShading, "Use gradient shading")
+BRAYNS_JSON_ADAPTER_GETSET("single_shade", getSingleShade, setSingleShade, "Use a single shade for the whole volume")
+BRAYNS_JSON_ADAPTER_GETSET("pre_integration", getPreIntegration, setPreIntegration, "Use pre-integration")
+BRAYNS_JSON_ADAPTER_GETSET(
+    "adaptive_max_sampling_rate",
+    getAdaptiveMaxSamplingRate,
+    setAdaptiveMaxSamplingRate,
+    "Max sampling rate")
+BRAYNS_JSON_ADAPTER_GETSET("adaptive_sampling", getAdaptiveSampling, setAdaptiveSampling, "Use adaptive sampling")
+BRAYNS_JSON_ADAPTER_GETSET("sampling_rate", getSamplingRate, setSamplingRate, "Fixed sampling rate")
+BRAYNS_JSON_ADAPTER_GETSET("specular", getSpecular, setSpecular, "Reflectivity amount XYZ")
 BRAYNS_JSON_ADAPTER_GETSET("clip_box", getClipBox, setClipBox, "Clip box")
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

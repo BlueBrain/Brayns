@@ -23,12 +23,11 @@
 namespace sonataloader
 {
 std::vector<NodeReportMapping> NodeVasculatureReportLoader::loadMapping(
-    const std::string& reportPath, const std::string& population,
-    const bbp::sonata::Selection& s) const
+    const std::string &reportPath,
+    const std::string &population,
+    const bbp::sonata::Selection &s) const
 {
-    const auto rawMapping =
-        SonataSimulationMapping::getCompartmentMapping(reportPath, population,
-                                                       s.flatten());
+    const auto rawMapping = SonataSimulationMapping::getCompartmentMapping(reportPath, population, s.flatten());
 
     // Sorted vasculature mapping indices
     std::map<uint64_t, size_t> sortedCompartmentsSize;

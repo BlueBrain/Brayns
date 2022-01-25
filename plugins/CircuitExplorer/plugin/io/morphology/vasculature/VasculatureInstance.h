@@ -35,22 +35,22 @@
 class VasculatureInstance : public MorphologyInstance
 {
 public:
-    VasculatureInstance(const brayns::Vector3f& start, const float startR,
-                        const brayns::Vector3f& end, const float endR,
-                        const VasculatureSection sectionType);
+    VasculatureInstance(
+        const brayns::Vector3f &start,
+        const float startR,
+        const brayns::Vector3f &end,
+        const float endR,
+        const VasculatureSection sectionType);
 
-    void mapSimulation(const size_t globalOffset, const std::vector<uint16_t>&,
-                       const std::vector<uint16_t>&) final;
+    void mapSimulation(const size_t globalOffset, const std::vector<uint16_t> &, const std::vector<uint16_t> &) final;
 
-    ElementMaterialMap::Ptr addToModel(brayns::Model& model) const final;
+    ElementMaterialMap::Ptr addToModel(brayns::Model &model) const final;
 
     size_t getSectionSegmentCount(const int32_t) const final;
 
-    MorphologyInstance::SegmentPoints getSegment(const int32_t,
-                                                 const uint32_t) const final;
+    MorphologyInstance::SegmentPoints getSegment(const int32_t, const uint32_t) const final;
 
-    uint64_t getSegmentSimulationOffset(const int32_t,
-                                        const uint32_t) const final;
+    uint64_t getSegmentSimulationOffset(const int32_t, const uint32_t) const final;
 
 private:
     brayns::SDFGeometry _geometry;

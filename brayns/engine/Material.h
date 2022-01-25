@@ -38,41 +38,80 @@ public:
     virtual void commit() = 0;
     //@}
 
-    Material(const PropertyMap& properties = {});
+    Material(const PropertyMap &properties = {});
 
-    const std::string& getName() const { return _name; }
-    void setName(const std::string& value) { _updateValue(_name, value); }
-    void setDiffuseColor(const Vector3d& value)
+    const std::string &getName() const
+    {
+        return _name;
+    }
+    void setName(const std::string &value)
+    {
+        _updateValue(_name, value);
+    }
+    void setDiffuseColor(const Vector3d &value)
     {
         _updateValue(_diffuseColor, value);
     }
-    const Vector3d& getDiffuseColor() const { return _diffuseColor; }
-    void setSpecularColor(const Vector3d& value)
+    const Vector3d &getDiffuseColor() const
+    {
+        return _diffuseColor;
+    }
+    void setSpecularColor(const Vector3d &value)
     {
         _updateValue(_specularColor, value);
     }
-    const Vector3d& getSpecularColor() const { return _specularColor; }
+    const Vector3d &getSpecularColor() const
+    {
+        return _specularColor;
+    }
     void setSpecularExponent(double value)
     {
         _updateValue(_specularExponent, value);
     }
-    double getSpecularExponent() const { return _specularExponent; }
+    double getSpecularExponent() const
+    {
+        return _specularExponent;
+    }
     void setReflectionIndex(double value)
     {
         _updateValue(_reflectionIndex, value);
     }
-    double getReflectionIndex() const { return _reflectionIndex; }
-    void setOpacity(double value) { _updateValue(_opacity, value); }
-    double getOpacity() const { return _opacity; }
+    double getReflectionIndex() const
+    {
+        return _reflectionIndex;
+    }
+    void setOpacity(double value)
+    {
+        _updateValue(_opacity, value);
+    }
+    double getOpacity() const
+    {
+        return _opacity;
+    }
     void setRefractionIndex(double value)
     {
         _updateValue(_refractionIndex, value);
     }
-    double getRefractionIndex() const { return _refractionIndex; }
-    void setEmission(double value) { _updateValue(_emission, value); }
-    double getEmission() const { return _emission; }
-    void setGlossiness(double value) { _updateValue(_glossiness, value); }
-    double getGlossiness() const { return _glossiness; }
+    double getRefractionIndex() const
+    {
+        return _refractionIndex;
+    }
+    void setEmission(double value)
+    {
+        _updateValue(_emission, value);
+    }
+    double getEmission() const
+    {
+        return _emission;
+    }
+    void setGlossiness(double value)
+    {
+        _updateValue(_glossiness, value);
+    }
+    double getGlossiness() const
+    {
+        return _glossiness;
+    }
 
 protected:
     std::string _name{"undefined"};

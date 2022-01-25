@@ -45,7 +45,7 @@ ColorTable::ColorTable()
 
 ColorTable ColorDeck::_TABLE;
 
-const brayns::Vector4f& ColorDeck::getColorForKey(const std::string& k) noexcept
+const brayns::Vector4f &ColorDeck::getColorForKey(const std::string &k) noexcept
 {
     const auto it = _colorMap.find(k);
     if (it == _colorMap.end())
@@ -54,7 +54,7 @@ const brayns::Vector4f& ColorDeck::getColorForKey(const std::string& k) noexcept
     return _TABLE.VALUES[it->second];
 }
 
-const brayns::Vector4f& ColorDeck::_emplaceColor(const std::string& k) noexcept
+const brayns::Vector4f &ColorDeck::_emplaceColor(const std::string &k) noexcept
 {
     const auto nextIndex = _lastIndex++ % _TABLE.VALUES.size();
     _colorMap[k] = nextIndex;
@@ -63,7 +63,7 @@ const brayns::Vector4f& ColorDeck::_emplaceColor(const std::string& k) noexcept
 
 ColorTable ColorRoulette::_TABLE;
 
-const brayns::Vector4f& ColorRoulette::getNextColor() noexcept
+const brayns::Vector4f &ColorRoulette::getNextColor() noexcept
 {
     const auto index = _lastIndex++ % _TABLE.VALUES.size();
     return _TABLE.VALUES[index];

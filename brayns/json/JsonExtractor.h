@@ -38,7 +38,7 @@ public:
      * @param json JSON source.
      * @return JsonArray::Ptr JSON array or null if not an array.
      */
-    static JsonArray::Ptr extractArray(const JsonValue& json)
+    static JsonArray::Ptr extractArray(const JsonValue &json)
     {
         if (json.type() != typeid(JsonArray::Ptr))
         {
@@ -53,7 +53,7 @@ public:
      * @param json JSON source.
      * @return JsonObject::Ptr JSON object or null if not an object.
      */
-    static JsonObject::Ptr extractObject(const JsonValue& json)
+    static JsonObject::Ptr extractObject(const JsonValue &json)
     {
         if (json.type() != typeid(JsonObject::Ptr))
         {

@@ -33,13 +33,13 @@
 
 TEST_CASE("default_scene_benchmark")
 {
-    const char* argv[] = {"brayns"};
+    const char *argv[] = {"brayns"};
     brayns::Brayns brayns(1, argv);
 
     uint64_t reference, shadows, softShadows, ambientOcclusion, allOptions;
 
     // Set default rendering parameters
-    brayns::ParametersManager& params = brayns.getParametersManager();
+    brayns::ParametersManager &params = brayns.getParametersManager();
     params.getRenderingParameters().setSamplesPerPixel(32);
     brayns.commit();
 
@@ -50,7 +50,7 @@ TEST_CASE("default_scene_benchmark")
     timer.stop();
     reference = timer.milliseconds();
 
-    auto& renderer = brayns.getEngine().getRenderer();
+    auto &renderer = brayns.getEngine().getRenderer();
 
     // Shadows
     auto props = renderer.getPropertyMap();

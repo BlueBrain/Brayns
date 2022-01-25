@@ -34,17 +34,16 @@ namespace brayns
 {
 namespace
 {
-template <size_t M, typename T>
-std::string to_string(const glm::vec<M, T>& vec)
+template<size_t M, typename T>
+std::string to_string(const glm::vec<M, T> &vec)
 {
     std::stringstream stream;
     stream << vec;
     return stream.str();
 }
 
-template <typename T>
-glm::vec<3, T> parseVec3(const std::string& str,
-                         std::function<T(std::string)> conv)
+template<typename T>
+glm::vec<3, T> parseVec3(const std::string &str, std::function<T(std::string)> conv)
 {
     const auto v = brayns::string_utils::split(str, ' ');
     if (v.size() != 3)
@@ -52,7 +51,7 @@ glm::vec<3, T> parseVec3(const std::string& str,
     return {conv(v[0]), conv(v[1]), conv(v[2])};
 }
 
-std::map<std::string, std::string> parseMHD(const std::string& filename)
+std::map<std::string, std::string> parseMHD(const std::string &filename)
 {
     std::ifstream infile(filename);
     if (!infile.good())
@@ -73,8 +72,7 @@ std::map<std::string, std::string> parseMHD(const std::string& filename)
     {
         const auto v = string_utils::split(line, '=');
         if (v.size() != 2)
-            throw std::runtime_error("Could not parse line " +
-                                     std::to_string(ctr));
+            throw std::runtime_error("Could not parse line " + std::to_string(ctr));
         auto key = v[0];
         auto value = v[1];
         string_utils::trim(key);
@@ -87,7 +85,7 @@ std::map<std::string, std::string> parseMHD(const std::string& filename)
     return result;
 }
 
-VolumeDataType dataTypeFromMET(const std::string& type)
+VolumeDataType dataTypeFromMET(const std::string &type)
 {
     if (type == "MET_FLOAT")
         return VolumeDataType::FLOAT;
@@ -114,23 +112,17 @@ Vector2f dataRangeFromType(VolumeDataType type)
     switch (type)
     {
     case VolumeDataType::UINT8:
-        return {std::numeric_limits<uint8_t>::min(),
-                std::numeric_limits<uint8_t>::max()};
+        return {std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max()};
     case VolumeDataType::UINT16:
-        return {std::numeric_limits<uint16_t>::min(),
-                std::numeric_limits<uint16_t>::max()};
+        return {std::numeric_limits<uint16_t>::min(), std::numeric_limits<uint16_t>::max()};
     case VolumeDataType::UINT32:
-        return {std::numeric_limits<uint32_t>::min() / 100,
-                std::numeric_limits<uint32_t>::max() / 100};
+        return {std::numeric_limits<uint32_t>::min() / 100, std::numeric_limits<uint32_t>::max() / 100};
     case VolumeDataType::INT8:
-        return {std::numeric_limits<int8_t>::min(),
-                std::numeric_limits<int8_t>::max()};
+        return {std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()};
     case VolumeDataType::INT16:
-        return {std::numeric_limits<int16_t>::min(),
-                std::numeric_limits<int16_t>::max()};
+        return {std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()};
     case VolumeDataType::INT32:
-        return {std::numeric_limits<int32_t>::min() / 100,
-                std::numeric_limits<int32_t>::max() / 100};
+        return {std::numeric_limits<int32_t>::min() / 100, std::numeric_limits<int32_t>::max() / 100};
     case VolumeDataType::FLOAT:
     case VolumeDataType::DOUBLE:
     default:
@@ -139,35 +131,45 @@ Vector2f dataRangeFromType(VolumeDataType type)
 }
 } // namespace
 
-bool RawVolumeLoader::isSupported(const std::string&,
-                                  const std::string& extension) const
+bool RawVolumeLoader::isSupported(const std::string &, const std::string &extension) const
 {
     return extension == "raw";
 }
 
 std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromBlob(
-    Blob&& blob, const LoaderProgress& callback,
-    const RawVolumeLoaderParameters& properties, Scene& scene) const
+    Blob &&blob,
+    const LoaderProgress &callback,
+    const RawVolumeLoaderParameters &properties,
+    Scene &scene) const
 {
     return {_loadVolume(
-        blob.name, callback, properties,
+        blob.name,
+        callback,
+        properties,
         [&blob](auto volume) { volume->mapData(std::move(blob.data)); },
         scene)};
 }
 
 std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromFile(
-    const std::string& filename, const LoaderProgress& callback,
-    const RawVolumeLoaderParameters& properties, Scene& scene) const
+    const std::string &filename,
+    const LoaderProgress &callback,
+    const RawVolumeLoaderParameters &properties,
+    Scene &scene) const
 {
     return {_loadVolume(
-        filename, callback, properties,
-        [filename](auto volume) { volume->mapData(filename); }, scene)};
+        filename,
+        callback,
+        properties,
+        [filename](auto volume) { volume->mapData(filename); },
+        scene)};
 }
 
 ModelDescriptorPtr RawVolumeLoader::_loadVolume(
-    const std::string& filename, const LoaderProgress& callback,
-    const RawVolumeLoaderParameters& params,
-    const std::function<void(SharedDataVolumePtr)>& mapData, Scene& scene) const
+    const std::string &filename,
+    const LoaderProgress &callback,
+    const RawVolumeLoaderParameters &params,
+    const std::function<void(SharedDataVolumePtr)> &mapData,
+    Scene &scene) const
 {
     callback.updateProgress("Parsing volume file ...", 0.f);
 
@@ -176,8 +178,7 @@ ModelDescriptorPtr RawVolumeLoader::_loadVolume(
 
     const auto dataRange = dataRangeFromType(params.type);
     auto model = scene.createModel();
-    auto volume = model->createSharedDataVolume(params.dimensions,
-                                                params.spacing, params.type);
+    auto volume = model->createSharedDataVolume(params.dimensions, params.spacing, params.type);
     volume->setDataRange(dataRange);
 
     callback.updateProgress("Loading voxels ...", 0.5f);
@@ -189,9 +190,9 @@ ModelDescriptorPtr RawVolumeLoader::_loadVolume(
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
     auto modelDescriptor = std::make_shared<ModelDescriptor>(
-        std::move(model), filename,
-        ModelMetadata{{"dimensions", to_string(params.dimensions)},
-                      {"element-spacing", to_string(params.spacing)}});
+        std::move(model),
+        filename,
+        ModelMetadata{{"dimensions", to_string(params.dimensions)}, {"element-spacing", to_string(params.spacing)}});
     modelDescriptor->setTransformation(transformation);
     return modelDescriptor;
 }
@@ -208,40 +209,32 @@ std::vector<std::string> RawVolumeLoader::getSupportedExtensions() const
 
 ////////////////////////////////////////////////////////////////////////////
 
-bool MHDVolumeLoader::isSupported(const std::string&,
-                                  const std::string& extension) const
+bool MHDVolumeLoader::isSupported(const std::string &, const std::string &extension) const
 {
     return extension == "mhd";
 }
 
-std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromBlob(
-    Blob&&, const LoaderProgress&, Scene&) const
+std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromBlob(Blob &&, const LoaderProgress &, Scene &) const
 {
     throw std::runtime_error("Volume loading from blob is not supported");
 }
 
-std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromFile(
-    const std::string& filename, const LoaderProgress& callback,
-    Scene& scene) const
+std::vector<ModelDescriptorPtr>
+    MHDVolumeLoader::importFromFile(const std::string &filename, const LoaderProgress &callback, Scene &scene) const
 {
     std::string volumeFile = filename;
     const auto mhd = parseMHD(filename);
 
     // Check all keys present
-    for (const auto key : {"ObjectType", "DimSize", "ElementSpacing",
-                           "ElementType", "ElementDataFile"})
+    for (const auto key : {"ObjectType", "DimSize", "ElementSpacing", "ElementType", "ElementDataFile"})
         if (mhd.find(key) == mhd.end())
             throw std::runtime_error("Missing key " + std::string(key));
 
     if (mhd.at("ObjectType") != "Image")
         throw std::runtime_error("Wrong object type for mhd file");
 
-    const auto dimensions =
-        parseVec3<int32_t>(mhd.at("DimSize"),
-                           [](const auto& s) { return stoi(s); });
-    const auto spacing =
-        parseVec3<double>(mhd.at("ElementSpacing"),
-                          [](const auto& s) { return stod(s); });
+    const auto dimensions = parseVec3<int32_t>(mhd.at("DimSize"), [](const auto &s) { return stoi(s); });
+    const auto spacing = parseVec3<double>(mhd.at("ElementSpacing"), [](const auto &s) { return stod(s); });
     const auto type = dataTypeFromMET(mhd.at("ElementType"));
 
     fs::path path = mhd.at("ElementDataFile");
@@ -257,8 +250,7 @@ std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromFile(
     params.spacing = spacing;
     params.type = type;
 
-    return RawVolumeLoader().importFromFile(volumeFile, callback, params,
-                                            scene);
+    return RawVolumeLoader().importFromFile(volumeFile, callback, params, scene);
 }
 
 std::string MHDVolumeLoader::getName() const

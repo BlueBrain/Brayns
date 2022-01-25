@@ -48,7 +48,7 @@ public:
      *
      * @param context Common data.
      */
-    EntrypointManager(NetworkContext& context);
+    EntrypointManager(NetworkContext &context);
 
     /**
      * @brief Retrieve an entrypoint using its name.
@@ -56,7 +56,7 @@ public:
      * @param name Entrypoint name (ex: "set-camera").
      * @return const EntrypointRef* Entrypoint or null if not registered.
      */
-    const EntrypointRef* find(const std::string& name) const;
+    const EntrypointRef *find(const std::string &name) const;
 
     /**
      * @brief Add a new entrypoint.
@@ -84,7 +84,7 @@ public:
      *
      * @param request Client text request.
      */
-    void processRequest(const NetworkRequest& request) const;
+    void processRequest(const NetworkRequest &request) const;
 
     /**
      * @brief Notify all entrypoints before render.
@@ -103,7 +103,10 @@ public:
      *
      * @return size_t Number of existing entrypoints.
      */
-    size_t size() const { return _entrypoints.size(); }
+    size_t size() const
+    {
+        return _entrypoints.size();
+    }
 
     /**
      * @brief Iterate over all registered entrypoints.
@@ -111,18 +114,18 @@ public:
      * @tparam FunctorType Functor type like void(const EntrypointRef&).
      * @param functor Functor instance.
      */
-    template <typename FunctorType>
+    template<typename FunctorType>
     void forEach(FunctorType functor) const
     {
-        for (const auto& pair : _entrypoints)
+        for (const auto &pair : _entrypoints)
         {
-            auto& entrypoint = pair.second;
+            auto &entrypoint = pair.second;
             functor(entrypoint);
         }
     }
 
 private:
-    NetworkContext* _context;
+    NetworkContext *_context;
     EntrypointMap _entrypoints;
 };
 } // namespace brayns

@@ -32,14 +32,17 @@ using namespace brayns;
 class MessageReceiver
 {
 public:
-    MessageReceiver(NetworkSocketPtr socket, NetworkContext& context)
+    MessageReceiver(NetworkSocketPtr socket, NetworkContext &context)
         : _socket(std::move(socket))
         , _connections(&context.getConnections())
     {
         _connections->add(_socket);
     }
 
-    ~MessageReceiver() { _connections->remove(_socket); }
+    ~MessageReceiver()
+    {
+        _connections->remove(_socket);
+    }
 
     bool receive()
     {
@@ -48,11 +51,11 @@ public:
             _receive();
             return true;
         }
-        catch (const ConnectionClosedException& e)
+        catch (const ConnectionClosedException &e)
         {
             Log::debug("Connection closed: {}.", e.what());
         }
-        catch (const std::exception& e)
+        catch (const std::exception &e)
         {
             Log::debug("Unknown receive error: {}.", e.what());
         }
@@ -69,13 +72,13 @@ private:
     }
 
     NetworkSocketPtr _socket;
-    ConnectionManager* _connections;
+    ConnectionManager *_connections;
 };
 } // namespace
 
 namespace brayns
 {
-NetworkInterface::NetworkInterface(NetworkContext& context)
+NetworkInterface::NetworkInterface(NetworkContext &context)
     : _context(&context)
 {
 }
@@ -90,29 +93,29 @@ void NetworkInterface::run(NetworkSocketPtr socket)
 
 void NetworkInterface::addEntrypoint(EntrypointRef entrypoint)
 {
-    auto& entrypoints = _context->getEntrypoints();
+    auto &entrypoints = _context->getEntrypoints();
     entrypoints.add(std::move(entrypoint));
 }
 
 void NetworkInterface::setupEntrypoints()
 {
-    auto& entrypoints = _context->getEntrypoints();
+    auto &entrypoints = _context->getEntrypoints();
     entrypoints.setup();
 }
 
 void NetworkInterface::processRequests()
 {
-    auto& connections = _context->getConnections();
+    auto &connections = _context->getConnections();
     connections.update();
 }
 
 void NetworkInterface::update()
 {
-    auto& entrypoints = _context->getEntrypoints();
+    auto &entrypoints = _context->getEntrypoints();
     entrypoints.update();
-    auto& tasks = _context->getTasks();
+    auto &tasks = _context->getTasks();
     tasks.poll();
-    auto& binary = _context->getBinary();
+    auto &binary = _context->getBinary();
     binary.pollTasks();
 }
 } // namespace brayns

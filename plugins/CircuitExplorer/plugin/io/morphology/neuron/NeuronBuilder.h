@@ -28,8 +28,7 @@ class NeuronInstantiableGeometry
 public:
     using Ptr = std::unique_ptr<NeuronInstantiableGeometry>;
 
-    virtual MorphologyInstance::Ptr instantiate(
-        const brayns::Vector3f& tr, const brayns::Quaternion& rot) const = 0;
+    virtual MorphologyInstance::Ptr instantiate(const brayns::Vector3f &tr, const brayns::Quaternion &rot) const = 0;
 };
 
 /**
@@ -43,9 +42,8 @@ class NeuronBuilder
 public:
     using Ptr = std::unique_ptr<NeuronBuilder>;
 
-    template <typename T, typename = std::enable_if_t<
-                              std::is_constructible<std::string, T>::value>>
-    NeuronBuilder(T&& name)
+    template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
+    NeuronBuilder(T &&name)
         : _name(std::forward<T>(name))
     {
     }
@@ -56,21 +54,23 @@ public:
      * @brief returns this neuron geoemtry builder name, used to identify it
      * @return std::string with the builders name
      */
-    const std::string& getName() { return _name; }
+    const std::string &getName()
+    {
+        return _name;
+    }
 
     /**
      * @brief builds the geometry from the given morphology representation. If
      * the builders has already been used to build a geometry, this function has
      * no effect
      */
-    NeuronInstantiableGeometry::Ptr build(const NeuronMorphology& nm) const
+    NeuronInstantiableGeometry::Ptr build(const NeuronMorphology &nm) const
     {
         return _buildImpl(nm);
     }
 
 protected:
-    virtual NeuronInstantiableGeometry::Ptr _buildImpl(
-        const NeuronMorphology&) const = 0;
+    virtual NeuronInstantiableGeometry::Ptr _buildImpl(const NeuronMorphology &) const = 0;
 
 private:
     const std::string _name;
@@ -91,8 +91,7 @@ public:
     /**
      * @brief instantiate a builder by its type and registers it on the table
      */
-    template <typename T, typename = std::enable_if_t<
-                              std::is_base_of<NeuronBuilder, T>::value>>
+    template<typename T, typename = std::enable_if_t<std::is_base_of<NeuronBuilder, T>::value>>
     void registerBuilder()
     {
         auto builder = std::make_unique<T>();
@@ -107,7 +106,7 @@ public:
      * existing builder
      * @returns a reference to a neuron builder
      */
-    const NeuronBuilder& getBuilder(const std::string& name) const;
+    const NeuronBuilder &getBuilder(const std::string &name) const;
 
     std::vector<std::string> getAvailableBuilderNames() const noexcept;
 

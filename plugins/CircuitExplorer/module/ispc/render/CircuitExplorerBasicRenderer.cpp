@@ -35,12 +35,20 @@ void CircuitExplorerBasicRenderer::commit()
     _simulationThreshold = getParam1f("simulationThreshold", 0.f);
 
     ispc::CircuitExplorerBasicRenderer_set(
-        getIE(), (_secondaryModel ? _secondaryModel->getIE() : nullptr),
+        getIE(),
+        (_secondaryModel ? _secondaryModel->getIE() : nullptr),
         _maxDistanceToSecondaryModel,
-        (_bgMaterial ? _bgMaterial->getIE() : nullptr), spp,
-        (_simulationData ? (float*)_simulationData->data : nullptr),
-        _simulationDataSize, _alphaCorrection, _simulationThreshold, _exposure,
-        _fogThickness, _fogStart, _maxBounces, _useHardwareRandomizer);
+        (_bgMaterial ? _bgMaterial->getIE() : nullptr),
+        spp,
+        (_simulationData ? (float *)_simulationData->data : nullptr),
+        _simulationDataSize,
+        _alphaCorrection,
+        _simulationThreshold,
+        _exposure,
+        _fogThickness,
+        _fogStart,
+        _maxBounces,
+        _useHardwareRandomizer);
 }
 
 CircuitExplorerBasicRenderer::CircuitExplorerBasicRenderer()

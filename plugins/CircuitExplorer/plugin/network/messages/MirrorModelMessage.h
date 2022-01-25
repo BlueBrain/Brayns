@@ -25,6 +25,5 @@
 
 BRAYNS_JSON_OBJECT_BEGIN(MirrorModelMessage)
 BRAYNS_JSON_OBJECT_ENTRY(size_t, model_id, "Model to mirror")
-BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector3d, mirror_axis,
-                         "The axis used to mirror")
+BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector3d, mirror_axis, "The axis used to mirror")
 BRAYNS_JSON_OBJECT_END()

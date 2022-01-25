@@ -33,8 +33,7 @@ public:
     size_t dendrite{std::numeric_limits<size_t>::max()};
     size_t apicalDendrite{std::numeric_limits<size_t>::max()};
 
-    void setColor(brayns::ModelDescriptor* model,
-                  const brayns::Vector4f& color) final
+    void setColor(brayns::ModelDescriptor *model, const brayns::Vector4f &color) final
     {
         _updateMaterial(model, soma, color);
         _updateMaterial(model, axon, color);
