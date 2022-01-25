@@ -27,7 +27,7 @@ Brayns can load mesh files with the following formats:
 - OFF
 
 ```
-braynsViewer mesh.obj
+braynsViewer mesh.ply
 ```
 
 ![Mesh](images/Mesh.png)
