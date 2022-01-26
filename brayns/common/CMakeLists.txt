@@ -7,7 +7,8 @@
 set(BRAYNSCOMMON_SOURCES
     Timer.cpp
     adapters/PropertyMapAdapter.cpp
-    material/Texture2D.cpp
+    geometry/SDFGeometry.cpp
+    geometry/TriangleMesh.cpp
     propertymap/ConversionRegistry.cpp
     scene/ClipPlane.cpp
     simulation/AbstractSimulationHandler.cpp
