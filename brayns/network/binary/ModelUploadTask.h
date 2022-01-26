@@ -41,8 +41,7 @@ namespace brayns
  * @brief Task implementation to execute a binary model upload.
  *
  */
-class ModelUploadTask
-    : public EntrypointTask<BinaryParam, std::vector<ModelDescriptorPtr>>
+class ModelUploadTask : public EntrypointTask<BinaryParam, std::vector<ModelDescriptorPtr>>
 {
 public:
     /**
@@ -50,7 +49,7 @@ public:
      *
      * @param engine Engine used to create the model.
      */
-    ModelUploadTask(Engine& engine, LoaderRegistry& registry)
+    ModelUploadTask(Engine &engine, LoaderRegistry &registry)
         : _engine(&engine)
         , _registry(&registry)
     {
@@ -61,14 +60,20 @@ public:
      *
      * @return const std::string& Model chunks common ID.
      */
-    const std::string& getChunksId() const { return _params.chunksID; }
+    const std::string &getChunksId() const
+    {
+        return _params.chunksID;
+    }
 
     /**
      * @brief Get the size in bytes of the model to upload.
      *
      * @return size_t Model size in bytes.
      */
-    size_t getModelSize() const { return _params.size; }
+    size_t getModelSize() const
+    {
+        return _params.size;
+    }
 
     /**
      * @brief Get the number of bytes of the model currently received.
@@ -77,7 +82,7 @@ public:
      */
     size_t getCurrentSize() const
     {
-        auto& data = _blob.data;
+        auto &data = _blob.data;
         return data.size();
     }
 
@@ -96,7 +101,7 @@ public:
      *
      * @param blob Blob binary data.
      */
-    void addBlob(const std::string& blob)
+    void addBlob(const std::string &blob)
     {
         try
         {
@@ -116,17 +121,17 @@ public:
     {
         _monitor.wait();
         checkCancelled();
-        auto& scene = _engine->getScene();
+        auto &scene = _engine->getScene();
 
-        const auto& blobType = _blob.type;
-        const auto& loaderName = _params.getLoaderName();
-        auto& loader = _registry->getSuitableLoader("", blobType, loaderName);
+        const auto &blobType = _blob.type;
+        const auto &loaderName = _params.getLoaderName();
+        auto &loader = _registry->getSuitableLoader("", blobType, loaderName);
 
-        _descriptors =
-            loader.loadFromBlob(std::move(_blob),
-                                {[this](const auto& operation, auto amount)
-                                 { _loadingProgress(operation, amount); }},
-                                _params.getLoadParameters(), scene);
+        _descriptors = loader.loadFromBlob(
+            std::move(_blob),
+            {[this](const auto &operation, auto amount) { _loadingProgress(operation, amount); }},
+            _params.getLoadParameters(),
+            scene);
 
         scene.addModels(_descriptors, _params);
     }
@@ -159,13 +164,19 @@ public:
      * @brief Cancel the task if the client disconnects.
      *
      */
-    virtual void onDisconnect() override { cancel(); }
+    virtual void onDisconnect() override
+    {
+        cancel();
+    }
 
     /**
      * @brief Stop waiting for upload if cancelled.
      *
      */
-    virtual void onCancel() override { _monitor.notify(); }
+    virtual void onCancel() override
+    {
+        _monitor.notify();
+    }
 
 private:
     void _validateParams()
@@ -174,7 +185,7 @@ private:
         {
             throw EntrypointException("Cannot load an empty model");
         }
-        auto& type = _params.type;
+        auto &type = _params.type;
         if (type.empty())
         {
             throw EntrypointException("Missing model type");
@@ -185,7 +196,7 @@ private:
         }
     }
 
-    void _addBlob(const std::string& blob)
+    void _addBlob(const std::string &blob)
     {
         _throwIfModelAlreadyUploaded();
         _throwIfBlobIsTooBig(blob);
@@ -202,7 +213,7 @@ private:
         }
     }
 
-    void _throwIfBlobIsTooBig(const std::string& blob)
+    void _throwIfBlobIsTooBig(const std::string &blob)
     {
         auto modelSize = getModelSize();
         auto currentSize = getCurrentSize();
@@ -212,14 +223,13 @@ private:
             return;
         }
         std::ostringstream stream;
-        stream << "Too many bytes uploaded: model size = " << modelSize
-               << " received = " << newSize;
+        stream << "Too many bytes uploaded: model size = " << modelSize << " received = " << newSize;
         throw EntrypointException(stream.str());
     }
 
-    void _addBlobData(const std::string& blob)
+    void _addBlobData(const std::string &blob)
     {
-        auto& data = _blob.data;
+        auto &data = _blob.data;
         data.insert(data.end(), blob.begin(), blob.end());
     }
 
@@ -239,13 +249,13 @@ private:
         progress(message, 0.5 * getUploadProgress());
     }
 
-    void _loadingProgress(const std::string& operation, double amount)
+    void _loadingProgress(const std::string &operation, double amount)
     {
         progress(operation, 0.5 + 0.5 * amount);
     }
 
-    Engine* _engine;
-    LoaderRegistry* _registry{nullptr};
+    Engine *_engine;
+    LoaderRegistry *_registry{nullptr};
     BinaryParam _params;
     Blob _blob;
     std::vector<ModelDescriptorPtr> _descriptors;

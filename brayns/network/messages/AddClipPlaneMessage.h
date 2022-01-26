@@ -27,7 +27,6 @@
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(AddClipPlaneMessage)
-BRAYNS_JSON_OBJECT_ENTRY(Plane, plane,
-                         "Plane normal vector XYZ and distance from origin")
+BRAYNS_JSON_OBJECT_ENTRY(Plane, plane, "Plane normal vector XYZ and distance from origin")
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

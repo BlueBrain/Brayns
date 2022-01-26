@@ -30,11 +30,9 @@ BRAYNS_JSON_OBJECT_ENTRY(std::string, endpoint, "Name of the endpoint")
 BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(SchemaResult)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, plugin,
-                         "Name of the plugin that loads the entrypoint")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, plugin, "Name of the plugin that loads the entrypoint")
 BRAYNS_JSON_OBJECT_ENTRY(std::string, title, "Name of the entrypoint")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, description,
-                         "Description of the entrypoint")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, description, "Description of the entrypoint")
 BRAYNS_JSON_OBJECT_ENTRY(std::string, type, "Type of entrypoint ('method')")
 BRAYNS_JSON_OBJECT_ENTRY(bool, async, "Check if the entrypoint is asynchronous")
 BRAYNS_JSON_OBJECT_ENTRY(std::vector<JsonSchema>, params, "Input schema")

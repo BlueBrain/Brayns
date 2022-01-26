@@ -44,7 +44,7 @@ brayns::AnyConverterMap _converters = _registerConverters();
 
 namespace brayns
 {
-bool ConversionRegistry::convert(const Any& from, Any& to)
+bool ConversionRegistry::convert(const Any &from, Any &to)
 {
     return _converters.convert(from, to);
 }

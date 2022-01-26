@@ -26,25 +26,23 @@
 
 namespace brayns
 {
-typedef Engine* (*CreateFuncType)(int, const char**, ParametersManager&);
+typedef Engine *(*CreateFuncType)(int, const char **, ParametersManager &);
 
-EngineFactory::EngineFactory(const int argc, const char** argv,
-                             ParametersManager& parametersManager)
+EngineFactory::EngineFactory(const int argc, const char **argv, ParametersManager &parametersManager)
     : _argc{argc}
     , _argv{argv}
     , _parametersManager{parametersManager}
 {
 }
 
-Engine* EngineFactory::create(const std::string& name)
+Engine *EngineFactory::create(const std::string &name)
 {
     if (_engines.count(name) == 0)
         return _loadEngine(name.c_str(), _argc, _argv);
     return _engines[name].get();
 }
 
-Engine* EngineFactory::_loadEngine(const std::string& name, int argc,
-                                   const char* argv[])
+Engine *EngineFactory::_loadEngine(const std::string &name, int argc, const char *argv[])
 {
     try
     {
@@ -53,9 +51,7 @@ Engine* EngineFactory::_loadEngine(const std::string& name, int argc,
         if (!createSym)
         {
             throw std::runtime_error(
-                std::string("Plugin '") + name +
-                "' is not a valid Brayns engine; missing " +
-                "brayns_engine_create()");
+                std::string("Plugin '") + name + "' is not a valid Brayns engine; missing " + "brayns_engine_create()");
         }
 
         CreateFuncType createFunc = (CreateFuncType)createSym;
@@ -67,7 +63,7 @@ Engine* EngineFactory::_loadEngine(const std::string& name, int argc,
             return plugin;
         }
     }
-    catch (const std::runtime_error& exc)
+    catch (const std::runtime_error &exc)
     {
         Log::error("Failed to load engine '{}': {}", name, exc.what());
     }

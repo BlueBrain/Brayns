@@ -49,7 +49,7 @@ public:
      *
      * @param api Brayns API.
      */
-    NetworkContext(PluginAPI& api)
+    NetworkContext(PluginAPI &api)
         : _api(&api)
         , _entrypoints(*this)
         , _stream(*this)
@@ -61,45 +61,63 @@ public:
      *
      * @return PluginAPI& Brayns API.
      */
-    PluginAPI& getApi() { return *_api; }
+    PluginAPI &getApi()
+    {
+        return *_api;
+    }
 
     /**
      * @brief Get registered entrypoints.
      *
      * @return EntrypointManager& Entrypoint manager with all entrypoints.
      */
-    EntrypointManager& getEntrypoints() { return _entrypoints; }
+    EntrypointManager &getEntrypoints()
+    {
+        return _entrypoints;
+    }
 
     /**
      * @brief Get all connected clients with the buffered requests.
      *
      * @return ConnectionManager& Connection manager with all clients.
      */
-    ConnectionManager& getConnections() { return _connections; }
+    ConnectionManager &getConnections()
+    {
+        return _connections;
+    }
 
     /**
      * @brief Get the image stream monitor.
      *
      * @return StreamManager& Stream manager to monitor image stream.
      */
-    StreamManager& getStream() { return _stream; }
+    StreamManager &getStream()
+    {
+        return _stream;
+    }
 
     /**
      * @brief Get the tasks running in parallel of the main loop.
      *
      * @return NetworkTaskManager& Task manager with all running tasks.
      */
-    NetworkTaskManager& getTasks() { return _tasks; }
+    NetworkTaskManager &getTasks()
+    {
+        return _tasks;
+    }
 
     /**
      * @brief Get the binary model upload manager.
      *
      * @return BinaryRequestManager& Binary manager with tasks and chunks.
      */
-    BinaryRequestManager& getBinary() { return _binary; }
+    BinaryRequestManager &getBinary()
+    {
+        return _binary;
+    }
 
 private:
-    PluginAPI* _api;
+    PluginAPI *_api;
     EntrypointManager _entrypoints;
     ConnectionManager _connections;
     StreamManager _stream;

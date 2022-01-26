@@ -27,25 +27,23 @@
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_ENUM(LightType, {"sphere", LightType::SPHERE},
-                         {"directional", LightType::DIRECTIONAL},
-                         {"quad", LightType::QUAD},
-                         {"spotlight", LightType::SPOTLIGHT},
-                         {"ambient", LightType::AMBIENT})
+BRAYNS_JSON_ADAPTER_ENUM(
+    LightType,
+    {"sphere", LightType::SPHERE},
+    {"directional", LightType::DIRECTIONAL},
+    {"quad", LightType::QUAD},
+    {"spotlight", LightType::SPOTLIGHT},
+    {"ambient", LightType::AMBIENT})
 
-#define BRAYNS_LIGHT_PROPERTIES()                                       \
+#define BRAYNS_LIGHT_PROPERTIES() \
     BRAYNS_JSON_ADAPTER_NAMED_ENTRY("color", _color, "Light color RGB") \
-    BRAYNS_JSON_ADAPTER_NAMED_ENTRY("intensity", _intensity,            \
-                                    "Light intensity 0-1")              \
-    BRAYNS_JSON_ADAPTER_NAMED_ENTRY("is_visible", _isVisible,           \
-                                    "Light is visible")
+    BRAYNS_JSON_ADAPTER_NAMED_ENTRY("intensity", _intensity, "Light intensity 0-1") \
+    BRAYNS_JSON_ADAPTER_NAMED_ENTRY("is_visible", _isVisible, "Light is visible")
 
 BRAYNS_JSON_ADAPTER_BEGIN(DirectionalLight)
 BRAYNS_LIGHT_PROPERTIES()
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("direction", _direction,
-                                "Light source direction");
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("angular_diameter", _angularDiameter,
-                                "Angular diameter in degrees");
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("direction", _direction, "Light source direction");
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("angular_diameter", _angularDiameter, "Angular diameter in degrees");
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(SphereLight)
@@ -65,10 +63,8 @@ BRAYNS_JSON_ADAPTER_BEGIN(SpotLight)
 BRAYNS_LIGHT_PROPERTIES()
 BRAYNS_JSON_ADAPTER_NAMED_ENTRY("position", _position, "Light position XYZ");
 BRAYNS_JSON_ADAPTER_NAMED_ENTRY("direction", _direction, "Spot direction XYZ");
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("opening_angle", _openingAngle,
-                                "Opening angle in degrees");
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("penumbra_angle", _penumbraAngle,
-                                "Penumbra angle in degrees");
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("opening_angle", _openingAngle, "Opening angle in degrees");
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("penumbra_angle", _penumbraAngle, "Penumbra angle in degrees");
 BRAYNS_JSON_ADAPTER_NAMED_ENTRY("radius", _radius, "Spot radius");
 BRAYNS_JSON_ADAPTER_END()
 

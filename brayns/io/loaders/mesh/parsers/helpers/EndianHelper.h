@@ -34,19 +34,19 @@ public:
         return *reinterpret_cast<char *>(&test) == 0;
     }
 
-    template <typename T>
+    template<typename T>
     static T convertLittleEndianToLocalEndian(T value)
     {
         return isBigEndian() ? swapBytes(value) : value;
     }
 
-    template <typename T>
+    template<typename T>
     static T convertBigEndianToLocalEndian(T value)
     {
         return isBigEndian() ? value : swapBytes(value);
     }
 
-    template <typename T>
+    template<typename T>
     static T swapBytes(T value)
     {
         T copy;

@@ -6,10 +6,12 @@ namespace bbploader
 {
 namespace
 {
-auto doLoad(const brain::Synapses& src, const brain::GIDSet& gids,
-            glm::vec3 (brain::Synapse::*posMethod)() const,
-            uint32_t (brain::Synapse::*gidMethod)() const,
-            uint32_t (brain::Synapse::*sectionMethod)() const)
+auto doLoad(
+    const brain::Synapses &src,
+    const brain::GIDSet &gids,
+    glm::vec3 (brain::Synapse::*posMethod)() const,
+    uint32_t (brain::Synapse::*gidMethod)() const,
+    uint32_t (brain::Synapse::*sectionMethod)() const)
 {
     std::vector<std::unique_ptr<SynapseGroup>> result;
     if (!src.empty())
@@ -18,16 +20,14 @@ auto doLoad(const brain::Synapses& src, const brain::GIDSet& gids,
         for (const auto gid : gids)
             synapseMap[gid] = std::make_unique<OldSurfaceSynapseGroup>();
 
-        for (const auto& synapse : src)
+        for (const auto &synapse : src)
         {
-            auto& group = static_cast<OldSurfaceSynapseGroup&>(
-                *synapseMap[(synapse.*gidMethod)()]);
-            group.addSynapse(0, (synapse.*sectionMethod)(),
-                             (synapse.*posMethod)());
+            auto &group = static_cast<OldSurfaceSynapseGroup &>(*synapseMap[(synapse.*gidMethod)()]);
+            group.addSynapse(0, (synapse.*sectionMethod)(), (synapse.*posMethod)());
         }
 
         result.reserve(synapseMap.size());
-        for (auto& entry : synapseMap)
+        for (auto &entry : synapseMap)
             result.push_back(std::move(entry.second));
     }
 
@@ -35,23 +35,26 @@ auto doLoad(const brain::Synapses& src, const brain::GIDSet& gids,
 }
 } // namespace
 
-std::vector<std::unique_ptr<SynapseGroup>> SynapseLoader::load(
-    const brain::Circuit& circuit, const brain::GIDSet& gids,
-    const bool afferent)
+std::vector<std::unique_ptr<SynapseGroup>>
+    SynapseLoader::load(const brain::Circuit &circuit, const brain::GIDSet &gids, const bool afferent)
 {
     if (afferent)
     {
-        return doLoad(circuit.getAfferentSynapses(gids), gids,
-                      &brain::Synapse::getPostsynapticSurfacePosition,
-                      &brain::Synapse::getPostsynapticGID,
-                      &brain::Synapse::getPostsynapticSectionID);
+        return doLoad(
+            circuit.getAfferentSynapses(gids),
+            gids,
+            &brain::Synapse::getPostsynapticSurfacePosition,
+            &brain::Synapse::getPostsynapticGID,
+            &brain::Synapse::getPostsynapticSectionID);
     }
     else
     {
-        return doLoad(circuit.getEfferentSynapses(gids), gids,
-                      &brain::Synapse::getPresynapticSurfacePosition,
-                      &brain::Synapse::getPresynapticGID,
-                      &brain::Synapse::getPresynapticSectionID);
+        return doLoad(
+            circuit.getEfferentSynapses(gids),
+            gids,
+            &brain::Synapse::getPresynapticSurfacePosition,
+            &brain::Synapse::getPresynapticGID,
+            &brain::Synapse::getPresynapticSectionID);
     }
 }
 } // namespace bbploader

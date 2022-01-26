@@ -31,7 +31,7 @@
 class CellDataRetriever
 {
 public:
-    static CIGetCellDataResult getCellData(const CIGetCellDataParams& params)
+    static CIGetCellDataResult getCellData(const CIGetCellDataParams &params)
     {
         // Result
         CIGetCellDataResult result;
@@ -68,9 +68,7 @@ public:
         // Layers
         if (_requires(params, "layer"))
         {
-            const auto& tsvFile =
-                config.get(brion::BlueConfigSection::CONFIGSECTION_RUN,
-                           "Default", "MEComboInfoFile");
+            const auto &tsvFile = config.get(brion::BlueConfigSection::CONFIGSECTION_RUN, "Default", "MEComboInfoFile");
             result.layers = circuit.getLayers(gids, tsvFile);
         }
 
@@ -79,7 +77,7 @@ public:
         {
             auto positions = circuit.getPositions(gids);
             result.positions.reserve(positions.size() * 3);
-            for (const auto& pos : positions)
+            for (const auto &pos : positions)
             {
                 result.positions.push_back(pos.x);
                 result.positions.push_back(pos.y);
@@ -92,7 +90,7 @@ public:
         {
             auto orientations = circuit.getRotations(gids);
             result.orientations.reserve(orientations.size() * 4);
-            for (const auto& o : orientations)
+            for (const auto &o : orientations)
             {
                 result.orientations.push_back(o.w);
                 result.orientations.push_back(o.x);
@@ -106,10 +104,9 @@ public:
     }
 
 private:
-    static bool _requires(const CIGetCellDataParams& params,
-                          const std::string& property)
+    static bool _requires(const CIGetCellDataParams &params, const std::string &property)
     {
-        auto& properties = params.properties;
+        auto &properties = params.properties;
         auto first = properties.begin();
         auto last = properties.end();
         auto i = std::find(first, last, property);
@@ -117,18 +114,20 @@ private:
     }
 };
 
-class CIGetCellDataEntrypoint
-    : public brayns::Entrypoint<CIGetCellDataParams, CIGetCellDataResult>
+class CIGetCellDataEntrypoint : public brayns::Entrypoint<CIGetCellDataParams, CIGetCellDataResult>
 {
 public:
-    virtual std::string getName() const override { return "ci-get-cell-data"; }
+    virtual std::string getName() const override
+    {
+        return "ci-get-cell-data";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Return data attached to one or many cells";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         auto result = CellDataRetriever::getCellData(params);

@@ -66,21 +66,30 @@ struct ImageInfo
      *
      * @return size_t Image size.
      */
-    size_t getSize() const { return getPixelCount() * getPixelSize(); }
+    size_t getSize() const
+    {
+        return getPixelCount() * getPixelSize();
+    }
 
     /**
      * @brief Return height.
      *
      * @return size_t Number of rows in an image.
      */
-    size_t getRowCount() const { return height; }
+    size_t getRowCount() const
+    {
+        return height;
+    }
 
     /**
      * @brief Compute the size in bytes of a row.
      *
      * @return size_t Row size.
      */
-    size_t getRowSize() const { return width * getPixelSize(); }
+    size_t getRowSize() const
+    {
+        return width * getPixelSize();
+    }
 
     /**
      * @brief Compute the offset in bytes of a row in a contiguous array.
@@ -88,21 +97,30 @@ struct ImageInfo
      * @param index Row index (0 is top-left).
      * @return size_t Row offset.
      */
-    size_t getRowOffset(size_t index) const { return index * getRowSize(); }
+    size_t getRowOffset(size_t index) const
+    {
+        return index * getRowSize();
+    }
 
     /**
      * @brief Compute the number of pixels in the image.
      *
      * @return size_t Pixel count.
      */
-    size_t getPixelCount() const { return width * height; }
+    size_t getPixelCount() const
+    {
+        return width * height;
+    }
 
     /**
      * @brief Compute the size of a pixel in bytes.
      *
      * @return size_t Pixel size.
      */
-    size_t getPixelSize() const { return channelCount * channelSize; }
+    size_t getPixelSize() const
+    {
+        return channelCount * channelSize;
+    }
 
     /**
      * @brief Compute the index of a pixel in a contiguous array.
@@ -111,7 +129,10 @@ struct ImageInfo
      * @param y Y offset.
      * @return size_t Pixel index in a 1D array.
      */
-    size_t getPixelIndex(size_t x, size_t y) const { return x + y * width; }
+    size_t getPixelIndex(size_t x, size_t y) const
+    {
+        return x + y * width;
+    }
 
     /**
      * @brief Compute the offset in bytes of a pixel in a contiguous array.
@@ -134,9 +155,8 @@ struct ImageInfo
      */
     bool operator==(const ImageInfo &other) const
     {
-        return width == other.width && height == other.height &&
-               channelCount == other.channelCount &&
-               channelSize == other.channelSize;
+        return width == other.width && height == other.height && channelCount == other.channelCount
+            && channelSize == other.channelSize;
     }
 
     /**
@@ -146,6 +166,9 @@ struct ImageInfo
      * @return true Different image info.
      * @return false Same image info.
      */
-    bool operator!=(const ImageInfo &other) const { return !(*this == other); }
+    bool operator!=(const ImageInfo &other) const
+    {
+        return !(*this == other);
+    }
 };
 } // namespace brayns

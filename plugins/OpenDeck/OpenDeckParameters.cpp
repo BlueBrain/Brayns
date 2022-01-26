@@ -28,16 +28,12 @@ namespace brayns
 OpenDeckParameters::OpenDeckParameters()
     : _props("OpenDeck plugin parameters")
 {
-    _props.add({PARAM_RESOLUTION_SCALING,
-                1.0,
-                {"OpenDeck native resolution scale",
-                 "OpenDeck native resolution scale"}});
-    _props.add({PARAM_CAMERA_SCALING,
-                1.0,
-                {"OpenDeck camera scaling", "OpenDeck camera scaling"}});
+    _props.add(
+        {PARAM_RESOLUTION_SCALING, 1.0, {"OpenDeck native resolution scale", "OpenDeck native resolution scale"}});
+    _props.add({PARAM_CAMERA_SCALING, 1.0, {"OpenDeck camera scaling", "OpenDeck camera scaling"}});
 }
 
-bool OpenDeckParameters::parse(int argc, const char** argv)
+bool OpenDeckParameters::parse(int argc, const char **argv)
 {
     if (argc > 1)
     {

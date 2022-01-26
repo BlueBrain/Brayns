@@ -29,7 +29,7 @@
 namespace
 {
 // https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C++
-unsigned int levenshtein_distance(const std::string& s1, const std::string& s2)
+unsigned int levenshtein_distance(const std::string &s1, const std::string &s2)
 {
     const std::size_t len1 = s1.size(), len2 = s2.size();
     std::vector<unsigned int> col(len2 + 1), prevCol(len2 + 1);
@@ -40,15 +40,13 @@ unsigned int levenshtein_distance(const std::string& s1, const std::string& s2)
     {
         col[0] = i + 1;
         for (unsigned int j = 0; j < len2; j++)
-            col[j + 1] = std::min({prevCol[1 + j] + 1, col[j] + 1,
-                                   prevCol[j] + (s1[i] == s2[j] ? 0 : 1)});
+            col[j + 1] = std::min({prevCol[1 + j] + 1, col[j] + 1, prevCol[j] + (s1[i] == s2[j] ? 0 : 1)});
         col.swap(prevCol);
     }
     return prevCol[len2];
 }
 
-std::vector<std::string> findSimilarOptions(
-    const std::string& name, const std::vector<std::string>& options)
+std::vector<std::string> findSimilarOptions(const std::string &name, const std::vector<std::string> &options)
 {
     constexpr size_t MAX_SUGGESTIONS = 7;
 
@@ -59,11 +57,10 @@ std::vector<std::string> findSimilarOptions(
     {
         // Strip dashes
         auto nameStrip = name;
-        nameStrip.erase(std::remove(nameStrip.begin(), nameStrip.end(), '-'),
-                        nameStrip.end());
+        nameStrip.erase(std::remove(nameStrip.begin(), nameStrip.end(), '-'), nameStrip.end());
 
         // Suggest options containing the substring
-        for (const auto& optionName : options)
+        for (const auto &optionName : options)
         {
             if (subStringOptions.size() >= MAX_SUGGESTIONS)
                 break;
@@ -77,7 +74,7 @@ std::vector<std::string> findSimilarOptions(
     {
         size_t bestDist = UINT_MAX;
 
-        for (const auto& optionName : options)
+        for (const auto &optionName : options)
         {
             if (levenshteinOptions.size() >= MAX_SUGGESTIONS)
                 break;
@@ -89,16 +86,15 @@ std::vector<std::string> findSimilarOptions(
                 bestDist = dist;
             }
 
-            if (dist == bestDist &&
-                std::find(subStringOptions.begin(), subStringOptions.end(),
-                          optionName) == subStringOptions.end())
+            if (dist == bestDist
+                && std::find(subStringOptions.begin(), subStringOptions.end(), optionName) == subStringOptions.end())
                 levenshteinOptions.push_back(optionName);
         }
     }
 
     // Merge suggestions giving precedence to substrings
     auto output = subStringOptions;
-    for (const auto& option : levenshteinOptions)
+    for (const auto &option : levenshteinOptions)
         output.push_back(option);
     output.resize(std::min(output.size(), MAX_SUGGESTIONS));
 
@@ -107,15 +103,18 @@ std::vector<std::string> findSimilarOptions(
 
 void _printVersion()
 {
-    brayns::Log::info("Brayns {}.{}.{} ({})", brayns::Version::getMajor(),
-                      brayns::Version::getMinor(), brayns::Version::getPatch(),
-                      brayns::Version::getCommitHash());
+    brayns::Log::info(
+        "Brayns {}.{}.{} ({})",
+        brayns::Version::getMajor(),
+        brayns::Version::getMinor(),
+        brayns::Version::getPatch(),
+        brayns::Version::getCommitHash());
 }
 } // namespace
 
 namespace brayns
 {
-ParametersManager::ParametersManager(const int argc, const char** argv)
+ParametersManager::ParametersManager(const int argc, const char **argv)
 {
     registerParameters(&_animationParameters);
     registerParameters(&_applicationParameters);
@@ -129,19 +128,19 @@ ParametersManager::ParametersManager(const int argc, const char** argv)
     _parse(argc, argv);
 }
 
-void ParametersManager::registerParameters(AbstractParameters* parameters)
+void ParametersManager::registerParameters(AbstractParameters *parameters)
 {
     _parameterSets.push_back(parameters);
 }
 
-void ParametersManager::_parse(int argc, const char** argv)
+void ParametersManager::_parse(int argc, const char **argv)
 {
     try
     {
         po::options_description generalOptions("General options");
         generalOptions.add_options()("help", "Print this help")(
-            "version", "Print the Brayns version")("verbose",
-                                                   "Print parsed parameters");
+            "version",
+            "Print the Brayns version")("verbose", "Print parsed parameters");
 
         _allOptions.add(generalOptions);
 
@@ -151,14 +150,12 @@ void ParametersManager::_parse(int argc, const char** argv)
                 .options(_allOptions)
                 .allow_unregistered()
                 .positional(_applicationParameters.posArgs())
-                .style(po::command_line_style::unix_style &
-                       ~po::command_line_style::allow_short &
-                       ~po::command_line_style::allow_guessing)
+                .style(
+                    po::command_line_style::unix_style & ~po::command_line_style::allow_short
+                    & ~po::command_line_style::allow_guessing)
                 .run();
 
-        const auto unrecognizedOptions =
-            po::collect_unrecognized(parsedOptions.options,
-                                     po::exclude_positional);
+        const auto unrecognizedOptions = po::collect_unrecognized(parsedOptions.options, po::exclude_positional);
 
         _processUnrecognizedOptions(unrecognizedOptions);
 
@@ -181,7 +178,7 @@ void ParametersManager::_parse(int argc, const char** argv)
         if (vm.count("verbose"))
             print();
     }
-    catch (const po::error& e)
+    catch (const po::error &e)
     {
         Log::error(e.what());
         exit(EXIT_FAILURE);
@@ -195,19 +192,19 @@ void ParametersManager::usage()
 
 void ParametersManager::print()
 {
-    for (AbstractParameters* parameters : _parameterSets)
+    for (AbstractParameters *parameters : _parameterSets)
         parameters->print();
 }
 
 void ParametersManager::resetModified()
 {
-    for (AbstractParameters* parameters : _parameterSets)
+    for (AbstractParameters *parameters : _parameterSets)
         parameters->resetModified();
 }
 
 bool ParametersManager::isAnyModified() const
 {
-    for (AbstractParameters* parameters : _parameterSets)
+    for (AbstractParameters *parameters : _parameterSets)
     {
         if (parameters->isModified())
             return true;
@@ -215,63 +212,62 @@ bool ParametersManager::isAnyModified() const
     return false;
 }
 
-AnimationParameters& ParametersManager::getAnimationParameters()
+AnimationParameters &ParametersManager::getAnimationParameters()
 {
     return _animationParameters;
 }
 
-const AnimationParameters& ParametersManager::getAnimationParameters() const
+const AnimationParameters &ParametersManager::getAnimationParameters() const
 {
     return _animationParameters;
 }
 
-ApplicationParameters& ParametersManager::getApplicationParameters()
+ApplicationParameters &ParametersManager::getApplicationParameters()
 {
     return _applicationParameters;
 }
 
-const ApplicationParameters& ParametersManager::getApplicationParameters() const
+const ApplicationParameters &ParametersManager::getApplicationParameters() const
 {
     return _applicationParameters;
 }
 
-RenderingParameters& ParametersManager::getRenderingParameters()
+RenderingParameters &ParametersManager::getRenderingParameters()
 {
     return _renderingParameters;
 }
 
-const RenderingParameters& ParametersManager::getRenderingParameters() const
+const RenderingParameters &ParametersManager::getRenderingParameters() const
 {
     return _renderingParameters;
 }
 
-VolumeParameters& ParametersManager::getVolumeParameters()
+VolumeParameters &ParametersManager::getVolumeParameters()
 {
     return _volumeParameters;
 }
 
-const VolumeParameters& ParametersManager::getVolumeParameters() const
+const VolumeParameters &ParametersManager::getVolumeParameters() const
 {
     return _volumeParameters;
 }
 
-NetworkParameters& ParametersManager::getNetworkParameters()
+NetworkParameters &ParametersManager::getNetworkParameters()
 {
     return _networkParameters;
 }
 
-const NetworkParameters& ParametersManager::getNetworkParameters() const
+const NetworkParameters &ParametersManager::getNetworkParameters() const
 {
     return _networkParameters;
 }
 
-void ParametersManager::_processUnrecognizedOptions(
-    const std::vector<std::string>& unrecognizedOptions) const
+void ParametersManager::_processUnrecognizedOptions(const std::vector<std::string> &unrecognizedOptions) const
 {
     if (unrecognizedOptions.empty())
         return;
 
-    const auto& unrecognized = unrecognizedOptions.front();
+    const auto &unrecognized = unrecognizedOptions.front();
 
     std::vector<std::string> availableOptions;
     for (auto option : _allOptions.options())
@@ -279,10 +275,9 @@ void ParametersManager::_processUnrecognizedOptions(
 
     const auto suggestions = findSimilarOptions(unrecognized, availableOptions);
 
-    std::string errorMessage = "Unrecognized option '" + unrecognized +
-                               "'.\n\nMost similar options are:";
+    std::string errorMessage = "Unrecognized option '" + unrecognized + "'.\n\nMost similar options are:";
 
-    for (const auto& suggestion : suggestions)
+    for (const auto &suggestion : suggestions)
         errorMessage += "\n\t" + suggestion;
 
     throw po::error(errorMessage);

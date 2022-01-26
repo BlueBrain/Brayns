@@ -28,8 +28,7 @@
 
 namespace brayns
 {
-class GetModelTransferFunctionEntrypoint
-    : public Entrypoint<GetModelMessage, TransferFunction>
+class GetModelTransferFunctionEntrypoint : public Entrypoint<GetModelMessage, TransferFunction>
 {
 public:
     virtual std::string getName() const override
@@ -42,19 +41,18 @@ public:
         return "Get the transfer function of the given model";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
+        auto &engine = getApi().getEngine();
+        auto &scene = engine.getScene();
         ExtractModel::fromParams(scene, params);
-        auto& transferFunction = scene.getTransferFunction();
+        auto &transferFunction = scene.getTransferFunction();
         request.reply(transferFunction);
     }
 };
 
-class SetModelTransferFunctionEntrypoint
-    : public Entrypoint<ModelTransferFunction, EmptyMessage>
+class SetModelTransferFunctionEntrypoint : public Entrypoint<ModelTransferFunction, EmptyMessage>
 {
 public:
     virtual std::string getName() const override
@@ -67,10 +65,10 @@ public:
         return "Set the transfer function of the given model";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
+        auto &engine = getApi().getEngine();
+        auto &scene = engine.getScene();
         ModelTransferFunction transferFunction(scene);
         request.getParams(transferFunction);
         request.reply(EmptyMessage());

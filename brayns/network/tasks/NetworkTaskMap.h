@@ -42,8 +42,7 @@ using NetworkTaskIdMap = std::unordered_map<RequestId, NetworkTaskPtr>;
  * @brief Map of task pools indexed by client connection handle.
  *
  */
-using NetworkTaskConnectionMap =
-    std::unordered_map<ConnectionHandle, NetworkTaskIdMap>;
+using NetworkTaskConnectionMap = std::unordered_map<ConnectionHandle, NetworkTaskIdMap>;
 
 /**
  * @brief Pool to store tasks.
@@ -62,8 +61,7 @@ public:
      * @param id ID of the request starting the task.
      * @param task Abstract task (might be running or not).
      */
-    void add(const ConnectionHandle& handle, const RequestId& id,
-             NetworkTaskPtr task)
+    void add(const ConnectionHandle &handle, const RequestId &id, NetworkTaskPtr task)
     {
         assert(task);
         _tasks[handle][id] = std::move(task);
@@ -76,20 +74,20 @@ public:
      * @param id ID of the request starting the task.
      * @return NetworkTask* Task or null if not found.
      */
-    NetworkTask* find(const ConnectionHandle& handle, const RequestId& id) const
+    NetworkTask *find(const ConnectionHandle &handle, const RequestId &id) const
     {
         auto i = _tasks.find(handle);
         if (i == _tasks.end())
         {
             return nullptr;
         }
-        auto& tasks = i->second;
+        auto &tasks = i->second;
         auto j = tasks.find(id);
         if (j == tasks.end())
         {
             return nullptr;
         }
-        auto& task = j->second;
+        auto &task = j->second;
         return task.get();
     }
 
@@ -101,17 +99,17 @@ public:
      * @tparam FunctorType Functor type.
      * @param functor Functor instance.
      */
-    template <typename FunctorType>
+    template<typename FunctorType>
     void forEach(FunctorType functor) const
     {
-        for (const auto& pair : _tasks)
+        for (const auto &pair : _tasks)
         {
-            auto& handle = pair.first;
-            auto& tasks = pair.second;
-            for (const auto& child : tasks)
+            auto &handle = pair.first;
+            auto &tasks = pair.second;
+            for (const auto &child : tasks)
             {
-                auto& id = child.first;
-                auto& task = child.second;
+                auto &id = child.first;
+                auto &task = child.second;
                 functor(handle, id, *task);
             }
         }
@@ -126,19 +124,19 @@ public:
      * @param handle Client connection handle.
      * @param functor Functor instance.
      */
-    template <typename FunctorType>
-    void forEach(const ConnectionHandle& handle, FunctorType functor) const
+    template<typename FunctorType>
+    void forEach(const ConnectionHandle &handle, FunctorType functor) const
     {
         auto i = _tasks.find(handle);
         if (i == _tasks.end())
         {
             return;
         }
-        auto& tasks = i->second;
-        for (const auto& pair : tasks)
+        auto &tasks = i->second;
+        for (const auto &pair : tasks)
         {
-            auto& id = pair.first;
-            auto& task = pair.second;
+            auto &id = pair.first;
+            auto &task = pair.second;
             functor(id, *task);
         }
     }
@@ -151,17 +149,17 @@ public:
      * @tparam FunctorType Functor type.
      * @param functor Functor instance.
      */
-    template <typename FunctorType>
+    template<typename FunctorType>
     void removeIf(FunctorType functor)
     {
         for (auto i = _tasks.begin(); i != _tasks.end();)
         {
-            auto& handle = i->first;
-            auto& tasks = i->second;
+            auto &handle = i->first;
+            auto &tasks = i->second;
             for (auto j = tasks.begin(); j != tasks.end();)
             {
-                auto& id = j->first;
-                auto& task = j->second;
+                auto &id = j->first;
+                auto &task = j->second;
                 if (functor(handle, id, *task))
                 {
                     j = tasks.erase(j);

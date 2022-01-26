@@ -60,25 +60,19 @@ namespace brayns
 {
 struct Brayns::Impl : public PluginAPI
 {
-    Impl(int argc, const char** argv)
+    Impl(int argc, const char **argv)
         : _parametersManager{argc, argv}
         , _engineFactory{argc, argv, _parametersManager}
         , _pluginManager{argc, argv}
     {
         Log::info("");
         Log::info(" _|_|_|");
-        Log::info(
-            " _|    _|  _|  _|_|    _|_|_|  _|    _|  _|_|_|      _|_|_|  ");
-        Log::info(
-            " _|_|_|    _|_|      _|    _|  _|    _|  _|    _|  _|_|     ");
-        Log::info(
-            " _|    _|  _|        _|    _|  _|    _|  _|    _|      _|_| ");
-        Log::info(
-            " _|_|_|    _|          _|_|_|    _|_|_|  _|    _|  _|_|_|   ");
-        Log::info(
-            "                                    _|                     ");
-        Log::info(
-            "                                  _|_|                       ");
+        Log::info(" _|    _|  _|  _|_|    _|_|_|  _|    _|  _|_|_|      _|_|_|  ");
+        Log::info(" _|_|_|    _|_|      _|    _|  _|    _|  _|    _|  _|_|     ");
+        Log::info(" _|    _|  _|        _|    _|  _|    _|  _|    _|      _|_| ");
+        Log::info(" _|_|_|    _|          _|_|_|    _|_|_|  _|    _|  _|_|_|   ");
+        Log::info("                                    _|                     ");
+        Log::info("                                  _|_|                       ");
         Log::info("");
 
         // This initialization must happen before plugin intialization.
@@ -116,16 +110,15 @@ struct Brayns::Impl : public PluginAPI
 
         _pluginManager.preRender();
 
-        auto& scene = _engine->getScene();
-        auto& lightManager = scene.getLightManager();
-        const auto& rp = _parametersManager.getRenderingParameters();
-        auto& camera = _engine->getCamera();
+        auto &scene = _engine->getScene();
+        auto &lightManager = scene.getLightManager();
+        const auto &rp = _parametersManager.getRenderingParameters();
+        auto &camera = _engine->getCamera();
 
         // Need to update head light before scene is committed
         if (rp.getHeadLight() && (camera.isModified() || rp.isModified()))
         {
-            const auto newDirection =
-                glm::rotate(camera.getOrientation(), Vector3d(0, 0, -1));
+            const auto newDirection = glm::rotate(camera.getOrientation(), Vector3d(0, 0, -1));
             _sunLight->_direction = newDirection;
             lightManager.addLight(_sunLight);
         }
@@ -134,17 +127,14 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->getStatistics().setSceneSizeInBytes(scene.getSizeInBytes());
 
-        auto& renderer = _engine->getRenderer();
+        auto &renderer = _engine->getRenderer();
         renderer.setCurrentType(rp.getCurrentRenderer());
 
-        const auto windowSize =
-            _parametersManager.getApplicationParameters().getWindowSize();
+        const auto windowSize = _parametersManager.getApplicationParameters().getWindowSize();
 
         if (camera.hasProperty("aspect"))
         {
-            camera.updateProperty("aspect",
-                                  static_cast<double>(windowSize.x) /
-                                      static_cast<double>(windowSize.y));
+            camera.updateProperty("aspect", static_cast<double>(windowSize.x) / static_cast<double>(windowSize.y));
         }
         for (auto frameBuffer : _frameBuffers)
             frameBuffer->resize(windowSize);
@@ -155,9 +145,8 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->commit();
 
-        if (_parametersManager.isAnyModified() || camera.isModified() ||
-            scene.isModified() || renderer.isModified() ||
-            lightManager.isModified())
+        if (_parametersManager.isAnyModified() || camera.isModified() || scene.isModified() || renderer.isModified()
+            || lightManager.isModified())
         {
             _engine->clearFrameBuffers();
         }
@@ -180,14 +169,13 @@ struct Brayns::Impl : public PluginAPI
         _renderTimer.stop();
         _lastFPS = _renderTimer.perSecondSmoothed();
 
-        const auto& params = _parametersManager.getApplicationParameters();
+        const auto &params = _parametersManager.getApplicationParameters();
         const auto fps = params.getMaxRenderFPS();
         const auto delta = _lastFPS - fps;
         if (delta > 0)
         {
             const int64_t targetTime = (1. / fps) * 1000.f;
-            std::this_thread::sleep_for(std::chrono::milliseconds(
-                targetTime - _renderTimer.milliseconds()));
+            std::this_thread::sleep_for(std::chrono::milliseconds(targetTime - _renderTimer.milliseconds()));
         }
     }
 
@@ -203,33 +191,50 @@ struct Brayns::Impl : public PluginAPI
         _engine->getStatistics().resetModified();
     }
 
-    Engine& getEngine() final { return *_engine; }
+    Engine &getEngine() final
+    {
+        return *_engine;
+    }
 
-    ParametersManager& getParametersManager() final
+    ParametersManager &getParametersManager() final
     {
         return _parametersManager;
     }
 
-    Camera& getCamera() final { return _engine->getCamera(); }
+    Camera &getCamera() final
+    {
+        return _engine->getCamera();
+    }
 
-    Renderer& getRenderer() final { return _engine->getRenderer(); }
+    Renderer &getRenderer() final
+    {
+        return _engine->getRenderer();
+    }
 
-    LoaderRegistry& getLoaderRegistry() final { return _loaderRegistry; }
+    LoaderRegistry &getLoaderRegistry() final
+    {
+        return _loaderRegistry;
+    }
 
-    void triggerRender() final { _engine->triggerRender(); }
+    void triggerRender() final
+    {
+        _engine->triggerRender();
+    }
 
-    ActionInterface* getActionInterface() final
+    ActionInterface *getActionInterface() final
     {
         return _actionInterface.get();
     }
 
-    void setActionInterface(
-        const std::shared_ptr<ActionInterface>& interface) final
+    void setActionInterface(const std::shared_ptr<ActionInterface> &interface) final
     {
         _actionInterface = interface;
     }
 
-    Scene& getScene() final { return _engine->getScene(); }
+    Scene &getScene() final
+    {
+        return _engine->getScene();
+    }
 
 private:
     void _createEngine()
@@ -239,17 +244,16 @@ private:
             throw std::runtime_error("Could not allocate ospray engine");
 
         // Default sun light
-        _sunLight =
-            std::make_shared<DirectionalLight>(DEFAULT_SUN_DIRECTION,
-                                               DEFAULT_SUN_ANGULAR_DIAMETER,
-                                               DEFAULT_SUN_COLOR,
-                                               DEFAULT_SUN_INTENSITY, false);
+        _sunLight = std::make_shared<DirectionalLight>(
+            DEFAULT_SUN_DIRECTION,
+            DEFAULT_SUN_ANGULAR_DIAMETER,
+            DEFAULT_SUN_COLOR,
+            DEFAULT_SUN_INTENSITY,
+            false);
         _engine->getScene().getLightManager().addLight(_sunLight);
 
-        _engine->getCamera().setCurrentType(
-            _parametersManager.getRenderingParameters().getCurrentCamera());
-        _engine->getRenderer().setCurrentType(
-            _parametersManager.getRenderingParameters().getCurrentRenderer());
+        _engine->getCamera().setCurrentType(_parametersManager.getRenderingParameters().getCurrentCamera());
+        _engine->getRenderer().setCurrentType(_parametersManager.getRenderingParameters().getCurrentRenderer());
     }
 
     void _createFrameBuffer()
@@ -260,23 +264,21 @@ private:
         _addFrameBuffer("default");
     }
 
-    void _addFrameBuffer(const std::string& name)
+    void _addFrameBuffer(const std::string &name)
     {
-        const auto& ap = _parametersManager.getApplicationParameters();
+        const auto &ap = _parametersManager.getApplicationParameters();
         const auto frameSize = ap.getWindowSize();
 
-        auto frameBuffer =
-            _engine->createFrameBuffer(name, frameSize, PixelFormat::RGBA_I8);
+        auto frameBuffer = _engine->createFrameBuffer(name, frameSize, PixelFormat::RGBA_I8);
         _engine->addFrameBuffer(frameBuffer);
         _frameBuffers.push_back(frameBuffer);
     }
 
     void _loadData()
     {
-        auto& scene = _engine->getScene();
+        auto &scene = _engine->getScene();
 
-        const auto& paths =
-            _parametersManager.getApplicationParameters().getInputPaths();
+        const auto &paths = _parametersManager.getApplicationParameters().getInputPaths();
         if (!paths.empty())
         {
             if (paths.size() == 1 && paths[0] == "demo")
@@ -285,12 +287,11 @@ private:
                 return;
             }
 
-            for (const auto& path : paths)
+            for (const auto &path : paths)
                 if (!_loaderRegistry.isSupportedFile(path))
-                    throw std::runtime_error("No loader found for '" + path +
-                                             "'");
+                    throw std::runtime_error("No loader found for '" + path + "'");
 
-            for (const auto& path : paths)
+            for (const auto &path : paths)
             {
                 int percentageLast = 0;
                 std::string msgLast;
@@ -298,7 +299,7 @@ private:
 
                 Log::info("Loading '{}'.", path);
 
-                auto progress = [&](const std::string& msg, float t)
+                auto progress = [&](const std::string &msg, float t)
                 {
                     constexpr auto MIN_SECS = 5;
                     constexpr auto MIN_PERCENTAGE = 10;
@@ -307,13 +308,11 @@ private:
                     const int percentage = static_cast<int>(100.0f * t);
                     const auto time = std::chrono::steady_clock::now();
                     const auto secondsElapsed =
-                        std::chrono::duration_cast<std::chrono::seconds>(
-                            time - timeLast)
-                            .count();
+                        std::chrono::duration_cast<std::chrono::seconds>(time - timeLast).count();
                     const auto percentageElapsed = percentage - percentageLast;
 
-                    if ((secondsElapsed >= MIN_SECS && percentageElapsed > 0) ||
-                        msgLast != msg || (percentageElapsed >= MIN_PERCENTAGE))
+                    if ((secondsElapsed >= MIN_SECS && percentageElapsed > 0) || msgLast != msg
+                        || (percentageElapsed >= MIN_PERCENTAGE))
                     {
                         std::string p = std::to_string(percentage);
                         p.insert(p.begin(), 3 - p.size(), ' ');
@@ -325,8 +324,7 @@ private:
                     }
                 };
 
-                const auto& loader =
-                    _loaderRegistry.getSuitableLoader(path, "", "");
+                const auto &loader = _loaderRegistry.getSuitableLoader(path, "", "");
 
                 auto models = loader.loadFromFile(path, {progress}, {}, scene);
 
@@ -341,9 +339,9 @@ private:
     void _adjustCamera()
     {
         // Extract data
-        auto& camera = _engine->getCamera();
-        auto& scene = _engine->getScene();
-        auto& bounds = scene.getBounds();
+        auto &camera = _engine->getCamera();
+        auto &scene = _engine->getScene();
+        auto &bounds = scene.getBounds();
 
         // Camera position
         auto position = bounds.getCenter();
@@ -371,7 +369,7 @@ private:
     ParametersManager _parametersManager;
     EngineFactory _engineFactory;
     PluginManager _pluginManager;
-    Engine* _engine{nullptr};
+    Engine *_engine{nullptr};
     LoaderRegistry _loaderRegistry;
     std::vector<FrameBufferPtr> _frameBuffers;
 
@@ -387,7 +385,7 @@ private:
 
 // -----------------------------------------------------------------------------
 
-Brayns::Brayns(int argc, const char** argv)
+Brayns::Brayns(int argc, const char **argv)
     : _impl(std::make_unique<Impl>(argc, argv))
 {
 }
@@ -419,22 +417,22 @@ void Brayns::postRender()
     _impl->postRender();
 }
 
-Engine& Brayns::getEngine()
+Engine &Brayns::getEngine()
 {
     return _impl->getEngine();
 }
 
-LoaderRegistry& Brayns::getLoaderRegistry()
+LoaderRegistry &Brayns::getLoaderRegistry()
 {
     return _impl->getLoaderRegistry();
 }
 
-ParametersManager& Brayns::getParametersManager()
+ParametersManager &Brayns::getParametersManager()
 {
     return _impl->getParametersManager();
 }
 
-ActionInterface* Brayns::getActionInterface()
+ActionInterface *Brayns::getActionInterface()
 {
     return _impl->getActionInterface();
 }

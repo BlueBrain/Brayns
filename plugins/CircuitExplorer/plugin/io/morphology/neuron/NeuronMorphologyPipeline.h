@@ -36,7 +36,7 @@ public:
      * @brief applies a process to the soma and/or sections of the given
      * morphology, effectively altering it in the process
      */
-    virtual void process(NeuronMorphology& morphology) const = 0;
+    virtual void process(NeuronMorphology &morphology) const = 0;
 };
 
 /**
@@ -56,24 +56,22 @@ public:
      * @param smooth a flag indicating wether the morphology should be processed
      * to have a smooth appearance, getting rid of original sampling artifacts
      */
-    static NeuronMorphologyPipeline create(const float radiusMultiplier,
-                                           const float radiusOverride,
-                                           const bool smooth) noexcept;
+    static NeuronMorphologyPipeline
+        create(const float radiusMultiplier, const float radiusOverride, const bool smooth) noexcept;
 
     /**
      * @brief registers a processing stage into this pipeline. Pipeline stages
      * are stored and applied over a morphology in the same order that they were
      * added
      */
-    template <typename StageClass, typename... Args>
-    void registerStage(Args&&... args)
+    template<typename StageClass, typename... Args>
+    void registerStage(Args &&...args)
     {
         static_assert(
             std::is_base_of<NeuronMorphologyPipelineStage, StageClass>::value,
             "Attempted to register wrong type of morphology stage");
 
-        _stages.push_back(
-            std::make_unique<StageClass>(std::forward<Args>(args)...));
+        _stages.push_back(std::make_unique<StageClass>(std::forward<Args>(args)...));
     }
 
     /**
@@ -81,7 +79,7 @@ public:
      * Pipeline stages are applied over a morphology in the same order that they
      * were added
      */
-    void process(NeuronMorphology& morphology) const;
+    void process(NeuronMorphology &morphology) const;
 
 private:
     std::vector<std::unique_ptr<NeuronMorphologyPipelineStage>> _stages;

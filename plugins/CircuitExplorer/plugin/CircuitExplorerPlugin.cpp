@@ -53,7 +53,7 @@
 
 namespace
 {
-void _addAdvancedSimulationRenderer(brayns::Engine& engine)
+void _addAdvancedSimulationRenderer(brayns::Engine &engine)
 {
     brayns::Log::info("[CE] Registering advanced renderer.");
     brayns::PropertyMap properties;
@@ -64,44 +64,33 @@ void _addAdvancedSimulationRenderer(brayns::Engine& engine)
     properties.add({"softShadows", 0., {"Shadow softness"}});
     properties.add({"softShadowsSamples", 1, {"Soft shadow samples"}});
     properties.add({"epsilonFactor", 1., {"Epsilon factor"}});
-    properties.add({"samplingThreshold",
-                    0.001,
-                    {"Threshold under which sampling is ignored"}});
-    properties.add(
-        {"volumeSpecularExponent", 20., {"Volume specular exponent"}});
+    properties.add({"samplingThreshold", 0.001, {"Threshold under which sampling is ignored"}});
+    properties.add({"volumeSpecularExponent", 20., {"Volume specular exponent"}});
     properties.add({"volumeAlphaCorrection", 0.5, {"Volume alpha correction"}});
-    properties.add({"maxDistanceToSecondaryModel",
-                    30.,
-                    {"Maximum distance to secondary model"}});
+    properties.add({"maxDistanceToSecondaryModel", 30., {"Maximum distance to secondary model"}});
     properties.add({"exposure", 1., {"Exposure"}});
     properties.add({"fogStart", 0., {"Fog start"}});
     properties.add({"fogThickness", 1e6, {"Fog thickness"}});
     properties.add({"maxBounces", 3, {"Maximum number of ray bounces"}});
-    properties.add({"useHardwareRandomizer",
-                    false,
-                    {"Use hardware accelerated randomizer"}});
+    properties.add({"useHardwareRandomizer", false, {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_advanced", properties);
 }
 
-void _addBasicSimulationRenderer(brayns::Engine& engine)
+void _addBasicSimulationRenderer(brayns::Engine &engine)
 {
     brayns::Log::info("[CE] Registering basic renderer.");
 
     brayns::PropertyMap properties;
     properties.add({"alphaCorrection", 0.5, {"Alpha correction"}});
     properties.add({"simulationThreshold", 0., {"Simulation threshold"}});
-    properties.add({"maxDistanceToSecondaryModel",
-                    30.,
-                    {"Maximum distance to secondary model"}});
+    properties.add({"maxDistanceToSecondaryModel", 30., {"Maximum distance to secondary model"}});
     properties.add({"exposure", 1., {"Exposure"}});
     properties.add({"maxBounces", 3, {"Maximum number of ray bounces"}});
-    properties.add({"useHardwareRandomizer",
-                    false,
-                    {"Use hardware accelerated randomizer"}});
+    properties.add({"useHardwareRandomizer", false, {"Use hardware accelerated randomizer"}});
     engine.addRendererType("circuit_explorer_basic", properties);
 }
 
-void _addDOFPerspectiveCamera(brayns::Engine& engine)
+void _addDOFPerspectiveCamera(brayns::Engine &engine)
 {
     brayns::Log::info("[CE] Registering DOF perspective camera.");
 
@@ -114,7 +103,7 @@ void _addDOFPerspectiveCamera(brayns::Engine& engine)
     engine.addCameraType("circuit_explorer_dof_perspective", properties);
 }
 
-void _addSphereClippingPerspectiveCamera(brayns::Engine& engine)
+void _addSphereClippingPerspectiveCamera(brayns::Engine &engine)
 {
     brayns::Log::info("[CE] Registering sphere clipping perspective camera.");
 
@@ -136,7 +125,7 @@ CircuitExplorerPlugin::CircuitExplorerPlugin()
 void CircuitExplorerPlugin::init()
 {
     // LOADERS ADDED BY THIS PLUGIN
-    auto& registry = _api->getLoaderRegistry();
+    auto &registry = _api->getLoaderRegistry();
     registry.registerLoader(std::make_unique<BBPLoader>(_colorManager));
     registry.registerLoader(std::make_unique<NeuronMorphologyLoader>());
     registry.registerLoader(std::make_unique<SonataLoader>(_colorManager));
@@ -167,27 +156,27 @@ void CircuitExplorerPlugin::init()
     add<SimulationColorEntryPoint>();
 
     // RENDERERS ADDED BY THIS PLUGIN
-    auto& engine = _api->getEngine();
+    auto &engine = _api->getEngine();
     _addAdvancedSimulationRenderer(engine);
     _addBasicSimulationRenderer(engine);
     _addDOFPerspectiveCamera(engine);
     _addSphereClippingPerspectiveCamera(engine);
 
-    _api->getParametersManager().getRenderingParameters().setCurrentRenderer(
-        "circuit_explorer_advanced");
+    _api->getParametersManager().getRenderingParameters().setCurrentRenderer("circuit_explorer_advanced");
 }
 
 void CircuitExplorerPlugin::preRender()
 {
-    auto& scene = _api->getScene();
-    const auto frame =
-        _api->getParametersManager().getAnimationParameters().getFrame();
+    auto &scene = _api->getScene();
+    const auto frame = _api->getParametersManager().getAnimationParameters().getFrame();
     VasculatureRadiiSimulation::update(frame, scene);
 }
 
-void CircuitExplorerPlugin::postRender() {}
+void CircuitExplorerPlugin::postRender()
+{
+}
 
-extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int, char**)
+extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int, char **)
 {
     brayns::Log::info("[CE] Initializing circuit explorer plugin.");
     return new CircuitExplorerPlugin();

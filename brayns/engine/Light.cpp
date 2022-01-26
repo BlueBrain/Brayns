@@ -21,8 +21,7 @@
 
 namespace brayns
 {
-Light::Light(LightType type, const Vector3d& color, double intensity,
-             bool isVisible)
+Light::Light(LightType type, const Vector3d &color, double intensity, bool isVisible)
     : _type(type)
     , _color(color)
     , _intensity(intensity)
@@ -38,10 +37,12 @@ Light::Light(LightType type)
 {
 }
 
-DirectionalLight::DirectionalLight(const Vector3d& direction,
-                                   double angularDiameter,
-                                   const Vector3d& color, double intensity,
-                                   bool isVisible)
+DirectionalLight::DirectionalLight(
+    const Vector3d &direction,
+    double angularDiameter,
+    const Vector3d &color,
+    double intensity,
+    bool isVisible)
     : Light(LightType::DIRECTIONAL, color, intensity, isVisible)
     , _direction(direction)
     , _angularDiameter(angularDiameter)
@@ -55,9 +56,12 @@ DirectionalLight::DirectionalLight()
 {
 }
 
-SphereLight::SphereLight(const Vector3d& position, double radius,
-                         const Vector3d& color, double intensity,
-                         bool isVisible)
+SphereLight::SphereLight(
+    const Vector3d &position,
+    double radius,
+    const Vector3d &color,
+    double intensity,
+    bool isVisible)
     : Light(LightType::SPHERE, color, intensity, isVisible)
     , _position(position)
     , _radius(radius)
@@ -71,9 +75,13 @@ SphereLight::SphereLight()
 {
 }
 
-QuadLight::QuadLight(const Vector3d& position, const Vector3d& edge1,
-                     const Vector3d& edge2, const Vector3d& color,
-                     double intensity, bool isVisible)
+QuadLight::QuadLight(
+    const Vector3d &position,
+    const Vector3d &edge1,
+    const Vector3d &edge2,
+    const Vector3d &color,
+    double intensity,
+    bool isVisible)
     : Light(LightType::QUAD, color, intensity, isVisible)
     , _position(position)
     , _edge1(edge1)
@@ -89,10 +97,15 @@ QuadLight::QuadLight()
 {
 }
 
-SpotLight::SpotLight(const Vector3d& position, const Vector3d& direction,
-                     const double openingAngle, const double penumbraAngle,
-                     const double radius, const Vector3d& color,
-                     double intensity, bool isVisible)
+SpotLight::SpotLight(
+    const Vector3d &position,
+    const Vector3d &direction,
+    const double openingAngle,
+    const double penumbraAngle,
+    const double radius,
+    const Vector3d &color,
+    double intensity,
+    bool isVisible)
     : Light(LightType::SPOTLIGHT, color, intensity, isVisible)
     , _position(position)
     , _direction(direction)
@@ -112,8 +125,7 @@ SpotLight::SpotLight()
 {
 }
 
-AmbientLight::AmbientLight(const Vector3d& color, double intensity,
-                           bool isVisible)
+AmbientLight::AmbientLight(const Vector3d &color, double intensity, bool isVisible)
     : Light(LightType::AMBIENT, color, intensity, isVisible)
 {
 }

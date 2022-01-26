@@ -26,24 +26,22 @@
 
 namespace brayns
 {
-class ExportFramesTask
-    : public EntrypointTask<ExportFramesParams, ExportFramesResult>
+class ExportFramesTask : public EntrypointTask<ExportFramesParams, ExportFramesResult>
 {
 public:
-    ExportFramesTask(Engine& engine, ExportFramesParams&& params);
+    ExportFramesTask(Engine &engine, ExportFramesParams &&params);
 
     void run() final;
 
     void onComplete() final;
 
 private:
-    Engine& _engine;
+    Engine &_engine;
     ExportFramesParams _params;
     ExportFramesResult _result{0, ""};
 };
 
-class ExportFramesEntrypoint
-    : public Entrypoint<ExportFramesParams, ExportFramesResult>
+class ExportFramesEntrypoint : public Entrypoint<ExportFramesParams, ExportFramesResult>
 {
 public:
     std::string getName() const final;
@@ -52,6 +50,6 @@ public:
 
     bool isAsync() const final;
 
-    void onRequest(const Request& request) final;
+    void onRequest(const Request &request) final;
 };
 } // namespace brayns

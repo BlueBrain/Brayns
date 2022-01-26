@@ -26,12 +26,12 @@
 
 namespace brayns
 {
-template <>
+template<>
 struct ObjectExtractor<Statistics>
 {
-    static Statistics& extract(PluginAPI& api)
+    static Statistics &extract(PluginAPI &api)
     {
-        auto& engine = api.getEngine();
+        auto &engine = api.getEngine();
         return engine.getStatistics();
     }
 };
@@ -44,7 +44,10 @@ public:
         setNotificationPeriod(NotificationPeriod::slow());
     }
 
-    virtual std::string getName() const override { return "get-statistics"; }
+    virtual std::string getName() const override
+    {
+        return "get-statistics";
+    }
 
     virtual std::string getDescription() const override
     {

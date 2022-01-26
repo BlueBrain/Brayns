@@ -33,9 +33,10 @@ auto frameIndexToTimestamp(const uint32_t frame, const double dt) noexcept
 }
 } // namespace
 
-SonataSpikeHandler::SonataSpikeHandler(const std::string& h5FilePath,
-                                       const std::string& populationName,
-                                       const bbp::sonata::Selection& selection)
+SonataSpikeHandler::SonataSpikeHandler(
+    const std::string &h5FilePath,
+    const std::string &populationName,
+    const bbp::sonata::Selection &selection)
     : brayns::AbstractSimulationHandler()
     , _h5FilePath(h5FilePath)
     , _populationName(populationName)
@@ -48,7 +49,7 @@ SonataSpikeHandler::SonataSpikeHandler(const std::string& h5FilePath,
     // Temporary fix until bbp::sonata::SpikeReader returns the start and end
     // time
     double greatestTime = 0.0;
-    for (const auto& spike : allSpikes)
+    for (const auto &spike : allSpikes)
     {
         if (spike.second > greatestTime)
             greatestTime = spike.second;
@@ -67,8 +68,7 @@ SonataSpikeHandler::SonataSpikeHandler(const std::string& h5FilePath,
     _unit = "";
 
     _frameSize = selection.flatSize();
-    _nbFrames = static_cast<uint32_t>(
-        std::round(std::nextafter(_endTime, INFINITY) / _dt));
+    _nbFrames = static_cast<uint32_t>(std::round(std::nextafter(_endTime, INFINITY) / _dt));
 
     const auto flatSelection = _selection.flatten();
     for (size_t i = 0; i < flatSelection.size(); ++i)
@@ -77,8 +77,7 @@ SonataSpikeHandler::SonataSpikeHandler(const std::string& h5FilePath,
 
 brayns::AbstractSimulationHandlerPtr SonataSpikeHandler::clone() const
 {
-    return std::make_shared<SonataSpikeHandler>(_h5FilePath, _populationName,
-                                                _selection);
+    return std::make_shared<SonataSpikeHandler>(_h5FilePath, _populationName, _selection);
 }
 
 std::vector<float> SonataSpikeHandler::getFrameDataImpl(const uint32_t frame)
@@ -88,12 +87,10 @@ std::vector<float> SonataSpikeHandler::getFrameDataImpl(const uint32_t frame)
     const auto timestamp = frameIndexToTimestamp(frame, _dt);
     std::vector<float> data(_frameSize, SPIKE_DEFAULT_REST_VALUE);
 
-    const auto trStart =
-        std::max(timestamp - SPIKE_TRANSITION_TIME_SECONDS, 0.0);
-    const auto trEnd =
-        std::min(timestamp + SPIKE_TRANSITION_TIME_SECONDS, _endTime);
+    const auto trStart = std::max(timestamp - SPIKE_TRANSITION_TIME_SECONDS, 0.0);
+    const auto trEnd = std::min(timestamp + SPIKE_TRANSITION_TIME_SECONDS, _endTime);
     const auto readSpikes = _spikePopulation.get(_selection, trStart, trEnd);
-    for (const auto& spike : readSpikes)
+    for (const auto &spike : readSpikes)
     {
         const auto index = _gidsToIndex[spike.first];
         const auto spikeTime = spike.second;
@@ -101,20 +98,16 @@ std::vector<float> SonataSpikeHandler::getFrameDataImpl(const uint32_t frame)
         // Spike in the future - start growth
         if (spikeTime > timestamp)
         {
-            auto alpha =
-                (spikeTime - timestamp) / SPIKE_TRANSITION_TIME_SECONDS;
+            auto alpha = (spikeTime - timestamp) / SPIKE_TRANSITION_TIME_SECONDS;
             alpha = std::min(std::max(0.0, alpha), 1.0);
-            data[index] = SPIKE_DEFAULT_REST_VALUE * alpha +
-                          SPIKE_DEFAULT_SPIKING_VALUE * (1.0 - alpha);
+            data[index] = SPIKE_DEFAULT_REST_VALUE * alpha + SPIKE_DEFAULT_SPIKING_VALUE * (1.0 - alpha);
         }
         // Spike in the past - start fading
         else if (spikeTime < timestamp)
         {
-            auto alpha =
-                (timestamp - spikeTime) / SPIKE_TRANSITION_TIME_SECONDS;
+            auto alpha = (timestamp - spikeTime) / SPIKE_TRANSITION_TIME_SECONDS;
             alpha = std::min(std::max(0.0, alpha), 1.0);
-            data[index] = SPIKE_DEFAULT_REST_VALUE * alpha +
-                          SPIKE_DEFAULT_SPIKING_VALUE * (1.0 - alpha);
+            data[index] = SPIKE_DEFAULT_REST_VALUE * alpha + SPIKE_DEFAULT_SPIKING_VALUE * (1.0 - alpha);
         }
         // Spiking neuron
         else

@@ -35,16 +35,15 @@ struct TriangleMesh
     std::vector<Vector2f> textureCoordinates;
 };
 
-inline Boxf createMeshBounds(const TriangleMesh& mesh)
+inline Boxf createMeshBounds(const TriangleMesh &mesh)
 {
     Boxf result;
-    for (const auto& vertex : mesh.vertices)
+    for (const auto &vertex : mesh.vertices)
         result.merge(vertex);
     return result;
 }
 
-inline TriangleMesh createBox(const Vector3f& minCorner,
-                              const Vector3f& maxCorner)
+inline TriangleMesh createBox(const Vector3f &minCorner, const Vector3f &maxCorner)
 {
     TriangleMesh result;
     const size_t numVertices = 24;

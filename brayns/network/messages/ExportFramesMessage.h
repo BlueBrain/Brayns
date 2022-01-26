@@ -32,36 +32,39 @@
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(ExportFramesKeyFrame)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, frame_index,
-                         "Integer index of the simulation frame")
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, frame_index, "Integer index of the simulation frame")
 BRAYNS_JSON_OBJECT_ENTRY(Camera, camera, "Camera definition")
-BRAYNS_JSON_OBJECT_ENTRY(PropertyMap, camera_params,
-                         "Camera-specific parameters")
+BRAYNS_JSON_OBJECT_ENTRY(PropertyMap, camera_params, "Camera-specific parameters")
 BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(ExportFramesParams)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, path,
-                         "Path where the frames will be stored")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path where the frames will be stored")
 BRAYNS_JSON_OBJECT_ENTRY(std::string, format, "Image format ('png' or 'jpg')")
-BRAYNS_JSON_OBJECT_ENTRY(size_t, quality,
-                         "Image quality "
-                         "(100 = highest quality, 0 = lowest quality)")
-BRAYNS_JSON_OBJECT_ENTRY(Vector2ui, image_size,
-                         "Image dimenssions "
-                         "[width, height]")
+BRAYNS_JSON_OBJECT_ENTRY(
+    size_t,
+    quality,
+    "Image quality "
+    "(100 = highest quality, 0 = lowest quality)")
+BRAYNS_JSON_OBJECT_ENTRY(
+    Vector2ui,
+    image_size,
+    "Image dimenssions "
+    "[width, height]")
 BRAYNS_JSON_OBJECT_ENTRY(uint32_t, spp, "Samples per pixel")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<ExportFramesKeyFrame>, key_frames,
-                         "List of keyframes to export")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, renderer_name,
-                         "Name of the renderer to use", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(PropertyMap, renderer_parameters,
-                         "Renderer-specific parameters", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(std::unique_ptr<VolumeParameters>, volume_parameters,
-                         "Volume rendering parameters", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(bool, name_after_simulation_index,
-                         "Name the frame image file after the simulation "
-                         "frame index",
-                         Default(false))
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<ExportFramesKeyFrame>, key_frames, "List of keyframes to export")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, renderer_name, "Name of the renderer to use", Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(PropertyMap, renderer_parameters, "Renderer-specific parameters", Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(
+    std::unique_ptr<VolumeParameters>,
+    volume_parameters,
+    "Volume rendering parameters",
+    Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(
+    bool,
+    name_after_simulation_index,
+    "Name the frame image file after the simulation "
+    "frame index",
+    Default(false))
 BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(ExportFramesResult)

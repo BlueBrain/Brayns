@@ -30,18 +30,21 @@ namespace brayns
 class ClearLightsEntrypoint : public Entrypoint<EmptyMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override { return "clear-lights"; }
+    virtual std::string getName() const override
+    {
+        return "clear-lights";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Clear all lights in the scene";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
-        auto& lightManager = scene.getLightManager();
+        auto &engine = getApi().getEngine();
+        auto &scene = engine.getScene();
+        auto &lightManager = scene.getLightManager();
         lightManager.clearLights();
         triggerRender();
         request.reply(EmptyMessage());

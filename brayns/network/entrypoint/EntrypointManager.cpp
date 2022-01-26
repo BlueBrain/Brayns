@@ -34,14 +34,14 @@ using namespace brayns;
 class MessageValidator
 {
 public:
-    static void validate(const JsonValue& params, const SchemaResult& schema)
+    static void validate(const JsonValue &params, const SchemaResult &schema)
     {
-        auto& schemaParams = schema.params;
+        auto &schemaParams = schema.params;
         if (schemaParams.empty())
         {
             return;
         }
-        auto& paramsSchema = schemaParams[0];
+        auto &paramsSchema = schemaParams[0];
         if (JsonSchemaHelper::isEmpty(paramsSchema))
         {
             return;
@@ -57,23 +57,23 @@ public:
 class MessageDispatcher
 {
 public:
-    MessageDispatcher(const EntrypointManager& entrypoints)
+    MessageDispatcher(const EntrypointManager &entrypoints)
         : _entrypoints(&entrypoints)
     {
     }
 
-    void dispatch(const NetworkRequest& request)
+    void dispatch(const NetworkRequest &request)
     {
-        auto& message = request.getMessage();
-        auto& entrypoint = _getEntrypoint(message);
+        auto &message = request.getMessage();
+        auto &entrypoint = _getEntrypoint(message);
         _validateSchema(message, entrypoint);
         entrypoint.processRequest(request);
     }
 
 private:
-    const EntrypointRef& _getEntrypoint(const RequestMessage& message)
+    const EntrypointRef &_getEntrypoint(const RequestMessage &message)
     {
-        auto& method = message.method;
+        auto &method = message.method;
         auto entrypoint = _entrypoints->find(method);
         if (!entrypoint)
         {
@@ -82,26 +82,25 @@ private:
         return *entrypoint;
     }
 
-    void _validateSchema(const RequestMessage& message,
-                         const EntrypointRef& entrypoint)
+    void _validateSchema(const RequestMessage &message, const EntrypointRef &entrypoint)
     {
-        auto& params = message.params;
-        auto& schema = entrypoint.getSchema();
+        auto &params = message.params;
+        auto &schema = entrypoint.getSchema();
         MessageValidator::validate(params, schema);
     }
 
-    const EntrypointManager* _entrypoints;
+    const EntrypointManager *_entrypoints;
 };
 } // namespace
 
 namespace brayns
 {
-EntrypointManager::EntrypointManager(NetworkContext& context)
+EntrypointManager::EntrypointManager(NetworkContext &context)
     : _context(&context)
 {
 }
 
-const EntrypointRef* EntrypointManager::find(const std::string& name) const
+const EntrypointRef *EntrypointManager::find(const std::string &name) const
 {
     auto i = _entrypoints.find(name);
     return i == _entrypoints.end() ? nullptr : &i->second;
@@ -124,23 +123,23 @@ void EntrypointManager::add(EntrypointRef entrypoint)
 
 void EntrypointManager::setup()
 {
-    for (auto& pair : _entrypoints)
+    for (auto &pair : _entrypoints)
     {
-        auto& entrypoint = pair.second;
+        auto &entrypoint = pair.second;
         entrypoint.setup(*_context);
     }
 }
 
 void EntrypointManager::update() const
 {
-    for (const auto& pair : _entrypoints)
+    for (const auto &pair : _entrypoints)
     {
-        auto& entrypoint = pair.second;
+        auto &entrypoint = pair.second;
         entrypoint.update();
     }
 }
 
-void EntrypointManager::processRequest(const NetworkRequest& request) const
+void EntrypointManager::processRequest(const NetworkRequest &request) const
 {
     MessageDispatcher dispatcher(*this);
     dispatcher.dispatch(request);
@@ -148,18 +147,18 @@ void EntrypointManager::processRequest(const NetworkRequest& request) const
 
 void EntrypointManager::preRender() const
 {
-    for (const auto& pair : _entrypoints)
+    for (const auto &pair : _entrypoints)
     {
-        auto& entrypoint = pair.second;
+        auto &entrypoint = pair.second;
         entrypoint.preRender();
     }
 }
 
 void EntrypointManager::postRender() const
 {
-    for (const auto& pair : _entrypoints)
+    for (const auto &pair : _entrypoints)
     {
-        auto& entrypoint = pair.second;
+        auto &entrypoint = pair.second;
         entrypoint.postRender();
     }
 }

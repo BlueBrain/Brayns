@@ -34,20 +34,18 @@ namespace brayns
 {
 namespace
 {
-template <typename VecT>
-OSPData allocateVectorData(const std::vector<VecT>& vec,
-                           const OSPDataType ospType,
-                           const size_t memoryManagementFlags)
+template<typename VecT>
+OSPData allocateVectorData(const std::vector<VecT> &vec, const OSPDataType ospType, const size_t memoryManagementFlags)
 {
     const size_t totBytes = vec.size() * sizeof(decltype(vec.back()));
-    return ospNewData(totBytes / ospray::sizeOf(ospType), ospType, vec.data(),
-                      memoryManagementFlags);
+    return ospNewData(totBytes / ospray::sizeOf(ospType), ospType, vec.data(), memoryManagementFlags);
 }
 } // namespace
 
-OSPRayModel::OSPRayModel(AnimationParameters& animationParameters,
-                         VolumeParameters& volumeParameters,
-                         OSPTransferFunction transferFunc)
+OSPRayModel::OSPRayModel(
+    AnimationParameters &animationParameters,
+    VolumeParameters &volumeParameters,
+    OSPTransferFunction transferFunc)
     : Model(animationParameters, volumeParameters)
     , _ospTransferFunction(transferFunc)
 {
@@ -55,7 +53,7 @@ OSPRayModel::OSPRayModel(AnimationParameters& animationParameters,
 
 OSPRayModel::~OSPRayModel()
 {
-    const auto releaseAndClearGeometry = [](auto& geometryMap)
+    const auto releaseAndClearGeometry = [](auto &geometryMap)
     {
         for (auto geom : geometryMap)
             ospRelease(geom.second);
@@ -100,7 +98,7 @@ void OSPRayModel::buildBoundingBox()
         {c.x - s.x, c.y - s.y, c.z + s.z}, //  | |      | |
         {c.x + s.x, c.y - s.y, c.z + s.z}, //  | 4------|-5
         {c.x - s.x, c.y + s.y, c.z + s.z}, //  |/       |/
-        {c.x + s.x, c.y + s.y, c.z + s.z}  //  0--------1
+        {c.x + s.x, c.y + s.y, c.z + s.z} //  0--------1
     };
 
     for (size_t i = 0; i < 8; ++i)
@@ -122,8 +120,7 @@ void OSPRayModel::buildBoundingBox()
     addCylinder(BOUNDINGBOX_MATERIAL_ID, {positions[3], positions[7], radius});
 }
 
-void OSPRayModel::_addGeometryToModel(const OSPGeometry geometry,
-                                      const size_t materialId)
+void OSPRayModel::_addGeometryToModel(const OSPGeometry geometry, const size_t materialId)
 {
     switch (materialId)
     {
@@ -142,11 +139,9 @@ void OSPRayModel::_addGeometryToModel(const OSPGeometry geometry,
     }
 }
 
-OSPGeometry& OSPRayModel::_createGeometry(GeometryMap& map,
-                                          const size_t materialId,
-                                          const char* name)
+OSPGeometry &OSPRayModel::_createGeometry(GeometryMap &map, const size_t materialId, const char *name)
 {
-    auto& geometry = map[materialId];
+    auto &geometry = map[materialId];
     if (!geometry)
         geometry = ospNewGeometry(name);
 
@@ -163,20 +158,16 @@ OSPGeometry& OSPRayModel::_createGeometry(GeometryMap& map,
 
 void OSPRayModel::_commitSpheres(const size_t materialId)
 {
-    auto& geometry = _createGeometry(_ospSpheres, materialId, "spheres");
+    auto &geometry = _createGeometry(_ospSpheres, materialId, "spheres");
 
-    auto data = allocateVectorData(_geometries->_spheres.at(materialId),
-                                   OSP_FLOAT, _memoryManagementFlags);
+    auto data = allocateVectorData(_geometries->_spheres.at(materialId), OSP_FLOAT, _memoryManagementFlags);
 
     ospSetObject(geometry, "spheres", data);
     ospRelease(data);
 
-    osphelper::set(geometry, "offset_center",
-                   static_cast<int>(offsetof(Sphere, center)));
-    osphelper::set(geometry, "offset_radius",
-                   static_cast<int>(offsetof(Sphere, radius)));
-    osphelper::set(geometry, "bytes_per_sphere",
-                   static_cast<int>(sizeof(Sphere)));
+    osphelper::set(geometry, "offset_center", static_cast<int>(offsetof(Sphere, center)));
+    osphelper::set(geometry, "offset_radius", static_cast<int>(offsetof(Sphere, radius)));
+    osphelper::set(geometry, "bytes_per_sphere", static_cast<int>(sizeof(Sphere)));
     ospCommit(geometry);
 
     _addGeometryToModel(geometry, materialId);
@@ -184,21 +175,16 @@ void OSPRayModel::_commitSpheres(const size_t materialId)
 
 void OSPRayModel::_commitCylinders(const size_t materialId)
 {
-    auto& geometry = _createGeometry(_ospCylinders, materialId, "cylinders");
+    auto &geometry = _createGeometry(_ospCylinders, materialId, "cylinders");
 
-    auto data = allocateVectorData(_geometries->_cylinders.at(materialId),
-                                   OSP_FLOAT, _memoryManagementFlags);
+    auto data = allocateVectorData(_geometries->_cylinders.at(materialId), OSP_FLOAT, _memoryManagementFlags);
     ospSetObject(geometry, "cylinders", data);
     ospRelease(data);
 
-    osphelper::set(geometry, "offset_v0",
-                   static_cast<int>(offsetof(Cylinder, center)));
-    osphelper::set(geometry, "offset_v1",
-                   static_cast<int>(offsetof(Cylinder, up)));
-    osphelper::set(geometry, "offset_radius",
-                   static_cast<int>(offsetof(Cylinder, radius)));
-    osphelper::set(geometry, "bytes_per_cylinder",
-                   static_cast<int>(sizeof(Cylinder)));
+    osphelper::set(geometry, "offset_v0", static_cast<int>(offsetof(Cylinder, center)));
+    osphelper::set(geometry, "offset_v1", static_cast<int>(offsetof(Cylinder, up)));
+    osphelper::set(geometry, "offset_radius", static_cast<int>(offsetof(Cylinder, radius)));
+    osphelper::set(geometry, "bytes_per_cylinder", static_cast<int>(sizeof(Cylinder)));
     ospCommit(geometry);
 
     _addGeometryToModel(geometry, materialId);
@@ -206,9 +192,8 @@ void OSPRayModel::_commitCylinders(const size_t materialId)
 
 void OSPRayModel::_commitCones(const size_t materialId)
 {
-    auto& geometry = _createGeometry(_ospCones, materialId, "cones");
-    auto data = allocateVectorData(_geometries->_cones.at(materialId),
-                                   OSP_FLOAT, _memoryManagementFlags);
+    auto &geometry = _createGeometry(_ospCones, materialId, "cones");
+    auto data = allocateVectorData(_geometries->_cones.at(materialId), OSP_FLOAT, _memoryManagementFlags);
 
     ospSetObject(geometry, "cones", data);
     ospRelease(data);
@@ -220,40 +205,34 @@ void OSPRayModel::_commitCones(const size_t materialId)
 
 void OSPRayModel::_commitMeshes(const size_t materialId)
 {
-    auto& geometry = _createGeometry(_ospMeshes, materialId, "trianglemesh");
-    auto& triangleMesh = _geometries->_triangleMeshes.at(materialId);
+    auto &geometry = _createGeometry(_ospMeshes, materialId, "trianglemesh");
+    auto &triangleMesh = _geometries->_triangleMeshes.at(materialId);
 
-    OSPData vertices = allocateVectorData(triangleMesh.vertices, OSP_FLOAT3,
-                                          _memoryManagementFlags);
+    OSPData vertices = allocateVectorData(triangleMesh.vertices, OSP_FLOAT3, _memoryManagementFlags);
     ospSetObject(geometry, "position", vertices);
     ospRelease(vertices);
 
-    OSPData indices = allocateVectorData(triangleMesh.indices, OSP_INT3,
-                                         _memoryManagementFlags);
+    OSPData indices = allocateVectorData(triangleMesh.indices, OSP_INT3, _memoryManagementFlags);
     ospSetObject(geometry, "index", indices);
     ospRelease(indices);
 
     if (!triangleMesh.normals.empty())
     {
-        OSPData normals = allocateVectorData(triangleMesh.normals, OSP_FLOAT3,
-                                             _memoryManagementFlags);
+        OSPData normals = allocateVectorData(triangleMesh.normals, OSP_FLOAT3, _memoryManagementFlags);
         ospSetObject(geometry, "vertex.normal", normals);
         ospRelease(normals);
     }
 
     if (!triangleMesh.colors.empty())
     {
-        OSPData colors = allocateVectorData(triangleMesh.colors, OSP_FLOAT3A,
-                                            _memoryManagementFlags);
+        OSPData colors = allocateVectorData(triangleMesh.colors, OSP_FLOAT3A, _memoryManagementFlags);
         ospSetObject(geometry, "vertex.color", colors);
         ospRelease(colors);
     }
 
     if (!triangleMesh.textureCoordinates.empty())
     {
-        OSPData texCoords =
-            allocateVectorData(triangleMesh.textureCoordinates, OSP_FLOAT2,
-                               _memoryManagementFlags);
+        OSPData texCoords = allocateVectorData(triangleMesh.textureCoordinates, OSP_FLOAT2, _memoryManagementFlags);
         ospSetObject(geometry, "vertex.texcoord", texCoords);
         ospRelease(texCoords);
     }
@@ -268,25 +247,21 @@ void OSPRayModel::_commitMeshes(const size_t materialId)
 
 void OSPRayModel::_commitStreamlines(const size_t materialId)
 {
-    auto& geometry =
-        _createGeometry(_ospStreamlines, materialId, "streamlines");
-    auto& data = _geometries->_streamlines[materialId];
+    auto &geometry = _createGeometry(_ospStreamlines, materialId, "streamlines");
+    auto &data = _geometries->_streamlines[materialId];
 
     {
-        OSPData vertex =
-            allocateVectorData(data.vertex, OSP_FLOAT4, _memoryManagementFlags);
+        OSPData vertex = allocateVectorData(data.vertex, OSP_FLOAT4, _memoryManagementFlags);
         ospSetObject(geometry, "vertex", vertex);
         ospRelease(vertex);
     }
     {
-        OSPData vertexColor = allocateVectorData(data.vertexColor, OSP_FLOAT4,
-                                                 _memoryManagementFlags);
+        OSPData vertexColor = allocateVectorData(data.vertexColor, OSP_FLOAT4, _memoryManagementFlags);
         ospSetObject(geometry, "vertex.color", vertexColor);
         ospRelease(vertexColor);
     }
     {
-        OSPData index =
-            allocateVectorData(data.indices, OSP_INT, _memoryManagementFlags);
+        OSPData index = allocateVectorData(data.indices, OSP_INT, _memoryManagementFlags);
         ospSetObject(geometry, "index", index);
         ospRelease(index);
     }
@@ -301,8 +276,7 @@ void OSPRayModel::_commitStreamlines(const size_t materialId)
 
 void OSPRayModel::_commitSDFGeometries()
 {
-    auto globalData = allocateVectorData(_geometries->_sdf.geometries, OSP_CHAR,
-                                         _memoryManagementFlags);
+    auto globalData = allocateVectorData(_geometries->_sdf.geometries, OSP_CHAR, _memoryManagementFlags);
 
     // Create and upload flat list of neighbours
     const size_t numGeoms = _geometries->_sdf.geometries.size();
@@ -311,13 +285,14 @@ void OSPRayModel::_commitSDFGeometries()
     for (size_t geomI = 0; geomI < numGeoms; geomI++)
     {
         const size_t currOffset = _geometries->_sdf.neighboursFlat.size();
-        const auto& neighsI = _geometries->_sdf.neighbours[geomI];
+        const auto &neighsI = _geometries->_sdf.neighbours[geomI];
         if (!neighsI.empty())
         {
             _geometries->_sdf.geometries[geomI].numNeighbours = neighsI.size();
             _geometries->_sdf.geometries[geomI].neighboursIndex = currOffset;
             _geometries->_sdf.neighboursFlat.insert(
-                std::end(_geometries->_sdf.neighboursFlat), std::begin(neighsI),
+                std::end(_geometries->_sdf.neighboursFlat),
+                std::begin(neighsI),
                 std::end(neighsI));
         }
     }
@@ -326,23 +301,19 @@ void OSPRayModel::_commitSDFGeometries()
     if (_geometries->_sdf.neighboursFlat.empty())
         _geometries->_sdf.neighboursFlat.resize(1, 0);
 
-    auto neighbourData = allocateVectorData(_geometries->_sdf.neighboursFlat,
-                                            OSP_ULONG, _memoryManagementFlags);
+    auto neighbourData = allocateVectorData(_geometries->_sdf.neighboursFlat, OSP_ULONG, _memoryManagementFlags);
 
-    for (const auto& mat : _materials)
+    for (const auto &mat : _materials)
     {
         const size_t materialId = mat.first;
 
-        if (_geometries->_sdf.geometryIndices.find(materialId) ==
-            _geometries->_sdf.geometryIndices.end())
+        if (_geometries->_sdf.geometryIndices.find(materialId) == _geometries->_sdf.geometryIndices.end())
             continue;
 
-        auto& geometry =
-            _createGeometry(_ospSDFGeometries, materialId, "sdfgeometries");
+        auto &geometry = _createGeometry(_ospSDFGeometries, materialId, "sdfgeometries");
 
         auto data =
-            allocateVectorData(_geometries->_sdf.geometryIndices[materialId],
-                               OSP_ULONG, _memoryManagementFlags);
+            allocateVectorData(_geometries->_sdf.geometryIndices[materialId], OSP_ULONG, _memoryManagementFlags);
         ospSetObject(geometry, "sdfgeometries", data);
         ospRelease(data);
 
@@ -379,31 +350,31 @@ void OSPRayModel::commitGeometry()
     // Group geometry
     if (_spheresDirty)
     {
-        for (const auto& spheres : _geometries->_spheres)
+        for (const auto &spheres : _geometries->_spheres)
             _commitSpheres(spheres.first);
     }
 
     if (_cylindersDirty)
     {
-        for (const auto& cylinders : _geometries->_cylinders)
+        for (const auto &cylinders : _geometries->_cylinders)
             _commitCylinders(cylinders.first);
     }
 
     if (_conesDirty)
     {
-        for (const auto& cones : _geometries->_cones)
+        for (const auto &cones : _geometries->_cones)
             _commitCones(cones.first);
     }
 
     if (_triangleMeshesDirty)
     {
-        for (const auto& meshes : _geometries->_triangleMeshes)
+        for (const auto &meshes : _geometries->_triangleMeshes)
             _commitMeshes(meshes.first);
     }
 
     if (_streamlinesDirty)
     {
-        for (const auto& streamlines : _geometries->_streamlines)
+        for (const auto &streamlines : _geometries->_streamlines)
             _commitStreamlines(streamlines.first);
     }
 
@@ -424,29 +395,26 @@ void OSPRayModel::commitGeometry()
         ospCommit(_boundingBoxModel);
 }
 
-void OSPRayModel::commitMaterials(const std::string& renderer)
+void OSPRayModel::commitMaterials(const std::string &renderer)
 {
     if (renderer.empty())
-        throw std::runtime_error(
-            "Materials cannot be instanced with an empty renderer name");
+        throw std::runtime_error("Materials cannot be instanced with an empty renderer name");
     if (_renderer != renderer)
     {
         for (auto kv : _materials)
         {
-            auto& material = *kv.second;
-            static_cast<OSPRayMaterial&>(material).commit(renderer);
+            auto &material = *kv.second;
+            static_cast<OSPRayMaterial &>(material).commit(renderer);
         }
         _renderer = renderer;
 
-        for (auto& map : {_ospSpheres, _ospCylinders, _ospCones, _ospMeshes,
-                          _ospStreamlines, _ospSDFGeometries})
+        for (auto &map : {_ospSpheres, _ospCylinders, _ospCones, _ospMeshes, _ospStreamlines, _ospSDFGeometries})
         {
             auto matIt = _materials.begin();
             auto geomIt = map.begin();
             while (matIt != _materials.end() && geomIt != map.end())
             {
-                while (matIt->first < geomIt->first &&
-                       matIt != _materials.end())
+                while (matIt->first < geomIt->first && matIt != _materials.end())
                     ++matIt;
                 if (matIt->first != geomIt->first)
                 {
@@ -454,7 +422,7 @@ void OSPRayModel::commitMaterials(const std::string& renderer)
                     ++geomIt;
                     continue;
                 }
-                auto& material = static_cast<OSPRayMaterial&>(*matIt->second);
+                auto &material = static_cast<OSPRayMaterial &>(*matIt->second);
                 ospSetMaterial(geomIt->second, material.getOSPMaterial());
                 ospCommit(geomIt->second);
                 ++geomIt;
@@ -470,42 +438,38 @@ void OSPRayModel::commitSimulationParams()
         if (_secondaryModel)
         {
             osphelper::set(_secondaryModel, "simEnabled", _simulationEnabled);
-            osphelper::set(_secondaryModel, "simOffset",
-                           static_cast<int32_t>(_simulationOffset));
+            osphelper::set(_secondaryModel, "simOffset", static_cast<int32_t>(_simulationOffset));
             ospCommit(_secondaryModel);
         }
         else
         {
             osphelper::set(_primaryModel, "simEnabled", _simulationEnabled);
-            osphelper::set(_primaryModel, "simOffset",
-                           static_cast<int32_t>(_simulationOffset));
+            osphelper::set(_primaryModel, "simOffset", static_cast<int32_t>(_simulationOffset));
             ospCommit(_primaryModel);
         }
         _simulationEnabledDirty = false;
     }
 }
 
-MaterialPtr OSPRayModel::createMaterialImpl(const PropertyMap& properties)
+MaterialPtr OSPRayModel::createMaterialImpl(const PropertyMap &properties)
 {
     return std::make_shared<OSPRayMaterial>(properties);
 }
 
 SharedDataVolumePtr OSPRayModel::createSharedDataVolume(
-    const Vector3ui& dimensions, const Vector3f& spacing,
+    const Vector3ui &dimensions,
+    const Vector3f &spacing,
     const VolumeDataType type) const
 {
-    return std::make_shared<OSPRaySharedDataVolume>(dimensions, spacing, type,
-                                                    _volumeParameters,
-                                                    _ospTransferFunction);
+    return std::make_shared<OSPRaySharedDataVolume>(dimensions, spacing, type, _volumeParameters, _ospTransferFunction);
 }
 
 BrickedVolumePtr OSPRayModel::createBrickedVolume(
-    const Vector3ui& dimensions, const Vector3f& spacing,
+    const Vector3ui &dimensions,
+    const Vector3f &spacing,
     const VolumeDataType type) const
 {
-    return std::make_shared<OSPRayBrickedVolume>(dimensions, spacing, type,
-                                                 _volumeParameters,
-                                                 _ospTransferFunction);
+    return std::make_shared<OSPRayBrickedVolume>(dimensions, spacing, type, _volumeParameters, _ospTransferFunction);
 }
 
 } // namespace brayns

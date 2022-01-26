@@ -27,7 +27,7 @@
 
 namespace
 {
-std::vector<uint64_t> parseIDRanges(const std::string& input)
+std::vector<uint64_t> parseIDRanges(const std::string &input)
 {
     if (input.empty())
         throw IDRangeParseException("Empty ID or ID range");
@@ -57,23 +57,21 @@ std::vector<uint64_t> parseIDRanges(const std::string& input)
             if (rangeEnd <= rangeStart)
                 throw IDRangeParseException(
                     "The range end must be greater than the range "
-                    "start for: '" +
-                    input + "'");
+                    "start for: '"
+                    + input + "'");
             result.resize(rangeEnd - rangeStart);
             std::iota(result.begin(), result.end(), rangeStart);
         }
         catch (...)
         {
-            throw IDRangeParseException("Could not parse ID range '" + input +
-                                        "'");
+            throw IDRangeParseException("Could not parse ID range '" + input + "'");
         }
     }
 
     return result;
 }
 
-void updateMaterialImpl(brayns::ModelDescriptor* model, const size_t id,
-                        const brayns::Vector4f& color)
+void updateMaterialImpl(brayns::ModelDescriptor *model, const size_t id, const brayns::Vector4f &color)
 {
     if (id == std::numeric_limits<size_t>::max())
         return;
@@ -87,9 +85,8 @@ void updateMaterialImpl(brayns::ModelDescriptor* model, const size_t id,
 
 } // namespace
 
-void ElementMaterialMap::_updateMaterial(brayns::ModelDescriptor* model,
-                                         const size_t id,
-                                         const brayns::Vector4f& color) const
+void ElementMaterialMap::_updateMaterial(brayns::ModelDescriptor *model, const size_t id, const brayns::Vector4f &color)
+    const
 {
     updateMaterialImpl(model, id, color);
 }
@@ -100,20 +97,17 @@ void CircuitColorHandler::initialize()
     _methodVariables.resize(_methods.size());
 }
 
-void CircuitColorHandler::setElements(
-    const std::vector<uint64_t>& ids,
-    std::vector<ElementMaterialMap::Ptr>&& elements)
+void CircuitColorHandler::setElements(const std::vector<uint64_t> &ids, std::vector<ElementMaterialMap::Ptr> &&elements)
 {
     _setElementsImpl(ids, std::move(elements));
 }
 
-const std::vector<std::string>& CircuitColorHandler::getMethods() const noexcept
+const std::vector<std::string> &CircuitColorHandler::getMethods() const noexcept
 {
     return _methods;
 }
 
-const std::vector<std::string>& CircuitColorHandler::getMethodVariables(
-    const std::string& method) const
+const std::vector<std::string> &CircuitColorHandler::getMethodVariables(const std::string &method) const
 {
     const auto lcm = brayns::string_utils::toLowercase(method);
 
@@ -121,7 +115,7 @@ const std::vector<std::string>& CircuitColorHandler::getMethodVariables(
     {
         if (lcm == _methods[i])
         {
-            auto& cache = _methodVariables[i];
+            auto &cache = _methodVariables[i];
             if (!cache.initialized)
             {
                 cache.variables = _getMethodVariablesImpl(_methods[i]);
@@ -134,16 +128,15 @@ const std::vector<std::string>& CircuitColorHandler::getMethodVariables(
     throw ColorMethodNotFoundException();
 }
 
-void CircuitColorHandler::updateColorById(
-    const std::vector<ColoringInformation>& vars)
+void CircuitColorHandler::updateColorById(const std::vector<ColoringInformation> &vars)
 {
     std::map<uint64_t, brayns::Vector4f> colorMap;
     if (!vars.empty())
     {
-        for (const auto& entry : vars)
+        for (const auto &entry : vars)
         {
-            const auto& rawIds = entry.variable;
-            const auto& color = entry.color;
+            const auto &rawIds = entry.variable;
+            const auto &color = entry.color;
 
             const auto ids = parseIDRanges(rawIds);
             for (const auto id : ids)
@@ -155,21 +148,19 @@ void CircuitColorHandler::updateColorById(
     _model->markModified();
 }
 
-void CircuitColorHandler::updateColorById(
-    const std::map<uint64_t, brayns::Vector4f>& colorMap)
+void CircuitColorHandler::updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
     _updateColorByIdImpl(colorMap);
     _model->markModified();
 }
 
-void CircuitColorHandler::updateSingleColor(const brayns::Vector4f& color)
+void CircuitColorHandler::updateSingleColor(const brayns::Vector4f &color)
 {
     _updateSingleColorImpl(color);
     _model->markModified();
 }
 
-void CircuitColorHandler::updateColor(
-    const std::string& method, const std::vector<ColoringInformation>& vars)
+void CircuitColorHandler::updateColor(const std::string &method, const std::vector<ColoringInformation> &vars)
 {
     const auto lcm = brayns::string_utils::toLowercase(method);
 
@@ -179,11 +170,10 @@ void CircuitColorHandler::updateColor(
 
     if (!vars.empty())
     {
-        const auto& methodVars = getMethodVariables(method);
-        for (const auto& var : vars)
+        const auto &methodVars = getMethodVariables(method);
+        for (const auto &var : vars)
         {
-            auto it =
-                std::find(methodVars.begin(), methodVars.end(), var.variable);
+            auto it = std::find(methodVars.begin(), methodVars.end(), var.variable);
             if (it == methodVars.end())
                 throw ColorMethodVariableNotFoundException();
         }
@@ -198,13 +188,12 @@ size_t CircuitColorHandler::getModelID() const noexcept
     return _model->getModelID();
 }
 
-void CircuitColorHandler::_updateMaterial(const size_t id,
-                                          const brayns::Vector4f& color)
+void CircuitColorHandler::_updateMaterial(const size_t id, const brayns::Vector4f &color)
 {
     updateMaterialImpl(_model, id, color);
 }
 
-void CircuitColorHandler::setModel(brayns::ModelDescriptor* model)
+void CircuitColorHandler::setModel(brayns::ModelDescriptor *model)
 {
     _model = model;
 }

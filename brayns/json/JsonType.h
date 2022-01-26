@@ -56,7 +56,7 @@ using JsonObject = Poco::JSON::Object;
  *
  * @tparam T Map value type.
  */
-template <typename T>
+template<typename T>
 using StringMap = std::map<std::string, T>;
 
 /**
@@ -64,7 +64,7 @@ using StringMap = std::map<std::string, T>;
  *
  * @tparam T Map value type.
  */
-template <typename T>
+template<typename T>
 using StringHash = std::unordered_map<std::string, T>;
 
 /**
@@ -99,8 +99,7 @@ struct JsonTypeHelper
      */
     static bool check(JsonType required, JsonType type)
     {
-        return required == type ||
-               (required == JsonType::Number && type == JsonType::Integer);
+        return required == type || (required == JsonType::Number && type == JsonType::Integer);
     }
 
     /**
@@ -134,7 +133,7 @@ struct JsonTypeHelper
      * @return true JSON is primitive.
      * @return false JSON is not primitive.
      */
-    static bool isPrimitive(const JsonValue& json)
+    static bool isPrimitive(const JsonValue &json)
     {
         return json.isNumeric() || json.isString();
     }
@@ -146,7 +145,7 @@ struct JsonTypeHelper
      * @return true Type is primitive.
      * @return false Type is object or array.
      */
-    template <typename T>
+    template<typename T>
     static constexpr bool isPrimitive()
     {
         return std::is_arithmetic<T>() || std::is_same<T, std::string>();
@@ -165,7 +164,7 @@ public:
      *
      * @return const std::string& Type name.
      */
-    static const std::string& ofNull()
+    static const std::string &ofNull()
     {
         static const std::string name = "null";
         return name;
@@ -176,7 +175,7 @@ public:
      *
      * @return const std::string& Type name.
      */
-    static const std::string& ofBoolean()
+    static const std::string &ofBoolean()
     {
         static const std::string name = "boolean";
         return name;
@@ -187,7 +186,7 @@ public:
      *
      * @return const std::string& Type name.
      */
-    static const std::string& ofInteger()
+    static const std::string &ofInteger()
     {
         static const std::string name = "integer";
         return name;
@@ -198,7 +197,7 @@ public:
      *
      * @return const std::string& Type name.
      */
-    static const std::string& ofNumber()
+    static const std::string &ofNumber()
     {
         static const std::string name = "number";
         return name;
@@ -209,7 +208,7 @@ public:
      *
      * @return const std::string& Type name.
      */
-    static const std::string& ofString()
+    static const std::string &ofString()
     {
         static const std::string name = "string";
         return name;
@@ -220,7 +219,7 @@ public:
      *
      * @return const std::string& Type name.
      */
-    static const std::string& ofArray()
+    static const std::string &ofArray()
     {
         static const std::string name = "array";
         return name;
@@ -231,7 +230,7 @@ public:
      *
      * @return const std::string& Type name.
      */
-    static const std::string& ofObject()
+    static const std::string &ofObject()
     {
         static const std::string name = "object";
         return name;
@@ -250,7 +249,7 @@ struct GetJsonType
      * @param name Type name.
      * @return JsonType JSON type.
      */
-    static JsonType fromName(const std::string& name)
+    static JsonType fromName(const std::string &name)
     {
         if (name == JsonTypeName::ofNull())
         {
@@ -289,7 +288,7 @@ struct GetJsonType
      * @param json JSON to evaluate.
      * @return JsonType JSON type.
      */
-    static JsonType fromJson(const JsonValue& json)
+    static JsonType fromJson(const JsonValue &json)
     {
         if (json.isEmpty())
         {
@@ -328,7 +327,7 @@ struct GetJsonType
      * @tparam T Primitive type to check.
      * @return JsonType JSON type.
      */
-    template <typename T>
+    template<typename T>
     static constexpr JsonType fromPrimitive()
     {
         if (std::is_same<T, nullptr_t>())
@@ -367,7 +366,7 @@ struct GetJsonTypeName
      * @param type Type to name.
      * @return const std::string& Name of type.
      */
-    static const std::string& fromType(JsonType type)
+    static const std::string &fromType(JsonType type)
     {
         static const std::string empty;
         switch (type)

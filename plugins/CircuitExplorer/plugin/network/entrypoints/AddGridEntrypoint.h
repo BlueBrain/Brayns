@@ -31,7 +31,7 @@
 class GridModel
 {
 public:
-    static void add(brayns::Scene& scene, const AddGridMessage& params)
+    static void add(brayns::Scene &scene, const AddGridMessage &params)
     {
         // Create grid model
         auto model = scene.createModel();
@@ -59,12 +59,9 @@ public:
                 }
 
         // X plane
-        matId =
-            CircuitExplorerMaterial::createUnlit(*model,
-                                                 params.use_colors ? red : grey,
-                                                 params.plane_opacity);
+        matId = CircuitExplorerMaterial::createUnlit(*model, params.use_colors ? red : grey, params.plane_opacity);
 
-        auto& tmx = model->getTriangleMeshes()[matId];
+        auto &tmx = model->getTriangleMeshes()[matId];
         tmx.vertices.push_back({m, 0, m});
         tmx.vertices.push_back({M, 0, m});
         tmx.vertices.push_back({M, 0, M});
@@ -73,11 +70,8 @@ public:
         tmx.indices.push_back(brayns::Vector3ui(2, 3, 0));
 
         // Y plane
-        matId = CircuitExplorerMaterial::createUnlit(*model,
-                                                     params.use_colors ? green
-                                                                       : grey,
-                                                     params.plane_opacity);
-        auto& tmy = model->getTriangleMeshes()[matId];
+        matId = CircuitExplorerMaterial::createUnlit(*model, params.use_colors ? green : grey, params.plane_opacity);
+        auto &tmy = model->getTriangleMeshes()[matId];
         tmy.vertices.push_back({m, m, 0});
         tmy.vertices.push_back({M, m, 0});
         tmy.vertices.push_back({M, M, 0});
@@ -86,11 +80,8 @@ public:
         tmy.indices.push_back(brayns::Vector3ui(2, 3, 0));
 
         // Z plane
-        matId = CircuitExplorerMaterial::createUnlit(*model,
-                                                     params.use_colors ? blue
-                                                                       : grey,
-                                                     params.plane_opacity);
-        auto& tmz = model->getTriangleMeshes()[matId];
+        matId = CircuitExplorerMaterial::createUnlit(*model, params.use_colors ? blue : grey, params.plane_opacity);
+        auto &tmz = model->getTriangleMeshes()[matId];
         tmz.vertices.push_back({0, m, m});
         tmz.vertices.push_back({0, m, M});
         tmz.vertices.push_back({0, M, M});
@@ -110,33 +101,29 @@ public:
 
             // Axis material properties
             brayns::PropertyMap diffuseProps;
+            diffuseProps.add({std::string(MATERIAL_PROPERTY_CAST_USER_DATA), false});
             diffuseProps.add(
-                {std::string(MATERIAL_PROPERTY_CAST_USER_DATA), false});
-            diffuseProps.add({std::string(MATERIAL_PROPERTY_SHADING_MODE),
-                              static_cast<int>(MaterialShadingMode::diffuse)});
+                {std::string(MATERIAL_PROPERTY_SHADING_MODE), static_cast<int>(MaterialShadingMode::diffuse)});
 
             // X
             matId = CircuitExplorerMaterial::create(*model, {1, 0, 0});
 
             model->addCylinder(matId, {{0, 0, 0}, {l1, 0, 0}, smallRadius});
-            model->addCone(matId,
-                           {{l1, 0, 0}, {l2, 0, 0}, smallRadius, largeRadius});
+            model->addCone(matId, {{l1, 0, 0}, {l2, 0, 0}, smallRadius, largeRadius});
             model->addCone(matId, {{l2, 0, 0}, {M, 0, 0}, largeRadius, 0});
 
             // Y
             matId = CircuitExplorerMaterial::create(*model, {0, 1, 0});
 
             model->addCylinder(matId, {{0, 0, 0}, {0, l1, 0}, smallRadius});
-            model->addCone(matId,
-                           {{0, l1, 0}, {0, l2, 0}, smallRadius, largeRadius});
+            model->addCone(matId, {{0, l1, 0}, {0, l2, 0}, smallRadius, largeRadius});
             model->addCone(matId, {{0, l2, 0}, {0, M, 0}, largeRadius, 0});
 
             // Z
             matId = CircuitExplorerMaterial::create(*model, {0, 0, 1});
 
             model->addCylinder(matId, {{0, 0, 0}, {0, 0, l1}, smallRadius});
-            model->addCone(matId,
-                           {{0, 0, l1}, {0, 0, l2}, smallRadius, largeRadius});
+            model->addCone(matId, {{0, 0, l1}, {0, 0, l2}, smallRadius, largeRadius});
             model->addCone(matId, {{0, 0, l2}, {0, 0, M}, largeRadius, 0});
 
             // Origin
@@ -144,27 +131,27 @@ public:
         }
 
         // Register model
-        scene.addModel(
-            std::make_shared<brayns::ModelDescriptor>(std::move(model),
-                                                      "Grid"));
+        scene.addModel(std::make_shared<brayns::ModelDescriptor>(std::move(model), "Grid"));
     }
 };
 
-class AddGridEntrypoint
-    : public brayns::Entrypoint<AddGridMessage, brayns::EmptyMessage>
+class AddGridEntrypoint : public brayns::Entrypoint<AddGridMessage, brayns::EmptyMessage>
 {
 public:
-    virtual std::string getName() const override { return "add-grid"; }
+    virtual std::string getName() const override
+    {
+        return "add-grid";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Add a visual 3D grid to the scene";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& scene = getApi().getScene();
+        auto &scene = getApi().getScene();
         brayns::Log::info("[CE] Building Grid scene.");
         GridModel::add(scene, params);
         triggerRender();

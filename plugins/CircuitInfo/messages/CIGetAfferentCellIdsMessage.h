@@ -29,6 +29,5 @@ BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint64_t>, sources, "Source cells GIDs")
 BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(CIGetAfferentCellIdsResult)
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint64_t>, ids,
-                         "Afferent cells unique GIDs")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint64_t>, ids, "Afferent cells unique GIDs")
 BRAYNS_JSON_OBJECT_END()

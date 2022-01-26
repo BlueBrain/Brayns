@@ -32,20 +32,18 @@ namespace brayns
 {
 namespace
 {
-void checkExportParameters(const FrameExporter::ExportInfo& input)
+void checkExportParameters(const FrameExporter::ExportInfo &input)
 {
     if (input.keyFrames.empty())
         throw FrameExportParameterException("No keyframe information");
 
     if (input.numSamples == 0)
-        throw FrameExportParameterException(
-            "Number of samples must be greater than 0");
+        throw FrameExportParameterException("Number of samples must be greater than 0");
 
-    const auto& path = input.storePath;
+    const auto &path = input.storePath;
     const auto bPath = fs::path(path);
     if (!fs::exists(bPath))
-        throw FrameExportParameterException("Frame result path " + path +
-                                            " not found");
+        throw FrameExportParameterException("Frame result path " + path + " not found");
 
     // Filesystem allow to query permissions, but no information about
     // current user permissions. To check wether we can write on the target
@@ -62,24 +60,22 @@ void checkExportParameters(const FrameExporter::ExportInfo& input)
     {
         fs::create_directory(bPath / testDirFilename);
     }
-    catch (const fs::filesystem_error& fse)
+    catch (const fs::filesystem_error &fse)
     {
-        throw FrameExportParameterException("Cannot write on " + path + ": " +
-                                            std::string(fse.what()));
+        throw FrameExportParameterException("Cannot write on " + path + ": " + std::string(fse.what()));
     }
     // Remove test directory on success
     fs::remove(bPath / testDirFilename);
 
-    auto& format = input.imageFormat;
+    auto &format = input.imageFormat;
     if (!ImageCodecRegistry::isSupported(format))
     {
-        throw FrameExportParameterException("Unknown image file format " +
-                                            format);
+        throw FrameExportParameterException("Unknown image file format " + format);
     }
 }
 } // namespace
 
-void FrameExporter::startNewExport(ExportInfo&& input)
+void FrameExporter::startNewExport(ExportInfo &&input)
 {
     if (_exportRunning || _exportRequested)
         throw FrameExportInProgressException();
@@ -94,13 +90,16 @@ void FrameExporter::startNewExport(ExportInfo&& input)
         "- Number of frames:\t{}\n"
         "- Samples per pixel:\t{}\n"
         "- Export folder:\t{}",
-        _currentExport.keyFrames.size(), _currentExport.numSamples,
+        _currentExport.keyFrames.size(),
+        _currentExport.numSamples,
         _currentExport.storePath);
 }
 
-void FrameExporter::preRender(Camera& camera, Renderer& renderer,
-                              FrameBuffer& frameBuffer,
-                              ParametersManager& parameters)
+void FrameExporter::preRender(
+    Camera &camera,
+    Renderer &renderer,
+    FrameBuffer &frameBuffer,
+    ParametersManager &parameters)
 {
     if (_exportRequested)
     {
@@ -129,8 +128,7 @@ void FrameExporter::preRender(Camera& camera, Renderer& renderer,
     // New frame begin, update camera and simulation
     if (_currentExportFrameAccumulation == 0)
     {
-        const auto& keyFrame =
-            _currentExport.keyFrames[_currentExportKeyFrameIndex];
+        const auto &keyFrame = _currentExport.keyFrames[_currentExportKeyFrameIndex];
 
         camera = keyFrame.camera;
         camera.setProperties(keyFrame.cameraParameters);
@@ -138,7 +136,7 @@ void FrameExporter::preRender(Camera& camera, Renderer& renderer,
     }
 }
 
-void FrameExporter::postRender(FrameBuffer& frameBuffer)
+void FrameExporter::postRender(FrameBuffer &frameBuffer)
 {
     if (!_exportRunning)
         return;
@@ -149,9 +147,7 @@ void FrameExporter::postRender(FrameBuffer& frameBuffer)
     {
         auto frameNumberName = _currentExportKeyFrameIndex;
         if (_currentExport.nameImageAfterSimulationFrameIndex)
-            frameNumberName =
-                _currentExport.keyFrames[_currentExportKeyFrameIndex]
-                    .frameIndex;
+            frameNumberName = _currentExport.keyFrames[_currentExportKeyFrameIndex].frameIndex;
         _writeImageToDisk(frameBuffer, frameNumberName);
 
         _currentExportFrameAccumulation = 0;
@@ -171,17 +167,16 @@ double FrameExporter::getExportProgress()
     const auto spp = _currentExport.numSamples;
 
     const auto totalFrameCount = numKeyframes * spp;
-    const auto progress =
-        _currentExportKeyFrameIndex * spp + _currentExportFrameAccumulation;
+    const auto progress = _currentExportKeyFrameIndex * spp + _currentExportFrameAccumulation;
 
     return static_cast<double>(progress) / static_cast<double>(totalFrameCount);
 }
 
-void FrameExporter::_saveState(Camera& camera, ParametersManager& parameters)
+void FrameExporter::_saveState(Camera &camera, ParametersManager &parameters)
 {
     _originalState = {};
 
-    const auto& renderParams = parameters.getRenderingParameters();
+    const auto &renderParams = parameters.getRenderingParameters();
     _originalState.hasAccumulation = renderParams.getAccumulation();
     _originalState.accumulationSize = renderParams.getMaxAccumFrames();
 
@@ -189,9 +184,9 @@ void FrameExporter::_saveState(Camera& camera, ParametersManager& parameters)
     _originalState.cameraProperties = camera.getPropertyMap();
 }
 
-void FrameExporter::_restoreState(Camera& camera, ParametersManager& parameters)
+void FrameExporter::_restoreState(Camera &camera, ParametersManager &parameters)
 {
-    auto& renderParams = parameters.getRenderingParameters();
+    auto &renderParams = parameters.getRenderingParameters();
     renderParams.setAccumulation(_originalState.hasAccumulation);
     renderParams.setMaxAccumFrames(_originalState.accumulationSize);
 
@@ -202,9 +197,11 @@ void FrameExporter::_restoreState(Camera& camera, ParametersManager& parameters)
     camera.commit();
 }
 
-void FrameExporter::_start(Camera& camera, Renderer& renderer,
-                           FrameBuffer& frameBuffer,
-                           ParametersManager& parameters) noexcept
+void FrameExporter::_start(
+    Camera &camera,
+    Renderer &renderer,
+    FrameBuffer &frameBuffer,
+    ParametersManager &parameters) noexcept
 {
     // Initialize export status
     _exportRunning = true;
@@ -215,7 +212,7 @@ void FrameExporter::_start(Camera& camera, Renderer& renderer,
 
     _saveState(camera, parameters);
 
-    auto& renderParams = parameters.getRenderingParameters();
+    auto &renderParams = parameters.getRenderingParameters();
     renderParams.setMaxAccumFrames(_currentExport.numSamples + 1);
 
     renderer.markModified();
@@ -224,8 +221,7 @@ void FrameExporter::_start(Camera& camera, Renderer& renderer,
     frameBuffer.clear();
 }
 
-void FrameExporter::_stop(Camera& camera, Renderer& renderer,
-                          ParametersManager& parameters) noexcept
+void FrameExporter::_stop(Camera &camera, Renderer &renderer, ParametersManager &parameters) noexcept
 {
     _exportRunning = false;
     _currentExportKeyFrameIndex = 0u;
@@ -237,15 +233,14 @@ void FrameExporter::_stop(Camera& camera, Renderer& renderer,
     renderer.commit();
 }
 
-void FrameExporter::_writeImageToDisk(FrameBuffer& frameBuffer,
-                                      const uint32_t frameNumberName)
+void FrameExporter::_writeImageToDisk(FrameBuffer &frameBuffer, const uint32_t frameNumberName)
 {
     auto image = frameBuffer.getImage();
 
     char frame[7];
     sprintf(frame, "%05d", static_cast<int32_t>(frameNumberName));
-    auto& basePath = _currentExport.storePath;
-    auto& extension = _currentExport.imageFormat;
+    auto &basePath = _currentExport.storePath;
+    auto &extension = _currentExport.imageFormat;
     auto filename = basePath + '/' + frame + "." + extension;
     auto quality = _currentExport.imageQuality;
 
@@ -253,7 +248,7 @@ void FrameExporter::_writeImageToDisk(FrameBuffer& frameBuffer,
     {
         ImageEncoder::save(image, filename, quality);
     }
-    catch (const std::runtime_error& e)
+    catch (const std::runtime_error &e)
     {
         _currentExportError = true;
         _currentExportErrorMessage = e.what();

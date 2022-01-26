@@ -34,24 +34,24 @@ namespace dti
 class StreamlineBuilder
 {
 public:
-    StreamlineBuilder(brayns::PluginAPI& api)
+    StreamlineBuilder(brayns::PluginAPI &api)
         : _api(&api)
     {
     }
 
-    void addStreamlines(const AddStreamlinesMessage& params)
+    void addStreamlines(const AddStreamlinesMessage &params)
     {
         // Extract params
-        auto& name = params.name;
-        auto& gids = params.gids;
-        auto& indices = params.indices;
-        auto& vertices = params.vertices;
+        auto &name = params.name;
+        auto &gids = params.gids;
+        auto &indices = params.indices;
+        auto &vertices = params.vertices;
         auto opacity = params.opacity;
         auto radius = params.radius;
         auto colorScheme = params.color_scheme;
 
         // Extract API data
-        auto& scene = _api->getScene();
+        auto &scene = _api->getScene();
 
         // Start loading model
         brayns::Log::info("Loading params <{}> from Json.", name);
@@ -68,9 +68,7 @@ public:
             const auto materialId = gids.empty() ? 0 : gids[index];
             brayns::PropertyMap props;
             props.add({"shading_mode", 0});
-            auto material =
-                model->createMaterial(materialId, std::to_string(materialId),
-                                      props);
+            auto material = model->createMaterial(materialId, std::to_string(materialId), props);
             material->setOpacity(opacity);
             material->setSpecularColor({0, 0, 0});
 
@@ -90,16 +88,13 @@ public:
             for (uint64_t p = startIndex; p < endIndex; ++p)
             {
                 const auto i = p * 3;
-                const brayns::Vector3f point = {vertices[i], vertices[i + 1],
-                                                vertices[i + 2]};
+                const brayns::Vector3f point = {vertices[i], vertices[i + 1], vertices[i + 2]};
                 points.push_back(point);
                 radii.push_back(radius);
             }
 
             // Load colors from points
-            const auto colors =
-                DTILoader::getColorsFromPoints(points, opacity,
-                                               ColorScheme(colorScheme));
+            const auto colors = DTILoader::getColorsFromPoints(points, opacity, ColorScheme(colorScheme));
 
             // Create streamlines
             brayns::Streamline streamline(points, colors, radii);
@@ -117,29 +112,30 @@ public:
         }
 
         // Register model
-        auto descriptor =
-            std::make_shared<brayns::ModelDescriptor>(std::move(model), name);
+        auto descriptor = std::make_shared<brayns::ModelDescriptor>(std::move(model), name);
         scene.addModel(descriptor);
 
         brayns::Log::info("{} streamlines loaded.", nbStreamlines);
     }
 
 private:
-    brayns::PluginAPI* _api;
+    brayns::PluginAPI *_api;
 };
 
-class AddStreamlinesEntrypoint
-    : public brayns::Entrypoint<AddStreamlinesMessage, brayns::EmptyMessage>
+class AddStreamlinesEntrypoint : public brayns::Entrypoint<AddStreamlinesMessage, brayns::EmptyMessage>
 {
 public:
-    virtual std::string getName() const override { return "add-streamlines"; }
+    virtual std::string getName() const override
+    {
+        return "add-streamlines";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Add a streamline representation to the scene";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         StreamlineBuilder builder(getApi());

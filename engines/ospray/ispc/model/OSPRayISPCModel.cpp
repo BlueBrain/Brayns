@@ -32,7 +32,9 @@ OSPRayISPCModel::OSPRayISPCModel()
     this->ispcEquivalent = ispc::OSPRayISPCModel_create(this);
 }
 
-OSPRayISPCModel::~OSPRayISPCModel() {}
+OSPRayISPCModel::~OSPRayISPCModel()
+{
+}
 
 void OSPRayISPCModel::commit()
 {

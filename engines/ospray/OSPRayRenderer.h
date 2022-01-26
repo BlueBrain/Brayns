@@ -31,21 +31,23 @@ namespace brayns
 class OSPRayRenderer : public Renderer
 {
 public:
-    OSPRayRenderer(const AnimationParameters& animationParameters,
-                   const RenderingParameters& renderingParameters);
+    OSPRayRenderer(const AnimationParameters &animationParameters, const RenderingParameters &renderingParameters);
     ~OSPRayRenderer();
 
     void render(FrameBufferPtr frameBuffer) final;
     void commit() final;
-    float getVariance() const final { return _variance; }
+    float getVariance() const final
+    {
+        return _variance;
+    }
     void setCamera(CameraPtr camera) final;
 
-    PickResult pick(const Vector2f& pickPos) final;
+    PickResult pick(const Vector2f &pickPos) final;
 
-    void setClipPlanes(const std::vector<Plane>& planes);
+    void setClipPlanes(const std::vector<Plane> &planes);
 
 private:
-    OSPRayCamera* _camera{nullptr};
+    OSPRayCamera *_camera{nullptr};
     OSPRenderer _renderer{nullptr};
     std::atomic<float> _variance{std::numeric_limits<float>::max()};
     std::string _currentOSPRenderer;

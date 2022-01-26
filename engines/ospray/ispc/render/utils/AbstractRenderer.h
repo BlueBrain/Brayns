@@ -44,12 +44,12 @@ public:
     void commit() override;
 
 protected:
-    std::vector<void*> _lightArray;
-    void** _lightPtr;
+    std::vector<void *> _lightArray;
+    void **_lightPtr;
 
-    ospray::Data* _lightData;
+    ospray::Data *_lightData;
 
-    brayns::DefaultMaterial* _bgMaterial;
+    brayns::DefaultMaterial *_bgMaterial;
     float _timestamp;
 };
 } // namespace brayns

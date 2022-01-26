@@ -36,7 +36,7 @@ namespace brayns
  *
  * @tparam T Enum type
  */
-template <typename T>
+template<typename T>
 class EnumMap
 {
 public:
@@ -57,21 +57,30 @@ public:
      *
      * @return size_t Number of available enums values
      */
-    size_t getSize() const { return _values.size(); }
+    size_t getSize() const
+    {
+        return _values.size();
+    }
 
     /**
      * @brief Pair value-name iterator.
      *
      * @return auto Iterator.
      */
-    auto begin() const { return _values.begin(); }
+    auto begin() const
+    {
+        return _values.begin();
+    }
 
     /**
      * @brief Pair value-name iterator.
      *
      * @return auto Iterator.
      */
-    auto end() const { return _values.end(); }
+    auto end() const
+    {
+        return _values.end();
+    }
 
     /**
      * @brief Get the value corresponding to enum name.
@@ -79,9 +88,9 @@ public:
      * @param name Enum name.
      * @return const T* Enum value or null if invalid name.
      */
-    const T* getValue(const std::string& name) const
+    const T *getValue(const std::string &name) const
     {
-        for (const auto& pair : _values)
+        for (const auto &pair : _values)
         {
             if (pair.first == name)
             {
@@ -97,9 +106,9 @@ public:
      * @param value Enum value.
      * @return const std::string* Enum name or null if invalid value.
      */
-    const std::string* getName(const T& value) const
+    const std::string *getName(const T &value) const
     {
-        for (const auto& pair : _values)
+        for (const auto &pair : _values)
         {
             if (pair.second == value)
             {
@@ -118,7 +127,7 @@ private:
  *
  * @tparam T Enum type to reflect.
  */
-template <typename T>
+template<typename T>
 struct EnumReflector
 {
     /**
@@ -126,7 +135,10 @@ struct EnumReflector
      *
      * @return EnumMap<T> Enum map of enum type.
      */
-    static EnumMap<T> reflect() { return enumMap<T>(); }
+    static EnumMap<T> reflect()
+    {
+        return enumMap<T>();
+    }
 };
 
 /**
@@ -134,7 +146,7 @@ struct EnumReflector
  *
  * @tparam T Enum type.
  */
-template <typename T>
+template<typename T>
 struct EnumAdapter
 {
     /**
@@ -142,7 +154,7 @@ struct EnumAdapter
      *
      * @return const EnumMap<T>& Reference to the static EnumMap<T> instance.
      */
-    static const EnumMap<T>& getEnumMap()
+    static const EnumMap<T> &getEnumMap()
     {
         static const EnumMap<T> values = EnumReflector<T>::reflect();
         return values;
@@ -156,15 +168,15 @@ struct EnumAdapter
      *
      * @return JsonSchema Schema of enum type.
      */
-    static JsonSchema getSchema(const T&)
+    static JsonSchema getSchema(const T &)
     {
         JsonSchema schema;
         schema.type = JsonType::String;
-        auto& enums = getEnumMap();
+        auto &enums = getEnumMap();
         schema.enums.reserve(enums.getSize());
-        for (const auto& pair : enums)
+        for (const auto &pair : enums)
         {
-            auto& name = pair.first;
+            auto &name = pair.first;
             schema.enums.push_back(name);
         }
         return schema;
@@ -178,9 +190,9 @@ struct EnumAdapter
      * @return true Success.
      * @return false Failure.
      */
-    static bool serialize(const T& value, JsonValue& json)
+    static bool serialize(const T &value, JsonValue &json)
     {
-        auto& enums = getEnumMap();
+        auto &enums = getEnumMap();
         auto name = enums.getName(value);
         if (!name)
         {
@@ -198,14 +210,14 @@ struct EnumAdapter
      * @return true Success.
      * @return false Failure.
      */
-    static bool deserialize(const JsonValue& json, T& value)
+    static bool deserialize(const JsonValue &json, T &value)
     {
         std::string name;
         if (!Json::deserialize(json, name))
         {
             return false;
         }
-        auto& enums = getEnumMap();
+        auto &enums = getEnumMap();
         auto newValue = enums.getValue(name);
         if (!newValue)
         {
@@ -230,10 +242,10 @@ struct GetEnumName
      * @return const std::string& Reference on the static name of value.
      * @throw std::runtime_error No name found for value.
      */
-    template <typename T>
-    static const std::string& of(const T& value)
+    template<typename T>
+    static const std::string &of(const T &value)
     {
-        auto& enumMap = EnumAdapter<T>::getEnumMap();
+        auto &enumMap = EnumAdapter<T>::getEnumMap();
         auto name = enumMap.getName(value);
         if (!name)
         {
@@ -255,28 +267,30 @@ struct GetEnumName
  * @endcode
  *
  */
-#define BRAYNS_JSON_ADAPTER_ENUM(TYPE, ...)                          \
-    template <>                                                      \
+#define BRAYNS_JSON_ADAPTER_ENUM(TYPE, ...) \
+    template<> \
     inline std::vector<std::pair<std::string, TYPE>> enumMap<TYPE>() \
-    {                                                                \
-        return {__VA_ARGS__};                                        \
-    }                                                                \
-                                                                     \
-    template <>                                                      \
-    struct JsonAdapter<TYPE> : EnumAdapter<TYPE>                     \
-    {                                                                \
+    { \
+        return {__VA_ARGS__}; \
+    } \
+\
+    template<> \
+    struct JsonAdapter<TYPE> : EnumAdapter<TYPE> \
+    { \
     };
 
 /**
  * @brief Reflect JsonType enum.
  *
  */
-BRAYNS_JSON_ADAPTER_ENUM(JsonType, {"", JsonType::Unknown},
-                         {JsonTypeName::ofNull(), JsonType::Null},
-                         {JsonTypeName::ofBoolean(), JsonType::Boolean},
-                         {JsonTypeName::ofInteger(), JsonType::Integer},
-                         {JsonTypeName::ofNumber(), JsonType::Number},
-                         {JsonTypeName::ofString(), JsonType::String},
-                         {JsonTypeName::ofArray(), JsonType::Array},
-                         {JsonTypeName::ofObject(), JsonType::Object})
+BRAYNS_JSON_ADAPTER_ENUM(
+    JsonType,
+    {"", JsonType::Unknown},
+    {JsonTypeName::ofNull(), JsonType::Null},
+    {JsonTypeName::ofBoolean(), JsonType::Boolean},
+    {JsonTypeName::ofInteger(), JsonType::Integer},
+    {JsonTypeName::ofNumber(), JsonType::Number},
+    {JsonTypeName::ofString(), JsonType::String},
+    {JsonTypeName::ofArray(), JsonType::Array},
+    {JsonTypeName::ofObject(), JsonType::Object})
 } // namespace brayns

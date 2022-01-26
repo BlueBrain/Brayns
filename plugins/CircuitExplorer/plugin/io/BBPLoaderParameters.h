@@ -29,46 +29,53 @@
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_ENUM(bbploader::SimulationType,
-                         {"none", bbploader::SimulationType::NONE},
-                         {"spikes", bbploader::SimulationType::SPIKES},
-                         {"compartment",
-                          bbploader::SimulationType::COMPARTMENT})
+BRAYNS_JSON_ADAPTER_ENUM(
+    bbploader::SimulationType,
+    {"none", bbploader::SimulationType::NONE},
+    {"spikes", bbploader::SimulationType::SPIKES},
+    {"compartment", bbploader::SimulationType::COMPARTMENT})
 }
 
 BRAYNS_JSON_OBJECT_BEGIN(BBPLoaderParameters)
+BRAYNS_JSON_OBJECT_ENTRY(float, percentage, "Percentage of neurons to load (Ignored if a list of gids is specified)")
 BRAYNS_JSON_OBJECT_ENTRY(
-    float, percentage,
-    "Percentage of neurons to load (Ignored if a list of gids is specified)")
-BRAYNS_JSON_OBJECT_ENTRY(
-    std::vector<std::string>, targets,
+    std::vector<std::string>,
+    targets,
     "List of targets to load. If empty, circuit's default target will be used "
     "(Ignored if a list of gids is specified",
     brayns::Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(
-    std::vector<uint64_t>, gids,
+    std::vector<uint64_t>,
+    gids,
     "List of GIDs to load. Invalidates 'percentage' and 'targets' parameters",
     brayns::Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(
-    bbploader::SimulationType, report_type,
-    "Type of report to load. Possible values are: " +
-        string_utils::join(enumNames<bbploader::SimulationType>(), ", "))
+    bbploader::SimulationType,
+    report_type,
+    "Type of report to load. Possible values are: " + string_utils::join(enumNames<bbploader::SimulationType>(), ", "))
 BRAYNS_JSON_OBJECT_ENTRY(
-    std::string, report_name,
+    std::string,
+    report_name,
     "Name of the report to load. Used only if 'report_type' is 'compartment'",
     brayns::Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(
-    float, spike_transition_time,
+    float,
+    spike_transition_time,
     "When loading a spike report, fade-in and fade-out time, in seconds, from "
     "resting state to spike state. Must be greater than or equal to 0.0",
     brayns::Default(1.f))
-BRAYNS_JSON_OBJECT_ENTRY(NeuronMorphologyLoaderParameters,
-                         neuron_morphology_parameters,
-                         "Settings to configure neuron morphology load")
-BRAYNS_JSON_OBJECT_ENTRY(bool, load_afferent_synapses,
-                         "Wether to add geometry for afferent synapses or not",
-                         brayns::Default(false))
-BRAYNS_JSON_OBJECT_ENTRY(bool, load_efferent_synapses,
-                         "Wether to add geometry for efferent synapses or not",
-                         brayns::Default(false))
+BRAYNS_JSON_OBJECT_ENTRY(
+    NeuronMorphologyLoaderParameters,
+    neuron_morphology_parameters,
+    "Settings to configure neuron morphology load")
+BRAYNS_JSON_OBJECT_ENTRY(
+    bool,
+    load_afferent_synapses,
+    "Wether to add geometry for afferent synapses or not",
+    brayns::Default(false))
+BRAYNS_JSON_OBJECT_ENTRY(
+    bool,
+    load_efferent_synapses,
+    "Wether to add geometry for efferent synapses or not",
+    brayns::Default(false))
 BRAYNS_JSON_OBJECT_END()

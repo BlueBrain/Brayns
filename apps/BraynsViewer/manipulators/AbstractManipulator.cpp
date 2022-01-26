@@ -20,10 +20,10 @@
 
 #include "AbstractManipulator.h"
 
-#include "../input/KeyboardHandler.h"
 #include <brayns/common/Log.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Scene.h>
+#include "../input/KeyboardHandler.h"
 
 namespace brayns
 {
@@ -33,8 +33,7 @@ constexpr float DEFAULT_MOTION_SPEED = 0.03f;
 constexpr float DEFAULT_ROTATION_SPEED = 0.006f;
 } // namespace
 
-AbstractManipulator::AbstractManipulator(Camera& camera,
-                                         KeyboardHandler& keyboardHandler)
+AbstractManipulator::AbstractManipulator(Camera &camera, KeyboardHandler &keyboardHandler)
     : _camera(camera)
     , _keyboardHandler(keyboardHandler)
     , _motionSpeed{DEFAULT_ROTATION_SPEED}
@@ -42,10 +41,9 @@ AbstractManipulator::AbstractManipulator(Camera& camera,
 {
 }
 
-void AbstractManipulator::adjust(const Boxd& boundingBox)
+void AbstractManipulator::adjust(const Boxd &boundingBox)
 {
-    const auto size =
-        boundingBox.isEmpty() ? 1 : glm::compMax(boundingBox.getSize());
+    const auto size = boundingBox.isEmpty() ? 1 : glm::compMax(boundingBox.getSize());
     auto position = boundingBox.getCenter();
     auto target = position;
     position.z += size;
@@ -81,7 +79,7 @@ void AbstractManipulator::updateMotionSpeed(const float speed)
     _motionSpeed *= speed;
 }
 
-void AbstractManipulator::translate(const Vector3d& vector)
+void AbstractManipulator::translate(const Vector3d &vector)
 {
     auto orientation = _camera.getOrientation();
     const auto translation = glm::rotate(orientation, vector);
@@ -89,16 +87,12 @@ void AbstractManipulator::translate(const Vector3d& vector)
     _camera.setPosition(_camera.getPosition() + translation);
 }
 
-void AbstractManipulator::rotate(const Vector3d& pivot, const double du,
-                                 const double dv, AxisMode axisMode)
+void AbstractManipulator::rotate(const Vector3d &pivot, const double du, const double dv, AxisMode axisMode)
 {
-    const Vector3d axisX =
-        glm::rotate(_camera.getOrientation(), Vector3d(1.0, 0.0, 0.0));
+    const Vector3d axisX = glm::rotate(_camera.getOrientation(), Vector3d(1.0, 0.0, 0.0));
 
-    const Vector3d axisY =
-        axisMode == AxisMode::localY
-            ? glm::rotate(_camera.getOrientation(), Vector3d(0.0, 1.0, 0.0))
-            : Vector3d(0.0, 1.0, 0.0);
+    const Vector3d axisY = axisMode == AxisMode::localY ? glm::rotate(_camera.getOrientation(), Vector3d(0.0, 1.0, 0.0))
+                                                        : Vector3d(0.0, 1.0, 0.0);
 
     const Quaterniond deltaU = glm::angleAxis(-du, axisY);
     const Quaterniond deltaV = glm::angleAxis(-dv, axisX);

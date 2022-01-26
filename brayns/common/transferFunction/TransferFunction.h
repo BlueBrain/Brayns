@@ -33,7 +33,7 @@ struct ColorMap
     std::string name;
     std::vector<Vector3f> colors;
 
-    bool operator==(const ColorMap& rhs) const;
+    bool operator==(const ColorMap &rhs) const;
 
     void clear();
 };
@@ -46,24 +46,33 @@ public:
     /** Reset to gray-scale with opacity [0..1] and value range [0,255]. */
     void clear();
 
-    const std::vector<Vector2d>& getControlPoints() const
+    const std::vector<Vector2d> &getControlPoints() const
     {
         return _controlPoints;
     }
-    void setControlPoints(const std::vector<Vector2d>& controlPoints)
+    void setControlPoints(const std::vector<Vector2d> &controlPoints)
     {
         _updateValue(_controlPoints, controlPoints);
     }
 
-    const ColorMap& getColorMap() const { return _colorMap; }
-    void setColorMap(const ColorMap& colorMap)
+    const ColorMap &getColorMap() const
+    {
+        return _colorMap;
+    }
+    void setColorMap(const ColorMap &colorMap)
     {
         _updateValue(_colorMap, colorMap);
     }
 
-    const auto& getColors() const { return _colorMap.colors; }
-    const Vector2d& getValuesRange() const { return _valuesRange; }
-    void setValuesRange(const Vector2d& valuesRange)
+    const auto &getColors() const
+    {
+        return _colorMap.colors;
+    }
+    const Vector2d &getValuesRange() const
+    {
+        return _valuesRange;
+    }
+    void setValuesRange(const Vector2d &valuesRange)
     {
         _updateValue(_valuesRange, valuesRange);
     }

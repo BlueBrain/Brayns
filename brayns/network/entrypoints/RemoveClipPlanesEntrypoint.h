@@ -26,8 +26,7 @@
 
 namespace brayns
 {
-class RemoveClipPlanesEntrypoint
-    : public Entrypoint<RemoveClipPlanesMessage, EmptyMessage>
+class RemoveClipPlanesEntrypoint : public Entrypoint<RemoveClipPlanesMessage, EmptyMessage>
 {
 public:
     virtual std::string getName() const override
@@ -40,12 +39,12 @@ public:
         return "Remove clip planes from the scene given their ids";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& ids = params.ids;
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
+        auto &ids = params.ids;
+        auto &engine = getApi().getEngine();
+        auto &scene = engine.getScene();
         for (auto id : ids)
         {
             scene.removeClipPlane(id);

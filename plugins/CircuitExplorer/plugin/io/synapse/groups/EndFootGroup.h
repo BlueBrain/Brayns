@@ -29,11 +29,11 @@
 class EndFootGroup : public SynapseGroup
 {
 public:
-    void addSynapse(const uint64_t id, brayns::TriangleMesh&& endFoottMesh);
+    void addSynapse(const uint64_t id, brayns::TriangleMesh &&endFoottMesh);
 
-    void mapToCell(const MorphologyInstance&) final;
-    void mapSimulation(const std::unordered_map<uint64_t, uint64_t>&) final;
-    SynapseMaterialMap::Ptr addToModel(brayns::Model& model) const final;
+    void mapToCell(const MorphologyInstance &) final;
+    void mapSimulation(const std::unordered_map<uint64_t, uint64_t> &) final;
+    SynapseMaterialMap::Ptr addToModel(brayns::Model &model) const final;
 
 private:
     std::vector<uint64_t> _ids;

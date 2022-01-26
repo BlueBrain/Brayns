@@ -27,7 +27,7 @@ namespace brayns
 class MultiviewPlugin : public ExtensionPlugin
 {
 public:
-    MultiviewPlugin(PropertyMap&& properties);
+    MultiviewPlugin(PropertyMap &&properties);
 
     void init() final;
 

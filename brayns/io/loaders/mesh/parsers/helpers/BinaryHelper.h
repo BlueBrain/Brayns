@@ -31,21 +31,21 @@ namespace brayns
 class BinaryHelper
 {
 public:
-    template <typename T>
+    template<typename T>
     static T extractBigEndian(std::string_view &line)
     {
         auto value = extract<T>(line);
         return EndianHelper::convertBigEndianToLocalEndian(value);
     }
 
-    template <typename T>
+    template<typename T>
     static T extractLittleEndian(std::string_view &line)
     {
         auto value = extract<T>(line);
         return EndianHelper::convertLittleEndianToLocalEndian(value);
     }
 
-    template <typename T>
+    template<typename T>
     static T extract(std::string_view &line)
     {
         auto stride = sizeof(T);

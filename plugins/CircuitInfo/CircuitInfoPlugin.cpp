@@ -36,8 +36,7 @@ void CircuitInfoPlugin::init()
     CircuitInfoEntrypoints::load(*this);
 }
 
-extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int /*argc*/,
-                                                         char** /*argv*/)
+extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int /*argc*/, char ** /*argv*/)
 {
     brayns::Log::info("[CI] Loading circuit info plugin");
     return new CircuitInfoPlugin();

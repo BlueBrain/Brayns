@@ -33,32 +33,29 @@ class Demo
 {
 public:
     Demo()
-        : _argv{"clipPlanes",    "demo", "--disable-accumulation",
-                "--window-size", "50",   "50"}
+        : _argv{"clipPlanes", "demo", "--disable-accumulation", "--window-size", "50", "50"}
         , _brayns(_argv.size(), _argv.data())
     {
         instance = &_brayns;
     }
 
-    static brayns::Brayns* instance;
+    static brayns::Brayns *instance;
 
 private:
-    std::vector<const char*> _argv;
+    std::vector<const char *> _argv;
     brayns::Brayns _brayns;
 };
-brayns::Brayns* Demo::instance = nullptr;
+brayns::Brayns *Demo::instance = nullptr;
 
-void testClipping(brayns::Brayns& brayns, bool orthographic = false)
+void testClipping(brayns::Brayns &brayns, bool orthographic = false)
 {
-    const std::string original =
-        orthographic ? "demo_ortho.png" : "snapshot.png";
+    const std::string original = orthographic ? "demo_ortho.png" : "snapshot.png";
 
-    const std::string clipped = orthographic ? "demo_clipped_ortho.png"
-                                             : "demo_clipped_perspective.png";
+    const std::string clipped = orthographic ? "demo_clipped_ortho.png" : "demo_clipped_perspective.png";
 
-    auto& engine = brayns.getEngine();
-    auto& scene = engine.getScene();
-    auto& camera = engine.getCamera();
+    auto &engine = brayns.getEngine();
+    auto &scene = engine.getScene();
+    auto &camera = engine.getCamera();
 
     auto position = scene.getBounds().getCenter();
     position.z += glm::compMax(scene.getBounds().getSize());

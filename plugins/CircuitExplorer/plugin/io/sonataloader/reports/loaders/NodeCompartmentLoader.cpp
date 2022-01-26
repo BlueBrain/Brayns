@@ -23,19 +23,18 @@
 namespace sonataloader
 {
 std::vector<NodeReportMapping> NodeCompartmentLoader::loadMapping(
-    const std::string& reportPath, const std::string& population,
-    const bbp::sonata::Selection& s) const
+    const std::string &reportPath,
+    const std::string &population,
+    const bbp::sonata::Selection &s) const
 {
-    const auto rawMapping =
-        SonataSimulationMapping::getCompartmentMapping(reportPath, population,
-                                                       s.flatten());
+    const auto rawMapping = SonataSimulationMapping::getCompartmentMapping(reportPath, population, s.flatten());
     // Compact mapping
     std::map<uint64_t, std::vector<uint16_t>> sortedCompartmentsSize;
     uint32_t lastSection = std::numeric_limits<uint32_t>::max();
     uint64_t lastNode = std::numeric_limits<uint64_t>::max();
-    for (const auto& key : rawMapping)
+    for (const auto &key : rawMapping)
     {
-        auto& cm = sortedCompartmentsSize[key.first];
+        auto &cm = sortedCompartmentsSize[key.first];
         if (lastSection != key.second || lastNode != key.first)
         {
             lastNode = key.first;
@@ -53,7 +52,7 @@ std::vector<NodeReportMapping> NodeCompartmentLoader::loadMapping(
     size_t prevOffset = 0;
     for (; it != sortedCompartmentsSize.end(); ++it)
     {
-        auto& cellMapping = mapping[index];
+        auto &cellMapping = mapping[index];
         cellMapping.globalOffset = prevOffset;
         cellMapping.compartments.resize(it->second.size());
         cellMapping.offsets.resize(it->second.size());

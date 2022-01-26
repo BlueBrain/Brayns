@@ -29,25 +29,25 @@
 class ModelMirrorer
 {
 public:
-    ModelMirrorer(brayns::PluginAPI& api)
+    ModelMirrorer(brayns::PluginAPI &api)
         : _api(&api)
     {
     }
 
-    void mirrorModel(const MirrorModelMessage& params)
+    void mirrorModel(const MirrorModelMessage &params)
     {
         // Extract params
         auto modelId = params.model_id;
-        auto& mirrorAxis = params.mirror_axis;
+        auto &mirrorAxis = params.mirror_axis;
 
         // Extract API data
-        auto& engine = _api->getEngine();
-        auto& scene = engine.getScene();
+        auto &engine = _api->getEngine();
+        auto &scene = engine.getScene();
 
         // Extract model data
-        auto& descriptor = brayns::ExtractModel::fromId(scene, modelId);
-        auto& model = descriptor.getModel();
-        auto& bounds = model.getBounds();
+        auto &descriptor = brayns::ExtractModel::fromId(scene, modelId);
+        auto &model = descriptor.getModel();
+        auto &bounds = model.getBounds();
         auto dimensions = (bounds.getMax() - bounds.getMin());
         auto min = bounds.getMin();
         auto max = bounds.getMax();
@@ -68,30 +68,28 @@ public:
         brayns::Vector3f center = (max + min) * 0.5;
 
         // Spheres
-        auto& sphereMap = model.getSpheres();
-        for (auto& entry : sphereMap)
+        auto &sphereMap = model.getSpheres();
+        for (auto &entry : sphereMap)
         {
             std::vector<brayns::Sphere> tempBuf;
             tempBuf.reserve(entry.second.size());
-            for (const brayns::Sphere& sphere : entry.second)
+            for (const brayns::Sphere &sphere : entry.second)
             {
                 auto toCenter = (center - sphere.center) * 2.f;
                 for (const auto skipAxis : skipMirrorAxis)
                     toCenter[skipAxis] = 0.f;
-                tempBuf.emplace_back(sphere.center + toCenter, sphere.radius,
-                                     sphere.userData);
+                tempBuf.emplace_back(sphere.center + toCenter, sphere.radius, sphere.userData);
             }
-            entry.second.insert(entry.second.end(), tempBuf.begin(),
-                                tempBuf.end());
+            entry.second.insert(entry.second.end(), tempBuf.begin(), tempBuf.end());
         }
 
         // Cones
-        auto& conesMap = model.getCones();
-        for (auto& entry : conesMap)
+        auto &conesMap = model.getCones();
+        for (auto &entry : conesMap)
         {
             std::vector<brayns::Cone> tempBuf;
             tempBuf.reserve(entry.second.size());
-            for (const brayns::Cone& cone : entry.second)
+            for (const brayns::Cone &cone : entry.second)
             {
                 auto toCenter = (center - cone.center) * 2.f;
                 auto toUp = (center - cone.up) * 2.f;
@@ -100,21 +98,23 @@ public:
                     toCenter[skipAxis] = 0.f;
                     toUp[skipAxis] = 0.f;
                 }
-                tempBuf.emplace_back(cone.center + toCenter, cone.up + toUp,
-                                     cone.centerRadius, cone.upRadius,
-                                     cone.userData);
+                tempBuf.emplace_back(
+                    cone.center + toCenter,
+                    cone.up + toUp,
+                    cone.centerRadius,
+                    cone.upRadius,
+                    cone.userData);
             }
-            entry.second.insert(entry.second.end(), tempBuf.begin(),
-                                tempBuf.end());
+            entry.second.insert(entry.second.end(), tempBuf.begin(), tempBuf.end());
         }
 
         // Cylinders
-        auto& cylindersMap = model.getCylinders();
-        for (auto& entry : cylindersMap)
+        auto &cylindersMap = model.getCylinders();
+        for (auto &entry : cylindersMap)
         {
             std::vector<brayns::Cylinder> tempBuf;
             tempBuf.reserve(entry.second.size());
-            for (brayns::Cylinder& cylinder : entry.second)
+            for (brayns::Cylinder &cylinder : entry.second)
             {
                 auto toCenter = (center - cylinder.center) * 2.f;
                 auto toUp = (center - cylinder.up) * 2.f;
@@ -123,27 +123,24 @@ public:
                     toCenter[skipAxis] = 0.f;
                     toUp[skipAxis] = 0.f;
                 }
-                tempBuf.emplace_back(cylinder.center + toCenter,
-                                     cylinder.up + toUp, cylinder.radius,
-                                     cylinder.userData);
+                tempBuf
+                    .emplace_back(cylinder.center + toCenter, cylinder.up + toUp, cylinder.radius, cylinder.userData);
             }
-            entry.second.insert(entry.second.end(), tempBuf.begin(),
-                                tempBuf.end());
+            entry.second.insert(entry.second.end(), tempBuf.begin(), tempBuf.end());
         }
 
         // SDF geometry
-        brayns::SDFGeometryData& sdfGeometry = model.getSDFGeometryData();
+        brayns::SDFGeometryData &sdfGeometry = model.getSDFGeometryData();
         const size_t originalOffset = sdfGeometry.geometries.size();
         std::vector<brayns::SDFGeometry> tempBuf;
         tempBuf.reserve(originalOffset);
-        for (auto& entry : sdfGeometry.geometryIndices)
+        for (auto &entry : sdfGeometry.geometryIndices)
         {
             std::vector<uint64_t> extraIndices;
             extraIndices.reserve(entry.second.size());
             for (const auto geomIndex : entry.second)
             {
-                const brayns::SDFGeometry& geom =
-                    sdfGeometry.geometries[geomIndex];
+                const brayns::SDFGeometry &geom = sdfGeometry.geometries[geomIndex];
                 auto toP0 = (center - geom.p0) * 2.f;
                 auto toP1 = (center - geom.p1) * 2.f;
                 for (const auto skipAxis : skipMirrorAxis)
@@ -160,16 +157,14 @@ public:
                 sdfGeometry.neighbours.push_back(newNeighbours);
                 // Insert the new geometry
                 tempBuf.emplace_back();
-                brayns::SDFGeometry& last = tempBuf.back();
+                brayns::SDFGeometry &last = tempBuf.back();
                 last = geom;
                 last.p0 += toP0;
                 last.p1 += toP1;
             }
-            entry.second.insert(entry.second.end(), extraIndices.begin(),
-                                extraIndices.end());
+            entry.second.insert(entry.second.end(), extraIndices.begin(), extraIndices.end());
         }
-        sdfGeometry.geometries.insert(sdfGeometry.geometries.end(),
-                                      tempBuf.begin(), tempBuf.end());
+        sdfGeometry.geometries.insert(sdfGeometry.geometries.end(), tempBuf.begin(), tempBuf.end());
         tempBuf.clear();
 
         // Recompute bounds
@@ -186,21 +181,23 @@ public:
     }
 
 private:
-    brayns::PluginAPI* _api;
+    brayns::PluginAPI *_api;
 };
 
-class MirrorModelEntrypoint
-    : public brayns::Entrypoint<MirrorModelMessage, brayns::EmptyMessage>
+class MirrorModelEntrypoint : public brayns::Entrypoint<MirrorModelMessage, brayns::EmptyMessage>
 {
 public:
-    virtual std::string getName() const override { return "mirror-model"; }
+    virtual std::string getName() const override
+    {
+        return "mirror-model";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Mirrors a model along a given axis";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         ModelMirrorer mirrorer(getApi());

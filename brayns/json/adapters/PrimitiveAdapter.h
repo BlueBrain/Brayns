@@ -35,7 +35,7 @@ namespace brayns
  *
  * @tparam T Primitive type.
  */
-template <typename T>
+template<typename T>
 struct PrimitiveAdapter
 {
     /**
@@ -43,7 +43,7 @@ struct PrimitiveAdapter
      *
      * @return JsonSchema Schema.
      */
-    static JsonSchema getSchema(const T&)
+    static JsonSchema getSchema(const T &)
     {
         JsonSchema schema;
         schema.type = GetJsonType::fromPrimitive<T>();
@@ -62,7 +62,7 @@ struct PrimitiveAdapter
      * @return true Success,
      * @return false Failure.
      */
-    static bool serialize(const T& value, JsonValue& json)
+    static bool serialize(const T &value, JsonValue &json)
     {
         json = value;
         return true;
@@ -76,7 +76,7 @@ struct PrimitiveAdapter
      * @return true Success.
      * @return false Failure.
      */
-    static bool deserialize(const JsonValue& json, T& value)
+    static bool deserialize(const JsonValue &json, T &value)
     {
         if (!json.isNumeric() && !json.isString())
         {
@@ -92,7 +92,7 @@ struct PrimitiveAdapter
  *
  * @tparam T Type (usually float or double).
  */
-template <typename T>
+template<typename T>
 struct FloatAdapter : PrimitiveAdapter<T>
 {
     /**
@@ -103,7 +103,7 @@ struct FloatAdapter : PrimitiveAdapter<T>
      * @return true Success.
      * @return false Failure.
      */
-    static bool serialize(T value, JsonValue& json)
+    static bool serialize(T value, JsonValue &json)
     {
         if (std::isinf(value))
         {
@@ -124,7 +124,7 @@ struct FloatAdapter : PrimitiveAdapter<T>
  * @brief Allow boolean JSON handling.
  *
  */
-template <>
+template<>
 struct JsonAdapter<bool> : PrimitiveAdapter<bool>
 {
 };
@@ -133,7 +133,7 @@ struct JsonAdapter<bool> : PrimitiveAdapter<bool>
  * @brief Allow int8 JSON handling.
  *
  */
-template <>
+template<>
 struct JsonAdapter<int8_t> : PrimitiveAdapter<int8_t>
 {
 };
@@ -142,7 +142,7 @@ struct JsonAdapter<int8_t> : PrimitiveAdapter<int8_t>
  * @brief Allow uint8 JSON handling.
  *
  */
-template <>
+template<>
 struct JsonAdapter<uint8_t> : PrimitiveAdapter<uint8_t>
 {
 };
@@ -151,7 +151,7 @@ struct JsonAdapter<uint8_t> : PrimitiveAdapter<uint8_t>
  * @brief Allow int16 JSON handling.
  *
  */
-template <>
+template<>
 struct JsonAdapter<int16_t> : PrimitiveAdapter<int16_t>
 {
 };
@@ -160,7 +160,7 @@ struct JsonAdapter<int16_t> : PrimitiveAdapter<int16_t>
  * @brief Allow uint16 JSON handling.
  *
  */
-template <>
+template<>
 struct JsonAdapter<uint16_t> : PrimitiveAdapter<uint16_t>
 {
 };
@@ -169,7 +169,7 @@ struct JsonAdapter<uint16_t> : PrimitiveAdapter<uint16_t>
  * @brief Allow int32 JSON handling.
  *
  */
-template <>
+template<>
 struct JsonAdapter<int32_t> : PrimitiveAdapter<int32_t>
 {
 };
@@ -178,7 +178,7 @@ struct JsonAdapter<int32_t> : PrimitiveAdapter<int32_t>
  * @brief Allow uint64 JSON handling.
  *
  */
-template <>
+template<>
 struct JsonAdapter<uint32_t> : PrimitiveAdapter<uint32_t>
 {
 };
@@ -187,7 +187,7 @@ struct JsonAdapter<uint32_t> : PrimitiveAdapter<uint32_t>
  * @brief Allow int64 JSON handling.
  *
  */
-template <>
+template<>
 struct JsonAdapter<int64_t> : PrimitiveAdapter<int64_t>
 {
 };
@@ -196,7 +196,7 @@ struct JsonAdapter<int64_t> : PrimitiveAdapter<int64_t>
  * @brief Allow uint64 JSON handling.
  *
  */
-template <>
+template<>
 struct JsonAdapter<uint64_t> : PrimitiveAdapter<uint64_t>
 {
 };
@@ -205,7 +205,7 @@ struct JsonAdapter<uint64_t> : PrimitiveAdapter<uint64_t>
  * @brief Allow float JSON handling
  *
  */
-template <>
+template<>
 struct JsonAdapter<float> : FloatAdapter<float>
 {
 };
@@ -214,7 +214,7 @@ struct JsonAdapter<float> : FloatAdapter<float>
  * @brief Allow double JSON handling.
  *
  */
-template <>
+template<>
 struct JsonAdapter<double> : FloatAdapter<double>
 {
 };
@@ -223,7 +223,7 @@ struct JsonAdapter<double> : FloatAdapter<double>
  * @brief Allow string JSON handling.
  *
  */
-template <>
+template<>
 struct JsonAdapter<std::string> : PrimitiveAdapter<std::string>
 {
 };

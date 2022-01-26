@@ -28,37 +28,38 @@
 
 namespace brayns
 {
-class GetLightsEntrypoint
-    : public Entrypoint<EmptyMessage, std::vector<LightMessage>>
+class GetLightsEntrypoint : public Entrypoint<EmptyMessage, std::vector<LightMessage>>
 {
 public:
-    virtual std::string getName() const override { return "get-lights"; }
+    virtual std::string getName() const override
+    {
+        return "get-lights";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Get all lights";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
-        auto& lightManager = scene.getLightManager();
-        auto& lights = lightManager.getLights();
+        auto &engine = getApi().getEngine();
+        auto &scene = engine.getScene();
+        auto &lightManager = scene.getLightManager();
+        auto &lights = lightManager.getLights();
         auto messages = _buildMessages(lights);
         request.reply(messages);
     }
 
 private:
-    std::vector<LightMessage> _buildMessages(
-        const std::map<size_t, LightPtr>& lights)
+    std::vector<LightMessage> _buildMessages(const std::map<size_t, LightPtr> &lights)
     {
         std::vector<LightMessage> messages;
         messages.reserve(lights.size());
-        for (const auto& pair : lights)
+        for (const auto &pair : lights)
         {
             auto id = pair.first;
-            auto& light = pair.second;
+            auto &light = pair.second;
             if (!light)
             {
                 continue;
@@ -68,7 +69,7 @@ private:
         return messages;
     }
 
-    LightMessage _buildMessage(size_t id, const LightPtr& light)
+    LightMessage _buildMessage(size_t id, const LightPtr &light)
     {
         LightMessage message;
         message.type = light->_type;

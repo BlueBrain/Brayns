@@ -22,23 +22,20 @@
 
 namespace bbploader
 {
-SpikeSimulation::SpikeSimulation(const std::string& reportPath,
-                                 const brain::GIDSet& inputGids, const float tt)
+SpikeSimulation::SpikeSimulation(const std::string &reportPath, const brain::GIDSet &inputGids, const float tt)
     : _path(reportPath)
     , _transitionTime(tt)
     , _gids(inputGids)
-    , _report(std::make_shared<brain::SpikeReportReader>(brion::URI(reportPath),
-                                                         inputGids))
+    , _report(std::make_shared<brain::SpikeReportReader>(brion::URI(reportPath), inputGids))
 {
 }
 
-const brain::GIDSet& SpikeSimulation::getReportGids() const
+const brain::GIDSet &SpikeSimulation::getReportGids() const
 {
     return _gids;
 }
 
-std::vector<Simulation::CellMapping> SpikeSimulation::getMapping(
-    const brain::GIDSet& inputGids) const
+std::vector<Simulation::CellMapping> SpikeSimulation::getMapping(const brain::GIDSet &inputGids) const
 {
     std::vector<Simulation::CellMapping> result(inputGids.size());
     for (size_t i = 0; i < inputGids.size(); ++i)
@@ -48,7 +45,6 @@ std::vector<Simulation::CellMapping> SpikeSimulation::getMapping(
 
 brayns::AbstractSimulationHandlerPtr SpikeSimulation::createHandler() const
 {
-    return std::make_shared<SpikeHandler>(_path, _transitionTime, _gids,
-                                          _report);
+    return std::make_shared<SpikeHandler>(_path, _transitionTime, _gids, _report);
 }
 } // namespace bbploader

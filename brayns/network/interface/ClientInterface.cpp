@@ -53,44 +53,43 @@ using namespace brayns;
 class PassphraseHandler : public Poco::Net::PrivateKeyPassphraseHandler
 {
 public:
-    PassphraseHandler(const NetworkParameters& parameters)
+    PassphraseHandler(const NetworkParameters &parameters)
         : Poco::Net::PrivateKeyPassphraseHandler(false)
         , _parameters(&parameters)
     {
     }
 
-    virtual void onPrivateKeyRequested(const void*, std::string& key) override
+    virtual void onPrivateKeyRequested(const void *, std::string &key) override
     {
         key = _parameters->getPrivateKeyPassphrase();
     }
 
 private:
-    const NetworkParameters* _parameters;
+    const NetworkParameters *_parameters;
 };
 
 class CertificateHandler : public Poco::Net::InvalidCertificateHandler
 {
 public:
-    CertificateHandler(const NetworkParameters& parameters)
+    CertificateHandler(const NetworkParameters &parameters)
         : Poco::Net::InvalidCertificateHandler(false)
         , _parameters(&parameters)
     {
     }
 
-    virtual void onInvalidCertificate(
-        const void*, Poco::Net::VerificationErrorArgs& args) override
+    virtual void onInvalidCertificate(const void *, Poco::Net::VerificationErrorArgs &args) override
     {
         Log::error("Invalid certificate: {}.", args.errorMessage());
     }
 
 private:
-    const NetworkParameters* _parameters;
+    const NetworkParameters *_parameters;
 };
 
 class ClientSslContext
 {
 public:
-    static Poco::Net::Context::Ptr create(const NetworkParameters& parameters)
+    static Poco::Net::Context::Ptr create(const NetworkParameters &parameters)
     {
         auto usage = Poco::Net::Context::TLS_CLIENT_USE;
         Poco::Net::Context::Params params;
@@ -104,9 +103,9 @@ public:
 class ClientSslManager
 {
 public:
-    ClientSslManager(const NetworkParameters& parameters)
+    ClientSslManager(const NetworkParameters &parameters)
     {
-        auto& manager = Poco::Net::SSLManager::instance();
+        auto &manager = Poco::Net::SSLManager::instance();
         auto passphrase = Poco::makeShared<PassphraseHandler>(parameters);
         auto certificate = Poco::makeShared<CertificateHandler>(parameters);
         auto context = ClientSslContext::create(parameters);
@@ -117,10 +116,9 @@ public:
 class ClientSession
 {
 public:
-    static std::unique_ptr<Poco::Net::HTTPClientSession> create(
-        const NetworkParameters& parameters)
+    static std::unique_ptr<Poco::Net::HTTPClientSession> create(const NetworkParameters &parameters)
     {
-        auto& uri = parameters.getUri();
+        auto &uri = parameters.getUri();
         auto secure = parameters.isSecure();
         auto address = Poco::Net::SocketAddress(uri);
         if (secure)
@@ -138,16 +136,13 @@ public:
 class ClientManager
 {
 public:
-    static void run(const NetworkParameters& parameters,
-                    NetworkInterface& interface)
+    static void run(const NetworkParameters &parameters, NetworkInterface &interface)
     {
         auto session = ClientSession::create(parameters);
-        Log::info("Establishing client session with '{}:{}'.",
-                  session->getHost(), session->getPort());
+        Log::info("Establishing client session with '{}:{}'.", session->getHost(), session->getPort());
         Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_1_1);
         Poco::Net::HTTPResponse response;
-        auto socket =
-            std::make_shared<NetworkSocket>(*session, request, response);
+        auto socket = std::make_shared<NetworkSocket>(*session, request, response);
         Log::info("Client session connected.");
         interface.run(std::move(socket));
     }
@@ -159,7 +154,7 @@ namespace brayns
 class ClientTask
 {
 public:
-    ClientTask(const NetworkParameters& parameters, NetworkInterface& interface)
+    ClientTask(const NetworkParameters &parameters, NetworkInterface &interface)
         : _parameters(&parameters)
         , _interface(&interface)
     {
@@ -181,7 +176,7 @@ public:
         {
             _handle.get();
         }
-        catch (const std::exception& e)
+        catch (const std::exception &e)
         {
             _error(e.what());
         }
@@ -197,11 +192,11 @@ private:
             {
                 ClientManager::run(*_parameters, *_interface);
             }
-            catch (const Poco::Exception& e)
+            catch (const Poco::Exception &e)
             {
                 _error(e.displayText().c_str());
             }
-            catch (const std::exception& e)
+            catch (const std::exception &e)
             {
                 _error(e.what());
             }
@@ -210,27 +205,29 @@ private:
         }
     }
 
-    void _error(const char* message)
+    void _error(const char *message)
     {
         Log::error("Error in websocket client: {}.", message);
     }
 
-    const NetworkParameters* _parameters;
-    NetworkInterface* _interface;
+    const NetworkParameters *_parameters;
+    NetworkInterface *_interface;
     std::atomic_bool _running{false};
     std::future<void> _handle;
 };
 
-ClientInterface::ClientInterface(NetworkContext& context)
+ClientInterface::ClientInterface(NetworkContext &context)
     : NetworkInterface(context)
 {
-    auto& api = context.getApi();
-    auto& manager = api.getParametersManager();
-    auto& parameters = manager.getNetworkParameters();
+    auto &api = context.getApi();
+    auto &manager = api.getParametersManager();
+    auto &parameters = manager.getNetworkParameters();
     _task = std::make_unique<ClientTask>(parameters, *this);
 }
 
-ClientInterface::~ClientInterface() {}
+ClientInterface::~ClientInterface()
+{
+}
 
 void ClientInterface::start()
 {

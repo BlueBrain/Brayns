@@ -35,7 +35,7 @@ namespace brayns
  * @tparam From The type of the source object to convert from.
  * @tparam To The type of the destination object to be converted.
  */
-template <typename From, typename To>
+template<typename From, typename To>
 struct Converter
 {
     /**
@@ -44,7 +44,10 @@ struct Converter
      * @param from The value to convert from.
      * @param to The value to convert to.
      */
-    static void convert(const From& from, To& to) { to = To(from); }
+    static void convert(const From &from, To &to)
+    {
+        to = To(from);
+    }
 };
 
 /**
@@ -54,7 +57,7 @@ struct Converter
  * @tparam From The type of the objects contained in the source vector.
  * @tparam To The type of the objects contained in the destination vector.
  */
-template <typename From, typename To>
+template<typename From, typename To>
 struct Converter<std::vector<From>, std::vector<To>>
 {
     /**
@@ -64,11 +67,11 @@ struct Converter<std::vector<From>, std::vector<To>>
      * @param from Source vector.
      * @param to Destination vector.
      */
-    static void convert(const std::vector<From>& from, std::vector<To>& to)
+    static void convert(const std::vector<From> &from, std::vector<To> &to)
     {
         to.clear();
         to.reserve(from.size());
-        for (const auto& item : from)
+        for (const auto &item : from)
         {
             to.emplace_back();
             Converter<From, To>::convert(item, to.back());
@@ -85,7 +88,7 @@ struct Converter<std::vector<From>, std::vector<To>>
  * @tparam To The type of the objects contained in the destination vec.
  * @tparam SizeTo The size of the destination vec.
  */
-template <typename From, glm::length_t L1, typename To, glm::length_t L2>
+template<typename From, glm::length_t L1, typename To, glm::length_t L2>
 struct Converter<glm::vec<L1, From>, glm::vec<L2, To>>
 {
     /**
@@ -96,7 +99,7 @@ struct Converter<glm::vec<L1, From>, glm::vec<L2, To>>
      * @param from Source vec.
      * @param to Destination vec.
      */
-    static void convert(const glm::vec<L1, From>& from, glm::vec<L2, To>& to)
+    static void convert(const glm::vec<L1, From> &from, glm::vec<L2, To> &to)
     {
         auto itemCount = std::min(from.length(), to.length());
         for (glm::length_t i = 0; i < itemCount; ++i)

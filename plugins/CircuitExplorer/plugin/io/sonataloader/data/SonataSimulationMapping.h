@@ -34,7 +34,8 @@ public:
      * given report
      */
     static std::vector<bbp::sonata::NodeID> getCompartmentNodes(
-        const std::string& reportPath, const std::string& population);
+        const std::string &reportPath,
+        const std::string &population);
 
     /**
      * @brief return the mapping for each reported element of the given list of
@@ -45,9 +46,9 @@ public:
      * once, denoting that the given element of the given node has multiple
      * compartments reported.
      */
-    static std::vector<std::pair<bbp::sonata::NodeID, bbp::sonata::ElementID>>
-        getCompartmentMapping(const std::string& reportPath,
-                              const std::string& population,
-                              const std::vector<bbp::sonata::NodeID>& nodeIds);
+    static std::vector<std::pair<bbp::sonata::NodeID, bbp::sonata::ElementID>> getCompartmentMapping(
+        const std::string &reportPath,
+        const std::string &population,
+        const std::vector<bbp::sonata::NodeID> &nodeIds);
 };
 } // namespace sonataloader

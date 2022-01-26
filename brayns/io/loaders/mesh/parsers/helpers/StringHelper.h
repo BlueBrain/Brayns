@@ -40,14 +40,13 @@ public:
 
     static size_t count(std::string_view str, std::string_view item);
 
-    static std::string_view extract(std::string_view &str,
-                                    std::string_view separator);
+    static std::string_view extract(std::string_view &str, std::string_view separator);
 
     static std::string_view extractToken(std::string_view &str);
 
     static size_t countTokens(std::string_view str);
 
-    template <typename T>
+    template<typename T>
     static T extract(std::string_view &data)
     {
         auto token = extractToken(data);
@@ -63,9 +62,9 @@ public:
     }
 };
 
-template <>
+template<>
 int8_t StringHelper::extract<int8_t>(std::string_view &data);
 
-template <>
+template<>
 uint8_t StringHelper::extract<uint8_t>(std::string_view &data);
 } // namespace brayns

@@ -40,8 +40,7 @@ public:
     class Section
     {
     public:
-        Section(const int32_t id, const int32_t parentId,
-                const NeuronSection type);
+        Section(const int32_t id, const int32_t parentId, const NeuronSection type);
 
         const int32_t id;
         const int32_t parentId;
@@ -55,16 +54,15 @@ public:
     class Soma
     {
     public:
-        Soma(const brayns::Vector3f& center, const float radius);
+        Soma(const brayns::Vector3f &center, const float radius);
 
         const brayns::Vector3f center;
         float radius;
-        std::vector<Section*> children;
+        std::vector<Section *> children;
     };
 
 public:
-    NeuronMorphology(const std::string& path, const bool soma, const bool axon,
-                     const bool dendrites);
+    NeuronMorphology(const std::string &path, const bool soma, const bool axon, const bool dendrites);
 
     /**
      * @brief returns true if this morphology was loaded with soma
@@ -75,37 +73,36 @@ public:
      * @brief returns a reference to the soma object.
      * @throws std::runtime_error if the morphology was loaded without soma
      */
-    Soma& soma();
-    const Soma& soma() const;
+    Soma &soma();
+    const Soma &soma() const;
 
     /**
      * @brief returns a list of all the sections that were loaded for this
      * morphology
      */
-    std::vector<Section>& sections() noexcept;
-    const std::vector<Section>& sections() const noexcept;
+    std::vector<Section> &sections() noexcept;
+    const std::vector<Section> &sections() const noexcept;
 
     /**
      * @brief returns a list with pointers to all the sections which are
      * children of the given section
      */
-    std::vector<Section*> sectionChildren(const Section& section) noexcept;
-    std::vector<const Section*> sectionChildren(
-        const Section& section) const noexcept;
+    std::vector<Section *> sectionChildren(const Section &section) noexcept;
+    std::vector<const Section *> sectionChildren(const Section &section) const noexcept;
 
     /**
      * @brief Returns the parent section of the passed section. If the passed
      * section is a root section, or if the morphology is incomplete and no
      * parent is found, it will return null
      */
-    Section* parent(const Section& section) noexcept;
+    Section *parent(const Section &section) noexcept;
 
     /**
      * @brief Returns the parent section of the passed section. If the passed
      * section is a root section, or if the morphology is incomplete and no
      * parent is found, it will return null
      */
-    const Section* parent(const Section& section) const noexcept;
+    const Section *parent(const Section &section) const noexcept;
 
 private:
     NeuronMorphology() = default;

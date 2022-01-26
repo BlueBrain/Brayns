@@ -29,12 +29,12 @@
 
 namespace brayns
 {
-template <>
+template<>
 struct ObjectExtractor<Renderer>
 {
-    static Renderer& extract(PluginAPI& api)
+    static Renderer &extract(PluginAPI &api)
     {
-        auto& engine = api.getEngine();
+        auto &engine = api.getEngine();
         return engine.getRenderer();
     }
 };

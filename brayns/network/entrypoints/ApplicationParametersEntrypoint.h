@@ -26,18 +26,17 @@
 
 namespace brayns
 {
-template <>
+template<>
 struct ObjectExtractor<ApplicationParameters>
 {
-    static ApplicationParameters& extract(PluginAPI& api)
+    static ApplicationParameters &extract(PluginAPI &api)
     {
-        auto& parametersManager = api.getParametersManager();
+        auto &parametersManager = api.getParametersManager();
         return parametersManager.getApplicationParameters();
     }
 };
 
-class GetApplicationParametersEntrypoint
-    : public GetEntrypoint<ApplicationParameters>
+class GetApplicationParametersEntrypoint : public GetEntrypoint<ApplicationParameters>
 {
 public:
     virtual std::string getName() const override
@@ -51,8 +50,7 @@ public:
     }
 };
 
-class SetApplicationParametersEntrypoint
-    : public SetEntrypoint<ApplicationParameters>
+class SetApplicationParametersEntrypoint : public SetEntrypoint<ApplicationParameters>
 {
 public:
     virtual std::string getName() const override

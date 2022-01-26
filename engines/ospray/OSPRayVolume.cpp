@@ -24,11 +24,13 @@
 
 namespace brayns
 {
-OSPRayVolume::OSPRayVolume(const Vector3ui& dimensions, const Vector3f& spacing,
-                           const VolumeDataType type,
-                           const VolumeParameters& params,
-                           OSPTransferFunction transferFunction,
-                           const std::string& volumeType)
+OSPRayVolume::OSPRayVolume(
+    const Vector3ui &dimensions,
+    const Vector3f &spacing,
+    const VolumeDataType type,
+    const VolumeParameters &params,
+    OSPTransferFunction transferFunction,
+    const std::string &volumeType)
     : Volume(dimensions, spacing, type)
     , _parameters(params)
     , _volume(ospNewVolume(volumeType.c_str()))
@@ -66,8 +68,7 @@ OSPRayVolume::OSPRayVolume(const Vector3ui& dimensions, const Vector3f& spacing,
     case VolumeDataType::UINT32:
     case VolumeDataType::INT8:
     case VolumeDataType::INT32:
-        throw std::runtime_error("Unsupported voxel type " +
-                                 std::to_string(int(type)));
+        throw std::runtime_error("Unsupported voxel type " + std::to_string(int(type)));
     }
 
     ospSetObject(_volume, "transferFunction", transferFunction);
@@ -78,53 +79,49 @@ OSPRayVolume::~OSPRayVolume()
     ospRelease(_volume);
 }
 
-OSPRayBrickedVolume::OSPRayBrickedVolume(const Vector3ui& dimensions,
-                                         const Vector3f& spacing,
-                                         const VolumeDataType type,
-                                         const VolumeParameters& params,
-                                         OSPTransferFunction transferFunction)
+OSPRayBrickedVolume::OSPRayBrickedVolume(
+    const Vector3ui &dimensions,
+    const Vector3f &spacing,
+    const VolumeDataType type,
+    const VolumeParameters &params,
+    OSPTransferFunction transferFunction)
     : Volume(dimensions, spacing, type)
     , BrickedVolume(dimensions, spacing, type)
-    , OSPRayVolume(dimensions, spacing, type, params, transferFunction,
-                   "block_bricked_volume")
+    , OSPRayVolume(dimensions, spacing, type, params, transferFunction, "block_bricked_volume")
 {
 }
 
 OSPRaySharedDataVolume::OSPRaySharedDataVolume(
-    const Vector3ui& dimensions, const Vector3f& spacing,
-    const VolumeDataType type, const VolumeParameters& params,
+    const Vector3ui &dimensions,
+    const Vector3f &spacing,
+    const VolumeDataType type,
+    const VolumeParameters &params,
     OSPTransferFunction transferFunction)
     : Volume(dimensions, spacing, type)
     , SharedDataVolume(dimensions, spacing, type)
-    , OSPRayVolume(dimensions, spacing, type, params, transferFunction,
-                   "shared_structured_volume")
+    , OSPRayVolume(dimensions, spacing, type, params, transferFunction, "shared_structured_volume")
 {
 }
 
-void OSPRayVolume::setDataRange(const Vector2f& range)
+void OSPRayVolume::setDataRange(const Vector2f &range)
 {
     osphelper::set(_volume, "voxelRange", range);
     markModified();
 }
 
-void OSPRayBrickedVolume::setBrick(const void* data, const Vector3ui& position,
-                                   const Vector3ui& size_)
+void OSPRayBrickedVolume::setBrick(const void *data, const Vector3ui &position, const Vector3ui &size_)
 {
-    const ospcommon::vec3i pos{int(position.x), int(position.y),
-                               int(position.z)};
+    const ospcommon::vec3i pos{int(position.x), int(position.y), int(position.z)};
     const ospcommon::vec3i size{int(size_.x), int(size_.y), int(size_.z)};
-    ospSetRegion(_volume, const_cast<void*>(data), (osp::vec3i&)pos,
-                 (osp::vec3i&)size);
+    ospSetRegion(_volume, const_cast<void *>(data), (osp::vec3i &)pos, (osp::vec3i &)size);
     BrickedVolume::_sizeInBytes += glm::compMul(size_) * _dataSize;
     markModified();
 }
 
-void OSPRaySharedDataVolume::setVoxels(const void* voxels)
+void OSPRaySharedDataVolume::setVoxels(const void *voxels)
 {
-    OSPData data = ospNewData(glm::compMul(SharedDataVolume::_dimensions),
-                              _ospType, voxels, OSP_DATA_SHARED_BUFFER);
-    SharedDataVolume::_sizeInBytes +=
-        glm::compMul(SharedDataVolume::_dimensions) * _dataSize;
+    OSPData data = ospNewData(glm::compMul(SharedDataVolume::_dimensions), _ospType, voxels, OSP_DATA_SHARED_BUFFER);
+    SharedDataVolume::_sizeInBytes += glm::compMul(SharedDataVolume::_dimensions) * _dataSize;
     ospSetData(_volume, "voxelData", data);
     ospRelease(data);
     markModified();
@@ -134,24 +131,18 @@ void OSPRayVolume::commit()
 {
     if (_parameters.isModified())
     {
-        osphelper::set(_volume, "gradientShadingEnabled",
-                       _parameters.getGradientShading());
-        osphelper::set(_volume, "adaptiveMaxSamplingRate",
-                       static_cast<float>(
-                           _parameters.getAdaptiveMaxSamplingRate()));
-        osphelper::set(_volume, "adaptiveSampling",
-                       _parameters.getAdaptiveSampling());
+        osphelper::set(_volume, "gradientShadingEnabled", _parameters.getGradientShading());
+        osphelper::set(
+            _volume,
+            "adaptiveMaxSamplingRate",
+            static_cast<float>(_parameters.getAdaptiveMaxSamplingRate()));
+        osphelper::set(_volume, "adaptiveSampling", _parameters.getAdaptiveSampling());
         osphelper::set(_volume, "singleShade", _parameters.getSingleShade());
-        osphelper::set(_volume, "preIntegration",
-                       _parameters.getPreIntegration());
-        osphelper::set(_volume, "samplingRate",
-                       static_cast<float>(_parameters.getSamplingRate()));
-        osphelper::set(_volume, "specular",
-                       Vector3f(_parameters.getSpecular()));
-        osphelper::set(_volume, "volumeClippingBoxLower",
-                       Vector3f(_parameters.getClipBox().getMin()));
-        osphelper::set(_volume, "volumeClippingBoxUpper",
-                       Vector3f(_parameters.getClipBox().getMax()));
+        osphelper::set(_volume, "preIntegration", _parameters.getPreIntegration());
+        osphelper::set(_volume, "samplingRate", static_cast<float>(_parameters.getSamplingRate()));
+        osphelper::set(_volume, "specular", Vector3f(_parameters.getSpecular()));
+        osphelper::set(_volume, "volumeClippingBoxLower", Vector3f(_parameters.getClipBox().getMin()));
+        osphelper::set(_volume, "volumeClippingBoxUpper", Vector3f(_parameters.getClipBox().getMax()));
     }
     if (isModified() || _parameters.isModified())
         ospCommit(_volume);

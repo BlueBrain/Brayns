@@ -29,7 +29,7 @@ class RadiusMultiplier : public NeuronMorphologyPipelineStage
 public:
     RadiusMultiplier(const float multiplier);
 
-    void process(NeuronMorphology& morphology) const final;
+    void process(NeuronMorphology &morphology) const final;
 
 private:
     const float _multiplier;

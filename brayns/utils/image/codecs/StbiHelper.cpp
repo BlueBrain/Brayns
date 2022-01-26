@@ -46,8 +46,7 @@ public:
     static Image decode(const unsigned char *data, int size)
     {
         int width, height, channelCount;
-        auto pixels = stbi_load_from_memory(data, size, &width, &height,
-                                            &channelCount, 0);
+        auto pixels = stbi_load_from_memory(data, size, &width, &height, &channelCount, 0);
         auto info = _getImageInfo(width, height, channelCount);
         auto copy = _copyPixels(pixels, info.getSize());
         stbi_image_free(pixels);
@@ -94,9 +93,7 @@ public:
         auto channelCount = int(image.getChannelCount());
         assert(image.getChannelSize() == 1);
         auto data = image.getData();
-        auto success =
-            stbi_write_png_to_func(&StringBuilder::append, &context, width,
-                                   height, channelCount, data, 0);
+        auto success = stbi_write_png_to_func(&StringBuilder::append, &context, width, height, channelCount, data, 0);
         if (!success)
         {
             return {};
@@ -117,8 +114,7 @@ public:
         assert(image.getChannelSize() == 1);
         auto data = image.getData();
         auto success =
-            stbi_write_jpg_to_func(&StringBuilder::append, &context, width,
-                                   height, channelCount, data, quality);
+            stbi_write_jpg_to_func(&StringBuilder::append, &context, width, height, channelCount, data, quality);
         if (!success)
         {
             return {};

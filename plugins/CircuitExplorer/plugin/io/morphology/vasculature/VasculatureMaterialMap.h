@@ -32,8 +32,7 @@ public:
     size_t materialId;
     VasculatureSection sectionType;
 
-    void setColor(brayns::ModelDescriptor* model,
-                  const brayns::Vector4f& color) final
+    void setColor(brayns::ModelDescriptor *model, const brayns::Vector4f &color) final
     {
         _updateMaterial(model, materialId, color);
     }

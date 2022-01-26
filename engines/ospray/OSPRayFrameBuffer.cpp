@@ -41,9 +41,10 @@ OSPFrameBufferFormat toOSPFrameBufferFormat(const PixelFormat frameBufferFormat)
     }
 }
 } // namespace
-OSPRayFrameBuffer::OSPRayFrameBuffer(const std::string& name,
-                                     const Vector2ui& frameSize,
-                                     const PixelFormat frameBufferFormat)
+OSPRayFrameBuffer::OSPRayFrameBuffer(
+    const std::string &name,
+    const Vector2ui &frameSize,
+    const PixelFormat frameBufferFormat)
     : FrameBuffer(name, frameSize, frameBufferFormat)
 {
     resize(frameSize);
@@ -59,7 +60,7 @@ OSPRayFrameBuffer::~OSPRayFrameBuffer()
     ospRelease(_subsamplingFrameBuffer);
 }
 
-void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
+void OSPRayFrameBuffer::resize(const Vector2ui &frameSize)
 {
     if (glm::compMul(frameSize) == 0)
         throw std::runtime_error("Invalid size for framebuffer resize");
@@ -85,9 +86,7 @@ void OSPRayFrameBuffer::_recreate()
     if (_accumulation)
         attributes |= OSP_FB_ACCUM | OSP_FB_VARIANCE;
 
-    _frameBuffer =
-        ospNewFrameBuffer(size, toOSPFrameBufferFormat(_frameBufferFormat),
-                          attributes);
+    _frameBuffer = ospNewFrameBuffer(size, toOSPFrameBufferFormat(_frameBufferFormat), attributes);
     if (_pixelOp)
         ospSetPixelOp(_frameBuffer, _pixelOp);
     osphelper::set(_frameBuffer, "name", getName());
@@ -105,10 +104,10 @@ void OSPRayFrameBuffer::_recreateSubsamplingBuffer()
     const auto subsamplingSize = _subsamplingSize();
     if (_frameSize != subsamplingSize)
     {
-        _subsamplingFrameBuffer =
-            ospNewFrameBuffer({int(subsamplingSize.x), int(subsamplingSize.y)},
-                              toOSPFrameBufferFormat(_frameBufferFormat),
-                              OSP_FB_COLOR | OSP_FB_DEPTH);
+        _subsamplingFrameBuffer = ospNewFrameBuffer(
+            {int(subsamplingSize.x), int(subsamplingSize.y)},
+            toOSPFrameBufferFormat(_frameBufferFormat),
+            OSP_FB_COLOR | OSP_FB_DEPTH);
         if (_pixelOp)
             ospSetPixelOp(_subsamplingFrameBuffer, _pixelOp);
         ospCommit(_subsamplingFrameBuffer);
@@ -137,8 +136,8 @@ void OSPRayFrameBuffer::_mapUnsafe()
     if (_frameBufferFormat == PixelFormat::NONE)
         return;
 
-    _colorBuffer = (uint8_t*)ospMapFrameBuffer(_currentFB(), OSP_FB_COLOR);
-    _depthBuffer = (float*)ospMapFrameBuffer(_currentFB(), OSP_FB_DEPTH);
+    _colorBuffer = (uint8_t *)ospMapFrameBuffer(_currentFB(), OSP_FB_COLOR);
+    _depthBuffer = (float *)ospMapFrameBuffer(_currentFB(), OSP_FB_DEPTH);
 }
 
 void OSPRayFrameBuffer::unmap()
@@ -210,7 +209,7 @@ void OSPRayFrameBuffer::setSubsampling(size_t factor)
     _recreateSubsamplingBuffer();
 }
 
-void OSPRayFrameBuffer::createPixelOp(const std::string& name)
+void OSPRayFrameBuffer::createPixelOp(const std::string &name)
 {
     if (_pixelOp)
         return;
@@ -224,7 +223,7 @@ void OSPRayFrameBuffer::createPixelOp(const std::string& name)
     }
 }
 
-void OSPRayFrameBuffer::updatePixelOp(const PropertyMap& properties)
+void OSPRayFrameBuffer::updatePixelOp(const PropertyMap &properties)
 {
     if (_pixelOp)
     {

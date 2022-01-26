@@ -63,7 +63,7 @@ public:
      *
      * @param handle Client handle.
      */
-    void remove(const ConnectionHandle& handle);
+    void remove(const ConnectionHandle &handle);
 
     /**
      * @brief Store data packet received from a client.
@@ -71,7 +71,7 @@ public:
      * @param handle Emitter handle.
      * @param packet Data packet.
      */
-    void receive(const ConnectionHandle& handle, InputPacket packet);
+    void receive(const ConnectionHandle &handle, InputPacket packet);
 
     /**
      * @brief Send a packet to a client.
@@ -79,14 +79,14 @@ public:
      * @param handle Receiver handle.
      * @param packet Data packet.
      */
-    void send(const ConnectionHandle& handle, const OutputPacket& packet);
+    void send(const ConnectionHandle &handle, const OutputPacket &packet);
 
     /**
      * @brief Send a packet to all clients.
      *
      * @param packet Data packet.
      */
-    void broadcast(const OutputPacket& packet);
+    void broadcast(const OutputPacket &packet);
 
     /**
      * @brief Send a packet to all clients except the source.
@@ -94,7 +94,7 @@ public:
      * @param source Packet emitter handle.
      * @param packet Data packet.
      */
-    void broadcast(const ConnectionHandle& source, const OutputPacket& packet);
+    void broadcast(const ConnectionHandle &source, const OutputPacket &packet);
 
     /**
      * @brief Update all connections from the main loop.
@@ -117,7 +117,10 @@ public:
      * @return true Has clients.
      * @return false No clients.
      */
-    bool isEmpty() { return getConnectionCount() == 0; }
+    bool isEmpty()
+    {
+        return getConnectionCount() == 0;
+    }
 
     /**
      * @brief Set callback when a client connects.

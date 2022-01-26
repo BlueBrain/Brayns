@@ -44,31 +44,54 @@ public:
         aoe
     };
 
-    Texture2D(const Type type, const std::string& filename,
-              const uint8_t channels, const uint8_t depth, const uint32_t width,
-              const uint32_t height);
+    Texture2D(
+        const Type type,
+        const std::string &filename,
+        const uint8_t channels,
+        const uint8_t depth,
+        const uint32_t width,
+        const uint32_t height);
 
-    size_t getSizeInBytes() const { return height * width * depth * channels; }
+    size_t getSizeInBytes() const
+    {
+        return height * width * depth * channels;
+    }
     void setMipLevels(const uint8_t mips);
 
-    uint8_t getMipLevels() const { return _mipLevels; }
-    template <typename T>
-    const T* getRawData(const uint8_t face = 0, const uint8_t mip = 0) const
+    uint8_t getMipLevels() const
     {
-        return reinterpret_cast<const T*>(_rawData[face][mip].data());
+        return _mipLevels;
     }
-    void setRawData(unsigned char* data, const size_t size,
-                    const uint8_t face = 0, const uint8_t mip = 0);
-    void setRawData(std::vector<unsigned char>&& rawData,
-                    const uint8_t face = 0, const uint8_t mip = 0);
+    template<typename T>
+    const T *getRawData(const uint8_t face = 0, const uint8_t mip = 0) const
+    {
+        return reinterpret_cast<const T *>(_rawData[face][mip].data());
+    }
+    void setRawData(unsigned char *data, const size_t size, const uint8_t face = 0, const uint8_t mip = 0);
+    void setRawData(std::vector<unsigned char> &&rawData, const uint8_t face = 0, const uint8_t mip = 0);
 
     uint8_t getPossibleMipMapsLevels() const;
 
-    bool isCubeMap() const { return type == Type::cubemap; }
-    bool isNormalMap() const { return type == Type::normal_roughness; }
-    uint8_t getNumFaces() const { return isCubeMap() ? 6 : 1; }
-    void setWrapMode(const TextureWrapMode mode) { _wrapMode = mode; }
-    TextureWrapMode getWrapMode() const { return _wrapMode; }
+    bool isCubeMap() const
+    {
+        return type == Type::cubemap;
+    }
+    bool isNormalMap() const
+    {
+        return type == Type::normal_roughness;
+    }
+    uint8_t getNumFaces() const
+    {
+        return isCubeMap() ? 6 : 1;
+    }
+    void setWrapMode(const TextureWrapMode mode)
+    {
+        _wrapMode = mode;
+    }
+    TextureWrapMode getWrapMode() const
+    {
+        return _wrapMode;
+    }
     const Type type;
     const std::string filename;
     const uint8_t channels;

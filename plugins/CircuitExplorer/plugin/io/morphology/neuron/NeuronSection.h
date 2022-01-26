@@ -36,12 +36,13 @@ enum class NeuronSection : uint8_t
 
 namespace brayns
 {
-template <>
+template<>
 inline std::vector<std::pair<std::string, NeuronSection>> enumMap()
 {
-    return {{"soma", NeuronSection::SOMA},
-            {"axon", NeuronSection::AXON},
-            {"dendrite", NeuronSection::DENDRITE},
-            {"apical_dendrite", NeuronSection::APICAL_DENDRITE}};
+    return {
+        {"soma", NeuronSection::SOMA},
+        {"axon", NeuronSection::AXON},
+        {"dendrite", NeuronSection::DENDRITE},
+        {"apical_dendrite", NeuronSection::APICAL_DENDRITE}};
 }
 } // namespace brayns

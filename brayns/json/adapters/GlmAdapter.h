@@ -32,7 +32,7 @@ namespace brayns
  *
  * @tparam T GLM type.
  */
-template <typename T>
+template<typename T>
 struct GlmAdapter
 {
     using ValueType = typename T::value_type;
@@ -43,7 +43,7 @@ struct GlmAdapter
      *
      * @return JsonSchema JSON schema of T.
      */
-    static JsonSchema getSchema(const T&)
+    static JsonSchema getSchema(const T &)
     {
         JsonSchema schema;
         schema.type = JsonType::Array;
@@ -65,7 +65,7 @@ struct GlmAdapter
      * @return true Success.
      * @return false Failure.
      */
-    static bool serialize(const T& value, JsonValue& json)
+    static bool serialize(const T &value, JsonValue &json)
     {
         auto array = Poco::makeShared<JsonArray>();
         for (glm::length_t i = 0; i < T::length(); ++i)
@@ -91,7 +91,7 @@ struct GlmAdapter
      * @return true Success.
      * @return false Failure.
      */
-    static bool deserialize(const JsonValue& json, T& value)
+    static bool deserialize(const JsonValue &json, T &value)
     {
         auto array = JsonExtractor::extractArray(json);
         if (!array)
@@ -113,7 +113,7 @@ struct GlmAdapter
  * @tparam S Size of the vector.
  * @tparam T Type of the vector components.
  */
-template <glm::length_t S, typename T>
+template<glm::length_t S, typename T>
 struct JsonAdapter<glm::vec<S, T>> : GlmAdapter<glm::vec<S, T>>
 {
 };
@@ -123,7 +123,7 @@ struct JsonAdapter<glm::vec<S, T>> : GlmAdapter<glm::vec<S, T>>
  *
  * @tparam T Type of the quaternion components.
  */
-template <typename T>
+template<typename T>
 struct JsonAdapter<glm::qua<T>> : GlmAdapter<glm::qua<T>>
 {
 };

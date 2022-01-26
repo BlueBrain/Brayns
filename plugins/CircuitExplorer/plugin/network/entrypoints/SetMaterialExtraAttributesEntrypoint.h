@@ -31,8 +31,7 @@
 
 namespace brayns
 {
-class SetMaterialExtraAttributesEntrypoint
-    : public Entrypoint<GetModelMessage, EmptyMessage>
+class SetMaterialExtraAttributesEntrypoint : public Entrypoint<GetModelMessage, EmptyMessage>
 {
 public:
     virtual std::string getName() const override
@@ -46,11 +45,11 @@ public:
                "Explorer renderer";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& scene = getApi().getScene();
-        auto& descriptor = ExtractModel::fromId(scene, params.id);
+        auto &scene = getApi().getScene();
+        auto &descriptor = ExtractModel::fromId(scene, params.id);
         CircuitExplorerMaterial::addExtraAttributes(descriptor.getModel());
         triggerRender();
         request.reply(EmptyMessage());

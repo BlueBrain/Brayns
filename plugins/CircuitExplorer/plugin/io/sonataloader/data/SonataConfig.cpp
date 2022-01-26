@@ -28,42 +28,35 @@ constexpr char H5_FORMAT[] = "h5v1";
 constexpr char ASCII_FORMAT[] = "neurolucida-asc";
 } // namespace
 
-SonataConfig::Data SonataConfig::readNetwork(const std::string& configPath)
+SonataConfig::Data SonataConfig::readNetwork(const std::string &configPath)
 {
-    return SonataConfig::Data{configPath,
-                              bbp::sonata::CircuitConfig::fromFile(configPath)};
+    return SonataConfig::Data{configPath, bbp::sonata::CircuitConfig::fromFile(configPath)};
 }
 
-SonataConfig::MorphologyPath::MorphologyPath(const std::string& path,
-                                             const char* extension)
+SonataConfig::MorphologyPath::MorphologyPath(const std::string &path, const char *extension)
     : _path(path)
     , _extension(extension)
 {
 }
 
-std::string SonataConfig::MorphologyPath::buildPath(
-    const std::string& morphologyName) const noexcept
+std::string SonataConfig::MorphologyPath::buildPath(const std::string &morphologyName) const noexcept
 {
     return _path + "/" + morphologyName + "." + _extension;
 }
 
-SonataConfig::MorphologyPath SonataConfig::resolveMorphologyPath(
-    const bbp::sonata::PopulationProperties& properties)
+SonataConfig::MorphologyPath SonataConfig::resolveMorphologyPath(const bbp::sonata::PopulationProperties &properties)
 {
     if (fs::exists(properties.morphologiesDir))
         return SonataConfig::MorphologyPath(properties.morphologiesDir, "swc");
 
     const auto h5It = properties.alternateMorphologyFormats.find(H5_FORMAT);
-    if (h5It != properties.alternateMorphologyFormats.end() &&
-        fs::exists(h5It->second))
+    if (h5It != properties.alternateMorphologyFormats.end() && fs::exists(h5It->second))
         return SonataConfig::MorphologyPath(h5It->second, "h5");
 
     const auto ascIt = properties.alternateMorphologyFormats.find(ASCII_FORMAT);
-    if (ascIt != properties.alternateMorphologyFormats.end() &&
-        fs::exists(ascIt->second))
+    if (ascIt != properties.alternateMorphologyFormats.end() && fs::exists(ascIt->second))
         return SonataConfig::MorphologyPath(ascIt->second, "asc");
 
-    throw std::runtime_error(
-        "SonataConfig: Could not determine morphology path");
+    throw std::runtime_error("SonataConfig: Could not determine morphology path");
 }
 } // namespace sonataloader

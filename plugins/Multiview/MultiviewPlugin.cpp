@@ -30,32 +30,26 @@ constexpr auto PARAM_HEIGHT = "height";
 
 namespace brayns
 {
-MultiviewPlugin::MultiviewPlugin(PropertyMap&& properties)
+MultiviewPlugin::MultiviewPlugin(PropertyMap &&properties)
     : _properties(std::move(properties))
 {
     const double armLength = _properties[PARAM_ARM_LENGTH].as<double>();
     if (armLength <= 0.0f)
     {
-        throw std::runtime_error(
-            "The multiview camera arm length must be stricly positive");
+        throw std::runtime_error("The multiview camera arm length must be stricly positive");
     }
 }
 
-void MultiviewPlugin::init() {}
+void MultiviewPlugin::init()
+{
+}
 } // namespace brayns
 
-extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
-                                                         const char** argv)
+extern "C" brayns::ExtensionPlugin *brayns_plugin_create(const int argc, const char **argv)
 {
     brayns::PropertyMap properties;
-    properties.add({PARAM_ARM_LENGTH,
-                    5.0,
-                    {"Arm length",
-                     "The distance between the cameras and the view center"}});
-    properties.add(
-        {PARAM_HEIGHT,
-         10.0,
-         {"View height", "The height of the viewport in world space"}});
+    properties.add({PARAM_ARM_LENGTH, 5.0, {"Arm length", "The distance between the cameras and the view center"}});
+    properties.add({PARAM_HEIGHT, 10.0, {"View height", "The height of the viewport in world space"}});
 
     if (!properties.parse(argc, argv))
         return nullptr;
@@ -63,7 +57,7 @@ extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
     {
         return new brayns::MultiviewPlugin(std::move(properties));
     }
-    catch (const std::runtime_error& exc)
+    catch (const std::runtime_error &exc)
     {
         std::cerr << exc.what() << std::endl;
         return nullptr;

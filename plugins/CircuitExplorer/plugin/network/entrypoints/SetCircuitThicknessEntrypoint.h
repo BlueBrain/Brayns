@@ -29,38 +29,38 @@
 class CircuitThicknessModifier
 {
 public:
-    CircuitThicknessModifier(brayns::PluginAPI& api)
+    CircuitThicknessModifier(brayns::PluginAPI &api)
         : _api(&api)
     {
     }
 
-    void setCircuitThickness(const SetCircuitThicknessMessage& params)
+    void setCircuitThickness(const SetCircuitThicknessMessage &params)
     {
         // Extract params
         auto modelId = params.model_id;
         auto radiusMultiplier = params.radius_multiplier;
 
         // Extract API data
-        auto& engine = _api->getEngine();
-        auto& scene = engine.getScene();
+        auto &engine = _api->getEngine();
+        auto &scene = engine.getScene();
 
         // Extract model
-        auto& descriptor = brayns::ExtractModel::fromId(scene, modelId);
-        auto& model = descriptor.getModel();
+        auto &descriptor = brayns::ExtractModel::fromId(scene, modelId);
+        auto &model = descriptor.getModel();
 
         // Spheres
-        auto& sphereMap = model.getSpheres();
-        for (auto& entry : sphereMap)
+        auto &sphereMap = model.getSpheres();
+        for (auto &entry : sphereMap)
         {
-            for (auto& sphere : entry.second)
+            for (auto &sphere : entry.second)
                 sphere.radius *= radiusMultiplier;
         }
 
         // Cones
-        auto& conesMap = model.getCones();
-        for (auto& entry : conesMap)
+        auto &conesMap = model.getCones();
+        for (auto &entry : conesMap)
         {
-            for (auto& cone : entry.second)
+            for (auto &cone : entry.second)
             {
                 cone.centerRadius *= radiusMultiplier;
                 cone.upRadius *= radiusMultiplier;
@@ -68,16 +68,16 @@ public:
         }
 
         // Cylinders
-        auto& cylindersMap = model.getCylinders();
-        for (auto& entry : cylindersMap)
+        auto &cylindersMap = model.getCylinders();
+        for (auto &entry : cylindersMap)
         {
-            for (auto& cylinder : entry.second)
+            for (auto &cylinder : entry.second)
                 cylinder.radius *= radiusMultiplier;
         }
 
         // SDF
-        auto& sdfGeometry = model.getSDFGeometryData();
-        for (auto& geom : sdfGeometry.geometries)
+        auto &sdfGeometry = model.getSDFGeometryData();
+        for (auto &geom : sdfGeometry.geometries)
         {
             geom.r0 *= radiusMultiplier;
             geom.r1 *= radiusMultiplier;
@@ -90,12 +90,10 @@ public:
     }
 
 private:
-    brayns::PluginAPI* _api;
+    brayns::PluginAPI *_api;
 };
 
-class SetCircuitThicknessEntrypoint
-    : public brayns::Entrypoint<SetCircuitThicknessMessage,
-                                brayns::EmptyMessage>
+class SetCircuitThicknessEntrypoint : public brayns::Entrypoint<SetCircuitThicknessMessage, brayns::EmptyMessage>
 {
 public:
     virtual std::string getName() const override
@@ -109,7 +107,7 @@ public:
                "SDF geometries)";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         CircuitThicknessModifier modifier(getApi());

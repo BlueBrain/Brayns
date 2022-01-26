@@ -84,7 +84,7 @@ public:
      * @return true Functor has been called.
      * @return false Too soon to call functor.
      */
-    template <typename FunctorType>
+    template<typename FunctorType>
     bool call(FunctorType functor)
     {
         auto currentTime = Clock::now();

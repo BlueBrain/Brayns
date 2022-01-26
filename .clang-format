@@ -1,51 +1,99 @@
 ---
+BasedOnStyle: Google
 AccessModifierOffset: -4
-AlignConsecutiveAssignments: false
-AlignConsecutiveDeclarations: false
-AlignEscapedNewlinesLeft: true
-AlignOperands: true
-AlignTrailingComments: true
-AllowAllParametersOfDeclarationOnNextLine: true
-AllowShortFunctionsOnASingleLine: Inline
-AllowShortIfStatementsOnASingleLine: false
+AlignAfterOpenBracket: AlwaysBreak
+# AlignArrayOfStructures: None
+AlignConsecutiveAssignments: None
+AlignConsecutiveBitFields: None
+AlignConsecutiveDeclarations: None
+AlignConsecutiveMacros: None
+AlignEscapedNewlines: DontAlign
+AlignOperands: DontAlign
+AlignTrailingComments: false
+AllowAllArgumentsOnNextLine: false
+AllowAllConstructorInitializersOnNextLine: false # Deprecated
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: All
 AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: true
-AlwaysBreakTemplateDeclarations: true
-BinPackParameters: true
-BreakBeforeBinaryOperators: false
-BreakBeforeBraces: Allman # brace on new line
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: false
+BinPackParameters: false
+BitFieldColonSpacing: Both
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Allman
+# BreakBeforeConceptDeclarations: true
 BreakBeforeTernaryOperators: true
-BreakConstructorInitializersBeforeComma: true
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
+BreakConstructorInitializers: BeforeComma
+BreakInheritanceList: BeforeComma
+BreakStringLiterals: false
+ColumnLimit: 120
+CompactNamespaces: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: false # Deprecated
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
 Cpp11BracedListStyle: true
-DerivePointerBinding: true
-ExperimentalAutoDetectBinPacking: false
+DeriveLineEnding: false
+DerivePointerAlignment: false
+# EmptyLineAfterAccessModifier: Never
+# EmptyLineBeforeAccessModifier: Always
+FixNamespaceComments: false
+IncludeBlocks: Preserve
+# IndentAccessModifiers: false
+IndentCaseBlocks: false
 IndentCaseLabels: false
-IndentFunctionDeclarationAfterType: true
-IndentWidth:     4
+IndentExternBlock: true
+IndentGotoLabels: false
+IndentPPDirectives: BeforeHash
+# IndentRequires: true
+IndentWidth: 4
+IndentWrappedFunctionNames: true
 KeepEmptyLinesAtTheStartOfBlocks: false
+# LambdaBodyIndentation: OuterScope
 Language: Cpp
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
-PenaltyBreakBeforeFirstCallParameter: 100
-PenaltyBreakComment: 100
-PenaltyBreakFirstLessLess: 120
-PenaltyBreakString: 1000
-PenaltyExcessCharacter: 1000000
-PenaltyReturnTypeOnItsOwnLine: 200
-PointerBindsToType: true
+# PackConstructorInitializers: Never
+PointerAlignment: Right
+# QualifierAlignment: Leave
+# QualifierOrder: ['static', 'inline', 'const', 'volatile', 'type']
+# ReferenceAlignment: Right
+ReflowComments: true
+# SeparateDefinitionBlocks: true
+# ShortNamespaceLines: 1
 SortIncludes: true
-SpaceAfterControlStatementKeyword: true
+SortUsingDeclarations: true
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: false
+SpaceAroundPointerQualifiers: Default
 SpaceBeforeAssignmentOperators: true
+SpaceBeforeCaseColon: false
+SpaceBeforeCpp11BracedList: false
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
 SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceBeforeSquareBrackets: false
+SpaceInEmptyBlock: false
 SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 1
-SpacesInAngles: false # '< ' style
+# SpacesInAngles: false
 SpacesInCStyleCastParentheses: false
-SpacesInParentheses: false # '(' style
-Standard: Cpp11
-TabWidth:        4
-UseTab:          Never
-...
+SpacesInConditionalStatement: false
+SpacesInContainerLiterals: false
+# SpacesInLineCommentPrefix:
+#     Minimum: 1
+#     Maximum: 1
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+Standard: c++17
+TabWidth: 4
+UseCRLF: false
+UseTab: Never

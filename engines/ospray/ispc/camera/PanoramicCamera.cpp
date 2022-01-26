@@ -26,8 +26,8 @@
 #include <ospray/SDK/common/Data.h>
 
 #ifdef _WIN32
-#define _USE_MATH_DEFINES
-#include <math.h> // M_PI
+    #define _USE_MATH_DEFINES
+    #include <math.h> // M_PI
 #endif
 
 namespace ospray
@@ -50,8 +50,7 @@ void PanoramicCamera::commit()
     // the default 63.5mm represents the average human IPD
     interpupillaryDistance = getParamf("interpupillaryDistance", 0.0635f);
     enableClippingPlanes = getParam("enableClippingPlanes", 0);
-    clipPlanes =
-        enableClippingPlanes ? getParamData("clipPlanes", nullptr) : nullptr;
+    clipPlanes = enableClippingPlanes ? getParamData("clipPlanes", nullptr) : nullptr;
 
     // ------------------------------------------------------------------
     // now, update the local precomputed values
@@ -78,12 +77,16 @@ void PanoramicCamera::commit()
     const auto clipPlaneData = clipPlanes ? clipPlanes->data : nullptr;
     const size_t numClipPlanes = clipPlanes ? clipPlanes->numItems : 0;
 
-    ispc::PanoramicCamera_set(getIE(), (const ispc::vec3f&)org,
-                              (const ispc::vec3f&)dir, (const ispc::vec3f&)dirU,
-                              (const ispc::vec3f&)dirV,
-                              (const ispc::vec3f&)ipd_offset,
-                              (const ispc::vec4f*)clipPlaneData, numClipPlanes,
-                              half);
+    ispc::PanoramicCamera_set(
+        getIE(),
+        (const ispc::vec3f &)org,
+        (const ispc::vec3f &)dir,
+        (const ispc::vec3f &)dirU,
+        (const ispc::vec3f &)dirV,
+        (const ispc::vec3f &)ipd_offset,
+        (const ispc::vec4f *)clipPlaneData,
+        numClipPlanes,
+        half);
 }
 
 OSP_REGISTER_CAMERA(PanoramicCamera, panoramic);

@@ -43,15 +43,16 @@ public:
      * first ID 0
      */
     virtual void mapSimulation(
-        const size_t globalOffset, const std::vector<uint16_t>& sectionOffsets,
-        const std::vector<uint16_t>& sectionCompartments) = 0;
+        const size_t globalOffset,
+        const std::vector<uint16_t> &sectionOffsets,
+        const std::vector<uint16_t> &sectionCompartments) = 0;
 
     /**
      * @brief adds the geometry in this morphology instance to the model,
      * creating the needed materials, and returns a ElementMaterialMap object
      * that allows to access all the materials of the newly added geometry
      */
-    virtual ElementMaterialMap::Ptr addToModel(brayns::Model& model) const = 0;
+    virtual ElementMaterialMap::Ptr addToModel(brayns::Model &model) const = 0;
 
     /**
      * @brief return the number of segments which makes up the given section.
@@ -60,8 +61,7 @@ public:
      */
     virtual size_t getSectionSegmentCount(const int32_t section) const = 0;
 
-    using SegmentPoints =
-        std::pair<const brayns::Vector3f*, const brayns::Vector3f*>;
+    using SegmentPoints = std::pair<const brayns::Vector3f *, const brayns::Vector3f *>;
 
     /**
      * @brief return the start and end point of the given segment of the given
@@ -69,8 +69,7 @@ public:
      * @throws std::runtime_error if the given section does not exists on this
      * instance, or if the given segment does not exists on the given section
      */
-    virtual SegmentPoints getSegment(const int32_t section,
-                                     const uint32_t segment) const = 0;
+    virtual SegmentPoints getSegment(const int32_t section, const uint32_t segment) const = 0;
 
     /**
      * @brief return the simulation offset in the geometry associated with the
@@ -78,6 +77,5 @@ public:
      * @throws std::runtime_error if the given section does not exists on this
      * instance, or if the given segment does not exists on the given section
      */
-    virtual uint64_t getSegmentSimulationOffset(
-        const int32_t section, const uint32_t segment) const = 0;
+    virtual uint64_t getSegmentSimulationOffset(const int32_t section, const uint32_t segment) const = 0;
 };

@@ -26,52 +26,55 @@
 
 namespace brayns
 {
-template <typename R, typename O, typename... A>
+template<typename R, typename O, typename... A>
 struct FunctorTrait
 {
     using ReturnType = R;
 
     using ObjectType = O;
 
-    template <size_t I>
+    template<size_t I>
     using ArgType = std::tuple_element_t<I, std::tuple<A...>>;
 
-    static constexpr size_t getArgCount() { return sizeof...(A); }
+    static constexpr size_t getArgCount()
+    {
+        return sizeof...(A);
+    }
 };
 
-template <typename T>
+template<typename T>
 struct FunctorInfo : FunctorInfo<decltype(&T::operator())>
 {
 };
 
-template <typename R, typename... A>
+template<typename R, typename... A>
 struct FunctorInfo<R (*)(A...)> : FunctorTrait<R, void, A...>
 {
 };
 
-template <typename R, typename... A>
+template<typename R, typename... A>
 struct FunctorInfo<R(A...)> : FunctorTrait<R, void, A...>
 {
 };
 
-template <typename R, typename O, typename... A>
+template<typename R, typename O, typename... A>
 struct FunctorInfo<R (O::*)(A...) const> : FunctorTrait<R, O, A...>
 {
 };
 
-template <typename R, typename O, typename... A>
+template<typename R, typename O, typename... A>
 struct FunctorInfo<R (O::*)(A...)> : FunctorTrait<R, O, A...>
 {
 };
 
-template <typename R, typename O, typename... A>
+template<typename R, typename O, typename... A>
 struct FunctorInfo<R (O::*)(A...) noexcept> : FunctorTrait<R, O, A...>
 {
 };
 
-template <typename T, size_t I>
+template<typename T, size_t I>
 using GetArgType = typename FunctorInfo<T>::template ArgType<I>;
 
-template <typename T, size_t I>
+template<typename T, size_t I>
 using DecayArgType = std::decay_t<GetArgType<T, I>>;
 } // namespace brayns

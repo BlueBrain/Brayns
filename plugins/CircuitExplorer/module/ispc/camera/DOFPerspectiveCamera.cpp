@@ -22,8 +22,8 @@
 #include <ospray/SDK/common/Data.h>
 
 #ifdef _WIN32
-#define _USE_MATH_DEFINES
-#include <math.h> // M_PI
+    #define _USE_MATH_DEFINES
+    #include <math.h> // M_PI
 #endif
 
 namespace ospray
@@ -48,16 +48,14 @@ void DOFPerspectiveCamera::commit()
     // the default 63.5mm represents the average human IPD
     interpupillaryDistance = getParamf("interpupillaryDistance", 0.0635f);
     enableClippingPlanes = getParam("enableClippingPlanes", 0);
-    clipPlanes =
-        enableClippingPlanes ? getParamData("clipPlanes", nullptr) : nullptr;
+    clipPlanes = enableClippingPlanes ? getParamData("clipPlanes", nullptr) : nullptr;
 
     // ------------------------------------------------------------------
     // now, update the local precomputed values
     // ------------------------------------------------------------------
     dir = normalize(dir);
     vec3f dir_du = normalize(cross(dir, up));
-    vec3f dir_dv =
-        cross(dir_du, dir); // rotate film to be perpendicular to 'dir'
+    vec3f dir_dv = cross(dir_du, dir); // rotate film to be perpendicular to 'dir'
 
     vec3f org = pos;
     const vec3f ipd_offset = 0.5f * interpupillaryDistance * dir_du;
@@ -95,13 +93,17 @@ void DOFPerspectiveCamera::commit()
     const auto clipPlaneData = clipPlanes ? clipPlanes->data : nullptr;
     const size_t numClipPlanes = clipPlanes ? clipPlanes->numItems : 0;
 
-    ispc::DOFPerspectiveCamera_set(getIE(), (const ispc::vec3f&)org,
-                                   (const ispc::vec3f&)dir_00,
-                                   (const ispc::vec3f&)dir_du,
-                                   (const ispc::vec3f&)dir_dv, scaledAperture,
-                                   aspect, (const ispc::vec3f&)ipd_offset,
-                                   (const ispc::vec4f*)clipPlaneData,
-                                   numClipPlanes);
+    ispc::DOFPerspectiveCamera_set(
+        getIE(),
+        (const ispc::vec3f &)org,
+        (const ispc::vec3f &)dir_00,
+        (const ispc::vec3f &)dir_du,
+        (const ispc::vec3f &)dir_dv,
+        scaledAperture,
+        aspect,
+        (const ispc::vec3f &)ipd_offset,
+        (const ispc::vec4f *)clipPlaneData,
+        numClipPlanes);
 }
 
 OSP_REGISTER_CAMERA(DOFPerspectiveCamera, circuit_explorer_dof_perspective);

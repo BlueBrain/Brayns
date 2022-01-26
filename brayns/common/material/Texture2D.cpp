@@ -21,9 +21,13 @@
 
 namespace brayns
 {
-Texture2D::Texture2D(const Type type_, const std::string& filename_,
-                     const uint8_t channels_, const uint8_t depth_,
-                     const uint32_t width_, const uint32_t height_)
+Texture2D::Texture2D(
+    const Type type_,
+    const std::string &filename_,
+    const uint8_t channels_,
+    const uint8_t depth_,
+    const uint32_t width_,
+    const uint32_t height_)
     : type(type_)
     , filename(filename_)
     , channels(channels_)
@@ -40,19 +44,17 @@ void Texture2D::setMipLevels(const uint8_t mips)
     if (mips == _mipLevels)
         return;
     _mipLevels = mips;
-    for (auto& data : _rawData)
+    for (auto &data : _rawData)
         data.resize(mips);
 }
 
-void Texture2D::setRawData(unsigned char* data, const size_t size,
-                           const uint8_t face, const uint8_t mip)
+void Texture2D::setRawData(unsigned char *data, const size_t size, const uint8_t face, const uint8_t mip)
 {
     _rawData[face][mip].clear();
     _rawData[face][mip].assign(data, data + size);
 }
 
-void Texture2D::setRawData(std::vector<unsigned char>&& rawData,
-                           const uint8_t face, const uint8_t mip)
+void Texture2D::setRawData(std::vector<unsigned char> &&rawData, const uint8_t face, const uint8_t mip)
 {
     _rawData[face][mip] = std::move(rawData);
 }

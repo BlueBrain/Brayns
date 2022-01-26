@@ -21,15 +21,14 @@
 #include <plugin/api/MaterialUtils.h>
 #include <plugin/io/synapse/SynapseMaterialMap.h>
 
-void SynapseAstrocyteGroup::addSynapse(const uint64_t id, const int32_t section,
-                                       const float distance)
+void SynapseAstrocyteGroup::addSynapse(const uint64_t id, const int32_t section, const float distance)
 {
     _ids.push_back(id);
     _sections.push_back(section);
     _distances.push_back(distance);
 }
 
-void SynapseAstrocyteGroup::mapToCell(const MorphologyInstance& cell)
+void SynapseAstrocyteGroup::mapToCell(const MorphologyInstance &cell)
 {
     for (size_t i = 0; i < _ids.size(); ++i)
     {
@@ -61,14 +60,12 @@ void SynapseAstrocyteGroup::mapToCell(const MorphologyInstance& cell)
                 if (localNorm >= distance)
                 {
                     const auto points = cell.getSegment(section, j);
-                    const auto point = glm::lerp(*points.first, *points.second,
-                                                 distance / localNorm);
+                    const auto point = glm::lerp(*points.first, *points.second, distance / localNorm);
                     _geometry.push_back(brayns::createSDFSphere(point, 2.f));
                     // By default we copy the cell simulation mapping to show
                     // the node simulation report. If there is a synapse report,
                     // it will overwrite this value
-                    _geometry.back().userData =
-                        cell.getSegmentSimulationOffset(section, j);
+                    _geometry.back().userData = cell.getSegmentSimulationOffset(section, j);
                     break;
                 }
             }
@@ -82,8 +79,7 @@ void SynapseAstrocyteGroup::mapToCell(const MorphologyInstance& cell)
     }
 }
 
-void SynapseAstrocyteGroup::mapSimulation(
-    const std::unordered_map<uint64_t, uint64_t>& mapping)
+void SynapseAstrocyteGroup::mapSimulation(const std::unordered_map<uint64_t, uint64_t> &mapping)
 {
     for (size_t i = 0; i < _addedSynapses.size(); ++i)
     {
@@ -93,8 +89,7 @@ void SynapseAstrocyteGroup::mapSimulation(
     }
 }
 
-SynapseMaterialMap::Ptr SynapseAstrocyteGroup::addToModel(
-    brayns::Model& model) const
+SynapseMaterialMap::Ptr SynapseAstrocyteGroup::addToModel(brayns::Model &model) const
 {
     auto result = std::make_unique<SynapseMaterialMap>();
     result->materials.reserve(_addedSynapses.size());

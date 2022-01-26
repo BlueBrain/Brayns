@@ -45,11 +45,10 @@ public:
      * CircuitExplorerMaterial attributes so that it can be rendered
      * appropiately
      */
-    static size_t create(brayns::Model& model,
-                         const brayns::Vector3f& color = brayns::Vector3f(1.f,
-                                                                          1.f,
-                                                                          1.f),
-                         const float opacity = 1.f);
+    static size_t create(
+        brayns::Model &model,
+        const brayns::Vector3f &color = brayns::Vector3f(1.f, 1.f, 1.f),
+        const float opacity = 1.f);
 
     /**
      * @brief creates an unlit material in the given model, initializing the
@@ -57,28 +56,27 @@ public:
      * appropiately
      */
     static size_t createUnlit(
-        brayns::Model& model,
-        const brayns::Vector3f& color = brayns::Vector3f(1.f, 1.f, 1.f),
+        brayns::Model &model,
+        const brayns::Vector3f &color = brayns::Vector3f(1.f, 1.f, 1.f),
         const float opacity = 1.f);
 
     /**
      * @brief adds the CircuitExplorer additional material attributes to all the
      * materials of a given model
      */
-    static void addExtraAttributes(brayns::Model& model);
+    static void addExtraAttributes(brayns::Model &model);
 
     /**
      * @brief manipulates the 'cast_simulation_data' parameter of
      * CircuitExplorerMaterial, allowing to show simulation colors (true) or
      * geometry color (false) on demand.
      */
-    static void setSimulationColorEnabled(brayns::Model& model,
-                                          const bool value);
+    static void setSimulationColorEnabled(brayns::Model &model, const bool value);
 
 private:
     /**
      * @brief Returns a PropertyMap with CircuitExplorer's custom material
      * attributes
      */
-    static const brayns::PropertyMap& _getExtraAttributes() noexcept;
+    static const brayns::PropertyMap &_getExtraAttributes() noexcept;
 };

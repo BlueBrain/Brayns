@@ -39,7 +39,10 @@ public:
      *
      * @return std::string JPEG format ID.
      */
-    virtual std::string getFormat() const override { return "jpg"; }
+    virtual std::string getFormat() const override
+    {
+        return "jpg";
+    }
 
     /**
      * @brief Encode an image as JPEG.

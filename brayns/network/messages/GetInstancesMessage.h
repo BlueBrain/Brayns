@@ -27,7 +27,6 @@ namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(GetInstanceMessage)
 BRAYNS_JSON_OBJECT_ENTRY(size_t, id, "Model ID")
-BRAYNS_JSON_OBJECT_ENTRY(Vector2ui, result_range, "Result list from/to indices",
-                         Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(Vector2ui, result_range, "Result list from/to indices", Required(false))
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

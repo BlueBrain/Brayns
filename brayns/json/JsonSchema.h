@@ -150,7 +150,7 @@ struct JsonSchemaHelper
      * @return true Empty schema.
      * @return false Non-empty schema.
      */
-    static bool isEmpty(const JsonSchema& schema)
+    static bool isEmpty(const JsonSchema &schema)
     {
         return schema.type == JsonType::Unknown && schema.oneOf.empty();
     }
@@ -162,7 +162,7 @@ struct JsonSchemaHelper
      * @return true Union.
      * @return false Not an union.
      */
-    static bool isOneOf(const JsonSchema& schema)
+    static bool isOneOf(const JsonSchema &schema)
     {
         return !schema.oneOf.empty();
     }
@@ -174,7 +174,7 @@ struct JsonSchemaHelper
      * @return true Number or integer.
      * @return false Not numeric.
      */
-    static bool isNumeric(const JsonSchema& schema)
+    static bool isNumeric(const JsonSchema &schema)
     {
         return JsonTypeHelper::isNumeric(schema.type);
     }
@@ -186,7 +186,7 @@ struct JsonSchemaHelper
      * @return true Enum.
      * @return false Not an enum.
      */
-    static bool isEnum(const JsonSchema& schema)
+    static bool isEnum(const JsonSchema &schema)
     {
         return !schema.enums.empty();
     }
@@ -198,7 +198,7 @@ struct JsonSchemaHelper
      * @return true Object.
      * @return false Not an object.
      */
-    static bool isObject(const JsonSchema& schema)
+    static bool isObject(const JsonSchema &schema)
     {
         return schema.type == JsonType::Object;
     }
@@ -210,7 +210,7 @@ struct JsonSchemaHelper
      * @return true Array.
      * @return false Not an array.
      */
-    static bool isArray(const JsonSchema& schema)
+    static bool isArray(const JsonSchema &schema)
     {
         return schema.type == JsonType::Array;
     }
@@ -223,9 +223,9 @@ struct JsonSchemaHelper
      * @return true Has property.
      * @return false Don't have the property.
      */
-    static bool hasProperty(const JsonSchema& schema, const std::string& key)
+    static bool hasProperty(const JsonSchema &schema, const std::string &key)
     {
-        auto& properties = schema.properties;
+        auto &properties = schema.properties;
         return properties.find(key) != properties.end();
     }
 
@@ -237,9 +237,9 @@ struct JsonSchemaHelper
      * @return true Property is required.
      * @return false Property is not required.
      */
-    static bool isRequired(const JsonSchema& schema, const std::string& key)
+    static bool isRequired(const JsonSchema &schema, const std::string &key)
     {
-        auto& required = schema.required;
+        auto &required = schema.required;
         auto first = required.begin();
         auto last = required.end();
         return std::find(first, last, key) != last;
@@ -253,7 +253,7 @@ struct JsonSchemaHelper
      * @return true The type is allowed by schema.
      * @return false The type is not allowed by schema.
      */
-    static bool checkType(const JsonSchema& schema, JsonType type)
+    static bool checkType(const JsonSchema &schema, JsonType type)
     {
         return JsonTypeHelper::check(schema.type, type);
     }
@@ -263,7 +263,7 @@ struct JsonSchemaHelper
      *
      * @param schema Schema to update.
      */
-    static void allowAnyAdditionalProperty(JsonSchema& schema)
+    static void allowAnyAdditionalProperty(JsonSchema &schema)
     {
         schema.additionalProperties = {{}};
     }
@@ -273,14 +273,14 @@ struct JsonSchemaHelper
      *
      * @param schema Schema to update.
      */
-    static void requireAll(JsonSchema& schema)
+    static void requireAll(JsonSchema &schema)
     {
-        auto& properties = schema.properties;
-        auto& required = schema.required;
+        auto &properties = schema.properties;
+        auto &required = schema.required;
         required.reserve(properties.size());
-        for (const auto& pair : properties)
+        for (const auto &pair : properties)
         {
-            auto& name = pair.first;
+            auto &name = pair.first;
             required.push_back(name);
         }
     }

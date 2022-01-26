@@ -25,9 +25,9 @@
 namespace sonataloader
 {
 std::vector<std::unique_ptr<SynapseGroup>> CommonEdgeLoader::load(
-    const SonataConfig::Data& networkConfig,
-    const SonataEdgePopulationParameters& lc,
-    const bbp::sonata::Selection& nodeSelection) const
+    const SonataConfig::Data &networkConfig,
+    const SonataEdgePopulationParameters &lc,
+    const bbp::sonata::Selection &nodeSelection) const
 {
     const auto baseNodeList = nodeSelection.flatten();
 
@@ -43,51 +43,38 @@ std::vector<std::unique_ptr<SynapseGroup>> CommonEdgeLoader::load(
     std::vector<brayns::Vector3f> surfacePos;
     std::vector<uint64_t> edgeIds;
 
-    const auto population =
-        networkConfig.config.getEdgePopulation(lc.edge_population);
+    const auto population = networkConfig.config.getEdgePopulation(lc.edge_population);
 
     if (lc.load_afferent)
     {
         const auto edgeSelection =
-            EdgeSelection(population.afferentEdges(baseNodeList))
-                .intersection(lc.edge_percentage);
+            EdgeSelection(population.afferentEdges(baseNodeList)).intersection(lc.edge_percentage);
         edgeIds = edgeSelection.flatten();
         srcNodes = SonataSynapses::getTargetNodes(population, edgeSelection);
-        sectionIds =
-            SonataSynapses::getAfferentSectionIds(population, edgeSelection);
-        surfacePos =
-            SonataSynapses::getAfferentSurfacePos(population, edgeSelection);
-        distances = SonataSynapses::getAfferentSectionDistances(population,
-                                                                edgeSelection);
+        sectionIds = SonataSynapses::getAfferentSectionIds(population, edgeSelection);
+        surfacePos = SonataSynapses::getAfferentSurfacePos(population, edgeSelection);
+        distances = SonataSynapses::getAfferentSectionDistances(population, edgeSelection);
     }
     else
     {
         const auto edgeSelection =
-            EdgeSelection(population.efferentEdges(baseNodeList))
-                .intersection(lc.edge_percentage);
+            EdgeSelection(population.efferentEdges(baseNodeList)).intersection(lc.edge_percentage);
         edgeIds = edgeSelection.flatten();
         srcNodes = SonataSynapses::getSourceNodes(population, edgeSelection);
-        surfacePos =
-            SonataSynapses::getEfferentSurfacePos(population, edgeSelection);
-        sectionIds =
-            SonataSynapses::getEfferentSectionIds(population, edgeSelection);
-        distances = SonataSynapses::getEfferentSectionDistances(population,
-                                                                edgeSelection);
+        surfacePos = SonataSynapses::getEfferentSurfacePos(population, edgeSelection);
+        sectionIds = SonataSynapses::getEfferentSectionIds(population, edgeSelection);
+        distances = SonataSynapses::getEfferentSectionDistances(population, edgeSelection);
     }
 
-    if (srcNodes.size() != sectionIds.size() ||
-        srcNodes.size() != surfacePos.size() ||
-        srcNodes.size() != distances.size())
-        throw std::runtime_error("Edge population '" + population.name() +
-                                 "' attributes missmatch in size");
+    if (srcNodes.size() != sectionIds.size() || srcNodes.size() != surfacePos.size()
+        || srcNodes.size() != distances.size())
+        throw std::runtime_error("Edge population '" + population.name() + "' attributes missmatch in size");
 
     // Group data by node id
     for (size_t i = 0; i < srcNodes.size(); ++i)
     {
-        auto& buffer =
-            static_cast<SurfaceSynapseGroup&>(*mapping[srcNodes[i]].get());
-        buffer.addSynapse(edgeIds[i], sectionIds[i], distances[i],
-                          surfacePos[i]);
+        auto &buffer = static_cast<SurfaceSynapseGroup &>(*mapping[srcNodes[i]].get());
+        buffer.addSynapse(edgeIds[i], sectionIds[i], distances[i], surfacePos[i]);
     }
 
     // Flatten

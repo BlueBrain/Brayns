@@ -31,14 +31,14 @@ constexpr char methodBySection[] = "vasculature_section";
 } // namespace
 
 void VasculatureColorHandler::_setElementsImpl(
-    const std::vector<uint64_t>& ids,
-    std::vector<ElementMaterialMap::Ptr>&& elements)
+    const std::vector<uint64_t> &ids,
+    std::vector<ElementMaterialMap::Ptr> &&elements)
 {
     _ids = ids;
     _elements = std::move(elements);
-    for (auto& element : _elements)
+    for (auto &element : _elements)
     {
-        auto& vmm = static_cast<VasculatureMaterialMap&>(*element.get());
+        auto &vmm = static_cast<VasculatureMaterialMap &>(*element.get());
         _sectionMaterials[vmm.sectionType].push_back(vmm.materialId);
     }
 }
@@ -48,14 +48,12 @@ std::vector<std::string> VasculatureColorHandler::_getMethodsImpl() const
     return {methodBySection};
 }
 
-std::vector<std::string> VasculatureColorHandler::_getMethodVariablesImpl(
-    const std::string&) const
+std::vector<std::string> VasculatureColorHandler::_getMethodVariablesImpl(const std::string &) const
 {
     return brayns::enumNames<VasculatureSection>();
 }
 
-void VasculatureColorHandler::_updateColorByIdImpl(
-    const std::map<uint64_t, brayns::Vector4f>& colorMap)
+void VasculatureColorHandler::_updateColorByIdImpl(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
     if (!colorMap.empty())
     {
@@ -66,9 +64,8 @@ void VasculatureColorHandler::_updateColorByIdImpl(
             const auto id = it->first;
             if (id > _ids.back())
                 throw std::invalid_argument(
-                    "Requested coloring ID '" + std::to_string(id) +
-                    "' is beyond the highest ID loaded '" +
-                    std::to_string(_ids.back()) + "'");
+                    "Requested coloring ID '" + std::to_string(id) + "' is beyond the highest ID loaded '"
+                    + std::to_string(_ids.back()) + "'");
 
             while (_ids[i] < id && i < _ids.size())
                 ++i;
@@ -82,27 +79,24 @@ void VasculatureColorHandler::_updateColorByIdImpl(
     else
     {
         ColorRoulette r;
-        for (auto& element : _elements)
+        for (auto &element : _elements)
             element->setColor(_model, r.getNextColor());
     }
 }
 
-void VasculatureColorHandler::_updateSingleColorImpl(
-    const brayns::Vector4f& color)
+void VasculatureColorHandler::_updateSingleColorImpl(const brayns::Vector4f &color)
 {
-    for (auto& element : _elements)
+    for (auto &element : _elements)
         element->setColor(_model, color);
 }
 
-void VasculatureColorHandler::_updateColorImpl(
-    const std::string&, const std::vector<ColoringInformation>& variables)
+void VasculatureColorHandler::_updateColorImpl(const std::string &, const std::vector<ColoringInformation> &variables)
 {
     if (!variables.empty())
     {
-        for (const auto& entry : variables)
+        for (const auto &entry : variables)
         {
-            const auto sectionType =
-                brayns::stringToEnum<VasculatureSection>(entry.variable);
+            const auto sectionType = brayns::stringToEnum<VasculatureSection>(entry.variable);
             auto sectionMaterials = _sectionMaterials.find(sectionType);
             if (sectionMaterials != _sectionMaterials.end())
             {
@@ -123,12 +117,12 @@ void VasculatureColorHandler::_updateColorImpl(
             VasculatureSection::VENULE};
 
         ColorRoulette roulette;
-        for (const auto& section : allSections)
+        for (const auto &section : allSections)
         {
             auto sectionMaterials = _sectionMaterials.find(section);
             if (sectionMaterials != _sectionMaterials.end())
             {
-                const auto& color = roulette.getNextColor();
+                const auto &color = roulette.getNextColor();
                 for (const auto materialId : sectionMaterials->second)
                     _updateMaterial(materialId, color);
             }

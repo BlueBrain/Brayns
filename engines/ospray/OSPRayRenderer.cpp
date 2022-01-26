@@ -32,8 +32,9 @@
 
 namespace brayns
 {
-OSPRayRenderer::OSPRayRenderer(const AnimationParameters& animationParameters,
-                               const RenderingParameters& renderingParameters)
+OSPRayRenderer::OSPRayRenderer(
+    const AnimationParameters &animationParameters,
+    const RenderingParameters &renderingParameters)
     : Renderer(animationParameters, renderingParameters)
 {
 }
@@ -52,27 +53,24 @@ void OSPRayRenderer::_destroyRenderer()
 
 void OSPRayRenderer::render(FrameBufferPtr frameBuffer)
 {
-    auto osprayFrameBuffer =
-        std::static_pointer_cast<OSPRayFrameBuffer>(frameBuffer);
+    auto osprayFrameBuffer = std::static_pointer_cast<OSPRayFrameBuffer>(frameBuffer);
     auto lock = osprayFrameBuffer->getScopeLock();
 
-    _variance = ospRenderFrame(osprayFrameBuffer->impl(), _renderer,
-                               OSP_FB_COLOR | OSP_FB_DEPTH | OSP_FB_ACCUM);
+    _variance = ospRenderFrame(osprayFrameBuffer->impl(), _renderer, OSP_FB_COLOR | OSP_FB_DEPTH | OSP_FB_ACCUM);
 
     osprayFrameBuffer->markModified();
 }
 
 void OSPRayRenderer::commit()
 {
-    const AnimationParameters& ap = _animationParameters;
-    const RenderingParameters& rp = _renderingParameters;
+    const AnimationParameters &ap = _animationParameters;
+    const RenderingParameters &rp = _renderingParameters;
     auto scene = std::static_pointer_cast<OSPRayScene>(_scene);
     const bool lightsChanged = _currLightsData != scene->lightData();
     const bool rendererChanged = _currentOSPRenderer != getCurrentType();
 
-    if (!ap.isModified() && !rp.isModified() && !_scene->isModified() &&
-        !isModified() && !_camera->isModified() && !lightsChanged &&
-        !rendererChanged)
+    if (!ap.isModified() && !rp.isModified() && !_scene->isModified() && !isModified() && !_camera->isModified()
+        && !lightsChanged && !rendererChanged)
     {
         return;
     }
@@ -109,7 +107,7 @@ void OSPRayRenderer::commit()
 
         // Setting the clip planes in the renderer and the camera
         std::vector<Plane> planes;
-        for (const auto& clipPlane : _scene->getClipPlanes())
+        for (const auto &clipPlane : _scene->getClipPlanes())
             planes.push_back(clipPlane->getPlane());
 
         setClipPlanes(planes);
@@ -121,12 +119,10 @@ void OSPRayRenderer::commit()
     osphelper::set(_renderer, "timestamp", static_cast<float>(ap.getFrame()));
     osphelper::set(_renderer, "randomNumber", 1);
     osphelper::set(_renderer, "bgColor", Vector3f(rp.getBackgroundColor()));
-    osphelper::set(_renderer, "varianceThreshold",
-                   static_cast<float>(rp.getVarianceThreshold()));
+    osphelper::set(_renderer, "varianceThreshold", static_cast<float>(rp.getVarianceThreshold()));
     osphelper::set(_renderer, "spp", static_cast<int>(rp.getSamplesPerPixel()));
 
-    if (auto material = std::static_pointer_cast<OSPRayMaterial>(
-            scene->getBackgroundMaterial()))
+    if (auto material = std::static_pointer_cast<OSPRayMaterial>(scene->getBackgroundMaterial()))
     {
         material->setDiffuseColor(rp.getBackgroundColor());
         material->commit(_currentOSPRenderer);
@@ -137,8 +133,7 @@ void OSPRayRenderer::commit()
     if (!_clipPlanes.empty())
     {
         const auto clipPlanes = convertVectorToFloat(_clipPlanes);
-        auto clipPlaneData =
-            ospNewData(clipPlanes.size(), OSP_FLOAT4, clipPlanes.data());
+        auto clipPlaneData = ospNewData(clipPlanes.size(), OSP_FLOAT4, clipPlanes.data());
         ospSetData(_renderer, "clipPlanes", clipPlaneData);
         ospRelease(clipPlaneData);
     }
@@ -156,14 +151,14 @@ void OSPRayRenderer::commit()
 
 void OSPRayRenderer::setCamera(CameraPtr camera)
 {
-    _camera = static_cast<OSPRayCamera*>(camera.get());
+    _camera = static_cast<OSPRayCamera *>(camera.get());
     assert(_camera);
     if (_renderer)
         ospSetObject(_renderer, "camera", _camera->impl());
     markModified();
 }
 
-Renderer::PickResult OSPRayRenderer::pick(const Vector2f& pickPos)
+Renderer::PickResult OSPRayRenderer::pick(const Vector2f &pickPos)
 {
     OSPPickResult ospResult;
     osp::vec2f pos{pickPos.x, pickPos.y};
@@ -185,8 +180,7 @@ Renderer::PickResult OSPRayRenderer::pick(const Vector2f& pickPos)
     PickResult result;
     result.hit = ospResult.hit;
     if (result.hit)
-        result.pos = {ospResult.position.x, ospResult.position.y,
-                      ospResult.position.z};
+        result.pos = {ospResult.position.x, ospResult.position.y, ospResult.position.z};
     return result;
 }
 
@@ -194,8 +188,7 @@ void OSPRayRenderer::_createOSPRenderer()
 {
     auto newRenderer = ospNewRenderer(getCurrentType().c_str());
     if (!newRenderer)
-        throw std::runtime_error(getCurrentType() +
-                                 " is not a registered renderer");
+        throw std::runtime_error(getCurrentType() + " is not a registered renderer");
     _destroyRenderer();
     _renderer = newRenderer;
     if (_camera)
@@ -206,12 +199,11 @@ void OSPRayRenderer::_createOSPRenderer()
 
 void OSPRayRenderer::_commitRendererMaterials()
 {
-    _scene->visitModels(
-        [&renderer = _currentOSPRenderer](Model& model)
-        { static_cast<OSPRayModel&>(model).commitMaterials(renderer); });
+    _scene->visitModels([&renderer = _currentOSPRenderer](Model &model)
+                        { static_cast<OSPRayModel &>(model).commitMaterials(renderer); });
 }
 
-void OSPRayRenderer::setClipPlanes(const std::vector<Plane>& planes)
+void OSPRayRenderer::setClipPlanes(const std::vector<Plane> &planes)
 {
     if (_clipPlanes == planes)
         return;

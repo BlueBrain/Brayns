@@ -50,7 +50,7 @@ public:
      * @return const MeshParser& Parser that can handle the file.
      * @throw std::runtime_error Format not supported.
      */
-    const MeshParser& getParser(const std::string& extension) const;
+    const MeshParser &getParser(const std::string &extension) const;
 
     /**
      * @brief Find if a parser can support the extension and return it.
@@ -58,7 +58,7 @@ public:
      * @param extension File extension.
      * @return const MeshParser* Parser or null if not supported.
      */
-    const MeshParser* findParser(const std::string& extension) const;
+    const MeshParser *findParser(const std::string &extension) const;
 
     /**
      * @brief Register a new mesh parser.
@@ -77,8 +77,8 @@ public:
      * @tparam Args Parser constructor arguments types.
      * @param args Parser constructor arguments.
      */
-    template <typename T, typename... Args>
-    void add(Args&&... args)
+    template<typename T, typename... Args>
+    void add(Args &&...args)
     {
         auto parser = std::make_shared<T>(std::forward<Args>(args)...);
         addParser(std::move(parser));
@@ -135,9 +135,8 @@ public:
      * @return std::vector<ModelDescriptorPtr> Models containing the mesh.
      * @throw std::runtime_error An error occurs.
      */
-    std::vector<ModelDescriptorPtr> importFromFile(
-        const std::string& fileName, const LoaderProgress& callback,
-        Scene& scene) const final;
+    std::vector<ModelDescriptorPtr>
+        importFromFile(const std::string &fileName, const LoaderProgress &callback, Scene &scene) const final;
 
     /**
      * @brief Import the mesh in the given scene from the given blob of data.
@@ -149,8 +148,8 @@ public:
      * @return std::vector<ModelDescriptorPtr> Models containing the mesh.
      * @throw std::runtime_error An error occurs.
      */
-    std::vector<ModelDescriptorPtr> importFromBlob(
-        Blob&& blob, const LoaderProgress& callback, Scene& scene) const final;
+    std::vector<ModelDescriptorPtr> importFromBlob(Blob &&blob, const LoaderProgress &callback, Scene &scene)
+        const final;
 
 private:
     MeshParserRegistry _parsers;

@@ -26,23 +26,22 @@ struct SectionOffsets
 };
 } // namespace
 
-void SectionWelder::process(NeuronMorphology& morphology) const
+void SectionWelder::process(NeuronMorphology &morphology) const
 {
-    for (auto& section : morphology.sections())
+    for (auto &section : morphology.sections())
     {
         auto parent = morphology.parent(section);
         if (parent)
         {
-            const auto& parentSample = parent->samples.back();
-            const auto& childSample = section.samples.front();
+            const auto &parentSample = parent->samples.back();
+            const auto &childSample = section.samples.front();
 
             const brayns::Vector3f parentPos(parentSample);
             const brayns::Vector3f childPos(childSample);
 
             // If samples are further away than their combined radii,
             // Add a sample to make it reach its parent
-            if (glm::length(parentPos - childPos) >
-                parentSample.w + childSample.w)
+            if (glm::length(parentPos - childPos) > parentSample.w + childSample.w)
                 section.samples.insert(section.samples.begin(), parentSample);
         }
     }

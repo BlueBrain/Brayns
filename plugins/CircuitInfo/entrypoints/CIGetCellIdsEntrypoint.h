@@ -31,7 +31,7 @@
 class CellIdsRetriever
 {
 public:
-    static CIGetCellIdsResult getCellIds(const CIGetCellIdsParams& params)
+    static CIGetCellIdsResult getCellIds(const CIGetCellIdsParams &params)
     {
         // Result
         CIGetCellIdsResult result;
@@ -48,7 +48,7 @@ public:
         }
         else
         {
-            for (const auto& target : params.targets)
+            for (const auto &target : params.targets)
             {
                 auto temp = circuit.getGIDs(target);
                 gids.insert(temp.begin(), temp.end());
@@ -63,18 +63,20 @@ public:
     }
 };
 
-class CIGetCellIdsEntrypoint
-    : public brayns::Entrypoint<CIGetCellIdsParams, CIGetCellIdsResult>
+class CIGetCellIdsEntrypoint : public brayns::Entrypoint<CIGetCellIdsParams, CIGetCellIdsResult>
 {
 public:
-    virtual std::string getName() const override { return "ci-get-cell-ids"; }
+    virtual std::string getName() const override
+    {
+        return "ci-get-cell-ids";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Return the list of GIDs from a circuit";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         auto result = CellIdsRetriever::getCellIds(params);

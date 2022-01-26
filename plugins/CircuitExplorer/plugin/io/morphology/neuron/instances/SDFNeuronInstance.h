@@ -39,22 +39,20 @@ struct SDFSharedData
 class SDFNeuronInstance : public MorphologyInstance
 {
 public:
-    SDFNeuronInstance(std::vector<brayns::SDFGeometry>&& sdfGeometries,
-                      const std::shared_ptr<SDFSharedData>& sdfData);
+    SDFNeuronInstance(std::vector<brayns::SDFGeometry> &&sdfGeometries, const std::shared_ptr<SDFSharedData> &sdfData);
 
-    void mapSimulation(const size_t globalOffset,
-                       const std::vector<uint16_t>& sectionOffsets,
-                       const std::vector<uint16_t>& sectionCompartments) final;
+    void mapSimulation(
+        const size_t globalOffset,
+        const std::vector<uint16_t> &sectionOffsets,
+        const std::vector<uint16_t> &sectionCompartments) final;
 
-    ElementMaterialMap::Ptr addToModel(brayns::Model& model) const final;
+    ElementMaterialMap::Ptr addToModel(brayns::Model &model) const final;
 
     size_t getSectionSegmentCount(const int32_t section) const final;
 
-    MorphologyInstance::SegmentPoints getSegment(
-        const int32_t section, const uint32_t segment) const final;
+    MorphologyInstance::SegmentPoints getSegment(const int32_t section, const uint32_t segment) const final;
 
-    uint64_t getSegmentSimulationOffset(const int32_t section,
-                                        const uint32_t segment) const final;
+    uint64_t getSegmentSimulationOffset(const int32_t section, const uint32_t segment) const final;
 
 private:
     std::vector<brayns::SDFGeometry> _sdfGeometries;

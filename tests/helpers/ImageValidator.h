@@ -43,15 +43,13 @@ public:
         return validate(framebuffer, filename);
     }
 
-    static bool validate(brayns::FrameBuffer &framebuffer,
-                         const std::string &filename)
+    static bool validate(brayns::FrameBuffer &framebuffer, const std::string &filename)
     {
         auto image = framebuffer.getImage();
         return validate(image, filename);
     }
 
-    static bool validate(const brayns::Image &image,
-                         const std::string &filename)
+    static bool validate(const brayns::Image &image, const std::string &filename)
     {
         std::cout << "Validation of image '" << filename << "'.\n";
         auto path = BRAYNS_TESTDATA_IMAGES_PATH + filename;
@@ -60,8 +58,7 @@ public:
         return validate(image, reference);
     }
 
-    static bool validate(const brayns::Image &image,
-                         const brayns::Image &reference)
+    static bool validate(const brayns::Image &image, const brayns::Image &reference)
     {
         auto evaluation = _evaluate(image, reference);
         std::cout << "Evaluation result: " << evaluation << ".\n";
@@ -72,8 +69,7 @@ public:
 private:
     static constexpr double _threshold = 1.0;
 
-    static void _saveIfNeeded(const brayns::Image &image,
-                              const std::string &path)
+    static void _saveIfNeeded(const brayns::Image &image, const std::string &path)
     {
         if (_isSavePngEnabled())
         {
@@ -105,8 +101,7 @@ private:
         stream.write(data, size);
     }
 
-    static double _evaluate(const brayns::Image &image,
-                            const brayns::Image &reference)
+    static double _evaluate(const brayns::Image &image, const brayns::Image &reference)
     {
         auto imageSize = image.getSize();
         auto referenceSize = reference.getSize();

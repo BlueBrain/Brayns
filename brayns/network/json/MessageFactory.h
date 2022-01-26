@@ -121,18 +121,24 @@ BRAYNS_JSON_OBJECT_END()
  * @brief Serialize empty message as empty object.
  *
  */
-template <>
+template<>
 struct JsonAdapter<EmptyMessage>
 {
-    static JsonSchema getSchema(const EmptyMessage&) { return {}; }
+    static JsonSchema getSchema(const EmptyMessage &)
+    {
+        return {};
+    }
 
-    static bool serialize(const EmptyMessage&, JsonValue& json)
+    static bool serialize(const EmptyMessage &, JsonValue &json)
     {
         json = Poco::makeShared<JsonObject>();
         return true;
     }
 
-    static bool deserialize(const JsonValue&, EmptyMessage&) { return true; }
+    static bool deserialize(const JsonValue &, EmptyMessage &)
+    {
+        return true;
+    }
 };
 
 /**
@@ -151,7 +157,7 @@ public:
      * @param request Request message containing the transaction info.
      * @return ReplyMessage The reply message corresponding to request.
      */
-    static ReplyMessage createReply(const RequestMessage& request)
+    static ReplyMessage createReply(const RequestMessage &request)
     {
         ReplyMessage reply;
         reply.jsonrpc = request.jsonrpc;
@@ -170,7 +176,7 @@ public:
      * @param request Request message containing the transaction info.
      * @return ErrorMessage The error message corresponding to request.
      */
-    static ErrorMessage createError(const RequestMessage& request)
+    static ErrorMessage createError(const RequestMessage &request)
     {
         ErrorMessage error;
         error.jsonrpc = request.jsonrpc;
@@ -188,7 +194,7 @@ public:
      * @param request Request message containing the transaction info.
      * @return ProgressMessage The progress message corresponding to request.
      */
-    static ProgressMessage createProgress(const RequestMessage& request)
+    static ProgressMessage createProgress(const RequestMessage &request)
     {
         ProgressMessage progress;
         progress.jsonrpc = request.jsonrpc;

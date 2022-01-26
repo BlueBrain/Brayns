@@ -27,5 +27,5 @@
 class TransferFunctionUtils
 {
 public:
-    static void set(brayns::TransferFunction&) noexcept;
+    static void set(brayns::TransferFunction &) noexcept;
 };

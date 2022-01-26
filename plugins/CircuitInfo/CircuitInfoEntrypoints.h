@@ -37,7 +37,7 @@
 class CircuitInfoEntrypoints
 {
 public:
-    static void load(CircuitInfoPlugin& plugin)
+    static void load(CircuitInfoPlugin &plugin)
     {
         plugin.add<CIInfoEntrypoint>();
         plugin.add<CIGetCellDataEntrypoint>();

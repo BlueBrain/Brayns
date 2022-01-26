@@ -28,24 +28,26 @@
 
 namespace brayns
 {
-class RemoveLightsEntrypoint
-    : public Entrypoint<RemoveLightsMessage, EmptyMessage>
+class RemoveLightsEntrypoint : public Entrypoint<RemoveLightsMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override { return "remove-lights"; }
+    virtual std::string getName() const override
+    {
+        return "remove-lights";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Remove the model(s) from the ID list from the scene";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& ids = params.ids;
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
-        auto& lightManager = scene.getLightManager();
+        auto &ids = params.ids;
+        auto &engine = getApi().getEngine();
+        auto &scene = engine.getScene();
+        auto &lightManager = scene.getLightManager();
         for (auto id : params.ids)
         {
             lightManager.removeLight(id);

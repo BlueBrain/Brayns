@@ -49,8 +49,7 @@ public:
 
     // Entrypoint access
     void updateSpikeSimulation(const SetSpikeSimulationMessage &);
-    void updateSpikeSimulationFromFile(
-        const SetSpikeSimulationFromFileMessage &);
+    void updateSpikeSimulationFromFile(const SetSpikeSimulationFromFileMessage &);
 
 private:
     void _updateSpikeSimulation();

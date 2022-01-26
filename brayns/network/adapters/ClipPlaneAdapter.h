@@ -29,7 +29,6 @@ namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(ClipPlane)
 BRAYNS_JSON_ADAPTER_GETSET("id", getID, setID, "Plane ID")
-BRAYNS_JSON_ADAPTER_GETSET("plane", getPlane, setPlane,
-                           "Plane normal vector XYZ and distance from origin")
+BRAYNS_JSON_ADAPTER_GETSET("plane", getPlane, setPlane, "Plane normal vector XYZ and distance from origin")
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

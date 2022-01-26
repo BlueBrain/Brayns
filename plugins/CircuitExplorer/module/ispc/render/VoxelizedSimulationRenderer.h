@@ -35,7 +35,10 @@ public:
        Returns the class name as a string
        @return string containing the full name of the class
     */
-    std::string toString() const final { return "VoxelizedSimulationRenderer"; }
+    std::string toString() const final
+    {
+        return "VoxelizedSimulationRenderer";
+    }
     void commit() final;
 
 private:

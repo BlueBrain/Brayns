@@ -34,7 +34,7 @@ namespace brayns
  *
  * @tparam T Contained type.
  */
-template <typename T>
+template<typename T>
 struct PtrAdapter
 {
     /**
@@ -42,7 +42,7 @@ struct PtrAdapter
      *
      * @return JsonSchema JSON schema of *T.
      */
-    static JsonSchema getSchema(const T& value)
+    static JsonSchema getSchema(const T &value)
     {
         if (!value)
         {
@@ -59,7 +59,7 @@ struct PtrAdapter
      * @return true Success.
      * @return false Failure.
      */
-    static bool serialize(const T& value, JsonValue& json)
+    static bool serialize(const T &value, JsonValue &json)
     {
         if (!value)
         {
@@ -76,7 +76,7 @@ struct PtrAdapter
      * @return true Success.
      * @return false Failure.
      */
-    static bool deserialize(const JsonValue& json, T& value)
+    static bool deserialize(const JsonValue &json, T &value)
     {
         if (!value)
         {
@@ -91,8 +91,8 @@ struct PtrAdapter
  *
  * @tparam T Referenced type.
  */
-template <typename T>
-struct JsonAdapter<T*> : PtrAdapter<T*>
+template<typename T>
+struct JsonAdapter<T *> : PtrAdapter<T *>
 {
 };
 
@@ -101,7 +101,7 @@ struct JsonAdapter<T*> : PtrAdapter<T*>
  *
  * @tparam T Referenced type.
  */
-template <typename T>
+template<typename T>
 struct JsonAdapter<std::unique_ptr<T>> : PtrAdapter<std::unique_ptr<T>>
 {
     /**
@@ -112,7 +112,7 @@ struct JsonAdapter<std::unique_ptr<T>> : PtrAdapter<std::unique_ptr<T>>
      * @return true Success.
      * @return false Failure.
      */
-    static bool deserialize(const JsonValue& json, std::unique_ptr<T>& value)
+    static bool deserialize(const JsonValue &json, std::unique_ptr<T> &value)
     {
         T buffer = {};
         if (!Json::deserialize(json, buffer))
@@ -129,7 +129,7 @@ struct JsonAdapter<std::unique_ptr<T>> : PtrAdapter<std::unique_ptr<T>>
  *
  * @tparam T Referenced type.
  */
-template <typename T>
+template<typename T>
 struct JsonAdapter<std::shared_ptr<T>> : PtrAdapter<std::shared_ptr<T>>
 {
     /**
@@ -140,7 +140,7 @@ struct JsonAdapter<std::shared_ptr<T>> : PtrAdapter<std::shared_ptr<T>>
      * @return true Success.
      * @return false Failure.
      */
-    static bool deserialize(const JsonValue& json, std::shared_ptr<T>& value)
+    static bool deserialize(const JsonValue &json, std::shared_ptr<T> &value)
     {
         T buffer = {};
         if (!Json::deserialize(json, buffer))
@@ -157,7 +157,7 @@ struct JsonAdapter<std::shared_ptr<T>> : PtrAdapter<std::shared_ptr<T>>
  *
  * @tparam T Referenced type.
  */
-template <typename T>
+template<typename T>
 struct JsonAdapter<boost::optional<T>> : PtrAdapter<boost::optional<T>>
 {
     /**
@@ -170,7 +170,7 @@ struct JsonAdapter<boost::optional<T>> : PtrAdapter<boost::optional<T>>
      * @return true Success.
      * @return false Failure.
      */
-    static bool deserialize(const JsonValue& json, boost::optional<T>& value)
+    static bool deserialize(const JsonValue &json, boost::optional<T> &value)
     {
         T buffer = {};
         if (!Json::deserialize(json, buffer))

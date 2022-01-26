@@ -44,12 +44,12 @@ constexpr char attribEtype[] = "etype";
 constexpr char attribMorphology[] = "morphology";
 
 std::vector<std::string> getEnumValueList(
-    const bbp::sonata::NodePopulation& population,
-    const bbp::sonata::Selection& selection, const std::string& attribute)
+    const bbp::sonata::NodePopulation &population,
+    const bbp::sonata::Selection &selection,
+    const std::string &attribute)
 {
     const auto enumValues = population.enumerationValues(attribute);
-    const auto enumIndices =
-        population.getEnumeration<size_t>(attribute, selection);
+    const auto enumIndices = population.getEnumeration<size_t>(attribute, selection);
 
     std::vector<std::string> result(enumIndices.size());
     for (size_t i = 0; i < result.size(); ++i)
@@ -59,10 +59,9 @@ std::vector<std::string> getEnumValueList(
     return result;
 }
 
-void checkAttributes(const bbp::sonata::NodePopulation& nodes,
-                     const std::vector<const char*>& attribs)
+void checkAttributes(const bbp::sonata::NodePopulation &nodes, const std::vector<const char *> &attribs)
 {
-    const auto& attributes = nodes.attributeNames();
+    const auto &attributes = nodes.attributeNames();
     for (const auto attrib : attribs)
     {
         if (attributes.find(attrib) == attributes.end())
@@ -75,10 +74,9 @@ void checkAttributes(const bbp::sonata::NodePopulation& nodes,
     }
 }
 
-void checkEnums(const bbp::sonata::NodePopulation& nodes,
-                const std::vector<const char*>& enums)
+void checkEnums(const bbp::sonata::NodePopulation &nodes, const std::vector<const char *> &enums)
 {
-    const auto& enumerations = nodes.enumerationNames();
+    const auto &enumerations = nodes.enumerationNames();
     for (const auto enumName : enums)
     {
         if (enumerations.find(enumName) == enumerations.end())
@@ -93,7 +91,7 @@ void checkEnums(const bbp::sonata::NodePopulation& nodes,
 
 } // namespace
 
-std::string SonataCells::getPopulationType(const Nodes& nodes)
+std::string SonataCells::getPopulationType(const Nodes &nodes)
 {
     // Standard still not stable on this point. Not sure if it will
     // be an enum on the library group. or a dataset of the population
@@ -115,15 +113,13 @@ std::string SonataCells::getPopulationType(const Nodes& nodes)
     return nodes.getAttribute<std::string>(enumModelType, selection)[0];
 }
 
-std::vector<std::string> SonataCells::getMorphologies(
-    const Nodes& nodes, const Selection& selection)
+std::vector<std::string> SonataCells::getMorphologies(const Nodes &nodes, const Selection &selection)
 {
     checkAttributes(nodes, {attribMorphology});
     return nodes.getAttribute<std::string>(attribMorphology, selection);
 }
 
-std::vector<brayns::Vector3f> SonataCells::getPositions(
-    const Nodes& nodes, const Selection& selection)
+std::vector<brayns::Vector3f> SonataCells::getPositions(const Nodes &nodes, const Selection &selection)
 {
     checkAttributes(nodes, {attribX, attribY, attribZ});
 
@@ -142,11 +138,9 @@ std::vector<brayns::Vector3f> SonataCells::getPositions(
     return result;
 }
 
-std::vector<brayns::Quaternion> SonataCells::getRotations(
-    const Nodes& nodes, const Selection& selection)
+std::vector<brayns::Quaternion> SonataCells::getRotations(const Nodes &nodes, const Selection &selection)
 {
-    checkAttributes(nodes, {attribOrientationW, attribOrientationX,
-                            attribOrientationY, attribOrientationZ});
+    checkAttributes(nodes, {attribOrientationW, attribOrientationX, attribOrientationY, attribOrientationZ});
 
     const auto x = nodes.getAttribute<float>(attribOrientationX, selection);
     const auto y = nodes.getAttribute<float>(attribOrientationY, selection);
@@ -161,29 +155,25 @@ std::vector<brayns::Quaternion> SonataCells::getRotations(
     return result;
 }
 
-std::vector<std::string> SonataCells::getLayers(const Nodes& nodes,
-                                                const Selection& selection)
+std::vector<std::string> SonataCells::getLayers(const Nodes &nodes, const Selection &selection)
 {
     checkAttributes(nodes, {attribLayer});
     return nodes.getAttribute<std::string>(attribLayer, selection);
 }
 
-std::vector<std::string> SonataCells::getRegions(const Nodes& nodes,
-                                                 const Selection& selection)
+std::vector<std::string> SonataCells::getRegions(const Nodes &nodes, const Selection &selection)
 {
     checkAttributes(nodes, {attribRegion});
     return getEnumValueList(nodes, selection, attribRegion);
 }
 
-std::vector<std::string> SonataCells::getMTypes(const Nodes& nodes,
-                                                const Selection& selection)
+std::vector<std::string> SonataCells::getMTypes(const Nodes &nodes, const Selection &selection)
 {
     checkAttributes(nodes, {attribMtype});
     return getEnumValueList(nodes, selection, attribMtype);
 }
 
-std::vector<std::string> SonataCells::getETypes(const Nodes& nodes,
-                                                const Selection& selection)
+std::vector<std::string> SonataCells::getETypes(const Nodes &nodes, const Selection &selection)
 {
     checkAttributes(nodes, {attribEtype});
     return getEnumValueList(nodes, selection, attribEtype);

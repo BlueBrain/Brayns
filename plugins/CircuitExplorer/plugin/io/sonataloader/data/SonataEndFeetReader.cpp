@@ -33,8 +33,9 @@ constexpr char triangleDataset[] = "triangles";
 } // namespace
 
 std::vector<brayns::TriangleMesh> SonataEndFeetReader::readEndFeet(
-    const std::string& filePath, const std::vector<uint64_t>& ids,
-    const std::vector<brayns::Vector3f>& positions)
+    const std::string &filePath,
+    const std::vector<uint64_t> &ids,
+    const std::vector<brayns::Vector3f> &positions)
 {
     static std::mutex hdf5Mutex;
     std::unique_ptr<HighFive::File> file;
@@ -49,15 +50,14 @@ std::vector<brayns::TriangleMesh> SonataEndFeetReader::readEndFeet(
 
     for (size_t i = 0; i < ids.size(); ++i)
     {
-        auto& mesh = result[i];
+        auto &mesh = result[i];
 
         const auto endFootGroupName = endFootGroup + std::to_string(ids[i]);
         const auto endFootGroup = root.getGroup(endFootGroupName);
 
         const auto vertexDataSet = endFootGroup.getDataSet(pointDataset);
         std::vector<std::vector<float>> rawVertices;
-        vertexDataSet.select({0, 0}, vertexDataSet.getDimensions())
-            .read(rawVertices);
+        vertexDataSet.select({0, 0}, vertexDataSet.getDimensions()).read(rawVertices);
 
         mesh.vertices.resize(rawVertices.size());
         for (size_t j = 0; j < rawVertices.size(); ++j)
@@ -69,8 +69,7 @@ std::vector<brayns::TriangleMesh> SonataEndFeetReader::readEndFeet(
 
         const auto triangleDataSet = endFootGroup.getDataSet(triangleDataset);
         std::vector<std::vector<uint32_t>> rawTriangles;
-        triangleDataSet.select({0, 0}, triangleDataSet.getDimensions())
-            .read(rawTriangles);
+        triangleDataSet.select({0, 0}, triangleDataSet.getDimensions()).read(rawTriangles);
 
         mesh.indices.resize(rawTriangles.size());
         for (size_t j = 0; j < rawTriangles.size(); ++j)
@@ -83,7 +82,7 @@ std::vector<brayns::TriangleMesh> SonataEndFeetReader::readEndFeet(
         // Adjust mesh position given the endfoot surface position
         const auto meshBounds = brayns::createMeshBounds(mesh);
         const auto translation = meshBounds.getCenter() - positions[i];
-        for (auto& vertex : mesh.vertices)
+        for (auto &vertex : mesh.vertices)
             vertex += translation;
     }
 

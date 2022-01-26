@@ -34,7 +34,7 @@
 class ModelCellIdsRetriever
 {
 public:
-    static CIGetCellIdsResult getCellIds(brayns::ModelDescriptor& model)
+    static CIGetCellIdsResult getCellIds(brayns::ModelDescriptor &model)
     {
         // Circuit info
         CIGetCellIdsParams params;
@@ -43,11 +43,11 @@ public:
         params.path = model.getPath();
 
         // Targets
-        auto& metadata = model.getMetadata();
+        auto &metadata = model.getMetadata();
         auto i = metadata.find("Targets");
         if (i != metadata.end())
         {
-            auto& target = i->second;
+            auto &target = i->second;
             if (!target.empty())
             {
                 if (target.find(',') == std::string::npos)
@@ -66,8 +66,7 @@ public:
     }
 };
 
-class CIGetCellIdsFromModelEntrypoint
-    : public brayns::Entrypoint<CIGetCellIdsFromModelParams, CIGetCellIdsResult>
+class CIGetCellIdsFromModelEntrypoint : public brayns::Entrypoint<CIGetCellIdsFromModelParams, CIGetCellIdsResult>
 {
 public:
     virtual std::string getName() const override
@@ -80,11 +79,11 @@ public:
         return "Return the list of GIDs from a loaded circuit";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         auto modelId = params.model_id;
-        auto& model = brayns::ExtractModel::fromId(getApi(), modelId);
+        auto &model = brayns::ExtractModel::fromId(getApi(), modelId);
         auto result = ModelCellIdsRetriever::getCellIds(model);
         request.reply(result);
     }

@@ -67,16 +67,21 @@ public:
      * Creates a scene object responsible for handling models, simulations and
      * light sources.
      */
-    Scene(AnimationParameters& animationParameters,
-          VolumeParameters& volumeParameters);
+    Scene(AnimationParameters &animationParameters, VolumeParameters &volumeParameters);
 
     /**
         Returns the bounding box of the scene
     */
-    const Boxd& getBounds() const { return _bounds; }
+    const Boxd &getBounds() const
+    {
+        return _bounds;
+    }
 
     /** Gets the light manager */
-    LightManager& getLightManager() { return _lightManager; }
+    LightManager &getLightManager()
+    {
+        return _lightManager;
+    }
     /**
         Adds a model to the scene
         @throw std::runtime_error if model is empty
@@ -115,7 +120,7 @@ public:
 
     ModelDescriptorPtr getModel(const size_t id) const;
 
-    const std::vector<ModelDescriptorPtr>& getModels() const
+    const std::vector<ModelDescriptorPtr> &getModels() const
     {
         return _modelDescriptors;
     }
@@ -135,7 +140,7 @@ public:
      * @param plane The coefficients of the clip plane equation.
      * @return The clip plane ID.
      */
-    size_t addClipPlane(const Plane& plane);
+    size_t addClipPlane(const Plane &plane);
 
     /** Get a clip plane by its ID.
         @param id the plane ID.
@@ -149,7 +154,7 @@ public:
     /**
        @return the clip planes
     */
-    const std::vector<ClipPlanePtr>& getClipPlanes() const
+    const std::vector<ClipPlanePtr> &getClipPlanes() const
     {
         return _clipPlanes;
     }
@@ -166,12 +171,18 @@ public:
      */
     void setMaterialsColorMap(MaterialsColorMap colorMap);
 
-    MaterialPtr getBackgroundMaterial() const { return _backgroundMaterial; }
+    MaterialPtr getBackgroundMaterial() const
+    {
+        return _backgroundMaterial;
+    }
 
     /** @return the transfer function used for volumes and simulations. */
-    TransferFunction& getTransferFunction() { return _transferFunction; }
+    TransferFunction &getTransferFunction()
+    {
+        return _transferFunction;
+    }
     /** @return the transfer function used for volumes and simulations. */
-    const TransferFunction& getTransferFunction() const
+    const TransferFunction &getTransferFunction() const
     {
         return _transferFunction;
     }
@@ -184,10 +195,9 @@ public:
      * @throws std::runtime_error if any of the models being added is not
      * correct
      */
-    void addModels(std::vector<ModelDescriptorPtr>& input,
-                   const ModelParams& params);
+    void addModels(std::vector<ModelDescriptorPtr> &input, const ModelParams &params);
 
-    void visitModels(const std::function<void(Model&)>& functor);
+    void visitModels(const std::function<void(Model &)> &functor);
 
     /** @internal */
     auto acquireReadAccess() const
@@ -196,18 +206,23 @@ public:
     }
 
     /** @internal */
-    void copyFrom(const Scene& rhs);
+    void copyFrom(const Scene &rhs);
 
-    virtual void copyFromImpl(const Scene&) {}
+    virtual void copyFromImpl(const Scene &)
+    {
+    }
 
 protected:
     /** @return True if this scene supports scene updates from any thread. */
-    virtual bool supportsConcurrentSceneUpdates() const { return false; }
+    virtual bool supportsConcurrentSceneUpdates() const
+    {
+        return false;
+    }
     void _computeBounds();
     void _updateAnimationParameters();
 
-    AnimationParameters& _animationParameters;
-    VolumeParameters& _volumeParameters;
+    AnimationParameters &_animationParameters;
+    VolumeParameters &_volumeParameters;
     MaterialPtr _backgroundMaterial;
 
     TransferFunction _transferFunction;

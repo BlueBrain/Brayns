@@ -24,24 +24,19 @@
 namespace sonataloader
 {
 std::vector<MorphologyInstance::Ptr> VasculaturePopulationLoader::load(
-    const SonataConfig::Data& networkData,
-    const SonataNodePopulationParameters& lc,
-    const bbp::sonata::Selection& selection) const
+    const SonataConfig::Data &networkData,
+    const SonataNodePopulationParameters &lc,
+    const bbp::sonata::Selection &selection) const
 {
-    const auto population =
-        networkData.config.getNodePopulation(lc.node_population);
+    const auto population = networkData.config.getNodePopulation(lc.node_population);
 
-    const auto startPoints =
-        SonataVasculature::getSegmentStartPoints(population, selection);
-    const auto endPoints =
-        SonataVasculature::getSegmentEndPoints(population, selection);
-    const auto sectionTypes =
-        SonataVasculature::getSegmentSectionTypes(population, selection);
+    const auto startPoints = SonataVasculature::getSegmentStartPoints(population, selection);
+    const auto endPoints = SonataVasculature::getSegmentEndPoints(population, selection);
+    const auto sectionTypes = SonataVasculature::getSegmentSectionTypes(population, selection);
 
     std::vector<float> startRadii, endRadii;
     const auto radOverride = lc.vasculature_geometry_parameters.radius_override;
-    const auto radMultiplier =
-        lc.vasculature_geometry_parameters.radius_multiplier;
+    const auto radMultiplier = lc.vasculature_geometry_parameters.radius_multiplier;
     if (radOverride > 0.f)
     {
         startRadii.resize(startPoints.size(), radOverride);
@@ -49,19 +44,21 @@ std::vector<MorphologyInstance::Ptr> VasculaturePopulationLoader::load(
     }
     else
     {
-        startRadii =
-            SonataVasculature::getSegmentStartRadii(population, selection);
+        startRadii = SonataVasculature::getSegmentStartRadii(population, selection);
         endRadii = SonataVasculature::getSegmentEndRadii(population, selection);
         if (radMultiplier != 1.f)
         {
             std::cout << "Modding" << std::endl;
-            std::transform(startRadii.begin(), startRadii.end(),
-                           startRadii.begin(),
-                           [mult = radMultiplier](const float r)
-                           { return r * mult; });
-            std::transform(endRadii.begin(), endRadii.end(), endRadii.begin(),
-                           [mult = radMultiplier](const float r)
-                           { return r * mult; });
+            std::transform(
+                startRadii.begin(),
+                startRadii.end(),
+                startRadii.begin(),
+                [mult = radMultiplier](const float r) { return r * mult; });
+            std::transform(
+                endRadii.begin(),
+                endRadii.end(),
+                endRadii.begin(),
+                [mult = radMultiplier](const float r) { return r * mult; });
         }
     }
 
@@ -69,10 +66,12 @@ std::vector<MorphologyInstance::Ptr> VasculaturePopulationLoader::load(
 
 #pragma omp parallel for
     for (size_t i = 0; i < startPoints.size(); ++i)
-        result[i] =
-            std::make_unique<VasculatureInstance>(startPoints[i], startRadii[i],
-                                                  endPoints[i], endRadii[i],
-                                                  sectionTypes[i]);
+        result[i] = std::make_unique<VasculatureInstance>(
+            startPoints[i],
+            startRadii[i],
+            endPoints[i],
+            endRadii[i],
+            sectionTypes[i]);
 
     return result;
 }

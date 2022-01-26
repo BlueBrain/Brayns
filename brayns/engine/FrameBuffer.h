@@ -40,15 +40,21 @@ public:
     /** Unmap the buffer for reading with get*Buffer(). */
     virtual void unmap() = 0;
     /** @return the color buffer, valid only after map(). */
-    virtual const uint8_t* getColorBuffer() const = 0;
+    virtual const uint8_t *getColorBuffer() const = 0;
     /** @return the depth buffer, valid only after map(). */
-    virtual const float* getDepthBuffer() const = 0;
+    virtual const float *getDepthBuffer() const = 0;
     /** Resize the framebuffer to the new size. */
-    virtual void resize(const Vector2ui& frameSize) = 0;
+    virtual void resize(const Vector2ui &frameSize) = 0;
     /** Clear the framebuffer. */
-    virtual void clear() { _accumFrames = 0; }
+    virtual void clear()
+    {
+        _accumFrames = 0;
+    }
     /** @return the current framebuffer size. */
-    virtual Vector2ui getSize() const { return _frameSize; }
+    virtual Vector2ui getSize() const
+    {
+        return _frameSize;
+    }
     /** Enable/disable accumulation state on the framebuffer. */
     virtual void setAccumulation(const bool accumulation)
     {
@@ -61,23 +67,42 @@ public:
     }
 
     /** Set a new subsampling with a factor from 1 to x of the current size. */
-    virtual void setSubsampling(const size_t) {}
+    virtual void setSubsampling(const size_t)
+    {
+    }
     /** Create and set a pixelop (pre/post filter) on the framebuffer. */
-    virtual void createPixelOp(const std::string& /*name*/){};
+    virtual void createPixelOp(const std::string & /*name*/){};
     /** Update the current pixelop with the given properties. */
-    virtual void updatePixelOp(const PropertyMap& /*properties*/){};
+    virtual void updatePixelOp(const PropertyMap & /*properties*/){};
     //@}
 
-    FrameBuffer(const std::string& name, const Vector2ui& frameSize,
-                PixelFormat frameBufferFormat);
+    FrameBuffer(const std::string &name, const Vector2ui &frameSize, PixelFormat frameBufferFormat);
 
     size_t getColorDepth() const;
-    const Vector2ui& getFrameSize() const { return _frameSize; }
-    bool getAccumulation() const { return _accumulation; }
-    PixelFormat getFrameBufferFormat() const { return _frameBufferFormat; }
-    const std::string& getName() const { return _name; }
-    void incrementAccumFrames() { ++_accumFrames; }
-    size_t numAccumFrames() const { return _accumFrames; }
+    const Vector2ui &getFrameSize() const
+    {
+        return _frameSize;
+    }
+    bool getAccumulation() const
+    {
+        return _accumulation;
+    }
+    PixelFormat getFrameBufferFormat() const
+    {
+        return _frameBufferFormat;
+    }
+    const std::string &getName() const
+    {
+        return _name;
+    }
+    void incrementAccumFrames()
+    {
+        ++_accumFrames;
+    }
+    size_t numAccumFrames() const
+    {
+        return _accumFrames;
+    }
 
     Image getImage();
 

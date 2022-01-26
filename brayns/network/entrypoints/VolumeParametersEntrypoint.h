@@ -26,12 +26,12 @@
 
 namespace brayns
 {
-template <>
+template<>
 struct ObjectExtractor<VolumeParameters>
 {
-    static VolumeParameters& extract(PluginAPI& api)
+    static VolumeParameters &extract(PluginAPI &api)
     {
-        auto& parametersManager = api.getParametersManager();
+        auto &parametersManager = api.getParametersManager();
         return parametersManager.getVolumeParameters();
     }
 };

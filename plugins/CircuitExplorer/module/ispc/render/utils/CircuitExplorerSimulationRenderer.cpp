@@ -36,18 +36,16 @@
 
 extern "C"
 {
-    int CircuitExplorerSimulationRenderer_getBytesPerPrimitive(
-        const void* geometry)
+    int CircuitExplorerSimulationRenderer_getBytesPerPrimitive(const void *geometry)
     {
-        const ospray::Geometry* base =
-            static_cast<const ospray::Geometry*>(geometry);
-        if (dynamic_cast<const ospray::Spheres*>(base))
+        const ospray::Geometry *base = static_cast<const ospray::Geometry *>(geometry);
+        if (dynamic_cast<const ospray::Spheres *>(base))
             return sizeof(brayns::Sphere);
-        else if (dynamic_cast<const ospray::Cylinders*>(base))
+        else if (dynamic_cast<const ospray::Cylinders *>(base))
             return sizeof(brayns::Cylinder);
-        else if (dynamic_cast<const ospray::Cones*>(base))
+        else if (dynamic_cast<const ospray::Cones *>(base))
             return sizeof(brayns::Cone);
-        else if (dynamic_cast<const ospray::SDFGeometries*>(base))
+        else if (dynamic_cast<const ospray::SDFGeometries *>(base))
             return sizeof(brayns::SDFGeometry);
         return 0;
     }
@@ -59,9 +57,8 @@ void CircuitExplorerSimulationRenderer::commit()
 {
     CircuitExplorerAbstractRenderer::commit();
 
-    _secondaryModel = (ospray::Model*)getParamObject("secondaryModel", nullptr);
-    _maxDistanceToSecondaryModel =
-        getParam1f("maxDistanceToSecondaryModel", 30.f);
+    _secondaryModel = (ospray::Model *)getParamObject("secondaryModel", nullptr);
+    _maxDistanceToSecondaryModel = getParam1f("maxDistanceToSecondaryModel", 30.f);
 
     _simulationData = getParamData("simulationData");
     _simulationDataSize = _simulationData ? _simulationData->size() : 0;
@@ -71,11 +68,10 @@ void CircuitExplorerSimulationRenderer::commit()
     _fogStart = getParam1f("fogStart", 0.f);
 
     // Transfer function
-    ospray::TransferFunction* transferFunction =
-        (ospray::TransferFunction*)getParamObject("transferFunction", nullptr);
+    ospray::TransferFunction *transferFunction =
+        (ospray::TransferFunction *)getParamObject("transferFunction", nullptr);
     if (transferFunction)
-        ispc::CircuitExplorerSimulationRenderer_setTransferFunction(
-            getIE(), transferFunction->getIE());
+        ispc::CircuitExplorerSimulationRenderer_setTransferFunction(getIE(), transferFunction->getIE());
 }
 
 } // namespace circuitExplorer

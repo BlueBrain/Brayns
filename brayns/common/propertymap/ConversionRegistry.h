@@ -43,6 +43,6 @@ public:
      * @return true A converter has been found to perform the conversion.
      * @return false No converter found to perform the conversion.
      */
-    static bool convert(const Any& from, Any& to);
+    static bool convert(const Any &from, Any &to);
 };
 } // namespace brayns

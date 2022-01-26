@@ -37,7 +37,7 @@ namespace brayns
  *
  * @tparam T The type of the array container.
  */
-template <typename T>
+template<typename T>
 struct ArrayAdapter
 {
     /**
@@ -45,7 +45,7 @@ struct ArrayAdapter
      *
      * @return JsonSchema Json schema of the container T.
      */
-    static JsonSchema getSchema(const T&)
+    static JsonSchema getSchema(const T &)
     {
         JsonSchema schema;
         schema.type = JsonType::Array;
@@ -65,10 +65,10 @@ struct ArrayAdapter
      * @return true Success.
      * @return false Failure.
      */
-    static bool serialize(const T& value, JsonValue& json)
+    static bool serialize(const T &value, JsonValue &json)
     {
         auto array = Poco::makeShared<JsonArray>();
-        for (const auto& item : value)
+        for (const auto &item : value)
         {
             JsonValue jsonItem;
             if (!Json::serialize(item, jsonItem))
@@ -94,7 +94,7 @@ struct ArrayAdapter
      * @return true Success.
      * @return false Failure.
      */
-    static bool deserialize(const JsonValue& json, T& value)
+    static bool deserialize(const JsonValue &json, T &value)
     {
         auto array = JsonExtractor::extractArray(json);
         if (!array)
@@ -119,7 +119,7 @@ struct ArrayAdapter
  * @brief Specialization for boolean ref of std::vector<bool>.
  *
  */
-template <>
+template<>
 struct JsonAdapter<std::vector<bool>::reference>
 {
     using Ref = std::vector<bool>::reference;
@@ -143,7 +143,7 @@ struct JsonAdapter<std::vector<bool>::reference>
      * @return true Success.
      * @return false Failure.
      */
-    static bool serialize(Ref value, JsonValue& json)
+    static bool serialize(Ref value, JsonValue &json)
     {
         json = bool(value);
         return true;
@@ -157,7 +157,7 @@ struct JsonAdapter<std::vector<bool>::reference>
      * @return true Success.
      * @return false Failure.
      */
-    static bool deserialize(const JsonValue& json, Ref value)
+    static bool deserialize(const JsonValue &json, Ref value)
     {
         if (!json.isBoolean())
         {
@@ -173,7 +173,7 @@ struct JsonAdapter<std::vector<bool>::reference>
  *
  * @tparam T Item type.
  */
-template <typename T>
+template<typename T>
 struct JsonAdapter<std::vector<T>> : ArrayAdapter<std::vector<T>>
 {
 };
@@ -183,7 +183,7 @@ struct JsonAdapter<std::vector<T>> : ArrayAdapter<std::vector<T>>
  *
  * @tparam T Item type.
  */
-template <typename T>
+template<typename T>
 struct JsonAdapter<std::deque<T>> : ArrayAdapter<std::deque<T>>
 {
 };
@@ -193,7 +193,7 @@ struct JsonAdapter<std::deque<T>> : ArrayAdapter<std::deque<T>>
  *
  * @tparam T Item type.
  */
-template <typename T>
+template<typename T>
 struct JsonAdapter<std::list<T>> : ArrayAdapter<std::list<T>>
 {
 };

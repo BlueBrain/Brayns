@@ -31,26 +31,38 @@ namespace brayns
 class OSPRayModel : public Model
 {
 public:
-    OSPRayModel(AnimationParameters& animationParameters,
-                VolumeParameters& volumeParameters,
-                OSPTransferFunction transferFunc);
+    OSPRayModel(
+        AnimationParameters &animationParameters,
+        VolumeParameters &volumeParameters,
+        OSPTransferFunction transferFunc);
     ~OSPRayModel() final;
 
     void setMemoryFlags(const size_t memoryManagementFlags);
 
     void commitGeometry() final;
-    void commitMaterials(const std::string& renderer);
+    void commitMaterials(const std::string &renderer);
     void commitSimulationParams();
 
-    OSPModel getPrimaryModel() const { return _primaryModel; }
-    OSPModel getSecondaryModel() const { return _secondaryModel; }
-    OSPModel getBoundingBoxModel() const { return _boundingBoxModel; }
+    OSPModel getPrimaryModel() const
+    {
+        return _primaryModel;
+    }
+    OSPModel getSecondaryModel() const
+    {
+        return _secondaryModel;
+    }
+    OSPModel getBoundingBoxModel() const
+    {
+        return _boundingBoxModel;
+    }
     SharedDataVolumePtr createSharedDataVolume(
-        const Vector3ui& dimensions, const Vector3f& spacing,
+        const Vector3ui &dimensions,
+        const Vector3f &spacing,
         const VolumeDataType type) const final;
-    BrickedVolumePtr createBrickedVolume(const Vector3ui& dimensions,
-                                         const Vector3f& spacing,
-                                         const VolumeDataType type) const final;
+    BrickedVolumePtr createBrickedVolume(
+        const Vector3ui &dimensions,
+        const Vector3f &spacing,
+        const VolumeDataType type) const final;
 
     void buildBoundingBox() final;
 
@@ -62,8 +74,7 @@ public:
 private:
     using GeometryMap = std::map<size_t, OSPGeometry>;
 
-    OSPGeometry& _createGeometry(GeometryMap& map, size_t materialID,
-                                 const char* name);
+    OSPGeometry &_createGeometry(GeometryMap &map, size_t materialID, const char *name);
     void _commitSpheres(const size_t materialId);
     void _commitCylinders(const size_t materialId);
     void _commitCones(const size_t materialId);
@@ -71,8 +82,7 @@ private:
     void _commitMeshes(const size_t materialId);
     void _commitStreamlines(const size_t materialId);
     void _commitSDFGeometries();
-    void _addGeometryToModel(const OSPGeometry geometry,
-                             const size_t materialId);
+    void _addGeometryToModel(const OSPGeometry geometry, const size_t materialId);
 
     // Models
     OSPModel _primaryModel{nullptr};
@@ -100,6 +110,6 @@ private:
 
     std::string _renderer;
 
-    MaterialPtr createMaterialImpl(const PropertyMap& properties = {}) final;
+    MaterialPtr createMaterialImpl(const PropertyMap &properties = {}) final;
 };
 } // namespace brayns

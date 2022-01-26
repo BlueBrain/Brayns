@@ -27,17 +27,16 @@
 
 namespace brayns
 {
-class ExportFramesToDiskEntrypoint
-    : public Entrypoint<FrameExporter::ExportInfo, EmptyMessage>
+class ExportFramesToDiskEntrypoint : public Entrypoint<FrameExporter::ExportInfo, EmptyMessage>
 {
 public:
-    ExportFramesToDiskEntrypoint(std::shared_ptr<FrameExporter>& exporter);
+    ExportFramesToDiskEntrypoint(std::shared_ptr<FrameExporter> &exporter);
 
     std::string getName() const final;
 
     std::string getDescription() const final;
 
-    void onRequest(const Request& request) final;
+    void onRequest(const Request &request) final;
 
     void onPreRender() final;
 

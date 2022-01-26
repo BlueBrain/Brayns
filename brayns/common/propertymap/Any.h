@@ -47,8 +47,8 @@ public:
      * @tparam T The type of the object to store.
      * @param value The value to store.
      */
-    template <typename T>
-    Any(T&& value)
+    template<typename T>
+    Any(T &&value)
         : _data(std::forward<T>(value))
     {
     }
@@ -59,14 +59,20 @@ public:
      * @return true The object is empty (default constructed).
      * @return false An object of any type is stored in the instance.
      */
-    bool isEmpty() const { return _data.empty(); }
+    bool isEmpty() const
+    {
+        return _data.empty();
+    }
 
     /**
      * @brief Get the type of the stored object.
      *
      * @return std::type_index Type of stored object, typeid(void) if empty.
      */
-    std::type_index getType() const { return _data.type(); }
+    std::type_index getType() const
+    {
+        return _data.type();
+    }
 
     /**
      * @brief Shorthand to check if getType() == typeid(T).
@@ -75,7 +81,7 @@ public:
      * @return true The stored value type is T.
      * @return false The stored value is not T.
      */
-    template <typename T>
+    template<typename T>
     bool is() const
     {
         return getType() == typeid(T);
@@ -88,8 +94,8 @@ public:
      * object (undefined behavior otherwise).
      * @return const T& A const reference on the stored object.
      */
-    template <typename T>
-    const T& as() const
+    template<typename T>
+    const T &as() const
     {
         assert(is<T>());
         return *boost::any_cast<T>(&_data);
@@ -102,8 +108,8 @@ public:
      * object (undefined behavior otherwise).
      * @return T& A mutable reference on the stored object.
      */
-    template <typename T>
-    T& as()
+    template<typename T>
+    T &as()
     {
         assert(is<T>());
         return *boost::any_cast<T>(&_data);
@@ -115,7 +121,10 @@ public:
      * @return true An object is stored inside the instance.
      * @return false The Any is empty.
      */
-    explicit operator bool() const { return !isEmpty(); }
+    explicit operator bool() const
+    {
+        return !isEmpty();
+    }
 
 private:
     boost::any _data;

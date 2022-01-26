@@ -85,7 +85,7 @@ LightPtr LightManager::getLight(const size_t id)
     return nullptr;
 }
 
-const std::map<size_t, LightPtr>& LightManager::getLights() const
+const std::map<size_t, LightPtr> &LightManager::getLights() const
 {
     return _lights;
 }

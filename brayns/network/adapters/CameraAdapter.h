@@ -28,13 +28,10 @@
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(Camera)
-BRAYNS_JSON_ADAPTER_GETSET("orientation", getOrientation, setOrientation,
-                           "Camera orientation XYZW")
-BRAYNS_JSON_ADAPTER_GETSET("position", getPosition, setPosition,
-                           "Camera position XYZ")
+BRAYNS_JSON_ADAPTER_GETSET("orientation", getOrientation, setOrientation, "Camera orientation XYZW")
+BRAYNS_JSON_ADAPTER_GETSET("position", getPosition, setPosition, "Camera position XYZ")
 BRAYNS_JSON_ADAPTER_GETSET("target", getTarget, setTarget, "Camera target XYZ")
-BRAYNS_JSON_ADAPTER_GETSET("current", getCurrentType, setCurrentType,
-                           "Camera current type")
+BRAYNS_JSON_ADAPTER_GETSET("current", getCurrentType, setCurrentType, "Camera current type")
 BRAYNS_JSON_ADAPTER_GET("types", getTypes, "Available camera types")
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

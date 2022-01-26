@@ -45,7 +45,7 @@ public:
      * @return ModelDescriptor& Model instance.
      * @throw EntrypointException Model not found.
      */
-    static ModelDescriptor& fromId(PluginAPI& api, size_t id)
+    static ModelDescriptor &fromId(PluginAPI &api, size_t id)
     {
         return fromId(api.getEngine(), id);
     }
@@ -58,7 +58,7 @@ public:
      * @return ModelDescriptor& Model instance.
      * @throw EntrypointException Model not found.
      */
-    static ModelDescriptor& fromId(Engine& engine, size_t id)
+    static ModelDescriptor &fromId(Engine &engine, size_t id)
     {
         return fromId(engine.getScene(), id);
     }
@@ -71,13 +71,12 @@ public:
      * @return ModelDescriptor& Model instance.
      * @throw EntrypointException Model not found.
      */
-    static ModelDescriptor& fromId(Scene& scene, size_t id)
+    static ModelDescriptor &fromId(Scene &scene, size_t id)
     {
         auto model = scene.getModel(id);
         if (!model)
         {
-            throw EntrypointException("No model found with ID " +
-                                      std::to_string(id));
+            throw EntrypointException("No model found with ID " + std::to_string(id));
         }
         return *model;
     }
@@ -94,8 +93,8 @@ public:
      * @return ModelDescriptor& Model instance.
      * @throw EntrypointException Model not found.
      */
-    template <typename T, typename U>
-    static ModelDescriptor& fromParams(T& source, const U& params)
+    template<typename T, typename U>
+    static ModelDescriptor &fromParams(T &source, const U &params)
     {
         return fromId(source, params.id);
     }
@@ -112,8 +111,8 @@ public:
      * @return ModelDescriptor& Model instance.
      * @throw EntrypointException Model not found.
      */
-    template <typename T, typename U>
-    static ModelDescriptor& fromRequest(T& source, const U& request)
+    template<typename T, typename U>
+    static ModelDescriptor &fromRequest(T &source, const U &request)
     {
         return fromParams(source, request.getParams());
     }

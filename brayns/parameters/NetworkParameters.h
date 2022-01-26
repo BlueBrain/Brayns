@@ -102,14 +102,14 @@ public:
      *
      * @return const std::string& URI.
      */
-    const std::string& getUri() const noexcept;
+    const std::string &getUri() const noexcept;
 
     /**
      * @brief Set the URI of the client or server.
      *
      * @param uri URI.
      */
-    void setUri(const std::string& uri) noexcept;
+    void setUri(const std::string &uri) noexcept;
 
     /**
      * @brief Get the delay between two connections attempts in client mode.
@@ -125,51 +125,49 @@ public:
      *
      * @param reconnectionPeriod Connection attempt period.
      */
-    void setReconnectionPeriod(
-        std::chrono::milliseconds reconnectionPeriod) noexcept;
+    void setReconnectionPeriod(std::chrono::milliseconds reconnectionPeriod) noexcept;
 
     /**
      * @brief Get the path of the server private key (server + SSL).
      *
      * @return const std::string& Private key server file.
      */
-    const std::string& getPrivateKeyFile() const noexcept;
+    const std::string &getPrivateKeyFile() const noexcept;
 
     /**
      * @brief Set the server private key.
      *
      * @param privateKeyFile File path.
      */
-    void setPrivateKeyFile(const std::string& privateKeyFile) noexcept;
+    void setPrivateKeyFile(const std::string &privateKeyFile) noexcept;
 
     /**
      * @brief Get the private key passphrase if any.
      *
      * @return const std::string& Passphrase.
      */
-    const std::string& getPrivateKeyPassphrase() const noexcept;
+    const std::string &getPrivateKeyPassphrase() const noexcept;
 
     /**
      * @brief Set the private key passphrase.
      *
      * @param privateKeyPassphrase Passphrase.
      */
-    void setPrivateKeyPassphrase(
-        const std::string& privateKeyPassphrase) noexcept;
+    void setPrivateKeyPassphrase(const std::string &privateKeyPassphrase) noexcept;
 
     /**
      * @brief Get the certificate of the server if any.
      *
      * @return const std::string& Certificate file.
      */
-    const std::string& getCertificateFile() const noexcept;
+    const std::string &getCertificateFile() const noexcept;
 
     /**
      * @brief Set the server certificate.
      *
      * @param certificateFile Certificate file.
      */
-    void setCertificateFile(const std::string& certificateFile) noexcept;
+    void setCertificateFile(const std::string &certificateFile) noexcept;
 
     /**
      * @brief Get CA location, if empty, default SLL ones will be used.
@@ -178,14 +176,14 @@ public:
      *
      * @return const std::string& CA file or directory.
      */
-    const std::string& getCALocation() const noexcept;
+    const std::string &getCALocation() const noexcept;
 
     /**
      * @brief Set CA location.
      *
      * @param caLocation CA file or directory.
      */
-    void setCALocation(const std::string& caLocation) noexcept;
+    void setCALocation(const std::string &caLocation) noexcept;
 
 private:
     bool _client = false;

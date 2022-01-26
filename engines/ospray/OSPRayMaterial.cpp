@@ -65,10 +65,8 @@ void OSPRayMaterial::commit()
     osphelper::set(_ospMaterial, "ks", Vector3f(_specularColor));
     osphelper::set(_ospMaterial, "ns", static_cast<float>(_specularExponent));
     osphelper::set(_ospMaterial, "d", static_cast<float>(_opacity));
-    osphelper::set(_ospMaterial, "refraction",
-                   static_cast<float>(_refractionIndex));
-    osphelper::set(_ospMaterial, "reflection",
-                   static_cast<float>(_reflectionIndex));
+    osphelper::set(_ospMaterial, "refraction", static_cast<float>(_refractionIndex));
+    osphelper::set(_ospMaterial, "reflection", static_cast<float>(_reflectionIndex));
     osphelper::set(_ospMaterial, "a", static_cast<float>(_emission));
     osphelper::set(_ospMaterial, "glossiness", static_cast<float>(_glossiness));
     osphelper::set(_ospMaterial, "skybox", _isBackGroundMaterial);
@@ -80,15 +78,14 @@ void OSPRayMaterial::commit()
     resetModified();
 }
 
-void OSPRayMaterial::commit(const std::string& renderer)
+void OSPRayMaterial::commit(const std::string &renderer)
 {
     if (!isModified() && renderer == _renderer)
         return;
     ospRelease(_ospMaterial);
     _ospMaterial = ospNewMaterial2(renderer.c_str(), "default");
     if (!_ospMaterial)
-        throw std::runtime_error("Could not create material for renderer '" +
-                                 renderer + "'");
+        throw std::runtime_error("Could not create material for renderer '" + renderer + "'");
     _renderer = renderer;
     markModified(false); // Ensure commit recreates the ISPC object
     commit();

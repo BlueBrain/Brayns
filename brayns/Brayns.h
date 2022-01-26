@@ -62,7 +62,7 @@ public:
      * the geometry and the renderer. Brayns creates the scene using built-in
      * and plug-in provided loaders.
      */
-    Brayns(int argc, const char** argv);
+    Brayns(int argc, const char **argv);
     ~Brayns();
 
     /**
@@ -113,25 +113,25 @@ public:
     /**
        @return the current engine
     */
-    Engine& getEngine();
+    Engine &getEngine();
 
     /**
      * @return The parameter manager
      */
-    ParametersManager& getParametersManager();
+    ParametersManager &getParametersManager();
 
     /**
      * @brief getLoaderRegistry gives access to the loaders registry
      * @return LoaderRegistry&
      */
-    LoaderRegistry& getLoaderRegistry();
+    LoaderRegistry &getLoaderRegistry();
 
     /**
      * @brief Get the registered network interface.
      *
      * @return ActionInterface* Network interface or null if not set.
      */
-    ActionInterface* getActionInterface();
+    ActionInterface *getActionInterface();
 
 private:
     struct Impl;

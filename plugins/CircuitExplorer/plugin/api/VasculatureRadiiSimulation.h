@@ -34,5 +34,5 @@ public:
      * @brief iterates over all the registered vasculature datasets, gathering
      * the current simulation frame and updating the geometry radii with it.
      */
-    static void update(const uint32_t frame, brayns::Scene& scene);
+    static void update(const uint32_t frame, brayns::Scene &scene);
 };

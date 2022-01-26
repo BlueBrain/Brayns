@@ -34,13 +34,12 @@
 
 TEST_CASE("streamlines")
 {
-    const char* argv[] = {"streamlines", "--disable-accumulation",
-                          "--window-size", "1600", "900"};
-    const int argc = sizeof(argv) / sizeof(char*);
+    const char *argv[] = {"streamlines", "--disable-accumulation", "--window-size", "1600", "900"};
+    const int argc = sizeof(argv) / sizeof(char *);
 
     brayns::Brayns brayns(argc, argv);
-    auto& engine = brayns.getEngine();
-    auto& scene = engine.getScene();
+    auto &engine = brayns.getEngine();
+    auto &scene = engine.getScene();
 
     {
         constexpr size_t materialId = 0;
@@ -61,8 +60,7 @@ TEST_CASE("streamlines")
                 std::vector<brayns::Vector4f> vertexColors;
                 std::vector<float> radii;
 
-                const auto offset =
-                    brayns::Vector3f{0.5f * col, 1.f * row, 0.0f};
+                const auto offset = brayns::Vector3f{0.5f * col, 1.f * row, 0.0f};
                 const float thicknessStart = 0.03f;
                 const float thicknessEnd = 0.005f;
 
@@ -70,33 +68,23 @@ TEST_CASE("streamlines")
                 for (size_t i = 0; i < numVertices; ++i)
                 {
                     const float t = i / static_cast<float>(numVertices);
-                    const auto v =
-                        brayns::Vector3f(0.1f * std::cos(i * 0.5f), i * 0.01f,
-                                         0.1f * std::sin(i * 0.5f));
+                    const auto v = brayns::Vector3f(0.1f * std::cos(i * 0.5f), i * 0.01f, 0.1f * std::sin(i * 0.5f));
                     vertices.push_back(v + offset);
-                    radii.push_back((1.f - t) * thicknessStart +
-                                    t * thicknessEnd);
-                    vertexColors.push_back(
-                        brayns::Vector4f(t, std::abs(1.0f - 2.0f * t), 1.0f - t,
-                                         1.0f));
+                    radii.push_back((1.f - t) * thicknessStart + t * thicknessEnd);
+                    vertexColors.push_back(brayns::Vector4f(t, std::abs(1.0f - 2.0f * t), 1.0f - t, 1.0f));
                 }
 
-                model->addStreamline(materialId,
-                                     brayns::Streamline(vertices, vertexColors,
-                                                        radii));
+                model->addStreamline(materialId, brayns::Streamline(vertices, vertexColors, radii));
             }
         }
 
-        auto modelDesc =
-            std::make_shared<brayns::ModelDescriptor>(std::move(model),
-                                                      "Streamlines");
+        auto modelDesc = std::make_shared<brayns::ModelDescriptor>(std::move(model), "Streamlines");
         scene.addModel(modelDesc);
 
         auto position = modelDesc->getModel().getBounds().getCenter();
         position.z += glm::compMax(modelDesc->getModel().getBounds().getSize());
 
-        engine.getCamera().setInitialState(
-            position, glm::identity<brayns::Quaterniond>());
+        engine.getCamera().setInitialState(position, glm::identity<brayns::Quaterniond>());
     }
 
     brayns.commitAndRender();

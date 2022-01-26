@@ -41,21 +41,21 @@ public:
     std::vector<std::string> getSupportedExtensions() const final;
 
     std::vector<brayns::ModelDescriptorPtr> importFromBlob(
-        brayns::Blob&& blob, const brayns::LoaderProgress& callback,
-        const DTILoaderParameters& properties,
-        brayns::Scene& scene) const final;
+        brayns::Blob &&blob,
+        const brayns::LoaderProgress &callback,
+        const DTILoaderParameters &properties,
+        brayns::Scene &scene) const final;
 
     std::vector<brayns::ModelDescriptorPtr> importFromFile(
-        const std::string& filename, const brayns::LoaderProgress& callback,
-        const DTILoaderParameters& properties,
-        brayns::Scene& scene) const final;
+        const std::string &filename,
+        const brayns::LoaderProgress &callback,
+        const DTILoaderParameters &properties,
+        brayns::Scene &scene) const final;
 
-    static Colors getColorsFromPoints(const Points& points, const float opacity,
-                                      const ColorScheme colorScheme);
+    static Colors getColorsFromPoints(const Points &points, const float opacity, const ColorScheme colorScheme);
 
 private:
-    DTIConfiguration _readConfiguration(
-        const boost::property_tree::ptree& pt) const;
+    DTIConfiguration _readConfiguration(const boost::property_tree::ptree &pt) const;
 
     brayns::PropertyMap _defaults;
 };

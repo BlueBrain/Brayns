@@ -50,15 +50,14 @@ public:
     /**
      * @brief return the GIDs that this simulation affects to
      */
-    virtual const brain::GIDSet& getReportGids() const = 0;
+    virtual const brain::GIDSet &getReportGids() const = 0;
 
     /**
      * @brief return the simulation mapping of each cell in the given inputGids
      *        (The simulation mapping is used to compute the offset into a
      * simulation frame, which is a vector of floats)
      */
-    virtual std::vector<CellMapping> getMapping(
-        const brain::GIDSet& inputGids) const = 0;
+    virtual std::vector<CellMapping> getMapping(const brain::GIDSet &inputGids) const = 0;
 
     /**
      * @brief creates a brayns::AbstractSimulationHandler object that is capable

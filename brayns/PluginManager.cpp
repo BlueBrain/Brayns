@@ -29,19 +29,18 @@
 
 namespace
 {
-bool containsString(const int length, const char** input, const char* toFind)
+bool containsString(const int length, const char **input, const char *toFind)
 {
-    return std::count_if(input, input + length,
-                         [toFind](const char* arg)
-                         { return std::strcmp(arg, toFind) == 0; }) > 0;
+    return std::count_if(input, input + length, [toFind](const char *arg) { return std::strcmp(arg, toFind) == 0; })
+        > 0;
 }
 } // namespace
 
 namespace brayns
 {
-typedef ExtensionPlugin* (*CreateFuncType)(int, const char**);
+typedef ExtensionPlugin *(*CreateFuncType)(int, const char **);
 
-PluginManager::PluginManager(int argc, const char** argv)
+PluginManager::PluginManager(int argc, const char **argv)
 {
     const bool help = containsString(argc, argv, "--help");
 
@@ -63,28 +62,27 @@ PluginManager::PluginManager(int argc, const char** argv)
         if (help)
             words.push_back("--help");
 
-        const char* name = words.front().c_str();
-        std::vector<const char*> args;
-        for (const auto& w : words)
+        const char *name = words.front().c_str();
+        std::vector<const char *> args;
+        for (const auto &w : words)
             args.push_back(w.c_str());
 
         _loadPlugin(name, args.size(), args.data());
     }
 }
 
-void PluginManager::initPlugins(PluginAPI* api)
+void PluginManager::initPlugins(PluginAPI *api)
 {
-    auto& parameters = api->getParametersManager();
-    auto& networkParameters = parameters.getNetworkParameters();
-    auto& uri = networkParameters.getUri();
+    auto &parameters = api->getParametersManager();
+    auto &networkParameters = parameters.getNetworkParameters();
+    auto &uri = networkParameters.getUri();
 
     if (!uri.empty())
     {
-        _extensions.insert(_extensions.begin(),
-                           std::make_unique<NetworkManager>());
+        _extensions.insert(_extensions.begin(), std::make_unique<NetworkManager>());
     }
 
-    for (const auto& extension : _extensions)
+    for (const auto &extension : _extensions)
     {
         extension->_api = api;
         extension->init();
@@ -104,17 +102,17 @@ void PluginManager::destroyPlugins()
 
 void PluginManager::preRender()
 {
-    for (const auto& extension : _extensions)
+    for (const auto &extension : _extensions)
         extension->preRender();
 }
 
 void PluginManager::postRender()
 {
-    for (const auto& extension : _extensions)
+    for (const auto &extension : _extensions)
         extension->postRender();
 }
 
-void PluginManager::_loadPlugin(const char* name, int argc, const char* argv[])
+void PluginManager::_loadPlugin(const char *name, int argc, const char *argv[])
 {
     try
     {
@@ -123,9 +121,7 @@ void PluginManager::_loadPlugin(const char* name, int argc, const char* argv[])
         if (!createSym)
         {
             throw std::runtime_error(
-                std::string("Plugin '") + name +
-                "' is not a valid Brayns plugin; missing " +
-                "brayns_plugin_create()");
+                std::string("Plugin '") + name + "' is not a valid Brayns plugin; missing " + "brayns_plugin_create()");
         }
 
         CreateFuncType createFunc = (CreateFuncType)createSym;
@@ -136,7 +132,7 @@ void PluginManager::_loadPlugin(const char* name, int argc, const char* argv[])
             Log::info("Loaded plugin '{}'.", name);
         }
     }
-    catch (const std::runtime_error& exc)
+    catch (const std::runtime_error &exc)
     {
         Log::error(exc.what());
     }

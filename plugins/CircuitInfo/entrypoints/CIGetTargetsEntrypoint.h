@@ -31,7 +31,7 @@
 class TargetRetriever
 {
 public:
-    static std::vector<std::string> getTargets(const std::string& path)
+    static std::vector<std::string> getTargets(const std::string &path)
     {
         std::vector<std::string> result;
 
@@ -42,16 +42,17 @@ public:
         auto targets = config.getTargets();
 
         // Desired target types
-        auto types = {brion::TargetType::TARGET_CELL,
-                      brion::TargetType::TARGET_COMPARTMENT,
-                      brion::TargetType::TARGET_ALL};
+        auto types = {
+            brion::TargetType::TARGET_CELL,
+            brion::TargetType::TARGET_COMPARTMENT,
+            brion::TargetType::TARGET_ALL};
 
         // Extract target names
-        for (const auto& target : targets)
+        for (const auto &target : targets)
         {
-            for (const auto& type : types)
+            for (const auto &type : types)
             {
-                auto& names = target.getTargetNames(type);
+                auto &names = target.getTargetNames(type);
                 result.insert(result.end(), names.begin(), names.end());
             }
         }
@@ -60,21 +61,23 @@ public:
     }
 };
 
-class CIGetTargetsEntrypoint
-    : public brayns::Entrypoint<CIGetTargetsParams, CIGetTargetsResult>
+class CIGetTargetsEntrypoint : public brayns::Entrypoint<CIGetTargetsParams, CIGetTargetsResult>
 {
 public:
-    virtual std::string getName() const override { return "ci-get-targets"; }
+    virtual std::string getName() const override
+    {
+        return "ci-get-targets";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Return a list of targets from a circuit";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& path = params.path;
+        auto &path = params.path;
         CIGetTargetsResult result;
         result.targets = TargetRetriever::getTargets(path);
         request.reply(result);

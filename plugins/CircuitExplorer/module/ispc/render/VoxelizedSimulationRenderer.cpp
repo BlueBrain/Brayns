@@ -35,11 +35,19 @@ void VoxelizedSimulationRenderer::commit()
     _simulationThreshold = getParam1f("simulationThreshold", 0.f);
 
     ispc::VoxelizedSimulationRenderer_set(
-        getIE(), (_secondaryModel ? _secondaryModel->getIE() : nullptr),
-        (_bgMaterial ? _bgMaterial->getIE() : nullptr), spp,
-        (_simulationData ? (float*)_simulationData->data : nullptr),
-        _simulationDataSize, _alphaCorrection, _simulationThreshold, _exposure,
-        _fogThickness, _fogStart, _maxBounces, _useHardwareRandomizer);
+        getIE(),
+        (_secondaryModel ? _secondaryModel->getIE() : nullptr),
+        (_bgMaterial ? _bgMaterial->getIE() : nullptr),
+        spp,
+        (_simulationData ? (float *)_simulationData->data : nullptr),
+        _simulationDataSize,
+        _alphaCorrection,
+        _simulationThreshold,
+        _exposure,
+        _fogThickness,
+        _fogStart,
+        _maxBounces,
+        _useHardwareRandomizer);
 }
 
 VoxelizedSimulationRenderer::VoxelizedSimulationRenderer()
@@ -47,6 +55,5 @@ VoxelizedSimulationRenderer::VoxelizedSimulationRenderer()
     ispcEquivalent = ispc::VoxelizedSimulationRenderer_create(this);
 }
 
-OSP_REGISTER_RENDERER(VoxelizedSimulationRenderer,
-                      circuit_explorer_voxelized_simulation);
+OSP_REGISTER_RENDERER(VoxelizedSimulationRenderer, circuit_explorer_voxelized_simulation);
 } // namespace circuitExplorer

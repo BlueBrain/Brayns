@@ -30,9 +30,7 @@
 
 #include <messages/CIGetSpikeReportInfoMessage.h>
 
-class CIGetSpikeReportInfoEntrypoint
-    : public brayns::Entrypoint<CIGetSpikeReportInfoParams,
-                                CIGetSpikeReportInfoResult>
+class CIGetSpikeReportInfoEntrypoint : public brayns::Entrypoint<CIGetSpikeReportInfoParams, CIGetSpikeReportInfoResult>
 {
 public:
     virtual std::string getName() const override
@@ -45,7 +43,7 @@ public:
         return "Return wether the circuit has a spike report and its path";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         CIGetSpikeReportInfoResult result;

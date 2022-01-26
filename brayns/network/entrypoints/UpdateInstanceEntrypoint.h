@@ -30,29 +30,31 @@ namespace brayns
 class UpdateInstanceEntrypoint : public Entrypoint<ModelInstance, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override { return "update-instance"; }
+    virtual std::string getName() const override
+    {
+        return "update-instance";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Update the model instance with the given values";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         auto modelId = params.getModelID();
         auto instanceId = params.getInstanceID();
-        auto& engine = getApi().getEngine();
-        auto& scene = engine.getScene();
-        auto& model = ExtractModel::fromId(scene, modelId);
+        auto &engine = getApi().getEngine();
+        auto &scene = engine.getScene();
+        auto &model = ExtractModel::fromId(scene, modelId);
         auto instance = model.getInstance(instanceId);
         if (!instance)
         {
             throw EntrypointException(
-                "Model with ID " + std::to_string(modelId) +
-                " has no instance with ID " + std::to_string(instanceId));
+                "Model with ID " + std::to_string(modelId) + " has no instance with ID " + std::to_string(instanceId));
         }
-        auto& source = model.getModel();
+        auto &source = model.getModel();
         source.markInstancesDirty();
         scene.markModified(false);
         engine.triggerRender();

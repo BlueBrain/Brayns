@@ -29,8 +29,9 @@ auto frameIndexToTimestamp(const uint32_t frame, const double dt) noexcept
 } // namespace
 
 VasculatureRadiiHandler::VasculatureRadiiHandler(
-    const std::string& h5FilePath, const std::string& populationName,
-    const bbp::sonata::Selection& selection)
+    const std::string &h5FilePath,
+    const std::string &populationName,
+    const bbp::sonata::Selection &selection)
     : brayns::AbstractSimulationHandler()
     , _h5FilePath(h5FilePath)
     , _populationName(populationName)
@@ -44,26 +45,20 @@ VasculatureRadiiHandler::VasculatureRadiiHandler(
     _dt = std::get<2>(times);
     _unit = _reportPopulation.getTimeUnits();
 
-    auto firstFrame =
-        _reportPopulation.get(selection, _startTime, _startTime + _dt);
+    auto firstFrame = _reportPopulation.get(selection, _startTime, _startTime + _dt);
     _frameSize = 0;
     _radiiFrameSize = firstFrame.ids.size();
     _radii.resize(_radiiFrameSize);
     _nbFrames = static_cast<uint32_t>(
-        std::round((std::nextafter(_endTime, INFINITY) -
-                    std::nextafter(_startTime, INFINITY)) /
-                   _dt));
+        std::round((std::nextafter(_endTime, INFINITY) - std::nextafter(_startTime, INFINITY)) / _dt));
 }
 
 brayns::AbstractSimulationHandlerPtr VasculatureRadiiHandler::clone() const
 {
-    return std::make_shared<VasculatureRadiiHandler>(_h5FilePath,
-                                                     _populationName,
-                                                     _selection);
+    return std::make_shared<VasculatureRadiiHandler>(_h5FilePath, _populationName, _selection);
 }
 
-std::vector<float> VasculatureRadiiHandler::getFrameDataImpl(
-    const uint32_t frame)
+std::vector<float> VasculatureRadiiHandler::getFrameDataImpl(const uint32_t frame)
 {
     _ready = false;
     const auto realFrame = frame > _nbFrames ? _nbFrames : frame;
@@ -74,8 +69,7 @@ std::vector<float> VasculatureRadiiHandler::getFrameDataImpl(
     return {};
 }
 
-const std::vector<float>& VasculatureRadiiHandler::getCurrentRadiiFrame()
-    const noexcept
+const std::vector<float> &VasculatureRadiiHandler::getCurrentRadiiFrame() const noexcept
 {
     return _radii;
 }

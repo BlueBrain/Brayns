@@ -34,20 +34,20 @@ class Volume : public BaseObject
 public:
     /** @name API for engine-specific code */
     //@{
-    virtual void setDataRange(const Vector2f& range) = 0;
+    virtual void setDataRange(const Vector2f &range) = 0;
 
     virtual void commit() = 0;
     //@}
 
-    Volume(const Vector3ui& dimensions, const Vector3f& spacing,
-           const VolumeDataType type);
+    Volume(const Vector3ui &dimensions, const Vector3f &spacing, const VolumeDataType type);
 
-    size_t getSizeInBytes() const { return _sizeInBytes; }
+    size_t getSizeInBytes() const
+    {
+        return _sizeInBytes;
+    }
     Boxd getBounds() const
     {
-        return {{0, 0, 0},
-                {_dimensions.x * _spacing.x, _dimensions.y * _spacing.y,
-                 _dimensions.z * _spacing.z}};
+        return {{0, 0, 0}, {_dimensions.x * _spacing.x, _dimensions.y * _spacing.y, _dimensions.z * _spacing.z}};
     }
 
 protected:

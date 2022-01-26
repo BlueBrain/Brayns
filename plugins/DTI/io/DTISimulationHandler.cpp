@@ -41,8 +41,7 @@ const float DEFAULT_TIME_INTERVAL = 1.f;
 
 namespace dti
 {
-DTISimulationHandler::DTISimulationHandler(
-    const Indices& indices, const SetSpikeSimulationMessage& spikeSimulation)
+DTISimulationHandler::DTISimulationHandler(const Indices &indices, const SetSpikeSimulationMessage &spikeSimulation)
     : brayns::AbstractSimulationHandler()
     , _indices(indices)
     , _spikeSimulation(spikeSimulation)
@@ -66,20 +65,15 @@ std::vector<float> DTISimulationHandler::getFrameDataImpl(const uint32_t frame)
         for (uint64_t j = begin; j < end; ++j)
         {
             const float timestamp =
-                (j - begin) + (_spikes[_spikeSimulation.gids[i]] / _dt *
-                               _spikeSimulation.time_scale);
+                (j - begin) + (_spikes[_spikeSimulation.gids[i]] / _dt * _spikeSimulation.time_scale);
             float value = _spikeSimulation.rest_intensity;
             if (frame > timestamp)
             {
-                value =
-                    _spikeSimulation.rest_intensity +
-                    _spikeSimulation.spike_intensity -
-                    _spikeSimulation.spike_intensity *
-                        std::min(1.f,
-                                 std::max(static_cast<float>(
-                                              _spikeSimulation.decay_speed) *
-                                              (frame - timestamp),
-                                          0.f));
+                value = _spikeSimulation.rest_intensity + _spikeSimulation.spike_intensity
+                    - _spikeSimulation.spike_intensity
+                        * std::min(
+                            1.f,
+                            std::max(static_cast<float>(_spikeSimulation.decay_speed) * (frame - timestamp), 0.f));
             }
             data[j] = std::max(0.f, std::min(value, 1.f));
         }

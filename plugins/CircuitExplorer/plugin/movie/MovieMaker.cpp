@@ -23,17 +23,17 @@
 // This will not compile if FFmpeg is not installed
 #ifdef BRAYNS_USE_FFMPEG
 
-#include <memory>
-#include <sstream>
+    #include <memory>
+    #include <sstream>
 
 extern "C"
 {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libavutil/avutil.h>
-#include <libavutil/opt.h>
-#include <libavutil/pixdesc.h>
-#include <libswscale/swscale.h>
+    #include <libavcodec/avcodec.h>
+    #include <libavformat/avformat.h>
+    #include <libavutil/avutil.h>
+    #include <libavutil/opt.h>
+    #include <libavutil/pixdesc.h>
+    #include <libswscale/swscale.h>
 }
 
 // Private implementation
@@ -58,11 +58,20 @@ public:
     {
     }
 
-    int getCode() const { return _code; }
+    int getCode() const
+    {
+        return _code;
+    }
 
-    bool isError() const { return _code < 0; }
+    bool isError() const
+    {
+        return _code < 0;
+    }
 
-    bool isSuccess() const { return _code == 0; }
+    bool isSuccess() const
+    {
+        return _code == 0;
+    }
 
     bool isRetry() const
     {
@@ -76,7 +85,10 @@ public:
         return buffer;
     }
 
-    operator int() const { return _code; }
+    operator int() const
+    {
+        return _code;
+    }
 
 private:
     int _code = 0;
@@ -90,23 +102,35 @@ private:
 class FfmpegException : public std::runtime_error
 {
 public:
-    FfmpegException(const std::string& message)
+    FfmpegException(const std::string &message)
         : std::runtime_error(message)
         , _message(message)
     {
     }
 
-    FfmpegException(const std::string& message, Status status)
+    FfmpegException(const std::string &message, Status status)
         : std::runtime_error(message)
         , _message(message)
         , _status(status)
     {
     }
 
-    const std::string& getMessage() const { return _message; }
-    Status getStatus() const { return _status; }
-    int getStatusCode() const { return _status.getCode(); }
-    std::string getStatusDescription() const { return _status.toString(); }
+    const std::string &getMessage() const
+    {
+        return _message;
+    }
+    Status getStatus() const
+    {
+        return _status;
+    }
+    int getStatusCode() const
+    {
+        return _status.getCode();
+    }
+    std::string getStatusDescription() const
+    {
+        return _status.toString();
+    }
 
 private:
     std::string _message;
@@ -123,7 +147,10 @@ class Packet
 public:
     struct Deleter
     {
-        void operator()(AVPacket* packet) const { av_packet_free(&packet); }
+        void operator()(AVPacket *packet) const
+        {
+            av_packet_free(&packet);
+        }
     };
 
     using Ptr = std::unique_ptr<AVPacket, Deleter>;
@@ -149,7 +176,10 @@ class Frame
 public:
     struct Deleter
     {
-        void operator()(AVFrame* frame) const { av_frame_free(&frame); }
+        void operator()(AVFrame *frame) const
+        {
+            av_frame_free(&frame);
+        }
     };
 
     using Ptr = std::unique_ptr<AVFrame, Deleter>;
@@ -175,7 +205,7 @@ class FormatContext
 public:
     struct Deleter
     {
-        void operator()(AVFormatContext* context) const
+        void operator()(AVFormatContext *context) const
         {
             avformat_free_context(context);
         }
@@ -194,7 +224,7 @@ class CodecContext
 public:
     struct Deleter
     {
-        void operator()(AVCodecContext* context) const
+        void operator()(AVCodecContext *context) const
         {
             avcodec_free_context(&context);
         }
@@ -202,7 +232,7 @@ public:
 
     using Ptr = std::unique_ptr<AVCodecContext, Deleter>;
 
-    static Ptr create(AVCodec* codec)
+    static Ptr create(AVCodec *codec)
     {
         auto context = avcodec_alloc_context3(codec);
         if (!context)
@@ -225,7 +255,7 @@ using CodecContextPtr = CodecContext::Ptr;
 class InputContext
 {
 public:
-    static FormatContextPtr create(const std::string& filename)
+    static FormatContextPtr create(const std::string &filename)
     {
         auto context = _openInput(filename);
         _findStreamInfo(context.get());
@@ -233,11 +263,10 @@ public:
     }
 
 private:
-    static FormatContextPtr _openInput(const std::string& filename)
+    static FormatContextPtr _openInput(const std::string &filename)
     {
-        AVFormatContext* context = nullptr;
-        Status status =
-            avformat_open_input(&context, filename.c_str(), nullptr, nullptr);
+        AVFormatContext *context = nullptr;
+        Status status = avformat_open_input(&context, filename.c_str(), nullptr, nullptr);
         if (!status.isSuccess())
         {
             throw FfmpegException("Cannot open input context", status);
@@ -245,7 +274,7 @@ private:
         return FormatContextPtr(context);
     }
 
-    static void _findStreamInfo(AVFormatContext* context)
+    static void _findStreamInfo(AVFormatContext *context)
     {
         Status status = avformat_find_stream_info(context, nullptr);
         if (!status.isSuccess())
@@ -261,12 +290,12 @@ private:
 class InputVideoStream
 {
 public:
-    static AVCodecParameters* findCodec(AVFormatContext* context)
+    static AVCodecParameters *findCodec(AVFormatContext *context)
     {
         return find(context)->codecpar;
     }
 
-    static AVStream* find(AVFormatContext* context)
+    static AVStream *find(AVFormatContext *context)
     {
         auto stream = tryFind(context);
         if (!stream)
@@ -276,7 +305,7 @@ public:
         return stream;
     }
 
-    static AVStream* tryFind(AVFormatContext* context)
+    static AVStream *tryFind(AVFormatContext *context)
     {
         for (unsigned int i = 0; i < context->nb_streams; ++i)
         {
@@ -296,7 +325,7 @@ public:
 class DecoderContext
 {
 public:
-    static CodecContextPtr create(AVCodecParameters* parameters)
+    static CodecContextPtr create(AVCodecParameters *parameters)
     {
         auto codec = _findDecoder(parameters);
         auto context = CodecContext::create(codec);
@@ -306,7 +335,7 @@ public:
     }
 
 private:
-    static AVCodec* _findDecoder(AVCodecParameters* parameters)
+    static AVCodec *_findDecoder(AVCodecParameters *parameters)
     {
         auto codec = avcodec_find_decoder(parameters->codec_id);
         if (!codec)
@@ -316,8 +345,7 @@ private:
         return codec;
     }
 
-    static void _prepareContext(AVCodecContext* context,
-                                AVCodecParameters* parameters)
+    static void _prepareContext(AVCodecContext *context, AVCodecParameters *parameters)
     {
         Status status = avcodec_parameters_to_context(context, parameters);
         if (!status.isSuccess())
@@ -326,7 +354,7 @@ private:
         }
     }
 
-    static void _openContext(AVCodecContext* context, AVCodec* codec)
+    static void _openContext(AVCodecContext *context, AVCodec *codec)
     {
         Status status = avcodec_open2(context, codec, nullptr);
         if (!status.isSuccess())
@@ -342,12 +370,12 @@ private:
 class ImageDecoder
 {
 public:
-    ImageDecoder(AVCodecContext* context)
+    ImageDecoder(AVCodecContext *context)
         : _context(context)
     {
     }
 
-    void sendPacket(AVPacket* packet)
+    void sendPacket(AVPacket *packet)
     {
         Status status = avcodec_send_packet(_context, packet);
         if (!status.isSuccess())
@@ -365,7 +393,7 @@ public:
         }
     }
 
-    void receiveFrame(AVFrame* frame)
+    void receiveFrame(AVFrame *frame)
     {
         Status status = avcodec_receive_frame(_context, frame);
         if (!status.isSuccess())
@@ -375,7 +403,7 @@ public:
     }
 
 private:
-    AVCodecContext* _context;
+    AVCodecContext *_context;
 };
 
 /**
@@ -389,7 +417,7 @@ private:
 class ImageReader
 {
 public:
-    static FramePtr read(const std::string& filename)
+    static FramePtr read(const std::string &filename)
     {
         auto context = InputContext::create(filename);
         auto codec = _createCodec(context.get());
@@ -399,20 +427,20 @@ public:
     }
 
 private:
-    static CodecContextPtr _createCodec(AVFormatContext* context)
+    static CodecContextPtr _createCodec(AVFormatContext *context)
     {
         auto codec = InputVideoStream::findCodec(context);
         return DecoderContext::create(codec);
     }
 
-    static PacketPtr _readRawImage(AVFormatContext* context)
+    static PacketPtr _readRawImage(AVFormatContext *context)
     {
         auto packet = Packet::create();
         _readPacket(context, packet.get());
         return packet;
     }
 
-    static void _readPacket(AVFormatContext* context, AVPacket* packet)
+    static void _readPacket(AVFormatContext *context, AVPacket *packet)
     {
         Status status = av_read_frame(context, packet);
         if (!status.isSuccess())
@@ -421,7 +449,7 @@ private:
         }
     }
 
-    static FramePtr _decodeImage(AVCodecContext* codec, AVPacket* packet)
+    static FramePtr _decodeImage(AVCodecContext *codec, AVPacket *packet)
     {
         ImageDecoder decoder(codec);
         decoder.sendPacket(packet);
@@ -445,7 +473,7 @@ struct ImageFormat
     int height = 0;
     AVPixelFormat format = AV_PIX_FMT_NONE;
 
-    static ImageFormat fromFrame(const AVFrame* frame)
+    static ImageFormat fromFrame(const AVFrame *frame)
     {
         ImageFormat info;
         info.width = frame->width;
@@ -454,7 +482,7 @@ struct ImageFormat
         return info;
     }
 
-    void toFrame(AVFrame* frame) const
+    void toFrame(AVFrame *frame) const
     {
         frame->width = width;
         frame->height = height;
@@ -470,17 +498,27 @@ class ConversionContext
 public:
     struct Deleter
     {
-        void operator()(SwsContext* context) const { sws_freeContext(context); }
+        void operator()(SwsContext *context) const
+        {
+            sws_freeContext(context);
+        }
     };
 
     using Ptr = std::unique_ptr<SwsContext, Deleter>;
 
-    static Ptr create(const ImageFormat& source, const ImageFormat& destination)
+    static Ptr create(const ImageFormat &source, const ImageFormat &destination)
     {
-        auto context = sws_getContext(source.width, source.height,
-                                      source.format, destination.width,
-                                      destination.height, destination.format,
-                                      SWS_BILINEAR, nullptr, nullptr, nullptr);
+        auto context = sws_getContext(
+            source.width,
+            source.height,
+            source.format,
+            destination.width,
+            destination.height,
+            destination.format,
+            SWS_BILINEAR,
+            nullptr,
+            nullptr,
+            nullptr);
         if (!context)
         {
             throw FfmpegException("Cannot allocate conversion context");
@@ -497,7 +535,7 @@ using ConversionContextPtr = ConversionContext::Ptr;
 class ImageConverter
 {
 public:
-    static FramePtr convert(const AVFrame* frame, const ImageFormat& format)
+    static FramePtr convert(const AVFrame *frame, const ImageFormat &format)
     {
         auto context = _createContext(frame, format);
         auto newFrame = Frame::create();
@@ -507,14 +545,13 @@ public:
     }
 
 private:
-    static ConversionContextPtr _createContext(const AVFrame* frame,
-                                               const ImageFormat& format)
+    static ConversionContextPtr _createContext(const AVFrame *frame, const ImageFormat &format)
     {
         auto sourceFormat = ImageFormat::fromFrame(frame);
         return ConversionContext::create(sourceFormat, format);
     }
 
-    static void _setupNewFrame(AVFrame* frame, const ImageFormat& format)
+    static void _setupNewFrame(AVFrame *frame, const ImageFormat &format)
     {
         format.toFrame(frame);
         Status status = av_frame_get_buffer(frame, 0);
@@ -524,11 +561,9 @@ private:
         }
     }
 
-    static void _convert(SwsContext* context, const AVFrame* source,
-                         AVFrame* destination)
+    static void _convert(SwsContext *context, const AVFrame *source, AVFrame *destination)
     {
-        sws_scale(context, source->data, source->linesize, 0, source->height,
-                  destination->data, destination->linesize);
+        sws_scale(context, source->data, source->linesize, 0, source->height, destination->data, destination->linesize);
     }
 };
 
@@ -541,14 +576,14 @@ private:
  */
 struct VideoInfo
 {
-    AVCodec* codec = nullptr;
+    AVCodec *codec = nullptr;
     int width = 0;
     int height = 0;
     AVPixelFormat format = AV_PIX_FMT_NONE;
     int64_t bitrate = 0;
     int framerate = 0;
 
-    static AVCodec* getCodec(const std::string& name)
+    static AVCodec *getCodec(const std::string &name)
     {
         auto codec = avcodec_find_encoder_by_name(name.c_str());
         if (!codec)
@@ -558,7 +593,7 @@ struct VideoInfo
         return codec;
     }
 
-    static AVPixelFormat getFormat(const std::string& name)
+    static AVPixelFormat getFormat(const std::string &name)
     {
         auto format = av_get_pix_fmt(name.c_str());
         if (format == AV_PIX_FMT_NONE)
@@ -575,12 +610,10 @@ struct VideoInfo
 class OutputContext
 {
 public:
-    static FormatContextPtr create(const std::string& filename)
+    static FormatContextPtr create(const std::string &filename)
     {
-        AVFormatContext* context = nullptr;
-        Status status =
-            avformat_alloc_output_context2(&context, nullptr, nullptr,
-                                           filename.c_str());
+        AVFormatContext *context = nullptr;
+        Status status = avformat_alloc_output_context2(&context, nullptr, nullptr, filename.c_str());
         if (!status.isSuccess())
         {
             throw FfmpegException("Cannot allocate output context", status);
@@ -595,7 +628,7 @@ public:
 class OutputVideoStream
 {
 public:
-    static AVStream* add(AVFormatContext* context, const VideoInfo& info)
+    static AVStream *add(AVFormatContext *context, const VideoInfo &info)
     {
         auto stream = _addStream(context, info.codec);
         _setupParameters(stream, info);
@@ -603,7 +636,7 @@ public:
     }
 
 private:
-    static AVStream* _addStream(AVFormatContext* context, AVCodec* codec)
+    static AVStream *_addStream(AVFormatContext *context, AVCodec *codec)
     {
         auto stream = avformat_new_stream(context, codec);
         if (!stream)
@@ -613,7 +646,7 @@ private:
         return stream;
     }
 
-    static void _setupParameters(AVStream* stream, const VideoInfo& info)
+    static void _setupParameters(AVStream *stream, const VideoInfo &info)
     {
         stream->codecpar->codec_id = info.codec->id;
         stream->codecpar->codec_type = info.codec->type;
@@ -630,9 +663,9 @@ private:
  */
 struct EncoderInfo
 {
-    AVFormatContext* context = nullptr;
-    AVCodec* codec = nullptr;
-    AVStream* stream = nullptr;
+    AVFormatContext *context = nullptr;
+    AVCodec *codec = nullptr;
+    AVStream *stream = nullptr;
     int framerate = 0;
 };
 
@@ -642,7 +675,7 @@ struct EncoderInfo
 class EncoderContext
 {
 public:
-    static CodecContextPtr create(const EncoderInfo& info)
+    static CodecContextPtr create(const EncoderInfo &info)
     {
         auto context = CodecContext::create(info.codec);
         _setup(context.get(), info.stream->codecpar);
@@ -653,7 +686,7 @@ public:
     }
 
 private:
-    static void _setup(AVCodecContext* context, AVCodecParameters* parameters)
+    static void _setup(AVCodecContext *context, AVCodecParameters *parameters)
     {
         Status status = avcodec_parameters_to_context(context, parameters);
         if (!status.isSuccess())
@@ -662,7 +695,7 @@ private:
         }
     }
 
-    static void _loadInfo(AVCodecContext* context, const EncoderInfo& info)
+    static void _loadInfo(AVCodecContext *context, const EncoderInfo &info)
     {
         context->time_base = {1, info.framerate};
         if (info.stream->codecpar->codec_id == AV_CODEC_ID_H264)
@@ -675,7 +708,7 @@ private:
         }
     }
 
-    static void _openContext(AVCodecContext* context, AVCodec* codec)
+    static void _openContext(AVCodecContext *context, AVCodec *codec)
     {
         Status status = avcodec_open2(context, codec, nullptr);
         if (!status.isSuccess())
@@ -684,10 +717,9 @@ private:
         }
     }
 
-    static void _updateStream(AVCodecContext* context, AVStream* stream)
+    static void _updateStream(AVCodecContext *context, AVStream *stream)
     {
-        Status status =
-            avcodec_parameters_from_context(stream->codecpar, context);
+        Status status = avcodec_parameters_from_context(stream->codecpar, context);
         if (!status.isSuccess())
         {
             throw FfmpegException("Cannot setup video stream", status);
@@ -701,9 +733,12 @@ private:
 class VideoEncoder
 {
 public:
-    void open(AVCodecContext* context) { _context = context; }
+    void open(AVCodecContext *context)
+    {
+        _context = context;
+    }
 
-    void sendFrame(const AVFrame* frame)
+    void sendFrame(const AVFrame *frame)
     {
         Status status = avcodec_send_frame(_context, frame);
         if (!status.isSuccess())
@@ -721,7 +756,7 @@ public:
         }
     }
 
-    bool receivePacket(AVPacket* packet)
+    bool receivePacket(AVPacket *packet)
     {
         Status status = avcodec_receive_packet(_context, packet);
         if (status.isRetry())
@@ -736,7 +771,7 @@ public:
     }
 
 private:
-    AVCodecContext* _context = nullptr;
+    AVCodecContext *_context = nullptr;
 };
 
 /**
@@ -745,14 +780,14 @@ private:
 class VideoWriter
 {
 public:
-    void open(AVFormatContext* context)
+    void open(AVFormatContext *context)
     {
         _context = context;
         _openVideo();
         _writeHeader();
     }
 
-    void write(AVPacket* packet)
+    void write(AVPacket *packet)
     {
         Status status = av_interleaved_write_frame(_context, packet);
         if (!status.isSuccess())
@@ -779,8 +814,7 @@ private:
         {
             return;
         }
-        Status status =
-            avio_open(&_context->pb, _context->url, AVIO_FLAG_WRITE);
+        Status status = avio_open(&_context->pb, _context->url, AVIO_FLAG_WRITE);
         if (!status.isSuccess())
         {
             throw FfmpegException("Cannot open video IO context", status);
@@ -822,7 +856,7 @@ private:
         }
     }
 
-    AVFormatContext* _context = nullptr;
+    AVFormatContext *_context = nullptr;
 };
 
 /**
@@ -831,14 +865,17 @@ private:
 class VideoTimer
 {
 public:
-    void setFramerate(int framerate) { _framerate = framerate; }
+    void setFramerate(int framerate)
+    {
+        _framerate = framerate;
+    }
 
     void setTimebase(AVRational timebase)
     {
         _frameDuration = timebase.den / (_framerate * timebase.num);
     }
 
-    void setupPacket(AVPacket* packet)
+    void setupPacket(AVPacket *packet)
     {
         packet->pts = getTimestamp();
         packet->dts = packet->pts;
@@ -846,7 +883,10 @@ public:
         ++_frameCount;
     }
 
-    int64_t getTimestamp() const { return _frameCount * _frameDuration; }
+    int64_t getTimestamp() const
+    {
+        return _frameCount * _frameDuration;
+    }
 
 private:
     int64_t _framerate = 0;
@@ -866,13 +906,13 @@ private:
 class VideoStream
 {
 public:
-    VideoStream(const VideoInfo& info)
+    VideoStream(const VideoInfo &info)
         : _info(info)
     {
         _timer.setFramerate(_info.framerate);
     }
 
-    void open(const std::string& filename)
+    void open(const std::string &filename)
     {
         _context = OutputContext::create(filename);
         _stream = OutputVideoStream::add(_context.get(), _info);
@@ -882,7 +922,7 @@ public:
         _timer.setTimebase(_stream->time_base);
     }
 
-    void write(AVFrame* frame)
+    void write(AVFrame *frame)
     {
         _encoder.sendFrame(frame);
         auto packet = Packet::create();
@@ -910,7 +950,7 @@ private:
         return EncoderContext::create(encoderInfo);
     }
 
-    void _writePacket(AVPacket* packet)
+    void _writePacket(AVPacket *packet)
     {
         packet->stream_index = _stream->index;
         _timer.setupPacket(packet);
@@ -931,7 +971,7 @@ private:
     VideoInfo _info;
     FormatContextPtr _context;
     VideoWriter _writer;
-    AVStream* _stream;
+    AVStream *_stream;
     CodecContextPtr _encoderContext;
     VideoEncoder _encoder;
     VideoTimer _timer;
@@ -944,7 +984,7 @@ private:
 class Movie
 {
 public:
-    Movie(const VideoInfo& info)
+    Movie(const VideoInfo &info)
         : _stream(info)
     {
         _conversionInfo.width = info.width;
@@ -952,25 +992,24 @@ public:
         _conversionInfo.format = info.format;
     }
 
-    Movie(const Movie&) = delete;
-    Movie& operator=(const Movie&) = delete;
+    Movie(const Movie &) = delete;
+    Movie &operator=(const Movie &) = delete;
 
-    void open(const std::string& filename)
+    void open(const std::string &filename)
     {
         try
         {
             _stream.open(filename);
         }
-        catch (const FfmpegException& e)
+        catch (const FfmpegException &e)
         {
             std::ostringstream message;
-            message << "Error while opening output file '" << filename
-                    << "': " << e.getMessage();
+            message << "Error while opening output file '" << filename << "': " << e.getMessage();
             throw FfmpegException(message.str(), e.getStatus());
         }
     }
 
-    void addFrame(const std::string& filename)
+    void addFrame(const std::string &filename)
     {
         try
         {
@@ -978,11 +1017,10 @@ public:
             auto frame = ImageConverter::convert(image.get(), _conversionInfo);
             _stream.write(frame.get());
         }
-        catch (const FfmpegException& e)
+        catch (const FfmpegException &e)
         {
             std::ostringstream message;
-            message << "Error while processing frame '" << filename
-                    << "': " << e.getMessage();
+            message << "Error while processing frame '" << filename << "': " << e.getMessage();
             throw FfmpegException(message.str(), e.getStatus());
         }
     }
@@ -993,7 +1031,7 @@ public:
         {
             _stream.close();
         }
-        catch (const FfmpegException& e)
+        catch (const FfmpegException &e)
         {
             std::ostringstream message;
             message << "Error while closing output file: " << e.getMessage();
@@ -1012,7 +1050,7 @@ private:
 class VideoInfoAdapter
 {
 public:
-    static VideoInfo createVideoInfo(const MovieInfo& movie)
+    static VideoInfo createVideoInfo(const MovieInfo &movie)
     {
         VideoInfo info;
         info.codec = getCodec(movie);
@@ -1025,26 +1063,24 @@ public:
     }
 
 private:
-    static int64_t getBitrate(const MovieInfo& info)
+    static int64_t getBitrate(const MovieInfo &info)
     {
         return info.bitrate <= 0 ? computeDefaultBitrate(info) : info.bitrate;
     }
 
-    static int64_t computeDefaultBitrate(const MovieInfo& info)
+    static int64_t computeDefaultBitrate(const MovieInfo &info)
     {
-        return int64_t(3) * int64_t(info.width) * int64_t(info.height) *
-               int64_t(info.framerate);
+        return int64_t(3) * int64_t(info.width) * int64_t(info.height) * int64_t(info.framerate);
     }
 
-    static AVCodec* getCodec(const MovieInfo& info)
+    static AVCodec *getCodec(const MovieInfo &info)
     {
         return VideoInfo::getCodec(info.codec.empty() ? "libx264" : info.codec);
     }
 
-    static AVPixelFormat getFormat(const MovieInfo& info)
+    static AVPixelFormat getFormat(const MovieInfo &info)
     {
-        return VideoInfo::getFormat(info.format.empty() ? "yuv420p"
-                                                        : info.format);
+        return VideoInfo::getFormat(info.format.empty() ? "yuv420p" : info.format);
     }
 };
 
@@ -1054,49 +1090,48 @@ private:
 class FfmpegMovieMaker
 {
 public:
-    static void createMovie(const MovieInfo& info)
+    static void createMovie(const MovieInfo &info)
     {
         try
         {
             _createMovie(info);
         }
-        catch (const FfmpegException& e)
+        catch (const FfmpegException &e)
         {
             throw MovieCreationException(_formatError(e));
         }
     }
 
 private:
-    static void _createMovie(const MovieInfo& info)
+    static void _createMovie(const MovieInfo &info)
     {
         auto videoInfo = VideoInfoAdapter::createVideoInfo(info);
         Movie movie(videoInfo);
         movie.open(info.outputFile);
-        for (const auto& frame : info.inputFiles)
+        for (const auto &frame : info.inputFiles)
         {
             movie.addFrame(frame);
         }
         movie.close();
     }
 
-    static std::string _formatError(const FfmpegException& e)
+    static std::string _formatError(const FfmpegException &e)
     {
         std::ostringstream stream;
-        stream << "FFmpeg error: '" << e.getMessage()
-               << "' (code: " << e.getStatusCode() << " '"
+        stream << "FFmpeg error: '" << e.getMessage() << "' (code: " << e.getStatusCode() << " '"
                << e.getStatusDescription() << "')";
         return stream.str();
     }
 };
 } // namespace
 
-void MovieMaker::createMovie(const MovieInfo& info)
+void MovieMaker::createMovie(const MovieInfo &info)
 {
     FfmpegMovieMaker::createMovie(info);
 }
 
 #else
-void MovieMaker::createMovie(const MovieInfo& info)
+void MovieMaker::createMovie(const MovieInfo &info)
 {
     throw MovieCreationException(
         "This version of Brayns was not compiled with FFmpeg, movie generation "

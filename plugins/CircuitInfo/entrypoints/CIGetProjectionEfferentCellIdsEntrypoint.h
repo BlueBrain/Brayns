@@ -31,14 +31,13 @@
 class ProjectionEfferentCellRetriever
 {
 public:
-    static std::vector<uint64_t> getEfferentCells(
-        const CIGetProjectionEfferentCellIdsParams& params)
+    static std::vector<uint64_t> getEfferentCells(const CIGetProjectionEfferentCellIdsParams &params)
     {
         // Read config
         brion::BlueConfig config(params.path);
 
         // Check projection exists
-        auto& projection = params.projection;
+        auto &projection = params.projection;
         auto section = brion::CONFIGSECTION_PROJECTION;
         auto path = config.get(section, params.projection, "Path");
         if (path.empty())
@@ -59,8 +58,7 @@ public:
 };
 
 class CIGetProjectionEfferentCellIdsEntrypoint
-    : public brayns::Entrypoint<CIGetProjectionEfferentCellIdsParams,
-                                CIGetProjectionEfferentCellIdsResult>
+    : public brayns::Entrypoint<CIGetProjectionEfferentCellIdsParams, CIGetProjectionEfferentCellIdsResult>
 {
 public:
     virtual std::string getName() const override
@@ -74,7 +72,7 @@ public:
                "circuit and a set of source cells";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         CIGetProjectionEfferentCellIdsResult result;

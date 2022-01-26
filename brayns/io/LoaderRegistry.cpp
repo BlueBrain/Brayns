@@ -40,69 +40,63 @@ LoaderRegistry::LoaderRegistry()
 
 void LoaderRegistry::registerLoader(std::unique_ptr<AbstractLoader> loader)
 {
-    _loaderInfos.push_back({loader->getName(), loader->getSupportedExtensions(),
-                            loader->getInputParametersSchema()});
+    _loaderInfos.push_back({loader->getName(), loader->getSupportedExtensions(), loader->getInputParametersSchema()});
 
     brayns::Log::info("Registering loader {}.", loader->getName());
 
     _loaders.push_back(std::move(loader));
 }
 
-const std::vector<LoaderInfo>& LoaderRegistry::getLoaderInfos() const
+const std::vector<LoaderInfo> &LoaderRegistry::getLoaderInfos() const
 {
     return _loaderInfos;
 }
 
-bool LoaderRegistry::isSupportedFile(const std::string& filename) const
+bool LoaderRegistry::isSupportedFile(const std::string &filename) const
 {
     if (fs::is_directory(filename))
         return false;
 
-    const auto extension =
-        fs::path(filename).extension().lexically_normal().string();
-    for (const auto& loader : _loaders)
+    const auto extension = fs::path(filename).extension().lexically_normal().string();
+    for (const auto &loader : _loaders)
         if (loader->isSupported(filename, extension))
             return true;
     return false;
 }
 
-bool LoaderRegistry::isSupportedType(const std::string& type) const
+bool LoaderRegistry::isSupportedType(const std::string &type) const
 {
-    for (const auto& loader : _loaders)
+    for (const auto &loader : _loaders)
         if (loader->isSupported("", type))
             return true;
     return false;
 }
 
-const AbstractLoader& LoaderRegistry::getSuitableLoader(
-    const std::string& filename, const std::string& filetype,
-    const std::string& loaderName) const
+const AbstractLoader &LoaderRegistry::getSuitableLoader(
+    const std::string &filename,
+    const std::string &filetype,
+    const std::string &loaderName) const
 {
     if (fs::is_directory(filename))
         throw std::runtime_error("'" + filename + "' is a directory");
 
-    const auto extension =
-        filetype.empty()
-            ? fs::path(filename).extension().lexically_normal().string()
-            : filetype;
+    const auto extension = filetype.empty() ? fs::path(filename).extension().lexically_normal().string() : filetype;
 
     // Find specific loader
     if (!loaderName.empty())
     {
-        for (const auto& loader : _loaders)
+        for (const auto &loader : _loaders)
             if (loader->getName() == loaderName)
                 return *loader.get();
 
-        throw std::runtime_error("No loader found with name '" + loaderName +
-                                 "'");
+        throw std::runtime_error("No loader found with name '" + loaderName + "'");
     }
 
-    for (const auto& loader : _loaders)
+    for (const auto &loader : _loaders)
         if (loader->isSupported(filename, extension))
             return *loader;
 
-    throw std::runtime_error("No loader found for filename '" + filename +
-                             "' and filetype '" + filetype + "'");
+    throw std::runtime_error("No loader found for filename '" + filename + "' and filetype '" + filetype + "'");
 }
 
 void LoaderRegistry::clear()

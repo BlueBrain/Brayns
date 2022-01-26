@@ -42,7 +42,6 @@ public:
      * @param schema JSON schema pattern.
      * @return std::vector<std::string> Error list (empty if valid).
      */
-    static std::vector<std::string> validate(const JsonValue& json,
-                                             const JsonSchema& schema);
+    static std::vector<std::string> validate(const JsonValue &json, const JsonSchema &schema);
 };
 } // namespace brayns

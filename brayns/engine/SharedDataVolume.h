@@ -36,20 +36,19 @@ class SharedDataVolume : public virtual Volume
 public:
     /** @name API for engine-specific code */
     //@{
-    virtual void setVoxels(const void* voxels) = 0;
+    virtual void setVoxels(const void *voxels) = 0;
     //@}
 
     /**
      * Convenience functions to use voxels from given file and pass them to
      * setVoxels().
      */
-    void mapData(const std::string& filename);
-    void mapData(const std::vector<uint8_t>& buffer);
-    void mapData(std::vector<uint8_t>&& buffer);
+    void mapData(const std::string &filename);
+    void mapData(const std::vector<uint8_t> &buffer);
+    void mapData(std::vector<uint8_t> &&buffer);
 
 protected:
-    SharedDataVolume(const Vector3ui& dimensions, const Vector3f& spacing,
-                     const VolumeDataType type)
+    SharedDataVolume(const Vector3ui &dimensions, const Vector3f &spacing, const VolumeDataType type)
         : Volume(dimensions, spacing, type)
     {
     }
@@ -58,7 +57,7 @@ protected:
 
 private:
     std::vector<uint8_t> _memoryBuffer;
-    void* _memoryMapPtr{nullptr};
+    void *_memoryMapPtr{nullptr};
     int _cacheFileDescriptor{-1};
     size_t _size{0};
 };

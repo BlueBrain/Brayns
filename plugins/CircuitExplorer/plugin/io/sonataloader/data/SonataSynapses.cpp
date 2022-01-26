@@ -49,36 +49,34 @@ constexpr char attribEndFeetSurfPosX[] = "endfoot_surface_x";
 constexpr char attribEndFeetSurfPosY[] = "endfoot_surface_y";
 constexpr char attribEndFeetSurfPosZ[] = "endfoot_surface_z";
 
-void checkEdgeParameters(const bbp::sonata::EdgePopulation& population,
-                         const std::vector<const char*>& inputAttribs)
+void checkEdgeParameters(const bbp::sonata::EdgePopulation &population, const std::vector<const char *> &inputAttribs)
 {
-    const auto& attribs = population.attributeNames();
-    for (const auto& attribute : inputAttribs)
+    const auto &attribs = population.attributeNames();
+    for (const auto &attribute : inputAttribs)
     {
         if (attribs.find(attribute) == attribs.end())
-            throw std::runtime_error("Edge population " + population.name() +
-                                     " is missing attribute " + attribute);
+            throw std::runtime_error("Edge population " + population.name() + " is missing attribute " + attribute);
     }
 }
 
 std::vector<brayns::Vector3f> loadSurfacePos(
-    const bbp::sonata::EdgePopulation& pops,
-    const bbp::sonata::Selection& selection, const char* attribX,
-    const char* attribY, const char* attribZ)
+    const bbp::sonata::EdgePopulation &pops,
+    const bbp::sonata::Selection &selection,
+    const char *attribX,
+    const char *attribY,
+    const char *attribZ)
 {
     checkEdgeParameters(pops, {attribX, attribY, attribZ});
     const auto surfaPosXs = pops.getAttribute<float>(attribX, selection);
     const auto surfaPosYs = pops.getAttribute<float>(attribY, selection);
     const auto surfaPosZs = pops.getAttribute<float>(attribZ, selection);
 
-    if (surfaPosXs.size() != surfaPosYs.size() ||
-        surfaPosXs.size() != surfaPosZs.size())
+    if (surfaPosXs.size() != surfaPosYs.size() || surfaPosXs.size() != surfaPosZs.size())
         throw std::runtime_error("Edge population '" + pops.name() +
                                  "' surface position "
                                  "parameters missmatch in size");
 
-    std::vector<brayns::Vector3f> result(surfaPosXs.size(),
-                                         brayns::Vector3f(0.f, 0.f, 0.f));
+    std::vector<brayns::Vector3f> result(surfaPosXs.size(), brayns::Vector3f(0.f, 0.f, 0.f));
     for (size_t i = 0; i < surfaPosXs.size(); ++i)
     {
         result[i].x = surfaPosXs[i];
@@ -88,99 +86,82 @@ std::vector<brayns::Vector3f> loadSurfacePos(
     return result;
 }
 
-void fixSections(std::vector<int32_t>& sectionIds) noexcept
+void fixSections(std::vector<int32_t> &sectionIds) noexcept
 {
-    std::transform(sectionIds.begin(), sectionIds.end(), sectionIds.begin(),
-                   [](int32_t secId) { return secId - 1; });
+    std::transform(sectionIds.begin(), sectionIds.end(), sectionIds.begin(), [](int32_t secId) { return secId - 1; });
 }
 } // namespace
 
-std::vector<uint64_t> SonataSynapses::getSourceNodes(const Edges& population,
-                                                     const Selection& selection)
+std::vector<uint64_t> SonataSynapses::getSourceNodes(const Edges &population, const Selection &selection)
 {
     return population.sourceNodeIDs(selection);
 }
 
-std::vector<uint64_t> SonataSynapses::getTargetNodes(const Edges& population,
-                                                     const Selection& selection)
+std::vector<uint64_t> SonataSynapses::getTargetNodes(const Edges &population, const Selection &selection)
 {
     return population.targetNodeIDs(selection);
 }
 
-std::vector<int32_t> SonataSynapses::getAfferentSectionIds(
-    const Edges& population, const Selection& selection)
+std::vector<int32_t> SonataSynapses::getAfferentSectionIds(const Edges &population, const Selection &selection)
 {
     checkEdgeParameters(population, {attribAffSectionId});
-    auto sectionIds =
-        population.getAttribute<int32_t>(attribAffSectionId, selection);
+    auto sectionIds = population.getAttribute<int32_t>(attribAffSectionId, selection);
     fixSections(sectionIds);
     return sectionIds;
 }
 
-std::vector<int32_t> SonataSynapses::getEfferentSectionIds(
-    const Edges& population, const Selection& selection)
+std::vector<int32_t> SonataSynapses::getEfferentSectionIds(const Edges &population, const Selection &selection)
 {
     checkEdgeParameters(population, {attribEffSectionId});
-    auto sectionIds =
-        population.getAttribute<int32_t>(attribEffSectionId, selection);
+    auto sectionIds = population.getAttribute<int32_t>(attribEffSectionId, selection);
     fixSections(sectionIds);
     return sectionIds;
 }
 
-std::vector<brayns::Vector3f> SonataSynapses::getAfferentSurfacePos(
-    const Edges& population, const Selection& selection)
+std::vector<brayns::Vector3f> SonataSynapses::getAfferentSurfacePos(const Edges &population, const Selection &selection)
 {
-    return loadSurfacePos(population, selection, attribAffSurfPosiX,
-                          attribAffSurfPosiY, attribAffSurfPosiZ);
+    return loadSurfacePos(population, selection, attribAffSurfPosiX, attribAffSurfPosiY, attribAffSurfPosiZ);
 }
 
-std::vector<brayns::Vector3f> SonataSynapses::getEfferentSurfacePos(
-    const Edges& population, const Selection& selection)
+std::vector<brayns::Vector3f> SonataSynapses::getEfferentSurfacePos(const Edges &population, const Selection &selection)
 {
-    return loadSurfacePos(population, selection, attribEffSurfPosiX,
-                          attribEffSurfPosiY, attribEffSurfPosiZ);
+    return loadSurfacePos(population, selection, attribEffSurfPosiX, attribEffSurfPosiY, attribEffSurfPosiZ);
 }
 
-std::vector<float> SonataSynapses::getAfferentSectionDistances(
-    const Edges& population, const Selection& selection)
+std::vector<float> SonataSynapses::getAfferentSectionDistances(const Edges &population, const Selection &selection)
 {
     checkEdgeParameters(population, {attribAffSegmentPos});
     return population.getAttribute<float>(attribAffSegmentPos, selection);
 }
 
-std::vector<float> SonataSynapses::getEfferentSectionDistances(
-    const Edges& population, const Selection& selection)
+std::vector<float> SonataSynapses::getEfferentSectionDistances(const Edges &population, const Selection &selection)
 {
     checkEdgeParameters(population, {attribEffSegmentPos});
     return population.getAttribute<float>(attribEffSegmentPos, selection);
 }
 
-std::vector<int32_t> SonataSynapses::getEfferentAstrocyteSectionIds(
-    const Edges& population, const Selection& selection)
+std::vector<int32_t> SonataSynapses::getEfferentAstrocyteSectionIds(const Edges &population, const Selection &selection)
 {
     checkEdgeParameters(population, {attribAstroSectionId});
-    auto sectionIds =
-        population.getAttribute<int32_t>(attribAstroSectionId, selection);
+    auto sectionIds = population.getAttribute<int32_t>(attribAstroSectionId, selection);
     fixSections(sectionIds);
     return sectionIds;
 }
 
 std::vector<float> SonataSynapses::getEfferentAstrocyteSectionDistances(
-    const Edges& population, const Selection& selection)
+    const Edges &population,
+    const Selection &selection)
 {
     checkEdgeParameters(population, {attribAstroSectionPos});
     return population.getAttribute<float>(attribAstroSectionPos, selection);
 }
 
-std::vector<brayns::Vector3f> SonataSynapses::getEndFeetSurfacePos(
-    const Edges& population, const Selection& selection)
+std::vector<brayns::Vector3f> SonataSynapses::getEndFeetSurfacePos(const Edges &population, const Selection &selection)
 {
-    return loadSurfacePos(population, selection, attribEndFeetSurfPosX,
-                          attribEndFeetSurfPosY, attribEndFeetSurfPosZ);
+    return loadSurfacePos(population, selection, attribEndFeetSurfPosX, attribEndFeetSurfPosY, attribEndFeetSurfPosZ);
 }
 
-std::vector<uint64_t> SonataSynapses::getEndFeetIds(const Edges& population,
-                                                    const Selection& selection)
+std::vector<uint64_t> SonataSynapses::getEndFeetIds(const Edges &population, const Selection &selection)
 {
     checkEdgeParameters(population, {attribEndFeetId});
     return population.getAttribute<uint64_t>(attribEndFeetId, selection);

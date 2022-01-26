@@ -32,22 +32,26 @@ namespace sonataloader
 class SonataReportHandler : public brayns::AbstractSimulationHandler
 {
 public:
-    SonataReportHandler(const std::string& h5FilePath,
-                        const std::string& populationName,
-                        const bbp::sonata::Selection& selection);
+    SonataReportHandler(
+        const std::string &h5FilePath,
+        const std::string &populationName,
+        const bbp::sonata::Selection &selection);
 
     brayns::AbstractSimulationHandlerPtr clone() const final;
 
     std::vector<float> getFrameDataImpl(const uint32_t frame) final;
 
-    bool isReady() const final { return _ready; }
+    bool isReady() const final
+    {
+        return _ready;
+    }
 
 private:
     const std::string _h5FilePath;
     const std::string _populationName;
     const bbp::sonata::Selection _selection;
     const bbp::sonata::ElementReportReader _reader;
-    const bbp::sonata::ElementReportReader::Population& _reportPopulation;
+    const bbp::sonata::ElementReportReader::Population &_reportPopulation;
     bool _ready{true};
 };
 } // namespace sonataloader

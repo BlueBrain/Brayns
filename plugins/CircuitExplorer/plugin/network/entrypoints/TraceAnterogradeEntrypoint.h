@@ -27,16 +27,18 @@
 #include <plugin/api/CircuitColorManager.h>
 #include <plugin/network/messages/TraceAnterogradeMessage.h>
 
-class TraceAnterogradeEntrypoint
-    : public brayns::Entrypoint<TraceAnterogradeMessage, brayns::EmptyMessage>
+class TraceAnterogradeEntrypoint : public brayns::Entrypoint<TraceAnterogradeMessage, brayns::EmptyMessage>
 {
 public:
-    TraceAnterogradeEntrypoint(CircuitColorManager& manager)
+    TraceAnterogradeEntrypoint(CircuitColorManager &manager)
         : _manager(manager)
     {
     }
 
-    virtual std::string getName() const override { return "trace-anterograde"; }
+    virtual std::string getName() const override
+    {
+        return "trace-anterograde";
+    }
 
     virtual std::string getDescription() const override
     {
@@ -44,7 +46,7 @@ public:
                "synapse relationship between cells (including projections)";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
 
@@ -56,8 +58,8 @@ public:
 
         // Extract API data
         auto modelId = params.model_id;
-        auto& scene = getApi().getEngine().getScene();
-        auto& model = brayns::ExtractModel::fromId(scene, modelId);
+        auto &scene = getApi().getEngine().getScene();
+        auto &model = brayns::ExtractModel::fromId(scene, modelId);
 
         // Retreive cell mapping
         if (!_manager.handlerExists(model))
@@ -85,5 +87,5 @@ public:
     }
 
 private:
-    CircuitColorManager& _manager;
+    CircuitColorManager &_manager;
 };

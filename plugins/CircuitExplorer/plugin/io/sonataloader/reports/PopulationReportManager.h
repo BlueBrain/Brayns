@@ -36,18 +36,20 @@ public:
      * it loads and sets the geometry simulation mapping for the given nodes of
      * the node population
      */
-    static void loadNodeMapping(const SonataNodePopulationParameters& input,
-                                const bbp::sonata::Selection& selection,
-                                std::vector<MorphologyInstance::Ptr>& nodes);
+    static void loadNodeMapping(
+        const SonataNodePopulationParameters &input,
+        const bbp::sonata::Selection &selection,
+        std::vector<MorphologyInstance::Ptr> &nodes);
 
     /**
      * @brief if the given population was requested to be loaded with a report,
      * it loads and sets the geometry simulation mapping for the given edges of
      * the edge population
      */
-    static void loadEdgeMapping(const SonataEdgePopulationParameters& input,
-                                const bbp::sonata::Selection& selection,
-                                std::vector<SynapseGroup::Ptr>& edges);
+    static void loadEdgeMapping(
+        const SonataEdgePopulationParameters &input,
+        const bbp::sonata::Selection &selection,
+        std::vector<SynapseGroup::Ptr> &edges);
 
     /**
      * @brief if the given population was requested to be loaded with a report,
@@ -55,18 +57,18 @@ public:
      * coloring and handles any special case (such as vasculature radii reports)
      */
     static void addNodeReportHandler(
-        const SonataNodePopulationParameters& input,
-        const bbp::sonata::Selection& selection,
-        brayns::ModelDescriptorPtr& model);
+        const SonataNodePopulationParameters &input,
+        const bbp::sonata::Selection &selection,
+        brayns::ModelDescriptorPtr &model);
 
     /**
      * @brief if the given population was requested to be loaded with a report,
      * it instantiates the appropriate simulation handler and enabled simulation
      */
     static void addEdgeReportHandler(
-        const SonataEdgePopulationParameters& input,
-        const bbp::sonata::Selection& selection,
-        brayns::ModelDescriptorPtr& model);
+        const SonataEdgePopulationParameters &input,
+        const bbp::sonata::Selection &selection,
+        brayns::ModelDescriptorPtr &model);
 
     /**
      * @brief Checks each edge population. If they dont have a simulation of
@@ -74,7 +76,7 @@ public:
      * as well
      */
     static void addNodeHandlerToEdges(
-        const brayns::ModelDescriptorPtr& nodeModel,
-        const std::vector<brayns::ModelDescriptor*>& edgeModels);
+        const brayns::ModelDescriptorPtr &nodeModel,
+        const std::vector<brayns::ModelDescriptor *> &edgeModels);
 };
 } // namespace sonataloader

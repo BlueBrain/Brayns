@@ -29,9 +29,11 @@ namespace brayns
 struct Cylinder
 {
 #if __cplusplus
-    Cylinder(const Vector3f c = {0.f, 0.f, 0.f},
-             const Vector3f u = {0.f, 0.f, 0.f}, const float r = 0.f,
-             const uint64_t data = 0)
+    Cylinder(
+        const Vector3f c = {0.f, 0.f, 0.f},
+        const Vector3f u = {0.f, 0.f, 0.f},
+        const float r = 0.f,
+        const uint64_t data = 0)
         : userData(data)
         , center(c)
         , up(u)

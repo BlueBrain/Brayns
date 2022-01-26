@@ -21,8 +21,7 @@
 
 namespace brayns
 {
-AbstractSimulationHandler& AbstractSimulationHandler::operator=(
-    const AbstractSimulationHandler& rhs)
+AbstractSimulationHandler &AbstractSimulationHandler::operator=(const AbstractSimulationHandler &rhs)
 {
     if (this == &rhs)
         return *this;
@@ -40,7 +39,7 @@ AbstractSimulationHandler& AbstractSimulationHandler::operator=(
     return *this;
 }
 
-void* AbstractSimulationHandler::getFrameData(const uint32_t frame)
+void *AbstractSimulationHandler::getFrameData(const uint32_t frame)
 {
     if (frame != _currentFrame)
     {
@@ -51,8 +50,7 @@ void* AbstractSimulationHandler::getFrameData(const uint32_t frame)
     return _frameData.data();
 }
 
-uint32_t AbstractSimulationHandler::getBoundedFrame(
-    const uint32_t inputFrame) const
+uint32_t AbstractSimulationHandler::getBoundedFrame(const uint32_t inputFrame) const
 {
     const auto frame = static_cast<uint32_t>(inputFrame * _frameAdjuster);
     const double frameTimestamp = static_cast<double>(frame) * _dt;

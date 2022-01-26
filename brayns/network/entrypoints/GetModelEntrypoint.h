@@ -30,16 +30,19 @@ namespace brayns
 class GetModelEntrypoint : public Entrypoint<GetModelMessage, ModelDescriptor>
 {
 public:
-    virtual std::string getName() const override { return "get-model"; }
+    virtual std::string getName() const override
+    {
+        return "get-model";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Get all the information of the given model";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
-        auto& model = ExtractModel::fromRequest(getApi(), request);
+        auto &model = ExtractModel::fromRequest(getApi(), request);
         request.reply(model);
     }
 };

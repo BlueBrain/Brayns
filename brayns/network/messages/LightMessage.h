@@ -32,7 +32,7 @@ class LightProperties
 public:
     LightProperties() = default;
 
-    LightProperties(const Light& light)
+    LightProperties(const Light &light)
     {
         switch (light._type)
         {
@@ -60,35 +60,36 @@ public:
     {
         JsonSchema schema;
         schema.title = "LightProperties";
-        schema.oneOf = {_getSchema<DirectionalLight>(LightType::DIRECTIONAL),
-                        _getSchema<SphereLight>(LightType::SPHERE),
-                        _getSchema<QuadLight>(LightType::QUAD),
-                        _getSchema<SpotLight>(LightType::SPOTLIGHT),
-                        _getSchema<AmbientLight>(LightType::AMBIENT)};
+        schema.oneOf = {
+            _getSchema<DirectionalLight>(LightType::DIRECTIONAL),
+            _getSchema<SphereLight>(LightType::SPHERE),
+            _getSchema<QuadLight>(LightType::QUAD),
+            _getSchema<SpotLight>(LightType::SPOTLIGHT),
+            _getSchema<AmbientLight>(LightType::AMBIENT)};
         return schema;
     }
 
-    bool serialize(JsonValue& json) const
+    bool serialize(JsonValue &json) const
     {
         json = _json;
         return true;
     }
 
-    bool deserialize(const JsonValue& json)
+    bool deserialize(const JsonValue &json)
     {
         _json = json;
         return true;
     }
 
 private:
-    template <typename T>
-    void _load(const Light& baseLight)
+    template<typename T>
+    void _load(const Light &baseLight)
     {
-        auto& light = dynamic_cast<const T&>(baseLight);
+        auto &light = dynamic_cast<const T &>(baseLight);
         _json = Json::serialize(light);
     }
 
-    template <typename T>
+    template<typename T>
     JsonSchema _getSchema(LightType type) const
     {
         auto schema = Json::getSchema<T>();

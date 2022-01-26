@@ -31,7 +31,7 @@
 class ReportInfoRetriever
 {
 public:
-    static auto getReportInfo(const CIGetReportInfoParams& params)
+    static auto getReportInfo(const CIGetReportInfoParams &params)
     {
         CIGetReportInfoResult result;
 
@@ -39,7 +39,7 @@ public:
         brion::BlueConfig config(params.path);
 
         // Get all report names
-        auto& reports = config.getSectionNames(brion::CONFIGSECTION_REPORT);
+        auto &reports = config.getSectionNames(brion::CONFIGSECTION_REPORT);
 
         // Find required report
         auto i = std::find(reports.begin(), reports.end(), params.report);
@@ -66,8 +66,7 @@ public:
     }
 };
 
-class CIGetReportInfoEntrypoint
-    : public brayns::Entrypoint<CIGetReportInfoParams, CIGetReportInfoResult>
+class CIGetReportInfoEntrypoint : public brayns::Entrypoint<CIGetReportInfoParams, CIGetReportInfoResult>
 {
 public:
     virtual std::string getName() const override
@@ -80,7 +79,7 @@ public:
         return "Return information about a specific report from a circuit";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         auto result = ReportInfoRetriever::getReportInfo(params);

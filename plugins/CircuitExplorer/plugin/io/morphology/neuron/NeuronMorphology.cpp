@@ -29,7 +29,7 @@
 
 namespace
 {
-morphio::Morphology readMorphology(const std::string& path)
+morphio::Morphology readMorphology(const std::string &path)
 {
     static std::mutex hdf5Mutex;
     const auto ext = fs::path(path).extension().string();
@@ -41,7 +41,7 @@ morphio::Morphology readMorphology(const std::string& path)
     return morphio::Morphology(path);
 }
 
-std::unique_ptr<NeuronMorphology::Soma> readSoma(const morphio::Morphology& m)
+std::unique_ptr<NeuronMorphology::Soma> readSoma(const morphio::Morphology &m)
 {
     const auto somaData = m.soma();
     const auto somaPoints = somaData.points();
@@ -65,25 +65,24 @@ std::unique_ptr<NeuronMorphology::Soma> readSoma(const morphio::Morphology& m)
 
     // Compute mean radius
     float somaRadius = 0.f;
-    for (const auto& somaPoint : somaSamples)
+    for (const auto &somaPoint : somaSamples)
         somaRadius += glm::length(somaPoint - somaPos);
     somaRadius /= static_cast<float>(somaPoints.size());
 
     return std::make_unique<NeuronMorphology::Soma>(somaPos, somaRadius);
 }
 
-std::vector<NeuronMorphology::Section> readNeurites(
-    const morphio::Morphology& m, const bool axon, const bool dendrites)
+std::vector<NeuronMorphology::Section> readNeurites(const morphio::Morphology &m, const bool axon, const bool dendrites)
 {
     if (!axon && !dendrites)
         return {};
 
-    const auto& morphSections = m.sections();
+    const auto &morphSections = m.sections();
 
     std::vector<NeuronMorphology::Section> result;
     result.reserve(morphSections.size());
 
-    for (const auto& section : morphSections)
+    for (const auto &section : morphSections)
     {
         const auto secPoints = section.points();
         if (secPoints.empty())
@@ -117,14 +116,13 @@ std::vector<NeuronMorphology::Section> readNeurites(
         }
 
         result.emplace_back(sectionId, parentId, type);
-        NeuronMorphology::Section& resultSection = result.back();
+        NeuronMorphology::Section &resultSection = result.back();
 
         // Fill in points
         for (size_t i = 0; i < secPoints.size(); ++i)
         {
-            const auto& p = secPoints[i];
-            resultSection.samples.emplace_back(p[0], p[1], p[2],
-                                               secDiameters[i]);
+            const auto &p = secPoints[i];
+            resultSection.samples.emplace_back(p[0], p[1], p[2], secDiameters[i]);
         }
     }
 
@@ -134,14 +132,12 @@ std::vector<NeuronMorphology::Section> readNeurites(
 
 // ------------------------------------------------------------------------------------------------
 
-NeuronMorphology::NeuronMorphology(const std::string& path, const bool soma,
-                                   const bool axon, const bool dendrites)
+NeuronMorphology::NeuronMorphology(const std::string &path, const bool soma, const bool axon, const bool dendrites)
     : _morphologyPath(path)
     , _soma(nullptr)
 {
     if (!soma && !axon && !dendrites)
-        throw std::invalid_argument(
-            "NeuronMorphology: Nothing requested to be loaded");
+        throw std::invalid_argument("NeuronMorphology: Nothing requested to be loaded");
 
     // If only soma requested, do not load the morphology file
     if (soma && !axon && !dendrites)
@@ -153,7 +149,7 @@ NeuronMorphology::NeuronMorphology(const std::string& path, const bool soma,
 
         if (soma && (_soma = readSoma(morph)))
         {
-            for (auto& sec : _sections)
+            for (auto &sec : _sections)
             {
                 if (sec.parentId == -1)
                     _soma->children.push_back(&sec);
@@ -167,40 +163,36 @@ bool NeuronMorphology::hasSoma() const noexcept
     return (_soma.get() != nullptr);
 }
 
-NeuronMorphology::Soma& NeuronMorphology::soma()
+NeuronMorphology::Soma &NeuronMorphology::soma()
 {
     if (hasSoma())
         return *_soma;
 
-    throw std::runtime_error("Morphology " + _morphologyPath +
-                             " loaded without soma");
+    throw std::runtime_error("Morphology " + _morphologyPath + " loaded without soma");
 }
 
-const NeuronMorphology::Soma& NeuronMorphology::soma() const
+const NeuronMorphology::Soma &NeuronMorphology::soma() const
 {
     if (hasSoma())
         return *_soma;
 
-    throw std::runtime_error("Morphology " + _morphologyPath +
-                             " loaded without soma");
+    throw std::runtime_error("Morphology " + _morphologyPath + " loaded without soma");
 }
 
-std::vector<NeuronMorphology::Section>& NeuronMorphology::sections() noexcept
+std::vector<NeuronMorphology::Section> &NeuronMorphology::sections() noexcept
 {
     return _sections;
 }
 
-const std::vector<NeuronMorphology::Section>& NeuronMorphology::sections()
-    const noexcept
+const std::vector<NeuronMorphology::Section> &NeuronMorphology::sections() const noexcept
 {
     return _sections;
 }
 
-std::vector<NeuronMorphology::Section*> NeuronMorphology::sectionChildren(
-    const Section& parent) noexcept
+std::vector<NeuronMorphology::Section *> NeuronMorphology::sectionChildren(const Section &parent) noexcept
 {
-    std::vector<Section*> result;
-    for (auto& section : _sections)
+    std::vector<Section *> result;
+    for (auto &section : _sections)
     {
         if (section.parentId == parent.id)
             result.push_back(&section);
@@ -208,11 +200,10 @@ std::vector<NeuronMorphology::Section*> NeuronMorphology::sectionChildren(
     return result;
 }
 
-std::vector<const NeuronMorphology::Section*> NeuronMorphology::sectionChildren(
-    const Section& parent) const noexcept
+std::vector<const NeuronMorphology::Section *> NeuronMorphology::sectionChildren(const Section &parent) const noexcept
 {
-    std::vector<const Section*> result;
-    for (const auto& section : _sections)
+    std::vector<const Section *> result;
+    for (const auto &section : _sections)
     {
         if (section.parentId == parent.id)
             result.push_back(&section);
@@ -220,10 +211,9 @@ std::vector<const NeuronMorphology::Section*> NeuronMorphology::sectionChildren(
     return result;
 }
 
-NeuronMorphology::Section* NeuronMorphology::parent(
-    const Section& section) noexcept
+NeuronMorphology::Section *NeuronMorphology::parent(const Section &section) noexcept
 {
-    for (auto& parent : _sections)
+    for (auto &parent : _sections)
     {
         if (parent.id == section.parentId)
             return &parent;
@@ -232,10 +222,9 @@ NeuronMorphology::Section* NeuronMorphology::parent(
     return nullptr;
 }
 
-const NeuronMorphology::Section* NeuronMorphology::parent(
-    const Section& section) const noexcept
+const NeuronMorphology::Section *NeuronMorphology::parent(const Section &section) const noexcept
 {
-    for (auto& parent : _sections)
+    for (auto &parent : _sections)
     {
         if (parent.id == section.parentId)
             return &parent;
@@ -246,9 +235,7 @@ const NeuronMorphology::Section* NeuronMorphology::parent(
 
 // ------------------------------------------------------------------------------------------------
 
-NeuronMorphology::Section::Section(const int32_t idParam,
-                                   const int32_t parentIdParam,
-                                   const NeuronSection typeParam)
+NeuronMorphology::Section::Section(const int32_t idParam, const int32_t parentIdParam, const NeuronSection typeParam)
     : id(idParam)
     , parentId(parentIdParam)
     , type(typeParam)
@@ -257,8 +244,7 @@ NeuronMorphology::Section::Section(const int32_t idParam,
 
 // ------------------------------------------------------------------------------------------------
 
-NeuronMorphology::Soma::Soma(const brayns::Vector3f& centerParam,
-                             const float radiusParam)
+NeuronMorphology::Soma::Soma(const brayns::Vector3f &centerParam, const float radiusParam)
     : center(centerParam)
     , radius(radiusParam)
 {

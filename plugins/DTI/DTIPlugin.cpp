@@ -80,23 +80,20 @@ void DTIPlugin::preRender()
     }
 }
 
-void DTIPlugin::updateSpikeSimulation(
-    const SetSpikeSimulationMessage &spikeSimulation)
+void DTIPlugin::updateSpikeSimulation(const SetSpikeSimulationMessage &spikeSimulation)
 
 {
     auto modelDescriptor = _api->getScene().getModel(spikeSimulation.model_id);
     if (!modelDescriptor)
     {
-        brayns::Log::error("[DTI] {} is an invalid model ID.",
-                           spikeSimulation.model_id);
+        brayns::Log::error("[DTI] {} is an invalid model ID.", spikeSimulation.model_id);
         return;
     }
     _spikeSimulation = spikeSimulation;
     _simulationDirty = true;
 }
 
-void DTIPlugin::updateSpikeSimulationFromFile(
-    const SetSpikeSimulationFromFileMessage &src)
+void DTIPlugin::updateSpikeSimulationFromFile(const SetSpikeSimulationFromFileMessage &src)
 {
     auto modelDescriptor = _api->getScene().getModel(src.model_id);
     if (!modelDescriptor)
@@ -112,14 +109,12 @@ void DTIPlugin::updateSpikeSimulationFromFile(
     }
     catch (...)
     {
-        brayns::Log::error("[DTI] Cannot read BlueConfig file: '{}'.",
-                           src.path);
+        brayns::Log::error("[DTI] Cannot read BlueConfig file: '{}'.", src.path);
     }
     std::unique_ptr<brain::SpikeReportReader> spikeReport{nullptr};
     try
     {
-        spikeReport = std::make_unique<brain::SpikeReportReader>(
-            config->getSpikeSource());
+        spikeReport = std::make_unique<brain::SpikeReportReader>(config->getSpikeSource());
     }
     catch (const std::exception &e)
     {
@@ -161,22 +156,16 @@ void DTIPlugin::_updateSpikeSimulation()
             indices.push_back(count);
         }
 
-        brayns::Log::info(
-            "[DTI] Creating spike simulation handler for model {}.",
-            _spikeSimulation.model_id);
-        simulationHandler =
-            std::make_shared<DTISimulationHandler>(indices, _spikeSimulation);
+        brayns::Log::info("[DTI] Creating spike simulation handler for model {}.", _spikeSimulation.model_id);
+        simulationHandler = std::make_shared<DTISimulationHandler>(indices, _spikeSimulation);
         model.setSimulationHandler(simulationHandler);
-        _registeredModelsForSpikeSimulation.push_back(
-            _spikeSimulation.model_id);
+        _registeredModelsForSpikeSimulation.push_back(_spikeSimulation.model_id);
     }
 
     const auto nbSpikes = _spikeSimulation.gids.size();
-    brayns::Log::info("[DTI] Loading {} spikes from JSON to model {}.",
-                      nbSpikes, _spikeSimulation.model_id);
+    brayns::Log::info("[DTI] Loading {} spikes from JSON to model {}.", nbSpikes, _spikeSimulation.model_id);
 
-    auto *spikesHandler =
-        dynamic_cast<DTISimulationHandler *>(simulationHandler.get());
+    auto *spikesHandler = dynamic_cast<DTISimulationHandler *>(simulationHandler.get());
     spikesHandler->setTimeScale(_spikeSimulation.time_scale);
     spikesHandler->setDecaySpeed(_spikeSimulation.decay_speed);
     spikesHandler->setRestIntensity(_spikeSimulation.rest_intensity);
@@ -211,9 +200,7 @@ void DTIPlugin::_updateSimulationFrame()
                 const auto &v1 = streamline.second.vertex[i - 1];
                 const auto &v2 = streamline.second.vertex[i];
                 const auto v = normalize(v2 - v1);
-                const brayns::Vector3f normal = {0.5f + v.x * 0.5f,
-                                                 0.5f + v.y * 0.5f,
-                                                 0.5f + v.z * 0.5f};
+                const brayns::Vector3f normal = {0.5f + v.x * 0.5f, 0.5f + v.y * 0.5f, 0.5f + v.z * 0.5f};
                 color[i].x = normal.x * simulationValue;
                 color[i].y = normal.y * simulationValue;
                 color[i].z = normal.z * simulationValue;
@@ -230,8 +217,7 @@ void DTIPlugin::_updateSimulationFrame()
 }
 } // namespace dti
 
-extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int /*argc*/,
-                                                         char ** /*argv*/)
+extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int /*argc*/, char ** /*argv*/)
 {
     brayns::Log::info("[DTI] Loading DTI plugin.");
     return new dti::DTIPlugin();

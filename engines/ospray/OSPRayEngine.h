@@ -30,7 +30,7 @@ namespace brayns
 class OSPRayEngine : public Engine
 {
 public:
-    OSPRayEngine(ParametersManager& parametersManager);
+    OSPRayEngine(ParametersManager &parametersManager);
 
     ~OSPRayEngine();
 
@@ -40,16 +40,14 @@ public:
     /** @copydoc Engine::getMinimumFrameSize */
     Vector2ui getMinimumFrameSize() const final;
 
-    FrameBufferPtr createFrameBuffer(const std::string& name,
-                                     const Vector2ui& frameSize,
-                                     PixelFormat frameBufferFormat) const final;
+    FrameBufferPtr createFrameBuffer(const std::string &name, const Vector2ui &frameSize, PixelFormat frameBufferFormat)
+        const final;
 
-    ScenePtr createScene(AnimationParameters& animationParameters,
-                         VolumeParameters& volumeParameters) const final;
+    ScenePtr createScene(AnimationParameters &animationParameters, VolumeParameters &volumeParameters) const final;
     CameraPtr createCamera() const final;
     RendererPtr createRenderer(
-        const AnimationParameters& animationParameters,
-        const RenderingParameters& renderingParameters) const final;
+        const AnimationParameters &animationParameters,
+        const RenderingParameters &renderingParameters) const final;
 
 private:
     void _createCameras();

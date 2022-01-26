@@ -28,5 +28,5 @@
 class RadiusSmoother : public NeuronMorphologyPipelineStage
 {
 public:
-    void process(NeuronMorphology& morphology) const final;
+    void process(NeuronMorphology &morphology) const final;
 };

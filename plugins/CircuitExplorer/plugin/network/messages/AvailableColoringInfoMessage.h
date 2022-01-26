@@ -27,8 +27,7 @@ BRAYNS_JSON_OBJECT_ENTRY(size_t, model_id, "ID of the model to query")
 BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(AvailableColorMethodsMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, methods,
-                         "Available coloring methods")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, methods, "Available coloring methods")
 BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(RequestCircuitColorMethodVariables)
@@ -38,6 +37,7 @@ BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(AvailableColorMethodVariablesMessage)
 BRAYNS_JSON_OBJECT_ENTRY(
-    std::vector<std::string>, variables,
+    std::vector<std::string>,
+    variables,
     "Available variables for the given circuit model and method")
 BRAYNS_JSON_OBJECT_END()

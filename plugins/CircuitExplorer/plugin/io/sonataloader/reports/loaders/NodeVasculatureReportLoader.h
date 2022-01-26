@@ -32,7 +32,8 @@ class NodeVasculatureReportLoader : public NodeReportLoader
 {
 public:
     std::vector<NodeReportMapping> loadMapping(
-        const std::string& reportPath, const std::string& population,
-        const bbp::sonata::Selection&) const final;
+        const std::string &reportPath,
+        const std::string &population,
+        const bbp::sonata::Selection &) const final;
 };
 } // namespace sonataloader

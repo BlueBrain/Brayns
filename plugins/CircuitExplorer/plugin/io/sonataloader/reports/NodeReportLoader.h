@@ -51,14 +51,15 @@ public:
 
     virtual ~NodeReportLoader() = default;
 
-    const std::string& getPopulationName() const noexcept;
+    const std::string &getPopulationName() const noexcept;
 
     /**
      * @brief computes and returns the simulation mapping for the set of given
      *        cells
      */
     virtual std::vector<NodeReportMapping> loadMapping(
-        const std::string& reportPath, const std::string& population,
-        const bbp::sonata::Selection&) const = 0;
+        const std::string &reportPath,
+        const std::string &population,
+        const bbp::sonata::Selection &) const = 0;
 };
 } // namespace sonataloader

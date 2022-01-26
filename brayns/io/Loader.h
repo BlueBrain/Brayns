@@ -41,7 +41,7 @@ public:
      * The callback for each progress update with the signature (message,
      * fraction of progress in 0..1 range)
      */
-    using CallbackFn = std::function<void(const std::string&, float)>;
+    using CallbackFn = std::function<void(const std::string &, float)>;
 
     LoaderProgress(CallbackFn callback)
         : _callback(std::move(callback))
@@ -54,7 +54,7 @@ public:
     /**
      * Update the current progress of an operation and call the callback
      */
-    void updateProgress(const std::string& message, const float fraction) const
+    void updateProgress(const std::string &message, const float fraction) const
     {
         if (_callback)
             _callback(message, fraction);
@@ -82,20 +82,15 @@ public:
      * extension to the supported extensions (removing the dot, if any, and
      * making them lowercase). Can be overriden to perform mor explicit checks
      */
-    virtual bool isSupported(const std::string& filename,
-                             const std::string& extension) const
+    virtual bool isSupported(const std::string &filename, const std::string &extension) const
     {
         const auto extensions = getSupportedExtensions();
-        const auto lcExtension = string_utils::toLowercase(
-            extension[0] == '.' ? extension.substr(1) : extension);
-        auto it =
-            std::find_if(extensions.begin(), extensions.end(),
-                         [&](const std::string& ext)
-                         {
-                             return string_utils::toLowercase(
-                                        ext[0] == '.' ? ext.substr(1) : ext) ==
-                                    lcExtension;
-                         });
+        const auto lcExtension = string_utils::toLowercase(extension[0] == '.' ? extension.substr(1) : extension);
+        auto it = std::find_if(
+            extensions.begin(),
+            extensions.end(),
+            [&](const std::string &ext)
+            { return string_utils::toLowercase(ext[0] == '.' ? ext.substr(1) : ext) == lcExtension; });
         return it != extensions.end();
     };
 
@@ -108,7 +103,7 @@ public:
      * @brief returns the loader input parameter schema to be used on loader
      *        discovery
      */
-    virtual const JsonSchema& getInputParametersSchema() const = 0;
+    virtual const JsonSchema &getInputParametersSchema() const = 0;
 
     /**
      * @brief Loads a model/list of models from a blob of memory
@@ -120,9 +115,8 @@ public:
      * @return a std::vector with all the brayns::ModelDescriptor loaded from
      * the blob
      */
-    virtual std::vector<ModelDescriptorPtr> loadFromBlob(
-        Blob&& blob, const LoaderProgress& callback, const JsonValue& params,
-        Scene& scene) const = 0;
+    virtual std::vector<ModelDescriptorPtr>
+        loadFromBlob(Blob &&blob, const LoaderProgress &callback, const JsonValue &params, Scene &scene) const = 0;
 
     /**
      * @brief Loads a model/list of models from a path to a file
@@ -135,15 +129,17 @@ public:
      * the file
      */
     virtual std::vector<ModelDescriptorPtr> loadFromFile(
-        const std::string& path, const LoaderProgress& callback,
-        const JsonValue& params, Scene& scene) const = 0;
+        const std::string &path,
+        const LoaderProgress &callback,
+        const JsonValue &params,
+        Scene &scene) const = 0;
 };
 
 /**
  * A base class for data loaders to unify loading data from blobs and files, and
  * provide progress feedback.
  */
-template <typename T>
+template<typename T>
 class Loader : public AbstractLoader
 {
 public:
@@ -154,22 +150,23 @@ public:
 
     virtual ~Loader() = default;
 
-    virtual const JsonSchema& getInputParametersSchema() const override
+    virtual const JsonSchema &getInputParametersSchema() const override
     {
         return _parameterSchema;
     }
 
-    virtual std::vector<ModelDescriptorPtr> loadFromBlob(
-        Blob&& blob, const LoaderProgress& callback, const JsonValue& params,
-        Scene& scene) const override
+    virtual std::vector<ModelDescriptorPtr>
+        loadFromBlob(Blob &&blob, const LoaderProgress &callback, const JsonValue &params, Scene &scene) const override
     {
         const T inputParams = _parseParameters(params);
         return importFromBlob(std::move(blob), callback, inputParams, scene);
     }
 
     virtual std::vector<ModelDescriptorPtr> loadFromFile(
-        const std::string& path, const LoaderProgress& callback,
-        const JsonValue& params, Scene& scene) const override
+        const std::string &path,
+        const LoaderProgress &callback,
+        const JsonValue &params,
+        Scene &scene) const override
     {
         const T inputParams = _parseParameters(params);
         return importFromFile(path, callback, inputParams, scene);
@@ -183,9 +180,8 @@ public:
      * @param properties Properties used for loading
      * @return the model that has been created by the loader
      */
-    virtual std::vector<ModelDescriptorPtr> importFromBlob(
-        Blob&& blob, const LoaderProgress& callback, const T& properties,
-        Scene& scene) const = 0;
+    virtual std::vector<ModelDescriptorPtr>
+        importFromBlob(Blob &&blob, const LoaderProgress &callback, const T &properties, Scene &scene) const = 0;
 
     /**
      * Import the data from the given file and return the created model.
@@ -196,25 +192,25 @@ public:
      * @return the model that has been created by the loader
      */
     virtual std::vector<ModelDescriptorPtr> importFromFile(
-        const std::string& filename, const LoaderProgress& callback,
-        const T& properties, Scene& scene) const = 0;
+        const std::string &filename,
+        const LoaderProgress &callback,
+        const T &properties,
+        Scene &scene) const = 0;
 
 private:
     const JsonSchema _parameterSchema;
 
-    T _parseParameters(const JsonValue& input) const
+    T _parseParameters(const JsonValue &input) const
     {
         T inputParams;
         if (input.isEmpty())
             Json::deserialize<T>(Json::parse("{}"), inputParams);
         else
         {
-            const auto errors =
-                JsonSchemaValidator::validate(input, _parameterSchema);
+            const auto errors = JsonSchemaValidator::validate(input, _parameterSchema);
             if (!errors.empty())
                 throw std::invalid_argument(
-                    "Could not parse " + getName() +
-                    " parameters: " + string_utils::join(errors, ", "));
+                    "Could not parse " + getName() + " parameters: " + string_utils::join(errors, ", "));
 
             Json::deserialize<T>(input, inputParams);
         }
@@ -230,20 +226,20 @@ private:
 struct EmptyLoaderParameters
 {
 };
-template <>
+template<>
 struct JsonAdapter<EmptyLoaderParameters>
 {
-    static JsonSchema getSchema(const EmptyLoaderParameters& value)
+    static JsonSchema getSchema(const EmptyLoaderParameters &value)
     {
         return JsonSchema();
     }
 
-    static bool serialize(const EmptyLoaderParameters& value, JsonValue& json)
+    static bool serialize(const EmptyLoaderParameters &value, JsonValue &json)
     {
         return true;
     }
 
-    static bool deserialize(const JsonValue& json, EmptyLoaderParameters& value)
+    static bool deserialize(const JsonValue &json, EmptyLoaderParameters &value)
     {
         return true;
     }
@@ -262,8 +258,8 @@ public:
      * @param callback a callback to update the load progress to the caller
      * @return a std::vector with the loaded ModelDescriptorPtr objects
      */
-    virtual std::vector<ModelDescriptorPtr> importFromBlob(
-        Blob&& blob, const LoaderProgress& callback, Scene& scene) const = 0;
+    virtual std::vector<ModelDescriptorPtr> importFromBlob(Blob &&blob, const LoaderProgress &callback, Scene &scene)
+        const = 0;
 
     /**
      * @brief importFromFile imports a model from a file from disk
@@ -271,20 +267,23 @@ public:
      * @param callback a callback to update the load progress to the caller
      * @return a std::vector with the loaded ModelDescriptorPtr objects
      */
-    virtual std::vector<ModelDescriptorPtr> importFromFile(
-        const std::string& path, const LoaderProgress& callback,
-        Scene& scene) const = 0;
+    virtual std::vector<ModelDescriptorPtr>
+        importFromFile(const std::string &path, const LoaderProgress &callback, Scene &scene) const = 0;
 
     std::vector<ModelDescriptorPtr> importFromBlob(
-        Blob&& blob, const LoaderProgress& callback,
-        const EmptyLoaderParameters&, Scene& scene) const final
+        Blob &&blob,
+        const LoaderProgress &callback,
+        const EmptyLoaderParameters &,
+        Scene &scene) const final
     {
         return importFromBlob(std::move(blob), callback, scene);
     }
 
     std::vector<ModelDescriptorPtr> importFromFile(
-        const std::string& path, const LoaderProgress& callback,
-        const EmptyLoaderParameters&, Scene& scene) const final
+        const std::string &path,
+        const LoaderProgress &callback,
+        const EmptyLoaderParameters &,
+        Scene &scene) const final
     {
         return importFromFile(path, callback, scene);
     }

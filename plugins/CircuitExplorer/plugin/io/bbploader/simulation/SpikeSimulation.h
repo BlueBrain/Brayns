@@ -28,12 +28,10 @@ namespace bbploader
 class SpikeSimulation : public Simulation
 {
 public:
-    SpikeSimulation(const std::string& reportPath,
-                    const brain::GIDSet& inputGids, const float tt);
+    SpikeSimulation(const std::string &reportPath, const brain::GIDSet &inputGids, const float tt);
 
-    const brain::GIDSet& getReportGids() const final;
-    std::vector<CellMapping> getMapping(
-        const brain::GIDSet& inputGids) const final;
+    const brain::GIDSet &getReportGids() const final;
+    std::vector<CellMapping> getMapping(const brain::GIDSet &inputGids) const final;
     brayns::AbstractSimulationHandlerPtr createHandler() const final;
 
 private:

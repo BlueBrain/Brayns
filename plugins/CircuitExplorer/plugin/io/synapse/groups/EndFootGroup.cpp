@@ -21,27 +21,26 @@
 #include <plugin/api/MaterialUtils.h>
 #include <plugin/io/synapse/SynapseMaterialMap.h>
 
-void EndFootGroup::addSynapse(const uint64_t,
-                              brayns::TriangleMesh&& endFootMesh)
+void EndFootGroup::addSynapse(const uint64_t, brayns::TriangleMesh &&endFootMesh)
 {
     _meshes.emplace_back(std::move(endFootMesh));
 }
 
-void EndFootGroup::mapToCell(const MorphologyInstance&)
+void EndFootGroup::mapToCell(const MorphologyInstance &)
 {
     // nothing to do for endfeet
 }
 
-void EndFootGroup::mapSimulation(const std::unordered_map<uint64_t, uint64_t>&)
+void EndFootGroup::mapSimulation(const std::unordered_map<uint64_t, uint64_t> &)
 {
     // mesh simulation not supported yet
 }
 
-SynapseMaterialMap::Ptr EndFootGroup::addToModel(brayns::Model& model) const
+SynapseMaterialMap::Ptr EndFootGroup::addToModel(brayns::Model &model) const
 {
     auto result = std::make_unique<SynapseMaterialMap>();
     result->materials.reserve(_meshes.size());
-    for (auto& mesh : _meshes)
+    for (auto &mesh : _meshes)
     {
         const auto matId = CircuitExplorerMaterial::create(model);
         model.getTriangleMeshes()[matId] = std::move(mesh);

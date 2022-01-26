@@ -28,18 +28,11 @@ BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path of the circuit config file")
 BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(CIInfoResult)
-BRAYNS_JSON_OBJECT_ENTRY(uint64_t, cells_count,
-                         "Number of cells in this circuit")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, cells_properties,
-                         "List of available cell properties")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, m_types,
-                         "List of morphology types available in this circuit")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, e_types,
-                         "List of electrical types available in this circuit")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, targets,
-                         "List of target names")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, reports,
-                         "List of report names")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, spike_report,
-                         "Path to the spike report file")
+BRAYNS_JSON_OBJECT_ENTRY(uint64_t, cells_count, "Number of cells in this circuit")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, cells_properties, "List of available cell properties")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, m_types, "List of morphology types available in this circuit")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, e_types, "List of electrical types available in this circuit")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, targets, "List of target names")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<std::string>, reports, "List of report names")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, spike_report, "Path to the spike report file")
 BRAYNS_JSON_OBJECT_END()

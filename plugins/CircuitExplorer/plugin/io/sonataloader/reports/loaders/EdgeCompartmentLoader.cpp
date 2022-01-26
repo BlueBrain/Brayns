@@ -25,13 +25,12 @@
 namespace sonataloader
 {
 std::vector<EdgeReportMapping> EdgeCompartmentLoader::loadMapping(
-    const std::string& reportPath, const std::string& population,
-    const bbp::sonata::Selection& s) const
+    const std::string &reportPath,
+    const std::string &population,
+    const bbp::sonata::Selection &s) const
 {
     const auto nodeIds = s.flatten();
-    const auto rawMapping =
-        SonataSimulationMapping::getCompartmentMapping(reportPath, population,
-                                                       nodeIds);
+    const auto rawMapping = SonataSimulationMapping::getCompartmentMapping(reportPath, population, nodeIds);
     // Pre-fill the map so all node Ids will have their mapping,
     // even if these nodes are not reported on the simulation
     std::map<uint64_t, EdgeReportMapping> sortedCompartmentsSize;
@@ -40,9 +39,9 @@ std::vector<EdgeReportMapping> EdgeCompartmentLoader::loadMapping(
 
     // Gather mapping
     uint64_t offset = 0;
-    for (const auto& key : rawMapping)
+    for (const auto &key : rawMapping)
     {
-        auto& nodeMapping = sortedCompartmentsSize[key.first];
+        auto &nodeMapping = sortedCompartmentsSize[key.first];
         nodeMapping.offsets[key.second] = offset++;
     }
 

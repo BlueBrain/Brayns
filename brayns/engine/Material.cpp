@@ -22,7 +22,7 @@
 
 namespace brayns
 {
-Material::Material(const PropertyMap& properties)
+Material::Material(const PropertyMap &properties)
 {
     setCurrentType("default");
     _properties.at(_currentType).merge(properties);

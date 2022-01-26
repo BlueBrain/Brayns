@@ -29,9 +29,10 @@
 
 namespace brayns
 {
-void KeyboardHandler::registerKeyboardShortcut(const unsigned char key,
-                                               const std::string& description,
-                                               std::function<void()> functor)
+void KeyboardHandler::registerKeyboardShortcut(
+    const unsigned char key,
+    const std::string &description,
+    std::function<void()> functor)
 {
     if (_registeredShortcuts.find(key) != _registeredShortcuts.end())
     {
@@ -63,9 +64,10 @@ void KeyboardHandler::handleKeyboardShortcut(const unsigned char key)
     }
 }
 
-void KeyboardHandler::registerSpecialKey(const SpecialKey key,
-                                         const std::string& description,
-                                         std::function<void()> functor)
+void KeyboardHandler::registerSpecialKey(
+    const SpecialKey key,
+    const std::string &description,
+    std::function<void()> functor)
 {
     if (_registeredSpecialKeys.find(key) != _registeredSpecialKeys.end())
     {
@@ -118,24 +120,22 @@ void KeyboardHandler::_buildHelp()
         return "INVALID";
     };
 
-    for (const auto& registeredShortcut : _registeredShortcuts)
+    for (const auto &registeredShortcut : _registeredShortcuts)
     {
         std::stringstream ss;
-        ss << "'" << registeredShortcut.first << "' "
-           << registeredShortcut.second.description;
+        ss << "'" << registeredShortcut.first << "' " << registeredShortcut.second.description;
         _helpStrings.push_back(ss.str());
     }
-    for (const auto& registeredShortcut : _registeredSpecialKeys)
+    for (const auto &registeredShortcut : _registeredSpecialKeys)
     {
         std::stringstream ss;
-        ss << "'" << specialKeyToString(registeredShortcut.first) << "' "
-           << registeredShortcut.second.description;
+        ss << "'" << specialKeyToString(registeredShortcut.first) << "' " << registeredShortcut.second.description;
         _helpStrings.push_back(ss.str());
     }
 
 } // namespace brayns
 
-const std::vector<std::string>& KeyboardHandler::help() const
+const std::vector<std::string> &KeyboardHandler::help() const
 {
     return _helpStrings;
 }

@@ -36,22 +36,20 @@ struct SampleSharedData
 class SampleNeuronInstance : public MorphologyInstance
 {
 public:
-    SampleNeuronInstance(std::vector<brayns::Sphere>&& samples,
-                         const std::shared_ptr<SampleSharedData>& data);
+    SampleNeuronInstance(std::vector<brayns::Sphere> &&samples, const std::shared_ptr<SampleSharedData> &data);
 
-    void mapSimulation(const size_t globalOffset,
-                       const std::vector<uint16_t>& sectionOffsets,
-                       const std::vector<uint16_t>& sectionCompartments) final;
+    void mapSimulation(
+        const size_t globalOffset,
+        const std::vector<uint16_t> &sectionOffsets,
+        const std::vector<uint16_t> &sectionCompartments) final;
 
-    ElementMaterialMap::Ptr addToModel(brayns::Model& model) const final;
+    ElementMaterialMap::Ptr addToModel(brayns::Model &model) const final;
 
     size_t getSectionSegmentCount(const int32_t section) const final;
 
-    MorphologyInstance::SegmentPoints getSegment(
-        const int32_t section, const uint32_t segment) const final;
+    MorphologyInstance::SegmentPoints getSegment(const int32_t section, const uint32_t segment) const final;
 
-    uint64_t getSegmentSimulationOffset(const int32_t section,
-                                        const uint32_t segment) const final;
+    uint64_t getSegmentSimulationOffset(const int32_t section, const uint32_t segment) const final;
 
 private:
     std::vector<brayns::Sphere> _samples;

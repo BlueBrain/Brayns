@@ -18,12 +18,11 @@
 
 #include "CameraUtils.h"
 
-void CameraUtils::updateCamera(brayns::Camera& camera,
-                               const ODUCameraInformation& cinfo)
+void CameraUtils::updateCamera(brayns::Camera &camera, const ODUCameraInformation &cinfo)
 {
-    auto& position = cinfo.origin;
-    auto& direction = cinfo.direction;
-    auto& up = cinfo.up;
+    auto &position = cinfo.origin;
+    auto &direction = cinfo.direction;
+    auto &up = cinfo.up;
     auto target = position + direction;
     auto orientation = glm::lookAt(position, target, up);
     auto apertureRadius = cinfo.apertureRadius;
@@ -36,12 +35,12 @@ void CameraUtils::updateCamera(brayns::Camera& camera,
     camera.commit();
 }
 
-ODUCameraInformation CameraUtils::getCameraAsODU(const brayns::Camera& camera)
+ODUCameraInformation CameraUtils::getCameraAsODU(const brayns::Camera &camera)
 {
     ODUCameraInformation result;
-    auto& position = camera.getPosition();
+    auto &position = camera.getPosition();
     result.origin = position;
-    auto& orientation = camera.getOrientation();
+    auto &orientation = camera.getOrientation();
     result.direction = glm::rotate(orientation, {0.0, 0.0, -1.0});
     result.up = glm::rotate(orientation, {0.0, 1.0, 0.0});
     auto apertureRadius = camera.getPropertyOrValue("apertureRadius", 0.0);

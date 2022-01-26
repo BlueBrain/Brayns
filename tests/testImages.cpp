@@ -34,12 +34,12 @@
 
 TEST_CASE("render_two_frames_and_compare_they_are_same")
 {
-    const char* argv[] = {"testImages", "--disable-accumulation", "demo"};
-    const int argc = sizeof(argv) / sizeof(char*);
+    const char *argv[] = {"testImages", "--disable-accumulation", "demo"};
+    const int argc = sizeof(argv) / sizeof(char *);
 
     brayns::Brayns brayns(argc, argv);
-    auto& engine = brayns.getEngine();
-    auto& framebuffer = engine.getFrameBuffer();
+    auto &engine = brayns.getEngine();
+    auto &framebuffer = engine.getFrameBuffer();
 
     brayns.commitAndRender();
     auto oldImage = framebuffer.getImage();
@@ -55,11 +55,11 @@ TEST_CASE("render_two_frames_and_compare_they_are_same")
 TEST_CASE("render_xyz_and_compare")
 {
     const auto path = BRAYNS_TESTDATA_MODEL_MONKEY_PATH;
-    const char* argv[] = {"testImages", path, "--disable-accumulation"};
-    const int argc = sizeof(argv) / sizeof(char*);
+    const char *argv[] = {"testImages", path, "--disable-accumulation"};
+    const int argc = sizeof(argv) / sizeof(char *);
 
     brayns::Brayns brayns(argc, argv);
-    auto& engine = brayns.getEngine();
+    auto &engine = brayns.getEngine();
 
     brayns.commitAndRender();
     CHECK(ImageValidator::validate(engine, "testdataMonkey.png"));
@@ -77,12 +77,11 @@ TEST_CASE("render_xyz_and_compare")
 
 TEST_CASE("render_protein_and_compare")
 {
-    const char* argv[] = {"testImages", BRAYNS_TESTDATA_MODEL_PDB_PATH,
-                          "--disable-accumulation"};
-    const int argc = sizeof(argv) / sizeof(char*);
+    const char *argv[] = {"testImages", BRAYNS_TESTDATA_MODEL_PDB_PATH, "--disable-accumulation"};
+    const int argc = sizeof(argv) / sizeof(char *);
 
     brayns::Brayns brayns(argc, argv);
-    auto& engine = brayns.getEngine();
+    auto &engine = brayns.getEngine();
 
     brayns.commitAndRender();
     CHECK(ImageValidator::validate(engine, "testdataProtein.png"));
@@ -91,11 +90,11 @@ TEST_CASE("render_protein_and_compare")
 TEST_CASE("render_ply_and_compare")
 {
     const auto path = BRAYNS_TESTDATA_MODEL_LUCY_PATH;
-    const char* argv[] = {"testImages", path, "--disable-accumulation"};
-    const int argc = sizeof(argv) / sizeof(char*);
+    const char *argv[] = {"testImages", path, "--disable-accumulation"};
+    const int argc = sizeof(argv) / sizeof(char *);
 
     brayns::Brayns brayns(argc, argv);
-    auto& engine = brayns.getEngine();
+    auto &engine = brayns.getEngine();
 
     brayns.commitAndRender();
     CHECK(ImageValidator::validate(engine, "testdataLucy.png"));

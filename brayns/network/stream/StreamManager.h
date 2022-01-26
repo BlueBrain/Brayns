@@ -41,7 +41,10 @@ public:
      *
      * @param fps
      */
-    void setFps(size_t fps) { _limiter = RateLimiter::fromFps(fps); }
+    void setFps(size_t fps)
+    {
+        _limiter = RateLimiter::fromFps(fps);
+    }
 
     /**
      * @brief Check if the stream is controlled.
@@ -51,7 +54,10 @@ public:
      * @return true Controlled.
      * @return false Automatic.
      */
-    bool isControlled() const { return _controlled; }
+    bool isControlled() const
+    {
+        return _controlled;
+    }
 
     /**
      * @brief Set the stream control mode.
@@ -70,19 +76,28 @@ public:
      * @return true Client triggered the image stream.
      * @return false Nothing triggered.
      */
-    bool isTriggered() const { return _triggered; }
+    bool isTriggered() const
+    {
+        return _triggered;
+    }
 
     /**
      * @brief Trigger the image stream in controlled mode.
      *
      */
-    void trigger() { _triggered = true; }
+    void trigger()
+    {
+        _triggered = true;
+    }
 
     /**
      * @brief Reset the trigger in control mode.
      *
      */
-    void resetTrigger() { _triggered = false; }
+    void resetTrigger()
+    {
+        _triggered = false;
+    }
 
     /**
      * @brief Call the given functor with maximum FPS rate limit.
@@ -90,7 +105,7 @@ public:
      * @tparam FunctorType Functor type.
      * @param functor Functor like void().
      */
-    template <typename FunctorType>
+    template<typename FunctorType>
     void callWithFpsLimit(FunctorType functor)
     {
         _limiter.call(std::move(functor));
@@ -114,7 +129,7 @@ public:
      *
      * @param context Context of the network manager.
      */
-    StreamManager(NetworkContext& context);
+    StreamManager(NetworkContext &context);
 
     /**
      * @brief Broadcast images according to current settings.
@@ -127,10 +142,13 @@ public:
      *
      * @return ImageStreamMonitor& Image stream monitor.
      */
-    ImageStreamMonitor& getMonitor() { return _imageStream; }
+    ImageStreamMonitor &getMonitor()
+    {
+        return _imageStream;
+    }
 
 private:
-    NetworkContext* _context;
+    NetworkContext *_context;
     ImageStreamMonitor _imageStream;
 };
 } // namespace brayns

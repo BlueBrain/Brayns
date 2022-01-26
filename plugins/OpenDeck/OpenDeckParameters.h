@@ -32,7 +32,7 @@ class OpenDeckParameters : public BaseObject
 public:
     OpenDeckParameters();
 
-    bool parse(int argc, const char** argv);
+    bool parse(int argc, const char **argv);
 
     double getResolutionScaling() const
     {
@@ -52,14 +52,20 @@ public:
         _updateProperty(PARAM_CAMERA_SCALING, cameraScaling);
     }
 
-    const PropertyMap& getPropertyMap() const { return _props; }
-    PropertyMap& getPropertyMap() { return _props; }
+    const PropertyMap &getPropertyMap() const
+    {
+        return _props;
+    }
+    PropertyMap &getPropertyMap()
+    {
+        return _props;
+    }
 
 private:
     PropertyMap _props;
 
-    template <typename T>
-    void _updateProperty(const char* property, const T& newValue)
+    template<typename T>
+    void _updateProperty(const char *property, const T &newValue)
     {
         if (!_isEqual(_props[property].as<T>(), newValue))
         {

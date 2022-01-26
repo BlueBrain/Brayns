@@ -38,7 +38,7 @@ SDFGeometries::SDFGeometries()
     this->ispcEquivalent = ispc::SDFGeometries_create(this);
 }
 
-void SDFGeometries::finalize(ospray::Model* model)
+void SDFGeometries::finalize(ospray::Model *model)
 {
     data = getParamData("sdfgeometries", nullptr);
     neighbours = getParamData("neighbours", nullptr);
@@ -53,12 +53,12 @@ void SDFGeometries::finalize(ospray::Model* model)
     const size_t numNeighbours = neighbours->numItems;
 
     bounds = empty;
-    const auto geoms = static_cast<brayns::SDFGeometry*>(geometries->data);
+    const auto geoms = static_cast<brayns::SDFGeometry *>(geometries->data);
     for (size_t i = 0; i < numSDFGeometries; i++)
     {
         const auto bd = getSDFBoundingBox(geoms[i]);
-        const auto& bMind = bd.getMin();
-        const auto& bMaxd = bd.getMax();
+        const auto &bMind = bd.getMin();
+        const auto &bMaxd = bd.getMax();
         const auto bMinf = vec3f(bMind[0], bMind[1], bMind[2]);
         const auto bMaxf = vec3f(bMaxd[0], bMaxd[1], bMaxd[2]);
 
@@ -66,9 +66,14 @@ void SDFGeometries::finalize(ospray::Model* model)
         bounds.extend(bMaxf);
     }
 
-    ispc::SDFGeometriesGeometry_set(getIE(), model->getIE(), data->data,
-                                    numSDFGeometries, neighbours->data,
-                                    numNeighbours, geometries->data);
+    ispc::SDFGeometriesGeometry_set(
+        getIE(),
+        model->getIE(),
+        data->data,
+        numSDFGeometries,
+        neighbours->data,
+        numNeighbours,
+        geometries->data);
 }
 
 OSP_REGISTER_GEOMETRY(SDFGeometries, sdfgeometries);

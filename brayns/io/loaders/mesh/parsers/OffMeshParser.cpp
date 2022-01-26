@@ -258,8 +258,7 @@ private:
         mesh.indices.reserve(size);
     }
 
-    static void _addVertex(const MeshBuffer &buffer, TriangleMesh &mesh,
-                           const Vector3ui &triangle)
+    static void _addVertex(const MeshBuffer &buffer, TriangleMesh &mesh, const Vector3ui &triangle)
     {
         auto offset = mesh.vertices.size();
         for (auto index : triangle)

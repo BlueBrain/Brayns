@@ -49,7 +49,10 @@ public:
        Returns the class name as a string
        @return string containing the full name of the class
     */
-    std::string toString() const final { return "ProximityDetectionRenderer"; }
+    std::string toString() const final
+    {
+        return "ProximityDetectionRenderer";
+    }
     /**
        Commits the changes held by the object so that
        attributes become available to the OSPRay rendering engine

@@ -42,11 +42,11 @@ public:
 protected:
     bool _useHardwareRandomizer;
 
-    std::vector<void*> _lightArray;
-    void** _lightPtr;
-    ospray::Data* _lightData;
+    std::vector<void *> _lightArray;
+    void **_lightPtr;
+    ospray::Data *_lightData;
 
-    brayns::obj::CircuitExplorerMaterial* _bgMaterial;
+    brayns::obj::CircuitExplorerMaterial *_bgMaterial;
 
     float _timestamp{0.f};
     ospray::uint32 _maxBounces{10};

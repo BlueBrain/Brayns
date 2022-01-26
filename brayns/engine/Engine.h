@@ -60,21 +60,20 @@ public:
     /** @return the minimum frame size in pixels supported by this engine. */
     virtual Vector2ui getMinimumFrameSize() const = 0;
     /** Factory method to create an engine-specific framebuffer. */
-    virtual FrameBufferPtr createFrameBuffer(
-        const std::string& name, const Vector2ui& frameSize,
-        PixelFormat frameBufferFormat) const = 0;
+    virtual FrameBufferPtr
+        createFrameBuffer(const std::string &name, const Vector2ui &frameSize, PixelFormat frameBufferFormat) const = 0;
 
     /** Factory method to create an engine-specific scene. */
-    virtual ScenePtr createScene(AnimationParameters& animationParameters,
-                                 VolumeParameters& volumeParameters) const = 0;
+    virtual ScenePtr createScene(AnimationParameters &animationParameters, VolumeParameters &volumeParameters)
+        const = 0;
 
     /** Factory method to create an engine-specific camera. */
     virtual CameraPtr createCamera() const = 0;
 
     /** Factory method to create an engine-specific renderer. */
     virtual RendererPtr createRenderer(
-        const AnimationParameters& animationParameters,
-        const RenderingParameters& renderingParameters) const = 0;
+        const AnimationParameters &animationParameters,
+        const RenderingParameters &renderingParameters) const = 0;
     //@}
 
     /**
@@ -82,21 +81,33 @@ public:
      * @param parametersManager holds all engine parameters (geometry,
      * rendering, etc)
      */
-    explicit Engine(ParametersManager& parametersManager);
+    explicit Engine(ParametersManager &parametersManager);
     virtual ~Engine() = default;
 
     /** Renders the current scene and populates the frame buffer accordingly */
     void render();
 
     /** Gets the scene */
-    Scene& getScene() { return *_scene; }
+    Scene &getScene()
+    {
+        return *_scene;
+    }
     /** Gets the frame buffer */
-    FrameBuffer& getFrameBuffer() { return *_frameBuffers[0]; }
+    FrameBuffer &getFrameBuffer()
+    {
+        return *_frameBuffers[0];
+    }
     /** Gets the camera */
-    const Camera& getCamera() const { return *_camera; }
-    Camera& getCamera() { return *_camera; }
+    const Camera &getCamera() const
+    {
+        return *_camera;
+    }
+    Camera &getCamera()
+    {
+        return *_camera;
+    }
     /** Gets the renderer */
-    Renderer& getRenderer();
+    Renderer &getRenderer();
 
     /**
      * Callback when a new frame shall be triggered. Currently called by event
@@ -108,12 +119,21 @@ public:
      * Keep continue to run the engine, aka the user did not request to stop
      * rendering.
      */
-    void setKeepRunning(bool keepRunning) { _keepRunning = keepRunning; }
+    void setKeepRunning(bool keepRunning)
+    {
+        _keepRunning = keepRunning;
+    }
     /**
      * @return true if the user wants to continue rendering, false otherwise.
      */
-    bool getKeepRunning() const { return _keepRunning; }
-    Statistics& getStatistics() { return _statistics; }
+    bool getKeepRunning() const
+    {
+        return _keepRunning;
+    }
+    Statistics &getStatistics()
+    {
+        return _statistics;
+    }
     /**
      * @return true if render() calls shall be continued, based on current
      *         accumulation settings.
@@ -121,8 +141,14 @@ public:
      */
     bool continueRendering() const;
 
-    const auto& getParametersManager() const { return _parametersManager; }
-    auto& getParametersManager() { return _parametersManager; }
+    const auto &getParametersManager() const
+    {
+        return _parametersManager;
+    }
+    auto &getParametersManager()
+    {
+        return _parametersManager;
+    }
 
     /**
      * Add the given frame buffer to the list of buffers that shall be filled
@@ -137,7 +163,7 @@ public:
     void removeFrameBuffer(FrameBufferPtr frameBuffer);
 
     /** @return all registered frame buffers that are used during rendering. */
-    const std::vector<FrameBufferPtr>& getFrameBuffers() const
+    const std::vector<FrameBufferPtr> &getFrameBuffers() const
     {
         return _frameBuffers;
     }
@@ -153,22 +179,20 @@ public:
      * registration for a concrete engine is specific to the actual engine, e.g.
      * OSP_REGISTER_RENDERER for OSPRay.
      */
-    void addRendererType(const std::string& name,
-                         const PropertyMap& properties = {});
+    void addRendererType(const std::string &name, const PropertyMap &properties = {});
 
     /**
      * Add a new camera type with optional properties. The camera registration
      * for a concrete engine is specific to the actual engine, e.g.
      * OSP_REGISTER_CAMERA for OSPRay.
      */
-    void addCameraType(const std::string& name,
-                       const PropertyMap& properties = {});
+    void addCameraType(const std::string &name, const PropertyMap &properties = {});
 
 private:
     bool mustRender();
 
 protected:
-    ParametersManager& _parametersManager;
+    ParametersManager &_parametersManager;
     ScenePtr _scene;
     CameraPtr _camera;
     RendererPtr _renderer;

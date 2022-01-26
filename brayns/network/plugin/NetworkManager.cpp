@@ -36,7 +36,7 @@ using namespace brayns;
 class MessageBuilder
 {
 public:
-    static RequestMessage build(const std::string& data)
+    static RequestMessage build(const std::string &data)
     {
         auto json = _parse(data);
         _validateSchema(json);
@@ -46,20 +46,19 @@ public:
     }
 
 private:
-    static JsonValue _parse(const std::string& data)
+    static JsonValue _parse(const std::string &data)
     {
         try
         {
             return Json::parse(data);
         }
-        catch (const Poco::JSON::JSONException& e)
+        catch (const Poco::JSON::JSONException &e)
         {
-            throw EntrypointException("Failed to parse JSON request: " +
-                                      e.displayText());
+            throw EntrypointException("Failed to parse JSON request: " + e.displayText());
         }
     }
 
-    static void _validateSchema(const JsonValue& json)
+    static void _validateSchema(const JsonValue &json)
     {
         static const JsonSchema schema = Json::getSchema<RequestMessage>();
         auto errors = JsonSchemaValidator::validate(json, schema);
@@ -69,14 +68,13 @@ private:
         }
     }
 
-    static void _validateHeader(const RequestMessage& message)
+    static void _validateHeader(const RequestMessage &message)
     {
         if (message.jsonrpc != "2.0")
         {
-            throw EntrypointException("Unsupported JSON-RPC version: '" +
-                                      message.jsonrpc + "'");
+            throw EntrypointException("Unsupported JSON-RPC version: '" + message.jsonrpc + "'");
         }
-        auto& method = message.method;
+        auto &method = message.method;
         if (method.empty())
         {
             throw EntrypointException("No method provided in request");
@@ -87,13 +85,12 @@ private:
 class RequestManager
 {
 public:
-    RequestManager(NetworkContext& context)
+    RequestManager(NetworkContext &context)
         : _context(&context)
     {
     }
 
-    void processRequest(const ConnectionHandle& handle,
-                        const InputPacket& packet)
+    void processRequest(const ConnectionHandle &handle, const InputPacket &packet)
     {
         if (packet.isBinary())
         {
@@ -109,15 +106,13 @@ public:
     }
 
 private:
-    void _processBinaryRequest(const ConnectionHandle& handle,
-                               const InputPacket& packet)
+    void _processBinaryRequest(const ConnectionHandle &handle, const InputPacket &packet)
     {
-        auto& binary = _context->getBinary();
+        auto &binary = _context->getBinary();
         binary.processBinaryRequest(handle, packet);
     }
 
-    void _processTextRequest(const ConnectionHandle& handle,
-                             const InputPacket& packet)
+    void _processTextRequest(const ConnectionHandle &handle, const InputPacket &packet)
     {
         auto request = _createRequest(handle);
         try
@@ -130,56 +125,49 @@ private:
         }
     }
 
-    NetworkRequest _createRequest(const ConnectionHandle& handle)
+    NetworkRequest _createRequest(const ConnectionHandle &handle)
     {
-        auto& connections = _context->getConnections();
+        auto &connections = _context->getConnections();
         return {handle, connections};
     }
 
-    void _dispatch(NetworkRequest& request, const InputPacket& packet)
+    void _dispatch(NetworkRequest &request, const InputPacket &packet)
     {
-        auto& data = packet.getData();
+        auto &data = packet.getData();
         auto message = MessageBuilder::build(data);
         request.setMessage(std::move(message));
-        auto& entrypoints = _context->getEntrypoints();
+        auto &entrypoints = _context->getEntrypoints();
         entrypoints.processRequest(request);
     }
 
-    NetworkContext* _context;
+    NetworkContext *_context;
 };
 
 class ConnectionCallbacks
 {
 public:
-    static void setup(NetworkContext& context)
+    static void setup(NetworkContext &context)
     {
-        auto& connections = context.getConnections();
-        connections.onConnect([&](const auto& handle)
-                              { onConnect(context, handle); });
-        connections.onDisconnect([&](const auto& handle)
-                                 { onDisconnect(context, handle); });
-        connections.onRequest([&](const auto& handle, const auto& packet)
-                              { onRequest(context, handle, packet); });
+        auto &connections = context.getConnections();
+        connections.onConnect([&](const auto &handle) { onConnect(context, handle); });
+        connections.onDisconnect([&](const auto &handle) { onDisconnect(context, handle); });
+        connections.onRequest([&](const auto &handle, const auto &packet) { onRequest(context, handle, packet); });
     }
 
 private:
-    static void onConnect(NetworkContext& context,
-                          const ConnectionHandle& handle)
+    static void onConnect(NetworkContext &context, const ConnectionHandle &handle)
     {
         Log::info("New connection: {}.", handle.getId());
     }
 
-    static void onDisconnect(NetworkContext& context,
-                             const ConnectionHandle& handle)
+    static void onDisconnect(NetworkContext &context, const ConnectionHandle &handle)
     {
-        auto& tasks = context.getTasks();
+        auto &tasks = context.getTasks();
         tasks.disconnect(handle);
         Log::info("Connection closed: {}.", handle.getId());
     }
 
-    static void onRequest(NetworkContext& context,
-                          const ConnectionHandle& handle,
-                          const InputPacket& packet)
+    static void onRequest(NetworkContext &context, const ConnectionHandle &handle, const InputPacket &packet)
     {
         RequestManager manager(context);
         manager.processRequest(handle, packet);
@@ -189,12 +177,11 @@ private:
 class InterfaceFactory
 {
 public:
-    static std::shared_ptr<ActionInterface> createInterface(
-        NetworkContext& context)
+    static std::shared_ptr<ActionInterface> createInterface(NetworkContext &context)
     {
-        auto& api = context.getApi();
-        auto& manager = api.getParametersManager();
-        auto& parameters = manager.getNetworkParameters();
+        auto &api = context.getApi();
+        auto &manager = api.getParametersManager();
+        auto &parameters = manager.getNetworkParameters();
         if (parameters.isClient())
         {
             return std::make_shared<ClientInterface>(context);
@@ -231,15 +218,15 @@ void NetworkManager::init()
 
 void NetworkManager::preRender()
 {
-    auto& entrypoints = _context->getEntrypoints();
+    auto &entrypoints = _context->getEntrypoints();
     entrypoints.preRender();
 }
 
 void NetworkManager::postRender()
 {
-    auto& entrypoints = _context->getEntrypoints();
+    auto &entrypoints = _context->getEntrypoints();
     entrypoints.postRender();
-    auto& stream = _context->getStream();
+    auto &stream = _context->getStream();
     stream.broadcast();
 }
 } // namespace brayns

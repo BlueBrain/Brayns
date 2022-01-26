@@ -29,21 +29,21 @@
 class BraynsService
 {
 public:
-    BraynsService(int argc, const char** argv)
+    BraynsService(int argc, const char **argv)
         : _brayns(argc, argv)
     {
         if (!_brayns.getActionInterface())
         {
             throw std::runtime_error("No action interface registered");
         }
-        auto& engine = _brayns.getEngine();
+        auto &engine = _brayns.getEngine();
         engine.triggerRender = [this] { _triggerRender(); };
     }
 
     void run()
     {
-        auto& engine = _brayns.getEngine();
-        auto& interface = *_brayns.getActionInterface();
+        auto &engine = _brayns.getEngine();
+        auto &interface = *_brayns.getActionInterface();
         while (engine.getKeepRunning())
         {
             interface.processRequests();
@@ -56,7 +56,10 @@ public:
     }
 
 private:
-    void _triggerRender() { _renderTriggered = true; }
+    void _triggerRender()
+    {
+        _renderTriggered = true;
+    }
 
     bool _isRenderTriggered()
     {
@@ -72,7 +75,7 @@ private:
     std::atomic_bool _renderTriggered{false};
 };
 
-int main(int argc, const char** argv)
+int main(int argc, const char **argv)
 {
     try
     {
@@ -83,10 +86,9 @@ int main(int argc, const char** argv)
         service.run();
 
         timer.stop();
-        brayns::Log::info("Service was running for {} seconds.",
-                          timer.seconds());
+        brayns::Log::info("Service was running for {} seconds.", timer.seconds());
     }
-    catch (const std::runtime_error& e)
+    catch (const std::runtime_error &e)
     {
         brayns::Log::error(e.what());
         return 1;

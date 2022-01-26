@@ -31,14 +31,14 @@ namespace brayns
 class SnapshotTask : public EntrypointTask<SnapshotParams, ImageBase64Message>
 {
 public:
-    SnapshotTask(Engine& engine, SnapshotParams&& params);
+    SnapshotTask(Engine &engine, SnapshotParams &&params);
 
     void run() final;
 
     void onComplete() final;
 
 private:
-    Engine& _engine;
+    Engine &_engine;
     SnapshotParams _params;
     ImageBase64Message _image;
 };
@@ -52,6 +52,6 @@ public:
 
     bool isAsync() const final;
 
-    void onRequest(const Request& request) final;
+    void onRequest(const Request &request) final;
 };
 } // namespace brayns

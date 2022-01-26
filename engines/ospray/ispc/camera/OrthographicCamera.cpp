@@ -36,8 +36,7 @@ void OrthographicCamera::commit()
     height = getParamf("height", 1.f); // imgPlane_size_y
     aspect = getParamf("aspect", 1.f);
     enableClippingPlanes = getParam("enableClippingPlanes", 0);
-    clipPlanes =
-        enableClippingPlanes ? getParamData("clipPlanes", nullptr) : nullptr;
+    clipPlanes = enableClippingPlanes ? getParamData("clipPlanes", nullptr) : nullptr;
 
     // ------------------------------------------------------------------
     // now, update the local precomputed values
@@ -54,12 +53,14 @@ void OrthographicCamera::commit()
     const auto clipPlaneData = clipPlanes ? clipPlanes->data : nullptr;
     const size_t numClipPlanes = clipPlanes ? clipPlanes->numItems : 0;
 
-    ispc::OrthographicCamera_set(getIE(), (const ispc::vec3f&)dir,
-                                 (const ispc::vec3f&)pos_00,
-                                 (const ispc::vec3f&)pos_du,
-                                 (const ispc::vec3f&)pos_dv,
-                                 (const ispc::vec4f*)clipPlaneData,
-                                 numClipPlanes);
+    ispc::OrthographicCamera_set(
+        getIE(),
+        (const ispc::vec3f &)dir,
+        (const ispc::vec3f &)pos_00,
+        (const ispc::vec3f &)pos_du,
+        (const ispc::vec3f &)pos_dv,
+        (const ispc::vec4f *)clipPlaneData,
+        numClipPlanes);
 }
 
 OSP_REGISTER_CAMERA(OrthographicCamera, orthographic);

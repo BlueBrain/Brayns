@@ -38,16 +38,25 @@ class MaterialRef
 public:
     MaterialRef() = default;
 
-    MaterialRef(Material& material)
+    MaterialRef(Material &material)
         : _material(&material)
     {
     }
 
-    bool hasMaterial() const { return _material; }
+    bool hasMaterial() const
+    {
+        return _material;
+    }
 
-    Material& getMaterial() const { return *_material; }
+    Material &getMaterial() const
+    {
+        return *_material;
+    }
 
-    void setMaterial(Material& material) { _material = &material; }
+    void setMaterial(Material &material)
+    {
+        _material = &material;
+    }
 
     void commit()
     {
@@ -58,7 +67,7 @@ public:
     }
 
 private:
-    Material* _material = nullptr;
+    Material *_material = nullptr;
 };
 
 class BaseMaterial : public MaterialRef
@@ -66,18 +75,17 @@ class BaseMaterial : public MaterialRef
 public:
     BaseMaterial() = default;
 
-    BaseMaterial(Material& material)
+    BaseMaterial(Material &material)
         : MaterialRef(material)
     {
     }
 
-    const Vector3d& getDiffuseColor() const
+    const Vector3d &getDiffuseColor() const
     {
-        return hasMaterial() ? getMaterial().getDiffuseColor()
-                             : _getDefaultVector();
+        return hasMaterial() ? getMaterial().getDiffuseColor() : _getDefaultVector();
     }
 
-    void setDiffuseColor(const Vector3d& value) const
+    void setDiffuseColor(const Vector3d &value) const
     {
         if (hasMaterial())
         {
@@ -85,13 +93,12 @@ public:
         }
     }
 
-    const Vector3d& getSpecularColor() const
+    const Vector3d &getSpecularColor() const
     {
-        return hasMaterial() ? getMaterial().getSpecularColor()
-                             : _getDefaultVector();
+        return hasMaterial() ? getMaterial().getSpecularColor() : _getDefaultVector();
     }
 
-    void setSpecularColor(const Vector3d& value) const
+    void setSpecularColor(const Vector3d &value) const
     {
         if (hasMaterial())
         {
@@ -178,7 +185,7 @@ public:
     }
 
 private:
-    static const Vector3d& _getDefaultVector()
+    static const Vector3d &_getDefaultVector()
     {
         static const Vector3d value{};
         return value;
@@ -190,7 +197,7 @@ class ExtendedMaterial : public BaseMaterial
 public:
     ExtendedMaterial() = default;
 
-    ExtendedMaterial(Material& material)
+    ExtendedMaterial(Material &material)
         : BaseMaterial(material)
     {
     }
@@ -238,8 +245,8 @@ public:
     }
 
 private:
-    template <typename T>
-    T _valueOr(const std::string& name, T defaultValue) const
+    template<typename T>
+    T _valueOr(const std::string &name, T defaultValue) const
     {
         if (!hasMaterial())
         {
@@ -248,8 +255,8 @@ private:
         return getMaterial().getPropertyOrValue(name, std::move(defaultValue));
     }
 
-    template <typename T>
-    void _setValue(const std::string& name, T value) const
+    template<typename T>
+    void _setValue(const std::string &name, T value) const
     {
         if (!hasMaterial())
         {
@@ -264,12 +271,15 @@ class MaterialProxy : public ExtendedMaterial
 public:
     MaterialProxy() = default;
 
-    MaterialProxy(Scene& scene)
+    MaterialProxy(Scene &scene)
         : _scene(&scene)
     {
     }
 
-    size_t getModelId() const { return _model ? _model->getModelID() : 0; }
+    size_t getModelId() const
+    {
+        return _model ? _model->getModelID() : 0;
+    }
 
     void setModelId(size_t id)
     {
@@ -280,7 +290,10 @@ public:
         _model = &ExtractModel::fromId(*_scene, id);
     }
 
-    size_t getMaterialId() const { return _materialId; }
+    size_t getMaterialId() const
+    {
+        return _materialId;
+    }
 
     void setMaterialId(size_t id)
     {
@@ -293,13 +306,14 @@ public:
     }
 
 private:
-    Scene* _scene = nullptr;
-    ModelDescriptor* _model = nullptr;
+    Scene *_scene = nullptr;
+    ModelDescriptor *_model = nullptr;
     size_t _materialId = 0;
 };
 
 BRAYNS_JSON_ADAPTER_ENUM(
-    MaterialShadingMode, {"None", MaterialShadingMode::none},
+    MaterialShadingMode,
+    {"None", MaterialShadingMode::none},
     {"Diffuse", MaterialShadingMode::diffuse},
     {"Electron", MaterialShadingMode::electron},
     {"Cartoon", MaterialShadingMode::cartoon},
@@ -308,46 +322,59 @@ BRAYNS_JSON_ADAPTER_ENUM(
     {"Diffuse transparency", MaterialShadingMode::diffuse_transparency},
     {"Checker", MaterialShadingMode::checker})
 
-BRAYNS_JSON_ADAPTER_ENUM(MaterialClippingMode,
-                         {"No clipping", MaterialClippingMode::no_clipping},
-                         {"Plane", MaterialClippingMode::plane},
-                         {"Sphere", MaterialClippingMode::sphere})
+BRAYNS_JSON_ADAPTER_ENUM(
+    MaterialClippingMode,
+    {"No clipping", MaterialClippingMode::no_clipping},
+    {"Plane", MaterialClippingMode::plane},
+    {"Sphere", MaterialClippingMode::sphere})
 
-#define BRAYNS_MATERIAL_PROPERTIES()                                        \
-    BRAYNS_JSON_ADAPTER_GETSET("diffuse_color", getDiffuseColor,            \
-                               setDiffuseColor,                             \
-                               "Diffuse reflection color RGB normalized")   \
-    BRAYNS_JSON_ADAPTER_GETSET("specular_color", getSpecularColor,          \
-                               setSpecularColor,                            \
-                               "Specular reflection RGB normalized")        \
-    BRAYNS_JSON_ADAPTER_GETSET(                                             \
-        "specular_exponent", getSpecularExponent, setSpecularExponent,      \
-        "The specular exponent to sharpen the specular reflection")         \
-    BRAYNS_JSON_ADAPTER_GETSET(                                             \
-        "reflection_index", getReflectionIndex, setReflectionIndex,         \
-        "The index of reflection of the material surface")                  \
-    BRAYNS_JSON_ADAPTER_GETSET("opacity", getOpacity, setOpacity,           \
-                               "The transparency of the material (0 to 1)") \
-    BRAYNS_JSON_ADAPTER_GETSET(                                             \
-        "refraction_index", getRefractionIndex, setRefractionIndex,         \
-        "The index of refraction of a transparent material")                \
-    BRAYNS_JSON_ADAPTER_GETSET("emission", getEmission, setEmission,        \
-                               "The emissive property of a material")       \
-    BRAYNS_JSON_ADAPTER_GETSET("glossiness", getGlossiness, setGlossiness,  \
-                               "The glossy component of a material")
+#define BRAYNS_MATERIAL_PROPERTIES() \
+    BRAYNS_JSON_ADAPTER_GETSET( \
+        "diffuse_color", \
+        getDiffuseColor, \
+        setDiffuseColor, \
+        "Diffuse reflection color RGB normalized") \
+    BRAYNS_JSON_ADAPTER_GETSET( \
+        "specular_color", \
+        getSpecularColor, \
+        setSpecularColor, \
+        "Specular reflection RGB normalized") \
+    BRAYNS_JSON_ADAPTER_GETSET( \
+        "specular_exponent", \
+        getSpecularExponent, \
+        setSpecularExponent, \
+        "The specular exponent to sharpen the specular reflection") \
+    BRAYNS_JSON_ADAPTER_GETSET( \
+        "reflection_index", \
+        getReflectionIndex, \
+        setReflectionIndex, \
+        "The index of reflection of the material surface") \
+    BRAYNS_JSON_ADAPTER_GETSET("opacity", getOpacity, setOpacity, "The transparency of the material (0 to 1)") \
+    BRAYNS_JSON_ADAPTER_GETSET( \
+        "refraction_index", \
+        getRefractionIndex, \
+        setRefractionIndex, \
+        "The index of refraction of a transparent material") \
+    BRAYNS_JSON_ADAPTER_GETSET("emission", getEmission, setEmission, "The emissive property of a material") \
+    BRAYNS_JSON_ADAPTER_GETSET("glossiness", getGlossiness, setGlossiness, "The glossy component of a material")
 
-#define BRAYNS_EXTENDED_MATERIAL_PROPERTIES()                                  \
-    BRAYNS_JSON_ADAPTER_GETSET(                                                \
-        "simulation_data_cast", getSimulationDataCast, setSimulationDataCast,  \
-        "Wether to cast the user parameter for simulation")                    \
-    BRAYNS_JSON_ADAPTER_GETSET("shading_mode", getShadingMode, setShadingMode, \
-                               "The chosen shading mode")                      \
-    BRAYNS_JSON_ADAPTER_GETSET("clipping_mode", getClippingMode,               \
-                               setClippingMode,                                \
-                               "The choosen material clipping mode")           \
-    BRAYNS_JSON_ADAPTER_GETSET("user_parameter", getUserParameter,             \
-                               setUserParameter,                               \
-                               "A custom parameter passed to the simulation")
+#define BRAYNS_EXTENDED_MATERIAL_PROPERTIES() \
+    BRAYNS_JSON_ADAPTER_GETSET( \
+        "simulation_data_cast", \
+        getSimulationDataCast, \
+        setSimulationDataCast, \
+        "Wether to cast the user parameter for simulation") \
+    BRAYNS_JSON_ADAPTER_GETSET("shading_mode", getShadingMode, setShadingMode, "The chosen shading mode") \
+    BRAYNS_JSON_ADAPTER_GETSET( \
+        "clipping_mode", \
+        getClippingMode, \
+        setClippingMode, \
+        "The choosen material clipping mode") \
+    BRAYNS_JSON_ADAPTER_GETSET( \
+        "user_parameter", \
+        getUserParameter, \
+        setUserParameter, \
+        "A custom parameter passed to the simulation")
 
 BRAYNS_JSON_ADAPTER_BEGIN(BaseMaterial)
 BRAYNS_MATERIAL_PROPERTIES()
@@ -359,10 +386,8 @@ BRAYNS_EXTENDED_MATERIAL_PROPERTIES()
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_NAMED_JSON_ADAPTER_BEGIN(MaterialProxy, "Material")
-BRAYNS_JSON_ADAPTER_GETSET("model_id", getModelId, setModelId,
-                           "The model which this material belongs to")
-BRAYNS_JSON_ADAPTER_GETSET("material_id", getMaterialId, setMaterialId,
-                           "The ID that identifies this material")
+BRAYNS_JSON_ADAPTER_GETSET("model_id", getModelId, setModelId, "The model which this material belongs to")
+BRAYNS_JSON_ADAPTER_GETSET("material_id", getMaterialId, setMaterialId, "The ID that identifies this material")
 BRAYNS_MATERIAL_PROPERTIES()
 BRAYNS_EXTENDED_MATERIAL_PROPERTIES()
 BRAYNS_JSON_ADAPTER_END()

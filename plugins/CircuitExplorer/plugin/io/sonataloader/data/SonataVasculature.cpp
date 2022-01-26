@@ -37,10 +37,9 @@ constexpr char attribEndNode[] = "end_node";
 constexpr char attribType[] = "type";
 constexpr char attribSectionId[] = "section_id";
 
-void checkAttributes(const bbp::sonata::NodePopulation& nodes,
-                     const std::vector<const char*>& attribs)
+void checkAttributes(const bbp::sonata::NodePopulation &nodes, const std::vector<const char *> &attribs)
 {
-    const auto& attributes = nodes.attributeNames();
+    const auto &attributes = nodes.attributeNames();
     for (const auto attrib : attribs)
     {
         if (attributes.find(attrib) == attributes.end())
@@ -54,9 +53,11 @@ void checkAttributes(const bbp::sonata::NodePopulation& nodes,
 }
 
 std::vector<brayns::Vector3f> getPoints(
-    const bbp::sonata::NodePopulation& nodes,
-    const bbp::sonata::Selection& selection, const char* ax, const char* ay,
-    const char* az)
+    const bbp::sonata::NodePopulation &nodes,
+    const bbp::sonata::Selection &selection,
+    const char *ax,
+    const char *ay,
+    const char *az)
 {
     checkAttributes(nodes, {ax, ay, az});
     const auto x = nodes.getAttribute<float>(ax, selection);
@@ -73,45 +74,39 @@ std::vector<brayns::Vector3f> getPoints(
     return result;
 }
 
-std::vector<float> getRadii(const bbp::sonata::NodePopulation& nodes,
-                            const bbp::sonata::Selection& selection,
-                            const char* ar)
+std::vector<float>
+    getRadii(const bbp::sonata::NodePopulation &nodes, const bbp::sonata::Selection &selection, const char *ar)
 {
     checkAttributes(nodes, {ar});
     auto radii = nodes.getAttribute<float>(ar, selection);
-    std::transform(radii.begin(), radii.end(), radii.begin(),
-                   [](const float diameter) { return diameter * .5f; });
+    std::transform(radii.begin(), radii.end(), radii.begin(), [](const float diameter) { return diameter * .5f; });
     return radii;
 }
 } // namespace
 
-std::vector<brayns::Vector3f> SonataVasculature::getSegmentStartPoints(
-    const Nodes& nodes, const Selection& selection)
+std::vector<brayns::Vector3f> SonataVasculature::getSegmentStartPoints(const Nodes &nodes, const Selection &selection)
 {
-    return getPoints(nodes, selection, attribStartX, attribStartY,
-                     attribStartZ);
+    return getPoints(nodes, selection, attribStartX, attribStartY, attribStartZ);
 }
 
-std::vector<brayns::Vector3f> SonataVasculature::getSegmentEndPoints(
-    const Nodes& nodes, const Selection& selection)
+std::vector<brayns::Vector3f> SonataVasculature::getSegmentEndPoints(const Nodes &nodes, const Selection &selection)
 {
     return getPoints(nodes, selection, attribEndX, attribEndY, attribEndZ);
 }
 
-std::vector<float> SonataVasculature::getSegmentStartRadii(
-    const Nodes& nodes, const Selection& selection)
+std::vector<float> SonataVasculature::getSegmentStartRadii(const Nodes &nodes, const Selection &selection)
 {
     return getRadii(nodes, selection, attribStartDiameter);
 }
 
-std::vector<float> SonataVasculature::getSegmentEndRadii(
-    const Nodes& nodes, const Selection& selection)
+std::vector<float> SonataVasculature::getSegmentEndRadii(const Nodes &nodes, const Selection &selection)
 {
     return getRadii(nodes, selection, attribEndDiameter);
 }
 
 std::vector<VasculatureSection> SonataVasculature::getSegmentSectionTypes(
-    const Nodes& nodes, const Selection& selection)
+    const Nodes &nodes,
+    const Selection &selection)
 {
     checkAttributes(nodes, {attribType});
     const auto rawTypes = nodes.getAttribute<uint8_t>(attribType, selection);

@@ -29,16 +29,14 @@
 
 namespace brayns
 {
-void ImageEncoder::save(const Image &image, const std::string &filename,
-                        int quality)
+void ImageEncoder::save(const Image &image, const std::string &filename, int quality)
 {
     auto format = ImageFormat::fromFilename(filename);
     auto data = encode(image, format, quality);
     FileWriter::write(data, filename);
 }
 
-std::string ImageEncoder::encode(const Image &image, const std::string &format,
-                                 int quality)
+std::string ImageEncoder::encode(const Image &image, const std::string &format, int quality)
 {
     auto &codec = ImageCodecRegistry::getCodec(format);
     auto data = codec.encode(image, quality);
@@ -49,8 +47,7 @@ std::string ImageEncoder::encode(const Image &image, const std::string &format,
     return data;
 }
 
-std::string ImageEncoder::encodeToBase64(const Image &image,
-                                         const std::string &format, int quality)
+std::string ImageEncoder::encodeToBase64(const Image &image, const std::string &format, int quality)
 {
     auto data = encode(image, format, quality);
     auto bytes = reinterpret_cast<const unsigned char *>(data.data());

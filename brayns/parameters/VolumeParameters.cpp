@@ -36,19 +36,17 @@ VolumeParameters::VolumeParameters()
     , _elementSpacing(1.f, 1.f, 1.f)
     , _offset(0.f, 0.f, 0.f)
 {
-    _parameters.add_options()(PARAM_VOLUME_DIMENSIONS.c_str(),
-                              po::fixed_tokens_value<std::vector<uint32_t>>(3,
-                                                                            3),
-                              "Volume dimensions [uint uint uint]")(
+    _parameters.add_options()(
+        PARAM_VOLUME_DIMENSIONS.c_str(),
+        po::fixed_tokens_value<std::vector<uint32_t>>(3, 3),
+        "Volume dimensions [uint uint uint]")(
         PARAM_VOLUME_ELEMENT_SPACING.c_str(),
         po::fixed_tokens_value<std::vector<float>>(3, 3),
         "Element spacing in the volume [float float "
-        "float]")(PARAM_VOLUME_OFFSET.c_str(),
-                  po::fixed_tokens_value<std::vector<float>>(3, 3),
-                  "Volume offset [float float float]");
+        "float]")(PARAM_VOLUME_OFFSET.c_str(), po::fixed_tokens_value<std::vector<float>>(3, 3), "Volume offset [float float float]");
 }
 
-void VolumeParameters::parse(const po::variables_map& vm)
+void VolumeParameters::parse(const po::variables_map &vm)
 {
     if (vm.count(PARAM_VOLUME_DIMENSIONS))
     {

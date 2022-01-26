@@ -59,16 +59,22 @@ public:
     /**
      * Called from Brayns::Brayns right after the engine has been created
      */
-    virtual void init() {}
+    virtual void init()
+    {
+    }
 
     /**
      * Called from Brayns::preRender() to prepare the engine based on the
      * plugins' need for an upcoming render().
      */
-    virtual void preRender() {}
+    virtual void preRender()
+    {
+    }
 
     /** Called from Brayns::postRender() after render() has finished. */
-    virtual void postRender() {}
+    virtual void postRender()
+    {
+    }
 
     /**
      * @brief Add an entrypoint of given type built using given args.
@@ -82,8 +88,8 @@ public:
      * @tparam Args Entrypoint construction arguments types.
      * @param args Entrypoint construction arguments.
      */
-    template <typename T, typename... Args>
-    void add(Args&&... args)
+    template<typename T, typename... Args>
+    void add(Args &&...args)
     {
         assert(_api);
         auto interface = _api->getActionInterface();
@@ -99,7 +105,7 @@ public:
 protected:
     friend class PluginManager;
 
-    PluginAPI* _api = nullptr;
+    PluginAPI *_api = nullptr;
 
 private:
     std::string _name;

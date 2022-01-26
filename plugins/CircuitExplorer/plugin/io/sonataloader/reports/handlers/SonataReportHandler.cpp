@@ -29,8 +29,9 @@ auto frameIndexToTimestamp(const uint32_t frame, const double dt) noexcept
 } // namespace
 
 SonataReportHandler::SonataReportHandler(
-    const std::string& h5FilePath, const std::string& populationName,
-    const bbp::sonata::Selection& selection)
+    const std::string &h5FilePath,
+    const std::string &populationName,
+    const bbp::sonata::Selection &selection)
     : brayns::AbstractSimulationHandler()
     , _h5FilePath(h5FilePath)
     , _populationName(populationName)
@@ -44,18 +45,15 @@ SonataReportHandler::SonataReportHandler(
     _dt = std::get<2>(times);
     _unit = _reportPopulation.getTimeUnits();
 
-    auto firstFrame =
-        _reportPopulation.get(selection, _startTime, _startTime + _dt);
+    auto firstFrame = _reportPopulation.get(selection, _startTime, _startTime + _dt);
     _frameSize = firstFrame.ids.size();
-    _nbFrames = static_cast<uint32_t>((std::nextafter(_endTime, INFINITY) -
-                                       std::nextafter(_startTime, INFINITY)) /
-                                      _dt);
+    _nbFrames =
+        static_cast<uint32_t>((std::nextafter(_endTime, INFINITY) - std::nextafter(_startTime, INFINITY)) / _dt);
 }
 
 brayns::AbstractSimulationHandlerPtr SonataReportHandler::clone() const
 {
-    return std::make_shared<SonataReportHandler>(_h5FilePath, _populationName,
-                                                 _selection);
+    return std::make_shared<SonataReportHandler>(_h5FilePath, _populationName, _selection);
 }
 
 std::vector<float> SonataReportHandler::getFrameDataImpl(const uint32_t frame)

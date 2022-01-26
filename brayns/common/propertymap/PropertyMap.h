@@ -61,7 +61,7 @@ public:
      * @brief Functor used to notify when the propery value changes.
      *
      */
-    using Callback = std::function<void(const Property&)>;
+    using Callback = std::function<void(const Property &)>;
 
     /**
      * @brief Construct a property from its name, type and optional metadata.
@@ -71,7 +71,7 @@ public:
      * @param value The value the property is initialized with.
      * @param metaData Optional metadata for high-level description.
      */
-    template <typename T>
+    template<typename T>
     Property(std::string name, T value, MetaData metaData = {})
         : _name(std::move(name))
         , _label(std::move(metaData.label))
@@ -101,35 +101,50 @@ public:
      *
      * @return const std::string& The name of the property (ex: "minValue")
      */
-    const std::string& getName() const { return _name; }
+    const std::string &getName() const
+    {
+        return _name;
+    }
 
     /**
      * @brief Get the label set to the property.
      *
      * @return const std::string& Property label.
      */
-    const std::string& getLabel() const { return _label; }
+    const std::string &getLabel() const
+    {
+        return _label;
+    }
 
     /**
      * @brief Get the description set to the property.
      *
      * @return const std::string& Property description.
      */
-    const std::string& getDescription() const { return _description; }
+    const std::string &getDescription() const
+    {
+        return _description;
+    }
 
     /**
      * @brief Get the type of the property.
      *
      * @return std::type_index The type of the property (cannot be changed).
      */
-    std::type_index getType() const { return _value.getType(); }
+    std::type_index getType() const
+    {
+        return _value.getType();
+    }
 
     /**
      * @brief Get the current value of the property.
      *
      * @return const Any& The value of the property as a generic type.
      */
-    const Any& getValue() const { return _value; }
+    const Any &getValue() const
+    {
+        return _value;
+    }
 
     /**
      * @brief Update the value of the property and notify if a callback is set.
@@ -156,7 +171,7 @@ public:
      * with the current one.
      * @throw std::runtime_error Invalid conversion (not in ConversionRegistry).
      */
-    void copyValue(const Any& value)
+    void copyValue(const Any &value)
     {
         if (!ConversionRegistry::convert(value, _value))
         {
@@ -171,21 +186,30 @@ public:
      * @return true The property is read only.
      * @return false The property can be written.
      */
-    bool isReadOnly() const { return _readOnly; }
+    bool isReadOnly() const
+    {
+        return _readOnly;
+    }
 
     /**
      * @brief Set the property as readonly. Not checked, info only.
      *
      * @param readOnly true if readonly.
      */
-    void setReadOnly(bool readOnly) { _readOnly = readOnly; }
+    void setReadOnly(bool readOnly)
+    {
+        _readOnly = readOnly;
+    }
 
     /**
      * @brief Set a callback to be called when the value is updated.
      *
      * @param callback The callback to set (signature: void(const Property&)).
      */
-    void onModified(Callback callback) { _callback = std::move(callback); }
+    void onModified(Callback callback)
+    {
+        _callback = std::move(callback);
+    }
 
     /**
      * @brief Trigger manually the modification callback if any.
@@ -206,7 +230,7 @@ public:
      * @return true The property is of type T.
      * @return false The property is not of type T.
      */
-    template <typename T>
+    template<typename T>
     bool is() const
     {
         return _value.is<T>();
@@ -218,8 +242,8 @@ public:
      * @tparam T The desired type, must be the exact same type of the property.
      * @return const T& Immutable reference on the contained value.
      */
-    template <typename T>
-    const T& as() const
+    template<typename T>
+    const T &as() const
     {
         return _value.as<T>();
     }
@@ -230,8 +254,8 @@ public:
      * @tparam T The desired type, must be the exact same type of the property.
      * @return const T& Mutable reference on the contained value.
      */
-    template <typename T>
-    T& as()
+    template<typename T>
+    T &as()
     {
         return _value.as<T>();
     }
@@ -244,7 +268,7 @@ public:
      * @return T The contained value converted to the desired type.
      * @throw std::runtime_error The conversion from getType() to T is invalid.
      */
-    template <typename T>
+    template<typename T>
     T to() const
     {
         Any result = T();
@@ -265,7 +289,7 @@ public:
      * @return true The functor has been called.
      * @return false The functor has not been called.
      */
-    template <typename T, typename FunctorType>
+    template<typename T, typename FunctorType>
     bool visit(FunctorType functor) const
     {
         if (!is<T>())
@@ -286,7 +310,7 @@ public:
      * @return true The functor has been called.
      * @return false The functor has not been called.
      */
-    template <typename T, typename FunctorType>
+    template<typename T, typename FunctorType>
     bool visit(FunctorType functor)
     {
         if (!is<T>())
@@ -334,42 +358,60 @@ public:
      *
      * @return const std::string& The name of the property map.
      */
-    const std::string& getName() const { return _name; }
+    const std::string &getName() const
+    {
+        return _name;
+    }
 
     /**
      * @brief Iterator on all immutable properties contained in the map.
      *
      * @return auto Iterator on the properties.
      */
-    auto begin() const { return _properties.begin(); }
+    auto begin() const
+    {
+        return _properties.begin();
+    }
 
     /**
      * @brief Iterator on all mutable properties contained in the map.
      *
      * @return auto Iterator on the properties.
      */
-    auto begin() { return _properties.begin(); }
+    auto begin()
+    {
+        return _properties.begin();
+    }
 
     /**
      * @brief Invalid const iterator.
      *
      * @return auto Invalid iterator.
      */
-    auto end() const { return _properties.end(); }
+    auto end() const
+    {
+        return _properties.end();
+    }
 
     /**
      * @brief Invalid iterator.
      *
      * @return auto Invalid iterator.
      */
-    auto end() { return _properties.end(); }
+    auto end()
+    {
+        return _properties.end();
+    }
 
     /**
      * @brief Get the number of properties inside the map.
      *
      * @return size_t Current number of properties.
      */
-    size_t size() const { return _properties.size(); }
+    size_t size() const
+    {
+        return _properties.size();
+    }
 
     /**
      * @brief Check if the map is empty.
@@ -377,7 +419,10 @@ public:
      * @return true The map is empty.
      * @return false The map has at least one property.
      */
-    bool empty() const { return _properties.empty(); }
+    bool empty() const
+    {
+        return _properties.empty();
+    }
 
     /**
      * @brief Check if an index is valid to access a property.
@@ -397,11 +442,12 @@ public:
      * @param name The key of the property to find.
      * @return int The index of the property or -1 if not found.
      */
-    int getIndex(const std::string& name) const
+    int getIndex(const std::string &name) const
     {
-        auto i = std::find_if(_properties.begin(), _properties.end(),
-                              [&](auto& property)
-                              { return property.getName() == name; });
+        auto i = std::find_if(
+            _properties.begin(),
+            _properties.end(),
+            [&](auto &property) { return property.getName() == name; });
         return i == _properties.end() ? -1 : int(i - _properties.begin());
     }
 
@@ -411,7 +457,7 @@ public:
      * @param index The index of the property.
      * @return const Property* A pointer to the property or null if not found.
      */
-    const Property* find(int index) const
+    const Property *find(int index) const
     {
         return isValidIndex(index) ? &_properties[index] : nullptr;
     }
@@ -422,7 +468,7 @@ public:
      * @param index The index of the property.
      * @return Property* A pointer to the property or null if not found.
      */
-    Property* find(int index)
+    Property *find(int index)
     {
         return isValidIndex(index) ? &_properties[index] : nullptr;
     }
@@ -433,7 +479,7 @@ public:
      * @param index The name of the property.
      * @return const Property* A pointer to the property or null if not found.
      */
-    const Property* find(const std::string& name) const
+    const Property *find(const std::string &name) const
     {
         return find(getIndex(name));
     }
@@ -444,7 +490,10 @@ public:
      * @param index The index of the property.
      * @return Property* A pointer to the property or null if not found.
      */
-    Property* find(const std::string& name) { return find(getIndex(name)); }
+    Property *find(const std::string &name)
+    {
+        return find(getIndex(name));
+    }
 
     /**
      * @brief Add a new property to the map. If already present, the existing
@@ -456,7 +505,7 @@ public:
      * @throw std::runtime_error The property already exists with a different
      * type.
      */
-    Property& add(const Property& property)
+    Property &add(const Property &property)
     {
         auto index = getIndex(property.getName());
         if (index < 0)
@@ -477,7 +526,7 @@ public:
      * @throw std::runtime_error The property has an incompatible type with
      * value.
      */
-    void update(const std::string& name, const Any& value)
+    void update(const std::string &name, const Any &value)
     {
         auto property = find(name);
         if (!property)
@@ -493,9 +542,9 @@ public:
      *
      * @param other The source properties.
      */
-    void merge(const PropertyMap& other)
+    void merge(const PropertyMap &other)
     {
-        for (const auto& property : other._properties)
+        for (const auto &property : other._properties)
         {
             auto index = getIndex(property.getName());
             if (index < 0)
@@ -513,9 +562,9 @@ public:
      *
      * @param other The source properties.
      */
-    void update(const PropertyMap& other)
+    void update(const PropertyMap &other)
     {
-        for (const auto& property : other._properties)
+        for (const auto &property : other._properties)
         {
             auto index = getIndex(property.getName());
             if (index < 0)
@@ -532,7 +581,7 @@ public:
      * @param index A valid index of a property.
      * @return const Property& The desired property.
      */
-    const Property& operator[](size_t index) const
+    const Property &operator[](size_t index) const
     {
         if (!isValidIndex(index))
         {
@@ -547,7 +596,7 @@ public:
      * @param name A valid name of a property.
      * @return const Property& The desired property.
      */
-    const Property& operator[](const std::string& name) const
+    const Property &operator[](const std::string &name) const
     {
         return (*this)[getIndex(name)];
     }
@@ -562,8 +611,8 @@ public:
      * @return T The value of the property or defaultValue if not found.
      * @throw std::runtime_error Invalid conversion (see ConversionRegistry).
      */
-    template <typename T>
-    T valueOr(const std::string& name, T defaultValue) const
+    template<typename T>
+    T valueOr(const std::string &name, T defaultValue) const
     {
         auto property = find(name);
         if (!property)

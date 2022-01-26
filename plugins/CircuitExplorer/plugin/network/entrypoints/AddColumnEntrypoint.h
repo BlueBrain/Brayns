@@ -31,7 +31,7 @@
 class ColumnModel
 {
 public:
-    static void add(brayns::Scene& scene, const AddColumnMessage& params)
+    static void add(brayns::Scene &scene, const AddColumnMessage &params)
     {
         // Create column model
         auto model = scene.createModel();
@@ -40,17 +40,28 @@ public:
 
         // Bottom of the column
         const std::vector<brayns::Vector3f> verticesBottom = {
-            {-0.25f, -1.0f, -0.5f}, {0.25f, -1.0f, -0.5f},
-            {0.5f, -1.0f, -0.25f},  {0.5f, -1.0f, 0.25f},
-            {0.5f, -1.0f, -0.25f},  {0.5f, -1.0f, 0.25f},
-            {0.25f, -1.0f, 0.5f},   {-0.25f, -1.0f, 0.5f},
-            {-0.5f, -1.0f, 0.25f},  {-0.5f, -1.0f, -0.25f}};
+            {-0.25f, -1.0f, -0.5f},
+            {0.25f, -1.0f, -0.5f},
+            {0.5f, -1.0f, -0.25f},
+            {0.5f, -1.0f, 0.25f},
+            {0.5f, -1.0f, -0.25f},
+            {0.5f, -1.0f, 0.25f},
+            {0.25f, -1.0f, 0.5f},
+            {-0.25f, -1.0f, 0.5f},
+            {-0.5f, -1.0f, 0.25f},
+            {-0.5f, -1.0f, -0.25f}};
 
         // Top of the column
         const std::vector<brayns::Vector3f> verticesTop = {
-            {-0.25f, 1.f, -0.5f}, {0.25f, 1.f, -0.5f}, {0.5f, 1.f, -0.25f},
-            {0.5f, 1.f, 0.25f},   {0.5f, 1.f, -0.25f}, {0.5f, 1.f, 0.25f},
-            {0.25f, 1.f, 0.5f},   {-0.25f, 1.f, 0.5f}, {-0.5f, 1.f, 0.25f},
+            {-0.25f, 1.f, -0.5f},
+            {0.25f, 1.f, -0.5f},
+            {0.5f, 1.f, -0.25f},
+            {0.5f, 1.f, 0.25f},
+            {0.5f, 1.f, -0.25f},
+            {0.5f, 1.f, 0.25f},
+            {0.25f, 1.f, 0.5f},
+            {-0.25f, 1.f, 0.5f},
+            {-0.5f, 1.f, 0.25f},
             {-0.5f, 1.f, -0.25f}};
 
         // Extract column info
@@ -59,50 +70,43 @@ public:
         // Bottom
         for (size_t i = 0; i < verticesBottom.size(); ++i)
         {
-            model->addCylinder(matId,
-                               {verticesBottom[i],
-                                verticesBottom[(i + 1) % verticesBottom.size()],
-                                r / 2.f});
+            model->addCylinder(matId, {verticesBottom[i], verticesBottom[(i + 1) % verticesBottom.size()], r / 2.f});
             model->addSphere(matId, {verticesBottom[i], r});
         }
 
         // Top
         for (size_t i = 0; i < verticesTop.size(); ++i)
         {
-            model->addCylinder(matId,
-                               {verticesTop[i],
-                                verticesTop[(i + 1) % verticesTop.size()],
-                                r / 2.f});
+            model->addCylinder(matId, {verticesTop[i], verticesTop[(i + 1) % verticesTop.size()], r / 2.f});
             model->addSphere(matId, {verticesTop[i], r});
         }
 
         // Middle
         for (size_t i = 0; i < verticesTop.size(); ++i)
-            model->addCylinder(matId,
-                               {verticesBottom[i], verticesTop[i], r / 2.f});
+            model->addCylinder(matId, {verticesBottom[i], verticesTop[i], r / 2.f});
 
         // Register column model
-        scene.addModel(
-            std::make_shared<brayns::ModelDescriptor>(std::move(model),
-                                                      "Column"));
+        scene.addModel(std::make_shared<brayns::ModelDescriptor>(std::move(model), "Column"));
     }
 };
 
-class AddColumnEntrypoint
-    : public brayns::Entrypoint<AddColumnMessage, brayns::EmptyMessage>
+class AddColumnEntrypoint : public brayns::Entrypoint<AddColumnMessage, brayns::EmptyMessage>
 {
 public:
-    virtual std::string getName() const override { return "add-column"; }
+    virtual std::string getName() const override
+    {
+        return "add-column";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Add a visual 3D column as a cylinder to the scene";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& scene = getApi().getScene();
+        auto &scene = getApi().getScene();
         brayns::Log::info("[CE] Building Column model.");
         ColumnModel::add(scene, params);
         triggerRender();

@@ -33,8 +33,7 @@ bool StringHelper::isSpace(char c)
 
 bool StringHelper::isSpace(std::string_view str)
 {
-    return std::all_of(str.begin(), str.end(),
-                       [](auto c) { return isSpace(c); });
+    return std::all_of(str.begin(), str.end(), [](auto c) { return isSpace(c); });
 }
 
 bool StringHelper::startsWith(std::string_view str, std::string_view item)
@@ -75,8 +74,7 @@ size_t StringHelper::count(std::string_view str, std::string_view item)
     return result;
 }
 
-std::string_view StringHelper::extract(std::string_view &str,
-                                       std::string_view separator)
+std::string_view StringHelper::extract(std::string_view &str, std::string_view separator)
 {
     auto size = separator.size();
     size_t i = 0;
@@ -114,19 +112,18 @@ size_t StringHelper::countTokens(std::string_view str)
     return result;
 }
 
-template <>
+template<>
 int8_t StringHelper::extract<int8_t>(std::string_view &data)
 {
     auto value = StringHelper::extract<int32_t>(data);
-    if (value < std::numeric_limits<int8_t>::min() ||
-        value > std::numeric_limits<int8_t>::max())
+    if (value < std::numeric_limits<int8_t>::min() || value > std::numeric_limits<int8_t>::max())
     {
         throw std::out_of_range(std::to_string(value));
     }
     return int8_t(value);
 }
 
-template <>
+template<>
 uint8_t StringHelper::extract<uint8_t>(std::string_view &data)
 {
     auto value = StringHelper::extract<uint32_t>(data);

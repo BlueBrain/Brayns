@@ -38,20 +38,20 @@ auto getSmoothRadius(float current, const float parentRadius)
 }
 } // namespace
 
-void RadiusSmoother::process(NeuronMorphology& morphology) const
+void RadiusSmoother::process(NeuronMorphology &morphology) const
 {
-    std::queue<NeuronMorphology::Section*> smoothQueue;
+    std::queue<NeuronMorphology::Section *> smoothQueue;
 
     // If we have the soma, use half of its radius as starting smoothing radius
     if (morphology.hasSoma())
     {
-        auto& soma = morphology.soma();
+        auto &soma = morphology.soma();
         for (auto s : soma.children)
         {
             s->samples.front().w = soma.radius * 0.4f;
             for (size_t i = 1; i < s->samples.size(); ++i)
             {
-                auto& sample = s->samples[i];
+                auto &sample = s->samples[i];
                 sample.w = getSmoothRadius(sample.w, s->samples[i - 1].w);
             }
             smoothQueue.push(s);
@@ -61,14 +61,14 @@ void RadiusSmoother::process(NeuronMorphology& morphology) const
     // radius
     else
     {
-        for (auto& section : morphology.sections())
+        for (auto &section : morphology.sections())
         {
             // We look for root sections
             if (section.parentId != -1)
                 continue;
             for (size_t i = 1; i < section.samples.size(); ++i)
             {
-                auto& sample = section.samples[i];
+                auto &sample = section.samples[i];
                 sample.w = getSmoothRadius(sample.w, section.samples[i - 1].w);
             }
             smoothQueue.push(&section);
@@ -87,7 +87,7 @@ void RadiusSmoother::process(NeuronMorphology& morphology) const
             float prevRadius = s->samples.back().w;
             for (size_t i = 0; i < child->samples.size(); ++i)
             {
-                auto& sample = child->samples[i];
+                auto &sample = child->samples[i];
                 sample.w = getSmoothRadius(sample.w, prevRadius);
                 prevRadius = sample.w;
             }

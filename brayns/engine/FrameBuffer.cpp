@@ -26,8 +26,7 @@
 
 namespace brayns
 {
-FrameBuffer::FrameBuffer(const std::string& name, const Vector2ui& frameSize,
-                         const PixelFormat frameBufferFormat)
+FrameBuffer::FrameBuffer(const std::string &name, const Vector2ui &frameSize, const PixelFormat frameBufferFormat)
     : _name(name)
     , _frameSize(frameSize)
     , _frameBufferFormat(frameBufferFormat)
@@ -53,7 +52,7 @@ Image FrameBuffer::getImage()
     map();
 
     const auto colorBuffer = getColorBuffer();
-    const auto& size = getSize();
+    const auto &size = getSize();
 
     ImageInfo info;
 
@@ -86,7 +85,7 @@ Image FrameBuffer::getImage()
         return {};
     }
 
-    auto data = reinterpret_cast<const char*>(colorBuffer);
+    auto data = reinterpret_cast<const char *>(colorBuffer);
     auto length = info.getSize();
     Image image(info, {data, length});
     ImageFlipper::flipVertically(image);

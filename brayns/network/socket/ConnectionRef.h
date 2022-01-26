@@ -49,7 +49,7 @@ public:
      * @param handle Client handle.
      * @param connections Connection manager.
      */
-    ConnectionRef(ConnectionHandle handle, ConnectionManager& connections)
+    ConnectionRef(ConnectionHandle handle, ConnectionManager &connections)
         : _handle(std::move(handle))
         , _connections(&connections)
     {
@@ -60,14 +60,17 @@ public:
      *
      * @return const ConnectionHandle& Client connection handle.
      */
-    const ConnectionHandle& getHandle() const { return _handle; }
+    const ConnectionHandle &getHandle() const
+    {
+        return _handle;
+    }
 
     /**
      * @brief Send a packet to the client.
      *
      * @param packet Data packet.
      */
-    void send(const OutputPacket& packet) const
+    void send(const OutputPacket &packet) const
     {
         if (!_connections)
         {
@@ -88,7 +91,7 @@ public:
      *
      * @param packet Data packet.
      */
-    void broadcast(const OutputPacket& packet) const
+    void broadcast(const OutputPacket &packet) const
     {
         if (!_connections)
         {
@@ -109,7 +112,7 @@ public:
      *
      * @param packet Data packet.
      */
-    void broadcastToOtherClients(const OutputPacket& packet) const
+    void broadcastToOtherClients(const OutputPacket &packet) const
     {
         if (!_connections)
         {
@@ -127,6 +130,6 @@ public:
 
 private:
     ConnectionHandle _handle;
-    ConnectionManager* _connections = nullptr;
+    ConnectionManager *_connections = nullptr;
 };
 } // namespace brayns

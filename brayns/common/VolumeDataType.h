@@ -36,13 +36,17 @@ enum class VolumeDataType
     INT32
 };
 
-template <>
+template<>
 inline std::vector<std::pair<std::string, VolumeDataType>> enumMap()
 {
     return {
-        {"float", VolumeDataType::FLOAT},   {"double", VolumeDataType::DOUBLE},
-        {"uint8", VolumeDataType::UINT8},   {"uint16", VolumeDataType::UINT16},
-        {"uint32", VolumeDataType::UINT32}, {"int8", VolumeDataType::INT8},
-        {"int16", VolumeDataType::INT16},   {"int32", VolumeDataType::INT32}};
+        {"float", VolumeDataType::FLOAT},
+        {"double", VolumeDataType::DOUBLE},
+        {"uint8", VolumeDataType::UINT8},
+        {"uint16", VolumeDataType::UINT16},
+        {"uint32", VolumeDataType::UINT32},
+        {"int8", VolumeDataType::INT8},
+        {"int16", VolumeDataType::INT16},
+        {"int32", VolumeDataType::INT32}};
 }
 } // namespace brayns

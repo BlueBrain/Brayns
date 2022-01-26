@@ -51,7 +51,7 @@ public:
      * @param values available values of the enum.
      * @throw std::runtime_error The provided value is not in values.
      */
-    EnumProperty(const std::string& value, std::vector<std::string> values)
+    EnumProperty(const std::string &value, std::vector<std::string> values)
         : _values(std::move(values))
     {
         _assignOrThrow(value);
@@ -88,7 +88,7 @@ public:
      * @return const std::string& The enum value in available values or empty if
      * no available values.
      */
-    const std::string& toString() const
+    const std::string &toString() const
     {
         return isValidIndex(_index) ? _values[_index] : _getEmptyString();
     }
@@ -99,14 +99,20 @@ public:
      * @return int The index of the current value in available values or -1 if
      * no available values.
      */
-    int toInt() const { return _index; }
+    int toInt() const
+    {
+        return _index;
+    }
 
     /**
      * @brief Get the available values of the enum.
      *
      * @return const std::vector<std::string>& The values the enum can take.
      */
-    const std::vector<std::string>& getValues() const { return _values; }
+    const std::vector<std::string> &getValues() const
+    {
+        return _values;
+    }
 
     /**
      * @brief Check if the given index is a valid enum value.
@@ -126,7 +132,7 @@ public:
      * @param value The value to get the index from values.
      * @return int The index of value in values or -1 if invalid.
      */
-    int getIndex(const std::string& value) const
+    int getIndex(const std::string &value) const
     {
         auto i = std::find(_values.begin(), _values.end(), value);
         return i == _values.end() ? -1 : int(i - _values.begin());
@@ -139,7 +145,7 @@ public:
      * @return const std::string* A pointer to the value in available values or
      * null if invalid.
      */
-    const std::string* find(const std::string& value) const
+    const std::string *find(const std::string &value) const
     {
         auto i = std::find(_values.begin(), _values.end(), value);
         return i == _values.end() ? nullptr : &*i;
@@ -152,7 +158,7 @@ public:
      * @return const std::string* A pointer to the corresponding value in
      * available values or null if invalid.
      */
-    const std::string* find(int index) const
+    const std::string *find(int index) const
     {
         return isValidIndex(index) ? &_values[index] : nullptr;
     }
@@ -163,7 +169,7 @@ public:
      * @param value The new value of the enum.
      * @return EnumProperty& *this.
      */
-    EnumProperty& operator=(const std::string& value)
+    EnumProperty &operator=(const std::string &value)
     {
         _assignOrThrow(value);
         return *this;
@@ -175,7 +181,7 @@ public:
      * @param value The index of the new value of the enum.
      * @return EnumProperty& *this.
      */
-    EnumProperty& operator=(int index)
+    EnumProperty &operator=(int index)
     {
         _assignOrThrow(index);
         return *this;
@@ -187,20 +193,20 @@ public:
      * @tparam EnumType The type to convert the current value index.
      * @return EnumType The current index converted in EnumType.
      */
-    template <typename EnumType>
+    template<typename EnumType>
     EnumType to() const
     {
         return EnumType(_index);
     }
 
 private:
-    static const std::string& _getEmptyString()
+    static const std::string &_getEmptyString()
     {
         static const std::string emptyString;
         return emptyString;
     }
 
-    void _assignOrThrow(const std::string& value)
+    void _assignOrThrow(const std::string &value)
     {
         auto index = getIndex(value);
         if (isValidIndex(index))
@@ -218,8 +224,7 @@ private:
             _index = index;
             return;
         }
-        throw std::runtime_error("Could not match enum index'" +
-                                 std::to_string(index) + "'");
+        throw std::runtime_error("Could not match enum index'" + std::to_string(index) + "'");
     }
 
     int _index = -1;
@@ -230,10 +235,10 @@ private:
  * @brief Converter to convert an enumeration to string.
  *
  */
-template <>
+template<>
 struct Converter<EnumProperty, std::string>
 {
-    static void convert(const EnumProperty& from, std::string& to)
+    static void convert(const EnumProperty &from, std::string &to)
     {
         to = from.toString();
     }
@@ -243,10 +248,10 @@ struct Converter<EnumProperty, std::string>
  * @brief Converter to assign a new string value to an enumeration.
  *
  */
-template <>
+template<>
 struct Converter<std::string, EnumProperty>
 {
-    static void convert(const std::string& from, EnumProperty& to)
+    static void convert(const std::string &from, EnumProperty &to)
     {
         to = from;
     }
@@ -256,10 +261,10 @@ struct Converter<std::string, EnumProperty>
  * @brief Converter to convert an enumeration to integer 32.
  *
  */
-template <>
+template<>
 struct Converter<EnumProperty, int32_t>
 {
-    static void convert(const EnumProperty& from, int32_t& to)
+    static void convert(const EnumProperty &from, int32_t &to)
     {
         to = from.toInt();
     }
@@ -269,20 +274,23 @@ struct Converter<EnumProperty, int32_t>
  * @brief Converter to assign a new integer value to an enumeration.
  *
  */
-template <>
+template<>
 struct Converter<int32_t, EnumProperty>
 {
-    static void convert(int32_t from, EnumProperty& to) { to = int(from); }
+    static void convert(int32_t from, EnumProperty &to)
+    {
+        to = int(from);
+    }
 };
 
 /**
  * @brief Converter to convert an enumeration to integer 64.
  *
  */
-template <>
+template<>
 struct Converter<EnumProperty, int64_t>
 {
-    static void convert(const EnumProperty& from, int64_t& to)
+    static void convert(const EnumProperty &from, int64_t &to)
     {
         to = from.toInt();
     }
@@ -292,9 +300,12 @@ struct Converter<EnumProperty, int64_t>
  * @brief Converter to assign a new integer value to an enumeration.
  *
  */
-template <>
+template<>
 struct Converter<int64_t, EnumProperty>
 {
-    static void convert(int64_t from, EnumProperty& to) { to = int(from); }
+    static void convert(int64_t from, EnumProperty &to)
+    {
+        to = int(from);
+    }
 };
 } // namespace brayns

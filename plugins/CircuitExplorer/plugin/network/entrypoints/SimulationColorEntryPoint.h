@@ -24,8 +24,7 @@
 #include <plugin/api/MaterialUtils.h>
 #include <plugin/network/messages/SimulationColorMessage.h>
 
-class SimulationColorEntryPoint
-    : public brayns::Entrypoint<SimulationColorMessage, brayns::EmptyMessage>
+class SimulationColorEntryPoint : public brayns::Entrypoint<SimulationColorMessage, brayns::EmptyMessage>
 {
 public:
     virtual std::string getName() const override
@@ -39,13 +38,12 @@ public:
                "simulation values";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& scene = getApi().getScene();
-        auto& model = brayns::ExtractModel::fromId(scene, params.model_id);
-        CircuitExplorerMaterial::setSimulationColorEnabled(model.getModel(),
-                                                           params.enabled);
+        auto &scene = getApi().getScene();
+        auto &model = brayns::ExtractModel::fromId(scene, params.model_id);
+        CircuitExplorerMaterial::setSimulationColorEnabled(model.getModel(), params.enabled);
         request.reply(brayns::EmptyMessage());
     }
 };

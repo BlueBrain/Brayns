@@ -28,7 +28,7 @@
 
 namespace brayns
 {
-template <class T>
+template<class T>
 class Box
 {
 public:
@@ -36,29 +36,29 @@ public:
 
     Box() = default;
 
-    Box(const vec& pMin, const vec& pMax)
+    Box(const vec &pMin, const vec &pMax)
         : _min(glm::min(pMin, pMax))
         , _max(glm::max(pMin, pMax))
     {
     }
-    inline bool operator==(const Box<T>& other) const
+    inline bool operator==(const Box<T> &other) const
     {
         return _min == other._min && _max == other._max;
     }
 
-    inline void merge(const Box<T>& aabb)
+    inline void merge(const Box<T> &aabb)
     {
         _min = glm::min(_min, aabb.getMin());
         _max = glm::max(_max, aabb.getMax());
     }
 
-    inline void merge(const vec& point)
+    inline void merge(const vec &point)
     {
         _min = glm::min(_min, point);
         _max = glm::max(_max, point);
     }
 
-    inline void intersect(const Box<T>& aabb)
+    inline void intersect(const Box<T> &aabb)
     {
         _min = glm::max(_min, aabb.getMin());
         _max = glm::min(_max, aabb.getMax());
@@ -75,12 +75,30 @@ public:
         return _min.x >= _max.x || _min.y >= _max.y || _min.z >= _max.z;
     }
 
-    inline vec getCenter() const { return (_min + _max) * .5; }
-    inline vec getSize() const { return _max - _min; }
-    inline const vec& getMin() const { return _min; }
-    inline const vec& getMax() const { return _max; }
-    inline void setMin(const vec& min) { _min = min; }
-    inline void setMax(const vec& max) { _max = max; }
+    inline vec getCenter() const
+    {
+        return (_min + _max) * .5;
+    }
+    inline vec getSize() const
+    {
+        return _max - _min;
+    }
+    inline const vec &getMin() const
+    {
+        return _min;
+    }
+    inline const vec &getMax() const
+    {
+        return _max;
+    }
+    inline void setMin(const vec &min)
+    {
+        _min = min;
+    }
+    inline void setMax(const vec &max)
+    {
+        _max = max;
+    }
 
 #ifdef __INTEL_COMPILER // Workaround for ICC. Make members public
 public:
@@ -139,8 +157,8 @@ using Quaterniond = glm::tquat<double, glm::highp>; //!< Double quaternion.
 
 namespace std
 {
-template <typename T>
-inline std::ostream& operator<<(std::ostream& os, const brayns::Box<T>& box)
+template<typename T>
+inline std::ostream &operator<<(std::ostream &os, const brayns::Box<T> &box)
 {
     return os << box.getMin() << " - " << box.getMax();
 }

@@ -35,7 +35,7 @@ class PropertyObject : public BaseObject
 {
 public:
     /** Set the current type to use for 'type-less' queries and updates. */
-    void setCurrentType(const std::string& type)
+    void setCurrentType(const std::string &type)
     {
         _updateValue(_currentType, type);
 
@@ -45,13 +45,15 @@ public:
     }
 
     /** @return the current set type. */
-    const std::string& getCurrentType() const { return _currentType; }
-    /** Update the value of the given property for the current type. */
-    template <typename T>
-    inline void updateProperty(const std::string& name, const T& value,
-                               const bool triggerCallback = true)
+    const std::string &getCurrentType() const
     {
-        auto& propMap = _properties.at(_currentType);
+        return _currentType;
+    }
+    /** Update the value of the given property for the current type. */
+    template<typename T>
+    inline void updateProperty(const std::string &name, const T &value, const bool triggerCallback = true)
+    {
+        auto &propMap = _properties.at(_currentType);
         const auto oldValue = propMap.valueOr(name, value);
         if (!_isEqual(oldValue, value))
         {
@@ -64,7 +66,7 @@ public:
      * @return true if the property with the given name exists for the current
      *         type.
      */
-    bool hasProperty(const std::string& name) const
+    bool hasProperty(const std::string &name) const
     {
         return _properties.at(_currentType).find(name);
     }
@@ -73,8 +75,8 @@ public:
      * @return the value of the property with the given name for the current
      *         type.
      */
-    template <typename T>
-    inline T getProperty(const std::string& name) const
+    template<typename T>
+    inline T getProperty(const std::string &name) const
     {
         return _properties.at(_currentType)[name].as<T>();
     }
@@ -83,20 +85,20 @@ public:
      * @return the value of the property with the given name for the current
      *         type. If it does not exist return the given value.
      */
-    template <typename T>
-    inline T getPropertyOrValue(const std::string& name, T val) const
+    template<typename T>
+    inline T getPropertyOrValue(const std::string &name, T val) const
     {
         return hasProperty(name) ? getProperty<T>(name) : val;
     }
 
     /** Assign a new set of properties to the current type. */
-    void setProperties(const PropertyMap& properties)
+    void setProperties(const PropertyMap &properties)
     {
         setProperties(_currentType, properties);
     }
 
     /** Assign a new set of properties to the given type. */
-    void setProperties(const std::string& type, const PropertyMap& properties)
+    void setProperties(const std::string &type, const PropertyMap &properties)
     {
         _properties[type] = properties;
         markModified();
@@ -105,16 +107,19 @@ public:
     /**
      * Update or add all the properties from the given map to the current type.
      */
-    void updateProperties(const PropertyMap& properties)
+    void updateProperties(const PropertyMap &properties)
     {
         _properties.at(_currentType).merge(properties);
         markModified();
     }
 
     /** @return the entire property map for the current type. */
-    const auto& getPropertyMap() const { return _properties.at(_currentType); }
+    const auto &getPropertyMap() const
+    {
+        return _properties.at(_currentType);
+    }
     /** @return the entire property map for the given type. */
-    const auto& getPropertyMap(const std::string& type) const
+    const auto &getPropertyMap(const std::string &type) const
     {
         return _properties.at(type);
     }
@@ -123,30 +128,33 @@ public:
     std::vector<std::string> getTypes() const
     {
         std::vector<std::string> types;
-        for (const auto& i : _properties)
+        for (const auto &i : _properties)
             types.push_back(i.first);
         return types;
     }
 
     /** Clear all current properties and clone new properties from object  */
-    void clonePropertiesFrom(const PropertyObject& obj)
+    void clonePropertiesFrom(const PropertyObject &obj)
     {
         _currentType = obj._currentType;
         _properties.clear();
-        for (const auto& kv : obj._properties)
+        for (const auto &kv : obj._properties)
         {
-            const auto& key = kv.first;
-            const auto& properties = kv.second;
+            const auto &key = kv.first;
+            const auto &properties = kv.second;
 
             PropertyMap propertyMapClone;
-            for (const auto& property : properties)
+            for (const auto &property : properties)
                 propertyMapClone.add(property);
 
             _properties[key] = propertyMapClone;
         }
     }
 
-    const auto& getProperties() const { return _properties; }
+    const auto &getProperties() const
+    {
+        return _properties;
+    }
 
 protected:
     std::string _currentType;

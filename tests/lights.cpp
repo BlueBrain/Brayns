@@ -51,17 +51,19 @@ const brayns::Vector3f lampPositions[4] = {
 
 TEST_CASE("render_scivis_quadlight")
 {
-    const char* argv[] = {"lights", "demo", "--renderer", "scivis",
-                          "--no-head-light"};
-    const int argc = sizeof(argv) / sizeof(char*);
+    const char *argv[] = {"lights", "demo", "--renderer", "scivis", "--no-head-light"};
+    const int argc = sizeof(argv) / sizeof(char *);
 
     brayns::Brayns brayns(argc, argv);
-    auto& engine = brayns.getEngine();
+    auto &engine = brayns.getEngine();
 
-    engine.getScene().getLightManager().addLight(
-        std::make_shared<brayns::QuadLight>(
-            lampPositions[0], (lampPositions[1] - lampPositions[0]),
-            (lampPositions[3] - lampPositions[0]), YELLOW, 1.0f, true));
+    engine.getScene().getLightManager().addLight(std::make_shared<brayns::QuadLight>(
+        lampPositions[0],
+        (lampPositions[1] - lampPositions[0]),
+        (lampPositions[3] - lampPositions[0]),
+        YELLOW,
+        1.0f,
+        true));
 
     brayns.commitAndRender();
 
@@ -70,17 +72,15 @@ TEST_CASE("render_scivis_quadlight")
 
 TEST_CASE("render_scivis_spotlight")
 {
-    const char* argv[] = {"lights", "demo", "--renderer", "scivis",
-                          "--no-head-light"};
-    const int argc = sizeof(argv) / sizeof(char*);
+    const char *argv[] = {"lights", "demo", "--renderer", "scivis", "--no-head-light"};
+    const int argc = sizeof(argv) / sizeof(char *);
 
     brayns::Brayns brayns(argc, argv);
-    auto& engine = brayns.getEngine();
+    auto &engine = brayns.getEngine();
 
     engine.getScene().getLightManager().addLight(
-        std::make_shared<brayns::SpotLight>(lampCentre,
-                                            brayns::Vector3f(0, -1, 0), 90.f,
-                                            10.f, lampWidth, BLUE, 1.0f, true));
+        std::make_shared<
+            brayns::SpotLight>(lampCentre, brayns::Vector3f(0, -1, 0), 90.f, 10.f, lampWidth, BLUE, 1.0f, true));
     brayns.commitAndRender();
 
     CHECK(ImageValidator::validate(engine, "testLightScivisSpotLight.png"));

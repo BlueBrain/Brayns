@@ -28,22 +28,18 @@
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(RenderingParameters)
-BRAYNS_JSON_ADAPTER_GETSET("accumulation", getAccumulation, setAccumulation,
-                           "Multiple render passes")
-BRAYNS_JSON_ADAPTER_GETSET("background_color", getBackgroundColor,
-                           setBackgroundColor, "Background color RGB")
-BRAYNS_JSON_ADAPTER_GETSET("current", getCurrentRenderer, setCurrentRenderer,
-                           "Current renderer name")
-BRAYNS_JSON_ADAPTER_GETSET("head_light", getHeadLight, setHeadLight,
-                           "Light source follows camera origin")
-BRAYNS_JSON_ADAPTER_GETSET("max_accum_frames", getMaxAccumFrames,
-                           setMaxAccumFrames, "Max render passes")
-BRAYNS_JSON_ADAPTER_GETSET("samples_per_pixel", getSamplesPerPixel,
-                           setSamplesPerPixel, "Samples per pixel")
-BRAYNS_JSON_ADAPTER_GETSET("subsampling", getSubsampling, setSubsampling,
-                           "Subsampling")
+BRAYNS_JSON_ADAPTER_GETSET("accumulation", getAccumulation, setAccumulation, "Multiple render passes")
+BRAYNS_JSON_ADAPTER_GETSET("background_color", getBackgroundColor, setBackgroundColor, "Background color RGB")
+BRAYNS_JSON_ADAPTER_GETSET("current", getCurrentRenderer, setCurrentRenderer, "Current renderer name")
+BRAYNS_JSON_ADAPTER_GETSET("head_light", getHeadLight, setHeadLight, "Light source follows camera origin")
+BRAYNS_JSON_ADAPTER_GETSET("max_accum_frames", getMaxAccumFrames, setMaxAccumFrames, "Max render passes")
+BRAYNS_JSON_ADAPTER_GETSET("samples_per_pixel", getSamplesPerPixel, setSamplesPerPixel, "Samples per pixel")
+BRAYNS_JSON_ADAPTER_GETSET("subsampling", getSubsampling, setSubsampling, "Subsampling")
 BRAYNS_JSON_ADAPTER_GET("types", getRenderers, "Available renderers")
-BRAYNS_JSON_ADAPTER_GETSET("variance_threshold", getVarianceThreshold,
-                           setVarianceThreshold, "Stop accumulation threshold")
+BRAYNS_JSON_ADAPTER_GETSET(
+    "variance_threshold",
+    getVarianceThreshold,
+    setVarianceThreshold,
+    "Stop accumulation threshold")
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

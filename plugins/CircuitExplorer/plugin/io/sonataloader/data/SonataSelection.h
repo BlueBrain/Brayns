@@ -38,21 +38,21 @@ public:
     /**
      * @brief select node Ids from a node population based on input nodesets
      */
-    void select(const bbp::sonata::CircuitConfig& config,
-                const std::string& population,
-                const std::vector<std::string>& nodeSets);
+    void select(
+        const bbp::sonata::CircuitConfig &config,
+        const std::string &population,
+        const std::vector<std::string> &nodeSets);
 
     /**
      * @brief select node ids from a node population based on a list of node Ids
      */
-    void select(const std::vector<uint64_t>& nodeList);
+    void select(const std::vector<uint64_t> &nodeList);
 
     /**
      * @brief select node ids from a node population based on reported nodes in
      * a simulation
      */
-    void select(const ReportType simType, const std::string& reportPath,
-                const std::string& population);
+    void select(const ReportType simType, const std::string &reportPath, const std::string &population);
 
     /**
      * @brief return the best selection candidate based on what was selected:
@@ -82,7 +82,7 @@ public:
      * @brief EdgeSelection initially start with the edges selected from a given
      * node network
      */
-    EdgeSelection(bbp::sonata::Selection&& intialEdgeSelection);
+    EdgeSelection(bbp::sonata::Selection &&intialEdgeSelection);
 
     /**
      * @brief return the best selection candidate based on what was selected

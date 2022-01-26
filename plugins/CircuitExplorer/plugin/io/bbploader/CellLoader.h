@@ -34,8 +34,7 @@ namespace bbploader
 class CellLoader
 {
 public:
-    static std::vector<MorphologyInstance::Ptr> load(
-        const BBPLoaderParameters& lc, const brain::GIDSet& gids,
-        const brain::Circuit& circuit);
+    static std::vector<MorphologyInstance::Ptr>
+        load(const BBPLoaderParameters &lc, const brain::GIDSet &gids, const brain::Circuit &circuit);
 };
 } // namespace bbploader

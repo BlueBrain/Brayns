@@ -50,15 +50,30 @@ public:
     {
     }
 
-    bool isEmpty() const { return _type == typeid(void); }
+    bool isEmpty() const
+    {
+        return _type == typeid(void);
+    }
 
-    bool isInt() const { return _type == typeid(int64_t); }
+    bool isInt() const
+    {
+        return _type == typeid(int64_t);
+    }
 
-    bool isString() const { return _type == typeid(std::string); }
+    bool isString() const
+    {
+        return _type == typeid(std::string);
+    }
 
-    int64_t toInt() const { return _int; }
+    int64_t toInt() const
+    {
+        return _int;
+    }
 
-    const std::string& toString() const { return _string; }
+    const std::string &toString() const
+    {
+        return _string;
+    }
 
     std::string getDisplayText() const
     {
@@ -81,13 +96,15 @@ public:
         return hashCode;
     }
 
-    bool operator==(const RequestId& other) const
+    bool operator==(const RequestId &other) const
     {
-        return _type == other._type && _int == other._int &&
-               _string == other._string;
+        return _type == other._type && _int == other._int && _string == other._string;
     }
 
-    bool operator!=(const RequestId& other) const { return !(*this == other); }
+    bool operator!=(const RequestId &other) const
+    {
+        return !(*this == other);
+    }
 
 private:
     std::type_index _type = typeid(void);
@@ -99,20 +116,18 @@ private:
  * @brief JSON interface for RequestId.
  *
  */
-template <>
+template<>
 struct JsonAdapter<RequestId>
 {
-    static JsonSchema getSchema(const RequestId&)
+    static JsonSchema getSchema(const RequestId &)
     {
         JsonSchema schema;
         schema.title = "RequestId";
-        schema.oneOf = {JsonSchemaHelper::getNullSchema(),
-                        Json::getSchema<int64_t>(),
-                        Json::getSchema<std::string>()};
+        schema.oneOf = {JsonSchemaHelper::getNullSchema(), Json::getSchema<int64_t>(), Json::getSchema<std::string>()};
         return schema;
     }
 
-    static bool serialize(const RequestId& value, JsonValue& json)
+    static bool serialize(const RequestId &value, JsonValue &json)
     {
         if (value.isEmpty())
         {
@@ -132,7 +147,7 @@ struct JsonAdapter<RequestId>
         return false;
     }
 
-    static bool deserialize(const JsonValue& json, RequestId& value)
+    static bool deserialize(const JsonValue &json, RequestId &value)
     {
         if (json.isEmpty())
         {
@@ -156,10 +171,10 @@ struct JsonAdapter<RequestId>
 
 namespace std
 {
-template <>
+template<>
 struct hash<brayns::RequestId>
 {
-    size_t operator()(const brayns::RequestId& id) const
+    size_t operator()(const brayns::RequestId &id) const
     {
         return id.getHashCode();
     }

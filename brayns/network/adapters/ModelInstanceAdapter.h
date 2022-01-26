@@ -31,14 +31,14 @@ namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(ModelInstance)
 BRAYNS_JSON_ADAPTER_GETSET("model_id", getModelID, setModelID, "Model ID")
-BRAYNS_JSON_ADAPTER_GETSET("instance_id", getInstanceID, setInstanceID,
-                           "Instance ID")
-BRAYNS_JSON_ADAPTER_GETSET("bounding_box", getBoundingBox, setBoundingBox,
-                           "Display bounding box", Required(false))
-BRAYNS_JSON_ADAPTER_GETSET("transformation", getTransformation,
-                           setTransformation, "Model transformation",
-                           Required(false))
-BRAYNS_JSON_ADAPTER_GETSET("visible", getVisible, setVisible,
-                           "Check if rendered", Required(false))
+BRAYNS_JSON_ADAPTER_GETSET("instance_id", getInstanceID, setInstanceID, "Instance ID")
+BRAYNS_JSON_ADAPTER_GETSET("bounding_box", getBoundingBox, setBoundingBox, "Display bounding box", Required(false))
+BRAYNS_JSON_ADAPTER_GETSET(
+    "transformation",
+    getTransformation,
+    setTransformation,
+    "Model transformation",
+    Required(false))
+BRAYNS_JSON_ADAPTER_GETSET("visible", getVisible, setVisible, "Check if rendered", Required(false))
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

@@ -26,8 +26,11 @@ namespace ospray
 {
 struct SDFGeometries : public ospray::Geometry
 {
-    std::string toString() const final { return "brayns::SDFGeometries"; }
-    void finalize(ospray::Model* model) final;
+    std::string toString() const final
+    {
+        return "brayns::SDFGeometries";
+    }
+    void finalize(ospray::Model *model) final;
 
     ospray::Ref<ospray::Data> data;
     ospray::Ref<ospray::Data> neighbours;
@@ -36,7 +39,7 @@ struct SDFGeometries : public ospray::Geometry
     SDFGeometries();
 
 private:
-    std::vector<void*> ispcMaterials_;
+    std::vector<void *> ispcMaterials_;
 };
 
 } // namespace ospray

@@ -29,7 +29,6 @@ namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(Statistics)
 BRAYNS_JSON_ADAPTER_GET("fps", getFPS, "Framerate")
-BRAYNS_JSON_ADAPTER_GET("scene_size_in_bytes", getSceneSizeInBytes,
-                        "Scene size")
+BRAYNS_JSON_ADAPTER_GET("scene_size_in_bytes", getSceneSizeInBytes, "Scene size")
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

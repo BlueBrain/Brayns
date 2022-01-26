@@ -43,8 +43,7 @@ public:
      * @param quality Image quality if compressed.
      * @throw std::runtime_error Invalid format, path or image.
      */
-    static void save(const Image &image, const std::string &filename,
-                     int quality = 0);
+    static void save(const Image &image, const std::string &filename, int quality = 0);
 
     /**
      * @brief Encode the image with given format.
@@ -55,8 +54,7 @@ public:
      * @return std::string Encoded image.
      * @throw std::runtime_error Invalid format or image.
      */
-    static std::string encode(const Image &image, const std::string &format,
-                              int quality = 0);
+    static std::string encode(const Image &image, const std::string &format, int quality = 0);
 
     /**
      * @brief Encode the image with given format and then to base64.
@@ -67,8 +65,6 @@ public:
      * @return std::string Encoded image in format and then base64.
      * @throw std::runtime_error Invalid format or image.
      */
-    static std::string encodeToBase64(const Image &image,
-                                      const std::string &format,
-                                      int quality = 0);
+    static std::string encodeToBase64(const Image &image, const std::string &format, int quality = 0);
 };
 } // namespace brayns

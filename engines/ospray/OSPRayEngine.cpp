@@ -29,19 +29,19 @@
 #include "OSPRayRenderer.h"
 #include "OSPRayScene.h"
 
-#include <ospray/OSPConfig.h>                    // TILE_SIZE
+#include <ospray/OSPConfig.h> // TILE_SIZE
 #include <ospray/SDK/camera/PerspectiveCamera.h> // enum StereoMode
 #include <ospray/version.h>
 
 namespace brayns
 {
-OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
+OSPRayEngine::OSPRayEngine(ParametersManager &parametersManager)
     : Engine(parametersManager)
 {
-    auto& ap = _parametersManager.getApplicationParameters();
+    auto &ap = _parametersManager.getApplicationParameters();
     try
     {
-        std::vector<const char*> argv;
+        std::vector<const char *> argv;
 
         // Ospray expects but ignores the application name as the first argument
         argv.push_back("Brayns");
@@ -52,8 +52,7 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
         argv.push_back("--osp:erroroutput");
         argv.push_back("cerr");
 
-        if (_parametersManager.getApplicationParameters()
-                .getParallelRendering())
+        if (_parametersManager.getApplicationParameters().getParallelRendering())
         {
             argv.push_back("--osp:mpi");
         }
@@ -61,7 +60,7 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
         int argc = argv.size();
         ospInit(&argc, argv.data());
     }
-    catch (const std::exception& e)
+    catch (const std::exception &e)
     {
         // Note: This is necessary because OSPRay does not yet implement a
         // ospDestroy API.
@@ -97,18 +96,14 @@ void OSPRayEngine::commit()
     auto device = ospGetCurrentDevice();
     if (device && _parametersManager.getRenderingParameters().isModified())
     {
-        const auto useDynamicLoadBalancer =
-            _parametersManager.getApplicationParameters()
-                .getDynamicLoadBalancer();
+        const auto useDynamicLoadBalancer = _parametersManager.getApplicationParameters().getDynamicLoadBalancer();
         if (_useDynamicLoadBalancer != useDynamicLoadBalancer)
         {
-            ospDeviceSet1i(device, "dynamicLoadBalancer",
-                           useDynamicLoadBalancer);
+            ospDeviceSet1i(device, "dynamicLoadBalancer", useDynamicLoadBalancer);
             ospDeviceCommit(device);
             _useDynamicLoadBalancer = useDynamicLoadBalancer;
 
-            Log::info("Using {} load balancer.",
-                      useDynamicLoadBalancer ? "dynamic" : "static");
+            Log::info("Using {} load balancer.", useDynamicLoadBalancer ? "dynamic" : "static");
         }
     }
 }
@@ -138,9 +133,7 @@ void OSPRayEngine::_createRenderers()
         PropertyMap properties;
         properties.add({"aoDistance", 10000., {"Ambient occlusion distance"}});
         properties.add({"aoSamples", 1, {"Ambient occlusion samples"}});
-        properties.add({"aoTransparencyEnabled",
-                        true,
-                        {"Ambient occlusion transparency"}});
+        properties.add({"aoTransparencyEnabled", true, {"Ambient occlusion transparency"}});
         properties.add({"aoWeight", 0., {"Ambient occlusion weight"}});
         properties.add({"oneSidedLighting", true, {"One-sided lighting"}});
         properties.add({"shadowsEnabled", false, {"Shadows"}});
@@ -152,15 +145,14 @@ void OSPRayEngine::_createRenderers()
 }
 
 FrameBufferPtr OSPRayEngine::createFrameBuffer(
-    const std::string& name, const Vector2ui& frameSize,
+    const std::string &name,
+    const Vector2ui &frameSize,
     const PixelFormat frameBufferFormat) const
 {
-    return std::make_shared<OSPRayFrameBuffer>(name, frameSize,
-                                               frameBufferFormat);
+    return std::make_shared<OSPRayFrameBuffer>(name, frameSize, frameBufferFormat);
 }
 
-ScenePtr OSPRayEngine::createScene(AnimationParameters& animationParameters,
-                                   VolumeParameters& volumeParameters) const
+ScenePtr OSPRayEngine::createScene(AnimationParameters &animationParameters, VolumeParameters &volumeParameters) const
 {
     return std::make_shared<OSPRayScene>(animationParameters, volumeParameters);
 }
@@ -171,11 +163,10 @@ CameraPtr OSPRayEngine::createCamera() const
 }
 
 RendererPtr OSPRayEngine::createRenderer(
-    const AnimationParameters& animationParameters,
-    const RenderingParameters& renderingParameters) const
+    const AnimationParameters &animationParameters,
+    const RenderingParameters &renderingParameters) const
 {
-    return std::make_shared<OSPRayRenderer>(animationParameters,
-                                            renderingParameters);
+    return std::make_shared<OSPRayRenderer>(animationParameters, renderingParameters);
 }
 
 void OSPRayEngine::_createCameras()
@@ -185,9 +176,7 @@ void OSPRayEngine::_createCameras()
     Property fovy{"fovy", 45., {"Field of view"}};
     Property aspect{"aspect", 1., {"Aspect ratio"}};
     aspect.setReadOnly(true);
-    Property eyeSeparation{"interpupillaryDistance",
-                           0.0635,
-                           {"Eye separation"}};
+    Property eyeSeparation{"interpupillaryDistance", 0.0635, {"Eye separation"}};
     Property enableClippingPlanes{"enableClippingPlanes", true, {"Clipping"}};
 
     {
@@ -231,8 +220,7 @@ void OSPRayEngine::_createCameras()
 }
 } // namespace brayns
 
-extern "C" brayns::Engine* brayns_engine_create(
-    int, const char**, brayns::ParametersManager& parametersManager)
+extern "C" brayns::Engine *brayns_engine_create(int, const char **, brayns::ParametersManager &parametersManager)
 {
     return new brayns::OSPRayEngine(parametersManager);
 }

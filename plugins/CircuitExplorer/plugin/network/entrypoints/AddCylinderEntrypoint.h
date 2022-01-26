@@ -33,20 +33,17 @@
 class CylinderModel
 {
 public:
-    static size_t add(brayns::Scene& scene, const AddCylinderMessage& params)
+    static size_t add(brayns::Scene &scene, const AddCylinderMessage &params)
     {
         // Create cylinder model
         auto model = scene.createModel();
 
         // Create cylinder material instance
-        const auto matId =
-            CircuitExplorerMaterial::create(*model,
-                                            brayns::Vector3f(params.color),
-                                            params.color.a);
+        const auto matId = CircuitExplorerMaterial::create(*model, brayns::Vector3f(params.color), params.color.a);
 
         // Extract cylinder info
-        auto& center = params.center;
-        auto& up = params.up;
+        auto &center = params.center;
+        auto &up = params.up;
         auto radius = static_cast<float>(params.radius);
 
         // Add geometry
@@ -61,26 +58,27 @@ public:
         }
 
         // Register cylinder model and return its ID
-        return scene.addModel(
-            std::make_shared<brayns::ModelDescriptor>(std::move(model), name));
+        return scene.addModel(std::make_shared<brayns::ModelDescriptor>(std::move(model), name));
     }
 };
 
-class AddCylinderEntrypoint
-    : public brayns::Entrypoint<AddCylinderMessage, AddShapeMessage>
+class AddCylinderEntrypoint : public brayns::Entrypoint<AddCylinderMessage, AddShapeMessage>
 {
 public:
-    virtual std::string getName() const override { return "add-cylinder"; }
+    virtual std::string getName() const override
+    {
+        return "add-cylinder";
+    }
 
     virtual std::string getDescription() const override
     {
         return "Add a visual 3D cylinder to the scene";
     }
 
-    virtual void onRequest(const Request& request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
-        auto& scene = getApi().getScene();
+        auto &scene = getApi().getScene();
         brayns::Log::info("[CE] Building Cylinder model.\n");
         auto id = CylinderModel::add(scene, params);
         scene.markModified();
