@@ -48,7 +48,7 @@ public:
         auto &engine = getApi().getEngine();
         auto &scene = engine.getScene();
         auto &lightManager = scene.getLightManager();
-        for (auto id : params.ids)
+        for (auto id : ids)
         {
             lightManager.removeLight(id);
         }

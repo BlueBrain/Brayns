@@ -74,21 +74,6 @@ void checkAttributes(const bbp::sonata::NodePopulation &nodes, const std::vector
     }
 }
 
-void checkEnums(const bbp::sonata::NodePopulation &nodes, const std::vector<const char *> &enums)
-{
-    const auto &enumerations = nodes.enumerationNames();
-    for (const auto enumName : enums)
-    {
-        if (enumerations.find(enumName) == enumerations.end())
-        {
-            throw std::runtime_error("Node population '" + nodes.name() +
-                                     "' is missing "
-                                     "enumeration " +
-                                     enumName);
-        }
-    }
-}
-
 } // namespace
 
 std::string SonataCells::getPopulationType(const Nodes &nodes)

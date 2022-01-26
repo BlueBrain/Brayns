@@ -307,6 +307,10 @@ set_target_properties(braynsCircuitExplorer
 )
 
 target_compile_options(braynsCircuitExplorer PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+# Temporary, for ISPC Renderers
+target_compile_options(braynsCircuitExplorer PRIVATE -Wno-strict-aliasing)
+# For Brion uint128_t
+target_compile_options(braynsCircuitExplorer PRIVATE -Wno-deprecated-copy)
 
 install(TARGETS braynsCircuitExplorer
     EXPORT braynsCircuitExplorer-targets

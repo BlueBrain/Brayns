@@ -62,7 +62,7 @@ if(NOT Poco_Found)
 
     # Remove Poco warnings
     if(NOT CMAKE_BUILD_TYPE MATCHES DEBUG)
-        target_compile_options(Foundation PUBLIC -w)
+        target_compile_options(Foundation PUBLIC -Wno-sign-compare)
     endif()
 
     # Remove Poco postfix d in debug

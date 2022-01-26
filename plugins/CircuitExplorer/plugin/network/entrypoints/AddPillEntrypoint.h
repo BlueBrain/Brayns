@@ -54,10 +54,13 @@ public:
         {
         case PillType::Pill:
             sdf = brayns::createSDFPill(p1, p2, radius1);
+            break;
         case PillType::ConePill:
             sdf = brayns::createSDFConePill(p1, p2, radius1, radius2);
+            break;
         case PillType::SigmoidPill:
             sdf = brayns::createSDFConePillSigmoid(p1, p2, radius1, radius2);
+            break;
         }
 
         // Add geometry
