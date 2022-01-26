@@ -82,7 +82,7 @@ public:
      * extension to the supported extensions (removing the dot, if any, and
      * making them lowercase). Can be overriden to perform mor explicit checks
      */
-    virtual bool isSupported(const std::string&, const std::string &extension) const
+    virtual bool isSupported(const std::string &, const std::string &extension) const
     {
         const auto extensions = getSupportedExtensions();
         const auto lcExtension = string_utils::toLowercase(extension[0] == '.' ? extension.substr(1) : extension);
@@ -229,17 +229,17 @@ struct EmptyLoaderParameters
 template<>
 struct JsonAdapter<EmptyLoaderParameters>
 {
-    static JsonSchema getSchema(const EmptyLoaderParameters&)
+    static JsonSchema getSchema(const EmptyLoaderParameters &)
     {
         return JsonSchema();
     }
 
-    static bool serialize(const EmptyLoaderParameters&, JsonValue&)
+    static bool serialize(const EmptyLoaderParameters &, JsonValue &)
     {
         return true;
     }
 
-    static bool deserialize(const JsonValue&, EmptyLoaderParameters&)
+    static bool deserialize(const JsonValue &, EmptyLoaderParameters &)
     {
         return true;
     }
