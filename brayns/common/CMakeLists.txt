@@ -6,6 +6,7 @@
 
 set(BRAYNSCOMMON_SOURCES
     Timer.cpp
+    adapters/PropertyMapAdapter.cpp
     material/Texture2D.cpp
     propertymap/ConversionRegistry.cpp
     scene/ClipPlane.cpp
