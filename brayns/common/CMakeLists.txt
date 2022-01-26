@@ -10,6 +10,8 @@ set(BRAYNSCOMMON_SOURCES
     geometry/SDFGeometry.cpp
     geometry/TriangleMesh.cpp
     propertymap/ConversionRegistry.cpp
+    propertymap/EnumProperty.cpp
+    propertymap/PropertyMap.cpp
     scene/ClipPlane.cpp
     simulation/AbstractSimulationHandler.cpp
     transferFunction/TransferFunction.cpp

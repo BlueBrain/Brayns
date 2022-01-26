@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <algorithm>
-#include <cassert>
 #include <string>
 #include <vector>
 
@@ -51,11 +49,7 @@ public:
      * @param values available values of the enum.
      * @throw std::runtime_error The provided value is not in values.
      */
-    EnumProperty(const std::string &value, std::vector<std::string> values)
-        : _values(std::move(values))
-    {
-        _assignOrThrow(value);
-    }
+    EnumProperty(const std::string &value, std::vector<std::string> values);
 
     /**
      * @brief Construct an enum from its integer value and available values.
@@ -64,11 +58,7 @@ public:
      * @param values available values of the enum.
      * @throw std::runtime_error The provided index is not in values.
      */
-    EnumProperty(int index, std::vector<std::string> values)
-        : _values(std::move(values))
-    {
-        _assignOrThrow(index);
-    }
+    EnumProperty(int index, std::vector<std::string> values);
 
     /**
      * @brief Construct an enum from its values and take the first one as
@@ -76,11 +66,7 @@ public:
      *
      * @param values available values of the enum.
      */
-    EnumProperty(std::vector<std::string> values)
-        : _values(std::move(values))
-    {
-        _index = _values.empty() ? -1 : 0;
-    }
+    EnumProperty(std::vector<std::string> values);
 
     /**
      * @brief Get the value of the enum as a string
@@ -88,10 +74,7 @@ public:
      * @return const std::string& The enum value in available values or empty if
      * no available values.
      */
-    const std::string &toString() const
-    {
-        return isValidIndex(_index) ? _values[_index] : _getEmptyString();
-    }
+    const std::string &toString() const;
 
     /**
      * @brief Get the value of the enum as an integer.
@@ -99,20 +82,14 @@ public:
      * @return int The index of the current value in available values or -1 if
      * no available values.
      */
-    int toInt() const
-    {
-        return _index;
-    }
+    int toInt() const;
 
     /**
      * @brief Get the available values of the enum.
      *
      * @return const std::vector<std::string>& The values the enum can take.
      */
-    const std::vector<std::string> &getValues() const
-    {
-        return _values;
-    }
+    const std::vector<std::string> &getValues() const;
 
     /**
      * @brief Check if the given index is a valid enum value.
@@ -121,10 +98,7 @@ public:
      * @return true The index is valid (>= 0 and < values.size())
      * @return false The index is invalid.
      */
-    bool isValidIndex(int index) const
-    {
-        return index >= 0 && size_t(index) < _values.size();
-    }
+    bool isValidIndex(int index) const;
 
     /**
      * @brief Get the index of a string in available values.
@@ -132,11 +106,7 @@ public:
      * @param value The value to get the index from values.
      * @return int The index of value in values or -1 if invalid.
      */
-    int getIndex(const std::string &value) const
-    {
-        auto i = std::find(_values.begin(), _values.end(), value);
-        return i == _values.end() ? -1 : int(i - _values.begin());
-    }
+    int getIndex(const std::string &value) const;
 
     /**
      * @brief Find a value in available enum values.
@@ -145,11 +115,7 @@ public:
      * @return const std::string* A pointer to the value in available values or
      * null if invalid.
      */
-    const std::string *find(const std::string &value) const
-    {
-        auto i = std::find(_values.begin(), _values.end(), value);
-        return i == _values.end() ? nullptr : &*i;
-    }
+    const std::string *find(const std::string &value) const;
 
     /**
      * @brief Get the value at index in available values.
@@ -158,10 +124,7 @@ public:
      * @return const std::string* A pointer to the corresponding value in
      * available values or null if invalid.
      */
-    const std::string *find(int index) const
-    {
-        return isValidIndex(index) ? &_values[index] : nullptr;
-    }
+    const std::string *find(int index) const;
 
     /**
      * @brief Assign the current enum value if valid, otherwise does nothing.
@@ -169,11 +132,7 @@ public:
      * @param value The new value of the enum.
      * @return EnumProperty& *this.
      */
-    EnumProperty &operator=(const std::string &value)
-    {
-        _assignOrThrow(value);
-        return *this;
-    }
+    EnumProperty &operator=(const std::string &value);
 
     /**
      * @brief Assign the current enum value if valid, otherwise does nothing.
@@ -181,11 +140,7 @@ public:
      * @param value The index of the new value of the enum.
      * @return EnumProperty& *this.
      */
-    EnumProperty &operator=(int index)
-    {
-        _assignOrThrow(index);
-        return *this;
-    }
+    EnumProperty &operator=(int index);
 
     /**
      * @brief Convert to regular enumeration from current value index.
@@ -200,32 +155,9 @@ public:
     }
 
 private:
-    static const std::string &_getEmptyString()
-    {
-        static const std::string emptyString;
-        return emptyString;
-    }
-
-    void _assignOrThrow(const std::string &value)
-    {
-        auto index = getIndex(value);
-        if (isValidIndex(index))
-        {
-            _index = index;
-            return;
-        }
-        throw std::runtime_error("Could not match enum '" + value + "'");
-    }
-
-    void _assignOrThrow(int index)
-    {
-        if (isValidIndex(index))
-        {
-            _index = index;
-            return;
-        }
-        throw std::runtime_error("Could not match enum index'" + std::to_string(index) + "'");
-    }
+    const std::string &_getEmptyString() const;
+    void _assignOrThrow(const std::string &value);
+    void _assignOrThrow(int index);
 
     int _index = -1;
     std::vector<std::string> _values;
@@ -238,10 +170,7 @@ private:
 template<>
 struct Converter<EnumProperty, std::string>
 {
-    static void convert(const EnumProperty &from, std::string &to)
-    {
-        to = from.toString();
-    }
+    static void convert(const EnumProperty &from, std::string &to);
 };
 
 /**
@@ -251,10 +180,7 @@ struct Converter<EnumProperty, std::string>
 template<>
 struct Converter<std::string, EnumProperty>
 {
-    static void convert(const std::string &from, EnumProperty &to)
-    {
-        to = from;
-    }
+    static void convert(const std::string &from, EnumProperty &to);
 };
 
 /**
@@ -264,10 +190,7 @@ struct Converter<std::string, EnumProperty>
 template<>
 struct Converter<EnumProperty, int32_t>
 {
-    static void convert(const EnumProperty &from, int32_t &to)
-    {
-        to = from.toInt();
-    }
+    static void convert(const EnumProperty &from, int32_t &to);
 };
 
 /**
@@ -277,10 +200,7 @@ struct Converter<EnumProperty, int32_t>
 template<>
 struct Converter<int32_t, EnumProperty>
 {
-    static void convert(int32_t from, EnumProperty &to)
-    {
-        to = int(from);
-    }
+    static void convert(int32_t from, EnumProperty &to);
 };
 
 /**
@@ -290,10 +210,7 @@ struct Converter<int32_t, EnumProperty>
 template<>
 struct Converter<EnumProperty, int64_t>
 {
-    static void convert(const EnumProperty &from, int64_t &to)
-    {
-        to = from.toInt();
-    }
+    static void convert(const EnumProperty &from, int64_t &to);
 };
 
 /**
@@ -303,9 +220,6 @@ struct Converter<EnumProperty, int64_t>
 template<>
 struct Converter<int64_t, EnumProperty>
 {
-    static void convert(int64_t from, EnumProperty &to)
-    {
-        to = int(from);
-    }
+    static void convert(int64_t from, EnumProperty &to);
 };
 } // namespace brayns
