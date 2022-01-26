@@ -21,11 +21,10 @@
 
 #pragma once
 
-#include <algorithm>
 #include <functional>
 #include <string>
 
-#include "ConversionRegistry.h"
+#include "Any.h"
 #include "EnumProperty.h"
 
 namespace brayns
@@ -88,63 +87,42 @@ public:
      * @param value The value of the property.
      * @param metaData Optional metadata.
      */
-    Property(std::string name, EnumProperty value, MetaData metaData = {})
-        : _name(std::move(name))
-        , _label(std::move(metaData.label))
-        , _description(std::move(metaData.description))
-        , _value(std::move(value))
-    {
-    }
+    Property(std::string name, EnumProperty value, MetaData metaData = {});
 
     /**
      * @brief Get the key/name of the property.
      *
      * @return const std::string& The name of the property (ex: "minValue")
      */
-    const std::string &getName() const
-    {
-        return _name;
-    }
+    const std::string &getName() const;
 
     /**
      * @brief Get the label set to the property.
      *
      * @return const std::string& Property label.
      */
-    const std::string &getLabel() const
-    {
-        return _label;
-    }
+    const std::string &getLabel() const;
 
     /**
      * @brief Get the description set to the property.
      *
      * @return const std::string& Property description.
      */
-    const std::string &getDescription() const
-    {
-        return _description;
-    }
+    const std::string &getDescription() const;
 
     /**
      * @brief Get the type of the property.
      *
      * @return std::type_index The type of the property (cannot be changed).
      */
-    std::type_index getType() const
-    {
-        return _value.getType();
-    }
+    std::type_index getType() const;
 
     /**
      * @brief Get the current value of the property.
      *
      * @return const Any& The value of the property as a generic type.
      */
-    const Any &getValue() const
-    {
-        return _value;
-    }
+    const Any &getValue() const;
 
     /**
      * @brief Update the value of the property and notify if a callback is set.
@@ -153,15 +131,7 @@ public:
      * type as the current one.
      * @throw std::runtime_error Invalid type.
      */
-    void setValue(Any value)
-    {
-        if (_value.getType() != value.getType())
-        {
-            throw std::runtime_error("Invalid type");
-        }
-        _value = std::move(value);
-        notifyModification();
-    }
+    void setValue(Any value);
 
     /**
      * @brief Same as setValue but perform authorized conversion using
@@ -171,14 +141,7 @@ public:
      * with the current one.
      * @throw std::runtime_error Invalid conversion (not in ConversionRegistry).
      */
-    void copyValue(const Any &value)
-    {
-        if (!ConversionRegistry::convert(value, _value))
-        {
-            throw std::runtime_error("Invalid conversion");
-        }
-        notifyModification();
-    }
+    void copyValue(const Any &value);
 
     /**
      * @brief Check if the property is read only. Not checked, info only.
@@ -186,42 +149,36 @@ public:
      * @return true The property is read only.
      * @return false The property can be written.
      */
-    bool isReadOnly() const
-    {
-        return _readOnly;
-    }
+    bool isReadOnly() const;
 
     /**
      * @brief Set the property as readonly. Not checked, info only.
      *
      * @param readOnly true if readonly.
      */
-    void setReadOnly(bool readOnly)
-    {
-        _readOnly = readOnly;
-    }
+    void setReadOnly(bool readOnly);
 
     /**
      * @brief Set a callback to be called when the value is updated.
      *
      * @param callback The callback to set (signature: void(const Property&)).
      */
-    void onModified(Callback callback)
-    {
-        _callback = std::move(callback);
-    }
+    void onModified(Callback callback);
 
     /**
      * @brief Trigger manually the modification callback if any.
      *
      */
-    void notifyModification()
-    {
-        if (_callback)
-        {
-            _callback(*this);
-        }
-    }
+    void notifyModification();
+
+    /**
+     * @brief Convert the underlying value to the type of the provided one.
+     *
+     * @param value Output result.
+     * @return true Success.
+     * @return false Failure.
+     */
+    bool to(Any &value) const;
 
     /**
      * @brief Shorthand to check the type of the property.
@@ -272,7 +229,7 @@ public:
     T to() const
     {
         Any result = T();
-        if (!ConversionRegistry::convert(_value, result))
+        if (!to(result))
         {
             throw std::runtime_error("Invalid conversion");
         }
@@ -348,70 +305,49 @@ public:
      *
      * @param name The name of the property map.
      */
-    PropertyMap(std::string name)
-        : _name(std::move(name))
-    {
-    }
+    PropertyMap(std::string name);
 
     /**
      * @brief Get the name of the property map.
      *
      * @return const std::string& The name of the property map.
      */
-    const std::string &getName() const
-    {
-        return _name;
-    }
+    const std::string &getName() const;
 
     /**
      * @brief Iterator on all immutable properties contained in the map.
      *
      * @return auto Iterator on the properties.
      */
-    auto begin() const
-    {
-        return _properties.begin();
-    }
+    std::vector<Property>::const_iterator begin() const;
 
     /**
      * @brief Iterator on all mutable properties contained in the map.
      *
      * @return auto Iterator on the properties.
      */
-    auto begin()
-    {
-        return _properties.begin();
-    }
+    std::vector<Property>::iterator begin();
 
     /**
      * @brief Invalid const iterator.
      *
      * @return auto Invalid iterator.
      */
-    auto end() const
-    {
-        return _properties.end();
-    }
+    std::vector<Property>::const_iterator end() const;
 
     /**
      * @brief Invalid iterator.
      *
      * @return auto Invalid iterator.
      */
-    auto end()
-    {
-        return _properties.end();
-    }
+    std::vector<Property>::iterator end();
 
     /**
      * @brief Get the number of properties inside the map.
      *
      * @return size_t Current number of properties.
      */
-    size_t size() const
-    {
-        return _properties.size();
-    }
+    size_t size() const;
 
     /**
      * @brief Check if the map is empty.
@@ -419,10 +355,7 @@ public:
      * @return true The map is empty.
      * @return false The map has at least one property.
      */
-    bool empty() const
-    {
-        return _properties.empty();
-    }
+    bool empty() const;
 
     /**
      * @brief Check if an index is valid to access a property.
@@ -431,10 +364,7 @@ public:
      * @return true The index is valid and can be used.
      * @return false The index is invalid.
      */
-    bool isValidIndex(int index) const
-    {
-        return index >= 0 && size_t(index) < _properties.size();
-    }
+    bool isValidIndex(int index) const;
 
     /**
      * @brief Get the index of the property with given name.
@@ -442,14 +372,7 @@ public:
      * @param name The key of the property to find.
      * @return int The index of the property or -1 if not found.
      */
-    int getIndex(const std::string &name) const
-    {
-        auto i = std::find_if(
-            _properties.begin(),
-            _properties.end(),
-            [&](auto &property) { return property.getName() == name; });
-        return i == _properties.end() ? -1 : int(i - _properties.begin());
-    }
+    int getIndex(const std::string &name) const;
 
     /**
      * @brief Find a property from its index.
@@ -457,10 +380,7 @@ public:
      * @param index The index of the property.
      * @return const Property* A pointer to the property or null if not found.
      */
-    const Property *find(int index) const
-    {
-        return isValidIndex(index) ? &_properties[index] : nullptr;
-    }
+    const Property *find(int index) const;
 
     /**
      * @brief Find a mutable property from its index.
@@ -468,10 +388,7 @@ public:
      * @param index The index of the property.
      * @return Property* A pointer to the property or null if not found.
      */
-    Property *find(int index)
-    {
-        return isValidIndex(index) ? &_properties[index] : nullptr;
-    }
+    Property *find(int index);
 
     /**
      * @brief Find a property from its name / key.
@@ -479,10 +396,7 @@ public:
      * @param index The name of the property.
      * @return const Property* A pointer to the property or null if not found.
      */
-    const Property *find(const std::string &name) const
-    {
-        return find(getIndex(name));
-    }
+    const Property *find(const std::string &name) const;
 
     /**
      * @brief Find a mutable property from its name / key.
@@ -490,10 +404,7 @@ public:
      * @param index The index of the property.
      * @return Property* A pointer to the property or null if not found.
      */
-    Property *find(const std::string &name)
-    {
-        return find(getIndex(name));
-    }
+    Property *find(const std::string &name);
 
     /**
      * @brief Add a new property to the map. If already present, the existing
@@ -505,17 +416,7 @@ public:
      * @throw std::runtime_error The property already exists with a different
      * type.
      */
-    Property &add(const Property &property)
-    {
-        auto index = getIndex(property.getName());
-        if (index < 0)
-        {
-            _properties.push_back(property);
-            return _properties.back();
-        }
-        _properties[index].setValue(property.getValue());
-        return _properties[index];
-    }
+    Property &add(const Property &property);
 
     /**
      * @brief Update the property with the given name with the given value. Does
@@ -526,15 +427,7 @@ public:
      * @throw std::runtime_error The property has an incompatible type with
      * value.
      */
-    void update(const std::string &name, const Any &value)
-    {
-        auto property = find(name);
-        if (!property)
-        {
-            return;
-        }
-        property->copyValue(value);
-    }
+    void update(const std::string &name, const Any &value);
 
     /**
      * @brief Take all properties from other and add or update current ones. The
@@ -542,19 +435,7 @@ public:
      *
      * @param other The source properties.
      */
-    void merge(const PropertyMap &other)
-    {
-        for (const auto &property : other._properties)
-        {
-            auto index = getIndex(property.getName());
-            if (index < 0)
-            {
-                _properties.push_back(property);
-                continue;
-            }
-            _properties[index].copyValue(property.getValue());
-        }
-    }
+    void merge(const PropertyMap &other);
 
     /**
      * @brief Take all properties from other and update current ones if exists
@@ -562,18 +443,7 @@ public:
      *
      * @param other The source properties.
      */
-    void update(const PropertyMap &other)
-    {
-        for (const auto &property : other._properties)
-        {
-            auto index = getIndex(property.getName());
-            if (index < 0)
-            {
-                continue;
-            }
-            _properties[index].copyValue(property.getValue());
-        }
-    }
+    void update(const PropertyMap &other);
 
     /**
      * @brief Access property at index (must be valid).
@@ -581,14 +451,7 @@ public:
      * @param index A valid index of a property.
      * @return const Property& The desired property.
      */
-    const Property &operator[](size_t index) const
-    {
-        if (!isValidIndex(index))
-        {
-            throw std::runtime_error("Missing property");
-        }
-        return _properties[index];
-    }
+    const Property &operator[](size_t index) const;
 
     /**
      * @brief Access the property with name (must be valid).
@@ -596,10 +459,7 @@ public:
      * @param name A valid name of a property.
      * @return const Property& The desired property.
      */
-    const Property &operator[](const std::string &name) const
-    {
-        return (*this)[getIndex(name)];
-    }
+    const Property &operator[](const std::string &name) const;
 
     /**
      * @brief Get the value of the property with name or defaultValue if not
