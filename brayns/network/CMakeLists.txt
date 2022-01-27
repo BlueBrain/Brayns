@@ -19,6 +19,8 @@ set(BRAYNSNETWORK_HEADERS
 )
 
 set(BRAYNSNETWORK_SOURCES
+  binary/BinaryRequestManager.cpp
+  binary/ModelUploadTask.cpp
   common/FrameExporter.cpp
   entrypoint/EntrypointManager.cpp
   entrypoints/ExportFramesEntrypoint.cpp

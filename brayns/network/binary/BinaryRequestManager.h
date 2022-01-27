@@ -24,9 +24,6 @@
 #include <string>
 #include <unordered_map>
 
-#include <brayns/common/Log.h>
-
-#include <brayns/network/entrypoint/EntrypointException.h>
 #include <brayns/network/socket/ConnectionHandle.h>
 
 #include "ModelUploadTask.h"
@@ -46,10 +43,7 @@ public:
      * @return true At least one model upload task is running.
      * @return false No model is uploaded.
      */
-    bool hasTasks() const
-    {
-        return !_tasks.empty();
-    }
+    bool hasTasks() const;
 
     /**
      * @brief Add a new model upload task.
@@ -58,27 +52,14 @@ public:
      *
      * @param task Running model upload task.
      */
-    void addTask(ModelUploadTaskPtr task)
-    {
-        auto &chunksId = task->getChunksId();
-        auto &currentTask = _tasks[chunksId];
-        if (currentTask)
-        {
-            throw EntrypointException("A model upload with chunks ID '" + chunksId + "' is already running");
-        }
-        _nextChunkId = chunksId;
-        currentTask = std::move(task);
-    }
+    void addTask(ModelUploadTaskPtr task);
 
     /**
      * @brief Associate the next binary packet with a model.
      *
      * @param id Chunks ID of the model.
      */
-    void setNextChunkId(const std::string &id)
-    {
-        _nextChunkId = id;
-    }
+    void setNextChunkId(const std::string &id);
 
     /**
      * @brief Add a new binary packet to the current model.
@@ -87,35 +68,13 @@ public:
      *
      * @param blob Model binary data chunk.
      */
-    void addBlob(const std::string &blob)
-    {
-        auto i = _tasks.find(_nextChunkId);
-        if (i == _tasks.end())
-        {
-            Log::error("No model upload with chunks ID '{}'.", _nextChunkId);
-            return;
-        }
-        auto &task = *i->second;
-        task.addBlob(blob);
-    }
+    void addBlob(const std::string &blob);
 
     /**
      * @brief Remove all finished tasks (cancelled or complete).
      *
      */
-    void removeFinishedTasks()
-    {
-        for (auto i = _tasks.begin(); i != _tasks.end();)
-        {
-            auto &task = *i->second;
-            if (task.isRunning())
-            {
-                ++i;
-                continue;
-            }
-            i = _tasks.erase(i);
-        }
-    }
+    void removeFinishedTasks();
 
 private:
     std::string _nextChunkId;
@@ -133,20 +92,7 @@ public:
      * @brief Called on each update to remove finished tasks.
      *
      */
-    void pollTasks()
-    {
-        for (auto i = _uploaders.begin(); i != _uploaders.end();)
-        {
-            auto &uploader = i->second;
-            uploader.removeFinishedTasks();
-            if (!uploader.hasTasks())
-            {
-                i = _uploaders.erase(i);
-                continue;
-            }
-            ++i;
-        }
-    }
+    void pollTasks();
 
     /**
      * @brief Register a new running model upload task.
@@ -154,10 +100,7 @@ public:
      * @param handle Client handle.
      * @param task Task to manage.
      */
-    void addTask(const ConnectionHandle &handle, ModelUploadTaskPtr task)
-    {
-        _uploaders[handle].addTask(std::move(task));
-    }
+    void addTask(const ConnectionHandle &handle, ModelUploadTaskPtr task);
 
     /**
      * @brief Indicate that the next binary request from the given client will
@@ -166,16 +109,7 @@ public:
      * @param handle Client handle.
      * @param id Model chunks ID given at model upload request.
      */
-    void setNextChunkId(const ConnectionHandle &handle, const std::string &id)
-    {
-        auto i = _uploaders.find(handle);
-        if (i == _uploaders.end())
-        {
-            throw EntrypointException("No model uploads are running");
-        }
-        auto &uploader = i->second;
-        uploader.setNextChunkId(id);
-    }
+    void setNextChunkId(const ConnectionHandle &handle, const std::string &id);
 
     /**
      * @brief Add the binary blob to the correct running mode upload task.
@@ -183,18 +117,7 @@ public:
      * @param handle Client handle.
      * @param packet Client binary message.
      */
-    void processBinaryRequest(const ConnectionHandle &handle, const InputPacket &packet)
-    {
-        auto i = _uploaders.find(handle);
-        if (i == _uploaders.end())
-        {
-            Log::error("Processing binary from unknown client.");
-            return;
-        }
-        auto &uploader = i->second;
-        auto &data = packet.getData();
-        uploader.addBlob(data);
-    }
+    void processBinaryRequest(const ConnectionHandle &handle, const InputPacket &packet);
 
 private:
     std::unordered_map<ConnectionHandle, ModelUploader> _uploaders;
