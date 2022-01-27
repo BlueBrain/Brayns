@@ -5,7 +5,13 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSCOMMON_SOURCES
+    BaseObject.cpp
+    Log.cpp
+    Progress.cpp
+    PropertyObject.cpp
+    Statistics.cpp
     Timer.cpp
+    Transformation.cpp
     adapters/PropertyMapAdapter.cpp
     geometry/SDFGeometry.cpp
     geometry/TriangleMesh.cpp

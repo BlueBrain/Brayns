@@ -18,23 +18,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/common/BaseObject.h>
+#include "Statistics.h"
 
 namespace brayns
 {
-/** Captures various statistics about rendering, scenes, etc. */
-class Statistics : public BaseObject
+double Statistics::getFPS() const
 {
-public:
-    double getFPS() const;
-    void setFPS(const double fps);
-    size_t getSceneSizeInBytes() const;
-    void setSceneSizeInBytes(const size_t sceneSizeInBytes);
+    return _fps;
+}
 
-private:
-    double _fps{0.0};
-    size_t _sceneSizeInBytes{0};
-};
+void Statistics::setFPS(const double fps)
+{
+    _updateValue(_fps, fps);
+}
+
+size_t Statistics::getSceneSizeInBytes() const
+{
+    return _sceneSizeInBytes;
+}
+
+void Statistics::setSceneSizeInBytes(const size_t sceneSizeInBytes)
+{
+    _updateValue(_sceneSizeInBytes, sceneSizeInBytes);
+}
 } // namespace brayns
