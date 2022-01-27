@@ -15,6 +15,7 @@ set(BRAYNSCOMMON_SOURCES
     adapters/PropertyMapAdapter.cpp
     geometry/SDFGeometry.cpp
     geometry/TriangleMesh.cpp
+    material/Texture2D.cpp
     propertymap/ConversionRegistry.cpp
     propertymap/EnumProperty.cpp
     propertymap/PropertyMap.cpp
