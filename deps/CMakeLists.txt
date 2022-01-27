@@ -30,7 +30,7 @@ add_subdirectory(async++)
 # =============================================================================
 # Poco
 # =============================================================================
-if(NOT Poco_Found)
+if(NOT Poco_FOUND)
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/poco")
         message(STATUS "Downloading Poco from submodules")
         FetchContent_Declare(
