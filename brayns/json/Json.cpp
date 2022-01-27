@@ -19,45 +19,42 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "Json.h"
 
-#include <brayns/json/JsonAdapter.h>
+#include <sstream>
+
+#include <Poco/JSON/Parser.h>
+#include <Poco/JSON/Stringifier.h>
 
 namespace brayns
 {
-/**
- * @brief Adapt JsonSchema to be used as JSON objects.
- *
- */
-template<>
-struct JsonAdapter<JsonSchema>
+std::string Json::stringify(const JsonValue &json)
 {
-    /**
-     * @brief Return the schema itself.
-     *
-     * @param schema Input schema.
-     * @return JsonSchema Output schema.
-     */
-    static JsonSchema getSchema(const JsonSchema &schema);
+    std::ostringstream stream;
+    Poco::JSON::Stringifier::condense(json, stream);
+    return stream.str();
+}
 
-    /**
-     * @brief Serialize a JSON schema as a JSON object
-     *
-     * @param value Input value.
-     * @param json Ouput JSON.
-     * @return true Success.
-     * @return false Failure.
-     */
-    static bool serialize(const JsonSchema &value, JsonValue &json);
+JsonValue Json::parse(const std::string &json)
+{
+    Poco::JSON::Parser parser;
+    return parser.parse(json);
+}
 
-    /**
-     * @brief Deserialize a JSON schema from a JSON object.
-     *
-     * @param json Input JSON.
-     * @param value Ouput value.
-     * @return true Success.
-     * @return false Failure.
-     */
-    static bool deserialize(const JsonValue &json, JsonSchema &value);
-};
+JsonSchema JsonAdapter<JsonValue>::getSchema(const JsonValue &)
+{
+    return {};
+}
+
+bool JsonAdapter<JsonValue>::serialize(const JsonValue &value, JsonValue &json)
+{
+    json = value;
+    return true;
+}
+
+bool JsonAdapter<JsonValue>::deserialize(const JsonValue &json, JsonValue &value)
+{
+    value = json;
+    return true;
+}
 } // namespace brayns

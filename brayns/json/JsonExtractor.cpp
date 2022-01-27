@@ -19,45 +19,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/json/JsonAdapter.h>
+#include "JsonExtractor.h"
 
 namespace brayns
 {
-/**
- * @brief Adapt JsonSchema to be used as JSON objects.
- *
- */
-template<>
-struct JsonAdapter<JsonSchema>
+JsonArray::Ptr JsonExtractor::extractArray(const JsonValue &json)
 {
-    /**
-     * @brief Return the schema itself.
-     *
-     * @param schema Input schema.
-     * @return JsonSchema Output schema.
-     */
-    static JsonSchema getSchema(const JsonSchema &schema);
+    if (json.type() != typeid(JsonArray::Ptr))
+    {
+        return nullptr;
+    }
+    return json.extract<JsonArray::Ptr>();
+}
 
-    /**
-     * @brief Serialize a JSON schema as a JSON object
-     *
-     * @param value Input value.
-     * @param json Ouput JSON.
-     * @return true Success.
-     * @return false Failure.
-     */
-    static bool serialize(const JsonSchema &value, JsonValue &json);
-
-    /**
-     * @brief Deserialize a JSON schema from a JSON object.
-     *
-     * @param json Input JSON.
-     * @param value Ouput value.
-     * @return true Success.
-     * @return false Failure.
-     */
-    static bool deserialize(const JsonValue &json, JsonSchema &value);
-};
+JsonObject::Ptr JsonExtractor::extractObject(const JsonValue &json)
+{
+    if (json.type() != typeid(JsonObject::Ptr))
+    {
+        return nullptr;
+    }
+    return json.extract<JsonObject::Ptr>();
+}
 } // namespace brayns
