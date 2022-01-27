@@ -84,8 +84,10 @@ public:
      * @param const std::string& fileName Path to the file to queried
      * @param const std::string& extension Extracted file extension from fileName
      */
-    virtual bool isSupported(const std::string &, const std::string &extension) const
+    virtual bool isSupported(const std::string &fileName, const std::string &extension) const
     {
+        (void)fileName;
+
         const auto extensions = getSupportedExtensions();
         const auto lcExtension = string_utils::toLowercase(extension[0] == '.' ? extension.substr(1) : extension);
         auto it = std::find_if(
@@ -231,18 +233,24 @@ struct EmptyLoaderParameters
 template<>
 struct JsonAdapter<EmptyLoaderParameters>
 {
-    static JsonSchema getSchema(const EmptyLoaderParameters &)
+    static JsonSchema getSchema(const EmptyLoaderParameters &params)
     {
+        (void)params;
         return JsonSchema();
     }
 
-    static bool serialize(const EmptyLoaderParameters &, JsonValue &)
+    static bool serialize(const EmptyLoaderParameters &params, JsonValue &value)
     {
+        (void)params;
+        (void)value;
+
         return true;
     }
 
-    static bool deserialize(const JsonValue &, EmptyLoaderParameters &)
+    static bool deserialize(const JsonValue &value, EmptyLoaderParameters &params)
     {
+        (void)value;
+        (void)params;
         return true;
     }
 };

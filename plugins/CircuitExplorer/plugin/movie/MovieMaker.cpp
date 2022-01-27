@@ -1131,8 +1131,10 @@ void MovieMaker::createMovie(const MovieInfo &info)
 }
 
 #else
-void MovieMaker::createMovie(const MovieInfo &)
+void MovieMaker::createMovie(const MovieInfo &info)
 {
+    (void)info;
+
     throw MovieCreationException(
         "This version of Brayns was not compiled with FFmpeg, movie generation "
         "is hence disabled");

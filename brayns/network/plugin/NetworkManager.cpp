@@ -155,8 +155,10 @@ public:
     }
 
 private:
-    static void onConnect(NetworkContext &, const ConnectionHandle &handle)
+    static void onConnect(NetworkContext &context, const ConnectionHandle &handle)
     {
+        (void)context;
+
         Log::info("New connection: {}.", handle.getId());
     }
 

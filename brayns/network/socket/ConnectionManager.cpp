@@ -167,8 +167,10 @@ void ConnectionManager::broadcast(const OutputPacket &packet)
 {
     std::lock_guard<std::mutex> lock(_mutex);
     _connections.forEach(
-        [&](const auto &, const auto &connection)
+        [&](const auto &handle, const auto &connection)
         {
+            (void)handle;
+
             auto &socket = connection.socket;
             socket->send(packet);
         });
@@ -207,8 +209,10 @@ void ConnectionManager::closeAll()
 {
     std::lock_guard<std::mutex> lock(_mutex);
     _connections.forEach(
-        [](auto &, auto &connection)
+        [](auto &handle, auto &connection)
         {
+            (void)handle;
+
             auto &socket = connection.socket;
             socket->close();
         });
