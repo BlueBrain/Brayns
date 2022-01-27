@@ -95,7 +95,7 @@ if(NOT glm_FOUND AND NOT TARGET glm)
             $<INSTALL_INTERFACE:include>)
             
     install(TARGETS glm
-        EXPORT Brion-targets
+        EXPORT Brayns-targets
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         INCLUDES DESTINATION include
