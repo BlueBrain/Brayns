@@ -44,4 +44,5 @@ std::vector<std::string> NeuronBuilderTable::getAvailableBuilderNames() const no
     result.reserve(_builders.size());
     for (const auto &entry : _builders)
         result.push_back(entry.first);
+    return result;
 }

@@ -169,6 +169,8 @@ void ConnectionManager::broadcast(const OutputPacket &packet)
     _connections.forEach(
         [&](const auto &handle, const auto &connection)
         {
+            (void)handle;
+
             auto &socket = connection.socket;
             socket->send(packet);
         });
@@ -209,6 +211,8 @@ void ConnectionManager::closeAll()
     _connections.forEach(
         [](auto &handle, auto &connection)
         {
+            (void)handle;
+
             auto &socket = connection.socket;
             socket->close();
         });

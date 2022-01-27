@@ -190,6 +190,8 @@ std::vector<std::string> CommonEdgeColorHandler::_getMethodVariablesImpl(const s
 
 void CommonEdgeColorHandler::_updateColorByIdImpl(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
+    (void)colorMap;
+
     ColorRoulette cr;
     for (const auto &group : _elements)
     {

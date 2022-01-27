@@ -56,7 +56,6 @@ void logExportInfo(const ExportFramesParams &info)
 void initializeParameters(Engine &engine, ExportFramesParams &params)
 {
     const auto &paramsManager = engine.getParametersManager();
-    const auto &sysRenderParams = paramsManager.getRenderingParameters();
     const auto &sysVolumeParams = paramsManager.getVolumeParameters();
     const auto &sysRenderer = engine.getRenderer();
 
@@ -123,7 +122,6 @@ void ExportFramesTask::run()
     const auto &rendererSettings = _params.renderer_parameters;
     const auto &imageSize = _params.image_size;
     const auto nameAfterStep = _params.name_after_simulation_index;
-    const auto &rendererSpecificParams = _params.renderer_parameters;
     const auto &keyFrames = _params.key_frames;
 
     // Create the camera

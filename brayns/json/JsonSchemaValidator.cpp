@@ -163,14 +163,14 @@ public:
     void addBelowMinimum(double value, double minimum)
     {
         std::ostringstream stream;
-        stream << "'" << _path.toString() << "' is below minimum value '" << minimum << "'";
+        stream << "'" << _path.toString() << "' " << value << " is below minimum value '" << minimum << "'";
         addError(stream.str());
     }
 
     void addAboveMaximum(double value, double maximum)
     {
         std::ostringstream stream;
-        stream << "'" << _path.toString() << "' is above maximum value '" << maximum << "'";
+        stream << "'" << _path.toString() << "' " << value << " is above maximum value '" << maximum << "'";
         addError(stream.str());
     }
 

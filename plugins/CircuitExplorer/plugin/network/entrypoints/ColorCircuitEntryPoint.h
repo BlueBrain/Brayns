@@ -188,7 +188,7 @@ public:
         {
             throw brayns::EntrypointException(1, "The given ID does not correspond to any circuit model");
         }
-        catch (const ColorMethodNotFoundException)
+        catch (const ColorMethodNotFoundException &)
         {
             throw brayns::EntrypointException(
                 2,
@@ -238,14 +238,14 @@ public:
         {
             throw brayns::EntrypointException(1, "The given ID does not correspond to any circuit model");
         }
-        catch (const ColorMethodNotFoundException)
+        catch (const ColorMethodNotFoundException &)
         {
             throw brayns::EntrypointException(
                 2,
                 "The given coloring method does not "
                 "exists for the given model");
         }
-        catch (const ColorMethodVariableNotFoundException)
+        catch (const ColorMethodVariableNotFoundException &)
         {
             throw brayns::EntrypointException(
                 3,

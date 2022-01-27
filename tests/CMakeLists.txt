@@ -31,6 +31,8 @@ foreach(TEST ${TEST_LIST})
     add_executable(${TEST_NAME} ${TEST})
     
     target_compile_options(${TEST_NAME} PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+    # no trivial copy error from doctest.h
+    target_compile_options(${TEST_NAME} PRIVATE -Wno-class-memaccess)
 
     set(TEST_TARGET_LIST ${TEST_TARGET_LIST} ${TEST_NAME})
 

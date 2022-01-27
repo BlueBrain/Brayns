@@ -27,6 +27,9 @@ std::vector<NodeReportMapping> NodeSpikeLoader::loadMapping(
     const std::string &population,
     const bbp::sonata::Selection &s) const
 {
+    (void)reportPath;
+    (void)population;
+
     std::vector<NodeReportMapping> mapping(s.flatSize());
     for (size_t i = 0; i < mapping.size(); ++i)
         mapping[i].globalOffset = i;

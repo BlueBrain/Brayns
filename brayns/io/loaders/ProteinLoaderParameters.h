@@ -40,7 +40,7 @@ BRAYNS_JSON_ADAPTER_ENUM(
     {"by_id", ProteinLoaderColorScheme::by_id},
     {"protein_atoms", ProteinLoaderColorScheme::protein_atoms},
     {"protein_chains", ProteinLoaderColorScheme::protein_chains},
-    {"protein_residues", ProteinLoaderColorScheme::protein_residues});
+    {"protein_residues", ProteinLoaderColorScheme::protein_residues})
 
 BRAYNS_JSON_OBJECT_BEGIN(ProteinLoaderParameters)
 BRAYNS_JSON_OBJECT_ENTRY(
