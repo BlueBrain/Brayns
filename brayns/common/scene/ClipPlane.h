@@ -30,36 +30,18 @@ namespace brayns
 class ClipPlane : public BaseObject
 {
 public:
-    ClipPlane(const Plane &plane)
-        : _id(_nextID++)
-        , _plane(plane)
-    {
-    }
+    ClipPlane(const Plane &plane);
 
-    size_t getID() const
-    {
-        return _id;
-    }
-    void setID(size_t id)
-    {
-        _updateValue(_id, id);
-    }
-    const Plane &getPlane() const
-    {
-        return _plane;
-    };
-    void setPlane(const Plane &plane)
-    {
-        _updateValue(_plane, plane);
-    }
+    size_t getID() const;
+    void setID(size_t id);
+    const Plane &getPlane() const;
+    void setPlane(const Plane &plane);
+
     /** @internal */
     ClipPlane() = default;
+
     /** @internal */
-    ClipPlane(const size_t id, const Plane &plane)
-        : _id(id)
-        , _plane(plane)
-    {
-    }
+    ClipPlane(const size_t id, const Plane &plane);
 
 private:
     static size_t _nextID;

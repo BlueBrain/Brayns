@@ -22,5 +22,37 @@
 
 namespace brayns
 {
-size_t ClipPlane::_nextID = 0;
+ClipPlane::ClipPlane(const Plane &plane)
+    : _id(_nextID++)
+    , _plane(plane)
+{
 }
+
+size_t ClipPlane::getID() const
+{
+    return _id;
+}
+
+void ClipPlane::setID(size_t id)
+{
+    _updateValue(_id, id);
+}
+
+const Plane &ClipPlane::getPlane() const
+{
+    return _plane;
+}
+
+void ClipPlane::setPlane(const Plane &plane)
+{
+    _updateValue(_plane, plane);
+}
+
+ClipPlane::ClipPlane(const size_t id, const Plane &plane)
+    : _id(id)
+    , _plane(plane)
+{
+}
+
+size_t ClipPlane::_nextID = 0;
+} // namespace brayns
