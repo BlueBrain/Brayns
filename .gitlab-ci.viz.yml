@@ -94,8 +94,6 @@ docker-publish-to-dockerhub:
     KUBERNETES_MEMORY_REQUEST: 8Gi
     CI_REGISTRY_IMAGE: bluebrain/brayns
   extends: .publish-image-using-kaniko
-  only:
-    - external_pull_requests
 
 debug-print:
   stage: test
@@ -105,3 +103,5 @@ debug-print:
   script:
     - echo $CI_MERGE_REQUEST_IID
     - env
+  only:
+    - external_pull_requests
