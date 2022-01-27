@@ -18,23 +18,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/common/BaseObject.h>
+#include "Progress.h"
 
 namespace brayns
 {
-/** Captures various statistics about rendering, scenes, etc. */
-class Statistics : public BaseObject
+Progress::Progress(const std::string &operation)
+    : _operation(operation)
 {
-public:
-    double getFPS() const;
-    void setFPS(const double fps);
-    size_t getSceneSizeInBytes() const;
-    void setSceneSizeInBytes(const size_t sceneSizeInBytes);
+}
 
-private:
-    double _fps{0.0};
-    size_t _sceneSizeInBytes{0};
-};
+void Progress::update(const std::string &operation, const float amount)
+{
+    std::lock_guard<std::mutex> lock_(_mutex);
+    _updateValue(_operation, operation);
+    _updateValue(_amount, amount);
+}
+
+void Progress::increment(const std::string &operation, const float increment)
+{
+    std::lock_guard<std::mutex> lock_(_mutex);
+    _updateValue(_operation, operation);
+    _updateValue(_amount, _amount + increment);
+}
+
+void Progress::consume(std::function<void(std::string, float)> callback)
+{
+    std::lock_guard<std::mutex> lock_(_mutex);
+    if (isModified())
+    {
+        callback(_operation, _amount);
+        resetModified();
+    }
+}
 } // namespace brayns
