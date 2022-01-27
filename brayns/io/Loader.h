@@ -81,6 +81,8 @@ public:
      * @brief Query the loader if it can load the given file. Compares the file
      * extension to the supported extensions (removing the dot, if any, and
      * making them lowercase). Can be overriden to perform mor explicit checks
+     * @param const std::string& fileName Path to the file to queried
+     * @param const std::string& extension Extracted file extension from fileName
      */
     virtual bool isSupported(const std::string &, const std::string &extension) const
     {
