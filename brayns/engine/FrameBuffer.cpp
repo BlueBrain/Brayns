@@ -54,12 +54,12 @@ void FrameBuffer::setSubsampling(const size_t factor)
 void FrameBuffer::createPixelOp(const std::string &name)
 {
     (void)name;
-};
+}
 
 void FrameBuffer::updatePixelOp(const PropertyMap &properties)
 {
     (void)properties;
-};
+}
 
 FrameBuffer::FrameBuffer(const std::string &name, const Vector2ui &frameSize, const PixelFormat frameBufferFormat)
     : _name(name)
