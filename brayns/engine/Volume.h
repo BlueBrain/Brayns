@@ -41,14 +41,9 @@ public:
 
     Volume(const Vector3ui &dimensions, const Vector3f &spacing, const VolumeDataType type);
 
-    size_t getSizeInBytes() const
-    {
-        return _sizeInBytes;
-    }
-    Boxd getBounds() const
-    {
-        return {{0, 0, 0}, {_dimensions.x * _spacing.x, _dimensions.y * _spacing.y, _dimensions.z * _spacing.z}};
-    }
+    size_t getSizeInBytes() const;
+
+    Boxd getBounds() const;
 
 protected:
     std::atomic_size_t _sizeInBytes{0};

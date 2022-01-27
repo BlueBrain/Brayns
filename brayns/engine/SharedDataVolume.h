@@ -48,11 +48,7 @@ public:
     void mapData(std::vector<uint8_t> &&buffer);
 
 protected:
-    SharedDataVolume(const Vector3ui &dimensions, const Vector3f &spacing, const VolumeDataType type)
-        : Volume(dimensions, spacing, type)
-    {
-    }
-
+    SharedDataVolume(const Vector3ui &dimensions, const Vector3f &spacing, const VolumeDataType type);
     ~SharedDataVolume();
 
 private:

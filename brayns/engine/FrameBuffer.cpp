@@ -26,6 +26,41 @@
 
 namespace brayns
 {
+void FrameBuffer::clear()
+{
+    _accumFrames = 0;
+}
+
+Vector2ui FrameBuffer::getSize() const
+{
+    return _frameSize;
+}
+
+void FrameBuffer::setAccumulation(const bool accumulation)
+{
+    _accumulation = accumulation;
+}
+
+void FrameBuffer::setFormat(PixelFormat frameBufferFormat)
+{
+    _frameBufferFormat = frameBufferFormat;
+}
+
+void FrameBuffer::setSubsampling(const size_t factor)
+{
+    (void)factor;
+}
+
+void FrameBuffer::createPixelOp(const std::string &name)
+{
+    (void)name;
+};
+
+void FrameBuffer::updatePixelOp(const PropertyMap &properties)
+{
+    (void)properties;
+};
+
 FrameBuffer::FrameBuffer(const std::string &name, const Vector2ui &frameSize, const PixelFormat frameBufferFormat)
     : _name(name)
     , _frameSize(frameSize)
@@ -45,6 +80,36 @@ size_t FrameBuffer::getColorDepth() const
     default:
         return 0;
     }
+}
+
+const Vector2ui &FrameBuffer::getFrameSize() const
+{
+    return _frameSize;
+}
+
+bool FrameBuffer::getAccumulation() const
+{
+    return _accumulation;
+}
+
+PixelFormat FrameBuffer::getFrameBufferFormat() const
+{
+    return _frameBufferFormat;
+}
+
+const std::string &FrameBuffer::getName() const
+{
+    return _name;
+}
+
+void FrameBuffer::incrementAccumFrames()
+{
+    ++_accumFrames;
+}
+
+size_t FrameBuffer::numAccumFrames() const
+{
+    return _accumFrames;
 }
 
 Image FrameBuffer::getImage()
