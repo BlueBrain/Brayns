@@ -34,10 +34,8 @@ class AbstractSimulationHandler
 {
 public:
     AbstractSimulationHandler() = default;
-    AbstractSimulationHandler(const AbstractSimulationHandler &o)
-    {
-        *this = o;
-    }
+
+    AbstractSimulationHandler(const AbstractSimulationHandler &other);
 
     /** @return a clone of the concrete simulation handler implementation. */
     virtual std::shared_ptr<AbstractSimulationHandler> clone() const = 0;
@@ -47,19 +45,13 @@ public:
     AbstractSimulationHandler &operator=(const AbstractSimulationHandler &rhs);
 
     /** @return the current loaded frame for the simulation. */
-    uint32_t getCurrentFrame() const
-    {
-        return _currentFrame;
-    }
+    uint32_t getCurrentFrame() const;
 
     /**
      * @brief Sets the current frame played by this simulation handler
      * @param newFrame unsigned integer.
      */
-    void setCurrentFrame(const uint32_t newFrame)
-    {
-        _currentFrame = newFrame;
-    }
+    void setCurrentFrame(const uint32_t newFrame);
 
     /**
      * @brief setFrameAdjuster sets the frame adjusting parameter
@@ -73,10 +65,7 @@ public:
      *
      * @param adjuster
      */
-    void setFrameAdjuster(const double adjuster)
-    {
-        _frameAdjuster = adjuster;
-    }
+    void setFrameAdjuster(const double adjuster);
 
     /**
      * @brief returns a void pointer to the simulation data for the given frame
@@ -88,81 +77,55 @@ public:
      * @brief Subclasses of the simulation handlers must implement this method
      * to retrieve the data for the given simulation frame
      */
-    virtual std::vector<float> getFrameDataImpl(const uint32_t)
-    {
-        return {};
-    };
+    virtual std::vector<float> getFrameDataImpl(const uint32_t frame);
 
     /**
      * @brief getFrameSize return the size of the current simulation frame
      */
-    uint64_t getFrameSize() const
-    {
-        return _frameSize;
-    }
+    uint64_t getFrameSize() const;
+
     /**
      * @brief setFrameSize Sets the size of the current simulation frame
      */
-    void setFrameSize(const uint64_t frameSize)
-    {
-        _frameSize = frameSize;
-    }
+    void setFrameSize(const uint64_t frameSize);
+
     /**
      * @brief getNbFrames returns the number of frame for the current simulation
      */
-    uint32_t getNbFrames() const
-    {
-        return _nbFrames;
-    }
+    uint32_t getNbFrames() const;
+
     /**
      * @brief setNbFrames sets the number of frame for the current simulation
      */
-    void setNbFrames(const uint32_t nbFrames)
-    {
-        _nbFrames = nbFrames;
-    }
+    void setNbFrames(const uint32_t nbFrames);
 
     /**
      * @brief getStartTime Return the time at which the simulation begins
      * @return double
      */
-    double getStartTime() const
-    {
-        return _startTime;
-    }
+    double getStartTime() const;
 
     /**
      * @brief getEndTime Return the time at which the simulation ends
      * @return double
      */
-    double getEndTime() const
-    {
-        return _endTime;
-    }
+    double getEndTime() const;
 
     /**
      * @return the dt of the simulation in getUnit() time unit; 0 if not
      *         reported
      */
-    double getDt() const
-    {
-        return _dt;
-    }
+    double getDt() const;
+
     /** @return the time unit of the simulation; empty if not reported. */
-    const std::string &getUnit() const
-    {
-        return _unit;
-    }
+    const std::string &getUnit() const;
+
     /** @return true if the requested frame from getFrameData() is ready to
      * consume and if it is allowed to advance to the next frame. */
-    virtual bool isReady() const
-    {
-        return true;
-    }
+    virtual bool isReady() const;
+
     /** Wait until current frame is ready */
-    virtual void waitReady() const
-    {
-    }
+    virtual void waitReady() const;
 
     /**
      * @brief return the frame index within this handler bounds that
