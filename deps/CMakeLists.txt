@@ -81,24 +81,28 @@ if(NOT glm_FOUND AND NOT TARGET glm)
         FetchContent_Declare(
             glm
             GIT_REPOSITORY https://github.com/g-truc/glm.git
-            GIT_TAG        9749727c2db4742369219e1d452f43e918734b4e
+            GIT_TAG        0.9.9.8
             GIT_SHALLOW ON
             GIT_SUBMODULES_RECURSE OFF
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/glm
         )
         FetchContent_Populate(glm)
     endif()
-    option(GLM_QUIET "No CMake Message" ON)
-    option(GLM_TEST_ENABLE "Build unit tests" OFF)
-    option(GLM_TEST_ENABLE_CXX_14 "Enable C++ 14" ON)
-    set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY ON)
-    set(CMAKE_INSTALL_LIBDIR lib)
-    add_subdirectory(glm)
+    
+    add_library(glm INTERFACE)
+    target_include_directories(glm SYSTEM INTERFACE
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/glm>
+            $<INSTALL_INTERFACE:include>)
+            
+    install(TARGETS glm
+        EXPORT Brion-targets
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        INCLUDES DESTINATION include
+    )
 
-    # WAR for https://github.com/g-truc/glm/issues/854
-    if(CMAKE_COMPILER_IS_GNUCXX AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
-      target_compile_options(glm INTERFACE -Wno-pedantic -Wno-error=pedantic -Wno-class-memaccess -Wno-error=class-memaccess)
-    endif()
+    install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/glm/glm
+            DESTINATION include)
 endif()
 
 # =============================================================================

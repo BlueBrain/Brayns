@@ -52,7 +52,7 @@ std::string getEndFeetAreasPath(
 
     const auto edgeNetworkList = json->getObject("networks")->getArray("edges");
     bool found = false;
-    for (const auto entry : *edgeNetworkList)
+    for (const auto& entry : *edgeNetworkList)
     {
         if (found)
             break;
