@@ -76,6 +76,41 @@ void TransferFunction::clear()
     markModified();
 }
 
+const std::vector<Vector2d> &TransferFunction::getControlPoints() const
+{
+    return _controlPoints;
+}
+
+void TransferFunction::setControlPoints(const std::vector<Vector2d> &controlPoints)
+{
+    _updateValue(_controlPoints, controlPoints);
+}
+
+const ColorMap &TransferFunction::getColorMap() const
+{
+    return _colorMap;
+}
+
+void TransferFunction::setColorMap(const ColorMap &colorMap)
+{
+    _updateValue(_colorMap, colorMap);
+}
+
+const std::vector<brayns::Vector3f> &TransferFunction::getColors() const
+{
+    return _colorMap.colors;
+}
+
+const Vector2d &TransferFunction::getValuesRange() const
+{
+    return _valuesRange;
+}
+
+void TransferFunction::setValuesRange(const Vector2d &valuesRange)
+{
+    _updateValue(_valuesRange, valuesRange);
+}
+
 std::vector<float> TransferFunction::calculateInterpolatedOpacities() const
 {
     constexpr size_t numSamples = 256;
