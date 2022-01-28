@@ -86,14 +86,13 @@ docker-build:
     KUBERNETES_CPU_REQUEST: 4
     KUBERNETES_MEMORY_LIMIT: 8Gi
     KUBERNETES_MEMORY_REQUEST: 8Gi
-    CI_REGISTRY: ""
   extends: .build-image-using-kaniko
   before_script:
     # We need to overwrite CI_REGISTRY variable so it does not point to CI/CD variable:
     # "https://index.docker.io/v1/". Otherwise we run into 401 Unauthorized as
     # CI_REGISTRY_PASSWORD is a protected variable i.e. not available for regular CI jobs.
-    # As per https://gitlab.com/gitlab-org/gitlab-runner/-/issues/3555
-    # We cannot overwrite predefined CI/CD variables in "variables" section, hence the hack
+    # And as per https://gitlab.com/gitlab-org/gitlab-runner/-/issues/3555:
+    # we cannot overwrite predefined CI/CD variables in "variables" section, hence the hack
     - export CI_REGISTRY=""
   rules:
     - if: $GITHUB_PULL_REQUEST_ID
@@ -106,17 +105,6 @@ docker-publish-to-dockerhub:
     KUBERNETES_MEMORY_REQUEST: 8Gi
     CI_REGISTRY_IMAGE: bluebrain/brayns
   extends: .publish-image-using-kaniko
-  rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-
-debug-print:
-  stage: test
-  image:
-    name: ubuntu:20.04
-    entrypoint: [""]
-  rules:
-    - if: $GITHUB_PULL_REQUEST_ID
-  script:
-    - echo $GITHUB_PULL_REQUEST_ID
-    - echo $CI_MERGE_REQUEST_IID
+  # TODO: remove later
+  before_script:
     - env
