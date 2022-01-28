@@ -25,6 +25,7 @@ set(BRAYNSNETWORK_SOURCES
   common/ExtractModel.cpp
   common/FrameExporter.cpp
   common/RateLimiter.cpp
+  context/NetworkContext.cpp
   entrypoint/EntrypointManager.cpp
   entrypoints/ExportFramesEntrypoint.cpp
   entrypoints/ExportFramesToDiskEntryPoint.cpp
