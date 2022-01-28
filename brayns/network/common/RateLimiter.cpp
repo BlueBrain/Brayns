@@ -19,38 +19,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
+#include "RateLimiter.h"
 
 namespace brayns
 {
-/**
- * @brief Helper class to extract a material from a model with error handling.
- *
- */
-class ExtractMaterial
+RateLimiter RateLimiter::fromFps(size_t fps)
 {
-public:
-    /**
-     * @brief Extract a material from a model descriptor and its ID.
-     *
-     * @param descriptor Source model.
-     * @param id Material ID
-     * @return Material& Material instance.
-     * @throw EntrypointException Material or model not found.
-     */
-    static Material &fromId(ModelDescriptor &descriptor, size_t id);
+    if (fps == 0)
+    {
+        return {Duration::max()};
+    }
+    auto period = std::chrono::duration<double>(1.0 / fps);
+    return std::chrono::duration_cast<Duration>(period);
+}
 
-    /**
-     * @brief Extract a material from a model and its ID.
-     *
-     * @param model Source model.
-     * @param id Material ID
-     * @return Material& Material instance.
-     * @throw EntrypointException Material or model not found.
-     */
-    static Material &fromId(Model &model, size_t modelId, size_t id);
-};
+RateLimiter::RateLimiter(Duration period)
+    : _period(period)
+{
+}
+
+bool RateLimiter::_tryUpdateLastCall()
+{
+    auto currentTime = Clock::now();
+    auto elapsed = currentTime - _lastCall;
+    if (elapsed < _period)
+    {
+        return false;
+    }
+    auto delay = (elapsed - _period) % _period;
+    _lastCall = currentTime - delay;
+    return true;
+}
 } // namespace brayns

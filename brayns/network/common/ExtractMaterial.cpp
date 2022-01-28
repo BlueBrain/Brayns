@@ -19,38 +19,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ExtractMaterial.h"
 
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
+#include <brayns/network/entrypoint/EntrypointException.h>
 
 namespace brayns
 {
-/**
- * @brief Helper class to extract a material from a model with error handling.
- *
- */
-class ExtractMaterial
+Material &ExtractMaterial::fromId(ModelDescriptor &descriptor, size_t id)
 {
-public:
-    /**
-     * @brief Extract a material from a model descriptor and its ID.
-     *
-     * @param descriptor Source model.
-     * @param id Material ID
-     * @return Material& Material instance.
-     * @throw EntrypointException Material or model not found.
-     */
-    static Material &fromId(ModelDescriptor &descriptor, size_t id);
+    auto &model = descriptor.getModel();
+    auto modelId = descriptor.getModelID();
+    return fromId(model, modelId, id);
+}
 
-    /**
-     * @brief Extract a material from a model and its ID.
-     *
-     * @param model Source model.
-     * @param id Material ID
-     * @return Material& Material instance.
-     * @throw EntrypointException Material or model not found.
-     */
-    static Material &fromId(Model &model, size_t modelId, size_t id);
-};
+Material &ExtractMaterial::fromId(Model &model, size_t modelId, size_t id)
+{
+    auto material = model.getMaterial(id);
+    if (!material)
+    {
+        throw EntrypointException("No material with ID " + std::to_string(id) + " in model " + std::to_string(modelId));
+    }
+    return *material;
+}
 } // namespace brayns
