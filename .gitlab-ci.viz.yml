@@ -107,9 +107,9 @@ debug-print:
   image:
     name: ubuntu:20.04
     entrypoint: [""]
-  # rules:
-    # - if: $GITHUB_PULL_REQUEST_ID
+  rules:
+    - if: $GITHUB_PULL_REQUEST_ID
   script:
-    - echo GITHUB_PULL_REQUEST_ID
+    - echo $GITHUB_PULL_REQUEST_ID
     - echo $CI_MERGE_REQUEST_IID
     - env

@@ -27,8 +27,7 @@ brayns-spack-build:
   extends: .spack_build
   stage: test
   timeout: 2h
-  rules:
-    - if: $GITHUB_PULL_REQUEST_ID
+
 
 brayns-spack-test:
   extends: .spack_test
@@ -37,7 +36,6 @@ brayns-spack-test:
   script:
    - cd ${SPACK_BUILD_DIR}
    - spack build-env ${SPACK_FULL_SPEC} -- ninja tests
-  rules:
-    - if: $GITHUB_PULL_REQUEST_ID
+
 
 

@@ -5,17 +5,16 @@ viz_stack:
       - local: .gitlab-ci.viz.yml
     strategy: depend
   rules:
-    - when: always
+    - if: $CI_EXTERNAL_PULL_REQUEST_IID
   variables:
     GITHUB_PULL_REQUEST_ID: $CI_EXTERNAL_PULL_REQUEST_IID
 
-hpc_stack:
-  stage: test
-  trigger:
-    include:
-      - local: .gitlab-ci.hpc-spack.yml
-    strategy: depend
-
-  rules:
-    - when: always
+# hpc_stack:
+#   stage: test
+#   trigger:
+#     include:
+#       - local: .gitlab-ci.hpc-spack.yml
+#     strategy: depend
+#   rules:
+#     - if: $CI_EXTERNAL_PULL_REQUEST_IID
 
