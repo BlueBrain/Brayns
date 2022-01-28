@@ -22,9 +22,8 @@
 #pragma once
 
 #include <stdexcept>
-#include <string>
 
-#include <brayns/json/Json.h>
+#include <brayns/json/JsonType.h>
 
 namespace brayns
 {
@@ -44,10 +43,7 @@ public:
      *
      * @param message Error description.
      */
-    EntrypointException(const std::string &message)
-        : std::runtime_error(message)
-    {
-    }
+    EntrypointException(const std::string &message);
 
     /**
      * @brief Construct an exception with a code and a description.
@@ -55,48 +51,21 @@ public:
      * @param code Error code.
      * @param message Error description.
      */
-    EntrypointException(int code, const std::string &message, const JsonValue &data = {})
-        : std::runtime_error(message)
-        , _code(code)
-        , _data(data)
-    {
-    }
-
-    /**
-     * @brief Construct an exception with additional data.
-     *
-     * @tparam T Error data type.
-     * @param code Error code.
-     * @param message Error description.
-     * @param data Error data.
-     */
-    template<typename T>
-    EntrypointException(int code, const std::string &message, const T &data)
-        : std::runtime_error(message)
-        , _code(code)
-        , _data(Json::serialize(data))
-    {
-    }
+    EntrypointException(int code, const std::string &message, const JsonValue &data = {});
 
     /**
      * @brief Get the error code of the exception.
      *
      * @return int Error code.
      */
-    int getCode() const
-    {
-        return _code;
-    }
+    int getCode() const;
 
     /**
      * @brief Get additional info about the error.
      *
      * @return const JsonValue& Error data.
      */
-    const JsonValue &getData() const
-    {
-        return _data;
-    }
+    const JsonValue &getData() const;
 
 private:
     int _code = 0;
