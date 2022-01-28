@@ -19,18 +19,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/LightMessage.h>
+#include "GetClipPlanesEntrypoint.h"
 
 namespace brayns
 {
-class GetLightsEntrypoint : public Entrypoint<EmptyMessage, std::vector<LightMessage>>
+std::string GetClipPlanesEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "get-clip-planes";
+}
+
+std::string GetClipPlanesEntrypoint::getDescription() const
+{
+    return "Get all clip planes";
+}
+
+void GetClipPlanesEntrypoint::onRequest(const Request &request)
+{
+    auto &engine = getApi().getEngine();
+    auto &scene = engine.getScene();
+    auto &clipPlanes = scene.getClipPlanes();
+    request.reply(clipPlanes);
+}
 } // namespace brayns

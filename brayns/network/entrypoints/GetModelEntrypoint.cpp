@@ -19,18 +19,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "GetModelEntrypoint.h"
 
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/LightMessage.h>
+#include <brayns/network/common/ExtractModel.h>
 
 namespace brayns
 {
-class GetLightsEntrypoint : public Entrypoint<EmptyMessage, std::vector<LightMessage>>
+std::string GetModelEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "get-model";
+}
+
+std::string GetModelEntrypoint::getDescription() const
+{
+    return "Get all the information of the given model";
+}
+
+void GetModelEntrypoint::onRequest(const Request &request)
+{
+    auto &model = ExtractModel::fromRequest(getApi(), request);
+    request.reply(model);
+}
 } // namespace brayns

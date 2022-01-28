@@ -29,21 +29,8 @@ namespace brayns
 class GetLoadersEntrypoint : public Entrypoint<EmptyMessage, std::vector<LoaderInfo>>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "get-loaders";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get all loaders";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto &registry = getApi().getLoaderRegistry();
-        auto &loaders = registry.getLoaderInfos();
-        request.reply(loaders);
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

@@ -19,18 +19,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/LightMessage.h>
+#include "GetLoadersEntrypoint.h"
 
 namespace brayns
 {
-class GetLightsEntrypoint : public Entrypoint<EmptyMessage, std::vector<LightMessage>>
+std::string GetLoadersEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "get-loaders";
+}
+
+std::string GetLoadersEntrypoint::getDescription() const
+{
+    return "Get all loaders";
+}
+
+void GetLoadersEntrypoint::onRequest(const Request &request)
+{
+    auto &registry = getApi().getLoaderRegistry();
+    auto &loaders = registry.getLoaderInfos();
+    request.reply(loaders);
+}
 } // namespace brayns

@@ -19,18 +19,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "GetInstancesEntrypoint.h"
 
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/LightMessage.h>
+#include <algorithm>
+
+#include <brayns/network/common/ExtractModel.h>
 
 namespace brayns
 {
-class GetLightsEntrypoint : public Entrypoint<EmptyMessage, std::vector<LightMessage>>
+std::string GetInstancesEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "get-instances";
+}
+
+std::string GetInstancesEntrypoint::getDescription() const
+{
+    return "Get instances of the given model";
+}
+
+void GetInstancesEntrypoint::onRequest(const Request &request)
+{
+    auto params = request.getParams();
+    auto id = params.id;
+    auto &range = params.result_range;
+    auto &model = ExtractModel::fromId(getApi(), id);
+    auto &instances = model.getInstances();
+    auto first = instances.begin();
+    auto from = std::min(size_t(range.x), instances.size());
+    auto to = std::min(size_t(range.y), instances.size());
+    request.reply({first + from, first + to});
+}
 } // namespace brayns

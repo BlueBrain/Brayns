@@ -40,9 +40,17 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/CancelEntrypoint.cpp
   entrypoints/ChunkEntrypoint.cpp
   entrypoints/ClearLightsEntrypoint.cpp
+  entrypoints/ExitLaterEntrypoint.cpp
   entrypoints/ExportFramesEntrypoint.cpp
   entrypoints/ExportFramesToDiskEntryPoint.cpp
+  entrypoints/GetClipPlanesEntrypoint.cpp
   entrypoints/GetExportFramesProgressEntrypoint.cpp
+  entrypoints/GetInstancesEntrypoint.cpp
+  entrypoints/GetLightsEntrypoint.cpp
+  entrypoints/GetLoadersEntrypoint.cpp
+  entrypoints/GetModelEntrypoint.cpp
+  entrypoints/ImageJpegEntrypoint.cpp
+  entrypoints/ImageStreamingModeEntrypoint.cpp
   entrypoints/SnapshotEntrypoint.cpp
   interface/NetworkInterface.cpp
   interface/ClientInterface.cpp

@@ -19,18 +19,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/LightMessage.h>
+#include "ImageStreamingModeEntrypoint.h"
 
 namespace brayns
 {
-class GetLightsEntrypoint : public Entrypoint<EmptyMessage, std::vector<LightMessage>>
+std::string ImageStreamingModeEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "image-streaming-mode";
+}
+
+std::string ImageStreamingModeEntrypoint::getDescription() const
+{
+    return "Set the image streaming method between automatic or controlled";
+}
+
+void ImageStreamingModeEntrypoint::onRequest(const Request &request)
+{
+    auto params = request.getParams();
+    auto controlled = params.type == ImageStreamingMode::Quanta;
+    auto &monitor = getStream().getMonitor();
+    monitor.setControlled(controlled);
+    auto &engine = getApi().getEngine();
+    auto &manager = engine.getParametersManager();
+    auto &parameters = manager.getApplicationParameters();
+    parameters.setUseQuantaRenderControl(controlled);
+    request.reply(EmptyMessage());
+}
 } // namespace brayns

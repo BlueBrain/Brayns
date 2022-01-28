@@ -19,18 +19,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ImageJpegEntrypoint.h"
 
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/LightMessage.h>
+#include <brayns/utils/image/ImageEncoder.h>
 
 namespace brayns
 {
-class GetLightsEntrypoint : public Entrypoint<EmptyMessage, std::vector<LightMessage>>
+std::string ImageJpegEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "image-jpeg";
+}
+
+std::string ImageJpegEntrypoint::getDescription() const
+{
+    return "Take a snapshot at JPEG format";
+}
+
+void ImageJpegEntrypoint::onRequest(const Request &request)
+{
+    auto &api = getApi();
+    auto &engine = api.getEngine();
+    auto &framebuffer = engine.getFrameBuffer();
+    auto &manager = api.getParametersManager();
+    auto &parameters = manager.getApplicationParameters();
+    auto quality = int(parameters.getJpegCompression());
+    auto image = framebuffer.getImage();
+    auto data = ImageEncoder::encodeToBase64(image, "jpg", quality);
+    request.reply({data});
+}
 } // namespace brayns

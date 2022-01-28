@@ -23,34 +23,14 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/ImageBase64Message.h>
-#include <brayns/utils/image/ImageEncoder.h>
 
 namespace brayns
 {
 class ImageJpegEntrypoint : public Entrypoint<EmptyMessage, ImageBase64Message>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "image-jpeg";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Take a snapshot at JPEG format";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto &api = getApi();
-        auto &engine = api.getEngine();
-        auto &framebuffer = engine.getFrameBuffer();
-        auto &manager = api.getParametersManager();
-        auto &parameters = manager.getApplicationParameters();
-        auto quality = int(parameters.getJpegCompression());
-        auto image = framebuffer.getImage();
-        auto data = ImageEncoder::encodeToBase64(image, "jpg", quality);
-        request.reply({data});
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns
