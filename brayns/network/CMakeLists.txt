@@ -19,6 +19,8 @@ set(BRAYNSNETWORK_HEADERS
 )
 
 set(BRAYNSNETWORK_SOURCES
+  adapters/ModelTransferFunctionAdapter.cpp
+  adapters/UpdateModelAdapter.cpp
   binary/BinaryRequestManager.cpp
   binary/ModelUploadTask.cpp
   common/ExtractMaterial.cpp

@@ -19,33 +19,44 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "UpdateModelAdapter.h"
 
-#include <brayns/engine/Scene.h>
-
-#include <brayns/json/JsonBuffer.h>
-
-#include "TransferFunctionAdapter.h"
+#include <brayns/network/common/ExtractModel.h>
 
 namespace brayns
 {
-class ModelTransferFunction
+UpdateModelProxy::UpdateModelProxy(Scene &scene)
+    : _scene(&scene)
 {
-public:
-    using Buffer = JsonBuffer<TransferFunction>;
+}
 
-    ModelTransferFunction() = default;
-    ModelTransferFunction(Scene &scene);
+void UpdateModelProxy::setId(size_t id)
+{
+    _model = &ExtractModel::fromId(*_scene, id);
+}
 
-    void setId(size_t id);
-    void setTransferFunction(const Buffer &buffer);
+void UpdateModelProxy::setBoundingBox(bool enabled)
+{
+    _model->setBoundingBox(enabled);
+}
 
-private:
-    Scene *_scene = nullptr;
-};
+void UpdateModelProxy::setName(const std::string &name)
+{
+    _model->setName(name);
+}
 
-BRAYNS_JSON_ADAPTER_BEGIN(ModelTransferFunction)
-BRAYNS_JSON_ADAPTER_SET("id", setId, "Model ID", Required())
-BRAYNS_JSON_ADAPTER_SET("transfer_function", setTransferFunction, "Transfer function", Required())
-BRAYNS_JSON_ADAPTER_END()
+void UpdateModelProxy::setTransformation(const Transformation &transformation)
+{
+    _model->setTransformation(transformation);
+}
+
+void UpdateModelProxy::setVisible(bool visible)
+{
+    _model->setVisible(visible);
+}
+
+void UpdateModelProxy::computeBounds()
+{
+    _model->computeBounds();
+}
 } // namespace brayns

@@ -19,33 +19,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ModelTransferFunctionAdapter.h"
 
-#include <brayns/engine/Scene.h>
-
-#include <brayns/json/JsonBuffer.h>
-
-#include "TransferFunctionAdapter.h"
+#include <brayns/network/common/ExtractModel.h>
 
 namespace brayns
 {
-class ModelTransferFunction
+ModelTransferFunction::ModelTransferFunction(Scene &scene)
+    : _scene(&scene)
 {
-public:
-    using Buffer = JsonBuffer<TransferFunction>;
+}
 
-    ModelTransferFunction() = default;
-    ModelTransferFunction(Scene &scene);
+void ModelTransferFunction::setId(size_t id)
+{
+    ExtractModel::fromId(*_scene, id);
+}
 
-    void setId(size_t id);
-    void setTransferFunction(const Buffer &buffer);
-
-private:
-    Scene *_scene = nullptr;
-};
-
-BRAYNS_JSON_ADAPTER_BEGIN(ModelTransferFunction)
-BRAYNS_JSON_ADAPTER_SET("id", setId, "Model ID", Required())
-BRAYNS_JSON_ADAPTER_SET("transfer_function", setTransferFunction, "Transfer function", Required())
-BRAYNS_JSON_ADAPTER_END()
+void ModelTransferFunction::setTransferFunction(const Buffer &buffer)
+{
+    auto &transferFunction = _scene->getTransferFunction();
+    buffer.deserialize(transferFunction);
+}
 } // namespace brayns

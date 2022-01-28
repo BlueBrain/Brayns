@@ -21,6 +21,8 @@
 
 #include "ModelTransferFunctionEntrypoint.h"
 
+#include <brayns/network/common/ExtractModel.h>
+
 namespace brayns
 {
 std::string GetModelTransferFunctionEntrypoint::getName() const
