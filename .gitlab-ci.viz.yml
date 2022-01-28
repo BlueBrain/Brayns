@@ -26,6 +26,8 @@ ubuntu-clangformat-check:
     - echo "clang-format check successful"
     - fi
     - fi
+  rules:
+    - if: $GITHUB_PULL_REQUEST_ID
 
 ubuntu-cpp-build:
   extends: .cmake-ubuntu
@@ -111,6 +113,8 @@ debug-print:
   image:
     name: ubuntu:20.04
     entrypoint: [""]
+  rules:
+    - if: $GITHUB_PULL_REQUEST_ID
   script:
     - echo GITHUB_PULL_REQUEST_ID
     - echo $CI_MERGE_REQUEST_IID
