@@ -34,7 +34,7 @@ enum class SDFType : uint8_t
 
 struct SDFGeometry
 {
-    uint64_t userData{};
+    uint64_t userData = 0;
     Vector3f center; // TO BE REMOVED, for v3 cache compatibility only
     Vector3f p0;
     Vector3f p1;
@@ -45,91 +45,19 @@ struct SDFGeometry
     SDFType type;
 };
 
-inline SDFGeometry createSDFSphere(const Vector3f &center, const float radius, const uint64_t data = 0)
-{
-    SDFGeometry geom{};
-    geom.userData = data;
-    geom.p0 = geom.p1 = center;
-    geom.r0 = geom.r1 = radius;
-    geom.type = SDFType::Sphere;
-    return geom;
-}
+SDFGeometry createSDFSphere(const Vector3f &center, const float radius, const uint64_t data = 0);
 
-inline SDFGeometry createSDFPill(const Vector3f &p0, const Vector3f &p1, const float radius, const uint64_t data = 0)
-{
-    SDFGeometry geom{};
-    geom.userData = data;
-    geom.p0 = p0;
-    geom.p1 = p1;
-    geom.r0 = geom.r1 = radius;
-    geom.type = SDFType::Pill;
-    return geom;
-}
+SDFGeometry createSDFPill(const Vector3f &p0, const Vector3f &p1, const float radius, const uint64_t data = 0);
 
-inline SDFGeometry
-    createSDFConePill(const Vector3f &p0, const Vector3f &p1, const float r0, const float r1, const uint64_t data = 0)
-{
-    SDFGeometry geom{};
-    geom.userData = data;
-    geom.p0 = p0;
-    geom.p1 = p1;
-    geom.r0 = r0;
-    geom.r1 = r1;
+SDFGeometry
+    createSDFConePill(const Vector3f &p0, const Vector3f &p1, const float r0, const float r1, const uint64_t data = 0);
 
-    if (r0 < r1)
-    {
-        std::swap(geom.p0, geom.p1);
-        std::swap(geom.r0, geom.r1);
-    }
-
-    geom.type = SDFType::ConePill;
-    return geom;
-}
-
-inline SDFGeometry createSDFConePillSigmoid(
+SDFGeometry createSDFConePillSigmoid(
     const Vector3f &p0,
     const Vector3f &p1,
     const float r0,
     const float r1,
-    const uint64_t data = 0)
-{
-    SDFGeometry geom = createSDFConePill(p0, p1, r0, r1, data);
-    geom.type = SDFType::ConePillSigmoid;
-    return geom;
-}
+    const uint64_t data = 0);
 
-inline Boxd getSDFBoundingBox(const SDFGeometry &geom)
-{
-    Boxd bounds;
-    switch (geom.type)
-    {
-    case brayns::SDFType::Sphere:
-    {
-        bounds.merge(geom.p0 - Vector3f(geom.r0));
-        bounds.merge(geom.p0 + Vector3f(geom.r0));
-        break;
-    }
-    case brayns::SDFType::Pill:
-    {
-        bounds.merge(geom.p0 - Vector3f(geom.r0));
-        bounds.merge(geom.p0 + Vector3f(geom.r0));
-        bounds.merge(geom.p1 - Vector3f(geom.r0));
-        bounds.merge(geom.p1 + Vector3f(geom.r0));
-        break;
-    }
-    case brayns::SDFType::ConePill:
-    case brayns::SDFType::ConePillSigmoid:
-    {
-        bounds.merge(geom.p0 - Vector3f(geom.r0));
-        bounds.merge(geom.p0 + Vector3f(geom.r0));
-        bounds.merge(geom.p1 - Vector3f(geom.r1));
-        bounds.merge(geom.p1 + Vector3f(geom.r1));
-        break;
-    }
-    default:
-        throw std::runtime_error("No bounds found for SDF type.");
-    }
-    return bounds;
-}
-
+Boxd getSDFBoundingBox(const SDFGeometry &geom);
 } // namespace brayns

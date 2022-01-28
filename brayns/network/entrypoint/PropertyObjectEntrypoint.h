@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <brayns/common/adapters/PropertyMapAdapter.h>
+
 #include <brayns/network/json/PropertyObjectSchema.h>
 
 #include "ObjectEntrypoint.h"

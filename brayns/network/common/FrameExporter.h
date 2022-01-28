@@ -34,10 +34,7 @@ namespace brayns
 class FrameExportParameterException : public std::runtime_error
 {
 public:
-    FrameExportParameterException(const std::string &msg)
-        : std::runtime_error(msg)
-    {
-    }
+    FrameExportParameterException(const std::string &msg);
 };
 
 /**
@@ -47,10 +44,7 @@ public:
 class FrameExportInProgressException : public std::runtime_error
 {
 public:
-    FrameExportInProgressException()
-        : std::runtime_error("")
-    {
-    }
+    FrameExportInProgressException();
 };
 
 /**
@@ -60,10 +54,7 @@ public:
 class FrameExportNotRunningException : public std::runtime_error
 {
 public:
-    FrameExportNotRunningException()
-        : std::runtime_error("")
-    {
-    }
+    FrameExportNotRunningException();
 };
 
 /**
@@ -90,7 +81,6 @@ public:
         std::vector<KeyFrame> keyFrames;
     };
 
-public:
     void startNewExport(ExportInfo &&input);
 
     void preRender(Camera &camera, Renderer &renderer, FrameBuffer &frameBuffer, ParametersManager &parameters);

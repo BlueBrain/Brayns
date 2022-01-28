@@ -29,24 +29,8 @@ namespace brayns
 class ChunkEntrypoint : public Entrypoint<ChunkMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "chunk";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Indicate sending of a binary chunk after this message";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto &handle = request.getConnectionHandle();
-        auto &id = params.id;
-        auto &binary = getBinary();
-        binary.setNextChunkId(handle, id);
-        request.reply(EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

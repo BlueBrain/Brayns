@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <algorithm>
 #include <map>
 #include <memory>
 #include <string>
@@ -150,10 +149,7 @@ struct JsonSchemaHelper
      * @return true Empty schema.
      * @return false Non-empty schema.
      */
-    static bool isEmpty(const JsonSchema &schema)
-    {
-        return schema.type == JsonType::Unknown && schema.oneOf.empty();
-    }
+    static bool isEmpty(const JsonSchema &schema);
 
     /**
      * @brief Check wether the schema is an union.
@@ -162,10 +158,7 @@ struct JsonSchemaHelper
      * @return true Union.
      * @return false Not an union.
      */
-    static bool isOneOf(const JsonSchema &schema)
-    {
-        return !schema.oneOf.empty();
-    }
+    static bool isOneOf(const JsonSchema &schema);
 
     /**
      * @brief Check if the schema describes a number or an integer.
@@ -174,10 +167,7 @@ struct JsonSchemaHelper
      * @return true Number or integer.
      * @return false Not numeric.
      */
-    static bool isNumeric(const JsonSchema &schema)
-    {
-        return JsonTypeHelper::isNumeric(schema.type);
-    }
+    static bool isNumeric(const JsonSchema &schema);
 
     /**
      * @brief Check wether the schema is an enum.
@@ -186,10 +176,7 @@ struct JsonSchemaHelper
      * @return true Enum.
      * @return false Not an enum.
      */
-    static bool isEnum(const JsonSchema &schema)
-    {
-        return !schema.enums.empty();
-    }
+    static bool isEnum(const JsonSchema &schema);
 
     /**
      * @brief Check if the schema is an object.
@@ -198,10 +185,7 @@ struct JsonSchemaHelper
      * @return true Object.
      * @return false Not an object.
      */
-    static bool isObject(const JsonSchema &schema)
-    {
-        return schema.type == JsonType::Object;
-    }
+    static bool isObject(const JsonSchema &schema);
 
     /**
      * @brief Check if the schema is an array.
@@ -210,10 +194,7 @@ struct JsonSchemaHelper
      * @return true Array.
      * @return false Not an array.
      */
-    static bool isArray(const JsonSchema &schema)
-    {
-        return schema.type == JsonType::Array;
-    }
+    static bool isArray(const JsonSchema &schema);
 
     /**
      * @brief Check if the schema has the given property.
@@ -223,11 +204,7 @@ struct JsonSchemaHelper
      * @return true Has property.
      * @return false Don't have the property.
      */
-    static bool hasProperty(const JsonSchema &schema, const std::string &key)
-    {
-        auto &properties = schema.properties;
-        return properties.find(key) != properties.end();
-    }
+    static bool hasProperty(const JsonSchema &schema, const std::string &key);
 
     /**
      * @brief Check wether the property is required in the given schema.
@@ -237,13 +214,7 @@ struct JsonSchemaHelper
      * @return true Property is required.
      * @return false Property is not required.
      */
-    static bool isRequired(const JsonSchema &schema, const std::string &key)
-    {
-        auto &required = schema.required;
-        auto first = required.begin();
-        auto last = required.end();
-        return std::find(first, last, key) != last;
-    }
+    static bool isRequired(const JsonSchema &schema, const std::string &key);
 
     /**
      * @brief Check if the given schema validate the given type.
@@ -253,48 +224,27 @@ struct JsonSchemaHelper
      * @return true The type is allowed by schema.
      * @return false The type is not allowed by schema.
      */
-    static bool checkType(const JsonSchema &schema, JsonType type)
-    {
-        return JsonTypeHelper::check(schema.type, type);
-    }
+    static bool checkType(const JsonSchema &schema, JsonType type);
 
     /**
      * @brief Set a wildcard for authorized additional properties.
      *
      * @param schema Schema to update.
      */
-    static void allowAnyAdditionalProperty(JsonSchema &schema)
-    {
-        schema.additionalProperties = {{}};
-    }
+    static void allowAnyAdditionalProperty(JsonSchema &schema);
 
     /**
      * @brief Add all schema properties to required.
      *
      * @param schema Schema to update.
      */
-    static void requireAll(JsonSchema &schema)
-    {
-        auto &properties = schema.properties;
-        auto &required = schema.required;
-        required.reserve(properties.size());
-        for (const auto &pair : properties)
-        {
-            auto &name = pair.first;
-            required.push_back(name);
-        }
-    }
+    static void requireAll(JsonSchema &schema);
 
     /**
      * @brief Get the schema of null object (not a wildcard).
      *
      * @return JsonSchema Null schema.
      */
-    static JsonSchema getNullSchema()
-    {
-        JsonSchema schema;
-        schema.type = JsonType::Null;
-        return schema;
-    }
+    static JsonSchema getNullSchema();
 };
 } // namespace brayns

@@ -19,11 +19,38 @@ set(BRAYNSNETWORK_HEADERS
 )
 
 set(BRAYNSNETWORK_SOURCES
+  binary/BinaryRequestManager.cpp
+  binary/ModelUploadTask.cpp
+  common/ExtractMaterial.cpp
+  common/ExtractModel.cpp
   common/FrameExporter.cpp
+  common/RateLimiter.cpp
+  context/NetworkContext.cpp
+  entrypoint/BaseEntrypoint.cpp
+  entrypoint/EntrypointException.cpp
+  entrypoint/EntrypointRef.cpp
   entrypoint/EntrypointManager.cpp
+  entrypoints/AddClipPlaneEntrypoint.cpp
+  entrypoints/AddLightEntrypoint.cpp
+  entrypoints/AddModelEntrypoint.cpp
+  entrypoints/AnimationParametersEntrypoint.cpp
+  entrypoints/ApplicationParametersEntrypoint.cpp
+  entrypoints/CameraEntrypoint.cpp
+  entrypoints/CameraParamsEntrypoint.cpp
+  entrypoints/CancelEntrypoint.cpp
+  entrypoints/ChunkEntrypoint.cpp
+  entrypoints/ClearLightsEntrypoint.cpp
+  entrypoints/ExitLaterEntrypoint.cpp
   entrypoints/ExportFramesEntrypoint.cpp
   entrypoints/ExportFramesToDiskEntryPoint.cpp
+  entrypoints/GetClipPlanesEntrypoint.cpp
   entrypoints/GetExportFramesProgressEntrypoint.cpp
+  entrypoints/GetInstancesEntrypoint.cpp
+  entrypoints/GetLightsEntrypoint.cpp
+  entrypoints/GetLoadersEntrypoint.cpp
+  entrypoints/GetModelEntrypoint.cpp
+  entrypoints/ImageJpegEntrypoint.cpp
+  entrypoints/ImageStreamingModeEntrypoint.cpp
   entrypoints/SnapshotEntrypoint.cpp
   interface/NetworkInterface.cpp
   interface/ClientInterface.cpp

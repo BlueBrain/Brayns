@@ -53,12 +53,16 @@ public:
      * modifications
      */
     virtual void commit();
+
     /** Executes engine specific pre-render operations */
     virtual void preRender();
+
     /** Executes engine specific post-render operations */
     virtual void postRender();
+
     /** @return the minimum frame size in pixels supported by this engine. */
     virtual Vector2ui getMinimumFrameSize() const = 0;
+
     /** Factory method to create an engine-specific framebuffer. */
     virtual FrameBufferPtr
         createFrameBuffer(const std::string &name, const Vector2ui &frameSize, PixelFormat frameBufferFormat) const = 0;
@@ -82,30 +86,23 @@ public:
      * rendering, etc)
      */
     explicit Engine(ParametersManager &parametersManager);
+
     virtual ~Engine() = default;
 
     /** Renders the current scene and populates the frame buffer accordingly */
     void render();
 
     /** Gets the scene */
-    Scene &getScene()
-    {
-        return *_scene;
-    }
+    Scene &getScene();
+
     /** Gets the frame buffer */
-    FrameBuffer &getFrameBuffer()
-    {
-        return *_frameBuffers[0];
-    }
+    FrameBuffer &getFrameBuffer();
+
     /** Gets the camera */
-    const Camera &getCamera() const
-    {
-        return *_camera;
-    }
-    Camera &getCamera()
-    {
-        return *_camera;
-    }
+    const Camera &getCamera() const;
+
+    Camera &getCamera();
+
     /** Gets the renderer */
     Renderer &getRenderer();
 
@@ -119,21 +116,15 @@ public:
      * Keep continue to run the engine, aka the user did not request to stop
      * rendering.
      */
-    void setKeepRunning(bool keepRunning)
-    {
-        _keepRunning = keepRunning;
-    }
+    void setKeepRunning(bool keepRunning);
+
     /**
      * @return true if the user wants to continue rendering, false otherwise.
      */
-    bool getKeepRunning() const
-    {
-        return _keepRunning;
-    }
-    Statistics &getStatistics()
-    {
-        return _statistics;
-    }
+    bool getKeepRunning() const;
+
+    Statistics &getStatistics();
+
     /**
      * @return true if render() calls shall be continued, based on current
      *         accumulation settings.
@@ -141,14 +132,9 @@ public:
      */
     bool continueRendering() const;
 
-    const auto &getParametersManager() const
-    {
-        return _parametersManager;
-    }
-    auto &getParametersManager()
-    {
-        return _parametersManager;
-    }
+    const ParametersManager &getParametersManager() const;
+
+    ParametersManager &getParametersManager();
 
     /**
      * Add the given frame buffer to the list of buffers that shall be filled
@@ -163,10 +149,7 @@ public:
     void removeFrameBuffer(FrameBufferPtr frameBuffer);
 
     /** @return all registered frame buffers that are used during rendering. */
-    const std::vector<FrameBufferPtr> &getFrameBuffers() const
-    {
-        return _frameBuffers;
-    }
+    const std::vector<FrameBufferPtr> &getFrameBuffers() const;
 
     /** @internal Clear all frame buffers. */
     void clearFrameBuffers();

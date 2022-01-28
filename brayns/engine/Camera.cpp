@@ -55,8 +55,49 @@ void Camera::setInitialState(const Vector3d &position, const Quaterniond &orient
     set(position, orientation, target);
 }
 
+void Camera::setPosition(const Vector3d &position)
+{
+    _updateValue(_position, position);
+}
+
+void Camera::setTarget(const Vector3d &target)
+{
+    _updateValue(_target, target);
+}
+
+const Vector3d &Camera::getPosition() const
+{
+    return _position;
+}
+
+const Vector3d &Camera::getTarget() const
+{
+    return _target;
+}
+
+void Camera::setOrientation(Quaterniond orientation)
+{
+    orientation = glm::normalize(orientation);
+    _updateValue(_orientation, orientation);
+}
+
+const Quaterniond &Camera::getOrientation() const
+{
+    return _orientation;
+}
+
 void Camera::reset()
 {
     set(_initialPosition, _initialOrientation, _initialTarget);
+}
+
+void Camera::setBufferTarget(const std::string &target)
+{
+    _updateValue(_bufferTarget, target, false);
+}
+
+const std::string &Camera::getBufferTarget() const
+{
+    return _bufferTarget;
 }
 } // namespace brayns

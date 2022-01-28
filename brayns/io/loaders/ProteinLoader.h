@@ -41,10 +41,10 @@ public:
         const ProteinLoaderParameters &properties,
         Scene &scene) const final;
 
-    std::vector<ModelDescriptorPtr>
-        importFromBlob(Blob &&, const LoaderProgress &, const ProteinLoaderParameters &, Scene &) const final
-    {
-        throw std::runtime_error("Loading from blob not supported");
-    }
+    std::vector<ModelDescriptorPtr> importFromBlob(
+        Blob &&blob,
+        const LoaderProgress &callback,
+        const ProteinLoaderParameters &properties,
+        Scene &scene) const final;
 };
 } // namespace brayns

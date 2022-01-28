@@ -29,27 +29,8 @@ namespace brayns
 class ImageStreamingModeEntrypoint : public Entrypoint<ImageStreamingModeMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "image-streaming-mode";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Set the image streaming method between automatic or controlled";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto controlled = params.type == ImageStreamingMode::Quanta;
-        auto &monitor = getStream().getMonitor();
-        monitor.setControlled(controlled);
-        auto &engine = getApi().getEngine();
-        auto &manager = engine.getParametersManager();
-        auto &parameters = manager.getApplicationParameters();
-        parameters.setUseQuantaRenderControl(controlled);
-        request.reply(EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

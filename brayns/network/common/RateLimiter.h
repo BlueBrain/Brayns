@@ -56,25 +56,14 @@ public:
      * @param fps Frames (calls) per second expected.
      * @return RateLimiter Matching rate limiter.
      */
-    static RateLimiter fromFps(size_t fps)
-    {
-        if (fps == 0)
-        {
-            return {Duration::max()};
-        }
-        auto period = std::chrono::duration<double>(1.0 / fps);
-        return std::chrono::duration_cast<Duration>(period);
-    }
+    static RateLimiter fromFps(size_t fps);
 
     /**
      * @brief Construct a rate limiter with min period to call functor.
      *
      * @param period Min duration between two functor calls.
      */
-    RateLimiter(Duration period = Duration(0))
-        : _period(period)
-    {
-    }
+    RateLimiter(Duration period = Duration(0));
 
     /**
      * @brief Call the functor if the given period is ellapsed.
@@ -87,19 +76,17 @@ public:
     template<typename FunctorType>
     bool call(FunctorType functor)
     {
-        auto currentTime = Clock::now();
-        auto elapsed = currentTime - _lastCall;
-        if (elapsed < _period)
+        if (!_tryUpdateLastCall())
         {
             return false;
         }
-        auto delay = (elapsed - _period) % _period;
-        _lastCall = currentTime - delay;
         functor();
         return true;
     }
 
 private:
+    bool _tryUpdateLastCall();
+
     Duration _period;
     TimePoint _lastCall;
 };

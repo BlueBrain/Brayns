@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <brayns/json/Json.h>
+
 #include <brayns/network/common/RateLimiter.h>
 
 #include "BaseEntrypoint.h"
@@ -147,7 +149,16 @@ public:
     virtual void onCreate() override
     {
         auto &object = getObject();
-        object.onModified([&](auto &) { _limiter.call([&] { notify(object); }); });
+        object.onModified(
+            [&](auto &)
+            {
+                _limiter.call(
+                    [&]
+                    {
+                        auto params = Json::serialize(object);
+                        notify(params);
+                    });
+            });
     }
 
     /**
