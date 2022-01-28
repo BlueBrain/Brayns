@@ -44,39 +44,38 @@ ubuntu-cpp-build:
   before_script:
     - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y $APT_BASE_PACKAGES $APT_PACKAGES
 
-    # # Install ISPC
-    # - ISPC_VERSION=1.10.0b
-    # - ISPC_DIR=ispc-v${ISPC_VERSION}-linux
-    # - ISPC_PATH=/app/ispc-v1.10.0-linux
-    # - export PATH=$PATH:${ISPC_PATH}
+    # Install ISPC
+    - ISPC_VERSION=1.10.0b
+    - ISPC_DIR=ispc-v${ISPC_VERSION}-linux
+    - ISPC_PATH=/app/ispc-v1.10.0-linux
+    - export PATH=$PATH:${ISPC_PATH}
 
-    # - mkdir -p ${ISPC_PATH}
-    # - wget https://github.com/ispc/ispc/releases/download/v1.10.0/${ISPC_DIR}.tar.gz
-    # - tar zxvf ${ISPC_DIR}.tar.gz -C ${ISPC_PATH} --strip-components=1
-    # - rm -rf ${ISPC_PATH}/${ISPC_DIR}/examples
+    - mkdir -p ${ISPC_PATH}
+    - wget https://github.com/ispc/ispc/releases/download/v1.10.0/${ISPC_DIR}.tar.gz
+    - tar zxvf ${ISPC_DIR}.tar.gz -C ${ISPC_PATH} --strip-components=1
+    - rm -rf ${ISPC_PATH}/${ISPC_DIR}/examples
 
-    # # Install embree
-    # # https://github.com/embree/embree/releases
-    # - EMBREE_VERSION=3.5.2
-    # - EMBREE_FILE=embree-${EMBREE_VERSION}.x86_64.linux.tar.gz
-    # - mkdir -p ${DIST_PATH}
-    # - wget https://github.com/embree/embree/releases/download/v${EMBREE_VERSION}/${EMBREE_FILE}
-    # - tar zxvf ${EMBREE_FILE} -C ${DIST_PATH} --strip-components=1
-    # - rm -rf ${DIST_PATH}/bin ${DIST_PATH}/doc
+    # Install embree
+    # https://github.com/embree/embree/releases
+    - EMBREE_VERSION=3.5.2
+    - EMBREE_FILE=embree-${EMBREE_VERSION}.x86_64.linux.tar.gz
+    - mkdir -p ${DIST_PATH}
+    - wget https://github.com/embree/embree/releases/download/v${EMBREE_VERSION}/${EMBREE_FILE}
+    - tar zxvf ${EMBREE_FILE} -C ${DIST_PATH} --strip-components=1
+    - rm -rf ${DIST_PATH}/bin ${DIST_PATH}/doc
 
-    # # Install OSPRay
-    # # https://github.com/ospray/ospray/releases
-    # - OSPRAY_TAG=v1.8.5
-    # - OSPRAY_SRC=/app/ospray
+    # Install OSPRay
+    # https://github.com/ospray/ospray/releases
+    - OSPRAY_TAG=v1.8.5
+    - OSPRAY_SRC=/app/ospray
 
-    # - mkdir -p ${OSPRAY_SRC}
-    # - git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC}
-    # - cd ${OSPRAY_SRC}
-    # - git checkout ${OSPRAY_TAG}
-    # - mkdir -p build && cd build
-    # - CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja -DOSPRAY_ENABLE_TUTORIALS=OFF -DOSPRAY_ENABLE_APPS=OFF -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
-    # - ninja -j$NUM_COMPILE_JOBS install
-    - echo "OSPRAY INSTALLED"
+    - mkdir -p ${OSPRAY_SRC}
+    - git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC}
+    - cd ${OSPRAY_SRC}
+    - git checkout ${OSPRAY_TAG}
+    - mkdir -p build && cd build
+    - CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja -DOSPRAY_ENABLE_TUTORIALS=OFF -DOSPRAY_ENABLE_APPS=OFF -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
+    - ninja -j$NUM_COMPILE_JOBS all
   rules:
     - if: $GITHUB_PULL_REQUEST_ID
 
