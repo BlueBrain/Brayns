@@ -76,6 +76,8 @@ ubuntu-cpp-build:
     - mkdir -p build && cd build
     - CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja -DOSPRAY_ENABLE_TUTORIALS=OFF -DOSPRAY_ENABLE_APPS=OFF -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
     - ninja -j$NUM_COMPILE_JOBS install
+  rules:
+    - if: $GITHUB_PULL_REQUEST_ID
 
 docker-build:
   variables:
@@ -85,8 +87,9 @@ docker-build:
     KUBERNETES_MEMORY_REQUEST: 8Gi
   extends: .build-image-using-kaniko
   before_script:
-    - echo $CI_MERGE_REQUEST_IID
     - env
+  rules:
+    - if: $GITHUB_PULL_REQUEST_ID
 
 docker-publish-to-dockerhub:
   variables:
@@ -96,17 +99,8 @@ docker-publish-to-dockerhub:
     KUBERNETES_MEMORY_REQUEST: 8Gi
     CI_REGISTRY_IMAGE: bluebrain/brayns
   extends: .publish-image-using-kaniko
-
-debug-print-external-pr:
-  stage: test
-  image:
-    name: ubuntu:20.04
-    entrypoint: [""]
-  script:
-    - echo $CI_MERGE_REQUEST_IID
-    - env
-  only:
-    - external_pull_requests
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
 
 debug-print:
   stage: test

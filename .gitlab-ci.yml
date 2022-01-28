@@ -4,22 +4,10 @@ viz_stack:
     include:
       - local: .gitlab-ci.viz.yml
     strategy: depend
-
   rules:
-    # Run on changes that are pushed to the default branch
-    # - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-    # Don't run on MR events because we also get "external_pull_request_event" from GitHub.
-    # - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      # when: never
     - when: always
   variables:
-    # Used to store artifacts in the right directory, grab dotenv
-    PARENT_PIPELINE_ID: $CI_PIPELINE_ID
-    # For feedback stuff, will be empty if not in a PR
     GITHUB_PULL_REQUEST_ID: $CI_EXTERNAL_PULL_REQUEST_IID
-    GITHUB_REPOSITORY: $CI_EXTERNAL_PULL_REQUEST_TARGET_REPOSITORY
-    GITHUB_API_USER_OVERRIDE: $GITHUB_API_USER_FOR_GITLAB_LOG_UPLOAD
-    GITHUB_API_KEY_OVERRIDE: $GITHUB_API_KEY_FOR_GITLAB_LOG_UPLOAD
 
 hpc_stack:
   stage: test
@@ -29,10 +17,5 @@ hpc_stack:
     strategy: depend
 
   rules:
-    # Run on changes that are pushed to the default branch
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-    # Don't run on MR events because we also get "external_pull_request_event" from GitHub.
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
     - when: always
 
