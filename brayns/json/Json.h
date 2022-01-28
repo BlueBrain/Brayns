@@ -21,11 +21,6 @@
 
 #pragma once
 
-#include <sstream>
-
-#include <Poco/JSON/Parser.h>
-#include <Poco/JSON/Stringifier.h>
-
 #include "JsonAdapter.h"
 #include "JsonType.h"
 
@@ -55,12 +50,7 @@ struct Json
      * @throw Poco::JSON::Exception The JsonValue doesn't contain JSON
      * values.
      */
-    static std::string stringify(const JsonValue &json)
-    {
-        std::ostringstream stream;
-        Poco::JSON::Stringifier::condense(json, stream);
-        return stream.str();
-    }
+    static std::string stringify(const JsonValue &json);
 
     /**
      * @brief Parse a JSON string to a JSON value.
@@ -69,11 +59,7 @@ struct Json
      * @return JsonValue The resulting JsonValue
      * @throw Poco::JSON::Exception The JSON format is incorrect.
      */
-    static JsonValue parse(const std::string &json)
-    {
-        Poco::JSON::Parser parser;
-        return parser.parse(json);
-    }
+    static JsonValue parse(const std::string &json);
 
     /**
      * @brief Return the JSON schema of value using JsonAdapter<T>.
@@ -202,10 +188,7 @@ struct JsonAdapter<JsonValue>
      *
      * @return JsonSchema Empty schema.
      */
-    static JsonSchema getSchema(const JsonValue &)
-    {
-        return {};
-    }
+    static JsonSchema getSchema(const JsonValue &value);
 
     /**
      * @brief Copy value into json.
@@ -215,11 +198,7 @@ struct JsonAdapter<JsonValue>
      * @return true if success, false if failure, the output value is left
      * unchanged in this case.
      */
-    static bool serialize(const JsonValue &value, JsonValue &json)
-    {
-        json = value;
-        return true;
-    }
+    static bool serialize(const JsonValue &value, JsonValue &json);
 
     /**
      * @brief Copy json into value.
@@ -229,10 +208,6 @@ struct JsonAdapter<JsonValue>
      * @return true if success, false if failure, the output value is left
      * unchanged in this case.
      */
-    static bool deserialize(const JsonValue &json, JsonValue &value)
-    {
-        value = json;
-        return true;
-    }
+    static bool deserialize(const JsonValue &json, JsonValue &value);
 };
 } // namespace brayns

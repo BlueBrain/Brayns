@@ -13,7 +13,14 @@ set(BRAYNSJSON_HEADERS
 )
 
 set(BRAYNSJSON_SOURCES
+    Json.cpp
+    JsonExtractor.cpp
+    JsonObjectInfo.cpp
+    JsonOptions.cpp
+    JsonSchema.cpp
     JsonSchemaValidator.cpp
+    JsonType.cpp
+    adapters/JsonSchemaAdapter.cpp
 )
 
 add_library(braynsJson SHARED ${BRAYNSJSON_SOURCES} ${BRAYNSJSON_HEADERS})

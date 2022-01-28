@@ -35,9 +35,63 @@
 
 namespace brayns
 {
-namespace
+ModelInstance::ModelInstance(const bool visible, const bool boundingBox, const Transformation &transformation)
+    : _visible(visible)
+    , _boundingBox(boundingBox)
+    , _transformation(transformation)
 {
-} // namespace
+}
+
+bool ModelInstance::getVisible() const
+{
+    return _visible;
+}
+
+void ModelInstance::setVisible(const bool visible)
+{
+    _updateValue(_visible, visible);
+}
+
+bool ModelInstance::getBoundingBox() const
+{
+    return _boundingBox;
+}
+
+void ModelInstance::setBoundingBox(const bool enabled)
+{
+    _updateValue(_boundingBox, enabled);
+}
+
+const Transformation &ModelInstance::getTransformation() const
+{
+    return _transformation;
+}
+
+void ModelInstance::setTransformation(const Transformation &transformation)
+{
+    _updateValue(_transformation, transformation);
+}
+
+void ModelInstance::setModelID(const size_t id)
+{
+    _updateValue(_modelID, id);
+}
+
+size_t ModelInstance::getModelID() const
+{
+    return _modelID;
+}
+
+void ModelInstance::setInstanceID(const size_t id)
+{
+    _updateValue(_instanceID, id);
+}
+
+size_t ModelInstance::getInstanceID() const
+{
+    return _instanceID;
+}
+
 ModelParams::ModelParams(const std::string &path)
     : _name(fs::path(path).stem().string())
     , _path(path)
@@ -55,6 +109,46 @@ ModelParams::ModelParams(const std::string &name, const std::string &path, const
     , _path(path)
     , _loadParameters(loadParameters)
 {
+}
+
+void ModelParams::setName(const std::string &name)
+{
+    _updateValue(_name, name);
+}
+
+const std::string &ModelParams::getName() const
+{
+    return _name;
+}
+
+void ModelParams::setPath(const std::string &path)
+{
+    _updateValue(_path, path);
+}
+
+const std::string &ModelParams::getPath() const
+{
+    return _path;
+}
+
+void ModelParams::setLoaderName(const std::string &loaderName)
+{
+    _updateValue(_loaderName, loaderName);
+}
+
+const std::string &ModelParams::getLoaderName() const
+{
+    return _loaderName;
+}
+
+const JsonValue &ModelParams::getLoadParameters() const
+{
+    return _loadParameters;
+}
+
+void ModelParams::setLoadParameters(const JsonValue &pm)
+{
+    _loadParameters = pm;
 }
 
 ModelDescriptor::ModelDescriptor(ModelPtr model, const std::string &path)
@@ -114,6 +208,32 @@ ModelDescriptor &ModelDescriptor::operator=(const ModelParams &rhs)
     return *this;
 }
 
+bool ModelDescriptor::getEnabled() const
+{
+    return _visible || _boundingBox;
+}
+
+void ModelDescriptor::setMetadata(const ModelMetadata &metadata)
+{
+    _metadata = metadata;
+    markModified();
+}
+
+const ModelMetadata &ModelDescriptor::getMetadata() const
+{
+    return _metadata;
+}
+
+const Model &ModelDescriptor::getModel() const
+{
+    return *_model;
+}
+
+Model &ModelDescriptor::getModel()
+{
+    return *_model;
+}
+
 void ModelDescriptor::addInstance(const ModelInstance &instance)
 {
     _instances.push_back(instance);
@@ -146,6 +266,16 @@ ModelInstance *ModelDescriptor::getInstance(const size_t id)
     return i == _instances.end() ? nullptr : &(*i);
 }
 
+const std::vector<ModelInstance> &ModelDescriptor::getInstances() const
+{
+    return _instances;
+}
+
+Boxd ModelDescriptor::getBounds() const
+{
+    return _bounds;
+}
+
 void ModelDescriptor::computeBounds()
 {
     _bounds.reset();
@@ -158,6 +288,39 @@ void ModelDescriptor::computeBounds()
 
         _bounds.merge(transformBox(getModel().getBounds(), getTransformation() * instance.getTransformation()));
     }
+}
+
+void ModelDescriptor::setProperties(const PropertyMap &properties)
+{
+    _properties = properties;
+    markModified();
+}
+
+const PropertyMap &ModelDescriptor::getProperties() const
+{
+    return _properties;
+}
+
+void ModelDescriptor::addOnRemoved(const RemovedCallback &callback)
+{
+    _onRemovedCallback.push_back(callback);
+}
+
+void ModelDescriptor::callOnRemoved()
+{
+    if (!_onRemovedCallback.empty())
+        for (const auto &callback : _onRemovedCallback)
+            callback(*this);
+}
+
+void ModelDescriptor::markForRemoval()
+{
+    _markedForRemoval = true;
+}
+
+bool ModelDescriptor::isMarkedForRemoval() const
+{
+    return _markedForRemoval;
 }
 
 ModelDescriptorPtr ModelDescriptor::clone(ModelPtr model) const
@@ -191,6 +354,22 @@ bool Model::empty() const
     return _geometries->isEmpty() && _bounds.isEmpty();
 }
 
+const Boxd &Model::getBounds() const
+{
+    return _bounds;
+}
+
+const std::map<size_t, std::vector<Sphere>> &Model::getSpheres() const
+{
+    return _geometries->_spheres;
+}
+
+std::map<size_t, std::vector<Sphere>> &Model::getSpheres()
+{
+    _spheresDirty = true;
+    return _geometries->_spheres;
+}
+
 uint64_t Model::addSphere(const size_t materialId, const Sphere &sphere)
 {
     _spheresDirty = true;
@@ -198,11 +377,33 @@ uint64_t Model::addSphere(const size_t materialId, const Sphere &sphere)
     return _geometries->_spheres[materialId].size() - 1;
 }
 
+const std::map<size_t, std::vector<Cylinder>> &Model::getCylinders() const
+{
+    return _geometries->_cylinders;
+}
+
+std::map<size_t, std::vector<Cylinder>> &Model::getCylinders()
+{
+    _cylindersDirty = true;
+    return _geometries->_cylinders;
+}
+
 uint64_t Model::addCylinder(const size_t materialId, const Cylinder &cylinder)
 {
     _cylindersDirty = true;
     _geometries->_cylinders[materialId].push_back(cylinder);
     return _geometries->_cylinders[materialId].size() - 1;
+}
+
+const std::map<size_t, std::vector<Cone>> &Model::getCones() const
+{
+    return _geometries->_cones;
+}
+
+std::map<size_t, std::vector<Cone>> &Model::getCones()
+{
+    _conesDirty = true;
+    return _geometries->_cones;
 }
 
 uint64_t Model::addCone(const size_t materialId, const Cone &cone)
@@ -242,6 +443,12 @@ void Model::addStreamline(const size_t materialId, const Streamline &streamline)
     _streamlinesDirty = true;
 }
 
+std::map<size_t, StreamlinesData> &Model::getStreamlines()
+{
+    _streamlinesDirty = true;
+    return _geometries->_streamlines;
+}
+
 uint64_t
     Model::addSDFGeometry(const size_t materialId, const SDFGeometry &geom, const std::vector<size_t> &neighbourIndices)
 {
@@ -253,10 +460,27 @@ uint64_t
     return geomIdx;
 }
 
+SDFGeometryData &Model::getSDFGeometryData()
+{
+    _sdfGeometriesDirty = true;
+    return _geometries->_sdf;
+}
+
 void Model::updateSDFGeometryNeighbours(size_t geometryIdx, const std::vector<size_t> &neighbourIndices)
 {
     _geometries->_sdf.neighbours[geometryIdx] = neighbourIndices;
     _sdfGeometriesDirty = true;
+}
+
+const std::map<size_t, TriangleMesh> &Model::getTriangleMeshes() const
+{
+    return _geometries->_triangleMeshes;
+}
+
+std::map<size_t, TriangleMesh> &Model::getTriangleMeshes()
+{
+    _triangleMeshesDirty = true;
+    return _geometries->_triangleMeshes;
 }
 
 void Model::addVolume(VolumePtr volume)
@@ -361,6 +585,11 @@ void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)
     }
 }
 
+const std::map<size_t, MaterialPtr> &Model::getMaterials() const
+{
+    return _materials;
+}
+
 void Model::logInformation()
 {
     _updateSizeInBytes();
@@ -436,6 +665,42 @@ void Model::_updateSizeInBytes()
         _sizeInBytes += sdfIndices.second.size() * sizeof(uint64_t);
     for (const auto &sdfNeighbours : _geometries->_sdf.neighbours)
         _sizeInBytes += sdfNeighbours.size() * sizeof(size_t);
+}
+
+void Model::markInstancesDirty()
+{
+    _instancesDirty = true;
+}
+
+void Model::markInstancesClean()
+{
+    _instancesDirty = false;
+}
+
+const std::vector<VolumePtr> &Model::getVolumes() const
+{
+    return _geometries->_volumes;
+}
+
+bool Model::isVolumesDirty() const
+{
+    return _volumesDirty;
+}
+
+void Model::resetVolumesDirty()
+{
+    _volumesDirty = false;
+}
+
+void Model::setSimulationEnabled(const bool v)
+{
+    _simulationEnabled = v;
+    _simulationEnabledDirty = true;
+}
+
+bool Model::isSimulationEnabled() const
+{
+    return _simulationEnabled;
 }
 
 void Model::copyFrom(const Model &rhs)
@@ -594,5 +859,16 @@ size_t Model::getSizeInBytes() const
 AbstractSimulationHandlerPtr Model::getSimulationHandler() const
 {
     return _simulationHandler;
+}
+
+bool Model::Geometries::isEmpty() const
+{
+    return _spheres.empty() && _cylinders.empty() && _cones.empty() && _triangleMeshes.empty()
+        && _sdf.geometries.empty() && _streamlines.empty() && _volumes.empty();
+}
+
+bool Model::_areGeometriesDirty() const
+{
+    return _spheresDirty || _cylindersDirty || _conesDirty || _triangleMeshesDirty || _sdfGeometriesDirty;
 }
 } // namespace brayns

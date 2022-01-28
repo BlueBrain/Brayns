@@ -21,6 +21,8 @@
 
 #include "NetworkManager.h"
 
+#include <Poco/JSON/JSONException.h>
+
 #include <brayns/json/JsonSchemaValidator.h>
 #include <brayns/network/context/NetworkContext.h>
 #include <brayns/network/interface/ClientInterface.h>

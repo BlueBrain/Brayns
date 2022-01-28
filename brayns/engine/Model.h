@@ -61,53 +61,18 @@ class ModelInstance : public BaseObject
 {
 public:
     ModelInstance() = default;
-    ModelInstance(const bool visible, const bool boundingBox, const Transformation &transformation)
-        : _visible(visible)
-        , _boundingBox(boundingBox)
-        , _transformation(transformation)
-    {
-    }
-    bool getVisible() const
-    {
-        return _visible;
-    }
-    void setVisible(const bool visible)
-    {
-        _updateValue(_visible, visible);
-    }
-    bool getBoundingBox() const
-    {
-        return _boundingBox;
-    }
-    void setBoundingBox(const bool enabled)
-    {
-        _updateValue(_boundingBox, enabled);
-    }
-    const Transformation &getTransformation() const
-    {
-        return _transformation;
-    }
-    void setTransformation(const Transformation &transformation)
-    {
-        _updateValue(_transformation, transformation);
-    }
+    ModelInstance(const bool visible, const bool boundingBox, const Transformation &transformation);
 
-    void setModelID(const size_t id)
-    {
-        _updateValue(_modelID, id);
-    }
-    size_t getModelID() const
-    {
-        return _modelID;
-    }
-    void setInstanceID(const size_t id)
-    {
-        _updateValue(_instanceID, id);
-    }
-    size_t getInstanceID() const
-    {
-        return _instanceID;
-    }
+    bool getVisible() const;
+    void setVisible(const bool visible);
+    bool getBoundingBox() const;
+    void setBoundingBox(const bool enabled);
+    const Transformation &getTransformation() const;
+    void setTransformation(const Transformation &transformation);
+    void setModelID(const size_t id);
+    size_t getModelID() const;
+    void setInstanceID(const size_t id);
+    size_t getInstanceID() const;
 
 protected:
     size_t _modelID{0};
@@ -132,38 +97,14 @@ public:
     ModelParams(const ModelParams &rhs) = default;
     ModelParams &operator=(const ModelParams &rhs) = default;
 
-    void setName(const std::string &name)
-    {
-        _updateValue(_name, name);
-    }
-    const std::string &getName() const
-    {
-        return _name;
-    }
-    void setPath(const std::string &path)
-    {
-        _updateValue(_path, path);
-    }
-    const std::string &getPath() const
-    {
-        return _path;
-    }
-    void setLoaderName(const std::string &loaderName)
-    {
-        _updateValue(_loaderName, loaderName);
-    }
-    const std::string &getLoaderName() const
-    {
-        return _loaderName;
-    }
-    const JsonValue &getLoadParameters() const
-    {
-        return _loadParameters;
-    }
-    void setLoadParameters(const JsonValue &pm)
-    {
-        _loadParameters = pm;
-    }
+    void setName(const std::string &name);
+    const std::string &getName() const;
+    void setPath(const std::string &path);
+    const std::string &getPath() const;
+    void setLoaderName(const std::string &loaderName);
+    const std::string &getLoaderName() const;
+    const JsonValue &getLoadParameters() const;
+    void setLoadParameters(const JsonValue &pm);
 
 protected:
     std::string _name;
@@ -201,6 +142,8 @@ using ModelMetadata = std::map<std::string, std::string>;
 class ModelDescriptor : public ModelParams
 {
 public:
+    using RemovedCallback = std::function<void(const ModelDescriptor &)>;
+
     ModelDescriptor() = default;
 
     ModelDescriptor(ModelDescriptor &&rhs) = default;
@@ -212,77 +155,46 @@ public:
 
     ModelDescriptor &operator=(const ModelParams &rhs);
 
-    bool getEnabled() const
-    {
-        return _visible || _boundingBox;
-    }
-    void setMetadata(const ModelMetadata &metadata)
-    {
-        _metadata = metadata;
-        markModified();
-    }
-    const ModelMetadata &getMetadata() const
-    {
-        return _metadata;
-    }
-    const Model &getModel() const
-    {
-        return *_model;
-    }
-    Model &getModel()
-    {
-        return *_model;
-    }
+    bool getEnabled() const;
+
+    void setMetadata(const ModelMetadata &metadata);
+
+    const ModelMetadata &getMetadata() const;
+
+    const Model &getModel() const;
+
+    Model &getModel();
+
     void addInstance(const ModelInstance &instance);
+
     void removeInstance(const size_t id);
+
     ModelInstance *getInstance(const size_t id);
-    const std::vector<ModelInstance> &getInstances() const
-    {
-        return _instances;
-    }
-    Boxd getBounds() const
-    {
-        return _bounds;
-    }
+
+    const std::vector<ModelInstance> &getInstances() const;
+
+    Boxd getBounds() const;
+
     void computeBounds();
 
-    void setProperties(const PropertyMap &properties)
-    {
-        _properties = properties;
-        markModified();
-    }
+    void setProperties(const PropertyMap &properties);
 
-    const PropertyMap &getProperties() const
-    {
-        return _properties;
-    }
-    using RemovedCallback = std::function<void(const ModelDescriptor &)>;
+    const PropertyMap &getProperties() const;
 
     /**
      * Set a function that is called when this model is about to be removed.
      */
-    void addOnRemoved(const RemovedCallback &callback)
-    {
-        _onRemovedCallback.push_back(callback);
-    }
+    void addOnRemoved(const RemovedCallback &callback);
 
     /** @internal */
-    void callOnRemoved()
-    {
-        if (!_onRemovedCallback.empty())
-            for (const auto &callback : _onRemovedCallback)
-                callback(*this);
-    }
+    void callOnRemoved();
+
     /** @internal */
-    void markForRemoval()
-    {
-        _markedForRemoval = true;
-    }
+    void markForRemoval();
+
     /** @internal */
-    bool isMarkedForRemoval() const
-    {
-        return _markedForRemoval;
-    }
+    bool isMarkedForRemoval() const;
+
     /** @internal */
     std::shared_ptr<ModelDescriptor> clone(ModelPtr model) const;
 
@@ -352,22 +264,15 @@ public:
     /**
         Returns the bounds for the Model
     */
-    const Boxd &getBounds() const
-    {
-        return _bounds;
-    }
+    const Boxd &getBounds() const;
+
     /**
         Returns spheres handled by the Model
     */
-    const std::map<size_t, std::vector<Sphere>> &getSpheres() const
-    {
-        return _geometries->_spheres;
-    }
-    std::map<size_t, std::vector<Sphere>> &getSpheres()
-    {
-        _spheresDirty = true;
-        return _geometries->_spheres;
-    }
+    const std::map<size_t, std::vector<Sphere>> &getSpheres() const;
+
+    std::map<size_t, std::vector<Sphere>> &getSpheres();
+
     /**
       Adds a sphere to the model
       @param materialId Id of the material for the sphere
@@ -378,16 +283,11 @@ public:
 
     /**
         Returns cylinders handled by the model
-      */
-    const std::map<size_t, std::vector<Cylinder>> &getCylinders() const
-    {
-        return _geometries->_cylinders;
-    }
-    std::map<size_t, std::vector<Cylinder>> &getCylinders()
-    {
-        _cylindersDirty = true;
-        return _geometries->_cylinders;
-    }
+    */
+    const std::map<size_t, std::vector<Cylinder>> &getCylinders() const;
+
+    std::map<size_t, std::vector<Cylinder>> &getCylinders();
+
     /**
       Adds a cylinder to the model
       @param materialId Id of the material for the cylinder
@@ -395,18 +295,14 @@ public:
       @return Index of the sphere for the specified material
       */
     uint64_t addCylinder(const size_t materialId, const Cylinder &cylinder);
+
     /**
         Returns cones handled by the model
     */
-    const std::map<size_t, std::vector<Cone>> &getCones() const
-    {
-        return _geometries->_cones;
-    }
-    std::map<size_t, std::vector<Cone>> &getCones()
-    {
-        _conesDirty = true;
-        return _geometries->_cones;
-    }
+    const std::map<size_t, std::vector<Cone>> &getCones() const;
+
+    std::map<size_t, std::vector<Cone>> &getCones();
+
     /**
       Adds a cone to the model
       @param materialId Id of the material for the cone
@@ -425,11 +321,8 @@ public:
     /**
         Returns streamlines handled by the model
     */
-    std::map<size_t, StreamlinesData> &getStreamlines()
-    {
-        _streamlinesDirty = true;
-        return _geometries->_streamlines;
-    }
+    std::map<size_t, StreamlinesData> &getStreamlines();
+
     /**
       Adds a SDFGeometry to the scene
       @param materialId Material of the geometry
@@ -444,11 +337,7 @@ public:
     /**
      * Returns SDF geometry data handled by the model
      */
-    SDFGeometryData &getSDFGeometryData()
-    {
-        _sdfGeometriesDirty = true;
-        return _geometries->_sdf;
-    }
+    SDFGeometryData &getSDFGeometryData();
 
     /** Update the list of neighbours for a SDF geometry
       @param geometryIdx Index of the geometry
@@ -460,15 +349,9 @@ public:
     /**
         Returns triangle meshes handled by the model
     */
-    const std::map<size_t, TriangleMesh> &getTriangleMeshes() const
-    {
-        return _geometries->_triangleMeshes;
-    }
-    std::map<size_t, TriangleMesh> &getTriangleMeshes()
-    {
-        _triangleMeshesDirty = true;
-        return _geometries->_triangleMeshes;
-    }
+    const std::map<size_t, TriangleMesh> &getTriangleMeshes() const;
+
+    std::map<size_t, TriangleMesh> &getTriangleMeshes();
 
     /** Add a volume to the model*/
     void addVolume(VolumePtr);
@@ -495,10 +378,8 @@ public:
      * by the model
      * @return The map of materials handled by the model
      */
-    const std::map<size_t, MaterialPtr> &getMaterials() const
-    {
-        return _materials;
-    }
+    const std::map<size_t, MaterialPtr> &getMaterials() const;
+
     /**
      * @brief getMaterial Returns a pointer to a specific material
      * @param materialId Id of the material
@@ -519,38 +400,23 @@ public:
 
     /** @return the size in bytes of all geometries. */
     size_t getSizeInBytes() const;
-    void markInstancesDirty()
-    {
-        _instancesDirty = true;
-    }
-    void markInstancesClean()
-    {
-        _instancesDirty = false;
-    }
-    const std::vector<VolumePtr> &getVolumes() const
-    {
-        return _geometries->_volumes;
-    }
-    bool isVolumesDirty() const
-    {
-        return _volumesDirty;
-    }
-    void resetVolumesDirty()
-    {
-        _volumesDirty = false;
-    }
 
-    void setSimulationEnabled(const bool v)
-    {
-        _simulationEnabled = v;
-        _simulationEnabledDirty = true;
-    }
-    bool isSimulationEnabled() const
-    {
-        return _simulationEnabled;
-    }
+    void markInstancesDirty();
+
+    void markInstancesClean();
+
+    const std::vector<VolumePtr> &getVolumes() const;
+
+    bool isVolumesDirty() const;
+
+    void resetVolumesDirty();
+
+    void setSimulationEnabled(const bool v);
+
+    bool isSimulationEnabled() const;
 
     void updateBounds();
+
     /** @internal */
     void copyFrom(const Model &rhs);
 
@@ -590,11 +456,7 @@ protected:
         Boxd _sdfGeometriesBounds;
         Boxd _volumesBounds;
 
-        bool isEmpty() const
-        {
-            return _spheres.empty() && _cylinders.empty() && _cones.empty() && _triangleMeshes.empty()
-                && _sdf.geometries.empty() && _streamlines.empty() && _volumes.empty();
-        }
+        bool isEmpty() const;
     };
 
     // the model clone actually shares all geometries to save memory. It will
@@ -610,10 +472,7 @@ protected:
     bool _sdfGeometriesDirty{false};
     bool _volumesDirty{false};
 
-    bool _areGeometriesDirty() const
-    {
-        return _spheresDirty || _cylindersDirty || _conesDirty || _triangleMeshesDirty || _sdfGeometriesDirty;
-    }
+    bool _areGeometriesDirty() const;
 
     Boxd _bounds;
     bool _instancesDirty{true};

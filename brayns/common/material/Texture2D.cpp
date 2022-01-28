@@ -39,6 +39,11 @@ Texture2D::Texture2D(
     setMipLevels(1);
 }
 
+size_t Texture2D::getSizeInBytes() const
+{
+    return height * width * depth * channels;
+}
+
 void Texture2D::setMipLevels(const uint8_t mips)
 {
     if (mips == _mipLevels)
@@ -46,6 +51,11 @@ void Texture2D::setMipLevels(const uint8_t mips)
     _mipLevels = mips;
     for (auto &data : _rawData)
         data.resize(mips);
+}
+
+uint8_t Texture2D::getMipLevels() const
+{
+    return _mipLevels;
 }
 
 void Texture2D::setRawData(unsigned char *data, const size_t size, const uint8_t face, const uint8_t mip)
@@ -71,5 +81,30 @@ uint8_t Texture2D::getPossibleMipMapsLevels() const
         ++mipMapLevels;
     }
     return mipMapLevels;
+}
+
+bool Texture2D::isCubeMap() const
+{
+    return type == Type::cubemap;
+}
+
+bool Texture2D::isNormalMap() const
+{
+    return type == Type::normal_roughness;
+}
+
+uint8_t Texture2D::getNumFaces() const
+{
+    return isCubeMap() ? 6 : 1;
+}
+
+void Texture2D::setWrapMode(const TextureWrapMode mode)
+{
+    _wrapMode = mode;
+}
+
+TextureWrapMode Texture2D::getWrapMode() const
+{
+    return _wrapMode;
 }
 } // namespace brayns

@@ -22,9 +22,25 @@
 
 namespace brayns
 {
+float Renderer::getVariance() const
+{
+    return 0.0f;
+}
+
+Renderer::PickResult Renderer::pick(const Vector2f &position)
+{
+    (void)position;
+    return {};
+}
+
 Renderer::Renderer(const AnimationParameters &animationParameters, const RenderingParameters &renderingParameters)
     : _animationParameters(animationParameters)
     , _renderingParameters(renderingParameters)
 {
+}
+
+void Renderer::setScene(ScenePtr scene)
+{
+    _scene = scene;
 }
 } // namespace brayns
