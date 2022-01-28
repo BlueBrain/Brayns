@@ -105,6 +105,3 @@ docker-publish-to-dockerhub:
     KUBERNETES_MEMORY_REQUEST: 8Gi
     CI_REGISTRY_IMAGE: bluebrain/brayns
   extends: .publish-image-using-kaniko
-  # TODO: remove later
-  before_script:
-    - env
