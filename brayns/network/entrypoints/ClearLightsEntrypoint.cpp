@@ -19,17 +19,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "ClearLightsEntrypoint.h"
 
 namespace brayns
 {
-class CancelEntrypoint : public Entrypoint<CancelParams, EmptyMessage>
+std::string ClearLightsEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "clear-lights";
+}
+
+std::string ClearLightsEntrypoint::getDescription() const
+{
+    return "Clear all lights in the scene";
+}
+
+void ClearLightsEntrypoint::onRequest(const Request &request)
+{
+    auto &engine = getApi().getEngine();
+    auto &scene = engine.getScene();
+    auto &lightManager = scene.getLightManager();
+    lightManager.clearLights();
+    triggerRender();
+    request.reply(EmptyMessage());
+}
 } // namespace brayns

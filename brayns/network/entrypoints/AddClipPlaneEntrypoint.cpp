@@ -19,17 +19,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "AddClipPlaneEntrypoint.h"
 
 namespace brayns
 {
-class CancelEntrypoint : public Entrypoint<CancelParams, EmptyMessage>
+std::string AddClipPlaneEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "add-clip-plane";
+}
+
+std::string AddClipPlaneEntrypoint::getDescription() const
+{
+    return "Add a clip plane and returns the clip plane descriptor";
+}
+
+JsonSchema AddClipPlaneEntrypoint::getParamsSchema() const
+{
+    auto schema = Json::getSchema<ClipPlane>();
+    schema.properties.erase("id");
+    return schema;
+}
+
+void AddClipPlaneEntrypoint::onRequest(const Request &request)
+{
+    auto params = request.getParams();
+    auto &plane = params.plane;
+    auto &engine = getApi().getEngine();
+    auto &scene = engine.getScene();
+    auto id = scene.addClipPlane(plane);
+    auto clipPlane = scene.getClipPlane(id);
+    engine.triggerRender();
+    request.notify(clipPlane);
+    request.reply(clipPlane);
+}
 } // namespace brayns

@@ -19,17 +19,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "ChunkEntrypoint.h"
 
 namespace brayns
 {
-class CancelEntrypoint : public Entrypoint<CancelParams, EmptyMessage>
+std::string ChunkEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "chunk";
+}
+
+std::string ChunkEntrypoint::getDescription() const
+{
+    return "Indicate sending of a binary chunk after this message";
+}
+
+void ChunkEntrypoint::onRequest(const Request &request)
+{
+    auto params = request.getParams();
+    auto &handle = request.getConnectionHandle();
+    auto &id = params.id;
+    auto &binary = getBinary();
+    binary.setNextChunkId(handle, id);
+    request.reply(EmptyMessage());
+}
 } // namespace brayns

@@ -19,17 +19,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "CameraEntrypoint.h"
 
 namespace brayns
 {
-class CancelEntrypoint : public Entrypoint<CancelParams, EmptyMessage>
+Camera &ObjectExtractor<Camera>::extract(PluginAPI &api)
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    auto &engine = api.getEngine();
+    return engine.getCamera();
+}
+
+std::string GetCameraEntrypoint::getName() const
+{
+    return "get-camera";
+}
+
+std::string GetCameraEntrypoint::getDescription() const
+{
+    return "Get the current state of the camera";
+}
+
+std::string SetCameraEntrypoint::getName() const
+{
+    return "set-camera";
+}
+
+std::string SetCameraEntrypoint::getDescription() const
+{
+    return "Set the current state of the camera";
+}
 } // namespace brayns

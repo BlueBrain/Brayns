@@ -19,17 +19,38 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "AnimationParametersEntrypoint.h"
 
 namespace brayns
 {
-class CancelEntrypoint : public Entrypoint<CancelParams, EmptyMessage>
+AnimationParameters &ObjectExtractor<AnimationParameters>::extract(PluginAPI &api)
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    auto &parametersManager = api.getParametersManager();
+    return parametersManager.getAnimationParameters();
+}
+
+GetAnimationParametersEntrypoint::GetAnimationParametersEntrypoint()
+{
+    setNotificationPeriod(NotificationPeriod::interactive());
+}
+
+std::string GetAnimationParametersEntrypoint::getName() const
+{
+    return "get-animation-parameters";
+}
+
+std::string GetAnimationParametersEntrypoint::getDescription() const
+{
+    return "Get the current state of the animation parameters";
+}
+
+std::string SetAnimationParametersEntrypoint::getName() const
+{
+    return "set-animation-parameters";
+}
+
+std::string SetAnimationParametersEntrypoint::getDescription() const
+{
+    return "Set the current state of the animation parameters";
+}
 } // namespace brayns

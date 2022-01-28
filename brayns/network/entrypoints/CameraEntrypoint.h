@@ -29,38 +29,20 @@ namespace brayns
 template<>
 struct ObjectExtractor<Camera>
 {
-    static Camera &extract(PluginAPI &api)
-    {
-        auto &engine = api.getEngine();
-        return engine.getCamera();
-    }
+    static Camera &extract(PluginAPI &api);
 };
 
 class GetCameraEntrypoint : public GetEntrypoint<Camera>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "get-camera";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the current state of the camera";
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
 };
 
 class SetCameraEntrypoint : public SetEntrypoint<Camera>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "set-camera";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Set the current state of the camera";
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
 };
 } // namespace brayns

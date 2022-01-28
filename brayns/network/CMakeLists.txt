@@ -30,6 +30,16 @@ set(BRAYNSNETWORK_SOURCES
   entrypoint/EntrypointException.cpp
   entrypoint/EntrypointRef.cpp
   entrypoint/EntrypointManager.cpp
+  entrypoints/AddClipPlaneEntrypoint.cpp
+  entrypoints/AddLightEntrypoint.cpp
+  entrypoints/AddModelEntrypoint.cpp
+  entrypoints/AnimationParametersEntrypoint.cpp
+  entrypoints/ApplicationParametersEntrypoint.cpp
+  entrypoints/CameraEntrypoint.cpp
+  entrypoints/CameraParamsEntrypoint.cpp
+  entrypoints/CancelEntrypoint.cpp
+  entrypoints/ChunkEntrypoint.cpp
+  entrypoints/ClearLightsEntrypoint.cpp
   entrypoints/ExportFramesEntrypoint.cpp
   entrypoints/ExportFramesToDiskEntryPoint.cpp
   entrypoints/GetExportFramesProgressEntrypoint.cpp

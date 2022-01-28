@@ -19,17 +19,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "CancelEntrypoint.h"
 
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/entrypoint/EntrypointException.h>
 
 namespace brayns
 {
-class CancelEntrypoint : public Entrypoint<CancelParams, EmptyMessage>
+std::string CancelEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "cancel";
+}
+
+std::string CancelEntrypoint::getDescription() const
+{
+    return "Cancel the task started by the request with the given ID";
+}
+
+void CancelEntrypoint::onRequest(const Request &request)
+{
+    auto params = request.getParams();
+    auto &id = params.id;
+    auto &handle = request.getConnectionHandle();
+    auto &tasks = getTasks();
+    if (!tasks.cancel(handle, id))
+    {
+        throw EntrypointException("No task with ID " + id.getDisplayText() + " is running for this client");
+    }
+    request.reply(EmptyMessage());
+}
 } // namespace brayns

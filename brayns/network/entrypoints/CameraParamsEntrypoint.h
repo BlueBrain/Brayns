@@ -30,28 +30,14 @@ namespace brayns
 class GetCameraParamsEntrypoint : public GetPropertyObjectEntrypoint<Camera>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "get-camera-params";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the current properties of the camera";
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
 };
 
 class SetCameraParamsEntrypoint : public SetPropertyObjectEntrypoint<Camera>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "set-camera-params";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Set the current properties of the camera";
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
 };
 } // namespace brayns

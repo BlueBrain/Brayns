@@ -19,17 +19,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "ApplicationParametersEntrypoint.h"
 
 namespace brayns
 {
-class CancelEntrypoint : public Entrypoint<CancelParams, EmptyMessage>
+ApplicationParameters &ObjectExtractor<ApplicationParameters>::extract(PluginAPI &api)
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    auto &parametersManager = api.getParametersManager();
+    return parametersManager.getApplicationParameters();
+}
+
+std::string GetApplicationParametersEntrypoint::getName() const
+{
+    return "get-application-parameters";
+}
+
+std::string GetApplicationParametersEntrypoint::getDescription() const
+{
+    return "Get the current state of the application parameters";
+}
+
+std::string SetApplicationParametersEntrypoint::getName() const
+{
+    return "set-application-parameters";
+}
+
+std::string SetApplicationParametersEntrypoint::getDescription() const
+{
+    return "Set the current state of the application parameters";
+}
 } // namespace brayns
