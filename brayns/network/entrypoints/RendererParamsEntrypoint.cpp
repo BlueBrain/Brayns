@@ -19,20 +19,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/adapters/BinaryParamAdapter.h>
-#include <brayns/network/adapters/ModelDescriptorAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "RendererParamsEntrypoint.h"
 
 namespace brayns
 {
-class RequestModelUploadEntrypoint : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
+Renderer &ObjectExtractor<Renderer>::extract(PluginAPI &api)
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual bool isAsync() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    auto &engine = api.getEngine();
+    return engine.getRenderer();
+}
+
+std::string GetRendererParamsEntrypoint::getName() const
+{
+    return "get-renderer-params";
+}
+
+std::string GetRendererParamsEntrypoint::getDescription() const
+{
+    return "Get the current properties of the renderer";
+}
+
+std::string SetRendererParamsEntrypoint::getName() const
+{
+    return "set-renderer-params";
+}
+
+std::string SetRendererParamsEntrypoint::getDescription() const
+{
+    return "Set the current properties of the renderer";
+}
 } // namespace brayns

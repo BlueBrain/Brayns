@@ -19,20 +19,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/adapters/BinaryParamAdapter.h>
-#include <brayns/network/adapters/ModelDescriptorAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "SceneEntrypoint.h"
 
 namespace brayns
 {
-class RequestModelUploadEntrypoint : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
+Scene &ObjectExtractor<Scene>::extract(PluginAPI &api)
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual bool isAsync() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    auto &engine = api.getEngine();
+    return engine.getScene();
+}
+
+std::string GetSceneEntrypoint::getName() const
+{
+    return "get-scene";
+}
+
+std::string GetSceneEntrypoint::getDescription() const
+{
+    return "Get the current state of the scene";
+}
+
+std::string SetSceneEntrypoint::getName() const
+{
+    return "set-scene";
+}
+
+std::string SetSceneEntrypoint::getDescription() const
+{
+    return "Set the current state of the scene";
+}
 } // namespace brayns

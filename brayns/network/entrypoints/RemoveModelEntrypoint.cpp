@@ -19,20 +19,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/adapters/BinaryParamAdapter.h>
-#include <brayns/network/adapters/ModelDescriptorAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "RemoveModelEntrypoint.h"
 
 namespace brayns
 {
-class RequestModelUploadEntrypoint : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
+std::string RemoveModelEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual bool isAsync() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "remove-model";
+}
+
+std::string RemoveModelEntrypoint::getDescription() const
+{
+    return "Remove the model(s) from the ID list from the scene";
+}
+
+void RemoveModelEntrypoint::onRequest(const Request &request)
+{
+    auto params = request.getParams();
+    auto &engine = getApi().getEngine();
+    auto &scene = engine.getScene();
+    for (auto id : params.ids)
+    {
+        scene.removeModel(id);
+    }
+    triggerRender();
+    request.reply(EmptyMessage());
+}
 } // namespace brayns

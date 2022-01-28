@@ -19,20 +19,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/adapters/BinaryParamAdapter.h>
-#include <brayns/network/adapters/ModelDescriptorAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "SchemaEntrypoint.h"
 
 namespace brayns
 {
-class RequestModelUploadEntrypoint : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
+std::string SchemaEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual bool isAsync() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "schema";
+}
+
+std::string SchemaEntrypoint::getDescription() const
+{
+    return "Get the JSON schema of the given entrypoint";
+}
+
+void SchemaEntrypoint::onRequest(const Request &request)
+{
+    auto params = request.getParams();
+    auto &endpoint = params.endpoint;
+    auto entrypoint = getEntrypoints().find(endpoint);
+    if (!entrypoint)
+    {
+        throw EntrypointException("Unknown entrypoint '" + endpoint + "'");
+    }
+    auto &schema = entrypoint->getSchema();
+    request.reply(schema);
+}
 } // namespace brayns

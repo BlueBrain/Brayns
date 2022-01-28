@@ -19,20 +19,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "RequestModelUploadEntrypoint.h"
 
-#include <brayns/network/adapters/BinaryParamAdapter.h>
-#include <brayns/network/adapters/ModelDescriptorAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/binary/ModelUploadTask.h>
 
 namespace brayns
 {
-class RequestModelUploadEntrypoint : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
+std::string RequestModelUploadEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual bool isAsync() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "request-model-upload";
+}
+
+std::string RequestModelUploadEntrypoint::getDescription() const
+{
+    return "Request model upload from further received blobs and return "
+           "model descriptor on success";
+}
+
+bool RequestModelUploadEntrypoint::isAsync() const
+{
+    return true;
+}
+
+void RequestModelUploadEntrypoint::onRequest(const Request &request)
+{
+    auto &engine = getApi().getEngine();
+    auto &registry = getApi().getLoaderRegistry();
+    auto task = std::make_shared<ModelUploadTask>(engine, registry);
+    launchTask(task, request);
+    auto &binary = getBinary();
+    auto &handle = request.getConnectionHandle();
+    binary.addTask(handle, task);
+}
 } // namespace brayns

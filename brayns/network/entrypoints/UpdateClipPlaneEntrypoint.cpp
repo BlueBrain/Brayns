@@ -19,20 +19,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/adapters/BinaryParamAdapter.h>
-#include <brayns/network/adapters/ModelDescriptorAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "UpdateClipPlaneEntrypoint.h"
 
 namespace brayns
 {
-class RequestModelUploadEntrypoint : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
+std::string UpdateClipPlaneEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual bool isAsync() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "update-clip-plane";
+}
+
+std::string UpdateClipPlaneEntrypoint::getDescription() const
+{
+    return "Update a clip plane with the given coefficients";
+}
+
+void UpdateClipPlaneEntrypoint::onRequest(const Request &request)
+{
+    auto params = request.getParams();
+    auto id = params.getID();
+    auto &plane = params.getPlane();
+    auto &engine = getApi().getEngine();
+    auto &scene = engine.getScene();
+    auto clipPlane = scene.getClipPlane(id);
+    if (!clipPlane)
+    {
+        throw EntrypointException("No clip plane found with ID " + std::to_string(id));
+    }
+    clipPlane->setPlane(plane);
+    engine.triggerRender();
+    request.notify(clipPlane);
+    request.reply(EmptyMessage());
+}
 } // namespace brayns

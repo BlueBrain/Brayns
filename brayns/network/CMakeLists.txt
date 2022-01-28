@@ -59,7 +59,21 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/RegistryEntrypoint.cpp
   entrypoints/RemoveClipPlanesEntrypoint.cpp
   entrypoints/RemoveLightsEntrypoint.cpp
+  entrypoints/RemoveModelEntrypoint.cpp
+  entrypoints/RendererEntrypoint.cpp
+  entrypoints/RendererParamsEntrypoint.cpp
+  entrypoints/RequestModelUploadEntrypoint.cpp
+  entrypoints/ResetCameraEntrypoint.cpp
+  entrypoints/SceneEntrypoint.cpp
+  entrypoints/SchemaEntrypoint.cpp
   entrypoints/SnapshotEntrypoint.cpp
+  entrypoints/StatisticsEntrypoint.cpp
+  entrypoints/TriggerJpegStreamEntrypoint.cpp
+  entrypoints/UpdateClipPlaneEntrypoint.cpp
+  entrypoints/UpdateInstanceEntrypoint.cpp
+  entrypoints/UpdateModelEntrypoint.cpp
+  entrypoints/VersionEntrypoint.cpp
+  entrypoints/VolumeParametersEntrypoint.cpp
   interface/NetworkInterface.cpp
   interface/ClientInterface.cpp
   interface/ServerInterface.cpp

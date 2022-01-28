@@ -19,20 +19,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/adapters/BinaryParamAdapter.h>
-#include <brayns/network/adapters/ModelDescriptorAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "VolumeParametersEntrypoint.h"
 
 namespace brayns
 {
-class RequestModelUploadEntrypoint : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
+VolumeParameters &ObjectExtractor<VolumeParameters>::extract(PluginAPI &api)
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual bool isAsync() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    auto &parametersManager = api.getParametersManager();
+    return parametersManager.getVolumeParameters();
+}
+
+std::string GetVolumeParametersEntrypoint::getName() const
+{
+    return "get-volume-parameters";
+}
+
+std::string GetVolumeParametersEntrypoint::getDescription() const
+{
+    return "Get the current state of the volume parameters";
+}
+
+std::string SetVolumeParametersEntrypoint::getName() const
+{
+    return "set-volume-parameters";
+}
+
+std::string SetVolumeParametersEntrypoint::getDescription() const
+{
+    return "Set the current state of the volume parameters";
+}
 } // namespace brayns

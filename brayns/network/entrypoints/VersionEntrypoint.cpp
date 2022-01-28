@@ -19,20 +19,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/adapters/BinaryParamAdapter.h>
-#include <brayns/network/adapters/ModelDescriptorAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "VersionEntrypoint.h"
 
 namespace brayns
 {
-class RequestModelUploadEntrypoint : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
+std::string VersionEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual bool isAsync() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "get-version";
+}
+
+std::string VersionEntrypoint::getDescription() const
+{
+    return "Get Brayns instance version";
+}
+
+void VersionEntrypoint::onRequest(const Request &request)
+{
+    VersionMessage message;
+    message.major = Version::getMajor();
+    message.minor = Version::getMinor();
+    message.patch = Version::getPatch();
+    message.revision = Version::getCommitHash();
+    request.reply(message);
+}
 } // namespace brayns

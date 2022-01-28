@@ -19,20 +19,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/adapters/BinaryParamAdapter.h>
-#include <brayns/network/adapters/ModelDescriptorAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "UpdateModelEntrypoint.h"
 
 namespace brayns
 {
-class RequestModelUploadEntrypoint : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
+std::string UpdateModelEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual bool isAsync() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "update-model";
+}
+
+std::string UpdateModelEntrypoint::getDescription() const
+{
+    return "Update the model with the given values";
+}
+
+void UpdateModelEntrypoint::onRequest(const Request &request)
+{
+    auto &api = getApi();
+    auto &engine = api.getEngine();
+    auto &scene = engine.getScene();
+    UpdateModelProxy model(scene);
+    request.getParams(model);
+    model.computeBounds();
+    scene.markModified();
+    engine.triggerRender();
+    request.reply(EmptyMessage());
+}
 } // namespace brayns

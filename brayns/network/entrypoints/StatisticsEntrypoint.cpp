@@ -19,20 +19,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/adapters/BinaryParamAdapter.h>
-#include <brayns/network/adapters/ModelDescriptorAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "StatisticsEntrypoint.h"
 
 namespace brayns
 {
-class RequestModelUploadEntrypoint : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
+Statistics &ObjectExtractor<Statistics>::extract(PluginAPI &api)
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual bool isAsync() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    auto &engine = api.getEngine();
+    return engine.getStatistics();
+}
+
+GetStatisticsEntrypoint::GetStatisticsEntrypoint()
+{
+    setNotificationPeriod(NotificationPeriod::slow());
+}
+
+std::string GetStatisticsEntrypoint::getName() const
+{
+    return "get-statistics";
+}
+
+std::string GetStatisticsEntrypoint::getDescription() const
+{
+    return "Get the current state of the statistics";
+}
 } // namespace brayns

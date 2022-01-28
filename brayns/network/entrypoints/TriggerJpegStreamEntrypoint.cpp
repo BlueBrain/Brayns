@@ -19,20 +19,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/adapters/BinaryParamAdapter.h>
-#include <brayns/network/adapters/ModelDescriptorAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "TriggerJpegStreamEntrypoint.h"
 
 namespace brayns
 {
-class RequestModelUploadEntrypoint : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
+std::string TriggerJpegStreamEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual bool isAsync() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "trigger-jpeg-stream";
+}
+
+std::string TriggerJpegStreamEntrypoint::getDescription() const
+{
+    return "Triggers the engine to stream a frame to the clients";
+}
+
+void TriggerJpegStreamEntrypoint::onRequest(const Request &request)
+{
+    auto &monitor = getStream().getMonitor();
+    monitor.trigger();
+    triggerRender();
+    request.reply(EmptyMessage());
+}
 } // namespace brayns

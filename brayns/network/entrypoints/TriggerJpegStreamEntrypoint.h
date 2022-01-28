@@ -28,22 +28,8 @@ namespace brayns
 class TriggerJpegStreamEntrypoint : public Entrypoint<EmptyMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "trigger-jpeg-stream";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Triggers the engine to stream a frame to the clients";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto &monitor = getStream().getMonitor();
-        monitor.trigger();
-        triggerRender();
-        request.reply(EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns
