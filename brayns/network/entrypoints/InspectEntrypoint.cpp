@@ -19,28 +19,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/adapters/ModelTransferFunctionAdapter.h>
-#include <brayns/network/adapters/TransferFunctionAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/GetModelMessage.h>
+#include "InspectEntrypoint.h"
 
 namespace brayns
 {
-class GetModelTransferFunctionEntrypoint : public Entrypoint<GetModelMessage, TransferFunction>
+std::string InspectEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "inspect";
+}
 
-class SetModelTransferFunctionEntrypoint : public Entrypoint<ModelTransferFunction, EmptyMessage>
+std::string InspectEntrypoint::getDescription() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "Inspect the scene at x-y position";
+}
+
+void InspectEntrypoint::onRequest(const Request &request)
+{
+    auto params = request.getParams();
+    auto position = Vector2f(params.position);
+    auto &engine = getApi().getEngine();
+    auto &renderer = engine.getRenderer();
+    auto result = renderer.pick(position);
+    request.reply(result);
+}
 } // namespace brayns

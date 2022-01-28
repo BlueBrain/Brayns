@@ -19,28 +19,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/adapters/ModelTransferFunctionAdapter.h>
-#include <brayns/network/adapters/TransferFunctionAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/GetModelMessage.h>
+#include "RemoveLightsEntrypoint.h"
 
 namespace brayns
 {
-class GetModelTransferFunctionEntrypoint : public Entrypoint<GetModelMessage, TransferFunction>
+std::string RemoveLightsEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "remove-lights";
+}
 
-class SetModelTransferFunctionEntrypoint : public Entrypoint<ModelTransferFunction, EmptyMessage>
+std::string RemoveLightsEntrypoint::getDescription() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "Remove the model(s) from the ID list from the scene";
+}
+
+void RemoveLightsEntrypoint::onRequest(const Request &request)
+{
+    auto params = request.getParams();
+    auto &ids = params.ids;
+    auto &engine = getApi().getEngine();
+    auto &scene = engine.getScene();
+    auto &lightManager = scene.getLightManager();
+    for (auto id : ids)
+    {
+        lightManager.removeLight(id);
+    }
+    triggerRender();
+    request.reply(EmptyMessage());
+}
 } // namespace brayns

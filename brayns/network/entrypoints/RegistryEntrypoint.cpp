@@ -19,28 +19,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/adapters/ModelTransferFunctionAdapter.h>
-#include <brayns/network/adapters/TransferFunctionAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/GetModelMessage.h>
+#include "RegistryEntrypoint.h"
 
 namespace brayns
 {
-class GetModelTransferFunctionEntrypoint : public Entrypoint<GetModelMessage, TransferFunction>
+std::string RegistryEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "registry";
+}
 
-class SetModelTransferFunctionEntrypoint : public Entrypoint<ModelTransferFunction, EmptyMessage>
+std::string RegistryEntrypoint::getDescription() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "Retreive the names of all registered entrypoints";
+}
+
+void RegistryEntrypoint::onRequest(const Request &request)
+{
+    auto &entrypoints = getEntrypoints();
+    std::vector<std::string> result;
+    result.reserve(entrypoints.size());
+    entrypoints.forEach([&](const auto &entrypoint) { result.push_back(entrypoint.getName()); });
+    request.reply(result);
+}
 } // namespace brayns

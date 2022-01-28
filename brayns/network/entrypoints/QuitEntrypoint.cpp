@@ -19,28 +19,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/adapters/ModelTransferFunctionAdapter.h>
-#include <brayns/network/adapters/TransferFunctionAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/GetModelMessage.h>
+#include "QuitEntrypoint.h"
 
 namespace brayns
 {
-class GetModelTransferFunctionEntrypoint : public Entrypoint<GetModelMessage, TransferFunction>
+std::string QuitEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "quit";
+}
 
-class SetModelTransferFunctionEntrypoint : public Entrypoint<ModelTransferFunction, EmptyMessage>
+std::string QuitEntrypoint::getDescription() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "Quit the application";
+}
+
+void QuitEntrypoint::onRequest(const Request &request)
+{
+    auto &engine = getApi().getEngine();
+    engine.setKeepRunning(false);
+    engine.triggerRender();
+    request.reply(EmptyMessage());
+}
 } // namespace brayns

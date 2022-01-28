@@ -51,6 +51,14 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/GetModelEntrypoint.cpp
   entrypoints/ImageJpegEntrypoint.cpp
   entrypoints/ImageStreamingModeEntrypoint.cpp
+  entrypoints/InspectEntrypoint.cpp
+  entrypoints/LoadersSchemaEntrypoint.cpp
+  entrypoints/ModelPropertiesEntrypoint.cpp
+  entrypoints/ModelTransferFunctionEntrypoint.cpp
+  entrypoints/QuitEntrypoint.cpp
+  entrypoints/RegistryEntrypoint.cpp
+  entrypoints/RemoveClipPlanesEntrypoint.cpp
+  entrypoints/RemoveLightsEntrypoint.cpp
   entrypoints/SnapshotEntrypoint.cpp
   interface/NetworkInterface.cpp
   interface/ClientInterface.cpp

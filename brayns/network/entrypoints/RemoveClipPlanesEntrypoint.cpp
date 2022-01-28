@@ -19,28 +19,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/adapters/ModelTransferFunctionAdapter.h>
-#include <brayns/network/adapters/TransferFunctionAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/GetModelMessage.h>
+#include "RemoveClipPlanesEntrypoint.h"
 
 namespace brayns
 {
-class GetModelTransferFunctionEntrypoint : public Entrypoint<GetModelMessage, TransferFunction>
+std::string RemoveClipPlanesEntrypoint::getName() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "remove-clip-planes";
+}
 
-class SetModelTransferFunctionEntrypoint : public Entrypoint<ModelTransferFunction, EmptyMessage>
+std::string RemoveClipPlanesEntrypoint::getDescription() const
 {
-public:
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-};
+    return "Remove clip planes from the scene given their ids";
+}
+
+void RemoveClipPlanesEntrypoint::onRequest(const Request &request)
+{
+    auto params = request.getParams();
+    auto &ids = params.ids;
+    auto &engine = getApi().getEngine();
+    auto &scene = engine.getScene();
+    for (auto id : ids)
+    {
+        scene.removeClipPlane(id);
+    }
+    engine.triggerRender();
+    request.notify(params);
+    request.reply(EmptyMessage());
+}
 } // namespace brayns
