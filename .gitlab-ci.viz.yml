@@ -88,6 +88,9 @@ docker-build:
     CI_REGISTRY: ""
   extends: .build-image-using-kaniko
   before_script:
+    - echo "before_script  before_script before_script"
+    - echo $CI_REGISTRY
+    - export CI_REGISTRY=""
     - echo $CI_REGISTRY
   rules:
     - if: $GITHUB_PULL_REQUEST_ID
