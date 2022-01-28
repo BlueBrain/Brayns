@@ -80,6 +80,7 @@ set(BRAYNSNETWORK_SOURCES
   json/MessageFactory.cpp
   json/PropertyObjectSchema.cpp
   json/RequestId.cpp
+  messages/LightMessage.cpp
   plugin/NetworkManager.cpp
   socket/ConnectionManager.cpp
   stream/StreamManager.cpp
