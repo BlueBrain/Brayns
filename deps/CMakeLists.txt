@@ -10,24 +10,6 @@ set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY ON)
 set(CMAKE_INSTALL_LIBDIR lib)
 
 # =============================================================================
-# Async++
-# =============================================================================
-set(BUILD_SHARED_LIBS ON CACHE BOOL "Build Async++ as a shared library" FORCE)
-if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/async++")
-    message(STATUS "Downloading Async++ from submodules")
-    FetchContent_Declare(
-        async++
-        GIT_REPOSITORY https://github.com/Amanieu/asyncplusplus.git
-        GIT_TAG        2c852e5c8751350afaa6cbd67a3d921a7469bc71
-        GIT_SHALLOW ON
-        GIT_SUBMODULES_RECURSE OFF
-        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/async++
-    )
-    FetchContent_Populate(async++)
-endif()
-add_subdirectory(async++)
-
-# =============================================================================
 # Poco libraries
 # =============================================================================
 if(NOT Poco_FOUND)

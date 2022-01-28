@@ -55,7 +55,7 @@ target_include_directories(braynsCommon PUBLIC
     "$<INSTALL_INTERFACE:include>")
 
 target_link_libraries(braynsCommon PUBLIC
-  glm Async++ braynsUtils braynsJson spdlog::spdlog
+  glm braynsUtils braynsJson spdlog::spdlog
 )
 target_link_libraries(braynsCommon PRIVATE
     braynsParameters ${Boost_PROGRAM_OPTIONS_LIBRARY}
