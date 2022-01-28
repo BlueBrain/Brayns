@@ -112,5 +112,6 @@ debug-print:
     name: ubuntu:20.04
     entrypoint: [""]
   script:
+    - echo GITHUB_PULL_REQUEST_ID
     - echo $CI_MERGE_REQUEST_IID
     - env
