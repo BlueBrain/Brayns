@@ -77,6 +77,9 @@ set(BRAYNSNETWORK_SOURCES
   interface/NetworkInterface.cpp
   interface/ClientInterface.cpp
   interface/ServerInterface.cpp
+  json/MessageFactory.cpp
+  json/PropertyObjectSchema.cpp
+  json/RequestId.cpp
   plugin/NetworkManager.cpp
   socket/ConnectionManager.cpp
   stream/StreamManager.cpp

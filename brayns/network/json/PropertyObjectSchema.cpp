@@ -19,27 +19,40 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "PropertyObjectSchema.h"
 
-#include <brayns/common/PropertyObject.h>
+#include <brayns/common/adapters/PropertyMapAdapter.h>
 
-#include <brayns/json/JsonSchema.h>
+#include <brayns/json/Json.h>
+
+namespace
+{
+class PropertyObjectSchemaHelper
+{
+public:
+    static brayns::JsonSchema getSchema(const std::pair<std::string, brayns::PropertyMap> &pair)
+    {
+        auto &properties = pair.second;
+        auto schema = brayns::Json::getSchema(properties);
+        auto &type = pair.first;
+        schema.title = type;
+        return schema;
+    }
+};
+} // namespace
 
 namespace brayns
 {
-/**
- * @brief Helper class to create a JSON schema from a PropertyObjet.
- *
- */
-class PropertyObjectSchema
+JsonSchema PropertyObjectSchema::create(const PropertyObject &object)
 {
-public:
-    /**
-     * @brief Create a oneOf schema from a property object.
-     *
-     * @param object Object to build the schema from.
-     * @return JsonSchema Schema of object.
-     */
-    static JsonSchema create(const PropertyObject &object);
-};
+    JsonSchema schema;
+    auto &oneOf = schema.oneOf;
+    auto &properties = object.getProperties();
+    oneOf.reserve(properties.size());
+    for (const auto &pair : properties)
+    {
+        oneOf.push_back(PropertyObjectSchemaHelper::getSchema(pair));
+    }
+    return schema;
+}
 } // namespace brayns

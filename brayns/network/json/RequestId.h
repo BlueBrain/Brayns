@@ -23,7 +23,7 @@
 
 #include <typeindex>
 
-#include <brayns/json/adapters/PrimitiveAdapter.h>
+#include <brayns/json/JsonAdapter.h>
 
 namespace brayns
 {
@@ -37,74 +37,19 @@ class RequestId
 {
 public:
     RequestId() = default;
+    RequestId(int64_t value);
+    RequestId(std::string value);
 
-    RequestId(int64_t value)
-        : _type(typeid(int64_t))
-        , _int(value)
-    {
-    }
+    bool isEmpty() const;
+    bool isInt() const;
+    bool isString() const;
+    int64_t toInt() const;
+    const std::string &toString() const;
+    std::string getDisplayText() const;
+    size_t getHashCode() const;
 
-    RequestId(std::string value)
-        : _type(typeid(std::string))
-        , _string(std::move(value))
-    {
-    }
-
-    bool isEmpty() const
-    {
-        return _type == typeid(void);
-    }
-
-    bool isInt() const
-    {
-        return _type == typeid(int64_t);
-    }
-
-    bool isString() const
-    {
-        return _type == typeid(std::string);
-    }
-
-    int64_t toInt() const
-    {
-        return _int;
-    }
-
-    const std::string &toString() const
-    {
-        return _string;
-    }
-
-    std::string getDisplayText() const
-    {
-        if (isInt())
-        {
-            return std::to_string(_int);
-        }
-        if (isString())
-        {
-            return "'" + _string + "'";
-        }
-        return {};
-    }
-
-    size_t getHashCode() const
-    {
-        auto hashCode = std::hash<std::type_index>()(_type);
-        hashCode ^= std::hash<int64_t>()(_int);
-        hashCode ^= std::hash<std::string>()(_string);
-        return hashCode;
-    }
-
-    bool operator==(const RequestId &other) const
-    {
-        return _type == other._type && _int == other._int && _string == other._string;
-    }
-
-    bool operator!=(const RequestId &other) const
-    {
-        return !(*this == other);
-    }
+    bool operator==(const RequestId &other) const;
+    bool operator!=(const RequestId &other) const;
 
 private:
     std::type_index _type = typeid(void);
@@ -119,53 +64,9 @@ private:
 template<>
 struct JsonAdapter<RequestId>
 {
-    static JsonSchema getSchema(const RequestId &)
-    {
-        JsonSchema schema;
-        schema.title = "RequestId";
-        schema.oneOf = {JsonSchemaHelper::getNullSchema(), Json::getSchema<int64_t>(), Json::getSchema<std::string>()};
-        return schema;
-    }
-
-    static bool serialize(const RequestId &value, JsonValue &json)
-    {
-        if (value.isEmpty())
-        {
-            json.clear();
-            return true;
-        }
-        if (value.isInt())
-        {
-            json = value.toInt();
-            return true;
-        }
-        if (value.isString())
-        {
-            json = value.toString();
-            return true;
-        }
-        return false;
-    }
-
-    static bool deserialize(const JsonValue &json, RequestId &value)
-    {
-        if (json.isEmpty())
-        {
-            value = {};
-            return true;
-        }
-        if (json.isInteger() && !json.isBoolean())
-        {
-            value = json.convert<int64_t>();
-            return true;
-        }
-        if (json.isString())
-        {
-            value = json.extract<std::string>();
-            return true;
-        }
-        return false;
-    }
+    static JsonSchema getSchema(const RequestId &value);
+    static bool serialize(const RequestId &value, JsonValue &json);
+    static bool deserialize(const JsonValue &json, RequestId &value);
 };
 } // namespace brayns
 
@@ -174,9 +75,6 @@ namespace std
 template<>
 struct hash<brayns::RequestId>
 {
-    size_t operator()(const brayns::RequestId &id) const
-    {
-        return id.getHashCode();
-    }
+    size_t operator()(const brayns::RequestId &id) const;
 };
 } // namespace std
