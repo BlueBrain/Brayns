@@ -85,9 +85,10 @@ docker-build:
     KUBERNETES_CPU_REQUEST: 4
     KUBERNETES_MEMORY_LIMIT: 8Gi
     KUBERNETES_MEMORY_REQUEST: 8Gi
+    CI_REGISTRY: ""
   extends: .build-image-using-kaniko
   before_script:
-    - env
+    - echo $CI_REGISTRY
   rules:
     - if: $GITHUB_PULL_REQUEST_ID
 
