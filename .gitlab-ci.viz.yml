@@ -75,7 +75,7 @@ ubuntu-cpp-build:
     - git checkout ${OSPRAY_TAG}
     - mkdir -p build && cd build
     - CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja -DOSPRAY_ENABLE_TUTORIALS=OFF -DOSPRAY_ENABLE_APPS=OFF -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
-    - ninja -j$NUM_COMPILE_JOBS install
+    - ninja -j$NUM_COMPILE_JOBS all
   rules:
     - if: $GITHUB_PULL_REQUEST_ID
 
