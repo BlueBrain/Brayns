@@ -1,15 +1,10 @@
 stages:
   - test
-
+  - publish
 
 include:
   - project: viz/ci/gitlabpipelines
     file: index.yml
-
-
-default:
-  tags: []
-
 
 ubuntu-clangformat-check:
   stage: test
@@ -31,7 +26,8 @@ ubuntu-clangformat-check:
     - echo "clang-format check successful"
     - fi
     - fi
-
+  rules:
+    - if: $GITHUB_PULL_REQUEST_ID
 
 ubuntu-cpp-build:
   extends: .cmake-ubuntu
@@ -44,10 +40,9 @@ ubuntu-cpp-build:
     KUBERNETES_MEMORY_LIMIT: 8Gi
     KUBERNETES_MEMORY_REQUEST: 8Gi
     NUM_COMPILE_JOBS: 4
+    DIST_PATH: /app/dist
   before_script:
     - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y $APT_BASE_PACKAGES $APT_PACKAGES
-
-    - DIST_PATH=/app/dist
 
     # Install ISPC
     - ISPC_VERSION=1.10.0b
@@ -59,7 +54,6 @@ ubuntu-cpp-build:
     - wget https://github.com/ispc/ispc/releases/download/v1.10.0/${ISPC_DIR}.tar.gz
     - tar zxvf ${ISPC_DIR}.tar.gz -C ${ISPC_PATH} --strip-components=1
     - rm -rf ${ISPC_PATH}/${ISPC_DIR}/examples
-
 
     # Install embree
     # https://github.com/embree/embree/releases
@@ -82,9 +76,9 @@ ubuntu-cpp-build:
     - mkdir -p build && cd build
     - CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja -DOSPRAY_ENABLE_TUTORIALS=OFF -DOSPRAY_ENABLE_APPS=OFF -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
     - ninja -j$NUM_COMPILE_JOBS install
-
     - cd $CI_PROJECT_DIR
-
+  rules:
+    - if: $GITHUB_PULL_REQUEST_ID
 
 docker-build:
   variables:
@@ -93,6 +87,24 @@ docker-build:
     KUBERNETES_MEMORY_LIMIT: 8Gi
     KUBERNETES_MEMORY_REQUEST: 8Gi
   extends: .build-image-using-kaniko
-  stage: test
+  before_script:
+    # We need to overwrite CI_REGISTRY variable so it does not point to CI/CD variable:
+    # "https://index.docker.io/v1/". Otherwise we run into 401 Unauthorized as
+    # CI_REGISTRY_PASSWORD is a protected variable i.e. not available for regular CI jobs.
+    # And as per https://gitlab.com/gitlab-org/gitlab-runner/-/issues/3555:
+    # we cannot overwrite predefined CI/CD variables in "variables" section, hence the hack
+    - export CI_REGISTRY=""
   rules:
-    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $GITHUB_PULL_REQUEST_ID
+
+docker-publish-to-dockerhub:
+  variables:
+    KUBERNETES_CPU_LIMIT: 4
+    KUBERNETES_CPU_REQUEST: 4
+    KUBERNETES_MEMORY_LIMIT: 8Gi
+    KUBERNETES_MEMORY_REQUEST: 8Gi
+    CI_REGISTRY_IMAGE: bluebrain/brayns
+  extends: .publish-image-using-kaniko
+  # TODO: remove later
+  before_script:
+    - env
