@@ -32,28 +32,11 @@ namespace dti
 class SetSpikeSimulationEntrypoint : public brayns::Entrypoint<SetSpikeSimulationMessage, brayns::EmptyMessage>
 {
 public:
-    SetSpikeSimulationEntrypoint(DTIPlugin &plugin)
-        : _plugin(&plugin)
-    {
-    }
+    SetSpikeSimulationEntrypoint(DTIPlugin &plugin);
 
-    virtual std::string getName() const override
-    {
-        return "set-spike-simulation";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Add a spike simulation to a model";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        _plugin->updateSpikeSimulation(params);
-        triggerRender();
-        request.reply(brayns::EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 
 private:
     DTIPlugin *_plugin;

@@ -19,27 +19,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/network/entrypoint/Entrypoint.h>
-
-#include <messages/SetSpikeSimulationFromFileMessage.h>
-
-#include <DTIPlugin.h>
+#include "SetSpikeSimulationFromFileEntrypoint.h"
 
 namespace dti
 {
-class SetSpikeSimulationFromFileEntrypoint
-    : public brayns::Entrypoint<SetSpikeSimulationFromFileMessage, brayns::EmptyMessage>
+SetSpikeSimulationFromFileEntrypoint::SetSpikeSimulationFromFileEntrypoint(DTIPlugin &plugin)
+    : _plugin(&plugin)
 {
-public:
-    SetSpikeSimulationFromFileEntrypoint(DTIPlugin &plugin);
+}
 
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
+std::string SetSpikeSimulationFromFileEntrypoint::getName() const
+{
+    return "set-spike-simulation-from-file";
+}
 
-private:
-    DTIPlugin *_plugin;
-};
+std::string SetSpikeSimulationFromFileEntrypoint::getDescription() const
+{
+    return "Add a spike simulation loaded from a file to a model";
+}
+
+void SetSpikeSimulationFromFileEntrypoint::onRequest(const Request &request)
+{
+    auto params = request.getParams();
+    _plugin->updateSpikeSimulationFromFile(params);
+    triggerRender();
+    request.reply(brayns::EmptyMessage());
+}
 } // namespace dti

@@ -1,5 +1,4 @@
-#ifndef UTILS_H
-#define UTILS_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -12,7 +11,7 @@ std::vector<std::pair<std::string, EnumT>> enumerateMap();
 
 /* Convert a string to an enum. */
 template<typename EnumT>
-inline EnumT stringToEnum(const std::string &v)
+EnumT stringToEnum(const std::string &v)
 {
     for (const auto &p : enumerateMap<EnumT>())
         if (p.first == v)
@@ -24,7 +23,7 @@ inline EnumT stringToEnum(const std::string &v)
 
 /* Returns all names for given enum type 'EnumT' */
 template<typename EnumT>
-inline std::vector<std::string> enumerateNames()
+std::vector<std::string> enumerateNames()
 {
     std::vector<std::string> v;
     for (const auto &p : enumerateMap<EnumT>())
@@ -34,7 +33,7 @@ inline std::vector<std::string> enumerateNames()
 
 /* Convert an enum to a string. */
 template<typename EnumT>
-inline std::string enumToString(const EnumT v)
+std::string enumToString(const EnumT v)
 {
     for (const auto &p : enumerateMap<EnumT>())
         if (p.second == v)
@@ -44,5 +43,3 @@ inline std::string enumToString(const EnumT v)
     return "Invalid";
 }
 } // namespace
-
-#endif // UTILS_H

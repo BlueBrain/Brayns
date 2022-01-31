@@ -43,28 +43,13 @@ public:
     DTISimulationHandler(const Indices &indices, const SetSpikeSimulationMessage &spikeSimulation);
 
     std::vector<float> getFrameDataImpl(const uint32_t frame) final;
-
     brayns::AbstractSimulationHandlerPtr clone() const final;
-    std::map<uint64_t, float> &getSpikes()
-    {
-        return _spikes;
-    }
-    void setTimeScale(const float scale)
-    {
-        _spikeSimulation.time_scale = scale;
-    }
-    void setDecaySpeed(const float value)
-    {
-        _spikeSimulation.decay_speed = value;
-    }
-    void setRestIntensity(const float value)
-    {
-        _spikeSimulation.rest_intensity = value;
-    }
-    void setSpikeIntensity(const float value)
-    {
-        _spikeSimulation.spike_intensity = value;
-    }
+
+    std::map<uint64_t, float> &getSpikes();
+    void setTimeScale(const float scale);
+    void setDecaySpeed(const float value);
+    void setRestIntensity(const float value);
+    void setSpikeIntensity(const float value);
 
 private:
     std::map<uint64_t, float> _spikes;

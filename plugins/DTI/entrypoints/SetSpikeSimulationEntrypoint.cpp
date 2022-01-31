@@ -1,5 +1,7 @@
-/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2021 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -17,24 +19,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <entrypoints/AddStreamlinesEntrypoint.h>
-#include <entrypoints/SetSpikeSimulationEntrypoint.h>
-#include <entrypoints/SetSpikeSimulationFromFileEntrypoint.h>
-
-#include "DTIPlugin.h"
+#include "SetSpikeSimulationEntrypoint.h"
 
 namespace dti
 {
-class DtiEntrypoints
+SetSpikeSimulationEntrypoint::SetSpikeSimulationEntrypoint(DTIPlugin &plugin)
+    : _plugin(&plugin)
 {
-public:
-    static void load(DTIPlugin &plugin)
-    {
-        plugin.add<AddStreamlinesEntrypoint>();
-        plugin.add<SetSpikeSimulationEntrypoint>(plugin);
-        plugin.add<SetSpikeSimulationFromFileEntrypoint>(plugin);
-    }
-};
+}
+
+std::string SetSpikeSimulationEntrypoint::getName() const
+{
+    return "set-spike-simulation";
+}
+
+std::string SetSpikeSimulationEntrypoint::getDescription() const
+{
+    return "Add a spike simulation to a model";
+}
+
+void SetSpikeSimulationEntrypoint::onRequest(const Request &request)
+{
+    auto params = request.getParams();
+    _plugin->updateSpikeSimulation(params);
+    triggerRender();
+    request.reply(brayns::EmptyMessage());
+}
 } // namespace dti
