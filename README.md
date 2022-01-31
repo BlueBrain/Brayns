@@ -4,17 +4,17 @@
 
 Brayns is a large-scale scientific visualization platform. It is based on Intel OSPRAY to perform CPU Ray-tracing, which allows it to take full advantage of the underlying hardware where it runs.
 
-It is based on a extension-plugin architecture. The core provide basic functionalities that can be reused and/or extended on plugins, which are independent and can be loaded or disabled at start-up. This simplifies the process of adding support for new scientific visualization use cased, without compromising the realiability of the rest of the software.
+It is based on a extension-plugin architecture. The core provides basic functionalities that can be reused and/or extended on plugins, which are independent and can be loaded or disabled at start-up. This simplifies the process of adding support for new scientific visualization use cases, without compromising the reliability of the rest of the software.
 
 Brayns counts with two main applications for its usage:
 
  * **braynsViewer**: An interactive desktop application to perform local rendering.
- * **braynsService**: A rendering backed which can be accessed over the internet and streams images to the connected clients.
+ * **braynsService**: A rendering backend which can be accessed over the internet and streams images to the connected clients.
 
 Brayns also comes with some already-made plugins:
 
 * **CircuitExplorer**: The main plugin used at BBP. Allows for neuronal circuit visualization and simulation rendering.
-* **CircuitInfo (Deprecated)**: A plugin which accept queries to extract information from neuronal circuits.
+* **CircuitInfo (Deprecated)**: A plugin which accepts queries to extract information from neuronal circuits.
 * **DTI**: A diffuse-tensor imaging visualization plugin.
 
 ## Building
@@ -47,7 +47,7 @@ Optionally, to build the core plugins of Brayns, the following components are re
 
 * HDF5 development files
 
-Brayns uses further dependencies, but if the are not present on the system, it will download them by itself during build.
+Brayns uses further dependencies, but if they are not present on the system, it will download them by itself during build.
 
 * GLFW 3.3.5 (https://github.com/glfw/glfw/tree/3.3.5)
 * ImGui (https://github.com/ocornut/imgui)
@@ -105,7 +105,7 @@ The name that must be used when specifying a plugin will depend on the name of t
 
 ### braynsViewer application
 
-The braynsViewer application is executed in a similar fashin as the braynsService app:
+The braynsViewer application is executed in a similar fashion as the braynsService app:
 
     $ braynsViewer --plugin braynsCircuitExplorer --plugin braynsCircuitInfo
 
@@ -115,7 +115,7 @@ Although not required, it also allows to specify the ***--uri*** parameter, alth
 
 Brayns is available as a docker image at https://hub.docker.com/r/bluebrain/brayns. The image allows to launch the braynsService application. 
 
-It is built with every commit merged into the main repository branch (develoop), and deployed into docker hub as brayns:latest. Furthermore, when a new release is made, and a new tag created, an additional image is built and deployed with the same tag.
+It is built with every commit merged into the main repository branch (develop), and deployed into docker hub as brayns:latest. Furthermore, when a new release is made, and a new tag created, an additional image is built and deployed with the same tag.
 
 To get Brayns docker image, you will need to have docker installed. Then execute the following command to download it:
 
