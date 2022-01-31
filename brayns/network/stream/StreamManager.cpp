@@ -154,6 +154,37 @@ private:
 
 namespace brayns
 {
+void ImageStreamMonitor::setFps(size_t fps)
+{
+    _limiter = RateLimiter::fromFps(fps);
+}
+
+bool ImageStreamMonitor::isControlled() const
+{
+    return _controlled;
+}
+
+void ImageStreamMonitor::setControlled(bool controlled)
+{
+    _controlled = controlled;
+    _triggered = false;
+}
+
+bool ImageStreamMonitor::isTriggered() const
+{
+    return _triggered;
+}
+
+void ImageStreamMonitor::trigger()
+{
+    _triggered = true;
+}
+
+void ImageStreamMonitor::resetTrigger()
+{
+    _triggered = false;
+}
+
 StreamManager::StreamManager(NetworkContext &context)
     : _context(&context)
 {
@@ -167,5 +198,10 @@ StreamManager::StreamManager(NetworkContext &context)
 void StreamManager::broadcast()
 {
     StreamDispatcher::broadcast(*_context);
+}
+
+ImageStreamMonitor &StreamManager::getMonitor()
+{
+    return _imageStream;
 }
 } // namespace brayns
