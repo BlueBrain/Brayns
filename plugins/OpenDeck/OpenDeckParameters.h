@@ -34,32 +34,12 @@ public:
 
     bool parse(int argc, const char **argv);
 
-    double getResolutionScaling() const
-    {
-        return _props[PARAM_RESOLUTION_SCALING].as<double>();
-    }
-    void setResolutionScaling(const double resScaling)
-    {
-        _updateProperty(PARAM_RESOLUTION_SCALING, resScaling);
-    }
-
-    double getCameraScaling() const
-    {
-        return _props[PARAM_CAMERA_SCALING].as<double>();
-    }
-    void setCameraScaling(const double cameraScaling)
-    {
-        _updateProperty(PARAM_CAMERA_SCALING, cameraScaling);
-    }
-
-    const PropertyMap &getPropertyMap() const
-    {
-        return _props;
-    }
-    PropertyMap &getPropertyMap()
-    {
-        return _props;
-    }
+    double getResolutionScaling() const;
+    void setResolutionScaling(const double resScaling);
+    double getCameraScaling() const;
+    void setCameraScaling(const double cameraScaling);
+    const PropertyMap &getPropertyMap() const;
+    PropertyMap &getPropertyMap();
 
 private:
     PropertyMap _props;
