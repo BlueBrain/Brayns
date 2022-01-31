@@ -75,6 +75,3 @@ add_subdirectory(plugins)
 if(BRAYNS_TESTS_ENABLED)
   add_subdirectory(tests)
 endif()
-
-# BRAYNS doc
-add_subdirectory(doc)
