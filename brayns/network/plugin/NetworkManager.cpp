@@ -23,9 +23,12 @@
 
 #include <Poco/JSON/JSONException.h>
 
+#include <brayns/common/Log.h>
+
 #include <brayns/json/JsonSchemaValidator.h>
 
 #include <brayns/network/context/NetworkContext.h>
+#include <brayns/network/entrypoint/EntrypointException.h>
 #include <brayns/network/interface/ClientInterface.h>
 #include <brayns/network/interface/ServerInterface.h>
 #include <brayns/network/stream/StreamManager.h>

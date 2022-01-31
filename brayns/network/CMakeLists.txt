@@ -84,7 +84,12 @@ set(BRAYNSNETWORK_SOURCES
   json/RequestId.cpp
   messages/LightMessage.cpp
   plugin/NetworkManager.cpp
+  socket/ConnectionHandle.cpp
   socket/ConnectionManager.cpp
+  socket/ConnectionMap.cpp
+  socket/ConnectionRef.cpp
+  socket/NetworkRequest.cpp
+  socket/NetworkSocket.cpp
   stream/StreamManager.cpp
 )
 

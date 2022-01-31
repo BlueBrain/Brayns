@@ -21,6 +21,8 @@
 
 #include "UpdateClipPlaneEntrypoint.h"
 
+#include <brayns/network/entrypoint/EntrypointException.h>
+
 namespace brayns
 {
 std::string UpdateClipPlaneEntrypoint::getName() const

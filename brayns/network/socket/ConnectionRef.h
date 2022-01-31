@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <brayns/common/Log.h>
-
 #include "ConnectionHandle.h"
 #include "ConnectionManager.h"
 
@@ -49,84 +47,35 @@ public:
      * @param handle Client handle.
      * @param connections Connection manager.
      */
-    ConnectionRef(ConnectionHandle handle, ConnectionManager &connections)
-        : _handle(std::move(handle))
-        , _connections(&connections)
-    {
-    }
+    ConnectionRef(ConnectionHandle handle, ConnectionManager &connections);
 
     /**
      * @brief Get the client handle.
      *
      * @return const ConnectionHandle& Client connection handle.
      */
-    const ConnectionHandle &getHandle() const
-    {
-        return _handle;
-    }
+    const ConnectionHandle &getHandle() const;
 
     /**
      * @brief Send a packet to the client.
      *
      * @param packet Data packet.
      */
-    void send(const OutputPacket &packet) const
-    {
-        if (!_connections)
-        {
-            return;
-        }
-        try
-        {
-            _connections->send(_handle, packet);
-        }
-        catch (...)
-        {
-            Log::error("Unexpected error during sending request.");
-        }
-    }
+    void send(const OutputPacket &packet) const;
 
     /**
      * @brief Send a packet to all clients.
      *
      * @param packet Data packet.
      */
-    void broadcast(const OutputPacket &packet) const
-    {
-        if (!_connections)
-        {
-            return;
-        }
-        try
-        {
-            _connections->broadcast(packet);
-        }
-        catch (...)
-        {
-            Log::error("Unexpected error during broadcast.");
-        }
-    }
+    void broadcast(const OutputPacket &packet) const;
 
     /**
      * @brief Send a packet to all client except this one.
      *
      * @param packet Data packet.
      */
-    void broadcastToOtherClients(const OutputPacket &packet) const
-    {
-        if (!_connections)
-        {
-            return;
-        }
-        try
-        {
-            _connections->broadcast(_handle, packet);
-        }
-        catch (...)
-        {
-            Log::error("Unexpected error during broadcast to others.");
-        }
-    }
+    void broadcastToOtherClients(const OutputPacket &packet) const;
 
 private:
     ConnectionHandle _handle;

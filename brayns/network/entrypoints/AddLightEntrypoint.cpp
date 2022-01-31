@@ -21,6 +21,8 @@
 
 #include "AddLightEntrypoint.h"
 
+#include <brayns/network/entrypoint/EntrypointException.h>
+
 namespace brayns
 {
 void AddLightHelper::load(PluginAPI &api, LightPtr light, const NetworkRequest &request)

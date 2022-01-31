@@ -19,43 +19,40 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "GetExportFramesProgressEntrypoint.h"
-
-#include <brayns/network/entrypoint/EntrypointException.h>
+#include "ConnectionHandle.h"
 
 namespace brayns
 {
-GetExportFramesProgressEntrypoint::GetExportFramesProgressEntrypoint(std::shared_ptr<FrameExporter> &expt)
-    : _exporter(expt)
+ConnectionHandle::ConnectionHandle(NetworkSocketPtr socket)
+    : _socket(std::move(socket))
 {
 }
 
-std::string GetExportFramesProgressEntrypoint::getName() const
+bool ConnectionHandle::isValid() const
 {
-    return "get-export-frames-progress";
+    return bool(_socket);
 }
 
-std::string GetExportFramesProgressEntrypoint::getDescription() const
+size_t ConnectionHandle::getId() const
 {
-    return "Get the progress of the last issued frame export";
+    return size_t(_socket.get());
 }
 
-void GetExportFramesProgressEntrypoint::onRequest(const Request &request)
+bool ConnectionHandle::operator==(const ConnectionHandle &other) const
 {
-    double progress{};
-    try
-    {
-        progress = _exporter->getExportProgress();
-    }
-    catch (const FrameExportNotRunningException &)
-    {
-        throw EntrypointException(1, "There is no frame export in progress");
-    }
-    catch (const std::runtime_error &e)
-    {
-        throw EntrypointException(2, e.what());
-    }
+    return _socket == other._socket;
+}
 
-    request.reply({progress});
+bool ConnectionHandle::operator!=(const ConnectionHandle &other) const
+{
+    return !(*this == other);
 }
 } // namespace brayns
+
+namespace std
+{
+size_t hash<brayns::ConnectionHandle>::operator()(const brayns::ConnectionHandle &handle) const
+{
+    return handle.getId();
+}
+} // namespace std

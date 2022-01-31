@@ -19,43 +19,44 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "GetExportFramesProgressEntrypoint.h"
-
-#include <brayns/network/entrypoint/EntrypointException.h>
+#include "ConnectionMap.h"
 
 namespace brayns
 {
-GetExportFramesProgressEntrypoint::GetExportFramesProgressEntrypoint(std::shared_ptr<FrameExporter> &expt)
-    : _exporter(expt)
+size_t ConnectionMap::getConnectionCount() const
 {
+    return _connections.size();
 }
 
-std::string GetExportFramesProgressEntrypoint::getName() const
+Connection *ConnectionMap::find(const ConnectionHandle &handle)
 {
-    return "get-export-frames-progress";
+    auto connection = _find(handle);
+    if (!connection || connection->removed)
+    {
+        return nullptr;
+    }
+    return connection;
 }
 
-std::string GetExportFramesProgressEntrypoint::getDescription() const
+void ConnectionMap::add(NetworkSocketPtr socket)
 {
-    return "Get the progress of the last issued frame export";
+    auto &connection = _connections[socket];
+    connection.socket = std::move(socket);
 }
 
-void GetExportFramesProgressEntrypoint::onRequest(const Request &request)
+void ConnectionMap::markAsRemoved(const ConnectionHandle &handle)
 {
-    double progress{};
-    try
+    auto connection = _find(handle);
+    if (!connection)
     {
-        progress = _exporter->getExportProgress();
+        return;
     }
-    catch (const FrameExportNotRunningException &)
-    {
-        throw EntrypointException(1, "There is no frame export in progress");
-    }
-    catch (const std::runtime_error &e)
-    {
-        throw EntrypointException(2, e.what());
-    }
+    connection->removed = true;
+}
 
-    request.reply({progress});
+Connection *ConnectionMap::_find(const ConnectionHandle &handle)
+{
+    auto i = _connections.find(handle);
+    return i == _connections.end() ? nullptr : &i->second;
 }
 } // namespace brayns

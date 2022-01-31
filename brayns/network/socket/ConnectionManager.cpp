@@ -217,4 +217,24 @@ void ConnectionManager::closeAll()
             socket->close();
         });
 }
+
+bool ConnectionManager::isEmpty()
+{
+    return getConnectionCount() == 0;
+}
+
+void ConnectionManager::onConnect(ConnectionCallback callback)
+{
+    _listener.onConnect = std::move(callback);
+}
+
+void ConnectionManager::onDisconnect(DisconnectionCallback callback)
+{
+    _listener.onDisconnect = std::move(callback);
+}
+
+void ConnectionManager::onRequest(RequestCallback callback)
+{
+    _listener.onRequest = std::move(callback);
+}
 } // namespace brayns

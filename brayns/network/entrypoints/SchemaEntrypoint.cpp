@@ -21,6 +21,8 @@
 
 #include "SchemaEntrypoint.h"
 
+#include <brayns/network/entrypoint/EntrypointException.h>
+
 namespace brayns
 {
 std::string SchemaEntrypoint::getName() const

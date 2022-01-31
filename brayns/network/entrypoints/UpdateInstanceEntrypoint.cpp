@@ -22,6 +22,7 @@
 #include "UpdateInstanceEntrypoint.h"
 
 #include <brayns/network/common/ExtractModel.h>
+#include <brayns/network/entrypoint/EntrypointException.h>
 
 namespace brayns
 {

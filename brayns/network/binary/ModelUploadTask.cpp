@@ -23,10 +23,14 @@
 
 #include <sstream>
 
+#include <brayns/common/Log.h>
+
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/Scene.h>
 
 #include <brayns/io/LoaderRegistry.h>
+
+#include <brayns/network/entrypoint/EntrypointException.h>
 
 namespace brayns
 {
