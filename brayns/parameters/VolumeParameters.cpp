@@ -73,4 +73,114 @@ void VolumeParameters::print()
     Log::info("Element spacing : {}", _elementSpacing);
     Log::info("Offset          : {}", _offset);
 }
+
+const Vector3ui &VolumeParameters::getDimensions() const
+{
+    return _dimensions;
+}
+
+void VolumeParameters::setDimensions(const Vector3ui &dim)
+{
+    _updateValue(_dimensions, dim);
+}
+
+const Vector3d &VolumeParameters::getElementSpacing() const
+{
+    return _elementSpacing;
+}
+
+void VolumeParameters::setElementSpacing(const Vector3d &spacing)
+{
+    _updateValue(_elementSpacing, spacing);
+}
+
+const Vector3d &VolumeParameters::getOffset() const
+{
+    return _offset;
+}
+
+void VolumeParameters::setOffset(const Vector3d &offset)
+{
+    _updateValue(_offset, offset);
+}
+
+void VolumeParameters::setGradientShading(const bool enabled)
+{
+    _updateValue(_gradientShading, enabled);
+}
+
+bool VolumeParameters::getGradientShading() const
+{
+    return _gradientShading;
+}
+
+void VolumeParameters::setSingleShade(const bool enabled)
+{
+    _updateValue(_singleShade, enabled);
+}
+
+bool VolumeParameters::getSingleShade() const
+{
+    return _singleShade;
+}
+
+void VolumeParameters::setPreIntegration(const bool enabled)
+{
+    _updateValue(_preIntegration, enabled);
+}
+
+bool VolumeParameters::getPreIntegration() const
+{
+    return _preIntegration;
+}
+
+void VolumeParameters::setAdaptiveSampling(const bool enabled)
+{
+    _updateValue(_adaptiveSampling, enabled);
+}
+
+bool VolumeParameters::getAdaptiveSampling() const
+{
+    return _adaptiveSampling;
+}
+
+void VolumeParameters::setAdaptiveMaxSamplingRate(const double value)
+{
+    _updateValue(_adaptiveMaxSamplingRate, value);
+}
+
+double VolumeParameters::getAdaptiveMaxSamplingRate() const
+{
+    return _adaptiveMaxSamplingRate;
+}
+
+void VolumeParameters::setSamplingRate(const double value)
+{
+    _updateValue(_samplingRate, value);
+}
+
+double VolumeParameters::getSamplingRate() const
+{
+    return _samplingRate;
+}
+
+void VolumeParameters::setSpecular(const Vector3d &value)
+{
+    _updateValue(_specular, value);
+}
+
+const Vector3d &VolumeParameters::getSpecular() const
+{
+    return _specular;
+}
+
+void VolumeParameters::setClipBox(const Boxd &value)
+{
+    _updateValue(_clipBox, value);
+}
+
+const Boxd &VolumeParameters::getClipBox() const
+{
+    return _clipBox;
+}
 } // namespace brayns
