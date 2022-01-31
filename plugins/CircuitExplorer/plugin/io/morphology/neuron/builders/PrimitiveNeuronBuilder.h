@@ -27,10 +27,7 @@
 class PrimitiveNeuronBuilder : public NeuronBuilder
 {
 public:
-    PrimitiveNeuronBuilder()
-        : NeuronBuilder("vanilla")
-    {
-    }
+    PrimitiveNeuronBuilder();
 
     NeuronInstantiableGeometry::Ptr _buildImpl(const NeuronMorphology &) const final;
 };

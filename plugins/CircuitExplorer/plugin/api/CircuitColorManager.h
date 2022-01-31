@@ -26,10 +26,7 @@
 class CircuitModelNotFoundException : public std::runtime_error
 {
 public:
-    CircuitModelNotFoundException()
-        : std::runtime_error("")
-    {
-    }
+    CircuitModelNotFoundException();
 };
 
 /**

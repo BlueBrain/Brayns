@@ -27,10 +27,7 @@
 class SampleNeuronBuilder : public NeuronBuilder
 {
 public:
-    SampleNeuronBuilder()
-        : NeuronBuilder("samples")
-    {
-    }
+    SampleNeuronBuilder();
 
     NeuronInstantiableGeometry::Ptr _buildImpl(const NeuronMorphology &) const final;
 };

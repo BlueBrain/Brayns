@@ -117,6 +117,11 @@ public:
 
 } // namespace
 
+PrimitiveNeuronBuilder::PrimitiveNeuronBuilder()
+    : NeuronBuilder("vanilla")
+{
+}
+
 NeuronInstantiableGeometry::Ptr PrimitiveNeuronBuilder::_buildImpl(const NeuronMorphology &m) const
 {
     auto instantiableResult = std::make_unique<PrimitiveInstantiableGeometry>();
