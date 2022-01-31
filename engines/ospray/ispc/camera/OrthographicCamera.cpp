@@ -26,6 +26,11 @@ OrthographicCamera::OrthographicCamera()
     ispcEquivalent = ispc::OrthographicCamera_create(this);
 }
 
+std::string OrthographicCamera::toString() const
+{
+    return "ospray::OrthographicCamera";
+}
+
 void OrthographicCamera::commit()
 {
     Camera::commit();

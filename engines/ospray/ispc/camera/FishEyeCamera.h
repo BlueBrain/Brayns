@@ -33,11 +33,8 @@ struct OSPRAY_SDK_INTERFACE FishEyeCamera : public Camera
 
     //! \brief common function to help printf-debugging
     /*! Every derived class should override this! */
-    virtual std::string toString() const
-    {
-        return "ospray::FishEyeCamera";
-    }
-    virtual void commit();
+    virtual std::string toString() const override;
+    virtual void commit() override;
 
 public:
     // Clip planes

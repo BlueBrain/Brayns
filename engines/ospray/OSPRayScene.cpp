@@ -259,6 +259,26 @@ ModelPtr OSPRayScene::createModel() const
     return std::make_unique<OSPRayModel>(_animationParameters, _volumeParameters, _ospTransferFunction);
 }
 
+OSPModel OSPRayScene::getModel()
+{
+    return _rootModel;
+}
+
+OSPData OSPRayScene::lightData()
+{
+    return _ospLightData;
+}
+
+OSPData OSPRayScene::getSimulationData()
+{
+    return _ospSimulationData;
+}
+
+OSPTransferFunction OSPRayScene::getTransferFunctionImpl()
+{
+    return _ospTransferFunction;
+}
+
 void OSPRayScene::_commitTransferFunction()
 {
     if (!_transferFunction.isModified())

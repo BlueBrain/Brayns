@@ -45,6 +45,12 @@ static TextureTypeMaterialAttribute textureTypeMaterialAttribute[8] = {
     {TextureType::reflection, "map_reflection"},
     {TextureType::refraction, "map_refraction"}};
 
+OSPRayMaterial::OSPRayMaterial(const PropertyMap &properties, const bool backgroundMaterial)
+    : Material(properties)
+    , _isBackGroundMaterial(backgroundMaterial)
+{
+}
+
 OSPRayMaterial::~OSPRayMaterial()
 {
     ospRelease(_ospMaterial);
@@ -89,5 +95,10 @@ void OSPRayMaterial::commit(const std::string &renderer)
     _renderer = renderer;
     markModified(false); // Ensure commit recreates the ISPC object
     commit();
+}
+
+OSPMaterial OSPRayMaterial::getOSPMaterial()
+{
+    return _ospMaterial;
 }
 } // namespace brayns

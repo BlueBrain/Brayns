@@ -37,6 +37,11 @@ PanoramicCamera::PanoramicCamera()
     ispcEquivalent = ispc::PanoramicCamera_create(this);
 }
 
+std::string PanoramicCamera::toString() const
+{
+    return "ospray::PanoramicCamera";
+}
+
 void PanoramicCamera::commit()
 {
     Camera::commit();

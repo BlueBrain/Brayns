@@ -38,6 +38,11 @@ SDFGeometries::SDFGeometries()
     this->ispcEquivalent = ispc::SDFGeometries_create(this);
 }
 
+std::string SDFGeometries::toString() const
+{
+    return "brayns::SDFGeometries";
+}
+
 void SDFGeometries::finalize(ospray::Model *model)
 {
     data = getParamData("sdfgeometries", nullptr);

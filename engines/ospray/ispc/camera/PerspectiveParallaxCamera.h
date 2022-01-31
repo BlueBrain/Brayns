@@ -37,10 +37,7 @@ struct PerspectiveParallaxCamera : public Camera
 
     //! \brief common function to help printf-debugging
     /*! Every derived class should override this! */
-    virtual std::string toString() const override
-    {
-        return "ospray::PerspectiveParallaxCamera";
-    }
+    virtual std::string toString() const override;
     virtual void commit() override;
 
     typedef enum

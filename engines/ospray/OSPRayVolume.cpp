@@ -148,4 +148,9 @@ void OSPRayVolume::commit()
         ospCommit(_volume);
     resetModified();
 }
+
+OSPVolume OSPRayVolume::impl() const
+{
+    return _volume;
+}
 } // namespace brayns

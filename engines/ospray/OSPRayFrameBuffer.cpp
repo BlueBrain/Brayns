@@ -209,6 +209,31 @@ void OSPRayFrameBuffer::setSubsampling(size_t factor)
     _recreateSubsamplingBuffer();
 }
 
+Vector2ui OSPRayFrameBuffer::getSize() const
+{
+    return _useSubsampling() ? _subsamplingSize() : _frameSize;
+}
+
+std::unique_lock<std::mutex> OSPRayFrameBuffer::getScopeLock()
+{
+    return std::unique_lock<std::mutex>(_mapMutex);
+}
+
+const uint8_t *OSPRayFrameBuffer::getColorBuffer() const
+{
+    return _colorBuffer;
+}
+
+const float *OSPRayFrameBuffer::getDepthBuffer() const
+{
+    return _depthBuffer;
+}
+
+OSPFrameBuffer OSPRayFrameBuffer::impl()
+{
+    return _currentFB();
+}
+
 void OSPRayFrameBuffer::createPixelOp(const std::string &name)
 {
     if (_pixelOp)

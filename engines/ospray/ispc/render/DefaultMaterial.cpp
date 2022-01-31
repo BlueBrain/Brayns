@@ -26,6 +26,11 @@
 
 namespace brayns
 {
+std::string DefaultMaterial::toString() const
+{
+    return "brayns::DefaultMaterial";
+}
+
 void DefaultMaterial::commit()
 {
     if (ispcEquivalent == nullptr)

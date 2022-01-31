@@ -29,6 +29,11 @@ PerspectiveParallaxCamera::PerspectiveParallaxCamera()
     ispcEquivalent = ispc::PerspectiveParallaxCamera_create(this);
 }
 
+std::string PerspectiveParallaxCamera::toString() const
+{
+    return "ospray::PerspectiveParallaxCamera";
+}
+
 void PerspectiveParallaxCamera::commit()
 {
     Camera::commit();

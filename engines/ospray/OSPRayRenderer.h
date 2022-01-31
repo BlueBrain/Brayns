@@ -36,10 +36,7 @@ public:
 
     void render(FrameBufferPtr frameBuffer) final;
     void commit() final;
-    float getVariance() const final
-    {
-        return _variance;
-    }
+    float getVariance() const final;
     void setCamera(CameraPtr camera) final;
 
     PickResult pick(const Vector2f &pickPos) final;

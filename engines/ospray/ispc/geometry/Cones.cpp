@@ -37,6 +37,11 @@ Cones::Cones()
     this->ispcEquivalent = ispc::Cones_create(this);
 }
 
+std::string Cones::toString() const
+{
+    return "brayns::Cones";
+}
+
 void Cones::finalize(ospray::Model *model)
 {
     data = getParamData("cones", nullptr);
@@ -65,5 +70,4 @@ void Cones::finalize(ospray::Model *model)
 }
 
 OSP_REGISTER_GEOMETRY(Cones, cones);
-
 } // namespace ospray

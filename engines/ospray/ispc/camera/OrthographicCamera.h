@@ -43,10 +43,7 @@ struct OSPRAY_SDK_INTERFACE OrthographicCamera : public Camera
     OrthographicCamera();
     ~OrthographicCamera() override = default;
 
-    virtual std::string toString() const override
-    {
-        return "ospray::OrthographicCamera";
-    }
+    virtual std::string toString() const override;
     virtual void commit() override;
 
     float height; // size of the camera's image plane in y, in world coordinates

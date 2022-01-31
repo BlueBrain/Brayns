@@ -33,6 +33,11 @@ PerspectiveCamera::PerspectiveCamera()
     ispcEquivalent = ispc::PerspectiveCamera_create(this);
 }
 
+std::string PerspectiveCamera::toString() const
+{
+    return "ospray::PerspectiveCamera";
+}
+
 void PerspectiveCamera::commit()
 {
     Camera::commit();
