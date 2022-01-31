@@ -19,15 +19,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "FileWriter.h"
 
-#include <string>
+#include <fstream>
+#include <stdexcept>
 
 namespace brayns
 {
-class FileReader
+void FileWriter::write(const std::string &data, const std::string &filename)
 {
-public:
-    static std::string read(const std::string &filename);
-};
+    std::ofstream stream(filename);
+    if (!stream.is_open())
+    {
+        throw std::runtime_error("Cannot write file '" + filename + "'");
+    }
+    stream.write(data.data(), data.size());
+}
 } // namespace brayns

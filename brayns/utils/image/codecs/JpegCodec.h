@@ -23,8 +23,6 @@
 
 #include <brayns/utils/image/ImageCodec.h>
 
-#include "StbiHelper.h"
-
 namespace brayns
 {
 /**
@@ -39,10 +37,7 @@ public:
      *
      * @return std::string JPEG format ID.
      */
-    virtual std::string getFormat() const override
-    {
-        return "jpg";
-    }
+    virtual std::string getFormat() const override;
 
     /**
      * @brief Encode an image as JPEG.
@@ -51,10 +46,7 @@ public:
      * @param quality Image quality (100 = better, 0 = smaller).
      * @return std::string JPEG data that can be saved directly.
      */
-    virtual std::string encode(const Image &image, int quality) const override
-    {
-        return StbiHelper::encodeJpeg(image, quality);
-    }
+    virtual std::string encode(const Image &image, int quality) const override;
 
     /**
      * @brief Decode raw JPEG data.
@@ -63,9 +55,6 @@ public:
      * @param size Size of data in bytes.
      * @return Image Decoded image.
      */
-    virtual Image decode(const void *data, size_t size) const override
-    {
-        return StbiHelper::decode(data, size);
-    };
+    virtual Image decode(const void *data, size_t size) const override;
 };
 } // namespace brayns

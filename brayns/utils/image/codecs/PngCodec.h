@@ -23,8 +23,6 @@
 
 #include <brayns/utils/image/ImageCodec.h>
 
-#include "StbiHelper.h"
-
 namespace brayns
 {
 /**
@@ -39,10 +37,7 @@ public:
      *
      * @return std::string PNG format ID.
      */
-    virtual std::string getFormat() const override
-    {
-        return "png";
-    }
+    virtual std::string getFormat() const override;
 
     /**
      * @brief Encode an image as PNG.
@@ -51,11 +46,7 @@ public:
      * @param quality Not used as PNG is lossless.
      * @return std::string PNG data that can be saved directly.
      */
-    virtual std::string encode(const Image &image, int quality) const override
-    {
-        (void)quality;
-        return StbiHelper::encodePng(image);
-    }
+    virtual std::string encode(const Image &image, int quality) const override;
 
     /**
      * @brief Decode raw PNG data.
@@ -64,9 +55,6 @@ public:
      * @param size Size of data in bytes.
      * @return Image Decoded image.
      */
-    virtual Image decode(const void *data, size_t size) const override
-    {
-        return StbiHelper::decode(data, size);
-    };
+    virtual Image decode(const void *data, size_t size) const override;
 };
 } // namespace brayns

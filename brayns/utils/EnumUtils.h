@@ -22,7 +22,6 @@
 
 #include <stdexcept> // std::runtime_error
 #include <string>
-#include <tuple>
 #include <vector>
 
 namespace brayns
@@ -39,7 +38,7 @@ std::vector<std::pair<std::string, EnumT>> enumMap();
 
 /* Returns all names for given enum type 'EnumT' */
 template<typename EnumT>
-inline std::vector<std::string> enumNames()
+std::vector<std::string> enumNames()
 {
     std::vector<std::string> v;
     for (const auto &p : enumMap<EnumT>())
@@ -49,7 +48,7 @@ inline std::vector<std::string> enumNames()
 
 /* Convert a string to an enum. */
 template<typename EnumT>
-inline EnumT stringToEnum(const std::string &v)
+EnumT stringToEnum(const std::string &v)
 {
     for (const auto &p : enumMap<EnumT>())
         if (p.first == v)
@@ -61,7 +60,7 @@ inline EnumT stringToEnum(const std::string &v)
 
 /* Convert an enum to a string. */
 template<typename EnumT>
-inline std::string enumToString(const EnumT v)
+std::string enumToString(const EnumT v)
 {
     for (const auto &p : enumMap<EnumT>())
         if (p.second == v)

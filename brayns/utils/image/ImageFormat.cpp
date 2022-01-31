@@ -19,15 +19,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ImageFormat.h"
 
+#include <filesystem>
 #include <string>
 
 namespace brayns
 {
-class FileReader
+std::string ImageFormat::fromFilename(const std::string &filename)
 {
-public:
-    static std::string read(const std::string &filename);
-};
+    auto extension = std::filesystem::path(filename).extension();
+    return fromExtension(extension.string());
+}
+
+std::string ImageFormat::fromExtension(const std::string &extension)
+{
+    if (extension.empty() || extension[0] != '.')
+    {
+        return extension;
+    }
+    return extension.substr(1);
+}
 } // namespace brayns

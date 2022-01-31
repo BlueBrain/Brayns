@@ -19,15 +19,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "JpegCodec.h"
 
-#include <string>
+#include "StbiHelper.h"
 
 namespace brayns
 {
-class FileReader
+std::string JpegCodec::getFormat() const
 {
-public:
-    static std::string read(const std::string &filename);
-};
+    return "jpg";
+}
+
+std::string JpegCodec::encode(const Image &image, int quality) const
+{
+    return StbiHelper::encodeJpeg(image, quality);
+}
+
+Image JpegCodec::decode(const void *data, size_t size) const
+{
+    return StbiHelper::decode(data, size);
+}
 } // namespace brayns

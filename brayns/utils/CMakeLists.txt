@@ -8,6 +8,8 @@ set(BRAYNSUTILS_HEADERS
   DynamicLib.h
   EnumUtils.h
   Filesystem.h
+  FileReader.h
+  FileWriter.h
   FunctorInfo.h
   image/Image.h
   image/ImageCodecRegistry.h
@@ -24,11 +26,18 @@ set(BRAYNSUTILS_HEADERS
 set(BRAYNSUTILS_SOURCES
   base64/base64.cpp
   DynamicLib.cpp
+  FileReader.cpp
+  FileWriter.cpp
+  image/codecs/JpegCodec.cpp
+  image/codecs/PngCodec.cpp
   image/codecs/StbiHelper.cpp
+  image/Image.cpp
   image/ImageCodecRegistry.cpp
   image/ImageDecoder.cpp
   image/ImageEncoder.cpp
   image/ImageFlipper.cpp
+  image/ImageFormat.cpp
+  image/ImageInfo.cpp
   image/ImageMerger.cpp
   StringUtils.cpp
 )
