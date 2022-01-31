@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
-
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/RemoveModelMessage.h>
 
@@ -31,27 +29,8 @@ namespace brayns
 class RemoveModelEntrypoint : public Entrypoint<RemoveModelMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "remove-model";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Remove the model(s) from the ID list from the scene";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto &engine = getApi().getEngine();
-        auto &scene = engine.getScene();
-        for (auto id : params.ids)
-        {
-            scene.removeModel(id);
-        }
-        triggerRender();
-        request.reply(EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

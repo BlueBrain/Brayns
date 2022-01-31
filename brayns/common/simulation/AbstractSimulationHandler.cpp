@@ -21,6 +21,11 @@
 
 namespace brayns
 {
+AbstractSimulationHandler::AbstractSimulationHandler(const AbstractSimulationHandler &other)
+{
+    *this = other;
+}
+
 AbstractSimulationHandler &AbstractSimulationHandler::operator=(const AbstractSimulationHandler &rhs)
 {
     if (this == &rhs)
@@ -37,6 +42,76 @@ AbstractSimulationHandler &AbstractSimulationHandler::operator=(const AbstractSi
     _frameData = rhs._frameData;
 
     return *this;
+}
+
+uint32_t AbstractSimulationHandler::getCurrentFrame() const
+{
+    return _currentFrame;
+}
+
+void AbstractSimulationHandler::setCurrentFrame(const uint32_t newFrame)
+{
+    _currentFrame = newFrame;
+}
+
+void AbstractSimulationHandler::setFrameAdjuster(const double adjuster)
+{
+    _frameAdjuster = adjuster;
+}
+
+std::vector<float> AbstractSimulationHandler::getFrameDataImpl(const uint32_t frame)
+{
+    (void)frame;
+    return {};
+}
+
+uint64_t AbstractSimulationHandler::getFrameSize() const
+{
+    return _frameSize;
+}
+
+void AbstractSimulationHandler::setFrameSize(const uint64_t frameSize)
+{
+    _frameSize = frameSize;
+}
+
+uint32_t AbstractSimulationHandler::getNbFrames() const
+{
+    return _nbFrames;
+}
+
+void AbstractSimulationHandler::setNbFrames(const uint32_t nbFrames)
+{
+    _nbFrames = nbFrames;
+}
+
+double AbstractSimulationHandler::getStartTime() const
+{
+    return _startTime;
+}
+
+double AbstractSimulationHandler::getEndTime() const
+{
+    return _endTime;
+}
+
+double AbstractSimulationHandler::getDt() const
+{
+    return _dt;
+}
+
+const std::string &AbstractSimulationHandler::getUnit() const
+{
+    return _unit;
+}
+
+bool AbstractSimulationHandler::isReady() const
+{
+    return true;
+}
+
+void AbstractSimulationHandler::waitReady() const
+{
 }
 
 void *AbstractSimulationHandler::getFrameData(const uint32_t frame)

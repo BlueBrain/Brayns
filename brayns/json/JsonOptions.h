@@ -75,9 +75,7 @@ struct JsonOptions
      * @brief build specialization for no options.
      *
      */
-    static void build(JsonOptions &)
-    {
-    }
+    static void build(JsonOptions &options);
 
     /**
      * @brief Property name.
@@ -171,29 +169,7 @@ public:
      * @param schema Schema to update.
      * @param options Options to set.
      */
-    static void add(JsonSchema &schema, const JsonOptions &options)
-    {
-        trySet(schema.title, options.title);
-        trySet(schema.description, options.description);
-        trySet(schema.readOnly, options.readOnly);
-        trySet(schema.writeOnly, options.writeOnly);
-        trySet(schema.minimum, options.minimum);
-        trySet(schema.maximum, options.maximum);
-        trySet(schema.minItems, options.minItems);
-        trySet(schema.maxItems, options.maxItems);
-        trySet(schema.defaultValue, options.defaultValue);
-    }
-
-private:
-    template<typename T, typename U>
-    static void trySet(T &value, const U &newValue)
-    {
-        if (!newValue)
-        {
-            return;
-        }
-        value = *newValue;
-    }
+    static void add(JsonSchema &schema, const JsonOptions &options);
 };
 
 /**
@@ -202,15 +178,9 @@ private:
  */
 struct Title
 {
-    Title(std::string title)
-        : value(std::move(title))
-    {
-    }
+    Title(std::string title);
 
-    void add(JsonOptions &options) const
-    {
-        options.title = value;
-    }
+    void add(JsonOptions &options) const;
 
     std::string value;
 };
@@ -221,15 +191,9 @@ struct Title
  */
 struct Description
 {
-    Description(std::string description)
-        : value(std::move(description))
-    {
-    }
+    Description(std::string description);
 
-    void add(JsonOptions &options) const
-    {
-        options.description = value;
-    }
+    void add(JsonOptions &options) const;
 
     std::string value;
 };
@@ -241,16 +205,9 @@ struct Description
 struct Required
 {
     Required() = default;
+    Required(bool required);
 
-    Required(bool required)
-        : value(required)
-    {
-    }
-
-    void add(JsonOptions &options) const
-    {
-        options.required = value;
-    }
+    void add(JsonOptions &options) const;
 
     bool value = true;
 };
@@ -262,16 +219,9 @@ struct Required
 struct ReadOnly
 {
     ReadOnly() = default;
+    ReadOnly(bool readOnly);
 
-    ReadOnly(bool readOnly)
-        : value(readOnly)
-    {
-    }
-
-    void add(JsonOptions &options) const
-    {
-        options.readOnly = value;
-    }
+    void add(JsonOptions &options) const;
 
     bool value = true;
 };
@@ -283,16 +233,9 @@ struct ReadOnly
 struct WriteOnly
 {
     WriteOnly() = default;
+    WriteOnly(bool writeOnly);
 
-    WriteOnly(bool writeOnly)
-        : value(writeOnly)
-    {
-    }
-
-    void add(JsonOptions &options) const
-    {
-        options.writeOnly = value;
-    }
+    void add(JsonOptions &options) const;
 
     bool value = true;
 };
@@ -303,15 +246,9 @@ struct WriteOnly
  */
 struct Minimum
 {
-    Minimum(double minimum)
-        : value(minimum)
-    {
-    }
+    Minimum(double minimum);
 
-    void add(JsonOptions &options) const
-    {
-        options.minimum = value;
-    }
+    void add(JsonOptions &options) const;
 
     double value = 0.0;
 };
@@ -322,15 +259,9 @@ struct Minimum
  */
 struct Maximum
 {
-    Maximum(double maximum)
-        : value(maximum)
-    {
-    }
+    Maximum(double maximum);
 
-    void add(JsonOptions &options) const
-    {
-        options.maximum = value;
-    }
+    void add(JsonOptions &options) const;
 
     double value = 0.0;
 };
@@ -341,15 +272,9 @@ struct Maximum
  */
 struct MinItems
 {
-    MinItems(size_t minItems)
-        : value(minItems)
-    {
-    }
+    MinItems(size_t minItems);
 
-    void add(JsonOptions &options) const
-    {
-        options.minItems = value;
-    }
+    void add(JsonOptions &options) const;
 
     size_t value = 0.0;
 };
@@ -360,15 +285,9 @@ struct MinItems
  */
 struct MaxItems
 {
-    MaxItems(size_t maxItems)
-        : value(maxItems)
-    {
-    }
+    MaxItems(size_t maxItems);
 
-    void add(JsonOptions &options) const
-    {
-        options.maxItems = value;
-    }
+    void add(JsonOptions &options) const;
 
     size_t value = 0.0;
 };
@@ -379,16 +298,9 @@ struct MaxItems
  */
 struct Default
 {
-    Default(const JsonValue &defaultValue)
-        : value(defaultValue)
-    {
-    }
+    Default(const JsonValue &defaultValue);
 
-    void add(JsonOptions &options) const
-    {
-        options.defaultValue = value;
-        options.required = false;
-    }
+    void add(JsonOptions &options) const;
 
     JsonValue value;
 };

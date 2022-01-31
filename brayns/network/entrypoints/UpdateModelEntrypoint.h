@@ -21,9 +21,6 @@
 
 #pragma once
 
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
-
 #include <brayns/network/adapters/UpdateModelAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -32,27 +29,8 @@ namespace brayns
 class UpdateModelEntrypoint : public Entrypoint<UpdateModelProxy, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "update-model";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Update the model with the given values";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto &api = getApi();
-        auto &engine = api.getEngine();
-        auto &scene = engine.getScene();
-        UpdateModelProxy model(scene);
-        request.getParams(model);
-        model.computeBounds();
-        scene.markModified();
-        engine.triggerRender();
-        request.reply(EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

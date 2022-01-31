@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/EntrypointRef.h>
 #include <brayns/network/socket/NetworkSocket.h>
 
 #include "ActionInterface.h"

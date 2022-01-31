@@ -28,4 +28,14 @@ Volume::Volume(const Vector3ui &dimensions, const Vector3f &spacing, const Volum
     , _dataType(type)
 {
 }
+
+size_t Volume::getSizeInBytes() const
+{
+    return _sizeInBytes;
+}
+
+Boxd Volume::getBounds() const
+{
+    return {{0, 0, 0}, {_dimensions.x * _spacing.x, _dimensions.y * _spacing.y, _dimensions.z * _spacing.z}};
+}
 } // namespace brayns

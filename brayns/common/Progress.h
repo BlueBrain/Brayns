@@ -36,40 +36,20 @@ class Progress : public BaseObject
 {
 public:
     Progress() = default;
-    explicit Progress(const std::string &operation)
-        : _operation(operation)
-    {
-    }
+
+    explicit Progress(const std::string &operation);
 
     /** Update the progress with a new absolute amount. */
-    void update(const std::string &operation, const float amount)
-    {
-        std::lock_guard<std::mutex> lock_(_mutex);
-        _updateValue(_operation, operation);
-        _updateValue(_amount, amount);
-    }
+    void update(const std::string &operation, const float amount);
 
     /** Update the progress with the given increment. */
-    void increment(const std::string &operation, const float increment)
-    {
-        std::lock_guard<std::mutex> lock_(_mutex);
-        _updateValue(_operation, operation);
-        _updateValue(_amount, _amount + increment);
-    }
+    void increment(const std::string &operation, const float increment);
 
     /**
      * Call the provided callback with the current progress if it has changed
      * since the last invokation.
      */
-    void consume(std::function<void(std::string, float)> callback)
-    {
-        std::lock_guard<std::mutex> lock_(_mutex);
-        if (isModified())
-        {
-            callback(_operation, _amount);
-            resetModified();
-        }
-    }
+    void consume(std::function<void(std::string, float)> callback);
 
 private:
     std::string _operation;

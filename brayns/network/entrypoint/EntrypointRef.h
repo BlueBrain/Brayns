@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <cassert>
 #include <memory>
 #include <type_traits>
 
@@ -31,37 +30,6 @@
 
 namespace brayns
 {
-/**
- * @brief Helper class to build the JSON schema of an entrypoint.
- *
- */
-class EntrypointSchema
-{
-public:
-    /**
-     * @brief Create a JSON schema for the given entrypoint.
-     *
-     * @param entrypoint Entrypoint.
-     * @return SchemaResult Entrypoint schema.
-     */
-    static SchemaResult create(const IEntrypoint &entrypoint)
-    {
-        SchemaResult schema;
-        schema.plugin = entrypoint.getPlugin();
-        schema.title = entrypoint.getName();
-        schema.type = "method";
-        schema.description = entrypoint.getDescription();
-        schema.async = entrypoint.isAsync();
-        auto params = entrypoint.getParamsSchema();
-        if (!JsonSchemaHelper::isEmpty(params))
-        {
-            schema.params.push_back(std::move(params));
-        }
-        schema.returns = entrypoint.getResultSchema();
-        return schema;
-    }
-};
-
 /**
  * @brief Entrypoint holder of an implementation of IEntrypoint.
  *
@@ -89,11 +57,7 @@ public:
      *
      * @param entrypoint Entrypoint implementation.
      */
-    EntrypointRef(std::unique_ptr<IEntrypoint> entrypoint)
-        : _entrypoint(std::move(entrypoint))
-    {
-        assert(_entrypoint);
-    }
+    EntrypointRef(std::unique_ptr<IEntrypoint> entrypoint);
 
     /**
      * @brief Setup entrypoint with given context.
@@ -103,79 +67,53 @@ public:
      *
      * @param context Common data to all entrypoints (API, connections).
      */
-    void setup(NetworkContext &context)
-    {
-        _entrypoint->setContext(context);
-        _entrypoint->onCreate();
-        _schema = EntrypointSchema::create(*_entrypoint);
-    }
+    void setup(NetworkContext &context);
 
     /**
      * @brief Call implementation onUpdate().
      *
      */
-    void update() const
-    {
-        _entrypoint->onUpdate();
-    }
+    void update() const;
 
     /**
      * @brief Call implementation onRequest with given request.
      *
      * @param request Client request to the underlying entrypoint.
      */
-    void processRequest(const NetworkRequest &request) const
-    {
-        _entrypoint->onRequest(request);
-    }
+    void processRequest(const NetworkRequest &request) const;
 
     /**
      * @brief Call implementation onPreRender.
      *
      */
-    void preRender() const
-    {
-        _entrypoint->onPreRender();
-    }
+    void preRender() const;
 
     /**
      * @brief Call implementation onPostRender.
      *
      */
-    void postRender() const
-    {
-        _entrypoint->onPostRender();
-    }
+    void postRender() const;
 
     /**
      * @brief Retrieve entrypoint name from implementation.
      *
      * @return std::string Entrypoint name (ex: "get-camera").
      */
-    std::string loadName() const
-    {
-        return _entrypoint->getName();
-    }
+    std::string loadName() const;
 
     /**
      * @brief Get the name of the plugin the entrypoint belongs to.
      *
      * @return const std::string& Parent plugin name.
      */
-    const std::string &getPlugin() const
-    {
-        return _entrypoint->getPlugin();
-    }
+    const std::string &getPlugin() const;
 
     /**
      * @brief Set the name of the plugin the entrypoint belongs to.
      *
      * @param plugin Parent plugin name.
      */
-    void setPlugin(const std::string &plugin)
-    {
-        _entrypoint->setPlugin(plugin);
-    }
+    void setPlugin(const std::string &plugin);
 
     /**
      * @brief Get the entrypoint schema.
@@ -184,10 +122,7 @@ public:
      *
      * @return const SchemaResult& Entrypoint schema.
      */
-    const SchemaResult &getSchema() const
-    {
-        return _schema;
-    }
+    const SchemaResult &getSchema() const;
 
     /**
      * @brief Get the name of the entrypoint cached at setup.
@@ -196,10 +131,7 @@ public:
      *
      * @return const std::string& Entrypoint name.
      */
-    const std::string &getName() const
-    {
-        return _schema.title;
-    }
+    const std::string &getName() const;
 
     /**
      * @brief Get the description of the entrypoint cached at setup.
@@ -208,10 +140,7 @@ public:
      *
      * @return const std::string& Entrypoint description.
      */
-    const std::string &getDescription() const
-    {
-        return _schema.description;
-    }
+    const std::string &getDescription() const;
 
     /**
      * @brief Get the JSON schema of the params of the entrypoint.
@@ -221,10 +150,7 @@ public:
      * @return const std::vector<JsonSchema>& Vector with JSON schema as first
      * component or empty if no schema.
      */
-    const std::vector<JsonSchema> &getParamsSchema() const
-    {
-        return _schema.params;
-    }
+    const std::vector<JsonSchema> &getParamsSchema() const;
 
     /**
      * @brief Get the JSON schema of the entrypoint result.
@@ -233,10 +159,7 @@ public:
      *
      * @return const JsonSchema& JSON schema.
      */
-    const JsonSchema &getResultSchema() const
-    {
-        return _schema.returns;
-    }
+    const JsonSchema &getResultSchema() const;
 
     /**
      * @brief Check if the entrypoint is asynchronous.
@@ -244,10 +167,7 @@ public:
      * @return true Async.
      * @return false Sync.
      */
-    bool isAsync() const
-    {
-        return _schema.async;
-    }
+    bool isAsync() const;
 
 private:
     std::unique_ptr<IEntrypoint> _entrypoint;

@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
-
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/RemoveLightsMessage.h>
 
@@ -31,29 +29,8 @@ namespace brayns
 class RemoveLightsEntrypoint : public Entrypoint<RemoveLightsMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "remove-lights";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Remove the model(s) from the ID list from the scene";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto &ids = params.ids;
-        auto &engine = getApi().getEngine();
-        auto &scene = engine.getScene();
-        auto &lightManager = scene.getLightManager();
-        for (auto id : ids)
-        {
-            lightManager.removeLight(id);
-        }
-        triggerRender();
-        request.reply(EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

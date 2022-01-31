@@ -31,24 +31,8 @@ namespace brayns
 class VersionEntrypoint : public Entrypoint<EmptyMessage, VersionMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "get-version";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get Brayns instance version";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        VersionMessage message;
-        message.major = Version::getMajor();
-        message.minor = Version::getMinor();
-        message.patch = Version::getPatch();
-        message.revision = Version::getCommitHash();
-        request.reply(message);
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

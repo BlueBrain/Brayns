@@ -30,64 +30,49 @@ namespace brayns
 class BaseObject
 {
 public:
+    using ModifiedCallback = std::function<void(const BaseObject &)>;
+
     BaseObject() = default;
+
     virtual ~BaseObject() = default;
 
     /**
      * Custom copy constructor to not copy changedCallback and solve
      * non-copyable atomic modified state.
      */
-    BaseObject(const BaseObject &)
-        : _modified(true)
-    {
-    }
+    BaseObject(const BaseObject &other);
 
     /** Custom assignment operator that does not copy the changedCallback. */
-    BaseObject &operator=(const BaseObject &rhs)
-    {
-        if (this == &rhs)
-            return *this;
-
-        _modified = true;
-        return *this;
-    }
+    BaseObject &operator=(const BaseObject &rhs);
 
     /**
      * @return true if any parameter has been modified since the last
      *         resetModified().
      */
-    bool isModified() const
-    {
-        return _modified;
-    }
+    bool isModified() const;
+
     /**
      * Reset the modified state, typically done after changes have been applied.
      */
-    void resetModified()
-    {
-        _modified = false;
-    }
-    void markModified(const bool triggerCallback = true)
-    {
-        _modified = true;
-        if (_modifiedCallback && triggerCallback)
-            _modifiedCallback(*this);
-    }
+    void resetModified();
 
-    using ModifiedCallback = std::function<void(const BaseObject &)>;
+    /**
+     * @brief Mark the object as modified.
+     *
+     * @param triggerCallback Call modification callback if set.
+     */
+    void markModified(const bool triggerCallback = true);
 
     /**
      * Set a function that is called after this object has been modified.
      */
-    void onModified(const ModifiedCallback &callback)
-    {
-        _modifiedCallback = callback;
-    }
+    void onModified(const ModifiedCallback &callback);
 
-    void clearModifiedCallback()
-    {
-        _modifiedCallback = ModifiedCallback();
-    }
+    /**
+     * @brief Remove modification callback.
+     *
+     */
+    void clearModifiedCallback();
 
 protected:
     /**

@@ -31,47 +31,16 @@ namespace brayns
 class GetModelTransferFunctionEntrypoint : public Entrypoint<GetModelMessage, TransferFunction>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "get-model-transfer-function";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the transfer function of the given model";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto &engine = getApi().getEngine();
-        auto &scene = engine.getScene();
-        ExtractModel::fromParams(scene, params);
-        auto &transferFunction = scene.getTransferFunction();
-        request.reply(transferFunction);
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 
 class SetModelTransferFunctionEntrypoint : public Entrypoint<ModelTransferFunction, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "set-model-transfer-function";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Set the transfer function of the given model";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto &engine = getApi().getEngine();
-        auto &scene = engine.getScene();
-        ModelTransferFunction transferFunction(scene);
-        request.getParams(transferFunction);
-        request.reply(EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

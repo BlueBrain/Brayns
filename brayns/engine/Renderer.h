@@ -43,24 +43,18 @@ public:
     virtual void render(FrameBufferPtr frameBuffer) = 0;
 
     /** @return the variance from the previous render(). */
-    virtual float getVariance() const
-    {
-        return 0.f;
-    }
+    virtual float getVariance() const;
+
     virtual void commit() = 0;
+
     virtual void setCamera(CameraPtr camera) = 0;
-    virtual PickResult pick(const Vector2f & /*pickPos*/)
-    {
-        return PickResult();
-    }
+
+    virtual PickResult pick(const Vector2f &position);
     //@}
 
     Renderer(const AnimationParameters &animationParameters, const RenderingParameters &renderingParameters);
 
-    void setScene(ScenePtr scene)
-    {
-        _scene = scene;
-    };
+    void setScene(ScenePtr scene);
 
 protected:
     const AnimationParameters &_animationParameters;
