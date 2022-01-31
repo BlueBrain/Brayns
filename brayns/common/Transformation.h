@@ -38,63 +38,20 @@ public:
         const Vector3d &translation,
         const Vector3d &scale,
         const Quaterniond &rotation,
-        const Vector3d &rotationCenter)
-        : _translation(translation)
-        , _scale(scale)
-        , _rotation(rotation)
-        , _rotationCenter(rotationCenter)
-    {
-    }
+        const Vector3d &rotationCenter);
 
-    const Vector3d &getTranslation() const
-    {
-        return _translation;
-    }
-    void setTranslation(const Vector3d &value)
-    {
-        _updateValue(_translation, value);
-    }
-    const Vector3d &getScale() const
-    {
-        return _scale;
-    }
-    void setScale(const Vector3d &value)
-    {
-        _updateValue(_scale, value);
-    }
-    const Quaterniond &getRotation() const
-    {
-        return _rotation;
-    }
-    void setRotation(const Quaterniond &value)
-    {
-        _updateValue(_rotation, value);
-    }
-    const Vector3d &getRotationCenter() const
-    {
-        return _rotationCenter;
-    }
-    void setRotationCenter(const Vector3d &value)
-    {
-        _updateValue(_rotationCenter, value);
-    }
+    const Vector3d &getTranslation() const;
+    void setTranslation(const Vector3d &value);
+    const Vector3d &getScale() const;
+    void setScale(const Vector3d &value);
+    const Quaterniond &getRotation() const;
+    void setRotation(const Quaterniond &value);
+    const Vector3d &getRotationCenter() const;
+    void setRotationCenter(const Vector3d &value);
+    Matrix4d toMatrix() const;
 
-    bool operator==(const Transformation &rhs) const
-    {
-        return _translation == rhs._translation && _rotation == rhs._rotation && _scale == rhs._scale
-            && _rotationCenter == rhs._rotationCenter;
-    }
-    bool operator!=(const Transformation &rhs) const
-    {
-        return !(*this == rhs);
-    }
-
-    Matrix4d toMatrix() const
-    {
-        return glm::translate(Matrix4d(1.), _rotationCenter)
-            * (glm::toMat4(_rotation)
-               * (glm::translate(Matrix4d(1.), _translation - _rotationCenter) * glm::scale(Matrix4d(1.), _scale)));
-    }
+    bool operator==(const Transformation &rhs) const;
+    bool operator!=(const Transformation &rhs) const;
 
 private:
     Vector3d _translation{0, 0, 0};
@@ -102,18 +59,8 @@ private:
     Quaterniond _rotation{1, 0, 0, 0};
     Vector3d _rotationCenter{0, 0, 0};
 };
-inline Transformation operator*(const Transformation &a, const Transformation &b)
-{
-    return {
-        a.getTranslation() + b.getTranslation(),
-        a.getScale() * b.getScale(),
-        a.getRotation() * b.getRotation(),
-        a.getRotationCenter()};
-}
 
-inline Boxd transformBox(const Boxd &box, const Transformation &transformation)
-{
-    const brayns::Matrix4d matrix = transformation.toMatrix();
-    return {matrix * Vector4d(box.getMin(), 1.), matrix * Vector4d(box.getMax(), 1.)};
-}
+Transformation operator*(const Transformation &a, const Transformation &b);
+
+Boxd transformBox(const Boxd &box, const Transformation &transformation);
 } // namespace brayns

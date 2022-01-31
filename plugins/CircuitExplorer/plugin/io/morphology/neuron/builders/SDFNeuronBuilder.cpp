@@ -191,6 +191,11 @@ private:
     }
 };
 
+SDFNeuronBuilder::SDFNeuronBuilder()
+    : NeuronBuilder("smooth")
+{
+}
+
 NeuronInstantiableGeometry::Ptr SDFNeuronBuilder::_buildImpl(const NeuronMorphology &m) const
 {
     auto instantiablePtr = std::make_unique<SDFInstantiableGeometry>();

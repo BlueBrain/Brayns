@@ -37,6 +37,11 @@ FishEyeCamera::FishEyeCamera()
     ispcEquivalent = ispc::FishEyeCamera_create(this);
 }
 
+std::string FishEyeCamera::toString() const
+{
+    return "ospray::FishEyeCamera";
+}
+
 void FishEyeCamera::commit()
 {
     Camera::commit();

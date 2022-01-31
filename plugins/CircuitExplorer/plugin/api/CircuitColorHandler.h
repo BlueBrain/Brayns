@@ -31,10 +31,7 @@
 class IDRangeParseException : public std::runtime_error
 {
 public:
-    IDRangeParseException(const std::string &message)
-        : std::runtime_error(message)
-    {
-    }
+    IDRangeParseException(const std::string &message);
 };
 /**
  * @brief Exception thrown when a requested method does not exists on a given
@@ -43,10 +40,7 @@ public:
 class ColorMethodNotFoundException : public std::runtime_error
 {
 public:
-    ColorMethodNotFoundException()
-        : std::runtime_error("")
-    {
-    }
+    ColorMethodNotFoundException();
 };
 /**
  * @brief Exception thrown when a requested variable does not exists on a given
@@ -55,10 +49,7 @@ public:
 class ColorMethodVariableNotFoundException : public std::runtime_error
 {
 public:
-    ColorMethodVariableNotFoundException()
-        : std::runtime_error("")
-    {
-    }
+    ColorMethodVariableNotFoundException();
 };
 
 /**

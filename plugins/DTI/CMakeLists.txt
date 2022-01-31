@@ -5,6 +5,9 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSDTI_SOURCES
+  entrypoints/AddStreamlinesEntrypoint.cpp
+  entrypoints/SetSpikeSimulationEntrypoint.cpp
+  entrypoints/SetSpikeSimulationFromFileEntrypoint.cpp
   io/DTILoader.cpp
   io/DTISimulationHandler.cpp
   DTIPlugin.cpp

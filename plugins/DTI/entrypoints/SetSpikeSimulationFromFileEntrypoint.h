@@ -33,28 +33,11 @@ class SetSpikeSimulationFromFileEntrypoint
     : public brayns::Entrypoint<SetSpikeSimulationFromFileMessage, brayns::EmptyMessage>
 {
 public:
-    SetSpikeSimulationFromFileEntrypoint(DTIPlugin &plugin)
-        : _plugin(&plugin)
-    {
-    }
+    SetSpikeSimulationFromFileEntrypoint(DTIPlugin &plugin);
 
-    virtual std::string getName() const override
-    {
-        return "set-spike-simulation-from-file";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Add a spike simulation loaded from a file to a model";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        _plugin->updateSpikeSimulationFromFile(params);
-        triggerRender();
-        request.reply(brayns::EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 
 private:
     DTIPlugin *_plugin;

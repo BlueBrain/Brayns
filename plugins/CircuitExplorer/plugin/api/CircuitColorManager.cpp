@@ -46,6 +46,11 @@ CircuitColorHandler *getHandler(
 }
 } // namespace
 
+CircuitModelNotFoundException::CircuitModelNotFoundException()
+    : std::runtime_error("")
+{
+}
+
 void CircuitColorManager::registerHandler(
     brayns::ModelDescriptorPtr &model,
     std::unique_ptr<CircuitColorHandler> &&handler,

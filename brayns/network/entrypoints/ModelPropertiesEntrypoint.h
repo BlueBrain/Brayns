@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <brayns/network/common/ExtractModel.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/GetModelMessage.h>
 #include <brayns/network/messages/ModelPropertiesMessage.h>
@@ -31,68 +30,24 @@ namespace brayns
 class GetModelPropertiesEntrypoint : public Entrypoint<GetModelMessage, PropertyMap>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "get-model-properties";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the properties of the given model";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto &model = ExtractModel::fromRequest(getApi(), request);
-        request.reply(model.getProperties());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 
 class SetModelPropertiesEntrypoint : public Entrypoint<ModelPropertiesMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "set-model-properties";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Set the properties of the given model";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto &newProperties = params.properties;
-        auto &model = ExtractModel::fromParams(getApi(), params);
-        auto oldProperties = model.getProperties();
-        oldProperties.merge(newProperties);
-        model.setProperties(oldProperties);
-        request.reply(EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 
 class ModelPropertiesSchemaEntrypoint : public Entrypoint<GetModelMessage, JsonValue>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "model-properties-schema";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the property schema of the model";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto &model = ExtractModel::fromRequest(getApi(), request);
-        auto &properties = model.getProperties();
-        auto schema = Json::getSchema(properties);
-        auto result = Json::serialize(schema);
-        request.reply(result);
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

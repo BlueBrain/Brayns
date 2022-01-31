@@ -21,6 +21,16 @@ void BBPSynapseColorHandler::_setElementsImpl(
     }
 }
 
+std::vector<std::string> BBPSynapseColorHandler::_getMethodsImpl() const
+{
+    return {};
+}
+
+std::vector<std::string> BBPSynapseColorHandler::_getMethodVariablesImpl(const std::string &) const
+{
+    return {};
+}
+
 void BBPSynapseColorHandler::_updateColorByIdImpl(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
     if (!colorMap.empty())
@@ -68,5 +78,9 @@ void BBPSynapseColorHandler::_updateSingleColorImpl(const brayns::Vector4f &colo
         for (const auto mat : materials)
             _updateMaterial(mat, color);
     }
+}
+
+void BBPSynapseColorHandler::_updateColorImpl(const std::string &, const std::vector<ColoringInformation> &)
+{
 }
 } // namespace bbploader

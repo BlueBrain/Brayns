@@ -43,6 +43,16 @@ void EndFootColorHandler::_setElementsImpl(
     }
 }
 
+std::vector<std::string> EndFootColorHandler::_getMethodsImpl() const
+{
+    return {};
+}
+
+std::vector<std::string> EndFootColorHandler::_getMethodVariablesImpl(const std::string &) const
+{
+    return {};
+}
+
 void EndFootColorHandler::_updateColorByIdImpl(const std::map<uint64_t, brayns::Vector4f> &)
 {
     ColorRoulette r;
@@ -54,5 +64,9 @@ void EndFootColorHandler::_updateSingleColorImpl(const brayns::Vector4f &color)
 {
     for (const auto matId : _materials)
         _updateMaterial(matId, color);
+}
+
+void EndFootColorHandler::_updateColorImpl(const std::string &, const std::vector<ColoringInformation> &)
+{
 }
 } // namespace sonataloader

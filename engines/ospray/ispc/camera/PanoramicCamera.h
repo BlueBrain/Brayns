@@ -33,11 +33,8 @@ struct OSPRAY_SDK_INTERFACE PanoramicCamera : public Camera
 
     //! \brief common function to help printf-debugging
     /*! Every derived class should override this! */
-    virtual std::string toString() const
-    {
-        return "ospray::PanoramicCamera";
-    }
-    virtual void commit();
+    virtual std::string toString() const override;
+    virtual void commit() override;
 
 public:
     // ------------------------------------------------------------------

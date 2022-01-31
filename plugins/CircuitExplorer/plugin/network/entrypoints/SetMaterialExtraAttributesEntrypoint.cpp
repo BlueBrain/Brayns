@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2021 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: nadir.romanguerrero@epfl.ch
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,32 +19,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "SetMaterialExtraAttributesEntrypoint.h"
+
 #include <brayns/network/common/ExtractModel.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <plugin/api/MaterialUtils.h>
-#include <plugin/network/messages/SimulationColorMessage.h>
 
-class SimulationColorEntryPoint : public brayns::Entrypoint<SimulationColorMessage, brayns::EmptyMessage>
+namespace brayns
 {
-public:
-    virtual std::string getName() const override
-    {
-        return "set-simulation-color";
-    }
+std::string SetMaterialExtraAttributesEntrypoint::getName() const
+{
+    return "set-material-extra-attributes";
+}
 
-    virtual std::string getDescription() const override
-    {
-        return "Enables or disables the color of a given Circuit Model by its "
-               "simulation values";
-    }
+std::string SetMaterialExtraAttributesEntrypoint::getDescription() const
+{
+    return "Add extra material attributes necessary for the Circuit Explorer renderer";
+}
 
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto &scene = getApi().getScene();
-        auto &model = brayns::ExtractModel::fromId(scene, params.model_id);
-        CircuitExplorerMaterial::setSimulationColorEnabled(model.getModel(), params.enabled);
-        request.reply(brayns::EmptyMessage());
-    }
-};
+void SetMaterialExtraAttributesEntrypoint::onRequest(const Request &request)
+{
+    auto params = request.getParams();
+    auto &scene = getApi().getScene();
+    auto &descriptor = ExtractModel::fromId(scene, params.id);
+    CircuitExplorerMaterial::addExtraAttributes(descriptor.getModel());
+    triggerRender();
+    request.reply(EmptyMessage());
+}
+} // namespace brayns

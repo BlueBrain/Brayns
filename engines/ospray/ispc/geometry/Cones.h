@@ -26,10 +26,7 @@ namespace ospray
 {
 struct Cones : public ospray::Geometry
 {
-    std::string toString() const final
-    {
-        return "brayns::Cones";
-    }
+    std::string toString() const final;
     void finalize(ospray::Model *model) final;
 
     ospray::Ref<ospray::Data> data;

@@ -29,27 +29,8 @@ namespace brayns
 class SchemaEntrypoint : public Entrypoint<SchemaParams, SchemaResult>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "schema";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the JSON schema of the given entrypoint";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto &endpoint = params.endpoint;
-        auto entrypoint = getEntrypoints().find(endpoint);
-        if (!entrypoint)
-        {
-            throw EntrypointException("Unknown entrypoint '" + endpoint + "'");
-        }
-        auto &schema = entrypoint->getSchema();
-        request.reply(schema);
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

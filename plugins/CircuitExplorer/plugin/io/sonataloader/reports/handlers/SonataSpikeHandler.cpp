@@ -118,4 +118,9 @@ std::vector<float> SonataSpikeHandler::getFrameDataImpl(const uint32_t frame)
 
     return data;
 }
+
+bool SonataSpikeHandler::isReady() const
+{
+    return _ready;
+}
 } // namespace sonataloader

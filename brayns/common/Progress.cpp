@@ -1,5 +1,6 @@
 /* Copyright (c) 2015-2021, EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
+ *
+ * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -17,24 +18,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "Progress.h"
 
-#include <entrypoints/AddStreamlinesEntrypoint.h>
-#include <entrypoints/SetSpikeSimulationEntrypoint.h>
-#include <entrypoints/SetSpikeSimulationFromFileEntrypoint.h>
-
-#include "DTIPlugin.h"
-
-namespace dti
+namespace brayns
 {
-class DtiEntrypoints
+Progress::Progress(const std::string &operation)
+    : _operation(operation)
 {
-public:
-    static void load(DTIPlugin &plugin)
+}
+
+void Progress::update(const std::string &operation, const float amount)
+{
+    std::lock_guard<std::mutex> lock_(_mutex);
+    _updateValue(_operation, operation);
+    _updateValue(_amount, amount);
+}
+
+void Progress::increment(const std::string &operation, const float increment)
+{
+    std::lock_guard<std::mutex> lock_(_mutex);
+    _updateValue(_operation, operation);
+    _updateValue(_amount, _amount + increment);
+}
+
+void Progress::consume(std::function<void(std::string, float)> callback)
+{
+    std::lock_guard<std::mutex> lock_(_mutex);
+    if (isModified())
     {
-        plugin.add<AddStreamlinesEntrypoint>();
-        plugin.add<SetSpikeSimulationEntrypoint>(plugin);
-        plugin.add<SetSpikeSimulationFromFileEntrypoint>(plugin);
+        callback(_operation, _amount);
+        resetModified();
     }
-};
-} // namespace dti
+}
+} // namespace brayns

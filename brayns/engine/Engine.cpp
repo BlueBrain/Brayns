@@ -70,9 +70,44 @@ void Engine::postRender()
         frameBuffer->incrementAccumFrames();
 }
 
+Scene &Engine::getScene()
+{
+    return *_scene;
+}
+
+FrameBuffer &Engine::getFrameBuffer()
+{
+    return *_frameBuffers[0];
+}
+
+const Camera &Engine::getCamera() const
+{
+    return *_camera;
+}
+
+Camera &Engine::getCamera()
+{
+    return *_camera;
+}
+
 Renderer &Engine::getRenderer()
 {
     return *_renderer;
+}
+
+void Engine::setKeepRunning(bool keepRunning)
+{
+    _keepRunning = keepRunning;
+}
+
+bool Engine::getKeepRunning() const
+{
+    return _keepRunning;
+}
+
+Statistics &Engine::getStatistics()
+{
+    return _statistics;
 }
 
 bool Engine::continueRendering() const
@@ -83,6 +118,16 @@ bool Engine::continueRendering() const
         && (frameBuffer->numAccumFrames() < _parametersManager.getRenderingParameters().getMaxAccumFrames()));
 }
 
+const ParametersManager &Engine::getParametersManager() const
+{
+    return _parametersManager;
+}
+
+ParametersManager &Engine::getParametersManager()
+{
+    return _parametersManager;
+}
+
 void Engine::addFrameBuffer(FrameBufferPtr frameBuffer)
 {
     _frameBuffers.push_back(frameBuffer);
@@ -91,6 +136,11 @@ void Engine::addFrameBuffer(FrameBufferPtr frameBuffer)
 void Engine::removeFrameBuffer(FrameBufferPtr frameBuffer)
 {
     _frameBuffers.erase(std::remove(_frameBuffers.begin(), _frameBuffers.end(), frameBuffer), _frameBuffers.end());
+}
+
+const std::vector<FrameBufferPtr> &Engine::getFrameBuffers() const
+{
+    return _frameBuffers;
 }
 
 void Engine::clearFrameBuffers()

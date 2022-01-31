@@ -29,10 +29,7 @@ namespace sonataloader
 class EndFootPopulationLoader : public EdgePopulationLoader
 {
 public:
-    EndFootPopulationLoader()
-        : EdgePopulationLoader("endfoot")
-    {
-    }
+    EndFootPopulationLoader();
 
     std::vector<SynapseGroup::Ptr> load(
         const SonataConfig::Data &networkData,

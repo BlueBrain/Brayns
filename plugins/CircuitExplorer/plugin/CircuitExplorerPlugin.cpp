@@ -21,6 +21,8 @@
 
 #include "CircuitExplorerPlugin.h"
 
+#include <brayns/common/Log.h>
+
 #include <brayns/network/interface/ActionInterface.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
@@ -39,7 +41,7 @@
 #include <plugin/network/entrypoints/AddGridEntrypoint.h>
 #include <plugin/network/entrypoints/AddPillEntrypoint.h>
 #include <plugin/network/entrypoints/AddSphereEntrypoint.h>
-#include <plugin/network/entrypoints/ColorCircuitEntryPoint.h>
+#include <plugin/network/entrypoints/ColorCircuitEntrypoint.h>
 #include <plugin/network/entrypoints/GetMaterialIdsEntrypoint.h>
 #include <plugin/network/entrypoints/MakeMovieEntrypoint.h>
 #include <plugin/network/entrypoints/MaterialEntrypoint.h>
@@ -48,7 +50,7 @@
 #include <plugin/network/entrypoints/SetMaterialExtraAttributesEntrypoint.h>
 #include <plugin/network/entrypoints/SetMaterialRangeEntrypoint.h>
 #include <plugin/network/entrypoints/SetMaterialsEntrypoint.h>
-#include <plugin/network/entrypoints/SimulationColorEntryPoint.h>
+#include <plugin/network/entrypoints/SimulationColorEntrypoint.h>
 #include <plugin/network/entrypoints/TraceAnterogradeEntrypoint.h>
 
 namespace
@@ -153,7 +155,7 @@ void CircuitExplorerPlugin::init()
     add<AvailableColorMethodsEntrypoint>(_colorManager);
     add<AvailableColorMethodVariablesEntrypoint>(_colorManager);
     add<ColorCircuitByMethodEntrypoint>(_colorManager);
-    add<SimulationColorEntryPoint>();
+    add<SimulationColorEntrypoint>();
 
     // RENDERERS ADDED BY THIS PLUGIN
     auto &engine = _api->getEngine();

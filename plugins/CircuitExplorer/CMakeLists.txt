@@ -93,6 +93,25 @@ set(BRAYNSCIRCUITEXPLORER_SOURCES
     plugin/io/synapse/groups/SynapseAstrocyteGroup.cpp
     plugin/io/util/TransferFunctionUtils.cpp
     plugin/movie/MovieMaker.cpp
+    plugin/network/adapters/MaterialAdapter.cpp
+    plugin/network/adapters/SetMaterialRangeAdapter.cpp
+    plugin/network/entrypoints/AddBoxEntrypoint.cpp
+    plugin/network/entrypoints/AddColumnEntrypoint.cpp
+    plugin/network/entrypoints/AddCylinderEntrypoint.cpp
+    plugin/network/entrypoints/AddGridEntrypoint.cpp
+    plugin/network/entrypoints/AddPillEntrypoint.cpp
+    plugin/network/entrypoints/AddSphereEntrypoint.cpp
+    plugin/network/entrypoints/ColorCircuitEntrypoint.cpp
+    plugin/network/entrypoints/GetMaterialIdsEntrypoint.cpp
+    plugin/network/entrypoints/MakeMovieEntrypoint.cpp
+    plugin/network/entrypoints/MaterialEntrypoint.cpp
+    plugin/network/entrypoints/MirrorModelEntrypoint.cpp
+    plugin/network/entrypoints/SetCircuitThicknessEntrypoint.cpp
+    plugin/network/entrypoints/SetMaterialExtraAttributesEntrypoint.cpp
+    plugin/network/entrypoints/SetMaterialRangeEntrypoint.cpp
+    plugin/network/entrypoints/SetMaterialsEntrypoint.cpp
+    plugin/network/entrypoints/SimulationColorEntrypoint.cpp
+    plugin/network/entrypoints/TraceAnterogradeEntrypoint.cpp
 )
 
 set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
@@ -199,7 +218,7 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     plugin/network/entrypoints/AddGridEntrypoint.h
     plugin/network/entrypoints/AddPillEntrypoint.h
     plugin/network/entrypoints/AddSphereEntrypoint.h
-    plugin/network/entrypoints/ColorCircuitEntryPoint.h
+    plugin/network/entrypoints/ColorCircuitEntrypoint.h
     plugin/network/entrypoints/GetMaterialIdsEntrypoint.h
     plugin/network/entrypoints/MakeMovieEntrypoint.h
     plugin/network/entrypoints/MaterialEntrypoint.h
@@ -208,7 +227,7 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     plugin/network/entrypoints/SetMaterialExtraAttributesEntrypoint.h
     plugin/network/entrypoints/SetMaterialRangeEntrypoint.h
     plugin/network/entrypoints/SetMaterialsEntrypoint.h
-    plugin/network/entrypoints/SimulationColorEntryPoint.h
+    plugin/network/entrypoints/SimulationColorEntrypoint.h
     plugin/network/entrypoints/TraceAnterogradeEntrypoint.h
     plugin/network/messages/AddBoxMessage.h
     plugin/network/messages/AddColumnMessage.h

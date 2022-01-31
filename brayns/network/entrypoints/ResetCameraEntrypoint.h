@@ -28,23 +28,8 @@ namespace brayns
 class ResetCameraEntrypoint : public Entrypoint<EmptyMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "reset-camera";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Reset the camera to its initial values";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto &engine = getApi().getEngine();
-        auto &camera = engine.getCamera();
-        camera.reset();
-        engine.triggerRender();
-        request.reply(EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

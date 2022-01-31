@@ -1,5 +1,4 @@
-#ifndef DTI_TYPES_H
-#define DTI_TYPES_H
+#pragma once
 
 #include <brayns/common/MathTypes.h>
 #include <brayns/common/Transformation.h>
@@ -32,5 +31,3 @@ using Indices = std::vector<size_t>;
 using Vertices = std::vector<float>;
 using Gids = std::vector<uint64_t>;
 using Transformations = std::vector<brayns::Transformation>;
-
-#endif // DTI_TYPES_H

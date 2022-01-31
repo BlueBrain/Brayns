@@ -31,23 +31,15 @@ class EndFootColorHandler : public CircuitColorHandler
 public:
     void _setElementsImpl(const std::vector<uint64_t> &ids, std::vector<ElementMaterialMap::Ptr> &&elements) final;
 
-    std::vector<std::string> _getMethodsImpl() const final
-    {
-        return {};
-    }
+    std::vector<std::string> _getMethodsImpl() const final;
 
-    std::vector<std::string> _getMethodVariablesImpl(const std::string &) const final
-    {
-        return {};
-    }
+    std::vector<std::string> _getMethodVariablesImpl(const std::string &) const final;
 
     void _updateColorByIdImpl(const std::map<uint64_t, brayns::Vector4f> &colorMap) final;
 
     void _updateSingleColorImpl(const brayns::Vector4f &color) final;
 
-    void _updateColorImpl(const std::string &, const std::vector<ColoringInformation> &) final
-    {
-    }
+    void _updateColorImpl(const std::string &, const std::vector<ColoringInformation> &) final;
 
 private:
     std::vector<size_t> _materials;

@@ -451,6 +451,26 @@ void OSPRayModel::commitSimulationParams()
     }
 }
 
+OSPModel OSPRayModel::getPrimaryModel() const
+{
+    return _primaryModel;
+}
+
+OSPModel OSPRayModel::getSecondaryModel() const
+{
+    return _secondaryModel;
+}
+
+OSPModel OSPRayModel::getBoundingBoxModel() const
+{
+    return _boundingBoxModel;
+}
+
+void OSPRayModel::setSimulationOffset(const uint64_t offset)
+{
+    _simulationOffset = offset;
+}
+
 MaterialPtr OSPRayModel::createMaterialImpl(const PropertyMap &properties)
 {
     return std::make_shared<OSPRayMaterial>(properties);

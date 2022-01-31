@@ -65,4 +65,34 @@ bool OpenDeckParameters::parse(int argc, const char **argv)
 
     return true;
 }
+
+double OpenDeckParameters::getResolutionScaling() const
+{
+    return _props[PARAM_RESOLUTION_SCALING].as<double>();
+}
+
+void OpenDeckParameters::setResolutionScaling(const double resScaling)
+{
+    _updateProperty(PARAM_RESOLUTION_SCALING, resScaling);
+}
+
+double OpenDeckParameters::getCameraScaling() const
+{
+    return _props[PARAM_CAMERA_SCALING].as<double>();
+}
+
+void OpenDeckParameters::setCameraScaling(const double cameraScaling)
+{
+    _updateProperty(PARAM_CAMERA_SCALING, cameraScaling);
+}
+
+const PropertyMap &OpenDeckParameters::getPropertyMap() const
+{
+    return _props;
+}
+
+PropertyMap &OpenDeckParameters::getPropertyMap()
+{
+    return _props;
+}
 } // namespace brayns

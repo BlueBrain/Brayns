@@ -23,6 +23,11 @@
 
 namespace sonataloader
 {
+VasculaturePopulationLoader::VasculaturePopulationLoader()
+    : NodePopulationLoader("vasculature")
+{
+}
+
 std::vector<MorphologyInstance::Ptr> VasculaturePopulationLoader::load(
     const SonataConfig::Data &networkData,
     const SonataNodePopulationParameters &lc,

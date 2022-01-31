@@ -24,8 +24,6 @@
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/Scene.h>
 
-#include <brayns/network/entrypoint/EntrypointException.h>
-
 #include <brayns/pluginapi/PluginAPI.h>
 
 namespace brayns
@@ -45,10 +43,7 @@ public:
      * @return ModelDescriptor& Model instance.
      * @throw EntrypointException Model not found.
      */
-    static ModelDescriptor &fromId(PluginAPI &api, size_t id)
-    {
-        return fromId(api.getEngine(), id);
-    }
+    static ModelDescriptor &fromId(PluginAPI &api, size_t id);
 
     /**
      * @brief Extract a model from an engine using its ID.
@@ -58,10 +53,7 @@ public:
      * @return ModelDescriptor& Model instance.
      * @throw EntrypointException Model not found.
      */
-    static ModelDescriptor &fromId(Engine &engine, size_t id)
-    {
-        return fromId(engine.getScene(), id);
-    }
+    static ModelDescriptor &fromId(Engine &engine, size_t id);
 
     /**
      * @brief Extract a model from a scene using its ID.
@@ -71,15 +63,7 @@ public:
      * @return ModelDescriptor& Model instance.
      * @throw EntrypointException Model not found.
      */
-    static ModelDescriptor &fromId(Scene &scene, size_t id)
-    {
-        auto model = scene.getModel(id);
-        if (!model)
-        {
-            throw EntrypointException("No model found with ID " + std::to_string(id));
-        }
-        return *model;
-    }
+    static ModelDescriptor &fromId(Scene &scene, size_t id);
 
     /**
      * @brief Extract a model from a given source and JSON-RPC params.

@@ -31,53 +31,16 @@ namespace brayns
 class GetMaterialEntrypoint : public Entrypoint<GetMaterialMessage, MaterialProxy>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "get-material";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Retreive the material with given ID in given model";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto modelId = params.model_id;
-        auto materialId = params.material_id;
-        auto &engine = getApi().getEngine();
-        auto &scene = engine.getScene();
-        MaterialProxy material(scene);
-        material.setModelId(modelId);
-        material.setMaterialId(materialId);
-        request.reply(material);
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 
 class SetMaterialEntrypoint : public Entrypoint<MaterialProxy, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "set-material";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Update the corresponding material with the given properties";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto &engine = getApi().getEngine();
-        auto &scene = engine.getScene();
-        MaterialProxy material(scene);
-        request.getParams(material);
-        material.commit();
-        scene.markModified();
-        triggerRender();
-        request.reply(EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

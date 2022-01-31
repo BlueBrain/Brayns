@@ -29,10 +29,7 @@ namespace sonataloader
 class PointNeuronPopulationLoader : public NodePopulationLoader
 {
 public:
-    PointNeuronPopulationLoader()
-        : NodePopulationLoader("point_neuron")
-    {
-    }
+    PointNeuronPopulationLoader();
 
     std::vector<MorphologyInstance::Ptr> load(
         const SonataConfig::Data &networkData,

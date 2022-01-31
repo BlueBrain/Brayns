@@ -38,20 +38,13 @@ public:
      * @brief Blocks until notified.
      *
      */
-    void wait()
-    {
-        std::unique_lock<std::mutex> lock(_mutex);
-        _monitor.wait(lock);
-    }
+    void wait();
 
     /**
      * @brief Notify the monitor and unlock all thread waiting on it.
      *
      */
-    void notify()
-    {
-        _monitor.notify_all();
-    }
+    void notify();
 
     /**
      * @brief Wait for notification or throw if timeout is reached.

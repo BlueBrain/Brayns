@@ -29,43 +29,22 @@ namespace brayns
 template<>
 struct ObjectExtractor<AnimationParameters>
 {
-    static AnimationParameters &extract(PluginAPI &api)
-    {
-        auto &parametersManager = api.getParametersManager();
-        return parametersManager.getAnimationParameters();
-    }
+    static AnimationParameters &extract(PluginAPI &api);
 };
 
 class GetAnimationParametersEntrypoint : public GetEntrypoint<AnimationParameters>
 {
 public:
-    GetAnimationParametersEntrypoint()
-    {
-        setNotificationPeriod(NotificationPeriod::interactive());
-    }
+    GetAnimationParametersEntrypoint();
 
-    virtual std::string getName() const override
-    {
-        return "get-animation-parameters";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the current state of the animation parameters";
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
 };
 
 class SetAnimationParametersEntrypoint : public SetEntrypoint<AnimationParameters>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "set-animation-parameters";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Set the current state of the animation parameters";
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
 };
 } // namespace brayns

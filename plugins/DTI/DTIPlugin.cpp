@@ -40,7 +40,9 @@
 #include <brain/brain.h>
 #include <brion/brion.h>
 
-#include "DtiEntrypoints.h"
+#include <entrypoints/AddStreamlinesEntrypoint.h>
+#include <entrypoints/SetSpikeSimulationEntrypoint.h>
+#include <entrypoints/SetSpikeSimulationFromFileEntrypoint.h>
 
 namespace
 {
@@ -61,7 +63,9 @@ void DTIPlugin::init()
 
     registry.registerLoader(std::make_unique<DTILoader>());
 
-    DtiEntrypoints::load(*this);
+    add<AddStreamlinesEntrypoint>();
+    add<SetSpikeSimulationEntrypoint>(*this);
+    add<SetSpikeSimulationFromFileEntrypoint>(*this);
 }
 
 void DTIPlugin::preRender()

@@ -27,6 +27,11 @@
 
 #include <brion/blueConfig.h>
 
+SonataNGVLoader::SonataNGVLoader(CircuitColorManager &colorManager)
+    : _internal(std::make_unique<BBPLoader>(colorManager))
+{
+}
+
 std::vector<std::string> SonataNGVLoader::getSupportedExtensions() const
 {
     return _internal->getSupportedExtensions();

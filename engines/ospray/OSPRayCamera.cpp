@@ -76,6 +76,11 @@ void OSPRayCamera::setClipPlanes(const std::vector<Plane> &planes)
     markModified(false);
 }
 
+OSPCamera OSPRayCamera::impl()
+{
+    return _camera;
+}
+
 void OSPRayCamera::_createOSPCamera()
 {
     auto newCamera = ospNewCamera(getCurrentType().c_str());

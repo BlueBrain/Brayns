@@ -29,10 +29,7 @@ namespace sonataloader
 class BiophysicalPopulationLoader : public CommonNodeLoader
 {
 public:
-    BiophysicalPopulationLoader()
-        : CommonNodeLoader("biophysical")
-    {
-    }
+    BiophysicalPopulationLoader();
 
     std::vector<MorphologyInstance::Ptr> load(
         const SonataConfig::Data &networkData,

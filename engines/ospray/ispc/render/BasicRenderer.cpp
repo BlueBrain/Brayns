@@ -27,6 +27,16 @@
 
 namespace brayns
 {
+BasicRenderer::BasicRenderer()
+{
+    ispcEquivalent = ispc::BasicRenderer_create(this);
+}
+
+std::string BasicRenderer::toString() const
+{
+    return "brayns::BasicRenderer";
+}
+
 void BasicRenderer::commit()
 {
     AbstractRenderer::commit();
@@ -37,11 +47,6 @@ void BasicRenderer::commit()
         spp,
         _lightPtr,
         _lightArray.size());
-}
-
-BasicRenderer::BasicRenderer()
-{
-    ispcEquivalent = ispc::BasicRenderer_create(this);
 }
 
 OSP_REGISTER_RENDERER(BasicRenderer, BASIC);

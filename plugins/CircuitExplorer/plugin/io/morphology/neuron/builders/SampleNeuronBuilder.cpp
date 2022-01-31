@@ -39,6 +39,11 @@ public:
 };
 } // namespace
 
+SampleNeuronBuilder::SampleNeuronBuilder()
+    : NeuronBuilder("samples")
+{
+}
+
 NeuronInstantiableGeometry::Ptr SampleNeuronBuilder::_buildImpl(const NeuronMorphology &m) const
 {
     auto instantiablePtr = std::make_unique<SampleNeuronInstantiableGeometry>();

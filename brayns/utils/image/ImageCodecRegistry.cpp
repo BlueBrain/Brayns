@@ -21,6 +21,7 @@
 
 #include "ImageCodecRegistry.h"
 
+#include <cassert>
 #include <memory>
 #include <unordered_map>
 

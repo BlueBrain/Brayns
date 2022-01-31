@@ -21,10 +21,9 @@
 
 #pragma once
 
-#include <brayns/network/common/ExtractModel.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/GetModelMessage.h>
 
+#include <brayns/network/messages/GetModelMessage.h>
 #include <plugin/network/messages/GetMaterialIdsMessage.h>
 
 namespace brayns
@@ -32,39 +31,8 @@ namespace brayns
 class GetMaterialIdsEntrypoint : public Entrypoint<GetModelMessage, GetMaterialIdsResult>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "get-material-ids";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Retreive the list of ID of the materials in given model";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto &scene = getApi().getScene();
-        auto &descriptor = ExtractModel::fromId(scene, params.id);
-        auto &model = descriptor.getModel();
-        auto &materials = model.getMaterials();
-        GetMaterialIdsResult result;
-        result.ids = _getIds(materials);
-        request.reply(result);
-    }
-
-private:
-    std::vector<size_t> _getIds(const std::map<size_t, MaterialPtr> &materials)
-    {
-        std::vector<size_t> ids;
-        ids.reserve(materials.size());
-        for (const auto &pair : materials)
-        {
-            auto id = pair.first;
-            ids.push_back(id);
-        }
-        return ids;
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

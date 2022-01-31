@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include <brayns/network/context/NetworkContext.h>
-#include <brayns/network/json/MessageFactory.h>
+#include <brayns/json/JsonType.h>
 
-#include "EntrypointException.h"
+#include <brayns/network/context/NetworkContext.h>
+
 #include "IEntrypoint.h"
 
 namespace brayns
@@ -41,50 +41,35 @@ public:
      *
      * @return NetworkContext& Network context.
      */
-    NetworkContext &getContext() const
-    {
-        return *_context;
-    }
+    NetworkContext &getContext() const;
 
     /**
      * @brief Shortcut to get a reference to Brayns API.
      *
      * @return PluginAPI& Brayns API access.
      */
-    PluginAPI &getApi() const
-    {
-        return _context->getApi();
-    }
+    PluginAPI &getApi() const;
 
     /**
      * @brief Shortcut to get the Entrypoint list.
      *
      * @return EntrypointManager& Entrypoint manager.
      */
-    EntrypointManager &getEntrypoints() const
-    {
-        return _context->getEntrypoints();
-    }
+    EntrypointManager &getEntrypoints() const;
 
     /**
      * @brief Shortcut to get the connection list.
      *
      * @return ConnectionManager& Client connection manager.
      */
-    ConnectionManager &getConnections() const
-    {
-        return _context->getConnections();
-    }
+    ConnectionManager &getConnections() const;
 
     /**
      * @brief Shortcut to get the stream manager.
      *
      * @return StreamManager& Stream manager.
      */
-    StreamManager &getStream() const
-    {
-        return _context->getStream();
-    }
+    StreamManager &getStream() const;
 
     /**
      * @brief Shortcut to get the task manager holding all asynchronous tasks
@@ -92,93 +77,50 @@ public:
      *
      * @return NetworkTaskManager& Task manager.
      */
-    NetworkTaskManager &getTasks() const
-    {
-        return _context->getTasks();
-    }
+    NetworkTaskManager &getTasks() const;
 
     /**
      * @brief Shortcut to get the binary request manager (raw model uploader).
      *
      * @return BinaryRequestManager& Binary request manager.
      */
-    BinaryRequestManager &getBinary() const
-    {
-        return _context->getBinary();
-    }
+    BinaryRequestManager &getBinary() const;
 
     /**
      * @brief Get the stored plugin name.
      *
      * @return const std::string& Parent plugin name.
      */
-    virtual const std::string &getPlugin() const override
-    {
-        return _plugin;
-    }
+    virtual const std::string &getPlugin() const override;
 
     /**
      * @brief Store the plugin name.
      *
      * @param plugin Parent plugin name.
      */
-    virtual void setPlugin(const std::string &plugin) override
-    {
-        _plugin = plugin;
-    }
+    virtual void setPlugin(const std::string &plugin) override;
 
     /**
      * @brief Store the network context reference inside instance.
      *
      * @param context A reference to the network context.
      */
-    virtual void setContext(NetworkContext &context) override
-    {
-        _context = &context;
-    }
+    virtual void setContext(NetworkContext &context) override;
 
     /**
      * @brief Shortcut to trigger the rendering of a new frame.
      *
      */
-    void triggerRender() const
-    {
-        auto &engine = getApi().getEngine();
-        engine.triggerRender();
-    }
+    void triggerRender() const;
 
     /**
-     * @brief Broadcast a notification to all connected clients.
+     * @brief Broadcast a notification message to all connected clients.
      *
-     * @tparam MessageType Notification message type.
      * @param params Message to send ("params" field).
      */
-    template<typename T>
-    void notify(const T &params) const
-    {
-        try
-        {
-            _sendNotification(params);
-        }
-        catch (...)
-        {
-            Log::error("Error during notification.");
-        }
-    }
+    void notify(const JsonValue &params) const;
 
 private:
-    template<typename T>
-    void _sendNotification(const T &params) const
-    {
-        NotificationMessage notification;
-        notification.jsonrpc = "2.0";
-        notification.method = getName();
-        notification.params = Json::serialize(params);
-        auto json = Json::stringify(notification);
-        auto &connections = _context->getConnections();
-        connections.broadcast(json);
-    }
-
     std::string _plugin;
     NetworkContext *_context = nullptr;
 };

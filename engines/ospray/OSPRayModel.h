@@ -43,18 +43,11 @@ public:
     void commitMaterials(const std::string &renderer);
     void commitSimulationParams();
 
-    OSPModel getPrimaryModel() const
-    {
-        return _primaryModel;
-    }
-    OSPModel getSecondaryModel() const
-    {
-        return _secondaryModel;
-    }
-    OSPModel getBoundingBoxModel() const
-    {
-        return _boundingBoxModel;
-    }
+    OSPModel getPrimaryModel() const;
+    OSPModel getSecondaryModel() const;
+    OSPModel getBoundingBoxModel() const;
+    void setSimulationOffset(const uint64_t offset);
+
     SharedDataVolumePtr createSharedDataVolume(
         const Vector3ui &dimensions,
         const Vector3f &spacing,
@@ -65,11 +58,6 @@ public:
         const VolumeDataType type) const final;
 
     void buildBoundingBox() final;
-
-    void setSimulationOffset(const uint64_t offset)
-    {
-        _simulationOffset = offset;
-    }
 
 private:
     using GeometryMap = std::map<size_t, OSPGeometry>;

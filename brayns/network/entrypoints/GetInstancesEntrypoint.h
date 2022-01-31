@@ -21,10 +21,7 @@
 
 #pragma once
 
-#include <algorithm>
-
 #include <brayns/network/adapters/ModelInstanceAdapter.h>
-#include <brayns/network/common/ExtractModel.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/GetInstancesMessage.h>
 
@@ -33,27 +30,8 @@ namespace brayns
 class GetInstancesEntrypoint : public Entrypoint<GetInstanceMessage, std::vector<ModelInstance>>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "get-instances";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get instances of the given model";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto id = params.id;
-        auto &range = params.result_range;
-        auto &model = ExtractModel::fromId(getApi(), id);
-        auto &instances = model.getInstances();
-        auto first = instances.begin();
-        auto from = std::min(size_t(range.x), instances.size());
-        auto to = std::min(size_t(range.y), instances.size());
-        request.reply({first + from, first + to});
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

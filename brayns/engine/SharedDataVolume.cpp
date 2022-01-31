@@ -36,20 +36,6 @@ const int NO_DESCRIPTOR = -1;
 
 namespace brayns
 {
-SharedDataVolume::~SharedDataVolume()
-{
-    if (_memoryMapPtr)
-    {
-        ::munmap((void *)_memoryMapPtr, _size);
-        _memoryMapPtr = nullptr;
-    }
-    if (_cacheFileDescriptor != NO_DESCRIPTOR)
-    {
-        ::close(_cacheFileDescriptor);
-        _cacheFileDescriptor = NO_DESCRIPTOR;
-    }
-}
-
 void SharedDataVolume::mapData(const std::string &filename)
 {
     _cacheFileDescriptor = open(filename.c_str(), O_RDONLY);
@@ -87,5 +73,24 @@ void SharedDataVolume::mapData(std::vector<uint8_t> &&buffer)
 {
     _memoryBuffer = std::move(buffer);
     setVoxels(_memoryBuffer.data());
+}
+
+SharedDataVolume::SharedDataVolume(const Vector3ui &dimensions, const Vector3f &spacing, const VolumeDataType type)
+    : Volume(dimensions, spacing, type)
+{
+}
+
+SharedDataVolume::~SharedDataVolume()
+{
+    if (_memoryMapPtr)
+    {
+        ::munmap((void *)_memoryMapPtr, _size);
+        _memoryMapPtr = nullptr;
+    }
+    if (_cacheFileDescriptor != NO_DESCRIPTOR)
+    {
+        ::close(_cacheFileDescriptor);
+        _cacheFileDescriptor = NO_DESCRIPTOR;
+    }
 }
 } // namespace brayns

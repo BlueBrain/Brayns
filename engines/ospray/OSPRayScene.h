@@ -52,24 +52,13 @@ public:
     {
         return true;
     }
+
     ModelPtr createModel() const final;
 
-    OSPModel getModel()
-    {
-        return _rootModel;
-    }
-    OSPData lightData()
-    {
-        return _ospLightData;
-    }
-    OSPData getSimulationData()
-    {
-        return _ospSimulationData;
-    }
-    OSPTransferFunction getTransferFunctionImpl()
-    {
-        return _ospTransferFunction;
-    }
+    OSPModel getModel();
+    OSPData lightData();
+    OSPData getSimulationData();
+    OSPTransferFunction getTransferFunctionImpl();
 
 private:
     bool _commitVolumes(std::vector<ModelDescriptorPtr> &modelDescriptors);

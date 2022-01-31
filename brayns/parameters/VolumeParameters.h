@@ -36,98 +36,28 @@ public:
      */
     void print() final;
 
-    /** Volume dimensions  */
-    const Vector3ui &getDimensions() const
-    {
-        return _dimensions;
-    }
-    void setDimensions(const Vector3ui &dim)
-    {
-        _updateValue(_dimensions, dim);
-    }
-    /** Volume scale  */
-    const Vector3d &getElementSpacing() const
-    {
-        return _elementSpacing;
-    }
-    void setElementSpacing(const Vector3d &spacing)
-    {
-        _updateValue(_elementSpacing, spacing);
-    }
-    /** Volume offset */
-    const Vector3d &getOffset() const
-    {
-        return _offset;
-    }
-    void setOffset(const Vector3d &offset)
-    {
-        _updateValue(_offset, offset);
-    }
-    void setGradientShading(const bool enabled)
-    {
-        _updateValue(_gradientShading, enabled);
-    }
-    bool getGradientShading() const
-    {
-        return _gradientShading;
-    }
-    void setSingleShade(const bool enabled)
-    {
-        _updateValue(_singleShade, enabled);
-    }
-    bool getSingleShade() const
-    {
-        return _singleShade;
-    }
-    void setPreIntegration(const bool enabled)
-    {
-        _updateValue(_preIntegration, enabled);
-    }
-    bool getPreIntegration() const
-    {
-        return _preIntegration;
-    }
-    void setAdaptiveSampling(const bool enabled)
-    {
-        _updateValue(_adaptiveSampling, enabled);
-    }
-    bool getAdaptiveSampling() const
-    {
-        return _adaptiveSampling;
-    }
-    void setAdaptiveMaxSamplingRate(const double value)
-    {
-        _updateValue(_adaptiveMaxSamplingRate, value);
-    }
-    double getAdaptiveMaxSamplingRate() const
-    {
-        return _adaptiveMaxSamplingRate;
-    }
-
-    void setSamplingRate(const double value)
-    {
-        _updateValue(_samplingRate, value);
-    }
-    double getSamplingRate() const
-    {
-        return _samplingRate;
-    }
-    void setSpecular(const Vector3d &value)
-    {
-        _updateValue(_specular, value);
-    }
-    const Vector3d &getSpecular() const
-    {
-        return _specular;
-    }
-    void setClipBox(const Boxd &value)
-    {
-        _updateValue(_clipBox, value);
-    }
-    const Boxd &getClipBox() const
-    {
-        return _clipBox;
-    }
+    const Vector3ui &getDimensions() const;
+    void setDimensions(const Vector3ui &dim);
+    const Vector3d &getElementSpacing() const;
+    void setElementSpacing(const Vector3d &spacing);
+    const Vector3d &getOffset() const;
+    void setOffset(const Vector3d &offset);
+    void setGradientShading(const bool enabled);
+    bool getGradientShading() const;
+    void setSingleShade(const bool enabled);
+    bool getSingleShade() const;
+    void setPreIntegration(const bool enabled);
+    bool getPreIntegration() const;
+    void setAdaptiveSampling(const bool enabled);
+    bool getAdaptiveSampling() const;
+    void setAdaptiveMaxSamplingRate(const double value);
+    double getAdaptiveMaxSamplingRate() const;
+    void setSamplingRate(const double value);
+    double getSamplingRate() const;
+    void setSpecular(const Vector3d &value);
+    const Vector3d &getSpecular() const;
+    void setClipBox(const Boxd &value);
+    const Boxd &getClipBox() const;
 
 protected:
     void parse(const po::variables_map &vm) final;

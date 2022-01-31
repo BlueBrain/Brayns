@@ -149,6 +149,11 @@ void OSPRayRenderer::commit()
     ospCommit(_renderer);
 }
 
+float OSPRayRenderer::getVariance() const
+{
+    return _variance;
+}
+
 void OSPRayRenderer::setCamera(CameraPtr camera)
 {
     _camera = static_cast<OSPRayCamera *>(camera.get());

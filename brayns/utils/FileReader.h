@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <fstream>
-#include <stdexcept>
 #include <string>
 
 namespace brayns
@@ -30,19 +28,6 @@ namespace brayns
 class FileReader
 {
 public:
-    static std::string read(const std::string &filename)
-    {
-        std::ifstream stream(filename, std::ios::ate);
-        if (!stream.is_open())
-        {
-            throw std::runtime_error("Cannot read file '" + filename + "'");
-        }
-        auto size = stream.tellg();
-        std::string data;
-        data.resize(size);
-        stream.seekg(0);
-        stream.read(&data[0], size);
-        return data;
-    }
+    static std::string read(const std::string &filename);
 };
 } // namespace brayns

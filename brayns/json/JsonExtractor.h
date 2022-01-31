@@ -38,14 +38,7 @@ public:
      * @param json JSON source.
      * @return JsonArray::Ptr JSON array or null if not an array.
      */
-    static JsonArray::Ptr extractArray(const JsonValue &json)
-    {
-        if (json.type() != typeid(JsonArray::Ptr))
-        {
-            return nullptr;
-        }
-        return json.extract<JsonArray::Ptr>();
-    }
+    static JsonArray::Ptr extractArray(const JsonValue &json);
 
     /**
      * @brief Extract an object if json is one.
@@ -53,13 +46,6 @@ public:
      * @param json JSON source.
      * @return JsonObject::Ptr JSON object or null if not an object.
      */
-    static JsonObject::Ptr extractObject(const JsonValue &json)
-    {
-        if (json.type() != typeid(JsonObject::Ptr))
-        {
-            return nullptr;
-        }
-        return json.extract<JsonObject::Ptr>();
-    }
+    static JsonObject::Ptr extractObject(const JsonValue &json);
 };
 } // namespace brayns

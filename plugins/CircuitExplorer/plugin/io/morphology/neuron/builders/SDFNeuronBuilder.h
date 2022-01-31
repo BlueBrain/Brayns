@@ -27,10 +27,7 @@
 class SDFNeuronBuilder : public NeuronBuilder
 {
 public:
-    SDFNeuronBuilder()
-        : NeuronBuilder("smooth")
-    {
-    }
+    SDFNeuronBuilder();
 
     NeuronInstantiableGeometry::Ptr _buildImpl(const NeuronMorphology &) const final;
 };

@@ -28,11 +28,7 @@ namespace brayns
 class OSPRayMaterial : public Material
 {
 public:
-    OSPRayMaterial(const PropertyMap &properties = {}, const bool backgroundMaterial = false)
-        : Material(properties)
-        , _isBackGroundMaterial(backgroundMaterial)
-    {
-    }
+    OSPRayMaterial(const PropertyMap &properties = {}, const bool backgroundMaterial = false);
     ~OSPRayMaterial();
 
     /** Noop until commit(renderer) is called. */
@@ -43,10 +39,7 @@ public:
      */
     void commit(const std::string &renderer);
 
-    OSPMaterial getOSPMaterial()
-    {
-        return _ospMaterial;
-    }
+    OSPMaterial getOSPMaterial();
 
 private:
     OSPMaterial _ospMaterial{nullptr};

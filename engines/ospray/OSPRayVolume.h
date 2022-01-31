@@ -45,10 +45,7 @@ public:
 
     void commit() final;
 
-    OSPVolume impl() const
-    {
-        return _volume;
-    }
+    OSPVolume impl() const;
 
 protected:
     size_t _dataSize{0};

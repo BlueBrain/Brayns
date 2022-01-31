@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <brayns/network/common/ExtractModel.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <plugin/api/CircuitColorManager.h>
@@ -30,61 +29,11 @@
 class TraceAnterogradeEntrypoint : public brayns::Entrypoint<TraceAnterogradeMessage, brayns::EmptyMessage>
 {
 public:
-    TraceAnterogradeEntrypoint(CircuitColorManager &manager)
-        : _manager(manager)
-    {
-    }
+    TraceAnterogradeEntrypoint(CircuitColorManager &manager);
 
-    virtual std::string getName() const override
-    {
-        return "trace-anterograde";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Performs neuronal tracing showing efferent and afferent "
-               "synapse relationship between cells (including projections)";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-
-        // Validation
-        if (params.cell_gids.empty())
-        {
-            throw brayns::EntrypointException("No input cell GIDs specified");
-        }
-
-        // Extract API data
-        auto modelId = params.model_id;
-        auto &scene = getApi().getEngine().getScene();
-        auto &model = brayns::ExtractModel::fromId(scene, modelId);
-
-        // Retreive cell mapping
-        if (!_manager.handlerExists(model))
-        {
-            throw brayns::EntrypointException(
-                "There given model ID does not correspond to any existing "
-                "circuit model");
-        }
-
-        _manager.updateSingleColor(model, params.non_connected_cells_color);
-
-        std::map<uint64_t, brayns::Vector4f> colorMap;
-        for (const auto gid : params.cell_gids)
-            colorMap[gid] = params.source_cell_color;
-
-        for (const auto gid : params.target_cell_gids)
-            colorMap[gid] = params.connected_cells_color;
-
-        _manager.updateColorsById(model, colorMap);
-
-        scene.markModified();
-        getApi().triggerRender();
-
-        request.reply(brayns::EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 
 private:
     CircuitColorManager &_manager;

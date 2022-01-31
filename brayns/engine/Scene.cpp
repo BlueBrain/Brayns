@@ -71,59 +71,24 @@ std::shared_ptr<T> _replace(
 
 namespace brayns
 {
+void Scene::commit()
+{
+}
+
 Scene::Scene(AnimationParameters &animationParameters, VolumeParameters &volumeParameters)
     : _animationParameters(animationParameters)
     , _volumeParameters(volumeParameters)
 {
 }
 
-void Scene::copyFrom(const Scene &rhs)
+const Boxd &Scene::getBounds() const
 {
-    if (this == &rhs)
-        return;
-
-    {
-        std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-        std::shared_lock<std::shared_timed_mutex> rhsLock(rhs._modelMutex);
-
-        _modelDescriptors.clear();
-        _modelDescriptors.reserve(rhs._modelDescriptors.size());
-        for (const auto &modelDesc : rhs._modelDescriptors)
-            _modelDescriptors.push_back(modelDesc->clone(createModel()));
-    }
-    _computeBounds();
-    _updateAnimationParameters();
-
-    *_backgroundMaterial = *rhs._backgroundMaterial;
-    _backgroundMaterial->markModified();
-
-    _lightManager = rhs._lightManager;
-    _clipPlanes = rhs._clipPlanes;
-
-    _transferFunction = rhs._transferFunction;
-
-    copyFromImpl(rhs);
-
-    markModified();
+    return _bounds;
 }
 
-void Scene::commit()
+LightManager &Scene::getLightManager()
 {
-}
-
-size_t Scene::getSizeInBytes() const
-{
-    auto lock = acquireReadAccess();
-    size_t sizeInBytes = 0;
-    for (auto modelDescriptor : _modelDescriptors)
-        sizeInBytes += modelDescriptor->getModel().getSizeInBytes();
-    return sizeInBytes;
-}
-
-size_t Scene::getNumModels() const
-{
-    auto lock = acquireReadAccess();
-    return _modelDescriptors.size();
+    return _lightManager;
 }
 
 size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
@@ -259,62 +224,9 @@ ModelDescriptorPtr Scene::getModel(const size_t id) const
     return _find(_modelDescriptors, id, &ModelDescriptor::getModelID);
 }
 
-bool Scene::empty() const
+const std::vector<ModelDescriptorPtr> &Scene::getModels() const
 {
-    auto lock = acquireReadAccess();
-    for (auto modelDescriptor : _modelDescriptors)
-        if (!modelDescriptor->getModel().empty())
-            return false;
-    return true;
-}
-
-size_t Scene::addClipPlane(const Plane &plane)
-{
-    auto clipPlane = std::make_shared<ClipPlane>(plane);
-    clipPlane->onModified([&](const BaseObject &) { markModified(false); });
-    _clipPlanes.emplace_back(std::move(clipPlane));
-    markModified();
-    return _clipPlanes.back()->getID();
-}
-
-ClipPlanePtr Scene::getClipPlane(const size_t id) const
-{
-    return _find(_clipPlanes, id);
-}
-
-void Scene::removeClipPlane(const size_t id)
-{
-    if (_remove(_clipPlanes, id))
-        markModified();
-}
-
-void Scene::addModels(std::vector<ModelDescriptorPtr> &input, const ModelParams &params)
-{
-    // Check for models correctness
-    if (input.empty())
-        throw std::runtime_error("No model returned by loader");
-
-    for (auto &md : input)
-    {
-        if (!md)
-            throw std::runtime_error("No model returned by loader");
-    }
-
-    // Update loaded model with loader properties (so we can have the
-    // information with which it was loaded)
-
-    for (auto &md : input)
-    {
-        *md = params;
-        addModel(md);
-    }
-}
-
-void Scene::visitModels(const std::function<void(Model &)> &functor)
-{
-    std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-    for (const auto &modelDescriptor : _modelDescriptors)
-        functor(modelDescriptor->getModel());
+    return _modelDescriptors;
 }
 
 void Scene::buildDefault()
@@ -429,6 +341,55 @@ void Scene::buildDefault()
     addModel(std::make_shared<ModelDescriptor>(std::move(model), "DefaultScene"));
 }
 
+bool Scene::empty() const
+{
+    auto lock = acquireReadAccess();
+    for (auto modelDescriptor : _modelDescriptors)
+        if (!modelDescriptor->getModel().empty())
+            return false;
+    return true;
+}
+
+size_t Scene::addClipPlane(const Plane &plane)
+{
+    auto clipPlane = std::make_shared<ClipPlane>(plane);
+    clipPlane->onModified([&](const BaseObject &) { markModified(false); });
+    _clipPlanes.emplace_back(std::move(clipPlane));
+    markModified();
+    return _clipPlanes.back()->getID();
+}
+
+ClipPlanePtr Scene::getClipPlane(const size_t id) const
+{
+    return _find(_clipPlanes, id);
+}
+
+void Scene::removeClipPlane(const size_t id)
+{
+    if (_remove(_clipPlanes, id))
+        markModified();
+}
+
+const std::vector<ClipPlanePtr> &Scene::getClipPlanes() const
+{
+    return _clipPlanes;
+}
+
+size_t Scene::getSizeInBytes() const
+{
+    auto lock = acquireReadAccess();
+    size_t sizeInBytes = 0;
+    for (auto modelDescriptor : _modelDescriptors)
+        sizeInBytes += modelDescriptor->getModel().getSizeInBytes();
+    return sizeInBytes;
+}
+
+size_t Scene::getNumModels() const
+{
+    auto lock = acquireReadAccess();
+    return _modelDescriptors.size();
+}
+
 void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)
 {
     {
@@ -437,6 +398,95 @@ void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)
             modelDescriptors->getModel().setMaterialsColorMap(colorMap);
     }
     markModified();
+}
+
+MaterialPtr Scene::getBackgroundMaterial() const
+{
+    return _backgroundMaterial;
+}
+
+TransferFunction &Scene::getTransferFunction()
+{
+    return _transferFunction;
+}
+
+const TransferFunction &Scene::getTransferFunction() const
+{
+    return _transferFunction;
+}
+
+void Scene::addModels(std::vector<ModelDescriptorPtr> &input, const ModelParams &params)
+{
+    // Check for models correctness
+    if (input.empty())
+        throw std::runtime_error("No model returned by loader");
+
+    for (auto &md : input)
+    {
+        if (!md)
+            throw std::runtime_error("No model returned by loader");
+    }
+
+    // Update loaded model with loader properties (so we can have the
+    // information with which it was loaded)
+
+    for (auto &md : input)
+    {
+        *md = params;
+        addModel(md);
+    }
+}
+
+void Scene::visitModels(const std::function<void(Model &)> &functor)
+{
+    std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+    for (const auto &modelDescriptor : _modelDescriptors)
+        functor(modelDescriptor->getModel());
+}
+
+std::shared_lock<std::shared_timed_mutex> Scene::acquireReadAccess() const
+{
+    return std::shared_lock<std::shared_timed_mutex>(_modelMutex);
+}
+
+void Scene::copyFrom(const Scene &rhs)
+{
+    if (this == &rhs)
+        return;
+
+    {
+        std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+        std::shared_lock<std::shared_timed_mutex> rhsLock(rhs._modelMutex);
+
+        _modelDescriptors.clear();
+        _modelDescriptors.reserve(rhs._modelDescriptors.size());
+        for (const auto &modelDesc : rhs._modelDescriptors)
+            _modelDescriptors.push_back(modelDesc->clone(createModel()));
+    }
+    _computeBounds();
+    _updateAnimationParameters();
+
+    *_backgroundMaterial = *rhs._backgroundMaterial;
+    _backgroundMaterial->markModified();
+
+    _lightManager = rhs._lightManager;
+    _clipPlanes = rhs._clipPlanes;
+
+    _transferFunction = rhs._transferFunction;
+
+    copyFromImpl(rhs);
+
+    markModified();
+}
+
+void Scene::copyFromImpl(const Scene &rhs)
+{
+    (void)rhs;
+}
+
+bool Scene::supportsConcurrentSceneUpdates() const
+{
+    return false;
 }
 
 void Scene::_computeBounds()
@@ -489,5 +539,4 @@ void Scene::_updateAnimationParameters()
         ap.markModified();
     }
 }
-
 } // namespace brayns

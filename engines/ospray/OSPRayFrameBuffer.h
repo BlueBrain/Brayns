@@ -40,26 +40,11 @@ public:
     void setAccumulation(const bool accumulation) final;
     void setFormat(PixelFormat frameBufferFormat) final;
     void setSubsampling(const size_t) final;
-    Vector2ui getSize() const final
-    {
-        return _useSubsampling() ? _subsamplingSize() : _frameSize;
-    }
-    std::unique_lock<std::mutex> getScopeLock()
-    {
-        return std::unique_lock<std::mutex>(_mapMutex);
-    }
-    const uint8_t *getColorBuffer() const final
-    {
-        return _colorBuffer;
-    }
-    const float *getDepthBuffer() const final
-    {
-        return _depthBuffer;
-    }
-    OSPFrameBuffer impl()
-    {
-        return _currentFB();
-    }
+    Vector2ui getSize() const final;
+    std::unique_lock<std::mutex> getScopeLock();
+    const uint8_t *getColorBuffer() const final;
+    const float *getDepthBuffer() const final;
+    OSPFrameBuffer impl();
     void createPixelOp(const std::string &name) final;
     void updatePixelOp(const PropertyMap &properties) final;
 

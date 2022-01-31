@@ -29,8 +29,6 @@
 #include <Poco/JSON/Array.h>
 #include <Poco/JSON/Object.h>
 
-#include <brayns/utils/EnumUtils.h>
-
 namespace brayns
 {
 /**
@@ -97,10 +95,7 @@ struct JsonTypeHelper
      * @return true Type is accepted by required.
      * @return false Type is not accepted by required.
      */
-    static bool check(JsonType required, JsonType type)
-    {
-        return required == type || (required == JsonType::Number && type == JsonType::Integer);
-    }
+    static bool check(JsonType required, JsonType type);
 
     /**
      * @brief Check if the given type is numeric (number or integer).
@@ -109,10 +104,7 @@ struct JsonTypeHelper
      * @return true Type is numeric.
      * @return false Type is not numeric.
      */
-    static bool isNumeric(JsonType type)
-    {
-        return type == JsonType::Integer || type == JsonType::Number;
-    }
+    static bool isNumeric(JsonType type);
 
     /**
      * @brief Check if the type is primitive (not object nor array).
@@ -121,10 +113,7 @@ struct JsonTypeHelper
      * @return true Type is primitive.
      * @return false Type is object or array.
      */
-    static bool isPrimitive(JsonType type)
-    {
-        return type != JsonType::Unknown && type <= JsonType::String;
-    }
+    static bool isPrimitive(JsonType type);
 
     /**
      * @brief Check if the given JSON is a primitive.
@@ -133,10 +122,7 @@ struct JsonTypeHelper
      * @return true JSON is primitive.
      * @return false JSON is not primitive.
      */
-    static bool isPrimitive(const JsonValue &json)
-    {
-        return json.isNumeric() || json.isString();
-    }
+    static bool isPrimitive(const JsonValue &json);
 
     /**
      * @brief Check if the type is primitive.
@@ -164,77 +150,49 @@ public:
      *
      * @return const std::string& Type name.
      */
-    static const std::string &ofNull()
-    {
-        static const std::string name = "null";
-        return name;
-    }
+    static const std::string &ofNull();
 
     /**
      * @brief Boolean type name.
      *
      * @return const std::string& Type name.
      */
-    static const std::string &ofBoolean()
-    {
-        static const std::string name = "boolean";
-        return name;
-    }
+    static const std::string &ofBoolean();
 
     /**
      * @brief Integer type name.
      *
      * @return const std::string& Type name.
      */
-    static const std::string &ofInteger()
-    {
-        static const std::string name = "integer";
-        return name;
-    }
+    static const std::string &ofInteger();
 
     /**
      * @brief Number type name.
      *
      * @return const std::string& Type name.
      */
-    static const std::string &ofNumber()
-    {
-        static const std::string name = "number";
-        return name;
-    }
+    static const std::string &ofNumber();
 
     /**
      * @brief String type name.
      *
      * @return const std::string& Type name.
      */
-    static const std::string &ofString()
-    {
-        static const std::string name = "string";
-        return name;
-    }
+    static const std::string &ofString();
 
     /**
      * @brief Array type name.
      *
      * @return const std::string& Type name.
      */
-    static const std::string &ofArray()
-    {
-        static const std::string name = "array";
-        return name;
-    }
+    static const std::string &ofArray();
 
     /**
      * @brief Object type name.
      *
      * @return const std::string& Type name.
      */
-    static const std::string &ofObject()
-    {
-        static const std::string name = "object";
-        return name;
-    }
+    static const std::string &ofObject();
 };
 
 /**
@@ -249,38 +207,7 @@ struct GetJsonType
      * @param name Type name.
      * @return JsonType JSON type.
      */
-    static JsonType fromName(const std::string &name)
-    {
-        if (name == JsonTypeName::ofNull())
-        {
-            return JsonType::Null;
-        }
-        if (name == JsonTypeName::ofBoolean())
-        {
-            return JsonType::Boolean;
-        }
-        if (name == JsonTypeName::ofInteger())
-        {
-            return JsonType::Integer;
-        }
-        if (name == JsonTypeName::ofNumber())
-        {
-            return JsonType::Number;
-        }
-        if (name == JsonTypeName::ofString())
-        {
-            return JsonType::String;
-        }
-        if (name == JsonTypeName::ofArray())
-        {
-            return JsonType::Array;
-        }
-        if (name == JsonTypeName::ofObject())
-        {
-            return JsonType::Object;
-        }
-        return JsonType::Unknown;
-    }
+    static JsonType fromName(const std::string &name);
 
     /**
      * @brief Return the JSON type from a JSON value.
@@ -288,38 +215,7 @@ struct GetJsonType
      * @param json JSON to evaluate.
      * @return JsonType JSON type.
      */
-    static JsonType fromJson(const JsonValue &json)
-    {
-        if (json.isEmpty())
-        {
-            return JsonType::Null;
-        }
-        if (json.isBoolean())
-        {
-            return JsonType::Boolean;
-        }
-        if (json.isInteger())
-        {
-            return JsonType::Integer;
-        }
-        if (json.isNumeric())
-        {
-            return JsonType::Number;
-        }
-        if (json.isString())
-        {
-            return JsonType::String;
-        }
-        if (json.type() == typeid(JsonArray::Ptr))
-        {
-            return JsonType::Array;
-        }
-        if (json.type() == typeid(JsonObject::Ptr))
-        {
-            return JsonType::Object;
-        }
-        return JsonType::Unknown;
-    }
+    static JsonType fromJson(const JsonValue &json);
 
     /**
      * @brief Return the JSON type from a primitive type.
@@ -366,28 +262,6 @@ struct GetJsonTypeName
      * @param type Type to name.
      * @return const std::string& Name of type.
      */
-    static const std::string &fromType(JsonType type)
-    {
-        static const std::string empty;
-        switch (type)
-        {
-        case JsonType::Null:
-            return JsonTypeName::ofNull();
-        case JsonType::Boolean:
-            return JsonTypeName::ofBoolean();
-        case JsonType::Integer:
-            return JsonTypeName::ofInteger();
-        case JsonType::Number:
-            return JsonTypeName::ofNumber();
-        case JsonType::String:
-            return JsonTypeName::ofString();
-        case JsonType::Array:
-            return JsonTypeName::ofArray();
-        case JsonType::Object:
-            return JsonTypeName::ofObject();
-        default:
-            return empty;
-        }
-    }
+    static const std::string &fromType(JsonType type);
 };
 } // namespace brayns

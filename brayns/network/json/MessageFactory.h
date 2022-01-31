@@ -124,21 +124,9 @@ BRAYNS_JSON_OBJECT_END()
 template<>
 struct JsonAdapter<EmptyMessage>
 {
-    static JsonSchema getSchema(const EmptyMessage &)
-    {
-        return {};
-    }
-
-    static bool serialize(const EmptyMessage &, JsonValue &json)
-    {
-        json = Poco::makeShared<JsonObject>();
-        return true;
-    }
-
-    static bool deserialize(const JsonValue &, EmptyMessage &)
-    {
-        return true;
-    }
+    static JsonSchema getSchema(const EmptyMessage &value);
+    static bool serialize(const EmptyMessage &value, JsonValue &json);
+    static bool deserialize(const JsonValue &json, EmptyMessage &value);
 };
 
 /**
@@ -157,14 +145,7 @@ public:
      * @param request Request message containing the transaction info.
      * @return ReplyMessage The reply message corresponding to request.
      */
-    static ReplyMessage createReply(const RequestMessage &request)
-    {
-        ReplyMessage reply;
-        reply.jsonrpc = request.jsonrpc;
-        reply.id = request.id;
-        reply.method = request.method;
-        return reply;
-    }
+    static ReplyMessage createReply(const RequestMessage &request);
 
     /**
      * @brief Create an ErrorMessage corresponding to a RequestMessage.
@@ -176,14 +157,7 @@ public:
      * @param request Request message containing the transaction info.
      * @return ErrorMessage The error message corresponding to request.
      */
-    static ErrorMessage createError(const RequestMessage &request)
-    {
-        ErrorMessage error;
-        error.jsonrpc = request.jsonrpc;
-        error.id = request.id;
-        error.method = request.method;
-        return error;
-    }
+    static ErrorMessage createError(const RequestMessage &request);
 
     /**
      * @brief Create a ProgressMessage corresponding to a RequestMessage.
@@ -194,13 +168,6 @@ public:
      * @param request Request message containing the transaction info.
      * @return ProgressMessage The progress message corresponding to request.
      */
-    static ProgressMessage createProgress(const RequestMessage &request)
-    {
-        ProgressMessage progress;
-        progress.jsonrpc = request.jsonrpc;
-        progress.method = "progress";
-        progress.params.id = request.id;
-        return progress;
-    }
+    static ProgressMessage createProgress(const RequestMessage &request);
 };
 } // namespace brayns

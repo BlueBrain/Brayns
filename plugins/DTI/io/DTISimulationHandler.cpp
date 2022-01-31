@@ -86,4 +86,29 @@ brayns::AbstractSimulationHandlerPtr DTISimulationHandler::clone() const
 {
     return std::make_shared<DTISimulationHandler>(*this);
 }
+
+std::map<uint64_t, float> &DTISimulationHandler::getSpikes()
+{
+    return _spikes;
+}
+
+void DTISimulationHandler::setTimeScale(const float scale)
+{
+    _spikeSimulation.time_scale = scale;
+}
+
+void DTISimulationHandler::setDecaySpeed(const float value)
+{
+    _spikeSimulation.decay_speed = value;
+}
+
+void DTISimulationHandler::setRestIntensity(const float value)
+{
+    _spikeSimulation.rest_intensity = value;
+}
+
+void DTISimulationHandler::setSpikeIntensity(const float value)
+{
+    _spikeSimulation.spike_intensity = value;
+}
 } // namespace dti

@@ -85,6 +85,21 @@ void updateMaterialImpl(brayns::ModelDescriptor *model, const size_t id, const b
 
 } // namespace
 
+IDRangeParseException::IDRangeParseException(const std::string &message)
+    : std::runtime_error(message)
+{
+}
+
+ColorMethodNotFoundException::ColorMethodNotFoundException()
+    : std::runtime_error("")
+{
+}
+
+ColorMethodVariableNotFoundException::ColorMethodVariableNotFoundException()
+    : std::runtime_error("")
+{
+}
+
 void ElementMaterialMap::_updateMaterial(brayns::ModelDescriptor *model, const size_t id, const brayns::Vector4f &color)
     const
 {

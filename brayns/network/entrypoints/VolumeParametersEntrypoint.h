@@ -29,38 +29,20 @@ namespace brayns
 template<>
 struct ObjectExtractor<VolumeParameters>
 {
-    static VolumeParameters &extract(PluginAPI &api)
-    {
-        auto &parametersManager = api.getParametersManager();
-        return parametersManager.getVolumeParameters();
-    }
+    static VolumeParameters &extract(PluginAPI &api);
 };
 
 class GetVolumeParametersEntrypoint : public GetEntrypoint<VolumeParameters>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "get-volume-parameters";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the current state of the volume parameters";
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
 };
 
 class SetVolumeParametersEntrypoint : public SetEntrypoint<VolumeParameters>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "set-volume-parameters";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Set the current state of the volume parameters";
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
 };
 } // namespace brayns

@@ -26,10 +26,7 @@
 class SonataNGVLoader : public brayns::Loader<SonataNGVLoaderParameters>
 {
 public:
-    SonataNGVLoader(CircuitColorManager &colorManager)
-        : _internal(std::make_unique<BBPLoader>(colorManager))
-    {
-    }
+    SonataNGVLoader(CircuitColorManager &colorManager);
 
     /**
      * @brief getSupportedExtensions returns a list with supported file
