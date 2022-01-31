@@ -29,29 +29,15 @@ namespace brayns
 template<>
 struct ObjectExtractor<Statistics>
 {
-    static Statistics &extract(PluginAPI &api)
-    {
-        auto &engine = api.getEngine();
-        return engine.getStatistics();
-    }
+    static Statistics &extract(PluginAPI &api);
 };
 
 class GetStatisticsEntrypoint : public GetEntrypoint<Statistics>
 {
 public:
-    GetStatisticsEntrypoint()
-    {
-        setNotificationPeriod(NotificationPeriod::slow());
-    }
+    GetStatisticsEntrypoint();
 
-    virtual std::string getName() const override
-    {
-        return "get-statistics";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the current state of the statistics";
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
 };
 } // namespace brayns

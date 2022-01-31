@@ -21,9 +21,8 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
-
-#include <brayns/network/binary/ModelUploadTask.h>
+#include <brayns/network/adapters/BinaryParamAdapter.h>
+#include <brayns/network/adapters/ModelDescriptorAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
@@ -31,31 +30,9 @@ namespace brayns
 class RequestModelUploadEntrypoint : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "request-model-upload";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Request model upload from further received blobs and return "
-               "model descriptor on success";
-    }
-
-    virtual bool isAsync() const override
-    {
-        return true;
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto &engine = getApi().getEngine();
-        auto &registry = getApi().getLoaderRegistry();
-        auto task = std::make_shared<ModelUploadTask>(engine, registry);
-        launchTask(task, request);
-        auto &binary = getBinary();
-        auto &handle = request.getConnectionHandle();
-        binary.addTask(handle, task);
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual bool isAsync() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

@@ -466,4 +466,17 @@ std::vector<std::string> ProteinLoader::getSupportedExtensions() const
 {
     return {"pdb", "pdb1"};
 }
+
+std::vector<ModelDescriptorPtr> ProteinLoader::importFromBlob(
+    Blob &&blob,
+    const LoaderProgress &callback,
+    const ProteinLoaderParameters &properties,
+    Scene &scene) const
+{
+    (void)blob;
+    (void)callback;
+    (void)properties;
+    (void)scene;
+    throw std::runtime_error("Loading from blob not supported");
+}
 } // namespace brayns

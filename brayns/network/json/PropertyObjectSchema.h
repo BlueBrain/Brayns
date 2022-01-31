@@ -23,7 +23,7 @@
 
 #include <brayns/common/PropertyObject.h>
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/JsonSchema.h>
 
 namespace brayns
 {
@@ -40,27 +40,6 @@ public:
      * @param object Object to build the schema from.
      * @return JsonSchema Schema of object.
      */
-    static JsonSchema create(const PropertyObject &object)
-    {
-        JsonSchema schema;
-        auto &oneOf = schema.oneOf;
-        auto &properties = object.getProperties();
-        oneOf.reserve(properties.size());
-        for (const auto &pair : properties)
-        {
-            oneOf.push_back(_getSchema(pair));
-        }
-        return schema;
-    }
-
-private:
-    static JsonSchema _getSchema(const std::pair<std::string, PropertyMap> &pair)
-    {
-        auto &properties = pair.second;
-        auto schema = Json::getSchema(properties);
-        auto &type = pair.first;
-        schema.title = type;
-        return schema;
-    }
+    static JsonSchema create(const PropertyObject &object);
 };
 } // namespace brayns

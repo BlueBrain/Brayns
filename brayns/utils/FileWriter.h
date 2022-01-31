@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <fstream>
-#include <stdexcept>
 #include <string>
 
 namespace brayns
@@ -30,14 +28,6 @@ namespace brayns
 class FileWriter
 {
 public:
-    static void write(const std::string &data, const std::string &filename)
-    {
-        std::ofstream stream(filename);
-        if (!stream.is_open())
-        {
-            throw std::runtime_error("Cannot write file '" + filename + "'");
-        }
-        stream.write(data.data(), data.size());
-    }
+    static void write(const std::string &data, const std::string &filename);
 };
 } // namespace brayns

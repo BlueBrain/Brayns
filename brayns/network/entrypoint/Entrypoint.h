@@ -22,6 +22,7 @@
 #pragma once
 
 #include "BaseEntrypoint.h"
+#include "EntrypointException.h"
 #include "EntrypointRequest.h"
 #include "EntrypointTask.h"
 

@@ -23,11 +23,14 @@
 
 #define SPDLOG_HEADER_ONLY
 #include <spdlog/fmt/ostr.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
 namespace brayns
 {
+/**
+ * @brief Available log levels.
+ *
+ */
 enum class LogLevel
 {
     Trace = spdlog::level::trace,
@@ -43,52 +46,98 @@ enum class LogLevel
 class Log
 {
 public:
-    static void disable()
-    {
-        setLevel(LogLevel::Off);
-    }
+    /**
+     * @brief Set the global log level.
+     *
+     * @param level Log level.
+     */
+    static void setLevel(LogLevel level);
 
-    static void setLevel(LogLevel level)
-    {
-        getLogger().set_level(spdlog::level::level_enum(level));
-    }
+    /**
+     * @brief Disable logging.
+     *
+     */
+    static void disable();
 
+    /**
+     * @brief Log the given object with optional arguments.
+     *
+     * @tparam Args Arguments types.
+     * @param level Log level.
+     * @param args Arguments to log, must be at least a message.
+     */
     template<typename... Args>
     static void log(LogLevel level, Args &&...args)
     {
-        getLogger().log(spdlog::level::level_enum(level), std::forward<Args>(args)...);
+        _logger->log(spdlog::level::level_enum(level), std::forward<Args>(args)...);
     }
 
+    /**
+     * @brief Log the given message with optional arguments and trace level.
+     *
+     * @tparam Args Arguments types.
+     * @param args Arguments to log, must be at least a message.
+     */
     template<typename... Args>
     static void trace(Args &&...args)
     {
         log(LogLevel::Trace, std::forward<Args>(args)...);
     }
 
+    /**
+     * @brief Log the given message with optional arguments and debug level.
+     *
+     * @tparam Args Arguments types.
+     * @param args Arguments to log, must be at least a message.
+     */
     template<typename... Args>
     static void debug(Args &&...args)
     {
         log(LogLevel::Debug, std::forward<Args>(args)...);
     }
 
+    /**
+     * @brief Log the given message with optional arguments and info level.
+     *
+     * @tparam Args Arguments types.
+     * @param args Arguments to log, must be at least a message.
+     */
     template<typename... Args>
     static void info(Args &&...args)
     {
         log(LogLevel::Info, std::forward<Args>(args)...);
     }
 
+    /**
+     * @brief Log the given message with optional arguments and warn level.
+     *
+     * @tparam Args Arguments types.
+     * @param args Arguments to log, must be at least a message.
+     */
     template<typename... Args>
     static void warn(Args &&...args)
     {
         log(LogLevel::Warn, std::forward<Args>(args)...);
     }
 
+    /**
+     * @brief Log the given message with optional arguments and error level.
+     *
+     * @tparam Args Arguments types.
+     * @param args Arguments to log, must be at least a message.
+     */
     template<typename... Args>
     static void error(Args &&...args)
     {
         log(LogLevel::Error, std::forward<Args>(args)...);
     }
 
+    /**
+     * @brief Log the given message with optional arguments and critical level.
+     *
+     * @tparam Args Arguments types.
+     * @param args Arguments to log, must be at least a message.
+     */
     template<typename... Args>
     static void critical(Args &&...args)
     {
@@ -96,22 +145,6 @@ public:
     }
 
 private:
-    static spdlog::logger &getLogger()
-    {
-        static const auto logger = _createLogger();
-        return *logger;
-    }
-
-    static std::shared_ptr<spdlog::logger> _createLogger()
-    {
-        auto logger = spdlog::stdout_color_mt("Brayns");
-        logger->set_pattern("%^[%l][%T] %v%$");
-#ifdef NDEBUG
-        logger->set_level(spdlog::level::info);
-#else
-        logger->set_level(spdlog::level::trace);
-#endif
-        return logger;
-    }
+    static std::shared_ptr<spdlog::logger> _logger;
 };
 } // namespace brayns

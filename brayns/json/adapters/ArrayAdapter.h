@@ -45,8 +45,9 @@ struct ArrayAdapter
      *
      * @return JsonSchema Json schema of the container T.
      */
-    static JsonSchema getSchema(const T &)
+    static JsonSchema getSchema(const T &value)
     {
+        (void)value;
         JsonSchema schema;
         schema.type = JsonType::Array;
         schema.items = {Json::getSchema<typename T::value_type>()};

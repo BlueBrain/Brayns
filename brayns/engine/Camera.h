@@ -58,76 +58,57 @@ public:
               the camera orientation
        @param target The x, y, z coordinates of the camera target
     */
-    void
-        set(const Vector3d &position, const Quaterniond &orientation, const Vector3d &target = Vector3d(0.0, 0.0, 0.0));
+    void set(const Vector3d &position, const Quaterniond &orientation, const Vector3d &target = Vector3d(0.0));
 
     void setInitialState(
         const Vector3d &position,
         const Quaterniond &orientation,
-        const Vector3d &target = Vector3d(0.0, 0.0, 0.0));
+        const Vector3d &target = Vector3d(0.0));
 
     /**
        Sets camera position
        @param position The x, y, z coordinates of the camera position
     */
-    void setPosition(const Vector3d &position)
-    {
-        _updateValue(_position, position);
-    }
+    void setPosition(const Vector3d &position);
+
     /**
        Sets camera target
        @param target The x, y, z coordinates of the camera target
     */
-    void setTarget(const Vector3d &target)
-    {
-        _updateValue(_target, target);
-    }
+    void setTarget(const Vector3d &target);
+
     /**
        Gets camera position
        @return The x, y, z coordinates of the camera position
     */
-    const Vector3d &getPosition() const
-    {
-        return _position;
-    }
+    const Vector3d &getPosition() const;
+
     /**
        Gets camera target
        @return The x, y, z coordinates of the camera target
     */
-    const Vector3d &getTarget() const
-    {
-        return _target;
-    }
+    const Vector3d &getTarget() const;
+
     /**
        Sets camera orientation quaternion.
        @param orientation The orientation quaternion
     */
-    void setOrientation(Quaterniond orientation)
-    {
-        orientation = glm::normalize(orientation);
-        _updateValue(_orientation, orientation);
-    }
+    void setOrientation(Quaterniond orientation);
+
     /**
        Gets the camera orientation quaternion
        @return the orientation quaternion
     */
-    const Quaterniond &getOrientation() const
-    {
-        return _orientation;
-    }
+    const Quaterniond &getOrientation() const;
+
     /** Resets the camera to its initial values */
     void reset();
 
     /** @internal Sets the name of current rendered frame buffer. */
-    void setBufferTarget(const std::string &target)
-    {
-        _updateValue(_bufferTarget, target, false);
-    }
+    void setBufferTarget(const std::string &target);
+
     /** @internal @return the current rendererd frame buffer. */
-    const std::string &getBufferTarget() const
-    {
-        return _bufferTarget;
-    }
+    const std::string &getBufferTarget() const;
 
 private:
     Vector3d _target;

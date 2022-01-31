@@ -35,36 +35,10 @@ namespace brayns
 class ConnectionMap
 {
 public:
-    size_t getConnectionCount() const
-    {
-        return _connections.size();
-    }
-
-    Connection *find(const ConnectionHandle &handle)
-    {
-        auto connection = _find(handle);
-        if (!connection || connection->removed)
-        {
-            return nullptr;
-        }
-        return connection;
-    }
-
-    void add(NetworkSocketPtr socket)
-    {
-        auto &connection = _connections[socket];
-        connection.socket = std::move(socket);
-    }
-
-    void markAsRemoved(const ConnectionHandle &handle)
-    {
-        auto connection = _find(handle);
-        if (!connection)
-        {
-            return;
-        }
-        connection->removed = true;
-    }
+    size_t getConnectionCount() const;
+    Connection *find(const ConnectionHandle &handle);
+    void add(NetworkSocketPtr socket);
+    void markAsRemoved(const ConnectionHandle &handle);
 
     template<typename FunctorType>
     void forEach(FunctorType functor) const
@@ -94,11 +68,7 @@ public:
     }
 
 private:
-    Connection *_find(const ConnectionHandle &handle)
-    {
-        auto i = _connections.find(handle);
-        return i == _connections.end() ? nullptr : &i->second;
-    }
+    Connection *_find(const ConnectionHandle &handle);
 
     std::unordered_map<ConnectionHandle, Connection> _connections;
 };

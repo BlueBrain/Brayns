@@ -43,10 +43,7 @@ public:
      */
     using CallbackFn = std::function<void(const std::string &, float)>;
 
-    LoaderProgress(CallbackFn callback)
-        : _callback(std::move(callback))
-    {
-    }
+    LoaderProgress(CallbackFn callback);
 
     LoaderProgress() = default;
     ~LoaderProgress() = default;
@@ -54,12 +51,9 @@ public:
     /**
      * Update the current progress of an operation and call the callback
      */
-    void updateProgress(const std::string &message, const float fraction) const
-    {
-        if (_callback)
-            _callback(message, fraction);
-    }
+    void updateProgress(const std::string &message, const float fraction) const;
 
+private:
     CallbackFn _callback;
 };
 
@@ -84,19 +78,7 @@ public:
      * @param const std::string& fileName Path to the file to queried
      * @param const std::string& extension Extracted file extension from fileName
      */
-    virtual bool isSupported(const std::string &fileName, const std::string &extension) const
-    {
-        (void)fileName;
-
-        const auto extensions = getSupportedExtensions();
-        const auto lcExtension = string_utils::toLowercase(extension[0] == '.' ? extension.substr(1) : extension);
-        auto it = std::find_if(
-            extensions.begin(),
-            extensions.end(),
-            [&](const std::string &ext)
-            { return string_utils::toLowercase(ext[0] == '.' ? ext.substr(1) : ext) == lcExtension; });
-        return it != extensions.end();
-    };
+    virtual bool isSupported(const std::string &fileName, const std::string &extension) const;
 
     /**
      * @return The loader name
@@ -230,29 +212,13 @@ private:
 struct EmptyLoaderParameters
 {
 };
+
 template<>
 struct JsonAdapter<EmptyLoaderParameters>
 {
-    static JsonSchema getSchema(const EmptyLoaderParameters &params)
-    {
-        (void)params;
-        return JsonSchema();
-    }
-
-    static bool serialize(const EmptyLoaderParameters &params, JsonValue &value)
-    {
-        (void)params;
-        (void)value;
-
-        return true;
-    }
-
-    static bool deserialize(const JsonValue &value, EmptyLoaderParameters &params)
-    {
-        (void)value;
-        (void)params;
-        return true;
-    }
+    static JsonSchema getSchema(const EmptyLoaderParameters &params);
+    static bool serialize(const EmptyLoaderParameters &params, JsonValue &value);
+    static bool deserialize(const JsonValue &value, EmptyLoaderParameters &params);
 };
 
 /**
@@ -283,19 +249,13 @@ public:
     std::vector<ModelDescriptorPtr> importFromBlob(
         Blob &&blob,
         const LoaderProgress &callback,
-        const EmptyLoaderParameters &,
-        Scene &scene) const final
-    {
-        return importFromBlob(std::move(blob), callback, scene);
-    }
+        const EmptyLoaderParameters &parameters,
+        Scene &scene) const final;
 
     std::vector<ModelDescriptorPtr> importFromFile(
         const std::string &path,
         const LoaderProgress &callback,
-        const EmptyLoaderParameters &,
-        Scene &scene) const final
-    {
-        return importFromFile(path, callback, scene);
-    }
+        const EmptyLoaderParameters &parameters,
+        Scene &scene) const final;
 };
 } // namespace brayns

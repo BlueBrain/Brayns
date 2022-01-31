@@ -38,13 +38,10 @@ public:
        Constructor
        @param name Display name for the set of parameters
      */
-    AbstractParameters(const std::string &name)
-        : _name(name)
-        , _parameters(name)
-    {
-    }
+    AbstractParameters(const std::string &name);
 
     virtual ~AbstractParameters() = default;
+
     /**
        Parses parameters managed by the class
        @param vm the variables map of all arguments passed by the user
@@ -60,13 +57,9 @@ public:
 
 protected:
     std::string _name;
-
     po::options_description _parameters;
 
-    static std::string asString(const bool flag)
-    {
-        return flag ? "on" : "off";
-    }
+    static std::string asString(const bool flag);
 };
 } // namespace brayns
 
@@ -93,10 +86,12 @@ public:
     {
         base::multitoken();
     }
+
     unsigned min_tokens() const
     {
         return _min;
     }
+
     unsigned max_tokens() const
     {
         return _max;
@@ -104,13 +99,13 @@ public:
 };
 
 template<typename T>
-inline fixed_tokens_typed_value<T> *fixed_tokens_value(unsigned min, unsigned max)
+fixed_tokens_typed_value<T> *fixed_tokens_value(unsigned min, unsigned max)
 {
     return new fixed_tokens_typed_value<T>(nullptr, min, max);
 }
 
 template<typename T>
-inline fixed_tokens_typed_value<T> *fixed_tokens_value(T *t, unsigned min, unsigned max)
+fixed_tokens_typed_value<T> *fixed_tokens_value(T *t, unsigned min, unsigned max)
 {
     return new fixed_tokens_typed_value<T>(t, min, max);
 }

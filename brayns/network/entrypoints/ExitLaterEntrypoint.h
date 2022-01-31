@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <chrono>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/ExitLaterMessage.h>
 #include <brayns/network/tasks/NetworkTask.h>
@@ -31,38 +33,14 @@ namespace brayns
 class ExitLaterTask : public NetworkTask
 {
 public:
-    ExitLaterTask(Engine &engine)
-        : _engine(&engine)
-    {
-    }
+    ExitLaterTask(Engine &engine);
+    virtual ~ExitLaterTask();
 
-    virtual ~ExitLaterTask()
-    {
-        _monitor.notify();
-    }
+    void execute(uint32_t minutes);
 
-    void execute(uint32_t minutes)
-    {
-        cancelAndWait();
-        _duration = std::chrono::minutes(minutes);
-        start();
-    }
-
-    virtual void run() override
-    {
-        _monitor.waitFor(_duration);
-    }
-
-    virtual void onComplete() override
-    {
-        _engine->setKeepRunning(false);
-        _engine->triggerRender();
-    }
-
-    virtual void onCancel() override
-    {
-        _monitor.notify();
-    }
+    virtual void run() override;
+    virtual void onComplete() override;
+    virtual void onCancel() override;
 
 private:
     std::chrono::minutes _duration;
@@ -73,34 +51,11 @@ private:
 class ExitLaterEntrypoint : public Entrypoint<ExitLaterMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "exit-later";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Schedules Brayns to shutdown after a given amount of minutes";
-    }
-
-    virtual void onCreate() override
-    {
-        auto &engine = getApi().getEngine();
-        _task = std::make_shared<ExitLaterTask>(engine);
-    }
-
-    virtual void onUpdate() override
-    {
-        _task->poll();
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto &minutes = params.minutes;
-        _task->execute(minutes);
-        request.reply(EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onCreate() override;
+    virtual void onUpdate() override;
+    virtual void onRequest(const Request &request) override;
 
 private:
     std::shared_ptr<ExitLaterTask> _task;

@@ -21,8 +21,10 @@
 
 #pragma once
 
+#include <brayns/engine/Model.h>
+#include <brayns/engine/Scene.h>
+
 #include <brayns/json/JsonAdapterMacro.h>
-#include <brayns/network/common/ExtractModel.h>
 
 #include "TransformationAdapter.h"
 
@@ -32,41 +34,14 @@ class UpdateModelProxy
 {
 public:
     UpdateModelProxy() = default;
+    UpdateModelProxy(Scene &scene);
 
-    UpdateModelProxy(Scene &scene)
-        : _scene(&scene)
-    {
-    }
-
-    void setId(size_t id)
-    {
-        _model = &ExtractModel::fromId(*_scene, id);
-    }
-
-    void setBoundingBox(bool enabled)
-    {
-        _model->setBoundingBox(enabled);
-    }
-
-    void setName(const std::string &name)
-    {
-        _model->setName(name);
-    }
-
-    void setTransformation(const Transformation &transformation)
-    {
-        _model->setTransformation(transformation);
-    }
-
-    void setVisible(bool visible)
-    {
-        _model->setVisible(visible);
-    }
-
-    void computeBounds()
-    {
-        _model->computeBounds();
-    }
+    void setId(size_t id);
+    void setBoundingBox(bool enabled);
+    void setName(const std::string &name);
+    void setTransformation(const Transformation &transformation);
+    void setVisible(bool visible);
+    void computeBounds();
 
 private:
     Scene *_scene = nullptr;

@@ -117,40 +117,28 @@ public:
      * @return true Has clients.
      * @return false No clients.
      */
-    bool isEmpty()
-    {
-        return getConnectionCount() == 0;
-    }
+    bool isEmpty();
 
     /**
      * @brief Set callback when a client connects.
      *
      * @param callback Connection callback.
      */
-    void onConnect(ConnectionCallback callback)
-    {
-        _listener.onConnect = std::move(callback);
-    }
+    void onConnect(ConnectionCallback callback);
 
     /**
      * @brief Set callback when a client disconnect.
      *
      * @param callback Disconnection callback.
      */
-    void onDisconnect(DisconnectionCallback callback)
-    {
-        _listener.onDisconnect = std::move(callback);
-    }
+    void onDisconnect(DisconnectionCallback callback);
 
     /**
      * @brief Set callback when a request is received by
      *
      * @param callback
      */
-    void onRequest(RequestCallback callback)
-    {
-        _listener.onRequest = std::move(callback);
-    }
+    void onRequest(RequestCallback callback);
 
 private:
     std::mutex _mutex;

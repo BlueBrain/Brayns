@@ -75,6 +75,21 @@ void checkExportParameters(const FrameExporter::ExportInfo &input)
 }
 } // namespace
 
+FrameExportParameterException::FrameExportParameterException(const std::string &msg)
+    : std::runtime_error(msg)
+{
+}
+
+FrameExportInProgressException::FrameExportInProgressException()
+    : std::runtime_error("")
+{
+}
+
+FrameExportNotRunningException::FrameExportNotRunningException()
+    : std::runtime_error("")
+{
+}
+
 void FrameExporter::startNewExport(ExportInfo &&input)
 {
     if (_exportRunning || _exportRequested)

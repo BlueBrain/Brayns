@@ -28,45 +28,8 @@ namespace brayns
 class LoadersSchemaEntrypoint : public Entrypoint<EmptyMessage, JsonValue>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "loaders-schema";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get the schema of all loaders";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto &registry = getApi().getLoaderRegistry();
-        auto &loaders = registry.getLoaderInfos();
-        auto schema = _getSchema(loaders);
-        auto json = Json::serialize(schema);
-        request.reply(json);
-    }
-
-private:
-    JsonSchema _getSchema(const std::vector<LoaderInfo> &loaders)
-    {
-        JsonSchema schema;
-        schema.title = "loaders";
-        auto &oneOf = schema.oneOf;
-        oneOf.reserve(loaders.size());
-        for (const auto &loader : loaders)
-        {
-            oneOf.push_back(_getSchema(loader));
-        }
-        return schema;
-    }
-
-    JsonSchema _getSchema(const LoaderInfo &loader)
-    {
-        auto schema = loader.inputParametersSchema;
-        auto &name = loader.name;
-        schema.title = name;
-        return schema;
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

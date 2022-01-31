@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <brayns/utils/Filesystem.h>
-
 #include <string>
 
 namespace brayns
@@ -44,11 +42,7 @@ public:
      * @param filename Path containing info about image format.
      * @return std::string Image format ID.
      */
-    static std::string fromFilename(const std::string &filename)
-    {
-        auto extension = fs::path(filename).extension();
-        return fromExtension(extension.string());
-    }
+    static std::string fromFilename(const std::string &filename);
 
     /**
      * @brief Extract the image format from the given file extension.
@@ -58,13 +52,6 @@ public:
      * @param filename Extension with or without the dot.
      * @return std::string Image format ID.
      */
-    static std::string fromExtension(const std::string &extension)
-    {
-        if (extension.empty() || extension[0] != '.')
-        {
-            return extension;
-        }
-        return extension.substr(1);
-    }
+    static std::string fromExtension(const std::string &extension);
 };
 } // namespace brayns

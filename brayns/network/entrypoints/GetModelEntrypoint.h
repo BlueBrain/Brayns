@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/network/common/ExtractModel.h>
+#include <brayns/engine/Model.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/GetModelMessage.h>
 
@@ -30,20 +30,8 @@ namespace brayns
 class GetModelEntrypoint : public Entrypoint<GetModelMessage, ModelDescriptor>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "get-model";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Get all the information of the given model";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto &model = ExtractModel::fromRequest(getApi(), request);
-        request.reply(model);
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

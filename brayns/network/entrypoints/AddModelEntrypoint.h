@@ -21,93 +21,17 @@
 
 #pragma once
 
-#include <brayns/io/Loader.h>
-
-#include <brayns/engine/Scene.h>
-
 #include <brayns/network/adapters/ModelParamsAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/entrypoint/EntrypointTask.h>
 
 namespace brayns
 {
-class LoadModelTask : public EntrypointTask<ModelParams, std::vector<ModelDescriptorPtr>>
-{
-public:
-    LoadModelTask(Engine &engine, LoaderRegistry &registry)
-        : _engine(&engine)
-        , _loaderRegistry(&registry)
-    {
-    }
-
-    virtual void run() override
-    {
-        auto &scene = _engine->getScene();
-        auto &path = _params.getPath();
-        auto &loaderName = _params.getLoaderName();
-
-        const auto &loader = _loaderRegistry->getSuitableLoader(path, "", loaderName);
-
-        _descriptors = loader.loadFromFile(
-            path,
-            {[this](const auto &operation, auto amount) { progress(operation, amount); }},
-            _params.getLoadParameters(),
-            scene);
-
-        scene.addModels(_descriptors, _params);
-    }
-
-    virtual void onStart() override
-    {
-        _params = getParams();
-        auto &path = _params.getPath();
-        if (path.empty())
-        {
-            throw EntrypointException("Missing model path");
-        }
-        if (!_loaderRegistry->isSupportedFile(path))
-        {
-            throw EntrypointException("Unsupported file type: '" + path + "'");
-        }
-    }
-
-    virtual void onComplete() override
-    {
-        _engine->triggerRender();
-        reply(_descriptors);
-    }
-
-private:
-    Engine *_engine;
-    LoaderRegistry *_loaderRegistry;
-    ModelParams _params;
-    std::vector<ModelDescriptorPtr> _descriptors;
-};
-
 class AddModelEntrypoint : public Entrypoint<ModelParams, std::vector<ModelDescriptorPtr>>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "add-model";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Add model from path and return model descriptor on success";
-    }
-
-    virtual bool isAsync() const override
-    {
-        return true;
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto &engine = getApi().getEngine();
-        auto &registry = getApi().getLoaderRegistry();
-        auto task = std::make_shared<LoadModelTask>(engine, registry);
-        launchTask(task, request);
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual bool isAsync() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

@@ -49,10 +49,7 @@ public:
      *
      * @param socket Client socket.
      */
-    ConnectionHandle(NetworkSocketPtr socket)
-        : _socket(std::move(socket))
-    {
-    }
+    ConnectionHandle(NetworkSocketPtr socket);
 
     /**
      * @brief Check if the handle is attached to a client socket.
@@ -60,20 +57,14 @@ public:
      * @return true Handle is valid.
      * @return false Handle is invalid.
      */
-    bool isValid() const
-    {
-        return bool(_socket);
-    }
+    bool isValid() const;
 
     /**
      * @brief Get a unique ID for the handle.
      *
      * @return size_t Unique ID of the handle.
      */
-    size_t getId() const
-    {
-        return size_t(_socket.get());
-    }
+    size_t getId() const;
 
     /**
      * @brief Check if other points to the same client.
@@ -82,10 +73,7 @@ public:
      * @return true Both point to the same client.
      * @return false Other points to a different client.
      */
-    bool operator==(const ConnectionHandle &other) const
-    {
-        return _socket == other._socket;
-    }
+    bool operator==(const ConnectionHandle &other) const;
 
     /**
      * @brief Unequality shorthand.
@@ -94,10 +82,7 @@ public:
      * @return true Not the same.
      * @return false Same.
      */
-    bool operator!=(const ConnectionHandle &other) const
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const ConnectionHandle &other) const;
 
 private:
     NetworkSocketPtr _socket;
@@ -113,9 +98,6 @@ namespace std
 template<>
 struct hash<brayns::ConnectionHandle>
 {
-    size_t operator()(const brayns::ConnectionHandle &handle) const
-    {
-        return handle.getId();
-    }
+    size_t operator()(const brayns::ConnectionHandle &handle) const;
 };
 } // namespace std

@@ -4,6 +4,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSIO_SOURCES
+    Loader.cpp
     LoaderRegistry.cpp
     loaders/MeshLoader.cpp
     loaders/ProteinLoader.cpp

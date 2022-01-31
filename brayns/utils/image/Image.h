@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <cassert>
-#include <cstring>
 #include <string>
 
 #include "ImageInfo.h"
@@ -57,12 +55,7 @@ public:
      * @param info Image info.
      * @param data Image content with contiguous pixels RGBA.
      */
-    Image(const ImageInfo &info, std::string data)
-        : _info(info)
-        , _data(std::move(data))
-    {
-        assert(_info.getSize() == _data.size());
-    }
+    Image(const ImageInfo &info, std::string data);
 
     /**
      * @brief Construct a new image filled with the given character.
@@ -70,11 +63,7 @@ public:
      * @param info Image info.
      * @param fillWith Fill image with this byte.
      */
-    Image(const ImageInfo &info, char fillWith = '\0')
-        : _info(info)
-        , _data(info.getSize(), fillWith)
-    {
-    }
+    Image(const ImageInfo &info, char fillWith = '\0');
 
     /**
      * @brief Check wether the image is empty (width = height = 0).
@@ -82,40 +71,28 @@ public:
      * @return true Empty image.
      * @return false Valid image.
      */
-    bool isEmpty() const
-    {
-        return getData() == nullptr;
-    }
+    bool isEmpty() const;
 
     /**
      * @brief Get the image info.
      *
      * @return const ImageInfo& Image info.
      */
-    const ImageInfo &getInfo() const
-    {
-        return _info;
-    }
+    const ImageInfo &getInfo() const;
 
     /**
      * @brief Get the image width in pixels.
      *
      * @return size_t Image width.
      */
-    size_t getWidth() const
-    {
-        return _info.width;
-    }
+    size_t getWidth() const;
 
     /**
      * @brief Get the image height in pixels.
      *
      * @return size_t Image height.
      */
-    size_t getHeight() const
-    {
-        return _info.height;
-    }
+    size_t getHeight() const;
 
     /**
      * @brief Get the number of channels per pixel.
@@ -127,50 +104,35 @@ public:
      *
      * @return size_t Channels per pixel.
      */
-    size_t getChannelCount() const
-    {
-        return _info.channelCount;
-    }
+    size_t getChannelCount() const;
 
     /**
      * @brief Get the size of a channel in bytes.
      *
      * @return size_t Channel size.
      */
-    size_t getChannelSize() const
-    {
-        return _info.channelSize;
-    }
+    size_t getChannelSize() const;
 
     /**
      * @brief Get the size of the image in bytes.
      *
      * @return size_t Image size.
      */
-    size_t getSize() const
-    {
-        return _data.size();
-    }
+    size_t getSize() const;
 
     /**
      * @brief Get the size of a pixel row in bytes.
      *
      * @return size_t Row size.
      */
-    size_t getRowSize() const
-    {
-        return _info.getRowSize();
-    }
+    size_t getRowSize() const;
 
     /**
      * @brief Get the size of a single pixel in bytes.
      *
      * @return size_t Pixel size.
      */
-    size_t getPixelSize() const
-    {
-        return _info.getPixelSize();
-    }
+    size_t getPixelSize() const;
 
     /**
      * @brief Write the given image inside the current one with given offset.
@@ -181,10 +143,7 @@ public:
      * @param x X offset.
      * @param y Y offset.
      */
-    void write(const Image &image, size_t x = 0, size_t y = 0)
-    {
-        write(image.getData(), image.getSize(), x, y);
-    }
+    void write(const Image &image, size_t x = 0, size_t y = 0);
 
     /**
      * @brief Write the given data with the given offset.
@@ -196,11 +155,7 @@ public:
      * @param x X offset.
      * @param y Y offset.
      */
-    void write(const void *data, size_t size, size_t x = 0, size_t y = 0)
-    {
-        auto destination = getData(x, y);
-        std::memcpy(destination, data, size);
-    }
+    void write(const void *data, size_t size, size_t x = 0, size_t y = 0);
 
     /**
      * @brief Get the immutable raw image data with given offset.
@@ -209,11 +164,7 @@ public:
      * @param y Y offset.
      * @return const void* Image data.
      */
-    const void *getData(size_t x = 0, size_t y = 0) const
-    {
-        auto offset = _info.getPixelOffset(x, y);
-        return &_data[offset];
-    }
+    const void *getData(size_t x = 0, size_t y = 0) const;
 
     /**
      * @brief Get the mutable raw image data with given offset.
@@ -222,11 +173,7 @@ public:
      * @param y Y offset.
      * @return const void* Image data.
      */
-    void *getData(size_t x = 0, size_t y = 0)
-    {
-        auto offset = _info.getPixelOffset(x, y);
-        return &_data[offset];
-    }
+    void *getData(size_t x = 0, size_t y = 0);
 
     /**
      * @brief Compare two images pixel by pixel.
@@ -235,10 +182,7 @@ public:
      * @return true Same info and data.
      * @return false Different info or data.
      */
-    bool operator==(const Image &other) const
-    {
-        return _info == other._info && _data == other._data;
-    }
+    bool operator==(const Image &other) const;
 
     /**
      * @brief Compare two images pixel by pixel.
@@ -247,10 +191,7 @@ public:
      * @return true Different info or data.
      * @return false Same info and data.
      */
-    bool operator!=(const Image &other) const
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const Image &other) const;
 
 private:
     ImageInfo _info;

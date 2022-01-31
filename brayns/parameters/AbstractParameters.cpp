@@ -24,6 +24,12 @@
 
 namespace brayns
 {
+AbstractParameters::AbstractParameters(const std::string &name)
+    : _name(name)
+    , _parameters(name)
+{
+}
+
 void AbstractParameters::print()
 {
     Log::info("-= {} parameters =-", _name);
@@ -32,5 +38,10 @@ void AbstractParameters::print()
 po::options_description &AbstractParameters::parameters()
 {
     return _parameters;
+}
+
+std::string AbstractParameters::asString(const bool flag)
+{
+    return flag ? "on" : "off";
 }
 } // namespace brayns

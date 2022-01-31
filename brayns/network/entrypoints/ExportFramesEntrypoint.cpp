@@ -20,6 +20,8 @@
 
 #include "ExportFramesEntrypoint.h"
 
+#include <brayns/common/Log.h>
+
 #include <brayns/utils/image/ImageEncoder.h>
 #include <brayns/utils/image/ImageFormat.h>
 

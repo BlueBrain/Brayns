@@ -21,6 +21,8 @@
 
 #include "GetExportFramesProgressEntrypoint.h"
 
+#include <brayns/network/entrypoint/EntrypointException.h>
+
 namespace brayns
 {
 GetExportFramesProgressEntrypoint::GetExportFramesProgressEntrypoint(std::shared_ptr<FrameExporter> &expt)

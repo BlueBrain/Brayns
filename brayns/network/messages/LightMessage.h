@@ -31,72 +31,13 @@ class LightProperties
 {
 public:
     LightProperties() = default;
+    LightProperties(const Light &light);
 
-    LightProperties(const Light &light)
-    {
-        switch (light._type)
-        {
-        case LightType::DIRECTIONAL:
-            _load<DirectionalLight>(light);
-            break;
-        case LightType::SPHERE:
-            _load<SphereLight>(light);
-            break;
-        case LightType::QUAD:
-            _load<QuadLight>(light);
-            break;
-        case LightType::SPOTLIGHT:
-            _load<SpotLight>(light);
-            break;
-        case LightType::AMBIENT:
-            _load<AmbientLight>(light);
-            break;
-        default:
-            throw std::runtime_error("Unknown light type");
-        }
-    }
-
-    JsonSchema getSchema() const
-    {
-        JsonSchema schema;
-        schema.title = "LightProperties";
-        schema.oneOf = {
-            _getSchema<DirectionalLight>(LightType::DIRECTIONAL),
-            _getSchema<SphereLight>(LightType::SPHERE),
-            _getSchema<QuadLight>(LightType::QUAD),
-            _getSchema<SpotLight>(LightType::SPOTLIGHT),
-            _getSchema<AmbientLight>(LightType::AMBIENT)};
-        return schema;
-    }
-
-    bool serialize(JsonValue &json) const
-    {
-        json = _json;
-        return true;
-    }
-
-    bool deserialize(const JsonValue &json)
-    {
-        _json = json;
-        return true;
-    }
+    JsonSchema getSchema() const;
+    bool serialize(JsonValue &json) const;
+    bool deserialize(const JsonValue &json);
 
 private:
-    template<typename T>
-    void _load(const Light &baseLight)
-    {
-        auto &light = dynamic_cast<const T &>(baseLight);
-        _json = Json::serialize(light);
-    }
-
-    template<typename T>
-    JsonSchema _getSchema(LightType type) const
-    {
-        auto schema = Json::getSchema<T>();
-        schema.title = GetEnumName::of(type);
-        return schema;
-    }
-
     JsonValue _json;
 };
 

@@ -21,8 +21,9 @@
 
 #pragma once
 
+#include <brayns/engine/Scene.h>
+
 #include <brayns/json/JsonBuffer.h>
-#include <brayns/network/common/ExtractModel.h>
 
 #include "TransferFunctionAdapter.h"
 
@@ -34,22 +35,10 @@ public:
     using Buffer = JsonBuffer<TransferFunction>;
 
     ModelTransferFunction() = default;
+    ModelTransferFunction(Scene &scene);
 
-    ModelTransferFunction(Scene &scene)
-        : _scene(&scene)
-    {
-    }
-
-    void setId(size_t id)
-    {
-        ExtractModel::fromId(*_scene, id);
-    }
-
-    void setTransferFunction(const Buffer &buffer)
-    {
-        auto &transferFunction = _scene->getTransferFunction();
-        buffer.deserialize(transferFunction);
-    }
+    void setId(size_t id);
+    void setTransferFunction(const Buffer &buffer);
 
 private:
     Scene *_scene = nullptr;

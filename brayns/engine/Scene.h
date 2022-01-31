@@ -72,16 +72,11 @@ public:
     /**
         Returns the bounding box of the scene
     */
-    const Boxd &getBounds() const
-    {
-        return _bounds;
-    }
+    const Boxd &getBounds() const;
 
     /** Gets the light manager */
-    LightManager &getLightManager()
-    {
-        return _lightManager;
-    }
+    LightManager &getLightManager();
+
     /**
         Adds a model to the scene
         @throw std::runtime_error if model is empty
@@ -120,10 +115,7 @@ public:
 
     ModelDescriptorPtr getModel(const size_t id) const;
 
-    const std::vector<ModelDescriptorPtr> &getModels() const
-    {
-        return _modelDescriptors;
-    }
+    const std::vector<ModelDescriptorPtr> &getModels() const;
 
     /**
         Builds a default scene made of a Cornell box, a reflective cube, and
@@ -154,10 +146,8 @@ public:
     /**
        @return the clip planes
     */
-    const std::vector<ClipPlanePtr> &getClipPlanes() const
-    {
-        return _clipPlanes;
-    }
+    const std::vector<ClipPlanePtr> &getClipPlanes() const;
+
     /** @return the current size in bytes of the loaded geometry. */
     size_t getSizeInBytes() const;
 
@@ -171,21 +161,13 @@ public:
      */
     void setMaterialsColorMap(MaterialsColorMap colorMap);
 
-    MaterialPtr getBackgroundMaterial() const
-    {
-        return _backgroundMaterial;
-    }
+    MaterialPtr getBackgroundMaterial() const;
 
     /** @return the transfer function used for volumes and simulations. */
-    TransferFunction &getTransferFunction()
-    {
-        return _transferFunction;
-    }
+    TransferFunction &getTransferFunction();
+
     /** @return the transfer function used for volumes and simulations. */
-    const TransferFunction &getTransferFunction() const
-    {
-        return _transferFunction;
-    }
+    const TransferFunction &getTransferFunction() const;
 
     /**
      * Adds the list of models to the scene
@@ -200,24 +182,17 @@ public:
     void visitModels(const std::function<void(Model &)> &functor);
 
     /** @internal */
-    auto acquireReadAccess() const
-    {
-        return std::shared_lock<std::shared_timed_mutex>(_modelMutex);
-    }
+    std::shared_lock<std::shared_timed_mutex> acquireReadAccess() const;
 
     /** @internal */
     void copyFrom(const Scene &rhs);
 
-    virtual void copyFromImpl(const Scene &)
-    {
-    }
+    virtual void copyFromImpl(const Scene &rhs);
 
 protected:
     /** @return True if this scene supports scene updates from any thread. */
-    virtual bool supportsConcurrentSceneUpdates() const
-    {
-        return false;
-    }
+    virtual bool supportsConcurrentSceneUpdates() const;
+
     void _computeBounds();
     void _updateAnimationParameters();
 

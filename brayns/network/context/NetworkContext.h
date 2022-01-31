@@ -21,17 +21,11 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/FrameBuffer.h>
-#include <brayns/engine/Scene.h>
-
 #include <brayns/network/binary/BinaryRequestManager.h>
 #include <brayns/network/entrypoint/EntrypointManager.h>
 #include <brayns/network/socket/ConnectionManager.h>
 #include <brayns/network/stream/StreamManager.h>
 #include <brayns/network/tasks/NetworkTaskManager.h>
-
-#include <brayns/parameters/ParametersManager.h>
 
 #include <brayns/pluginapi/PluginAPI.h>
 
@@ -49,72 +43,49 @@ public:
      *
      * @param api Brayns API.
      */
-    NetworkContext(PluginAPI &api)
-        : _api(&api)
-        , _entrypoints(*this)
-        , _stream(*this)
-    {
-    }
+    NetworkContext(PluginAPI &api);
 
     /**
      * @brief Get Brayns API to access engine, parameters, etc.
      *
      * @return PluginAPI& Brayns API.
      */
-    PluginAPI &getApi()
-    {
-        return *_api;
-    }
+    PluginAPI &getApi();
 
     /**
      * @brief Get registered entrypoints.
      *
      * @return EntrypointManager& Entrypoint manager with all entrypoints.
      */
-    EntrypointManager &getEntrypoints()
-    {
-        return _entrypoints;
-    }
+    EntrypointManager &getEntrypoints();
 
     /**
      * @brief Get all connected clients with the buffered requests.
      *
      * @return ConnectionManager& Connection manager with all clients.
      */
-    ConnectionManager &getConnections()
-    {
-        return _connections;
-    }
+    ConnectionManager &getConnections();
 
     /**
      * @brief Get the image stream monitor.
      *
      * @return StreamManager& Stream manager to monitor image stream.
      */
-    StreamManager &getStream()
-    {
-        return _stream;
-    }
+    StreamManager &getStream();
 
     /**
      * @brief Get the tasks running in parallel of the main loop.
      *
      * @return NetworkTaskManager& Task manager with all running tasks.
      */
-    NetworkTaskManager &getTasks()
-    {
-        return _tasks;
-    }
+    NetworkTaskManager &getTasks();
 
     /**
      * @brief Get the binary model upload manager.
      *
      * @return BinaryRequestManager& Binary manager with tasks and chunks.
      */
-    BinaryRequestManager &getBinary()
-    {
-        return _binary;
-    }
+    BinaryRequestManager &getBinary();
 
 private:
     PluginAPI *_api;

@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include <brayns/network/common/RateLimiter.h>
+#include <utility>
 
-#include <memory>
+#include <brayns/network/common/RateLimiter.h>
 
 namespace brayns
 {
@@ -41,10 +41,7 @@ public:
      *
      * @param fps
      */
-    void setFps(size_t fps)
-    {
-        _limiter = RateLimiter::fromFps(fps);
-    }
+    void setFps(size_t fps);
 
     /**
      * @brief Check if the stream is controlled.
@@ -54,21 +51,14 @@ public:
      * @return true Controlled.
      * @return false Automatic.
      */
-    bool isControlled() const
-    {
-        return _controlled;
-    }
+    bool isControlled() const;
 
     /**
      * @brief Set the stream control mode.
      *
      * @param controlled True if controlled.
      */
-    void setControlled(bool controlled)
-    {
-        _controlled = controlled;
-        _triggered = false;
-    }
+    void setControlled(bool controlled);
 
     /**
      * @brief Check if the image stream has been triggered.
@@ -76,28 +66,19 @@ public:
      * @return true Client triggered the image stream.
      * @return false Nothing triggered.
      */
-    bool isTriggered() const
-    {
-        return _triggered;
-    }
+    bool isTriggered() const;
 
     /**
      * @brief Trigger the image stream in controlled mode.
      *
      */
-    void trigger()
-    {
-        _triggered = true;
-    }
+    void trigger();
 
     /**
      * @brief Reset the trigger in control mode.
      *
      */
-    void resetTrigger()
-    {
-        _triggered = false;
-    }
+    void resetTrigger();
 
     /**
      * @brief Call the given functor with maximum FPS rate limit.
@@ -142,10 +123,7 @@ public:
      *
      * @return ImageStreamMonitor& Image stream monitor.
      */
-    ImageStreamMonitor &getMonitor()
-    {
-        return _imageStream;
-    }
+    ImageStreamMonitor &getMonitor();
 
 private:
     NetworkContext *_context;

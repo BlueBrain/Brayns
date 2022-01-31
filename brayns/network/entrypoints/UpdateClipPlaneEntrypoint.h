@@ -29,32 +29,8 @@ namespace brayns
 class UpdateClipPlaneEntrypoint : public Entrypoint<ClipPlane, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "update-clip-plane";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Update a clip plane with the given coefficients";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto id = params.getID();
-        auto &plane = params.getPlane();
-        auto &engine = getApi().getEngine();
-        auto &scene = engine.getScene();
-        auto clipPlane = scene.getClipPlane(id);
-        if (!clipPlane)
-        {
-            throw EntrypointException("No clip plane found with ID " + std::to_string(id));
-        }
-        clipPlane->setPlane(plane);
-        engine.triggerRender();
-        request.notify(clipPlane);
-        request.reply(EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns
