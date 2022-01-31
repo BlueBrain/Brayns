@@ -47,7 +47,7 @@ Optionally, to build the core plugins of Brayns, the following components are re
 
 * HDF5 development files
 
-Brayns uses the further dependencies, but if the are not present on the system, it will download them by itself during build. If they are present on the system, the build and compiling process will be speed up:
+Brayns uses further dependencies, but if the are not present on the system, it will download them by itself during build. If they are present on the system, the build and compiling process will be speed up:
 
 * GLFW 3.3.5 (https://github.com/glfw/glfw/tree/3.3.5)
 * ImGui (https://github.com/ocornut/imgui)
