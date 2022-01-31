@@ -91,6 +91,9 @@ set(BRAYNSNETWORK_SOURCES
   socket/NetworkRequest.cpp
   socket/NetworkSocket.cpp
   stream/StreamManager.cpp
+  tasks/NetworkTask.cpp
+  tasks/NetworkTaskManager.cpp
+  tasks/NetworkTaskMonitor.cpp
 )
 
 set(BRAYNSNETWORK_INCLUDE_DIR ${PROJECT_SOURCE_DIR})
