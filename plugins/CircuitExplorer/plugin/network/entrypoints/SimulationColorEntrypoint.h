@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2021 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: nadir.romanguerrero@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -23,18 +22,12 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <plugin/api/CircuitColorManager.h>
-#include <plugin/network/messages/TraceAnterogradeMessage.h>
+#include <plugin/network/messages/SimulationColorMessage.h>
 
-class TraceAnterogradeEntrypoint : public brayns::Entrypoint<TraceAnterogradeMessage, brayns::EmptyMessage>
+class SimulationColorEntrypoint : public brayns::Entrypoint<SimulationColorMessage, brayns::EmptyMessage>
 {
 public:
-    TraceAnterogradeEntrypoint(CircuitColorManager &manager);
-
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
-
-private:
-    CircuitColorManager &_manager;
 };

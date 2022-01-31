@@ -23,7 +23,6 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <plugin/network/adapters/MaterialAdapter.h>
 #include <plugin/network/messages/SetMaterialsMessage.h>
 
 namespace brayns
@@ -31,30 +30,8 @@ namespace brayns
 class SetMaterialsEntrypoint : public Entrypoint<SetMaterialsMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "set-materials";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Update the corresponding materials with the given properties";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto &materials = params.materials;
-        auto &scene = getApi().getScene();
-        for (const auto &buffer : materials)
-        {
-            MaterialProxy material(scene);
-            buffer.deserialize(material);
-            material.commit();
-        }
-        scene.markModified();
-        triggerRender();
-        request.reply(EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

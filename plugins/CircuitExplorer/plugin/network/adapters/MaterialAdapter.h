@@ -26,8 +26,6 @@
 #include <brayns/engine/Scene.h>
 #include <brayns/json/JsonAdapterMacro.h>
 #include <brayns/json/JsonBuffer.h>
-#include <brayns/network/common/ExtractMaterial.h>
-#include <brayns/network/common/ExtractModel.h>
 
 #include <plugin/api/MaterialUtils.h>
 
@@ -37,34 +35,12 @@ class MaterialRef
 {
 public:
     MaterialRef() = default;
+    MaterialRef(Material &material);
 
-    MaterialRef(Material &material)
-        : _material(&material)
-    {
-    }
-
-    bool hasMaterial() const
-    {
-        return _material;
-    }
-
-    Material &getMaterial() const
-    {
-        return *_material;
-    }
-
-    void setMaterial(Material &material)
-    {
-        _material = &material;
-    }
-
-    void commit()
-    {
-        if (_material)
-        {
-            _material->commit();
-        }
-    }
+    bool hasMaterial() const;
+    Material &getMaterial() const;
+    void setMaterial(Material &material);
+    void commit();
 
 private:
     Material *_material = nullptr;
@@ -74,175 +50,43 @@ class BaseMaterial : public MaterialRef
 {
 public:
     BaseMaterial() = default;
+    BaseMaterial(Material &material);
 
-    BaseMaterial(Material &material)
-        : MaterialRef(material)
-    {
-    }
-
-    const Vector3d &getDiffuseColor() const
-    {
-        return hasMaterial() ? getMaterial().getDiffuseColor() : _getDefaultVector();
-    }
-
-    void setDiffuseColor(const Vector3d &value) const
-    {
-        if (hasMaterial())
-        {
-            getMaterial().setDiffuseColor(value);
-        }
-    }
-
-    const Vector3d &getSpecularColor() const
-    {
-        return hasMaterial() ? getMaterial().getSpecularColor() : _getDefaultVector();
-    }
-
-    void setSpecularColor(const Vector3d &value) const
-    {
-        if (hasMaterial())
-        {
-            getMaterial().setSpecularColor(value);
-        }
-    }
-
-    double getSpecularExponent() const
-    {
-        return hasMaterial() ? getMaterial().getSpecularExponent() : 0.0;
-    }
-
-    void setSpecularExponent(double value) const
-    {
-        if (hasMaterial())
-        {
-            getMaterial().setSpecularExponent(value);
-        }
-    }
-
-    double getReflectionIndex() const
-    {
-        return hasMaterial() ? getMaterial().getReflectionIndex() : 0.0;
-    }
-
-    void setReflectionIndex(double value) const
-    {
-        if (hasMaterial())
-        {
-            getMaterial().setReflectionIndex(value);
-        }
-    }
-
-    double getOpacity() const
-    {
-        return hasMaterial() ? getMaterial().getOpacity() : 0.0;
-    }
-
-    void setOpacity(double value) const
-    {
-        if (hasMaterial())
-        {
-            getMaterial().setOpacity(value);
-        }
-    }
-
-    double getRefractionIndex() const
-    {
-        return hasMaterial() ? getMaterial().getRefractionIndex() : 0.0;
-    }
-
-    void setRefractionIndex(double value) const
-    {
-        if (hasMaterial())
-        {
-            getMaterial().setRefractionIndex(value);
-        }
-    }
-
-    double getEmission() const
-    {
-        return hasMaterial() ? getMaterial().getEmission() : 0.0;
-    }
-
-    void setEmission(double value) const
-    {
-        if (hasMaterial())
-        {
-            getMaterial().setEmission(value);
-        }
-    }
-
-    double getGlossiness() const
-    {
-        return hasMaterial() ? getMaterial().getGlossiness() : 0.0;
-    }
-
-    void setGlossiness(double value) const
-    {
-        if (hasMaterial())
-        {
-            getMaterial().setGlossiness(value);
-        }
-    }
+    const Vector3d &getDiffuseColor() const;
+    void setDiffuseColor(const Vector3d &value) const;
+    const Vector3d &getSpecularColor() const;
+    void setSpecularColor(const Vector3d &value) const;
+    double getSpecularExponent() const;
+    void setSpecularExponent(double value) const;
+    double getReflectionIndex() const;
+    void setReflectionIndex(double value) const;
+    double getOpacity() const;
+    void setOpacity(double value) const;
+    double getRefractionIndex() const;
+    void setRefractionIndex(double value) const;
+    double getEmission() const;
+    void setEmission(double value) const;
+    double getGlossiness() const;
+    void setGlossiness(double value) const;
 
 private:
-    static const Vector3d &_getDefaultVector()
-    {
-        static const Vector3d value{};
-        return value;
-    }
+    static const Vector3d &_getDefaultVector();
 };
 
 class ExtendedMaterial : public BaseMaterial
 {
 public:
     ExtendedMaterial() = default;
+    ExtendedMaterial(Material &material);
 
-    ExtendedMaterial(Material &material)
-        : BaseMaterial(material)
-    {
-    }
-
-    bool getSimulationDataCast() const
-    {
-        return _valueOr(std::string(MATERIAL_PROPERTY_CAST_USER_DATA), false);
-    }
-
-    void setSimulationDataCast(bool value) const
-    {
-        _setValue(std::string(MATERIAL_PROPERTY_CAST_USER_DATA), value);
-    }
-
-    MaterialShadingMode getShadingMode() const
-    {
-        auto code = _valueOr(std::string(MATERIAL_PROPERTY_SHADING_MODE), 0);
-        return MaterialShadingMode(code);
-    }
-
-    void setShadingMode(MaterialShadingMode value) const
-    {
-        _setValue(std::string(MATERIAL_PROPERTY_SHADING_MODE), int(value));
-    }
-
-    MaterialClippingMode getClippingMode() const
-    {
-        auto code = _valueOr(std::string(MATERIAL_PROPERTY_CLIPPING_MODE), 0);
-        return MaterialClippingMode(code);
-    }
-
-    void setClippingMode(MaterialClippingMode value) const
-    {
-        _setValue(std::string(MATERIAL_PROPERTY_CLIPPING_MODE), int(value));
-    }
-
-    double getUserParameter() const
-    {
-        return _valueOr(std::string(MATERIAL_PROPERTY_USER_PARAMETER), 0.0);
-    }
-
-    void setUserParameter(double value) const
-    {
-        _setValue(std::string(MATERIAL_PROPERTY_USER_PARAMETER), value);
-    }
+    bool getSimulationDataCast() const;
+    void setSimulationDataCast(bool value) const;
+    MaterialShadingMode getShadingMode() const;
+    void setShadingMode(MaterialShadingMode value) const;
+    MaterialClippingMode getClippingMode() const;
+    void setClippingMode(MaterialClippingMode value) const;
+    double getUserParameter() const;
+    void setUserParameter(double value) const;
 
 private:
     template<typename T>
@@ -270,40 +114,12 @@ class MaterialProxy : public ExtendedMaterial
 {
 public:
     MaterialProxy() = default;
+    MaterialProxy(Scene &scene);
 
-    MaterialProxy(Scene &scene)
-        : _scene(&scene)
-    {
-    }
-
-    size_t getModelId() const
-    {
-        return _model ? _model->getModelID() : 0;
-    }
-
-    void setModelId(size_t id)
-    {
-        if (!_scene)
-        {
-            return;
-        }
-        _model = &ExtractModel::fromId(*_scene, id);
-    }
-
-    size_t getMaterialId() const
-    {
-        return _materialId;
-    }
-
-    void setMaterialId(size_t id)
-    {
-        if (!_model)
-        {
-            return;
-        }
-        _materialId = id;
-        setMaterial(ExtractMaterial::fromId(*_model, id));
-    }
+    size_t getModelId() const;
+    void setModelId(size_t id);
+    size_t getMaterialId() const;
+    void setMaterialId(size_t id);
 
 private:
     Scene *_scene = nullptr;

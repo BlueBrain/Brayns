@@ -42,26 +42,10 @@ public:
     std::vector<float> getFrameDataImpl(const uint32_t frame) final;
 
     const std::vector<float> &getCurrentRadiiFrame() const noexcept;
-
-    size_t getRadiiFrameSize() const noexcept
-    {
-        return _radiiFrameSize;
-    }
-
-    void setLastUsedFrame(const uint32_t frame)
-    {
-        _lastRadiiFrame = frame;
-    }
-
-    uint32_t getLastUsedFrame() const noexcept
-    {
-        return _lastRadiiFrame;
-    }
-
-    bool isReady() const final
-    {
-        return _ready;
-    }
+    size_t getRadiiFrameSize() const noexcept;
+    void setLastUsedFrame(const uint32_t frame);
+    uint32_t getLastUsedFrame() const noexcept;
+    bool isReady() const final;
 
 private:
     const std::string _h5FilePath;

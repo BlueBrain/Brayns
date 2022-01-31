@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2021 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: nadir.romanguerrero@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,22 +18,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "SimulationColorEntrypoint.h"
 
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/common/ExtractModel.h>
 
-#include <plugin/api/CircuitColorManager.h>
-#include <plugin/network/messages/TraceAnterogradeMessage.h>
+#include <plugin/api/MaterialUtils.h>
 
-class TraceAnterogradeEntrypoint : public brayns::Entrypoint<TraceAnterogradeMessage, brayns::EmptyMessage>
+std::string SimulationColorEntrypoint::getName() const
 {
-public:
-    TraceAnterogradeEntrypoint(CircuitColorManager &manager);
+    return "set-simulation-color";
+}
 
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
+std::string SimulationColorEntrypoint::getDescription() const
+{
+    return "Enables or disables the color of a given Circuit Model by its "
+           "simulation values";
+}
 
-private:
-    CircuitColorManager &_manager;
-};
+void SimulationColorEntrypoint::onRequest(const Request &request)
+{
+    auto params = request.getParams();
+    auto &scene = getApi().getScene();
+    auto &model = brayns::ExtractModel::fromId(scene, params.model_id);
+    CircuitExplorerMaterial::setSimulationColorEnabled(model.getModel(), params.enabled);
+    request.reply(brayns::EmptyMessage());
+}

@@ -31,10 +31,7 @@
 class BBPLoader : public brayns::Loader<BBPLoaderParameters>
 {
 public:
-    BBPLoader(CircuitColorManager &colorManager)
-        : _colorManager(colorManager)
-    {
-    }
+    BBPLoader(CircuitColorManager &colorManager);
 
     /**
      * @brief getSupportedExtensions returns a list with supported file

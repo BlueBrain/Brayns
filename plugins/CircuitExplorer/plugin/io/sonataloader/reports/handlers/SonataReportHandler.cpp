@@ -66,4 +66,9 @@ std::vector<float> SonataReportHandler::getFrameDataImpl(const uint32_t frame)
 
     return data;
 }
+
+bool SonataReportHandler::isReady() const
+{
+    return _ready;
+}
 } // namespace sonataloader

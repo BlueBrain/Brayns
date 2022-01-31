@@ -90,10 +90,7 @@ public:
     /**
      * @brief Construct an exception from the error message.
      */
-    MovieCreationException(const std::string &message)
-        : std::runtime_error(message)
-    {
-    }
+    MovieCreationException(const std::string &message);
 };
 
 /**

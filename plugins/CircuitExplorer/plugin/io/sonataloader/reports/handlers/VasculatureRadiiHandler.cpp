@@ -73,4 +73,24 @@ const std::vector<float> &VasculatureRadiiHandler::getCurrentRadiiFrame() const 
 {
     return _radii;
 }
+
+size_t VasculatureRadiiHandler::getRadiiFrameSize() const noexcept
+{
+    return _radiiFrameSize;
+}
+
+void VasculatureRadiiHandler::setLastUsedFrame(const uint32_t frame)
+{
+    _lastRadiiFrame = frame;
+}
+
+uint32_t VasculatureRadiiHandler::getLastUsedFrame() const noexcept
+{
+    return _lastRadiiFrame;
+}
+
+bool VasculatureRadiiHandler::isReady() const
+{
+    return _ready;
+}
 } // namespace sonataloader

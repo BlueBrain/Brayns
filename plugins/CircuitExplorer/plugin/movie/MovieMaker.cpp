@@ -1125,6 +1125,11 @@ private:
 };
 } // namespace
 
+MovieCreationException::MovieCreationException(const std::string &message)
+    : std::runtime_error(message)
+{
+}
+
 void MovieMaker::createMovie(const MovieInfo &info)
 {
     FfmpegMovieMaker::createMovie(info);

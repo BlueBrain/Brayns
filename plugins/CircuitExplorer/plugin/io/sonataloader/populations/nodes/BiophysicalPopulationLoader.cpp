@@ -22,6 +22,11 @@
 
 namespace sonataloader
 {
+BiophysicalPopulationLoader::BiophysicalPopulationLoader()
+    : CommonNodeLoader("biophysical")
+{
+}
+
 std::vector<MorphologyInstance::Ptr> BiophysicalPopulationLoader::load(
     const SonataConfig::Data &networkData,
     const SonataNodePopulationParameters &lc,

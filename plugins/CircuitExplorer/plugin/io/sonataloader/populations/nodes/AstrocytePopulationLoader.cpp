@@ -22,6 +22,11 @@
 
 namespace sonataloader
 {
+AstrocytePopulationLoader::AstrocytePopulationLoader()
+    : CommonNodeLoader("astrocyte")
+{
+}
+
 std::vector<MorphologyInstance::Ptr> AstrocytePopulationLoader::load(
     const SonataConfig::Data &networkData,
     const SonataNodePopulationParameters &lc,

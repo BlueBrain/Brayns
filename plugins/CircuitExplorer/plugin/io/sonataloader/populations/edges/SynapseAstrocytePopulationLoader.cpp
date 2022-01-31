@@ -24,6 +24,11 @@
 
 namespace sonataloader
 {
+SynapseAstrocytePopulationLoader::SynapseAstrocytePopulationLoader()
+    : EdgePopulationLoader("synapse_astrocyte")
+{
+}
+
 std::vector<SynapseGroup::Ptr> SynapseAstrocytePopulationLoader::load(
     const SonataConfig::Data &networkData,
     const SonataEdgePopulationParameters &lc,

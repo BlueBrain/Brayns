@@ -21,12 +21,9 @@
 
 #pragma once
 
-#include <brayns/engine/Material.h>
-#include <brayns/network/common/ExtractModel.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/GetModelMessage.h>
 
-#include <plugin/api/MaterialUtils.h>
 #include <plugin/network/messages/GetMaterialIdsMessage.h>
 
 namespace brayns
@@ -34,25 +31,8 @@ namespace brayns
 class SetMaterialExtraAttributesEntrypoint : public Entrypoint<GetModelMessage, EmptyMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "set-material-extra-attributes";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Add extra material attributes necessary for the Circuit "
-               "Explorer renderer";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto &scene = getApi().getScene();
-        auto &descriptor = ExtractModel::fromId(scene, params.id);
-        CircuitExplorerMaterial::addExtraAttributes(descriptor.getModel());
-        triggerRender();
-        request.reply(EmptyMessage());
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };
 } // namespace brayns

@@ -167,6 +167,11 @@ std::string getCircuitFilePath(const brion::BlueConfig &config)
 }
 } // namespace
 
+BBPLoader::BBPLoader(CircuitColorManager &colorManager)
+    : _colorManager(colorManager)
+{
+}
+
 std::vector<std::string> BBPLoader::getSupportedExtensions() const
 {
     return {"BlueConfig", "CircuitConfig"};

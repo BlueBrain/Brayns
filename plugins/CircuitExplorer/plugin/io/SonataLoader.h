@@ -29,10 +29,7 @@
 class SonataLoader : public brayns::Loader<SonataLoaderParameters>
 {
 public:
-    SonataLoader(CircuitColorManager &colorManager)
-        : _colorManager(colorManager)
-    {
-    }
+    SonataLoader(CircuitColorManager &colorManager);
 
     /**
      * @brief getSupportedExtensions returns a list with supported file

@@ -93,6 +93,11 @@ std::string getEndFeetAreasPath(
 }
 } // namespace
 
+EndFootPopulationLoader::EndFootPopulationLoader()
+    : EdgePopulationLoader("endfoot")
+{
+}
+
 std::vector<std::unique_ptr<SynapseGroup>> EndFootPopulationLoader::load(
     const SonataConfig::Data &networkData,
     const SonataEdgePopulationParameters &lc,

@@ -42,10 +42,7 @@ public:
 
     std::vector<float> getFrameDataImpl(const uint32_t frame) final;
 
-    bool isReady() const final
-    {
-        return _ready;
-    }
+    bool isReady() const final;
 
 private:
     const std::string _h5FilePath;

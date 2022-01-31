@@ -21,13 +21,10 @@
 
 #pragma once
 
-#include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/json/JsonAdapterMacro.h>
 #include <brayns/json/JsonBuffer.h>
-#include <brayns/network/common/ExtractMaterial.h>
-#include <brayns/network/common/ExtractModel.h>
 
 #include "MaterialAdapter.h"
 
@@ -37,67 +34,16 @@ class MaterialRangeProxy
 {
 public:
     MaterialRangeProxy() = default;
+    MaterialRangeProxy(Scene &scene);
 
-    MaterialRangeProxy(Scene &scene)
-        : _scene(&scene)
-    {
-    }
-
-    void setModelId(size_t id)
-    {
-        _model = &ExtractModel::fromId(*_scene, id);
-    }
-
-    void setMaterialIds(const std::vector<size_t> &ids)
-    {
-        if (!_model)
-        {
-            return;
-        }
-        if (ids.empty())
-        {
-            _loadAllMaterials();
-            return;
-        }
-        _loadMaterialIds(ids);
-    }
-
-    void setProperties(const JsonBuffer<ExtendedMaterial> &properties)
-    {
-        _properties = properties;
-    }
-
-    void commit() const
-    {
-        for (auto material : _materials)
-        {
-            _properties.deserialize(material);
-            material.commit();
-        }
-    }
+    void setModelId(size_t id);
+    void setMaterialIds(const std::vector<size_t> &ids);
+    void setProperties(const JsonBuffer<ExtendedMaterial> &properties);
+    void commit() const;
 
 private:
-    void _loadAllMaterials()
-    {
-        auto &model = _model->getModel();
-        auto &materials = model.getMaterials();
-        for (const auto &pair : materials)
-        {
-            auto &material = *pair.second;
-            _materials.push_back(material);
-        }
-    }
-
-    void _loadMaterialIds(const std::vector<size_t> &ids)
-    {
-        _materials.clear();
-        _materials.reserve(ids.size());
-        for (auto id : ids)
-        {
-            auto &material = ExtractMaterial::fromId(*_model, id);
-            _materials.push_back(material);
-        }
-    }
+    void _loadAllMaterials();
+    void _loadMaterialIds(const std::vector<size_t> &ids);
 
     Scene *_scene = nullptr;
     ModelDescriptor *_model = nullptr;

@@ -23,6 +23,11 @@
 
 namespace sonataloader
 {
+PointNeuronPopulationLoader::PointNeuronPopulationLoader()
+    : NodePopulationLoader("point_neuron")
+{
+}
+
 std::vector<MorphologyInstance::Ptr> PointNeuronPopulationLoader::load(
     const SonataConfig::Data &networkData,
     const SonataNodePopulationParameters &lc,

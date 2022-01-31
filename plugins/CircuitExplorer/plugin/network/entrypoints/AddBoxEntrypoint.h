@@ -21,70 +21,15 @@
 
 #pragma once
 
-#include <brayns/common/Log.h>
-#include <brayns/common/geometry/TriangleMesh.h>
-
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <plugin/api/MaterialUtils.h>
 #include <plugin/network/messages/AddBoxMessage.h>
 #include <plugin/network/messages/AddShapeMessage.h>
-
-class BoxModel
-{
-public:
-    static size_t add(brayns::Scene &scene, const AddBoxMessage &params)
-    {
-        // Create box model
-        auto model = scene.createModel();
-
-        // Create box material instance
-        const auto matId = CircuitExplorerMaterial::create(*model, brayns::Vector3f(params.color), params.color.a);
-
-        // Extract box info
-        auto &minCorner = params.min_corner;
-        auto &maxCorner = params.max_corner;
-
-        // Create box mesh
-        auto mesh = brayns::createBox(minCorner, maxCorner);
-        auto &meshes = model->getTriangleMeshes();
-        meshes[matId] = mesh;
-        model->markInstancesDirty();
-
-        // Box model name
-        size_t count = scene.getNumModels();
-        auto name = params.name;
-        if (name.empty())
-        {
-            name = "box_" + std::to_string(count);
-        }
-
-        // Register box model and return its ID
-        return scene.addModel(std::make_shared<brayns::ModelDescriptor>(std::move(model), name));
-    }
-};
 
 class AddBoxEntrypoint : public brayns::Entrypoint<AddBoxMessage, AddShapeMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "add-box";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Add a visual 3D box to the scene";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto &scene = getApi().getScene();
-        brayns::Log::info("[CE] Building Box model.");
-        auto id = BoxModel::add(scene, params);
-        scene.markModified();
-        triggerRender();
-        request.reply({id});
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };

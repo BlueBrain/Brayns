@@ -71,6 +71,11 @@ void informProgress(const brayns::LoaderProgress &cb, const std::string &msg, fl
 }
 } // namespace
 
+SonataLoader::SonataLoader(CircuitColorManager &colorManager)
+    : _colorManager(colorManager)
+{
+}
+
 std::vector<std::string> SonataLoader::getSupportedExtensions() const
 {
     return std::vector<std::string>{".json"};

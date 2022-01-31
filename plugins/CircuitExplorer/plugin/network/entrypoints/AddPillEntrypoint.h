@@ -21,85 +21,15 @@
 
 #pragma once
 
-#include <brayns/common/Log.h>
-#include <brayns/common/geometry/SDFGeometry.h>
-
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <plugin/api/MaterialUtils.h>
 #include <plugin/network/messages/AddPillMessage.h>
 #include <plugin/network/messages/AddShapeMessage.h>
-
-class PillModel
-{
-public:
-    static size_t add(brayns::Scene &scene, const AddPillMessage &params)
-    {
-        // Create pill model
-        auto model = scene.createModel();
-
-        // Create pill material instance
-        const auto matId = CircuitExplorerMaterial::create(*model, brayns::Vector3f(params.color), params.color.a);
-
-        // Extract pill info
-        auto type = params.type;
-        auto &p1 = params.p1;
-        auto &p2 = params.p2;
-        auto radius1 = params.radius1;
-        auto radius2 = params.radius2;
-
-        // Build geometry
-        brayns::SDFGeometry sdf;
-        switch (type)
-        {
-        case PillType::Pill:
-            sdf = brayns::createSDFPill(p1, p2, radius1);
-            break;
-        case PillType::ConePill:
-            sdf = brayns::createSDFConePill(p1, p2, radius1, radius2);
-            break;
-        case PillType::SigmoidPill:
-            sdf = brayns::createSDFConePillSigmoid(p1, p2, radius1, radius2);
-            break;
-        }
-
-        // Add geometry
-        model->addSDFGeometry(matId, sdf, {});
-
-        // Pill model name
-        size_t count = scene.getNumModels();
-        auto name = params.name;
-        if (name.empty())
-        {
-            name = brayns::GetEnumName::of(type) + "_" + std::to_string(count);
-        }
-
-        // Register pill model and return its ID
-        return scene.addModel(std::make_shared<brayns::ModelDescriptor>(std::move(model), name));
-    }
-};
 
 class AddPillEntrypoint : public brayns::Entrypoint<AddPillMessage, AddShapeMessage>
 {
 public:
-    virtual std::string getName() const override
-    {
-        return "add-pill";
-    }
-
-    virtual std::string getDescription() const override
-    {
-        return "Add a visual 3D pill to the scene";
-    }
-
-    virtual void onRequest(const Request &request) override
-    {
-        auto params = request.getParams();
-        auto &scene = getApi().getScene();
-        brayns::Log::info("[CE] Building Pill model.");
-        auto id = PillModel::add(scene, params);
-        scene.markModified();
-        triggerRender();
-        request.reply({id});
-    }
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 };

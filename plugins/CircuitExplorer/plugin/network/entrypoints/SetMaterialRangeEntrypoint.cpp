@@ -19,22 +19,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "SetMaterialRangeEntrypoint.h"
 
-#include <brayns/network/entrypoint/Entrypoint.h>
-
-#include <plugin/api/CircuitColorManager.h>
-#include <plugin/network/messages/TraceAnterogradeMessage.h>
-
-class TraceAnterogradeEntrypoint : public brayns::Entrypoint<TraceAnterogradeMessage, brayns::EmptyMessage>
+namespace brayns
 {
-public:
-    TraceAnterogradeEntrypoint(CircuitColorManager &manager);
+std::string SetMaterialRangeEntrypoint::getName() const
+{
+    return "set-material-range";
+}
 
-    virtual std::string getName() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
+std::string SetMaterialRangeEntrypoint::getDescription() const
+{
+    return "Update the corresponding materials with common properties";
+}
 
-private:
-    CircuitColorManager &_manager;
-};
+void SetMaterialRangeEntrypoint::onRequest(const Request &request)
+{
+    auto &engine = getApi().getEngine();
+    auto &scene = engine.getScene();
+    MaterialRangeProxy materialRange(scene);
+    request.getParams(materialRange);
+    materialRange.commit();
+    scene.markModified();
+    engine.triggerRender();
+    request.reply(EmptyMessage());
+}
+} // namespace brayns
