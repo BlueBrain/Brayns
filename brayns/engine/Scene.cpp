@@ -25,8 +25,7 @@
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/engine/Material.h>
 
-#include <brayns/utils/Filesystem.h>
-
+#include <filesystem>
 #include <fstream>
 #include <mutex> // std::unique_lock
 

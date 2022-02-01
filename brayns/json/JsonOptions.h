@@ -21,10 +21,10 @@
 
 #pragma once
 
+#include <optional>
+
 #include "JsonSchema.h"
 #include "JsonType.h"
-
-#include <boost/optional.hpp>
 
 namespace brayns
 {
@@ -81,61 +81,61 @@ struct JsonOptions
      * @brief Property name.
      *
      */
-    boost::optional<std::string> title;
+    std::optional<std::string> title;
 
     /**
      * @brief Property description.
      *
      */
-    boost::optional<std::string> description;
+    std::optional<std::string> description;
 
     /**
      * @brief Check wether the property is required.
      *
      */
-    boost::optional<bool> required = false;
+    std::optional<bool> required = false;
 
     /**
      * @brief Check wether the property is read only.
      *
      */
-    boost::optional<bool> readOnly = false;
+    std::optional<bool> readOnly = false;
 
     /**
      * @brief Check wether the property is write only.
      *
      */
-    boost::optional<bool> writeOnly = false;
+    std::optional<bool> writeOnly = false;
 
     /**
      * @brief Property min value if JSON number.
      *
      */
-    boost::optional<double> minimum;
+    std::optional<double> minimum;
 
     /**
      * @brief Property max value if JSON number.
      *
      */
-    boost::optional<double> maximum;
+    std::optional<double> maximum;
 
     /**
      * @brief Property min item count if JSON array.
      *
      */
-    boost::optional<size_t> minItems;
+    std::optional<size_t> minItems;
 
     /**
      * @brief Property max item count if JSON array.
      *
      */
-    boost::optional<size_t> maxItems;
+    std::optional<size_t> maxItems;
 
     /**
      * @brief Property default value.
      *
      */
-    boost::optional<JsonValue> defaultValue;
+    std::optional<JsonValue> defaultValue;
 
     /**
      * @brief Construct an Empty option set.

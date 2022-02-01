@@ -7,7 +7,6 @@ set(BRAYNSUTILS_HEADERS
   base64/base64.h
   DynamicLib.h
   EnumUtils.h
-  Filesystem.h
   FileReader.h
   FileWriter.h
   FunctorInfo.h

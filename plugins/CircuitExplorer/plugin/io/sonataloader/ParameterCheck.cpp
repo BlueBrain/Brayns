@@ -20,10 +20,9 @@
 
 #include <bbp/sonata/node_sets.h>
 
-#include <brayns/utils/Filesystem.h>
-
 #include <plugin/io/sonataloader/data/SonataCells.h>
 
+#include <filesystem>
 #include <unordered_set>
 
 namespace sonataloader
@@ -43,7 +42,7 @@ void checkNodePopulation(
     if (!nodeSets.empty())
     {
         const auto &nsPath = config.getNodeSetsPath();
-        if (!fs::exists(nsPath))
+        if (!std::filesystem::exists(nsPath))
             throw std::invalid_argument("SonataLoader: Cannot find nodesets file (path='" + nsPath + "')");
         // Cant check nodesets, since regex are allowed and correctness
         // cannot be checked until materialization happens
@@ -54,7 +53,7 @@ void checkNodePopulation(
     const auto &reportPath = population.report_path;
     if (reportType != ReportType::NONE)
     {
-        if (!fs::exists(reportPath))
+        if (!std::filesystem::exists(reportPath))
             throw std::invalid_argument("SonataLoader: Cannot find report file for report '" + reportTypeStr + "'");
         switch (reportType)
         {
@@ -117,7 +116,7 @@ void checkEdges(
                 "SonataLoader: synapse_astrocyte edge populations are not "
                 "allowed for biophysical node populations");
 
-        if (!edge.edge_report.empty() && !fs::exists(edge.edge_report))
+        if (!edge.edge_report.empty() && !std::filesystem::exists(edge.edge_report))
             throw std::invalid_argument("SonataLoader: Requested report for edge population " + name + " not found");
     }
 }

@@ -18,13 +18,14 @@
 
 #include "FrameExporter.h"
 
+#include <filesystem>
+
 #include <brayns/common/Log.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/Renderer.h>
 #include <brayns/parameters/ParametersManager.h>
-#include <brayns/utils/Filesystem.h>
 #include <brayns/utils/image/ImageCodecRegistry.h>
 #include <brayns/utils/image/ImageEncoder.h>
 
@@ -41,8 +42,8 @@ void checkExportParameters(const FrameExporter::ExportInfo &input)
         throw FrameExportParameterException("Number of samples must be greater than 0");
 
     const auto &path = input.storePath;
-    const auto bPath = fs::path(path);
-    if (!fs::exists(bPath))
+    const auto bPath = std::filesystem::path(path);
+    if (!std::filesystem::exists(bPath))
         throw FrameExportParameterException("Frame result path " + path + " not found");
 
     // Filesystem allow to query permissions, but no information about
@@ -51,21 +52,21 @@ void checkExportParameters(const FrameExporter::ExportInfo &input)
     // capture any exception that may be thrown
     std::string testDirBaseName = "test_directory_";
     uint32_t indexTest{0u};
-    while (fs::exists(fs::path(testDirBaseName + std::to_string(indexTest))))
+    while (std::filesystem::exists(std::filesystem::path(testDirBaseName + std::to_string(indexTest))))
         ++indexTest;
 
     const auto testDirName = testDirBaseName + std::to_string(indexTest);
-    const fs::path testDirFilename(testDirName);
+    const std::filesystem::path testDirFilename(testDirName);
     try
     {
-        fs::create_directory(bPath / testDirFilename);
+        std::filesystem::create_directory(bPath / testDirFilename);
     }
-    catch (const fs::filesystem_error &fse)
+    catch (const std::filesystem::filesystem_error &fse)
     {
         throw FrameExportParameterException("Cannot write on " + path + ": " + std::string(fse.what()));
     }
     // Remove test directory on success
-    fs::remove(bPath / testDirFilename);
+    std::filesystem::remove(bPath / testDirFilename);
 
     auto &format = input.imageFormat;
     if (!ImageCodecRegistry::isSupported(format))

@@ -22,8 +22,7 @@
 #pragma once
 
 #include <memory>
-
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "PrimitiveAdapter.h"
 
@@ -153,12 +152,12 @@ struct JsonAdapter<std::shared_ptr<T>> : PtrAdapter<std::shared_ptr<T>>
 };
 
 /**
- * @brief Allow JSON handling for boost::optional
+ * @brief Allow JSON handling for std::optional
  *
  * @tparam T Referenced type.
  */
 template<typename T>
-struct JsonAdapter<boost::optional<T>> : PtrAdapter<boost::optional<T>>
+struct JsonAdapter<std::optional<T>> : PtrAdapter<std::optional<T>>
 {
     /**
      * @brief Deserialize and fill an optional value of T using JsonAdapter<T>.
@@ -170,7 +169,7 @@ struct JsonAdapter<boost::optional<T>> : PtrAdapter<boost::optional<T>>
      * @return true Success.
      * @return false Failure.
      */
-    static bool deserialize(const JsonValue &json, boost::optional<T> &value)
+    static bool deserialize(const JsonValue &json, std::optional<T> &value)
     {
         T buffer = {};
         if (!Json::deserialize(json, buffer))

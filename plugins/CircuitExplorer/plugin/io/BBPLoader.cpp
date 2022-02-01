@@ -24,7 +24,6 @@
 #include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
 #include <brayns/engine/Scene.h>
-#include <brayns/utils/Filesystem.h>
 
 #include <plugin/api/CircuitColorManager.h>
 #include <plugin/api/MaterialUtils.h>
@@ -41,6 +40,7 @@
 #include <brion/brion.h>
 
 #include <unistd.h>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 
@@ -157,10 +157,10 @@ brayns::ModelDescriptorPtr loadSynapse(
 std::string getCircuitFilePath(const brion::BlueConfig &config)
 {
     const auto csrc = config.getCircuitSource().getPath();
-    if (fs::exists(csrc))
+    if (std::filesystem::exists(csrc))
         return csrc;
     const auto ssrc = config.getCellLibrarySource().getPath();
-    if (fs::exists(ssrc))
+    if (std::filesystem::exists(ssrc))
         return ssrc;
 
     return "";
@@ -188,7 +188,7 @@ bool BBPLoader::isSupported(const std::string &filename, const std::string &exte
         return false;
     };
 
-    return containsKeyword(fs::path(filename).filename()) || containsKeyword(extension);
+    return containsKeyword(std::filesystem::path(filename).filename()) || containsKeyword(extension);
 }
 
 std::string BBPLoader::getName() const

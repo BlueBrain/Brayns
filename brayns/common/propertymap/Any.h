@@ -21,10 +21,9 @@
 
 #pragma once
 
+#include <any>
 #include <cassert>
 #include <typeindex>
-
-#include <boost/any.hpp>
 
 namespace brayns
 {
@@ -61,7 +60,7 @@ public:
      */
     bool isEmpty() const
     {
-        return _data.empty();
+        return !_data.has_value();
     }
 
     /**
@@ -98,7 +97,7 @@ public:
     const T &as() const
     {
         assert(is<T>());
-        return *boost::any_cast<T>(&_data);
+        return *std::any_cast<T>(&_data);
     }
 
     /**
@@ -112,7 +111,7 @@ public:
     T &as()
     {
         assert(is<T>());
-        return *boost::any_cast<T>(&_data);
+        return *std::any_cast<T>(&_data);
     }
 
     /**
@@ -127,6 +126,6 @@ public:
     }
 
 private:
-    boost::any _data;
+    std::any _data;
 };
 } // namespace brayns
