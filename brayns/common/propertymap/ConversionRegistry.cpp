@@ -46,7 +46,7 @@ struct Conversion
 namespace std
 {
 /**
- * @brief Custom hasher for Conversion (same as boost::hash_combine).
+ * @brief Custom hasher for Conversion (~hash_combine).
  *
  * @note The hash function is a bit overcomplicated to avoid hash(From, To) ==
  * hash(To, From).

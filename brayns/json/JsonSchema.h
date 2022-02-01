@@ -23,10 +23,9 @@
 
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
-
-#include <boost/optional.hpp>
 
 #include "JsonType.h"
 
@@ -84,13 +83,13 @@ struct JsonSchema
      * @brief Optional min value if number.
      *
      */
-    boost::optional<double> minimum;
+    std::optional<double> minimum;
 
     /**
      * @brief Optional max value if number.
      *
      */
-    boost::optional<double> maximum;
+    std::optional<double> maximum;
 
     /**
      * @brief Enum description, empty if not an enum.
@@ -127,13 +126,13 @@ struct JsonSchema
      * @brief Optional min item count if array.
      *
      */
-    boost::optional<size_t> minItems;
+    std::optional<size_t> minItems;
 
     /**
      * @brief Optional max item count if array.
      *
      */
-    boost::optional<size_t> maxItems;
+    std::optional<size_t> maxItems;
 };
 
 /**

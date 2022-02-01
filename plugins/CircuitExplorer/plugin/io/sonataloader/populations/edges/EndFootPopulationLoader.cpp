@@ -18,9 +18,9 @@
 
 #include "EndFootPopulationLoader.h"
 
-#include <brayns/json/Json.h>
+#include <filesystem>
 
-#include <brayns/utils/Filesystem.h>
+#include <brayns/json/Json.h>
 
 #include <plugin/io/sonataloader/data/SonataEndFeetReader.h>
 #include <plugin/io/sonataloader/data/SonataSelection.h>
@@ -60,8 +60,9 @@ std::string getEndFeetAreasPath(
         const auto &entryObject = entry.extract<Poco::JSON::Object::Ptr>();
         auto edgeFile = entryObject->get("edges_file").extract<std::string>();
 
-        if (!fs::path(edgeFile).is_absolute())
-            edgeFile = fs::absolute(fs::path(basePath) / fs::path(edgeFile)).string();
+        if (!std::filesystem::path(edgeFile).is_absolute())
+            edgeFile =
+                std::filesystem::absolute(std::filesystem::path(basePath) / std::filesystem::path(edgeFile)).string();
 
         const auto populationStorage = bbp::sonata::EdgeStorage(edgeFile);
 
@@ -86,8 +87,10 @@ std::string getEndFeetAreasPath(
 
     if (resultPath.empty())
         throw std::runtime_error("EndFootPopulationLoader: Cannot locate endfeet areas H5 file");
-    else if (!fs::path(resultPath).is_absolute())
-        resultPath = fs::path(fs::path(basePath) / fs::path(resultPath)).lexically_normal().string();
+    else if (!std::filesystem::path(resultPath).is_absolute())
+        resultPath = std::filesystem::path(std::filesystem::path(basePath) / std::filesystem::path(resultPath))
+                         .lexically_normal()
+                         .string();
 
     return resultPath;
 }
@@ -106,7 +109,7 @@ std::vector<std::unique_ptr<SynapseGroup>> EndFootPopulationLoader::load(
     if (lc.load_afferent)
         throw std::runtime_error("Afferent edges not supported on endfoot connectivity");
 
-    const auto basePath = fs::path(networkData.path).parent_path().string();
+    const auto basePath = std::filesystem::path(networkData.path).parent_path().string();
     auto path = getEndFeetAreasPath(networkData.config, lc.edge_population, basePath);
 
     const auto nodes = nodeSelection.flatten();

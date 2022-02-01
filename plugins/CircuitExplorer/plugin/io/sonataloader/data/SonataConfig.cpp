@@ -18,7 +18,7 @@
 
 #include "SonataConfig.h"
 
-#include <brayns/utils/Filesystem.h>
+#include <filesystem>
 
 namespace sonataloader
 {
@@ -46,15 +46,15 @@ std::string SonataConfig::MorphologyPath::buildPath(const std::string &morpholog
 
 SonataConfig::MorphologyPath SonataConfig::resolveMorphologyPath(const bbp::sonata::PopulationProperties &properties)
 {
-    if (fs::exists(properties.morphologiesDir))
+    if (std::filesystem::exists(properties.morphologiesDir))
         return SonataConfig::MorphologyPath(properties.morphologiesDir, "swc");
 
     const auto h5It = properties.alternateMorphologyFormats.find(H5_FORMAT);
-    if (h5It != properties.alternateMorphologyFormats.end() && fs::exists(h5It->second))
+    if (h5It != properties.alternateMorphologyFormats.end() && std::filesystem::exists(h5It->second))
         return SonataConfig::MorphologyPath(h5It->second, "h5");
 
     const auto ascIt = properties.alternateMorphologyFormats.find(ASCII_FORMAT);
-    if (ascIt != properties.alternateMorphologyFormats.end() && fs::exists(ascIt->second))
+    if (ascIt != properties.alternateMorphologyFormats.end() && std::filesystem::exists(ascIt->second))
         return SonataConfig::MorphologyPath(ascIt->second, "asc");
 
     throw std::runtime_error("SonataConfig: Could not determine morphology path");

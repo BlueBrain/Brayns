@@ -26,11 +26,11 @@ namespace po = boost::program_options;
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <filesystem>
 #include <iostream>
 #include <vector>
 
 #include <brayns/common/types.h>
-#include <brayns/utils/Filesystem.h>
 
 #include <apps/BraynsIBL/brdf.fs.h>
 #include <apps/BraynsIBL/brdf.vs.h>
@@ -370,8 +370,8 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    const auto path = fs::path(envMap).parent_path();
-    const auto basename = (path / fs::path(envMap).stem()).string();
+    const auto path = std::filesystem::path(envMap).parent_path();
+    const auto basename = (path / std::filesystem::path(envMap).stem()).string();
 
     const std::string irradianceMapFilename = basename + brayns::IRRADIANCE_MAP;
     const std::string radianceMapFilename = basename + brayns::RADIANCE_MAP;

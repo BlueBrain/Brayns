@@ -23,9 +23,9 @@
 #include <brayns/common/Log.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
-#include <brayns/utils/Filesystem.h>
 #include <brayns/utils/StringUtils.h>
 
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 
@@ -57,7 +57,7 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(Blob &&blob, const Lo
 
     auto model = scene.createModel();
 
-    const auto name = fs::path({blob.name}).stem().string();
+    const auto name = std::filesystem::path({blob.name}).stem().string();
     const auto materialId = 0;
     model->createMaterial(materialId, name);
     auto &spheres = model->getSpheres()[materialId];

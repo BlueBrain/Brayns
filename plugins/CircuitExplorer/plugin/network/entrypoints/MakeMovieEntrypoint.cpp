@@ -42,7 +42,7 @@ public:
             throw brayns::EntrypointException("Invalid frame folder: '" + frameFolder + "'");
         }
 
-        // Make sure the extension has a dot as in boost::filesystem
+        // Make sure the extension has a dot as in std::filesystem
         std::string extension = params.frames_file_extension;
         if (!extension.empty() && extension[0] != '.')
         {

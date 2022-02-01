@@ -18,9 +18,9 @@
 
 #include "ParameterCheck.h"
 
-#include <brion/target.h>
+#include <filesystem>
 
-#include <brayns/utils/Filesystem.h>
+#include <brion/target.h>
 
 namespace bbploader
 {
@@ -63,7 +63,7 @@ void checkReport(const brion::BlueConfig &config, const BBPLoaderParameters &inp
     case SimulationType::SPIKES:
     {
         const auto uri = config.getSpikeSource();
-        if (uri.getPath().empty() || !fs::exists(uri.getPath()))
+        if (uri.getPath().empty() || !std::filesystem::exists(uri.getPath()))
             throw std::invalid_argument("BBPLoader: Unable to find Spike report file");
         break;
     }
@@ -74,7 +74,7 @@ void checkReport(const brion::BlueConfig &config, const BBPLoaderParameters &inp
                 "BBPLoader: A compartment report type was requested, but no "
                 "report_name was provided");
         const auto uri = config.getReportSource(input.report_name);
-        if (uri.getPath().empty() || !fs::exists(uri.getPath()))
+        if (uri.getPath().empty() || !std::filesystem::exists(uri.getPath()))
             throw std::invalid_argument(
                 "BBPLoader: Unable to find Voltage report file for '" + input.report_name + "'");
         break;

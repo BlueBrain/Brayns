@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <brain/brain.h>
 #include <brion/brion.h>
@@ -49,7 +49,7 @@ public:
         CIGetSpikeReportInfoResult result;
         brion::BlueConfig config(params.path);
         result.path = config.getSpikeSource().getPath();
-        result.exists = boost::filesystem::exists(result.path);
+        result.exists = std::filesystem::exists(result.path);
         request.reply(result);
     }
 };
