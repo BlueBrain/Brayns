@@ -34,8 +34,7 @@ struct BasicRenderer
     @param sample Screen sample containing information about the ray, and the
            location in the screen space.
 */
-inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
-                                    varying ScreenSample& sample)
+inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer *uniform self, varying ScreenSample &sample)
 {
     Ray ray = sample.ray;
     varying vec3f color = make_vec3f(0.f);
@@ -48,18 +47,19 @@ inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
     if (ray.geomID < 0)
     {
         // No intersection, use environment map or background color
-        vec4f bgSample =
-            skyboxMapping((Renderer*)self, ray, self->abstract.bgMaterial);
+        vec4f bgSample = skyboxMapping((Renderer *)self, ray, self->abstract.bgMaterial);
         sample.alpha = bgSample.w;
         return make_vec3f(bgSample);
     }
 
     DifferentialGeometry dg;
-    postIntersect(self->abstract.super.model, dg, ray,
-                  DG_NS | DG_NG | DG_NORMALIZE | DG_FACEFORWARD |
-                      DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
+    postIntersect(
+        self->abstract.super.model,
+        dg,
+        ray,
+        DG_NS | DG_NG | DG_NORMALIZE | DG_FACEFORWARD | DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
 
-    uniform DefaultMaterial* material = (uniform DefaultMaterial*)dg.material;
+    uniform DefaultMaterial *material = (uniform DefaultMaterial *)dg.material;
 
     vec3f Kd = make_vec3f(0.f);
     if (!material)
@@ -86,37 +86,39 @@ inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
     return color;
 }
 
-void BasicRenderer_renderSample(uniform Renderer* uniform _self,
-                                void* uniform perFrameData,
-                                varying ScreenSample& sample)
+void BasicRenderer_renderSample(
+    uniform Renderer *uniform _self,
+    void *uniform perFrameData,
+    varying ScreenSample &sample)
 {
-    uniform BasicRenderer* uniform self =
-        (uniform BasicRenderer * uniform)_self;
+    uniform BasicRenderer *uniform self = (uniform BasicRenderer * uniform) _self;
     sample.ray.time = self->abstract.timestamp;
     sample.rgb = BasicRenderer_shadeRay(self, sample);
 }
 
 // Exports (called from C++)
-export void* uniform BasicRenderer_create(void* uniform cppE)
+export void *uniform BasicRenderer_create(void *uniform cppE)
 {
-    uniform BasicRenderer* uniform self = uniform new uniform BasicRenderer;
+    uniform BasicRenderer *uniform self = uniform new uniform BasicRenderer;
     Renderer_Constructor(&self->abstract.super, cppE);
     self->abstract.super.renderSample = BasicRenderer_renderSample;
     return self;
 }
 
-export void BasicRenderer_set(void* uniform _self, void* uniform bgMaterial,
-                              const uniform float& timestamp,
-                              const uniform int& spp, void** uniform lights,
-                              uniform int32 numLights)
+export void BasicRenderer_set(
+    void *uniform _self,
+    void *uniform bgMaterial,
+    const uniform float &timestamp,
+    const uniform int &spp,
+    void **uniform lights,
+    uniform int32 numLights)
 {
-    uniform BasicRenderer* uniform self =
-        (uniform BasicRenderer * uniform)_self;
+    uniform BasicRenderer *uniform self = (uniform BasicRenderer * uniform) _self;
 
-    self->abstract.bgMaterial = (uniform DefaultMaterial * uniform)bgMaterial;
+    self->abstract.bgMaterial = (uniform DefaultMaterial * uniform) bgMaterial;
     self->abstract.timestamp = timestamp;
     self->abstract.super.spp = spp;
 
-    self->abstract.lights = (const uniform Light* uniform* uniform)lights;
+    self->abstract.lights = (const uniform Light *uniform *uniform)lights;
     self->abstract.numLights = numLights;
 }

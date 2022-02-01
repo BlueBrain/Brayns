@@ -18,6 +18,10 @@
 
 #include "math/vec.ih"
 
-void clipRay(const uniform vec4f* clipPlanes, const unsigned int numClipPlanes,
-             const varying vec3f& position, const varying vec3f& direction,
-             varying float& near, varying float& far);
+void clipRay(
+    const uniform vec4f *clipPlanes,
+    const unsigned int numClipPlanes,
+    const varying vec3f &position,
+    const varying vec3f &direction,
+    varying float &near,
+    varying float &far);

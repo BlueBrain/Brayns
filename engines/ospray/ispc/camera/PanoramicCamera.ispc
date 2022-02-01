@@ -27,8 +27,8 @@ struct PanoramicCamera
 {
     Camera super;
 
-    vec3f org;        //!< position of camera, already contains shift when
-                      //! STEREO_{LEFT|RIGHT}
+    vec3f org; //!< position of camera, already contains shift when
+               //! STEREO_{LEFT|RIGHT}
     vec3f ipd_offset; //!< shift of camera position for left/right eye (only
                       //! when stereo)
     vec3f dirCam;
@@ -38,25 +38,22 @@ struct PanoramicCamera
     vec3f dirV;
 
     // Clip planes
-    const uniform vec4f* clipPlanes;
+    const uniform vec4f *clipPlanes;
     unsigned int numClipPlanes;
 
     bool half;
 };
 
-void PanoramicCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
-                             const varying CameraSample& sample)
+void PanoramicCamera_initRay(uniform Camera *uniform _self, varying Ray &ray, const varying CameraSample &sample)
 {
-    uniform PanoramicCamera* uniform self =
-        (uniform PanoramicCamera * uniform) _self;
+    uniform PanoramicCamera *uniform self = (uniform PanoramicCamera * uniform) _self;
 
     vec2f screen = sample.screen;
     const vec3f org = self->org;
 
     screen = Camera_subRegion(_self, screen);
 
-    const float phi =
-        self->half ? M_PI / 2.f - two_pi * screen.x * 0.5f : two_pi * screen.x;
+    const float phi = self->half ? M_PI / 2.f - two_pi * screen.x * 0.5f : two_pi * screen.x;
     const float theta = M_PI * screen.y;
 
     float sinTheta, cosTheta;
@@ -66,8 +63,7 @@ void PanoramicCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
     // trnasform to camera- and then to world-space
     vec3f dir = make_vec3f(-localDir.y, -localDir.z, localDir.x);
 
-    const LinearSpace3f cameraSpace =
-        make_LinearSpace3f(self->dirU, self->dirV, self->dirCam);
+    const LinearSpace3f cameraSpace = make_LinearSpace3f(self->dirU, self->dirV, self->dirCam);
 
     dir = normalize(cameraSpace * dir);
 
@@ -84,9 +80,9 @@ void PanoramicCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
     pointer to the c-class version - and return both class pointer and
     pointer to internal data back via the supplied reference
     parameters */
-export void* uniform PanoramicCamera_create(void* uniform cppE)
+export void *uniform PanoramicCamera_create(void *uniform cppE)
 {
-    uniform PanoramicCamera* uniform self = uniform new uniform PanoramicCamera;
+    uniform PanoramicCamera *uniform self = uniform new uniform PanoramicCamera;
     self->super.cppEquivalent = cppE;
     self->super.initRay = PanoramicCamera_initRay;
     self->super.doesDOF = false;
@@ -95,13 +91,17 @@ export void* uniform PanoramicCamera_create(void* uniform cppE)
 }
 
 export void PanoramicCamera_set(
-    void* uniform _self, const uniform vec3f& org, const uniform vec3f& dir,
-    const uniform vec3f& dirU, const uniform vec3f& dirV,
-    const uniform vec3f& ipd_offset, const uniform vec4f clipPlanes[],
-    const uniform unsigned int numClipPlanes, const uniform bool& half)
+    void *uniform _self,
+    const uniform vec3f &org,
+    const uniform vec3f &dir,
+    const uniform vec3f &dirU,
+    const uniform vec3f &dirV,
+    const uniform vec3f &ipd_offset,
+    const uniform vec4f clipPlanes[],
+    const uniform unsigned int numClipPlanes,
+    const uniform bool &half)
 {
-    uniform PanoramicCamera* uniform self =
-        (uniform PanoramicCamera * uniform) _self;
+    uniform PanoramicCamera *uniform self = (uniform PanoramicCamera * uniform) _self;
     self->org = org;
     self->dirCam = dir;
     self->dirU = dirU;

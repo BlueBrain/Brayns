@@ -18,10 +18,9 @@
 
 #include "CircuitExplorerSimulationRenderer.ih"
 
-export void CircuitExplorerSimulationRenderer_setTransferFunction(
-    void* uniform _self, void* uniform value)
+export void CircuitExplorerSimulationRenderer_setTransferFunction(void *uniform _self, void *uniform value)
 {
-    uniform CircuitExplorerSimulationRenderer* uniform self =
+    uniform CircuitExplorerSimulationRenderer *uniform self =
         (uniform CircuitExplorerSimulationRenderer * uniform) _self;
     self->transferFunction = (TransferFunction * uniform) value;
 }

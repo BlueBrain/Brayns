@@ -26,35 +26,33 @@
 
 #define INT_MAX 2147483647
 
-#define DEFINE_SAFE_INCREMENT_INTERNALl(T, UNIFORM_VARYING, CONST)    \
-    inline CONST uniform T* UNIFORM_VARYING                           \
-        safeIncrement(const uniform bool useSafeIncrement,            \
-                      CONST T* UNIFORM_VARYING const base,            \
-                      const UNIFORM_VARYING uint64 index)             \
-    {                                                                 \
-        if (useSafeIncrement)                                         \
-        {                                                             \
-            const uniform uint64 tSize = sizeof(uniform T);           \
+#define DEFINE_SAFE_INCREMENT_INTERNALl(T, UNIFORM_VARYING, CONST) \
+    inline CONST uniform T *UNIFORM_VARYING safeIncrement( \
+        const uniform bool useSafeIncrement, \
+        CONST T *UNIFORM_VARYING const base, \
+        const UNIFORM_VARYING uint64 index) \
+    { \
+        if (useSafeIncrement) \
+        { \
+            const uniform uint64 tSize = sizeof(uniform T); \
             const UNIFORM_VARYING uint64 offsetBytes = tSize * index; \
-            return (CONST T * UNIFORM_VARYING const)((uint64)base +   \
-                                                     offsetBytes);    \
-        }                                                             \
-        else                                                          \
-        {                                                             \
-            return base + index;                                      \
-        }                                                             \
+            return (CONST T * UNIFORM_VARYING const)((uint64)base + offsetBytes); \
+        } \
+        else \
+        { \
+            return base + index; \
+        } \
     }
 
-#define DEFINE_NEEDS_SAFE_INCREMENT(T)                                         \
-    inline uniform bool needsSafeIncrement(const T* uniform ptr,               \
-                                           const uniform uint64 numGeometries) \
-    {                                                                          \
-        return (sizeof(uniform T) * numGeometries) >= INT_MAX;                 \
+#define DEFINE_NEEDS_SAFE_INCREMENT(T) \
+    inline uniform bool needsSafeIncrement(const T *uniform ptr, const uniform uint64 numGeometries) \
+    { \
+        return (sizeof(uniform T) * numGeometries) >= INT_MAX; \
     }
 
-#define DEFINE_SAFE_INCREMENT(T)                        \
+#define DEFINE_SAFE_INCREMENT(T) \
     DEFINE_SAFE_INCREMENT_INTERNALl(T, uniform, const); \
-    DEFINE_SAFE_INCREMENT_INTERNALl(T, uniform, );      \
+    DEFINE_SAFE_INCREMENT_INTERNALl(T, uniform, ); \
     DEFINE_SAFE_INCREMENT_INTERNALl(T, varying, const); \
-    DEFINE_SAFE_INCREMENT_INTERNALl(T, varying, );      \
+    DEFINE_SAFE_INCREMENT_INTERNALl(T, varying, ); \
     DEFINE_NEEDS_SAFE_INCREMENT(T);

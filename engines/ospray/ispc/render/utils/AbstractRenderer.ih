@@ -38,9 +38,9 @@ struct AbstractRenderer
     Renderer super;
 
     // Rendering attributes
-    const uniform Light* uniform* uniform lights;
+    const uniform Light *uniform *uniform lights;
     uint32 numLights;
-    DefaultMaterial* bgMaterial;
+    DefaultMaterial *bgMaterial;
     float timestamp;
 };
 
@@ -51,11 +51,9 @@ struct AbstractRenderer
    @param dst Returned destination RGBA color
    @param alphaCorrection Alpha correction used to blend colors
 */
-inline void composite(const varying vec4f& src, varying vec4f& dst,
-                      const varying float alphaCorrection)
+inline void composite(const varying vec4f &src, varying vec4f &dst, const varying float alphaCorrection)
 {
-    const float alpha =
-        1.f - pow(1.f - min(src.w, 1.f - 1.f / 256.f), alphaCorrection);
+    const float alpha = 1.f - pow(1.f - min(src.w, 1.f - 1.f / 256.f), alphaCorrection);
     const float a = alpha * (1.f - dst.w);
     dst.x = dst.x + src.x * a;
     dst.y = dst.y + src.y * a;
@@ -72,9 +70,11 @@ inline void composite(const varying vec4f& src, varying vec4f& dst,
    @param n2 Out localRefraction index
    @return Refracted vector
 */
-inline vec3f refractedVector(const varying vec3f& direction,
-                             const varying vec3f& normal,
-                             const varying float n1, const varying float n2)
+inline vec3f refractedVector(
+    const varying vec3f &direction,
+    const varying vec3f &normal,
+    const varying float n1,
+    const varying float n2)
 {
     if (n2 == 0.f)
         return direction;

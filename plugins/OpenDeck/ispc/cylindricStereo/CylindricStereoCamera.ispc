@@ -25,12 +25,9 @@
 
 static const float OPENDECK_RADIUS = 2.55f;
 
-void CylindricStereoCamera_initRay(uniform Camera* uniform _self,
-                                   varying Ray& ray,
-                                   const varying CameraSample& sample)
+void CylindricStereoCamera_initRay(uniform Camera *uniform _self, varying Ray &ray, const varying CameraSample &sample)
 {
-    uniform CylindricStereoCamera* uniform self =
-        (uniform CylindricStereoCamera * uniform)_self;
+    uniform CylindricStereoCamera *uniform self = (uniform CylindricStereoCamera * uniform) _self;
 
     const vec2f screen = Camera_subRegion(_self, sample.screen);
 
@@ -58,20 +55,15 @@ void CylindricStereoCamera_initRay(uniform Camera* uniform _self,
     }
 
     const float y = self->imgPlane_size_y * (screen.y - 0.5f);
-    const LinearSpace3f cameraSpace =
-        make_LinearSpace3f(self->dir_cam, self->dir_dv, self->dir_du);
+    const LinearSpace3f cameraSpace = make_LinearSpace3f(self->dir_cam, self->dir_dv, self->dir_du);
 
-    vec3f dir =
-        normalize(make_vec3f(sinf(alpha + beta), y, -cosf(alpha + beta)));
+    vec3f dir = normalize(make_vec3f(sinf(alpha + beta), y, -cosf(alpha + beta)));
     dir = normalize(cameraSpace * dir);
 
     vec3f org;
-    org.x = self->org.x + self->dir_cam.x * radius * cosf(alpha) +
-            self->dir_du.x * radius * sinf(alpha);
-    org.y = self->org.y + self->dir_cam.y * radius * cosf(alpha) +
-            self->dir_du.y * radius * sinf(alpha);
-    org.z = self->org.z + self->dir_cam.z * radius * cosf(alpha) +
-            self->dir_du.z * radius * sinf(alpha);
+    org.x = self->org.x + self->dir_cam.x * radius * cosf(alpha) + self->dir_du.x * radius * sinf(alpha);
+    org.y = self->org.y + self->dir_cam.y * radius * cosf(alpha) + self->dir_du.y * radius * sinf(alpha);
+    org.z = self->org.z + self->dir_cam.z * radius * cosf(alpha) + self->dir_du.z * radius * sinf(alpha);
 
     const float time = Camera_shutterTime(_self, sample.time);
     setRay(ray, org, normalize(dir), self->super.nearClip, inf, time);
@@ -80,10 +72,9 @@ void CylindricStereoCamera_initRay(uniform Camera* uniform _self,
 /*! create a new ispc-side version of a OpenDeckCylinderStereoCamera - with
     given pointer to the c-class version - and return both class pointer and
     pointer to internal data back via the supplied reference parameters. */
-export void* uniform CylindricStereoCamera_create(void* uniform cppE)
+export void *uniform CylindricStereoCamera_create(void *uniform cppE)
 {
-    uniform CylindricStereoCamera* uniform self =
-        uniform new uniform CylindricStereoCamera;
+    uniform CylindricStereoCamera *uniform self = uniform new uniform CylindricStereoCamera;
     self->super.cppEquivalent = cppE;
     self->super.initRay = CylindricStereoCamera_initRay;
     self->super.doesDOF = false;
@@ -91,13 +82,16 @@ export void* uniform CylindricStereoCamera_create(void* uniform cppE)
 }
 
 export void CylindricStereoCamera_set(
-    void* uniform _self, const uniform vec3f& org, const uniform vec3f& dir_cam,
-    const uniform vec3f& dir_du, const uniform vec3f& dir_dv,
+    void *uniform _self,
+    const uniform vec3f &org,
+    const uniform vec3f &dir_cam,
+    const uniform vec3f &dir_du,
+    const uniform vec3f &dir_dv,
     const uniform float imgPlane_size_y,
-    const uniform float interpupillaryDistance, const uniform bool side_by_side)
+    const uniform float interpupillaryDistance,
+    const uniform bool side_by_side)
 {
-    uniform CylindricStereoCamera* uniform self =
-        (uniform CylindricStereoCamera * uniform)_self;
+    uniform CylindricStereoCamera *uniform self = (uniform CylindricStereoCamera * uniform) _self;
     self->org = org;
     self->dir_cam = dir_cam;
     self->dir_du = dir_du;

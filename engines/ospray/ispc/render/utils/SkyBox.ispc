@@ -24,9 +24,10 @@
 #include "../DefaultMaterial.ih"
 #include "Consts.ih"
 
-vec4f skyboxMapping(const uniform Renderer* uniform renderer,
-                    const varying Ray& ray,
-                    const uniform DefaultMaterial* uniform bgMaterial)
+vec4f skyboxMapping(
+    const uniform Renderer *uniform renderer,
+    const varying Ray &ray,
+    const uniform DefaultMaterial *uniform bgMaterial)
 {
     varying vec4f result = make_vec4f(bgMaterial->Kd);
 
@@ -66,9 +67,7 @@ vec4f skyboxMapping(const uniform Renderer* uniform renderer,
 
     // Only st needs to be set to sample from Texture2D
     varying DifferentialGeometry dg;
-    dg.st =
-        make_vec2f(((atan2(-intersection.x, intersection.z) / PI) + 1.f) * .5f,
-                   (asin(intersection.y) / PI) + .5f);
+    dg.st = make_vec2f(((atan2(-intersection.x, intersection.z) / PI) + 1.f) * .5f, (asin(intersection.y) / PI) + .5f);
 
     return get4f(bgMaterial->map_Kd.map, dg);
 }

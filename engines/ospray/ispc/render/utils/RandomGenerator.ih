@@ -23,8 +23,7 @@
 #include <ospray/SDK/math/random.ih>
 #include <ospray/SDK/math/vec.ih>
 
-float getRandomValue(const varying ScreenSample& sample,
-                     const int randomNumber);
+float getRandomValue(const varying ScreenSample &sample, const int randomNumber);
 
 /**
     Returns a random direction based on location in the frame buffer, the normal
@@ -38,9 +37,11 @@ float getRandomValue(const varying ScreenSample& sample,
     @return A random direction based on specified parameters
 */
 
-vec3f getRandomVector(const unsigned int frameBufferWidth,
-                      const varying ScreenSample& sample, const vec3f& normal,
-                      const int randomNumber);
+vec3f getRandomVector(
+    const unsigned int frameBufferWidth,
+    const varying ScreenSample &sample,
+    const vec3f &normal,
+    const int randomNumber);
 
 /**
     Returns tangent vectors for a given normal.
@@ -52,30 +53,33 @@ vec3f getRandomVector(const unsigned int frameBufferWidth,
    tangent vector for the surface, which is orthogonal to both the Normal vector
    and the chosen tangent vector
 */
-void getTangentVectors(const vec3f& normal, vec3f& tangent, vec3f& biTangent);
+void getTangentVectors(const vec3f &normal, vec3f &tangent, vec3f &biTangent);
 
 /**
     @return An orthogonal vector (and combining coconuts)
     http://lolengine.net/blog/2013/09/21/picking-orthogonal-vector-combing-coconuts
 */
-vec3f ortho(const vec3f& v);
+vec3f ortho(const vec3f &v);
 
 /**
     @brief Returns a random direction according to specified parameters
 */
-vec3f getRandomDir(varying RandomTEA* uniform rng, const vec3f& biNorm0,
-                   const vec3f& biNorm1, const vec3f& gNormal,
-                   const float rot_x, const float rot_y,
-                   const uniform float epsilon);
+vec3f getRandomDir(
+    varying RandomTEA *uniform rng,
+    const vec3f &biNorm0,
+    const vec3f &biNorm1,
+    const vec3f &gNormal,
+    const float rot_x,
+    const float rot_y,
+    const uniform float epsilon);
 
 /**
     @return A random vector within a specified cone
  */
-vec3f getConeSample(const vec3f& direction, varying RandomTEA* uniform rng,
-                    const float extent);
+vec3f getConeSample(const vec3f &direction, varying RandomTEA *uniform rng, const float extent);
 
 /**
     @return A random generator according to the location in the frame buffer
 */
-varying RandomTEA* uniform createRandomNumberGenerator(
-    const uniform Renderer* uniform self, const varying ScreenSample& sample);
+varying RandomTEA *uniform
+    createRandomNumberGenerator(const uniform Renderer *uniform self, const varying ScreenSample &sample);

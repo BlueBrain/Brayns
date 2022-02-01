@@ -40,7 +40,7 @@ struct CircuitExplorerMaterial
     float Ns;
     TextureParam map_Bump;
     linear2f rot_Bump;
-    uniform Volume* uniform volume;
+    uniform Volume *uniform volume;
 
     float glossiness;
     bool castSimulationData;

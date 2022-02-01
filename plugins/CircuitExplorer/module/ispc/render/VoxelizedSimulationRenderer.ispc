@@ -28,8 +28,8 @@ struct VoxelizedSimulationRenderer
 };
 
 inline vec3f VoxelizedSimulationRenderer_shadeRay(
-    const uniform VoxelizedSimulationRenderer* uniform self,
-    varying ScreenSample& sample)
+    const uniform VoxelizedSimulationRenderer *uniform self,
+    varying ScreenSample &sample)
 {
     Ray ray = sample.ray;
     ray.time = inf;
@@ -40,7 +40,7 @@ inline vec3f VoxelizedSimulationRenderer_shadeRay(
     vec3f normal;
 
     vec4f pathColor = make_vec4f(0.f);
-    const uniform Material* previousMaterial = 0;
+    const uniform Material *previousMaterial = 0;
 
     while (pathColor.w < 1.f)
     {
@@ -50,8 +50,7 @@ inline vec3f VoxelizedSimulationRenderer_shadeRay(
         {
             // No intersection
             vec4f colorContribution =
-                skyboxMapping((Renderer*)self, ray,
-                              (DefaultMaterial*)self->super.super.bgMaterial);
+                skyboxMapping((Renderer *)self, ray, (DefaultMaterial *)self->super.super.bgMaterial);
             colorContribution.w = 1.f;
             composite(colorContribution, pathColor, self->alphaCorrection);
             break;
@@ -61,16 +60,14 @@ inline vec3f VoxelizedSimulationRenderer_shadeRay(
         // Retreive information about the geometry, typically geometry ID,
         // normal to the surface, material ID, texture coordinates, etc.
         DifferentialGeometry dg;
-        postIntersect(self->super.super.super.model, dg, ray,
-                      DG_FACEFORWARD | DG_MATERIALID);
+        postIntersect(self->super.super.super.model, dg, ray, DG_FACEFORWARD | DG_MATERIALID);
 
         // Material management
-        const uniform Material* material = dg.material;
+        const uniform Material *material = dg.material;
 
         if (material != previousMaterial)
         {
-            const vec4f colorContribution =
-                getSimulationValue(&self->super, &dg, ray.primID);
+            const vec4f colorContribution = getSimulationValue(&self->super, &dg, ray.primID);
 
             if (colorContribution.w > self->simulationThreshold)
             {
@@ -100,44 +97,46 @@ inline vec3f VoxelizedSimulationRenderer_shadeRay(
     return make_vec3f(pathColor) * self->super.super.exposure;
 }
 
-void VoxelizedSimulationRenderer_renderSample(uniform Renderer* uniform _self,
-                                              void* uniform perFrameData,
-                                              varying ScreenSample& sample)
+void VoxelizedSimulationRenderer_renderSample(
+    uniform Renderer *uniform _self,
+    void *uniform perFrameData,
+    varying ScreenSample &sample)
 {
-    uniform VoxelizedSimulationRenderer* uniform self =
-        (uniform VoxelizedSimulationRenderer * uniform) _self;
+    uniform VoxelizedSimulationRenderer *uniform self = (uniform VoxelizedSimulationRenderer * uniform) _self;
     sample.rgb = VoxelizedSimulationRenderer_shadeRay(self, sample);
 }
 
 // Exports (called from C++)
-export void* uniform VoxelizedSimulationRenderer_create(void* uniform cppE)
+export void *uniform VoxelizedSimulationRenderer_create(void *uniform cppE)
 {
-    uniform VoxelizedSimulationRenderer* uniform self =
-        uniform new uniform VoxelizedSimulationRenderer;
+    uniform VoxelizedSimulationRenderer *uniform self = uniform new uniform VoxelizedSimulationRenderer;
     Renderer_Constructor(&self->super.super.super, cppE);
-    self->super.super.super.renderSample =
-        VoxelizedSimulationRenderer_renderSample;
+    self->super.super.super.renderSample = VoxelizedSimulationRenderer_renderSample;
     return self;
 }
 
 export void VoxelizedSimulationRenderer_set(
-    void* uniform _self, void* uniform secondaryModel, void* uniform bgMaterial,
-    const uniform uint32 spp, uniform float* uniform simulationData,
+    void *uniform _self,
+    void *uniform secondaryModel,
+    void *uniform bgMaterial,
+    const uniform uint32 spp,
+    uniform float *uniform simulationData,
     const uniform uint64 simulationDataSize,
     const uniform float alphaCorrection,
-    const uniform float simulationThreshold, const uniform float exposure,
-    const uniform float fogThickness, const uniform float fogStart,
-    const uniform uint32 maxBounces, const uniform bool useHardwareRandomizer)
+    const uniform float simulationThreshold,
+    const uniform float exposure,
+    const uniform float fogThickness,
+    const uniform float fogStart,
+    const uniform uint32 maxBounces,
+    const uniform bool useHardwareRandomizer)
 {
-    uniform VoxelizedSimulationRenderer* uniform self =
-        (uniform VoxelizedSimulationRenderer * uniform) _self;
+    uniform VoxelizedSimulationRenderer *uniform self = (uniform VoxelizedSimulationRenderer * uniform) _self;
 
     // OSPRay
     self->super.super.super.spp = spp;
 
     // Abstract
-    self->super.super.bgMaterial =
-        (uniform CircuitExplorerMaterial * uniform) bgMaterial;
+    self->super.super.bgMaterial = (uniform CircuitExplorerMaterial * uniform) bgMaterial;
 
     self->super.super.lights = 0;
     self->super.super.numLights = 0;
@@ -148,7 +147,7 @@ export void VoxelizedSimulationRenderer_set(
     self->super.super.useHardwareRandomizer = useHardwareRandomizer;
 
     // Simulation
-    self->super.simulationData = (uniform float* uniform)simulationData;
+    self->super.simulationData = (uniform float *uniform)simulationData;
     self->super.simulationDataSize = simulationDataSize;
 
     self->super.secondaryModel = (uniform Model * uniform) secondaryModel;
