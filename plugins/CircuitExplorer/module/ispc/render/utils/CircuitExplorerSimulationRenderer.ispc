@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -18,10 +18,9 @@
 
 #include "CircuitExplorerSimulationRenderer.ih"
 
-export void CircuitExplorerSimulationRenderer_setTransferFunction(
-    void* uniform _self, void* uniform value)
+export void CircuitExplorerSimulationRenderer_setTransferFunction(void *uniform _self, void *uniform value)
 {
-    uniform CircuitExplorerSimulationRenderer* uniform self =
+    uniform CircuitExplorerSimulationRenderer *uniform self =
         (uniform CircuitExplorerSimulationRenderer * uniform) _self;
     self->transferFunction = (TransferFunction * uniform) value;
 }

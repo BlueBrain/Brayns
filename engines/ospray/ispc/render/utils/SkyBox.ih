@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include "../DefaultMaterial.ih"
 #include <ospray/SDK/math/vec.ih>
+#include "../DefaultMaterial.ih"
 
 /**
     Returns the color of the skybox for a given ray. If no material is defined
@@ -31,6 +31,7 @@
     @param bgMaterial Background material
     @return The RGBA color of the skybox
 */
-vec4f skyboxMapping(const uniform Renderer* uniform renderer,
-                    const varying Ray& ray,
-                    const uniform DefaultMaterial* uniform bgMaterial);
+vec4f skyboxMapping(
+    const uniform Renderer *uniform renderer,
+    const varying Ray &ray,
+    const uniform DefaultMaterial *uniform bgMaterial);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -26,14 +26,14 @@ struct CircuitExplorerSimulationRenderer
     CircuitExplorerAbstractRenderer super;
 
     // Transfer function attributes
-    const uniform TransferFunction* uniform transferFunction;
+    const uniform TransferFunction *uniform transferFunction;
 
     // Simulation data
-    uniform float* uniform simulationData;
+    uniform float *uniform simulationData;
     uint64 simulationDataSize;
 
     // Secondary model
-    Model* secondaryModel;
+    Model *secondaryModel;
     float maxDistanceToSecondaryModel;
 
     // Fog
@@ -41,60 +41,54 @@ struct CircuitExplorerSimulationRenderer
     float fogStart;
 };
 
-extern "C" unmasked uniform int
-    CircuitExplorerSimulationRenderer_getBytesPerPrimitive(
-        const void* uniform geometry);
+extern "C" unmasked uniform int CircuitExplorerSimulationRenderer_getBytesPerPrimitive(const void *uniform geometry);
 
-static inline int getBytesPerPrimitive(const void* geometry)
+static inline int getBytesPerPrimitive(const void *geometry)
 {
     int bytesPerPrimitive;
     foreach_unique(g in geometry)
     {
-        bytesPerPrimitive =
-            CircuitExplorerSimulationRenderer_getBytesPerPrimitive(g);
+        bytesPerPrimitive = CircuitExplorerSimulationRenderer_getBytesPerPrimitive(g);
     }
     return bytesPerPrimitive;
 }
 
-static inline uint64 getOffset(const uniform Geometry* geometry,
-                               const varying int primID)
+static inline uint64 getOffset(const uniform Geometry *geometry, const varying int primID)
 {
     if (!geometry)
         return 0;
 
     // The data pointer in all "derived" geometries is just after data members
     // of the base Geometry struct. That's why array index starts at 1
-    const uniform uint8* data = *((const uniform uint8**)&geometry[1]);
+    const uniform uint8 *data = *((const uniform uint8 **)&geometry[1]);
 
     const int bytesPerPrimitive = getBytesPerPrimitive(geometry->cppEquivalent);
     const uint64 bytesPerPrimitive64 = (uint64)bytesPerPrimitive;
     if (primID * bytesPerPrimitive64 > 0x7FFFFFFF)
-        data =
-            (const uniform uint8*)((uint64)data + bytesPerPrimitive64 * primID);
+        data = (const uniform uint8 *)((uint64)data + bytesPerPrimitive64 * primID);
     else
         data += bytesPerPrimitive * primID;
 
-    return *((const uniform uint64*)data);
+    return *((const uniform uint64 *)data);
 }
 
 inline vec4f getSimulationValue(
-    const uniform CircuitExplorerSimulationRenderer* uniform self,
-    varying DifferentialGeometry* dg, const varying int primID)
+    const uniform CircuitExplorerSimulationRenderer *uniform self,
+    varying DifferentialGeometry *dg,
+    const varying int primID)
 {
     if (self->simulationDataSize == 0)
         return make_vec4f(1.f, 0.f, 0.f, 1.f);
 
-    const uniform Geometry* geometry = dg->geometry;
-    const uniform OSPRayISPCModel* model =
-        (const uniform OSPRayISPCModel*)geometry->model;
+    const uniform Geometry *geometry = dg->geometry;
+    const uniform OSPRayISPCModel *model = (const uniform OSPRayISPCModel *)geometry->model;
 
     const uint64 offset = getOffset(dg->geometry, primID) + model->simOffset;
     if (offset < self->simulationDataSize)
     {
         const varying float value = self->simulationData[offset];
-        const uniform TransferFunction* uniform tf = self->transferFunction;
-        return make_vec4f(tf->getColorForValue(tf, value),
-                          tf->getOpacityForValue(tf, value));
+        const uniform TransferFunction *uniform tf = self->transferFunction;
+        return make_vec4f(tf->getColorForValue(tf, value), tf->getOpacityForValue(tf, value));
     }
     return make_vec4f(1.f, 0.f, 0.f, 1.f);
 }

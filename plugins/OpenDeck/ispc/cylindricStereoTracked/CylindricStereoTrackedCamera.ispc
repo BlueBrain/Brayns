@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
@@ -32,12 +32,12 @@ static const uint8 RIGHT_WALL = 1;
 static const uint8 LEFT_FLOOR = 2;
 static const uint8 RIGHT_FLOOR = 3;
 
-void CylindricStereoTrackedCamera_initRay(uniform Camera* uniform _self,
-                                          varying Ray& ray,
-                                          const varying CameraSample& sample)
+void CylindricStereoTrackedCamera_initRay(
+    uniform Camera *uniform _self,
+    varying Ray &ray,
+    const varying CameraSample &sample)
 {
-    uniform CylindricStereoTrackedCamera* uniform self =
-        (uniform CylindricStereoTrackedCamera * uniform)_self;
+    uniform CylindricStereoTrackedCamera *uniform self = (uniform CylindricStereoTrackedCamera * uniform) _self;
 
     const vec2f screen = Camera_subRegion(_self, sample.screen);
 
@@ -68,8 +68,7 @@ void CylindricStereoTrackedCamera_initRay(uniform Camera* uniform _self,
         pixelPos.x = self->opendeck_radius * -cosf(alpha);
         // pixelPos.y = OPENDECK_METALSTRIPE_HEIGHT + OPENDECK_HEIGHT *
         // screen.y;
-        pixelPos.y = self->opendeck_metal_stripe_height +
-                     self->opendeck_height - self->opendeck_height * screen.y;
+        pixelPos.y = self->opendeck_metal_stripe_height + self->opendeck_height - self->opendeck_height * screen.y;
         pixelPos.z = self->opendeck_radius * -sinf(alpha);
     }
     else if (self->bufferId == LEFT_FLOOR || self->bufferId == RIGHT_FLOOR)
@@ -83,8 +82,7 @@ void CylindricStereoTrackedCamera_initRay(uniform Camera* uniform _self,
     const vec3f eyeAxis = self->od_dir_du;
     const vec3f eyeDeltaPos = eyeAxis * eyeDelta;
 
-    const LinearSpace3f cameraSpace =
-        make_LinearSpace3f(self->dir_du, self->dir_dv, self->dir_cam);
+    const LinearSpace3f cameraSpace = make_LinearSpace3f(self->dir_du, self->dir_dv, self->dir_cam);
 
     vec3f dir = normalize(pixelPos - self->headPos + eyeDeltaPos);
     dir = normalize(cameraSpace * dir);
@@ -97,10 +95,9 @@ void CylindricStereoTrackedCamera_initRay(uniform Camera* uniform _self,
 /*! create a new ispc-side version of a OpenDeckCylinderStereoCamera - with
     given pointer to the c-class version - and return both class pointer and
     pointer to internal data back via the supplied reference parameters. */
-export void* uniform CylindricStereoTrackedCamera_create(void* uniform cppE)
+export void *uniform CylindricStereoTrackedCamera_create(void *uniform cppE)
 {
-    uniform CylindricStereoTrackedCamera* uniform self =
-        uniform new uniform CylindricStereoTrackedCamera;
+    uniform CylindricStereoTrackedCamera *uniform self = uniform new uniform CylindricStereoTrackedCamera;
     self->super.cppEquivalent = cppE;
     self->super.initRay = CylindricStereoTrackedCamera_initRay;
     self->super.doesDOF = false;
@@ -108,14 +105,18 @@ export void* uniform CylindricStereoTrackedCamera_create(void* uniform cppE)
 }
 
 export void CylindricStereoTrackedCamera_set(
-    void* uniform _self, const uniform vec3f& org, const uniform vec3f& headPos,
-    const uniform vec3f& dir_cam, const uniform vec3f& dir_du,
-    const uniform vec3f& dir_dv, const uniform vec3f& od_dir_du,
-    const uniform float interpupillaryDistance, const uniform uint8 bufferId,
+    void *uniform _self,
+    const uniform vec3f &org,
+    const uniform vec3f &headPos,
+    const uniform vec3f &dir_cam,
+    const uniform vec3f &dir_du,
+    const uniform vec3f &dir_dv,
+    const uniform vec3f &od_dir_du,
+    const uniform float interpupillaryDistance,
+    const uniform uint8 bufferId,
     const uniform float cameraScaling)
 {
-    uniform CylindricStereoTrackedCamera* uniform self =
-        (uniform CylindricStereoTrackedCamera * uniform)_self;
+    uniform CylindricStereoTrackedCamera *uniform self = (uniform CylindricStereoTrackedCamera * uniform) _self;
     self->org = org;
     self->headPos = headPos * cameraScaling;
     self->dir_cam = dir_cam;
@@ -126,6 +127,5 @@ export void CylindricStereoTrackedCamera_set(
     self->bufferId = bufferId;
     self->opendeck_radius = OPENDECK_RADIUS * cameraScaling;
     self->opendeck_height = OPENDECK_HEIGHT * cameraScaling;
-    self->opendeck_metal_stripe_height =
-        OPENDECK_METALSTRIPE_HEIGHT * cameraScaling;
+    self->opendeck_metal_stripe_height = OPENDECK_METALSTRIPE_HEIGHT * cameraScaling;
 }

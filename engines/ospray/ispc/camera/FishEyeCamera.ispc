@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2019, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
@@ -36,7 +36,7 @@ struct FishEyeCamera
     vec3f dirV;
 
     // Clip planes
-    const uniform vec4f* clipPlanes;
+    const uniform vec4f *clipPlanes;
     unsigned int numClipPlanes;
 
     float aperture;
@@ -51,11 +51,9 @@ inline float getRandomValue()
     return r;
 }
 
-void FishEyeCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
-                           const varying CameraSample& sample)
+void FishEyeCamera_initRay(uniform Camera *uniform _self, varying Ray &ray, const varying CameraSample &sample)
 {
-    uniform FishEyeCamera* uniform self =
-        (uniform FishEyeCamera * uniform) _self;
+    uniform FishEyeCamera *uniform self = (uniform FishEyeCamera * uniform) _self;
 
     vec2f screen = sample.screen;
     vec3f org = self->org;
@@ -76,14 +74,12 @@ void FishEyeCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
 
     const float phi = (radius - 1.f) * PI * 0.5f;
     const float theta = atan2(yp, xp);
-    const vec3f localDir = {cos(phi) * cos(theta), cos(phi) * sin(theta),
-                            sin(phi)};
+    const vec3f localDir = {cos(phi) * cos(theta), cos(phi) * sin(theta), sin(phi)};
 
     // transform to camera and then to world-space
     dir = normalize(localDir);
 
-    const LinearSpace3f cameraSpace =
-        make_LinearSpace3f(self->dirU, self->dirV, self->dirCam);
+    const LinearSpace3f cameraSpace = make_LinearSpace3f(self->dirU, self->dirV, self->dirCam);
 
     dir = normalize(cameraSpace * dir);
 
@@ -93,8 +89,7 @@ void FishEyeCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
         float random = 1.f;
         random = getRandomValue();
         random = (random == 0.f ? 0.001f : random);
-        const vec3f llp =
-            uniformSampleDisk(random * self->aperture, sample.lens);
+        const vec3f llp = uniformSampleDisk(random * self->aperture, sample.lens);
         // transform local lens point to focal plane (dir_XX are prescaled in
         // this case)
         const vec3f lp = (llp.x * self->dirU) + (llp.y * self->dirV);
@@ -115,9 +110,9 @@ void FishEyeCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
     pointer to the c-class version - and return both class pointer and
     pointer to internal data back via the supplied reference
     parameters */
-export void* uniform FishEyeCamera_create(void* uniform cppE)
+export void *uniform FishEyeCamera_create(void *uniform cppE)
 {
-    uniform FishEyeCamera* uniform self = uniform new uniform FishEyeCamera;
+    uniform FishEyeCamera *uniform self = uniform new uniform FishEyeCamera;
     self->super.cppEquivalent = cppE;
     self->super.initRay = FishEyeCamera_initRay;
     self->super.doesDOF = false;
@@ -125,16 +120,17 @@ export void* uniform FishEyeCamera_create(void* uniform cppE)
     return self;
 }
 
-export void FishEyeCamera_set(void* uniform _self, const uniform vec3f& org,
-                              const uniform vec3f& dir,
-                              const uniform vec3f& dirU,
-                              const uniform vec3f& dirV,
-                              const uniform vec4f clipPlanes[],
-                              const uniform unsigned int numClipPlanes,
-                              const uniform float aperture)
+export void FishEyeCamera_set(
+    void *uniform _self,
+    const uniform vec3f &org,
+    const uniform vec3f &dir,
+    const uniform vec3f &dirU,
+    const uniform vec3f &dirV,
+    const uniform vec4f clipPlanes[],
+    const uniform unsigned int numClipPlanes,
+    const uniform float aperture)
 {
-    uniform FishEyeCamera* uniform self =
-        (uniform FishEyeCamera * uniform) _self;
+    uniform FishEyeCamera *uniform self = (uniform FishEyeCamera * uniform) _self;
     self->org = org;
     self->dirCam = dir;
     self->dirU = dirU;

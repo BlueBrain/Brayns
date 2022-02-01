@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018, Blue Brain Project
+# Copyright (c) 2015-2022, Blue Brain Project
 #                          Raphael Dumusc <raphael.dumusc@epfl.ch>
 #                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
 #                          Cyrille Favreau <cyrille.favreau@epfl.ch>

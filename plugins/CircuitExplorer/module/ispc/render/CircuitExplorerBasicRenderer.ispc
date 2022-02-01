@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2021, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -28,8 +28,8 @@ struct CircuitExplorerBasicRenderer
 };
 
 inline vec3f CircuitExplorerBasicRenderer_shadeRay(
-    const uniform CircuitExplorerBasicRenderer* uniform self,
-    varying ScreenSample& sample)
+    const uniform CircuitExplorerBasicRenderer *uniform self,
+    varying ScreenSample &sample)
 {
     Ray ray = sample.ray;
     ray.time = inf;
@@ -39,7 +39,7 @@ inline vec3f CircuitExplorerBasicRenderer_shadeRay(
     int depth = 0;
     float oldRefraction = 1.f;
 
-    const uniform Material* previousMaterial = 0;
+    const uniform Material *previousMaterial = 0;
     vec4f pathColor = make_vec4f(0.f);
 
     while (pathColor.w < 1.f && depth < self->super.super.maxBounces)
@@ -50,9 +50,7 @@ inline vec3f CircuitExplorerBasicRenderer_shadeRay(
         if (ray.geomID < 0)
         {
             // No intersection
-            colorContribution =
-                skyboxMapping((Renderer*)self, ray,
-                              (DefaultMaterial*)self->super.super.bgMaterial);
+            colorContribution = skyboxMapping((Renderer *)self, ray, (DefaultMaterial *)self->super.super.bgMaterial);
             colorContribution.w = 1.f;
             composite(colorContribution, pathColor, self->alphaCorrection);
             break;
@@ -62,21 +60,22 @@ inline vec3f CircuitExplorerBasicRenderer_shadeRay(
         // Retreive information about the geometry, typically geometry ID,
         // normal to the surface, material ID, texture coordinates, etc.
         DifferentialGeometry dg;
-        postIntersect(self->super.super.super.model, dg, ray,
-                      DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD |
-                          DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
+        postIntersect(
+            self->super.super.super.model,
+            dg,
+            ray,
+            DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD | DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
 
         const vec3f intersection = ray.org + ray.t * ray.dir;
 
         // Material management
-        const uniform Material* material = dg.material;
+        const uniform Material *material = dg.material;
 
         if (material != previousMaterial)
         {
             // Material attributes
             MaterialShadingMode shadingMode = diffuse;
-            const uniform CircuitExplorerMaterial* objMaterial =
-                (const uniform CircuitExplorerMaterial*)material;
+            const uniform CircuitExplorerMaterial *objMaterial = (const uniform CircuitExplorerMaterial *)material;
 
             vec3f Kd;
             float Ns = 1;
@@ -98,40 +97,33 @@ inline vec3f CircuitExplorerBasicRenderer_shadeRay(
                     userParam = mat->userParameter;
                     if (opacity < 1.f)
                     {
-                        ray.dir = refractedVector(ray.dir, dg.Ns, oldRefraction,
-                                                  mat->refraction);
+                        ray.dir = refractedVector(ray.dir, dg.Ns, oldRefraction, mat->refraction);
                         oldRefraction = mat->refraction;
                     }
                 }
 
             vec4f simulationContribution = make_vec4f(0.f);
             bool ignoreIntersection = false;
-            const uniform Geometry* geometry = dg.geometry;
-            const uniform OSPRayISPCModel* model =
-                (const uniform OSPRayISPCModel*)geometry->model;
+            const uniform Geometry *geometry = dg.geometry;
+            const uniform OSPRayISPCModel *model = (const uniform OSPRayISPCModel *)geometry->model;
             if (model->simEnabled == 1 && objMaterial->castSimulationData == 1)
             {
                 // Get simulation value from geometry
-                simulationContribution =
-                    getSimulationValue(&self->super, &dg, ray.primID);
-                ignoreIntersection =
-                    (simulationContribution.w < self->simulationThreshold);
+                simulationContribution = getSimulationValue(&self->super, &dg, ray.primID);
+                ignoreIntersection = (simulationContribution.w < self->simulationThreshold);
             }
 
             if (!ignoreIntersection)
             {
                 // Head-light shading
-                float cosNL =
-                    (shadingMode == none ? 1.f
-                                         : max(0.f, dot(neg(ray.dir), dg.Ns)));
+                float cosNL = (shadingMode == none ? 1.f : max(0.f, dot(neg(ray.dir), dg.Ns)));
 
                 switch (shadingMode)
                 {
                 case electron:
                 case electron_transparency:
                     cosNL = 1.f - pow(cosNL, userParam);
-                    opacity *=
-                        (shadingMode == electron_transparency ? cosNL : 1.f);
+                    opacity *= (shadingMode == electron_transparency ? cosNL : 1.f);
                     break;
                 case diffuse_transparency:
                     opacity *= cosNL;
@@ -148,10 +140,9 @@ inline vec3f CircuitExplorerBasicRenderer_shadeRay(
                     break;
                 }
 
-                const vec3f color =
-                    cosNL * (Kd * (1.f - simulationContribution.w) +
-                             simulationContribution.w *
-                                 make_vec3f(simulationContribution));
+                const vec3f color = cosNL
+                    * (Kd * (1.f - simulationContribution.w)
+                       + simulationContribution.w * make_vec3f(simulationContribution));
 
                 colorContribution = make_vec4f(color, opacity);
 
@@ -184,45 +175,47 @@ inline vec3f CircuitExplorerBasicRenderer_shadeRay(
     return make_vec3f(pathColor) * self->super.super.exposure;
 }
 
-void CircuitExplorerBasicRenderer_renderSample(uniform Renderer* uniform _self,
-                                               void* uniform perFrameData,
-                                               varying ScreenSample& sample)
+void CircuitExplorerBasicRenderer_renderSample(
+    uniform Renderer *uniform _self,
+    void *uniform perFrameData,
+    varying ScreenSample &sample)
 {
-    uniform CircuitExplorerBasicRenderer* uniform self =
-        (uniform CircuitExplorerBasicRenderer * uniform) _self;
+    uniform CircuitExplorerBasicRenderer *uniform self = (uniform CircuitExplorerBasicRenderer * uniform) _self;
     sample.rgb = CircuitExplorerBasicRenderer_shadeRay(self, sample);
 }
 
 // Exports (called from C++)
-export void* uniform CircuitExplorerBasicRenderer_create(void* uniform cppE)
+export void *uniform CircuitExplorerBasicRenderer_create(void *uniform cppE)
 {
-    uniform CircuitExplorerBasicRenderer* uniform self =
-        uniform new uniform CircuitExplorerBasicRenderer;
+    uniform CircuitExplorerBasicRenderer *uniform self = uniform new uniform CircuitExplorerBasicRenderer;
     Renderer_Constructor(&self->super.super.super, cppE);
-    self->super.super.super.renderSample =
-        CircuitExplorerBasicRenderer_renderSample;
+    self->super.super.super.renderSample = CircuitExplorerBasicRenderer_renderSample;
     return self;
 }
 
 export void CircuitExplorerBasicRenderer_set(
-    void* uniform _self, void* uniform secondaryModel,
-    const uniform float maxDistanceToSecondaryModel, void* uniform bgMaterial,
-    const uniform uint32 spp, uniform float* uniform simulationData,
+    void *uniform _self,
+    void *uniform secondaryModel,
+    const uniform float maxDistanceToSecondaryModel,
+    void *uniform bgMaterial,
+    const uniform uint32 spp,
+    uniform float *uniform simulationData,
     const uniform uint64 simulationDataSize,
     const uniform float alphaCorrection,
-    const uniform float simulationThreshold, const uniform float exposure,
-    const uniform float fogThickness, const uniform float fogStart,
-    const uniform uint32 maxBounces, const uniform bool useHardwareRandomizer)
+    const uniform float simulationThreshold,
+    const uniform float exposure,
+    const uniform float fogThickness,
+    const uniform float fogStart,
+    const uniform uint32 maxBounces,
+    const uniform bool useHardwareRandomizer)
 {
-    uniform CircuitExplorerBasicRenderer* uniform self =
-        (uniform CircuitExplorerBasicRenderer * uniform) _self;
+    uniform CircuitExplorerBasicRenderer *uniform self = (uniform CircuitExplorerBasicRenderer * uniform) _self;
 
     // OSPRay
     self->super.super.super.spp = spp;
 
     // Abstract
-    self->super.super.bgMaterial =
-        (uniform CircuitExplorerMaterial * uniform) bgMaterial;
+    self->super.super.bgMaterial = (uniform CircuitExplorerMaterial * uniform) bgMaterial;
 
     self->super.super.lights = 0;
     self->super.super.numLights = 0;
@@ -236,7 +229,7 @@ export void CircuitExplorerBasicRenderer_set(
     self->super.secondaryModel = (uniform Model * uniform) secondaryModel;
     self->super.maxDistanceToSecondaryModel = maxDistanceToSecondaryModel;
 
-    self->super.simulationData = (uniform float* uniform)simulationData;
+    self->super.simulationData = (uniform float *uniform)simulationData;
     self->super.simulationDataSize = simulationDataSize;
 
     self->super.fogThickness = fogThickness;

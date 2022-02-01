@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
@@ -36,6 +36,6 @@ struct MultiviewCamera
     float armLength;
 
     // Clip planes
-    const uniform vec4f* clipPlanes;
+    const uniform vec4f *clipPlanes;
     unsigned int numClipPlanes;
 };
