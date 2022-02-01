@@ -22,9 +22,9 @@
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/engine/SharedDataVolume.h>
-#include <brayns/utils/Filesystem.h>
 #include <brayns/utils/StringUtils.h>
 
+#include <filesystem>
 #include <fstream>
 #include <map>
 #include <sstream>
@@ -237,11 +237,11 @@ std::vector<ModelDescriptorPtr>
     const auto spacing = parseVec3<double>(mhd.at("ElementSpacing"), [](const auto &s) { return stod(s); });
     const auto type = dataTypeFromMET(mhd.at("ElementType"));
 
-    fs::path path = mhd.at("ElementDataFile");
+    std::filesystem::path path = mhd.at("ElementDataFile");
     if (!path.is_absolute())
     {
-        auto basePath = fs::path(filename).parent_path();
-        path = fs::canonical(basePath / path);
+        auto basePath = std::filesystem::path(filename).parent_path();
+        path = std::filesystem::canonical(basePath / path);
     }
     volumeFile = path.string();
 

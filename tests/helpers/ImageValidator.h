@@ -22,6 +22,7 @@
 #pragma once
 
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -29,7 +30,6 @@
 #include <tests/paths.h>
 
 #include <brayns/engine/Engine.h>
-#include <brayns/utils/Filesystem.h>
 #include <brayns/utils/image/Image.h>
 #include <brayns/utils/image/ImageDecoder.h>
 #include <brayns/utils/image/ImageEncoder.h>
@@ -93,7 +93,7 @@ private:
 
     static void _saveRaw(const brayns::Image &image, const std::string &path)
     {
-        fs::path modifiedPath(path);
+        std::filesystem::path modifiedPath(path);
         modifiedPath.replace_extension(".txt");
         std::ofstream stream(modifiedPath);
         auto data = static_cast<const char *>(image.getData());

@@ -29,8 +29,8 @@
 
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/parameters/AnimationParameters.h>
-#include <brayns/utils/Filesystem.h>
 
+#include <filesystem>
 #include <set>
 
 namespace brayns
@@ -93,7 +93,7 @@ size_t ModelInstance::getInstanceID() const
 }
 
 ModelParams::ModelParams(const std::string &path)
-    : _name(fs::path(path).stem().string())
+    : _name(std::filesystem::path(path).stem().string())
     , _path(path)
 {
 }
@@ -182,7 +182,7 @@ ModelDescriptor &ModelDescriptor::operator=(const ModelParams &rhs)
 
     _updateValue(_boundingBox, rhs.getBoundingBox());
     if (rhs.getName().empty())
-        _updateValue(_name, fs::path(rhs.getPath()).stem().string());
+        _updateValue(_name, std::filesystem::path(rhs.getPath()).stem().string());
     else
     {
         // TEMP HACK FFS: Append whatever is on name to the model params name

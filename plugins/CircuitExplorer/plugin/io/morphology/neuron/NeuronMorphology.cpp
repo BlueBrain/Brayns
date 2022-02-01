@@ -18,13 +18,12 @@
 
 #include "NeuronMorphology.h"
 
-#include <brayns/utils/Filesystem.h>
-
 #include <morphio/errorMessages.h>
 #include <morphio/morphology.h>
 #include <morphio/section.h>
 #include <morphio/soma.h>
 
+#include <filesystem>
 #include <mutex>
 
 namespace
@@ -32,7 +31,7 @@ namespace
 morphio::Morphology readMorphology(const std::string &path)
 {
     static std::mutex hdf5Mutex;
-    const auto ext = fs::path(path).extension().string();
+    const auto ext = std::filesystem::path(path).extension().string();
     if (ext == ".h5")
     {
         std::lock_guard<std::mutex> lock(hdf5Mutex);

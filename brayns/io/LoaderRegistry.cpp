@@ -20,12 +20,13 @@
 
 #include "LoaderRegistry.h"
 
+#include <filesystem>
+
 #include <brayns/common/Log.h>
 #include <brayns/io/loaders/MeshLoader.h>
 #include <brayns/io/loaders/ProteinLoader.h>
 #include <brayns/io/loaders/VolumeLoader.h>
 #include <brayns/io/loaders/XYZBLoader.h>
-#include <brayns/utils/Filesystem.h>
 
 namespace brayns
 {
@@ -54,10 +55,10 @@ const std::vector<LoaderInfo> &LoaderRegistry::getLoaderInfos() const
 
 bool LoaderRegistry::isSupportedFile(const std::string &filename) const
 {
-    if (fs::is_directory(filename))
+    if (std::filesystem::is_directory(filename))
         return false;
 
-    const auto extension = fs::path(filename).extension().lexically_normal().string();
+    const auto extension = std::filesystem::path(filename).extension().lexically_normal().string();
     for (const auto &loader : _loaders)
         if (loader->isSupported(filename, extension))
             return true;
@@ -77,10 +78,11 @@ const AbstractLoader &LoaderRegistry::getSuitableLoader(
     const std::string &filetype,
     const std::string &loaderName) const
 {
-    if (fs::is_directory(filename))
+    if (std::filesystem::is_directory(filename))
         throw std::runtime_error("'" + filename + "' is a directory");
 
-    const auto extension = filetype.empty() ? fs::path(filename).extension().lexically_normal().string() : filetype;
+    const auto extension =
+        filetype.empty() ? std::filesystem::path(filename).extension().lexically_normal().string() : filetype;
 
     // Find specific loader
     if (!loaderName.empty())
