@@ -23,59 +23,24 @@
 
 #include <atomic>
 #include <future>
-#include <memory>
-#include <mutex>
 #include <stdexcept>
+
+#include <brayns/network/entrypoint/EntrypointException.h>
 
 namespace brayns
 {
 /**
- * @brief Synchronized wrapper around an arbitrary exception.
- *
- * Can be used to set an exception to a task from the task thread or the main
- * thread.
+ * @brief Exception thrown when a task is cancelled.
  *
  */
-class NetworkTaskException
+class TaskCancelledException : public EntrypointException
 {
 public:
-    /**
-     * @brief Rethrow the contained exception.
-     *
-     * Throw std::runtime_error with generic cancellation message if not set.
-     *
-     */
-    void rethrow();
-
-    /**
-     * @brief Assign an arbitrary exception.
-     *
-     * @param e Opaque exception pointer.
-     * @return NetworkTaskException& *this.
-     */
-    NetworkTaskException &operator=(std::exception_ptr e);
-
-    /**
-     * @brief Assign an arbitrary exception.
-     *
-     * @tparam T Exception type.
-     * @param e Exception instance.
-     * @return NetworkTaskException& *this
-     */
-    template<typename T>
-    NetworkTaskException &operator=(T e)
-    {
-        *this = std::make_exception_ptr(std::move(e));
-        return *this;
-    }
-
-private:
-    std::mutex _mutex;
-    std::exception_ptr _e;
+    TaskCancelledException();
 };
 
 /**
- * @brief Base class to run a network request in a parallel thread.
+ * @brief Base class to run a task in a parallel thread.
  *
  * Provides cancellation and polling support to monitor the task from the main
  * thread.
@@ -91,51 +56,18 @@ public:
     virtual ~NetworkTask() = default;
 
     /**
-     * @brief Check wether the task result is ready to be retreived.
-     *
-     * @return true Task is done and a the result has not been retreived yet.
-     * @return false Task is running or the result has already been retreived.
-     */
-    bool isReady() const;
-
-    /**
-     * @brief Check if the task is running.
-     *
-     * @return true Task is running.
-     * @return false Task is done or not started.
-     */
-    bool isRunning() const;
-
-    /**
-     * @brief Check if the task has been cancelled.
-     *
-     * @return true Cancel was called between start() and onComplete().
-     * @return false Task was not cancelled or has been restarted.
-     */
-    bool isCancelled() const;
-
-    /**
-     * @brief Check if the task can be cancelled.
-     *
-     * Cancelling a task is meaningful if the task is running and not already
-     * cancelled.
-     *
-     * @return true Task cancellation is meaningful.
-     * @return false Task cannot be cancelled.
-     */
-    bool isCancellable() const;
-
-    /**
      * @brief Start the task by calling run() in a separated thread.
      *
      */
     void start();
 
     /**
-     * @brief Retreive task result if this one is ready to be fetched.
+     * @brief Check if the task is ready and fetch result if yes.
      *
+     * @return true Task is complete, the result has been fetched.
+     * @return false Task is not ready yet, no result available.
      */
-    void poll();
+    bool poll();
 
     /**
      * @brief Retreive task result or wait for it if not ready.
@@ -150,34 +82,18 @@ public:
     void cancel();
 
     /**
-     * @brief Assign an exception to the task (thread safe).
-     *
-     * The exception will be passed to the onError(exception) method on the next
-     * poll() from the main thread.
-     *
-     * @param e Opaque exception pointer.
-     */
-    void setException(std::exception_ptr e);
-
-    /**
-     * @brief Shortcut to assign an exception with cancellation.
-     *
-     * @param e  Opaque exception pointer.
-     */
-    void cancelWith(std::exception_ptr e);
-
-    /**
      * @brief Cancel the task and wait for its termination.
      *
      */
     void cancelAndWait();
 
     /**
-     * @brief Throw the current exception set if the task is cancelled.
+     * @brief Called when the client who started the task disconnects.
      *
      */
-    void checkCancelled();
+    void disconnect();
 
+protected:
     /**
      * @brief Check cancellation and call onProgress() implementation.
      *
@@ -193,76 +109,52 @@ public:
     virtual void run() = 0;
 
     /**
-     * @brief Custom logic to run in the main thread when a task is started.
+     * @brief Called in start().
      *
      */
     virtual void onStart();
 
     /**
-     * @brief Custom logic to run in the main thread when a task succeed.
+     * @brief Called in poll() if the task is complete.
      *
+     * A task is complete if no exceptions have been thrown in run().
      */
     virtual void onComplete();
 
     /**
-     * @brief Custom logic to run in the main thread just before cancellation.
+     * @brief Called in cancel().
      *
      */
     virtual void onCancel();
 
     /**
-     * @brief Custom logic to run in the main thread when an exception is set.
+     * @brief Called in poll() if the task fails.
      *
+     * A task fails if an exception has been thrown in run().
+     *
+     * @param e Opaque exception pointer.
      */
-    virtual void onError(std::exception_ptr);
+    virtual void onError(std::exception_ptr e);
 
     /**
-     * @brief Custom logic to run when progress() is called.
+     * @brief Called in progress().
      *
      * @param operation Current operation description.
      * @param amount Percentage progress 0-1.
      */
-    virtual void onProgress(const std::string &, double);
+    virtual void onProgress(const std::string &operation, double amount);
 
     /**
-     * @brief Called when the task client is disconnected.
+     * @brief Called if the client starting the task is disconnected.
      *
      */
     virtual void onDisconnect();
 
-    /**
-     * @brief Assign an exception to the task.
-     *
-     * @tparam T Exception type.
-     * @param e Exception instance.
-     */
-    template<typename T>
-    void setException(T e)
-    {
-        _e = std::move(e);
-    }
-
-    /**
-     * @brief Cancel the task with the given exception.
-     *
-     * @tparam T Exception type.
-     * @param e Exception instance.
-     */
-    template<typename T>
-    void cancelWith(T e)
-    {
-        _e = std::move(e);
-        cancel();
-    }
-
 private:
-    bool _hasStatus(std::future_status status) const;
+    void _throwIfCancelled();
     void _fetchResult();
 
-    std::future<void> _result;
+    std::future<void> _future;
     std::atomic_bool _cancelled{false};
-    NetworkTaskException _e;
 };
-
-using NetworkTaskPtr = std::shared_ptr<NetworkTask>;
 } // namespace brayns

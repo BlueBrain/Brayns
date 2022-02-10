@@ -1,7 +1,7 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
  *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Authors: Daniel.Nachbaur@epfl.ch
+ *                      Nadir Román Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,45 +21,29 @@
 
 #pragma once
 
-#include <brayns/network/socket/NetworkSocket.h>
+#include <brayns/network/client/ClientManager.h>
+#include <brayns/network/entrypoint/EntrypointManager.h>
+#include <brayns/network/tasks/NetworkTaskManager.h>
 
-#include "ActionInterface.h"
+#include "INetworkInterface.h"
 
 namespace brayns
 {
-class NetworkContext;
-
 /**
- * @brief Base implementation of ActionInterface to register entrypoints.
- *
- * Registered entrypoints will be stored inside the instance and fetched when a
- * client request message is addressed with the same name (path).
- *
- * Child classes must provide a socket opened with the client and call the run
- * method on it. Requests and replies will then be received / sent until the
- * client close the connection.
+ * @brief Implementation of the network interface.
  *
  */
-class NetworkInterface : public ActionInterface
+class NetworkInterface : public INetworkInterface
 {
 public:
     /**
-     * @brief Construct an interface with context access.
+     * @brief Construct with reference on exposed objects.
      *
-     * @param context Network context reference.
+     * @param entrypoints Entrypoint manager.
+     * @param tasks Task manager.
+     * @param clients Client manager.
      */
-    NetworkInterface(NetworkContext &context);
-
-    /**
-     * @brief Receive requests and send replies to the client until the
-     * connection is closed.
-     *
-     * Can be used by child class when a new connection is opened to delegate
-     * clients management.
-     *
-     * @param socket Socket used for communication.
-     */
-    void run(NetworkSocketPtr socket);
+    NetworkInterface(EntrypointManager &entrypoints, NetworkTaskManager &tasks, ClientManager &clients);
 
     /**
      * @brief Register an entrypoint.
@@ -69,24 +53,24 @@ public:
     virtual void addEntrypoint(EntrypointRef entrypoint) override;
 
     /**
-     * @brief Run setup on all registered entrypoints.
+     * @brief Register and start a task.
      *
+     * @param client Client requesting the task.
+     * @param id Task request ID.
+     * @param task Task to execute.
      */
-    virtual void setupEntrypoints() override;
+    virtual void addTask(const ClientRef &client, const RequestId &id, std::unique_ptr<NetworkTask> task) override;
 
     /**
-     * @brief Process incoming network requests.
+     * @brief Send a notification to all connected clients.
      *
+     * @param message Notification message.
      */
-    virtual void processRequests() override;
-
-    /**
-     * @brief Update all entrypoints.
-     *
-     */
-    virtual void update() override;
+    virtual void notify(const NotificationMessage &message) override;
 
 private:
-    NetworkContext *_context;
+    EntrypointManager &_entrypoints;
+    NetworkTaskManager &_tasks;
+    ClientManager &_clients;
 };
 } // namespace brayns

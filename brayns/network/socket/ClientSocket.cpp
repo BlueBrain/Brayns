@@ -1,0 +1,149 @@
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include "ClientSocket.h"
+
+#include <stdexcept>
+#include <thread>
+
+#include <Poco/Net/Context.h>
+#include <Poco/Net/HTTPRequest.h>
+#include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/HTTPSClientSession.h>
+
+#include <brayns/common/Log.h>
+
+namespace
+{
+class SslClientContextFactory
+{
+public:
+    static Poco::Net::Context::Ptr create(const brayns::NetworkParameters &parameters)
+    {
+        auto usage = Poco::Net::Context::TLS_CLIENT_USE;
+        auto caLocation = parameters.getCALocation();
+        auto context = Poco::makeAuto<Poco::Net::Context>(usage, caLocation);
+        auto certificateFile = parameters.getCertificateFile();
+        auto certificate = Poco::Crypto::X509Certificate(certificateFile);
+        context->useCertificate(certificate);
+        auto privateKeyFile = parameters.getPrivateKeyFile();
+        auto privateKeyPassphrase = parameters.getPrivateKeyPassphrase();
+        auto privateKey = Poco::Crypto::RSAKey("", privateKeyFile, privateKeyPassphrase);
+        context->usePrivateKey(privateKey);
+        return context;
+    }
+};
+
+class ClientSessionFactory
+{
+public:
+    static std::unique_ptr<Poco::Net::HTTPClientSession> create(const brayns::NetworkParameters &parameters)
+    {
+        auto &uri = parameters.getUri();
+        auto secure = parameters.isSecure();
+        auto address = Poco::Net::SocketAddress(uri);
+        if (!secure)
+        {
+            return std::make_unique<Poco::Net::HTTPClientSession>(address);
+        }
+        auto context = SslClientContextFactory::create(parameters);
+        return std::make_unique<Poco::Net::HTTPSClientSession>(address, context);
+    }
+};
+
+class ClientManager
+{
+public:
+    static void run(const brayns::NetworkParameters &parameters, const brayns::SocketManager &manager)
+    {
+        auto session = ClientSessionFactory::create(parameters);
+        brayns::Log::info("Establishing client session with '{}:{}'.", session->getHost(), session->getPort());
+        Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_1_1);
+        Poco::Net::HTTPResponse response;
+        auto socket = std::make_shared<brayns::WebSocket>(*session, request, response);
+        brayns::Log::info("Client session connected.");
+        manager.run(socket);
+    }
+};
+} // namespace
+
+namespace brayns
+{
+ClientTask::ClientTask(const NetworkParameters &parameters, std::unique_ptr<ISocketListener> listener)
+    : _parameters(parameters)
+    , _manager(std::move(listener))
+{
+}
+
+void ClientTask::start()
+{
+    _handle = std::async(std::launch::async, [this] { _run(); });
+}
+
+ClientTask::~ClientTask()
+{
+    if (!_handle.valid() || !_running)
+    {
+        return;
+    }
+    _running = false;
+    try
+    {
+        _handle.get();
+    }
+    catch (const std::exception &e)
+    {
+        Log::error("Error while terminating client task: {}.", e.what());
+    }
+}
+
+void ClientTask::_run()
+{
+    _running = true;
+    while (_running)
+    {
+        try
+        {
+            ClientManager::run(_parameters, _manager);
+        }
+        catch (const Poco::Exception &e)
+        {
+            Log::error("Client disconnected: {}.", e.displayText());
+        }
+        catch (const std::exception &e)
+        {
+            Log::error("Unexpected error in client task: {}.", e.what());
+        }
+        auto reconnectionPeriod = _parameters.getReconnectionPeriod();
+        std::this_thread::sleep_for(reconnectionPeriod);
+    }
+}
+
+ClientSocket::ClientSocket(const NetworkParameters &parameters, std::unique_ptr<ISocketListener> listener)
+    : _task(parameters, std::move(listener))
+{
+}
+
+void ClientSocket::start()
+{
+    _task.start();
+}
+} // namespace brayns

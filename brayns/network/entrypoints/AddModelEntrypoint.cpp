@@ -29,19 +29,20 @@ namespace
 class LoadModelTask : public brayns::EntrypointTask<brayns::ModelParams, std::vector<brayns::ModelDescriptorPtr>>
 {
 public:
-    LoadModelTask(brayns::Engine &engine, brayns::LoaderRegistry &registry)
-        : _engine(&engine)
-        , _loaderRegistry(&registry)
+    LoadModelTask(Request request, brayns::Engine &engine, brayns::LoaderRegistry &loaders)
+        : EntrypointTask(std::move(request))
+        , _engine(engine)
+        , _loaders(loaders)
     {
     }
 
     virtual void run() override
     {
-        auto &scene = _engine->getScene();
+        auto &scene = _engine.getScene();
         auto &path = _params.getPath();
         auto &loaderName = _params.getLoaderName();
 
-        const auto &loader = _loaderRegistry->getSuitableLoader(path, "", loaderName);
+        const auto &loader = _loaders.getSuitableLoader(path, "", loaderName);
 
         _descriptors = loader.loadFromFile(
             path,
@@ -60,7 +61,7 @@ public:
         {
             throw brayns::EntrypointException("Missing model path");
         }
-        if (!_loaderRegistry->isSupportedFile(path))
+        if (!_loaders.isSupportedFile(path))
         {
             throw brayns::EntrypointException("Unsupported file type: '" + path + "'");
         }
@@ -68,13 +69,13 @@ public:
 
     virtual void onComplete() override
     {
-        _engine->triggerRender();
+        _engine.triggerRender();
         reply(_descriptors);
     }
 
 private:
-    brayns::Engine *_engine;
-    brayns::LoaderRegistry *_loaderRegistry;
+    brayns::Engine &_engine;
+    brayns::LoaderRegistry &_loaders;
     brayns::ModelParams _params;
     std::vector<brayns::ModelDescriptorPtr> _descriptors;
 };
@@ -82,6 +83,13 @@ private:
 
 namespace brayns
 {
+AddModelEntrypoint::AddModelEntrypoint(Engine &engine, LoaderRegistry &loaders, INetworkInterface &interface)
+    : _engine(engine)
+    , _loaders(loaders)
+    , _interface(interface)
+{
+}
+
 std::string AddModelEntrypoint::getName() const
 {
     return "add-model";
@@ -99,10 +107,7 @@ bool AddModelEntrypoint::isAsync() const
 
 void AddModelEntrypoint::onRequest(const Request &request)
 {
-    auto &api = getApi();
-    auto &engine = api.getEngine();
-    auto &registry = api.getLoaderRegistry();
-    auto task = std::make_shared<LoadModelTask>(engine, registry);
-    launchTask(task, request);
+    auto task = std::make_shared<LoadModelTask>(request, _engine, _loaders);
+    _interface.addTask(request, std::move(task));
 }
 } // namespace brayns

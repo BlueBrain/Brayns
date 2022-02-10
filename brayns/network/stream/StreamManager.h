@@ -23,12 +23,15 @@
 
 #include <utility>
 
+#include <brayns/engine/FrameBuffer.h>
+
+#include <brayns/network/client/ClientManager.h>
 #include <brayns/network/common/RateLimiter.h>
+
+#include <brayns/parameters/ApplicationParameters.h>
 
 namespace brayns
 {
-class NetworkContext;
-
 /**
  * @brief Info to monitor the image stream.
  *
@@ -36,13 +39,6 @@ class NetworkContext;
 class ImageStreamMonitor
 {
 public:
-    /**
-     * @brief Set the max FPS of the stream.
-     *
-     * @param fps
-     */
-    void setFps(size_t fps);
-
     /**
      * @brief Check if the stream is controlled.
      *
@@ -87,12 +83,18 @@ public:
      * @param functor Functor like void().
      */
     template<typename FunctorType>
-    void callWithFpsLimit(FunctorType functor)
+    void callWithFpsLimit(size_t fps, FunctorType functor)
     {
+        if (fps != _fps)
+        {
+            _fps = fps;
+            _limiter = RateLimiter::fromFps(fps);
+        }
         _limiter.call(std::move(functor));
     }
 
 private:
+    size_t _fps = 0;
     RateLimiter _limiter;
     bool _controlled = false;
     bool _triggered = false;
@@ -106,17 +108,17 @@ class StreamManager
 {
 public:
     /**
-     * @brief Construct a stream manager with NetworkContext access.
+     * @brief Load application parameters (jpeg compression, FPS).
      *
-     * @param context Context of the network manager.
+     * @param parameters Application parameters to load.
      */
-    StreamManager(NetworkContext &context);
+    void setParameters(const ApplicationParameters &parameters);
 
     /**
      * @brief Broadcast images according to current settings.
      *
      */
-    void broadcast();
+    void broadcast(FrameBuffer &framebuffer, ClientManager &clients);
 
     /**
      * @brief Get the image stream monitor.
@@ -126,7 +128,7 @@ public:
     ImageStreamMonitor &getMonitor();
 
 private:
-    NetworkContext *_context;
-    ImageStreamMonitor _imageStream;
+    const ApplicationParameters *_parameters = nullptr;
+    ImageStreamMonitor _monitor;
 };
 } // namespace brayns

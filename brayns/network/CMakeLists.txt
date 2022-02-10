@@ -13,23 +13,24 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/ExportFramesToDiskEntryPoint.h
   entrypoints/GetExportFramesProgressEntrypoint.h
   entrypoints/SnapshotEntrypoint.h
-  interface/ActionInterface.h
-  json/MessageFactory.h
+  interface/INetworkInterface.h
+  jsonrpc/JsonRpcFactory.h
   plugin/NetworkManager.h
 )
 
 set(BRAYNSNETWORK_SOURCES
   adapters/ModelTransferFunctionAdapter.cpp
   adapters/UpdateModelAdapter.cpp
-  binary/BinaryRequestManager.cpp
-  binary/ModelUploadTask.cpp
+  client/ClientManager.cpp
+  client/ClientRef.cpp
+  client/RequestBuffer.cpp
   common/ExtractMaterial.cpp
   common/ExtractModel.cpp
   common/FrameExporter.cpp
+  common/NotificationPeriod.cpp
   common/RateLimiter.cpp
-  context/NetworkContext.cpp
-  entrypoint/BaseEntrypoint.cpp
   entrypoint/EntrypointException.cpp
+  entrypoint/EntrypointNotifier.cpp
   entrypoint/EntrypointRef.cpp
   entrypoint/EntrypointManager.cpp
   entrypoints/AddClipPlaneEntrypoint.cpp
@@ -77,23 +78,24 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/VersionEntrypoint.cpp
   entrypoints/VolumeParametersEntrypoint.cpp
   interface/NetworkInterface.cpp
-  interface/ClientInterface.cpp
-  interface/ServerInterface.cpp
-  json/MessageFactory.cpp
-  json/PropertyObjectSchema.cpp
-  json/RequestId.cpp
+  jsonrpc/JsonRpcFactory.cpp
+  jsonrpc/JsonRpcMessages.cpp
+  jsonrpc/JsonRpcRequest.cpp
+  jsonrpc/JsonRpcSender.cpp
+  jsonrpc/PropertyObjectSchema.cpp
+  jsonrpc/RequestId.cpp
   messages/LightMessage.cpp
   plugin/NetworkManager.cpp
-  socket/ConnectionHandle.cpp
-  socket/ConnectionManager.cpp
-  socket/ConnectionMap.cpp
-  socket/ConnectionRef.cpp
-  socket/NetworkRequest.cpp
-  socket/NetworkSocket.cpp
+  socket/ClientSocket.cpp
+  socket/ServerSocket.cpp
+  socket/SocketManager.cpp
+  socket/WebSocket.cpp
   stream/StreamManager.cpp
   tasks/NetworkTask.cpp
   tasks/NetworkTaskManager.cpp
   tasks/NetworkTaskMonitor.cpp
+  upload/ModelUploadManager.cpp
+  upload/ModelUploadTask.cpp
 )
 
 set(BRAYNSNETWORK_INCLUDE_DIR ${PROJECT_SOURCE_DIR})

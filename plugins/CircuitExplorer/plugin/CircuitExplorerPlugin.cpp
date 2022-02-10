@@ -23,7 +23,7 @@
 
 #include <brayns/common/Log.h>
 
-#include <brayns/network/interface/ActionInterface.h>
+#include <brayns/network/interface/IActionInterface.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
 

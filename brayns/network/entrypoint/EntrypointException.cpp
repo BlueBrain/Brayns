@@ -44,4 +44,29 @@ const JsonValue &EntrypointException::getData() const
 {
     return _data;
 }
+
+ParsingErrorException::ParsingErrorException(const std::string &message)
+    : EntrypointException(-32700, "Failed to parse JSON request: " + message)
+{
+}
+
+InvalidRequestException::InvalidRequestException(const std::string &message, const std::vector<std::string> &errors)
+    : EntrypointException(-32600, "Invalid request: " + message, errors)
+{
+}
+
+MethodNotFoundException::MethodNotFoundException(const std::string &method)
+    : EntrypointException(-32601, "Method not found '" + method + "'")
+{
+}
+
+InvalidParamsException::InvalidParamsException(const std::string &message, const std::vector<std::string> &errors)
+    : EntrypointException(-32602, "Invalid params " + message, errors)
+{
+}
+
+InternalErrorException::InternalErrorException(const std::string &message)
+    : EntrypointException(-32603, "Server error: " + message)
+{
+}
 } // namespace brayns

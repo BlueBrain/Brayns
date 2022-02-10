@@ -25,18 +25,22 @@
 
 namespace brayns
 {
-void AddLightHelper::load(PluginAPI &api, LightPtr light, const NetworkRequest &request)
+void AddLightHelper::load(Engine &engine, LightPtr light, const JsonRpcRequest &request)
 {
     if (!light)
     {
-        throw EntrypointException("Failed to extract light properties");
+        throw InvalidParamsException("Failed to extract light properties");
     }
-    auto &engine = api.getEngine();
     auto &scene = engine.getScene();
     auto &lightManager = scene.getLightManager();
     auto id = lightManager.addLight(std::move(light));
     engine.triggerRender();
     request.reply(Json::serialize(id));
+}
+
+AddLightDirectionalEntrypoint::AddLightDirectionalEntrypoint(Engine &engine)
+    : AddLightEntrypoint(engine)
+{
 }
 
 std::string AddLightDirectionalEntrypoint::getName() const
@@ -49,6 +53,11 @@ std::string AddLightDirectionalEntrypoint::getDescription() const
     return "Add a directional light and return its ID";
 }
 
+AddLightSphereEntrypoint::AddLightSphereEntrypoint(Engine &engine)
+    : AddLightEntrypoint(engine)
+{
+}
+
 std::string AddLightSphereEntrypoint::getName() const
 {
     return "add-light-sphere";
@@ -57,6 +66,11 @@ std::string AddLightSphereEntrypoint::getName() const
 std::string AddLightSphereEntrypoint::getDescription() const
 {
     return "Add a sphere light and return its ID";
+}
+
+AddLightQuadEntrypoint::AddLightQuadEntrypoint(Engine &engine)
+    : AddLightEntrypoint(engine)
+{
 }
 
 std::string AddLightQuadEntrypoint::getName() const
@@ -69,6 +83,11 @@ std::string AddLightQuadEntrypoint::getDescription() const
     return "Add a quad light and return its ID";
 }
 
+AddLightSpotEntrypoint::AddLightSpotEntrypoint(Engine &engine)
+    : AddLightEntrypoint(engine)
+{
+}
+
 std::string AddLightSpotEntrypoint::getName() const
 {
     return "add-light-spot";
@@ -77,6 +96,11 @@ std::string AddLightSpotEntrypoint::getName() const
 std::string AddLightSpotEntrypoint::getDescription() const
 {
     return "Add a spot light and return its ID";
+}
+
+AddLightAmbientEntrypoint::AddLightAmbientEntrypoint(Engine &engine)
+    : AddLightEntrypoint(engine)
+{
 }
 
 std::string AddLightAmbientEntrypoint::getName() const

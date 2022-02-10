@@ -21,7 +21,6 @@
 #include "CircuitInfoPlugin.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include "CircuitInfoEntrypoints.h"

@@ -23,7 +23,7 @@
 
 #include <brayns/engine/Engine.h>
 #include <brayns/io/LoaderRegistry.h>
-#include <brayns/network/interface/ActionInterface.h>
+#include <brayns/network/plugin/NetworkManager.h>
 #include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
@@ -111,27 +111,32 @@ public:
     //@}
 
     /**
-       @return the current engine
-    */
+     * @brief Get engine.
+     *
+     * @return Engine& Engine.
+     */
     Engine &getEngine();
 
     /**
-     * @return The parameter manager
+     * @brief Get parameters.
+     *
+     * @return ParametersManager& Brayns parameters.
      */
     ParametersManager &getParametersManager();
 
     /**
-     * @brief getLoaderRegistry gives access to the loaders registry
-     * @return LoaderRegistry&
+     * @brief Gives access to the loaders registry
+     *
+     * @return LoaderRegistry& All available loaders.
      */
     LoaderRegistry &getLoaderRegistry();
 
     /**
-     * @brief Get the registered network interface.
+     * @brief Get the network manager if enabled.
      *
-     * @return ActionInterface* Network interface or null if not set.
+     * @return NetworkManager* Network manager or null if not enabled.
      */
-    ActionInterface *getActionInterface();
+    NetworkManager *getNetworkManager();
 
 private:
     struct Impl;

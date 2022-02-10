@@ -24,17 +24,14 @@
 #include <brayns/common/Log.h>
 
 #include <brayns/json/JsonSchemaValidator.h>
-#include <brayns/network/context/NetworkContext.h>
 #include <brayns/network/entrypoint/EntrypointException.h>
 
 namespace
 {
-using namespace brayns;
-
 class MessageValidator
 {
 public:
-    static void validate(const JsonValue &params, const SchemaResult &schema)
+    static void validate(const brayns::JsonValue &params, const brayns::SchemaResult &schema)
     {
         auto &schemaParams = schema.params;
         if (schemaParams.empty())
@@ -42,14 +39,14 @@ public:
             return;
         }
         auto &paramsSchema = schemaParams[0];
-        if (JsonSchemaHelper::isEmpty(paramsSchema))
+        if (brayns::JsonSchemaHelper::isEmpty(paramsSchema))
         {
             return;
         }
-        auto errors = JsonSchemaValidator::validate(params, paramsSchema);
+        auto errors = brayns::JsonSchemaValidator::validate(params, paramsSchema);
         if (!errors.empty())
         {
-            throw EntrypointException(0, "Invalid params", errors);
+            throw brayns::InvalidParamsException("JSON schema errors", errors);
         }
     }
 };
@@ -57,109 +54,105 @@ public:
 class MessageDispatcher
 {
 public:
-    MessageDispatcher(const EntrypointManager &entrypoints)
-        : _entrypoints(&entrypoints)
-    {
-    }
-
-    void dispatch(const NetworkRequest &request)
+    static void dispatch(const brayns::JsonRpcRequest &request, const brayns::EntrypointManager &entrypoints)
     {
         auto &message = request.getMessage();
-        auto &entrypoint = _getEntrypoint(message);
+        auto &entrypoint = _getEntrypoint(message, entrypoints);
         _validateSchema(message, entrypoint);
-        entrypoint.processRequest(request);
+        entrypoint.onRequest(request);
     }
 
 private:
-    const EntrypointRef &_getEntrypoint(const RequestMessage &message)
+    static const brayns::EntrypointRef &_getEntrypoint(
+        const brayns::RequestMessage &message,
+        const brayns::EntrypointManager &entrypoints)
     {
         auto &method = message.method;
-        auto entrypoint = _entrypoints->find(method);
+        auto entrypoint = entrypoints.find(method);
         if (!entrypoint)
         {
-            throw EntrypointException("Invalid entrypoint: '" + method + "'");
+            throw brayns::MethodNotFoundException(method);
         }
         return *entrypoint;
     }
 
-    void _validateSchema(const RequestMessage &message, const EntrypointRef &entrypoint)
+    static void _validateSchema(const brayns::RequestMessage &message, const brayns::EntrypointRef &entrypoint)
     {
         auto &params = message.params;
         auto &schema = entrypoint.getSchema();
         MessageValidator::validate(params, schema);
     }
-
-    const EntrypointManager *_entrypoints;
 };
 } // namespace
 
 namespace brayns
 {
-EntrypointManager::EntrypointManager(NetworkContext &context)
-    : _context(&context)
-{
-}
-
 const EntrypointRef *EntrypointManager::find(const std::string &name) const
 {
     auto i = _entrypoints.find(name);
     return i == _entrypoints.end() ? nullptr : &i->second;
 }
 
+std::vector<std::string> EntrypointManager::getNames() const
+{
+    std::vector<std::string> names;
+    names.reserve(_entrypoints.size());
+    for (const auto &[name, entrypoint] : _entrypoints)
+    {
+        names.push_back(name);
+    }
+    return names;
+}
+
 void EntrypointManager::add(EntrypointRef entrypoint)
 {
-    auto name = entrypoint.loadName();
+    auto &name = entrypoint.getName();
     if (name.empty())
     {
-        throw EntrypointException("Entrypoints must have a name");
+        throw std::invalid_argument("Entrypoints must have a name");
     }
     if (find(name))
     {
-        throw EntrypointException("Entrypoint '" + name + "' already exists");
+        throw std::invalid_argument("Entrypoint '" + name + "' already registered");
     }
-    Log::info("Add entrypoint '{}'.", name);
+    Log::info("Register entrypoint '{}'.", name);
     _entrypoints.emplace(name, std::move(entrypoint));
 }
 
-void EntrypointManager::setup()
+void EntrypointManager::onCreate()
 {
-    for (auto &pair : _entrypoints)
+    for (auto &[name, entrypoint] : _entrypoints)
     {
-        auto &entrypoint = pair.second;
-        entrypoint.setup(*_context);
+        entrypoint.onCreate();
     }
 }
 
-void EntrypointManager::update() const
+void EntrypointManager::onUpdate() const
 {
-    for (const auto &pair : _entrypoints)
+    for (const auto &[name, entrypoint] : _entrypoints)
     {
-        auto &entrypoint = pair.second;
-        entrypoint.update();
+        entrypoint.onUpdate();
     }
 }
 
-void EntrypointManager::processRequest(const NetworkRequest &request) const
+void EntrypointManager::onRequest(const JsonRpcRequest &request) const
 {
-    MessageDispatcher dispatcher(*this);
-    dispatcher.dispatch(request);
+    MessageDispatcher::dispatch(request, *this);
 }
 
-void EntrypointManager::preRender() const
+void EntrypointManager::onPreRender() const
 {
-    for (const auto &pair : _entrypoints)
+    for (const auto &[name, entrypoint] : _entrypoints)
     {
-        auto &entrypoint = pair.second;
-        entrypoint.preRender();
+        entrypoint.onPreRender();
     }
 }
 
-void EntrypointManager::postRender() const
+void EntrypointManager::onPostRender() const
 {
-    for (const auto &pair : _entrypoints)
+    for (const auto &[name, entrypoint] : _entrypoints)
     {
-        auto &entrypoint = pair.second;
-        entrypoint.postRender();
+        entrypoint.onPostRender();
     }
 }
 } // namespace brayns

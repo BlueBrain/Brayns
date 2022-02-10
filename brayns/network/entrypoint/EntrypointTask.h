@@ -45,12 +45,6 @@ public:
     using Request = EntrypointRequest<ParamsType, ResultType>;
 
     /**
-     * @brief Construct a task with no associated requests.
-     *
-     */
-    EntrypointTask() = default;
-
-    /**
      * @brief Construct a task with request.
      *
      * Store the request to allow subclasses to access it.
@@ -60,20 +54,6 @@ public:
     EntrypointTask(Request request)
         : _request(std::move(request))
     {
-    }
-
-    /**
-     * @brief Process the given request in separated thread.
-     *
-     * Store the request to allow subclasses to access it and start the task.
-     *
-     * @param request Request starting the task.
-     */
-    void execute(Request request)
-    {
-        cancelAndWait();
-        _request = std::move(request);
-        start();
     }
 
     /**
@@ -111,7 +91,7 @@ public:
      *
      * @param e Opaque exception ptr.
      */
-    virtual void onError(std::exception_ptr e)
+    virtual void onError(std::exception_ptr e) override
     {
         _request.error(e);
     }
@@ -124,7 +104,7 @@ public:
      * @param operation Current operation.
      * @param amount Progress amount 0-1.
      */
-    virtual void onProgress(const std::string &operation, double amount)
+    virtual void onProgress(const std::string &operation, double amount) override
     {
         _limiter.call([&] { _request.progress(operation, amount); });
     }

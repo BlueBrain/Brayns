@@ -22,7 +22,7 @@
 #pragma once
 
 #include <memory>
-#include <type_traits>
+#include <string>
 
 #include <brayns/network/messages/SchemaMessage.h>
 
@@ -38,82 +38,49 @@ class EntrypointRef
 {
 public:
     /**
-     * @brief Shortcut to instanciate a ref on an entrypoint of given type.
-     *
-     * @tparam T Entrypoint type.
-     * @tparam Args Entrypoint constructor arg types.
-     * @param args Entrypoint constructor args.
-     * @return EntrypointRef Entrypoint.
-     */
-    template<typename T, typename... Args>
-    static EntrypointRef create(Args &&...args)
-    {
-        static_assert(std::is_base_of<IEntrypoint, T>());
-        return EntrypointRef(std::make_unique<T>(std::forward<Args>(args)...));
-    }
-
-    /**
      * @brief Construct a ref on an entrypoint implementing IEntrypoint.
      *
      * @param entrypoint Entrypoint implementation.
      */
-    EntrypointRef(std::unique_ptr<IEntrypoint> entrypoint);
+    EntrypointRef(std::string plugin, std::unique_ptr<IEntrypoint> entrypoint);
 
     /**
-     * @brief Setup entrypoint with given context.
+     * @brief Call implementation onCreate() and build JSON schema.
      *
-     * Give underlying entrypoint context access, call onCreate() and build JSON
-     * schema using implementation.
-     *
-     * @param context Common data to all entrypoints (API, connections).
      */
-    void setup(NetworkContext &context);
+    void onCreate();
+
+    /**
+     * @brief Call implementation onRequest() with given request.
+     *
+     * @param request Client request to the underlying entrypoint.
+     */
+    void onRequest(const JsonRpcRequest &request) const;
 
     /**
      * @brief Call implementation onUpdate().
      *
      */
-    void update() const;
+    void onUpdate() const;
 
     /**
-     * @brief Call implementation onRequest with given request.
-     *
-     * @param request Client request to the underlying entrypoint.
-     */
-    void processRequest(const NetworkRequest &request) const;
-
-    /**
-     * @brief Call implementation onPreRender.
+     * @brief Call implementation onPreRender().
      *
      */
-    void preRender() const;
+    void onPreRender() const;
 
     /**
-     * @brief Call implementation onPostRender.
+     * @brief Call implementation onPostRender().
      *
      */
-    void postRender() const;
+    void onPostRender() const;
 
     /**
-     * @brief Retrieve entrypoint name from implementation.
-     *
-     * @return std::string Entrypoint name (ex: "get-camera").
-     */
-    std::string loadName() const;
-
-    /**
-     * @brief Get the name of the plugin the entrypoint belongs to.
+     * @brief Get the name of the plugin that registered the entrypoint.
      *
      * @return const std::string& Parent plugin name.
      */
     const std::string &getPlugin() const;
-
-    /**
-     * @brief Set the name of the plugin the entrypoint belongs to.
-     *
-     * @param plugin Parent plugin name.
-     */
-    void setPlugin(const std::string &plugin);
 
     /**
      * @brief Get the entrypoint schema.
@@ -160,14 +127,6 @@ public:
      * @return const JsonSchema& JSON schema.
      */
     const JsonSchema &getResultSchema() const;
-
-    /**
-     * @brief Check if the entrypoint is asynchronous.
-     *
-     * @return true Async.
-     * @return false Sync.
-     */
-    bool isAsync() const;
 
 private:
     std::unique_ptr<IEntrypoint> _entrypoint;

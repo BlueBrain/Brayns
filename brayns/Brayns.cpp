@@ -36,10 +36,6 @@
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
 
-#include <brayns/parameters/ParametersManager.h>
-
-#include <brayns/network/interface/ActionInterface.h>
-
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <brayns/utils/DynamicLib.h>
@@ -86,11 +82,6 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->getScene().commit(); // Needed to obtain a bounding box
         _adjustCamera();
-
-        if (_actionInterface)
-        {
-            _actionInterface->start();
-        }
     }
 
     ~Impl()
@@ -191,6 +182,11 @@ struct Brayns::Impl : public PluginAPI
         _engine->getStatistics().resetModified();
     }
 
+    NetworkManager *getNetworkManager()
+    {
+        return _pluginManager.getNetworkManager();
+    }
+
     Engine &getEngine() final
     {
         return *_engine;
@@ -221,14 +217,14 @@ struct Brayns::Impl : public PluginAPI
         _engine->triggerRender();
     }
 
-    ActionInterface *getActionInterface() final
+    INetworkInterface *getNetworkInterface() final
     {
-        return _actionInterface.get();
+        return _networkInterface.get();
     }
 
-    void setActionInterface(const std::shared_ptr<ActionInterface> &interface) final
+    void setNetworkInterface(std::unique_ptr<INetworkInterface> interface) final
     {
-        _actionInterface = interface;
+        _networkInterface = std::move(interface);
     }
 
     Scene &getScene() final
@@ -379,7 +375,7 @@ private:
     Timer _renderTimer;
     std::atomic<double> _lastFPS;
 
-    std::shared_ptr<ActionInterface> _actionInterface;
+    std::unique_ptr<INetworkInterface> _networkInterface;
     std::shared_ptr<DirectionalLight> _sunLight;
 };
 
@@ -432,8 +428,8 @@ ParametersManager &Brayns::getParametersManager()
     return _impl->getParametersManager();
 }
 
-ActionInterface *Brayns::getActionInterface()
+NetworkManager *Brayns::getNetworkManager()
 {
-    return _impl->getActionInterface();
+    return _impl->getNetworkManager();
 }
 } // namespace brayns

@@ -33,7 +33,6 @@
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
-#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
 

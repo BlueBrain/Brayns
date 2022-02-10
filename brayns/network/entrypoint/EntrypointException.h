@@ -50,6 +50,7 @@ public:
      *
      * @param code Error code.
      * @param message Error description.
+     * @param data Additional optional error data.
      */
     EntrypointException(int code, const std::string &message, const JsonValue &data = {});
 
@@ -70,5 +71,35 @@ public:
 private:
     int _code = 0;
     JsonValue _data;
+};
+
+class ParsingErrorException : public EntrypointException
+{
+public:
+    ParsingErrorException(const std::string &message);
+};
+
+class InvalidRequestException : public EntrypointException
+{
+public:
+    InvalidRequestException(const std::string &message, const std::vector<std::string> &errors = {});
+};
+
+class MethodNotFoundException : public EntrypointException
+{
+public:
+    MethodNotFoundException(const std::string &method);
+};
+
+class InvalidParamsException : public EntrypointException
+{
+public:
+    InvalidParamsException(const std::string &message, const std::vector<std::string> &errors = {});
+};
+
+class InternalErrorException : public EntrypointException
+{
+public:
+    InternalErrorException(const std::string &message);
 };
 } // namespace brayns

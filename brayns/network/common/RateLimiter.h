@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <chrono>
+#include "Clock.h"
 
 namespace brayns
 {
@@ -32,24 +32,6 @@ namespace brayns
 class RateLimiter
 {
 public:
-    /**
-     * @brief Clock used to measure the rate.
-     *
-     */
-    using Clock = std::chrono::high_resolution_clock;
-
-    /**
-     * @brief Clock timepoint used to measure the rate.
-     *
-     */
-    using TimePoint = Clock::time_point;
-
-    /**
-     * @brief Duration unit used to measure the rate.
-     *
-     */
-    using Duration = Clock::duration;
-
     /**
      * @brief Build a rate limiter using FPS specification.
      *

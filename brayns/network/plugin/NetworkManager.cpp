@@ -21,17 +21,20 @@
 
 #include "NetworkManager.h"
 
+#include <optional>
+
 #include <Poco/JSON/JSONException.h>
 
 #include <brayns/common/Log.h>
 
 #include <brayns/json/JsonSchemaValidator.h>
 
-#include <brayns/network/context/NetworkContext.h>
 #include <brayns/network/entrypoint/EntrypointException.h>
-#include <brayns/network/interface/ClientInterface.h>
-#include <brayns/network/interface/ServerInterface.h>
-#include <brayns/network/stream/StreamManager.h>
+#include <brayns/network/interface/NetworkInterface.h>
+#include <brayns/network/jsonrpc/JsonRpcFactory.h>
+#include <brayns/network/jsonrpc/JsonRpcSender.h>
+#include <brayns/network/socket/ClientSocket.h>
+#include <brayns/network/socket/ServerSocket.h>
 
 #include <brayns/network/entrypoints/AddClipPlaneEntrypoint.h>
 #include <brayns/network/entrypoints/AddLightEntrypoint.h>
@@ -80,233 +83,502 @@
 
 namespace
 {
-using namespace brayns;
-
-class MessageBuilder
+class RequestParser
 {
 public:
-    static RequestMessage build(const std::string &data)
+    static brayns::RequestMessage parse(const std::string &data)
     {
         auto json = _parse(data);
         _validateSchema(json);
-        auto message = Json::deserialize<RequestMessage>(json);
+        auto message = brayns::Json::deserialize<brayns::RequestMessage>(json);
         _validateHeader(message);
         return message;
     }
 
 private:
-    static JsonValue _parse(const std::string &data)
+    static inline const auto _schema = brayns::Json::getSchema<brayns::RequestMessage>();
+
+    static brayns::JsonValue _parse(const std::string &data)
     {
         try
         {
-            return Json::parse(data);
+            return brayns::Json::parse(data);
         }
         catch (const Poco::JSON::JSONException &e)
         {
-            throw EntrypointException("Failed to parse JSON request: " + e.displayText());
+            throw brayns::ParsingErrorException(e.displayText());
+        }
+        catch (const std::exception &e)
+        {
+            throw brayns::InternalErrorException("Unexpected error during request parsing: " + std::string(e.what()));
+        }
+        catch (...)
+        {
+            throw brayns::InternalErrorException("Unknown error during request parsing");
         }
     }
 
-    static void _validateSchema(const JsonValue &json)
+    static void _validateSchema(const brayns::JsonValue &json)
     {
-        static const JsonSchema schema = Json::getSchema<RequestMessage>();
-        auto errors = JsonSchemaValidator::validate(json, schema);
+        auto errors = brayns::JsonSchemaValidator::validate(json, _schema);
         if (!errors.empty())
         {
-            throw EntrypointException(0, "Invalid JSON-RPC request", errors);
+            throw brayns::InvalidRequestException("JSON schema errors", errors);
         }
     }
 
-    static void _validateHeader(const RequestMessage &message)
+    static void _validateHeader(const brayns::RequestMessage &message)
     {
         if (message.jsonrpc != "2.0")
         {
-            throw EntrypointException("Unsupported JSON-RPC version: '" + message.jsonrpc + "'");
+            throw brayns::InvalidRequestException("Unsupported JSON-RPC version: '" + message.jsonrpc + "'");
         }
         auto &method = message.method;
         if (method.empty())
         {
-            throw EntrypointException("No method provided in request");
+            throw brayns::InvalidRequestException("No method provided in request");
         }
     }
 };
 
-class RequestManager
+class JsonRpcDispatcher
 {
 public:
-    RequestManager(NetworkContext &context)
-        : _context(&context)
+    static void dispatch(const brayns::JsonRpcRequest &request, const brayns::EntrypointManager &entrypoints)
+    {
+        try
+        {
+            _dispatch(request, entrypoints);
+        }
+        catch (const brayns::EntrypointException &e)
+        {
+            auto &message = request.getMessage();
+            auto &client = request.getClient();
+            auto error = brayns::JsonRpcFactory::error(message, e);
+            brayns::JsonRpcSender::error(error, client);
+        }
+    }
+
+private:
+    static void _dispatch(const brayns::JsonRpcRequest &request, const brayns::EntrypointManager &entrypoints)
+    {
+        try
+        {
+            entrypoints.onRequest(request);
+        }
+        catch (const std::exception &e)
+        {
+            throw brayns::InternalErrorException("Unexpected error while processing request: " + std::string(e.what()));
+        }
+        catch (...)
+        {
+            throw brayns::InternalErrorException("Unknown error while processing request");
+        }
+    }
+};
+
+class JsonRpcHandler
+{
+public:
+    static void processRequest(
+        const brayns::ClientRef &client,
+        const std::string &data,
+        const brayns::EntrypointManager &entrypoints)
+    {
+        brayns::RequestMessage message;
+        try
+        {
+            message = RequestParser::parse(data);
+        }
+        catch (const brayns::EntrypointException &e)
+        {
+            auto error = brayns::JsonRpcFactory::error(e);
+            brayns::JsonRpcSender::error(error, client);
+            return;
+        }
+        auto request = brayns::JsonRpcRequest(client, std::move(message));
+        JsonRpcDispatcher::dispatch(request, entrypoints);
+    }
+};
+
+class ModelUploadHandler
+{
+public:
+    static void processBinaryRequest(
+        const brayns::ClientRef &client,
+        std::string_view data,
+        brayns::ModelUploadManager &modelUploads)
+    {
+        try
+        {
+            _processBinaryRequest(client, data, modelUploads);
+        }
+        catch (const brayns::EntrypointException &e)
+        {
+            auto error = brayns::JsonRpcFactory::error(e);
+            brayns::JsonRpcSender::error(error, client);
+        }
+    }
+
+private:
+    static void _processBinaryRequest(
+        const brayns::ClientRef &client,
+        std::string_view data,
+        brayns::ModelUploadManager &modelUploads)
+    {
+        try
+        {
+            modelUploads.addChunk(client, data);
+        }
+        catch (const std::exception &e)
+        {
+            throw brayns::InternalErrorException(
+                "Unexpected error while processing binary request: " + std::string(e.what()));
+        }
+        catch (...)
+        {
+            throw brayns::InternalErrorException("Unknown error while processing binary request");
+        }
+    }
+};
+
+class RequestDispatcher
+{
+public:
+    RequestDispatcher(const brayns::EntrypointManager &entrypoints, brayns::ModelUploadManager &modelUploads)
+        : _handler(entrypoints)
+        , _modelUploads(modelUploads)
     {
     }
 
-    void processRequest(const ConnectionHandle &handle, const InputPacket &packet)
+    void dispatch(
+        brayns::RequestBuffer &buffer,
+        const brayns::EntrypointManager &entrypoints,
+        brayns::ModelUploadManager &modelUploads)
+    {
+        auto requests = buffer.extractAll();
+        return dispatch(requests);
+    }
+
+    void dispatch(
+        const brayns::RequestBuffer::Map &requests,
+        const brayns::EntrypointManager &entrypoints,
+        brayns::ModelUploadManager &modelUploads)
+    {
+        for (const auto &[client, packets] : requests)
+        {
+            for (const auto &packet : packets)
+            {
+                _dispatch(client, packet);
+            }
+        }
+    }
+
+private:
+    JsonRpcHandler _handler;
+    brayns::ModelUploadManager &_modelUploads;
+
+    void _dispatch(const brayns::ClientRef > &client, const brayns::InputPacket &packet)
     {
         if (packet.isBinary())
         {
-            _processBinaryRequest(handle, packet);
+            _dispatchBinary(socket, packet);
             return;
         }
         if (packet.isText())
         {
-            _processTextRequest(handle, packet);
+            _dispatchText(socket, packet);
             return;
         }
-        Log::error("Invalid packet received.");
+        brayns::Log::error("Invalid packet received.");
     }
 
-private:
-    void _processBinaryRequest(const ConnectionHandle &handle, const InputPacket &packet)
+    void _dispatchBinary(const std::shared_ptr<brayns::WebSocket> &socket, const brayns::InputPacket &packet)
     {
-        auto &binary = _context->getBinary();
-        binary.processBinaryRequest(handle, packet);
+        auto data = packet.getData();
+        _modelUploads.processBinaryRequest(socket, data);
     }
 
-    void _processTextRequest(const ConnectionHandle &handle, const InputPacket &packet)
+    void _dispatchText(const std::shared_ptr<brayns::WebSocket> &socket, const brayns::InputPacket &packet)
     {
-        auto request = _createRequest(handle);
-        try
-        {
-            _dispatch(request, packet);
-        }
-        catch (...)
-        {
-            request.invalidRequest(std::current_exception());
-        }
-    }
-
-    NetworkRequest _createRequest(const ConnectionHandle &handle)
-    {
-        auto &connections = _context->getConnections();
-        return {handle, connections};
-    }
-
-    void _dispatch(NetworkRequest &request, const InputPacket &packet)
-    {
-        auto &data = packet.getData();
-        auto message = MessageBuilder::build(data);
-        request.setMessage(std::move(message));
-        auto &entrypoints = _context->getEntrypoints();
-        entrypoints.processRequest(request);
-    }
-
-    NetworkContext *_context;
-};
-
-class ConnectionCallbacks
-{
-public:
-    static void setup(NetworkContext &context)
-    {
-        auto &connections = context.getConnections();
-        connections.onConnect([&](const auto &handle) { onConnect(context, handle); });
-        connections.onDisconnect([&](const auto &handle) { onDisconnect(context, handle); });
-        connections.onRequest([&](const auto &handle, const auto &packet) { onRequest(context, handle, packet); });
-    }
-
-private:
-    static void onConnect(NetworkContext &context, const ConnectionHandle &handle)
-    {
-        (void)context;
-
-        Log::info("New connection: {}.", handle.getId());
-    }
-
-    static void onDisconnect(NetworkContext &context, const ConnectionHandle &handle)
-    {
-        auto &tasks = context.getTasks();
-        tasks.disconnect(handle);
-        Log::info("Connection closed: {}.", handle.getId());
-    }
-
-    static void onRequest(NetworkContext &context, const ConnectionHandle &handle, const InputPacket &packet)
-    {
-        RequestManager manager(context);
-        manager.processRequest(handle, packet);
+        auto data = std::string(packet.getData());
+        _handler.processRequest(socket, data);
     }
 };
 
-class InterfaceFactory
+class SocketListener : public brayns::ISocketListener
 {
 public:
-    static std::shared_ptr<ActionInterface> createInterface(NetworkContext &context)
+    SocketListener(brayns::ClientManager &clients, brayns::RequestBuffer &requests)
+        : _clients(clients)
+        , _requests(requests)
     {
-        auto &api = context.getApi();
-        auto &manager = api.getParametersManager();
-        auto &parameters = manager.getNetworkParameters();
+    }
+
+    virtual void onRequest(const std::shared_ptr<brayns::WebSocket> &socket, brayns::InputPacket request) override
+    {
+        auto data = request.isBinary() ? "<Binary data>" : request.getData();
+        brayns::Log::info("New request from {}: '{}'.", socket, data);
+        _requests.add(socket, std::move(request));
+    }
+
+    virtual void onConnect(const std::shared_ptr<brayns::WebSocket> &socket) override
+    {
+        brayns::Log::info("Client connection : {}.", socket);
+        _clients.add(socket);
+    }
+
+    virtual void onDisconnect(const std::shared_ptr<brayns::WebSocket> &socket) override
+    {
+        brayns::Log::info("Client disconnection : {}.", socket);
+        _clients.remove(socket);
+    }
+
+private:
+    brayns::ClientManager &_clients;
+    brayns::RequestBuffer &_requests;
+};
+
+class SocketFactory
+{
+public:
+    static std::unique_ptr<brayns::ISocket> create(
+        const brayns::NetworkParameters &parameters,
+        std::unique_ptr<SocketListener> listener)
+    {
         if (parameters.isClient())
         {
-            return std::make_shared<ClientInterface>(context);
+            return std::make_unique<brayns::ClientSocket>(parameters, std::move(listener));
         }
-        return std::make_shared<ServerInterface>(context);
+        return std::make_unique<brayns::ServerSocket>(parameters, std::move(listener));
     }
 };
 
-class NetworkManagerEntrypoints
+class CoreEntrypointRegistry
 {
 public:
-    static void load(NetworkManager &plugin)
+    CoreEntrypointRegistry(brayns::NetworkContext &context)
+        : _entrypoints(context.entrypoints)
+        , _clients(context.clients)
+        , _streamer(context.streamer)
+        , _tasks(context.tasks)
+        , _modelUploads(context.modelUploads)
+        , _frameExporter(context.frameExporter)
     {
-        plugin.add<GetAnimationParametersEntrypoint>();
-        plugin.add<SetAnimationParametersEntrypoint>();
-        plugin.add<GetCameraEntrypoint>();
-        plugin.add<SetCameraEntrypoint>();
-        plugin.add<ImageJpegEntrypoint>();
-        plugin.add<TriggerJpegStreamEntrypoint>();
-        plugin.add<ImageStreamingModeEntrypoint>();
-        plugin.add<GetRendererEntrypoint>();
-        plugin.add<SetRendererEntrypoint>();
-        plugin.add<VersionEntrypoint>();
-        plugin.add<GetApplicationParametersEntrypoint>();
-        plugin.add<SetApplicationParametersEntrypoint>();
-        plugin.add<GetVolumeParametersEntrypoint>();
-        plugin.add<SetVolumeParametersEntrypoint>();
-        plugin.add<GetSceneEntrypoint>();
-        plugin.add<SetSceneEntrypoint>();
-        plugin.add<GetStatisticsEntrypoint>();
-        plugin.add<SchemaEntrypoint>();
-        plugin.add<InspectEntrypoint>();
-        plugin.add<QuitEntrypoint>();
-        plugin.add<ExitLaterEntrypoint>();
-        plugin.add<ResetCameraEntrypoint>();
-        plugin.add<SnapshotEntrypoint>();
-        plugin.add<RequestModelUploadEntrypoint>();
-        plugin.add<ChunkEntrypoint>();
-        plugin.add<AddModelEntrypoint>();
-        plugin.add<RemoveModelEntrypoint>();
-        plugin.add<UpdateModelEntrypoint>();
-        plugin.add<GetModelEntrypoint>();
-        plugin.add<GetModelPropertiesEntrypoint>();
-        plugin.add<SetModelPropertiesEntrypoint>();
-        plugin.add<ModelPropertiesSchemaEntrypoint>();
-        plugin.add<GetModelTransferFunctionEntrypoint>();
-        plugin.add<SetModelTransferFunctionEntrypoint>();
-        plugin.add<AddClipPlaneEntrypoint>();
-        plugin.add<GetClipPlanesEntrypoint>();
-        plugin.add<UpdateClipPlaneEntrypoint>();
-        plugin.add<RemoveClipPlanesEntrypoint>();
-        plugin.add<GetInstancesEntrypoint>();
-        plugin.add<UpdateInstanceEntrypoint>();
-        plugin.add<GetLoadersEntrypoint>();
-        plugin.add<LoadersSchemaEntrypoint>();
-        plugin.add<GetCameraParamsEntrypoint>();
-        plugin.add<SetCameraParamsEntrypoint>();
-        plugin.add<GetRendererParamsEntrypoint>();
-        plugin.add<SetRendererParamsEntrypoint>();
-        plugin.add<GetLightsEntrypoint>();
-        plugin.add<AddLightDirectionalEntrypoint>();
-        plugin.add<AddLightSphereEntrypoint>();
-        plugin.add<AddLightQuadEntrypoint>();
-        plugin.add<AddLightSpotEntrypoint>();
-        plugin.add<AddLightAmbientEntrypoint>();
-        plugin.add<RemoveLightsEntrypoint>();
-        plugin.add<ClearLightsEntrypoint>();
-        plugin.add<CancelEntrypoint>();
-        plugin.add<RegistryEntrypoint>();
-        plugin.add<ExportFramesEntrypoint>();
+    }
 
-        auto frameExporter = std::make_shared<FrameExporter>();
-        plugin.add<ExportFramesToDiskEntrypoint>(frameExporter);
-        plugin.add<GetExportFramesProgressEntrypoint>(frameExporter);
+    void registerEntrypoints(brayns::ExtensionPlugin &plugin)
+    {
+        plugin.add<brayns::GetAnimationParametersEntrypoint>();
+        plugin.add<brayns::SetAnimationParametersEntrypoint>();
+        plugin.add<brayns::GetCameraEntrypoint>();
+        plugin.add<brayns::SetCameraEntrypoint>();
+        plugin.add<brayns::ImageJpegEntrypoint>();
+        plugin.add<brayns::TriggerJpegStreamEntrypoint>();
+        plugin.add<brayns::ImageStreamingModeEntrypoint>();
+        plugin.add<brayns::GetRendererEntrypoint>();
+        plugin.add<brayns::SetRendererEntrypoint>();
+        plugin.add<brayns::VersionEntrypoint>();
+        plugin.add<brayns::GetApplicationParametersEntrypoint>();
+        plugin.add<brayns::SetApplicationParametersEntrypoint>();
+        plugin.add<brayns::GetVolumeParametersEntrypoint>();
+        plugin.add<brayns::SetVolumeParametersEntrypoint>();
+        plugin.add<brayns::GetSceneEntrypoint>();
+        plugin.add<brayns::SetSceneEntrypoint>();
+        plugin.add<brayns::GetStatisticsEntrypoint>();
+        plugin.add<brayns::SchemaEntrypoint>();
+        plugin.add<brayns::InspectEntrypoint>();
+        plugin.add<brayns::QuitEntrypoint>();
+        plugin.add<brayns::ExitLaterEntrypoint>();
+        plugin.add<brayns::ResetCameraEntrypoint>();
+        plugin.add<brayns::SnapshotEntrypoint>();
+        plugin.add<brayns::RequestModelUploadEntrypoint>();
+        plugin.add<brayns::ChunkEntrypoint>();
+        plugin.add<brayns::AddModelEntrypoint>();
+        plugin.add<brayns::RemoveModelEntrypoint>();
+        plugin.add<brayns::UpdateModelEntrypoint>();
+        plugin.add<brayns::GetModelEntrypoint>();
+        plugin.add<brayns::GetModelPropertiesEntrypoint>();
+        plugin.add<brayns::SetModelPropertiesEntrypoint>();
+        plugin.add<brayns::ModelPropertiesSchemaEntrypoint>();
+        plugin.add<brayns::GetModelTransferFunctionEntrypoint>();
+        plugin.add<brayns::SetModelTransferFunctionEntrypoint>();
+        plugin.add<brayns::AddClipPlaneEntrypoint>();
+        plugin.add<brayns::GetClipPlanesEntrypoint>();
+        plugin.add<brayns::UpdateClipPlaneEntrypoint>();
+        plugin.add<brayns::RemoveClipPlanesEntrypoint>();
+        plugin.add<brayns::GetInstancesEntrypoint>();
+        plugin.add<brayns::UpdateInstanceEntrypoint>();
+        plugin.add<brayns::GetLoadersEntrypoint>();
+        plugin.add<brayns::LoadersSchemaEntrypoint>();
+        plugin.add<brayns::GetCameraParamsEntrypoint>();
+        plugin.add<brayns::SetCameraParamsEntrypoint>();
+        plugin.add<brayns::GetRendererParamsEntrypoint>();
+        plugin.add<brayns::SetRendererParamsEntrypoint>();
+        plugin.add<brayns::GetLightsEntrypoint>();
+        plugin.add<brayns::AddLightDirectionalEntrypoint>();
+        plugin.add<brayns::AddLightSphereEntrypoint>();
+        plugin.add<brayns::AddLightQuadEntrypoint>();
+        plugin.add<brayns::AddLightSpotEntrypoint>();
+        plugin.add<brayns::AddLightAmbientEntrypoint>();
+        plugin.add<brayns::RemoveLightsEntrypoint>();
+        plugin.add<brayns::ClearLightsEntrypoint>();
+        plugin.add<brayns::CancelEntrypoint>();
+        plugin.add<brayns::RegistryEntrypoint>();
+        plugin.add<brayns::ExportFramesEntrypoint>();
+
+        plugin.add<brayns::ExportFramesToDiskEntrypoint>(_frameExporter);
+        plugin.add<brayns::GetExportFramesProgressEntrypoint>(_frameExporter);
+    }
+
+private:
+    const brayns::EntrypointManager &_entrypoints;
+    brayns::ClientManager &_clients;
+    brayns::StreamManager &_streamer;
+    brayns::NetworkTaskManager &_tasks;
+    brayns::ModelUploadManager &_modelUploads;
+    brayns::FrameExporter &_frameExporter;
+};
+
+class NetworkContextBuilder
+{
+public:
+    static void build(brayns::NetworkContext &context, brayns::ExtensionPlugin &plugin)
+    {
+        _registerInterface(context);
+        _setupStream(context);
+        _createSocket(context);
+        _registerEntrypoints(context, plugin);
+    }
+
+private:
+    static void _registerInterface(brayns::NetworkContext &context)
+    {
+        auto &api = *context.api;
+        auto &entrypoints = context.entrypoints;
+        auto &tasks = context.tasks;
+        auto &clients = context.clients;
+        auto interface = std::make_unique<brayns::NetworkInterface>(entrypoints, tasks, clients);
+        api.setNetworkInterface(std::move(interface));
+    }
+
+    static void _registerEntrypoints(brayns::NetworkContext &context, brayns::ExtensionPlugin &plugin)
+    {
+        CoreEntrypointRegistry registry(context);
+        registry.registerEntrypoints(plugin);
+    }
+
+    static void _setupStream(brayns::NetworkContext &context)
+    {
+        auto &api = *context.api;
+        auto &streamer = context.streamer;
+        auto &manager = api.getParametersManager();
+        auto &parameters = manager.getApplicationParameters();
+        streamer.setParameters(parameters);
+    }
+
+    static void _createSocket(brayns::NetworkContext &context)
+    {
+        auto &api = *context.api;
+        auto &manager = api.getParametersManager();
+        auto &parameters = manager.getNetworkParameters();
+        auto &clients = context.clients;
+        auto &requests = context.requests;
+        auto &socket = context.socket;
+        auto listener = std::make_unique<SocketListener>(clients, requests);
+        socket = SocketFactory::create(parameters, std::move(listener));
+    }
+};
+
+class NetworkStartup
+{
+public:
+    static void run(brayns::NetworkContext &context)
+    {
+        auto &entrypoints = context.entrypoints;
+        auto &socket = *context.socket;
+        entrypoints.onCreate();
+        socket.start();
+    }
+};
+
+class NetworkRequestProcessing
+{
+public:
+    static void run(brayns::NetworkContext &context)
+    {
+        auto &entrypoints = context.entrypoints;
+        auto &modelUploads = context.modelUploads;
+        auto &requests = context.requests;
+        RequestDispatcher dispatcher(entrypoints, modelUploads);
+        dispatcher.dispatch(requests);
+    }
+};
+
+class NetworkUpdate
+{
+public:
+    static void run(brayns::NetworkContext &context)
+    {
+        _updateEntrypoints(context);
+        _pollTasks(context);
+        _pollModelUploads(context);
+    }
+
+private:
+    static void _updateEntrypoints(brayns::NetworkContext &context)
+    {
+        auto &entrypoints = context.entrypoints;
+        entrypoints.onUpdate();
+    }
+
+    static void _pollTasks(brayns::NetworkContext &context)
+    {
+        auto &tasks = context.tasks;
+        tasks.poll();
+    }
+
+    static void _pollModelUploads(brayns::NetworkContext &context)
+    {
+        auto &modelUploads = context.modelUploads;
+        modelUploads.poll();
+    }
+};
+
+class NetworkPreRender
+{
+public:
+    static void run(brayns::NetworkContext &context)
+    {
+        auto &entrypoints = context.entrypoints;
+        entrypoints.onPreRender();
+    }
+};
+
+class NetworkPostRender
+{
+public:
+    static void run(brayns::NetworkContext &context)
+    {
+        _notifyEntrypoints(context);
+        _broadcastImage(context);
+    }
+
+private:
+    static void _notifyEntrypoints(brayns::NetworkContext &context)
+    {
+        auto &entrypoints = context.entrypoints;
+        entrypoints.onPostRender();
+    }
+
+    static void _broadcastImage(brayns::NetworkContext &context)
+    {
+        auto &api = *context.api;
+        auto &engine = api.getEngine();
+        auto &streamer = context.streamer;
+        auto &framebuffer = engine.getFrameBuffer();
+        auto &clients = context.clients;
+        streamer.broadcast(framebuffer, clients);
     }
 };
 } // namespace
@@ -318,35 +590,34 @@ NetworkManager::NetworkManager()
 {
 }
 
-NetworkManager::~NetworkManager()
+void NetworkManager::start()
 {
-    if (_api->getActionInterface() != _interface.get())
-    {
-        return;
-    }
-    _api->setActionInterface(nullptr);
+    NetworkStartup::run(_context);
+}
+
+void NetworkManager::processRequests()
+{
+    NetworkRequestProcessing::run(_context);
+}
+
+void NetworkManager::update()
+{
+    NetworkUpdate::run(_context);
 }
 
 void NetworkManager::init()
 {
-    _context = std::make_unique<NetworkContext>(*_api);
-    _interface = InterfaceFactory::createInterface(*_context);
-    _api->setActionInterface(_interface);
-    NetworkManagerEntrypoints::load(*this);
-    ConnectionCallbacks::setup(*_context);
+    _context.api = _api;
+    NetworkContextBuilder::build(_context, *this);
 }
 
 void NetworkManager::preRender()
 {
-    auto &entrypoints = _context->getEntrypoints();
-    entrypoints.preRender();
+    NetworkPreRender::run(_context);
 }
 
 void NetworkManager::postRender()
 {
-    auto &entrypoints = _context->getEntrypoints();
-    entrypoints.postRender();
-    auto &stream = _context->getStream();
-    stream.broadcast();
+    NetworkPostRender::run(_context);
 }
 } // namespace brayns

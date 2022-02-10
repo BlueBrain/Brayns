@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/network/socket/NetworkRequest.h>
+#include <brayns/network/jsonrpc/JsonRpcRequest.h>
 
 namespace brayns
 {
@@ -36,29 +36,23 @@ class EntrypointRequest
 {
 public:
     /**
-     * @brief Construct an empty request.
-     *
-     */
-    EntrypointRequest() = default;
-
-    /**
      * @brief Construct a request wrapping the generic (JSON) request.
      *
      * @param request Request to wrap.
      */
-    EntrypointRequest(NetworkRequest request)
+    EntrypointRequest(JsonRpcRequest request)
         : _request(std::move(request))
     {
     }
 
     /**
-     * @brief Get the connection handle of the client sending the request.
+     * @brief Get the client sending the request.
      *
-     * @return const ConnectionHandle& Client connection handle.
+     * @return const ClientRef& Client ref.
      */
-    const ConnectionHandle &getConnectionHandle() const
+    const ClientRef &getClient() const
     {
-        return _request.getConnectionHandle();
+        return _request.getClient();
     }
 
     /**
@@ -114,34 +108,14 @@ public:
     }
 
     /**
-     * @brief Send an error as reply to the client.
+     * @brief Send a success reply with the given result.
      *
-     * @param code Error code.
-     * @param message Error description.
+     * @param result Result data of the reply.
      */
-    void error(int code, const std::string &message) const
+    void reply(const ResultType &result) const
     {
-        _request.error(code, message);
-    }
-
-    /**
-     * @brief Shortcut to send an error reply with no code.
-     *
-     * @param message Error description.
-     */
-    void error(const std::string &message) const
-    {
-        _request.error(message);
-    }
-
-    /**
-     * @brief Shortcut to send an error reply from an arbitrary exception.
-     *
-     * @param e Opaque exception pointer.
-     */
-    void error(std::exception_ptr e) const
-    {
-        _request.error(e);
+        auto json = Json::serialize(result);
+        _request.reply(result);
     }
 
     /**
@@ -155,29 +129,7 @@ public:
         _request.progress(operation, amount);
     }
 
-    /**
-     * @brief Send a success reply with the given result.
-     *
-     * @param result Result data of the reply.
-     */
-    void reply(const ResultType &result) const
-    {
-        _request.reply(result);
-    }
-
-    /**
-     * @brief Send a notification to all other clients (not the request sender).
-     *
-     * @tparam T Notification params type.
-     * @param params Params of the notification.
-     */
-    template<typename T>
-    void notify(const T &params) const
-    {
-        _request.notify(params);
-    }
-
 private:
-    NetworkRequest _request;
+    JsonRpcRequest _request;
 };
 } // namespace brayns

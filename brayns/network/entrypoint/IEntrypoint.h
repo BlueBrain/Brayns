@@ -24,12 +24,11 @@
 #include <string>
 
 #include <brayns/json/JsonSchema.h>
-#include <brayns/network/socket/NetworkRequest.h>
+
+#include <brayns/network/jsonrpc/JsonRpcRequest.h>
 
 namespace brayns
 {
-class NetworkContext;
-
 /**
  * @brief IEntrypoint interface.
  *
@@ -38,27 +37,6 @@ class IEntrypoint
 {
 public:
     virtual ~IEntrypoint() = default;
-
-    /**
-     * @brief Get the name of the plugin that loads this entrypoint.
-     *
-     * @return const std::string& Parent plugin name.
-     */
-    virtual const std::string &getPlugin() const = 0;
-
-    /**
-     * @brief Set the name of the plugin that loads this entrypoint.
-     *
-     * @param plugin Parent plugin name.
-     */
-    virtual void setPlugin(const std::string &plugin) = 0;
-
-    /**
-     * @brief Used by the manager give context access.
-     *
-     * @param context A reference to the current network context.
-     */
-    virtual void setContext(NetworkContext &context) = 0;
 
     /**
      * @brief Return the name of the entrypoint (unique ID).
@@ -89,11 +67,17 @@ public:
     virtual JsonSchema getResultSchema() const = 0;
 
     /**
+     * @brief Called each time the client sends a request to the entrypoint.
+     *
+     * @param request Client request.
+     */
+    virtual void onRequest(const JsonRpcRequest &request) = 0;
+
+    /**
      * @brief Return true if the entrypoint takes a long time and must be
      * executed in a separated thread.
      *
-     * @return true The entrypoint will be executed asynchonously in a separated
-     * thread.
+     * @return true The entrypoint will start a task in a separated thread.
      * @return false The entrypoint will be executed in the main loop.
      */
     virtual bool isAsync() const
@@ -110,19 +94,12 @@ public:
     }
 
     /**
-     * @brief Called each time a frame is rendered.
+     * @brief Called at each update of Brayns.
      *
      */
     virtual void onUpdate()
     {
     }
-
-    /**
-     * @brief Called each time the client sends a request to the entrypoint.
-     *
-     * @param request Client request.
-     */
-    virtual void onRequest(const NetworkRequest &request) = 0;
 
     /**
      * @brief Called before each render.

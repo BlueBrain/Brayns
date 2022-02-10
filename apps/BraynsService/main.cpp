@@ -22,7 +22,7 @@
 #include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
 #include <brayns/engine/Engine.h>
-#include <brayns/network/interface/ActionInterface.h>
+#include <brayns/network/interface/INetworkInterface.h>
 
 #include <atomic>
 
@@ -32,9 +32,9 @@ public:
     BraynsService(int argc, const char **argv)
         : _brayns(argc, argv)
     {
-        if (!_brayns.getActionInterface())
+        if (!_brayns.getNetworkManager())
         {
-            throw std::runtime_error("No action interface registered");
+            throw std::runtime_error("Network is not enabled");
         }
         auto &engine = _brayns.getEngine();
         engine.triggerRender = [this] { _triggerRender(); };
@@ -43,15 +43,15 @@ public:
     void run()
     {
         auto &engine = _brayns.getEngine();
-        auto &interface = *_brayns.getActionInterface();
+        auto &network = *_brayns.getNetworkManager();
         while (engine.getKeepRunning())
         {
-            interface.processRequests();
+            network.processRequests();
             if (_isRenderTriggered() || engine.continueRendering())
             {
                 _brayns.commitAndRender();
             }
-            interface.update();
+            network.update();
         }
     }
 
@@ -88,9 +88,9 @@ int main(int argc, const char **argv)
         timer.stop();
         brayns::Log::info("Service was running for {} seconds.", timer.seconds());
     }
-    catch (const std::runtime_error &e)
+    catch (const std::exception &e)
     {
-        brayns::Log::error(e.what());
+        brayns::Log::critical(e.what());
         return 1;
     }
     return 0;

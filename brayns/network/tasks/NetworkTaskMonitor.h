@@ -47,25 +47,6 @@ public:
     void notify();
 
     /**
-     * @brief Wait for notification or throw if timeout is reached.
-     *
-     * @tparam R Representation type.
-     * @tparam P Period ratio.
-     * @param timeout Timeout duration.
-     * @throw std::runtime_error Timeout is reached with no notifications.
-     */
-    template<typename R, typename P>
-    void wait(std::chrono::duration<R, P> timeout)
-    {
-        std::unique_lock<std::mutex> lock(_mutex);
-        auto status = _monitor.wait_for(lock, timeout);
-        if (status == std::cv_status::timeout)
-        {
-            throw std::runtime_error("Task monitor timeout");
-        }
-    }
-
-    /**
      * @brief Wait for notification with time limit.
      *
      * @tparam R Representation type.
@@ -75,7 +56,7 @@ public:
      * @return false Cancelled by a notification.
      */
     template<typename R, typename P>
-    bool waitFor(std::chrono::duration<R, P> duration)
+    bool wait(std::chrono::duration<R, P> duration)
     {
         std::unique_lock<std::mutex> lock(_mutex);
         auto status = _monitor.wait_for(lock, duration);

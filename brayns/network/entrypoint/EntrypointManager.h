@@ -28,14 +28,6 @@
 
 namespace brayns
 {
-class NetworkContext;
-
-/**
- * @brief Map of entrypoints indexed by name.
- *
- */
-using EntrypointMap = std::unordered_map<std::string, EntrypointRef>;
-
 /**
  * @brief Holds and manage all registered entrypoints.
  *
@@ -44,19 +36,19 @@ class EntrypointManager
 {
 public:
     /**
-     * @brief Construct a manager with context access.
-     *
-     * @param context Common data.
-     */
-    EntrypointManager(NetworkContext &context);
-
-    /**
      * @brief Retrieve an entrypoint using its name.
      *
      * @param name Entrypoint name (ex: "set-camera").
      * @return const EntrypointRef* Entrypoint or null if not registered.
      */
     const EntrypointRef *find(const std::string &name) const;
+
+    /**
+     * @brief Return the list of the names of all entrypoints registered.
+     *
+     * @return std::vector<std::string> Names of registered entrypoints.
+     */
+    std::vector<std::string> getNames() const;
 
     /**
      * @brief Add a new entrypoint.
@@ -68,64 +60,35 @@ public:
     /**
      * @brief Setup all registered entrypoints.
      *
-     * Setup the context access and call onCreate method.
-     *
      */
-    void setup();
-
-    /**
-     * @brief Update all entrypoints.
-     *
-     */
-    void update() const;
+    void onCreate();
 
     /**
      * @brief Dispatch request to corresponding entrypoint.
      *
      * @param request Client text request.
      */
-    void processRequest(const NetworkRequest &request) const;
+    void onRequest(const JsonRpcRequest &request) const;
+
+    /**
+     * @brief Update all entrypoints.
+     *
+     */
+    void onUpdate() const;
 
     /**
      * @brief Notify all entrypoints before render.
      *
      */
-    void preRender() const;
+    void onPreRender() const;
 
     /**
      * @brief Notify all entrypoints after render.
      *
      */
-    void postRender() const;
-
-    /**
-     * @brief Return the number of registered entrypoints.
-     *
-     * @return size_t Number of existing entrypoints.
-     */
-    size_t size() const
-    {
-        return _entrypoints.size();
-    }
-
-    /**
-     * @brief Iterate over all registered entrypoints.
-     *
-     * @tparam FunctorType Functor type like void(const EntrypointRef&).
-     * @param functor Functor instance.
-     */
-    template<typename FunctorType>
-    void forEach(FunctorType functor) const
-    {
-        for (const auto &pair : _entrypoints)
-        {
-            auto &entrypoint = pair.second;
-            functor(entrypoint);
-        }
-    }
+    void onPostRender() const;
 
 private:
-    NetworkContext *_context;
-    EntrypointMap _entrypoints;
+    std::unordered_map<std::string, EntrypointRef> _entrypoints;
 };
 } // namespace brayns

@@ -1,121 +1,49 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
  *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Authors: Daniel.Nachbaur@epfl.ch
+ *                      Nadir Román Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
- * This library is free software; you can redistribute it and/or modify it under
+ * This library is free software{} you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
  * by the Free Software Foundation.
  *
  * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * ANY WARRANTY{} without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
  * details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * along with this library{} if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "NetworkInterface.h"
 
-#include <brayns/common/Log.h>
-
-#include <brayns/network/context/NetworkContext.h>
-
-namespace
-{
-using namespace brayns;
-
-class MessageReceiver
-{
-public:
-    MessageReceiver(NetworkSocketPtr socket, NetworkContext &context)
-        : _socket(std::move(socket))
-        , _connections(&context.getConnections())
-    {
-        _connections->add(_socket);
-    }
-
-    ~MessageReceiver()
-    {
-        _connections->remove(_socket);
-    }
-
-    bool receive()
-    {
-        try
-        {
-            _receive();
-            return true;
-        }
-        catch (const ConnectionClosedException &e)
-        {
-            Log::debug("Connection closed: {}.", e.what());
-        }
-        catch (const std::exception &e)
-        {
-            Log::debug("Unknown receive error: {}.", e.what());
-        }
-        return false;
-    }
-
-private:
-    void _receive()
-    {
-        Log::debug("Waiting for client request...");
-        auto packet = _socket->receive();
-        Log::debug("Message received.");
-        _connections->receive(_socket, packet);
-    }
-
-    NetworkSocketPtr _socket;
-    ConnectionManager *_connections;
-};
-} // namespace
+#include <brayns/network/jsonrpc/JsonRpcSender.h>
 
 namespace brayns
 {
-NetworkInterface::NetworkInterface(NetworkContext &context)
-    : _context(&context)
+NetworkInterface::NetworkInterface(EntrypointManager &entrypoints, NetworkTaskManager &tasks, ClientManager &clients)
+    : _entrypoints(entrypoints)
+    , _tasks(tasks)
+    , _clients(clients)
 {
-}
-
-void NetworkInterface::run(NetworkSocketPtr socket)
-{
-    MessageReceiver receiver(std::move(socket), *_context);
-    while (receiver.receive())
-    {
-    }
 }
 
 void NetworkInterface::addEntrypoint(EntrypointRef entrypoint)
 {
-    auto &entrypoints = _context->getEntrypoints();
-    entrypoints.add(std::move(entrypoint));
+    _entrypoints.add(std::move(entrypoint));
 }
 
-void NetworkInterface::setupEntrypoints()
+void NetworkInterface::addTask(const ClientRef &client, const RequestId &id, std::unique_ptr<NetworkTask> task)
 {
-    auto &entrypoints = _context->getEntrypoints();
-    entrypoints.setup();
+    _tasks.add(client, id, std::move(task));
 }
 
-void NetworkInterface::processRequests()
+void NetworkInterface::notify(const NotificationMessage &message)
 {
-    auto &connections = _context->getConnections();
-    connections.update();
-}
-
-void NetworkInterface::update()
-{
-    auto &entrypoints = _context->getEntrypoints();
-    entrypoints.update();
-    auto &tasks = _context->getTasks();
-    tasks.poll();
-    auto &binary = _context->getBinary();
-    binary.pollTasks();
+    JsonRpcSender::notification(message, _clients);
 }
 } // namespace brayns

@@ -23,9 +23,12 @@
 
 #include <brayns/common/adapters/PropertyMapAdapter.h>
 
-#include <brayns/network/json/PropertyObjectSchema.h>
+#include <brayns/engine/Engine.h>
 
-#include "ObjectEntrypoint.h"
+#include <brayns/network/common/PropertyObjectSchema.h>
+#include <brayns/network/entrypoint/EntrypointNotifier.h>
+
+#include "IEntrypoint.h"
 
 namespace brayns
 {
@@ -38,17 +41,17 @@ namespace brayns
  * @tparam ObjectType Property object to retrieve.
  */
 template<typename ObjectType>
-class GetPropertyObjectEntrypoint : public BaseEntrypoint
+class GetPropertyObjectEntrypoint : public IEntrypoint
 {
 public:
     /**
-     * @brief Get the Underlying object using ObjectExtractor::extract(api).
+     * @brief Store the property object.
      *
-     * @return const ObjectType& Underlying object.
+     * @param object Object bound to the entrypoint.
      */
-    const ObjectType &getObject() const
+    GetPropertyObjectEntrypoint(const ObjectType &object)
+        : _object(object)
     {
-        return ObjectExtractor<ObjectType>::extract(getApi());
     }
 
     /**
@@ -68,8 +71,7 @@ public:
      */
     virtual JsonSchema getResultSchema() const override
     {
-        auto &object = getObject();
-        return PropertyObjectSchema::create(object);
+        return PropertyObjectSchema::create(_object);
     }
 
     /**
@@ -77,12 +79,15 @@ public:
      *
      * @param request Client get-...-properties request.
      */
-    virtual void onRequest(const NetworkRequest &request) override
+    virtual void onRequest(const JsonRpcRequest &request) override
     {
-        auto &object = getObject();
-        auto &properties = object.getPropertyMap();
-        request.reply(properties);
+        auto &properties = _object.getPropertyMap();
+        auto result = Json::serialize(properties);
+        request.reply(result);
     }
+
+private:
+    const ObjectType &_object;
 };
 
 /**
@@ -91,17 +96,19 @@ public:
  * @tparam ObjectType Property object to update.
  */
 template<typename ObjectType>
-class SetPropertyObjectEntrypoint : public BaseEntrypoint
+class SetPropertyObjectEntrypoint : public IEntrypoint
 {
 public:
     /**
-     * @brief Get the Underlying object using ObjectExtractor::extract(api).
+     * @brief Store the object and the engine.
      *
-     * @return const ObjectType& Underlying object.
+     * @param object Object bound to the entrypoint.
+     * @param engine Engine to trigger render when object is modified.
      */
-    ObjectType &getObject() const
+    SetPropertyObjectEntrypoint(ObjectType &object, Engine &engine, INetworkInterface &interface)
+        : _object(object)
+        , _notifier(*this, interface)
     {
-        return ObjectExtractor<ObjectType>::extract(getApi());
     }
 
     /**
@@ -111,8 +118,7 @@ public:
      */
     virtual JsonSchema getParamsSchema() const override
     {
-        auto &object = getObject();
-        return PropertyObjectSchema::create(object);
+        return PropertyObjectSchema::create(_object);
     }
 
     /**
@@ -130,15 +136,36 @@ public:
      *
      * @param request Client set-...-properties request.
      */
-    virtual void onRequest(const NetworkRequest &request) override
+    virtual void onRequest(const JsonRpcRequest &request) override
+    {
+        _updateProperties(request);
+        _notify();
+        _reply(request);
+    }
+
+private:
+    ObjectType &_object;
+    Engine &_engine;
+    EntrypointNotifier _notifier;
+
+    void _updateProperties(const JsonRequest &request)
     {
         auto &params = request.getParams();
         auto properties = Json::deserialize<PropertyMap>(params);
-        auto &object = getObject();
-        object.updateProperties(properties);
-        triggerRender();
-        request.notify(properties);
-        request.reply(EmptyMessage());
+        _object.updateProperties(properties);
+        _engine.triggerRender();
+    }
+
+    void _notify()
+    {
+        auto &properties = _object.getPropertyMap();
+        _interface.notify(properties);
+    }
+
+    void _reply(const JsonRpcRequest &request)
+    {
+        auto result = Json::serialize(EmptyMessage());
+        request.reply(result);
     }
 };
 } // namespace brayns

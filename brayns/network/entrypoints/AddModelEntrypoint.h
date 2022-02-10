@@ -21,17 +21,28 @@
 
 #pragma once
 
+#include <brayns/engine/Engine.h>
+#include <brayns/io/LoaderRegistry.h>
+
 #include <brayns/network/adapters/ModelParamsAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/interface/INetworkInterface.h>
 
 namespace brayns
 {
 class AddModelEntrypoint : public Entrypoint<ModelParams, std::vector<ModelDescriptorPtr>>
 {
 public:
+    AddModelEntrypoint(Engine &engine, LoaderRegistry &loaders, INetworkInterface &interface);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual bool isAsync() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    Engine &_engine;
+    LoaderRegistry &_loaders;
+    INetworkInterface &_interface;
 };
 } // namespace brayns
