@@ -32,7 +32,7 @@ namespace brayns
 class AddClipPlaneEntrypoint : public Entrypoint<AddClipPlaneMessage, ClipPlanePtr>
 {
 public:
-    AddClipPlaneEntrypoint(Engine &engine, EntrypointNotifier notifier);
+    AddClipPlaneEntrypoint(Engine &engine, INetworkInterface &interface);
 
     virtual std::string getName() const override;
 

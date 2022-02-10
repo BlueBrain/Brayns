@@ -26,15 +26,11 @@
 
 namespace brayns
 {
-template<>
-struct ObjectExtractor<Camera>
-{
-    static Camera &extract(PluginAPI &api);
-};
-
 class GetCameraEntrypoint : public GetEntrypoint<Camera>
 {
 public:
+    GetCameraEntrypoint(Camera &camera, INetworkInterface &interface);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
 };
@@ -42,6 +38,8 @@ public:
 class SetCameraEntrypoint : public SetEntrypoint<Camera>
 {
 public:
+    SetCameraEntrypoint(Camera &camera, Engine &engine);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
 };

@@ -23,6 +23,11 @@
 
 namespace brayns
 {
+ClearLightsEntrypoint::ClearLightsEntrypoint(Engine &engine)
+    : _engine(engine)
+{
+}
+
 std::string ClearLightsEntrypoint::getName() const
 {
     return "clear-lights";
@@ -35,11 +40,10 @@ std::string ClearLightsEntrypoint::getDescription() const
 
 void ClearLightsEntrypoint::onRequest(const Request &request)
 {
-    auto &engine = getApi().getEngine();
-    auto &scene = engine.getScene();
+    auto &scene = _engine.getScene();
     auto &lightManager = scene.getLightManager();
     lightManager.clearLights();
-    triggerRender();
+    _engine.triggerRender();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

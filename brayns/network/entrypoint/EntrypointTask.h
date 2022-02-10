@@ -57,6 +57,26 @@ public:
     }
 
     /**
+     * @brief Get the client that started the task.
+     *
+     * @return const ClientRef& Client ref.
+     */
+    const ClientRef &getClient() const
+    {
+        return _request.getClient();
+    }
+
+    /**
+     * @brief Get the ID of the request that started the task.
+     *
+     * @return const RequestId& Request ID.
+     */
+    const RequestId &getRequestId() const
+    {
+        return _request.getId();
+    }
+
+    /**
      * @brief Parse and return the request params.
      *
      * @return ParamsType Request params.

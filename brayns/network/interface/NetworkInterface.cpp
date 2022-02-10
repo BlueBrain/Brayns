@@ -37,7 +37,7 @@ void NetworkInterface::addEntrypoint(EntrypointRef entrypoint)
     _entrypoints.add(std::move(entrypoint));
 }
 
-void NetworkInterface::addTask(const ClientRef &client, const RequestId &id, std::unique_ptr<NetworkTask> task)
+void NetworkInterface::launchTask(const ClientRef &client, const RequestId &id, std::unique_ptr<NetworkTask> task)
 {
     _tasks.add(client, id, std::move(task));
 }

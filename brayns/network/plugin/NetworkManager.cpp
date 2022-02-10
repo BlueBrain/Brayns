@@ -315,7 +315,7 @@ public:
     virtual void onRequest(const brayns::ClientRef &client, brayns::InputPacket request) override
     {
         auto data = request.isBinary() ? "<Binary data>" : request.getData();
-        brayns::Log::trace("New request from client {}: {}.", client, data);
+        brayns::Log::trace("New request from client {}: '{}'.", client, data);
         _requests.add(client, std::move(request));
     }
 

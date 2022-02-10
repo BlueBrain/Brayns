@@ -26,7 +26,7 @@
 
 #include <brayns/network/adapters/ModelParamsAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/interface/INetworkInterface.h>
+#include <brayns/network/tasks/NetworkTaskLauncher.h>
 
 namespace brayns
 {
@@ -43,6 +43,6 @@ public:
 private:
     Engine &_engine;
     LoaderRegistry &_loaders;
-    INetworkInterface &_interface;
+    NetworkTaskLauncher _launcher;
 };
 } // namespace brayns

@@ -9,15 +9,17 @@ set(BRAYNSNETWORK_HEADERS
   entrypoint/EntrypointManager.h
   entrypoint/IEntrypoint.h
   entrypoint/EntrypointException.h
+  entrypoint/EntrypointTask.h
   entrypoints/ExportFramesEntrypoint.h
   entrypoints/ExportFramesToDiskEntryPoint.h
   entrypoints/GetExportFramesProgressEntrypoint.h
   entrypoints/SnapshotEntrypoint.h
   interface/INetworkInterface.h
   jsonrpc/JsonRpcFactory.h
+  tasks/NetworkTaskLauncher.h
   plugin/NetworkManager.h
-)
-
+  )
+  
 set(BRAYNSNETWORK_SOURCES
   adapters/ModelTransferFunctionAdapter.cpp
   adapters/UpdateModelAdapter.cpp
@@ -28,6 +30,7 @@ set(BRAYNSNETWORK_SOURCES
   common/ExtractModel.cpp
   common/FrameExporter.cpp
   common/NotificationPeriod.cpp
+  common/PropertyObjectSchema.cpp
   common/RateLimiter.cpp
   entrypoint/EntrypointException.cpp
   entrypoint/EntrypointNotifier.cpp
@@ -82,7 +85,6 @@ set(BRAYNSNETWORK_SOURCES
   jsonrpc/JsonRpcMessages.cpp
   jsonrpc/JsonRpcRequest.cpp
   jsonrpc/JsonRpcSender.cpp
-  jsonrpc/PropertyObjectSchema.cpp
   jsonrpc/RequestId.cpp
   messages/LightMessage.cpp
   plugin/NetworkManager.cpp

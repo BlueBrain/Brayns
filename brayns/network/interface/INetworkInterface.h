@@ -52,7 +52,7 @@ public:
      * @param id Task request ID.
      * @param task Task to execute.
      */
-    virtual void addTask(const ClientRef &client, const RequestId &id, std::unique_ptr<NetworkTask> task) = 0;
+    virtual void launchTask(const ClientRef &client, const RequestId &id, std::unique_ptr<NetworkTask> task) = 0;
 
     /**
      * @brief Send a notification to all connected clients.

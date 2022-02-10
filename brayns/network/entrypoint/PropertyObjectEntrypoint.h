@@ -104,9 +104,11 @@ public:
      *
      * @param object Object bound to the entrypoint.
      * @param engine Engine to trigger render when object is modified.
+     * @param interface Interface to notify when object is modified.
      */
     SetPropertyObjectEntrypoint(ObjectType &object, Engine &engine, INetworkInterface &interface)
         : _object(object)
+        , _engine(engine)
         , _notifier(*this, interface)
     {
     }
@@ -138,34 +140,19 @@ public:
      */
     virtual void onRequest(const JsonRpcRequest &request) override
     {
-        _updateProperties(request);
-        _notify();
-        _reply(request);
+        auto &params = request.getParams();
+        auto properties = Json::deserialize<PropertyMap>(params);
+        _object.updateProperties(properties);
+        _engine.triggerRender();
+        auto &properties = _object.getPropertyMap();
+        _notifier.notify(properties);
+        auto result = Json::serialize(EmptyMessage());
+        request.reply(result);
     }
 
 private:
     ObjectType &_object;
     Engine &_engine;
     EntrypointNotifier _notifier;
-
-    void _updateProperties(const JsonRequest &request)
-    {
-        auto &params = request.getParams();
-        auto properties = Json::deserialize<PropertyMap>(params);
-        _object.updateProperties(properties);
-        _engine.triggerRender();
-    }
-
-    void _notify()
-    {
-        auto &properties = _object.getPropertyMap();
-        _interface.notify(properties);
-    }
-
-    void _reply(const JsonRpcRequest &request)
-    {
-        auto result = Json::serialize(EmptyMessage());
-        request.reply(result);
-    }
 };
 } // namespace brayns

@@ -24,7 +24,7 @@
 namespace brayns
 {
 ExitLaterTask::ExitLaterTask(Engine &engine)
-    : _engine(&engine)
+    : _engine(engine)
 {
 }
 
@@ -33,27 +33,32 @@ ExitLaterTask::~ExitLaterTask()
     _monitor.notify();
 }
 
-void ExitLaterTask::execute(uint32_t minutes)
+void ExitLaterTask::quitAfter(std::chrono::minutes duration)
 {
     cancelAndWait();
-    _duration = std::chrono::minutes(minutes);
+    _duration = duration;
     start();
 }
 
 void ExitLaterTask::run()
 {
-    _monitor.waitFor(_duration);
+    _monitor.wait(_duration);
 }
 
 void ExitLaterTask::onComplete()
 {
-    _engine->setKeepRunning(false);
-    _engine->triggerRender();
+    _engine.setKeepRunning(false);
+    _engine.triggerRender();
 }
 
 void ExitLaterTask::onCancel()
 {
     _monitor.notify();
+}
+
+ExitLaterEntrypoint::ExitLaterEntrypoint(Engine &engine)
+    : _task(engine)
+{
 }
 
 std::string ExitLaterEntrypoint::getName() const
@@ -66,22 +71,16 @@ std::string ExitLaterEntrypoint::getDescription() const
     return "Schedules Brayns to shutdown after a given amount of minutes";
 }
 
-void ExitLaterEntrypoint::onCreate()
-{
-    auto &engine = getApi().getEngine();
-    _task = std::make_shared<ExitLaterTask>(engine);
-}
-
 void ExitLaterEntrypoint::onUpdate()
 {
-    _task->poll();
+    _task.poll();
 }
 
 void ExitLaterEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto &minutes = params.minutes;
-    _task->execute(minutes);
+    auto duration = std::chrono::minutes(params.minutes);
+    _task.quitAfter(duration);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

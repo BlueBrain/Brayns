@@ -25,6 +25,11 @@
 
 namespace brayns
 {
+CancelEntrypoint::CancelEntrypoint(NetworkTaskManager &tasks)
+    : _tasks(tasks)
+{
+}
+
 std::string CancelEntrypoint::getName() const
 {
     return "cancel";
@@ -39,11 +44,14 @@ void CancelEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto &id = params.id;
-    auto &handle = request.getConnectionHandle();
-    auto &tasks = getTasks();
-    if (!tasks.cancel(handle, id))
+    auto &client = request.getClient();
+    try
     {
-        throw EntrypointException("No task with ID " + id.getDisplayText() + " is running for this client");
+        _tasks.cancel(client, id);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        throw InvalidParamsException(e.what());
     }
     request.reply(EmptyMessage());
 }

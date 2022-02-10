@@ -30,6 +30,8 @@ namespace brayns
 class GetCameraParamsEntrypoint : public GetPropertyObjectEntrypoint<Camera>
 {
 public:
+    GetCameraParamsEntrypoint(const Camera &camera);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
 };
@@ -37,6 +39,8 @@ public:
 class SetCameraParamsEntrypoint : public SetPropertyObjectEntrypoint<Camera>
 {
 public:
+    SetCameraParamsEntrypoint(Camera &camera, Engine &engine, INetworkInterface &interface);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
 };

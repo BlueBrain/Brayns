@@ -32,7 +32,7 @@ class MessageSenderHelper
 public:
     static void trySend(const std::string &data, const brayns::ClientRef &client)
     {
-        brayns::Log::trace("Sending message to client {}: {}.", client, data);
+        brayns::Log::trace("Sending message to client {}: '{}'.", client, data);
         try
         {
             auto &socket = client.getSocket();

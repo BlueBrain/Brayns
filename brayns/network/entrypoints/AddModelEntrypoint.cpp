@@ -26,45 +26,45 @@
 
 namespace
 {
+class ModelParametersValidator
+{
+public:
+    static void validate(const brayns::ModelParams &params, const brayns::LoaderRegistry &loaders)
+    {
+        auto &path = params.getPath();
+        if (path.empty())
+        {
+            throw brayns::EntrypointException("Missing model path");
+        }
+        if (!loaders.isSupportedFile(path))
+        {
+            throw brayns::EntrypointException("Unsupported file type: '" + path + "'");
+        }
+    }
+};
+
 class LoadModelTask : public brayns::EntrypointTask<brayns::ModelParams, std::vector<brayns::ModelDescriptorPtr>>
 {
 public:
-    LoadModelTask(Request request, brayns::Engine &engine, brayns::LoaderRegistry &loaders)
+    LoadModelTask(Request request, brayns::Engine &engine, const brayns::LoaderRegistry &loaders)
         : EntrypointTask(std::move(request))
         , _engine(engine)
         , _loaders(loaders)
     {
+        _params = getParams();
+        ModelParametersValidator::validate(_params, _loaders);
     }
 
     virtual void run() override
     {
         auto &scene = _engine.getScene();
         auto &path = _params.getPath();
-        auto &loaderName = _params.getLoaderName();
-
-        const auto &loader = _loaders.getSuitableLoader(path, "", loaderName);
-
-        _descriptors = loader.loadFromFile(
-            path,
-            {[this](const auto &operation, auto amount) { progress(operation, amount); }},
-            _params.getLoadParameters(),
-            scene);
-
+        auto &name = _params.getLoaderName();
+        auto &loader = _loaders.getSuitableLoader(path, "", name);
+        auto &parameters = _params.getLoadParameters();
+        auto callback = [this](const auto &operation, auto amount) { progress(operation, amount); };
+        _descriptors = loader.loadFromFile(path, {callback}, parameters, scene);
         scene.addModels(_descriptors, _params);
-    }
-
-    virtual void onStart() override
-    {
-        _params = getParams();
-        auto &path = _params.getPath();
-        if (path.empty())
-        {
-            throw brayns::EntrypointException("Missing model path");
-        }
-        if (!_loaders.isSupportedFile(path))
-        {
-            throw brayns::EntrypointException("Unsupported file type: '" + path + "'");
-        }
     }
 
     virtual void onComplete() override
@@ -75,7 +75,7 @@ public:
 
 private:
     brayns::Engine &_engine;
-    brayns::LoaderRegistry &_loaders;
+    const brayns::LoaderRegistry &_loaders;
     brayns::ModelParams _params;
     std::vector<brayns::ModelDescriptorPtr> _descriptors;
 };
@@ -86,7 +86,7 @@ namespace brayns
 AddModelEntrypoint::AddModelEntrypoint(Engine &engine, LoaderRegistry &loaders, INetworkInterface &interface)
     : _engine(engine)
     , _loaders(loaders)
-    , _interface(interface)
+    , _launcher(interface)
 {
 }
 
@@ -107,7 +107,7 @@ bool AddModelEntrypoint::isAsync() const
 
 void AddModelEntrypoint::onRequest(const Request &request)
 {
-    auto task = std::make_shared<LoadModelTask>(request, _engine, _loaders);
-    _interface.addTask(request, std::move(task));
+    auto task = std::make_unique<LoadModelTask>(request, _engine, _loaders);
+    _launcher.launch(std::move(task));
 }
 } // namespace brayns
