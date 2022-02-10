@@ -27,10 +27,10 @@
 
 namespace
 {
-class ImageStreamPolicy
+class ImageStreamHelper
 {
 public:
-    static bool needsBroadcast(brayns::FrameBuffer &framebuffer, brayns::ClientManager &clients)
+    static bool hasClientsAndNewImage(brayns::ClientManager &clients, brayns::FrameBuffer &framebuffer)
     {
         if (clients.isEmpty())
         {
@@ -44,100 +44,99 @@ public:
     }
 };
 
-class ImageStreamer
+class ImageStream
 {
 public:
-    ImageStreamer(const brayns::ApplicationParameters &parameters)
-        : _parameters(parameters)
+    static void broadcast(
+        brayns::FrameBuffer &framebuffer,
+        brayns::ClientManager &clients,
+        const brayns::ApplicationParameters &parameters)
     {
-    }
-
-    void broadcast(brayns::FrameBuffer &framebuffer, brayns::ClientManager &clients) const
-    {
-        auto compression = _parameters.getJpegCompression();
+        auto compression = parameters.getJpegCompression();
         auto image = framebuffer.getImage();
         auto data = brayns::ImageEncoder::encode(image, "jpg", compression);
         clients.broadcast(data);
     }
-
-private:
-    const brayns::ApplicationParameters &_parameters;
 };
 
-class ControlledImageStreamer
+class ControlledImageStream
 {
 public:
-    ControlledImageStreamer(const brayns::ApplicationParameters &parameters, brayns::ImageStreamMonitor &monitor)
-        : _streamer(parameters)
-        , _monitor(monitor)
+    ControlledImageStream(brayns::ImageStreamMonitor &monitor)
+        : _monitor(monitor)
     {
     }
 
-    void broadcast(brayns::FrameBuffer &framebuffer, brayns::ClientManager &clients) const
+    void broadcast(
+        brayns::FrameBuffer &framebuffer,
+        brayns::ClientManager &clients,
+        const brayns::ApplicationParameters &parameters) const
     {
         if (!_monitor.isTriggered())
         {
             return;
         }
-        _streamer.broadcast(framebuffer, clients);
+        ImageStream::broadcast(framebuffer, clients, parameters);
         _monitor.resetTrigger();
     }
 
 private:
-    ImageStreamer _streamer;
     brayns::ImageStreamMonitor &_monitor;
 };
 
-class AutoImageStreamer
+class AutoImageStream
 {
 public:
-    AutoImageStreamer(const brayns::ApplicationParameters &parameters, brayns::ImageStreamMonitor &monitor)
-        : _parameters(parameters)
-        , _streamer(parameters)
-        , _monitor(monitor)
+    AutoImageStream(brayns::RateLimiter &limiter)
+        : _limiter(limiter)
     {
     }
 
-    void broadcast(brayns::FrameBuffer &framebuffer, brayns::ClientManager &clients) const
+    void broadcast(
+        brayns::FrameBuffer &framebuffer,
+        brayns::ClientManager &clients,
+        const brayns::ApplicationParameters &parameters) const
     {
-        auto fps = _parameters.getImageStreamFPS();
-        _monitor.callWithFpsLimit(fps, [&] { _streamer.broadcast(framebuffer, clients); });
+        auto fps = parameters.getImageStreamFPS();
+        _limiter.setRate(fps);
+        _limiter.call([&] { ImageStream::broadcast(framebuffer, clients, parameters); });
     }
 
 private:
-    const brayns::ApplicationParameters &_parameters;
-    ImageStreamer _streamer;
-    brayns::ImageStreamMonitor &_monitor;
+    brayns::RateLimiter &_limiter;
 };
 
 class StreamDispatcher
 {
 public:
-    StreamDispatcher(const brayns::ApplicationParameters &parameters, brayns::ImageStreamMonitor &monitor)
-        : _controlledStreamer(parameters, monitor)
-        , _autoStreamer(parameters, monitor)
+    StreamDispatcher(brayns::ImageStreamMonitor &monitor, brayns::RateLimiter &limiter)
+        : _controlledStream(monitor)
+        , _autoStream(limiter)
         , _monitor(monitor)
     {
     }
 
-    void broadcast(brayns::FrameBuffer &framebuffer, brayns::ClientManager &clients) const
+    void broadcast(
+        brayns::FrameBuffer &framebuffer,
+        brayns::ClientManager &clients,
+        const brayns::ApplicationParameters &parameters) const
     {
-        if (!ImageStreamPolicy::needsBroadcast(framebuffer, clients))
+        if (!ImageStreamHelper::hasClientsAndNewImage(clients, framebuffer))
         {
             return;
         }
         if (_monitor.isControlled())
         {
-            _controlledStreamer.broadcast(framebuffer, clients);
+            _controlledStream.broadcast(framebuffer, clients, parameters);
             return;
         }
-        _autoStreamer.broadcast(framebuffer, clients);
+        _autoStream.broadcast(framebuffer, clients, parameters);
     }
 
 private:
-    ControlledImageStreamer _controlledStreamer;
-    AutoImageStreamer _autoStreamer;
-    brayns::ImageStreamMonitor _monitor;
+    ControlledImageStream _controlledStream;
+    AutoImageStream _autoStream;
+    brayns::ImageStreamMonitor &_monitor;
 };
 } // namespace
 
@@ -169,15 +168,10 @@ void ImageStreamMonitor::resetTrigger()
     _triggered = false;
 }
 
-void StreamManager::setParameters(const ApplicationParameters &parameters)
+void StreamManager::broadcast(FrameBuffer &framebuffer, ClientManager &clients, const ApplicationParameters &parameters)
 {
-    _parameters = &parameters;
-}
-
-void StreamManager::broadcast(FrameBuffer &framebuffer, ClientManager &clients)
-{
-    StreamDispatcher dispatcher(*_parameters, _monitor);
-    dispatcher.broadcast(framebuffer, clients);
+    StreamDispatcher dispatcher(_monitor, _limiter);
+    dispatcher.broadcast(framebuffer, clients, parameters);
 }
 
 ImageStreamMonitor &StreamManager::getMonitor()

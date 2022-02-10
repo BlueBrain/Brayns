@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <utility>
-
 #include <brayns/engine/FrameBuffer.h>
 
 #include <brayns/network/client/ClientManager.h>
@@ -33,7 +31,7 @@
 namespace brayns
 {
 /**
- * @brief Info to monitor the image stream.
+ * @brief Used to monitor the image stream.
  *
  */
 class ImageStreamMonitor
@@ -42,7 +40,7 @@ public:
     /**
      * @brief Check if the stream is controlled.
      *
-     * If true, the client trigger the stream of each image required.
+     * If true, the client trigger the stream when an image is required.
      *
      * @return true Controlled.
      * @return false Automatic.
@@ -52,7 +50,7 @@ public:
     /**
      * @brief Set the stream control mode.
      *
-     * @param controlled True if controlled.
+     * @param controlled True if controlled, False if automatic.
      */
     void setControlled(bool controlled);
 
@@ -76,26 +74,7 @@ public:
      */
     void resetTrigger();
 
-    /**
-     * @brief Call the given functor with maximum FPS rate limit.
-     *
-     * @tparam FunctorType Functor type.
-     * @param functor Functor like void().
-     */
-    template<typename FunctorType>
-    void callWithFpsLimit(size_t fps, FunctorType functor)
-    {
-        if (fps != _fps)
-        {
-            _fps = fps;
-            _limiter = RateLimiter::fromFps(fps);
-        }
-        _limiter.call(std::move(functor));
-    }
-
 private:
-    size_t _fps = 0;
-    RateLimiter _limiter;
     bool _controlled = false;
     bool _triggered = false;
 };
@@ -108,17 +87,13 @@ class StreamManager
 {
 public:
     /**
-     * @brief Load application parameters (jpeg compression, FPS).
+     * @brief Broadcast framebuffer image.
      *
-     * @param parameters Application parameters to load.
+     * @param framebuffer Framebuffer containing the image to stream.
+     * @param clients Clients that will receive the image.
+     * @param parameters Stream parameters.
      */
-    void setParameters(const ApplicationParameters &parameters);
-
-    /**
-     * @brief Broadcast images according to current settings.
-     *
-     */
-    void broadcast(FrameBuffer &framebuffer, ClientManager &clients);
+    void broadcast(FrameBuffer &framebuffer, ClientManager &clients, const ApplicationParameters &parameters);
 
     /**
      * @brief Get the image stream monitor.
@@ -128,7 +103,7 @@ public:
     ImageStreamMonitor &getMonitor();
 
 private:
-    const ApplicationParameters *_parameters = nullptr;
     ImageStreamMonitor _monitor;
+    RateLimiter _limiter;
 };
 } // namespace brayns

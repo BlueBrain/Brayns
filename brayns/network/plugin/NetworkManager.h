@@ -40,7 +40,7 @@ struct NetworkContext
     EntrypointManager entrypoints;
     ClientManager clients;
     RequestBuffer requests;
-    StreamManager streamer;
+    StreamManager stream;
     NetworkTaskManager tasks;
     ModelUploadManager modelUploads;
     std::unique_ptr<ISocket> socket;

@@ -32,6 +32,7 @@ class MessageSenderHelper
 public:
     static void trySend(const std::string &data, const brayns::ClientRef &client)
     {
+        brayns::Log::trace("Sending message to client {}: {}.", client, data);
         try
         {
             auto &socket = client.getSocket();
@@ -62,7 +63,7 @@ public:
 
 namespace brayns
 {
-void reply(const ReplyMessage &message, const ClientRef &client)
+void JsonRpcSender::reply(const ReplyMessage &message, const ClientRef &client)
 {
     if (message.id.isEmpty())
     {
@@ -71,12 +72,12 @@ void reply(const ReplyMessage &message, const ClientRef &client)
     MessageSenderHelper::trySend(message, client);
 }
 
-void error(const ErrorMessage &message, const ClientRef &client)
+void JsonRpcSender::error(const ErrorMessage &message, const ClientRef &client)
 {
     MessageSenderHelper::trySend(message, client);
 }
 
-void progress(const ProgressMessage &message, const ClientRef &client)
+void JsonRpcSender::progress(const ProgressMessage &message, const ClientRef &client)
 {
     if (message.params.id.isEmpty())
     {
@@ -85,7 +86,7 @@ void progress(const ProgressMessage &message, const ClientRef &client)
     MessageSenderHelper::trySend(message, client);
 }
 
-void notification(const NotificationMessage &message, ClientManager &clients, const ClientRef &source)
+void JsonRpcSender::notification(const NotificationMessage &message, ClientManager &clients, const ClientRef &source)
 {
     auto data = Json::stringify(message);
     clients.broadcast(data, source);

@@ -242,67 +242,64 @@ private:
     }
 };
 
-class RequestDispatcher
+class RequestHandler
 {
 public:
-    RequestDispatcher(const brayns::EntrypointManager &entrypoints, brayns::ModelUploadManager &modelUploads)
-        : _handler(entrypoints)
-        , _modelUploads(modelUploads)
+    static void processRequests(brayns::NetworkContext &context)
     {
-    }
-
-    void dispatch(
-        brayns::RequestBuffer &buffer,
-        const brayns::EntrypointManager &entrypoints,
-        brayns::ModelUploadManager &modelUploads)
-    {
+        auto &buffer = context.requests;
         auto requests = buffer.extractAll();
-        return dispatch(requests);
+        return _dispatch(requests, context);
     }
 
-    void dispatch(
-        const brayns::RequestBuffer::Map &requests,
-        const brayns::EntrypointManager &entrypoints,
-        brayns::ModelUploadManager &modelUploads)
+private:
+    static void _dispatch(const brayns::RequestBuffer::Map &requests, brayns::NetworkContext &context)
     {
         for (const auto &[client, packets] : requests)
         {
             for (const auto &packet : packets)
             {
-                _dispatch(client, packet);
+                _dispatchTextOrBinary(client, packet, context);
             }
         }
     }
 
-private:
-    JsonRpcHandler _handler;
-    brayns::ModelUploadManager &_modelUploads;
-
-    void _dispatch(const brayns::ClientRef > &client, const brayns::InputPacket &packet)
+    static void _dispatchTextOrBinary(
+        const brayns::ClientRef &client,
+        const brayns::InputPacket &packet,
+        brayns::NetworkContext &context)
     {
         if (packet.isBinary())
         {
-            _dispatchBinary(socket, packet);
+            _dispatchBinary(client, packet, context);
             return;
         }
         if (packet.isText())
         {
-            _dispatchText(socket, packet);
+            _dispatchText(client, packet, context);
             return;
         }
         brayns::Log::error("Invalid packet received.");
     }
 
-    void _dispatchBinary(const std::shared_ptr<brayns::WebSocket> &socket, const brayns::InputPacket &packet)
+    static void _dispatchBinary(
+        const brayns::ClientRef &client,
+        const brayns::InputPacket &packet,
+        brayns::NetworkContext &context)
     {
         auto data = packet.getData();
-        _modelUploads.processBinaryRequest(socket, data);
+        auto &modelUploads = context.modelUploads;
+        ModelUploadHandler::processBinaryRequest(client, data, modelUploads);
     }
 
-    void _dispatchText(const std::shared_ptr<brayns::WebSocket> &socket, const brayns::InputPacket &packet)
+    static void _dispatchText(
+        const brayns::ClientRef &client,
+        const brayns::InputPacket &packet,
+        brayns::NetworkContext &context)
     {
         auto data = std::string(packet.getData());
-        _handler.processRequest(socket, data);
+        auto &entrypoints = context.entrypoints;
+        JsonRpcHandler::processRequest(client, data, entrypoints);
     }
 };
 
@@ -315,23 +312,23 @@ public:
     {
     }
 
-    virtual void onRequest(const std::shared_ptr<brayns::WebSocket> &socket, brayns::InputPacket request) override
+    virtual void onRequest(const brayns::ClientRef &client, brayns::InputPacket request) override
     {
         auto data = request.isBinary() ? "<Binary data>" : request.getData();
-        brayns::Log::info("New request from {}: '{}'.", socket, data);
-        _requests.add(socket, std::move(request));
+        brayns::Log::trace("New request from client {}: {}.", client, data);
+        _requests.add(client, std::move(request));
     }
 
-    virtual void onConnect(const std::shared_ptr<brayns::WebSocket> &socket) override
+    virtual void onConnect(const brayns::ClientRef &client) override
     {
-        brayns::Log::info("Client connection : {}.", socket);
-        _clients.add(socket);
+        brayns::Log::info("Connection of client {}.", client);
+        _clients.add(client);
     }
 
-    virtual void onDisconnect(const std::shared_ptr<brayns::WebSocket> &socket) override
+    virtual void onDisconnect(const brayns::ClientRef &client) override
     {
-        brayns::Log::info("Client disconnection : {}.", socket);
-        _clients.remove(socket);
+        brayns::Log::info("Disconnection of client {}.", client);
+        _clients.remove(client);
     }
 
 private:
@@ -342,15 +339,30 @@ private:
 class SocketFactory
 {
 public:
-    static std::unique_ptr<brayns::ISocket> create(
-        const brayns::NetworkParameters &parameters,
-        std::unique_ptr<SocketListener> listener)
+    static std::unique_ptr<brayns::ISocket> create(brayns::NetworkContext &context)
     {
+        auto &parameters = _getNetworkParameters(context);
+        auto listener = _createListener(context);
         if (parameters.isClient())
         {
             return std::make_unique<brayns::ClientSocket>(parameters, std::move(listener));
         }
         return std::make_unique<brayns::ServerSocket>(parameters, std::move(listener));
+    }
+
+private:
+    static const brayns::NetworkParameters &_getNetworkParameters(brayns::NetworkContext &context)
+    {
+        auto &api = *context.api;
+        auto &manager = api.getParametersManager();
+        return manager.getNetworkParameters();
+    }
+
+    static std::unique_ptr<brayns::ISocketListener> _createListener(brayns::NetworkContext &context)
+    {
+        auto &clients = context.clients;
+        auto &requests = context.requests;
+        return std::make_unique<SocketListener>(clients, requests);
     }
 };
 
@@ -360,7 +372,7 @@ public:
     CoreEntrypointRegistry(brayns::NetworkContext &context)
         : _entrypoints(context.entrypoints)
         , _clients(context.clients)
-        , _streamer(context.streamer)
+        , _streamer(context.stream)
         , _tasks(context.tasks)
         , _modelUploads(context.modelUploads)
         , _frameExporter(context.frameExporter)
@@ -446,7 +458,6 @@ public:
     static void build(brayns::NetworkContext &context, brayns::ExtensionPlugin &plugin)
     {
         _registerInterface(context);
-        _setupStream(context);
         _createSocket(context);
         _registerEntrypoints(context, plugin);
     }
@@ -468,25 +479,9 @@ private:
         registry.registerEntrypoints(plugin);
     }
 
-    static void _setupStream(brayns::NetworkContext &context)
-    {
-        auto &api = *context.api;
-        auto &streamer = context.streamer;
-        auto &manager = api.getParametersManager();
-        auto &parameters = manager.getApplicationParameters();
-        streamer.setParameters(parameters);
-    }
-
     static void _createSocket(brayns::NetworkContext &context)
     {
-        auto &api = *context.api;
-        auto &manager = api.getParametersManager();
-        auto &parameters = manager.getNetworkParameters();
-        auto &clients = context.clients;
-        auto &requests = context.requests;
-        auto &socket = context.socket;
-        auto listener = std::make_unique<SocketListener>(clients, requests);
-        socket = SocketFactory::create(parameters, std::move(listener));
+        context.socket = SocketFactory::create(context);
     }
 };
 
@@ -499,19 +494,6 @@ public:
         auto &socket = *context.socket;
         entrypoints.onCreate();
         socket.start();
-    }
-};
-
-class NetworkRequestProcessing
-{
-public:
-    static void run(brayns::NetworkContext &context)
-    {
-        auto &entrypoints = context.entrypoints;
-        auto &modelUploads = context.modelUploads;
-        auto &requests = context.requests;
-        RequestDispatcher dispatcher(entrypoints, modelUploads);
-        dispatcher.dispatch(requests);
     }
 };
 
@@ -574,11 +556,13 @@ private:
     static void _broadcastImage(brayns::NetworkContext &context)
     {
         auto &api = *context.api;
+        auto &manager = api.getParametersManager();
+        auto &parameters = manager.getApplicationParameters();
         auto &engine = api.getEngine();
-        auto &streamer = context.streamer;
+        auto &stream = context.stream;
         auto &framebuffer = engine.getFrameBuffer();
         auto &clients = context.clients;
-        streamer.broadcast(framebuffer, clients);
+        stream.broadcast(framebuffer, clients, parameters);
     }
 };
 } // namespace
@@ -597,7 +581,7 @@ void NetworkManager::start()
 
 void NetworkManager::processRequests()
 {
-    NetworkRequestProcessing::run(_context);
+    RequestHandler::processRequests(_context);
 }
 
 void NetworkManager::update()
