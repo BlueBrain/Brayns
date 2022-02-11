@@ -28,19 +28,13 @@ namespace
 class CircuitThicknessModifier
 {
 public:
-    CircuitThicknessModifier(brayns::PluginAPI &api)
-        : _api(&api)
-    {
-    }
-
-    void setCircuitThickness(const SetCircuitThicknessMessage &params)
+    static void setCircuitThickness(brayns::Engine &engine, const SetCircuitThicknessMessage &params)
     {
         // Extract params
         auto modelId = params.model_id;
         auto radiusMultiplier = params.radius_multiplier;
 
         // Extract API data
-        auto &engine = _api->getEngine();
         auto &scene = engine.getScene();
 
         // Extract model
@@ -93,6 +87,11 @@ private:
 };
 } // namespace
 
+SetCircuitThicknessEntrypoint::SetCircuitThicknessEntrypoint(brayns::Engine &engine)
+    : _engine(engine)
+{
+}
+
 std::string SetCircuitThicknessEntrypoint::getName() const
 {
     return "set-circuit-thickness";
@@ -106,7 +105,6 @@ std::string SetCircuitThicknessEntrypoint::getDescription() const
 void SetCircuitThicknessEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    CircuitThicknessModifier modifier(getApi());
-    modifier.setCircuitThickness(params);
+    CircuitThicknessModifier::setCircuitThickness(_engine, params);
     request.reply(brayns::EmptyMessage());
 }

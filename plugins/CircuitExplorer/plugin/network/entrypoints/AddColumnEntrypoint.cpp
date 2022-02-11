@@ -90,6 +90,11 @@ public:
 };
 } // namespace
 
+AddColumnEntrypoint::AddColumnEntrypoint(brayns::Engine &engine)
+    : _engine(engine)
+{
+}
+
 std::string AddColumnEntrypoint::getName() const
 {
     return "add-column";
@@ -103,9 +108,9 @@ std::string AddColumnEntrypoint::getDescription() const
 void AddColumnEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto &scene = getApi().getScene();
+    auto &scene = _engine.getScene();
     brayns::Log::info("[CE] Building Column model.");
     ColumnModel::add(scene, params);
-    triggerRender();
+    _engine.triggerRender();
     request.reply(brayns::EmptyMessage());
 }

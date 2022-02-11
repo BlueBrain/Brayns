@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <brayns/engine/Engine.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <plugin/network/messages/AddShapeMessage.h>
@@ -29,7 +31,12 @@
 class AddSphereEntrypoint : public brayns::Entrypoint<AddSphereMessage, AddShapeMessage>
 {
 public:
+    AddSphereEntrypoint(brayns::Engine &engine);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    brayns::Engine &_engine;
 };

@@ -27,6 +27,11 @@
 
 namespace brayns
 {
+SetMaterialExtraAttributesEntrypoint::SetMaterialExtraAttributesEntrypoint(Engine &engine)
+    : _engine(engine)
+{
+}
+
 std::string SetMaterialExtraAttributesEntrypoint::getName() const
 {
     return "set-material-extra-attributes";
@@ -40,10 +45,10 @@ std::string SetMaterialExtraAttributesEntrypoint::getDescription() const
 void SetMaterialExtraAttributesEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto &scene = getApi().getScene();
+    auto &scene = _engine.getScene();
     auto &descriptor = ExtractModel::fromId(scene, params.id);
     CircuitExplorerMaterial::addExtraAttributes(descriptor.getModel());
-    triggerRender();
+    _engine.triggerRender();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

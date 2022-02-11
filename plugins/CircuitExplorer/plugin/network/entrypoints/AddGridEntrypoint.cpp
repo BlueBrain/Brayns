@@ -135,6 +135,11 @@ public:
 };
 } // namespace
 
+AddGridEntrypoint::AddGridEntrypoint(brayns::Engine &engine)
+    : _engine(engine)
+{
+}
+
 std::string AddGridEntrypoint::getName() const
 {
     return "add-grid";
@@ -148,9 +153,9 @@ std::string AddGridEntrypoint::getDescription() const
 void AddGridEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto &scene = getApi().getScene();
+    auto &scene = _engine.getScene();
     brayns::Log::info("[CE] Building Grid scene.");
     GridModel::add(scene, params);
-    triggerRender();
+    _engine.triggerRender();
     request.reply(brayns::EmptyMessage());
 }

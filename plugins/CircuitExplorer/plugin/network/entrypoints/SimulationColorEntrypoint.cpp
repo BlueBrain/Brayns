@@ -24,6 +24,11 @@
 
 #include <plugin/api/MaterialUtils.h>
 
+SimulationColorEntrypoint::SimulationColorEntrypoint(brayns::Scene &scene)
+    : _scene(scene)
+{
+}
+
 std::string SimulationColorEntrypoint::getName() const
 {
     return "set-simulation-color";
@@ -38,8 +43,10 @@ std::string SimulationColorEntrypoint::getDescription() const
 void SimulationColorEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto &scene = getApi().getScene();
-    auto &model = brayns::ExtractModel::fromId(scene, params.model_id);
-    CircuitExplorerMaterial::setSimulationColorEnabled(model.getModel(), params.enabled);
+    auto modelId = params.model_id;
+    auto enabled = params.enabled;
+    auto &descriptor = brayns::ExtractModel::fromId(_scene, modelId);
+    auto &model = descriptor.getModel();
+    CircuitExplorerMaterial::setSimulationColorEnabled(model, enabled);
     request.reply(brayns::EmptyMessage());
 }

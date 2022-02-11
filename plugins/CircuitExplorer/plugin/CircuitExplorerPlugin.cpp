@@ -23,7 +23,6 @@
 
 #include <brayns/common/Log.h>
 
-#include <brayns/network/interface/IActionInterface.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
@@ -134,31 +133,32 @@ void CircuitExplorerPlugin::init()
     registry.registerLoader(std::make_unique<SonataNGVLoader>(_colorManager));
 
     // ENTRY POINTS ADDED BY THIS PLUGIN
-    add<brayns::GetMaterialIdsEntrypoint>();
-    add<brayns::GetMaterialEntrypoint>();
-    add<brayns::SetMaterialEntrypoint>();
-    add<brayns::SetMaterialsEntrypoint>();
-    add<brayns::SetMaterialRangeEntrypoint>();
-    add<brayns::SetMaterialExtraAttributesEntrypoint>();
+    auto &engine = _api->getEngine();
+    auto &scene = engine.getScene();
+    add<AddBoxEntrypoint>(engine);
+    add<AddColumnEntrypoint>(engine);
+    add<AddCylinderEntrypoint>(engine);
+    add<AddGridEntrypoint>(engine);
+    add<AddPillEntrypoint>(engine);
+    add<AddSphereEntrypoint>(engine);
+    add<AvailableColorMethodsEntrypoint>(engine, _colorManager);
+    add<AvailableColorMethodVariablesEntrypoint>(engine, _colorManager);
+    add<brayns::GetMaterialEntrypoint>(scene);
+    add<brayns::GetMaterialIdsEntrypoint>(scene);
+    add<brayns::SetMaterialEntrypoint>(engine);
+    add<brayns::SetMaterialExtraAttributesEntrypoint>(engine);
+    add<brayns::SetMaterialRangeEntrypoint>(engine);
+    add<brayns::SetMaterialsEntrypoint>(engine);
+    add<ColorCircuitByIdEntrypoint>(engine, _colorManager);
+    add<ColorCircuitByMethodEntrypoint>(engine, _colorManager);
+    add<ColorCircuitBySingleColorEntrypoint>(engine, _colorManager);
     add<MakeMovieEntrypoint>();
-    add<TraceAnterogradeEntrypoint>(_colorManager);
-    add<AddGridEntrypoint>();
-    add<AddColumnEntrypoint>();
-    add<AddSphereEntrypoint>();
-    add<AddPillEntrypoint>();
-    add<AddCylinderEntrypoint>();
-    add<AddBoxEntrypoint>();
-    add<MirrorModelEntrypoint>();
-    add<SetCircuitThicknessEntrypoint>();
-    add<ColorCircuitByIdEntrypoint>(_colorManager);
-    add<ColorCircuitBySingleColorEntrypoint>(_colorManager);
-    add<AvailableColorMethodsEntrypoint>(_colorManager);
-    add<AvailableColorMethodVariablesEntrypoint>(_colorManager);
-    add<ColorCircuitByMethodEntrypoint>(_colorManager);
-    add<SimulationColorEntrypoint>();
+    add<MirrorModelEntrypoint>(engine);
+    add<SetCircuitThicknessEntrypoint>(engine);
+    add<SimulationColorEntrypoint>(scene);
+    add<TraceAnterogradeEntrypoint>(engine, _colorManager);
 
     // RENDERERS ADDED BY THIS PLUGIN
-    auto &engine = _api->getEngine();
     _addAdvancedSimulationRenderer(engine);
     _addBasicSimulationRenderer(engine);
     _addDOFPerspectiveCamera(engine);

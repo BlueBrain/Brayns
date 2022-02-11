@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <brayns/engine/Engine.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <plugin/network/adapters/MaterialAdapter.h>
@@ -31,16 +33,26 @@ namespace brayns
 class GetMaterialEntrypoint : public Entrypoint<GetMaterialMessage, MaterialProxy>
 {
 public:
+    GetMaterialEntrypoint(Scene &scene);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    Scene &_scene;
 };
 
 class SetMaterialEntrypoint : public Entrypoint<MaterialProxy, EmptyMessage>
 {
 public:
+    SetMaterialEntrypoint(Engine &engine);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    Engine &_engine;
 };
 } // namespace brayns

@@ -28,19 +28,13 @@ namespace
 class ModelMirrorer
 {
 public:
-    ModelMirrorer(brayns::PluginAPI &api)
-        : _api(&api)
-    {
-    }
-
-    void mirrorModel(const MirrorModelMessage &params)
+    static void mirrorModel(brayns::Engine &engine, const MirrorModelMessage &params)
     {
         // Extract params
         auto modelId = params.model_id;
         auto &mirrorAxis = params.mirror_axis;
 
         // Extract API data
-        auto &engine = _api->getEngine();
         auto &scene = engine.getScene();
 
         // Extract model data
@@ -184,6 +178,11 @@ private:
 };
 } // namespace
 
+MirrorModelEntrypoint::MirrorModelEntrypoint(brayns::Engine &engine)
+    : _engine(engine)
+{
+}
+
 std::string MirrorModelEntrypoint::getName() const
 {
     return "mirror-model";
@@ -197,7 +196,6 @@ std::string MirrorModelEntrypoint::getDescription() const
 void MirrorModelEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    ModelMirrorer mirrorer(getApi());
-    mirrorer.mirrorModel(params);
+    ModelMirrorer::mirrorModel(_engine, params);
     request.reply(brayns::EmptyMessage());
 }

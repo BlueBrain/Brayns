@@ -23,8 +23,9 @@
 
 #include <brayns/network/common/ExtractModel.h>
 
-TraceAnterogradeEntrypoint::TraceAnterogradeEntrypoint(CircuitColorManager &manager)
-    : _manager(manager)
+TraceAnterogradeEntrypoint::TraceAnterogradeEntrypoint(brayns::Engine &engine, CircuitColorManager &manager)
+    : _engine(engine)
+    , _manager(manager)
 {
 }
 
@@ -51,7 +52,7 @@ void TraceAnterogradeEntrypoint::onRequest(const Request &request)
 
     // Extract API data
     auto modelId = params.model_id;
-    auto &scene = getApi().getEngine().getScene();
+    auto &scene = _engine.getScene();
     auto &model = brayns::ExtractModel::fromId(scene, modelId);
 
     // Retreive cell mapping
@@ -74,7 +75,7 @@ void TraceAnterogradeEntrypoint::onRequest(const Request &request)
     _manager.updateColorsById(model, colorMap);
 
     scene.markModified();
-    getApi().triggerRender();
+    _engine.triggerRender();
 
     request.reply(brayns::EmptyMessage());
 }
