@@ -82,6 +82,12 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->getScene().commit(); // Needed to obtain a bounding box
         _adjustCamera();
+
+        auto network = _pluginManager.getNetworkManager();
+        if (network)
+        {
+            network->start();
+        }
     }
 
     ~Impl()

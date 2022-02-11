@@ -56,12 +56,12 @@ InvalidRequestException::InvalidRequestException(const std::string &message, con
 }
 
 MethodNotFoundException::MethodNotFoundException(const std::string &method)
-    : JsonRpcException(-32601, "Method not found '" + method + "'")
+    : JsonRpcException(-32601, "Method not found: '" + method + "'")
 {
 }
 
 InvalidParamsException::InvalidParamsException(const std::string &message, const std::vector<std::string> &errors)
-    : JsonRpcException(-32602, "Invalid params " + message, errors)
+    : JsonRpcException(-32602, "Invalid params: " + message, errors)
 {
 }
 

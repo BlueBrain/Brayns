@@ -35,7 +35,7 @@ public:
 #ifdef NDEBUG
         logger->set_level(spdlog::level::info);
 #else
-        logger->set_level(spdlog::level::trace);
+        logger->set_level(spdlog::level::debug);
 #endif
         return logger;
     }

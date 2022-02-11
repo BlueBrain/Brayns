@@ -149,9 +149,11 @@ public:
         try
         {
             _dispatch(request, entrypoints);
+            brayns::Log::info("Request handled with success.");
         }
         catch (const brayns::JsonRpcException &e)
         {
+            brayns::Log::error("Error during request handling: '{}'.", e.what());
             auto &message = request.getMessage();
             auto &client = request.getClient();
             auto error = brayns::JsonRpcFactory::error(message, e);
@@ -185,17 +187,25 @@ public:
         const std::string &data,
         const brayns::EntrypointManager &entrypoints)
     {
-        brayns::RequestMessage message;
         try
         {
-            message = RequestParser::parse(data);
+            _processRequest(client, data, entrypoints);
         }
         catch (const brayns::JsonRpcException &e)
         {
+            brayns::Log::error("Failed to handle request: '{}'.", e.what());
             auto error = brayns::JsonRpcFactory::error(e);
             brayns::JsonRpcSender::error(error, client);
-            return;
         }
+    }
+
+private:
+    static void _processRequest(
+        const brayns::ClientRef &client,
+        const std::string &data,
+        const brayns::EntrypointManager &entrypoints)
+    {
+        auto message = RequestParser::parse(data);
         auto request = brayns::JsonRpcRequest(client, std::move(message));
         JsonRpcDispatcher::dispatch(request, entrypoints);
     }
@@ -212,9 +222,11 @@ public:
         try
         {
             _processBinaryRequest(client, data, modelUploads);
+            brayns::Log::info("Model chunk successfully uploaded.");
         }
         catch (const brayns::JsonRpcException &e)
         {
+            brayns::Log::error("Failed to upload model chunk: '{}'.", e.what());
             auto error = brayns::JsonRpcFactory::error(e);
             brayns::JsonRpcSender::error(error, client);
         }
@@ -249,6 +261,7 @@ public:
     {
         auto &buffer = context.requests;
         auto requests = buffer.extractAll();
+        brayns::Log::trace("Received {} requests.", requests.size());
         return _dispatch(requests, context);
     }
 
@@ -271,11 +284,13 @@ private:
     {
         if (packet.isBinary())
         {
+            brayns::Log::debug("Processing binary request.");
             _dispatchBinary(client, packet, context);
             return;
         }
         if (packet.isText())
         {
+            brayns::Log::debug("Processing text request.");
             _dispatchText(client, packet, context);
             return;
         }
@@ -574,36 +589,43 @@ namespace brayns
 NetworkManager::NetworkManager()
     : ExtensionPlugin("Core")
 {
+    Log::info("Network enabled.");
 }
 
 void NetworkManager::start()
 {
+    Log::info("Network start.");
     NetworkStartup::run(_context);
 }
 
 void NetworkManager::processRequests()
 {
+    Log::trace("Processing network requests.");
     RequestHandler::processRequests(_context);
 }
 
 void NetworkManager::update()
 {
+    Log::trace("Network update.");
     NetworkUpdate::run(_context);
 }
 
 void NetworkManager::init()
 {
+    Log::info("Network setup.");
     _context.api = _api;
     NetworkContextBuilder::build(_context, *this);
 }
 
 void NetworkManager::preRender()
 {
+    Log::trace("Network pre render.");
     NetworkPreRender::run(_context);
 }
 
 void NetworkManager::postRender()
 {
+    Log::trace("Network post render.");
     NetworkPostRender::run(_context);
 }
 } // namespace brayns
