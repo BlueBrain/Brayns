@@ -30,12 +30,7 @@ namespace
 class StreamlineBuilder
 {
 public:
-    StreamlineBuilder(brayns::PluginAPI &api)
-        : _api(&api)
-    {
-    }
-
-    void addStreamlines(const dti::AddStreamlinesMessage &params)
+    static void build(const dti::AddStreamlinesMessage &params, brayns::Scene &scene)
     {
         // Extract params
         auto &name = params.name;
@@ -45,9 +40,6 @@ public:
         auto opacity = params.opacity;
         auto radius = params.radius;
         auto colorScheme = params.color_scheme;
-
-        // Extract API data
-        auto &scene = _api->getScene();
 
         // Start loading model
         brayns::Log::info("Loading params <{}> from Json.", name);
@@ -113,14 +105,16 @@ public:
 
         brayns::Log::info("{} streamlines loaded.", nbStreamlines);
     }
-
-private:
-    brayns::PluginAPI *_api;
 };
 } // namespace
 
 namespace dti
 {
+AddStreamlinesEntrypoint::AddStreamlinesEntrypoint(brayns::Engine &engine)
+    : _engine(engine)
+{
+}
+
 std::string AddStreamlinesEntrypoint::getName() const
 {
     return "add-streamlines";
@@ -134,9 +128,9 @@ std::string AddStreamlinesEntrypoint::getDescription() const
 void AddStreamlinesEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    StreamlineBuilder builder(getApi());
-    builder.addStreamlines(params);
-    triggerRender();
+    auto &scene = _engine.getScene();
+    StreamlineBuilder::build(params, scene);
+    _engine.triggerRender();
     request.reply(brayns::EmptyMessage());
 }
 } // namespace dti

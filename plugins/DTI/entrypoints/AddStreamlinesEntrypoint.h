@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <brayns/engine/Engine.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <messages/AddStreamlinesMessage.h>
@@ -30,8 +32,13 @@ namespace dti
 class AddStreamlinesEntrypoint : public brayns::Entrypoint<AddStreamlinesMessage, brayns::EmptyMessage>
 {
 public:
+    AddStreamlinesEntrypoint(brayns::Engine &engine);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    brayns::Engine &_engine;
 };
 } // namespace dti

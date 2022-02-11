@@ -62,9 +62,11 @@ void DTIPlugin::init()
 
     registry.registerLoader(std::make_unique<DTILoader>());
 
-    add<AddStreamlinesEntrypoint>();
-    add<SetSpikeSimulationEntrypoint>(*this);
-    add<SetSpikeSimulationFromFileEntrypoint>(*this);
+    auto &engine = _api->getEngine();
+
+    add<AddStreamlinesEntrypoint>(engine);
+    add<SetSpikeSimulationEntrypoint>(engine, *this);
+    add<SetSpikeSimulationFromFileEntrypoint>(engine, *this);
 }
 
 void DTIPlugin::preRender()
