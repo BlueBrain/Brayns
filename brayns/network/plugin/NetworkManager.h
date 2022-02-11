@@ -63,12 +63,6 @@ public:
     NetworkManager();
 
     /**
-     * @brief Destroy the network manager.
-     *
-     */
-    virtual ~NetworkManager();
-
-    /**
      * @brief Load schemas and call onCreate() of all entrypoints.
      *
      * This method must be separated from the construction because it can only

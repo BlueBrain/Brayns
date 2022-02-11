@@ -4,21 +4,132 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSNETWORK_HEADERS
+  adapters/AnimationParametersAdapter.h
+  adapters/ApplicationParametersAdapter.h
+  adapters/BinaryParamAdapter.h
+  adapters/BoxAdapter.h
+  adapters/CameraAdapter.h
+  adapters/ClipPlaneAdapter.h
+  adapters/ColorMapAdapter.h
+  adapters/FrameExportAdapter.h
+  adapters/LightAdapter.h
+  adapters/LoaderInfoAdapter.h
+  adapters/ModelDescriptorAdapter.h
+  adapters/ModelInstanceAdapter.h
+  adapters/ModelParamsAdapter.h
+  adapters/ModelTransferFunctionAdapter.h
+  adapters/RendererPickResultAdapter.h
+  adapters/RenderingParametersAdapter.h
+  adapters/SceneAdapter.h
+  adapters/StatisticsAdapter.h
+  adapters/TransferFunctionAdapter.h
+  adapters/TransformationAdapter.h
+  adapters/UpdateModelAdapter.h
+  adapters/VolumeParametersAdapter.h
+  client/ClientManager.h
+  client/ClientRef.h
+  client/RequestBuffer.h
+  common/Clock.h
+  common/ExtractMaterial.h
+  common/ExtractModel.h
   common/FrameExporter.h
+  common/NotificationPeriod.h
+  common/PropertyObjectSchema.h
+  common/RateLimiter.h
   entrypoint/Entrypoint.h
   entrypoint/EntrypointManager.h
-  entrypoint/IEntrypoint.h
-  jsonrpc/JsonRpcException.h
+  entrypoint/EntrypointRef.h
+  entrypoint/EntrypointRequest.h
   entrypoint/EntrypointTask.h
+  entrypoint/IEntrypoint.h
+  entrypoint/ObjectEntrypoint.h
+  entrypoint/PropertyObjectEntrypoint.h
+  entrypoints/AddClipPlaneEntrypoint.h
+  entrypoints/AddLightEntrypoint.h
+  entrypoints/AddModelEntrypoint.h
+  entrypoints/AnimationParametersEntrypoint.h
+  entrypoints/ApplicationParametersEntrypoint.h
+  entrypoints/CameraEntrypoint.h
+  entrypoints/CameraParamsEntrypoint.h
+  entrypoints/CancelEntrypoint.h
+  entrypoints/ChunkEntrypoint.h
+  entrypoints/ClearLightsEntrypoint.h
+  entrypoints/ExitLaterEntrypoint.h
   entrypoints/ExportFramesEntrypoint.h
   entrypoints/ExportFramesToDiskEntryPoint.h
+  entrypoints/GetClipPlanesEntrypoint.h
   entrypoints/GetExportFramesProgressEntrypoint.h
+  entrypoints/GetInstancesEntrypoint.h
+  entrypoints/GetLightsEntrypoint.h
+  entrypoints/GetLoadersEntrypoint.h
+  entrypoints/GetModelEntrypoint.h
+  entrypoints/ImageJpegEntrypoint.h
+  entrypoints/ImageStreamingModeEntrypoint.h
+  entrypoints/InspectEntrypoint.h
+  entrypoints/LoadersSchemaEntrypoint.h
+  entrypoints/ModelPropertiesEntrypoint.h
+  entrypoints/ModelTransferFunctionEntrypoint.h
+  entrypoints/QuitEntrypoint.h
+  entrypoints/RegistryEntrypoint.h
+  entrypoints/RemoveClipPlanesEntrypoint.h
+  entrypoints/RemoveLightsEntrypoint.h
+  entrypoints/RemoveModelEntrypoint.h
+  entrypoints/RendererEntrypoint.h
+  entrypoints/RendererParamsEntrypoint.h
+  entrypoints/RequestModelUploadEntrypoint.h
+  entrypoints/ResetCameraEntrypoint.h
+  entrypoints/SceneEntrypoint.h
+  entrypoints/SchemaEntrypoint.h
   entrypoints/SnapshotEntrypoint.h
+  entrypoints/StatisticsEntrypoint.h
+  entrypoints/TriggerJpegStreamEntrypoint.h
+  entrypoints/UpdateClipPlaneEntrypoint.h
+  entrypoints/UpdateInstanceEntrypoint.h
+  entrypoints/UpdateModelEntrypoint.h
+  entrypoints/VersionEntrypoint.h
+  entrypoints/VolumeParametersEntrypoint.h
   interface/INetworkInterface.h
+  interface/NetworkInterface.h
+  jsonrpc/JsonRpcException.h
   jsonrpc/JsonRpcFactory.h
-  tasks/NetworkTaskLauncher.h
+  jsonrpc/JsonRpcMessages.h
+  jsonrpc/JsonRpcNotifier.h
+  jsonrpc/JsonRpcRequest.h
+  jsonrpc/JsonRpcSender.h
+  jsonrpc/RequestId.h
+  messages/AddClipPlaneMessage.h
+  messages/ChunkMessage.h
+  messages/ExitLaterMessage.h
+  messages/ExportFramesMessage.h
+  messages/GetExportFramesProgressMessage.h
+  messages/GetInstancesMessage.h
+  messages/GetModelMessage.h
+  messages/ImageBase64Message.h
+  messages/ImageStreamingModeMessage.h
+  messages/InspectMessage.h
+  messages/LightMessage.h
+  messages/ModelPropertiesMessage.h
+  messages/RemoveClipPlanesMessage.h
+  messages/RemoveLightsMessage.h
+  messages/RemoveModelMessage.h
+  messages/SchemaMessage.h
+  messages/SnapshotMessage.h
+  messages/VersionMessage.h
   plugin/NetworkManager.h
-  )
+  socket/ClientSocket.h
+  socket/ISocket.h
+  socket/ServerSocket.h
+  socket/SocketManager.h
+  socket/WebSocket.h
+  stream/StreamManager.h
+  stream/StreamMonitor.h
+  tasks/NetworkTask.h
+  tasks/NetworkTaskLauncher.h
+  tasks/NetworkTaskManager.h
+  tasks/NetworkTaskMonitor.h
+  upload/ModelUploadManager.h
+  upload/ModelUploadTask.h
+)
   
 set(BRAYNSNETWORK_SOURCES
   adapters/ModelTransferFunctionAdapter.cpp
@@ -32,8 +143,8 @@ set(BRAYNSNETWORK_SOURCES
   common/NotificationPeriod.cpp
   common/PropertyObjectSchema.cpp
   common/RateLimiter.cpp
-  entrypoint/EntrypointRef.cpp
   entrypoint/EntrypointManager.cpp
+  entrypoint/EntrypointRef.cpp
   entrypoints/AddClipPlaneEntrypoint.cpp
   entrypoints/AddLightEntrypoint.cpp
   entrypoints/AddModelEntrypoint.cpp

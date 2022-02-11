@@ -77,12 +77,6 @@ public:
     ClientSocket(const NetworkParameters &parameters, std::unique_ptr<ISocketListener> listener);
 
     /**
-     * @brief Shutdown the client thread.
-     *
-     */
-    virtual ~ClientSocket();
-
-    /**
      * @brief Start client task and send connection request.
      *
      */

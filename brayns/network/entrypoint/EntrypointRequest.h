@@ -115,7 +115,7 @@ public:
     void reply(const ResultType &result) const
     {
         auto json = Json::serialize(result);
-        _request.reply(result);
+        _request.reply(json);
     }
 
     /**
