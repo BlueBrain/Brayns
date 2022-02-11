@@ -369,87 +369,90 @@ private:
 class CoreEntrypointRegistry
 {
 public:
-    CoreEntrypointRegistry(brayns::NetworkContext &context)
-        : _entrypoints(context.entrypoints)
-        , _clients(context.clients)
-        , _streamer(context.stream)
-        , _tasks(context.tasks)
-        , _modelUploads(context.modelUploads)
-        , _frameExporter(context.frameExporter)
+    static void registerEntrypoints(brayns::NetworkContext &context, brayns::ExtensionPlugin &plugin)
     {
-    }
+        auto &api = *context.api;
+        auto &parameters = api.getParametersManager();
+        auto &application = parameters.getApplicationParameters();
+        auto &animation = parameters.getAnimationParameters();
+        auto &volume = parameters.getVolumeParameters();
+        auto &rendering = parameters.getRenderingParameters();
+        auto &engine = api.getEngine();
+        auto &renderer = engine.getRenderer();
+        auto &statistics = engine.getStatistics();
+        auto &scene = engine.getScene();
+        auto &lights = scene.getLightManager();
+        auto &camera = api.getCamera();
+        auto &loaders = api.getLoaderRegistry();
+        auto &interface = *api.getNetworkInterface();
 
-    void registerEntrypoints(brayns::ExtensionPlugin &plugin)
-    {
-        plugin.add<brayns::GetAnimationParametersEntrypoint>();
-        plugin.add<brayns::SetAnimationParametersEntrypoint>();
-        plugin.add<brayns::GetCameraEntrypoint>();
-        plugin.add<brayns::SetCameraEntrypoint>();
-        plugin.add<brayns::ImageJpegEntrypoint>();
-        plugin.add<brayns::TriggerJpegStreamEntrypoint>();
-        plugin.add<brayns::ImageStreamingModeEntrypoint>();
-        plugin.add<brayns::GetRendererEntrypoint>();
-        plugin.add<brayns::SetRendererEntrypoint>();
+        auto &exporter = context.frameExporter;
+        auto &entrypoints = context.entrypoints;
+        auto &tasks = context.tasks;
+        auto &modelUploads = context.modelUploads;
+        auto &stream = context.stream;
+        auto &monitor = stream.getMonitor();
+
+        plugin.add<brayns::AddClipPlaneEntrypoint>(engine, interface);
+        plugin.add<brayns::AddLightAmbientEntrypoint>(engine);
+        plugin.add<brayns::AddLightDirectionalEntrypoint>(engine);
+        plugin.add<brayns::AddLightQuadEntrypoint>(engine);
+        plugin.add<brayns::AddLightSphereEntrypoint>(engine);
+        plugin.add<brayns::AddLightSpotEntrypoint>(engine);
+        plugin.add<brayns::AddModelEntrypoint>(engine, loaders, interface);
+        plugin.add<brayns::CancelEntrypoint>(tasks);
+        plugin.add<brayns::ChunkEntrypoint>(modelUploads);
+        plugin.add<brayns::ClearLightsEntrypoint>(engine);
+        plugin.add<brayns::ExitLaterEntrypoint>(engine);
+        plugin.add<brayns::ExportFramesEntrypoint>(engine, interface);
+        plugin.add<brayns::ExportFramesToDiskEntrypoint>(parameters, engine, exporter);
+        plugin.add<brayns::GetAnimationParametersEntrypoint>(animation);
+        plugin.add<brayns::GetApplicationParametersEntrypoint>(application);
+        plugin.add<brayns::GetCameraEntrypoint>(camera, interface);
+        plugin.add<brayns::GetCameraParamsEntrypoint>(camera);
+        plugin.add<brayns::GetClipPlanesEntrypoint>(scene);
+        plugin.add<brayns::GetExportFramesProgressEntrypoint>(exporter);
+        plugin.add<brayns::GetInstancesEntrypoint>(scene);
+        plugin.add<brayns::GetLightsEntrypoint>(lights);
+        plugin.add<brayns::GetLoadersEntrypoint>(loaders);
+        plugin.add<brayns::GetModelEntrypoint>(scene);
+        plugin.add<brayns::GetModelPropertiesEntrypoint>(scene);
+        plugin.add<brayns::GetModelTransferFunctionEntrypoint>(scene);
+        plugin.add<brayns::GetRendererEntrypoint>(rendering, interface);
+        plugin.add<brayns::GetRendererParamsEntrypoint>(renderer);
+        plugin.add<brayns::GetSceneEntrypoint>(scene, interface);
+        plugin.add<brayns::GetStatisticsEntrypoint>(statistics, interface);
+        plugin.add<brayns::GetVolumeParametersEntrypoint>(volume, interface);
+        plugin.add<brayns::ImageJpegEntrypoint>(application, engine);
+        plugin.add<brayns::ImageStreamingModeEntrypoint>(application, monitor);
+        plugin.add<brayns::InspectEntrypoint>(renderer);
+        plugin.add<brayns::LoadersSchemaEntrypoint>(loaders);
+        plugin.add<brayns::ModelPropertiesSchemaEntrypoint>(scene);
+        plugin.add<brayns::QuitEntrypoint>(engine);
+        plugin.add<brayns::RegistryEntrypoint>(entrypoints);
+        plugin.add<brayns::RemoveClipPlanesEntrypoint>(engine, interface);
+        plugin.add<brayns::RemoveLightsEntrypoint>(engine);
+        plugin.add<brayns::RemoveModelEntrypoint>(engine);
+        plugin.add<brayns::RequestModelUploadEntrypoint>(engine, loaders, modelUploads);
+        plugin.add<brayns::ResetCameraEntrypoint>(engine);
+        plugin.add<brayns::SchemaEntrypoint>(entrypoints);
+        plugin.add<brayns::SetAnimationParametersEntrypoint>(animation, engine);
+        plugin.add<brayns::SetApplicationParametersEntrypoint>(application, engine);
+        plugin.add<brayns::SetCameraEntrypoint>(camera, engine);
+        plugin.add<brayns::SetCameraParamsEntrypoint>(camera, engine, interface);
+        plugin.add<brayns::SetModelPropertiesEntrypoint>(scene);
+        plugin.add<brayns::SetModelTransferFunctionEntrypoint>(scene);
+        plugin.add<brayns::SetRendererEntrypoint>(rendering);
+        plugin.add<brayns::SetRendererParamsEntrypoint>(renderer, engine, interface);
+        plugin.add<brayns::SetSceneEntrypoint>(scene, engine);
+        plugin.add<brayns::SetVolumeParametersEntrypoint>(volume, engine);
+        plugin.add<brayns::SnapshotEntrypoint>(engine, interface);
+        plugin.add<brayns::TriggerJpegStreamEntrypoint>(engine, monitor);
+        plugin.add<brayns::UpdateClipPlaneEntrypoint>(engine, interface);
+        plugin.add<brayns::UpdateInstanceEntrypoint>(engine, interface);
+        plugin.add<brayns::UpdateModelEntrypoint>(engine);
         plugin.add<brayns::VersionEntrypoint>();
-        plugin.add<brayns::GetApplicationParametersEntrypoint>();
-        plugin.add<brayns::SetApplicationParametersEntrypoint>();
-        plugin.add<brayns::GetVolumeParametersEntrypoint>();
-        plugin.add<brayns::SetVolumeParametersEntrypoint>();
-        plugin.add<brayns::GetSceneEntrypoint>();
-        plugin.add<brayns::SetSceneEntrypoint>();
-        plugin.add<brayns::GetStatisticsEntrypoint>();
-        plugin.add<brayns::SchemaEntrypoint>();
-        plugin.add<brayns::InspectEntrypoint>();
-        plugin.add<brayns::QuitEntrypoint>();
-        plugin.add<brayns::ExitLaterEntrypoint>();
-        plugin.add<brayns::ResetCameraEntrypoint>();
-        plugin.add<brayns::SnapshotEntrypoint>();
-        plugin.add<brayns::RequestModelUploadEntrypoint>();
-        plugin.add<brayns::ChunkEntrypoint>();
-        plugin.add<brayns::AddModelEntrypoint>();
-        plugin.add<brayns::RemoveModelEntrypoint>();
-        plugin.add<brayns::UpdateModelEntrypoint>();
-        plugin.add<brayns::GetModelEntrypoint>();
-        plugin.add<brayns::GetModelPropertiesEntrypoint>();
-        plugin.add<brayns::SetModelPropertiesEntrypoint>();
-        plugin.add<brayns::ModelPropertiesSchemaEntrypoint>();
-        plugin.add<brayns::GetModelTransferFunctionEntrypoint>();
-        plugin.add<brayns::SetModelTransferFunctionEntrypoint>();
-        plugin.add<brayns::AddClipPlaneEntrypoint>();
-        plugin.add<brayns::GetClipPlanesEntrypoint>();
-        plugin.add<brayns::UpdateClipPlaneEntrypoint>();
-        plugin.add<brayns::RemoveClipPlanesEntrypoint>();
-        plugin.add<brayns::GetInstancesEntrypoint>();
-        plugin.add<brayns::UpdateInstanceEntrypoint>();
-        plugin.add<brayns::GetLoadersEntrypoint>();
-        plugin.add<brayns::LoadersSchemaEntrypoint>();
-        plugin.add<brayns::GetCameraParamsEntrypoint>();
-        plugin.add<brayns::SetCameraParamsEntrypoint>();
-        plugin.add<brayns::GetRendererParamsEntrypoint>();
-        plugin.add<brayns::SetRendererParamsEntrypoint>();
-        plugin.add<brayns::GetLightsEntrypoint>();
-        plugin.add<brayns::AddLightDirectionalEntrypoint>();
-        plugin.add<brayns::AddLightSphereEntrypoint>();
-        plugin.add<brayns::AddLightQuadEntrypoint>();
-        plugin.add<brayns::AddLightSpotEntrypoint>();
-        plugin.add<brayns::AddLightAmbientEntrypoint>();
-        plugin.add<brayns::RemoveLightsEntrypoint>();
-        plugin.add<brayns::ClearLightsEntrypoint>();
-        plugin.add<brayns::CancelEntrypoint>();
-        plugin.add<brayns::RegistryEntrypoint>();
-        plugin.add<brayns::ExportFramesEntrypoint>();
-
-        plugin.add<brayns::ExportFramesToDiskEntrypoint>(_frameExporter);
-        plugin.add<brayns::GetExportFramesProgressEntrypoint>(_frameExporter);
     }
-
-private:
-    const brayns::EntrypointManager &_entrypoints;
-    brayns::ClientManager &_clients;
-    brayns::StreamManager &_streamer;
-    brayns::NetworkTaskManager &_tasks;
-    brayns::ModelUploadManager &_modelUploads;
-    brayns::FrameExporter &_frameExporter;
 };
 
 class NetworkContextBuilder
@@ -475,8 +478,7 @@ private:
 
     static void _registerEntrypoints(brayns::NetworkContext &context, brayns::ExtensionPlugin &plugin)
     {
-        CoreEntrypointRegistry registry(context);
-        registry.registerEntrypoints(plugin);
+        CoreEntrypointRegistry::registerEntrypoints(context, plugin);
     }
 
     static void _createSocket(brayns::NetworkContext &context)
