@@ -22,6 +22,7 @@
 #pragma once
 
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/entrypoint/EntrypointManager.h>
 #include <brayns/network/messages/SchemaMessage.h>
 
 namespace brayns
@@ -29,8 +30,13 @@ namespace brayns
 class SchemaEntrypoint : public Entrypoint<SchemaParams, SchemaResult>
 {
 public:
+    SchemaEntrypoint(const EntrypointManager &entrypoints);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    const EntrypointManager &_entrypoints;
 };
 } // namespace brayns

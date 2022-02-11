@@ -42,8 +42,8 @@ void NetworkInterface::launchTask(const ClientRef &client, const RequestId &id, 
     _tasks.add(client, id, std::move(task));
 }
 
-void NetworkInterface::notify(const NotificationMessage &message)
+void NetworkInterface::notify(const NotificationMessage &message, const ClientRef &source)
 {
-    JsonRpcSender::notification(message, _clients);
+    JsonRpcSender::notification(message, _clients, source);
 }
 } // namespace brayns

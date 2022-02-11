@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <brayns/engine/Renderer.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/InspectMessage.h>
 
@@ -31,8 +33,13 @@ namespace brayns
 class InspectEntrypoint : public Entrypoint<InspectMessage, Renderer::PickResult>
 {
 public:
+    InspectEntrypoint(Renderer &renderer);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    Renderer &_renderer;
 };
 } // namespace brayns

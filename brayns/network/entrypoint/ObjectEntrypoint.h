@@ -26,7 +26,7 @@
 #include <brayns/json/Json.h>
 
 #include <brayns/network/common/NotificationPeriod.h>
-#include <brayns/network/entrypoint/EntrypointNotifier.h>
+#include <brayns/network/jsonrpc/JsonRpcNotifier.h>
 
 #include "IEntrypoint.h"
 
@@ -53,9 +53,9 @@ public:
         INetworkInterface &interface,
         Duration notificationPeriod = NotificationPeriod::defaultValue())
         : _object(object)
-        , _notifier(*this, interface, notificationPeriod)
+        , _notifier(interface, notificationPeriod)
     {
-        _object.onModified([this](auto &) { _notifier.notify(_object); });
+        _object.onModified([this](auto &) { _notifier.notify(getName(), _object); });
     }
 
     /**
@@ -91,7 +91,7 @@ public:
 
 private:
     ObjectType &_object;
-    EntrypointNotifier _notifier;
+    JsonRpcNotifier _notifier;
 };
 
 /**

@@ -25,6 +25,11 @@
 
 namespace brayns
 {
+SchemaEntrypoint::SchemaEntrypoint(const EntrypointManager &entrypoints)
+    : _entrypoints(entrypoints)
+{
+}
+
 std::string SchemaEntrypoint::getName() const
 {
     return "schema";
@@ -39,10 +44,10 @@ void SchemaEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto &endpoint = params.endpoint;
-    auto entrypoint = getEntrypoints().find(endpoint);
+    auto entrypoint = _entrypoints.find(endpoint);
     if (!entrypoint)
     {
-        throw EntrypointException("Unknown entrypoint '" + endpoint + "'");
+        throw MethodNotFoundException("Unknown entrypoint '" + endpoint + "'");
     }
     auto &schema = entrypoint->getSchema();
     request.reply(schema);

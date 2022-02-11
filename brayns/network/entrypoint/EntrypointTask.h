@@ -96,6 +96,7 @@ public:
         return _request.getParams(params);
     }
 
+protected:
     /**
      * @brief Send success reply using underlying request.
      *

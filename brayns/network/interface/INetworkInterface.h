@@ -55,10 +55,11 @@ public:
     virtual void launchTask(const ClientRef &client, const RequestId &id, std::unique_ptr<NetworkTask> task) = 0;
 
     /**
-     * @brief Send a notification to all connected clients.
+     * @brief Send a notification to all clients except source if set.
      *
      * @param message Notification message.
+     * @param source Optional source of the notification.
      */
-    virtual void notify(const NotificationMessage &message) = 0;
+    virtual void notify(const NotificationMessage &message, const ClientRef &source = {}) = 0;
 };
 } // namespace brayns

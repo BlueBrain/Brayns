@@ -26,7 +26,7 @@
 #include <brayns/engine/Engine.h>
 
 #include <brayns/network/common/PropertyObjectSchema.h>
-#include <brayns/network/entrypoint/EntrypointNotifier.h>
+#include <brayns/network/jsonrpc/JsonRpcNotifier.h>
 
 #include "IEntrypoint.h"
 
@@ -109,7 +109,7 @@ public:
     SetPropertyObjectEntrypoint(ObjectType &object, Engine &engine, INetworkInterface &interface)
         : _object(object)
         , _engine(engine)
-        , _notifier(*this, interface)
+        , _notifier(interface)
     {
     }
 
@@ -145,7 +145,7 @@ public:
         _object.updateProperties(properties);
         _engine.triggerRender();
         auto &properties = _object.getPropertyMap();
-        _notifier.notify(properties);
+        _notifier.notify(request, properties);
         auto result = Json::serialize(EmptyMessage());
         request.reply(result);
     }
@@ -153,6 +153,6 @@ public:
 private:
     ObjectType &_object;
     Engine &_engine;
-    EntrypointNotifier _notifier;
+    JsonRpcNotifier _notifier;
 };
 } // namespace brayns

@@ -23,15 +23,9 @@
 
 namespace brayns
 {
-Statistics &ObjectExtractor<Statistics>::extract(PluginAPI &api)
+GetStatisticsEntrypoint::GetStatisticsEntrypoint(Statistics &statistics, INetworkInterface &interface)
+    : GetEntrypoint(statistics, interface, NotificationPeriod::slow())
 {
-    auto &engine = api.getEngine();
-    return engine.getStatistics();
-}
-
-GetStatisticsEntrypoint::GetStatisticsEntrypoint()
-{
-    setNotificationPeriod(NotificationPeriod::slow());
 }
 
 std::string GetStatisticsEntrypoint::getName() const

@@ -58,6 +58,11 @@ private:
 
 namespace brayns
 {
+GetLightsEntrypoint::GetLightsEntrypoint(LightManager &manager)
+    : _manager(manager)
+{
+}
+
 std::string GetLightsEntrypoint::getName() const
 {
     return "get-lights";
@@ -70,10 +75,7 @@ std::string GetLightsEntrypoint::getDescription() const
 
 void GetLightsEntrypoint::onRequest(const Request &request)
 {
-    auto &engine = getApi().getEngine();
-    auto &scene = engine.getScene();
-    auto &lightManager = scene.getLightManager();
-    auto &lights = lightManager.getLights();
+    auto &lights = _manager.getLights();
     auto messages = LightsMessageBuilder::buildMessages(lights);
     request.reply(messages);
 }

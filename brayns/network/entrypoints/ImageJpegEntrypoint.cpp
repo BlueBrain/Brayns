@@ -25,6 +25,12 @@
 
 namespace brayns
 {
+ImageJpegEntrypoint::ImageJpegEntrypoint(const ApplicationParameters &parameters, Engine &engine)
+    : _parameters(parameters)
+    , _engine(engine)
+{
+}
+
 std::string ImageJpegEntrypoint::getName() const
 {
     return "image-jpeg";
@@ -37,12 +43,8 @@ std::string ImageJpegEntrypoint::getDescription() const
 
 void ImageJpegEntrypoint::onRequest(const Request &request)
 {
-    auto &api = getApi();
-    auto &engine = api.getEngine();
-    auto &framebuffer = engine.getFrameBuffer();
-    auto &manager = api.getParametersManager();
-    auto &parameters = manager.getApplicationParameters();
-    auto quality = int(parameters.getJpegCompression());
+    auto &framebuffer = _engine.getFrameBuffer();
+    auto quality = int(_parameters.getJpegCompression());
     auto image = framebuffer.getImage();
     auto data = ImageEncoder::encodeToBase64(image, "jpg", quality);
     request.reply({data});

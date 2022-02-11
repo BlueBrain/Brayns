@@ -23,6 +23,11 @@
 
 namespace brayns
 {
+UpdateModelEntrypoint::UpdateModelEntrypoint(Engine &engine)
+    : _engine(engine)
+{
+}
+
 std::string UpdateModelEntrypoint::getName() const
 {
     return "update-model";
@@ -35,14 +40,12 @@ std::string UpdateModelEntrypoint::getDescription() const
 
 void UpdateModelEntrypoint::onRequest(const Request &request)
 {
-    auto &api = getApi();
-    auto &engine = api.getEngine();
-    auto &scene = engine.getScene();
+    auto &scene = _engine.getScene();
     UpdateModelProxy model(scene);
     request.getParams(model);
     model.computeBounds();
     scene.markModified();
-    engine.triggerRender();
+    _engine.triggerRender();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

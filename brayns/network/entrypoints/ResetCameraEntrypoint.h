@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <brayns/engine/Engine.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
@@ -28,8 +30,13 @@ namespace brayns
 class ResetCameraEntrypoint : public Entrypoint<EmptyMessage, EmptyMessage>
 {
 public:
+    ResetCameraEntrypoint(Engine &engine);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    Engine &_engine;
 };
 } // namespace brayns

@@ -33,7 +33,6 @@ set(BRAYNSNETWORK_SOURCES
   common/PropertyObjectSchema.cpp
   common/RateLimiter.cpp
   entrypoint/EntrypointException.cpp
-  entrypoint/EntrypointNotifier.cpp
   entrypoint/EntrypointRef.cpp
   entrypoint/EntrypointManager.cpp
   entrypoints/AddClipPlaneEntrypoint.cpp
@@ -93,6 +92,7 @@ set(BRAYNSNETWORK_SOURCES
   socket/SocketManager.cpp
   socket/WebSocket.cpp
   stream/StreamManager.cpp
+  stream/StreamMonitor.cpp
   tasks/NetworkTask.cpp
   tasks/NetworkTaskManager.cpp
   tasks/NetworkTaskMonitor.cpp

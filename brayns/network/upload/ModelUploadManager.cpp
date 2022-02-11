@@ -61,19 +61,21 @@ void ModelUploadManager::poll()
     }
 }
 
-void ModelUploadManager::add(const ClientRef &client, std::unique_ptr<ModelUploadTask> task)
+void ModelUploadManager::add(std::unique_ptr<ModelUploadTask> task)
 {
     assert(task);
+    auto &client = task->getClient();
     auto &clientUpload = _clientUploads[client];
     auto &tasks = clientUpload.tasks;
     auto &chunksId = task->getChunksId();
-    auto &currentTask = tasks[chunksId];
-    if (currentTask)
+    auto &oldTask = tasks[chunksId];
+    if (oldTask)
     {
         throw InvalidRequestException("A model upload with chunks ID '" + chunksId + "' is already running");
     }
     clientUpload.nextChunkId = chunksId;
-    currentTask = std::move(task);
+    oldTask = std::move(task);
+    oldTask->start();
 }
 
 void ModelUploadManager::setNextChunkId(const ClientRef &client, const std::string &id)

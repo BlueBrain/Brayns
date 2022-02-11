@@ -23,6 +23,11 @@
 
 namespace brayns
 {
+QuitEntrypoint::QuitEntrypoint(Engine &engine)
+    : _engine(engine)
+{
+}
+
 std::string QuitEntrypoint::getName() const
 {
     return "quit";
@@ -35,9 +40,8 @@ std::string QuitEntrypoint::getDescription() const
 
 void QuitEntrypoint::onRequest(const Request &request)
 {
-    auto &engine = getApi().getEngine();
-    engine.setKeepRunning(false);
-    engine.triggerRender();
+    _engine.setKeepRunning(false);
+    _engine.triggerRender();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

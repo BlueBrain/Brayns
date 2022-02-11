@@ -62,7 +62,7 @@ public:
 class ControlledImageStream
 {
 public:
-    ControlledImageStream(brayns::ImageStreamMonitor &monitor)
+    ControlledImageStream(brayns::StreamMonitor &monitor)
         : _monitor(monitor)
     {
     }
@@ -81,7 +81,7 @@ public:
     }
 
 private:
-    brayns::ImageStreamMonitor &_monitor;
+    brayns::StreamMonitor &_monitor;
 };
 
 class AutoImageStream
@@ -109,7 +109,7 @@ private:
 class StreamDispatcher
 {
 public:
-    StreamDispatcher(brayns::ImageStreamMonitor &monitor, brayns::RateLimiter &limiter)
+    StreamDispatcher(brayns::StreamMonitor &monitor, brayns::RateLimiter &limiter)
         : _controlledStream(monitor)
         , _autoStream(limiter)
         , _monitor(monitor)
@@ -136,45 +136,19 @@ public:
 private:
     ControlledImageStream _controlledStream;
     AutoImageStream _autoStream;
-    brayns::ImageStreamMonitor &_monitor;
+    brayns::StreamMonitor &_monitor;
 };
 } // namespace
 
 namespace brayns
 {
-bool ImageStreamMonitor::isControlled() const
-{
-    return _controlled;
-}
-
-void ImageStreamMonitor::setControlled(bool controlled)
-{
-    _controlled = controlled;
-    _triggered = false;
-}
-
-bool ImageStreamMonitor::isTriggered() const
-{
-    return _triggered;
-}
-
-void ImageStreamMonitor::trigger()
-{
-    _triggered = true;
-}
-
-void ImageStreamMonitor::resetTrigger()
-{
-    _triggered = false;
-}
-
 void StreamManager::broadcast(FrameBuffer &framebuffer, ClientManager &clients, const ApplicationParameters &parameters)
 {
     StreamDispatcher dispatcher(_monitor, _limiter);
     dispatcher.broadcast(framebuffer, clients, parameters);
 }
 
-ImageStreamMonitor &StreamManager::getMonitor()
+StreamMonitor &StreamManager::getMonitor()
 {
     return _monitor;
 }

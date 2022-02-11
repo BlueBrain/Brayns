@@ -21,53 +21,51 @@
 
 #pragma once
 
-#include <brayns/json/Json.h>
-
 #include <brayns/network/common/RateLimiter.h>
 #include <brayns/network/interface/INetworkInterface.h>
 
-#include "IEntrypoint.h"
+#include "JsonRpcFactory.h"
 
 namespace brayns
 {
 /**
- * @brief Helper class to send notifications from an entrypoint.
+ * @brief Helper class wrapping network interface to send notifications.
  *
  */
-class EntrypointNotifier
+class JsonRpcNotifier
 {
 public:
     /**
      * @brief Construct a notifier.
      *
-     * @param entrypoint Entrypoint which notifies.
      * @param interface Interface to send the message.
-     * @param period Optional rate limit.
+     * @param period Optional min period between two notifications.
      */
-    EntrypointNotifier(IEntrypoint &entrypoint, INetworkInterface &interface, Duration period = Duration(0));
+    JsonRpcNotifier(INetworkInterface &interface, Duration period = Duration(0))
+        : _interface(interface)
+        , _limiter(period)
+    {
+    }
 
-    /**
-     * @brief Send notification with JSON params.
-     *
-     * @param json "params" field.
-     */
-    void notify(const JsonValue &json);
-
-    /**
-     * @brief Send notification with params.
-     *
-     * @tparam T Params type, must be serializable.
-     * @param params "params" field.
-     */
-    template<typename T>
-    void notify(const T &params)
+    template<typename ParamsType>
+    void notify(const std::string &method, const ParamsType &params)
     {
         auto json = Json::serialize(params);
-        notify(json);
+        auto message = JsonRpcFactory::notification(method, json);
+        _interface.notify(message);
+    }
+
+    template<typename RequestType, typename ParamsType>
+    void notify(const RequestType &request, const ParamsType &params)
+    {
+        auto &client = request.getClient();
+        auto &method = request.getMethod();
+        auto json = Json::serialize(params);
+        auto message = JsonRpcFactory::notification(method, json);
+        _interface.notify(message, source);
     }
 
 private:
-    IEntrypoint &_entrypoint;
     INetworkInterface &_interface;
     RateLimiter _limiter;
 };

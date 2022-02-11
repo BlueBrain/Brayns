@@ -23,10 +23,9 @@
 
 namespace brayns
 {
-VolumeParameters &ObjectExtractor<VolumeParameters>::extract(PluginAPI &api)
+GetVolumeParametersEntrypoint::GetVolumeParametersEntrypoint(VolumeParameters &parameters, INetworkInterface &interface)
+    : GetEntrypoint(parameters, interface)
 {
-    auto &parametersManager = api.getParametersManager();
-    return parametersManager.getVolumeParameters();
 }
 
 std::string GetVolumeParametersEntrypoint::getName() const
@@ -37,6 +36,11 @@ std::string GetVolumeParametersEntrypoint::getName() const
 std::string GetVolumeParametersEntrypoint::getDescription() const
 {
     return "Get the current state of the volume parameters";
+}
+
+SetVolumeParametersEntrypoint::SetVolumeParametersEntrypoint(VolumeParameters &parameters, Engine &engine)
+    : SetEntrypoint(parameters, engine)
+{
 }
 
 std::string SetVolumeParametersEntrypoint::getName() const

@@ -22,6 +22,9 @@
 
 #include <brayns/common/Log.h>
 
+#include <brayns/network/entrypoint/EntrypointTask.h>
+
+#include <brayns/utils/StringUtils.h>
 #include <brayns/utils/image/ImageEncoder.h>
 #include <brayns/utils/image/ImageFormat.h>
 
@@ -107,80 +110,96 @@ std::string encodeSnapshotToBase64(SnapshotParams &params, FrameBuffer &fb)
 
     return {};
 }
-} // namespace
 
-SnapshotTask::SnapshotTask(Engine &engine, SnapshotParams &&params)
-    : _engine(engine)
-    , _params(std::move(params))
+class SnapshotTask : public EntrypointTask<SnapshotParams, ImageBase64Message>
 {
-}
-
-void SnapshotTask::run()
-{
-    // Initialize parameters
-    initializeParameters(_engine, _params);
-    auto &animParams = _params.animation_parameters;
-    auto &renderParams = _params.renderer;
-    auto &volumeParams = _params.volume_parameters;
-
-    // Initialize (Clone) scene
-    auto scene = _engine.createScene(*animParams, *volumeParams);
-    scene->copyFrom(_engine.getScene());
-    scene->commit();
-
-    // Initialize camera
-    auto camera = initializeCamera(_engine, _params);
-    const auto &size = _params.size;
-    const auto ar = static_cast<double>(size.x) / static_cast<double>(size.y);
-    camera->updateProperty("aspect", ar);
-    camera->setBufferTarget("default");
-    camera->commit();
-
-    // Initialize renderer
-    auto renderer = _engine.createRenderer(*animParams, *renderParams);
-    const auto &sysRenderer = _engine.getRenderer();
-    renderer->setCurrentType(sysRenderer.getCurrentType());
-    renderer->clonePropertiesFrom(sysRenderer);
-    renderer->setCamera(camera);
-    renderer->setScene(scene);
-    renderer->commit();
-
-    // Initialize framebuffer
-    auto frameBuffer = _engine.createFrameBuffer("default", size, PixelFormat::RGBA_I8);
-    frameBuffer->setAccumulation(true);
-
-    // Prepare notifications message
-    const auto name = string_utils::shortenString(_params.name);
-    const auto msg = "Render snapshot " + name + " ...";
-
-    // Render snapshot
-    // TODO WITH ENGINE REFACTORING
-    // OSPRay supports a progress callback for the rendering process
-    // https://github.com/ospray/ospray/tree/v1.8.5#progress-and-cancel-progress-and-cancel-unnumbered
-    // Can be used to get progress information while using samples per pixel
-    // instead of accumulation to speed up rendering
-    size_t numAccumFrames = frameBuffer->numAccumFrames();
-    const auto spp = _params.samples_per_pixel;
-    while (numAccumFrames != spp)
+public:
+    SnapshotTask(Request request, Engine &engine)
+        : EntrypointTask(std::move(request))
+        , _engine(engine)
+        , _params(getParams())
     {
-        renderer->render(frameBuffer);
-        frameBuffer->incrementAccumFrames();
-        numAccumFrames = frameBuffer->numAccumFrames();
-
-        const auto totalProgress = static_cast<float>(numAccumFrames) / static_cast<float>(spp);
-        progress(msg, totalProgress);
     }
 
-    // Handle result
-    if (!_params.file_path.empty())
-        _image.data = writeSnapshotToDisk(_params, *frameBuffer);
-    else
-        _image.data = encodeSnapshotToBase64(_params, *frameBuffer);
-}
+    virtual void run() override
+    {
+        // Initialize parameters
+        initializeParameters(_engine, _params);
+        auto &animParams = _params.animation_parameters;
+        auto &renderParams = _params.renderer;
+        auto &volumeParams = _params.volume_parameters;
 
-void SnapshotTask::onComplete()
+        // Initialize (Clone) scene
+        auto scene = _engine.createScene(*animParams, *volumeParams);
+        scene->copyFrom(_engine.getScene());
+        scene->commit();
+
+        // Initialize camera
+        auto camera = initializeCamera(_engine, _params);
+        const auto &size = _params.size;
+        const auto ar = static_cast<double>(size.x) / static_cast<double>(size.y);
+        camera->updateProperty("aspect", ar);
+        camera->setBufferTarget("default");
+        camera->commit();
+
+        // Initialize renderer
+        auto renderer = _engine.createRenderer(*animParams, *renderParams);
+        const auto &sysRenderer = _engine.getRenderer();
+        renderer->setCurrentType(sysRenderer.getCurrentType());
+        renderer->clonePropertiesFrom(sysRenderer);
+        renderer->setCamera(camera);
+        renderer->setScene(scene);
+        renderer->commit();
+
+        // Initialize framebuffer
+        auto frameBuffer = _engine.createFrameBuffer("default", size, PixelFormat::RGBA_I8);
+        frameBuffer->setAccumulation(true);
+
+        // Prepare notifications message
+        const auto name = string_utils::shortenString(_params.name);
+        const auto msg = "Render snapshot " + name + " ...";
+
+        // Render snapshot
+        // TODO WITH ENGINE REFACTORING
+        // OSPRay supports a progress callback for the rendering process
+        // https://github.com/ospray/ospray/tree/v1.8.5#progress-and-cancel-progress-and-cancel-unnumbered
+        // Can be used to get progress information while using samples per pixel
+        // instead of accumulation to speed up rendering
+        size_t numAccumFrames = frameBuffer->numAccumFrames();
+        const auto spp = _params.samples_per_pixel;
+        while (numAccumFrames != spp)
+        {
+            renderer->render(frameBuffer);
+            frameBuffer->incrementAccumFrames();
+            numAccumFrames = frameBuffer->numAccumFrames();
+
+            const auto totalProgress = static_cast<float>(numAccumFrames) / static_cast<float>(spp);
+            progress(msg, totalProgress);
+        }
+
+        // Handle result
+        if (!_params.file_path.empty())
+            _image.data = writeSnapshotToDisk(_params, *frameBuffer);
+        else
+            _image.data = encodeSnapshotToBase64(_params, *frameBuffer);
+    }
+
+    virtual void onComplete() override
+    {
+        reply(_image);
+    }
+
+private:
+    Engine &_engine;
+    SnapshotParams _params;
+    ImageBase64Message _image;
+};
+} // namespace
+
+SnapshotEntrypoint::SnapshotEntrypoint(Engine &engine, INetworkInterface &interface)
+    : _engine(engine)
+    , _launcher(interface)
 {
-    reply(_image);
 }
 
 std::string SnapshotEntrypoint::getName() const
@@ -200,9 +219,7 @@ bool SnapshotEntrypoint::isAsync() const
 
 void SnapshotEntrypoint::onRequest(const Request &request)
 {
-    auto params = request.getParams();
-    auto &engine = getApi().getEngine();
-    auto task = std::make_shared<SnapshotTask>(engine, std::move(params));
-    launchTask(task, request);
+    auto task = std::make_unique<SnapshotTask>(request, _engine);
+    _launcher.launch(std::move(task));
 }
 } // namespace brayns

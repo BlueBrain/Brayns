@@ -21,42 +21,54 @@
 
 #pragma once
 
-#include <brayns/engine/FrameBuffer.h>
-
-#include <brayns/network/client/ClientManager.h>
-#include <brayns/network/common/RateLimiter.h>
-
-#include <brayns/parameters/ApplicationParameters.h>
-
-#include "StreamMonitor.h"
-
 namespace brayns
 {
 /**
- * @brief Stream manager to monitor image streaming.
+ * @brief Used to monitor the image stream.
  *
  */
-class StreamManager
+class StreamMonitor
 {
 public:
     /**
-     * @brief Broadcast framebuffer image.
+     * @brief Check if the stream is controlled.
      *
-     * @param framebuffer Framebuffer containing the image to stream.
-     * @param clients Clients that will receive the image.
-     * @param parameters Stream parameters.
+     * If true, the client trigger the stream when an image is required.
+     *
+     * @return true Controlled.
+     * @return false Automatic.
      */
-    void broadcast(FrameBuffer &framebuffer, ClientManager &clients, const ApplicationParameters &parameters);
+    bool isControlled() const;
 
     /**
-     * @brief Get the image stream monitor.
+     * @brief Set the stream control mode.
      *
-     * @return StreamMonitor& Image stream monitor.
+     * @param controlled True if controlled, False if automatic.
      */
-    StreamMonitor &getMonitor();
+    void setControlled(bool controlled);
+
+    /**
+     * @brief Check if the image stream has been triggered.
+     *
+     * @return true Client triggered the image stream.
+     * @return false Nothing triggered.
+     */
+    bool isTriggered() const;
+
+    /**
+     * @brief Trigger the image stream in controlled mode.
+     *
+     */
+    void trigger();
+
+    /**
+     * @brief Reset the trigger in control mode.
+     *
+     */
+    void resetTrigger();
 
 private:
-    StreamMonitor _monitor;
-    RateLimiter _limiter;
+    bool _controlled = false;
+    bool _triggered = false;
 };
 } // namespace brayns

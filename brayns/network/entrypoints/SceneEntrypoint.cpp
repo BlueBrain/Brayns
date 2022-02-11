@@ -23,10 +23,9 @@
 
 namespace brayns
 {
-Scene &ObjectExtractor<Scene>::extract(PluginAPI &api)
+GetSceneEntrypoint::GetSceneEntrypoint(Scene &scene, INetworkInterface &interface)
+    : GetEntrypoint(scene, interface)
 {
-    auto &engine = api.getEngine();
-    return engine.getScene();
 }
 
 std::string GetSceneEntrypoint::getName() const
@@ -37,6 +36,11 @@ std::string GetSceneEntrypoint::getName() const
 std::string GetSceneEntrypoint::getDescription() const
 {
     return "Get the current state of the scene";
+}
+
+SetSceneEntrypoint::SetSceneEntrypoint(Scene &scene, Engine &engine)
+    : SetEntrypoint(scene, engine)
+{
 }
 
 std::string SetSceneEntrypoint::getName() const

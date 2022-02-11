@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * Responsible Author: adrien.fleury@epfl.ch
@@ -19,23 +19,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "EntrypointNotifier.h"
-
-#include <brayns/network/jsonrpc/JsonRpcFactory.h>
+#include "StreamMonitor.h"
 
 namespace brayns
 {
-EntrypointNotifier::EntrypointNotifier(IEntrypoint &entrypoint, INetworkInterface &interface, Duration period)
-    : _entrypoint(entrypoint)
-    , _interface(interface)
-    , _limiter(period)
+bool StreamMonitor::isControlled() const
 {
+    return _controlled;
 }
 
-void EntrypointNotifier::notify(const JsonValue &json)
+void StreamMonitor::setControlled(bool controlled)
 {
-    auto method = _entrypoint.getName();
-    auto message = JsonRpcFactory::notification(method, json);
-    _limiter.call([&] { _interface.notify(message); });
+    _controlled = controlled;
+    _triggered = false;
+}
+
+bool StreamMonitor::isTriggered() const
+{
+    return _triggered;
+}
+
+void StreamMonitor::trigger()
+{
+    _triggered = true;
+}
+
+void StreamMonitor::resetTrigger()
+{
+    _triggered = false;
 }
 } // namespace brayns

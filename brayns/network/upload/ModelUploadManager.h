@@ -89,10 +89,9 @@ public:
     /**
      * @brief Register a model upload task.
      *
-     * @param client Client uploading model.
      * @param task Task to upload model.
      */
-    void add(const ClientRef &client, std::unique_ptr<ModelUploadTask> task);
+    void add(std::unique_ptr<ModelUploadTask> task);
 
     /**
      * @brief Indicate that the next binary request from the given client will

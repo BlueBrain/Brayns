@@ -24,8 +24,13 @@
 
 namespace brayns
 {
-ExportFramesToDiskEntrypoint::ExportFramesToDiskEntrypoint(std::shared_ptr<FrameExporter> &exporter)
-    : _exporter(exporter)
+ExportFramesToDiskEntrypoint::ExportFramesToDiskEntrypoint(
+    ParametersManager &parameters,
+    Engine &engine,
+    FrameExporter &exporter)
+    : _parameters(parameters)
+    , _engine(engine)
+    , _exporter(exporter)
 {
 }
 
@@ -44,7 +49,7 @@ void ExportFramesToDiskEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     try
     {
-        _exporter->startNewExport(std::move(params));
+        _exporter.startNewExport(std::move(params));
     }
     catch (const FrameExportParameterException &fpe)
     {
@@ -55,23 +60,22 @@ void ExportFramesToDiskEntrypoint::onRequest(const Request &request)
         throw EntrypointException(2, "Frame export already in progress");
     }
 
-    getApi().getEngine().triggerRender();
+    _engine.triggerRender();
     request.reply(EmptyMessage());
 }
 
 void ExportFramesToDiskEntrypoint::onPreRender()
 {
-    auto &camera = getApi().getCamera();
-    auto &renderer = getApi().getRenderer();
-    auto &frameBuffer = getApi().getEngine().getFrameBuffer();
-    auto &paramManager = getApi().getParametersManager();
+    auto &camera = _engine.getCamera();
+    auto &renderer = _engine.getRenderer();
+    auto &frameBuffer = _engine.getFrameBuffer();
 
-    _exporter->preRender(camera, renderer, frameBuffer, paramManager);
+    _exporter.preRender(camera, renderer, frameBuffer, _parameters);
 }
 
 void ExportFramesToDiskEntrypoint::onPostRender()
 {
-    auto &frameBuffer = getApi().getEngine().getFrameBuffer();
-    _exporter->postRender(frameBuffer);
+    auto &frameBuffer = _engine.getFrameBuffer();
+    _exporter.postRender(frameBuffer);
 }
 } // namespace brayns

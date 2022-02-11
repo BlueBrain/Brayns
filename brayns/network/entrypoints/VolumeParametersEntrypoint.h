@@ -26,15 +26,11 @@
 
 namespace brayns
 {
-template<>
-struct ObjectExtractor<VolumeParameters>
-{
-    static VolumeParameters &extract(PluginAPI &api);
-};
-
 class GetVolumeParametersEntrypoint : public GetEntrypoint<VolumeParameters>
 {
 public:
+    GetVolumeParametersEntrypoint(VolumeParameters &parameters, INetworkInterface &interface);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
 };
@@ -42,6 +38,8 @@ public:
 class SetVolumeParametersEntrypoint : public SetEntrypoint<VolumeParameters>
 {
 public:
+    SetVolumeParametersEntrypoint(VolumeParameters &parameters, Engine &engine);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
 };

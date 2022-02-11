@@ -101,14 +101,5 @@ public:
      * @param request Request specialized for Params and Result.
      */
     virtual void onRequest(const Request &request) = 0;
-
-    template<typename T>
-    void notify(INetworkInterface &interface, const T &params)
-    {
-        auto method = getName();
-        auto json = Json::serialize(params);
-        auto message = JsonRpcFactory::notification(method, params);
-        interface.notify()
-    }
 };
 } // namespace brayns

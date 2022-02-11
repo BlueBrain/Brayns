@@ -23,6 +23,11 @@
 
 namespace brayns
 {
+GetLoadersEntrypoint::GetLoadersEntrypoint(const LoaderRegistry &loaders)
+    : _loaders(loaders)
+{
+}
+
 std::string GetLoadersEntrypoint::getName() const
 {
     return "get-loaders";
@@ -35,8 +40,7 @@ std::string GetLoadersEntrypoint::getDescription() const
 
 void GetLoadersEntrypoint::onRequest(const Request &request)
 {
-    auto &registry = getApi().getLoaderRegistry();
-    auto &loaders = registry.getLoaderInfos();
+    auto &loaders = _loaders.getLoaderInfos();
     request.reply(loaders);
 }
 } // namespace brayns

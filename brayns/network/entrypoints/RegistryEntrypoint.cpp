@@ -23,6 +23,11 @@
 
 namespace brayns
 {
+RegistryEntrypoint::RegistryEntrypoint(const EntrypointManager &entrypoints)
+    : _entrypoints(entrypoints)
+{
+}
+
 std::string RegistryEntrypoint::getName() const
 {
     return "registry";
@@ -35,10 +40,7 @@ std::string RegistryEntrypoint::getDescription() const
 
 void RegistryEntrypoint::onRequest(const Request &request)
 {
-    auto &entrypoints = getEntrypoints();
-    std::vector<std::string> result;
-    result.reserve(entrypoints.size());
-    entrypoints.forEach([&](const auto &entrypoint) { result.push_back(entrypoint.getName()); });
-    request.reply(result);
+    auto names = _entrypoints.getNames();
+    request.reply(names);
 }
 } // namespace brayns

@@ -26,6 +26,12 @@
 
 namespace brayns
 {
+UpdateInstanceEntrypoint::UpdateInstanceEntrypoint(Engine &engine, INetworkInterface &interface)
+    : _engine(engine)
+    , _notifier(interface)
+{
+}
+
 std::string UpdateInstanceEntrypoint::getName() const
 {
     return "update-instance";
@@ -41,8 +47,7 @@ void UpdateInstanceEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     auto modelId = params.getModelID();
     auto instanceId = params.getInstanceID();
-    auto &engine = getApi().getEngine();
-    auto &scene = engine.getScene();
+    auto &scene = _engine.getScene();
     auto &model = ExtractModel::fromId(scene, modelId);
     auto instance = model.getInstance(instanceId);
     if (!instance)
@@ -53,9 +58,9 @@ void UpdateInstanceEntrypoint::onRequest(const Request &request)
     auto &source = model.getModel();
     source.markInstancesDirty();
     scene.markModified(false);
-    engine.triggerRender();
+    _engine.triggerRender();
     request.getParams(*instance);
-    request.notify(*instance);
+    _notifier.notify(request, *instance);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

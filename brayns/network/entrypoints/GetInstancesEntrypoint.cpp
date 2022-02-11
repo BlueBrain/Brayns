@@ -27,6 +27,11 @@
 
 namespace brayns
 {
+GetInstancesEntrypoint::GetInstancesEntrypoint(Scene &scene)
+    : _scene(scene)
+{
+}
+
 std::string GetInstancesEntrypoint::getName() const
 {
     return "get-instances";
@@ -42,7 +47,7 @@ void GetInstancesEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     auto id = params.id;
     auto &range = params.result_range;
-    auto &model = ExtractModel::fromId(getApi(), id);
+    auto &model = ExtractModel::fromId(_scene, id);
     auto &instances = model.getInstances();
     auto first = instances.begin();
     auto from = std::min(size_t(range.x), instances.size());

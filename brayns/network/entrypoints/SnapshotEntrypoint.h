@@ -21,37 +21,27 @@
 
 #pragma once
 
+#include <brayns/engine/Engine.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/entrypoint/EntrypointTask.h>
 #include <brayns/network/messages/ImageBase64Message.h>
 #include <brayns/network/messages/SnapshotMessage.h>
+#include <brayns/network/tasks/NetworkTaskLauncher.h>
 
 namespace brayns
 {
-class SnapshotTask : public EntrypointTask<SnapshotParams, ImageBase64Message>
-{
-public:
-    SnapshotTask(Engine &engine, SnapshotParams &&params);
-
-    void run() final;
-
-    void onComplete() final;
-
-private:
-    Engine &_engine;
-    SnapshotParams _params;
-    ImageBase64Message _image;
-};
-
 class SnapshotEntrypoint : public Entrypoint<SnapshotParams, ImageBase64Message>
 {
 public:
-    std::string getName() const final;
+    SnapshotEntrypoint(Engine &engine, INetworkInterface &interface);
 
-    std::string getDescription() const final;
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual bool isAsync() const override;
+    virtual void onRequest(const Request &request) override;
 
-    bool isAsync() const final;
-
-    void onRequest(const Request &request) final;
+private:
+    Engine &_engine;
+    NetworkTaskLauncher _launcher;
 };
 } // namespace brayns

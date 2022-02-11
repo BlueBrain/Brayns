@@ -23,6 +23,11 @@
 
 namespace brayns
 {
+GetClipPlanesEntrypoint::GetClipPlanesEntrypoint(Scene &scene)
+    : _scene(scene)
+{
+}
+
 std::string GetClipPlanesEntrypoint::getName() const
 {
     return "get-clip-planes";
@@ -35,9 +40,7 @@ std::string GetClipPlanesEntrypoint::getDescription() const
 
 void GetClipPlanesEntrypoint::onRequest(const Request &request)
 {
-    auto &engine = getApi().getEngine();
-    auto &scene = engine.getScene();
-    auto &clipPlanes = scene.getClipPlanes();
+    auto &clipPlanes = _scene.getClipPlanes();
     request.reply(clipPlanes);
 }
 } // namespace brayns

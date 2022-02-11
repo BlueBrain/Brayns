@@ -24,7 +24,7 @@
 #include <brayns/engine/Engine.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/entrypoint/EntrypointNotifier.h>
+#include <brayns/network/jsonrpc/JsonRpcNotifier.h>
 #include <brayns/network/messages/AddClipPlaneMessage.h>
 
 namespace brayns
@@ -44,6 +44,6 @@ public:
 
 private:
     Engine &_engine;
-    EntrypointNotifier _notifier;
+    JsonRpcNotifier _notifier;
 };
 } // namespace brayns

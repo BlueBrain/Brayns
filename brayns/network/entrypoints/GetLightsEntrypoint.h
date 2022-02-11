@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <brayns/engine/LightManager.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/LightMessage.h>
 
@@ -29,8 +31,13 @@ namespace brayns
 class GetLightsEntrypoint : public Entrypoint<EmptyMessage, std::vector<LightMessage>>
 {
 public:
+    GetLightsEntrypoint(LightManager &manager);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    LightManager &_manager;
 };
 } // namespace brayns

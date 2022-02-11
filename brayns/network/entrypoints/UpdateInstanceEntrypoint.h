@@ -21,16 +21,25 @@
 
 #pragma once
 
+#include <brayns/engine/Engine.h>
+
 #include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/jsonrpc/JsonRpcNotifier.h>
 
 namespace brayns
 {
 class UpdateInstanceEntrypoint : public Entrypoint<ModelInstance, EmptyMessage>
 {
 public:
+    UpdateInstanceEntrypoint(Engine &engine, INetworkInterface &interface);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    Engine &_engine;
+    JsonRpcNotifier _notifier;
 };
 } // namespace brayns

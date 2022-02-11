@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-GetExportFramesProgressEntrypoint::GetExportFramesProgressEntrypoint(std::shared_ptr<FrameExporter> &expt)
-    : _exporter(expt)
+GetExportFramesProgressEntrypoint::GetExportFramesProgressEntrypoint(FrameExporter &exporter)
+    : _exporter(exporter)
 {
 }
 
@@ -42,10 +42,10 @@ std::string GetExportFramesProgressEntrypoint::getDescription() const
 
 void GetExportFramesProgressEntrypoint::onRequest(const Request &request)
 {
-    double progress{};
+    double progress = 0.0;
     try
     {
-        progress = _exporter->getExportProgress();
+        progress = _exporter.getExportProgress();
     }
     catch (const FrameExportNotRunningException &)
     {
@@ -55,7 +55,6 @@ void GetExportFramesProgressEntrypoint::onRequest(const Request &request)
     {
         throw EntrypointException(2, e.what());
     }
-
     request.reply({progress});
 }
 } // namespace brayns
