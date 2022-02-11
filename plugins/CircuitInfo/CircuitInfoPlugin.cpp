@@ -23,7 +23,18 @@
 #include <brayns/common/Log.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
-#include "CircuitInfoEntrypoints.h"
+#include <entrypoints/CIGetAfferentCellIdsEntrypoint.h>
+#include <entrypoints/CIGetCellDataEntrypoint.h>
+#include <entrypoints/CIGetCellIdsEntrypoint.h>
+#include <entrypoints/CIGetCellIdsFromModelEntrypoint.h>
+#include <entrypoints/CIGetEfferentCellIdsEntrypoint.h>
+#include <entrypoints/CIGetProjectionEfferentCellIdsEntrypoint.h>
+#include <entrypoints/CIGetProjectionsEntrypoint.h>
+#include <entrypoints/CIGetReportInfoEntrypoint.h>
+#include <entrypoints/CIGetReportsEntrypoint.h>
+#include <entrypoints/CIGetSpikeReportInfoEntrypoint.h>
+#include <entrypoints/CIGetTargetsEntrypoint.h>
+#include <entrypoints/CIInfoEntrypoint.h>
 
 CircuitInfoPlugin::CircuitInfoPlugin()
     : brayns::ExtensionPlugin("Circuit Info")
@@ -32,7 +43,20 @@ CircuitInfoPlugin::CircuitInfoPlugin()
 
 void CircuitInfoPlugin::init()
 {
-    CircuitInfoEntrypoints::load(*this);
+    auto &scene = _api->getScene();
+
+    add<CIInfoEntrypoint>();
+    add<CIGetCellDataEntrypoint>();
+    add<CIGetCellIdsEntrypoint>();
+    add<CIGetCellIdsFromModelEntrypoint>(scene);
+    add<CIGetReportsEntrypoint>();
+    add<CIGetReportInfoEntrypoint>();
+    add<CIGetSpikeReportInfoEntrypoint>();
+    add<CIGetTargetsEntrypoint>();
+    add<CIGetAfferentCellIdsEntrypoint>();
+    add<CIGetEfferentCellIdsEntrypoint>();
+    add<CIGetProjectionsEntrypoint>();
+    add<CIGetProjectionEfferentCellIdsEntrypoint>();
 }
 
 extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int /*argc*/, char ** /*argv*/)

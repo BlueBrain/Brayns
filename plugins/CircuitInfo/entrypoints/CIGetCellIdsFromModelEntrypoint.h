@@ -69,6 +69,11 @@ public:
 class CIGetCellIdsFromModelEntrypoint : public brayns::Entrypoint<CIGetCellIdsFromModelParams, CIGetCellIdsResult>
 {
 public:
+    CIGetCellIdsFromModelEntrypoint(brayns::Scene &scene)
+        : _scene(scene)
+    {
+    }
+
     virtual std::string getName() const override
     {
         return "ci-get-cell-ids-from-model";
@@ -83,8 +88,11 @@ public:
     {
         auto params = request.getParams();
         auto modelId = params.model_id;
-        auto &model = brayns::ExtractModel::fromId(getApi(), modelId);
+        auto &model = brayns::ExtractModel::fromId(_scene, modelId);
         auto result = ModelCellIdsRetriever::getCellIds(model);
         request.reply(result);
     }
+
+private:
+    brayns::Scene &_scene;
 };
