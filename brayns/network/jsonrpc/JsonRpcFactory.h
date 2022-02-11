@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/EntrypointException.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 #include "JsonRpcMessages.h"
 
@@ -56,7 +56,7 @@ public:
      * @param e Exception to fill "error" field.
      * @return ErrorMessage The error message corresponding to request.
      */
-    static ErrorMessage error(const RequestMessage &request, const EntrypointException &e);
+    static ErrorMessage error(const RequestMessage &request, const JsonRpcException &e);
 
     /**
      * @brief Create an ErrorMessage without the request message.
@@ -66,7 +66,7 @@ public:
      * @param e Exception to fill "error" field.
      * @return ErrorMessage The error message corresponding to request.
      */
-    static ErrorMessage error(const EntrypointException &e);
+    static ErrorMessage error(const JsonRpcException &e);
 
     /**
      * @brief Create a ProgressMessage corresponding to a RequestMessage.
@@ -79,7 +79,7 @@ public:
      * @param operation Progress operation.
      * @return ProgressMessage The progress message corresponding to request.
      */
-    static ProgressMessage progress(const RequestMessage &request, double amount, const std::string &operation);
+    static ProgressMessage progress(const RequestMessage &request, const std::string &operation, double amount);
 
     /**
      * @brief Create a NotificationMessage for the given method.

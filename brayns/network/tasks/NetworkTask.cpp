@@ -50,7 +50,7 @@ public:
 namespace brayns
 {
 TaskCancelledException::TaskCancelledException()
-    : EntrypointException(-32000, "Task cancelled")
+    : JsonRpcException(-32000, "Task cancelled")
 {
 }
 
@@ -120,7 +120,7 @@ void NetworkTask::onCancel()
 {
 }
 
-void NetworkTask::onError(std::exception_ptr e)
+void NetworkTask::onError(const JsonRpcException &e)
 {
     (void)e;
 }
@@ -151,9 +151,17 @@ void NetworkTask::_fetchResult()
         _throwIfCancelled();
         onComplete();
     }
+    catch (const JsonRpcException &e)
+    {
+        onError(e);
+    }
+    catch (const std::exception &e)
+    {
+        onError(InternalErrorException(e.what()));
+    }
     catch (...)
     {
-        onError(std::current_exception());
+        onError(InternalErrorException("Unknown error"));
     }
 }
 } // namespace brayns

@@ -62,7 +62,7 @@ public:
         auto &method = request.getMethod();
         auto json = Json::serialize(params);
         auto message = JsonRpcFactory::notification(method, json);
-        _interface.notify(message, source);
+        _interface.notify(message, client);
     }
 
 private:

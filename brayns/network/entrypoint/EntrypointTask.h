@@ -110,9 +110,9 @@ protected:
     /**
      * @brief Send an error reply when an exception occurs in the thread.
      *
-     * @param e Opaque exception ptr.
+     * @param e Source of the error.
      */
-    virtual void onError(std::exception_ptr e) override
+    virtual void onError(const JsonRpcException &e) override
     {
         _request.error(e);
     }

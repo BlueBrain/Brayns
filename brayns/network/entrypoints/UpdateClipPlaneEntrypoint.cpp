@@ -21,7 +21,7 @@
 
 #include "UpdateClipPlaneEntrypoint.h"
 
-#include <brayns/network/entrypoint/EntrypointException.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
 {
@@ -50,7 +50,7 @@ void UpdateClipPlaneEntrypoint::onRequest(const Request &request)
     auto clipPlane = scene.getClipPlane(id);
     if (!clipPlane)
     {
-        throw EntrypointException("No clip plane found with ID " + std::to_string(id));
+        throw JsonRpcException("No clip plane found with ID " + std::to_string(id));
     }
     clipPlane->setPlane(plane);
     _engine.triggerRender();

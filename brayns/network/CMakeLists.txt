@@ -8,7 +8,7 @@ set(BRAYNSNETWORK_HEADERS
   entrypoint/Entrypoint.h
   entrypoint/EntrypointManager.h
   entrypoint/IEntrypoint.h
-  entrypoint/EntrypointException.h
+  jsonrpc/JsonRpcException.h
   entrypoint/EntrypointTask.h
   entrypoints/ExportFramesEntrypoint.h
   entrypoints/ExportFramesToDiskEntryPoint.h
@@ -32,7 +32,6 @@ set(BRAYNSNETWORK_SOURCES
   common/NotificationPeriod.cpp
   common/PropertyObjectSchema.cpp
   common/RateLimiter.cpp
-  entrypoint/EntrypointException.cpp
   entrypoint/EntrypointRef.cpp
   entrypoint/EntrypointManager.cpp
   entrypoints/AddClipPlaneEntrypoint.cpp
@@ -80,8 +79,8 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/VersionEntrypoint.cpp
   entrypoints/VolumeParametersEntrypoint.cpp
   interface/NetworkInterface.cpp
+  jsonrpc/JsonRpcException.cpp
   jsonrpc/JsonRpcFactory.cpp
-  jsonrpc/JsonRpcMessages.cpp
   jsonrpc/JsonRpcRequest.cpp
   jsonrpc/JsonRpcSender.cpp
   jsonrpc/RequestId.cpp

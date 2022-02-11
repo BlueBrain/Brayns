@@ -21,8 +21,8 @@
 
 #include "AddModelEntrypoint.h"
 
-#include <brayns/network/entrypoint/EntrypointException.h>
 #include <brayns/network/entrypoint/EntrypointTask.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace
 {
@@ -34,11 +34,11 @@ public:
         auto &path = params.getPath();
         if (path.empty())
         {
-            throw brayns::EntrypointException("Missing model path");
+            throw brayns::JsonRpcException("Missing model path");
         }
         if (!loaders.isSupportedFile(path))
         {
-            throw brayns::EntrypointException("Unsupported file type: '" + path + "'");
+            throw brayns::JsonRpcException("Unsupported file type: '" + path + "'");
         }
     }
 };

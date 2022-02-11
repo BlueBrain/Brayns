@@ -65,9 +65,15 @@ void JsonRpcRequest::reply(const JsonValue &result) const
     JsonRpcSender::reply(message, _client);
 }
 
-void JsonRpcRequest::progress(double amount, const std::string &operation) const
+void JsonRpcRequest::error(const JsonRpcException &e) const
 {
-    auto message = JsonRpcFactory::progress(_message, amount, operation);
+    auto message = brayns::JsonRpcFactory::error(_message, e);
+    brayns::JsonRpcSender::error(message, _client);
+}
+
+void JsonRpcRequest::progress(const std::string &operation, double amount) const
+{
+    auto message = JsonRpcFactory::progress(_message, operation, amount);
     JsonRpcSender::progress(message, _client);
 }
 } // namespace brayns

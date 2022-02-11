@@ -42,7 +42,7 @@ public:
         auto path = config.get(section, params.projection, "Path");
         if (path.empty())
         {
-            throw brayns::EntrypointException(1, "Projection not found");
+            throw brayns::JsonRpcException(1, "Projection not found");
         }
 
         // Sources

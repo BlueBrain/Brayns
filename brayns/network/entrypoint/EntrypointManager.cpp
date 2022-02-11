@@ -24,7 +24,7 @@
 #include <brayns/common/Log.h>
 
 #include <brayns/json/JsonSchemaValidator.h>
-#include <brayns/network/entrypoint/EntrypointException.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace
 {

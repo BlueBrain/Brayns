@@ -35,7 +35,7 @@ namespace brayns
  * to the client.
  *
  */
-class EntrypointException : public std::runtime_error
+class JsonRpcException : public std::runtime_error
 {
 public:
     /**
@@ -43,7 +43,7 @@ public:
      *
      * @param message Error description.
      */
-    EntrypointException(const std::string &message);
+    JsonRpcException(const std::string &message);
 
     /**
      * @brief Construct an exception with a code and a description.
@@ -52,7 +52,7 @@ public:
      * @param message Error description.
      * @param data Additional optional error data.
      */
-    EntrypointException(int code, const std::string &message, const JsonValue &data = {});
+    JsonRpcException(int code, const std::string &message, const JsonValue &data = {});
 
     /**
      * @brief Get the error code of the exception.
@@ -73,31 +73,31 @@ private:
     JsonValue _data;
 };
 
-class ParsingErrorException : public EntrypointException
+class ParsingErrorException : public JsonRpcException
 {
 public:
     ParsingErrorException(const std::string &message);
 };
 
-class InvalidRequestException : public EntrypointException
+class InvalidRequestException : public JsonRpcException
 {
 public:
     InvalidRequestException(const std::string &message, const std::vector<std::string> &errors = {});
 };
 
-class MethodNotFoundException : public EntrypointException
+class MethodNotFoundException : public JsonRpcException
 {
 public:
     MethodNotFoundException(const std::string &method);
 };
 
-class InvalidParamsException : public EntrypointException
+class InvalidParamsException : public JsonRpcException
 {
 public:
     InvalidParamsException(const std::string &message, const std::vector<std::string> &errors = {});
 };
 
-class InternalErrorException : public EntrypointException
+class InternalErrorException : public JsonRpcException
 {
 public:
     InternalErrorException(const std::string &message);

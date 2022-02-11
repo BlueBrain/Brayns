@@ -119,6 +119,16 @@ public:
     }
 
     /**
+     * @brief Send an error message in case of exception.
+     *
+     * @param e Source of the error.
+     */
+    void error(const JsonRpcException &e) const
+    {
+        _request.error(e);
+    }
+
+    /**
      * @brief Send a progress message of the request to the client.
      *
      * @param operation Operation description.

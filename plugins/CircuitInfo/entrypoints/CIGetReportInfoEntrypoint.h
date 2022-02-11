@@ -45,7 +45,7 @@ public:
         auto i = std::find(reports.begin(), reports.end(), params.report);
         if (i == reports.end())
         {
-            throw brayns::EntrypointException(1, "Report not found");
+            throw brayns::JsonRpcException(1, "Report not found");
         }
 
         // Get report

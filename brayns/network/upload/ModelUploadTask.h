@@ -30,6 +30,8 @@
 
 #include <brayns/io/LoaderRegistry.h>
 
+#include <brayns/network/adapters/BinaryParamAdapter.h>
+#include <brayns/network/adapters/ModelDescriptorAdapter.h>
 #include <brayns/network/entrypoint/EntrypointTask.h>
 #include <brayns/network/tasks/NetworkTaskMonitor.h>
 

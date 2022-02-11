@@ -53,11 +53,11 @@ void ColorCircuitByIdEntrypoint::onRequest(const Request &request)
     }
     catch (const CircuitModelNotFoundException &)
     {
-        throw brayns::EntrypointException(1, "The given ID does not correspond to any circuit model");
+        throw brayns::JsonRpcException(1, "The given ID does not correspond to any circuit model");
     }
     catch (const IDRangeParseException &irpe)
     {
-        throw brayns::EntrypointException(2, irpe.what());
+        throw brayns::JsonRpcException(2, irpe.what());
     }
 
     request.reply(brayns::EmptyMessage());
@@ -94,7 +94,7 @@ void ColorCircuitBySingleColorEntrypoint::onRequest(const Request &request)
     }
     catch (const CircuitModelNotFoundException &)
     {
-        throw brayns::EntrypointException(1, "The given ID does not correspond to any circuit model");
+        throw brayns::JsonRpcException(1, "The given ID does not correspond to any circuit model");
     }
     request.reply(brayns::EmptyMessage());
 }
@@ -126,7 +126,7 @@ void AvailableColorMethodsEntrypoint::onRequest(const Request &request)
     }
     catch (const CircuitModelNotFoundException &)
     {
-        throw brayns::EntrypointException(1, "The given ID does not correspond to any circuit model");
+        throw brayns::JsonRpcException(1, "The given ID does not correspond to any circuit model");
     }
 }
 
@@ -159,11 +159,11 @@ void AvailableColorMethodVariablesEntrypoint::onRequest(const Request &request)
     }
     catch (const CircuitModelNotFoundException &)
     {
-        throw brayns::EntrypointException(1, "The given ID does not correspond to any circuit model");
+        throw brayns::JsonRpcException(1, "The given ID does not correspond to any circuit model");
     }
     catch (const ColorMethodNotFoundException &)
     {
-        throw brayns::EntrypointException(2, "The given coloring method does not exists for the given model");
+        throw brayns::JsonRpcException(2, "The given coloring method does not exists for the given model");
     }
 }
 
@@ -197,15 +197,15 @@ void ColorCircuitByMethodEntrypoint::onRequest(const Request &request)
     }
     catch (const CircuitModelNotFoundException &)
     {
-        throw brayns::EntrypointException(1, "The given ID does not correspond to any circuit model");
+        throw brayns::JsonRpcException(1, "The given ID does not correspond to any circuit model");
     }
     catch (const ColorMethodNotFoundException &)
     {
-        throw brayns::EntrypointException(2, "The given coloring method does not exists for the given model");
+        throw brayns::JsonRpcException(2, "The given coloring method does not exists for the given model");
     }
     catch (const ColorMethodVariableNotFoundException &)
     {
-        throw brayns::EntrypointException(3, "One or more method variables specified does not exist");
+        throw brayns::JsonRpcException(3, "One or more method variables specified does not exist");
     }
 
     request.reply(brayns::EmptyMessage());

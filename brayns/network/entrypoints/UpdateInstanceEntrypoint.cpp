@@ -22,7 +22,7 @@
 #include "UpdateInstanceEntrypoint.h"
 
 #include <brayns/network/common/ExtractModel.h>
-#include <brayns/network/entrypoint/EntrypointException.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
 {
@@ -52,7 +52,7 @@ void UpdateInstanceEntrypoint::onRequest(const Request &request)
     auto instance = model.getInstance(instanceId);
     if (!instance)
     {
-        throw EntrypointException(
+        throw JsonRpcException(
             "Model with ID " + std::to_string(modelId) + " has no instance with ID " + std::to_string(instanceId));
     }
     auto &source = model.getModel();

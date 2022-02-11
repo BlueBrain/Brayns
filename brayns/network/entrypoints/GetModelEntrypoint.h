@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
+#include <brayns/network/adapters/ModelDescriptorAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/GetModelMessage.h>
 

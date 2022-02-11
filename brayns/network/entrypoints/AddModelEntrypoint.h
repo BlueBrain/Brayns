@@ -24,6 +24,7 @@
 #include <brayns/engine/Engine.h>
 #include <brayns/io/LoaderRegistry.h>
 
+#include <brayns/network/adapters/ModelDescriptorAdapter.h>
 #include <brayns/network/adapters/ModelParamsAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/tasks/NetworkTaskLauncher.h>

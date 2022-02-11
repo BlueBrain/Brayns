@@ -22,6 +22,7 @@
 #pragma once
 
 #include <brayns/network/client/ClientRef.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 #include <brayns/network/jsonrpc/JsonRpcMessages.h>
 
 namespace brayns
@@ -89,12 +90,19 @@ public:
     void reply(const JsonValue &result) const;
 
     /**
+     * @brief Send an error message in case of exception.
+     *
+     * @param e Source of the error.
+     */
+    void error(const JsonRpcException &e) const;
+
+    /**
      * @brief Send a progress message.
      *
-     * @param amount Progress 0-1.
      * @param operation Description of current operation.
+     * @param amount Progress 0-1.
      */
-    void progress(double amount, const std::string &operation) const;
+    void progress(const std::string &operation, double amount) const;
 
 private:
     ClientRef _client;

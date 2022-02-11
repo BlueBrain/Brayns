@@ -38,7 +38,7 @@ public:
         // Validate path
         if (!std::filesystem::exists(path))
         {
-            throw brayns::EntrypointException(9, "Circuit not found");
+            throw brayns::JsonRpcException(9, "Circuit not found");
         }
 
         // Result

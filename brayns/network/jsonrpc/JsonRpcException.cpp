@@ -19,54 +19,54 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "EntrypointException.h"
+#include "JsonRpcException.h"
 
 namespace brayns
 {
-EntrypointException::EntrypointException(const std::string &message)
+JsonRpcException::JsonRpcException(const std::string &message)
     : std::runtime_error(message)
 {
 }
 
-EntrypointException::EntrypointException(int code, const std::string &message, const JsonValue &data)
+JsonRpcException::JsonRpcException(int code, const std::string &message, const JsonValue &data)
     : std::runtime_error(message)
     , _code(code)
     , _data(data)
 {
 }
 
-int EntrypointException::getCode() const
+int JsonRpcException::getCode() const
 {
     return _code;
 }
 
-const JsonValue &EntrypointException::getData() const
+const JsonValue &JsonRpcException::getData() const
 {
     return _data;
 }
 
 ParsingErrorException::ParsingErrorException(const std::string &message)
-    : EntrypointException(-32700, "Failed to parse JSON request: " + message)
+    : JsonRpcException(-32700, "Failed to parse JSON request: " + message)
 {
 }
 
 InvalidRequestException::InvalidRequestException(const std::string &message, const std::vector<std::string> &errors)
-    : EntrypointException(-32600, "Invalid request: " + message, errors)
+    : JsonRpcException(-32600, "Invalid request: " + message, errors)
 {
 }
 
 MethodNotFoundException::MethodNotFoundException(const std::string &method)
-    : EntrypointException(-32601, "Method not found '" + method + "'")
+    : JsonRpcException(-32601, "Method not found '" + method + "'")
 {
 }
 
 InvalidParamsException::InvalidParamsException(const std::string &message, const std::vector<std::string> &errors)
-    : EntrypointException(-32602, "Invalid params " + message, errors)
+    : JsonRpcException(-32602, "Invalid params " + message, errors)
 {
 }
 
 InternalErrorException::InternalErrorException(const std::string &message)
-    : EntrypointException(-32603, "Server error: " + message)
+    : JsonRpcException(-32603, "Server error: " + message)
 {
 }
 } // namespace brayns

@@ -41,7 +41,7 @@ public:
      * @param api Brayns API.
      * @param id Model ID.
      * @return ModelDescriptor& Model instance.
-     * @throw EntrypointException Model not found.
+     * @throw JsonRpcException Model not found.
      */
     static ModelDescriptor &fromId(PluginAPI &api, size_t id);
 
@@ -51,7 +51,7 @@ public:
      * @param engine Brayns engine.
      * @param id Model ID.
      * @return ModelDescriptor& Model instance.
-     * @throw EntrypointException Model not found.
+     * @throw JsonRpcException Model not found.
      */
     static ModelDescriptor &fromId(Engine &engine, size_t id);
 
@@ -61,7 +61,7 @@ public:
      * @param engine Brayns scene.
      * @param id Model ID.
      * @return ModelDescriptor& Model instance.
-     * @throw EntrypointException Model not found.
+     * @throw JsonRpcException Model not found.
      */
     static ModelDescriptor &fromId(Scene &scene, size_t id);
 
@@ -75,7 +75,7 @@ public:
      * @param source Source instance.
      * @param params Params instance.
      * @return ModelDescriptor& Model instance.
-     * @throw EntrypointException Model not found.
+     * @throw JsonRpcException Model not found.
      */
     template<typename T, typename U>
     static ModelDescriptor &fromParams(T &source, const U &params)
@@ -93,7 +93,7 @@ public:
      * @param source Source instance.
      * @param request Request instance.
      * @return ModelDescriptor& Model instance.
-     * @throw EntrypointException Model not found.
+     * @throw JsonRpcException Model not found.
      */
     template<typename T, typename U>
     static ModelDescriptor &fromRequest(T &source, const U &request)

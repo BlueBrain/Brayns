@@ -64,12 +64,8 @@ std::ostream &operator<<(std::ostream &stream, const brayns::ClientRef &client)
     return stream << client.getId();
 }
 
-template<>
-struct hash<brayns::ClientRef>
+size_t hash<brayns::ClientRef>::operator()(const brayns::ClientRef &client) const
 {
-    size_t operator()(const brayns::ClientRef &client) const
-    {
-        return client.getId();
-    }
-};
+    return client.getId();
+}
 } // namespace std

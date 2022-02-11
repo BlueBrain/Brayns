@@ -25,7 +25,7 @@
 #include <string_view>
 #include <unordered_map>
 
-#include <brayns/network/entrypoint/EntrypointException.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 #include "ModelUploadTask.h"
 

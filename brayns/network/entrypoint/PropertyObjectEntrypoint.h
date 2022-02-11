@@ -144,8 +144,8 @@ public:
         auto properties = Json::deserialize<PropertyMap>(params);
         _object.updateProperties(properties);
         _engine.triggerRender();
-        auto &properties = _object.getPropertyMap();
-        _notifier.notify(request, properties);
+        auto &updatedProperties = _object.getPropertyMap();
+        _notifier.notify(request, updatedProperties);
         auto result = Json::serialize(EmptyMessage());
         request.reply(result);
     }

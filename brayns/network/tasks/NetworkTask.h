@@ -25,7 +25,7 @@
 #include <future>
 #include <stdexcept>
 
-#include <brayns/network/entrypoint/EntrypointException.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
 {
@@ -33,7 +33,7 @@ namespace brayns
  * @brief Exception thrown when a task is cancelled.
  *
  */
-class TaskCancelledException : public EntrypointException
+class TaskCancelledException : public JsonRpcException
 {
 public:
     TaskCancelledException();
@@ -132,9 +132,9 @@ protected:
      *
      * A task fails if an exception has been thrown in run().
      *
-     * @param e Opaque exception pointer.
+     * @param e Exception thrown in run().
      */
-    virtual void onError(std::exception_ptr e);
+    virtual void onError(const JsonRpcException &e);
 
     /**
      * @brief Called in progress().

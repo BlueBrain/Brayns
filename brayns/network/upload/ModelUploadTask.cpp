@@ -25,7 +25,7 @@
 
 #include <brayns/common/Log.h>
 
-#include <brayns/network/entrypoint/EntrypointException.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace
 {
@@ -161,7 +161,7 @@ private:
     {
         auto &params = context.params;
         auto &name = params.getName();
-        auto operation = "Model upload of " + name + "...";
+        return "Model upload of " + name + "...";
     }
 
     static double _getAmount(const brayns::ModelUploadContext &context)
@@ -282,7 +282,7 @@ private:
         auto &name = params.getLoaderName();
         auto &blob = context.blob;
         auto &type = blob.type;
-        auto &loader = loaders.getSuitableLoader("", type, name);
+        return loaders.getSuitableLoader("", type, name);
     }
 
     static void _addModels(brayns::ModelUploadContext &context, std::vector<brayns::ModelDescriptorPtr> &descriptors)

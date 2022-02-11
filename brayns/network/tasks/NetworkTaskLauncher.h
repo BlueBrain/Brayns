@@ -55,7 +55,7 @@ public:
     {
         auto &client = request.getClient();
         auto &id = request.getId();
-        _interface.launchTask(std::move(task));
+        _interface.launchTask(client, id, std::move(task));
     }
 
     /**
@@ -69,7 +69,7 @@ public:
     {
         auto &client = task->getClient();
         auto &id = task->getRequestId();
-        _interface.launchTask(std::move(task));
+        _interface.launchTask(client, id, std::move(task));
     }
 
 private:

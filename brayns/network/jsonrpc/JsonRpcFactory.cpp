@@ -33,7 +33,7 @@ ReplyMessage JsonRpcFactory::reply(const RequestMessage &request, const JsonValu
     return reply;
 }
 
-ErrorMessage JsonRpcFactory::error(const RequestMessage &request, const EntrypointException &e)
+ErrorMessage JsonRpcFactory::error(const RequestMessage &request, const JsonRpcException &e)
 {
     ErrorMessage error;
     error.jsonrpc = request.jsonrpc;
@@ -45,7 +45,7 @@ ErrorMessage JsonRpcFactory::error(const RequestMessage &request, const Entrypoi
     return error;
 }
 
-ErrorMessage JsonRpcFactory::error(const EntrypointException &e)
+ErrorMessage JsonRpcFactory::error(const JsonRpcException &e)
 {
     ErrorMessage error;
     error.jsonrpc = "2.0";
@@ -57,14 +57,14 @@ ErrorMessage JsonRpcFactory::error(const EntrypointException &e)
     return error;
 }
 
-ProgressMessage JsonRpcFactory::progress(const RequestMessage &request, double amount, const std::string &operation)
+ProgressMessage JsonRpcFactory::progress(const RequestMessage &request, const std::string &operation, double amount)
 {
     ProgressMessage progress;
     progress.jsonrpc = request.jsonrpc;
     progress.method = request.method;
     progress.params.id = request.id;
-    progress.params.amount = amount;
     progress.params.operation = operation;
+    progress.params.amount = amount;
     return progress;
 }
 

@@ -53,11 +53,11 @@ void ExportFramesToDiskEntrypoint::onRequest(const Request &request)
     }
     catch (const FrameExportParameterException &fpe)
     {
-        throw EntrypointException(1, fpe.what());
+        throw JsonRpcException(1, fpe.what());
     }
     catch (const FrameExportInProgressException &)
     {
-        throw EntrypointException(2, "Frame export already in progress");
+        throw JsonRpcException(2, "Frame export already in progress");
     }
 
     _engine.triggerRender();

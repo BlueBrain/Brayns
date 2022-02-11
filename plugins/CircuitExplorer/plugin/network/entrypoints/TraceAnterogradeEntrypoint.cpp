@@ -47,7 +47,7 @@ void TraceAnterogradeEntrypoint::onRequest(const Request &request)
     // Validation
     if (params.cell_gids.empty())
     {
-        throw brayns::EntrypointException("No input cell GIDs specified");
+        throw brayns::JsonRpcException("No input cell GIDs specified");
     }
 
     // Extract API data
@@ -58,7 +58,7 @@ void TraceAnterogradeEntrypoint::onRequest(const Request &request)
     // Retreive cell mapping
     if (!_manager.handlerExists(model))
     {
-        throw brayns::EntrypointException(
+        throw brayns::JsonRpcException(
             "There given model ID does not correspond to any existing "
             "circuit model");
     }

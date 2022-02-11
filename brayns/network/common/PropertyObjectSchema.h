@@ -23,6 +23,8 @@
 
 #include <brayns/common/PropertyObject.h>
 
+#include <brayns/json/JsonSchema.h>
+
 namespace brayns
 {
 /**

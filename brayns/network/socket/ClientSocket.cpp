@@ -28,6 +28,7 @@
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPSClientSession.h>
+#include <Poco/Net/SecureStreamSocket.h>
 
 #include <brayns/common/Log.h>
 
@@ -65,7 +66,8 @@ public:
             return std::make_unique<Poco::Net::HTTPClientSession>(address);
         }
         auto context = SslClientContextFactory::create(parameters);
-        return std::make_unique<Poco::Net::HTTPSClientSession>(address, context);
+        auto socket = Poco::Net::SecureStreamSocket(address, context);
+        return std::make_unique<Poco::Net::HTTPSClientSession>(socket);
     }
 };
 

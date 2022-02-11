@@ -29,8 +29,8 @@
 
 #include <brayns/json/JsonSchemaValidator.h>
 
-#include <brayns/network/entrypoint/EntrypointException.h>
 #include <brayns/network/interface/NetworkInterface.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 #include <brayns/network/jsonrpc/JsonRpcFactory.h>
 #include <brayns/network/jsonrpc/JsonRpcSender.h>
 #include <brayns/network/socket/ClientSocket.h>
@@ -150,7 +150,7 @@ public:
         {
             _dispatch(request, entrypoints);
         }
-        catch (const brayns::EntrypointException &e)
+        catch (const brayns::JsonRpcException &e)
         {
             auto &message = request.getMessage();
             auto &client = request.getClient();
@@ -190,7 +190,7 @@ public:
         {
             message = RequestParser::parse(data);
         }
-        catch (const brayns::EntrypointException &e)
+        catch (const brayns::JsonRpcException &e)
         {
             auto error = brayns::JsonRpcFactory::error(e);
             brayns::JsonRpcSender::error(error, client);
@@ -213,7 +213,7 @@ public:
         {
             _processBinaryRequest(client, data, modelUploads);
         }
-        catch (const brayns::EntrypointException &e)
+        catch (const brayns::JsonRpcException &e)
         {
             auto error = brayns::JsonRpcFactory::error(e);
             brayns::JsonRpcSender::error(error, client);
@@ -406,8 +406,8 @@ public:
         plugin.add<brayns::ExitLaterEntrypoint>(engine);
         plugin.add<brayns::ExportFramesEntrypoint>(engine, interface);
         plugin.add<brayns::ExportFramesToDiskEntrypoint>(parameters, engine, exporter);
-        plugin.add<brayns::GetAnimationParametersEntrypoint>(animation);
-        plugin.add<brayns::GetApplicationParametersEntrypoint>(application);
+        plugin.add<brayns::GetAnimationParametersEntrypoint>(animation, interface);
+        plugin.add<brayns::GetApplicationParametersEntrypoint>(application, interface);
         plugin.add<brayns::GetCameraEntrypoint>(camera, interface);
         plugin.add<brayns::GetCameraParamsEntrypoint>(camera);
         plugin.add<brayns::GetClipPlanesEntrypoint>(scene);
@@ -442,7 +442,7 @@ public:
         plugin.add<brayns::SetCameraParamsEntrypoint>(camera, engine, interface);
         plugin.add<brayns::SetModelPropertiesEntrypoint>(scene);
         plugin.add<brayns::SetModelTransferFunctionEntrypoint>(scene);
-        plugin.add<brayns::SetRendererEntrypoint>(rendering);
+        plugin.add<brayns::SetRendererEntrypoint>(rendering, engine);
         plugin.add<brayns::SetRendererParamsEntrypoint>(renderer, engine, interface);
         plugin.add<brayns::SetSceneEntrypoint>(scene, engine);
         plugin.add<brayns::SetVolumeParametersEntrypoint>(volume, engine);

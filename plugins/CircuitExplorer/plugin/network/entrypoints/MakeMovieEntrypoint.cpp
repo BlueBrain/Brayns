@@ -39,7 +39,7 @@ public:
         // Return an error if the directory provided doesn't exist
         if (!std::filesystem::is_directory(frameFolder))
         {
-            throw brayns::EntrypointException("Invalid frame folder: '" + frameFolder + "'");
+            throw brayns::JsonRpcException("Invalid frame folder: '" + frameFolder + "'");
         }
 
         // Make sure the extension has a dot as in std::filesystem
@@ -84,7 +84,7 @@ public:
         }
         catch (const MovieCreationException &e)
         {
-            throw brayns::EntrypointException(e.what());
+            throw brayns::JsonRpcException(e.what());
         }
 
         // Remove frames image files from disk if asked to save space
