@@ -21,6 +21,8 @@
 
 #include "RateLimiter.h"
 
+#include <algorithm>
+
 namespace brayns
 {
 RateLimiter RateLimiter::fromRate(size_t rate)
@@ -59,7 +61,8 @@ bool RateLimiter::_tryUpdateLastCall()
     {
         return false;
     }
-    auto delay = (elapsed - _period) % _period;
+    auto delay = elapsed - _period;
+    delay = std::max(delay, _period);
     _lastCall = currentTime - delay;
     return true;
 }
