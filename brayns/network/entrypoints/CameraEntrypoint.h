@@ -29,7 +29,7 @@ namespace brayns
 class GetCameraEntrypoint : public GetEntrypoint<Camera>
 {
 public:
-    GetCameraEntrypoint(Camera &camera, INetworkInterface &interface);
+    GetCameraEntrypoint(const Camera &camera, INetworkInterface &interface);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

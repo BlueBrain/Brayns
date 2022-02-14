@@ -29,7 +29,7 @@ namespace brayns
 class GetStatisticsEntrypoint : public GetEntrypoint<Statistics>
 {
 public:
-    GetStatisticsEntrypoint(Statistics &statistics, INetworkInterface &interface);
+    GetStatisticsEntrypoint(const Statistics &statistics, INetworkInterface &interface);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

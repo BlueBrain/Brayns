@@ -90,7 +90,7 @@ public:
     virtual void onRequest(const brayns::ClientRef &client, brayns::InputPacket request) override
     {
         auto data = request.isBinary() ? "<Binary data>" : request.getData();
-        brayns::Log::debug("New request from client {}: '{}'.", client, data);
+        brayns::Log::debug("Received request from client {}: '{}'.", client, data);
         _requests.add(client, std::move(request));
     }
 
@@ -396,9 +396,9 @@ public:
     static void run(brayns::NetworkContext &context)
     {
         _processRequests(context);
-        _updateEntrypoints(context);
         _pollTasks(context);
         _pollModelUploads(context);
+        _updateEntrypoints(context);
     }
 
 private:

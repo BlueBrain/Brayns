@@ -23,7 +23,7 @@
 
 namespace brayns
 {
-GetVolumeParametersEntrypoint::GetVolumeParametersEntrypoint(VolumeParameters &parameters, INetworkInterface &interface)
+GetVolumeParametersEntrypoint::GetVolumeParametersEntrypoint(const VolumeParameters &parameters, INetworkInterface &interface)
     : GetEntrypoint(parameters, interface)
 {
 }

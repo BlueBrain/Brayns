@@ -52,7 +52,7 @@ public:
     {
         auto json = Json::serialize(params);
         auto message = JsonRpcFactory::notification(method, json);
-        _interface.notify(message);
+        _limiter.call([&] { _interface.notify(message); });
     }
 
     template<typename RequestType, typename ParamsType>
@@ -62,7 +62,7 @@ public:
         auto &method = request.getMethod();
         auto json = Json::serialize(params);
         auto message = JsonRpcFactory::notification(method, json);
-        _interface.notify(message, client);
+        _limiter.call([&] { _interface.notify(message, client); });
     }
 
 private:

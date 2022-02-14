@@ -49,13 +49,12 @@ public:
      * @param object Object bound to the entrypoint.
      */
     GetEntrypoint(
-        ObjectType &object,
+        const ObjectType &object,
         INetworkInterface &interface,
         Duration notificationPeriod = NotificationPeriod::defaultValue())
         : _object(object)
         , _notifier(interface, notificationPeriod)
     {
-        _object.onModified([this](auto &) { _notifier.notify(getName(), _object); });
     }
 
     /**
@@ -89,9 +88,36 @@ public:
         request.reply(result);
     }
 
+    /**
+     * @brief Notify if the object is modified.
+     *
+     */
+    virtual void onUpdate() override
+    {
+        _notify();
+    }
+
+    /**
+     * @brief Notify if the object is modified.
+     *
+     */
+    virtual void onPostRender() override
+    {
+        _notify();
+    }
+
 private:
-    ObjectType &_object;
+    const ObjectType &_object;
     JsonRpcNotifier _notifier;
+
+    void _notify()
+    {
+        if (_object.isModified())
+        {
+            auto method = getName();
+            _notifier.notify(method, _object);
+        }
+    }
 };
 
 /**

@@ -24,7 +24,7 @@
 namespace brayns
 {
 GetApplicationParametersEntrypoint::GetApplicationParametersEntrypoint(
-    ApplicationParameters &parameters,
+    const ApplicationParameters &parameters,
     INetworkInterface &interface)
     : GetEntrypoint(parameters, interface)
 {
