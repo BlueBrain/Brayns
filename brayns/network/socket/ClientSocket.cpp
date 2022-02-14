@@ -60,14 +60,17 @@ public:
     {
         auto &uri = parameters.getUri();
         auto secure = parameters.isSecure();
+        brayns::Log::debug("Trying to establish client session with {}.", uri);
         auto address = Poco::Net::SocketAddress(uri);
         if (!secure)
         {
             return std::make_unique<Poco::Net::HTTPClientSession>(address);
         }
         auto context = SslClientContextFactory::create(parameters);
-        auto socket = Poco::Net::SecureStreamSocket(address, context);
-        return std::make_unique<Poco::Net::HTTPSClientSession>(socket);
+        auto host = address.host();
+        auto ip = host.toString();
+        auto port = address.port();
+        return std::make_unique<Poco::Net::HTTPSClientSession>(ip, port, context);
     }
 };
 
@@ -77,11 +80,11 @@ public:
     static void run(const brayns::NetworkParameters &parameters, const brayns::SocketManager &manager)
     {
         auto session = ClientSessionFactory::create(parameters);
-        brayns::Log::info("Establishing client session with '{}:{}'.", session->getHost(), session->getPort());
+        brayns::Log::info("Client session established with '{}:{}'.", session->getHost(), session->getPort());
         Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_1_1);
         Poco::Net::HTTPResponse response;
         auto socket = std::make_shared<brayns::WebSocket>(*session, request, response);
-        brayns::Log::info("Client session connected.");
+        brayns::Log::info("Client socket connected.");
         manager.run(socket);
     }
 };
@@ -128,11 +131,15 @@ void ClientTask::_run()
         }
         catch (const Poco::Exception &e)
         {
-            Log::error("Client disconnected: {}.", e.displayText());
+            Log::debug("Connection to server failed: {}.", e.displayText());
         }
         catch (const std::exception &e)
         {
             Log::error("Unexpected error in client task: {}.", e.what());
+        }
+        catch (...)
+        {
+            Log::error("Unknown error in client task.");
         }
         auto reconnectionPeriod = _parameters.getReconnectionPeriod();
         std::this_thread::sleep_for(reconnectionPeriod);
@@ -142,10 +149,12 @@ void ClientTask::_run()
 ClientSocket::ClientSocket(const NetworkParameters &parameters, std::unique_ptr<ISocketListener> listener)
     : _task(parameters, std::move(listener))
 {
+    Log::info("Client socket initialization.");
 }
 
 void ClientSocket::start()
 {
     _task.start();
+    Log::info("Client task started.");
 }
 } // namespace brayns

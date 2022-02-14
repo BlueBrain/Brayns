@@ -53,11 +53,15 @@ public:
         }
         catch (const Poco::Exception &e)
         {
-            brayns::Log::error("Unexpected error during websocket server connection: {}", e.displayText());
+            brayns::Log::error("Websocket server connection failed: {}.", e.displayText());
         }
         catch (const std::exception &e)
         {
-            brayns::Log::error("Unexpected error during websocket server connection: {}", e.what());
+            brayns::Log::error("Unexpected error during websocket server connection: {}.", e.what());
+        }
+        catch (...)
+        {
+            brayns::Log::error("Unexpected error during websocket server connection.");
         }
     }
 
@@ -154,11 +158,12 @@ ServerSocket::ServerSocket(const NetworkParameters &parameters, std::unique_ptr<
 {
     try
     {
+        Log::info("Server socket initialization.");
         _server = ServerFactory::create(parameters, std::move(listener));
     }
     catch (const Poco::Exception &e)
     {
-        throw std::runtime_error("Cannot create server: " + e.displayText());
+        throw std::runtime_error("Cannot create server socket: " + e.displayText());
     }
 }
 
@@ -166,6 +171,7 @@ void ServerSocket::start()
 {
     try
     {
+        Log::info("Starting server socket.");
         _server->start();
     }
     catch (const Poco::Exception &e)
