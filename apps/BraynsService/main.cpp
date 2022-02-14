@@ -46,12 +46,11 @@ public:
         auto &network = *_brayns.getNetworkManager();
         while (engine.getKeepRunning())
         {
-            network.processRequests();
+            network.update();
             if (_isRenderTriggered() || engine.continueRendering())
             {
                 _brayns.commitAndRender();
             }
-            network.update();
         }
     }
 

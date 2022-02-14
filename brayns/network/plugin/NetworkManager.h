@@ -25,6 +25,7 @@
 #include <brayns/network/client/RequestBuffer.h>
 #include <brayns/network/common/FrameExporter.h>
 #include <brayns/network/entrypoint/EntrypointManager.h>
+#include <brayns/network/interface/NetworkInterface.h>
 #include <brayns/network/socket/ISocket.h>
 #include <brayns/network/stream/StreamManager.h>
 #include <brayns/network/tasks/NetworkTaskManager.h>
@@ -63,6 +64,13 @@ public:
     NetworkManager();
 
     /**
+     * @brief Get the interface to access network from plugins.
+     *
+     * @return INetworkInterface& Network interface.
+     */
+    INetworkInterface &getInterface();
+
+    /**
      * @brief Load schemas and call onCreate() of all entrypoints.
      *
      * This method must be separated from the construction because it can only
@@ -73,13 +81,7 @@ public:
     void start();
 
     /**
-     * @brief Process incoming network requests.
-     *
-     */
-    void processRequests();
-
-    /**
-     * @brief Poll running tasks and update entrypoints.
+     * @brief Poll running tasks, update entrypoints and process requests.
      *
      */
     void update();
@@ -104,5 +106,6 @@ public:
 
 private:
     NetworkContext _context;
+    NetworkInterface _interface;
 };
 } // namespace brayns

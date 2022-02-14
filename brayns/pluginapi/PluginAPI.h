@@ -62,18 +62,11 @@ public:
     virtual ParametersManager &getParametersManager() = 0;
 
     /**
-     * @brief Get the network interface.
+     * @brief Get the network interface if enabled.
      *
-     * @return INetworkInterface* Network interface.
+     * @return INetworkInterface* Network interface or null if not enabled.
      */
     virtual INetworkInterface *getNetworkInterface() = 0;
-
-    /**
-     * @brief Set the network interface.
-     *
-     * @param interface Network access.
-     */
-    virtual void setNetworkInterface(std::unique_ptr<INetworkInterface> interface) = 0;
 
     /**
      * @brief Get the camera.

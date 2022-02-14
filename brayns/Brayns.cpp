@@ -225,12 +225,12 @@ struct Brayns::Impl : public PluginAPI
 
     INetworkInterface *getNetworkInterface() final
     {
-        return _networkInterface.get();
-    }
-
-    void setNetworkInterface(std::unique_ptr<INetworkInterface> interface) final
-    {
-        _networkInterface = std::move(interface);
+        auto manager = _pluginManager.getNetworkManager();
+        if (!manager)
+        {
+            return nullptr;
+        }
+        return &manager->getInterface();
     }
 
     Scene &getScene() final
@@ -381,7 +381,6 @@ private:
     Timer _renderTimer;
     std::atomic<double> _lastFPS;
 
-    std::unique_ptr<INetworkInterface> _networkInterface;
     std::shared_ptr<DirectionalLight> _sunLight;
 };
 

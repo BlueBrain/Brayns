@@ -78,137 +78,6 @@
 
 namespace
 {
-class JsonRpcHandler
-{
-public:
-    static void processTextRequest(
-        const brayns::ClientRef &client,
-        const std::string &data,
-        const brayns::EntrypointManager &entrypoints)
-    {
-        try
-        {
-            auto request = _parse(client, data);
-            _dispatch(request, entrypoints);
-        }
-        catch (const brayns::JsonRpcException &e)
-        {
-            brayns::Log::error("Failed to parse request: '{}'.", e.what());
-            auto error = brayns::JsonRpcFactory::error(e);
-            brayns::JsonRpcSender::error(error, client);
-        }
-    }
-
-private:
-    static brayns::JsonRpcRequest _parse(const brayns::ClientRef &client, const std::string &data)
-    {
-        auto message = brayns::JsonRpcRequestParser::parse(data);
-        return {client, std::move(message)};
-    }
-
-    static void _dispatch(const brayns::JsonRpcRequest &request, const brayns::EntrypointManager &entrypoints)
-    {
-        try
-        {
-            entrypoints.onRequest(request);
-        }
-        catch (const brayns::JsonRpcException &e)
-        {
-            brayns::Log::error("Failed to dispatch request: '{}'.", e.what());
-            auto &message = request.getMessage();
-            auto &client = request.getClient();
-            auto error = brayns::JsonRpcFactory::error(message, e);
-            brayns::JsonRpcSender::error(error, client);
-        }
-    }
-};
-
-class ModelChunkHandler
-{
-public:
-    static void processBinaryRequest(
-        const brayns::ClientRef &client,
-        std::string_view data,
-        brayns::ModelUploadManager &modelUploads)
-    {
-        try
-        {
-            modelUploads.addChunk(client, data);
-            brayns::Log::info("Model chunk successfully uploaded.");
-        }
-        catch (const brayns::JsonRpcException &e)
-        {
-            brayns::Log::error("Failed to upload model chunk: '{}'.", e.what());
-            auto error = brayns::JsonRpcFactory::error(e);
-            brayns::JsonRpcSender::error(error, client);
-        }
-    }
-};
-
-class RequestHandler
-{
-public:
-    static void processRequests(brayns::NetworkContext &context)
-    {
-        auto &buffer = context.requests;
-        auto requests = buffer.extractAll();
-        brayns::Log::trace("Received {} requests.", requests.size());
-        _dispatch(requests, context);
-    }
-
-private:
-    static void _dispatch(const brayns::RequestBuffer::Map &requests, brayns::NetworkContext &context)
-    {
-        for (const auto &[client, packets] : requests)
-        {
-            for (const auto &packet : packets)
-            {
-                _dispatchTextOrBinary(client, packet, context);
-            }
-        }
-    }
-
-    static void _dispatchTextOrBinary(
-        const brayns::ClientRef &client,
-        const brayns::InputPacket &packet,
-        brayns::NetworkContext &context)
-    {
-        if (packet.isBinary())
-        {
-            _dispatchBinary(client, packet, context);
-            return;
-        }
-        if (packet.isText())
-        {
-            _dispatchText(client, packet, context);
-            return;
-        }
-        brayns::Log::error("Invalid packet received.");
-    }
-
-    static void _dispatchBinary(
-        const brayns::ClientRef &client,
-        const brayns::InputPacket &packet,
-        brayns::NetworkContext &context)
-    {
-        brayns::Log::debug("Processing binary request.");
-        auto data = packet.getData();
-        auto &modelUploads = context.modelUploads;
-        ModelChunkHandler::processBinaryRequest(client, data, modelUploads);
-    }
-
-    static void _dispatchText(
-        const brayns::ClientRef &client,
-        const brayns::InputPacket &packet,
-        brayns::NetworkContext &context)
-    {
-        brayns::Log::debug("Processing text request.");
-        auto data = std::string(packet.getData());
-        auto &entrypoints = context.entrypoints;
-        JsonRpcHandler::processTextRequest(client, data, entrypoints);
-    }
-};
-
 class SocketListener : public brayns::ISocketListener
 {
 public:
@@ -366,30 +235,150 @@ class NetworkContextBuilder
 public:
     static void build(brayns::NetworkContext &context, brayns::ExtensionPlugin &plugin)
     {
-        _registerInterface(context);
         _createSocket(context);
         _registerEntrypoints(context, plugin);
     }
 
 private:
-    static void _registerInterface(brayns::NetworkContext &context)
+    static void _createSocket(brayns::NetworkContext &context)
     {
-        auto &api = *context.api;
-        auto &entrypoints = context.entrypoints;
-        auto &tasks = context.tasks;
-        auto &clients = context.clients;
-        auto interface = std::make_unique<brayns::NetworkInterface>(entrypoints, tasks, clients);
-        api.setNetworkInterface(std::move(interface));
+        context.socket = SocketFactory::create(context);
     }
 
     static void _registerEntrypoints(brayns::NetworkContext &context, brayns::ExtensionPlugin &plugin)
     {
         CoreEntrypointRegistry::registerEntrypoints(context, plugin);
     }
+};
 
-    static void _createSocket(brayns::NetworkContext &context)
+class JsonRpcHandler
+{
+public:
+    static void processTextRequest(
+        const brayns::ClientRef &client,
+        const std::string &data,
+        const brayns::EntrypointManager &entrypoints)
     {
-        context.socket = SocketFactory::create(context);
+        try
+        {
+            auto request = _parse(client, data);
+            _dispatch(request, entrypoints);
+        }
+        catch (const brayns::JsonRpcException &e)
+        {
+            brayns::Log::error("Failed to parse request: '{}'.", e.what());
+            auto error = brayns::JsonRpcFactory::error(e);
+            brayns::JsonRpcSender::error(error, client);
+        }
+    }
+
+private:
+    static brayns::JsonRpcRequest _parse(const brayns::ClientRef &client, const std::string &data)
+    {
+        auto message = brayns::JsonRpcRequestParser::parse(data);
+        return {client, std::move(message)};
+    }
+
+    static void _dispatch(const brayns::JsonRpcRequest &request, const brayns::EntrypointManager &entrypoints)
+    {
+        try
+        {
+            entrypoints.onRequest(request);
+        }
+        catch (const brayns::JsonRpcException &e)
+        {
+            brayns::Log::error("Failed to dispatch request: '{}'.", e.what());
+            auto &message = request.getMessage();
+            auto &client = request.getClient();
+            auto error = brayns::JsonRpcFactory::error(message, e);
+            brayns::JsonRpcSender::error(error, client);
+        }
+    }
+};
+
+class ModelChunkHandler
+{
+public:
+    static void processBinaryRequest(
+        const brayns::ClientRef &client,
+        std::string_view data,
+        brayns::ModelUploadManager &modelUploads)
+    {
+        try
+        {
+            modelUploads.addChunk(client, data);
+            brayns::Log::info("Model chunk successfully uploaded.");
+        }
+        catch (const brayns::JsonRpcException &e)
+        {
+            brayns::Log::error("Failed to upload model chunk: '{}'.", e.what());
+            auto error = brayns::JsonRpcFactory::error(e);
+            brayns::JsonRpcSender::error(error, client);
+        }
+    }
+};
+
+class RequestHandler
+{
+public:
+    static void processRequests(brayns::NetworkContext &context)
+    {
+        auto &buffer = context.requests;
+        auto requests = buffer.extractAll();
+        brayns::Log::trace("Received {} requests.", requests.size());
+        _dispatch(requests, context);
+    }
+
+private:
+    static void _dispatch(const brayns::RequestBuffer::Map &requests, brayns::NetworkContext &context)
+    {
+        for (const auto &[client, packets] : requests)
+        {
+            for (const auto &packet : packets)
+            {
+                _dispatchTextOrBinary(client, packet, context);
+            }
+        }
+    }
+
+    static void _dispatchTextOrBinary(
+        const brayns::ClientRef &client,
+        const brayns::InputPacket &packet,
+        brayns::NetworkContext &context)
+    {
+        if (packet.isBinary())
+        {
+            _dispatchBinary(client, packet, context);
+            return;
+        }
+        if (packet.isText())
+        {
+            _dispatchText(client, packet, context);
+            return;
+        }
+        brayns::Log::error("Invalid packet received.");
+    }
+
+    static void _dispatchBinary(
+        const brayns::ClientRef &client,
+        const brayns::InputPacket &packet,
+        brayns::NetworkContext &context)
+    {
+        brayns::Log::debug("Processing binary request.");
+        auto data = packet.getData();
+        auto &modelUploads = context.modelUploads;
+        ModelChunkHandler::processBinaryRequest(client, data, modelUploads);
+    }
+
+    static void _dispatchText(
+        const brayns::ClientRef &client,
+        const brayns::InputPacket &packet,
+        brayns::NetworkContext &context)
+    {
+        brayns::Log::debug("Processing text request.");
+        auto data = std::string(packet.getData());
+        auto &entrypoints = context.entrypoints;
+        JsonRpcHandler::processTextRequest(client, data, entrypoints);
     }
 };
 
@@ -410,6 +399,7 @@ class NetworkUpdate
 public:
     static void run(brayns::NetworkContext &context)
     {
+        _processRequests(context);
         _updateEntrypoints(context);
         _pollTasks(context);
         _pollModelUploads(context);
@@ -432,6 +422,11 @@ private:
     {
         auto &modelUploads = context.modelUploads;
         modelUploads.poll();
+    }
+
+    static void _processRequests(brayns::NetworkContext &context)
+    {
+        RequestHandler::processRequests(context);
     }
 };
 
@@ -479,20 +474,20 @@ namespace brayns
 {
 NetworkManager::NetworkManager()
     : ExtensionPlugin("Core")
+    , _interface(_context.entrypoints, _context.tasks, _context.clients)
 {
     Log::info("Network enabled.");
+}
+
+INetworkInterface &NetworkManager::getInterface()
+{
+    return _interface;
 }
 
 void NetworkManager::start()
 {
     Log::info("Network start.");
     NetworkStartup::run(_context);
-}
-
-void NetworkManager::processRequests()
-{
-    Log::trace("Processing network requests.");
-    RequestHandler::processRequests(_context);
 }
 
 void NetworkManager::update()
