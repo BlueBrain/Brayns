@@ -45,14 +45,7 @@ void CancelEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     auto &id = params.id;
     auto &client = request.getClient();
-    try
-    {
-        _tasks.cancel(client, id);
-    }
-    catch (const std::invalid_argument &e)
-    {
-        throw InvalidParamsException(e.what());
-    }
+    _tasks.cancel(client, id);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

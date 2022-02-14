@@ -22,17 +22,33 @@
 #include "NetworkTaskManager.h"
 
 #include <cassert>
-#include <stdexcept>
 
 namespace brayns
 {
+TaskAlreadyRunningException::TaskAlreadyRunningException(const ClientRef &client, const RequestId &id)
+    : InvalidRequestException(
+        "A task is already running for client " + client.toString() + " and request ID '" + id.getDisplayText() + "'")
+{
+}
+
+TaskNotFoundException::TaskNotFoundException(const ClientRef &client)
+    : InvalidParamsException("No tasks running for client " + client.toString())
+{
+}
+
+TaskNotFoundException::TaskNotFoundException(const ClientRef &client, const RequestId &id)
+    : InvalidParamsException(
+        "No tasks running for client " + client.toString() + " and request ID '" + id.getDisplayText() + "'")
+{
+}
+
 void NetworkTaskManager::add(const ClientRef &client, const RequestId &id, std::unique_ptr<NetworkTask> task)
 {
     assert(task);
     auto &oldTask = _tasks[client][id];
     if (oldTask)
     {
-        throw std::invalid_argument("A task is already registered with this client and request ID");
+        throw TaskAlreadyRunningException(client, id);
     }
     oldTask = std::move(task);
     oldTask->start();
@@ -43,13 +59,13 @@ void NetworkTaskManager::cancel(const ClientRef &client, const RequestId &id)
     auto i = _tasks.find(client);
     if (i == _tasks.end())
     {
-        throw std::invalid_argument("No task running for this client");
+        throw TaskNotFoundException(client);
     }
     auto &tasks = i->second;
     auto j = tasks.find(id);
     if (j == tasks.end())
     {
-        throw std::invalid_argument("No task running with this request ID");
+        throw TaskNotFoundException(client, id);
     }
     auto &task = j->second;
     task->cancel();

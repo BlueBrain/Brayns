@@ -25,12 +25,48 @@
 #include <unordered_map>
 
 #include <brayns/network/client/ClientRef.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 #include <brayns/network/jsonrpc/RequestId.h>
 
 #include "NetworkTask.h"
 
 namespace brayns
 {
+/**
+ * @brief Exception thrown when a task is already running.
+ *
+ */
+class TaskAlreadyRunningException : public InvalidRequestException
+{
+public:
+    /**
+     * @brief Task already running for client and request ID.
+     *
+     * @param client Client starting the task.
+     * @param id ID of the request starting the task.
+     */
+    TaskAlreadyRunningException(const ClientRef &client, const RequestId &id);
+};
+
+class TaskNotFoundException : public InvalidParamsException
+{
+public:
+    /**
+     * @brief No tasks running for given client.
+     *
+     * @param client Client starting the task.
+     */
+    TaskNotFoundException(const ClientRef &client);
+
+    /**
+     * @brief No tasks running for client and request ID.
+     *
+     * @param client Client starting the task.
+     * @param id ID of the request starting the task.
+     */
+    TaskNotFoundException(const ClientRef &client, const RequestId &id);
+};
+
 class NetworkTaskManager
 {
 public:
@@ -42,7 +78,7 @@ public:
      * @param client Client starting the task.
      * @param id Task request ID.
      * @param task Task to run.
-     * @throw std::invalid_argument Task already registered with client and ID.
+     * @throw TaskAlreadyRunningException Task with same client / ID running.
      */
     void add(const ClientRef &client, const RequestId &id, std::unique_ptr<NetworkTask> task);
 
@@ -51,7 +87,7 @@ public:
      *
      * @param client Client that started the task.
      * @param id Request ID that started the task.
-     * @throw std::invalid_argument Task not found.
+     * @throw TaskNotFoundException Task not found.
      */
     void cancel(const ClientRef &client, const RequestId &id);
 

@@ -34,12 +34,12 @@ InvalidModelUploadException::InvalidModelUploadException(const ClientRef &client
 }
 
 InvalidChunkRequestException::InvalidChunkRequestException(const ClientRef &client)
-    : InvalidRequestException("No model uploads for client " + client.toString())
+    : InvalidRequestException("No model uploads running for client " + client.toString())
 {
 }
 
 InvalidChunkRequestException::InvalidChunkRequestException(const ClientRef &client, const std::string &chunksId)
-    : InvalidRequestException("No model uploads for client " + client.toString() + " and chunks ID " + chunksId)
+    : InvalidRequestException("No model uploads running for client " + client.toString() + " and chunks ID " + chunksId)
 {
 }
 
