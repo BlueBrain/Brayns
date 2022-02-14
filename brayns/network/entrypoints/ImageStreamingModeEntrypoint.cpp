@@ -23,8 +23,12 @@
 
 namespace brayns
 {
-ImageStreamingModeEntrypoint::ImageStreamingModeEntrypoint(ApplicationParameters &parameters, StreamMonitor &monitor)
-    : _parameters(parameters)
+ImageStreamingModeEntrypoint::ImageStreamingModeEntrypoint(
+    Engine &engine,
+    ApplicationParameters &parameters,
+    StreamMonitor &monitor)
+    : _engine(engine)
+    , _parameters(parameters)
     , _monitor(monitor)
 {
 }
@@ -45,6 +49,7 @@ void ImageStreamingModeEntrypoint::onRequest(const Request &request)
     auto controlled = params.type == ImageStreamingMode::Quanta;
     _monitor.setControlled(controlled);
     _parameters.setUseQuantaRenderControl(controlled);
+    _engine.triggerRender();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

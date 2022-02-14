@@ -206,7 +206,7 @@ public:
         plugin.add<brayns::GetStatisticsEntrypoint>(statistics, interface);
         plugin.add<brayns::GetVolumeParametersEntrypoint>(volume, interface);
         plugin.add<brayns::ImageJpegEntrypoint>(application, engine);
-        plugin.add<brayns::ImageStreamingModeEntrypoint>(application, monitor);
+        plugin.add<brayns::ImageStreamingModeEntrypoint>(engine, application, monitor);
         plugin.add<brayns::InspectEntrypoint>(renderer);
         plugin.add<brayns::LoadersSchemaEntrypoint>(loaders);
         plugin.add<brayns::ModelPropertiesSchemaEntrypoint>(scene);
