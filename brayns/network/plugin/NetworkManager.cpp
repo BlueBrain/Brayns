@@ -111,18 +111,14 @@ private:
     brayns::RequestBuffer &_requests;
 };
 
-class SocketFactory
+class SocketBuilder
 {
 public:
-    static std::unique_ptr<brayns::ISocket> create(brayns::NetworkContext &context)
+    static void build(brayns::NetworkContext &context)
     {
         auto &parameters = _getNetworkParameters(context);
         auto listener = _createListener(context);
-        if (parameters.isClient())
-        {
-            return std::make_unique<brayns::ClientSocket>(parameters, std::move(listener));
-        }
-        return std::make_unique<brayns::ServerSocket>(parameters, std::move(listener));
+        context.socket = _createSocket(parameters, std::move(listener));
     }
 
 private:
@@ -138,6 +134,17 @@ private:
         auto &clients = context.clients;
         auto &requests = context.requests;
         return std::make_unique<SocketListener>(clients, requests);
+    }
+
+    static std::unique_ptr<brayns::ISocket> _createSocket(
+        const brayns::NetworkParameters &parameters,
+        std::unique_ptr<brayns::ISocketListener> listener)
+    {
+        if (parameters.isClient())
+        {
+            return std::make_unique<brayns::ClientSocket>(parameters, std::move(listener));
+        }
+        return std::make_unique<brayns::ServerSocket>(parameters, std::move(listener));
     }
 };
 
@@ -227,27 +234,6 @@ public:
         plugin.add<brayns::UpdateInstanceEntrypoint>(engine, interface);
         plugin.add<brayns::UpdateModelEntrypoint>(engine);
         plugin.add<brayns::VersionEntrypoint>();
-    }
-};
-
-class NetworkContextBuilder
-{
-public:
-    static void build(brayns::NetworkContext &context, brayns::ExtensionPlugin &plugin)
-    {
-        _createSocket(context);
-        _registerEntrypoints(context, plugin);
-    }
-
-private:
-    static void _createSocket(brayns::NetworkContext &context)
-    {
-        context.socket = SocketFactory::create(context);
-    }
-
-    static void _registerEntrypoints(brayns::NetworkContext &context, brayns::ExtensionPlugin &plugin)
-    {
-        CoreEntrypointRegistry::registerEntrypoints(context, plugin);
     }
 };
 
@@ -476,7 +462,7 @@ NetworkManager::NetworkManager()
     : ExtensionPlugin("Core")
     , _interface(_context.entrypoints, _context.tasks, _context.clients)
 {
-    Log::info("Network enabled.");
+    Log::info("Network plugin is enabled.");
 }
 
 INetworkInterface &NetworkManager::getInterface()
@@ -486,7 +472,7 @@ INetworkInterface &NetworkManager::getInterface()
 
 void NetworkManager::start()
 {
-    Log::info("Network start.");
+    Log::info("Network plugin started.");
     NetworkStartup::run(_context);
 }
 
@@ -498,9 +484,10 @@ void NetworkManager::update()
 
 void NetworkManager::init()
 {
-    Log::info("Network setup.");
+    Log::info("Initializing network plugin.");
     _context.api = _api;
-    NetworkContextBuilder::build(_context, *this);
+    SocketBuilder::build(_context);
+    CoreEntrypointRegistry::registerEntrypoints(_context, *this);
 }
 
 void NetworkManager::preRender()

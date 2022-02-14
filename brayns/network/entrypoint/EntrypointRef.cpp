@@ -40,7 +40,7 @@ void EntrypointRef::onCreate()
     _schema.description = _entrypoint->getDescription();
     _schema.async = _entrypoint->isAsync();
     auto params = _entrypoint->getParamsSchema();
-    if (!brayns::JsonSchemaHelper::isEmpty(params))
+    if (!brayns::JsonSchemaHelper::isNull(params))
     {
         _schema.params.push_back(std::move(params));
     }

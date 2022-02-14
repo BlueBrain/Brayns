@@ -21,8 +21,6 @@
 #include <brayns/Brayns.h>
 #include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/network/interface/INetworkInterface.h>
 
 #include <atomic>
 
@@ -55,6 +53,9 @@ public:
     }
 
 private:
+    brayns::Brayns _brayns;
+    std::atomic_bool _renderTriggered{false};
+
     void _triggerRender()
     {
         _renderTriggered = true;
@@ -69,9 +70,6 @@ private:
         }
         return false;
     }
-
-    brayns::Brayns _brayns;
-    std::atomic_bool _renderTriggered{false};
 };
 
 int main(int argc, const char **argv)

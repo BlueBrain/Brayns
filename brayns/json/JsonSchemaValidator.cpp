@@ -216,7 +216,7 @@ public:
 private:
     void _validate(const JsonValue &json, const JsonSchema &schema)
     {
-        if (JsonSchemaHelper::isEmpty(schema))
+        if (JsonSchemaHelper::isWildcard(schema))
         {
             return;
         }

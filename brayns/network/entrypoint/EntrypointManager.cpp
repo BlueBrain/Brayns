@@ -33,17 +33,26 @@ class MessageValidator
 public:
     static void validate(const brayns::JsonValue &params, const brayns::SchemaResult &schema)
     {
-        auto &schemaParams = schema.params;
-        if (schemaParams.empty())
+        if (schema.params.empty())
         {
+            _checkParamsIsEmpty(params);
             return;
         }
-        auto &paramsSchema = schemaParams[0];
-        if (brayns::JsonSchemaHelper::isEmpty(paramsSchema))
+        _validate(params, schema.params[0]);
+    }
+
+private:
+    static void _checkParamsIsEmpty(const brayns::JsonValue &params)
+    {
+        if (!params.isEmpty())
         {
-            return;
+            throw brayns::InvalidParamsException("This method takes no params");
         }
-        auto errors = brayns::JsonSchemaValidator::validate(params, paramsSchema);
+    }
+
+    static void _validate(const brayns::JsonValue &params, const brayns::JsonSchema &schema)
+    {
+        auto errors = brayns::JsonSchemaValidator::validate(params, schema);
         if (!errors.empty())
         {
             throw brayns::InvalidParamsException("Invalid params schema", errors);

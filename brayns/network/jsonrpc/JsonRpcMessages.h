@@ -112,6 +112,32 @@ BRAYNS_JSON_OBJECT_END()
  * @brief Empty message when no params or result is needed.
  *
  */
-BRAYNS_JSON_OBJECT_BEGIN(EmptyMessage)
-BRAYNS_JSON_OBJECT_END()
+struct EmptyMessage
+{
+};
+
+template<>
+class JsonAdapter<EmptyMessage>
+{
+public:
+    static JsonSchema getSchema(const EmptyMessage &value)
+    {
+        (void)value;
+        return JsonSchemaHelper::getNullSchema();
+    }
+
+    bool serialize(const EmptyMessage &value, JsonValue &json)
+    {
+        (void)value;
+        json = Poco::makeShared<JsonObject>();
+        return true;
+    }
+
+    bool deserialize(const JsonValue &json, EmptyMessage &value)
+    {
+        (void)json;
+        (void)value;
+        return true;
+    }
+};
 } // namespace brayns
