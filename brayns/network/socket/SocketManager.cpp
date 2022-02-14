@@ -32,13 +32,12 @@ public:
     {
         try
         {
-            brayns::Log::debug("Waiting for request from client {}.", client);
             auto &socket = client.getSocket();
             return socket.receive();
         }
         catch (const brayns::ConnectionClosedException &e)
         {
-            brayns::Log::debug("Connection error during reception from client {}: '{}'.", client, e.what());
+            brayns::Log::debug("Connection closed during reception from client {}: '{}'.", client, e.what());
         }
         catch (const std::exception &e)
         {

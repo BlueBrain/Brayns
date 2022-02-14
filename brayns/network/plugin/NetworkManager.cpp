@@ -90,7 +90,7 @@ public:
     virtual void onRequest(const brayns::ClientRef &client, brayns::InputPacket request) override
     {
         auto data = request.isBinary() ? "<Binary data>" : request.getData();
-        brayns::Log::trace("New request from client {}: '{}'.", client, data);
+        brayns::Log::debug("New request from client {}: '{}'.", client, data);
         _requests.add(client, std::move(request));
     }
 
@@ -368,6 +368,16 @@ private:
     }
 };
 
+class NetworkInitialization
+{
+public:
+    static void run(brayns::NetworkContext &context, brayns::ExtensionPlugin &plugin)
+    {
+        SocketBuilder::build(context);
+        CoreEntrypointRegistry::registerEntrypoints(context, plugin);
+    }
+};
+
 class NetworkStartup
 {
 public:
@@ -486,8 +496,7 @@ void NetworkManager::init()
 {
     Log::info("Initializing network plugin.");
     _context.api = _api;
-    SocketBuilder::build(_context);
-    CoreEntrypointRegistry::registerEntrypoints(_context, *this);
+    NetworkInitialization::run(_context, *this);
 }
 
 void NetworkManager::preRender()

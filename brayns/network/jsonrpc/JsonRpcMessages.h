@@ -126,14 +126,14 @@ public:
         return JsonSchemaHelper::getNullSchema();
     }
 
-    bool serialize(const EmptyMessage &value, JsonValue &json)
+    static bool serialize(const EmptyMessage &value, JsonValue &json)
     {
         (void)value;
         json = Poco::makeShared<JsonObject>();
         return true;
     }
 
-    bool deserialize(const JsonValue &json, EmptyMessage &value)
+    static bool deserialize(const JsonValue &json, EmptyMessage &value)
     {
         (void)json;
         (void)value;
