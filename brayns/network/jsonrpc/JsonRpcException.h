@@ -82,7 +82,9 @@ public:
 class InvalidRequestException : public JsonRpcException
 {
 public:
-    InvalidRequestException(const std::string &message, const std::vector<std::string> &errors = {});
+    InvalidRequestException(const std::string &message);
+
+    InvalidRequestException(const std::string &message, const std::vector<std::string> &errors);
 };
 
 class MethodNotFoundException : public JsonRpcException
@@ -94,7 +96,9 @@ public:
 class InvalidParamsException : public JsonRpcException
 {
 public:
-    InvalidParamsException(const std::string &message, const std::vector<std::string> &errors = {});
+    InvalidParamsException(const std::string &message);
+
+    InvalidParamsException(const std::string &message, const std::vector<std::string> &errors);
 };
 
 class InternalErrorException : public JsonRpcException

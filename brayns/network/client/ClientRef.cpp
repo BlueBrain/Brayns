@@ -41,6 +41,11 @@ size_t ClientRef::getId() const
     return size_t(_socket.get());
 }
 
+std::string ClientRef::toString() const
+{
+    return std::to_string(getId());
+}
+
 ClientRef::operator bool() const
 {
     return bool(_socket);

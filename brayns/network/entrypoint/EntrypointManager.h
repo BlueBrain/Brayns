@@ -54,6 +54,7 @@ public:
      * @brief Add a new entrypoint.
      *
      * @param entrypoint Entrypoint implementing common interface.
+     * @throw std::invalid_argument Name missing or already present.
      */
     void add(EntrypointRef entrypoint);
 
@@ -67,6 +68,7 @@ public:
      * @brief Dispatch request to corresponding entrypoint.
      *
      * @param request Client text request.
+     * @throw JsonRpcException If an error occurs and must be replied.
      */
     void onRequest(const JsonRpcRequest &request) const;
 

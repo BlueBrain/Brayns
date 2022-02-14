@@ -95,6 +95,7 @@ set(BRAYNSNETWORK_HEADERS
   jsonrpc/JsonRpcMessages.h
   jsonrpc/JsonRpcNotifier.h
   jsonrpc/JsonRpcRequest.h
+  jsonrpc/JsonRpcRequestParser.h
   jsonrpc/JsonRpcSender.h
   jsonrpc/RequestId.h
   messages/AddClipPlaneMessage.h
@@ -193,6 +194,7 @@ set(BRAYNSNETWORK_SOURCES
   jsonrpc/JsonRpcException.cpp
   jsonrpc/JsonRpcFactory.cpp
   jsonrpc/JsonRpcRequest.cpp
+  jsonrpc/JsonRpcRequestParser.cpp
   jsonrpc/JsonRpcSender.cpp
   jsonrpc/RequestId.cpp
   messages/LightMessage.cpp

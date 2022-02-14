@@ -21,17 +21,12 @@
 
 #include "NetworkManager.h"
 
-#include <optional>
-
-#include <Poco/JSON/JSONException.h>
-
 #include <brayns/common/Log.h>
-
-#include <brayns/json/JsonSchemaValidator.h>
 
 #include <brayns/network/interface/NetworkInterface.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 #include <brayns/network/jsonrpc/JsonRpcFactory.h>
+#include <brayns/network/jsonrpc/JsonRpcRequestParser.h>
 #include <brayns/network/jsonrpc/JsonRpcSender.h>
 #include <brayns/network/socket/ClientSocket.h>
 #include <brayns/network/socket/ServerSocket.h>
@@ -83,135 +78,52 @@
 
 namespace
 {
-class RequestParser
-{
-public:
-    static brayns::RequestMessage parse(const std::string &data)
-    {
-        auto json = _parse(data);
-        _validateSchema(json);
-        auto message = brayns::Json::deserialize<brayns::RequestMessage>(json);
-        _validateHeader(message);
-        return message;
-    }
-
-private:
-    static inline const auto _schema = brayns::Json::getSchema<brayns::RequestMessage>();
-
-    static brayns::JsonValue _parse(const std::string &data)
-    {
-        try
-        {
-            return brayns::Json::parse(data);
-        }
-        catch (const Poco::JSON::JSONException &e)
-        {
-            throw brayns::ParsingErrorException(e.displayText());
-        }
-        catch (const std::exception &e)
-        {
-            throw brayns::InternalErrorException("Unexpected error during request parsing: " + std::string(e.what()));
-        }
-        catch (...)
-        {
-            throw brayns::InternalErrorException("Unknown error during request parsing");
-        }
-    }
-
-    static void _validateSchema(const brayns::JsonValue &json)
-    {
-        auto errors = brayns::JsonSchemaValidator::validate(json, _schema);
-        if (!errors.empty())
-        {
-            throw brayns::InvalidRequestException("JSON schema errors", errors);
-        }
-    }
-
-    static void _validateHeader(const brayns::RequestMessage &message)
-    {
-        if (message.jsonrpc != "2.0")
-        {
-            throw brayns::InvalidRequestException("Unsupported JSON-RPC version: '" + message.jsonrpc + "'");
-        }
-        auto &method = message.method;
-        if (method.empty())
-        {
-            throw brayns::InvalidRequestException("No method provided in request");
-        }
-    }
-};
-
-class JsonRpcDispatcher
-{
-public:
-    static void dispatch(const brayns::JsonRpcRequest &request, const brayns::EntrypointManager &entrypoints)
-    {
-        try
-        {
-            _dispatch(request, entrypoints);
-            brayns::Log::info("Request handled with success.");
-        }
-        catch (const brayns::JsonRpcException &e)
-        {
-            brayns::Log::error("Error during request handling: '{}'.", e.what());
-            auto &message = request.getMessage();
-            auto &client = request.getClient();
-            auto error = brayns::JsonRpcFactory::error(message, e);
-            brayns::JsonRpcSender::error(error, client);
-        }
-    }
-
-private:
-    static void _dispatch(const brayns::JsonRpcRequest &request, const brayns::EntrypointManager &entrypoints)
-    {
-        try
-        {
-            entrypoints.onRequest(request);
-        }
-        catch (const std::exception &e)
-        {
-            throw brayns::InternalErrorException("Unexpected error while processing request: " + std::string(e.what()));
-        }
-        catch (...)
-        {
-            throw brayns::InternalErrorException("Unknown error while processing request");
-        }
-    }
-};
-
 class JsonRpcHandler
 {
 public:
-    static void processRequest(
+    static void processTextRequest(
         const brayns::ClientRef &client,
         const std::string &data,
         const brayns::EntrypointManager &entrypoints)
     {
         try
         {
-            _processRequest(client, data, entrypoints);
+            auto request = _parse(client, data);
+            _dispatch(request, entrypoints);
         }
         catch (const brayns::JsonRpcException &e)
         {
-            brayns::Log::error("Failed to handle request: '{}'.", e.what());
+            brayns::Log::error("Failed to parse request: '{}'.", e.what());
             auto error = brayns::JsonRpcFactory::error(e);
             brayns::JsonRpcSender::error(error, client);
         }
     }
 
 private:
-    static void _processRequest(
-        const brayns::ClientRef &client,
-        const std::string &data,
-        const brayns::EntrypointManager &entrypoints)
+    static brayns::JsonRpcRequest _parse(const brayns::ClientRef &client, const std::string &data)
     {
-        auto message = RequestParser::parse(data);
-        auto request = brayns::JsonRpcRequest(client, std::move(message));
-        JsonRpcDispatcher::dispatch(request, entrypoints);
+        auto message = brayns::JsonRpcRequestParser::parse(data);
+        return {client, std::move(message)};
+    }
+
+    static void _dispatch(const brayns::JsonRpcRequest &request, const brayns::EntrypointManager &entrypoints)
+    {
+        try
+        {
+            entrypoints.onRequest(request);
+        }
+        catch (const brayns::JsonRpcException &e)
+        {
+            brayns::Log::error("Failed to dispatch request: '{}'.", e.what());
+            auto &message = request.getMessage();
+            auto &client = request.getClient();
+            auto error = brayns::JsonRpcFactory::error(message, e);
+            brayns::JsonRpcSender::error(error, client);
+        }
     }
 };
 
-class ModelUploadHandler
+class ModelChunkHandler
 {
 public:
     static void processBinaryRequest(
@@ -221,7 +133,7 @@ public:
     {
         try
         {
-            _processBinaryRequest(client, data, modelUploads);
+            modelUploads.addChunk(client, data);
             brayns::Log::info("Model chunk successfully uploaded.");
         }
         catch (const brayns::JsonRpcException &e)
@@ -229,27 +141,6 @@ public:
             brayns::Log::error("Failed to upload model chunk: '{}'.", e.what());
             auto error = brayns::JsonRpcFactory::error(e);
             brayns::JsonRpcSender::error(error, client);
-        }
-    }
-
-private:
-    static void _processBinaryRequest(
-        const brayns::ClientRef &client,
-        std::string_view data,
-        brayns::ModelUploadManager &modelUploads)
-    {
-        try
-        {
-            modelUploads.addChunk(client, data);
-        }
-        catch (const std::exception &e)
-        {
-            throw brayns::InternalErrorException(
-                "Unexpected error while processing binary request: " + std::string(e.what()));
-        }
-        catch (...)
-        {
-            throw brayns::InternalErrorException("Unknown error while processing binary request");
         }
     }
 };
@@ -262,7 +153,7 @@ public:
         auto &buffer = context.requests;
         auto requests = buffer.extractAll();
         brayns::Log::trace("Received {} requests.", requests.size());
-        return _dispatch(requests, context);
+        _dispatch(requests, context);
     }
 
 private:
@@ -284,13 +175,11 @@ private:
     {
         if (packet.isBinary())
         {
-            brayns::Log::debug("Processing binary request.");
             _dispatchBinary(client, packet, context);
             return;
         }
         if (packet.isText())
         {
-            brayns::Log::debug("Processing text request.");
             _dispatchText(client, packet, context);
             return;
         }
@@ -302,9 +191,10 @@ private:
         const brayns::InputPacket &packet,
         brayns::NetworkContext &context)
     {
+        brayns::Log::debug("Processing binary request.");
         auto data = packet.getData();
         auto &modelUploads = context.modelUploads;
-        ModelUploadHandler::processBinaryRequest(client, data, modelUploads);
+        ModelChunkHandler::processBinaryRequest(client, data, modelUploads);
     }
 
     static void _dispatchText(
@@ -312,9 +202,10 @@ private:
         const brayns::InputPacket &packet,
         brayns::NetworkContext &context)
     {
+        brayns::Log::debug("Processing text request.");
         auto data = std::string(packet.getData());
         auto &entrypoints = context.entrypoints;
-        JsonRpcHandler::processRequest(client, data, entrypoints);
+        JsonRpcHandler::processTextRequest(client, data, entrypoints);
     }
 };
 

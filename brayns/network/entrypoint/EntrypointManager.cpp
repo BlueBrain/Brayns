@@ -46,7 +46,7 @@ public:
         auto errors = brayns::JsonSchemaValidator::validate(params, paramsSchema);
         if (!errors.empty())
         {
-            throw brayns::InvalidParamsException("JSON schema errors", errors);
+            throw brayns::InvalidParamsException("Invalid params schema", errors);
         }
     }
 };
@@ -56,13 +56,34 @@ class MessageDispatcher
 public:
     static void dispatch(const brayns::JsonRpcRequest &request, const brayns::EntrypointManager &entrypoints)
     {
+        try
+        {
+            _dispatch(request, entrypoints);
+        }
+        catch (const brayns::JsonRpcException &e)
+        {
+            (void)e;
+            throw;
+        }
+        catch (const std::exception &e)
+        {
+            throw brayns::InternalErrorException("Unexpected error during request dispatch: " + std::string(e.what()));
+        }
+        catch (...)
+        {
+            throw brayns::InternalErrorException("Unknown error during request dispatch");
+        }
+    }
+
+private:
+    static void _dispatch(const brayns::JsonRpcRequest &request, const brayns::EntrypointManager &entrypoints)
+    {
         auto &message = request.getMessage();
         auto &entrypoint = _getEntrypoint(message, entrypoints);
         _validateSchema(message, entrypoint);
         entrypoint.onRequest(request);
     }
 
-private:
     static const brayns::EntrypointRef &_getEntrypoint(
         const brayns::RequestMessage &message,
         const brayns::EntrypointManager &entrypoints)

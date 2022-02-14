@@ -23,16 +23,23 @@
 
 #include <cassert>
 
+#include <brayns/network/jsonrpc/JsonRpcException.h>
+
 namespace brayns
 {
+InvalidModelUploadException::InvalidModelUploadException(const ClientRef &client, const std::string &chunksId)
+    : InvalidRequestException(
+        "A model upload with client " + client.toString() + " and chunks ID '" + chunksId + "' is already running")
+{
+}
+
 InvalidChunkRequestException::InvalidChunkRequestException(const ClientRef &client)
-    : InvalidRequestException("No model uploads for client " + std::to_string(client.getId()))
+    : InvalidRequestException("No model uploads for client " + client.toString())
 {
 }
 
 InvalidChunkRequestException::InvalidChunkRequestException(const ClientRef &client, const std::string &chunksId)
-    : InvalidRequestException(
-        "No model uploads for client " + std::to_string(client.getId()) + " and chunks ID " + chunksId)
+    : InvalidRequestException("No model uploads for client " + client.toString() + " and chunks ID " + chunksId)
 {
 }
 
@@ -71,7 +78,7 @@ void ModelUploadManager::add(std::unique_ptr<ModelUploadTask> task)
     auto &oldTask = tasks[chunksId];
     if (oldTask)
     {
-        throw InvalidRequestException("A model upload with chunks ID '" + chunksId + "' is already running");
+        throw InvalidModelUploadException(client, chunksId);
     }
     clientUpload.nextChunkId = chunksId;
     oldTask = std::move(task);
@@ -83,7 +90,7 @@ void ModelUploadManager::setNextChunkId(const ClientRef &client, const std::stri
     auto i = _clientUploads.find(client);
     if (i == _clientUploads.end())
     {
-        throw InvalidRequestException("No model uploads running.");
+        throw InvalidChunkRequestException(client);
     }
     auto &clientUpload = i->second;
     clientUpload.nextChunkId = id;

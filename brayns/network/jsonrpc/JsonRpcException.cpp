@@ -21,6 +21,10 @@
 
 #include "JsonRpcException.h"
 
+#include <brayns/json/Json.h>
+#include <brayns/json/adapters/ArrayAdapter.h>
+#include <brayns/json/adapters/PrimitiveAdapter.h>
+
 namespace brayns
 {
 JsonRpcException::JsonRpcException(const std::string &message)
@@ -50,8 +54,13 @@ ParsingErrorException::ParsingErrorException(const std::string &message)
 {
 }
 
+InvalidRequestException::InvalidRequestException(const std::string &message)
+    : JsonRpcException(-32600, message)
+{
+}
+
 InvalidRequestException::InvalidRequestException(const std::string &message, const std::vector<std::string> &errors)
-    : JsonRpcException(-32600, "Invalid request: " + message, errors)
+    : JsonRpcException(-32600, message, Json::serialize(errors))
 {
 }
 
@@ -60,13 +69,18 @@ MethodNotFoundException::MethodNotFoundException(const std::string &method)
 {
 }
 
+InvalidParamsException::InvalidParamsException(const std::string &message)
+    : JsonRpcException(-32602, message)
+{
+}
+
 InvalidParamsException::InvalidParamsException(const std::string &message, const std::vector<std::string> &errors)
-    : JsonRpcException(-32602, "Invalid params: " + message, errors)
+    : JsonRpcException(-32602, message, Json::serialize(errors))
 {
 }
 
 InternalErrorException::InternalErrorException(const std::string &message)
-    : JsonRpcException(-32603, "Server error: " + message)
+    : JsonRpcException(-32603, message)
 {
 }
 } // namespace brayns

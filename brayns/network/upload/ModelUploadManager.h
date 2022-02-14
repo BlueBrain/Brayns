@@ -25,14 +25,28 @@
 #include <string_view>
 #include <unordered_map>
 
-#include <brayns/network/jsonrpc/JsonRpcException.h>
-
 #include "ModelUploadTask.h"
 
 namespace brayns
 {
 /**
- * @brief Request thrown when the chunk has no corresponding model uploads.
+ * @brief Exception when the model upload cannot be started.
+ *
+ */
+class InvalidModelUploadException : public InvalidRequestException
+{
+public:
+    /**
+     * @brief Model upload alreay running with same client and chunks ID.
+     *
+     * @param client Client ref.
+     * @param chunksId Current chunks ID.
+     */
+    InvalidModelUploadException(const ClientRef &client, const std::string &chunksId);
+};
+
+/**
+ * @brief Exception thrown when the chunk has no corresponding model uploads.
  *
  */
 class InvalidChunkRequestException : public InvalidRequestException
@@ -90,6 +104,7 @@ public:
      * @brief Register a model upload task.
      *
      * @param task Task to upload model.
+     * @throw InvalidModelUploadException If a similar task is already running.
      */
     void add(std::unique_ptr<ModelUploadTask> task);
 
@@ -99,6 +114,7 @@ public:
      *
      * @param client Client setting next chunk ID.
      * @param id Model chunks ID given at model upload request.
+     * @throw InvalidChunkRequestException If no model uploads are running.
      */
     void setNextChunkId(const ClientRef &client, const std::string &id);
 
@@ -107,6 +123,7 @@ public:
      *
      * @param client Client sending binary request.
      * @param data Client binary request data.
+     * @throw InvalidChunkRequestException Model upload not found.
      */
     void addChunk(const ClientRef &client, std::string_view data);
 
