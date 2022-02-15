@@ -40,7 +40,7 @@ foreach(TEST ${TEST_LIST})
 
     target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${PROJECT_BINARY_DIR})
     target_link_libraries(${TEST_NAME} PRIVATE
-        brayns braynsIO ${OpenMP_CXX_LIBRARRIES} braynsOSPRayEngine
+        brayns braynsIO ${OpenMP_CXX_LIBRARRIES} braynsEngine
     )
 
     add_test(NAME ${TEST_NAME}

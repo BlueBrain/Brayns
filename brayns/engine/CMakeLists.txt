@@ -5,32 +5,44 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSENGINE_SOURCES
-  Camera.cpp
-  Engine.cpp
-  FrameBuffer.cpp
-  Light.cpp
-  LightManager.cpp
-  Material.cpp
-  Model.cpp
-  Renderer.cpp
-  Scene.cpp
-  SharedDataVolume.cpp
-  Volume.cpp
+    Camera.cpp
+    DefaultEngineObjects.cpp
+    Engine.cpp
+    EngineObject.cpp
+    FrameBuffer.cpp
+    Geometry.cpp
+    Light.cpp
+    Material.cpp
+    Model.cpp
+    Renderer.cpp
+    Scene.cpp
+    cameras/PerspectiveCamera.cpp
+    geometries/Sphere.cpp
+    lights/DirectionalLight.cpp
+    materials/MatteMaterial.cpp
+    renderers/InteractiveRenderer.cpp
 )
 
 set(BRAYNSENGINE_PUBLIC_HEADERS
-  BrickedVolume.h
-  Camera.h
-  Engine.h
-  FrameBuffer.h
-  Light.h
-  LightManager.h
-  Material.h
-  Model.h
-  Renderer.h
-  Scene.h
-  SharedDataVolume.h
-  Volume.h
+    Camera.h
+    DefaultEngineObjects.h
+    Engine.h
+    EngineObject.h
+    EngineObjectFactory.h
+    FrameBuffer.h
+    Geometry.h
+    Light.h
+    Material.h
+    Model.h
+    ModelAction.h
+    Renderer.h
+    Scene.h
+    cameras/PerspectiveCamera.h
+    geometries/Sphere.h
+    lights/DirectionalLight.h
+    materials/MatteMaterial.h
+    models/GeometricModel.h
+    renderers/InteractiveRenderer.h
 )
 
 add_library(braynsEngine SHARED ${BRAYNSENGINE_SOURCES} ${BRAYNSENGINE_PUBLIC_HEADERS})
@@ -39,9 +51,11 @@ target_include_directories(braynsEngine PUBLIC
   "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
   "$<INSTALL_INTERFACE:include>")
 
-target_link_libraries(braynsEngine PUBLIC braynsCommon)
+target_link_libraries(braynsEngine PUBLIC
+    braynsParameters braynsCommon ospray::ospray)
 
-target_compile_options(braynsEngine PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+# No strict aliassing for ospray common -> ospray and ospray -> ispc type casting
+target_compile_options(braynsEngine PRIVATE ${BRAYNS_COMPILE_OPTIONS}) # -Wno-strict-aliasing)
 
 set_target_properties(braynsEngine
     PROPERTIES

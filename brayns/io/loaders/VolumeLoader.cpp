@@ -21,7 +21,7 @@
 
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
-#include <brayns/engine/SharedDataVolume.h>
+#include <brayns/engine/Volume.h>
 #include <brayns/utils/StringUtils.h>
 
 #include <filesystem>

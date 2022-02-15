@@ -29,7 +29,7 @@ option(BRAYNS_SERVICE_ENABLED "Activate Brayns Service" ON)
 option(BRAYNS_BENCHMARK_ENABLED "Activate Brayns Benchmark" OFF)
 option(BRAYNS_IBL_ENABLED "Activate Brayns IBL tool" OFF)
 option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" OFF)
-option(BRAYNS_CIRCUITEXPLORER_ENABLED "Activate CircuitExplorer plugin" ON)
+option(BRAYNS_CIRCUITEXPLORER_ENABLED "Activate CircuitExplorer plugin" OFF)
 option(BRAYNS_CIRCUITINFO_ENABLED "Activate CircuitInfo plugin" OFF)
 option(BRAYNS_DTI_ENABLED "Activate Diffusion-Transfer Imaging plugin" OFF)
 option(BRAYNS_HARDWARE_RANDOMIZER_ENABLED "Enables hardware randomizer if supported by target CPU" OFF)
@@ -40,7 +40,7 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_USE_STATIC_LIBS OFF)
 find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(OpenMP REQUIRED)
-find_package(ospray 1.8 REQUIRED)
+find_package(ospray 2.8 REQUIRED)
 find_package(Poco QUIET COMPONENTS Foundation JSON Net NetSSL)
 find_package(glm QUIET)
 
@@ -62,9 +62,6 @@ add_subdirectory(brayns)
 
 # BRAYNS apps
 add_subdirectory(apps)
-
-# BRAYNS OSPRay render engine
-add_subdirectory(engines/ospray)
 
 # BRAYNS plugins
 add_subdirectory(plugins)

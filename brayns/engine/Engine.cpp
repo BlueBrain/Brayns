@@ -18,179 +18,187 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Engine.h"
+#include <brayns/common/Log.h>
+#include <brayns/engine/DefaultEngineObjects.h>
+#include <brayns/engine/Engine.h>
+
+#include <ospray/version.h>
+
+#include <thread>
 
 namespace brayns
 {
-Engine::Engine(ParametersManager &parametersManager)
-    : _parametersManager(parametersManager)
+Engine::Engine(const ParametersManager& parameters)
+ : _params(parameters)
 {
+    try
+    {
+        // Setup log and error output
+        std::vector<const char *> argv =
+        {
+            "--osp:log-level=warning",
+            "--osp:log-output=cout",
+            "--osp:error-output=cerr"
+        };
+
+        auto argc = static_cast<int>(argv.size());
+        const auto error = ospInit(&argc, argv.data());
+
+        switch(error)
+        {
+        case OSPError::OSP_OUT_OF_MEMORY:
+            throw std::runtime_error("Cannot initialize OSPRay: out of memory");
+            break;
+        case OSPError::OSP_UNSUPPORTED_CPU:
+            throw std::runtime_error("Cannot initialize OSPRay: unsupported CPU");
+            break;
+        case OSPError::OSP_INVALID_ARGUMENT:
+            throw std::runtime_error("Cannot initialize OSPRay: invalid argument given to to ospInit()");
+            break;
+        case OSPError::OSP_INVALID_OPERATION:
+        case OSPError::OSP_UNKNOWN_ERROR:
+        case OSPError::OSP_VERSION_MISMATCH: // We are not loading any module, so this shouldn't happen ...
+            throw std::runtime_error("Cannot initialize OSPRay: Unknown error");
+            break;
+        default:
+            break;
+        }
+    }
+    catch (const std::exception &e)
+    {
+        // Note: This is necessary because OSPRay does not yet implement a
+        // ospDestroy API.
+        Log::error("{}", e.what());
+
+        auto device = ospGetCurrentDevice();
+        auto errorMessage = ospDeviceGetLastErrorMsg(device);
+        Log::error("OSPRay message: {}", errorMessage);
+    }
+
+    // Register core renderers, cameras, materials and lights
+    DefaultEngineObjects::registerObjects(*this);
+}
+
+Engine::~Engine()
+{
+    ospShutdown();
 }
 
 void Engine::commit()
 {
-    _renderer->commit();
-}
-
-void Engine::preRender()
-{
-    if (!mustRender())
+    if(!_keepRunning)
         return;
 
-    const auto &renderParams = _parametersManager.getRenderingParameters();
-    if (!renderParams.isModified())
-        return;
-    for (auto frameBuffer : _frameBuffers)
+    // update statistics
+    const auto avgFPS = _fpsCounter.getAverageFPS();
+    _statistics.setFPS(avgFPS);
+
+    // Update changes on the viewport
+    auto& appParams = _params.getApplicationParameters();
+    if(appParams.isModified())
     {
-        frameBuffer->setAccumulation(renderParams.getAccumulation());
-        frameBuffer->setSubsampling(renderParams.getSubsampling());
+        const auto& frameSize = appParams.getWindowSize();
+        const auto aspectRatio = static_cast<float>(frameSize.x) / static_cast<float>(frameSize.y);
+
+        _frameBuffer.setFrameSize(frameSize);
+        _camera->setAspectRatio(aspectRatio);
     }
+
+    // Clear the framebuffer if something changed, so that we do not accumulate on top of old stuff,
+    // which would produce an incorrect image
+    const bool somethingChanged = _frameBuffer.isModified() || _scene.isModified()
+            || _camera->isModified() || _renderer->isModified();
+
+    if(somethingChanged)
+        _frameBuffer.clear();
+
+    _frameBuffer.commit();
+    _camera->commit();
+    _renderer->commit();
+    _scene.commit();
+
+    // check if anything changed, clear the framebuffer so we dont render on top of old stuff
 }
 
 void Engine::render()
 {
-    if (!mustRender())
+    if(!_keepRunning)
         return;
 
-    for (auto frameBuffer : _frameBuffers)
+    // Check wether we should keep rendering or not
+    const auto maxSpp = _renderer->getSamplesPerPixel();
+    const auto currentSpp = _frameBuffer.numAccumFrames();
+    if(currentSpp >= maxSpp)
+        return;
+
+    // A frame is counted from the momment we start rendering until we come again to the same point.
+    _fpsCounter.endFrame();
+    const auto& appParams = _params.getApplicationParameters();
+    const auto maxFPS = appParams.getMaxRenderFPS();
+    const auto minFrameTimeMilis = (1.0 / static_cast<double>(maxFPS)) * 1000.0;
+
+    const auto avgFPS = _fpsCounter.getAverageFPS();
+    const auto avgFrameTimeMillis = (1.0 / static_cast<double>(avgFPS)) * 1000.0;
+
+    const auto diff = avgFrameTimeMillis - minFrameTimeMilis;
+
+    if(diff < 0.0)
     {
-        _camera->setBufferTarget(frameBuffer->getName());
-        _camera->commit();
-        _camera->resetModified();
-        _renderer->render(frameBuffer);
+        Log::info("Slowing down FPS. Last frame rendered {} ms too fast", diff);
+        std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(diff));
     }
-}
 
-void Engine::postRender()
-{
-    if (!mustRender())
-        return;
+    // Start measuring a new frame render time.
+    _fpsCounter.startFrame();
 
-    for (auto frameBuffer : _frameBuffers)
-        frameBuffer->incrementAccumFrames();
+    auto ospFrameBuffer = _frameBuffer.handle();
+    auto ospRenderer = _renderer->handle();
+    auto ospCamera = _camera->handle();
+    auto ospWorld = _scene.handle();
+
+    auto ospRenderTask = ospRenderFrame(ospFrameBuffer, ospRenderer, ospCamera, ospWorld);
+    ospWait(ospRenderTask);
+
+    _frameBuffer.incrementAccumFrames();
 }
 
 Scene &Engine::getScene()
 {
-    return *_scene;
+    return _scene;
 }
 
-FrameBuffer &Engine::getFrameBuffer()
+FrameBuffer &Engine::getFrameBuffer() noexcept
 {
-    return *_frameBuffers[0];
+    return _frameBuffer;
 }
 
-const Camera &Engine::getCamera() const
-{
-    return *_camera;
-}
-
-Camera &Engine::getCamera()
+Camera &Engine::getCamera() noexcept
 {
     return *_camera;
 }
 
-Renderer &Engine::getRenderer()
+Renderer &Engine::getRenderer() noexcept
 {
     return *_renderer;
 }
 
-void Engine::setKeepRunning(bool keepRunning)
+void Engine::setRunning(bool keepRunning) noexcept
 {
     _keepRunning = keepRunning;
 }
 
-bool Engine::getKeepRunning() const
+bool Engine::isRunning() const noexcept
 {
     return _keepRunning;
 }
 
-Statistics &Engine::getStatistics()
+const Statistics &Engine::getStatistics() const noexcept
 {
     return _statistics;
 }
 
-bool Engine::continueRendering() const
+EngineFactories &Engine::getObjectFactories() noexcept
 {
-    auto frameBuffer = _frameBuffers[0];
-    return (
-        frameBuffer->getAccumulation()
-        && (frameBuffer->numAccumFrames() < _parametersManager.getRenderingParameters().getMaxAccumFrames()));
-}
-
-const ParametersManager &Engine::getParametersManager() const
-{
-    return _parametersManager;
-}
-
-ParametersManager &Engine::getParametersManager()
-{
-    return _parametersManager;
-}
-
-void Engine::addFrameBuffer(FrameBufferPtr frameBuffer)
-{
-    _frameBuffers.push_back(frameBuffer);
-}
-
-void Engine::removeFrameBuffer(FrameBufferPtr frameBuffer)
-{
-    _frameBuffers.erase(std::remove(_frameBuffers.begin(), _frameBuffers.end(), frameBuffer), _frameBuffers.end());
-}
-
-const std::vector<FrameBufferPtr> &Engine::getFrameBuffers() const
-{
-    return _frameBuffers;
-}
-
-void Engine::clearFrameBuffers()
-{
-    for (auto frameBuffer : _frameBuffers)
-        frameBuffer->clear();
-}
-
-void Engine::resetFrameBuffers()
-{
-    for (auto frameBuffer : _frameBuffers)
-        frameBuffer->resetModified();
-}
-
-void Engine::addRendererType(const std::string &name, const PropertyMap &properties)
-{
-    _parametersManager.getRenderingParameters().addRenderer(name);
-    getRenderer().setProperties(name, properties);
-}
-
-void Engine::addCameraType(const std::string &name, const PropertyMap &properties)
-{
-    _parametersManager.getRenderingParameters().addCamera(name);
-    getCamera().setProperties(name, properties);
-}
-
-bool Engine::mustRender()
-{
-    if (_parametersManager.getApplicationParameters().getUseQuantaRenderControl())
-    {
-        // When playing an animation:
-        //  - A frame data from the animation gets loaded
-        //  (Model::commitSimulationData())
-        //      - This triggers the scene to be marked as modified
-        //          - This triggers Brayns to clear the frame buffer accumation
-        //          frames
-        //  This is way the animations keep working even though the camera might
-        //  be fixed at a specific location and direction
-
-        // Do not render if camera hasnt been modified and either there is no
-        // accumulation frames or they are completed for the current pass
-        auto frameBuffer = _frameBuffers[0];
-        if (!_camera->isModified()
-            && (!frameBuffer->getAccumulation()
-                || (frameBuffer->getAccumulation()
-                    && frameBuffer->numAccumFrames()
-                        >= _parametersManager.getRenderingParameters().getMaxAccumFrames())))
-            return false;
-    }
-
-    return true;
+    return _engineFactory;
 }
 } // namespace brayns

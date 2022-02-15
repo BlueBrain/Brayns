@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-/** Loads protein from PDB files
- * http://www.rcsb.org
+/**
+ * @brief The ProteinLoader class loads protein from PDB files: http://www.rcsb.org
  */
 class ProteinLoader : public Loader<ProteinLoaderParameters>
 {
@@ -35,16 +35,10 @@ public:
 
     std::string getName() const final;
 
-    std::vector<ModelDescriptorPtr> importFromFile(
-        const std::string &fileName,
-        const LoaderProgress &callback,
-        const ProteinLoaderParameters &properties,
-        Scene &scene) const final;
+    std::vector<Model::Ptr> importFromFile(
+        const std::string &fileName, const LoaderProgress &cb, const ProteinLoaderParameters &properties) const final;
 
-    std::vector<ModelDescriptorPtr> importFromBlob(
-        Blob &&blob,
-        const LoaderProgress &callback,
-        const ProteinLoaderParameters &properties,
-        Scene &scene) const final;
+    std::vector<Model::Ptr> importFromBlob(
+        Blob &&blob, const LoaderProgress &callback, const ProteinLoaderParameters &properties) const final;
 };
 } // namespace brayns

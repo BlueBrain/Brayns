@@ -27,7 +27,7 @@
 
 namespace
 {
-double _interpolatedOpacity(const std::vector<brayns::Vector2d> &controlPointsSorted, const double x)
+double _interpolatedOpacity(const std::vector<brayns::Vector2f> &controlPointsSorted, const double x)
 {
     const auto &firstPoint = controlPointsSorted.front();
     if (x <= firstPoint.x)
@@ -76,12 +76,12 @@ void TransferFunction::clear()
     markModified();
 }
 
-const std::vector<Vector2d> &TransferFunction::getControlPoints() const
+const std::vector<Vector2f> &TransferFunction::getControlPoints() const
 {
     return _controlPoints;
 }
 
-void TransferFunction::setControlPoints(const std::vector<Vector2d> &controlPoints)
+void TransferFunction::setControlPoints(const std::vector<Vector2f> &controlPoints)
 {
     _updateValue(_controlPoints, controlPoints);
 }
@@ -101,12 +101,12 @@ const std::vector<brayns::Vector3f> &TransferFunction::getColors() const
     return _colorMap.colors;
 }
 
-const Vector2d &TransferFunction::getValuesRange() const
+const Vector2f &TransferFunction::getValuesRange() const
 {
     return _valuesRange;
 }
 
-void TransferFunction::setValuesRange(const Vector2d &valuesRange)
+void TransferFunction::setValuesRange(const Vector2f &valuesRange)
 {
     _updateValue(_valuesRange, valuesRange);
 }

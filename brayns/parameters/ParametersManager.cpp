@@ -18,13 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ParametersManager.h"
-
-#include <iostream>
-
 #include <brayns/Version.h>
 #include <brayns/common/Log.h>
-#include <brayns/parameters/AbstractParameters.h>
+#include <brayns/parameters/ParametersManager.h>
+
+#include <iostream>
 
 namespace
 {
@@ -118,8 +116,6 @@ ParametersManager::ParametersManager(const int argc, const char **argv)
 {
     registerParameters(&_animationParameters);
     registerParameters(&_applicationParameters);
-    registerParameters(&_renderingParameters);
-    registerParameters(&_volumeParameters);
     registerParameters(&_networkParameters);
 
     for (auto parameters : _parameterSets)
@@ -232,26 +228,6 @@ const ApplicationParameters &ParametersManager::getApplicationParameters() const
     return _applicationParameters;
 }
 
-RenderingParameters &ParametersManager::getRenderingParameters()
-{
-    return _renderingParameters;
-}
-
-const RenderingParameters &ParametersManager::getRenderingParameters() const
-{
-    return _renderingParameters;
-}
-
-VolumeParameters &ParametersManager::getVolumeParameters()
-{
-    return _volumeParameters;
-}
-
-const VolumeParameters &ParametersManager::getVolumeParameters() const
-{
-    return _volumeParameters;
-}
-
 NetworkParameters &ParametersManager::getNetworkParameters()
 {
     return _networkParameters;
@@ -270,7 +246,7 @@ void ParametersManager::_processUnrecognizedOptions(const std::vector<std::strin
     const auto &unrecognized = unrecognizedOptions.front();
 
     std::vector<std::string> availableOptions;
-    for (auto option : _allOptions.options())
+    for (const auto& option : _allOptions.options())
         availableOptions.push_back(option->format_name());
 
     const auto suggestions = findSimilarOptions(unrecognized, availableOptions);

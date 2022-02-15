@@ -20,47 +20,44 @@
 
 #pragma once
 
-#include <brayns/common/PropertyObject.h>
-#include <brayns/engine/Camera.h>
-#include <brayns/engine/FrameBuffer.h>
-#include <brayns/engine/Scene.h>
-#include <brayns/parameters/AnimationParameters.h>
-#include <brayns/parameters/RenderingParameters.h>
+#include <brayns/common/MathTypes.h>
+#include <brayns/engine/EngineObject.h>
+
+#include <ospray/ospray.h>
+
+#include <memory>
 
 namespace brayns
 {
-class Renderer : public PropertyObject
+class Renderer : public SerializableEngineObject
 {
 public:
-    struct PickResult
-    {
-        bool hit{false};
-        Vector3d pos;
-    };
+    using Ptr = std::unique_ptr<Renderer>;
 
-    /** @name API for engine-specific code */
-    //@{
-    virtual void render(FrameBufferPtr frameBuffer) = 0;
+    virtual ~Renderer();
 
-    /** @return the variance from the previous render(). */
-    virtual float getVariance() const;
+    void commit() final;
 
-    virtual void commit() = 0;
+    int32_t getSamplesPerPixel() const noexcept;
+    int32_t getMaxRayBounces() const noexcept;
+    const Vector4f &getBackgroundColor() const noexcept;
 
-    virtual void setCamera(CameraPtr camera) = 0;
+    void setSamplesPerPixel(const int32_t spp) noexcept;
+    void setMaxRayBounces(const int32_t maxBounces) noexcept;
+    void setBackgroundColor(const Vector4f& background) noexcept;
 
-    virtual PickResult pick(const Vector2f &position);
-    //@}
-
-    Renderer(const AnimationParameters &animationParameters, const RenderingParameters &renderingParameters);
-
-    void setScene(ScenePtr scene);
+    OSPRenderer handle() const noexcept;
 
 protected:
-    const AnimationParameters &_animationParameters;
-    const RenderingParameters &_renderingParameters;
-    ScenePtr _scene;
-};
+    virtual void commitRendererSpecificParams() = 0;
 
-using RendererPtr = std::shared_ptr<Renderer>;
+private:
+    int32_t _samplesPerPixel {1};
+    int32_t _maxRayBounces {5};
+
+    Vector4f _backgroundColor {0.004f, 0.016f, 0.102f, 0.f};
+
+protected:
+    OSPRenderer _handle {nullptr};
+};
 } // namespace brayns

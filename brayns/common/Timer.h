@@ -1,4 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -22,56 +24,50 @@
 
 namespace brayns
 {
-using clock = std::chrono::high_resolution_clock;
-
-/** Simple timer class to measure time spent in a portion of the code */
+/**
+ * @brief The Timer class is a simpler timer class that uses the standard high resolution clock
+ * to measure time between 2 time points.
+ *
+ * It is initialized when constructed, and resetted by calling the reset() method.
+ * After that, every call to micros(), millis() or seconds() will return the time, in such
+ * time unit, since the last call to reset() up to that point.
+ *
+ * THIS CLASS IS NOT THREAD SAFE
+ */
 class Timer
 {
 public:
+    /**
+     * @brief Timer constructs the timer, setting the start time point to the current time
+     */
     Timer();
 
-    /** (Re)Start the timer at 'now' */
-    void start();
-
-    /** Stops the timer and records the interval + a smoothed value over time*/
-    void stop();
-
-    /** @return the elapsed time in seconds since the last start(). */
-    double elapsed() const;
-
-    /** @return last interval from start() to stop() in microseconds. */
-    int64_t microseconds() const;
-
-    /** @return last interval from start() to stop() in milliseconds. */
-    int64_t milliseconds() const;
-
-    /** @return last interval from start() to stop() in seconds. */
-    double seconds() const;
+    /**
+     * @brief reset resets the start time point to the current time
+     */
+    void reset() noexcept;
 
     /**
-     * @return last interval from start() to stop() in per seconds, e.g. for
-     * frame per seconds
+     * @brief micros return the time passed, in microseconds, since the start time point and now (rounded down)
+     * @return microseconds
      */
-    double perSecond() const;
+    int64_t micros() const noexcept;
 
     /**
-     * @return the current FPS, updated every 150 ms
+     * @brief millis returns the time passed, in milliseconds, since the start time point and now (rounded down)
+     * @return milliseconds
      */
-    double fps() const;
+    int64_t millis() const noexcept;
 
     /**
-     * @return last smoothed interval from start() to stop() in per seconds,
-     * e.g. for frame per seconds
+     * @brief seconds returns the time passed, in seconds, since the start time point and now (rounded down)
+     * @return seconds
      */
-    double perSecondSmoothed() const;
+    int64_t seconds() const noexcept;
 
 private:
+    using clock = std::chrono::high_resolution_clock;
+
     clock::time_point _startTime;
-    int64_t _microseconds{0};
-    double _smoothNom{0.0};
-    double _smoothDen{0.0};
-    const double _smoothingFactor{0.9}; // closer to 1 means more smoothing
-    clock::time_point _lastFPSTickTime;
-    double _fps{0.0};
 };
 } // namespace brayns

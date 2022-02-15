@@ -2,6 +2,7 @@
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,106 +22,50 @@
 
 #pragma once
 
-#include <brayns/common/PropertyObject.h>
+#include <brayns/common/MathTypes.h>
+#include <brayns/engine/EngineObject.h>
+
+#include <ospray/ospray.h>
 
 #include <memory>
 
 namespace brayns
 {
-/**
-   Camera object
-
-   This object in an abstract interface to a camera which is defined by a
-   position and a quaternion
-*/
-class Camera : public PropertyObject
+class Camera : public SerializableEngineObject
 {
 public:
-    /** @name API for engine-specific code */
-    //@{
-    /**
-       Commits the changes held by the camera object so that
-       attributes become available to the underlying rendering engine
-    */
-    virtual void commit(){};
-    //@}
+    using Ptr = std::unique_ptr<Camera>;
 
     Camera() = default;
 
-    Camera(const Camera &other);
+    Camera(const Camera&) noexcept;
+    Camera &operator=(const Camera &) noexcept;
 
-    Camera &operator=(const Camera &rhs);
+    virtual ~Camera();
 
-    /**
-       Sets position, and quaternion
-       @param position The x, y, z coordinates of the camera position
-       @param orientation The x, y, z, w values of the quaternion describing
-              the camera orientation
-       @param target The x, y, z coordinates of the camera target
-    */
-    void set(const Vector3d &position, const Quaterniond &orientation, const Vector3d &target = Vector3d(0.0));
+    void commit() final;
 
-    void setInitialState(
-        const Vector3d &position,
-        const Quaterniond &orientation,
-        const Vector3d &target = Vector3d(0.0));
+    void setPosition(const Vector3f &position) noexcept;
+    void setTarget(const Vector3f &target) noexcept;
+    void setUp(const Vector3f &up) noexcept;
+    void setAspectRatio(const float aspectRatio) noexcept;
 
-    /**
-       Sets camera position
-       @param position The x, y, z coordinates of the camera position
-    */
-    void setPosition(const Vector3d &position);
+    const Vector3f& getPosition() const noexcept;
+    const Vector3f& getTarget() const noexcept;
+    const Vector3f& getUp() const noexcept;
 
-    /**
-       Sets camera target
-       @param target The x, y, z coordinates of the camera target
-    */
-    void setTarget(const Vector3d &target);
+    OSPCamera handle() const noexcept;
 
-    /**
-       Gets camera position
-       @return The x, y, z coordinates of the camera position
-    */
-    const Vector3d &getPosition() const;
-
-    /**
-       Gets camera target
-       @return The x, y, z coordinates of the camera target
-    */
-    const Vector3d &getTarget() const;
-
-    /**
-       Sets camera orientation quaternion.
-       @param orientation The orientation quaternion
-    */
-    void setOrientation(Quaterniond orientation);
-
-    /**
-       Gets the camera orientation quaternion
-       @return the orientation quaternion
-    */
-    const Quaterniond &getOrientation() const;
-
-    /** Resets the camera to its initial values */
-    void reset();
-
-    /** @internal Sets the name of current rendered frame buffer. */
-    void setBufferTarget(const std::string &target);
-
-    /** @internal @return the current rendererd frame buffer. */
-    const std::string &getBufferTarget() const;
+protected:
+    virtual void commitCameraSpecificParams() = 0;
 
 private:
-    Vector3d _target;
-    Vector3d _position;
-    Quaterniond _orientation;
+    Vector3f _position {0.f};
+    Vector3f _target {0.f, 0.f, 1.f};
+    Vector3f _up {0.f, 1.f, 0.f};
+    float _aspectRatio;
 
-    Vector3d _initialTarget;
-    Vector3d _initialPosition;
-    Quaterniond _initialOrientation;
-
-    std::string _bufferTarget;
+protected:
+    OSPCamera _handle {nullptr};
 };
-
-using CameraPtr = std::shared_ptr<Camera>;
 } // namespace brayns

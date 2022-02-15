@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,96 +19,110 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "FrameBuffer.h"
-
-#include <brayns/common/Log.h>
-
+#include <brayns/engine/FrameBuffer.h>
 #include <brayns/utils/image/ImageFlipper.h>
+
+namespace
+{
+OSPFrameBufferFormat toOSPFrameBufferFormat(const brayns::PixelFormat frameBufferFormat)
+{
+    switch (frameBufferFormat)
+    {
+    case brayns::PixelFormat::SRGBA_I8:
+        return OSP_FB_SRGBA;
+    case brayns::PixelFormat::RGBA_I8:
+        return OSP_FB_RGBA8;
+    case brayns::PixelFormat::RGBA_F32:
+        return OSP_FB_RGBA32F;
+    }
+
+    throw std::invalid_argument("Unknown PixelFormat");
+    return OSP_FB_NONE;
+}
+} // namespace
 
 namespace brayns
 {
-void FrameBuffer::clear()
+FrameBuffer::FrameBuffer()
 {
-    _accumFrames = 0;
+    _recreate();
 }
 
-Vector2ui FrameBuffer::getSize() const
+FrameBuffer::~FrameBuffer()
 {
-    return _frameSize;
+    unmap();
+    ospRelease(_handle);
 }
 
-void FrameBuffer::setAccumulation(const bool accumulation)
+void FrameBuffer::map()
 {
-    _accumulation = accumulation;
+    _colorBuffer = (uint8_t *)ospMapFrameBuffer(_handle, OSP_FB_COLOR);
 }
 
-void FrameBuffer::setFormat(PixelFormat frameBufferFormat)
+void FrameBuffer::unmap()
 {
-    _frameBufferFormat = frameBufferFormat;
-}
-
-void FrameBuffer::setSubsampling(const size_t factor)
-{
-    (void)factor;
-}
-
-void FrameBuffer::createPixelOp(const std::string &name)
-{
-    (void)name;
-}
-
-void FrameBuffer::updatePixelOp(const PropertyMap &properties)
-{
-    (void)properties;
-}
-
-FrameBuffer::FrameBuffer(const std::string &name, const Vector2ui &frameSize, const PixelFormat frameBufferFormat)
-    : _name(name)
-    , _frameSize(frameSize)
-    , _frameBufferFormat(frameBufferFormat)
-{
-}
-
-size_t FrameBuffer::getColorDepth() const
-{
-    switch (_frameBufferFormat)
+    if (_colorBuffer)
     {
-    case PixelFormat::RGBA_I8:
-    case PixelFormat::RGB_F32:
-        return 4;
-    case PixelFormat::RGB_I8:
-        return 3;
-    default:
-        return 0;
+        ospUnmapFrameBuffer(_colorBuffer, _handle);
+        _colorBuffer = nullptr;
     }
 }
 
-const Vector2ui &FrameBuffer::getFrameSize() const
+const uint8_t *FrameBuffer::getColorBuffer() const
+{
+    return _colorBuffer;
+}
+
+void FrameBuffer::commit()
+{
+    _recreate();
+}
+
+void FrameBuffer::setFrameSize(const Vector2ui &frameSize)
+{
+    if (glm::compMul(frameSize) == 0 || frameSize.x < 64 || frameSize.y < 64)
+        throw std::invalid_argument("Frame size must be greather than or equal to 64x64");
+
+    _updateValue(_frameSize, frameSize);
+}
+
+const Vector2ui &FrameBuffer::getFrameSize() const noexcept
 {
     return _frameSize;
 }
 
-bool FrameBuffer::getAccumulation() const
+void FrameBuffer::setAccumulation(const bool accumulation) noexcept
+{
+   _updateValue(_accumulation, accumulation);
+}
+
+bool FrameBuffer::isAccumulating() const noexcept
 {
     return _accumulation;
 }
 
-PixelFormat FrameBuffer::getFrameBufferFormat() const
+void FrameBuffer::setFormat(PixelFormat frameBufferFormat) noexcept
+{
+    _updateValue(_frameBufferFormat, frameBufferFormat);
+}
+
+PixelFormat FrameBuffer::getFrameBufferFormat() const noexcept
 {
     return _frameBufferFormat;
 }
 
-const std::string &FrameBuffer::getName() const
+void FrameBuffer::clear() noexcept
 {
-    return _name;
+    _accumFrames = 0;
+    ospResetAccumulation(_handle);
 }
 
-void FrameBuffer::incrementAccumFrames()
+void FrameBuffer::incrementAccumFrames() noexcept
 {
     ++_accumFrames;
 }
 
-size_t FrameBuffer::numAccumFrames() const
+int32_t FrameBuffer::numAccumFrames() const noexcept
 {
     return _accumFrames;
 }
@@ -117,38 +132,14 @@ Image FrameBuffer::getImage()
     map();
 
     const auto colorBuffer = getColorBuffer();
-    const auto &size = getSize();
+    const auto &size = getFrameSize();
 
     ImageInfo info;
 
     info.width = size.x;
     info.height = size.y;
-
-    switch (_frameBufferFormat)
-    {
-    case PixelFormat::RGB_I8:
-    case PixelFormat::RGB_F32:
-        info.channelCount = 3;
-        break;
-    case PixelFormat::RGBA_I8:
-        info.channelCount = 4;
-        break;
-    default:
-        Log::warn("Invalid framebuffer format: {}.", int(_frameBufferFormat));
-        return {};
-    }
-
-    switch (_frameBufferFormat)
-    {
-    case PixelFormat::RGB_I8:
-    case PixelFormat::RGB_F32:
-    case PixelFormat::RGBA_I8:
-        info.channelSize = 1;
-        break;
-    default:
-        Log::warn("Invalid framebuffer format: {}.", int(_frameBufferFormat));
-        return {};
-    }
+    info.channelCount = 4;
+    info.channelSize = 1;
 
     auto data = reinterpret_cast<const char *>(colorBuffer);
     auto length = info.getSize();
@@ -158,5 +149,33 @@ Image FrameBuffer::getImage()
     unmap();
 
     return image;
+}
+
+OSPFrameBuffer FrameBuffer::handle() const noexcept
+{
+    return _handle;
+}
+
+void FrameBuffer::_recreate()
+{
+    unmap();
+
+    if(_handle)
+        ospRelease(_handle);
+
+    const auto width = static_cast<int>(_frameSize.x);
+    const auto height = static_cast<int>(_frameSize.y);
+
+    const auto format = toOSPFrameBufferFormat(_frameBufferFormat);
+
+    size_t channels = OSP_FB_COLOR;
+    if (_accumulation)
+        channels |= OSP_FB_ACCUM;
+
+    _handle = ospNewFrameBuffer(width, height, format, channels);
+
+    ospCommit(_handle);
+
+    clear();
 }
 } // namespace brayns

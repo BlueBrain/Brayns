@@ -102,7 +102,7 @@ protected:
     }
 
 private:
-    std::atomic_bool _modified{true};
+    bool _modified{true};
     ModifiedCallback _modifiedCallback;
 };
 } // namespace brayns

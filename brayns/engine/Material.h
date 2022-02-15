@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,57 +21,41 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
-#include <brayns/common/PropertyObject.h>
+#include <brayns/engine/EngineObject.h>
+
+#include <ospray/ospray.h>
 
 #include <memory>
 
 namespace brayns
 {
-class Material : public PropertyObject
+/**
+ * @brief The Material class defines which material is applied to the geometry is associated with.
+ * Materials define the physical surface properties of the geometry, BUT NOT THE COLOR. Color is
+ * managed by the GeometricModels implementation, because this allows for a more optimal representation
+ * of the geometry color for Brayns needs.
+ */
+class Material : public SerializableEngineObject
 {
 public:
-    /** @name API for engine-specific code */
-    //@{
+    using Ptr = std::unique_ptr<Material>;
+
+    virtual ~Material();
+
     /**
-     * Called after material change
+     * @brief synchronizes the material data with the OSPRay backend
      */
-    virtual void commit() = 0;
-    //@}
+    void commit() final;
 
-    Material(const PropertyMap &properties = {});
-
-    const std::string &getName() const;
-    void setName(const std::string &value);
-    void setDiffuseColor(const Vector3d &value);
-    const Vector3d &getDiffuseColor() const;
-    void setSpecularColor(const Vector3d &value);
-    const Vector3d &getSpecularColor() const;
-    void setSpecularExponent(double value);
-    double getSpecularExponent() const;
-    void setReflectionIndex(double value);
-    double getReflectionIndex() const;
-    void setOpacity(double value);
-    double getOpacity() const;
-    void setRefractionIndex(double value);
-    double getRefractionIndex() const;
-    void setEmission(double value);
-    double getEmission() const;
-    void setGlossiness(double value);
-    double getGlossiness() const;
+    /**
+     * @brief returns the handle to the OSPRay object of the material
+     */
+    OSPMaterial handle() const noexcept;
 
 protected:
-    std::string _name{"undefined"};
-    Vector3d _diffuseColor{1., 1., 1.};
-    Vector3d _specularColor{1., 1., 1.};
-    double _specularExponent{10.};
-    double _reflectionIndex{0.};
-    double _opacity{1.};
-    double _refractionIndex{1.};
-    double _emission{0.};
-    double _glossiness{1.};
+    virtual void commitMaterialSpecificParams() = 0;
+
+    OSPMaterial _handle{nullptr};
+
 };
-
-using MaterialPtr = std::shared_ptr<Material>;
-
 } // namespace brayns

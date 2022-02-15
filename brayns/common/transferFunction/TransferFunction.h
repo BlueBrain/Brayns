@@ -46,9 +46,9 @@ public:
     /** Reset to gray-scale with opacity [0..1] and value range [0,255]. */
     void clear();
 
-    const std::vector<Vector2d> &getControlPoints() const;
+    const std::vector<Vector2f> &getControlPoints() const;
 
-    void setControlPoints(const std::vector<Vector2d> &controlPoints);
+    void setControlPoints(const std::vector<Vector2f> &controlPoints);
 
     const ColorMap &getColorMap() const;
 
@@ -56,9 +56,9 @@ public:
 
     const std::vector<brayns::Vector3f> &getColors() const;
 
-    const Vector2d &getValuesRange() const;
+    const Vector2f &getValuesRange() const;
 
-    void setValuesRange(const Vector2d &valuesRange);
+    void setValuesRange(const Vector2f &valuesRange);
 
     std::vector<float> calculateInterpolatedOpacities() const;
 
@@ -66,7 +66,7 @@ public:
 
 private:
     ColorMap _colorMap;
-    std::vector<Vector2d> _controlPoints;
-    Vector2d _valuesRange;
+    std::vector<Vector2f> _controlPoints;
+    Vector2f _valuesRange;
 };
 } // namespace brayns

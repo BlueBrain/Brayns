@@ -33,12 +33,14 @@ namespace brayns
 class AbstractSimulationHandler
 {
 public:
+    using Ptr = std::unique_ptr<AbstractSimulationHandler>;
+
     AbstractSimulationHandler() = default;
 
     AbstractSimulationHandler(const AbstractSimulationHandler &other);
 
     /** @return a clone of the concrete simulation handler implementation. */
-    virtual std::shared_ptr<AbstractSimulationHandler> clone() const = 0;
+    virtual Ptr clone() const = 0;
 
     virtual ~AbstractSimulationHandler() = default;
 
@@ -154,6 +156,4 @@ protected:
     double _frameAdjuster{1.0};
     std::string _unit;
 };
-
-using AbstractSimulationHandlerPtr = std::shared_ptr<AbstractSimulationHandler>;
 } // namespace brayns

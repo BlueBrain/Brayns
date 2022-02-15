@@ -8,7 +8,7 @@ set(BRAYNSIO_SOURCES
     LoaderRegistry.cpp
     loaders/MeshLoader.cpp
     loaders/ProteinLoader.cpp
-    loaders/VolumeLoader.cpp
+    #loaders/VolumeLoader.cpp # TEMPORARY DISABLED
     loaders/XYZBLoader.cpp
     loaders/mesh/parsers/ObjMeshParser.cpp
     loaders/mesh/parsers/PlyMeshParser.cpp
@@ -23,7 +23,7 @@ set(BRAYNSIO_PUBLIC_HEADERS
     LoaderRegistry.h
     loaders/MeshLoader.h
     loaders/ProteinLoader.h
-    loaders/VolumeLoader.h
+    #loaders/VolumeLoader.h # TEMPORARY DISABLED
     loaders/XYZBLoader.h
 )
 

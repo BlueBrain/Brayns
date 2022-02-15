@@ -18,29 +18,61 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Renderer.h"
+#include <brayns/engine/Renderer.h>
 
 namespace brayns
 {
-float Renderer::getVariance() const
+Renderer::~Renderer()
 {
-    return 0.0f;
+    ospRelease(_handle);
 }
 
-Renderer::PickResult Renderer::pick(const Vector2f &position)
+void Renderer::commit()
 {
-    (void)position;
-    return {};
+    if(!_handle)
+        throw std::runtime_error("Renderer handle not initialized");
+
+    ospSetParam(_handle, "pixelSamples", OSPDataType::OSP_INT, &_samplesPerPixel);
+    ospSetParam(_handle, "maxPathLength", OSPDataType::OSP_INT, &_maxRayBounces);
+    ospSetParam(_handle, "backgroundColor", OSPDataType::OSP_VEC4F, &_backgroundColor);
+
+    commitRendererSpecificParams();
+
+    ospCommit(_handle);
 }
 
-Renderer::Renderer(const AnimationParameters &animationParameters, const RenderingParameters &renderingParameters)
-    : _animationParameters(animationParameters)
-    , _renderingParameters(renderingParameters)
+int32_t Renderer::getSamplesPerPixel() const noexcept
 {
+    return _samplesPerPixel;
 }
 
-void Renderer::setScene(ScenePtr scene)
+int32_t Renderer::getMaxRayBounces() const noexcept
 {
-    _scene = scene;
+    return _maxRayBounces;
+}
+
+const Vector4f &Renderer::getBackgroundColor() const noexcept
+{
+    return _backgroundColor;
+}
+
+void Renderer::setSamplesPerPixel(const int32_t spp) noexcept
+{
+    _updateValue(_samplesPerPixel, spp);
+}
+
+void Renderer::setMaxRayBounces(const int32_t maxBounces) noexcept
+{
+    _updateValue(_maxRayBounces, maxBounces);
+}
+
+void Renderer::setBackgroundColor(const Vector4f& background) noexcept
+{
+    _updateValue(_backgroundColor, background);
+}
+
+OSPRenderer Renderer::handle() const noexcept
+{
+    return _handle;
 }
 } // namespace brayns

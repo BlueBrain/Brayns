@@ -1,4 +1,6 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+﻿/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -22,66 +24,41 @@
 constexpr double MICRO_PER_SEC = 1000000.0;
 constexpr double FPS_UPDATE_MILLISECS = 150;
 
+namespace
+{
+template<typename Rep>
+int64_t getDuration(const std::chrono::high_resolution_clock::time_point &start)
+{
+    const auto end = std::chrono::high_resolution_clock::now();
+    const auto duration = std::chrono::duration_cast<std::chrono::duration<int64_t, Rep>>(end - start);
+    return duration.count();
+}
+}
+
 namespace brayns
 {
 Timer::Timer()
+ : _startTime(clock::now())
 {
-    _lastFPSTickTime = clock::now();
+}
+
+void Timer::reset() noexcept
+{
     _startTime = clock::now();
 }
 
-void Timer::start()
+int64_t Timer::micros() const noexcept
 {
-    _startTime = clock::now();
-}
-double Timer::elapsed() const
-{
-    return std::chrono::duration<double>{clock::now() - _startTime}.count();
+    return getDuration<std::micro>(_startTime);
 }
 
-void Timer::stop()
+int64_t Timer::millis() const noexcept
 {
-    const auto now = clock::now();
-    _microseconds = std::chrono::duration_cast<std::chrono::microseconds>(now - _startTime).count();
-    _smoothNom = _smoothNom * _smoothingFactor + _microseconds / MICRO_PER_SEC;
-    _smoothDen = _smoothDen * _smoothingFactor + 1.f;
-
-    const auto secsLastFPSTick = std::chrono::duration_cast<std::chrono::milliseconds>(now - _lastFPSTickTime).count();
-
-    if (secsLastFPSTick >= FPS_UPDATE_MILLISECS)
-    {
-        _lastFPSTickTime = now;
-        _fps = perSecond();
-    }
+    return getDuration<std::milli>(_startTime);
 }
 
-int64_t Timer::microseconds() const
+int64_t Timer::seconds() const noexcept
 {
-    return _microseconds;
-}
-
-int64_t Timer::milliseconds() const
-{
-    return _microseconds / 1000.0;
-}
-
-double Timer::seconds() const
-{
-    return _microseconds / MICRO_PER_SEC;
-}
-
-double Timer::perSecond() const
-{
-    return MICRO_PER_SEC / _microseconds;
-}
-
-double Timer::perSecondSmoothed() const
-{
-    return _smoothDen / _smoothNom;
-}
-
-double Timer::fps() const
-{
-    return _fps;
+    return getDuration<std::ratio<1, 1>>(_startTime);
 }
 } // namespace brayns

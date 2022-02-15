@@ -22,12 +22,12 @@
 
 namespace brayns
 {
-double Statistics::getFPS() const
+uint32_t Statistics::getFPS() const
 {
     return _fps;
 }
 
-void Statistics::setFPS(const double fps)
+void Statistics::setFPS(const uint32_t fps)
 {
     _updateValue(_fps, fps);
 }

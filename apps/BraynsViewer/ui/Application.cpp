@@ -165,14 +165,6 @@ void Application::registerKeyboardShortcuts()
             renderParams.setBackgroundColor({1.f, 1.f, 1.f});
         });
     m_keyboardHandler.registerKeyboardShortcut(
-        '3',
-        "Set gradient materials",
-        [&] { scene.setMaterialsColorMap(brayns::MaterialsColorMap::gradient); });
-    m_keyboardHandler.registerKeyboardShortcut(
-        '4',
-        "Set random materials",
-        [&] { scene.setMaterialsColorMap(brayns::MaterialsColorMap::random); });
-    m_keyboardHandler.registerKeyboardShortcut(
         '5',
         "Scientific visualization renderer",
         [&] { renderParams.setCurrentRenderer("scivis"); });

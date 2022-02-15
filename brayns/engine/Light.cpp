@@ -1,5 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -17,121 +18,61 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Light.h"
+#include <brayns/engine/Light.h>
 
 namespace brayns
 {
-Light::Light(LightType type, const Vector3d &color, double intensity, bool isVisible)
-    : _type(type)
-    , _color(color)
-    , _intensity(intensity)
-    , _isVisible(isVisible)
+Light::~Light()
 {
+    ospRelease(_handle);
 }
 
-Light::Light(LightType type)
-    : _type(type)
-    , _color(0.0)
-    , _intensity(0.0)
-    , _isVisible(false)
+void Light::setColor(const Vector3f &color) noexcept
 {
+    _updateValue(_color, color);
 }
 
-DirectionalLight::DirectionalLight(
-    const Vector3d &direction,
-    double angularDiameter,
-    const Vector3d &color,
-    double intensity,
-    bool isVisible)
-    : Light(LightType::DIRECTIONAL, color, intensity, isVisible)
-    , _direction(direction)
-    , _angularDiameter(angularDiameter)
+void Light::setIntensity(const float intensity) noexcept
 {
+    _updateValue(_intensity, intensity);
 }
 
-DirectionalLight::DirectionalLight()
-    : Light(LightType::DIRECTIONAL)
-    , _direction(0.0)
-    , _angularDiameter(0.0)
+void Light::setVisible(const bool visible) noexcept
 {
+    _updateValue(_visible, visible);
 }
 
-SphereLight::SphereLight(
-    const Vector3d &position,
-    double radius,
-    const Vector3d &color,
-    double intensity,
-    bool isVisible)
-    : Light(LightType::SPHERE, color, intensity, isVisible)
-    , _position(position)
-    , _radius(radius)
+const Vector3f &Light::getColor() const noexcept
 {
+    return _color;
 }
 
-SphereLight::SphereLight()
-    : Light(LightType::SPHERE)
-    , _position(0.0)
-    , _radius(0.0)
+float Light::getIntensity() const noexcept
 {
+    return _intensity;
 }
 
-QuadLight::QuadLight(
-    const Vector3d &position,
-    const Vector3d &edge1,
-    const Vector3d &edge2,
-    const Vector3d &color,
-    double intensity,
-    bool isVisible)
-    : Light(LightType::QUAD, color, intensity, isVisible)
-    , _position(position)
-    , _edge1(edge1)
-    , _edge2(edge2)
+bool Light::isVisible() const noexcept
 {
+    return _visible;
 }
 
-QuadLight::QuadLight()
-    : Light(LightType::QUAD)
-    , _position(0.0)
-    , _edge1(0.0)
-    , _edge2(0.0)
+void Light::commit()
 {
+    if(!_handle)
+        throw std::runtime_error("Light handle not initialized");
+
+    ospSetParam(_handle, "color", OSPDataType::OSP_VEC3F, &_color);
+    ospSetParam(_handle, "intensity", OSPDataType::OSP_FLOAT, &_intensity);
+    ospSetParam(_handle, "visible", OSPDataType::OSP_BOOL, &_visible);
+
+    commitLightSpecificParams();
+
+    ospCommit(_handle);
 }
 
-SpotLight::SpotLight(
-    const Vector3d &position,
-    const Vector3d &direction,
-    const double openingAngle,
-    const double penumbraAngle,
-    const double radius,
-    const Vector3d &color,
-    double intensity,
-    bool isVisible)
-    : Light(LightType::SPOTLIGHT, color, intensity, isVisible)
-    , _position(position)
-    , _direction(direction)
-    , _openingAngle(openingAngle)
-    , _penumbraAngle(penumbraAngle)
-    , _radius(radius)
+OSPLight Light::handle() const noexcept
 {
-}
-
-SpotLight::SpotLight()
-    : Light(LightType::SPOTLIGHT)
-    , _position(0.0)
-    , _direction(0.0)
-    , _openingAngle(0.0)
-    , _penumbraAngle(0.0)
-    , _radius(0.0)
-{
-}
-
-AmbientLight::AmbientLight(const Vector3d &color, double intensity, bool isVisible)
-    : Light(LightType::AMBIENT, color, intensity, isVisible)
-{
-}
-
-AmbientLight::AmbientLight()
-    : Light(LightType::AMBIENT)
-{
+    return _handle;
 }
 } // namespace brayns

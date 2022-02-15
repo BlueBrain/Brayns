@@ -2,6 +2,7 @@
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -23,86 +24,85 @@
 
 namespace brayns
 {
-Camera::Camera(const Camera &other)
+Camera::Camera(const Camera& o) noexcept
 {
-    *this = other;
+    *this = o;
 }
 
-Camera &Camera::operator=(const Camera &rhs)
+Camera &Camera::operator=(const Camera &o) noexcept
 {
-    if (this == &rhs)
-        return *this;
+    _position = o._position;
+    _target = o._target;
+    _up = o._up;
+    _aspectRatio = o._aspectRatio;
 
-    clonePropertiesFrom(rhs);
-
-    setPosition(rhs.getPosition());
-    setOrientation(rhs.getOrientation());
-
-    _initialPosition = rhs._initialPosition;
-    _initialOrientation = rhs._initialOrientation;
+    markModified();
 
     return *this;
 }
 
-void Camera::set(const Vector3d &position, const Quaterniond &orientation, const Vector3d &target)
+Camera::~Camera()
 {
-    setPosition(position);
-    setOrientation(orientation);
-    setTarget(target);
+    if(_handle)
+        ospRelease(_handle);
 }
 
-void Camera::setInitialState(const Vector3d &position, const Quaterniond &orientation, const Vector3d &target)
+void Camera::commit()
 {
-    _initialPosition = position;
-    _initialTarget = target;
-    _initialOrientation = orientation;
-    _initialOrientation = glm::normalize(_initialOrientation);
-    set(position, orientation, target);
+    if(!_handle)
+        throw std::runtime_error("Camera handle not initialized");
+
+    const auto direction = glm::normalize(_target - _position);
+
+    // TODO RECOMPUTE STRAFE AND UP TO MAKE SURE THEY ARE CORRECT
+
+    ospSetParam(_handle, "position", OSP_VEC3F, &_position[0]);
+    ospSetParam(_handle, "direction", OSP_VEC3F, &direction[0]);
+    ospSetParam(_handle, "up", OSP_VEC3F, &_up[0]);
+    ospSetParam(_handle, "aspect", OSP_FLOAT, &_aspectRatio);
+
+    commitCameraSpecificParams();
+
+    ospCommit(_handle);
 }
 
-void Camera::setPosition(const Vector3d &position)
+void Camera::setPosition(const Vector3f &position) noexcept
 {
     _updateValue(_position, position);
 }
 
-void Camera::setTarget(const Vector3d &target)
+void Camera::setTarget(const Vector3f &target) noexcept
 {
     _updateValue(_target, target);
 }
 
-const Vector3d &Camera::getPosition() const
+void Camera::setUp(const Vector3f &up) noexcept
+{
+    _updateValue(_up, glm::normalize(up));
+}
+
+void Camera::setAspectRatio(const float aspectRatio) noexcept
+{
+    _aspectRatio = aspectRatio;
+}
+
+const Vector3f& Camera::getPosition() const noexcept
 {
     return _position;
 }
 
-const Vector3d &Camera::getTarget() const
+const Vector3f& Camera::getTarget() const noexcept
 {
     return _target;
 }
 
-void Camera::setOrientation(Quaterniond orientation)
+const Vector3f& Camera::getUp() const noexcept
 {
-    orientation = glm::normalize(orientation);
-    _updateValue(_orientation, orientation);
+    return _up;
 }
 
-const Quaterniond &Camera::getOrientation() const
+OSPCamera Camera::handle() const noexcept
 {
-    return _orientation;
-}
-
-void Camera::reset()
-{
-    set(_initialPosition, _initialOrientation, _initialTarget);
-}
-
-void Camera::setBufferTarget(const std::string &target)
-{
-    _updateValue(_bufferTarget, target, false);
-}
-
-const std::string &Camera::getBufferTarget() const
-{
-    return _bufferTarget;
+    return _handle;
 }
 } // namespace brayns

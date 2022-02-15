@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,201 +21,98 @@
 
 #pragma once
 
-#include <brayns/common/BaseObject.h>
-#include <brayns/common/MaterialsColorMap.h>
-#include <brayns/common/scene/ClipPlane.h>
-#include <brayns/common/transferFunction/TransferFunction.h>
-#include <brayns/engine/LightManager.h>
+#include <brayns/common/Bounds.h>
+#include <brayns/engine/EngineObject.h>
+#include <brayns/engine/Light.h>
 #include <brayns/engine/Model.h>
-#include <brayns/parameters/AnimationParameters.h>
-#include <brayns/parameters/VolumeParameters.h>
+#include <brayns/json/JsonType.h>
 
-#include <shared_mutex>
+#include <ospray/ospray.h>
+
+#include <map>
+#include <mutex>
+#include <vector>
 
 namespace brayns
 {
+
 /**
-
-   Scene object
-
-   This object contains collections of geometries, materials and light sources
-   that are used to describe the 3D scene to be rendered. Scene is the base
-   class for rendering-engine-specific inherited scenes.
+ * @brief The ModelsLoadParameters struct holds the information with which a group of models was loaded
  */
-class Scene : public BaseObject
+struct ModelsLoadParameters
 {
-public:
-    /** @name API for engine-specific code */
-    //@{
-    /**
-     * Called after scene-related changes have been made before rendering the
-     * scene.
-     */
-    virtual void commit();
-
-    /**
-     * Commits lights to renderers.
-     * @return True if lights were committed, false otherwise
-     */
-    virtual bool commitLights() = 0;
-
-    /** Factory method to create an engine-specific model. */
-    virtual ModelPtr createModel() const = 0;
-
-    //@}
-
-    /**
-     * Creates a scene object responsible for handling models, simulations and
-     * light sources.
-     */
-    Scene(AnimationParameters &animationParameters, VolumeParameters &volumeParameters);
-
-    /**
-        Returns the bounding box of the scene
-    */
-    const Boxd &getBounds() const;
-
-    /** Gets the light manager */
-    LightManager &getLightManager();
-
-    /**
-        Adds a model to the scene
-        @throw std::runtime_error if model is empty
-      */
-    size_t addModel(ModelDescriptorPtr model);
-
-    /**
-     * @brief Adds a model to the scene with the specific model id
-     * @param id to be used as model identifier
-     * @param model the model itself
-     */
-    void addModel(const size_t id, ModelDescriptorPtr model);
-
-    /**
-        Removes a model from the scene
-        @param id id of the model (descriptor)
-        @return True if model was found and removed, false otherwise
-      */
-    bool removeModel(const size_t id);
-
-    /**
-     * @brief Check wether a model has been marked for replacement
-     *        for a new model
-     * @param id the ID of the model to replace the current one
-     * @return true if the model is on the list to be replaced
-     */
-    bool isMarkedForReplacement(const size_t id);
-
-    /**
-     * @brief Replaces an existing model (given its ID) for a new one
-     * @param id the ID of the model to replace
-     * @param modelDescriptor The model which will replace the current one
-     * @return True if the model was found and replace, false otherwise
-     */
-    bool replaceModel(const size_t id, ModelDescriptorPtr modelDescriptor);
-
-    ModelDescriptorPtr getModel(const size_t id) const;
-
-    const std::vector<ModelDescriptorPtr> &getModels() const;
-
-    /**
-        Builds a default scene made of a Cornell box, a reflective cube, and
-        a transparent sphere
-    */
-    void buildDefault();
-
-    /**
-     * @return true if the scene does not contain any geometry, false otherwise
-     */
-    bool empty() const;
-
-    /** Add a clip plane to the scene.
-     * @param plane The coefficients of the clip plane equation.
-     * @return The clip plane ID.
-     */
-    size_t addClipPlane(const Plane &plane);
-
-    /** Get a clip plane by its ID.
-        @param id the plane ID.
-        @return A pointer to the clip plane or null if not found.
-     */
-    ClipPlanePtr getClipPlane(const size_t id) const;
-
-    /** Remove a clip plane by its ID, or nop if not found. */
-    void removeClipPlane(const size_t id);
-
-    /**
-       @return the clip planes
-    */
-    const std::vector<ClipPlanePtr> &getClipPlanes() const;
-
-    /** @return the current size in bytes of the loaded geometry. */
-    size_t getSizeInBytes() const;
-
-    /** @return the current number of models in the scene. */
-    size_t getNumModels() const;
-
-    /**
-     * @brief initializeMaterials Initializes materials for all models in the
-     * scene
-     * @param colorMap Color map to use for every individual model
-     */
-    void setMaterialsColorMap(MaterialsColorMap colorMap);
-
-    MaterialPtr getBackgroundMaterial() const;
-
-    /** @return the transfer function used for volumes and simulations. */
-    TransferFunction &getTransferFunction();
-
-    /** @return the transfer function used for volumes and simulations. */
-    const TransferFunction &getTransferFunction() const;
-
-    /**
-     * Adds the list of models to the scene
-     *
-     * @param input list of models to add to the scene
-     * @param params Parameters for the model to be loaded
-     * @throws std::runtime_error if any of the models being added is not
-     * correct
-     */
-    void addModels(std::vector<ModelDescriptorPtr> &input, const ModelParams &params);
-
-    void visitModels(const std::function<void(Model &)> &functor);
-
-    /** @internal */
-    std::shared_lock<std::shared_timed_mutex> acquireReadAccess() const;
-
-    /** @internal */
-    void copyFrom(const Scene &rhs);
-
-    virtual void copyFromImpl(const Scene &rhs);
-
-protected:
-    /** @return True if this scene supports scene updates from any thread. */
-    virtual bool supportsConcurrentSceneUpdates() const;
-
-    void _computeBounds();
-    void _updateAnimationParameters();
-
-    AnimationParameters &_animationParameters;
-    VolumeParameters &_volumeParameters;
-    MaterialPtr _backgroundMaterial;
-
-    TransferFunction _transferFunction;
-
-    // Model
-    size_t _modelID{0};
-    std::vector<ModelDescriptorPtr> _modelDescriptors;
-    mutable std::shared_timed_mutex _modelMutex;
-
-    std::unordered_map<size_t, ModelDescriptorPtr> _markedForReplacement;
-
-    LightManager _lightManager;
-    std::vector<ClipPlanePtr> _clipPlanes;
-
-    Boxd _bounds;
+    std::string type; // "Binary" or "File"
+    std::string path;
+    std::string givenName;
+    std::string loaderName;
+    JsonValue loadParameters;
 };
 
-using ScenePtr = std::shared_ptr<Scene>;
+class Scene : public EngineObject
+{
+public:
+    Scene();
+    ~Scene();
+
+    const Bounds &getBounds() const noexcept;
+
+    std::vector<ModelInstance*> addModels(ModelsLoadParameters params, std::vector<Model::Ptr>&& models);
+    ModelInstance& getModel(const uint32_t modelID);
+    const ModelInstance& getModel(const uint32_t modelID) const;
+    std::vector<uint32_t> getAllModelIDs() const noexcept;
+    void removeModel(const uint32_t modelID);
+
+    uint32_t addLight(Light::Ptr&& light) noexcept;
+    const Light& getLight(const uint32_t lightID) const;
+    void removeLight(const uint32_t lightID);
+
+    void commit() final;
+
+    OSPWorld handle() const noexcept;
+
+private:
+    struct ModelIndex
+    {
+        // used to find and delete a ModelIndex when the model it corresponds with is deleted from the scene
+        uint32_t modelId {};
+        // Index in the array of loaded models spitted by the loader
+        uint32_t modelIndex {};
+    };
+    /**
+     * @brief The ModelsLoadEntry struct is used to keep track of every add-model request
+     * made to the system. It is used when creating a "dump image" of the current system so that
+     * it can be restored later.
+     *
+     * This, however, does not allow to dump binary-uploaded models. To allow for that, the
+     * dump image method should be implemented as a binary file with the binary contents of the
+     * system, which could become a 300 GB+ file.
+     *
+     * For this reason. the current implementation simply dumps the state of the objects of the
+     * engine + the parameters to load the active models
+     */
+    struct ModelsLoadEntry
+    {
+        ModelsLoadParameters params;
+        // For a given loader + parameters, it will produce the same models, in the same
+        // order, on every call. modelIndices holds the indices of the models which must be
+        // kept after performing the loader call. This is because an user might have loaded
+        // multiple models, but then deleted some before creating the dump.
+        std::vector<ModelIndex> modelIndices;
+    };
+
+private:
+    Bounds _bounds;
+
+    // Load is an asynchronous task, so addModels can be accessed by multiple threads
+    std::mutex _loadMutex;
+    uint32_t _modelIdFactory {0};
+    std::map<uint32_t, ModelInstance::Ptr> _models;
+    std::vector<ModelsLoadEntry> _loadEntries;
+
+    uint32_t _lightIdFactory {0};
+    std::map<uint32_t, Light::Ptr> _lights;
+
+    OSPWorld _handle {nullptr};
+};
 
 } // namespace brayns

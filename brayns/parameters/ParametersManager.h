@@ -23,8 +23,6 @@
 #include <brayns/parameters/AnimationParameters.h>
 #include <brayns/parameters/ApplicationParameters.h>
 #include <brayns/parameters/NetworkParameters.h>
-#include <brayns/parameters/RenderingParameters.h>
-#include <brayns/parameters/VolumeParameters.h>
 
 namespace brayns
 {
@@ -64,25 +62,11 @@ public:
     const AnimationParameters &getAnimationParameters() const;
 
     /**
-       Gets rendering parameters
-       @return Rendering parameters for the current scene
-    */
-    RenderingParameters &getRenderingParameters();
-    const RenderingParameters &getRenderingParameters() const;
-
-    /**
        Gets application parameters
        @return Application parameters for the current scene
     */
     ApplicationParameters &getApplicationParameters();
     const ApplicationParameters &getApplicationParameters() const;
-
-    /**
-       Gets volume parameters
-       @return Parameters for the current volume
-    */
-    VolumeParameters &getVolumeParameters();
-    const VolumeParameters &getVolumeParameters() const;
 
     /**
        Gets volume parameters
@@ -109,8 +93,6 @@ private:
     std::vector<AbstractParameters *> _parameterSets;
     AnimationParameters _animationParameters;
     ApplicationParameters _applicationParameters;
-    RenderingParameters _renderingParameters;
-    VolumeParameters _volumeParameters;
     NetworkParameters _networkParameters;
 };
 } // namespace brayns

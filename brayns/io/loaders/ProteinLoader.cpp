@@ -21,10 +21,7 @@
 #include "ProteinLoader.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/models/geometricmodels/SpheresModel.h>
 
 #include <assert.h>
 #include <fstream>
@@ -40,7 +37,7 @@ constexpr char LOADER_NAME[] = "protein";
  */
 struct PDBCellPositions
 {
-    int id;
+    int32_t id;
     Vector3f position;
     Vector3f unknown;
 };
@@ -49,14 +46,14 @@ struct PDBCellPositions
  */
 struct Atom
 {
-    int processed;
-    int id;
-    int index;
+    int32_t processed;
+    int32_t id;
+    int32_t index;
     Vector3f position;
     float radius;
-    int materialId;
-    int chainId;
-    int residue;
+    int32_t materialId;
+    int32_t chainId;
+    int32_t residue;
 };
 
 /** Structure defining an atom radius in microns
@@ -67,7 +64,7 @@ struct AtomicRadius
     float radius;
     int index;
 };
-const float DEFAULT_RADIUS = 25.f;
+constexpr float DEFAULT_RADIUS = 25.f;
 
 /** Structure defining the color of atoms according to the JMol Scheme
  */
@@ -312,18 +309,19 @@ static AtomicRadius atomic_radii[colorMapSize] = // atomic radii in microns
      {"OXT", 25.f, 112},
      {"P", 25.f, 113}};
 
-std::vector<ModelDescriptorPtr> ProteinLoader::importFromFile(
-    const std::string &fileName,
-    const LoaderProgress &,
-    const ProteinLoaderParameters &properties,
-    Scene &scene) const
+std::vector<Model::Ptr> ProteinLoader::importFromFile(
+    const std::string &fileName, const LoaderProgress &cb, const ProteinLoaderParameters &properties) const
 {
+    (void) cb;
+
     std::ifstream file(fileName.c_str());
     if (!file.is_open())
         throw std::runtime_error("Could not open " + fileName);
 
     size_t lineIndex{0};
-    std::map<size_t, std::vector<Sphere>> spheres;
+
+    std::vector<Sphere> spheres;
+    std::vector<uint8_t> colorMapIndices;
 
     while (file.good())
     {
@@ -432,29 +430,32 @@ std::vector<ModelDescriptorPtr> ProteinLoader::importFromFile(
             // Convert radius from angstrom
             const float radius = 0.0001f * atom.radius * properties.radius_multiplier;
 
-            spheres[atom.materialId].push_back({center, radius});
+            spheres.push_back({center, radius});
+            colorMapIndices.push_back(static_cast<uint8_t>(atom.materialId));
         }
     }
     file.close();
 
-    auto model = scene.createModel();
+    // Generate the color map for the model
+    std::vector<Vector4f> modelColors;
+    modelColors.reserve(colorMapSize);
 
-    // Add materials and spheres
-    for (const auto &spheresPerMaterial : spheres)
+    const auto normalizationFactor = 1.f / 255.f;
+    for(const auto& colorMapEntry : colorMap)
     {
-        const auto materialId = spheresPerMaterial.first;
-        auto material = model->createMaterial(materialId, colorMap[materialId].symbol);
-        material->setDiffuseColor(
-            {colorMap[materialId].R / 255.f, colorMap[materialId].G / 255.f, colorMap[materialId].B / 255.f});
-        for (const auto &sphere : spheresPerMaterial.second)
-            model->addSphere(materialId, sphere);
+        const auto r = colorMapEntry.R * normalizationFactor;
+        const auto g = colorMapEntry.G * normalizationFactor;
+        const auto b = colorMapEntry.B * normalizationFactor;
+        modelColors.emplace_back(r, g, b, 1.f);
     }
 
-    Transformation transformation;
-    transformation.setRotationCenter(model->getBounds().getCenter());
-    auto modelDescriptor = std::make_shared<ModelDescriptor>(std::move(model), fileName);
-    modelDescriptor->setTransformation(transformation);
-    return {modelDescriptor};
+    auto model = std::make_unique<SpheresModel>();
+
+    model->addSpheres(spheres);
+    model->setColors(std::move(modelColors));
+    model->setColorIndices(std::move(colorMapIndices));
+
+    return {std::move(model)};
 }
 
 std::string ProteinLoader::getName() const
