@@ -142,13 +142,22 @@ struct JsonSchema
 struct JsonSchemaHelper
 {
     /**
-     * @brief Check if the schema is empty (wildcard).
+     * @brief Check if the schema is a wildcard (allow anything).
      *
      * @param schema Schema to check.
-     * @return true Empty schema.
-     * @return false Non-empty schema.
+     * @return true Wildcard schema.
+     * @return false Not a wildcard schema.
      */
-    static bool isEmpty(const JsonSchema &schema);
+    static bool isWildcard(const JsonSchema &schema);
+
+    /**
+     * @brief Check if the schema specifies a null element.
+     *
+     * @param schema Schema to check.
+     * @return true Null.
+     * @return false Not null.
+     */
+    static bool isNull(const JsonSchema &schema);
 
     /**
      * @brief Check wether the schema is an union.
@@ -231,13 +240,6 @@ struct JsonSchemaHelper
      * @param schema Schema to update.
      */
     static void allowAnyAdditionalProperty(JsonSchema &schema);
-
-    /**
-     * @brief Add all schema properties to required.
-     *
-     * @param schema Schema to update.
-     */
-    static void requireAll(JsonSchema &schema);
 
     /**
      * @brief Get the schema of null object (not a wildcard).

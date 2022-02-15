@@ -22,10 +22,16 @@
 #include "UpdateInstanceEntrypoint.h"
 
 #include <brayns/network/common/ExtractModel.h>
-#include <brayns/network/entrypoint/EntrypointException.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
 {
+UpdateInstanceEntrypoint::UpdateInstanceEntrypoint(Scene &scene, INetworkInterface &interface)
+    : _scene(scene)
+    , _notifier(interface)
+{
+}
+
 std::string UpdateInstanceEntrypoint::getName() const
 {
     return "update-instance";
@@ -41,21 +47,18 @@ void UpdateInstanceEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     auto modelId = params.getModelID();
     auto instanceId = params.getInstanceID();
-    auto &engine = getApi().getEngine();
-    auto &scene = engine.getScene();
-    auto &model = ExtractModel::fromId(scene, modelId);
+    auto &model = ExtractModel::fromId(_scene, modelId);
     auto instance = model.getInstance(instanceId);
     if (!instance)
     {
-        throw EntrypointException(
-            "Model with ID " + std::to_string(modelId) + " has no instance with ID " + std::to_string(instanceId));
+        throw JsonRpcException(
+            "Model with ID " + std::to_string(modelId) + " has no instances with ID " + std::to_string(instanceId));
     }
     auto &source = model.getModel();
     source.markInstancesDirty();
-    scene.markModified(false);
-    engine.triggerRender();
+    _scene.markModified(false);
     request.getParams(*instance);
-    request.notify(*instance);
+    _notifier.notify(request, *instance);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

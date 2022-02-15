@@ -25,6 +25,11 @@
 
 namespace brayns
 {
+GetModelEntrypoint::GetModelEntrypoint(Scene &scene)
+    : _scene(scene)
+{
+}
+
 std::string GetModelEntrypoint::getName() const
 {
     return "get-model";
@@ -37,7 +42,7 @@ std::string GetModelEntrypoint::getDescription() const
 
 void GetModelEntrypoint::onRequest(const Request &request)
 {
-    auto &model = ExtractModel::fromRequest(getApi(), request);
+    auto &model = ExtractModel::fromRequest(_scene, request);
     request.reply(model);
 }
 } // namespace brayns

@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <brayns/engine/Scene.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <plugin/network/messages/MirrorModelMessage.h>
@@ -28,7 +30,12 @@
 class MirrorModelEntrypoint : public brayns::Entrypoint<MirrorModelMessage, brayns::EmptyMessage>
 {
 public:
+    MirrorModelEntrypoint(brayns::Scene &scene);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    brayns::Scene &_scene;
 };

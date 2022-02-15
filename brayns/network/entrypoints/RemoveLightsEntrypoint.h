@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <brayns/engine/LightManager.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/RemoveLightsMessage.h>
 
@@ -29,8 +31,13 @@ namespace brayns
 class RemoveLightsEntrypoint : public Entrypoint<RemoveLightsMessage, EmptyMessage>
 {
 public:
+    RemoveLightsEntrypoint(LightManager &lights);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    LightManager &_lights;
 };
 } // namespace brayns

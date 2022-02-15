@@ -21,21 +21,36 @@
 
 #include "RateLimiter.h"
 
+#include <algorithm>
+
 namespace brayns
 {
-RateLimiter RateLimiter::fromFps(size_t fps)
+RateLimiter RateLimiter::fromRate(size_t rate)
 {
-    if (fps == 0)
-    {
-        return {Duration::max()};
-    }
-    auto period = std::chrono::duration<double>(1.0 / fps);
-    return std::chrono::duration_cast<Duration>(period);
+    RateLimiter limiter;
+    limiter.setRate(rate);
+    return limiter;
 }
 
 RateLimiter::RateLimiter(Duration period)
     : _period(period)
 {
+}
+
+void RateLimiter::setPeriod(Duration period)
+{
+    _period = period;
+}
+
+void RateLimiter::setRate(size_t rate)
+{
+    if (rate == 0)
+    {
+        _period = Duration::max();
+        return;
+    }
+    auto period = std::chrono::duration<double>(1.0 / rate);
+    _period = std::chrono::duration_cast<Duration>(period);
 }
 
 bool RateLimiter::_tryUpdateLastCall()
@@ -46,7 +61,8 @@ bool RateLimiter::_tryUpdateLastCall()
     {
         return false;
     }
-    auto delay = (elapsed - _period) % _period;
+    auto delay = elapsed - _period;
+    delay = std::min(delay, _period);
     _lastCall = currentTime - delay;
     return true;
 }

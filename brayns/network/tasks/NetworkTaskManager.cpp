@@ -25,88 +25,87 @@
 
 namespace brayns
 {
-/**
- * @brief Add a task to the pool with the associated client and request ID.
- *
- * @param handle Connection handle of the client requesting the task.
- * @param id ID of the request starting the task.
- * @param task Abstract task (might be running or not).
- */
-void NetworkTaskMap::add(const ConnectionHandle &handle, const RequestId &id, NetworkTaskPtr task)
+TaskAlreadyRunningException::TaskAlreadyRunningException(const ClientRef &client, const RequestId &id)
+    : InvalidRequestException(
+        "A task is already running for client " + client.toString() + " and request ID '" + id.getDisplayText() + "'")
 {
-    assert(task);
-    _tasks[handle][id] = std::move(task);
 }
 
-/**
- * @brief Retreive a task using its client and request ID.
- *
- * @param handle Connection handle of the client requesting the task.
- * @param id ID of the request starting the task.
- * @return NetworkTask* Task or null if not found.
- */
-NetworkTask *NetworkTaskMap::find(const ConnectionHandle &handle, const RequestId &id) const
+TaskNotFoundException::TaskNotFoundException(const ClientRef &client)
+    : InvalidParamsException("No tasks running for client " + client.toString())
 {
-    auto i = _tasks.find(handle);
+}
+
+TaskNotFoundException::TaskNotFoundException(const ClientRef &client, const RequestId &id)
+    : InvalidParamsException(
+        "No tasks running for client " + client.toString() + " and request ID '" + id.getDisplayText() + "'")
+{
+}
+
+void NetworkTaskManager::add(const ClientRef &client, const RequestId &id, std::unique_ptr<NetworkTask> task)
+{
+    assert(task);
+    auto &oldTask = _tasks[client][id];
+    if (oldTask)
+    {
+        throw TaskAlreadyRunningException(client, id);
+    }
+    oldTask = std::move(task);
+    oldTask->start();
+}
+
+void NetworkTaskManager::cancel(const ClientRef &client, const RequestId &id)
+{
+    auto i = _tasks.find(client);
     if (i == _tasks.end())
     {
-        return nullptr;
+        throw TaskNotFoundException(client);
     }
     auto &tasks = i->second;
     auto j = tasks.find(id);
     if (j == tasks.end())
     {
-        return nullptr;
+        throw TaskNotFoundException(client, id);
     }
     auto &task = j->second;
-    return task.get();
-}
-
-void NetworkTaskManager::addOrReplace(const ConnectionHandle &handle, const RequestId &id, NetworkTaskPtr task)
-{
-    auto oldTask = _tasks.find(handle, id);
-    if (oldTask)
-    {
-        oldTask->cancelAndWait();
-    }
-    _tasks.add(handle, id, std::move(task));
-}
-
-bool NetworkTaskManager::addIfNotPresent(const ConnectionHandle &handle, const RequestId &id, NetworkTaskPtr task)
-{
-    auto oldTask = _tasks.find(handle, id);
-    if (oldTask)
-    {
-        return false;
-    }
-    _tasks.add(handle, id, std::move(task));
-    return true;
-}
-
-void NetworkTaskManager::disconnect(const ConnectionHandle &handle) const
-{
-    _tasks.forEach(handle, [&](auto &, auto &task) { task.onDisconnect(); });
-}
-
-bool NetworkTaskManager::cancel(const ConnectionHandle &handle, const RequestId &id) const
-{
-    auto task = _tasks.find(handle, id);
-    if (!task)
-    {
-        return false;
-    }
     task->cancel();
-    return true;
+}
+
+void NetworkTaskManager::disconnect(const ClientRef &client)
+{
+    auto i = _tasks.find(client);
+    if (i == _tasks.end())
+    {
+        return;
+    }
+    auto &tasks = i->second;
+    for (const auto &[id, task] : tasks)
+    {
+        task->disconnect();
+    }
 }
 
 void NetworkTaskManager::poll()
 {
-    _tasks.removeIf(
-        [](auto &, auto &, auto &task)
+    for (auto i = _tasks.begin(); i != _tasks.end();)
+    {
+        auto &tasks = i->second;
+        for (auto j = tasks.begin(); j != tasks.end();)
         {
-            bool complete = !task.isRunning();
-            task.poll();
-            return complete;
-        });
+            auto &task = j->second;
+            if (task->poll())
+            {
+                j = tasks.erase(j);
+                continue;
+            }
+            ++j;
+        }
+        if (tasks.empty())
+        {
+            i = _tasks.erase(i);
+            continue;
+        }
+        ++i;
+    }
 }
 } // namespace brayns

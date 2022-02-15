@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <brayns/io/LoaderRegistry.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
@@ -28,8 +30,13 @@ namespace brayns
 class LoadersSchemaEntrypoint : public Entrypoint<EmptyMessage, JsonValue>
 {
 public:
+    LoadersSchemaEntrypoint(const LoaderRegistry &loaders);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    const LoaderRegistry &_loaders;
 };
 } // namespace brayns

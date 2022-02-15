@@ -32,13 +32,11 @@ namespace brayns
 class ModelTransferFunction
 {
 public:
-    using Buffer = JsonBuffer<TransferFunction>;
-
     ModelTransferFunction() = default;
     ModelTransferFunction(Scene &scene);
 
     void setId(size_t id);
-    void setTransferFunction(const Buffer &buffer);
+    void setTransferFunction(const JsonBuffer<TransferFunction> &buffer);
 
 private:
     Scene *_scene = nullptr;

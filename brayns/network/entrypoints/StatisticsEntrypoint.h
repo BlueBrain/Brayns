@@ -26,16 +26,10 @@
 
 namespace brayns
 {
-template<>
-struct ObjectExtractor<Statistics>
-{
-    static Statistics &extract(PluginAPI &api);
-};
-
 class GetStatisticsEntrypoint : public GetEntrypoint<Statistics>
 {
 public:
-    GetStatisticsEntrypoint();
+    GetStatisticsEntrypoint(const Statistics &statistics, INetworkInterface &interface);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

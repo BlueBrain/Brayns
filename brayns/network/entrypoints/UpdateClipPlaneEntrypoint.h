@@ -21,16 +21,25 @@
 
 #pragma once
 
+#include <brayns/engine/Scene.h>
+
 #include <brayns/network/adapters/ClipPlaneAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/jsonrpc/JsonRpcNotifier.h>
 
 namespace brayns
 {
 class UpdateClipPlaneEntrypoint : public Entrypoint<ClipPlane, EmptyMessage>
 {
 public:
+    UpdateClipPlaneEntrypoint(Scene &scene, INetworkInterface &interface);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    Scene &_scene;
+    JsonRpcNotifier _notifier;
 };
 } // namespace brayns

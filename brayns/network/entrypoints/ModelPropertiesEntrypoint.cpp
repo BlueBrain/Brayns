@@ -25,6 +25,11 @@
 
 namespace brayns
 {
+GetModelPropertiesEntrypoint::GetModelPropertiesEntrypoint(Scene &scene)
+    : _scene(scene)
+{
+}
+
 std::string GetModelPropertiesEntrypoint::getName() const
 {
     return "get-model-properties";
@@ -37,8 +42,13 @@ std::string GetModelPropertiesEntrypoint::getDescription() const
 
 void GetModelPropertiesEntrypoint::onRequest(const Request &request)
 {
-    auto &model = ExtractModel::fromRequest(getApi(), request);
+    auto &model = ExtractModel::fromRequest(_scene, request);
     request.reply(model.getProperties());
+}
+
+SetModelPropertiesEntrypoint::SetModelPropertiesEntrypoint(Scene &scene)
+    : _scene(scene)
+{
 }
 
 std::string SetModelPropertiesEntrypoint::getName() const
@@ -55,11 +65,16 @@ void SetModelPropertiesEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto &newProperties = params.properties;
-    auto &model = ExtractModel::fromParams(getApi(), params);
+    auto &model = ExtractModel::fromParams(_scene, params);
     auto oldProperties = model.getProperties();
     oldProperties.merge(newProperties);
     model.setProperties(oldProperties);
     request.reply(EmptyMessage());
+}
+
+ModelPropertiesSchemaEntrypoint::ModelPropertiesSchemaEntrypoint(Scene &scene)
+    : _scene(scene)
+{
 }
 
 std::string ModelPropertiesSchemaEntrypoint::getName() const
@@ -74,7 +89,7 @@ std::string ModelPropertiesSchemaEntrypoint::getDescription() const
 
 void ModelPropertiesSchemaEntrypoint::onRequest(const Request &request)
 {
-    auto &model = ExtractModel::fromRequest(getApi(), request);
+    auto &model = ExtractModel::fromRequest(_scene, request);
     auto &properties = model.getProperties();
     auto schema = Json::getSchema(properties);
     auto result = Json::serialize(schema);

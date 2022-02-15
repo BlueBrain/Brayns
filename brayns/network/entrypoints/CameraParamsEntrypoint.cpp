@@ -23,6 +23,11 @@
 
 namespace brayns
 {
+GetCameraParamsEntrypoint::GetCameraParamsEntrypoint(const Camera &camera)
+    : GetPropertyObjectEntrypoint(camera)
+{
+}
+
 std::string GetCameraParamsEntrypoint::getName() const
 {
     return "get-camera-params";
@@ -31,6 +36,11 @@ std::string GetCameraParamsEntrypoint::getName() const
 std::string GetCameraParamsEntrypoint::getDescription() const
 {
     return "Get the current properties of the camera";
+}
+
+SetCameraParamsEntrypoint::SetCameraParamsEntrypoint(Camera &camera, INetworkInterface &interface)
+    : SetPropertyObjectEntrypoint(camera, interface)
+{
 }
 
 std::string SetCameraParamsEntrypoint::getName() const

@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <brayns/network/plugin/NetworkManager.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 #include <brayns/utils/DynamicLib.h>
 
@@ -28,6 +29,8 @@
 namespace brayns
 {
 /**
+ * @brief Plugin manager to load and update plugins.
+ *
  */
 class PluginManager
 {
@@ -39,21 +42,42 @@ public:
      */
     PluginManager(int argc, const char **argv);
 
-    /** Calls ExtensionPlugin::init in all loaded plugins */
+    /**
+     * @brief Load network engine if required and call init() on all plugins.
+     *
+     * @param api API access.
+     */
     void initPlugins(PluginAPI *api);
 
-    /** Destroys all plugins. */
+    /**
+     * @brief Destroy all plugins.
+     *
+     */
     void destroyPlugins();
 
-    /** Calls ExtensionPlugin::preRender in all loaded plugins */
+    /**
+     * @brief Call preRender() on all plugins.
+     *
+     */
     void preRender();
 
-    /** Calls ExtensionPlugin::postRender in all loaded plugins */
+    /**
+     * @brief Call postRender() on all plugins
+     *
+     */
     void postRender();
+
+    /**
+     * @brief Get the network manager plugin.
+     *
+     * @return NetworkManager* Network manager or null if disabled.
+     */
+    NetworkManager *getNetworkManager() const;
 
 private:
     std::vector<DynamicLib> _libs;
     std::vector<std::unique_ptr<ExtensionPlugin>> _extensions;
+    NetworkManager *_networkManager = nullptr;
 
     void _loadPlugin(const char *name, int argc, const char *argv[]);
 };

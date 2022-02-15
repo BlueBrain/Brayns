@@ -23,6 +23,11 @@
 
 namespace brayns
 {
+Camera::Camera(const Camera &other)
+{
+    *this = other;
+}
+
 Camera &Camera::operator=(const Camera &rhs)
 {
     if (this == &rhs)

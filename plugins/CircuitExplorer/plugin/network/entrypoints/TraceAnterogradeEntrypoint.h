@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <brayns/engine/Scene.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <plugin/api/CircuitColorManager.h>
@@ -29,12 +31,13 @@
 class TraceAnterogradeEntrypoint : public brayns::Entrypoint<TraceAnterogradeMessage, brayns::EmptyMessage>
 {
 public:
-    TraceAnterogradeEntrypoint(CircuitColorManager &manager);
+    TraceAnterogradeEntrypoint(brayns::Scene &scene, CircuitColorManager &manager);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
+    brayns::Scene &_scene;
     CircuitColorManager &_manager;
 };

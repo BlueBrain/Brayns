@@ -93,7 +93,7 @@ private:
             return;
         }
         auto &schema = additionalProperties[0];
-        if (JsonSchemaHelper::isEmpty(schema))
+        if (JsonSchemaHelper::isWildcard(schema))
         {
             return;
         }

@@ -36,10 +36,6 @@
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
 
-#include <brayns/parameters/ParametersManager.h>
-
-#include <brayns/network/interface/ActionInterface.h>
-
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <brayns/utils/DynamicLib.h>
@@ -87,9 +83,10 @@ struct Brayns::Impl : public PluginAPI
         _engine->getScene().commit(); // Needed to obtain a bounding box
         _adjustCamera();
 
-        if (_actionInterface)
+        auto network = _pluginManager.getNetworkManager();
+        if (network)
         {
-            _actionInterface->start();
+            network->start();
         }
     }
 
@@ -191,6 +188,11 @@ struct Brayns::Impl : public PluginAPI
         _engine->getStatistics().resetModified();
     }
 
+    NetworkManager *getNetworkManager()
+    {
+        return _pluginManager.getNetworkManager();
+    }
+
     Engine &getEngine() final
     {
         return *_engine;
@@ -216,19 +218,14 @@ struct Brayns::Impl : public PluginAPI
         return _loaderRegistry;
     }
 
-    void triggerRender() final
+    INetworkInterface *getNetworkInterface() final
     {
-        _engine->triggerRender();
-    }
-
-    ActionInterface *getActionInterface() final
-    {
-        return _actionInterface.get();
-    }
-
-    void setActionInterface(const std::shared_ptr<ActionInterface> &interface) final
-    {
-        _actionInterface = interface;
+        auto manager = _pluginManager.getNetworkManager();
+        if (!manager)
+        {
+            return nullptr;
+        }
+        return &manager->getInterface();
     }
 
     Scene &getScene() final
@@ -379,7 +376,6 @@ private:
     Timer _renderTimer;
     std::atomic<double> _lastFPS;
 
-    std::shared_ptr<ActionInterface> _actionInterface;
     std::shared_ptr<DirectionalLight> _sunLight;
 };
 
@@ -430,10 +426,5 @@ LoaderRegistry &Brayns::getLoaderRegistry()
 ParametersManager &Brayns::getParametersManager()
 {
     return _impl->getParametersManager();
-}
-
-ActionInterface *Brayns::getActionInterface()
-{
-    return _impl->getActionInterface();
 }
 } // namespace brayns

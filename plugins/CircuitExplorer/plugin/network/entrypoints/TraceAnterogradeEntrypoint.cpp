@@ -23,8 +23,9 @@
 
 #include <brayns/network/common/ExtractModel.h>
 
-TraceAnterogradeEntrypoint::TraceAnterogradeEntrypoint(CircuitColorManager &manager)
-    : _manager(manager)
+TraceAnterogradeEntrypoint::TraceAnterogradeEntrypoint(brayns::Scene &scene, CircuitColorManager &manager)
+    : _scene(scene)
+    , _manager(manager)
 {
 }
 
@@ -46,18 +47,17 @@ void TraceAnterogradeEntrypoint::onRequest(const Request &request)
     // Validation
     if (params.cell_gids.empty())
     {
-        throw brayns::EntrypointException("No input cell GIDs specified");
+        throw brayns::JsonRpcException("No input cell GIDs specified");
     }
 
     // Extract API data
     auto modelId = params.model_id;
-    auto &scene = getApi().getEngine().getScene();
-    auto &model = brayns::ExtractModel::fromId(scene, modelId);
+    auto &model = brayns::ExtractModel::fromId(_scene, modelId);
 
     // Retreive cell mapping
     if (!_manager.handlerExists(model))
     {
-        throw brayns::EntrypointException(
+        throw brayns::JsonRpcException(
             "There given model ID does not correspond to any existing "
             "circuit model");
     }
@@ -73,8 +73,7 @@ void TraceAnterogradeEntrypoint::onRequest(const Request &request)
 
     _manager.updateColorsById(model, colorMap);
 
-    scene.markModified();
-    getApi().triggerRender();
+    _scene.markModified();
 
     request.reply(brayns::EmptyMessage());
 }

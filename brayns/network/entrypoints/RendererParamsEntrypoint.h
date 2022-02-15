@@ -21,19 +21,17 @@
 
 #pragma once
 
+#include <brayns/engine/Renderer.h>
+
 #include <brayns/network/entrypoint/PropertyObjectEntrypoint.h>
 
 namespace brayns
 {
-template<>
-struct ObjectExtractor<Renderer>
-{
-    static Renderer &extract(PluginAPI &api);
-};
-
 class GetRendererParamsEntrypoint : public GetPropertyObjectEntrypoint<Renderer>
 {
 public:
+    GetRendererParamsEntrypoint(const Renderer &renderer);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
 };
@@ -41,6 +39,8 @@ public:
 class SetRendererParamsEntrypoint : public SetPropertyObjectEntrypoint<Renderer>
 {
 public:
+    SetRendererParamsEntrypoint(Renderer &renderer, INetworkInterface &interface);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
 };

@@ -44,6 +44,11 @@ public:
 
 namespace brayns
 {
+GetMaterialIdsEntrypoint::GetMaterialIdsEntrypoint(Scene &scene)
+    : _scene(scene)
+{
+}
+
 std::string GetMaterialIdsEntrypoint::getName() const
 {
     return "get-material-ids";
@@ -57,8 +62,7 @@ std::string GetMaterialIdsEntrypoint::getDescription() const
 void GetMaterialIdsEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto &scene = getApi().getScene();
-    auto &descriptor = ExtractModel::fromId(scene, params.id);
+    auto &descriptor = ExtractModel::fromId(_scene, params.id);
     auto &model = descriptor.getModel();
     auto &materials = model.getMaterials();
     GetMaterialIdsResult result;

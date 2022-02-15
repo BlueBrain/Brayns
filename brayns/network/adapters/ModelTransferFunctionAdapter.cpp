@@ -35,7 +35,7 @@ void ModelTransferFunction::setId(size_t id)
     ExtractModel::fromId(*_scene, id);
 }
 
-void ModelTransferFunction::setTransferFunction(const Buffer &buffer)
+void ModelTransferFunction::setTransferFunction(const JsonBuffer<TransferFunction> &buffer)
 {
     auto &transferFunction = _scene->getTransferFunction();
     buffer.deserialize(transferFunction);

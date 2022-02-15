@@ -21,10 +21,20 @@
 
 #include "RequestModelUploadEntrypoint.h"
 
-#include <brayns/network/binary/ModelUploadTask.h>
+#include <brayns/network/upload/ModelUploadTask.h>
 
 namespace brayns
 {
+RequestModelUploadEntrypoint::RequestModelUploadEntrypoint(
+    Scene &scene,
+    const LoaderRegistry &loaders,
+    ModelUploadManager &modelUploads)
+    : _scene(scene)
+    , _loaders(loaders)
+    , _modelUploads(modelUploads)
+{
+}
+
 std::string RequestModelUploadEntrypoint::getName() const
 {
     return "request-model-upload";
@@ -43,12 +53,7 @@ bool RequestModelUploadEntrypoint::isAsync() const
 
 void RequestModelUploadEntrypoint::onRequest(const Request &request)
 {
-    auto &engine = getApi().getEngine();
-    auto &registry = getApi().getLoaderRegistry();
-    auto task = std::make_shared<ModelUploadTask>(engine, registry);
-    launchTask(task, request);
-    auto &binary = getBinary();
-    auto &handle = request.getConnectionHandle();
-    binary.addTask(handle, task);
+    auto task = std::make_unique<ModelUploadTask>(request, _scene, _loaders);
+    _modelUploads.add(std::move(task));
 }
 } // namespace brayns

@@ -23,6 +23,11 @@
 
 namespace brayns
 {
+ResetCameraEntrypoint::ResetCameraEntrypoint(Camera &camera)
+    : _camera(camera)
+{
+}
+
 std::string ResetCameraEntrypoint::getName() const
 {
     return "reset-camera";
@@ -35,10 +40,7 @@ std::string ResetCameraEntrypoint::getDescription() const
 
 void ResetCameraEntrypoint::onRequest(const Request &request)
 {
-    auto &engine = getApi().getEngine();
-    auto &camera = engine.getCamera();
-    camera.reset();
-    engine.triggerRender();
+    _camera.reset();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

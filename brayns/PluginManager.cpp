@@ -79,18 +79,15 @@ void PluginManager::initPlugins(PluginAPI *api)
 
     if (!uri.empty())
     {
-        _extensions.insert(_extensions.begin(), std::make_unique<NetworkManager>());
+        auto networkManager = std::make_unique<NetworkManager>();
+        _networkManager = networkManager.get();
+        _extensions.insert(_extensions.begin(), std::move(networkManager));
     }
 
     for (const auto &extension : _extensions)
     {
         extension->_api = api;
         extension->init();
-    }
-
-    if (auto interface = api->getActionInterface())
-    {
-        interface->setupEntrypoints();
     }
 }
 
@@ -103,13 +100,22 @@ void PluginManager::destroyPlugins()
 void PluginManager::preRender()
 {
     for (const auto &extension : _extensions)
+    {
         extension->preRender();
+    }
 }
 
 void PluginManager::postRender()
 {
     for (const auto &extension : _extensions)
+    {
         extension->postRender();
+    }
+}
+
+NetworkManager *PluginManager::getNetworkManager() const
+{
+    return _networkManager;
 }
 
 void PluginManager::_loadPlugin(const char *name, int argc, const char *argv[])

@@ -21,12 +21,12 @@
 
 #include "GetExportFramesProgressEntrypoint.h"
 
-#include <brayns/network/entrypoint/EntrypointException.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
 {
-GetExportFramesProgressEntrypoint::GetExportFramesProgressEntrypoint(std::shared_ptr<FrameExporter> &expt)
-    : _exporter(expt)
+GetExportFramesProgressEntrypoint::GetExportFramesProgressEntrypoint(FrameExporter &exporter)
+    : _exporter(exporter)
 {
 }
 
@@ -42,20 +42,19 @@ std::string GetExportFramesProgressEntrypoint::getDescription() const
 
 void GetExportFramesProgressEntrypoint::onRequest(const Request &request)
 {
-    double progress{};
+    double progress = 0.0;
     try
     {
-        progress = _exporter->getExportProgress();
+        progress = _exporter.getExportProgress();
     }
     catch (const FrameExportNotRunningException &)
     {
-        throw EntrypointException(1, "There is no frame export in progress");
+        throw JsonRpcException(1, "There is no frame export in progress");
     }
     catch (const std::runtime_error &e)
     {
-        throw EntrypointException(2, e.what());
+        throw JsonRpcException(2, e.what());
     }
-
     request.reply({progress});
 }
 } // namespace brayns

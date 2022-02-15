@@ -23,6 +23,11 @@
 
 namespace brayns
 {
+ChunkEntrypoint::ChunkEntrypoint(ModelUploadManager &modelUploads)
+    : _modelUploads(modelUploads)
+{
+}
+
 std::string ChunkEntrypoint::getName() const
 {
     return "chunk";
@@ -36,10 +41,9 @@ std::string ChunkEntrypoint::getDescription() const
 void ChunkEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto &handle = request.getConnectionHandle();
+    auto &client = request.getClient();
     auto &id = params.id;
-    auto &binary = getBinary();
-    binary.setNextChunkId(handle, id);
+    _modelUploads.setNextChunkId(client, id);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

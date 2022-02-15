@@ -23,6 +23,11 @@
 
 namespace brayns
 {
+InspectEntrypoint::InspectEntrypoint(Renderer &renderer)
+    : _renderer(renderer)
+{
+}
+
 std::string InspectEntrypoint::getName() const
 {
     return "inspect";
@@ -37,9 +42,7 @@ void InspectEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto position = Vector2f(params.position);
-    auto &engine = getApi().getEngine();
-    auto &renderer = engine.getRenderer();
-    auto result = renderer.pick(position);
+    auto result = _renderer.pick(position);
     request.reply(result);
 }
 } // namespace brayns

@@ -21,7 +21,7 @@
 
 #include "ExtractModel.h"
 
-#include <brayns/network/entrypoint/EntrypointException.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
 {
@@ -40,7 +40,7 @@ ModelDescriptor &ExtractModel::fromId(Scene &scene, size_t id)
     auto model = scene.getModel(id);
     if (!model)
     {
-        throw EntrypointException("No model found with ID " + std::to_string(id));
+        throw JsonRpcException("No model found with ID " + std::to_string(id));
     }
     return *model;
 }

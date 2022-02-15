@@ -21,22 +21,23 @@
 
 #include "AddLightEntrypoint.h"
 
-#include <brayns/network/entrypoint/EntrypointException.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
 {
-void AddLightHelper::load(PluginAPI &api, LightPtr light, const NetworkRequest &request)
+void AddLightHelper::load(LightManager &lights, LightPtr light, const JsonRpcRequest &request)
 {
     if (!light)
     {
-        throw EntrypointException("Failed to extract light properties");
+        throw InvalidParamsException("Failed to extract light properties");
     }
-    auto &engine = api.getEngine();
-    auto &scene = engine.getScene();
-    auto &lightManager = scene.getLightManager();
-    auto id = lightManager.addLight(std::move(light));
-    engine.triggerRender();
+    auto id = lights.addLight(std::move(light));
     request.reply(Json::serialize(id));
+}
+
+AddLightDirectionalEntrypoint::AddLightDirectionalEntrypoint(LightManager &lights)
+    : AddLightEntrypoint(lights)
+{
 }
 
 std::string AddLightDirectionalEntrypoint::getName() const
@@ -49,6 +50,11 @@ std::string AddLightDirectionalEntrypoint::getDescription() const
     return "Add a directional light and return its ID";
 }
 
+AddLightSphereEntrypoint::AddLightSphereEntrypoint(LightManager &lights)
+    : AddLightEntrypoint(lights)
+{
+}
+
 std::string AddLightSphereEntrypoint::getName() const
 {
     return "add-light-sphere";
@@ -57,6 +63,11 @@ std::string AddLightSphereEntrypoint::getName() const
 std::string AddLightSphereEntrypoint::getDescription() const
 {
     return "Add a sphere light and return its ID";
+}
+
+AddLightQuadEntrypoint::AddLightQuadEntrypoint(LightManager &lights)
+    : AddLightEntrypoint(lights)
+{
 }
 
 std::string AddLightQuadEntrypoint::getName() const
@@ -69,6 +80,11 @@ std::string AddLightQuadEntrypoint::getDescription() const
     return "Add a quad light and return its ID";
 }
 
+AddLightSpotEntrypoint::AddLightSpotEntrypoint(LightManager &lights)
+    : AddLightEntrypoint(lights)
+{
+}
+
 std::string AddLightSpotEntrypoint::getName() const
 {
     return "add-light-spot";
@@ -77,6 +93,11 @@ std::string AddLightSpotEntrypoint::getName() const
 std::string AddLightSpotEntrypoint::getDescription() const
 {
     return "Add a spot light and return its ID";
+}
+
+AddLightAmbientEntrypoint::AddLightAmbientEntrypoint(LightManager &lights)
+    : AddLightEntrypoint(lights)
+{
 }
 
 std::string AddLightAmbientEntrypoint::getName() const

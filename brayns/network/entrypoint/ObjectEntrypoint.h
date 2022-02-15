@@ -23,67 +23,13 @@
 
 #include <brayns/json/Json.h>
 
-#include <brayns/network/common/RateLimiter.h>
+#include <brayns/network/common/NotificationPeriod.h>
+#include <brayns/network/jsonrpc/JsonRpcNotifier.h>
 
-#include "BaseEntrypoint.h"
+#include "IEntrypoint.h"
 
 namespace brayns
 {
-/**
- * @brief Template class used to extract an object from PluginAPI.
- *
- * Must have a static method T& extract(PluginAPI& api).
- *
- * @tparam T Object type to extract.
- */
-template<typename T>
-struct ObjectExtractor
-{
-};
-
-/**
- * @brief Available notification periods.
- *
- */
-struct NotificationPeriod
-{
-    /**
-     * @brief Duration used to measure periods.
-     *
-     */
-    using Duration = RateLimiter::Duration;
-
-    /**
-     * @brief Interactive notification period.
-     *
-     * @return Duration Equivalent duration.
-     */
-    static Duration interactive()
-    {
-        return std::chrono::milliseconds(1);
-    }
-
-    /**
-     * @brief Default notification period.
-     *
-     * @return Duration Equivalent duration.
-     */
-    static Duration defaultValue()
-    {
-        return std::chrono::milliseconds(50);
-    }
-
-    /**
-     * @brief Slow notification period.
-     *
-     * @return Duration Equivalent duration.
-     */
-    static Duration slow()
-    {
-        return std::chrono::milliseconds(750);
-    }
-};
-
 /**
  * @brief Base class for entrypoints retrieving a Brayns object.
  *
@@ -92,33 +38,21 @@ struct NotificationPeriod
  * @tparam ObjectType Object type to retrieve.
  */
 template<typename ObjectType>
-class GetEntrypoint : public BaseEntrypoint
+class GetEntrypoint : public IEntrypoint
 {
 public:
     /**
-     * @brief Duration used to rate limit notifications.
+     * @brief Store the object and setup notifications.
      *
+     * @param object Object bound to the entrypoint.
      */
-    using Duration = RateLimiter::Duration;
-
-    /**
-     * @brief Set the min duration between two notifications.
-     *
-     * @param duration Notification period.
-     */
-    void setNotificationPeriod(Duration duration)
+    GetEntrypoint(
+        const ObjectType &object,
+        INetworkInterface &interface,
+        Duration notificationPeriod = NotificationPeriod::defaultValue())
+        : _object(object)
+        , _notifier(interface, notificationPeriod)
     {
-        _limiter = duration;
-    }
-
-    /**
-     * @brief Get the object using ObjectExtractor<ObjectType>::extract(api).
-     *
-     * @return const ObjectType& Entrypoint object.
-     */
-    ObjectType &getObject() const
-    {
-        return ObjectExtractor<ObjectType>::extract(getApi());
     }
 
     /**
@@ -138,27 +72,7 @@ public:
      */
     virtual JsonSchema getResultSchema() const override
     {
-        auto &object = getObject();
-        return Json::getSchema(object);
-    }
-
-    /**
-     * @brief Setup object modification callback to notify it.
-     *
-     */
-    virtual void onCreate() override
-    {
-        auto &object = getObject();
-        object.onModified(
-            [&](auto &)
-            {
-                _limiter.call(
-                    [&]
-                    {
-                        auto params = Json::serialize(object);
-                        notify(params);
-                    });
-            });
+        return Json::getSchema(_object);
     }
 
     /**
@@ -166,14 +80,42 @@ public:
      *
      * @param request Client get-object request.
      */
-    virtual void onRequest(const NetworkRequest &request) override
+    virtual void onRequest(const JsonRpcRequest &request) override
     {
-        auto &object = getObject();
-        request.reply(object);
+        auto result = Json::serialize(_object);
+        request.reply(result);
+    }
+
+    /**
+     * @brief Notify if the object is modified.
+     *
+     */
+    virtual void onPreRender() override
+    {
+        _notify();
+    }
+
+    /**
+     * @brief Notify if the object is modified.
+     *
+     */
+    virtual void onPostRender() override
+    {
+        _notify();
     }
 
 private:
-    RateLimiter _limiter = NotificationPeriod::defaultValue();
+    const ObjectType &_object;
+    JsonRpcNotifier _notifier;
+
+    void _notify()
+    {
+        if (_object.isModified())
+        {
+            auto method = getName();
+            _notifier.notify(method, _object);
+        }
+    }
 };
 
 /**
@@ -182,17 +124,17 @@ private:
  * @tparam ObjectType Object type to update.
  */
 template<typename ObjectType>
-class SetEntrypoint : public BaseEntrypoint
+class SetEntrypoint : public IEntrypoint
 {
 public:
     /**
-     * @brief Extract the underlying object using ObjectExtractor::extract(api).
+     * @brief Setup entrypoint with exposed object.
      *
-     * @return ObjectType& Object to update.
+     * @param object Object bound to the entrypoint.
      */
-    ObjectType &getObject() const
+    SetEntrypoint(ObjectType &object)
+        : _object(object)
     {
-        return ObjectExtractor<ObjectType>::extract(getApi());
     }
 
     /**
@@ -202,8 +144,7 @@ public:
      */
     virtual JsonSchema getParamsSchema() const override
     {
-        auto &object = getObject();
-        return Json::getSchema(object);
+        return Json::getSchema(_object);
     }
 
     /**
@@ -221,13 +162,15 @@ public:
      *
      * @param request Client set-object request.
      */
-    virtual void onRequest(const NetworkRequest &request) override
+    virtual void onRequest(const JsonRpcRequest &request) override
     {
         auto &params = request.getParams();
-        auto &object = getObject();
-        Json::deserialize(params, object);
-        triggerRender();
-        request.reply(EmptyMessage());
+        Json::deserialize(params, _object);
+        auto result = Json::serialize(EmptyMessage());
+        request.reply(result);
     }
+
+private:
+    ObjectType &_object;
 };
 } // namespace brayns

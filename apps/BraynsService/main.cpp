@@ -18,13 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <thread>
+
 #include <brayns/Brayns.h>
 #include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/network/interface/ActionInterface.h>
-
-#include <atomic>
 
 class BraynsService
 {
@@ -32,53 +30,46 @@ public:
     BraynsService(int argc, const char **argv)
         : _brayns(argc, argv)
     {
-        if (!_brayns.getActionInterface())
-        {
-            throw std::runtime_error("No action interface registered");
-        }
-        auto &engine = _brayns.getEngine();
-        engine.triggerRender = [this] { _triggerRender(); };
     }
 
     void run()
     {
         auto &engine = _brayns.getEngine();
-        auto &interface = *_brayns.getActionInterface();
         while (engine.getKeepRunning())
         {
-            interface.processRequests();
-            if (_isRenderTriggered() || engine.continueRendering())
+            if (!_brayns.commit())
             {
-                _brayns.commitAndRender();
+                continue;
             }
-            interface.update();
+            if (!engine.continueRendering())
+            {
+                _sleep();
+                continue;
+            }
+            _brayns.render();
+            _brayns.postRender();
         }
     }
 
 private:
-    void _triggerRender()
-    {
-        _renderTriggered = true;
-    }
-
-    bool _isRenderTriggered()
-    {
-        if (_renderTriggered)
-        {
-            _renderTriggered = false;
-            return true;
-        }
-        return false;
-    }
-
     brayns::Brayns _brayns;
-    std::atomic_bool _renderTriggered{false};
+
+    void _sleep()
+    {
+        auto &manager = _brayns.getParametersManager();
+        auto &parameters = manager.getApplicationParameters();
+        auto fps = parameters.getMaxRenderFPS();
+        auto period = 1000 / fps;
+        std::this_thread::sleep_for(std::chrono::milliseconds(period));
+    }
 };
 
 int main(int argc, const char **argv)
 {
     try
     {
+        brayns::Log::info("Start Brayns service.");
+
         brayns::Timer timer;
         timer.start();
 
@@ -88,9 +79,9 @@ int main(int argc, const char **argv)
         timer.stop();
         brayns::Log::info("Service was running for {} seconds.", timer.seconds());
     }
-    catch (const std::runtime_error &e)
+    catch (const std::exception &e)
     {
-        brayns::Log::error(e.what());
+        brayns::Log::critical(e.what());
         return 1;
     }
     return 0;

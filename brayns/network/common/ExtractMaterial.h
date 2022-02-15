@@ -39,7 +39,7 @@ public:
      * @param descriptor Source model.
      * @param id Material ID
      * @return Material& Material instance.
-     * @throw EntrypointException Material or model not found.
+     * @throw JsonRpcException Material or model not found.
      */
     static Material &fromId(ModelDescriptor &descriptor, size_t id);
 
@@ -49,7 +49,7 @@ public:
      * @param model Source model.
      * @param id Material ID
      * @return Material& Material instance.
-     * @throw EntrypointException Material or model not found.
+     * @throw JsonRpcException Material or model not found.
      */
     static Material &fromId(Model &model, size_t modelId, size_t id);
 };

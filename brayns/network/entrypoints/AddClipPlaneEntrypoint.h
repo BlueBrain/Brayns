@@ -21,7 +21,10 @@
 
 #pragma once
 
+#include <brayns/engine/Scene.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/jsonrpc/JsonRpcNotifier.h>
 #include <brayns/network/messages/AddClipPlaneMessage.h>
 
 namespace brayns
@@ -29,12 +32,15 @@ namespace brayns
 class AddClipPlaneEntrypoint : public Entrypoint<AddClipPlaneMessage, ClipPlanePtr>
 {
 public:
+    AddClipPlaneEntrypoint(Scene &scene, INetworkInterface &interface);
+
     virtual std::string getName() const override;
-
     virtual std::string getDescription() const override;
-
     virtual JsonSchema getParamsSchema() const override;
-
     virtual void onRequest(const Request &request) override;
+
+private:
+    Scene &_scene;
+    JsonRpcNotifier _notifier;
 };
 } // namespace brayns

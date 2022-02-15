@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <brayns/engine/Scene.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <plugin/network/messages/AddColumnMessage.h>
@@ -28,7 +30,12 @@
 class AddColumnEntrypoint : public brayns::Entrypoint<AddColumnMessage, brayns::EmptyMessage>
 {
 public:
+    AddColumnEntrypoint(brayns::Scene &scene);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    brayns::Scene &_scene;
 };

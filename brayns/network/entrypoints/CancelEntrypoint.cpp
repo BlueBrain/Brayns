@@ -21,10 +21,15 @@
 
 #include "CancelEntrypoint.h"
 
-#include <brayns/network/entrypoint/EntrypointException.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
 {
+CancelEntrypoint::CancelEntrypoint(NetworkTaskManager &tasks)
+    : _tasks(tasks)
+{
+}
+
 std::string CancelEntrypoint::getName() const
 {
     return "cancel";
@@ -39,12 +44,8 @@ void CancelEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto &id = params.id;
-    auto &handle = request.getConnectionHandle();
-    auto &tasks = getTasks();
-    if (!tasks.cancel(handle, id))
-    {
-        throw EntrypointException("No task with ID " + id.getDisplayText() + " is running for this client");
-    }
+    auto &client = request.getClient();
+    _tasks.cancel(client, id);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

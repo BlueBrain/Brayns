@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <chrono>
+#include "Clock.h"
 
 namespace brayns
 {
@@ -33,37 +33,35 @@ class RateLimiter
 {
 public:
     /**
-     * @brief Clock used to measure the rate.
+     * @brief Build a rate limiter using a rate specification.
      *
-     */
-    using Clock = std::chrono::high_resolution_clock;
-
-    /**
-     * @brief Clock timepoint used to measure the rate.
-     *
-     */
-    using TimePoint = Clock::time_point;
-
-    /**
-     * @brief Duration unit used to measure the rate.
-     *
-     */
-    using Duration = Clock::duration;
-
-    /**
-     * @brief Build a rate limiter using FPS specification.
-     *
-     * @param fps Frames (calls) per second expected.
+     * @param rate Max calls per second.
      * @return RateLimiter Matching rate limiter.
      */
-    static RateLimiter fromFps(size_t fps);
+    static RateLimiter fromRate(size_t rate);
 
     /**
-     * @brief Construct a rate limiter with min period to call functor.
+     * @brief Construct a rate limiter using a period specification.
      *
-     * @param period Min duration between two functor calls.
+     * Limits nothing by default if no period is specified.
+     *
+     * @param period Min duration between two calls.
      */
-    RateLimiter(Duration period = Duration(0));
+    explicit RateLimiter(Duration period = Duration(0));
+
+    /**
+     * @brief Update period but not last call.
+     *
+     * @param period Min duration between two calls.
+     */
+    void setPeriod(Duration period);
+
+    /**
+     * @brief Update period from rate.
+     *
+     * @param rate Max calls per second.
+     */
+    void setRate(size_t rate);
 
     /**
      * @brief Call the functor if the given period is ellapsed.

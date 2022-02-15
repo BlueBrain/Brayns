@@ -21,83 +21,17 @@
 
 #pragma once
 
-#include <utility>
+#include <brayns/engine/FrameBuffer.h>
 
+#include <brayns/network/client/ClientManager.h>
 #include <brayns/network/common/RateLimiter.h>
+
+#include <brayns/parameters/ApplicationParameters.h>
+
+#include "StreamMonitor.h"
 
 namespace brayns
 {
-class NetworkContext;
-
-/**
- * @brief Info to monitor the image stream.
- *
- */
-class ImageStreamMonitor
-{
-public:
-    /**
-     * @brief Set the max FPS of the stream.
-     *
-     * @param fps
-     */
-    void setFps(size_t fps);
-
-    /**
-     * @brief Check if the stream is controlled.
-     *
-     * If true, the client trigger the stream of each image required.
-     *
-     * @return true Controlled.
-     * @return false Automatic.
-     */
-    bool isControlled() const;
-
-    /**
-     * @brief Set the stream control mode.
-     *
-     * @param controlled True if controlled.
-     */
-    void setControlled(bool controlled);
-
-    /**
-     * @brief Check if the image stream has been triggered.
-     *
-     * @return true Client triggered the image stream.
-     * @return false Nothing triggered.
-     */
-    bool isTriggered() const;
-
-    /**
-     * @brief Trigger the image stream in controlled mode.
-     *
-     */
-    void trigger();
-
-    /**
-     * @brief Reset the trigger in control mode.
-     *
-     */
-    void resetTrigger();
-
-    /**
-     * @brief Call the given functor with maximum FPS rate limit.
-     *
-     * @tparam FunctorType Functor type.
-     * @param functor Functor like void().
-     */
-    template<typename FunctorType>
-    void callWithFpsLimit(FunctorType functor)
-    {
-        _limiter.call(std::move(functor));
-    }
-
-private:
-    RateLimiter _limiter;
-    bool _controlled = false;
-    bool _triggered = false;
-};
-
 /**
  * @brief Stream manager to monitor image streaming.
  *
@@ -106,27 +40,23 @@ class StreamManager
 {
 public:
     /**
-     * @brief Construct a stream manager with NetworkContext access.
+     * @brief Broadcast framebuffer image.
      *
-     * @param context Context of the network manager.
+     * @param framebuffer Framebuffer containing the image to stream.
+     * @param clients Clients that will receive the image.
+     * @param parameters Stream parameters.
      */
-    StreamManager(NetworkContext &context);
-
-    /**
-     * @brief Broadcast images according to current settings.
-     *
-     */
-    void broadcast();
+    void broadcast(FrameBuffer &framebuffer, ClientManager &clients, const ApplicationParameters &parameters);
 
     /**
      * @brief Get the image stream monitor.
      *
-     * @return ImageStreamMonitor& Image stream monitor.
+     * @return StreamMonitor& Image stream monitor.
      */
-    ImageStreamMonitor &getMonitor();
+    StreamMonitor &getMonitor();
 
 private:
-    NetworkContext *_context;
-    ImageStreamMonitor _imageStream;
+    StreamMonitor _monitor;
+    RateLimiter _limiter;
 };
 } // namespace brayns

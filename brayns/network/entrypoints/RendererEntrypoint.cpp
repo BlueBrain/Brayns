@@ -23,10 +23,9 @@
 
 namespace brayns
 {
-RenderingParameters &ObjectExtractor<RenderingParameters>::extract(PluginAPI &api)
+GetRendererEntrypoint::GetRendererEntrypoint(const RenderingParameters &parameters, INetworkInterface &interface)
+    : GetEntrypoint(parameters, interface)
 {
-    auto &parametersManager = api.getParametersManager();
-    return parametersManager.getRenderingParameters();
 }
 
 std::string GetRendererEntrypoint::getName() const
@@ -37,6 +36,11 @@ std::string GetRendererEntrypoint::getName() const
 std::string GetRendererEntrypoint::getDescription() const
 {
     return "Get the current state of the renderer";
+}
+
+SetRendererEntrypoint::SetRendererEntrypoint(RenderingParameters &parameters)
+    : SetEntrypoint(parameters)
+{
 }
 
 std::string SetRendererEntrypoint::getName() const

@@ -23,6 +23,12 @@
 
 namespace brayns
 {
+RemoveClipPlanesEntrypoint::RemoveClipPlanesEntrypoint(Scene &scene, INetworkInterface &interface)
+    : _scene(scene)
+    , _notifier(interface)
+{
+}
+
 std::string RemoveClipPlanesEntrypoint::getName() const
 {
     return "remove-clip-planes";
@@ -37,14 +43,11 @@ void RemoveClipPlanesEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto &ids = params.ids;
-    auto &engine = getApi().getEngine();
-    auto &scene = engine.getScene();
     for (auto id : ids)
     {
-        scene.removeClipPlane(id);
+        _scene.removeClipPlane(id);
     }
-    engine.triggerRender();
-    request.notify(params);
+    _notifier.notify(request, params);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

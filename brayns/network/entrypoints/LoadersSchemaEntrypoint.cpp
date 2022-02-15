@@ -52,6 +52,11 @@ private:
 
 namespace brayns
 {
+LoadersSchemaEntrypoint::LoadersSchemaEntrypoint(const LoaderRegistry &loaders)
+    : _loaders(loaders)
+{
+}
+
 std::string LoadersSchemaEntrypoint::getName() const
 {
     return "loaders-schema";
@@ -64,8 +69,7 @@ std::string LoadersSchemaEntrypoint::getDescription() const
 
 void LoadersSchemaEntrypoint::onRequest(const Request &request)
 {
-    auto &registry = getApi().getLoaderRegistry();
-    auto &loaders = registry.getLoaderInfos();
+    auto &loaders = _loaders.getLoaderInfos();
     auto schema = LoadersSchemaBuilder::getSchemas(loaders);
     auto json = Json::serialize(schema);
     request.reply(json);

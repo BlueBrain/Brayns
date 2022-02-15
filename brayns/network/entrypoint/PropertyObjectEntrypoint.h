@@ -23,9 +23,10 @@
 
 #include <brayns/common/adapters/PropertyMapAdapter.h>
 
-#include <brayns/network/json/PropertyObjectSchema.h>
+#include <brayns/network/common/PropertyObjectSchema.h>
+#include <brayns/network/jsonrpc/JsonRpcNotifier.h>
 
-#include "ObjectEntrypoint.h"
+#include "IEntrypoint.h"
 
 namespace brayns
 {
@@ -38,17 +39,17 @@ namespace brayns
  * @tparam ObjectType Property object to retrieve.
  */
 template<typename ObjectType>
-class GetPropertyObjectEntrypoint : public BaseEntrypoint
+class GetPropertyObjectEntrypoint : public IEntrypoint
 {
 public:
     /**
-     * @brief Get the Underlying object using ObjectExtractor::extract(api).
+     * @brief Store the property object.
      *
-     * @return const ObjectType& Underlying object.
+     * @param object Object bound to the entrypoint.
      */
-    const ObjectType &getObject() const
+    GetPropertyObjectEntrypoint(const ObjectType &object)
+        : _object(object)
     {
-        return ObjectExtractor<ObjectType>::extract(getApi());
     }
 
     /**
@@ -68,8 +69,7 @@ public:
      */
     virtual JsonSchema getResultSchema() const override
     {
-        auto &object = getObject();
-        return PropertyObjectSchema::create(object);
+        return PropertyObjectSchema::create(_object);
     }
 
     /**
@@ -77,12 +77,15 @@ public:
      *
      * @param request Client get-...-properties request.
      */
-    virtual void onRequest(const NetworkRequest &request) override
+    virtual void onRequest(const JsonRpcRequest &request) override
     {
-        auto &object = getObject();
-        auto &properties = object.getPropertyMap();
-        request.reply(properties);
+        auto &properties = _object.getPropertyMap();
+        auto result = Json::serialize(properties);
+        request.reply(result);
     }
+
+private:
+    const ObjectType &_object;
 };
 
 /**
@@ -91,17 +94,19 @@ public:
  * @tparam ObjectType Property object to update.
  */
 template<typename ObjectType>
-class SetPropertyObjectEntrypoint : public BaseEntrypoint
+class SetPropertyObjectEntrypoint : public IEntrypoint
 {
 public:
     /**
-     * @brief Get the Underlying object using ObjectExtractor::extract(api).
+     * @brief Store the exposed object.
      *
-     * @return const ObjectType& Underlying object.
+     * @param object Object bound to the entrypoint.
+     * @param interface Interface to notify when object is modified.
      */
-    ObjectType &getObject() const
+    SetPropertyObjectEntrypoint(ObjectType &object, INetworkInterface &interface)
+        : _object(object)
+        , _notifier(interface)
     {
-        return ObjectExtractor<ObjectType>::extract(getApi());
     }
 
     /**
@@ -111,8 +116,7 @@ public:
      */
     virtual JsonSchema getParamsSchema() const override
     {
-        auto &object = getObject();
-        return PropertyObjectSchema::create(object);
+        return PropertyObjectSchema::create(_object);
     }
 
     /**
@@ -130,15 +134,19 @@ public:
      *
      * @param request Client set-...-properties request.
      */
-    virtual void onRequest(const NetworkRequest &request) override
+    virtual void onRequest(const JsonRpcRequest &request) override
     {
         auto &params = request.getParams();
         auto properties = Json::deserialize<PropertyMap>(params);
-        auto &object = getObject();
-        object.updateProperties(properties);
-        triggerRender();
-        request.notify(properties);
-        request.reply(EmptyMessage());
+        _object.updateProperties(properties);
+        auto &updatedProperties = _object.getPropertyMap();
+        _notifier.notify(request, updatedProperties);
+        auto result = Json::serialize(EmptyMessage());
+        request.reply(result);
     }
+
+private:
+    ObjectType &_object;
+    JsonRpcNotifier _notifier;
 };
 } // namespace brayns

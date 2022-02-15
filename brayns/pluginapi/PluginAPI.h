@@ -26,44 +26,67 @@
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/io/LoaderRegistry.h>
+#include <brayns/network/interface/INetworkInterface.h>
 #include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
 {
-class ActionInterface;
-
-/** The API that plugins can use to interact with Brayns. */
+/**
+ * @brief Expose Brayns functionalities to plugins.
+ *
+ */
 class PluginAPI
 {
 public:
     virtual ~PluginAPI() = default;
 
+    /**
+     * @brief Get the engine.
+     *
+     * @return Engine& Engine.
+     */
     virtual Engine &getEngine() = 0;
 
-    /** @return access to the scene of Brayns. */
+    /**
+     * @brief Get the scene.
+     *
+     * @return Scene& Scene.
+     */
     virtual Scene &getScene() = 0;
 
-    /** @return access to the parameters of Brayns. */
+    /**
+     * @brief Get the parameters.
+     *
+     * @return ParametersManager& Parameters.
+     */
     virtual ParametersManager &getParametersManager() = 0;
 
-    /** @return access to the action interface of Brayns. */
-    virtual ActionInterface *getActionInterface() = 0;
+    /**
+     * @brief Get the network interface if enabled.
+     *
+     * @return INetworkInterface* Network interface or null if not enabled.
+     */
+    virtual INetworkInterface *getNetworkInterface() = 0;
 
-    /** @return access to the camera of Brayns. */
+    /**
+     * @brief Get the camera.
+     *
+     * @return Camera& Camera.
+     */
     virtual Camera &getCamera() = 0;
 
-    /** @return access to the renderer of Brayns. */
+    /**
+     * @brief Get the renderer.
+     *
+     * @return Renderer& Renderer.
+     */
     virtual Renderer &getRenderer() = 0;
 
     /**
-     * @brief getLoaderRegistry gives access to the loader registry
+     * @brief Get the available loaders.
+     *
+     * @return LoaderRegistry& Loaders.
      */
     virtual LoaderRegistry &getLoaderRegistry() = 0;
-
-    /** Triggers a new preRender() and potentially render() and postRender(). */
-    virtual void triggerRender() = 0;
-
-    /** Set the action interface to be used by Brayns main loop. */
-    virtual void setActionInterface(const std::shared_ptr<ActionInterface> &interface) = 0;
 };
 } // namespace brayns

@@ -33,7 +33,6 @@
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
-#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
@@ -63,7 +62,9 @@ void DTIPlugin::init()
 
     registry.registerLoader(std::make_unique<DTILoader>());
 
-    add<AddStreamlinesEntrypoint>();
+    auto &scene = _api->getScene();
+
+    add<AddStreamlinesEntrypoint>(scene);
     add<SetSpikeSimulationEntrypoint>(*this);
     add<SetSpikeSimulationFromFileEntrypoint>(*this);
 }

@@ -22,6 +22,8 @@
 
 #include <brayns/common/Log.h>
 
+#include <brayns/network/entrypoint/EntrypointTask.h>
+
 #include <brayns/utils/image/ImageEncoder.h>
 #include <brayns/utils/image/ImageFormat.h>
 
@@ -98,105 +100,121 @@ std::string writeFrameToDisk(const ExportFramesParams &params, const uint32_t fr
 
     return {};
 }
-} // namespace
 
-ExportFramesTask::ExportFramesTask(Engine &engine, ExportFramesParams &&params)
-    : _engine(engine)
-    , _params(std::move(params))
+class ExportFramesTask : public EntrypointTask<ExportFramesParams, ExportFramesResult>
 {
-}
-
-void ExportFramesTask::run()
-{
-    // Initialize parameters
-    initializeParameters(_engine, _params);
-
-    // Create parameter managers
-    auto &paramManager = _engine.getParametersManager();
-    auto animParams = paramManager.getAnimationParameters();
-    auto renderParams = paramManager.getRenderingParameters();
-    renderParams.setSamplesPerPixel(_params.spp);
-    renderParams.setSubsampling(1);
-    renderParams.setAccumulation(false);
-    auto &volumeParams = *_params.volume_parameters;
-
-    const auto &rendererName = _params.renderer_name;
-    const auto &rendererSettings = _params.renderer_parameters;
-    const auto &imageSize = _params.image_size;
-    const auto nameAfterStep = _params.name_after_simulation_index;
-    const auto &keyFrames = _params.key_frames;
-
-    // Create the camera
-    auto camera = _engine.createCamera();
-    const auto &systemCamera = _engine.getCamera();
-    camera->clonePropertiesFrom(systemCamera);
-    const auto aspectRatio = static_cast<double>(imageSize.x) / static_cast<double>(imageSize.y);
-    camera->setBufferTarget("default");
-    camera->markModified(false);
-    camera->commit();
-
-    // Create (clone) the scene
-    auto scene = _engine.createScene(animParams, volumeParams);
-    scene->copyFrom(_engine.getScene());
-
-    // Create the renderer
-    auto renderer = _engine.createRenderer(animParams, renderParams);
-    renderer->setCurrentType(rendererName);
-    renderer->setProperties(rendererSettings);
-    renderer->setCamera(camera);
-    renderer->setScene(scene);
-
-    // Create the framebuffer
-    auto frameBuffer = _engine.createFrameBuffer("default", imageSize, PixelFormat::RGBA_I8);
-    frameBuffer->setAccumulation(false);
-    frameBuffer->markModified();
-
-    const auto progressChunk = 1.f / static_cast<float>(keyFrames.size());
-    float totalProgress = 0.f;
-
-    logExportInfo(_params);
-
-    for (size_t i = 0; i < keyFrames.size(); ++i)
+public:
+    ExportFramesTask(Request request, Engine &engine, ExportFramesParams params)
+        : EntrypointTask(std::move(request))
+        , _engine(engine)
+        , _params(std::move(params))
     {
-        const auto &keyFrame = keyFrames[i];
+    }
 
-        animParams.setFrame(keyFrame.frame_index);
-        scene->markModified(false);
-        scene->commit();
+    virtual void run() override
+    {
+        // Initialize parameters
+        initializeParameters(_engine, _params);
 
-        *camera = keyFrame.camera;
-        camera->updateProperties(keyFrame.camera_params);
-        camera->updateProperty("aspect", aspectRatio);
+        // Create parameter managers
+        auto &paramManager = _engine.getParametersManager();
+        auto animParams = paramManager.getAnimationParameters();
+        auto renderParams = paramManager.getRenderingParameters();
+        renderParams.setSamplesPerPixel(_params.spp);
+        renderParams.setSubsampling(1);
+        renderParams.setAccumulation(false);
+        auto &volumeParams = *_params.volume_parameters;
+
+        const auto &rendererName = _params.renderer_name;
+        const auto &rendererSettings = _params.renderer_parameters;
+        const auto &imageSize = _params.image_size;
+        const auto nameAfterStep = _params.name_after_simulation_index;
+        const auto &keyFrames = _params.key_frames;
+
+        // Create the camera
+        auto camera = _engine.createCamera();
+        const auto &systemCamera = _engine.getCamera();
+        camera->clonePropertiesFrom(systemCamera);
+        const auto aspectRatio = static_cast<double>(imageSize.x) / static_cast<double>(imageSize.y);
+        camera->setBufferTarget("default");
         camera->markModified(false);
         camera->commit();
 
-        renderer->commit();
+        // Create (clone) the scene
+        auto scene = _engine.createScene(animParams, volumeParams);
+        scene->copyFrom(_engine.getScene());
 
-        frameBuffer->clear();
-        renderer->render(frameBuffer);
+        // Create the renderer
+        auto renderer = _engine.createRenderer(animParams, renderParams);
+        renderer->setCurrentType(rendererName);
+        renderer->setProperties(rendererSettings);
+        renderer->setCamera(camera);
+        renderer->setScene(scene);
 
-        auto name = nameAfterStep ? keyFrame.frame_index : i;
-        char frame[7];
-        sprintf(frame, "%05d", static_cast<int32_t>(name));
-        try
+        // Create the framebuffer
+        auto frameBuffer = _engine.createFrameBuffer("default", imageSize, PixelFormat::RGBA_I8);
+        frameBuffer->setAccumulation(false);
+        frameBuffer->markModified();
+
+        const auto progressChunk = 1.f / static_cast<float>(keyFrames.size());
+        float totalProgress = 0.f;
+
+        logExportInfo(_params);
+
+        for (size_t i = 0; i < keyFrames.size(); ++i)
         {
-            writeFrameToDisk(_params, name, *frameBuffer);
-        }
-        catch (const std::exception &e)
-        {
-            _result = {1, e.what()};
-            return;
-        }
+            const auto &keyFrame = keyFrames[i];
 
-        totalProgress += progressChunk;
+            animParams.setFrame(keyFrame.frame_index);
+            scene->markModified(false);
+            scene->commit();
 
-        progress(fmt::format("Frame {} out of {} done", i, keyFrames.size()), totalProgress);
+            *camera = keyFrame.camera;
+            camera->updateProperties(keyFrame.camera_params);
+            camera->updateProperty("aspect", aspectRatio);
+            camera->markModified(false);
+            camera->commit();
+
+            renderer->commit();
+
+            frameBuffer->clear();
+            renderer->render(frameBuffer);
+
+            auto name = nameAfterStep ? keyFrame.frame_index : i;
+            char frame[7];
+            sprintf(frame, "%05d", static_cast<int32_t>(name));
+            try
+            {
+                writeFrameToDisk(_params, name, *frameBuffer);
+            }
+            catch (const std::exception &e)
+            {
+                _result = {1, e.what()};
+                return;
+            }
+
+            totalProgress += progressChunk;
+
+            progress(fmt::format("Frame {} out of {} done", i, keyFrames.size()), totalProgress);
+        }
     }
-}
 
-void ExportFramesTask::onComplete()
+    virtual void onComplete() override
+    {
+        reply(_result);
+    }
+
+private:
+    Engine &_engine;
+    ExportFramesParams _params;
+    ExportFramesResult _result{0, ""};
+};
+} // namespace
+
+ExportFramesEntrypoint::ExportFramesEntrypoint(Engine &engine, INetworkInterface &interface)
+    : _engine(engine)
+    , _launcher(interface)
 {
-    reply(_result);
 }
 
 std::string ExportFramesEntrypoint::getName() const
@@ -217,8 +235,7 @@ bool ExportFramesEntrypoint::isAsync() const
 void ExportFramesEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto &engine = getApi().getEngine();
-    auto task = std::make_shared<ExportFramesTask>(engine, std::move(params));
-    launchTask(task, request);
+    auto task = std::make_unique<ExportFramesTask>(request, _engine, std::move(params));
+    _launcher.launch(std::move(task));
 }
 } // namespace brayns

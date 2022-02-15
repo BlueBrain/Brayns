@@ -45,12 +45,6 @@ public:
     using Request = EntrypointRequest<ParamsType, ResultType>;
 
     /**
-     * @brief Construct a task with no associated requests.
-     *
-     */
-    EntrypointTask() = default;
-
-    /**
      * @brief Construct a task with request.
      *
      * Store the request to allow subclasses to access it.
@@ -63,17 +57,23 @@ public:
     }
 
     /**
-     * @brief Process the given request in separated thread.
+     * @brief Get the client that started the task.
      *
-     * Store the request to allow subclasses to access it and start the task.
-     *
-     * @param request Request starting the task.
+     * @return const ClientRef& Client ref.
      */
-    void execute(Request request)
+    const ClientRef &getClient() const
     {
-        cancelAndWait();
-        _request = std::move(request);
-        start();
+        return _request.getClient();
+    }
+
+    /**
+     * @brief Get the ID of the request that started the task.
+     *
+     * @return const RequestId& Request ID.
+     */
+    const RequestId &getRequestId() const
+    {
+        return _request.getId();
     }
 
     /**
@@ -96,6 +96,7 @@ public:
         return _request.getParams(params);
     }
 
+protected:
     /**
      * @brief Send success reply using underlying request.
      *
@@ -109,9 +110,9 @@ public:
     /**
      * @brief Send an error reply when an exception occurs in the thread.
      *
-     * @param e Opaque exception ptr.
+     * @param e Source of the error.
      */
-    virtual void onError(std::exception_ptr e)
+    virtual void onError(const JsonRpcException &e) override
     {
         _request.error(e);
     }
@@ -124,7 +125,7 @@ public:
      * @param operation Current operation.
      * @param amount Progress amount 0-1.
      */
-    virtual void onProgress(const std::string &operation, double amount)
+    virtual void onProgress(const std::string &operation, double amount) override
     {
         _limiter.call([&] { _request.progress(operation, amount); });
     }

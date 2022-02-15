@@ -21,54 +21,85 @@
 
 #pragma once
 
-#include <memory>
+#include <brayns/network/client/ClientManager.h>
+#include <brayns/network/client/RequestBuffer.h>
+#include <brayns/network/common/FrameExporter.h>
+#include <brayns/network/entrypoint/EntrypointManager.h>
+#include <brayns/network/interface/NetworkInterface.h>
+#include <brayns/network/socket/ISocket.h>
+#include <brayns/network/stream/StreamManager.h>
+#include <brayns/network/tasks/NetworkTaskManager.h>
+#include <brayns/network/upload/ModelUploadManager.h>
 
-#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 namespace brayns
 {
-class NetworkContext;
+struct NetworkContext
+{
+    PluginAPI *api = nullptr;
+    EntrypointManager entrypoints;
+    ClientManager clients;
+    RequestBuffer requests;
+    StreamManager stream;
+    NetworkTaskManager tasks;
+    ModelUploadManager modelUploads;
+    std::unique_ptr<ISocket> socket;
+    FrameExporter frameExporter;
+};
 
 /**
- * @brief Network manager plugin providing the network action interface.
+ * @brief Network manager plugin.
+ *
+ * Provide the network action interface and core entrypoints.
  *
  */
 class NetworkManager : public ExtensionPlugin
 {
 public:
     /**
-     * @brief Construct the object.
+     * @brief Construct the network manager.
      *
      */
     NetworkManager();
 
     /**
-     * @brief Remove the action interface if still the active one.
+     * @brief Get the interface to access network from plugins.
      *
+     * @return INetworkInterface& Network interface.
      */
-    virtual ~NetworkManager();
+    INetworkInterface &getInterface();
 
     /**
-     * @brief Register base entrypoints and setup ActionInterface.
+     * @brief Load schemas and call onCreate() of all entrypoints.
+     *
+     * This method must be separated from the construction because it can only
+     * be called once all plugins and entrypoints are registered to have correct
+     * schemas.
+     *
+     */
+    void start();
+
+    /**
+     * @brief Setup action interface and register core entrypoints.
      *
      */
     virtual void init() override;
 
     /**
-     * @brief Process request buffer.
+     * @brief Notify entrypoints.
      *
      */
     virtual void preRender() override;
 
     /**
-     * @brief Broadcast images.
+     * @brief Notify entrypoints and stream image if needed.
      *
      */
     virtual void postRender() override;
 
 private:
-    std::unique_ptr<NetworkContext> _context;
-    std::shared_ptr<ActionInterface> _interface;
+    NetworkContext _context;
+    NetworkInterface _interface;
 };
 } // namespace brayns

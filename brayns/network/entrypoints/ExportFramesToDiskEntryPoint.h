@@ -22,27 +22,29 @@
 
 #pragma once
 
+#include <brayns/engine/Engine.h>
+
 #include <brayns/network/adapters/FrameExportAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
+
+#include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
 {
 class ExportFramesToDiskEntrypoint : public Entrypoint<FrameExporter::ExportInfo, EmptyMessage>
 {
 public:
-    ExportFramesToDiskEntrypoint(std::shared_ptr<FrameExporter> &exporter);
+    ExportFramesToDiskEntrypoint(ParametersManager &parameters, Engine &engine, FrameExporter &exporter);
 
-    std::string getName() const final;
-
-    std::string getDescription() const final;
-
-    void onRequest(const Request &request) final;
-
-    void onPreRender() final;
-
-    void onPostRender() final;
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
+    virtual void onPreRender() override;
+    virtual void onPostRender() override;
 
 private:
-    std::shared_ptr<FrameExporter> _exporter{nullptr};
+    ParametersManager &_parameters;
+    Engine &_engine;
+    FrameExporter &_exporter;
 };
 } // namespace brayns

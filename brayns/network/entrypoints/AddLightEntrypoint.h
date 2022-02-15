@@ -21,22 +21,27 @@
 
 #pragma once
 
+#include <brayns/engine/LightManager.h>
+
 #include <brayns/network/adapters/LightAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/entrypoint/IEntrypoint.h>
 
 namespace brayns
 {
 class AddLightHelper
 {
 public:
-    static void load(PluginAPI &api, LightPtr light, const NetworkRequest &request);
+    static void load(LightManager &lights, LightPtr light, const JsonRpcRequest &request);
 };
 
 template<typename T>
-class AddLightEntrypoint : public BaseEntrypoint
+class AddLightEntrypoint : public IEntrypoint
 {
 public:
-    using Ptr = std::shared_ptr<T>;
+    AddLightEntrypoint(LightManager &lights)
+        : _lights(lights)
+    {
+    }
 
     virtual JsonSchema getParamsSchema() const override
     {
@@ -48,18 +53,22 @@ public:
         return Json::getSchema<size_t>();
     }
 
-    virtual void onRequest(const NetworkRequest &request) override
+    virtual void onRequest(const JsonRpcRequest &request) override
     {
         auto params = request.getParams();
-        auto light = Json::deserialize<Ptr>(params);
-        auto &api = getApi();
-        AddLightHelper::load(api, std::move(light), request);
+        auto light = Json::deserialize<std::shared_ptr<T>>(params);
+        AddLightHelper::load(_lights, std::move(light), request);
     }
+
+private:
+    LightManager &_lights;
 };
 
 class AddLightDirectionalEntrypoint : public AddLightEntrypoint<DirectionalLight>
 {
 public:
+    AddLightDirectionalEntrypoint(LightManager &lights);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
 };
@@ -67,6 +76,8 @@ public:
 class AddLightSphereEntrypoint : public AddLightEntrypoint<SphereLight>
 {
 public:
+    AddLightSphereEntrypoint(LightManager &lights);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
 };
@@ -74,6 +85,8 @@ public:
 class AddLightQuadEntrypoint : public AddLightEntrypoint<QuadLight>
 {
 public:
+    AddLightQuadEntrypoint(LightManager &lights);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
 };
@@ -81,6 +94,8 @@ public:
 class AddLightSpotEntrypoint : public AddLightEntrypoint<SpotLight>
 {
 public:
+    AddLightSpotEntrypoint(LightManager &lights);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
 };
@@ -88,6 +103,8 @@ public:
 class AddLightAmbientEntrypoint : public AddLightEntrypoint<AmbientLight>
 {
 public:
+    AddLightAmbientEntrypoint(LightManager &lights);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
 };

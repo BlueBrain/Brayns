@@ -23,15 +23,11 @@
 
 namespace brayns
 {
-AnimationParameters &ObjectExtractor<AnimationParameters>::extract(PluginAPI &api)
+GetAnimationParametersEntrypoint::GetAnimationParametersEntrypoint(
+    const AnimationParameters &parameters,
+    INetworkInterface &interface)
+    : GetEntrypoint(parameters, interface, NotificationPeriod::interactive())
 {
-    auto &parametersManager = api.getParametersManager();
-    return parametersManager.getAnimationParameters();
-}
-
-GetAnimationParametersEntrypoint::GetAnimationParametersEntrypoint()
-{
-    setNotificationPeriod(NotificationPeriod::interactive());
 }
 
 std::string GetAnimationParametersEntrypoint::getName() const
@@ -42,6 +38,11 @@ std::string GetAnimationParametersEntrypoint::getName() const
 std::string GetAnimationParametersEntrypoint::getDescription() const
 {
     return "Get the current state of the animation parameters";
+}
+
+SetAnimationParametersEntrypoint::SetAnimationParametersEntrypoint(AnimationParameters &parameters)
+    : SetEntrypoint(parameters)
+{
 }
 
 std::string SetAnimationParametersEntrypoint::getName() const

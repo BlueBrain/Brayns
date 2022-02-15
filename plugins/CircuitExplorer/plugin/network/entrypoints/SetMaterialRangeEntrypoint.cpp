@@ -23,6 +23,11 @@
 
 namespace brayns
 {
+SetMaterialRangeEntrypoint::SetMaterialRangeEntrypoint(Scene &scene)
+    : _scene(scene)
+{
+}
+
 std::string SetMaterialRangeEntrypoint::getName() const
 {
     return "set-material-range";
@@ -35,13 +40,10 @@ std::string SetMaterialRangeEntrypoint::getDescription() const
 
 void SetMaterialRangeEntrypoint::onRequest(const Request &request)
 {
-    auto &engine = getApi().getEngine();
-    auto &scene = engine.getScene();
-    MaterialRangeProxy materialRange(scene);
+    MaterialRangeProxy materialRange(_scene);
     request.getParams(materialRange);
     materialRange.commit();
-    scene.markModified();
-    engine.triggerRender();
+    _scene.markModified();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

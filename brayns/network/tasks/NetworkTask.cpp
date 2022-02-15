@@ -21,65 +21,60 @@
 
 #include "NetworkTask.h"
 
+namespace
+{
+class NetworkTaskStatus
+{
+public:
+    static bool isReady(const std::future<void> &future)
+    {
+        return hasStatus(future, std::future_status::ready);
+    }
+
+    static bool isRunning(const std::future<void> &future)
+    {
+        return hasStatus(future, std::future_status::timeout);
+    }
+
+    static bool hasStatus(const std::future<void> &future, std::future_status status)
+    {
+        if (!future.valid())
+        {
+            return false;
+        }
+        return future.wait_for(std::chrono::seconds(0)) == status;
+    }
+};
+} // namespace
+
 namespace brayns
 {
-void NetworkTaskException::rethrow()
+TaskCancelledException::TaskCancelledException()
+    : JsonRpcException(-32000, "Task cancelled")
 {
-    std::lock_guard<std::mutex> lock(_mutex);
-    if (!_e)
-    {
-        _e = std::make_exception_ptr(std::runtime_error("Task cancelled"));
-    }
-    std::rethrow_exception(_e);
-}
-
-NetworkTaskException &NetworkTaskException::operator=(std::exception_ptr e)
-{
-    std::lock_guard<std::mutex> lock(_mutex);
-    _e = std::move(e);
-    return *this;
-}
-
-bool NetworkTask::isReady() const
-{
-    return _hasStatus(std::future_status::ready);
-}
-
-bool NetworkTask::isRunning() const
-{
-    return _hasStatus(std::future_status::timeout);
-}
-
-bool NetworkTask::isCancelled() const
-{
-    return _cancelled;
-}
-
-bool NetworkTask::isCancellable() const
-{
-    return isRunning() && !isCancelled();
 }
 
 void NetworkTask::start()
 {
     cancelAndWait();
-    onStart();
     _cancelled = false;
-    _result = std::async(std::launch::async, [this] { run(); });
+    onStart();
+    _future = std::async(std::launch::async, [this] { run(); });
 }
 
-void NetworkTask::poll()
+bool NetworkTask::poll()
 {
-    if (!isReady())
+    if (!NetworkTaskStatus::isReady(_future))
     {
-        return;
+        return false;
     }
     _fetchResult();
+    return true;
 }
 
 void NetworkTask::wait()
 {
-    if (!_result.valid())
+    if (!_future.valid())
     {
         return;
     }
@@ -88,23 +83,12 @@ void NetworkTask::wait()
 
 void NetworkTask::cancel()
 {
-    if (!isCancellable())
+    if (!NetworkTaskStatus::isRunning(_future) || _cancelled)
     {
         return;
     }
     onCancel();
     _cancelled = true;
-}
-
-void NetworkTask::setException(std::exception_ptr e)
-{
-    _e = e;
-}
-
-void NetworkTask::cancelWith(std::exception_ptr e)
-{
-    _e = e;
-    cancel();
 }
 
 void NetworkTask::cancelAndWait()
@@ -113,18 +97,14 @@ void NetworkTask::cancelAndWait()
     wait();
 }
 
-void NetworkTask::checkCancelled()
+void NetworkTask::disconnect()
 {
-    if (!_cancelled)
-    {
-        return;
-    }
-    _e.rethrow();
+    onDisconnect();
 }
 
 void NetworkTask::progress(const std::string &operation, double amount)
 {
-    checkCancelled();
+    _throwIfCancelled();
     onProgress(operation, amount);
 }
 
@@ -140,38 +120,48 @@ void NetworkTask::onCancel()
 {
 }
 
-void NetworkTask::onError(std::exception_ptr)
+void NetworkTask::onError(const JsonRpcException &e)
 {
+    (void)e;
 }
 
-void NetworkTask::onProgress(const std::string &, double)
+void NetworkTask::onProgress(const std::string &operation, double amount)
 {
+    (void)operation;
+    (void)amount;
 }
 
 void NetworkTask::onDisconnect()
 {
 }
 
-bool NetworkTask::_hasStatus(std::future_status status) const
+void NetworkTask::_throwIfCancelled()
 {
-    if (!_result.valid())
+    if (_cancelled)
     {
-        return false;
+        throw TaskCancelledException();
     }
-    return _result.wait_for(std::chrono::seconds(0)) == status;
 }
 
 void NetworkTask::_fetchResult()
 {
     try
     {
-        _result.get();
-        checkCancelled();
+        _future.get();
+        _throwIfCancelled();
         onComplete();
+    }
+    catch (const JsonRpcException &e)
+    {
+        onError(e);
+    }
+    catch (const std::exception &e)
+    {
+        onError(InternalErrorException(e.what()));
     }
     catch (...)
     {
-        onError(std::current_exception());
+        onError(InternalErrorException("Unknown error"));
     }
 }
 } // namespace brayns

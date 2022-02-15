@@ -23,6 +23,8 @@
 
 #include <chrono>
 
+#include <brayns/engine/Engine.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/ExitLaterMessage.h>
 #include <brayns/network/tasks/NetworkTask.h>
@@ -36,28 +38,30 @@ public:
     ExitLaterTask(Engine &engine);
     virtual ~ExitLaterTask();
 
-    void execute(uint32_t minutes);
+    void quitAfter(std::chrono::minutes duration);
 
+protected:
     virtual void run() override;
     virtual void onComplete() override;
     virtual void onCancel() override;
 
 private:
-    std::chrono::minutes _duration;
-    Engine *_engine;
+    Engine &_engine;
     NetworkTaskMonitor _monitor;
+    std::chrono::minutes _duration;
 };
 
 class ExitLaterEntrypoint : public Entrypoint<ExitLaterMessage, EmptyMessage>
 {
 public:
+    ExitLaterEntrypoint(Engine &engine);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
-    virtual void onCreate() override;
-    virtual void onUpdate() override;
     virtual void onRequest(const Request &request) override;
+    virtual void onPreRender() override;
 
 private:
-    std::shared_ptr<ExitLaterTask> _task;
+    ExitLaterTask _task;
 };
 } // namespace brayns

@@ -23,14 +23,20 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/ChunkMessage.h>
+#include <brayns/network/upload/ModelUploadManager.h>
 
 namespace brayns
 {
 class ChunkEntrypoint : public Entrypoint<ChunkMessage, EmptyMessage>
 {
 public:
+    ChunkEntrypoint(ModelUploadManager &modelUploads);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    ModelUploadManager &_modelUploads;
 };
 } // namespace brayns

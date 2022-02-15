@@ -30,15 +30,13 @@ namespace brayns
 class GetExportFramesProgressEntrypoint : public Entrypoint<EmptyMessage, GetExportFramesProgressMessage>
 {
 public:
-    GetExportFramesProgressEntrypoint(std::shared_ptr<FrameExporter> &expt);
+    GetExportFramesProgressEntrypoint(FrameExporter &exporter);
 
-    std::string getName() const final;
-
-    std::string getDescription() const final;
-
-    void onRequest(const Request &request) final;
+    virtual std::string getName() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 
 private:
-    std::shared_ptr<FrameExporter> _exporter{nullptr};
+    FrameExporter _exporter;
 };
 } // namespace brayns

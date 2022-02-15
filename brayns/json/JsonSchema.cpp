@@ -25,9 +25,14 @@
 
 namespace brayns
 {
-bool JsonSchemaHelper::isEmpty(const JsonSchema &schema)
+bool JsonSchemaHelper::isWildcard(const JsonSchema &schema)
 {
     return schema.type == JsonType::Unknown && schema.oneOf.empty();
+}
+
+bool JsonSchemaHelper::isNull(const JsonSchema &schema)
+{
+    return schema.type == JsonType::Null;
 }
 
 bool JsonSchemaHelper::isOneOf(const JsonSchema &schema)
@@ -77,18 +82,6 @@ bool JsonSchemaHelper::checkType(const JsonSchema &schema, JsonType type)
 void JsonSchemaHelper::allowAnyAdditionalProperty(JsonSchema &schema)
 {
     schema.additionalProperties = {{}};
-}
-
-void JsonSchemaHelper::requireAll(JsonSchema &schema)
-{
-    auto &properties = schema.properties;
-    auto &required = schema.required;
-    required.reserve(properties.size());
-    for (const auto &pair : properties)
-    {
-        auto &name = pair.first;
-        required.push_back(name);
-    }
 }
 
 JsonSchema JsonSchemaHelper::getNullSchema()

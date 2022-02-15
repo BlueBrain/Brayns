@@ -61,6 +61,11 @@ public:
 };
 } // namespace
 
+AddCylinderEntrypoint::AddCylinderEntrypoint(brayns::Scene &scene)
+    : _scene(scene)
+{
+}
+
 std::string AddCylinderEntrypoint::getName() const
 {
     return "add-cylinder";
@@ -74,10 +79,7 @@ std::string AddCylinderEntrypoint::getDescription() const
 void AddCylinderEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto &scene = getApi().getScene();
     brayns::Log::info("[CE] Building Cylinder model.\n");
-    auto id = CylinderModel::add(scene, params);
-    scene.markModified();
-    triggerRender();
+    auto id = CylinderModel::add(_scene, params);
     request.reply({id});
 }

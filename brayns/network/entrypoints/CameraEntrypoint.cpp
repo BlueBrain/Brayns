@@ -23,10 +23,9 @@
 
 namespace brayns
 {
-Camera &ObjectExtractor<Camera>::extract(PluginAPI &api)
+GetCameraEntrypoint::GetCameraEntrypoint(const Camera &camera, INetworkInterface &interface)
+    : GetEntrypoint(camera, interface)
 {
-    auto &engine = api.getEngine();
-    return engine.getCamera();
 }
 
 std::string GetCameraEntrypoint::getName() const
@@ -37,6 +36,11 @@ std::string GetCameraEntrypoint::getName() const
 std::string GetCameraEntrypoint::getDescription() const
 {
     return "Get the current state of the camera";
+}
+
+SetCameraEntrypoint::SetCameraEntrypoint(Camera &camera)
+    : SetEntrypoint(camera)
+{
 }
 
 std::string SetCameraEntrypoint::getName() const

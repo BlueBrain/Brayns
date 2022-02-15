@@ -39,6 +39,6 @@ public:
     virtual void onRequest(const Request &request) override;
 
 private:
-    DTIPlugin *_plugin;
+    DTIPlugin &_plugin;
 };
 } // namespace dti

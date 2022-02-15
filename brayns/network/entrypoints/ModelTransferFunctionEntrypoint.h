@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <brayns/engine/Scene.h>
+
 #include <brayns/network/adapters/ModelTransferFunctionAdapter.h>
 #include <brayns/network/adapters/TransferFunctionAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
@@ -31,16 +33,26 @@ namespace brayns
 class GetModelTransferFunctionEntrypoint : public Entrypoint<GetModelMessage, TransferFunction>
 {
 public:
+    GetModelTransferFunctionEntrypoint(Scene &scene);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    Scene &_scene;
 };
 
 class SetModelTransferFunctionEntrypoint : public Entrypoint<ModelTransferFunction, EmptyMessage>
 {
 public:
+    SetModelTransferFunctionEntrypoint(Scene &scene);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
+private:
+    Scene &_scene;
 };
 } // namespace brayns

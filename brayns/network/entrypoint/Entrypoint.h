@@ -21,10 +21,13 @@
 
 #pragma once
 
-#include "BaseEntrypoint.h"
-#include "EntrypointException.h"
+#include <brayns/json/Json.h>
+
+#include <brayns/network/interface/INetworkInterface.h>
+#include <brayns/network/jsonrpc/JsonRpcFactory.h>
+
 #include "EntrypointRequest.h"
-#include "EntrypointTask.h"
+#include "IEntrypoint.h"
 
 namespace brayns
 {
@@ -44,28 +47,22 @@ namespace brayns
  *      {
  *          auto params = request.getParams();
  *          // Do stuff
- *          request.reply(MyResult());
+ *          request.reply(result);
  *      }
  * };
  *
- * MyPlugin.cpp
- * auto interface = _api->getActionInterface();
- * if (interface)
- * {
- *      interface->add<MyEntrypoint>();
- * }
+ * // MyPlugin.cpp in init() method
+ * add<MyEntrypoint>();
  * @endcode
  *
  */
 template<typename ParamsType, typename ResultType>
-class Entrypoint : public BaseEntrypoint
+class Entrypoint : public IEntrypoint
 {
 public:
     using Params = ParamsType;
     using Result = ResultType;
     using Request = EntrypointRequest<ParamsType, ResultType>;
-    using Task = EntrypointTask<ParamsType, ResultType>;
-    using TaskPtr = std::shared_ptr<Task>;
 
     /**
      * @brief Build JsonSchema using ParamsType.
@@ -93,7 +90,7 @@ public:
      *
      * @param request Generic request.
      */
-    virtual void onRequest(const NetworkRequest &request) override
+    virtual void onRequest(const JsonRpcRequest &request) override
     {
         onRequest(Request(request));
     }
@@ -104,48 +101,5 @@ public:
      * @param request Request specialized for Params and Result.
      */
     virtual void onRequest(const Request &request) = 0;
-
-    /**
-     * @brief Launch a task to process the given request.
-     *
-     * This method will throw if a task is already running with the same client
-     * and ID.
-     *
-     * @param task Corresponding EntrypointTask on which execute(request) will
-     * be called.
-     * @param request Client request to process.
-     * @throw EntrypointException A request with the same client and ID is
-     * already running.
-     */
-    void launchTask(const TaskPtr &task, const Request &request) const
-    {
-        auto &tasks = getTasks();
-        auto &handle = request.getConnectionHandle();
-        auto &id = request.getId();
-        if (!tasks.addIfNotPresent(handle, id, task))
-        {
-            throw EntrypointException("A task with ID " + id.getDisplayText() + " is already running for this client");
-        }
-        task->execute(request);
-    }
-
-    /**
-     * @brief Launch or restart a task to process the given request.
-     *
-     * This method will cancel and restart the task if any exists with
-     * the same client and ID.
-     *
-     * @param task Corresponding EntrypointTask on which execute(request) will
-     * be called.
-     * @param request Client request to process.
-     */
-    void launchOrRestartTask(const TaskPtr &task, const Request &request) const
-    {
-        auto &tasks = getTasks();
-        auto &handle = request.getConnectionHandle();
-        auto &id = request.getId();
-        tasks.addIfNotPresent(handle, id, task);
-        task->execute(request);
-    }
 };
 } // namespace brayns

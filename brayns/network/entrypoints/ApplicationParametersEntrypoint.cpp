@@ -23,10 +23,11 @@
 
 namespace brayns
 {
-ApplicationParameters &ObjectExtractor<ApplicationParameters>::extract(PluginAPI &api)
+GetApplicationParametersEntrypoint::GetApplicationParametersEntrypoint(
+    const ApplicationParameters &parameters,
+    INetworkInterface &interface)
+    : GetEntrypoint(parameters, interface)
 {
-    auto &parametersManager = api.getParametersManager();
-    return parametersManager.getApplicationParameters();
 }
 
 std::string GetApplicationParametersEntrypoint::getName() const
@@ -37,6 +38,11 @@ std::string GetApplicationParametersEntrypoint::getName() const
 std::string GetApplicationParametersEntrypoint::getDescription() const
 {
     return "Get the current state of the application parameters";
+}
+
+SetApplicationParametersEntrypoint::SetApplicationParametersEntrypoint(ApplicationParameters &parameters)
+    : SetEntrypoint(parameters)
+{
 }
 
 std::string SetApplicationParametersEntrypoint::getName() const

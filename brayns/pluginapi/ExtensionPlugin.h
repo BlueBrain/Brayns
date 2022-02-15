@@ -23,7 +23,6 @@
 #include <cassert>
 
 #include <brayns/network/entrypoint/EntrypointRef.h>
-#include <brayns/network/interface/ActionInterface.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
 namespace brayns
@@ -57,21 +56,24 @@ public:
     virtual ~ExtensionPlugin() = default;
 
     /**
-     * Called from Brayns::Brayns right after the engine has been created
+     * @brief Called once when the engine is created.
      */
     virtual void init()
     {
     }
 
     /**
-     * Called from Brayns::preRender() to prepare the engine based on the
-     * plugins' need for an upcoming render().
+     * @brief Called before each render.
+     *
      */
     virtual void preRender()
     {
     }
 
-    /** Called from Brayns::postRender() after render() has finished. */
+    /**
+     * @brief Called after each render.
+     *
+     */
     virtual void postRender()
     {
     }
@@ -89,17 +91,17 @@ public:
      * @param args Entrypoint construction arguments.
      */
     template<typename T, typename... Args>
-    void add(Args &&...args)
+    void add(Args &&...args) const
     {
         assert(_api);
-        auto interface = _api->getActionInterface();
+        auto interface = _api->getNetworkInterface();
         if (!interface)
         {
             return;
         }
-        auto entrypoint = EntrypointRef::create<T>(std::forward<Args>(args)...);
-        entrypoint.setPlugin(_name);
-        interface->addEntrypoint(std::move(entrypoint));
+        auto entrypoint = std::make_unique<T>(std::forward<Args>(args)...);
+        auto ref = EntrypointRef(_name, std::move(entrypoint));
+        interface->addEntrypoint(std::move(ref));
     }
 
 protected:

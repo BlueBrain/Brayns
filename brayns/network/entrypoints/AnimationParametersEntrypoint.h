@@ -26,16 +26,10 @@
 
 namespace brayns
 {
-template<>
-struct ObjectExtractor<AnimationParameters>
-{
-    static AnimationParameters &extract(PluginAPI &api);
-};
-
 class GetAnimationParametersEntrypoint : public GetEntrypoint<AnimationParameters>
 {
 public:
-    GetAnimationParametersEntrypoint();
+    GetAnimationParametersEntrypoint(const AnimationParameters &parameters, INetworkInterface &interface);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
@@ -44,6 +38,8 @@ public:
 class SetAnimationParametersEntrypoint : public SetEntrypoint<AnimationParameters>
 {
 public:
+    SetAnimationParametersEntrypoint(AnimationParameters &parameters);
+
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
 };

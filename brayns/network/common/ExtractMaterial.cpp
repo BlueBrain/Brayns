@@ -21,7 +21,7 @@
 
 #include "ExtractMaterial.h"
 
-#include <brayns/network/entrypoint/EntrypointException.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
 {
@@ -37,7 +37,7 @@ Material &ExtractMaterial::fromId(Model &model, size_t modelId, size_t id)
     auto material = model.getMaterial(id);
     if (!material)
     {
-        throw EntrypointException("No material with ID " + std::to_string(id) + " in model " + std::to_string(modelId));
+        throw JsonRpcException("No material with ID " + std::to_string(id) + " in model " + std::to_string(modelId));
     }
     return *material;
 }
