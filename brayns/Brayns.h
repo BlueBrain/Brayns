@@ -23,7 +23,6 @@
 
 #include <brayns/engine/Engine.h>
 #include <brayns/io/LoaderRegistry.h>
-#include <brayns/network/plugin/NetworkManager.h>
 #include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
@@ -130,13 +129,6 @@ public:
      * @return LoaderRegistry& All available loaders.
      */
     LoaderRegistry &getLoaderRegistry();
-
-    /**
-     * @brief Get the network manager if enabled.
-     *
-     * @return NetworkManager* Network manager or null if not enabled.
-     */
-    NetworkManager *getNetworkManager();
 
 private:
     struct Impl;

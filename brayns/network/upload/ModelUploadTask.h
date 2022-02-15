@@ -26,7 +26,7 @@
 
 #include <brayns/common/Blob.h>
 
-#include <brayns/engine/Engine.h>
+#include <brayns/engine/Scene.h>
 
 #include <brayns/io/LoaderRegistry.h>
 
@@ -43,7 +43,7 @@ namespace brayns
  */
 struct ModelUploadContext
 {
-    Engine *engine = nullptr;
+    Scene *scene = nullptr;
     const LoaderRegistry *loaders = nullptr;
     BinaryParam params;
     bool started = false;
@@ -65,10 +65,10 @@ public:
      * @brief Construct a task with the model upload request and dependencies.
      *
      * @param request Model upload request
-     * @param engine Engine to trigger render and get scene.
+     * @param scene Scene to load model.
      * @param loaders Loaders available to load the model.
      */
-    ModelUploadTask(Request request, Engine &engine, const LoaderRegistry &loaders);
+    ModelUploadTask(Request request, Scene &scene, const LoaderRegistry &loaders);
 
     /**
      * @brief Get the ID of the model chunks from the upload request.

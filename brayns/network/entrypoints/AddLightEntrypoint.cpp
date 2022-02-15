@@ -25,21 +25,18 @@
 
 namespace brayns
 {
-void AddLightHelper::load(Engine &engine, LightPtr light, const JsonRpcRequest &request)
+void AddLightHelper::load(LightManager &lights, LightPtr light, const JsonRpcRequest &request)
 {
     if (!light)
     {
         throw InvalidParamsException("Failed to extract light properties");
     }
-    auto &scene = engine.getScene();
-    auto &lightManager = scene.getLightManager();
-    auto id = lightManager.addLight(std::move(light));
-    engine.triggerRender();
+    auto id = lights.addLight(std::move(light));
     request.reply(Json::serialize(id));
 }
 
-AddLightDirectionalEntrypoint::AddLightDirectionalEntrypoint(Engine &engine)
-    : AddLightEntrypoint(engine)
+AddLightDirectionalEntrypoint::AddLightDirectionalEntrypoint(LightManager &lights)
+    : AddLightEntrypoint(lights)
 {
 }
 
@@ -53,8 +50,8 @@ std::string AddLightDirectionalEntrypoint::getDescription() const
     return "Add a directional light and return its ID";
 }
 
-AddLightSphereEntrypoint::AddLightSphereEntrypoint(Engine &engine)
-    : AddLightEntrypoint(engine)
+AddLightSphereEntrypoint::AddLightSphereEntrypoint(LightManager &lights)
+    : AddLightEntrypoint(lights)
 {
 }
 
@@ -68,8 +65,8 @@ std::string AddLightSphereEntrypoint::getDescription() const
     return "Add a sphere light and return its ID";
 }
 
-AddLightQuadEntrypoint::AddLightQuadEntrypoint(Engine &engine)
-    : AddLightEntrypoint(engine)
+AddLightQuadEntrypoint::AddLightQuadEntrypoint(LightManager &lights)
+    : AddLightEntrypoint(lights)
 {
 }
 
@@ -83,8 +80,8 @@ std::string AddLightQuadEntrypoint::getDescription() const
     return "Add a quad light and return its ID";
 }
 
-AddLightSpotEntrypoint::AddLightSpotEntrypoint(Engine &engine)
-    : AddLightEntrypoint(engine)
+AddLightSpotEntrypoint::AddLightSpotEntrypoint(LightManager &lights)
+    : AddLightEntrypoint(lights)
 {
 }
 
@@ -98,8 +95,8 @@ std::string AddLightSpotEntrypoint::getDescription() const
     return "Add a spot light and return its ID";
 }
 
-AddLightAmbientEntrypoint::AddLightAmbientEntrypoint(Engine &engine)
-    : AddLightEntrypoint(engine)
+AddLightAmbientEntrypoint::AddLightAmbientEntrypoint(LightManager &lights)
+    : AddLightEntrypoint(lights)
 {
 }
 

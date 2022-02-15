@@ -78,8 +78,8 @@ public:
 };
 } // namespace
 
-AddPillEntrypoint::AddPillEntrypoint(brayns::Engine &engine)
-    : _engine(engine)
+AddPillEntrypoint::AddPillEntrypoint(brayns::Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -96,10 +96,7 @@ std::string AddPillEntrypoint::getDescription() const
 void AddPillEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto &scene = _engine.getScene();
     brayns::Log::info("[CE] Building Pill model.");
-    auto id = PillModel::add(scene, params);
-    scene.markModified();
-    _engine.triggerRender();
+    auto id = PillModel::add(_scene, params);
     request.reply({id});
 }

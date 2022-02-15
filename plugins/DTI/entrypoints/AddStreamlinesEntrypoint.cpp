@@ -110,8 +110,8 @@ public:
 
 namespace dti
 {
-AddStreamlinesEntrypoint::AddStreamlinesEntrypoint(brayns::Engine &engine)
-    : _engine(engine)
+AddStreamlinesEntrypoint::AddStreamlinesEntrypoint(brayns::Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -128,9 +128,7 @@ std::string AddStreamlinesEntrypoint::getDescription() const
 void AddStreamlinesEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto &scene = _engine.getScene();
-    StreamlineBuilder::build(params, scene);
-    _engine.triggerRender();
+    StreamlineBuilder::build(params, _scene);
     request.reply(brayns::EmptyMessage());
 }
 } // namespace dti

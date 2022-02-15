@@ -38,7 +38,7 @@ public:
 class SetSceneEntrypoint : public SetEntrypoint<Scene>
 {
 public:
-    SetSceneEntrypoint(Scene &scene, Engine &engine);
+    SetSceneEntrypoint(Scene &scene);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

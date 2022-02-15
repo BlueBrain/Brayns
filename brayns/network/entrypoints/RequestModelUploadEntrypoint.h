@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
+#include <brayns/engine/Scene.h>
 
 #include <brayns/io/LoaderRegistry.h>
 
@@ -35,7 +35,7 @@ namespace brayns
 class RequestModelUploadEntrypoint : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
 {
 public:
-    RequestModelUploadEntrypoint(Engine &engine, const LoaderRegistry &loaders, ModelUploadManager &modelUploads);
+    RequestModelUploadEntrypoint(Scene &scene, const LoaderRegistry &loaders, ModelUploadManager &modelUploads);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
@@ -43,7 +43,7 @@ public:
     virtual void onRequest(const Request &request) override;
 
 private:
-    Engine &_engine;
+    Scene &_scene;
     const LoaderRegistry &_loaders;
     ModelUploadManager &_modelUploads;
 };

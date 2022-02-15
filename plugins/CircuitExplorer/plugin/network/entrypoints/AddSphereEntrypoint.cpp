@@ -57,8 +57,8 @@ public:
 };
 } // namespace
 
-AddSphereEntrypoint::AddSphereEntrypoint(brayns::Engine &engine)
-    : _engine(engine)
+AddSphereEntrypoint::AddSphereEntrypoint(brayns::Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -75,10 +75,7 @@ std::string AddSphereEntrypoint::getDescription() const
 void AddSphereEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto &scene = _engine.getScene();
     brayns::Log::info("[CE] Building Sphere model.");
-    auto id = SphereModel::add(scene, params);
-    scene.markModified();
-    _engine.triggerRender();
+    auto id = SphereModel::add(_scene, params);
     request.reply({id});
 }

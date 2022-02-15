@@ -38,7 +38,7 @@ public:
 class SetVolumeParametersEntrypoint : public SetEntrypoint<VolumeParameters>
 {
 public:
-    SetVolumeParametersEntrypoint(VolumeParameters &parameters, Engine &engine);
+    SetVolumeParametersEntrypoint(VolumeParameters &parameters);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

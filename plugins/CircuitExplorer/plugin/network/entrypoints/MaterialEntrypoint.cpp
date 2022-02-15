@@ -49,8 +49,8 @@ void GetMaterialEntrypoint::onRequest(const Request &request)
     request.reply(material);
 }
 
-SetMaterialEntrypoint::SetMaterialEntrypoint(Engine &engine)
-    : _engine(engine)
+SetMaterialEntrypoint::SetMaterialEntrypoint(Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -66,12 +66,10 @@ std::string SetMaterialEntrypoint::getDescription() const
 
 void SetMaterialEntrypoint::onRequest(const Request &request)
 {
-    auto &scene = _engine.getScene();
-    MaterialProxy material(scene);
+    MaterialProxy material(_scene);
     request.getParams(material);
     material.commit();
-    scene.markModified();
-    _engine.triggerRender();
+    _scene.markModified();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

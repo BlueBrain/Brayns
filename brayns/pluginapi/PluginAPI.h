@@ -88,11 +88,5 @@ public:
      * @return LoaderRegistry& Loaders.
      */
     virtual LoaderRegistry &getLoaderRegistry() = 0;
-
-    /**
-     * @brief Trigger preRender() and potentially render() and postRender().
-     *
-     */
-    virtual void triggerRender() = 0;
 };
 } // namespace brayns

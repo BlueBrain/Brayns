@@ -23,8 +23,6 @@
 
 #include <brayns/common/adapters/PropertyMapAdapter.h>
 
-#include <brayns/engine/Engine.h>
-
 #include <brayns/network/common/PropertyObjectSchema.h>
 #include <brayns/network/jsonrpc/JsonRpcNotifier.h>
 
@@ -100,15 +98,13 @@ class SetPropertyObjectEntrypoint : public IEntrypoint
 {
 public:
     /**
-     * @brief Store the object and the engine.
+     * @brief Store the exposed object.
      *
      * @param object Object bound to the entrypoint.
-     * @param engine Engine to trigger render when object is modified.
      * @param interface Interface to notify when object is modified.
      */
-    SetPropertyObjectEntrypoint(ObjectType &object, Engine &engine, INetworkInterface &interface)
+    SetPropertyObjectEntrypoint(ObjectType &object, INetworkInterface &interface)
         : _object(object)
-        , _engine(engine)
         , _notifier(interface)
     {
     }
@@ -143,7 +139,6 @@ public:
         auto &params = request.getParams();
         auto properties = Json::deserialize<PropertyMap>(params);
         _object.updateProperties(properties);
-        _engine.triggerRender();
         auto &updatedProperties = _object.getPropertyMap();
         _notifier.notify(request, updatedProperties);
         auto result = Json::serialize(EmptyMessage());
@@ -152,7 +147,6 @@ public:
 
 private:
     ObjectType &_object;
-    Engine &_engine;
     JsonRpcNotifier _notifier;
 };
 } // namespace brayns

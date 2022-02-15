@@ -23,7 +23,9 @@
 
 namespace brayns
 {
-GetVolumeParametersEntrypoint::GetVolumeParametersEntrypoint(const VolumeParameters &parameters, INetworkInterface &interface)
+GetVolumeParametersEntrypoint::GetVolumeParametersEntrypoint(
+    const VolumeParameters &parameters,
+    INetworkInterface &interface)
     : GetEntrypoint(parameters, interface)
 {
 }
@@ -38,8 +40,8 @@ std::string GetVolumeParametersEntrypoint::getDescription() const
     return "Get the current state of the volume parameters";
 }
 
-SetVolumeParametersEntrypoint::SetVolumeParametersEntrypoint(VolumeParameters &parameters, Engine &engine)
-    : SetEntrypoint(parameters, engine)
+SetVolumeParametersEntrypoint::SetVolumeParametersEntrypoint(VolumeParameters &parameters)
+    : SetEntrypoint(parameters)
 {
 }
 

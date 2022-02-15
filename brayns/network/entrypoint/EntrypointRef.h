@@ -58,12 +58,6 @@ public:
     void onRequest(const JsonRpcRequest &request) const;
 
     /**
-     * @brief Call implementation onUpdate().
-     *
-     */
-    void onUpdate() const;
-
-    /**
      * @brief Call implementation onPreRender().
      *
      */

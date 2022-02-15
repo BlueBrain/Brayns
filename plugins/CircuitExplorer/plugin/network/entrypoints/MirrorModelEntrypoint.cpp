@@ -28,14 +28,11 @@ namespace
 class ModelMirrorer
 {
 public:
-    static void mirrorModel(brayns::Engine &engine, const MirrorModelMessage &params)
+    static void mirrorModel(brayns::Scene &scene, const MirrorModelMessage &params)
     {
         // Extract params
         auto modelId = params.model_id;
         auto &mirrorAxis = params.mirror_axis;
-
-        // Extract API data
-        auto &scene = engine.getScene();
 
         // Extract model data
         auto &descriptor = brayns::ExtractModel::fromId(scene, modelId);
@@ -170,7 +167,6 @@ public:
         // Commit
         descriptor.markModified();
         scene.markModified();
-        engine.triggerRender();
     }
 
 private:
@@ -178,8 +174,8 @@ private:
 };
 } // namespace
 
-MirrorModelEntrypoint::MirrorModelEntrypoint(brayns::Engine &engine)
-    : _engine(engine)
+MirrorModelEntrypoint::MirrorModelEntrypoint(brayns::Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -196,6 +192,6 @@ std::string MirrorModelEntrypoint::getDescription() const
 void MirrorModelEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    ModelMirrorer::mirrorModel(_engine, params);
+    ModelMirrorer::mirrorModel(_scene, params);
     request.reply(brayns::EmptyMessage());
 }

@@ -107,12 +107,6 @@ public:
     Renderer &getRenderer();
 
     /**
-     * Callback when a new frame shall be triggered. Currently called by event
-     * plugins Deflect.
-     */
-    std::function<void()> triggerRender{[] {}};
-
-    /**
      * Keep continue to run the engine, aka the user did not request to stop
      * rendering.
      */

@@ -48,7 +48,6 @@ void ExitLaterTask::run()
 void ExitLaterTask::onComplete()
 {
     _engine.setKeepRunning(false);
-    _engine.triggerRender();
 }
 
 void ExitLaterTask::onCancel()
@@ -71,16 +70,16 @@ std::string ExitLaterEntrypoint::getDescription() const
     return "Schedules Brayns to shutdown after a given amount of minutes";
 }
 
-void ExitLaterEntrypoint::onUpdate()
-{
-    _task.poll();
-}
-
 void ExitLaterEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto duration = std::chrono::minutes(params.minutes);
     _task.quitAfter(duration);
     request.reply(EmptyMessage());
+}
+
+void ExitLaterEntrypoint::onPreRender()
+{
+    _task.poll();
 }
 } // namespace brayns

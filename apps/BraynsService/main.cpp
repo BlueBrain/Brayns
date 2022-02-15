@@ -22,60 +22,32 @@
 #include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
 
-#include <atomic>
-
 class BraynsService
 {
 public:
     BraynsService(int argc, const char **argv)
         : _brayns(argc, argv)
     {
-        if (!_brayns.getNetworkManager())
-        {
-            throw std::runtime_error("Network is not enabled");
-        }
-        auto &engine = _brayns.getEngine();
-        engine.triggerRender = [this] { _triggerRender(); };
     }
 
     void run()
     {
-        auto &engine = _brayns.getEngine();
-        auto &network = *_brayns.getNetworkManager();
-        while (engine.getKeepRunning())
+        while (_brayns.commitAndRender())
         {
-            network.update();
-            if (_isRenderTriggered() || engine.continueRendering())
-            {
-                _brayns.commitAndRender();
-            }
+            brayns::Log::trace("Brayns service update.");
         }
     }
 
 private:
     brayns::Brayns _brayns;
-    std::atomic_bool _renderTriggered{false};
-
-    void _triggerRender()
-    {
-        _renderTriggered = true;
-    }
-
-    bool _isRenderTriggered()
-    {
-        if (_renderTriggered)
-        {
-            _renderTriggered = false;
-            return true;
-        }
-        return false;
-    }
 };
 
 int main(int argc, const char **argv)
 {
     try
     {
+        brayns::Log::info("Start Brayns service.");
+
         brayns::Timer timer;
         timer.start();
 

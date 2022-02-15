@@ -266,8 +266,7 @@ public:
 private:
     static std::vector<brayns::ModelDescriptorPtr> _createModels(brayns::ModelUploadContext &context, Callback callback)
     {
-        auto &engine = *context.engine;
-        auto &scene = engine.getScene();
+        auto &scene = *context.scene;
         auto &params = context.params;
         auto &blob = context.blob;
         auto parameters = params.getLoadParameters();
@@ -287,8 +286,7 @@ private:
 
     static void _addModels(brayns::ModelUploadContext &context, std::vector<brayns::ModelDescriptorPtr> &descriptors)
     {
-        auto &engine = *context.engine;
-        auto &scene = engine.getScene();
+        auto &scene = *context.scene;
         auto &params = context.params;
         scene.addModels(descriptors, params);
     }
@@ -297,10 +295,10 @@ private:
 
 namespace brayns
 {
-ModelUploadTask::ModelUploadTask(Request request, Engine &engine, const LoaderRegistry &loaders)
+ModelUploadTask::ModelUploadTask(Request request, Scene &scene, const LoaderRegistry &loaders)
     : EntrypointTask(std::move(request))
 {
-    _context.engine = &engine;
+    _context.scene = &scene;
     _context.loaders = &loaders;
     _context.params = getParams();
     BinaryParamsValidator::validate(_context);
@@ -335,9 +333,7 @@ void ModelUploadTask::onStart()
 
 void ModelUploadTask::onComplete()
 {
-    auto &engine = *_context.engine;
     auto &descriptors = _context.descriptors;
-    engine.triggerRender();
     reply(descriptors);
 }
 

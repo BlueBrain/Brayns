@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <brayns/engine/Renderer.h>
+
 #include <brayns/network/entrypoint/PropertyObjectEntrypoint.h>
 
 namespace brayns
@@ -37,7 +39,7 @@ public:
 class SetRendererParamsEntrypoint : public SetPropertyObjectEntrypoint<Renderer>
 {
 public:
-    SetRendererParamsEntrypoint(Renderer &renderer, Engine &engine, INetworkInterface &interface);
+    SetRendererParamsEntrypoint(Renderer &renderer, INetworkInterface &interface);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

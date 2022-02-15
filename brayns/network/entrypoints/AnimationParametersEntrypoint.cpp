@@ -40,8 +40,8 @@ std::string GetAnimationParametersEntrypoint::getDescription() const
     return "Get the current state of the animation parameters";
 }
 
-SetAnimationParametersEntrypoint::SetAnimationParametersEntrypoint(AnimationParameters &parameters, Engine &engine)
-    : SetEntrypoint(parameters, engine)
+SetAnimationParametersEntrypoint::SetAnimationParametersEntrypoint(AnimationParameters &parameters)
+    : SetEntrypoint(parameters)
 {
 }
 

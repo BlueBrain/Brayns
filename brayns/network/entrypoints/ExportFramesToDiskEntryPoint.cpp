@@ -60,7 +60,6 @@ void ExportFramesToDiskEntrypoint::onRequest(const Request &request)
         throw JsonRpcException(2, "Frame export already in progress");
     }
 
-    _engine.triggerRender();
     request.reply(EmptyMessage());
 }
 

@@ -26,8 +26,8 @@
 
 namespace brayns
 {
-UpdateInstanceEntrypoint::UpdateInstanceEntrypoint(Engine &engine, INetworkInterface &interface)
-    : _engine(engine)
+UpdateInstanceEntrypoint::UpdateInstanceEntrypoint(Scene &scene, INetworkInterface &interface)
+    : _scene(scene)
     , _notifier(interface)
 {
 }
@@ -47,18 +47,16 @@ void UpdateInstanceEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     auto modelId = params.getModelID();
     auto instanceId = params.getInstanceID();
-    auto &scene = _engine.getScene();
-    auto &model = ExtractModel::fromId(scene, modelId);
+    auto &model = ExtractModel::fromId(_scene, modelId);
     auto instance = model.getInstance(instanceId);
     if (!instance)
     {
         throw JsonRpcException(
-            "Model with ID " + std::to_string(modelId) + " has no instance with ID " + std::to_string(instanceId));
+            "Model with ID " + std::to_string(modelId) + " has no instances with ID " + std::to_string(instanceId));
     }
     auto &source = model.getModel();
     source.markInstancesDirty();
-    scene.markModified(false);
-    _engine.triggerRender();
+    _scene.markModified(false);
     request.getParams(*instance);
     _notifier.notify(request, *instance);
     request.reply(EmptyMessage());

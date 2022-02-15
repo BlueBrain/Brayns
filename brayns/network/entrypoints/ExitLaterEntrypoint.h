@@ -58,8 +58,8 @@ public:
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
-    virtual void onUpdate() override;
     virtual void onRequest(const Request &request) override;
+    virtual void onPreRender() override;
 
 private:
     ExitLaterTask _task;

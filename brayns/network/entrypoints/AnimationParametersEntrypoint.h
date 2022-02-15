@@ -38,7 +38,7 @@ public:
 class SetAnimationParametersEntrypoint : public SetEntrypoint<AnimationParameters>
 {
 public:
-    SetAnimationParametersEntrypoint(AnimationParameters &parameters, Engine &engine);
+    SetAnimationParametersEntrypoint(AnimationParameters &parameters);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

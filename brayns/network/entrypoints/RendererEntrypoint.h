@@ -38,7 +38,7 @@ public:
 class SetRendererEntrypoint : public SetEntrypoint<RenderingParameters>
 {
 public:
-    SetRendererEntrypoint(RenderingParameters &parameters, Engine &engine);
+    SetRendererEntrypoint(RenderingParameters &parameters);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

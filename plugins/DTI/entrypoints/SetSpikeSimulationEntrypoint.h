@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
-
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <messages/SetSpikeSimulationMessage.h>
@@ -34,7 +32,7 @@ namespace dti
 class SetSpikeSimulationEntrypoint : public brayns::Entrypoint<SetSpikeSimulationMessage, brayns::EmptyMessage>
 {
 public:
-    SetSpikeSimulationEntrypoint(brayns::Engine &engine, DTIPlugin &plugin);
+    SetSpikeSimulationEntrypoint(DTIPlugin &plugin);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
@@ -42,6 +40,5 @@ public:
 
 private:
     DTIPlugin &_plugin;
-    brayns::Engine &_engine;
 };
 } // namespace dti

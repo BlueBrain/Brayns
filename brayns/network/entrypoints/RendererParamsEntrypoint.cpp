@@ -38,11 +38,8 @@ std::string GetRendererParamsEntrypoint::getDescription() const
     return "Get the current properties of the renderer";
 }
 
-SetRendererParamsEntrypoint::SetRendererParamsEntrypoint(
-    Renderer &renderer,
-    Engine &engine,
-    INetworkInterface &interface)
-    : SetPropertyObjectEntrypoint(renderer, engine, interface)
+SetRendererParamsEntrypoint::SetRendererParamsEntrypoint(Renderer &renderer, INetworkInterface &interface)
+    : SetPropertyObjectEntrypoint(renderer, interface)
 {
 }
 

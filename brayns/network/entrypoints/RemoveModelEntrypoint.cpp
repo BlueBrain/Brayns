@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-RemoveModelEntrypoint::RemoveModelEntrypoint(Engine &engine)
-    : _engine(engine)
+RemoveModelEntrypoint::RemoveModelEntrypoint(Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -41,12 +41,10 @@ std::string RemoveModelEntrypoint::getDescription() const
 void RemoveModelEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto &scene = _engine.getScene();
     for (auto id : params.ids)
     {
-        scene.removeModel(id);
+        _scene.removeModel(id);
     }
-    _engine.triggerRender();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

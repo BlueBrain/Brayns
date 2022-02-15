@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
-
 #include <brayns/json/Json.h>
 
 #include <brayns/network/common/NotificationPeriod.h>
@@ -92,7 +90,7 @@ public:
      * @brief Notify if the object is modified.
      *
      */
-    virtual void onUpdate() override
+    virtual void onPreRender() override
     {
         _notify();
     }
@@ -130,14 +128,12 @@ class SetEntrypoint : public IEntrypoint
 {
 public:
     /**
-     * @brief Setup entrypoint with object and engine to trigger render.
+     * @brief Setup entrypoint with exposed object.
      *
      * @param object Object bound to the entrypoint.
-     * @param engine Engine to trigger render when object is modified.
      */
-    SetEntrypoint(ObjectType &object, Engine &engine)
+    SetEntrypoint(ObjectType &object)
         : _object(object)
-        , _engine(engine)
     {
     }
 
@@ -170,13 +166,11 @@ public:
     {
         auto &params = request.getParams();
         Json::deserialize(params, _object);
-        _engine.triggerRender();
         auto result = Json::serialize(EmptyMessage());
         request.reply(result);
     }
 
 private:
     ObjectType &_object;
-    Engine &_engine;
 };
 } // namespace brayns

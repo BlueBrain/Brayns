@@ -218,11 +218,6 @@ struct Brayns::Impl : public PluginAPI
         return _loaderRegistry;
     }
 
-    void triggerRender() final
-    {
-        _engine->triggerRender();
-    }
-
     INetworkInterface *getNetworkInterface() final
     {
         auto manager = _pluginManager.getNetworkManager();
@@ -431,10 +426,5 @@ LoaderRegistry &Brayns::getLoaderRegistry()
 ParametersManager &Brayns::getParametersManager()
 {
     return _impl->getParametersManager();
-}
-
-NetworkManager *Brayns::getNetworkManager()
-{
-    return _impl->getNetworkManager();
 }
 } // namespace brayns

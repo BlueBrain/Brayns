@@ -73,12 +73,6 @@ public:
     void onRequest(const JsonRpcRequest &request) const;
 
     /**
-     * @brief Update all entrypoints.
-     *
-     */
-    void onUpdate() const;
-
-    /**
      * @brief Notify all entrypoints before render.
      *
      */

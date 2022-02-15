@@ -94,14 +94,6 @@ public:
     }
 
     /**
-     * @brief Called at each update of Brayns.
-     *
-     */
-    virtual void onUpdate()
-    {
-    }
-
-    /**
      * @brief Called before each render.
      *
      */

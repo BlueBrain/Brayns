@@ -81,12 +81,6 @@ public:
     void start();
 
     /**
-     * @brief Poll running tasks, update entrypoints and process requests.
-     *
-     */
-    void update();
-
-    /**
      * @brief Setup action interface and register core entrypoints.
      *
      */

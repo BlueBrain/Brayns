@@ -38,8 +38,8 @@ std::string GetSceneEntrypoint::getDescription() const
     return "Get the current state of the scene";
 }
 
-SetSceneEntrypoint::SetSceneEntrypoint(Scene &scene, Engine &engine)
-    : SetEntrypoint(scene, engine)
+SetSceneEntrypoint::SetSceneEntrypoint(Scene &scene)
+    : SetEntrypoint(scene)
 {
 }
 

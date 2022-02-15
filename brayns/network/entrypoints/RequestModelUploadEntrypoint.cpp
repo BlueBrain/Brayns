@@ -26,10 +26,10 @@
 namespace brayns
 {
 RequestModelUploadEntrypoint::RequestModelUploadEntrypoint(
-    Engine &engine,
+    Scene &scene,
     const LoaderRegistry &loaders,
     ModelUploadManager &modelUploads)
-    : _engine(engine)
+    : _scene(scene)
     , _loaders(loaders)
     , _modelUploads(modelUploads)
 {
@@ -53,7 +53,7 @@ bool RequestModelUploadEntrypoint::isAsync() const
 
 void RequestModelUploadEntrypoint::onRequest(const Request &request)
 {
-    auto task = std::make_unique<ModelUploadTask>(request, _engine, _loaders);
+    auto task = std::make_unique<ModelUploadTask>(request, _scene, _loaders);
     _modelUploads.add(std::move(task));
 }
 } // namespace brayns

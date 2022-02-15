@@ -38,8 +38,8 @@ std::string GetCameraParamsEntrypoint::getDescription() const
     return "Get the current properties of the camera";
 }
 
-SetCameraParamsEntrypoint::SetCameraParamsEntrypoint(Camera &camera, Engine &engine, INetworkInterface &interface)
-    : SetPropertyObjectEntrypoint(camera, engine, interface)
+SetCameraParamsEntrypoint::SetCameraParamsEntrypoint(Camera &camera, INetworkInterface &interface)
+    : SetPropertyObjectEntrypoint(camera, interface)
 {
 }
 

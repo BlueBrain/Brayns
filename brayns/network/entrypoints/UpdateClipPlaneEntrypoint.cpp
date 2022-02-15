@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-UpdateClipPlaneEntrypoint::UpdateClipPlaneEntrypoint(Engine &engine, INetworkInterface &interface)
-    : _engine(engine)
+UpdateClipPlaneEntrypoint::UpdateClipPlaneEntrypoint(Scene &scene, INetworkInterface &interface)
+    : _scene(scene)
     , _notifier(interface)
 {
 }
@@ -46,14 +46,12 @@ void UpdateClipPlaneEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     auto id = params.getID();
     auto &plane = params.getPlane();
-    auto &scene = _engine.getScene();
-    auto clipPlane = scene.getClipPlane(id);
+    auto clipPlane = _scene.getClipPlane(id);
     if (!clipPlane)
     {
-        throw JsonRpcException("No clip plane found with ID " + std::to_string(id));
+        throw InvalidParamsException("No clip plane found with ID " + std::to_string(id));
     }
     clipPlane->setPlane(plane);
-    _engine.triggerRender();
     _notifier.notify(request, clipPlane);
     request.reply(EmptyMessage());
 }

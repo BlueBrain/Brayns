@@ -40,10 +40,8 @@ std::string GetApplicationParametersEntrypoint::getDescription() const
     return "Get the current state of the application parameters";
 }
 
-SetApplicationParametersEntrypoint::SetApplicationParametersEntrypoint(
-    ApplicationParameters &parameters,
-    Engine &engine)
-    : SetEntrypoint(parameters, engine)
+SetApplicationParametersEntrypoint::SetApplicationParametersEntrypoint(ApplicationParameters &parameters)
+    : SetEntrypoint(parameters)
 {
 }
 

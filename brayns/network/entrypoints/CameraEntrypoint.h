@@ -38,7 +38,7 @@ public:
 class SetCameraEntrypoint : public SetEntrypoint<Camera>
 {
 public:
-    SetCameraEntrypoint(Camera &camera, Engine &engine);
+    SetCameraEntrypoint(Camera &camera);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

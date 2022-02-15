@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
-
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/ImageStreamingModeMessage.h>
 #include <brayns/network/stream/StreamMonitor.h>
@@ -34,14 +32,13 @@ namespace brayns
 class ImageStreamingModeEntrypoint : public Entrypoint<ImageStreamingModeMessage, EmptyMessage>
 {
 public:
-    ImageStreamingModeEntrypoint(Engine &engine, ApplicationParameters &parameters, StreamMonitor &monitor);
+    ImageStreamingModeEntrypoint(ApplicationParameters &parameters, StreamMonitor &monitor);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    Engine &_engine;
     ApplicationParameters &_parameters;
     StreamMonitor &_monitor;
 };

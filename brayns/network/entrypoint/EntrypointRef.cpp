@@ -47,11 +47,6 @@ void EntrypointRef::onCreate()
     _schema.returns = _entrypoint->getResultSchema();
 }
 
-void EntrypointRef::onUpdate() const
-{
-    _entrypoint->onUpdate();
-}
-
 void EntrypointRef::onRequest(const JsonRpcRequest &request) const
 {
     _entrypoint->onRequest(request);

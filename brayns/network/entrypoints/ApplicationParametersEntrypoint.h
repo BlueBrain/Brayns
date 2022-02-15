@@ -38,7 +38,7 @@ public:
 class SetApplicationParametersEntrypoint : public SetEntrypoint<ApplicationParameters>
 {
 public:
-    SetApplicationParametersEntrypoint(ApplicationParameters &parameters, Engine &engine);
+    SetApplicationParametersEntrypoint(ApplicationParameters &parameters);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

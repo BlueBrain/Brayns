@@ -157,14 +157,6 @@ void EntrypointManager::onCreate()
     }
 }
 
-void EntrypointManager::onUpdate() const
-{
-    for (const auto &[name, entrypoint] : _entrypoints)
-    {
-        entrypoint.onUpdate();
-    }
-}
-
 void EntrypointManager::onRequest(const JsonRpcRequest &request) const
 {
     MessageDispatcher::dispatch(request, *this);

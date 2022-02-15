@@ -38,8 +38,8 @@ std::string GetCameraEntrypoint::getDescription() const
     return "Get the current state of the camera";
 }
 
-SetCameraEntrypoint::SetCameraEntrypoint(Camera &camera, Engine &engine)
-    : SetEntrypoint(camera, engine)
+SetCameraEntrypoint::SetCameraEntrypoint(Camera &camera)
+    : SetEntrypoint(camera)
 {
 }
 

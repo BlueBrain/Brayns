@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
+#include <brayns/engine/Scene.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -32,13 +32,13 @@ namespace brayns
 class SetMaterialRangeEntrypoint : public Entrypoint<MaterialRangeProxy, EmptyMessage>
 {
 public:
-    SetMaterialRangeEntrypoint(Engine &engine);
+    SetMaterialRangeEntrypoint(Scene &scene);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    Engine &_engine;
+    Scene &_scene;
 };
 } // namespace brayns

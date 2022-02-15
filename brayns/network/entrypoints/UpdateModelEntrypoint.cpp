@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-UpdateModelEntrypoint::UpdateModelEntrypoint(Engine &engine)
-    : _engine(engine)
+UpdateModelEntrypoint::UpdateModelEntrypoint(Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -40,12 +40,10 @@ std::string UpdateModelEntrypoint::getDescription() const
 
 void UpdateModelEntrypoint::onRequest(const Request &request)
 {
-    auto &scene = _engine.getScene();
-    UpdateModelProxy model(scene);
+    UpdateModelProxy model(_scene);
     request.getParams(model);
     model.computeBounds();
-    scene.markModified();
-    _engine.triggerRender();
+    _scene.markModified();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

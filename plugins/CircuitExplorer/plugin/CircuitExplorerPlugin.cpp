@@ -135,28 +135,28 @@ void CircuitExplorerPlugin::init()
     // ENTRY POINTS ADDED BY THIS PLUGIN
     auto &engine = _api->getEngine();
     auto &scene = engine.getScene();
-    add<AddBoxEntrypoint>(engine);
-    add<AddColumnEntrypoint>(engine);
-    add<AddCylinderEntrypoint>(engine);
-    add<AddGridEntrypoint>(engine);
-    add<AddPillEntrypoint>(engine);
-    add<AddSphereEntrypoint>(engine);
-    add<AvailableColorMethodsEntrypoint>(engine, _colorManager);
-    add<AvailableColorMethodVariablesEntrypoint>(engine, _colorManager);
+    add<AddBoxEntrypoint>(scene);
+    add<AddColumnEntrypoint>(scene);
+    add<AddCylinderEntrypoint>(scene);
+    add<AddGridEntrypoint>(scene);
+    add<AddPillEntrypoint>(scene);
+    add<AddSphereEntrypoint>(scene);
+    add<AvailableColorMethodsEntrypoint>(scene, _colorManager);
+    add<AvailableColorMethodVariablesEntrypoint>(scene, _colorManager);
     add<brayns::GetMaterialEntrypoint>(scene);
     add<brayns::GetMaterialIdsEntrypoint>(scene);
-    add<brayns::SetMaterialEntrypoint>(engine);
-    add<brayns::SetMaterialExtraAttributesEntrypoint>(engine);
-    add<brayns::SetMaterialRangeEntrypoint>(engine);
-    add<brayns::SetMaterialsEntrypoint>(engine);
-    add<ColorCircuitByIdEntrypoint>(engine, _colorManager);
-    add<ColorCircuitByMethodEntrypoint>(engine, _colorManager);
-    add<ColorCircuitBySingleColorEntrypoint>(engine, _colorManager);
+    add<brayns::SetMaterialEntrypoint>(scene);
+    add<brayns::SetMaterialExtraAttributesEntrypoint>(scene);
+    add<brayns::SetMaterialRangeEntrypoint>(scene);
+    add<brayns::SetMaterialsEntrypoint>(scene);
+    add<ColorCircuitByIdEntrypoint>(scene, _colorManager);
+    add<ColorCircuitByMethodEntrypoint>(scene, _colorManager);
+    add<ColorCircuitBySingleColorEntrypoint>(scene, _colorManager);
     add<MakeMovieEntrypoint>();
-    add<MirrorModelEntrypoint>(engine);
-    add<SetCircuitThicknessEntrypoint>(engine);
+    add<MirrorModelEntrypoint>(scene);
+    add<SetCircuitThicknessEntrypoint>(scene);
     add<SimulationColorEntrypoint>(scene);
-    add<TraceAnterogradeEntrypoint>(engine, _colorManager);
+    add<TraceAnterogradeEntrypoint>(scene, _colorManager);
 
     // RENDERERS ADDED BY THIS PLUGIN
     _addAdvancedSimulationRenderer(engine);

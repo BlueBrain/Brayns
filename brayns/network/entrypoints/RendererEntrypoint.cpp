@@ -38,8 +38,8 @@ std::string GetRendererEntrypoint::getDescription() const
     return "Get the current state of the renderer";
 }
 
-SetRendererEntrypoint::SetRendererEntrypoint(RenderingParameters &parameters, Engine &engine)
-    : SetEntrypoint(parameters, engine)
+SetRendererEntrypoint::SetRendererEntrypoint(RenderingParameters &parameters)
+    : SetEntrypoint(parameters)
 {
 }
 

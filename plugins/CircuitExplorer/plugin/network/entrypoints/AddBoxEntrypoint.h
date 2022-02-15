@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
+#include <brayns/engine/Scene.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -31,12 +31,12 @@
 class AddBoxEntrypoint : public brayns::Entrypoint<AddBoxMessage, AddShapeMessage>
 {
 public:
-    AddBoxEntrypoint(brayns::Engine &engine);
+    AddBoxEntrypoint(brayns::Scene &scene);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    brayns::Engine &_engine;
+    brayns::Scene &_scene;
 };

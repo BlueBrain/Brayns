@@ -46,9 +46,9 @@ public:
 class LoadModelTask : public brayns::EntrypointTask<brayns::ModelParams, std::vector<brayns::ModelDescriptorPtr>>
 {
 public:
-    LoadModelTask(Request request, brayns::Engine &engine, const brayns::LoaderRegistry &loaders)
+    LoadModelTask(Request request, brayns::Scene &scene, const brayns::LoaderRegistry &loaders)
         : EntrypointTask(std::move(request))
-        , _engine(engine)
+        , _scene(scene)
         , _loaders(loaders)
     {
         _params = getParams();
@@ -57,24 +57,22 @@ public:
 
     virtual void run() override
     {
-        auto &scene = _engine.getScene();
         auto &path = _params.getPath();
         auto &name = _params.getLoaderName();
         auto &loader = _loaders.getSuitableLoader(path, "", name);
         auto &parameters = _params.getLoadParameters();
         auto callback = [this](const auto &operation, auto amount) { progress(operation, amount); };
-        _descriptors = loader.loadFromFile(path, {callback}, parameters, scene);
-        scene.addModels(_descriptors, _params);
+        _descriptors = loader.loadFromFile(path, {callback}, parameters, _scene);
+        _scene.addModels(_descriptors, _params);
     }
 
     virtual void onComplete() override
     {
-        _engine.triggerRender();
         reply(_descriptors);
     }
 
 private:
-    brayns::Engine &_engine;
+    brayns::Scene &_scene;
     const brayns::LoaderRegistry &_loaders;
     brayns::ModelParams _params;
     std::vector<brayns::ModelDescriptorPtr> _descriptors;
@@ -83,8 +81,8 @@ private:
 
 namespace brayns
 {
-AddModelEntrypoint::AddModelEntrypoint(Engine &engine, LoaderRegistry &loaders, INetworkInterface &interface)
-    : _engine(engine)
+AddModelEntrypoint::AddModelEntrypoint(Scene &scene, LoaderRegistry &loaders, INetworkInterface &interface)
+    : _scene(scene)
     , _loaders(loaders)
     , _launcher(interface)
 {
@@ -107,7 +105,7 @@ bool AddModelEntrypoint::isAsync() const
 
 void AddModelEntrypoint::onRequest(const Request &request)
 {
-    auto task = std::make_unique<LoadModelTask>(request, _engine, _loaders);
+    auto task = std::make_unique<LoadModelTask>(request, _scene, _loaders);
     _launcher.launch(std::move(task));
 }
 } // namespace brayns

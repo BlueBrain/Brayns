@@ -63,8 +63,8 @@ public:
 };
 } // namespace
 
-AddBoxEntrypoint::AddBoxEntrypoint(brayns::Engine &engine)
-    : _engine(engine)
+AddBoxEntrypoint::AddBoxEntrypoint(brayns::Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -81,10 +81,7 @@ std::string AddBoxEntrypoint::getDescription() const
 void AddBoxEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto &scene = _engine.getScene();
     brayns::Log::info("[CE] Building Box model.");
-    auto id = BoxModel::add(scene, params);
-    scene.markModified();
-    _engine.triggerRender();
+    auto id = BoxModel::add(_scene, params);
     request.reply({id});
 }

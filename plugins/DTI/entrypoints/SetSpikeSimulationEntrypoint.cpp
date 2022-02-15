@@ -23,9 +23,8 @@
 
 namespace dti
 {
-SetSpikeSimulationEntrypoint::SetSpikeSimulationEntrypoint(brayns::Engine &engine, DTIPlugin &plugin)
-    : _engine(engine)
-    , _plugin(plugin)
+SetSpikeSimulationEntrypoint::SetSpikeSimulationEntrypoint(DTIPlugin &plugin)
+    : _plugin(plugin)
 {
 }
 
@@ -43,7 +42,6 @@ void SetSpikeSimulationEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     _plugin.updateSpikeSimulation(params);
-    _engine.triggerRender();
     request.reply(brayns::EmptyMessage());
 }
 } // namespace dti
