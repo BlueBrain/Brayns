@@ -62,7 +62,7 @@ bool RateLimiter::_tryUpdateLastCall()
         return false;
     }
     auto delay = elapsed - _period;
-    delay = std::max(delay, _period);
+    delay = std::min(delay, _period);
     _lastCall = currentTime - delay;
     return true;
 }
