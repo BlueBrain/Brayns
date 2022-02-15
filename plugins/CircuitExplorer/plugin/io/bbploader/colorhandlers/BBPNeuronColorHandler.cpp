@@ -193,10 +193,10 @@ private:
         }
         std::vector<std::string> result(gids.size());
         auto it = gids.begin();
+        auto previousGid = *it;
         size_t sourceIndex = 0;
         for (size_t i = 0; i < result.size(); ++i, ++it)
         {
-            auto previousGid = *it;
             auto offset = *it - previousGid;
             sourceIndex += offset;
             if (sourceIndex > source.size())
@@ -204,6 +204,7 @@ private:
                 throw std::runtime_error("Vector overflowed access");
             }
             result[i] = source[sourceIndex];
+            previousGid = *it;
         }
         return result;
     }
