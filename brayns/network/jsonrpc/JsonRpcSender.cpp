@@ -40,11 +40,11 @@ public:
         }
         catch (const brayns::ConnectionClosedException &e)
         {
-            brayns::Log::debug("Connection closed while sending data to {}: {}.", client, e.what());
+            brayns::Log::debug("Connection closed while sending data to {}: '{}'.", client, e.what());
         }
         catch (const std::exception &e)
         {
-            brayns::Log::error("Unexpected error while sending data to {}: {}.", client, e.what());
+            brayns::Log::error("Unexpected error while sending data to {}: '{}'.", client, e.what());
         }
         catch (...)
         {
