@@ -63,7 +63,7 @@ ClientManager::~ClientManager()
 bool ClientManager::isEmpty()
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    return !_clients.empty();
+    return _clients.empty();
 }
 
 void ClientManager::add(ClientRef client)
