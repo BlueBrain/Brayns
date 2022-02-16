@@ -85,10 +85,4 @@ void JsonRpcSender::progress(const ProgressMessage &message, const ClientRef &cl
     }
     MessageSenderHelper::trySend(message, client);
 }
-
-void JsonRpcSender::notification(const NotificationMessage &message, ClientManager &clients, const ClientRef &source)
-{
-    auto data = Json::stringify(message);
-    clients.broadcast(data, source);
-}
 } // namespace brayns

@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-GetSceneEntrypoint::GetSceneEntrypoint(const Scene &scene, INetworkInterface &interface)
-    : GetEntrypoint(scene, interface)
+GetSceneEntrypoint::GetSceneEntrypoint(const Scene &scene)
+    : GetEntrypoint(scene)
 {
 }
 

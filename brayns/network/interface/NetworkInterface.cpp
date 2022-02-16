@@ -21,14 +21,11 @@
 
 #include "NetworkInterface.h"
 
-#include <brayns/network/jsonrpc/JsonRpcSender.h>
-
 namespace brayns
 {
-NetworkInterface::NetworkInterface(EntrypointManager &entrypoints, NetworkTaskManager &tasks, ClientManager &clients)
+NetworkInterface::NetworkInterface(EntrypointManager &entrypoints, NetworkTaskManager &tasks)
     : _entrypoints(entrypoints)
     , _tasks(tasks)
-    , _clients(clients)
 {
 }
 
@@ -40,10 +37,5 @@ void NetworkInterface::addEntrypoint(EntrypointRef entrypoint)
 void NetworkInterface::launchTask(const ClientRef &client, const RequestId &id, std::unique_ptr<NetworkTask> task)
 {
     _tasks.add(client, id, std::move(task));
-}
-
-void NetworkInterface::notify(const NotificationMessage &message, const ClientRef &source)
-{
-    JsonRpcSender::notification(message, _clients, source);
 }
 } // namespace brayns

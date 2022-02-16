@@ -26,9 +26,8 @@
 
 namespace brayns
 {
-UpdateInstanceEntrypoint::UpdateInstanceEntrypoint(Scene &scene, INetworkInterface &interface)
+UpdateInstanceEntrypoint::UpdateInstanceEntrypoint(Scene &scene)
     : _scene(scene)
-    , _notifier(interface)
 {
 }
 
@@ -58,7 +57,6 @@ void UpdateInstanceEntrypoint::onRequest(const Request &request)
     source.markInstancesDirty();
     _scene.markModified(false);
     request.getParams(*instance);
-    _notifier.notify(request, *instance);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

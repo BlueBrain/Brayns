@@ -80,14 +80,5 @@ public:
      * @return ProgressMessage The progress message corresponding to request.
      */
     static ProgressMessage progress(const RequestMessage &request, const std::string &operation, double amount);
-
-    /**
-     * @brief Create a NotificationMessage for the given method.
-     *
-     * @param method Source of the notification.
-     * @param params "params" field.
-     * @return NotificationMessage Method corresponding message.
-     */
-    static NotificationMessage notification(const std::string &method, const JsonValue &params);
 };
 } // namespace brayns

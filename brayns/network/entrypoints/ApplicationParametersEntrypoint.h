@@ -29,7 +29,7 @@ namespace brayns
 class GetApplicationParametersEntrypoint : public GetEntrypoint<ApplicationParameters>
 {
 public:
-    GetApplicationParametersEntrypoint(const ApplicationParameters &parameters, INetworkInterface &interface);
+    GetApplicationParametersEntrypoint(const ApplicationParameters &parameters);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

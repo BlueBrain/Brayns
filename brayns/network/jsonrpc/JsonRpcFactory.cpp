@@ -67,13 +67,4 @@ ProgressMessage JsonRpcFactory::progress(const RequestMessage &request, const st
     progress.params.amount = amount;
     return progress;
 }
-
-NotificationMessage JsonRpcFactory::notification(const std::string &method, const JsonValue &params)
-{
-    NotificationMessage message;
-    message.jsonrpc = "2.0";
-    message.method = method;
-    message.params = params;
-    return message;
-}
 } // namespace brayns

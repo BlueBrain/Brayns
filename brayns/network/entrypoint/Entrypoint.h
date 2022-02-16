@@ -23,8 +23,7 @@
 
 #include <brayns/json/Json.h>
 
-#include <brayns/network/interface/INetworkInterface.h>
-#include <brayns/network/jsonrpc/JsonRpcFactory.h>
+#include <brayns/network/jsonrpc/JsonRpcRequest.h>
 
 #include "EntrypointRequest.h"
 #include "IEntrypoint.h"

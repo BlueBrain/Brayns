@@ -29,7 +29,7 @@ namespace brayns
 class GetAnimationParametersEntrypoint : public GetEntrypoint<AnimationParameters>
 {
 public:
-    GetAnimationParametersEntrypoint(const AnimationParameters &parameters, INetworkInterface &interface);
+    GetAnimationParametersEntrypoint(const AnimationParameters &parameters);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

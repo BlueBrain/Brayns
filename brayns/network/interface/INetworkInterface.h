@@ -23,8 +23,7 @@
 
 #include <brayns/network/client/ClientRef.h>
 #include <brayns/network/entrypoint/EntrypointRef.h>
-#include <brayns/network/jsonrpc/JsonRpcMessages.h>
-#include <brayns/network/jsonrpc/JsonRpcRequest.h>
+#include <brayns/network/jsonrpc/RequestId.h>
 #include <brayns/network/tasks/NetworkTask.h>
 
 namespace brayns
@@ -53,13 +52,5 @@ public:
      * @param task Task to execute.
      */
     virtual void launchTask(const ClientRef &client, const RequestId &id, std::unique_ptr<NetworkTask> task) = 0;
-
-    /**
-     * @brief Send a notification to all clients except source if set.
-     *
-     * @param message Notification message.
-     * @param source Optional source of the notification.
-     */
-    virtual void notify(const NotificationMessage &message, const ClientRef &source = {}) = 0;
 };
 } // namespace brayns

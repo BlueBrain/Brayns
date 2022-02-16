@@ -29,7 +29,7 @@ namespace brayns
 class GetRendererEntrypoint : public GetEntrypoint<RenderingParameters>
 {
 public:
-    GetRendererEntrypoint(const RenderingParameters &parameters, INetworkInterface &interface);
+    GetRendererEntrypoint(const RenderingParameters &parameters);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

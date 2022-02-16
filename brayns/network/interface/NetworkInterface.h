@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <brayns/network/client/ClientManager.h>
 #include <brayns/network/entrypoint/EntrypointManager.h>
 #include <brayns/network/tasks/NetworkTaskManager.h>
 
@@ -43,7 +42,7 @@ public:
      * @param tasks Task manager.
      * @param clients Client manager.
      */
-    NetworkInterface(EntrypointManager &entrypoints, NetworkTaskManager &tasks, ClientManager &clients);
+    NetworkInterface(EntrypointManager &entrypoints, NetworkTaskManager &tasks);
 
     /**
      * @brief Register an entrypoint.
@@ -61,17 +60,8 @@ public:
      */
     virtual void launchTask(const ClientRef &client, const RequestId &id, std::unique_ptr<NetworkTask> task) override;
 
-    /**
-     * @brief Send a notification to all clients except source if set.
-     *
-     * @param message Notification message.
-     * @param source Optional source of the notification.
-     */
-    virtual void notify(const NotificationMessage &message, const ClientRef &source = {}) override;
-
 private:
     EntrypointManager &_entrypoints;
     NetworkTaskManager &_tasks;
-    ClientManager &_clients;
 };
 } // namespace brayns

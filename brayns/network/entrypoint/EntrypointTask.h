@@ -118,9 +118,9 @@ protected:
     }
 
     /**
-     * @brief Send progress notification when progress() is called.
+     * @brief Send progress message when progress() is called.
      *
-     * Notification are rate limited to 1 per second.
+     * A rate limit of 1 per second is applied.
      *
      * @param operation Current operation.
      * @param amount Progress amount 0-1.

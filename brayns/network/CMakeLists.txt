@@ -33,7 +33,6 @@ set(BRAYNSNETWORK_HEADERS
   common/ExtractMaterial.h
   common/ExtractModel.h
   common/FrameExporter.h
-  common/NotificationPeriod.h
   common/PropertyObjectSchema.h
   common/RateLimiter.h
   entrypoint/Entrypoint.h
@@ -93,7 +92,6 @@ set(BRAYNSNETWORK_HEADERS
   jsonrpc/JsonRpcException.h
   jsonrpc/JsonRpcFactory.h
   jsonrpc/JsonRpcMessages.h
-  jsonrpc/JsonRpcNotifier.h
   jsonrpc/JsonRpcRequest.h
   jsonrpc/JsonRpcRequestParser.h
   jsonrpc/JsonRpcSender.h
@@ -141,7 +139,6 @@ set(BRAYNSNETWORK_SOURCES
   common/ExtractMaterial.cpp
   common/ExtractModel.cpp
   common/FrameExporter.cpp
-  common/NotificationPeriod.cpp
   common/PropertyObjectSchema.cpp
   common/RateLimiter.cpp
   entrypoint/EntrypointManager.cpp
