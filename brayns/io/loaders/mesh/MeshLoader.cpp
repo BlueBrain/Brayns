@@ -25,7 +25,8 @@
 #include <sstream>
 
 #include <brayns/common/DefaultMaterialIds.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/geometries/TriangleMesh.h>
+#include <brayns/engine/models/GeometricModel.h>
 #include <brayns/utils/FileReader.h>
 
 #include "mesh/parsers/ObjMeshParser.h"
@@ -74,21 +75,16 @@ public:
 class MeshLoadingHelper
 {
 public:
-    static brayns::ModelPtr load(const brayns::TriangleMesh &mesh, brayns::Scene &scene)
+    static brayns::Model::Ptr load(const brayns::TriangleMesh &mesh)
     {
-        auto model = scene.createModel();
-        size_t defaultMaterialId = 0;
-        model->createMaterial(defaultMaterialId, "default");
-        auto &meshes = model->getTriangleMeshes();
-        meshes[defaultMaterialId] = mesh;
-        return model;
+        return std::make_unique<brayns::GeometricModel<brayns::TriangleMesh>>(mesh, brayns::Vector4f(1.f));
     }
 };
 
 class MeshMetadataBuilder
 {
 public:
-    static brayns::ModelMetadata build(const brayns::TriangleMesh &mesh)
+    static brayns::Model::Metadata build(const brayns::TriangleMesh &mesh)
     {
         auto vertexCount = mesh.vertices.size();
         auto triangleCount = mesh.indices.size();
@@ -99,13 +95,14 @@ public:
 class MeshImporter
 {
 public:
-    static std::vector<brayns::ModelDescriptorPtr>
-        import(brayns::Scene &scene, const brayns::TriangleMesh &mesh, const std::string &name)
+    static std::vector<brayns::Model::Ptr> import(const brayns::TriangleMesh &mesh)
     {
-        auto model = MeshLoadingHelper::load(mesh, scene);
+        auto model = MeshLoadingHelper::load(mesh);
+
         auto metadata = MeshMetadataBuilder::build(mesh);
-        auto descriptor = std::make_shared<brayns::ModelDescriptor>(std::move(model), name, metadata);
-        return {descriptor};
+        model->setMetaData(metadata);
+
+        return {std::move(model)};
     }
 };
 } // namespace
@@ -170,21 +167,18 @@ std::string MeshLoader::getName() const
     return "mesh";
 }
 
-std::vector<ModelDescriptorPtr>
-    MeshLoader::importFromFile(const std::string &fileName, const LoaderProgress &callback, Scene &scene) const
+std::vector<Model::Ptr> MeshLoader::importFromFile(const std::string &fileName, const LoaderProgress &callback) const
 {
     (void)callback;
     auto mesh = MeshParsingHelper::parse(_parsers, fileName);
-    auto &name = fileName;
-    return MeshImporter::import(scene, mesh, name);
+    return MeshImporter::import(mesh);
 }
 
-std::vector<ModelDescriptorPtr> MeshLoader::importFromBlob(Blob &&blob, const LoaderProgress &callback, Scene &scene)
+std::vector<Model::Ptr> MeshLoader::importFromBlob(Blob &&blob, const LoaderProgress &callback)
     const
 {
     (void)callback;
     auto mesh = MeshParsingHelper::parse(_parsers, blob);
-    auto &name = blob.name;
-    return MeshImporter::import(scene, mesh, name);
+    return MeshImporter::import(mesh);
 }
 } // namespace brayns

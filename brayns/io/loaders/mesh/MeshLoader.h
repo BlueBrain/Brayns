@@ -24,8 +24,7 @@
 #include <unordered_map>
 
 #include <brayns/io/Loader.h>
-
-#include "mesh/MeshParser.h"
+#include <brayns/io/loaders/mesh/MeshParser.h>
 
 namespace brayns
 {
@@ -130,25 +129,21 @@ public:
      *
      * @param fileName File to import.
      * @param callback Deprecated.
-     * @param properties Deprecated.
-     * @param scene Scene receiving the new mesh.
      * @return std::vector<ModelDescriptorPtr> Models containing the mesh.
      * @throw std::runtime_error An error occurs.
      */
-    std::vector<ModelDescriptorPtr>
-        importFromFile(const std::string &fileName, const LoaderProgress &callback, Scene &scene) const final;
+    std::vector<Model::Ptr>
+        importFromFile(const std::string &fileName, const LoaderProgress &callback) const final;
 
     /**
      * @brief Import the mesh in the given scene from the given blob of data.
      *
      * @param blob Mesh data.
      * @param callback Deprecated.
-     * @param properties  Deprecated.
-     * @param scene Scene receiving the new mesh.
      * @return std::vector<ModelDescriptorPtr> Models containing the mesh.
      * @throw std::runtime_error An error occurs.
      */
-    std::vector<ModelDescriptorPtr> importFromBlob(Blob &&blob, const LoaderProgress &callback, Scene &scene)
+    std::vector<Model::Ptr> importFromBlob(Blob &&blob, const LoaderProgress &callback)
         const final;
 
 private:

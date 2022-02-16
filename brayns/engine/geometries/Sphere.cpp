@@ -23,7 +23,7 @@
 namespace brayns
 {
 template<>
-void GeometryBoundsUpdater<Sphere>::updateBounds(const Sphere& s, const Matrix4f& t, Bounds& b)
+void GeometryBoundsUpdater<Sphere>::update(const Sphere& s, const Matrix4f& t, Bounds& b)
 {
     const Vector3f radiusDelta (s.radius);
     auto sphereMin = s.center - radiusDelta;

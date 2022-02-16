@@ -10,7 +10,6 @@ set(BRAYNSENGINE_SOURCES
     Engine.cpp
     EngineObject.cpp
     FrameBuffer.cpp
-    Geometry.cpp
     Light.cpp
     Material.cpp
     Model.cpp

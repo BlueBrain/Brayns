@@ -54,40 +54,18 @@ Model::~Model()
     ospRelease(_groupHandle);
 }
 
-void Model::onRendererChanged(const Renderer& renderer)
-{
-    (void) renderer;
-}
-
 void Model::onRemoved()
 {
 }
 
-void Model::setMetaData(MetaData metadata) noexcept
+void Model::setMetaData(Metadata metadata) noexcept
 {
     _metadata = std::move(metadata);
 }
 
-const Model::MetaData& Model::getMetaData() const noexcept
+const Model::Metadata& Model::getMetaData() const noexcept
 {
     return _metadata;
-}
-
-void Model::addModelAction(std::unique_ptr<IModelAction>&& modelAction) noexcept
-{
-    const std::string name (modelAction->getName().data());
-    _modelActions[name] = std::move(modelAction);
-}
-
-IModelAction& Model::getModelAction(const std::string& name)
-{
-    auto it = _modelActions.find(name);
-    if(it != _modelActions.end())
-    {
-        return *(it->second);
-    }
-
-    throw std::invalid_argument("Model action " + name + " could not be found");
 }
 
 OSPGroup Model::groupHandle() const noexcept
@@ -95,16 +73,24 @@ OSPGroup Model::groupHandle() const noexcept
     return _groupHandle;
 }
 
-ModelInstance::ModelInstance(const size_t modelID, Model::Ptr&& model)
+ModelInstance::ModelInstance(const size_t modelID, Model* model)
  : _modelID(modelID)
- , _model(std::move(model))
+ , _model(model)
 {
+    if(!_model)
+        throw std::invalid_argument("A ModelInstance cannot be initialized with a null model");
+
     _instanceHandle = ospNewInstance(model->groupHandle());
 }
 
 ModelInstance::~ModelInstance()
 {
     ospRelease(_instanceHandle);
+}
+
+uint32_t ModelInstance::getID() const noexcept
+{
+    return _modelID;
 }
 
 const Bounds &ModelInstance::getBounds() const noexcept

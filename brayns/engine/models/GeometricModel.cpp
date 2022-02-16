@@ -18,47 +18,50 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include <brayns/engine/models/GeometricModel.h>
 
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Material.h>
+#include <brayns/engine/materials/MatteMaterial.h>
 
 namespace brayns
 {
-/**
- * @brief The GeometricModel class is a candidate base class for geometry based models with a material
- */
-class GeometricModel : public Model
+GeometricModel::GeometricModel()
+ : _handle(ospNewGeometricModel())
+ , _material(std::make_unique<MatteMaterial>())
 {
-public:
-    /**
-     * @brief Initializes the OSPRay handle and the material to a default one
-     */
-    GeometricModel();
+}
 
-    ~GeometricModel();
+GeometricModel::~GeometricModel()
+{
+    ospRelease(_handle);
+}
 
-    /**
-     * @brief Sets the material applied to the surface of the geometry handled by this model
-     */
-    void setMaterial(Material::Ptr&& material);
 
-    /**
-     * @brief Returns the material of this model
-     */
-    const Material& getMaterial() const noexcept;
+void GeometricModel::setMaterial(Material::Ptr&& material)
+{
+    if(!material)
+        throw std::invalid_argument("GeometricModel: Material cannot be null");
 
-    /**
-     * @brief Commit implementation
-     */
-    void commit() final;
+    _material = std::move(material);
+    markModified(false);
+}
 
-protected:
-    virtual void commitGeometryModel() = 0;
+const Material& GeometricModel::getMaterial() const noexcept
+{
+    return *_material;
+}
 
-private:
-    Material::Ptr _material {nullptr};
+void GeometricModel::commit()
+{
+    if(_material->isModified())
+    {
+        _material->doCommit();
 
-    OSPGeometricModel _handle {nullptr};
-};
+        auto materialHandle = _material->handle();
+        ospSetParam(_handle, "material", OSP_MATERIAL, &materialHandle);
+    }
+
+    commitGeometryModel();
+
+    ospCommit(_handle);
+}
 }

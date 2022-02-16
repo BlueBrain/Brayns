@@ -18,17 +18,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/Geometry.h>
+#include <brayns/io/loaders/mesh/MeshModel.h>
 
 namespace brayns
 {
-IGeometry::~IGeometry()
+MeshModel::MeshModel(const TriangleMesh& mesh)
 {
-    ospRelease(_handle);
+
 }
 
-OSPGeometry IGeometry::handle() const noexcept
+Bounds MeshModel::computeBounds(const Matrix4f& transform) const noexcept
 {
-    return _handle;
+
+}
+
+const Material& MeshModel::getMaterial() const noexcept
+{
+
+}
+
+void MeshModel::setMaterial(Material::Ptr&& material)
+{
+
 }
 }

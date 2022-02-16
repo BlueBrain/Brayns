@@ -67,16 +67,15 @@ std::vector<ModelInstance*> Scene::addModels(ModelsLoadParameters params, std::v
     std::vector<ModelInstance*> result;
     result.reserve(models.size());
 
-    std::lock_guard lock(_loadMutex);
-
     for(size_t i = 0; i < models.size(); ++i)
     {
         auto& model = models[i];
+        auto modelPtr = model.get();
+        _models.push_back(std::move(model));
 
-        auto modelID = _modelIdFactory++;
-        auto modelInstance = std::make_unique<ModelInstance>(modelID, std::move(model));
-        result.push_back(modelInstance.get());
-        _models[modelID] = std::move(modelInstance);
+        auto modelInstance = _createModelInstance(modelPtr);
+        auto modelID = modelInstance->getID();
+        result.push_back(modelInstance);
 
         auto modelIndex = static_cast<uint32_t>(i);
         modelIndices.push_back({modelID, modelIndex});
@@ -87,19 +86,32 @@ std::vector<ModelInstance*> Scene::addModels(ModelsLoadParameters params, std::v
     return result;
 }
 
+ModelInstance& Scene::createInstance(const uint32_t modelID)
+{
+    auto& modelInstance = getModel(modelID);
+    auto& model = modelInstance.getModel();
+
+    auto newInstance = _createModelInstance(&model);
+    auto newInstanceID = newInstance->getID();
+
+    _instanceSources[newInstanceID] = modelID;
+    markModified(false);
+    return *newInstance;
+}
+
 ModelInstance& Scene::getModel(const uint32_t modelID)
 {
-    return retrieveModel(_models, modelID);
+    return retrieveModel(_modelInstances, modelID);
 }
 
 const ModelInstance &Scene::getModel(const uint32_t modelID) const
 {
-    return retrieveModel(_models, modelID);
+    return retrieveModel(_modelInstances, modelID);
 }
 
 void Scene::removeModel(const uint32_t modelID)
 {
-    const auto count = _models.erase(modelID);
+    const auto count = _modelInstances.erase(modelID);
     if(count == 0)
         throw std::invalid_argument("Could not remove model, ID does not exists");
 }
@@ -108,7 +120,7 @@ std::vector<uint32_t> Scene::getAllModelIDs() const noexcept
 {
     std::vector<uint32_t> result;
     result.reserve(_models.size());
-    for(const auto& [modelID, model] : _models)
+    for(const auto& [modelID, model] : _modelInstances)
         result.push_back(modelID);
     return result;
 }
@@ -143,7 +155,7 @@ void Scene::commit()
     std::vector<OSPInstance> instances;
     instances.reserve(_models.size());
 
-    for(auto& [modelID, model] : _models)
+    for(auto& [modelID, model] : _modelInstances)
     {
         if(model->isVisible())
         {
@@ -187,5 +199,14 @@ void Scene::commit()
 OSPWorld Scene::handle() const noexcept
 {
     return _handle;
+}
+
+ModelInstance* Scene::_createModelInstance(Model* model)
+{
+    auto modelID = _modelIdFactory++;
+    auto modelInstance = std::make_unique<ModelInstance>(modelID, model);
+    auto result = modelInstance.get();
+    _modelInstances[modelID] = std::move(modelInstance);
+    return result;
 }
 } // namespace brayns

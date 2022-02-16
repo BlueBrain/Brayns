@@ -28,70 +28,132 @@
 #include <ospray/ospray.h>
 
 #include <map>
-#include <string_view>
+#include <memory>
 
 namespace brayns
 {
-class IModelAction;
-
+/**
+ * @brief The Model class is the base class for all models that can be loaded into Brayns.
+ */
 class Model : public EngineObject
 {
 public:
     using Ptr = std::unique_ptr<Model>;
-    using MetaData = std::map<std::string, std::string>;
+    using Metadata = std::map<std::string, std::string>;
 
+    /**
+     * @brief Initializes the OSPRay handle
+     */
     Model();
 
     virtual ~Model();
 
+    /**
+     * @brief onRemoved called when the model is removed from the Scene and before it is destoryed
+     */
     virtual void onRemoved();
 
-    void setMetaData(MetaData metadata) noexcept;
+    /**
+     * @brief Compute the model bounds, taking into account the given trasnformation
+     * @param transform Matrix with the trasnformation to apply to the model data
+     * @return Bounds of the model
+     */
+    virtual Bounds computeBounds(const Matrix4f& transform) const noexcept = 0;
 
-    const MetaData& getMetaData() const noexcept;
+    /**
+     * @brief Sets the metadata of this model (The metadata is a map<string, string> with model-specific
+     * information).
+     * @param metadata
+     */
+    void setMetaData(Metadata metadata) noexcept;
 
-    void addModelAction(std::unique_ptr<IModelAction>&& modelAction) noexcept;
+    /**
+     * @brief Returns the metadata of this model
+     */
+    const Metadata& getMetaData() const noexcept;
 
-    IModelAction& getModelAction(const std::string& name);
-
+    /**
+     * @brief Returns the OSPRay handle
+     */
     OSPGroup groupHandle() const noexcept;
 
 private:
     OSPGroup _groupHandle {nullptr};
-    MetaData _metadata;
-
-    std::map<std::string, std::unique_ptr<IModelAction>> _modelActions;
+    Metadata _metadata;
 };
 
-
+/**
+ * @brief The ModelInstance class is a wrapper around a Model. It shares the data provided by the Model
+ * with other instances, and applies a custom trasnformation and visibility.
+ */
 class ModelInstance : public EngineObject
 {
 public:
     using Ptr = std::unique_ptr<ModelInstance>;
 
-    ModelInstance(const size_t modelID, Model::Ptr&& model);
+    /**
+     * @brief Initializes the instance with the unique ID and the given model
+     */
+    ModelInstance(const size_t modelID, Model* model);
+
     ~ModelInstance();
 
+    /**
+     * @brief Returns this instance ID
+     */
+    uint32_t getID() const noexcept;
+
+    /**
+     * @brief Returns the bounds of this instance in world space coordinates
+     */
     const Bounds& getBounds() const noexcept;
 
+    /**
+     * @brief Commit implementation
+     */
     void commit() final;
 
+    /**
+     * @brief Returns a mutable version of the model this instance refers to.
+     */
     Model& getModel() noexcept;
+
+    /**
+     * @brief Returns a const reference to the model this instance refers to.
+     */
     const Model& getModel() const noexcept;
 
+    /**
+     * @brief Sets wether this instance is visible or not.
+     */
     void setVisible(const bool val) noexcept;
+
+    /**
+     * @brief Returns wether this instance is visible or not.
+     */
     bool isVisible() const noexcept;
 
+    /**
+     * @brief Sets the transformation of this instance.
+     */
     void setTranform(const Transformation &transform) noexcept;
+
+    /**
+     * @brief Returns the trasnsformation of this instance.
+     */
     const Transformation& getTransform() const noexcept;
 
+    /**
+     * @brief Returns the OSPRay handle of this instance.
+     */
     OSPInstance handle() const noexcept;
 
 private:
     friend class Scene;
 
+private:
     const size_t _modelID {};
-    Model::Ptr _model {nullptr};
+    Model* _model {nullptr};
 
     bool _visible {true};
     Transformation _transformation;

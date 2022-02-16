@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,23 +18,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/io/Loader.h>
+#include <brayns/engine/Geometry.h>
+#include <brayns/engine/Material.h>
+#include <brayns/engine/Model.h>
+#include <brayns/engine/geometries/TriangleMesh.h>
 
 namespace brayns
 {
-class XYZBLoader : public NoInputLoader
+class MeshModel : public Model
 {
 public:
-    std::vector<std::string> getSupportedExtensions() const final;
+    MeshModel(const TriangleMesh& mesh);
 
-    std::string getName() const final;
+    Bounds computeBounds(const Matrix4f& transform) const noexcept final;
 
-    std::vector<ModelDescriptorPtr> importFromBlob(Blob &&blob, const LoaderProgress &callback, Scene &scene)
-        const final;
+    const Material& getMaterial() const noexcept;
 
-    std::vector<ModelDescriptorPtr>
-        importFromFile(const std::string &filename, const LoaderProgress &callback, Scene &scene) const final;
+    void setMaterial(Material::Ptr&& material);
+
+private:
+    Geometry<TriangleMesh> _meshGeometry;
+    Material::Ptr _material {nullptr};
 };
-} // namespace brayns
+}

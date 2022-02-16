@@ -48,15 +48,23 @@ struct ModelsLoadParameters
     JsonValue loadParameters;
 };
 
+/**
+ * @brief The Scene class is the container of objects that are being rendered. It contains Models, which can
+ * be geometry, volumes or clipping geometry, as well as the lights.
+ */
 class Scene : public EngineObject
 {
 public:
+    /**
+     * @brief Initializes the OSPRay handle
+     */
     Scene();
     ~Scene();
 
     const Bounds &getBounds() const noexcept;
 
     std::vector<ModelInstance*> addModels(ModelsLoadParameters params, std::vector<Model::Ptr>&& models);
+    ModelInstance& createInstance(const uint32_t modelID);
     ModelInstance& getModel(const uint32_t modelID);
     const ModelInstance& getModel(const uint32_t modelID) const;
     std::vector<uint32_t> getAllModelIDs() const noexcept;
@@ -100,14 +108,18 @@ private:
         std::vector<ModelIndex> modelIndices;
     };
 
+    ModelInstance* _createModelInstance(Model* model);
+
 private:
     Bounds _bounds;
 
-    // Load is an asynchronous task, so addModels can be accessed by multiple threads
-    std::mutex _loadMutex;
-    uint32_t _modelIdFactory {0};
-    std::map<uint32_t, ModelInstance::Ptr> _models;
+    // Scene serialization data
     std::vector<ModelsLoadEntry> _loadEntries;
+    std::map<uint32_t, uint32_t> _instanceSources;
+
+    uint32_t _modelIdFactory {0};
+    std::vector<Model::Ptr> _models;
+    std::map<uint32_t, ModelInstance::Ptr> _modelInstances;
 
     uint32_t _lightIdFactory {0};
     std::map<uint32_t, Light::Ptr> _lights;

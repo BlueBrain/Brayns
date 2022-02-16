@@ -21,7 +21,8 @@
 #include "ProteinLoader.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/engine/models/geometricmodels/SpheresModel.h>
+#include <brayns/engine/geometries/Sphere.h>
+#include <brayns/engine/models/GeometricModel.h>
 
 #include <assert.h>
 #include <fstream>
@@ -449,11 +450,7 @@ std::vector<Model::Ptr> ProteinLoader::importFromFile(
         modelColors.emplace_back(r, g, b, 1.f);
     }
 
-    auto model = std::make_unique<SpheresModel>();
-
-    model->addSpheres(spheres);
-    model->setColors(std::move(modelColors));
-    model->setColorIndices(std::move(colorMapIndices));
+    auto model = std::make_unique<GeometricModel<Sphere>>(spheres, modelColors, colorMapIndices);
 
     return {std::move(model)};
 }
@@ -468,16 +465,13 @@ std::vector<std::string> ProteinLoader::getSupportedExtensions() const
     return {"pdb", "pdb1"};
 }
 
-std::vector<ModelDescriptorPtr> ProteinLoader::importFromBlob(
-    Blob &&blob,
-    const LoaderProgress &callback,
-    const ProteinLoaderParameters &properties,
-    Scene &scene) const
+std::vector<Model::Ptr> ProteinLoader::importFromBlob(
+    Blob &&blob, const LoaderProgress &callback, const ProteinLoaderParameters &properties) const
 {
     (void)blob;
     (void)callback;
     (void)properties;
-    (void)scene;
+
     throw std::runtime_error("Loading from blob not supported");
 }
 } // namespace brayns

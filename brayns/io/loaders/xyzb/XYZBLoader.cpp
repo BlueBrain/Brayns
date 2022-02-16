@@ -21,8 +21,8 @@
 #include "XYZBLoader.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/geometries/Sphere.h>
+#include <brayns/engine/models/GeometricModel.h>
 #include <brayns/utils/StringUtils.h>
 
 #include <filesystem>
@@ -36,15 +36,14 @@ namespace
 constexpr auto ALMOST_ZERO = 1e-7f;
 constexpr auto LOADER_NAME = "xyzb";
 
-float _computeHalfArea(const Boxf &bbox)
+float _computeHalfArea(const Bounds &bbox)
 {
-    const auto size = bbox.getSize();
+    const auto size = bbox.max() - bbox.min();
     return size[0] * size[1] + size[0] * size[2] + size[1] * size[2];
 }
 } // namespace
 
-std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(Blob &&blob, const LoaderProgress &callback, Scene &scene)
-    const
+std::vector<Model::Ptr> XYZBLoader::importFromBlob(Blob &&blob, const LoaderProgress &callback) const
 {
     Log::info("Loading xyz {}.", blob.name);
 
@@ -55,17 +54,14 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(Blob &&blob, const Lo
     }
     stream.seekg(0);
 
-    auto model = scene.createModel();
-
     const auto name = std::filesystem::path({blob.name}).stem().string();
-    const auto materialId = 0;
-    model->createMaterial(materialId, name);
-    auto &spheres = model->getSpheres()[materialId];
+
+    std::vector<Sphere> spheres;
 
     const size_t startOffset = spheres.size();
     spheres.reserve(spheres.size() + numlines);
 
-    Boxf bbox;
+    Bounds bbox;
     size_t i = 0;
     std::string line;
     std::stringstream msg;
@@ -84,10 +80,10 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(Blob &&blob, const Lo
         case 3:
         {
             const Vector3f position(lineData[0], lineData[1], lineData[2]);
-            bbox.merge(position);
+            bbox.expand(position);
             // The point radius used here is irrelevant as it's going to be
             // changed later.
-            model->addSphere(materialId, {position, 1});
+            spheres.push_back({position, 1});
             break;
         }
         default:
@@ -99,7 +95,8 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(Blob &&blob, const Lo
     // Find an appropriate mean radius to avoid overlaps of the spheres, see
     // https://en.wikipedia.org/wiki/Wigner%E2%80%93Seitz_radius
 
-    const auto volume = glm::compMul(bbox.getSize());
+    const auto size = bbox.max() - bbox.min();
+    const auto volume = glm::compMul(size);
     const auto density4PI = 4 * M_PI * numlines / (volume > ALMOST_ZERO ? volume : _computeHalfArea(bbox));
 
     const double meanRadius = volume > ALMOST_ZERO ? std::pow((3. / density4PI), 1. / 3.) : std::sqrt(1 / density4PI);
@@ -107,6 +104,7 @@ std::vector<ModelDescriptorPtr> XYZBLoader::importFromBlob(Blob &&blob, const Lo
     // resize the spheres to the new mean radius
     for (i = 0; i < numlines; ++i)
         spheres[i + startOffset].radius = meanRadius;
+
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
