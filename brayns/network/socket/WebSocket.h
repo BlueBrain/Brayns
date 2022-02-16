@@ -104,25 +104,33 @@ class OutputPacket
 {
 public:
     /**
+     * @brief Construct a text packet.
+     *
+     * @param data The text content of the packet.
+     */
+    static OutputPacket fromText(std::string_view data);
+
+    /**
+     * @brief Construct a binary packet.
+     *
+     * @param data The binary content of the packet.
+     */
+    static OutputPacket fromBinary(std::string_view data);
+
+    /**
      * @brief Construct an empty packet.
      *
      */
     OutputPacket() = default;
 
     /**
-     * @brief Construct a text packet.
+     * @brief Construct a packet with all information.
      *
-     * @param data The text content of the packet.
+     * @param data Pointer to packet data.
+     * @param size Packet size.
+     * @param flags Flags (text or binary).
      */
-    OutputPacket(const std::string &data);
-
-    /**
-     * @brief Construct a binary packet.
-     *
-     * @param data The binary content of the packet.
-     * @param size The size of the packet content.
-     */
-    OutputPacket(const void *data, int size);
+    OutputPacket(const void *data, size_t size, int flags);
 
     /**
      * @brief Check if the packet is empty.

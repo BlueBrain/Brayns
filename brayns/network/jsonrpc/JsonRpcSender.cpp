@@ -36,7 +36,8 @@ public:
         try
         {
             auto &socket = client.getSocket();
-            socket.send(data);
+            auto packet = brayns::OutputPacket::fromText(data);
+            socket.send(packet);
         }
         catch (const brayns::ConnectionClosedException &e)
         {
