@@ -185,21 +185,26 @@ private:
         return range;
     }
 
-    std::vector<std::string> _arrange(const std::vector<std::string> &src, const brain::GIDSet &gids) const
+    std::vector<std::string> _arrange(const std::vector<std::string> &source, const brain::GIDSet &gids) const
     {
-        if (src.empty())
+        if (source.empty())
+        {
             return {};
+        }
         std::vector<std::string> result(gids.size());
         auto it = gids.begin();
-        auto prevGID = *it;
-        size_t srcIdx = 0;
+        auto previousGid = *it;
+        size_t sourceIndex = 0;
         for (size_t i = 0; i < result.size(); ++i, ++it)
         {
-            const auto offset = *it - prevGID;
-            srcIdx += offset;
-            if (srcIdx > src.size())
+            auto offset = *it - previousGid;
+            sourceIndex += offset;
+            if (sourceIndex > source.size())
+            {
                 throw std::runtime_error("Vector overflowed access");
-            result[i] = src[srcIdx];
+            }
+            result[i] = source[sourceIndex];
+            previousGid = *it;
         }
         return result;
     }
