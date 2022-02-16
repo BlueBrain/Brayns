@@ -23,9 +23,8 @@
 
 namespace brayns
 {
-RemoveClipPlanesEntrypoint::RemoveClipPlanesEntrypoint(Scene &scene, INetworkInterface &interface)
+RemoveClipPlanesEntrypoint::RemoveClipPlanesEntrypoint(Scene &scene)
     : _scene(scene)
-    , _notifier(interface)
 {
 }
 
@@ -47,7 +46,6 @@ void RemoveClipPlanesEntrypoint::onRequest(const Request &request)
     {
         _scene.removeClipPlane(id);
     }
-    _notifier.notify(request, params);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

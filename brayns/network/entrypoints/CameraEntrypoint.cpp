@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-GetCameraEntrypoint::GetCameraEntrypoint(const Camera &camera, INetworkInterface &interface)
-    : GetEntrypoint(camera, interface)
+GetCameraEntrypoint::GetCameraEntrypoint(const Camera &camera)
+    : GetEntrypoint(camera)
 {
 }
 

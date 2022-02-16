@@ -39,7 +39,7 @@ public:
 class SetRendererParamsEntrypoint : public SetPropertyObjectEntrypoint<Renderer>
 {
 public:
-    SetRendererParamsEntrypoint(Renderer &renderer, INetworkInterface &interface);
+    SetRendererParamsEntrypoint(Renderer &renderer);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

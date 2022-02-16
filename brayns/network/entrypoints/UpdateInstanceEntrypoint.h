@@ -25,14 +25,13 @@
 
 #include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/jsonrpc/JsonRpcNotifier.h>
 
 namespace brayns
 {
 class UpdateInstanceEntrypoint : public Entrypoint<ModelInstance, EmptyMessage>
 {
 public:
-    UpdateInstanceEntrypoint(Scene &scene, INetworkInterface &interface);
+    UpdateInstanceEntrypoint(Scene &scene);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
@@ -40,6 +39,5 @@ public:
 
 private:
     Scene &_scene;
-    JsonRpcNotifier _notifier;
 };
 } // namespace brayns
