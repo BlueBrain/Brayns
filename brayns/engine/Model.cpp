@@ -19,7 +19,6 @@
  */
 
 #include <brayns/engine/Model.h>
-#include <brayns/engine/ModelAction.h>
 
 #include <ospray/SDK/common/OSPCommon.h>
 

@@ -27,10 +27,8 @@ set(BRAYNSIO_PUBLIC_HEADERS
     loaders/mesh/MeshModel.h
     loaders/protein/ProteinLoader.h
     loaders/protein/ProteinModel.h
-    #loaders/VolumeLoader.h # TEMPORARY DISABLED
     loaders/xyzb/XYZBLoader.h
     loaders/xyzb/XYZBModel.h
-
 )
 
 add_library(braynsIO SHARED ${BRAYNSIO_SOURCES} ${BRAYNSIO_PUBLIC_HEADERS})

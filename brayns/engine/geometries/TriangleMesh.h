@@ -21,6 +21,7 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
+#include <brayns/engine/Geometry.h>
 
 #include <vector>
 
@@ -34,4 +35,19 @@ struct TriangleMesh
     std::vector<Vector3ui> indices;
     std::vector<Vector2f> textureCoordinates;
 };
+
+template<>
+void GeometryBoundsUpdater<TriangleMesh>::update(const TriangleMesh& mesh, const Matrix4f& matrix, Bounds& bounds);
+
+template<>
+Geometry<TriangleMesh>::Geometry();
+
+template<>
+uint32_t Geometry<TriangleMesh>::add(const TriangleMesh& geometry);
+
+template<>
+std::vector<uint32_t> Geometry<TriangleMesh>::add(const std::vector<TriangleMesh>& geometries);
+
+template<>
+void Geometry<TriangleMesh>::commitGeometrySpecificParams();
 }

@@ -114,6 +114,9 @@ void Scene::removeModel(const uint32_t modelID)
     const auto count = _modelInstances.erase(modelID);
     if(count == 0)
         throw std::invalid_argument("Could not remove model, ID does not exists");
+
+    // Remove from the instance map if it was an instance
+    _instanceSources.erase(modelID);
 }
 
 std::vector<uint32_t> Scene::getAllModelIDs() const noexcept

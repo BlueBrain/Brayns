@@ -33,7 +33,6 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     Light.h
     Material.h
     Model.h
-    ModelAction.h
     Renderer.h
     Scene.h
     cameras/PerspectiveCamera.h

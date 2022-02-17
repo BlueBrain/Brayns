@@ -63,7 +63,7 @@ public:
 
     const Bounds &getBounds() const noexcept;
 
-    std::vector<ModelInstance*> addModels(ModelsLoadParameters params, std::vector<Model::Ptr>&& models);
+    ModelInstance& addModel(ModelsLoadParameters params, Model::Ptr&& model);
     ModelInstance& createInstance(const uint32_t modelID);
     ModelInstance& getModel(const uint32_t modelID);
     const ModelInstance& getModel(const uint32_t modelID) const;
@@ -79,13 +79,6 @@ public:
     OSPWorld handle() const noexcept;
 
 private:
-    struct ModelIndex
-    {
-        // used to find and delete a ModelIndex when the model it corresponds with is deleted from the scene
-        uint32_t modelId {};
-        // Index in the array of loaded models spitted by the loader
-        uint32_t modelIndex {};
-    };
     /**
      * @brief The ModelsLoadEntry struct is used to keep track of every add-model request
      * made to the system. It is used when creating a "dump image" of the current system so that
@@ -117,10 +110,12 @@ private:
     std::vector<ModelsLoadEntry> _loadEntries;
     std::map<uint32_t, uint32_t> _instanceSources;
 
+    // Model data
     uint32_t _modelIdFactory {0};
     std::vector<Model::Ptr> _models;
     std::map<uint32_t, ModelInstance::Ptr> _modelInstances;
 
+    // Lights data
     uint32_t _lightIdFactory {0};
     std::map<uint32_t, Light::Ptr> _lights;
 

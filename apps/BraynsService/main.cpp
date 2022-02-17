@@ -18,8 +18,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <thread>
-
 #include <brayns/Brayns.h>
 #include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
@@ -34,34 +32,13 @@ public:
 
     void run()
     {
-        auto &engine = _brayns.getEngine();
-        while (engine.getKeepRunning())
+        while (_brayns.commitAndRender())
         {
-            if (!_brayns.commit())
-            {
-                continue;
-            }
-            if (!engine.continueRendering())
-            {
-                _sleep();
-                continue;
-            }
-            _brayns.render();
-            _brayns.postRender();
         }
     }
 
 private:
     brayns::Brayns _brayns;
-
-    void _sleep()
-    {
-        auto &manager = _brayns.getParametersManager();
-        auto &parameters = manager.getApplicationParameters();
-        auto fps = parameters.getMaxRenderFPS();
-        auto period = 1000 / fps;
-        std::this_thread::sleep_for(std::chrono::milliseconds(period));
-    }
 };
 
 int main(int argc, const char **argv)
@@ -73,11 +50,9 @@ int main(int argc, const char **argv)
         brayns::Log::info("Start Brayns service.");
 
         brayns::Timer timer;
-        timer.start();
 
         service.run();
 
-        timer.stop();
         brayns::Log::info("Service was running for {} seconds.", timer.seconds());
     }
     catch (const std::exception &e)

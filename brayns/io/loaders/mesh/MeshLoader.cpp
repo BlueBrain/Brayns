@@ -18,21 +18,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "MeshLoader.h"
+#include <brayns/io/loaders/mesh/MeshLoader.h>
 
 #include <filesystem>
 #include <fstream>
 #include <sstream>
 
-#include <brayns/common/DefaultMaterialIds.h>
-#include <brayns/engine/geometries/TriangleMesh.h>
-#include <brayns/engine/models/GeometricModel.h>
 #include <brayns/utils/FileReader.h>
 
-#include "mesh/parsers/ObjMeshParser.h"
-#include "mesh/parsers/OffMeshParser.h"
-#include "mesh/parsers/PlyMeshParser.h"
-#include "mesh/parsers/StlMeshParser.h"
+#include <brayns/io/loaders/mesh/MeshModel.h>
+#include <brayns/io/loaders/mesh/parsers/ObjMeshParser.h>
+#include <brayns/io/loaders/mesh/parsers/OffMeshParser.h>
+#include <brayns/io/loaders/mesh/parsers/PlyMeshParser.h>
+#include <brayns/io/loaders/mesh/parsers/StlMeshParser.h>
 
 namespace
 {
@@ -77,7 +75,7 @@ class MeshLoadingHelper
 public:
     static brayns::Model::Ptr load(const brayns::TriangleMesh &mesh)
     {
-        return std::make_unique<brayns::GeometricModel<brayns::TriangleMesh>>(mesh, brayns::Vector4f(1.f));
+        return std::make_unique<brayns::MeshModel>(mesh);
     }
 };
 

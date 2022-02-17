@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/io/Loader.h>
-#include <brayns/io/loaders/ProteinLoaderParameters.h>
+#include <brayns/io/loaders/protein/ProteinLoaderParameters.h>
 
 namespace brayns
 {

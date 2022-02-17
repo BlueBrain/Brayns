@@ -175,7 +175,7 @@ public:
             for(size_t i = 0; i < _geometries.size(); ++i)
             {
                 const auto& geometry = _geometries[i];
-                GeometryBoundsUpdater<T>::updateBounds(geometry, transform, local);
+                GeometryBoundsUpdater<T>::update(geometry, transform, local);
             }
 
             #pragma omp critical (local_bounds_merge_section)

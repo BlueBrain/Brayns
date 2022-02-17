@@ -63,5 +63,25 @@ void GeometricModel::commit()
     commitGeometryModel();
 
     ospCommit(_handle);
+
+    auto ospGroup = groupHandle();
+
+    std::vector<OSPGeometricModel> modelList = {_handle};
+
+    auto sharedModelList = ospNewSharedData(modelList.data(), OSPDataType::OSP_GEOMETRIC_MODEL, 1);
+    auto copyModelList = ospNewData(OSPDataType::OSP_GEOMETRIC_MODEL, 1);
+    ospCopyData(sharedModelList, copyModelList);
+
+    ospSetParam(ospGroup, "geometry", OSPDataType::OSP_DATA, &copyModelList);
+
+    ospRelease(sharedModelList);
+    ospRelease(copyModelList);
+
+    ospCommit(ospGroup);
+}
+
+OSPGeometricModel GeometricModel::handle() const noexcept
+{
+    return _handle;
 }
 }

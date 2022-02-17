@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/common/Log.h>
-#include <brayns/engine/Geometry.h>
 #include <brayns/engine/geometries/TriangleMesh.h>
+
+#include <brayns/common/Log.h>
 
 namespace
 {

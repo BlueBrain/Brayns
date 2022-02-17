@@ -20,50 +20,28 @@
 
 #pragma once
 
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Material.h>
+#include <brayns/engine/Geometry.h>
+#include <brayns/engine/geometries/Sphere.h>
+#include <brayns/engine/models/GeometricModel.h>
 
 namespace brayns
 {
-/**
- * @brief The GeometricModel class is a candidate base class for geometry based models with a material
- */
-class GeometricModel : public Model
+class ProteinModel : public GeometricModel
 {
 public:
-    /**
-     * @brief Initializes the OSPRay handle and the material to a default one
-     */
-    GeometricModel();
+    ProteinModel(const std::vector<Sphere>& spheres,
+                 std::vector<Vector4f>&& colorMap,
+                 std::vector<uint8_t>&& colorMapIndices);
 
-    virtual ~GeometricModel();
-
-    /**
-     * @brief Sets the material applied to the surface of the geometry handled by this model
-     */
-    void setMaterial(Material::Ptr&& material);
-
-    /**
-     * @brief Returns the material of this model
-     */
-    const Material& getMaterial() const noexcept;
-
-    /**
-     * @brief Commit implementation
-     */
-    void commit() final;
-
-    /**
-     * @brief Returns the geometric model OSPRay handle
-     */
-    OSPGeometricModel handle() const noexcept;
-
-protected:
-    virtual void commitGeometryModel() = 0;
+    Bounds computeBounds(const Matrix4f& transform) const noexcept final;
 
 private:
-    Material::Ptr _material {nullptr};
+    void commitGeometryModel() final;
 
-    OSPGeometricModel _handle {nullptr};
+private:
+    std::vector<Vector4f> _colorMap;
+    std::vector<uint8_t> _colorMapIndices;
+
+    Geometry<Sphere> _geometry;
 };
 }

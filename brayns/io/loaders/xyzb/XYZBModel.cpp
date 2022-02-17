@@ -18,37 +18,48 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/io/loaders/mesh/MeshModel.h>
+#include <brayns/io/loaders/xyzb/XYZBModel.h>
 
 namespace brayns
 {
-MeshModel::MeshModel(const TriangleMesh& mesh)
+XYZBModel::XYZBModel(const std::vector<Sphere>& spheres)
 {
-    _meshGeometry.add(mesh);
+    _geometry.add(spheres);
 }
 
-Bounds MeshModel::computeBounds(const Matrix4f& transform) const noexcept
+Bounds XYZBModel::computeBounds(const Matrix4f& transform) const noexcept
 {
-    return _meshGeometry.computeBounds(transform);
+    return _geometry.computeBounds(transform);
 }
 
-const Vector4f &MeshModel::getColor() const noexcept
+void XYZBModel::setColor(const Vector4f &color) noexcept
+{
+    _updateValue(_color, color);
+}
+
+const Vector4f &XYZBModel::getColor() const noexcept
 {
     return _color;
 }
 
-void MeshModel::setColor(const Vector4f &newColor) noexcept
+void XYZBModel::setRadius(const float newRadius) noexcept
 {
-    _updateValue(_color, newColor);
+    _geometry.mainpulateAll([&](const uint32_t index, Sphere& sphere)
+    {
+        (void) index;
+        sphere.radius = newRadius;
+    });
+
+    markModified(false);
 }
 
-void MeshModel::commitGeometryModel()
+void XYZBModel::commitGeometryModel()
 {
-    _meshGeometry.commit();
-
     auto ospHandle = handle();
-    auto geomHandle = _meshGeometry.handle();
 
+    _geometry.commit();
+
+    auto geomHandle = _geometry.handle();
     ospSetParam(ospHandle, "geometry", OSPDataType::OSP_GEOMETRY, &geomHandle);
     ospSetParam(ospHandle, "color", OSPDataType::OSP_VEC4F, &_color);
 }

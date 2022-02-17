@@ -18,11 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ProteinLoader.h"
+#include <brayns/io/loaders/protein/ProteinLoader.h>
 
 #include <brayns/common/Log.h>
-#include <brayns/engine/geometries/Sphere.h>
-#include <brayns/engine/models/GeometricModel.h>
+#include <brayns/io/loaders/protein/ProteinModel.h>
 
 #include <assert.h>
 #include <fstream>
@@ -450,9 +449,11 @@ std::vector<Model::Ptr> ProteinLoader::importFromFile(
         modelColors.emplace_back(r, g, b, 1.f);
     }
 
-    auto model = std::make_unique<GeometricModel<Sphere>>(spheres, modelColors, colorMapIndices);
+    Model::Ptr model = std::make_unique<ProteinModel>(spheres, std::move(modelColors), std::move(colorMapIndices));
 
-    return {std::move(model)};
+    std::vector<Model::Ptr> result;
+    result.push_back(std::move(model));
+    return result;
 }
 
 std::string ProteinLoader::getName() const

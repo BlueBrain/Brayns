@@ -34,6 +34,9 @@ struct Sphere
 };
 
 template<>
+void GeometryBoundsUpdater<Sphere>::update(const Sphere& s, const Matrix4f& t, Bounds& b);
+
+template<>
 Geometry<Sphere>::Geometry();
 
 template<>

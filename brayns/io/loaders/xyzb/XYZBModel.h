@@ -20,12 +20,30 @@
 
 #pragma once
 
-#include <cstdlib>
-#include <limits>
+#include <brayns/engine/Geometry.h>
+#include <brayns/engine/geometries/Sphere.h>
+#include <brayns/engine/models/GeometricModel.h>
 
 namespace brayns
 {
-constexpr size_t NO_MATERIAL = std::numeric_limits<size_t>::max();
-constexpr size_t BOUNDINGBOX_MATERIAL_ID = NO_MATERIAL - 1;
-constexpr size_t SECONDARY_MODEL_MATERIAL_ID = NO_MATERIAL - 2;
-} // namespace brayns
+class XYZBModel : public GeometricModel
+{
+public:
+    XYZBModel(const std::vector<Sphere>& spheres);
+
+    Bounds computeBounds(const Matrix4f& transform) const noexcept final;
+
+    void setColor(const Vector4f& color) noexcept;
+
+    const Vector4f& getColor() const noexcept;
+
+    void setRadius(const float newRadius) noexcept;
+
+private:
+    void commitGeometryModel() final;
+
+private:
+    Geometry<Sphere> _geometry;
+    Vector4f _color;
+};
+}

@@ -18,26 +18,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/Geometry.h>
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
+#pragma once
+
 #include <brayns/engine/geometries/TriangleMesh.h>
+#include <brayns/engine/models/GeometricModel.h>
 
 namespace brayns
 {
-class MeshModel : public Model
+class MeshModel : public GeometricModel
 {
 public:
     MeshModel(const TriangleMesh& mesh);
 
     Bounds computeBounds(const Matrix4f& transform) const noexcept final;
 
-    const Material& getMaterial() const noexcept;
+    const Vector4f& getColor() const noexcept;
 
-    void setMaterial(Material::Ptr&& material);
+    void setColor(const Vector4f& newColor) noexcept;
+
+private:
+    void commitGeometryModel() final;
 
 private:
     Geometry<TriangleMesh> _meshGeometry;
-    Material::Ptr _material {nullptr};
+    Vector4f _color {1.f};
 };
 }

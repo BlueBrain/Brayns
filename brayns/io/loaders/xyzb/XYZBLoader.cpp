@@ -18,11 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "XYZBLoader.h"
+#include <brayns/io/loaders/xyzb/XYZBLoader.h>
 
 #include <brayns/common/Log.h>
-#include <brayns/engine/geometries/Sphere.h>
-#include <brayns/engine/models/GeometricModel.h>
+#include <brayns/io/loaders/xyzb/XYZBModel.h>
 #include <brayns/utils/StringUtils.h>
 
 #include <filesystem>
@@ -105,39 +104,20 @@ std::vector<Model::Ptr> XYZBLoader::importFromBlob(Blob &&blob, const LoaderProg
     for (i = 0; i < numlines; ++i)
         spheres[i + startOffset].radius = meanRadius;
 
+    auto model = std::make_unique<XYZBModel>(spheres);
 
-    Transformation transformation;
-    transformation.setRotationCenter(model->getBounds().getCenter());
-    auto modelDescriptor = std::make_shared<ModelDescriptor>(std::move(model), blob.name);
-    modelDescriptor->setTransformation(transformation);
-
-    Property radiusProperty("radius", meanRadius, {"Point size"});
-    radiusProperty.onModified(
-        [modelDesc = std::weak_ptr<ModelDescriptor>(modelDescriptor)](const Property &property)
-        {
-            if (auto modelDesc_ = modelDesc.lock())
-            {
-                const auto newRadius = property.as<double>();
-                for (auto &sphere : modelDesc_->getModel().getSpheres()[materialId])
-                    sphere.radius = newRadius;
-            }
-        });
-    PropertyMap modelProperties;
-    modelProperties.add(radiusProperty);
-    modelDescriptor->setProperties(modelProperties);
-    return {modelDescriptor};
+    std::vector<Model::Ptr> result;
+    result.push_back(std::move(model));
+    return result;
 }
 
-std::vector<ModelDescriptorPtr>
-    XYZBLoader::importFromFile(const std::string &filename, const LoaderProgress &callback, Scene &scene) const
+std::vector<Model::Ptr> XYZBLoader::importFromFile(const std::string &filename, const LoaderProgress &callback) const
 {
     std::ifstream file(filename);
     if (!file.good())
-        throw std::runtime_error("Could not open file " + filename);
+        throw std::runtime_error("XYZBLoader: Could not open file " + filename);
     return importFromBlob(
-        {"xyz", filename, {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()}},
-        callback,
-        scene);
+        {"xyz", filename, {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()}}, callback);
 }
 
 std::string XYZBLoader::getName() const
