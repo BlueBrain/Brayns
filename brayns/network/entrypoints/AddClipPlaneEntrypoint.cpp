@@ -23,9 +23,8 @@
 
 namespace brayns
 {
-AddClipPlaneEntrypoint::AddClipPlaneEntrypoint(Scene &scene, INetworkInterface &interface)
+AddClipPlaneEntrypoint::AddClipPlaneEntrypoint(Scene &scene)
     : _scene(scene)
-    , _notifier(interface)
 {
 }
 
@@ -52,7 +51,6 @@ void AddClipPlaneEntrypoint::onRequest(const Request &request)
     auto &plane = params.plane;
     auto id = _scene.addClipPlane(plane);
     auto clipPlane = _scene.getClipPlane(id);
-    _notifier.notify(request, clipPlane);
     request.reply(clipPlane);
 }
 } // namespace brayns

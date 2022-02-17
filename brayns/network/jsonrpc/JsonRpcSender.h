@@ -59,14 +59,5 @@ public:
      * @param client Client ref.
      */
     static void progress(const ProgressMessage &message, const ClientRef &client);
-
-    /**
-     * @brief Send a notification to all clients except the source if set.
-     *
-     * @param message Notification message.
-     * @param clients Clients that will receive the message.
-     * @param source Sender of the message that won't receive it (optional).
-     */
-    static void notification(const NotificationMessage &message, ClientManager &clients, const ClientRef &source = {});
 };
 } // namespace brayns

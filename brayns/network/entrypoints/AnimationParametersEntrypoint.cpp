@@ -23,10 +23,8 @@
 
 namespace brayns
 {
-GetAnimationParametersEntrypoint::GetAnimationParametersEntrypoint(
-    const AnimationParameters &parameters,
-    INetworkInterface &interface)
-    : GetEntrypoint(parameters, interface, NotificationPeriod::interactive())
+GetAnimationParametersEntrypoint::GetAnimationParametersEntrypoint(const AnimationParameters &parameters)
+    : GetEntrypoint(parameters)
 {
 }
 

@@ -23,9 +23,6 @@
 
 #include <brayns/json/Json.h>
 
-#include <brayns/network/common/NotificationPeriod.h>
-#include <brayns/network/jsonrpc/JsonRpcNotifier.h>
-
 #include "IEntrypoint.h"
 
 namespace brayns
@@ -46,12 +43,8 @@ public:
      *
      * @param object Object bound to the entrypoint.
      */
-    GetEntrypoint(
-        const ObjectType &object,
-        INetworkInterface &interface,
-        Duration notificationPeriod = NotificationPeriod::defaultValue())
+    GetEntrypoint(const ObjectType &object)
         : _object(object)
-        , _notifier(interface, notificationPeriod)
     {
     }
 
@@ -86,36 +79,8 @@ public:
         request.reply(result);
     }
 
-    /**
-     * @brief Notify if the object is modified.
-     *
-     */
-    virtual void onPreRender() override
-    {
-        _notify();
-    }
-
-    /**
-     * @brief Notify if the object is modified.
-     *
-     */
-    virtual void onPostRender() override
-    {
-        _notify();
-    }
-
 private:
     const ObjectType &_object;
-    JsonRpcNotifier _notifier;
-
-    void _notify()
-    {
-        if (_object.isModified())
-        {
-            auto method = getName();
-            _notifier.notify(method, _object);
-        }
-    }
 };
 
 /**

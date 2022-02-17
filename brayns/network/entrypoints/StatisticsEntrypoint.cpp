@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-GetStatisticsEntrypoint::GetStatisticsEntrypoint(const Statistics &statistics, INetworkInterface &interface)
-    : GetEntrypoint(statistics, interface, NotificationPeriod::slow())
+GetStatisticsEntrypoint::GetStatisticsEntrypoint(const Statistics &statistics)
+    : GetEntrypoint(statistics)
 {
 }
 

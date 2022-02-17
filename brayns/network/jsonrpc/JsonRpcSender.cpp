@@ -36,7 +36,8 @@ public:
         try
         {
             auto &socket = client.getSocket();
-            socket.send(data);
+            auto packet = brayns::OutputPacket::fromText(data);
+            socket.send(packet);
         }
         catch (const brayns::ConnectionClosedException &e)
         {
@@ -84,11 +85,5 @@ void JsonRpcSender::progress(const ProgressMessage &message, const ClientRef &cl
         return;
     }
     MessageSenderHelper::trySend(message, client);
-}
-
-void JsonRpcSender::notification(const NotificationMessage &message, ClientManager &clients, const ClientRef &source)
-{
-    auto data = Json::stringify(message);
-    clients.broadcast(data, source);
 }
 } // namespace brayns

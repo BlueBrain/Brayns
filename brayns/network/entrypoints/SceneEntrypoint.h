@@ -29,7 +29,7 @@ namespace brayns
 class GetSceneEntrypoint : public GetEntrypoint<Scene>
 {
 public:
-    GetSceneEntrypoint(const Scene &scene, INetworkInterface &interface);
+    GetSceneEntrypoint(const Scene &scene);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

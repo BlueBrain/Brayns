@@ -55,7 +55,8 @@ public:
         auto compression = parameters.getJpegCompression();
         auto image = framebuffer.getImage();
         auto data = brayns::ImageEncoder::encode(image, "jpg", compression);
-        clients.broadcast(data);
+        auto packet = brayns::OutputPacket::fromBinary(data);
+        clients.broadcast(packet);
     }
 };
 

@@ -39,7 +39,7 @@ public:
 class SetCameraParamsEntrypoint : public SetPropertyObjectEntrypoint<Camera>
 {
 public:
-    SetCameraParamsEntrypoint(Camera &camera, INetworkInterface &interface);
+    SetCameraParamsEntrypoint(Camera &camera);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

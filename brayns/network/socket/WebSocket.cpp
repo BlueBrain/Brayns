@@ -116,17 +116,20 @@ bool InputPacket::isClose() const
     return _flags & Poco::Net::WebSocket::FRAME_OP_CLOSE;
 }
 
-OutputPacket::OutputPacket(const std::string &data)
-    : _data(data.data())
-    , _size(int(data.size()))
-    , _flags(Poco::Net::WebSocket::FRAME_TEXT)
+OutputPacket OutputPacket::fromText(std::string_view data)
 {
+    return {data.data(), data.size(), Poco::Net::WebSocket::FRAME_TEXT};
 }
 
-OutputPacket::OutputPacket(const void *data, int size)
+OutputPacket OutputPacket::fromBinary(std::string_view data)
+{
+    return {data.data(), data.size(), Poco::Net::WebSocket::FRAME_BINARY};
+}
+
+OutputPacket::OutputPacket(const void *data, size_t size, int flags)
     : _data(data)
-    , _size(size)
-    , _flags(Poco::Net::WebSocket::FRAME_BINARY)
+    , _size(int(size))
+    , _flags(flags)
 {
 }
 

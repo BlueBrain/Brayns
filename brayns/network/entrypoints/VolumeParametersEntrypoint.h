@@ -29,7 +29,7 @@ namespace brayns
 class GetVolumeParametersEntrypoint : public GetEntrypoint<VolumeParameters>
 {
 public:
-    GetVolumeParametersEntrypoint(const VolumeParameters &parameters, INetworkInterface &interface);
+    GetVolumeParametersEntrypoint(const VolumeParameters &parameters);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;

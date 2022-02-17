@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-GetRendererEntrypoint::GetRendererEntrypoint(const RenderingParameters &parameters, INetworkInterface &interface)
-    : GetEntrypoint(parameters, interface)
+GetRendererEntrypoint::GetRendererEntrypoint(const RenderingParameters &parameters)
+    : GetEntrypoint(parameters)
 {
 }
 

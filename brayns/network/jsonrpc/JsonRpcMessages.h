@@ -99,16 +99,6 @@ BRAYNS_JSON_OBJECT_ENTRY(ProgressInfoMessage, params, "Progression info")
 BRAYNS_JSON_OBJECT_END()
 
 /**
- * @brief Message send spontaneously by brayns.
- *
- */
-BRAYNS_JSON_OBJECT_BEGIN(NotificationMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, jsonrpc, "Protocol version")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, method, "Entrypoint name")
-BRAYNS_JSON_OBJECT_ENTRY(JsonValue, params, "Message content")
-BRAYNS_JSON_OBJECT_END()
-
-/**
  * @brief Empty message when no params or result is needed.
  *
  */

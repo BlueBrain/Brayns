@@ -179,7 +179,7 @@ public:
         auto &stream = context.stream;
         auto &monitor = stream.getMonitor();
 
-        plugin.add<brayns::AddClipPlaneEntrypoint>(scene, interface);
+        plugin.add<brayns::AddClipPlaneEntrypoint>(scene);
         plugin.add<brayns::AddLightAmbientEntrypoint>(lights);
         plugin.add<brayns::AddLightDirectionalEntrypoint>(lights);
         plugin.add<brayns::AddLightQuadEntrypoint>(lights);
@@ -192,9 +192,9 @@ public:
         plugin.add<brayns::ExitLaterEntrypoint>(engine);
         plugin.add<brayns::ExportFramesEntrypoint>(engine, interface);
         plugin.add<brayns::ExportFramesToDiskEntrypoint>(parameters, engine, exporter);
-        plugin.add<brayns::GetAnimationParametersEntrypoint>(animation, interface);
-        plugin.add<brayns::GetApplicationParametersEntrypoint>(application, interface);
-        plugin.add<brayns::GetCameraEntrypoint>(camera, interface);
+        plugin.add<brayns::GetAnimationParametersEntrypoint>(animation);
+        plugin.add<brayns::GetApplicationParametersEntrypoint>(application);
+        plugin.add<brayns::GetCameraEntrypoint>(camera);
         plugin.add<brayns::GetCameraParamsEntrypoint>(camera);
         plugin.add<brayns::GetClipPlanesEntrypoint>(scene);
         plugin.add<brayns::GetExportFramesProgressEntrypoint>(exporter);
@@ -204,11 +204,11 @@ public:
         plugin.add<brayns::GetModelEntrypoint>(scene);
         plugin.add<brayns::GetModelPropertiesEntrypoint>(scene);
         plugin.add<brayns::GetModelTransferFunctionEntrypoint>(scene);
-        plugin.add<brayns::GetRendererEntrypoint>(rendering, interface);
+        plugin.add<brayns::GetRendererEntrypoint>(rendering);
         plugin.add<brayns::GetRendererParamsEntrypoint>(renderer);
-        plugin.add<brayns::GetSceneEntrypoint>(scene, interface);
-        plugin.add<brayns::GetStatisticsEntrypoint>(statistics, interface);
-        plugin.add<brayns::GetVolumeParametersEntrypoint>(volume, interface);
+        plugin.add<brayns::GetSceneEntrypoint>(scene);
+        plugin.add<brayns::GetStatisticsEntrypoint>(statistics);
+        plugin.add<brayns::GetVolumeParametersEntrypoint>(volume);
         plugin.add<brayns::ImageJpegEntrypoint>(application, engine);
         plugin.add<brayns::ImageStreamingModeEntrypoint>(application, monitor);
         plugin.add<brayns::InspectEntrypoint>(renderer);
@@ -216,7 +216,7 @@ public:
         plugin.add<brayns::ModelPropertiesSchemaEntrypoint>(scene);
         plugin.add<brayns::QuitEntrypoint>(engine);
         plugin.add<brayns::RegistryEntrypoint>(entrypoints);
-        plugin.add<brayns::RemoveClipPlanesEntrypoint>(scene, interface);
+        plugin.add<brayns::RemoveClipPlanesEntrypoint>(scene);
         plugin.add<brayns::RemoveLightsEntrypoint>(lights);
         plugin.add<brayns::RemoveModelEntrypoint>(scene);
         plugin.add<brayns::RequestModelUploadEntrypoint>(scene, loaders, modelUploads);
@@ -225,17 +225,17 @@ public:
         plugin.add<brayns::SetAnimationParametersEntrypoint>(animation);
         plugin.add<brayns::SetApplicationParametersEntrypoint>(application);
         plugin.add<brayns::SetCameraEntrypoint>(camera);
-        plugin.add<brayns::SetCameraParamsEntrypoint>(camera, interface);
+        plugin.add<brayns::SetCameraParamsEntrypoint>(camera);
         plugin.add<brayns::SetModelPropertiesEntrypoint>(scene);
         plugin.add<brayns::SetModelTransferFunctionEntrypoint>(scene);
         plugin.add<brayns::SetRendererEntrypoint>(rendering);
-        plugin.add<brayns::SetRendererParamsEntrypoint>(renderer, interface);
+        plugin.add<brayns::SetRendererParamsEntrypoint>(renderer);
         plugin.add<brayns::SetSceneEntrypoint>(scene);
         plugin.add<brayns::SetVolumeParametersEntrypoint>(volume);
         plugin.add<brayns::SnapshotEntrypoint>(engine, interface);
         plugin.add<brayns::TriggerJpegStreamEntrypoint>(monitor);
-        plugin.add<brayns::UpdateClipPlaneEntrypoint>(scene, interface);
-        plugin.add<brayns::UpdateInstanceEntrypoint>(scene, interface);
+        plugin.add<brayns::UpdateClipPlaneEntrypoint>(scene);
+        plugin.add<brayns::UpdateInstanceEntrypoint>(scene);
         plugin.add<brayns::UpdateModelEntrypoint>(scene);
         plugin.add<brayns::VersionEntrypoint>();
     }
@@ -464,7 +464,7 @@ namespace brayns
 {
 NetworkManager::NetworkManager()
     : ExtensionPlugin("Core")
-    , _interface(_context.entrypoints, _context.tasks, _context.clients)
+    , _interface(_context.entrypoints, _context.tasks)
 {
     Log::info("Network plugin is enabled.");
 }
