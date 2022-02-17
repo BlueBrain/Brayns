@@ -77,9 +77,6 @@ public:
         descriptor.markModified();
         scene.markModified();
     }
-
-private:
-    brayns::PluginAPI *_api;
 };
 } // namespace
 

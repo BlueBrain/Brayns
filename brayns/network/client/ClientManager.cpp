@@ -39,11 +39,11 @@ public:
         }
         catch (const brayns::ConnectionClosedException &e)
         {
-            brayns::Log::debug("Connection closed during broadcast to {}: {}.", client, e.what());
+            brayns::Log::debug("Connection closed during broadcast to {}: '{}'.", client, e.what());
         }
         catch (const std::exception &e)
         {
-            brayns::Log::error("Unexpected error during broadcast to {}: {}.", client, e.what());
+            brayns::Log::error("Unexpected error during broadcast to {}: '{}'.", client, e.what());
         }
         catch (...)
         {
@@ -79,15 +79,11 @@ void ClientManager::remove(const ClientRef &client)
     _clients.erase(client);
 }
 
-void ClientManager::broadcast(const OutputPacket &packet, const ClientRef &source)
+void ClientManager::broadcast(const OutputPacket &packet)
 {
     std::lock_guard<std::mutex> lock(_mutex);
     for (const auto &client : _clients)
     {
-        if (client == source)
-        {
-            continue;
-        }
         ClientManagerHelper::trySend(client, packet);
     }
 }

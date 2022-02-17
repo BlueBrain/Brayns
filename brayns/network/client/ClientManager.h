@@ -69,9 +69,8 @@ public:
      * @brief Send a packet to all clients except the source if specified.
      *
      * @param packet Data packet.
-     * @param source Don't send packet to given client if specified.
      */
-    void broadcast(const OutputPacket &packet, const ClientRef &source = {});
+    void broadcast(const OutputPacket &packet);
 
     /**
      * @brief Close all sockets.

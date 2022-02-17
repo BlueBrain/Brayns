@@ -43,7 +43,8 @@ std::string GetModelTransferFunctionEntrypoint::getDescription() const
 void GetModelTransferFunctionEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    ExtractModel::fromParams(_scene, params);
+    auto modelId = params.id;
+    ExtractModel::fromId(_scene, modelId);
     auto &transferFunction = _scene.getTransferFunction();
     request.reply(transferFunction);
 }

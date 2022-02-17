@@ -25,22 +25,12 @@
 
 namespace brayns
 {
-ModelDescriptor &ExtractModel::fromId(PluginAPI &api, size_t id)
-{
-    return fromId(api.getEngine(), id);
-}
-
-ModelDescriptor &ExtractModel::fromId(Engine &engine, size_t id)
-{
-    return fromId(engine.getScene(), id);
-}
-
 ModelDescriptor &ExtractModel::fromId(Scene &scene, size_t id)
 {
     auto model = scene.getModel(id);
     if (!model)
     {
-        throw JsonRpcException("No model found with ID " + std::to_string(id));
+        throw InvalidParamsException("No model found with ID " + std::to_string(id));
     }
     return *model;
 }
