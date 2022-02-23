@@ -19,18 +19,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "NetworkTaskMonitor.h"
+#include "CurrentEntrypoint.h"
+
+#include <cassert>
 
 namespace brayns
 {
-void NetworkTaskMonitor::wait()
+CurrentEntrypoint::CurrentEntrypoint(const EntrypointRef &entrypoint, const JsonRpcRequest &request)
+    : _entrypoint(&entrypoint)
+    , _request(&request)
 {
-    std::unique_lock<std::mutex> lock(_mutex);
-    _monitor.wait(lock);
+    assert(entrypoint.getMethod() == request.getMethod());
 }
 
-void NetworkTaskMonitor::notify()
+std::string CurrentEntrypoint::getMethod() const
 {
-    _monitor.notify_all();
+    return _entrypoint ? _entrypoint->getMethod() : "";
+}
+
+CurrentEntrypoint::operator bool() const
+{
+    return _entrypoint;
 }
 } // namespace brayns

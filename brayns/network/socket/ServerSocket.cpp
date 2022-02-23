@@ -32,14 +32,12 @@
 
 #include <brayns/common/Log.h>
 
-#include "SocketManager.h"
-
 namespace
 {
 class RequestHandler : public Poco::Net::HTTPRequestHandler
 {
 public:
-    RequestHandler(const brayns::SocketManager &manager)
+    RequestHandler(brayns::SocketManager &manager)
         : _manager(manager)
     {
     }
@@ -66,14 +64,14 @@ public:
     }
 
 private:
-    const brayns::SocketManager &_manager;
+    brayns::SocketManager &_manager;
 };
 
 class RequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
 {
 public:
-    RequestHandlerFactory(std::unique_ptr<brayns::ISocketListener> listener)
-        : _manager(std::move(listener))
+    RequestHandlerFactory(brayns::SocketManager &manager)
+        : _manager(manager)
     {
     }
 
@@ -84,7 +82,7 @@ public:
     }
 
 private:
-    brayns::SocketManager _manager;
+    brayns::SocketManager &_manager;
 };
 
 class SslServerContextFactory
@@ -142,9 +140,9 @@ class ServerFactory
 public:
     static std::unique_ptr<Poco::Net::HTTPServer> create(
         const brayns::NetworkParameters &parameters,
-        std::unique_ptr<brayns::ISocketListener> listener)
+        brayns::SocketManager &manager)
     {
-        auto factory = Poco::makeShared<RequestHandlerFactory>(std::move(listener));
+        auto factory = Poco::makeShared<RequestHandlerFactory>(manager);
         auto socket = ServerSocketFactory::create(parameters);
         auto params = ServerParamsFactory::create(parameters);
         return std::make_unique<Poco::Net::HTTPServer>(factory, socket, params);
@@ -155,15 +153,16 @@ public:
 namespace brayns
 {
 ServerSocket::ServerSocket(const NetworkParameters &parameters, std::unique_ptr<ISocketListener> listener)
+    : _manager(std::move(listener))
 {
     try
     {
         Log::info("Server socket initialization.");
-        _server = ServerFactory::create(parameters, std::move(listener));
+        _server = ServerFactory::create(parameters, _manager);
     }
     catch (const Poco::Exception &e)
     {
-        throw std::runtime_error("Cannot create server socket: " + e.displayText());
+        throw std::runtime_error("Cannot initialize server socket: '" + e.displayText() + "'");
     }
 }
 
@@ -176,7 +175,7 @@ void ServerSocket::start()
     }
     catch (const Poco::Exception &e)
     {
-        throw std::runtime_error("Cannot start server: " + e.displayText());
+        throw std::runtime_error("Cannot start server: '" + e.displayText() + "'");
     }
     auto &socket = _server->socket();
     auto address = socket.address();

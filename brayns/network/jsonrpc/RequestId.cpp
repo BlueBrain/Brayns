@@ -105,11 +105,6 @@ JsonSchema JsonAdapter<RequestId>::getSchema(const RequestId &value)
 
 bool JsonAdapter<RequestId>::serialize(const RequestId &value, JsonValue &json)
 {
-    if (value.isEmpty())
-    {
-        json.clear();
-        return true;
-    }
     if (value.isInt())
     {
         json = value.toInt();

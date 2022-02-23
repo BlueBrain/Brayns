@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * Responsible Author: adrien.fleury@epfl.ch
@@ -19,28 +19,40 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "InputPacket.h"
 
-#include <string>
-
-#include "JsonRpcRequest.h"
+#include <Poco/Net/WebSocket.h>
 
 namespace brayns
 {
-/**
- * @brief Helper class to parse and validate a JSON-RPC request.
- *
- */
-class JsonRpcRequestParser
+InputPacket::InputPacket(Poco::Buffer<char> data, int flags)
+    : _data(std::move(data))
+    , _flags(flags)
 {
-public:
-    /**
-     * @brief Parse data to create a JSON-RPC request message.
-     *
-     * @param data Raw JSON data.
-     * @return brayns::RequestMessage Parsed request message.
-     * @throw JsonRpcException If any errors occur that must be reported.
-     */
-    static brayns::RequestMessage parse(const std::string &data);
-};
+}
+
+bool InputPacket::isEmpty() const
+{
+    return _flags == 0 && _data.empty();
+}
+
+std::string_view InputPacket::getData() const
+{
+    return {_data.begin(), _data.size()};
+}
+
+bool InputPacket::isBinary() const
+{
+    return _flags & Poco::Net::WebSocket::FRAME_OP_BINARY;
+}
+
+bool InputPacket::isText() const
+{
+    return _flags & Poco::Net::WebSocket::FRAME_OP_TEXT;
+}
+
+bool InputPacket::isClose() const
+{
+    return _flags & Poco::Net::WebSocket::FRAME_OP_CLOSE;
+}
 } // namespace brayns

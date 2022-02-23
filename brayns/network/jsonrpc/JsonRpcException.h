@@ -73,12 +73,20 @@ private:
     JsonValue _data;
 };
 
+/**
+ * @brief The request cannot be parsed to a JsonRpcMessage.
+ *
+ */
 class ParsingErrorException : public JsonRpcException
 {
 public:
     ParsingErrorException(const std::string &message);
 };
 
+/**
+ * @brief The request has invalid schema or header.
+ *
+ */
 class InvalidRequestException : public JsonRpcException
 {
 public:
@@ -87,12 +95,20 @@ public:
     InvalidRequestException(const std::string &message, const std::vector<std::string> &errors);
 };
 
+/**
+ * @brief Method specified doesn't exist.
+ *
+ */
 class MethodNotFoundException : public JsonRpcException
 {
 public:
     MethodNotFoundException(const std::string &method);
 };
 
+/**
+ * @brief Invalid params schema or content.
+ *
+ */
 class InvalidParamsException : public JsonRpcException
 {
 public:
@@ -101,9 +117,53 @@ public:
     InvalidParamsException(const std::string &message, const std::vector<std::string> &errors);
 };
 
+/**
+ * @brief Valid request but internal error.
+ *
+ */
 class InternalErrorException : public JsonRpcException
 {
 public:
     InternalErrorException(const std::string &message);
+};
+
+/**
+ * @brief Service busy on a given method.
+ *
+ */
+class ServiceUnavailableException : public JsonRpcException
+{
+public:
+    ServiceUnavailableException(const std::string &method);
+};
+
+/**
+ * @brief Method cannot be cancelled.
+ *
+ */
+class MethodNotCancellableException : public JsonRpcException
+{
+public:
+    MethodNotCancellableException();
+};
+
+/**
+ * @brief Trying to cancel a method that is not currently running.
+ *
+ */
+class MethodNotRunningException : public JsonRpcException
+{
+public:
+    MethodNotRunningException();
+};
+
+/**
+ * @brief Method has been cancelled.
+ *
+ */
+class MethodCancelledException : public JsonRpcException
+{
+public:
+    MethodCancelledException();
 };
 } // namespace brayns

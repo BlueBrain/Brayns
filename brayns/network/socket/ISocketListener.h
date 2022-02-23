@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
  *
- * Responsible Author: Daniel.Nachbaur@epfl.ch
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,36 +19,40 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Progress.h"
+#pragma once
+
+#include <brayns/network/client/ClientRequest.h>
 
 namespace brayns
 {
-Progress::Progress(const std::string &operation)
-    : _operation(operation)
+/**
+ * @brief Interface to implement to be notified of network events.
+ *
+ */
+class ISocketListener
 {
-}
+public:
+    virtual ~ISocketListener() = default;
 
-void Progress::update(const std::string &operation, const float amount)
-{
-    std::lock_guard<std::mutex> lock_(_mutex);
-    _updateValue(_operation, operation);
-    _updateValue(_amount, amount);
-}
+    /**
+     * @brief Called when a new client connects.
+     *
+     * @param client Client ref.
+     */
+    virtual void onConnect(const ClientRef &client) = 0;
 
-void Progress::increment(const std::string &operation, const float increment)
-{
-    std::lock_guard<std::mutex> lock_(_mutex);
-    _updateValue(_operation, operation);
-    _updateValue(_amount, _amount + increment);
-}
+    /**
+     * @brief Called when a client disconnects.
+     *
+     * @param client Client ref.
+     */
+    virtual void onDisconnect(const ClientRef &client) = 0;
 
-void Progress::consume(std::function<void(std::string, float)> callback)
-{
-    std::lock_guard<std::mutex> lock_(_mutex);
-    if (isModified())
-    {
-        callback(_operation, _amount);
-        resetModified();
-    }
-}
+    /**
+     * @brief Called when a request is received from a client.
+     *
+     * @param request Raw client request.
+     */
+    virtual void onRequest(ClientRequest request) = 0;
+};
 } // namespace brayns

@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "JsonRpcRequestParser.h"
+#include "JsonRpcParser.h"
 
 #include <Poco/JSON/JSONException.h>
 
@@ -30,7 +30,7 @@
 
 namespace
 {
-class RequestParser
+class JsonParser
 {
 public:
     static brayns::JsonValue parse(const std::string &data)
@@ -54,7 +54,7 @@ public:
         auto errors = brayns::JsonSchemaValidator::validate(json, _schema);
         if (!errors.empty())
         {
-            throw brayns::InvalidRequestException("Invalid JSON-RPC request schema", errors);
+            throw brayns::InvalidRequestException("Invalid request schema", errors);
         }
     }
 
@@ -74,36 +74,32 @@ public:
         auto &method = message.method;
         if (method.empty())
         {
-            throw brayns::InvalidRequestException("No method provided in request");
+            throw brayns::InvalidRequestException("No methods provided in request");
         }
+    }
+};
+
+class ParserHelper
+{
+public:
+    static brayns::RequestMessage parse(const std::string &data)
+    {
+        auto json = JsonParser::parse(data);
+        RequestSchemaValidator::validate(json);
+        auto message = brayns::Json::deserialize<brayns::RequestMessage>(json);
+        RequestHeaderValidator::validate(message);
+        return message;
     }
 };
 } // namespace
 
 namespace brayns
 {
-brayns::RequestMessage JsonRpcRequestParser::parse(const std::string &data)
+JsonRpcRequest JsonRpcParser::parse(const ClientRequest &request)
 {
-    try
-    {
-        auto json = RequestParser::parse(data);
-        RequestSchemaValidator::validate(json);
-        auto message = brayns::Json::deserialize<brayns::RequestMessage>(json);
-        RequestHeaderValidator::validate(message);
-        return message;
-    }
-    catch (const brayns::JsonRpcException &e)
-    {
-        (void)e;
-        throw;
-    }
-    catch (const std::exception &e)
-    {
-        throw brayns::InternalErrorException("Unexpected error during request parsing: " + std::string(e.what()));
-    }
-    catch (...)
-    {
-        throw brayns::InternalErrorException("Unknown error during request parsing");
-    }
+    auto &client = request.getClient();
+    auto data = std::string(request.getData());
+    auto message = ParserHelper::parse(data);
+    return {client, std::move(message)};
 }
 } // namespace brayns

@@ -211,9 +211,8 @@ private:
 };
 } // namespace
 
-ExportFramesEntrypoint::ExportFramesEntrypoint(Engine &engine, INetworkInterface &interface)
+ExportFramesEntrypoint::ExportFramesEntrypoint(Engine &engine)
     : _engine(engine)
-    , _launcher(interface)
 {
 }
 
@@ -235,7 +234,5 @@ bool ExportFramesEntrypoint::isAsync() const
 void ExportFramesEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto task = std::make_unique<ExportFramesTask>(request, _engine, std::move(params));
-    _launcher.launch(std::move(task));
 }
 } // namespace brayns

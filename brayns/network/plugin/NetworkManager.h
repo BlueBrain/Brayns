@@ -24,12 +24,11 @@
 #include <brayns/network/client/ClientManager.h>
 #include <brayns/network/client/RequestBuffer.h>
 #include <brayns/network/common/FrameExporter.h>
-#include <brayns/network/entrypoint/EntrypointManager.h>
+#include <brayns/network/dispatch/CurrentEntrypoint.h>
+#include <brayns/network/entrypoint/EntrypointRegistry.h>
 #include <brayns/network/interface/NetworkInterface.h>
 #include <brayns/network/socket/ISocket.h>
 #include <brayns/network/stream/StreamManager.h>
-#include <brayns/network/tasks/NetworkTaskManager.h>
-#include <brayns/network/upload/ModelUploadManager.h>
 
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
@@ -38,12 +37,11 @@ namespace brayns
 struct NetworkContext
 {
     PluginAPI *api = nullptr;
-    EntrypointManager entrypoints;
+    INetworkInterface *interface = nullptr;
+    CurrentEntrypoint currentEntrypoint;
+    EntrypointRegistry entrypoints;
     ClientManager clients;
-    RequestBuffer requests;
     StreamManager stream;
-    NetworkTaskManager tasks;
-    ModelUploadManager modelUploads;
     std::unique_ptr<ISocket> socket;
     FrameExporter frameExporter;
 };
@@ -81,10 +79,17 @@ public:
     void start();
 
     /**
-     * @brief Setup action interface and register core entrypoints.
+     * @brief Initialize network components.
      *
      */
     virtual void init() override;
+
+    /**
+     * @brief Register core entrypoints.
+     *
+     * @param interface Network access.
+     */
+    virtual void registerEntrypoints(INetworkInterface &interface) override;
 
     /**
      * @brief Notify entrypoints.

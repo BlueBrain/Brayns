@@ -49,13 +49,6 @@ struct JsonObjectProperty
     std::function<JsonSchema(const void *)> getSchema;
     std::function<bool(const void *, JsonValue &)> serialize;
     std::function<bool(const JsonValue &, void *)> deserialize;
-
-    JsonSchema getSchemaWithOptions(const void *message) const;
-    void add(JsonSchema &schema, const void *message) const;
-    JsonValue extract(const JsonObject &object) const;
-    bool isRequired() const;
-    bool isReadOnly() const;
-    bool isWriteOnly() const;
 };
 
 /**

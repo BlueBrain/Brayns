@@ -27,12 +27,12 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/ExitLaterMessage.h>
-#include <brayns/network/tasks/NetworkTask.h>
-#include <brayns/network/tasks/NetworkTaskMonitor.h>
+#include <brayns/network/tasks/Task.h>
+#include <brayns/network/tasks/TaskMonitor.h>
 
 namespace brayns
 {
-class ExitLaterTask : public NetworkTask
+class ExitLaterTask : public Task
 {
 public:
     ExitLaterTask(Engine &engine);
@@ -47,7 +47,7 @@ protected:
 
 private:
     Engine &_engine;
-    NetworkTaskMonitor _monitor;
+    TaskMonitor _monitor;
     std::chrono::minutes _duration;
 };
 

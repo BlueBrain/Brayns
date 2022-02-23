@@ -22,9 +22,9 @@
 #pragma once
 
 #include <mutex>
-#include <unordered_map>
+#include <vector>
 
-#include "ClientRef.h"
+#include "ClientRequest.h"
 
 namespace brayns
 {
@@ -36,28 +36,21 @@ class RequestBuffer
 {
 public:
     /**
-     * @brief Client -> list of requests.
+     * @brief Add a request to the receive buffer.
      *
+     * @param request Raw client request.
      */
-    using Map = std::unordered_map<ClientRef, std::vector<InputPacket>>;
+    void add(ClientRequest request);
 
     /**
-     * @brief Add a request received from the given client.
+     * @brief Extract all requests received since last call.
      *
-     * @param client Client sending packet.
-     * @param packet Packet sent by client.
+     * @return std::vector<ClientRequest> List of received requests.
      */
-    void add(const ClientRef &client, InputPacket packet);
-
-    /**
-     * @brief Get all requests received since last call.
-     *
-     * @return Map Mapping from client to list of requests.
-     */
-    Map extractAll();
+    std::vector<ClientRequest> poll();
 
 private:
     std::mutex _mutex;
-    Map _buffers;
+    std::vector<ClientRequest> _requests;
 };
 } // namespace brayns

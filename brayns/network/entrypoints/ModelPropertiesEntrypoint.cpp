@@ -42,7 +42,9 @@ std::string GetModelPropertiesEntrypoint::getDescription() const
 
 void GetModelPropertiesEntrypoint::onRequest(const Request &request)
 {
-    auto &model = ExtractModel::fromRequest(_scene, request);
+    auto params = request.getParams();
+    auto modelId = params.id;
+    auto &model = ExtractModel::fromId(_scene, modelId);
     request.reply(model.getProperties());
 }
 
@@ -64,8 +66,9 @@ std::string SetModelPropertiesEntrypoint::getDescription() const
 void SetModelPropertiesEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
+    auto modelId = params.id;
     auto &newProperties = params.properties;
-    auto &model = ExtractModel::fromParams(_scene, params);
+    auto &model = ExtractModel::fromId(_scene, modelId);
     auto oldProperties = model.getProperties();
     oldProperties.merge(newProperties);
     model.setProperties(oldProperties);
@@ -89,7 +92,9 @@ std::string ModelPropertiesSchemaEntrypoint::getDescription() const
 
 void ModelPropertiesSchemaEntrypoint::onRequest(const Request &request)
 {
-    auto &model = ExtractModel::fromRequest(_scene, request);
+    auto params = request.getParams();
+    auto modelId = params.id;
+    auto &model = ExtractModel::fromId(_scene, modelId);
     auto &properties = model.getProperties();
     auto schema = Json::getSchema(properties);
     auto result = Json::serialize(schema);

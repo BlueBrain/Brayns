@@ -24,14 +24,13 @@
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/ExportFramesMessage.h>
-#include <brayns/network/tasks/NetworkTaskLauncher.h>
 
 namespace brayns
 {
 class ExportFramesEntrypoint : public Entrypoint<ExportFramesParams, ExportFramesResult>
 {
 public:
-    ExportFramesEntrypoint(Engine &engine, INetworkInterface &interface);
+    ExportFramesEntrypoint(Engine &engine);
 
     virtual std::string getName() const override;
     virtual std::string getDescription() const override;
@@ -40,6 +39,5 @@ public:
 
 private:
     Engine &_engine;
-    NetworkTaskLauncher _launcher;
 };
 } // namespace brayns

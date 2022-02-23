@@ -25,12 +25,12 @@
 
 namespace brayns
 {
-CancelEntrypoint::CancelEntrypoint(NetworkTaskManager &tasks)
-    : _tasks(tasks)
+CancelEntrypoint::CancelEntrypoint(CurrentEntrypoint &entrypoint)
+    : _entrypoint(entrypoint)
 {
 }
 
-std::string CancelEntrypoint::getName() const
+std::string CancelEntrypoint::getMethod() const
 {
     return "cancel";
 }

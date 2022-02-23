@@ -42,7 +42,9 @@ std::string GetModelEntrypoint::getDescription() const
 
 void GetModelEntrypoint::onRequest(const Request &request)
 {
-    auto &model = ExtractModel::fromRequest(_scene, request);
+    auto params = request.getParams();
+    auto modelId = params.id;
+    auto &model = ExtractModel::fromId(_scene, modelId);
     request.reply(model);
 }
 } // namespace brayns
