@@ -4,6 +4,7 @@ include:
 
 
 variables:
+   BRAYNS_COMMIT: ${CI_COMMIT_SHA}
    bb5_account: proj3
    bb5_duration: "2:00:00"
    DATADIR: /tmp

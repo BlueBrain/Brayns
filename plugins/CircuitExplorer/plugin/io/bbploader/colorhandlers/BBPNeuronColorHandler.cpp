@@ -118,15 +118,25 @@ public:
 private:
     std::vector<std::string> _getAttrib(const brain::GIDSet &gids, const uint32_t attrib) const
     {
-        const auto matrix = _circuit.get(gids, attrib);
-        if (matrix.shape()[0] == 0)
-            return {};
+        try
+        {
+            const auto matrix = _circuit.get(gids, attrib);
+            if (matrix.shape()[0] == 0)
+                return {};
 
-        const size_t idx = matrix.shape()[1] > 1 ? 1 : 0;
-        std::vector<std::string> data(gids.size());
-        for (size_t i = 0; i < gids.size(); ++i)
-            data[i] = matrix[i][idx];
-        return data;
+            const size_t idx = matrix.shape()[1] > 1 ? 1 : 0;
+            std::vector<std::string> data(gids.size());
+            for (size_t i = 0; i < gids.size(); ++i)
+                data[i] = matrix[i][idx];
+            return data;
+        }
+        catch (const std::exception &e)
+        {
+            // Let the caller inform that it was not possible to retrieve any data
+            (void)e;
+        }
+
+        return {};
     }
     brion::Circuit _circuit;
 };
@@ -142,38 +152,79 @@ public:
 
     std::vector<std::string> getLayers(const brain::GIDSet &gids) const final
     {
-        const auto range = _getRange(gids);
-        const auto result = _arrange(_circuit->getLayers(range), gids);
-        if (result.empty())
-            brayns::Log::warn("[CE] GenericCircuit: No layer data found");
-        return result;
+        try
+        {
+            const auto range = _getRange(gids);
+            const auto result = _arrange(_circuit->getLayers(range), gids);
+            if (result.empty())
+                brayns::Log::warn("[CE] GenericCircuit: No layer data found");
+            return result;
+        }
+        catch (const std::exception &e)
+        {
+            (void)e;
+            brayns::Log::warn("Unable to retrieve MVD3/Sonata Layers. Variable will not be available for coloring");
+        }
+
+        return {};
     }
 
     std::vector<std::string> getETypes(const brain::GIDSet &gids) const final
     {
-        const auto range = _getRange(gids);
-        const auto result = _arrange(_circuit->getEtypes(range), gids);
-        if (result.empty())
-            brayns::Log::warn("[CE] GenericCircuit: No e-type data found");
-        return result;
+        try
+        {
+            const auto range = _getRange(gids);
+            const auto result = _arrange(_circuit->getEtypes(range), gids);
+            if (result.empty())
+                brayns::Log::warn("[CE] GenericCircuit: No e-type data found");
+            return result;
+        }
+        catch (const std::exception &e)
+        {
+            (void)e;
+            brayns::Log::warn("Unable to retrieve MVD3/Sonata ETypes. Variable will not be available for coloring");
+        }
+
+        return {};
     }
 
     std::vector<std::string> getMTypes(const brain::GIDSet &gids) const final
     {
-        const auto range = _getRange(gids);
-        const auto result = _arrange(_circuit->getMtypes(range), gids);
-        if (result.empty())
-            brayns::Log::warn("[CE] GenericCircuit: No m-type data found");
-        return result;
+        try
+        {
+            const auto range = _getRange(gids);
+            const auto result = _arrange(_circuit->getMtypes(range), gids);
+            if (result.empty())
+                brayns::Log::warn("[CE] GenericCircuit: No m-type data found");
+            return result;
+        }
+        catch (const std::exception &e)
+        {
+            (void)e;
+            brayns::Log::warn("Unable to retrieve MVD3/Sonata MTypes. Variable will not be available for coloring");
+        }
+
+        return {};
     }
 
     std::vector<std::string> getMorphologyNames(const brain::GIDSet &gids) const final
     {
-        const auto range = _getRange(gids);
-        const auto result = _arrange(_circuit->getMorphologies(range), gids);
-        if (result.empty())
-            brayns::Log::warn("[CE] GenericCircuit: No morphology name data found");
-        return result;
+        try
+        {
+            const auto range = _getRange(gids);
+            const auto result = _arrange(_circuit->getMorphologies(range), gids);
+            if (result.empty())
+                brayns::Log::warn("[CE] GenericCircuit: No morphology name data found");
+            return result;
+        }
+        catch (const std::exception &e)
+        {
+            (void)e;
+            brayns::Log::warn(
+                "Unable to retrieve MVD3/Sonata morphology names. Variable will not be available for coloring");
+        }
+
+        return {};
     }
 
 private:
@@ -197,7 +248,7 @@ private:
         size_t sourceIndex = 0;
         for (size_t i = 0; i < result.size(); ++i, ++it)
         {
-            auto offset = *it - previousGid;
+            const auto offset = *it - previousGid;
             sourceIndex += offset;
             if (sourceIndex > source.size())
             {
