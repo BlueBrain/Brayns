@@ -42,6 +42,12 @@ void MeshModel::setColor(const Vector4f &newColor) noexcept
     _updateValue(_color, newColor);
 }
 
+uint64_t MeshModel::getGeometryModelSizeInBytes() const noexcept
+{
+    // Mesh geometry can only have 1 mesh, but we will still do the multiplicaion...
+    return sizeof(MeshModel) + sizeof(TriangleMesh) * _meshGeometry.getNumGeometries();
+}
+
 void MeshModel::commitGeometryModel()
 {
     _meshGeometry.commit();

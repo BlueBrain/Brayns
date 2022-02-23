@@ -32,7 +32,7 @@ auto& retrieveModel(ModelMap& models, const uint32_t modelID)
 
     return *(it->second);
 }
-}
+} // namespace
 
 namespace brayns
 {
@@ -51,57 +51,50 @@ const Bounds &Scene::getBounds() const noexcept
     return _bounds;
 }
 
-std::vector<ModelInstance*> Scene::addModels(ModelsLoadParameters params, std::vector<Model::Ptr>&& models)
+uint32_t Scene::addModel(ModelsLoadParameters params, Model::Ptr&& model)
 {
-    if(models.empty())
-        throw std::invalid_argument("Attempted to add an empty of list models to the scene");
+    if(!model)
+        throw std::invalid_argument("Scene: Attempted to add a null model");
 
-    _loadEntries.emplace_back();
-    auto& loadEntry = _loadEntries.back();
+    // Create a new model entry
+    const auto modelIndex = _models.size();
+    _models.emplace_back();
+    auto& modelEntry = _models.back();
 
-    loadEntry.params = std::move(params);
+    // Store load parameters on the model entry
+    modelEntry.params = std::move(params);
 
-    auto& modelIndices = loadEntry.modelIndices;
-    modelIndices.reserve(models.size());
+    // Set the model index and store it on the model entry
+    model->_modelIndex = modelIndex;
+    auto modelPtr = model.get();
+    modelEntry.model = (std::move(model));
 
-    std::vector<ModelInstance*> result;
-    result.reserve(models.size());
+    // Create an instance that we will use for rendering
+    auto& modelInstance = _createModelInstance(modelPtr);
+    auto modelID = modelInstance.getID();
 
-    for(size_t i = 0; i < models.size(); ++i)
-    {
-        auto& model = models[i];
-        auto modelPtr = model.get();
-        _models.push_back(std::move(model));
-
-        auto modelInstance = _createModelInstance(modelPtr);
-        auto modelID = modelInstance->getID();
-        result.push_back(modelInstance);
-
-        auto modelIndex = static_cast<uint32_t>(i);
-        modelIndices.push_back({modelID, modelIndex});
-    }
+    // Add the model instance to the list of the loaded model instances
+    modelEntry.instances.insert(modelID);
 
     markModified(false);
 
-    return result;
+    return modelID;
 }
 
-ModelInstance& Scene::createInstance(const uint32_t modelID)
+uint32_t Scene::createInstance(const uint32_t modelID)
 {
-    auto& modelInstance = getModel(modelID);
+    auto& modelInstance = retrieveModel(_modelInstances, modelID);
     auto& model = modelInstance.getModel();
+    auto modelIndex = model._modelIndex;
 
-    auto newInstance = _createModelInstance(&model);
-    auto newInstanceID = newInstance->getID();
+    auto& newInstance = _createModelInstance(&model);
+    auto newInstanceID = newInstance.getID();
 
-    _instanceSources[newInstanceID] = modelID;
+    auto& modelEntry = _models[modelIndex];
+    modelEntry.instances.insert(newInstanceID);
+
     markModified(false);
-    return *newInstance;
-}
-
-ModelInstance& Scene::getModel(const uint32_t modelID)
-{
-    return retrieveModel(_modelInstances, modelID);
+    return newInstanceID;
 }
 
 const ModelInstance &Scene::getModel(const uint32_t modelID) const
@@ -111,12 +104,34 @@ const ModelInstance &Scene::getModel(const uint32_t modelID) const
 
 void Scene::removeModel(const uint32_t modelID)
 {
-    const auto count = _modelInstances.erase(modelID);
-    if(count == 0)
-        throw std::invalid_argument("Could not remove model, ID does not exists");
+    // Get the source model index
+    auto& instance = getModel(modelID);
+    auto& model = instance.getModel();
+    auto modelIndex = model._modelIndex;
 
-    // Remove from the instance map if it was an instance
-    _instanceSources.erase(modelID);
+    // Remove the model instance
+    _modelInstances.erase(modelID);
+
+    // Remove the instance from the list of instances of the given model
+    auto& modelEntry = _models[modelIndex];
+    auto& instanceList = modelEntry.instances;
+    instanceList.erase(modelID);
+
+    // If no more instances refer to the model, remove it
+    if(instanceList.empty())
+    {
+        auto it = _models.begin();
+        std::advance(it, modelIndex);
+        _models.erase(it);
+    }
+}
+
+void Scene::manipulateModel(const uint32_t modelID, const std::function<void(ModelInstance&)> &callback)
+{
+    auto& instance = retrieveModel(_modelInstances, modelID);
+    callback(instance);
+    if(instance._boundsDirty)
+        _recomputeBounds();
 }
 
 std::vector<uint32_t> Scene::getAllModelIDs() const noexcept
@@ -152,11 +167,30 @@ void Scene::removeLight(const uint32_t lightID)
         throw std::invalid_argument("Could not remove light, ID does not exists");
 }
 
+void Scene::preRender(const AnimationParameters &animation)
+{
+    for(auto& [modelID, modelInstance] : _modelInstances)
+    {
+        auto& model = modelInstance->getModel();
+        model.onPreRender(animation);
+    }
+}
+
+void Scene::postRender()
+{
+    for(auto& [modelID, modelInstance] : _modelInstances)
+    {
+        auto& model = modelInstance->getModel();
+        model.onPostRender();
+    }
+}
+
 void Scene::commit()
 {
     // Commit models
     std::vector<OSPInstance> instances;
     instances.reserve(_models.size());
+    bool recomputeBounds = false;
 
     for(auto& [modelID, model] : _modelInstances)
     {
@@ -164,8 +198,13 @@ void Scene::commit()
         {
             model->doCommit();
             instances.push_back(model->handle());
+            recomputeBounds = recomputeBounds || model->_boundsDirty;
         }
     }
+
+    // Recompute scene bounds if any model changed its bounds
+    if(recomputeBounds)
+        _recomputeBounds();
 
     auto instancesPtr = instances.data();
     auto numInstances = instances.size();
@@ -204,12 +243,45 @@ OSPWorld Scene::handle() const noexcept
     return _handle;
 }
 
-ModelInstance* Scene::_createModelInstance(Model* model)
+uint64_t Scene::_getSizeBytes() const noexcept
+{
+    uint64_t baseSize = sizeof(Scene);
+
+    // Account for model entries
+    for(const auto& modelEntry : _models)
+    {
+        baseSize += sizeof(ModelEntry);
+        baseSize += modelEntry.model->getSizeInBytes();
+        baseSize += sizeof(uint32_t) * modelEntry.instances.size();
+    }
+
+    // Account for instances
+    baseSize += _modelInstances.size() * sizeof(ModelInstance);
+
+    // Account for lights
+    for(const auto& [lightID, light] : _lights)
+        baseSize += light->getSizeInBytes();
+
+    return baseSize;
+}
+
+ModelInstance& Scene::_createModelInstance(Model* model)
 {
     auto modelID = _modelIdFactory++;
     auto modelInstance = std::make_unique<ModelInstance>(modelID, model);
     auto result = modelInstance.get();
     _modelInstances[modelID] = std::move(modelInstance);
-    return result;
+    return *result;
+}
+
+void Scene::_recomputeBounds() noexcept
+{
+    _bounds = Bounds();
+    for(auto& [modelID, instance] : _modelInstances)
+    {
+        const auto& modelBounds = instance->getBounds();
+        _bounds.expand(modelBounds);
+        instance->_boundsDirty = false;
+    }
 }
 } // namespace brayns

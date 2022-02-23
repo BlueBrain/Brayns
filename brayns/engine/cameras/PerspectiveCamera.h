@@ -28,19 +28,44 @@ namespace brayns
 class PerspectiveCamera : public Camera
 {
 public:
-    PerspectiveCamera();
+    Ptr clone() const noexcept final;
 
-    std::string_view getName() const noexcept final;
-
-    void commitCameraSpecificParams() final;
-
+    /**
+     * @brief Sets the perspective viertical field of view (in degrees)
+     */
     void setFOVY(const float fovy) noexcept;
+
+    /**
+     * @brief Sets the camera lens aperture radius. Used for depth of field effect. A value of 0.0 disables
+     * the effect. Must be >= 0.0
+     */
     void setApertureRadius(const float aperture) noexcept;
+
+    /**
+     * @brief Sets the distance at which the camera lens is focusing. Used for depth of field effect. A value of 1.0
+     * disables the effect. Must be >= 1.0
+     */
     void setFocusDistance(const float distance) noexcept;
 
+    /**
+     * @brief Returns the perspective vertical field of view (in degrees)
+     */
     float getFOVY() const noexcept;
+
+    /**
+     * @brief Returns the camera lens aperture radius.
+     */
     float getApertureRadius() const noexcept;
+
+    /**
+     * @brief Returns the distance at which the camera lens is focusing.
+     */
     float getFocusDistance() const noexcept;
+
+protected:
+    std::string_view getOSPHandleName() const noexcept final;
+    void commitCameraSpecificParams() final;
+
 private:
     float _fovy {45.f};
     float _apertureRadius {0.f};

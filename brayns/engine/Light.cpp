@@ -22,9 +22,24 @@
 
 namespace brayns
 {
+Light::Light(const Light& o)
+{
+    *this = o;
+}
+
+Light& Light::operator=(const Light &o)
+{
+    _color = o._color;
+    _intensity = o._intensity;
+    _visible = o._visible;
+    markModified(false);
+    return *this;
+}
+
 Light::~Light()
 {
-    ospRelease(_handle);
+    if(_handle)
+        ospRelease(_handle);
 }
 
 void Light::setColor(const Vector3f &color) noexcept
@@ -60,7 +75,10 @@ bool Light::isVisible() const noexcept
 void Light::commit()
 {
     if(!_handle)
-        throw std::runtime_error("Light handle not initialized");
+    {
+        const auto handleName = getOSPHandleName();
+        _handle = ospNewLight(handleName.data());
+    }
 
     ospSetParam(_handle, "color", OSPDataType::OSP_VEC3F, &_color);
     ospSetParam(_handle, "intensity", OSPDataType::OSP_FLOAT, &_intensity);

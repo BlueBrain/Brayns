@@ -84,4 +84,10 @@ OSPGeometricModel GeometricModel::handle() const noexcept
 {
     return _handle;
 }
+
+uint64_t GeometricModel::getSizeInBytes() const noexcept
+{
+    const auto materialSize = _material->getSizeInBytes();
+    return materialSize + getGeometryModelSizeInBytes();
+}
 }

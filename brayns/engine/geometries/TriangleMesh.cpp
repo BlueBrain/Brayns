@@ -50,7 +50,7 @@ void GeometryBoundsUpdater<TriangleMesh>::update(const TriangleMesh& mesh, const
 }
 
 template<>
-Geometry<TriangleMesh>::Geometry()
+void Geometry<TriangleMesh>::initializeHandle()
 {
     _handle = ospNewGeometry("mesh");
 }
@@ -58,7 +58,9 @@ Geometry<TriangleMesh>::Geometry()
 template<>
 uint32_t Geometry<TriangleMesh>::add(const TriangleMesh& geometry)
 {
-    if(!_geometries.empty())
+    auto& geometries = *_geometries;
+
+    if(!geometries.empty())
         throw std::runtime_error("TriangleMesh Geometry can only handle 1 mesh");
 
     if(geometry.vertices.empty())
@@ -67,7 +69,7 @@ uint32_t Geometry<TriangleMesh>::add(const TriangleMesh& geometry)
     if(geometry.indices.empty())
         throw std::invalid_argument("TriangleMesh must provide vertex indices");
 
-    _geometries.push_back(geometry);
+    geometries.push_back(geometry);
     _dirty = true;
     return 0;
 }
@@ -82,7 +84,9 @@ std::vector<uint32_t> Geometry<TriangleMesh>::add(const std::vector<TriangleMesh
 template<>
 void Geometry<TriangleMesh>::commitGeometrySpecificParams()
 {
-    auto& mesh = _geometries[0];
+    auto& geometries = *_geometries;
+
+    auto& mesh = geometries[0];
 
     auto& vertices = mesh.vertices;
     auto& indices = mesh.indices;

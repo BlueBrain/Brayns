@@ -36,6 +36,17 @@ Bounds ProteinModel::computeBounds(const Matrix4f& transform) const noexcept
     return _geometry.computeBounds(transform);
 }
 
+uint64_t ProteinModel::getGeometryModelSizeInBytes() const noexcept
+{
+    auto baseSize = sizeof(ProteinModel);
+
+    baseSize += _colorMap.size() * sizeof(Vector4f);
+    baseSize += _colorMapIndices.size() * sizeof(uint8_t);
+    baseSize += _geometry.getNumGeometries() * sizeof(Sphere);
+
+    return baseSize;
+}
+
 void ProteinModel::commitGeometryModel()
 {
     auto ospHandle = handle();

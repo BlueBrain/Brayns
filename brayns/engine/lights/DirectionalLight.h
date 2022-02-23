@@ -28,13 +28,25 @@ namespace brayns
 class DirectionalLight : public Light
 {
 public:
-    DirectionalLight();
-
+    /**
+     * @brief Sets the direction this light is facing. The vector will be normalized before storing it.
+     */
     void setDirection(const Vector3f& newDirection);
 
+    /**
+     * @brief Returns the normalized direction that the light is facing
+     */
     const Vector3f& getDirection() const noexcept;
 
+    /**
+     * @brief getName() implementation
+     */
     std::string_view getName() const noexcept final;
+
+protected:
+    std::string_view getOSPHandleName() const noexcept final;
+
+    uint64_t getSizeInBytes() const noexcept final;
 
     void commitLightSpecificParams() final;
 

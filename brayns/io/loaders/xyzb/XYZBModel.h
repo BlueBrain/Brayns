@@ -40,6 +40,8 @@ public:
     void setRadius(const float newRadius) noexcept;
 
 private:
+    uint64_t getGeometryModelSizeInBytes() const noexcept final;
+
     void commitGeometryModel() final;
 
 private:

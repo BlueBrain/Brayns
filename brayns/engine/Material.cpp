@@ -23,13 +23,32 @@
 
 namespace brayns
 {
+Material::Material(const Material& o)
+{
+    (void)o;
+}
+
+Material &Material::operator=(const Material &o)
+{
+    (void)o;
+    markModified(false);
+    return *this;
+}
+
 Material::~Material()
 {
-    ospRelease(_handle);
+    if(_handle)
+        ospRelease(_handle);
 }
 
 void Material::commit()
 {
+    if(!_handle)
+    {
+        const auto handleName = getOSPHandleName();
+        _handle = ospNewMaterial("", handleName.data());
+    }
+
     commitMaterialSpecificParams();
 
     ospCommit(_handle);

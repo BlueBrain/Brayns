@@ -29,17 +29,35 @@ namespace brayns
 class MatteMaterial : public Material
 {
 public:
-    MatteMaterial();
-
-    void commitMaterialSpecificParams() final;
-
     std::string_view getName() const noexcept final;
 
+    uint64_t getSizeInBytes() const noexcept final;
+
+    /**
+     * @brief Sets the base color (albedo) of this matte material as normalized RGB
+     */
     void setColor(const Vector3f& color) noexcept;
+
+    /**
+     * @brief Sets the opacity of the material. Must be between 0.0 and 1.0, with 0.0 = fully transparent,
+     * and 1.0 = fully opaque.
+     */
     void setOpacity(const float opacity) noexcept;
 
+    /**
+     * @brief Returns the current base color of the material as normalized RGB
+     */
     const Vector3f& getColor() const noexcept;
+
+    /**
+     * @brief Returns the material opacity
+     */
     float getOpacity() const noexcept;
+
+protected:
+    std::string_view getOSPHandleName() const noexcept final;
+
+    void commitMaterialSpecificParams() final;
 
 private:
     Vector3f _color {1.f}; // default white

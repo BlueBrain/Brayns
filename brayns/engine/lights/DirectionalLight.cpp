@@ -22,11 +22,6 @@
 
 namespace brayns
 {
-DirectionalLight::DirectionalLight()
-{
-    _handle = ospNewLight("distant");
-}
-
 void DirectionalLight::setDirection(const Vector3f& newDirection)
 {
     if(glm::length2(newDirection) == 0.f)
@@ -45,13 +40,25 @@ std::string_view DirectionalLight::getName() const noexcept
     return "directional";
 }
 
+uint64_t DirectionalLight::getSizeInBytes() const noexcept
+{
+    return sizeof(DirectionalLight);
+}
+
 void DirectionalLight::commitLightSpecificParams()
 {
+    auto ospHandle = handle();
+
     // Only taken into account by stochastic sampling renderers.
     // Value >= 0.f allows for soft shadows. 0.f will produce hard shadows
-    constexpr float angularDiameter = 0.53f;
+    static constexpr float angularDiameter = 0.53f;
 
-    ospSetParam(_handle, "direction", OSPDataType::OSP_VEC3F, &_direction);
-    ospSetParam(_handle, "angularDiameter", OSPDataType::OSP_FLOAT, &angularDiameter);
+    ospSetParam(ospHandle, "direction", OSPDataType::OSP_VEC3F, &_direction);
+    ospSetParam(ospHandle, "angularDiameter", OSPDataType::OSP_FLOAT, &angularDiameter);
+}
+
+std::string_view DirectionalLight::getOSPHandleName() const noexcept
+{
+    return "distant";
 }
 }

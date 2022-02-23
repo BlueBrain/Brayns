@@ -31,6 +31,7 @@
 
 #include <map>
 #include <mutex>
+#include <set>
 #include <vector>
 
 namespace brayns
@@ -55,65 +56,133 @@ struct ModelsLoadParameters
 class Scene : public EngineObject
 {
 public:
-    /**
-     * @brief Initializes the OSPRay handle
-     */
     Scene();
     ~Scene();
 
+    Scene(const Scene&) = delete;
+    Scene &operator=(const Scene&) = delete;
+
+    Scene(Scene&&) = delete;
+    Scene &operator=(Scene&&) = delete;
+
+    /**
+     * @brief Return the bounds of the scene
+     */
     const Bounds &getBounds() const noexcept;
 
-    ModelInstance& addModel(ModelsLoadParameters params, Model::Ptr&& model);
-    ModelInstance& createInstance(const uint32_t modelID);
-    ModelInstance& getModel(const uint32_t modelID);
+    /**
+     * @brief Adds a new model to the scene and creates an instance out of it to be rendered.
+     * The model ID is returned
+     */
+    uint32_t addModel(ModelsLoadParameters params, Model::Ptr&& model);
+
+    /**
+     * @brief Creates a new instance from the model that is being instantiated by the given model ID,
+     * adds it to the scene and returns its ID.
+     * @throws std::invalid_argument if modelID does not correspond to any existing model
+     */
+    uint32_t createInstance(const uint32_t modelID);
+
+    /**
+     * @brief Returns the model instance identified by the given model ID
+     * @throws std::invalid_argument if modelID does not correspond to any existing model
+     */
     const ModelInstance& getModel(const uint32_t modelID) const;
+
+    /**
+     * @brief Return a list of all the IDs of the model instances on the scene
+     */
     std::vector<uint32_t> getAllModelIDs() const noexcept;
+
+    /**
+     * @brief Removes a model instance from the scene, identified by the given model ID.
+     * If the model to which the instance refers does not have any other instance, it will be deleted as well.
+     * @throws std::invalid_argument if modelID does not correspond to any existing model
+     */
     void removeModel(const uint32_t modelID);
 
+    /**
+     * @brief Allos to pass a callback to modify a model instance (and thus, its model) given its model ID.
+     * This allows to control better when the bounds needs to be re-computed.
+     * @throws std::invalid_argument if modelID does not correspond to any existing model
+     */
+    void manipulateModel(const uint32_t modelID, const std::function<void(ModelInstance&)>& callback);
+
+    /**
+     * @brief Adds a new light to the scene and returns the ID which identifies it.
+     */
     uint32_t addLight(Light::Ptr&& light) noexcept;
+
+    /**
+     * @brief Returns the light that it is identified by the given light ID.
+     * @throws std::invalid_argument if lightID does not correspond to any existing light
+     */
     const Light& getLight(const uint32_t lightID) const;
+
+    /**
+     * @brief Removes the light from the scene that is identified by the given light ID
+     * @throws std::invalid_argument if lightID does not correspond to any existing ligth
+     */
     void removeLight(const uint32_t lightID);
 
+    /**
+     * @brief Called before a new frame is. Will call onPreRender on all the models of the scene
+     */
+    void preRender(const AnimationParameters& animation);
+
+    /**
+     * @brief Called after a new frame is rendered. Will call onPostRender on all the models of the scene
+     */
+    void postRender();
+
+    /**
+     * @brief commit implementation. Will call the doCommit() implementation of the models and the lights.
+     */
     void commit() final;
 
+    /**
+     * @brief Returns the OSPRay handle of the scene
+     */
     OSPWorld handle() const noexcept;
 
 private:
+    friend class Engine;
+
+private:
     /**
-     * @brief The ModelsLoadEntry struct is used to keep track of every add-model request
-     * made to the system. It is used when creating a "dump image" of the current system so that
-     * it can be restored later.
-     *
-     * This, however, does not allow to dump binary-uploaded models. To allow for that, the
-     * dump image method should be implemented as a binary file with the binary contents of the
-     * system, which could become a 300 GB+ file.
-     *
-     * For this reason. the current implementation simply dumps the state of the objects of the
-     * engine + the parameters to load the active models
+     * @brief Returns the size in bytes of the scene
      */
-    struct ModelsLoadEntry
+    uint64_t _getSizeBytes() const noexcept;
+
+    /**
+     * @brief Creates a new instance of the given Model, adds it to the scene and returns it.
+     */
+    ModelInstance& _createModelInstance(Model* model);
+
+    /**
+     * @brief Recompute bounds based on its current instances
+     */
+    void _recomputeBounds() noexcept;
+
+private:
+    /**
+     * @brief The ModelsLoadEntry struct is used to keep track of every model loaded into the scene and the
+     * instances made out of it.
+     */
+    struct ModelEntry
     {
         ModelsLoadParameters params;
-        // For a given loader + parameters, it will produce the same models, in the same
-        // order, on every call. modelIndices holds the indices of the models which must be
-        // kept after performing the loader call. This is because an user might have loaded
-        // multiple models, but then deleted some before creating the dump.
-        std::vector<ModelIndex> modelIndices;
+        Model::Ptr model {nullptr};
+        std::set<uint32_t> instances;
     };
-
-    ModelInstance* _createModelInstance(Model* model);
 
 private:
     Bounds _bounds;
 
-    // Scene serialization data
-    std::vector<ModelsLoadEntry> _loadEntries;
-    std::map<uint32_t, uint32_t> _instanceSources;
-
     // Model data
     uint32_t _modelIdFactory {0};
-    std::vector<Model::Ptr> _models;
-    std::map<uint32_t, ModelInstance::Ptr> _modelInstances;
+    std::vector<ModelEntry> _models; // Stores loaded models
+    std::map<uint32_t, ModelInstance::Ptr> _modelInstances; // Stores model instances
 
     // Lights data
     uint32_t _lightIdFactory {0};

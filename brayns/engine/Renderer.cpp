@@ -22,23 +22,25 @@
 
 namespace brayns
 {
+Renderer::Renderer(const Renderer &o)
+{
+    *this = o;
+}
+
+Renderer &Renderer::operator=(const Renderer &o)
+{
+    _samplesPerPixel = o._samplesPerPixel;
+    _maxRayBounces = o._maxRayBounces;
+    _backgroundColor = o._backgroundColor;
+
+    markModified(false);
+
+    return *this;
+}
+
 Renderer::~Renderer()
 {
     ospRelease(_handle);
-}
-
-void Renderer::commit()
-{
-    if(!_handle)
-        throw std::runtime_error("Renderer handle not initialized");
-
-    ospSetParam(_handle, "pixelSamples", OSPDataType::OSP_INT, &_samplesPerPixel);
-    ospSetParam(_handle, "maxPathLength", OSPDataType::OSP_INT, &_maxRayBounces);
-    ospSetParam(_handle, "backgroundColor", OSPDataType::OSP_VEC4F, &_backgroundColor);
-
-    commitRendererSpecificParams();
-
-    ospCommit(_handle);
 }
 
 int32_t Renderer::getSamplesPerPixel() const noexcept
@@ -69,6 +71,23 @@ void Renderer::setMaxRayBounces(const int32_t maxBounces) noexcept
 void Renderer::setBackgroundColor(const Vector4f& background) noexcept
 {
     _updateValue(_backgroundColor, background);
+}
+
+void Renderer::commit()
+{
+    if(!_handle)
+    {
+        const auto handleName = getOSPHandleName();
+        _handle = ospNewRenderer(handleName.data());
+    }
+
+    ospSetParam(_handle, "pixelSamples", OSPDataType::OSP_INT, &_samplesPerPixel);
+    ospSetParam(_handle, "maxPathLength", OSPDataType::OSP_INT, &_maxRayBounces);
+    ospSetParam(_handle, "backgroundColor", OSPDataType::OSP_VEC4F, &_backgroundColor);
+
+    commitRendererSpecificParams();
+
+    ospCommit(_handle);
 }
 
 OSPRenderer Renderer::handle() const noexcept

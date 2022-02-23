@@ -37,7 +37,7 @@ template<>
 void GeometryBoundsUpdater<Sphere>::update(const Sphere& s, const Matrix4f& t, Bounds& b);
 
 template<>
-Geometry<Sphere>::Geometry();
+void Geometry<Sphere>::initializeHandle();
 
 template<>
 void Geometry<Sphere>::commitGeometrySpecificParams();

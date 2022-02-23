@@ -38,34 +38,95 @@ public:
 
     Camera() = default;
 
-    Camera(const Camera&) noexcept;
-    Camera &operator=(const Camera &) noexcept;
+    Camera(const Camera&);
+    Camera &operator=(const Camera &);
+
+    Camera(Camera&&) = default;
+    Camera &operator=(Camera&&) = default;
 
     virtual ~Camera();
 
+    /**
+     * @brief EngineObject getName() implementation
+     */
+    std::string_view getName() const noexcept final;
+
+    /**
+     * @brief Creates a copy of this camera
+     */
+    virtual Ptr clone() const noexcept = 0;
+
+    /**
+     * @brief Commit implementation. Derived camera types must override commitCameraSpecificParams(),
+     * which will be called during commit() to perform camera-specific synchronization with OSPRay
+     */
     void commit() final;
 
+    /**
+     * @brief Sets the camera position on world coordinates
+     */
     void setPosition(const Vector3f &position) noexcept;
+
+    /**
+     * @brief Sets the point in world space coordinates at which the camera is looking at
+     */
     void setTarget(const Vector3f &target) noexcept;
+
+    /**
+     * @brief Sets the Up vector of this camera. Will be used to compute the real Up vector,
+     * thus it doesnt have to be the exact up vector of the camera, but to point at the
+     * hemisphere in which the UP vector must be contained.
+     * The computation is as follows:
+     *  - forward = normalize(target - position)
+     *  - strafe = cross(forward, up)
+     *  - real UP = cross(strafe, forward) (the one committed to OSPRay)
+     */
     void setUp(const Vector3f &up) noexcept;
+
+    /**
+     * @brief Sets the resolution aspect ratio on to which this camera will be generating rays
+     */
     void setAspectRatio(const float aspectRatio) noexcept;
 
+    /**
+     * @brief Returns the camera current position in space
+     */
     const Vector3f& getPosition() const noexcept;
+
+    /**
+     * @brief Returns the camera current view target in space
+     */
     const Vector3f& getTarget() const noexcept;
+
+    /**
+     * @brief Returns the user-specified camera up vector (It might be not the same that is being
+     * commited to OSPRay, see setUp())
+     */
     const Vector3f& getUp() const noexcept;
 
+    /**
+     * @brief Returns the OSPRay handle of this camera
+     */
     OSPCamera handle() const noexcept;
 
 protected:
+    /**
+     * @brief Subclasses must implement this method so that the appropiate OSPRay camera object maight be
+     * instantiated
+     */
+    virtual std::string_view getOSPHandleName() const noexcept = 0;
+
+    /**
+     * @brief Subclasses of the Camera must implement this method to commit to OSPRay camera type specific
+     * parameters. The camera class will call ospCommit(_handle), thus sublcass may avoid calling it.
+     */
     virtual void commitCameraSpecificParams() = 0;
 
 private:
     Vector3f _position {0.f};
     Vector3f _target {0.f, 0.f, 1.f};
     Vector3f _up {0.f, 1.f, 0.f};
-    float _aspectRatio;
-
-protected:
+    float _aspectRatio {1.f};
     OSPCamera _handle {nullptr};
 };
 } // namespace brayns

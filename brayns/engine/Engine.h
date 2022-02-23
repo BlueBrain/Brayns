@@ -49,8 +49,13 @@ public:
     ~Engine();
 
     /**
+     * @brief Called before commit() and render()
+     */
+    void preRender();
+
+    /**
      * @brief Ensures that all the system data is updated on the OSPRay rendered backend to ensure the
-     * correct frame rendering
+     * correct frame rendering. Called before render()
      */
     void commit();
 
@@ -59,6 +64,11 @@ public:
      * contents of the engine have changed). It has built-in FPS limiter.
      */
     void render();
+
+    /**
+     * @brief Called after render()
+     */
+    void postRender();
 
     /**
      * @brief Returns the system's Scene object.

@@ -28,13 +28,22 @@ namespace brayns
 class InteractiveRenderer : public Renderer
 {
 public:
-    InteractiveRenderer();
-
     std::string_view getName() const noexcept final;
 
+    /**
+     * @brief Sets wether casted shadows should be rendered or not
+     */
     void setShadowsEnabled(const bool enabled) noexcept;
 
+    /**
+     * @brief Returns wether casted shadows are being rendered or not
+     */
     bool getShadowsEnabled() const noexcept;
+
+    Ptr clone() const noexcept final;
+
+protected:
+    std::string_view getOSPHandleName() const noexcept final;
 
     void commitRendererSpecificParams() final;
 

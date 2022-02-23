@@ -26,6 +26,7 @@
 
 #include <ospray/ospray.h>
 
+#include <memory>
 #include <numeric>
 #include <vector>
 
@@ -65,13 +66,29 @@ template<typename T>
 class Geometry
 {
 public:
-    /**
-     * @brief Constructor must be speizalized by supported geometry to call ospNewGeometry with the appropiate
-     * OSPRay ID
-     */
     Geometry()
     {
-        throw std::runtime_error("Constructor must be specialized to instantiate the appropiate OSPRay geometry");
+        initializeHandle();
+    }
+
+    Geometry(const Geometry&) = delete;
+    Geometry &operator=(const Geometry& o) = delete;
+
+    Geometry(Geometry&&) = default;
+    Geometry &operator=(Geometry&&) = default;
+
+    ~Geometry()
+    {
+        ospRelease(_handle);
+    }
+
+    /**
+     * @brief initializeHandle must be specialized for the supported geometries in order to instantiate the
+     * OSPRay geometry counterpart
+     */
+    void initializeHandle()
+    {
+        throw std::runtime_error("initializeHandle() must be specialized to instantiate the OSPRay geometry");
     }
 
     /**
@@ -235,6 +252,8 @@ private:
 protected:
     OSPGeometry _handle {nullptr};
     bool _dirty {true};
+
+    // Shared, to allow instances to share the geometry memory
     std::vector<T> _geometries;
 };
 }

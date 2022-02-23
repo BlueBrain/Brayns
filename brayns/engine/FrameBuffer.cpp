@@ -54,6 +54,28 @@ FrameBuffer::~FrameBuffer()
     ospRelease(_handle);
 }
 
+FrameBuffer::FrameBuffer(const FrameBuffer &o)
+{
+    *this = o;
+}
+
+FrameBuffer &FrameBuffer::operator=(const FrameBuffer &o)
+{
+    _frameSize = o._frameSize;
+    _frameBufferFormat = o._frameBufferFormat;
+    _accumulation = o._accumulation;
+    _accumFrames = 0;
+
+    _recreate();
+
+    return *this;
+}
+
+FrameBuffer FrameBuffer::clone() const noexcept
+{
+    return FrameBuffer(*this);
+}
+
 void FrameBuffer::map()
 {
     _colorBuffer = (uint8_t *)ospMapFrameBuffer(_handle, OSP_FB_COLOR);

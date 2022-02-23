@@ -59,6 +59,16 @@ public:
     OSPGeometricModel handle() const noexcept;
 
 protected:
+    uint64_t getSizeInBytes() const noexcept final;
+
+    /**
+     * @brief Subclasses must implement this returning their size in bytes
+     */
+    virtual uint64_t getGeometryModelSizeInBytes() const noexcept = 0;
+
+    /**
+     * @brief Sublclasses must implement this to commit their geometry
+     */
     virtual void commitGeometryModel() = 0;
 
 private:

@@ -22,28 +22,19 @@
 
 namespace brayns
 {
-MatteMaterial::MatteMaterial()
-{
-    _handle = ospNewMaterial("", "principled");
-}
-
-void MatteMaterial::commitMaterialSpecificParams()
-{
-    constexpr float roughness = 1.f;
-
-    ospSetParam(_handle, "baseColor", OSPDataType::OSP_VEC3F, &_color);
-    ospSetParam(_handle, "roughness", OSPDataType::OSP_FLOAT, &roughness);
-    ospSetParam(_handle, "opacity", OSPDataType::OSP_FLOAT, &_opacity);
-}
-
 std::string_view MatteMaterial::getName() const noexcept
 {
     return "matte";
 }
 
+uint64_t MatteMaterial::getSizeInBytes() const noexcept
+{
+    return sizeof(MatteMaterial);
+}
+
 void MatteMaterial::setColor(const Vector3f &color) noexcept
 {
-    _updateValue(_color, color);
+    _updateValue(_color, glm::clamp(color, Vector3f(0.f), Vector3f(1.f)));
 }
 
 void MatteMaterial::setOpacity(const float opacity) noexcept
@@ -59,5 +50,21 @@ const Vector3f& MatteMaterial::getColor() const noexcept
 float MatteMaterial::getOpacity() const noexcept
 {
     return _opacity;
+}
+
+void MatteMaterial::commitMaterialSpecificParams()
+{
+    static constexpr float roughness = 1.f;
+
+    auto ospHandle = handle();
+
+    ospSetParam(ospHandle, "baseColor", OSPDataType::OSP_VEC3F, &_color);
+    ospSetParam(ospHandle, "roughness", OSPDataType::OSP_FLOAT, &roughness);
+    ospSetParam(ospHandle, "opacity", OSPDataType::OSP_FLOAT, &_opacity);
+}
+
+std::string_view Material::getOSPHandleName() const noexcept
+{
+    return "principled";
 }
 }

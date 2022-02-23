@@ -53,10 +53,6 @@ Model::~Model()
     ospRelease(_groupHandle);
 }
 
-void Model::onRemoved()
-{
-}
-
 void Model::setMetaData(Metadata metadata) noexcept
 {
     _metadata = std::move(metadata);
@@ -65,6 +61,24 @@ void Model::setMetaData(Metadata metadata) noexcept
 const Model::Metadata& Model::getMetaData() const noexcept
 {
     return _metadata;
+}
+
+void Model::onPreRender(const AnimationParameters &animation)
+{
+    (void) animation;
+}
+
+void Model::onPostRender()
+{
+}
+
+void Model::onRemoved()
+{
+}
+
+void Model::setBoundsChanged(const bool val) noexcept
+{
+    _boundsChanged = val;
 }
 
 OSPGroup Model::groupHandle() const noexcept
@@ -80,6 +94,7 @@ ModelInstance::ModelInstance(const size_t modelID, Model* model)
         throw std::invalid_argument("A ModelInstance cannot be initialized with a null model");
 
     _instanceHandle = ospNewInstance(model->groupHandle());
+    _recomputeBounds();
 }
 
 ModelInstance::~ModelInstance()
@@ -99,8 +114,14 @@ const Bounds &ModelInstance::getBounds() const noexcept
 
 void ModelInstance::commit()
 {
+    // Commit model data (If any other instance did it before, it will have no effect)
     _model->doCommit();
 
+    // Recompute bounds if needed
+    if(_model->_boundsChanged)
+        _recomputeBounds();
+
+    // Re-commit transform if needed
     if(_transformation.isModified())
     {
         const auto affine = glmMatrixToAffine(_transformation.toMatrix());
@@ -135,6 +156,10 @@ bool ModelInstance::isVisible() const noexcept
 void ModelInstance::setTranform(const Transformation &transform) noexcept
 {
     _updateValue(_transformation, transform);
+
+    // Recompute bounds as soon as the transform changes
+    if(_transformation.isModified())
+        _recomputeBounds();
 }
 
 const Transformation& ModelInstance::getTransform() const noexcept
@@ -145,5 +170,12 @@ const Transformation& ModelInstance::getTransform() const noexcept
 OSPInstance ModelInstance::handle() const noexcept
 {
     return _instanceHandle;
+}
+
+void ModelInstance::_recomputeBounds() noexcept
+{
+    const auto matrix = _transformation.toMatrix();
+    _bounds = _model->computeBounds(matrix);
+    _boundsDirty = true;
 }
 } // namespace brayns

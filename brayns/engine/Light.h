@@ -37,30 +37,79 @@ class Light : public SerializableEngineObject
 public:
     using Ptr = std::unique_ptr<Light>;
 
+    Light() = default;
+
+    Light(const Light&);
+    Light &operator=(const Light&);
+
+    Light(Light&&) = default;
+    Light &operator=(Light&&) = default;
+
     virtual ~Light();
 
+    /**
+     * @brief Sets the light color as normalized RGB
+     */
     void setColor(const Vector3f &color) noexcept;
+
+    /**
+     * @brief Sets the light intensity. A value of 0.0 will disable the light. Must be >= 0.0
+     */
     void setIntensity(const float intensity) noexcept;
+
+    /**
+     * @brief Sets wether the light is visible on the scene rendering.
+     */
     void setVisible(const bool visible) noexcept;
 
+    /**
+     * @brief Return the lights current color as normalized RGB
+     */
     const Vector3f &getColor() const noexcept;
+
+    /**
+     * @brief Returns the light current intensity
+     */
     float getIntensity() const noexcept;
+
+    /**
+     * @brief Returns wether the light is visible on the scene or not
+     */
     bool isVisible() const noexcept;
 
+protected:
+    friend class Scene;
+
+    /**
+     * @brief Returns the size in bytes of the light
+     */
+    virtual uint64_t getSizeInBytes() const noexcept = 0;
+
+    /**
+     * @brief commit() implementation
+     */
     void commit() final;
 
+    /**
+     * @brief Returns this light OSPRay handle
+     */
     OSPLight handle() const noexcept;
 
-protected:
-    virtual void commitLightSpecificParams() = 0;
+    /**
+     * @brief Subclasses must implement this method to return the OSPRay handle ID so that it can be instantiated.
+     */
+    virtual std::string_view getOSPHandleName() const noexcept = 0;
 
-    OSPLight _handle {nullptr};
+    /**
+     * @brief Subclasses must implement this method to set their light-speicfic parameters onto the OSPRay handle.
+     * The Light base class will make sure to call ospCommit(handle) on the light handle.
+     */
+    virtual void commitLightSpecificParams() = 0;
 
 private:
     Vector3f _color {1.f};
     float _intensity {1.};
     bool _visible {true};
-
-
+    OSPLight _handle {nullptr};
 };
 } // namespace brayns

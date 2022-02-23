@@ -40,7 +40,7 @@ template<>
 void GeometryBoundsUpdater<TriangleMesh>::update(const TriangleMesh& mesh, const Matrix4f& matrix, Bounds& bounds);
 
 template<>
-Geometry<TriangleMesh>::Geometry();
+void Geometry<TriangleMesh>::initializeHandle();
 
 template<>
 uint32_t Geometry<TriangleMesh>::add(const TriangleMesh& geometry);

@@ -24,19 +24,19 @@
 
 namespace brayns
 {
-Camera::Camera(const Camera& o) noexcept
+Camera::Camera(const Camera &o)
 {
     *this = o;
 }
 
-Camera &Camera::operator=(const Camera &o) noexcept
+Camera &Camera::operator=(const Camera &o)
 {
     _position = o._position;
     _target = o._target;
     _up = o._up;
     _aspectRatio = o._aspectRatio;
 
-    markModified();
+    markModified(false);
 
     return *this;
 }
@@ -47,18 +47,27 @@ Camera::~Camera()
         ospRelease(_handle);
 }
 
+std::string_view Camera::getName() const noexcept
+{
+    return getOSPHandleName();
+}
+
 void Camera::commit()
 {
     if(!_handle)
-        throw std::runtime_error("Camera handle not initialized");
+    {
+        const auto handleName = getOSPHandleName();
+        _handle = ospNewCamera(handleName.data());
+    }
 
-    const auto direction = glm::normalize(_target - _position);
+    const auto forward = glm::normalize(_target - _position);
+    const auto strafe = glm::cross(forward, _up);
+    const auto up = glm::cross(strafe, forward);
 
-    // TODO RECOMPUTE STRAFE AND UP TO MAKE SURE THEY ARE CORRECT
 
     ospSetParam(_handle, "position", OSP_VEC3F, &_position[0]);
-    ospSetParam(_handle, "direction", OSP_VEC3F, &direction[0]);
-    ospSetParam(_handle, "up", OSP_VEC3F, &_up[0]);
+    ospSetParam(_handle, "direction", OSP_VEC3F, &forward);
+    ospSetParam(_handle, "up", OSP_VEC3F, &up);
     ospSetParam(_handle, "aspect", OSP_FLOAT, &_aspectRatio);
 
     commitCameraSpecificParams();

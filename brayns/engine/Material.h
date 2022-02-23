@@ -40,21 +40,46 @@ class Material : public SerializableEngineObject
 public:
     using Ptr = std::unique_ptr<Material>;
 
-    virtual ~Material();
+    Material() = default;
 
-    /**
-     * @brief synchronizes the material data with the OSPRay backend
-     */
-    void commit() final;
+    Material(const Material&);
+    Material &operator=(const Material&);
+
+    Material(Material&&) = default;
+    Material &operator=(Material&&) = default;
+
+    virtual ~Material();
 
     /**
      * @brief returns the handle to the OSPRay object of the material
      */
     OSPMaterial handle() const noexcept;
 
+    /**
+     * @brief Subclasses must implement this method returning their size in bytes
+     */
+    virtual uint64_t getSizeInBytes() const noexcept = 0;
+
 protected:
+    /**
+     * @brief synchronizes the material data with the OSPRay backend
+     */
+    void commit() final;
+
+    /**
+     * @brief Subclasses must implement this method to return the OSPRay material ID to instantiate the appropiate
+     * object
+     */
+    virtual std::string_view getOSPHandleName() const noexcept = 0;
+
+    /**
+     * @brief Subclasses must implement this method to commit material specific parameters to the OSPRay material
+     * counterpart. The base class will make sure to call ospCommit(handle) on the material handle, so subclasses
+     * should avoid it.
+     */
     virtual void commitMaterialSpecificParams() = 0;
 
+private:
     OSPMaterial _handle{nullptr};
 
 };

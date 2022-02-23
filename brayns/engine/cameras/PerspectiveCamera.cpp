@@ -22,21 +22,17 @@
 
 namespace brayns
 {
-PerspectiveCamera::PerspectiveCamera()
-{
-    _handle = ospNewCamera("perspective");
-}
-
-std::string_view PerspectiveCamera::getName() const noexcept
-{
-    return "perspective";
-}
-
 void PerspectiveCamera::commitCameraSpecificParams()
 {
-    ospSetParam(_handle, "fovy", OSP_FLOAT, &_fovy);
-    ospSetParam(_handle, "apertureRadius", OSP_FLOAT, &_apertureRadius);
-    ospSetParam(_handle, "focusDistance", OSP_FLOAT, &_focusDistance);
+    auto ospHandle = handle();
+    ospSetParam(ospHandle, "fovy", OSP_FLOAT, &_fovy);
+    ospSetParam(ospHandle, "apertureRadius", OSP_FLOAT, &_apertureRadius);
+    ospSetParam(ospHandle, "focusDistance", OSP_FLOAT, &_focusDistance);
+}
+
+Camera::Ptr PerspectiveCamera::clone() const noexcept
+{
+    return std::make_unique<PerspectiveCamera>(*this);
 }
 
 void PerspectiveCamera::setFOVY(const float fovy) noexcept
@@ -67,5 +63,10 @@ float PerspectiveCamera::getApertureRadius() const noexcept
 float PerspectiveCamera::getFocusDistance() const noexcept
 {
     return _focusDistance;
+}
+
+std::string_view PerspectiveCamera::getOSPHandleName() const noexcept
+{
+    return "perspective";
 }
 }

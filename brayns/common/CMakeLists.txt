@@ -9,9 +9,8 @@ set(BRAYNSCOMMON_SOURCES
     Log.cpp
     Statistics.cpp
     Timer.cpp
+    TransferFunction.cpp
     Transformation.cpp
-    simulation/AbstractSimulationHandler.cpp
-    transferFunction/TransferFunction.cpp
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
@@ -22,11 +21,9 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
     PixelFormat.h
     Statistics.h
     Timer.h
+    TransferFunction.h
     Transformation.h
     VolumeDataType.h
-    adapters/VolumeDataTypeAdapter.h
-    simulation/AbstractSimulationHandler.h
-    transferFunction/TransferFunction.h
 )
 
 add_library(braynsCommon SHARED ${BRAYNSCOMMON_PUBLIC_HEADERS} ${BRAYNSCOMMON_SOURCES})

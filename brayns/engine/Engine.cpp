@@ -84,6 +84,13 @@ Engine::~Engine()
     ospShutdown();
 }
 
+void Engine::preRender()
+{
+    const auto& animation = _params.getAnimationParameters();
+
+    _scene.preRender(animation);
+}
+
 void Engine::commit()
 {
     if(!_keepRunning)
@@ -116,8 +123,6 @@ void Engine::commit()
     _camera->commit();
     _renderer->commit();
     _scene.commit();
-
-    // check if anything changed, clear the framebuffer so we dont render on top of old stuff
 }
 
 void Engine::render()
@@ -160,6 +165,11 @@ void Engine::render()
     ospWait(ospRenderTask);
 
     _frameBuffer.incrementAccumFrames();
+}
+
+void Engine::postRender()
+{
+    _scene.postRender();
 }
 
 Scene &Engine::getScene()

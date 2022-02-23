@@ -24,6 +24,7 @@
 #include <brayns/common/Bounds.h>
 #include <brayns/common/Transformation.h>
 #include <brayns/engine/EngineObject.h>
+#include <brayns/parameters/AnimationParameters.h>
 
 #include <ospray/ospray.h>
 
@@ -46,19 +47,13 @@ public:
      */
     Model();
 
+    Model(const Model&) = delete;
+    Model &operator=(const Model&) = delete;
+
+    Model(Model&&) = delete;
+    Model &operator=(Model&&) = delete;
+
     virtual ~Model();
-
-    /**
-     * @brief onRemoved called when the model is removed from the Scene and before it is destoryed
-     */
-    virtual void onRemoved();
-
-    /**
-     * @brief Compute the model bounds, taking into account the given trasnformation
-     * @param transform Matrix with the trasnformation to apply to the model data
-     * @return Bounds of the model
-     */
-    virtual Bounds computeBounds(const Matrix4f& transform) const noexcept = 0;
 
     /**
      * @brief Sets the metadata of this model (The metadata is a map<string, string> with model-specific
@@ -72,12 +67,55 @@ public:
      */
     const Metadata& getMetaData() const noexcept;
 
+protected:
+    /**
+     * @brief called before a new frame is rendered
+     */
+    virtual void onPreRender(const AnimationParameters& animation);
+
+    /**
+     * @brief called after a new frame is rendered
+     */
+    virtual void onPostRender();
+
+    /**
+     * @brief onRemoved called when the model is removed from the Scene and before it is destoryed
+     */
+    virtual void onRemoved();
+
+    /**
+     * @brief Returns the size in bytes of the model. Subclasses should override it to provide a more accurate
+     * measure of the memory footprint.
+     */
+    virtual uint64_t getSizeInBytes() const noexcept = 0;
+
+    /**
+     * @brief Compute the model bounds, taking into account the given trasnformation
+     * @param transform Matrix with the trasnformation to apply to the model data
+     * @return Bounds of the model
+     */
+    virtual Bounds computeBounds(const Matrix4f& transform) const noexcept = 0;
+
+    /**
+     * @brief Sets wether the intrisict data of the model, on which the bounds depend, have changed or not.
+     * This method sets a flag that is used by the instances to know if they need to update the bounds more
+     * efficiently. Subclasses call it to control the behaviour. Otherwise, the flag is always false.
+     */
+    void setBoundsChanged(const bool val) noexcept;
+
     /**
      * @brief Returns the OSPRay handle
      */
     OSPGroup groupHandle() const noexcept;
 
 private:
+    friend class Scene;
+    friend class ModelInstance;
+
+private:
+    // The model index refers to the position of this model in the Model list of the scene.
+    uint32_t _modelIndex {};
+    bool _boundsChanged {false};
     OSPGroup _groupHandle {nullptr};
     Metadata _metadata;
 };
@@ -95,6 +133,12 @@ public:
      * @brief Initializes the instance with the unique ID and the given model
      */
     ModelInstance(const size_t modelID, Model* model);
+
+    ModelInstance(const ModelInstance&) = delete;
+    ModelInstance &operator=(const ModelInstance&) = delete;
+
+    ModelInstance(ModelInstance&&) = delete;
+    ModelInstance &operator=(ModelInstance&&) = delete;
 
     ~ModelInstance();
 
@@ -143,10 +187,16 @@ public:
      */
     const Transformation& getTransform() const noexcept;
 
+private:
     /**
      * @brief Returns the OSPRay handle of this instance.
      */
     OSPInstance handle() const noexcept;
+
+    /**
+     * @brief Recompute the model bounds with the current transformation
+     */
+    void _recomputeBounds() noexcept;
 
 private:
     friend class Scene;
@@ -157,6 +207,9 @@ private:
 
     bool _visible {true};
     Transformation _transformation;
+
+    // Flag used by the scene to know if it needs to recompute its own bounds
+    bool _boundsDirty {true};
     Bounds _bounds;
 
     OSPInstance _instanceHandle {nullptr};

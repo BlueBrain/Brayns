@@ -53,6 +53,15 @@ void XYZBModel::setRadius(const float newRadius) noexcept
     markModified(false);
 }
 
+uint64_t XYZBModel::getGeometryModelSizeInBytes() const noexcept
+{
+    auto baseSize = sizeof(XYZBModel);
+
+    baseSize += sizeof(Sphere) * _geometry.getNumGeometries();
+
+    return baseSize;
+}
+
 void XYZBModel::commitGeometryModel()
 {
     auto ospHandle = handle();

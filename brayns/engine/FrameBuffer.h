@@ -39,6 +39,17 @@ public:
     FrameBuffer();
     ~FrameBuffer();
 
+    FrameBuffer(const FrameBuffer&);
+    FrameBuffer &operator=(const FrameBuffer&);
+
+    FrameBuffer(FrameBuffer&&) = default;
+    FrameBuffer &operator=(FrameBuffer&&) = default;
+
+    /**
+     * @brief Creates a copy of this framebuffer
+     */
+    FrameBuffer clone() const noexcept;
+
     /**
      * @brief Maps OSPRay backend framebuffer to an accessible system buffer
      */

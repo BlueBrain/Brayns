@@ -37,7 +37,7 @@ void GeometryBoundsUpdater<Sphere>::update(const Sphere& s, const Matrix4f& t, B
 }
 
 template<>
-Geometry<Sphere>::Geometry()
+void Geometry<Sphere>::initializeHandle()
 {
     _handle = ospNewGeometry("sphere");
 }

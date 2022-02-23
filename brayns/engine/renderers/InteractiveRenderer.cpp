@@ -22,11 +22,6 @@
 
 namespace brayns
 {
-InteractiveRenderer::InteractiveRenderer()
-{
-    _handle = ospNewRenderer("scivis");
-}
-
 std::string_view InteractiveRenderer::getName() const noexcept
 {
     return "interactive";
@@ -42,8 +37,20 @@ bool InteractiveRenderer::getShadowsEnabled() const noexcept
     return _shadowsEnabled;
 }
 
+Renderer::Ptr InteractiveRenderer::clone() const noexcept
+{
+    return std::make_unique<InteractiveRenderer>(*this);
+}
+
+std::string_view InteractiveRenderer::getOSPHandleName() const noexcept
+{
+    return "scivis";
+}
+
 void InteractiveRenderer::commitRendererSpecificParams()
 {
-    ospSetParam(_handle, "shadows", OSPDataType::OSP_BOOL, &_shadowsEnabled);
+    auto ospHandle = handle();
+
+    ospSetParam(ospHandle, "shadows", OSPDataType::OSP_BOOL, &_shadowsEnabled);
 }
 }

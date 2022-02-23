@@ -24,15 +24,10 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
 
 # Options
 option(BRAYNS_TESTS_ENABLED "Activate unit testing" ON)
-option(BRAYNS_VIEWER_ENABLED "Activate Brayns Viewer" OFF)
 option(BRAYNS_SERVICE_ENABLED "Activate Brayns Service" ON)
-option(BRAYNS_BENCHMARK_ENABLED "Activate Brayns Benchmark" OFF)
-option(BRAYNS_IBL_ENABLED "Activate Brayns IBL tool" OFF)
-option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" OFF)
 option(BRAYNS_CIRCUITEXPLORER_ENABLED "Activate CircuitExplorer plugin" OFF)
 option(BRAYNS_CIRCUITINFO_ENABLED "Activate CircuitInfo plugin" OFF)
 option(BRAYNS_DTI_ENABLED "Activate Diffusion-Transfer Imaging plugin" OFF)
-option(BRAYNS_HARDWARE_RANDOMIZER_ENABLED "Enables hardware randomizer if supported by target CPU" OFF)
 
 # Core dependencies
 find_package(Git REQUIRED)

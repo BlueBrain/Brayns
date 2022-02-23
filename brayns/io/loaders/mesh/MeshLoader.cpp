@@ -100,7 +100,9 @@ public:
         auto metadata = MeshMetadataBuilder::build(mesh);
         model->setMetaData(metadata);
 
-        return {std::move(model)};
+        std::vector<brayns::Model::Ptr> result;
+        result.push_back(std::move(model));
+        return result;
     }
 };
 } // namespace

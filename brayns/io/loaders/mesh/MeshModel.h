@@ -37,6 +37,8 @@ public:
     void setColor(const Vector4f& newColor) noexcept;
 
 private:
+    uint64_t getGeometryModelSizeInBytes() const noexcept final;
+
     void commitGeometryModel() final;
 
 private:

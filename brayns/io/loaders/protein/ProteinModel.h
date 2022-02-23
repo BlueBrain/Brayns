@@ -36,6 +36,8 @@ public:
     Bounds computeBounds(const Matrix4f& transform) const noexcept final;
 
 private:
+    uint64_t getGeometryModelSizeInBytes() const noexcept final;
+
     void commitGeometryModel() final;
 
 private:
