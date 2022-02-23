@@ -18,6 +18,7 @@
 
 #include "CommonEdgeColorHandler.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/engine/Material.h>
 
 #include <bbp/sonata/config.h>
@@ -90,11 +91,24 @@ std::vector<std::string> getMethodsValues(
     const std::string &method,
     const std::vector<uint64_t> &nodeIds)
 {
-    const std::set<uint64_t> uniqueNodes(nodeIds.begin(), nodeIds.end());
-    const auto nodes = config.getNodePopulation(nodePopulation);
     const auto attrib = getAttribForMethod(method);
-    const auto nodeSelection = bbp::sonata::Selection::fromValues(uniqueNodes.begin(), uniqueNodes.end());
-    return nodes.getAttribute<std::string>(attrib, nodeSelection);
+    try
+    {
+        const std::set<uint64_t> uniqueNodes(nodeIds.begin(), nodeIds.end());
+        const auto nodes = config.getNodePopulation(nodePopulation);
+        const auto nodeSelection = bbp::sonata::Selection::fromValues(uniqueNodes.begin(), uniqueNodes.end());
+        return nodes.getAttribute<std::string>(attrib, nodeSelection);
+    }
+    catch (const std::exception &e)
+    {
+        brayns::Log::warn(
+            "Could not retrieve data from population {}, attribute {}: {}",
+            nodePopulation,
+            attrib,
+            e.what());
+    }
+
+    return {};
 }
 } // namespace
 
@@ -174,7 +188,14 @@ std::vector<std::string> CommonEdgeColorHandler::_getMethodsImpl() const
     for (const auto &possibleMethod : possibleMethods)
     {
         if (attributes.find(possibleMethod.second) != attributes.end())
-            result.emplace_back(possibleMethod.first);
+        {
+            // Check we can actually retrieve the data
+            const auto &methodName = possibleMethod.first;
+            const std::vector<uint64_t> dummySelection = {0};
+            const auto variableTest = getMethodsValues(_config, _nodePopulation, methodName, dummySelection);
+            if (!variableTest.empty())
+                result.emplace_back(possibleMethod.first);
+        }
     }
 
     result.shrink_to_fit();
@@ -214,6 +235,8 @@ void CommonEdgeColorHandler::_updateColorImpl(
     const std::vector<ColoringInformation> &variables)
 {
     const auto values = getMethodsValues(_config, _nodePopulation, method, _nodeIds);
+    if (values.empty())
+        throw std::runtime_error("Cannot color by " + method + ": Cannot retrieve circuit data");
 
     if (!variables.empty())
     {

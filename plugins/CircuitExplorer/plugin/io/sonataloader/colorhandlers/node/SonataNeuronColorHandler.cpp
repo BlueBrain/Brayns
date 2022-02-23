@@ -18,10 +18,10 @@
 
 #include "SonataNeuronColorHandler.h"
 
+#include <brayns/common/Log.h>
+
 #include <set>
 
-namespace sonataloader
-{
 namespace
 {
 constexpr char methodByMorphology[] = "morphology";
@@ -32,8 +32,33 @@ constexpr char methodByMType[] = "mtype";
 constexpr char methodBySynapseClass[] = "synapse class";
 constexpr char methodByRegion[] = "region";
 constexpr char methodByHemisphere[] = "hemisphere";
+
+std::vector<std::string> getAttributeValues(
+    const bbp::sonata::NodePopulation &population,
+    const std::string &attribute,
+    const std::vector<uint64_t> &nodeIds)
+{
+    const auto selection = bbp::sonata::Selection::fromValues(nodeIds);
+    try
+    {
+        const auto values = population.getAttribute<std::string>(attribute, selection);
+    }
+    catch (const std::exception &e)
+    {
+        const auto popName = population.name();
+        brayns::Log::warn(
+            "Could not read sonata node attribute from population {}, attribute {}: {}",
+            popName,
+            attribute,
+            e.what());
+    }
+
+    return {};
+}
 } // namespace
 
+namespace sonataloader
+{
 SonataNeuronColorHandler::SonataNeuronColorHandler(const std::string &configPath, const std::string &population)
     : _config(bbp::sonata::CircuitConfig::fromFile(configPath))
     , _population(population)
@@ -59,7 +84,12 @@ std::vector<std::string> SonataNeuronColorHandler::_getExtraMethods() const
     for (const auto &possible : possibleMethods)
     {
         if (attributes.find(possible) != attributes.end())
-            result.push_back(possible);
+        {
+            // Check we can actually read the data
+            const auto dataTest = getAttributeValues(population, possible, {0});
+            if (!dataTest.empty())
+                result.push_back(possible);
+        }
     }
 
     result.shrink_to_fit();
@@ -68,7 +98,7 @@ std::vector<std::string> SonataNeuronColorHandler::_getExtraMethods() const
 
 std::vector<std::string> SonataNeuronColorHandler::_getValuesForMethod(const std::string &method) const
 {
-    const auto selection = bbp::sonata::Selection::fromValues(_ids);
-    return _config.getNodePopulation(_population).getAttribute<std::string>(method, selection);
+    const auto population = _config.getNodePopulation(_population);
+    return getAttributeValues(population, method, _ids);
 }
 } // namespace sonataloader
