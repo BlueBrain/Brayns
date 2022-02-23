@@ -29,26 +29,19 @@
 namespace brayns
 {
 /**
- * @brief Holds and manage all registered entrypoints.
+ * @brief Contains all registered entrypoints.
  *
  */
-class EntrypointManager
+class EntrypointRegistry
 {
 public:
     /**
-     * @brief Retrieve an entrypoint using its name.
+     * @brief Retrieve an entrypoint using its method name.
      *
-     * @param name Entrypoint name (ex: "set-camera").
+     * @param method Entrypoint method (ex: "set-camera").
      * @return const EntrypointRef* Entrypoint or null if not registered.
      */
-    const EntrypointRef *find(const std::string &name) const;
-
-    /**
-     * @brief Return the list of the names of all entrypoints registered.
-     *
-     * @return std::vector<std::string> Names of registered entrypoints.
-     */
-    std::vector<std::string> getNames() const;
+    const EntrypointRef *find(const std::string &method) const;
 
     /**
      * @brief Add a new entrypoint.
@@ -59,30 +52,19 @@ public:
     void add(EntrypointRef entrypoint);
 
     /**
-     * @brief Setup all registered entrypoints.
+     * @brief Iterate over all registered entrypoints.
      *
+     * @tparam FunctorType Functor type.
+     * @param functor Functor with signature void(const EntrypointRef &).
      */
-    void onCreate();
-
-    /**
-     * @brief Dispatch request to corresponding entrypoint.
-     *
-     * @param request Client text request.
-     * @throw JsonRpcException If an error occurs and must be replied.
-     */
-    void onRequest(const JsonRpcRequest &request) const;
-
-    /**
-     * @brief Notify all entrypoints before render.
-     *
-     */
-    void onPreRender() const;
-
-    /**
-     * @brief Notify all entrypoints after render.
-     *
-     */
-    void onPostRender() const;
+    template<typename FunctorType>
+    void forEach(FunctorType functor) const
+    {
+        for (const auto &[name, entrypoint] : _entrypoints)
+        {
+            functor(entrypoint);
+        }
+    }
 
 private:
     std::unordered_map<std::string, EntrypointRef> _entrypoints;

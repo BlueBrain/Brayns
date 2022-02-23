@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <brayns/network/client/ClientManager.h>
 #include <brayns/network/client/ClientRef.h>
 #include <brayns/network/jsonrpc/JsonRpcMessages.h>
 

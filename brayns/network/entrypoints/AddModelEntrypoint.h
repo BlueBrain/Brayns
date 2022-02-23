@@ -27,7 +27,7 @@
 #include <brayns/network/adapters/ModelDescriptorAdapter.h>
 #include <brayns/network/adapters/ModelParamsAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/tasks/NetworkTaskLauncher.h>
+#include <brayns/network/tasks/TaskLauncher.h>
 
 namespace brayns
 {
@@ -44,6 +44,6 @@ public:
 private:
     Scene &_scene;
     LoaderRegistry &_loaders;
-    NetworkTaskLauncher _launcher;
+    TaskLauncher _launcher;
 };
 } // namespace brayns

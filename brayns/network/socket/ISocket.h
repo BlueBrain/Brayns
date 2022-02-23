@@ -21,44 +21,10 @@
 
 #pragma once
 
-#include <brayns/network/client/ClientRef.h>
+#include "ISocketListener.h"
 
 namespace brayns
 {
-/**
- * @brief Interface to implement to be notified of network events.
- *
- * @note Can be called from a separated thread.
- *
- */
-class ISocketListener
-{
-public:
-    virtual ~ISocketListener() = default;
-
-    /**
-     * @brief Called when a request is received from a client.
-     *
-     * @param client Client sending request.
-     * @param request Request received from client.
-     */
-    virtual void onRequest(const ClientRef &client, InputPacket request) = 0;
-
-    /**
-     * @brief Called when a new client connects.
-     *
-     * @param client Client ref.
-     */
-    virtual void onConnect(const ClientRef &client) = 0;
-
-    /**
-     * @brief Called when a client disconnects.
-     *
-     * @param client Client ref.
-     */
-    virtual void onDisconnect(const ClientRef &client) = 0;
-};
-
 /**
  * @brief Client or server socket.
  *
@@ -73,5 +39,11 @@ public:
      *
      */
     virtual void start() = 0;
+
+    /**
+     * @brief Used to poll the socket and trigger the listener.
+     *
+     */
+    virtual void poll() = 0;
 };
 } // namespace brayns

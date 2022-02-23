@@ -19,49 +19,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClientManager.h"
+#include "EntrypointRegistry.h"
 
-#include <cassert>
-
-#include "ClientSender.h"
+#include <stdexcept>
 
 namespace brayns
 {
-ClientManager::~ClientManager()
+const EntrypointRef *EntrypointRegistry::find(const std::string &method) const
 {
-    closeAll();
+    auto i = _entrypoints.find(method);
+    return i == _entrypoints.end() ? nullptr : &i->second;
 }
 
-bool ClientManager::isEmpty() const
+void EntrypointRegistry::add(EntrypointRef entrypoint)
 {
-    return _clients.empty();
-}
-
-void ClientManager::add(ClientRef client)
-{
-    assert(client);
-    _clients.insert(std::move(client));
-}
-
-void ClientManager::remove(const ClientRef &client)
-{
-    _clients.erase(client);
-}
-
-void ClientManager::broadcast(const OutputPacket &packet) const
-{
-    for (const auto &client : _clients)
+    auto &method = entrypoint.getMethod();
+    if (method.empty())
     {
-        ClientSender::send(packet, client);
+        throw std::invalid_argument("Entrypoints must have a method name");
     }
-}
-
-void ClientManager::closeAll() const
-{
-    for (const auto &client : _clients)
+    if (find(method))
     {
-        auto &socket = client.getSocket();
-        socket.close();
+        throw std::invalid_argument("Entrypoint '" + method + "' already registered");
     }
+    _entrypoints.emplace(method, std::move(entrypoint));
 }
 } // namespace brayns

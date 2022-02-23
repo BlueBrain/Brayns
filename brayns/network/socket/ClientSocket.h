@@ -27,6 +27,7 @@
 
 #include <brayns/parameters/NetworkParameters.h>
 
+#include "ISocket.h"
 #include "SocketManager.h"
 
 namespace brayns
@@ -42,6 +43,7 @@ public:
     ~ClientTask();
 
     void start();
+    void poll();
 
 private:
     void _run();
@@ -81,6 +83,12 @@ public:
      *
      */
     virtual void start() override;
+
+    /**
+     * @brief Poll connections and requests and trigger listener.
+     *
+     */
+    virtual void poll() override;
 
 private:
     ClientTask _task;

@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/EntrypointManager.h>
-#include <brayns/network/tasks/NetworkTaskManager.h>
+#include <brayns/network/entrypoint/EntrypointRegistry.h>
+#include <brayns/network/socket/ISocket.h>
 
 #include "INetworkInterface.h"
 
@@ -36,32 +36,28 @@ class NetworkInterface : public INetworkInterface
 {
 public:
     /**
-     * @brief Construct with reference on exposed objects.
+     * @brief Construct with dependencies.
      *
-     * @param entrypoints Entrypoint manager.
-     * @param tasks Task manager.
-     * @param clients Client manager.
+     * @param entrypoints Register entrypoints.
+     * @param socket Poll requests.
      */
-    NetworkInterface(EntrypointManager &entrypoints, NetworkTaskManager &tasks);
+    NetworkInterface(EntrypointRegistry &entrypoints, ISocket &socket);
 
     /**
      * @brief Register an entrypoint.
      *
      * @param entrypoint Entrypoint to register.
      */
-    virtual void addEntrypoint(EntrypointRef entrypoint) override;
+    virtual void add(EntrypointRef entrypoint) override;
 
     /**
-     * @brief Register and start a task.
+     * @brief Poll incoming requests.
      *
-     * @param client Client requesting the task.
-     * @param id Task request ID.
-     * @param task Task to execute.
      */
-    virtual void launchTask(const ClientRef &client, const RequestId &id, std::unique_ptr<NetworkTask> task) override;
+    virtual void poll() override;
 
 private:
-    EntrypointManager &_entrypoints;
-    NetworkTaskManager &_tasks;
+    EntrypointRegistry &_entrypoints;
+    ISocket &_socket;
 };
 } // namespace brayns

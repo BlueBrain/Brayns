@@ -21,50 +21,25 @@
 
 #pragma once
 
-#include <chrono>
-#include <condition_variable>
-#include <mutex>
+#include <brayns/network/websocket/WebSocket.h>
+
+#include "ClientRef.h"
 
 namespace brayns
 {
 /**
- * @brief Wrapper around a condition variable to monitor a task.
+ * @brief Helper class to send a frame to a client and handle errors.
  *
  */
-class NetworkTaskMonitor
+class ClientSender
 {
 public:
     /**
-     * @brief Blocks until notified.
+     * @brief Send packet to client and log errors.
      *
+     * @param packet Data packet.
+     * @param client Client ref.
      */
-    void wait();
-
-    /**
-     * @brief Notify the monitor and unlock all thread waiting on it.
-     *
-     */
-    void notify();
-
-    /**
-     * @brief Wait for notification with time limit.
-     *
-     * @tparam R Representation type.
-     * @tparam P Period type.
-     * @param duration Max duration to wait for notifications.
-     * @return true No notifications has been received, duration waited.
-     * @return false Cancelled by a notification.
-     */
-    template<typename R, typename P>
-    bool wait(std::chrono::duration<R, P> duration)
-    {
-        std::unique_lock<std::mutex> lock(_mutex);
-        auto status = _monitor.wait_for(lock, duration);
-        return status == std::cv_status::timeout;
-    }
-
-private:
-    std::mutex _mutex;
-    std::condition_variable _monitor;
+    static void send(const OutputPacket &packet, const ClientRef &client);
 };
 } // namespace brayns

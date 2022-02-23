@@ -26,7 +26,7 @@
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/ImageBase64Message.h>
 #include <brayns/network/messages/SnapshotMessage.h>
-#include <brayns/network/tasks/NetworkTaskLauncher.h>
+#include <brayns/network/tasks/TaskLauncher.h>
 
 namespace brayns
 {
@@ -42,6 +42,6 @@ public:
 
 private:
     Engine &_engine;
-    NetworkTaskLauncher _launcher;
+    TaskLauncher _launcher;
 };
 } // namespace brayns

@@ -21,46 +21,38 @@
 
 #pragma once
 
-#include <brayns/network/client/ClientBuffer.h>
-#include <brayns/network/client/RequestBuffer.h>
-
-#include "ISocketListener.h"
+#include <brayns/network/client/ClientRequest.h>
 
 namespace brayns
 {
 /**
- * @brief Helper class to manage exchange through a websocket.
+ * @brief Interface to implement to be notified of network events.
  *
  */
-class SocketManager
+class ISocketListener
 {
 public:
-    /**
-     * @brief Construct a manager with given listener.
-     *
-     * @param listener Listener to call on network events.
-     */
-    SocketManager(std::unique_ptr<ISocketListener> listener);
+    virtual ~ISocketListener() = default;
 
     /**
-     * @brief Receive and send messages until connection is closed.
-     *
-     * Events are buffered and will be passed to listener when poll() is called.
+     * @brief Called when a new client connects.
      *
      * @param client Client ref.
      */
-    void run(const ClientRef &client);
+    virtual void onConnect(const ClientRef &client) = 0;
 
     /**
-     * @brief Poll connections and requests and trigger listener.
+     * @brief Called when a client disconnects.
      *
+     * @param client Client ref.
      */
-    void poll();
+    virtual void onDisconnect(const ClientRef &client) = 0;
 
-private:
-    std::unique_ptr<ISocketListener> _listener;
-    ClientBuffer _newClients;
-    ClientBuffer _removedClients;
-    RequestBuffer _requests;
+    /**
+     * @brief Called when a request is received from a client.
+     *
+     * @param request Raw client request.
+     */
+    virtual void onRequest(ClientRequest request) = 0;
 };
 } // namespace brayns

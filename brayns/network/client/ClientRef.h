@@ -25,7 +25,7 @@
 #include <memory>
 #include <string>
 
-#include <brayns/network/socket/WebSocket.h>
+#include <brayns/network/websocket/WebSocket.h>
 
 namespace brayns
 {

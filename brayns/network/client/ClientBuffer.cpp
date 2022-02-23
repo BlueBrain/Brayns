@@ -19,49 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClientManager.h"
-
-#include <cassert>
-
-#include "ClientSender.h"
+#include "ClientBuffer.h"
 
 namespace brayns
 {
-ClientManager::~ClientManager()
+void ClientBuffer::add(ClientRef client)
 {
-    closeAll();
+    std::lock_guard<std::mutex> lock(_mutex);
+    _clients.emplace_back(std::move(client));
 }
 
-bool ClientManager::isEmpty() const
+std::vector<ClientRef> ClientBuffer::poll()
 {
-    return _clients.empty();
-}
-
-void ClientManager::add(ClientRef client)
-{
-    assert(client);
-    _clients.insert(std::move(client));
-}
-
-void ClientManager::remove(const ClientRef &client)
-{
-    _clients.erase(client);
-}
-
-void ClientManager::broadcast(const OutputPacket &packet) const
-{
-    for (const auto &client : _clients)
-    {
-        ClientSender::send(packet, client);
-    }
-}
-
-void ClientManager::closeAll() const
-{
-    for (const auto &client : _clients)
-    {
-        auto &socket = client.getSocket();
-        socket.close();
-    }
+    std::lock_guard<std::mutex> lock(_mutex);
+    auto clients = std::move(_clients);
+    _clients.clear();
+    return clients;
 }
 } // namespace brayns

@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <mutex>
 #include <unordered_set>
 
 #include "ClientRef.h"
@@ -30,8 +29,6 @@ namespace brayns
 {
 /**
  * @brief Manage all connected clients.
- *
- * This object is thread safe (synchronized).
  *
  */
 class ClientManager
@@ -49,7 +46,7 @@ public:
      * @return true Has clients.
      * @return false No clients.
      */
-    bool isEmpty();
+    bool isEmpty() const;
 
     /**
      * @brief Add a client.
@@ -70,16 +67,15 @@ public:
      *
      * @param packet Data packet.
      */
-    void broadcast(const OutputPacket &packet);
+    void broadcast(const OutputPacket &packet) const;
 
     /**
      * @brief Close all sockets.
      *
      */
-    void closeAll();
+    void closeAll() const;
 
 private:
-    std::mutex _mutex;
     std::unordered_set<ClientRef> _clients;
 };
 } // namespace brayns

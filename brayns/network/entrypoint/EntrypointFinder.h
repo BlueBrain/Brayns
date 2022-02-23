@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * Responsible Author: adrien.fleury@epfl.ch
@@ -21,46 +21,29 @@
 
 #pragma once
 
-#include <brayns/network/client/ClientBuffer.h>
-#include <brayns/network/client/RequestBuffer.h>
+#include <brayns/network/jsonrpc/JsonRpcRequest.h>
 
-#include "ISocketListener.h"
+#include "EntrypointRegistry.h"
 
 namespace brayns
 {
 /**
- * @brief Helper class to manage exchange through a websocket.
+ * @brief Helper class to get an entrypoint from a JSON-RPC request.
  *
  */
-class SocketManager
+class EntrypointFinder
 {
 public:
     /**
-     * @brief Construct a manager with given listener.
+     * @brief Find entrypoint matching request in entrypoints.
      *
-     * @param listener Listener to call on network events.
+     * Throw in case of invalid method or params.
+     *
+     * @param request JSON-RPC request.
+     * @param entrypoints Supported entrypoints.
+     * @return const EntrypointRef& Corresponding entrypoint.
+     * @throw JsonRpcException Invalid request.
      */
-    SocketManager(std::unique_ptr<ISocketListener> listener);
-
-    /**
-     * @brief Receive and send messages until connection is closed.
-     *
-     * Events are buffered and will be passed to listener when poll() is called.
-     *
-     * @param client Client ref.
-     */
-    void run(const ClientRef &client);
-
-    /**
-     * @brief Poll connections and requests and trigger listener.
-     *
-     */
-    void poll();
-
-private:
-    std::unique_ptr<ISocketListener> _listener;
-    ClientBuffer _newClients;
-    ClientBuffer _removedClients;
-    RequestBuffer _requests;
+    static const EntrypointRef &find(const JsonRpcRequest &request, const EntrypointRegistry &entrypoints);
 };
 } // namespace brayns

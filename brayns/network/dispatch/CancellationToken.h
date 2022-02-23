@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * Responsible Author: adrien.fleury@epfl.ch
@@ -21,46 +21,40 @@
 
 #pragma once
 
-#include <brayns/network/client/ClientBuffer.h>
-#include <brayns/network/client/RequestBuffer.h>
-
-#include "ISocketListener.h"
+#include <brayns/network/interface/INetworkInterface.h>
 
 namespace brayns
 {
 /**
- * @brief Helper class to manage exchange through a websocket.
+ * @brief Helper class to poll for cancellation from an entrypoint.
  *
  */
-class SocketManager
+class CancellationToken
 {
 public:
     /**
-     * @brief Construct a manager with given listener.
+     * @brief Construct a token with dependencies.
      *
-     * @param listener Listener to call on network events.
+     * @param interface Used to poll for requests and receive cancellation.
+     * @param entrypoint Used to check the cancellation status.
      */
-    SocketManager(std::unique_ptr<ISocketListener> listener);
+    CancellationToken(INetworkInterface &interface);
 
     /**
-     * @brief Receive and send messages until connection is closed.
+     * @brief Poll requests and check cancellation flag.
      *
-     * Events are buffered and will be passed to listener when poll() is called.
-     *
-     * @param client Client ref.
+     * @throw MethodCancelledException Cancel flag is set.
      */
-    void run(const ClientRef &client);
+    void poll() const;
 
     /**
-     * @brief Poll connections and requests and trigger listener.
+     * @brief Set the cancel flag.
      *
      */
-    void poll();
+    void cancel();
 
 private:
-    std::unique_ptr<ISocketListener> _listener;
-    ClientBuffer _newClients;
-    ClientBuffer _removedClients;
-    RequestBuffer _requests;
+    bool _cancelled = false;
+    INetworkInterface &_interface;
 };
 } // namespace brayns

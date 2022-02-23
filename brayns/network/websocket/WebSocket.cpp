@@ -46,7 +46,7 @@ public:
         }
         catch (const Poco::Exception &e)
         {
-            throw brayns::ConnectionClosedException("Error while receiving packet " + e.displayText());
+            throw brayns::ConnectionClosedException("Error while receiving packet: '" + e.displayText() + "'");
         }
         brayns::InputPacket packet(std::move(buffer), flags);
         if (packet.isClose())
@@ -67,15 +67,17 @@ public:
     static void send(Poco::Net::WebSocket &socket, const brayns::OutputPacket &packet)
     {
         int size = 0;
+        auto data = packet.getData();
+        auto flags = packet.getFlags();
         try
         {
-            size = socket.sendFrame(packet.getData(), packet.getSize(), packet.getFlags());
+            size = socket.sendFrame(data.data(), data.size(), flags);
         }
         catch (const Poco::Exception &e)
         {
-            throw brayns::ConnectionClosedException("Error while sending packet " + e.displayText());
+            throw brayns::ConnectionClosedException("Error while sending packet: '" + e.displayText() + "'");
         }
-        if (size < packet.getSize())
+        if (size != data.size())
         {
             throw brayns::ConnectionClosedException("Cannot send frame entirely");
         }
@@ -85,74 +87,6 @@ public:
 
 namespace brayns
 {
-InputPacket::InputPacket(Poco::Buffer<char> data, int flags)
-    : _data(std::move(data))
-    , _flags(flags)
-{
-}
-
-bool InputPacket::isEmpty() const
-{
-    return _flags == 0 && _data.empty();
-}
-
-std::string_view InputPacket::getData() const
-{
-    return {_data.begin(), _data.size()};
-}
-
-bool InputPacket::isBinary() const
-{
-    return _flags & Poco::Net::WebSocket::FRAME_OP_BINARY;
-}
-
-bool InputPacket::isText() const
-{
-    return _flags & Poco::Net::WebSocket::FRAME_OP_TEXT;
-}
-
-bool InputPacket::isClose() const
-{
-    return _flags & Poco::Net::WebSocket::FRAME_OP_CLOSE;
-}
-
-OutputPacket OutputPacket::fromText(std::string_view data)
-{
-    return {data.data(), data.size(), Poco::Net::WebSocket::FRAME_TEXT};
-}
-
-OutputPacket OutputPacket::fromBinary(std::string_view data)
-{
-    return {data.data(), data.size(), Poco::Net::WebSocket::FRAME_BINARY};
-}
-
-OutputPacket::OutputPacket(const void *data, size_t size, int flags)
-    : _data(data)
-    , _size(int(size))
-    , _flags(flags)
-{
-}
-
-bool OutputPacket::isEmpty() const
-{
-    return _size <= 0;
-}
-
-const void *OutputPacket::getData() const
-{
-    return _data;
-}
-
-int OutputPacket::getSize() const
-{
-    return _size;
-}
-
-int OutputPacket::getFlags() const
-{
-    return _flags;
-}
-
 ConnectionClosedException::ConnectionClosedException(const std::string &message)
     : std::runtime_error(message)
 {

@@ -19,49 +19,42 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClientManager.h"
+#include "ClientRequest.h"
 
-#include <cassert>
-
-#include "ClientSender.h"
+#include <brayns/network/jsonrpc/JsonRpcFactory.h>
+#include <brayns/network/jsonrpc/JsonRpcSender.h>
 
 namespace brayns
 {
-ClientManager::~ClientManager()
+ClientRequest::ClientRequest(ClientRef client, InputPacket packet)
+    : _client(std::move(client))
+    , _packet(std::move(packet))
 {
-    closeAll();
 }
 
-bool ClientManager::isEmpty() const
+const ClientRef &ClientRequest::getClient() const
 {
-    return _clients.empty();
+    return _client;
 }
 
-void ClientManager::add(ClientRef client)
+bool ClientRequest::isBinary() const
 {
-    assert(client);
-    _clients.insert(std::move(client));
+    return _packet.isBinary();
 }
 
-void ClientManager::remove(const ClientRef &client)
+bool ClientRequest::isText() const
 {
-    _clients.erase(client);
+    return _packet.isText();
 }
 
-void ClientManager::broadcast(const OutputPacket &packet) const
+std::string_view ClientRequest::getData() const
 {
-    for (const auto &client : _clients)
-    {
-        ClientSender::send(packet, client);
-    }
+    return _packet.getData();
 }
 
-void ClientManager::closeAll() const
+void ClientRequest::error(const JsonRpcException &e) const
 {
-    for (const auto &client : _clients)
-    {
-        auto &socket = client.getSocket();
-        socket.close();
-    }
+    auto message = JsonRpcFactory::error(e);
+    JsonRpcSender::error(message, _client);
 }
 } // namespace brayns

@@ -28,7 +28,6 @@ ReplyMessage JsonRpcFactory::reply(const RequestMessage &request, const JsonValu
     ReplyMessage reply;
     reply.jsonrpc = request.jsonrpc;
     reply.id = request.id;
-    reply.method = request.method;
     reply.result = result;
     return reply;
 }
@@ -38,7 +37,6 @@ ErrorMessage JsonRpcFactory::error(const RequestMessage &request, const JsonRpcE
     ErrorMessage error;
     error.jsonrpc = request.jsonrpc;
     error.id = request.id;
-    error.method = request.method;
     error.error.code = e.getCode();
     error.error.message = e.what();
     error.error.data = e.getData();
@@ -50,7 +48,6 @@ ErrorMessage JsonRpcFactory::error(const JsonRpcException &e)
     ErrorMessage error;
     error.jsonrpc = "2.0";
     error.id = {};
-    error.method = "";
     error.error.code = e.getCode();
     error.error.message = e.what();
     error.error.data = e.getData();

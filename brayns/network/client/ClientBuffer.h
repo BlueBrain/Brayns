@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * Responsible Author: adrien.fleury@epfl.ch
@@ -21,46 +21,36 @@
 
 #pragma once
 
-#include <brayns/network/client/ClientBuffer.h>
-#include <brayns/network/client/RequestBuffer.h>
+#include <mutex>
+#include <vector>
 
-#include "ISocketListener.h"
+#include "ClientRef.h"
 
 namespace brayns
 {
 /**
- * @brief Helper class to manage exchange through a websocket.
+ * @brief Synchronized buffer to manage new / removed clients.
  *
  */
-class SocketManager
+class ClientBuffer
 {
 public:
     /**
-     * @brief Construct a manager with given listener.
-     *
-     * @param listener Listener to call on network events.
-     */
-    SocketManager(std::unique_ptr<ISocketListener> listener);
-
-    /**
-     * @brief Receive and send messages until connection is closed.
-     *
-     * Events are buffered and will be passed to listener when poll() is called.
+     * @brief Add a client.
      *
      * @param client Client ref.
      */
-    void run(const ClientRef &client);
+    void add(ClientRef client);
 
     /**
-     * @brief Poll connections and requests and trigger listener.
+     * @brief Extract all clients connected since last call.
      *
+     * @return std::vector<ClientRef> List of client ref.
      */
-    void poll();
+    std::vector<ClientRef> poll();
 
 private:
-    std::unique_ptr<ISocketListener> _listener;
-    ClientBuffer _newClients;
-    ClientBuffer _removedClients;
-    RequestBuffer _requests;
+    std::mutex _mutex;
+    std::vector<ClientRef> _clients;
 };
 } // namespace brayns

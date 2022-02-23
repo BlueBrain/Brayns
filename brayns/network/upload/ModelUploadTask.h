@@ -33,7 +33,7 @@
 #include <brayns/network/adapters/BinaryParamAdapter.h>
 #include <brayns/network/adapters/ModelDescriptorAdapter.h>
 #include <brayns/network/entrypoint/EntrypointTask.h>
-#include <brayns/network/tasks/NetworkTaskMonitor.h>
+#include <brayns/network/tasks/TaskMonitor.h>
 
 namespace brayns
 {
@@ -51,7 +51,7 @@ struct ModelUploadContext
     std::exception_ptr error;
     Blob blob;
     std::vector<ModelDescriptorPtr> descriptors;
-    NetworkTaskMonitor monitor;
+    TaskMonitor monitor;
 };
 
 /**

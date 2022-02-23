@@ -19,49 +19,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClientManager.h"
+#include "CurrentEntrypoint.h"
 
 #include <cassert>
 
-#include "ClientSender.h"
-
 namespace brayns
 {
-ClientManager::~ClientManager()
+CurrentEntrypoint::CurrentEntrypoint(const EntrypointRef &entrypoint)
+    : _entrypoint(&entrypoint)
 {
-    closeAll();
 }
 
-bool ClientManager::isEmpty() const
+std::string CurrentEntrypoint::getMethod() const
 {
-    return _clients.empty();
+    return _entrypoint ? _entrypoint->getMethod() : "";
 }
 
-void ClientManager::add(ClientRef client)
+CurrentEntrypoint::operator bool() const
 {
-    assert(client);
-    _clients.insert(std::move(client));
-}
-
-void ClientManager::remove(const ClientRef &client)
-{
-    _clients.erase(client);
-}
-
-void ClientManager::broadcast(const OutputPacket &packet) const
-{
-    for (const auto &client : _clients)
-    {
-        ClientSender::send(packet, client);
-    }
-}
-
-void ClientManager::closeAll() const
-{
-    for (const auto &client : _clients)
-    {
-        auto &socket = client.getSocket();
-        socket.close();
-    }
+    return _entrypoint;
 }
 } // namespace brayns

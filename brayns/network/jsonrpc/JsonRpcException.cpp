@@ -50,7 +50,7 @@ const JsonValue &JsonRpcException::getData() const
 }
 
 ParsingErrorException::ParsingErrorException(const std::string &message)
-    : JsonRpcException(-32700, "Failed to parse JSON request: " + message)
+    : JsonRpcException(-32700, "Request is not a valid JSON: '" + message + "'")
 {
 }
 
@@ -65,7 +65,7 @@ InvalidRequestException::InvalidRequestException(const std::string &message, con
 }
 
 MethodNotFoundException::MethodNotFoundException(const std::string &method)
-    : JsonRpcException(-32601, "Method not found: '" + method + "'")
+    : JsonRpcException(-32601, "Method '" + method + "' not found")
 {
 }
 
@@ -81,6 +81,26 @@ InvalidParamsException::InvalidParamsException(const std::string &message, const
 
 InternalErrorException::InternalErrorException(const std::string &message)
     : JsonRpcException(-32603, message)
+{
+}
+
+ServiceUnavailableException::ServiceUnavailableException(const std::string &method)
+    : JsonRpcException(20, "Service busy on '" + method + "'")
+{
+}
+
+MethodNotCancellableException::MethodNotCancellableException()
+    : JsonRpcException(30, "Method cannot be cancelled")
+{
+}
+
+MethodNotRunningException::MethodNotRunningException()
+    : JsonRpcException(31, "Method not currently running")
+{
+}
+
+MethodCancelledException::MethodCancelledException()
+    : JsonRpcException(32, "Method cancelled")
 {
 }
 } // namespace brayns

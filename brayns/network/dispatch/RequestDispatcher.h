@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * Responsible Author: adrien.fleury@epfl.ch
@@ -21,46 +21,36 @@
 
 #pragma once
 
-#include <brayns/network/client/ClientBuffer.h>
-#include <brayns/network/client/RequestBuffer.h>
+#include <brayns/network/client/ClientRequest.h>
+#include <brayns/network/entrypoint/EntrypointRegistry.h>
 
-#include "ISocketListener.h"
+#include "CurrentEntrypoint.h"
 
 namespace brayns
 {
 /**
- * @brief Helper class to manage exchange through a websocket.
+ * @brief Helper class to dispatch a request to entrypoints.
  *
  */
-class SocketManager
+class RequestDispatcher
 {
 public:
     /**
-     * @brief Construct a manager with given listener.
+     * @brief Construct a dispatcher with info on current entrypoint.
      *
-     * @param listener Listener to call on network events.
+     * @param entrypoint Current entrypoint that can be overriden.
      */
-    SocketManager(std::unique_ptr<ISocketListener> listener);
+    RequestDispatcher(CurrentEntrypoint &entrypoint);
 
     /**
-     * @brief Receive and send messages until connection is closed.
+     * @brief Dispatch client request to entrypoints.
      *
-     * Events are buffered and will be passed to listener when poll() is called.
-     *
-     * @param client Client ref.
+     * @param request Raw client request.
+     * @param entrypoints Supported entrypoints.
      */
-    void run(const ClientRef &client);
-
-    /**
-     * @brief Poll connections and requests and trigger listener.
-     *
-     */
-    void poll();
+    void dispatch(const ClientRequest &request, const EntrypointRegistry &entrypoints);
 
 private:
-    std::unique_ptr<ISocketListener> _listener;
-    ClientBuffer _newClients;
-    ClientBuffer _removedClients;
-    RequestBuffer _requests;
+    CurrentEntrypoint &_entrypoint;
 };
 } // namespace brayns

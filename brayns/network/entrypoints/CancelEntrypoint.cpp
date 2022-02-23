@@ -25,7 +25,7 @@
 
 namespace brayns
 {
-CancelEntrypoint::CancelEntrypoint(NetworkTaskManager &tasks)
+CancelEntrypoint::CancelEntrypoint(TaskManager &tasks)
     : _tasks(tasks)
 {
 }

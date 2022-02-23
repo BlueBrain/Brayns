@@ -19,49 +19,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClientManager.h"
+#include "CancellationToken.h"
 
-#include <cassert>
-
-#include "ClientSender.h"
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
 {
-ClientManager::~ClientManager()
+CancellationToken::CancellationToken(INetworkInterface &interface)
+    : _interface(interface)
 {
-    closeAll();
 }
 
-bool ClientManager::isEmpty() const
+void CancellationToken::poll() const
 {
-    return _clients.empty();
-}
-
-void ClientManager::add(ClientRef client)
-{
-    assert(client);
-    _clients.insert(std::move(client));
-}
-
-void ClientManager::remove(const ClientRef &client)
-{
-    _clients.erase(client);
-}
-
-void ClientManager::broadcast(const OutputPacket &packet) const
-{
-    for (const auto &client : _clients)
+    _interface.poll();
+    if (_cancelled)
     {
-        ClientSender::send(packet, client);
+        throw MethodCancelledException();
     }
 }
 
-void ClientManager::closeAll() const
+void CancellationToken::cancel()
 {
-    for (const auto &client : _clients)
-    {
-        auto &socket = client.getSocket();
-        socket.close();
-    }
+    _cancelled = true;
 }
 } // namespace brayns

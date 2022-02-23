@@ -19,18 +19,48 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "NetworkTaskMonitor.h"
+#pragma once
+
+#include <brayns/network/entrypoint/EntrypointRef.h>
 
 namespace brayns
 {
-void NetworkTaskMonitor::wait()
+/**
+ * @brief Holds the current entrypoint being processed.
+ *
+ */
+class CurrentEntrypoint
 {
-    std::unique_lock<std::mutex> lock(_mutex);
-    _monitor.wait(lock);
-}
+public:
+    /**
+     * @brief No current entrypoint.
+     *
+     */
+    CurrentEntrypoint() = default;
 
-void NetworkTaskMonitor::notify()
-{
-    _monitor.notify_all();
-}
+    /**
+     * @brief Set the current entrypoint.
+     *
+     * @param entrypoint Current entrypoint being processed.
+     */
+    CurrentEntrypoint(const EntrypointRef &entrypoint);
+
+    /**
+     * @brief Helper class to get the current method or an empty string.
+     *
+     * @return std::string Current entrypoint method or empty.
+     */
+    std::string getMethod() const;
+
+    /**
+     * @brief Check if a current entrypoint is set.
+     *
+     * @return true Current entrypoint being processed.
+     * @return false No entrypoints being processed.
+     */
+    operator bool() const;
+
+private:
+    const EntrypointRef *_entrypoint = nullptr;
+};
 } // namespace brayns

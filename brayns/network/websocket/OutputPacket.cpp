@@ -19,49 +19,45 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClientManager.h"
+#include "WebSocket.h"
 
-#include <cassert>
-
-#include "ClientSender.h"
+#include <Poco/Net/WebSocket.h>
 
 namespace brayns
 {
-ClientManager::~ClientManager()
+OutputPacket OutputPacket::fromText(std::string_view data)
 {
-    closeAll();
+    return {data, Poco::Net::WebSocket::FRAME_TEXT};
 }
 
-bool ClientManager::isEmpty() const
+OutputPacket OutputPacket::fromBinary(std::string_view data)
 {
-    return _clients.empty();
+    return {data, Poco::Net::WebSocket::FRAME_BINARY};
 }
 
-void ClientManager::add(ClientRef client)
+OutputPacket::OutputPacket(std::string_view data, int flags)
+    : _data(data)
+    , _flags(flags)
 {
-    assert(client);
-    _clients.insert(std::move(client));
 }
 
-void ClientManager::remove(const ClientRef &client)
+std::string_view OutputPacket::getData() const
 {
-    _clients.erase(client);
+    return _data;
 }
 
-void ClientManager::broadcast(const OutputPacket &packet) const
+int OutputPacket::getFlags() const
 {
-    for (const auto &client : _clients)
-    {
-        ClientSender::send(packet, client);
-    }
+    return _flags;
 }
 
-void ClientManager::closeAll() const
+bool OutputPacket::isBinary() const
 {
-    for (const auto &client : _clients)
-    {
-        auto &socket = client.getSocket();
-        socket.close();
-    }
+    return _flags == Poco::Net::WebSocket::FRAME_BINARY;
+}
+
+bool OutputPacket::isText() const
+{
+    return _flags == Poco::Net::WebSocket::FRAME_TEXT;
 }
 } // namespace brayns

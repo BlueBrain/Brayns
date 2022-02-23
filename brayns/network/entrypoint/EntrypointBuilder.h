@@ -19,49 +19,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClientManager.h"
+#pragma once
 
-#include <cassert>
-
-#include "ClientSender.h"
+#include <brayns/network/interface/INetworkInterface.h>
 
 namespace brayns
 {
-ClientManager::~ClientManager()
+class EntrypointBuilder
 {
-    closeAll();
-}
-
-bool ClientManager::isEmpty() const
-{
-    return _clients.empty();
-}
-
-void ClientManager::add(ClientRef client)
-{
-    assert(client);
-    _clients.insert(std::move(client));
-}
-
-void ClientManager::remove(const ClientRef &client)
-{
-    _clients.erase(client);
-}
-
-void ClientManager::broadcast(const OutputPacket &packet) const
-{
-    for (const auto &client : _clients)
+public:
+    EntrypointBuilder(std::string plugin, INetworkInterface &interface)
+        : _plugin(std::move(plugin))
+        , _interface(interface)
     {
-        ClientSender::send(packet, client);
     }
-}
 
-void ClientManager::closeAll() const
-{
-    for (const auto &client : _clients)
+    template<typename EntrypointType, typename... Args>
+    void add(Args &&...args) const
     {
-        auto &socket = client.getSocket();
-        socket.close();
+        auto entrypoint = std::make_unique<EntrypointType>(std::forward<Args>(args)...);
+        _interface.add({_plugin, std::move(entrypoint)});
     }
-}
+
+private:
+    std::string _plugin;
+    INetworkInterface &_interface;
+};
 } // namespace brayns

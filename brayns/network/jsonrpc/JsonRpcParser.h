@@ -21,46 +21,26 @@
 
 #pragma once
 
-#include <brayns/network/client/ClientBuffer.h>
-#include <brayns/network/client/RequestBuffer.h>
+#include <brayns/network/client/ClientRequest.h>
 
-#include "ISocketListener.h"
+#include "JsonRpcRequest.h"
 
 namespace brayns
 {
 /**
- * @brief Helper class to manage exchange through a websocket.
+ * @brief Helper class to parse and validate a JSON-RPC request.
  *
  */
-class SocketManager
+class JsonRpcParser
 {
 public:
     /**
-     * @brief Construct a manager with given listener.
+     * @brief Parse directly the raw client request to a JSON-RPC request.
      *
-     * @param listener Listener to call on network events.
+     * @param request Client request.
+     * @return JsonRpcRequest Parsed request.
+     * @throw JsonRpcException If any errors occur that must be reported.
      */
-    SocketManager(std::unique_ptr<ISocketListener> listener);
-
-    /**
-     * @brief Receive and send messages until connection is closed.
-     *
-     * Events are buffered and will be passed to listener when poll() is called.
-     *
-     * @param client Client ref.
-     */
-    void run(const ClientRef &client);
-
-    /**
-     * @brief Poll connections and requests and trigger listener.
-     *
-     */
-    void poll();
-
-private:
-    std::unique_ptr<ISocketListener> _listener;
-    ClientBuffer _newClients;
-    ClientBuffer _removedClients;
-    RequestBuffer _requests;
+    static JsonRpcRequest parse(const ClientRequest &request);
 };
 } // namespace brayns
