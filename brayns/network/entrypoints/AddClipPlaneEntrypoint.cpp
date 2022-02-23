@@ -28,7 +28,7 @@ AddClipPlaneEntrypoint::AddClipPlaneEntrypoint(Scene &scene)
 {
 }
 
-std::string AddClipPlaneEntrypoint::getName() const
+std::string AddClipPlaneEntrypoint::getMethod() const
 {
     return "add-clip-plane";
 }

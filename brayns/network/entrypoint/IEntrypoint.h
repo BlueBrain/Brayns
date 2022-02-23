@@ -122,7 +122,7 @@ public:
     /**
      * @brief Called when the entrypoint is cancelled.
      *
-     * Only used when isAsync() is true.
+     * Only called when isAsync() is true and entrypoint is running.
      *
      */
     virtual void onCancel()

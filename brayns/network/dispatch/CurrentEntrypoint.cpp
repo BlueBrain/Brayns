@@ -25,9 +25,11 @@
 
 namespace brayns
 {
-CurrentEntrypoint::CurrentEntrypoint(const EntrypointRef &entrypoint)
+CurrentEntrypoint::CurrentEntrypoint(const EntrypointRef &entrypoint, const JsonRpcRequest &request)
     : _entrypoint(&entrypoint)
+    , _request(&request)
 {
+    assert(entrypoint.getMethod() == request.getMethod());
 }
 
 std::string CurrentEntrypoint::getMethod() const

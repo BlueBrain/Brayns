@@ -21,21 +21,21 @@
 
 #pragma once
 
+#include <brayns/network/dispatch/CurrentEntrypoint.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/tasks/TaskManager.h>
 
 namespace brayns
 {
 class CancelEntrypoint : public Entrypoint<CancelParams, EmptyMessage>
 {
 public:
-    CancelEntrypoint(TaskManager &tasks);
+    CancelEntrypoint(CurrentEntrypoint &entrypoint);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    TaskManager &_tasks;
+    CurrentEntrypoint &_entrypoint;
 };
 } // namespace brayns

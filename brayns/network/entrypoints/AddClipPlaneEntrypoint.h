@@ -33,7 +33,7 @@ class AddClipPlaneEntrypoint : public Entrypoint<AddClipPlaneMessage, ClipPlaneP
 public:
     AddClipPlaneEntrypoint(Scene &scene);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual JsonSchema getParamsSchema() const override;
     virtual void onRequest(const Request &request) override;

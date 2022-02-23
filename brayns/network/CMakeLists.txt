@@ -31,13 +31,14 @@ set(BRAYNSNETWORK_HEADERS
   client/ClientRef.h
   client/RequestBuffer.h
   client/ClientSender.h
+  common/CancellationToken.h
   common/Clock.h
   common/ExtractMaterial.h
   common/ExtractModel.h
   common/FrameExporter.h
+  common/ProgressHandler.h
   common/PropertyObjectSchema.h
   common/RateLimiter.h
-  dispatch/CancellationToken.h
   dispatch/CurrentEntrypoint.h
   dispatch/RequestDispatcher.h
   entrypoint/Entrypoint.h
@@ -141,12 +142,12 @@ set(BRAYNSNETWORK_SOURCES
   client/ClientRequest.cpp
   client/ClientSender.cpp
   client/RequestBuffer.cpp
+  common/CancellationToken.cpp
   common/ExtractMaterial.cpp
   common/ExtractModel.cpp
   common/FrameExporter.cpp
   common/PropertyObjectSchema.cpp
   common/RateLimiter.cpp
-  dispatch/CancellationToken.cpp
   dispatch/CurrentEntrypoint.cpp
   dispatch/RequestDispatcher.cpp
   entrypoint/EntrypointFinder.cpp

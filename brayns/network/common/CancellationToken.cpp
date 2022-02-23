@@ -19,42 +19,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "CancellationToken.h"
 
-#include <brayns/network/interface/INetworkInterface.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
 {
-/**
- * @brief Helper class to poll for cancellation from an entrypoint.
- *
- */
-class CancellationToken
+CancellationToken::CancellationToken(INetworkInterface &interface)
+    : _interface(interface)
 {
-public:
-    /**
-     * @brief Construct a token with dependencies.
-     *
-     * @param interface Used to poll for requests and receive cancellation.
-     * @param entrypoint Used to check the cancellation status.
-     */
-    CancellationToken(INetworkInterface &interface);
+}
 
-    /**
-     * @brief Poll requests and check cancellation flag.
-     *
-     * @throw MethodCancelledException Cancel flag is set.
-     */
-    void poll() const;
+void CancellationToken::poll() const
+{
+    _interface.poll();
+    if (!_cancelled)
+    {
+        throw MethodCancelledException();
+    }
+}
 
-    /**
-     * @brief Set the cancel flag.
-     *
-     */
-    void cancel();
+void CancellationToken::cancel()
+{
+    _cancelled = true;
+}
 
-private:
-    bool _cancelled = false;
-    INetworkInterface &_interface;
-};
+void CancellationToken::reset()
+{
+    _cancelled = false;
+}
 } // namespace brayns

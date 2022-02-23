@@ -80,6 +80,80 @@
 
 namespace
 {
+class ConnectionHandler
+{
+public:
+    static void handle(brayns::NetworkContext &context, const brayns::ClientRef &client)
+    {
+        brayns::Log::info("Connection of client {}.", client);
+        _addClient(context, client);
+        _notifyEntrypoints(context, client);
+    }
+
+private:
+    static void _addClient(brayns::NetworkContext &context, const brayns::ClientRef &client)
+    {
+        auto &clients = context.clients;
+        clients.add(client);
+    }
+
+    static void _notifyEntrypoints(brayns::NetworkContext &context, const brayns::ClientRef &client)
+    {
+        auto &entrypoints = context.entrypoints;
+        entrypoints.forEach([&](auto &entrypoint) { entrypoint.onConnect(client); });
+    }
+};
+
+class DisconnectionHandler
+{
+public:
+    static void handle(brayns::NetworkContext &context, const brayns::ClientRef &client)
+    {
+        brayns::Log::info("Disconnection of client {}.", client);
+        _removeClient(context, client);
+        _notifyEntrypoints(context, client);
+    }
+
+private:
+    static void _removeClient(brayns::NetworkContext &context, const brayns::ClientRef &client)
+    {
+        auto &clients = context.clients;
+        clients.remove(client);
+    }
+
+    static void _notifyEntrypoints(brayns::NetworkContext &context, const brayns::ClientRef &client)
+    {
+        auto &entrypoints = context.entrypoints;
+        entrypoints.forEach([&](auto &entrypoint) { entrypoint.onDisconnect(client); });
+    }
+};
+
+class RequestHandler
+{
+public:
+    static void handle(brayns::NetworkContext &context, const brayns::ClientRequest &request)
+    {
+        _log(request);
+        _dispatch(context, request);
+    }
+
+private:
+    static void _log(const brayns::ClientRequest &request)
+    {
+        auto &client = request.getClient();
+        auto data = request.isBinary() ? "<Binary data>" : request.getData();
+        brayns::Log::debug("Received request from client {}: '{}'.", client, data);
+    }
+
+    static void _dispatch(brayns::NetworkContext &context, const brayns::ClientRequest &request)
+    {
+        auto &entrypoints = context.entrypoints;
+        auto &current = context.currentEntrypoint;
+        brayns::RequestDispatcher dispatcher(current);
+        dispatcher.dispatch(request, entrypoints);
+    }
+};
+
 class SocketListener : public brayns::ISocketListener
 {
 public:
@@ -90,73 +164,32 @@ public:
 
     virtual void onConnect(const brayns::ClientRef &client) override
     {
-        brayns::Log::info("Connection of client {}.", client);
-        _clients.add(client);
+        ConnectionHandler::handle(_context, client);
     }
 
     virtual void onDisconnect(const brayns::ClientRef &client) override
     {
-        brayns::Log::info("Disconnection of client {}.", client);
-        _clients.remove(client);
+        DisconnectionHandler::handle(_context, client);
     }
 
     virtual void onRequest(brayns::ClientRequest request) override
     {
-        auto &client = request.getClient();
-        auto data = request.isBinary() ? "<Binary data>" : request.getData();
-        brayns::Log::debug("Received request from client {}: '{}'.", client, data);
-        _requests.add(std::move(request));
+        RequestHandler::handle(_context, client);
     }
 
 private:
     brayns::NetworkContext &_context;
 };
 
-class SocketFactory
-{
-public:
-    static void create(brayns::NetworkContext &context)
-    {
-        auto &parameters = _getNetworkParameters(context);
-        auto listener = _createListener(context);
-        context.socket = _createSocket(parameters, std::move(listener));
-    }
-
-private:
-    static const brayns::NetworkParameters &_getNetworkParameters(brayns::NetworkContext &context)
-    {
-        auto &api = *context.api;
-        auto &manager = api.getParametersManager();
-        return manager.getNetworkParameters();
-    }
-
-    static std::unique_ptr<brayns::ISocketListener> _createListener(brayns::NetworkContext &context)
-    {
-        auto &clients = context.clients;
-        auto &requests = context.requests;
-        return std::make_unique<SocketListener>(clients, requests);
-    }
-
-    static std::unique_ptr<brayns::ISocket> _createSocket(
-        const brayns::NetworkParameters &parameters,
-        std::unique_ptr<brayns::ISocketListener> listener)
-    {
-        if (parameters.isClient())
-        {
-            return std::make_unique<brayns::ClientSocket>(parameters, std::move(listener));
-        }
-        return std::make_unique<brayns::ServerSocket>(parameters, std::move(listener));
-    }
-};
-
 class CoreEntrypointRegistry
 {
 public:
-    static void registerEntrypoints(brayns::NetworkContext &context, brayns::INetworkInterface &interface)
+    static void registerEntrypoints(brayns::NetworkContext &context)
     {
-        EntrypointBuilder builder("Core", interface);
+        brayns::EntrypointBuilder builder("Core", interface);
 
         auto &api = *context.api;
+        auto &interface = *context.interface;
 
         auto &parameters = api.getParametersManager();
         auto &application = parameters.getApplicationParameters();
@@ -242,13 +275,49 @@ public:
     }
 };
 
+class SocketFactory
+{
+public:
+    static void create(brayns::NetworkContext &context)
+    {
+        auto &parameters = _getNetworkParameters(context);
+        auto listener = _createListener(context);
+        context.socket = _createSocket(parameters, std::move(listener));
+    }
+
+private:
+    static const brayns::NetworkParameters &_getNetworkParameters(brayns::NetworkContext &context)
+    {
+        auto &api = *context.api;
+        auto &manager = api.getParametersManager();
+        return manager.getNetworkParameters();
+    }
+
+    static std::unique_ptr<brayns::ISocketListener> _createListener(brayns::NetworkContext &context)
+    {
+        auto &clients = context.clients;
+        auto &requests = context.requests;
+        return std::make_unique<SocketListener>(clients, requests);
+    }
+
+    static std::unique_ptr<brayns::ISocket> _createSocket(
+        const brayns::NetworkParameters &parameters,
+        std::unique_ptr<brayns::ISocketListener> listener)
+    {
+        if (parameters.isClient())
+        {
+            return std::make_unique<brayns::ClientSocket>(parameters, std::move(listener));
+        }
+        return std::make_unique<brayns::ServerSocket>(parameters, std::move(listener));
+    }
+};
+
 class NetworkInitialization
 {
 public:
     static void run(brayns::NetworkContext &context, brayns::ExtensionPlugin &plugin)
     {
         SocketFactory::create(context);
-        CoreEntrypointRegistry::registerEntrypoints(context, plugin);
     }
 };
 
@@ -280,12 +349,12 @@ class NetworkPreRender
 public:
     static void run(brayns::NetworkContext &context)
     {
-        _processRequests(context);
+        _pollSocket(context);
         _notifyEntrypoints(context);
     }
 
 private:
-    static void _processRequests(brayns::NetworkContext &context)
+    static void _pollSocket(brayns::NetworkContext &context)
     {
         auto &socket = *context.socket;
         socket.poll();
@@ -332,7 +401,7 @@ namespace brayns
 {
 NetworkManager::NetworkManager()
     : ExtensionPlugin("Core")
-    , _interface(_context.entrypoints, _context.tasks)
+    , _interface(_context.entrypoints, *_context.socket)
 {
     Log::info("Network plugin is enabled.");
 }
@@ -352,12 +421,14 @@ void NetworkManager::init()
 {
     Log::info("Initializing network plugin.");
     _context.api = _api;
+    _context.interface = &_interface;
     NetworkInitialization::run(_context, *this);
 }
 
 void NetworkManager::registerEntrypoints(INetworkInterface &interface)
 {
-    CoreEntrypointRegistry::registerEntrypoints(*_context, interface);
+    (void)interface;
+    CoreEntrypointRegistry::registerEntrypoints(*_context);
 }
 
 void NetworkManager::preRender()

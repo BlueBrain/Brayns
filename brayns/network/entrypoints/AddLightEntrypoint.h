@@ -69,7 +69,7 @@ class AddLightDirectionalEntrypoint : public AddLightEntrypoint<DirectionalLight
 public:
     AddLightDirectionalEntrypoint(LightManager &lights);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 
@@ -78,7 +78,7 @@ class AddLightSphereEntrypoint : public AddLightEntrypoint<SphereLight>
 public:
     AddLightSphereEntrypoint(LightManager &lights);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 
@@ -87,7 +87,7 @@ class AddLightQuadEntrypoint : public AddLightEntrypoint<QuadLight>
 public:
     AddLightQuadEntrypoint(LightManager &lights);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 
@@ -96,7 +96,7 @@ class AddLightSpotEntrypoint : public AddLightEntrypoint<SpotLight>
 public:
     AddLightSpotEntrypoint(LightManager &lights);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 
@@ -105,7 +105,7 @@ class AddLightAmbientEntrypoint : public AddLightEntrypoint<AmbientLight>
 public:
     AddLightAmbientEntrypoint(LightManager &lights);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 } // namespace brayns

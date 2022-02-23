@@ -24,7 +24,7 @@
 #include <brayns/network/client/ClientManager.h>
 #include <brayns/network/client/RequestBuffer.h>
 #include <brayns/network/common/FrameExporter.h>
-#include <brayns/network/dispatch/RequestDispatcher.h>
+#include <brayns/network/dispatch/CurrentEntrypoint.h>
 #include <brayns/network/entrypoint/EntrypointRegistry.h>
 #include <brayns/network/interface/NetworkInterface.h>
 #include <brayns/network/socket/ISocket.h>
@@ -37,7 +37,8 @@ namespace brayns
 struct NetworkContext
 {
     PluginAPI *api = nullptr;
-    RequestDispatcher dispatcher;
+    INetworkInterface *interface = nullptr;
+    CurrentEntrypoint currentEntrypoint;
     EntrypointRegistry entrypoints;
     ClientManager clients;
     StreamManager stream;

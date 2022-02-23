@@ -21,48 +21,48 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/EntrypointRef.h>
-#include <brayns/network/jsonrpc/JsonRpcRequest.h>
+#include "CancellationToken.h"
 
 namespace brayns
 {
 /**
- * @brief Holds the current entrypoint being processed.
+ * @brief Helper class to notify a request progress and check cancellation.
  *
+ * Request must have a progress(const std::string &, double) method.
+ *
+ * @tparam RequestType Type of request to monitor.
  */
-class CurrentEntrypoint
+template<typename RequestType>
+class ProgressHandler
 {
 public:
     /**
-     * @brief No current entrypoint.
+     * @brief Construct a handler for the given request.
      *
+     * @param token Used to poll for cancellation.
+     * @param request Request to monitor.
      */
-    CurrentEntrypoint() = default;
+    ProgressHandler(CancellationToken &token, const RequestType &request)
+        : _token(token)
+    {
+        _token.reset();
+    }
 
     /**
-     * @brief Set the current entrypoint.
+     * @brief Poll cancellation and notifies request.
      *
-     * @param entrypoint Current entrypoint being processed.
+     * @param operation Current operation description.
+     * @param amount Current progress amount [0-1].
+     * @throw MethodCancelledException Request has been cancelled.
      */
-    CurrentEntrypoint(const EntrypointRef &entrypoint, const JsonRpcRequest &request);
-
-    /**
-     * @brief Helper class to get the current method or an empty string.
-     *
-     * @return std::string Current entrypoint method or empty.
-     */
-    std::string getMethod() const;
-
-    /**
-     * @brief Check if a current entrypoint is set.
-     *
-     * @return true Current entrypoint being processed.
-     * @return false No entrypoints being processed.
-     */
-    operator bool() const;
+    void notify(const std::string &operation, double amount) const
+    {
+        _token.poll();
+        _request.progress(operation, amount);
+    }
 
 private:
-    const EntrypointRef *_entrypoint = nullptr;
-    const JsonRpcRequest *_request = nullptr;
+    CancellationToken &_token;
+    const RequestType &_request;
 };
 } // namespace brayns
