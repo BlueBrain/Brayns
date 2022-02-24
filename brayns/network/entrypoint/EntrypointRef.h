@@ -157,6 +157,14 @@ public:
      */
     bool isAsync() const;
 
+    /**
+     * @brief Check if the request can be run inside a progress.
+     *
+     * @return true Can be nested.
+     * @return false Cannot be nested.
+     */
+    virtual bool canBeNested() const;
+
 private:
     std::unique_ptr<IEntrypoint> _entrypoint;
     SchemaResult _schema;

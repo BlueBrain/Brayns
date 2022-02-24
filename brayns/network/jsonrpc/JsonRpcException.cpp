@@ -84,23 +84,18 @@ InternalErrorException::InternalErrorException(const std::string &message)
 {
 }
 
-ServiceUnavailableException::ServiceUnavailableException(const std::string &method)
-    : JsonRpcException(20, "Service busy on '" + method + "'")
+TaskNotCancellableException::TaskNotCancellableException()
+    : JsonRpcException(20, "Task is not asynchronous and cannot be cancelled")
 {
 }
 
-MethodNotCancellableException::MethodNotCancellableException()
-    : JsonRpcException(30, "Method cannot be cancelled")
+TaskNotFoundException::TaskNotFoundException()
+    : JsonRpcException(21, "No tasks found with this request ID")
 {
 }
 
-MethodNotRunningException::MethodNotRunningException()
-    : JsonRpcException(31, "Method not currently running")
-{
-}
-
-MethodCancelledException::MethodCancelledException()
-    : JsonRpcException(32, "Method cancelled")
+TaskCancelledException::TaskCancelledException()
+    : JsonRpcException(22, "Task has been cancelled")
 {
 }
 } // namespace brayns

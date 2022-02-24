@@ -42,7 +42,7 @@ public:
     /**
      * @brief Poll requests and check if the cancel flag is set.
      *
-     * @throw MethodCancelledException Cancel flag was set.
+     * @throw TaskCancelledException Cancel flag was set.
      */
     void poll() const;
 

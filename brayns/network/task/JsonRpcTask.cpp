@@ -19,38 +19,55 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "JsonRpcTask.h"
 
-#include <brayns/network/client/ClientRequest.h>
-#include <brayns/network/entrypoint/EntrypointRegistry.h>
-#include <brayns/network/task/TaskManager.h>
+#include <cassert>
+
+#include <brayns/network/common/ErrorHandler.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
 {
-/**
- * @brief Helper class to process a request.
- *
- */
-class RequestDispatcher
+JsonRpcTask::JsonRpcTask(JsonRpcRequest request, const EntrypointRef &entrypoint)
+    : _request(std::move(request))
+    , _entrypoint(entrypoint)
 {
-public:
-    /**
-     * @brief Construct a dispatcher with dependencies.
-     *
-     * @param entrypoints Available entrypoints to process request.
-     * @param tasks Task queue if the request processing must be delayed.
-     */
-    RequestDispatcher(const EntrypointRegistry &entrypoints, TaskManager &tasks);
+    assert(request.getMethod() == entrypoint.getMethod());
+}
 
-    /**
-     * @brief Dispatch client request to entrypoints or create a task.
-     *
-     * @param request Raw client request.
-     */
-    void dispatch(ClientRequest request);
+const ClientRef &JsonRpcTask::getClient() const
+{
+    return _request.getClient();
+}
 
-private:
-    const EntrypointRegistry &_entrypoints;
-    TaskManager &_tasks;
-};
+const RequestId &JsonRpcTask::getId() const
+{
+    return _request.getId();
+}
+
+const std::string &JsonRpcTask::getMethod() const
+{
+    return _request.getMethod();
+}
+
+void JsonRpcTask::run()
+{
+    try
+    {
+        _entrypoint.onRequest(_request);
+    }
+    catch (...)
+    {
+        ErrorHandler::reply(_request);
+    }
+}
+
+void JsonRpcTask::cancel()
+{
+    if (!_entrypoint.isAsync())
+    {
+        throw TaskNotCancellableException();
+    }
+    _entrypoint.onCancel();
+}
 } // namespace brayns

@@ -37,12 +37,14 @@ public:
     /**
      * @brief Find entrypoint matching request in entrypoints.
      *
-     * Throw in case of invalid method or params.
+     * Check that request method is valid (contained in entrypoints).
+     *
+     * Request params are also validated using target entrypoint (if found).
      *
      * @param request JSON-RPC request.
      * @param entrypoints Supported entrypoints.
      * @return const EntrypointRef& Corresponding entrypoint.
-     * @throw JsonRpcException Invalid request.
+     * @throw JsonRpcException Method not found or invalid params schema.
      */
     static const EntrypointRef &find(const JsonRpcRequest &request, const EntrypointRegistry &entrypoints);
 };

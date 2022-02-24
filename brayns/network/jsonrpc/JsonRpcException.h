@@ -128,42 +128,32 @@ public:
 };
 
 /**
- * @brief Service busy on a given method.
- *
- */
-class ServiceUnavailableException : public JsonRpcException
-{
-public:
-    ServiceUnavailableException(const std::string &method);
-};
-
-/**
  * @brief Method cannot be cancelled.
  *
  */
-class MethodNotCancellableException : public JsonRpcException
+class TaskNotCancellableException : public JsonRpcException
 {
 public:
-    MethodNotCancellableException();
+    TaskNotCancellableException();
 };
 
 /**
  * @brief Trying to cancel a method that is not currently running.
  *
  */
-class MethodNotRunningException : public JsonRpcException
+class TaskNotFoundException : public JsonRpcException
 {
 public:
-    MethodNotRunningException();
+    TaskNotFoundException();
 };
 
 /**
  * @brief Method has been cancelled.
  *
  */
-class MethodCancelledException : public JsonRpcException
+class TaskCancelledException : public JsonRpcException
 {
 public:
-    MethodCancelledException();
+    TaskCancelledException();
 };
 } // namespace brayns

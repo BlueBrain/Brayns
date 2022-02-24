@@ -19,33 +19,58 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "CancellationToken.h"
+#include "BinaryTask.h"
 
+#include <brayns/network/common/ErrorHandler.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
+
+namespace
+{
+static const brayns::RequestId emptyId;
+static const std::string emptyMethod;
+} // namespace
 
 namespace brayns
 {
-CancellationToken::CancellationToken(INetworkInterface &interface)
-    : _interface(interface)
+BinaryTask::BinaryTask(ClientRequest request, const EntrypointRegistry &entrypoints)
+    : _request(std::move(request))
+    , _entrypoints(entrypoints)
 {
 }
 
-void CancellationToken::poll() const
+const ClientRef &BinaryTask::getClient() const
 {
-    _interface.poll();
-    if (!_cancelled)
-    {
-        throw TaskCancelledException();
-    }
+    return _request.getClient();
 }
 
-void CancellationToken::cancel()
+const RequestId &BinaryTask::getId() const
 {
-    _cancelled = true;
+    return emptyId;
 }
 
-void CancellationToken::reset()
+const std::string &BinaryTask::getMethod() const
 {
-    _cancelled = false;
+    return emptyMethod;
+}
+
+void BinaryTask::run()
+{
+    _entrypoints.forEach(
+        [this](auto &entrypoint)
+        {
+            try
+            {
+                entrypoint.onBinary(_request);
+            }
+            catch (...)
+            {
+                ErrorHandler::reply(_request);
+            }
+        });
+}
+
+void BinaryTask::cancel()
+{
+    throw TaskNotCancellableException();
 }
 } // namespace brayns

@@ -24,11 +24,11 @@
 #include <brayns/network/client/ClientManager.h>
 #include <brayns/network/client/RequestBuffer.h>
 #include <brayns/network/common/FrameExporter.h>
-#include <brayns/network/dispatch/CurrentEntrypoint.h>
 #include <brayns/network/entrypoint/EntrypointRegistry.h>
 #include <brayns/network/interface/NetworkInterface.h>
 #include <brayns/network/socket/ISocket.h>
 #include <brayns/network/stream/StreamManager.h>
+#include <brayns/network/task/TaskManager.h>
 
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
@@ -38,11 +38,11 @@ struct NetworkContext
 {
     PluginAPI *api = nullptr;
     INetworkInterface *interface = nullptr;
-    CurrentEntrypoint currentEntrypoint;
-    EntrypointRegistry entrypoints;
-    ClientManager clients;
-    StreamManager stream;
     std::unique_ptr<ISocket> socket;
+    ClientManager clients;
+    EntrypointRegistry entrypoints;
+    StreamManager stream;
+    TaskManager tasks;
     FrameExporter frameExporter;
 };
 

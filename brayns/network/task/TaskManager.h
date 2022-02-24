@@ -19,26 +19,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "CurrentEntrypoint.h"
+#pragma once
 
-#include <cassert>
+#include <deque>
+#include <memory>
+
+#include <brayns/network/entrypoint/EntrypointRegistry.h>
+#include <brayns/network/jsonrpc/JsonRpcRequest.h>
+
+#include "ITask.h"
 
 namespace brayns
 {
-CurrentEntrypoint::CurrentEntrypoint(const EntrypointRef &entrypoint, const JsonRpcRequest &request)
-    : _entrypoint(&entrypoint)
-    , _request(&request)
+class TaskManager
 {
-    assert(entrypoint.getMethod() == request.getMethod());
-}
+public:
+    void addBinaryTask(ClientRequest request, const EntrypointRegistry &entrypoints);
 
-std::string CurrentEntrypoint::getMethod() const
-{
-    return _entrypoint ? _entrypoint->getMethod() : "";
-}
+    void addJsonRpcTask(JsonRpcRequest request, const EntrypointRef &entrypoint);
 
-CurrentEntrypoint::operator bool() const
-{
-    return _entrypoint;
-}
+    void runAllTasks();
+
+    void cancel(const ClientRef &client, const RequestId &id);
+
+private:
+    std::deque<std::unique_ptr<ITask>> _tasks;
+};
 } // namespace brayns

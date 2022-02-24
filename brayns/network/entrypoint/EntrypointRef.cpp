@@ -127,4 +127,9 @@ bool EntrypointRef::isAsync() const
 {
     return _schema.async;
 }
+
+bool EntrypointRef::canBeNested() const
+{
+    return _entrypoint->canBeNested();
+}
 } // namespace brayns

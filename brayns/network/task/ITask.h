@@ -21,48 +21,51 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/EntrypointRef.h>
-#include <brayns/network/jsonrpc/JsonRpcRequest.h>
+#include <brayns/network/jsonrpc/RequestId.h>
 
 namespace brayns
 {
 /**
- * @brief Holds the current entrypoint being processed.
+ * @brief Interface for a JSON-RPC or binary request processing.
  *
  */
-class CurrentEntrypoint
+class ITask
 {
 public:
-    /**
-     * @brief No current entrypoint.
-     *
-     */
-    CurrentEntrypoint() = default;
+    virtual ~ITask() = default;
 
     /**
-     * @brief Set the current entrypoint.
+     * @brief Get the client who sent the request.
      *
-     * @param entrypoint Current entrypoint being processed.
+     * @return const ClientRef& Client ref.
      */
-    CurrentEntrypoint(const EntrypointRef &entrypoint, const JsonRpcRequest &request);
+    virtual const ClientRef &getClient() const = 0;
 
     /**
-     * @brief Helper class to get the current method or an empty string.
+     * @brief Get the request ID of the task.
      *
-     * @return std::string Current entrypoint method or empty.
+     * @return const RequestId& JSON-RPC request ID (empty if binary).
      */
-    std::string getMethod() const;
+    virtual const RequestId &getId() const = 0;
 
     /**
-     * @brief Check if a current entrypoint is set.
+     * @brief Get the method of the task.
      *
-     * @return true Current entrypoint being processed.
-     * @return false No entrypoints being processed.
+     * @return const std::string& JSON-RPC method (empty if binary).
      */
-    operator bool() const;
+    virtual const std::string &getMethod() const = 0;
 
-private:
-    const EntrypointRef *_entrypoint = nullptr;
-    const JsonRpcRequest *_request = nullptr;
+    /**
+     * @brief Execute the task.
+     *
+     */
+    virtual void run() = 0;
+
+    /**
+     * @brief Cancel the task or throw if not cancellable.
+     *
+     * @throw TaskNotCancellableException Task is not cancellable.
+     */
+    virtual void cancel() = 0;
 };
 } // namespace brayns

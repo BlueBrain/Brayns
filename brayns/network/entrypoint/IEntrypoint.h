@@ -77,10 +77,25 @@ public:
     /**
      * @brief Enable cancellation for long running tasks.
      *
+     * Default to false.
+     *
      * @return true The entrypoint can be cancelled.
      * @return false The entrypoint cannot be cancelled.
      */
     virtual bool isAsync() const
+    {
+        return false;
+    }
+
+    /**
+     * @brief Check if the entrypoint can be run in a progress call.
+     *
+     * Default to false.
+     *
+     * @return true Can be nested (example "cancel").
+     * @return false Cannot be nested (recommended).
+     */
+    virtual bool canBeNested() const
     {
         return false;
     }

@@ -21,36 +21,34 @@
 
 #pragma once
 
-#include <brayns/network/client/ClientRequest.h>
-#include <brayns/network/entrypoint/EntrypointRegistry.h>
-#include <brayns/network/task/TaskManager.h>
+#include <exception>
+
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
 {
-/**
- * @brief Helper class to process a request.
- *
- */
-class RequestDispatcher
+class ErrorHandler
 {
 public:
-    /**
-     * @brief Construct a dispatcher with dependencies.
-     *
-     * @param entrypoints Available entrypoints to process request.
-     * @param tasks Task queue if the request processing must be delayed.
-     */
-    RequestDispatcher(const EntrypointRegistry &entrypoints, TaskManager &tasks);
-
-    /**
-     * @brief Dispatch client request to entrypoints or create a task.
-     *
-     * @param request Raw client request.
-     */
-    void dispatch(ClientRequest request);
-
-private:
-    const EntrypointRegistry &_entrypoints;
-    TaskManager &_tasks;
+    template<typename RequestType>
+    static void reply(const RequestType &request)
+    {
+        try
+        {
+            _entrypoint.onRequest(_request);
+        }
+        catch (const JsonRpcException &e)
+        {
+            _request.error(e);
+        }
+        catch (const std::exception &e)
+        {
+            _request.error(InternalError(e.what()));
+        }
+        catch (...)
+        {
+            _request.error(InternalError("Unknown error"));
+        }
+    }
 };
 } // namespace brayns

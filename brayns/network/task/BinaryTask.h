@@ -23,34 +23,58 @@
 
 #include <brayns/network/client/ClientRequest.h>
 #include <brayns/network/entrypoint/EntrypointRegistry.h>
-#include <brayns/network/task/TaskManager.h>
+
+#include "ITask.h"
 
 namespace brayns
 {
-/**
- * @brief Helper class to process a request.
- *
- */
-class RequestDispatcher
+class BinaryTask : public ITask
 {
 public:
     /**
-     * @brief Construct a dispatcher with dependencies.
+     * @brief Construct a task to process the given binary request.
      *
-     * @param entrypoints Available entrypoints to process request.
-     * @param tasks Task queue if the request processing must be delayed.
+     * @param request Binary request to process.
+     * @param entrypoints Entrypoints notified by request.
      */
-    RequestDispatcher(const EntrypointRegistry &entrypoints, TaskManager &tasks);
+    BinaryTask(ClientRequest request, const EntrypointRegistry &entrypoints);
 
     /**
-     * @brief Dispatch client request to entrypoints or create a task.
+     * @brief Get the client who sent the request.
      *
-     * @param request Raw client request.
+     * @return const ClientRef& Client ref.
      */
-    void dispatch(ClientRequest request);
+    virtual const ClientRef &getClient() const override;
+
+    /**
+     * @brief Return an empty ID.
+     *
+     * @return const RequestId& Empty ID.
+     */
+    virtual const RequestId &getId() const override;
+
+    /**
+     * @brief Return an empty string.
+     *
+     * @return const std::string& No methods.
+     */
+    virtual const std::string &getMethod() const override;
+
+    /**
+     * @brief Notify entrypoints with onBinary(request).
+     *
+     */
+    virtual void run() override;
+
+    /**
+     * @brief Always throw.
+     *
+     * @throw TaskNotCancellableException Task not cancellable.
+     */
+    virtual void cancel() override;
 
 private:
+    ClientRequest _request;
     const EntrypointRegistry &_entrypoints;
-    TaskManager &_tasks;
 };
 } // namespace brayns

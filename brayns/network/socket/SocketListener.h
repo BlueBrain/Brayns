@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * Responsible Author: adrien.fleury@epfl.ch
@@ -21,35 +21,53 @@
 
 #pragma once
 
-#include <brayns/network/client/ClientRequest.h>
+#include <brayns/network/client/ClientManager.h>
 #include <brayns/network/entrypoint/EntrypointRegistry.h>
 #include <brayns/network/task/TaskManager.h>
+
+#include "ISocketListener.h"
 
 namespace brayns
 {
 /**
- * @brief Helper class to process a request.
+ * @brief Socket listener implementation.
  *
  */
-class RequestDispatcher
+class SocketListener : public ISocketListener
 {
 public:
     /**
-     * @brief Construct a dispatcher with dependencies.
+     * @brief Construct a listener with dependencies.
      *
-     * @param entrypoints Available entrypoints to process request.
-     * @param tasks Task queue if the request processing must be delayed.
+     * @param clients Client pool to update.
+     * @param entrypoints Entrypoints to process requests.
+     * @param tasks Tasks to schedule request processing.
      */
-    RequestDispatcher(const EntrypointRegistry &entrypoints, TaskManager &tasks);
+    SocketListener(ClientManager &clients, const EntrypointRegistry &entrypoints, TaskManager &tasks);
 
     /**
-     * @brief Dispatch client request to entrypoints or create a task.
+     * @brief Register new client and notify entrypoints.
+     *
+     * @param client Client ref.
+     */
+    virtual void onConnect(const ClientRef &client) override;
+
+    /**
+     * @brief Notify entrypoints and remove client.
+     *
+     * @param client Client ref.
+     */
+    virtual void onDisconnect(const ClientRef &client) override;
+
+    /**
+     * @brief Dispatch request to entrypoints.
      *
      * @param request Raw client request.
      */
-    void dispatch(ClientRequest request);
+    virtual void onRequest(ClientRequest request) override;
 
 private:
+    ClientManager &_clients;
     const EntrypointRegistry &_entrypoints;
     TaskManager &_tasks;
 };

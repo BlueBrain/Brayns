@@ -33,13 +33,13 @@ set(BRAYNSNETWORK_HEADERS
   client/ClientSender.h
   common/CancellationToken.h
   common/Clock.h
+  common/ErrorHandler.h
   common/ExtractMaterial.h
   common/ExtractModel.h
   common/FrameExporter.h
   common/ProgressHandler.h
   common/PropertyObjectSchema.h
   common/RateLimiter.h
-  dispatch/CurrentEntrypoint.h
   dispatch/RequestDispatcher.h
   entrypoint/Entrypoint.h
   entrypoint/EntrypointBuilder.h
@@ -125,9 +125,14 @@ set(BRAYNSNETWORK_HEADERS
   socket/ClientSocket.h
   socket/ISocket.h
   socket/ServerSocket.h
+  socket/SocketListener.h
   socket/SocketManager.h
   stream/StreamManager.h
   stream/StreamMonitor.h
+  task/BinaryTask.h
+  task/ITask.h
+  task/JsonRpcTask.h
+  task/TaskManager.h
   websocket/InputPacket.h
   websocket/OutputPacket.h
   websocket/WebSocket.h
@@ -148,7 +153,6 @@ set(BRAYNSNETWORK_SOURCES
   common/FrameExporter.cpp
   common/PropertyObjectSchema.cpp
   common/RateLimiter.cpp
-  dispatch/CurrentEntrypoint.cpp
   dispatch/RequestDispatcher.cpp
   entrypoint/EntrypointFinder.cpp
   entrypoint/EntrypointRegistry.cpp
@@ -208,9 +212,13 @@ set(BRAYNSNETWORK_SOURCES
   plugin/NetworkManager.cpp
   socket/ClientSocket.cpp
   socket/ServerSocket.cpp
+  socket/SocketListener.cpp
   socket/SocketManager.cpp
   stream/StreamManager.cpp
   stream/StreamMonitor.cpp
+  task/BinaryTask.cpp
+  task/JsonRpcTask.cpp
+  task/TaskManager.cpp
   websocket/InputPacket.cpp
   websocket/OutputPacket.cpp
   websocket/WebSocket.cpp

@@ -53,7 +53,7 @@ public:
      *
      * @param operation Current operation description.
      * @param amount Current progress amount [0-1].
-     * @throw MethodCancelledException Request has been cancelled.
+     * @throw TaskCancelledException Request has been cancelled.
      */
     void notify(const std::string &operation, double amount) const
     {
