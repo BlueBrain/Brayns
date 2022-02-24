@@ -30,7 +30,7 @@ SchemaEntrypoint::SchemaEntrypoint(const EntrypointRegistry &entrypoints)
 {
 }
 
-std::string SchemaEntrypoint::getName() const
+std::string SchemaEntrypoint::getMethod() const
 {
     return "schema";
 }

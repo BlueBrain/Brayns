@@ -31,7 +31,7 @@ UpdateInstanceEntrypoint::UpdateInstanceEntrypoint(Scene &scene)
 {
 }
 
-std::string UpdateInstanceEntrypoint::getName() const
+std::string UpdateInstanceEntrypoint::getMethod() const
 {
     return "update-instance";
 }

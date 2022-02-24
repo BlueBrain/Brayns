@@ -28,7 +28,7 @@ GetStatisticsEntrypoint::GetStatisticsEntrypoint(const Statistics &statistics)
 {
 }
 
-std::string GetStatisticsEntrypoint::getName() const
+std::string GetStatisticsEntrypoint::getMethod() const
 {
     return "get-statistics";
 }

@@ -28,7 +28,7 @@ GetSceneEntrypoint::GetSceneEntrypoint(const Scene &scene)
 {
 }
 
-std::string GetSceneEntrypoint::getName() const
+std::string GetSceneEntrypoint::getMethod() const
 {
     return "get-scene";
 }
@@ -43,7 +43,7 @@ SetSceneEntrypoint::SetSceneEntrypoint(Scene &scene)
 {
 }
 
-std::string SetSceneEntrypoint::getName() const
+std::string SetSceneEntrypoint::getMethod() const
 {
     return "set-scene";
 }

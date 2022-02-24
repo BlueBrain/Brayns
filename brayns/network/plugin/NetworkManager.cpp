@@ -83,8 +83,6 @@ class CoreEntrypointRegistry
 public:
     static void registerEntrypoints(brayns::NetworkContext &context)
     {
-        brayns::EntrypointBuilder builder("Core", interface);
-
         auto &api = *context.api;
         auto &interface = *context.interface;
 
@@ -105,9 +103,11 @@ public:
 
         auto &entrypoints = context.entrypoints;
         auto &tasks = context.tasks;
-        auto &modelUploads = context.modelUploads;
         auto &stream = context.stream;
         auto &monitor = stream.getMonitor();
+
+        brayns::CancellationToken token(interface);
+        brayns::EntrypointBuilder builder("Core", interface);
 
         builder.add<brayns::AddClipPlaneEntrypoint>(scene);
         builder.add<brayns::AddLightAmbientEntrypoint>(lights);
@@ -115,12 +115,11 @@ public:
         builder.add<brayns::AddLightQuadEntrypoint>(lights);
         builder.add<brayns::AddLightSphereEntrypoint>(lights);
         builder.add<brayns::AddLightSpotEntrypoint>(lights);
-        builder.add<brayns::AddModelEntrypoint>(scene, loaders, interface);
+        builder.add<brayns::AddModelEntrypoint>(scene, loaders, token);
         builder.add<brayns::CancelEntrypoint>(tasks);
-        builder.add<brayns::ChunkEntrypoint>(modelUploads);
         builder.add<brayns::ClearLightsEntrypoint>(lights);
         builder.add<brayns::ExitLaterEntrypoint>(engine);
-        builder.add<brayns::ExportFramesEntrypoint>(engine, interface);
+        builder.add<brayns::ExportFramesEntrypoint>(engine, token);
         builder.add<brayns::GetAnimationParametersEntrypoint>(animation);
         builder.add<brayns::GetApplicationParametersEntrypoint>(application);
         builder.add<brayns::GetCameraEntrypoint>(camera);
@@ -147,7 +146,7 @@ public:
         builder.add<brayns::RemoveClipPlanesEntrypoint>(scene);
         builder.add<brayns::RemoveLightsEntrypoint>(lights);
         builder.add<brayns::RemoveModelEntrypoint>(scene);
-        builder.add<brayns::RequestModelUploadEntrypoint>(scene, loaders, modelUploads);
+        builder.add<brayns::RequestModelUploadEntrypoint>(scene, loaders, token);
         builder.add<brayns::ResetCameraEntrypoint>(camera);
         builder.add<brayns::SchemaEntrypoint>(entrypoints);
         builder.add<brayns::SetAnimationParametersEntrypoint>(animation);
@@ -294,8 +293,7 @@ private:
 namespace brayns
 {
 NetworkManager::NetworkManager()
-    : ExtensionPlugin("Core")
-    , _interface(_context.entrypoints, *_context.socket)
+    : _interface(_context.entrypoints, *_context.socket)
 {
     Log::info("Network plugin is enabled.");
 }
@@ -316,13 +314,13 @@ void NetworkManager::init()
     Log::info("Initializing network plugin.");
     _context.api = _api;
     _context.interface = &_interface;
-    NetworkInitialization::run(_context, *this);
+    NetworkInitialization::run(_context);
 }
 
 void NetworkManager::registerEntrypoints(INetworkInterface &interface)
 {
     (void)interface;
-    CoreEntrypointRegistry::registerEntrypoints(*_context);
+    CoreEntrypointRegistry::registerEntrypoints(_context);
 }
 
 void NetworkManager::preRender()

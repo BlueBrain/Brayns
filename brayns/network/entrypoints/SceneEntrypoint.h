@@ -31,7 +31,7 @@ class GetSceneEntrypoint : public GetEntrypoint<Scene>
 public:
     GetSceneEntrypoint(const Scene &scene);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 
@@ -40,7 +40,7 @@ class SetSceneEntrypoint : public SetEntrypoint<Scene>
 public:
     SetSceneEntrypoint(Scene &scene);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 } // namespace brayns

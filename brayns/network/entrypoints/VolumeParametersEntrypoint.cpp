@@ -28,7 +28,7 @@ GetVolumeParametersEntrypoint::GetVolumeParametersEntrypoint(const VolumeParamet
 {
 }
 
-std::string GetVolumeParametersEntrypoint::getName() const
+std::string GetVolumeParametersEntrypoint::getMethod() const
 {
     return "get-volume-parameters";
 }
@@ -43,7 +43,7 @@ SetVolumeParametersEntrypoint::SetVolumeParametersEntrypoint(VolumeParameters &p
 {
 }
 
-std::string SetVolumeParametersEntrypoint::getName() const
+std::string SetVolumeParametersEntrypoint::getMethod() const
 {
     return "set-volume-parameters";
 }
