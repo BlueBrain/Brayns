@@ -30,7 +30,7 @@ GetModelEntrypoint::GetModelEntrypoint(Scene &scene)
 {
 }
 
-std::string GetModelEntrypoint::getName() const
+std::string GetModelEntrypoint::getMethod() const
 {
     return "get-model";
 }

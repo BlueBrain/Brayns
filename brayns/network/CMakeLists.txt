@@ -11,7 +11,6 @@ set(BRAYNSNETWORK_HEADERS
   adapters/CameraAdapter.h
   adapters/ClipPlaneAdapter.h
   adapters/ColorMapAdapter.h
-  adapters/FrameExportAdapter.h
   adapters/LightAdapter.h
   adapters/LoaderInfoAdapter.h
   adapters/ModelDescriptorAdapter.h
@@ -36,7 +35,6 @@ set(BRAYNSNETWORK_HEADERS
   common/ErrorHandler.h
   common/ExtractMaterial.h
   common/ExtractModel.h
-  common/FrameExporter.h
   common/ProgressHandler.h
   common/PropertyObjectSchema.h
   common/RateLimiter.h
@@ -58,13 +56,10 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/CameraEntrypoint.h
   entrypoints/CameraParamsEntrypoint.h
   entrypoints/CancelEntrypoint.h
-  entrypoints/ChunkEntrypoint.h
   entrypoints/ClearLightsEntrypoint.h
   entrypoints/ExitLaterEntrypoint.h
   entrypoints/ExportFramesEntrypoint.h
-  entrypoints/ExportFramesToDiskEntryPoint.h
   entrypoints/GetClipPlanesEntrypoint.h
-  entrypoints/GetExportFramesProgressEntrypoint.h
   entrypoints/GetInstancesEntrypoint.h
   entrypoints/GetLightsEntrypoint.h
   entrypoints/GetLoadersEntrypoint.h
@@ -104,7 +99,6 @@ set(BRAYNSNETWORK_HEADERS
   jsonrpc/JsonRpcSender.h
   jsonrpc/RequestId.h
   messages/AddClipPlaneMessage.h
-  messages/ChunkMessage.h
   messages/ExitLaterMessage.h
   messages/ExportFramesMessage.h
   messages/GetExportFramesProgressMessage.h
@@ -150,7 +144,6 @@ set(BRAYNSNETWORK_SOURCES
   common/CancellationToken.cpp
   common/ExtractMaterial.cpp
   common/ExtractModel.cpp
-  common/FrameExporter.cpp
   common/PropertyObjectSchema.cpp
   common/RateLimiter.cpp
   dispatch/RequestDispatcher.cpp
@@ -165,13 +158,10 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/CameraEntrypoint.cpp
   entrypoints/CameraParamsEntrypoint.cpp
   entrypoints/CancelEntrypoint.cpp
-  entrypoints/ChunkEntrypoint.cpp
   entrypoints/ClearLightsEntrypoint.cpp
   entrypoints/ExitLaterEntrypoint.cpp
   entrypoints/ExportFramesEntrypoint.cpp
-  entrypoints/ExportFramesToDiskEntryPoint.cpp
   entrypoints/GetClipPlanesEntrypoint.cpp
-  entrypoints/GetExportFramesProgressEntrypoint.cpp
   entrypoints/GetInstancesEntrypoint.cpp
   entrypoints/GetLightsEntrypoint.cpp
   entrypoints/GetLoadersEntrypoint.cpp

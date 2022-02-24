@@ -21,47 +21,29 @@
 
 #pragma once
 
-#include <chrono>
+#include <optional>
 
 #include <brayns/engine/Engine.h>
 
+#include <brayns/network/common/Clock.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/ExitLaterMessage.h>
-#include <brayns/network/tasks/Task.h>
-#include <brayns/network/tasks/TaskMonitor.h>
 
 namespace brayns
 {
-class ExitLaterTask : public Task
-{
-public:
-    ExitLaterTask(Engine &engine);
-    virtual ~ExitLaterTask();
-
-    void quitAfter(std::chrono::minutes duration);
-
-protected:
-    virtual void run() override;
-    virtual void onComplete() override;
-    virtual void onCancel() override;
-
-private:
-    Engine &_engine;
-    TaskMonitor _monitor;
-    std::chrono::minutes _duration;
-};
-
 class ExitLaterEntrypoint : public Entrypoint<ExitLaterMessage, EmptyMessage>
 {
 public:
     ExitLaterEntrypoint(Engine &engine);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
     virtual void onPreRender() override;
 
 private:
-    ExitLaterTask _task;
+    Engine &_engine;
+    std::optional<TimePoint> _start;
+    std::optional<Duration> _duration;
 };
 } // namespace brayns

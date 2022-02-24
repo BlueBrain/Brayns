@@ -23,44 +23,12 @@
 
 namespace brayns
 {
-ExitLaterTask::ExitLaterTask(Engine &engine)
+ExitLaterEntrypoint::ExitLaterEntrypoint(Engine &engine)
     : _engine(engine)
 {
 }
 
-ExitLaterTask::~ExitLaterTask()
-{
-    _monitor.notify();
-}
-
-void ExitLaterTask::quitAfter(std::chrono::minutes duration)
-{
-    cancelAndWait();
-    _duration = duration;
-    start();
-}
-
-void ExitLaterTask::run()
-{
-    _monitor.wait(_duration);
-}
-
-void ExitLaterTask::onComplete()
-{
-    _engine.setKeepRunning(false);
-}
-
-void ExitLaterTask::onCancel()
-{
-    _monitor.notify();
-}
-
-ExitLaterEntrypoint::ExitLaterEntrypoint(Engine &engine)
-    : _task(engine)
-{
-}
-
-std::string ExitLaterEntrypoint::getName() const
+std::string ExitLaterEntrypoint::getMethod() const
 {
     return "exit-later";
 }
@@ -73,13 +41,24 @@ std::string ExitLaterEntrypoint::getDescription() const
 void ExitLaterEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto duration = std::chrono::minutes(params.minutes);
-    _task.quitAfter(duration);
+    _start = Clock::now();
+    _duration = std::chrono::minutes(params.minutes);
     request.reply(EmptyMessage());
 }
 
 void ExitLaterEntrypoint::onPreRender()
 {
-    _task.poll();
+    if (!_start || !_duration)
+    {
+        return;
+    }
+    auto duration = Clock::now() - *_start;
+    if (duration < *_duration)
+    {
+        return;
+    }
+    _engine.setKeepRunning(false);
+    _start = std::nullopt;
+    _duration = std::nullopt;
 }
 } // namespace brayns

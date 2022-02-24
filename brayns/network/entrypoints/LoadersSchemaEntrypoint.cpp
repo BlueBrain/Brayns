@@ -57,7 +57,7 @@ LoadersSchemaEntrypoint::LoadersSchemaEntrypoint(const LoaderRegistry &loaders)
 {
 }
 
-std::string LoadersSchemaEntrypoint::getName() const
+std::string LoadersSchemaEntrypoint::getMethod() const
 {
     return "loaders-schema";
 }

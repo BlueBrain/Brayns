@@ -32,7 +32,7 @@ class GetRendererParamsEntrypoint : public GetPropertyObjectEntrypoint<Renderer>
 public:
     GetRendererParamsEntrypoint(const Renderer &renderer);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 
@@ -41,7 +41,7 @@ class SetRendererParamsEntrypoint : public SetPropertyObjectEntrypoint<Renderer>
 public:
     SetRendererParamsEntrypoint(Renderer &renderer);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 } // namespace brayns

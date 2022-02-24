@@ -23,7 +23,6 @@
 
 #include <brayns/network/client/ClientManager.h>
 #include <brayns/network/client/RequestBuffer.h>
-#include <brayns/network/common/FrameExporter.h>
 #include <brayns/network/entrypoint/EntrypointRegistry.h>
 #include <brayns/network/interface/NetworkInterface.h>
 #include <brayns/network/socket/ISocket.h>
@@ -43,7 +42,6 @@ struct NetworkContext
     EntrypointRegistry entrypoints;
     StreamManager stream;
     TaskManager tasks;
-    FrameExporter frameExporter;
 };
 
 /**

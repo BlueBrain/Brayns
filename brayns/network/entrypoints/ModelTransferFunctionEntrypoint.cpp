@@ -30,7 +30,7 @@ GetModelTransferFunctionEntrypoint::GetModelTransferFunctionEntrypoint(Scene &sc
 {
 }
 
-std::string GetModelTransferFunctionEntrypoint::getName() const
+std::string GetModelTransferFunctionEntrypoint::getMethod() const
 {
     return "get-model-transfer-function";
 }
@@ -54,7 +54,7 @@ SetModelTransferFunctionEntrypoint::SetModelTransferFunctionEntrypoint(Scene &sc
 {
 }
 
-std::string SetModelTransferFunctionEntrypoint::getName() const
+std::string SetModelTransferFunctionEntrypoint::getMethod() const
 {
     return "set-model-transfer-function";
 }

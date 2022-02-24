@@ -28,7 +28,7 @@ RemoveLightsEntrypoint::RemoveLightsEntrypoint(LightManager &lights)
 {
 }
 
-std::string RemoveLightsEntrypoint::getName() const
+std::string RemoveLightsEntrypoint::getMethod() const
 {
     return "remove-lights";
 }

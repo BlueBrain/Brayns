@@ -21,12 +21,10 @@
 
 #include "CancelEntrypoint.h"
 
-#include <brayns/network/jsonrpc/JsonRpcException.h>
-
 namespace brayns
 {
-CancelEntrypoint::CancelEntrypoint(CurrentEntrypoint &entrypoint)
-    : _entrypoint(entrypoint)
+CancelEntrypoint::CancelEntrypoint(TaskManager &tasks)
+    : _tasks(tasks)
 {
 }
 

@@ -21,7 +21,6 @@
 
 #include "BinaryTask.h"
 
-#include <brayns/network/common/ErrorHandler.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace
@@ -55,18 +54,7 @@ const std::string &BinaryTask::getMethod() const
 
 void BinaryTask::run()
 {
-    _entrypoints.forEach(
-        [this](auto &entrypoint)
-        {
-            try
-            {
-                entrypoint.onBinary(_request);
-            }
-            catch (...)
-            {
-                ErrorHandler::reply(_request);
-            }
-        });
+    _entrypoints.forEach([this](auto &entrypoint) { entrypoint.onBinary(_request); });
 }
 
 void BinaryTask::cancel()

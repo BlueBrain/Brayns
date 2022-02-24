@@ -28,7 +28,7 @@ RemoveClipPlanesEntrypoint::RemoveClipPlanesEntrypoint(Scene &scene)
 {
 }
 
-std::string RemoveClipPlanesEntrypoint::getName() const
+std::string RemoveClipPlanesEntrypoint::getMethod() const
 {
     return "remove-clip-planes";
 }

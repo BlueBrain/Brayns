@@ -33,7 +33,7 @@ class GetLoadersEntrypoint : public Entrypoint<EmptyMessage, std::vector<LoaderI
 public:
     GetLoadersEntrypoint(const LoaderRegistry &loaders);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 

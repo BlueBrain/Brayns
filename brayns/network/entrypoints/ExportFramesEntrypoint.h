@@ -22,6 +22,7 @@
 
 #include <brayns/engine/Engine.h>
 
+#include <brayns/network/common/CancellationToken.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/ExportFramesMessage.h>
 
@@ -30,14 +31,16 @@ namespace brayns
 class ExportFramesEntrypoint : public Entrypoint<ExportFramesParams, ExportFramesResult>
 {
 public:
-    ExportFramesEntrypoint(Engine &engine);
+    ExportFramesEntrypoint(Engine &engine, CancellationToken token);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual bool isAsync() const override;
     virtual void onRequest(const Request &request) override;
+    virtual void onCancel() override;
 
 private:
     Engine &_engine;
+    CancellationToken _token;
 };
 } // namespace brayns

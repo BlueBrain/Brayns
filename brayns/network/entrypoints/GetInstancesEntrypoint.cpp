@@ -32,7 +32,7 @@ GetInstancesEntrypoint::GetInstancesEntrypoint(Scene &scene)
 {
 }
 
-std::string GetInstancesEntrypoint::getName() const
+std::string GetInstancesEntrypoint::getMethod() const
 {
     return "get-instances";
 }

@@ -31,7 +31,7 @@ ImageJpegEntrypoint::ImageJpegEntrypoint(const ApplicationParameters &parameters
 {
 }
 
-std::string ImageJpegEntrypoint::getName() const
+std::string ImageJpegEntrypoint::getMethod() const
 {
     return "image-jpeg";
 }

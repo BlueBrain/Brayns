@@ -30,7 +30,7 @@ GetModelPropertiesEntrypoint::GetModelPropertiesEntrypoint(Scene &scene)
 {
 }
 
-std::string GetModelPropertiesEntrypoint::getName() const
+std::string GetModelPropertiesEntrypoint::getMethod() const
 {
     return "get-model-properties";
 }
@@ -53,7 +53,7 @@ SetModelPropertiesEntrypoint::SetModelPropertiesEntrypoint(Scene &scene)
 {
 }
 
-std::string SetModelPropertiesEntrypoint::getName() const
+std::string SetModelPropertiesEntrypoint::getMethod() const
 {
     return "set-model-properties";
 }
@@ -80,7 +80,7 @@ ModelPropertiesSchemaEntrypoint::ModelPropertiesSchemaEntrypoint(Scene &scene)
 {
 }
 
-std::string ModelPropertiesSchemaEntrypoint::getName() const
+std::string ModelPropertiesSchemaEntrypoint::getMethod() const
 {
     return "model-properties-schema";
 }

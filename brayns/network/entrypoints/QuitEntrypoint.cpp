@@ -28,7 +28,7 @@ QuitEntrypoint::QuitEntrypoint(Engine &engine)
 {
 }
 
-std::string QuitEntrypoint::getName() const
+std::string QuitEntrypoint::getMethod() const
 {
     return "quit";
 }

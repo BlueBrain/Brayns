@@ -42,13 +42,10 @@
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
 #include <brayns/network/entrypoints/CameraParamsEntrypoint.h>
 #include <brayns/network/entrypoints/CancelEntrypoint.h>
-#include <brayns/network/entrypoints/ChunkEntrypoint.h>
 #include <brayns/network/entrypoints/ClearLightsEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
 #include <brayns/network/entrypoints/ExportFramesEntrypoint.h>
-#include <brayns/network/entrypoints/ExportFramesToDiskEntryPoint.h>
 #include <brayns/network/entrypoints/GetClipPlanesEntrypoint.h>
-#include <brayns/network/entrypoints/GetExportFramesProgressEntrypoint.h>
 #include <brayns/network/entrypoints/GetInstancesEntrypoint.h>
 #include <brayns/network/entrypoints/GetLightsEntrypoint.h>
 #include <brayns/network/entrypoints/GetLoadersEntrypoint.h>
@@ -106,7 +103,6 @@ public:
 
         auto &loaders = api.getLoaderRegistry();
 
-        auto &exporter = context.frameExporter;
         auto &entrypoints = context.entrypoints;
         auto &tasks = context.tasks;
         auto &modelUploads = context.modelUploads;
@@ -125,13 +121,11 @@ public:
         builder.add<brayns::ClearLightsEntrypoint>(lights);
         builder.add<brayns::ExitLaterEntrypoint>(engine);
         builder.add<brayns::ExportFramesEntrypoint>(engine, interface);
-        builder.add<brayns::ExportFramesToDiskEntrypoint>(parameters, engine, exporter);
         builder.add<brayns::GetAnimationParametersEntrypoint>(animation);
         builder.add<brayns::GetApplicationParametersEntrypoint>(application);
         builder.add<brayns::GetCameraEntrypoint>(camera);
         builder.add<brayns::GetCameraParamsEntrypoint>(camera);
         builder.add<brayns::GetClipPlanesEntrypoint>(scene);
-        builder.add<brayns::GetExportFramesProgressEntrypoint>(exporter);
         builder.add<brayns::GetInstancesEntrypoint>(scene);
         builder.add<brayns::GetLightsEntrypoint>(lights);
         builder.add<brayns::GetLoadersEntrypoint>(loaders);
