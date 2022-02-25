@@ -78,7 +78,7 @@ brain::GIDSet
     if (!input.targets.empty())
         targets = input.targets;
     else if (const auto defaultTarget = config.getCircuitTarget(); !defaultTarget.empty())
-        targets = {config.getCircuitTarget()};
+        targets = {defaultTarget};
 
     brain::GIDSet allGids;
     if (!targets.empty())
