@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <ostream>
+
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 #include <brayns/network/websocket/InputPacket.h>
 
@@ -87,3 +89,8 @@ private:
     InputPacket _packet;
 };
 } // namespace brayns
+
+namespace std
+{
+std::ostream &operator<<(std::ostream &stream, const brayns::ClientRequest &request);
+} // namespace std

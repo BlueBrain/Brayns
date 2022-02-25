@@ -21,19 +21,21 @@
 
 #include "BinaryTask.h"
 
+#include <brayns/common/Log.h>
+
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace
 {
 static const brayns::RequestId emptyId;
-static const std::string emptyMethod;
+static const std::string binaryMethod = "<binary request>";
 } // namespace
 
 namespace brayns
 {
-BinaryTask::BinaryTask(ClientRequest request, const EntrypointRegistry &entrypoints)
+BinaryTask::BinaryTask(ClientRequest request, BinaryManager &binary)
     : _request(std::move(request))
-    , _entrypoints(entrypoints)
+    , _binary(binary)
 {
 }
 
@@ -49,16 +51,18 @@ const RequestId &BinaryTask::getId() const
 
 const std::string &BinaryTask::getMethod() const
 {
-    return emptyMethod;
+    return binaryMethod;
 }
 
 void BinaryTask::run()
 {
-    _entrypoints.forEach([this](auto &entrypoint) { entrypoint.onBinary(_request); });
+    Log::info("Buffering binary request {}.", _request);
+    _binary.add(std::move(_request));
 }
 
 void BinaryTask::cancel()
 {
-    throw TaskNotCancellableException();
+    Log::error("Trying to cancel a binary request.");
+    throw TaskNotCancellableException(binaryMethod);
 }
 } // namespace brayns

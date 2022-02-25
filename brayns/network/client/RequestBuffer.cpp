@@ -21,6 +21,8 @@
 
 #include "RequestBuffer.h"
 
+#include <algorithm>
+
 namespace brayns
 {
 void RequestBuffer::add(ClientRequest request)
@@ -32,8 +34,6 @@ void RequestBuffer::add(ClientRequest request)
 std::vector<ClientRequest> RequestBuffer::poll()
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    auto requests = std::move(_requests);
-    _requests.clear();
-    return requests;
+    return std::exchange(_requests, {});
 }
 } // namespace brayns

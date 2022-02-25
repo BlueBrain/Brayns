@@ -23,6 +23,7 @@
 
 #include <functional>
 #include <memory>
+#include <ostream>
 #include <string>
 
 #include <brayns/network/websocket/WebSocket.h>

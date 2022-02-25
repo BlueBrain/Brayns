@@ -25,6 +25,7 @@ set(BRAYNSNETWORK_HEADERS
   adapters/TransformationAdapter.h
   adapters/UpdateModelAdapter.h
   adapters/VolumeParametersAdapter.h
+  binary/BinaryManager.h
   client/ClientBuffer.h
   client/ClientManager.h
   client/ClientRef.h
@@ -32,7 +33,6 @@ set(BRAYNSNETWORK_HEADERS
   client/ClientSender.h
   common/CancellationToken.h
   common/Clock.h
-  common/ErrorHandler.h
   common/ExtractMaterial.h
   common/ExtractModel.h
   common/ProgressHandler.h
@@ -93,6 +93,7 @@ set(BRAYNSNETWORK_HEADERS
   interface/NetworkInterface.h
   jsonrpc/JsonRpcException.h
   jsonrpc/JsonRpcFactory.h
+  jsonrpc/JsonRpcHandler.h
   jsonrpc/JsonRpcMessages.h
   jsonrpc/JsonRpcRequest.h
   jsonrpc/JsonRpcParser.h
@@ -101,7 +102,6 @@ set(BRAYNSNETWORK_HEADERS
   messages/AddClipPlaneMessage.h
   messages/ExitLaterMessage.h
   messages/ExportFramesMessage.h
-  messages/GetExportFramesProgressMessage.h
   messages/GetInstancesMessage.h
   messages/GetModelMessage.h
   messages/ImageBase64Message.h
@@ -135,6 +135,7 @@ set(BRAYNSNETWORK_HEADERS
 set(BRAYNSNETWORK_SOURCES
   adapters/ModelTransferFunctionAdapter.cpp
   adapters/UpdateModelAdapter.cpp
+  binary/BinaryManager.cpp
   client/ClientBuffer.cpp
   client/ClientManager.cpp
   client/ClientRef.cpp
@@ -194,6 +195,7 @@ set(BRAYNSNETWORK_SOURCES
   interface/NetworkInterface.cpp
   jsonrpc/JsonRpcException.cpp
   jsonrpc/JsonRpcFactory.cpp
+  jsonrpc/JsonRpcHandler.cpp
   jsonrpc/JsonRpcRequest.cpp
   jsonrpc/JsonRpcParser.cpp
   jsonrpc/JsonRpcSender.cpp

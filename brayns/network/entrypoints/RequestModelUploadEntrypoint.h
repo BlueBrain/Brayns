@@ -29,6 +29,7 @@
 
 #include <brayns/network/adapters/BinaryParamAdapter.h>
 #include <brayns/network/adapters/ModelDescriptorAdapter.h>
+#include <brayns/network/binary/BinaryManager.h>
 #include <brayns/network/common/CancellationToken.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -37,21 +38,27 @@ namespace brayns
 class RequestModelUploadEntrypoint : public Entrypoint<BinaryParam, std::vector<ModelDescriptorPtr>>
 {
 public:
-    RequestModelUploadEntrypoint(Scene &scene, const LoaderRegistry &loaders, CancellationToken token);
+    RequestModelUploadEntrypoint(
+        Scene &scene,
+        const LoaderRegistry &loaders,
+        BinaryManager &binary,
+        CancellationToken token);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual bool isAsync() const override;
     virtual void onRequest(const Request &request) override;
-    virtual void onBinary(const ClientRequest &request) override;
+    virtual void onPreRender() override;
     virtual void onCancel() override;
     virtual void onDisconnect(const ClientRef &client) override;
 
 private:
     Scene &_scene;
     const LoaderRegistry &_loaders;
+    BinaryManager &_binary;
     CancellationToken _token;
     std::optional<Request> _request;
     BinaryParam _params;
+    const AbstractLoader *_loader = nullptr;
 };
 } // namespace brayns

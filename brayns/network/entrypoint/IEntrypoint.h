@@ -25,7 +25,6 @@
 
 #include <brayns/json/JsonSchema.h>
 
-#include <brayns/network/client/ClientRequest.h>
 #include <brayns/network/jsonrpc/JsonRpcRequest.h>
 
 namespace brayns
@@ -71,6 +70,7 @@ public:
      * @brief Called when a JSON-RPC request is received for this method.
      *
      * @param request Client request.
+     * @throw JsonRpcException Will be catched and replied as error.
      */
     virtual void onRequest(const JsonRpcRequest &request) = 0;
 
@@ -122,16 +122,6 @@ public:
      */
     virtual void onPostRender()
     {
-    }
-
-    /**
-     * @brief Called on all entrypoints when a binary request is received.
-     *
-     * @param request Client binary request.
-     */
-    virtual void onBinary(const ClientRequest &request)
-    {
-        (void)request;
     }
 
     /**

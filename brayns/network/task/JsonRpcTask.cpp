@@ -21,10 +21,12 @@
 
 #include "JsonRpcTask.h"
 
+#include <brayns/common/Log.h>
+
 #include <cassert>
 
-#include <brayns/network/common/ErrorHandler.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
+#include <brayns/network/jsonrpc/JsonRpcHandler.h>
 
 namespace brayns
 {
@@ -52,22 +54,25 @@ const std::string &JsonRpcTask::getMethod() const
 
 void JsonRpcTask::run()
 {
-    try
+    Log::info("Execute JSON-RPC request {}.", _request);
+    if (_cancelled)
     {
-        _entrypoint.onRequest(_request);
+        Log::info("Request {} cancelled before start.", _request);
+        _request.reply(TaskCancelledException());
     }
-    catch (...)
-    {
-        ErrorHandler::reply(_request);
-    }
+    JsonRpcHandler::handle(_request, _entrypoint);
 }
 
 void JsonRpcTask::cancel()
 {
+    Log::info("Cancel JSON-RPC request {}.", _request);
     if (!_entrypoint.isAsync())
     {
-        throw TaskNotCancellableException();
+        Log::info("Entrypoint does not support cancellation.");
+        auto &method = _request.getMethod();
+        throw TaskNotCancellableException(method);
     }
+    _cancelled = true;
     _entrypoint.onCancel();
 }
 } // namespace brayns

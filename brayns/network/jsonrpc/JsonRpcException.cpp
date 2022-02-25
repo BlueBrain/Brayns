@@ -84,13 +84,13 @@ InternalErrorException::InternalErrorException(const std::string &message)
 {
 }
 
-TaskNotCancellableException::TaskNotCancellableException()
-    : JsonRpcException(20, "Task is not asynchronous and cannot be cancelled")
+TaskNotCancellableException::TaskNotCancellableException(const std::string &method)
+    : JsonRpcException(20, "Task with method '" + method + "' is not asynchronous and cannot be cancelled")
 {
 }
 
-TaskNotFoundException::TaskNotFoundException()
-    : JsonRpcException(21, "No tasks found with this request ID")
+TaskNotFoundException::TaskNotFoundException(const std::string &id)
+    : JsonRpcException(21, "No tasks found with request ID " + id)
 {
 }
 
@@ -99,3 +99,11 @@ TaskCancelledException::TaskCancelledException()
 {
 }
 } // namespace brayns
+
+namespace std
+{
+std::ostream &operator<<(std::ostream &stream, const brayns::JsonRpcException &e)
+{
+    stream << "{code = " << e.getCode() << ", message = '" << e.what() << "'}";
+}
+} // namespace std

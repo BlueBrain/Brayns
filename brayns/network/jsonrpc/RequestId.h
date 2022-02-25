@@ -22,6 +22,7 @@
 #pragma once
 
 #include <functional>
+#include <ostream>
 #include <typeindex>
 
 #include <brayns/json/JsonAdapter.h>

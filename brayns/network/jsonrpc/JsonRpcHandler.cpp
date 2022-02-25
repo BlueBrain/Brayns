@@ -19,21 +19,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClientBuffer.h"
+#include "JsonRpcHandler.h"
 
-#include <algorithm>
+#include <brayns/common/Log.h>
+
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
 {
-void ClientBuffer::add(ClientRef client)
+void JsonRpcHandler::handle(const JsonRpcRequest &request, const EntrypointRef &entrypoint)
 {
-    std::lock_guard<std::mutex> lock(_mutex);
-    _clients.emplace_back(std::move(client));
-}
-
-std::vector<ClientRef> ClientBuffer::poll()
-{
-    std::lock_guard<std::mutex> lock(_mutex);
-    return std::exchange(_clients, {});
+    Log::info("Execution of request {} from entrypoint.", request);
+    try
+    {
+        entrypoint.onRequest(request);
+        Log::info("Request {} executed with success.", request);
+    }
+    catch (const JsonRpcException &e)
+    {
+        Log::info("Request {} execution error: {}.", request, e);
+        request.error(e);
+    }
+    catch (const std::exception &e)
+    {
+        Log::error("Unexpected entrypoint error during execution of request {}: '{}'.", request, e.what());
+        request.error(InternalErrorException(e.what()));
+    }
+    catch (...)
+    {
+        Log::error("Unknown entrypoint error during execution of request {}.", request);
+        request.error(InternalErrorException("Unknown error"));
+    }
 }
 } // namespace brayns

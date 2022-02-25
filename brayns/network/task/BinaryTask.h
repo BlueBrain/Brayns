@@ -21,8 +21,8 @@
 
 #pragma once
 
+#include <brayns/network/binary/BinaryManager.h>
 #include <brayns/network/client/ClientRequest.h>
-#include <brayns/network/entrypoint/EntrypointRegistry.h>
 
 #include "ITask.h"
 
@@ -35,9 +35,9 @@ public:
      * @brief Construct a task to process the given binary request.
      *
      * @param request Binary request to process.
-     * @param entrypoints Entrypoints notified by request.
+     * @param binary Binary manager to buffer the request.
      */
-    BinaryTask(ClientRequest request, const EntrypointRegistry &entrypoints);
+    BinaryTask(ClientRequest request, BinaryManager &binary);
 
     /**
      * @brief Get the client who sent the request.
@@ -54,14 +54,14 @@ public:
     virtual const RequestId &getId() const override;
 
     /**
-     * @brief Return an empty string.
+     * @brief Return a generic name.
      *
-     * @return const std::string& No methods.
+     * @return const std::string& Binary requests method.
      */
     virtual const std::string &getMethod() const override;
 
     /**
-     * @brief Notify entrypoints with onBinary(request).
+     * @brief Buffer request in binary manager.
      *
      */
     virtual void run() override;
@@ -75,6 +75,6 @@ public:
 
 private:
     ClientRequest _request;
-    const EntrypointRegistry &_entrypoints;
+    BinaryManager &_binary;
 };
 } // namespace brayns

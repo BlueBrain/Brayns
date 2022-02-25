@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <ostream>
 #include <stdexcept>
 
 #include <brayns/json/JsonType.h>
@@ -134,7 +135,7 @@ public:
 class TaskNotCancellableException : public JsonRpcException
 {
 public:
-    TaskNotCancellableException();
+    TaskNotCancellableException(const std::string &method);
 };
 
 /**
@@ -144,7 +145,7 @@ public:
 class TaskNotFoundException : public JsonRpcException
 {
 public:
-    TaskNotFoundException();
+    TaskNotFoundException(const std::string &id);
 };
 
 /**
@@ -157,3 +158,8 @@ public:
     TaskCancelledException();
 };
 } // namespace brayns
+
+namespace std
+{
+std::ostream &operator<<(std::ostream &stream, const brayns::JsonRpcException &e);
+} // namespace std

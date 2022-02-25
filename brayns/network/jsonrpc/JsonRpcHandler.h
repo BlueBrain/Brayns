@@ -19,21 +19,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClientBuffer.h"
+#pragma once
 
-#include <algorithm>
+#include <brayns/network/entrypoint/EntrypointRef.h>
+#include <brayns/network/jsonrpc/JsonRpcRequest.h>
 
 namespace brayns
 {
-void ClientBuffer::add(ClientRef client)
+/**
+ * @brief Helper class to pass a request to an entrypoint and handle errors.
+ *
+ */
+class JsonRpcHandler
 {
-    std::lock_guard<std::mutex> lock(_mutex);
-    _clients.emplace_back(std::move(client));
-}
-
-std::vector<ClientRef> ClientBuffer::poll()
-{
-    std::lock_guard<std::mutex> lock(_mutex);
-    return std::exchange(_clients, {});
-}
+public:
+    /**
+     * @brief Call entrypoint.onRequest(request).
+     *
+     * Call request.error(e) if any exception occurs to notify client.
+     *
+     * @param request Request to handle.
+     * @param entrypoint Entrypoint to handle request.
+     */
+    static void handle(const JsonRpcRequest &request, const EntrypointRef &entrypoint);
+};
 } // namespace brayns

@@ -58,3 +58,14 @@ void ClientRequest::error(const JsonRpcException &e) const
     JsonRpcSender::error(message, _client);
 }
 } // namespace brayns
+
+namespace std
+{
+std::ostream &operator<<(std::ostream &stream, const brayns::ClientRequest &request)
+{
+    auto &client = request.getClient();
+    auto data = request.getData();
+    auto size = data.size();
+    return stream << "{client = " << client << ", size = " << size << "}";
+}
+} // namespace std

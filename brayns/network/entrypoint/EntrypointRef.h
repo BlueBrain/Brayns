@@ -54,6 +54,7 @@ public:
      * @brief Call implementation onRequest() with given request.
      *
      * @param request Client request to the underlying entrypoint.
+     * @throw JsonRpcException Errors that must be replied.
      */
     void onRequest(const JsonRpcRequest &request) const;
 
@@ -68,13 +69,6 @@ public:
      *
      */
     void onPostRender() const;
-
-    /**
-     * @brief Call implementation onBinary(request).
-     *
-     * @param request Client binary request.
-     */
-    void onBinary(const ClientRequest &request) const;
 
     /**
      * @brief Call implementation onCancel().

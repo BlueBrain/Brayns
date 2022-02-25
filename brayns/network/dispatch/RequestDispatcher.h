@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <brayns/network/binary/BinaryManager.h>
 #include <brayns/network/client/ClientRequest.h>
 #include <brayns/network/entrypoint/EntrypointRegistry.h>
 #include <brayns/network/task/TaskManager.h>
@@ -37,10 +38,11 @@ public:
     /**
      * @brief Construct a dispatcher with dependencies.
      *
+     * @param binary Binary manager to buffer binary requests.
      * @param entrypoints Available entrypoints to process request.
      * @param tasks Task queue if the request processing must be delayed.
      */
-    RequestDispatcher(const EntrypointRegistry &entrypoints, TaskManager &tasks);
+    RequestDispatcher(BinaryManager &binary, const EntrypointRegistry &entrypoints, TaskManager &tasks);
 
     /**
      * @brief Dispatch client request to entrypoints or create a task.
@@ -50,6 +52,7 @@ public:
     void dispatch(ClientRequest request);
 
 private:
+    BinaryManager &_binary;
     const EntrypointRegistry &_entrypoints;
     TaskManager &_tasks;
 };

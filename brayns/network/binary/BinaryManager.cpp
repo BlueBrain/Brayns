@@ -19,36 +19,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "BinaryManager.h"
 
-#include <exception>
+#include <algorithm>
+#include <cassert>
 
-#include <brayns/network/jsonrpc/JsonRpcException.h>
+#include <brayns/common/Log.h>
 
 namespace brayns
 {
-class ErrorHandler
+void BinaryManager::add(ClientRequest request)
 {
-public:
-    template<typename RequestType>
-    static void reply(const RequestType &request)
+    assert(request.isBinary());
+    if (_request)
     {
-        try
-        {
-            _entrypoint.onRequest(_request);
-        }
-        catch (const JsonRpcException &e)
-        {
-            _request.error(e);
-        }
-        catch (const std::exception &e)
-        {
-            _request.error(InternalError(e.what()));
-        }
-        catch (...)
-        {
-            _request.error(InternalError("Unknown error"));
-        }
+        Log::debug("Received binary request {} has been discarded because {} is already buffered.", request, *_request);
+        return;
     }
-};
+    _request = std::move(request);
+}
+
+std::optional<ClientRequest> BinaryManager::poll()
+{
+    return std::exchange(_request, std::nullopt);
+}
 } // namespace brayns

@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <ostream>
+
 #include <brayns/network/client/ClientRef.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 #include <brayns/network/jsonrpc/JsonRpcMessages.h>
@@ -109,3 +111,8 @@ private:
     RequestMessage _message;
 };
 } // namespace brayns
+
+namespace std
+{
+std::ostream &operator<<(std::ostream &stream, const brayns::JsonRpcRequest &request);
+} // namespace std

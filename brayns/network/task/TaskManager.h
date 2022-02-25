@@ -31,15 +31,41 @@
 
 namespace brayns
 {
+/**
+ * @brief Helper class to manage request processing.
+ *
+ */
 class TaskManager
 {
 public:
-    void addBinaryTask(ClientRequest request, const EntrypointRegistry &entrypoints);
+    /**
+     * @brief Add a task to process a binary request in the queue.
+     *
+     * @param request Binary request to process.
+     * @param binary Binary to buffer request.
+     */
+    void addBinaryTask(ClientRequest request, BinaryManager &binary);
 
+    /**
+     * @brief Add a task to process a JSON-RPC request in the queue.
+     *
+     * @param request JSON-RPC request to process.
+     * @param entrypoint Entrypoint to process request.
+     */
     void addJsonRpcTask(JsonRpcRequest request, const EntrypointRef &entrypoint);
 
+    /**
+     * @brief Run all registered tasks.
+     *
+     */
     void runAllTasks();
 
+    /**
+     * @brief Cancel request sent by client with given ID.
+     *
+     * @param client Client that requested the task.
+     * @param id ID of the task to cancel.
+     */
     void cancel(const ClientRef &client, const RequestId &id);
 
 private:

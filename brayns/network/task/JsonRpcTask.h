@@ -76,5 +76,6 @@ public:
 private:
     JsonRpcRequest _request;
     const EntrypointRef &_entrypoint;
+    bool _cancelled = false;
 };
 } // namespace brayns

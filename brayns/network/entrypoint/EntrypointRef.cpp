@@ -73,11 +73,6 @@ void EntrypointRef::onPostRender() const
     _entrypoint->onPostRender();
 }
 
-void EntrypointRef::onBinary(const ClientRequest &request) const
-{
-    _entrypoint->onBinary(request);
-}
-
 void EntrypointRef::onCancel() const
 {
     _entrypoint->onCancel();

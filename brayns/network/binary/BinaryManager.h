@@ -19,21 +19,38 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClientBuffer.h"
+#pragma once
 
-#include <algorithm>
+#include <optional>
+
+#include <brayns/network/client/ClientRequest.h>
 
 namespace brayns
 {
-void ClientBuffer::add(ClientRef client)
+/**
+ * @brief Manage binary requests received.
+ *
+ */
+class BinaryManager
 {
-    std::lock_guard<std::mutex> lock(_mutex);
-    _clients.emplace_back(std::move(client));
-}
+public:
+    /**
+     * @brief Add a binary request waiting for processing.
+     *
+     * Discard request if another one is already buffered.
+     *
+     * @param request Request to store (must be binary).
+     */
+    void add(ClientRequest request);
 
-std::vector<ClientRef> ClientBuffer::poll()
-{
-    std::lock_guard<std::mutex> lock(_mutex);
-    return std::exchange(_clients, {});
-}
+    /**
+     * @brief Retreive buffered request.
+     *
+     * @return std::optional<ClientRequest> Binary requests stored if any.
+     */
+    std::optional<ClientRequest> poll();
+
+private:
+    std::optional<ClientRequest> _request;
+};
 } // namespace brayns

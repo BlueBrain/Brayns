@@ -51,7 +51,7 @@ public:
     /**
      * @brief Get the method of the task.
      *
-     * @return const std::string& JSON-RPC method (empty if binary).
+     * @return const std::string& JSON-RPC method.
      */
     virtual const std::string &getMethod() const = 0;
 

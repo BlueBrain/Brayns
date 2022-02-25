@@ -23,9 +23,9 @@
 
 #include <brayns/common/Log.h>
 
-#include <brayns/network/common/ErrorHandler.h>
 #include <brayns/network/entrypoint/EntrypointFinder.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
+#include <brayns/network/jsonrpc/JsonRpcHandler.h>
 #include <brayns/network/jsonrpc/JsonRpcParser.h>
 
 namespace
@@ -47,16 +47,8 @@ public:
 private:
     static void _run(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint)
     {
-        try
-        {
-            brayns::Log::debug("Processing directly request '{}'.", request.getMethod());
-            entrypoint.onRequest(request);
-        }
-        catch (...)
-        {
-            brayns::Log::error("JSON-RPC request processing failed.");
-            brayns::ErrorHandler::reply(request);
-        }
+        brayns::Log::debug("Processing directly request {}.", request);
+        brayns::JsonRpcHandler::handle(request, entrypoint);
     }
 
     static void
@@ -77,15 +69,25 @@ public:
     {
         try
         {
-            brayns::Log::debug("Dispatching JSON-RPC request.");
+            brayns::Log::debug("Dispatch JSON-RPC request {} to entrypoints.", request);
             auto &entrypoint = brayns::EntrypointFinder::find(request, entrypoints);
             brayns::Log::debug("Entrypoint found to process request: '{}'.", entrypoint.getMethod());
             EntrypointDispatcher::dispatch(std::move(request), entrypoint, tasks);
         }
+        catch (const brayns::JsonRpcException &e)
+        {
+            brayns::Log::info("Failed to dispatch request {} to entrypoints: {}.", request, e);
+            request.error(e);
+        }
+        catch (const std::exception &e)
+        {
+            brayns::Log::error("Unexpected error in request {} dispatch to entrypoints: '{}'.", request, e);
+            request.error({e.what()});
+        }
         catch (...)
         {
-            brayns::Log::error("JSON-RPC request dispatch failed.");
-            brayns::ErrorHandler::reply(request);
+            brayns::Log::error("Unknown error in request {} dispatch to entrypoints.", request);
+            request.error({"Unknown error"});
         }
     }
 };
@@ -100,14 +102,24 @@ public:
     {
         try
         {
-            brayns::Log::debug("Parsing JSON-RPC request.");
+            brayns::Log::debug("Parse JSON-RPC request.");
             auto jsonrpc = brayns::JsonRpcParser::parse(request);
             JsonRpcDispatcher::dispatch(std::move(jsonrpc), entrypoints, tasks);
         }
+        catch (const brayns::JsonRpcException &e)
+        {
+            brayns::Log::info("Failed to parse request {}.", request, e);
+            request.error(e);
+        }
+        catch (const std::exception &e)
+        {
+            brayns::Log::error("Unexpected error in request {} parsing.", request, e);
+            request.error({e.what()});
+        }
         catch (...)
         {
-            brayns::Log::error("JSON-RPC request parsing failed.");
-            brayns::ErrorHandler::reply(request);
+            brayns::Log::error("Unknown error in request {} parsing.", request);
+            request.error({"Unknown error"});
         }
     }
 };
@@ -115,49 +127,36 @@ public:
 class BinaryDispatcher
 {
 public:
-    static void dispatch(
-        brayns::ClientRequest request,
-        const brayns::EntrypointRegistry &entrypoints,
-        brayns::TaskManager &tasks)
+    static void dispatch(brayns::ClientRequest request, brayns::BinaryManager &binary, brayns::TaskManager &tasks)
     {
         brayns::Log::debug("Create task to process binary request.");
-        tasks.addBinaryTask(std::move(request), entrypoints);
-    }
-};
-
-class RequestDispatcherHelper
-{
-public:
-    static void dispatch(
-        brayns::ClientRequest request,
-        const brayns::EntrypointRegistry &entrypoints,
-        brayns::TaskManager &tasks)
-    {
-        if (request.isBinary())
-        {
-            BinaryDispatcher::dispatch(std::move(request), entrypoints, tasks);
-            return;
-        }
-        if (request.isText())
-        {
-            TextDispatcher::dispatch(request, entrypoints, tasks);
-            return;
-        }
-        brayns::Log::error("Invalid request, discard it.");
+        tasks.addBinaryTask(std::move(request), binary);
     }
 };
 } // namespace
 
 namespace brayns
 {
-RequestDispatcher::RequestDispatcher(const EntrypointRegistry &entrypoints, TaskManager &tasks)
-    : _entrypoints(entrypoints)
+RequestDispatcher::RequestDispatcher(BinaryManager &binary, const EntrypointRegistry &entrypoints, TaskManager &tasks)
+    : _binary(binary)
+    , _entrypoints(entrypoints)
     , _tasks(tasks)
 {
 }
 
 void RequestDispatcher::dispatch(ClientRequest request)
 {
-    RequestDispatcherHelper::dispatch(std::move(request), _entrypoints, _tasks);
+    Log::debug("Dispatch request {}.", request);
+    if (request.isBinary())
+    {
+        BinaryDispatcher::dispatch(std::move(request), _binary, _tasks);
+        return;
+    }
+    if (request.isText())
+    {
+        TextDispatcher::dispatch(request, _entrypoints, _tasks);
+        return;
+    }
+    brayns::Log::error("Invalid request, discard it.");
 }
 } // namespace brayns

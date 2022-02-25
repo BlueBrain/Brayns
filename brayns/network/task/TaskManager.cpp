@@ -21,59 +21,16 @@
 
 #include "TaskManager.h"
 
-#include <algorithm>
-
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
 #include "BinaryTask.h"
 #include "JsonRpcTask.h"
 
-namespace
-{
-class TaskMatcher
-{
-public:
-    static bool match(brayns::ITask &task, const brayns::ClientRef &client, const brayns::RequestId &id)
-    {
-        if (task.getClient() != client)
-        {
-            return false;
-        }
-        if (task.getId() != id)
-        {
-            return false;
-        }
-        return true;
-    }
-};
-
-class TaskCanceller
-{
-public:
-    static void cancel(
-        std::deque<std::unique_ptr<brayns::ITask>> &tasks,
-        const brayns::ClientRef &client,
-        const brayns::RequestId &id)
-    {
-        auto first = tasks.begin();
-        auto last = tasks.end();
-        auto match = [&](auto &task) { return TaskMatcher::match(*task, client, id); };
-        auto i = std::find_if(first, last, match);
-        if (i == last)
-        {
-            throw brayns::TaskNotFoundException();
-        }
-        auto &task = **i;
-        task.cancel();
-    }
-};
-} // namespace
-
 namespace brayns
 {
-void TaskManager::addBinaryTask(ClientRequest request, const EntrypointRegistry &entrypoints)
+void TaskManager::addBinaryTask(ClientRequest request, BinaryManager &binary)
 {
-    auto task = std::make_unique<BinaryTask>(std::move(request), entrypoints);
+    auto task = std::make_unique<BinaryTask>(std::move(request), binary);
     _tasks.push_back(std::move(task));
 }
 
@@ -95,6 +52,24 @@ void TaskManager::runAllTasks()
 
 void TaskManager::cancel(const ClientRef &client, const RequestId &id)
 {
-    TaskCanceller::cancel(_tasks, client, id);
+    if (id.isEmpty())
+    {
+        throw brayns::InvalidParamsException("Empty task ID");
+    }
+    bool found = false;
+    for (const auto &task : _tasks)
+    {
+        if (task->getClient() != client || task->getId() != id)
+        {
+            continue;
+        }
+        task->cancel();
+        found = true;
+    }
+    if (!found)
+    {
+        auto text = id.getDisplayText();
+        throw brayns::TaskNotFoundException(text);
+    }
 }
 } // namespace brayns
