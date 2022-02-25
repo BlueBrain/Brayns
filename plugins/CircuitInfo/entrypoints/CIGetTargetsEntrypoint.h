@@ -64,7 +64,7 @@ public:
 class CIGetTargetsEntrypoint : public brayns::Entrypoint<CIGetTargetsParams, CIGetTargetsResult>
 {
 public:
-    virtual std::string getName() const override
+    virtual std::string getMethod() const override
     {
         return "ci-get-targets";
     }

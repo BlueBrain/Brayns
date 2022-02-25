@@ -28,7 +28,7 @@ GetAnimationParametersEntrypoint::GetAnimationParametersEntrypoint(const Animati
 {
 }
 
-std::string GetAnimationParametersEntrypoint::getName() const
+std::string GetAnimationParametersEntrypoint::getMethod() const
 {
     return "get-animation-parameters";
 }
@@ -43,7 +43,7 @@ SetAnimationParametersEntrypoint::SetAnimationParametersEntrypoint(AnimationPara
 {
 }
 
-std::string SetAnimationParametersEntrypoint::getName() const
+std::string SetAnimationParametersEntrypoint::getMethod() const
 {
     return "set-animation-parameters";
 }

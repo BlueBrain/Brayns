@@ -83,7 +83,7 @@ AddPillEntrypoint::AddPillEntrypoint(brayns::Scene &scene)
 {
 }
 
-std::string AddPillEntrypoint::getName() const
+std::string AddPillEntrypoint::getMethod() const
 {
     return "add-pill";
 }

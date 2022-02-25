@@ -115,7 +115,7 @@ AddStreamlinesEntrypoint::AddStreamlinesEntrypoint(brayns::Scene &scene)
 {
 }
 
-std::string AddStreamlinesEntrypoint::getName() const
+std::string AddStreamlinesEntrypoint::getMethod() const
 {
     return "add-streamlines";
 }

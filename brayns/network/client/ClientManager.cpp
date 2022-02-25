@@ -23,35 +23,7 @@
 
 #include <cassert>
 
-#include <brayns/common/Log.h>
-
-namespace
-{
-class ClientManagerHelper
-{
-public:
-    static void trySend(const brayns::ClientRef &client, const brayns::OutputPacket &packet)
-    {
-        try
-        {
-            auto &socket = client.getSocket();
-            socket.send(packet);
-        }
-        catch (const brayns::ConnectionClosedException &e)
-        {
-            brayns::Log::debug("Connection closed during broadcast to {}: {}.", client, e.what());
-        }
-        catch (const std::exception &e)
-        {
-            brayns::Log::error("Unexpected error during broadcast to {}: {}.", client, e.what());
-        }
-        catch (...)
-        {
-            brayns::Log::error("Unknown error during broadcast to {}.", client);
-        }
-    }
-};
-} // namespace
+#include "ClientSender.h"
 
 namespace brayns
 {
@@ -60,41 +32,32 @@ ClientManager::~ClientManager()
     closeAll();
 }
 
-bool ClientManager::isEmpty()
+bool ClientManager::isEmpty() const
 {
-    std::lock_guard<std::mutex> lock(_mutex);
     return _clients.empty();
 }
 
 void ClientManager::add(ClientRef client)
 {
     assert(client);
-    std::lock_guard<std::mutex> lock(_mutex);
     _clients.insert(std::move(client));
 }
 
 void ClientManager::remove(const ClientRef &client)
 {
-    std::lock_guard<std::mutex> lock(_mutex);
     _clients.erase(client);
 }
 
-void ClientManager::broadcast(const OutputPacket &packet, const ClientRef &source)
+void ClientManager::broadcast(const OutputPacket &packet) const
 {
-    std::lock_guard<std::mutex> lock(_mutex);
     for (const auto &client : _clients)
     {
-        if (client == source)
-        {
-            continue;
-        }
-        ClientManagerHelper::trySend(client, packet);
+        ClientSender::send(packet, client);
     }
 }
 
-void ClientManager::closeAll()
+void ClientManager::closeAll() const
 {
-    std::lock_guard<std::mutex> lock(_mutex);
     for (const auto &client : _clients)
     {
         auto &socket = client.getSocket();

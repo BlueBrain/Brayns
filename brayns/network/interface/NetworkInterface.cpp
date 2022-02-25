@@ -21,21 +21,25 @@
 
 #include "NetworkInterface.h"
 
+#include <brayns/common/Log.h>
+
 namespace brayns
 {
-NetworkInterface::NetworkInterface(EntrypointManager &entrypoints, NetworkTaskManager &tasks)
+NetworkInterface::NetworkInterface(EntrypointRegistry &entrypoints, ISocket &socket)
     : _entrypoints(entrypoints)
-    , _tasks(tasks)
+    , _socket(socket)
 {
 }
 
-void NetworkInterface::addEntrypoint(EntrypointRef entrypoint)
+void NetworkInterface::add(EntrypointRef entrypoint)
 {
+    Log::info("Register entrypoint '{}'.", entrypoint.getMethod());
     _entrypoints.add(std::move(entrypoint));
 }
 
-void NetworkInterface::launchTask(const ClientRef &client, const RequestId &id, std::unique_ptr<NetworkTask> task)
+void NetworkInterface::poll()
 {
-    _tasks.add(client, id, std::move(task));
+    Log::debug("Poll requests from plugin or entrypoint");
+    _socket.poll();
 }
 } // namespace brayns

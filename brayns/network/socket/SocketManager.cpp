@@ -21,6 +21,9 @@
 
 #include "SocketManager.h"
 
+#include <cassert>
+#include <optional>
+
 #include <brayns/common/Log.h>
 
 namespace
@@ -28,7 +31,7 @@ namespace
 class MessageReceiver
 {
 public:
-    static brayns::InputPacket tryReceive(const brayns::ClientRef &client)
+    static std::optional<brayns::InputPacket> tryReceive(const brayns::ClientRef &client)
     {
         try
         {
@@ -47,7 +50,7 @@ public:
         {
             brayns::Log::error("Unexpected error during reception from client {}.", client);
         }
-        return {};
+        return std::nullopt;
     }
 };
 } // namespace
@@ -57,29 +60,37 @@ namespace brayns
 SocketManager::SocketManager(std::unique_ptr<ISocketListener> listener)
     : _listener(std::move(listener))
 {
+    assert(_listener);
 }
 
-void SocketManager::run(const ClientRef &client) const
+void SocketManager::run(const ClientRef &client)
 {
-    if (_listener)
-    {
-        _listener->onConnect(client);
-    }
+    _newClients.add(client);
     while (true)
     {
         auto packet = MessageReceiver::tryReceive(client);
-        if (packet.isEmpty())
+        if (!packet)
         {
             break;
         }
-        if (_listener)
-        {
-            _listener->onRequest(client, std::move(packet));
-        }
+        _requests.add({client, std::move(*packet)});
     }
-    if (_listener)
+    _removedClients.add(client);
+}
+
+void SocketManager::poll()
+{
+    for (const auto &client : _newClients.poll())
+    {
+        _listener->onConnect(client);
+    }
+    for (const auto &client : _removedClients.poll())
     {
         _listener->onDisconnect(client);
+    }
+    for (auto &request : _requests.poll())
+    {
+        _listener->onRequest(std::move(request));
     }
 }
 } // namespace brayns

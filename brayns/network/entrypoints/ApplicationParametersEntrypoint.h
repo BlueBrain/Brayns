@@ -31,7 +31,7 @@ class GetApplicationParametersEntrypoint : public GetEntrypoint<ApplicationParam
 public:
     GetApplicationParametersEntrypoint(const ApplicationParameters &parameters);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 
@@ -40,7 +40,7 @@ class SetApplicationParametersEntrypoint : public SetEntrypoint<ApplicationParam
 public:
     SetApplicationParametersEntrypoint(ApplicationParameters &parameters);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 } // namespace brayns

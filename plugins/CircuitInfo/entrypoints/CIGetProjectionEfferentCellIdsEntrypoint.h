@@ -61,7 +61,7 @@ class CIGetProjectionEfferentCellIdsEntrypoint
     : public brayns::Entrypoint<CIGetProjectionEfferentCellIdsParams, CIGetProjectionEfferentCellIdsResult>
 {
 public:
-    virtual std::string getName() const override
+    virtual std::string getMethod() const override
     {
         return "ci-get-projection-efferent-cell-ids";
     }

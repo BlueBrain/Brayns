@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <ostream>
 #include <stdexcept>
 
 #include <brayns/json/JsonType.h>
@@ -73,12 +74,20 @@ private:
     JsonValue _data;
 };
 
+/**
+ * @brief The request cannot be parsed to a JsonRpcMessage.
+ *
+ */
 class ParsingErrorException : public JsonRpcException
 {
 public:
     ParsingErrorException(const std::string &message);
 };
 
+/**
+ * @brief The request has invalid schema or header.
+ *
+ */
 class InvalidRequestException : public JsonRpcException
 {
 public:
@@ -87,12 +96,20 @@ public:
     InvalidRequestException(const std::string &message, const std::vector<std::string> &errors);
 };
 
+/**
+ * @brief Method specified doesn't exist.
+ *
+ */
 class MethodNotFoundException : public JsonRpcException
 {
 public:
     MethodNotFoundException(const std::string &method);
 };
 
+/**
+ * @brief Invalid params schema or content.
+ *
+ */
 class InvalidParamsException : public JsonRpcException
 {
 public:
@@ -101,9 +118,48 @@ public:
     InvalidParamsException(const std::string &message, const std::vector<std::string> &errors);
 };
 
+/**
+ * @brief Valid request but internal error.
+ *
+ */
 class InternalErrorException : public JsonRpcException
 {
 public:
     InternalErrorException(const std::string &message);
 };
+
+/**
+ * @brief Method cannot be cancelled.
+ *
+ */
+class TaskNotCancellableException : public JsonRpcException
+{
+public:
+    TaskNotCancellableException(const std::string &method);
+};
+
+/**
+ * @brief Trying to cancel a method that is not currently running.
+ *
+ */
+class TaskNotFoundException : public JsonRpcException
+{
+public:
+    TaskNotFoundException(const std::string &id);
+};
+
+/**
+ * @brief Method has been cancelled.
+ *
+ */
+class TaskCancelledException : public JsonRpcException
+{
+public:
+    TaskCancelledException();
+};
 } // namespace brayns
+
+namespace std
+{
+std::ostream &operator<<(std::ostream &stream, const brayns::JsonRpcException &e);
+} // namespace std

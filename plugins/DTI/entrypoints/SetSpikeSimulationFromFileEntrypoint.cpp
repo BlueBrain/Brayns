@@ -28,7 +28,7 @@ SetSpikeSimulationFromFileEntrypoint::SetSpikeSimulationFromFileEntrypoint(DTIPl
 {
 }
 
-std::string SetSpikeSimulationFromFileEntrypoint::getName() const
+std::string SetSpikeSimulationFromFileEntrypoint::getMethod() const
 {
     return "set-spike-simulation-from-file";
 }

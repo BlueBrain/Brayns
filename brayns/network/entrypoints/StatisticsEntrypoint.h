@@ -31,7 +31,7 @@ class GetStatisticsEntrypoint : public GetEntrypoint<Statistics>
 public:
     GetStatisticsEntrypoint(const Statistics &statistics);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 } // namespace brayns

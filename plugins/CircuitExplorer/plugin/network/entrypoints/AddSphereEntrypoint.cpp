@@ -62,7 +62,7 @@ AddSphereEntrypoint::AddSphereEntrypoint(brayns::Scene &scene)
 {
 }
 
-std::string AddSphereEntrypoint::getName() const
+std::string AddSphereEntrypoint::getMethod() const
 {
     return "add-sphere";
 }

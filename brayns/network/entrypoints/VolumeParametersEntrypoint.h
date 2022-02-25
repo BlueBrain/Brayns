@@ -31,7 +31,7 @@ class GetVolumeParametersEntrypoint : public GetEntrypoint<VolumeParameters>
 public:
     GetVolumeParametersEntrypoint(const VolumeParameters &parameters);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 
@@ -40,7 +40,7 @@ class SetVolumeParametersEntrypoint : public SetEntrypoint<VolumeParameters>
 public:
     SetVolumeParametersEntrypoint(VolumeParameters &parameters);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 } // namespace brayns

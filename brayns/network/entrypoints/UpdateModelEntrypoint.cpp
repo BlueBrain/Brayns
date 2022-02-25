@@ -28,7 +28,7 @@ UpdateModelEntrypoint::UpdateModelEntrypoint(Scene &scene)
 {
 }
 
-std::string UpdateModelEntrypoint::getName() const
+std::string UpdateModelEntrypoint::getMethod() const
 {
     return "update-model";
 }

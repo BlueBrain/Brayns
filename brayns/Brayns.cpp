@@ -188,11 +188,6 @@ struct Brayns::Impl : public PluginAPI
         _engine->getStatistics().resetModified();
     }
 
-    NetworkManager *getNetworkManager()
-    {
-        return _pluginManager.getNetworkManager();
-    }
-
     Engine &getEngine() final
     {
         return *_engine;
@@ -216,16 +211,6 @@ struct Brayns::Impl : public PluginAPI
     LoaderRegistry &getLoaderRegistry() final
     {
         return _loaderRegistry;
-    }
-
-    INetworkInterface *getNetworkInterface() final
-    {
-        auto manager = _pluginManager.getNetworkManager();
-        if (!manager)
-        {
-            return nullptr;
-        }
-        return &manager->getInterface();
     }
 
     Scene &getScene() final

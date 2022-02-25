@@ -140,7 +140,7 @@ AddGridEntrypoint::AddGridEntrypoint(brayns::Scene &scene)
 {
 }
 
-std::string AddGridEntrypoint::getName() const
+std::string AddGridEntrypoint::getMethod() const
 {
     return "add-grid";
 }

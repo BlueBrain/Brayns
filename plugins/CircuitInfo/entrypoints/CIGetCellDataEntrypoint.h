@@ -117,7 +117,7 @@ private:
 class CIGetCellDataEntrypoint : public brayns::Entrypoint<CIGetCellDataParams, CIGetCellDataResult>
 {
 public:
-    virtual std::string getName() const override
+    virtual std::string getMethod() const override
     {
         return "ci-get-cell-data";
     }

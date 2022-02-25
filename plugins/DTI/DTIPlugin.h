@@ -38,9 +38,8 @@ namespace dti
 class DTIPlugin : public brayns::ExtensionPlugin
 {
 public:
-    DTIPlugin();
-
     void init() final;
+    void registerEntrypoints(brayns::INetworkInterface &interface) final;
 
     /**
      * @brief preRender Updates the scene according to latest data load

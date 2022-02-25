@@ -28,7 +28,7 @@ GetRendererEntrypoint::GetRendererEntrypoint(const RenderingParameters &paramete
 {
 }
 
-std::string GetRendererEntrypoint::getName() const
+std::string GetRendererEntrypoint::getMethod() const
 {
     return "get-renderer";
 }
@@ -43,7 +43,7 @@ SetRendererEntrypoint::SetRendererEntrypoint(RenderingParameters &parameters)
 {
 }
 
-std::string SetRendererEntrypoint::getName() const
+std::string SetRendererEntrypoint::getMethod() const
 {
     return "set-renderer";
 }

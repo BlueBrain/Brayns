@@ -20,9 +20,8 @@
 
 #pragma once
 
-#include <cassert>
+#include <brayns/network/interface/INetworkInterface.h>
 
-#include <brayns/network/entrypoint/EntrypointRef.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
 namespace brayns
@@ -48,11 +47,6 @@ namespace brayns
 class ExtensionPlugin
 {
 public:
-    ExtensionPlugin(std::string name = {})
-        : _name(std::move(name))
-    {
-    }
-
     virtual ~ExtensionPlugin() = default;
 
     /**
@@ -63,7 +57,16 @@ public:
     }
 
     /**
-     * @brief Called before each render.
+     * @brief Called once when the network is initialized.
+     *
+     * @param interface Network access.
+     */
+    virtual void registerEntrypoints(INetworkInterface &interface)
+    {
+    }
+
+    /**
+     * @brief Called on each update before trying to call render().
      *
      */
     virtual void preRender()
@@ -71,45 +74,16 @@ public:
     }
 
     /**
-     * @brief Called after each render.
+     * @brief Called once a render() is effectively called.
      *
      */
     virtual void postRender()
     {
     }
 
-    /**
-     * @brief Add an entrypoint of given type built using given args.
-     *
-     * Must be called in init() method.
-     *
-     * If an action interface is registered, it will be used to register the
-     * entrypoint, otherwise nothing will be done.
-     *
-     * @tparam T Entrypoint type.
-     * @tparam Args Entrypoint construction arguments types.
-     * @param args Entrypoint construction arguments.
-     */
-    template<typename T, typename... Args>
-    void add(Args &&...args) const
-    {
-        assert(_api);
-        auto interface = _api->getNetworkInterface();
-        if (!interface)
-        {
-            return;
-        }
-        auto entrypoint = std::make_unique<T>(std::forward<Args>(args)...);
-        auto ref = EntrypointRef(_name, std::move(entrypoint));
-        interface->addEntrypoint(std::move(ref));
-    }
-
 protected:
     friend class PluginManager;
 
     PluginAPI *_api = nullptr;
-
-private:
-    std::string _name;
 };
 } // namespace brayns

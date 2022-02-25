@@ -23,6 +23,25 @@
 
 #include <cassert>
 
+namespace
+{
+class EntrypointSchemaBuilder
+{
+public:
+    static void build(brayns::SchemaResult &schema, brayns::IEntrypoint &entrypoint)
+    {
+        schema.description = entrypoint.getDescription();
+        schema.async = entrypoint.isAsync();
+        auto params = entrypoint.getParamsSchema();
+        if (!brayns::JsonSchemaHelper::isNull(params))
+        {
+            schema.params.push_back(std::move(params));
+        }
+        schema.returns = entrypoint.getResultSchema();
+    }
+};
+} // namespace
+
 namespace brayns
 {
 EntrypointRef::EntrypointRef(std::string plugin, std::unique_ptr<IEntrypoint> entrypoint)
@@ -30,21 +49,13 @@ EntrypointRef::EntrypointRef(std::string plugin, std::unique_ptr<IEntrypoint> en
 {
     assert(_entrypoint);
     _schema.plugin = std::move(plugin);
-    _schema.title = _entrypoint->getName();
+    _schema.title = _entrypoint->getMethod();
 }
 
 void EntrypointRef::onCreate()
 {
     _entrypoint->onCreate();
-    _schema.type = "method";
-    _schema.description = _entrypoint->getDescription();
-    _schema.async = _entrypoint->isAsync();
-    auto params = _entrypoint->getParamsSchema();
-    if (!brayns::JsonSchemaHelper::isNull(params))
-    {
-        _schema.params.push_back(std::move(params));
-    }
-    _schema.returns = _entrypoint->getResultSchema();
+    EntrypointSchemaBuilder::build(_schema, *_entrypoint);
 }
 
 void EntrypointRef::onRequest(const JsonRpcRequest &request) const
@@ -62,6 +73,21 @@ void EntrypointRef::onPostRender() const
     _entrypoint->onPostRender();
 }
 
+void EntrypointRef::onCancel() const
+{
+    _entrypoint->onCancel();
+}
+
+void EntrypointRef::onConnect(const ClientRef &client) const
+{
+    _entrypoint->onConnect(client);
+}
+
+void EntrypointRef::onDisconnect(const ClientRef &client) const
+{
+    _entrypoint->onDisconnect(client);
+}
+
 const std::string &EntrypointRef::getPlugin() const
 {
     return _schema.plugin;
@@ -72,7 +98,7 @@ const SchemaResult &EntrypointRef::getSchema() const
     return _schema;
 }
 
-const std::string &EntrypointRef::getName() const
+const std::string &EntrypointRef::getMethod() const
 {
     return _schema.title;
 }
@@ -90,5 +116,15 @@ const std::vector<JsonSchema> &EntrypointRef::getParamsSchema() const
 const JsonSchema &EntrypointRef::getResultSchema() const
 {
     return _schema.returns;
+}
+
+bool EntrypointRef::isAsync() const
+{
+    return _schema.async;
+}
+
+bool EntrypointRef::canBeNested() const
+{
+    return _entrypoint->canBeNested();
 }
 } // namespace brayns

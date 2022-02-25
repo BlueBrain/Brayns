@@ -28,7 +28,7 @@ GetClipPlanesEntrypoint::GetClipPlanesEntrypoint(Scene &scene)
 {
 }
 
-std::string GetClipPlanesEntrypoint::getName() const
+std::string GetClipPlanesEntrypoint::getMethod() const
 {
     return "get-clip-planes";
 }

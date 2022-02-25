@@ -30,7 +30,7 @@ GetModelPropertiesEntrypoint::GetModelPropertiesEntrypoint(Scene &scene)
 {
 }
 
-std::string GetModelPropertiesEntrypoint::getName() const
+std::string GetModelPropertiesEntrypoint::getMethod() const
 {
     return "get-model-properties";
 }
@@ -42,7 +42,9 @@ std::string GetModelPropertiesEntrypoint::getDescription() const
 
 void GetModelPropertiesEntrypoint::onRequest(const Request &request)
 {
-    auto &model = ExtractModel::fromRequest(_scene, request);
+    auto params = request.getParams();
+    auto modelId = params.id;
+    auto &model = ExtractModel::fromId(_scene, modelId);
     request.reply(model.getProperties());
 }
 
@@ -51,7 +53,7 @@ SetModelPropertiesEntrypoint::SetModelPropertiesEntrypoint(Scene &scene)
 {
 }
 
-std::string SetModelPropertiesEntrypoint::getName() const
+std::string SetModelPropertiesEntrypoint::getMethod() const
 {
     return "set-model-properties";
 }
@@ -64,8 +66,9 @@ std::string SetModelPropertiesEntrypoint::getDescription() const
 void SetModelPropertiesEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
+    auto modelId = params.id;
     auto &newProperties = params.properties;
-    auto &model = ExtractModel::fromParams(_scene, params);
+    auto &model = ExtractModel::fromId(_scene, modelId);
     auto oldProperties = model.getProperties();
     oldProperties.merge(newProperties);
     model.setProperties(oldProperties);
@@ -77,7 +80,7 @@ ModelPropertiesSchemaEntrypoint::ModelPropertiesSchemaEntrypoint(Scene &scene)
 {
 }
 
-std::string ModelPropertiesSchemaEntrypoint::getName() const
+std::string ModelPropertiesSchemaEntrypoint::getMethod() const
 {
     return "model-properties-schema";
 }
@@ -89,7 +92,9 @@ std::string ModelPropertiesSchemaEntrypoint::getDescription() const
 
 void ModelPropertiesSchemaEntrypoint::onRequest(const Request &request)
 {
-    auto &model = ExtractModel::fromRequest(_scene, request);
+    auto params = request.getParams();
+    auto modelId = params.id;
+    auto &model = ExtractModel::fromId(_scene, modelId);
     auto &properties = model.getProperties();
     auto schema = Json::getSchema(properties);
     auto result = Json::serialize(schema);

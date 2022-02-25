@@ -29,7 +29,7 @@ ImageStreamingModeEntrypoint::ImageStreamingModeEntrypoint(ApplicationParameters
 {
 }
 
-std::string ImageStreamingModeEntrypoint::getName() const
+std::string ImageStreamingModeEntrypoint::getMethod() const
 {
     return "image-streaming-mode";
 }

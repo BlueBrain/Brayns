@@ -49,7 +49,7 @@ GetMaterialIdsEntrypoint::GetMaterialIdsEntrypoint(Scene &scene)
 {
 }
 
-std::string GetMaterialIdsEntrypoint::getName() const
+std::string GetMaterialIdsEntrypoint::getMethod() const
 {
     return "get-material-ids";
 }

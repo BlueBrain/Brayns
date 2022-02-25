@@ -23,7 +23,10 @@
 
 #include <brayns/common/Log.h>
 
+#include <brayns/network/entrypoint/EntrypointBuilder.h>
+
 #include <brayns/parameters/ParametersManager.h>
+
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <plugin/api/CircuitColorManager.h>
@@ -118,11 +121,6 @@ void _addSphereClippingPerspectiveCamera(brayns::Engine &engine)
 }
 } // namespace
 
-CircuitExplorerPlugin::CircuitExplorerPlugin()
-    : brayns::ExtensionPlugin("Circuit Explorer")
-{
-}
-
 void CircuitExplorerPlugin::init()
 {
     // LOADERS ADDED BY THIS PLUGIN
@@ -132,39 +130,45 @@ void CircuitExplorerPlugin::init()
     registry.registerLoader(std::make_unique<SonataLoader>(_colorManager));
     registry.registerLoader(std::make_unique<SonataNGVLoader>(_colorManager));
 
-    // ENTRY POINTS ADDED BY THIS PLUGIN
-    auto &engine = _api->getEngine();
-    auto &scene = engine.getScene();
-    add<AddBoxEntrypoint>(scene);
-    add<AddColumnEntrypoint>(scene);
-    add<AddCylinderEntrypoint>(scene);
-    add<AddGridEntrypoint>(scene);
-    add<AddPillEntrypoint>(scene);
-    add<AddSphereEntrypoint>(scene);
-    add<AvailableColorMethodsEntrypoint>(scene, _colorManager);
-    add<AvailableColorMethodVariablesEntrypoint>(scene, _colorManager);
-    add<brayns::GetMaterialEntrypoint>(scene);
-    add<brayns::GetMaterialIdsEntrypoint>(scene);
-    add<brayns::SetMaterialEntrypoint>(scene);
-    add<brayns::SetMaterialExtraAttributesEntrypoint>(scene);
-    add<brayns::SetMaterialRangeEntrypoint>(scene);
-    add<brayns::SetMaterialsEntrypoint>(scene);
-    add<ColorCircuitByIdEntrypoint>(scene, _colorManager);
-    add<ColorCircuitByMethodEntrypoint>(scene, _colorManager);
-    add<ColorCircuitBySingleColorEntrypoint>(scene, _colorManager);
-    add<MakeMovieEntrypoint>();
-    add<MirrorModelEntrypoint>(scene);
-    add<SetCircuitThicknessEntrypoint>(scene);
-    add<SimulationColorEntrypoint>(scene);
-    add<TraceAnterogradeEntrypoint>(scene, _colorManager);
-
     // RENDERERS ADDED BY THIS PLUGIN
+    auto &engine = _api->getEngine();
     _addAdvancedSimulationRenderer(engine);
     _addBasicSimulationRenderer(engine);
     _addDOFPerspectiveCamera(engine);
     _addSphereClippingPerspectiveCamera(engine);
 
     _api->getParametersManager().getRenderingParameters().setCurrentRenderer("circuit_explorer_advanced");
+}
+
+void CircuitExplorerPlugin::registerEntrypoints(brayns::INetworkInterface &interface)
+{
+    auto &engine = _api->getEngine();
+    auto &scene = engine.getScene();
+
+    auto builder = brayns::EntrypointBuilder("Circuit Explorer", interface);
+
+    builder.add<AddBoxEntrypoint>(scene);
+    builder.add<AddColumnEntrypoint>(scene);
+    builder.add<AddCylinderEntrypoint>(scene);
+    builder.add<AddGridEntrypoint>(scene);
+    builder.add<AddPillEntrypoint>(scene);
+    builder.add<AddSphereEntrypoint>(scene);
+    builder.add<AvailableColorMethodsEntrypoint>(scene, _colorManager);
+    builder.add<AvailableColorMethodVariablesEntrypoint>(scene, _colorManager);
+    builder.add<brayns::GetMaterialEntrypoint>(scene);
+    builder.add<brayns::GetMaterialIdsEntrypoint>(scene);
+    builder.add<brayns::SetMaterialEntrypoint>(scene);
+    builder.add<brayns::SetMaterialExtraAttributesEntrypoint>(scene);
+    builder.add<brayns::SetMaterialRangeEntrypoint>(scene);
+    builder.add<brayns::SetMaterialsEntrypoint>(scene);
+    builder.add<ColorCircuitByIdEntrypoint>(scene, _colorManager);
+    builder.add<ColorCircuitByMethodEntrypoint>(scene, _colorManager);
+    builder.add<ColorCircuitBySingleColorEntrypoint>(scene, _colorManager);
+    builder.add<MakeMovieEntrypoint>();
+    builder.add<MirrorModelEntrypoint>(scene);
+    builder.add<SetCircuitThicknessEntrypoint>(scene);
+    builder.add<SimulationColorEntrypoint>(scene);
+    builder.add<TraceAnterogradeEntrypoint>(scene, _colorManager);
 }
 
 void CircuitExplorerPlugin::preRender()

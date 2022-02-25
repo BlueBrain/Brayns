@@ -31,7 +31,7 @@
 class CIGetProjectionsEntrypoint : public brayns::Entrypoint<CIGetProjectionsParams, CIGetProjectionsResult>
 {
 public:
-    virtual std::string getName() const override
+    virtual std::string getMethod() const override
     {
         return "ci-get-projections";
     }

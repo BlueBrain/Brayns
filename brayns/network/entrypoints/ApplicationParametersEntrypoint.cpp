@@ -28,7 +28,7 @@ GetApplicationParametersEntrypoint::GetApplicationParametersEntrypoint(const App
 {
 }
 
-std::string GetApplicationParametersEntrypoint::getName() const
+std::string GetApplicationParametersEntrypoint::getMethod() const
 {
     return "get-application-parameters";
 }
@@ -43,7 +43,7 @@ SetApplicationParametersEntrypoint::SetApplicationParametersEntrypoint(Applicati
 {
 }
 
-std::string SetApplicationParametersEntrypoint::getName() const
+std::string SetApplicationParametersEntrypoint::getMethod() const
 {
     return "set-application-parameters";
 }

@@ -39,11 +39,11 @@ public:
     virtual ~IEntrypoint() = default;
 
     /**
-     * @brief Return the name of the entrypoint (unique ID).
+     * @brief Return the name of the method bound to the entrypoint.
      *
-     * @return std::string Name of the entrypoint.
+     * @return std::string Method run by the entrypoint.
      */
-    virtual std::string getName() const = 0;
+    virtual std::string getMethod() const = 0;
 
     /**
      * @brief Return a description of the entrypoint.
@@ -67,18 +67,20 @@ public:
     virtual JsonSchema getResultSchema() const = 0;
 
     /**
-     * @brief Called each time the client sends a request to the entrypoint.
+     * @brief Called when a JSON-RPC request is received for this method.
      *
      * @param request Client request.
+     * @throw JsonRpcException Will be catched and replied as error.
      */
     virtual void onRequest(const JsonRpcRequest &request) = 0;
 
     /**
-     * @brief Return true if the entrypoint takes a long time and must be
-     * executed in a separated thread.
+     * @brief Enable cancellation for long running tasks.
      *
-     * @return true The entrypoint will start a task in a separated thread.
-     * @return false The entrypoint will be executed in the main loop.
+     * Default to false.
+     *
+     * @return true The entrypoint can be cancelled.
+     * @return false The entrypoint cannot be cancelled.
      */
     virtual bool isAsync() const
     {
@@ -86,7 +88,20 @@ public:
     }
 
     /**
-     * @brief Called once the entrypoint is ready to be used.
+     * @brief Check if the entrypoint can be run in a progress call.
+     *
+     * Default to false.
+     *
+     * @return true Can be nested (example "cancel").
+     * @return false Cannot be nested (recommended).
+     */
+    virtual bool canBeNested() const
+    {
+        return false;
+    }
+
+    /**
+     * @brief Called once when all plugins are initialized.
      *
      */
     virtual void onCreate()
@@ -107,6 +122,36 @@ public:
      */
     virtual void onPostRender()
     {
+    }
+
+    /**
+     * @brief Called when the entrypoint is cancelled.
+     *
+     * Only called when isAsync() is true and entrypoint is running.
+     *
+     */
+    virtual void onCancel()
+    {
+    }
+
+    /**
+     * @brief Called when a client connects.
+     *
+     * @param client Client ref.
+     */
+    virtual void onConnect(const ClientRef &client)
+    {
+        (void)client;
+    }
+
+    /**
+     * @brief Called when a client disconnects.
+     *
+     * @param client Client ref.
+     */
+    virtual void onDisconnect(const ClientRef &client)
+    {
+        (void)client;
     }
 };
 } // namespace brayns

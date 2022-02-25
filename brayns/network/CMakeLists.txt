@@ -11,7 +11,6 @@ set(BRAYNSNETWORK_HEADERS
   adapters/CameraAdapter.h
   adapters/ClipPlaneAdapter.h
   adapters/ColorMapAdapter.h
-  adapters/FrameExportAdapter.h
   adapters/LightAdapter.h
   adapters/LoaderInfoAdapter.h
   adapters/ModelDescriptorAdapter.h
@@ -26,20 +25,26 @@ set(BRAYNSNETWORK_HEADERS
   adapters/TransformationAdapter.h
   adapters/UpdateModelAdapter.h
   adapters/VolumeParametersAdapter.h
+  binary/BinaryManager.h
+  client/ClientBuffer.h
   client/ClientManager.h
   client/ClientRef.h
   client/RequestBuffer.h
+  client/ClientSender.h
+  common/CancellationToken.h
   common/Clock.h
   common/ExtractMaterial.h
   common/ExtractModel.h
-  common/FrameExporter.h
+  common/ProgressHandler.h
   common/PropertyObjectSchema.h
   common/RateLimiter.h
+  dispatch/RequestDispatcher.h
   entrypoint/Entrypoint.h
-  entrypoint/EntrypointManager.h
+  entrypoint/EntrypointBuilder.h
+  entrypoint/EntrypointFinder.h
+  entrypoint/EntrypointRegistry.h
   entrypoint/EntrypointRef.h
   entrypoint/EntrypointRequest.h
-  entrypoint/EntrypointTask.h
   entrypoint/IEntrypoint.h
   entrypoint/ObjectEntrypoint.h
   entrypoint/PropertyObjectEntrypoint.h
@@ -51,13 +56,10 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/CameraEntrypoint.h
   entrypoints/CameraParamsEntrypoint.h
   entrypoints/CancelEntrypoint.h
-  entrypoints/ChunkEntrypoint.h
   entrypoints/ClearLightsEntrypoint.h
   entrypoints/ExitLaterEntrypoint.h
   entrypoints/ExportFramesEntrypoint.h
-  entrypoints/ExportFramesToDiskEntryPoint.h
   entrypoints/GetClipPlanesEntrypoint.h
-  entrypoints/GetExportFramesProgressEntrypoint.h
   entrypoints/GetInstancesEntrypoint.h
   entrypoints/GetLightsEntrypoint.h
   entrypoints/GetLoadersEntrypoint.h
@@ -91,16 +93,15 @@ set(BRAYNSNETWORK_HEADERS
   interface/NetworkInterface.h
   jsonrpc/JsonRpcException.h
   jsonrpc/JsonRpcFactory.h
+  jsonrpc/JsonRpcHandler.h
   jsonrpc/JsonRpcMessages.h
   jsonrpc/JsonRpcRequest.h
-  jsonrpc/JsonRpcRequestParser.h
+  jsonrpc/JsonRpcParser.h
   jsonrpc/JsonRpcSender.h
   jsonrpc/RequestId.h
   messages/AddClipPlaneMessage.h
-  messages/ChunkMessage.h
   messages/ExitLaterMessage.h
   messages/ExportFramesMessage.h
-  messages/GetExportFramesProgressMessage.h
   messages/GetInstancesMessage.h
   messages/GetModelMessage.h
   messages/ImageBase64Message.h
@@ -118,30 +119,37 @@ set(BRAYNSNETWORK_HEADERS
   socket/ClientSocket.h
   socket/ISocket.h
   socket/ServerSocket.h
+  socket/SocketListener.h
   socket/SocketManager.h
-  socket/WebSocket.h
   stream/StreamManager.h
   stream/StreamMonitor.h
-  tasks/NetworkTask.h
-  tasks/NetworkTaskLauncher.h
-  tasks/NetworkTaskManager.h
-  tasks/NetworkTaskMonitor.h
-  upload/ModelUploadManager.h
-  upload/ModelUploadTask.h
+  task/BinaryTask.h
+  task/ITask.h
+  task/JsonRpcTask.h
+  task/TaskManager.h
+  websocket/InputPacket.h
+  websocket/OutputPacket.h
+  websocket/WebSocket.h
 )
   
 set(BRAYNSNETWORK_SOURCES
   adapters/ModelTransferFunctionAdapter.cpp
   adapters/UpdateModelAdapter.cpp
+  binary/BinaryManager.cpp
+  client/ClientBuffer.cpp
   client/ClientManager.cpp
   client/ClientRef.cpp
+  client/ClientRequest.cpp
+  client/ClientSender.cpp
   client/RequestBuffer.cpp
+  common/CancellationToken.cpp
   common/ExtractMaterial.cpp
   common/ExtractModel.cpp
-  common/FrameExporter.cpp
   common/PropertyObjectSchema.cpp
   common/RateLimiter.cpp
-  entrypoint/EntrypointManager.cpp
+  dispatch/RequestDispatcher.cpp
+  entrypoint/EntrypointFinder.cpp
+  entrypoint/EntrypointRegistry.cpp
   entrypoint/EntrypointRef.cpp
   entrypoints/AddClipPlaneEntrypoint.cpp
   entrypoints/AddLightEntrypoint.cpp
@@ -151,13 +159,10 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/CameraEntrypoint.cpp
   entrypoints/CameraParamsEntrypoint.cpp
   entrypoints/CancelEntrypoint.cpp
-  entrypoints/ChunkEntrypoint.cpp
   entrypoints/ClearLightsEntrypoint.cpp
   entrypoints/ExitLaterEntrypoint.cpp
   entrypoints/ExportFramesEntrypoint.cpp
-  entrypoints/ExportFramesToDiskEntryPoint.cpp
   entrypoints/GetClipPlanesEntrypoint.cpp
-  entrypoints/GetExportFramesProgressEntrypoint.cpp
   entrypoints/GetInstancesEntrypoint.cpp
   entrypoints/GetLightsEntrypoint.cpp
   entrypoints/GetLoadersEntrypoint.cpp
@@ -190,23 +195,25 @@ set(BRAYNSNETWORK_SOURCES
   interface/NetworkInterface.cpp
   jsonrpc/JsonRpcException.cpp
   jsonrpc/JsonRpcFactory.cpp
+  jsonrpc/JsonRpcHandler.cpp
   jsonrpc/JsonRpcRequest.cpp
-  jsonrpc/JsonRpcRequestParser.cpp
+  jsonrpc/JsonRpcParser.cpp
   jsonrpc/JsonRpcSender.cpp
   jsonrpc/RequestId.cpp
   messages/LightMessage.cpp
   plugin/NetworkManager.cpp
   socket/ClientSocket.cpp
   socket/ServerSocket.cpp
+  socket/SocketListener.cpp
   socket/SocketManager.cpp
-  socket/WebSocket.cpp
   stream/StreamManager.cpp
   stream/StreamMonitor.cpp
-  tasks/NetworkTask.cpp
-  tasks/NetworkTaskManager.cpp
-  tasks/NetworkTaskMonitor.cpp
-  upload/ModelUploadManager.cpp
-  upload/ModelUploadTask.cpp
+  task/BinaryTask.cpp
+  task/JsonRpcTask.cpp
+  task/TaskManager.cpp
+  websocket/InputPacket.cpp
+  websocket/OutputPacket.cpp
+  websocket/WebSocket.cpp
 )
 
 set(BRAYNSNETWORK_INCLUDE_DIR ${PROJECT_SOURCE_DIR})

@@ -31,7 +31,7 @@ class GetRendererEntrypoint : public GetEntrypoint<RenderingParameters>
 public:
     GetRendererEntrypoint(const RenderingParameters &parameters);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 
@@ -40,7 +40,7 @@ class SetRendererEntrypoint : public SetEntrypoint<RenderingParameters>
 public:
     SetRendererEntrypoint(RenderingParameters &parameters);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 } // namespace brayns

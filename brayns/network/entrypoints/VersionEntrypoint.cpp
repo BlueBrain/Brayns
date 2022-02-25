@@ -23,7 +23,7 @@
 
 namespace brayns
 {
-std::string VersionEntrypoint::getName() const
+std::string VersionEntrypoint::getMethod() const
 {
     return "get-version";
 }

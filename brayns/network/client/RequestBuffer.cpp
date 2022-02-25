@@ -21,19 +21,19 @@
 
 #include "RequestBuffer.h"
 
+#include <algorithm>
+
 namespace brayns
 {
-void RequestBuffer::add(const ClientRef &client, InputPacket packet)
+void RequestBuffer::add(ClientRequest request)
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    _buffers[client].push_back(std::move(packet));
+    _requests.emplace_back(std::move(request));
 }
 
-RequestBuffer::Map RequestBuffer::extractAll()
+std::vector<ClientRequest> RequestBuffer::poll()
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    auto buffers = std::move(_buffers);
-    _buffers.clear();
-    return buffers;
+    return std::exchange(_requests, {});
 }
 } // namespace brayns

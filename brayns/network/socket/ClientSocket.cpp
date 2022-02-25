@@ -28,7 +28,6 @@
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPSClientSession.h>
-#include <Poco/Net/SecureStreamSocket.h>
 
 #include <brayns/common/Log.h>
 
@@ -77,7 +76,7 @@ public:
 class ClientManager
 {
 public:
-    static void run(const brayns::NetworkParameters &parameters, const brayns::SocketManager &manager)
+    static void run(const brayns::NetworkParameters &parameters, brayns::SocketManager &manager)
     {
         auto session = ClientSessionFactory::create(parameters);
         brayns::Log::info("Client session established with '{}:{}'.", session->getHost(), session->getPort());
@@ -103,6 +102,11 @@ void ClientTask::start()
     _handle = std::async(std::launch::async, [this] { _run(); });
 }
 
+void ClientTask::poll()
+{
+    _manager.poll();
+}
+
 ClientTask::~ClientTask()
 {
     if (!_handle.valid() || !_running)
@@ -116,7 +120,7 @@ ClientTask::~ClientTask()
     }
     catch (const std::exception &e)
     {
-        Log::error("Error while terminating client task: {}.", e.what());
+        Log::error("Error while terminating client task: '{}'.", e.what());
     }
 }
 
@@ -131,11 +135,11 @@ void ClientTask::_run()
         }
         catch (const Poco::Exception &e)
         {
-            Log::debug("Connection to server failed: {}.", e.displayText());
+            Log::debug("Connection to server failed: '{}'.", e.displayText());
         }
         catch (const std::exception &e)
         {
-            Log::error("Unexpected error in client task: {}.", e.what());
+            Log::error("Unexpected error in client task: '{}'.", e.what());
         }
         catch (...)
         {
@@ -156,5 +160,10 @@ void ClientSocket::start()
 {
     _task.start();
     Log::info("Client task started.");
+}
+
+void ClientSocket::poll()
+{
+    _task.poll();
 }
 } // namespace brayns

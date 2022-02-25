@@ -7,7 +7,6 @@
 set(BRAYNSCOMMON_SOURCES
     BaseObject.cpp
     Log.cpp
-    Progress.cpp
     PropertyObject.cpp
     Statistics.cpp
     Timer.cpp
@@ -31,8 +30,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
     Log.h
     MaterialsColorMap.h
     MathTypes.h
-    PixelFormat.h
-    Progress.h
+    PixelFormat.h  
     PropertyObject.h
     Statistics.h
     TextureType.h
