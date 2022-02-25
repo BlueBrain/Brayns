@@ -19,3 +19,27 @@
  */
 
 #pragma once
+
+#include <brayns/common/MathTypes.h>
+#include <brayns/engine/Geometry.h>
+
+#include <vector>
+
+namespace brayns
+{
+struct Box
+{
+    Vector3f min;
+    Vector3f max;
+};
+
+template<>
+void GeometryBoundsUpdater<Box>::update(const Box& s, const Matrix4f& t, Bounds& b);
+
+template<>
+void Geometry<Box>::initializeHandle();
+
+template<>
+void Geometry<Box>::commitGeometrySpecificParams();
+
+}

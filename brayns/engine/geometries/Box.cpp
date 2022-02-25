@@ -18,33 +18,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/cameras/OrthographicCamera.h>
+#include <brayns/engine/geometries/Box.h>
 
 namespace brayns
 {
-void OrthographicCamera::commitCameraSpecificParams()
+template<>
+void GeometryBoundsUpdater<Box>::update(const Box& box, const Matrix4f& t, Bounds& b)
 {
-    auto ospHandle = handle();
-    ospSetParam(ospHandle, "height", OSP_FLOAT, &_height);
+    const auto& min = box.min;
+    const auto& max = box.max;
+
+    b.expand(Vector3f(t * Vector4f(min, 1.f)));
+    b.expand(Vector3f(t * Vector4f(max, 1.f)));
 }
 
-Camera::Ptr OrthographicCamera::clone() const noexcept
+template<>
+void Geometry<Box>::initializeHandle()
 {
-    return std::make_unique<OrthographicCamera>(*this);
+    _handle = ospNewGeometry("box");
 }
 
-void OrthographicCamera::setHeight(const float height) noexcept
+template<>
+void Geometry<Box>::commitGeometrySpecificParams()
 {
-    _updateValue(_height, height);
-}
+    const auto numGeoms = _geometries.size();
 
-float OrthographicCamera::getHeight() const noexcept
-{
-    return _height;
-}
+    OSPData boxDataHandle = ospNewSharedData(_geometries.data(), OSPDataType::OSP_VEC3F, numGeoms * 2);
 
-std::string_view OrthographicCamera::getOSPHandleName() const noexcept
-{
-    return "orthographic";
+    ospSetParam(_handle, "box", OSP_DATA, &boxDataHandle);
+
+    ospRelease(boxDataHandle);
 }
 }

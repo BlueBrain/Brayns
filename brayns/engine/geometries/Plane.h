@@ -19,3 +19,27 @@
  */
 
 #pragma once
+
+#include <brayns/common/MathTypes.h>
+#include <brayns/engine/Geometry.h>
+
+#include <vector>
+
+namespace brayns
+{
+struct Plane
+{
+    // A, B, C D from Ax + By + Cz + D = 0
+    Vector4f coefficents;
+};
+
+template<>
+void GeometryBoundsUpdater<Plane>::update(const Plane& p, const Matrix4f& t, Bounds& b);
+
+template<>
+void Geometry<Plane>::initializeHandle();
+
+template<>
+void Geometry<Plane>::commitGeometrySpecificParams();
+
+}

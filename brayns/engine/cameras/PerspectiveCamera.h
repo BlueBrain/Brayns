@@ -73,9 +73,6 @@ private:
 };
 
 BRAYNS_JSON_ADAPTER_BEGIN(PerspectiveCamera)
-BRAYNS_JSON_ADAPTER_GETSET("position", getPosition, setPosition, "Camera position in world space coordinates")
-BRAYNS_JSON_ADAPTER_GETSET("target", getTarget, setTarget, "Camera target in world space coordinates")
-BRAYNS_JSON_ADAPTER_GETSET("up", getUp, setUp, "Camera UP vector")
 BRAYNS_JSON_ADAPTER_GETSET("fovy", getFOVY, setFOVY, "Camera vertical field of view (in degrees)")
 BRAYNS_JSON_ADAPTER_GETSET("aperture_radius", getApertureRadius, setApertureRadius,
                            "Lens aperture radius (Use for depth of field effect. A value of 0.0 disables it. "

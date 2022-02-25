@@ -15,7 +15,11 @@ set(BRAYNSENGINE_SOURCES
     Model.cpp
     Renderer.cpp
     Scene.cpp
+    cameras/OrthographicCamera.cpp
     cameras/PerspectiveCamera.cpp
+    geometries/Box.cpp
+    geometries/Plane.cpp
+    geometries/Primitive.cpp
     geometries/Sphere.cpp
     lights/DirectionalLight.cpp
     materials/MatteMaterial.cpp
@@ -35,7 +39,11 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     Model.h
     Renderer.h
     Scene.h
+    cameras/OrthographicCamera.h
     cameras/PerspectiveCamera.h
+    geometries/Box.h
+    geometries/Plane.h
+    geometries/Primitive.h
     geometries/Sphere.h
     lights/DirectionalLight.h
     materials/MatteMaterial.h

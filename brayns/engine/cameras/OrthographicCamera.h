@@ -19,3 +19,36 @@
  */
 
 #pragma once
+
+#include <brayns/engine/Camera.h>
+#include <brayns/json/JsonAdapterMacro.h>
+
+namespace brayns
+{
+class OrthographicCamera : public Camera
+{
+public:
+    Ptr clone() const noexcept final;
+
+    /**
+     * @brief Sets the orthographic projection height
+     */
+    void setHeight(const float height) noexcept;
+
+    /**
+     * @brief Returns the orthographic projection height
+     */
+    float getHeight() const noexcept;
+
+protected:
+    std::string_view getOSPHandleName() const noexcept final;
+    void commitCameraSpecificParams() final;
+
+private:
+    float _height {1.f};
+};
+
+BRAYNS_JSON_ADAPTER_BEGIN(OrthographicCamera)
+BRAYNS_JSON_ADAPTER_GETSET("height", getHeight, setHeight, "Camera orthographic projection height")
+BRAYNS_JSON_ADAPTER_END()
+}
