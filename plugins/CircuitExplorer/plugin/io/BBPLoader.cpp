@@ -77,15 +77,20 @@ brain::GIDSet
     std::vector<std::string> targets;
     if (!input.targets.empty())
         targets = input.targets;
-    else
-        targets = {config.getCircuitTarget()};
+    else if (const auto defaultTarget = config.getCircuitTarget(); !defaultTarget.empty())
+        targets = {defaultTarget};
 
     brain::GIDSet allGids;
-    for (const auto &target : targets)
+    if (!targets.empty())
     {
-        const auto tempGids = circuit.getGIDs(target);
-        allGids.insert(tempGids.begin(), tempGids.end());
+        for (const auto &target : targets)
+        {
+            const auto tempGids = circuit.getGIDs(target);
+            allGids.insert(tempGids.begin(), tempGids.end());
+        }
     }
+    else
+        allGids = circuit.getGIDs();
 
     if (input.percentage >= 1.f)
         return allGids;
