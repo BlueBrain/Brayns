@@ -23,8 +23,9 @@
 
 #include <functional>
 #include <memory>
-#include <ostream>
 #include <string>
+
+#include <spdlog/fmt/ostr.h>
 
 #include <brayns/network/websocket/WebSocket.h>
 

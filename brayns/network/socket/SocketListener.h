@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <brayns/network/binary/BinaryManager.h>
 #include <brayns/network/client/ClientManager.h>
 #include <brayns/network/entrypoint/EntrypointRegistry.h>
 #include <brayns/network/task/TaskManager.h>
@@ -39,11 +40,16 @@ public:
     /**
      * @brief Construct a listener with dependencies.
      *
+     * @param binary Binary manager to buffer binary frames.
      * @param clients Client pool to update.
      * @param entrypoints Entrypoints to process requests.
      * @param tasks Tasks to schedule request processing.
      */
-    SocketListener(ClientManager &clients, const EntrypointRegistry &entrypoints, TaskManager &tasks);
+    SocketListener(
+        BinaryManager &binary,
+        ClientManager &clients,
+        const EntrypointRegistry &entrypoints,
+        TaskManager &tasks);
 
     /**
      * @brief Register new client and notify entrypoints.
@@ -67,6 +73,7 @@ public:
     virtual void onRequest(ClientRequest request) override;
 
 private:
+    BinaryManager &_binary;
     ClientManager &_clients;
     const EntrypointRegistry &_entrypoints;
     TaskManager &_tasks;

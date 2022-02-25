@@ -181,4 +181,9 @@ void ServerSocket::start()
     auto address = socket.address();
     Log::info("Server started on '{}'.", address.toString());
 }
+
+void ServerSocket::poll()
+{
+    _manager.poll();
+}
 } // namespace brayns

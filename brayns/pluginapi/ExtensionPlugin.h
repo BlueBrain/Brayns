@@ -63,6 +63,7 @@ public:
      */
     virtual void registerEntrypoints(INetworkInterface &interface)
     {
+        (void)interface;
     }
 
     /**

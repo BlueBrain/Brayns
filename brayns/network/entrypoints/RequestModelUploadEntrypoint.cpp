@@ -249,9 +249,9 @@ void RequestModelUploadEntrypoint::onPreRender()
     {
         return;
     }
-    Log::info("Upload model from binary request {}.", request);
+    Log::info("Upload model from binary request {}.", *request);
     BinaryModelLoader::load(_scene, *_loader, *_request, *request, _params, _token);
-    Log::info("Model upload from binary request {} done.", request);
+    Log::info("Model upload from binary request {} done.", *request);
     _request = std::nullopt;
     _loader = nullptr;
 }

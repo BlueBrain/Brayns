@@ -24,6 +24,8 @@
 #include <deque>
 #include <memory>
 
+#include <brayns/network/binary/BinaryManager.h>
+#include <brayns/network/client/ClientRequest.h>
 #include <brayns/network/entrypoint/EntrypointRegistry.h>
 #include <brayns/network/jsonrpc/JsonRpcRequest.h>
 

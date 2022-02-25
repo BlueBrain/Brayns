@@ -21,8 +21,9 @@
 
 #pragma once
 
-#include <ostream>
 #include <stdexcept>
+
+#include <spdlog/fmt/ostr.h>
 
 #include <brayns/json/JsonType.h>
 

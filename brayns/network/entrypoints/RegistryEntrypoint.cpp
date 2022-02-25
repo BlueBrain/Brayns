@@ -41,7 +41,7 @@ std::string RegistryEntrypoint::getDescription() const
 void RegistryEntrypoint::onRequest(const Request &request)
 {
     std::vector<std::string> result;
-    _entrypoints.forEach([&](auto &entrypoint) { result.push_back(entrypoint.getMethod();) });
+    _entrypoints.forEach([&](auto &entrypoint) { result.push_back(entrypoint.getMethod()); });
     request.reply(result);
 }
 } // namespace brayns

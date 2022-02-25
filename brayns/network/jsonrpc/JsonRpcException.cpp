@@ -104,6 +104,6 @@ namespace std
 {
 std::ostream &operator<<(std::ostream &stream, const brayns::JsonRpcException &e)
 {
-    stream << "{code = " << e.getCode() << ", message = '" << e.what() << "'}";
+    return stream << "{code = " << e.getCode() << ", message = '" << e.what() << "'}";
 }
 } // namespace std

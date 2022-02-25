@@ -47,9 +47,15 @@ public:
      * @brief Add a new entrypoint.
      *
      * @param entrypoint Entrypoint implementing common interface.
-     * @throw std::invalid_argument Name missing or already present.
+     * @throw std::invalid_argument Method missing or already present.
      */
     void add(EntrypointRef entrypoint);
+
+    /**
+     * @brief Call onCreate() on all entrypoints.
+     *
+     */
+    void onCreate();
 
     /**
      * @brief Iterate over all registered entrypoints.
@@ -60,7 +66,7 @@ public:
     template<typename FunctorType>
     void forEach(FunctorType functor) const
     {
-        for (const auto &[name, entrypoint] : _entrypoints)
+        for (const auto &[method, entrypoint] : _entrypoints)
         {
             functor(entrypoint);
         }

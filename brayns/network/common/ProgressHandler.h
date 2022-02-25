@@ -37,13 +37,16 @@ class ProgressHandler
 {
 public:
     /**
-     * @brief Construct a handler for the given request.
+     * @brief Construct a new progress handler for the given request.
+     *
+     * Reset token cancellation flag automatically.
      *
      * @param token Used to poll for cancellation.
      * @param request Request to monitor.
      */
     ProgressHandler(CancellationToken &token, const RequestType &request)
         : _token(token)
+        , _request(request)
     {
         _token.reset();
     }

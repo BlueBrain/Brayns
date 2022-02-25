@@ -22,8 +22,9 @@
 #pragma once
 
 #include <functional>
-#include <ostream>
 #include <typeindex>
+
+#include <spdlog/fmt/ostr.h>
 
 #include <brayns/json/JsonAdapter.h>
 

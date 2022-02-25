@@ -58,11 +58,14 @@ public:
 class RequestHandler
 {
 public:
-    static void
-        handle(const brayns::EntrypointRegistry &entrypoints, brayns::TaskManager &tasks, brayns::ClientRequest request)
+    static void handle(
+        brayns::BinaryManager &binary,
+        const brayns::EntrypointRegistry &entrypoints,
+        brayns::TaskManager &tasks,
+        brayns::ClientRequest request)
     {
         _log(request);
-        _dispatch(entrypoints, tasks, std::move(request));
+        _dispatch(binary, entrypoints, tasks, std::move(request));
     }
 
 private:
@@ -75,11 +78,12 @@ private:
     }
 
     static void _dispatch(
+        brayns::BinaryManager &binary,
         const brayns::EntrypointRegistry &entrypoints,
         brayns::TaskManager &tasks,
         brayns::ClientRequest request)
     {
-        brayns::RequestDispatcher dispatcher(entrypoints, tasks);
+        brayns::RequestDispatcher dispatcher(binary, entrypoints, tasks);
         dispatcher.dispatch(std::move(request));
     }
 };
@@ -87,8 +91,13 @@ private:
 
 namespace brayns
 {
-SocketListener::SocketListener(ClientManager &clients, const EntrypointRegistry &entrypoints, TaskManager &tasks)
-    : _clients(clients)
+SocketListener::SocketListener(
+    BinaryManager &binary,
+    ClientManager &clients,
+    const EntrypointRegistry &entrypoints,
+    TaskManager &tasks)
+    : _binary(binary)
+    , _clients(clients)
     , _entrypoints(entrypoints)
     , _tasks(tasks)
 {
@@ -106,6 +115,6 @@ void SocketListener::onDisconnect(const ClientRef &client)
 
 void SocketListener::onRequest(ClientRequest request)
 {
-    RequestHandler::handle(_entrypoints, _tasks, std::move(request));
+    RequestHandler::handle(_binary, _entrypoints, _tasks, std::move(request));
 }
 } // namespace brayns

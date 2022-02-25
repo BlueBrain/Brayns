@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <ostream>
+#include <spdlog/fmt/ostr.h>
 
 #include <brayns/network/client/ClientRef.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
