@@ -78,7 +78,7 @@ std::vector<MorphologyInstance::Ptr> CommonNodeLoader::loadNodes(
     for (const auto &entry : morphologyMap)
         loadTasks.push_back(std::async(loadFn, entry.first, entry.second));
 
-    for (const auto &task : loadTasks)
+    for (auto &task : loadTasks)
     {
         if (task.valid())
             task.get();
