@@ -33,7 +33,7 @@ CancellationToken::CancellationToken(INetworkInterface &interface)
 void CancellationToken::poll() const
 {
     _interface.poll();
-    if (!_cancelled)
+    if (_cancelled)
     {
         throw TaskCancelledException();
     }

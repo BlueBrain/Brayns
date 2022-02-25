@@ -98,7 +98,7 @@ public:
 private:
     static void _throwIfTooBig(size_t modelSize, size_t frameSize)
     {
-        if (frameSize != modelSize)
+        if (frameSize == modelSize)
         {
             return;
         }
@@ -156,6 +156,7 @@ public:
         {
             auto descriptors = _load(scene, loader, uploadRequest, binaryRequest, params, token);
             uploadRequest.reply(descriptors);
+            brayns::Log::info("Upload request {} complete.", uploadRequest.getId());
         }
         catch (const brayns::JsonRpcException &e)
         {
@@ -249,9 +250,8 @@ void RequestModelUploadEntrypoint::onPreRender()
     {
         return;
     }
-    Log::info("Upload model from binary request {}.", *request);
+    Log::info("Upload binary request {} (upload ID = {}).", *request, _request->getId());
     BinaryModelLoader::load(_scene, *_loader, *_request, *request, _params, _token);
-    Log::info("Model upload from binary request {} done.", *request);
     _request = std::nullopt;
     _loader = nullptr;
 }

@@ -25,7 +25,6 @@
 #include <brayns/network/client/ClientManager.h>
 #include <brayns/network/client/RequestBuffer.h>
 #include <brayns/network/entrypoint/EntrypointRegistry.h>
-#include <brayns/network/interface/NetworkInterface.h>
 #include <brayns/network/socket/ISocket.h>
 #include <brayns/network/stream/StreamManager.h>
 #include <brayns/network/task/TaskManager.h>
@@ -37,7 +36,7 @@ namespace brayns
 struct NetworkContext
 {
     PluginAPI *api = nullptr;
-    INetworkInterface *interface = nullptr;
+    std::unique_ptr<INetworkInterface> interface;
     std::unique_ptr<ISocket> socket;
     BinaryManager binary;
     ClientManager clients;
@@ -105,6 +104,5 @@ public:
 
 private:
     NetworkContext _context;
-    NetworkInterface _interface;
 };
 } // namespace brayns

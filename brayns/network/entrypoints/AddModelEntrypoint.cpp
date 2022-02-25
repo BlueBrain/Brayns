@@ -79,6 +79,7 @@ void AddModelEntrypoint::onRequest(const Request &request)
     auto &parameters = params.getLoadParameters();
     auto callback = [&](const auto &operation, auto amount) { progress.notify(operation, amount); };
     auto descriptors = loader.loadFromFile(path, {callback}, parameters, _scene);
+    _scene.addModels(descriptors, params);
     request.reply(descriptors);
 }
 

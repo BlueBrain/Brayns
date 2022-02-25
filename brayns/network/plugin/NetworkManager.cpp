@@ -207,12 +207,20 @@ public:
     static void run(brayns::NetworkContext &context)
     {
         _createSocket(context);
+        _createInterface(context);
     }
 
 private:
     static void _createSocket(brayns::NetworkContext &context)
     {
         context.socket = SocketFactory::create(context);
+    }
+
+    static void _createInterface(brayns::NetworkContext &context)
+    {
+        auto &entrypoints = context.entrypoints;
+        auto &socket = *context.socket;
+        context.interface = std::make_unique<brayns::NetworkInterface>(entrypoints, socket);
     }
 };
 
@@ -245,6 +253,7 @@ public:
     static void run(brayns::NetworkContext &context)
     {
         _pollSocket(context);
+        _runTasks(context);
         _notifyEntrypoints(context);
     }
 
@@ -253,6 +262,12 @@ private:
     {
         auto &socket = *context.socket;
         socket.poll();
+    }
+
+    static void _runTasks(brayns::NetworkContext &context)
+    {
+        auto &tasks = context.tasks;
+        tasks.runAllTasks();
     }
 
     static void _notifyEntrypoints(brayns::NetworkContext &context)
@@ -295,14 +310,13 @@ private:
 namespace brayns
 {
 NetworkManager::NetworkManager()
-    : _interface(_context.entrypoints, *_context.socket)
 {
     Log::info("Network plugin is enabled.");
 }
 
 INetworkInterface &NetworkManager::getInterface()
 {
-    return _interface;
+    return *_context.interface;
 }
 
 void NetworkManager::start()
@@ -315,7 +329,6 @@ void NetworkManager::init()
 {
     Log::info("Initializing network plugin.");
     _context.api = _api;
-    _context.interface = &_interface;
     NetworkInitialization::run(_context);
 }
 

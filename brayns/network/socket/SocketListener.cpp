@@ -71,8 +71,7 @@ public:
 private:
     static void _log(const brayns::ClientRequest &request)
     {
-        auto &client = request.getClient();
-        brayns::Log::info("Received request from client {}.", client);
+        brayns::Log::info("Received request {}.", request);
         auto data = request.isBinary() ? "<Binary data>" : request.getData();
         brayns::Log::debug("Request content: '{}'.", data);
     }

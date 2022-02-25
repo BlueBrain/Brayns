@@ -29,7 +29,7 @@ namespace brayns
 {
 void JsonRpcHandler::handle(const JsonRpcRequest &request, const EntrypointRef &entrypoint)
 {
-    Log::info("Execution of request {} from entrypoint.", request);
+    Log::info("Execution of request {}.", request);
     try
     {
         entrypoint.onRequest(request);

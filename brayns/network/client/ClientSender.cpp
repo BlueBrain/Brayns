@@ -40,6 +40,7 @@ public:
         if (packet.isText())
         {
             _logText(packet, client);
+            return;
         }
         brayns::Log::error("Trying to send invalid packet.");
     }

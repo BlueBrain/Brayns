@@ -33,8 +33,6 @@
 class CircuitExplorerPlugin : public brayns::ExtensionPlugin
 {
 public:
-    CircuitExplorerPlugin();
-
     void init() final;
     void registerEntrypoints(brayns::INetworkInterface &interface) final;
     void preRender() final;

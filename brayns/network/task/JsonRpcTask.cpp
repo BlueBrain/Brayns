@@ -34,7 +34,7 @@ JsonRpcTask::JsonRpcTask(JsonRpcRequest request, const EntrypointRef &entrypoint
     : _request(std::move(request))
     , _entrypoint(entrypoint)
 {
-    assert(request.getMethod() == entrypoint.getMethod());
+    assert(_request.getMethod() == _entrypoint.getMethod());
 }
 
 const ClientRef &JsonRpcTask::getClient() const
@@ -54,7 +54,7 @@ const std::string &JsonRpcTask::getMethod() const
 
 void JsonRpcTask::run()
 {
-    Log::info("Execute JSON-RPC request {}.", _request);
+    Log::debug("Execute JSON-RPC task for request {}.", _request);
     if (_cancelled)
     {
         Log::info("Request {} cancelled before start.", _request);

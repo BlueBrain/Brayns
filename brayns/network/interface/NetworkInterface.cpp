@@ -33,7 +33,9 @@ NetworkInterface::NetworkInterface(EntrypointRegistry &entrypoints, ISocket &soc
 
 void NetworkInterface::add(EntrypointRef entrypoint)
 {
-    Log::info("Register entrypoint '{}'.", entrypoint.getMethod());
+    auto &plugin = entrypoint.getPlugin();
+    auto &method = entrypoint.getMethod();
+    Log::info("Plugin '{}' registered entrypoint '{}'.", plugin, method);
     _entrypoints.add(std::move(entrypoint));
 }
 
