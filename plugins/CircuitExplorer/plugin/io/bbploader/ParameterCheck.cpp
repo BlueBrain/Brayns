@@ -43,7 +43,7 @@ void checkTargets(const brion::BlueConfig &config, const BBPLoaderParameters &in
     for (const auto &trg : input.targets)
     {
         if (trg.empty())
-            continue;
+            throw std::invalid_argument("BBPLoader: Specified an empty target name");
 
         bool exists = false;
         for (const auto &parser : targetParsers)
