@@ -81,7 +81,9 @@ std::vector<MorphologyInstance::Ptr> CommonNodeLoader::loadNodes(
     for (const auto &task : loadTasks)
     {
         if (task.valid())
-            task.wait();
+            task.get();
+        else
+            throw std::runtime_error("Unknown error while loading morphologies");
     }
 
     return result;

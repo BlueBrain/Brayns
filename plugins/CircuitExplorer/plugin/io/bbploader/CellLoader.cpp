@@ -69,10 +69,12 @@ std::vector<MorphologyInstance::Ptr>
     for (const auto &entry : morphPathMap)
         loadTasks.push_back(std::async(loadFn, entry.first, entry.second));
 
-    for (const auto &task : loadTasks)
+    for (auto &task : loadTasks)
     {
         if (task.valid())
-            task.wait();
+            task.get();
+        else
+            throw std::runtime_error("Unknown error while loading morphologies");
     }
 
     return cells;

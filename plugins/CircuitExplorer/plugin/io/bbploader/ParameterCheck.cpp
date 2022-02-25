@@ -42,6 +42,9 @@ void checkTargets(const brion::BlueConfig &config, const BBPLoaderParameters &in
     const auto targetParsers = config.getTargets();
     for (const auto &trg : input.targets)
     {
+        if (trg.empty())
+            continue;
+
         bool exists = false;
         for (const auto &parser : targetParsers)
         {
