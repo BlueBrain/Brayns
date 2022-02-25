@@ -99,7 +99,7 @@ public:
 };
 } // namespace
 
-std::string MakeMovieEntrypoint::getName() const
+std::string MakeMovieEntrypoint::getMethod() const
 {
     return "make-movie";
 }

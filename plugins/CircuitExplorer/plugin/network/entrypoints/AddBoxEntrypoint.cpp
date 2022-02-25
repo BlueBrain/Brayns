@@ -68,7 +68,7 @@ AddBoxEntrypoint::AddBoxEntrypoint(brayns::Scene &scene)
 {
 }
 
-std::string AddBoxEntrypoint::getName() const
+std::string AddBoxEntrypoint::getMethod() const
 {
     return "add-box";
 }

@@ -28,7 +28,7 @@ GetMaterialEntrypoint::GetMaterialEntrypoint(Scene &scene)
 {
 }
 
-std::string GetMaterialEntrypoint::getName() const
+std::string GetMaterialEntrypoint::getMethod() const
 {
     return "get-material";
 }
@@ -54,7 +54,7 @@ SetMaterialEntrypoint::SetMaterialEntrypoint(Scene &scene)
 {
 }
 
-std::string SetMaterialEntrypoint::getName() const
+std::string SetMaterialEntrypoint::getMethod() const
 {
     return "set-material";
 }

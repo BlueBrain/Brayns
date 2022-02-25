@@ -28,7 +28,7 @@ SetMaterialRangeEntrypoint::SetMaterialRangeEntrypoint(Scene &scene)
 {
 }
 
-std::string SetMaterialRangeEntrypoint::getName() const
+std::string SetMaterialRangeEntrypoint::getMethod() const
 {
     return "set-material-range";
 }

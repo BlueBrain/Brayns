@@ -66,7 +66,7 @@ public:
 class CIGetCellIdsEntrypoint : public brayns::Entrypoint<CIGetCellIdsParams, CIGetCellIdsResult>
 {
 public:
-    virtual std::string getName() const override
+    virtual std::string getMethod() const override
     {
         return "ci-get-cell-ids";
     }

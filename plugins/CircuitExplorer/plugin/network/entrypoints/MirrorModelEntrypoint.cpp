@@ -176,7 +176,7 @@ MirrorModelEntrypoint::MirrorModelEntrypoint(brayns::Scene &scene)
 {
 }
 
-std::string MirrorModelEntrypoint::getName() const
+std::string MirrorModelEntrypoint::getMethod() const
 {
     return "mirror-model";
 }

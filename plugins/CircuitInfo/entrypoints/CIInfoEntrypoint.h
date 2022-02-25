@@ -82,7 +82,7 @@ public:
 class CIInfoEntrypoint : public brayns::Entrypoint<CIInfoParams, CIInfoResult>
 {
 public:
-    virtual std::string getName() const override
+    virtual std::string getMethod() const override
     {
         return "ci-info";
     }

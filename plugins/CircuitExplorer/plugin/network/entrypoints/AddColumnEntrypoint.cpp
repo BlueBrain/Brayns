@@ -95,7 +95,7 @@ AddColumnEntrypoint::AddColumnEntrypoint(brayns::Scene &scene)
 {
 }
 
-std::string AddColumnEntrypoint::getName() const
+std::string AddColumnEntrypoint::getMethod() const
 {
     return "add-column";
 }

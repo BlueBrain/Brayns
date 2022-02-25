@@ -28,7 +28,7 @@ SetSpikeSimulationEntrypoint::SetSpikeSimulationEntrypoint(DTIPlugin &plugin)
 {
 }
 
-std::string SetSpikeSimulationEntrypoint::getName() const
+std::string SetSpikeSimulationEntrypoint::getMethod() const
 {
     return "set-spike-simulation";
 }

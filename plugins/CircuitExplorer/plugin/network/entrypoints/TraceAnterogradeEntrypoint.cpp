@@ -29,7 +29,7 @@ TraceAnterogradeEntrypoint::TraceAnterogradeEntrypoint(brayns::Scene &scene, Cir
 {
 }
 
-std::string TraceAnterogradeEntrypoint::getName() const
+std::string TraceAnterogradeEntrypoint::getMethod() const
 {
     return "trace-anterograde";
 }

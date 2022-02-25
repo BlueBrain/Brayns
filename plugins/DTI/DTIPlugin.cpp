@@ -32,6 +32,7 @@
 #include <brayns/engine/Material.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
+#include <brayns/network/entrypoint/EntrypointBuilder.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
@@ -50,22 +51,21 @@ const std::string MATERIAL_PROPERTY_SHADING_MODE = "shading_mode";
 
 namespace dti
 {
-DTIPlugin::DTIPlugin()
-    : brayns::ExtensionPlugin("DTI")
-{
-}
-
 void DTIPlugin::init()
 {
     auto &registry = _api->getLoaderRegistry();
-
     registry.registerLoader(std::make_unique<DTILoader>());
+}
 
+void DTIPlugin::registerEntrypoints(brayns::INetworkInterface &interface)
+{
     auto &scene = _api->getScene();
 
-    add<AddStreamlinesEntrypoint>(scene);
-    add<SetSpikeSimulationEntrypoint>(*this);
-    add<SetSpikeSimulationFromFileEntrypoint>(*this);
+    auto builder = brayns::EntrypointBuilder("DTI", interface);
+
+    builder.add<AddStreamlinesEntrypoint>(scene);
+    builder.add<SetSpikeSimulationEntrypoint>(*this);
+    builder.add<SetSpikeSimulationFromFileEntrypoint>(*this);
 }
 
 void DTIPlugin::preRender()

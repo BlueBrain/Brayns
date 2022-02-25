@@ -28,7 +28,7 @@ ColorCircuitByIdEntrypoint::ColorCircuitByIdEntrypoint(brayns::Scene &scene, Cir
 {
 }
 
-std::string ColorCircuitByIdEntrypoint::getName() const
+std::string ColorCircuitByIdEntrypoint::getMethod() const
 {
     return "color-circuit-by-id";
 }
@@ -69,7 +69,7 @@ ColorCircuitBySingleColorEntrypoint::ColorCircuitBySingleColorEntrypoint(
 {
 }
 
-std::string ColorCircuitBySingleColorEntrypoint::getName() const
+std::string ColorCircuitBySingleColorEntrypoint::getMethod() const
 {
     return "color-circuit-by-single-color";
 }
@@ -101,7 +101,7 @@ AvailableColorMethodsEntrypoint::AvailableColorMethodsEntrypoint(brayns::Scene &
 {
 }
 
-std::string AvailableColorMethodsEntrypoint::getName() const
+std::string AvailableColorMethodsEntrypoint::getMethod() const
 {
     return "get-circuit-color-methods";
 }
@@ -133,7 +133,7 @@ AvailableColorMethodVariablesEntrypoint::AvailableColorMethodVariablesEntrypoint
 {
 }
 
-std::string AvailableColorMethodVariablesEntrypoint::getName() const
+std::string AvailableColorMethodVariablesEntrypoint::getMethod() const
 {
     return "get-circuit-color-method-variables";
 }
@@ -167,7 +167,7 @@ ColorCircuitByMethodEntrypoint::ColorCircuitByMethodEntrypoint(brayns::Scene &sc
 {
 }
 
-std::string ColorCircuitByMethodEntrypoint::getName() const
+std::string ColorCircuitByMethodEntrypoint::getMethod() const
 {
     return "color-circuit-by-method";
 }

@@ -36,6 +36,7 @@ public:
     CircuitExplorerPlugin();
 
     void init() final;
+    void registerEntrypoints(brayns::INetworkInterface &interface) final;
     void preRender() final;
     void postRender() final;
 

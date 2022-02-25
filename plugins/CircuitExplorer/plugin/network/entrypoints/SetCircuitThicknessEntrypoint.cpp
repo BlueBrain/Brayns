@@ -85,7 +85,7 @@ SetCircuitThicknessEntrypoint::SetCircuitThicknessEntrypoint(brayns::Scene &scen
 {
 }
 
-std::string SetCircuitThicknessEntrypoint::getName() const
+std::string SetCircuitThicknessEntrypoint::getMethod() const
 {
     return "set-circuit-thickness";
 }

@@ -33,7 +33,7 @@ class TraceAnterogradeEntrypoint : public brayns::Entrypoint<TraceAnterogradeMes
 public:
     TraceAnterogradeEntrypoint(brayns::Scene &scene, CircuitColorManager &manager);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
