@@ -33,7 +33,7 @@ class ColorCircuitByIdEntrypoint : public brayns::Entrypoint<ColorCircuitByIdMes
 public:
     ColorCircuitByIdEntrypoint(brayns::Scene &scene, CircuitColorManager &manager);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
@@ -48,7 +48,7 @@ class ColorCircuitBySingleColorEntrypoint
 public:
     ColorCircuitBySingleColorEntrypoint(brayns::Scene &scene, CircuitColorManager &manager);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
@@ -62,7 +62,7 @@ class AvailableColorMethodsEntrypoint : public brayns::Entrypoint<ColoredCircuit
 public:
     AvailableColorMethodsEntrypoint(brayns::Scene &scene, CircuitColorManager &manager);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
@@ -77,7 +77,7 @@ class AvailableColorMethodVariablesEntrypoint
 public:
     AvailableColorMethodVariablesEntrypoint(brayns::Scene &scene, CircuitColorManager &manager);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
@@ -91,7 +91,7 @@ class ColorCircuitByMethodEntrypoint : public brayns::Entrypoint<ColorCircuitByM
 public:
     ColorCircuitByMethodEntrypoint(brayns::Scene &scene, CircuitColorManager &manager);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 

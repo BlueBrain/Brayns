@@ -33,7 +33,7 @@ class RemoveClipPlanesEntrypoint : public Entrypoint<RemoveClipPlanesMessage, Em
 public:
     RemoveClipPlanesEntrypoint(Scene &scene);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 

@@ -168,9 +168,6 @@ public:
         descriptor.markModified();
         scene.markModified();
     }
-
-private:
-    brayns::PluginAPI *_api;
 };
 } // namespace
 
@@ -179,7 +176,7 @@ MirrorModelEntrypoint::MirrorModelEntrypoint(brayns::Scene &scene)
 {
 }
 
-std::string MirrorModelEntrypoint::getName() const
+std::string MirrorModelEntrypoint::getMethod() const
 {
     return "mirror-model";
 }

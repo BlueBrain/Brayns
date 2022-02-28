@@ -22,7 +22,7 @@
 
 #include <brayns/common/Log.h>
 
-#include <brayns/network/entrypoint/EntrypointTask.h>
+#include <brayns/network/common/ProgressHandler.h>
 
 #include <brayns/utils/StringUtils.h>
 #include <brayns/utils/image/ImageEncoder.h>
@@ -111,40 +111,38 @@ std::string encodeSnapshotToBase64(SnapshotParams &params, FrameBuffer &fb)
     return {};
 }
 
-class SnapshotTask : public EntrypointTask<SnapshotParams, ImageBase64Message>
+class SnapshotHandler
 {
 public:
-    SnapshotTask(Request request, Engine &engine)
-        : EntrypointTask(std::move(request))
-        , _engine(engine)
-        , _params(getParams())
-    {
-    }
+    using Request = brayns::SnapshotEntrypoint::Request;
 
-    virtual void run() override
+    static void handle(const Request &request, Engine &engine, CancellationToken &token)
     {
+        auto progress = brayns::ProgressHandler(token, request);
+
         // Initialize parameters
-        initializeParameters(_engine, _params);
-        auto &animParams = _params.animation_parameters;
-        auto &renderParams = _params.renderer;
-        auto &volumeParams = _params.volume_parameters;
+        auto params = request.getParams();
+        initializeParameters(engine, params);
+        auto &animParams = params.animation_parameters;
+        auto &renderParams = params.renderer;
+        auto &volumeParams = params.volume_parameters;
 
         // Initialize (Clone) scene
-        auto scene = _engine.createScene(*animParams, *volumeParams);
-        scene->copyFrom(_engine.getScene());
+        auto scene = engine.createScene(*animParams, *volumeParams);
+        scene->copyFrom(engine.getScene());
         scene->commit();
 
         // Initialize camera
-        auto camera = initializeCamera(_engine, _params);
-        const auto &size = _params.size;
+        auto camera = initializeCamera(engine, params);
+        const auto &size = params.size;
         const auto ar = static_cast<double>(size.x) / static_cast<double>(size.y);
         camera->updateProperty("aspect", ar);
         camera->setBufferTarget("default");
         camera->commit();
 
         // Initialize renderer
-        auto renderer = _engine.createRenderer(*animParams, *renderParams);
-        const auto &sysRenderer = _engine.getRenderer();
+        auto renderer = engine.createRenderer(*animParams, *renderParams);
+        const auto &sysRenderer = engine.getRenderer();
         renderer->setCurrentType(sysRenderer.getCurrentType());
         renderer->clonePropertiesFrom(sysRenderer);
         renderer->setCamera(camera);
@@ -152,11 +150,11 @@ public:
         renderer->commit();
 
         // Initialize framebuffer
-        auto frameBuffer = _engine.createFrameBuffer("default", size, PixelFormat::RGBA_I8);
+        auto frameBuffer = engine.createFrameBuffer("default", size, PixelFormat::RGBA_I8);
         frameBuffer->setAccumulation(true);
 
         // Prepare notifications message
-        const auto name = string_utils::shortenString(_params.name);
+        const auto name = string_utils::shortenString(params.name);
         const auto msg = "Render snapshot " + name + " ...";
 
         // Render snapshot
@@ -166,7 +164,7 @@ public:
         // Can be used to get progress information while using samples per pixel
         // instead of accumulation to speed up rendering
         size_t numAccumFrames = frameBuffer->numAccumFrames();
-        const auto spp = _params.samples_per_pixel;
+        const auto spp = params.samples_per_pixel;
         while (numAccumFrames != spp)
         {
             renderer->render(frameBuffer);
@@ -174,35 +172,33 @@ public:
             numAccumFrames = frameBuffer->numAccumFrames();
 
             const auto totalProgress = static_cast<float>(numAccumFrames) / static_cast<float>(spp);
-            progress(msg, totalProgress);
+            progress.notify(msg, totalProgress);
         }
 
         // Handle result
-        if (!_params.file_path.empty())
-            _image.data = writeSnapshotToDisk(_params, *frameBuffer);
+        brayns::ImageBase64Message image;
+
+        if (!params.file_path.empty())
+        {
+            image.data = writeSnapshotToDisk(params, *frameBuffer);
+        }
         else
-            _image.data = encodeSnapshotToBase64(_params, *frameBuffer);
-    }
+        {
+            image.data = encodeSnapshotToBase64(params, *frameBuffer);
+        }
 
-    virtual void onComplete() override
-    {
-        reply(_image);
+        request.reply(image);
     }
-
-private:
-    Engine &_engine;
-    SnapshotParams _params;
-    ImageBase64Message _image;
 };
 } // namespace
 
-SnapshotEntrypoint::SnapshotEntrypoint(Engine &engine, INetworkInterface &interface)
+SnapshotEntrypoint::SnapshotEntrypoint(Engine &engine, CancellationToken token)
     : _engine(engine)
-    , _launcher(interface)
+    , _token(token)
 {
 }
 
-std::string SnapshotEntrypoint::getName() const
+std::string SnapshotEntrypoint::getMethod() const
 {
     return "snapshot";
 }
@@ -219,7 +215,19 @@ bool SnapshotEntrypoint::isAsync() const
 
 void SnapshotEntrypoint::onRequest(const Request &request)
 {
-    auto task = std::make_unique<SnapshotTask>(request, _engine);
-    _launcher.launch(std::move(task));
+    SnapshotHandler::handle(request, _engine, _token);
+}
+
+void SnapshotEntrypoint::onCancel()
+{
+    _token.cancel();
+}
+
+void SnapshotEntrypoint::onDisconnect(const ClientRef &client)
+{
+    if (_client && client == *_client)
+    {
+        _token.cancel();
+    }
 }
 } // namespace brayns

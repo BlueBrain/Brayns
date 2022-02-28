@@ -63,7 +63,7 @@ GetLightsEntrypoint::GetLightsEntrypoint(LightManager &manager)
 {
 }
 
-std::string GetLightsEntrypoint::getName() const
+std::string GetLightsEntrypoint::getMethod() const
 {
     return "get-lights";
 }

@@ -21,10 +21,7 @@
 
 #pragma once
 
-#include <brayns/network/client/ClientRef.h>
 #include <brayns/network/entrypoint/EntrypointRef.h>
-#include <brayns/network/jsonrpc/RequestId.h>
-#include <brayns/network/tasks/NetworkTask.h>
 
 namespace brayns
 {
@@ -42,15 +39,13 @@ public:
      *
      * @param entrypoint Entrypoint to register.
      */
-    virtual void addEntrypoint(EntrypointRef entrypoint) = 0;
+    virtual void add(EntrypointRef entrypoint) = 0;
 
     /**
-     * @brief Register and start a task.
+     * @brief Can be used to poll requests from an entrypoint or plugin.
      *
-     * @param client Client requesting the task.
-     * @param id Task request ID.
-     * @param task Task to execute.
+     * @note The network manager already calls it on each update.
      */
-    virtual void launchTask(const ClientRef &client, const RequestId &id, std::unique_ptr<NetworkTask> task) = 0;
+    virtual void poll() = 0;
 };
 } // namespace brayns

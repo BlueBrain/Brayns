@@ -34,7 +34,7 @@ class GetModelPropertiesEntrypoint : public Entrypoint<GetModelMessage, Property
 public:
     GetModelPropertiesEntrypoint(Scene &scene);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
@@ -47,7 +47,7 @@ class SetModelPropertiesEntrypoint : public Entrypoint<ModelPropertiesMessage, E
 public:
     SetModelPropertiesEntrypoint(Scene &scene);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
@@ -60,7 +60,7 @@ class ModelPropertiesSchemaEntrypoint : public Entrypoint<GetModelMessage, JsonV
 public:
     ModelPropertiesSchemaEntrypoint(Scene &scene);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 

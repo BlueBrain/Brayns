@@ -31,7 +31,7 @@
 class CIGetReportsEntrypoint : public brayns::Entrypoint<CIGetReportsParams, CIGetReportsResult>
 {
 public:
-    virtual std::string getName() const override
+    virtual std::string getMethod() const override
     {
         return "ci-get-reports";
     }

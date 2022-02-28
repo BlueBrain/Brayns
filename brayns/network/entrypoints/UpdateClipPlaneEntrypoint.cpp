@@ -30,7 +30,7 @@ UpdateClipPlaneEntrypoint::UpdateClipPlaneEntrypoint(Scene &scene)
 {
 }
 
-std::string UpdateClipPlaneEntrypoint::getName() const
+std::string UpdateClipPlaneEntrypoint::getMethod() const
 {
     return "update-clip-plane";
 }

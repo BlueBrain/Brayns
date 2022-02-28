@@ -28,7 +28,7 @@ ClearLightsEntrypoint::ClearLightsEntrypoint(LightManager &lights)
 {
 }
 
-std::string ClearLightsEntrypoint::getName() const
+std::string ClearLightsEntrypoint::getMethod() const
 {
     return "clear-lights";
 }

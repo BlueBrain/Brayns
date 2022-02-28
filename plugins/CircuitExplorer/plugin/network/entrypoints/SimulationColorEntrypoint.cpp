@@ -29,7 +29,7 @@ SimulationColorEntrypoint::SimulationColorEntrypoint(brayns::Scene &scene)
 {
 }
 
-std::string SimulationColorEntrypoint::getName() const
+std::string SimulationColorEntrypoint::getMethod() const
 {
     return "set-simulation-color";
 }

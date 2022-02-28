@@ -66,7 +66,7 @@ AddCylinderEntrypoint::AddCylinderEntrypoint(brayns::Scene &scene)
 {
 }
 
-std::string AddCylinderEntrypoint::getName() const
+std::string AddCylinderEntrypoint::getMethod() const
 {
     return "add-cylinder";
 }

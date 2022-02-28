@@ -31,7 +31,7 @@ class GetAnimationParametersEntrypoint : public GetEntrypoint<AnimationParameter
 public:
     GetAnimationParametersEntrypoint(const AnimationParameters &parameters);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 
@@ -40,7 +40,7 @@ class SetAnimationParametersEntrypoint : public SetEntrypoint<AnimationParameter
 public:
     SetAnimationParametersEntrypoint(AnimationParameters &parameters);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 } // namespace brayns

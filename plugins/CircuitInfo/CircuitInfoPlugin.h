@@ -31,7 +31,5 @@
 class CircuitInfoPlugin : public brayns::ExtensionPlugin
 {
 public:
-    CircuitInfoPlugin();
-
-    void init() final;
+    void registerEntrypoints(brayns::INetworkInterface &interface) final;
 };

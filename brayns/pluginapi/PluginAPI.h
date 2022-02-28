@@ -26,7 +26,6 @@
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
 #include <brayns/io/LoaderRegistry.h>
-#include <brayns/network/interface/INetworkInterface.h>
 #include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
@@ -60,13 +59,6 @@ public:
      * @return ParametersManager& Parameters.
      */
     virtual ParametersManager &getParametersManager() = 0;
-
-    /**
-     * @brief Get the network interface if enabled.
-     *
-     * @return INetworkInterface* Network interface or null if not enabled.
-     */
-    virtual INetworkInterface *getNetworkInterface() = 0;
 
     /**
      * @brief Get the camera.

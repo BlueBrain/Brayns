@@ -21,29 +21,184 @@
 
 #include "RequestModelUploadEntrypoint.h"
 
-#include <brayns/network/upload/ModelUploadTask.h>
+#include <sstream>
+#include <thread>
+
+#include <brayns/network/common/ProgressHandler.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
+
+namespace
+{
+using Request = brayns::RequestModelUploadEntrypoint::Request;
+using Progress = brayns::ProgressHandler<Request>;
+
+class BinaryParamsValidator
+{
+public:
+    static void validate(const brayns::BinaryParam &params)
+    {
+        if (params.size == 0)
+        {
+            throw brayns::InvalidParamsException("Cannot load an empty model");
+        }
+        auto &type = params.type;
+        if (type.empty())
+        {
+            throw brayns::InvalidParamsException("Missing model type");
+        }
+    }
+};
+
+class LoaderFinder
+{
+public:
+    static const brayns::AbstractLoader &find(const brayns::BinaryParam &params, const brayns::LoaderRegistry &loaders)
+    {
+        auto &name = params.getLoaderName();
+        auto &type = params.type;
+        try
+        {
+            return loaders.getSuitableLoader("", type, name);
+        }
+        catch (const std::runtime_error &e)
+        {
+            throw brayns::InvalidParamsException(e.what());
+        }
+    }
+};
+
+class BinaryLock
+{
+public:
+    static brayns::ClientRequest waitForBinary(brayns::BinaryManager &binary, const Progress &progress)
+    {
+        while (true)
+        {
+            progress.poll();
+            auto request = binary.poll();
+            if (request)
+            {
+                return std::move(*request);
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+    }
+};
+
+class BlobValidator
+{
+public:
+    static void throwIfTooBig(const brayns::BinaryParam &params, std::string_view data)
+    {
+        auto modelSize = params.size;
+        auto frameSize = data.size();
+        _throwIfTooBig(modelSize, frameSize);
+    }
+
+private:
+    static void _throwIfTooBig(size_t modelSize, size_t frameSize)
+    {
+        if (frameSize == modelSize)
+        {
+            return;
+        }
+        std::ostringstream stream;
+        stream << "Frame size of " << frameSize << " different from model size of " << modelSize;
+        throw brayns::InvalidParamsException(stream.str());
+    }
+};
+
+class BlobLoader
+{
+public:
+    static brayns::Blob load(const brayns::BinaryParam &params, std::string_view data, const Progress &progress)
+    {
+        auto blob = _prepare(params);
+        BlobValidator::throwIfTooBig(params, data);
+        _load(data, blob);
+        progress.notify("Model uploaded", 0.5);
+        return blob;
+    }
+
+private:
+    static brayns::Blob _prepare(const brayns::BinaryParam &params)
+    {
+        brayns::Blob blob;
+        blob.type = params.type;
+        blob.name = params.getName();
+        return blob;
+    }
+
+    static void _load(std::string_view data, brayns::Blob &blob)
+    {
+        auto &destination = blob.data;
+        auto size = data.size();
+        destination.reserve(size);
+        destination.insert(destination.end(), data.begin(), data.end());
+    }
+};
+
+class BinaryModelHandler
+{
+public:
+    BinaryModelHandler(
+        brayns::Scene &scene,
+        const brayns::LoaderRegistry &loaders,
+        brayns::BinaryManager &binary,
+        brayns::CancellationToken &token)
+        : _scene(scene)
+        , _loaders(loaders)
+        , _binary(binary)
+        , _token(token)
+    {
+    }
+
+    void handle(const Request &request)
+    {
+        auto progress = Progress(_token, request);
+        auto params = request.getParams();
+        BinaryParamsValidator::validate(params);
+        auto &loader = LoaderFinder::find(params, _loaders);
+        auto binaryRequest = BinaryLock::waitForBinary(_binary, progress);
+        auto data = binaryRequest.getData();
+        auto blob = BlobLoader::load(params, data, progress);
+        auto parameters = params.getLoadParameters();
+        auto callback = [&](auto &operation, auto amount) { progress.notify(operation, 0.5 + 0.5 * amount); };
+        auto descriptors = loader.loadFromBlob(std::move(blob), {callback}, parameters, _scene);
+        _scene.addModels(descriptors, params);
+        request.reply(descriptors);
+    }
+
+private:
+    brayns::Scene &_scene;
+    const brayns::LoaderRegistry &_loaders;
+    brayns::BinaryManager &_binary;
+    brayns::CancellationToken &_token;
+};
+} // namespace
 
 namespace brayns
 {
 RequestModelUploadEntrypoint::RequestModelUploadEntrypoint(
     Scene &scene,
     const LoaderRegistry &loaders,
-    ModelUploadManager &modelUploads)
+    BinaryManager &binary,
+    CancellationToken token)
     : _scene(scene)
     , _loaders(loaders)
-    , _modelUploads(modelUploads)
+    , _binary(binary)
+    , _token(token)
 {
 }
 
-std::string RequestModelUploadEntrypoint::getName() const
+std::string RequestModelUploadEntrypoint::getMethod() const
 {
     return "request-model-upload";
 }
 
 std::string RequestModelUploadEntrypoint::getDescription() const
 {
-    return "Request model upload from further received blobs and return "
-           "model descriptor on success";
+    return "Request model upload from next binary frame received and return model descriptors on success";
 }
 
 bool RequestModelUploadEntrypoint::isAsync() const
@@ -53,7 +208,26 @@ bool RequestModelUploadEntrypoint::isAsync() const
 
 void RequestModelUploadEntrypoint::onRequest(const Request &request)
 {
-    auto task = std::make_unique<ModelUploadTask>(request, _scene, _loaders);
-    _modelUploads.add(std::move(task));
+    _client = request.getClient();
+    BinaryModelHandler handler(_scene, _loaders, _binary, _token);
+    handler.handle(request);
+}
+
+void RequestModelUploadEntrypoint::onPreRender()
+{
+    _binary.flush();
+}
+
+void RequestModelUploadEntrypoint::onCancel()
+{
+    _token.cancel();
+}
+
+void RequestModelUploadEntrypoint::onDisconnect(const ClientRef &client)
+{
+    if (_client && client == *_client)
+    {
+        _token.cancel();
+    }
 }
 } // namespace brayns

@@ -31,7 +31,7 @@
 namespace brayns
 {
 /**
- * @brief Entrypoint holder of an implementation of IEntrypoint.
+ * @brief Entrypoint wrapper.
  *
  */
 class EntrypointRef
@@ -54,6 +54,7 @@ public:
      * @brief Call implementation onRequest() with given request.
      *
      * @param request Client request to the underlying entrypoint.
+     * @throw JsonRpcException Errors that must be replied.
      */
     void onRequest(const JsonRpcRequest &request) const;
 
@@ -70,6 +71,26 @@ public:
     void onPostRender() const;
 
     /**
+     * @brief Call implementation onCancel().
+     *
+     */
+    void onCancel() const;
+
+    /**
+     * @brief Call implementation onConnect(client).
+     *
+     * @param client Client ref.
+     */
+    void onConnect(const ClientRef &client) const;
+
+    /**
+     * @brief Call implementation onDisconnect(client).
+     *
+     * @param client Client ref.
+     */
+    void onDisconnect(const ClientRef &client) const;
+
+    /**
      * @brief Get the name of the plugin that registered the entrypoint.
      *
      * @return const std::string& Parent plugin name.
@@ -79,25 +100,25 @@ public:
     /**
      * @brief Get the entrypoint schema.
      *
-     * Must be called after setup.
+     * Must be called after onCreate().
      *
      * @return const SchemaResult& Entrypoint schema.
      */
     const SchemaResult &getSchema() const;
 
     /**
-     * @brief Get the name of the entrypoint cached at setup.
+     * @brief Get the method the entrypoint performs.
      *
-     * Must be called after setup.
+     * Must be called after onCreate().
      *
      * @return const std::string& Entrypoint name.
      */
-    const std::string &getName() const;
+    const std::string &getMethod() const;
 
     /**
-     * @brief Get the description of the entrypoint cached at setup.
+     * @brief Get the description of the entrypoint.
      *
-     * Must be called after setup.
+     * Must be called after onCreate().
      *
      * @return const std::string& Entrypoint description.
      */
@@ -106,7 +127,7 @@ public:
     /**
      * @brief Get the JSON schema of the params of the entrypoint.
      *
-     * Must be called after setup.
+     * Must be called after onCreate().
      *
      * @return const std::vector<JsonSchema>& Vector with JSON schema as first
      * component or empty if no schema.
@@ -116,11 +137,27 @@ public:
     /**
      * @brief Get the JSON schema of the entrypoint result.
      *
-     * Must be called after setup.
+     * Must be called after onCreate().
      *
      * @return const JsonSchema& JSON schema.
      */
     const JsonSchema &getResultSchema() const;
+
+    /**
+     * @brief Check if the request can be cancelled.
+     *
+     * @return true Can be cancelled.
+     * @return false Cannot be cancelled.
+     */
+    bool isAsync() const;
+
+    /**
+     * @brief Check if the entrypoint has priority over the others in queue.
+     *
+     * @return true Higher priority.
+     * @return false Normal priority.
+     */
+    bool hasPriority() const;
 
 private:
     std::unique_ptr<IEntrypoint> _entrypoint;

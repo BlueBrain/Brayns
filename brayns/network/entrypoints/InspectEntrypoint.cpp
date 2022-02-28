@@ -28,7 +28,7 @@ InspectEntrypoint::InspectEntrypoint(Renderer &renderer)
 {
 }
 
-std::string InspectEntrypoint::getName() const
+std::string InspectEntrypoint::getMethod() const
 {
     return "inspect";
 }

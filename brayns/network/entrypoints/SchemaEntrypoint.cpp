@@ -25,12 +25,12 @@
 
 namespace brayns
 {
-SchemaEntrypoint::SchemaEntrypoint(const EntrypointManager &entrypoints)
+SchemaEntrypoint::SchemaEntrypoint(const EntrypointRegistry &entrypoints)
     : _entrypoints(entrypoints)
 {
 }
 
-std::string SchemaEntrypoint::getName() const
+std::string SchemaEntrypoint::getMethod() const
 {
     return "schema";
 }

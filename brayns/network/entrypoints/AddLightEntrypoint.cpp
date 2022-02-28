@@ -40,7 +40,7 @@ AddLightDirectionalEntrypoint::AddLightDirectionalEntrypoint(LightManager &light
 {
 }
 
-std::string AddLightDirectionalEntrypoint::getName() const
+std::string AddLightDirectionalEntrypoint::getMethod() const
 {
     return "add-light-directional";
 }
@@ -55,7 +55,7 @@ AddLightSphereEntrypoint::AddLightSphereEntrypoint(LightManager &lights)
 {
 }
 
-std::string AddLightSphereEntrypoint::getName() const
+std::string AddLightSphereEntrypoint::getMethod() const
 {
     return "add-light-sphere";
 }
@@ -70,7 +70,7 @@ AddLightQuadEntrypoint::AddLightQuadEntrypoint(LightManager &lights)
 {
 }
 
-std::string AddLightQuadEntrypoint::getName() const
+std::string AddLightQuadEntrypoint::getMethod() const
 {
     return "add-light-quad";
 }
@@ -85,7 +85,7 @@ AddLightSpotEntrypoint::AddLightSpotEntrypoint(LightManager &lights)
 {
 }
 
-std::string AddLightSpotEntrypoint::getName() const
+std::string AddLightSpotEntrypoint::getMethod() const
 {
     return "add-light-spot";
 }
@@ -100,7 +100,7 @@ AddLightAmbientEntrypoint::AddLightAmbientEntrypoint(LightManager &lights)
 {
 }
 
-std::string AddLightAmbientEntrypoint::getName() const
+std::string AddLightAmbientEntrypoint::getMethod() const
 {
     return "add-light-ambient";
 }

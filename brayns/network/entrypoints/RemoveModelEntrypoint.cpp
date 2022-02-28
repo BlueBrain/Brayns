@@ -28,7 +28,7 @@ RemoveModelEntrypoint::RemoveModelEntrypoint(Scene &scene)
 {
 }
 
-std::string RemoveModelEntrypoint::getName() const
+std::string RemoveModelEntrypoint::getMethod() const
 {
     return "remove-model";
 }

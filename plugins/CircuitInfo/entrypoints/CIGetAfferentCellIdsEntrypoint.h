@@ -60,7 +60,7 @@ public:
 class CIGetAfferentCellIdsEntrypoint : public brayns::Entrypoint<CIGetAfferentCellIdsParams, CIGetAfferentCellIdsResult>
 {
 public:
-    virtual std::string getName() const override
+    virtual std::string getMethod() const override
     {
         return "ci-get-afferent-cell-ids";
     }

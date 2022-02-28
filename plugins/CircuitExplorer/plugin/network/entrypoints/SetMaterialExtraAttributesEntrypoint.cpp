@@ -32,7 +32,7 @@ SetMaterialExtraAttributesEntrypoint::SetMaterialExtraAttributesEntrypoint(Scene
 {
 }
 
-std::string SetMaterialExtraAttributesEntrypoint::getName() const
+std::string SetMaterialExtraAttributesEntrypoint::getMethod() const
 {
     return "set-material-extra-attributes";
 }

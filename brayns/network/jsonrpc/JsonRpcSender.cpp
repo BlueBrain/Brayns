@@ -21,46 +21,24 @@
 
 #include "JsonRpcSender.h"
 
-#include <brayns/common/Log.h>
-
 #include <brayns/json/Json.h>
+
+#include <brayns/network/client/ClientSender.h>
 
 namespace
 {
 class MessageSenderHelper
 {
 public:
-    static void trySend(const std::string &data, const brayns::ClientRef &client)
-    {
-        brayns::Log::debug("Send message to client {}: '{}'.", client, data);
-        try
-        {
-            auto &socket = client.getSocket();
-            auto packet = brayns::OutputPacket::fromText(data);
-            socket.send(packet);
-        }
-        catch (const brayns::ConnectionClosedException &e)
-        {
-            brayns::Log::debug("Connection closed while sending data to {}: '{}'.", client, e.what());
-        }
-        catch (const std::exception &e)
-        {
-            brayns::Log::error("Unexpected error while sending data to {}: '{}'.", client, e.what());
-        }
-        catch (...)
-        {
-            brayns::Log::error("Unknown error while sending data to {}.", client);
-        }
-    }
-
     template<typename MessageType>
-    static void trySend(const MessageType &message, const brayns::ClientRef &client)
+    static void send(const MessageType &message, const brayns::ClientRef &client)
     {
-        auto data = brayns::Json::stringify(message);
-        trySend(data, client);
+        auto json = brayns::Json::stringify(message);
+        auto packet = brayns::OutputPacket::fromText(json);
+        brayns::ClientSender::send(packet, client);
     }
 };
-}
+} // namespace
 
 namespace brayns
 {
@@ -70,12 +48,12 @@ void JsonRpcSender::reply(const ReplyMessage &message, const ClientRef &client)
     {
         return;
     }
-    MessageSenderHelper::trySend(message, client);
+    MessageSenderHelper::send(message, client);
 }
 
 void JsonRpcSender::error(const ErrorMessage &message, const ClientRef &client)
 {
-    MessageSenderHelper::trySend(message, client);
+    MessageSenderHelper::send(message, client);
 }
 
 void JsonRpcSender::progress(const ProgressMessage &message, const ClientRef &client)
@@ -84,6 +62,6 @@ void JsonRpcSender::progress(const ProgressMessage &message, const ClientRef &cl
     {
         return;
     }
-    MessageSenderHelper::trySend(message, client);
+    MessageSenderHelper::send(message, client);
 }
 } // namespace brayns

@@ -21,40 +21,17 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
 #include <brayns/engine/Scene.h>
-
-#include <brayns/pluginapi/PluginAPI.h>
 
 namespace brayns
 {
 /**
- * @brief Helper class to extract a model from a given source.
+ * @brief Helper class to extract a model from a scene.
  *
  */
 class ExtractModel
 {
 public:
-    /**
-     * @brief Extract a model from the API using its ID.
-     *
-     * @param api Brayns API.
-     * @param id Model ID.
-     * @return ModelDescriptor& Model instance.
-     * @throw JsonRpcException Model not found.
-     */
-    static ModelDescriptor &fromId(PluginAPI &api, size_t id);
-
-    /**
-     * @brief Extract a model from an engine using its ID.
-     *
-     * @param engine Brayns engine.
-     * @param id Model ID.
-     * @return ModelDescriptor& Model instance.
-     * @throw JsonRpcException Model not found.
-     */
-    static ModelDescriptor &fromId(Engine &engine, size_t id);
-
     /**
      * @brief Extract a model from a scene using its ID.
      *
@@ -64,41 +41,5 @@ public:
      * @throw JsonRpcException Model not found.
      */
     static ModelDescriptor &fromId(Scene &scene, size_t id);
-
-    /**
-     * @brief Extract a model from a given source and JSON-RPC params.
-     *
-     * Params must have a public "id" member.
-     *
-     * @tparam T Source type (API, engine, scene).
-     * @tparam U JSON-RPC params type.
-     * @param source Source instance.
-     * @param params Params instance.
-     * @return ModelDescriptor& Model instance.
-     * @throw JsonRpcException Model not found.
-     */
-    template<typename T, typename U>
-    static ModelDescriptor &fromParams(T &source, const U &params)
-    {
-        return fromId(source, params.id);
-    }
-
-    /**
-     * @brief Extract a model from a given source and JSON-RPC request.
-     *
-     * Request must have a public getParams() method.
-     *
-     * @tparam T Source type (API, engine, scene).
-     * @tparam U JSON-RPC request type.
-     * @param source Source instance.
-     * @param request Request instance.
-     * @return ModelDescriptor& Model instance.
-     * @throw JsonRpcException Model not found.
-     */
-    template<typename T, typename U>
-    static ModelDescriptor &fromRequest(T &source, const U &request)
-    {
-        return fromParams(source, request.getParams());
-    }
 };
 } // namespace brayns

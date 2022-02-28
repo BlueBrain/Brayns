@@ -28,7 +28,7 @@ GetLoadersEntrypoint::GetLoadersEntrypoint(const LoaderRegistry &loaders)
 {
 }
 
-std::string GetLoadersEntrypoint::getName() const
+std::string GetLoadersEntrypoint::getMethod() const
 {
     return "get-loaders";
 }

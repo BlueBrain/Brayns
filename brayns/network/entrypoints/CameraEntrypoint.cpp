@@ -28,7 +28,7 @@ GetCameraEntrypoint::GetCameraEntrypoint(const Camera &camera)
 {
 }
 
-std::string GetCameraEntrypoint::getName() const
+std::string GetCameraEntrypoint::getMethod() const
 {
     return "get-camera";
 }
@@ -43,7 +43,7 @@ SetCameraEntrypoint::SetCameraEntrypoint(Camera &camera)
 {
 }
 
-std::string SetCameraEntrypoint::getName() const
+std::string SetCameraEntrypoint::getMethod() const
 {
     return "set-camera";
 }

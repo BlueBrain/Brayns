@@ -95,7 +95,7 @@ public:
     }
 
     /**
-     * @brief Shortcut to process the request with the message already parsed.
+     * @brief Shortcut to process a strongly typed request.
      *
      * @param request Request specialized for Params and Result.
      */

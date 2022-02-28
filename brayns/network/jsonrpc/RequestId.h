@@ -24,6 +24,8 @@
 #include <functional>
 #include <typeindex>
 
+#include <spdlog/fmt/ostr.h>
+
 #include <brayns/json/JsonAdapter.h>
 
 namespace brayns

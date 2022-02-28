@@ -50,7 +50,7 @@ const JsonValue &JsonRpcException::getData() const
 }
 
 ParsingErrorException::ParsingErrorException(const std::string &message)
-    : JsonRpcException(-32700, "Failed to parse JSON request: " + message)
+    : JsonRpcException(-32700, "Request is not a valid JSON: '" + message + "'")
 {
 }
 
@@ -65,7 +65,7 @@ InvalidRequestException::InvalidRequestException(const std::string &message, con
 }
 
 MethodNotFoundException::MethodNotFoundException(const std::string &method)
-    : JsonRpcException(-32601, "Method not found: '" + method + "'")
+    : JsonRpcException(-32601, "Method '" + method + "' not found")
 {
 }
 
@@ -83,4 +83,27 @@ InternalErrorException::InternalErrorException(const std::string &message)
     : JsonRpcException(-32603, message)
 {
 }
+
+TaskNotCancellableException::TaskNotCancellableException(const std::string &method)
+    : JsonRpcException(20, "Task with method '" + method + "' is not asynchronous and cannot be cancelled")
+{
+}
+
+TaskNotFoundException::TaskNotFoundException(const std::string &id)
+    : JsonRpcException(21, "No tasks found with request ID " + id)
+{
+}
+
+TaskCancelledException::TaskCancelledException()
+    : JsonRpcException(22, "Task has been cancelled")
+{
+}
 } // namespace brayns
+
+namespace std
+{
+std::ostream &operator<<(std::ostream &stream, const brayns::JsonRpcException &e)
+{
+    return stream << "{code = " << e.getCode() << ", message = '" << e.what() << "'}";
+}
+} // namespace std

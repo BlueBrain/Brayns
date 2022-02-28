@@ -89,6 +89,15 @@ void PluginManager::initPlugins(PluginAPI *api)
         extension->_api = api;
         extension->init();
     }
+
+    if (_networkManager)
+    {
+        auto &interface = _networkManager->getInterface();
+        for (const auto &extension : _extensions)
+        {
+            extension->registerEntrypoints(interface);
+        }
+    }
 }
 
 void PluginManager::destroyPlugins()

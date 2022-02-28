@@ -21,10 +21,17 @@
 
 #pragma once
 
-#include "ISocket.h"
+#include <brayns/network/client/ClientBuffer.h>
+#include <brayns/network/client/RequestBuffer.h>
+
+#include "ISocketListener.h"
 
 namespace brayns
 {
+/**
+ * @brief Helper class to manage exchange through a websocket.
+ *
+ */
 class SocketManager
 {
 public:
@@ -38,11 +45,22 @@ public:
     /**
      * @brief Receive and send messages until connection is closed.
      *
+     * Events are buffered and will be passed to listener when poll() is called.
+     *
      * @param client Client ref.
      */
-    void run(const ClientRef &client) const;
+    void run(const ClientRef &client);
+
+    /**
+     * @brief Poll connections and requests and trigger listener.
+     *
+     */
+    void poll();
 
 private:
     std::unique_ptr<ISocketListener> _listener;
+    ClientBuffer _newClients;
+    ClientBuffer _removedClients;
+    RequestBuffer _requests;
 };
 } // namespace brayns

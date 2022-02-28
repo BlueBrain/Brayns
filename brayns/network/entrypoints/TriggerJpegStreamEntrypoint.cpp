@@ -28,7 +28,7 @@ TriggerJpegStreamEntrypoint::TriggerJpegStreamEntrypoint(StreamMonitor &monitor)
 {
 }
 
-std::string TriggerJpegStreamEntrypoint::getName() const
+std::string TriggerJpegStreamEntrypoint::getMethod() const
 {
     return "trigger-jpeg-stream";
 }

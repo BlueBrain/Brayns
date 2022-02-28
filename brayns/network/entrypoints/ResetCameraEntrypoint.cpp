@@ -28,7 +28,7 @@ ResetCameraEntrypoint::ResetCameraEntrypoint(Camera &camera)
 {
 }
 
-std::string ResetCameraEntrypoint::getName() const
+std::string ResetCameraEntrypoint::getMethod() const
 {
     return "reset-camera";
 }

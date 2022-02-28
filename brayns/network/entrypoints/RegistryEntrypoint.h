@@ -22,20 +22,20 @@
 #pragma once
 
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/entrypoint/EntrypointManager.h>
+#include <brayns/network/entrypoint/EntrypointRegistry.h>
 
 namespace brayns
 {
 class RegistryEntrypoint : public Entrypoint<EmptyMessage, std::vector<std::string>>
 {
 public:
-    RegistryEntrypoint(const EntrypointManager &entrypoints);
+    RegistryEntrypoint(const EntrypointRegistry &entrypoints);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    const EntrypointManager &_entrypoints;
+    const EntrypointRegistry &_entrypoints;
 };
 } // namespace brayns

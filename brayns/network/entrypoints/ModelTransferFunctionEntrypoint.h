@@ -35,7 +35,7 @@ class GetModelTransferFunctionEntrypoint : public Entrypoint<GetModelMessage, Tr
 public:
     GetModelTransferFunctionEntrypoint(Scene &scene);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
@@ -48,7 +48,7 @@ class SetModelTransferFunctionEntrypoint : public Entrypoint<ModelTransferFuncti
 public:
     SetModelTransferFunctionEntrypoint(Scene &scene);
 
-    virtual std::string getName() const override;
+    virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
