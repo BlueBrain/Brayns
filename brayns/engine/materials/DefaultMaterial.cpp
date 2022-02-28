@@ -18,51 +18,54 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/materials/GlassMaterial.h>
+#include <brayns/engine/materials/DefaultMaterial.h>
 
 namespace brayns
 {
-std::string_view GlassMaterial::getName() const noexcept
+std::string_view DefaultMaterial::getName() const noexcept
 {
-    return "glass";
+    return "default";
 }
 
-uint64_t GlassMaterial::getSizeInBytes() const noexcept
+uint64_t DefaultMaterial::getSizeInBytes() const noexcept
 {
     // We copy all data to ospray, so we must account for that
-    return sizeof(GlassMaterial) * 2 - sizeof(OSPMaterial);
+    return sizeof(DefaultMaterial) * 2 - sizeof(OSPMaterial);
 }
 
-void GlassMaterial::setColor(const Vector3f &color) noexcept
+void DefaultMaterial::setColor(const Vector3f &color) noexcept
 {
     _updateValue(_color, glm::clamp(color, Vector3f(0.f), Vector3f(1.f)));
 }
 
-void GlassMaterial::setIndexOfRefraction(const float ior) noexcept
+void DefaultMaterial::setOpacity(const float opacity) noexcept
 {
-    _updateValue(_ior, ior);
+    _updateValue(_opacity, glm::clamp(opacity, 0.f, 1.f));
 }
 
-const Vector3f& GlassMaterial::getColor() const noexcept
+const Vector3f& DefaultMaterial::getColor() const noexcept
 {
     return _color;
 }
 
-float GlassMaterial::getIndexOfRefraction() const noexcept
+float DefaultMaterial::getOpacity() const noexcept
 {
-    return _ior;
+    return _opacity;
 }
 
-void GlassMaterial::commitMaterialSpecificParams()
+void DefaultMaterial::commitMaterialSpecificParams()
 {
+    static constexpr float ns = 2.f;
+
     auto ospHandle = handle();
 
-    ospSetParam(ospHandle, "attenuationColor", OSPDataType::OSP_VEC3F, &_color);
-    ospSetParam(ospHandle, "eta", OSPDataType::OSP_FLOAT, &_ior);
+    ospSetParam(ospHandle, "kd", OSPDataType::OSP_VEC3F, &_color);
+    ospSetParam(ospHandle, "ns", OSPDataType::OSP_FLOAT, &ns);
+    ospSetParam(ospHandle, "d", OSPDataType::OSP_FLOAT, &_opacity);
 }
 
-std::string_view GlassMaterial::getOSPHandleName() const noexcept
+std::string_view DefaultMaterial::getOSPHandleName() const noexcept
 {
-    return "glass";
+    return "obj";
 }
 }

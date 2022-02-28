@@ -17,3 +17,28 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <brayns/engine/lights/AmbientLight.h>
+
+namespace brayns
+{
+std::string_view AmbientLight::getName() const noexcept
+{
+    return "ambient";
+}
+
+std::string_view AmbientLight::getOSPHandleName() const noexcept
+{
+    return "ambient";
+}
+
+uint64_t AmbientLight::getSizeInBytes() const noexcept
+{
+    // We copy all the light data to OSPRay, so we must account for it
+    return sizeof(AmbientLight) * 2 - sizeof(OSPLight);
+}
+
+void AmbientLight::commitLightSpecificParams()
+{
+}
+}

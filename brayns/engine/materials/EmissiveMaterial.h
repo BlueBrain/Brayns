@@ -19,3 +19,53 @@
  */
 
 #pragma once
+
+#include <brayns/common/MathTypes.h>
+#include <brayns/engine/Material.h>
+#include <brayns/json/JsonAdapterMacro.h>
+
+namespace brayns
+{
+class EmissiveMaterial : public Material
+{
+public:
+    std::string_view getName() const noexcept final;
+
+    uint64_t getSizeInBytes() const noexcept final;
+
+    /**
+     * @brief Sets the base color
+     */
+    void setColor(const Vector3f& color) noexcept;
+
+    /**
+     * @brief Sets the intensity of the light emitted by the material
+     */
+    void setIntensity(const float intensity) noexcept;
+
+    /**
+     * @brief Returns the current base color of the material as normalized RGB
+     */
+    const Vector3f& getColor() const noexcept;
+
+    /**
+     * @brief Returns the material emission intensity
+     */
+    float getIntensity() const noexcept;
+
+protected:
+    std::string_view getOSPHandleName() const noexcept final;
+
+    void commitMaterialSpecificParams() final;
+
+private:
+    Vector3f _color {1.f}; // default white
+    float _intensity {1.f};  // default opaque
+};
+
+BRAYNS_JSON_ADAPTER_BEGIN(EmissiveMaterial)
+BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Base color of the material")
+BRAYNS_JSON_ADAPTER_GETSET("intensity", getIntensity, setIntensity,
+                           "Intensity of the light emitted. Will be clampled to the range [0.0, +infinite]")
+BRAYNS_JSON_ADAPTER_END()
+}

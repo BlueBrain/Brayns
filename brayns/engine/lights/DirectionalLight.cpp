@@ -42,7 +42,8 @@ std::string_view DirectionalLight::getName() const noexcept
 
 uint64_t DirectionalLight::getSizeInBytes() const noexcept
 {
-    return sizeof(DirectionalLight);
+    // We copy all the light data to OSPRay, so we must account for it
+    return sizeof(DirectionalLight) * 2 - sizeof(OSPLight);
 }
 
 void DirectionalLight::commitLightSpecificParams()

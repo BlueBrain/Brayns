@@ -37,6 +37,16 @@ bool InteractiveRenderer::getShadowsEnabled() const noexcept
     return _shadowsEnabled;
 }
 
+void InteractiveRenderer::setAmbientOcclusionSamples(const int32_t numSamples) noexcept
+{
+    _updateValue(_aoSamples, numSamples);
+}
+
+int32_t InteractiveRenderer::getAmbientOcclusionSamples() const noexcept
+{
+    return _aoSamples;
+}
+
 Renderer::Ptr InteractiveRenderer::clone() const noexcept
 {
     return std::make_unique<InteractiveRenderer>(*this);
@@ -52,5 +62,6 @@ void InteractiveRenderer::commitRendererSpecificParams()
     auto ospHandle = handle();
 
     ospSetParam(ospHandle, "shadows", OSPDataType::OSP_BOOL, &_shadowsEnabled);
+    ospSetParam(ospHandle, "aoSamples", OSPDataType::OSP_INT, &_aoSamples);
 }
 }

@@ -29,7 +29,8 @@ std::string_view MatteMaterial::getName() const noexcept
 
 uint64_t MatteMaterial::getSizeInBytes() const noexcept
 {
-    return sizeof(MatteMaterial);
+    // We copy all data to ospray, so we must account for that
+    return sizeof(MatteMaterial) * 2 - sizeof(OSPMaterial);
 }
 
 void MatteMaterial::setColor(const Vector3f &color) noexcept
@@ -63,7 +64,7 @@ void MatteMaterial::commitMaterialSpecificParams()
     ospSetParam(ospHandle, "opacity", OSPDataType::OSP_FLOAT, &_opacity);
 }
 
-std::string_view Material::getOSPHandleName() const noexcept
+std::string_view MatteMaterial::getOSPHandleName() const noexcept
 {
     return "principled";
 }

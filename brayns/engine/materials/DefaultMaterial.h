@@ -26,7 +26,7 @@
 
 namespace brayns
 {
-class MetalMaterial : public Material
+class DefaultMaterial : public Material
 {
 public:
     std::string_view getName() const noexcept final;
@@ -39,9 +39,10 @@ public:
     void setColor(const Vector3f& color) noexcept;
 
     /**
-     * @brief Sets the surface roughness
+     * @brief Sets the opacity of the material. Must be between 0.0 and 1.0, with 0.0 = fully transparent,
+     * and 1.0 = fully opaque.
      */
-    void setRoughness(const float roughness) noexcept;
+    void setOpacity(const float opacity) noexcept;
 
     /**
      * @brief Returns the current base color of the material as normalized RGB
@@ -49,9 +50,9 @@ public:
     const Vector3f& getColor() const noexcept;
 
     /**
-     * @brief Returns the surface roughness
+     * @brief Returns the material opacity
      */
-    float getRoughness() const noexcept;
+    float getOpacity() const noexcept;
 
 protected:
     std::string_view getOSPHandleName() const noexcept final;
@@ -60,12 +61,13 @@ protected:
 
 private:
     Vector3f _color {1.f}; // default white
-    float _roughness {0.1f};  // default opaque
+    float _opacity {1.f};  // default opaque
 };
 
-BRAYNS_JSON_ADAPTER_BEGIN(MetalMaterial)
+BRAYNS_JSON_ADAPTER_BEGIN(DefaultMaterial)
 BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Base color of the material")
-BRAYNS_JSON_ADAPTER_GETSET("roughness", getRoughness, setRoughness,
-                           "Surface roughness. Will be clamped on the range [0-1]")
+BRAYNS_JSON_ADAPTER_GETSET("opacity", getOpacity, setOpacity,
+                           "Base opacity of the material. Will be clampled to the range [0.0, 1.0]")
 BRAYNS_JSON_ADAPTER_END()
 }
+

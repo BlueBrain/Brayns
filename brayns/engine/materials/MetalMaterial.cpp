@@ -17,3 +17,51 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <brayns/engine/materials/MetalMaterial.h>
+
+namespace brayns
+{
+std::string_view MetalMaterial::getName() const noexcept
+{
+    return "metal";
+}
+
+uint64_t MetalMaterial::getSizeInBytes() const noexcept
+{
+    // We copy all data to ospray, so we must account for that
+    return sizeof(MetalMaterial) * 2 - sizeof(OSPMaterial);
+}
+
+void MetalMaterial::setColor(const Vector3f &color) noexcept
+{
+    _updateValue(_color, glm::clamp(color, Vector3f(0.f), Vector3f(1.f)));
+}
+
+void MetalMaterial::setRoughness(const float roughness) noexcept
+{
+    _updateValue(_roughness, glm::clamp(roughness, 0.f, 1.f));
+}
+
+const Vector3f& MetalMaterial::getColor() const noexcept
+{
+    return _color;
+}
+
+float MetalMaterial::getRoughness() const noexcept
+{
+    return _roughness;
+}
+
+void MetalMaterial::commitMaterialSpecificParams()
+{
+    auto ospHandle = handle();
+    ospSetParam(ospHandle, "color", OSPDataType::OSP_VEC3F, &_color);
+    ospSetParam(ospHandle, "roughness", OSPDataType::OSP_FLOAT, &_roughness);
+}
+
+std::string_view MetalMaterial::getOSPHandleName() const noexcept
+{
+    return "alloy";
+}
+}

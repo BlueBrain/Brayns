@@ -79,6 +79,11 @@ public:
     void setValuesRange(const Vector2f &valuesRange);
 
     /**
+     * @brief Return the interpolated opacities computed based on the control points
+     */
+    const std::vector<float>& getOpacities() const noexcept;
+
+    /**
      * @brief Computes the color + opacity that corresponds to a given value
      */
     Vector4f getColorForValue(const float v) const;

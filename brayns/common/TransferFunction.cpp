@@ -108,6 +108,11 @@ void TransferFunction::setValuesRange(const Vector2f &valuesRange)
     _updateValue(_valuesRange, valuesRange);
 }
 
+const std::vector<float>& TransferFunction::getOpacities() const noexcept
+{
+    return _opacities;
+}
+
 Vector4f TransferFunction::getColorForValue(const float v) const
 {
     if (v <= _valuesRange.x)

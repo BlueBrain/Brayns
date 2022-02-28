@@ -21,8 +21,18 @@ set(BRAYNSENGINE_SOURCES
     geometries/Plane.cpp
     geometries/Primitive.cpp
     geometries/Sphere.cpp
+    lights/AmbientLight.cpp
     lights/DirectionalLight.cpp
+    lights/QuadLight.cpp
+    materials/CarPaintMaterial.cpp
+    materials/DefaultMaterial.cpp
+    materials/EmissiveMaterial.cpp
+    materials/GlassMaterial.cpp
     materials/MatteMaterial.cpp
+    materials/MetalMaterial.cpp
+    materials/PlasticMaterial.cpp
+    models/GeometricModel.cpp
+    models/VolumetricModel.cpp
     renderers/InteractiveRenderer.cpp
 )
 
@@ -45,9 +55,18 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     geometries/Plane.h
     geometries/Primitive.h
     geometries/Sphere.h
+    lights/AmbientLight.h
     lights/DirectionalLight.h
+    lights/QuadLight.h
+    materials/CarPaintMaterial.h
+    materials/DefaultMaterial.h
+    materials/EmissiveMaterial.h
+    materials/GlassMaterial.h
     materials/MatteMaterial.h
+    materials/MetalMaterial.h
+    materials/PlasticMaterial.h
     models/GeometricModel.h
+    models/VolumetricModel.h
     renderers/InteractiveRenderer.h
 )
 

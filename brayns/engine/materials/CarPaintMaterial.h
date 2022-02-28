@@ -19,3 +19,53 @@
  */
 
 #pragma once
+
+#include <brayns/common/MathTypes.h>
+#include <brayns/engine/Material.h>
+#include <brayns/json/JsonAdapterMacro.h>
+
+namespace brayns
+{
+class CarPaintMaterial : public Material
+{
+public:
+    std::string_view getName() const noexcept final;
+
+    uint64_t getSizeInBytes() const noexcept final;
+
+    /**
+     * @brief Sets the base color
+     */
+    void setColor(const Vector3f& color) noexcept;
+
+    /**
+     * @brief Sets the normalized percentage of metal flakes in the surface.
+     */
+    void setFlakesDesnity(const float flakeDensity) noexcept;
+
+    /**
+     * @brief Returns the current base color of the material as normalized RGB
+     */
+    const Vector3f& getColor() const noexcept;
+
+    /**
+     * @brief Returns the normalized percentage of flakes
+     */
+    float getFlakesDensity() const noexcept;
+
+protected:
+    std::string_view getOSPHandleName() const noexcept final;
+
+    void commitMaterialSpecificParams() final;
+
+private:
+    Vector3f _color {1.f};
+    float _flakeDensity {0.f};
+};
+
+BRAYNS_JSON_ADAPTER_BEGIN(CarPaintMaterial)
+BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Base color of the material")
+BRAYNS_JSON_ADAPTER_GETSET("flake_density", getFlakesDensity, setFlakesDesnity,
+                           "Normalized percentage of flakes on the surface. Will be clampled to the range [0.0, 1.0]")
+BRAYNS_JSON_ADAPTER_END()
+}

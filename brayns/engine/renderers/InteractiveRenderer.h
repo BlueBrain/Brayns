@@ -40,6 +40,16 @@ public:
      */
     bool getShadowsEnabled() const noexcept;
 
+    /**
+     * @brief Sets the number of ambient occlusion samples that the renderer will trace
+     */
+    void setAmbientOcclusionSamples(const int32_t numSamples) noexcept;
+
+    /**
+     * @brief Return the number of ambient occlusion samples that the renderer is tracing
+     */
+    int32_t getAmbientOcclusionSamples() const noexcept;
+
     Ptr clone() const noexcept final;
 
 protected:
@@ -49,6 +59,7 @@ protected:
 
 private:
     bool _shadowsEnabled {true};
+    int32_t _aoSamples {10u};
 };
 
 BRAYNS_JSON_ADAPTER_BEGIN(InteractiveRenderer)
@@ -56,5 +67,7 @@ BRAYNS_JSON_ADAPTER_GETSET("samples_per_pixel", getSamplesPerPixel, setSamplesPe
 BRAYNS_JSON_ADAPTER_GETSET("max_ray_bounces", getMaxRayBounces, setMaxRayBounces, "Max ray bounces per sample")
 BRAYNS_JSON_ADAPTER_GETSET("background_color", getBackgroundColor, setBackgroundColor, "Background color")
 BRAYNS_JSON_ADAPTER_GETSET("enable_shadows", getShadowsEnabled, setShadowsEnabled, "Render casted shadows")
+BRAYNS_JSON_ADAPTER_GETSET("ao_samples", getAmbientOcclusionSamples, setAmbientOcclusionSamples,
+                           "Sets number of samples to compute ambient occlusion")
 BRAYNS_JSON_ADAPTER_END()
 }

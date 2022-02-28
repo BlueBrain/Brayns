@@ -70,3 +70,4 @@ BRAYNS_JSON_ADAPTER_GETSET("opacity", getOpacity, setOpacity,
                            "Base opacity of the material. Will be clampled to the range [0.0, 1.0]")
 BRAYNS_JSON_ADAPTER_END()
 }
+

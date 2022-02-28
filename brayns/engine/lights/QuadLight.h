@@ -19,3 +19,78 @@
  */
 
 #pragma once
+
+#include <brayns/engine/Light.h>
+#include <brayns/json/JsonAdapterMacro.h>
+
+namespace brayns
+{
+class QuadLight : public Light
+{
+public:
+    /**
+     * @brief Sets the bottom left corner position of the light (in world space coordinates)
+     */
+    void setBottomLeftCorner(const Vector3f& pos) noexcept;
+
+    /**
+     * @brief Sets a displacement vector to compute the top left corner, computed as
+     * top left corner = bottom left corner + vertical displacement.
+     */
+    void setVerticalDisplacement(const Vector3f& verticalVector) noexcept;
+
+    /**
+     * @brief Sets a displacement vector to compute the bottom right corner, computed as
+     * bottom right corner = bottom left corner + horizontal displacement.
+     */
+    void setHorizontalDisplacement(const Vector3f& horizontalVector) noexcept;
+
+    /**
+     * @brief Returns the bottom left corner position of the light
+     */
+    const Vector3f& getBottomLeftCorner() const noexcept;
+
+    /**
+     * @brief Returns the vertical displacement vector of the light (used to compute the top left corner from
+     * the bottom left corner)
+     */
+    const Vector3f& getVerticalDisplacement() const noexcept;
+
+    /**
+     * @brief Returns the horizontal displacement vector of the light (used to compute the bottom right corner
+     * from the bottom left corner)
+     */
+    const Vector3f& getHorizontalDisplacement() const noexcept;
+
+    /**
+     * @brief getName() implementation
+     */
+    std::string_view getName() const noexcept final;
+
+protected:
+    std::string_view getOSPHandleName() const noexcept final;
+
+    uint64_t getSizeInBytes() const noexcept final;
+
+    void commitLightSpecificParams() final;
+
+private:
+    // Default crates a X-Plane parallel light of size 1 x 1
+    Vector3f _bottomLeftCorner {0.f};
+    Vector3f _verticalDisplacement {0.f, 1.f, 0.f};
+    Vector3f _horizontalDisplacement {1.f, 0.f, 1.f};
+};
+
+BRAYNS_JSON_ADAPTER_BEGIN(QuadLight)
+BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Light color (Normalized RGB)")
+BRAYNS_JSON_ADAPTER_GETSET("intensity", getIntensity, setIntensity,
+                           "Light intensity (Will be clamped on the range [0.0, +infinity)")
+BRAYNS_JSON_ADAPTER_GETSET("visible", isVisible, setVisible, "Sets wether the light should be visible on the scene")
+BRAYNS_JSON_ADAPTER_GETSET("bottom_left_corner", getBottomLeftCorner, setBottomLeftCorner,
+                           "Sets the bottom left corner position of the light (in world space coordinates)")
+BRAYNS_JSON_ADAPTER_GETSET("vertical_displacement", getVerticalDisplacement, setVerticalDisplacement,
+                           "Sets the vertical displacement vector used to compute the top left corner")
+BRAYNS_JSON_ADAPTER_GETSET("horizontal_displacement", getHorizontalDisplacement, setHorizontalDisplacement,
+                           "Sets the horizontal displacement vector used to compute the bottom right corner")
+BRAYNS_JSON_ADAPTER_END()
+}
