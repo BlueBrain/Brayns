@@ -52,6 +52,16 @@ public:
     }
 
     /**
+     * @brief Used to poll cancellation without sending notification.
+     *
+     * @throw TaskCancelledException Request has been cancelled.
+     */
+    void poll() const
+    {
+        _token.poll();
+    }
+
+    /**
      * @brief Poll cancellation and notifies request.
      *
      * @param operation Current operation description.

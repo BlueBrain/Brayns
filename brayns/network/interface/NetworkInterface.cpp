@@ -41,7 +41,7 @@ void NetworkInterface::add(EntrypointRef entrypoint)
 
 void NetworkInterface::poll()
 {
-    Log::debug("Poll requests from plugin or entrypoint");
+    Log::trace("Poll requests from plugin or entrypoint");
     _socket.poll();
 }
 } // namespace brayns

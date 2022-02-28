@@ -57,8 +57,6 @@ private:
     const LoaderRegistry &_loaders;
     BinaryManager &_binary;
     CancellationToken _token;
-    std::optional<Request> _request;
-    BinaryParam _params;
-    const AbstractLoader *_loader = nullptr;
+    std::optional<ClientRef> _client;
 };
 } // namespace brayns

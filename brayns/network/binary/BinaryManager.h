@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <deque>
 #include <optional>
 
 #include <brayns/network/client/ClientRequest.h>
@@ -35,22 +36,26 @@ class BinaryManager
 {
 public:
     /**
-     * @brief Add a binary request waiting for processing.
-     *
-     * Discard request if another one is already buffered.
+     * @brief Buffer a binary request.
      *
      * @param request Request to store (must be binary).
      */
     void add(ClientRequest request);
 
     /**
-     * @brief Retreive buffered request.
+     * @brief Extract older request from buffer if any.
      *
-     * @return std::optional<ClientRequest> Binary requests stored if any.
+     * @return std::optional<ClientRequest> Older binary request if any.
      */
     std::optional<ClientRequest> poll();
 
+    /**
+     * @brief Discard all requests currently in buffer.
+     *
+     */
+    void flush();
+
 private:
-    std::optional<ClientRequest> _request;
+    std::deque<ClientRequest> _requests;
 };
 } // namespace brayns

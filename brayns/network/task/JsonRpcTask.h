@@ -85,5 +85,6 @@ private:
     JsonRpcRequest _request;
     const EntrypointRef &_entrypoint;
     bool _cancelled = false;
+    bool _running = false;
 };
 } // namespace brayns

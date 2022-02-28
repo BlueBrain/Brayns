@@ -93,7 +93,6 @@ set(BRAYNSNETWORK_HEADERS
   interface/NetworkInterface.h
   jsonrpc/JsonRpcException.h
   jsonrpc/JsonRpcFactory.h
-  jsonrpc/JsonRpcHandler.h
   jsonrpc/JsonRpcMessages.h
   jsonrpc/JsonRpcRequest.h
   jsonrpc/JsonRpcParser.h
@@ -195,7 +194,6 @@ set(BRAYNSNETWORK_SOURCES
   interface/NetworkInterface.cpp
   jsonrpc/JsonRpcException.cpp
   jsonrpc/JsonRpcFactory.cpp
-  jsonrpc/JsonRpcHandler.cpp
   jsonrpc/JsonRpcRequest.cpp
   jsonrpc/JsonRpcParser.cpp
   jsonrpc/JsonRpcSender.cpp

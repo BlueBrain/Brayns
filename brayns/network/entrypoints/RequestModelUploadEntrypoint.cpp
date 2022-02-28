@@ -24,13 +24,14 @@
 #include <sstream>
 #include <thread>
 
-#include <brayns/common/Log.h>
-
 #include <brayns/network/common/ProgressHandler.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace
 {
+using Request = brayns::RequestModelUploadEntrypoint::Request;
+using Progress = brayns::ProgressHandler<Request>;
+
 class BinaryParamsValidator
 {
 public:
@@ -66,22 +67,21 @@ public:
     }
 };
 
-class BinaryExtractor
+class BinaryLock
 {
 public:
-    static void flush(brayns::BinaryManager &binary)
+    static brayns::ClientRequest waitForBinary(brayns::BinaryManager &binary, const Progress &progress)
     {
-        auto request = binary.poll();
-        if (request)
+        while (true)
         {
-            _discard(*request);
+            progress.poll();
+            auto request = binary.poll();
+            if (request)
+            {
+                return std::move(*request);
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
-    }
-
-private:
-    static void _discard(const brayns::ClientRequest &request)
-    {
-        brayns::Log::debug("Binary request {} discarded because no model uploads requested.", request);
     }
 };
 
@@ -107,9 +107,6 @@ private:
         throw brayns::InvalidParamsException(stream.str());
     }
 };
-
-using Request = brayns::RequestModelUploadEntrypoint::Request;
-using Progress = brayns::ProgressHandler<Request>;
 
 class BlobLoader
 {
@@ -141,58 +138,42 @@ private:
     }
 };
 
-class BinaryModelLoader
+class BinaryModelHandler
 {
 public:
-    static void load(
+    BinaryModelHandler(
         brayns::Scene &scene,
-        const brayns::AbstractLoader &loader,
-        const Request &uploadRequest,
-        const brayns::ClientRequest &binaryRequest,
-        const brayns::BinaryParam &params,
+        const brayns::LoaderRegistry &loaders,
+        brayns::BinaryManager &binary,
         brayns::CancellationToken &token)
+        : _scene(scene)
+        , _loaders(loaders)
+        , _binary(binary)
+        , _token(token)
     {
-        try
-        {
-            auto descriptors = _load(scene, loader, uploadRequest, binaryRequest, params, token);
-            uploadRequest.reply(descriptors);
-            brayns::Log::info("Upload request {} complete.", uploadRequest.getId());
-        }
-        catch (const brayns::JsonRpcException &e)
-        {
-            brayns::Log::info("Upload error: {}.", e);
-            uploadRequest.error(e);
-        }
-        catch (const std::exception &e)
-        {
-            brayns::Log::error("Unknown upload error: {}.", e.what());
-            uploadRequest.error(brayns::InternalErrorException(e.what()));
-        }
-        catch (...)
-        {
-            brayns::Log::error("Unknown model upload error.");
-            uploadRequest.error(brayns::InternalErrorException("Unknown error"));
-        }
     }
 
-private:
-    static std::vector<brayns::ModelDescriptorPtr> _load(
-        brayns::Scene &scene,
-        const brayns::AbstractLoader &loader,
-        const Request &uploadRequest,
-        const brayns::ClientRequest &binaryRequest,
-        const brayns::BinaryParam &params,
-        brayns::CancellationToken &token)
+    void handle(const Request &request)
     {
-        auto progress = Progress(token, uploadRequest);
+        auto progress = Progress(_token, request);
+        auto params = request.getParams();
+        BinaryParamsValidator::validate(params);
+        auto &loader = LoaderFinder::find(params, _loaders);
+        auto binaryRequest = BinaryLock::waitForBinary(_binary, progress);
         auto data = binaryRequest.getData();
         auto blob = BlobLoader::load(params, data, progress);
         auto parameters = params.getLoadParameters();
         auto callback = [&](auto &operation, auto amount) { progress.notify(operation, 0.5 + 0.5 * amount); };
-        auto descriptors = loader.loadFromBlob(std::move(blob), {callback}, parameters, scene);
-        scene.addModels(descriptors, params);
-        return descriptors;
+        auto descriptors = loader.loadFromBlob(std::move(blob), {callback}, parameters, _scene);
+        _scene.addModels(descriptors, params);
+        request.reply(descriptors);
     }
+
+private:
+    brayns::Scene &_scene;
+    const brayns::LoaderRegistry &_loaders;
+    brayns::BinaryManager &_binary;
+    brayns::CancellationToken &_token;
 };
 } // namespace
 
@@ -227,48 +208,26 @@ bool RequestModelUploadEntrypoint::isAsync() const
 
 void RequestModelUploadEntrypoint::onRequest(const Request &request)
 {
-    if (_request)
-    {
-        throw JsonRpcException("A model upload is already running.");
-    }
-    auto params = request.getParams();
-    BinaryParamsValidator::validate(params);
-    _loader = &LoaderFinder::find(params, _loaders);
-    _request = request;
-    _params = std::move(params);
+    _client = request.getClient();
+    BinaryModelHandler handler(_scene, _loaders, _binary, _token);
+    handler.handle(request);
 }
 
 void RequestModelUploadEntrypoint::onPreRender()
 {
-    if (!_request)
-    {
-        BinaryExtractor::flush(_binary);
-        return;
-    }
-    auto request = _binary.poll();
-    if (!request)
-    {
-        return;
-    }
-    Log::info("Upload binary request {} (upload ID = {}).", *request, _request->getId());
-    BinaryModelLoader::load(_scene, *_loader, *_request, *request, _params, _token);
-    _request = std::nullopt;
-    _loader = nullptr;
+    _binary.flush();
 }
 
 void RequestModelUploadEntrypoint::onCancel()
 {
     _token.cancel();
-    _request = std::nullopt;
-    _loader = nullptr;
 }
 
 void RequestModelUploadEntrypoint::onDisconnect(const ClientRef &client)
 {
-    if (_request && client == _request->getClient())
+    if (_client && client == *_client)
     {
-        Log::info("Client {} disconnected, cancel upload.", client);
-        onCancel();
+        _token.cancel();
     }
 }
 } // namespace brayns

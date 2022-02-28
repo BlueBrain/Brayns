@@ -61,10 +61,10 @@ public:
     virtual const std::string &getMethod() const override;
 
     /**
-     * @brief Return false.
+     * @brief Return true.
      *
-     * @return true Never.
-     * @return false Always.
+     * @return true Always.
+     * @return false Never.
      */
     virtual bool hasPriority() const override;
 

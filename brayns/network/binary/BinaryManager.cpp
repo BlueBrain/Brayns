@@ -21,7 +21,6 @@
 
 #include "BinaryManager.h"
 
-#include <algorithm>
 #include <cassert>
 
 #include <brayns/common/Log.h>
@@ -31,15 +30,27 @@ namespace brayns
 void BinaryManager::add(ClientRequest request)
 {
     assert(request.isBinary());
-    if (_request)
-    {
-        Log::debug("Received binary request {} while {} is already buffered.", request, *_request);
-    }
-    _request = std::move(request);
+    Log::debug("Binary request buffered {}.", request);
+    _requests.push_back(std::move(request));
 }
 
 std::optional<ClientRequest> BinaryManager::poll()
 {
-    return std::exchange(_request, std::nullopt);
+    if (_requests.empty())
+    {
+        return std::nullopt;
+    }
+    auto request = std::move(_requests.front());
+    _requests.pop_front();
+    return request;
+}
+
+void BinaryManager::flush()
+{
+    for (const auto &request : _requests)
+    {
+        Log::info("Discard unused binary request {}.", request);
+    }
+    _requests.clear();
 }
 } // namespace brayns

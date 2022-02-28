@@ -77,6 +77,7 @@ public:
         {
             brayns::Log::debug("Parse JSON-RPC request.");
             auto jsonrpc = brayns::JsonRpcParser::parse(request);
+            brayns::Log::info("Successfully parsed JSON-RPC request {}.", jsonrpc);
             JsonRpcDispatcher::dispatch(std::move(jsonrpc), entrypoints, tasks);
         }
         catch (const brayns::JsonRpcException &e)

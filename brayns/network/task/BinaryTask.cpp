@@ -56,18 +56,18 @@ const std::string &BinaryTask::getMethod() const
 
 bool BinaryTask::hasPriority() const
 {
-    return false;
+    return true;
 }
 
 void BinaryTask::run()
 {
-    Log::info("Buffering binary request {}.", _request);
+    Log::info("Execution of binary request {}.", _request);
     _binary.add(std::move(_request));
 }
 
 void BinaryTask::cancel()
 {
-    Log::error("Trying to cancel a binary request.");
+    Log::error("Try to cancel a binary request.");
     throw TaskNotCancellableException(binaryMethod);
 }
 } // namespace brayns

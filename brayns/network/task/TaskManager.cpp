@@ -21,17 +21,22 @@
 
 #include "TaskManager.h"
 
+#include <brayns/common/Log.h>
+
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
 {
 void TaskManager::add(std::unique_ptr<ITask> task)
 {
+    auto &method = task->getMethod();
     if (task->hasPriority())
     {
+        Log::debug("Task '{}' has priority.", method);
         task->run();
         return;
     }
+    Log::debug("Task '{}' queued for execution.", method);
     _tasks.push_back(std::move(task));
 }
 
@@ -39,6 +44,8 @@ void TaskManager::runAllTasks()
 {
     while (!_tasks.empty())
     {
+        auto count = _tasks.size();
+        Log::debug("Flushing task queue, {} remaining.", count);
         auto &task = *_tasks.front();
         task.run();
         _tasks.pop_front();
