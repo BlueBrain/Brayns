@@ -21,6 +21,9 @@
 
 #include "WebSocket.h"
 
+#include <limits>
+#include <stdexcept>
+
 namespace
 {
 class WebSocketBuilder
@@ -66,20 +69,21 @@ class WebSocketSender
 public:
     static void send(Poco::Net::WebSocket &socket, const brayns::OutputPacket &packet)
     {
-        int size = 0;
         auto data = packet.getData();
+        auto size = data.size();
+        if (size > std::numeric_limits<int>::max())
+        {
+            throw std::invalid_argument("Output packet size too big: " + std::to_string(size));
+        }
+        auto buffer = data.data();
         auto flags = packet.getFlags();
         try
         {
-            size = socket.sendFrame(data.data(), data.size(), flags);
+            socket.sendFrame(buffer, int(size), flags);
         }
         catch (const Poco::Exception &e)
         {
             throw brayns::ConnectionClosedException("Error while sending packet: '" + e.displayText() + "'");
-        }
-        if (size != data.size())
-        {
-            throw brayns::ConnectionClosedException("Cannot send frame entirely");
         }
     }
 };
