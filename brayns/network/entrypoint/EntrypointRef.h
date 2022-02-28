@@ -152,12 +152,12 @@ public:
     bool isAsync() const;
 
     /**
-     * @brief Check if the request can be run inside a progress.
+     * @brief Check if the entrypoint has priority over the others in queue.
      *
-     * @return true Can be nested.
-     * @return false Cannot be nested.
+     * @return true Higher priority.
+     * @return false Normal priority.
      */
-    virtual bool canBeNested() const;
+    bool hasPriority() const;
 
 private:
     std::unique_ptr<IEntrypoint> _entrypoint;

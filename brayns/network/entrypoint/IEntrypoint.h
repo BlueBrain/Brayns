@@ -88,14 +88,19 @@ public:
     }
 
     /**
-     * @brief Check if the entrypoint can be run in a progress call.
+     * @brief Check if the entrypoint must be executed directly on reception.
      *
      * Default to false.
      *
-     * @return true Can be nested (example "cancel").
-     * @return false Cannot be nested (recommended).
+     * If an entrypoint has priority, it will be executed directly on reception
+     * (in the main thread). It will not be queued and can be run inside the
+     * execution of another entrypoint before previously received requests have
+     * been processed.
+     *
+     * @return true Higher priority, will not be queued.
+     * @return false No special priority, executed in reception order.
      */
-    virtual bool canBeNested() const
+    virtual bool hasPriority() const
     {
         return false;
     }

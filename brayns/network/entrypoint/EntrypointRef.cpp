@@ -123,8 +123,8 @@ bool EntrypointRef::isAsync() const
     return _schema.async;
 }
 
-bool EntrypointRef::canBeNested() const
+bool EntrypointRef::hasPriority() const
 {
-    return _entrypoint->canBeNested();
+    return _entrypoint->hasPriority();
 }
 } // namespace brayns

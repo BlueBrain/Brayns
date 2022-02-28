@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <brayns/network/client/ClientRef.h>
 #include <brayns/network/jsonrpc/RequestId.h>
 
 namespace brayns
@@ -54,6 +55,16 @@ public:
      * @return const std::string& JSON-RPC method.
      */
     virtual const std::string &getMethod() const = 0;
+
+    /**
+     * @brief Check if the task has priority.
+     *
+     * Tasks with priority are executed directly while others are queued.
+     *
+     * @return true Higher priority.
+     * @return false Normal priority.
+     */
+    virtual bool hasPriority() const = 0;
 
     /**
      * @brief Execute the task.

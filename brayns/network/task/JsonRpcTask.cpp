@@ -52,6 +52,11 @@ const std::string &JsonRpcTask::getMethod() const
     return _request.getMethod();
 }
 
+bool JsonRpcTask::hasPriority() const
+{
+    return _entrypoint.hasPriority();
+}
+
 void JsonRpcTask::run()
 {
     Log::debug("Execute JSON-RPC task for request {}.", _request);
@@ -68,8 +73,8 @@ void JsonRpcTask::cancel()
     Log::info("Cancel JSON-RPC request {}.", _request);
     if (!_entrypoint.isAsync())
     {
-        Log::info("Entrypoint does not support cancellation.");
         auto &method = _request.getMethod();
+        Log::info("Entrypoint '{}' does not support cancellation.", method);
         throw TaskNotCancellableException(method);
     }
     _cancelled = true;

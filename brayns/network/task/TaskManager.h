@@ -24,10 +24,8 @@
 #include <deque>
 #include <memory>
 
-#include <brayns/network/binary/BinaryManager.h>
-#include <brayns/network/client/ClientRequest.h>
-#include <brayns/network/entrypoint/EntrypointRegistry.h>
-#include <brayns/network/jsonrpc/JsonRpcRequest.h>
+#include <brayns/network/client/ClientRef.h>
+#include <brayns/network/jsonrpc/RequestId.h>
 
 #include "ITask.h"
 
@@ -41,23 +39,18 @@ class TaskManager
 {
 public:
     /**
-     * @brief Add a task to process a binary request in the queue.
+     * @brief Register a new task.
      *
-     * @param request Binary request to process.
-     * @param binary Binary to buffer request.
+     * If the task has priority, it will be executed directly.
+     *
+     * Otherwise it will be queued and run on next call to runAllTasks().
+     *
+     * @param task Task to run.
      */
-    void addBinaryTask(ClientRequest request, BinaryManager &binary);
+    void add(std::unique_ptr<ITask> task);
 
     /**
-     * @brief Add a task to process a JSON-RPC request in the queue.
-     *
-     * @param request JSON-RPC request to process.
-     * @param entrypoint Entrypoint to process request.
-     */
-    void addJsonRpcTask(JsonRpcRequest request, const EntrypointRef &entrypoint);
-
-    /**
-     * @brief Run all registered tasks.
+     * @brief Run all registered tasks in the order they have been added.
      *
      */
     void runAllTasks();

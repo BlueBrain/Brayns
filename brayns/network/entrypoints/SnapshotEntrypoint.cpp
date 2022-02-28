@@ -111,12 +111,12 @@ std::string encodeSnapshotToBase64(SnapshotParams &params, FrameBuffer &fb)
     return {};
 }
 
-class SnapshotBuilder
+class SnapshotHandler
 {
 public:
     using Request = brayns::SnapshotEntrypoint::Request;
 
-    static void build(Engine &engine, const Request &request, CancellationToken &token)
+    static void handle(const Request &request, Engine &engine, CancellationToken &token)
     {
         auto progress = brayns::ProgressHandler(token, request);
 
@@ -215,7 +215,7 @@ bool SnapshotEntrypoint::isAsync() const
 
 void SnapshotEntrypoint::onRequest(const Request &request)
 {
-    SnapshotBuilder::build(_engine, request, _token);
+    SnapshotHandler::handle(request, _engine, _token);
 }
 
 void SnapshotEntrypoint::onCancel()
@@ -225,7 +225,7 @@ void SnapshotEntrypoint::onCancel()
 
 void SnapshotEntrypoint::onDisconnect(const ClientRef &client)
 {
-    if (client == _client)
+    if (_client && client == *_client)
     {
         _token.cancel();
     }

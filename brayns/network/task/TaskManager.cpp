@@ -23,20 +23,15 @@
 
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
-#include "BinaryTask.h"
-#include "JsonRpcTask.h"
-
 namespace brayns
 {
-void TaskManager::addBinaryTask(ClientRequest request, BinaryManager &binary)
+void TaskManager::add(std::unique_ptr<ITask> task)
 {
-    auto task = std::make_unique<BinaryTask>(std::move(request), binary);
-    _tasks.push_back(std::move(task));
-}
-
-void TaskManager::addJsonRpcTask(JsonRpcRequest request, const EntrypointRef &entrypoint)
-{
-    auto task = std::make_unique<JsonRpcTask>(std::move(request), entrypoint);
+    if (task->hasPriority())
+    {
+        task->run();
+        return;
+    }
     _tasks.push_back(std::move(task));
 }
 

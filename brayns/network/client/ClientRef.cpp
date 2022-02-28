@@ -28,27 +28,17 @@ namespace brayns
 ClientRef::ClientRef(std::shared_ptr<WebSocket> socket)
     : _socket(std::move(socket))
 {
+    assert(_socket);
 }
 
 WebSocket &ClientRef::getSocket() const
 {
-    assert(_socket);
     return *_socket;
 }
 
 size_t ClientRef::getId() const
 {
     return size_t(_socket.get());
-}
-
-std::string ClientRef::toString() const
-{
-    return std::to_string(getId());
-}
-
-ClientRef::operator bool() const
-{
-    return bool(_socket);
 }
 
 bool ClientRef::operator==(const ClientRef &other) const

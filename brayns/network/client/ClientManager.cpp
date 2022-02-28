@@ -21,8 +21,6 @@
 
 #include "ClientManager.h"
 
-#include <cassert>
-
 #include "ClientSender.h"
 
 namespace brayns
@@ -39,7 +37,6 @@ bool ClientManager::isEmpty() const
 
 void ClientManager::add(ClientRef client)
 {
-    assert(client);
     _clients.insert(std::move(client));
 }
 

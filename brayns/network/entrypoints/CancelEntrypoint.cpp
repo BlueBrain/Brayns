@@ -38,6 +38,11 @@ std::string CancelEntrypoint::getDescription() const
     return "Cancel the task started by the request with the given ID";
 }
 
+bool CancelEntrypoint::hasPriority() const
+{
+    return true;
+}
+
 void CancelEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();

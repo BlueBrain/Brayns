@@ -72,8 +72,10 @@ private:
     static void _log(const brayns::ClientRequest &request)
     {
         brayns::Log::info("Received request {}.", request);
-        auto data = request.isBinary() ? "<Binary data>" : request.getData();
-        brayns::Log::debug("Request content: '{}'.", data);
+        if (request.isText())
+        {
+            brayns::Log::debug("Request content: '{}'.", request.getData());
+        }
     }
 
     static void _dispatch(

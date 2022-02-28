@@ -25,40 +25,12 @@
 
 #include <brayns/network/entrypoint/EntrypointFinder.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
-#include <brayns/network/jsonrpc/JsonRpcHandler.h>
 #include <brayns/network/jsonrpc/JsonRpcParser.h>
+#include <brayns/network/task/BinaryTask.h>
+#include <brayns/network/task/JsonRpcTask.h>
 
 namespace
 {
-class EntrypointDispatcher
-{
-public:
-    static void
-        dispatch(brayns::JsonRpcRequest request, const brayns::EntrypointRef &entrypoint, brayns::TaskManager &tasks)
-    {
-        if (entrypoint.canBeNested())
-        {
-            _run(request, entrypoint);
-            return;
-        }
-        _queue(std::move(request), entrypoint, tasks);
-    }
-
-private:
-    static void _run(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint)
-    {
-        brayns::Log::debug("Processing directly request {}.", request);
-        brayns::JsonRpcHandler::handle(request, entrypoint);
-    }
-
-    static void
-        _queue(brayns::JsonRpcRequest request, const brayns::EntrypointRef &entrypoint, brayns::TaskManager &tasks)
-    {
-        brayns::Log::debug("Create task to process request '{}'.", request.getMethod());
-        tasks.addJsonRpcTask(std::move(request), entrypoint);
-    }
-};
-
 class JsonRpcDispatcher
 {
 public:
@@ -72,7 +44,8 @@ public:
             brayns::Log::debug("Dispatch JSON-RPC request {} to entrypoints.", request);
             auto &entrypoint = brayns::EntrypointFinder::find(request, entrypoints);
             brayns::Log::debug("Entrypoint found to process request: '{}'.", entrypoint.getMethod());
-            EntrypointDispatcher::dispatch(std::move(request), entrypoint, tasks);
+            auto task = std::make_unique<brayns::JsonRpcTask>(std::move(request), entrypoint);
+            tasks.add(std::move(task));
         }
         catch (const brayns::JsonRpcException &e)
         {
@@ -108,12 +81,12 @@ public:
         }
         catch (const brayns::JsonRpcException &e)
         {
-            brayns::Log::info("Failed to parse request {}.", request, e);
+            brayns::Log::info("Failed to parse request {}: {}.", request, e);
             request.error(e);
         }
         catch (const std::exception &e)
         {
-            brayns::Log::error("Unexpected error in parsing of request {}.", request, e.what());
+            brayns::Log::error("Unexpected error in parsing of request {}: '{}'.", request, e.what());
             request.error({e.what()});
         }
         catch (...)
@@ -130,7 +103,8 @@ public:
     static void dispatch(brayns::ClientRequest request, brayns::BinaryManager &binary, brayns::TaskManager &tasks)
     {
         brayns::Log::debug("Create task to process binary request.");
-        tasks.addBinaryTask(std::move(request), binary);
+        auto task = std::make_unique<brayns::BinaryTask>(std::move(request), binary);
+        tasks.add(std::move(task));
     }
 };
 } // namespace

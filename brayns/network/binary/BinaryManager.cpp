@@ -33,8 +33,7 @@ void BinaryManager::add(ClientRequest request)
     assert(request.isBinary());
     if (_request)
     {
-        Log::debug("Received binary request {} has been discarded because {} is already buffered.", request, *_request);
-        return;
+        Log::debug("Received binary request {} while {} is already buffered.", request, *_request);
     }
     _request = std::move(request);
 }

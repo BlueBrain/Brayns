@@ -54,6 +54,11 @@ const std::string &BinaryTask::getMethod() const
     return binaryMethod;
 }
 
+bool BinaryTask::hasPriority() const
+{
+    return false;
+}
+
 void BinaryTask::run()
 {
     Log::info("Buffering binary request {}.", _request);

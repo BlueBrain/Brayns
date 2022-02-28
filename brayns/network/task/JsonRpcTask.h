@@ -61,6 +61,14 @@ public:
     virtual const std::string &getMethod() const override;
 
     /**
+     * @brief Check if entrypoint has priority.
+     *
+     * @return true High priority.
+     * @return false Normal priority.
+     */
+    virtual bool hasPriority() const override;
+
+    /**
      * @brief Process request using entrypoint.
      *
      */

@@ -61,6 +61,14 @@ public:
     virtual const std::string &getMethod() const override;
 
     /**
+     * @brief Return false.
+     *
+     * @return true Never.
+     * @return false Always.
+     */
+    virtual bool hasPriority() const override;
+
+    /**
      * @brief Buffer request in binary manager.
      *
      */

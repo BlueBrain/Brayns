@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include <brayns/engine/Engine.h>
 
 #include <brayns/network/common/CancellationToken.h>
@@ -45,6 +47,6 @@ public:
 private:
     Engine &_engine;
     CancellationToken _token;
-    ClientRef _client;
+    std::optional<ClientRef> _client;
 };
 } // namespace brayns

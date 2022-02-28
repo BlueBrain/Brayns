@@ -23,7 +23,6 @@
 
 #include <functional>
 #include <memory>
-#include <string>
 
 #include <spdlog/fmt/ostr.h>
 
@@ -38,12 +37,6 @@ namespace brayns
 class ClientRef
 {
 public:
-    /**
-     * @brief Construct an invalid client.
-     *
-     */
-    ClientRef() = default;
-
     /**
      * @brief Construct a connected client.
      *
@@ -64,21 +57,6 @@ public:
      * @return size_t Client ID.
      */
     size_t getId() const;
-
-    /**
-     * @brief Shortcut for std::to_string(getId());
-     *
-     * @return std::string Client ID as string.
-     */
-    std::string toString() const;
-
-    /**
-     * @brief Check if the client is valid.
-     *
-     * @return true Client has a socket.
-     * @return false Client has no socket.
-     */
-    operator bool() const;
 
     /**
      * @brief Comparison using underlying socket.
