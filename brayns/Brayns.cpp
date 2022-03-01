@@ -74,7 +74,7 @@ struct Brayns::Impl : public PluginAPI
         // This initialization must happen before plugin intialization.
         _createEngine();
 
-        // Plugin init before frame buffer creation needed by OpenDeck plugin
+        // Plugin init before frame buffer creation
         _pluginManager.initPlugins(this);
         _createFrameBuffer();
 

@@ -23,15 +23,6 @@ endif()
 
 add_subdirectory(deps)
 
-if(BRAYNS_MULTIVIEW_ENABLED)
-    message(FATAL_ERROR "Multiview plugin needs to be updated before compilation")
-    add_subdirectory(Multiview)
-endif()
-
-if(BRAYNS_OPENDECK_ENABLED)
-    add_subdirectory(OpenDeck)
-endif()
-
 if (BRAYNS_CIRCUITEXPLORER_ENABLED)
     add_subdirectory(CircuitExplorer)
 endif()
