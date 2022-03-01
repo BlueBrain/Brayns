@@ -32,8 +32,6 @@ option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" OFF)
 option(BRAYNS_CIRCUITEXPLORER_ENABLED "Activate CircuitExplorer plugin" ON)
 option(BRAYNS_CIRCUITINFO_ENABLED "Activate CircuitInfo plugin" OFF)
 option(BRAYNS_DTI_ENABLED "Activate Diffusion-Transfer Imaging plugin" OFF)
-option(BRAYNS_OPENDECK_ENABLED "Activate OpenDeck plugin" OFF)
-option(BRAYNS_MULTIVIEW_ENABLED "Activate Multiview camera plugin" OFF)
 option(BRAYNS_HARDWARE_RANDOMIZER_ENABLED "Enables hardware randomizer if supported by target CPU" OFF)
 
 # Core dependencies
