@@ -240,7 +240,7 @@ schema = {
 
 params = {
     'name': 'My Mesh',
-    'path': '/home/acfleury/Test/circuit5000_99983_decimated.off',
+    'path': 'path/to/mesh',
     'loader_name': 'mesh',
     'loader_properties': {
         'geometryQuality': 1

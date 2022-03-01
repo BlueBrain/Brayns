@@ -83,8 +83,8 @@ params = {
     'erase_frames': True,
     'fps_rate': 1,
     'frames_file_extension': 'png',
-    'frames_folder_path': '/home/acfleury/Test/simulation',
-    'output_movie_path': '/home/acfleury/Test/movie.mp4'
+    'frames_folder_path': '/path/to/folder',
+    'output_movie_path': 'movie.mp4'
 }
 
 result = {

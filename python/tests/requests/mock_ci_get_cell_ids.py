@@ -68,7 +68,7 @@ schema = {
 }
 
 params = {
-    'path': '/home/acfleury/Source/bin/TestData/share/BBPTestData/circuitBuilding_1000neurons/BlueConfig',
+    'path': 'path/to/mesh',
     'targets': [
         'allmini50',
         'mini50'
