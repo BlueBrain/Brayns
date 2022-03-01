@@ -56,7 +56,7 @@ schema = {
 
 params = {
     'model_id': 0,
-    'circuit_configuration': '/home/acfleury/Source/bin/TestData/share/BBPTestData/circuitBuilding_1000neurons/BlueConfig',
+    'circuit_configuration': 'path/to/mesh',
     'report_name': 'somas'
 }
 

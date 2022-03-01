@@ -51,7 +51,7 @@ schema = {
 
 params = {
     'model_id': 0,
-    'path': '/home/acfleury/Test/model.txt'
+    'path': 'model.txt'
 }
 
 result = {

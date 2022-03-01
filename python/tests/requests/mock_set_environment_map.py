@@ -44,7 +44,7 @@ schema = {
 }
 
 params = {
-    'filename': '/home/acfleury/Test/images/Horizon.jpg'
+    'filename': 'envmap.jpg'
 }
 
 result = {

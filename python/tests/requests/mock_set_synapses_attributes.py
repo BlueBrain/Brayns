@@ -67,7 +67,7 @@ schema = {
 }
 
 params = {
-    'circuit_configuration': '/home/acfleury/Source/bin/TestData/share/BBPTestData/circuitBuilding_1000neurons/BlueConfig',
+    'circuit_configuration': 'path/to/mesh',
     'gid': 0,
     'html_colors': [
         '#AABB99'
