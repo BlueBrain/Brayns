@@ -277,22 +277,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
-
-----
-
-chunk
-~~~~~
-
-Indicate sending of a binary chunk after this message.
-
-Parameters:
-
-* ``id``: ``str``. Chunk ID.
-
-Return value:
-
-This method has no return values.
+* ``None``
 
 ----
 
@@ -307,7 +292,7 @@ This method takes no parameters.
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -322,19 +307,23 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
-export_frames_to_disk
-~~~~~~~~~~~~~~~~~~~~~
+export_frames
+~~~~~~~~~~~~~
 
-Export a set of frames from a simulation as image files.
+Export a list of keyframes as images to disk.
 
 Parameters:
 
-* ``format``: ``str``. Image store format ('png', 'jpg', ...).
-* ``key_frames``: ``list``. List of key frames to render.
+* ``format``: ``str``. Image format ('png' or 'jpg').
+* ``image_size``: ``list``. Image dimenssions [width, height].
+
+  * ``items``: ``int``
+
+* ``key_frames``: ``list``. List of keyframes to export.
 
   * ``items``: ``dict``. The object has the following properties.
 
@@ -353,17 +342,55 @@ Parameters:
 
         * ``items``: ``float``
 
-    * ``camera_params``: ``dict``. Camera parameters.
+    * ``camera_params``: ``dict``. Camera-specific parameters.
     * ``frame_index``: ``int``. Integer index of the simulation frame.
 
-* ``name_image_after_simulation_index``: ``bool``. Wether to name the rendered images after the simulation frame index or not.
-* ``path``: ``str``. Path where to store the rendered frames.
-* ``quality``: ``int``. Image quality (compression rate = 100 - quality, 100 = highest quality, 0 = lowest quality.
-* ``spp``: ``int``. Number of samples per pixel.
+* ``path``: ``str``. Path where the frames will be stored.
+* ``quality``: ``int``. Image quality (100 = highest quality, 0 = lowest quality).
+* ``spp``: ``int``. Samples per pixel.
+* ``name_after_simulation_index``: ``bool``. Name the frame image file after the simulation frame index.
+* ``renderer_name``: ``str``. Name of the renderer to use.
+* ``renderer_parameters``: ``dict``. Renderer-specific parameters.
+* ``volume_parameters``: ``dict``. Volume rendering parameters. The object has the following properties.
+
+  * ``adaptive_max_sampling_rate``: ``float``. Max sampling rate.
+  * ``adaptive_sampling``: ``bool``. Use adaptive sampling.
+  * ``clip_box``: ``dict``. Clip box. The object has the following properties.
+
+    * ``max``: ``list``. Top-right XYZ.
+
+      * ``items``: ``float``
+
+    * ``min``: ``list``. Bottom-left XYZ.
+
+      * ``items``: ``float``
+
+  * ``gradient_shading``: ``bool``. Use gradient shading.
+  * ``pre_integration``: ``bool``. Use pre-integration.
+  * ``sampling_rate``: ``float``. Fixed sampling rate.
+  * ``single_shade``: ``bool``. Use a single shade for the whole volume.
+  * ``specular``: ``list``. Reflectivity amount XYZ.
+
+    * ``items``: ``float``
+
+  * ``volume_dimensions``: ``list``. Dimensions XYZ.
+
+    * ``items``: ``int``
+
+  * ``volume_element_spacing``: ``list``. Element spacing XYZ.
+
+    * ``items``: ``float``
+
+  * ``volume_offset``: ``list``. Offset XYZ.
+
+    * ``items``: ``float``
 
 Return value:
 
-This method has no return values.
+* ``dict``. The object has the following properties.
+
+  * ``error``: ``int``. Error code (0 = no error).
+  * ``message``: ``str``. Message explaining the error.
 
 ----
 
@@ -528,23 +555,6 @@ Return value:
     * ``plane``: ``list``. Plane normal vector XYZ and distance from origin.
 
       * ``items``: ``float``
-
-----
-
-get_export_frames_progress
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Get the progress of the last issued frame export.
-
-Parameters:
-
-This method takes no parameters.
-
-Return value:
-
-* ``dict``. The object has the following properties.
-
-  * ``progress``: ``float``. Progress of the last export 0-1.
 
 ----
 
@@ -1092,7 +1102,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1115,21 +1125,6 @@ Return value:
   * ``position``: ``list``. Picked position XYZ.
 
     * ``items``: ``float``
-
-----
-
-loaders_schema
-~~~~~~~~~~~~~~
-
-Get the schema of all loaders.
-
-Parameters:
-
-This method takes no parameters.
-
-Return value:
-
-This method has no return values.
 
 ----
 
@@ -1159,7 +1154,7 @@ This method takes no parameters.
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1193,7 +1188,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1210,7 +1205,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1227,14 +1222,14 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
 request_model_upload
 ~~~~~~~~~~~~~~~~~~~~
 
-Request model upload from further received blobs and return model descriptor on success.
+Request model upload from next binary frame received and return model descriptors on success.
 
 Parameters:
 
@@ -1325,7 +1320,7 @@ This method takes no parameters.
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1348,7 +1343,6 @@ Return value:
   * ``plugin``: ``str``. Name of the plugin that loads the entrypoint.
   * ``returns``: ``Any``. Output schema.
   * ``title``: ``str``. Name of the entrypoint.
-  * ``type``: ``str``. Type of entrypoint ('method').
 
 ----
 
@@ -1360,10 +1354,12 @@ Set the current state of the animation parameters.
 Parameters:
 
 * ``current``: ``int``. Current frame index.
+* ``end_frame``: ``int``. Global final simulation frame index.
+* ``start_frame``: ``int``. Global initial simulation frame index.
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1382,7 +1378,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1408,7 +1404,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1468,7 +1464,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1484,7 +1480,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1520,7 +1516,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1545,7 +1541,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1605,7 +1601,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1620,7 +1616,7 @@ This method takes no parameters.
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1665,7 +1661,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1684,6 +1680,8 @@ Parameters:
 * ``animation_parameters``: ``dict``. Animation parameters. The object has the following properties.
 
   * ``current``: ``int``. Current frame index.
+  * ``end_frame``: ``int``. Global final simulation frame index.
+  * ``start_frame``: ``int``. Global initial simulation frame index.
 
 * ``camera``: ``dict``. Camera parameters. The object has the following properties.
 
@@ -1700,7 +1698,7 @@ Parameters:
 
     * ``items``: ``float``
 
-* ``file_path``: ``str``. Path if saved on disk.
+* ``file_path``: ``str``. Path if saved on disk. If empty, image will be sentto the client as a base64 encoded image.
 * ``name``: ``str``. Name of the snapshot.
 * ``quality``: ``int``. Image quality from 0 to 100.
 * ``renderer``: ``dict``. Renderer parameters. The object has the following properties.
@@ -1718,6 +1716,39 @@ Parameters:
   * ``variance_threshold``: ``float``. Stop accumulation threshold.
 
 * ``samples_per_pixel``: ``int``. Samples per pixel.
+* ``volume_parameters``: ``dict``. Volume parameters. The object has the following properties.
+
+  * ``adaptive_max_sampling_rate``: ``float``. Max sampling rate.
+  * ``adaptive_sampling``: ``bool``. Use adaptive sampling.
+  * ``clip_box``: ``dict``. Clip box. The object has the following properties.
+
+    * ``max``: ``list``. Top-right XYZ.
+
+      * ``items``: ``float``
+
+    * ``min``: ``list``. Bottom-left XYZ.
+
+      * ``items``: ``float``
+
+  * ``gradient_shading``: ``bool``. Use gradient shading.
+  * ``pre_integration``: ``bool``. Use pre-integration.
+  * ``sampling_rate``: ``float``. Fixed sampling rate.
+  * ``single_shade``: ``bool``. Use a single shade for the whole volume.
+  * ``specular``: ``list``. Reflectivity amount XYZ.
+
+    * ``items``: ``float``
+
+  * ``volume_dimensions``: ``list``. Dimensions XYZ.
+
+    * ``items``: ``int``
+
+  * ``volume_element_spacing``: ``list``. Element spacing XYZ.
+
+    * ``items``: ``float``
+
+  * ``volume_offset``: ``list``. Offset XYZ.
+
+    * ``items``: ``float``
 
 Return value:
 
@@ -1738,7 +1769,7 @@ This method takes no parameters.
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1756,7 +1787,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1792,7 +1823,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -1828,5 +1859,5 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
