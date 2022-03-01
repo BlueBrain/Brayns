@@ -23,7 +23,6 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
     Timer.h
     TransferFunction.h
     Transformation.h
-    VolumeDataType.h
 )
 
 add_library(braynsCommon SHARED ${BRAYNSCOMMON_PUBLIC_HEADERS} ${BRAYNSCOMMON_SOURCES})

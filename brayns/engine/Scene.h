@@ -109,6 +109,25 @@ public:
     void manipulateModel(const uint32_t modelID, const std::function<void(ModelInstance&)>& callback);
 
     /**
+     * @brief Adds a new model to be used as geometry and volume clipping geometry, returning the ID assigned
+     * to it
+     * @throws std::invalid_argument if the passed model is null
+     */
+    uint32_t addClippingModel(Model::Ptr&& clippingModel);
+
+    /**
+     * @brief Return a clipping model identified by its ID.
+     * @throws std::invalid_argument if the given ID does not correspond to any existing clipping model
+     */
+    const Model& getClippingModel(const uint32_t clippingModelID) const;
+
+    /**
+     * @brief Removes a clipping plane from the scene, identified by its ID.
+     * @throws std::invalid_argument if the given ID does not correspond to any existing clipping model
+     */
+    void removeClippingModel(const uint32_t clippingModelID);
+
+    /**
      * @brief Adds a new light to the scene and returns the ID which identifies it.
      */
     uint32_t addLight(Light::Ptr&& light) noexcept;
@@ -177,6 +196,7 @@ private:
     };
 
 private:
+    // Scene bounds
     Bounds _bounds;
 
     // Model data
@@ -184,10 +204,15 @@ private:
     std::vector<ModelEntry> _models; // Stores loaded models
     std::map<uint32_t, ModelInstance::Ptr> _modelInstances; // Stores model instances
 
+    // Clipping model data
+    uint32_t _clippingModelIDFactory {0};
+    std::map<uint32_t, Model::Ptr> _clippingModels;
+
     // Lights data
     uint32_t _lightIdFactory {0};
     std::map<uint32_t, Light::Ptr> _lights;
 
+    // OSPRRay "scene" handle
     OSPWorld _handle {nullptr};
 };
 

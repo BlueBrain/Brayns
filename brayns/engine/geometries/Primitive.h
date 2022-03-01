@@ -22,6 +22,7 @@
 
 #include <brayns/common/MathTypes.h>
 #include <brayns/engine/Geometry.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 #include <vector>
 
@@ -50,4 +51,10 @@ void Geometry<Primitive>::initializeHandle();
 template<>
 void Geometry<Primitive>::commitGeometrySpecificParams();
 
+BRAYNS_JSON_ADAPTER_BEGIN(Primitive)
+BRAYNS_JSON_ADAPTER_ENTRY(p0, "Starting point of the primitive")
+BRAYNS_JSON_ADAPTER_ENTRY(r0, "Primitive radius at p0")
+BRAYNS_JSON_ADAPTER_ENTRY(p1, "Ending point of the primitive")
+BRAYNS_JSON_ADAPTER_ENTRY(r1, "Primitive radius at p1")
+BRAYNS_JSON_ADAPTER_END()
 }

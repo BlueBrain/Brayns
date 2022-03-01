@@ -65,6 +65,7 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     materials/MatteMaterial.h
     materials/MetalMaterial.h
     materials/PlasticMaterial.h
+    models/ClippingModel.h
     models/GeometricModel.h
     models/VolumetricModel.h
     renderers/InteractiveRenderer.h

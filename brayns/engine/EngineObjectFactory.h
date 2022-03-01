@@ -45,6 +45,7 @@ private:
         using Ptr = std::unique_ptr<IEngineObjectHandler>;
 
         virtual std::unique_ptr<SuperT> instantiate() const noexcept = 0;
+        virtual JsonSchema getSchema() const noexcept = 0;
         virtual JsonValue serialize(const SuperT& object) const noexcept = 0;
         virtual void deserialize(const JsonValue& data, SuperT& dst) const = 0;
     };
@@ -55,6 +56,11 @@ private:
         std::unique_ptr<SuperT> instantiate() const noexcept final
         {
             return std::make_unique<DerivedT>();
+        }
+
+        JsonSchema getSchema() const noexcept
+        {
+            return Json::getSchema<DerivedT>();
         }
 
         JsonValue serialize(const SuperT& object) const noexcept final
@@ -109,6 +115,19 @@ public:
     {
         auto& entry = _findEntry(name);
         return entry->instantiate();
+    }
+
+    JsonSchema getFactorySchema() const noexcept
+    {
+        JsonSchema result;
+        result.oneOf.reserve(_registeredTypes.size());
+        for(const auto& [name, handle] : _registeredTypes)
+        {
+            JsonSchema schema = handle->getSchema();
+            schema.title = name;
+            result.oneOf.push_back(schema);
+        }
+        return result;
     }
 
     JsonValue serialize(const SuperT& object) const

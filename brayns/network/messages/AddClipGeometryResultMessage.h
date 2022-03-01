@@ -22,11 +22,11 @@
 #pragma once
 
 #include <brayns/json/JsonObjectMacro.h>
-#include <brayns/network/adapters/ClipPlaneAdapter.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(AddClipPlaneMessage)
-BRAYNS_JSON_OBJECT_ENTRY(Plane, plane, "Plane normal vector XYZ and distance from origin")
+BRAYNS_JSON_OBJECT_BEGIN(AddClipGeometryResultMessage)
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, id, "Clipping geometry ID")
+BRAYNS_JSON_OBJECT_ENTRY(JsonValue, geometry, "Clipping geometry data")
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

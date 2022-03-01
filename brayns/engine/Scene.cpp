@@ -143,6 +143,30 @@ std::vector<uint32_t> Scene::getAllModelIDs() const noexcept
     return result;
 }
 
+uint32_t Scene::addClippingModel(Model::Ptr&& clippingModel)
+{
+    _clippingModels[_clippingModelIDFactory] = std::move(clippingModel);
+    return _clippingModelIDFactory++;
+}
+
+const Model &Scene::getClippingModel(const uint32_t clippingModelID) const
+{
+    const auto it = _clippingModels.find(clippingModelID);
+
+    if(it == _clippingModels.end())
+        throw std::invalid_argument("Clippoing model with ID " + std::to_string(clippingModelID) + " does not exists");
+
+    return *(it->second);
+}
+
+void Scene::removeClippingModel(const uint32_t clippingModelID)
+{
+    const auto count = _clippingModels.erase(clippingModelID);
+
+    if(count == 0)
+        throw std::invalid_argument("Clippoing model with ID " + std::to_string(clippingModelID) + " does not exists");
+}
+
 uint32_t Scene::addLight(Light::Ptr&& light) noexcept
 {
     const auto id = _lightIdFactory++;

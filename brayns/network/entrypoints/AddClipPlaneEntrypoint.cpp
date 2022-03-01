@@ -19,7 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AddClipPlaneEntrypoint.h"
+#include <brayns/network/entrypoints/AddClipPlaneEntrypoint.h>
+
+#include <brayns/engine/models/ClippingModel.h>
 
 namespace brayns
 {
@@ -38,19 +40,19 @@ std::string AddClipPlaneEntrypoint::getDescription() const
     return "Add a clip plane and returns the clip plane descriptor";
 }
 
-JsonSchema AddClipPlaneEntrypoint::getParamsSchema() const
-{
-    auto schema = Json::getSchema<ClipPlane>();
-    schema.properties.erase("id");
-    return schema;
-}
-
 void AddClipPlaneEntrypoint::onRequest(const Request &request)
 {
-    auto params = request.getParams();
-    auto &plane = params.plane;
-    auto id = _scene.addClipPlane(plane);
-    auto clipPlane = _scene.getClipPlane(id);
-    request.reply(clipPlane);
+    auto plane = request.getParams();
+
+    auto model = std::make_unique<ClippingModel<Plane>>();
+    model->addClipGeometry(plane);
+    auto modelPtr = model.get();
+    auto id = _scene.addClippingModel(std::move(model));
+
+    AddClipGeometryResultMessage result;
+    result.id = id;
+    result.geometry = modelPtr->serializeGeometry();
+
+    request.reply(result);
 }
 } // namespace brayns

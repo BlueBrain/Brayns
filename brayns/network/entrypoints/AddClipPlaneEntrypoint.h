@@ -22,20 +22,19 @@
 #pragma once
 
 #include <brayns/engine/Scene.h>
-
+#include <brayns/engine/geometries/Plane.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/AddClipPlaneMessage.h>
+#include <brayns/network/messages/AddClipGeometryResultMessage.h>
 
 namespace brayns
 {
-class AddClipPlaneEntrypoint : public Entrypoint<AddClipPlaneMessage, ClipPlanePtr>
+class AddClipPlaneEntrypoint : public Entrypoint<Plane, AddClipGeometryResultMessage>
 {
 public:
     AddClipPlaneEntrypoint(Scene &scene);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
-    virtual JsonSchema getParamsSchema() const override;
     virtual void onRequest(const Request &request) override;
 
 private:

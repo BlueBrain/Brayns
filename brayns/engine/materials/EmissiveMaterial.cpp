@@ -40,7 +40,7 @@ void EmissiveMaterial::setColor(const Vector3f &color) noexcept
 
 void EmissiveMaterial::setIntensity(const float intensity) noexcept
 {
-    _updateValue(_intensity, glm::max(_intensity, 0.f));
+    _updateValue(_intensity, glm::max(intensity, 0.f));
 }
 
 const Vector3f& EmissiveMaterial::getColor() const noexcept

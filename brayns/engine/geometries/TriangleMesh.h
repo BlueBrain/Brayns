@@ -22,6 +22,7 @@
 
 #include <brayns/common/MathTypes.h>
 #include <brayns/engine/Geometry.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 #include <vector>
 
@@ -32,8 +33,8 @@ struct TriangleMesh
     std::vector<Vector3f> vertices;
     std::vector<Vector3f> normals;
     std::vector<Vector4f> colors;
+    std::vector<Vector2f> uvs;
     std::vector<Vector3ui> indices;
-    std::vector<Vector2f> textureCoordinates;
 };
 
 template<>
@@ -50,4 +51,12 @@ std::vector<uint32_t> Geometry<TriangleMesh>::add(const std::vector<TriangleMesh
 
 template<>
 void Geometry<TriangleMesh>::commitGeometrySpecificParams();
+
+BRAYNS_JSON_ADAPTER_BEGIN(TriangleMesh)
+BRAYNS_JSON_ADAPTER_ENTRY(vertices, "Mesh vertex positions")
+BRAYNS_JSON_ADAPTER_ENTRY(normals, "Mesh vertex normals")
+BRAYNS_JSON_ADAPTER_ENTRY(colors, "Mesh vertex colors")
+BRAYNS_JSON_ADAPTER_ENTRY(uvs, "Mesh vertex texture coordinates")
+BRAYNS_JSON_ADAPTER_ENTRY(indices, "Mesh triangle vertex indices")
+BRAYNS_JSON_ADAPTER_END()
 }

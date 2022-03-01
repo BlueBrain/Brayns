@@ -23,6 +23,7 @@
 #include <brayns/common/Bounds.h>
 #include <brayns/common/Log.h>
 #include <brayns/engine/EngineObject.h>
+#include <brayns/json/Json.h>
 
 #include <ospray/ospray.h>
 
@@ -225,6 +226,11 @@ public:
     OSPGeometry handle() const noexcept
     {
         return _handle;
+    }
+
+    JsonValue serialize() const
+    {
+        return Json::serialize<T>(_geometries);
     }
 
 private:

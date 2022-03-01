@@ -72,8 +72,7 @@ protected:
     virtual void commitGeometryModel() = 0;
 
 private:
-    Material::Ptr _material {nullptr};
-
     OSPGeometricModel _handle {nullptr};
+    Material::Ptr _material {nullptr};
 };
 }
