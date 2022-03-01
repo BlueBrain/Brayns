@@ -67,7 +67,6 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/ImageJpegEntrypoint.h
   entrypoints/ImageStreamingModeEntrypoint.h
   entrypoints/InspectEntrypoint.h
-  entrypoints/LoadersSchemaEntrypoint.h
   entrypoints/ModelPropertiesEntrypoint.h
   entrypoints/ModelTransferFunctionEntrypoint.h
   entrypoints/QuitEntrypoint.h
@@ -169,7 +168,6 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/ImageJpegEntrypoint.cpp
   entrypoints/ImageStreamingModeEntrypoint.cpp
   entrypoints/InspectEntrypoint.cpp
-  entrypoints/LoadersSchemaEntrypoint.cpp
   entrypoints/ModelPropertiesEntrypoint.cpp
   entrypoints/ModelTransferFunctionEntrypoint.cpp
   entrypoints/QuitEntrypoint.cpp

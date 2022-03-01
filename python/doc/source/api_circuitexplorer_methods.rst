@@ -68,7 +68,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -119,7 +119,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -184,7 +184,7 @@ Return value:
 color_circuit_by_id
 ~~~~~~~~~~~~~~~~~~~
 
-Colors a circuit model by element ID. Specific IDs can be targetted as single IDs or ID Ranges (being-end),otherwise, random colors per ID will be applied.
+Colors a circuit model by element ID. Specific IDs can be targetted as single IDs or ID Ranges (being-end).Otherwise, random colors per ID will be applied.
 
 Parameters:
 
@@ -202,7 +202,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -228,7 +228,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -247,7 +247,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -365,7 +365,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -384,7 +384,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -400,7 +400,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -434,7 +434,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -449,7 +449,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -488,7 +488,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -526,7 +526,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -542,7 +542,7 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
 ----
 
@@ -576,5 +576,5 @@ Parameters:
 
 Return value:
 
-This method has no return values.
+* ``None``
 
