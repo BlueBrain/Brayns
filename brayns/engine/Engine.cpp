@@ -19,10 +19,9 @@
  */
 
 #include <brayns/common/Log.h>
-#include <brayns/engine/DefaultEngineObjects.h>
 #include <brayns/engine/Engine.h>
-
-#include <ospray/version.h>
+#include <brayns/engine/cameras/PerspectiveCamera.h>
+#include <brayns/engine/renderers/InteractiveRenderer.h>
 
 #include <thread>
 
@@ -31,56 +30,34 @@ namespace brayns
 Engine::Engine(const ParametersManager& parameters)
  : _params(parameters)
 {
-    try
+    _device = ospNewDevice("cpu");
+
+    const auto logLevel = OSPLogLevel::OSP_LOG_WARNING;
+    const auto logOutput = "cout";
+    const auto logErrorOutput = "cerr";
+    ospDeviceSetParam(_device, "logLevel", OSPDataType::OSP_INT, &logLevel);
+    ospDeviceSetParam(_device, "logOutput", OSPDataType::OSP_STRING, logOutput);
+    ospDeviceSetParam(_device, "errorOutput", OSPDataType::OSP_STRING, logErrorOutput);
+
+    ospDeviceCommit(_device);
+    const auto error = ospDeviceGetLastErrorCode(_device);
+    if(error != OSPError::OSP_NO_ERROR)
     {
-        // Setup log and error output
-        std::vector<const char *> argv =
-        {
-            "--osp:log-level=warning",
-            "--osp:log-output=cout",
-            "--osp:error-output=cerr"
-        };
-
-        auto argc = static_cast<int>(argv.size());
-        const auto error = ospInit(&argc, argv.data());
-
-        switch(error)
-        {
-        case OSPError::OSP_OUT_OF_MEMORY:
-            throw std::runtime_error("Cannot initialize OSPRay: out of memory");
-            break;
-        case OSPError::OSP_UNSUPPORTED_CPU:
-            throw std::runtime_error("Cannot initialize OSPRay: unsupported CPU");
-            break;
-        case OSPError::OSP_INVALID_ARGUMENT:
-            throw std::runtime_error("Cannot initialize OSPRay: invalid argument given to to ospInit()");
-            break;
-        case OSPError::OSP_INVALID_OPERATION:
-        case OSPError::OSP_UNKNOWN_ERROR:
-        case OSPError::OSP_VERSION_MISMATCH: // We are not loading any module, so this shouldn't happen ...
-            throw std::runtime_error("Cannot initialize OSPRay: Unknown error");
-            break;
-        default:
-            break;
-        }
-    }
-    catch (const std::exception &e)
-    {
-        // Note: This is necessary because OSPRay does not yet implement a
-        // ospDestroy API.
-        Log::error("{}", e.what());
-
-        auto device = ospGetCurrentDevice();
-        auto errorMessage = ospDeviceGetLastErrorMsg(device);
-        Log::error("OSPRay message: {}", errorMessage);
+        const auto ospErrorMessage = ospDeviceGetLastErrorMsg(_device);
+        Log::critical("Could not initialize OSPRay device: {}", ospErrorMessage);
+        throw std::runtime_error("Could not initialize OSPRay device");
     }
 
-    // Register core renderers, cameras, materials and lights
-    DefaultEngineObjects::registerObjects(*this);
+    // Default camera and renderer
+    _camera = std::make_unique<PerspectiveCamera>();
+    _renderer = std::make_unique<InteractiveRenderer>();
 }
 
 Engine::~Engine()
 {
+    if(_device)
+        ospDeviceRelease(_device);
+
     ospShutdown();
 }
 
@@ -123,6 +100,9 @@ void Engine::commit()
     _camera->commit();
     _renderer->commit();
     _scene.commit();
+
+    const auto sceneSize = _scene._getSizeBytes();
+    _statistics.setSceneSizeInBytes(sceneSize);
 }
 
 void Engine::render()
@@ -205,10 +185,5 @@ bool Engine::isRunning() const noexcept
 const Statistics &Engine::getStatistics() const noexcept
 {
     return _statistics;
-}
-
-EngineFactories &Engine::getObjectFactories() noexcept
-{
-    return _engineFactory;
 }
 } // namespace brayns

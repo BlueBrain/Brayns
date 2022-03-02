@@ -29,9 +29,9 @@ namespace
 class ModelParametersValidator
 {
 public:
-    static void validate(const brayns::ModelParams &params, const brayns::LoaderRegistry &loaders)
+    static void validate(const brayns::FileLoadParameters &params, const brayns::LoaderRegistry &loaders)
     {
-        auto &path = params.getPath();
+        auto &path = params.filePath;
         if (path.empty())
         {
             throw brayns::InvalidParamsException("Missing model path");
@@ -73,13 +73,20 @@ void AddModelEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     ModelParametersValidator::validate(params, _loaders);
     auto progress = brayns::ProgressHandler(_token, request);
-    auto &path = params.getPath();
-    auto &name = params.getLoaderName();
+    auto &path = params.filePath;
+    auto &name = params.loaderName;
     auto &loader = _loaders.getSuitableLoader(path, "", name);
-    auto &parameters = params.getLoadParameters();
+    auto &parameters = params.loadParameters;
     auto callback = [&](const auto &operation, auto amount) { progress.notify(operation, amount); };
-    auto descriptors = loader.loadFromFile(path, {callback}, parameters, _scene);
-    _scene.addModels(descriptors, params);
+    auto model = loader.loadFromFile(path, {callback}, parameters);
+
+    ModelLoadParameters loadParameters;
+    loadParameters.type = ModelLoadParameters::LoadType::FROM_FILE;
+    loadParameters.path = path;
+    loadParameters.loaderName = name;
+    loadParameters.loadParameters = parameters;
+
+    auto instanceID = _scene.addModel(loadParameters, std::move(model));
     request.reply(descriptors);
 }
 

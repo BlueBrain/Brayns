@@ -24,6 +24,7 @@
 #include <brayns/common/Bounds.h>
 #include <brayns/common/Transformation.h>
 #include <brayns/engine/EngineObject.h>
+#include <brayns/engine/ModelComponents.h>
 #include <brayns/parameters/AnimationParameters.h>
 
 #include <ospray/ospray.h>
@@ -66,6 +67,11 @@ public:
      * @brief Returns the metadata of this model
      */
     const Metadata& getMetaData() const noexcept;
+
+    /**
+     * @brief Returns this model components container as a modifiable reference
+     */
+    ModelComponents &getComponents() noexcept;
 
 protected:
     /**
@@ -118,6 +124,8 @@ private:
     bool _boundsChanged {false};
     OSPGroup _groupHandle {nullptr};
     Metadata _metadata;
+    // Holds string based bindings to model objects so that they can be accessed in a generic way
+    ModelComponents _components;
 };
 
 /**

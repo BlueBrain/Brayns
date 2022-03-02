@@ -22,9 +22,6 @@
 
 #include <brayns/common/MathTypes.h>
 #include <brayns/engine/Geometry.h>
-#include <brayns/json/JsonAdapterMacro.h>
-
-#include <vector>
 
 namespace brayns
 {
@@ -42,10 +39,4 @@ void Geometry<Box>::initializeHandle();
 
 template<>
 void Geometry<Box>::commitGeometrySpecificParams();
-
-BRAYNS_JSON_ADAPTER_BEGIN(Box)
-BRAYNS_JSON_ADAPTER_ENTRY(min, "Minimum bound corner (bottom back left)")
-BRAYNS_JSON_ADAPTER_ENTRY(max, "Maximum bound corner (top front right)")
-BRAYNS_JSON_ADAPTER_END()
-
 }

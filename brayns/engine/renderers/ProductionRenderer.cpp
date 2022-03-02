@@ -17,3 +17,27 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <brayns/engine/renderers/ProductionRenderer.h>
+
+namespace brayns
+{
+std::string_view ProductionRenderer::getName() const noexcept
+{
+    return "production";
+}
+
+Renderer::Ptr ProductionRenderer::clone() const noexcept
+{
+    return std::make_unique<ProductionRenderer>(*this);
+}
+
+std::string_view ProductionRenderer::getOSPHandleName() const noexcept
+{
+    return "pathtracer";
+}
+
+void ProductionRenderer::commitRendererSpecificParams()
+{
+}
+}

@@ -21,7 +21,6 @@
 #pragma once
 
 #include <brayns/engine/Light.h>
-#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
@@ -80,17 +79,4 @@ private:
     Vector3f _verticalDisplacement {0.f, 1.f, 0.f};
     Vector3f _horizontalDisplacement {1.f, 0.f, 1.f};
 };
-
-BRAYNS_JSON_ADAPTER_BEGIN(QuadLight)
-BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Light color (Normalized RGB)")
-BRAYNS_JSON_ADAPTER_GETSET("intensity", getIntensity, setIntensity,
-                           "Light intensity (Will be clamped on the range [0.0, +infinity)")
-BRAYNS_JSON_ADAPTER_GETSET("visible", isVisible, setVisible, "Sets wether the light should be visible on the scene")
-BRAYNS_JSON_ADAPTER_GETSET("bottom_left_corner", getBottomLeftCorner, setBottomLeftCorner,
-                           "Sets the bottom left corner position of the light (in world space coordinates)")
-BRAYNS_JSON_ADAPTER_GETSET("vertical_displacement", getVerticalDisplacement, setVerticalDisplacement,
-                           "Sets the vertical displacement vector used to compute the top left corner")
-BRAYNS_JSON_ADAPTER_GETSET("horizontal_displacement", getHorizontalDisplacement, setHorizontalDisplacement,
-                           "Sets the horizontal displacement vector used to compute the bottom right corner")
-BRAYNS_JSON_ADAPTER_END()
 }

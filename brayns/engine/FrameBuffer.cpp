@@ -43,11 +43,6 @@ OSPFrameBufferFormat toOSPFrameBufferFormat(const brayns::PixelFormat frameBuffe
 
 namespace brayns
 {
-FrameBuffer::FrameBuffer()
-{
-    _recreate();
-}
-
 FrameBuffer::~FrameBuffer()
 {
     unmap();
@@ -66,8 +61,6 @@ FrameBuffer &FrameBuffer::operator=(const FrameBuffer &o)
     _accumulation = o._accumulation;
     _accumFrames = 0;
 
-    _recreate();
-
     return *this;
 }
 
@@ -78,12 +71,15 @@ FrameBuffer FrameBuffer::clone() const noexcept
 
 void FrameBuffer::map()
 {
+    if(_handle)
+        throw std::runtime_error("Framebuffer is not initialized. Cannot be mapped at this time");
+
     _colorBuffer = (uint8_t *)ospMapFrameBuffer(_handle, OSP_FB_COLOR);
 }
 
 void FrameBuffer::unmap()
 {
-    if (_colorBuffer)
+    if (_handle && _colorBuffer)
     {
         ospUnmapFrameBuffer(_colorBuffer, _handle);
         _colorBuffer = nullptr;
@@ -97,7 +93,25 @@ const uint8_t *FrameBuffer::getColorBuffer() const
 
 void FrameBuffer::commit()
 {
-    _recreate();
+    unmap();
+
+    if(_handle)
+        ospRelease(_handle);
+
+    const auto width = static_cast<int>(_frameSize.x);
+    const auto height = static_cast<int>(_frameSize.y);
+
+    const auto format = toOSPFrameBufferFormat(_frameBufferFormat);
+
+    size_t channels = OSP_FB_COLOR;
+    if (_accumulation)
+        channels |= OSP_FB_ACCUM;
+
+    _handle = ospNewFrameBuffer(width, height, format, channels);
+
+    ospCommit(_handle);
+
+    clear();
 }
 
 void FrameBuffer::setFrameSize(const Vector2ui &frameSize)
@@ -176,28 +190,5 @@ Image FrameBuffer::getImage()
 OSPFrameBuffer FrameBuffer::handle() const noexcept
 {
     return _handle;
-}
-
-void FrameBuffer::_recreate()
-{
-    unmap();
-
-    if(_handle)
-        ospRelease(_handle);
-
-    const auto width = static_cast<int>(_frameSize.x);
-    const auto height = static_cast<int>(_frameSize.y);
-
-    const auto format = toOSPFrameBufferFormat(_frameBufferFormat);
-
-    size_t channels = OSP_FB_COLOR;
-    if (_accumulation)
-        channels |= OSP_FB_ACCUM;
-
-    _handle = ospNewFrameBuffer(width, height, format, channels);
-
-    ospCommit(_handle);
-
-    clear();
 }
 } // namespace brayns

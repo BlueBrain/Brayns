@@ -23,20 +23,15 @@
 
 #include <brayns/json/JsonAdapterMacro.h>
 
-#include <brayns/engine/Model.h>
-
-#include "BoxAdapter.h"
-#include "TransformationAdapter.h"
+#include <brayns/io/LoadParameters.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(ModelParams)
-BRAYNS_JSON_ADAPTER_GETSET("bounding_box", getBoundingBox, setBoundingBox, "Display bounding box")
-BRAYNS_JSON_ADAPTER_GETSET("name", getName, setName, "Model name")
-BRAYNS_JSON_ADAPTER_GETSET("path", getPath, setPath, "Model file path")
-BRAYNS_JSON_ADAPTER_GETSET("transformation", getTransformation, setTransformation, "Model transformation")
-BRAYNS_JSON_ADAPTER_GETSET("visible", getVisible, setVisible, "Is visible")
-BRAYNS_JSON_ADAPTER_GETSET("loader_name", getLoaderName, setLoaderName, "Name of the loader")
-BRAYNS_JSON_ADAPTER_GETSET("loader_properties", getLoadParameters, setLoadParameters, "Loader properties")
+BRAYNS_JSON_ADAPTER_BEGIN(BinaryLoadParameters)
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("chunks_id", chunksID, "Chunk ID", Required());
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("size", size, "File size in bytes", Required());
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("type", type, "File extension or type (MESH, POINTS, CIRCUIT)", Required());
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("loader_name", loaderName, "Loader name");
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("loader_properties", loadParameters, "Loader properties");
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

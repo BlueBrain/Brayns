@@ -21,62 +21,59 @@
 
 #pragma once
 
-#include <brayns/engine/LightManager.h>
-
+#include <brayns/engine/Scene.h>
 #include <brayns/network/adapters/LightAdapter.h>
-#include <brayns/network/entrypoint/IEntrypoint.h>
+#include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
 {
-class AddLightHelper
-{
-public:
-    static void load(LightManager &lights, LightPtr light, const JsonRpcRequest &request);
-};
-
 template<typename T>
-class AddLightEntrypoint : public IEntrypoint
+class AddLightEntrypoint : public Entrypoint<T, uint32_t>
 {
 public:
-    AddLightEntrypoint(LightManager &lights)
-        : _lights(lights)
+    AddLightEntrypoint(Scene &scene)
+        : _scene(scene)
     {
     }
 
     virtual JsonSchema getParamsSchema() const override
     {
-        return Json::getSchema<T>();
-    }
-
-    virtual JsonSchema getResultSchema() const override
-    {
-        return Json::getSchema<size_t>();
+        JsonSchema baseSchema = Json::getSchema<T>();
+        baseSchema.properties.erase("type");
+        return baseSchema;
     }
 
     virtual void onRequest(const JsonRpcRequest &request) override
     {
         auto params = request.getParams();
-        auto light = Json::deserialize<std::shared_ptr<T>>(params);
-        AddLightHelper::load(_lights, std::move(light), request);
+        auto light = Json::deserialize<std::unique_ptr<T>>(params);
+
+        if (!light)
+        {
+            throw InvalidParamsException("Failed to extract light properties");
+        }
+
+        auto lightId = _scene.addLight(std::move(light));
+        request.reply(Json::serialize(lightId));
     }
 
 private:
-    LightManager &_lights;
+    Scene &_scene;
 };
 
-class AddLightDirectionalEntrypoint : public AddLightEntrypoint<DirectionalLight>
+class AddLightAmbientEntrypoint : public AddLightEntrypoint<AmbientLight>
 {
 public:
-    AddLightDirectionalEntrypoint(LightManager &lights);
+    AddLightAmbientEntrypoint(Scene &scene);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
 
-class AddLightSphereEntrypoint : public AddLightEntrypoint<SphereLight>
+class AddLightDirectionalEntrypoint : public AddLightEntrypoint<DirectionalLight>
 {
 public:
-    AddLightSphereEntrypoint(LightManager &lights);
+    AddLightDirectionalEntrypoint(Scene &scene);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -85,25 +82,7 @@ public:
 class AddLightQuadEntrypoint : public AddLightEntrypoint<QuadLight>
 {
 public:
-    AddLightQuadEntrypoint(LightManager &lights);
-
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-};
-
-class AddLightSpotEntrypoint : public AddLightEntrypoint<SpotLight>
-{
-public:
-    AddLightSpotEntrypoint(LightManager &lights);
-
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-};
-
-class AddLightAmbientEntrypoint : public AddLightEntrypoint<AmbientLight>
-{
-public:
-    AddLightAmbientEntrypoint(LightManager &lights);
+    AddLightQuadEntrypoint(Scene &scene);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

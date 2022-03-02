@@ -19,3 +19,21 @@
  */
 
 #pragma once
+
+#include <brayns/engine/Renderer.h>
+
+namespace brayns
+{
+class ProductionRenderer : public Renderer
+{
+public:
+    std::string_view getName() const noexcept final;
+
+    Ptr clone() const noexcept final;
+
+protected:
+    std::string_view getOSPHandleName() const noexcept final;
+
+    void commitRendererSpecificParams() final;
+};
+}

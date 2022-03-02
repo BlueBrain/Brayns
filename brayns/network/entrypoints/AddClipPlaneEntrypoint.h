@@ -22,13 +22,12 @@
 #pragma once
 
 #include <brayns/engine/Scene.h>
-#include <brayns/engine/geometries/Plane.h>
+#include <brayns/network/adapters/GeometryAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/AddClipGeometryResultMessage.h>
 
 namespace brayns
 {
-class AddClipPlaneEntrypoint : public Entrypoint<Plane, AddClipGeometryResultMessage>
+class AddClipPlaneEntrypoint : public Entrypoint<Plane, uint32_t>
 {
 public:
     AddClipPlaneEntrypoint(Scene &scene);

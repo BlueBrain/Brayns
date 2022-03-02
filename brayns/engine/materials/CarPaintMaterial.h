@@ -22,7 +22,6 @@
 
 #include <brayns/common/MathTypes.h>
 #include <brayns/engine/Material.h>
-#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
@@ -62,10 +61,4 @@ private:
     Vector3f _color {1.f};
     float _flakeDensity {0.f};
 };
-
-BRAYNS_JSON_ADAPTER_BEGIN(CarPaintMaterial)
-BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Base color of the material")
-BRAYNS_JSON_ADAPTER_GETSET("flake_density", getFlakesDensity, setFlakesDesnity,
-                           "Normalized percentage of flakes on the surface. Will be clampled to the range [0.0, 1.0]")
-BRAYNS_JSON_ADAPTER_END()
 }

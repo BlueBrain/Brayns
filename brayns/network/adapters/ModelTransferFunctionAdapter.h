@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <brayns/common/TransferFunction.h>
 #include <brayns/engine/Scene.h>
 
 #include <brayns/json/JsonBuffer.h>

@@ -22,9 +22,6 @@
 
 #include <brayns/common/MathTypes.h>
 #include <brayns/engine/Geometry.h>
-#include <brayns/json/JsonAdapterMacro.h>
-
-#include <vector>
 
 namespace brayns
 {
@@ -42,8 +39,4 @@ void Geometry<Plane>::initializeHandle();
 
 template<>
 void Geometry<Plane>::commitGeometrySpecificParams();
-
-BRAYNS_JSON_ADAPTER_BEGIN(Plane)
-BRAYNS_JSON_ADAPTER_ENTRY(coefficents, "Plane equation coefficents (A, B, C, D from Ax + By + Cz + D = 0)")
-BRAYNS_JSON_ADAPTER_END()
 }

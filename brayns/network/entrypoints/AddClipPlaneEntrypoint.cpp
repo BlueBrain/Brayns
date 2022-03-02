@@ -49,10 +49,6 @@ void AddClipPlaneEntrypoint::onRequest(const Request &request)
     auto modelPtr = model.get();
     auto id = _scene.addClippingModel(std::move(model));
 
-    AddClipGeometryResultMessage result;
-    result.id = id;
-    result.geometry = modelPtr->serializeGeometry();
-
-    request.reply(result);
+    request.reply(id);
 }
 } // namespace brayns

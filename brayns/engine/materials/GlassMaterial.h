@@ -22,7 +22,6 @@
 
 #include <brayns/common/MathTypes.h>
 #include <brayns/engine/Material.h>
-#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
@@ -62,11 +61,5 @@ private:
     Vector3f _color {1.f};
     float _ior {1.5f};
 };
-
-BRAYNS_JSON_ADAPTER_BEGIN(GlassMaterial)
-BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Base color of the material")
-BRAYNS_JSON_ADAPTER_GETSET("index_of_refraction", getIndexOfRefraction, setIndexOfRefraction,
-                           "Index of refraction of the glass")
-BRAYNS_JSON_ADAPTER_END()
 }
 

@@ -27,7 +27,7 @@
 
 #include <brayns/io/LoaderRegistry.h>
 
-#include <brayns/network/adapters/BinaryParamAdapter.h>
+#include <brayns/network/adapters/BinaryLoadParametersAdapter.h>
 #include <brayns/network/adapters/ModelDescriptorAdapter.h>
 #include <brayns/network/binary/BinaryManager.h>
 #include <brayns/network/common/CancellationToken.h>

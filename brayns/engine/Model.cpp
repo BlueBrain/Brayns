@@ -63,6 +63,11 @@ const Model::Metadata& Model::getMetaData() const noexcept
     return _metadata;
 }
 
+ModelComponents &Model::getComponents() noexcept
+{
+    return _components;
+}
+
 void Model::onPreRender(const AnimationParameters &animation)
 {
     (void) animation;

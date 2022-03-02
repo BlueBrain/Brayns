@@ -40,11 +40,16 @@ namespace brayns
 /**
  * @brief The ModelsLoadParameters struct holds the information with which a group of models was loaded
  */
-struct ModelsLoadParameters
+struct ModelLoadParameters
 {
-    std::string type; // "Binary" or "File"
+    enum class LoadType
+    {
+        FROM_FILE,
+        FROM_BLOB
+    };
+
+    LoadType type;
     std::string path;
-    std::string givenName;
     std::string loaderName;
     JsonValue loadParameters;
 };
@@ -56,7 +61,7 @@ struct ModelsLoadParameters
 class Scene : public EngineObject
 {
 public:
-    Scene();
+    Scene() = default;
     ~Scene();
 
     Scene(const Scene&) = delete;
@@ -74,7 +79,7 @@ public:
      * @brief Adds a new model to the scene and creates an instance out of it to be rendered.
      * The model ID is returned
      */
-    uint32_t addModel(ModelsLoadParameters params, Model::Ptr&& model);
+    uint32_t addModel(ModelLoadParameters params, Model::Ptr&& model);
 
     /**
      * @brief Creates a new instance from the model that is being instantiated by the given model ID,
@@ -190,7 +195,7 @@ private:
      */
     struct ModelEntry
     {
-        ModelsLoadParameters params;
+        ModelLoadParameters params;
         Model::Ptr model {nullptr};
         std::set<uint32_t> instances;
     };

@@ -22,7 +22,6 @@
 
 #include <brayns/common/MathTypes.h>
 #include <brayns/engine/Material.h>
-#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
@@ -62,10 +61,4 @@ private:
     Vector3f _color {1.f}; // default white
     float _roughness {0.1f};  // default opaque
 };
-
-BRAYNS_JSON_ADAPTER_BEGIN(MetalMaterial)
-BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Base color of the material")
-BRAYNS_JSON_ADAPTER_GETSET("roughness", getRoughness, setRoughness,
-                           "Surface roughness. Will be clamped on the range [0-1]")
-BRAYNS_JSON_ADAPTER_END()
 }

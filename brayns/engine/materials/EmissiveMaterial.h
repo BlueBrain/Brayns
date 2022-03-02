@@ -22,7 +22,6 @@
 
 #include <brayns/common/MathTypes.h>
 #include <brayns/engine/Material.h>
-#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
@@ -59,13 +58,7 @@ protected:
     void commitMaterialSpecificParams() final;
 
 private:
-    Vector3f _color {1.f}; // default white
-    float _intensity {1.f};  // default opaque
+    Vector3f _color {1.f};
+    float _intensity {1.f};
 };
-
-BRAYNS_JSON_ADAPTER_BEGIN(EmissiveMaterial)
-BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Base color of the material")
-BRAYNS_JSON_ADAPTER_GETSET("intensity", getIntensity, setIntensity,
-                           "Intensity of the light emitted. Will be clampled to the range [0.0, +infinite]")
-BRAYNS_JSON_ADAPTER_END()
 }

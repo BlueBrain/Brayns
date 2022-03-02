@@ -36,7 +36,7 @@ namespace brayns
 class FrameBuffer : public EngineObject
 {
 public:
-    FrameBuffer();
+    FrameBuffer() = default;
     ~FrameBuffer();
 
     FrameBuffer(const FrameBuffer&);
@@ -129,12 +129,6 @@ public:
      * @brief Returns the OSPRay backend framebuffer handle object
      */
     OSPFrameBuffer handle() const noexcept;
-
-private:
-    /**
-     * @brief Recreates the OSPRay backend framebuffer based on this framebuffer current state
-     */
-    void _recreate();
 
 private:
     Vector2ui _frameSize {800u, 600u};

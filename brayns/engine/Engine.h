@@ -115,11 +115,6 @@ public:
      */
     const Statistics &getStatistics() const noexcept;
 
-    /**
-     * @brief Returns the system's engine object factories
-     */
-    EngineFactories &getObjectFactories() noexcept;
-
 private:
     // Global system parameters used to read when updating the backend during commit() and render()
     const ParametersManager& _params;
@@ -130,14 +125,13 @@ private:
     Camera::Ptr _camera {nullptr};
     Renderer::Ptr _renderer {nullptr};
 
-    // Object factories
-    EngineFactories _engineFactory;
-
     // Engine statistics
     FPSCounter _fpsCounter;
     Statistics _statistics;
 
     // Run flag
     bool _keepRunning{true};
+
+    OSPDevice _device {nullptr};
 };
 } // namespace brayns

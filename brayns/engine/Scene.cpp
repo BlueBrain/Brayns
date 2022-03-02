@@ -36,11 +36,6 @@ auto& retrieveModel(ModelMap& models, const uint32_t modelID)
 
 namespace brayns
 {
-Scene::Scene()
-{
-    _handle = ospNewWorld();
-}
-
 Scene::~Scene()
 {
     ospRelease(_handle);
@@ -51,7 +46,7 @@ const Bounds &Scene::getBounds() const noexcept
     return _bounds;
 }
 
-uint32_t Scene::addModel(ModelsLoadParameters params, Model::Ptr&& model)
+uint32_t Scene::addModel(ModelLoadParameters params, Model::Ptr&& model)
 {
     if(!model)
         throw std::invalid_argument("Scene: Attempted to add a null model");
@@ -211,6 +206,9 @@ void Scene::postRender()
 
 void Scene::commit()
 {
+    if(!_handle)
+        _handle = ospNewWorld();
+
     // Commit models
     std::vector<OSPInstance> instances;
     instances.reserve(_models.size());
@@ -281,6 +279,10 @@ uint64_t Scene::_getSizeBytes() const noexcept
 
     // Account for instances
     baseSize += _modelInstances.size() * sizeof(ModelInstance);
+
+    // Account for clipping geometry
+    for(const auto& [clippingModelID, clippingModel] : _clippingModels)
+        baseSize += clippingModel->getSizeInBytes();
 
     // Account for lights
     for(const auto& [lightID, light] : _lights)

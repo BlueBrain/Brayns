@@ -21,7 +21,6 @@
 #pragma once
 
 #include <brayns/engine/Camera.h>
-#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
@@ -71,14 +70,4 @@ private:
     float _apertureRadius {0.f};
     float _focusDistance {1.f};
 };
-
-BRAYNS_JSON_ADAPTER_BEGIN(PerspectiveCamera)
-BRAYNS_JSON_ADAPTER_GETSET("fovy", getFOVY, setFOVY, "Camera vertical field of view (in degrees)")
-BRAYNS_JSON_ADAPTER_GETSET("aperture_radius", getApertureRadius, setApertureRadius,
-                           "Lens aperture radius (Use for depth of field effect. A value of 0.0 disables it. "
-                           "Will be clamped to the range [0.0, +infinity)")
-BRAYNS_JSON_ADAPTER_GETSET("focus_distance", getFocusDistance, setFocusDistance,
-                           "Distance at which to focus (for depth of field effect). A value of 1.0 disables it. "
-                           "Will be clamped to the range [1.0, +infinity]")
-BRAYNS_JSON_ADAPTER_END()
 }

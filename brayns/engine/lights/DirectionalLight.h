@@ -21,7 +21,6 @@
 #pragma once
 
 #include <brayns/engine/Light.h>
-#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
@@ -53,12 +52,4 @@ protected:
 private:
     Vector3f _direction {0.f, 1.f, 0.f};
 };
-
-BRAYNS_JSON_ADAPTER_BEGIN(DirectionalLight)
-BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Light color (Normalized RGB)")
-BRAYNS_JSON_ADAPTER_GETSET("intensity", getIntensity, setIntensity,
-                           "Light intensity (Will be clamped on the range [0.0, +infinity)")
-BRAYNS_JSON_ADAPTER_GETSET("visible", isVisible, setVisible, "Sets wether the light should be visible on the scene")
-BRAYNS_JSON_ADAPTER_GETSET("direction", getDirection, setDirection, "Light direction vector")
-BRAYNS_JSON_ADAPTER_END()
 }

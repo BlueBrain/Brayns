@@ -22,7 +22,6 @@
 
 #include <brayns/common/MathTypes.h>
 #include <brayns/engine/Material.h>
-#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
@@ -63,11 +62,5 @@ private:
     Vector3f _color {1.f}; // default white
     float _opacity {1.f};  // default opaque
 };
-
-BRAYNS_JSON_ADAPTER_BEGIN(MatteMaterial)
-BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Base color of the material")
-BRAYNS_JSON_ADAPTER_GETSET("opacity", getOpacity, setOpacity,
-                           "Base opacity of the material. Will be clampled to the range [0.0, 1.0]")
-BRAYNS_JSON_ADAPTER_END()
 }
 

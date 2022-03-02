@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,14 +20,23 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
-
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/JsonType.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(Boxd)
-BRAYNS_JSON_ADAPTER_GETSET("min", getMin, setMin, "Bottom-left XYZ")
-BRAYNS_JSON_ADAPTER_GETSET("max", getMax, setMax, "Top-right XYZ")
-BRAYNS_JSON_ADAPTER_END()
-} // namespace brayns
+struct FileLoadParameters
+{
+    std::string filePath;
+    std::string loaderName;
+    JsonValue loadSettings;
+};
+
+struct BinaryLoadParameters
+{
+    std::string chunksID;
+    uint64_t size {};
+    std::string type;
+    std::string loaderName;
+    JsonValue loadParameters;
+};
+}

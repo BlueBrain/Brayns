@@ -22,9 +22,6 @@
 
 #include <brayns/common/MathTypes.h>
 #include <brayns/engine/Geometry.h>
-#include <brayns/json/JsonAdapterMacro.h>
-
-#include <vector>
 
 namespace brayns
 {
@@ -42,9 +39,4 @@ void Geometry<Sphere>::initializeHandle();
 
 template<>
 void Geometry<Sphere>::commitGeometrySpecificParams();
-
-BRAYNS_JSON_ADAPTER_BEGIN(Sphere)
-BRAYNS_JSON_ADAPTER_ENTRY(center, "Sphere center point")
-BRAYNS_JSON_ADAPTER_ENTRY(radius, "Sphere radius")
-BRAYNS_JSON_ADAPTER_END()
 }
